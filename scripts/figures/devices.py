@@ -8311,3 +8311,186 @@ def generate_turbine_sound_power(output_dir: str) -> None:
     fig.tight_layout()
     save_figure(output_dir, "turbine_sound_power.svg")
     plt.close()
+
+
+# ---------------------------------------------------------------------------
+# IEC 60118-4 and IEC 62489-1: audio-frequency induction loops
+# ---------------------------------------------------------------------------
+#
+# The figures of the guide devices/electroacoustics/induction-loops, built with
+# the code the guide prints, step for step: the field of a 10 m by 14 m loop at
+# listening height, the meter reading the combi signal, the verdict on a
+# 10 m by 20 m loop over its seating, a counter loop at the points of Figure 3,
+# the overload test of Amendment 1 on the same loop, an amplifier's AGC and
+# quadrature network, and a neck loop on the test jig of IEC 62489-1.
+
+#: The sample rate the guide generates its test signals at, in hertz.
+_LOOP_FS = 48000
+
+#: The background noise with the loop off and the noise with the system on at
+#: five points of the seating, A-weighted, dB re 400 mA/m.
+_LOOP_NOISE_OFF_DB = (-38.5, -36.0, -40.2, -37.1, -35.4)
+_LOOP_NOISE_ON_DB = (-38.1, -35.6, -39.9, -36.6, -35.0)
+
+
+def _worship_loop_levels() -> NDArray[np.float64]:
+    """The seating of a 10 m by 20 m loop at 1,2 m and 1,7 m, in dB re 400 mA/m.
+
+    The Biot-Savart field at fifteen points of each height, with the current
+    that gives 400 mA/m above the centre at 1,2 m, then turned down 2 dB so
+    the spread straddles the reference.
+    """
+    from phonometry import electroacoustics
+
+    current = electroacoustics.loop_current(10.0, 20.0, height_m=1.2)
+    x, y = np.meshgrid([-3.5, 0.0, 3.5], [-8.0, -4.0, 0.0, 4.0, 8.0])
+    levels = np.stack(
+        [
+            electroacoustics.rectangular_loop_field(
+                current, 10.0, 20.0, x, y, height
+            ).level_db("z")
+            for height in (1.2, 1.7)
+        ]
+    )
+    return np.asarray(levels - 2.0)
+
+
+def generate_induction_loop_field(output_dir: str) -> None:
+    """The vertical field across a 10 m by 14 m loop at 1,2 m (IEC 60118-4 Annex E)."""
+    print("Generating induction_loop_field...")
+    from phonometry import electroacoustics
+
+    current = electroacoustics.loop_current(10.0, 14.0, height_m=1.2)
+    x = np.linspace(-8.0, 8.0, 641)
+    field = electroacoustics.rectangular_loop_field(current, 10.0, 14.0, x, 0.0, 1.2)
+    fig, ax = plt.subplots(figsize=(10, 5.6))
+    field.plot(ax, language=_LANG)
+    ax.set_ylim(-30.0, 8.0)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_field.svg")
+    plt.close()
+
+
+def generate_induction_loop_combi(output_dir: str) -> None:
+    """The true-RMS meter of IEC 60118-4 6.1.3 reading the combi signal of 6.6."""
+    print("Generating induction_loop_combi...")
+    from phonometry import electroacoustics
+
+    combi = 0.4 * electroacoustics.combi_signal(_LOOP_FS, cycles=2, seed=7)
+    reading = electroacoustics.field_strength_meter(combi, _LOOP_FS)
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    reading.plot(ax, language=_LANG)
+    ax.set_ylim(-16.0, 4.0)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_combi.svg")
+    plt.close()
+
+
+def generate_induction_loop_verification(output_dir: str) -> None:
+    """The site's background noise (7.2) and the verdict of clause 8 and 10.4.7."""
+    print("Generating induction_loop_verification...")
+    from phonometry import electroacoustics
+
+    verdict = electroacoustics.verify_induction_loop_system(
+        _worship_loop_levels(),
+        frequencies_hz=[100.0, 1000.0, 5000.0],
+        response_db=[[-0.4, 0.0, -1.8], [-0.3, 0.0, -2.4], [-0.6, 0.0, -3.4]],
+        background_noise_levels_db=_LOOP_NOISE_OFF_DB,
+        system_noise_levels_db=_LOOP_NOISE_ON_DB,
+    )
+    fig, (ax_noise, ax_verdict) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    if verdict.background_noise is not None:
+        verdict.background_noise.plot(ax_noise, language=_LANG)
+    verdict.plot(ax_verdict, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_verification.svg")
+    plt.close()
+
+
+def generate_induction_loop_counter(output_dir: str) -> None:
+    """A counter loop at the points of Figure 3, judged by 9.5 as amended."""
+    print("Generating induction_loop_counter...")
+    from phonometry import electroacoustics
+
+    verdict = electroacoustics.verify_small_volume_system(
+        [[5.1, 4.2, 5.3], [2.0, 1.1, 2.2], [-2.9, -3.8, -2.7]],
+        layout="counter",
+        standing_area_levels_db=[6.5, 7.9, 9.2],
+    )
+    fig, (ax_area, ax_verdict) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    verdict.requirement("standing_area").plot(ax_area, language=_LANG)
+    verdict.plot(ax_verdict, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_counter.svg")
+    plt.close()
+
+
+def generate_induction_loop_overload(output_dir: str) -> None:
+    """The loop of Table B.1 as a load and the overload test of 10.3 as amended."""
+    print("Generating induction_loop_overload...")
+    from phonometry import electroacoustics
+
+    resistance = electroacoustics.loop_resistance(60.0, 1.5)
+    inductance = electroacoustics.rectangular_loop_inductance(
+        10.0, 20.0, 1.5, internal_inductance=False
+    )
+    impedance = electroacoustics.loop_impedance(resistance, inductance)
+    response = electroacoustics.amplifier_frequency_response(
+        [100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
+        [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
+    )
+    overload = electroacoustics.verify_amplifier_overload(
+        electroacoustics.loop_current(10.0, 20.0, height_m=1.2),
+        impedance,
+        11.0,
+        programme="music",
+        current_response=response,
+    )
+    fig, (ax_z, ax_overload) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    impedance.plot(ax_z, language=_LANG)
+    overload.plot(ax_overload, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_overload.svg")
+    plt.close()
+
+
+def generate_induction_loop_amplifier(output_dir: str) -> None:
+    """An amplifier's AGC range (5.4.13) and quadrature phase error (5.4.14)."""
+    print("Generating induction_loop_amplifier...")
+    from phonometry import electroacoustics
+
+    emf = np.arange(-60.0, 1.0, 5.0)
+    output = np.where(emf < -40.0, emf + 30.0, -10.0 + 2.5 * (emf + 40.0) / 40.0)
+    agc = electroacoustics.agc_characteristic(emf, output)
+    f = np.array(
+        [100.0, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000]
+        + [1250, 1600, 2000, 2500, 3150, 4000, 5000]
+    )
+    phase = 90.0 - 4.0 * np.log2(f / 700.0) ** 2 / 3.0
+    quadrature = electroacoustics.quadrature_phase_error(f, phase)
+    fig, (ax_agc, ax_phase) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    agc.plot(ax_agc, language=_LANG)
+    quadrature.plot(ax_phase, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_amplifier.svg")
+    plt.close()
+
+
+def generate_induction_loop_neck_loop(output_dir: str) -> None:
+    """A neck loop on the jig of IEC 62489-1 Annex E, and the draft's type 1."""
+    print("Generating induction_loop_neck_loop...")
+    from phonometry import electroacoustics
+
+    f = np.array([100.0, 200, 500, 1000, 2000, 5000, 8000, 10000])
+    z = np.abs(32.2 + 2j * np.pi * f * 0.53e-3)
+    level = -6.0 + 20 * np.log10(z[3] / z)
+    neck = electroacoustics.neck_loop_characteristics(f, level, z, input_voltage_v=0.5)
+    verdict = electroacoustics.verify_neck_loop(
+        32.4, neck.reference_input_voltage_v, neck_loop_type=1
+    )
+    fig, (ax_response, ax_verdict) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    neck.plot(ax_response, language=_LANG)
+    verdict.plot(ax_verdict, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "induction_loop_neck_loop.svg")
+    plt.close()

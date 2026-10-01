@@ -855,6 +855,127 @@ from .impulsive_sel import ISO13474_FIGURE_A3_LT1_DB as ISO13474_FIGURE_A3_LT1_D
 from .impulsive_sel import ISO13474_FIGURE_A3_LT2_DB as ISO13474_FIGURE_A3_LT2_DB
 from .impulsive_sel import ISO13474_TABLE_A3 as ISO13474_TABLE_A3
 from .impulsive_sel import ISO13474_TABLE_A4 as ISO13474_TABLE_A4
+from .induction_loop import IEC60028_COPPER_ALPHA_PER_K as IEC60028_COPPER_ALPHA_PER_K
+from .induction_loop import (
+    IEC60028_COPPER_OHM_MM2_PER_M as IEC60028_COPPER_OHM_MM2_PER_M,
+)
+from .induction_loop import (
+    IEC60118_4_A1_COMMISSIONING_MA_PER_M as IEC60118_4_A1_COMMISSIONING_MA_PER_M,
+)
+from .induction_loop import (
+    IEC60118_4_A1_COUNTER_HEIGHTS_M as IEC60118_4_A1_COUNTER_HEIGHTS_M,
+)
+from .induction_loop import IEC60118_4_A1_FIGURE2A_MM as IEC60118_4_A1_FIGURE2A_MM
+from .induction_loop import IEC60118_4_A1_FIGURE2B_MM as IEC60118_4_A1_FIGURE2B_MM
+from .induction_loop import IEC60118_4_A1_FIGURE3_MM as IEC60118_4_A1_FIGURE3_MM
+from .induction_loop import (
+    IEC60118_4_A1_OVERLOAD_OFFSET_DB as IEC60118_4_A1_OVERLOAD_OFFSET_DB,
+)
+from .induction_loop import (
+    IEC60118_4_A1_REFUGE_HEIGHTS_M as IEC60118_4_A1_REFUGE_HEIGHTS_M,
+)
+from .induction_loop import (
+    IEC60118_4_A1_SMALL_VOLUME_RANGE_DB as IEC60118_4_A1_SMALL_VOLUME_RANGE_DB,
+)
+from .induction_loop import (
+    IEC60118_4_A1_STANDING_AREA_MAX_DB as IEC60118_4_A1_STANDING_AREA_MAX_DB,
+)
+from .induction_loop import (
+    IEC60118_4_A1_SYSTEM_NOISE_CEILING_DB as IEC60118_4_A1_SYSTEM_NOISE_CEILING_DB,
+)
+from .induction_loop import (
+    IEC60118_4_A1_SYSTEM_NOISE_RISE_DB as IEC60118_4_A1_SYSTEM_NOISE_RISE_DB,
+)
+from .induction_loop import IEC60118_4_A1_TABLE4 as IEC60118_4_A1_TABLE4
+from .induction_loop import (
+    IEC60118_4_BAND_LIMIT_COMPUTED_DB as IEC60118_4_BAND_LIMIT_COMPUTED_DB,
+)
+from .induction_loop import IEC60118_4_BAND_LIMIT_HZ as IEC60118_4_BAND_LIMIT_HZ
+from .induction_loop import (
+    IEC60118_4_BAND_LIMIT_PRINTED_DB as IEC60118_4_BAND_LIMIT_PRINTED_DB,
+)
+from .induction_loop import IEC60118_4_COMBI_MIN_NOISE_S as IEC60118_4_COMBI_MIN_NOISE_S
+from .induction_loop import IEC60118_4_COMBI_MIN_SINE_S as IEC60118_4_COMBI_MIN_SINE_S
+from .induction_loop import (
+    IEC60118_4_COMBI_NOISE_RELATIVE_DB as IEC60118_4_COMBI_NOISE_RELATIVE_DB,
+)
+from .induction_loop import IEC60118_4_COMBI_RAMP_MS as IEC60118_4_COMBI_RAMP_MS
+from .induction_loop import IEC60118_4_COMBI_SINE_HZ as IEC60118_4_COMBI_SINE_HZ
+from .induction_loop import (
+    IEC60118_4_COMBI_SINE_PEAK_BELOW_NOISE_PEAK_DB as IEC60118_4_COMBI_SINE_PEAK_BELOW_NOISE_PEAK_DB,
+)
+from .induction_loop import IEC60118_4_E3_CORNER_FACTOR as IEC60118_4_E3_CORNER_FACTOR
+from .induction_loop import (
+    IEC60118_4_E3_INDUCTANCE_UH_PER_M_SIDE as IEC60118_4_E3_INDUCTANCE_UH_PER_M_SIDE,
+)
+from .induction_loop import (
+    IEC60118_4_E6_MICROTESLA_PER_A_PER_M as IEC60118_4_E6_MICROTESLA_PER_A_PER_M,
+)
+from .induction_loop import (
+    IEC60118_4_E6_OERSTED_A_PER_M as IEC60118_4_E6_OERSTED_A_PER_M,
+)
+from .induction_loop import IEC60118_4_FIELD_TOL_DB as IEC60118_4_FIELD_TOL_DB
+from .induction_loop import IEC60118_4_FIGURE_E2B_DB as IEC60118_4_FIGURE_E2B_DB
+from .induction_loop import IEC60118_4_FIGURE_E2B_LOOP as IEC60118_4_FIGURE_E2B_LOOP
+from .induction_loop import (
+    IEC60118_4_FIGURE_H1_AT_10_M_A as IEC60118_4_FIGURE_H1_AT_10_M_A,
+)
+from .induction_loop import IEC60118_4_LONG_TERM_A_PER_M as IEC60118_4_LONG_TERM_A_PER_M
+from .induction_loop import (
+    IEC60118_4_LONG_TERM_LEVEL_DB as IEC60118_4_LONG_TERM_LEVEL_DB,
+)
+from .induction_loop import (
+    IEC60118_4_NOISE_PEAK_TO_PEAK_DB as IEC60118_4_NOISE_PEAK_TO_PEAK_DB,
+)
+from .induction_loop import IEC60118_4_REFERENCE_A_PER_M as IEC60118_4_REFERENCE_A_PER_M
+from .induction_loop import IEC60118_4_RESPONSE_BAND_HZ as IEC60118_4_RESPONSE_BAND_HZ
+from .induction_loop import IEC60118_4_RESPONSE_TOL_DB as IEC60118_4_RESPONSE_TOL_DB
+from .induction_loop import IEC60118_4_SNR_IDEAL_DB as IEC60118_4_SNR_IDEAL_DB
+from .induction_loop import IEC60118_4_SNR_MINIMUM_DB as IEC60118_4_SNR_MINIMUM_DB
+from .induction_loop import (
+    IEC60118_4_SNR_SHORT_PERIODS_DB as IEC60118_4_SNR_SHORT_PERIODS_DB,
+)
+from .induction_loop import IEC60118_4_TABLE3 as IEC60118_4_TABLE3
+from .induction_loop import IEC60118_4_TELECOIL_DB as IEC60118_4_TELECOIL_DB
+from .induction_loop import (
+    IEC62489_1_A2_DRAFT_MAX_INPUT_V as IEC62489_1_A2_DRAFT_MAX_INPUT_V,
+)
+from .induction_loop import (
+    IEC62489_1_A2_DRAFT_TYPE1_OHM as IEC62489_1_A2_DRAFT_TYPE1_OHM,
+)
+from .induction_loop import (
+    IEC62489_1_A2_DRAFT_TYPE1_TOL_PERCENT as IEC62489_1_A2_DRAFT_TYPE1_TOL_PERCENT,
+)
+from .induction_loop import (
+    IEC62489_1_A2_DRAFT_TYPE2_MIN_OHM as IEC62489_1_A2_DRAFT_TYPE2_MIN_OHM,
+)
+from .induction_loop import (
+    IEC62489_1_AGC_OUTPUT_CHANGE_DB as IEC62489_1_AGC_OUTPUT_CHANGE_DB,
+)
+from .induction_loop import IEC62489_1_AGC_RANGE_DB as IEC62489_1_AGC_RANGE_DB
+from .induction_loop import IEC62489_1_FIELD_HEIGHT_M as IEC62489_1_FIELD_HEIGHT_M
+from .induction_loop import (
+    IEC62489_1_NECK_LOOP_IMPEDANCES_OHM as IEC62489_1_NECK_LOOP_IMPEDANCES_OHM,
+)
+from .induction_loop import (
+    IEC62489_1_NOISE_PEAK_TO_PEAK_TOL_DB as IEC62489_1_NOISE_PEAK_TO_PEAK_TOL_DB,
+)
+from .induction_loop import (
+    IEC62489_1_QUADRATURE_EXAMPLE_COS as IEC62489_1_QUADRATURE_EXAMPLE_COS,
+)
+from .induction_loop import (
+    IEC62489_1_QUADRATURE_EXAMPLE_DB as IEC62489_1_QUADRATURE_EXAMPLE_DB,
+)
+from .induction_loop import (
+    IEC62489_1_QUADRATURE_EXAMPLE_DEG as IEC62489_1_QUADRATURE_EXAMPLE_DEG,
+)
+from .induction_loop import (
+    IEC62489_1_STANDARD_MEASURING_DB as IEC62489_1_STANDARD_MEASURING_DB,
+)
+from .induction_loop import IEC62489_1_TABLE_B1 as IEC62489_1_TABLE_B1
+from .induction_loop import (
+    IEC62489_1_TABLE_B1_INDUCTANCE_REPRODUCED as IEC62489_1_TABLE_B1_INDUCTANCE_REPRODUCED,
+)
 from .materials import ALLARD_AIR_VISCOSITY_PA_S as ALLARD_AIR_VISCOSITY_PA_S
 from .materials import ALLARD_JCA_CARPET_ROWS as ALLARD_JCA_CARPET_ROWS
 from .materials import ALLARD_JCA_SPECIMENS as ALLARD_JCA_SPECIMENS

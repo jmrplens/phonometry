@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 158 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 159 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-eight guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-nine guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -800,7 +800,8 @@ Sound power, intensity, emission declarations, electroacoustics and programme
 loudness. What a source emits rather than what a receiver gets, plus the
 electroacoustic chain that reproduces or measures it. Implements ISO 3741,
 ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 26101, ISO 6926, ISO 9614-1/-2/-3,
-IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
+IEC 61043, ISO 4871, IEC 60268-3/-4/-5, IEC 60118-4, IEC 62489-1, ITU-R BS.1770-5
+and EBU R 128.
 
 **[Sound power and intensity](/phonometry/devices/emission/)**
 
@@ -863,6 +864,10 @@ IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
 - [Swept-sine distortion and phase utilities](/phonometry/devices/electroacoustics/swept-sine-distortion/):
   harmonic separation from one exponential sweep, THD against excitation
   frequency, and minimum phase, group delay and excess phase.
+- [Audio-Frequency Induction Loops (IEC 60118-4)](/phonometry/devices/electroacoustics/induction-loops/):
+  hearing loops for telecoil listeners: the 400 mA/m reference, the field of a
+  loop by Biot-Savart, the loop as a load, the verdicts on a room, a refuge and
+  a counter, the overload test, the amplifier and the neck loop.
 **[Broadcast](/phonometry/devices/broadcast/)**
 
 - [Programme loudness and true peak](/phonometry/devices/broadcast/program-loudness/):

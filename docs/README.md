@@ -314,6 +314,7 @@ silencers.
 - [Loudspeaker characterisation (IEC 60268-5)](devices/electroacoustics/loudspeakers.md): the sensitivity conventions of a loudspeaker datasheet, the radiating piston (radiation impedance and directivity) behind its polar response, and the IEC 60268-5 characteristics fiche
 - [Microphone characterisation (IEC 60268-4)](devices/electroacoustics/microphones.md): the IEC 60268-4 sensitivity references, the directional patterns and directivity index, the inherent noise in dB(A) and dB(468), and the IEC 60268-4 characteristics fiche
 - [Swept-sine distortion and phase utilities](devices/electroacoustics/swept-sine-distortion.md): harmonic separation from one exponential sweep (Farina 2000) with the synchronized swept-sine of Novak et al. 2015 for coherent harmonic phases, THD as a function of the excitation frequency, and minimum phase from $|H|$ (real cepstrum), group delay and excess phase
+- [Audio-frequency induction loops (IEC 60118-4)](devices/electroacoustics/induction-loops.md): the hearing loop for telecoil listeners, the 400 mA/m reference and the Biot-Savart field of a loop, the loop as a load reproducing Table B.1 of IEC 62489-1, the true-RMS meter, the pink noise and the combi signal, the verdicts on a room, a refuge and a counter as Amendment 1 writes them, the overload test of Table 4, the amplifier's compliance voltage, AGC range and quadrature error, and the neck loop with the two types of the draft Amendment 2
 
 **[Broadcast](devices/broadcast/index.md)**
 

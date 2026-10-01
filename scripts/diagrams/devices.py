@@ -5029,3 +5029,166 @@ def _d_noise_declaration_chain(s: SVG, th: Theme) -> None:
         12,
         th.muted,
     )
+
+
+def _d_induction_loop_measurement(s: SVG, th: Theme) -> None:
+    """IEC 60118-4: where an induction loop is measured, and what it has to meet.
+
+    A room's loop is judged over its useful magnetic field volume (clause 8),
+    at points the installer chooses at the listeners' heights; a refuge and a
+    counter are judged at the fixed points of Figures 2 a) and 3 as Amendment
+    1 draws them (clause 9). The frequency response and the noise with the
+    system switched on are judged the same way in every case.
+    """
+    tops = (24.0, 318.0, 612.0)
+    w = 264.0
+    heads = (
+        "A room: the useful volume (8.4)",
+        "A refuge: Figure 2 a)",
+        "A counter: Figure 3",
+    )
+    for x0, head in zip(tops, heads, strict=True):
+        s.rect(x0, 50, w, 350, th.panel, th.muted, rx=12, sw=1.6)
+        s.text(x0 + w / 2, 76, head, 14, th.fg, bold=True)
+
+    # --- 1: a room with a perimeter loop ------------------------------------
+    x0 = tops[0]
+    left, top, right, bottom = x0 + 58.0, 104.0, x0 + 244.0, 262.0
+    s.rect(left, top, right - left, bottom - top, th.bg, th.muted, sw=1.2)
+    s.rect(
+        left + 8,
+        top + 8,
+        right - left - 16,
+        bottom - top - 16,
+        "none",
+        th.primary,
+        sw=3.0,
+    )
+    s.rect(
+        left + 34,
+        top + 30,
+        right - left - 68,
+        bottom - top - 60,
+        th.panel,
+        th.accent,
+        rx=4,
+        sw=1.4,
+        dash="5,4",
+    )
+    for gx in (left + 52.0, (left + right) / 2, right - 52.0):
+        for gy in (top + 46.0, (top + bottom) / 2, bottom - 46.0):
+            s.circle(gx, gy, 4.0, th.accent)
+    # The amplifier outside the room, feeding the loop by a twisted pair.
+    s.rect(x0 + 12, 170, 34, 26, th.primary, th.fg, rx=3, sw=1.2)
+    s.line(x0 + 46, 178, left + 8, 178, th.primary, 1.6)
+    s.line(x0 + 46, 188, left + 8, 188, th.primary, 1.6)
+    s.line(x0 + 29, 196, x0 + 29, 266, th.muted, 1.0, dash="3,3")
+    s.text(x0 + 12, 280, "amplifier (IEC 62489-1)", 11, th.muted, anchor="start")
+    s.text((left + right) / 2, top - 6, "loop", 11, th.primary)
+    yc = 302.0
+    s.text(x0 + w / 2, yc, "points chosen through the volume,", 12, th.muted)
+    s.text(x0 + w / 2, yc + 18, "at 1.2 m seated and 1.7 m standing,", 12, th.muted)
+    s.text(x0 + w / 2, yc + 36, "pick-up coil vertical (8.1)", 12, th.muted)
+    s.text(x0 + w / 2, yc + 64, "±3 dB of 400 mA/m", 14, th.accent, bold=True)
+    s.text(x0 + w / 2, yc + 83, "at every point (8.4.3)", 12, th.muted)
+
+    # --- 2: a refuge, the points of Figure 2 a) ----------------------------
+    x1 = tops[1]
+    cx, ref_y = x1 + w / 2, 128.0
+    scale = 0.30  # pixels per millimetre
+    s.ellipse(cx, 100, 18, 6, th.primary, th.fg, sw=1.2)
+    s.text(cx + 26, 104, "source", 11, th.muted, anchor="start")
+    s.line(cx, 106, cx, ref_y, th.muted, 1.0, dash="3,3")
+    s.circle(cx, ref_y, 4.0, th.fg)
+    s.text(cx + 10, ref_y + 4, "reference point", 11, th.muted, anchor="start")
+    for radius in (300.0, 500.0):
+        r = radius * scale
+        s.path(
+            f"M {cx - r * math.sin(math.radians(45)):.1f} "
+            f"{ref_y + r * math.cos(math.radians(45)):.1f} "
+            f"A {r:.1f} {r:.1f} 0 0 0 {cx + r * math.sin(math.radians(45)):.1f} "
+            f"{ref_y + r * math.cos(math.radians(45)):.1f}",
+            stroke=th.muted,
+            sw=1.0,
+            dash="4,3",
+        )
+    r_out = 500.0 * scale
+    for angle in (-45.0, 0.0, 45.0):
+        a = math.radians(angle)
+        s.line(
+            cx,
+            ref_y,
+            cx + r_out * math.sin(a),
+            ref_y + r_out * math.cos(a),
+            th.muted,
+            1.0,
+        )
+        for radius in (300.0, 500.0):
+            r = radius * scale
+            s.circle(cx + r * math.sin(a), ref_y + r * math.cos(a), 4.5, th.secondary)
+    s.text(x1 + w / 2, yc, "six points, 300 mm and 500 mm out,", 12, th.muted)
+    s.text(x1 + w / 2, yc + 18, "at 0° and ±45°, 1.2 m and 1.7 m (9.2)", 12, th.muted)
+    s.text(x1 + w / 2, yc + 36, "outer radius as Amendment 1 keys it", 12, th.muted)
+    s.text(x1 + w / 2, yc + 64, "±6 dB, 0 dB at one point", 14, th.secondary, bold=True)
+    s.text(x1 + w / 2, yc + 83, "never above +8 dB (9.5)", 12, th.muted)
+
+    # --- 3: a counter, the points of Figure 3 ------------------------------
+    x2 = tops[2]
+    cx, line_y = x2 + w / 2, 124.0
+    s.line(x2 + 40, 100, x2 + w - 40, 100, th.primary, 3.0)
+    s.text(x2 + w - 40, 94, "source", 11, th.muted, anchor="end")
+    s.line(x2 + 30, line_y, x2 + w - 30, line_y, th.fg, 1.4)
+    s.text(x2 + 32, line_y - 6, "counter face", 11, th.muted, anchor="start")
+    r = 300.0 * scale * 1.3
+    s.path(
+        f"M {cx - r:.1f} {line_y} A {r:.1f} {r:.1f} 0 0 0 {cx + r:.1f} {line_y}",
+        stroke=th.muted,
+        sw=1.0,
+        dash="4,3",
+    )
+    s.line(cx, line_y, cx, line_y + r, th.muted, 1.0)
+    lateral = 150.0 * scale * 1.3
+    s.circle(cx, line_y + r, 4.5, th.secondary)
+    for side in (-1.0, 1.0):
+        s.circle(
+            cx + side * lateral,
+            line_y + math.sqrt(r * r - lateral * lateral),
+            4.5,
+            th.secondary,
+        )
+    s.text(cx + 8, line_y + r / 2, "300 mm", 11, th.fg, anchor="start")
+    s.dim(cx, line_y + r + 22, cx + lateral, line_y + r + 22, "150 mm", size=11)
+    s.text(x2 + w / 2, yc, "three points on the semicircle,", 12, th.muted)
+    s.text(x2 + w / 2, yc + 18, "at 1.2 m, 1.45 m and 1.7 m (9.3)", 12, th.muted)
+    s.text(x2 + w / 2, yc + 36, "a null at 1.45 m is the risk", 12, th.muted)
+    s.text(
+        x2 + w / 2, yc + 64, "the same limits as a refuge", 14, th.secondary, bold=True
+    )
+    s.text(x2 + w / 2, yc + 83, "Annex A.4's +12 dB is not 9.5", 12, th.muted)
+
+    # --- what every system meets --------------------------------------------
+    s.rect(24, 416, 852, 128, th.panel, th.primary, rx=12, sw=2.0)
+    s.text(44, 444, "Every system", 15, th.fg, anchor="start", bold=True)
+    # Three requirements, then the recommendation of 7.2, which 9.5 NOTE 2
+    # declines to make a requirement and which the bullet colour sets apart.
+    rules = (
+        (
+            "frequency response: ±3 dB of the one at 1 kHz, 100 Hz to 5 kHz (8.3.7)",
+            th.primary,
+        ),
+        (
+            "noise with the system on: below −47 dB, or ≤ 1 dB over the loop off (10.4.7)",
+            th.primary,
+        ),
+        (
+            "overload: the loop voltage at the Table 4 frequency within compliance (10.3.3)",
+            th.primary,
+        ),
+        (
+            "recommended, loop off: signal-to-noise 47 dB ideal, 32 dB minimum (7.2)",
+            th.muted,
+        ),
+    )
+    for k, (txt, colour) in enumerate(rules):
+        s.circle(54, 466 + k * 22, 4.0, colour)
+        s.text(70, 471 + k * 22, txt, 12, th.muted, anchor="start")

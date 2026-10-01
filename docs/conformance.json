@@ -3,20 +3,22 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1691,
-    "passing": 1691,
+    "checks": 1758,
+    "passing": 1758,
     "failing": 0,
-    "domains": 106,
-    "standards": 509,
-    "citations": 1189,
-    "designations": 214,
-    "sources": 122
+    "domains": 107,
+    "standards": 513,
+    "citations": 1218,
+    "designations": 217,
+    "sources": 123
   },
   "units": [
     "%",
     "1/kg",
     "1/m",
     "1/s",
+    "A",
+    "A/m",
     "Cam",
     "EPNdB",
     "Hz",
@@ -34,6 +36,7 @@
     "Pa",
     "Pa²·s",
     "Pa·s/m²",
+    "V",
     "W",
     "W/m²",
     "acum",
@@ -62,6 +65,8 @@
     "m/s^1.5",
     "m/s^1.75",
     "m/s²",
+    "mA/m",
+    "mm",
     "mm/s",
     "modes/Hz",
     "ms",
@@ -71,6 +76,7 @@
     "m·Hz",
     "nm",
     "ohm",
+    "ohm·mm²/m",
     "rad",
     "rad/m",
     "s",
@@ -81,6 +87,8 @@
     "vacil",
     "vacil_HMS",
     "yr",
+    "µH",
+    "µT",
     "µm"
   ],
   "domains": [
@@ -653,6 +661,12 @@
       "title": "Free-field corrections of a sound level meter (IEC 62585)",
       "checks": 16,
       "passing": 16
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "title": "Audio-frequency induction loops (IEC 60118-4:2014+A1, IEC 62489-1:2010+A1)",
+      "checks": 67,
+      "passing": 67
     },
     {
       "id": "industrial-noise-control",
@@ -48548,6 +48562,2380 @@
         "value": 0.0
       },
       "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-3-1/level-of-400-ma-m-the-reference-magnetic-field-strength",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 3.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "3.1"
+          }
+        ]
+      },
+      "quantity": "Level of 400 mA/m, the reference magnetic field strength",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-4-3/level-of-100-ma-m-the-long-term-average-of-70-db-spl",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 4.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "4.3"
+          }
+        ]
+      },
+      "quantity": "Level of 100 mA/m, the long-term average of 70 dB SPL",
+      "kind": "scalar",
+      "expected": {
+        "value": -12.0
+      },
+      "computed": {
+        "value": -12.04
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.041
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-6-4-note-2/third-order-butterworth-band-limit-at-100-hz-3-db-at-75-hz-and-6-5-khz",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 6.4 NOTE 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "6.4 NOTE 2"
+          }
+        ]
+      },
+      "quantity": "Third-order Butterworth band limit at 100 Hz (-3 dB at 75 Hz and 6,5 kHz)",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.711,
+        "label": "-0.711 dB from the 6.4 filters (NOTE 2 prints -0.8 dB, see ERRATA)"
+      },
+      "computed": {
+        "value": -0.711
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.000374
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-6-4-note-2/third-order-butterworth-band-limit-at-5-khz-3-db-at-75-hz-and-6-5-khz",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 6.4 NOTE 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "6.4 NOTE 2"
+          }
+        ]
+      },
+      "quantity": "Third-order Butterworth band limit at 5 kHz (-3 dB at 75 Hz and 6,5 kHz)",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.818,
+        "label": "-0.818 dB from the 6.4 filters (NOTE 2 prints -0.7 dB, see ERRATA)"
+      },
+      "computed": {
+        "value": -0.818
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.000293
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-6-4/band-limited-pink-noise-flat-within-1-db-from-100-hz-to-5-khz",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 6.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "6.4"
+          }
+        ]
+      },
+      "quantity": "Band-limited pink noise flat within 1 dB from 100 Hz to 5 kHz",
+      "kind": "mask",
+      "expected": {
+        "label": "within +/-1 dB from 100 Hz to 5 kHz"
+      },
+      "computed": {
+        "label": "worst -0.818 dB at 5000 Hz"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "mask",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": -0.818
+      },
+      "binding": {
+        "frequency_hz": 5000.0,
+        "lower": -1.0,
+        "upper": 1.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-6-4/peak-to-peak-over-rms-of-the-pink-noise-at-least-18-db-crest-factor-4",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 6.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "6.4"
+          }
+        ]
+      },
+      "quantity": "Peak-to-peak over RMS of the pink noise, at least 18 dB (crest factor 4)",
+      "kind": "mask",
+      "expected": {
+        "label": "at least 18 dB (IEC 62489-1 5.4.8.2 b): 18 dB +/-2 dB)"
+      },
+      "computed": {
+        "label": "18.062 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "mask",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 18.062
+      },
+      "binding": {
+        "lower": 18.0,
+        "upper": 20.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-table-2/combi-signal-rms-of-the-pink-noise-re-the-sine",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Combi signal: RMS of the pink noise re the sine",
+      "kind": "scalar",
+      "expected": {
+        "value": -6.0
+      },
+      "computed": {
+        "value": -5.999
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": 0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-table-2/combi-signal-sine-peaks-below-the-maximum-peak-of-the-noise",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Combi signal: sine peaks below the maximum peak of the noise",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.031
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.031
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-7-2/reference-signal-to-noise-ratio-classed-at-47-32-and-22-db",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 7.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "7.2"
+          }
+        ]
+      },
+      "quantity": "Reference signal-to-noise ratio classed at 47, 32 and 22 dB",
+      "kind": "record",
+      "expected": {
+        "label": "each boundary in its 7.2 class",
+        "record": {
+          "above 47 dB": 1.0,
+          "47 dB": 1.0,
+          "32 dB": 1.0,
+          "below 32 dB": 1.0,
+          "22 dB": 1.0,
+          "below 22 dB": 1.0
+        }
+      },
+      "computed": {
+        "label": "above 47 dB = 1; 47 dB = 1; 32 dB = 1; below 32 dB = 1; 22 dB = 1; below 22 dB = 1",
+        "record": {
+          "above 47 dB": 1.0,
+          "47 dB": 1.0,
+          "32 dB": 1.0,
+          "below 32 dB": 1.0,
+          "22 dB": 1.0,
+          "below 22 dB": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-8-4-3/field-strength-at-every-point-within-3-db-of-8-2-7",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 8.4.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "8.4.3"
+          }
+        ]
+      },
+      "quantity": "Field strength at every point within 3 dB of 8.2.7",
+      "kind": "record",
+      "expected": {
+        "label": "+3 dB = 1; -3 dB = 1; +3,01 dB = 0; -3,01 dB = 0; -2,9 dB on a meter reading 400 mA/m as -5,9 dB = 1",
+        "record": {
+          "+3 dB": 1.0,
+          "-3 dB": 1.0,
+          "+3,01 dB": 0.0,
+          "-3,01 dB": 0.0,
+          "-2,9 dB on a meter reading 400 mA/m as -5,9 dB": 1.0
+        }
+      },
+      "computed": {
+        "label": "+3 dB = 1; -3 dB = 1; +3,01 dB = 0; -3,01 dB = 0; -2,9 dB on a meter reading 400 mA/m as -5,9 dB = 1",
+        "record": {
+          "+3 dB": 1.0,
+          "-3 dB": 1.0,
+          "+3,01 dB": 0.0,
+          "-3,01 dB": 0.0,
+          "-2,9 dB on a meter reading 400 mA/m as -5,9 dB": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-8-2-7/maximum-field-of-400-ma-m-reached-at-one-point-at-least",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 8.2.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "8.2.7"
+          }
+        ]
+      },
+      "quantity": "Maximum field of 400 mA/m reached at one point at least",
+      "kind": "record",
+      "expected": {
+        "label": "0 dB at one point, -3 dB elsewhere = 1; -0,01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6,01 dB at best = 0",
+        "record": {
+          "0 dB at one point, -3 dB elsewhere": 1.0,
+          "-0,01 dB at best": 0.0,
+          "pink noise: -6 dB at one point (Table 3)": 1.0,
+          "pink noise: -6,01 dB at best": 0.0
+        }
+      },
+      "computed": {
+        "label": "0 dB at one point, -3 dB elsewhere = 1; -0,01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6,01 dB at best = 0",
+        "record": {
+          "0 dB at one point, -3 dB elsewhere": 1.0,
+          "-0,01 dB at best": 0.0,
+          "pink noise: -6 dB at one point (Table 3)": 1.0,
+          "pink noise: -6,01 dB at best": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-8-3-7/frequency-response-within-3-db-of-1-khz-from-100-hz-to-5-khz",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 8.3.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "8.3.7"
+          }
+        ]
+      },
+      "quantity": "Frequency response within 3 dB of 1 kHz from 100 Hz to 5 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "-3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3,01 dB at 100 Hz = 0; +3,01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18,6 dB at 100 Hz against -15,6 dB at 1 kHz = 1; -31,7 dB at 5 kHz against -34,7 dB at 1 kHz = 1",
+        "record": {
+          "-3 dB at 100 Hz, +3 dB at 5 kHz": 1.0,
+          "-3,01 dB at 100 Hz": 0.0,
+          "+3,01 dB at 5 kHz": 0.0,
+          "-20 dB outside the band": 1.0,
+          "-18,6 dB at 100 Hz against -15,6 dB at 1 kHz": 1.0,
+          "-31,7 dB at 5 kHz against -34,7 dB at 1 kHz": 1.0
+        }
+      },
+      "computed": {
+        "label": "-3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3,01 dB at 100 Hz = 0; +3,01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18,6 dB at 100 Hz against -15,6 dB at 1 kHz = 1; -31,7 dB at 5 kHz against -34,7 dB at 1 kHz = 1",
+        "record": {
+          "-3 dB at 100 Hz, +3 dB at 5 kHz": 1.0,
+          "-3,01 dB at 100 Hz": 0.0,
+          "+3,01 dB at 5 kHz": 0.0,
+          "-20 dB outside the band": 1.0,
+          "-18,6 dB at 100 Hz against -15,6 dB at 1 kHz": 1.0,
+          "-31,7 dB at 5 kHz against -34,7 dB at 1 kHz": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-9-5/small-volume-limits-6-db-range-0-db-reached-8-db-area",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 9.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "9.5"
+          }
+        ]
+      },
+      "quantity": "Small-volume limits: 6 dB range, 0 dB reached, +8 dB area",
+      "kind": "record",
+      "expected": {
+        "label": "+/-6 dB with 0 dB reached = 1; +6,01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8,01 dB in the standing area = 0",
+        "record": {
+          "+/-6 dB with 0 dB reached": 1.0,
+          "+6,01 dB at one point": 0.0,
+          "every point below 0 dB": 0.0,
+          "+8 dB in the standing area": 1.0,
+          "+8,01 dB in the standing area": 0.0
+        }
+      },
+      "computed": {
+        "label": "+/-6 dB with 0 dB reached = 1; +6,01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8,01 dB in the standing area = 0",
+        "record": {
+          "+/-6 dB with 0 dB reached": 1.0,
+          "+6,01 dB at one point": 0.0,
+          "every point below 0 dB": 0.0,
+          "+8 dB in the standing area": 1.0,
+          "+8,01 dB in the standing area": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-figures-2-and-3/measurement-points-of-a-refuge-and-a-counter-in-millimetres",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 Figures 2 and 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "Figures 2 and 3"
+          }
+        ]
+      },
+      "quantity": "Measurement points of a refuge and a counter, in millimetres",
+      "kind": "record",
+      "expected": {
+        "label": "2 a) inner radius = 300 mm; 2 a) outer radius = 500 mm; 2 b) l4 = 424 mm; 2 b) l5 = 700 mm; 3 a) radius = 300 mm; 3 a) l4 = 150 mm; 3 b) top height = 1700 mm",
+        "record": {
+          "2 a) inner radius": 300.0,
+          "2 a) outer radius": 500.0,
+          "2 b) l4": 424.0,
+          "2 b) l5": 700.0,
+          "3 a) radius": 300.0,
+          "3 a) l4": 150.0,
+          "3 b) top height": 1700.0
+        }
+      },
+      "computed": {
+        "label": "2 a) inner radius = 300 mm; 2 a) outer radius = 500 mm; 2 b) l4 = 424 mm; 2 b) l5 = 700 mm; 3 a) radius = 300 mm; 3 a) l4 = 150 mm; 3 b) top height = 1700 mm",
+        "record": {
+          "2 a) inner radius": 300.0,
+          "2 a) outer radius": 500.0,
+          "2 b) l4": 424.0,
+          "2 b) l5": 700.0,
+          "3 a) radius": 300.0,
+          "3 a) l4": 150.0,
+          "3 b) top height": 1700.0
+        }
+      },
+      "unit": "mm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-10-2/lower-end-of-the-3-db-commissioning-window-ma-m",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 10.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "10.2"
+          }
+        ]
+      },
+      "quantity": "Lower end of the 3 dB commissioning window, mA/m",
+      "kind": "scalar",
+      "expected": {
+        "value": 283.0
+      },
+      "computed": {
+        "value": 283.2
+      },
+      "unit": "mA/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.178
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-10-2/upper-end-of-the-3-db-commissioning-window-ma-m",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 10.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "10.2"
+          }
+        ]
+      },
+      "quantity": "Upper end of the 3 dB commissioning window, mA/m",
+      "kind": "scalar",
+      "expected": {
+        "value": 566.0,
+        "label": "566 mA/m (+/-1: printed as 400 sqrt(2), 565 at +3 dB)"
+      },
+      "computed": {
+        "value": 565.0
+      },
+      "unit": "mA/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1.0
+      },
+      "deviation": {
+        "value": -0.985
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-table-4/programme-material-and-overload-test-frequency",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Programme material and overload test frequency",
+      "kind": "record",
+      "expected": {
+        "label": "transient_speech limit = 1250 Hz; transient_speech test = 2500 Hz; speech limit = 1600 Hz; speech test = 3150 Hz; music limit = 2000 Hz; music test = 4000 Hz",
+        "record": {
+          "transient_speech limit": 1250.0,
+          "transient_speech test": 2500.0,
+          "speech limit": 1600.0,
+          "speech test": 3150.0,
+          "music limit": 2000.0,
+          "music test": 4000.0
+        }
+      },
+      "computed": {
+        "label": "transient_speech limit = 1250 Hz; transient_speech test = 2500 Hz; speech limit = 1600 Hz; speech test = 3150 Hz; music limit = 2000 Hz; music test = 4000 Hz",
+        "record": {
+          "transient_speech limit": 1250.0,
+          "transient_speech test": 2500.0,
+          "speech limit": 1600.0,
+          "speech test": 3150.0,
+          "music limit": 2000.0,
+          "music test": 4000.0
+        }
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-10-3-2/overload-test-current-7-db-below-the-one-for-the-required-field",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 10.3.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "10.3.2"
+          }
+        ]
+      },
+      "quantity": "Overload test current 7 dB below the one for the required field",
+      "kind": "scalar",
+      "expected": {
+        "value": -7.0
+      },
+      "computed": {
+        "value": -7.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-10-3-2/sweep-end-where-the-voltage-of-a-0-69-ohm-109-uh-loop-doubles-hz",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 10.3.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "10.3.2"
+          }
+        ]
+      },
+      "quantity": "Sweep end where the voltage of a 0,69 ohm, 109 uH loop doubles, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 2654.267520450667,
+        "label": "2654.268 Hz, where |Z| is twice its 1 kHz value"
+      },
+      "computed": {
+        "value": 2654.268
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-10-3-3/no-clipping-at-the-table-4-frequency-judged-there-when-the-sweep-runs-past",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 10.3.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "10.3.3"
+          }
+        ]
+      },
+      "quantity": "No clipping at the Table 4 frequency, judged there when the sweep runs past",
+      "kind": "record",
+      "expected": {
+        "label": "compliance at the 2,5 kHz voltage = 1; compliance 0,1 % below it = 0",
+        "record": {
+          "compliance at the 2,5 kHz voltage": 1.0,
+          "compliance 0,1 % below it": 0.0
+        }
+      },
+      "computed": {
+        "label": "compliance at the 2,5 kHz voltage = 1; compliance 0,1 % below it = 0",
+        "record": {
+          "compliance at the 2,5 kHz voltage": 1.0,
+          "compliance 0,1 % below it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-a1-10-4-7/system-noise-47-db-ceiling-or-1-db-rise",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014+A1 10.4.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014+A1",
+            "clause": "10.4.7"
+          }
+        ]
+      },
+      "quantity": "System noise: -47 dB ceiling or 1 dB rise",
+      "kind": "record",
+      "expected": {
+        "label": "SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46,99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1,01 dB up = 0; SNR 32,7 dB, on at -31,7 dB = 1",
+        "record": {
+          "SNR 55 dB, on at -47 dB": 1.0,
+          "SNR 55 dB, on at -46,99 dB": 0.0,
+          "SNR 40 dB, on 1 dB up": 1.0,
+          "SNR 40 dB, on 1,01 dB up": 0.0,
+          "SNR 32,7 dB, on at -31,7 dB": 1.0
+        }
+      },
+      "computed": {
+        "label": "SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46,99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1,01 dB up = 0; SNR 32,7 dB, on at -31,7 dB = 1",
+        "record": {
+          "SNR 55 dB, on at -47 dB": 1.0,
+          "SNR 55 dB, on at -46,99 dB": 0.0,
+          "SNR 40 dB, on 1 dB up": 1.0,
+          "SNR 40 dB, on 1,01 dB up": 0.0,
+          "SNR 32,7 dB, on at -31,7 dB": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-1/centre-field-of-a-5-m-square-loop-by-biot-savart-against-2-sqrt-2-i-pi-d",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.1"
+          }
+        ]
+      },
+      "quantity": "Centre field of a 5 m square loop by Biot-Savart, against 2 sqrt(2) I/(pi d)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5401897896942637
+      },
+      "computed": {
+        "value": 0.54019
+      },
+      "unit": "A/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-1/centre-field-of-a-10-m-by-15-m-loop-with-d-sqrt-d1-d2-as-e-1-prints-it",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.1"
+          }
+        ]
+      },
+      "quantity": "Centre field of a 10 m by 15 m loop with d = sqrt(d1 d2), as E.1 prints it",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.22053155816871686
+      },
+      "computed": {
+        "value": 0.220532
+      },
+      "unit": "A/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-e-2-b/horizontal-component-of-a-15-by-10-loop-at-1-2-units-2-5-across-its-width",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure E.2 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure E.2 b)"
+          }
+        ]
+      },
+      "quantity": "Horizontal component of a 15 by 10 loop at 1,2 units, 2,5 % across its width",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.2,
+        "label": "4.2 dB read off the curve (+/-0,5)"
+      },
+      "computed": {
+        "value": 4.21
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.011
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-e-2-b/horizontal-component-of-a-15-by-10-loop-at-1-2-units-30-across-its-width",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure E.2 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure E.2 b)"
+          }
+        ]
+      },
+      "quantity": "Horizontal component of a 15 by 10 loop at 1,2 units, 30 % across its width",
+      "kind": "scalar",
+      "expected": {
+        "value": -15.0,
+        "label": "-15.0 dB read off the curve (+/-0,5)"
+      },
+      "computed": {
+        "value": -14.72
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.28
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-e-2-b/vertical-component-of-a-15-by-10-loop-at-1-2-units-12-5-across-its-width",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure E.2 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure E.2 b)"
+          }
+        ]
+      },
+      "quantity": "Vertical component of a 15 by 10 loop at 1,2 units, 12,5 % across its width",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.7,
+        "label": "1.7 dB read off the curve (+/-0,5)"
+      },
+      "computed": {
+        "value": 1.89
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.189
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-e-2-b/vertical-component-of-a-15-by-10-loop-at-1-2-units-50-across-its-width",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure E.2 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure E.2 b)"
+          }
+        ]
+      },
+      "quantity": "Vertical component of a 15 by 10 loop at 1,2 units, 50 % across its width",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.8,
+        "label": "-0.8 dB read off the curve (+/-0,5)"
+      },
+      "computed": {
+        "value": -0.48
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.32
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-h-1/current-for-400-ma-m-1-4-m-above-a-10-m-loop-of-aspect-ratio-1",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure H.1"
+          }
+        ]
+      },
+      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 1",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.89,
+        "label": "4.89 A read off the curve (+/-0,03)"
+      },
+      "computed": {
+        "value": 4.884
+      },
+      "unit": "A",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": -0.006
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-h-1/current-for-400-ma-m-1-4-m-above-a-10-m-loop-of-aspect-ratio-1-5",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure H.1"
+          }
+        ]
+      },
+      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 1,5",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.64,
+        "label": "5.64 A read off the curve (+/-0,03)"
+      },
+      "computed": {
+        "value": 5.632
+      },
+      "unit": "A",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": -0.008
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-h-1/current-for-400-ma-m-1-4-m-above-a-10-m-loop-of-aspect-ratio-2",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure H.1"
+          }
+        ]
+      },
+      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 2",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.04,
+        "label": "6.04 A read off the curve (+/-0,03)"
+      },
+      "computed": {
+        "value": 6.038
+      },
+      "unit": "A",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-h-1/current-for-400-ma-m-1-4-m-above-a-10-m-loop-of-aspect-ratio-3",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure H.1"
+          }
+        ]
+      },
+      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 3",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.41,
+        "label": "6.41 A read off the curve (+/-0,03)"
+      },
+      "computed": {
+        "value": 6.409
+      },
+      "unit": "A",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": -0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-figure-h-1/current-for-400-ma-m-1-4-m-above-a-10-m-loop-of-aspect-ratio-5",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 Figure H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "Figure H.1"
+          }
+        ]
+      },
+      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 5",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.63,
+        "label": "6.63 A read off the curve (+/-0,03)"
+      },
+      "computed": {
+        "value": 6.635
+      },
+      "unit": "A",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": 0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-5-4-10-2/loop-current-for-400-ma-m-1-4-m-above-a-3-turn-6-m-by-2-m-loop-by-biot-savart",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 5.4.10.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "5.4.10.2"
+          }
+        ]
+      },
+      "quantity": "Loop current for 400 mA/m 1,4 m above a 3-turn 6 m by 2 m loop, by Biot-Savart",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.4
+      },
+      "computed": {
+        "value": 0.4
+      },
+      "unit": "A/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-2/telecoil-response-45-degrees-off-axis",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.2"
+          }
+        ]
+      },
+      "quantity": "Telecoil response 45 degrees off axis",
+      "kind": "scalar",
+      "expected": {
+        "value": -3.0
+      },
+      "computed": {
+        "value": -3.01
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.01
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-2/telecoil-response-70-degrees-off-axis",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.2"
+          }
+        ]
+      },
+      "quantity": "Telecoil response 70 degrees off axis",
+      "kind": "scalar",
+      "expected": {
+        "value": -9.3
+      },
+      "computed": {
+        "value": -9.32
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.019
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-3/loop-impedance-over-resistance-where-the-reactance-equals-it",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.3"
+          }
+        ]
+      },
+      "quantity": "Loop impedance over resistance where the reactance equals it",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.4
+      },
+      "computed": {
+        "value": 1.414
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.015
+      },
+      "deviation": {
+        "value": 0.014
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-6/one-oersted-in-amperes-per-metre",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.6"
+          }
+        ]
+      },
+      "quantity": "One oersted in amperes per metre",
+      "kind": "scalar",
+      "expected": {
+        "value": 79.58
+      },
+      "computed": {
+        "value": 79.577
+      },
+      "unit": "A/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.003
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60118-4-2014-e-6/flux-density-of-1-a-m-in-air-microtesla",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60118-4:2014 E.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60118-4",
+            "edition": "2014",
+            "clause": "E.6"
+          }
+        ]
+      },
+      "quantity": "Flux density of 1 A/m in air, microtesla",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.256,
+        "label": "1,256 µT (+/-0,001: the print truncates 1,2566, see ERRATA)"
+      },
+      "computed": {
+        "value": 1.2566
+      },
+      "unit": "µT",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0006
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/neck-loop-resistance-1-58-ohm-mm2-m-copper",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "neck loop: resistance, 1/58 ohm mm2/m copper",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.24,
+        "label": "0.24 ohm"
+      },
+      "computed": {
+        "value": 0.238
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/neck-loop-impedance-at-2-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "neck loop: impedance at 2 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.09
+      },
+      "computed": {
+        "value": 1.095
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01223202396775502
+      },
+      "deviation": {
+        "value": 0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/neck-loop-impedance-at-5-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "neck loop: impedance at 5 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.67
+      },
+      "computed": {
+        "value": 2.681
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.021094845653439106
+      },
+      "deviation": {
+        "value": 0.011
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/counter-loop-resistance-1-58-ohm-mm2-m-copper",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "counter loop: resistance, 1/58 ohm mm2/m copper",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.37,
+        "label": "0.37 ohm (with the 1.6 m its sides give, see ERRATA)"
+      },
+      "computed": {
+        "value": 0.368
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/counter-loop-inductance-by-grover-s-formula-58-no-internal-term",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "counter loop: inductance by Grover's Formula (58), no internal term",
+      "kind": "scalar",
+      "expected": {
+        "value": 189.0
+      },
+      "computed": {
+        "value": 189.42
+      },
+      "unit": "µH",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.416
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/counter-loop-impedance-at-2-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "counter loop: impedance at 2 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.41
+      },
+      "computed": {
+        "value": 2.404
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.011981224624934336
+      },
+      "deviation": {
+        "value": -0.006
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/counter-loop-impedance-at-5-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "counter loop: impedance at 5 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.96
+      },
+      "computed": {
+        "value": 5.949
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.020989874004278094
+      },
+      "deviation": {
+        "value": -0.011
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/home-loop-resistance-1-58-ohm-mm2-m-copper",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "home loop: resistance, 1/58 ohm mm2/m copper",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.24,
+        "label": "0.24 ohm"
+      },
+      "computed": {
+        "value": 0.241
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/home-loop-inductance-by-grover-s-formula-58-no-internal-term",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "home loop: inductance by Grover's Formula (58), no internal term",
+      "kind": "scalar",
+      "expected": {
+        "value": 22.0
+      },
+      "computed": {
+        "value": 22.23
+      },
+      "unit": "µH",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.232
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/home-loop-impedance-at-2-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "home loop: impedance at 2 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.37
+      },
+      "computed": {
+        "value": 0.366
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.013022663188058444
+      },
+      "deviation": {
+        "value": -0.004
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/home-loop-impedance-at-5-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "home loop: impedance at 5 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.74
+      },
+      "computed": {
+        "value": 0.732
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.021479071344703168
+      },
+      "deviation": {
+        "value": -0.008
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/small-room-resistance-1-58-ohm-mm2-m-copper",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "small room: resistance, 1/58 ohm mm2/m copper",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.32,
+        "label": "0.32 ohm"
+      },
+      "computed": {
+        "value": 0.322
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/small-room-inductance-by-grover-s-formula-58-no-internal-term",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "small room: inductance by Grover's Formula (58), no internal term",
+      "kind": "scalar",
+      "expected": {
+        "value": 47.0
+      },
+      "computed": {
+        "value": 47.21
+      },
+      "unit": "µH",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.21
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/small-room-impedance-at-2-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "small room: impedance at 2 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.67
+      },
+      "computed": {
+        "value": 0.672
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.012907767394353838
+      },
+      "deviation": {
+        "value": 0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/small-room-impedance-at-5-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "small room: impedance at 5 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.52
+      },
+      "computed": {
+        "value": 1.511
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02141140087071169
+      },
+      "deviation": {
+        "value": -0.009
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/typical-place-of-worship-resistance-1-58-ohm-mm2-m-copper",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "typical place of worship: resistance, 1/58 ohm mm2/m copper",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.69,
+        "label": "0.69 ohm"
+      },
+      "computed": {
+        "value": 0.69
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.000345
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/typical-place-of-worship-inductance-by-grover-s-formula-58-no-internal-term",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "typical place of worship: inductance by Grover's Formula (58), no internal term",
+      "kind": "scalar",
+      "expected": {
+        "value": 109.0
+      },
+      "computed": {
+        "value": 109.24
+      },
+      "unit": "µH",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.237
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/typical-place-of-worship-impedance-at-2-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "typical place of worship: impedance at 2 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.54
+      },
+      "computed": {
+        "value": 1.534
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.012861731082440927
+      },
+      "deviation": {
+        "value": -0.006
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/typical-place-of-worship-impedance-at-5-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "typical place of worship: impedance at 5 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.5
+      },
+      "computed": {
+        "value": 3.493
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02138657553046219
+      },
+      "deviation": {
+        "value": -0.007
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/large-place-of-worship-resistance-1-58-ohm-mm2-m-copper",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "large place of worship: resistance, 1/58 ohm mm2/m copper",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.76,
+        "label": "0.76 ohm"
+      },
+      "computed": {
+        "value": 0.759
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/large-place-of-worship-impedance-at-2-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "large place of worship: impedance at 2 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.85
+      },
+      "computed": {
+        "value": 2.843
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.012392884148885949
+      },
+      "deviation": {
+        "value": -0.007
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-table-b-1/large-place-of-worship-impedance-at-5-khz-from-the-printed-r-and-l",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "large place of worship: impedance at 5 kHz from the printed R and L",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.89
+      },
+      "computed": {
+        "value": 6.891
+      },
+      "unit": "ohm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.021164355645348572
+      },
+      "deviation": {
+        "value": 0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-60028-1925-clause-i/resistivity-of-standard-annealed-copper-at-20-degc-from-1-m-of-1-mm2",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 60028:1925 clause I",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60028",
+            "edition": "1925",
+            "clause": "clause I"
+          }
+        ]
+      },
+      "quantity": "Resistivity of standard annealed copper at 20 degC, from 1 m of 1 mm2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.017241379310344827
+      },
+      "computed": {
+        "value": 0.017241
+      },
+      "unit": "ohm·mm²/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-5-4-7-2/maximum-output-current-the-voltage-across-the-resistance-over-its-value-where-the-thd-reaches-its-rating",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 5.4.7.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "5.4.7.2"
+          }
+        ]
+      },
+      "quantity": "Maximum output current: the voltage across the resistance over its value where the THD reaches its rating",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.6489361702127665
+      },
+      "computed": {
+        "value": 6.6489
+      },
+      "unit": "A",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-5-4-8-2/compliance-voltage-of-a-sine-the-average-peak-over-sqrt-2",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 5.4.8.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "5.4.8.2"
+          }
+        ]
+      },
+      "quantity": "Compliance voltage of a sine, the average peak over sqrt(2)",
+      "kind": "scalar",
+      "expected": {
+        "value": 9.899494936611665
+      },
+      "computed": {
+        "value": 9.8995
+      },
+      "unit": "V",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-5-4-14-1/in-phase-part-of-a-quadrature-network-at-85-degrees",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 5.4.14.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "5.4.14.1"
+          }
+        ]
+      },
+      "quantity": "In-phase part of a quadrature network at 85 degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.087
+      },
+      "computed": {
+        "value": 0.0872
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-5-4-14-1/rise-where-the-fields-add-at-85-degrees",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 5.4.14.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "5.4.14.1"
+          }
+        ]
+      },
+      "quantity": "Rise where the fields add at 85 degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.72
+      },
+      "computed": {
+        "value": 0.726
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": 0.006
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/iec-62489-1-2010-a1-5-4-14-1/fall-where-the-fields-subtract-at-85-degrees",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "IEC 62489-1:2010+A1 5.4.14.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62489-1",
+            "edition": "2010+A1",
+            "clause": "5.4.14.1"
+          }
+        ]
+      },
+      "quantity": "Fall where the fields subtract at 85 degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.7920662452733371,
+        "label": "-0.792 dB, 20 lg(1 - cos 85) (printed as 0,72 dB, see ERRATA)"
+      },
+      "computed": {
+        "value": -0.792
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1/e-din-en-62489-1-a2-2017-10-annex-d-d-1-2-and-d-1-3/neck-loop-types-of-the-draft-dc-resistance-and-input-voltage-for-400-ma-m",
+      "domain": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
+      "reference": {
+        "cite": "E DIN EN 62489-1/A2:2017-10 Annex D, D.1.2 and D.1.3",
+        "documents": [
+          {
+            "kind": "book",
+            "designation": "E DIN EN 62489-1/A2:2017-10",
+            "clause": "Annex D, D.1.2 and D.1.3"
+          }
+        ]
+      },
+      "quantity": "Neck-loop types of the draft: DC resistance and input voltage for 400 mA/m",
+      "kind": "record",
+      "expected": {
+        "label": "type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0",
+        "record": {
+          "type 1 at -5 %": 1.0,
+          "type 1 at +5 %": 1.0,
+          "type 1 at +5,1 %": 0.0,
+          "type 2 at 32 ohm": 1.0,
+          "type 2 below 32 ohm": 0.0,
+          "1,07 V for 400 mA/m": 0.0
+        }
+      },
+      "computed": {
+        "label": "type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0",
+        "record": {
+          "type 1 at -5 %": 1.0,
+          "type 1 at +5 %": 1.0,
+          "type 1 at +5,1 %": 0.0,
+          "type 2 at 32 ohm": 1.0,
+          "type 2 below 32 ohm": 0.0,
+          "1,07 V for 400 mA/m": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

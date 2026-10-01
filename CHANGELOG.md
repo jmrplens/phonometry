@@ -691,6 +691,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   position level as $L_{p\mathrm{A}I}$, with a capital $I$, for the
   $L_{p\mathrm{A}i}$ of the equation; that is registered in the errata.
 
+- **Audio-frequency induction loops for hearing aids (IEC 60118-4:2014 with
+  Amendment 1:2017, IEC 62489-1:2010 with Amendment 1:2014).** Two new
+  modules. `electroacoustics.induction_loop` judges an installed hearing loop:
+  `verify_induction_loop_system` checks that the maximum field reaches the
+  specified level at one point at least (8.2.7), every selected point of the
+  useful magnetic field volume within 3 dB of it (8.4.3), the frequency
+  response within 3 dB of the one at 1 kHz from 100 Hz to 5 kHz (8.3.7) and
+  the noise with the system switched on against the site's reference
+  signal-to-noise ratio (10.4.7 as amended), and
+  `verify_small_volume_system` judges a refuge, call point or counter at the
+  points of Figures 2 and 3 as the amendment draws them
+  (`small_volume_measurement_points`), or at the points of a useful volume
+  agreed by contract that covers each of their heights (9.4): within 6 dB,
+  0 dB at one point, nowhere above +8 dB. `assess_background_noise` classes
+  the site against the 47, 32 and 22 dB of 7.2, tonal noise included,
+  `verify_amplifier_overload` runs the overload test of the amendment to the
+  frequency of Table 4 (`OVERLOAD_TEST_FREQUENCIES`) or to where the loop
+  voltage first doubles and judges the loop voltage at the Table 4 frequency
+  against the amplifier's compliance voltage (10.3.3), and
+  `field_strength_meter`, `loop_test_noise` and
+  `combi_signal` are the true-RMS meter, the band-limited pink noise with its
+  crest factor of 4 and the combi signal of Table 2. The levels are referred
+  to `REFERENCE_FIELD_STRENGTH_A_PER_M`, 400 mA/m.
+  `electroacoustics.induction_loop_components` holds the components:
+  `rectangular_loop_field`, the exact Biot-Savart field of a rectangular loop
+  at any point, which reproduces the centre formula of IEC 60118-4 E.1 and
+  the curves of its Figure E.2 b); `loop_current` and `loop_dimensions` for
+  the field at 1.4 m of IEC 62489-1 5.4.10 and 5.4.11, which reproduce the
+  currents of Figure H.1; `loop_resistance` with the copper of IEC 60028 and
+  `rectangular_loop_inductance` by Grover's Formula (58), which reproduce the
+  resistances of Table B.1 and, without the internal term, four of its
+  inductances; `loop_impedance`; the
+  amplifier's `maximum_output_current` where the distortion reaches its
+  rating (5.4.7), `compliance_voltage`, noise, frequency response, AGC range
+  against the 32 dB of 5.4.13.4 and quadrature phase error; and
+  `neck_loop_characteristics` with `verify_neck_loop` against the two types
+  of the draft Amendment 2, cited as a draft. Every result has `.plot()`, and
+  a new guide in both languages walks a place of worship, a counter, an
+  amplifier and a neck loop through both standards. Thirteen printed defects
+  of the three documents are in the errata register, among them the
+  band-limit responses of 6.4 NOTE 2 printed the wrong way round, the
+  vertical-field line of Figure E.2 a) drawn along the loop instead of across
+  it, the gap the noise rule of 10.4.7 leaves at exactly 47 dB and the counter
+  loop's perimeter in Table B.1.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

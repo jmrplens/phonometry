@@ -153,6 +153,13 @@ from .devices import (
     generate_in_duct_flow_correction,
     generate_in_situ_noise_control,
     generate_in_situ_sound_power,
+    generate_induction_loop_amplifier,
+    generate_induction_loop_combi,
+    generate_induction_loop_counter,
+    generate_induction_loop_field,
+    generate_induction_loop_neck_loop,
+    generate_induction_loop_overload,
+    generate_induction_loop_verification,
     generate_intensity_class,
     generate_intensity_demo,
     generate_intensity_scan_power,
@@ -1177,6 +1184,16 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_microphone_directivity,
     generate_microphone_noise,
     generate_microphone_distortion,
+    # IEC 60118-4 and IEC 62489-1: an induction loop's field, the meter on the
+    # combi signal, the verdicts on a loop and a counter, the overload test,
+    # the amplifier and the neck loop.
+    generate_induction_loop_field,
+    generate_induction_loop_combi,
+    generate_induction_loop_verification,
+    generate_induction_loop_counter,
+    generate_induction_loop_overload,
+    generate_induction_loop_amplifier,
+    generate_induction_loop_neck_loop,
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,

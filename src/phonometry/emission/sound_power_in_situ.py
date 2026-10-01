@@ -94,6 +94,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .reference_sound_source import ReferenceSourceCalibration
+
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     _as_float64,
@@ -110,6 +112,7 @@ from ._shared import (
     SoundPowerWarning,
     _a_weighting_corrections,
     _c2_correction,
+    _reference_power_levels,
     _validate_meteorology,
 )
 
@@ -667,7 +670,7 @@ class _Comparison:
     """
 
     levels_ref: ArrayLike
-    lw_ref: ArrayLike
+    lw_ref: ArrayLike | ReferenceSourceCalibration
     frequencies: ArrayLike
     background_levels_ref: ArrayLike | None
     temperature_c: float
@@ -771,7 +774,10 @@ def _determine(
     n_positions, n_bands = background_correction.shape
     freqs = _checked_frequencies(comparison.frequencies, n_bands)
     ref, power = _reference_grids(
-        comparison.levels_ref, comparison.lw_ref, n_positions, n_bands
+        comparison.levels_ref,
+        _reference_power_levels(comparison.lw_ref, freqs, bandwidth="octave"),
+        n_positions,
+        n_bands,
     )
     m = ref.shape[0]
     # One background reading serves both sources (7.5): the reference-source
@@ -838,7 +844,7 @@ def _determine(
 def sound_power_in_situ(
     levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     background_levels: ArrayLike | None = None,
@@ -878,7 +884,12 @@ def sound_power_in_situ(
         location, or ``(m, n, bands)`` for ``m`` locations (Eq. 10).
     :param lw_ref: Calibrated octave-band sound power level ``LW(RSS)`` of the
         reference source, ``(bands,)``, or ``(m, bands)`` when each location
-        was calibrated in its own similar position (Eq. 12), in decibels.
+        was calibrated in its own similar position (Eq. 12), in decibels; or
+        the :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO
+        6926, whose one-third octave bands are summed into the octaves at
+        ``frequencies``. It is read as calibrated: Eq. (9) corrects the
+        measured levels of the reference source for speed, temperature and
+        static pressure by the manufacturer's specifications instead.
     :param frequencies: Nominal octave mid-band frequencies, one per band,
         from 63 Hz to 8 kHz (Table D.1), in hertz.
     :param background_levels: Octave-band time-averaged background levels
@@ -956,7 +967,7 @@ def sound_power_in_situ(
 def sound_energy_in_situ(
     event_levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     events: int | None = None,
@@ -997,7 +1008,9 @@ def sound_energy_in_situ(
     :param levels_ref: Time-averaged levels of the reference sound source,
         ``(n, bands)`` or ``(m, n, bands)``, as in :func:`sound_power_in_situ`.
     :param lw_ref: Calibrated sound power level of the reference source,
-        ``(bands,)`` or ``(m, bands)``, in decibels.
+        ``(bands,)`` or ``(m, bands)``, in decibels, or its
+        :class:`~phonometry.emission.ReferenceSourceCalibration`, as for
+        :func:`sound_power_in_situ`.
     :param frequencies: Nominal octave mid-band frequencies, one per band.
     :param events: The number ``N`` of events a 2D ``event_levels`` contains
         (Eq. 17); must be ``None`` with the 3D form, which counts them.

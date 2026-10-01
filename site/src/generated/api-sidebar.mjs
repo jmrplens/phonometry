@@ -321,6 +321,8 @@ export const apiSections = {
     items: [
       'reference/api/power/sound-power',
       'reference/api/power/sound-power-anechoic',
+      'reference/api/power/free-field-qualification',
+      'reference/api/power/reference-sound-source',
       'reference/api/power/sound-power-intensity',
       'reference/api/power/sound-power-intensity-points',
       'reference/api/power/sound-power-reverberation',

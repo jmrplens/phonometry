@@ -5844,6 +5844,168 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
     plt.close()
 
 
+#: The hemi-anechoic room of the free-field qualification guide: 8 m x 6 m x
+#: 5 m between the wedge tips, a hard floor at z = 0 that returns all of the
+#: pressure, and the pressure reflection coefficient of the wedges at 100,
+#: 125, 250, 500 Hz and 10 kHz.
+_FF_SURFACES = ((0, -4.0), (0, 4.0), (1, -3.0), (1, 3.0), (2, 5.0))
+_FF_WEDGE_R = (0.30, 0.22, 0.12, 0.07, 0.05)
+_FF_PATHS = (
+    ("dihedral corner", "diedro", (4.0, 3.0, 2.5), ("dihedral corner",)),
+    ("trihedral corner", "triedro", (-4.0, 3.0, 5.0), ("trihedral corner",)),
+    ("centre of a wall", "centro de una pared", (0.0, -3.0, 2.5), ("boundary centre",)),
+    ("nearest wall", "pared más cercana", (0.0, 3.0, 1.2), ("closest boundary",)),
+    ("door", "puerta", (-4.0, -1.5, 1.0), ("unique features",)),
+    ("towards the ceiling", "hacia el techo", (1.5, 1.0, 4.0), ()),
+)
+
+
+def _free_field_room() -> tuple[Any, Any, Any]:
+    """The guide's qualification: the fit, the verdict and the source directionality."""
+    from phonometry import emission
+
+    grid = emission.qualification_frequencies_hz()
+    wedge = np.interp(
+        np.log10(grid), np.log10([100.0, 125.0, 250.0, 500.0, 10000.0]), _FF_WEDGE_R
+    )
+    # The source sits in a cavity in the floor, its acoustic centre in the
+    # plane (A.3.2.2), so it and its image in the floor coincide.
+    centre = np.array([0.02, -0.01, 0.0])
+    d = np.arange(0.25, 3.0001, 0.025)
+
+    def levels_at(points: NDArray[np.float64]) -> NDArray[np.float64]:
+        k = 2.0 * np.pi * grid / 343.0
+        images: list[tuple[NDArray[np.float64], Any]] = [(centre, 1.0)]
+        for axis, plane in _FF_SURFACES:
+            image = centre.copy()
+            image[axis] = 2.0 * plane - centre[axis]
+            images.append((image, wedge))
+        p = np.zeros((points.shape[0], grid.size), dtype=np.complex128)
+        for source, gain in images:
+            for mirrored in (source, source * np.array([1.0, 1.0, -1.0])):
+                r = np.linalg.norm(points - mirrored, axis=1)[:, None]
+                p = p + gain * np.exp(-1j * k * r) / r
+        return np.asarray(88.0 + 20.0 * np.log10(np.abs(p)), dtype=np.float64)
+
+    traverses = []
+    for name, name_es, target, aims in _FF_PATHS:
+        unit = np.asarray(target) / np.linalg.norm(target)
+        traverses.append(
+            emission.MicrophoneTraverse.along(
+                target,
+                d,
+                levels_at(d[:, None] * unit[None, :]),
+                background_levels_db=np.full(grid.size, 25.0),
+                name=name_es if _LANG == "es" else name,
+                targets=aims,
+            )
+        )
+    fit = emission.inverse_square_law_deviations(
+        traverses,
+        frequencies_hz=grid,
+        room="hemi-anechoic",
+        source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.08)),
+    )
+    rows = np.arange(32)[:, None]
+    bands = np.arange(grid.size)[None, :]
+    directionality = emission.verify_source_directionality(
+        80.0 + 0.4 * np.sin(0.7 * rows + bands) * (1.0 + bands / 10.0),
+        frequencies_hz=grid,
+        room="hemi-anechoic",
+    )
+    check = emission.check_free_field(
+        fit,
+        bandwidth="discrete-frequency",
+        source_directionality=directionality,
+        measurement_radius_m=1.5,
+        reflecting_plane_absorption_coefficient=0.02,
+        reflecting_plane_margin_m=1.2,
+        paths_in_working_area=True,
+    )
+    return fit, check, directionality
+
+
+def generate_free_field_deviations(output_dir: str) -> None:
+    """ISO 26101: the deviations along six traverses at 100 Hz and at 1 kHz."""
+    print("Generating free_field_deviations.svg...")
+    fit, _, _ = _free_field_room()
+    fig, (low, high) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    fit.plot(ax=low, frequency_hz=100.0, language=_LANG)
+    fit.plot(ax=high, frequency_hz=1000.0, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_deviations.svg")
+    plt.close()
+
+
+def generate_free_field_check(output_dir: str) -> None:
+    """ISO 3745 Annex A as amended: the verdict and the test source directionality."""
+    print("Generating free_field_check.svg...")
+    _, check, source = _free_field_room()
+    fig, (left, right) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    check.plot(ax=left, language=_LANG)
+    source.plot(ax=right, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_check.svg")
+    plt.close()
+
+
+#: The fan-type reference sound source of the guide: its one-third octave
+#: sound power from 100 Hz to 10 kHz, dB re 1 pW.
+_RSS_THIRDS = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0,
+     1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0]
+)  # fmt: skip
+_RSS_LW = np.array(
+    [86.0, 86.8, 87.5, 88.1, 88.4, 88.6, 88.7, 88.6, 88.4, 88.1, 87.7, 87.2, 86.6,
+     85.9, 85.1, 84.2, 83.2, 82.1, 80.9, 79.6, 78.2]
+)  # fmt: skip
+
+
+def generate_reference_source_calibration(output_dir: str) -> None:
+    """ISO 6926: a calibration on the 2 m hemisphere and the clause 5 verdict."""
+    print("Generating reference_source_calibration.svg...")
+    from phonometry import emission, environment
+
+    positions = emission.precision_positions("hemisphere", radius=2.0, count=20)
+    upward = positions[:, 2:3] / 2.0 - 0.5
+    pattern = 4.0 * upward * np.sqrt(_RSS_THIRDS / 10000.0)[None, :]
+    alpha = environment.air_attenuation(
+        _RSS_THIRDS,
+        temperature_c=20.0,
+        relative_humidity_percent=45.0,
+        atmospheric_pressure_kpa=98.6,
+    )
+    levels = (
+        _RSS_LW[None, :]
+        - 10.0 * np.log10(2.0 * np.pi * 2.0**2)
+        + pattern
+        - 2.0 * alpha[None, :]
+    )
+    calibration = emission.reference_source_calibration(
+        levels,
+        frequencies_hz=_RSS_THIRDS,
+        arrangement="fixed",
+        conditions=emission.CalibrationConditions(
+            temperature_c=20.0, static_pressure_kpa=98.6, air_absorption_db_per_m=alpha
+        ),
+    )
+    jitter = np.array([[0.05], [-0.08], [0.04]]) * np.where(
+        _RSS_THIRDS < 200.0, 3.0, 1.0
+    )
+    supply = 0.12 + 0.06 * np.cos(np.arange(_RSS_THIRDS.size) / 3.0)
+    verdict = emission.verify_reference_sound_source(
+        calibration,
+        repeated_levels_db=calibration.sound_power_level_db[None, :] + jitter,
+        supply_variation_db=supply,
+    )
+    fig, (left, right) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    calibration.plot(ax=left, language=_LANG)
+    verdict.plot(ax=right, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "reference_source_calibration.svg")
+    plt.close()
+
+
 #: VDI 2081 Part 2:2005 Table 1: the octave bands the worked sheet is written
 #: in, and the A-weighting column it carries beside them.
 _VDI_BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])

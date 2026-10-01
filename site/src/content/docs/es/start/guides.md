@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 152 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 153 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y dos guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y tres guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -825,8 +825,8 @@ ISO 17208-1/-2, ISO 18406 y JOMOPANS-ECHO.
 Potencia acústica, intensidad, declaraciones de emisión, electroacústica y
 sonoridad de programa. Lo que emite una fuente y no lo que recibe un receptor,
 más la cadena electroacústica que lo reproduce o lo mide. Implementa ISO 3741,
-ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 9614-1/-2/-3, IEC 61043, ISO 4871,
-IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
+ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 26101, ISO 6926, ISO 9614-1/-2/-3,
+IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
 
 **[Potencia acústica e intensidad](/phonometry/es/devices/emission/)**
 
@@ -837,6 +837,11 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
 - [Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/):
   la superficie envolvente de ISO 3744/3746 y el grado de precisión anecoico de
   ISO 3745.
+- [Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/):
+  la cualificación de ISO 26101 de una cámara anecoica o semianecoica por la
+  ley del cuadrado inverso frente al anexo A que la modificación 1:2017
+  escribió en ISO 3745, y la calibración y los requisitos de una fuente sonora
+  de referencia de ISO 6926.
 - [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
   los métodos directo y de comparación de ISO 3741.
 - [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):

@@ -47,6 +47,9 @@ se construye.
 - [Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/):
   la superficie envolvente de ISO 3744/3746 y el grado de precisión anecoico
   de ISO 3745.
+- [Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/):
+  la cualificación de sala de ISO 26101 y la fuente sonora de referencia de
+  ISO 6926.
 - [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
   los métodos directo y de comparación de ISO 3741.
 - [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):
@@ -114,12 +117,21 @@ Control de ruido industrial en el camino, entre la máquina y quien la oye.
 
 <Scope>
 <ScopeClaim status="not-covered">
-**Aquí no se cualifica ningún recinto.** La cualificación de campo libre de
-una sala anecoica de ISO 3745, la cualificación de la cámara reverberante de
-ISO 3741 y el ensayo de intensidad residual de una sonda de IEC 61043 se dan
-todos por hechos: la biblioteca avisa de los criterios orientativos gruesos
-que una norma declara explícitamente y cualifica un índice residual que
-aportas tú, pero no certifica ni una sala ni un instrumento. El mismo límite
+**No todos los recintos se cualifican aquí.** La cualificación de campo
+libre de una sala anecoica o semianecoica se hace, por ISO 26101 frente al
+anexo A modificado de ISO 3745, en [Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/),
+y las dos salas de ISO 3743 se cualifican en
+[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):
+la sala de paredes rígidas de la Parte 1 por su volumen, sus superficies y su
+idoneidad acústica (`check_hard_walled_room`), la sala reverberante especial
+de la Parte 2 por su tiempo de reverberación, sus superficies y su idoneidad
+(`check_special_room_reverberation`, `check_special_room_surfaces`,
+`check_special_room_suitability`). La cualificación de la cámara reverberante
+de ISO 3741 y el ensayo de intensidad residual de una sonda de IEC 61043 se
+dan por hechos: la biblioteca avisa de los criterios orientativos gruesos que
+una norma declara explícitamente y cualifica un índice residual que aportas
+tú, pero no certifica ni una cámara reverberante de ISO 3741 ni un
+instrumento. El mismo límite
 recorre las páginas de electroacústica, que **reducen y presentan curvas que
 aporta el laboratorio** en vez de decirte cómo adquirirlas, y la ISO/TS 7849,
 cuyos apartados 5 a 7 sobre instrumentación, instalación y posiciones de

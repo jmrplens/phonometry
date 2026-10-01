@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 152 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 153 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-two guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-three guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -783,8 +783,8 @@ JOMOPANS-ECHO.
 Sound power, intensity, emission declarations, electroacoustics and programme
 loudness. What a source emits rather than what a receiver gets, plus the
 electroacoustic chain that reproduces or measures it. Implements ISO 3741,
-ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 9614-1/-2/-3, IEC 61043, ISO 4871,
-IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
+ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 26101, ISO 6926, ISO 9614-1/-2/-3,
+IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
 
 **[Sound power and intensity](/phonometry/devices/emission/)**
 
@@ -795,6 +795,11 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
 - [Sound Power by Pressure Methods](/phonometry/devices/emission/sound-power-pressure/):
   the enveloping surface of ISO 3744/3746 and the precision anechoic grade of
   ISO 3745.
+- [Free Field and Reference Sources](/phonometry/devices/emission/free-field-qualification/):
+  the ISO 26101 inverse-square-law qualification of an anechoic or
+  hemi-anechoic room against the Annex A that Amendment 1:2017 wrote into
+  ISO 3745, and the calibration and requirements of an ISO 6926 reference
+  sound source.
 - [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
 - [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/):

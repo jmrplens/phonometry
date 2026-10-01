@@ -862,6 +862,109 @@ def _high_frequency_power() -> ph.emission.HighFrequencySoundPowerResult:
     )
 
 
+_FREE_FIELD_DIRECTIONS = (
+    (1.0, 1.0, 1.0),
+    (1.0, 1.0, 0.3),
+    (0.0, 1.0, 0.5),
+    (1.0, 0.0, 0.2),
+    (-1.0, 0.5, 0.6),
+    (0.3, -1.0, 0.8),
+)
+_FREE_FIELD_TARGETS: tuple[tuple[str, ...], ...] = (
+    ("trihedral corner",),
+    ("dihedral corner",),
+    ("boundary centre",),
+    ("closest boundary",),
+    ("unique features",),
+    (),
+)
+
+
+def _inverse_square_law() -> ph.emission.InverseSquareLawResult:
+    """ISO 26101 deviations: six traverses, one wall reflection at 1 kHz."""
+    freqs = ph.emission.qualification_frequencies_hz()
+    d = np.arange(0.30, 3.0001, 0.02)
+    traverses = []
+    for index, direction in enumerate(_FREE_FIELD_DIRECTIONS):
+        level = 90.0 - 20.0 * np.log10(d)
+        grid = np.repeat(level[:, None], freqs.size, axis=1)
+        grid[:, 4] += 0.5 * (index + 1) / 6.0 * np.sin(2.0 * np.pi * d / 0.343)
+        traverses.append(
+            ph.emission.MicrophoneTraverse.along(
+                direction,
+                d,
+                grid,
+                background_levels_db=np.full(freqs.size, 30.0),
+                name=f"path {index + 1}",
+                targets=_FREE_FIELD_TARGETS[index],
+            )
+        )
+    return ph.emission.inverse_square_law_deviations(
+        traverses, frequencies_hz=freqs, room="hemi-anechoic"
+    )
+
+
+def _source_directionality() -> ph.emission.SourceDirectionalityResult:
+    """ISO 26101 Annex B: 32 positions, a gentle lobe growing with frequency."""
+    freqs = ph.emission.qualification_frequencies_hz()
+    positions = ph.emission.directionality_positions("hemi-anechoic")
+    lobe = positions[:, 0] / 1.5
+    levels = 80.0 + np.outer(lobe, np.linspace(0.3, 2.0, freqs.size))
+    return ph.emission.verify_source_directionality(
+        levels, frequencies_hz=freqs, room="hemi-anechoic"
+    )
+
+
+def _free_field_check() -> ph.emission.FreeFieldCheck:
+    """ISO 3745 Annex A as amended, measured out to 2 m."""
+    return ph.emission.check_free_field(
+        _inverse_square_law(),
+        bandwidth="discrete-frequency",
+        source_directionality=_source_directionality(),
+        measurement_radius_m=2.0,
+        reflecting_plane_absorption_coefficient=0.03,
+        reflecting_plane_margin_m=1.2,
+        paths_in_working_area=True,
+    )
+
+
+_RSS_THIRDS = np.array(
+    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000,
+     2500, 3150, 4000, 5000, 6300, 8000, 10000],
+    dtype=float,
+)  # fmt: skip
+
+
+def _reference_source_calibration() -> ph.emission.ReferenceSourceCalibration:
+    """ISO 6926 clause 8 over the 20 fixed positions of a 2 m hemisphere."""
+    shape = 78.0 + 2.0 * np.sin(np.linspace(0.0, np.pi, _RSS_THIRDS.size))
+    levels = shape[None, :] + np.linspace(-1.0, 1.0, 20)[:, None]
+    return ph.emission.reference_source_calibration(
+        levels, frequencies_hz=_RSS_THIRDS, arrangement="fixed"
+    )
+
+
+def _reference_sound_source() -> ph.emission.ReferenceSoundSourceVerdict:
+    """ISO 6926 clause 5 with three repeated sound power levels."""
+    calibration = _reference_source_calibration()
+    repeated = calibration.sound_power_level_db[None, :] + np.array(
+        [[0.08], [-0.05], [0.02]]
+    )
+    return ph.emission.verify_reference_sound_source(
+        calibration, repeated_levels_db=repeated, supply_variation_db=0.15
+    )
+
+
+def _reference_source_drift() -> ph.emission.ReferenceSourceDriftResult:
+    """ISO 6926 5.6.3: two checks six months apart, one band drifted."""
+    reference = 80.0 + np.zeros(_RSS_THIRDS.size)
+    latest = reference + np.linspace(-0.2, 0.3, _RSS_THIRDS.size)
+    latest[12] += 0.5
+    return ph.emission.verify_reference_source_drift(
+        reference, latest, frequencies_hz=_RSS_THIRDS
+    )
+
+
 def _in_situ_power() -> ph.emission.InSituSoundPowerResult:
     """ISO 3747 in situ comparison at four positions, one band an upper bound."""
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])

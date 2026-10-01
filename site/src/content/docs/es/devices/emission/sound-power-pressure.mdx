@@ -1138,10 +1138,13 @@ meteorológicas de referencia (`reference_atmosphere_correction`, Ec. G.1/G.3).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-Ninguno de los dos métodos ejecuta el ensayo de cualificación del recinto: la
-cualificación de campo libre de la cámara anecoica o semianecoica de ISO 3745
-se da por supuesta, no se realiza, y la validez de $K_2$ en ISO 3744 solo
-emite avisos. La corrección del **Anexo G** de ISO 3744 a las condiciones
+Ninguna de las dos determinaciones ejecuta la cualificación del recinto en
+la que se apoya: la cualificación de campo libre de la cámara anecoica o
+semianecoica es un paso propio, por ISO 26101 frente al anexo A modificado de
+ISO 3745, en
+[Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/),
+cuyo veredicto toma `sound_power_anechoic` como `room_qualification` para
+avisar, y la validez de $K_2$ en ISO 3744 solo emite avisos. La corrección del **Anexo G** de ISO 3744 a las condiciones
 meteorológicas de referencia, exigida por encima de 500 m de altitud o por
 debajo de 10 °C (apartados 8.2.5 y 8.3.6), la evalúa
 `reference_atmosphere_correction` pero nunca se aplica dentro de una

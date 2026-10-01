@@ -395,7 +395,7 @@ de la fuente de referencia y su potencia conocida.
 | Parámetro | Tipo | Unidades | Rango / defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels_ref` | array 1D o 2D | dB | coincide con `levels` | SPL medio de cámara con la fuente de referencia (RSS) en marcha |
-| `lw_ref` | array 1D | dB | por banda | Potencia acústica conocida $L_W(\text{RSS})$ de la fuente de referencia, de su calibración ISO 6926 |
+| `lw_ref` | array 1D o `ReferenceSourceCalibration` | dB | por banda | Potencia acústica conocida $L_W(\text{RSS})$ de la fuente de referencia, de su calibración ISO 6926; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se lee en las bandas de tercio de octava de `frequencies` |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Ruido de fondo de la fuente de ensayo; $K_1$ por banda sobre $L_p(\text{ST})$ |
 | `background_levels_ref` | array 1D o 2D | dB | coincide con `levels_ref` | Ruido de fondo de la fuente de **referencia**; $K_1$ por banda sobre $L_p(\text{RSS})$ |
 

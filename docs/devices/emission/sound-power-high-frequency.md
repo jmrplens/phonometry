@@ -406,9 +406,11 @@ the levels Table 3 asks to determine for each type of noise
 (`high_frequency_levels_to_determine`).
 
 **Not covered.** The room, the boom and the instruments are assumed qualified: the ISO 3741
-qualification of the room, the flatness of the chain and the ISO 6926
-calibration of the reference source are checks the laboratory makes, and the
-$\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
+qualification of the room and the flatness of the chain are checks the
+laboratory makes, the reference source comes calibrated (for broadband noise
+as the ISO 6926 calibration of
+[Free Field and Reference Sources](free-field-qualification.md) if the
+laboratory made it here), and the $\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
 monitored. The background correction is ISO 3741's, applied to the levels
 before they are passed (`reverberation_background_correction`). The
 free-field method is ISO 3744 as the library implements it, plus

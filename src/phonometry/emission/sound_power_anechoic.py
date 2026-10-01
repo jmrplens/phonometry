@@ -54,6 +54,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._report.metadata import ReportMetadata
+    from .free_field_qualification import FreeFieldCheck
 
 PrecisionSurface = Literal["sphere", "hemisphere"]
 PrecisionArray = Literal["general", "broadband"]
@@ -733,6 +734,56 @@ def _precision_uncertainty_bands(
     )
 
 
+def _room_qualification_warnings(
+    check: FreeFieldCheck,
+    surface: PrecisionSurface,
+    radius: float,
+    frequencies: np.ndarray | None,
+) -> None:
+    """Warn where the measurement leaves the room qualification (Annex A)."""
+    room = "anechoic" if surface == "sphere" else "hemi-anechoic"
+    if check.room != room:
+        msg = (
+            f"the room qualification is for a {check.room} room; a {surface} "
+            f"is measured in a {room} one (ISO 3745:2012, 5.1)."
+        )
+        raise ValueError(msg)
+    if check.passes:
+        qualified_radius = check.maximum_qualified_radius_m
+        low, high = float(check.frequencies_hz[0]), float(check.frequencies_hz[-1])
+    elif check.conforming_range_hz is not None and not check.not_judged:
+        qualified_radius = check.conforming_radius_m
+        low, high = check.conforming_range_hz
+    else:
+        warnings.warn(
+            "The room is not qualified by ISO 3745:2012 Annex A as amended in "
+            "2017; the determination is not in conformity with ISO 3745.",
+            SoundPowerWarning,
+            stacklevel=3,
+        )
+        return
+    if radius > qualified_radius:
+        warnings.warn(
+            f"The measurement radius {radius:g} m lies beyond the qualified "
+            f"radius {qualified_radius:.3g} m (ISO 3745:2012/Amd.1:2017, A.2.4).",
+            SoundPowerWarning,
+            stacklevel=3,
+        )
+    if frequencies is not None:
+        freqs = np.asarray(frequencies, dtype=np.float64)
+        # A band is inside the range when its one-third octave band is: the
+        # nominal frequencies and the exact ones differ by under 3 %.
+        edge = 10.0 ** (1.0 / 20.0)
+        outside = (freqs < low / edge) | (freqs > high * edge)
+        if np.any(outside):
+            warnings.warn(
+                f"Bands outside the qualified frequency range {low:g} Hz to "
+                f"{high:g} Hz (ISO 3745:2012/Amd.1:2017, A.2.3).",
+                SoundPowerWarning,
+                stacklevel=3,
+            )
+
+
 @overload
 def sound_power_anechoic(
     levels_positions: np.ndarray,
@@ -747,6 +798,7 @@ def sound_power_anechoic(
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
+    room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult: ...
 
 
@@ -763,6 +815,7 @@ def sound_power_anechoic(
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
+    room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult: ...
 
 
@@ -779,6 +832,7 @@ def sound_power_anechoic(
     air_absorption_coefficient: float | np.ndarray | None = None,
     sigma_omc: float = 0.0,
     coverage_factor: float = 2.0,
+    room_qualification: FreeFieldCheck | None = None,
 ) -> PrecisionSoundPowerResult:
     r"""Sound power level in an (hemi-)anechoic room (ISO 3745:2012, precision).
 
@@ -817,13 +871,21 @@ def sound_power_anechoic(
         per band; ``None`` leaves :math:`C_3 = 0`.
     :param sigma_omc: Operating/mounting standard deviation, dB.
     :param coverage_factor: ``k`` (2 two-sided, 1.6 one-sided).
+    :param room_qualification: The :func:`~phonometry.emission.check_free_field`
+        verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room
+        type must match ``surface``; a :class:`SoundPowerWarning` says when the
+        room is not qualified, when ``radius`` lies beyond the qualified
+        radius, or when a band lies outside the qualified frequency range.
     :return: :class:`PrecisionSoundPowerResult`.
+    :raises ValueError: for a room qualification of the other room type.
     """
     if surface not in ("sphere", "hemisphere"):
         raise ValueError(_SURFACE_CHOICE_MSG)
     if radius <= 0:
         msg = "A positive 'radius' is required."
         raise ValueError(msg)
+    if room_qualification is not None:
+        _room_qualification_warnings(room_qualification, surface, radius, frequencies)
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'levels_positions' must be a 2D (positions, bands) array."

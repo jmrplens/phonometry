@@ -205,7 +205,7 @@ plt.show()
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 1D, 2D or 3D array | dB | `(bands,)`, `(NM, bands)` or `(NS, NM, bands)` | Measured $L'_{pi(\mathrm{ST})}$: one traverse (NOTE to 8.1.2), one row per fixed position (at least three, 7.3), or one grid per source location (Eq. 9) |
 | `levels_ref` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | The reference source at the same positions, or on the same traverse |
-| `lw_ref` | 1D array | dB | `(bands,)` | Calibrated $L_{W(\mathrm{RSS})}$ |
+| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | `(bands,)` | Calibrated $L_{W(\mathrm{RSS})}$ at the conditions of the test; a [`ReferenceSourceCalibration`](free-field-qualification.md) is summed from its one-third octave bands into the octaves at `frequencies` and read there, less its own $C_2$ |
 | `frequencies` | 1D array | Hz | 125 Hz to 8 kHz octaves | Ascending octave centres (3.11); 63 Hz is accepted where the room and the instrumentation are satisfactory there (Table B.1 footnote) |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | $L_{pi(\mathrm{B})}$, averaged by Eq. 12. `None` warns and leaves `background_requirement_met` `False` throughout |
 | `background_levels_ref` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` |
@@ -521,8 +521,10 @@ plt.show()
 | `sigma_omc_db`, `coverage_factor` | float | dB, | `None`, `2.0` | Formulae 12 and 13 |
 
 `sound_power_special_room_comparison()` takes `levels`, `levels_ref` (at
-least six positions, 10.3), `lw_ref`, `frequencies`, `background_levels`,
-`background_levels_ref` and the same four last arguments. Both return a
+least six positions, 10.3), `lw_ref` (the levels or a
+`ReferenceSourceCalibration`, as in Part 1), `frequencies`,
+`background_levels`, `background_levels_ref` and the same four last
+arguments. Both return a
 `SpecialRoomSoundPowerResult`: `sound_power_level`, `mean_pressure_level`,
 `background_correction`, `background_requirement_met`, the reference
 source's `mean_reference_level` and `reference_power_level` (comparison) or
@@ -688,7 +690,10 @@ them a sound energy level. The reference sound source is taken as
 calibrated: its characteristics and calibration tolerances, Annex A of Part 2
 (A.1 and Table A.1: ±1 dB from 100 Hz to 160 Hz, ±0,5 dB from 200 Hz to
 4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
-calibration certificate's and are not judged here.
+calibration certificate's and are not judged here. An ISO 6926 calibration
+made in [Free Field and Reference Sources](free-field-qualification.md), which judges the
+requirements of ISO 6926, is taken by either comparison as `lw_ref` and read
+at the conditions of the test.
 
 ## See also
 

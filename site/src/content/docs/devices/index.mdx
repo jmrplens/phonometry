@@ -44,6 +44,8 @@ The total acoustic emission of a source, and the power flux it is built on.
 - [Sound Power by Pressure Methods](/phonometry/devices/emission/sound-power-pressure/):
   the enveloping surface of ISO 3744/3746 and the precision anechoic grade of
   ISO 3745.
+- [Free Field and Reference Sources](/phonometry/devices/emission/free-field-qualification/):
+  the ISO 26101 room qualification and the ISO 6926 reference sound source.
 - [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
 - [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/):
@@ -109,12 +111,21 @@ it.
 
 <Scope>
 <ScopeClaim status="not-covered">
-**No facility is qualified here.** ISO 3745's free-field qualification of an
-anechoic room, ISO 3741's reverberation-room qualification and IEC 61043's
-residual-intensity test of a probe are all assumed to have been done: the
-library warns on the coarse advisory criteria a standard states explicitly and
-grades a residual index you supply, but it does not certify a room or an
-instrument. The same boundary runs through the electroacoustics pages, which
+**Not every facility is qualified here.** The free-field qualification of
+an anechoic or hemi-anechoic room is performed, by ISO 26101 against the
+amended ISO 3745 Annex A, in [Free Field and Reference Sources](/phonometry/devices/emission/free-field-qualification/),
+and the two rooms of ISO 3743 are qualified in
+[Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/): the hard-walled room of
+Part 1 by its volume, surfaces and acoustic adequacy
+(`check_hard_walled_room`), the special reverberation room of Part 2 by its
+reverberation time, surfaces and suitability
+(`check_special_room_reverberation`, `check_special_room_surfaces`,
+`check_special_room_suitability`). ISO 3741's reverberation-room
+qualification and IEC 61043's residual-intensity test of a probe are assumed
+to have been done: the library warns on the coarse advisory criteria a
+standard states explicitly and grades a residual index you supply, but it
+does not certify an ISO 3741 reverberation room or an instrument. The same
+boundary runs through the electroacoustics pages, which
 **reduce and report curves the laboratory supplies** rather than telling you
 how to acquire them, and through ISO/TS 7849, whose clauses 5 to 7 on
 instrumentation, installation and measurement positions are laboratory

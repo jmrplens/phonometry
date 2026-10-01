@@ -371,6 +371,58 @@ def _background_exposure(
     return np.asarray(bg + 10.0 * np.log10(t / _T0), dtype=np.float64)
 
 
+def _reference_power_levels(
+    lw_ref: object,
+    frequencies: object,
+    *,
+    bandwidth: Literal["one-third-octave", "octave"],
+    name: str = "lw_ref",
+    temperature_c: float | None = None,
+    static_pressure_kpa: float | None = None,
+) -> np.ndarray:
+    r"""The calibrated sound power of a reference sound source, per band.
+
+    A comparison method takes :math:`L_{W(\mathrm{RSS})}` either as the levels
+    themselves or as the :class:`~phonometry.emission.ReferenceSourceCalibration`
+    of ISO 6926, from which the bands at ``frequencies`` are read (an octave
+    band is the energy sum of its three one-third octave bands). Given the
+    meteorological conditions of the test, a calibration is read there, as
+    :math:`L_W - C_2` (ISO 3741 Formulae (21) and (31)); without them, as
+    calibrated, under the reference conditions (ISO 3747, whose Equation (9)
+    corrects the measured levels of the reference source instead).
+
+    :param lw_ref: The levels, or a calibration.
+    :param frequencies: The bands the method works in; required with a
+        calibration.
+    :param bandwidth: ``"one-third-octave"`` or ``"octave"``, the bands of the
+        method.
+    :param name: The parameter name for the error message.
+    :param temperature_c: Air temperature at the test, in degrees Celsius, or
+        ``None`` for the calibrated levels as they are.
+    :param static_pressure_kpa: Static pressure at the test, in kilopascals,
+        or ``None``.
+    :return: The levels, in dB re 1 pW.
+    :raises ValueError: for a calibration without ``frequencies`` or one that
+        does not cover them.
+    """
+    from .reference_sound_source import ReferenceSourceCalibration
+
+    if not isinstance(lw_ref, ReferenceSourceCalibration):
+        return np.asarray(lw_ref, dtype=np.float64)
+    if frequencies is None:
+        msg = (
+            f"'frequencies' are required to read '{name}' from a "
+            "ReferenceSourceCalibration."
+        )
+        raise ValueError(msg)
+    return lw_ref.sound_power_level_at(
+        np.asarray(frequencies, dtype=np.float64),
+        bandwidth=bandwidth,
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
+    )
+
+
 #: Approximate mean sound absorption coefficient of a room by description, the
 #: seven rows of ISO 11546-2:1995 Table C.2, Annex C, printed folio 13.
 #: It answers the question that annex asks first: what is ``alpha`` in this

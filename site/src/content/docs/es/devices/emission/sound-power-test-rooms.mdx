@@ -237,7 +237,7 @@ plt.show()
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 1D, 2D o 3D | dB | `(bandas,)`, `(NM, bandas)` o `(NS, NM, bandas)` | $L'_{pi(\mathrm{ST})}$ medidos: un recorrido (NOTA de 8.1.2), una fila por posición fija (al menos tres, 7.3) o una rejilla por ubicación de la fuente (Ec. 9) |
 | `levels_ref` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | La fuente de referencia en las mismas posiciones, o en el mismo recorrido |
-| `lw_ref` | array 1D | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado |
+| `lw_ref` | array 1D o `ReferenceSourceCalibration` | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado en las condiciones del ensayo; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` y se lee allí, menos su propio $C_2$ |
 | `frequencies` | array 1D | Hz | octavas de 125 Hz a 8 kHz | Centros de octava ascendentes (3.11); se acepta 63 Hz donde la sala y la instrumentación son satisfactorias en esa banda (nota de la Tabla B.1) |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | $L_{pi(\mathrm{B})}$, promediados con la Ec. 12. `None` avisa y deja `background_requirement_met` en `False` en todas las bandas |
 | `background_levels_ref` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` |
@@ -559,8 +559,10 @@ plt.show()
 | `sigma_omc_db`, `coverage_factor` | float | dB, | `None`, `2.0` | Fórmulas 12 y 13 |
 
 `sound_power_special_room_comparison()` recibe `levels`, `levels_ref` (al
-menos seis posiciones, 10.3), `lw_ref`, `frequencies`, `background_levels`,
-`background_levels_ref` y los mismos cuatro últimos argumentos. Ambas
+menos seis posiciones, 10.3), `lw_ref` (los niveles o una
+`ReferenceSourceCalibration`, como en la Parte 1), `frequencies`,
+`background_levels`, `background_levels_ref` y los mismos cuatro últimos
+argumentos. Ambas
 devuelven un `SpecialRoomSoundPowerResult`: `sound_power_level`,
 `mean_pressure_level`, `background_correction`,
 `background_requirement_met`, el `mean_reference_level` y el
@@ -749,7 +751,10 @@ referencia se toma como calibrada: sus características y sus tolerancias de
 calibración, el Anexo A de la Parte 2 (A.1 y la Tabla A.1: ±1 dB de 100 Hz a
 160 Hz, ±0,5 dB de 200 Hz a 4 kHz, ±1 dB de 5 kHz a 10 kHz) y la ISO 6926
 para la Parte 1, son cosa de su certificado de calibración y no se juzgan
-aquí.
+aquí. Una calibración ISO 6926 hecha en
+[Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/), que juzga los requisitos de
+ISO 6926, la toman ambas comparaciones como `lw_ref` y la leen en las
+condiciones del ensayo.
 </ScopeClaim>
 </Scope>
 

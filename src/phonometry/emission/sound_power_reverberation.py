@@ -88,6 +88,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._report.metadata import ReportMetadata
+    from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -105,6 +106,7 @@ from ._shared import (
     _background_exposure,
     _c1_correction,
     _c2_correction,
+    _reference_power_levels,
     _single_event_mean,
     _validate_event_count,
     _validate_meteorology,
@@ -654,10 +656,17 @@ def _direct_terms(
 def _comparison_inputs(
     n_bands: int,
     levels_ref: np.ndarray,
-    lw_ref: np.ndarray,
+    lw_ref: np.ndarray | ReferenceSourceCalibration,
     frequencies: np.ndarray | None,
+    *,
+    temperature_c: float,
+    static_pressure_kpa: float,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
     """The reference source's mean room level, its known ``LW`` and the bands.
+
+    A :class:`~phonometry.emission.ReferenceSourceCalibration` is read in the
+    one-third octave bands at ``frequencies`` and at the meteorological
+    conditions of the test, as Eq. (21) and (31) define ``LW(RSS)``.
 
     :return: ``(Lp(RSS), LW(RSS), frequencies or None)``, each spanning the
         ``n_bands`` of the source under test.
@@ -665,7 +674,13 @@ def _comparison_inputs(
         do not span the same bands as the source under test.
     """
     lp_rss = _mean_level(levels_ref)
-    lw_rss = np.asarray(lw_ref, dtype=np.float64)
+    lw_rss = _reference_power_levels(
+        lw_ref,
+        frequencies,
+        bandwidth="one-third-octave",
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
+    )
     if lp_rss.shape != (n_bands,) or lw_rss.shape != (n_bands,):
         msg = "'levels', 'levels_ref' and 'lw_ref' must span the same bands."
         raise ValueError(msg)
@@ -784,7 +799,7 @@ def sound_power_reverberation(
 def sound_power_comparison(
     levels: np.ndarray,
     levels_ref: np.ndarray,
-    lw_ref: np.ndarray,
+    lw_ref: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
@@ -811,8 +826,13 @@ def sound_power_comparison(
     :param levels: Mean room SPL per band (1D) or ``(NM, NB)`` per-position
         levels of the source under test, in decibels.
     :param levels_ref: Same, for the reference sound source, in decibels.
-    :param lw_ref: Known sound power level ``LW(RSS)`` per band, in decibels.
-    :param frequencies: Band mid-frequencies (Hz) for the A-weighted total.
+    :param lw_ref: Known sound power level ``LW(RSS)`` per band, in decibels,
+        under the meteorological conditions of the test (Eq. 21), or the
+        :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
+        read in the one-third octave bands at ``frequencies`` and carried from
+        the reference conditions to those of the test by its own ``C2``.
+    :param frequencies: Band mid-frequencies (Hz) for the A-weighted total;
+        required with a calibration.
     :param background_levels: Background levels for the ``K1`` correction of
         ``levels`` (per position, or a single spectrum; applied per position
         per Eq. 14/15 before the Eq. 16 average when ``levels`` is 2D).
@@ -824,7 +844,14 @@ def sound_power_comparison(
     _validate_meteorology(temperature_c, static_pressure_kpa)
     lp_st = _mean_level(levels)
     n_bands = lp_st.shape[0]
-    lp_rss, lw_rss, freqs = _comparison_inputs(n_bands, levels_ref, lw_ref, frequencies)
+    lp_rss, lw_rss, freqs = _comparison_inputs(
+        n_bands,
+        levels_ref,
+        lw_ref,
+        frequencies,
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
+    )
 
     # Microphone-sampling advisories (<6 positions, sM > 1,5 dB) apply to the
     # per-position measurement of the source under test, exactly as in the
@@ -1130,7 +1157,7 @@ def sound_energy_reverberation(
 def sound_energy_comparison(
     levels: np.ndarray,
     levels_ref: np.ndarray,
-    lw_ref: np.ndarray,
+    lw_ref: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     events: int | None = None,
@@ -1168,7 +1195,10 @@ def sound_energy_comparison(
     :param levels_ref: Mean room SPL per band (1D) or ``(NM, NB)`` per-position
         time-averaged levels of the reference sound source, in decibels.
     :param lw_ref: Known sound power level ``LW(RSS)`` per band, in decibels,
-        under the meteorological conditions of the test.
+        under the meteorological conditions of the test (Eq. 31), or the
+        :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
+        read in the one-third octave bands at ``frequencies`` and carried from
+        the reference conditions to those of the test by its own ``C2``.
     :param frequencies: Band mid-frequencies (Hz) for the ``K1`` criterion and
         the A-weighted total.
     :param events: The number of events ``Ne`` one measurement encompasses
@@ -1192,7 +1222,14 @@ def sound_energy_comparison(
         integration_time = require_positive(integration_time, "integration_time")
     le_st = _mean_level(event_levels)
     n_bands = le_st.shape[0]
-    lp_rss, lw_rss, freqs = _comparison_inputs(n_bands, levels_ref, lw_ref, frequencies)
+    lp_rss, lw_rss, freqs = _comparison_inputs(
+        n_bands,
+        levels_ref,
+        lw_ref,
+        frequencies,
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
+    )
 
     _position_sampling_warnings(event_levels, stacklevel=2)
 

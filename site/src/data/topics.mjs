@@ -462,6 +462,7 @@ export const topics = [
           'devices/emission/intensity',
           'devices/emission/sound-power',
           'devices/emission/sound-power-pressure',
+          'devices/emission/free-field-qualification',
           'devices/emission/sound-power-reverberation',
           'devices/emission/sound-power-test-rooms',
           'devices/emission/sound-power-in-situ',

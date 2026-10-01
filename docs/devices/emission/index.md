@@ -12,7 +12,10 @@ standardised routes and closes the job with the ISO 4871 emission
 declaration, and each route has its own page:
 [Sound Power by Pressure Methods](sound-power-pressure.md)
 for the enveloping surface of ISO 3744/3746 and the precision anechoic grade
-of ISO 3745,
+of ISO 3745, whose room the guide
+[Free Field and Reference Sources](free-field-qualification.md)
+qualifies by ISO 26101, beside the ISO 6926 calibration of the reference
+source every comparison method needs,
 [Sound Power in the Reverberation Room](sound-power-reverberation.md)
 for the direct and comparison methods of ISO 3741,
 [Sound Power in Small Test Rooms](sound-power-test-rooms.md)
@@ -80,6 +83,10 @@ judged against.
   the enveloping surface of ISO 3744/3746 and the precision anechoic grade of
   ISO 3745, and the sound energy level of a burst over the ISO 3744/3746
   enveloping surface.
+- [Free Field and Reference Sources](free-field-qualification.md):
+  the ISO 26101 qualification of an anechoic or hemi-anechoic room against the
+  Annex A that Amendment 1:2017 wrote into ISO 3745, and the calibration and
+  requirements of an ISO 6926 reference sound source.
 - [Sound Power in the Reverberation Room](sound-power-reverberation.md):
   the direct and comparison methods of ISO 3741, for sound power and for the
   sound energy of a single event.
@@ -113,10 +120,19 @@ judged against.
 ## What this section does not cover
 
 The determination methods start after the facility and the probe have been
-qualified. ISO 3745's free-field qualification of an anechoic or hemi-anechoic
-room, ISO 3741's reverberation-room qualification (eigenfrequency counting or
-a reference-source comparison) and the IEC 61043 residual-intensity test of a
-probe-and-analyser chain are all **assumed, not performed**: the library warns
+qualified. The free-field qualification of an anechoic or hemi-anechoic room
+is performed, by ISO 26101 against the amended ISO 3745 Annex A, in
+[Free Field and Reference Sources](free-field-qualification.md),
+and so are the room checks of ISO 3743, in
+[Sound Power in Small Test Rooms](sound-power-test-rooms.md): the volume, surfaces
+and acoustic adequacy of the hard-walled room of Part 1
+(`check_hard_walled_room`) and the reverberation time, surfaces and
+suitability of the special reverberation room of Part 2
+(`check_special_room_reverberation`, `check_special_room_surfaces`,
+`check_special_room_suitability`).
+ISO 3741's reverberation-room qualification (eigenfrequency counting or a
+reference-source comparison) and the IEC 61043 residual-intensity test of a
+probe-and-analyser chain are **assumed, not performed**: the library warns
 on the coarse advisory criteria the standards state explicitly (the Table 1
 minimum volume, the position count, an inter-position spread above 1.5 dB, the
 ISO 3744 K₂ validity) and grades a residual-intensity index you measured

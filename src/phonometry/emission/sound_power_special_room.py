@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._report.metadata import ReportMetadata
+    from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -96,6 +97,7 @@ from ._shared import (
     SoundPowerWarning,
     _a_weighting_corrections,
     _c2_correction,
+    _reference_power_levels,
     _settled,
     _validate_meteorology,
 )
@@ -1628,7 +1630,7 @@ def sound_power_special_room(
 def sound_power_special_room_comparison(
     levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     background_levels: ArrayLike | None = None,
@@ -1661,7 +1663,13 @@ def sound_power_special_room_comparison(
     :param levels_ref: Levels of the reference source, ``(NMr, bands)``, at
         least six positions (10.3), or one traverse level ``(bands,)``.
     :param lw_ref: The reference source's calibrated octave-band power level
-        :math:`L_{W\mathrm{r}}`, ``(bands,)``, in decibels.
+        :math:`L_{W\mathrm{r}}`, ``(bands,)``, in decibels, under the
+        meteorological conditions of the test, since Formula (10) gives
+        :math:`L_{W\mathrm{e}}` there (Annex E); or the
+        :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
+        whose one-third octave bands are summed into the octaves at
+        ``frequencies`` and carried from the reference conditions to those of
+        the test by its own ``C2`` (ISO 6926:2016, 8.4).
     :param frequencies: Nominal octave centres from 63 Hz to 8 kHz.
     :param background_levels: Background for the source under test, as in
         :func:`sound_power_special_room`.
@@ -1676,7 +1684,9 @@ def sound_power_special_room_comparison(
     :raises ValueError: for levels of an inadmissible shape, a reference
         spectrum of other bands, a background that fits neither source,
         frequencies outside Table F.1, a climate out of range, a negative
-        ``sigma_omc_db`` or a coverage factor that is not positive.
+        ``sigma_omc_db``, a coverage factor that is not positive, or a
+        calibration that does not cover the bands or used the manufacturer's
+        ``C2``, whose value at the test only the manufacturer gives.
     """
     grid, traverse = _measurement_grid(levels, "levels")
     n_sources, n_positions, n_bands = grid.shape
@@ -1699,7 +1709,19 @@ def sound_power_special_room_comparison(
             SoundPowerWarning,
             stacklevel=2,
         )
-    power = _finite(lw_ref, "lw_ref", (1,))
+    # Formula (10) gives the level under the conditions of the test (Annex E),
+    # so a calibration is read there, less its own C2.
+    power = _finite(
+        _reference_power_levels(
+            lw_ref,
+            freqs,
+            bandwidth="octave",
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+        ),
+        "lw_ref",
+        (1,),
+    )
     if power.shape != (n_bands,):
         msg = f"'lw_ref' must carry one value per band ({n_bands})."
         raise ValueError(msg)

@@ -599,6 +599,28 @@ def test_an_amended_edition_is_still_an_edition() -> None:
     )
 
 
+def test_an_amendment_issued_on_its_own_is_part_of_the_edition() -> None:
+    """``ISO 3745:2012/Amd.1:2017`` stopped the edition at the slash, and with
+    nothing after it able to open a clause the document fell back to the bare
+    body "ISO"; beside another document the whole of it became one name.
+    """
+    document = _first("ISO 3745:2012/Amd.1:2017 A.2.3")
+    assert (document.designation, document.edition, document.clause) == (
+        "ISO 3745",
+        "2012/Amd.1:2017",
+        "A.2.3",
+    )
+    pair = references.documents(
+        references.parse(
+            "ISO 26101:2017 Table A.1 / ISO 3745:2012/Amd.1:2017 Table A.1"
+        )
+    )
+    assert [(d.designation, d.edition) for d in pair] == [
+        ("ISO 26101", "2017"),
+        ("ISO 3745", "2012/Amd.1:2017"),
+    ]
+
+
 def test_an_edition_dated_to_the_month_keeps_its_month() -> None:
     """DIN and VDI identify an edition by year and month, and so must the split.
 

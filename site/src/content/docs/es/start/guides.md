@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 155 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 156 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y cinco guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y seis guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -403,7 +403,8 @@ hace una sala con el sonido que se produce dentro, y cuánto del sonido que se
 produce al lado consigue pasar. Implementa ISO 3382-1/-2/-3, ISO 14257,
 ISO 11690-3, ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2,
 ISO 16251-1, ISO 717-1/-2, EN 12354-1 a -6, ISO 18233, ISO 12999-1,
-ISO 10052, ANSI/ASA S12.2 y ASTM E413/E1414.
+ISO 10052, ISO 16032 (desde el borrador ISO/DIS 16032:2023), ANSI/ASA S12.2 y
+ASTM E413/E1414.
 
 **[Acústica de salas](/phonometry/es/buildings/rooms/)**
 
@@ -461,6 +462,9 @@ ISO 10052, ANSI/ASA S12.2 y ASTM E413/E1414.
 - [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
   el método de control en bandas de octava con su índice de reverberación y sus
   magnitudes aérea, de impactos, de fachada y de equipamientos.
+- [Ruido de equipamientos y actividades (ISO 16032)](/phonometry/es/buildings/insulation/service-equipment-noise/):
+  el método de ingeniería para el sonido de los equipamientos de un edificio y
+  de las actividades dentro o cerca de él, desde el borrador ISO/DIS 16032:2023.
 - [Transmisión por flancos en laboratorio (ISO 10848)](/phonometry/es/buildings/insulation/flanking-lab/):
   el índice de reducción vibratoria de unión y las diferencias de niveles de
   flanco medidas en una instalación de ensayo.

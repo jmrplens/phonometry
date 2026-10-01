@@ -9348,6 +9348,163 @@ in the same order.
   estimate.
 - **Status:** unreported.
 
+## ISO/DIS 16032:2023, Annex A, Table A.1 (the one-third-octave C-weighting at 25 Hz and from 1 600 Hz up)
+
+- **Location:** Annex A (normative), Table A.1 "A-weighting and C-weighting
+  correction values", the C-weighting column of the one-third-octave bands, in
+  the English text of E DIN EN ISO 16032:2023-05 (printed p. 12) and in the
+  German text of the same publication (Tabelle A.1, printed p. 19).
+- **The print:** the one-third-octave C-weighting reads −5 dB at 25 Hz, −3 dB
+  at 31,5 Hz and −2 dB at 40 Hz, then −1,3 dB to −0,1 dB from 50 Hz to 160 Hz,
+  and 0 dB in every band from 200 Hz to 10 000 Hz. The octave columns of the
+  same table print −0,2 dB at 2 000 Hz, −0,8 dB at 4 000 Hz and −3,0 dB at
+  8 000 Hz; the first octave band is labelled "31".
+- **The problem:** the one-third-octave column contradicts the octave column
+  beside it at 2 000 Hz, 4 000 Hz and 8 000 Hz, and IEC 61672-1, whose
+  weightings 4.1 names, gives −4,4 dB at 25 Hz and −0,1, −0,2, −0,3, −0,5,
+  −0,8, −1,3, −2,0, −3,0 and −4,4 dB from 1 600 Hz to 10 000 Hz. The column
+  stops at 1 250 Hz, as though only its low-frequency half had been filled
+  in; the A-weighting columns agree with IEC 61672-1 in every cell. Read as
+  printed, a C-weighted level from one-third-octave bands overstates a
+  spectrum with energy above 1 kHz: a flat spectrum from 25 Hz to 10 000 Hz
+  sums 0,4 dB higher than with the IEC 61672-1 weighting, a third of the
+  1,2 dB reproducibility standard deviation Table 2 gives the C-weighted value.
+- **Evidence:** the one-third-octave column against the octave column of the
+  same table and against IEC 61672-1:2013 Table 3. Verified on PDF page 50
+  (printed p. 12) and PDF page 23 (printed p. 19) of E DIN EN ISO
+  16032:2023-05, the German publication of ISO/DIS 16032:2023
+  (prEN ISO 16032:2023, German and English text), and on PDF page 24
+  (printed p. 22) of BS EN 61672-1:2013.
+- **Library behaviour:**
+  [`SERVICE_EQUIPMENT_WEIGHTING`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  keeps every printed cell but the ten misprinted ones, which take the
+  IEC 61672-1 values; `test_third_octave_c_weighting_departs_from_print_only_in_the_defect`
+  and the conformance check "ISO/DIS 16032:2023 Annex A, Table A.1 against
+  IEC 61672-1:2013 Table 3" pin which cells come from where.
+- **Status:** unreported (the document is a draft under comment).
+
+## ISO/DIS 16032:2023, 7.6 (the background correction sent to Clause 8, the reverberation time)
+
+- **Location:** 7.6 "Determination of the background sound pressure level",
+  last sentence (printed p. 8 of the English text, printed p. 15 of the German
+  text).
+- **The print:** "Corrections for background sounds are applied according to
+  Clause 8." The German text reads "Die Korrekturen für Hintergrundgeräusche
+  werden nach Abschnitt 8 angewendet."
+- **The problem:** Clause 8 is "Measurement of reverberation time"; the
+  background correction is Clause 9, "Correction for background noise". In the
+  2004 edition the correction was Clause 8 and 6.6 sent the reader there; the
+  draft inserted a clause before it and did not move the reference.
+- **Evidence:** the reference read against the clause titles of the draft and
+  of the edition it revises. Verified on PDF page 46 (printed p. 8) and PDF
+  page 47 (printed p. 9) of E DIN EN ISO 16032:2023-05 for the English text,
+  PDF page 19 (printed p. 15) for the German, and on PDF page 13 (printed
+  p. 11) and PDF page 14 (printed p. 12) of BS EN ISO 16032:2004.
+- **Library behaviour:** no change required; the correction
+  [`service_equipment_background_correction`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  applies is that of Clause 9.
+- **Status:** unreported (the document is a draft under comment).
+
+## ISO/DIS 16032:2023, B.10 (the corner selection sent to Clause 6)
+
+- **Location:** B.10 "Measurements of unknown sources or under unknown
+  operating conditions", last paragraph (printed p. 19 of the English text,
+  printed p. 27 of the German text).
+- **The print:** "In the case the sound of interest appears very irregularly
+  and unpredictable, the selection procedure in clause 6 may be impossible to
+  follow." The German text reads "das Auswahlverfahren nach Abschnitt 6".
+- **The problem:** Clause 6 is the general part of the test method and
+  describes no selection. The procedure the paragraph replaces, choosing the corner with the
+  highest C-weighted level, is 7.2, and the sentence that follows, which puts
+  position 1 in the most reflective corner and positions 2 and 3 "as
+  described", is about 7.2 and 7.3.
+- **Evidence:** the reference read against the clause it can mean. Verified
+  on PDF page 57 (printed p. 19), PDF page 44 (printed p. 6) and PDF page 45
+  (printed p. 7) of E DIN EN ISO 16032:2023-05, and PDF page 31 (printed
+  p. 27) for the German text.
+- **Library behaviour:** no change required; the guide sends the reader to
+  7.2 and [`loudest_corner`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  implements it.
+- **Status:** unreported (the document is a draft under comment).
+
+## ISO/DIS 16032:2023, 7.4.1 (no rule at a spread of exactly 6,0 dB or 9,0 dB)
+
+- **Location:** 7.4.1 "Measurement of the equivalent continuous sound
+  pressure level", the four paragraphs after the first (printed p. 8 of the
+  English text, printed pp. 14 and 15 of the German text).
+- **The print:** three readings "equal to, or less than 3,0 dB" apart
+  proceed; a difference that "exceeds 3,0 dB but is less than 6,0 dB" adds
+  positions 4 and 5, and six readings "less than 6,0 dB" apart proceed; a
+  difference that "exceeds 6,0 dB but is less than 9,0 dB" adds positions 6
+  and 7, and nine readings "less than 9,0 dB" apart proceed. "If the
+  difference is larger than 9,0 dB and is related to unpredictable time
+  domain variations whereas the readings in the corner position confirm the
+  sound source is stable, then the measurement session shall be interrupted",
+  the reasons investigated before a new series, and no data from the
+  interrupted series used.
+- **The problem:** the ladder names no step for six readings exactly 6,0 dB
+  apart (not "less than 6,0 dB", and not "exceeds 6,0 dB") nor for nine
+  exactly 9,0 dB apart (not "less than", and not "larger than"). Nor does it
+  say what three readings 6,0 dB or more apart lead to, since the next
+  paragraph is written for the six, and positions 6 and 7 answer only a
+  difference "less than 9,0 dB", so three or six readings already 9,0 dB or
+  more apart have no step before the interruption paragraph, whose two
+  conditions no reading of the levels can settle. The first threshold is
+  inclusive and the other two strict, so the gap is not a matter of one
+  convention applied throughout.
+- **Evidence:** the four paragraphs read against each other. Verified on PDF
+  page 46 (printed p. 8) of E DIN EN ISO 16032:2023-05, and on PDF pages 18
+  and 19 (printed pp. 14 and 15) for the German text. The 2004 edition had no
+  such ladder: its 6.4.1 set the number of readings from the difference of
+  two corner readings (PDF page 13, printed p. 11, of BS EN ISO 16032:2004).
+- **Library behaviour:**
+  [`check_position_spread`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  reads the ladder as a sequence: a stage that does not pass goes to the next
+  one, and a spread at a strict limit does not pass it, so six readings
+  exactly 6,0 dB apart add positions 6 and 7 and nine exactly 9,0 dB apart
+  interrupt the session. A spread can only widen as readings are added, so
+  three or six readings already 9,0 dB or more apart interrupt at once rather
+  than ask for positions that cannot lead to an average. Whether the
+  difference comes from unpredictable variations in time while the corner
+  readings show a stable source is left to the operator: the check reports
+  that no stage can pass, not why. The conformance check "ISO/DIS 16032:2023
+  7.4.1" holds both boundaries and the early interruption.
+- **Status:** unreported (the document is a draft under comment).
+
+## ISO/DIS 16032:2023, 4.8, Formula (5) (the S-weighted maximum level listed twice)
+
+- **Location:** 4.8, the list under Formula (5) (printed p. 5 of the English
+  text, printed p. 11 of the German text).
+- **The print:** "$L$ can be $L_\mathrm{Smax}$ or $L_\mathrm{Fmax}$ or
+  $L_\mathrm{Smax}$ or $L_\mathrm{eq}$"; the list under Formula (6) on the
+  same page reads "$L_\mathrm{Smax}$ or $L_\mathrm{Fmax}$ or $L_\mathrm{eq}$".
+- **The problem:** $L_\mathrm{Smax}$ is repeated; the two lists mean the same
+  three quantities, as 4.6.2, 4.6.5 and 4.6.8 confirm by standardizing each of
+  them with Formula (5).
+- **Evidence:** the two lists on the same page. Verified on PDF page 43
+  (printed p. 5) of E DIN EN ISO 16032:2023-05 and on PDF page 15 (printed
+  p. 11) for the German text.
+- **Library behaviour:** no change required; all three quantities are
+  standardized alike.
+- **Status:** unreported (the document is a draft under comment).
+
+## ISO/DIS 16032:2023, 4.2 (the band definitions credited to "IEC 612604.3")
+
+- **Location:** 4.2 "frequency bands", last line (printed p. 2 of the English
+  text, printed p. 8 of the German text).
+- **The print:** "with centre frequencies and bandwidths defined in IEC
+  612604.3".
+- **The problem:** there is no such document. The reference is IEC 61260,
+  which Clause 2 lists, run into the number of the next definition, 4.3, that
+  follows on the next line.
+- **Evidence:** the reference against Clause 2 and the heading below it.
+  Verified on PDF page 40 (printed p. 2) and PDF page 39 (printed p. 1) of
+  E DIN EN ISO 16032:2023-05, and on PDF page 12 (printed p. 8) for the German
+  text.
+- **Library behaviour:** no change required; the nominal band centres the
+  module accepts are those of IEC 61260-1.
+- **Status:** unreported (the document is a draft under comment).
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

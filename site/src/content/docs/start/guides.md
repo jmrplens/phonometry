@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 155 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 156 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-five guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-six guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -385,7 +385,8 @@ treats the sound made inside it, and how much of the sound made next door gets
 through. Implements ISO 3382-1/-2/-3, ISO 14257, ISO 11690-3,
 ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2, ISO 16251-1,
 ISO 717-1/-2, EN 12354-1 to -6, ISO 18233, ISO 12999-1, ISO 10052,
-ANSI/ASA S12.2 and ASTM E413/E1414.
+ISO 16032 (from the ISO/DIS 16032:2023 draft), ANSI/ASA S12.2 and
+ASTM E413/E1414.
 
 **[Room acoustics](/phonometry/buildings/rooms/)**
 
@@ -442,6 +443,9 @@ ANSI/ASA S12.2 and ASTM E413/E1414.
 - [Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/):
   the octave-band control method with its reverberation index and its
   airborne, impact, façade and service-equipment quantities.
+- [Service-Equipment and Activity Noise (ISO 16032)](/phonometry/buildings/insulation/service-equipment-noise/):
+  the engineering method for the sound of a building's equipment and of
+  activities in or near it, from the ISO/DIS 16032:2023 draft.
 - [Laboratory Flanking Transmission (ISO 10848)](/phonometry/buildings/insulation/flanking-lab/):
   the junction vibration reduction index and the flanking level differences
   measured on a test facility.

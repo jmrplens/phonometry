@@ -1,0 +1,540 @@
+---
+title: "Ruido de equipamientos y actividades (ISO 16032)"
+description: "El método de ingeniería de ISO 16032, desde el borrador ISO/DIS 16032:2023: las posiciones de esquina y de campo reverberante y la escalera que decide cuántas, el promedio por banda, la corrección por ruido de fondo limitada a 2,2 dB, la estandarización de 50 Hz a 5000 Hz, los valores únicos ponderados A y C de la tabla 1, las condiciones de funcionamiento del anexo B y la reproducibilidad de la tabla 2."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2023
+    title: "Acoustics — Measurement of sound pressure level from service equipment or activities in buildings — Engineering method (draft international standard)"
+    designation: "E DIN EN ISO 16032:2023-05"
+    note: "El borrador ISO/DIS 16032:2023 de la segunda edición (prEN ISO 16032:2023) en su publicación alemana, texto alemán e inglés, y citado como borrador. Todos los números de apartado de esta página son los del borrador. Seis defectos impresos figuran en el registro de erratas, entre ellos la ponderación C de la tabla A.1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2004
+    title: "Acoustics — Measurement of sound pressure level from service equipment in buildings — Engineering method"
+    designation: "ISO 16032:2004"
+    note: "La primera edición, que el borrador revisa y que está anulada. Leída en la BS EN ISO 16032:2004 para saber qué cambia: solo bandas de octava, un número de posiciones fijado por dos lecturas en la esquina y ninguna fuente de actividad."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2021
+    title: "Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method"
+    designation: "ISO 10052:2021"
+    url: "https://www.iso.org/standard/76560.html"
+    note: "El método de control de las mismas magnitudes: tres lecturas ponderadas A o C, sin análisis por bandas, y el índice de reverberación en lugar de un tiempo de reverberación medido."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+La cisterna del vecino de madrugada, el motor de un ascensor tras la pared del
+dormitorio, una boca de ventilación que zumba o el bar de abajo: el número que
+les pone una reglamentación de edificación sale de ISO 16032, el **método de
+ingeniería** para el nivel de presión acústica que los equipamientos de un
+edificio producen en un recinto. Su revisión amplía el alcance de los
+equipamientos instalados a las **actividades**, fuentes en el edificio o cerca
+de él cuyo funcionamiento no controla nadie en la obra, como instalaciones
+deportivas, bares y música amplificada.
+
+La biblioteca implementa la revisión desde su borrador, **ISO/DIS 16032:2023**,
+publicado en Alemania como E DIN EN ISO 16032:2023-05. La segunda edición
+publicada no está al alcance del proyecto; el borrador es el único texto de la
+revisión que hay, así que todo lo que la biblioteca implementa lo sigue, y se
+cita como borrador, con
+sus propios números de apartado. La edición de 2004, anulada, se usa solo para
+decir qué cambia. El método de control de las mismas magnitudes es
+[ISO 10052](/phonometry/es/buildings/insulation/insulation-survey/), y la
+predicción de la parte estructural del ruido de equipamientos es
+[EN 12354-5](/phonometry/es/buildings/design/installed-structure-borne/).
+
+**Dónde se aplica.** El capítulo 1 destina el método a recintos de unos
+300 m³ o menos, en viviendas, hoteles, colegios, oficinas y hospitales. No
+está pensado para grandes auditorios ni salas de conciertos, ni para una
+fuente tan alejada del edificio que el tiempo atmosférico cambie cómo llega
+el sonido, aunque las condiciones de funcionamiento del anexo B se pueden
+seguir usando en esos casos.
+
+## Qué mide el método
+
+El espectro lineal por bandas se registra junto con el nivel ponderado A o C
+(un registro *multiespectral*, capítulo 6) en una de tres magnitudes: el
+**nivel máximo** con ponderación temporal S o F, leído en el instante en que
+el nivel ponderado alcanza su pico, o el **nivel continuo equivalente** sobre
+un tiempo de integración. Los valores únicos se calculan después a partir de
+las bandas, nunca se leen en el sonómetro, y la tabla 1 los nombra:
+
+| | Ponderado A | Ponderado C |
+| :--- | :--- | :--- |
+| Máximo, ponderación temporal S | $L_\mathrm{A,Smax}$, $L_\mathrm{A,Smax,nT}$, $L_\mathrm{A,Smax,n}$ | $L_\mathrm{C,Smax}$, $L_\mathrm{C,Smax,nT}$, $L_\mathrm{C,Smax,n}$ |
+| Máximo, ponderación temporal F | $L_\mathrm{A,Fmax}$, $L_\mathrm{A,Fmax,nT}$, $L_\mathrm{A,Fmax,n}$ | $L_\mathrm{C,Fmax}$, $L_\mathrm{C,Fmax,nT}$, $L_\mathrm{C,Fmax,n}$ |
+| Continuo equivalente | $L_\mathrm{A,eq}$, $L_\mathrm{A,eq,nT}$, $L_\mathrm{A,eq,n}$ | $L_\mathrm{C,eq}$, $L_\mathrm{C,eq,nT}$, $L_\mathrm{C,eq,n}$ |
+
+El borrador es explícito en que no son intercambiables: solo se comparan
+resultados obtenidos con el mismo método, y un resultado que se compara con
+una exigencia legal tiene que ser la magnitud que nombra la exigencia. La
+biblioteca indexa cada valor único exactamente con esta notación.
+
+## Dónde van los micrófonos (apartados 7.2 y 7.3)
+
+**La posición 1 es una esquina.** Primero se busca la esquina con el nivel
+ponderado C más alto, como nivel máximo con S o F o como nivel equivalente,
+con las condiciones de funcionamiento elegidas o cualquier condición estable
+que sirva para encontrar la esquina más ruidosa. Basta un sonómetro integrador
+de mano: sin cálculo por bandas ni correcciones. El micrófono va
+preferiblemente a 0,5 m de las dos paredes y del suelo, elevado a 1,0 m o a
+1,5 m si hay muebles, y al menos a 0,2 m de cualquier obstáculo. Una esquina
+dominada por el sonido directo de una fuente en el recinto, una boca de
+ventilación por ejemplo, queda fuera de la búsqueda.
+
+**Las posiciones 2 y 3 están en el campo reverberante.** Guardan
+preferiblemente 1,5 m, y al menos 1,0 m, entre sí y con la posición de
+esquina; 1,5 m de cualquier fuente sonora en el recinto; 0,50 m de todas las
+superficies del recinto (0,30 m en un recinto pequeño donde no se pueda); y
+una altura de 0,5 m a 2,0 m.
+
+`loudest_corner` elige la posición 1 a partir de las lecturas en las esquinas,
+y `check_service_equipment_positions` somete un conjunto de posiciones en un
+recinto rectangular a las distancias y alturas del apartado 7.3, y la esquina
+a su altura de 0,5 m a 1,5 m. Las dos preferencias, la esquina a 0,5 m de sus
+paredes y las posiciones a 1,5 m entre sí, se informan en
+`preferred_corner_wall_distance` y `preferred_separation` y no deciden
+`passes`:
+
+```python
+import numpy as np
+from phonometry import building
+
+# La esquina más ruidosa de cuatro, ponderada C y leída directamente.
+corner = building.loudest_corner([47.8, 49.3, 51.6, 50.2])
+print(corner)                   # 2: la tercera esquina, contando desde 0
+
+# Un dormitorio de 4,2 m x 3,4 m x 2,5 m junto al cuarto de baño.
+positions = building.check_service_equipment_positions(
+    (4.2, 3.4, 2.5),                            # largo, ancho, alto [m]
+    (3.7, 2.9, 0.5),                            # posición 1, en esa esquina
+    [(1.4, 1.9, 1.2), (3.1, 0.8, 1.5)],         # posiciones 2 y 3
+    source_positions_m=[(0.6, 3.0, 2.5)],       # una boca de impulsión en el techo
+)
+print(positions.passes, round(positions.separation_m, 2))   # True 2.05
+print(positions.preferred_corner_wall_distance)             # True: a 0,5 m de las dos paredes
+positions.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_positions.svg" alt="Planta de un dormitorio de 4,2 por 3,4 metros. Un rectángulo sombreado de borde discontinuo, a medio metro de las paredes, marca la zona que la distancia a las superficies deja a las posiciones en campo reverberante. La posición de esquina, numerada 1, está en la esquina superior derecha, a medio metro de las dos paredes; las posiciones 2 y 3 están dentro de la zona sombreada, a más de 2 metros entre sí. Una boca de impulsión en el techo cerca de la esquina superior izquierda se une a la posición 2, la más cercana, con una línea de puntos rotulada 1,88 metros, la distancia en tres dimensiones. La segunda línea del título dice que los requisitos se cumplen." width="90%" />
+
+*Una planta no puede mostrar una distancia en tres dimensiones: la boca está
+en el techo y la posición 2 a 1,2 m de altura, así que están a 1,88 m aunque
+parezcan más cerca. La figura une cada fuente con su posición más cercana y
+escribe sobre la línea la distancia real.*
+
+Los 0,2 m a los obstáculos y la elección de la esquina no se pueden juzgar
+desde el contorno del recinto, y la comprobación los deja a quien coloca el
+micrófono.
+
+**Una fuente en el recinto tiene su propia posición (apartado 7.9).** Cuando
+hay una fuente en el propio recinto, por ejemplo una boca de ventilación en la
+pared o en el techo, se mide una posición adicional para cada una: a 1 m
+delante de una fuente en pared y a 1,5 m del suelo, o a 1,5 m del suelo justo
+debajo de una fuente en el techo. Su resultado se informa aparte, nunca se
+estandariza ni se normaliza, y no se promedia con las posiciones 1, 2 y 3.
+`additional_microphone_position` la sitúa en las mismas coordenadas:
+
+```python
+extra = building.additional_microphone_position(
+    (4.2, 3.4, 2.5), (0.6, 3.0, 2.5), mounting="ceiling")
+print(extra)                                    # [0.6 3.  1.5]
+```
+
+## Cuántas posiciones (apartado 7.4.1)
+
+Las lecturas ponderadas A de las posiciones 1, 2 y 3, tal como las muestra el
+instrumento, sin ninguna corrección, deciden si tres bastan. Si están a
+3,0 dB o menos entre sí, siguen las correcciones. Si no, se mide otra vez la
+esquina con dos posiciones nuevas en la sala, la 4 y la 5, y las seis tienen
+que quedar a menos de 6,0 dB; si tampoco, la esquina una vez más con las
+posiciones 6 y 7, y las nueve a menos de 9,0 dB. Una diferencia de más de
+9,0 dB que se debe a variaciones imprevisibles en el tiempo, mientras las
+lecturas en la esquina muestran una fuente estable, interrumpe la sesión: se
+investiga la causa antes de una serie nueva y no se usa ninguna lectura de la
+interrumpida. La misma escalera vale para un nivel máximo (7.4.2), donde el
+nivel de exposición sonora $L_\mathrm{AE}$ puede sustituirlo en eventos
+breves.
+
+`check_position_spread` toma las lecturas en ese orden (esquina, 2, 3, luego
+esquina, 4, 5 y esquina, 6, 7) y dice qué viene después:
+
+```python
+first = building.check_position_spread([34.1, 31.2, 35.6])
+print(first.action, first.next_positions)       # add_positions (4, 5)
+
+second = building.check_position_spread([34.1, 31.2, 35.6, 33.9, 32.4, 34.8])
+print(second.action, round(second.corner_standard_deviation_db, 2))  # proceed 0.14
+second.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_position_spread.svg" alt="Seis lecturas ponderadas A en el orden del 7.4.1: la esquina a 34,1 dB, las posiciones 2 y 3 a 31,2 y 35,6 dB, otra vez la esquina a 33,9 dB y las posiciones 4 y 5 a 32,4 y 34,8 dB. Una franja sombreada de 6 dB de alto que empieza en la lectura más baja contiene las seis. El título da la dispersión, 4,4 dB, y el veredicto, se continúa." width="80%" />
+
+*Las tres primeras lecturas están a 4,4 dB, por encima de los 3,0 dB de la
+primera etapa; con las posiciones 4 y 5 las seis siguen a 4,4 dB, por debajo
+de los 6,0 dB que admite la segunda etapa, así que el método sigue con las
+seis. La esquina, medida dos veces, es la lectura que usa el 7.4.1 cuando se
+quiere un valor estadístico: la desviación típica de las lecturas en la
+esquina se toma como representativa del promedio de la sala.*
+
+El borrador deja dos límites sin regla: seis lecturas separadas exactamente
+6,0 dB, y nueve separadas exactamente 9,0 dB, no están ni «por debajo» ni
+«por encima» del límite. La biblioteca lee la escalera como una secuencia, así
+que una dispersión igual al límite no lo supera. Las posiciones 6 y 7 solo
+responden a una diferencia de menos de 9,0 dB, y más lecturas solo pueden
+ensanchar la dispersión, así que tres o seis lecturas separadas ya 9,0 dB o
+más reciben `"interrupt"` en el acto: ninguna etapa posterior puede
+superarse. Si la diferencia viene de la variación en el tiempo o de la
+fuente lo juzga quien mide, porque los niveles por sí solos no lo dicen. Los
+huecos están en el
+[registro de erratas](/phonometry/es/reference/errata/).
+
+## De las lecturas a un valor único
+
+El capítulo 6 fija el orden: promediar, corregir por ruido de fondo,
+estandarizar o normalizar si lo pide una reglamentación, y ponderar.
+
+**El promedio por banda (fórmula (1), apartado 7.5).** Todas las lecturas
+entran en el promedio energético, incluidas las repeticiones en la esquina, y
+los niveles por banda se redondean a un decimal:
+
+$$
+L = 10 \lg \left[ \frac{1}{n} \sum_{i=1}^{n} 10^{0{,}1 L_i} \right]\ \mathrm{dB}
+$$
+
+**El ruido de fondo (capítulo 9).** El ruido de fondo se mide como nivel
+equivalente durante unos 30 s justo antes o después de cada serie de medidas,
+en las mismas posiciones. Con $\Delta L = L_1 - L_2$ entre la banda medida y
+la del ruido de fondo, no se corrige nada a 10 dB o más; de 4 dB a 10 dB la
+banda se corrige con las fórmulas (7) a (9),
+
+$$
+L = L_1 - K, \qquad K = -10 \lg \left[ 1 - 10^{-0{,}1 \Delta L} \right]\ \mathrm{dB}
+$$
+
+y por debajo de 4 dB la corrección se limita a los 2,2 dB que da un margen de
+4 dB. Esa banda está influida por el ruido de fondo: el informe tiene que
+decirlo, y para compararla con un límite el resultado es un límite superior
+del nivel del equipamiento. `service_equipment_background_correction` aplica
+el capítulo por sí sola:
+
+```python
+k = building.service_equipment_background_correction(
+    [40.0, 40.0, 40.0], [28.0, 34.0, 38.0])
+print(np.round(k.correction_db, 2), k.regime)
+# [0.   1.26 2.2 ] ('none', 'corrected', 'limited')
+```
+
+**Estandarización y normalización (apartados 4.8 y 7.7).** Si se exige, las
+bandas corregidas se refieren a un tiempo de reverberación de referencia
+$T_0$, 0,5 s salvo que se indique otro valor, o a un área de absorción de
+referencia $A_0 = 10$ m² (fórmulas (5) y (6)):
+
+$$
+L_\mathrm{nT} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
+L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0{,}16\,V}\ \mathrm{dB}
+$$
+
+El tiempo de reverberación se mide según ISO 3382-2 en los tercios de octava
+de 50 Hz a 5000 Hz (octavas de 63 Hz a 4000 Hz), preferiblemente por el
+método de la respuesta al impulso al menos de 50 Hz a 315 Hz (capítulo 8).
+Solo esas bandas se estandarizan: 25, 31,5, 40, 6300, 8000 y 10 000 Hz entran
+en las sumas ponderadas sin estandarizar, y el informe lo menciona cuando
+contribuyen. El borrador desaconseja además estandarizar un recinto sin
+amueblar con una sola superficie muy absorbente, donde las reflexiones tardías
+entre las demás superficies paralelas alargan el tiempo de reverberación y la
+corrección sale mal.
+
+**Los valores ponderados (apartados 4.3, 4.4 y 7.8).** Los valores únicos
+ponderados A y C son sumas energéticas de las bandas corregidas más las
+correcciones del anexo A, redondeadas a decibelios enteros:
+
+$$
+L_\mathrm{A} = 10 \lg \sum_{i} 10^{0{,}1 (L_i + A_i)}\ \mathrm{dB}, \qquad
+L_\mathrm{C} = 10 \lg \sum_{i} 10^{0{,}1 (L_i + C_i)}\ \mathrm{dB}
+$$
+
+El valor ponderado A se suma sobre el rango restringido de 50 Hz a 5000 Hz o
+sobre el ampliado de 25 Hz a 10 000 Hz, y el ponderado C sobre el ampliado; el
+informe nombra el rango. La NOTA al 7.8 sugiere comparar el resultado con el
+nivel ponderado que mostró el instrumento: si difieren más de 2 dB, conviene
+revisar el cálculo.
+
+`service_equipment_level` recorre la cadena entera. Aquí se descarga y se
+vuelve a llenar la cisterna de un inodoro (anexo B.2.6) y se escucha en el
+dormitorio de al lado, tres lecturas de 25 Hz a 10 kHz:
+
+```python
+freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+spectrum = np.array([29.5, 31.0, 33.2, 35.4, 37.1, 38.6, 40.2, 41.5, 42.3,
+                     42.8, 42.6, 41.9, 40.8, 39.4, 37.9, 36.2, 34.6, 33.1,
+                     31.4, 29.8, 28.1, 26.5, 24.6, 22.9, 21.0, 19.4, 17.6])
+readings = spectrum + np.array([[0.6], [-0.9], [0.4]])   # posiciones 1, 2, 3
+background = np.array([28.0, 28.4, 29.6, 27.2, 25.1, 23.0, 21.2, 19.6, 18.1,
+                       16.9, 15.8, 14.9, 14.1, 13.4, 12.8, 12.3, 11.9, 11.6,
+                       11.4, 11.3, 11.2, 11.2, 11.3, 11.5, 11.8, 12.2, 12.7])
+t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
+              0.60, 0.58, 0.56, 0.55, 0.54, 0.53, 0.52, 0.51, 0.50, 0.49,
+              0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
+res = building.service_equipment_level(
+    readings, freqs, quantity="eq",
+    background_db=background, reverberation_time_s=t, volume_m3=35.7,
+)
+print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])
+# 45 45 51
+print(res.upper_limit("A"), res.upper_limit("C"))  # False True
+print(res.unstandardized_bands_hz)
+# (25.0, 31.5, 40.0, 6300.0, 8000.0, 10000.0)
+res.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_level.svg" alt="El espectro en tercios de octava de un inodoro escuchado en un dormitorio, de 25 Hz a 10 kHz. El promedio de las tres lecturas tiene su pico cerca de 43 dB a 200 Hz y cae hasta unos 18 dB a 10 kHz. El ruido de fondo, en puntos, queda de 1,6 a 3,7 dB por debajo del promedio a 25, 31,5 y 40 Hz, 8,3 dB por debajo a 50 Hz, más de 11 dB por debajo de 63 Hz a 5 kHz y de 5 a 9 dB por debajo de 6,3 a 10 kHz. La curva corregida por ruido de fondo coincide con el promedio de 63 Hz a 5 kHz; queda 2,2 dB por debajo en las tres bandas más bajas, 0,7 dB por debajo a 50 Hz y de 0,5 a 1,7 dB por debajo de 6,3 a 10 kHz. La estandarizada queda hasta 2,8 dB por debajo del promedio en las frecuencias bajas, donde la sala es más reverberante, y hasta 0,6 dB por encima cerca de 5 kHz. Franjas grises marcan de 25 a 40 Hz y de 6,3 a 10 kHz como sin estandarizar, y triángulos naranjas marcan las tres bandas más bajas como límites superiores. El título da L A,eq,nT = 45 dB." width="94%" />
+
+*Las tres bandas más bajas quedan a menos de 4 dB del ruido de fondo, así que
+su corrección se limita a 2,2 dB y son límites superiores. Están dentro del
+rango ponderado C, lo que hace de $L_\mathrm{C,eq}$ un límite superior, y
+fuera del rango restringido de la ponderación A, lo que deja $L_\mathrm{A,eq}$
+intacto. A 50 Hz y desde 6,3 kHz el ruido de fondo queda de 5 dB a 9 dB por
+debajo, y la fórmula (8) quita de 0,5 dB a 1,7 dB a esas bandas. La
+estandarización baja las bandas en las que la sala es más
+reverberante que 0,5 s y sube aquellas en las que lo es menos, y deja como
+están las seis bandas grises.*
+
+### Parámetros de `service_equipment_level`
+
+| Parámetro | Tipo | Unidades | Por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels_db` | array | dB | obligatorio | Niveles por banda de cada lectura, `(lecturas, bandas)`; una fila para una sola lectura |
+| `frequencies_hz` | array | Hz | obligatorio | Frecuencias centrales nominales, crecientes: tercios de octava de 25 Hz a 10 kHz u octavas de 31,5 Hz a 8 kHz |
+| `quantity` | str | | obligatorio | `"Smax"`, `"Fmax"` o `"eq"`, la magnitud de la tabla 1; da nombre a los valores únicos |
+| `band` | str | | `"third"` | `"third"` u `"octave"`; el capítulo 6 pide tercios de octava, las octavas son opcionales |
+| `background_db` | array | dB | `None` | Un nivel por banda, o una fila por posición, promediada energéticamente |
+| `reverberation_time_s` | array | s | `None` | Por banda; solo se lee de 50 Hz a 5 kHz (octavas de 63 Hz a 4 kHz), el resto puede ser `nan` |
+| `volume_m3` | float | m³ | `None` | Volumen del recinto para los niveles normalizados; necesita el tiempo de reverberación |
+| `reference_reverberation_time_s` | float | s | `0.5` | $T_0$ de la fórmula (5) |
+| `a_weighting_range` | str | | `"restricted"` | `"restricted"` (50 Hz a 5 kHz; octavas de 63 Hz a 4 kHz) o `"extended"` (25 Hz a 10 kHz; octavas de 31,5 Hz a 8 kHz) |
+
+El resultado lleva `average_db`, `background` (la corrección del capítulo 9),
+`corrected_db`, `standardized_db`, `normalized_db`, `standardizable`,
+`ratings` y `unrounded_ratings` indexados por la tabla 1, `upper_limit("A")` y
+`upper_limit("C")`, `unstandardized_bands_hz`, `reproducibility_db` y
+`weighted_reproducibility_db`. Los valores ponderados C solo se forman cuando
+las bandas cubren el rango ampliado.
+
+Para el equivalente en octavas del rango restringido de la ponderación A el
+borrador no da un rango propio; la biblioteca usa de 63 Hz a 4000 Hz, el rango
+en octavas que el borrador empareja con 50 Hz a 5000 Hz para la
+estandarización.
+
+## Condiciones de funcionamiento (anexo B)
+
+Cómo funciona el equipamiento mientras se mide decide el número tanto como
+los micrófonos. El anexo B es normativo, pero las exigencias y reglamentaciones
+nacionales prevalecen (B.1.1), y el equipamiento que no recoge se mide según
+sus principios, informando con detalle de las condiciones elegidas.
+`SERVICE_EQUIPMENT_OPERATING_CONDITIONS` guarda cada entrada como datos:
+
+| Clave | Apartado | Nivel máximo | Nivel equivalente |
+| :--- | :--- | :--- | :--- |
+| `water_tap` | B.2.2 | un grifo simple: abrir del todo, esperar, cerrar; un mezclador de dos llaves, caliente y fría: abrir la caliente y luego la fría, y cerrarlas en el mismo orden; monomandos, mezcladores de mandos de caudal y temperatura independientes y termostáticos: recorren el rango de temperatura | unos 30 s en la posición más ruidosa; en monomandos, mezcladores de caudal y temperatura independientes y termostáticos, el mayor de las posiciones media, caliente y fría |
+| `shower_cabin` | B.2.3 | como un grifo | como un grifo |
+| `bath` | B.2.4 | como un grifo, y la ducha; sin soporte en la pared, la ducha a unos 1,5 m sobre el fondo de la bañera | como un grifo |
+| `filling_emptying` | B.2.5 | el llenado y luego el vaciado | el periodo de llenado y el de vaciado, hasta la mitad |
+| `water_closet` | B.2.6 | un ciclo completo de descarga y llenado | el mismo ciclo |
+| `mechanical_ventilation` | B.3 | unos 30 s en la posición más ruidosa | unos 30 s |
+| `heating` / `cooling` | B.4 | arranque en frío, plena carga, cada aparato / unos 30 s | unos 30 s |
+| `lift` | B.5 | 1 o 2 personas, hasta cinco plantas en cada sentido, al menos tres repeticiones | el mismo ciclo |
+| `rubbish_chute` | B.6 | dos tubos de PVC de 0,1 m de largo, 50 mm de diámetro, 0,7 kg/m | no se mide |
+| `auxiliary_equipment` | B.7 | arranque, funcionamiento, parada; o un ciclo automático completo | el ciclo |
+| `car_park_door` | B.8 | apertura y cierre | un ciclo completo |
+| `other_equipment` | B.9 | el ciclo de uso normal | el ciclo |
+| `unknown_source` | B.10 | | varios periodos de 30 s en la hora más ruidosa de funcionamiento normal |
+
+El B.10 es lo nuevo. Una actividad, los enfriadores de un restaurante o la
+música en directo de al lado, se mide en funcionamiento normal, suspendiendo
+los controles automáticos si hace falta, durante varios periodos de 30 s
+dentro de la hora en que se espera el nivel más alto, dejando fuera los
+tiempos muertos y los sucesos irregulares menores. Si el sonido es demasiado
+irregular para buscar la esquina más ruidosa, la posición 1 pasa a ser la
+esquina acústicamente más reflectante, y el informe lo dice. Si no se puede
+definir ningún ciclo de funcionamiento, el nivel equivalente se promedia hasta
+que se estabiliza, y nunca menos de 30 s (B.1.3).
+
+```python
+wc = building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["water_closet"]
+print(wc.clause, wc.equivalent_cycle)
+# B.2.6 a full flushing and refilling cycle
+chute = building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["rubbish_chute"]
+print(chute.equivalent_level, chute.parameters["tube_length_m"])   # False 0.1
+```
+
+## Precisión (capítulo 10)
+
+La tabla 2 estima la desviación típica de reproducibilidad de un nivel por
+banda promediado en la sala, a partir de un número limitado de medidas de
+fuentes estables:
+
+| Tercios de octava | Octavas | $\sigma_\mathrm{R}$ |
+| :--- | :--- | :--- |
+| 25 Hz a 160 Hz | 31,5 Hz a 125 Hz | 1,9 dB |
+| 200 Hz a 315 Hz | 250 Hz | 1,5 dB |
+| 400 Hz a 630 Hz | 500 Hz | 1,2 dB |
+| 800 Hz a 10 000 Hz | 1000 Hz a 8000 Hz | 1,0 dB |
+| Ponderado A | | 0,8 dB |
+| Ponderado C | | 1,2 dB |
+
+Los dos valores ponderados valen para un sonido estable con un espectro
+relativamente plano de 25 Hz a 10 kHz, al menos 10 dB por encima del ruido de
+fondo. Una fuente que fluctúa aumenta la incertidumbre, sobre todo en los
+niveles máximos. El resultado lleva los valores por banda en
+`reproducibility_db` y el de cada índice, con las mismas claves que `ratings`,
+en `weighted_reproducibility_db`; las tablas son
+`SERVICE_EQUIPMENT_REPRODUCIBILITY` y
+`SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY`. El borrador no da un factor de
+cobertura, así que la biblioteca no forma una incertidumbre expandida.
+
+```python
+print(dict(res.weighted_reproducibility_db))
+# {'LA,eq': 0.8, 'LC,eq': 1.2, 'LA,eq,nT': 0.8, 'LC,eq,nT': 1.2, 'LA,eq,n': 0.8, 'LC,eq,n': 1.2}
+```
+
+## Qué cambia la revisión
+
+Frente a la ISO 16032:2004, anulada, el borrador:
+
+- amplía el alcance de los equipamientos instalados a las actividades y a las
+  fuentes desconocidas en el edificio o cerca de él (B.10);
+- mide en tercios de octava, con las octavas como opción, donde la de 2004
+  medía solo en octavas;
+- fija el número de posiciones con la escalera de dispersión del 7.4.1, donde
+  la de 2004 tomaba dos lecturas en la esquina y medía cada posición tantas
+  veces como decibelios enteros las separaban;
+- estandariza solo de 50 Hz a 5000 Hz (octavas de 63 Hz a 4000 Hz);
+- suma el valor ponderado A de 50 Hz a 5000 Hz o de 25 Hz a 10 000 Hz, donde
+  la de 2004 usaba las octavas de 63 Hz a 8000 Hz (de 31,5 Hz a 8000 Hz para
+  la C);
+- relaja las posiciones en campo reverberante: al menos 1,0 m entre ellas (la
+  de 2004 pedía 1,5 m), 0,50 m a las superficies (0,75 m) y hasta 2,0 m de
+  altura (1,5 m);
+- sube la reproducibilidad de la tabla 2 en baja frecuencia de 1,5 dB a
+  1,9 dB, y la del ponderado C de 1,1 dB a 1,2 dB.
+
+## Cómo se verifica sin un ejemplo resuelto
+
+El borrador no imprime ningún ejemplo resuelto, así que las filas de
+conformidad se apoyan en lo que sí imprime y en formas cerradas. Impreso: los
+2,2 dB que da un margen de 4 dB al ruido de fondo (capítulo 9), las 36 celdas
+de ponderación A de la tabla A.1, sus celdas de ponderación C con las diez mal
+impresas tomadas de la IEC 61672-1, y las 38 celdas de la tabla 2. Formas
+cerradas: el promedio por banda de tres lecturas, un tiempo de reverberación
+de $2T_0$ que baja exactamente de 50 Hz a 5000 Hz (octavas de 63 Hz a
+4000 Hz) en $10\lg 2$, un área de absorción equivalente de 16 m² normalizada
+a $A_0 = 10$ m² que gana
+$10\lg 1{,}6 = 2{,}04$ dB, las sumas ponderadas A y C de un espectro plano y
+su redondeo a decibelios enteros con la mitad hacia arriba, los umbrales del
+capítulo 9 con niveles dados a 0,1 dB, los umbrales del 7.4.1 en sus límites,
+cada límite de distancia y de altura del apartado 7.3, y la altura de la
+esquina y los 0,5 m a sus paredes que prefiere el 7.2, cumplidos exactamente e
+incumplidos por 0,01 m, y las posiciones que el 7.9 pone delante de una fuente
+en pared y bajo una en el techo.
+
+## Respuestas rápidas
+
+### ¿Por qué el valor ponderado C no coincide con la tabla A.1 tal como está impresa?
+
+Porque la tabla lo imprime mal. La columna de ponderación C en tercios de
+octava del borrador da 0 dB en todas las bandas de 1600 Hz a 10 000 Hz y
+−5 dB a 25 Hz, lo que contradice su propia columna de octavas (−0,2, −0,8 y
+−3,0 dB a 2, 4 y 8 kHz) y la IEC 61672-1 (de −0,1 dB a −4,4 dB desde
+1600 Hz, −4,4 dB a 25 Hz). La biblioteca usa los valores de la IEC 61672-1 en
+esas diez celdas, los de la tabla 3 de la IEC 61672-1:2013, que implementa
+la [ponderación frecuencial](/phonometry/es/signals/levels/weighting/);
+leída como está impresa, un espectro plano sumaría 0,4 dB
+más. El defecto está en el
+[registro de erratas](/phonometry/es/reference/errata/).
+
+### ¿Se estandarizan las bandas de 25 Hz y de 10 kHz?
+
+No. El 7.7 estandariza y normaliza solo de 50 Hz a 5000 Hz, porque fuera de
+ese rango el tiempo de reverberación no se puede medir con fiabilidad. Las
+bandas exteriores entran en las sumas ponderadas tal como quedan corregidas,
+y `unstandardized_bands_hz` enumera las que lo hacen, para el informe.
+
+### ¿Sirve para el bar de abajo?
+
+Sí: eso es lo que añade el B.10. Haga funcionar la actividad con normalidad,
+mida varios periodos de 30 s en su hora más ruidosa, y trate cada serie de
+tres posiciones exactamente como la de un equipamiento. Si el sonido es
+demasiado irregular para encontrar la esquina más ruidosa, use la más
+reflectante e informe de la desviación.
+
+### ¿El resultado es un límite superior?
+
+Cuando una banda del rango ponderado quedó a menos de 4 dB del ruido de fondo,
+sí: `upper_limit("A")` y `upper_limit("C")` dicen qué valor único lo es, y el
+informe tiene que declararlo.
+
+## Normas
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+El método de ingeniería del ISO/DIS 16032:2023, el borrador de la segunda
+edición de ISO 16032, leído en la E DIN EN ISO 16032:2023-05: las magnitudes
+de la tabla 1, la búsqueda de la esquina del 7.2 y las distancias del 7.3 en
+un recinto rectangular, la escalera de posiciones del 7.4.1 con la desviación
+típica de la esquina, la posición adicional del 7.9 para una fuente en el
+recinto, el promedio por banda de la fórmula (1) redondeado a
+0,1 dB, la corrección por ruido de fondo del capítulo 9 limitada a 2,2 dB, la
+estandarización y la normalización con las fórmulas (5) y (6) de 50 Hz a
+5000 Hz, las sumas ponderadas A y C de las fórmulas (2) y (3) sobre los rangos
+del 7.8 redondeadas a decibelios enteros, la tabla A.1 (con las celdas de
+ponderación C mal impresas tomadas de la IEC 61672-1), la tabla 2, y las
+condiciones de funcionamiento del anexo B como datos, incluidas las
+actividades del B.10.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+El borrador no es la norma publicada: donde ISO 16032:2024 difiera, esta
+página sigue al borrador. La biblioteca no registra el trazado temporal
+multiespectral ni busca el instante del máximo: toma como dados los niveles
+por banda de ese instante. Nada comprueba los 0,2 m a los obstáculos, la
+deriva del calibrador de 0,5 dB (capítulo 5), los 30 s de la medida del ruido
+de fondo, el máximo del ruido de fondo durante 10 min a 15 min de la NOTA al
+capítulo 9, la comprobación de 5 dB entre el máximo y el equivalente que la
+sigue, ni la comparación de 2 dB de la NOTA al 7.8. Tampoco se comprueba el
+volumen de unos 300 m³ o menos al que el capítulo 1 destina el método. El
+«rango de frecuencias específico» que el 4.2 admite junto a los dos rangos, y
+para el que el formulario del anexo C tiene una casilla, no se ofrece: el 7.8
+forma los valores ponderados solo sobre el rango restringido o el ampliado, y
+un conjunto de bandas que no cubre el rango elegido se rechaza. No se genera
+ninguna ficha `.report()`: las fichas de edificación se dibujan alrededor de
+una curva de referencia de ISO 717 que este método no tiene. No hay ejemplo
+resuelto impreso, así que ninguna fila reproduce uno.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
+  el método de control de las mismas magnitudes de equipamientos.
+- [Ruido estructural instalado (EN 12354-5)](/phonometry/es/buildings/design/installed-structure-borne/):
+  la predicción de la parte estructural del mismo ruido antes de que exista el
+  edificio.
+- [Parámetros acústicos de salas (ISO 3382-1/2)](/phonometry/es/buildings/rooms/room-acoustics/):
+  los tiempos de reverberación de ISO 3382-2 que necesita la estandarización.
+- [Ponderación frecuencial (A, C, Z)](/phonometry/es/signals/levels/weighting/):
+  las ponderaciones A y C de la IEC 61672-1, cuya tabla 3 da las diez celdas de
+  ponderación C que el borrador imprime mal.
+- [Erratas de las fuentes publicadas](/phonometry/es/reference/errata/):
+  los seis defectos del borrador con los que se encuentra este método.
+- Referencia de la API:
+  [`building.measurement.service_equipment`](/phonometry/es/reference/api/building/service-equipment/).
+
+</SeeAlso>

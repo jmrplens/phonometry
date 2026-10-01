@@ -80,6 +80,9 @@ laboratorio y predicho a partir de datos de elemento.
   la trayectoria de potencia directa hacia los mismos índices cuando hay muchos flancos.
 - [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
   el método de control en bandas de octava y su índice de reverberación.
+- [Ruido de equipamientos y actividades (ISO 16032)](/phonometry/es/buildings/insulation/service-equipment-noise/):
+  el método de ingeniería para el ruido de equipamientos y actividades en un
+  recinto, desde el borrador ISO/DIS 16032:2023.
 - [Fuentes de impacto pesadas y blandas (ISO 16283-2)](/phonometry/es/buildings/insulation/heavy-impact-sources/):
   la pelota de caucho y la máquina de neumático, el nivel de exposición a la
   fuerza de impacto que las especifica y el número único del anexo D de
@@ -134,10 +137,16 @@ energía los espectros por posición por ti), pero nada verifica cómo se hizo
 la medición: el número y la colocación de las posiciones, las posiciones de
 esquina con las que se alimenta el procedimiento de baja frecuencia y las
 cualificaciones de la instalación de ensayo de ISO 16283, ISO 10140 e ISO 3382
-son cosa del operador. También lo es medir el
-ruido de fondo: solo está implementada la corrección de laboratorio de
-ISO 10140-4, que avisa cuando se incumple su mínimo de 6 dB, y los niveles de
-campo han de llegar ya corregidos. Del lado de la predicción, los índices
+son cosa del operador. La excepción es el método de ingeniería de ISO 16032
+para el ruido de los equipamientos, que comprueba su propia escalera de
+posiciones, las distancias de su apartado 7.3 y la altura de su posición de
+esquina (apartado 7.2). Medir el ruido de fondo también es cosa del
+operador, y hay dos correcciones implementadas: la
+de laboratorio de ISO 10140-4, que avisa cuando se incumple su mínimo de
+6 dB, y la corrección de campo del capítulo 9 de ISO 16032 para los
+equipamientos, limitada a 2,2 dB por debajo de un margen de 4 dB. Los
+niveles de campo de un índice de aislamiento han de llegar ya corregidos. Del
+lado de la predicción, los índices
 globales de los elementos, los índices de unión y las mejoras de los
 revestimientos son entradas que aportas tú desde una medición o desde el
 propio anexo de una norma; ninguna se deriva de un plano.

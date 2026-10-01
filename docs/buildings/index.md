@@ -70,6 +70,9 @@ laboratory, and predicted from element data.
   the direct-power route to the same indices when flanking is high.
 - [Sound Insulation Survey Method (ISO 10052)](insulation/insulation-survey.md):
   the octave-band control method and its reverberation index.
+- [Service-Equipment and Activity Noise (ISO 16032)](insulation/service-equipment-noise.md):
+  the engineering method for equipment and activity noise in a room, from the
+  ISO/DIS 16032:2023 draft.
 - [Heavy and Soft Impact Sources (ISO 16283-2)](insulation/heavy-impact-sources.md):
   the rubber ball and the bang machine, the impact force exposure level that
   specifies them and the ISO 717-2 Annex D single number.
@@ -116,10 +119,15 @@ the measurement side, position averaging happens once positions are supplied
 nothing verifies how the measurement was made: the position counts and
 placements, the corner positions the ISO 16283 low-frequency procedure is fed
 from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
-are the operator's job. So is measuring
-the background noise: only the ISO 10140-4 laboratory correction is
-implemented, warning when its 6 dB floor is broken, and field levels must
-arrive already corrected. On the prediction side, the element ratings, the
+are the operator's job. The exception is the ISO 16032 engineering method for
+service-equipment noise, which checks its own position ladder, the distances
+of its 7.3 and the height of its corner position (7.2). Measuring the
+background noise is the operator's job too, and two corrections are
+implemented: the ISO 10140-4
+laboratory one, warning when its 6 dB floor is broken, and the Clause 9 field
+correction of ISO 16032 for service equipment, held at 2.2 dB below a 4 dB
+margin. The field levels of an insulation index must arrive already
+corrected. On the prediction side, the element ratings, the
 junction indices and the covering improvements are inputs you supply from
 measurement or from a standard's own annex; none is derived from a drawing.
 

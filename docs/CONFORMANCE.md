@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1648/1648 conformance checks pass** across 104 domains and 506 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1664/1664 conformance checks pass** across 105 domains and 507 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -636,6 +636,30 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 6926:2016 5.2 / ISO 6926:2016 5.5 | A change of 0,30 dB over the declared supply range passes and 0,31 dB fails; a highest directivity index of 6,0 dB passes and 6,1 dB fails | 0,30 dB = 1; 0,31 dB = 0; 6,0 dB = 1; 6,1 dB = 0 | 0,30 dB = 1; 0,31 dB = 0; 6,0 dB = 1; 6,1 dB = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 6926:2016 Formula (2) | L_W of a uniform 80 dB over the 2 m hemisphere at 30 degC and 95 kPa, C1 and the C2 of a source of unknown radiation evaluated by hand, 1 kHz, dB (closed form) | 94.5636 dB (+/-0 dB) | 94.5636 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 6926:2016 8.4 / ISO 3741:2010 Eq. 21 | A calibration read by an ISO 3741 comparison at 20 degC and 90 kPa: L_W less its own C2 at the test, 0,483 dB for a source of unknown radiation, plus 4 dB and ISO 3741's C2 of 0,452 dB, 1 kHz, dB (closed form) | 97.8454 dB (+/-0 dB) | 97.8454 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Service-equipment sound in buildings (ISO/DIS 16032:2023)</b>: 100% (16/16)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO/DIS 16032:2023 Clause 9 | Correction for a background 4 dB below | 2.2 dB (+/-0.05 dB) | 2.2 dB | 0.005 dB | 10 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 9 | Correction held at 2,2 dB below 4 dB | 3/3 bands held at 2,2 dB | 3/3 bands held at 2,2 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 9 | Thresholds of 10 dB and 4 dB met by decimal levels | 2/2 bands placed as Clause 9 reads | 2/2 bands placed as Clause 9 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 9, Formulae (7) to (9) | Correction from 4 dB to 10 dB is the energy subtraction | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Annex A, Table A.1 | A-weighting, one-third-octave and octave | 36/36 A-weighting cells of Table A.1 | 36/36 A-weighting cells of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Annex A, Table A.1 against IEC 61672-1:2013 Table 3 | C-weighting: printed cells kept, misprinted cells from IEC 61672-1 | 36/36 C-weighting cells: 26 as printed, 10 from IEC 61672-1 | 36/36 C-weighting cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 10, Table 2 | Reproducibility standard deviations | 38/38 cells of Table 2 | 38/38 cells of Table 2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Formula (1) and 7.5 | Band average of three readings, to 0,1 dB | 43.7 dB (+/-0 dB) | 43.7 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Formula (5) and 7.7 | Standardization by T = 2 T0 in 50 Hz to 5 000 Hz (octaves 63 Hz to 4 000 Hz) only | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Formula (6) | Normalization of an equivalent absorption area of 16 m² to A0 = 10 m² at 1 kHz | 42.0412 dB (+/-0.0001 dB) | 42.0412 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Formula (2) and 7.8 | LA,eq of a flat 40 dB spectrum over 50 Hz to 5 000 Hz | 51.0004 dB (+/-0 dB) | 51.0004 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Formula (3) and 7.8 | LC,eq of a flat 40 dB spectrum over 25 Hz to 10 000 Hz | 53.5507 dB (+/-0 dB) | 53.5507 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.8 | Single numbers rounded to whole decibels | 3/3 single numbers rounded as 7.8 reads | 3/3 single numbers rounded as 7.8 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.4.1 | Position ladder at its thresholds | 8/8 stages decided as 7.4.1 reads | 8/8 stages decided as 7.4.1 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.2 and 7.3 | Distances and heights of the positions at each limit | 26/26 limits decided as 7.2 and 7.3 read | 26/26 limits decided as 7.2 and 7.3 read | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.9 | Additional position for a source in the room | 3/3 positions placed as 7.9 reads | 3/3 positions placed as 7.9 reads | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

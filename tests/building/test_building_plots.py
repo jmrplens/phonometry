@@ -142,6 +142,18 @@ def test_standardization_plot_without_frequencies_uses_band_indices() -> None:
     assert [t.get_text() for t in ax.get_xticklabels()] == ["1", "2", "3", "4"]
 
 
+@pytest.mark.parametrize(
+    ("language", "label"), [("en", "Band index"), ("es", "Índice de banda")]
+)
+def test_band_index_axis_is_labelled_in_the_figure_language(
+    language: str, label: str
+) -> None:
+    res = ph.building.standardized_maximum_impact_level(_TABLE_D4, 41.4, 2.0)
+    ax = res.plot(language=language)
+    assert ax.get_xlabel() == label
+    assert _plenum().plot(language=language).get_xlabel() == label
+
+
 def test_standardization_plot_forwards_kwargs() -> None:
     res = ph.building.standardized_maximum_impact_level(_TABLE_D4, 41.4, 2.0)
     ax = res.plot(linewidth=2.5)

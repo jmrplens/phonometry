@@ -243,6 +243,7 @@ export const topics = [
           'buildings/insulation/insulation-lab',
           'buildings/insulation/insulation-intensity',
           'buildings/insulation/insulation-survey',
+          'buildings/insulation/service-equipment-noise',
           'buildings/insulation/flanking-lab',
           'buildings/insulation/heavy-impact-sources',
           'buildings/insulation/insulation-ratings',

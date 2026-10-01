@@ -149,6 +149,8 @@ _BODIES = (
     "EN ISO",
     "ISO/IEC Guide",
     "ISO/IEC",
+    "ISO/FDIS",
+    "ISO/DIS",
     "ISO/PAS",
     "ISO/TR",
     "ISO/TS",

@@ -173,6 +173,7 @@ export const apiSections = {
       'reference/api/building/aperture-transmission',
       'reference/api/building/lab-insulation',
       'reference/api/building/survey-insulation',
+      'reference/api/building/service-equipment',
       'reference/api/building/intensity-insulation',
       'reference/api/building/flanking-transmission',
       'reference/api/building/facade',

@@ -9901,6 +9901,174 @@ dos ediciones con las mismas entradas y en el mismo orden.
   la TS de que los valores son una estimación burda.
 - **Estado:** no reportada.
 
+## ISO/DIS 16032:2023, anexo A, tabla A.1 (la ponderación C de los tercios de octava a 25 Hz y desde 1 600 Hz)
+
+- **Ubicación:** anexo A (normativo), tabla A.1 «A-weighting and C-weighting
+  correction values», la columna de ponderación C de los tercios de octava, en
+  el texto inglés de la E DIN EN ISO 16032:2023-05 (p. 12 impresa) y en el
+  texto alemán de la misma publicación (Tabelle A.1, p. 19 impresa).
+- **El impreso:** la ponderación C de los tercios de octava da −5 dB a 25 Hz,
+  −3 dB a 31,5 Hz y −2 dB a 40 Hz, luego de −1,3 dB a −0,1 dB entre 50 Hz y
+  160 Hz, y 0 dB en todas las bandas de 200 Hz a 10 000 Hz. Las columnas de
+  octava de la misma tabla imprimen −0,2 dB a 2 000 Hz, −0,8 dB a 4 000 Hz y
+  −3,0 dB a 8 000 Hz; la primera banda de octava está rotulada «31».
+- **El problema:** la columna de tercios contradice a la de octavas que tiene
+  al lado a 2 000 Hz, 4 000 Hz y 8 000 Hz, y la IEC 61672-1, cuyas
+  ponderaciones nombra el 4.1, da −4,4 dB a 25 Hz y −0,1, −0,2, −0,3, −0,5,
+  −0,8, −1,3, −2,0, −3,0 y −4,4 dB de 1 600 Hz a 10 000 Hz. La columna se
+  detiene en 1 250 Hz, como si solo se hubiera rellenado su mitad de
+  frecuencias bajas; las columnas de ponderación A coinciden con la
+  IEC 61672-1 en todas las celdas. Leída tal como está impresa, un nivel
+  ponderado C calculado a partir de tercios de octava sobrestima un espectro
+  con energía por encima de 1 kHz: un espectro plano de 25 Hz a 10 000 Hz suma
+  0,4 dB más que con la ponderación de la IEC 61672-1, un tercio de la
+  desviación típica de reproducibilidad de 1,2 dB que la tabla 2 da al valor
+  ponderado C.
+- **Evidencia:** la columna de tercios frente a la de octavas de la misma
+  tabla y frente a la tabla 3 de la IEC 61672-1:2013. Verificado en la página
+  50 del PDF (p. 12 impresa) y en la página 23 del PDF (p. 19 impresa) de la
+  E DIN EN ISO 16032:2023-05, la publicación alemana del ISO/DIS 16032:2023
+  (prEN ISO 16032:2023, texto alemán e inglés), y en la página 24 del PDF
+  (p. 22 impresa) de la BS EN 61672-1:2013.
+- **Comportamiento de la biblioteca:**
+  [`SERVICE_EQUIPMENT_WEIGHTING`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  conserva todas las celdas impresas salvo las diez mal impresas, que toman
+  los valores de la IEC 61672-1;
+  `test_third_octave_c_weighting_departs_from_print_only_in_the_defect` y la
+  comprobación de conformidad «ISO/DIS 16032:2023 Annex A, Table A.1 against
+  IEC 61672-1:2013 Table 3» fijan qué celdas salen de dónde.
+- **Estado:** sin notificar (el documento es un borrador en consulta).
+
+## ISO/DIS 16032:2023, 7.6 (la corrección por ruido de fondo remitida al capítulo 8, el tiempo de reverberación)
+
+- **Ubicación:** 7.6 «Determination of the background sound pressure level»,
+  última frase (p. 8 impresa del texto inglés, p. 15 impresa del alemán).
+- **El impreso:** «Corrections for background sounds are applied according
+  to Clause 8.» El texto alemán dice «Die Korrekturen für
+  Hintergrundgeräusche werden nach Abschnitt 8 angewendet.»
+- **El problema:** el capítulo 8 es «Measurement of reverberation time»; la
+  corrección por ruido de fondo es el capítulo 9, «Correction for background
+  noise». En la edición de 2004 la corrección era el capítulo 8 y el 6.6
+  remitía a él; el borrador insertó un capítulo delante y no movió la
+  referencia.
+- **Evidencia:** la referencia leída frente a los títulos de los capítulos
+  del borrador y de la edición que revisa. Verificado en la página 46 del PDF
+  (p. 8 impresa) y en la página 47 del PDF (p. 9 impresa) de la
+  E DIN EN ISO 16032:2023-05 para el texto inglés, en la página 19 del PDF
+  (p. 15 impresa) para el alemán, y en la página 13 del PDF (p. 11 impresa) y
+  en la página 14 del PDF (p. 12 impresa) de la BS EN ISO 16032:2004.
+- **Comportamiento de la biblioteca:** no requiere cambios; la corrección que
+  aplica
+  [`service_equipment_background_correction`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  es la del capítulo 9.
+- **Estado:** sin notificar (el documento es un borrador en consulta).
+
+## ISO/DIS 16032:2023, B.10 (la elección de la esquina remitida al capítulo 6)
+
+- **Ubicación:** B.10 «Measurements of unknown sources or under unknown
+  operating conditions», último párrafo (p. 19 impresa del texto inglés,
+  p. 27 impresa del alemán).
+- **El impreso:** «In the case the sound of interest appears very irregularly
+  and unpredictable, the selection procedure in clause 6 may be impossible to
+  follow.» El texto alemán dice «das Auswahlverfahren nach Abschnitt 6».
+- **El problema:** el capítulo 6 es la parte general del método de ensayo y
+  no describe ninguna elección. El procedimiento que el párrafo sustituye,
+  escoger la esquina con el nivel ponderado C más alto, es el 7.2, y la frase
+  que sigue, que pone la posición 1 en la esquina más reflectante y las
+  posiciones 2 y 3 «as described», habla del 7.2 y del 7.3.
+- **Evidencia:** la referencia leída frente al apartado al que puede
+  referirse. Verificado en la página 57 del PDF (p. 19 impresa), en la página
+  44 del PDF (p. 6 impresa) y en la página 45 del PDF (p. 7 impresa) de la
+  E DIN EN ISO 16032:2023-05, y en la página 31 del PDF (p. 27 impresa) para
+  el texto alemán.
+- **Comportamiento de la biblioteca:** no requiere cambios; la guía remite al
+  lector al 7.2 y
+  [`loudest_corner`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  lo implementa.
+- **Estado:** sin notificar (el documento es un borrador en consulta).
+
+## ISO/DIS 16032:2023, 7.4.1 (sin regla para una dispersión de exactamente 6,0 dB o 9,0 dB)
+
+- **Ubicación:** 7.4.1 «Measurement of the equivalent continuous sound
+  pressure level», los cuatro párrafos que siguen al primero (p. 8 impresa
+  del texto inglés, pp. 14 y 15 impresas del alemán).
+- **El impreso:** tres lecturas separadas «equal to, or less than 3,0 dB»
+  siguen adelante; una diferencia que «exceeds 3,0 dB but is less than
+  6,0 dB» añade las posiciones 4 y 5, y seis lecturas separadas «less than
+  6,0 dB» siguen adelante; una diferencia que «exceeds 6,0 dB but is less than
+  9,0 dB» añade las posiciones 6 y 7, y nueve lecturas separadas «less than
+  9,0 dB» siguen adelante. «If the difference is larger than 9,0 dB and is
+  related to unpredictable time domain variations whereas the readings in the
+  corner position confirm the sound source is stable, then the measurement
+  session shall be interrupted»: se investigan las causas antes de una serie
+  nueva y no se usa ningún dato de la serie interrumpida.
+- **El problema:** la escalera no da ningún paso para seis lecturas separadas
+  exactamente 6,0 dB (ni «less than 6,0 dB» ni «exceeds 6,0 dB») ni para nueve
+  separadas exactamente 9,0 dB (ni «less than» ni «larger than»). Tampoco dice
+  adónde llevan tres lecturas separadas 6,0 dB o más, porque el párrafo
+  siguiente está escrito para las seis, y las posiciones 6 y 7 solo responden
+  a una diferencia «less than 9,0 dB», así que tres o seis lecturas separadas
+  ya 9,0 dB o más no tienen ningún paso antes del párrafo de la interrupción,
+  cuyas dos condiciones no se pueden decidir leyendo los niveles. El primer
+  umbral es inclusivo y los otros dos estrictos, así que el hueco no es
+  cuestión de un convenio aplicado de principio a fin.
+- **Evidencia:** los cuatro párrafos leídos unos frente a otros. Verificado
+  en la página 46 del PDF (p. 8 impresa) de la E DIN EN ISO 16032:2023-05, y
+  en las páginas 18 y 19 del PDF (pp. 14 y 15 impresas) para el texto alemán.
+  La edición de 2004 no tenía esta escalera: su 6.4.1 fijaba el número de
+  lecturas a partir de la diferencia entre dos lecturas en la esquina (página
+  13 del PDF, p. 11 impresa, de la BS EN ISO 16032:2004).
+- **Comportamiento de la biblioteca:**
+  [`check_position_spread`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/measurement/service_equipment.py)
+  lee la escalera como una secuencia: una etapa que no se supera pasa a la
+  siguiente, y una dispersión igual a un límite estricto no lo supera, así que
+  seis lecturas separadas exactamente 6,0 dB añaden las posiciones 6 y 7 y
+  nueve separadas exactamente 9,0 dB interrumpen la sesión. Una dispersión
+  solo puede crecer al añadir lecturas, así que tres o seis lecturas separadas
+  ya 9,0 dB o más interrumpen la sesión en el acto en lugar de pedir
+  posiciones que no pueden llevar a un promedio. Si la diferencia se debe a
+  variaciones imprevisibles en el tiempo mientras las lecturas en la esquina
+  muestran una fuente estable queda en manos de quien mide: la comprobación
+  dice que ninguna etapa puede superarse, no por qué. La comprobación de
+  conformidad «ISO/DIS 16032:2023 7.4.1» sostiene los dos límites y la
+  interrupción anticipada.
+- **Estado:** sin notificar (el documento es un borrador en consulta).
+
+## ISO/DIS 16032:2023, 4.8, fórmula (5) (el nivel máximo con ponderación S nombrado dos veces)
+
+- **Ubicación:** 4.8, la lista bajo la fórmula (5) (p. 5 impresa del texto
+  inglés, p. 11 impresa del alemán).
+- **El impreso:** «$L$ can be $L_\mathrm{Smax}$ or $L_\mathrm{Fmax}$ or
+  $L_\mathrm{Smax}$ or $L_\mathrm{eq}$»; la lista bajo la fórmula (6) de la
+  misma página dice «$L_\mathrm{Smax}$ or $L_\mathrm{Fmax}$ or
+  $L_\mathrm{eq}$».
+- **El problema:** $L_\mathrm{Smax}$ aparece repetido; las dos listas quieren
+  decir las mismas tres magnitudes, como confirman el 4.6.2, el 4.6.5 y el
+  4.6.8, que estandarizan cada una de ellas con la fórmula (5).
+- **Evidencia:** las dos listas de la misma página. Verificado en la página 43
+  del PDF (p. 5 impresa) de la E DIN EN ISO 16032:2023-05 y en la página 15
+  del PDF (p. 11 impresa) para el texto alemán.
+- **Comportamiento de la biblioteca:** no requiere cambios; las tres
+  magnitudes se estandarizan igual.
+- **Estado:** sin notificar (el documento es un borrador en consulta).
+
+## ISO/DIS 16032:2023, 4.2 (las bandas atribuidas a «IEC 612604.3»)
+
+- **Ubicación:** 4.2 «frequency bands», última línea (p. 2 impresa del texto
+  inglés, p. 8 impresa del alemán).
+- **El impreso:** «with centre frequencies and bandwidths defined in IEC
+  612604.3».
+- **El problema:** no existe tal documento. La referencia es la IEC 61260,
+  que figura en el capítulo 2, pegada al número de la definición siguiente,
+  4.3, que viene en la línea de abajo.
+- **Evidencia:** la referencia frente al capítulo 2 y al encabezado que la
+  sigue. Verificado en la página 40 del PDF (p. 2 impresa) y en la página 39
+  del PDF (p. 1 impresa) de la E DIN EN ISO 16032:2023-05, y en la página 12
+  del PDF (p. 8 impresa) para el texto alemán.
+- **Comportamiento de la biblioteca:** no requiere cambios; las frecuencias
+  centrales nominales que acepta el módulo son las de la IEC 61260-1.
+- **Estado:** sin notificar (el documento es un borrador en consulta).
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

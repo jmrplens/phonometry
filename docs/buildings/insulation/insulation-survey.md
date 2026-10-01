@@ -247,6 +247,9 @@ ISO 717-2.
 - [Field Insulation Measurement (ISO 16283)](insulation-field.md): the
   engineering-grade airborne, impact and façade measurements this method
   approximates, and their ISO 12999-1 uncertainty.
+- [Service-Equipment and Activity Noise (ISO 16032)](service-equipment-noise.md):
+  the engineering method for the service-equipment sound this survey
+  measures quickly: band spectra and a measured reverberation time.
 - [Insulation Ratings (ISO 717)](insulation-ratings.md): the reference-curve
   engines behind the survey ratings.
 - [Room Acoustics](../rooms/room-acoustics.md): the measured reverberation times

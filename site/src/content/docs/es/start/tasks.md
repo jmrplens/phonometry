@@ -53,7 +53,7 @@ calcula.
 | La potencia de la fuente para un mapa de ruido viario o ferroviario | [Emisión de la fuente de tráfico viario CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-road-emission/) y [emisión de la fuente ferroviaria](/phonometry/es/environment/sources/cnossos-rail-emission/): el anexo II de la 2002/49/CE, su lado de la fuente |
 | Cuánto quitan la distancia, una barrera o la meteorología | [Propagación en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/) (ISO 9613-2), [Efecto suelo y barreras](/phonometry/es/environment/propagation/ground-barriers/), [Refracción atmosférica](/phonometry/es/environment/propagation/atmospheric-refraction/) |
 | Cuánto sonido devuelve una pantalla de carretera, medido donde está | [Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/): EN 1793-5, el índice de reflexión acústica y $DL_{RI}$ |
-| Si un parque eólico cumple | [Ruido de aerogeneradores](/phonometry/es/environment/sources/wind-turbine-noise/): IEC 61400-11 y la evaluación de audibilidad tonal |
+| Si un parque eólico cumple | [Ruido de aerogeneradores](/phonometry/es/environment/sources/wind-turbine-noise/): IEC 61400-11 y la evaluación de audibilidad tonal; [en la vivienda](/phonometry/es/environment/sources/wind-turbine-receptor/): IEC TS 61400-11-2, la corrección por fondo, la valoración de la modulación de amplitud y el nivel de evaluación |
 | El nivel de certificación del sobrevuelo de una aeronave | [Ruido de aeronaves: EPNL](/phonometry/es/aircraft/aircraft-noise/): Anexo 16 de la OACI, y [Curvas de ruido de aeropuerto](/phonometry/es/aircraft/airport-noise/) para el mapa alrededor del aeropuerto |
 
 ## Personas

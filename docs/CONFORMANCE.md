@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1608/1608 conformance checks pass** across 101 domains and 496 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1640/1640 conformance checks pass** across 103 domains and 504 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1828,6 +1828,54 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 11819-1:1997 9.5 and Annex E | SPBI corrected for temperature, from the corrected L_veh Annex E prints, dB | 80.1 dB (+/-0.05 dB) | 80.121 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
 | ISO 11819-1:1997 clause 10 and Annex E | Difference of the temperature-corrected SPBI from the 77,3 dB of the reference surface, dB | 2.8 dB (+/-0.05 dB) | 2.821 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
 | ISO 11819-1:1997 10.2 and Annex D | L_veh of the normalized reference surface for the medium speed range, the average of the seven surfaces printed, to one decimal, dB | 1 = 76.4 dB; 2a = 81 dB; 2b = 84 dB | 1 = 76.4 dB; 2a = 81 dB; 2b = 84 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Wind turbine sound at a receptor (IEC TS 61400-11-2)</b>: 100% (23/23)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC TS 61400-11-2:2024 Table K.1 | Wind speed at 10 m from 120 m, every cell | 156/156 cells of Table K.1 | 156/156 cells of Table K.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table K.2 | Shear exponent from 10 m and 120 m, every cell and every blank | 195/195 cells of Table K.2, the blanks outside -0.1 to 0.5 | 195/195 cells of Table K.2, the blanks outside -0.1 to 0.5 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table K.3 | Roughness length of four terrains, m | Water, snow or sand surfaces = 0.0001 m; Open, flat land, mown grass, bare soil = 0.01 m; Farmland with some vegetation = 0.05 m; Suburbs, towns, forests, many trees and bushes = 0.3 m | Water, snow or sand surfaces = 0.0001 m; Open, flat land, mown grass, bare soil = 0.01 m; Farmland with some vegetation = 0.05 m; Suburbs, towns, forests, many trees and bushes = 0.3 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 9.3.2.1 with IEC 61400-11:2012 Equation (29) | Hub-height wind speed brought back to 10 m over z0ref = 0.05 m, m/s | 6 m/s (+/-0.000001 m/s) | 6 m/s | 0 m/s | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Equations (1) to (5) | Combined uncertainty of an energy-averaged bin of three intervals, dB | 0.709168 dB (+/-0.000001 dB) | 0.709168 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Equations (6) and (7) | Turbine level and its uncertainty 5 dB over the background, dB | 0 dB (+/-0.000001 dB) | worst deviation 0.00e+00 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 11.7 | Turbine level of a total 2 dB over the background: the suggested 3 dB correction, dB | 39 dB (+/-0.000001 dB) | 39 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table 3 | Type B uncertainty examples: typical range and standard uncertainty, dB | 4/4 components of Table 3 | 4/4 components of Table 3 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Equations (10) and (11) | Combined uncertainty of a prediction over three turbines, dB | 2.418549 dB (+/-0.000001 dB) | 2.418549 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 9.3.2.3 | Sound relevant turbines of six at 35, 33, 32, 25, 20 and 18 dB | the three loudest (the other three drop the total by 0.3 dB) | 1, 2, 3 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table C.1 | Impedance classes A to H: flow resistivity, Nordtest classes and ground | 8/8 classes of Table C.1 | 8/8 classes of Table C.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Tables C.2, C.3 and C.5 | Ground correction, air attenuation, facade insulation and the Swedish curve | 65/65 cells of Tables C.2, C.3 and C.5 | 65/65 cells of Tables C.2, C.3 and C.5 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table C.2 with ISO 9613-1 | Air attenuation at 125 Hz to 200 Hz: ISO 9613-1 at 10 degrees C and 70 % at the nominal band centres | 3/3 cells of Table C.2 to 0.01 dB/km | 3/3 cells of Table C.2 to 0.01 dB/km | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table C.2 with ISO 9613-1 and BEK nr. 135:2019 Table 1.4 | Air attenuation at 50 Hz to 100 Hz under ISO 9613-1 at 70 %, dB/km | 0.01, 0.01, 0.02, 0.02 dB/km: the cells are the Danish order's, at 80 % | 50 Hz = 0.01 dB/km; 63 Hz = 0.01 dB/km; 80 Hz = 0.02 dB/km; 100 Hz = 0.02 dB/km | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table C.2 with BEK nr. 135:2019 Table 1.4 | Air attenuation at 25 Hz to 100 Hz within 0.01 dB/km of ISO 9613-1 at 80 % | 7/7 cells of Table C.2, the Danish order's cells | 7/7 cells of Table C.2, the Danish order's cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table C.4 | A-weighting row, 10 Hz to 200 Hz, against IEC 61672-1:2013 Table 3 | 14/14 bands of Table C.4 | 14/14 bands of Table C.4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Equation (C.1) | Indoor A-weighted 63 Hz level of 95 dB at 500 m from a 100 m hub, dB | -8.705823 dB (+/-0.000001 dB) | -8.705823 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Equation (J.1) | Emergence of a 44.5 dB ambient over 41 dB, dB | 3.5 dB (+/-0.000001 dB) | 3.5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Figure A.1 | Amplitude modulation adjustment at the grid points the curve meets | 6/6 points of Figure A.1 | 6/6 points of Figure A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table A.1 and A.2 | Tonal adjustment at each limit of the mean audibility, both step sizes | 10/10 limits of Table A.1 and A.2 | 10/10 limits of Table A.1 and A.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 A.1 | Rating level with the most severe adjustment alone, dB | 44 dB (+/-0.000001 dB) | 44 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table 7 | Upper tone search frequency, the four rows printed at their own atmosphere | 16/16 cells of Table 7 | 16/16 cells of Table 7 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 Table 7, fourth row | The row printed at 10 degrees C and 80 %, reproduced at -10 degrees C | 4/4 cells of the fourth row at -10 degrees C | 4/4 cells of the fourth row at -10 degrees C | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Wind turbine amplitude modulation (IEC TS 61400-11-2 clause 13)</b>: 100% (9/9)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IOA AMWG reference code v1.4, sample Sample-50_200Hz | Prominence, fundamental modulation frequency and 10 s AM of band 1 | 40.43, 0.70 Hz, 5.36 dB | 40.43, 0.70 Hz, 5.36 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG reference code v1.4, sample Sample-100_400Hz | Prominence, fundamental modulation frequency and 10 s AM of band 2 | 44.64, 0.70 Hz, 8.38 dB | 44.64, 0.70 Hz, 8.38 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG reference code v1.4, sample Sample-200_800Hz | Prominence, fundamental modulation frequency and 10 s AM of band 3 | 52.31, 0.70 Hz, 7.66 dB | 52.31, 0.70 Hz, 7.66 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG sample band filtering workbook | A-weighted sums of seven one-third-octave bands, rounded to 0.1 dB | 303/303 sums of the three bands, one per 100 ms sample | 303/303 sums of the three bands, one per 100 ms sample | exact | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG reference code v1.4, synthetic 10 s blocks | Status, prominence, fundamental and depth of nine designed blocks | 9/9 blocks | 9/9 blocks | exact | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG reference code v1.4, 10 min rating | 90th percentile of 36 valid 10 s blocks, dB | 10.43974 dB (+/-0.000001 dB) | 10.43974 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.2.2 | A period of exactly 30 valid blocks is rated, dB | 9.364678 dB (+/-0.000001 dB) | 9.364678 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC TS 61400-11-2:2024 13.6.3 (the IOA code discards the period) | A period of 29 valid blocks is rated 0 dB and kept, dB | 29 valid blocks, rated 0 dB (the AMWG report discards it) | 29 valid blocks, rated 0 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.3 | Mean and mode fundamental of a rated period, 20 of 36 valid blocks at 0.7 Hz | mean 0.7778 Hz, mode 0.70 Hz | mean 0.7778 Hz, mode 0.70 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

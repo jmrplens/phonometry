@@ -104,6 +104,9 @@ surface adds to the traffic on it.
   and aerodynamic contributions.
 - [Wind-turbine noise: sound power and tonal audibility](sources/wind-turbine-noise.md):
   the IEC 61400-11 apparent sound power level and tonal-audibility chain.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](sources/wind-turbine-receptor.md):
+  the same turbines heard at the receptor, with the amplitude modulation
+  rating, the low frequency level indoors and the rating level.
 
 Aircraft are the other transport source with internationally fixed metrics,
 and they have a topic of their own:

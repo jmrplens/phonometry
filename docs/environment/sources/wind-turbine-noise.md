@@ -80,15 +80,19 @@ maps each result to the wind speed at 10 m height over a **reference
 roughness length** $z_{0\mathrm{ref}} = 0.05$ m (a logarithmic wind profile), giving
 $L_{W\mathrm{A},10\mathrm{m}}$ at integer 10 m wind speeds regardless of the site's actual
 terrain. The library implements the closed-form quantities of this pipeline
-(slant distance, per-band apparent power, tonal audibility); the binning,
+(slant distance, per-band apparent power, tonal audibility), and Formula (29)
+is `environment.logarithmic_wind_speed`, on the
+[receptor page](wind-turbine-receptor.md); the binning,
 averaging and uncertainty machinery operates on whole measurement campaigns
 and stays out of scope. So does the IEC TS 61400-14 declaration route, which
 turns a batch of measured machines into the declared value a planning authority
 receives. And two things a wind-turbine reader often arrives looking for sit
 outside IEC 61400-11 altogether: **amplitude modulation** (the swish, folded
 into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** (optional
-measurements under 7.2.1 with no rating method attached, so their assessment
-falls to national guidance).
+measurements under 7.2.1 with no rating method attached). Amplitude modulation
+at a dwelling is rated by clause 13 of IEC TS 61400-11-2, on the
+[receptor page](wind-turbine-receptor.md); infrasound falls to national
+guidance.
 
 ## 2. Tonal audibility
 
@@ -223,6 +227,7 @@ the 0 dB audibility line and past a 6 dB acceptance requirement.*
 - [Environmental noise levels](../assessment/environmental-levels.md): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
 - [Tone audibility](../../perception/psychoacoustics/tone-audibility.md): the same tonal-audibility idea outside the wind-turbine context.
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](wind-turbine-receptor.md): what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
 - API reference: [`environment.sources.wind_turbine`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/).
 
 ## References

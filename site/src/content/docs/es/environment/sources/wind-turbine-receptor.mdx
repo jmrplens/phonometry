@@ -1,0 +1,650 @@
+---
+title: "Aerogeneradores en la vivienda: IEC TS 61400-11-2"
+description: "La IEC TS 61400-11-2:2024, el lado del receptor de la acústica de aerogeneradores: la cizalladura y la velocidad de clasificación, los promedios por intervalo con su incertidumbre y la corrección por fondo, el nivel de baja frecuencia en el interior del Anexo C, la emergencia, la valoración de la modulación de amplitud del apartado 13 contrastada con el código de referencia del IOA y el nivel de evaluación."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2024
+    title: "Wind energy generation systems – Part 11-2: Acoustic noise measurement techniques – Measurement of wind turbine sound characteristics in receptor position"
+    designation: "IEC TS 61400-11-2:2024"
+    note: "La edición implementada (Edición 1.0, 2024-03): el Anexo K y el 9.3.2 para las velocidades de viento, el 10.3 y el 11.7 para los intervalos y el fondo, el Anexo C para el nivel de baja frecuencia, el Anexo J, el Anexo A y el 12.5.2.4, y la modulación de amplitud del apartado 13. Nueve de sus defectos impresos están en el registro de erratas."
+    primary: true
+  - type: report
+    organization: "Institute of Acoustics, Amplitude Modulation Working Group"
+    year: 2016
+    title: "A method for rating amplitude modulation in wind turbine noise"
+    note: "Informe final, versión 1, de 9 de agosto de 2016: el método de referencia que implementa el apartado 13, con su metodología de 10 s y de 10 min. Donde la TS se aparta de él, se sigue la TS."
+  - type: web
+    organization: "Institute of Acoustics, Amplitude Modulation Working Group"
+    year: 2016
+    title: "IOA AM code"
+    siteName: "SourceForge"
+    url: "https://sourceforge.net/projects/ioa-am-code/"
+    note: "El código de referencia del grupo de trabajo (v1.4) y sus tres series de ejemplo, la dirección que imprime la TS en el 13.6.1. Se usa sólo como oráculo: las filas de conformidad reproducen sus resultados de ejemplo y su salida en bloques y periodos sintéticos."
+  - type: report
+    organization: "Miljøministeriet"
+    year: 2019
+    title: "Bekendtgørelse om støj fra vindmøller"
+    number: "BEK nr. 135 af 07/02/2019"
+    note: "La orden reglamentaria danesa cuya Tabla 1.4 es el origen de la corrección de terreno, de la fila de fachada ligera y, de 10 Hz a 100 Hz, de la atenuación del aire de la Tabla C.2, fijada para 10 °C y 80 % de humedad relativa."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics – Attenuation of sound during propagation outdoors – Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    note: "La absorción atmosférica del 12.5.2.4 y del título de la Tabla C.2."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+La [IEC 61400-11](/phonometry/es/environment/sources/wind-turbine-noise/) mide lo
+que emite un aerogenerador, cerca de él y a sotavento. La IEC TS 61400-11-2:2024
+mide lo que llega a una vivienda a varios cientos de metros, donde el viento que
+mueve el rotor también agita los árboles, sube el fondo y curva el sonido por el
+camino. La medida es larga, de semanas y no de horas, y todo se clasifica por
+velocidad y dirección del viento antes de promediarlo. Esta página cubre los
+cálculos que la TS deja escritos: la velocidad del viento a las alturas que
+necesitan los intervalos, los promedios por intervalo con su incertidumbre, la
+corrección por fondo, el nivel de baja frecuencia en el interior, la emergencia,
+la valoración de la modulación de amplitud y el nivel de evaluación al que
+alimentan.
+
+## Cómo se hace la medida
+
+El montaje preferido es un micrófono de campo libre con pantalla antiviento de
+dos etapas o sobredimensionada, sobre trípode o mástil (8.1.3). Un micrófono en
+la fachada mejora la relación señal-ruido, si la fachada es plana con ±0,05 m en
+1 m a su alrededor y los bordes quedan a más de 1 m, pero no sirve para la
+audibilidad tonal, la modulación de amplitud ni la impulsividad (8.1.3); una
+posición sustituta elegida en otro sitio también es de uso limitado para ellas
+(8.1.2). La velocidad y la dirección del viento salen de los propios
+aerogeneradores, de su curva de potencia o de la góndola, o de un mástil, y se
+llevan a una altura de referencia de 10 m (9.3). Después, todo lo acústico se
+clasifica en intervalos de velocidad de 1 m/s y sectores de 30° (10.1). Para la
+modulación de amplitud el sonómetro registra $L_\mathrm{Aeq}$ de 100 ms en bandas
+de tercio de octava de 20 Hz a 10 kHz como mínimo, y el viento se refiere a
+promedios de 10 min (13.6.1).
+
+## La velocidad del viento a las alturas que necesitan los intervalos
+
+La ley potencial de la Ecuación (K.1) lleva una velocidad de viento de una altura
+a otra con el exponente de cizalladura $\alpha$, y la Ecuación (K.2) la invierte:
+
+$$
+V_z = V_{z,\mathrm{ref}} \left(\frac{z}{z_\mathrm{ref}}\right)^{\alpha},
+\qquad
+\alpha = \frac{\ln(V_z / V_{z,\mathrm{ref}})}{\ln(z / z_\mathrm{ref})}
+$$
+
+Las Tablas K.1 y K.2 evalúan las dos entre 120 m y 10 m. La velocidad de
+clasificación del 9.3.2 es, en cambio, una velocidad a altura de buje bajada a
+10 m con el perfil logarítmico y la longitud de rugosidad de referencia
+$z_{0\mathrm{ref}} = 0{,}05$ m del 3.31, que supone aire neutro; la ley potencial
+entre dos alturas medidas lleva consigo la estratificación.
+
+```python
+from phonometry import environment
+
+# Tabla K.1: 8 m/s a 120 m con alfa = 0,3 son 3,8 m/s a 10 m.
+v10 = environment.power_law_wind_speed(
+    8.0, height_m=10.0, reference_height_m=120.0, shear_exponent=0.3
+)
+# Tabla K.2: 5 m/s a 10 m bajo 8 m/s a 120 m es alfa = 0,19.
+alpha = environment.wind_shear_exponent(
+    8.0, 5.0, height_m=120.0, reference_height_m=10.0
+)
+# La velocidad de clasificación del 9.3.2.1: 8 m/s en el buje, logarítmico, z0 = 0,05 m.
+v_bin = environment.logarithmic_wind_speed(8.0, height_m=10.0, reference_height_m=120.0)
+print(round(v10, 2), round(alpha, 2), round(v_bin, 2))   # 3.8 0.19 5.45
+
+profile = environment.wind_shear_profile(4.5, 8.6, upper_height_m=120.0)
+print(round(profile.shear_exponent, 2), profile.typical)   # 0.26 True
+```
+
+En un parque eólico la velocidad de clasificación es la media de los
+aerogeneradores que hacen el sonido (9.3.2.3). Se ordenan por su nivel previsto en
+la vivienda y se van dejando fuera los más silenciosos mientras el total no baje
+más de 1 dB; lo típico es que queden dos o tres.
+
+```python
+relevant = environment.sound_relevant_turbines(
+    [33.5, 38.2, 29.4, 36.9, 25.1, 31.8, 27.0]
+)
+print(relevant.indices)                                  # (1, 3, 0)
+print(round(relevant.total_level_db, 1), round(relevant.relevant_level_db, 1))  # 42.3 41.4
+print(round(relevant.binning_wind_speed_m_s([6.1, 6.4, 5.8, 6.6, 5.5, 6.0, 5.7]), 2))  # 6.37
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_shear.svg" alt="Dos paneles. Izquierda: la altura de 0 m a 150 m frente a la velocidad del viento, el perfil de ley potencial con un exponente de cizalladura de 0,26 trazado por dos puntos medidos, 4,5 m/s a 10 m y 8,6 m/s a 120 m, y el perfil logarítmico con una longitud de rugosidad de 0,05 m por el punto inferior, que se aparta hacia velocidades menores por encima de él. Derecha: los niveles previstos de siete aerogeneradores en una vivienda, del más fuerte al más débil, con los tres más fuertes, los aerogeneradores 2, 4 y 1, en el color de los relevantes y los otros cuatro en gris, el total de 42,3 dB como una línea y el total menos 1 dB como una línea discontinua justo por debajo, y una línea de rombos sobre las barras con la suma energética de los aerogeneradores más ruidosos juntos, 38,2 dB, 40,6 dB, 41,4 dB y así hacia el total, que alcanza la línea discontinua por primera vez en el tercer aerogenerador" width="96%" />
+
+*Izquierda: el perfil logarítmico del 9.3.2.1 es la atmósfera neutra; en una
+noche estable la cizalladura medida es mayor y el buje ve más viento del que
+sugiere la velocidad a 10 m. Derecha: dejar fuera los cuatro aerogeneradores más
+silenciosos baja el total 0,9 dB, y el quinto lo bajaría más, así que tres
+aerogeneradores fijan la velocidad de clasificación; los rombos son los tres más
+ruidosos juntos llegando a la línea discontinua. La figura numera los
+aerogeneradores desde 1, así que los `indices` (1, 3, 0) de arriba son en ella
+los aerogeneradores 2, 4 y 1.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+profile.plot(left, language="es")
+relevant.plot(right, language="es")
+plt.show()
+```
+
+</details>
+
+## Promedios por intervalo y el fondo
+
+Cada intervalo promedia sus periodos en energía, Ecuación (1), o aritméticamente
+para un nivel estadístico como $L_{90}$, Ecuación (8). La incertidumbre de tipo A
+es la dispersión respecto a ese promedio sobre $N(N-1)$, Ecuación (2) o (9); la
+parte de tipo B es la media cuadrática de las incertidumbres de cada periodo,
+Ecuaciones (3) y (4), con ejemplos en la Tabla 3; la Ecuación (5) las combina. El
+fondo, medido con los aerogeneradores parados y clasificado igual, se resta
+intervalo a intervalo con la regla del 11.7: logarítmicamente, Ecuación (6) con
+la incertidumbre de la Ecuación (7), donde el total queda al menos 3 dB por
+encima; con los 3 dB que se sugieren donde queda entre 0 dB y 3 dB por encima; y
+nada en absoluto donde el fondo es más fuerte, cuando el nivel del aerogenerador
+no se puede determinar.
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(611)
+speeds = rng.uniform(2.6, 11.45, 420)              # velocidades de clasificación, m/s
+turbine = 33.0 + 2.0 * np.minimum(speeds, 9.0)     # potencia nominal a 9 m/s
+background = 15.0 + 3.4 * speeds                   # el viento en los árboles
+total = 10.0 * np.log10(10.0 ** (turbine / 10.0) + 10.0 ** (background / 10.0))
+total_levels = np.round(total + rng.normal(0.0, 1.2, speeds.size), 1)
+off_speeds = rng.uniform(2.6, 11.45, 240)           # aerogeneradores parados
+off_levels = np.round(15.0 + 3.4 * off_speeds + rng.normal(0.0, 1.5, 240), 1)
+
+on = environment.bin_sound_levels(total_levels, speeds, type_b_uncertainty_db=0.5)
+off = environment.bin_sound_levels(off_levels, off_speeds, type_b_uncertainty_db=0.5)
+corrected = on.background_corrected(off)
+print(corrected.wind_speeds_m_s)                   # [ 3.  4. ...  10. 11.]
+print(np.round(corrected.level_differences_db, 1))  # 13.7 ... 3.4 2.1
+print(np.round(corrected.turbine_levels_db, 1))     # 39.2 ... 50.4 52.2
+print(corrected.regimes[-1].value)                  # three_db
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_bins.svg" alt="Dos paneles frente a la velocidad del viento de 3 m/s a 11 m/s. Izquierda: 420 niveles totales de diez minutos dispersos entre 36 dB y 58 dB y el promedio energético de cada intervalo de 1 m/s dibujado sobre ellos como un cuadrado con su incertidumbre combinada de alrededor de medio decibelio. Derecha: por intervalo, el nivel total que sube de 39 dB a 55 dB, el fondo medido con los aerogeneradores parados que sube más deprisa de 26 dB a 53 dB, y el nivel del aerogenerador tras la corrección por fondo, que sigue al total con poco viento y cae por debajo de él a medida que el fondo se acerca; el intervalo de 11 m/s, donde el fondo queda a menos de 3 dB, va rodeado con un círculo" width="96%" />
+
+*Derecha: de 3 m/s a 10 m/s el total queda 3,4 dB o más por encima del fondo y el
+fondo se resta; a 11 m/s queda 2,1 dB por encima, y el 11.7 sugiere quitar 3 dB
+al total en su lugar. Su NOTA 1 advierte que entonces no se puede establecer que
+se supere un límite.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+on.plot(left, language="es")
+corrected.plot(right, language="es")
+plt.show()
+```
+
+</details>
+
+Una previsión a partir de los niveles de potencia acústica de la IEC 61400-11
+lleva su propia incertidumbre (10.3.4): la Ecuación (10) pondera la incertidumbre
+de la potencia acústica de cada aerogenerador por su parte de la energía en la
+vivienda, y la Ecuación (11) le suma los 2 dB que la TS espera de la ISO 9613-2 o
+de Nord2000 a sotavento y 0,5 dB por el modelado.
+
+```python
+prediction = environment.predicted_receptor_level([36.9, 38.2, 33.5], 1.5)
+print(round(prediction.level_db, 1), round(prediction.combined_uncertainty_db, 2))  # 41.4 2.55
+```
+
+## Sonido de baja frecuencia en el interior (Anexo C)
+
+Medir durante semanas el sonido de baja frecuencia dentro de una casa es intrusivo
+y rara vez sale limpio, así que el Anexo C lo predice a partir de los niveles de
+potencia acústica, banda a banda de 10 Hz a 200 Hz:
+
+$$
+L_{p,\mathrm{LF}} = L_{W,\mathrm{LF}} - 10\lg\left(l^2 + h^2\right) - 11~\mathrm{dB}
++ \Delta L_{g,\mathrm{LF}} - \Delta L_\mathrm{a} - \Delta L_\sigma
+$$
+
+con $l$ la distancia horizontal y $h$ la altura de buje, 11 dB por
+$10\lg(4\pi)$, la corrección de terreno $\Delta L_{g,\mathrm{LF}}$ de la Tabla C.2
+para la clase de impedancia D, la absorción del aire $\Delta L_\mathrm{a} = \alpha
+\sqrt{l^2 + h^2}$ y un aislamiento de fachada $\Delta L_\sigma$ como las dos filas
+danesas de la Tabla C.3. Los aerogeneradores se suman por banda, y el nivel es la
+suma energética de las bandas; el límite danés del C.6.1 son 20 dB para la suma
+ponderada A de 10 Hz a 160 Hz.
+
+```python
+power = 118.0 - np.arange(environment.LOW_FREQUENCY_BANDS_HZ.size, dtype=float)
+low = environment.wind_turbine_low_frequency_level(
+    np.vstack([power, power, power - 1.0]),      # tres aerogeneradores, de 10 Hz a 200 Hz
+    distance_m=[650.0, 820.0, 1100.0],
+    hub_height_m=120.0,
+    facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+        "Denmark brick or similar"
+    ],
+)
+print(round(low.outdoor_level_db, 1), round(low.indoor_level_db, 1))   # 35.1 16.5
+danish = environment.LOW_FREQUENCY_BANDS_HZ <= 160.0
+print(round(10.0 * np.log10(np.sum(10.0 ** (low.indoor_levels_db[danish] / 10.0))), 1))  # 15.8
+```
+
+### Por qué la Tabla C.2 queda por debajo de la ISO 9613-1
+
+El título de la Tabla C.2 dice 70 % de humedad relativa y 10 °C, y el texto que
+la sigue dice que el coeficiente de absorción del aire se calcula según la
+ISO 9613-1. De 125 Hz a 200 Hz es así: 0,41, 0,59 y 0,80 dB/km son la ISO 9613-1
+en esa atmósfera, evaluada en las frecuencias centrales nominales. La propia
+Tabla 1 de la ISO 9613-1 se calcula en las frecuencias exactas de centro de banda
+e imprime 0,584 dB/km (0,58) a 160 Hz, cuyo centro exacto es 158,5 Hz; la TS toma
+aquí los centros nominales, mientras que su Tabla 7 sigue los exactos. De 50 Hz a
+100 Hz no lo es. La ISO 9613-1 al 70 % da 0,08,
+0,12, 0,19 y 0,28 dB/km a 50 Hz, 63 Hz, 80 Hz y 100 Hz; la tabla imprime 0,07,
+0,11, 0,17 y 0,26, entre 0,01 y 0,02 dB/km menos.
+
+Esas celdas más bajas no son un accidente de redondeo. De 10 Hz a 100 Hz la fila
+es, celda a celda, la atenuación del aire de la orden reglamentaria danesa sobre
+ruido de aerogeneradores (BEK nr. 135 de 2019, Tabla 1.4), que está fijada para
+un **80 %** de humedad relativa y 10 °C, toma las tasas de atenuación de Nord2000
+y desprecia la absorción del aire por debajo de 25 Hz, como recomienda el informe
+de DELTA en el que se apoya. El aire más húmedo absorbe menos a estas
+frecuencias, y la ISO 9613-1 al 80 % da ahí 0,07, 0,11, 0,17 y 0,25 dB/km, a
+0,01 dB/km o menos de las celdas impresas. La tabla une, por tanto, dos
+atmósferas en 100 Hz: el 80 % danés por debajo y el 70 % del título por encima.
+La orden termina en 160 Hz con 0,38 y 0,55 dB/km a 125 Hz y 160 Hz, que la TS
+sustituyó por sus propios valores al 70 %.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_low_frequency.svg" alt="Dos paneles. Izquierda: los niveles de banda de baja frecuencia ponderados A de tres aerogeneradores en una vivienda de 10 Hz a 200 Hz según la Ecuación (C.1), en el exterior subiendo de menos 11 dB a 10 Hz a 29 dB a 200 Hz con un total de 35,1 dB, y en el interior tras la fachada de ladrillo danesa de la Tabla C.3, aplanándose entre 6 dB y 8 dB por encima de 40 Hz con un total de 16,5 dB. Derecha: cada celda impresa de atenuación del aire de la Tabla C.2 de 25 Hz a 200 Hz menos la ISO 9613-1 a 10 grados C, una línea al 70 % y otra al 80 % de humedad relativa, con una franja sombreada de más o menos 0,005 dB/km para el redondeo impreso; la línea del 80 % se mantiene dentro de la franja o justo por encima hasta 100 Hz y salta a unos 0,035 dB/km desde 125 Hz, mientras que la del 70 % baja a menos 0,02 dB/km entre 50 Hz y 100 Hz y vuelve a la franja desde 125 Hz" width="96%" />
+
+*Derecha: una celda y un valor calculado que difieren en menos de 0,005 dB/km se
+imprimen con el mismo número. Hasta 100 Hz las celdas son las de la atmósfera
+del 80 % (los 0,006 dB/km de 100 Hz son la tasa por banda de Nord2000 de la orden
+danesa, 0,26 donde la ISO 9613-1 da 0,254), y desde 125 Hz las del 70 % del
+título.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import warnings
+
+from phonometry.environment.propagation.air_absorption import air_attenuation
+
+bands = environment.LOW_FREQUENCY_BANDS_HZ
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+low.plot(left, language="es")
+shown = bands >= 25.0
+for humidity in (70.0, 80.0):
+    with warnings.catch_warnings():       # la ISO 9613-1 es orientativa por debajo de 50 Hz
+        warnings.simplefilter("ignore")
+        iso = 1000.0 * np.asarray(
+            air_attenuation(
+                bands[shown], temperature_c=10.0, relative_humidity_percent=humidity
+            )
+        )
+    printed = environment.LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM[shown]
+    right.semilogx(bands[shown], printed - iso, marker="o",
+                   label=f"Tabla C.2 menos ISO 9613-1 a 10 °C, {humidity:.0f} %")
+right.axhspan(-0.005, 0.005, alpha=0.2)
+right.set(xlabel="Frecuencia [Hz]", ylabel="Diferencia de alfa [dB/km]")
+right.legend()
+plt.show()
+```
+
+</details>
+
+La diferencia es como mucho de 0,02 dB/km, unas centésimas de decibelio en las
+distancias para las que se usa el Anexo C, pero quien recalcule la fila en la
+atmósfera del título no puede reproducir su mitad inferior, así que está en el
+[registro de erratas](/phonometry/es/reference/errata/). La biblioteca publica la fila tal como
+está impresa, `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`, y la usa por defecto,
+así que sus resultados reproducen la TS y la orden danesa; para la ISO 9613-1 en
+otra atmósfera, pasa tú los coeficientes:
+
+```python
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    iso_70 = 1000.0 * np.asarray(
+        air_attenuation(bands, temperature_c=10.0, relative_humidity_percent=70.0)
+    )
+at_70 = environment.wind_turbine_low_frequency_level(
+    np.vstack([power, power, power - 1.0]),
+    distance_m=[650.0, 820.0, 1100.0],
+    hub_height_m=120.0,
+    air_attenuation_db_per_km=iso_70,
+    facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+        "Denmark brick or similar"
+    ],
+)
+print(round(at_70.indoor_level_db - low.indoor_level_db, 3))   # -0.005
+```
+
+La Tabla C.4, la de presentación de resultados, suma el término de distancia que
+la Ecuación (C.1) resta; lo implementado es la ecuación, y la tabla está en el
+[registro de erratas](/phonometry/es/reference/errata/).
+
+## Emergencia (Anexo J)
+
+La reglamentación francesa limita la emergencia, el criterio de sonido ambiental
+con los aerogeneradores en marcha menos el criterio de fondo con ellos parados,
+por clase completa de velocidad de viento, Ecuación (J.1). No es un límite sobre
+el sonido del aerogenerador en sí.
+
+```python
+emergence = environment.sound_emergence(
+    [38.5, 41.0, 43.5], [33.0, 37.5, 41.5], wind_speeds_m_s=[5.0, 6.0, 7.0]
+)
+print(emergence.emergence_db)   # [5.5 3.5 2. ]
+```
+
+## Modulación de amplitud (apartado 13)
+
+El nivel del sonido de un aerogenerador sube y baja una vez por cada paso de
+pala, el «silbido» que describe un vecino, y cuanto más hay, más molesta de lo que
+dice su nivel medio. El apartado 13 lo valora con el método de referencia del
+Grupo de Trabajo sobre Modulación de Amplitud del Institute of Acoustics (13.2).
+La entrada es una serie de niveles ponderados A de 100 ms sumados sobre siete
+bandas de tercio de octava, de 50 Hz a 200 Hz, de 100 Hz a 400 Hz o de 200 Hz a
+800 Hz (13.6.2.1.1), con tres bandas más altas en el Anexo G.3 para
+aerogeneradores más pequeños cuyo silbido está por encima de 800 Hz.
+
+```python
+freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800]
+rng = np.random.default_rng(7)
+logged = 40.0 + rng.normal(0.0, 1.0, (1000, len(freqs)))    # 100 s, bandas sin ponderar
+band_2 = environment.amplitude_modulation_band_levels(logged, freqs, band=2, weighting="Z")
+print(band_2.shape)   # (1000,)
+```
+
+**Un bloque de 10 s** (13.6.2.3). A los 100 valores se les elimina la tendencia
+con un ajuste cúbico y se transforman con una DFT rectangular de 0,1 Hz de
+resolución en el espectro de potencia de la Ecuación (12),
+$S_{xx} = |F\{x\}|^2 / m^2$. El máximo local más alto dentro del rango donde se
+espera la frecuencia de paso de pala es la fundamental. Su prominencia, Ecuación
+(13), es esa línea sobre la media de las dos líneas que hay más allá de cada
+vecina; un bloque sin máximo en el rango, o con una prominencia menor que 4, es
+un bloque «sin prominencia». Los armónicos segundo y tercero se suman si hay un
+máximo en el doble y el triple de la fundamental, o a una o dos líneas de ellos, y
+tanto la fundamental sola como el armónico solo oscilan más de 1,5 dB. Tres
+líneas alrededor de cada componente conservada, con sus simétricas de frecuencia
+negativa, se transforman de vuelta, y la profundidad de modulación es el
+$L_5 - L_{95}$ de esa serie.
+
+```python
+t = np.arange(100) * 0.1
+rng = np.random.default_rng(1340)
+levels = np.round(
+    38.0
+    + 1.2 * np.sin(2 * np.pi * t / 47.0)                # la deriva del viento
+    + 2.0 * np.sin(2 * np.pi * 0.8 * t)                 # el silbido, 0,8 Hz
+    + (4.0 / 6.0) * np.sin(4 * np.pi * 0.8 * t + 0.9)   # y su armónico
+    + rng.normal(0.0, 1.0, t.size),
+    1,
+)
+block = environment.amplitude_modulation_block(
+    levels, modulation_frequency_range_hz=(0.5, 1.1)
+)
+print(block.status.value, block.fundamental_frequency_hz)   # valid 0.8
+print(round(block.prominence, 1), block.harmonic_frequencies_hz)  # 79.9 (1.6, 2.5)
+print(round(block.modulation_depth_db, 2))                  # 4.95
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_block.svg" alt="Dos paneles de un bloque de 10 s. Izquierda: el espectro de potencia de 0,1 Hz a 4,9 Hz como barras, el rango de la fundamental de 0,5 Hz a 1,1 Hz entre líneas de puntos, la fundamental en 0,8 Hz muy por encima de todo lo demás, los armónicos segundo y tercero estimados en 1,6 Hz y 2,4 Hz como líneas discontinuas, y las tres líneas conservadas alrededor de la fundamental y de cada armónico rellenas; el título da la fundamental de 0,8 Hz y una prominencia de 79,87. Derecha: la serie de 100 ms sin tendencia durante 10 s oscilando unos 3 dB a cada lado con ruido, la serie reconstruida dibujada encima como una curva periódica suave, y su L5 y su L95 como líneas discontinuas; el título da un L5 menos L95 de 4,95 dB" width="96%" />
+
+*Izquierda: el tercer armónico aparece en 2,5 Hz, una línea por encima de su
+estimación de 2,4 Hz, lo que el 13.6.2.3 f) permite hasta a dos líneas.
+Derecha: la reconstrucción conserva el paso de pala y deja fuera el ruido.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+block.plot(left, language="es")
+block.plot(right, kind="series", language="es")
+plt.show()
+```
+
+</details>
+
+**La valoración de 10 min** (13.6.3). Sesenta bloques forman un periodo; con al
+menos 30 válidos, la valoración es el percentil 90 de sus profundidades, con la
+media y la moda de sus fundamentales. Un periodo con menos se valora con 0 dB y
+no da frecuencia de modulación. La valoración alimenta el ajuste de la
+Figura A.1.
+
+```python
+t = np.arange(6000) * 0.1
+rng = np.random.default_rng(1363)
+depth = 3.0 + 2.5 * np.sin(2.0 * np.pi * t / 600.0) ** 2
+gust = (t >= 240.0) & (t < 330.0)                  # 90 s de rachas, sin silbido
+depth[gust] = 0.0
+series = (
+    38.0
+    + 1.2 * np.sin(2 * np.pi * t / 47.0)
+    + 0.5 * depth * np.sin(2 * np.pi * 0.8 * t)
+    + depth / 6.0 * np.sin(4 * np.pi * 0.8 * t + 0.9)
+    + rng.normal(0.0, 1.0, t.size)
+)
+series[gust] += rng.normal(0.0, 2.5, int(gust.sum()))
+period = environment.amplitude_modulation_period(
+    np.round(series, 1), modulation_frequency_range_hz=(0.5, 1.1)
+)
+print(period.valid_blocks, round(period.rating_db, 2))    # 55 5.84
+print(round(period.mean_modulation_frequency_hz, 2), period.mode_modulation_frequency_hz)  # 0.8 0.8
+```
+
+**Los intervalos** (13.6.4). Cada periodo es un punto de datos de su valoración en
+cada banda, clasificado por 1 m/s y 30° como todo lo demás. La media de cada
+intervalo cuenta los 0 dB de los periodos sin valorar y deja fuera los
+excluidos, y cada intervalo da la banda con la media más alta, con su recuento, el
+número de valoraciones distintas de cero y la proporción por encima de 3 dB, 6 dB
+y 9 dB (13.7).
+
+```python
+ratings = np.array(
+    [[2.1, 4.6, 3.0], [0.0, 0.0, 0.0], [1.8, 5.2, 3.9],
+     [2.5, 3.9, 4.4], [0.0, 0.0, 0.0], [3.1, 2.2, 5.0]]
+)   # bandas 1, 2 y 3 de seis periodos
+binned = environment.bin_amplitude_modulation(ratings, [6.2, 6.4, 5.9, 7.1, 7.3, 6.8])
+print(binned.wind_speeds_m_s, binned.counts)           # [6. 7.] [3 3]
+print(binned.selected_bands, np.round(binned.selected_ratings_db, 2))  # [2 3] [3.27 3.13]
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_period.svg" alt="Dos paneles. Izquierda: la profundidad de modulación de cada uno de los sesenta bloques de 10 s de un periodo de 10 min frente al tiempo, subiendo y bajando en dos jorobas entre unos 2,5 dB y 6 dB, con cinco bloques en torno a 280 s a 330 s marcados como no válidos en 0 dB durante un minuto de rachas, y la valoración de 10 min de 5,84 dB dibujada como una línea; el título dice n = 55/60. Derecha: la valoración media de la peor banda en cada intervalo de 1 m/s de una campaña de 600 periodos frente a la velocidad del viento de 4 m/s a 10 m/s, subiendo de unos 2,4 dB a 5,4 dB a 7 m/s y bajando de nuevo, con cada punto dibujado como el número de la banda que eligió sobre una etiqueta: 1 a 4 m/s y 5 m/s, 2 a 6 m/s y 7 m/s, 3 de 8 m/s a 10 m/s, y la leyenda nombra la banda 1 como 50 Hz a 200 Hz, la banda 2 como 100 Hz a 400 Hz y la banda 3 como 200 Hz a 800 Hz" width="96%" />
+
+*Derecha: la banda que lleva el silbido cambia con el viento, y el 13.6.4 la elige
+por intervalo; la etiqueta sobre cada punto nombra la banda, 1 para 50 Hz a
+200 Hz, 2 para 100 Hz a 400 Hz y 3 para 200 Hz a 800 Hz. Los periodos sin valorar
+bajan las medias donde el silbido es raro.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+rng = np.random.default_rng(1364)
+survey_speeds = rng.uniform(3.5, 10.45, 600)
+survey = np.column_stack([
+    np.clip(1.5 + height * np.exp(-(((survey_speeds - peak) / 2.0) ** 2))
+            + rng.normal(0.0, 0.8, 600), 0.0, None)
+    for peak, height in ((5.0, 2.5), (7.0, 4.0), (9.0, 4.5))
+])
+audible = np.exp(-(((survey_speeds - 7.0) / 2.5) ** 2))
+survey[rng.uniform(0.0, 1.0, 600) < 0.35 * (1.0 - audible)] = 0.0
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+period.plot(left, language="es")
+environment.bin_amplitude_modulation(np.round(survey, 2), survey_speeds).plot(
+    right, language="es"
+)
+plt.show()
+```
+
+</details>
+
+### La TS frente al informe y el código del grupo de trabajo
+
+El apartado 13 dice que implementa el Final Report del AMWG con salidas más
+concretas y la banda del caso más desfavorable en cada intervalo, y el análisis
+de 10 s es el de ese informe paso a paso. De la redacción de la TS salen dos
+diferencias, y la biblioteca implementa la TS:
+
+- **Un periodo con menos de 30 bloques válidos** se valora con 0 dB y se mantiene
+  en la media del intervalo (13.6.3, 13.6.4); el informe lo descarta (su
+  Figura 4.2.2). El 13.6.4 deja fuera además «any excluded periods due to pf or
+  other exclusions». Leído al pie de la letra, eso quitaría justo los periodos
+  que el 13.6.3 valora con 0 dB, cuyos bloques no pasaron la prueba de
+  prominencia, y el «including 0 values» de la misma frase y el recuento de
+  valores distintos de cero que pide no significarían nada. La biblioteca lo lee
+  como los periodos que excluye el técnico, las marcas `excluded=` de
+  `bin_amplitude_modulation`.
+- **La banda** se elige por intervalo (13.6.4); el informe elige una sola banda
+  para toda la campaña haciendo una regresión de las valoraciones de unas bandas
+  frente a otras.
+
+Un periodo con exactamente 30 bloques válidos se valora, como dicen el 13.6.2.2
+(«at least 50 %») y el informe («at least 50 % (i.e. 30)»); las viñetas del
+13.6.3 dicen «greater than» y «less than» y lo dejan fuera, lo que está en el
+registro de erratas.
+
+El grupo de trabajo publicó su código (v1.4) con tres series de ejemplo. Aquí se
+ha usado como oráculo y nunca como fuente: la biblioteca reproduce los resultados
+impresos del ejemplo, prominencia 44,64, fundamental 0,70 Hz y una valoración de
+10 s de 8,38 dB para la serie de 100 Hz a 400 Hz en el rango de 0,4 Hz a 0,9 Hz,
+y coincide con el código sin modificar en bloques y periodos sintéticos, como
+muestra el [informe de conformidad](/phonometry/es/reference/conformance/). Donde
+los dos divergen decide la TS, y las filas lo fijan: un periodo de 29 bloques
+válidos se valora con 0 dB. Un detalle es sólo del código: compara las
+frecuencias de sus líneas espectrales, calculadas como múltiplos de 0,1 Hz, con
+los límites del rango como números en coma flotante, así que un límite superior
+de 0,6 Hz, 0,7 Hz, 1,2 Hz o 1,4 Hz deja fuera su propia línea (seis, siete,
+doce y catorce veces 0,1 Hz salen un poco por encima del límite; dieciséis
+veces 0,1 Hz es exactamente 1,6 Hz, y esa línea se conserva). La biblioteca
+trabaja con índices de línea y conserva la línea de cualquier límite, como se
+lee en el «between» de la TS.
+
+## El nivel de evaluación (Anexo A)
+
+$L_\mathrm{r} = L_\mathrm{eq} + K$, con $K$ el más severo de los ajustes tonal, de
+modulación de amplitud e impulsivo, sólo uno cada vez (A.1). Los ejemplos de la
+TS son la Tabla A.1 para los tonos (ISO 1996-2 Tabla J.1,
+[`tonal_adjustment_from_mean_audibility`](/phonometry/es/environment/assessment/environmental-levels/)),
+la ISO/PAS 1996-3 para los impulsos
+([`impulse_adjustment`](/phonometry/es/environment/assessment/impulsive-sound/)) y
+la Figura A.1 para la modulación de amplitud: nada por debajo de una profundidad
+de 3 dB, 3 dB en 3 dB, subiendo hasta 5 dB en 10 dB y constante por encima.
+
+```python
+k_am = environment.amplitude_modulation_adjustment(period.rating_db)
+rating = environment.wind_turbine_rating_level(
+    41.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=k_am
+)
+print(round(k_am, 2), rating.governing, round(rating.rating_level_db, 1))  # 3.81 amplitude_modulation 44.8
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_rating.svg" alt="Dos paneles. Izquierda: el ajuste por modulación de amplitud de la Figura A.1 frente a la profundidad de modulación de 0 dB a 12 dB, cero hasta 3 dB, un escalón a 3 dB ahí, subida lineal hasta 5 dB en 10 dB y constante después, con la valoración de 10 min de 5,84 dB marcada sobre él en un ajuste de 3,8 dB. Derecha: los tres ajustes candidatos como barras, tonal 2 dB, modulación de amplitud 3,8 dB contorneado y rayado como el que manda, que la leyenda nombra como el aplicado, el más severo del A.1, impulsivo cero, bajo el título L_r = 41,0 + 3,8 = 44,8 dB" width="96%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+depths = np.linspace(0.0, 12.0, 481)
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+left.plot(depths, environment.amplitude_modulation_adjustment(depths))
+left.plot([period.rating_db], [k_am], "o")
+left.set(xlabel="Profundidad de modulación [dB]", ylabel="Ajuste K_am [dB]")
+rating.plot(right, language="es")
+plt.show()
+```
+
+</details>
+
+## Hasta dónde buscar tonos (12.5.2.4)
+
+Los tonos de una banda que la ISO 9613-1 atenúa 20 dB o más en la distancia al
+aerogenerador más cercano no suelen preocupar, y toda banda más alta se atenúa
+más, así que la banda más baja que lo cumple fija el techo de la búsqueda. La
+Tabla 7 la da para cinco atmósferas y cuatro distancias; la función la calcula
+para cualquiera.
+
+```python
+search = environment.upper_tone_search_frequency(
+    600.0, temperature_c=10.0, relative_humidity_percent=50.0
+)
+print(search.upper_frequency_hz)   # 4000.0, como imprime la Tabla 7
+```
+
+La fila de la Tabla 7 impresa para 10 °C y 80 % lleva las frecuencias que da
+la regla a −10 °C y 80 % (no las de la propia fila de −10 °C de la tabla, que
+está al 100 %); a 10 °C y 80 % la función da 10, 6,3, 5 y 4 kHz donde la tabla imprime
+10, 5, 2,5 y 2 kHz. Esa fila, con otros ocho defectos impresos de la TS, está en
+el [registro de erratas](/phonometry/es/reference/errata/).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search.svg" alt="La atenuación de la ISO 9613-1 en 600 m a 10 grados C y 50 % de humedad relativa para cada banda de tercio de octava de 50 Hz a 10 kHz en ejes logarítmicos, subiendo de 0,06 dB a 50 Hz a unos 130 dB a 10 kHz, la línea de 20 dB discontinua, y la frecuencia superior de búsqueda de 4 kHz marcada donde la atenuación la alcanza por primera vez" width="84%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+search.plot(language="es")
+plt.show()
+```
+
+</details>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Los cálculos que la IEC TS 61400-11-2:2024 deja escritos: la velocidad del viento
+entre alturas del Anexo K (Ecuaciones (K.1) y (K.2), Tablas K.1 a K.3) y la
+velocidad de clasificación del 9.3.2.1 y del 9.3.2.3; los promedios por
+intervalo y las incertidumbres de las Ecuaciones (1) a (9) con la Tabla 3, la
+corrección por fondo de las Ecuaciones (6) y (7) con la regla del 11.7, y la
+incertidumbre de la previsión de las Ecuaciones (10) y (11); el nivel de baja
+frecuencia de la Ecuación (C.1) con las Tablas C.1 a C.3 y C.5; la emergencia de
+la Ecuación (J.1); la modulación de amplitud del apartado 13, el bloque de 10 s,
+la valoración de 10 min y los intervalos, con las bandas más altas del Anexo G.3;
+el nivel de evaluación del A.1 con el ajuste de la Figura A.1; y la frecuencia
+superior de búsqueda de tonos del 12.5.2.4. Todos los resultados se dibujan.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+La propia campaña de medida: la selección de periodos, el filtrado de los
+sonidos ajenos y la escucha de audio del Anexo F son cosa del técnico. No está
+implementado el procedimiento de audibilidad tonal del 12.5 (espectros de 3 s,
+la agrupación de frecuencias del 12.5.2.6 y la media de 1 min del 12.5.2.7); la
+audibilidad tonal de la biblioteca es la de la ISO/PAS 20065:2016 de la página de
+[audibilidad de tonos](/phonometry/es/perception/psychoacoustics/tone-audibility/).
+Tampoco lo están la impulsividad del apartado 14 más allá del ajuste de la
+ISO/PAS 1996-3, el infrasonido del Anexo D, los criterios sueco y danés como
+dictámenes, ni la propagación Nord2000 sobre la que se construye el Anexo C.
+Quedan fuera también los rotores más rápidos del Anexo G.2, cuya frecuencia
+fundamental de modulación supera 1,6 Hz: las funciones rechazan un rango por
+encima de los 1,6 Hz del 13.2.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/environment/sources/wind-turbine-noise/): la emisión de la IEC 61400-11 cuyos niveles de potencia acústica alimentan el Anexo C y la previsión del 10.3.4.
+- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/): la absorción atmosférica de la ISO 9613-1 y la cadena de la ISO 9613-2.
+- [Prominencia del sonido impulsivo](/phonometry/es/environment/assessment/impulsive-sound/): el ajuste de la ISO/PAS 1996-3 del A.4.
+- [Intensidad de fluctuación y aspereza](/phonometry/es/perception/psychoacoustics/sound-quality/): la visión psicoacústica de la modulación.
+- Referencia de la API: [`environment.assessment.wind_turbine_receptor`](/phonometry/es/reference/api/environment/wind-turbine-receptor/) y [`environment.assessment.wind_turbine_modulation`](/phonometry/es/reference/api/environment/wind-turbine-modulation/).
+
+</SeeAlso>

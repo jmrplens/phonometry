@@ -226,6 +226,111 @@ def _statistical_pass_by() -> ph.environment.StatisticalPassByResult:
     )
 
 
+def _am_block() -> ph.environment.ModulationBlock:
+    """The IOA sample series of 100 Hz to 400 Hz (IEC TS 61400-11-2, 13.6.2.3)."""
+    from reference_data import wind_turbine_receptor as wt
+
+    return ph.environment.amplitude_modulation_block(
+        np.asarray(wt.IOA_SAMPLE_SERIES_TENTHS_DB[2][:100]) / 10.0,
+        modulation_frequency_range_hz=(0.4, 0.9),
+    )
+
+
+def _am_period() -> ph.environment.ModulationPeriod:
+    """A 10 min period of 36 valid 10 s blocks (IEC TS 61400-11-2, 13.6.3)."""
+    from reference_data import wind_turbine_receptor as wt
+
+    indices = wt.IOA_PERIOD_CASES[0][1]
+    series = np.concatenate([wt.IOA_PERIOD_BLOCKS_TENTHS_DB[i] for i in indices])
+    return ph.environment.amplitude_modulation_period(
+        series / 10.0, modulation_frequency_range_hz=wt.IOA_PERIOD_RANGE_HZ
+    )
+
+
+def _am_bins() -> ph.environment.BinnedModulation:
+    """Ten 10 min ratings in three bands, binned (IEC TS 61400-11-2, 13.6.4)."""
+    ratings = np.array(
+        [
+            [2.0, 4.0, 1.0],
+            [0.0, 6.5, 3.5],
+            [5.0, 1.0, 9.5],
+            [3.0, 3.0, 0.0],
+            [7.0, 2.0, 2.0],
+        ]
+        * 2
+    )
+    speeds = np.array([4.6, 5.4, 5.5, 7.0, 7.4, 6.1, 6.2, 8.0, 3.2, 4.0])
+    return ph.environment.bin_amplitude_modulation(ratings, speeds)
+
+
+def _wind_shear() -> ph.environment.WindShearProfile:
+    return ph.environment.wind_shear_profile(5.0, 9.0, upper_height_m=120.0)
+
+
+def _binned_levels() -> ph.environment.BinnedSoundLevels:
+    speeds = np.linspace(3.0, 9.0, 40)
+    levels = 30.0 + 1.5 * speeds + np.sin(7.0 * speeds)
+    return ph.environment.bin_sound_levels(levels, speeds, type_b_uncertainty_db=0.4)
+
+
+def _turbine_levels() -> ph.environment.TurbineSoundLevels:
+    return ph.environment.turbine_sound_levels(
+        [38.0, 40.0, 42.0, 43.0],
+        [33.0, 36.0, 40.0, 41.0],
+        total_uncertainty_db=0.8,
+        background_uncertainty_db=0.6,
+        wind_speeds_m_s=[4.0, 5.0, 6.0, 7.0],
+    )
+
+
+def _turbine_levels_by_sector() -> ph.environment.TurbineSoundLevels:
+    speeds, directions = [4.0, 5.0, 6.0, 4.0, 5.0, 6.0], [0.0] * 3 + [90.0] * 3
+    total = ph.environment.bin_sound_levels(
+        [38.0, 40.0, 42.0, 36.0, 39.0, 41.0], speeds, directions
+    )
+    background = ph.environment.bin_sound_levels(
+        [33.0, 36.0, 40.0, 30.0, 32.0, 35.0], speeds, directions
+    )
+    return total.background_corrected(background)
+
+
+def _predicted_receptor() -> ph.environment.PredictedReceptorLevel:
+    return ph.environment.predicted_receptor_level([35.0, 32.0, 28.0, 20.0], 1.5)
+
+
+def _relevant_turbines() -> ph.environment.SoundRelevantTurbines:
+    return ph.environment.sound_relevant_turbines([35.0, 33.0, 32.0, 25.0, 20.0, 18.0])
+
+
+def _low_frequency() -> ph.environment.LowFrequencyLevel:
+    return ph.environment.wind_turbine_low_frequency_level(
+        np.full(14, 100.0),
+        distance_m=600.0,
+        hub_height_m=120.0,
+        facade_insulation_db=ph.environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+            "Denmark brick or similar"
+        ],
+    )
+
+
+def _emergence() -> ph.environment.SoundEmergence:
+    return ph.environment.sound_emergence(
+        [40.0, 42.0, 45.0], [36.0, 38.0, 41.0], wind_speeds_m_s=[5.0, 6.0, 7.0]
+    )
+
+
+def _wt_rating() -> ph.environment.WindTurbineRatingLevel:
+    return ph.environment.wind_turbine_rating_level(
+        40.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=3.5
+    )
+
+
+def _tone_search() -> ph.environment.ToneSearchLimit:
+    return ph.environment.upper_tone_search_frequency(
+        600.0, temperature_c=10.0, relative_humidity_percent=50.0
+    )
+
+
 def _porous_medium() -> ph.materials.PorousMediumResult:
     f = np.linspace(400.0, 4000.0, 40)
     return ph.materials.miki(f, 20000.0)

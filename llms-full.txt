@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1608 numerical conformance checks against 496 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1640 numerical conformance checks against 504 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1608 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 101 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1640 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 103 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -287,6 +287,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/)
 - [Road-surface noise: the statistical pass-by method (ISO 11819-1)](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/)
 - [Wind-turbine noise: apparent sound power and tonal audibility (IEC 61400-11)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/)
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/)
 
 ## Aircraft noise
 
@@ -536,6 +537,8 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/spain](https://jmrplens.github.io/phonometry/reference/api/environment/spain/)
 - [environment/statistical-pass-by](https://jmrplens.github.io/phonometry/reference/api/environment/statistical-pass-by/)
 - [environment/wind-turbine](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/)
+- [environment/wind-turbine-modulation](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-modulation/)
+- [environment/wind-turbine-receptor](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-receptor/)
 - [filters/compliance](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/)
 - [filters/core](https://jmrplens.github.io/phonometry/reference/api/filters/core/)
 - [filters/equalizer](https://jmrplens.github.io/phonometry/reference/api/filters/equalizer/)
@@ -29724,6 +29727,9 @@ surface adds to the traffic on it.
   and aerodynamic contributions.
 - [Wind-turbine noise: sound power and tonal audibility](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/):
   the IEC 61400-11 apparent sound power level and tonal-audibility chain.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/):
+  the same turbines heard at the receptor, with the amplitude modulation
+  rating, the low frequency level indoors and the rating level.
 
 Aircraft are the other transport source with internationally fixed metrics,
 and they have a topic of their own:
@@ -32856,9 +32862,19 @@ speed. The same page carries the tonal audibility that decides whether a
 blade-passing, gearbox or generator tone stands above its masking noise, and
 ends in a `.report()` assessment fiche.
 
+[Wind turbine sound at a dwelling](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/)
+is IEC TS 61400-11-2, the other end of the same path: what arrives at a
+neighbour's house several hundred metres away. It sorts weeks of intervals by
+wind speed and direction, averages each bin with its uncertainty, takes off
+the background measured with the turbines stopped, predicts the low frequency
+level indoors from the sound power levels, and rates the amplitude modulation,
+the blade-passage swish, by the reference method of the Institute of
+Acoustics, before all of it meets in the rating level.
+
 Read the road page first even for a railway job: it introduces the source-line
-bookkeeping and the Annex II layering that the rail page reuses. The turbine
-page is independent of both, and so is the pass-by page, which feeds no
+bookkeeping and the Annex II layering that the rail page reuses. The two turbine
+pages are independent of both (the receptor page takes the emission page's
+sound power levels as its input), and so is the pass-by page, which feeds no
 propagation model: its index ranks surfaces.
 
 ## Pages in this section
@@ -32877,6 +32893,10 @@ propagation model: its index ranks surfaces.
 - [Wind-turbine noise: sound power and tonal audibility](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/):
   the IEC 61400-11 apparent sound power referred to the rotor centre, its
   wind-speed binning and the tonal-audibility chain, with the assessment fiche.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/):
+  the wind speed between heights, the bin averages and background correction,
+  the low frequency level indoors, the emergence, the amplitude modulation
+  rating and the rating level at the receptor.
 
 ## See also
 
@@ -33157,15 +33177,19 @@ maps each result to the wind speed at 10 m height over a **reference
 roughness length** $z_{0\mathrm{ref}} = 0.05$ m (a logarithmic wind profile), giving
 $L_{W\mathrm{A},10\mathrm{m}}$ at integer 10 m wind speeds regardless of the site's actual
 terrain. The library implements the closed-form quantities of this pipeline
-(slant distance, per-band apparent power, tonal audibility); the binning,
+(slant distance, per-band apparent power, tonal audibility), and Formula (29)
+is `environment.logarithmic_wind_speed`, on the
+[receptor page](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/); the binning,
 averaging and uncertainty machinery operates on whole measurement campaigns
 and stays out of scope. So does the IEC TS 61400-14 declaration route, which
 turns a batch of measured machines into the declared value a planning authority
 receives. And two things a wind-turbine reader often arrives looking for sit
 outside IEC 61400-11 altogether: **amplitude modulation** (the swish, folded
 into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** (optional
-measurements under 7.2.1 with no rating method attached, so their assessment
-falls to national guidance).
+measurements under 7.2.1 with no rating method attached). Amplitude modulation
+at a dwelling is rated by clause 13 of IEC TS 61400-11-2, on the
+[receptor page](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/); infrasound falls to national
+guidance.
 
 ## 2. Tonal audibility
 
@@ -33300,6 +33324,7 @@ the 0 dB audibility line and past a 6 dB acceptance requirement.*
 - [Environmental noise levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
 - [Tone audibility](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/): the same tonal-audibility idea outside the wind-turbine context.
 - [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/): what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
 - API reference: [`environment.sources.wind_turbine`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/).
 
 ## References
@@ -33334,6 +33359,287 @@ tonality/audibility (Formulae 32–34). The tonal-audibility formula coincides
 with ISO 1996-2 Annex C. The full measurement pipeline (wind-speed binning,
 regression to standardised speeds and the uncertainty budgets) is out of scope
 here; these are the underlying closed forms.
+
+---
+
+
+<!-- source: docs/environment/sources/wind-turbine-receptor.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/ -->
+Source: https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/
+
+# Wind turbine sound at a dwelling (IEC TS 61400-11-2)
+
+[IEC 61400-11](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/) measures what a turbine emits, close to
+it and downwind. IEC TS 61400-11-2:2024 measures what arrives at a dwelling
+several hundred metres away, where the wind that drives the rotor also stirs
+the trees, raises the background and bends the sound on its way. The
+measurement lasts weeks, and everything is sorted by wind speed and direction
+before it is averaged. This page covers the calculations the TS writes down:
+the wind speed at the heights the bins need, the bin averages with their
+uncertainty, the background correction, the low frequency level indoors, the
+emergence, the amplitude modulation rating and the rating level they feed.
+
+## How the measurement goes
+
+A free-field microphone with a two-stage or oversize wind screen on a tripod
+or a pole is the preferred mounting (8.1.3). A facade microphone raises the
+signal-to-noise ratio but cannot be used for tonal audibility, amplitude
+modulation or impulsivity (8.1.3); a proxy position is of limited use for them
+too (8.1.2). Wind speed and direction come from the turbines or a mast and are
+brought to 10 m (9.3); everything acoustic is binned in 1 m/s classes and 30°
+sectors (10.1). For amplitude modulation the meter logs 100 ms `LAeq` in
+one-third octave bands from 20 Hz to 10 kHz at least (13.6.1).
+
+## Wind speed between heights (Annex K, 9.3.2)
+
+The power law of Equation (K.1), `V_z = V_ref (z / z_ref)^alpha`, moves a wind
+speed between heights with the shear exponent `alpha`, and Equation (K.2)
+inverts it. The binning wind speed of 9.3.2.1 is a hub height speed brought
+to 10 m with the logarithmic profile and `z0ref = 0,05 m` (3.31), which
+assumes neutral air. At a wind farm it is the mean of the sound relevant
+turbines (9.3.2.3): the quietest are left out while the total drops by no
+more than 1 dB.
+
+```python
+from phonometry import environment
+
+v10 = environment.power_law_wind_speed(
+    8.0, height_m=10.0, reference_height_m=120.0, shear_exponent=0.3
+)                                                 # Table K.1
+alpha = environment.wind_shear_exponent(
+    8.0, 5.0, height_m=120.0, reference_height_m=10.0
+)                                                 # Table K.2
+v_bin = environment.logarithmic_wind_speed(8.0, height_m=10.0, reference_height_m=120.0)
+print(round(v10, 2), round(alpha, 2), round(v_bin, 2))   # 3.8 0.19 5.45
+
+relevant = environment.sound_relevant_turbines([33.5, 38.2, 29.4, 36.9, 25.1, 31.8, 27.0])
+print(relevant.indices, round(relevant.total_level_db, 1))   # (1, 3, 0) 42.3
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_shear_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_shear.svg" alt="Left: the power-law profile with a shear exponent of 0.26 through 4.5 m/s at 10 m and 8.6 m/s at 120 m, and the logarithmic profile with a roughness length of 0.05 m through the lower point. Right: the predicted levels of seven turbines at a dwelling, numbered from 1, the three loudest sound relevant, the total of 42.3 dB, the total less 1 dB and the energy sum of the loudest turbines together, which first reaches the total less 1 dB at the third" width="96%"></picture>
+
+## Bin averages and the background (10.3, 11.7)
+
+Each bin averages its intervals by energy (Equation (1)) or arithmetically for
+a statistical level (Equation (8)); the type A uncertainty is Equation (2) or
+(9), the type B part the root mean square of Equations (3) and (4), combined by
+Equation (5). The background is subtracted bin by bin by Equation (6) where the
+total is at least 3 dB above it, by a suggested 3 dB where it is 0 dB to 3 dB
+above, and not at all where the background is louder (11.7).
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(611)
+speeds = rng.uniform(2.6, 11.45, 420)
+turbine = 33.0 + 2.0 * np.minimum(speeds, 9.0)
+background = 15.0 + 3.4 * speeds
+total = 10.0 * np.log10(10.0 ** (turbine / 10.0) + 10.0 ** (background / 10.0))
+total_levels = np.round(total + rng.normal(0.0, 1.2, speeds.size), 1)
+off_speeds = rng.uniform(2.6, 11.45, 240)
+off_levels = np.round(15.0 + 3.4 * off_speeds + rng.normal(0.0, 1.5, 240), 1)
+
+on = environment.bin_sound_levels(total_levels, speeds, type_b_uncertainty_db=0.5)
+off = environment.bin_sound_levels(off_levels, off_speeds, type_b_uncertainty_db=0.5)
+corrected = on.background_corrected(off)
+print(np.round(corrected.turbine_levels_db[-3:], 1), corrected.regimes[-1].value)
+# [50.8 50.4 52.2] three_db
+
+prediction = environment.predicted_receptor_level([36.9, 38.2, 33.5], 1.5)
+print(round(prediction.combined_uncertainty_db, 2))   # 2.55, Equations (10) and (11)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_bins_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_bins.svg" alt="Left: 420 ten-minute total levels against wind speed with the energy average of each 1 m/s bin and its uncertainty. Right: the total, the background and the corrected turbine level per bin, the 11 m/s bin where the background is within 3 dB circled" width="96%"></picture>
+
+## Low frequency sound indoors (Annex C)
+
+Equation (C.1) predicts the low frequency level band by band from 10 Hz to
+200 Hz:
+`L_p,LF = L_W,LF - 10 lg(l² + h²) - 11 dB + ΔL_g,LF - ΔL_a - ΔL_σ`, with the
+ground correction and the air attenuation of Table C.2 and a facade insulation
+such as the Danish rows of Table C.3.
+
+```python
+power = 118.0 - np.arange(environment.LOW_FREQUENCY_BANDS_HZ.size, dtype=float)
+low = environment.wind_turbine_low_frequency_level(
+    np.vstack([power, power, power - 1.0]),
+    distance_m=[650.0, 820.0, 1100.0],
+    hub_height_m=120.0,
+    facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+        "Denmark brick or similar"
+    ],
+)
+print(round(low.outdoor_level_db, 1), round(low.indoor_level_db, 1))   # 35.1 16.5
+```
+
+**Why Table C.2 sits under ISO 9613-1.** Its caption says 70 % relative
+humidity and 10 °C, and from 125 Hz to 200 Hz its air attenuation is ISO 9613-1
+at that atmosphere evaluated at the nominal band centres (0,41, 0,59 and
+0,80 dB/km; ISO 9613-1's own Table 1, computed at the exact mid-band of
+158,5 Hz, prints 0,584 dB/km at 160 Hz, while the TS's Table 7 follows the exact
+mid-bands). From 50 Hz to 100 Hz it prints
+0,07, 0,11, 0,17 and 0,26 dB/km where ISO 9613-1 at 70 % gives 0,08, 0,12, 0,19
+and 0,28: from 10 Hz to 100 Hz the row is, cell for cell, Table 1.4 of the
+Danish statutory order on wind turbine noise (BEK nr. 135 of 2019), set for
+80 % relative humidity and 10 °C with Nord2000 band rates and no absorption
+below 25 Hz. ISO 9613-1 at 80 % gives 0,07, 0,11, 0,17 and 0,25 dB/km there.
+The table joins two atmospheres at 100 Hz, which is in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/). The library publishes the row as printed,
+`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`, and takes other coefficients through
+`air_attenuation_db_per_km=`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_low_frequency_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_low_frequency.svg" alt="Left: the A-weighted low frequency band levels of three turbines outdoors (35.1 dB) and indoors behind the Danish brick facade (16.5 dB). Right: each printed air attenuation cell of Table C.2 minus ISO 9613-1 at 10 degrees C and 70 % and 80 % relative humidity, with the printed rounding strip of plus or minus 0.005 dB/km" width="96%"></picture>
+
+## Emergence (Annex J)
+
+The emergence of Equation (J.1) is the ambient criterion with the turbines
+running less the background criterion with them stopped, per wind speed class.
+
+```python
+emergence = environment.sound_emergence(
+    [38.5, 41.0, 43.5], [33.0, 37.5, 41.5], wind_speeds_m_s=[5.0, 6.0, 7.0]
+)
+print(emergence.emergence_db)   # [5.5 3.5 2. ]
+```
+
+## Amplitude modulation (clause 13)
+
+Clause 13 implements the reference method of the IOA Amplitude Modulation
+Working Group (13.2). The input is the 100 ms A-weighted level summed over
+seven one-third octave bands (13.6.2.1.1). Each 10 s block (13.6.2.3) is
+de-trended with a cubic fit and transformed with a rectangular DFT of 0,1 Hz
+resolution into `S_xx = |F{x}|² / m²` (Equation (12)); the highest local
+maximum in the user's range is the fundamental, and a block without one or with
+a prominence `p_AM = L_pk / L_m` under 4 (Equation (13)) is prominence-failed.
+The second and third harmonics join under the two 1,5 dB conditions, three
+lines about each kept component are transformed back, and the depth is the
+`L5 - L95` of that series. A 10 min period is rated with the 90th percentile of
+its valid depths when at least 30 of its 60 blocks are valid, and 0 dB
+otherwise (13.6.3); each wind speed bin reports the band with the highest mean
+rating (13.6.4).
+
+```python
+t = np.arange(100) * 0.1
+rng = np.random.default_rng(1340)
+levels = np.round(
+    38.0
+    + 1.2 * np.sin(2 * np.pi * t / 47.0)
+    + 2.0 * np.sin(2 * np.pi * 0.8 * t)
+    + (4.0 / 6.0) * np.sin(4 * np.pi * 0.8 * t + 0.9)
+    + rng.normal(0.0, 1.0, t.size),
+    1,
+)
+block = environment.amplitude_modulation_block(levels, modulation_frequency_range_hz=(0.5, 1.1))
+print(block.fundamental_frequency_hz, round(block.prominence, 1))   # 0.8 79.9
+print(round(block.modulation_depth_db, 2))                          # 4.95
+
+ratings = np.array([[2.1, 4.6, 3.0], [0.0, 0.0, 0.0], [1.8, 5.2, 3.9],
+                    [2.5, 3.9, 4.4], [0.0, 0.0, 0.0], [3.1, 2.2, 5.0]])
+binned = environment.bin_amplitude_modulation(ratings, [6.2, 6.4, 5.9, 7.1, 7.3, 6.8])
+print(binned.selected_bands, np.round(binned.selected_ratings_db, 2))   # [2 3] [3.27 3.13]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_block_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_block.svg" alt="Left: the power spectrum of one 10 s block with the fundamental at 0.8 Hz, the estimated harmonics and the three lines kept about each component. Right: the de-trended series and the reconstructed one with its L5 and L95, a depth of 4.95 dB" width="96%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_period_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_period.svg" alt="Left: the depth of each of the sixty 10 s blocks of a 10 min period, five invalid during a gusty minute, and the rating of 5.84 dB. Right: the mean rating of the worst band per 1 m/s bin of a survey, each point labelled with the band it selected (1 for 50 Hz to 200 Hz, 2 for 100 Hz to 400 Hz, 3 for 200 Hz to 800 Hz)" width="96%"></picture>
+
+**The TS against the AMWG report and code.** The 10 s analysis is the report's
+step for step. Where the TS departs, the library follows the TS: a period with
+fewer than 30 valid blocks is rated 0 dB and kept in the bin mean (the report
+discards it), and the band is chosen per bin (the report chooses one band for
+the whole survey). The "excluded periods due to pf or other exclusions" that
+13.6.4 leaves out of the bin mean are read as the periods the practitioner
+excludes (`excluded=`): read literally they would be the periods 13.6.3 rates
+0 dB, and the "including 0 values" of the same sentence would mean nothing. A
+period of exactly 30 valid blocks is rated, as 13.6.2.2
+and the report say; the bullets of 13.6.3 leave it out, which is in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/). The working group's code (v1.4) was used as
+an oracle only: the library reproduces its printed sample result (prominence
+44.64, fundamental 0.70 Hz and a 10 s rating of 8.38 dB for the 100 Hz to
+400 Hz series in the 0.4 Hz to 0.9 Hz range) and its output on synthetic
+blocks, as the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/) shows. The code alone
+drops the line at an upper range limit of 0,6 Hz, 0,7 Hz, 1,2 Hz or 1,4 Hz,
+because it compares floating-point frequencies and those multiples of 0,1 Hz
+come out a little above the limit (sixteen times 0,1 Hz is exactly 1,6 Hz, so
+that line is kept); the library works in line indices and keeps every limit's
+line.
+
+## The rating level (Annex A) and the tone search (12.5.2.4)
+
+`L_r = L_eq + K`, with `K` the most severe of the tonal, amplitude modulation
+and impulsive adjustments (A.1); Figure A.1 gives 0 dB below a depth of 3 dB,
+3 dB at 3 dB rising to 5 dB at 10 dB, and 5 dB above. The upper tone search
+frequency is the lowest band that ISO 9613-1 attenuates by 20 dB or more over
+the distance to the nearest turbine (Table 7).
+
+```python
+k_am = environment.amplitude_modulation_adjustment(5.84)
+rating = environment.wind_turbine_rating_level(
+    41.0, tonal_adjustment_db=2.0, amplitude_modulation_adjustment_db=k_am
+)
+print(round(k_am, 2), rating.governing, round(rating.rating_level_db, 1))   # 3.81 amplitude_modulation 44.8
+
+search = environment.upper_tone_search_frequency(
+    600.0, temperature_c=10.0, relative_humidity_percent=50.0
+)
+print(search.upper_frequency_hz)   # 4000.0, as Table 7 prints
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_rating.svg" alt="Left: the amplitude modulation adjustment of Figure A.1 against modulation depth with a rating of 5.84 dB marked at 3.8 dB. Right: the tonal, amplitude modulation and impulsive adjustments as bars, amplitude modulation hatched and named in the legend as the one applied, L_r = 44.8 dB" width="96%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search.svg" alt="The ISO 9613-1 attenuation over 600 m at 10 degrees C and 50 % relative humidity per one-third octave band, the 20 dB line and the upper search frequency of 4 kHz" width="84%"></picture>
+
+The row of Table 7 printed for 10 °C and 80 % holds the frequencies the rule
+gives at −10 °C and 80 % (10, 5, 2,5 and 2 kHz where 10 °C gives 10, 6,3, 5
+and 4 kHz); it is in
+the [errata register](https://jmrplens.github.io/phonometry/reference/errata/) with eight other printed defects.
+
+## What this guide covers
+
+Implemented: the wind speed between heights of Annex K and the binning wind
+speed of 9.3.2; the bin averages and uncertainties of Equations (1) to (9), the
+background correction of Equations (6) and (7) under 11.7 and the prediction
+uncertainty of Equations (10) and (11); the low frequency level of Equation
+(C.1) with Tables C.1 to C.3 and C.5; the emergence of Equation (J.1); the
+amplitude modulation of clause 13 with the higher bands of Annex G.3; the
+rating level of A.1 with Figure A.1; and the upper tone search frequency of
+12.5.2.4. Not implemented: the campaign itself (interval selection, filtering
+and the auditioning of Annex F), the tonal audibility procedure of 12.5, the
+impulsivity of clause 14 beyond the ISO/PAS 1996-3 adjustment, the infrasound
+of Annex D, the Swedish and Danish criteria as verdicts, the Nord2000
+propagation Annex C builds on, and the faster rotors of Annex G.2, whose
+fundamental modulation frequency lies above the 1,6 Hz of 13.2.
+
+## See also
+
+- [Wind-turbine noise (IEC 61400-11)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/): the emission
+  whose sound power levels feed Annex C and the prediction of 10.3.4.
+- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): ISO
+  9613-1 air absorption and the ISO 9613-2 chain.
+- [Impulsive-sound prominence](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/): the ISO/PAS
+  1996-3 adjustment.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): Tables 7, C.2 and C.4, 13.6.3
+  and five more.
+- API reference: [`environment.assessment.wind_turbine_receptor`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-receptor/)
+  and [`environment.assessment.wind_turbine_modulation`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-modulation/).
+
+## References
+
+- International Electrotechnical Commission. (2024). *Wind energy generation
+  systems – Part 11-2: Acoustic noise measurement techniques – Measurement of
+  wind turbine sound characteristics in receptor position* (IEC TS
+  61400-11-2:2024, Edition 1.0). The implemented edition.
+- Institute of Acoustics, Amplitude Modulation Working Group. (2016). *A method
+  for rating amplitude modulation in wind turbine noise* (Final Report,
+  Version 1, 9 August 2016). The reference method of clause 13.
+- Institute of Acoustics, Amplitude Modulation Working Group. (2016). *IOA AM
+  code*, v1.4, with its sample data.
+  [SourceForge](https://sourceforge.net/projects/ioa-am-code/). Used as an
+  oracle only.
+- Miljøministeriet. (2019). *Bekendtgørelse om støj fra vindmøller* (BEK nr.
+  135 af 07/02/2019). Table 1.4, the source of the Table C.2 row.
+- International Organization for Standardization. (1993). *Acoustics –
+  Attenuation of sound during propagation outdoors – Part 1: Calculation of the
+  absorption of sound by the atmosphere* (ISO 9613-1:1993).
 
 ---
 
@@ -47994,6 +48300,43 @@ documents, one page per module.
 | `wind_turbine_tonality` | `function` | **Tonal audibility from a narrowband spectrum (IEC 61400-11), with the 9.5.2 possible-tone screening; tone lines and La anchor to the highest classified line (9.5.3/9.5.4).**<br>• `levels` [dB] / `frequencies` [Hz]: 1-D, equal length (≥ 3), strictly increasing and uniformly spaced (narrowband), covering the whole critical band<br>• `tone_frequency`: optional [Hz] (≥ 20 Hz) | `res = environment.wind_turbine_tonality(levels, freqs)`<br><br>• `WindTurbineTonalityResult` |
 | `WindTurbineTonalityResult` | `dataclass` | **Wind-turbine tonality result.**<br>• `tone_frequency` [Hz] / `critical_bandwidth` [Hz]<br>• `tone_level` / `masking_level` / `tonality` [dB]<br>• `audibility_criterion` / `tonal_audibility` [dB]<br>• `is_audible` / `has_identified_tone` (False → exclude from 9.5.1 bin averaging)<br>• `.plot()`: spectrum + critical band + masking | `res.tonal_audibility, res.is_audible` |
 | `WindTurbineNoiseWarning` | `warning class` | **IEC 61400-11 advisory.**<br>Emitted when the tonality inputs leave the standard's stated domain of validity | `warnings.simplefilter('error', WindTurbineNoiseWarning)` |
+| `power_law_wind_speed` / `wind_shear_exponent` / `logarithmic_wind_speed` | `function` | **Wind speed at another height (IEC TS 61400-11-2 Annex K, IEC 61400-11 Annex D).**<br>• `power_law_wind_speed(V_ref, height_m=, reference_height_m=, shear_exponent=)` = V_ref (z/z_ref)^α, Equation (K.1), Table K.1<br>• `wind_shear_exponent(V, V_ref, height_m=, reference_height_m=)` = ln(V/V_ref)/ln(z/z_ref), Equation (K.2), Table K.2<br>• `logarithmic_wind_speed(V_ref, height_m=, reference_height_m=, roughness_length_m=0.05)`: the logarithmic profile over the reference roughness length z0ref = 0.05 m (3.31; IEC 61400-11 Equation (29)) with which 9.3.2.1 brings a hub-height wind speed to 10 m | `power_law_wind_speed(9.0, height_m=10, reference_height_m=120, shear_exponent=0.2)` |
+| `wind_shear_profile` | `function` | **Power-law profile through two measured wind speeds (K.4.3).**<br>• `lower_speed_m_s` / `upper_speed_m_s` [m/s]<br>• `lower_height_m` [m] (10) / `upper_height_m` [m] | `environment.wind_shear_profile(5.0, 9.0, upper_height_m=120.0)`<br><br>• `WindShearProfile` |
+| `WindShearProfile` | `dataclass` | **Wind profile through two heights.**<br>• `heights_m` / `speeds_m_s` / `shear_exponent` / `typical` (−0.1 ≤ α ≤ 0.5)<br>• `.speed_at(height_m)`<br>• `.plot()`: power law and logarithmic profile through the points | `profile.speed_at(100.0)` |
+| `REFERENCE_ROUGHNESS_LENGTH_M` / `ROUGHNESS_LENGTHS_M` / `TYPICAL_WIND_SHEAR_EXPONENT_RANGE` | `constant` / `mapping` / `constant` | **Annex K constants.**<br>• z0ref = 0.05 m (3.31)<br>• Table K.3: terrain → roughness length [m]<br>• (−0.1, 0.5): the shear exponents Table K.2 keeps | `ROUGHNESS_LENGTHS_M["Farmland with some vegetation"]` |
+| `bin_sound_levels` | `function` | **Interval levels per wind speed bin and sector (10.1, 10.3).**<br>• `levels_db` / `wind_speeds_m_s` / optional `wind_directions_deg`<br>• `averaging`: `"energy"` (Equation (1)) or `"arithmetic"` (Equation (8), statistical levels)<br>• `type_b_uncertainty_db`: Equation (3), one or per interval<br>• `bin_width_m_s` (1) / `sector_width_deg` (30, north-centred) | `total = environment.bin_sound_levels(levels, speeds)`<br><br>• `BinnedSoundLevels` |
+| `BinnedSoundLevels` | `dataclass` | **Bin averages and their uncertainty.**<br>• `wind_speeds_m_s` / `wind_directions_deg` / `counts`<br>• `mean_levels_db` / `type_a_uncertainty_db` (Eq. (2)/(9)) / `type_b_uncertainty_db` (Eq. (4)) / `combined_uncertainty_db` (Eq. (5))<br>• `bin_width_m_s` / `sector_width_deg`: the widths binned with<br>• `.background_corrected(background)` → `TurbineSoundLevels` over the shared bins (same widths required)<br>• `.plot()`: interval scatter and bin averages | `total.background_corrected(background)` |
+| `turbine_sound_levels` | `function` | **Background subtracted bin by bin (Equations (6), (7) and 11.7).**<br>• `total_levels_db` / `background_levels_db`<br>• `total_uncertainty_db` / `background_uncertainty_db` / `wind_speeds_m_s` / `wind_directions_deg`<br>• ≥ 3 dB: logarithmic subtraction; 0 dB to 3 dB: the suggested 3 dB correction; background above: undetermined (NaN) | `environment.turbine_sound_levels([45.0], [40.0])`<br><br>• `TurbineSoundLevels` |
+| `TurbineSoundLevels` | `dataclass` | **Background-corrected turbine levels.**<br>• `level_differences_db` / `turbine_levels_db` / `turbine_uncertainty_db`<br>• `regimes`: `BackgroundCorrectionRegime` per bin<br>• `wind_speeds_m_s` / `wind_directions_deg`: the bin of each row, or `None`<br>• `.plot()`: total, background and turbine per bin, each direction sector apart in its own colour | `res.turbine_levels_db` |
+| `BackgroundCorrectionRegime` | `enum` | **Which rule of 11.7 a bin followed.**<br>`LOGARITHMIC` / `THREE_DB` / `UNDETERMINED` | `res.regimes[0] is BackgroundCorrectionRegime.THREE_DB` |
+| `predicted_receptor_level` | `function` | **A prediction summed over the turbines, with its uncertainty (10.3.4).**<br>• `turbine_levels_db` / `sound_power_uncertainty_db`<br>• `prediction_model_uncertainty_db` (2) / `modelling_uncertainty_db` (0.5)<br>= energy sum; Equation (10) level-weighted, Equation (11) in quadrature | `environment.predicted_receptor_level([35, 32, 28], 1.5)`<br><br>• `PredictedReceptorLevel` |
+| `PredictedReceptorLevel` | `dataclass` | **Predicted receptor level.**<br>• `level_db` / `propagated_uncertainty_db` / `combined_uncertainty_db`<br>• `.plot()`: turbine contributions and the total | `res.combined_uncertainty_db` |
+| `PREDICTION_MODEL_UNCERTAINTY_DB` / `MODELLING_UNCERTAINTY_DB` / `TYPE_B_UNCERTAINTY_EXAMPLES_DB` | `constant` / `constant` / `mapping` | **10.3 uncertainty values.**<br>• 2 dB (ISO 9613-2 or Nord2000 downwind to 3 km to 5 km) / 0.5 dB<br>• Table 3: component → (range, standard uncertainty) [dB] | `TYPE_B_UNCERTAINTY_EXAMPLES_DB["calibration"]` |
+| `sound_relevant_turbines` | `function` | **The turbines that set the binning wind speed (9.3.2.3).**<br>• `predicted_levels_db`: each turbine at the receptor<br>• quietest left out while the total drops 1.0 dB or less | `environment.sound_relevant_turbines(levels)`<br><br>• `SoundRelevantTurbines` |
+| `SoundRelevantTurbines` | `dataclass` | **Sound relevant turbines.**<br>• `relevant` / `indices` (loudest first) / `total_level_db` / `relevant_level_db`<br>• `.binning_wind_speed_m_s(speeds)`: their arithmetic mean<br>• `.plot()`: levels loudest first, turbines numbered from 1, with the energy sum of the loudest | `res.binning_wind_speed_m_s(speeds)` |
+| `wind_turbine_low_frequency_level` | `function` | **Low frequency sound by Equation (C.1) (Annex C).**<br>• `sound_power_levels_db`: one row per turbine<br>• `distance_m` l / `hub_height_m` h<br>• `frequencies_hz` (10 Hz to 200 Hz) / `ground_correction_db` / `air_attenuation_db_per_km` (Table C.2) / `facade_insulation_db` / `a_weighted` (True) | `environment.wind_turbine_low_frequency_level(lw, distance_m=600, hub_height_m=120)`<br><br>• `LowFrequencyLevel` |
+| `LowFrequencyLevel` | `dataclass` | **Outdoor and indoor low frequency levels.**<br>• band terms of Table C.4 / `outdoor_levels_db` / `indoor_levels_db`<br>• `outdoor_level_db` / `indoor_level_db`: energy sums<br>• `.plot()` | `res.indoor_level_db` |
+| `LOW_FREQUENCY_BANDS_HZ` / `LOW_FREQUENCY_GROUND_CORRECTION_DB` / `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM` | `array` | **Table C.2, 10 Hz to 200 Hz.**<br>• onshore ground correction, class D [dB]<br>• air attenuation [dB/km] as printed: the Danish order's 80 % cells to 100 Hz, ISO 9613-1 at 70 % above | `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM[7]  # 0.07` |
+| `LOW_FREQUENCY_FACADE_INSULATION_DB` / `LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES` / `SWEDISH_LOW_FREQUENCY_LIMITS_DB` | `mapping` | **Tables C.3, C.1 and C.5.**<br>• facade insulation examples [dB]<br>• impedance classes A to H → `GroundImpedanceClass`<br>• the Swedish criterion curve, 31.5 Hz to 200 Hz [dB] | `LOW_FREQUENCY_FACADE_INSULATION_DB["Denmark lightweight"]` |
+| `GroundImpedanceClass` | `dataclass` | **One row of Table C.1.**<br>• `flow_resistivity_kpa_s_m2` / `nordtest_classes_kpa_s_m2` / `description` | `LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES["D"]` |
+| `sound_emergence` | `function` | **The emergence criterion per wind speed class (Equation (J.1)).**<br>• `ambient_levels_db` / `background_levels_db` / `wind_speeds_m_s` | `environment.sound_emergence([40.0], [36.0])`<br><br>• `SoundEmergence` |
+| `SoundEmergence` | `dataclass` | **Emergence per class.**<br>• `emergence_db` = L_Amb − L_Rés<br>• `.plot()` | `res.emergence_db` |
+| `amplitude_modulation_adjustment` | `function` | **The amplitude modulation adjustment of Figure A.1 [dB].**<br>• `modulation_depth_db`: 0 below 3 dB, 3 dB at 3 dB, rising to 5 dB at 10 dB, 5 dB above | `environment.amplitude_modulation_adjustment(6.5)  # 4.0` |
+| `wind_turbine_rating_level` | `function` | **Rating level with the most severe adjustment alone (A.1).**<br>• `equivalent_level_db`<br>• `tonal_adjustment_db` / `amplitude_modulation_adjustment_db` / `impulsive_adjustment_db` | `environment.wind_turbine_rating_level(40.0, tonal_adjustment_db=2.0)`<br><br>• `WindTurbineRatingLevel` |
+| `WindTurbineRatingLevel` | `dataclass` | **Rating level.**<br>• `adjustments_db` / `governing` / `rating_level_db`<br>• `.plot()`: the three adjustments, the governing one hatched | `res.rating_level_db` |
+| `upper_tone_search_frequency` | `function` | **Top of the search for tones at a receptor (12.5.2.4, Table 7).**<br>• `distance_m`<br>• `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` (101.325)<br>= lowest band ISO 9613-1 attenuates by 20 dB over the distance, else 10 kHz | `environment.upper_tone_search_frequency(600.0, temperature_c=10.0, relative_humidity_percent=50.0)`<br><br>• `ToneSearchLimit` |
+| `ToneSearchLimit` | `dataclass` | **Tone search limit.**<br>• `upper_frequency_hz` / `frequencies_hz` / `attenuation_db`<br>• `.plot()`: band attenuation and the 20 dB line | `res.upper_frequency_hz` |
+| `TONE_SEARCH_BANDS_HZ` | `array` | **The one-third-octave centres searched, 50 Hz to 10 kHz.** | `TONE_SEARCH_BANDS_HZ[-1]  # 10000.0` |
+| `amplitude_modulation_band_levels` | `function` | **Band-limited 100 ms levels of one AM band (13.6.2.1.1).**<br>• `band_levels_db`: one row per 100 ms, one column per band<br>• `frequencies_hz` / `band` (1 to 3, or 4 to 6 of Annex G.3)<br>• `weighting`: `"A"` (already weighted) or `"Z"` (A-weighting applied) | `environment.amplitude_modulation_band_levels(logged, freqs, band=2, weighting="Z")` |
+| `amplitude_modulation_block` | `function` | **One 10 s block of clause 13 (13.6.2.3).**<br>• `levels_db`: 100 values of 100 ms<br>• `modulation_frequency_range_hz`: range of the fundamental within 0.3 Hz to 1.6 Hz | `environment.amplitude_modulation_block(x, modulation_frequency_range_hz=(0.4, 0.9))`<br><br>• `ModulationBlock` |
+| `ModulationBlock` | `dataclass` | **10 s block analysis.**<br>• `status` / `valid` / `fundamental_frequency_hz` / `prominence` (Eq. (13))<br>• `harmonic_frequencies_hz` / `included_frequencies_hz` / `power_spectrum` (Eq. (12))<br>• `detrended_db` / `reconstructed_db` / `modulation_depth_db` (L5 − L95)<br>• `.plot(kind="spectrum" \| "series")` | `block.modulation_depth_db` |
+| `ModulationBlockStatus` | `enum` | **Why a 10 s block counts or not.**<br>`VALID` / `NO_PEAK` / `LOW_PROMINENCE` / `EXCLUDED` | `block.status is ModulationBlockStatus.VALID` |
+| `amplitude_modulation_period` | `function` | **The 10 min AM rating (13.6.3).**<br>• `levels_db`: 6 000 values of 100 ms<br>• `modulation_frequency_range_hz` / `excluded_blocks` (60 flags) | `environment.amplitude_modulation_period(x, modulation_frequency_range_hz=(0.4, 0.9))`<br><br>• `ModulationPeriod` |
+| `ModulationPeriod` | `dataclass` | **10 min rating.**<br>• `blocks` / `modulation_depths_db` / `valid_blocks` / `rated` (≥ 30)<br>• `rating_db`: 90th percentile of the valid depths, else 0 dB<br>• `mean_modulation_frequency_hz` / `mode_modulation_frequency_hz`<br>• `.plot()` | `period.rating_db` |
+| `bin_amplitude_modulation` | `function` | **10 min ratings per bin, worst band chosen (13.6.4).**<br>• `ratings_db`: one row per period, one column per band<br>• `wind_speeds_m_s` / optional `wind_directions_deg`<br>• `bands` ((1, 2, 3)) / `excluded` / `sector_width_deg` (30) | `environment.bin_amplitude_modulation(r, speeds, directions)`<br><br>• `BinnedModulation` |
+| `BinnedModulation` | `dataclass` | **Binned AM ratings.**<br>• `mean_ratings_db` (zeros included) / `type_a_uncertainty_db` / `counts` / `nonzero_counts` / `exceedance_percent` (3, 6, 9 dB)<br>• `selected_bands` / `selected_ratings_db`<br>• `.plot()` | `binned.selected_bands` |
+| `AM_FREQUENCY_BANDS_HZ` / `AM_EXCEEDANCE_THRESHOLDS_DB` / `AM_MODULATION_FREQUENCY_LIMITS_HZ` | `mapping` / `constant` / `constant` | **Clause 13 bands and limits.**<br>• band → its seven one-third-octave centres [Hz]<br>• (3, 6, 9) dB of 13.7<br>• (0.3, 1.6) Hz of 13.2 | `AM_FREQUENCY_BANDS_HZ[2]` |
+| `AM_SAMPLE_INTERVAL_S` / `AM_BLOCK_SAMPLES` / `AM_PERIOD_BLOCKS` / `AM_MINIMUM_VALID_BLOCKS` / `AM_PROMINENCE_THRESHOLD` | `constant` | **Clause 13 numbers.**<br>0.1 s / 100 samples / 60 blocks / 30 valid blocks / prominence 4 | `AM_PROMINENCE_THRESHOLD  # 4.0` |
 | `noise_criterion` | `function` | **NC rating, clause 5.2.2 two-step (ANSI/ASA S12.2-2019).**<br>• `levels`: octave-band SPL [dB] (the 10 bands 16 Hz–8 kHz without `frequencies`)<br>• `frequencies`: optional band centres [Hz] (subset allowed) | `nc = room.noise_criterion(levels)`<br><br>• `NCResult`; NC-(SIL) designation, tangency when exceeded |
 | `room_criterion` | `function` | **RC Mark II rating (ANSI/ASA S12.2-2019 Annex D).**<br>• `levels`: octave-band SPL [dB]<br>• `frequencies`: optional band centres [Hz] | `rc = room.room_criterion(levels)`<br><br>• `RCResult`; LMF average + 'N'/'R'/'H'/'RH' tag |
 | `nc_curve` | `function` | **NC curve levels (Table 1).**<br>• `index`: NC designation 15–70 (intermediate values interpolated band by band) | `nc_curve(35)  # [82, 71, 60, ...]`<br><br>• 10 band levels [dB], 16 Hz–8 kHz |
@@ -60314,7 +60657,7 @@ pinned bit-exact in the tests. The envelope spectrum is the frequency-domain
 view of the same analytic signal the
 [Hilbert envelope](https://jmrplens.github.io/phonometry/signals/spectra/correlation-delay/) returns in time, and a
 natural pre-analysis before the dedicated
-[wind-turbine amplitude-modulation](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/)
+[wind-turbine amplitude-modulation](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/)
 metrics: the envelope spectrum tells you *whether and at what rate* a signal
 is modulated, the domain metrics quantify it normatively.
 
@@ -65161,7 +65504,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1608 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1640 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -66169,7 +66512,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1608 numerical conformance checks across 101 domains and 496 standards, covering
+1640 numerical conformance checks across 103 domains and 504 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

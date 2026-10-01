@@ -4702,6 +4702,8 @@ _ES_EXACT = {
         "la banda sombreada es el rango habitual de la Tabla A.1,\n"
         "de $-$2 dB a $+$10 dB en salas desocupadas"
     ),
+    # WindTurbineRatingLevel.plot(): the tonal adjustment reads the same.
+    "Tonal": "Tonal",
 }
 
 

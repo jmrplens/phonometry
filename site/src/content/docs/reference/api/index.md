@@ -266,6 +266,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.assessment.exposure_distribution`](/phonometry/reference/api/environment/exposure-distribution/) | How often a blast is how loud: the distribution of its sound exposure level (ISO 13474:2009, clauses 4 and 5). |
 | [`environment.assessment.rating`](/phonometry/reference/api/environment/rating/) | Environmental noise descriptors per ISO 1996-1:2016. |
 | [`environment.sources.wind_turbine`](/phonometry/reference/api/environment/wind-turbine/) | Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018). |
+| [`environment.assessment.wind_turbine_receptor`](/phonometry/reference/api/environment/wind-turbine-receptor/) | Wind turbine sound at a receptor (IEC TS 61400-11-2:2024). |
+| [`environment.assessment.wind_turbine_modulation`](/phonometry/reference/api/environment/wind-turbine-modulation/) | Amplitude modulation of wind turbine sound at a receptor (IEC TS 61400-11-2:2024, clause 13). |
 | [`environment.assessment.measurement`](/phonometry/reference/api/environment/measurement/) | Determination of environmental-noise sound pressure levels (ISO 1996-2:2017). |
 | [`environment.assessment.spain`](/phonometry/reference/api/environment/spain/) | Spanish noise regulation: the corrected level LKeq (Real Decreto 1367/2007). |
 | [`environment.assessment.soundscape`](/phonometry/reference/api/environment/soundscape/) | How people hear a place: the soundscape questionnaire and its analysis (ISO/TS 12913-2:2018 Annexes A and C, ISO/TS 12913-3:2019 Annexes A and B). |

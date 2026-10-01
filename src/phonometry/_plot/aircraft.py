@@ -13,6 +13,7 @@ from .common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _C_TERTIARY,
+    _LEGEND_UPPER_LEFT,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     format_frequency_axis,
@@ -28,10 +29,14 @@ if TYPE_CHECKING:
         NoiseContourResult,
         NpdLevelResult,
     )
-    from ..aircraft.anp_fleet import AnpNpdCurves, AnpProfile
-    from ..aircraft.atmospheric_absorption import AircraftBandAttenuation
+    from ..aircraft.anp_fleet import AnpNpdCurves, AnpProfile, SpectralClass
+    from ..aircraft.atmospheric_absorption import (
+        AircraftBandAttenuation,
+        Arp866aAttenuation,
+    )
     from ..aircraft.certification import EPNLResult
     from ..aircraft.flight_performance import FlightProfile
+    from ..aircraft.npd_atmosphere import NpdAtmosphereIncrement, RevisedNpdCurves
     from ..aircraft.rotorcraft_noise import (
         FlightPathKinematics,
         RotorcraftEventResult,
@@ -57,6 +62,9 @@ _EVENT_LEVEL_LABEL = "Event level [dB]"
 _TERRAIN_PROFILE_LABEL = "Terrain profile"
 _SECTION_DISTANCE_LABEL = "Section distance [m]"
 _HEIGHT_LABEL = "Height [m]"
+_FREQUENCY_LABEL = "Frequency [Hz]"
+_ATTENUATION_LABEL = "Attenuation [dB]"
+_ORIGINAL_NPD_LABEL = "original (SAE AIR-1845)"
 
 _STRINGS: dict[str, str] = {
     _TEN_DB_DOWN_LABEL: "Ventana 10 dB por debajo",
@@ -64,8 +72,8 @@ _STRINGS: dict[str, str] = {
     "Level [PNdB]": "Nivel [PNdB]",
     "SAE band": "Banda SAE",
     "Pure-tone mid-band (ISO 9613-1)": "Banda media de tono puro (ISO 9613-1)",
-    "Frequency [Hz]": "Frecuencia [Hz]",
-    "Attenuation [dB]": "Atenuación [dB]",
+    _FREQUENCY_LABEL: "Frecuencia [Hz]",
+    _ATTENUATION_LABEL: "Atenuación [dB]",
     "Aircraft atmospheric absorption (SAE ARP 5534)": "Absorción atmosférica de aeronaves (SAE ARP 5534)",
     "Tabulated": "Tabulados",
     _SLANT_DISTANCE_LABEL: "Distancia oblicua [m]",
@@ -120,6 +128,18 @@ _STRINGS: dict[str, str] = {
     # every unrelated figure whose own labels mention a height.
     "height (left axis)": "altura (eje izquierdo)",
     "thrust (right axis)": "empuje (eje derecho)",
+    # ECAC Doc 29 Vol. 2 Appendix D: NPD data for a non-reference atmosphere,
+    # with the SAE ARP 866A absorption of ISO 3891 Annex A.
+    "Attenuation coefficient [dB/100 m]": "Coeficiente de atenuación [dB/100 m]",
+    "Atmospheric absorption (SAE ARP 866A, ISO 3891)": "Absorción atmosférica (SAE ARP 866A, ISO 3891)",
+    "Band level at 1000 ft [dB]": "Nivel de banda a 1000 ft [dB]",
+    "ANP spectral class": "Clase espectral ANP",
+    "NPD increment $\\Delta L$ [dB]": "Incremento NPD $\\Delta L$ [dB]",
+    "NPD increment for a non-reference atmosphere": "Incremento NPD en una atmósfera distinta de la de referencia",
+    "SAE AIR-1845 (Table D-1)": "SAE AIR-1845 (tabla D-1)",
+    "Atmospheric attenuation over {distance} ft": "Atenuación atmosférica en {distance} ft",
+    _ORIGINAL_NPD_LABEL: "original (SAE AIR-1845)",
+    "Revised NPD curves": "Curvas NPD recalculadas",
 }
 
 
@@ -222,11 +242,11 @@ def plot_aircraft_band_attenuation(
         label=_t("Pure-tone mid-band (ISO 9613-1)", language),
     )
     ax.set_xscale("log")
-    ax.set_xlabel(_t("Frequency [Hz]", language))
-    ax.set_ylabel(_t("Attenuation [dB]", language))
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_ATTENUATION_LABEL, language))
     ax.set_title(_t("Aircraft atmospheric absorption (SAE ARP 5534)", language))
     ax.grid(visible=True, which="both", alpha=0.3)
-    ax.legend(loc="upper left", fontsize="small")
+    ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
     localize_axes(ax, language)
     return ax
@@ -790,7 +810,7 @@ def plot_anp_profile(
             color=_C_REFERENCE,
             label=_t("ground roll", language),
         )
-        ax.legend(loc="upper left", fontsize="small")
+        ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
     ax.set_xlabel(_t("Along-track distance [km]", language))
     ax.set_ylabel(_t("Altitude AFE [m]", language))
     ax.set_title(
@@ -865,4 +885,285 @@ def plot_flight_profile(
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     localize_axes(thrust_ax, language)
+    return ax
+
+
+#: How each absorption route of ECAC Doc 29 Vol. 2 Appendix D is named in a
+#: legend, and the colour it is drawn in, so two routes on one axes differ.
+_ROUTE_LABELS = {"arp5534": "SAE ARP 5534", "arp866a": "SAE ARP 866A"}
+_ROUTE_COLORS = {"arp5534": _C_PRIMARY, "arp866a": _C_SECONDARY}
+#: Feet to metres, for the NPD distance a title names in feet.
+_FT_M = 0.3048
+
+
+def _air_label(
+    temperature_c: float, relative_humidity_percent: float, language: str
+) -> str:
+    """``"10 °C, 80 %"`` in the figure's language."""
+    from .._i18n import format_number
+
+    t = format_number(temperature_c, language, decimals=1, trim=True)
+    rh = format_number(relative_humidity_percent, language, decimals=1, trim=True)
+    return f"{t} °C, {rh} %"
+
+
+def _route_label(absorption: str, air: str) -> str:
+    """Legend entry of one absorption route in one atmosphere."""
+    return f"{_ROUTE_LABELS[absorption]} ({air})"
+
+
+def plot_arp866a_attenuation(
+    result: Arp866aAttenuation,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """SAE ARP 866A attenuation coefficient versus frequency (ISO 3891 Annex A).
+
+    :param result: An
+        :class:`~phonometry.aircraft.atmospheric_absorption.Arp866aAttenuation`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the coefficient ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    f = np.asarray(result.frequencies_hz, dtype=np.float64)
+    air = _air_label(result.temperature_c, result.relative_humidity_percent, language)
+    ax.plot(
+        f,
+        np.asarray(result.coefficient_db_per_100m),
+        **styled(
+            kwargs,
+            color=_C_SECONDARY,
+            lw=1.6,
+            marker="o",
+            ms=3,
+            label=_route_label("arp866a", air),
+        ),
+    )
+    ax.set_xscale("log")
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t("Attenuation coefficient [dB/100 m]", language))
+    ax.set_title(_t("Atmospheric absorption (SAE ARP 866A, ISO 3891)", language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
+    format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_spectral_class(
+    result: SpectralClass,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """ANP spectral class: band level at 1000 ft versus frequency.
+
+    :param result: A :class:`~phonometry.aircraft.anp_fleet.SpectralClass`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the spectrum ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    f = np.asarray(result.frequencies_hz, dtype=np.float64)
+    operation = "departure" if result.operation == "D" else "arrival"
+    ax.plot(
+        f,
+        np.asarray(result.levels_db),
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.6,
+            marker="o",
+            ms=3,
+            label=f"{result.class_id} ({_t(operation, language)})",
+        ),
+    )
+    ax.set_xscale("log")
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t("Band level at 1000 ft [dB]", language))
+    ax.set_title(_t("ANP spectral class", language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="lower left", fontsize="small")
+    format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_npd_atmosphere_increment(
+    result: NpdAtmosphereIncrement,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """ECAC Doc 29 Appendix D increment against slant distance.
+
+    :param result: A
+        :class:`~phonometry.aircraft.npd_atmosphere.NpdAtmosphereIncrement`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the increment ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    d = np.asarray(result.distances_m, dtype=np.float64)
+    air = _air_label(result.temperature_c, result.relative_humidity_percent, language)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.plot(
+        d,
+        np.asarray(result.increment_db),
+        **styled(
+            kwargs,
+            color=_ROUTE_COLORS[result.absorption],
+            lw=1.6,
+            marker="o",
+            ms=4,
+            label=_route_label(result.absorption, air),
+        ),
+    )
+    ax.set_xscale("log")
+    ax.set_xlabel(_t(_SLANT_DISTANCE_LABEL, language))
+    ax.set_ylabel(_t("NPD increment $\\Delta L$ [dB]", language))
+    ax.set_title(_t("NPD increment for a non-reference atmosphere", language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_npd_atmosphere_attenuation(
+    result: NpdAtmosphereIncrement,
+    ax: Axes | None = None,
+    *,
+    column: int,
+    reference: bool = True,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Band attenuation of the AIR-1845 and the specified atmosphere at one distance.
+
+    :param result: A
+        :class:`~phonometry.aircraft.npd_atmosphere.NpdAtmosphereIncrement`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param column: Index of the NPD distance to draw.
+    :param reference: Also draw the SAE AIR-1845 attenuation of Table D-1.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the specified-atmosphere ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    f = np.asarray(result.frequencies_hz, dtype=np.float64)
+    if reference:
+        ax.plot(
+            f,
+            np.asarray(result.reference_attenuation_db)[:, column],
+            color=_C_MUTED,
+            lw=1.4,
+            ls="--",
+            marker="s",
+            ms=3,
+            label=_t("SAE AIR-1845 (Table D-1)", language),
+        )
+    air = _air_label(result.temperature_c, result.relative_humidity_percent, language)
+    ax.plot(
+        f,
+        np.asarray(result.specified_attenuation_db)[:, column],
+        **styled(
+            kwargs,
+            color=_ROUTE_COLORS[result.absorption],
+            lw=1.6,
+            marker="o",
+            ms=3,
+            label=_route_label(result.absorption, air),
+        ),
+    )
+    distance_ft = float(result.distances_m[column]) / _FT_M
+    ax.set_xscale("log")
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_ATTENUATION_LABEL, language))
+    ax.set_title(
+        _t(
+            "Atmospheric attenuation over {distance} ft",
+            language,
+            distance=format_number(distance_ft, language, decimals=0),
+        )
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
+    format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_revised_npd_curves(
+    result: RevisedNpdCurves,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Revised NPD curves (solid) over the original ones (dashed) against distance.
+
+    :param result: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNpdCurves`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to each revised-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, fmt_minus, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    original = result.original
+    d = np.asarray(original.distances, dtype=np.float64)
+    for i, power in enumerate(original.powers):
+        reading = decimal_comma(fmt_minus(float(power), "g"), language)
+        (line,) = ax.plot(
+            d,
+            np.asarray(result.revised.levels)[i],
+            **styled(kwargs, lw=1.5, marker="o", ms=3, label=f"$P$ = {reading}"),
+        )
+        ax.plot(
+            d,
+            np.asarray(original.levels)[i],
+            ls="--",
+            lw=1.0,
+            color=line.get_color(),
+            alpha=0.6,
+        )
+    ax.plot(
+        [],
+        [],
+        ls="--",
+        lw=1.0,
+        color=_C_MUTED,
+        label=_t(_ORIGINAL_NPD_LABEL, language),
+    )
+    increment = result.increment
+    air = _air_label(
+        increment.temperature_c, increment.relative_humidity_percent, language
+    )
+    ax.set_xscale("log")
+    ax.set_xlabel(_t(_SLANT_DISTANCE_LABEL, language))
+    ax.set_ylabel(_t(_EVENT_LEVEL_LABEL, language))
+    ax.set_title(
+        f"{_t('Revised NPD curves', language)} - {original.aircraft_id} "
+        f"({original.metric}, {original.operation}; {air})"
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
     return ax

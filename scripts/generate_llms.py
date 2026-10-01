@@ -88,6 +88,9 @@ DOI = "10.5281/zenodo.21215280"
 #: message it raises.
 SHARD_LIMIT_BYTES = 200_000
 
+#: The glossary page, which has a shard of its own (see :func:`build_shards`).
+GLOSSARY_ROUTE = "reference/glossary"
+
 #: Markdown files under docs/ that are not documentation pages.
 NOT_PAGES = frozenset({"README", "CONFORMANCE", "ERRATA", "ERRATA.es"})
 
@@ -708,8 +711,9 @@ def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
         "",
         (
             "The theory pages travel in their own shard "
-            f"({SITE_URL}/llms/llms-theory.txt); the rest of the reference in "
-            f"{SITE_URL}/llms/llms-reference.txt."
+            f"({SITE_URL}/llms/llms-theory.txt), the glossary in another "
+            f"({SITE_URL}/llms/llms-glossary.txt), and the rest of the reference "
+            f"in {SITE_URL}/llms/llms-reference.txt."
         ),
         "",
     ]
@@ -935,14 +939,21 @@ def build_shards() -> dict[str, str]:
     # The API index stays out: llms.txt lists the whole generated reference as
     # Optional, one page per module, and a shard duplicating that table would
     # be the largest file in the set saying the least.
+    # The glossary travels on its own. With the bibliography beside it the
+    # reference shard reached the fetch budget, and the two answer different
+    # questions: a client after the definition of a quantity has no use for the
+    # list of sources, nor the other way round.
     reference = sorted(
         route
         for route in pages.values()
         if route.startswith("reference/")
         and not route.startswith(("reference/theory", "reference/api"))
+        and route != GLOSSARY_ROUTE
     )
     if reference:
         shards["reference"] = emit("Reference", reference)
+    if GLOSSARY_ROUTE in route_to_file:
+        shards["glossary"] = emit("Glossary of quantities", [GLOSSARY_ROUTE])
 
     # Every mirror page belongs to a shard; a page that falls between the
     # buckets is how the bibliography went missing. The set compared against is

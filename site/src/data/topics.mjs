@@ -425,6 +425,7 @@ export const topics = [
       'aircraft/aircraft-noise',
       'aircraft/airport-noise',
       'aircraft/anp-fleet',
+      'aircraft/npd-atmosphere',
       'aircraft/rotorcraft-noise',
       apiGroup('aeroacoustics'),
     ],

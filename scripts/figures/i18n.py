@@ -381,6 +381,13 @@ _ES_EXACT = {
     "ANP Default Departure Profile - Boeing 747-100 / JT9DBD": "Perfil de despegue por defecto ANP - Boeing 747-100 / JT9DBD",
     "power parameter: CNT (lb)\nmarkers: tabulated NPD nodes": "parámetro de potencia: CNT (lb)\nmarcadores: nodos NPD tabulados",
     "stage length 1, 11 fixed points": "etapa 1, 11 puntos fijos",
+    # ECAC Doc 29 Appendix D guide: the rest of each figure is drawn by the
+    # library renderers, already in the figure's language.
+    "ANP spectral classes 103 and 205 (ECAC Doc 29 Table D-2)": "Clases espectrales ANP 103 y 205 (ECAC Doc 29, tabla D-2)",
+    "NPD increment at 10 °C, 80 % (ECAC Doc 29 Tables D-4, D-5)": "Incremento NPD a 10 °C, 80 % (ECAC Doc 29, tablas D-4 y D-5)",
+    # The legend entry of the original curves reads the same in both
+    # languages; the library renderer draws it, and this says it was looked at.
+    "original (SAE AIR-1845)": "original (SAE AIR-1845)",
     # The axis labels and the legend come from the library renderer, so they
     # are worded exactly as src/phonometry/_plot/aircraft.py translates them.
     "Along-track distance [km]": "Distancia sobre la ruta [km]",

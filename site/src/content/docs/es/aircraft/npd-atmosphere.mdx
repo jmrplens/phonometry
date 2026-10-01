@@ -1,0 +1,426 @@
+---
+title: "Datos NPD para el aire del aeropuerto"
+description: "Recalcular las curvas nivel-potencia-distancia de ANP para la temperatura, la humedad y la presión de un estudio según el apéndice D del volumen 2 de ECAC Doc 29, con la absorción de SAE ARP 5534 o la de SAE ARP 866A según ISO 3891."
+references:
+  - type: report
+    organization: "European Civil Aviation Conference"
+    year: 2026
+    title: "Report on standard method of computing noise contours around civil airports, Volume 2: Technical guide"
+    number: "ECAC.CEAC Doc 29, 5th ed."
+    url: "https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements"
+    note: "Apéndice D: las tasas SAE AIR-1845 de la tabla D-1, los tres pasos de las ecuaciones D-1 a D-4 y el ejemplo resuelto de las tablas D-2 a D-6c que reproduce esta guía; G4.3 para las clases espectrales. Los volúmenes están catalogados en la página de documentos de ECAC."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1978
+    title: "Acoustics — Procedure for describing aircraft noise heard on the ground"
+    designation: "ISO 3891:1978"
+    note: "El anexo A da el coeficiente de atenuación de SAE ARP 866A en la forma implementada aquí (A.1, A.2, tablas 1 y 2); el anexo C es el ejemplo de corrección tonal que el informe de conformidad comprueba paso a paso. Anulada."
+  - type: standard
+    organization: "SAE International"
+    year: 2013
+    title: "Application of pure-tone atmospheric absorption losses to one-third octave-band data"
+    designation: "SAE ARP 5534, reaffirmed 2021"
+    url: "https://www.sae.org/standards/content/arp5534/"
+    note: "La vía de absorción recomendada: el coeficiente de tono puro de las ecuaciones 1-6 y la atenuación en banda del método SAE de las ecuaciones 7-8."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+Las curvas nivel-potencia-distancia (NPD) de la base de datos ANP se midieron
+en el aire que tuvieran los ensayos de certificación, y después se normalizaron
+a una sola atmósfera para que las curvas de aeronaves distintas se puedan
+comparar. Esa atmósfera es la **SAE AIR-1845**: la media aritmética de las
+tasas de atenuación registradas en ensayos de certificación europeos y
+estadounidenses. No es una temperatura y una humedad; ningún aire real absorbe
+exactamente como ella en todas las bandas, y ECAC Doc 29 la llama una atmósfera
+puramente nocional.
+
+Un aeropuerto no es nocional. Un aeródromo costero, frío y húmedo, absorbe
+menos en alta frecuencia que el día de ensayo medio, así que, lejos de la
+pista, sus aeronaves suenan más fuerte de lo que dice la base; uno caluroso y
+seco puede absorber más. El apéndice D del volumen 2 de ECAC Doc 29 recalcula las curvas
+NPD para el aire de un estudio, y esta guía lo recorre: de las tasas AIR-1845,
+pasando por la clase espectral que lleva cada NPD, a curvas recalculadas que
+alimentan los niveles de evento y los contornos de
+[Ruido de aeropuertos (ECAC Doc 29)](/phonometry/es/aircraft/airport-noise/) y
+de [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/).
+
+## 1. La atmósfera AIR-1845
+
+La tabla D-1 es todo lo que hay: una tasa de atenuación por banda de tercio de
+octava, en decibelios por 100 m, de 50 Hz a 10 kHz.
+
+```python
+from phonometry import aircraft
+
+rates = aircraft.SAE_AIR1845_ATTENUATION_DB_PER_100M
+print(rates[1000.0], rates[10000.0])   # 0.59 9.836 dB/100 m
+```
+
+La tabla es de solo lectura, como todas las que publica la biblioteca. El
+apéndice D propone calcular las tasas de la atmósfera del estudio y compararlas
+con estas antes de decidir si hace falta un ajuste; el incremento de la
+sección 3 es esa comparación llevada hasta el nivel.
+
+## 2. La clase espectral de una NPD
+
+Una tabla NPD da niveles ponderados A, y la absorción actúa banda a banda, así
+que el recálculo necesita un espectro. Cada aeronave de ANP tiene asignadas dos
+**clases espectrales**, una para la aproximación y otra para el despegue: el
+espectro medio sin ponderar de una familia de aeronaves en el instante del nivel
+máximo, a 1000 ft, normalizado a las mismas tasas AIR-1845 y, por razones
+históricas, a 70 dB en la banda de 1 kHz (Doc 29 vol. 2, G4.3). La base trae 41
+en `Spectral_classes.csv`, y phonometry ahora lo lee.
+
+```python
+from phonometry import aircraft
+
+db = aircraft.load_anp_database()
+ac = db.aircraft("747100")
+print(ac.departure_spectral_class_id, ac.approach_spectral_class_id)   # 107 209
+spectrum = ac.spectral_class("D")
+print(spectrum.description, spectrum.levels_db[13])   # 4-Engine.Tfan 70.0 dB en 1 kHz
+print(db.spectral_class(103).description)             # 2-Engine.HighByPass.Tfan
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/npd_atmosphere_spectral_classes.svg" alt="Dos espectros de tercio de octava de 50 Hz a 10 kHz a 1000 ft: la clase espectral de despegue 103 y la de aproximación 205 de la base ANP, las dos pasando por 70 dB en 1 kHz, con el máximo entre 125 Hz y 250 Hz y una caída pronunciada por encima de 4 kHz; el espectro de aproximación conserva más energía por encima de 5 kHz" width="82%" />
+
+*Las dos clases espectrales del ejemplo del apéndice D, tal como las trae la
+base y tal como las imprime la tabla D-2. Las dos pasan por 70 dB en 1 kHz por
+construcción; la de aproximación conserva más energía por encima de 5 kHz,
+donde la absorción es más fuerte.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import aircraft
+
+db = aircraft.load_anp_database()
+fig, ax = plt.subplots(figsize=(10, 6))
+db.spectral_class(103).plot(ax=ax, language="es")
+db.spectral_class(205).plot(ax=ax, color="tab:red", language="es")
+ax.set_title("Clases espectrales ANP 103 y 205 (ECAC Doc 29, tabla D-2)")
+plt.show()
+```
+
+</details>
+
+## 3. El incremento, en tres pasos
+
+Con la clase espectral $L_{n,\mathrm{ref}}(d_\mathrm{ref})$ a
+$d_\mathrm{ref}$ = 1000 ft = 304,8 m y la tasa AIR-1845
+$\alpha_{n,\mathrm{ref}}$ de la banda $n$, el apéndice D primero devuelve la
+atenuación de referencia (ecuación D-1), después lleva el espectro a cada
+distancia NPD $d_i$ dos veces, una en cada atmósfera (ecuaciones D-2 y D-3), y
+por último pondera A y suma los dos (ecuación D-4). Las tasas son los
+decibelios que se pierden en 100 m de camino, como las imprime la tabla D-1, y
+las distancias van en metros, así que cada término de atenuación lleva la
+conversión $d/(100\,\mathrm{m})$:
+
+$$
+\begin{aligned}
+L_n(d_\mathrm{ref}) &= L_{n,\mathrm{ref}}(d_\mathrm{ref}) + \alpha_{n,\mathrm{ref}}\,\frac{d_\mathrm{ref}}{100\,\mathrm{m}} \\
+L_{n,\mathrm{ref}}(d_i) &= L_n(d_\mathrm{ref}) - 20\lg(d_i/d_\mathrm{ref}) - \alpha_{n,\mathrm{ref}}\,\frac{d_i}{100\,\mathrm{m}} \\
+L_{n,\mathrm{atm}}(d_i) &= L_n(d_\mathrm{ref}) - 20\lg(d_i/d_\mathrm{ref}) - \delta_n(d_i)\,\frac{d_i}{100\,\mathrm{m}} \\
+\Delta L(d_i) &= 10\lg\sum_n 10^{(L_{n,\mathrm{atm}}(d_i) - A_n)/10} - 10\lg\sum_n 10^{(L_{n,\mathrm{ref}}(d_i) - A_n)/10}
+\end{aligned}
+$$
+
+Doc 29 imprime las mismas ecuaciones con las tasas en dB/m. En 1 kHz la tasa de
+0,59 dB/100 m devuelve $0{,}59 \times 304{,}8/100$ = 1,80 dB en
+$d_\mathrm{ref}$, los 1,798 dB de la tabla D-3a, y los 70,0 dB de la clase
+pasan a ser los 71,8 dB que la tabla D-2 imprime en la fuente.
+$\delta_n(d_i)$ es la tasa del aire especificado en la misma unidad, que con
+ARP 5534 depende además de la longitud del camino y de la presión, así que
+$\delta_n(d_i)\,d_i/(100\,\mathrm{m})$ es su atenuación en banda a lo largo del
+camino. $A_n$ es la ponderación A como atenuación: los valores nominales de
+IEC 61672-1, a 0,1 dB, que Doc 29 nombra sin imprimir y que son los que
+reproducen sus tablas. El incremento $\Delta L$ se suma al nivel NPD a la misma
+distancia, en todos los ajustes de potencia y por igual a $L_\mathrm{max}$ y a
+$L_E$: se supone que el cambio de aire altera el espectro, no la forma de la
+historia temporal del nivel. Como $\Delta L$ es la diferencia de dos sumas sobre
+el mismo espectro, la normalización a 70 dB de la clase desaparece de él.
+
+```python
+import numpy as np
+from phonometry import aircraft
+
+db = aircraft.load_anp_database()
+increment = aircraft.npd_atmosphere_increment(
+    db.spectral_class(103), temperature_c=10.0, relative_humidity_percent=80.0
+)
+print(round(increment.reference_attenuation_db[13, 3], 3))   # 1.798 dB, 1 kHz en 1000 ft
+print(round(increment.source_spectrum_db[13], 1))            # 71.8 dB, ecuación D-1
+print(np.round(increment.reference_levels_dba, 1))   # 97.0 90.3 ... 35.3 dBA
+print(np.round(increment.increment_db, 1))
+# [0.1 0.3 0.4 0.7 1.2 1.8 2.1 2.4 2.9 3.6] dB, de 200 ft a 25000 ft
+```
+
+Son los números de la tabla D-4. A 10 °C y 80 % el aire absorbe menos que la
+media AIR-1845 en las bandas que cuentan, así que los niveles NPD suben, una
+décima de decibelio a 200 ft y 3,6 dB a 25000 ft. La temperatura y la humedad
+son de palabra clave y no tienen valor por defecto: la atmósfera AIR-1845 no es
+un par de ellas, así que no hay un valor de referencia al que volver.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/npd_atmosphere_increment.svg" alt="Incremento NPD frente a la distancia oblicua en eje logarítmico a 10 grados Celsius y 80 por ciento de humedad, para la clase de despegue 103 y la de aproximación 205 con SAE ARP 5534 y con SAE ARP 866A: las cuatro curvas parten de casi cero a 61 m y crecen con la distancia, las de ARP 5534 hasta 3,6 y 3,7 dB a 7620 m y las de ARP 866A hasta 2,8 y 2,7 dB" width="82%" />
+
+*El incremento de las tablas D-4 y D-5 para las dos clases espectrales y las dos
+vías de absorción. Las dos vías coinciden a unos 0,3 dB como mucho hasta 2000 ft
+(610 m) y se separan más allá, hasta un decibelio a 25000 ft.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import aircraft
+
+db = aircraft.load_anp_database()
+fig, ax = plt.subplots(figsize=(10, 6))
+for class_id, operation, style, marker in ((103, "DEP", "-", "o"),
+                                           (205, "ARR", "--", "s")):
+    for route, name, color in (("arp5534", "SAE ARP 5534", "tab:blue"),
+                               ("arp866a", "SAE ARP 866A", "tab:red")):
+        aircraft.npd_atmosphere_increment(
+            db.spectral_class(class_id), absorption=route,
+            temperature_c=10.0, relative_humidity_percent=80.0,
+        ).plot(ax=ax, color=color, ls=style, marker=marker, language="es",
+               label=f"{operation}_{class_id}, {name}")
+ax.set_title("Incremento NPD a 10 °C, 80 % (ECAC Doc 29, tablas D-4 y D-5)")
+plt.show()
+```
+
+</details>
+
+## 4. Dos vías de absorción
+
+El apéndice D ofrece dos maneras de calcular $\delta_n(d_i)$, y `absorption=`
+elige una.
+
+**SAE ARP 5534** (`"arp5534"`, la vía por defecto y la que recomienda Doc 29)
+evalúa el coeficiente de tono puro en la frecuencia central exacta de la banda
+y convierte la atenuación de tono puro a lo largo del camino en una atenuación
+en banda con el método SAE, así que la atenuación en banda depende de la
+longitud del camino y de la presión. Es
+[`sae_band_attenuation`](/phonometry/es/aircraft/aircraft-noise/) de la guía de
+certificación. Su coeficiente de tono puro es el de ISO 9613-1 con la presión
+de vapor de saturación que ARP 5534 imprime en sus ecuaciones 5-6, la forma
+larga de ANSI S1.26; con la forma corta de ISO 9613-1, 57 de las 240 celdas de
+la tabla D-3c salen desviadas hasta 0,036 dB, y con las ecuaciones 5-6 las 240
+coinciden hasta la última cifra impresa.
+
+**SAE ARP 866A** (`"arp866a"`, que Doc 29 mantiene para la transición) es una
+tasa de atenuación por banda que solo depende de la temperatura y de la humedad.
+SAE ARP 866A no se puede consultar como documento propio; su fórmula la da el
+anexo A de ISO 3891:1978, que es desde donde phonometry la implementa, como
+`arp866a_attenuation`:
+
+```python
+import numpy as np
+from phonometry import aircraft
+
+absorption = aircraft.arp866a_attenuation(
+    [1000.0, 10000.0], temperature_c=10.0, relative_humidity_percent=80.0
+)
+print(absorption.evaluation_frequencies_hz)             # [1000. 9000.] Hz
+print(np.round(absorption.coefficient_db_per_100m, 3))  # [0.439 9.774] dB/100 m
+
+for reading in ("quadratic", "linear"):
+    band = aircraft.arp866a_attenuation(
+        [4000.0], temperature_c=10.0, relative_humidity_percent=80.0,
+        eta_interpolation=reading,
+    )
+    print(reading, np.round(band.path_attenuation_db(7620.0), 1))
+# quadratic [203.1], linear [204.4] dB en 25000 ft; la tabla D-3b imprime 204.355
+```
+
+Dos detalles del anexo A deciden esos números. Por encima de 4 kHz la fórmula
+se evalúa en el borde inferior de la banda, no en su centro, porque la caída
+pronunciada del espectro de una aeronave concentra la energía de una banda alta
+en su extremo inferior; la tabla 2 imprime esas frecuencias redondeadas, 4500,
+5600, 7100 y 9000 Hz, y la banda de 10 kHz se evalúa en 9 kHz. Y el factor
+$\eta(\delta)$ sale de la tabla 1, cuya nota dice «a form of quadratic
+interpolation shall be used» sin decir cuál, y los dos documentos que imprimen
+esta atenuación la leen de forma distinta. La propia tabla 10 de ISO 3891
+(80 %, de -10 °C a 40 °C) se reproduce en sus 264 celdas con la parábola por
+tres entradas vecinas de la tabla 1, que es la opción por defecto de
+`arp866a_attenuation`; la interpolación lineal falla 11 de ellas. La tabla D-3b
+de Doc 29, y a través de ella las tablas D-5 y D-6c, se reproduce con
+interpolación lineal, que la cuadrática falla hasta en 1,2 dB a 25000 ft, así
+que la vía del apéndice D lee $\eta$ linealmente. Las dos solo se separan donde
+$\delta$ cae en la parte curva de la tabla 1, por debajo de 6,50 (desde ahí la
+tabla 1 imprime 0,200 y las dos lecturas lo mantienen), y los incrementos que
+dan difieren en unas milésimas de decibelio.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/npd_atmosphere_attenuation.svg" alt="Atenuación en 25000 ft frente a la frecuencia de 50 Hz a 10 kHz: las tasas SAE AIR-1845 de la tabla D-1 en discontinuo, SAE ARP 5534 y SAE ARP 866A a 10 grados Celsius y 80 por ciento en continuo. Las tres son pequeñas por debajo de 1 kHz y suben con fuerza por encima; ARP 5534 queda por debajo de las otras dos hasta 4 kHz y por encima de ambas desde 6,3 kHz, hasta 922 dB en 10 kHz, mientras que ARP 866A queda por debajo de AIR-1845 en lo más alto, en 745 dB" width="82%" />
+
+*La atenuación de las tablas D-3a a D-3c en la mayor distancia NPD. Donde una
+curva queda por debajo de la discontinua de AIR-1845, el aire especificado
+absorbe menos que el día de ensayo medio y el nivel NPD a esa distancia sube. En
+25000 ft las bandas de 1 kHz en adelante aportan como mucho un 1 % del nivel
+ponderado A en cualquiera de las tres atmósferas, y las de 125 Hz a 500 Hz unas
+nueve décimas partes, así que el incremento se decide allí entre 125 Hz y
+500 Hz, donde ARP 5534 absorbe menos que ARP 866A y ambas menos que AIR-1845.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import aircraft
+
+spectrum = aircraft.load_anp_database().spectral_class(103)
+fig, ax = plt.subplots(figsize=(10, 6))
+for route, reference in (("arp5534", True), ("arp866a", False)):
+    aircraft.npd_atmosphere_increment(
+        spectrum, absorption=route,
+        temperature_c=10.0, relative_humidity_percent=80.0,
+    ).plot_attenuation(ax=ax, distance_m=25000 * 0.3048, reference=reference,
+                       language="es")
+plt.show()
+```
+
+</details>
+
+## 5. Curvas recalculadas, y la cadena que las lee
+
+`revise_npd_curves` suma el incremento a todos los ajustes de potencia de un
+`AnpNpdCurves`, y `AnpDatabase.revised_npd_curves` lo hace con la clase
+espectral propia de la aeronave. Las curvas recalculadas son un `AnpNpdCurves`
+corriente, así que `level`, `plot` y las funciones de Doc 29 las leen como las
+de la propia base.
+
+```python
+from phonometry import aircraft
+
+db = aircraft.load_anp_database()
+revised = db.revised_npd_curves(
+    "747100", "D", "SEL", temperature_c=30.0, relative_humidity_percent=30.0
+)
+before = float(revised.original.levels[0, -1])
+after = float(revised.revised.levels[0, -1])
+print(round(before, 1), round(after, 1))   # 63.4 62.9 dB a 25000 ft, 20000 lb
+revised.plot(language="es")
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/npd_atmosphere_revised.svg" alt="Curvas nivel-potencia-distancia de SEL del despegue de un Boeing 747-100 para tres ajustes de empuje frente a la distancia oblicua, recalculadas para 30 grados Celsius y 30 por ciento de humedad en línea continua sobre las curvas de la base en discontinua: coinciden hasta unos 600 m y las recalculadas quedan por debajo de las originales más allá, alrededor de un decibelio entre 3 y 5 km" width="82%" />
+
+*Un día caluroso y seco en el despegue de un cuatrimotor. El incremento es
+negativo: este aire absorbe más que la media AIR-1845 en las bandas que llevan
+el nivel ponderado A a gran distancia, así que más allá de 1 km las curvas
+recalculadas quedan por debajo de las de la base, hasta 1,1 dB a 3 km, mientras
+que cerca de la aeronave las dos son la misma curva.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import aircraft
+
+revised = aircraft.load_anp_database().revised_npd_curves(
+    "747100", "D", "SEL", temperature_c=30.0, relative_humidity_percent=30.0
+)
+fig, ax = plt.subplots(figsize=(10, 6))
+revised.plot(ax=ax, language="es")
+plt.show()
+```
+
+</details>
+
+Para un evento completo o un contorno no hace falta recalcular nada a mano. El
+cableado de eventos y contornos de la base acepta la humedad, recalcula las
+tablas de SEL y de LAmax con la clase espectral de la aeronave, y usa la misma
+temperatura y la misma presión que ya lee para el ajuste de impedancia: en el
+aeródromo hay un solo aire, y la humedad lo completa.
+
+```python
+from phonometry import aircraft
+
+db = aircraft.load_anp_database()
+receiver = [6000.0, 0.0, 0.0]
+reference = db.event_level("747100", receiver, "D", temperature_c=10.0)
+humid = db.event_level(
+    "747100", receiver, "D", temperature_c=10.0, relative_humidity_percent=80.0
+)
+print(round(reference.level, 1), round(humid.level, 1))   # 97.8 99.1 dB SEL
+```
+
+Sin `relative_humidity_percent` no cambia nada: las curvas se quedan en la
+atmósfera AIR-1845, como siempre. Con un `Aerodrome`, la temperatura y la
+presión en el aeródromo salen de él.
+
+## 6. Comprobado contra el ejemplo resuelto
+
+El apéndice D termina con un ejemplo resuelto que imprime todas las tablas
+intermedias, y cada una es una fila del informe de conformidad: los espectros en
+la fuente de la tabla D-2, las tres tablas de atenuación D-3a a D-3c, los
+niveles ponderados A y los incrementos de las tablas D-4 y D-5, y los datos
+recalculados del JETW de las tablas D-6b y D-6c, celda a celda con la precisión
+con que se imprimen. Todas coinciden hasta la última cifra salvo dos. En la
+tabla D-3b, 32 de las 240 celdas, los caminos más largos en las frecuencias más
+altas, están impresas unas 6 partes por millón por debajo de la fórmula de
+ISO 3891, como mucho 0,0045 dB de 745 dB; la fila lo admite y lo dice. Y la
+última fila de la tabla D-6c está impresa como copia de la última fila de la
+tabla D-6b, lo que figura en el
+[registro de erratas](/phonometry/es/reference/errata/) junto con una frase del
+apéndice que empareja las tablas D-3b y D-3c con el método de la otra.
+
+ISO 3891 también se comprueba por sí misma: su tabla 10 es una fila del
+informe, las 264 celdas de -10 °C a 40 °C hasta la cifra impresa. Su tabla 9, al
+70 %, no lo es, y la fórmula falla 15 de sus celdas por una unidad impresa. En
+siete de ellas la humedad desaparece de la fórmula, así que las dos tablas
+tienen que imprimir el mismo valor, y la tabla 9 imprime una unidad más que la
+tabla 10; esas siete figuran también en el registro de erratas. Las otras ocho
+son celdas en las que la humedad sí interviene, y cada una queda a menos de
+0,014 dB/100 m de un límite de redondeo: ninguna de las lecturas de la tabla 1
+probadas (la cuadrática de tres puntos, la lineal, la cúbica monótona, la de
+Akima y el spline cúbico) las reproduce todas, y ninguna otra tabla las
+contradice, así que se dejan como están impresas y no se registran como
+erratas.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+El recálculo de los datos NPD de ANP para una atmósfera distinta de la de
+referencia según el apéndice D del volumen 2 de ECAC Doc 29: las tasas SAE
+AIR-1845 de la tabla D-1, las clases espectrales de la base distribuida, el
+incremento de las ecuaciones D-1 a D-4 con SAE ARP 5534 o con SAE ARP 866A en la
+forma del anexo A de ISO 3891:1978, las curvas NPD recalculadas, y el nivel de
+evento y el contorno de una aeronave de ANP en el aire de un estudio.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Una atmósfera que varíe a lo largo del camino: el apéndice D, y esta
+implementación, toman una sola temperatura, humedad y presión para toda la
+propagación. Tampoco el resto de ISO 3891, cuyos descriptores del ruido
+percibido en tierra no se implementan desde ella; su ejemplo de corrección tonal
+solo se usa para comprobar el procedimiento del Anexo 16 de la OACI de la guía
+de certificación.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+Páginas de otras áreas del sitio en las que se apoya esta sección:
+
+- [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/): las
+  curvas NPD, los perfiles y el cableado de eventos que esta guía recalcula.
+- [Ruido de aeropuertos (ECAC Doc 29)](/phonometry/es/aircraft/airport-noise/):
+  la cadena de evento único que alimentan las curvas recalculadas.
+- [Ruido de aeronaves: nivel efectivo de ruido percibido](/phonometry/es/aircraft/aircraft-noise/):
+  SAE ARP 5534 por sí sola, como la usa la certificación.
+- Referencia de la API:
+  [`aircraft.npd_atmosphere`](/phonometry/es/reference/api/aeroacoustics/npd-atmosphere/)
+  y
+  [`aircraft.atmospheric_absorption`](/phonometry/es/reference/api/aeroacoustics/atmospheric-absorption/).
+
+</SeeAlso>

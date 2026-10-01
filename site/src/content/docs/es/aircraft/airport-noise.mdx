@@ -125,10 +125,15 @@ Las tablas pueden usarse tal como están tabuladas mientras la media del
 emplazamiento se mantenga dentro de la envolvente del §2.5: temperatura del aire
 por debajo de 30 °C, producto de la temperatura en grados Celsius por la humedad
 relativa en por ciento superior a 500, y viento por debajo de 8 m/s. Fuera de
-ella hay que convertir *las propias tablas* con el procedimiento del Apéndice D,
-cosa que esta cadena no hace: `impedance_adjustment` solo reescala los niveles
-por la impedancia acústica específica del aire, y no hay ningún argumento de
-humedad en toda la cadena.
+ella hay que convertir *las propias tablas* con el procedimiento del Apéndice D
+antes de que esta cadena las lea. Las funciones de esta página toman las
+matrices NPD tal como vienen y no tienen argumento de humedad:
+`impedance_adjustment` solo reescala los niveles por la impedancia acústica
+específica del aire. La conversión está en
+[Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/),
+cuya `revise_npd_curves` devuelve tablas recalculadas para pasarlas aquí, y el
+cableado ANP de [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/)
+la aplica por su cuenta cuando recibe `relative_humidity_percent=`.
 
 Las curvas se leen en consecuencia. Entre los marcadores el nivel cae casi
 linealmente frente al logaritmo de la distancia y se empina a gran distancia a
@@ -534,9 +539,10 @@ un tipo de avión, no las sintetiza a partir de datos de motor. La base de
 datos ANP de EASA/EUROCONTROL de tablas medidas para tipos reales sí viene con
 phonometry y la lee [La base de datos ANP de
 flota](/phonometry/es/aircraft/anp-fleet/), que la enchufa directamente a las
-funciones de esta página. Convertir datos NPD a un emplazamiento fuera de la
-envolvente del §2.5 (el recálculo del Apéndice D) no está implementado, y
-tampoco lo está el suelo acústicamente duro que SAE AIR 5662 excluye: la
+funciones de esta página, y el recálculo del Apéndice D de los datos NPD para
+un emplazamiento fuera de la envolvente del §2.5 está en
+[Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/).
+El suelo acústicamente duro que SAE AIR 5662 excluye no está implementado: la
 atenuación lateral, y con ella toda la cadena de evento único, supone suelo
 blando con hierba.
 </ScopeClaim>

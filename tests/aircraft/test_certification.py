@@ -12,6 +12,7 @@ from __future__ import annotations
 import matplotlib as mpl
 
 mpl.use("Agg")
+import iso3891_annex_c_data as iso3891_annex_c
 import numpy as np
 import pytest
 
@@ -185,6 +186,25 @@ def test_tone_correction_background_column() -> None:
     assert spl_dd[17] == pytest.approx(79.0, abs=0.05)  # 2500 Hz
     assert spl_dd[23] == pytest.approx(45.0, abs=0.05)  # 10 kHz
     assert excess[17] == pytest.approx(6.0, abs=0.05)  # F = 85 − 79
+
+
+@pytest.mark.parametrize("unused_bands", [0.0, 120.0])
+def test_tone_background_is_iso3891_annex_c(unused_bands: float) -> None:
+    # The example of ISO 3891 prints every step of the slope method, not only
+    # the correction. Its 22 bands start at 80 Hz, so whatever stands in the
+    # 50 Hz and 63 Hz bands must not reach the result. It is the spectrum of
+    # ICAO ETM Table 3-7 from 80 Hz up.
+    assert tuple(NOY_BANDS[2:]) == iso3891_annex_c.FREQUENCIES_HZ
+    assert tuple(_SPL_37[2:]) == iso3891_annex_c.LEVELS_DB
+    spl = [unused_bands, unused_bands, *iso3891_annex_c.LEVELS_DB]
+    background, excess = _tone_background(spl)
+    thirds = np.array(iso3891_annex_c.BACKGROUND_THIRDS) / 3.0
+    assert np.allclose(background[2:], thirds, rtol=0.0, atol=1e-9)
+    printed_excess = np.array(iso3891_annex_c.EXCESS_THIRDS) / 3.0
+    assert np.allclose(np.maximum(excess[2:], 0.0), printed_excess, rtol=0.0, atol=1e-9)
+    assert tone_correction(spl) == pytest.approx(
+        iso3891_annex_c.TONE_CORRECTION_DB, abs=1e-9
+    )
 
 
 def test_tone_correction_none_when_flat() -> None:

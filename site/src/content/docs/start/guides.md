@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 146 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 147 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and forty-six guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and forty-seven guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -717,7 +717,7 @@ regulatory mapping.
 Certification levels, airport contours and the rotorcraft hemisphere
 method: the noise of flight measured the way the certification and
 airport-planning documents prescribe. Implements ICAO Annex 16, IEC 61265,
-SAE ARP 866B/5534 and ECAC Doc 29/32.
+SAE ARP 866A/866B/5534, ISO 3891 and ECAC Doc 29/32.
 
 - [Aircraft noise: Effective Perceived Noise Level](/phonometry/aircraft/aircraft-noise/):
   perceived noisiness and PNL, the tone correction, the duration correction and
@@ -731,6 +731,9 @@ SAE ARP 866B/5534 and ECAC Doc 29/32.
 - [The ANP fleet database](/phonometry/aircraft/anp-fleet/): the EASA tables of
   noise-power-distance curves and default trajectories, and the Doc 29 chain run
   from an aircraft identifier.
+- [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/):
+  the ANP curves recalculated for the temperature, humidity and pressure of a
+  study by Doc 29 Appendix D, with SAE ARP 5534 or SAE ARP 866A absorption.
 
 ## [Underwater acoustics](/phonometry/underwater/)
 

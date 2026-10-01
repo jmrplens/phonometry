@@ -182,8 +182,10 @@ print(report.passes, report.checks)
 
 Correcting a measured flyover spectrum to reference atmospheric conditions
 needs the one-third-octave-band attenuation over the path. The pure-tone
-coefficient is the ISO 9613-1 one (identical, per ARP 5534 §3.1) already
-provided by `air_attenuation`; `sae_band_attenuation` adds the **SAE Method**
+coefficient is the one of ISO 9613-1, whose terms ARP 5534 §3.1 repeats in its
+Eqs. 1-3, with the saturation vapour pressure ARP 5534 prints in Eqs. 5-6 (the
+longer form of ANSI S1.26, not the Annex B formula of `air_attenuation`); on top
+of it `sae_band_attenuation` adds the **SAE Method**
 (ARP 5534 §3.2.2), a regression that maps the pure-tone mid-band path-length
 attenuation $\delta_\mathrm{t} = \alpha\,s$ to the band attenuation $\delta_\mathrm{B}$ and stays
 consistent with the ISO/ANSI Exact Method well beyond the 50 dB limit of the
@@ -242,11 +244,14 @@ Part 36 test window), over path lengths to 7620 m, and is reciprocal
 The adjustment those attenuations feed is given by Appendix 2 §8, which
 transports a measured EPNL to the reference day and the reference flight path.
 This is not implemented, in either its simplified or its integrated form:
-`air_attenuation` and `sae_band_attenuation` are exactly the test-day and
+`air_attenuation` and `sae_band_attenuation` supply the test-day and
 reference-day coefficients of its first terms, but the flight-path geometry
-and the four $\Delta$ terms are left to the reader. The EPNL of section 3 is
-therefore the as-measured, test-day value; adjust it first, and only then
-report it against a certification limit.
+and the four $\Delta$ terms are left to the reader. Those terms take the
+coefficients in dB/100 m and multiply them by 0.01 and the path in metres
+(§8.3.2.1), where `air_attenuation` returns dB/m and `sae_band_attenuation`
+the attenuation over the whole path in dB, so neither takes the 0.01. The EPNL
+of section 3 is therefore the as-measured, test-day value; adjust it first, and
+only then report it against a certification limit.
 
 The certification chain ends here. Turning these aeroplanes into noise
 around an airport, the noise-power-distance tables, the per-segment
@@ -306,6 +311,6 @@ Table 4-4 integrated-method EPNL) used as numeric oracles. IEC 61265:1995,
 *Instruments for the measurement of aircraft noise*: the measurement-system
 performance tolerances. SAE ARP 5534:2021, *Application of Pure-Tone
 Atmospheric Absorption Losses to One-Third-Octave-Band Data*: the SAE-Method
-band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
+band attenuation (Eqs. 7–10), with the pure-tone coefficient of Eqs. 1-6.
 The ECAC Doc 29 airport-noise method is documented in
 [Airport noise](airport-noise.md).

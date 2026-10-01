@@ -1102,6 +1102,100 @@ def generate_anp_contour(output_dir: str) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# ECAC Doc 29 Vol. 2 Appendix D: NPD data for a non-reference atmosphere
+# --------------------------------------------------------------------------- #
+
+#: The atmosphere of the Appendix D worked example.
+_APPENDIX_D_AIR = {"temperature_c": 10.0, "relative_humidity_percent": 80.0}
+#: The longest NPD distance, 25 000 ft, where the two routes part most.
+_LONGEST_NPD_M = 25000.0 * 0.3048
+
+
+def generate_npd_atmosphere_spectral_classes(output_dir: str) -> None:
+    """The two spectral classes of the Appendix D example, as the ANP ships them."""
+    print("Generating npd_atmosphere_spectral_classes...")
+    from phonometry import aircraft
+
+    database = aircraft.load_anp_database()
+    _fig, ax = plt.subplots(figsize=(10, 6))
+    database.spectral_class(103).plot(ax=ax, language=_LANG, color=COLOR_PRIMARY)
+    database.spectral_class(205).plot(ax=ax, language=_LANG, color=COLOR_SECONDARY)
+    ax.set_title("ANP spectral classes 103 and 205 (ECAC Doc 29 Table D-2)", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    save_figure(output_dir, "npd_atmosphere_spectral_classes.svg")
+    plt.close()
+
+
+def generate_npd_atmosphere_attenuation(output_dir: str) -> None:
+    """The attenuation of both absorption routes against Table D-1, over 25 000 ft."""
+    print("Generating npd_atmosphere_attenuation...")
+    from phonometry import aircraft
+
+    spectrum = aircraft.load_anp_database().spectral_class(103)
+    _fig, ax = plt.subplots(figsize=(10, 6))
+    for route, reference in (("arp5534", True), ("arp866a", False)):
+        aircraft.npd_atmosphere_increment(
+            spectrum, absorption=route, **_APPENDIX_D_AIR
+        ).plot_attenuation(
+            ax=ax, distance_m=_LONGEST_NPD_M, reference=reference, language=_LANG
+        )
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    save_figure(output_dir, "npd_atmosphere_attenuation.svg")
+    plt.close()
+
+
+def generate_npd_atmosphere_increment(output_dir: str) -> None:
+    """The increment of Tables D-4 and D-5 against distance, both classes and routes."""
+    print("Generating npd_atmosphere_increment...")
+    from phonometry import aircraft
+
+    database = aircraft.load_anp_database()
+    _fig, ax = plt.subplots(figsize=(10, 6))
+    for class_id, operation, marker in ((103, "DEP", "o"), (205, "ARR", "s")):
+        for route, name, color in (
+            ("arp5534", "SAE ARP 5534", COLOR_PRIMARY),
+            ("arp866a", "SAE ARP 866A", COLOR_SECONDARY),
+        ):
+            aircraft.npd_atmosphere_increment(
+                database.spectral_class(class_id), absorption=route, **_APPENDIX_D_AIR
+            ).plot(
+                ax=ax,
+                language=_LANG,
+                color=color,
+                marker=marker,
+                ls="-" if class_id == 103 else "--",
+                label=f"{operation}_{class_id}, {name}",
+            )
+    ax.set_title("NPD increment at 10 °C, 80 % (ECAC Doc 29 Tables D-4, D-5)", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    save_figure(output_dir, "npd_atmosphere_increment.svg")
+    plt.close()
+
+
+def generate_npd_atmosphere_revised(output_dir: str) -> None:
+    """A real ANP aircraft's SEL curves on a hot, dry day against the database's."""
+    print("Generating npd_atmosphere_revised...")
+    from phonometry import aircraft
+
+    revised = aircraft.load_anp_database().revised_npd_curves(
+        "747100", "D", "SEL", temperature_c=30.0, relative_humidity_percent=30.0
+    )
+    _fig, ax = plt.subplots(figsize=(10, 6))
+    revised.plot(ax=ax, language=_LANG)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    save_figure(output_dir, "npd_atmosphere_revised.svg")
+    plt.close()
+
+
+# --------------------------------------------------------------------------- #
 # The ECAC Doc 32 hemisphere method, opened up
 # --------------------------------------------------------------------------- #
 

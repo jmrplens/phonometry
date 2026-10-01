@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1447/1447 conformance checks pass** across 97 domains and 477 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1457/1457 conformance checks pass** across 97 domains and 486 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1564,7 +1564,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (18/18)</summary>
+<summary><b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (28/28)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -1579,13 +1579,23 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | SAE ARP 5534 high branch at the split (Eq. 8) | SAE-Method δ_B just above δ_t = 150 dB vs the printed Eq. 7 value there, dB | 123.953 dB (+/-0.01 dB) | 123.95 dB | -0.003 dB | 30 % | ![Pass][cv-pass] Pass |
 | EASA ANP database round-trip | Interpolated NPD level at a tabulated node vs the published ANP value, dB | 98.8 dB (+/-0 dB) | 98.8 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ECAC Doc 29 NPD interpolation | Log-linear NPD level at the log-midpoint distance (Eq. 4-4), dB | 97 dB (+/-0 dB) | 97 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| SAE ARP 5534 pure-tone coefficient (ISO 9613-1) | Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m | 0.006186 dB/m (+/-0 dB/m) | 0.006186 dB/m | 0 dB/m | 0 % | ![Pass][cv-pass] Pass |
+| SAE ARP 5534 pure-tone coefficient (Eqs. 1-6) | Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m | 0.006187 dB/m (+/-0 dB/m) | 0.006187 dB/m | 0 dB/m | 0 % | ![Pass][cv-pass] Pass |
 | ICAO Annex 16 Vol. I App. 2 Table A2-3 | Perceived noisiness at SPL(b), 1 kHz band, in noys | 1 (+/-0) | 1 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ICAO Doc 9501 ETM Vol. I Table 3-7 | Tone correction of the turbofan example, dB | 2 (+/-0) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ICAO Doc 9501 ETM Vol. I Table 4-4 | Integrated-method reference EPNL, EPNdB | 92.619 EPNdB (+/-0.01 EPNdB) | 92.619 EPNdB | 0 EPNdB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61265:1995 Table 1 | Directional-response tolerance at 4 kHz / 90°, dB | 2 dB (+/-0 dB) | 2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ECAC Doc 29 Appendix B take-off ground roll | Equivalent take-off distance of reference case 6 (Eq. B-15/B-16), ft | 4897.5 ft (+/-0.1 ft) | 4897.5 ft | 0.036 ft | 72 % | ![Pass][cv-pass] Pass |
 | ECAC Doc 29 Appendix B approach thrust | Corrected net thrust at the top of reference case 2A (Eq. B-40/B-48), lb | 533.1 lb (+/-0.1 lb) | 533.1 lb | 0.035 lb | 70 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-2 | Spectral classes 103 and 205 corrected back to the source (Eq. D-1), cells | 48/48 cells of Table D-2 at source | 48/48 cells of Table D-2 at source | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-3a | SAE AIR-1845 attenuation of Table D-1 over the ten NPD distances, cells | 240/240 cells of Table D-3a | 240/240 cells of Table D-3a | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-3b | SAE ARP 866A attenuation at 10 °C, 80 % over the NPD distances, cells | 240/240 cells of Table D-3b within half a unit of the last digit plus 7 ppm | 240/240 cells of Table D-3b | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-3c | SAE ARP 5534 attenuation at 10 °C, 80 %, 101.325 kPa over the NPD distances, cells | 240/240 cells of Table D-3c | 240/240 cells of Table D-3c | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-4 | A-weighted levels and increment ΔL with SAE ARP 5534 (Eq. D-4), cells | 60/60 cells of Table D-4 | 60/60 cells of Table D-4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-5 | A-weighted levels and increment ΔL with SAE ARP 866A (Eq. D-4), cells | 60/60 cells of Table D-5 | 60/60 cells of Table D-5 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-6b | JETW SEL NPD data revised end to end with SAE ARP 5534, cells | 70/70 cells of Table D-6b | 70/70 cells of Table D-6b | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECAC Doc 29 Appendix D Table D-6c | JETW SEL NPD data revised end to end with SAE ARP 866A, cells | 60/60 cells of Table D-6c outside its misprinted last row | 60/60 cells of Table D-6c | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3891:1978 Annex C | Tone correction worked example: background and excess F in 22 bands, fields | 44/44 printed background and excess values | 44/44 printed background and excess values | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3891:1978 Annex A Table 10 | SAE ARP 866A coefficient at 80 % from -10 °C to 40 °C, 50 Hz to 10 kHz, cells | 264/264 cells of Table 10 | 264/264 cells of Table 10 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

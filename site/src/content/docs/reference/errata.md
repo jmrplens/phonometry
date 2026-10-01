@@ -4396,6 +4396,110 @@ in the same order.
   is the one the reference results decide most sharply, and the only one that
   changes a shipped profile.
 
+## ECAC Doc 29, 5th ed., Volume 2, Appendix D, Table D-6c (the last row is the last row of Table D-6b)
+
+- **Location:** Appendix D, Table D-6c "Revised JETW NPD data using
+  SAE-ARP-866A", last row (JETW, SEL, operation D, power setting 22500).
+- **The print:** 109.8, 106.0, 103.2, 100.2, 95.2, 89.8, 85.8, 81.4, 76.8 and
+  72.3 dB from 200 ft to 25000 ft: the ten values of the last row of Table
+  D-6b, the same aeroplane revised with SAE-ARP-5534, printed a few lines above
+  it on the same page.
+- **The problem:** the text under Table D-5 builds Table D-6c as the Table D-6a
+  levels plus the SAE-ARP-866A increments of Table D-5, and the other six rows
+  of the table are exactly that, to the last digit. The last row of Table D-6a
+  (109.7, 105.7, 102.8, 99.5, 94.0, 88.0, 83.7, 79.0, 73.9 and 68.7 dB) plus
+  the DEP_103 increments of Table D-5 (+0.2, +0.3, +0.4, +0.6, +0.9, +1.3,
+  +1.5, +1.8, +2.2 and +2.8 dB) gives 109.9, 106.0, 103.2, 100.1, 94.9, 89.3,
+  85.2, 80.8, 76.1 and 71.5 dB, and the unrounded increments give the same ten
+  values. Eight of the ten printed cells differ from these, by up to 0.8 dB at
+  25000 ft; the two that agree, at 400 ft and 630 ft, are the two where the
+  increments of the two routes round to the same sum. The row has been copied
+  from Table D-6b rather than computed.
+- **Evidence:** recomputation from Tables D-6a and D-5 of the same example.
+  Verified on PDF page 133 (printed p. D-9) of ECAC.CEAC Doc 29, 5th ed.,
+  Volume 2: Technical guide, which carries Tables D-6a, D-6b and D-6c on the
+  one page, and on PDF page 132 (printed p. D-8) of the same document for the
+  increments of Table D-5.
+- **Library behaviour:** `revise_npd_curves` adds the increment to Table D-6a
+  and gives the recomputed row.
+  `test_revised_npd_data_is_table_d6c_but_its_misprinted_row` pins it, and the
+  conformance row *ECAC Doc 29 Appendix D Table D-6c* holds the other 60 cells
+  of the table.
+- **Status:** unreported.
+
+## ECAC Doc 29, 5th ed., Volume 2, Appendix D, text under Table D-2 (Tables D-3b and D-3c paired with the wrong methods)
+
+- **Location:** Appendix D, the paragraph under Table D-2 that introduces the
+  three attenuation tables of the worked example.
+- **The print:** "together with the absorption coefficients in Table D-1 for
+  the AIR-1845 atmosphere and using attenuation values calculated using
+  SAE-ARP-5534 and SAE-ARP-866A for the specified atmosphere [...]. All three
+  sets of attenuation values are listed in Tables D-3a, D-3b and D-3c
+  respectively."
+- **The problem:** "respectively" gives SAE-ARP-5534 to Table D-3b and
+  SAE-ARP-866A to Table D-3c, and the tables are titled the other way round:
+  Table D-3b "calculated using SAE-ARP-866A", Table D-3c "calculated using
+  SAE-ARP-5534". The values follow the titles. SAE ARP 5534 reproduces all 240
+  cells of Table D-3c to the printed digit, and SAE ARP 866A 208 of the 240 of
+  Table D-3b, the other 32 (the longest high-frequency paths) within half a
+  unit of the printed digit plus 7 parts per million, while the pairing the
+  sentence states is off by as much as 177 dB, at 10 kHz and 25000 ft
+  (921.851 dB against 744.810 dB). The text after the tables, which gives
+  Table D-4 to SAE-ARP-5534 and Table D-5 to SAE-ARP-866A, follows the titles
+  too.
+- **Evidence:** comparison of the sentence with the two table titles, and
+  recomputation of both tables by both methods. Verified on PDF page 128
+  (printed p. D-4) of ECAC.CEAC Doc 29, 5th ed., Volume 2: Technical guide for
+  the sentence, and on PDF pages 130 and 131 (printed pp. D-6 and D-7) of the
+  same document for the titles and values of Tables D-3b and D-3c.
+- **Library behaviour:** none needed; the library pairs each table with the
+  method its title names, which is the pairing its values confirm. The
+  conformance rows *ECAC Doc 29 Appendix D Table D-3b* and *Table D-3c* hold
+  the two tables.
+- **Status:** unreported.
+
+## ISO 3891:1978, Annex A, Table 9 (seven cells a unit above Table 10 where the humidity drops out)
+
+- **Location:** Annex A, Table 9 "Sound attenuation coefficient in dB/100 m
+  for 1/3 octave band analysis", relative humidity 70 %, set against Table 10,
+  relative humidity 80 %, printed below it on the same page.
+- **The print:** Table 9 prints 0,2 at 200 Hz and at 250 Hz for 20 °C, 0,4
+  at 500 Hz for 35 °C and at 800 Hz for 10 °C, 0,7 at 1 000 Hz for 30 °C, 1,0
+  at 1 600 Hz for 25 °C and 2,9 at 5 000 Hz for 25 °C. Table 10 prints 0,1,
+  0,1, 0,3, 0,3, 0,6, 0,9 and 2,8 in the same seven cells.
+- **The problem:** in these seven cells the humidity does not enter the
+  coefficient. The factor $\eta(\delta)$ of A.2 is 0,200 from $\delta = 6{,}50$
+  onwards (Table 1), and in each of these cells $\delta$ is past 6,50 at 70 %
+  as well as at 80 %, so the formula gives the one value 0,104, 0,130, 0,349,
+  0,349, 0,642, 0,946 and 2,849 dB/100 m for both tables. Table 10 prints each
+  of them rounded; Table 9 prints each one unit of the last digit above it,
+  which at 200 Hz and 250 Hz and 20 °C doubles the coefficient, and reads
+  against its own neighbours at 15 °C and 25 °C, both printed 0,1. The same
+  formula, with $\eta$ read by the three-point quadratic Table 1 asks for,
+  reproduces all 264 cells of Table 10 from 50 Hz to 10 kHz to the printed
+  digit. Against Table 9 it misses eight more cells, by one unit, where $\eta$
+  does depend on the humidity: 800 Hz at 5 °C, 1 250 Hz at 0 °C and at 5 °C,
+  2 000 Hz at 10 °C, 4 000 Hz at 0 °C, 6 300 Hz at 10 °C and at 20 °C, and
+  8 000 Hz at 5 °C. Each of them lies within 0,014 dB/100 m of a rounding
+  boundary, no reading of Table 1 tried (the three-point quadratic, linear,
+  monotone cubic, Akima, cubic spline) reproduces them all, and no second
+  table contradicts them, so they are not registered here. Five of the seven
+  cells above lie as close to a boundary, within 0,009 dB/100 m; the 200 Hz
+  and 250 Hz cells, at 0,104 and 0,130, do not.
+- **Evidence:** the two tables compared cell by cell where A.2 makes them
+  equal, and recomputation of both. Verified on PDF page 19 (printed p. 16) of
+  ISO 3891:1978, which carries Tables 9 and 10, and on PDF pages 14 and 15
+  (printed pp. 11 and 12) of the same document for the formula of A.2 and
+  Table 1.
+- **Library behaviour:** `arp866a_attenuation` evaluates the formula and
+  reproduces Table 10; the conformance row *ISO 3891:1978 Annex A Table 10*
+  holds that table,
+  `test_iso3891_table_9_contradicts_table_10_where_humidity_drops_out` pins
+  the seven cells, and
+  `test_iso3891_table_9_misses_are_the_seven_errata_and_eight_near_boundaries`
+  counts all fifteen.
+- **Status:** unreported. ISO 3891:1978 is withdrawn.
+
 ## ANSI S1.4-1983, Table V, 20 Hz type 2 cell (a plus sign that lost its bar)
 
 - **Location:** clause 5.2, Table V "Tolerance limits on relative response

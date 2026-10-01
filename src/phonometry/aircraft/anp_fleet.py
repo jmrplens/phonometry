@@ -41,12 +41,13 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 import numpy as np
 
 from .._internal.validation import (
     require_axis_count,
+    require_choice,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -60,6 +61,7 @@ from .airport_noise import (
     event_level,
     noise_contour,
 )
+from .certification import NOY_BANDS
 from .flight_performance import (
     AerodynamicCoefficients,
     ApproachStep,
@@ -80,9 +82,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .flight_performance import Aerodrome
+    from .npd_atmosphere import RevisedNpdCurves
 
 #: Feet-to-metres conversion (NPD slant distances and profile altitudes/distances).
 _FT_M = 0.3048
+#: How far, in Hz, a spectral-class column may sit from its nominal band.
+_BAND_MATCH_HZ = 0.5
 #: Knots-to-metres-per-second conversion (profile true airspeed).
 _KT_MS = 0.514444
 #: Altitude below which a profile point counts as on the ground, in metres.
@@ -124,6 +129,7 @@ _DEFAULT_PROFILE_ID = "DEFAULT"
 _COL_STAGE_LENGTH = "Stage Length"
 _COL_DISTANCE_FT = "Distance (ft)"
 _COL_THRUST_RATING = "Thrust Rating"
+_COL_OP_TYPE = "Op Type"
 
 
 def _operation_code(operation: str) -> str:
@@ -413,6 +419,51 @@ class AnpProfile:
 
 
 @dataclass(frozen=True)
+class SpectralClass:
+    """One ANP spectral class: the reference spectrum of a group of aircraft.
+
+    ECAC Doc 29 Vol. 2 G4.3: the average unweighted spectrum at the time of the
+    maximum level, at 1 000 ft, normalised to the same SAE AIR-1845 attenuation
+    rates as the NPD data and, for historical reasons, to 70 dB in the 1 kHz
+    band. Every aircraft is assigned one for approach and one for departure.
+    Appendix D recalculates the aircraft's NPD curves for another atmosphere
+    from it (:func:`~phonometry.aircraft.npd_atmosphere.revise_npd_curves`).
+
+    :ivar class_id: Spectral class identifier (``"103"``, ``"205"``...).
+    :ivar operation: ``"A"`` (approach) or ``"D"`` (departure).
+    :ivar description: The aircraft family the class describes.
+    :ivar frequencies_hz: Nominal one-third-octave-band centre frequencies, in
+        Hz, from 50 Hz to 10 kHz.
+    :ivar levels_db: Band levels at 1 000 ft, in dB.
+    """
+
+    class_id: str
+    operation: str
+    description: str
+    frequencies_hz: NDArray[np.float64]
+    levels_db: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Reject a class whose levels do not run over its bands.
+
+        :raises ValueError: if the two arrays disagree or carry an extra axis.
+        """
+        require_ranks(self, frequencies_hz=1, levels_db=1)
+        require_same_length(self, "frequencies_hz", "levels_db")
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the band levels versus frequency."""
+        from .._i18n import check_language
+        from .._plot.aircraft import plot_spectral_class
+
+        return plot_spectral_class(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+@dataclass(frozen=True)
 class AnpAircraft:
     """One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 
@@ -424,6 +475,8 @@ class AnpAircraft:
     :ivar mounting: Doc 29 engine mounting (``"wing"``/``"fuselage"``/``"propeller"``).
     :ivar npd_id: ANP noise identifier.
     :ivar power_parameter: Name/unit of the NPD power parameter.
+    :ivar approach_spectral_class_id: Spectral class of the approach NPD.
+    :ivar departure_spectral_class_id: Spectral class of the departure NPD.
     """
 
     aircraft_id: str
@@ -434,11 +487,49 @@ class AnpAircraft:
     mounting: str
     npd_id: str
     power_parameter: str
+    approach_spectral_class_id: str
+    departure_spectral_class_id: str
     _database: AnpDatabase = field(repr=False, compare=False)
 
     def npd_curves(self, operation: str, metric: str = "SEL") -> AnpNpdCurves:
         """NPD curves for this aircraft (see :meth:`AnpDatabase.npd_curves`)."""
         return self._database.npd_curves(self.aircraft_id, operation, metric)
+
+    def spectral_class(self, operation: str) -> SpectralClass:
+        """Spectral class of this aircraft's NPD for an operation.
+
+        :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
+        :return: The :class:`SpectralClass` the ANP database assigns.
+        :raises KeyError: if the database carries no such class.
+        """
+        op = _operation_code(operation)
+        class_id = (
+            self.departure_spectral_class_id
+            if op == _DEPARTURE
+            else self.approach_spectral_class_id
+        )
+        return self._database.spectral_class(class_id)
+
+    def revised_npd_curves(
+        self,
+        operation: str,
+        metric: str = "SEL",
+        *,
+        temperature_c: float,
+        relative_humidity_percent: float,
+        atmospheric_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
+        absorption: str = "arp5534",
+    ) -> RevisedNpdCurves:
+        """NPD curves for another atmosphere (see :meth:`AnpDatabase.revised_npd_curves`)."""
+        return self._database.revised_npd_curves(
+            self.aircraft_id,
+            operation,
+            metric,
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            absorption=absorption,
+        )
 
     def profile(
         self, operation: str, stage_length: int = 1, *, profile_id: str | None = None
@@ -458,6 +549,8 @@ class AnpAircraft:
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
         atmospheric_pressure_kpa: float | None = None,
+        relative_humidity_percent: float | None = None,
+        absorption: str = "arp5534",
     ) -> FlyoverResult:
         """Single-event level at a receiver (see :meth:`AnpDatabase.event_level`)."""
         return self._database.event_level(
@@ -469,6 +562,8 @@ class AnpAircraft:
             metric=metric,
             temperature_c=temperature_c,
             atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            relative_humidity_percent=relative_humidity_percent,
+            absorption=absorption,
         )
 
     def noise_contour(
@@ -482,6 +577,8 @@ class AnpAircraft:
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
         atmospheric_pressure_kpa: float | None = None,
+        relative_humidity_percent: float | None = None,
+        absorption: str = "arp5534",
     ) -> NoiseContourResult:
         """Single-event ground contour (see :meth:`AnpDatabase.noise_contour`)."""
         return self._database.noise_contour(
@@ -494,6 +591,8 @@ class AnpAircraft:
             metric=metric,
             temperature_c=temperature_c,
             atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            relative_humidity_percent=relative_humidity_percent,
+            absorption=absorption,
         )
 
 
@@ -542,6 +641,7 @@ class AnpDatabase:
         distances: NDArray[np.float64],
         profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
         performance: _PerformanceTables | None = None,
+        spectral_classes: Mapping[str, SpectralClass] | None = None,
     ) -> None:
         self._aircraft = dict(aircraft)
         self._npd = dict(npd)
@@ -550,6 +650,7 @@ class AnpDatabase:
         self._performance = (
             performance if performance is not None else _PerformanceTables()
         )
+        self._spectral_classes = dict(spectral_classes or {})
 
     @property
     def aircraft_ids(self) -> list[str]:
@@ -578,7 +679,79 @@ class AnpDatabase:
             mounting=_MOUNTING.get(lat, "wing"),
             npd_id=m.get("NPD_ID", ""),
             power_parameter=m.get("Power Parameter", ""),
+            approach_spectral_class_id=m.get("Approach Spectral Class ID", ""),
+            departure_spectral_class_id=m.get("Departure Spectral Class ID", ""),
             _database=self,
+        )
+
+    @property
+    def spectral_class_ids(self) -> list[str]:
+        """Sorted list of the spectral class identifiers in the database."""
+        return sorted(self._spectral_classes)
+
+    def spectral_class(self, class_id: int | str) -> SpectralClass:
+        """One spectral class of the database (ECAC Doc 29 Vol. 2 G4.3).
+
+        :param class_id: Spectral class identifier, as a number or as the
+            table writes it (``103`` or ``"103"``).
+        :return: A :class:`SpectralClass`.
+        :raises KeyError: if the export carries no such class, or no
+            spectral-class table at all.
+        """
+        key = str(class_id).strip()
+        if key not in self._spectral_classes:
+            available = (
+                str(self.spectral_class_ids)
+                if self._spectral_classes
+                else "none, the export has no spectral-class table"
+            )
+            msg = (
+                f"spectral class {key!r} not in this ANP database "
+                f"(available: {available})."
+            )
+            raise KeyError(msg)
+        return self._spectral_classes[key]
+
+    def revised_npd_curves(
+        self,
+        aircraft_id: str,
+        operation: str,
+        metric: str = "SEL",
+        *,
+        temperature_c: float,
+        relative_humidity_percent: float,
+        atmospheric_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
+        absorption: str = "arp5534",
+    ) -> RevisedNpdCurves:
+        """NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
+
+        The curves of :meth:`npd_curves` revised by the increment of the
+        aircraft's own spectral class for the operation, as
+        :func:`~phonometry.aircraft.npd_atmosphere.revise_npd_curves` computes
+        it.
+
+        :param aircraft_id: ANP aircraft identifier.
+        :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
+        :param metric: ``"SEL"`` (default) or ``"LAmax"``.
+        :param temperature_c: Air temperature, in degrees Celsius.
+        :param relative_humidity_percent: Relative humidity, in percent.
+        :param atmospheric_pressure_kpa: Air pressure, in kPa (default 101.325).
+        :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
+        :return: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNpdCurves`.
+        :raises KeyError: if the aircraft, its NPD data or its spectral class is
+            missing.
+        :raises ValueError: for an unknown metric, operation or absorption route.
+        """
+        from .npd_atmosphere import revise_npd_curves
+
+        curves = self.npd_curves(aircraft_id, operation, metric)
+        return revise_npd_curves(
+            curves,
+            self.aircraft(aircraft_id).spectral_class(operation),
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            absorption=absorption,
         )
 
     def npd_curves(
@@ -978,6 +1151,7 @@ class AnpDatabase:
         operation: str,
         stage_length: int | str,
         aerodrome: Aerodrome | None = None,
+        npd_air: _NpdAir | None = None,
     ) -> tuple[
         AnpAircraft,
         AnpProfile,
@@ -992,6 +1166,11 @@ class AnpDatabase:
         every caller wanted while the fixed points were all this bridge could
         fly. With one it is the published procedure flown at that field, which
         is the only trajectory most of the fleet has.
+
+        With *npd_air* both NPD tables are recalculated for that air by ECAC
+        Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the
+        operation; without it they stay in the SAE AIR-1845 atmosphere the
+        database is normalised to.
         """
         acft = self.aircraft(aircraft_id)
         prof = (
@@ -1013,7 +1192,26 @@ class AnpDatabase:
                 f"{lmax.powers}."
             )
             raise ValueError(msg)
-        return acft, prof, sel.powers, sel.distances, sel.levels, lmax.levels
+        if npd_air is None:
+            return acft, prof, sel.powers, sel.distances, sel.levels, lmax.levels
+        from .npd_atmosphere import npd_atmosphere_increment
+
+        increment = npd_atmosphere_increment(
+            acft.spectral_class(operation),
+            temperature_c=npd_air.atmosphere.temperature_c,
+            relative_humidity_percent=npd_air.relative_humidity_percent,
+            atmospheric_pressure_kpa=npd_air.atmosphere.atmospheric_pressure_kpa,
+            absorption=npd_air.absorption,
+            distances_m=sel.distances,
+        ).increment_db
+        return (
+            acft,
+            prof,
+            sel.powers,
+            sel.distances,
+            sel.levels + increment[None, :],
+            lmax.levels + increment[None, :],
+        )
 
     def event_level(
         self,
@@ -1026,6 +1224,8 @@ class AnpDatabase:
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
         atmospheric_pressure_kpa: float | None = None,
+        relative_humidity_percent: float | None = None,
+        absorption: str = "arp5534",
     ) -> FlyoverResult:
         """Doc 29 single-event level of an ANP aircraft at a receiver.
 
@@ -1045,10 +1245,25 @@ class AnpDatabase:
             atmospheric impedance adjustment. Left unset it follows
             *aerodrome*, or the standard atmosphere when there is none.
         :param atmospheric_pressure_kpa: Air pressure at the field, in kPa, likewise.
+        :param relative_humidity_percent: Relative humidity at the field, in
+            percent. Given, the SEL and LAmax NPD curves are recalculated for
+            that humidity and the temperature and pressure above by ECAC Doc 29
+            Vol. 2 Appendix D, with the aircraft's spectral class for the
+            operation; left unset they stay in the SAE AIR-1845 atmosphere the
+            database is normalised to.
+        :param absorption: The Appendix D absorption route, ``"arp5534"``
+            (default) or ``"arp866a"``; read only with a humidity.
         :return: A :class:`~phonometry.aircraft.airport_noise.FlyoverResult`.
         """
+        atmosphere = _impedance_atmosphere(
+            aerodrome, temperature_c, atmospheric_pressure_kpa
+        )
         acft, prof, p, d, sel, lmax = self._doc29_inputs(
-            aircraft_id, operation, stage_length, aerodrome
+            aircraft_id,
+            operation,
+            stage_length,
+            aerodrome,
+            _npd_air(atmosphere, relative_humidity_percent, absorption),
         )
         return event_level(
             prof.path,
@@ -1059,9 +1274,7 @@ class AnpDatabase:
             lmax,
             mounting=acft.mounting,
             metric=metric,
-            atmosphere=_impedance_atmosphere(
-                aerodrome, temperature_c, atmospheric_pressure_kpa
-            ),
+            atmosphere=atmosphere,
             segments=FlightSegmentState(
                 ground_roll=prof.ground_roll, landing_roll=prof.landing_roll
             ),
@@ -1079,6 +1292,8 @@ class AnpDatabase:
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
         atmospheric_pressure_kpa: float | None = None,
+        relative_humidity_percent: float | None = None,
+        absorption: str = "arp5534",
     ) -> NoiseContourResult:
         """Doc 29 single-event ground contour of an ANP aircraft.
 
@@ -1099,10 +1314,25 @@ class AnpDatabase:
             atmospheric impedance adjustment. Left unset it follows
             *aerodrome*, or the standard atmosphere when there is none.
         :param atmospheric_pressure_kpa: Air pressure at the field, in kPa, likewise.
+        :param relative_humidity_percent: Relative humidity at the field, in
+            percent. Given, the SEL and LAmax NPD curves are recalculated for
+            that humidity and the temperature and pressure above by ECAC Doc 29
+            Vol. 2 Appendix D, with the aircraft's spectral class for the
+            operation; left unset they stay in the SAE AIR-1845 atmosphere the
+            database is normalised to.
+        :param absorption: The Appendix D absorption route, ``"arp5534"``
+            (default) or ``"arp866a"``; read only with a humidity.
         :return: A :class:`~phonometry.aircraft.airport_noise.NoiseContourResult`.
         """
+        atmosphere = _impedance_atmosphere(
+            aerodrome, temperature_c, atmospheric_pressure_kpa
+        )
         acft, prof, p, d, sel, lmax = self._doc29_inputs(
-            aircraft_id, operation, stage_length, aerodrome
+            aircraft_id,
+            operation,
+            stage_length,
+            aerodrome,
+            _npd_air(atmosphere, relative_humidity_percent, absorption),
         )
         return noise_contour(
             prof.path,
@@ -1114,9 +1344,7 @@ class AnpDatabase:
             y=y,
             mounting=acft.mounting,
             metric=metric,
-            atmosphere=_impedance_atmosphere(
-                aerodrome, temperature_c, atmospheric_pressure_kpa
-            ),
+            atmosphere=atmosphere,
             segments=FlightSegmentState(
                 ground_roll=prof.ground_roll, landing_roll=prof.landing_roll
             ),
@@ -1159,6 +1387,37 @@ def _impedance_atmosphere(
         if atmospheric_pressure_kpa is None
         else atmospheric_pressure_kpa,
     )
+
+
+class _NpdAir(NamedTuple):
+    """The air the Appendix D recalculation of the NPD tables is made for."""
+
+    atmosphere: AerodromeAtmosphere
+    relative_humidity_percent: float
+    absorption: str
+
+
+def _npd_air(
+    atmosphere: AerodromeAtmosphere,
+    relative_humidity_percent: float | None,
+    absorption: str,
+) -> _NpdAir | None:
+    """The Appendix D air, or ``None`` when no humidity asks for one.
+
+    The temperature and pressure are the ones the impedance adjustment reads,
+    for the reason :func:`_impedance_atmosphere` gives: there is one air at the
+    field, and the humidity completes it rather than describing another. The
+    route is checked even when no humidity asks for it, so a misspelt one is
+    refused rather than ignored.
+
+    :raises ValueError: for an absorption route Appendix D does not offer.
+    """
+    from .npd_atmosphere import _ABSORPTION
+
+    require_choice(absorption, "absorption", _ABSORPTION)
+    if relative_humidity_percent is None:
+        return None
+    return _NpdAir(atmosphere, float(relative_humidity_percent), absorption)
 
 
 def _read_tables(path: Path | str | None) -> dict[str, str]:
@@ -1243,7 +1502,7 @@ def _parse_profiles(
             # lookup compares against an already-normalised code, so a row
             # spelling its operation "d" would simply never be found and the
             # aeroplane would report no fixed-point profile at all.
-            _operation_code(row["Op Type"]),
+            _operation_code(row[_COL_OP_TYPE]),
             row["Profile_ID"],
             int(float(row[_COL_STAGE_LENGTH])),
         )
@@ -1353,7 +1612,7 @@ def _parse_aerodynamic_table(
         # would be stored with the landing coefficient and still be found
         # by a departure. Eq. B-15 would then rotate at the wrong speed
         # with nothing to show for it.
-        op = _operation_code(row["Op Type"])
+        op = _operation_code(row[_COL_OP_TYPE])
         # The take-off speed coefficient C and the landing one D live in
         # separate columns, and a row fills whichever its operation flies.
         speed = _optional(row["C"] if op == _DEPARTURE else row["D"])
@@ -1441,6 +1700,52 @@ def _parse_approach_step_table(
         out.approach_steps[akey] = tuple(step for _n, step in asteps)
 
 
+def _spectral_frequencies(header: Iterable[str]) -> NDArray[np.float64]:
+    """Band centre frequencies (Hz) parsed from the ``L_<f>Hz`` column headers.
+
+    :raises ValueError: unless they are the 24 one-third-octave bands from
+        50 Hz to 10 kHz that G4.3 of Doc 29 Vol. 2 describes.
+    """
+    found = [
+        float(c.strip()[2:-2])
+        for c in header
+        if c.strip().startswith("L_") and c.strip().endswith("Hz")
+    ]
+    frequencies = np.asarray(found, dtype=np.float64)
+    if frequencies.shape != NOY_BANDS.shape or not np.allclose(
+        frequencies, NOY_BANDS, rtol=0.0, atol=_BAND_MATCH_HZ
+    ):
+        msg = (
+            "spectral-class table must carry the 24 'L_<f>Hz' columns from "
+            f"L_50Hz to L_10000Hz; got {found}."
+        )
+        raise ValueError(msg)
+    return frequencies
+
+
+def _parse_spectral_classes(text: str) -> dict[str, SpectralClass]:
+    """Parse the spectral-class table into ``{class_id: SpectralClass}``."""
+    rows = _rows(text)
+    if not rows:
+        return {}
+    frequencies = _spectral_frequencies(rows[0].keys())
+    frequencies.flags.writeable = False  # shared by every class
+    columns = [c for c in rows[0] if c.startswith("L_") and c.endswith("Hz")]
+    out: dict[str, SpectralClass] = {}
+    for row in rows:
+        levels = np.asarray([float(row[c]) for c in columns], dtype=np.float64)
+        levels.flags.writeable = False
+        class_id = row["Spectral Class ID"]
+        out[class_id] = SpectralClass(
+            class_id=class_id,
+            operation=_operation_code(row[_COL_OP_TYPE]),
+            description=row.get("Description", ""),
+            frequencies_hz=frequencies,
+            levels_db=levels,
+        )
+    return out
+
+
 def _optional_table(name: str, tables: Mapping[str, str]) -> str | None:
     """One logical table by filename keyword, or ``None`` when the export omits it."""
     try:
@@ -1456,7 +1761,9 @@ def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
         ``*NPD_data.csv``, ``*fixed_point_profiles.csv`` tables, plus the
         optional performance tables the procedural-step model reads:
         ``*engine_coefficients.csv``, ``*Aerodynamic_coefficients.csv``,
-        ``*weights.csv`` and the two ``*procedural_steps.csv``). If ``None``
+        ``*weights.csv`` and the two ``*procedural_steps.csv``, and the
+        ``*Spectral_classes.csv`` table ECAC Doc 29 Vol. 2 Appendix D reads to
+        recalculate the NPD curves for another atmosphere). If ``None``
         (default), loads the full EASA ANP database v2.3 shipped with the
         package (see ``aircraft/data/anp/PROVENANCE.md``).
     :return: An :class:`AnpDatabase`.
@@ -1467,10 +1774,12 @@ def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
     aircraft = {row["ACFT_ID"]: row for row in aircraft_rows}
     npd, distances = _parse_npd(_pick("npd", tables))
     profiles = _parse_profiles(_pick("fixed_point", tables))
+    spectral = _optional_table("spectral", tables)
     return AnpDatabase(
         aircraft=aircraft,
         npd=npd,
         distances=distances,
         profiles=profiles,
         performance=_parse_performance(tables),
+        spectral_classes=_parse_spectral_classes(spectral) if spectral else None,
     )

@@ -25,9 +25,15 @@ from .anp_fleet import (
     AnpDatabase,
     AnpNpdCurves,
     AnpProfile,
+    SpectralClass,
     load_anp_database,
 )
-from .atmospheric_absorption import AircraftBandAttenuation, sae_band_attenuation
+from .atmospheric_absorption import (
+    AircraftBandAttenuation,
+    Arp866aAttenuation,
+    arp866a_attenuation,
+    sae_band_attenuation,
+)
 from .certification import (
     NOY_BANDS,
     EPNLResult,
@@ -53,6 +59,13 @@ from .flight_performance import (
 from .measurement_system import (
     AircraftSystemComplianceResult,
     verify_aircraft_noise_system,
+)
+from .npd_atmosphere import (
+    SAE_AIR1845_ATTENUATION_DB_PER_100M,
+    NpdAtmosphereIncrement,
+    RevisedNpdCurves,
+    npd_atmosphere_increment,
+    revise_npd_curves,
 )
 from .rotorcraft_noise import (
     FlightConditionInterpolation,
@@ -95,6 +108,7 @@ __all__ = [
     "AnpNpdCurves",
     "AnpProfile",
     "ApproachStep",
+    "Arp866aAttenuation",
     "DepartureStep",
     "EPNLResult",
     "FlightConditionInterpolation",
@@ -106,18 +120,23 @@ __all__ = [
     "MeanGroundPlaneResult",
     "NOY_BANDS",
     "NoiseContourResult",
+    "NpdAtmosphereIncrement",
     "NpdLevelResult",
     "PerformanceAircraft",
     "ProfilePoint",
     "PropellerEngineCoefficients",
+    "RevisedNpdCurves",
     "RotorcraftAtmosphere",
     "RotorcraftEventResult",
     "RotorcraftGround",
     "RotorcraftHemisphere",
     "RotorcraftNoiseContourResult",
     "RotorcraftTrackState",
+    "SAE_AIR1845_ATTENUATION_DB_PER_100M",
+    "SpectralClass",
     "TerrainScreeningResult",
     "approach_profile",
+    "arp866a_attenuation",
     "atmospheric_adjustment",
     "departure_profile",
     "diffraction_attenuation",
@@ -140,10 +159,12 @@ __all__ = [
     "mean_ground_plane",
     "noise_contour",
     "noise_fraction",
+    "npd_atmosphere_increment",
     "npd_curve",
     "npd_level",
     "perceived_noise_level",
     "perceived_noisiness",
+    "revise_npd_curves",
     "rotorcraft_event_level",
     "rotorcraft_noise_contour",
     "sae_band_attenuation",

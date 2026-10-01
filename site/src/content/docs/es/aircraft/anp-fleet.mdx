@@ -391,9 +391,14 @@ del aeródromo, y valen por defecto los 15 °C y 101,325 kPa de la atmósfera
 estándar. Ese último par es un término de contabilidad y no una corrección
 meteorológica: en la atmósfera estándar vale +0,07 dB, y rara vez pasa de unas
 décimas. Los niveles NPD siguen llevando dentro la absorción de la atmósfera a
-la que se redujeron, y la cadena no ofrece ninguna corrección de banda
-dependiente de la humedad, así que un aeródromo caluroso y seco no se modela
-pasándole su temperatura.
+la que se redujeron, así que un aeródromo caluroso y seco no se modela
+pasándole solo su temperatura. Si se le pasa también su
+`relative_humidity_percent`, el cableado de eventos y contornos recalcula las
+dos tablas NPD para ese aire según el apéndice D del volumen 2 de ECAC Doc 29,
+con la clase espectral de la aeronave; sin ella, las tablas se quedan en la
+atmósfera AIR-1845 a la que se normalizaron.
+[Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/)
+recorre ese recálculo.
 
 ```python
 from phonometry import aircraft

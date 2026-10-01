@@ -6,7 +6,7 @@ Aircraft noise is computed under internationally negotiated methods of two
 kinds. **Certification** fixes a single number per aircraft type to the last
 decimal, at reference points a standard places around the runway. **Contour
 methods** take that certified fleet and predict what an airport does to the
-ground around it. The four pages of this section cover both, and they share a
+ground around it. The five pages of this section cover both, and they share a
 common anatomy: a rigorously standardised **source descriptor** (a spectral
 time history, a noise-power-distance table or a noise hemisphere) plus
 standardised **propagation adjustments** that place the source at a receiver.
@@ -36,6 +36,12 @@ single-event SEL, LASmax and EPNL and their ground-grid contours.
 the two above: the noise-power-distance tables and default trajectories EASA and
 EUROCONTROL publish for real aircraft types, ready to feed the Doc 29 chain
 without writing a table by hand.
+[NPD data for the air at the airport](npd-atmosphere.md)
+adjusts those tables to the air of a study: the ANP curves are normalised to the
+average absorption of certification tests, and ECAC Doc 29 Vol. 2 Appendix D
+recalculates them from each aircraft's spectral class for another temperature,
+humidity and pressure, with the SAE ARP 5534 absorption or the legacy SAE ARP
+866A one of ISO 3891.
 
 The shared physics connects outward: atmospheric absorption comes from the
 same ISO 9613-1 model as
@@ -76,6 +82,9 @@ land-use study is finally judged on.
 - [The ANP fleet database](anp-fleet.md): the EASA tables of
   noise-power-distance curves and default trajectories that run the Doc 29
   chain for a real aircraft type.
+- [NPD data for the air at the airport](npd-atmosphere.md):
+  the ANP curves recalculated for a non-reference atmosphere by Doc 29
+  Appendix D.
 
 ## What this section does not cover
 

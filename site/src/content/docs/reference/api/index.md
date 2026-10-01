@@ -42,7 +42,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`signals.levels`](/phonometry/reference/api/signals/levels/) | Integrated and statistical sound levels (Leq, LAeq, LN percentiles). |
 | [`signals.spectra`](/phonometry/reference/api/signals/spectra/) | Calibrated spectral-density estimation with statistical error analysis. |
-| [`signals.multitaper`](/phonometry/reference/api/signals/multitaper/) | Thomson multitaper spectral estimation (Percival & Walden 1993, Ch. |
+| [`signals.multitaper`](/phonometry/reference/api/signals/multitaper/) | Thomson multitaper spectral estimation (Percival & Walden 1993, Ch. 7). |
 | [`signals.windows`](/phonometry/reference/api/signals/windows/) | Figures of merit of a spectral-analysis taper (Harris 1978). |
 | [`signals.miso`](/phonometry/reference/api/signals/miso/) | Multiple and partial coherence of a multiple-input/single-output system. |
 | [`signals.time_frequency`](/phonometry/reference/api/signals/time-frequency/) | Calibrated time-frequency analysis: STFT spectrogram and zoom FFT. |
@@ -220,10 +220,10 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`vibration.structural.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/) | Mechanical mobility and the frequency-response-function family (ISO 7626-1:2011). |
 | [`vibration.structural.point_mobility`](/phonometry/reference/api/vibration/point-mobility/) | Point mobilities and impedances of infinite structures (Cremer, Heckl & Petersson 2005, Chapter 5, Table 5.1). |
-| [`vibration.structural.radiation_efficiency`](/phonometry/reference/api/vibration/radiation-efficiency/) | Radiation efficiency of a plate in bending (Hopkins 2007, Sound Insulation, Section 2.9; Leppington et al. |
-| [`vibration.structural.junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/) | Bending-wave transmission coefficients for rigid plate junctions (Hopkins 2007, *Sound Insulation*, Section 5.2.1.3; Cremer et al. |
-| [`vibration.structural.experimental_sea`](/phonometry/reference/api/vibration/experimental-sea/) | Experimental statistical energy analysis: coupling loss factors from measured energies (Norton & Karczub Ch. |
-| [`vibration.machinery.diagnostics`](/phonometry/reference/api/vibration/diagnostics/) | Kinematic fault frequencies of rotating machinery (Norton & Karczub Ch. |
+| [`vibration.structural.radiation_efficiency`](/phonometry/reference/api/vibration/radiation-efficiency/) | Radiation efficiency of a plate in bending (Hopkins 2007, Sound Insulation, Section 2.9; Leppington et al. 1982; Maidanik 1962). |
+| [`vibration.structural.junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/) | Bending-wave transmission coefficients for rigid plate junctions (Hopkins 2007, *Sound Insulation*, Section 5.2.1.3; Cremer et al. 1973; Craik 1981, 1996). |
+| [`vibration.structural.experimental_sea`](/phonometry/reference/api/vibration/experimental-sea/) | Experimental statistical energy analysis: coupling loss factors from measured energies (Norton & Karczub Ch. 6). |
+| [`vibration.machinery.diagnostics`](/phonometry/reference/api/vibration/diagnostics/) | Kinematic fault frequencies of rotating machinery (Norton & Karczub Ch. 8). |
 | [`vibration.machinery.evaluation`](/phonometry/reference/api/vibration/evaluation/) | Evaluation of machine vibration by measurement (ISO 20816-1:2016). |
 | [`vibration.structural.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) | Dynamic transfer stiffness of resilient elements (ISO 10846, Parts 1 to 5). |
 | [`vibration.structural.building_damage`](/phonometry/reference/api/vibration/building-damage/) | Effects of vibration on structures (DIN 4150-3:1999-02). |
@@ -270,9 +270,10 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`aircraft.certification`](/phonometry/reference/api/aeroacoustics/certification/) | Aircraft noise certification: Effective Perceived Noise Level (ICAO Annex 16). |
-| [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/) | One-third-octave-band atmospheric absorption for aircraft noise (SAE ARP 5534). |
+| [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/) | One-third-octave-band atmospheric absorption for aircraft noise (SAE ARP 5534 and 866A). |
 | [`aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) | Noise-Power-Distance (NPD) event-level interpolation (ECAC Doc 29). |
 | [`aircraft.anp_fleet`](/phonometry/reference/api/aeroacoustics/anp-fleet/) | EASA ANP fleet database bridge for the ECAC Doc 29 airport-noise chain. |
+| [`aircraft.npd_atmosphere`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/) | NPD data for a non-reference atmosphere (ECAC Doc 29 Vol. 2 Appendix D). |
 | [`aircraft.flight_performance`](/phonometry/reference/api/aeroacoustics/flight-performance/) | ECAC Doc 29 flight performance: procedural steps into a flight profile. |
 | [`aircraft.rotorcraft_noise`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/) | Rotorcraft noise by the hemisphere method (ECAC Doc 32 / NORAH2). |
 | [`aircraft.rotorcraft_propagation`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/) | Rotorcraft propagation, ground effect and screening (ECAC Doc 32 / NORAH2). |

@@ -379,9 +379,13 @@ specific acoustic impedance to the air at the aerodrome, defaulting to the 15
 °C and 101.325 kPa of the standard atmosphere. That last pair is a bookkeeping
 term and not a weather correction: at the standard atmosphere it is worth +0.07
 dB, and it rarely exceeds a few tenths. The NPD levels still carry the
-absorption of the atmosphere they were reduced to, and the chain offers no
-humidity-dependent band correction, so a hot dry aerodrome is not modelled by
-passing its temperature.
+absorption of the atmosphere they were reduced to, so a hot dry aerodrome is not
+modelled by passing its temperature alone. Pass its `relative_humidity_percent`
+as well and the event and contour wiring recalculates both NPD tables for that
+air by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class; left
+unset, the tables stay in the AIR-1845 atmosphere they were normalised to.
+[NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/)
+walks through that recalculation.
 
 ```python
 from phonometry import aircraft

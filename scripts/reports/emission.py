@@ -5,13 +5,14 @@ The emission of a machine, by every route the standards give to it: the
 perceived noise level an aircraft is certificated on (ICAO Annex 16), the
 dual-number declaration of ISO 4871, and the sound power determined from
 pressure over a measurement surface (ISO 3744), in a reverberation room
-(ISO 3741), by an intensity scan (ISO 9614-2, and its precision sibling
-ISO 9614-3), from surface vibration (ISO/TS 7849-2) and in an anechoic room
-(ISO 3745).
+(ISO 3741), in the small test rooms of ISO 3743-1 and ISO 3743-2, by an
+intensity scan (ISO 9614-2, and its precision sibling ISO 9614-3), from
+surface vibration (ISO/TS 7849-2) and in an anechoic room (ISO 3745).
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -497,3 +498,147 @@ def _precision_sound_power_example() -> tuple[object, ReportMetadata, str]:
         ),
     )
     return result, metadata, "iso3745_precision_power_example.pdf"
+
+
+def _hard_walled_sound_power_example() -> tuple[object, ReportMetadata, str]:
+    """Hard-walled test room fiche: the ISO 3743-1:2010 comparison.
+
+    The guide's own worked example: a bench-top blender and a calibrated
+    reference sound source read at five microphone positions, one on each side
+    of the reference box and one above it (7.3), in a 60 m3 hard-walled room,
+    with a ceiling duct loud at the low end. At 125 Hz the duct is within 6 dB
+    of the blender, so K1 takes its fixed 1,3 dB and the band is an upper bound
+    (8.1.3), which the sheet marks; the louder reference source keeps 9 dB
+    there. Eq. (14) gives LWA = 100,1 dB(A) re 1 pW, and sigma_omc = 1,0 dB
+    with the Table 3 A-weighted reproducibility gives an expanded uncertainty
+    of 3,6 dB at k = 2. The declared limit of 102 dB(A) is met. The climate of
+    the test reaches both the determination and the header, so the C2 the
+    sheet prints is the one for 22 degC and 101,2 kPa.
+    """
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+    source = np.array(
+        [
+            [84.1, 86.0, 88.2, 90.1, 87.4, 83.2, 78.1],
+            [82.6, 85.1, 87.5, 89.6, 88.0, 83.9, 77.5],
+            [83.3, 86.8, 88.9, 90.8, 86.9, 82.8, 78.6],
+            [85.0, 85.6, 87.8, 89.2, 87.7, 84.4, 77.9],
+            [82.9, 86.3, 88.4, 90.5, 88.3, 83.5, 78.3],
+        ]
+    )
+    reference = np.array(
+        [
+            [87.8, 83.9, 86.8, 87.9, 87.1, 85.2, 81.8],
+            [87.1, 83.1, 86.1, 87.3, 86.6, 84.7, 81.2],
+            [88.5, 84.4, 87.2, 88.4, 87.6, 85.8, 82.4],
+            [87.7, 83.6, 86.5, 87.8, 87.0, 85.1, 81.6],
+            [88.2, 83.8, 86.9, 88.1, 87.4, 85.4, 82.0],
+        ]
+    )
+    lw_reference = np.array([94.0, 89.9, 92.8, 94.1, 93.2, 91.3, 87.9])
+    background = np.array(
+        [
+            [78.5, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+            [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],
+            [78.0, 70.5, 63.5, 57.5, 51.5, 44.5, 39.5],
+            [79.0, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+            [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],
+        ]
+    )
+    with warnings.catch_warnings():
+        # The 125 Hz upper bound warns; the sheet states it instead.
+        warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
+        result = ph.emission.sound_power_hard_walled(
+            source,
+            reference,
+            lw_reference,
+            freqs,
+            background_levels=background,
+            temperature_c=22.0,
+            static_pressure_kpa=101.2,
+            sigma_omc_db=1.0,
+        )
+    metadata = ReportMetadata(
+        client="Example appliance manufacturer",
+        specimen="Bench-top blender on a test table, full speed",
+        test_room="Hard-walled test room, V = 60 m3, painted concrete",
+        instrumentation="Class 1 sound level meter (IEC 61672-1), s/n 0042",
+        temperature_c=22.0,
+        relative_humidity_percent=48.0,
+        static_pressure_kpa=101.2,
+        test_date="2026-09-25",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-3743-1",
+        requirement=102.0,
+        notes="One source location (Table 2).",
+    )
+    return result, metadata, "iso3743_1_hard_walled_power_example.pdf"
+
+
+def _special_room_sound_power_example() -> tuple[object, ReportMetadata, str]:
+    """Special reverberation test room fiche: the ISO 3743-2:2018 direct method.
+
+    The guide's own worked example: a desktop printer whose cooling fan hums in
+    the 500 Hz octave, measured at six positions and two source locations in a
+    72 m3 special reverberation room with a centred nominal reverberation time
+    of 0,77 s. Formula (9) gives the octave bands and, applied to the measured
+    A-weighted levels as clause 4 reads it, LWA = 75,8 dB(A) re 1 pW; the Annex F
+    band total agrees. sigma_omc = 0,5 dB with the Table 5 A-weighted
+    reproducibility gives an expanded uncertainty of 4,1 dB at k = 2. The
+    declared limit of 77 dB(A) is met.
+    """
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+    first = np.array(
+        [
+            [62.1, 65.4, 63.2, 64.2, 61.5, 58.1, 52.3],
+            [60.4, 66.2, 69.1, 64.9, 61.1, 57.7, 51.8],
+            [63.0, 64.1, 64.0, 63.8, 62.0, 58.6, 52.9],
+            [61.2, 66.8, 68.7, 64.6, 61.7, 57.9, 52.1],
+            [62.6, 64.7, 62.9, 63.5, 61.3, 58.4, 52.6],
+            [60.9, 65.9, 67.8, 64.1, 61.9, 58.0, 52.0],
+        ]
+    )
+    second = first + np.array(
+        [
+            [0.3, -0.4, 2.1, 0.2, -0.1, 0.2, 0.1],
+            [-0.2, 0.3, -3.8, -0.1, 0.2, -0.1, 0.0],
+            [0.1, 0.2, 3.3, 0.1, 0.0, 0.1, -0.1],
+            [-0.3, -0.2, -3.1, 0.2, 0.1, 0.0, 0.2],
+            [0.2, 0.1, 2.9, -0.2, -0.2, 0.1, 0.1],
+            [-0.1, 0.0, -2.4, 0.0, 0.1, -0.2, 0.0],
+        ]
+    )
+    a_weighted = np.array(
+        [
+            [68.4, 70.1, 68.5, 70.0, 68.1, 69.5],
+            [68.8, 69.0, 69.4, 69.2, 68.5, 68.9],
+        ]
+    )
+    result = ph.emission.sound_power_special_room(
+        np.stack([first, second]),
+        freqs,
+        volume_m3=72.0,
+        nominal_reverberation_time_s=0.77,
+        background_levels=np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0]),
+        a_weighted_levels=a_weighted,
+        a_weighted_background_levels=46.0,
+        temperature_c=22.0,
+        static_pressure_kpa=101.2,
+        sigma_omc_db=0.5,
+    )
+    metadata = ReportMetadata(
+        client="Example office equipment maker",
+        specimen="Desktop printer, continuous printing",
+        test_room="Special reverberation test room, V = 72 m3, Tnom = 0.77 s",
+        instrumentation="Class 1 sound level meter (IEC 61672-1), s/n 0042",
+        temperature_c=22.0,
+        relative_humidity_percent=48.0,
+        static_pressure_kpa=101.2,
+        test_date="2026-09-25",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-3743-2",
+        requirement=77.0,
+        notes="Two source locations for the 500 Hz octave (Table 3).",
+    )
+    return result, metadata, "iso3743_2_special_room_power_example.pdf"

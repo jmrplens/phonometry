@@ -134,6 +134,7 @@ from .devices import (
     generate_feedback_stability,
     generate_field_indicators,
     generate_frequency_response,
+    generate_hard_walled_sound_power,
     generate_helmholtz_branch_geometry,
     generate_high_frequency_air_absorption,
     generate_high_frequency_sound_power,
@@ -195,6 +196,8 @@ from .devices import (
     generate_sound_power_reverberation_result,
     generate_sound_reinforcement_geometry,
     generate_spacer_bandwidth,
+    generate_special_room_reverberation,
+    generate_special_room_sound_power,
     generate_swept_sine_harmonic_responses,
     generate_swept_sine_methods,
     generate_swept_sine_thd,
@@ -945,6 +948,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # ISO 3747 in situ comparison: the per-position levels of both sources
     # after K1, and the LW they yield with the RSS calibration beside it.
     generate_in_situ_sound_power,
+    # ISO 3743-1 and -2 small test rooms: the hard-walled comparison, the
+    # special room's reverberation time within its curves, and the survey
+    # of 9.4 with the direct and comparison methods.
+    generate_hard_walled_sound_power,
+    generate_special_room_reverberation,
+    generate_special_room_sound_power,
     # ISO 9295 16 kHz octave: Annex A against the 624 printed cells of
     # Tables 1 and 2, and a direct and a tonal determination.
     generate_high_frequency_air_absorption,

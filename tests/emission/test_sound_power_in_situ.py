@@ -753,17 +753,30 @@ def test_result_refuses_disagreeing_shapes() -> None:
 # Plot
 # --------------------------------------------------------------------------
 def test_plot_draws_one_bar_per_band_and_hatches_upper_bounds() -> None:
+    """8.1 makes a band an upper bound on the source under test's margin;
+    a band whose reference-source margin is short fails 8.1 without being
+    one, since the capped K1i(RSS) lowers the level, and is drawn apart.
+    """
     background = np.full_like(ST, 40.0)
     background[3, 2] = ST[3, 2] - 3.0
-    res = _power(background_levels=background)
+    bg_ref = np.full_like(RSS, 40.0)
+    bg_ref[0, 5] = RSS[0, 5] - 3.0
+    res = _power(background_levels=background, background_levels_ref=bg_ref)
+    assert res.upper_bound.tolist() == [False, False, True] + [False] * 4
+    assert not bool(res.background_requirement_met[5])
     ax = res.plot()
     heights = [p.get_height() for p in ax.patches]
     np.testing.assert_allclose(heights, res.sound_power_level)
     hatched = [p.get_hatch() for p in ax.patches]
     assert hatched[2] == "//"
+    assert hatched[5] == "xx"
     assert hatched[0] is None
     assert f"{res.sound_power_level_a:.1f}" in ax.get_title()
-    assert ax.get_legend() is not None
+    labels = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert labels == [
+        "Upper bound: source margin below 6 dB",
+        "Background requirement (8.1) not shown to be met",
+    ]
     plt.close("all")
 
 

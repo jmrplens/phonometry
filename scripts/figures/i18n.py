@@ -1717,13 +1717,31 @@ _ES_EXACT = {
     "As measured, before $K_1$": "Tal como se midió, antes de $K_1$",
     "Background $L_{pi(\\mathrm{B})}$": "Ruido de fondo $L_{pi(\\mathrm{B})}$",
     "125 Hz: margin below 6 dB here, and at every\n"
-    "position for the reference source: $K_1$ capped\n"
-    "at 1.3 dB and the band is an upper bound": "125 Hz: margen inferior a 6 dB aquí, y en todas\n"
-    "las posiciones de la fuente de referencia: $K_1$\n"
-    "limitado a 1,3 dB y la banda es una cota superior",
+    "position for the reference source: both $K_1$\n"
+    "capped at 1.3 dB, the band fails 8.1 and is\n"
+    "no upper bound": "125 Hz: margen inferior a 6 dB aquí, y en todas\n"
+    "las posiciones de la fuente de referencia: los dos\n"
+    "$K_1$ limitados a 1,3 dB; la banda incumple el\n"
+    "apartado 8.1 y no es una cota superior",
     "$L_W$ of the source under test (Eq. 11)": "$L_W$ de la fuente en ensayo (Ec. 11)",
     "$L_{W(\\mathrm{RSS})}$, calibrated": "$L_{W(\\mathrm{RSS})}$, calibrado",
-    "Upper bound (background)": "Cota superior (ruido de fondo)",
+    "Background requirement not met (8.1)": "Requisito de ruido de fondo no cumplido (apartado 8.1)",
+    # hard_walled_sound_power: the ISO 3743-1 comparison at five positions;
+    # the lower panel is the library's own plot, translated there.
+    "Hard-walled test room (ISO 3743-1): the blender and the reference "
+    "source at five microphone positions": "Sala de ensayo de paredes rígidas (ISO 3743-1): la batidora y la "
+    "fuente de referencia en cinco posiciones de micrófono",
+    "Mean $\\overline{L'_{p(\\mathrm{ST})}}$ of the blender (Eq. 10)": "Media $\\overline{L'_{p(\\mathrm{ST})}}$ de la batidora (Ec. 10)",
+    "Mean $\\overline{L'_{p(\\mathrm{RSS})}}$ of the reference source (Eq. 11)": "Media $\\overline{L'_{p(\\mathrm{RSS})}}$ de la fuente de referencia (Ec. 11)",
+    "Mean background $\\overline{L_{p(\\mathrm{B})}}$ (Eq. 12)": "Ruido de fondo medio $\\overline{L_{p(\\mathrm{B})}}$ (Ec. 12)",
+    "Blender at each microphone position, $L'_{pi(\\mathrm{ST})}$": "Batidora en cada posición de micrófono, $L'_{pi(\\mathrm{ST})}$",
+    "Reference source at each microphone position, $L'_{pi(\\mathrm{RSS})}$": "Fuente de referencia en cada posición de micrófono, $L'_{pi(\\mathrm{RSS})}$",
+    # special_room_sound_power: the comparison-method markers drawn over the
+    # library's direct-method plot.
+    "Comparison method, Formula (10)": "Método de comparación, fórmula (10)",
+    # special_room_reverberation: the axis of Figure B.3, a ratio of two
+    # symbols, the same in both languages.
+    "$T/T_\\mathrm{nom}$": "$T/T_\\mathrm{nom}$",
     # spacer_bandwidth: what each p-p spacer costs at both ends (the decimal
     # comma inside the mathtext is baked in with the brace-guarded {,} form)
     "High end: the finite-difference bias, and "

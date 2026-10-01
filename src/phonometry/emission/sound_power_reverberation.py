@@ -382,6 +382,8 @@ def _background_corrected_mean(
     levels: np.ndarray,
     background_levels: np.ndarray,
     frequencies: np.ndarray,
+    *,
+    reference: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Background-corrected mean room level and effective per-band ``K1``.
 
@@ -433,7 +435,19 @@ def _background_corrected_mean(
             raise ValueError(msg)
         k1, clamped = _k1_eq14(raw_mean - bg_mean, frequencies)
         corrected = raw_mean - k1
-    if clamped:
+    if clamped and reference:
+        # The reference source's corrected level is subtracted in Eq. (21), so
+        # its clamped K1 lowers the result: no upper bound comes of it.
+        warnings.warn(
+            "Background margin of the reference sound source below the ISO 3741 "
+            "criterion (6 dB / 10 dB) in one or more bands; K1 clamped to the "
+            "criterion value, which lowers the comparison result there, so it "
+            "does not meet the criterion and is not an upper bound "
+            "(ISO 3741:2010, 9.1.2).",
+            SoundPowerWarning,
+            stacklevel=4,
+        )
+    elif clamped:
         warnings.warn(
             "Background margin below the ISO 3741 criterion (6 dB / 10 dB) in "
             "one or more bands; K1 clamped to the criterion value and the "
@@ -862,6 +876,7 @@ def _reference_source_level(
         levels_ref,
         background_levels_ref,
         _require_frequencies(freqs, "background_levels_ref"),
+        reference=True,
     )
     return corrected
 

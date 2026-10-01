@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1510,
-    "passing": 1510,
+    "checks": 1539,
+    "passing": 1539,
     "failing": 0,
     "domains": 98,
-    "standards": 488,
-    "citations": 1029,
-    "designations": 199,
+    "standards": 490,
+    "citations": 1058,
+    "designations": 201,
     "sources": 114
   },
   "units": [
@@ -159,8 +159,8 @@
     {
       "id": "intensity-sound-power",
       "title": "Intensity & sound power",
-      "checks": 49,
-      "passing": 49
+      "checks": 78,
+      "passing": 78
     },
     {
       "id": "emission-sound-pressure-level-iso-11200-group",
@@ -10394,6 +10394,1133 @@
         "value": 0.0
       },
       "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-9-5-example/expanded-uncertainty-u-2-sqrt-1-5-2-2-2-db-5-db-sigma-omc-2-0-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 9.5 EXAMPLE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "9.5 EXAMPLE"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB = 5 dB, sigma_omc = 2,0 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-table-3/typical-upper-bounds-of-sigma-r0-per-octave-band-and-a-weighted-the-400-to-5-000-row-read-as-500-hz-to-4-khz",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Typical upper bounds of sigma_R0 per octave band and A-weighted (the '400 to 5 000' row read as 500 Hz to 4 kHz)",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = 3 dB; 250 Hz = 2 dB; 500 Hz = 1.5 dB; 1 kHz = 1.5 dB; 2 kHz = 1.5 dB; 4 kHz = 1.5 dB; 8 kHz = 2.5 dB; A = 1.5 dB",
+        "record": {
+          "125 Hz": 3.0,
+          "250 Hz": 2.0,
+          "500 Hz": 1.5,
+          "1 kHz": 1.5,
+          "2 kHz": 1.5,
+          "4 kHz": 1.5,
+          "8 kHz": 2.5,
+          "A": 1.5
+        }
+      },
+      "computed": {
+        "label": "125 Hz = 3 dB; 250 Hz = 2 dB; 500 Hz = 1.5 dB; 1 kHz = 1.5 dB; 2 kHz = 1.5 dB; 4 kHz = 1.5 dB; 8 kHz = 2.5 dB; A = 1.5 dB",
+        "record": {
+          "125 Hz": 3.0,
+          "250 Hz": 2.0,
+          "500 Hz": 1.5,
+          "1 kHz": 1.5,
+          "2 kHz": 1.5,
+          "4 kHz": 1.5,
+          "8 kHz": 2.5,
+          "A": 1.5
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-table-c-1/total-standard-deviation-of-the-grade-2-row-sigma-r0-1-5-db-for-sigma-omc-0-5-2-and-4-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Total standard deviation of the grade 2 row, sigma_R0 = 1,5 dB, for sigma_omc = 0,5, 2 and 4 dB",
+      "kind": "record",
+      "expected": {
+        "label": "sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB",
+        "record": {
+          "sigma_omc 0,5": 1.6,
+          "sigma_omc 2": 2.5,
+          "sigma_omc 4": 4.3
+        }
+      },
+      "computed": {
+        "label": "sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB",
+        "record": {
+          "sigma_omc 0,5": 1.6,
+          "sigma_omc 2": 2.5,
+          "sigma_omc 4": 4.3
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-eq-13-8-1-3/k1-at-the-6-db-margin-is-10-lg-1-10-0-6-1-2563-db-1-3-db-below-it-and-0-above-15-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Eq. 13 / 8.1.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Eq. 13 / 8.1.3"
+          }
+        ]
+      },
+      "quantity": "K1 at the 6 dB margin is -10 lg(1 - 10^-0,6) = 1,2563 dB, 1,3 dB below it and 0 above 15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15,5 dB) = 0 dB",
+        "record": {
+          "K1(6 dB)": 1.2563,
+          "K1(4 dB)": 1.3,
+          "K1(15,5 dB)": 0.0
+        }
+      },
+      "computed": {
+        "label": "K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15,5 dB) = 0 dB",
+        "record": {
+          "K1(6 dB)": 1.2563,
+          "K1(4 dB)": 1.3,
+          "K1(15,5 dB)": 0.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-eq-14-vs-iso-3747-2010-eq-11/the-hard-walled-comparison-and-the-in-situ-comparison-give-the-same-lw-with-the-background-negligible-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Eq. 14 vs ISO 3747:2010 Eq. 11",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Eq. 14"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 3747",
+            "edition": "2010",
+            "clause": "Eq. 11",
+            "lead": " vs ",
+            "relation": "compares"
+          }
+        ]
+      },
+      "quantity": "The hard-walled comparison and the in situ comparison give the same LW with the background negligible (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB difference"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-eq-20-clause-3-4-note-1/a-source-steady-over-t-10-s-lj-lw-10-lg-t-t0-band-for-band-background-carried-over-the-same-t",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Eq. 20 / clause 3.4 NOTE 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Eq. 20 / clause 3.4 NOTE 1"
+          }
+        ]
+      },
+      "quantity": "A source steady over T = 10 s: LJ = LW + 10 lg(T/T0) band for band, background carried over the same T",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB difference"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-eq-15-eq-16/ne-events-one-at-a-time-and-one-measurement-over-ne-events-agree-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Eq. 15 / Eq. 16",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Eq. 15 / Eq. 16"
+          }
+        ]
+      },
+      "quantity": "Ne events one at a time and one measurement over Ne events agree (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB difference"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-annex-a/c2-at-500-m-and-23-0-degc-from-eq-a-2-0-26-db-not-the-0-4-db-of-c-4-2-5",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Annex A",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Annex A"
+          }
+        ]
+      },
+      "quantity": "C2 at 500 m and 23,0 degC from Eq. (A.2): 0,26 dB (not the 0,4 dB of C.4.2.5)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.26
+      },
+      "computed": {
+        "value": 0.2622
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0022
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-table-b-1-eq-b-1/lwa-of-a-flat-90-db-octave-spectrum-63-hz-to-8-khz-with-the-printed-ck",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Table B.1 / Eq. B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Table B.1 / Eq. B.1"
+          }
+        ]
+      },
+      "quantity": "LWA of a flat 90 dB octave spectrum, 63 Hz to 8 kHz, with the printed Ck",
+      "kind": "scalar",
+      "expected": {
+        "value": 96.98713148119768
+      },
+      "computed": {
+        "value": 96.9871
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-4-2/room-volume-and-reference-box-40-m3-and-40-boxes-1-0-m-up-to-100-m3-2-0-m-above",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 4.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "4.2"
+          }
+        ]
+      },
+      "quantity": "Room volume and reference box: 40 m3 and 40 boxes; 1,0 m up to 100 m3, 2,0 m above",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 room and box verdicts"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 room and box verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-table-2/source-locations-from-sm-1-up-to-2-5-db-2-up-to-4-0-db-2-plus-2-in-another-room-above",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Source locations from sM: 1 up to 2,5 dB, 2 up to 4,0 dB, 2 plus 2 in another room above",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 Table 2 rows"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 Table 2 rows"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-eq-24-iso-3743-2-2018-formula-14/sigma-r0-sqrt-sigma-tot-2-sigma-omc-2-2-0-db-for-2-5-db-and-1-5-db-the-minus-of-part-1-part-2-prints-a-plus",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 Eq. 24 / ISO 3743-2:2018 Formula 14",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Eq. 24"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Formula 14",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2) = 2,0 dB for 2,5 dB and 1,5 dB (the minus of Part 1; Part 2 prints a plus)",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-1-2010-4-5-vs-iso-11546-2-1995-table-c-1/the-6-db-background-margin-the-determination-holds-to-is-the-one-iso-11546-2-tabulates-for-iso-3743-1",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-1:2010 4.5 vs ISO 11546-2:1995 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "4.5"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 11546-2",
+            "edition": "1995",
+            "clause": "Table C.1",
+            "lead": " vs ",
+            "relation": "compares"
+          }
+        ]
+      },
+      "quantity": "The 6 dB background margin the determination holds to is the one ISO 11546-2 tabulates for ISO 3743-1",
+      "kind": "record",
+      "expected": {
+        "label": "ISO 3743-1 4.5 = 6 dB; ISO 11546-2 Table C.1 = 6 dB",
+        "record": {
+          "ISO 3743-1 4.5": 6.0,
+          "ISO 11546-2 Table C.1": 6.0
+        }
+      },
+      "computed": {
+        "label": "ISO 3743-1 4.5 = 6 dB; ISO 11546-2 Table C.1 = 6 dB",
+        "record": {
+          "ISO 3743-1 4.5": 6.0,
+          "ISO 11546-2 Table C.1": 6.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-11-5-example/expanded-uncertainty-u-2-sqrt-2-2-2-2-db-5-7-db-sigma-omc-2-0-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 11.5 EXAMPLE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "11.5 EXAMPLE"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty U = 2 sqrt(2^2 + 2^2) dB = 5,7 dB, sigma_omc = 2,0 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.7
+      },
+      "computed": {
+        "value": 5.6569
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0431
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-table-5/typical-upper-bounds-of-sigma-r0-per-octave-band-and-a-weighted",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Table 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Table 5"
+          }
+        ]
+      },
+      "quantity": "Typical upper bounds of sigma_R0 per octave band and A-weighted",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 2 dB; 1 kHz = 2 dB; 2 kHz = 2 dB; 4 kHz = 2 dB; 8 kHz = 3 dB; A = 2 dB",
+        "record": {
+          "125 Hz": 5.0,
+          "250 Hz": 3.0,
+          "500 Hz": 2.0,
+          "1 kHz": 2.0,
+          "2 kHz": 2.0,
+          "4 kHz": 2.0,
+          "8 kHz": 3.0,
+          "A": 2.0
+        }
+      },
+      "computed": {
+        "label": "125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 2 dB; 1 kHz = 2 dB; 2 kHz = 2 dB; 4 kHz = 2 dB; 8 kHz = 3 dB; A = 2 dB",
+        "record": {
+          "125 Hz": 5.0,
+          "250 Hz": 3.0,
+          "500 Hz": 2.0,
+          "1 kHz": 2.0,
+          "2 kHz": 2.0,
+          "4 kHz": 2.0,
+          "8 kHz": 3.0,
+          "A": 2.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-table-d-1/total-standard-deviation-of-the-grade-2-row-sigma-r0-2-db-for-sigma-omc-0-5-2-0-and-4-0-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Table D.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Table D.1"
+          }
+        ]
+      },
+      "quantity": "Total standard deviation of the grade 2 row, sigma_R0 = 2 dB, for sigma_omc = 0,5, 2,0 and 4,0 dB",
+      "kind": "record",
+      "expected": {
+        "label": "sigma_omc 0,5 = 2.1 dB; sigma_omc 2,0 = 2.8 dB; sigma_omc 4,0 = 4.5 dB",
+        "record": {
+          "sigma_omc 0,5": 2.1,
+          "sigma_omc 2,0": 2.8,
+          "sigma_omc 4,0": 4.5
+        }
+      },
+      "computed": {
+        "label": "sigma_omc 0,5 = 2.1 dB; sigma_omc 2,0 = 2.8 dB; sigma_omc 4,0 = 4.5 dB",
+        "record": {
+          "sigma_omc 0,5": 2.1,
+          "sigma_omc 2,0": 2.8,
+          "sigma_omc 4,0": 4.5
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-formula-1-formula-b-2/r-at-1-000-hz-for-a-70-m3-room-is-the-1-06-of-formula-b-2",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Formula 1 / Formula B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Formula 1 / Formula B.2"
+          }
+        ]
+      },
+      "quantity": "R at 1 000 Hz for a 70 m3 room is the 1,06 of Formula (B.2)",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.06
+      },
+      "computed": {
+        "value": 1.0624
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0024
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-formula-b-2/a-room-that-follows-the-curve-exactly-centres-on-tnom-t1000-r-1-000-hz-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Formula B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Formula B.2"
+          }
+        ]
+      },
+      "quantity": "A room that follows the curve exactly centres on Tnom = T1000 / R(1 000 Hz) (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7530409770215317
+      },
+      "computed": {
+        "value": 0.753041
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-b-5-example/t1000-0-8-s-on-the-curve-of-figure-b-4-the-printed-t-tnom-1-09-is-the-midpoint-of-the-extreme-ratios-against-0-9-and-1-1-alone-within-0-015-and-as-tnom-0-73-s-it-puts-250-hz-above-1-1-r-the-library-s-centring-qualifies-the-room-at-0-76-s-a-departure-of-0-17-db-in-lw-see-the-errata",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 B.5 EXAMPLE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "B.5 EXAMPLE"
+          }
+        ]
+      },
+      "quantity": "T1000 = 0,8 s on the curve of Figure B.4: the printed T/Tnom = 1,09 is the midpoint of the extreme ratios against 0,9 and 1,1 alone (within 0,015), and as Tnom = 0,73 s it puts 250 Hz above 1,1 R; the library's centring qualifies the room at 0,76 s, a departure of 0,17 dB in LW (see the errata)",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 B.5 readings"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 B.5 readings"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-clause-5/the-noise-source-should-not-exceed-1-of-the-room-0-7-m3-in-the-minimum-70-m3-room-is-within-the-recommendation-0-71-m3-is-not-and-neither-moves-the-verdict",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Clause 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Clause 5"
+          }
+        ]
+      },
+      "quantity": "The noise source should not exceed 1 % of the room: 0,7 m3 in the minimum 70 m3 room is within the recommendation, 0,71 m3 is not, and neither moves the verdict",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 clause 5 readings"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 clause 5 readings"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-6-3/limiting-curves-0-9-and-1-1-times-r-tnom-up-to-6-3-khz-0-8-and-1-2-above",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 6.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "6.3"
+          }
+        ]
+      },
+      "quantity": "Limiting curves 0,9 and 1,1 times R Tnom up to 6,3 kHz, 0,8 and 1,2 above",
+      "kind": "record",
+      "expected": {
+        "label": "6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2",
+        "record": {
+          "6,3 kHz low": 0.9,
+          "6,3 kHz high": 1.1,
+          "8 kHz low": 0.8,
+          "8 kHz high": 1.2
+        }
+      },
+      "computed": {
+        "label": "6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2",
+        "record": {
+          "6,3 kHz low": 0.9,
+          "6,3 kHz high": 1.1,
+          "8 kHz low": 0.8,
+          "8 kHz high": 1.2
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-table-1/maximum-permitted-differences-of-the-reference-source-evaluation-of-6-7",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Maximum permitted differences of the reference-source evaluation of 6.7",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 3 dB; 1 kHz = 3 dB; 2 kHz = 3 dB; 4 kHz = 3 dB; 8 kHz = 4 dB",
+        "record": {
+          "125 Hz": 5.0,
+          "250 Hz": 3.0,
+          "500 Hz": 3.0,
+          "1 kHz": 3.0,
+          "2 kHz": 3.0,
+          "4 kHz": 3.0,
+          "8 kHz": 4.0
+        }
+      },
+      "computed": {
+        "label": "125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 3 dB; 1 kHz = 3 dB; 2 kHz = 3 dB; 4 kHz = 3 dB; 8 kHz = 4 dB",
+        "record": {
+          "125 Hz": 5.0,
+          "250 Hz": 3.0,
+          "500 Hz": 3.0,
+          "1 kHz": 3.0,
+          "2 kHz": 3.0,
+          "4 kHz": 3.0,
+          "8 kHz": 4.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-6-7-table-1/each-band-is-suitable-at-its-table-1-difference-read-high-or-low-and-not-0-1-db-beyond-it-on-either-side",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 6.7 / Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "6.7 / Table 1"
+          }
+        ]
+      },
+      "quantity": "Each band is suitable at its Table 1 difference read high or low, and not 0,1 dB beyond it on either side",
+      "kind": "count",
+      "expected": {
+        "value": 28.0,
+        "label": "28/28 Table 1 verdicts"
+      },
+      "computed": {
+        "value": 28.0,
+        "label": "28/28 Table 1 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-table-3/minimum-number-of-source-locations-for-3-6-and-12-microphone-positions-every-band-row-and-the-a-weighted-row",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Minimum number of source locations for 3, 6 and 12 microphone positions, every band row and the A-weighted row",
+      "kind": "count",
+      "expected": {
+        "value": 45.0,
+        "label": "45/45 Table 3 cells"
+      },
+      "computed": {
+        "value": 45.0,
+        "label": "45/45 Table 3 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-table-4/background-corrections-2-2-1-1-1-0-5-0-5-db-for-4-db-to-10-db-0-above",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Background corrections: 2, 2, 1, 1, 1, 0,5, 0,5 dB for 4 dB to 10 dB, 0 above",
+      "kind": "record",
+      "expected": {
+        "label": "4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB",
+        "record": {
+          "4 dB": 2.0,
+          "5 dB": 2.0,
+          "6 dB": 1.0,
+          "7 dB": 1.0,
+          "8 dB": 1.0,
+          "9 dB": 0.5,
+          "10 dB": 0.5,
+          "11 dB": 0.0
+        }
+      },
+      "computed": {
+        "label": "4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB",
+        "record": {
+          "4 dB": 2.0,
+          "5 dB": 2.0,
+          "6 dB": 1.0,
+          "7 dB": 1.0,
+          "8 dB": 1.0,
+          "9 dB": 0.5,
+          "10 dB": 0.5,
+          "11 dB": 0.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-formula-9/direct-method-lw-lp-10-lg-tnom-t0-10-lg-v-v0-13-db-in-a-70-m3-room-tnom-0-73-s-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Formula 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Formula 9"
+          }
+        ]
+      },
+      "quantity": "Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0,73 s (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB difference"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-formula-10-vs-iso-3743-1-2010-eq-14/the-comparison-methods-of-the-two-parts-agree-with-the-background-negligible-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Formula 10 vs ISO 3743-1:2010 Eq. 14",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Formula 10"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-1",
+            "edition": "2010",
+            "clause": "Eq. 14",
+            "lead": " vs ",
+            "relation": "compares"
+          }
+        ]
+      },
+      "quantity": "The comparison methods of the two parts agree with the background negligible (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB difference"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-10-3-a-table-4/the-reference-levels-take-table-4-before-formula-10-st-75-db-rss-80-db-lwr-90-db-and-a-5-db-reference-margin-give-lpr-78-db-and-lw-87-db-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 10.3 a) / Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "10.3 a) / Table 4"
+          }
+        ]
+      },
+      "quantity": "The reference levels take Table 4 before Formula (10): ST 75 dB, RSS 80 dB, LWr 90 dB and a 5 dB reference margin give Lpr 78 dB and LW 87 dB (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 87.0
+      },
+      "computed": {
+        "value": 87.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3743-2-2018-formula-2/h-theta-5-degc-within-10-of-its-value-during-the-reverberation-measurement-10-passes-12-fails-and-80-at-10-degc-passes-against-50-at-20-degc-only-through-the-5-degc",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3743-2:2018 Formula 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3743-2",
+            "edition": "2018",
+            "clause": "Formula 2"
+          }
+        ]
+      },
+      "quantity": "H (theta + 5 degC) within +/-10 % of its value during the reverberation measurement: +10 % passes, +12 % fails, and 80 % at 10 degC passes against 50 % at 20 degC only through the 5 degC",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 climate verdicts"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 climate verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

@@ -84,12 +84,14 @@ from reports.devices import (
 )
 from reports.emission import (
     _epnl_example,
+    _hard_walled_sound_power_example,
     _intensity_sound_power_example,
     _iso4871_declaration_example,
     _precision_intensity_example,
     _precision_sound_power_example,
     _reverberation_sound_power_example,
     _sound_power_example,
+    _special_room_sound_power_example,
     _vibration_sound_power_example,
 )
 from reports.environment import (
@@ -218,6 +220,8 @@ _FICHES: dict[str, Callable[[], _Fiche]] = {
     "iso9614_sound_power_intensity_example.pdf": _intensity_sound_power_example,
     "iso9614_3_precision_intensity_example.pdf": _precision_intensity_example,
     "iso3741_reverberation_power_example.pdf": _reverberation_sound_power_example,
+    "iso3743_1_hard_walled_power_example.pdf": _hard_walled_sound_power_example,
+    "iso3743_2_special_room_power_example.pdf": _special_room_sound_power_example,
     "iso7849_vibration_power_example.pdf": _vibration_sound_power_example,
     "en15657_structure_borne_power_example.pdf": _structure_borne_power_example,
     "en12354_5_installed_structure_borne_example.pdf": _installed_structure_borne_example,

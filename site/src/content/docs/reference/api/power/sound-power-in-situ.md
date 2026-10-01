@@ -34,10 +34,15 @@ $$
 with three rules around it: a margin above 15 dB needs no correction, a
 margin between 6 dB and 15 dB takes Eq. (7), and a margin below 6 dB caps
 the correction at 1,3 dB and turns the band into an upper bound that the
-report must flag as not meeting the background requirement. A determination
-that carries no background reading at all cannot meet that requirement
-either, since 8.1 declares a measurement valid only where the margin is at
-least 6 dB and 7.5 has the background obtained once at each position. When the RSS is
+report must flag as not meeting the background requirement. The reference
+source takes the same rule for its own `K1i(RSS)` (Eq. 9, 10), but a short
+margin there is no upper bound: its capped correction is subtracted from the
+level that Eq. (11) subtracts, so it pulls $L_W$ down, and 8.1 gives the
+upper-bound reading to the margin of the source under test alone. A
+determination that carries no background reading at all cannot meet the
+requirement either, since 8.1 declares a measurement valid only where the
+margin is at least 6 dB and 7.5 has the background obtained once at each
+position. When the RSS is
 run at `m` locations around a large source the calibrated powers and the
 per-location means are each energy-averaged over the locations before the
 subtraction (clause 8.3.2, Eq. 12).
@@ -160,6 +165,7 @@ InSituSoundPowerResult(
     background_correction: np.ndarray,
     background_correction_ref: np.ndarray,
     background_requirement_met: np.ndarray,
+    upper_bound: np.ndarray,
     c2: float,
     grade: str,
     sigma_r0: float,
@@ -207,8 +213,12 @@ Eq. 11 carrying a `K1` of its own, rather than call a band sound on a
 correction the standard had to cap. It is `False` in a band where
 either margin fell below 6 dB, and `False` throughout when no
 background levels were supplied at all, since nothing was measured
-against; either way the level is an upper bound to be reported as such
-(8.1).
+against. `upper_bound` marks the bands 8.1 calls upper bounds: the
+margin of the source under test was measured and fell below 6 dB while
+the reference source's margin met it everywhere, so the capped `K1i`
+leaves the level too high. A band where the reference source's margin is
+short is not one, since its capped correction pulls the level down; it
+is flagged by `background_requirement_met` alone.
 
 `grade` is the accuracy grade Table 2 grants (`'engineering'` or
 `'survey'`) and `sigma_r0` its typical reproducibility; `sigma_omc`,
@@ -232,8 +242,9 @@ InSituSoundPowerResult.plot(
 Plot the determined spectrum with the A-weighted total annotated.
 
 One bar per octave band of `LW` (or `LJ` for an energy
-determination); a band whose background margin fell below 6 dB is
-hatched, because its level is an upper bound (8.1). Requires
+determination); a band that 8.1 makes an upper bound is hatched and
+named as one, and a band that fails the background requirement
+otherwise is cross-hatched and named as that. Requires
 matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 

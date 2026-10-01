@@ -2139,9 +2139,10 @@ in the same order.
   of clauses 3.3 and 3.4 (PDF page 9, printed p. 3). The same construction is
   printed as ISO 3741:2010 Equation (25) (PDF page 33, printed p. 24, with its
   symbol list on PDF page 34, printed p. 25) as ISO 3747:2010 Equation
-  (14) (PDF pages 22 and 23, printed pp. 13 and 14), and as ISO 3746:2010
-  Equation (15) in clause 8.4.2 (PDF page 25, printed p. 16), which is the
-  survey-grade route the library takes for `grade='survey'`.
+  (14) (PDF pages 22 and 23, printed pp. 13 and 14), as ISO 3743-1:2010
+  Equation (19) in clause 8.2.3 (PDF page 25, printed p. 16), and as ISO
+  3746:2010 Equation (15) in clause 8.4.2 (PDF page 25, printed p. 16), which
+  is the survey-grade route the library takes for `grade='survey'`.
 - **The print:** $K_1 = -10 \lg\left(1 - 10^{-0{,}1\,\Delta L_E}\right)$ dB
   with $\Delta L_E = \overline{L'_{E(\mathrm{ST})}} - \overline{L_{p(\mathrm{B})}}$,
   where $\overline{L'_{E(\mathrm{ST})}}$ "is the mean frequency-band or
@@ -2174,8 +2175,9 @@ in the same order.
 - **Evidence:** Verified on PDF page 31 (printed p. 25) of ISO 3744:2010 for
   the equation and its symbol list, and on PDF page 9 (printed p. 3) for the
   definitions of clauses 3.3 and 3.4 with NOTE 1; the same construction read
-  on PDF pages 33 and 34 (printed pp. 24 and 25) of BS EN ISO 3741:2010 and on
-  PDF pages 22 and 23 (printed pp. 13 and 14) of BS EN ISO 3747:2010.
+  on PDF pages 33 and 34 (printed pp. 24 and 25) of BS EN ISO 3741:2010, on
+  PDF pages 22 and 23 (printed pp. 13 and 14) of BS EN ISO 3747:2010 and on
+  PDF page 25 (printed p. 16) of BS EN ISO 3743-1:2010.
 - **Library behaviour:** `sound_energy_pressure`, `sound_energy_reverberation`
   and `sound_energy_comparison` compare the background as its exposure over
   the same interval, $L_{p(\mathrm{B})} + 10 \lg(T/T_0)$, and require
@@ -2188,7 +2190,11 @@ in the same order.
   burst over a 62 dB background in a 10 s window, and
   $L_J = L_W + 10 \lg(T/T_0)$ field by field on both families; the
   conformance report carries the identity as "ISO 3744:2010 Eq. 23 / clause
-  3.4 NOTE 1".
+  3.4 NOTE 1". `sound_energy_hard_walled` reads ISO 3743-1:2010 Equation (19)
+  the same way and requires `integration_time_s` with the background;
+  `test_steady_source_energy_is_power_plus_10_lg_t` in
+  `tests/emission/test_sound_power_hard_walled.py` and the conformance check
+  "ISO 3743-1:2010 Eq. 20 / clause 3.4 NOTE 1" pin the identity there.
 - **Status:** unreported.
 
 ## ISO 3744:2010, 8.3.4 (the correction named K_1i in the text and K_1 in Equation (21))
@@ -4655,6 +4661,426 @@ in the same order.
 - **Library behaviour:** the Annex E uncertainty budget is not modelled, so no
   library number depends on it. Recorded so that a future reader chasing the
   derivation is not sent to the wrong equation.
+- **Status:** unreported.
+
+## ISO 3743-1:2010, 9.1, Equation (21) (the total standard deviation written $\sigma_\mathrm{TO}$)
+
+- **Location:** 9.1 "Methodology", Equation (21).
+- **The print:** $u(L_W) \approx u(L_J) \approx \sigma_\mathrm{TO}$.
+- **The problem:** the subscript is "TO", in capitals. The sentence before
+  the equation calls the quantity "the total standard deviation" and the
+  sentence after it "This total standard deviation"; Equations (22) and (23)
+  on the next page and the heading of 9.5 write it $\sigma_\mathrm{tot}$, and
+  no $\sigma_\mathrm{TO}$ is defined anywhere in the part. ISO 3743-2:2018
+  prints the same equation for its own methods, Formula (11), as
+  $u(L_W) \approx \sigma_\mathrm{tot}$.
+- **Evidence:** Verified on PDF page 25 (printed p. 16) of BS EN ISO
+  3743-1:2010, against Equations (22) and (23) on PDF page 26 (printed p. 17)
+  and the heading of 9.5 on PDF page 28 (printed p. 19) of the same
+  document, and Formula (11) on PDF page 19 (printed p. 13) of ISO
+  3743-2:2018.
+- **Library behaviour:** the total standard deviation is the `sigma_tot` of
+  `HardWalledSoundPowerResult`, $\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$
+  by Equation (22). No change was required.
+- **Status:** unreported.
+
+## ISO 3743-1:2010, Table 3 (a one-third-octave range under an octave heading)
+
+- **Location:** 9.4, Table 3 "Typical upper bound values of the standard
+  deviation of reproducibility of the method, $\sigma_{R0}$, for A-weighted
+  sound power levels and sound energy levels determined in accordance with
+  this part of ISO 3743", the third row of the octave block.
+- **The print:** under the heading "Octave mid-band frequency, Hz" the rows
+  read 125, 250, "400 to 5 000" and 8 000, with $\sigma_{R0}$ = 3,0, 2,0, 1,5
+  and 2,5 dB.
+- **The problem:** 400 Hz and 5 000 Hz are not octave mid-band frequencies;
+  they are one-third-octave centres. Every other row of the block is an octave,
+  the whole determination is made in octave bands (3.11, 7.5), and the octaves
+  between 250 Hz and 8 kHz are 500 Hz, 1 kHz, 2 kHz and 4 kHz. The table is
+  ISO 3744:2010 Table 2 converted to octaves: that table is headed
+  "One-third-octave mid-band frequency" and prints the same four values
+  against "100 to 160", "200 to 315", "400 to 5 000" and "6 300 to 10 000".
+  The first, second and fourth labels were rewritten as the octaves 125 Hz,
+  250 Hz and 8 000 Hz; the third kept its one-third-octave range. ISO
+  3743-2:2018 Table 5, the same table for Part 2 with its own values, labels
+  that row "500 to 4 000". The title carries the same slip: it announces the
+  table "for A-weighted sound power levels and sound energy levels", yet four
+  of its five rows are octave bands and only the last is A-weighted. 1.4 of
+  the part gives the uncertainty "for measurements made in frequency octave
+  bands and for A-weighted frequency calculations performed on them"; ISO
+  3744:2010 Table 2 is titled "for sound power levels and sound energy
+  levels", and ISO 3743-2:2018 Table 5 "for octave band and A-weighted sound
+  power levels".
+- **Evidence:** Verified on PDF page 28 (printed p. 19) of BS EN ISO
+  3743-1:2010, against 1.4 on PDF page 10 (printed p. 1) of the same
+  document, Table 2 on PDF page 38 (printed p. 29) of BS EN ISO 3744:2010 and
+  Table 5 on PDF page 22 (printed p. 16) of ISO 3743-2:2018.
+- **Library behaviour:** reads the row as the four octaves it spans, 500 Hz to
+  4 kHz, each with 1,5 dB
+  ([`sound_power_hard_walled.py`](../src/phonometry/emission/sound_power_hard_walled.py)).
+  Pinned by `test_table3_sigma_r0_per_band_and_a_weighted` in
+  [`tests/emission/test_sound_power_hard_walled.py`](../tests/emission/test_sound_power_hard_walled.py)
+  and by the conformance check "ISO 3743-1:2010 Table 3".
+- **Status:** unreported.
+
+## ISO 3743-1:2010, C.4.2.5 (the altitude correction of another standard)
+
+- **Location:** Annex C (informative), C.4.2.5 "Radiation impedance
+  correction, $C_2$", the sentences that size $s_{C_2}$.
+- **The print:** "For altitudes less than 500 m, no meteorological correction
+  is required. At 120 m altitude and 23 °C the correction is zero and at 500 m
+  altitude the correction is 0,4 dB. Assuming a triangular distribution for
+  this uncertainty, the standard deviation is
+  $s_{C_2} = 0{,}4/\sqrt{6} = 0{,}2\ \mathrm{dB}$."
+- **The problem:** the correction of this part is the $C_2$ of Annex A,
+  $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \lg[(273{,}15 +
+  \theta)/\theta_1]$ with $\theta_1$ = 296 K and the static pressure of
+  Equation (A.2). At 23 °C it gives 0,07 dB at 120 m ($p_\mathrm{s}$ =
+  99,89 kPa) and 0,26 dB at 500 m ($p_\mathrm{s}$ = 95,46 kPa), not zero and
+  0,4 dB. The two printed numbers are those of the sum $C_1 + C_2$ of ISO
+  3741:2010 clause 9.1.4, whose $C_1 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) +
+  5 \lg[(273{,}15 + \theta)/314]$ brings the sum to 0,000 dB at 120 m and
+  0,394 dB at 500 m. A comparison method has no $C_1$: it cancels between the
+  source under test and the reference sound source, which is why Annex A
+  prints $C_2$ alone. The divisor is right, $0{,}4/\sqrt{6} = 0{,}16$, which
+  rounds to the 0,2 printed.
+- **Evidence:** recomputation of Equation (A.2) and of $C_2$ from the
+  constants Annex A prints ($a$ = 2,256 0 × 10⁻⁵ m⁻¹, $b$ = 5,255 3,
+  $p_{\mathrm{s},0}$ = 101,325 kPa, $\theta_1$ = 296 K), and of $C_1 + C_2$
+  from ISO 3741:2010 clause 9.1.4. Verified on PDF page 41 (printed p. 32)
+  and PDF page 31 (printed p. 22) of BS EN ISO 3743-1:2010.
+- **Library behaviour:** implements Annex A as printed: a site at 500 m and
+  23 °C gets $C_2$ = 0,26 dB in `c2` and in `sound_power_level_ref`
+  ([`sound_power_hard_walled.py`](../src/phonometry/emission/sound_power_hard_walled.py)).
+  The Annex C budget is not modelled. Pinned by
+  `test_annex_a_c2_at_500_m_is_0_26_db` in
+  [`tests/emission/test_sound_power_hard_walled.py`](../tests/emission/test_sound_power_hard_walled.py)
+  and by the conformance check "ISO 3743-1:2010 Annex A".
+- **Status:** unreported.
+
+## ISO 3743-1:2010, C.4.2.8 and C.4.2.9 (the humidity band of ISO 3741 quoted at 30 % instead of 50 %)
+
+- **Location:** Annex C (informative), C.4.2.8 "Temperature, $\delta_\theta$"
+  and C.4.2.9 "Humidity, $\delta_H$", the last paragraph of each.
+- **The print:** C.4.2.8 "Recommended temperature and humidity ranges given in
+  ISO 3741 are ±1 °C and ±3 % $H$ below 20 °C when below 30 % $H$, to a maximum
+  of ±5 °C and ±10 % $H$ above 20 °C when above 30 % $H$"; C.4.2.9 "The
+  recommended humidity ranges given in ISO 3741 are ±3 %, if $H \leqslant$
+  30 %, to a maximum of ±10 %, if $H$ > 30 % $H$".
+- **The problem:** ISO 3741:2010 Table 3 has three humidity columns, below
+  30 %, 30 % to 50 % and above 50 %, and allows ±10 % only in the last; from
+  30 % to 50 % it allows ±5 %. Both clauses put the ±10 % above 30 %, so the
+  middle column of the table they quote is lost. ISO 3743-2:2018 prints the
+  same two sentences in D.4.2.8 and D.4.2.9 with "above 50 % $H$", which is
+  the table.
+- **Evidence:** Verified on PDF page 42 (printed p. 33) of BS EN ISO
+  3743-1:2010, against Table 3 on PDF page 18 (printed p. 9) of BS EN ISO
+  3741:2010 and D.4.2.8 and D.4.2.9 on PDF page 39 (printed p. 33) of ISO
+  3743-2:2018.
+- **Library behaviour:** the Annex C budget is not modelled, and nothing reads
+  the ISO 3741 tolerances through it. No change was required.
+- **Status:** unreported.
+
+## ISO 3743-2:2018, D.4.2.5 (the altitude correction of another standard)
+
+- **Location:** Annex D (informative), D.4.2.5 "Meteorological correction,
+  $C_2$", the sentences that size $s_{C_2}$.
+- **The print:** "For altitudes less than 500 m above sea level, no
+  meteorological correction is required. At 120 m altitude and 23 °C the
+  correction is zero and at 500 m altitude the correction is 0,4 dB. Assuming
+  a triangular distribution for this uncertainty, the standard deviation is
+  $s_{C_2} = 0{,}4/\sqrt{6} = 0{,}2$ dB."
+- **The problem:** the same sentence as ISO 3743-1:2010 C.4.2.5, and the same
+  defect. The correction of this part is the $C_2$ of Formula (E.2), which at
+  23 °C and the static pressure of Formula (E.3) is 0,07 dB at 120 m and
+  0,26 dB at 500 m; zero and 0,4 dB belong to the sum $C_1 + C_2$ of ISO
+  3741:2010 clause 9.1.4, and neither method of this part applies a $C_1$
+  (Formula (9) and Formula (10) carry none, and Formula (D.2) lists $C_2$
+  alone).
+- **Evidence:** recomputation of Formulae (E.2) and (E.3) from the printed
+  constants. Verified on PDF page 38 (printed p. 32) and PDF page 42 (printed
+  p. 36) of ISO 3743-2:2018.
+- **Library behaviour:** implements Annex E as printed, with the same
+  $C_2$ as Part 1
+  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  The Annex D budget is not modelled. Pinned by
+  `test_annex_e_c2_matches_part_1` in
+  [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
+  and by the conformance check "ISO 3743-1:2010 Annex A".
+- **Status:** unreported.
+
+## ISO 3743-2:2018, 11.3.2, Formula (14) (the total and the operating deviation added instead of subtracted)
+
+- **Location:** 11.3.2 "Round robin test", Formula (14).
+- **The print:** $\sigma'_{R0} = \sqrt{{\sigma'_\mathrm{tot}}^2 +
+  {\sigma'_\mathrm{omc}}^2}$.
+- **The problem:** the sentence that introduces the formula says the total
+  standard deviation of a round robin "includes the standard deviation
+  $\sigma'_\mathrm{omc}$" and "allows $\sigma'_{R0}$ to be determined", which
+  is Formula (12), $\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 +
+  \sigma_\mathrm{omc}^2}$, solved for $\sigma_{R0}$: the operating deviation
+  comes out by subtraction. With the plus sign the method's share would exceed
+  the total it is extracted from. The paragraph after it only makes sense with
+  the minus sign too: Formula (14) "is imprecise if $\sigma_\mathrm{tot}$ is
+  only slightly higher than $\sigma_\mathrm{omc}$" and then "provides a small
+  value of $\sigma_{R0}$", which a sum can never do. ISO 3743-1:2010 prints the
+  same formula, Equation (24), with the minus sign.
+- **Evidence:** Verified on PDF page 20 (printed p. 14) and PDF page 21
+  (printed p. 15) of ISO 3743-2:2018, against Equation (24) on PDF page 27
+  (printed p. 18) of BS EN ISO 3743-1:2010.
+- **Library behaviour:**
+  [`reproducibility_from_round_robin`](../src/phonometry/emission/sound_power_hard_walled.py)
+  evaluates the difference for both parts, and warns when
+  $\sigma_\mathrm{omc}$ exceeds $\sigma_\mathrm{tot}/\sqrt{2}$ as both parts
+  ask. Pinned by `test_round_robin_reproducibility_is_the_quadrature_difference`
+  in
+  [`tests/emission/test_sound_power_hard_walled.py`](../tests/emission/test_sound_power_hard_walled.py)
+  and by the conformance check "ISO 3743-1:2010 Eq. 24 / ISO 3743-2:2018
+  Formula 14".
+- **Status:** unreported.
+
+## ISO 3743-2:2018, D.4.2.4 and D.4.2.12 (a background contribution that is not the product it names, and a budget that does not use it)
+
+- **Location:** Annex D (informative), D.4.2.4 "Background noise correction,
+  $K_1$", the extreme and the typical contribution, and D.4.2.12 "Typical
+  value for direct method, $\sigma_{R0}$", the third term of the sum.
+- **The print:** "The worst case, $\overline{L'_p} - \overline{L_{p(\mathrm{B})}}$
+  is 4 dB. This results in a sensitivity coefficient of $c_{K_1}$ = 0,7 and a
+  total contribution to uncertainty of 1,7 dB. Typically this contribution
+  will be closer to 1,0 dB due to better control of the background noise.",
+  after "high background noise levels with a standard deviation of 3 dB are
+  assumed"; and in D.4.2.12, $\sigma_{R0} = \sqrt{0{,}3^2 + 0{,}4^2 + 0{,}4^2 +
+  0{,}2^2 + 0{,}5^2 + 0{,}8^2 + 0{,}2^2 + 0{,}2^2 + 0{,}04^2 + 0{,}1^2} =
+  1{,}2$ dB.
+- **The problem:** two defects. (a) The contribution is the sensitivity
+  coefficient times the standard uncertainty, and the clause gives both: at a
+  4 dB margin $c_{K_1} = 1/(10^{0{,}4} - 1) = 0{,}66$, printed 0,7, and
+  $u_{K_1}$ = 3 dB, so the extreme contribution is 2,0 dB (2,1 dB with the
+  rounded 0,7), not 1,7 dB. 1,7 is the $c_{L'_p} = 1 + c_{K_1}$ that D.4.2.3
+  quotes for the same scenario. ISO 3743-1:2010 C.4.2.4 runs the same
+  arithmetic at its 6 dB margin and closes it: 0,3 × 3 dB = 1,0 dB.
+  (b) The third term of the D.4.2.12 sum, which stands in the position of the
+  $K_1$ row of Table D.2, is 0,4 dB, the typical value ISO 3743-1:2010
+  C.4.2.4 gives for Part 1; the clause of this part puts the typical
+  contribution at 1,0 dB. With 1,0 dB the sum is 1,5 dB rather than the 1,2 dB
+  printed.
+- **Evidence:** the clause's own inputs, recomputed, read on PDF page 37
+  (printed p. 31) and PDF page 40 (printed p. 34) of ISO 3743-2:2018, against
+  C.4.2.4 on PDF page 40 (printed p. 31) of BS EN ISO 3743-1:2010.
+- **Library behaviour:** the Annex D budget is not modelled; the library
+  reports the typical upper bounds of Table 5. No number changes.
+- **Status:** unreported.
+
+## ISO 3743-2:2018, D.4.2.11 and Table D.2 (a reverberation-time coefficient that is the derivative of neither)
+
+- **Location:** Annex D (informative), D.4.2.11 "Reverberation time,
+  $T_\mathrm{nom}$", the worst-case example, and the $T_\mathrm{nom}$ row of
+  Table D.2.
+- **The print:** D.4.2.11: "The sensitivity coefficient, $c_T$, due to
+  reverberation time is obtained from the derivative of $L_W$ [see Formula
+  (9)] with respect to reverberation time. The worst case example assumes a
+  source producing dominant noise at about 500 Hz. Using the minimum 0,5 s
+  nominal reverberation time from 6.3 and assuming a standard deviation
+  $s_T$ = 0,3 s at 500 Hz, the sensitivity coefficient is −5 dB/s and the
+  worst case uncertainty contribution $u_T c_T$ = 1 dB." Table D.2:
+  $c_T = -4{,}3/T_\mathrm{nom} - 240 \cdot V/(T_\mathrm{nom}^2 \cdot S \cdot c)$.
+- **The problem:** Formula (9) depends on the reverberation time only through
+  $-10 \lg(T_\mathrm{nom}/T_0)$, whose derivative is
+  $-10/(T_\mathrm{nom} \ln 10) = -4{,}34/T_\mathrm{nom}$: −8,7 dB/s at 0,5 s,
+  not −5 dB/s. Table D.2 adds a second term Formula (9) does not have: it is
+  the derivative of the $4{,}34\,A/S$ of ISO 3741:2010 Equation (20) with
+  $A = 55{,}26\,V/(c\,T)$ ($4{,}34 \times 55{,}26 = 240$), so the table
+  differentiates ISO 3741 rather than the formula the clause names; for a
+  70 m³ cube at 343 m/s it takes the coefficient to −10,5 dB/s. And the
+  worst-case contribution does not follow from the table's own $u_T =
+  \sqrt{2{,}42\,T_\mathrm{nom}/f + s_T^2/N_\mathrm{decays}}$ with the 120
+  decays the clause calls typical: $u_T$ = 0,056 s, and 0,056 s × 8,7 dB/s =
+  0,5 dB.
+- **Evidence:** Verified on PDF page 40 (printed p. 34) and PDF page 36
+  (printed p. 30) of ISO 3743-2:2018, against Formula (9) on PDF page 18
+  (printed p. 12); the ratio of the derivative to the printed coefficient,
+  8,69/5 = 1,74, was read against the page, which prints −5 dB/s.
+- **Library behaviour:** the Annex D budget is not modelled. No number
+  changes.
+- **Status:** unreported.
+
+## ISO 3743-2:2018, Formula (D.1) (a sum that starts at $j = i$)
+
+- **Location:** Annex D (informative), D.3, Formula (D.1).
+- **The print:** $\sigma_\mathrm{omc} = \sqrt{\frac{1}{N-1} \sum_{j=i}^{N}
+  (L_{p,j} - L_{p\mathrm{av}})^2}$ dB.
+- **The problem:** the lower limit of the sum is $j = i$; no $i$ is defined in
+  the clause, and the $N - 1$ in the divisor is the sample standard deviation
+  of all $N$ repetitions, which starts at $j = 1$. ISO 3743-1:2010 prints the
+  same formula, Equation (C.1), with $j = 1$.
+- **Evidence:** Verified on PDF page 32 (printed p. 26) of ISO 3743-2:2018,
+  against Equation (C.1) on PDF page 35 (printed p. 26) of BS EN ISO
+  3743-1:2010.
+- **Library behaviour:** the standard deviation of the operating and mounting
+  conditions is taken from the caller as `sigma_omc_db`; where the library
+  computes one from repeated readings it sums over all of them
+  ([`operating_standard_deviation`](../src/phonometry/emission/workstation.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO 3743-2:2018, D.4.2.8 (the frequency of the formula defined as $F$)
+
+- **Location:** Annex D (informative), D.4.2.8 "Temperature, $\delta_\theta$",
+  the where-list under the formula for $c_\theta$.
+- **The print:** the formula carries $\lg(2{,}6 f)$, and the where-list
+  defines "$F$ is the highest frequency significantly affecting the A-weighted
+  levels".
+- **The problem:** the symbol is $f$ in the formula, in Table D.2 and in the
+  where-list of D.4.2.9 a few lines further on, which defines the same
+  quantity as "$f$ is the highest frequency significantly affecting the A-
+  weighted levels"; ISO 3743-1:2010 C.4.2.8 writes $f$ in both places.
+- **Evidence:** Verified on PDF page 39 (printed p. 33) of ISO 3743-2:2018,
+  against C.4.2.8 on PDF page 42 (printed p. 33) of BS EN ISO 3743-1:2010.
+- **Library behaviour:** the Annex D budget is not modelled. No change was
+  required.
+- **Status:** unreported.
+
+## ISO 3743-2:2018, 3.1 (the designation written "ISO ISO 3743-2")
+
+- **Location:** Clause 3 "Terms and definitions", 3.1 "special reverberation
+  test room".
+- **The print:** "room which meets the requirements of Clause 6 of ISO ISO
+  3743-2".
+- **The problem:** "ISO" is printed twice. The definition names the document
+  it stands in, which the rest of the edition calls "this document".
+- **Evidence:** Verified on PDF page 8 (printed p. 2) of ISO 3743-2:2018.
+- **Library behaviour:** a label the library never reads. No change was
+  required.
+- **Status:** unreported.
+
+## ISO 3743-2:2018, 6.3, Figure 1 (a curve that runs above Formula (1) at the low end)
+
+- **Location:** 6.3, Figure 1 "Values of $R$ at the one-third-octave-band
+  centre frequencies for $V$ = 70 m³", and the sentence before it.
+- **The print:** 6.3 gives $R = 1 + 257/(f V^{1/3})$ as Formula (1) and says
+  "For a room volume $V$ of 70 m³, the value of $R$ is determined from Figure
+  1". The curve of the figure, read against its own grid (0,2 per division),
+  passes 1,66 at 100 Hz, 1,54 at 125 Hz, 1,43 at 160 Hz, 1,34 at 200 Hz,
+  1,06 at 1 000 Hz and 1,02 at 2 000 Hz.
+- **The problem:** Formula (1) for 70 m³ gives 1,62, 1,50, 1,39, 1,31, 1,06
+  and 1,03 at the same frequencies. The figure agrees with it at 1 000 Hz, the
+  frequency Formula (B.2) uses, but runs 0,03 to 0,04 above it from 100 Hz to
+  160 Hz and about 0,01 below it from 1 600 Hz up, four to five times the
+  width of the drawn line at the low end. The figure the clause sends a 70 m³
+  room to is therefore not the formula the same clause states for every
+  room, and a room whose reverberation time follows the figure is measured
+  against limits 2,5 % higher at 100 Hz than a room that follows the formula.
+- **Evidence:** Verified on PDF page 10 (printed p. 4) of ISO 3743-2:2018,
+  the curve read at each one-third-octave grid line against the horizontal
+  lines at $R$ = 0 and $R$ = 2, against Formula (1) on PDF page 9 (printed
+  p. 3) of the same document.
+- **Library behaviour:** `reverberation_parameter` and
+  `check_special_room_reverberation` evaluate Formula (1) for every volume,
+  70 m³ included, and take nothing from the figure
+  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  The difference at 100 Hz is a quarter of the ±10 % tolerance of 6.3.
+  Pinned by `test_formula1_gives_the_1_06_of_formula_b2_for_70_m3` in
+  [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
+  and by the conformance check "ISO 3743-2:2018 Formula 1 / Formula B.2".
+- **Status:** unreported.
+
+## ISO 3743-2:2018, Figure B.3 (the limiting curves widened at 6,3 kHz, where 6.3 widens them above it)
+
+- **Location:** Annex B (informative), B.5, Figure B.3 "Limiting curves for
+  the ratio of the reverberation time $T$ to the nominal reverberation time
+  $T_\mathrm{nom}$ for a 70 m³ room".
+- **The print:** 6.3 sets the limits at $0{,}9\,R\,T_\mathrm{nom}$ and
+  $1{,}1\,R\,T_\mathrm{nom}$ and says "For frequencies above 6,3 kHz,
+  constants 0,9 and 1,1 shall be replaced by 0,8 and 1,2 respectively". The
+  two limiting curves of Figure B.3, read against the figure's own grid
+  (0,2 per division), begin to part above 4 kHz and pass 1,22 and 0,84 at
+  the 6,3 kHz band, where they have nearly reached the plateaus of about 1,23
+  and 0,82 they keep to 10 kHz.
+- **The problem:** at 6,3 kHz the text still holds the band to 0,9 and 1,1:
+  with $R$ = 1,01 for 70 m³ the limits are 0,91 and 1,11. The figure draws
+  the wide pair at that band already, 0,1 wider on each side, so a room whose
+  6,3 kHz band reads 1,15 $R$ passes against the figure and fails against the
+  text. The widening belongs to the bands above 6,3 kHz, the first of which is
+  8 kHz.
+- **Evidence:** Verified on PDF page 28 (printed p. 22) of ISO 3743-2:2018,
+  the curves read at the one-third-octave abscissae against the grid lines at
+  0 and 1,8, against 6.3 on PDF page 9 (printed p. 3) of the same document.
+- **Library behaviour:** follows the text. The wider tolerance starts at the
+  upper edge of the 6,3 kHz band, so 8 kHz and 10 kHz take 0,8 and 1,2 and
+  6,3 kHz keeps 0,9 and 1,1, and `SpecialRoomReverberationCheck.plot` draws
+  the curves that way
+  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  Pinned by `test_bands_above_6_3_khz_take_the_wider_tolerance` in
+  [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
+  and by the conformance check "ISO 3743-2:2018 6.3".
+- **Status:** unreported.
+
+## ISO 3743-2:2018, B.5, EXAMPLE (a centring that puts the curve of Figure B.4 outside the limits)
+
+- **Location:** Annex B (informative), B.5 "Example of determination of the
+  nominal reverberation time of a room", the EXAMPLE, and the NOTE to
+  Figure B.3.
+- **The print:** "When the data of Figure B.4 are centred within the limiting
+  curves of Figure B.3, it is found that, at 1 000 Hz, the ratio
+  $T/T_{1\,000}$ = 1 corresponds to $T/T_\mathrm{nom}$ = 1,09", and so
+  $T_\mathrm{nom} = 0{,}8/1{,}09 = 0{,}73$ s; the NOTE to Figure B.3 reads
+  "The data of Figure B.4 are centred within the limiting curves."
+- **The problem:** the curve of Figure B.4, read against its grid, gives
+  $T/T_{1\,000}$ = 1,40 at 100 Hz, 1,34 at 200 Hz, 1,30 at 250 Hz, 1,24 at
+  315 Hz, 1,00 from 1 000 Hz to 2 000 Hz and 0,80 at 10 kHz. Scaled by 1,09
+  and divided by the $R$ of Formula (1) for 70 m³, the bands from 200 Hz to
+  400 Hz exceed 1,1, the 250 Hz band reaching 1,13: centred as printed, the
+  example room fails the requirement of 6.3 it illustrates. The 1,09 is the
+  midpoint of the extreme ratios $q = (T/T_{1\,000})/R$ taken as if 0,9 and
+  1,1 held at every band, $2/(q_{\max} + q_{\min})$ with the 0,80 of 10 kHz as
+  the minimum, although 6.3 allows 0,8 there; the centring that uses each
+  band's own limits puts every band inside at $T/T_\mathrm{nom}$ = 1,05,
+  $T_\mathrm{nom}$ = 0,76 s. Figure B.3 does not draw Figure B.4 scaled by
+  1,09 either: its data curve sits at 1,09 from 1 000 Hz to 2 000 Hz but at
+  1,46 at 100 Hz, 1,37 at 250 Hz and 0,95 at 10 kHz, where 1,09 times
+  Figure B.4 gives 1,52, 1,41 and 0,87.
+- **Evidence:** Verified on PDF page 28 (printed p. 22) and PDF page 29
+  (printed p. 23) of ISO 3743-2:2018, both curves read at the
+  one-third-octave abscissae against their grids, with $R$ from Formula (1)
+  on PDF page 9 (printed p. 3); the ratios are a recomputation from those
+  readings.
+- **Library behaviour:** `check_special_room_reverberation` centres
+  $T_\mathrm{nom}$ by minimising the largest deviation of any band from the
+  ideal curve, each measured against its own tolerance; on the curve of
+  Figure B.4 it returns 0,76 s and qualifies the room, 0,17 dB from the
+  printed 0,73 s in the $L_W$ of Formula (9). A value given in
+  `nominal_reverberation_time_s` is checked as given, and the printed 0,73 s
+  fails at 250 Hz
+  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  Pinned by `test_the_b5_example_centres_the_room_within_its_curves` and
+  `test_the_printed_1_09_of_b5_is_the_narrow_midpoint_and_fails_250_hz` in
+  [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py)
+  and by the conformance check "ISO 3743-2:2018 B.5 EXAMPLE".
+- **Status:** unreported.
+
+## ISO 3743-2:2018, F.1 (Annex F tied to the direct method while 10.4 sends the comparison method to it)
+
+- **Location:** Annex F (normative), F.1 "A-weighted sound power levels", the
+  sentence above Formula (F.1) and the where-list under it.
+- **The print:** "The A-weighted sound power level, $L_{WA}$, determined from
+  octave band sound power levels according to 10.2 shall be calculated from
+  Formula (F.1)", and "$L_{Wk}$ is the sound power level in the $k$th octave
+  band determined according to 10.2".
+- **The problem:** 10.2 is the direct method. The only clause of the document
+  that calls Annex F is 10.4, "A-weighted sound power levels determined by the
+  comparison method", which sends to it the octave bands "made ... according
+  to 10.3". Read as printed, the annex covers the method that never refers to
+  it and excludes the one that does. Annex E, the next one, writes "from the
+  formula in 10.2 or the formula in 10.3".
+- **Evidence:** Verified on PDF page 43 (printed p. 37) of ISO 3743-2:2018,
+  against 10.4 on PDF page 19 (printed p. 13) and Annex E on PDF page 42
+  (printed p. 36) of the same document.
+- **Library behaviour:** Formula (F.1) forms `sound_power_level_a` from the
+  octave bands of both methods, as Annex E is written for both
+  ([`sound_power_special_room.py`](../src/phonometry/emission/sound_power_special_room.py)).
+  Pinned by `test_comparison_a_weighted_total_is_annex_f` and
+  `test_a_weighted_level_by_formula9_directly` in
+  [`tests/emission/test_sound_power_special_room.py`](../tests/emission/test_sound_power_special_room.py).
 - **Status:** unreported.
 
 ## ISO 5136:2003, Table A.5, 5 000 Hz row (the leading digit of $a_3$ is missing)

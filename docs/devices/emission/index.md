@@ -15,6 +15,9 @@ for the enveloping surface of ISO 3744/3746 and the precision anechoic grade
 of ISO 3745,
 [Sound Power in the Reverberation Room](sound-power-reverberation.md)
 for the direct and comparison methods of ISO 3741,
+[Sound Power in Small Test Rooms](sound-power-test-rooms.md)
+for the two ISO 3743 rooms for small movable sources, hard-walled with a
+reference sound source or specially reverberant,
 [Sound Power in Situ by Comparison](sound-power-in-situ.md)
 for the ISO 3747 comparison against a reference sound source where the
 machine works,
@@ -80,6 +83,11 @@ judged against.
 - [Sound Power in the Reverberation Room](sound-power-reverberation.md):
   the direct and comparison methods of ISO 3741, for sound power and for the
   sound energy of a single event.
+- [Sound Power in Small Test Rooms](sound-power-test-rooms.md):
+  the ISO 3743-1 comparison against a reference sound source in a
+  hard-walled room and the ISO 3743-2 direct and comparison methods in a
+  special reverberation room, for small movable sources, with the room
+  qualification of both and the sound energy level of a burst.
 - [Sound Power in Situ by Comparison](sound-power-in-situ.md):
   the ISO 3747 engineering and survey comparison against a reference sound
   source in a reverberant environment, for the machine that cannot leave its

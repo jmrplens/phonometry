@@ -74,7 +74,7 @@ El ruido de fondo se corrige **posición a posición** antes de promediar nada
 (apartado 8.1, Ec. 7):
 
 $$
-K_{1i} = -10 \log_{10}\left(1 - 10^{-0.1\,\Delta L_{pi}}\right),
+K_{1i} = -10 \log_{10}\left(1 - 10^{-0{,}1\,\Delta L_{pi}}\right),
 \qquad \Delta L_{pi} = L'_{pi(\mathrm{ST})} - L_{pi(\mathrm{B})},
 $$
 
@@ -87,7 +87,10 @@ debe decir que el requisito de ruido de fondo no se cumplió.
 `sound_power_in_situ` aplica las tres, devuelve la $K_{1i}$ por posición que
 usó y marca cada banda en la que algún margen bajó de 6 dB en
 `background_requirement_met`, banda a banda, para que la marca viaje al
-informe con el nivel al que califica. La fuente de referencia se corrige del
+informe con el nivel al que califica; marca en `upper_bound` las bandas en
+las que solo se quedó corto el margen de la máquina, las únicas que 8.1 lee
+como cotas superiores, porque un margen corto de la fuente de referencia
+limita su propia corrección y rebaja el nivel. La fuente de referencia se corrige del
 mismo modo, con la misma lectura de ruido de fondo salvo que traiga la suya
 (el apartado 7.5 toma una sola lectura para ambas), y los niveles corregidos
 se promedian en energía sobre las posiciones (Ec. 8, 9):
@@ -174,6 +177,7 @@ res = emission.sound_power_in_situ(
 print(np.round(res.sound_power_level, 1))   # [88.8 91.5 92.6 91.8 88.9 84.7 78.6]
 print(round(res.sound_power_level_a, 1))    # 96.1 dB(A)
 print(res.background_requirement_met)       # [False  True  True  True  True  True  True]
+print(res.upper_bound)                      # [False False False False False False False]
 print(np.round(res.background_correction[1], 2))  # posición 2: [1.3 0.57 0.26 0.19 0.18 0.16 0.21]
 print(res.grade, res.sigma_r0, round(res.expanded_uncertainty, 1))  # engineering 1.5 3.2
 ```
@@ -181,15 +185,18 @@ print(res.grade, res.sigma_r0, round(res.expanded_uncertainty, 1))  # engineerin
 La banda de 125 Hz es la que hay que leer dos veces. En una de las cuatro
 posiciones el margen sobre el ruido de la nave está por debajo de 6 dB para
 la máquina, y está por debajo de 6 dB en todas las posiciones para la fuente
-de referencia, más silenciosa, así que $K_1$ toma allí su tope de 1,3 dB y
-los 88,8 dB que reporta la banda son una **cota superior**, que es lo que
-dice el `False`. Todas las demás bandas superan los 6 dB en todas partes, la
+de referencia, más silenciosa, así que las dos correcciones toman allí su
+tope de 1,3 dB. La banda incumple el requisito de ruido de fondo, que es lo
+que dice el `False`, pero los 88,8 dB que reporta **no son una cota
+superior**: la $K_1$ limitada de la máquina da un nivel alto, la $K_{1i}$
+limitada de la fuente de referencia lo da bajo, y nada dice cuál gana, así
+que `upper_bound` sigue en `False`. Todas las demás bandas superan los 6 dB en todas partes, la
 de 250 Hz con correcciones de medio decibelio que la Ec. 7 evalúa en lugar
 de ignorar, y de 1 kHz en adelante el margen supera los 15 dB en dos o tres
 de las cuatro posiciones, donde la corrección es cero; la que aún toman las
 demás se queda por debajo de 0,25 dB.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Dos paneles sobre las siete bandas de octava de 125 Hz a 8 kHz. El panel superior representa los niveles de presión acústica en las cuatro posiciones de micrófono: los niveles corregidos de la fuente en ensayo como círculos azules rellenos con su media energética como línea azul, los niveles corregidos de la fuente de referencia como cuadrados verdes con su media como línea verde, los niveles medidos antes de la corrección por ruido de fondo como círculos huecos unidos a los corregidos allí donde la corrección los movió, y el ruido de fondo en cada posición como aspas grises. Una nota enmarcada en 125 Hz dice que el margen está por debajo de 6 dB en esa posición y en todas las posiciones para la fuente de referencia, que K1 se limita a 1,3 dB y que la banda es una cota superior. El panel inferior dibuja el nivel de potencia acústica resultante de la fuente en ensayo como barras azules, la de 125 Hz rayada como cota superior, con el nivel de potencia acústica calibrado de la fuente de referencia como línea roja discontinua con rombos, y declara en su título un nivel ponderado A de 96,1 dB(A), grado 2, y una incertidumbre expandida de 3,2 dB con k = 2 y una desviación de 0,5 dB por condiciones de funcionamiento" width="96%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Dos paneles sobre las siete bandas de octava de 125 Hz a 8 kHz. El panel superior representa los niveles de presión acústica en las cuatro posiciones de micrófono: los niveles corregidos de la fuente en ensayo como círculos azules rellenos con su media energética como línea azul, los niveles corregidos de la fuente de referencia como cuadrados verdes con su media como línea verde, los niveles medidos antes de la corrección por ruido de fondo como círculos huecos unidos a los corregidos allí donde la corrección los movió, y el ruido de fondo en cada posición como aspas grises. Una nota enmarcada en 125 Hz dice que el margen está por debajo de 6 dB en esa posición y en todas las posiciones para la fuente de referencia, que las dos K1 se limitan a 1,3 dB y que la banda incumple el apartado 8.1 y no es una cota superior. El panel inferior dibuja el nivel de potencia acústica resultante de la fuente en ensayo como barras azules, la de 125 Hz rayada en cruz por incumplir el requisito de ruido de fondo, con el nivel de potencia acústica calibrado de la fuente de referencia como línea roja discontinua con rombos, y declara en su título un nivel ponderado A de 96,1 dB(A), grado 2, y una incertidumbre expandida de 3,2 dB con k = 2 y una desviación de 0,5 dB por condiciones de funcionamiento" width="96%" />
 
 *La comparación posición a posición. Arriba, ambas fuentes en los cuatro
 micrófonos tras la corrección de la Ec. 7, con los marcadores huecos
@@ -197,7 +204,8 @@ mostrando dónde estaba cada nivel antes de ella; la fuente de referencia
 queda por debajo de la máquina en el extremo grave y por encima de 1 kHz en
 adelante, que es lo que la forma de la curva calibrada de abajo hace con el
 resultado. Abajo, la Ec. 11 banda a banda, con la $L_{W(\mathrm{RSS})}$
-calibrada al lado y la cota superior de 125 Hz rayada.*
+calibrada al lado y la banda de 125 Hz, que no cumple el requisito de ruido
+de fondo, rayada en cruz.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -206,7 +214,7 @@ calibrada al lado y la cota superior de 125 Hz rayada.*
 import matplotlib.pyplot as plt
 
 # res es el InSituSoundPowerResult calculado arriba. Una línea:
-res.plot(language="es")   # barras de LW, LWA en el título, la banda cota superior rayada
+res.plot(language="es")   # barras de LW, LWA en el título, la banda que incumple rayada en cruz
 plt.show()
 
 # A mano: ambas fuentes por posición arriba, la Ec. 11 abajo.
@@ -223,9 +231,11 @@ axt.plot(x, res.mean_reference_level, "-", color="#2ca02c", label="media, fuente
 axt.set_ylabel("Nivel de presión acústica [dB]")
 axt.legend()
 bars = axb.bar(x, res.sound_power_level, width=0.62, color="#1f77b4")
-for bar, met in zip(bars, res.background_requirement_met, strict=True):
+for bar, met, upper in zip(
+    bars, res.background_requirement_met, res.upper_bound, strict=True
+):
     if not met:
-        bar.set_hatch("//")
+        bar.set_hatch("//" if upper else "xx")
 axb.plot(x, res.reference_power_level, "D--", color="#d62728", label="LW(RSS) calibrada")
 axb.set_xticks(x, [f"{f:g}" for f in freqs])
 axb.set_xlabel("Frecuencia [Hz]")
@@ -285,7 +295,8 @@ orientación, mide la máquina, la fuente de referencia unos 30 s y el ruido de
 fondo justo antes o después, en bandas de octava de 125 Hz a 8 kHz, y cinco
 sucesos o más si es impulsiva. Corrige el fondo por posición según el margen:
 más de 15 dB, nada; de 6 dB a 15 dB, la Ec. 7; menos de 6 dB, 1,3 dB como
-mucho y una cota superior que el informe declara. Anota lo que hayas oído en
+mucho, y la banda incumple el requisito, cosa que el informe declara, y es
+una cota superior cuando solo se quedó corto el margen de la máquina. Anota lo que hayas oído en
 la escucha previa, las dimensiones de la caja de referencia, la distancia de
 medición, las posiciones, las ubicaciones de la fuente y $\Delta L_f$, y da
 los niveles por banda y ponderados A a 0,1 dB con el grado, $U$ y su factor de
@@ -312,7 +323,7 @@ La función devuelve un `InSituSoundPowerResult`: `sound_power_level`
 `mean_reference_level` (Ec. 8, 9), `reference_levels` por ubicación
 (Ec. 10), `reference_power_level`, `background_correction` por posición y
 banda, `background_correction_ref` por ubicación, posición y banda,
-`background_requirement_met` por banda, `c2`, `grade`, `sigma_r0`,
+`background_requirement_met` y `upper_bound` por banda, `c2`, `grade`, `sigma_r0`,
 `sigma_omc`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
 `sound_power_level_a` y `quantity`. `sound_power_level_ref` suma `c2` al
 nivel (sección 3).
@@ -380,10 +391,10 @@ print(round(energy.sound_energy_level_a, 1))      # 109.7 dB(A) re 1 pJ
 print(round(energy.expanded_uncertainty, 1))      # 5.0 dB: grado 2 con sigma_omc = 2 dB
 ```
 
-La banda de 125 Hz es también aquí una cota superior, y por la razón que dio
-la determinación estacionaria: el propio margen de la fuente de referencia
-sobre el ruido de la nave está por debajo de 6 dB allí, y la marca sigue a
-ambas fuentes. Los 5,0 dB son el ejemplo de la propia norma en el apartado
+La banda de 125 Hz incumple también aquí el requisito de ruido de fondo, y
+por la razón que dio la determinación estacionaria: el propio margen de la
+fuente de referencia sobre el ruido de la nave está por debajo de 6 dB allí,
+y la marca sigue a ambas fuentes, así que tampoco es una cota superior. Los 5,0 dB son el ejemplo de la propia norma en el apartado
 9.5, reproducido porque las entradas son las mismas: grado 2,
 $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 

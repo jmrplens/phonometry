@@ -112,6 +112,27 @@ def _validate_event_count(events: object, owner: str) -> None:
         raise ValueError(msg)
 
 
+#: Decimal places a quantity is settled to before an inclusive comparison
+#: with a printed limit (see :func:`_settled`).
+_SETTLED_PLACES = 9
+
+
+def _settled(value: np.ndarray | float) -> np.ndarray:
+    """``value`` rounded to nine decimal places, for comparing with a limit.
+
+    The criteria of the ISO 3743 family are inclusive and printed in whole
+    tenths: a spread "does not exceed" 1,5 dB, a margin of 6 dB "or more", a
+    difference within ±3 dB. A level difference that is 3,0 dB in decimal is
+    3,000 000 000 000 03 dB in binary often enough to flip such a verdict, so
+    the quantity is settled first at a resolution a nanodecibel wide, far
+    below any digit a standard prints or a meter reads.
+
+    :param value: The quantity to settle, any shape.
+    :return: The rounded values as a float array.
+    """
+    return np.round(np.asarray(value, dtype=np.float64), _SETTLED_PLACES)
+
+
 Grade = Literal["engineering", "survey"]
 
 
@@ -240,7 +261,12 @@ def _check_grade(grade: str) -> Grade:
 
 
 def _single_event_mean(
-    levels: np.ndarray, events: int | None, *, name: str, stacklevel: int
+    levels: np.ndarray,
+    events: int | None,
+    *,
+    name: str,
+    stacklevel: int,
+    clause: str = "ISO 3744:2010 8.3.1, ISO 3741:2010 8.5.1",
 ) -> np.ndarray:
     r"""Mean single event time-integrated level of one event, per position.
 
@@ -275,6 +301,9 @@ def _single_event_mean(
         the number of events one measurement encompasses.
     :param name: The caller's parameter name, for the error messages.
     :param stacklevel: Where the warning is reported.
+    :param clause: The clauses the warning cites for the five-event minimum,
+        which each caller names for its own standard (ISO 3743-1:2010 prints
+        it in 7.6).
     :return: The mean level of one event, one axis fewer than ``levels`` when
         ``events`` is ``None``, the same shape otherwise.
     :raises ValueError: for non-finite levels, an empty event axis or a
@@ -302,8 +331,7 @@ def _single_event_mean(
     if count < _MIN_EVENTS:
         warnings.warn(
             f"Only {count} single event(s); the sound energy determination "
-            f"requires at least {_MIN_EVENTS} (ISO 3744:2010 8.3.1, ISO "
-            "3741:2010 8.5.1).",
+            f"requires at least {_MIN_EVENTS} ({clause}).",
             SoundPowerWarning,
             stacklevel=stacklevel,
         )

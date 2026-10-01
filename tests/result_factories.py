@@ -809,6 +809,95 @@ def _in_situ_power() -> ph.emission.InSituSoundPowerResult:
     )
 
 
+#: Octave bands and levels the ISO 3743 factories share.
+_ISO3743_FREQS = np.array([250.0, 500.0, 1000.0, 2000.0])
+_ISO3743_ST = np.array(
+    [
+        [83.4, 85.0, 84.2, 81.0],
+        [82.8, 84.6, 83.9, 80.4],
+        [84.0, 85.9, 85.0, 81.9],
+    ]
+)
+_ISO3743_RSS = np.array(
+    [
+        [81.9, 83.7, 84.9, 84.8],
+        [81.2, 83.1, 84.3, 84.1],
+        [82.6, 84.4, 85.5, 85.4],
+    ]
+)
+
+
+def _hard_walled_power() -> ph.emission.HardWalledSoundPowerResult:
+    """ISO 3743-1 comparison at three positions, one band an upper bound."""
+    background = np.array([66.0, 67.0, 66.0, 79.0])  # 2 kHz margin below 6 dB
+    with pytest.warns(ph.emission.SoundPowerWarning, match="below 6 dB"):
+        return ph.emission.sound_power_hard_walled(
+            _ISO3743_ST, _ISO3743_RSS, np.array([90.5, 92.5, 93.8, 94.0]),
+            _ISO3743_FREQS, background_levels=background, sigma_omc_db=1.0,
+        )  # fmt: skip
+
+
+def _hard_walled_room_check() -> ph.emission.HardWalledRoomCheck:
+    """ISO 3743-1 4.4 with the 1 kHz spread over its Table 3 limit."""
+    spread = np.array([1.8, 1.2, 1.9, 1.0])
+    orientations = 80.0 + np.linspace(0.0, 1.0, 8)[:, None] * spread[None, :]
+    return ph.emission.check_hard_walled_room(
+        orientations, _ISO3743_FREQS, volume_m3=60.0, reference_box_m=[0.6, 0.5, 0.4]
+    )
+
+
+def _source_location_plan() -> ph.emission.SourceLocationPlan:
+    """ISO 3743-2 Table 3 for six positions, with the A-weighted row."""
+    survey = np.array(
+        [
+            [70.0, 71.0, 72.0, 70.5],
+            [72.5, 69.0, 72.4, 71.0],
+            [70.4, 73.0, 71.8, 70.2],
+            [72.8, 70.0, 72.2, 71.4],
+            [71.0, 68.5, 72.0, 70.9],
+            [71.6, 72.2, 71.9, 70.6],
+        ]
+    )
+    return ph.emission.special_room_source_locations(
+        survey, _ISO3743_FREQS, a_weighted_levels=[80.0, 81.5, 79.8, 80.9, 80.2, 81.0]
+    )
+
+
+def _special_room_power() -> ph.emission.SpecialRoomSoundPowerResult:
+    """ISO 3743-2 direct method in a 70 m3 room, Tnom = 0,73 s."""
+    return ph.emission.sound_power_special_room(
+        _ISO3743_ST, _ISO3743_FREQS, volume_m3=70.0, nominal_reverberation_time_s=0.73,
+        background_levels=np.array([66.0, 67.0, 66.0, 60.0]), sigma_omc_db=1.0,
+    )  # fmt: skip
+
+
+def _special_room_reverberation() -> ph.emission.SpecialRoomReverberationCheck:
+    """ISO 3743-2 6.3 on one-third octaves, one band pushed out of the limits."""
+    thirds = np.array(
+        [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0,
+         1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0]
+    )  # fmt: skip
+    t = 0.7 * ph.emission.reverberation_parameter(thirds, 70.0)
+    t[4] *= 1.25
+    return ph.emission.check_special_room_reverberation(
+        t, thirds, volume_m3=70.0, nominal_reverberation_time_s=0.7
+    )
+
+
+def _special_room_surfaces() -> ph.emission.SpecialRoomSurfaceCheck:
+    """ISO 3743-2 6.4, five surfaces around a mean of 0,15."""
+    walls = 0.15 * np.array([1.0, 1.2, 0.8, 1.1, 0.9])[:, None] * np.ones((1, 4))
+    return ph.emission.check_special_room_surfaces(walls, [0.03] * 4, _ISO3743_FREQS)
+
+
+def _special_room_suitability() -> ph.emission.SpecialRoomSuitabilityCheck:
+    """ISO 3743-2 6.7, the 2 kHz difference beyond Table 1."""
+    calibrated = np.array([90.5, 92.5, 93.8, 94.0])
+    return ph.emission.check_special_room_suitability(
+        calibrated + np.array([1.0, -2.0, 0.5, 3.4]), calibrated, _ISO3743_FREQS
+    )
+
+
 def _immission_record(fs_hz: float = 2048.0) -> np.ndarray:
     """A two-second burst of ground vibration inside a quiet 70 s record.
 

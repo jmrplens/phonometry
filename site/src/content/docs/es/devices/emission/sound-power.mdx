@@ -1,6 +1,6 @@
 ---
 title: "Potencia acústica"
-description: "El nivel de potencia acústica LW como descriptor de emisión independiente del dispositivo: la elección entre las ocho vías de determinación normalizadas (ISO 3744/3746, ISO 3745, ISO 3741, ISO 3747, ISO 9614-1, ISO 9614-2, ISO 9614-3, ISO/TS 7849), qué prometen los grados de precisión, y la declaración de emisión sonora de ISO 4871 con sus formas de número doble y único y su verificación."
+description: "El nivel de potencia acústica LW como descriptor de emisión independiente del dispositivo: la elección entre las diez vías de determinación normalizadas (ISO 3744/3746, ISO 3745, ISO 3741, ISO 3743-1, ISO 3743-2, ISO 3747, ISO 9614-1, ISO 9614-2, ISO 9614-3, ISO/TS 7849), qué prometen los grados de precisión, y la declaración de emisión sonora de ISO 4871 con sus formas de número doble y único y su verificación."
 references:
   - type: book
     authors: ["Beranek, L. L.", "Mellow, T. J."]
@@ -37,8 +37,8 @@ la **potencia** acústica no. El nivel de potencia acústica $L_W$ es la energí
 acústica total por segundo que radia una fuente, referida a $P_0 = 1\ \text{pW}$, y es
 el descriptor de **emisión** independiente del dispositivo que figura en una
 hoja de características, alimenta una predicción de sala (EN 12354) o se contrasta con
-un límite de emisión de ruido. phonometry implementa ocho vías normalizadas
-para obtenerlo, repartidas en seis guías: una superficie envolvente de
+un límite de emisión de ruido. phonometry implementa diez vías normalizadas
+para obtenerlo, repartidas en siete guías: una superficie envolvente de
 *presión* en campo (ISO 3744/3746) y el grado de precisión en
 *cámara anecoica* (ISO 3745), cubiertas en
 [Potencia acústica por métodos de
@@ -46,6 +46,10 @@ presión](/phonometry/es/devices/emission/sound-power-pressure/);
 el campo difuso de una *cámara reverberante* (ISO 3741), cubierto en
 [Potencia acústica en cámara
 reverberante](/phonometry/es/devices/emission/sound-power-reverberation/);
+una *sala de ensayo pequeña* para una fuente pequeña y transportable, de
+paredes rígidas con una fuente sonora de referencia (ISO 3743-1) o
+especialmente reverberante (ISO 3743-2), cubierta en
+[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/);
 la misma comparación con una fuente sonora de referencia llevada a la sala
 en la que trabaja la máquina (ISO 3747), cubierta en
 [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/);
@@ -78,13 +82,16 @@ Todas proporcionan la misma magnitud para una fuente que funciona de forma
 estacionaria, un $L_W$ por banda y un total ponderado A $L_{W\mathrm{A}}$, pero
 bajo entornos, grados de precisión y restricciones prácticas distintos. Una
 fuente que emite por ráfagas no tiene potencia estacionaria que declarar, y la
-vía in situ determina en su lugar su nivel de energía sonora $L_J$
-(apartado 8.5).
+vía in situ y la sala de paredes rígidas de ISO 3743-1 determinan en su lugar
+su nivel de energía acústica $L_J$ (apartado 8.5 de ISO 3747, apartado 8.2 de
+ISO 3743-1).
 
 | Método | Norma | Magnitud medida | Entorno | Grado de precisión | Cuándo usarlo |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Superficie envolvente | **ISO 3744** (ingeniería) / **ISO 3746** (inspección) | Presión acústica sobre una semiesfera o caja | Campo esencialmente libre sobre uno o varios planos reflectantes | Grado 2 ($\sigma_{\mathrm{R}0} \approx 1{,}5\ \text{dB}$) / grado 3 ($\approx 3{,}0\ \text{dB}$) | In situ o en una sala grande; sin instalación de ensayo especial disponible |
 | Cámara reverberante | **ISO 3741** | Presión acústica en el campo difuso | Cámara reverberante cualificada de paredes rígidas | Grado 1 (precisión) | Máxima precisión para fuentes estacionarias de banda ancha en laboratorio |
+| Sala de ensayo de paredes rígidas | **ISO 3743-1** | Presión acústica de la fuente y de una fuente sonora de referencia calibrada en las mismas posiciones | Una sala corriente de paredes rígidas de al menos 40 m³, sin ninguna superficie con absorción mayor que 0,20 | Grado 2 ($\sigma_{\mathrm{R}0} \approx 1{,}5\ \text{dB}$ ponderado A) | Una fuente pequeña y transportable, sin una sala de laboratorio cualificada a mano |
+| Sala reverberante especial | **ISO 3743-2** | Presión acústica en una sala cuyo tiempo de reverberación sigue una curva prescrita | Una sala reverberante especial de al menos 70 m³, como mucho 300 m³ en el método directo con las octavas de 4 kHz y 8 kHz | Grado 2 ($\sigma_{\mathrm{R}0} \approx 2{,}0\ \text{dB}$ ponderado A) | Fuentes pequeñas ensayadas una tras otra, leídas a partir de la sala sola o frente a una fuente de referencia |
 | Comparación in situ | **ISO 3747** | Presión acústica de la fuente y de una fuente sonora de referencia calibrada en las mismas posiciones | La parte reverberante de la sala en la que trabaja la máquina ($\Delta L_f \ge 7$ dB) | Grado 2 ($\sigma_{\mathrm{R}0} \approx 1{,}5\ \text{dB}$) / grado 3 ($\approx 4{,}0\ \text{dB}$) | Una máquina que no puede salir de su instalación, en una sala demasiado reverberante para una superficie envolvente |
 | Intensidad en puntos discretos | **ISO 9614-1** | Intensidad acústica normal medida con la sonda detenida en cada uno de $N$ puntos, uno por segmento | Casi cualquiera, tolerante al ruido extraño estacionario | Grado 1 o 2 por banda a partir de los criterios del anexo B; grado 3 sobre el total ponderado A | In situ cuando la sonda se detiene en cada punto en vez de barrer la superficie |
 | Barrido de intensidad | **ISO 9614-2** | Intensidad acústica normal barrida sobre una superficie | Casi cualquiera, tolerante al ruido extraño estacionario | Grado 2 / 3 (a partir de los indicadores de campo por banda) | In situ con ruido de fondo, o una máquina entre muchas |
@@ -100,26 +107,26 @@ comprobación de validez por banda; la vía de velocidad superficial renuncia de
 todo al micrófono y lo paga con un factor de radiación. Cada guía de método
 recorre sus vías por turno.
 
-**Dos miembros de la familia ISO 3740 faltan en esa tabla a propósito.** La
-ISO 3743-1 y la ISO 3743-2 alcanzan el grado de ingeniería con fuentes
-*pequeñas y móviles* en una sala de ensayo de paredes rígidas o especialmente
-reverberante, la vía que piden la mayoría de los códigos de ensayo de ruido de
-electrodomésticos, y ninguna está implementada aquí. En la práctica, para un
-electrodoméstico pequeño, la ISO 3744 sobre una semiesfera en esa misma sala
-suele estar disponible con el mismo grado. Su pariente in situ, la ISO 3747,
-está en la tabla y tiene su propia guía,
+**Las dos partes de ISO 3743** alcanzan el grado de ingeniería con fuentes
+*pequeñas y transportables* y comparten guía,
+[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):
+la Parte 1 compara la fuente con una fuente sonora de referencia en una sala
+corriente de paredes rígidas, y la Parte 2 lee la potencia a partir de una
+sala construida para que su tiempo de reverberación siga una curva prescrita.
+Su pariente in situ, la ISO 3747, tiene su propia guía,
 [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
 la fórmula de comparación de la
 [página de ISO 3741](/phonometry/es/devices/emission/sound-power-reverberation/#2-el-método-de-comparación-ec-21)
 aplicada a la sala en la que trabaja la máquina en lugar de a una cámara
 cualificada, con el ruido de fondo corregido en cada posición de micrófono y
 el grado leído del exceso de nivel de presión acústica. La lámina de abajo
-dibuja siete de las ocho: la comparación in situ comparte el álgebra de la
-fila de presión acústica con la ISO 3741 y se dibuja en su propia página.
+dibuja siete de las diez: la comparación in situ y las dos salas de ensayo
+pequeñas comparten el álgebra de la fila de presión acústica con la ISO 3741
+y se dibujan en sus propias páginas.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="Las siete vías de potencia acústica, una fila por cada magnitud medida y todas las celdas con los mismos cinco atributos. La fila de presión acústica: la superficie envolvente hemisférica de ISO 3744/3746 sobre un plano reflectante, la malla fija de micrófonos de ISO 3745 en una cámara anecoica revestida de cuñas y el campo difuso de una cámara reverberante de ISO 3741. La fila de intensidad acústica: la superficie de medición de ISO 9614-1 dividida en diez segmentos con la sonda detenida en un punto de cada uno, el barrido serpenteante de ISO 9614-2 sobre esa misma superficie y el barrido de precisión más estricto de ISO 9614-3. La fila de velocidad superficial lleva una sola vía a todo lo ancho, ISO/TS 7849 con un acelerómetro sobre una carcasa radiante y sin micrófono alguno" width="92%" loading="eager" />
 
-Las ocho dan la misma magnitud, y la última llega sin micrófono. Que
+Las diez dan la misma magnitud, y la última llega sin micrófono. Que
 *coincidan* es comprobable, y merece comprobarse una vez: el bloque de abajo
 lleva una misma fuente sintética por tres de las vías y compara sus espectros.
 No es una reproducción del diagrama de arriba (un esquema de montaje no tiene
@@ -219,7 +226,9 @@ primera coincidencia nombra la norma.
    una cámara anecoica o semianecoica cualificada con una dimensión
    característica menor que la mitad del radio de medición, y es la vía que
    además proporciona la directividad. Una máquina anclada a su bancada
-   descarta ambas y deja los métodos in situ.
+   descarta ambas y deja los métodos in situ. Una fuente pequeña y
+   transportable sin una sala cualificada a mano aún tiene una vía de
+   laboratorio de grado 2: las salas de ensayo pequeñas de ISO 3743.
 3. **¿Cómo de silencioso y de seco es el emplazamiento?** ISO 3744 necesita
    el fondo al menos 6 dB por debajo de la fuente (preferiblemente más de
    15 dB) y $K_2 \le 4\ \text{dB}$. Si solo se alcanza un margen de 3 dB o
@@ -254,7 +263,8 @@ El grado es una afirmación sobre la **reproducibilidad**: $\sigma_{\mathrm{R}0}
 desviación típica que verías si laboratorios distintos midieran la misma
 fuente, cada uno siguiendo la norma correctamente. Los valores ponderados A
 típicos son $\sigma_{\mathrm{R}0} \approx 0{,}5\ \text{dB}$ para el grado 1 (ISO 3741), 1,5 dB para el
-grado 2 (ISO 3744, ISO 3747, ISO 9614-2) y 3 dB o más para el grado 3 (aún mayores
+grado 2 (ISO 3744, ISO 3743-1, ISO 3747, ISO 9614-2; 2,0 dB para la
+ISO 3743-2) y 3 dB o más para el grado 3 (aún mayores
 cuando $K_2$ es grande o el espectro es tonal). Los valores
 por banda son mayores en los extremos del espectro. El campo `uncertainty`
 de los resultados de los métodos de presión (superficie envolvente y cámara
@@ -286,7 +296,9 @@ la ISO 3746 y determinado por `sound_energy_pressure` sobre la [superficie
 envolvente](/phonometry/es/devices/emission/sound-power-pressure/#4-nivel-de-energía-acústica-de-una-ráfaga-apartado-83),
 por `sound_energy_reverberation`, o por `sound_energy_comparison` contra una
 fuente de referencia, en la [cámara
-reverberante](/phonometry/es/devices/emission/sound-power-reverberation/#4-nivel-de-energía-acústica-de-un-suceso-aislado-apartado-92)
+reverberante](/phonometry/es/devices/emission/sound-power-reverberation/#4-nivel-de-energía-acústica-de-un-suceso-aislado-apartado-92),
+por `sound_energy_hard_walled` en la sala de paredes rígidas de ISO 3743-1, en
+[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/#ráfagas-el-nivel-de-energía-acústica-ec-15-a-20),
 y por `sound_energy_in_situ` allí donde la máquina trabaja, en [Potencia
 acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/#2-fuentes-impulsivas-el-nivel-de-energía-acústica-ec-13-a-20).
 La prueba práctica: si el nivel
@@ -475,7 +487,7 @@ ficha de declaración mediante `.report()`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-Las ocho determinaciones viven en sus guías de método: la superficie
+Las diez determinaciones viven en sus guías de método: la superficie
 envolvente y la malla anecoica en [Potencia acústica por métodos de
 presión](/phonometry/es/devices/emission/sound-power-pressure/), el método de
 campo difuso en [Potencia acústica en cámara
@@ -486,13 +498,14 @@ por puntos discretos de ISO 9614-1 en [Intensidad
 acústica](/phonometry/es/devices/emission/intensity/), junto a los indicadores
 de campo del Anexo A que presta a las partes de barrido, y la vía
 de velocidad superficial en [Potencia acústica a partir de la
-vibración](/phonometry/es/devices/emission/vibration-sound-power/), y la
+vibración](/phonometry/es/devices/emission/vibration-sound-power/), las salas
+de ensayo pequeñas de ISO 3743-1 e ISO 3743-2 en [Potencia acústica en salas
+de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/), y la
 comparación in situ de ISO 3747 en [Potencia acústica in situ por
-comparación](/phonometry/es/devices/emission/sound-power-in-situ/). La
-ISO 3743-1 y la ISO 3743-2, los miembros restantes de la familia ISO 3740, no
-están implementadas. El nivel de *energía* acústica $L_J$ de un suceso aislado
-sí lo está, para la ISO 3744, la ISO 3746, la ISO 3741 y la ISO 3747, cada una
-en su propia página; la ISO 3745 no define ninguno.
+comparación](/phonometry/es/devices/emission/sound-power-in-situ/). El nivel
+de *energía* acústica $L_J$ de un suceso aislado está cubierto para la
+ISO 3744, la ISO 3746, la ISO 3741, la ISO 3743-1 y la ISO 3747, cada una en
+su propia página; la ISO 3745 y la ISO 3743-2 no definen ninguno.
 El nivel de presión acústica de emisión $L_{p\mathrm{A}}$ que
 acompaña a $L_{W\mathrm{A}}$ en una declaración se consume, no se determina: la ISO
 11201, la ISO 11202 y la ISO 11204 quedan fuera de la biblioteca. Los
@@ -513,6 +526,10 @@ enuncia, no se deriva.
 - [Potencia acústica en cámara reverberante (ISO 3741)](/phonometry/es/devices/emission/sound-power-reverberation/):
   el método de precisión en campo difuso con las correcciones de Waterhouse
   y meteorológicas.
+- [Potencia acústica en salas de ensayo pequeñas (ISO 3743)](/phonometry/es/devices/emission/sound-power-test-rooms/):
+  una fuente pequeña y transportable en una sala de paredes rígidas frente a
+  una fuente sonora de referencia, o en una sala reverberante especial leída
+  directamente o frente a otra.
 - [Potencia acústica in situ por comparación (ISO 3747)](/phonometry/es/devices/emission/sound-power-in-situ/):
   la comparación con una fuente de referencia donde trabaja la máquina, con
   el nivel de energía acústica de una fuente impulsiva.
@@ -548,7 +565,8 @@ acústica no. El nivel de potencia acústica $L_W$ es la energía acústica tota
 por segundo que radia una fuente, referida a $P_0 = 1\ \text{pW}$, y es el descriptor
 de emisión independiente del dispositivo que figura en una hoja de características o
 se contrasta con un límite de emisión de ruido; lo determinan ISO 3744,
-ISO 3741, ISO 3747, ISO 9614-1, ISO 9614-2, ISO 3745, ISO 9614-3 e ISO/TS 7849.
+ISO 3741, ISO 3743-1, ISO 3743-2, ISO 3747, ISO 9614-1, ISO 9614-2, ISO 3745,
+ISO 9614-3 e ISO/TS 7849.
 
 ### ¿Qué significan los grados de precisión en la medición de potencia acústica?
 
@@ -556,7 +574,8 @@ El grado es una afirmación sobre la reproducibilidad: $\sigma_{\mathrm{R}0}$ es
 típica que verías si laboratorios distintos midieran la misma fuente, cada
 uno siguiendo la norma correctamente. Los valores ponderados A típicos son
 $\sigma_{\mathrm{R}0} \approx 0{,}5\ \text{dB}$ para el grado 1 (ISO 3741), 1,5 dB para el grado 2
-(ISO 3744, ISO 3747, ISO 9614-2) y 3 dB o más para el grado 3. Un $L_{W\mathrm{A}}$ de grado 2
+(ISO 3744, ISO 3743-1, ISO 3747, ISO 9614-2; 2,0 dB para la ISO 3743-2) y 3 dB o
+más para el grado 3. Un $L_{W\mathrm{A}}$ de grado 2
 lleva $U \approx 3\ \text{dB}$, así que dos resultados de grado 2 separados 2 dB son
 estadísticamente indistinguibles.
 

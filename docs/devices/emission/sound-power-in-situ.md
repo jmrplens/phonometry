@@ -54,7 +54,10 @@ the correction at **1,3 dB** and turns the band into an upper bound that the
 report must flag as not meeting the background requirement.
 `sound_power_in_situ` applies all three, returns the per-position $K_{1i}$
 and flags every band where some margin fell below 6 dB in
-`background_requirement_met`. The corrected levels are energy-averaged over
+`background_requirement_met`, and in `upper_bound` the bands where the
+machine's margin alone fell short, the only ones 8.1 reads as upper bounds:
+a short margin of the reference source caps its own correction and lowers
+the level instead. The corrected levels are energy-averaged over
 the positions (Eq. 8, 9) and the sound power level in each octave band is
 the comparison itself (clause 8.3.1, Eq. 11):
 
@@ -108,22 +111,26 @@ res = emission.sound_power_in_situ(
 print(np.round(res.sound_power_level, 1))   # [88.8 91.5 92.6 91.8 88.9 84.7 78.6]
 print(round(res.sound_power_level_a, 1))    # 96.1 dB(A)
 print(res.background_requirement_met)       # [False  True  True  True  True  True  True]
+print(res.upper_bound)                      # [False False False False False False False]
 print(np.round(res.background_correction[1], 2))  # position 2: [1.3 0.57 0.26 0.19 0.18 0.16 0.21]
 print(res.grade, res.sigma_r0, round(res.expanded_uncertainty, 1))  # engineering 1.5 3.2
 ```
 
 The 125 Hz band is the one to read twice: at one of the four positions the
 margin over the floor is below 6 dB for the machine, and it is below 6 dB at
-every position for the quieter reference source, so $K_1$ takes its 1,3 dB
-cap and the 88,8 dB the band reports is an **upper bound**, which is what the
-`False` says.
+every position for the quieter reference source, so both corrections take
+their 1,3 dB cap. The band fails the background requirement, which is what
+the `False` says, but the 88,8 dB it reports is **no upper bound**: the
+machine's capped $K_1$ reads high, the reference source's capped $K_{1i}$
+reads low, and nothing says which wins, so `upper_bound` stays `False`.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the four microphone positions: the corrected levels of the source under test as filled blue circles with their energy mean as a blue line, the corrected levels of the reference source as green squares with their mean as a green line, the measured levels before the background correction as hollow circles joined to the corrected ones wherever the correction moved them, and the background at each position as grey crosses. A boxed note at 125 Hz says the margin is below 6 dB at that position and at every position for the reference source, K1 is capped at 1.3 dB and the band is an upper bound. The lower panel draws the resulting sound power level of the source under test as blue bars, the 125 Hz bar hatched as an upper bound, with the calibrated sound power level of the reference source as a red dashed line with diamonds, and states in its title an A-weighted level of 96.1 dB(A), grade 2, and an expanded uncertainty of 3.2 dB with k = 2 and a 0.5 dB operating-condition deviation" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the four microphone positions: the corrected levels of the source under test as filled blue circles with their energy mean as a blue line, the corrected levels of the reference source as green squares with their mean as a green line, the measured levels before the background correction as hollow circles joined to the corrected ones wherever the correction moved them, and the background at each position as grey crosses. A boxed note at 125 Hz says the margin is below 6 dB at that position and at every position for the reference source, both K1 are capped at 1.3 dB, and the band fails clause 8.1 and is no upper bound. The lower panel draws the resulting sound power level of the source under test as blue bars, the 125 Hz bar cross-hatched as failing the background requirement, with the calibrated sound power level of the reference source as a red dashed line with diamonds, and states in its title an A-weighted level of 96.1 dB(A), grade 2, and an expanded uncertainty of 3.2 dB with k = 2 and a 0.5 dB operating-condition deviation" width="96%"></picture>
 
 *The comparison position by position: both sources at the four microphones
 after the Eq. 7 correction above, with the hollow markers showing where each
 level was before it, and Eq. 11 band by band below, with the calibrated
-$L_{W(\mathrm{RSS})}$ beside it and the 125 Hz upper bound hatched.*
+$L_{W(\mathrm{RSS})}$ beside it and the 125 Hz band, short of the background
+requirement, cross-hatched.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -149,9 +156,11 @@ axt.plot(x, res.mean_reference_level, "-", color="#2ca02c", label="mean, referen
 axt.set_ylabel("Sound pressure level [dB]")
 axt.legend()
 bars = axb.bar(x, res.sound_power_level, width=0.62, color="#1f77b4")
-for bar, met in zip(bars, res.background_requirement_met, strict=True):
+for bar, met, upper in zip(
+    bars, res.background_requirement_met, res.upper_bound, strict=True
+):
     if not met:
-        bar.set_hatch("//")
+        bar.set_hatch("//" if upper else "xx")
 axb.plot(x, res.reference_power_level, "D--", color="#d62728", label="calibrated LW(RSS)")
 axb.set_xticks(x, [f"{f:g}" for f in freqs])
 axb.set_xlabel("Frequency [Hz]")
@@ -228,7 +237,7 @@ or 12, at the conditions of the test), `mean_source_level` and
 `mean_reference_level` (Eq. 8, 9), `reference_levels` per location (Eq. 10),
 `reference_power_level`, `background_correction` per position and band,
 `background_correction_ref` per location, position and band,
-`background_requirement_met` per band, `c2`, `grade`, `sigma_r0`,
+`background_requirement_met` and `upper_bound` per band, `c2`, `grade`, `sigma_r0`,
 `sigma_omc`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
 `sound_power_level_a` and `quantity`. `sound_power_level_ref` adds `c2` to
 the level (section 3).

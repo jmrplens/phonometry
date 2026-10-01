@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 149 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 150 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and forty-nine guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -773,7 +773,7 @@ JOMOPANS-ECHO.
 Sound power, intensity, emission declarations, electroacoustics and programme
 loudness. What a source emits rather than what a receiver gets, plus the
 electroacoustic chain that reproduces or measures it. Implements ISO 3741,
-ISO 3744/3746, ISO 3745, ISO 9614-1/-2/-3, IEC 61043, ISO 4871,
+ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 9614-1/-2/-3, IEC 61043, ISO 4871,
 IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
 
 **[Sound power and intensity](/phonometry/devices/emission/)**
@@ -787,6 +787,10 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
   ISO 3745.
 - [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
+- [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/):
+  the ISO 3743 methods for small movable sources, a comparison in a
+  hard-walled room and a special reverberation room read directly or against
+  a reference source.
 - [Sound Power in Situ by Comparison](/phonometry/devices/emission/sound-power-in-situ/):
   the ISO 3747 comparison against a reference sound source where the machine
   works, with the sound energy level of an impulsive source.

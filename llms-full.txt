@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1510 numerical conformance checks against 488 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1539 numerical conformance checks against 490 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1510 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 98 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1539 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 98 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -320,6 +320,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/devices/emission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-emission-reverberant.txt)
 - [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/)
+- [Sound Power in Small Test Rooms (ISO 3743)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/)
 - [Sound Power in Situ by Comparison (ISO 3747)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/)
 - [Sound Power in the 16 kHz Octave (ISO 9295)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/)
 
@@ -609,12 +610,14 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [power/intensity-compliance](https://jmrplens.github.io/phonometry/reference/api/power/intensity-compliance/)
 - [power/sound-power](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/)
 - [power/sound-power-anechoic](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-anechoic/)
+- [power/sound-power-hard-walled](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-hard-walled/)
 - [power/sound-power-high-frequency](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-high-frequency/)
 - [power/sound-power-in-duct](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-in-duct/)
 - [power/sound-power-in-situ](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-in-situ/)
 - [power/sound-power-intensity](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/)
 - [power/sound-power-intensity-points](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity-points/)
 - [power/sound-power-reverberation](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/)
+- [power/sound-power-special-room](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-special-room/)
 - [power/vibration-sound-power](https://jmrplens.github.io/phonometry/reference/api/power/vibration-sound-power/)
 - [power/workstation](https://jmrplens.github.io/phonometry/reference/api/power/workstation/)
 - [psychoacoustics/annoyance](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/annoyance/)
@@ -17330,6 +17333,9 @@ for the enveloping surface of ISO 3744/3746 and the precision anechoic grade
 of ISO 3745,
 [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/)
 for the direct and comparison methods of ISO 3741,
+[Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/)
+for the two ISO 3743 rooms for small movable sources, hard-walled with a
+reference sound source or specially reverberant,
 [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/)
 for the ISO 3747 comparison against a reference sound source where the
 machine works,
@@ -17395,6 +17401,11 @@ judged against.
 - [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741, for sound power and for the
   sound energy of a single event.
+- [Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/):
+  the ISO 3743-1 comparison against a reference sound source in a
+  hard-walled room and the ISO 3743-2 direct and comparison methods in a
+  special reverberation room, for small movable sources, with the room
+  qualification of both and the sound energy level of a burst.
 - [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
   the ISO 3747 engineering and survey comparison against a reference sound
   source in a reverberant environment, for the machine that cannot leave its
@@ -19244,7 +19255,10 @@ the correction at **1,3 dB** and turns the band into an upper bound that the
 report must flag as not meeting the background requirement.
 `sound_power_in_situ` applies all three, returns the per-position $K_{1i}$
 and flags every band where some margin fell below 6 dB in
-`background_requirement_met`. The corrected levels are energy-averaged over
+`background_requirement_met`, and in `upper_bound` the bands where the
+machine's margin alone fell short, the only ones 8.1 reads as upper bounds:
+a short margin of the reference source caps its own correction and lowers
+the level instead. The corrected levels are energy-averaged over
 the positions (Eq. 8, 9) and the sound power level in each octave band is
 the comparison itself (clause 8.3.1, Eq. 11):
 
@@ -19298,22 +19312,26 @@ res = emission.sound_power_in_situ(
 print(np.round(res.sound_power_level, 1))   # [88.8 91.5 92.6 91.8 88.9 84.7 78.6]
 print(round(res.sound_power_level_a, 1))    # 96.1 dB(A)
 print(res.background_requirement_met)       # [False  True  True  True  True  True  True]
+print(res.upper_bound)                      # [False False False False False False False]
 print(np.round(res.background_correction[1], 2))  # position 2: [1.3 0.57 0.26 0.19 0.18 0.16 0.21]
 print(res.grade, res.sigma_r0, round(res.expanded_uncertainty, 1))  # engineering 1.5 3.2
 ```
 
 The 125 Hz band is the one to read twice: at one of the four positions the
 margin over the floor is below 6 dB for the machine, and it is below 6 dB at
-every position for the quieter reference source, so $K_1$ takes its 1,3 dB
-cap and the 88,8 dB the band reports is an **upper bound**, which is what the
-`False` says.
+every position for the quieter reference source, so both corrections take
+their 1,3 dB cap. The band fails the background requirement, which is what
+the `False` says, but the 88,8 dB it reports is **no upper bound**: the
+machine's capped $K_1$ reads high, the reference source's capped $K_{1i}$
+reads low, and nothing says which wins, so `upper_bound` stays `False`.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the four microphone positions: the corrected levels of the source under test as filled blue circles with their energy mean as a blue line, the corrected levels of the reference source as green squares with their mean as a green line, the measured levels before the background correction as hollow circles joined to the corrected ones wherever the correction moved them, and the background at each position as grey crosses. A boxed note at 125 Hz says the margin is below 6 dB at that position and at every position for the reference source, K1 is capped at 1.3 dB and the band is an upper bound. The lower panel draws the resulting sound power level of the source under test as blue bars, the 125 Hz bar hatched as an upper bound, with the calibrated sound power level of the reference source as a red dashed line with diamonds, and states in its title an A-weighted level of 96.1 dB(A), grade 2, and an expanded uncertainty of 3.2 dB with k = 2 and a 0.5 dB operating-condition deviation" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the four microphone positions: the corrected levels of the source under test as filled blue circles with their energy mean as a blue line, the corrected levels of the reference source as green squares with their mean as a green line, the measured levels before the background correction as hollow circles joined to the corrected ones wherever the correction moved them, and the background at each position as grey crosses. A boxed note at 125 Hz says the margin is below 6 dB at that position and at every position for the reference source, both K1 are capped at 1.3 dB, and the band fails clause 8.1 and is no upper bound. The lower panel draws the resulting sound power level of the source under test as blue bars, the 125 Hz bar cross-hatched as failing the background requirement, with the calibrated sound power level of the reference source as a red dashed line with diamonds, and states in its title an A-weighted level of 96.1 dB(A), grade 2, and an expanded uncertainty of 3.2 dB with k = 2 and a 0.5 dB operating-condition deviation" width="96%"></picture>
 
 *The comparison position by position: both sources at the four microphones
 after the Eq. 7 correction above, with the hollow markers showing where each
 level was before it, and Eq. 11 band by band below, with the calibrated
-$L_{W(\mathrm{RSS})}$ beside it and the 125 Hz upper bound hatched.*
+$L_{W(\mathrm{RSS})}$ beside it and the 125 Hz band, short of the background
+requirement, cross-hatched.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -19339,9 +19357,11 @@ axt.plot(x, res.mean_reference_level, "-", color="#2ca02c", label="mean, referen
 axt.set_ylabel("Sound pressure level [dB]")
 axt.legend()
 bars = axb.bar(x, res.sound_power_level, width=0.62, color="#1f77b4")
-for bar, met in zip(bars, res.background_requirement_met, strict=True):
+for bar, met, upper in zip(
+    bars, res.background_requirement_met, res.upper_bound, strict=True
+):
     if not met:
-        bar.set_hatch("//")
+        bar.set_hatch("//" if upper else "xx")
 axb.plot(x, res.reference_power_level, "D--", color="#d62728", label="calibrated LW(RSS)")
 axb.set_xticks(x, [f"{f:g}" for f in freqs])
 axb.set_xlabel("Frequency [Hz]")
@@ -19418,7 +19438,7 @@ or 12, at the conditions of the test), `mean_source_level` and
 `mean_reference_level` (Eq. 8, 9), `reference_levels` per location (Eq. 10),
 `reference_power_level`, `background_correction` per position and band,
 `background_correction_ref` per location, position and band,
-`background_requirement_met` per band, `c2`, `grade`, `sigma_r0`,
+`background_requirement_met` and `upper_bound` per band, `c2`, `grade`, `sigma_r0`,
 `sigma_omc`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
 `sound_power_level_a` and `quantity`. `sound_power_level_ref` adds `c2` to
 the level (section 3).
@@ -21137,6 +21157,764 @@ criteria and the Annex F A-weighting.
 ---
 
 
+<!-- source: docs/devices/emission/sound-power-test-rooms.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/ -->
+Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/
+
+# Sound Power in Small Test Rooms (ISO 3743)
+
+A hair dryer, a blender, a desktop printer, a power drill: small sources that
+can be carried into a room built for them. ISO 3743 measures their sound
+power at engineering grade 2 in two such rooms. Part 1 asks almost nothing of
+the room, an ordinary hard-walled one, and pays for it with a calibrated
+reference sound source at every determination: the source and the reference
+source are heard at the same microphones, and the room drops out of the
+difference. Part 2 builds the room instead, a **special reverberation test
+room** whose reverberation time follows a prescribed curve, so that the sound
+power can be read off the mean room level alone; a comparison method is kept
+beside it. This guide covers the room qualification of both parts, the
+background corrections, the source-location surveys, the determinations, the
+reproducibility of Tables 3 and 5 and the reference meteorological
+conditions. Which route fits which job is weighed in
+[Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_small_test_rooms_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_small_test_rooms.svg" alt="Two room plans side by side. On the left, the ISO 3743-1 hard-walled room of 5.0 m by 4.0 m: the source's reference box turned off the axes of the walls and at least 1 m from the wall, labelled as the source under test and then the reference source in its place, four numbered microphone positions round it and a fifth on the box, marked as standing above it, one joined to the source by a dashed line marked at least 0.3 V to the one-third, two joined by a line marked at least half a wavelength, and one at least 0.5 m from the wall. On the right, the ISO 3743-2 special reverberation room of 5.4 m by 4.4 m with absorber patches of at most 1.5 square metres along the walls and a painted concrete floor absorbing less than 0.06: a first source location at least 1 m from the wall, a dashed second location 1.2 m beside it, and six numbered microphone positions, with at least 0.3 V to the one-third from the second location, half a wavelength between two positions and a quarter wavelength from the wall. A footer states the room criteria of both parts, the worked distances for 60 and 72 cubic metres, Eq. 14 on the means with both margins at least 6 dB, the reverberation-time limits with R, Formula 9, and Formula 10 with the reference source at least 1.5 m from the walls" width="96%"></picture>
+
+*The two rooms in plan, each the room of the guide's worked example. Part 1
+asks little of the room and carries a reference source to where the source
+stood; Part 2 builds the room so that its reverberation time follows a curve,
+and reads the power from the room level alone.*
+
+## 1. The hard-walled room and the reference source (ISO 3743-1)
+
+**The room.** Clause 4 asks for a room of at least 40 m³ and at least forty
+times the reference box, the smallest box that encloses the source and its
+table; in a room of up to 100 m³ the largest dimension of the box is at most
+1,0 m, and 2,0 m above that (4.2). No portion of any wall, the floor or the
+ceiling may absorb more than 0,20 at any frequency of interest (4.3): a
+nearly empty room with smooth concrete, brick, plaster or tile is the model.
+What qualifies it acoustically is 4.4: a highly directional broadband source,
+directivity index at least 5 dB above 500 Hz, is turned through four
+horizontal and four vertical orientations, and in every octave band from
+125 Hz to 8 kHz the largest difference between the eight mean levels may not
+exceed the standard deviation of reproducibility of Table 3.
+
+```python
+import numpy as np
+from phonometry import emission
+
+# A bench-top blender on a small test table, in a 5.0 m x 4.0 m x 3.0 m room
+# with painted concrete walls and a terrazzo floor. The reference box, table
+# included, is 0.5 m x 0.4 m x 0.9 m.
+freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+orientations = np.array([  # 4.4: a directional source, mean level per orientation
+    [71.2, 74.0, 76.1, 77.3, 76.0, 73.1, 68.2],   # four horizontal ...
+    [72.4, 73.1, 75.4, 76.6, 75.2, 72.6, 67.4],
+    [70.3, 74.6, 76.3, 77.0, 76.4, 73.5, 68.9],
+    [71.9, 73.6, 75.7, 76.2, 75.5, 72.4, 67.8],
+    [72.8, 74.3, 76.8, 77.1, 76.3, 73.6, 69.0],   # ... and four vertical
+    [70.8, 73.3, 75.9, 76.5, 75.6, 72.9, 68.1],
+    [71.5, 74.9, 76.2, 77.5, 75.9, 73.3, 68.6],
+    [72.1, 73.9, 75.5, 76.8, 76.2, 73.0, 67.9],
+])
+room = emission.check_hard_walled_room(
+    orientations, freqs, volume_m3=60.0, reference_box_m=[0.5, 0.4, 0.9],
+    absorption_coefficients=[0.02, 0.03, 0.05, 0.08, 0.12],
+)
+print(np.round(room.level_range_db, 1))           # [2.5 1.8 1.4 1.3 1.2 1.2 1.6]
+print(room.limit_db)                              # [3.  2.  1.5 1.5 1.5 1.5 2.5]
+print(room.passes)                                # True
+print(round(room.minimum_microphone_distance_m, 2))  # 1.17 m from the source (7.3)
+```
+
+Table 3 prints its middle octave row as "400 to 5 000", a one-third-octave
+range it kept from the ISO 3744 table it was converted from; the library
+reads the row as the octaves it spans, 500 Hz to 4 kHz (see the
+[errata](https://jmrplens.github.io/phonometry/reference/errata/)). The last line is the
+$d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3 that keeps every microphone in the
+reverberant field, stated for the setup rather than judged.
+
+**How many source locations.** A source with audible tones or narrow bands
+of noise is surveyed first (7.4): at least six fixed positions record its
+uncorrected level, and the standard deviation per band about their
+arithmetic mean (Eq. 7, 8) sets the number of source locations of Table 2:
+one up to 2,5 dB, two in the same room up to 4,0 dB, and above that two more
+in a second room of different dimensions.
+
+```python
+survey = np.array([  # 7.4: six positions, the blender running, dB
+    [84.1, 86.0, 88.2, 90.1, 87.4, 83.2, 78.1],
+    [82.6, 85.1, 87.5, 89.6, 88.0, 83.9, 77.5],
+    [83.3, 86.8, 88.9, 90.8, 86.9, 82.8, 78.6],
+    [85.0, 85.6, 87.8, 89.2, 87.7, 84.4, 77.9],
+    [82.9, 86.3, 88.4, 90.5, 88.3, 83.5, 78.3],
+    [84.4, 85.4, 87.1, 91.4, 87.2, 83.0, 77.6],
+])
+plan = emission.hard_walled_source_locations(survey, freqs)
+print(np.round(plan.standard_deviation_db, 2))    # [0.93 0.63 0.65 0.8  0.52 0.6  0.42]
+print(plan.required_source_locations)             # 1
+```
+
+**The comparison.** The source runs, then the reference sound source runs
+where the source stood (7.2), and both are read at the same three or more
+positions, with the background just before or after (7.3, 7.5). Each set is
+energy-averaged over the positions (Eq. 10 to 12), and over the source
+locations first when there are several (Eq. 9). The background is corrected
+once per band, **on the means** and not position by position (8.1.3):
+
+$$
+K_1 = -10 \log_{10}\left(1 - 10^{-0.1\,\Delta L_p}\right),
+\qquad \Delta L_p = \overline{L'_{p(\mathrm{ST})}} - \overline{L_{p(\mathrm{B})}},
+$$
+
+with nothing to correct above 15 dB and, **below 6 dB**, a fixed **1,3 dB**,
+the value at 6 dB, with the band reported as an **upper bound**: the fixed
+correction is smaller than Eq. 13 would take, so the level reads high. The
+same rule gives $K_{1(\mathrm{RSS})}$ from the reference source's mean, and
+4.5 holds both margins to 6 dB, but a short margin of the reference source is
+no upper bound. $K_{1(\mathrm{RSS})}$ enters Eq. 14 with a plus sign, so its
+fixed 1,3 dB pulls the level down, and 8.1.3 gives the upper-bound reading to
+the margin of the source under test alone. The library flags both bands with
+`background_requirement_met` and only the first with `upper_bound`. The
+sound power level in each octave band is then
+
+$$
+L_W = L_{W(\mathrm{RSS})} - \overline{L'_{p(\mathrm{RSS})}} + \overline{L'_{p(\mathrm{ST})}}
++ K_{1(\mathrm{RSS})} - K_1 \qquad \text{(Eq. 14)}
+$$
+
+and $L_{W\mathrm{A}}$ the Annex B total with the octave corrections of
+Table B.1.
+
+```python
+st = survey[:5]  # five positions: one on each side of the box, one above it (7.3)
+rss = np.array([  # the reference source where the blender stood, same positions
+    [87.8, 83.9, 86.8, 87.9, 87.1, 85.2, 81.8],
+    [87.1, 83.1, 86.1, 87.3, 86.6, 84.7, 81.2],
+    [88.5, 84.4, 87.2, 88.4, 87.6, 85.8, 82.4],
+    [87.7, 83.6, 86.5, 87.8, 87.0, 85.1, 81.6],
+    [88.2, 83.8, 86.9, 88.1, 87.4, 85.4, 82.0],
+])
+lw_rss = np.array([94.0, 89.9, 92.8, 94.1, 93.2, 91.3, 87.9])  # calibrated
+background = np.array([  # a ventilation duct in the ceiling, loud at the low end
+    [78.5, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+    [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],
+    [78.0, 70.5, 63.5, 57.5, 51.5, 44.5, 39.5],
+    [79.0, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+    [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],   # above the box, nearer the duct
+])
+res = emission.sound_power_hard_walled(
+    st, rss, lw_rss, freqs, background_levels=background, sigma_omc_db=1.0,
+)
+print(np.round(res.sound_power_level, 1))         # [89.1 92.2 94.3 96.3 93.7 89.6 84.2]
+print(round(res.sound_power_level_a, 1))          # 100.1 dB(A)
+print(np.round(res.background_correction, 2))     # [1.3  0.14 0.   0.   0.   0.   0.  ]
+print(np.round(res.background_correction_ref, 2)) # [0.59 0.24 0.   0.   0.   0.   0.  ]
+print(res.background_requirement_met)             # [False  True  True  True  True  True  True]
+print(res.upper_bound)                            # [ True False False False False False False]
+print(round(res.expanded_uncertainty_a, 1))       # 3.6 dB (k = 2)
+```
+
+At 125 Hz the duct comes within 4.7 dB of the blender, so $K_1$ takes its
+fixed 1,3 dB where Eq. 13 would take 1.8 dB, the call warns, and the 89.1 dB
+the band reports is an **upper bound**, which is what the `False` and the
+`True` of `upper_bound` say. The louder reference source keeps 8.9 dB over
+the duct there, inside the Eq. 13 range, so its 0.59 dB is exact. Had it been
+the reference source that fell short, the band would fail 4.5 all the same,
+but `upper_bound` would stay `False`: its capped correction would read low.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hard_walled_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hard_walled_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the five microphone positions: the blender as blue circles with its energy mean as a blue line, the reference source as green squares with its mean as a green line, and the background as grey crosses with its mean as a dotted grey line that falls from about 79 dB at 125 Hz to 40 dB at 8 kHz, about 5 dB under the blender and 9 dB under the louder reference source at 125 Hz and far below both from 500 Hz up. The lower panel draws the sound power level of the blender as blue bars from 89.1 dB at 125 Hz to a peak of 96.3 dB at 1 kHz and 84.2 dB at 8 kHz, the 125 Hz bar hatched and named an upper bound because the blender's own background margin fell below 6 dB, with an expanded uncertainty as an error bar on every band, and states an A-weighted level of 100.1 dB(A) in its title" width="96%"></picture>
+
+*The comparison in a hard-walled room. Above, the blender and the reference
+source at the five microphone positions, with the background that decides
+$K_1$; below,
+Eq. 14 band by band, the 125 Hz upper bound hatched and the expanded
+uncertainty of Table 3 with $\sigma_\mathrm{omc}$ = 1.0 dB on every bar.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# res is the HardWalledSoundPowerResult computed above. One line:
+res.plot()   # LW bars, LWA in the title, the upper bound hatched, U as error bars
+plt.show()
+
+# By hand: both sources and the background per position above, Eq. 14 below.
+x = np.arange(freqs.size)
+fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6))
+for i, offset in enumerate(np.linspace(-0.24, 0.24, st.shape[0])):
+    axt.plot(x + offset, st[i], "o", color="#1f77b4")
+    axt.plot(x + offset, rss[i], "s", color="#2ca02c")
+    axt.plot(x + offset, background[i], "x", color="#9e9e9e")
+axt.plot(x, res.mean_source_level, "-", color="#1f77b4", label="mean, blender")
+axt.plot(x, res.mean_reference_level, "-", color="#2ca02c", label="mean, reference source")
+axt.plot(x, res.mean_background_level, ":", color="#9e9e9e", label="mean background")
+axt.set_xticks(x, [f"{f:g}" for f in freqs])
+axt.set_ylabel("Sound pressure level [dB]")
+axt.legend()
+res.plot(ax=axb)
+plt.show()
+```
+
+</details>
+
+### `sound_power_hard_walled()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels` | 1D, 2D or 3D array | dB | `(bands,)`, `(NM, bands)` or `(NS, NM, bands)` | Measured $L'_{pi(\mathrm{ST})}$: one traverse (NOTE to 8.1.2), one row per fixed position (at least three, 7.3), or one grid per source location (Eq. 9) |
+| `levels_ref` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | The reference source at the same positions, or on the same traverse |
+| `lw_ref` | 1D array | dB | `(bands,)` | Calibrated $L_{W(\mathrm{RSS})}$ |
+| `frequencies` | 1D array | Hz | 125 Hz to 8 kHz octaves | Ascending octave centres (3.11); 63 Hz is accepted where the room and the instrumentation are satisfactory there (Table B.1 footnote) |
+| `background_levels` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | $L_{pi(\mathrm{B})}$, averaged by Eq. 12. `None` warns and leaves `background_requirement_met` `False` throughout |
+| `background_levels_ref` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` |
+| `temperature_c` | float | °C | default `23.0` | For $C_2$ (Annex A) |
+| `static_pressure_kpa` | float | kPa | default `101.325` | For $C_2$; `static_pressure_from_altitude` gives it from the altitude (Eq. A.2) |
+| `sigma_omc_db` | float | dB | $\ge 0$ | Operating and mounting conditions (9.2); `None` leaves the uncertainty `NaN` |
+| `coverage_factor` | float | | default `2.0` | $k$ of Eq. 23, which 9.5 fixes at 2; 1,6 for a one-sided comparison with a limit |
+
+The function returns a `HardWalledSoundPowerResult`: `sound_power_level`
+(Eq. 14), `mean_source_level`, `mean_reference_level` and
+`mean_background_level` (Eq. 10 to 12), `reference_power_level`,
+`background_correction` and `background_correction_ref` per band,
+`background_requirement_met`, `upper_bound`, `c2`, `sigma_r0` per band (Table 3) and
+`sigma_r0_a`, `sigma_omc`, `coverage_factor`, `sound_power_level_a`,
+`microphone_positions` and `source_positions`; the properties `sigma_tot`,
+`expanded_uncertainty` (and their `_a` forms) and `sound_power_level_ref`
+complete it.
+
+### Bursts: the sound energy level (Eq. 15 to 20)
+
+A stapler, a door latch or a paper punch has no steady power. Clause 7.6
+measures its single event level at each position, at least five events one
+at a time or once over a run of $N_\mathrm{e}$ events, and 8.2 reduces them to
+the level of one event (Eq. 15 or 16), averages them over the source
+locations and positions (Eq. 17, 18), corrects them by the same rule
+(Eq. 19) and returns the **sound energy level** $L_J$ in dB re 1 pJ by
+Eq. 20, the Eq. 14 comparison with $\overline{L'_{E(\mathrm{ST})}}$ in place
+of $\overline{L'_{p(\mathrm{ST})}}$. Eq. 19 subtracts the *time-averaged*
+background from a *time-integrated* event level, as ISO 3744 does; the
+library compares the background as its exposure over the same interval $T$,
+$\overline{L_{p(\mathrm{B})}} + 10 \log_{10}(T/T_0)$, and so needs
+`integration_time_s` with a background (see the
+[errata](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+```python
+# An electric desk stapler in the same room: five strokes measured one at a
+# time at the same five positions, each over T = 2 s.
+strokes = st + 12.0
+events = np.stack([strokes + d for d in (-0.4, 0.1, 0.3, -0.2, 0.2)])
+energy = emission.sound_energy_hard_walled(
+    events, rss, lw_rss, freqs,                  # (5 events, 5 positions, 7 bands)
+    background_levels=background, integration_time_s=2.0, sigma_omc_db=2.0,
+)
+print(np.round(energy.sound_energy_level, 1))     # [102.2 104.4 106.3 108.3 105.7 101.6  96.2]
+print(round(energy.sound_energy_level_a, 1))      # 112.1 dB(A) re 1 pJ
+print(round(energy.expanded_uncertainty_a, 1))    # 5.0 dB: the 9.5 EXAMPLE
+```
+
+The 5.0 dB is the example of clause 9.5, reproduced because the inputs are
+the same: $\sigma_{R0}$ = 1,5 dB from Table 3, $\sigma_\mathrm{omc}$ = 2,0 dB
+and $k$ = 2.
+
+### How the measurement goes
+
+Qualify the room first: its volume against the reference box, its surfaces
+against 0,20, and the eight orientations of a directional source against
+Table 3; a source of the type to be tested may stand in for the directional
+one, but the room is then qualified for that type only. Use class 1
+instruments and filters and a class 1 calibrator before and after each
+series, discarding the series if the two readings differ by more than
+0,5 dB (5.2). Set the source as it is used, at least 1 m from every wall and
+the ceiling, the sides of its box not parallel to the walls (6.3), and turn
+a directional source so that its strongest component reaches every
+microphone by reflection. Survey six positions if it has tones, and use the
+number of source locations Table 2 gives. Place at least three microphones,
+$0{,}3\,V^{1/3}$ from the source, 0,5 m from the walls and the ceiling and
+half a wavelength of the lowest band apart; five, one on each side of the box
+and one above it, where the room allows (7.3). Read the source, the reference source where it stood
+for about 30 s, and the background over the same interval, and report the
+band and A-weighted levels to 0,1 dB with the expanded uncertainty.
+
+## 2. The special reverberation room (ISO 3743-2)
+
+**The room.** At least 70 m³, and at most 300 m³ when the 4 kHz and 8 kHz
+octaves are measured by the direct method (6.2 and its NOTE). Its reverberation time is
+prescribed band by band: between $0{,}9\,R\,T_\mathrm{nom}$ and
+$1{,}1\,R\,T_\mathrm{nom}$ (0,8 and 1,2 above 6,3 kHz), with
+
+$$
+R = 1 + \frac{257}{f\,V^{1/3}} \qquad \text{(Formula 1)}
+$$
+
+or, for a room that is not nearly cubical, $R = 1 + cS/(8Vf)$ (NOTE to 6.3),
+and a nominal reverberation time $T_\mathrm{nom}$ between 0,5 s and 1,0 s.
+The NOTE form of $R$ is the argument of the Waterhouse term of ISO 3741:
+where ISO 3741 corrects for the energy gathered near the walls, this room
+builds it in, with a reverberation time that rises at low frequencies and
+the 13 dB of Formula 9 in place of 14 dB (NOTE to 10.2). The standard finds
+$T_\mathrm{nom}$ by centring the measured values within the limiting curves
+(6.3, B.5) and prints no rule for the centring; the library takes the
+$T_\mathrm{nom}$ that leaves the most margin, the one that minimises the
+largest deviation of any band from the ideal curve measured against that
+band's own tolerance. Where the curve is followed exactly, B.5 gives
+Formula (B.2), $T_\mathrm{nom} = T_{1\,000}/1{,}06$ for its 70 m³ room, 1,06
+being $R$ at 1 000 Hz, and the library returns
+$T_{1\,000}/R(1\,000\ \mathrm{Hz})$ for such a room at any volume. The EXAMPLE
+of B.5 centres the measured curve of its Figure B.4 and reads
+$T/T_\mathrm{nom}$ = 1,09 at 1 kHz, so $T_\mathrm{nom}$ = 0,8 s/1,09 = 0,73 s;
+on the same curve the library's rule gives 1.05 and 0.76 s, 0.17 dB apart in
+the $L_W$ of Formula 9. The 1,09 is the midpoint of the extreme ratios taken
+against 0,9 and 1,1 alone, and it puts the 250 Hz band of Figure B.4 at
+1.13 $R$, outside the limits the example says the curve is centred in, so the
+library keeps its rule; a $T_\mathrm{nom}$ given in
+`nominal_reverberation_time_s`, the printed 0,73 s among them, is checked as
+given (see the [errata](https://jmrplens.github.io/phonometry/reference/errata/)). 6.6 then asks the climate to hold:
+$H(\theta + 5\ ^\circ\mathrm{C})$ during the test within ±10 % of its value
+while the reverberation time was measured. Clause 5 adds a recommendation on
+the source: its volume should not exceed 1 % of the room's, 0,7 m³ in a room
+of 70 m³. Given `source_volume_m3`, the check reads it as
+`source_size_recommended` and warns above it, but leaves `passes` to 6.2, 6.3
+and 6.6, since the clause says "should".
+
+```python
+# A 4.8 m x 5.0 m x 3.0 m special reverberation room, 72 m3, measured in
+# one-third-octave bands at 52 % and 21 degC.
+thirds = np.array([
+    100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0,
+    1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0,
+])
+t = np.array([
+    1.30, 1.13, 1.14, 1.01, 0.99, 0.90, 0.94, 0.86, 0.87, 0.82, 0.83,
+    0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67,
+])
+room2 = emission.check_special_room_reverberation(
+    t, thirds, volume_m3=72.0,
+    relative_humidity_percent=48.0, temperature_c=22.0,          # during the test
+    reverberation_relative_humidity_percent=52.0, reverberation_temperature_c=21.0,
+)
+print(round(room2.nominal_reverberation_time_s, 2))  # 0.77 s, centred
+print(room2.passes)                                  # True
+print(round(room2.climate_product_change, 3))        # -0.041: within +/-10 % (6.6)
+print(np.round(emission.reverberation_parameter([100.0, 1000.0], 72.0), 3))  # [1.618 1.062]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_reverberation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_reverberation.svg" alt="The measured reverberation time of a 72 cubic metre special reverberation room, divided by its centred nominal reverberation time of 0.77 s, plotted as a blue line with dots over the one-third-octave bands from 100 Hz to 10 kHz. A shaded green band between two green curves marks the limiting curves, 0.9 to 1.1 times the reverberation parameter R, widening to 0.8 to 1.2 above 6.3 kHz, and a dotted curve inside it is the ideal ratio R itself, falling from about 1.6 at 100 Hz to 1.0 at the top. The measured curve starts near 1.7 at 100 Hz, zigzags inside the band around the dotted curve, and ends near 0.87 at 10 kHz, inside every limit" width="96%"></picture>
+
+*6.3 laid out as Figure B.3: the measured $T/T_\mathrm{nom}$ inside the
+limiting curves of this 72 m³ room, with the centred $T_\mathrm{nom}$ in the
+title. The curves widen above the 6,3 kHz band, as the text of 6.3 says;
+Figure B.3 draws them wide at 6,3 kHz already (see the
+[errata](https://jmrplens.github.io/phonometry/reference/errata/)).*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+room2.plot()   # T/Tnom, the limiting curves and the ideal R
+plt.show()
+```
+
+</details>
+
+**The surfaces and the suitability evaluation.** The floor reflects, its
+absorption coefficient below 0,06, and each wall and the ceiling absorbs
+within 0,5 and 1,5 times the mean of the walls and ceiling (6.4); the clause
+does not say how that mean is formed, and with the areas given the library
+weights by them. Before the room is used, 6.7 determines the octave-band
+power of a broadband reference source calibrated by ISO 3741, or by ISO 6926
+and ISO 3745, in the room by this standard and compares it with the
+calibration: within ±5 dB at 125 Hz, ±3 dB from 250 Hz to 4 kHz and ±4 dB at
+8 kHz (Table 1).
+
+```python
+walls = np.array([  # 6.4: each wall and the ceiling, octave bands
+    [0.16, 0.14, 0.12, 0.11, 0.10, 0.10, 0.11],
+    [0.18, 0.15, 0.13, 0.12, 0.11, 0.11, 0.12],
+    [0.13, 0.12, 0.11, 0.10, 0.09, 0.09, 0.10],
+    [0.17, 0.15, 0.12, 0.11, 0.10, 0.10, 0.12],
+    [0.12, 0.11, 0.10, 0.09, 0.09, 0.09, 0.10],   # the ceiling
+])
+floor = np.array([0.02, 0.02, 0.02, 0.03, 0.03, 0.04, 0.05])
+surfaces = emission.check_special_room_surfaces(
+    walls, floor, freqs, surface_areas_m2=[15.0, 14.4, 15.0, 14.4, 24.0]
+)
+print(surfaces.passes)                               # True
+print(np.round(surfaces.surface_ratio.min(), 2), np.round(surfaces.surface_ratio.max(), 2))  # 0.81 1.21
+
+tnom = round(room2.nominal_reverberation_time_s, 2)
+bg2 = np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0])
+lw_r = np.array([80.0, 83.5, 86.2, 86.9, 86.4, 84.3, 80.7])  # calibrated by ISO 3741
+rss2 = np.array([  # the reference source on the floor, 1.5 m from the walls
+    [74.5, 76.8, 79.8, 80.0, 80.2, 77.2, 73.7],
+    [73.6, 77.3, 79.3, 80.3, 79.7, 77.5, 73.3],
+    [74.3, 77.5, 79.7, 79.9, 80.0, 77.7, 73.8],
+    [73.8, 76.9, 79.5, 80.4, 79.6, 77.3, 73.7],
+    [74.2, 77.2, 79.9, 80.2, 80.1, 77.2, 73.4],
+    [74.1, 76.9, 79.4, 79.8, 79.8, 77.5, 73.6],
+])
+in_room = emission.sound_power_special_room(
+    rss2, freqs, volume_m3=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
+)
+suitability = emission.check_special_room_suitability(in_room.sound_power_level, lw_r, freqs)
+print(np.round(suitability.difference_db, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
+print(suitability.passes)                       # True
+```
+
+**The survey.** Six positions at one source location give $s_\mathrm{M}$ per
+band and for the A-weighted level (Formula 4), about the arithmetic mean when
+the six levels span no more than 5 dB and about their energy mean
+(Formula 5) when they span more. Table 3 turns it into the minimum number of
+source locations for 3, 6 or 12 microphone positions, and 9.5 reads the same
+classes as the spectrum: broadband below 2,3 dB, narrow-band components up
+to 4 dB, a discrete tone above, which the report must mention.
+
+```python
+# A desktop printer whose cooling fan hums in the 500 Hz octave:
+# the survey of 9.4, six positions at one source location, and A-weighted.
+survey2 = np.array([
+    [62.1, 65.4, 63.2, 64.2, 61.5, 58.1, 52.3],
+    [60.4, 66.2, 69.1, 64.9, 61.1, 57.7, 51.8],
+    [63.0, 64.1, 64.0, 63.8, 62.0, 58.6, 52.9],
+    [61.2, 66.8, 68.7, 64.6, 61.7, 57.9, 52.1],
+    [62.6, 64.7, 62.9, 63.5, 61.3, 58.4, 52.6],
+    [60.9, 65.9, 67.8, 64.1, 61.9, 58.0, 52.0],
+])
+survey2_a = np.array([68.4, 70.1, 68.5, 70.0, 68.1, 69.5])
+plan2 = emission.special_room_source_locations(survey2, freqs, a_weighted_levels=survey2_a)
+print(np.round(plan2.standard_deviation_db, 2))  # [1.02 0.99 3.   0.51 0.35 0.33 0.41]
+print(plan2.spectral_character[2])               # narrow-band
+print(plan2.source_locations, plan2.a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
+```
+
+**The direct and the comparison methods.** Every level is corrected for
+background by the stepped Table 4 at its own position (9.8): 2 dB at a 4 dB
+or 5 dB margin, 1 dB from 6 dB to 8 dB, 0,5 dB at 9 dB and 10 dB, nothing
+above; the table gives whole decibels and the library reads a margin at the
+nearest one. The corrected levels of every position and source location are
+energy-averaged (Formula 8), and the direct method reads the power off the
+room (10.2):
+
+$$
+L_W = \overline{L_p} - 10 \log_{10}\frac{T_\mathrm{nom}}{T_0}
++ 10 \log_{10}\frac{V}{V_0} - 13\ \mathrm{dB} \qquad \text{(Formula 9)},
+$$
+
+in each octave band and, from the A-weighted levels, for the A-weighted level
+directly, which is how clause 4 describes the method. The comparison method
+keeps a reference source at no fewer than six positions (10.3) and reads
+$L_{W\mathrm{e}} = L_{p\mathrm{e}} + (L_{W\mathrm{r}} - L_{p\mathrm{r}})$
+(Formula 10), with the A-weighted level from the bands by Annex F.
+
+```python
+# So two source locations, the second 1.2 m further along the floor.
+second = survey2 + np.array([
+    [0.3, -0.4, 2.1, 0.2, -0.1, 0.2, 0.1],
+    [-0.2, 0.3, -3.8, -0.1, 0.2, -0.1, 0.0],
+    [0.1, 0.2, 3.3, 0.1, 0.0, 0.1, -0.1],
+    [-0.3, -0.2, -3.1, 0.2, 0.1, 0.0, 0.2],
+    [0.2, 0.1, 2.9, -0.2, -0.2, 0.1, 0.1],
+    [-0.1, 0.0, -2.4, 0.0, 0.1, -0.2, 0.0],
+])
+levels = np.stack([survey2, second])                           # (2, 6, 7)
+levels_a = np.array([survey2_a, [68.8, 69.0, 69.4, 69.2, 68.5, 68.9]])
+direct = emission.sound_power_special_room(
+    levels, freqs, volume_m3=72.0, nominal_reverberation_time_s=tnom,
+    background_levels=bg2, a_weighted_levels=levels_a, a_weighted_background_levels=46.0,
+    sigma_omc_db=0.5,
+)
+print(np.round(direct.sound_power_level, 1))     # [68.5 72.3 73.  70.9 68.3 64.8 59. ]
+print(round(direct.sound_power_level_a_direct, 1), round(direct.sound_power_level_a, 1))  # 75.8 75.8
+print(round(direct.expanded_uncertainty_a, 1))   # 4.1 dB (Table 5, k = 2)
+
+comparison = emission.sound_power_special_room_comparison(
+    levels, rss2, lw_r, freqs, background_levels=bg2, sigma_omc_db=0.5,
+)
+print(np.round(comparison.sound_power_level, 1))  # [67.7 72.  72.9 71.  68.1 65.  59.4]
+print(round(comparison.sound_power_level_a, 1))   # 75.7 dB(A)
+print(emission.special_room_background_correction([62.0, 62.0, 62.0], [57.6, 54.5, 50.0]))  # [2. 1. 0.]
+```
+
+The two methods part by the room's own deviation from its model, the same
+0.8 dB at 125 Hz that the suitability evaluation found: the direct method
+reads the room, the comparison method cancels it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_sound_power.svg" alt="Two panels. The upper one plots the survey standard deviation of the printer at six positions as blue bars over the octave bands from 125 Hz to 8 kHz and an A-weighted bar at the right, with the class limits of Table 3 at 2.3 dB and 4 dB as orange dashed and dotted lines; the 500 Hz bar stands at 3 dB, in the narrow-band class, and carries the figure 2 above it for two source locations, every other bar about 1 dB or less with a 1 above it. The lower panel draws the sound power level of the printer by the direct method as blue bars from 68.5 dB at 125 Hz to 59 dB at 8 kHz, each with its expanded uncertainty as an error bar, the largest at 125 Hz, and red diamonds for the comparison method sitting on or just beside each bar, lowest against the bar at 125 Hz by 0.8 dB; the title gives the A-weighted level of 75.8 dB(A)" width="96%"></picture>
+
+*9.4 and 10 in one view. Above, the survey's $s_\mathrm{M}$ against the
+class limits of Table 3, the fan hum at 500 Hz asking for two source
+locations; below, Formula 9 band by band with the Table 5 expanded
+uncertainty, and Formula 10 as diamonds.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6), height_ratios=(0.85, 1.0))
+plan2.plot(ax=axt)
+direct.plot(ax=axb)
+axb.plot(np.arange(freqs.size), comparison.sound_power_level, "D",
+         color="#d62728", label="Comparison method, Formula (10)")
+axb.legend(loc="lower right")
+plt.show()
+```
+
+</details>
+
+### `sound_power_special_room()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels` | 1D, 2D or 3D array | dB | `(bands,)`, `(NM, bands)` or `(NS, NM, bands)` | Measured band levels: one traverse, one row per position, or one grid per source location; every entry enters Formula 8 |
+| `frequencies` | 1D array | Hz | 125 Hz to 8 kHz octaves | Ascending octave centres of Table F.1; 63 Hz under its footnote |
+| `volume_m3` | float | m³ | $> 0$ | Warns below 70 m³, and above 300 m³ when the bands reach the 8 kHz octave (6.2) |
+| `nominal_reverberation_time_s` | float | s | $> 0$ | $T_\mathrm{nom}$; warns outside 0,5 s to 1,0 s (6.3) |
+| `background_levels` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | Table 4 at each position; `None` warns and meets nothing |
+| `a_weighted_levels` | 0D, 1D or 2D array | dB | one per position | The A-weighted levels for Formula 9 directly; `None` leaves `sound_power_level_a_direct` `NaN` |
+| `a_weighted_background_levels` | float or 1D array | dB | one, or one per position | Their background, Table 4 |
+| `temperature_c`, `static_pressure_kpa` | float | °C, kPa | `23.0`, `101.325` | For $C_2$ (Annex E) |
+| `sigma_omc_db`, `coverage_factor` | float | dB, | `None`, `2.0` | Formulae 12 and 13 |
+
+`sound_power_special_room_comparison()` takes `levels`, `levels_ref` (at
+least six positions, 10.3), `lw_ref`, `frequencies`, `background_levels`,
+`background_levels_ref` and the same four last arguments. Both return a
+`SpecialRoomSoundPowerResult`: `sound_power_level`, `mean_pressure_level`,
+`background_correction`, `background_requirement_met`, the reference
+source's `mean_reference_level` and `reference_power_level` (comparison) or
+the room's `volume_m3` and `nominal_reverberation_time_s` (direct), `c2`,
+`sigma_r0` (Table 5), `sound_power_level_a` (Annex F),
+`sound_power_level_a_direct` and `mean_a_weighted_level`, with the same
+uncertainty properties as Part 1.
+
+### How the measurement goes
+
+Build or treat the room to the curve: membrane absorbers for the low end and
+perforated panels filled with mineral wool for the middle and high
+frequencies, spread at random over the walls and the ceiling in patches of
+no more than 1,5 m², and a floor of painted poured concrete (Annex B). Measure the
+reverberation time in one-third-octave bands with any absorbing support of
+the source in place, centre it, and keep the humidity and temperature of
+that measurement within 6.6 during every test. Check the room once with a
+calibrated reference source (6.7). Use a microphone flat for random
+incidence, within the tolerances of Table 2 of the standard. Set the source
+as it is used or, failing that, on the floor at least 1 m from the nearest
+wall (8.2), and keep it within 1 % of the room's volume (clause 5). Survey six
+positions, at least $\lambda/4$ from the room's surfaces for the lowest band,
+$0{,}3\,V^{1/3}$ from the source and $\lambda/2$ apart ($\lambda$ = 3,5 m for
+A-weighting, 9.3), and take the positions and locations Table 3 gives.
+Average at least 10 s per band with a moving microphone, 30 s at 160 Hz and
+below and for A-weighting (9.2).
+
+## 3. Uncertainty, round robins and reference conditions
+
+**Uncertainty (ISO 3743-1 clause 9, ISO 3743-2 clause 11).**
+$\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ and
+$U = k\,\sigma_\mathrm{tot}$, with $\sigma_{R0}$ the typical upper bound per
+band: Table 3 of Part 1 gives 3,0 / 2,0 / 1,5 / 2,5 dB at 125 Hz / 250 Hz /
+500 Hz to 4 kHz / 8 kHz and 1,5 dB A-weighted, Table 5 of Part 2 gives
+5,0 / 3,0 / 2,0 / 3,0 dB and 2,0 dB. The two EXAMPLEs, with
+$\sigma_\mathrm{omc}$ = 2,0 dB and $k$ = 2, give 5 dB (Part 1) and 5,7 dB
+(Part 2), and Tables C.1 and D.1 print the totals for three stabilities of
+the operating conditions; the conformance report pins all of them. The
+budgets of Annexes C and D are informative and not modelled.
+
+**Round robins (Eq. 24 of Part 1).** A round robin gives the total standard
+deviation of one source, which still carries that source's instability;
+$\sigma'_{R0} = \sqrt{{\sigma'_\mathrm{tot}}^2 - {\sigma'_\mathrm{omc}}^2}$
+takes it out, and should not be used with $\sigma'_\mathrm{omc}$ above
+$\sigma'_\mathrm{tot}/\sqrt{2}$. Part 2 prints the same relation as its
+Formula (14) with a plus sign, which its own next paragraph contradicts; the
+library takes the difference for both (see the
+[errata](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+**Reference conditions (Annex A of Part 1, Annex E of Part 2).** Above
+500 m the levels are carried to 101,325 kPa and 23,0 °C by
+$C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}[(273{,}15 + \theta)/296]$,
+the $C_2$ of ISO 3741 and ISO 3747, with the static pressure from the
+altitude by $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$. Both
+annexes print $C_2$ alone.
+
+```python
+# A laboratory 1 100 m above sea level, at 19 degC.
+ps = emission.static_pressure_from_altitude(1100.0)
+high = emission.sound_power_hard_walled(
+    st, rss, lw_rss, freqs, background_levels=background,
+    temperature_c=19.0, static_pressure_kpa=ps,
+)
+print(round(ps, 2), round(high.c2, 3))            # 88.79 kPa, 0.488 dB (Eq. A.2, A.1)
+print(round(high.sound_power_level_a_ref, 1))     # 100.6 dB(A) under the reference conditions
+print(round(emission.reproducibility_from_round_robin(1.9, 1.1), 2))  # 1.55 dB (Eq. 24)
+```
+
+**A-weighted totals (Annex B of Part 1, Annex F of Part 2).** $L_{W\mathrm{A}}$
+is the energy sum of the band levels plus the octave corrections of Table B.1
+(the same as Table F.1 and as ISO 3744 Table E.2): −26,2, −16,1, −8,6,
+−3,2, 0,0, 1,2, 1,0 and −1,1 dB from 63 Hz to 8 kHz.
+
+## 4. The test sheet (`.report()`)
+
+A determination ends as a document. Both results have a `.report()` method
+that writes a one-page PDF fiche in the layout of the other sound power
+sheets: the method and its accuracy grade, an optional `ReportMetadata`
+header (client, noise source, test room, instrumentation, climate, date), a
+table per octave band, the spectrum, the boxed A-weighted level with the
+expanded uncertainty and its coverage factor, and the chain of formulae the
+level rests on, which is what clause 10.5 of Part 1 and 12.5 of Part 2 ask
+the record to hold. The ISO 3743-1 table carries both sources: the mean
+level of the source, the mean level and the calibrated power of the
+reference sound source, and $L_W$ (or $L_J$ for a burst). The ISO 3743-2
+table carries the mean level and $L_W$, with the reference source's columns
+for the comparison method, and prints $L_W$ to the nearest one-half decibel
+as its 12.5 d) asks, where Part 1 asks for 0,1 dB (10.5 g). In the ISO 3743-1 table
+a band that 8.1.3 makes an upper bound is marked `*` and named one beneath
+the table; a band that fails 4.5 through the reference source's margin, or
+with no background measured, is marked `†` and named as that. The ISO 3743-2
+table marks `*` every band whose background requirement is not shown to be
+met, which is all 9.8 says of it. The basis line states what the coverage
+factor gives: 95 % two-sided for $k$ = 2, 95 % one-sided for a comparison
+with a limit for $k$ = 1,6. The direct method boxes the
+A-weighted level clause 4 describes, Formula 9 on the A-weighted sound
+pressure levels, and prints the Annex F band total beside it. `requirement`
+adds a PASS or FAIL verdict against a declared A-weighted limit,
+`verbose=True` adds the background columns and `language="es"` writes the
+Spanish sheet.
+
+```python
+from phonometry import ReportMetadata
+
+res.report(
+    "blender_iso3743_1.pdf",
+    metadata=ReportMetadata(
+        client="Example appliance manufacturer",
+        specimen="Bench-top blender on a test table, full speed",
+        test_room="Hard-walled test room, V = 60 m3, painted concrete",
+        requirement=102.0,
+    ),
+)   # LWA = 100.1 dB(A) re 1 pW, 125 Hz marked *: declared limit 102 dB(A), PASS
+direct.report("printer_iso3743_2.pdf", language="es", verbose=True)
+```
+
+The example fiches, regenerated with `make reports`, are kept rendered in the
+repository. Click a preview to open the PDF:
+
+[![One-page ISO 3743-1 sound power determination fiche: a header with the client, the bench-top blender as noise source, the 60 cubic metre hard-walled test room, the instrumentation and the climate, the octave-band table from 125 Hz to 8 kHz of the mean level of the source, the mean level and the calibrated sound power level of the reference sound source and the determined LW, with the 125 Hz value of 89.1 dB marked by an asterisk, the sound power spectrum with its expanded uncertainty and the 125 Hz upper bound in the legend, the boxed A-weighted sound power level LWA = 100.1 dB(A) re 1 pW with the total LW, the comparison method and an expanded uncertainty of 3.6 dB at coverage factor 2, a PASS verdict against a declared 102 dB(A), and basis lines giving the Eq. 10 to 14 chain with its background corrections, the sentence naming the starred band an upper bound, the uncertainty from Table 3 and the Annex B A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_1_hard_walled_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_1_hard_walled_power_example.pdf)
+
+*Hard-walled test room fiche (`HardWalledSoundPowerResult.report`): the ISO 3743-1 comparison of the blender with the reference sound source, its 125 Hz band an upper bound.*
+
+[![One-page ISO 3743-2 sound power determination fiche: a header with the client, the desktop printer as noise source, the 72 cubic metre special reverberation test room with a nominal reverberation time of 0.77 s, the instrumentation and the climate, the octave-band table from 125 Hz to 8 kHz of the mean sound pressure level and the determined LW to the nearest half decibel, the sound power spectrum with its expanded uncertainty, the boxed A-weighted sound power level LWA = 75.8 dB(A) re 1 pW from the A-weighted levels by Formula 9, with the total LW, the Annex F band total of 75.8 dB(A), the direct method with the room volume and nominal reverberation time and an expanded uncertainty of 4.1 dB at coverage factor 2, a PASS verdict against a declared 77 dB(A), and basis lines giving Formula 8 with the Table 4 background corrections and Formula 9, the uncertainty from Table 5 and the Annex F A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_2_special_room_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_2_special_room_power_example.pdf)
+
+*Special reverberation test room fiche (`SpecialRoomSoundPowerResult.report`): the ISO 3743-2 direct method on the printer, with the A-weighted level read as clause 4 describes it.*
+
+## What this guide covers
+
+**Covered.** ISO 3743-1:2010: the room criteria of 4.2 to 4.4 (`check_hard_walled_room`),
+the survey of 7.4 with Table 2 (`hard_walled_source_locations`), the means of
+Eq. 9 to 12, the background correction of 8.1.3 on the means with its 6 dB,
+15 dB and 1,3 dB rules, the sound power level of Eq. 14
+(`sound_power_hard_walled`), the sound energy level of Eq. 15 to 20
+(`sound_energy_hard_walled`), the Table 3 reproducibility with Eq. 22 and 23,
+the round robin of Eq. 24 (`reproducibility_from_round_robin`), Annex A and
+the Annex B totals. ISO 3743-2:2018: the reverberation parameter of
+Formula (1) and its NOTE (`reverberation_parameter`), the limiting curves of
+6.3 with a centred or given $T_\mathrm{nom}$, the volume of 6.2, the
+climate of 6.6 and the source size of clause 5
+(`check_special_room_reverberation`), the surfaces of 6.4
+(`check_special_room_surfaces`), the suitability evaluation of 6.7
+(`check_special_room_suitability`), the survey of 9.4 with Table 3 and the
+spectral character of 9.5 (`special_room_source_locations`), Table 4
+(`special_room_background_correction`), the direct Formula 9
+(`sound_power_special_room`) and the comparison Formula 10
+(`sound_power_special_room_comparison`), the Table 5 reproducibility, Annex E
+and the Annex F totals. Both results write the one-page test sheet through
+`.report()`, with the upper bounds of Part 1 and the other bands that fail
+the background requirement marked and stated apart.
+
+**Not covered.** The uncertainty budgets of Annex C (Part 1) and Annex D (Part 2) are
+informative and not modelled: $\sigma_{R0}$ is the typical upper bound of
+Table 3 or Table 5, not a value from a round robin or a model. The
+placement rules (source location, microphone distances from the source and
+the surfaces, traverse paths and their speed) are the operator's decisions,
+made before the levels exist, and the instrumentation tolerances of Table 2
+of Part 2 are the instrument's. The design guidance of Annex B of Part 2 (the
+room proportions of Table B.1, the membrane absorber of Formula B.1) is
+advice for building a room, not a criterion the room is judged by. Part 2
+leaves isolated bursts to ISO 3744 and ISO 3745 by its scope; Part 1 gives
+them a sound energy level. The reference sound source is taken as
+calibrated: its characteristics and calibration tolerances, Annex A of Part 2
+(A.1 and Table A.1: ±1 dB from 100 Hz to 160 Hz, ±0,5 dB from 200 Hz to
+4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
+calibration certificate's and are not judged here.
+
+## See also
+
+- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the
+  determination routes, the accuracy grades and the ISO 4871 noise-emission
+  declaration.
+- [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+  the precision grade of ISO 3741, whose Waterhouse term the special room
+  builds into its reverberation curve.
+- [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
+  the same comparison with a reference source, taken to the room the machine
+  works in.
+- [Sound Power by Pressure Methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+  the enveloping surface of ISO 3744, ISO 3745 and ISO 3746 for a source
+  measured in its direct field.
+- [API reference](https://jmrplens.github.io/phonometry/reference/api/): the ISO 3743 functions and
+  results under `phonometry.emission`.
+
+
+## References
+
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for small movable
+  sources in reverberant fields — Part 1: Comparison method for a
+  hard-walled test room* (ISO 3743-1:2010). The comparison method of
+  section 1: the room criteria of 4.2 to 4.4, the survey of 7.4, the
+  background correction of 8.1.3, Eq. 14 and Eq. 20, the Table 3
+  reproducibility and Annexes A and B.
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  pressure — Engineering methods for small, movable sources in reverberant
+  fields — Part 2: Methods for special reverberation test rooms*
+  (ISO 3743-2:2018). The special room of section 2: the reverberation-time
+  curve of 6.3, the surfaces of 6.4, the suitability evaluation of 6.7,
+  Tables 3 and 4, the direct Formula 9 and the comparison Formula 10, the
+  Table 5 reproducibility and Annexes E and F.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52053.html).
+  The precision reverberation-room method the two parts sit below: the
+  Waterhouse term the special room builds into its reverberation curve, and
+  the $C_1 + C_2$ whose altitude figures the informative annexes of ISO 3743
+  quote.
+
+## Standards
+
+ISO 3743-1:2010, *Acoustics — Determination of sound power levels and sound
+energy levels of noise sources using sound pressure — Engineering methods for
+small movable sources in reverberant fields — Part 1: Comparison method for a
+hard-walled test room*: the room criteria, the source-location survey, the
+comparison with a reference sound source for the sound power and the sound
+energy level, the Table 3 reproducibility and Annexes A and B.
+
+ISO 3743-2:2018, *Acoustics — Determination of sound power levels of noise
+sources using sound pressure — Engineering methods for small, movable sources
+in reverberant fields — Part 2: Methods for special reverberation test rooms*:
+the reverberation-time curve, the surfaces and the suitability of the room,
+the survey of Table 3, the background correction of Table 4, the direct and
+the comparison methods, the Table 5 reproducibility and Annexes E and F.
+
+---
+
+
 <!-- source: docs/devices/emission/sound-power.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power/ -->
 Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power/
 
@@ -21147,12 +21925,15 @@ sound **power** does not. The sound power level $L_W$ is the total acoustic
 energy per second a source radiates, referenced to $P_0 = 1\ \text{pW}$, and it is
 the device-independent **emission** descriptor that goes on a datasheet,
 feeds a room prediction (EN 12354) or is checked against a noise-emission
-limit. phonometry implements eight standardised routes to it, split across
-six guides: an enveloping *pressure* surface in the field
+limit. phonometry implements ten standardised routes to it, split across
+seven guides: an enveloping *pressure* surface in the field
 (ISO 3744/3746) and the precision grade in an *anechoic room* (ISO 3745),
 covered in [Sound Power by Pressure Methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/); the
 diffuse field of a *reverberation room* (ISO 3741), covered in
-[Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/); the
+[Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/); a
+*small test room* for a small movable source, hard-walled with a reference
+sound source (ISO 3743-1) or specially reverberant (ISO 3743-2), covered in
+[Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/); the
 same comparison against a reference sound source taken to the room the
 machine works in (ISO 3747), covered in
 [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/);
@@ -21177,13 +21958,16 @@ declaration a datasheet prints.
 All deliver the same quantity for a source that runs steadily, a per-band
 $L_W$ and an A-weighted total $L_{W\mathrm{A}}$, but under different
 environments, accuracy grades and practical constraints. A source that emits in
-bursts has no steady power to report, and the in situ route determines its
-sound energy level $L_J$ instead (clause 8.5).
+bursts has no steady power to report, and the in situ route and the
+hard-walled room of ISO 3743-1 determine its sound energy level $L_J$
+instead (ISO 3747 clause 8.5, ISO 3743-1 clause 8.2).
 
 | Method | Standard | Measured quantity | Environment | Accuracy grade | Use when |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Enveloping surface | **ISO 3744** (engineering) / **ISO 3746** (survey) | Sound pressure on a hemisphere or box | Essentially free field over one or more reflecting planes | Grade 2 ($\sigma_{\mathrm{R}0} \approx 1.5\ \text{dB}$) / grade 3 ($\approx 3.0\ \text{dB}$) | In situ or a large room; no special test facility available |
 | Reverberation room | **ISO 3741** | Sound pressure in the diffuse field | Qualified hard-walled reverberation room | Grade 1 (precision) | Highest accuracy for steady, broadband sources in a lab |
+| Hard-walled test room | **ISO 3743-1** | Sound pressure of the source and of a calibrated reference sound source at the same positions | An ordinary hard-walled room of at least 40 m³, no surface absorbing more than 0.20 | Grade 2 ($\sigma_{\mathrm{R}0} \approx 1.5\ \text{dB}$ A-weighted) | A small movable source, with no qualified laboratory room at hand |
+| Special reverberation room | **ISO 3743-2** | Sound pressure in a room whose reverberation time follows a prescribed curve | A special reverberation room of at least 70 m³, at most 300 m³ for the direct method with the 4 kHz and 8 kHz octaves | Grade 2 ($\sigma_{\mathrm{R}0} \approx 2.0\ \text{dB}$ A-weighted) | Small sources tested one after another, read off the room alone or against a reference source |
 | In situ comparison | **ISO 3747** | Sound pressure of the source and of a calibrated reference sound source at the same positions | The reverberant part of the room the machine works in ($\Delta L_f \ge 7$ dB) | Grade 2 ($\sigma_{\mathrm{R}0} \approx 1.5\ \text{dB}$) / grade 3 ($\approx 4.0\ \text{dB}$) | A machine that cannot leave its installation, in a room too reverberant for an enveloping surface |
 | Intensity at discrete points | **ISO 9614-1** | Normal sound intensity held at each of $N$ points, one per segment | Almost any, tolerant of steady extraneous noise | Grade 1 or 2 per band from the Annex B criteria; grade 3 on the A-weighted total | On-site where the probe stands still at each point rather than sweeping the surface |
 | Intensity scanning | **ISO 9614-2** | Normal sound intensity scanned over a surface | Almost any, tolerant of steady extraneous noise | Grade 2 / 3 (from per-band field indicators) | On-site with background noise, or one machine among many |
@@ -21198,8 +21982,9 @@ the cost of a two-microphone probe and a per-band validity check; the
 surface-velocity route abandons the microphone altogether and pays for it with
 a radiation factor. Each method guide walks its routes in turn.
 
-The plate below draws seven of the eight: the in situ comparison shares the
-sound pressure row's algebra with ISO 3741 and is drawn on its own page.
+The plate below draws seven of the ten: the in situ comparison and the two
+small test rooms share the sound pressure row's algebra with ISO 3741 and are
+drawn on their own pages.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The seven sound power routes, one row for each measured quantity, every cell carrying the same five attributes. The sound pressure row: the ISO 3744/3746 hemispherical enveloping surface over a reflecting plane, the ISO 3745 fixed microphone array in a wedge-lined anechoic room, and the ISO 3741 diffuse field of a reverberation room. The sound intensity row: the ISO 9614-1 measurement surface cut into ten segments with the probe held still at a point in each, the ISO 9614-2 serpentine scan swept over that same surface, and the tighter ISO 9614-3 precision scan. The surface velocity row carries one route across the full width, ISO/TS 7849 with an accelerometer on a radiating casing and no microphone at all" width="92%"></picture>
 
@@ -21266,7 +22051,8 @@ order; the first match names the standard.
    hemi-anechoic room with a characteristic dimension below half the
    measurement radius, and it is the route that also yields directivity. A
    machine bolted to its foundation rules both out and leaves the in-situ
-   methods.
+   methods. A small movable source with no qualified room at hand still has
+   a laboratory route at grade 2: the small test rooms of ISO 3743.
 3. **How quiet and how dry is the site?** ISO 3744 needs the background at
    least 6 dB below the source (preferably more than 15 dB) and
    $K_2 \le 4\ \text{dB}$. If only a
@@ -21293,8 +22079,8 @@ order; the first match names the standard.
 The grade is a claim about **reproducibility**: $\sigma_{\mathrm{R}0}$ is the standard
 deviation you would see if different laboratories measured the same source,
 each following the standard correctly. Typical A-weighted values are
-$\sigma_{\mathrm{R}0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3747,
-ISO 9614-2) and 3 dB or more for grade 3 (larger still when $K_2$ is
+$\sigma_{\mathrm{R}0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3743-1, ISO 3747,
+ISO 9614-2; 2.0 dB for ISO 3743-2) and 3 dB or more for grade 3 (larger still when $K_2$ is
 large or the spectrum is tonal). Per-band values are larger at the
 spectrum edges. The `uncertainty` field of the pressure-method results
 (enveloping surface and anechoic) is the expanded uncertainty
@@ -21401,6 +22187,9 @@ the clause 6.2 verification verdict.*
 - [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
   the precision diffuse-field method with the Waterhouse and meteorological
   corrections.
+- [Sound Power in Small Test Rooms (ISO 3743)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/):
+  a small movable source in a hard-walled room against a reference sound
+  source, or in a special reverberation room read directly or against one.
 - [Sound Power in Situ by Comparison (ISO 3747)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
   the reference-source comparison where the machine works, with the sound
   energy level of an impulsive source.
@@ -21425,16 +22214,17 @@ Sound pressure depends on where you stand and on the room; sound power does
 not. The sound power level $L_W$ is the total acoustic energy per second a
 source radiates, referenced to $P_0 = 1\ \text{pW}$, and it is the device-independent
 emission descriptor that goes on a datasheet or is checked against a
-noise-emission limit; ISO 3744, ISO 3741, ISO 3747, ISO 9614-1, ISO 9614-2,
-ISO 3745, ISO 9614-3 and ISO/TS 7849 all determine it.
+noise-emission limit; ISO 3744, ISO 3741, ISO 3743-1, ISO 3743-2, ISO 3747,
+ISO 9614-1, ISO 9614-2, ISO 3745, ISO 9614-3 and ISO/TS 7849 all determine
+it.
 
 ### What do the accuracy grades in sound power measurement mean?
 
 The grade is a claim about reproducibility: $\sigma_{\mathrm{R}0}$ is the standard deviation
 you would see if different laboratories measured the same source, each
 following the standard correctly. Typical A-weighted values are
-$\sigma_{\mathrm{R}0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3747,
-ISO 9614-2) and 3 dB or more for grade 3. A grade-2 $L_{W\mathrm{A}}$ carries
+$\sigma_{\mathrm{R}0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3743-1, ISO 3747,
+ISO 9614-2; 2.0 dB for ISO 3743-2) and 3 dB or more for grade 3. A grade-2 $L_{W\mathrm{A}}$ carries
 $U \approx 3\ \text{dB}$, so two grade-2 results 2 dB apart are statistically
 indistinguishable.
 
@@ -21477,18 +22267,20 @@ ISO 4871:1996, *Acoustics — Declaration and verification of noise emission
 values of machinery and equipment*: the dual-number and single-number
 declaration forms, the declared value $L_{W\mathrm{Ad}} = L_{W\mathrm{A}} + K_{W\mathrm{A}}$ and the
 clause 6.2 verification. The basic determination standards (ISO 3744/3746,
-ISO 3741, ISO 3745, ISO 3747, ISO 9614-1/-2/-3, ISO/TS 7849-1/-2) are covered
+ISO 3741, ISO 3743-1/-2, ISO 3745, ISO 3747, ISO 9614-1/-2/-3, ISO/TS 7849-1/-2) are covered
 in their method guides.
 
-**Not covered.** Two members of the ISO 3740 family are not implemented at
-all: ISO 3743-1 and ISO 3743-2. The sound *energy* level $L_J$ of a single
-event is covered for the rest, each on its own page: for ISO 3744 and ISO 3746
+**Not covered.** The determinations themselves live in their method guides.
+The sound *energy* level $L_J$ of a single event is covered for the
+standards that define one, each on its own page: for ISO 3744 and ISO 3746
 on the [pressure-methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/#4-sound-energy-level-of-a-burst-clause-83)
 page, for ISO 3741 on the
 [reverberation-room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/#3-sound-energy-level-of-a-single-event-clause-92)
-page, and for ISO 3747 in
-[Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/). ISO 3745 defines
-none. The emission sound pressure level $L_{p\mathrm{A}}$
+page, for ISO 3743-1 in
+[Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/#bursts-the-sound-energy-level-eq-15-to-20),
+and for ISO 3747 in
+[Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/). ISO 3745 and
+ISO 3743-2 define none. The emission sound pressure level $L_{p\mathrm{A}}$
 that stands beside $L_{W\mathrm{A}}$ in a declaration is consumed here, never
 determined: ISO 11201, ISO 11202 and ISO 11204 are outside the library. Of
 ISO 4871, only the clause 6.2 single-machine verification is evaluated; the
@@ -22060,6 +22852,9 @@ The total acoustic emission of a source, and the power flux it is built on.
   ISO 3745.
 - [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
+- [Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/):
+  the ISO 3743 methods for small movable sources in a hard-walled or a
+  special reverberation test room.
 - [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
   the ISO 3747 comparison against a reference sound source where the machine
   works.
@@ -45542,6 +46337,21 @@ documents, one page per module.
 | `InSituSoundPowerResult` | `dataclass` | **In situ comparison result (ISO 3747).**<br>• `frequencies` [Hz]<br>• `sound_power_level` / `sound_energy_level` [dB] (the other NaN)<br>• `mean_source_level`, `mean_reference_level`, `reference_levels`, `reference_power_level` [dB]<br>• `background_correction` (n, bands), `background_correction_ref` (m, n, bands) [dB]<br>• `background_requirement_met` per band<br>• `c2` [dB], `grade`, `sigma_r0`, `sigma_omc`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`<br>• `sound_power_level_a` / `sound_energy_level_a` [dB], `quantity`<br>• `.sound_power_level_ref`, `.sound_energy_level_ref` (Annex C)<br>• `.plot()` | `res.sound_power_level, res.background_requirement_met` |
 | `excess_sound_pressure_level` | `function` | **Excess of sound pressure level over the free field ΔLf (ISO 3747 Eq. A.1).**<br>• `level` Lp(RSS),r [dB], `lw_ref` LW(RSS) [dB], `distance` r [m]; broadcast | `emission.excess_sound_pressure_level(76.5, 92.5, 3.0)  # 4.54 dB` |
 | `static_pressure_from_altitude` | `function` | **Static pressure from the site altitude (ISO 3747 Eq. C.2).**<br>• `altitude` Ha [m] | `emission.static_pressure_from_altitude(640.0)  # 93.87 kPa` |
+| `sound_power_hard_walled` | `function` | **LW of a small movable source in a hard-walled test room, by comparison with a reference sound source (ISO 3743-1 Eq. 14).**<br>• `levels`: (NM, bands), (NS, NM, bands) or one traverse (bands,) L'p(ST) [dB]<br>• `levels_ref`: (NM, bands) or (bands,) L'p(RSS) [dB]; `lw_ref`: calibrated LW(RSS) [dB]<br>• `frequencies` [Hz]: octaves 125 Hz–8 kHz (63 Hz under the Table B.1 footnote)<br>• `background_levels`, `background_levels_ref`: K1 of Eq. (13) on the means, 1,3 dB below a 6 dB margin<br>• `temperature_c` [°C], `static_pressure_kpa` [kPa]: C2 of Annex A<br>• `sigma_omc_db` [dB], `coverage_factor` (Default: 2) | `res = emission.sound_power_hard_walled(lp, lp_ref, lw_ref, f, background_levels=lb)`<br><br>• `HardWalledSoundPowerResult` |
+| `sound_energy_hard_walled` | `function` | **LJ of a source that emits bursts, in a hard-walled test room (ISO 3743-1 Eq. 20).**<br>• `event_levels`: (Ne, NM, bands) one event at a time, or (NM, bands) with `events=Ne`; a source-location axis may precede NM<br>• `background_levels` [dB] + `integration_time_s` T [s] (required together): the background as its exposure over T<br>• the rest as `sound_power_hard_walled` | `res = emission.sound_energy_hard_walled(le, lp_ref, lw_ref, f, background_levels=lb, integration_time_s=10.0)`<br><br>• `HardWalledSoundPowerResult` (quantity='energy') |
+| `HardWalledSoundPowerResult` | `dataclass` | **Hard-walled test room result (ISO 3743-1).**<br>• `frequencies` [Hz], `sound_power_level` / `sound_energy_level` [dB] (the other NaN)<br>• `mean_source_level`, `mean_reference_level`, `mean_background_level`, `reference_power_level` [dB]<br>• `background_correction`, `background_correction_ref` [dB], `background_requirement_met` per band<br>• `c2` [dB], `sigma_r0` (Table 3) per band, `sigma_r0_a`, `sigma_omc`, `coverage_factor`<br>• `.sigma_tot`, `.expanded_uncertainty` (and `_a`), `.sound_power_level_ref` (Annex A)<br>• `.plot()` | `res.sound_power_level, res.expanded_uncertainty_a` |
+| `check_hard_walled_room` / `HardWalledRoomCheck` | `function` / `dataclass` | **Is this room a hard-walled test room? (ISO 3743-1 4.2 to 4.4).**<br>• `orientation_levels`: the eight orientation means of a directional source [dB]<br>• `frequencies` [Hz]: octaves 125 Hz–8 kHz<br>• `volume_m3`, `reference_box_m` (three dimensions), `absorption_coefficients` (optional)<br>• `.passes`, `.band_adequate` (spread within Table 3), `.volume_adequate`, `.box_fits`, `.surfaces_hard`, `.plot()` | `emission.check_hard_walled_room(lp8, f, volume_m3=60.0, reference_box_m=[0.6, 0.5, 0.4]).passes` |
+| `hard_walled_source_locations` / `SourceLocationPlan` | `function` / `dataclass` | **Source locations from the preliminary survey (ISO 3743-1 7.4, Table 2).**<br>• `levels`: (NM ≥ 6, bands) [dB], `frequencies` [Hz]<br>• sM of Eq. (7) → 1, 2, or 2 plus 2 in another room<br>• `SourceLocationPlan`: `standard_deviation_db`, `source_locations`, `additional_room_locations`, `spectral_character` (Part 2), `.required_source_locations`, `.plot()` | `emission.hard_walled_source_locations(survey, f).source_locations` |
+| `reproducibility_from_round_robin` | `function` | **sigma'_R0 = sqrt(sigma'_tot² − sigma'_omc²) of a round robin (ISO 3743-1 Eq. 24; ISO 3743-2 Formula 14 prints a plus, see `docs/ERRATA.md`).**<br>• `total_db`, `operating_db` [dB]; warns above sigma_tot/√2 | `emission.reproducibility_from_round_robin(2.5, 1.5)  # 2.0` |
+| `sound_power_special_room` | `function` | **LW in a special reverberation test room, direct method (ISO 3743-2 Formula 9).**<br>• `levels`: (NM, bands), (NS, NM, bands) or (bands,) [dB]; `frequencies` [Hz]<br>• `volume_m3`, `nominal_reverberation_time_s` Tnom [s]<br>• `background_levels`: Table 4 at each position<br>• `a_weighted_levels`, `a_weighted_background_levels`: LWA by Formula (9) directly<br>• `temperature_c`, `static_pressure_kpa`, `sigma_omc_db`, `coverage_factor` | `res = emission.sound_power_special_room(lp, f, volume_m3=70.0, nominal_reverberation_time_s=0.73)`<br><br>• `SpecialRoomSoundPowerResult` |
+| `sound_power_special_room_comparison` | `function` | **LW in a special reverberation test room, comparison method (ISO 3743-2 Formula 10).**<br>• `levels`, `levels_ref` (≥ 6 positions), `lw_ref`, `frequencies`<br>• `background_levels`, `background_levels_ref`: Table 4<br>• `temperature_c`, `static_pressure_kpa`, `sigma_omc_db`, `coverage_factor` | `emission.sound_power_special_room_comparison(lp, lp_ref, lw_ref, f)`<br><br>• `SpecialRoomSoundPowerResult` (method='comparison') |
+| `SpecialRoomSoundPowerResult` | `dataclass` | **Special reverberation test room result (ISO 3743-2).**<br>• `sound_power_level`, `mean_pressure_level`, `background_correction` [dB], `background_requirement_met`<br>• `mean_reference_level`, `reference_power_level` (comparison), `volume_m3`, `nominal_reverberation_time_s` (direct)<br>• `sound_power_level_a` (Annex F), `sound_power_level_a_direct`, `mean_a_weighted_level`<br>• `c2`, `sigma_r0` (Table 5), `.expanded_uncertainty_a`, `.plot()` | `res.sound_power_level_a, res.expanded_uncertainty_a` |
+| `special_room_background_correction` | `function` | **The stepped background correction of ISO 3743-2 Table 4.**<br>• `levels`, `background_levels` [dB], broadcast<br>2 dB at 4–5 dB, 1 dB at 6–8 dB, 0,5 dB at 9–10 dB, 0 above; read at the nearest whole decibel | `emission.special_room_background_correction(80.0, 74.5)  # 1.0` |
+| `reverberation_parameter` | `function` | **R = 1 + 257/(f V^(1/3)) of ISO 3743-2 Formula (1), or 1 + cS/(8Vf) (NOTE).**<br>• `frequencies` [Hz], `volume_m3`; `surface_area_m2` + `speed_of_sound` [m/s] for the NOTE | `emission.reverberation_parameter([1000.0], 70.0)  # 1.06` |
+| `check_special_room_reverberation` / `SpecialRoomReverberationCheck` | `function` / `dataclass` | **Does the reverberation time follow the prescribed curve? (ISO 3743-2 6.2, 6.3, 6.6).**<br>• `reverberation_time_s`, `frequencies` [Hz], `volume_m3`<br>• `nominal_reverberation_time_s`: given, or centred within 0,9–1,1 R Tnom (0,8–1,2 above 6,3 kHz)<br>• `method`: 'direct' (300 m³ ceiling with the 8 kHz octave) / 'comparison'<br>• the four climate values of Formula (2), optional<br>• `.passes`, `.band_within`, `.nominal_in_range`, `.plot()` | `emission.check_special_room_reverberation(t, f3, volume_m3=70.0).nominal_reverberation_time_s` |
+| `check_special_room_surfaces` / `SpecialRoomSurfaceCheck` | `function` / `dataclass` | **The surface treatment of ISO 3743-2 6.4.**<br>• `surface_absorption_coefficients`: (walls and ceiling, bands); `floor_absorption_coefficients`; `frequencies`<br>• `surface_areas_m2` for an area-weighted mean<br>• `.surfaces_uniform` (0,5–1,5 times the mean), `.floor_reflective` (< 0,06), `.passes`, `.plot()` | `emission.check_special_room_surfaces(alpha, alpha_floor, f).passes` |
+| `check_special_room_suitability` / `SpecialRoomSuitabilityCheck` | `function` / `dataclass` | **The reference-source evaluation of ISO 3743-2 6.7 (Table 1).**<br>• `measured_power_levels`, `calibrated_power_levels` [dB], `frequencies` 125 Hz–8 kHz<br>• ±5 dB at 125 Hz, ±3 dB 250 Hz–4 kHz, ±4 dB at 8 kHz; `.passes`, `.plot()` | `emission.check_special_room_suitability(lw_room, lw_cal, f).passes` |
+| `special_room_source_locations` | `function` | **Source locations from the survey of ISO 3743-2 9.4 (Table 3) and the spectral character of 9.5.**<br>• `levels`: six positions [dB]; `frequencies` 125 Hz–8 kHz<br>• `microphone_positions`: 3, 6 (Default) or 12, the column of Table 3<br>• `a_weighted_levels`: the A-weighted row | `emission.special_room_source_locations(survey, f).spectral_character`<br><br>• `SourceLocationPlan` |
 | `sound_energy_reverberation` | `function` | **Reverberation-room LJ of a single event, direct (ISO 3741 9.2.4, Eq. 30).**<br>• `levels`: single event levels, 1D, (NM, NB) or (Ne, NM, NB) [dB]<br>• `t60` [s], `volume` V [m³], `surface_area` S [m²], `frequencies` [Hz]<br>• `events`: Ne of one reading (Eq. 23)<br>• `background_levels` [dB] + `integration_time` T [s]: per-position K1i over the same window<br>• `temperature_c`, `static_pressure_kpa` | `lj = emission.sound_energy_reverberation(slams, t60, 200, 220, f)`<br><br>• `ReverberationSoundEnergyResult` |
 | `sound_energy_comparison` | `function` | **Reverberation-room LJ of a single event, comparison (ISO 3741 9.2.5, Eq. 31).**<br>• `levels`: single event levels of the source under test<br>• `levels_ref`, `lw_ref`: the steady reference source<br>• `frequencies`, `events`, `background_levels` + `integration_time`, `background_levels_ref`<br>• `temperature_c`, `static_pressure_kpa` | `lj = emission.sound_energy_comparison(slams, lp_ref, lw_ref, frequencies=f)`<br><br>• `ReverberationSoundEnergyResult` (method='comparison') |
 | `ReverberationSoundEnergyResult` | `dataclass` | **Reverberation-room sound energy of a single event.**<br>• `frequencies` [Hz] (or `None`)<br>• `sound_energy_level` [dB re 1 pJ]<br>• `mean_event_level` [dB]<br>• `absorption_area` [m²], `waterhouse_correction` [dB]<br>• `background_correction`, `c1`, `c2` [dB]<br>• `speed_of_sound` [m/s]<br>• `sound_energy_level_a` [dB]<br>• `method`, `events` (a count)<br>• `integration_time` [s] | `lj.sound_energy_level, lj.method` |
@@ -47204,7 +48014,22 @@ it; the list grows as guides gain their References sections.
   rooms* (ISO 3741:2010).
   [iso.org catalogue](https://www.iso.org/standard/52053.html).
   The precision reverberation-room method.
-  Cited by [Sound power in the reverberation room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/).
+  Cited by [Sound power in the reverberation room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/) and
+  [Sound power in small test rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for small movable
+  sources in reverberant fields — Part 1: Comparison method for a
+  hard-walled test room* (ISO 3743-1:2010).
+  The comparison with a reference sound source in a hard-walled room.
+  Cited by [Sound power in small test rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/).
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  pressure — Engineering methods for small, movable sources in reverberant
+  fields — Part 2: Methods for special reverberation test rooms*
+  (ISO 3743-2:2018).
+  The direct and comparison methods of a special reverberation room.
+  Cited by [Sound power in small test rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering/survey methods for use in situ
@@ -63216,7 +64041,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1510 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1539 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -64224,7 +65049,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1510 numerical conformance checks across 98 domains and 488 standards, covering
+1539 numerical conformance checks across 98 domains and 490 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

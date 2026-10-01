@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 149 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 150 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y nueve guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -814,7 +814,7 @@ ISO 17208-1/-2, ISO 18406 y JOMOPANS-ECHO.
 Potencia acústica, intensidad, declaraciones de emisión, electroacústica y
 sonoridad de programa. Lo que emite una fuente y no lo que recibe un receptor,
 más la cadena electroacústica que lo reproduce o lo mide. Implementa ISO 3741,
-ISO 3744/3746, ISO 3745, ISO 9614-1/-2/-3, IEC 61043, ISO 4871,
+ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 9614-1/-2/-3, IEC 61043, ISO 4871,
 IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
 
 **[Potencia acústica e intensidad](/phonometry/es/devices/emission/)**
@@ -828,6 +828,10 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
   ISO 3745.
 - [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
   los métodos directo y de comparación de ISO 3741.
+- [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):
+  los métodos de ISO 3743 para fuentes pequeñas y transportables, una
+  comparación en una sala de paredes rígidas y una sala reverberante especial
+  leída directamente o frente a una fuente de referencia.
 - [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
   la comparación de ISO 3747 con una fuente sonora de referencia donde trabaja
   la máquina, con el nivel de energía acústica de una fuente impulsiva.

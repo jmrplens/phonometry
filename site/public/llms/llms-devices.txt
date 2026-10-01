@@ -49,6 +49,9 @@ The total acoustic emission of a source, and the power flux it is built on.
   ISO 3745.
 - [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
+- [Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/):
+  the ISO 3743 methods for small movable sources in a hard-walled or a
+  special reverberation test room.
 - [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
   the ISO 3747 comparison against a reference sound source where the machine
   works.

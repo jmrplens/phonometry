@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1510/1510 conformance checks pass** across 98 domains and 488 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1539/1539 conformance checks pass** across 98 domains and 490 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -486,7 +486,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Intensity &amp; sound power</b>: 100% (49/49)</summary>
+<summary><b>Intensity &amp; sound power</b>: 100% (78/78)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -539,6 +539,35 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 5136:2003 Eq. (12) | Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0,5 m | -7.2113 dB (+/-0 dB) | -7.2113 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Table 2 / Table 3 | Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12,5 to 20 kHz | 27 tabulated values of sigma_R reproduced | max absolute deviation 0.000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Annex C Table C.1 | A-weighting C_j of the 27 bands, read back as LWA - LW of one band at a time | 27 tabulated values of C_j reproduced | max absolute deviation below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 9.5 EXAMPLE | Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB = 5 dB, sigma_omc = 2,0 dB | 5 dB (+/-0 dB) | 5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Table 3 | Typical upper bounds of sigma_R0 per octave band and A-weighted (the '400 to 5 000' row read as 500 Hz to 4 kHz) | 125 Hz = 3 dB; 250 Hz = 2 dB; 500 Hz = 1.5 dB; 1 kHz = 1.5 dB; 2 kHz = 1.5 dB; 4 kHz = 1.5 dB; 8 kHz = 2.5 dB; A = 1.5 dB | 125 Hz = 3 dB; 250 Hz = 2 dB; 500 Hz = 1.5 dB; 1 kHz = 1.5 dB; 2 kHz = 1.5 dB; 4 kHz = 1.5 dB; 8 kHz = 2.5 dB; A = 1.5 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Table C.1 | Total standard deviation of the grade 2 row, sigma_R0 = 1,5 dB, for sigma_omc = 0,5, 2 and 4 dB | sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB | sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Eq. 13 / 8.1.3 | K1 at the 6 dB margin is -10 lg(1 - 10^-0,6) = 1,2563 dB, 1,3 dB below it and 0 above 15 dB | K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15,5 dB) = 0 dB | K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15,5 dB) = 0 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Eq. 14 vs ISO 3747:2010 Eq. 11 | The hard-walled comparison and the in situ comparison give the same LW with the background negligible (closed form) | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Eq. 20 / clause 3.4 NOTE 1 | A source steady over T = 10 s: LJ = LW + 10 lg(T/T0) band for band, background carried over the same T | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Eq. 15 / Eq. 16 | Ne events one at a time and one measurement over Ne events agree (closed form) | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Annex A | C2 at 500 m and 23,0 degC from Eq. (A.2): 0,26 dB (not the 0,4 dB of C.4.2.5) | 0.26 dB (+/-0.005 dB) | 0.2622 dB | 0.0022 dB | 44 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Table B.1 / Eq. B.1 | LWA of a flat 90 dB octave spectrum, 63 Hz to 8 kHz, with the printed Ck | 96.9871 dB (+/-0 dB) | 96.9871 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 4.2 | Room volume and reference box: 40 m3 and 40 boxes; 1,0 m up to 100 m3, 2,0 m above | 6/6 room and box verdicts | 6/6 room and box verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Table 2 | Source locations from sM: 1 up to 2,5 dB, 2 up to 4,0 dB, 2 plus 2 in another room above | 3/3 Table 2 rows | 3/3 Table 2 rows | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 Eq. 24 / ISO 3743-2:2018 Formula 14 | sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2) = 2,0 dB for 2,5 dB and 1,5 dB (the minus of Part 1; Part 2 prints a plus) | 2 dB (+/-0 dB) | 2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-1:2010 4.5 vs ISO 11546-2:1995 Table C.1 | The 6 dB background margin the determination holds to is the one ISO 11546-2 tabulates for ISO 3743-1 | ISO 3743-1 4.5 = 6 dB; ISO 11546-2 Table C.1 = 6 dB | ISO 3743-1 4.5 = 6 dB; ISO 11546-2 Table C.1 = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 11.5 EXAMPLE | Expanded uncertainty U = 2 sqrt(2^2 + 2^2) dB = 5,7 dB, sigma_omc = 2,0 dB | 5.7 dB (+/-0.05 dB) | 5.6569 dB | -0.0431 dB | 86 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Table 5 | Typical upper bounds of sigma_R0 per octave band and A-weighted | 125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 2 dB; 1 kHz = 2 dB; 2 kHz = 2 dB; 4 kHz = 2 dB; 8 kHz = 3 dB; A = 2 dB | 125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 2 dB; 1 kHz = 2 dB; 2 kHz = 2 dB; 4 kHz = 2 dB; 8 kHz = 3 dB; A = 2 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Table D.1 | Total standard deviation of the grade 2 row, sigma_R0 = 2 dB, for sigma_omc = 0,5, 2,0 and 4,0 dB | sigma_omc 0,5 = 2.1 dB; sigma_omc 2,0 = 2.8 dB; sigma_omc 4,0 = 4.5 dB | sigma_omc 0,5 = 2.1 dB; sigma_omc 2,0 = 2.8 dB; sigma_omc 4,0 = 4.5 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Formula 1 / Formula B.2 | R at 1 000 Hz for a 70 m3 room is the 1,06 of Formula (B.2) | 1.06 (+/-0.005) | 1.0624 | 0.0024 | 48 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Formula B.2 | A room that follows the curve exactly centres on Tnom = T1000 / R(1 000 Hz) (closed form) | 0.753041 s (+/-0 s) | 0.753041 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 B.5 EXAMPLE | T1000 = 0,8 s on the curve of Figure B.4: the printed T/Tnom = 1,09 is the midpoint of the extreme ratios against 0,9 and 1,1 alone (within 0,015), and as Tnom = 0,73 s it puts 250 Hz above 1,1 R; the library's centring qualifies the room at 0,76 s, a departure of 0,17 dB in LW (see the errata) | 4/4 B.5 readings | 4/4 B.5 readings | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Clause 5 | The noise source should not exceed 1 % of the room: 0,7 m3 in the minimum 70 m3 room is within the recommendation, 0,71 m3 is not, and neither moves the verdict | 2/2 clause 5 readings | 2/2 clause 5 readings | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 6.3 | Limiting curves 0,9 and 1,1 times R Tnom up to 6,3 kHz, 0,8 and 1,2 above | 6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2 | 6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Table 1 | Maximum permitted differences of the reference-source evaluation of 6.7 | 125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 3 dB; 1 kHz = 3 dB; 2 kHz = 3 dB; 4 kHz = 3 dB; 8 kHz = 4 dB | 125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 3 dB; 1 kHz = 3 dB; 2 kHz = 3 dB; 4 kHz = 3 dB; 8 kHz = 4 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 6.7 / Table 1 | Each band is suitable at its Table 1 difference read high or low, and not 0,1 dB beyond it on either side | 28/28 Table 1 verdicts | 28/28 Table 1 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Table 3 | Minimum number of source locations for 3, 6 and 12 microphone positions, every band row and the A-weighted row | 45/45 Table 3 cells | 45/45 Table 3 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Table 4 | Background corrections: 2, 2, 1, 1, 1, 0,5, 0,5 dB for 4 dB to 10 dB, 0 above | 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB | 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Formula 9 | Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0,73 s (closed form) | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Formula 10 vs ISO 3743-1:2010 Eq. 14 | The comparison methods of the two parts agree with the background negligible (closed form) | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 10.3 a) / Table 4 | The reference levels take Table 4 before Formula (10): ST 75 dB, RSS 80 dB, LWr 90 dB and a 5 dB reference margin give Lpr 78 dB and LW 87 dB (closed form) | 87 dB (+/-0.000000001 dB) | 87 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 Formula 2 | H (theta + 5 degC) within +/-10 % of its value during the reverberation measurement: +10 % passes, +12 % fails, and 80 % at 10 degC passes against 50 % at 20 degC only through the 5 degC | 3/3 climate verdicts | 3/3 climate verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

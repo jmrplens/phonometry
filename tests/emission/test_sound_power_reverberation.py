@@ -371,6 +371,23 @@ def test_comparison_method_corrects_test_source_per_position() -> None:
     assert res.sound_power_level[0] == pytest.approx(expected_lw, abs=1e-9)
 
 
+def test_comparison_short_reference_margin_warns_without_an_upper_bound() -> None:
+    """9.1.2 clamps K1 at the criterion for the reference source too, but its
+    corrected level is subtracted in Eq. (21), so the clamp lowers LW: the
+    warning must not call the result an upper bound.
+    """
+    freqs = np.array([1000.0])
+    with pytest.warns(emission.SoundPowerWarning, match="not an upper bound") as seen:
+        emission.sound_power_comparison(
+            np.array([80.0]),
+            np.array([70.0]),
+            np.array([90.0]),
+            frequencies=freqs,
+            background_levels_ref=np.array([67.0]),
+        )
+    assert not any("levels are upper bounds" in str(w.message) for w in seen)
+
+
 def test_a_weighted_total_from_bands() -> None:
     """LWA combines bands with Annex F A-weighting (Eq. F.2)."""
     freqs = np.array([500.0, 1000.0, 2000.0])

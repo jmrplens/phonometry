@@ -17,6 +17,19 @@ The calibration reference recording looks unreliable.
 
 ```python
 sensitivity(
+    ref_signal: Signal,
+    target_spl: float = ...,
+    reference_pressure_pa: float = ...,
+    fs: int | None = ...,
+    *,
+    validate: bool = ...,
+    max_fluctuation_db: float | None = ...,
+    frequency: float = ...,
+    calibrator_class: str = ...,
+    narrowband: bool = ...,
+) -> float
+
+sensitivity(
     ref_signal: SignalInput,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
@@ -26,7 +39,20 @@ sensitivity(
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
     calibrator_class: str = ...,
-    narrowband: Literal[True],
+    narrowband: bool = ...,
+) -> float
+
+sensitivity(
+    ref_signal: SignalInput,
+    target_spl: float,
+    reference_pressure_pa: float,
+    fs: int,
+    *,
+    validate: bool = ...,
+    max_fluctuation_db: float | None = ...,
+    frequency: float = ...,
+    calibrator_class: str = ...,
+    narrowband: bool = ...,
 ) -> float
 
 sensitivity(
@@ -82,6 +108,6 @@ integrator attack).
 | `max_fluctuation_db` | Explicit fluctuation limit in dB. Default (None) resolves the IEC 60942:2017 Table 2 limit for `calibrator_class` at `frequency`. |
 | `frequency` | Nominal frequency of the calibration tone in Hz (default 1000.0), used to select the Table 2 row. |
 | `calibrator_class` | The calibrator's class designation, `"LS"`, `"LS/M"`, `"1"` (default), `"1/M"` or `"2"` (IEC 60942:2017 Table 1), used to select the Table 2 column. |
-| `narrowband` | If True (requires `fs`), estimate the tone level with a coherent single-frequency (Goertzel) detector locked to the tone near `frequency` instead of the full-band RMS. This rejects broadband hum/noise in the reference take, which otherwise inflates the RMS and shrinks the factor by $-10 \log_{10}(1 + 1/\mathrm{SNR})$ (about -0.44 dB at 20 dB SNR), silently biasing every subsequent level. The default (False) keeps the exact legacy broadband-RMS behaviour; enable it for noisy coupler recordings. |
+| `narrowband` | If True (requires the rate, as `fs` or carried by a [`Signal`](/phonometry/reference/api/io/io/#signal)), estimate the tone level with a coherent single-frequency (Goertzel) detector locked to the tone near `frequency` instead of the full-band RMS. This rejects broadband hum/noise in the reference take, which otherwise inflates the RMS and shrinks the factor by $-10 \log_{10}(1 + 1/\mathrm{SNR})$ (about -0.44 dB at 20 dB SNR), silently biasing every subsequent level. The default (False) keeps the exact legacy broadband-RMS behaviour; enable it for noisy coupler recordings. |
 
 **Returns:** Calibration factor (sensitivity multiplier).

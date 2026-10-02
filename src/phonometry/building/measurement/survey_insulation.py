@@ -276,6 +276,12 @@ def estimate_reverberation_index(
 ) -> float: ...
 
 
+@overload
+def estimate_reverberation_index(
+    volume: float, room: str, *, weighted: bool = ...
+) -> np.ndarray | float: ...
+
+
 def estimate_reverberation_index(
     volume: float, room: str, *, weighted: bool = False
 ) -> np.ndarray | float:

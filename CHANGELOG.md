@@ -1512,6 +1512,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A type checker accepts a `bool` held in a variable for the form of a
+  survey's reverberation index and for a calibration's tone estimate.**
+  `building.estimate_reverberation_index` was typed for `weighted=True` and
+  `weighted=False` only, and `metrology.sensitivity` for `narrowband=True`
+  and `narrowband=False` only, so mypy refused a call that passed a flag
+  read from a setting or taken as a parameter of the caller's own, although
+  the call runs. Each now takes a `bool` as well: the index is then the five
+  octave-band values or the single weighted value, typed as either, and the
+  sensitivity is a float. `metrology.sensitivity` also accepts, where mypy
+  refused them before, a `Signal` with `narrowband=True` and no `fs`, since
+  the take carries its rate, and a bare array with `narrowband=True` and `fs`
+  given in position after the target level and the reference pressure; a
+  bare array with `narrowband=True`, or with a `bool` that may hold it,
+  still needs `fs`, by keyword or in position. Nothing changes at run time.
+
 - **A calibration sidecar no reader can take is refused as a `ValueError`,
   and none is written into a pipe.** `io.read_sidecar`, which `io.read` and
   `io.read_blocks` call for every audio file they open, read the file at the

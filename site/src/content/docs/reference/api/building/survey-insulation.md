@@ -88,6 +88,13 @@ estimate_reverberation_index(
     *,
     weighted: Literal[True],
 ) -> float
+
+estimate_reverberation_index(
+    volume: float,
+    room: str,
+    *,
+    weighted: bool = ...,
+) -> np.ndarray | float
 ```
 
 Estimate the reverberation index from room type and volume (Clause 6.5).

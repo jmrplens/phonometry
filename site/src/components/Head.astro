@@ -20,6 +20,7 @@ import { topicForSlug } from '../data/topics.mjs';
 import { firstPublished } from '../lib/page-dates.mjs';
 import { citationsFor, referenceId, referenceNode } from '../lib/citations.mjs';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
+import { prose } from '../lib/markdown-fences.mjs';
 
 const SITE = import.meta.env.SITE ?? 'https://jmrplens.github.io';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -146,8 +147,7 @@ const hubMainEntity =
 // imports, component tags, fenced code) stripped first. An approximation, but
 // an honest one: it moves with the text, not with the markup around it.
 const rawBody = (route?.entry as { body?: string } | undefined)?.body ?? '';
-const proseBody = rawBody
-  .replace(/```[\s\S]*?```/g, ' ')
+const proseBody = prose(rawBody)
   .replace(/^import\s.+$/gm, ' ')
   .replace(/<\/?[A-Za-z][^>]*>/g, ' ');
 const wordCount = proseBody.split(/\s+/).filter(Boolean).length;

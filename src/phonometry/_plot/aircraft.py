@@ -15,6 +15,7 @@ from .common import (
     _C_TERTIARY,
     _LEGEND_UPPER_LEFT,
     _LEGEND_UPPER_RIGHT,
+    _OFFSET_POINTS,
     _new_axes,
     format_frequency_axis,
     styled,
@@ -720,11 +721,11 @@ def plot_terrain_screening(
         )
     ax.plot(*src, "o", color=_C_PRIMARY, ms=7)
     ax.annotate(
-        "$S$", src, textcoords="offset points", xytext=(0, 8), ha="center", fontsize=10
+        "$S$", src, textcoords=_OFFSET_POINTS, xytext=(0, 8), ha="center", fontsize=10
     )
     ax.plot(*rcv, "s", color=_C_SECONDARY, ms=6)
     ax.annotate(
-        "$R$", rcv, textcoords="offset points", xytext=(0, 8), ha="center", fontsize=10
+        "$R$", rcv, textcoords=_OFFSET_POINTS, xytext=(0, 8), ha="center", fontsize=10
     )
     # Room over the highest of the ground, the source and the receiver for
     # the S and R written above their points: with the default margin a

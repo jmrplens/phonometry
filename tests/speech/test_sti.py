@@ -433,14 +433,15 @@ def test_invalid_inputs_raise() -> None:
             match=r"Signal too short for STIPA: it must contain at least one full period",
         ):
             speech.stipa(half_second_clip, FS)
-    with pytest.warns(STIWarning) as tone_warnings:  # noqa: PT031 - the warns block records the whole STIWarning family while running
-        # A pure tone: the 4 s clip (correctly) raises the sub-15 s STIPA
-        # and the m > 1.3 advisories; recording the whole STIWarning family
-        # keeps them out of the run summary (a leaked warning is
-        # re-materialised on the pytest-xdist controller by importing its
-        # module, which races the phonometry import).
-        t = np.arange(4 * FS) / FS
-        res_tone = speech.stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
+    # A pure tone: the 4 s clip (correctly) raises the sub-15 s STIPA and the
+    # m > 1.3 advisories; recording the whole STIWarning family keeps them out
+    # of the run summary (a leaked warning is re-materialised on the
+    # pytest-xdist controller by importing its module, which races the
+    # phonometry import).
+    t = np.arange(4 * FS) / FS
+    tone = np.sin(2 * np.pi * 1000.0 * t)
+    with pytest.warns(STIWarning) as tone_warnings:
+        res_tone = speech.stipa(tone, FS)
     assert tone_warnings
     # The 1 kHz band carries the tone, unmodulated: m ~ 0.
     assert np.all(res_tone.mtf[3] < 0.01)

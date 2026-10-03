@@ -31,6 +31,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
+import { fences } from '../lib/markdown-fences.mjs';
+
 /**
  * Paths are resolved by walking up from the working directory rather than from
  * `import.meta.url`. This module is imported by a component, so Vite bundles it
@@ -378,9 +380,9 @@ for (const path of citingPages) {
     throw new Error(`${path}: ${problem}`);
   };
 
-  const block = source.match(/```bibtex\n([\s\S]*?)```/);
+  const block = fences(source).find((fence) => fence.language === 'bibtex');
   if (!block) fail('no bibtex block to check.');
-  if (collapse(block[1]) !== collapse(bibtex)) {
+  if (collapse(block.body) !== collapse(bibtex)) {
     fail(
       'the BibTeX block has drifted from the one built from CITATION.cff. ' +
         `Expected, ignoring line breaks and padding:\n\n${bibtex}\n`,

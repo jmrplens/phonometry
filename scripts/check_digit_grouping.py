@@ -43,6 +43,8 @@ import sys
 import tokenize
 from pathlib import Path
 
+from markdown_fences import code_lines
+
 #: The repository, for paths a reader can click.
 _REPO = Path(__file__).resolve().parent.parent
 
@@ -84,20 +86,22 @@ _BREAKABLE = re.compile(
 )
 
 
-#: A fenced block, and a span of inline code. Both show a literal, and a
-#: literal is quoted as it is written: an array prints its values apart, and a
-#: table keyed by ``"diesel locomotive, c. 2 200 kW"`` is keyed by that exact
-#: string. Neither is prose, and neither reflows.
-_FENCE = re.compile(r"^[ \t]*(```|~~~).*?^[ \t]*\1[ \t]*$", re.MULTILINE | re.DOTALL)
+#: A span of inline code. Like a fenced block, which ``markdown_fences`` finds,
+#: it shows a literal, and a literal is quoted as it is written: an array
+#: prints its values apart, and a table keyed by
+#: ``"diesel locomotive, c. 2 200 kW"`` is keyed by that exact string. Neither
+#: is prose, and neither reflows.
 _SPAN = re.compile(r"`[^`\n]*`")
 
 
 def _markdown_prose(text: str) -> list[tuple[int, str]]:
     """The lines of a Markdown file with the code blanked out, line numbers kept."""
-    blanked = _FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    lines = text.splitlines()
     return [
-        (number, _SPAN.sub("", line))
-        for number, line in enumerate(blanked.splitlines(), start=1)
+        (number, "" if code else _SPAN.sub("", line))
+        for number, (line, code) in enumerate(
+            zip(lines, code_lines(lines), strict=True), start=1
+        )
     ]
 
 

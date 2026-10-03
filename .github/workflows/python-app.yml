@@ -727,6 +727,16 @@ jobs:
         python-version: "3.13"
     - name: Check the hand-written markdown
       run: python scripts/check_markdown_hazards.py
+    - name: Every script reads a fence the one way
+      # Where a fence closes is decided in scripts/markdown_fences.py, as
+      # CommonMark decides it, for the markdown check above and every other
+      # script that reads a page, and in site/src/lib/markdown-fences.mjs, the
+      # same reading in JavaScript, for the site's own code. Four scripts and
+      # four pieces of the site used to work it out by themselves, each right
+      # on the pages it was written against and each reading a fence shown
+      # inside another fence inside out. Static, stdlib only, so it runs here
+      # with the checks that use the shared reader.
+      run: python scripts/check_fence_readers.py
     - name: No em dash in the published prose
       # The house style writes its prose without the em dash, in the pages,
       # the mirrors, the CHANGELOG, the docstrings and the figure labels
@@ -861,6 +871,30 @@ jobs:
         python-version: "3.13"
     - name: Check that every private constant is read somewhere
       run: python scripts/check_dead_constants.py
+
+  # A pytest.raises or pytest.warns block passes on whatever call inside it
+  # raises. Seven writer tests built their catalogue inside the block of the
+  # write they checked, and six warning tests built their case inside the block
+  # of the model, so a refusal from the builder would have passed for the one
+  # under test. Ruff holds the block to one statement; this holds the statement
+  # to one call that could raise, with SonarCloud's own definition (S5778,
+  # S9088), so the mistake is caught before a pull request rather than after.
+  # Static and dependency-free, so it runs on its own.
+  raises-blocks:
+    name: Every exception test waits on one call
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no raises or warns block holds a second call
+      run: python scripts/check_raises_blocks.py
 
   # A level is a ratio to a reference value, and ISO 1683 fixes one per
   # quantity. The package publishes them once, as

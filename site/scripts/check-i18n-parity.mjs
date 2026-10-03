@@ -10,6 +10,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { prose } from "../src/lib/markdown-fences.mjs";
+
 const docsDir = fileURLToPath(new URL("../src/content/docs", import.meta.url));
 const esDir = join(docsDir, "es");
 
@@ -69,10 +71,11 @@ if (missingEs.length || orphanEs.length) {
 // the build if the plugin ever renames it, so every figure goes through it.
 const figures = [];
 for (const page of esPages) {
-	const source = readFileSync(join(esDir, page), "utf8")
-		// Fenced blocks and inline code are samples of markup, not markup.
-		.replace(/^```[\s\S]*?^```/gm, "")
-		.replace(/`[^`\n]*`/g, "");
+	// Fenced blocks and inline code are samples of markup, not markup.
+	const source = prose(readFileSync(join(esDir, page), "utf8")).replace(
+		/`[^`\n]*`/g,
+		"",
+	);
 	// Every markdown image opens with the same two characters, whatever comes
 	// after them: the inline `![alt](src)`, the two reference forms
 	// `![alt][label]` and `![alt][]`, and the shortcut `![label]` whose target

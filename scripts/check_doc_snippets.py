@@ -45,18 +45,16 @@ import argparse
 import ast
 import concurrent.futures
 import pathlib
-import re
 import subprocess
 import sys
 import tempfile
+
+from markdown_fences import python_fences
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _DOCS = _ROOT / "docs"
 _SITE = _ROOT / "site" / "src" / "content" / "docs"
 _SITE_ES = _SITE / "es"
-
-#: Fenced Python block, capturing its body.
-_BLOCK = re.compile(r"```python\n(.*?)```", re.DOTALL)
 
 #: Pages whose snippets cannot run as a standalone script, with the reason.
 #: Anything not listed here must run to completion. Keep the reasons specific:
@@ -87,7 +85,7 @@ _TIMEOUT_S = 600
 
 def _blocks(path: pathlib.Path) -> list[str]:
     """Python blocks of a page, in reading order."""
-    return _BLOCK.findall(path.read_text(encoding="utf-8"))
+    return python_fences(path.read_text(encoding="utf-8"))
 
 
 def _imported_names(code: str) -> list[str]:

@@ -16,6 +16,7 @@ from .common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _C_TERTIARY,
+    _OFFSET_POINTS,
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
@@ -817,7 +818,7 @@ def plot_tone_assessment(
         ),
         xy=(ft, 0.5 * (ratio + criterion)),
         xytext=(6, 0),
-        textcoords="offset points",
+        textcoords=_OFFSET_POINTS,
         va="center",
         fontsize="small",
     )

@@ -22,6 +22,10 @@ if TYPE_CHECKING:
 _SCRIPT = (
     pathlib.Path(__file__).resolve().parent.parent / "scripts" / "check_doc_snippets.py"
 )
+# The script reads its fences through scripts/markdown_fences.py, which it
+# imports as a sibling, the way it runs from the command line.
+if str(_SCRIPT.parent) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT.parent))
 _spec = importlib.util.spec_from_file_location("check_doc_snippets", _SCRIPT)
 assert _spec is not None
 assert _spec.loader is not None

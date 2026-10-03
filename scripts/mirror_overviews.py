@@ -34,6 +34,8 @@ import re
 import sys
 from pathlib import Path
 
+from markdown_fences import code_lines
+
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site" / "src" / "content" / "docs"
 DOCS = ROOT / "docs"
@@ -275,22 +277,17 @@ def _unfenced_lines(text: str) -> list[tuple[int, str]]:
     comment that starts a line with ``#``, as several reproduction blocks do,
     or a snippet demonstrating link syntax a guide is teaching rather than
     using. Shared by the heading scan and the anchor scan so both agree on
-    what counts as fenced.
+    what counts as fenced, and read through ``markdown_fences`` so that both
+    agree with every other check on where a fence closes.
     """
-    lines: list[tuple[int, str]] = []
-    fence = ""
-    for lineno, line in enumerate(text.splitlines(), start=1):
-        stripped = line.strip()
-        if stripped[:3] in ("```", "~~~"):
-            if fence and stripped.startswith(fence):
-                fence = ""
-            elif not fence:
-                fence = stripped[:3]
-            continue
-        if fence:
-            continue
-        lines.append((lineno, line))
-    return lines
+    lines = text.splitlines()
+    return [
+        (lineno, line)
+        for lineno, (line, code) in enumerate(
+            zip(lines, code_lines(lines), strict=True), start=1
+        )
+        if not code
+    ]
 
 
 def _headings(path: Path) -> list[str]:

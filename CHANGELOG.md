@@ -1776,6 +1776,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reads, which is the same for both. A new guide in
   both languages grades a synthetic class 1 meter, and the pages that said the
   library does not grade periodic tests of a meter now point to it.
+- **A test that expects an error waits on one call.**
+  `scripts/check_raises_blocks.py` (`make raises-blocks`, and a job of its own
+  in CI) fails on a `pytest.raises`, `pytest.warns` or `pytest.deprecated_call`
+  block that holds more than one call that could raise, or more than one
+  statement. Such a block passes on a refusal from whatever builds its input
+  as well as on one from the code it says it checks, and SonarCloud reported
+  it only once a pull request was open, so it came back three times. The
+  definition is Sonar's (python:S5778 and S9088), so the calls Sonar holds
+  safe, conversions such as `float("nan")`, containers, paths and NumPy, do
+  not count. Run against the history, it finds the seven catalogue writer
+  tests and the six warning tests that review had to fix; the one block it
+  found in the suite today, a warning test that built its tone inside the
+  block, now builds it first.
+- **Every script, and the site, reads a page's fences one way.** Eight places
+  decided for themselves where a code fence of a page opens and closes. Among
+  the scripts, the overview mirror read its headings past a flag flipped on
+  any line opening with three backticks or tildes, the digit-grouping check
+  blanked code with a regular expression, and the snippet runner and the
+  fence-order check took the Python examples out with two more. In the site,
+  the maths check stepped over code behind the same kind of flag, the check
+  that a Spanish page takes its figures from ThemeImage and the word count of
+  each page's structured data cut code out with a regular expression that knew
+  only backticks, and the check of the BibTeX block on the about page found it
+  with another. Each closed a fence on the first run of three markers, so a
+  page that shows a fence inside another would have been read inside out, and
+  the snippet runner would have run the example the page only shows. The
+  scripts now read through `scripts/markdown_fences.py`, which closes a fence
+  as CommonMark does and now also hands out the blocks (`fences()` and
+  `python_fences()`), and the site through `site/src/lib/markdown-fences.mjs`,
+  the same reading in JavaScript, which a test holds to the same answer as the
+  Python one on every page. On every page today all eight read exactly what
+  they read before, and no word count moves. `scripts/check_fence_readers.py`
+  (`make fence-readers`, and a step of the markdown job in CI) fails on a
+  Python script that flips a flag on a fence, looks for three backticks or
+  tildes in a line or matches them with a regular expression, however the
+  string is built, and on a line of the site's code that spells them at all.
 
 ### Fixed
 

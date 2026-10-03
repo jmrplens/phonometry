@@ -15,6 +15,7 @@ from .common import (
     _C_SECONDARY,
     _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
+    _OFFSET_POINTS,
     _format_freq,
     _import_pyplot,
     _new_axes,
@@ -57,8 +58,6 @@ _FREE_FIELD_RESPONSE = "Free-field response"
 _TOLERANCE_LABEL = "Tolerance ±{tol} dB"
 #: Legend entry of the effective-frequency-range markers.
 _EFFECTIVE_RANGE = "Effective range"
-#: Matplotlib ``textcoords`` mode for annotations displaced in points.
-_OFFSET_POINTS = "offset points"
 #: Legend placement of the wide datasheet response panels.
 _LEGEND_LOWER_CENTER: Final = "lower center"
 

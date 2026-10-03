@@ -2826,3 +2826,38 @@ ISO12354_2_TABLE_B2: tuple[tuple[str, float, tuple[float, ...], int], ...] = (
     ("lightweight", 260.0, (65.0, 72.0, 78.0, 77.0, 77.0, 76.0, 70.0), 77),
     ("lightweight", 390.0, (64.0, 68.0, 70.0, 70.0, 70.0, 70.0, 64.0), 71),
 )
+
+# ISO 10140-2:2021 Table A.1 (PDF page 16, printed folio 10): typical flanking
+# sound reduction index R'F of a small test opening of 1 250 mm x 1 500 mm,
+# one-third-octave bands 100 Hz to 5 000 Hz, in dB, and the single numbers the
+# table prints beside it, R'F,w (C; Ctr) = 59 (-2; -7) dB. ISO 10140-1:2021
+# J.1 corrects a joint by the rules of this annex (A.3).
+ISO10140_2_TABLE_A1_R_F: tuple[float, ...] = (
+    35.0,
+    40.0,
+    42.0,
+    47.0,
+    50.0,
+    52.0,
+    54.0,
+    56.0,
+    58.0,
+    60.0,
+    62.0,
+    63.0,
+    65.0,
+    67.0,
+    68.0,
+    70.0,
+    72.0,
+    73.0,
+)
+ISO10140_2_TABLE_A1_RATING: tuple[int, int, int] = (59, -2, -7)
+
+# ISO 10140-1:2021 J.1 (PDF page 44, printed folio 38): the fixed correction
+# below a 6 dB margin over Rs,max, 1,3 dB, which ISO 10140-2:2021 A.3 (PDF
+# page 16, printed folio 10) says "corresponds to a difference of 6 dB"; and
+# the lower limit J.1 prints as its example, "(Rs >= 50,4 dB)".
+ISO10140_1_J1_LIMIT_CORRECTION_DB = 1.3
+ISO10140_1_J1_LIMIT_MARGIN_DB = 6.0
+ISO10140_1_J1_EXAMPLE_MINIMUM_DB = 50.4

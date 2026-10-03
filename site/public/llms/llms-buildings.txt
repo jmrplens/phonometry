@@ -73,9 +73,10 @@ laboratory, and predicted from element data.
   octave reverberation time that comes with it.
 - [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/):
   the ISO 10140 laboratory characterisation of an element.
-- [Linings, Floor Coverings and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
   what a lining or a floor covering adds, rated on the ISO 717 reference
-  curves, and the sound of rain on a roof.
+  curves, what a sealed joint lets through per metre, and the sound of rain on
+  a roof.
 - [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/):
   the direct-power route to the same indices when flanking is high.
 - [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/):

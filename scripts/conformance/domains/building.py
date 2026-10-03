@@ -33,6 +33,12 @@ import phonometry as ph
 from ..registry import Outcome, count, numeric, record, register, residue_text
 from .levels import _FS
 
+#: The 18 one-third-octave bands of ISO 10140, 100 Hz to 5000 Hz.
+_LAB_BANDS_18 = [
+    *(100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0),
+    *(800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0),
+]
+
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
@@ -1409,6 +1415,184 @@ def _chk_iso10140_1_formula_k4() -> Outcome:
     return numeric(
         50.0 + 10.0 * math.log10(4.0), float(res.l_i_db[0]), 1e-12, unit="dB", places=6
     )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Formula (J.1)",
+    "A 5,4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5,4 m / (8 m2 x 1 m))",
+)
+def _chk_iso10140_1_formula_j1() -> Outcome:
+    # Every term away from zero and the joint length away from the reference
+    # length, so a swapped ratio or a dropped normalization shows.
+    expected = 37.0 + 10.0 * math.log10((1.0 * 5.4) / (8.0 * 1.0))
+    got = ph.building.joint_sound_reduction_index(
+        [92.0], [55.0], [8.0], joint_length_m=5.4
+    )
+    return numeric(expected, float(got[0]), 1e-12, unit="dB", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Formula (J.2) with ISO 10140-2:2021 A.3",
+    "The fixed 1,3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, "
+    "to the printed decimal",
+)
+def _chk_iso10140_1_formula_j2_limit() -> Outcome:
+    # ISO 10140-2:2021 A.3 prints the correction and the margin it stands for;
+    # Formula (J.2) at that margin has to round to the printed value, and the
+    # library has to apply exactly the printed value just below it.
+    margin = ref.ISO10140_1_J1_LIMIT_MARGIN_DB
+    at_six = ph.building.lab_joint_insulation([50.0], [50.0 + margin], [1000.0])
+    below = ph.building.lab_joint_insulation([50.0], [50.0 + margin - 0.1], [1000.0])
+    formula = round(float(at_six.r_s_db[0]) - 50.0, 1)
+    applied = float(below.r_s_db[0]) - 50.0
+    printed = ref.ISO10140_1_J1_LIMIT_CORRECTION_DB
+    ok = math.isclose(formula, printed) and math.isclose(applied, printed)
+    return Outcome(
+        expected=f"{printed} dB at and below a {margin:g} dB margin",
+        computed=f"Formula (J.2) at {margin:g} dB {formula} dB, applied below {applied:.1f} dB",
+        delta="exact" if ok else "differs",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 J.1",
+    "R's within 3 dB of Rs,max = 50,4 dB: the lower limit as printed, (Rs >= 50,4 dB)",
+)
+def _chk_iso10140_1_j1_lower_limit() -> Outcome:
+    maximum = ref.ISO10140_1_J1_EXAMPLE_MINIMUM_DB
+    res = ph.building.lab_joint_insulation([maximum - 2.5], [maximum], [1000.0])
+    got = float(res.r_s_db[0])
+    ok = res.regime == ("maximum",) and math.isclose(got, maximum)
+    return Outcome(
+        expected=f"(Rs >= {maximum} dB)",
+        computed=f"Rs = {got:.1f} dB, a minimum value"
+        if ok
+        else f"Rs = {got:.1f} dB, {res.regime[0]}",
+        delta="exact" if ok else "differs",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 J.1 with ISO 717-1:2020 4.4 and 4.5",
+    "Indicative bands 400 Hz to 800 Hz rated again as infinitely high, by hand: "
+    "Rs,w = 51 dB becomes 59 dB with C = 0 dB, more than 1 dB, so in brackets",
+)
+def _chk_iso10140_1_j1_open_bands() -> Outcome:
+    # Rs,max is 70 dB with a 44 dB dip from 400 Hz to 800 Hz, and R's lies
+    # 12 dB below it, 2 dB in the dip: the dip is indicative and set to Rs,max.
+    # By hand, ISO 717-1:2020 4.4 on 100 Hz to 3150 Hz: directly, the reference
+    # shifted by -1 dB leaves 6 + 7 + 8 + 9 = 30 dB of unfavourable deviations
+    # in the dip and an unshifted one 34 dB, so Rs,w = 52 - 1 = 51 dB. With the
+    # dip infinitely high the twelve other bands sit at 58 dB; +7 dB leaves
+    # 4 dB at 1000 Hz and 5 dB at each of the five bands from 1250 Hz, 29 dB,
+    # where +8 dB leaves 35 dB, so 59 dB. 4.5 with spectrum No 1 over those
+    # twelve bands: XA = 58 - 10 lg 0,7787 = 59,1 dB, which rounds to 59, so
+    # C = 0 dB. 59 - 51 is more than the 1 dB of J.1.
+    maximum = np.full(18, 70.0)
+    maximum[6:10] = 44.0
+    measured = maximum - 12.0
+    measured[6:10] = 42.0
+    res = ph.building.lab_joint_insulation(measured, maximum, _LAB_BANDS_18)
+    direct = None if res.rating is None else res.rating.rating
+    opened = res.open_band_rating
+    open_rw = None if opened is None else opened.r_s_w_db
+    open_c = None if opened is None else opened.c_db
+    ok = (direct, open_rw, open_c, res.bracketed) == (51, 59, 0, True)
+    return Outcome(
+        expected="Rs,w = 51 dB; opened 59 dB, C = 0 dB; in brackets",
+        computed=(
+            f"Rs,w = {direct} dB; opened {open_rw} dB, C = {open_c} dB; "
+            + ("in brackets" if res.bracketed else "not in brackets")
+        ),
+        delta="exact" if ok else "differs",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-2:2021 Table A.1",
+    "The printed R'F of the small test opening, carried through the joint front end "
+    "uncorrected: R'F,w (C; Ctr) = 59 (-2; -7) dB as printed",
+)
+def _chk_iso10140_2_table_a1() -> Outcome:
+    measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F, dtype=float)
+    res = ph.building.lab_joint_insulation(measured, measured + 20.0, _LAB_BANDS_18)
+    rating = res.rating
+    expected = dict(
+        zip(("Rw", "C", "Ctr"), ref.ISO10140_2_TABLE_A1_RATING, strict=True)
+    )
+    computed = (
+        {"Rw": rating.rating, "C": rating.c, "Ctr": rating.ctr}
+        if rating is not None
+        else {"Rw": float("nan"), "C": float("nan"), "Ctr": float("nan")}
+    )
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 J.2.1, J.2.2",
+    "Joint longer than 1 m (1 m fails), at most 50 mm wide (50 mm passes), a window "
+    "or door gap at least 5,0 m (5,0 m passes); four gap readings within 0,3 mm",
+)
+def _chk_iso10140_1_j2_bounds() -> Outcome:
+    cases = [
+        (ph.building.check_joint_test_element(1.0, 20.0).passes, False),
+        (ph.building.check_joint_test_element(1.01, 50.0).passes, True),
+        (ph.building.check_joint_test_element(2.0, 50.1).passes, False),
+        (
+            ph.building.check_joint_test_element(
+                5.0, 5.0, window_or_door_gap=True
+            ).passes,
+            True,
+        ),
+        (
+            ph.building.check_joint_test_element(
+                4.99, 5.0, window_or_door_gap=True
+            ).passes,
+            False,
+        ),
+        (ph.building.check_gap_width([4.6, 4.9, 4.7, 4.8]).passes, True),
+        (ph.building.check_gap_width([4.6, 4.95, 4.7, 4.8]).passes, False),
+        (ph.building.check_gap_width([4.7, 4.8, 4.75]).passes, False),
+    ]
+    matching = sum(1 for got, expected in cases if got is expected)
+    return count(matching, len(cases), subject="bounds")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 J.4",
+    "A variable slit at bmin, bn = 5 mm (taken when unknown) and bn + 3 = 8 mm "
+    "passes; without 8 mm, without bmin named, or at 6 mm nominal without 9 mm it fails",
+)
+def _chk_iso10140_1_j4_widths() -> Outcome:
+    # J.4 a) "if unknown bn = 5 mm is to be taken", c) "a gap width 3 mm more
+    # than nominal". The same rated result stands at every width: only the
+    # widths the series names are judged.
+    maximum = np.full(18, 60.0)
+    rated = ph.building.lab_joint_insulation(maximum - 12.0, maximum, _LAB_BANDS_18)
+
+    def passes(widths: list[float], **kwargs: float) -> bool:
+        series = ph.building.joint_gap_series(widths, [rated] * len(widths), **kwargs)
+        return ph.building.check_joint_gap_series(series).passes
+
+    cases = [
+        (passes([3.0, 5.0, 8.0], minimum_gap_mm=3.0), True),
+        (passes([3.0, 5.0], minimum_gap_mm=3.0), False),
+        (passes([3.0, 5.0, 8.0]), False),
+        (passes([3.0, 6.0, 8.0], nominal_gap_mm=6.0, minimum_gap_mm=3.0), False),
+        (passes([3.0, 6.0, 9.0], nominal_gap_mm=6.0, minimum_gap_mm=3.0), True),
+    ]
+    matching = sum(1 for got, expected in cases if got is expected)
+    return count(matching, len(cases), subject="series")
 
 
 @register(

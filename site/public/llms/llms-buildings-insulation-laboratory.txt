@@ -294,9 +294,10 @@ their own pages: intensity (ISO 15186), the floor-covering improvement
 
 ## See also
 
-- [Linings, Floor Coverings and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
-  what ISO 10140-1 Annexes G, H and K do with these measurements: the
-  improvement of a lining or a floor covering, and rain on a roof.
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
+  what ISO 10140-1 Annexes G, H, J and K do with these measurements: the
+  improvement of a lining or a floor covering, a sealed joint per metre, and
+  rain on a roof.
 - [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/):
   the in-building airborne, impact and façade measurements, their single-number
   ratings and their uncertainty.
@@ -323,16 +324,18 @@ their own pages: intensity (ISO 15186), the floor-covering improvement
 <!-- source: docs/buildings/insulation/lab-application-rules.md | canonical: https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/ -->
 Source: https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/
 
-# Linings, Floor Coverings and Rain (ISO 10140-1)
+# Linings, Floor Coverings, Joints and Rain (ISO 10140-1)
 
 Most of ISO 10140 measures what an element *is*: the sound reduction index of
-a wall, the impact level under a floor. Three of the application rules of
+a wall, the impact level under a floor. Four of the application rules of
 ISO 10140-1 measure something else. Annex G measures what a **lining** adds to
 the wall it is fixed to, Annex H what a **floor covering** takes off the impact
-level of the floor it is laid on, and Annex K what **rain** does to a roof, a
-roof window or a rooflight. The first two are products that are never sold on
-their own, so the laboratory measures the element twice, without and with the
-product, and reports the difference. The third is an impact source that falls
+level of the floor it is laid on, Annex J what a **joint** lets through, a
+metre of it at a time, and Annex K what **rain** does to a roof, a roof window
+or a rooflight. The first two are products that are never sold on their own,
+so the laboratory measures the element twice, without and with the product,
+and reports the difference. A joint is a line rather than an area, measured in
+an element built to hide everything else. Rain is an impact source that falls
 from the sky rather than from a tapping machine, so the laboratory has to make
 its own rain.
 
@@ -646,6 +649,269 @@ plt.show()
 
 </details>
 
+### The form of Figure H.4
+
+H.6.3 prints "an example of the form for the expression of results" and lets
+the user copy it. `cover.report()` fills it: the manufacturer and product, the
+client, the test room, who mounted the specimen, the date, the description of
+facility and specimen, the type of reference floor, the mass per unit area,
+the curing time, the air temperature and humidity in the source room and the
+receiving room volume; the one-third-octave table of $L_\mathrm{n,0}$ and
+$\Delta L$ beside the $\Delta L$ diagram with the frequency range of the
+ISO 717-2 rating dashed, as key 1 of the form marks it; and the rating, with
+the two floor ratings H.5 i) asks for beside it. The product identification
+and the curing time come from the `product` and `curing_time_h` fields of
+`ReportMetadata`.
+
+```python
+from phonometry import ReportMetadata
+
+cover.report("covering.pdf", metadata=ReportMetadata(
+    manufacturer="Example floorings", product="Resilient vinyl, 4 mm",
+    mass_per_area=2.6, curing_time_h=0.0, source_temperature_c=21.2,
+    source_relative_humidity_percent=48.0, receiving_volume=58.0))
+```
+
+The form also asks for $C_\mathrm{I,r,50\text{-}2500}$, a term of the
+reference floor with the covering from 50 Hz, which the reference floors of
+ISO 717-2:2020 Table 4 cannot give: they start at 100 Hz (see the
+[errata registry](https://jmrplens.github.io/phonometry/reference/errata/)). The sheet says so where the number would
+go.
+
+[![ISO 10140-1 Figure H.4 example report: the form's header with manufacturer, product, reference floor type, mass per unit area, curing time and the climate of the source room, the one-third-octave table of Ln,0 and delta L beside the delta L diagram with the ISO 717-2 rating range dashed, the boxed delta Lw = 15 dB and CI,delta, the two floor ratings and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.pdf)
+
+*The form of Figure H.4 (`LabFloorCoveringImprovementResult.report`), filled
+with the floor and the covering of ISO 717-2:2020 Annex C: $\Delta L_\mathrm{w}
+= 15$ dB, as Table C.2 prints it.*
+
+## Joints: the sound reduction index per metre (Annex J)
+
+A joint is a line, not an area: a slit with or without a filler, a foam or
+sealing tape between two elements, the gasket on the rebate of a door or a
+window. Annex J measures what it lets through. The joint is mounted in an
+element that insulates far better than it does, the level difference is
+measured to ISO 10140-2, and the result is normalized to a **metre** of joint
+rather than to a square metre of element,
+
+$$
+R_\mathrm{s} = L_1 - L_2 + 10 \lg \frac{S_\mathrm{n} l}{A l_\mathrm{n}}
+$$
+
+(Formula (J.1)), with the joint length $l$, the equivalent absorption area $A$
+of the receiving room, $S_\mathrm{n} = 1$ m² and $l_\mathrm{n} = 1$ m. A joint
+twice as long lets twice the power through and lowers the level difference by
+3 dB; the term in $l$ gives the 3 dB back, which leaves a number that does not
+depend on how much of the joint the laboratory could fit in its opening.
+
+```python
+# One band: 95 dB in the source room, 48.6 dB in the receiving room, whose
+# absorption area is 12.4 m2, with 5.4 m of rebate seal in the opening.
+r = building.joint_sound_reduction_index([95.0], [48.6], [12.4],
+                                         joint_length_m=5.4)
+print(np.round(r, 1))                          # [42.8]
+```
+
+### The element around the joint is part of every measurement (J.1)
+
+Whatever the joint lets through, the element it sits in lets something
+through too, and a good seal can come close to it. So J.1 asks for the
+**maximum** of the arrangement, $R_\mathrm{s,max}$: the same Formula (J.1)
+with the joint sealed on both sides, "e.g. with elastic sealant". Unless the
+maximum lies at least 10 dB above the measured index $R_\mathrm{s}'$, the
+result is corrected by the rules of ISO 10140-2:2021 A.3, band by band, with
+$d = R_\mathrm{s,max} - R_\mathrm{s}'$:
+
+| Margin $d$ | $R_\mathrm{s}$ |
+| :--- | :--- |
+| 10 dB or more | $R_\mathrm{s}'$, no correction |
+| 6 dB to 10 dB | $-10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$, Formula (J.2) |
+| under 6 dB | $R_\mathrm{s}' + 1{,}3$ dB, a minimum value |
+| under 3 dB | $\geq R_\mathrm{s,max}$, in brackets |
+
+The 1,3 dB is what Formula (J.2) gives at 6 dB, which is how A.3 puts it. A.3
+itself stops correcting a sound reduction index at 15 dB and an
+element-normalized level difference at 10 dB; Annex J writes the 10 dB, which
+fits an index normalized to a reference length rather than to the area of
+the opening, and the 10 dB is what the library applies. The
+last row is exact rather than cautious: the arrangement passes the power of
+the maximum alone, and the power of the joint on top of it when the joint is
+open, so a measured index within 3 dB of the maximum means the joint passes
+less than the element does, and its own index is above $R_\mathrm{s,max}$.
+J.1 allows that lower limit ("may be set"); `limit_at_maximum=False` gives
+those bands the 1,3 dB instead.
+
+A rebate seal on a door, measured against its arrangement:
+
+```python
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
+                  63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
+r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
+                   45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
+seal = building.lab_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+print(seal.regime[-4:])
+# ('uncorrected', 'corrected', 'limit', 'maximum')
+print(np.round(seal.r_s_db[-4:], 1))           # [55.4 59.5 64.4 69. ]
+```
+
+The single numbers are those of ISO 717-1 on the corrected index, and the form
+of Figure J.7 asks for the enlarged-range terms to 5 000 Hz as well:
+
+```python
+rating = seal.rating
+print(rating.rating, rating.c, rating.ctr)               # 49 -1 -4
+print(seal.c_100_5000_db, seal.ctr_100_5000_db)           # 0 -4
+print(seal.max_rating.rating)                             # 61
+```
+
+Where a band is above $R_\mathrm{s,max} - 3$ dB, it says only that the joint
+is better than the arrangement can show. J.1 rates the curve a second time
+with an infinitely high index in those **indicative bands**, which then add no
+unfavourable deviation and no energy, and if the two ratings differ by more
+than 1 dB the single numbers go in brackets too. Here the only indicative band
+is 5 000 Hz, outside the rating range, so nothing moves:
+
+```python
+print(seal.open_band_rating.open_frequencies_hz, seal.bracketed)  # (5000.0,) False
+```
+
+`seal.octave_bands()` averages the transmitted power of the three thirds of
+each octave, the octave index Figure J.9 plots.
+
+### The test element and the gap width (J.2)
+
+J.2.1 asks for a joint longer than 1 m and no wider than 50 mm, and J.2.2 for
+at least 5,0 m of a gap between the parts of a window or door, which may be
+the sum of several gaps. The gap width $b$ is read at four positions or more,
+evenly spread along the seal, and the readings "shall not deviate by more than
+0,3 mm, otherwise readjust the mounting"; their average is the gap width.
+
+```python
+check = building.check_joint_test_element(5.4, 5.0, window_or_door_gap=True)
+print(check.passes)                            # True
+gap = building.check_gap_width([5.1, 4.9, 5.0, 5.15, 4.95])
+print(round(gap.gap_width_mm, 2), round(gap.spread_mm, 2), gap.passes)
+# 5.02 0.25 True
+```
+
+The deviation is read between the readings, the largest minus the smallest:
+the sentence could also mean each reading against the average, which would let
+the readings spread twice as far, and the stricter reading is the one checked.
+Both verdicts have no truth value of their own: read `.passes`.
+
+### A variable slit (J.4 and J.5)
+
+An openable window or door does not have one gap width, so J.4 repeats the test
+at three: the nominal width $b_\mathrm{n}$ the manufacturer gives (5 mm when
+it gives none), the minimum width $b_\mathrm{min}$ under the maximal pressure
+(normally a force of 100 N per metre of seal), and $b_\mathrm{n} + 3$ mm. The
+report then gives every single number as a function of the gap width with the
+nominal width marked (J.5.2 i)), and the results at $b_\mathrm{n}$ and
+$b_\mathrm{n} + 3$ are the ones products are compared by (J.5.2 h)).
+
+```python
+loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
+        12.0: 13.0}                            # dB lost against 5 mm, mid band
+slope = np.linspace(0.6, 1.4, 18)              # and more at high frequency
+results = [building.lab_joint_insulation(
+               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
+           for db in loss.values()]
+series = building.joint_gap_series(list(loss), results, minimum_gap_mm=3.0)
+print(series.r_s_w_ctr_db)        # [48. 47. 45. 43. 38. 33. 33.]
+print(series.at_gap(7.0), series.working_range_mm)        # 40.5 (5.0, 8.0)
+```
+
+`at_gap` reads the straight line between the two measured widths either side,
+as Figure J.8 draws "lines plotted through measurement results", and never
+extrapolates. Where J.5.2 h) lets "a gap range other than 3 mm" apply, it reads
+the single numbers at that width as well; `working_range_mm` and the figure
+keep the 3 mm that J.4 c) measures at. `series.plot_octave_bands()` draws
+Figure J.9: the octave index at every gap width, under the closed and sealed
+element ($b = 0$) as $R_\mathrm{s,max}$, which J.5.1 says the figure also
+gives.
+
+`joint_gap_series` collects any set of widths; whether the three of J.4 are
+among them is a verdict of its own. J.4 gives no tolerance, so a width within
+the 0,3 mm that J.2.2 lets the readings of a gap width spread over counts as the
+width asked for, and a series that does not name $b_\mathrm{min}$ fails J.4 b),
+since nothing then shows which width it was.
+
+```python
+widths = building.check_joint_gap_series(series)
+print(widths.nominal_measured, widths.minimum_measured,
+      widths.working_range_measured, widths.passes)     # True True True True
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/joint_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/joint_insulation.svg" alt="Two panels for an EPDM rebate seal on a door. Left: over 18 one-third-octave bands from 100 Hz to 5000 Hz, the maximum of the arrangement rising from 40 dB to 69 dB, the measured index of the seal from 33 dB to 66 dB with a dip near 1000 Hz, the corrected index just above it, and the shifted ISO 717-1 reference curve over 100 Hz to 3150 Hz; the 4000 Hz and 5000 Hz bands are marked as minimum values; the title reads R s w (C; C tr) equals 49 (minus 1; minus 4) dB. Right: the traffic single number R s A tr against the gap width from 3 mm to 12 mm, falling from 48 dB at 3 mm through 45 dB at the nominal 5 mm to 38 dB at 8 mm and 33 dB from 10 mm, with the working range from 5 mm to 8 mm shaded and the minimum width of 3 mm marked" width="100%"></picture>
+
+*Left, the seal at its nominal gap: the measured index, the maximum of the
+arrangement above it, and the corrected index, whose two top bands are minimum
+values because the seal comes within 6 dB and then within 3 dB of what the
+arrangement can show. Right, the same seal at seven gap widths: 7 dB of
+$R_\mathrm{s,Atr}$ are lost across the 3 mm working range from the nominal
+width.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
+                  63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
+r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
+                   45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
+seal = building.lab_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
+        12.0: 13.0}
+slope = np.linspace(0.6, 1.4, 18)
+results = [building.lab_joint_insulation(
+               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
+           for db in loss.values()]
+series = building.joint_gap_series(list(loss), results, minimum_gap_mm=3.0)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
+seal.plot(ax=ax1)
+series.plot(ax=ax2)
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+### The form of Figure J.7
+
+J.5.1 prints a sample form for the result and J.5.2 b) asks the report for "a
+data sheet with a diagram which shows the sound insulation of joints as a
+function of the frequency". `seal.report()` writes it: the header of the form
+(client, specimen, date, test length, separation wall, test noise, room
+volumes, the maximum joint sound reduction index, mounting, and the climate of
+both rooms), the table of $R_\mathrm{s}$ from 100 Hz to 5 000 Hz beside its
+diagram over the printed 30 dB to 80 dB, with `≥` before a minimum value and
+brackets round one set to the maximum, and the evaluation $R_\mathrm{s,w}$
+($C$; $C_\mathrm{tr}$), $C_{100\text{-}5000}$ and
+$C_\mathrm{tr,100\text{-}5000}$. When J.1 puts the single numbers in brackets,
+every one of them is, and a note gives each of them rated with the indicative
+bands open, so the one that moved is there to see. The separation wall and the
+test noise come from the `separating_element` and `test_signal` fields of
+`ReportMetadata`; the climate comes from the per-room fields when they are
+given.
+
+```python
+seal.report("joint.pdf", metadata=ReportMetadata(
+    client="Example client", separating_element="Lead-lined filler wall",
+    test_signal="Pink noise", source_volume=53.0, receiving_volume=51.0))
+```
+
+[![ISO 10140-1 Figure J.7 example report: the form's header with the test length, separation wall, test noise and the maximum joint sound reduction index, the one-third-octave table of Rs from 100 Hz to 5000 Hz beside its diagram with the two top bands as minimum values, the boxed Rs,w (C; Ctr) with the enlarged-range terms and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.pdf)
+
+*The form of Figure J.7 (`LabJointInsulationResult.report`), Rs,w (C; Ctr).*
+
 ## Rain on a roof (Annex K)
 
 Rain is impact sound. It is measured as the **sound intensity level**
@@ -815,6 +1081,16 @@ same tapping-machine positions. Report the category, the specimen, the
 positions, the load, the floor temperature, $\Delta L$ with its weighted value
 and adaptation term, and the two ratings of H.5 i).
 
+**A joint.** Build the joint into an element that insulates far better than
+it does, at least 1 m long and no wider than 50 mm (5,0 m for a gap between
+the parts of a window or door), read the gap width at four positions or more,
+and measure $L_1$, $L_2$ and the reverberation time to ISO 10140-2. Seal the
+joint on both sides and measure the arrangement's maximum the same way. A
+variable slit is measured again at its minimum width under load and at its
+nominal width plus 3 mm. Report the maximum, the data sheet of Figure J.7 for
+each gap width, the test element and the cross-section with its gap width, and
+the single numbers against the gap width (J.5.2).
+
 **Rain.** Install the specimen at its slope (at least 5° for roofs and
 rooflights, 30° for roof windows) in an opening of 10 m² to 20 m², or a
 roof window in a heavy filler construction; check the rain rate; rain on it
@@ -826,7 +1102,7 @@ totals (K.5).
 
 ## Verifying it
 
-The printed tables and examples of the three annexes, and the tables behind
+The printed tables and examples of the four annexes, and the tables behind
 them, are conformance rows:
 
 - The **reference curves, band by band**: the 63 values of ISO 717-1:2020
@@ -870,6 +1146,18 @@ them, are conformance rows:
   one hour, a rounding error below 38. Then Formula (K.1) with every term away
   from zero, and closed forms of Formulas (D.4) and (K.4).
 
+- **Annex J** at its printed numbers: the fixed 1,3 dB below a 6 dB margin is
+  Formula (J.2) at 6 dB to the printed decimal, as ISO 10140-2:2021 A.3 says
+  it corresponds, and the library applies exactly that just below it; the
+  lower limit J.1 prints as its example, $R_\mathrm{s} \geq 50{,}4$ dB in brackets;
+  and the typical flanking spectrum of ISO 10140-2:2021 Table A.1 carried
+  through the joint front end, rated 59 ($-2$; $-7$) dB as printed. Then
+  Formula (J.1) with every term away from zero, the bounds of J.2.1 and J.2.2
+  at their printed values, each inclusive or exclusive as the text says, the
+  three gap widths of J.4 with the 5 mm taken when the nominal width is
+  unknown and the 3 mm above it, and the open-band rating checked by hand
+  against ISO 717-1 Clauses 4.4 and 4.5.
+
 The rain has no worked example in either standard, so Formulas (K.1) to (K.5)
 are checked in closed form rather than against a printed result. Tables H.1
 and I.1 were read on the pages of the 2021 edition and agree digit for digit
@@ -893,6 +1181,15 @@ resilient covering works best; the timber curves are loudest below 400 Hz,
 where it barely works. A $\Delta L_\mathrm{w}$ measured on concrete applies to
 massive floors only (ISO 717-2:2020 5.4).
 
+### Why is a band of my joint in brackets?
+
+Because the joint came within 3 dB of what the arrangement can show there, so
+the measurement says only that the joint is better than $R_\mathrm{s,max}$:
+the band is reported as $(R_\mathrm{s} \geq R_\mathrm{s,max})$. A better
+filler wall or a better seal on the sealed measurement raises the maximum and
+turns the band into a number. If such bands also move the single numbers by
+more than 1 dB, the single numbers go in brackets too (J.1).
+
 ### Do I need the reference pane to report rain noise?
 
 The intensity level $L_I$ and $L_{I\mathrm{A}}$ are reported without it. The
@@ -907,8 +1204,15 @@ defined for large roofs (ISO 10140-5:2021 I.3).
   rules for specific products* (ISO 10140-1:2021). Third edition.
   Annex G (linings: ΔR, the curing condition of G.4 and the report of G.5),
   Annex H (floor coverings: Formulae (H.1) to (H.3), the three categories of
-  covering and the tapping-machine positions) and Annex K (rainfall sound:
+  covering, the tapping-machine positions and the form of Figure H.4),
+  Annex J (joints: Formulae (J.1) and (J.2), the test element of J.2, the gap
+  widths of J.4 and the form of Figure J.7) and Annex K (rainfall sound:
   Formulae (K.1) to (K.5) and the 18 $C_j$ of Table K.2).
+- International Organization for Standardization. (2021). *Acoustics — Laboratory
+  measurement of sound insulation of building elements — Part 2: Measurement
+  of airborne sound insulation* (ISO 10140-2:2021). Second edition. A.3, the
+  correction for flanking through the filler wall that Annex J applies to a
+  joint, and Table A.1, the typical flanking spectrum of a small test opening.
 - International Organization for Standardization. (2021). *Acoustics — Laboratory
   measurement of sound insulation of building elements — Part 5: Requirements
   for test facilities and equipment* (ISO 10140-5:2021). Annexes B and C build
@@ -918,9 +1222,12 @@ defined for large roofs (ISO 10140-5:2021 I.3).
   Formulae (I.1) to (I.3)). Annex F specifies the rubber ball of H.6.1.
 - International Organization for Standardization. (2020). *Acoustics — Rating of
   sound insulation in buildings and of building elements — Part 1: Airborne
-  sound insulation* (ISO 717-1:2020). Annex D rates a lining on a standard
-  basic element (Formulae (D.1) to (D.4)); Annex E prints the reference curves
-  of the three elements, Table E.1, with every single number under them.
+  sound insulation* (ISO 717-1:2020). Clauses 4.4 and 4.5 with Annex B rate a
+  joint, $R_\mathrm{s,w}$ ($C$; $C_\mathrm{tr}$) with $C_{100\text{-}5000}$ and
+  $C_\mathrm{tr,100\text{-}5000}$, also with its indicative bands taken as
+  infinitely high; Annex D rates a lining on a standard basic element
+  (Formulae (D.1) to (D.4)); Annex E prints the reference curves of the three
+  elements, Table E.1, with every single number under them.
 - International Organization for Standardization. (2020). *Acoustics — Rating of
   sound insulation in buildings and of building elements — Part 2: Impact
   sound insulation* (ISO 717-2:2020). Clauses 5 and 6 rate a floor covering on
@@ -939,8 +1246,19 @@ the curing condition of G.4. Annex H: $\Delta L$ of Formula (H.1), the octave
 values of Formula (H.2), the weighted reductions $\Delta L_\mathrm{w}$ and
 $\Delta L_\mathrm{t,n,w}$ with $C_{\mathrm{I}\Delta}$ and
 $C_{\mathrm{I}\Delta,\mathrm{t}}$ on all four reference floors (ISO 717-2:2020
-Clauses 5 and 6, A.2.2, A.2.3), the two ratings of H.5 i), and the heavy/soft
-improvement of Formula (H.3). Annex K: Formulae (K.1) to (K.5), the 18 $C_j$ of
+Clauses 5 and 6, A.2.2, A.2.3), the two ratings of H.5 i), the heavy/soft
+improvement of Formula (H.3), and the form of Figure H.4 as a `.report()` PDF.
+Annex J: the sound reduction index of joints per metre of Formula (J.1), the
+correction for the test arrangement of Formula (J.2) with the rules of
+ISO 10140-2:2021 A.3 (no correction from 10 dB, the fixed 1,3 dB below 6 dB,
+the lower limit at $R_\mathrm{s,max}$ below 3 dB), the ISO 717-1 single
+numbers with $C_{100\text{-}5000}$ and $C_\mathrm{tr,100\text{-}5000}$, the
+rating with infinitely high indicative bands and the 1 dB bracket rule, the
+length and width of the test element (J.2.1, J.2.2), the gap-width readings
+(J.2.2), the gap widths of a variable slit with the check that the three of
+J.4 were measured and the single numbers against the gap width (J.4,
+J.5.2 h) and i), Figures J.8 and J.9), and the form of
+Figure J.7 as a `.report()` PDF. Annex K: Formulae (K.1) to (K.5), the 18 $C_j$ of
 Table K.2, three generator positions, the background correction, the rain
 classes of Table K.1, the artificial rains and tolerances of ISO 10140-5:2021
 Tables H.1 and H.2 with the rate check of H.2.3, and the reference-pane
@@ -948,26 +1266,25 @@ correction of its Annex I (Table I.1, Formulae (I.1) to (I.3)). The reference
 curves of ISO 717-1:2020 Table E.1 and ISO 717-2:2020 Table 4 are published
 read-only tables.
 
-**Not covered.** The mounting, specimen and procedure requirements of the three annexes are
-documented above and checked only where G.4 and ISO 10140-5 H.1 put a verdict
-on them: nothing checks the covering category, the specimen sizes, the number
-and placement of tapping-machine positions, the load, the floor temperature,
-the slope of a roof or the 5 min of steady rain. The wooden mock-up of H.6.2
+**Not covered.** The mounting, specimen and procedure requirements of the four annexes are
+documented above and checked only where G.4, J.2 and ISO 10140-5 H.1 put a
+verdict on them: nothing checks the covering category, the specimen sizes, the
+number and placement of tapping-machine positions, the load, the floor
+temperature, the slope of a roof or the 5 min of steady rain, and for a joint
+nothing checks the uniform cross-section, the shape of Figure J.1, that the
+gap readings are evenly spread, the force of 100 N/m behind the minimum gap
+width or the time a sealing band takes to expand. A working range other than
+the 3 mm of J.4, which J.5.2 h) allows for comparisons, is read with `at_gap`
+but not drawn. The wooden mock-up of H.6.2
 has no reference curve of its own. The form of Figure H.4 asks for a
 $C_{\mathrm{I,r,50\text{–}2500}}$ that the reference floor cannot give, since
-Table 4 starts at 100 Hz (recorded in the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/)); the
-bare floor's own enlarged-range term is available from
-`weighted_impact_rating_extended`. None of the three annexes' results renders
-a report fiche: the example form of Figure H.4 is not produced as a
-`.report()` PDF, as it is for the ISO 10140-2 and ISO 10140-3 measurements
-and for ISO 16251-1. The measurements that feed these
-annexes, $R$, $L_\mathrm{n}$ and the reverberation times, are those of
-[Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/),
-and the other annexes of ISO 10140-1 are mounting rules for that $R$ and
-$L_\mathrm{n}$ (walls, doors, windows, glazing, small technical elements,
-floors, shutters), except Annex J, whose sound reduction index of a sealed
-joint per metre, $R_\mathrm{s}$ of Formulae (J.1) and (J.2), is not
-implemented.
+Table 4 starts at 100 Hz (recorded in the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/));
+the sheet says so in its place, and the bare floor's own enlarged-range term is
+available from `weighted_impact_rating_extended`. The measurements that feed
+these annexes, $R$, $L_\mathrm{n}$ and the reverberation times, are those of
+[Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/), and the other annexes
+of ISO 10140-1 are mounting rules for that $R$ and $L_\mathrm{n}$ (walls,
+doors, windows, glazing, small technical elements, floors, shutters).
 
 ## See also
 
@@ -987,6 +1304,7 @@ implemented.
   the intensity method K.4.3 allows for rain.
 - API reference:
   [`building.measurement.lab_improvement`](https://jmrplens.github.io/phonometry/reference/api/building/lab-improvement/),
+  [`building.measurement.joint_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/joint-insulation/),
   [`building.measurement.rainfall_sound`](https://jmrplens.github.io/phonometry/reference/api/building/rainfall-sound/)
   and [`building.measurement.ratings`](https://jmrplens.github.io/phonometry/reference/api/building/ratings/).
 

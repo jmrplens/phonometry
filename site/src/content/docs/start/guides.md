@@ -441,10 +441,11 @@ ASTM E413/E1414.
   octave reverberation time that comes with it.
 - [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
   the ISO 10140 characterisation of an element with flanking suppressed.
-- [Linings, Floor Coverings and Rain (ISO 10140-1)](/phonometry/buildings/insulation/lab-application-rules/):
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](/phonometry/buildings/insulation/lab-application-rules/):
   the improvement a lining or a floor covering gives the element it is laid
-  on, rated on the ISO 717 reference curves, and the sound of artificial rain
-  on a roof or a rooflight.
+  on, rated on the ISO 717 reference curves, the sound reduction index of a
+  sealed joint per metre, the forms of Figures H.4 and J.7, and the sound of
+  artificial rain on a roof or a rooflight.
 - [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/):
   the transmitted power read off the radiating face, for the whole element or
   element by element.

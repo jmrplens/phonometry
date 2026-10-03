@@ -49,6 +49,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.validation import (
+    check_engine,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -74,6 +75,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._report.metadata import ReportMetadata
     from .ratings import BasicElement, ImpactRatingResult, ReferenceFloor
 
 __all__ = [
@@ -502,19 +504,92 @@ class LabFloorCoveringImprovementResult:
         return improvement_octave_bands(self.improvement_db, self.frequencies_hz)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self,
+        ax: Axes | None = None,
+        *,
+        language: str = "en",
+        rating_range: bool = False,
+        **kwargs: Any,
     ) -> Axes:
         """Plot the improvement ``ΔL`` per band with its weighted reduction.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param rating_range: Mark the frequency range of the ISO 717-2 rating,
+            100 Hz to 3 150 Hz, with two dashed lines, as the diagram of the
+            form of Figure H.4 does (its key 1).
+        :param kwargs: Forwarded to the ``ΔL`` curve.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_lab_floor_covering_improvement
 
         check_language(language)
         return plot_lab_floor_covering_improvement(
-            self, ax=ax, language=language, **kwargs
+            self, ax=ax, language=language, rating_range=rating_range, **kwargs
+        )
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: ReportMetadata | None = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        r"""Render the form of ISO 10140-1:2021 Figure H.4 to a one-page PDF.
+
+        "An example of the form for the expression of results ... is given in
+        Figure H.4. The user is allowed to copy this form" (H.6.3). The sheet
+        carries its fields: manufacturer and product, client, test room,
+        who mounted the specimen, the date, the description of the facility
+        and specimen, the type of reference floor, the mass per unit area,
+        the curing time, the air temperature and humidity in the source room
+        and the receiving room volume; the one-third-octave table of
+        :math:`L_\mathrm{n,0}` and :math:`\Delta L` beside the :math:`\Delta L`
+        diagram with the frequency range of the ISO 717-2 rating marked; the
+        rating :math:`\Delta L_\mathrm{w}` (or :math:`\Delta L_\mathrm{t,n,w}`)
+        and :math:`C_{\mathrm{I}\Delta}` with the two floor ratings of
+        H.5 i); and the statement that the result comes from an artificial
+        source on a specified reference floor. The form also asks for
+        :math:`C_\mathrm{I,r,50\text{-}2500}`, which the reference floors of
+        ISO 717-2:2020 Table 4 cannot give below 100 Hz; the sheet says so in
+        its place.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; its
+            ``product`` and ``curing_time_h`` fill the product identification
+            and curing time rows, ``source_temperature_c`` and
+            ``source_relative_humidity_percent`` (or the single
+            ``temperature_c`` and ``relative_humidity_percent``) the climate
+            of the source room, and ``requirement`` a verdict on the weighted
+            reduction (passing at or above it).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table also shows
+            :math:`L_\mathrm{n}` with the covering.
+        :param language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` or ``language`` is unknown, or the
+            result carries no weighted reduction (the 16 bands 100 Hz to
+            3 150 Hz are missing).
+        :raises ImportError: If reportlab or matplotlib is not installed.
+        """
+        from ..._i18n import check_language
+        from ..._report.iso10140_1 import render_floor_covering_form
+
+        check_engine(engine)
+        check_language(language)
+        if self.delta_lw_db is None or self.ci_delta_db is None:
+            msg = (
+                "The Figure H.4 form needs the weighted reduction, formed on the "
+                "16 one-third-octave bands 100 Hz to 3150 Hz; this result has none."
+            )
+            raise ValueError(msg)
+        return render_floor_covering_form(
+            self, path, metadata=metadata, verbose=verbose, language=language
         )
 
 

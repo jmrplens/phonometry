@@ -188,6 +188,9 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "follows its source (lab_lining_improvement)",
     r"$L_{I,\mathrm{m,ref}}$": "the symbol of ISO 10140-5:2021 Formula (I.2); the m,ref subscript is "
     "the one the standard prints, and a subscript follows its source (rainfall_sound)",
+    r"$R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$ [dB]": "the traffic single number of a "
+    "joint as ISO 10140-1:2021 prints it in J.5.1 and on the axis of Figure J.8, whose Atr subscript "
+    "is the one the standard prints; a subscript follows its source (JointGapSeries.plot)",
     r"$L_\mathrm{test} \pm U$ ($k$ = 2)": "the level of the test microphone, whose test subscript "
     "is the one IEC 61094-5 D.2 prints in M_test, with its expanded uncertainty; a subscript "
     "follows its source (ComparisonCalibration.plot)",

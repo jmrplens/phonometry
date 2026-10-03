@@ -3507,6 +3507,9 @@ _LAB_STRINGS: dict[str, str] = {
     r"$L_{I\mathrm{c,ref}}$ (Table I.1)": r"$L_{I\mathrm{c,ref}}$ (Tabla I.1)",
     "lightweight floors No 1 and No 2": "suelos de referencia ligeros n.º 1 y n.º 2",
     "Reference floors (ISO 717-2 Table 4)": "Suelos de referencia (ISO 717-2 Tabla 4)",
+    "Frequency range for rating (ISO 717-2)": (
+        "Intervalo de frecuencias de la evaluación (ISO 717-2)"
+    ),
 }
 _STRINGS.update(_LAB_STRINGS)
 
@@ -3737,6 +3740,8 @@ def plot_lab_floor_covering_improvement(
     result: LabFloorCoveringImprovementResult,
     ax: Axes | None = None,
     language: str = "en",
+    *,
+    rating_range: bool = False,
     **kwargs: Any,
 ) -> Axes:
     """Improvement ``ΔL`` of a floor covering per band (ISO 10140-1:2021 Annex H).
@@ -3745,6 +3750,9 @@ def plot_lab_floor_covering_improvement(
         :class:`~phonometry.building.measurement.lab_improvement.LabFloorCoveringImprovementResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param rating_range: Mark the frequency range of the ISO 717-2 rating,
+        100 Hz to 3 150 Hz, with two dashed lines, as the diagram of the form
+        of Figure H.4 does (key 1).
     :param kwargs: Forwarded to the improvement-curve ``plot`` call.
     :return: The axes.
     """
@@ -3759,6 +3767,14 @@ def plot_lab_floor_covering_improvement(
         language,
         kwargs,
     )
+    if rating_range:
+        freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+        label: str | None = _t("Frequency range for rating (ISO 717-2)", language)
+        for edge in (100.0, 3150.0):
+            hits = np.nonzero(np.abs(freqs - edge) <= 0.06 * edge)[0]
+            if hits.size:
+                ax.axvline(float(hits[0]), color=_C_MUTED, ls="--", lw=1.4, label=label)
+                label = None
     ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
     floor = _t(_REFERENCE_FLOOR_LABELS[result.reference_floor], language)
     if result.delta_lw_db is not None and result.ci_delta_db is not None:

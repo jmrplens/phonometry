@@ -332,6 +332,7 @@ LabFloorCoveringImprovementResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
+    rating_range: bool = False,
     **kwargs: Any,
 ) -> Axes
 ```
@@ -340,6 +341,66 @@ Plot the improvement `ΔL` per band with its weighted reduction.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `rating_range` | Mark the frequency range of the ISO 717-2 rating, 100 Hz to 3 150 Hz, with two dashed lines, as the diagram of the form of Figure H.4 does (its key 1). |
+| `kwargs` | Forwarded to the `ΔL` curve. |
+
+### LabFloorCoveringImprovementResult.report()
+
+```python
+LabFloorCoveringImprovementResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render the form of ISO 10140-1:2021 Figure H.4 to a one-page PDF.
+
+"An example of the form for the expression of results ... is given in
+Figure H.4. The user is allowed to copy this form" (H.6.3). The sheet
+carries its fields: manufacturer and product, client, test room,
+who mounted the specimen, the date, the description of the facility
+and specimen, the type of reference floor, the mass per unit area,
+the curing time, the air temperature and humidity in the source room
+and the receiving room volume; the one-third-octave table of
+$L_\mathrm{n,0}$ and $\Delta L$ beside the $\Delta L$
+diagram with the frequency range of the ISO 717-2 rating marked; the
+rating $\Delta L_\mathrm{w}$ (or $\Delta L_\mathrm{t,n,w}$)
+and $C_{\mathrm{I}\Delta}$ with the two floor ratings of
+H.5 i); and the statement that the result comes from an artificial
+source on a specified reference floor. The form also asks for
+$C_\mathrm{I,r,50\text{-}2500}$, which the reference floors of
+ISO 717-2:2020 Table 4 cannot give below 100 Hz; the sheet says so in
+its place.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); its `product` and `curing_time_h` fill the product identification and curing time rows, `source_temperature_c` and `source_relative_humidity_percent` (or the single `temperature_c` and `relative_humidity_percent`) the climate of the source room, and `requirement` a verdict on the weighted reduction (passing at or above it). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table also shows $L_\mathrm{n}$ with the covering. |
+| `language` | `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` or `language` is unknown, or the result carries no weighted reduction (the 16 bands 100 Hz to 3 150 Hz are missing). |
+| ImportError | If reportlab or matplotlib is not installed. |
 
 ## LabLiningImprovementResult
 

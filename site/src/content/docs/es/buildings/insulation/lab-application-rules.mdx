@@ -1,13 +1,19 @@
 ---
-title: "Trasdosados, revestimientos y lluvia (ISO 10140-1)"
-description: "Tres reglas de aplicación de laboratorio de ISO 10140-1:2021: la mejora que un trasdosado da a una pared (Anexo G), la que un revestimiento de suelo da a un suelo de referencia, suelos ligeros incluidos (Anexo H), y el ruido de la lluvia artificial sobre una cubierta o un lucernario (Anexo K), con las curvas de referencia de ISO 717 sobre las que se valoran."
+title: "Trasdosados, revestimientos, juntas, lluvia (ISO 10140-1)"
+description: "Cuatro reglas de aplicación de laboratorio de ISO 10140-1:2021: la mejora que un trasdosado da a una pared (Anexo G), la que un revestimiento de suelo da a un suelo de referencia, suelos ligeros incluidos, con el formulario de la Figura H.4 (Anexo H), el índice de reducción acústica de una junta sellada por metro con el formulario de la Figura J.7 (Anexo J), y el ruido de la lluvia artificial sobre una cubierta o un lucernario (Anexo K), con las curvas de referencia de ISO 717 sobre las que se valoran."
 references:
   - type: standard
     organization: "International Organization for Standardization"
     year: 2021
     title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products"
     designation: "ISO 10140-1:2021"
-    note: "Anexo G (trasdosados: ΔR, la condición de curado de G.4 y el informe de G.5), Anexo H (revestimientos de suelo: Fórmulas (H.1) a (H.3), las tres categorías de revestimiento y las posiciones de la máquina de impactos) y Anexo K (ruido de lluvia: Fórmulas (K.1) a (K.5) y los 18 C_j de la Tabla K.2). Tercera edición."
+    note: "Anexo G (trasdosados: ΔR, la condición de curado de G.4 y el informe de G.5), Anexo H (revestimientos de suelo: Fórmulas (H.1) a (H.3), las tres categorías de revestimiento, las posiciones de la máquina de impactos y el formulario de la Figura H.4), Anexo J (juntas: Fórmulas (J.1) y (J.2), el elemento de ensayo de J.2, las anchuras de rendija de J.4 y el formulario de la Figura J.7) y Anexo K (ruido de lluvia: Fórmulas (K.1) a (K.5) y los 18 C_j de la Tabla K.2). Tercera edición."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2021
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation"
+    designation: "ISO 10140-2:2021"
+    note: "El A.3, la corrección por la transmisión a través de la pared de relleno que el Anexo J aplica a una junta, y la Tabla A.1, el espectro típico de flancos de una abertura de ensayo pequeña. Segunda edición."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2021
@@ -19,7 +25,7 @@ references:
     year: 2020
     title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation"
     designation: "ISO 717-1:2020"
-    note: "El Anexo D valora un trasdosado sobre un elemento base normalizado (Fórmulas (D.1) a (D.4)); el Anexo E imprime las curvas de referencia de los tres elementos, Tabla E.1, con todas las magnitudes globales debajo."
+    note: "Los apartados 4.4 y 4.5 con el Anexo B valoran una junta, Rs,w (C; Ctr) con C100-5000 y Ctr,100-5000, también con sus bandas indicativas tomadas como infinitamente altas; el Anexo D valora un trasdosado sobre un elemento base normalizado (Fórmulas (D.1) a (D.4)); el Anexo E imprime las curvas de referencia de los tres elementos, Tabla E.1, con todas las magnitudes globales debajo."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2020
@@ -28,20 +34,23 @@ references:
     note: "Los apartados 5 y 6 valoran un revestimiento de suelo sobre el suelo de referencia pesado y sobre los ligeros; la Tabla 4 imprime las cuatro curvas de referencia; A.2.2 y A.2.3 dan los términos de adaptación CIΔ y CIΔ,t."
 ---
 
+import ReportPreview from '../../../../../components/ReportPreview.astro';
 import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 Casi toda ISO 10140 mide lo que un elemento *es*: el índice de reducción
-acústica de una pared, el nivel de impactos bajo un suelo. Tres de las reglas
+acústica de una pared, el nivel de impactos bajo un suelo. Cuatro de las reglas
 de aplicación de ISO 10140-1 miden otra cosa. El Anexo G mide lo que un
 **trasdosado** añade a la pared sobre la que se fija, el Anexo H lo que un
 **revestimiento de suelo** le quita al nivel de impactos del suelo sobre el que
-se coloca, y el Anexo K lo que la **lluvia** le hace a una cubierta, a una
-ventana de tejado o a un lucernario. Los dos primeros son productos que nunca
-se venden solos, así que el laboratorio mide el elemento dos veces, sin el
-producto y con él, y declara la diferencia. El tercero es una fuente de
+se coloca, el Anexo J lo que deja pasar una **junta**, metro a metro, y el
+Anexo K lo que la **lluvia** le hace a una cubierta, a una ventana de tejado o a
+un lucernario. Los dos primeros son productos que nunca se venden solos, así
+que el laboratorio mide el elemento dos veces, sin el producto y con él, y
+declara la diferencia. Una junta es una línea y no una superficie, y se mide en
+un elemento construido para ocultar todo lo demás. La lluvia es una fuente de
 impactos que cae del cielo en lugar de una máquina de impactos, así que el
 laboratorio tiene que fabricar su propia lluvia.
 
@@ -368,6 +377,281 @@ plt.show()
 
 </details>
 
+### El formulario de la Figura H.4
+
+H.6.3 imprime «un ejemplo del formulario para la expresión de los resultados»
+y permite copiarlo. `cover.report()` lo rellena: el fabricante y el producto,
+el cliente, la sala de ensayo, quién montó el elemento de ensayo, la fecha, la
+descripción de la instalación y del elemento, el tipo de suelo de referencia,
+la masa por unidad de superficie, el tiempo de curado, la temperatura y la
+humedad del aire en el recinto emisor y el volumen del recinto receptor; la
+tabla en tercios de octava de $L_\mathrm{n,0}$ y $\Delta L$ junto al diagrama de
+$\Delta L$, con el intervalo de frecuencias de la evaluación de ISO 717-2 en
+trazo discontinuo, como lo marca la clave 1 del formulario; y el índice, con los
+dos índices del suelo que pide H.5 i) a su lado. La identificación del producto
+y el tiempo de curado salen de los campos `product` y `curing_time_h` de
+`ReportMetadata`.
+
+```python
+from phonometry import ReportMetadata
+
+cover.report("covering.pdf", metadata=ReportMetadata(
+    manufacturer="Example floorings", product="Resilient vinyl, 4 mm",
+    mass_per_area=2.6, curing_time_h=0.0, source_temperature_c=21.2,
+    source_relative_humidity_percent=48.0, receiving_volume=58.0))
+```
+
+El formulario pide también $C_\mathrm{I,r,50\text{-}2500}$, un término del suelo
+de referencia con el revestimiento desde 50 Hz, que los suelos de referencia de
+la Tabla 4 de ISO 717-2:2020 no pueden dar: empiezan en 100 Hz (véase el
+[registro de erratas](/phonometry/es/reference/errata/)). La ficha lo dice
+donde iría el número.
+
+<ReportPreview
+	name="iso10140_1_floor_covering_example"
+	title="Informe de ejemplo de la Figura H.4 de ISO 10140-1 (PDF)"
+	description="El formulario de la Figura H.4 de ISO 10140-1:2021 relleno con el suelo y el revestimiento del Anexo C de ISO 717-2:2020: la cabecera con el fabricante, el producto, el tipo de suelo de referencia, la masa por unidad de superficie, el tiempo de curado y el clima del recinto emisor, la tabla de Ln,0 y delta L en tercios de octava junto al diagrama de delta L con el intervalo de la evaluación de ISO 717-2 en trazo discontinuo, delta Lw = 15 dB con CI,delta en un recuadro, los dos índices del suelo de H.5 i), la nota sobre CI,r,50-2500 y un veredicto CUMPLE."
+	caption="El formulario de la Figura H.4 (LabFloorCoveringImprovementResult.report), con delta Lw = 15 dB tal como lo imprime la Tabla C.2 de ISO 717-2:2020."
+/>
+
+## Juntas: el índice de reducción acústica por metro (Anexo J)
+
+Una junta es una línea, no una superficie: una rendija con o sin material de
+relleno, una espuma o una cinta de sellado entre dos elementos, la junta de
+estanqueidad del galce de una puerta o de una ventana. El Anexo J mide lo que
+deja pasar. La junta se monta en un elemento que aísla mucho más que ella, la
+diferencia de niveles se mide según ISO 10140-2 y el resultado se normaliza a un
+**metro** de junta en lugar de a un metro cuadrado de elemento,
+
+$$
+R_\mathrm{s} = L_1 - L_2 + 10 \lg \frac{S_\mathrm{n} l}{A l_\mathrm{n}}
+$$
+
+(Fórmula (J.1)), con la longitud de la junta $l$, el área de absorción
+equivalente $A$ del recinto receptor, $S_\mathrm{n} = 1$ m² y
+$l_\mathrm{n} = 1$ m. Una junta el doble de larga deja pasar el doble de
+potencia y baja 3 dB la diferencia de niveles; el término en $l$ devuelve esos
+3 dB, y queda un número que no depende de cuánta junta cupo en la abertura del
+laboratorio.
+
+```python
+# Una banda: 95 dB en el recinto emisor, 48,6 dB en el receptor, cuya área
+# de absorción es 12,4 m2, con 5,4 m de junta de galce en la abertura.
+r = building.joint_sound_reduction_index([95.0], [48.6], [12.4],
+                                         joint_length_m=5.4)
+print(np.round(r, 1))                          # [42.8]
+```
+
+### El elemento que rodea la junta entra en cada medición (J.1)
+
+Deje pasar lo que deje la junta, el elemento en el que está también deja pasar
+algo, y una buena junta de estanqueidad puede acercarse a ello. Por eso J.1
+pide el **máximo** del montaje, $R_\mathrm{s,max}$: la misma Fórmula (J.1)
+con la junta sellada por los dos lados, «por ejemplo con un sellante
+elástico». Salvo que el máximo quede al menos 10 dB por encima del índice
+medido $R_\mathrm{s}'$, el resultado se corrige con las reglas del A.3 de
+ISO 10140-2:2021, banda a banda, con $d = R_\mathrm{s,max} - R_\mathrm{s}'$:
+
+| Margen $d$ | $R_\mathrm{s}$ |
+| :--- | :--- |
+| 10 dB o más | $R_\mathrm{s}'$, sin corrección |
+| de 6 dB a 10 dB | $-10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$, Fórmula (J.2) |
+| menos de 6 dB | $R_\mathrm{s}' + 1{,}3$ dB, un valor mínimo |
+| menos de 3 dB | $\geq R_\mathrm{s,max}$, entre paréntesis |
+
+Los 1,3 dB son lo que da la Fórmula (J.2) con 6 dB, que es como lo dice el
+A.3. El propio A.3 deja de corregir un índice de reducción acústica a los
+15 dB y una diferencia de niveles normalizada de elemento a los 10 dB; el
+Anexo J escribe los 10 dB, que encajan con un índice normalizado a una
+longitud de referencia y no al área de la abertura, y son los que aplica la
+biblioteca. La última fila es exacta, no prudente: el montaje deja pasar la potencia
+del máximo sola, y la de la junta encima de ella cuando la junta está abierta,
+así que un índice medido a menos de 3 dB del máximo significa que la junta deja
+pasar menos que el elemento, y su propio índice está por encima de
+$R_\mathrm{s,max}$. J.1 permite ese límite inferior («puede tomarse»);
+`limit_at_maximum=False` da a esas bandas los 1,3 dB en su lugar.
+
+Una junta de galce de una puerta, medida frente a su montaje:
+
+```python
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
+                  63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
+r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
+                   45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
+seal = building.lab_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+print(seal.regime[-4:])
+# ('uncorrected', 'corrected', 'limit', 'maximum')
+print(np.round(seal.r_s_db[-4:], 1))           # [55.4 59.5 64.4 69. ]
+```
+
+Las magnitudes globales son las de ISO 717-1 sobre el índice corregido, y el
+formulario de la Figura J.7 pide además los términos de rango ampliado hasta
+5 000 Hz:
+
+```python
+rating = seal.rating
+print(rating.rating, rating.c, rating.ctr)               # 49 -1 -4
+print(seal.c_100_5000_db, seal.ctr_100_5000_db)           # 0 -4
+print(seal.max_rating.rating)                             # 61
+```
+
+Donde una banda está por encima de $R_\mathrm{s,max} - 3$ dB, solo dice que la
+junta es mejor de lo que el montaje puede mostrar. J.1 valora la curva una
+segunda vez con un índice infinitamente alto en esas **bandas indicativas**,
+que entonces no aportan desviación desfavorable ni energía, y si los dos
+índices difieren en más de 1 dB las magnitudes globales también van entre
+paréntesis. Aquí la única banda indicativa es 5 000 Hz, fuera del intervalo
+de evaluación, así que nada se mueve:
+
+```python
+print(seal.open_band_rating.open_frequencies_hz, seal.bracketed)  # (5000.0,) False
+```
+
+`seal.octave_bands()` promedia la potencia transmitida de los tres tercios de
+cada octava, el índice por octava que dibuja la Figura J.9.
+
+### El elemento de ensayo y la anchura de la rendija (J.2)
+
+J.2.1 pide una junta de más de 1 m de longitud y no más de 50 mm de anchura, y
+J.2.2 al menos 5,0 m de rendija entre las partes de una ventana o de una
+puerta, que pueden ser la suma de varias rendijas. La anchura de la rendija $b$
+se lee en cuatro posiciones o más, repartidas a lo largo de la junta, y las
+lecturas «no deben desviarse más de 0,3 mm; si no, se reajusta el montaje»; su
+media es la anchura de la rendija.
+
+```python
+check = building.check_joint_test_element(5.4, 5.0, window_or_door_gap=True)
+print(check.passes)                            # True
+gap = building.check_gap_width([5.1, 4.9, 5.0, 5.15, 4.95])
+print(round(gap.gap_width_mm, 2), round(gap.spread_mm, 2), gap.passes)
+# 5.02 0.25 True
+```
+
+La desviación se lee entre las lecturas, la mayor menos la menor: la frase
+podría querer decir también cada lectura frente a la media, lo que dejaría a
+las lecturas separarse el doble, y se comprueba la lectura más estricta. Los
+dos veredictos no tienen valor de verdad propio: se lee `.passes`.
+
+### Una rendija variable (J.4 y J.5)
+
+Una ventana o una puerta practicable no tiene una sola anchura de rendija, así
+que J.4 repite el ensayo en tres: la anchura nominal $b_\mathrm{n}$ que da el
+fabricante (5 mm si no da ninguna), la anchura mínima $b_\mathrm{min}$ bajo la
+presión máxima (normalmente una fuerza de 100 N por metro de junta) y
+$b_\mathrm{n} + 3$ mm. El informe da entonces cada magnitud global en función
+de la anchura de la rendija con la anchura nominal marcada (J.5.2 i)), y los
+resultados en $b_\mathrm{n}$ y $b_\mathrm{n} + 3$ son los que sirven para
+comparar productos (J.5.2 h)).
+
+```python
+loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
+        12.0: 13.0}                            # dB perdidos frente a 5 mm
+slope = np.linspace(0.6, 1.4, 18)              # y más en alta frecuencia
+results = [building.lab_joint_insulation(
+               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
+           for db in loss.values()]
+series = building.joint_gap_series(list(loss), results, minimum_gap_mm=3.0)
+print(series.r_s_w_ctr_db)        # [48. 47. 45. 43. 38. 33. 33.]
+print(series.at_gap(7.0), series.working_range_mm)        # 40.5 (5.0, 8.0)
+```
+
+`at_gap` lee la recta entre las dos anchuras medidas a cada lado, como la
+Figura J.8 dibuja «líneas trazadas por los resultados de medición», y nunca
+extrapola. Donde J.5.2 h) admite «un intervalo de anchuras distinto de 3 mm»,
+lee también las magnitudes globales en esa anchura; `working_range_mm` y la
+figura conservan los 3 mm en que mide J.4 c). `series.plot_octave_bands()`
+dibuja la Figura J.9: el índice por octava en cada anchura de rendija, bajo el
+elemento cerrado y sellado ($b = 0$) como $R_\mathrm{s,max}$, que según J.5.1
+la figura también da.
+
+`joint_gap_series` reúne cualquier conjunto de anchuras; si las tres de J.4
+están entre ellas es un veredicto aparte. J.4 no da tolerancia, así que una
+anchura a 0,3 mm o menos de la pedida, lo que J.2.2 deja separarse a las
+lecturas de una anchura de rendija, cuenta como esa anchura, y una serie que no
+nombra $b_\mathrm{min}$ no cumple J.4 b), porque nada muestra entonces cuál
+fue.
+
+```python
+widths = building.check_joint_gap_series(series)
+print(widths.nominal_measured, widths.minimum_measured,
+      widths.working_range_measured, widths.passes)     # True True True True
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/joint_insulation.svg" alt="Dos paneles para una junta de galce de EPDM de una puerta. A la izquierda: en 18 bandas de tercio de octava de 100 Hz a 5000 Hz, el máximo del montaje subiendo de 40 dB a 69 dB, el índice medido de la junta de 33 dB a 66 dB con una caída cerca de 1000 Hz, el índice corregido justo encima y la curva de referencia desplazada de ISO 717-1 de 100 Hz a 3150 Hz; las bandas de 4000 Hz y 5000 Hz están marcadas como valores mínimos; el título dice R s w (C; C tr) igual a 49 (menos 1; menos 4) dB. A la derecha: la magnitud global de tráfico R s A tr frente a la anchura de la rendija de 3 mm a 12 mm, bajando de 48 dB en 3 mm, por 45 dB en los 5 mm nominales, hasta 38 dB en 8 mm y 33 dB desde 10 mm, con el intervalo de trabajo de 5 mm a 8 mm sombreado y la anchura mínima de 3 mm marcada" width="100%" />
+
+*A la izquierda, la junta en su rendija nominal: el índice medido, el máximo
+del montaje por encima y el índice corregido, cuyas dos bandas superiores son
+valores mínimos porque la junta se acerca a menos de 6 dB y después a menos de
+3 dB de lo que el montaje puede mostrar. A la derecha, la misma junta en siete
+anchuras de rendija: se pierden 7 dB de $R_\mathrm{s,Atr}$ en los 3 mm del
+intervalo de trabajo desde la anchura nominal.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+r_max = np.array([40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7, 62.4,
+                  63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0])
+r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
+                   45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2])
+seal = building.lab_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
+loss = {3.0: -2.5, 4.0: -1.2, 5.0: 0.0, 6.0: 2.5, 8.0: 8.0, 10.0: 12.5,
+        12.0: 13.0}
+slope = np.linspace(0.6, 1.4, 18)
+results = [building.lab_joint_insulation(
+               np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
+           for db in loss.values()]
+series = building.joint_gap_series(list(loss), results, minimum_gap_mm=3.0)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
+seal.plot(ax=ax1, language="es")
+series.plot(ax=ax2, language="es")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+### El formulario de la Figura J.7
+
+J.5.1 imprime un formulario de muestra para el resultado y J.5.2 b) pide al
+informe «una hoja de datos con un diagrama que muestre el aislamiento acústico
+de las juntas en función de la frecuencia». `seal.report()` la escribe: la
+cabecera del formulario (cliente, elemento de ensayo, fecha, longitud de
+ensayo, pared de separación, ruido de ensayo, volúmenes de las salas, el índice
+de reducción acústica máximo de la junta, montaje y el clima de las dos
+salas), la tabla de $R_\mathrm{s}$ de 100 Hz a 5 000 Hz junto a su diagrama
+entre los 30 dB y 80 dB impresos, con `≥` delante de un valor mínimo y
+paréntesis alrededor del que se fija en el máximo, y la evaluación
+$R_\mathrm{s,w}$ ($C$; $C_\mathrm{tr}$), $C_{100\text{-}5000}$ y
+$C_\mathrm{tr,100\text{-}5000}$. Cuando J.1 pone las magnitudes globales
+entre paréntesis, las pone todas, y una nota da cada una valorada con las
+bandas indicativas abiertas, para que se vea cuál se ha movido. La pared de
+separación y el ruido de ensayo salen de los campos `separating_element` y
+`test_signal` de `ReportMetadata`; el clima, de los campos de cada recinto
+cuando se dan.
+
+```python
+seal.report("joint.pdf", metadata=ReportMetadata(
+    client="Example client", separating_element="Lead-lined filler wall",
+    test_signal="Pink noise", source_volume=53.0, receiving_volume=51.0))
+```
+
+<ReportPreview
+	name="iso10140_1_joint_example"
+	title="Informe de ejemplo de la Figura J.7 de ISO 10140-1 (PDF)"
+	description="El formulario de la Figura J.7 de ISO 10140-1:2021 para una junta de galce de EPDM: la cabecera con la longitud de ensayo, la pared de separación, el ruido de ensayo, los volúmenes de las salas y el índice de reducción acústica máximo del montaje, la tabla de Rs en tercios de octava de 100 Hz a 5000 Hz junto a su diagrama, con la banda de 4000 Hz como valor mínimo y la de 5000 Hz entre paréntesis en el máximo, Rs,w (C; Ctr) con C100-5000 y Ctr,100-5000 en un recuadro y un veredicto CUMPLE."
+	caption="El formulario de la Figura J.7 (LabJointInsulationResult.report), Rs,w (C; Ctr)."
+/>
+
 ## Lluvia sobre una cubierta (Anexo K)
 
 La lluvia es ruido de impactos. Se mide como el **nivel de intensidad
@@ -545,6 +829,17 @@ impactos. Se declaran la categoría, el elemento de ensayo, las posiciones, la
 carga, la temperatura del suelo, $\Delta L$ con su valor ponderado y su término
 de adaptación, y los dos índices de H.5 i).
 
+**Una junta.** Se construye la junta en un elemento que aísle mucho más que
+ella, de más de 1 m de longitud y no más de 50 mm de anchura (5,0 m para una
+rendija entre las partes de una ventana o de una puerta), se lee la anchura de
+la rendija en cuatro posiciones o más y se miden $L_1$, $L_2$ y el tiempo de
+reverberación según ISO 10140-2. Se sella la junta por los dos lados y se mide
+del mismo modo el máximo del montaje. Una rendija variable se mide además en
+su anchura mínima bajo carga y en su anchura nominal más 3 mm. Se declaran el
+máximo, la hoja de datos de la Figura J.7 para cada anchura de rendija, el
+elemento de ensayo y la sección con su anchura de rendija, y las magnitudes
+globales frente a la anchura de la rendija (J.5.2).
+
 **Lluvia.** Se instala el elemento de ensayo con su pendiente (al menos 5° para
 cubiertas y lucernarios, 30° para ventanas de tejado) en un hueco de 10 m² a
 20 m², o una ventana de tejado en un cerramiento pesado de relleno; se
@@ -557,7 +852,7 @@ de decibelio y los totales ponderados A (K.5).
 
 ## Verificarlo
 
-Las tablas y los ejemplos impresos de los tres anexos, y las tablas en que se
+Las tablas y los ejemplos impresos de los cuatro anexos, y las tablas en que se
 apoyan, son filas de conformidad:
 
 - Las **curvas de referencia, banda a banda**: los 63 valores de la Tabla E.1
@@ -608,6 +903,20 @@ apoyan, son filas de conformidad:
   sus términos lejos de cero, y las formas cerradas de las Fórmulas (D.4) y
   (K.4).
 
+- El **Anexo J** en sus números impresos: la corrección fija de 1,3 dB por
+  debajo de un margen de 6 dB es la Fórmula (J.2) con 6 dB hasta el decimal
+  impreso, como dice el A.3 de ISO 10140-2:2021 que le corresponde, y la
+  biblioteca aplica justo eso por debajo; el límite inferior que J.1 imprime
+  como ejemplo, $R_\mathrm{s} \geq 50{,}4$ dB entre paréntesis; y el espectro típico de
+  flancos de la Tabla A.1 de ISO 10140-2:2021 llevado por la entrada de juntas,
+  valorado en 59 ($-2$; $-7$) dB tal como está impreso. Después, la
+  Fórmula (J.1) con todos sus términos lejos de cero, los límites de J.2.1 y
+  J.2.2 en sus valores impresos, cada uno incluido o excluido como dice el
+  texto, las tres anchuras de rendija de J.4 con los 5 mm que se toman cuando
+  no se conoce la anchura nominal y los 3 mm por encima, y la valoración con
+  bandas abiertas comprobada a mano frente a los apartados 4.4 y 4.5 de
+  ISO 717-1.
+
 La lluvia no tiene ejemplo resuelto en ninguna de las dos normas, así que las
 Fórmulas (K.1) a (K.5) se comprueban en forma cerrada y no frente a un
 resultado impreso. Las Tablas H.1 e I.1 se leyeron en las páginas de la
@@ -632,6 +941,16 @@ frecuencia, donde un revestimiento elástico trabaja mejor; las de madera lo son
 por debajo de 400 Hz, donde apenas trabaja. Una $\Delta L_\mathrm{w}$ medida
 sobre hormigón solo vale para suelos macizos (apartado 5.4 de ISO 717-2:2020).
 
+### ¿Por qué una banda de mi junta va entre paréntesis?
+
+Porque la junta quedó a menos de 3 dB de lo que el montaje puede mostrar en
+ella, así que la medición solo dice que la junta es mejor que
+$R_\mathrm{s,max}$: la banda se declara como
+$(R_\mathrm{s} \geq R_\mathrm{s,max})$. Una pared de relleno mejor o un mejor
+sellado en la medición del máximo suben el máximo y convierten la banda en un
+número. Si esas bandas mueven además las magnitudes globales en más de 1 dB,
+las magnitudes globales también van entre paréntesis (J.1).
+
 ### ¿Necesito el vidrio de referencia para declarar el ruido de lluvia?
 
 El nivel de intensidad $L_I$ y $L_{I\mathrm{A}}$ se declaran sin él. Los niveles
@@ -654,8 +973,21 @@ condición de curado de G.4. Anexo H: $\Delta L$ de la Fórmula (H.1), los valor
 por octava de la Fórmula (H.2), las reducciones ponderadas $\Delta L_\mathrm{w}$
 y $\Delta L_\mathrm{t,n,w}$ con $C_{\mathrm{I}\Delta}$ y
 $C_{\mathrm{I}\Delta,\mathrm{t}}$ sobre los cuatro suelos de referencia
-(apartados 5 y 6, A.2.2 y A.2.3 de ISO 717-2:2020), los dos índices de H.5 i) y
-la mejora con impacto pesado y blando de la Fórmula (H.3). Anexo K: las
+(apartados 5 y 6, A.2.2 y A.2.3 de ISO 717-2:2020), los dos índices de H.5 i),
+la mejora con impacto pesado y blando de la Fórmula (H.3) y el formulario de la
+Figura H.4 como PDF con `.report()`. Anexo J: el índice de reducción acústica
+de juntas por metro de la Fórmula (J.1), la corrección por el montaje de ensayo
+de la Fórmula (J.2) con las reglas del A.3 de ISO 10140-2:2021 (sin corrección
+desde 10 dB, los 1,3 dB fijos por debajo de 6 dB, el límite inferior en
+$R_\mathrm{s,max}$ por debajo de 3 dB), las magnitudes globales de ISO 717-1
+con $C_{100\text{-}5000}$ y $C_\mathrm{tr,100\text{-}5000}$, la valoración con
+las bandas indicativas infinitamente altas y la regla de los paréntesis de
+1 dB, la longitud y la anchura del elemento de ensayo (J.2.1, J.2.2), las
+lecturas de la anchura de la rendija (J.2.2), las anchuras de una rendija
+variable con la comprobación de que se midieron las tres de J.4 y las
+magnitudes globales frente a la anchura (J.4, J.5.2 h) e i),
+Figuras J.8 y J.9) y el formulario de la Figura J.7 como PDF con `.report()`.
+Anexo K: las
 Fórmulas (K.1) a (K.5), los 18 $C_j$ de la Tabla K.2, las tres posiciones del
 generador, la corrección por ruido de fondo, las clases de lluvia de la
 Tabla K.1, las lluvias artificiales y sus tolerancias de las Tablas H.1 y H.2
@@ -666,28 +998,28 @@ ISO 717-2:2020 se publican como tablas de solo lectura.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-Los requisitos de montaje, de elemento de ensayo y de procedimiento de los tres
-anexos están documentados arriba y solo se comprueban donde G.4 y el H.1 de
-ISO 10140-5 ponen un veredicto: nada comprueba la categoría del revestimiento,
-el tamaño de los elementos de ensayo, el número y la colocación de las
-posiciones de la máquina de impactos, la carga, la temperatura del suelo, la
-pendiente de una cubierta ni los 5 min de lluvia estable. La maqueta de madera
-de H.6.2 no tiene curva de referencia propia. El formulario de la Figura H.4
-pide un $C_{\mathrm{I,r,50\text{–}2500}}$ que el suelo de referencia no puede
-dar, porque la Tabla 4 empieza en 100 Hz (anotado en el
-[registro de erratas](/phonometry/es/reference/errata/)); el término de rango
-ampliado del propio suelo desnudo sale de `weighted_impact_rating_extended`.
-Ningún resultado de los tres anexos genera una ficha de informe: el formulario
-de ejemplo de la Figura H.4 no se produce como PDF con `.report()`, como sí
-ocurre con las mediciones de ISO 10140-2 e ISO 10140-3 y con ISO 16251-1. Las mediciones
-de las que parten estos anexos, $R$, $L_\mathrm{n}$ y los tiempos de
-reverberación, son las de
+Los requisitos de montaje, de elemento de ensayo y de procedimiento de los
+cuatro anexos están documentados arriba y solo se comprueban donde G.4, J.2 y el
+H.1 de ISO 10140-5 ponen un veredicto: nada comprueba la categoría del
+revestimiento, el tamaño de los elementos de ensayo, el número y la colocación
+de las posiciones de la máquina de impactos, la carga, la temperatura del suelo,
+la pendiente de una cubierta ni los 5 min de lluvia estable, y en una junta nada
+comprueba la sección uniforme, la forma de la Figura J.1, que las lecturas de la
+rendija estén repartidas, la fuerza de 100 N/m de la anchura mínima ni el tiempo
+que tarda en expandirse una cinta de sellado. Un intervalo de trabajo distinto
+de los 3 mm de J.4, que J.5.2 h) admite para comparar, se lee con `at_gap` pero
+no se dibuja. La maqueta de madera de H.6.2 no
+tiene curva de referencia propia. El formulario de la Figura H.4 pide un
+$C_{\mathrm{I,r,50\text{–}2500}}$ que el suelo de referencia no puede dar,
+porque la Tabla 4 empieza en 100 Hz (anotado en el
+[registro de erratas](/phonometry/es/reference/errata/)); la ficha lo dice en su
+lugar, y el término de rango ampliado del propio suelo desnudo sale de
+`weighted_impact_rating_extended`. Las mediciones de las que parten estos
+anexos, $R$, $L_\mathrm{n}$ y los tiempos de reverberación, son las de
 [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
 y los demás anexos de ISO 10140-1 son reglas de montaje para ese $R$ y ese
 $L_\mathrm{n}$ (paredes, puertas, ventanas, acristalamientos, elementos técnicos
-pequeños, suelos, persianas), salvo el Anexo J, cuyo índice de reducción
-acústica de una junta sellada por metro, el $R_\mathrm{s}$ de las
-Fórmulas (J.1) y (J.2), no está implementado.
+pequeños, suelos, persianas).
 </ScopeClaim>
 </Scope>
 
@@ -711,6 +1043,7 @@ Fórmulas (J.1) y (J.2), no está implementado.
   el método de intensidad que admite K.4.3 para la lluvia.
 - Referencia de la API:
   [`building.measurement.lab_improvement`](/phonometry/es/reference/api/building/lab-improvement/),
+  [`building.measurement.joint_insulation`](/phonometry/es/reference/api/building/joint-insulation/),
   [`building.measurement.rainfall_sound`](/phonometry/es/reference/api/building/rainfall-sound/)
   y [`building.measurement.ratings`](/phonometry/es/reference/api/building/ratings/).
 

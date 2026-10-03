@@ -521,6 +521,94 @@ def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
     return result, metadata, "iso16251_floor_covering_example.pdf"
 
 
+def _floor_covering_form_example() -> tuple[object, ReportMetadata, str]:
+    """The form of ISO 10140-1:2021 Figure H.4: a floor covering on concrete.
+
+    Both spectra are printed ones. The bare floor is the normalized impact
+    sound pressure level of ISO 717-2:2020 Annex C, Table C.1 (Ln,w = 79 dB,
+    CI = -11 dB), and the improvement is the one of its Table C.2, which
+    ISO 717-2 rates at ΔLw = 15 dB; the sheet prints that number. Its
+    adaptation term comes out -9 dB on the Table 4 reference floor, where the
+    example's own chain gives -8 dB (docs/ERRATA.md). Table C.2 is printed from
+    100 Hz to 3 150 Hz, so the form's table carries those 16 bands.
+    """
+    bare = np.array(
+        [62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1]
+        + [73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2]
+    )
+    delta_l = np.array(
+        [3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1]
+        + [6.7, 7.0, 7.7, 10.8, 15.2, 20.3, 25.4, 23.2]
+    )
+    result = ph.building.lab_floor_covering_improvement(
+        bare, bare - delta_l, _RATING_FREQS
+    )
+    metadata = ReportMetadata(
+        manufacturer="Example floorings",
+        product="Resilient vinyl on felt backing, 4 mm",
+        client="Example client",
+        test_room="Floor transmission suite (example)",
+        mounted_by="Example laboratory",
+        test_date="2026-10-01",
+        specimen="Category I covering, three specimens of 650 mm x 350 mm laid "
+        "loose on the 140 mm concrete reference floor",
+        mass_per_area=2.6,
+        curing_time_h=0.0,
+        source_temperature_c=21.2,
+        source_relative_humidity_percent=48.0,
+        receiving_volume=58.0,
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10140-1-H",
+        requirement=15.0,
+    )
+    return result, metadata, "iso10140_1_floor_covering_example.pdf"
+
+
+def _joint_form_example() -> tuple[object, ReportMetadata, str]:
+    """The form of ISO 10140-1:2021 Figure J.7: a rebate seal per metre.
+
+    An EPDM rebate seal on a door leaf at its nominal gap of 5 mm, 5,4 m of
+    seal in the test opening, measured against the maximum of the arrangement
+    with the gap sealed on both sides. Above 3 150 Hz the seal reaches within
+    a few decibels of that maximum, so the 4 000 Hz band carries the fixed
+    1,3 dB correction as a minimum value and the 5 000 Hz band is set to the
+    maximum itself, in brackets (J.1). The same seal is the one the guide's
+    figure draws.
+    """
+    maximum = np.array(
+        [40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7]
+        + [62.4, 63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0]
+    )
+    seal = np.array(
+        [33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0]
+        + [46.2, 45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2]
+    )
+    result = ph.building.lab_joint_insulation(
+        seal, maximum, _FLANKING_FREQS, joint_length_m=5.4
+    )
+    metadata = ReportMetadata(
+        client="Example client",
+        specimen="EPDM rebate seal on a door leaf, nominal gap 5 mm",
+        test_date="2026-10-01",
+        separating_element="Lead-lined filler wall with the specific small "
+        "test opening of ISO 10140-5",
+        test_signal="Pink noise",
+        source_volume=53.0,
+        receiving_volume=51.0,
+        mounting="Seal on the frame rebate, leaf closed to the nominal gap",
+        source_temperature_c=21.0,
+        source_relative_humidity_percent=45.0,
+        receiving_temperature_c=20.5,
+        receiving_relative_humidity_percent=47.0,
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10140-1-J",
+        requirement=45.0,
+    )
+    return result, metadata, "iso10140_1_joint_example.pdf"
+
+
 #: One-third-octave centre frequencies of the ISO 10848 mandatory range,
 #: 100 Hz to 5000 Hz (18 bands, Part 1 Clause 7.5), in Hz.
 _FLANKING_FREQS = np.array(

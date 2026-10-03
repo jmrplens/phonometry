@@ -19,6 +19,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
@@ -44,7 +45,7 @@ from ._layout import (
 from .iso717 import _Y_TOP_AIRBORNE, _Y_TOP_IMPACT, _metadata_pairs
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
     from matplotlib.axes import Axes
     from reportlab.platypus import Table
@@ -55,8 +56,16 @@ if TYPE_CHECKING:
     )
     from .metadata import ReportMetadata
 
-#: A per-band table column: header markup, values and decimal places.
-Column = tuple[str, np.ndarray, int]
+#: Cell padding, font size and leading of a compact band table, in points
+#: (the regular table pads 2,6 pt and sets 8 pt type).
+_COMPACT_PADDING_PT = 0.8
+_COMPACT_FONT_PT = 7.4
+_COMPACT_LEADING_PT = 8.6
+
+#: A per-band table column: header markup, values and decimal places. The
+#: values are numbers formatted to that many decimals in the fiche language,
+#: or cells already written as text (a minimum value printed with its sign).
+Column = tuple[str, "np.ndarray | Sequence[str]", int]
 
 
 #: Builder of the left-hand table content for one report: given the reported
@@ -138,6 +147,8 @@ def band_value_table(
     columns: Sequence[Column],
     language: str,
     col_widths: list[float] | None = None,
+    *,
+    compact: bool = False,
 ) -> Table:
     """Build the left-hand per-band table.
 
@@ -170,10 +181,25 @@ def band_value_table(
     for k, fk in enumerate(centers):
         row: list[Any] = [f"{round(fk)}"]
         for _, values, decimals in columns:
-            row.append(format_number(float(values[k]), language, decimals=decimals))
+            cell = values[k]
+            row.append(
+                cell
+                if isinstance(cell, str)
+                else format_number(float(cell), language, decimals=decimals)
+            )
         rows.append(row)
 
-    return band_table(rows, widths, len(centers), band_centres=centers)
+    extra = None
+    if compact:
+        # Tighter rows: a form that tabulates 50 Hz to 5000 Hz under a long
+        # header still has to come to one page.
+        extra = [
+            ("FONTSIZE", (0, 1), (-1, -1), _COMPACT_FONT_PT),
+            ("LEADING", (0, 1), (-1, -1), _COMPACT_LEADING_PT),
+            ("TOPPADDING", (0, 1), (-1, -1), _COMPACT_PADDING_PT),
+            ("BOTTOMPADDING", (0, 1), (-1, -1), _COMPACT_PADDING_PT),
+        ]
+    return band_table(rows, widths, len(centers), extra, band_centres=centers)
 
 
 def iso717_columns_builder(
@@ -267,16 +293,12 @@ def render_insulation_fiche(
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
+    # The columns callback imports reportlab before the page is composed, so
+    # the actionable hint is raised here, ahead of it.
     try:
-        from reportlab.lib import colors
-        from reportlab.lib.styles import ParagraphStyle
-        from reportlab.lib.units import mm
-        from reportlab.platypus import Spacer
-
-        from ._layout import fiche_paragraph
+        import reportlab  # noqa: F401
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
-    accent = colors.HexColor(_ACCENT_HEX)
 
     # Guard a manually constructed rating: its quantity must match the reported
     # result, and it must carry the per-band arrays the table and plot consume
@@ -311,22 +333,12 @@ def render_insulation_fiche(
         "band",
     )
 
-    styles, title_style, basis_style, caption_style = document_styles(accent)
-    title_text = t(spec["title"], language)
-    flow: list[Any] = [
-        fiche_paragraph(title_text, title_style),
-        fiche_paragraph(t(spec["basis"], language), basis_style),
-    ]
-
     # Metadata header block (only the supplied fields; the same grid the two
     # sound-insulation families share, both describing rooms and a specimen).
+    header_pairs: list[tuple[str, str]] = []
     if metadata is not None and not metadata.is_empty():
         identity, conditions = _metadata_pairs(metadata, language)
         header_pairs = identity + conditions
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
 
     # Left panel: the report-specific table content; right panel: the rating's
     # own measured-versus-shifted-reference curve.
@@ -334,25 +346,186 @@ def render_insulation_fiche(
     columns, caption, col_widths = build_columns(
         value_header, curve, verbose=verbose, language=language
     )
-    value_table = band_value_table(centers, columns, language, col_widths)
-    left_cell = [fiche_paragraph(caption, caption_style), value_table]
 
     def _plot(ax: Axes | None = None, language: str = language) -> Axes:
         axes = rating.plot(ax=ax, language=language)
         axes.set_ylabel(t(spec["ylabel"], language))
         return axes
 
-    y_top = _Y_TOP_IMPACT if is_impact else _Y_TOP_AIRBORNE
-    plot_drawing = render_figure_drawing(
-        _plot, 116 * mm, y_top=y_top, expand_step=10.0, language=language
+    verdict: tuple[str, bool] | None = None
+    if metadata is not None and metadata.requirement is not None:
+        verdict = requirement_verdict(
+            rating, rating_symbol, metadata.requirement, language
+        )
+    return compose_insulation_fiche(
+        path,
+        title=t(spec["title"], language),
+        basis=t(spec["basis"], language),
+        header_pairs=header_pairs,
+        table=BandTable(
+            centers=centers, columns=columns, caption=caption, col_widths=col_widths
+        ),
+        plot=FichePlot(
+            draw=_plot,
+            y_top=_Y_TOP_IMPACT if is_impact else _Y_TOP_AIRBORNE,
+            expand_step=10.0,
+        ),
+        result=ResultBlock(
+            box=single_number_statement(rating, rating_symbol),
+            statement=t(spec["statement"], language),
+            verdict=verdict,
+        ),
+        metadata=metadata,
+        language=language,
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
+
+
+@dataclass(frozen=True)
+class BandTable:
+    """The left panel of a band fiche: the per-band table and its caption.
+
+    :ivar centers: Band centre frequencies, in Hz, one table row each.
+    :ivar columns: The columns after the frequency column.
+    :ivar caption: The caption above the table (already translated).
+    :ivar col_widths: Explicit column widths for a multi-column table, or
+        ``None`` for the two-column ``f | value`` form.
+    :ivar compact: Set the rows tighter, for a table of 50 Hz to 5000 Hz
+        under a long header.
+    """
+
+    centers: np.ndarray
+    columns: Sequence[Column]
+    caption: str
+    col_widths: list[float] | None = None
+    compact: bool = False
+
+
+@dataclass(frozen=True)
+class FichePlot:
+    """The right panel of a band fiche: the result's own plot and its axis.
+
+    :ivar draw: Called with ``ax=`` and ``language=``; draws the plot.
+    :ivar y_top: Fixed top of a 0-based y-axis, or ``None`` to keep the
+        plot's own limits (see :func:`._layout.render_figure_drawing`).
+    :ivar expand_step: Raise ``y_top`` to the next multiple of this step when
+        the data exceeds it, or ``None``.
+    :ivar figsize: Matplotlib figure size ``(width, height)`` in inches, or
+        ``None`` for the default portrait panel; a form whose header grid is
+        long draws a shorter panel to keep to one page.
+    """
+
+    draw: Callable[..., Axes]
+    y_top: float | None
+    expand_step: float | None = None
+    figsize: tuple[float, float] | None = None
+
+
+@dataclass(frozen=True)
+class ResultBlock:
+    """The block under the two panels of a band fiche: what the test found.
+
+    :ivar box: The boxed single-number statement.
+    :ivar statement: The method statement under the box (translated).
+    :ivar extended: Further terms printed beside the boxed statement, or
+        ``None``.
+    :ivar verdict: ``(text, passed)`` of a requirement verdict, or ``None``.
+    """
+
+    box: str
+    statement: str
+    extended: list[str] | None = None
+    verdict: tuple[str, bool] | None = None
+
+
+def compose_insulation_fiche(
+    path: str,
+    *,
+    title: str,
+    basis: str,
+    header_pairs: list[tuple[str, str]],
+    table: BandTable,
+    plot: FichePlot,
+    result: ResultBlock,
+    metadata: ReportMetadata | None,
+    language: str,
+    left_width_mm: float = 56.0,
+    plot_width_mm: float = 118.0,
+) -> str:
+    """Lay out and write a one-page band fiche from its prepared parts.
+
+    The skeleton every sound-insulation sheet shares: the title and basis
+    line, the header grid, the per-band table beside the plot, the boxed
+    single numbers (with an optional column of further terms), the method
+    statement, the optional verdict and the footer. :func:`render_insulation_fiche`
+    prepares the parts from an ISO 717 rating; the forms of ISO 10140-1
+    (Figures H.4 and J.7) prepare their own, so all of them print the same way.
+
+    :param path: Destination path of the PDF file.
+    :param title: The title (translated).
+    :param basis: The standard-basis line (translated).
+    :param header_pairs: The ``(label, value)`` pairs of the header grid; an
+        empty list leaves it out.
+    :param table: The per-band table of the left panel.
+    :param plot: The plot of the right panel.
+    :param result: The boxed single numbers with any further terms beside
+        them, the method statement and the optional verdict, under the two
+        panels.
+    :param metadata: The metadata whose identity block the footer prints.
+    :param language: ``"en"`` or ``"es"``.
+    :param left_width_mm: Width of the table panel, in mm.
+    :param plot_width_mm: Width of the plot panel, in mm (the two sum to the
+        174 mm content width).
+    :return: The written ``path`` as a :class:`str`.
+    :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
+        installed.
+    """
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import Spacer
+
+        from ._layout import fiche_paragraph
+    except ImportError as exc:
+        raise ImportError(_REPORTLAB_HINT) from exc
+    accent = colors.HexColor(_ACCENT_HEX)
+
+    styles, title_style, basis_style, caption_style = document_styles(accent)
+    flow: list[Any] = [
+        fiche_paragraph(title, title_style),
+        fiche_paragraph(basis, basis_style),
+    ]
+    if header_pairs:
+        flow.extend([Spacer(1, 3), grid_table(header_pairs)])
     flow.append(Spacer(1, 8))
 
-    # Boxed single-number rating, the method statement, optional verdict row
-    # and the footer.
-    flow.append(
-        result_box(single_number_statement(rating, rating_symbol), styles, accent)
+    value_table = band_value_table(
+        table.centers,
+        table.columns,
+        language,
+        table.col_widths,
+        compact=table.compact,
+    )
+    left_cell = [fiche_paragraph(table.caption, caption_style), value_table]
+    plot_drawing = render_figure_drawing(
+        plot.draw,
+        (plot_width_mm - 2.0) * mm,
+        y_top=plot.y_top,
+        expand_step=plot.expand_step,
+        figsize=plot.figsize,
+        language=language,
+    )
+    flow.extend(
+        [
+            two_panel_body(
+                left_cell,
+                plot_drawing,
+                left_width_mm=left_width_mm,
+                plot_width_mm=plot_width_mm,
+            ),
+            Spacer(1, 8),
+            result_box(result.box, styles, accent, result.extended),
+        ]
     )
     statement_style = ParagraphStyle(
         "insulation_statement",
@@ -361,14 +534,12 @@ def render_insulation_fiche(
         textColor=colors.HexColor(_MUTED_HEX),
         spaceBefore=4,
     )
-    flow.append(fiche_paragraph(t(spec["statement"], language), statement_style))
-    if metadata is not None and metadata.requirement is not None:
-        text, passed = requirement_verdict(
-            rating, rating_symbol, metadata.requirement, language
-        )
+    flow.append(fiche_paragraph(result.statement, statement_style))
+    if result.verdict is not None:
+        text, passed = result.verdict
         flow.extend(
             verdict_flow(text=text, passed=passed, styles=styles, language=language)
         )
     flow.extend(footer_flow(metadata, language))
 
-    return build_document(path, flow, title_text)
+    return build_document(path, flow, title)

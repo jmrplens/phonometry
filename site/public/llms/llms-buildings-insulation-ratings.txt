@@ -461,7 +461,7 @@ sources it rates, in
 
 ## See also
 
-- [Linings, Floor Coverings and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
   the improvements $\Delta R_\mathrm{w}$ and $\Delta L_\mathrm{w}$ rated on
   the reference curves of ISO 717-1 Table E.1 and ISO 717-2 Table 4.
 - [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/): the

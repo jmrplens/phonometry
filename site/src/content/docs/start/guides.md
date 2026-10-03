@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 163 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 164 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and sixty-three guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and sixty-four guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -543,6 +543,7 @@ ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 and ISO 12999-2.
 - [Metamaterial Absorbers](/phonometry/materials/absorbers/metamaterial-absorbers/): the
   critical-coupling condition for perfect absorption and the slow-sound slit
   panel loaded by Helmholtz resonators, with its design solver.
+
 **[Diffusers and surfaces](/phonometry/materials/diffusers/)**
 
 - [Diffusers and Their Coefficients](/phonometry/materials/diffusers/diffusers/): the
@@ -816,7 +817,7 @@ Sound power, intensity, emission declarations, electroacoustics and programme
 loudness. What a source emits rather than what a receiver gets, plus the
 electroacoustic chain that reproduces or measures it. Implements ISO 3741,
 ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 26101, ISO 6926, ISO 9614-1/-2/-3,
-IEC 61043, ISO 4871, IEC 60268-3/-4/-5, IEC 60118-4, IEC 62489-1, ITU-R BS.1770-5
+IEC 61043, ISO 4871, IEC 60268-1/-3/-4/-5/-7, IEC 60118-4, IEC 62489-1, ITU-R BS.1770-5
 and EBU R 128.
 
 **[Sound power and intensity](/phonometry/devices/emission/)**
@@ -888,6 +889,12 @@ and EBU R 128.
   hearing loops for telecoil listeners: the 400 mA/m reference, the field of a
   loop by Biot-Savart, the loop as a load, the verdicts on a room, a refuge and
   a counter, the overload test, the amplifier and the neck loop.
+- [Headphones and Earphones (IEC 60268-7)](/phonometry/devices/electroacoustics/headphones/):
+  the simulated programme signal of IEC 60268-1, the classification code, the
+  rated impedance, the characteristic voltages and working levels, the
+  protective device, the coupler, comparison and ear canal responses, and the
+  probe microphone of Annex B.
+
 **[Broadcast](/phonometry/devices/broadcast/)**
 
 - [Programme loudness and true peak](/phonometry/devices/broadcast/program-loudness/):

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1851 numerical conformance checks against 520 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1877 numerical conformance checks against 521 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1851 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 110 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1877 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -358,6 +358,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Microphone Characterisation (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/)
 - [Swept-sine distortion and phase utilities (Farina / Novak)](https://jmrplens.github.io/phonometry/devices/electroacoustics/swept-sine-distortion/)
 - [Audio-Frequency Induction Loops (IEC 60118-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/induction-loops/)
+- [Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/)
 
 ### Broadcast
 
@@ -534,6 +535,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [building/uncertainty](https://jmrplens.github.io/phonometry/reference/api/building/uncertainty/)
 - [electroacoustics/distortion](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/distortion/)
 - [electroacoustics/frequency-response](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/frequency-response/)
+- [electroacoustics/headphones](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/headphones/)
 - [electroacoustics/induction-loop](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/induction-loop/)
 - [electroacoustics/induction-loop-components](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/induction-loop-components/)
 - [electroacoustics/intermodulation](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/intermodulation/)
@@ -541,6 +543,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [electroacoustics/microphone](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/microphone/)
 - [electroacoustics/noise-measurements](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/noise-measurements/)
 - [electroacoustics/piston](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/piston/)
+- [electroacoustics/programme-signal](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/programme-signal/)
 - [electroacoustics/sound-reinforcement](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/sound-reinforcement/)
 - [electroacoustics/swept-sine](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/swept-sine/)
 - [environment/acoustic-roughness](https://jmrplens.github.io/phonometry/reference/api/environment/acoustic-roughness/)
@@ -17799,6 +17802,584 @@ full DIM test-signal synthesis, and a known LTI path).
 ---
 
 
+<!-- source: docs/devices/electroacoustics/headphones.md | canonical: https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/ -->
+Source: https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/
+
+# Headphones and Earphones (IEC 60268-7)
+
+A headphone is measured on an ear simulator, a coupler or a head and torso
+simulator, never in a room, so the questions IEC 60268-7 asks are about the
+transducer and the voltage that drives it: what impedance it presents, what
+e.m.f. makes it produce 94 dB, how much it can take, how its response looks on
+a coupler and to a panel of listeners. Several of those answers are given with
+a noise that stands in for programme, the **simulated programme signal** of
+IEC 60268-1. This guide builds that signal first, from its table and from the
+filter the standard draws, and then walks a 32 Ω moving-coil headphone through
+the characteristics of IEC 60268-7 that are computations: the code that names
+it, its rated impedance, its voltages, powers and levels, its protective
+device, its frequency responses, its distortion test signals and the probe
+microphone that measures it in the ear canal.
+
+## 1. The simulated programme signal (IEC 60268-1 Clause 7)
+
+Clause 7 defines a stationary Gaussian noise whose power spectrum, read in
+one-third-octave bands, follows **Table II**: 0 dB from 250 Hz to 800 Hz,
+falling to −13.5 dB at 20 Hz and −21.6 dB at 20 kHz, with tolerances of
+±0.5 dB in the middle widening to ±3 dB at the ends. The table is relative:
+its 0 dB is the level of one band, and the Note under the clause states the
+whole signal as "approximately 12.5 dB higher". It is the power sum of the 31
+bands.
+
+```python
+import numpy as np
+from phonometry import electroacoustics
+from phonometry.filters import octave_filter
+
+table = electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
+levels = np.array([band.relative_level_db for band in table.values()])
+print(len(table), table[20.0].relative_level_db, table[20000.0].relative_level_db)
+# 31 -13.5 -21.6
+print(round(10 * np.log10(np.sum(10 ** (levels / 10))), 2))  # 12.56
+```
+
+"Such a signal may be obtained from a pink-noise source by means of the
+filter circuit shown in Figure 2": a passive ladder of 430 Ω and 2.2 µF into
+3.3 kΩ and 91 nF, then 330 Ω and 2.2 µF into 3.3 kΩ and 68 nF, then 0.47 µF
+into 10 kΩ. `programme_signal_filter` is its exact transfer function, about
+−4 dB in the passband. Pink noise through it lands inside every tolerance of
+Table II, but closely: in ideal bands the smallest margin is 0.18 dB, at
+400 Hz on one side and 5 kHz on the other, so a short record can fall outside.
+`simulated_programme_signal` therefore offers two shapes. The default puts
+every band on its printed level: a spectrum straight in decibels between the
+band centres, with its nodes fitted so that each band, integrated in closed
+form, is exactly the table. `spectrum="figure_2"` is the circuit.
+
+`check_programme_signal` judges band levels against Table II. Since the table
+is relative, it looks for the level that places every band inside its window
+and passes when one exists; it reports the margin and the bands that bind.
+
+```python
+fs = 48000
+x = electroacoustics.simulated_programme_signal(fs, 60.0, spectrum="figure_2", seed=2)
+bands = octave_filter(x, fs, fraction=3, limits=[19.95, 19952.6])
+check = electroacoustics.check_programme_signal(bands.frequencies, bands.levels)
+print(check.passes, round(check.margin_db, 2), check.binding_bands_hz)
+# True 0.12 (315.0, 5000.0)
+
+y = electroacoustics.simulated_programme_signal(fs, 60.0, seed=2)
+bands_y = octave_filter(y, fs, fraction=3, limits=[19.95, 19952.6])
+check_y = electroacoustics.check_programme_signal(bands_y.frequencies, bands_y.levels)
+print(check_y.passes, round(check_y.margin_db, 2))  # True 0.34
+```
+
+With the same seed, the table's own shape keeps 0.34 dB of margin and the
+circuit 0.12 dB: the circuit has spent most of its margin before the record
+adds its own fluctuation.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_programme_signal_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_programme_signal.svg" alt="Two panels of one-third-octave band levels from 20 Hz to 20 kHz, each referred to the level that centres it in the tolerances of Table II of IEC 60268-1, drawn over the table's relative levels and their shaded tolerance band. Left, sixty seconds of pink noise through the filter of Figure 2: the curve runs about 1 dB below the table on both shoulders, near 40 Hz and near 5 kHz, but stays inside the band everywhere; the title reads pass. Right, sixty seconds of the generator's Table II spectrum clipped to a peak-to-RMS ratio of 2.00, which follows the table closely at every band; the title reads Clipped programme signal, peak/RMS 2.00: pass" width="100%"></picture>
+
+*Left, the filter of Figure 2: inside the tolerances, but riding the lower
+edge on both shoulders of the curve. Right, the generator's spectrum clipped
+for the limiting voltages of IEC 60268-7 (section 5), which still follows the
+table: clipping at twice the RMS value spreads only a little power into the
+weak upper bands.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+clipped = electroacoustics.simulated_programme_signal(fs, 60.0, peak_to_rms=2.0, seed=2)
+limiting = electroacoustics.check_limiting_test_signal(clipped, fs)
+fig, (ax_figure_2, ax_limiting) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+check.plot(ax_figure_2)
+limiting.plot(ax_limiting)
+plt.show()
+```
+
+</details>
+
+## 2. How the measurement goes (IEC 60268-7 Clause 7)
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_headphone_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_headphone_measurement.svg" alt="The measurement chain of Figure 3 of IEC 60268-7 in two rows and a panel. Top row, left to right: a signal generator giving a 500 Hz sine or the programme signal, a power amplifier whose voltmeter reads the e.m.f. E, the rated source impedance Rs, and the headphone on an ear simulator of IEC 60711 or a head and torso simulator of IEC 60959. Second row, right to left: the measuring amplifier of the simulator's microphone, a dashed free-field compensation and a dashed A-weighting of IEC 61672-1, both used if needed (8.3.5), and a one-third-octave analyser; under it, the note that the same correction can be made numerically as the power sum of the bands Lk + Ak - Fk (NOTE under Figure 3). The lower panel lists what each reading gives: 94 dB with the 500 Hz sine, the characteristic voltage (8.3.3); 94 dB with the programme signal, bands power-summed, 8.3.4 and 8.3.5 with A and F over 3 to 5 fittings; 1 mW in the rated impedance or across the headphone, the working level (8.5.2 b, 8.5.3 c); the rated e.m.f. swept in frequency, the coupler response at 50 dB to a decade (8.6.2); the clipped programme signal with a peak-to-RMS ratio of 1.8 to 2.2, the limiting voltages (8.3.2); and test persons instead of the simulator, loudness comparison (8.6.3, 8.6.4) and probe microphone (8.6.5)" width="100%"></picture>
+
+1. **The standard conditions** (7.2, 7.3). One earphone sits at its rated
+   application force on the coupler or ear simulator its standard names
+   (IEC 60318, IEC 60711, or the ear of the head and torso simulator of
+   IEC 60959, with the pinna simulator of Annex A where it applies), and the
+   type is stated with the results. The signal is a source e.m.f. applied
+   through the rated source impedance, 120 Ω for a headphone output by
+   IEC 61938, at the point an amplifier drives in use, and set for 94 dB at
+   the standard measuring frequency of 500 Hz; the manufacturer may set 1 mW
+   in the rated impedance instead. Volume controls sit at minimum attenuation.
+2. **With the programme signal** (7.4, Figure 3). The same, with the
+   simulated programme signal of IEC 60268-1 from a generator and a power
+   amplifier whose voltmeter reads the e.m.f.; the simulator's output passes,
+   where a clause asks for it, through the A-weighting of IEC 61672-1 and a
+   filter with the inverse of the head and torso simulator's free-field
+   response, then a one-third-octave analyser. The NOTE under the figure
+   allows the same correction numerically, which is what section 5 does. A
+   noise reading wanders, so it is repeated and averaged (8.3.4.2 NOTE 2), and
+   for 8.3.5 the headphone is taken off and put back between 3 to 5 readings.
+3. **With test persons** (7.5, 7.6). The comparison responses put a listener
+   in a free field, a progressive plane wave (7.5.2), or in a diffuse field
+   (7.5.3), and ask for equal loudness band by band; the ear canal responses
+   put a probe microphone that meets Annex B at least 4 mm inside the canal
+   and read levels instead. Annexes C to E give the practical details.
+
+## 3. The code of a headphone (Clause 4)
+
+IEC 60268-7 names a headphone by a code, `60268-7-IEC-XXXX-NNRN-N`: four
+letters for the principle of the transducer, the type of earphone, the
+acoustic coupling to the ear canal and the radiation to the outside, the
+impedance in ohms in "mantissa and exponent" form, and the number of
+channels. The clause gives three impedances, 8 Ω as `08R0`, 32 Ω as `32R0` and
+600 Ω as `06R2`; the last one settles the choice the rule leaves open, between
+`06R2` and `60R1`, in favour of giving every trailing zero to the exponent.
+
+```python
+code = electroacoustics.HeadphoneClassification("D", "C", "S", "C", 32.0, 2).code
+print(code)  # 60268-7-IEC-DCSC-32R0-2
+print([electroacoustics.impedance_code(ohm) for ohm in (8, 32, 600, 150)])
+# ['08R0', '32R0', '06R2', '15R1']
+earbud = electroacoustics.parse_classification_code("60268-7 - IEC - DELO - 16R0 - 2")
+print(earbud.description)
+# electrodynamic (moving coil), intra-concha, acoustically open (controlled
+# leakage), open-back
+```
+
+## 4. Impedance (8.2)
+
+The rated impedance is a pure resistance the manufacturer states, "chosen so
+that the lowest value of the modulus of the actual impedance within the rated
+frequency range is not less than 80 % of the rated value"; a dip below that
+anywhere up to 20 kHz should be stated, and the modulus is measured "at least
+over the frequency range 20 Hz to 20 kHz". `verify_rated_impedance` judges the
+first, lists the second and checks the third.
+
+```python
+f = np.geomspace(10.0, 30000.0, 241)
+z = 31.0 + 22.0 / (1.0 + ((f / 90.0 - 90.0 / f) / 0.9) ** 2) + 4.0 * (f / 20000.0)
+impedance = electroacoustics.verify_rated_impedance(
+    f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
+)
+print(impedance.passes, round(impedance.minimum_ohm, 1), round(impedance.minimum_ratio, 3))
+# True 31.3 0.979
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_impedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_impedance.svg" alt="The modulus of a 32 ohm headphone's impedance from 10 Hz to 30 kHz: about 31 ohm at the bottom, a resonance peak of about 53 ohm at 90 Hz, a broad minimum of 31.3 ohm near 1.1 kHz marked with a circle that the legend names as the lowest modulus in range, and a slow rise to about 37 ohm at 30 kHz, against a dashed line at the rated 32 ohm and a dotted line at 25.6 ohm, 80 % of it, with the rated frequency range from 15 Hz to 25 kHz shaded; the title reads Rated impedance (8.2.1): pass" width="88%"></picture>
+
+*The coil's resistance sets the floor, the moving system's resonance the peak
+and the coil's inductance the rise. The minimum, 31.3 Ω, is 98 % of the rated
+32 Ω, well clear of the 80 % the clause allows.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+ax = impedance.plot()
+plt.show()
+```
+
+</details>
+
+## 5. Voltages, powers and levels (8.3 to 8.5)
+
+Every input of IEC 60268-7 is a source e.m.f. applied through the rated source
+impedance, 120 Ω for a headphone output by IEC 61938 (7.1 NOTE). The
+**characteristic voltage** (8.3.3) is the 500 Hz sinusoidal e.m.f. that
+produces 94 dB in the coupler or ear simulator; the headphone is linear there,
+so one reading scales to it. Every voltage has a power counterpart (8.4), the
+power it would dissipate in a resistance equal to the rated impedance through
+the rated source impedance, $P = E^2 R/(R + R_\mathrm{s})^2$, and the
+**working sound pressure level** (8.5.2) is the level at the e.m.f. that
+dissipates 1 mW that way.
+
+```python
+characteristic = electroacoustics.characteristic_voltage(0.1, 100.0)
+print(round(characteristic, 4))  # 0.0501 V
+impedances = {"rated_impedance_ohm": 32.0, "rated_source_impedance_ohm": 120.0}
+print(round(electroacoustics.headphone_source_emf(1e-3, **impedances), 3))  # 0.85 V
+print(round(1e3 * electroacoustics.headphone_input_power(5.0, **impedances), 1))
+# 34.6 mW from the 5 V rated source e.m.f. of 8.3.1 NOTE 2
+print(round(20 * np.log10(5.0 / characteristic), 1))  # 40.0 dB above it
+```
+
+8.3.1 NOTE 3 draws attention to hearing damage and says the rated source
+e.m.f. "should, preferably, not exceed the characteristic voltage (see 8.3.3)
+by more than 10 dB to 15 dB". The 5 V of IEC 61938 on this headphone sits
+40 dB above it. NOTE 3 states a preference over a range, so the number is
+yours to read; the library gives no verdict on it.
+
+The **simulated programme signal characteristic voltage** (8.3.4) is the same
+94 dB with the programme signal, and 8.3.5 reads it after the A-weighting of
+IEC 61672-1 and the inverse of the head and torso simulator's free-field
+response. The NOTE under Figure 3 does without filters: the one-third-octave
+band levels in the ear simulator are multiplied by the filters' coefficients
+and power-summed,
+
+$$
+L = 10\lg \sum_k 10^{(L_k + A_k - F_k)/10},
+$$
+
+with $A_k$ the A-weighting at the exact centre of band $k$ and $F_k$ the
+free-field response. 8.3.5 g) removes and refits the headphone between
+readings and averages the e.m.f. of 3 to 5 fittings.
+
+```python
+centres = np.array(list(table))
+in_range = (centres >= 100.0) & (centres <= 10000.0)
+bands_hz = centres[in_range]
+resonance = 9.0 / (1.0 + ((bands_hz / 3000.0 - 3000.0 / bands_hz) / 0.8) ** 2)
+reading = 72.0 + levels[in_range] + resonance  # dB re 20 µPa at 0.1 V
+fittings = np.vstack([reading, reading + 0.6, reading - 0.4])
+plain = electroacoustics.programme_characteristic_voltage(0.1, bands_hz, fittings)
+weighted = electroacoustics.programme_characteristic_voltage(
+    0.1, bands_hz, fittings, a_weighted=True
+)
+print(round(plain.characteristic_voltage_v, 3), round(weighted.characteristic_voltage_v, 3))
+# 0.241 0.253
+print(weighted.fittings_conform)  # True, three fittings
+working = electroacoustics.working_sound_pressure_level(plain.levels_db[0], 0.1, **impedances)
+print(round(working, 1))  # 104.9 dB at 1 mW
+```
+
+The `weighted` call stops at the A-weighting. 8.3.5 also compensates the
+free-field response of the head and torso simulator of IEC 60959, which is
+that manikin's own data and not a table the library holds; a real 8.3.5
+reading passes it as `free_field_response_db`. The 0.253 V is therefore the
+e.m.f. for 94 dB A-weighted only, not the corrected characteristic voltage of
+8.3.5, and the figure says so in its title.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_characteristic_voltage_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_characteristic_voltage.svg" alt="Bar chart of the A-weighted one-third-octave band levels in the ear simulator, from 100 Hz to 10 kHz, at the e.m.f. of 0.253 V that gives 94 dB A-weighted: about 60 dB at 100 Hz rising steadily to a peak of about 88 dB at 3.15 kHz, where the simulator's canal resonance adds to the signal, then falling to about 66 dB at 10 kHz; a dashed line at 94.0 dB marks their power sum; the title reads Programme signal e.m.f. for 94 dB, A-weighted only: 0.253 V" width="88%"></picture>
+
+*The band levels at the e.m.f. that gives 94 dB A-weighted: their power sum
+is 94 dB, carried mostly by the four bands around the ear simulator's canal
+resonance near 3 kHz. With the free-field compensation of a head and torso
+simulator as well, the same call gives the corrected characteristic voltage
+of 8.3.5.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+ax = weighted.plot()
+plt.show()
+```
+
+</details>
+
+The method of 8.5.3 c) sets the 1 mW e.m.f. another way, so that the voltage
+across the headphone's own input connector is the one that would put 1 mW
+into the rated impedance. The two agree only when the headphone presents its
+rated impedance at 500 Hz. Given the measured impedance,
+`working_sound_pressure_level` gives the method's reading as well; for a
+32 Ω headphone that is 40 Ω at 500 Hz it is 1.49 dB lower, and the errata
+register records the disagreement.
+
+```python
+by_definition = electroacoustics.working_sound_pressure_level(100.0, 0.5, **impedances)
+by_method = electroacoustics.working_sound_pressure_level(
+    100.0, 0.5, **impedances, headphone_impedance_ohm=40.0
+)
+print(round(by_definition, 2), round(by_method, 2))  # 104.61 103.11
+```
+
+The **limiting voltages** of 8.3.2 are the e.m.f.s a headphone survives, for
+ten minutes of one-minute bursts or for 100 h, of the programme signal "with
+additional clipping": its spectrum still that of IEC 60268-1, its
+peak-to-RMS ratio "between 1,8 and 2,2". That window is IEC 60268-7's own:
+IEC 60268-1 asks for noise "without amplitude limiting" and specifies no crest
+factor, whatever NOTE 1 of 8.3.4.2 says. `peak_to_rms` clips the generator to
+exactly that ratio, and `check_limiting_test_signal` judges a record on both
+counts.
+
+```python
+print(round(limiting.peak_to_rms, 2), limiting.passes)  # 2.0 True
+unclipped = electroacoustics.check_limiting_test_signal(y, fs)
+print(round(unclipped.peak_to_rms, 2), unclipped.passes)  # 4.92 False
+```
+
+## 6. The protective device (8.3.6)
+
+A protective device "causes a change of at least 1 dB in the sensitivity" at
+its protection voltage, and the impedance and level are then measured 1 dB
+below and 1 dB above it. `protection_voltage` takes a sweep of e.m.f. and
+level, reads the sensitivity at each step against the first, and interpolates
+where the change reaches 1 dB.
+
+```python
+emf = np.array([0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0])
+shortfall = np.array([0.0, 0.0, 0.05, 0.2, 0.7, 1.6, 3.5, 7.0])
+protection = electroacoustics.protection_voltage(
+    emf, 94.0 + 20 * np.log10(emf / 0.1) - shortfall
+)
+print(round(protection.protection_voltage_v, 2))  # 1.65 V
+print([round(v, 2) for v in protection.measurement_voltages_v])  # [1.47, 1.85]
+```
+
+## 7. Frequency responses (8.6) and crosstalk (8.12)
+
+The **coupler or ear simulator frequency response** (8.6.2) is the level
+against frequency at the rated e.m.f., over at least the rated frequency
+range, and its graph is drawn with "the same length representing 50 dB as
+represents one decade of frequency". The **crosstalk attenuation** (8.12) is
+the difference between the level in a channel's coupler driven by that channel
+and by another.
+
+```python
+fr = np.geomspace(20.0, 20000.0, 241)
+level = (
+    104.0
+    - 10.0 * np.log10(1.0 + (60.0 / fr) ** 4)
+    + 6.0 / (1.0 + ((fr / 3200.0 - 3200.0 / fr) / 0.6) ** 2)
+    - 10.0 * np.log10(1.0 + (fr / 12000.0) ** 6)
+)
+response = electroacoustics.coupler_frequency_response(
+    fr, level, rated_frequency_range_hz=(20.0, 20000.0)
+)
+crosstalk = electroacoustics.crosstalk_attenuation(
+    bands_hz, np.full(bands_hz.size, 100.0), 52.0 - 12.0 * np.log10(bands_hz / 1000.0) ** 2
+)
+print(response.covers_rated_range, round(crosstalk.minimum_db, 1))  # True 48.0
+```
+
+None of these responses has a tolerance: "It is not at present possible to set
+limits for the frequency range based on deviations from a flat, or defined,
+frequency response" (8.6.6 NOTE 2). The rated frequency range is the
+manufacturer's statement, with the criteria its limits were chosen by, and
+enters here only as the range a measurement has to cover.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_coupler_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_coupler_response.svg" alt="Two panels. Left, a coupler frequency response drawn so that 50 dB has the length of one decade: rising from 85 dB at 20 Hz to a plateau of 104 dB from about 100 Hz, a peak of 110 dB at 3.2 kHz and a fall to about 90 dB at 20 kHz, with dashed lines at the rated range of 20 Hz and 20 kHz. Right, the crosstalk attenuation from 100 Hz to 10 kHz, 60 dB at both ends and 48.0 dB at its minimum at 1 kHz; the title reads Crosstalk attenuation (8.12), minimum 48.0 dB" width="100%"></picture>
+
+*At 50 dB to the decade a coupler response looks as flat as the ear hears it:
+the 6 dB peak near 3 kHz, which a stretched axis turns into a mountain, is a
+modest bump.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+fig, (ax_response, ax_crosstalk) = plt.subplots(1, 2, figsize=(13.5, 5.2))
+response.plot(ax_response)
+crosstalk.plot(ax_crosstalk)
+plt.show()
+```
+
+</details>
+
+The other responses are measured with **test persons**. In the comparison
+methods (8.6.3, 8.6.4) each person adjusts the e.m.f. until the headphone is
+as loud as a free or diffuse reference field in each one-third-octave band of
+pink noise; the response is the field's sound pressure over that e.m.f.,
+"expressed in decibels referred to the value at the standard reference
+frequency", averaged over at least eight persons with the standard deviation
+in each band, and a headphone measured on at least 16 may serve as the
+reference of the substitution method. The ear canal method (8.6.5) puts a
+probe microphone in the ear canal instead of asking for a judgement, and
+reads Formula (1),
+
+$$
+L_\mathrm{f} = L_\mathrm{e} - L_\mathrm{s} - (L_\mathrm{e} - L_\mathrm{s})_{500},
+$$
+
+after averaging two fittings of the headphone and two readings of the sound
+field, with the procedure repeated when the fittings differ by more than
+2.5 dB in any band and the 500 Hz band matched to the field's within 3 dB;
+16 persons calibrate the headphone that replaces the sound field of the
+indirect method (8.6.5.3).
+
+The two use different reference bands. Formula (1) prints its own, 500 Hz,
+the standard measuring frequency of 7.2 b). "The standard reference
+frequency" of the comparison responses is a term IEC 60268-7 never defines;
+IEC 60268-1 Clause 3, which it cites, sets it at 1 000 Hz "in the absence of
+a clear reason to the contrary", the band 8.6.3.2 c) begins and ends the test
+sequence on, so `field_comparison_response` refers to 1 kHz unless it is
+given `reference_frequency_hz`.
+
+```python
+rng = np.random.default_rng(7)
+shape_db = 3.0 / (1.0 + ((bands_hz / 2500.0 - 2500.0 / bands_hz) / 0.7) ** 2)
+equal_loudness_emf = 0.05 * 10.0 ** (
+    -(shape_db + rng.normal(0.0, 1.2, (8, bands_hz.size))) / 20.0
+)
+comparison = electroacoustics.field_comparison_response(
+    bands_hz, 70.0, equal_loudness_emf, field="free"
+)
+field = 70.0 + rng.normal(0.0, 0.4, (8, 2, bands_hz.size))
+earphone = field + shape_db + rng.normal(0.0, 0.6, (8, 2, bands_hz.size))
+ear_canal = electroacoustics.ear_canal_frequency_response(bands_hz, earphone, field)
+band = list(bands_hz).index(2500.0)
+print(comparison.meets_panel_size, round(comparison.mean_db[band], 1))  # True 2.8
+print(round(ear_canal.mean_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True
+print(comparison.reference_frequency_hz, ear_canal.reference_frequency_hz)  # 1000.0 500.0
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_test_persons_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_test_persons.svg" alt="Two panels, one above the other, for a panel of eight test persons, one-third-octave bands from 100 Hz to 10 kHz, each drawn so that 50 dB has the length of one decade on an axis from -20 dB to 20 dB. Top, the free-field comparison response as bars referred to 1000 Hz: within about 1 dB of zero below 1 kHz and above 5 kHz, rising to a mean of 2.8 dB at 2.5 kHz, each bar with a red error bar of about plus or minus 0.7 to 1.6 dB for the standard deviation of the persons, and none at the 1 kHz reference band. Bottom, the ear canal response of Formula (1) referred to 500 Hz: eight thin grey curves, one per person, a shaded standard deviation band, and their mean, flat within a few tenths of a decibel to 1 kHz, peaking at 3.2 dB at 2.5 kHz and back near zero at 5 kHz" width="100%"></picture>
+
+*The same headphone through two panels, at the 50 dB to the decade the part
+prefers, where a 3 dB rise is the modest bump it is. The loudness judgements
+scatter by 0.7 dB to 1.6 dB in every band but the reference; the probe
+microphone, which needs no judgement, scatters by 0.2 dB to 0.8 dB and shows
+the same 3 dB rise at 2.5 kHz.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+fig, (ax_comparison, ax_ear) = plt.subplots(2, 1, figsize=(10, 9.6))
+comparison.plot(ax_comparison)
+ear_canal.plot(ax_ear)
+plt.show()
+```
+
+</details>
+
+## 8. The distortion test signals (8.7)
+
+The distortions of a headphone are the ones of IEC 60268-2, read with
+`harmonic_distortion`, `modulation_distortion` and
+`difference_frequency_distortion` and expressed as $20\lg$ of the ratio. What
+IEC 60268-7 adds are the signals. For modulation distortion, 70 Hz and 600 Hz
+in the amplitude ratio 4:1 with the peak of the rated input voltage, "−1,9 dB
+at 70 Hz and −14,0 dB at 600 Hz" (NOTE 1 of 8.7.3.3); for difference-frequency
+distortion, two tones 80 Hz apart, each at half the rated input voltage. Both
+generators start every tone at its crest, so the sum reaches the rated peak.
+Below, a drive with a little square law in it puts the second-order product
+of the two tones at 80 Hz, 35.1 dB under them.
+
+```python
+modulation = electroacoustics.headphone_modulation_signal(fs, 1.0, rated_source_emf_v=1.0)
+products = electroacoustics.modulation_distortion(modulation, fs, f_low=70.0, f_high=600.0)
+print(round(float(np.max(np.abs(modulation))), 4))  # 1.4142, the peak of 1 V RMS
+print(products.sideband_frequencies)  # [460. 530. 670. 740.]
+difference = electroacoustics.headphone_difference_frequency_signal(
+    fs, 1.0, upper_frequency_hz=1000.0, rated_source_emf_v=1.0
+)
+driven = difference + 0.05 * difference**2  # a drive with 5 % of square law
+second = electroacoustics.difference_frequency_distortion(driven, fs, f1=920.0, f2=1000.0)
+print(round(20 * np.log10(second), 1))  # -35.1 dB, the product at 80 Hz
+```
+
+The third-order products are at 460 Hz and 740 Hz, as item b) of 8.7.3.3
+says. Formula (3) under it prints $U_{470}$, and Formula (5) of the
+difference-frequency distortion closes a parenthesis it never opened; the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/) records both, with the
+cross-references of 8.6.3 to 8.6.5 and of Table 1 that name the wrong
+subclause, the NOTE under Figure 3 that cites the head and torso simulator as
+IEC 60969, the NOTE of 8.3.4.2 that credits IEC 60268-1 with a crest factor,
+and the two settings of the 1 mW e.m.f. in 8.5.2 b) and 8.5.3 c).
+
+## 9. The probe microphone (Annex B)
+
+The microphone in the ear canal of 8.6.5 is specified by the normative Annex
+B: a cross-sectional area of 5 mm² or less in the concha and the first 4 mm of
+the canal, less than 0.6 of the canal's area beyond (an adult's averages
+45 mm²), a volume under 130 mm³, responses to neighbouring one-third-octave
+bands of pink noise within 3 dB of each other, and an output at least 15 dB
+lower with the entrance sealed. `verify_ear_canal_microphone` judges all five.
+
+```python
+microphone = electroacoustics.verify_ear_canal_microphone(
+    entrance_area_mm2=3.8,
+    canal_section_area_mm2=19.0,
+    volume_mm3=95.0,
+    pink_noise_band_levels_db=[61.0, 62.2, 63.1, 62.5, 61.4],
+    open_levels_db=[62.0, 63.0, 62.5],
+    sealed_levels_db=[41.0, 44.0, 45.5],
+)
+print(microphone.passes, round(microphone.area_ratio, 3))  # True 0.422
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_protection_microphone_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_protection_microphone.svg" alt="Two panels. Left, the change of a headphone's sensitivity against the source e.m.f. from 0.1 V to 5 V on a logarithmic axis: flat at 0 dB to 0.5 V, -0.2 dB at 1 V, -0.7 dB at 1.5 V, then falling steeply to -7 dB at 5 V, with a dashed line at -1 dB and a dotted vertical line at the protection voltage of 1.65 V where they cross. Right, the five measurable items of Annex B as bars in percent of their limits: entrance area 76 %, area ratio 70 %, volume 73 %, neighbouring bands 40 % and the sealed entrance 113 % of its 15 dB minimum, all green, with a dashed line at 100 %; the sealed-entrance bar is hatched and labelled minimum, since it has to reach the line rather than stay under it, and the legend keys the line, the green of a bar within its limit and the hatching; the title reads Ear canal microphone (Annex B): pass" width="100%"></picture>
+
+*Left, a limiter that cuts in gently: the sensitivity has lost 1 dB at
+1.65 V, where 8.3.6.2 b) reads the protection voltage. Right, the probe
+microphone of Annex B: four upper limits met with room to spare, and the
+sealed entrance 17 dB down against the 15 dB required.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+fig, (ax_protection, ax_microphone) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+protection.plot(ax_protection)
+microphone.plot(ax_microphone)
+plt.show()
+```
+
+</details>
+
+## What this guide covers
+
+**Covered.** IEC 60268-1:1985 Clause 7 with its two amendments of 1988: Table II and its
+Note, the filter of Figure 2 as an exact transfer function, a generator of the
+programme signal with the table's band levels or through the filter, optionally
+clipped to a peak-to-RMS ratio, and the verdict on a one-third-octave spectrum.
+IEC 60268-7:2010: the classification code of Clause 4; the rated impedance and
+the measured range of 8.2; the characteristic voltage (8.3.3), the
+programme signal characteristic voltages of 8.3.4 and 8.3.5 by the power
+summation of the NOTE under Figure 3 with the averaging of 3 to 5 fittings,
+the clipped programme signal of the limiting voltages (8.3.2.2 b) and the
+protection voltage (8.3.6.2 b); the powers of 8.4 and the working sound
+pressure levels of 8.5.2, by the definition or by the method of 8.5.3 c); the
+coupler or ear simulator response (8.6.2), the free-field and diffuse-field
+comparison responses with their panel sizes, referred to the standard
+reference frequency of IEC 60268-1 Clause 3 (8.6.3, 8.6.4), the ear canal
+response by Formula (1) with its fitting and level checks and the 16 persons
+of a reference (8.6.5); the distortion test signals of 8.7.3 and 8.7.4; the
+sound attenuation of 8.11, which is ISO 4869-1 and is computed by
+`hearing.real_ear_attenuation`, with `hearing.anr_total_attenuation` of
+ISO 4869-6 for a headphone with active noise compensation; the crosstalk
+attenuation (8.12); and the probe microphone of Annex B, items a) to e).
+
+**Not covered.** The rated conditions (7.1, 8.6.6, 8.8, 8.13, 8.14) are stated by the
+manufacturer, the frequency responses carry no tolerance to judge (8.6.6
+NOTE 2), and the endurance runs of 8.3.2 are a test schedule, not a
+computation. The preference of 8.3.1 NOTE 3, a rated source e.m.f. no more
+than 10 dB to 15 dB above the characteristic voltage, is a range, so it gets a
+number and no verdict. The external field (8.9) and the unwanted sound
+radiation (8.10) are readings. The free-field response of the head and torso
+simulator of IEC 60959 is an input, not a table the library holds. Annex A is the geometry of a pinna simulator, and
+Annexes C to E are informative practical conditions; the sound pressure level
+limit of 85 dB and the 10 dB signal-to-noise ratio of 8.6.5.2 b) need
+calibrated readings the response function is not given.
+
+## See also
+
+- [Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/):
+  the IEC 60268-3 harmonic, modulation and difference-frequency distortions
+  that read the test signals of section 8.
+- [Loudspeaker Characterisation (IEC 60268-5)](https://jmrplens.github.io/phonometry/devices/electroacoustics/loudspeakers/):
+  the transducer of the same family that radiates into a room instead of a
+  coupler.
+- [Microphone Characterisation (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/):
+  the measuring microphone behind every coupler reading.
+- [Filter Banks](https://jmrplens.github.io/phonometry/signals/filters/filter-banks/):
+  the one-third-octave analysis that reads Table II.
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
+  the sound attenuation of 8.11, measured by ISO 4869-1 on test subjects, and
+  the active noise reduction of ISO 4869-6.
+- [Test signals and sample-rate tools](https://jmrplens.github.io/phonometry/signals/spectra/test-signals/):
+  the tone bursts of IEC 60268-1 Annex A, the other part of that standard the
+  library implements.
+- API reference: [`electroacoustics.programme_signal`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/programme-signal/)
+  and [`electroacoustics.headphones`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/headphones/).
+
+## Standards
+
+IEC 60268-7:2010, *Sound system equipment – Part 7: Headphones and earphones*. Edition 3.0. The classification code (Clause 4), the standard conditions and the measurement with the simulated programme signal (7.2, 7.4, Figure 3 and its NOTE), the impedance (8.2), the voltages (8.3: the limiting values with the clipped programme signal, the characteristic voltage, the programme signal characteristic voltages and the protective devices), the powers (8.4), the sound pressure levels (8.5), the frequency responses (8.6: coupler, free-field and diffuse-field comparison, ear canal Formula (1)), the distortion test signals (8.7), the sound attenuation (8.11, by ISO 4869-1), the crosstalk attenuation (8.12) and the probe microphone of Annex B.
+
+IEC 60268-1:1985, *Sound system equipment – Part 1: General*. With Amendment 1 (1988-01) and Amendment 2 (1988-06), neither of which touches Clause 7. The standard reference frequency of Clause 3, and the simulated programme signal: Clause 7 with its Note, Table II (the power spectrum and its tolerances) and Figure 2 (the filter for a pink-noise source).
+
+IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*. The difference-frequency distortion of 14.12.8.1 b), the reading Formula (5) of IEC 60268-7 needs where its brackets are unbalanced.
+
+IEC 61672-1:2013, *Electroacoustics – Sound level meters – Part 1: Specifications*. The A-weighting whose band coefficients the NOTE under Figure 3 of IEC 60268-7 sums with, Table 3.
+
+---
+
+
 <!-- source: docs/devices/electroacoustics/index.md | canonical: https://jmrplens.github.io/phonometry/devices/electroacoustics/ -->
 Source: https://jmrplens.github.io/phonometry/devices/electroacoustics/
 
@@ -17851,6 +18432,13 @@ hearing loop drives a current round a room so a hearing aid's telecoil picks
 the voice up as a magnetic field, and that page judges the installed system by
 IEC 60118-4 and its components, the amplifier, the loop as a load and the neck
 loop, by IEC 62489-1.
+[Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/)
+takes the transducer off the loudspeaker baffle and onto an ear simulator: it
+builds the simulated programme signal of IEC 60268-1, the noise that stands in
+for programme, and measures a headphone with it by IEC 60268-7, from the code
+that names it and its rated impedance to its characteristic voltages, its
+responses on a coupler and to a panel of listeners, and the probe microphone
+that reads it in the ear canal.
 
 [Programme loudness](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/) covers the signal
 the devices carry: the ITU-R BS.1770-5 loudness of a broadcast or streaming
@@ -17885,6 +18473,10 @@ are the place to start.
   the installed hearing loop judged by IEC 60118-4 and its Amendment 1, over a
   room's useful volume or at the points of a refuge and a counter, and its
   amplifier, loop and neck loop measured by IEC 62489-1.
+- [Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/):
+  the headphone on its ear simulator, measured by IEC 60268-7 with the
+  simulated programme signal of IEC 60268-1: impedance, voltages, levels,
+  frequency responses and the probe microphone of Annex B.
 - [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the loudness problem solved
   with a measurement rather than a compressor, one gated number per programme
   and the range that says how much it moves.
@@ -27325,6 +27917,10 @@ signal they carry.
   the installed hearing loop judged by IEC 60118-4 and its Amendment 1, over a
   room's useful volume or at the points of a refuge and a counter, and its
   amplifier, loop and neck loop measured by IEC 62489-1.
+- [Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/):
+  the headphone on its ear simulator, measured by IEC 60268-7 with the
+  simulated programme signal of IEC 60268-1: impedance, voltages, levels,
+  frequency responses and the probe microphone of Annex B.
 - [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the loudness problem solved
   with a measurement rather than a compressor, one gated number per programme
   and the range that says how much it moves.
@@ -52524,6 +53120,39 @@ documents, one page per module.
 | `NeckLoopType` | `dataclass` | **One type of the draft Annex D.**<br>• `description`, `min_dc_resistance_ohm`, `max_dc_resistance_ohm` [Ω], `max_input_voltage_v` [V] | `electroacoustics.NECK_LOOP_TYPES[2].min_dc_resistance_ohm  # 32.0` |
 | `verify_neck_loop` | `function` | **Verify a neck loop against one type of the draft Annex D (prA2:2017, a draft).**<br>• `dc_resistance_ohm` [Ω], `input_voltage_v` [V] for 400 mA/m on the jig<br>• keyword-only: `neck_loop_type` 1 or 2 (Default: 1) | `v = electroacoustics.verify_neck_loop(32.4, 0.9)`<br><br>• `NeckLoopVerification` |
 | `NeckLoopVerification` | `dataclass` | **The verdict on a neck loop.**<br>• `neck_loop_type`, `dc_resistance_ohm` [Ω], `input_voltage_v` [V], `limits` (a `NeckLoopType`)<br>• `.resistance_passes`, `.voltage_passes`, `.passes`; `bool()` raises<br>• `.plot()`: each value as a share of its limit | `v.passes` |
+| `SIMULATED_PROGRAMME_SPECTRUM` | `mapping` | **Table II of IEC 60268-1:1985, the power spectrum of the simulated programme signal, keyed by the nominal one-third-octave frequency 20 Hz to 20 kHz.**<br>• each value a `ProgrammeSpectrumBand`: 0 dB from 250 Hz to 800 Hz, −13,5 dB at 20 Hz, −21,6 dB at 20 kHz; ±0,5 dB in the middle to ±3 dB at the ends<br>• neither 1988 amendment touches Clause 7 | `electroacoustics.SIMULATED_PROGRAMME_SPECTRUM[20000.0].relative_level_db  # -21.6` |
+| `ProgrammeSpectrumBand` | `dataclass` | **One row of Table II.**<br>• `relative_level_db`, `tolerance_plus_db`, `tolerance_minus_db` [dB], the tolerances as printed (positive) | `electroacoustics.SIMULATED_PROGRAMME_SPECTRUM[1000.0].tolerance_plus_db  # 0.6` |
+| `programme_signal_filter` | `function` | **Transfer function of the filter of IEC 60268-1:1985 Figure 2, the ladder that turns pink noise into the programme signal.**<br>• `frequencies_hz` [Hz], any shape<br>• the voltage across the 10 kΩ over the source e.m.f.; the source impedance is part of the 430 Ω and the 10 kΩ is the whole output shunt | `h = electroacoustics.programme_signal_filter([1000.0])` |
+| `simulated_programme_signal` | `function` | **The simulated programme signal of IEC 60268-1:1985 Clause 7: stationary Gaussian noise with the spectrum of Table II.**<br>• `fs` [Hz], `seconds` [s]<br>• keyword-only: `rms` (Default: 1.0); `spectrum` 'table' (Default: every band on its printed level) or 'figure_2' (pink noise through Figure 2); `peak_to_rms` clips to that ratio, 1,8 to 2,2 for IEC 60268-7 8.3.2 (Default: None, no clipping); `seed` | `x = electroacoustics.simulated_programme_signal(48000, 30.0, seed=1)` |
+| `check_programme_signal` | `function` | **Is a one-third-octave spectrum the programme signal of IEC 60268-1 Table II?**<br>• `frequencies_hz` [Hz], nominal or exact base-ten centres; `band_levels_db` [dB] on any reference<br>• judged up to a constant: passes when one level places every band inside its tolerance; only the bands given are judged | `c = electroacoustics.check_programme_signal(f, levels)`<br><br>• `ProgrammeSignalCheck` |
+| `ProgrammeSignalCheck` | `dataclass` | **A spectrum judged against Table II.**<br>• `frequencies_hz`, `band_levels_db`, `offset_db` (the middle of the window of levels that fit), `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db`<br>• `.deviations_db`, `.margin_db`, `.binding_bands_hz`, `.passes`; `bool()` raises<br>• `.plot()`: the referred bands inside the tolerances | `c.margin_db` |
+| `HeadphoneClassification` | `dataclass` | **The classification of a headphone by IEC 60268-7:2010 Clause 4.**<br>• `principle`, `earphone_type`, `coupling`, `radiation` (one letter each), `impedance_ohm` [Ω], `channels` (1 to 9)<br>• `.code` ('60268-7-IEC-DCSC-32R0-2'), `.description` | `electroacoustics.HeadphoneClassification("D", "C", "S", "C", 32.0, 2).code` |
+| `TRANSDUCER_PRINCIPLES` / `EARPHONE_TYPES` / `ACOUSTIC_COUPLINGS` / `BACK_RADIATIONS` | `mapping` | **The four letters of the IEC 60268-7 code, each letter to its meaning (Clause 4).**<br>• principle D, E, F, M, P, S; type C, E, H, I, M, S, T; coupling L (open) or S (closed); radiation C (closed-back) or O (open-back) | `electroacoustics.EARPHONE_TYPES["E"]  # 'intra-concha'` |
+| `impedance_code` | `function` | **The impedance in the "mantissa and exponent" form of the code (Clause 4).**<br>• `impedance_ohm`: a whole number of ohms<br>• the exponent takes every trailing zero: 8 Ω '08R0', 32 Ω '32R0', 600 Ω '06R2' as printed | `electroacoustics.impedance_code(600)  # '06R2'` |
+| `parse_classification_code` | `function` | **Read a code of the form 60268-7-IEC-XXXX-NNRN-N.**<br>• spaces around the hyphens, as the clause lays it out, are ignored | `electroacoustics.parse_classification_code("60268-7-IEC-DCSC-32R0-2")`<br><br>• `HeadphoneClassification` |
+| `verify_rated_impedance` | `function` | **Verify a headphone's rated impedance against the measured modulus (IEC 60268-7 8.2).**<br>• `frequencies_hz` [Hz], `impedance_ohm` [Ω] (complex allowed)<br>• keyword-only: `rated_impedance_ohm` [Ω], `rated_frequency_range_hz` (lower, upper) [Hz]<br>• the lowest modulus in the rated range at least 80 % of the rated value; dips below it up to 20 kHz listed to be stated; coverage of 20 Hz to 20 kHz | `v = electroacoustics.verify_rated_impedance(f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0))`<br><br>• `RatedImpedanceVerification` |
+| `RatedImpedanceVerification` | `dataclass` | **The verdict of 8.2.1 b).**<br>• `frequencies_hz`, `impedance_ohm`, `rated_impedance_ohm`, `rated_frequency_range_hz`<br>• `.limit_ohm`, `.minimum_ohm`, `.minimum_frequency_hz`, `.minimum_ratio`, `.frequencies_to_state_hz`, `.covers_measurement_range`, `.passes`; `bool()` raises<br>• `.plot()`: the modulus with the rated value and its 80 % | `v.minimum_ratio` |
+| `characteristic_voltage` | `function` | **The source e.m.f. that gives 94 dB in the coupler (IEC 60268-7 8.3.3).**<br>• `source_emf_v` [V] of a reading, `sound_pressure_level_db` it gave [dB re 20 µPa]<br>• the linear scaling E 10^((94 − L)/20); with the level of the whole programme signal it is 8.3.4 | `electroacoustics.characteristic_voltage(0.1, 98.0)  # 0.0631` |
+| `programme_signal_level` | `function` | **The level of the programme signal from its one-third-octave bands (IEC 60268-7 Figure 3 NOTE).**<br>• `frequencies_hz` [Hz], `band_levels_db` [dB re 20 µPa]<br>• keyword-only: `a_weighted` (Default: False), `free_field_response_db` of the head and torso simulator, compensated by its inverse (Default: None)<br>• the power sum of the bands with the IEC 61672-1 A-weighting at each exact centre | `electroacoustics.programme_signal_level(f, levels, a_weighted=True)` |
+| `programme_characteristic_voltage` | `function` | **The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, and 8.3.5 corrected).**<br>• `source_emf_v` [V] per fitting, `frequencies_hz` [Hz], `band_levels_db` (fittings, bands) [dB re 20 µPa]<br>• keyword-only: `a_weighted`, `free_field_response_db` (8.3.5)<br>• each fitting scaled to 94 dB, the e.m.f.s averaged (8.3.5 g, 3 to 5 fittings) | `p = electroacoustics.programme_characteristic_voltage(0.1, f, levels)`<br><br>• `ProgrammeCharacteristicVoltage` |
+| `ProgrammeCharacteristicVoltage` | `dataclass` | **The 8.3.4 or 8.3.5 characteristic.**<br>• `frequencies_hz`, `band_levels_db`, `source_emf_v`, `corrections_db`, `a_weighted`, `free_field_compensated`<br>• `.levels_db`, `.voltages_v`, `.characteristic_voltage_v`, `.fittings_conform`, `.band_levels_at_characteristic_db`<br>• `.plot()`: the band levels whose power sum is 94 dB | `p.characteristic_voltage_v` |
+| `headphone_input_power` / `headphone_source_emf` | `function` | **The power that corresponds to a source e.m.f., and back (IEC 60268-7 8.4).**<br>• `source_emf_v` [V] or `input_power_w` [W]<br>• keyword-only: `rated_impedance_ohm`, `rated_source_impedance_ohm` [Ω]<br>• the power in a pure resistance equal to the rated impedance through the rated source impedance, E² R/(R + Rs)² | `electroacoustics.headphone_source_emf(1e-3, rated_impedance_ohm=32.0, rated_source_impedance_ohm=120.0)  # 0.850` |
+| `working_sound_pressure_level` | `function` | **The working sound pressure level of IEC 60268-7 8.5.2 b) to d).**<br>• `sound_pressure_level_db` [dB re 20 µPa] read at `source_emf_v` [V]<br>• keyword-only: `rated_impedance_ohm`, `rated_source_impedance_ohm` [Ω]<br>• scaled to the e.m.f. that dissipates 1 mW in the rated impedance | `electroacoustics.working_sound_pressure_level(98.0, 0.1, rated_impedance_ohm=32.0, rated_source_impedance_ohm=120.0)` |
+| `check_limiting_test_signal` | `function` | **Is this the clipped programme signal of IEC 60268-7 8.3.2.2 b)?**<br>• `signal` (1-D or `Signal`), `fs` [Hz]<br>• a peak-to-RMS ratio from 1,8 to 2,2 and the spectrum of IEC 60268-1 Table II in every band below the Nyquist frequency | `c = electroacoustics.check_limiting_test_signal(x, 48000)`<br><br>• `LimitingTestSignalCheck` |
+| `LimitingTestSignalCheck` | `dataclass` | **The verdict on the limiting voltages' test signal.**<br>• `peak_to_rms`, `spectrum` (a `ProgrammeSignalCheck`)<br>• `.peak_to_rms_passes`, `.passes`; `bool()` raises<br>• `.plot()`: the spectrum against Table II with the ratio | `c.peak_to_rms` |
+| `protection_voltage` | `function` | **The protection voltage of a headphone's protective device from a level sweep (IEC 60268-7 8.3.6).**<br>• `source_emf_v` [V] ascending, `sound_pressure_level_db` [dB re 20 µPa]<br>• where the sensitivity has changed 1 dB from the first step, interpolated in 20 lg E | `p = electroacoustics.protection_voltage(e, levels)`<br><br>• `ProtectionVoltage` |
+| `ProtectionVoltage` | `dataclass` | **A protective device's operating point.**<br>• `source_emf_v`, `sound_pressure_level_db`, `protection_voltage_v` (None if not reached)<br>• `.sensitivity_change_db`, `.measurement_voltages_v` (1 dB either side, 8.3.6.2 b)<br>• `.plot()`: the sensitivity change against the e.m.f. | `p.protection_voltage_v` |
+| `coupler_frequency_response` | `function` | **The coupler or ear simulator frequency response (IEC 60268-7 8.6.2).**<br>• `frequencies_hz` [Hz], `sound_pressure_level_db` [dB re 20 µPa]<br>• keyword-only: `rated_frequency_range_hz` to judge the coverage (Default: None) | `r = electroacoustics.coupler_frequency_response(f, levels)`<br><br>• `CouplerFrequencyResponse` |
+| `CouplerFrequencyResponse` | `dataclass` | **The level against frequency at the rated e.m.f.**<br>• `frequencies_hz`, `sound_pressure_level_db`, `rated_frequency_range_hz`<br>• `.covers_rated_range`, `.relative_response_db(reference_frequency_hz=500.0)`<br>• `.plot(iec_scale=True)`: 50 dB the length of a decade (8.6.2.2 c) | `r.relative_response_db()` |
+| `crosstalk_attenuation` | `function` | **The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).**<br>• `frequencies_hz` [Hz], `driven_level_db`, `other_level_db` [dB re 20 µPa] in the same coupler | `c = electroacoustics.crosstalk_attenuation(f, driven, other)`<br><br>• `CrosstalkAttenuation` |
+| `CrosstalkAttenuation` | `dataclass` | **The difference of the two levels against frequency.**<br>• `frequencies_hz`, `driven_level_db`, `other_level_db`<br>• `.attenuation_db`, `.minimum_db`<br>• `.plot()` | `c.minimum_db` |
+| `field_comparison_response` | `function` | **The free-field or diffuse-field comparison frequency response (IEC 60268-7 8.6.3, 8.6.4).**<br>• `frequencies_hz` [Hz] with the reference band, `field_level_db` [dB re 20 µPa] per band (or per person), `source_emf_v` (persons, bands) [V] for equal loudness<br>• keyword-only: `field` 'free' or 'diffuse'; `reference_frequency_hz` (Default: 500, the standard measuring frequency of 7.2 b)<br>• 20 lg(p/E) referred to the reference band, per person | `r = electroacoustics.field_comparison_response(f, 70.0, e, field="free")`<br><br>• `FieldComparisonResponse` |
+| `FieldComparisonResponse` | `dataclass` | **The responses of a panel of test persons.**<br>• `field`, `frequencies_hz`, `response_db` (persons, bands), `reference_frequency_hz`<br>• `.persons`, `.mean_db`, `.standard_deviation_db`, `.meets_panel_size` (8 persons), `.qualifies_as_reference` (16 persons)<br>• `.plot()`: the mean as bars with each band's standard deviation | `r.mean_db` |
+| `ear_canal_frequency_response` | `function` | **The ear canal sound pressure level frequency response, Formula (1) (IEC 60268-7 8.6.5).**<br>• `frequencies_hz` [Hz] with 500 Hz, `earphone_levels_db` and `sound_field_levels_db` (persons, 2, bands) [dB]: the two fittings c), d) and the two sound-field readings b), e)<br>• keyword-only: `reference_frequency_hz` (Default: 500) | `r = electroacoustics.ear_canal_frequency_response(f, le, ls)`<br><br>• `EarCanalFrequencyResponse` |
+| `EarCanalFrequencyResponse` | `dataclass` | **Formula (1) for each person and the panel.**<br>• `frequencies_hz`, `earphone_levels_db`, `sound_field_levels_db`, `reference_frequency_hz`<br>• `.response_db`, `.mean_db`, `.standard_deviation_db`, `.persons`, `.meets_panel_size`; `.fitting_difference_db` and `.fittings_consistent` (2,5 dB, item f); `.level_match_db` and `.levels_matched` (3 dB, item c)<br>• `.plot()` | `r.fittings_consistent` |
+| `verify_ear_canal_microphone` | `function` | **Verify a probe microphone for the ear canal (IEC 60268-7 Annex B a to e).**<br>• keyword-only: `entrance_area_mm2` (≤ 5 mm²), `canal_section_area_mm2` (less than 0,6 of `ear_canal_area_mm2`, Default: 45 mm²), `volume_mm3` (< 130 mm³), `pink_noise_band_levels_db` (neighbours within 3 dB), `open_levels_db` and `sealed_levels_db` (sealed 15 dB below) | `v = electroacoustics.verify_ear_canal_microphone(entrance_area_mm2=4.0, ...)`<br><br>• `EarCanalMicrophoneVerification` |
+| `EarCanalMicrophoneVerification` | `dataclass` | **The verdict of Annex B.**<br>• `entrance_area_mm2`, `canal_section_area_mm2`, `ear_canal_area_mm2`, `volume_mm3`, `neighbour_difference_db`, `sealed_attenuation_db`<br>• `.area_ratio`, `.requirements` (item letter to verdict), `.passes`; `bool()` raises<br>• `.plot()`: each item as a share of its limit | `v.requirements["e"]` |
+| `headphone_modulation_signal` / `headphone_difference_frequency_signal` | `function` | **The distortion test signals of IEC 60268-7 8.7.3 and 8.7.4.**<br>• `fs` [Hz], `seconds` [s]; keyword-only `rated_source_emf_v` [V]; for the second also `upper_frequency_hz` [Hz]<br>• 70 Hz and 600 Hz in the ratio 4:1 with the rated peak (−1,9 dB and −14,0 dB, NOTE 1); two tones 80 Hz apart at half the rated voltage each; read with `modulation_distortion` and `difference_frequency_distortion` | `x = electroacoustics.headphone_modulation_signal(48000, 1.0, rated_source_emf_v=1.0)` |
 | `expansion_chamber` | `function` | **Expansion-chamber silencer TL/IL (Bies Eq. 8.111, four-pole).**<br>• `frequencies`, `length` L, `chamber_area`, `pipe_area`<br>• `source_impedance`/`radiation_impedance` (Default: None → no IL) | `res = noise_control.expansion_chamber(f, 0.3, 0.04, 0.01)`<br><br>• `ReactiveSilencerResult` |
 | `plot_silencer_geometry` | `function` | **To-scale silencer cross-section.**<br>• `kind`: the `ReactiveSilencerResult.kind` strings<br>• Chamber: `length`, `chamber_area`, `pipe_area` (+ `inlet_extension`/`outlet_extension`)<br>• Branch: `duct_area` + Helmholtz (`neck_area`, `neck_length`, `cavity_volume`) or quarter-wave (`length`, `branch_area`)<br>• `language` | `plot_silencer_geometry('expansion chamber', length=0.3, chamber_area=0.03, pipe_area=0.005)`<br><br>• Equivalent circular diameters 2·√(S/π); also `ReactiveSilencerResult.plot_geometry()` |
 | `helmholtz_resonator` / `quarter_wave_resonator` | `function` | **Side-branch resonator silencers (Bies Eqs. 8.46/8.44).**<br>• Helmholtz: `duct_area`, `neck_area`, `neck_length`, `cavity_volume`<br>• Quarter-wave: `duct_area`, `length`, `branch_area` | `quarter_wave_resonator(f, 0.01, 1.5, 2e-3)` |
@@ -53797,7 +54426,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `ReciprocityCalibration`, `ReciprocityUncertaintyBudget`, `CouplerTransferImpedance`, `HeatConductionCorrection`, `CapillaryTubeImpedance`, `WaveMotionCorrection`, `CouplerCheck`, `CouplerParameterUncertainty`, `ReciprocityAirAttenuation`, `AcousticCentre`, `FreeFieldArrangementCheck`, `FreeFieldParameterUncertainty`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AgcCharacteristic`, `QuadraturePhaseError`, `MaximumOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `ReciprocityCalibration`, `ReciprocityUncertaintyBudget`, `CouplerTransferImpedance`, `HeatConductionCorrection`, `CapillaryTubeImpedance`, `WaveMotionCorrection`, `CouplerCheck`, `CouplerParameterUncertainty`, `ReciprocityAirAttenuation`, `AcousticCentre`, `FreeFieldArrangementCheck`, `FreeFieldParameterUncertainty`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AgcCharacteristic`, `QuadraturePhaseError`, `MaximumOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `ProgrammeSignalCheck`, `RatedImpedanceVerification`, `ProgrammeCharacteristicVoltage`, `LimitingTestSignalCheck`, `ProtectionVoltage`, `CouplerFrequencyResponse`, `CrosstalkAttenuation`, `FieldComparisonResponse`, `EarCanalFrequencyResponse`, `EarCanalMicrophoneVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -68671,11 +69300,20 @@ anti-alias requirement, turned into an explicit, checkable specification by
 `resample_signal`'s stopband attenuation and transition width.
 
 **Not covered.** IEC 60268-1:1985 is a general standard for sound system
-equipment, and only its Annex A tone-burst clauses are implemented; amplifiers,
-loudspeakers, connectors and the rest are untouched. `fractional_delay` and the
-coloured-noise generators of `noise_signal` are general-purpose DSP tools with
-no governing standard of their own, and their accuracy claims are closed-form,
-not normative.
+equipment; only the Annex A tone-burst clauses are implemented on this page.
+Its Clause 7, the simulated programme signal, is in
+`electroacoustics.programme_signal` and has its walk-through in the
+[Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/)
+guide. The device parts are not covered here, but they are not untouched
+either: amplifiers (IEC 60268-3), microphones (IEC 60268-4), loudspeakers
+(IEC 60268-5) and headphones (IEC 60268-7) have their own guides under
+[Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/), and the speech
+transmission index of IEC 60268-16 has the
+[Speech Transmission Index](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/)
+guide; only the connector parts are absent from the library altogether.
+`fractional_delay` and the coloured-noise generators of `noise_signal` are
+general-purpose DSP tools with no governing standard of their own, and their
+accuracy claims are closed-form, not normative.
 
 ## See also
 
@@ -71018,7 +71656,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1851 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1877 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -72026,7 +72664,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1851 numerical conformance checks across 110 domains and 520 standards, covering
+1877 numerical conformance checks across 111 domains and 521 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

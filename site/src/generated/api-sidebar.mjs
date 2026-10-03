@@ -370,6 +370,8 @@ export const apiSections = {
       'reference/api/electroacoustics/sound-reinforcement',
       'reference/api/electroacoustics/induction-loop',
       'reference/api/electroacoustics/induction-loop-components',
+      'reference/api/electroacoustics/programme-signal',
+      'reference/api/electroacoustics/headphones',
     ],
   },
   'noise_control': {

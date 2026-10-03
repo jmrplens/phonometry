@@ -90,6 +90,7 @@ const ANCHORED = [
       '/signals/filters/block-processing/',
       '/signals/filters/multichannel/',
       '/reference/theory/signal-analysis/',
+      '/devices/electroacoustics/headphones/',
     ],
   },
   {

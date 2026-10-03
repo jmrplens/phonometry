@@ -493,6 +493,7 @@ export const topics = [
           'devices/electroacoustics/microphones',
           'devices/electroacoustics/swept-sine-distortion',
           'devices/electroacoustics/induction-loops',
+          'devices/electroacoustics/headphones',
           { slug: 'devices/broadcast', label: 'Broadcast overview', translations: { es: 'Resumen de radiodifusión' } },
           'devices/broadcast/program-loudness',
           'devices/broadcast/quasi-peak',

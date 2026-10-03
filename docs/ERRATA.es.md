@@ -11160,6 +11160,222 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Table 1" lo evalúan banda a banda y con tonos que pasan por él.
 - **Estado:** no reportada.
 
+## IEC 60268-7:2010, 8.7.3.3, fórmula (3) ($U_{470}$ por el producto a 460 Hz)
+
+- **Ubicación:** 8.7.3.3 c), fórmula (3), p. 28 impresa.
+- **El impreso:** «$L_\mathrm{d3} = 20 \log \{(U_{470} + U_{740})/U_{600}\}$», un
+  párrafo después del punto b), que dice «the third-order components are at
+  460 Hz and 740 Hz».
+- **El problema:** la señal de ensayo de 8.7.3.2 es el par de 70 Hz y 600 Hz,
+  así que los productos de modulación de tercer orden están en
+  $600 \pm 2 \times 70$ Hz, 460 Hz y 740 Hz, como dice el punto b). Ningún
+  producto de los dos tonos cae en 470 Hz: el subíndice de la primera tensión
+  debería ser 460.
+- **Evidencia:** el punto b) y la fórmula (3) en la página 30 del PDF (p. 28
+  impresa) de IEC 60268-7:2010, edición 3.0.
+- **Comportamiento de la biblioteca:**
+  [`headphone_modulation_signal`](../src/phonometry/electroacoustics/headphones.py)
+  genera el par de 70 Hz y 600 Hz, y `modulation_distortion` lee los productos
+  de tercer orden en 460 Hz y 740 Hz; la fila de conformidad de 8.7.3.3 b)
+  fija las cuatro frecuencias de los productos.
+- **Estado:** sin notificar.
+
+## IEC 60268-7:2010, 8.7.4.2 c), fórmula (5) (un paréntesis que se cierra sin haberse abierto)
+
+- **Ubicación:** 8.7.4.2 c), fórmula (5), p. 29 impresa.
+- **El impreso:** «$L_\mathrm{dd3} = 20 \log \{U_{2f2-f1} + U_{2f1-f2})/2\,U_{f2}\}$».
+- **El problema:** se abre una llave antes de $U_{2f2-f1}$ y se cierra un
+  paréntesis después de $U_{2f1-f2}$ que nunca se abrió, de modo que el
+  impreso deja sin decir si $2U_{f2}$ divide a los dos productos o solo al
+  segundo. La característica a la que remite 8.7.4.1 es la de IEC
+  60268-3:2013, 14.12.8.1 b): «the ratio of the arithmetic sum of the output
+  voltages at frequencies $2f_2 - f_1$ and $2f_1 - f_2$ to the reference
+  voltage $U_{2,\mathrm{ref}}$ which is equal to twice the output voltage
+  $U_{2,f2}$», es decir,
+  $20\lg\{(U_{2f_2-f_1} + U_{2f_1-f_2})/2U_{f_2}\}$.
+- **Evidencia:** la fórmula (5) en la página 31 del PDF (p. 29 impresa) de
+  IEC 60268-7:2010, edición 3.0, leída frente a 14.12.8.1 b) en la página 38
+  del PDF (p. 36 impresa) de IEC 60268-3:2013.
+- **Comportamiento de la biblioteca:**
+  [`difference_frequency_distortion`](../src/phonometry/electroacoustics/intermodulation.py)
+  divide la suma aritmética de los dos productos de tercer orden por la suma
+  de las amplitudes de los dos tonos, que es $2U_{f_2}$ para los tonos iguales
+  de
+  [`headphone_difference_frequency_signal`](../src/phonometry/electroacoustics/headphones.py).
+  No hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
+## IEC 60268-7:2010, 8.7.4.2 a) (la señal de ensayo remitida a 8.7.3.1)
+
+- **Ubicación:** 8.7.4.2 a), p. 28 impresa.
+- **El impreso:** «The headphone is brought under standard measuring
+  conditions, and then the input signal is changed to that required for the
+  measurement (see 8.7.3.1).»
+- **El problema:** 8.7.3.1 es el apartado general de la distorsión de
+  modulación, una sola frase que remite a IEC 60268-2. La señal que necesita
+  la medida de la distorsión por diferencia de frecuencias, dos sinusoides
+  separadas 80 Hz que dan cada una la mitad de la tensión de entrada asignada,
+  está en 8.7.4.1, unas líneas por encima del punto.
+- **Evidencia:** 8.7.3.1, 8.7.4.1 y 8.7.4.2 a) en la página 30 del PDF
+  (p. 28 impresa) de IEC 60268-7:2010, edición 3.0.
+- **Comportamiento de la biblioteca:** no hace falta ninguno.
+  [`headphone_difference_frequency_signal`](../src/phonometry/electroacoustics/headphones.py)
+  genera la señal de 8.7.4.1.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 60268-7:2010, figura 3, NOTA (el simulador de cabeza y torso citado como IEC 60969)
+
+- **Ubicación:** la NOTA bajo la figura 3, «Illustrated measurement diagram
+  by simulated programme signal», p. 16 impresa.
+- **El impreso:** «Power summation of the 1/3-octave-analized data
+  multiplied by filtering coefficients given by IEC 61672-1 and/or IEC 60969
+  gives the corrected voltage.»
+- **El problema:** los coeficientes de filtrado a los que se refiere la NOTA
+  son los de los dos filtros que 7.4 enumera sobre la figura, la ponderación A
+  de IEC 61672-1 y el «free field compensating filter, that is the filter with
+  inverse response of the free field response of the manikin specified in IEC
+  60959». La propia figura rotula el maniquí «HATS (IEC 60959)», y el
+  capítulo 2 incluye IEC TR 60959 entre las referencias normativas; no incluye
+  ninguna IEC 60969. Las cifras están transpuestas.
+- **Evidencia:** 7.4 y la figura 3 en las páginas 17 y 18 del PDF (pp. 15 y
+  16 impresas), y el capítulo 2 en la página 9 del PDF (p. 7 impresa), de IEC
+  60268-7:2010, edición 3.0.
+- **Comportamiento de la biblioteca:** no hace falta ninguno.
+  [`programme_signal_level`](../src/phonometry/electroacoustics/headphones.py)
+  recibe la respuesta en campo libre del simulador de cabeza y torso como dato
+  y la compensa.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 60268-7:2010, 8.6.3 a 8.6.5 (referencias cruzadas que no llegan a su apartado)
+
+- **Ubicación:** 8.6.3.2 a) y b), 8.6.3.3, 8.6.4.2 a) y b), 8.6.4.3,
+  8.6.5.2 a) y b) y 8.6.5.3, pp. 24 a 27 impresas.
+- **El impreso:** las medidas por comparación en campo libre y en campo
+  difuso llevan el auricular a las condiciones de comparación «(see 7.4 and
+  Annex C)» y «(see 7.4 and Annex D)», y cubren «at least the rated frequency
+  range (see 8.6.5)»; 8.6.3.3 usa un auricular «measured as described in
+  8.6.2.2» y 8.6.4.3 uno «measured as described in 8.6.3.2», con sus
+  resultados «calculated as described in 8.6.3.2»; 8.6.5.2 a) remite a
+  «8.6.2.2 or 8.6.3.2 and Annex E» para las condiciones, b) a 8.6.5 para el
+  rango de frecuencias asignado y lee el micrófono de sonda «through a 1/3
+  octave filter with appropriate centre frequency (see 7.5 and Annex B)»;
+  8.6.5.3 es «the same as given in 8.6.4.2, except that the sound field is
+  replaced by a headphone, previously calibrated by the method of 8.6.4.2,
+  using at least 16 test persons».
+- **El problema:** 7.4 son las condiciones de medida con la señal de programa
+  simulado; las condiciones de comparación en campo libre y en campo difuso son
+  7.5.2 y 7.5.3, y las condiciones de medida en el conducto auditivo, con «A
+  very small microphone, in accordance with the requirements in Annex B», son
+  7.6, no 7.5, que son las condiciones de comparación de sonoridad. El rango de
+  frecuencias asignado es 8.6.6, que 8.6.2.2 b) cita bien. La medida directa de
+  la que tiene que salir una referencia de sustitución, y cuyo cálculo sigue,
+  es 8.6.3.2 en campo libre y 8.6.4.2 en campo difuso; las condiciones que
+  toma prestadas 8.6.5.2 a) son las de esos mismos dos métodos, 8.6.3.2 y
+  8.6.4.2; y el método directo en el conducto auditivo que repite 8.6.5.3 es
+  8.6.5.2. Cada referencia se queda un apartado antes del que describe su
+  texto. El segundo 8.6.4.2 de 8.6.5.3 sigue la misma pauta: el auricular que
+  sustituye al campo sonoro de una medida en el conducto auditivo tiene que
+  calibrarse por el método del conducto auditivo, 8.6.5.2, porque 8.6.4.2 es
+  una comparación de sonoridad frente al campo difuso solo y no puede calibrar
+  la respuesta en el conducto auditivo en campo libre que 8.6.5.1 a) también
+  abarca.
+- **Evidencia:** las referencias leídas frente a los apartados que nombran, en
+  las páginas 26 a 29 del PDF (pp. 24 a 27 impresas), con 7.4 a 7.6 en las
+  páginas 17 a 19 del PDF (pp. 15 a 17 impresas), de IEC 60268-7:2010,
+  edición 3.0.
+- **Comportamiento de la biblioteca:**
+  [`field_comparison_response`](../src/phonometry/electroacoustics/headphones.py)
+  y `ear_canal_frequency_response` siguen el texto de cada método; el panel de
+  16 sujetos de una referencia de sustitución es el de 8.6.3.3 y 8.6.4.3
+  (`FieldComparisonResponse.qualifies_as_reference`), y el de 8.6.5.3 se lee
+  como un panel del método directo en el conducto auditivo
+  (`EarCanalFrequencyResponse.qualifies_as_reference`). La fila de conformidad
+  «IEC 60268-7:2010 8.6.5.3 with 8.6.5.2 h)» fija los 8 y los 16 sujetos.
+- **Estado:** sin notificar (defecto de referencia cruzada).
+
+## IEC 60268-7:2010, tabla 1 (seis números de apartado que nombran otro apartado)
+
+- **Ubicación:** tabla 1, «Classification of characteristics», p. 32 impresa.
+- **El impreso:** las filas «8.3.4 Rated characteristics of protective
+  devices», «8.5.1 Rated maximum or working sound pressure level», «8.6.5
+  Rated frequency range», «8.7.1 Rated harmonic distortion», «8.7.2 Rated
+  modulation distortion» y «8.7.3 Rated difference-frequency distortion».
+- **El problema:** en esta edición los dispositivos de protección son 8.3.6
+  (8.3.4 es la tensión característica con señal de programa simulado), los
+  niveles de presión acústica máximo y de trabajo se especifican en 8.5.2
+  (8.5.1 es el apartado general), el rango de frecuencias asignado es 8.6.6, y
+  las distorsiones armónica, de modulación y por diferencia de frecuencias son
+  8.7.2, 8.7.3 y 8.7.4 (8.7.1 es el apartado general).
+- **Evidencia:** la tabla 1 en la página 34 del PDF (p. 32 impresa) leída
+  frente al índice de las páginas 4 y 5 del PDF (pp. 2 y 3 impresas) de IEC
+  60268-7:2010, edición 3.0.
+- **Comportamiento de la biblioteca:** no hace falta ninguno; la biblioteca no
+  lee la tabla 1.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 60268-7:2010, 8.3.4.2 NOTA 1 (un factor de cresta atribuido a IEC 60268-1)
+
+- **Ubicación:** 8.3.4.2, NOTA 1, p. 20 impresa.
+- **El impreso:** «IEC 60268-1 specifies the spectrum, filtering circuit and
+  crest factor of the simulated programme signal.»
+- **El problema:** IEC 60268-1:1985, que el capítulo 2 cita sin fecha,
+  especifica el espectro (tabla II, figura 1) y el circuito de filtrado
+  (figura 2) y ningún factor de cresta: el capítulo 7 define la señal como
+  «stationary weighted Gaussian noise without amplitude limiting». Ninguna de
+  las dos modificaciones de 1988 añade uno; la modificación 1 sustituye la
+  tabla AII y la modificación 2 sustituye 12.1. El único factor de cresta que
+  imprimen las dos partes es la «peak-to-r.m.s ratio between 1,8 and 2,2» del
+  propio 8.3.2.2 b) de IEC 60268-7, para la señal recortada de las tensiones
+  límite.
+- **Evidencia:** la NOTA 1 en la página 22 del PDF (p. 20 impresa) y 8.3.2.2
+  b) en la página 21 del PDF (p. 19 impresa) de IEC 60268-7:2010, edición 3.0;
+  el capítulo 7 en la página 15 del PDF (p. 13 impresa), la tabla II en la
+  página 23 del PDF (p. 21 impresa) y las figuras 1 y 2 en la página 24 del
+  PDF (p. 22 impresa) de IEC 60268-1:1985.
+- **Comportamiento de la biblioteca:** no hace falta ninguno.
+  [`simulated_programme_signal`](../src/phonometry/electroacoustics/programme_signal.py)
+  no recorta por defecto, como pide el capítulo 7, y solo recorta a una
+  relación pico/eficaz cuando se le da `peak_to_rms`, que la biblioteca
+  atribuye a 8.3.2.2 b).
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 60268-7:2010, 8.5.2 b) y 8.5.3 c) (dos formas de fijar la f.e.m. de 1 mW)
+
+- **Ubicación:** 8.5.2 b), p. 22 impresa; 8.5.3 c) y d), p. 23 impresa.
+- **El impreso:** 8.5.2 b) define el nivel de presión acústica de trabajo con
+  «a sinusoidal voltage at 500 Hz, in series with the rated source impedance,
+  of such value that 1 mW would be dissipated in a pure resistance equal to
+  the rated impedance of the headphone, connected in place of it». El método,
+  8.5.3 c): «The source e.m.f. is then adjusted so that the voltage across the
+  input connector of the headphone is such that it would cause 1 mW to be
+  dissipated in a pure resistance equal to the rated impedance of the
+  headphone», y d) da el nivel «as the result b) in 8.5.2».
+- **El problema:** las dos fijan f.e.m. distintas. Con una impedancia asignada
+  $R$, una impedancia de fuente asignada $R_\mathrm{s}$ y 1 mW, la definición
+  pide $E = \sqrt{PR}\,(R + R_\mathrm{s})/R$, la f.e.m. que entrega 1 mW a
+  $R$ puesta en lugar del auricular; el método pide la f.e.m. que deja
+  $\sqrt{PR}$ en bornes del propio auricular, cuya impedancia $Z$ a 500 Hz se
+  lleva su parte, $E = \sqrt{PR}\,|Z + R_\mathrm{s}|/|Z|$. Solo coinciden
+  cuando $Z$ es la impedancia asignada o $R_\mathrm{s}$ es cero. Un auricular
+  de 32 Ω que a 500 Hz presenta 40 Ω, sobre la fuente de 120 Ω de IEC 61938,
+  da por el método $20\lg\{(152/32)/(160/40)\} = 1{,}49$ dB menos que por la
+  definición, y la impedancia asignada de 8.2.1 b) deja que el módulo quede en
+  cualquier valor por encima del 80 % de $R$.
+- **Evidencia:** 8.5.2 b) en la página 24 del PDF (p. 22 impresa) y 8.5.3 c)
+  y d) en la página 25 del PDF (p. 23 impresa) de IEC 60268-7:2010, edición
+  3.0.
+- **Comportamiento de la biblioteca:**
+  [`working_sound_pressure_level`](../src/phonometry/electroacoustics/headphones.py)
+  sigue por defecto la definición de 8.5.2 b) a d), y el método de 8.5.3 c)
+  cuando recibe la impedancia medida del auricular a 500 Hz como
+  `headphone_impedance_ohm`; la fila de conformidad «IEC 60268-7:2010 8.5.2 b)
+  and 8.5.3 c)» fija los 1,49 dB.
+- **Estado:** sin notificar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la
@@ -11418,3 +11634,29 @@ concordancia con las fuentes publicadas:
   biblioteca sigue a Delany y Bazley a través de Bies, en
   $X = \rho_0 f/\sigma$, de modo que sus amplitudes **no** deben «corregirse»
   hacia las de Beranek, lo que aplicaría la densidad del aire por segunda vez.
+
+- **IEC 60268-7:2010, «the standard reference frequency» junto a la frecuencia
+  de medida normalizada de 500 Hz:** 7.2 b) fija «the standard measuring
+  frequency» en 500 Hz, y la NOTA de 8.3.3.1 da el motivo para el acoplador,
+  «to avoid the effects of diaphragm resonance, leakage and standing waves».
+  La parte nombra además «the standard reference frequency» (8.3.6.2 b),
+  8.6.3.1, 8.6.4.1, 8.7.2.1, 8.9.1 a)) y nunca la define; IEC 60268-1:1985,
+  que cita el capítulo 2, sí lo hace, en el capítulo 3: «If a measurement
+  relates to a reference frequency, then, in the absence of a clear reason to
+  the contrary, this shall be the standard reference frequency of
+  1 000 Hz». Los métodos por comparación empiezan y terminan su secuencia de
+  ensayo en «the band centred on 1 kHz» (8.6.3.2 c), 8.6.4.2 c)), mientras que
+  la fórmula (1) del método en el conducto auditivo imprime su propia banda de
+  referencia, 500 Hz. Los dos términos no siempre se mantienen separados:
+  8.7.2.1 especifica la distorsión armónica «at the standard reference
+  frequency» y 8.7.2.2 b) aplica la tensión «at the standard measuring
+  frequency». No se registra como errata porque cada apartado puede leerse tal
+  como está impreso. Leído en la página 11 del PDF (p. 9 impresa) de IEC
+  60268-1:1985 y en las páginas 17, 21, 23, 26 a 29 y 31 del PDF (pp. 15, 19,
+  21, 24 a 27 y 29 impresas) de IEC 60268-7:2010. La biblioteca refiere por
+  defecto las respuestas por comparación de
+  [`field_comparison_response`](../src/phonometry/electroacoustics/headphones.py)
+  a 1 000 Hz, y la respuesta en el conducto auditivo y la respuesta relativa
+  del acoplador a 500 Hz; la fila de conformidad «IEC 60268-7:2010 8.6.3.1
+  with IEC 60268-1:1985 Clause 3» fija el valor por defecto. No hay que pasar
+  las respuestas por comparación a 500 Hz para uniformarlas.

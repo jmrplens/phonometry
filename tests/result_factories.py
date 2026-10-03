@@ -2134,3 +2134,105 @@ def _maximum_output_current() -> ph.electroacoustics.MaximumOutputCurrent:
         load_resistance_ohm=0.5,
         rated_thd_percent=1.0,
     )
+
+
+#: One-third-octave centres from 100 Hz to 10 kHz for the headphone results.
+_HEADPHONE_BANDS = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0]
+    + [1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0]
+    + [10000.0]
+)
+
+
+def _programme_signal_check() -> ph.electroacoustics.ProgrammeSignalCheck:
+    """IEC 60268-1:1985 Table II itself, judged against itself."""
+    table = ph.electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
+    return ph.electroacoustics.check_programme_signal(
+        list(table), [band.relative_level_db for band in table.values()]
+    )
+
+
+def _limiting_test_signal() -> ph.electroacoustics.LimitingTestSignalCheck:
+    """IEC 60268-7:2010 8.3.2.2 b): five seconds of the programme signal clipped to 2,0."""
+    x = ph.electroacoustics.simulated_programme_signal(FS, 5.0, peak_to_rms=2.0, seed=1)
+    return ph.electroacoustics.check_limiting_test_signal(x, FS)
+
+
+def _rated_impedance() -> ph.electroacoustics.RatedImpedanceVerification:
+    """IEC 60268-7:2010 8.2.1: a 32 ohm headphone with its resonance at 80 Hz."""
+    f = np.geomspace(20.0, 20000.0, 61)
+    z = 33.0 + 18.0 * np.exp(-(np.log10(f / 80.0) ** 2) / 0.02)
+    return ph.electroacoustics.verify_rated_impedance(
+        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
+    )
+
+
+def _programme_characteristic_voltage() -> (
+    ph.electroacoustics.ProgrammeCharacteristicVoltage
+):
+    """IEC 60268-7:2010 8.3.5: three fittings, A-weighted."""
+    levels = np.array(
+        [np.linspace(70.0, 84.0, _HEADPHONE_BANDS.size) + d for d in (0.0, 0.4, -0.3)]
+    )
+    return ph.electroacoustics.programme_characteristic_voltage(
+        0.05, _HEADPHONE_BANDS, levels, a_weighted=True
+    )
+
+
+def _protection_voltage() -> ph.electroacoustics.ProtectionVoltage:
+    """IEC 60268-7:2010 8.3.6: a limiter that cuts in near 1 V."""
+    emf = np.array([0.1, 0.2, 0.5, 1.0, 2.0, 3.0])
+    return ph.electroacoustics.protection_voltage(
+        emf, 94.0 + 20.0 * np.log10(emf / 0.1) - np.array([0, 0, 0, 0.4, 1.8, 3.5])
+    )
+
+
+def _coupler_frequency_response() -> ph.electroacoustics.CouplerFrequencyResponse:
+    """IEC 60268-7:2010 8.6.2: a response falling 6 dB at each end."""
+    f = np.geomspace(20.0, 20000.0, 61)
+    return ph.electroacoustics.coupler_frequency_response(
+        f,
+        100.0 - 6.0 * np.log10(f / 1000.0) ** 2,
+        rated_frequency_range_hz=(20.0, 20000.0),
+    )
+
+
+def _crosstalk_attenuation() -> ph.electroacoustics.CrosstalkAttenuation:
+    """IEC 60268-7:2010 8.12: crosstalk rising with frequency."""
+    return ph.electroacoustics.crosstalk_attenuation(
+        _HEADPHONE_BANDS,
+        np.full(_HEADPHONE_BANDS.size, 100.0),
+        40.0 + 10.0 * np.log10(_HEADPHONE_BANDS / 100.0),
+    )
+
+
+def _field_comparison_response() -> ph.electroacoustics.FieldComparisonResponse:
+    """IEC 60268-7:2010 8.6.3: eight persons in a free field."""
+    rng = np.random.default_rng(3)
+    emf = 0.05 * 10.0 ** (rng.normal(0.0, 1.0, (8, _HEADPHONE_BANDS.size)) / 20.0)
+    return ph.electroacoustics.field_comparison_response(
+        _HEADPHONE_BANDS, 70.0, emf, field="free"
+    )
+
+
+def _ear_canal_frequency_response() -> ph.electroacoustics.EarCanalFrequencyResponse:
+    """IEC 60268-7:2010 8.6.5: eight persons, two fittings and two field readings each."""
+    rng = np.random.default_rng(4)
+    shape = (8, 2, _HEADPHONE_BANDS.size)
+    return ph.electroacoustics.ear_canal_frequency_response(
+        _HEADPHONE_BANDS,
+        70.0 + rng.normal(0.0, 0.5, shape),
+        70.0 + rng.normal(0.0, 0.5, shape),
+    )
+
+
+def _ear_canal_microphone() -> ph.electroacoustics.EarCanalMicrophoneVerification:
+    """IEC 60268-7:2010 Annex B: a probe microphone inside every limit."""
+    return ph.electroacoustics.verify_ear_canal_microphone(
+        entrance_area_mm2=3.5,
+        canal_section_area_mm2=18.0,
+        volume_mm3=90.0,
+        pink_noise_band_levels_db=[60.0, 61.5, 62.0, 60.5],
+        open_levels_db=[60.0, 62.0, 61.0],
+        sealed_levels_db=[38.0, 40.0, 41.0],
+    )

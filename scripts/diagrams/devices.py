@@ -5192,3 +5192,127 @@ def _d_induction_loop_measurement(s: SVG, th: Theme) -> None:
     for k, (txt, colour) in enumerate(rules):
         s.circle(54, 466 + k * 22, 4.0, colour)
         s.text(70, 471 + k * 22, txt, 12, th.muted, anchor="start")
+
+
+def _d_headphone_measurement(s: SVG, th: Theme) -> None:
+    """IEC 60268-7 Figure 3: the chain a headphone is measured through.
+
+    The source e.m.f. reaches the headphone through the rated source
+    impedance, the headphone sits on an ear simulator or a head and torso
+    simulator, and the simulator's output is read in one-third-octave bands,
+    through the A-weighting and the free-field compensation when a clause asks
+    for them (7.4); the NOTE under the figure does the same by power summation.
+    The lower panel lists what each reading of the chain gives.
+    """
+    ay1, ay2 = 128.0, 300.0  # the two rows of the chain
+
+    def box(
+        x: float,
+        w: float,
+        y: float,
+        head: str,
+        subs: tuple[str, ...],
+        col: str,
+        *,
+        dashed: bool = False,
+    ) -> None:
+        s.rect(
+            x, y - 46, w, 92, th.panel, col, rx=10, sw=2.2, dash="7,5" if dashed else ""
+        )
+        s.text(x + w / 2, y - 16, head, 15, th.fg, bold=True)
+        for k, sub in enumerate(subs):
+            s.text(x + w / 2, y + 8 + k * 18, sub, 12, th.muted)
+
+    # Row 1: generator, power amplifier and the rated source impedance, headphone.
+    box(
+        24,
+        214,
+        ay1,
+        "Signal generator",
+        ("500 Hz sine, or the", "programme signal"),
+        th.primary,
+    )
+    s.arrow(238, ay1, 272, ay1, th.fg, 2.0)
+    box(
+        272,
+        196,
+        ay1,
+        "Power amplifier",
+        ("e.m.f. $E$ read on", "its voltmeter"),
+        th.primary,
+    )
+    s.line(468, ay1, 500, ay1, th.fg, 2.0)
+    s.rect(500, ay1 - 13, 62, 26, th.bg, th.fg, rx=3, sw=2.0)
+    s.text(531, ay1 - 24, "$R_s$", 14, th.fg)
+    s.text(531, ay1 + 34, "source impedance", 11, th.muted)
+    s.text(531, ay1 + 49, "(rated, 8.2.3)", 11, th.muted)
+    s.arrow(562, ay1, 600, ay1, th.fg, 2.0)
+    box(
+        600,
+        276,
+        ay1,
+        "Headphone",
+        ("on an ear simulator (IEC 60711)", "or a HATS (IEC 60959)"),
+        th.secondary,
+    )
+
+    # Row 2, right to left: what the simulator's microphone gives.
+    s.arrow(738, ay1 + 46, 738, ay2 - 46, th.fg, 2.0)
+    box(
+        600,
+        276,
+        ay2,
+        "Measuring amplifier",
+        ("the simulator's", "microphone output"),
+        th.primary,
+    )
+    s.arrow(600, ay2, 566, ay2, th.fg, 2.0)
+    box(
+        396,
+        170,
+        ay2,
+        "Free-field",
+        ("compensation", "if needed (8.3.5)"),
+        th.accent,
+        dashed=True,
+    )
+    s.arrow(396, ay2, 362, ay2, th.fg, 2.0)
+    box(
+        206,
+        156,
+        ay2,
+        "A-weighting",
+        ("IEC 61672-1", "if needed (8.3.5)"),
+        th.accent,
+        dashed=True,
+    )
+    s.arrow(206, ay2, 172, ay2, th.fg, 2.0)
+    box(24, 148, ay2, "Analyser", ("one-third-", "octave bands"), th.primary)
+    s.text(
+        450,
+        ay2 + 70,
+        "or numerically: the power sum of the bands $L_k + A_k − F_k$ "
+        "(NOTE under Figure 3)",
+        13,
+        th.muted,
+    )
+
+    # What each reading of the chain gives.
+    s.rect(24, 400, 852, 196, th.panel, th.secondary, rx=12, sw=2.0)
+    s.text(44, 428, "What each reading gives", 15, th.fg, anchor="start", bold=True)
+    rules = (
+        "94 dB with the 500 Hz sine: the characteristic voltage (8.3.3)",
+        "94 dB with the programme signal, bands power-summed: 8.3.4, and 8.3.5 "
+        "with A and F (3 to 5 fittings)",
+        "1 mW in the rated impedance, or across the headphone: the working "
+        "level (8.5.2 b, 8.5.3 c)",
+        "the rated e.m.f. swept in frequency: the coupler response, 50 dB to "
+        "a decade (8.6.2)",
+        "the clipped programme signal, peak/RMS 1.8 to 2.2: the limiting "
+        "voltages (8.3.2)",
+        "test persons instead of the simulator: loudness comparison (8.6.3, "
+        "8.6.4), probe microphone (8.6.5)",
+    )
+    for k, txt in enumerate(rules):
+        s.circle(54, 452 + k * 24, 4.0, th.secondary)
+        s.text(70, 457 + k * 24, txt, 12, th.muted, anchor="start")

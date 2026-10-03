@@ -10191,6 +10191,32 @@ dos ediciones con las mismas entradas y en el mismo orden.
   mantiene la Fórmula (3) en lo que lee el banco en marcha.
 - **Estado:** no reportada.
 
+## EN 61260:1995, 3.2, NOTA 3 (la razón de octava de base dos rotulada como de base diez)
+
+- **Ubicación:** apartado 3.2, "octave ratio", NOTA 3 y ecuación (2), página
+  impresa 4; apartado 3.7, página impresa 5.
+- **Lo impreso:** la NOTA 1 del 3.2 dice "This standard permits two options,
+  designated base-ten and base-two, for determining an octave-band, or
+  fractional-octave-band, frequency ratio." La NOTA 2 dice "For base-ten
+  systems, $G_{10} = 10^{3/10}$" como ecuación (1), y la NOTA 3 dice "For
+  base-ten systems, $G_2 = 2$" como ecuación (2).
+- **El problema:** la NOTA 3 da la razón de base dos, $G_2 = 2$, con el nombre
+  del otro sistema, de modo que el apartado nombra dos veces el sistema de base
+  diez y ninguna el de base dos. El apartado 3.7 lee la ecuación (2) como se
+  pretende: "G represents an octave frequency ratio calculated according to
+  equation (1) for base-ten systems or (2) for base-two systems". La NOTA 3
+  debería decir "For base-two systems".
+- **Evidencia:** leído en la página 8 del PDF (p. 4 impresa) y en la página 9
+  del PDF (p. 5 impresa) de la BS EN 61260:1996, que es la EN 61260:1995
+  (IEC 61260:1995) con la modificación A1 incorporada, la copia fechada
+  "© BSI 23 August 2002".
+- **Comportamiento de la biblioteca:** no requiere cambios. Los bancos de
+  filtros y [`verify_filter_class`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/compliance.py)
+  con `edition="1995"` usan la razón de base diez $G = 10^{3/10}$ de la
+  ecuación (1), la que prefiere la NOTA 4, y nada en la biblioteca lee la
+  ecuación (2) por su rótulo.
+- **Estado:** no reportada.
+
 ## IEC 61672-1:2013, tabla 3 (el límite inferior de clase 1 a 6 300 Hz impreso con punto decimal)
 
 - **Ubicación:** tabla 3, "Frequency weightings and acceptance limits", fila
@@ -10879,6 +10905,73 @@ dos ediciones con las mismas entradas y en el mismo orden.
   `test_a_broad_ridge_is_kept_and_the_sweep_ends` en
   [`tests/environment/sources/test_acoustic_roughness.py`](https://github.com/jmrplens/phonometry/blob/main/tests/environment/sources/test_acoustic_roughness.py)
   lo fijan en los dos.
+- **Estado:** no reportada.
+
+## EN 15610:2009, anexo B, B.9.2 (filtros del método B pasados hacia delante y hacia atrás, fuera de todas las clases de la EN 61260)
+
+- **Ubicación:** anexo B (informativo), B.9.2, la sección de filtrado digital
+  del listado de RoughProcess.m, página impresa 25, descrita en el B.6, página
+  impresa 20; apartado 7.4.3, página impresa 15, y apartado 2, página impresa
+  5.
+- **Lo impreso:** el listado fija los bordes de banda `fsmin=fsc/(2^(1/6))` y
+  `fsmax=fsc*(2^(1/6))` alrededor de los centros `fsc=1./wl_d`, diseña cada
+  banda con `order=3;` y `[b,a]=butter(order,Wn);`, filtra con
+  `rf=filtfilt(b,a,rraw);` y da `specdf(q)=std(rf);` del registro que queda
+  tras cortar 2 m de cada extremo. El apartado 7.4.3 dice: "The digital
+  filters shall comply with EN 61260", y el apartado 2 fecha esa referencia
+  como EN 61260 (IEC 61260:1995).
+- **El problema:** `butter(3,Wn)` diseña un filtro paso banda que cae 3 dB en
+  `fsmin` y `fsmax`, y `filtfilt` lo pasa hacia delante y luego hacia atrás,
+  así que el filtro por el que pasa de verdad el registro tiene el cuadrado de
+  su respuesta en módulo: 6,02 dB de caída en sus propios bordes de banda.
+  Tomando el `fsc` del listado como frecuencia central exacta y la razón de
+  base dos con la que están construidos sus bordes, la tabla 1 de la
+  EN 61260:1995 admite justo dentro de un borde de banda una atenuación
+  relativa de como mucho 4,5 dB, 5,0 dB y 5,5 dB para las clases 0, 1 y 2, y
+  el 4.5.3 limita la respuesta integrada del filtro
+  $\Delta B = 10 \lg (B_\mathrm{e}/B_\mathrm{r})$, con $B_\mathrm{e}$ de la
+  ecuación (14) y $B_\mathrm{r} = G^{1/(2b)} - G^{-1/(2b)}$ de la ecuación (9),
+  a $\pm 0{,}15$ dB, $\pm 0{,}3$ dB y $\pm 0{,}5$ dB. La respuesta al
+  cuadrado da $\Delta B = -0{,}59$ dB en todas las bandas de `wl_d` de 0,5 m a
+  4 mm con un muestreo de 1 mm, y $-0{,}58$ dB en las bandas de 3,15 mm y
+  2,5 mm, donde el muestreo deforma la respuesta. Los
+  filtros del listado no cumplen por tanto ninguna clase de la EN 61260 en
+  ninguna banda, en ninguno de los dos requisitos, que es lo que el 7.4.3 les
+  pide, y una banda de espectro plano se lee unos 0,6 dB por debajo. El mismo
+  filtro pasado una sola vez hacia delante caería 3,01 dB en los bordes, con
+  $\Delta B$ de $+0{,}15$ dB a $+0{,}20$ dB, dentro de la clase 1. Un comentario de la misma
+  sección, "used later for fsc(q)<50 ie lambda >0.02", no concuerda con la
+  prueba que hace el código, `if fsc(q)>=20` y `elseif fsc(q)<20`, que manda
+  al registro diezmado las bandas de más de 0,05 m.
+- **Evidencia:** el listado leído en la página 27 del PDF (p. 25 impresa), el
+  B.6 en la página 22 del PDF (p. 20 impresa), el apartado 7.4.3 en la página
+  17 del PDF (p. 15 impresa) y el apartado 2 en la página 7 del PDF (p. 5
+  impresa) de la BS EN 15610:2009, la implementación británica de la
+  EN 15610:2009; la tabla 1 en la página 14 del PDF (p. 10 impresa), la
+  ecuación (9) en la página 10 del PDF (p. 6 impresa), las ecuaciones (13) y
+  (14) en la página 15 del PDF (p. 11 impresa) y el 4.5.3 en la página 16 del
+  PDF (p. 12 impresa) de la BS EN 61260:1996, que es la IEC 61260:1995. Las
+  atenuaciones y $\Delta B$ son un recálculo: los filtros del listado
+  diseñados con `scipy.signal.butter`, el mismo diseño que la función de
+  MATLAB, con un muestreo de 1 mm (y sobre el registro diezmado por 10 para
+  `fsc<20`), su respuesta elevada al cuadrado, leída en los bordes de banda e
+  integrada con la ecuación (14).
+- **Comportamiento de la biblioteca:**
+  [`filtered_roughness_spectrum`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/acoustic_roughness.py)
+  pasa cada banda una sola vez hacia delante por las secciones de Butterworth
+  de orden 4 de
+  [`roughness_filter_bank`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/acoustic_roughness.py),
+  a la frecuencia de muestreo del propio registro, un banco de clase 0 de la
+  EN 61260:1995 en la tabla 1 hasta el número de onda de Nyquist del registro,
+  en el 4.5.3 y en el 4.9;
+  `test_the_bank_is_class_0_on_table_1_of_en_61260_1995`,
+  `test_the_bank_attenuates_class_0_beyond_g4_on_a_record`,
+  `test_the_integrated_response_of_every_band_is_within_class_0` y
+  `test_the_summation_of_outputs_is_within_class_0` en
+  [`tests/environment/sources/test_roughness_method_b.py`](https://github.com/jmrplens/phonometry/blob/main/tests/environment/sources/test_roughness_method_b.py)
+  lo fijan, y las comprobaciones de conformidad "EN 15610:2009 7.4.3 and
+  EN 61260:1995 Table 1" y "EN 15610:2009 7.4.3 and EN 61260:1995 4.8 and
+  Table 1" lo evalúan banda a banda y con tonos que pasan por él.
 - **Estado:** no reportada.
 
 ## Propiedades de las fuentes, relacionadas, que no son erratas

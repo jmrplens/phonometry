@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1802 numerical conformance checks against 519 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1809 numerical conformance checks against 519 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1802 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1809 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -37055,6 +37055,43 @@ limit is Figure 2 of ISO 3095, which prints its twenty-two values beside the
 points (`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`); the Annex B listing of EN 15610
 prints them again.
 
+**Method B (EN 15610 7.4.3).** The record runs through digital one-third
+octave band filters and each band is the mean square of its output, once 2 m
+are discarded at either end for the filter transients; a record needs 5 m
+(NOTE 1) and the records of a line 15 m analysed in total, which
+`check_reference_track` judges. The filters "shall comply with EN 61260", the
+1995 edition: `roughness_filter_bank` is the library's own `OctaveFilterBank`
+run at the record's samples per metre, order 4 Butterworth sections on the
+base-ten bands Method A reports, class 0 of EN 61260:1995 on Table 1, on the
+integrated response of 4.5.3 and on the summation of 4.9. Every band runs at
+the record's own rate, without the band-by-band decimation the library's banks
+use by default: decimated, the wavenumbers that fold onto a band would come
+through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks beyond
+$G^{\pm 4}$, so the grade here reaches the Nyquist wavenumber of the record and
+covers all a record goes through. A band is reported
+when its filter has settled to within 0,15 dB (the class 0 tolerance of 4.5.3)
+over the length analysed: a 5 m record reports from 0,25 m, a 20 m one from
+0,5 m.
+
+```python
+from phonometry import filters
+
+bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
+print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+# 4 24 0
+x = np.arange(0.0, 20.0, 1.0e-3)
+record = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength
+raw = {"spike_removal": False, "curvature_processing": False}
+filtered = environment.filtered_roughness_spectrum(record, sample_spacing_m=1.0e-3, **raw)
+fourier = environment.acoustic_roughness_spectrum(record, sample_spacing_m=1.0e-3, **raw)
+print(filtered.record_length_m, filtered.wavelengths_m[0])
+# 16.0 0.5
+print(round(filtered.level_at(0.01), 3), round(fourier.level_at(0.01), 3))
+# 6.532 6.532   10 lg(9/2) dB re 1 um by both methods
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg" alt="Roughness level in dB re 1 µm against wavelength of one 20 m record by both methods: Method A from 25 cm and Method B from 50 cm down to 0.25 cm, within a few tenths of a decibel of each other where both report, about 3 dB under the Figure 2 limit" width="88%"></picture>
+
 **Track decay rate (EN 15461).** From the band magnitudes of the responses on
 the hammer grid of Figure 2, Formula 1 gives
 $\mathrm{DR} = 4{,}343 / \sum |A(x_n)|^2/|A(x_0)|^2\,\Delta x_n$ dB/m, with the floor
@@ -37085,8 +37122,12 @@ G.6). `pass_by_uncertainty` reproduces the worked budget of Table G.2:
 The printed tables disagree in three places (the 25 m distance of Table G.1
 printed as 0,004 dB; the ground level at 7,5 m, 0,55 dB in Table G.1 and
 0,30 dB in Table G.2; the wind screen interval with its bounds out of order),
-and the spike-removal loop of the EN 15610 listing leaves out the change of
-sign of 7.2 c) and never ends on a sharp bend of the rail; see the
+the spike-removal loop of the EN 15610 listing leaves out the change of sign
+of 7.2 c) and never ends on a sharp bend of the rail, and the Method B filters
+of the same listing, third-order Butterworth run forward and back, are 6,02 dB
+down at their band edges (just inside them, where Table 1 allows at most 5,5 dB
+for class 2) and read a flat band about 0,6 dB low, outside every class of
+EN 61260 that 7.4.3 requires; see the
 [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
 
 ## What this page does not cover
@@ -37094,8 +37135,9 @@ sign of 7.2 c) and never ends on a sharp bend of the rail; see the
 The measurement itself (the stationary mesh, finding $T_1$ and $T_2$ inside a
 train, the site and weather checks, Annex B beyond Formula B.1), the speed
 normalisation of 6.7.1, which has no formula, the tonal difference of 6.7.2,
-Annex F, the editing of rail defects and Method B of EN 15610, the measurement
-of the frequency response functions of EN 15461, and the roughness of wheels.
+Annex F, the editing of rail defects and the concatenation of records of
+EN 15610 7.5, the measurement of the frequency response functions of
+EN 15461, and the roughness of wheels.
 
 ## See also
 
@@ -51935,7 +51977,7 @@ documents, one page per module.
 | `SmallRoughnessDeviation` | `dataclass` | **The Annex C chain.**<br>• `corrected_roughness_levels_db` (C.1) / `roughness_correction_db` (C.2)<br>• `.revised_noise_levels_db` (C.3) / `.impact_db` (C.4)<br>• `.exceeded` / `.passes` (no truth value) / `.plot()` | `c.impact_db` |
 | `roughness_comparability` | `function` | **Annex E: bound what the roughness of two tracks could change in a pass-by level.**<br>• `roughness_1` / `roughness_2`<br>• `noise_levels_1_db` / `noise_levels_2_db` / `frequencies_hz` / `speed_kmh` | `e = environment.roughness_comparability(r1, r2, L1, L2, frequencies_hz=f, speed_kmh=80.0)`<br><br>• `RoughnessComparability` |
 | `RoughnessComparability` | `dataclass` | **The four differences of Formula E.4 and the bound of E.5.**<br>• `level_differences_db` / `.bound_db`<br>• `.envelope_min` / `.envelope_max` (E.1) / `.plot()` | `e.bound_db` |
-| `check_reference_track` | `function` | **6.2: is this a reference track for the constant-speed test?**<br>• `roughness`: one spectrum per rail or line / `decay_rates`: vertical and lateral<br>• `speed_kmh` / `curve_radius_m` / `track_gradient_ratio`<br>• `small_deviations`: the Annex C verdict of this speed on the quadratic average of the rails, which accepts a small exceedance (another speed or roughness is refused)<br>• `roughness_limit_db` / `decay_limits_db_per_m` | `chk = environment.check_reference_track([r1, r2], [vert, lat], speed_kmh=160.0)`<br><br>• `ReferenceTrackCheck` |
+| `check_reference_track` | `function` | **6.2: is this a reference track for the constant-speed test?**<br>• `roughness`: one spectrum per rail or line (a Method B line needs 15 m analysed, EN 15610 7.4.3) / `decay_rates`: vertical and lateral<br>• `speed_kmh` / `curve_radius_m` / `track_gradient_ratio`<br>• `small_deviations`: the Annex C verdict of this speed on the quadratic average of the rails, which accepts a small exceedance (another speed or roughness is refused)<br>• `roughness_limit_db` / `decay_limits_db_per_m` | `chk = environment.check_reference_track([r1, r2], [vert, lat], speed_kmh=160.0)`<br><br>• `ReferenceTrackCheck` |
 | `ReferenceTrackCheck` | `dataclass` | **The track verdict.**<br>• `conditions` (one `TrackCondition` per requirement) / `.failed`<br>• `roughness_limit_db` / `decay_limits_db_per_m` (read-only copies) / `small_deviations` (the Annex C verdict the limit rested on, else `None`)<br>• `.passes` (no truth value) / `.plot(panel="roughness" \| "decay")` | `chk.passes` |
 | `TrackCondition` | `dataclass` | **One requirement of 6.2 and whether it holds.**<br>• `clause` / `requirement` / `holds` (`None` when not judged) / `detail` | `chk.conditions[0].holds` |
 | `REFERENCE_TRACK_ROUGHNESS_LIMIT_DB` | `mapping` | **Figure 2: the roughness limit, nominal wavelength [m] → dB re 1 µm, 0,4 m to 3,15 mm.** | `REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.01]  # -8.0` |
@@ -51943,7 +51985,9 @@ documents, one page per module.
 | `pass_by_uncertainty` | `function` | **Annex G: u_c = √Σu², U = 2 u_c, and the reading plus the mean value corrections.**<br>• `reading_db`<br>• `inputs`: `metrology.Quantity` per input (value = ΔLp, uncertainty = u)<br>• `coverage_factor` | `environment.pass_by_uncertainty(55.0, inputs)`<br><br>• `PassByUncertainty` |
 | `PassByUncertainty` | `dataclass` | **An Annex G budget.**<br>• `.level_db` / `.combined_uncertainty_db` / `.expanded_uncertainty_db`<br>• `.variance_ratios` (Figure G.1) / `.plot()` | `u.expanded_uncertainty_db` |
 | `acoustic_roughness_spectrum` | `function` | **EN 15610:2009 7.2 to 7.4: the one-third octave band roughness of a record, Method A.**<br>• `roughness_um` / `sample_spacing_m` (1 mm or less)<br>• `spike_removal` / `curvature_processing`<br>• `segment_length_m`: at least 1 m | `s = environment.acoustic_roughness_spectrum(r, sample_spacing_m=1e-3)`<br><br>• `AcousticRoughnessSpectrum` |
-| `AcousticRoughnessSpectrum` | `dataclass` | **A roughness spectrum, longest wavelength first.**<br>• `wavelengths_m` / `levels_db` (dB re 1 µm)<br>• `record_length_m` / `segment_count`<br>• `.bands` / `.level_at(wavelength_m)` / `.plot(limit_db=...)` | `s.level_at(0.01)` |
+| `AcousticRoughnessSpectrum` | `dataclass` | **A roughness spectrum, longest wavelength first.**<br>• `wavelengths_m` / `levels_db` (dB re 1 µm)<br>• `record_length_m` (for Method B, the length analysed) / `segment_count`<br>• `method`: `"A"`, `"B"` or `None`<br>• `.bands` / `.level_at(wavelength_m)` / `.plot(limit_db=...)` | `s.level_at(0.01)` |
+| `filtered_roughness_spectrum` | `function` | **EN 15610:2009 7.4.3: the one-third octave band roughness of a record through digital filters, Method B.**<br>• `roughness_um` / `sample_spacing_m` (1 mm or less, a whole number of samples per metre)<br>• `spike_removal` / `curvature_processing`<br>• 2 m discarded at either end, so a record of at least 5 m | `s = environment.filtered_roughness_spectrum(r, sample_spacing_m=1e-3)`<br><br>• `AcousticRoughnessSpectrum` |
+| `roughness_filter_bank` | `function` | **EN 15610 7.4.3: the one-third octave filters of Method B, class 0 of EN 61260:1995, every band at the record's own rate.**<br>• `sample_spacing_m`<br>• `longest_wavelength_m`: 0,5 m by default, as in the Annex B listing | `bank = environment.roughness_filter_bank(sample_spacing_m=1e-3)`<br><br>• `filters.OctaveFilterBank` |
 | `remove_roughness_spikes` | `function` | **EN 15610 7.2: narrow upward spikes replaced by straight lines.**<br>• `roughness_um` / `sample_spacing_m` | `environment.remove_roughness_spikes(r, sample_spacing_m=1e-3)` |
 | `curvature_processed_roughness` | `function` | **EN 15610 7.3: the record as a wheel of 0,375 m radius rides it.**<br>• `roughness_um` / `sample_spacing_m` / `curve_radius_m` | `environment.curvature_processed_roughness(r, sample_spacing_m=1e-3)` |
 | `redistributed_band_energies` | `function` | **EN 15610 Annex C: band energies shared among other bands by the width they cover.**<br>• `source_lower` / `source_upper` / `energies`<br>• `target_lower` / `target_upper` | `environment.redistributed_band_energies(lo, hi, e, tlo, thi)` |
@@ -70002,7 +70046,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1802 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1809 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -71010,7 +71054,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1802 numerical conformance checks across 109 domains and 519 standards, covering
+1809 numerical conformance checks across 109 domains and 519 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

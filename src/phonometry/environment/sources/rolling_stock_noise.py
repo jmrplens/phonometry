@@ -112,6 +112,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ._shared import _TOLERANCE
 from .acoustic_roughness import (
+    _MINIMUM_FILTERED_TOTAL_M,
     AcousticRoughnessSpectrum,
     _band_edges,
     _band_of_wavelength,
@@ -1671,6 +1672,10 @@ def roughness_comparability(
 # ---------------------------------------------------------------------------
 
 
+#: Where the length a line analysed by digital filters needs is written.
+_FILTERED_LENGTH_CLAUSE = "EN 15610 7.4.3"
+
+
 @dataclass(frozen=True)
 class TrackCondition:
     """One requirement of the reference track and whether it holds.
@@ -1751,14 +1756,15 @@ class ReferenceTrackCheck:
         """Whether every requirement judged holds and none was left unjudged for want of data.
 
         The curve radius and the gradient are judged only when given; the
-        roughness and both decay rates are always required.
+        roughness and both decay rates are always required, and so is the
+        length of a line analysed by EN 15610 Method B.
         """
         return all(
             c.holds is True for c in self.conditions if c.holds is not None
         ) and all(
             c.holds is not None
             for c in self.conditions
-            if c.clause in {"6.2.5", "6.2.6"}
+            if c.clause in {"6.2.5", "6.2.6", _FILTERED_LENGTH_CLAUSE}
         )
 
     @property
@@ -2041,6 +2047,37 @@ def _roughness_conditions(
     return [coverage, within], through_annex_c
 
 
+def _filtered_length_condition(
+    roughness: Sequence[AcousticRoughnessSpectrum],
+) -> TrackCondition | None:
+    """The length EN 15610 7.4.3 asks of every line analysed by digital filters.
+
+    ``None`` when no spectrum says it came from Method B.
+    """
+    filtered = [s for s in roughness if s.method == "B"]
+    if not filtered:
+        return None
+    requirement = (
+        f"at least {_MINIMUM_FILTERED_TOTAL_M:g} m of record analysed by digital "
+        "filtering on every line, once 2 m are discarded at either end"
+    )
+    lengths = [s.record_length_m for s in filtered]
+    if any(length is None for length in lengths):
+        return TrackCondition(
+            clause=_FILTERED_LENGTH_CLAUSE,
+            requirement=requirement,
+            holds=None,
+            detail="a Method B spectrum without its record length",
+        )
+    shortest = min(length for length in lengths if length is not None)
+    return TrackCondition(
+        clause=_FILTERED_LENGTH_CLAUSE,
+        requirement=requirement,
+        holds=shortest >= _MINIMUM_FILTERED_TOTAL_M * (1.0 - _TOLERANCE),
+        detail=f"{shortest:g} m on the shortest line",
+    )
+
+
 def _decay_condition(
     direction: str,
     spectra: Sequence[TrackDecayRate],
@@ -2136,7 +2173,12 @@ def check_reference_track(
     0,003 m to 0,25 m above, and must not exceed the limit of Figure 2 in any
     band (EN 15610 clause 8). A small exceedance is accepted when Annex C
     finds its effect on the pass-by level at most 1 dB: pass the result of
-    :func:`check_small_roughness_deviations` for the speed.
+    :func:`check_small_roughness_deviations` for the speed. A line analysed
+    by the digital filters of EN 15610 Method B
+    (:func:`~phonometry.environment.sources.acoustic_roughness.filtered_roughness_spectrum`)
+    must also have at least 15 m of record analysed once 2 m are discarded
+    at either end of each record (EN 15610 7.4.3), judged on the record
+    length its average carries.
 
     **6.2.6.** The vertical and the lateral decay rates of every set of
     measurements must be at least the limits of Figure 3 in every band from
@@ -2182,6 +2224,9 @@ def check_reference_track(
     conditions, through_annex_c = _roughness_conditions(
         roughness, speed, roughness_limit, small_deviations
     )
+    filtered_length = _filtered_length_condition(roughness)
+    if filtered_length is not None:
+        conditions.append(filtered_length)
     conditions += _decay_conditions(decay_rates, decay_limits)
     if curve_radius_m is not None:
         radius = require_positive(curve_radius_m, "curve_radius_m")

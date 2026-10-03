@@ -35,6 +35,21 @@ portion of their width inside the band (Annex C,
 (3.3, Formula 1). A record of a given length only resolves wavelengths up to
 a quarter of it (7.5), so a 1 m segment reports down to the 0,25 m band.
 
+Method B of 7.4.3 (:func:`filtered_roughness_spectrum`) runs digital one-third
+octave filters along the record itself and takes the mean square of each
+band's output, once 2 m at either end have been discarded for the filter
+transients; a record therefore needs at least 5 m (NOTE 1), and the records
+of a line at least 15 m once those ends are gone. The filters "shall comply
+with EN 61260", the 1995 edition the normative references date. The bank is
+the library's own (:func:`roughness_filter_bank`, an
+:class:`~phonometry.filters.OctaveFilterBank` running at so many samples per
+metre): base-ten bands, the same ones Method A reports, of order 4
+Butterworth sections, every band run at the record's own sampling rate, class
+0 of EN 61260:1995 on its Table 1
+(:func:`~phonometry.filters.verify_filter_class` with ``edition="1995"``, up
+to the Nyquist wavenumber of the record), on the filter integrated response
+of 4.5.3 and on the summation of outputs of 4.9.
+
 **7.6, the average.** The spectra of the records of one line are averaged on
 their mean squares, without weighting by where along the test section they
 were taken (:func:`average_roughness_spectra`), and 6.4.3 sets how many lines
@@ -44,12 +59,23 @@ limit and allows no band above it; that verdict, with the flexibility of ISO
 3095 Annex C, is
 :func:`~phonometry.environment.sources.rolling_stock_noise.check_reference_track`.
 
-**What is left to the tester.** Method B, the digital one-third octave
-filters of 7.4.3 on records of at least 5 m, is not implemented: Method A is
-the one Annex B uses by default and the one the Fourier synthesis of Annex C
-serves. The spike height :math:`h` of 7.2 is not defined by the clause; it is
-read here, as the Annex B listing computes it, as the height of the peak above
-the straight line the spike is replaced by.
+**Readings of the library.** The spike height :math:`h` of 7.2 is not
+defined by the clause; it is read here, as the Annex B listing computes it, as
+the height of the peak above the straight line the spike is replaced by. The
+filters of Method B ring for a distance that grows with the wavelength of
+their band, and 7.4.3 allows them 2 m to settle whatever the band: a band is
+reported only when, over the length analysed, its filter has built up to
+within 0,15 dB of its steady output, the class 0 tolerance of EN 61260:1995
+4.5.3 on the integrated response. That is the reason for order 4, the lowest
+whose bank is class 0: it settles soonest. The bank is not decimated band by
+band, as the library's banks are by default: the anti-alias filter of the
+decimation lets the wavenumbers that fold onto a band around each decimated
+rate through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks
+at and beyond :math:`G^{\pm 4}` in Table 1, and 4.8 asks the anti-alias
+filters of a sampled-data system to keep aliased components from breaking
+those limits. Run at the record's own rate, a band has no alias, and its
+response is graded up to the Nyquist wavenumber. The filters of the Annex B
+listing do not comply with EN 61260 (see the errata register).
 
 Read from BS EN 15610:2009, which is identical to EN 15610:2009 (its national
 foreword).
@@ -64,7 +90,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import read_only
-from ..._internal.validation import require_finite_array, require_positive
+from ..._internal.validation import (
+    require_choice,
+    require_finite_array,
+    require_positive,
+)
 from ._shared import _TOLERANCE
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -73,13 +103,17 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ...filters import OctaveFilterBank
+
 __all__ = [
     "AcousticRoughnessSpectrum",
     "acoustic_roughness_spectrum",
     "average_roughness_spectra",
     "curvature_processed_roughness",
+    "filtered_roughness_spectrum",
     "redistributed_band_energies",
     "remove_roughness_spikes",
+    "roughness_filter_bank",
     "roughness_measurement_lines",
 ]
 
@@ -115,6 +149,33 @@ _RESOLVED_FRACTION = 0.25
 
 #: 7.4.2: the overlap of successive segments.
 _SEGMENT_OVERLAP = 0.5
+
+#: 7.4.3: the length discarded at either end of a record after filtering, in
+#: metres, "to remove the effects of filter transients".
+_FILTER_TRANSIENT_M = 2.0
+
+#: 7.4.3: the least length the records of one line must leave, in metres, once
+#: the 2 m at either end of each have been discarded.
+_MINIMUM_FILTERED_TOTAL_M = 15.0
+
+#: The order of the Butterworth band filters of Method B: the lowest whose
+#: bank, run at the record's own rate, is class 0 of EN 61260:1995 on Table 1,
+#: 4.5.3 and 4.9 (order 3 misses Table 1 in the bands near the Nyquist
+#: wavenumber), and the one that settles soonest inside the 2 m 7.4.3 allows
+#: for it.
+_FILTER_ORDER = 4
+
+#: EN 61260:1995 4.5.3: the class 0 limit on the filter integrated response,
+#: in decibels. A Method B band is reported only when the transient left after
+#: the 2 m discarded moves its level by no more than this.
+_SETTLING_TOLERANCE_DB = 0.15
+
+#: Annex B, B.9.2: the longest wavelength the listing filters (``wl_max``),
+#: in metres, the default reach of :func:`roughness_filter_bank`.
+_LISTING_LONGEST_WAVELENGTH_M = 0.5
+
+#: The labels of the two spectral analyses of 7.4.
+_METHODS = ("A", "B")
 
 #: 6.4.3: the reference widths, in millimetres, above which three lines are
 #: measured 5 mm apart and then 10 mm apart.
@@ -395,7 +456,8 @@ def redistributed_band_energies(
 class AcousticRoughnessSpectrum:
     r"""A one-third octave band spectrum of acoustic rail roughness (EN 15610).
 
-    Built by :func:`acoustic_roughness_spectrum` from a record, by
+    Built by :func:`acoustic_roughness_spectrum` (Method A) or
+    :func:`filtered_roughness_spectrum` (Method B) from a record, by
     :func:`average_roughness_spectra` from several, or directly from the band
     levels of a report, which is all the ISO 3095 checks need.
 
@@ -405,25 +467,34 @@ class AcousticRoughnessSpectrum:
     :param levels_db: The acoustic roughness level :math:`L_r` of each band,
         dB re 1 µm.
     :param record_length_m: The length of roughness the spectrum was taken
-        from, in metres; ``None`` when not known.
+        from, in metres: for Method B, what is left once the 2 m at either
+        end of each record have been discarded (7.4.3); ``None`` when not
+        known.
     :param segment_count: How many Fourier segments were averaged into it;
-        ``None`` when not known.
+        ``None`` when not known, and for Method B, which has none.
+    :param method: ``"A"`` for the Fourier analysis of 7.4.2, ``"B"`` for the
+        digital filters of 7.4.3; ``None`` when not known or when an average
+        mixes the two.
     """
 
     wavelengths_m: NDArray[np.float64]
     levels_db: NDArray[np.float64]
     record_length_m: float | None = None
     segment_count: int | None = None
+    method: str | None = None
 
     def __post_init__(self) -> None:
         """Hold the bands as read-only arrays, one level per band, longest first.
 
         :raises ValueError: For wavelengths that are not positive, levels
-            that are not finite, arrays of different lengths, or bands that
-            are not in decreasing order of wavelength.
+            that are not finite, arrays of different lengths, bands that are
+            not in decreasing order of wavelength, or a method that is
+            neither ``"A"`` nor ``"B"``.
         """
         from ..._internal.validation import require_positive_array
 
+        if self.method is not None:
+            require_choice(self.method, "method", _METHODS)
         wavelengths = require_positive_array(self.wavelengths_m, "wavelengths_m")
         levels = require_finite_array(self.levels_db, "levels_db")
         if wavelengths.size != levels.size:
@@ -486,6 +557,27 @@ class AcousticRoughnessSpectrum:
         )
 
 
+def _require_sampling_interval(spacing: float) -> None:
+    """Refuse a sampling interval above the 1 mm of 5.5."""
+    if spacing > _MAXIMUM_SAMPLING_INTERVAL_M * (1.0 + _TOLERANCE):
+        msg = f"'sample_spacing_m' is {spacing:g} m; 5.5 asks for 1 mm or less."
+        raise ValueError(msg)
+
+
+def _longest_resolved_band(length_m: float) -> int:
+    """The longest band whose nominal wavelength is at most a quarter of ``length_m`` (7.5)."""
+    reach = length_m * _RESOLVED_FRACTION
+    band = _band_of_wavelength(reach)
+    if _nominal_wavelength_m(band) > reach * (1.0 + _TOLERANCE):
+        band += 1
+    return band
+
+
+def _shortest_band(rate_per_m: float) -> int:
+    """The shortest band whose upper edge lies below the Nyquist wavenumber."""
+    return int(math.floor(10.0 * (math.log10(rate_per_m / 2.0) - _HALF_BAND_DECADES)))
+
+
 def _segments(record: NDArray[np.float64], samples: int) -> NDArray[np.float64]:
     """The segments of 7.4.2, overlapping by half, one per row."""
     step = max(1, int(round(samples * (1.0 - _SEGMENT_OVERLAP))))
@@ -534,9 +626,7 @@ def acoustic_roughness_spectrum(
         than 1 m, or a record shorter than one segment.
     """
     record, spacing = _record(roughness_um, sample_spacing_m)
-    if spacing > _MAXIMUM_SAMPLING_INTERVAL_M * (1.0 + _TOLERANCE):
-        msg = f"'sample_spacing_m' is {spacing:g} m; 5.5 asks for 1 mm or less."
-        raise ValueError(msg)
+    _require_sampling_interval(spacing)
     segment_m = require_positive(segment_length_m, "segment_length_m")
     if segment_m < _MINIMUM_RECORD_M * (1.0 - _TOLERANCE):
         msg = f"'segment_length_m' is {segment_m:g} m; 7.4.2 asks for at least 1 m."
@@ -566,14 +656,7 @@ def acoustic_roughness_spectrum(
     line_width = 1.0 / (samples * spacing)
     wavenumbers = np.arange(density.size) * line_width
     line_energy = density[1:] * line_width
-    longest_band = _band_of_wavelength(segment_m * _RESOLVED_FRACTION)
-    if _nominal_wavelength_m(longest_band) > segment_m * _RESOLVED_FRACTION * (
-        1.0 + _TOLERANCE
-    ):
-        longest_band += 1
-    nyquist = rate / 2.0
-    shortest_band = int(math.floor(10.0 * (math.log10(nyquist) - _HALF_BAND_DECADES)))
-    bands = np.arange(longest_band, shortest_band + 1)
+    bands = np.arange(_longest_resolved_band(segment_m), _shortest_band(rate) + 1)
     if bands.size == 0:
         msg = "the segment and the sampling interval leave no whole band between them."
         raise ValueError(msg)
@@ -592,6 +675,227 @@ def acoustic_roughness_spectrum(
         levels_db=levels,
         record_length_m=float(record.size * spacing),
         segment_count=int(segments.shape[0]),
+        method="A",
+    )
+
+
+def _samples_per_metre(spacing: float) -> int:
+    """The sampling rate of a record, which the filter bank needs whole."""
+    rate = round(1.0 / spacing)
+    if rate < 1 or not math.isclose(rate, 1.0 / spacing, rel_tol=_TOLERANCE):
+        msg = (
+            f"'sample_spacing_m' is {spacing:g} m, which is not a whole number of "
+            "samples per metre; the one-third octave filter bank of Method B runs "
+            "at a whole number of them."
+        )
+        raise ValueError(msg)
+    return int(rate)
+
+
+def roughness_filter_bank(
+    *,
+    sample_spacing_m: float,
+    longest_wavelength_m: float = _LISTING_LONGEST_WAVELENGTH_M,
+) -> OctaveFilterBank:
+    r"""The one-third octave filters Method B runs along a record (7.4.3).
+
+    7.4.3 asks for digital one-third octave band filters that "shall comply
+    with EN 61260", the 1995 edition (IEC 61260:1995) the normative
+    references of EN 15610:2009 date. This is the library's own bank,
+    :class:`~phonometry.filters.OctaveFilterBank`, run with the record's
+    samples per metre for a sample rate, so that its frequencies are
+    wavenumbers in cycles per metre: base-ten bands centred on
+    :math:`10^{k/10}` per metre, the bands Method A reports, of order 4
+    Butterworth sections, every band run at the record's own rate.
+    Passed to :func:`~phonometry.filters.verify_filter_class` with
+    ``edition="1995"`` it grades class 0 on Table 1 of EN 61260:1995 in every
+    band, from the lowest wavenumbers up to the Nyquist wavenumber of the
+    record, and its filter integrated response (4.5.3) and summation of
+    outputs (4.9) are within the class 0 limits too. Order 4 is the lowest
+    that is class 0, and the lowest settles soonest inside the 2 m 7.4.3
+    discards for the filter transients.
+
+    The bank is designed without the band-by-band decimation the library's
+    banks use by default (``FilterDesign(resample=False)``). Decimated, it
+    would let the wavenumbers that fold onto a band around each decimated
+    rate through only about 73 dB to 75 dB down, the stopband of the
+    decimator's anti-alias filter: class 1 still, but short of the 75 dB
+    class 0 asks at and beyond :math:`G^{\pm 4}` in Table 1, and 4.8 asks
+    the anti-alias filters of a sampled-data system to keep aliased
+    components from breaking those limits. At the record's own rate a band
+    has no alias, and what the grade reads is what a record goes through.
+
+    :param sample_spacing_m: The sampling interval of the records, in metres;
+        5.5 asks for 1 mm or less, and the bank needs a whole number of
+        samples per metre.
+    :param longest_wavelength_m: The longest band the bank holds, by its
+        nominal wavelength, in metres; 0,5 m by default, where the Annex B
+        listing stops (``wl_max``). The bank runs from that band to the
+        shortest whose upper edge lies below the Nyquist wavenumber.
+    :return: The filter bank.
+    :raises ValueError: For a sampling interval above 1 mm or that is not a
+        whole number of samples per metre, or a longest wavelength that leaves
+        no band above the Nyquist band.
+    """
+    spacing = require_positive(sample_spacing_m, "sample_spacing_m")
+    _require_sampling_interval(spacing)
+    rate = _samples_per_metre(spacing)
+    longest = require_positive(longest_wavelength_m, "longest_wavelength_m")
+    first = _band_of_wavelength(longest)
+    if _nominal_wavelength_m(first) > longest * (1.0 + _TOLERANCE):
+        first += 1
+    last = _shortest_band(rate)
+    if first > last:
+        msg = (
+            f"no one-third octave band lies between {longest:g} m and the "
+            f"Nyquist wavenumber of {rate / 2.0:g} per metre."
+        )
+        raise ValueError(msg)
+    from ...filters import FilterDesign, OctaveFilterBank
+
+    return OctaveFilterBank(
+        rate,
+        fraction=3,
+        order=_FILTER_ORDER,
+        limits=[10.0 ** (first / 10.0), 10.0 ** (last / 10.0)],
+        design=FilterDesign(resample=False),
+    )
+
+
+def _settling_deficit_db(
+    bank: OctaveFilterBank, index: int, start: int, stop: int
+) -> float:
+    r"""How far a band reads below its steady level over the samples analysed.
+
+    A filter switched on at the start of a record builds its output up as
+    the energy of its impulse response accumulates: for an input that is
+    steady across the band, the mean square at :math:`x` is the steady one
+    times :math:`E(x)/E(\infty)`, :math:`E` the running energy of the
+    impulse response. The deficit is that ratio averaged over the samples
+    from ``start`` to ``stop`` of the record, in decibels, computed on the
+    band's sections at the rate the bank runs them at.
+    """
+    from scipy.signal import sosfilt
+
+    factor = int(bank.factor[index])
+    first = math.ceil(start / factor)
+    last = max(first + 1, math.ceil(stop / factor))
+    length = max(last, 64)
+    # Double the impulse response until its second half carries nothing
+    # measurable; a stable filter's tail falls geometrically after that.
+    doublings = 24
+    for _ in range(doublings):
+        impulse = np.zeros(length)
+        impulse[0] = 1.0
+        energy = np.cumsum(sosfilt(bank.sos[index], impulse) ** 2)
+        if energy[-1] - energy[length // 2] <= 1.0e-12 * energy[-1]:
+            break
+        length *= 2
+    built = energy[first:last] / energy[-1]
+    return float(10.0 * np.log10(np.mean(built)))
+
+
+def filtered_roughness_spectrum(
+    roughness_um: ArrayLike,
+    *,
+    sample_spacing_m: float,
+    spike_removal: bool = True,
+    curvature_processing: bool = True,
+) -> AcousticRoughnessSpectrum:
+    r"""The one-third octave band acoustic roughness of a record by digital filters (7.4.3, Method B).
+
+    The record is processed as 7.1 asks, spikes first
+    (:func:`remove_roughness_spikes`) and curvature next
+    (:func:`curvature_processed_roughness`), and its mean and linear trend
+    are removed, as the Annex B listing does before either analysis. It then
+    runs through the one-third octave filters of
+    :func:`roughness_filter_bank`, and 2 m of every band's output are
+    discarded at either end "to remove the effects of filter transients"
+    (7.4.3). The band level is the mean square of what is left,
+    :math:`L_r = 10 \lg (r_\mathrm{RMS}^2 / r_0^2)` with
+    :math:`r_0 = 1\ \mathrm{\mu m}` (Formula 1).
+
+    The bands reported are those whose nominal wavelength is at most a
+    quarter of the length analysed (7.5) and whose filter, over that length,
+    has built up to within 0,15 dB of its steady output, the class 0
+    tolerance of EN 61260:1995 4.5.3; the longest bands ring on past the 2 m
+    allowed and are left out until the record is long enough to dilute what
+    is left of their transient. A 5 m record reports from the 0,25 m band
+    down, a 19 m one from the 0,5 m band, and the shortest band is the one
+    whose upper edge lies below the Nyquist wavenumber.
+
+    :param roughness_um: The roughness record, in micrometres, at equal
+        intervals, with joints, welds and defects already edited out.
+    :param sample_spacing_m: The sampling interval, in metres; 5.5 asks for
+        1 mm or less, and the filter bank needs a whole number of samples per
+        metre.
+    :param spike_removal: Whether to apply 7.2 first.
+    :param curvature_processing: Whether to apply 7.3 next.
+    :return: The spectrum, longest wavelength first, with the length
+        analysed (the record less 2 m at either end) as its record length and
+        ``"B"`` as its method. The records of one line need at least 15 m
+        analysed in total (7.4.3), which
+        :func:`~phonometry.environment.sources.rolling_stock_noise.check_reference_track`
+        judges on their average.
+    :raises ValueError: For a sampling interval above 1 mm or that is not a
+        whole number of samples per metre, or a record shorter than 5 m
+        (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end).
+    """
+    record, spacing = _record(roughness_um, sample_spacing_m)
+    _require_sampling_interval(spacing)
+    rate = _samples_per_metre(spacing)
+    discard = round(_FILTER_TRANSIENT_M * rate)
+    analysed = record.size - 2 * discard
+    minimum = round(_MINIMUM_RECORD_M * rate)
+    if analysed < minimum:
+        msg = (
+            f"the record is {record.size * spacing:g} m long; 7.4.3 discards 2 m "
+            "at either end and NOTE 1 asks for at least 5 m, leaving 1 m."
+        )
+        raise ValueError(msg)
+    if spike_removal:
+        record = remove_roughness_spikes(record, sample_spacing_m=spacing)
+    if curvature_processing:
+        record = curvature_processed_roughness(record, sample_spacing_m=spacing)
+    from scipy.signal import detrend
+
+    record = detrend(record, type="linear")
+    analysed_m = analysed / rate
+    stop = discard + analysed
+    # Every band 7.5 allows, designed but not run; from the shortest up, the
+    # bands whose filter settles within tolerance over the stretch analysed.
+    candidates = roughness_filter_bank(
+        sample_spacing_m=spacing,
+        longest_wavelength_m=_nominal_wavelength_m(_longest_resolved_band(analysed_m)),
+    )
+    settled = 0
+    for index in range(candidates.num_bands - 1, -1, -1):
+        deficit = _settling_deficit_db(candidates, index, discard, stop)
+        if abs(deficit) > _SETTLING_TOLERANCE_DB:
+            break
+        settled += 1
+    if not settled:
+        msg = "no band of the filter bank settles within the length analysed."
+        raise ValueError(msg)
+    first = round(10.0 * math.log10(float(candidates.freq[-settled])))
+    bank = roughness_filter_bank(
+        sample_spacing_m=spacing, longest_wavelength_m=_nominal_wavelength_m(first)
+    )
+    outputs = bank.filter(
+        record, sigbands=True, calculate_level=False, detrend=False
+    ).require_bands()
+    levels = []
+    for output in outputs:
+        band = np.asarray(output, dtype=np.float64)[discard:stop]
+        mean_square = max(float(np.mean(band**2)), np.finfo(np.float64).tiny)
+        levels.append(10.0 * math.log10(mean_square / _REFERENCE_ROUGHNESS_UM**2))
+    bands = [round(10.0 * math.log10(float(f))) for f in bank.freq]
+    return AcousticRoughnessSpectrum(
+        wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
+        levels_db=np.array(levels),
+        record_length_m=float(analysed_m),
+        segment_count=None,
+        method="B",
     )
 
 
@@ -611,7 +915,8 @@ def average_roughness_spectra(
 
     :param spectra: The spectra to average.
     :return: The average, with the record lengths and segment counts summed
-        when every spectrum carries them.
+        when every spectrum carries them, and the method of the spectra when
+        they all share one.
     :raises ValueError: For no spectrum, or spectra with no band in common.
     """
     if not spectra:
@@ -633,6 +938,7 @@ def average_roughness_spectra(
     levels = 10.0 * np.log10(energies / len(spectra))
     lengths = [s.record_length_m for s in spectra]
     counts = [s.segment_count for s in spectra]
+    methods = {s.method for s in spectra}
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
         levels_db=levels,
@@ -642,6 +948,7 @@ def average_roughness_spectra(
         segment_count=None
         if None in counts
         else int(sum(c for c in counts if c is not None)),
+        method=methods.pop() if len(methods) == 1 else None,
     )
 
 

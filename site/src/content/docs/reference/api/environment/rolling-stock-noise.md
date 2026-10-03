@@ -264,7 +264,12 @@ asks for three) must cover at least 0,003 m to 0,10 m up to 190 km/h and
 0,003 m to 0,25 m above, and must not exceed the limit of Figure 2 in any
 band (EN 15610 clause 8). A small exceedance is accepted when Annex C
 finds its effect on the pass-by level at most 1 dB: pass the result of
-[`check_small_roughness_deviations`](/phonometry/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations) for the speed.
+[`check_small_roughness_deviations`](/phonometry/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations) for the speed. A line analysed
+by the digital filters of EN 15610 Method B
+([`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum))
+must also have at least 15 m of record analysed once 2 m are discarded
+at either end of each record (EN 15610 7.4.3), judged on the record
+length its average carries.
 
 **6.2.6.** The vertical and the lateral decay rates of every set of
 measurements must be at least the limits of Figure 3 in every band from
@@ -781,7 +786,8 @@ The requirements that do not hold.
 Whether every requirement judged holds and none was left unjudged for want of data.
 
 The curve radius and the gradient are judged only when given; the
-roughness and both decay rates are always required.
+roughness and both decay rates are always required, and so is the
+length of a line analysed by EN 15610 Method B.
 
 ### ReferenceTrackCheck.plot()
 

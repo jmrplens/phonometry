@@ -41,6 +41,21 @@ $$
 (3.3, Formula 1). A record of a given length only resolves wavelengths up to
 a quarter of it (7.5), so a 1 m segment reports down to the 0,25 m band.
 
+Method B of 7.4.3 ([`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum)) runs digital one-third
+octave filters along the record itself and takes the mean square of each
+band's output, once 2 m at either end have been discarded for the filter
+transients; a record therefore needs at least 5 m (NOTE 1), and the records
+of a line at least 15 m once those ends are gone. The filters "shall comply
+with EN 61260", the 1995 edition the normative references date. The bank is
+the library's own ([`roughness_filter_bank`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_filter_bank), an
+[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank) running at so many samples per
+metre): base-ten bands, the same ones Method A reports, of order 4
+Butterworth sections, every band run at the record's own sampling rate, class
+0 of EN 61260:1995 on its Table 1
+([`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) with `edition="1995"`, up
+to the Nyquist wavenumber of the record), on the filter integrated response
+of 4.5.3 and on the summation of outputs of 4.9.
+
 **7.6, the average.** The spectra of the records of one line are averaged on
 their mean squares, without weighting by where along the test section they
 were taken ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra)), and 6.4.3 sets how many lines
@@ -50,12 +65,23 @@ limit and allows no band above it; that verdict, with the flexibility of ISO
 3095 Annex C, is
 [`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track).
 
-**What is left to the tester.** Method B, the digital one-third octave
-filters of 7.4.3 on records of at least 5 m, is not implemented: Method A is
-the one Annex B uses by default and the one the Fourier synthesis of Annex C
-serves. The spike height $h$ of 7.2 is not defined by the clause; it is
-read here, as the Annex B listing computes it, as the height of the peak above
-the straight line the spike is replaced by.
+**Readings of the library.** The spike height $h$ of 7.2 is not
+defined by the clause; it is read here, as the Annex B listing computes it, as
+the height of the peak above the straight line the spike is replaced by. The
+filters of Method B ring for a distance that grows with the wavelength of
+their band, and 7.4.3 allows them 2 m to settle whatever the band: a band is
+reported only when, over the length analysed, its filter has built up to
+within 0,15 dB of its steady output, the class 0 tolerance of EN 61260:1995
+4.5.3 on the integrated response. That is the reason for order 4, the lowest
+whose bank is class 0: it settles soonest. The bank is not decimated band by
+band, as the library's banks are by default: the anti-alias filter of the
+decimation lets the wavenumbers that fold onto a band around each decimated
+rate through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks
+at and beyond $G^{\pm 4}$ in Table 1, and 4.8 asks the anti-alias
+filters of a sampled-data system to keep aliased components from breaking
+those limits. Run at the record's own rate, a band has no alias, and its
+response is graded up to the Nyquist wavenumber. The filters of the Annex B
+listing do not comply with EN 61260 (see the errata register).
 
 Read from BS EN 15610:2009, which is identical to EN 15610:2009 (its national
 foreword).
@@ -120,12 +146,14 @@ AcousticRoughnessSpectrum(
     levels_db: NDArray[np.float64],
     record_length_m: float | None = None,
     segment_count: int | None = None,
+    method: str | None = None,
 )
 ```
 
 A one-third octave band spectrum of acoustic rail roughness (EN 15610).
 
-Built by [`acoustic_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#acoustic_roughness_spectrum) from a record, by
+Built by [`acoustic_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#acoustic_roughness_spectrum) (Method A) or
+[`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum) (Method B) from a record, by
 [`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra) from several, or directly from the band
 levels of a report, which is all the ISO 3095 checks need.
 
@@ -135,8 +163,9 @@ levels of a report, which is all the ISO 3095 checks need.
 | :--- | :--- |
 | `wavelengths_m` | The nominal band wavelengths, in metres, from the longest to the shortest as clause 9 draws them; each names the base-ten one-third octave band of wavenumber it is nominal for. |
 | `levels_db` | The acoustic roughness level $L_r$ of each band, dB re 1 µm. |
-| `record_length_m` | The length of roughness the spectrum was taken from, in metres; `None` when not known. |
-| `segment_count` | How many Fourier segments were averaged into it; `None` when not known. |
+| `record_length_m` | The length of roughness the spectrum was taken from, in metres: for Method B, what is left once the 2 m at either end of each record have been discarded (7.4.3); `None` when not known. |
+| `segment_count` | How many Fourier segments were averaged into it; `None` when not known, and for Method B, which has none. |
+| `method` | `"A"` for the Fourier analysis of 7.4.2, `"B"` for the digital filters of 7.4.3; `None` when not known or when an average mixes the two. |
 
 ### AcousticRoughnessSpectrum.bands
 
@@ -219,7 +248,7 @@ limit. Only the bands every spectrum has are averaged.
 | :--- | :--- |
 | `spectra` | The spectra to average. |
 
-**Returns:** The average, with the record lengths and segment counts summed when every spectrum carries them.
+**Returns:** The average, with the record lengths and segment counts summed when every spectrum carries them, and the method of the spectra when they all share one.
 
 **Raises**
 
@@ -269,6 +298,57 @@ of the record can win the maximum, so the search is limited to them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an invalid record, spacing or radius. |
+
+## filtered_roughness_spectrum
+
+```python
+filtered_roughness_spectrum(
+    roughness_um: ArrayLike,
+    *,
+    sample_spacing_m: float,
+    spike_removal: bool = True,
+    curvature_processing: bool = True,
+) -> AcousticRoughnessSpectrum
+```
+
+The one-third octave band acoustic roughness of a record by digital filters (7.4.3, Method B).
+
+The record is processed as 7.1 asks, spikes first
+([`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)) and curvature next
+([`curvature_processed_roughness`](/phonometry/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)), and its mean and linear trend
+are removed, as the Annex B listing does before either analysis. It then
+runs through the one-third octave filters of
+[`roughness_filter_bank`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_filter_bank), and 2 m of every band's output are
+discarded at either end "to remove the effects of filter transients"
+(7.4.3). The band level is the mean square of what is left,
+$L_r = 10 \lg (r_\mathrm{RMS}^2 / r_0^2)$ with
+$r_0 = 1\ \mathrm{\mu m}$ (Formula 1).
+
+The bands reported are those whose nominal wavelength is at most a
+quarter of the length analysed (7.5) and whose filter, over that length,
+has built up to within 0,15 dB of its steady output, the class 0
+tolerance of EN 61260:1995 4.5.3; the longest bands ring on past the 2 m
+allowed and are left out until the record is long enough to dilute what
+is left of their transient. A 5 m record reports from the 0,25 m band
+down, a 19 m one from the 0,5 m band, and the shortest band is the one
+whose upper edge lies below the Nyquist wavenumber.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `roughness_um` | The roughness record, in micrometres, at equal intervals, with joints, welds and defects already edited out. |
+| `sample_spacing_m` | The sampling interval, in metres; 5.5 asks for 1 mm or less, and the filter bank needs a whole number of samples per metre. |
+| `spike_removal` | Whether to apply 7.2 first. |
+| `curvature_processing` | Whether to apply 7.3 next. |
+
+**Returns:** The spectrum, longest wavelength first, with the length analysed (the record less 2 m at either end) as its record length and `"B"` as its method. The records of one line need at least 15 m analysed in total (7.4.3), which [`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track) judges on their average.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a sampling interval above 1 mm or that is not a whole number of samples per metre, or a record shorter than 5 m (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end). |
 
 ## redistributed_band_energies
 
@@ -369,6 +449,59 @@ is detected" can mean for a peak that is detected and kept.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a record that is not a finite one-dimensional array of at least three samples, or a spacing that is not positive. |
+
+## roughness_filter_bank
+
+```python
+roughness_filter_bank(
+    *,
+    sample_spacing_m: float,
+    longest_wavelength_m: float = 0.5,
+) -> OctaveFilterBank
+```
+
+The one-third octave filters Method B runs along a record (7.4.3).
+
+7.4.3 asks for digital one-third octave band filters that "shall comply
+with EN 61260", the 1995 edition (IEC 61260:1995) the normative
+references of EN 15610:2009 date. This is the library's own bank,
+[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank), run with the record's
+samples per metre for a sample rate, so that its frequencies are
+wavenumbers in cycles per metre: base-ten bands centred on
+$10^{k/10}$ per metre, the bands Method A reports, of order 4
+Butterworth sections, every band run at the record's own rate.
+Passed to [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) with
+`edition="1995"` it grades class 0 on Table 1 of EN 61260:1995 in every
+band, from the lowest wavenumbers up to the Nyquist wavenumber of the
+record, and its filter integrated response (4.5.3) and summation of
+outputs (4.9) are within the class 0 limits too. Order 4 is the lowest
+that is class 0, and the lowest settles soonest inside the 2 m 7.4.3
+discards for the filter transients.
+
+The bank is designed without the band-by-band decimation the library's
+banks use by default (`FilterDesign(resample=False)`). Decimated, it
+would let the wavenumbers that fold onto a band around each decimated
+rate through only about 73 dB to 75 dB down, the stopband of the
+decimator's anti-alias filter: class 1 still, but short of the 75 dB
+class 0 asks at and beyond $G^{\pm 4}$ in Table 1, and 4.8 asks
+the anti-alias filters of a sampled-data system to keep aliased
+components from breaking those limits. At the record's own rate a band
+has no alias, and what the grade reads is what a record goes through.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `sample_spacing_m` | The sampling interval of the records, in metres; 5.5 asks for 1 mm or less, and the bank needs a whole number of samples per metre. |
+| `longest_wavelength_m` | The longest band the bank holds, by its nominal wavelength, in metres; 0,5 m by default, where the Annex B listing stops (`wl_max`). The bank runs from that band to the shortest whose upper edge lies below the Nyquist wavenumber. |
+
+**Returns:** The filter bank.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a sampling interval above 1 mm or that is not a whole number of samples per metre, or a longest wavelength that leaves no band above the Nyquist band. |
 
 ## roughness_measurement_lines
 

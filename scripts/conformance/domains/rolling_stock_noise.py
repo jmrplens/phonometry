@@ -5,7 +5,10 @@ ISO 3095:2013 prints no worked pass-by, but it sets numbers beside its figures:
 the roughness limit of Figure 2 as a label on every point, the decay-rate
 limits of Figure 3 as a table beside the curves, and the microphone positions
 of four units dimensioned in Figure 10. EN 15610:2009 prints the same roughness
-limit a second time, as the table its Annex B listing types in. Annex G works
+limit a second time, as the table its Annex B listing types in, and prints the
+lengths of Method B (2 m discarded at either end, 5 m, 15 m) in 7.4.3 and the
+bands it filters in the listing; the filters of Method B are held to the
+class 0 limits EN 61260:1995 prints in its Table 1. Annex G works
 one uncertainty budget, Table G.2, to 55,68 dB, 0,83 dB and 1,66 dB, and
 Figure G.1 draws its shares in an order the budget has to reproduce.
 
@@ -264,6 +267,179 @@ def _chk_sinusoid_roughness() -> Outcome:
     return numeric(
         10.0 * math.log10(4.5), spectrum.level_at(0.01), 1e-9, unit="dB", places=6
     )
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 7.4.3 and EN 61260:1995 Table 1",
+    "Bands of the Method B filter bank at 1 mm sampling within the class 0 "
+    "limits of Table 1 on relative attenuation, graded up to the Nyquist "
+    "wavenumber of the record, 0,5 m to 2,5 mm",
+)
+def _chk_method_b_filter_class() -> Outcome:
+    bank = ph.environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
+    result = ph.filters.verify_filter_class(bank, edition="1995")
+    nyquist = bank.fs / 2.0
+    class_0 = sum(
+        1
+        for band, centre, factor in zip(
+            result.bands, bank.freq, bank.factor, strict=True
+        )
+        if band["class"] == 0
+        and int(factor) == 1
+        and band["checked_to_omega"] * float(centre) >= nyquist * (1.0 - 1e-9)
+    )
+    return count(class_0, bank.num_bands, subject="bands")
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 7.4.3 and EN 61260:1995 4.8 and Table 1",
+    "Unit sinusoids run through the Method B bank on a 40 m record sampled "
+    "every millimetre, at the normalized frequencies G⁴ and G⁻⁴ map to "
+    "(equation 10) about every band and at the two wavenumbers a decimated "
+    "bank lets through (74,773 and 88,202 per metre): band outputs at and "
+    "beyond them at least the +75 dB of class 0 below the midband tone",
+)
+def _chk_method_b_alias_rejection() -> Outcome:
+    bank = ph.environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
+    x = np.arange(40_000) * 1.0e-3
+    # Every filter has rung out over the first 25 m; the last 15 m are steady.
+    steady = slice(25_000, None)
+    g = 10.0**0.3
+    omega_h = 1.0 + (g ** (1.0 / 6.0) - 1.0) / (g**0.5 - 1.0) * (g**4 - 1.0)
+    centres = [float(f) for f in bank.freq]
+
+    def outputs(wavenumber: float) -> list[float]:
+        tone = np.cos(2.0 * np.pi * wavenumber * x + 0.4)
+        result = bank.filter(tone, sigbands=True, calculate_level=False, detrend=False)
+        return [
+            float(np.mean(np.asarray(y)[steady] ** 2)) for y in result.require_bands()
+        ]
+
+    midband = [outputs(f)[index] for index, f in enumerate(centres)]
+    tones = sorted(
+        {k for f in centres for k in (f * omega_h, f / omega_h) if k < bank.fs / 2.0}
+        | {74.773, 88.202}
+    )
+    held = judged = 0
+    for wavenumber in tones:
+        for f, reference, level in zip(
+            centres, midband, outputs(wavenumber), strict=True
+        ):
+            if 1.0 / omega_h < wavenumber / f < omega_h:
+                continue
+            judged += 1
+            if (
+                10.0 * math.log10(reference / level)
+                >= ref.EN61260_1995_CLASS_0_BEYOND_G4_DB
+            ):
+                held += 1
+    return count(held, judged, subject="band outputs")
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 Annex B.9.2",
+    "Bands Method B reports on a 19 m record sampled every millimetre, against "
+    "wl_d, the 24 band centres the listing filters, 0,5 m to 2,5 mm",
+)
+def _chk_method_b_bands() -> Outcome:
+    x = np.arange(0.0, 19.0, 1.0e-3)
+    spectrum = ph.environment.filtered_roughness_spectrum(
+        np.cos(2.0 * np.pi * 40.0 * x),
+        sample_spacing_m=1.0e-3,
+        spike_removal=False,
+        curvature_processing=False,
+    )
+    listed = ref.EN15610_LISTING_FILTER_WAVELENGTHS_M
+    reported = [float(w) for w in spectrum.wavelengths_m]
+    matching = sum(
+        1
+        for printed, computed in zip(listed, reported, strict=False)
+        if math.isclose(printed, computed)
+    )
+    return count(matching, max(len(listed), len(reported)), subject="bands")
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 7.4.3 and EN 61260:1995 Table 1",
+    "Band level of a 3 µm sinusoidal roughness at the 1 cm band centre, Method B: "
+    "10 lg(A²/2) within the ±0,15 dB of class 0 at the midband, dB re 1 µm",
+)
+def _chk_method_b_sinusoid() -> Outcome:
+    x = np.arange(0.0, 20.0, 1.0e-3)
+    spectrum = ph.environment.filtered_roughness_spectrum(
+        3.0 * np.cos(2.0 * np.pi * 100.0 * x),
+        sample_spacing_m=1.0e-3,
+        spike_removal=False,
+        curvature_processing=False,
+    )
+    return numeric(
+        10.0 * math.log10(4.5), spectrum.level_at(0.01), 0.15, unit="dB", places=6
+    )
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 7.4.3",
+    "Length analysed by Method B in a 20 m record, once 2 m are discarded at "
+    "either end after filtering: 20 - 2 × 2, m",
+)
+def _chk_method_b_length() -> Outcome:
+    x = np.arange(0.0, 20.0, 1.0e-3)
+    spectrum = ph.environment.filtered_roughness_spectrum(
+        np.cos(2.0 * np.pi * 40.0 * x), sample_spacing_m=1.0e-3
+    )
+    expected = 20.0 - 2.0 * ref.EN15610_FILTER_TRANSIENT_M
+    return numeric(expected, float(spectrum.record_length_m or 0.0), 1e-9, unit="m")
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 7.4.3 NOTE 1",
+    "The shortest record Method B analyses, 5 m: a 5 m record is analysed and "
+    "one a millimetre shorter is refused",
+)
+def _chk_method_b_shortest_record() -> Outcome:
+    shortest = ref.EN15610_SHORTEST_FILTERED_RECORD_M
+    record_ = np.cos(2.0 * np.pi * 40.0 * np.arange(0.0, shortest, 1.0e-3))
+    verdicts = []
+    for candidate, accepted in ((record_, True), (record_[:-1], False)):
+        try:
+            ph.environment.filtered_roughness_spectrum(
+                candidate, sample_spacing_m=1.0e-3
+            )
+        except ValueError:
+            verdicts.append(not accepted)
+        else:
+            verdicts.append(accepted)
+    return count(sum(verdicts), len(verdicts), subject="records")
+
+
+@register(
+    _ROLLING_STOCK,
+    "EN 15610:2009 7.4.3",
+    "A line analysed by Method B needs 15 m of record once 2 m are discarded at "
+    "either end of each: a 15 m line holds, a 14,9 m one does not",
+)
+def _chk_method_b_total_length() -> Outcome:
+    limit = ph.environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
+    wavelengths = sorted(limit, reverse=True)
+    total = ref.EN15610_FILTERED_TOTAL_M
+    verdicts = []
+    for length_m, holds in ((total, True), (total - 0.1, False)):
+        line = ph.environment.AcousticRoughnessSpectrum(
+            np.array(wavelengths),
+            np.array([limit[w] - 2.0 for w in wavelengths]),
+            record_length_m=length_m,
+            method="B",
+        )
+        check = ph.environment.check_reference_track([line], [], speed_kmh=160.0)
+        condition = next(c for c in check.conditions if c.clause == "EN 15610 7.4.3")
+        verdicts.append(condition.holds is holds)
+    return count(sum(verdicts), len(verdicts), subject="lines")
 
 
 @register(

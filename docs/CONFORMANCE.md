@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1802/1802 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1809/1809 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2721,7 +2721,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Railway rolling stock noise and its reference track (ISO 3095)</b>: 100% (16/16)</summary>
+<summary><b>Railway rolling stock noise and its reference track (ISO 3095)</b>: 100% (23/23)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -2737,6 +2737,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 3095:2005 3.14, Formulae 9 and 10 | Transit exposure level of a 12 s record at 84 dB over a 5 s pass-by: SEL + 10 lg(T0/Tp) against the library's L_Aeq,T + 10 lg(T/Tp), dB | 87.802112 dB (+/-0 dB) | 87.802112 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3095:2013 3.14 and 6.5 | L_pAeq,T of a steady 1 kHz tone of 1 Pa amplitude, where A-weighting is 0 dB: 10 lg(1/2/p0²), dB | 90.969 dB (+/-0.02 dB) | 90.969 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | EN 15610:2009 3.3 and 7.4.2 | Band level of a 3 µm sinusoidal roughness of 1 cm wavelength on a Fourier line, Method A: 10 lg(A²/2), dB re 1 µm | 6.532125 dB (+/-0 dB) | 6.532125 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.4.3 and EN 61260:1995 Table 1 | Bands of the Method B filter bank at 1 mm sampling within the class 0 limits of Table 1 on relative attenuation, graded up to the Nyquist wavenumber of the record, 0,5 m to 2,5 mm | 24/24 bands | 24/24 bands | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.4.3 and EN 61260:1995 4.8 and Table 1 | Unit sinusoids run through the Method B bank on a 40 m record sampled every millimetre, at the normalized frequencies G⁴ and G⁻⁴ map to (equation 10) about every band and at the two wavenumbers a decimated bank lets through (74,773 and 88,202 per metre): band outputs at and beyond them at least the +75 dB of class 0 below the midband tone | 554/554 band outputs | 554/554 band outputs | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 Annex B.9.2 | Bands Method B reports on a 19 m record sampled every millimetre, against wl_d, the 24 band centres the listing filters, 0,5 m to 2,5 mm | 24/24 bands | 24/24 bands | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.4.3 and EN 61260:1995 Table 1 | Band level of a 3 µm sinusoidal roughness at the 1 cm band centre, Method B: 10 lg(A²/2) within the ±0,15 dB of class 0 at the midband, dB re 1 µm | 6.532125 dB (+/-0.15 dB) | 6.532125 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.4.3 | Length analysed by Method B in a 20 m record, once 2 m are discarded at either end after filtering: 20 - 2 × 2, m | 16 m (+/-0 m) | 16 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.4.3 NOTE 1 | The shortest record Method B analyses, 5 m: a 5 m record is analysed and one a millimetre shorter is refused | 2/2 records | 2/2 records | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.4.3 | A line analysed by Method B needs 15 m of record once 2 m are discarded at either end of each: a 15 m line holds, a 14,9 m one does not | 2/2 lines | 2/2 lines | exact | 0 % | ![Pass][cv-pass] Pass |
 | EN 15610:2009 7.3 | Curvature processing of an 11 mm pit 50 µm deep: the 0,375 m circle rests on its rims 6 mm from its middle, µm | -48.003072 µm (+/-0 µm) | -48.003072 µm | 0 µm | 0 % | ![Pass][cv-pass] Pass |
 | EN 15461:2008+A1:2010 Formula 1 and Annex A | Decay rate of a response A(0) exp(-βx) sampled every millimetre over 150 m, against 20 lg e^β, dB/m | 1.9978 dB/m (+/-0.02%) | 1.9978 dB/m | 0 dB/m | 6 % | ![Pass][cv-pass] Pass |
 | ISO 3095:2013 Annex C | Effect of a 3 dB exceedance in the 4 cm band at 36 km/h, carried whole onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0,3), dB | 0.087529 dB (+/-0 dB) | 0.087529 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |

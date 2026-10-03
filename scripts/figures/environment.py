@@ -3942,6 +3942,58 @@ def generate_rolling_stock_track_roughness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_rolling_stock_roughness_methods(output_dir: str) -> None:
+    """EN 15610 7.4.2 and 7.4.3: Methods A and B on one 20 m record."""
+    print("Generating rolling_stock_roughness_methods...")
+    from phonometry import environment
+
+    limit = environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
+    # Every band 3 dB under the limit, with the 0,5 m and 2,5 mm bands the
+    # limit does not cover carried on along its slope.
+    levels = {w: v - 3.0 for w, v in limit.items()}
+    levels[0.5] = 16.1
+    levels[0.0025] = -14.6
+    x = np.arange(0.0, 20.0, 1.0e-3)
+    rng = np.random.default_rng(15610)
+    record = np.zeros_like(x)
+    for wavelength, level in levels.items():
+        k = 10.0 ** np.linspace(-0.045, 0.045, 10) / wavelength
+        amplitude = np.sqrt(2.0 * 10.0 ** (level / 10.0) / k.size)
+        for kk in k:
+            record += amplitude * np.cos(
+                2.0 * np.pi * kk * x + rng.uniform(0.0, 2.0 * np.pi)
+            )
+    fourier = environment.acoustic_roughness_spectrum(record, sample_spacing_m=1.0e-3)
+    filtered = environment.filtered_roughness_spectrum(record, sample_spacing_m=1.0e-3)
+    spanish = _LANG == "es"
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    fourier.plot(
+        ax=ax,
+        language=_LANG,
+        label="Método A (Fourier, segmentos de 1 m)"
+        if spanish
+        else "Method A (Fourier, 1 m segments)",
+    )
+    filtered.plot(
+        ax=ax,
+        limit_db=limit,
+        language=_LANG,
+        color=COLOR_TERTIARY,
+        marker="s",
+        label="Método B (filtros, 2 m descartados en cada extremo)"
+        if spanish
+        else "Method B (filters, 2 m discarded at either end)",
+    )
+    ax.set_title(
+        "Métodos A y B de la EN 15610 sobre un mismo registro de 20 m"
+        if spanish
+        else "EN 15610 Methods A and B on one 20 m record"
+    )
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_roughness_methods.svg")
+    plt.close()
+
+
 def generate_rolling_stock_track_decay(output_dir: str) -> None:
     """ISO 3095 6.2.6: the vertical and lateral decay rates against Figure 3."""
     print("Generating rolling_stock_track_decay...")

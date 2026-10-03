@@ -78,6 +78,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     require_finite,
@@ -389,7 +390,9 @@ def silencer_background_correction_db(
     :raises ValueError: For a margin under
         :data:`ISO11820_MINIMUM_BACKGROUND_MARGIN_DB`, which Table 1 calls invalid.
     """
-    margin = require_finite_array(level_difference_db, "level_difference_db")
+    # Settled: a difference of two readings that is 10 dB in decimal can be
+    # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
+    margin = settled(require_finite_array(level_difference_db, "level_difference_db"))
     if float(np.min(margin)) < ISO11820_MINIMUM_BACKGROUND_MARGIN_DB:
         msg = (
             f"Table 1 of ISO 11820 calls a margin under "

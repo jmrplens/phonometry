@@ -23,8 +23,9 @@ only the regressions and threshold read-offs of Clause 6.
 The distraction and privacy distances are read from the fitted STI line,
 extrapolating beyond the measured range when necessary (the regression-line
 method of Clause 6.3, Figure 3 b). A distance is reported as ``nan`` when
-the STI does not decrease with distance (non-negative fitted slope) or when
-the crossing would fall at or before the source, realising the standard's
+the STI does not decrease with distance (a fitted slope that does not fall by
+more than a billionth of STI per metre, which is how a constant STI fits) or
+when the crossing would fall at or before the source, realising the standard's
 note that it "can prove impossible to determine the privacy distance if
 STI > 0.20 in all positions" (Clause 6.3).
 """
@@ -36,6 +37,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.validation import check_engine, require_equal_shapes
 
 if TYPE_CHECKING:
@@ -62,6 +64,15 @@ _STI_PRIVACY = 0.20
 
 #: Minimum number of measurement positions (ISO 3382-3:2012, 5.2.2).
 _MIN_POSITIONS = 4
+
+#: A fitted STI slope at or shallower than this, per metre, is no decrease
+#: with distance (Clause 6.3). A line through STI values that do not change
+#: comes out of the least-squares fit with a slope of about 1e-17 per metre,
+#: of either sign depending on the positions and the machine, and read as a
+#: decrease it would put the distraction distance some 1e16 m away. A billionth
+#: of STI per metre would need a hundred thousand kilometres to lose a tenth
+#: of STI, so nothing an office can produce is mistaken for it.
+_NO_DECREASE_STI_PER_M = -1e-9
 
 #: Minimum number of positions inside the 2 m to 16 m decay range to fit
 #: the D2,S regression line (ISO 3382-3:2012, 6.2): a degree-1 fit needs
@@ -211,16 +222,16 @@ def _sti_crossing(slope: float, intercept: float, threshold: float) -> float:
 
     Solves :math:`\text{slope} \cdot r + \text{intercept} = \text{threshold}`
     (ISO 3382-3:2012, 6.3).
-    Returns ``nan`` when the STI does not decrease with distance
-    (:math:`\text{slope} \ge 0`) or the crossing is at or before the source
-    (:math:`r \le 0`); otherwise the (possibly extrapolated) crossing distance.
+    Returns ``nan`` when the STI does not decrease with distance (a slope no
+    steeper than :data:`_NO_DECREASE_STI_PER_M`) or the crossing is at or
+    before the source (an intercept that, settled, does not exceed the
+    threshold); otherwise the (possibly extrapolated) crossing distance.
     """
-    if slope >= 0.0:
+    if slope >= _NO_DECREASE_STI_PER_M:
         return float("nan")
-    distance = (threshold - intercept) / slope
-    if distance <= 0.0:
+    if settled(intercept - threshold) <= 0.0:
         return float("nan")
-    return distance
+    return (threshold - intercept) / slope
 
 
 def open_plan_metrics(

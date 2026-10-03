@@ -60,6 +60,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -412,8 +413,14 @@ def assess_railway_change(
     if _keeps_to(fmax_after, guide.a_u):
         fmax_met = ftr_met = True
     else:
-        fmax_met = _keeps_to(fmax_after, guide.a_o) or fmax_increase < tolerable
-        ftr_met = _keeps_to(ftr_after, guide.a_r) or ftr_increase < tolerable
+        # The increases are judged settled: 0,28 to 0,35 is 25 % in decimal and
+        # 24,999 999 999 999 98 % in binary, which must not decide the verdict.
+        fmax_met = _keeps_to(fmax_after, guide.a_o) or bool(
+            settled(fmax_increase) < tolerable
+        )
+        ftr_met = _keeps_to(ftr_after, guide.a_r) or bool(
+            settled(ftr_increase) < tolerable
+        )
     return RailwayChange(
         complies=fmax_met and ftr_met,
         kb_fmax_met=fmax_met,

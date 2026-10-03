@@ -135,6 +135,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -151,7 +152,6 @@ from ._shared import (
     _S0,
     SoundPowerWarning,
     _a_weighting_corrections,
-    _settled,
 )
 
 if TYPE_CHECKING:
@@ -301,8 +301,8 @@ _INTEGRATED_RANGE_DB = 1.0
 # worked from decimal readings, a difference or an energy mean, which binary
 # arithmetic leaves a few units of the last place off their decimal value:
 # 20,4 - 14,4 dB is 5,999 999 999 999 998 and is still the 6 dB of Table 2's
-# first row. Each such level is settled to nine decimals (``_settled``, shared
-# by the sound power methods) before it meets its limit, so the verdict does
+# first row. Each such level is settled to nine decimals (``settled``, shared
+# by every verdict at a printed limit) before it meets its limit, so the verdict does
 # not hang on the last binary digit of the machine that worked it out.
 
 #: The fewest vertices of a polygon.
@@ -526,7 +526,7 @@ def plant_background_correction_db(
     if not np.all(np.isfinite(raw)):
         msg = "'level_difference_db' must be finite."
         raise ValueError(msg)
-    diff = _settled(raw)
+    diff = settled(raw)
     invalid = diff < _MIN_BACKGROUND_MARGIN_DB
     if np.any(invalid):
         msg = (
@@ -654,7 +654,7 @@ def plant_steady_reading_db(maximum_db: float, minimum_db: float) -> float:
     if bottom > top:
         msg = "'minimum_db' must not exceed 'maximum_db'."
         raise ValueError(msg)
-    swing = float(_settled(top - bottom))
+    swing = float(settled(top - bottom))
     if swing >= _STEADY_RANGE_DB:
         msg = (
             f"The needle swings over {swing:.1f} dB; ISO 8297 9.5.2 calls "
@@ -1390,10 +1390,11 @@ def plant_measurement_contour(
         layout = PlantMeasurementContour(
             first.plant_outline_m, first.contour_m, characteristic_height_m, count
         )
-        if is_at_most(
-            layout.position_spacing_m,
-            _SPACING_PER_MEAN_DISTANCE * layout.mean_distance_m,
-        ):
+        # Judged settled, as the 9.1.1 c) row of the report judges it.
+        excess = layout.position_spacing_m - (
+            _SPACING_PER_MEAN_DISTANCE * layout.mean_distance_m
+        )
+        if is_at_most(float(settled(excess)), 0.0):
             return layout
     return PlantMeasurementContour(
         first.plant_outline_m, first.contour_m, characteristic_height_m, ceiling
@@ -1562,7 +1563,7 @@ class PlantSoundPowerResult:
         place of the levels either side of 5, which side depending on the
         machine, and is not replaced.
         """
-        excess = _settled(self.levels_db - self.mean_level_db)
+        excess = settled(self.levels_db - self.mean_level_db)
         return np.asarray(excess > _EXCESS_LIMIT_DB, dtype=bool)
 
     @property
@@ -1891,14 +1892,18 @@ def _row(
 ) -> PlantRequirement:
     """A requirement row, its verdict computed from the comparison unless given."""
     if holds is None:
+        # Judged on the settled difference: a spacing of 10,2 m worked from a
+        # contour of 163,2 m in 16 positions is twice a mean distance of 5,1 m
+        # whichever way the last bits of either fall.
+        margin = float(settled(value - limit))
         if comparison == ">":
-            holds = value > limit
+            holds = margin > 0.0
         elif comparison == ">=":
-            holds = value >= limit
+            holds = margin >= 0.0
         elif comparison == "=":
-            holds = is_at_most(abs(value - limit), tolerance)
+            holds = is_at_most(float(settled(abs(value - limit) - tolerance)), 0.0)
         else:
-            holds = is_at_most(value, limit)
+            holds = is_at_most(margin, 0.0)
     return PlantRequirement(
         key=key,
         clause=clause,
@@ -2035,7 +2040,7 @@ def _reading_rows(result: PlantSoundPowerResult) -> list[PlantRequirement]:
         )  # fmt: skip
     margin = result.background_margin_db
     if margin is not None:
-        worst = float(_settled(np.min(margin)))
+        worst = float(settled(np.min(margin)))
         rows.append(
             _row("background_margin", "6 b)", "margin over the background noise",
                  worst, ">=", _MIN_BACKGROUND_MARGIN_DB, "dB")
@@ -2050,7 +2055,7 @@ def _reading_rows(result: PlantSoundPowerResult) -> list[PlantRequirement]:
         _row("octave_bands", "9.5.1 a)", "octave bands from 63 Hz to 4 kHz measured",
              present, ">=", len(_REQUIRED_BANDS_HZ), "")
     )  # fmt: skip
-    excess = float(_settled(np.max(result.levels_db - result.mean_level_db)))
+    excess = float(settled(np.max(result.levels_db - result.mean_level_db)))
     rows.append(
         _row("level_excess", "10.2", "largest level above the contour average",
              excess, "<=", _EXCESS_LIMIT_DB, "dB", advisory=True)
@@ -2187,7 +2192,7 @@ def _integrated_reading_row(leq_range_db: float | ArrayLike) -> PlantRequirement
         raise ValueError(msg)
     return _row("integrated_reading", "9.5.3",
                 "range of the integrated reading L_eq,T (±0,5 dB)",
-                float(_settled(np.max(spread))), "<=", _INTEGRATED_RANGE_DB,
+                float(settled(np.max(spread))), "<=", _INTEGRATED_RANGE_DB,
                 "dB")  # fmt: skip
 
 

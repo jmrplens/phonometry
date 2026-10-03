@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import round_half_even
 from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
@@ -684,7 +685,7 @@ def noise_criterion(
     tangency = float(per_band[governing])
 
     if math.isfinite(sil):
-        nc_sil = float(np.rint(sil))
+        nc_sil = float(round_half_even(sil))
         if NC_INDICES[0] <= nc_sil <= NC_INDICES[-1]:
             curve = nc_curve(nc_sil)
             if not np.any(aligned[valid] > curve[valid]):
@@ -740,7 +741,7 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
             stacklevel=2,
         )
     lmf = float(np.mean(mid))
-    rating = int(np.rint(lmf))
+    rating = int(round_half_even(lmf))
     reference = rc_curve(float(rating))
     deviation = aligned - reference
 

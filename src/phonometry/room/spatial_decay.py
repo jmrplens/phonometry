@@ -94,6 +94,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.validation import (
     require_finite,
     require_finite_array,
@@ -352,11 +353,12 @@ def check_background_margin(
         )
         raise ValueError(msg)
     margins = np.asarray(levels - background, dtype=np.float64)
-    unusable = margins <= ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB
-    needs_correction = (
-        margins < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB
-    ) & ~unusable
-    satisfied = not bool(np.any(margins < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
+    # Judged settled, so a margin of two readings that is 6 dB in decimal is
+    # judged as 6 dB whichever side of it binary arithmetic leaves it.
+    judged = settled(margins)
+    unusable = judged <= ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB
+    needs_correction = (judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB) & ~unusable
+    satisfied = not bool(np.any(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
     if not satisfied:
         worst = float(np.min(margins))
         detail = (
@@ -372,7 +374,7 @@ def check_background_margin(
         warnings.warn(
             f"ISO 14257 5.1.4 asks for {ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB:g} dB over the "
             f"background at every position and in every octave band; "
-            f"{int(np.count_nonzero(margins < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))} of "
+            f"{int(np.count_nonzero(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))} of "
             f"{margins.size} clear less than that and the worst is "
             f"{worst:.1f} dB, {detail}.",
             SpatialDecayWarning,

@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -403,7 +404,8 @@ def _screen_possible_tone(
     return bool(
         screen_indices.size
         and local_max
-        and lv[peak] > _energy_mean(lv[screen_indices]) + _POSSIBLE_TONE_MARGIN
+        and settled(lv[peak] - _energy_mean(lv[screen_indices]) - _POSSIBLE_TONE_MARGIN)
+        > 0.0
     )
 
 
@@ -474,7 +476,9 @@ def wind_turbine_tonality(
     # L_70%: energy mean of the 70 % lowest-level lines in the critical band.
     n_low = max(1, round(0.7 * band.size))
     l70 = _energy_mean(np.sort(band)[:n_low])
-    masking = band[band < l70 + _MASKING_MARGIN]
+    # The line levels are judged against energy means settled, since the mean
+    # of equal lines is that level only to its last bits.
+    masking = band[settled(band - l70 - _MASKING_MARGIN) < 0.0]
     l_pn_avg = _energy_mean(masking) if masking.size else l70
     tone_threshold = l_pn_avg + _TONE_MARGIN
 
@@ -485,10 +489,10 @@ def wind_turbine_tonality(
     # such line ("the line having the greatest level is identified; lines are
     # then only classified as tone if within 10 dB of the highest level"),
     # whether or not contiguous with it.
-    above = in_band & (lv > tone_threshold)
+    above = in_band & (settled(lv - tone_threshold) > 0.0)
     if np.any(above):
         highest_level = float(np.max(lv[above]))
-        is_tone = above & (highest_level - lv <= _TONE_GROUP_DROP)
+        is_tone = above & (settled(highest_level - lv) <= _TONE_GROUP_DROP)
     else:
         is_tone = above
     tone_positions = np.nonzero(is_tone)[0]

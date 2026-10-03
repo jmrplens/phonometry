@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import round_half_away_from_zero
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
@@ -154,10 +155,12 @@ _THIRD_OCTAVE_AXIS = "one-third-octave band"
 
 
 def _round_half_up(value: float) -> int:
-    """Round to the nearest integer, halves away from zero."""
-    if value < 0.0:
-        return -math.floor(-value + 0.5)
-    return math.floor(value + 0.5)
+    """Round to the nearest integer, halves away from zero.
+
+    The value is settled before the half is judged, so a mean that is a half
+    in decimal and a last bit under it in binary still rounds outwards.
+    """
+    return int(round_half_away_from_zero(value))
 
 
 def _practical_round(mean: float) -> float:

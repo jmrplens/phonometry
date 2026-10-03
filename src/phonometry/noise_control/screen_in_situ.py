@@ -66,6 +66,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import round_half_even, settled
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     require_choice,
@@ -209,7 +210,8 @@ def background_corrected_level_db(
         raise ValueError(msg)
     lower, upper = BACKGROUND_CORRECTION_WINDOW_DB
     margin = levels - background
-    if float(np.min(margin)) < lower:
+    judged = settled(margin)
+    if float(np.min(judged)) < lower:
         msg = (
             f"ISO 11821 5.7 calls the environmental conditions unacceptable "
             f"under {lower:g} dB over the background, wind-generated noise "
@@ -217,7 +219,7 @@ def background_corrected_level_db(
         )
         raise ValueError(msg)
     corrected = 10.0 * np.log10(10.0 ** (levels / 10.0) - 10.0 ** (background / 10.0))
-    return np.asarray(np.where(margin > upper, levels, corrected), dtype=np.float64)
+    return np.asarray(np.where(judged > upper, levels, corrected), dtype=np.float64)
 
 
 def directivity_index_db(levels_db: ArrayLike) -> NDArray[np.float64]:
@@ -310,7 +312,7 @@ def impulse_mean_level_db(repeat_levels_db: ArrayLike) -> float:
             f"{IMPULSE_REPEATS} times; got {levels.size}."
         )
         raise ValueError(msg)
-    spread = float(np.max(levels) - np.min(levels))
+    spread = float(settled(np.max(levels) - np.min(levels)))
     if spread > IMPULSE_INVALID_DEVIATION_DB:
         msg = (
             f"ISO 11821 5.6.2.1 calls the measurement invalid past a "
@@ -360,7 +362,7 @@ class ScreenInSituResult:
         the even decibel, Rule A of ISO 80000-1:2009 Annex B, as in the other
         in-situ standards of this library.
         """
-        return np.asarray(np.rint(self.attenuation_db), dtype=np.int_)
+        return np.asarray(round_half_even(self.attenuation_db), dtype=np.int_)
 
     def rounded_a_weighted(self) -> int | None:
         """:math:`D_{pA}` as 7.4 c) reports it, to the nearest integer.
@@ -370,7 +372,7 @@ class ScreenInSituResult:
         """
         if self.a_weighted_attenuation_db is None:
             return None
-        return int(np.rint(self.a_weighted_attenuation_db))
+        return int(round_half_even(self.a_weighted_attenuation_db))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

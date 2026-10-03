@@ -57,6 +57,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.validation import require_choice, require_finite_array
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import resolve_fs
@@ -1751,8 +1752,10 @@ def perceptibly_different(symbol: str, first: ArrayLike, second: ArrayLike) -> b
         # "Rel. 5 %" of what is not printed; the mean of the two is the
         # reading that does not depend on which one is called the reference.
         reference = 0.5 * np.abs(a + b)
-        return bool(np.all(np.abs(a - b) >= limit * reference))
-    return bool(np.all(np.abs(a - b) >= limit))
+        return bool(np.all(settled(np.abs(a - b) - limit * reference) >= 0.0))
+    # Judged settled: 1,95 and 2,05 s differ by the 0,1 s of a JND in decimal
+    # whichever side of it the subtraction lands.
+    return bool(np.all(settled(np.abs(a - b)) >= limit))
 
 
 def _table_a1_row(symbol: str) -> AuditoriumQuantity:

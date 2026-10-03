@@ -99,6 +99,7 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+from .._internal.boundary import settled, settled_net_share
 from .._internal.levels_math import energy_mean, weighted_energy_mean
 from .._internal.validation import (
     check_engine,
@@ -526,10 +527,13 @@ def sound_power_intensity(
     partial_power = mean_intensity * seg[:, None]  # Eq. 12
     partial_power_level = _level_magnitude(partial_power)  # Eq. 8 (magnitude)
     total_power = np.sum(partial_power, axis=0)  # Eq. 6
-    negative_band = total_power <= 0.0
+    # The sign of the net power is judged on its settled share of the gross,
+    # so partial powers that cancel in decimal are no net power whichever way
+    # the last bits of their sum fall.
+    negative_band = settled_net_share(partial_power, axis=0) <= 0.0
     with np.errstate(divide="ignore", invalid="ignore"):
         sound_power_level = np.where(
-            total_power > 0.0,
+            ~negative_band,
             10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _W0),
             np.nan,
         )
@@ -1335,7 +1339,7 @@ def precision_qualification(
                 "or 'repeatability_limit'."
             )
             raise ValueError(msg)
-        criterion_1 = np.asarray(np.abs(l1 - l2) <= s / 2.0, dtype=bool)
+        criterion_1 = np.asarray(settled(np.abs(l1 - l2) - s / 2.0) <= 0.0, dtype=bool)
 
     # Criterion 2: Ld >= F_pIn(signed), Ld = delta_pI0 - K.
     criterion_2: np.ndarray | None = None
@@ -1352,7 +1356,9 @@ def precision_qualification(
         fs1 = _spread_over_bands(field_nonuniformity_1, n_bands)
         fs2 = _spread_over_bands(field_nonuniformity_2, n_bands)
         with np.errstate(divide="ignore", invalid="ignore"):
-            ratio = fs1 / fs2
+            # Settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
+            # in binary, and the criterion includes 1,2.
+            ratio = settled(fs1 / fs2)
         criterion_5 = np.asarray(
             (ratio >= _FS_RATIO_LOW) & (ratio <= _FS_RATIO_HIGH), dtype=bool
         )
@@ -1466,10 +1472,11 @@ def sound_power_intensity_precision(
 
     partial_power = intensity * seg[:, None]  # Eq. 5
     total_power = np.sum(partial_power, axis=0)  # Eq. 8
-    not_applicable = total_power <= 0.0
+    # Judged on the settled share of the gross power, as in ISO 9614-2.
+    not_applicable = settled_net_share(partial_power, axis=0) <= 0.0
     with np.errstate(divide="ignore", invalid="ignore"):
         lw = np.where(
-            total_power > 0.0,
+            ~not_applicable,
             10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _W0),
             np.nan,
         )

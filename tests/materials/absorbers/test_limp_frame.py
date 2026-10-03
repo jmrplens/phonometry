@@ -285,11 +285,13 @@ def test_limp_frame_criteria_match_the_printed_thresholds() -> None:
     assert not materials.limp_frame_applicable(20.5e3)
     assert materials.limp_frame_applicable(5.0e3, criterion="beranek")
     assert not materials.limp_frame_applicable(5.1e3, criterion="beranek")
-    # Exactly at the boundary of each printed threshold.
+    # Exactly at the boundary of each printed threshold, and a millionth past
+    # it: the ratio is judged settled to nine decimals, so a part in a billion
+    # is still on the threshold rather than past it.
     for name, ratio in materials.LIMP_FRAME_CRITERIA.items():
         assert materials.limp_frame_applicable(ratio * 101325.0, criterion=name)
         assert not materials.limp_frame_applicable(
-            ratio * 101325.0 * (1.0 + 1e-9), criterion=name
+            ratio * 101325.0 * (1.0 + 1e-6), criterion=name
         )
 
 

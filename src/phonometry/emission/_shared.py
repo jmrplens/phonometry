@@ -112,27 +112,6 @@ def _validate_event_count(events: object, owner: str) -> None:
         raise ValueError(msg)
 
 
-#: Decimal places a quantity is settled to before an inclusive comparison
-#: with a printed limit (see :func:`_settled`).
-_SETTLED_PLACES = 9
-
-
-def _settled(value: np.ndarray | float) -> np.ndarray:
-    """``value`` rounded to nine decimal places, for comparing with a limit.
-
-    The criteria of the ISO 3743 family are inclusive and printed in whole
-    tenths: a spread "does not exceed" 1,5 dB, a margin of 6 dB "or more", a
-    difference within ±3 dB. A level difference that is 3,0 dB in decimal is
-    3,000 000 000 000 03 dB in binary often enough to flip such a verdict, so
-    the quantity is settled first at a resolution a nanodecibel wide, far
-    below any digit a standard prints or a meter reads.
-
-    :param value: The quantity to settle, any shape.
-    :return: The rounded values as a float array.
-    """
-    return np.round(np.asarray(value, dtype=np.float64), _SETTLED_PLACES)
-
-
 Grade = Literal["engineering", "survey"]
 
 

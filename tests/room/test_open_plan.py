@@ -90,6 +90,49 @@ def test_sti_non_decreasing_returns_nan() -> None:
     assert math.isnan(res.rp)
 
 
+@pytest.mark.parametrize("value", [0.3, 0.35, 0.6, 0.7, 0.123456])
+@pytest.mark.parametrize(
+    "positions",
+    [
+        [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+        [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0],
+        [1.5, 3.2, 4.7, 6.1, 9.3],
+    ],
+)
+def test_constant_sti_has_no_crossing(value: float, positions: list[float]) -> None:
+    """A constant STI does not decrease with distance (Clause 6.3).
+
+    The least-squares slope through equal values is a few units in the last
+    place either side of zero, so a sign test alone put rD or rP some 1e16 m
+    away for some of these sets of positions and NaN for others.
+    """
+    r = np.asarray(positions)
+    sti = np.full(r.size, value)
+    res = room.open_plan_metrics(r, 60.0 - 6.0 * np.log2(r), sti)
+    assert math.isnan(res.rd)
+    assert math.isnan(res.rp)
+
+
+@pytest.mark.parametrize(
+    "positions",
+    [[2.0, 4.0, 6.0, 8.0], [1.5, 3.2, 4.7, 6.1, 9.3], [1.1, 2.3, 3.7, 5.3, 7.9]],
+)
+def test_a_line_through_the_threshold_at_the_source_has_no_crossing(
+    positions: list[float],
+) -> None:
+    """STI that starts at exactly 0.50 crosses it at the source, not past it.
+
+    The fitted intercept is 0.50 to the last bits, which fall either side of
+    it, so rD is NaN whatever the positions, and rP is still read off.
+    """
+    r = np.asarray(positions)
+    sti = 0.5 - 0.02 * r
+    res = room.open_plan_metrics(r, 60.0 - 6.0 * np.log2(r), sti)
+    assert math.isnan(res.rd)
+    # 0.20 = 0.5 - 0.02 r -> r = 15 m.
+    assert res.rp == pytest.approx(15.0, abs=1e-9)
+
+
 def test_too_few_positions_raises() -> None:
     """Fewer than 4 positions is a violation of Clause 5.2.2."""
     r = np.array([2.0, 4.0, 8.0])

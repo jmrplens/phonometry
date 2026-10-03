@@ -74,6 +74,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import check_engine, require_equal_shapes
 from ..._internal.warnings import PhonometryWarning
 from ...fluids import Fluid
@@ -640,7 +641,7 @@ def _warn_alternating_validity(
         )
     if (
         background_level is not None
-        and level_specimen - background_level <= _ALT_BACKGROUND_MARGIN
+        and float(settled(level_specimen - background_level)) <= _ALT_BACKGROUND_MARGIN
     ):
         warnings.warn(
             f"Specimen-to-background margin {level_specimen - background_level:g} dB "

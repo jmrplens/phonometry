@@ -128,6 +128,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+from .._internal.boundary import settled, settled_net_share, settled_ratio
 from .._internal.validation import (
     is_at_most,
     is_positive,
@@ -205,6 +206,10 @@ _RELAXED_POSITIONS = 50
 #: Fewest positions the Bessel-corrected (N - 1) spread of equations (A.1) and
 #: (A.8) is defined from.
 _MIN_VARIATION_OBSERVATIONS = 2
+
+#: The share of the total sound power the subset of B.1.3 has to carry more
+#: than: half.
+_CONCENTRATED_SHARE = 0.5
 
 #: One printed row of Table B.2 or Table 2: the octave centre range it covers
 #: (``None`` where the row has no octave counterpart), the one-third-octave
@@ -793,7 +798,10 @@ def partial_power_concentration(
 
     partial = i_n * seg
     total = float(np.sum(partial))
-    if not is_positive(total):
+    # The sign of the net power is read as in sound_power_intensity_points: as
+    # a settled share of the gross, so partial powers that cancel in decimal
+    # are not positive whichever way the last bits of their sum fall.
+    if not is_positive(float(settled_net_share(partial))):
         msg = (
             "The total sound power of this band is not positive, so ISO "
             "9614-1 is not applicable to it (clause 9.2) and the optional "
@@ -808,7 +816,10 @@ def partial_power_concentration(
     positive = np.flatnonzero(partial > 0.0)
     order = positive[np.argsort(-partial[positive], kind="stable")]
     cumulative = np.cumsum(partial[order])
-    reached = np.flatnonzero(cumulative > 0.5 * total)
+    # Judged on the settled share of the total: partial powers of decimal
+    # readings whose leading ones carry exactly half of it in decimal carry
+    # half of it to the last bits, either side, and B.1.3 asks for more.
+    reached = np.flatnonzero(settled_ratio(cumulative, total) > _CONCENTRATED_SHARE)
     half = 0.5 * n_positions
     subset_size = int(reached[0]) + 1 if reached.size else n_positions + 1
     if subset_size >= half:
@@ -862,7 +873,10 @@ def partial_power_concentration(
     delta_alpha = (
         delta - (1.0 - alpha) * (2.0 / math.sqrt(n_remainder)) * f4_remainder
     ) / alpha
-    if not is_positive(delta_alpha):
+    # Settled: a subset error factor that the remainder uses up exactly in
+    # decimal is no budget at all, not one of a few units in the last place
+    # that would ask for an astronomical number of positions.
+    if not is_positive(float(settled(delta_alpha))):
         msg = (
             f"The remaining {n_remainder} segments exhaust the ISO 9614-1 "
             f"Table B.1 error factor on their own (Delta_alpha = "
@@ -1129,8 +1143,11 @@ def _band_actions(
     actions: list[ActionCode] = []
     # ``not (f1 <= limit)`` rather than ``f1 > limit`` so a NaN F1, which every
     # comparison answers False, is treated as a field that failed to qualify
-    # rather than as one that passed.
-    if f1 is not None and not is_at_most(f1, TEMPORAL_VARIABILITY_LIMIT):
+    # rather than as one that passed. F1 is judged settled: ten samples whose
+    # standard deviation is 0,6 of their mean in decimal sit on the limit.
+    if f1 is not None and not is_at_most(
+        float(settled(f1)), TEMPORAL_VARIABILITY_LIMIT
+    ):
         actions.append(ActionCode.REDUCE_TEMPORAL_VARIABILITY)
     elif not criterion_1 or not inward_flow_ok:
         actions.extend(
@@ -1334,8 +1351,13 @@ def _test_conditions_met(intensity: np.ndarray) -> np.ndarray:
     ``mean > 0`` rather than ``not mean <= 0``, as at the other sites here: a
     mean that is not a number answers every comparison False, and it is a band
     whose test conditions were not met, not one that met them.
+
+    The sign is read off the sum settled as a share of the sum of the
+    magnitudes: intensities that cancel in decimal, 0,3,
+    -0,1 and -0,2 W/m², sum to a few units in the last place either side of
+    zero in binary, and that must not decide the verdict.
     """
-    return np.asarray(np.mean(intensity, axis=0) > 0.0, dtype=bool)
+    return np.asarray(settled_net_share(intensity, axis=0) > 0.0, dtype=bool)
 
 
 def _band_indicators(
@@ -1447,8 +1469,9 @@ def _criterion_2(
     minimum = factors * f4**2
     # ``positions > minimum`` and not ``not (positions <= minimum)``: a NaN F4
     # marks a band whose test conditions already failed A.2.3, and it must not
-    # come back qualified.
-    return np.asarray(positions > minimum, dtype=bool), minimum
+    # come back qualified. The minimum is judged settled, since a C F4^2 that
+    # is a whole number of positions in decimal is not exceeded by it.
+    return np.asarray(positions > settled(minimum), dtype=bool), minimum
 
 
 def _per_band_grade(
@@ -1475,7 +1498,7 @@ def _per_band_grade(
     stationary = (
         np.ones(f4.shape, dtype=bool)
         if f1 is None
-        else f1 <= TEMPORAL_VARIABILITY_LIMIT
+        else settled(f1) <= TEMPORAL_VARIABILITY_LIMIT
     )
     gates = applicable & stationary & (ld > f2) & ((f3 - f2) <= _NEGATIVE_POWER_LIMIT)
     verdict = np.empty(f4.shape, dtype=object)
@@ -1487,7 +1510,7 @@ def _per_band_grade(
             factor = position_count_factor(
                 grade, float(frequencies[band]), band_type=band_type
             )
-            if positions > factor * f4[band] ** 2:
+            if positions > float(settled(factor * f4[band] ** 2)):
                 verdict[band] = grade
                 break
     return verdict
@@ -1658,7 +1681,10 @@ def _a_weighted_determination(
     per_position = np.sum(
         intensity[:, summed] * 10.0 ** (0.1 * corrections[summed]), axis=1
     )
-    if not is_positive(float(np.mean(per_position))):
+    # Judged as _coefficient_of_variation judges it, on the settled share of
+    # the gross, so intensities that cancel in decimal give no F4 rather than
+    # a refusal that turns on the order of the readings.
+    if not is_positive(float(settled_net_share(per_position))):
         return level, float("nan"), None
     f4_a = _coefficient_of_variation(
         per_position, non_positive_message=_F4_NON_POSITIVE
@@ -1702,7 +1728,9 @@ def _a_weighted_grade(
     if f2 is None or f3 is None or residual_index is None:
         return None
     stationary = (
-        True if f1 is None else bool(np.all(f1[summed] <= TEMPORAL_VARIABILITY_LIMIT))
+        True
+        if f1 is None
+        else bool(np.all(settled(f1[summed]) <= TEMPORAL_VARIABILITY_LIMIT))
     )
     inward_ok = bool(np.all((f3[summed] - f2[summed]) <= _NEGATIVE_POWER_LIMIT))
     for grade in _GRADES:
@@ -1711,7 +1739,7 @@ def _a_weighted_grade(
         if not (stationary and inward_ok and bool(np.all(ld[summed] > f2[summed]))):
             continue
         factor = _a_weighted_factor(contributions, frequencies, band_type, typed)
-        if positions > factor * f4_a**2:
+        if positions > float(settled(factor * f4_a**2)):
             return grade
     return "none"
 
@@ -1811,8 +1839,11 @@ def sound_power_intensity_points(
     partial_power = intensity * seg[:, None]  # Eq. (11)
     sound_power = np.sum(partial_power, axis=0)  # the sum of Eq. (12)
     # ``~(P > 0)`` and not ``P <= 0``: a NaN total answers every comparison
-    # False, so the second form would call an unusable band applicable.
-    applicable = sound_power > 0.0
+    # False, so the second form would call an unusable band applicable. The
+    # sign is that of the net power as a settled share of the gross, so
+    # partial powers that cancel in decimal leave a band with no net power
+    # whichever way the last bits of the sum fall; a NaN share stays NaN.
+    applicable = settled_net_share(partial_power, axis=0) > 0.0
     not_applicable = ~applicable
     with np.errstate(divide="ignore", invalid="ignore"):
         sound_power_level = np.where(

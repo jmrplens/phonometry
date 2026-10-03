@@ -103,6 +103,28 @@ class TestAbsorptionRating:
             got = prop.sound_absorption_rating(np.full(_BANDS, 1.05))
         assert math.isfinite(got.rating)
 
+    @pytest.mark.parametrize(
+        ("spectrum", "changes"),
+        [
+            # Pairs of bands with the same spectrum level, moved by the same
+            # amount either way, so the weighted ratio is 0,99 in decimal.
+            ("road", {3: 0.98, 16: 1.00, 8: 0.94, 13: 1.04}),
+            ("railway", {7: 0.85, 16: 1.13, 13: 0.85, 14: 1.13}),
+        ],
+    )
+    def test_a_ratio_of_exactly_0_99_reaches_the_limit(
+        self, spectrum: str, changes: dict[int, float]
+    ) -> None:
+        # Clause 5 limits a ratio that reaches 0,99; these coefficients weigh
+        # to 0,99 in decimal, which binary arithmetic can leave a unit or two
+        # in the last place under it, and that must not decide the verdict.
+        alpha = np.full(_BANDS, 0.99)
+        for band, value in changes.items():
+            alpha[band] = value
+        with pytest.warns(prop.RoadDeviceWarning, match="0.99 limit"):
+            got = prop.sound_absorption_rating(alpha, spectrum=spectrum)
+        assert got.rating == pytest.approx(20.0, abs=1e-12)
+
     def test_the_weighting_is_the_spectrum_and_not_the_mean(self) -> None:
         # Absorptive only where the spectrum is loudest versus only where it
         # is quietest: same arithmetic mean, different rating.

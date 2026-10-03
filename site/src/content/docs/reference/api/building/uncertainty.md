@@ -302,7 +302,9 @@ Test a minimum requirement with one-sided uncertainty (Formula 5).
 Returns `True` when
 $\text{value} - U > \text{requirement}$, e.g. an apparent sound
 reduction index `R'w` provably exceeds a minimum. `U` should be computed
-with the one-sided coverage factor.
+with the one-sided coverage factor. The margin is settled before it is
+judged, so a value exactly `U` above the requirement in decimal does not
+pass on the last bits of the subtraction.
 
 ## satisfies_upper_requirement
 
@@ -319,7 +321,9 @@ Test a maximum requirement with one-sided uncertainty (Formula 4).
 Returns `True` when
 $\text{value} + U < \text{requirement}$, e.g. a normalized impact
 level `L'n,w` provably stays below a maximum. `U` should be computed with
-the one-sided coverage factor.
+the one-sided coverage factor. The margin is settled before it is judged,
+so a value exactly `U` below the requirement in decimal does not pass on
+the last bits of the sum.
 
 ## single_number_uncertainty
 

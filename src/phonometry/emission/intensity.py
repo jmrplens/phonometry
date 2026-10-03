@@ -67,6 +67,7 @@ from ..io._resolve import SignalInput, apply_calibration, resolve_pair_fs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from .._internal.boundary import settled, settled_net_share
 from .._internal.levels_math import energy_mean
 from .._internal.utils import _typesignal
 from .._internal.validation import (
@@ -447,7 +448,9 @@ class FieldIndicators:
                 "temporal_intensity=...) or temporal_variability_indicator()."
             )
             raise ValueError(msg)
-        f1 = np.asarray(self.f1, dtype=np.float64)
+        # Settled: samples whose standard deviation is 0,6 of their mean in
+        # decimal are at the limit, whichever side of it the last bits fall.
+        f1 = settled(self.f1)
         ok = f1 <= float(limit)
         return bool(ok) if ok.ndim == 0 else ok
 
@@ -797,7 +800,11 @@ def _coefficient_of_variation(
         msg = "The normal intensity samples must all be finite."
         raise ValueError(msg)
     mean = float(np.mean(samples))
-    if mean <= 0.0:
+    # The sign is judged on the settled share of the magnitudes: samples that
+    # cancel in decimal have no positive mean whichever way the last bits of
+    # their sum fall, and a ratio to a mean of a few units in the last place
+    # would be no indicator at all.
+    if float(settled_net_share(samples)) <= 0.0:
         raise ValueError(non_positive_message)
     deviation = float(np.sqrt(np.sum((samples - mean) ** 2) / (samples.size - 1)))
     return deviation / mean

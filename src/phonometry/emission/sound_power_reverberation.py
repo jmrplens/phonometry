@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -336,8 +337,11 @@ def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bo
     )
     clamped = np.maximum(delta, low)
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * clamped))
-    k1 = np.where(delta >= _K1_UPPER_DB, 0.0, k1)
-    return np.asarray(k1, dtype=np.float64), bool(np.any(delta < low))
+    # The criteria are judged on the settled margin, so a difference of two
+    # readings that is 15 dB in decimal is not taken as below it in binary.
+    judged = settled(delta)
+    k1 = np.where(judged >= _K1_UPPER_DB, 0.0, k1)
+    return np.asarray(k1, dtype=np.float64), bool(np.any(judged < low))
 
 
 def reverberation_background_correction(
@@ -509,7 +513,7 @@ def _room_qualification_warnings(
         )
     floor = volume / surface_area
     below_6k3 = frequencies < _ABSORPTION_CRITERION_MAX_HZ
-    if np.any(below_6k3 & (t60 <= floor)):
+    if np.any(below_6k3 & (settled(t60 - floor) <= 0.0)):
         warnings.warn(
             f"Reverberation time falls to or below the V/S floor ({floor:g} s) "
             "in one or more bands below 6,3 kHz; the room is too absorptive and "
@@ -543,7 +547,7 @@ def _position_sampling_warnings(levels: np.ndarray, stacklevel: int) -> None:
         )
     if n_positions >= _MIN_POSITIONS_FOR_SM:
         s_m = np.std(arr, axis=0, ddof=1)
-        if np.any(s_m > _SM_CRITERION_DB):
+        if np.any(settled(s_m) > _SM_CRITERION_DB):
             warnings.warn(
                 "Inter-position standard deviation exceeds the ISO 3741 sM "
                 "criterion (1,5 dB) in one or more bands; the source may radiate "

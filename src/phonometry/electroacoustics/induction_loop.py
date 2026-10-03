@@ -111,6 +111,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import optimize, signal
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.validation import (
     _as_float64,
@@ -168,14 +169,6 @@ _MU_0 = 4.0e-7 * math.pi
 #: The window around the specified field strength every selected point of the
 #: useful magnetic field volume has to fall in, in dB (8.4.3).
 _FIELD_TOLERANCE_DB = 3.0
-
-#: Decimal places a margin is settled to before it is judged (see
-#: :attr:`LoopRequirement.margins_db`). The windows of 8.3.7, 8.4.3 and 10.4.7
-#: hold their edges and are printed in whole decibels; a response of -18,6 dB
-#: against -15,6 dB at 1 kHz is 3,0 dB down in decimal and
-#: 3,000 000 000 000 001 8 dB in binary, so each margin is settled first at a
-#: resolution a nanodecibel wide, far below any digit a meter reads.
-_SETTLED_PLACES = 9
 
 #: The match within which a measured height is taken as one of the heights of
 #: 9.2 and 9.3, in metres: a height typed as 1.2000000001 is still 1,2 m.
@@ -865,7 +858,7 @@ class LoopRequirement:
         """
         # Adding 0.0 turns the -0.0 a settled rounding error leaves into 0.0.
         return tuple(
-            round(min(value - low, high - value), _SETTLED_PLACES) + 0.0
+            float(settled(min(value - low, high - value))) + 0.0
             for value, low, high in zip(
                 self.values_db, self.lower_db, self.upper_db, strict=True
             )

@@ -82,6 +82,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.boundary import settled
 from ..._internal.catalogue import CatalogueError, CatalogueRow, read_table, take
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import check_engine, require_non_negative, require_positive
@@ -99,6 +100,10 @@ STANDARD_ATMOSPHERIC_PRESSURE = 1.0e5
 #: Airflow-resistivity thresholds of clause 8.2, in kPa.s/m2.
 _HIGH_RESISTIVITY = 100.0
 _LOW_RESISTIVITY = 10.0
+
+#: Clause 8.2: below the low resistivity the enclosed gas is negligible only
+#: while its stiffness stays within this share of the apparent one.
+_NEGLIGIBLE_GAS_SHARE = 0.1
 
 #: ``2*pi`` and ``4*pi**2`` for the resonance relations.
 _TWO_PI = 2.0 * np.pi
@@ -251,7 +256,9 @@ def installed_dynamic_stiffness(
     if airflow_resistivity_kpa_s_m2 >= _LOW_RESISTIVITY:
         return apparent_stiffness_n_m3 + gas_stiffness_n_m3
     # r < 10 kPa.s/m2: the enclosed gas is only negligible for a firm structure.
-    if gas_stiffness_n_m3 > 0.1 * apparent_stiffness_n_m3:
+    # Judged on the settled ratio: stiffnesses run to 1e8 N/m3, where nine
+    # decimals sit below the last bit, and a tenth in decimal is a tenth.
+    if settled(gas_stiffness_n_m3 / apparent_stiffness_n_m3) > _NEGLIGIBLE_GAS_SHARE:
         warnings.warn(
             "for airflow resistivity below 10 kPa.s/m2 with a non-negligible "
             "enclosed-gas stiffness, EN 29052-1 cannot resolve s' (clause 8.2); "

@@ -78,6 +78,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -1233,7 +1234,9 @@ class RunningRmsDecayVerification:
         nothing more: the other clauses a meter is graded on are hardware
         measurements this cannot stand in for.
         """
-        return abs(self.deviation_s) <= self.tolerance_s
+        # Judged settled: 0,129 s against 0,124 s +- 0,005 s is on the edge
+        # of the interval in decimal, a last bit outside it in binary.
+        return bool(settled(abs(self.deviation_s) - self.tolerance_s) <= 0.0)
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.

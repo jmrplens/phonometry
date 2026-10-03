@@ -84,6 +84,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import round_half_up
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -334,9 +335,12 @@ def _positive(value: float, name: str) -> float:
 
 
 def _round_half_up(value: float, decimals: int = 0) -> float:
-    """Round half-up to ``decimals`` places (DB-HR 3.1.3.1 point 4)."""
-    scale = 10.0**decimals
-    return math.floor(value * scale + 0.5) / scale
+    """Round half-up to ``decimals`` places (DB-HR 3.1.3.1 point 4).
+
+    The scaled value is settled before the half is judged, so a value that is
+    a half in decimal and a last bit under it in binary still rounds up.
+    """
+    return float(round_half_up(value, decimals))
 
 
 def _normalise(value: str, aliases: Mapping[str, str], name: str) -> str:

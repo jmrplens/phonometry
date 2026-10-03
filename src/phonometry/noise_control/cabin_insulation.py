@@ -73,6 +73,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import round_half_even, settled
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_choice,
@@ -315,7 +316,7 @@ def _corrected(
         msg = f"'{where}_background_levels' must match '{where}_levels' band for band."
         raise ValueError(msg)
     margin = levels - background
-    if float(np.min(margin)) < MIN_SIGNAL_TO_BACKGROUND_DB:
+    if float(np.min(settled(margin))) < MIN_SIGNAL_TO_BACKGROUND_DB:
         msg = (
             f"ISO 11957 asks for at least {MIN_SIGNAL_TO_BACKGROUND_DB:g} dB over "
             f"the background in the {where}, and preferably more than "
@@ -365,7 +366,7 @@ class CabinInsulationResult:
 
     def rounded(self) -> NDArray[np.int_]:
         """The band values as 11.4 e) reports them, to the nearest decibel."""
-        return np.asarray(np.rint(self.insulation), dtype=np.int_)
+        return np.asarray(round_half_even(self.insulation), dtype=np.int_)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -718,7 +719,10 @@ def internal_noise_level(
         return mean
     lower, upper = INTERNAL_NOISE_CORRECTION_WINDOW_DB
     margin = mean - require_finite(background_level, "background_level")
-    if margin < lower:
+    # Judged settled: the energy mean of one reading, or of equal ones, is that
+    # reading only to the last bits, which must not move it across a limit.
+    judged = float(settled(margin))
+    if judged < lower:
         msg = (
             f"ISO 11957 6.7 asks for at least {lower:g} dB over the background "
             f"inside the cabin, and preferably more than "
@@ -727,7 +731,7 @@ def internal_noise_level(
         )
         warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
         return mean
-    if margin > upper:
+    if judged > upper:
         return mean
     return mean + 10.0 * float(np.log10(1.0 - 10.0 ** (-0.1 * margin)))
 
@@ -765,16 +769,19 @@ def check_source_positions(
         )
         raise ValueError(msg)
     spread = float(np.max(np.max(values, axis=0) - np.min(values, axis=0)))
+    # A spread of 3,0 dB worked from two readings can be 3,000 000 000 000 004 in
+    # binary; settled, it asks for three positions and not four.
+    judged = float(settled(spread))
     required = max(
         MIN_SOURCE_POSITIONS_IN_SITU,
-        min(MAX_SOURCE_POSITIONS_IN_SITU, int(np.ceil(spread))),
+        min(MAX_SOURCE_POSITIONS_IN_SITU, int(np.ceil(judged))),
     )
     return SourcePositionCheck(
         positions_used=positions,
         max_octave_spread_db=spread,
         required_positions=required,
         satisfied=positions >= required,
-        exceeds_maximum=spread > MAX_SOURCE_POSITIONS_IN_SITU,
+        exceeds_maximum=judged > MAX_SOURCE_POSITIONS_IN_SITU,
     )
 
 
@@ -857,7 +864,9 @@ def check_band_flatness(
             )
     spread = np.asarray(spreads, dtype=np.float64)
     limit = np.asarray(limits, dtype=np.float64)
-    satisfied = np.isnan(limit) | (spread <= limit)
+    # Judged settled: three readings 6,0 dB apart in decimal are within the
+    # 6 dB of 125 Hz whichever way the last bits of their difference fall.
+    satisfied = np.isnan(limit) | (settled(spread) <= limit)
     return BandFlatnessCheck(
         octave_centres_hz=np.asarray(centres, dtype=np.float64),
         spread_db=spread,
@@ -930,7 +939,7 @@ def uncertainty_conditions(
     cabin = require_positive(cabin_volume_m3, "cabin_volume_m3")
     how = require_choice(str(method), "method", _METHODS)
     ratio = room / cabin
-    satisfied = ratio >= MIN_ROOM_TO_CABIN_VOLUME_RATIO
+    satisfied = bool(settled(ratio) >= MIN_ROOM_TO_CABIN_VOLUME_RATIO)
     if how == _ACTUAL_NOISE:
         # Clause 10 states no uncertainty for this method at all, so the
         # volume ratio it attaches its statement to has nothing to qualify:

@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.boundary import round_half_even, settled
 from ..._internal.validation import (
     require_choice,
     require_finite,
@@ -290,7 +291,9 @@ def barrier_background_correction_db(
     :raises ValueError: For a margin under
         :data:`ISO10847_MINIMUM_BACKGROUND_MARGIN_DB`, which 6.4 calls invalid.
     """
-    margin = require_finite_array(level_difference_db, "level_difference_db")
+    # Settled: a difference of two readings that is 10 dB in decimal can be
+    # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
+    margin = settled(require_finite_array(level_difference_db, "level_difference_db"))
     if float(np.min(margin)) < ISO10847_MINIMUM_BACKGROUND_MARGIN_DB:
         msg = (
             f"ISO 10847 6.4 calls the results invalid under "
@@ -349,9 +352,13 @@ def is_short_distance(
     barrier = require_positive(barrier_height_m, "barrier_height_m")
     first = require_positive(source_to_barrier_m, "source_to_barrier_m")
     second = require_positive(barrier_to_receiver_m, "barrier_to_receiver_m")
-    before = (source + receiver) / (first + second) > SHORT_DISTANCE_RATIO
-    after = ((source + barrier) / first > SHORT_DISTANCE_RATIO) and (
-        (barrier + receiver) / second > SHORT_DISTANCE_RATIO
+    # The ratios are judged settled, so heights and distances whose ratio is
+    # the printed one in decimal are not taken past it by the last bits.
+    before = bool(
+        settled((source + receiver) / (first + second)) > SHORT_DISTANCE_RATIO
+    )
+    after = bool(settled((source + barrier) / first) > SHORT_DISTANCE_RATIO) and bool(
+        settled((barrier + receiver) / second) > SHORT_DISTANCE_RATIO
     )
     return before, after
 
@@ -519,7 +526,7 @@ class MeasuredBarrierInsertionLoss:
 
     def rounded(self) -> NDArray[np.int_]:
         """The values as clause 10 c) reports them, to the nearest decibel."""
-        return np.asarray(np.rint(self.insertion_loss_db), dtype=np.int_)
+        return np.asarray(round_half_even(self.insertion_loss_db), dtype=np.int_)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

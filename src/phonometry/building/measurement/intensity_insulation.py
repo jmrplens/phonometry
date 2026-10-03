@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -1044,7 +1045,7 @@ def _low_frequency_qualification(
     limit = _low_frequency_limit(
         absorbing_specimen_surface=_validated_absorbing_flag(absorbing_specimen_surface)
     )
-    return f_pi, np.asarray(f_pi <= limit, dtype=bool)
+    return f_pi, np.asarray(settled(f_pi) <= limit, dtype=bool)
 
 
 def _check_low_frequency_bands(

@@ -85,6 +85,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.boundary import settled_ratio
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -415,7 +416,11 @@ def rigid_mass_calibration_check(
     else:
         expected = 1.0 / (omega * mass)
     deviation = measured / expected - 1.0
-    within = np.abs(deviation) <= tolerance
+    # Judged as a settled share of the tolerance, so that a block exactly 5 %
+    # off in decimal is within the +/- 5 % whichever side of it the last bits
+    # of the ratio fall, and a tighter tolerance of the caller's is judged on
+    # its own scale rather than on nine decimals of a ratio.
+    within = settled_ratio(np.abs(deviation), tolerance) <= 1.0
     return RigidMassCalibrationResult(
         frequencies=freq,
         measured=np.asarray(measured, dtype=np.float64),

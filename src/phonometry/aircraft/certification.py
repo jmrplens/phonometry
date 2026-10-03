@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
@@ -266,7 +267,7 @@ def _tone_marked_slopes(
         if (
             not np.isnan(s[i])
             and not np.isnan(s[i - 1])
-            and abs(s[i] - s[i - 1]) > _ENCIRCLE_SLOPE_CHANGE_DB
+            and float(settled(abs(s[i] - s[i - 1]))) > _ENCIRCLE_SLOPE_CHANGE_DB
         ):
             s_enc[i] = True
 
@@ -424,13 +425,19 @@ def _ten_db_down_limits(pnlt: NDArray[np.float64], threshold: float) -> tuple[in
         return 0, n - 1
 
     first = int(above[0])
-    if first > 0 and abs(pnlt[first - 1] - threshold) < abs(pnlt[first] - threshold):
+    # Distances judged settled: two samples that are equally far from the
+    # threshold in decimal are a tie, which keeps the sample above it.
+    if first > 0 and settled(abs(pnlt[first - 1] - threshold)) < settled(
+        abs(pnlt[first] - threshold)
+    ):
         kf = first - 1
     else:
         kf = first
 
     last = int(above[-1])
-    if last < n - 1 and abs(pnlt[last + 1] - threshold) < abs(pnlt[last] - threshold):
+    if last < n - 1 and settled(abs(pnlt[last + 1] - threshold)) < settled(
+        abs(pnlt[last] - threshold)
+    ):
         kl = last + 1
     else:
         kl = last

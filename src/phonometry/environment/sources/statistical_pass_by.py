@@ -110,6 +110,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import round_half_up
 from ..._internal.frozen import read_only
 from ..._internal.validation import (
     require_choice,
@@ -254,9 +255,11 @@ def _round_tenth(value: float) -> float:
     """Round a level to the one decimal place of 9.2.
 
     A level on the half goes up. That is a convention of this module: 9.2 says
-    only "rounded to one decimal place" and gives no rule for the half.
+    only "rounded to one decimal place" and gives no rule for the half. The
+    scaled value is settled before the half is judged, so a level that is a
+    half in decimal and a last bit under it in binary still goes up.
     """
-    return math.floor(value * 10.0 + 0.5) / 10.0
+    return float(round_half_up(value, 1))
 
 
 def _reported_levels(levels_db: Mapping[str, float]) -> dict[str, float]:

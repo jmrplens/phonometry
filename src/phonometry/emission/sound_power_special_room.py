@@ -85,6 +85,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -98,7 +99,6 @@ from ._shared import (
     _a_weighting_corrections,
     _c2_correction,
     _reference_power_levels,
-    _settled,
     _validate_meteorology,
 )
 from .sound_power_hard_walled import (
@@ -218,7 +218,7 @@ def _table4_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     since the table has nothing lower and the level is then reported, if at
     all, as not meeting the requirement (9.8).
     """
-    margin = _settled(delta)
+    margin = settled(delta)
     whole = np.clip(np.floor(margin + 0.5), _TABLE4_MIN_DB, _TABLE4_MAX_DB)
     table = np.vectorize(lambda d: _TABLE4[int(d)], otypes=[np.float64])(whole)
     correction = np.where(margin > _TABLE4_MAX_DB, 0.0, table)
@@ -447,7 +447,7 @@ class SpecialRoomReverberationCheck:
     @property
     def band_within(self) -> np.ndarray:
         """Per band, whether ``T`` lies within the limiting curves."""
-        ratio = _settled(self.normalized_ratio)
+        ratio = settled(self.normalized_ratio)
         return np.asarray(
             (ratio >= self.lower_limit) & (ratio <= self.upper_limit), dtype=bool
         )
@@ -455,7 +455,7 @@ class SpecialRoomReverberationCheck:
     @property
     def nominal_in_range(self) -> bool:
         r"""Whether :math:`T_\mathrm{nom}` is between 0,5 s and 1,0 s (6.3)."""
-        nominal = float(_settled(self.nominal_reverberation_time_s))
+        nominal = float(settled(self.nominal_reverberation_time_s))
         return _TNOM_MIN_S <= nominal <= _TNOM_MAX_S
 
     @property
@@ -483,7 +483,7 @@ class SpecialRoomReverberationCheck:
         """
         if math.isnan(self.climate_product_change):
             return None
-        return float(_settled(abs(self.climate_product_change))) <= _CLIMATE_TOLERANCE
+        return float(settled(abs(self.climate_product_change))) <= _CLIMATE_TOLERANCE
 
     @property
     def source_size_recommended(self) -> bool | None:
@@ -492,7 +492,7 @@ class SpecialRoomReverberationCheck:
         """
         if math.isnan(self.source_volume_m3):
             return None
-        ratio = float(_settled(self.source_volume_m3 / self.volume_m3))
+        ratio = float(settled(self.source_volume_m3 / self.volume_m3))
         return ratio <= _SOURCE_VOLUME_FRACTION
 
     @property
@@ -786,7 +786,7 @@ class SpecialRoomSurfaceCheck:
         """Per wall or ceiling and band, ``(surfaces, bands)``, whether the
         coefficient lies within 0,5 and 1,5 times the mean.
         """
-        ratio = _settled(self.surface_ratio)
+        ratio = settled(self.surface_ratio)
         return np.asarray(
             (ratio >= _SURFACE_RATIO_MIN) & (ratio <= _SURFACE_RATIO_MAX), dtype=bool
         )
@@ -802,7 +802,7 @@ class SpecialRoomSurfaceCheck:
     def floor_reflective(self) -> np.ndarray:
         """Per band, whether the floor absorbs less than 0,06."""
         return np.asarray(
-            _settled(self.floor_absorption) < _FLOOR_MAX_ABSORPTION, dtype=bool
+            settled(self.floor_absorption) < _FLOOR_MAX_ABSORPTION, dtype=bool
         )
 
     @property
@@ -949,7 +949,7 @@ class SpecialRoomSuitabilityCheck:
     def band_within(self) -> np.ndarray:
         """Per band, whether the difference stays within Table 1."""
         return np.asarray(
-            _settled(np.abs(self.difference_db)) <= self.limit_db, dtype=bool
+            settled(np.abs(self.difference_db)) <= self.limit_db, dtype=bool
         )
 
     @property
@@ -1039,10 +1039,10 @@ def _band_group(frequency: float) -> str:
 
 def _sm_class(s_m: float) -> str:
     """The 9.5 reading of s_M, which is also the row block of Table 3."""
-    settled = float(_settled(s_m))
-    if settled < _SM_BROADBAND_BELOW_DB:
+    s_m_settled = float(settled(s_m))
+    if s_m_settled < _SM_BROADBAND_BELOW_DB:
         return "broadband"
-    if settled <= _SM_NARROW_BAND_UP_TO_DB:
+    if s_m_settled <= _SM_NARROW_BAND_UP_TO_DB:
         return "narrow-band"
     return "discrete tone"
 
@@ -1057,7 +1057,7 @@ def _survey_deviation(levels: np.ndarray) -> np.ndarray:
     about that mean with the divisor :math:`n - 1`, as printed.
     """
     arr = levels
-    spread = _settled(np.ptp(arr, axis=0))
+    spread = settled(np.ptp(arr, axis=0))
     mean = np.where(
         spread <= _ARITHMETIC_MEAN_RANGE_DB,
         arr.mean(axis=0),

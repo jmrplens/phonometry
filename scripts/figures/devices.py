@@ -7621,10 +7621,10 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
     # needs one sample the grid does not carry: its last row is a point rather
     # than an interval, since 10 dB takes off 0,5 dB and anything above it
     # nothing, so the sample after 10 sits immediately above 10 and the drop is
-    # drawn there rather than a decibel late.
-    table_margins = np.concatenate(
-        [np.arange(3.0, 11.0, 1.0), [np.nextafter(10.0, np.inf), 12.4]]
-    )
+    # drawn there rather than a decibel late. Immediately is a millionth of a
+    # decibel: the margin is judged to nine decimals, so the next float above
+    # 10 is still 10.
+    table_margins = np.concatenate([np.arange(3.0, 11.0, 1.0), [10.0 + 1e-6, 12.4]])
     silencer = np.array(
         [noise_control.silencer_background_correction_db([m])[0] for m in table_margins]
     )

@@ -74,6 +74,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
@@ -374,7 +375,9 @@ class DamageAssessment:
         guideline value does not mean damage occurs, it means the question
         has to be answered by 4.2 to 4.4 instead.
         """
-        return bool(self.velocity_mm_s <= self.guideline_mm_s)
+        # Judged settled: the guideline interpolated at 65,1 Hz is 43,02 mm/s
+        # in decimal and a last bit under it in binary.
+        return bool(settled(self.velocity_mm_s - self.guideline_mm_s) <= 0.0)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

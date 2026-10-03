@@ -61,6 +61,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import round_half_away_from_zero
+
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
@@ -261,10 +263,13 @@ def _round_half_up(value: float) -> int:
     which is not what :func:`round` does: it sends halves to the even
     neighbour, so 82,5 dB would come back 82 dB.
 
+    The level is settled before the half is judged, so an effective level of
+    64,1 - 3,6 dB, 60,499 999 999 999 99 in binary, still rounds to 61 dB.
+
     :param value: The level to round.
     :return: The nearest integer, with .5 going away from zero.
     """
-    return int(np.floor(value + 0.5)) if value >= 0 else -int(np.floor(-value + 0.5))
+    return int(round_half_away_from_zero(value))
 
 
 @dataclass(frozen=True)

@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
 from .._internal.types import as_float_or_array
 from .._internal.validation import check_engine, require_ranks, require_same_length
@@ -522,8 +523,11 @@ def precision_background_correction(
     delta = src - bg
     clamped = np.maximum(delta, low)
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * clamped))
-    k1 = np.where(delta >= _K1_UPPER_3745, 0.0, k1)
-    if np.any(delta < low):
+    # The criteria are judged on the settled margin, so a difference of two
+    # readings that is 15 dB in decimal is not taken as below it in binary.
+    judged = settled(delta)
+    k1 = np.where(judged >= _K1_UPPER_3745, 0.0, k1)
+    if np.any(judged < low):
         warnings.warn(
             "Background margin below the frequency-dependent criterion (6 dB "
             "edge bands / 10 dB mid bands) in one or more positions; K1 clamped "

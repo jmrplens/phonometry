@@ -264,13 +264,17 @@ measurements themselves and the phase of the sensitivity; the corrections for
 the difference of the acoustic impedances (7.4, 7.5) and for non-uniform
 pressure beyond Table A.1 (6.5); the time-selective processing of IEC 61094-8
 Annex B and the qualification of the free field by ISO 26101; the values of
-IEC/TS 61094-7 and the reciprocity calibration of the reference, which are
-inputs; the second special case of Table D.1, a microphone calibrated as a
+IEC/TS 61094-7, which are inputs, and the reciprocity calibration of the
+reference, which is in
+[Microphone calibration by reciprocity](reciprocity-calibration.md); the second special case of Table D.1, a microphone calibrated as a
 system with its preamplifier (0,002 dB, and under 0,02 dB above 200 Hz),
 which a budget takes through `additional_components`.
 
 ## See also
 
+- [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](reciprocity-calibration.md):
+  the primary calibration of the laboratory standard microphone a comparison
+  takes as its reference.
 - [Free-field corrections of a sound level meter (IEC 62585)](free-field-corrections.md):
   a meter compared with an LS2P reference in the same way.
 - [Random-incidence and diffuse-field response (IEC 61183)](random-incidence.md):

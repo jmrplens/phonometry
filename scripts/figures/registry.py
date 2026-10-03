@@ -512,6 +512,13 @@ from .perception import (
     generate_two_tone_separation,
     generate_zwicker_time_varying,
 )
+from .reciprocity import (
+    generate_reciprocity_acoustic_centre,
+    generate_reciprocity_budgets,
+    generate_reciprocity_coupler_physics,
+    generate_reciprocity_free_field,
+    generate_reciprocity_pressure,
+)
 from .room import (
     generate_absorption_per_table,
     generate_decay_range_bias,
@@ -1171,6 +1178,13 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_comparison_budget,
     generate_comparison_jig_correction,
     generate_free_field_region,
+    # IEC 61094-2 and IEC 61094-3: laboratory standard microphones calibrated
+    # by reciprocity, in a coupler and in a free field.
+    generate_reciprocity_pressure,
+    generate_reciprocity_coupler_physics,
+    generate_reciprocity_free_field,
+    generate_reciprocity_budgets,
+    generate_reciprocity_acoustic_centre,
     generate_stationarity_glide_blind_spot,
     generate_rice_nongaussian_screen,
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)

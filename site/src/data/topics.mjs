@@ -124,6 +124,7 @@ export const topics = [
           'signals/metrology/free-field-corrections',
           'signals/metrology/sound-level-meter-periodic-tests',
           'signals/metrology/comparison-calibration',
+          'signals/metrology/reciprocity-calibration',
         ],
       },
       apiGroup('filters', 'signals', 'metrology'),

@@ -2,8 +2,8 @@
 
 # Humid air
 
-A reciprocity calibration needs the air it is done in to five or six figures,
-which is why the standard that defines that calibration also carries the most
+A [reciprocity calibration](../signals/metrology/reciprocity-calibration.md)
+needs the air it is done in to five or six figures, which is why the standard that defines that calibration also carries the most
 carefully stated model of humid air in the acoustic literature. Annex F is
 that model, and this page is what the library does with it.
 

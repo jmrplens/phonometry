@@ -81,6 +81,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   diagram with the frequency range of the rating marked, as the H.4 sheet
   does.
 
+- **The primary calibration of laboratory standard microphones by
+  reciprocity, in a coupler and in a free field (IEC 61094-2:2009,
+  IEC 61094-3:2016 with COR1:2016).** Three microphones measured in pairs now
+  give their complex sensitivities with no reference microphone.
+  `metrology.coupler_transfer_impedance` computes the acoustic transfer
+  impedance of a `metrology.PlaneWaveCoupler`, the transmission line of
+  Formula (4) with the losses of Formulas (A.3) to (A.5) and the excess volume
+  of each front cavity, or of a `metrology.LargeVolumeCoupler`, the compliance
+  of Formula (3) with the heat-conduction factor of Formula (A.1), the two
+  bores of length F that Figure C.2 draws between each microphone face and
+  the cavity included (`port_length_m`), and divides either by the capillary
+  correction of Formula (6); `metrology.temperature_transfer_function` gives
+  Gerber's $E_V$ by the full solution the annex asks for below 20 Hz, which
+  reproduces every entry of Table A.1, or by the approximation (A.2), and
+  `metrology.capillary_tube_impedance` the input impedance of an open tube by
+  Formulas (B.1) to (B.3), which gives Tables B.1 and B.2 to within
+  0,002 GPa·s/m³. A
+  `metrology.ReciprocityMicrophone` carries the lumped impedance of Annex E
+  and its front cavity, and `metrology.microphone_acoustic_impedance` is
+  Formula (E.1). `metrology.pressure_reciprocity` and
+  `metrology.pressure_reciprocity_pair` solve the products of Formula (2) for
+  the three sensitivities of Formula (7), or for two with the ratio from an
+  auxiliary source of Formula (8), and return a
+  `metrology.ReciprocityCalibration` with the levels, the moduli and the
+  phases. In a free field, `metrology.free_field_reciprocity` and
+  `metrology.free_field_reciprocity_pair` take the products of Formula (7) of
+  IEC 61094-3 with the distances between the acoustic centres, the
+  attenuation of `metrology.reciprocity_air_attenuation` (Annex B) and the
+  speed of sound with the dispersion of IEC 61094-2 F.3;
+  `metrology.free_field_transfer_impedance` is Formula (D.1) and
+  `metrology.acoustic_centre` finds an acoustic centre from the
+  inverse-distance law of 6.5. `metrology.check_coupler` holds a coupler to
+  what its formulas need, and `metrology.check_free_field_arrangement` an
+  arrangement to what 6.4 and 7.3 recommend,
+  `metrology.large_volume_wave_motion_correction` reads Table C.3, and
+  `metrology.coupler_parameter_uncertainty`,
+  `metrology.free_field_parameter_uncertainty` and
+  `metrology.reciprocity_uncertainty_budget` build the budgets of Table 1 of
+  both parts by the one-at-a-time recalculation they describe, from the
+  standard uncertainties gathered in a `metrology.CouplerInputUncertainties`
+  or a `metrology.FreeFieldInputUncertainties`, with $k = 2$. Tables C.1,
+  C.2, C.3 and both Tables 1 are published read-only,
+  every result has `.plot()`, and the printed tables are conformance rows.
+  Three printed defects are in the errata: IEC 61094-2 heads two columns of
+  Tables B.1 and B.2 with a radius of 0,1667 mm, while the values under them
+  were computed with a radius of 1/6 mm, and prints one entry with a decimal
+  point and one with a digit missing; Formulas (8) and (9) of IEC 61094-3 drop the factor $-\mathrm{j}$
+  of Formula (7), which turns the complex sensitivity by 45°; and Step 1 of
+  its Annex B misprints the last coefficient of the saturation vapour
+  pressure. A new guide under Calibration and uncertainty, with a diagram of
+  the readings, runs a pressure and a free-field calibration with their
+  budgets, in English and Spanish.
 - **Take a solid's row into the elastic simulation and the detailed building
   model, and a ground's into the outdoor models.** A solid's catalogue row,
   one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your

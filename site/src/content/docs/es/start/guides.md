@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 162 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 163 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento sesenta y dos guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento sesenta y tres guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -158,7 +158,7 @@ una respuesta al impulso filtrada, una valoración ambiental es un $L_\mathrm{eq
 ajustado.
 Implementa IEC 61260-1, IEC 61260-3, ANSI S1.11, IEC 61672-1, IEC 61672-3,
 ISO 7196, IEC 61252, ISO 1996-1, IEC 60942, IEC 61183, IEC 62585,
-IEC 61094-5, IEC 61094-8 y la GUM.
+IEC 61094-2, IEC 61094-3, IEC 61094-5, IEC 61094-8 y la GUM.
 
 - [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): el área
   entera montada de principio a fin en una sola página ejecutable, del tono del
@@ -282,6 +282,11 @@ IEC 61094-5, IEC 61094-8 y la GUM.
   acoplador o en campo libre, con el intercambio del Anexo C, el monitor de
   una sustitución, las correcciones y los balances de la Tabla D.1 y de la
   Tabla 2.
+- [Calibración por reciprocidad (IEC 61094-2/-3)](/phonometry/es/signals/metrology/reciprocity-calibration/):
+  micrófonos patrón de laboratorio calibrados por pares sin referencia, en un
+  acoplador con sus correcciones por conducción térmica y por tubos capilares
+  o en campo libre con su atenuación y sus centros acústicos, y los balances
+  de la Tabla 1.
 
 ## [El medio](/phonometry/es/fluids/)
 

@@ -178,6 +178,7 @@ from .signals import (
     _d_multichannel_capture,
     _d_multirate,
     _d_random_incidence_setup,
+    _d_reciprocity_setup,
     _d_signal_chain,
     _d_slm_chain,
     _d_slm_pipeline,
@@ -255,6 +256,11 @@ DIAGRAMS = {
         _d_comparison_calibration_setup,
         "Calibration by comparison: the readings of IEC 61094-5 and IEC 61094-8",
         470,
+    ),
+    "diagram_reciprocity_setup": (
+        _d_reciprocity_setup,
+        "Calibration by reciprocity: the readings of IEC 61094-2 and IEC 61094-3",
+        486,
     ),
     "diagram_env_measurement": (
         _d_env_positions,

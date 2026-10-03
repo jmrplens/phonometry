@@ -194,6 +194,12 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     r"$L_\mathrm{test} \pm U$ ($k$ = 2)": "the level of the test microphone, whose test subscript "
     "is the one IEC 61094-5 D.2 prints in M_test, with its expanded uncertainty; a subscript "
     "follows its source (ComparisonCalibration.plot)",
+    r"$Z_\mathrm{a,C}$ [GPa·s/m³]": "the symbol of IEC 61094-2 Formula (B.1) and its unit, "
+    "which read the same in Spanish (CapillaryTubeImpedance.plot)",
+    r"$\alpha$, total": "the attenuation symbol of IEC 61094-3 B.2 and the word total, "
+    "which Spanish spells the same (ReciprocityAirAttenuation.plot)",
+    r"$\alpha_\mathrm{cl} + \alpha_\mathrm{rot}$": "the classical and rotational terms of "
+    "IEC 61094-3 B.2 Step 4; a subscript follows its source (ReciprocityAirAttenuation.plot)",
 }
 
 # A run of at least three letters, in any alphabet: shorter runs are unit and

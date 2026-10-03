@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1793 numerical conformance checks against 519 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1796 numerical conformance checks against 519 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1793 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1796 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -19885,7 +19885,9 @@ and reads the bands it needs: `sound_power_comparison` and
 and `sound_energy_hard_walled` (ISO 3743-1),
 `sound_power_special_room_comparison` (ISO 3743-2), `sound_power_in_situ` and
 `sound_energy_in_situ` (ISO 3747) in octaves, each the energy sum of its
-three one-third octave bands. `sound_power_level_at` reads it directly.
+three one-third octave bands. The suitability evaluation of ISO 3743-2 6.7,
+`check_special_room_suitability`, takes it as the calibration the room is
+judged against, in octaves too. `sound_power_level_at` reads it directly.
 
 The calibration holds $L_W$ under the reference conditions, and $C_2$ is what
 carried the power the source radiated during the calibration there. ISO 3741
@@ -24880,7 +24882,10 @@ weights by them. Before the room is used, 6.7 determines the octave-band
 power of a broadband reference source calibrated by ISO 3741, or by ISO 6926
 and ISO 3745, in the room by this standard and compares it with the
 calibration: within ±5 dB at 125 Hz, ±3 dB from 250 Hz to 4 kHz and ±4 dB at
-8 kHz (Table 1).
+8 kHz (Table 1). A certificate holds its levels under the reference
+conditions, 23,0 °C and 101,325 kPa, and passed as levels they stand for the
+levels at the test: this first comparison takes the reference source's run
+in the room at those conditions.
 
 ```python
 walls = np.array([  # 6.4: each wall and the ceiling, octave bands
@@ -24915,6 +24920,64 @@ suitability = emission.check_special_room_suitability(in_room.sound_power_level,
 print(np.round(suitability.difference_db, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
 print(suitability.passes)                       # True
 ```
+
+**The calibration itself, read at the test.** Formula 9 gives the power the
+source radiated under the meteorological conditions of the test (Annex E),
+and an ISO 6926 calibration holds it under the reference conditions,
+23,0 °C and 101,325 kPa. `check_special_room_suitability` takes the
+`ReferenceSourceCalibration` in place of the levels, with the temperature and
+the static pressure in the room during step 2, and reads it there, as the
+comparison method of 10.3 does: each octave is the energy sum of its three
+one-third octave bands, less the $C_2$ of the Annex A formula the
+calibration used, which ISO 6926 8.4 asks the laboratory and the user to
+share. Levels passed as such are taken as already carried to the test, and
+the conditions then only have to be valid. The room's levels to pass are
+`sound_power_level`, the level at the test, and not `sound_power_level_ref`,
+which Annex E has already carried to the reference conditions and which
+would then count $C_2$ twice. Here the same room levels are read as a run at
+22 °C and 97.5 kPa, against an ISO 6926 calibration of the same source made
+in a hemi-anechoic room: the source radiates 0.16 dB less there than under
+the reference conditions, so every difference is 0.16 dB larger than against
+the certificate as printed.
+
+```python
+# The same source calibrated by ISO 6926 in a hemi-anechoic room: 20 fixed
+# positions on the 2 m hemisphere, one-third octaves from 100 Hz to 10 kHz
+# (the levels are taken equal at every position, for brevity).
+hemisphere = np.tile(np.repeat(lw_r, 3) - 10.0 * np.log10(3.0 * 2.0 * np.pi * 2.0**2), (20, 1))
+calibration = emission.reference_source_calibration(
+    hemisphere, frequencies_hz=thirds, arrangement="fixed",
+)
+print(np.round(calibration.sound_power_level_at(freqs, bandwidth="octave"), 2))
+# [79.87 83.37 86.07 86.77 86.27 84.17 80.57] dB under the reference conditions
+suitability2 = emission.check_special_room_suitability(
+    in_room.sound_power_level, calibration, freqs, temperature_c=22.0, static_pressure_kpa=97.5,
+)
+print(np.round(suitability2.calibrated_power_level_db, 2))  # [79.72 83.22 85.92 86.62 86.12 84.02 80.42]
+print(np.round(suitability2.difference_db, 1))   # [ 1.1  0.6  0.4  0.2  0.5  0.1 -0.1]
+print(suitability2.passes)                       # True
+```
+
+The certificate's octaves sit 0.13 dB below the levels the hemisphere was
+built from: that is $C_1$, the reference-quantity correction of ISO 6926
+Formula (2), −0.13 dB at the reference conditions.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_suitability_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_suitability.svg" alt="Bars of the difference between the octave-band sound power level of a reference sound source determined in a 72 cubic metre special reverberation room and its ISO 6926 calibration read at 22 degrees Celsius and 97.5 kPa, over the octave bands from 125 Hz to 8 kHz, with short orange horizontal marks at plus and minus the Table 1 limit of each band: 5 dB at 125 Hz, 3 dB from 250 Hz to 4 kHz and 4 dB at 8 kHz. Every bar is blue and small beside its marks: 1.1 dB at 125 Hz, 0.6 dB at 250 Hz, between 0.5 dB and 0.1 dB from 500 Hz to 4 kHz, and minus 0.1 dB at 8 kHz; the title reads ISO 3743-2 room suitability (6.7): suitable" width="96%"></picture>
+
+*6.7 against the ISO 6926 calibration read at 22 °C and 97.5 kPa: the
+difference per octave band within the ± limits of Table 1.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+suitability2.plot()   # the difference per band within the Table 1 limits
+plt.show()
+```
+
+</details>
 
 **The survey.** Six positions at one source location give $s_\mathrm{M}$ per
 band and for the A-weighted level (Formula 4), about the arithmetic mean when
@@ -25054,10 +25117,12 @@ no more than 1,5 m², and a floor of painted poured concrete (Annex B). Measure 
 reverberation time in one-third-octave bands with any absorbing support of
 the source in place, centre it, and keep the humidity and temperature of
 that measurement within 6.6 during every test. Check the room once with a
-calibrated reference source (6.7). Use a microphone flat for random
-incidence, within the tolerances of Table 2 of the standard. Set the source
-as it is used or, failing that, on the floor at least 1 m from the nearest
-wall (8.2), and keep it within 1 % of the room's volume (clause 5). Survey six
+calibrated reference source (6.7), noting the temperature and the static
+pressure in the room while it runs, the conditions at which its calibration
+is read. Use a microphone flat for random incidence, within the tolerances
+of Table 2 of the standard. Set the source as it is used or, failing that,
+on the floor at least 1 m from the nearest wall (8.2), and keep it within
+1 % of the room's volume (clause 5). Survey six
 positions, at least $\lambda/4$ from the room's surfaces for the lowest band,
 $0{,}3\,V^{1/3}$ from the source and $\lambda/2$ apart ($\lambda$ = 3,5 m for
 A-weighting, 9.3), and take the positions and locations Table 3 gives.
@@ -25179,7 +25244,9 @@ Formula (1) and its NOTE (`reverberation_parameter`), the limiting curves of
 climate of 6.6 and the source size of clause 5
 (`check_special_room_reverberation`), the surfaces of 6.4
 (`check_special_room_surfaces`), the suitability evaluation of 6.7
-(`check_special_room_suitability`), the survey of 9.4 with Table 3 and the
+against the calibrated levels or an ISO 6926 calibration read at the
+conditions of the test (`check_special_room_suitability`), the survey of
+9.4 with Table 3 and the
 spectral character of 9.5 (`special_room_source_locations`), Table 4
 (`special_room_background_correction`), the direct Formula 9
 (`sound_power_special_room`) and the comparison Formula 10
@@ -25204,8 +25271,9 @@ calibrated: its characteristics and calibration tolerances, Annex A of Part 2
 4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
 calibration certificate's and are not judged here. An ISO 6926 calibration
 made in [Free Field and Reference Sources](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/), which judges the
-requirements of ISO 6926, is taken by either comparison as `lw_ref` and read
-at the conditions of the test.
+requirements of ISO 6926, is taken by either comparison as `lw_ref`, and by
+the suitability evaluation of 6.7 as `calibrated_power_levels`, and read at
+the conditions of the test.
 
 ## See also
 
@@ -51443,7 +51511,7 @@ documents, one page per module.
 | `reverberation_parameter` | `function` | **R = 1 + 257/(f V^(1/3)) of ISO 3743-2 Formula (1), or 1 + cS/(8Vf) (NOTE).**<br>• `frequencies` [Hz], `volume_m3`; `surface_area_m2` + `speed_of_sound` [m/s] for the NOTE | `emission.reverberation_parameter([1000.0], 70.0)  # 1.06` |
 | `check_special_room_reverberation` / `SpecialRoomReverberationCheck` | `function` / `dataclass` | **Does the reverberation time follow the prescribed curve? (ISO 3743-2 6.2, 6.3, 6.6).**<br>• `reverberation_time_s`, `frequencies` [Hz], `volume_m3`<br>• `nominal_reverberation_time_s`: given, or centred within 0,9–1,1 R Tnom (0,8–1,2 above 6,3 kHz)<br>• `method`: 'direct' (300 m³ ceiling with the 8 kHz octave) / 'comparison'<br>• the four climate values of Formula (2), optional<br>• `.passes`, `.band_within`, `.nominal_in_range`, `.plot()` | `emission.check_special_room_reverberation(t, f3, volume_m3=70.0).nominal_reverberation_time_s` |
 | `check_special_room_surfaces` / `SpecialRoomSurfaceCheck` | `function` / `dataclass` | **The surface treatment of ISO 3743-2 6.4.**<br>• `surface_absorption_coefficients`: (walls and ceiling, bands); `floor_absorption_coefficients`; `frequencies`<br>• `surface_areas_m2` for an area-weighted mean<br>• `.surfaces_uniform` (0,5–1,5 times the mean), `.floor_reflective` (< 0,06), `.passes`, `.plot()` | `emission.check_special_room_surfaces(alpha, alpha_floor, f).passes` |
-| `check_special_room_suitability` / `SpecialRoomSuitabilityCheck` | `function` / `dataclass` | **The reference-source evaluation of ISO 3743-2 6.7 (Table 1).**<br>• `measured_power_levels`, `calibrated_power_levels` [dB], `frequencies` 125 Hz–8 kHz<br>• ±5 dB at 125 Hz, ±3 dB 250 Hz–4 kHz, ±4 dB at 8 kHz; `.passes`, `.plot()` | `emission.check_special_room_suitability(lw_room, lw_cal, f).passes` |
+| `check_special_room_suitability` / `SpecialRoomSuitabilityCheck` | `function` / `dataclass` | **The reference-source evaluation of ISO 3743-2 6.7 (Table 1).**<br>• `measured_power_levels` [dB], `frequencies` 125 Hz–8 kHz<br>• `calibrated_power_levels`: the levels [dB], or the ISO 6926 `ReferenceSourceCalibration`, read at `temperature_c`, `static_pressure_kpa` of the test as LW − C2 (ISO 6926 8.4)<br>• ±5 dB at 125 Hz, ±3 dB 250 Hz–4 kHz, ±4 dB at 8 kHz; `.difference_db`, `.passes`, `.plot()` | `emission.check_special_room_suitability(lw_room, calibration, f, temperature_c=20.0, static_pressure_kpa=98.0).passes` |
 | `special_room_source_locations` | `function` | **Source locations from the survey of ISO 3743-2 9.4 (Table 3) and the spectral character of 9.5.**<br>• `levels`: six positions [dB]; `frequencies` 125 Hz–8 kHz<br>• `microphone_positions`: 3, 6 (Default) or 12, the column of Table 3<br>• `a_weighted_levels`: the A-weighted row | `emission.special_room_source_locations(survey, f).spectral_character`<br><br>• `SourceLocationPlan` |
 | `sound_energy_reverberation` | `function` | **Reverberation-room LJ of a single event, direct (ISO 3741 9.2.4, Eq. 30).**<br>• `levels`: single event levels, 1D, (NM, NB) or (Ne, NM, NB) [dB]<br>• `t60` [s], `volume` V [m³], `surface_area` S [m²], `frequencies` [Hz]<br>• `events`: Ne of one reading (Eq. 23)<br>• `background_levels` [dB] + `integration_time` T [s]: per-position K1i over the same window<br>• `temperature_c`, `static_pressure_kpa` | `lj = emission.sound_energy_reverberation(slams, t60, 200, 220, f)`<br><br>• `ReverberationSoundEnergyResult` |
 | `sound_energy_comparison` | `function` | **Reverberation-room LJ of a single event, comparison (ISO 3741 9.2.5, Eq. 31).**<br>• `levels`: single event levels of the source under test<br>• `levels_ref`, `lw_ref`: the steady reference source (`lw_ref` may be its `ReferenceSourceCalibration`)<br>• `frequencies`, `events`, `background_levels` + `integration_time`, `background_levels_ref`<br>• `temperature_c`, `static_pressure_kpa` | `lj = emission.sound_energy_comparison(slams, lp_ref, lw_ref, frequencies=f)`<br><br>• `ReverberationSoundEnergyResult` (method='comparison') |
@@ -69714,7 +69782,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1793 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1796 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -70722,7 +70790,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1793 numerical conformance checks across 109 domains and 519 standards, covering
+1796 numerical conformance checks across 109 domains and 519 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

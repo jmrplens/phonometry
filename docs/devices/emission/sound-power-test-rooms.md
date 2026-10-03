@@ -368,7 +368,10 @@ weights by them. Before the room is used, 6.7 determines the octave-band
 power of a broadband reference source calibrated by ISO 3741, or by ISO 6926
 and ISO 3745, in the room by this standard and compares it with the
 calibration: within ±5 dB at 125 Hz, ±3 dB from 250 Hz to 4 kHz and ±4 dB at
-8 kHz (Table 1).
+8 kHz (Table 1). A certificate holds its levels under the reference
+conditions, 23,0 °C and 101,325 kPa, and passed as levels they stand for the
+levels at the test: this first comparison takes the reference source's run
+in the room at those conditions.
 
 ```python
 walls = np.array([  # 6.4: each wall and the ceiling, octave bands
@@ -403,6 +406,64 @@ suitability = emission.check_special_room_suitability(in_room.sound_power_level,
 print(np.round(suitability.difference_db, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
 print(suitability.passes)                       # True
 ```
+
+**The calibration itself, read at the test.** Formula 9 gives the power the
+source radiated under the meteorological conditions of the test (Annex E),
+and an ISO 6926 calibration holds it under the reference conditions,
+23,0 °C and 101,325 kPa. `check_special_room_suitability` takes the
+`ReferenceSourceCalibration` in place of the levels, with the temperature and
+the static pressure in the room during step 2, and reads it there, as the
+comparison method of 10.3 does: each octave is the energy sum of its three
+one-third octave bands, less the $C_2$ of the Annex A formula the
+calibration used, which ISO 6926 8.4 asks the laboratory and the user to
+share. Levels passed as such are taken as already carried to the test, and
+the conditions then only have to be valid. The room's levels to pass are
+`sound_power_level`, the level at the test, and not `sound_power_level_ref`,
+which Annex E has already carried to the reference conditions and which
+would then count $C_2$ twice. Here the same room levels are read as a run at
+22 °C and 97.5 kPa, against an ISO 6926 calibration of the same source made
+in a hemi-anechoic room: the source radiates 0.16 dB less there than under
+the reference conditions, so every difference is 0.16 dB larger than against
+the certificate as printed.
+
+```python
+# The same source calibrated by ISO 6926 in a hemi-anechoic room: 20 fixed
+# positions on the 2 m hemisphere, one-third octaves from 100 Hz to 10 kHz
+# (the levels are taken equal at every position, for brevity).
+hemisphere = np.tile(np.repeat(lw_r, 3) - 10.0 * np.log10(3.0 * 2.0 * np.pi * 2.0**2), (20, 1))
+calibration = emission.reference_source_calibration(
+    hemisphere, frequencies_hz=thirds, arrangement="fixed",
+)
+print(np.round(calibration.sound_power_level_at(freqs, bandwidth="octave"), 2))
+# [79.87 83.37 86.07 86.77 86.27 84.17 80.57] dB under the reference conditions
+suitability2 = emission.check_special_room_suitability(
+    in_room.sound_power_level, calibration, freqs, temperature_c=22.0, static_pressure_kpa=97.5,
+)
+print(np.round(suitability2.calibrated_power_level_db, 2))  # [79.72 83.22 85.92 86.62 86.12 84.02 80.42]
+print(np.round(suitability2.difference_db, 1))   # [ 1.1  0.6  0.4  0.2  0.5  0.1 -0.1]
+print(suitability2.passes)                       # True
+```
+
+The certificate's octaves sit 0.13 dB below the levels the hemisphere was
+built from: that is $C_1$, the reference-quantity correction of ISO 6926
+Formula (2), −0.13 dB at the reference conditions.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_suitability_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_suitability.svg" alt="Bars of the difference between the octave-band sound power level of a reference sound source determined in a 72 cubic metre special reverberation room and its ISO 6926 calibration read at 22 degrees Celsius and 97.5 kPa, over the octave bands from 125 Hz to 8 kHz, with short orange horizontal marks at plus and minus the Table 1 limit of each band: 5 dB at 125 Hz, 3 dB from 250 Hz to 4 kHz and 4 dB at 8 kHz. Every bar is blue and small beside its marks: 1.1 dB at 125 Hz, 0.6 dB at 250 Hz, between 0.5 dB and 0.1 dB from 500 Hz to 4 kHz, and minus 0.1 dB at 8 kHz; the title reads ISO 3743-2 room suitability (6.7): suitable" width="96%"></picture>
+
+*6.7 against the ISO 6926 calibration read at 22 °C and 97.5 kPa: the
+difference per octave band within the ± limits of Table 1.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+suitability2.plot()   # the difference per band within the Table 1 limits
+plt.show()
+```
+
+</details>
 
 **The survey.** Six positions at one source location give $s_\mathrm{M}$ per
 band and for the A-weighted level (Formula 4), about the arithmetic mean when
@@ -542,10 +603,12 @@ no more than 1,5 m², and a floor of painted poured concrete (Annex B). Measure 
 reverberation time in one-third-octave bands with any absorbing support of
 the source in place, centre it, and keep the humidity and temperature of
 that measurement within 6.6 during every test. Check the room once with a
-calibrated reference source (6.7). Use a microphone flat for random
-incidence, within the tolerances of Table 2 of the standard. Set the source
-as it is used or, failing that, on the floor at least 1 m from the nearest
-wall (8.2), and keep it within 1 % of the room's volume (clause 5). Survey six
+calibrated reference source (6.7), noting the temperature and the static
+pressure in the room while it runs, the conditions at which its calibration
+is read. Use a microphone flat for random incidence, within the tolerances
+of Table 2 of the standard. Set the source as it is used or, failing that,
+on the floor at least 1 m from the nearest wall (8.2), and keep it within
+1 % of the room's volume (clause 5). Survey six
 positions, at least $\lambda/4$ from the room's surfaces for the lowest band,
 $0{,}3\,V^{1/3}$ from the source and $\lambda/2$ apart ($\lambda$ = 3,5 m for
 A-weighting, 9.3), and take the positions and locations Table 3 gives.
@@ -667,7 +730,9 @@ Formula (1) and its NOTE (`reverberation_parameter`), the limiting curves of
 climate of 6.6 and the source size of clause 5
 (`check_special_room_reverberation`), the surfaces of 6.4
 (`check_special_room_surfaces`), the suitability evaluation of 6.7
-(`check_special_room_suitability`), the survey of 9.4 with Table 3 and the
+against the calibrated levels or an ISO 6926 calibration read at the
+conditions of the test (`check_special_room_suitability`), the survey of
+9.4 with Table 3 and the
 spectral character of 9.5 (`special_room_source_locations`), Table 4
 (`special_room_background_correction`), the direct Formula 9
 (`sound_power_special_room`) and the comparison Formula 10
@@ -692,8 +757,9 @@ calibrated: its characteristics and calibration tolerances, Annex A of Part 2
 4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
 calibration certificate's and are not judged here. An ISO 6926 calibration
 made in [Free Field and Reference Sources](free-field-qualification.md), which judges the
-requirements of ISO 6926, is taken by either comparison as `lw_ref` and read
-at the conditions of the test.
+requirements of ISO 6926, is taken by either comparison as `lw_ref`, and by
+the suitability evaluation of 6.7 as `calibrated_power_levels`, and read at
+the conditions of the test.
 
 ## See also
 

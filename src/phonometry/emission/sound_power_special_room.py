@@ -61,9 +61,10 @@ The room is qualified by :func:`check_special_room_reverberation` (6.2, 6.3
 and the climate of 6.6), :func:`check_special_room_surfaces` (6.4) and
 :func:`check_special_room_suitability` (6.7, the octave-band power of a
 calibrated reference source determined in the room against its calibration,
-Table 1). The number of source locations and microphone positions follows
-from the survey of 9.4 by :func:`special_room_source_locations` (Table 3),
-which also reads the spectral character of 9.5.
+Table 1, an ISO 6926 calibration read at the conditions of the test). The
+number of source locations and microphone positions follows from the survey
+of 9.4 by :func:`special_room_source_locations` (Table 3), which also reads
+the spectral character of 9.5.
 """
 
 from __future__ import annotations
@@ -928,13 +929,17 @@ def check_special_room_surfaces(
 class SpecialRoomSuitabilityCheck:
     """The suitability evaluation of ISO 3743-2:2018, 6.7 (Table 1).
 
-    ``difference_db`` is, per octave band, the sound power level of a
-    calibrated broad-band reference source determined in the room less its
-    calibrated value, and ``limit_db`` the Table 1 bound on its magnitude.
+    Per octave band, ``measured_power_level_db`` is the sound power level of
+    a calibrated broad-band reference source determined in the room by this
+    standard (step 2), ``calibrated_power_level_db`` its calibration as the
+    evaluation read it, under the meteorological conditions of the test
+    (step 1), and ``limit_db`` the Table 1 bound on the magnitude of their
+    difference (step 4).
     """
 
     frequencies: np.ndarray
-    difference_db: np.ndarray
+    measured_power_level_db: np.ndarray
+    calibrated_power_level_db: np.ndarray
     limit_db: np.ndarray
 
     def __post_init__(self) -> None:
@@ -942,8 +947,28 @@ class SpecialRoomSuitabilityCheck:
 
         :raises ValueError: if the arrays differ in length or rank.
         """
-        require_ranks(self, frequencies=1, difference_db=1, limit_db=1)
-        require_same_length(self, "frequencies", "difference_db", "limit_db")
+        require_ranks(
+            self,
+            frequencies=1,
+            measured_power_level_db=1,
+            calibrated_power_level_db=1,
+            limit_db=1,
+        )
+        require_same_length(
+            self,
+            "frequencies",
+            "measured_power_level_db",
+            "calibrated_power_level_db",
+            "limit_db",
+        )
+
+    @property
+    def difference_db(self) -> np.ndarray:
+        """Per band, the level determined in the room less the calibration (step 3)."""
+        return np.asarray(
+            self.measured_power_level_db - self.calibrated_power_level_db,
+            dtype=np.float64,
+        )
 
     @property
     def band_within(self) -> np.ndarray:
@@ -999,34 +1024,78 @@ def _table_bands(frequencies: ArrayLike, n_bands: int, table: str) -> np.ndarray
 
 def check_special_room_suitability(
     measured_power_levels: ArrayLike,
-    calibrated_power_levels: ArrayLike,
+    calibrated_power_levels: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
+    *,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> SpecialRoomSuitabilityCheck:
-    """Is the room suitable for broad-band sources? ISO 3743-2:2018, 6.7.
+    r"""Is the room suitable for broad-band sources? ISO 3743-2:2018, 6.7.
 
     A small broad-band reference sound source calibrated by ISO 3741, or by
     ISO 6926 and ISO 3745 (step 1), has its octave-band power levels
-    determined in the room by this standard (step 2); the differences from
-    the calibration (step 3) may not exceed Table 1 (step 4): ±5 dB at
-    125 Hz, ±3 dB from 250 Hz to 4 kHz and ±4 dB at 8 kHz.
+    determined in the room by this standard, under identical operating
+    conditions (step 2); the differences from the calibration (step 3) may
+    not exceed Table 1 (step 4): ±5 dB at 125 Hz, ±3 dB from 250 Hz to
+    4 kHz and ±4 dB at 8 kHz.
+
+    The level Formula 9 gives is, in the words of Annex E, the sound power
+    level "under the meteorological conditions which occurred at the time
+    and place of the test", and a calibration holds the power under the
+    reference conditions, 23,0 °C and 101,325 kPa. The two are compared
+    where the room measured: a
+    :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926 is
+    read at the temperature and static pressure of the test as
+    :math:`L_W - C_2`, with :math:`C_2` evaluated there by the Annex A
+    formula the calibration used (ISO 6926:2016, 8.4), each octave the
+    energy sum of its three one-third octave bands, exactly as
+    :func:`sound_power_special_room_comparison` reads it.
 
     :param measured_power_levels: The reference source's octave-band power
-        levels determined in the room, in decibels.
-    :param calibrated_power_levels: Its calibrated levels, in decibels.
+        levels determined in the room, in decibels: the ``sound_power_level``
+        of :func:`sound_power_special_room`, the level at the test, and not
+        its ``sound_power_level_ref``, which the Annex E :math:`C_2` has
+        already carried to the reference conditions: against a calibration
+        read at the conditions of the test, it would count :math:`C_2` twice.
+    :param calibrated_power_levels: Its calibrated octave-band levels, in
+        decibels, already under the meteorological conditions of the test;
+        or its :class:`~phonometry.emission.ReferenceSourceCalibration`,
+        which is read there.
     :param frequencies: Octave centres from 125 Hz to 8 kHz, ascending.
+    :param temperature_c: Air temperature in the room during step 2, in
+        degrees Celsius; it reads a calibration and is otherwise only
+        validated.
+    :param static_pressure_kpa: Static pressure in the room during step 2,
+        in kilopascals, likewise.
     :return: The verdict, as a :class:`SpecialRoomSuitabilityCheck`.
-    :raises ValueError: for non-finite levels, mismatched lengths, or bands
-        outside Table 1.
+    :raises ValueError: for non-finite levels, mismatched lengths, bands
+        outside Table 1, a climate out of range, or a calibration that does
+        not cover the one-third octave bands of an octave or used the
+        manufacturer's :math:`C_2`, whose value at the test only the
+        manufacturer gives.
     """
     measured = _finite(measured_power_levels, "measured_power_levels", (1,))
-    calibrated = _finite(calibrated_power_levels, "calibrated_power_levels", (1,))
+    freqs = _table_bands(frequencies, measured.size, f"{_STANDARD}, Table 1")
+    _validate_meteorology(temperature_c, static_pressure_kpa)
+    calibrated = _finite(
+        _reference_power_levels(
+            calibrated_power_levels,
+            freqs,
+            bandwidth="octave",
+            name="calibrated_power_levels",
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+        ),
+        "calibrated_power_levels",
+        (1,),
+    )
     if calibrated.shape != measured.shape:
         msg = "'calibrated_power_levels' must carry one value per band."
         raise ValueError(msg)
-    freqs = _table_bands(frequencies, measured.size, f"{_STANDARD}, Table 1")
     return SpecialRoomSuitabilityCheck(
         frequencies=freqs,
-        difference_db=np.asarray(measured - calibrated, dtype=np.float64),
+        measured_power_level_db=measured.copy(),
+        calibrated_power_level_db=np.asarray(calibrated, dtype=np.float64).copy(),
         limit_db=np.array([_TABLE1_DB[round(float(f))] for f in freqs]),
     )
 
@@ -1169,8 +1238,9 @@ class SpecialRoomSoundPowerResult:
 
     ``method`` is ``'direct'`` (Formula 9) or ``'comparison'`` (Formula 10).
     ``sound_power_level`` is the octave-band :math:`L_W` at the
-    meteorological conditions of the test; the ``..._ref`` properties add the
-    Annex E correction ``c2``, which 10.2 and 10.3 require above 500 m.
+    meteorological conditions of the test, the level the suitability
+    evaluation of 6.7 compares; the ``..._ref`` properties add the Annex E
+    correction ``c2``, which 10.2 and 10.3 require above 500 m.
 
     ``mean_pressure_level`` is the mean background-corrected level of the
     source under test, :math:`\overline{L_p}` (Formula 8) or

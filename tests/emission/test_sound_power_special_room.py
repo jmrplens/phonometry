@@ -911,6 +911,78 @@ def test_suitability_fails_a_band_read_too_low(band: int, offset: float) -> None
     assert not check.passes
 
 
+def test_suitability_keeps_both_spectra_as_copies() -> None:
+    """Step 3 is the difference of the two levels the check keeps, and the
+    check owns its arrays: changing the caller's after the call moves nothing.
+    """
+    measured = LW_RSS + np.array([1.0, -0.5, 0.2, 0.0, 0.4, -1.1, 2.0])
+    calibrated = LW_RSS.copy()
+    freqs = FREQS.copy()
+    check = emission.check_special_room_suitability(measured, calibrated, freqs)
+    measured[0] = 0.0
+    calibrated[0] = 0.0
+    freqs[0] = 63.0
+    np.testing.assert_allclose(check.measured_power_level_db[0], LW_RSS[0] + 1.0)
+    np.testing.assert_allclose(check.calibrated_power_level_db, LW_RSS)
+    np.testing.assert_array_equal(check.frequencies, FREQS)
+    np.testing.assert_allclose(
+        check.difference_db,
+        check.measured_power_level_db - check.calibrated_power_level_db,
+        rtol=0,
+        atol=0,
+    )
+
+
+def test_results_keep_frequencies_of_their_own() -> None:
+    """A result read from the caller's float array keeps its own copy:
+    changing the caller's afterwards relabels no band.
+    """
+    freqs = FREQS.copy()
+    results = (
+        emission.sound_power_special_room(
+            ST,
+            freqs,
+            volume_m3=70.0,
+            nominal_reverberation_time_s=0.73,
+            background_levels=BACKGROUND,
+        ),
+        emission.sound_power_special_room_comparison(
+            ST, RSS, LW_RSS, freqs, background_levels=BACKGROUND
+        ),
+        emission.special_room_source_locations(ST, freqs),
+    )
+    freqs[0] = 63.0
+    for result in results:
+        np.testing.assert_array_equal(result.frequencies, FREQS)
+
+
+def test_suitability_takes_the_conditions_of_the_test_by_keyword() -> None:
+    with pytest.raises(TypeError, match="positional"):
+        emission.check_special_room_suitability(LW_RSS, LW_RSS, FREQS, 20.0, 90.0)  # type: ignore[misc]
+
+
+@pytest.mark.parametrize(
+    ("temperature_c", "static_pressure_kpa", "name"),
+    [(-274.0, 101.325, "temperature_c"), (23.0, 0.0, "static_pressure_kpa")],
+)
+def test_suitability_refuses_a_climate_out_of_range(
+    temperature_c: float, static_pressure_kpa: float, name: str
+) -> None:
+    with pytest.raises(ValueError, match=name):
+        emission.check_special_room_suitability(
+            LW_RSS,
+            LW_RSS,
+            FREQS,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+        )
+
+
+def test_suitability_refuses_calibrated_levels_of_other_bands() -> None:
+    with pytest.raises(ValueError, match="one value per band"):
+        emission.check_special_room_suitability(LW_RSS, LW_RSS[:-1], FREQS)
+
+
 def test_a_4_db_margin_meets_9_8_without_a_warning() -> None:
     """Table 4 starts at 4 dB: that margin is met, with its 2 dB, silently."""
     with warnings.catch_warnings():

@@ -8119,6 +8119,58 @@ def generate_special_room_sound_power(output_dir: str) -> None:
     plt.close()
 
 
+def generate_special_room_suitability(output_dir: str) -> None:
+    """ISO 3743-2 6.7: the reference source in the 72 m3 room against its
+    ISO 6926 calibration, read at 22 degC and 97,5 kPa.
+    """
+    print("Generating special_room_suitability.svg...")
+    from phonometry import emission
+
+    thirds = np.array(
+        [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0,
+         1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0,
+         8000.0, 10000.0]
+    )  # fmt: skip
+    lw_r = np.array([80.0, 83.5, 86.2, 86.9, 86.4, 84.3, 80.7])
+    hemisphere = np.tile(
+        np.repeat(lw_r, 3) - 10.0 * np.log10(3.0 * 2.0 * np.pi * 2.0**2), (20, 1)
+    )
+    calibration = emission.reference_source_calibration(
+        hemisphere, frequencies_hz=thirds, arrangement="fixed"
+    )
+    rss = np.array(
+        [
+            [74.5, 76.8, 79.8, 80.0, 80.2, 77.2, 73.7],
+            [73.6, 77.3, 79.3, 80.3, 79.7, 77.5, 73.3],
+            [74.3, 77.5, 79.7, 79.9, 80.0, 77.7, 73.8],
+            [73.8, 76.9, 79.5, 80.4, 79.6, 77.3, 73.7],
+            [74.2, 77.2, 79.9, 80.2, 80.1, 77.2, 73.4],
+            [74.1, 76.9, 79.4, 79.8, 79.8, 77.5, 73.6],
+        ]
+    )
+    in_room = emission.sound_power_special_room(
+        rss,
+        _ISO3743_FREQS,
+        volume_m3=72.0,
+        nominal_reverberation_time_s=0.77,
+        background_levels=np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0]),
+        temperature_c=22.0,
+        static_pressure_kpa=97.5,
+    )
+    check = emission.check_special_room_suitability(
+        in_room.sound_power_level,
+        calibration,
+        _ISO3743_FREQS,
+        temperature_c=22.0,
+        static_pressure_kpa=97.5,
+    )
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    check.plot(ax=ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "special_room_suitability.svg")
+    plt.close()
+
+
 #: The large turbine set of the IEC 61063 guide, in reference boxes (length,
 #: width, height in metres, and the part each encloses): the HP and IP casings
 #: share one box and the LP turbine has its own, as Figure 2 b draws them.

@@ -196,11 +196,12 @@ def _octave_frequencies(
     :param frequencies: One mid-band frequency per band, in hertz.
     :param n_bands: The number of bands the levels carry.
     :param table: The table the messages cite.
-    :return: The frequencies as a float array.
+    :return: The frequencies as a float array of their own, which a result
+        keeps without sharing the caller's.
     :raises ValueError: if the count differs, a value is not a Table B.1
         octave centre, or the centres repeat or descend.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = np.array(frequencies, dtype=np.float64)
     if freqs.shape != (n_bands,):
         msg = f"'frequencies' must carry one value per band ({n_bands})."
         raise ValueError(msg)

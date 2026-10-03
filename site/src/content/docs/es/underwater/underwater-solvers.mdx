@@ -1052,7 +1052,7 @@ simplificación de seis términos válida hasta unos 1000 m en aguas someras y
 cálidas; es la más basta de las cuatro y la que hay detrás de las reglas
 prácticas $\partial c/\partial T \approx 4{,}6 - 0{,}110\,T$ m/s por °C y
 $\partial c/\partial z \approx 0{,}016$ m/s por metro, así que resérvala para el
-cálculo mental y las comprobaciones a mano, no para un presupuesto.
+cálculo mental y las comprobaciones a mano, no para un balance de sonar.
 
 **Absorción.** **Francois-Garrison** (1982) es la referencia y el valor por
 defecto: incorpora las relajaciones del ácido bórico, el sulfato de magnesio y
@@ -1077,12 +1077,12 @@ cuando ya lo ha hecho. En el ejemplo de 10 kHz de la
 la elección no es cosmética: frente a la misma figura de mérito de 87 dB, la
 divergencia solo esférica predice detección hasta unos 8,7 km, mientras
 que la ley práctica con $R_0 = 1000$ m la estira hasta unos 15,8 km. Cuando
-la ley de divergencia es la mayor incertidumbre del presupuesto, esa es
+la ley de divergencia es la mayor incertidumbre del balance, esa es
 la señal de dejar la forma cerrada y calcular el campo.
 
 **¿Forma cerrada o cálculo numérico?** La pérdida de propagación en forma cerrada no
 sabe nada del perfil de velocidad del sonido, del fondo ni de la superficie;
-es honesta para caminos cortos, directos y sin contornos, y para presupuestos
+es honesta para caminos cortos, directos y sin contornos, y para balances
 de sonar de primera pasada. Cuando la refracción y los contornos deciden la
 respuesta, elíjase el método por frecuencia y geometría (Jensen et al. 2011,
 cap. 1):
@@ -1106,7 +1106,7 @@ malla, mientras que el núcleo de rayos no, así que `gaussian_beams` es el que
 sigue siendo asequible justo donde los otros dejan de serlo, y es también aquel
 cuya aproximación está mejor justificada allí.
 
-## 7. Un presupuesto de sonar resuelto
+## 7. Un balance de sonar resuelto
 
 Encadenando las piezas de punta a punta: una fuente de 140 dB re 1 µPa²/Hz a
 10 kHz, un nivel espectral de ruido ambiental de 60 dB, una ganancia de array de
@@ -1153,7 +1153,7 @@ divergencia es la palanca mayor: elegir la esférica sola en lugar de la prácti
 con $R_0 = 1$ km cuesta 7,1 km a 10 kHz. Reducir a la mitad la ganancia de array
 cuesta 5,8 km; doblar la frecuencia cuesta 9,9 km, porque $\alpha$ pasa de 0,95 a
 3,30 dB/km. Cuando la ley de divergencia es la mayor incertidumbre de un
-presupuesto, esa es la señal de dejar la forma cerrada y calcular el campo.*
+balance, esa es la señal de dejar la forma cerrada y calcular el campo.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -1187,12 +1187,12 @@ plt.show()
 
 </details>
 
-Un número de ese presupuesto merece una segunda mirada. Un nivel *espectral*
+Un número de ese balance merece una segunda mirada. Un nivel *espectral*
 ambiental de 60 dB a 10 kHz está bastante por encima de lo que produce el mar
 por sí solo: `ocean_ambient_noise` da ahí 42 dB re 1 µPa²/Hz con un viento de
 15 nudos. Sesenta decibelios describen por tanto un emplazamiento ruidoso o un
 receptor limitado por su propio ruido, no un océano tranquilo, y darse cuenta de
-eso es la diferencia entre un presupuesto y un ejercicio de aritmética. Este
+eso es la diferencia entre un balance y un ejercicio de aritmética. Este
 acoplamiento entre el modelo de absorción, la ley de divergencia y la ecuación
 del sonar es la razón de que todos vivan en un mismo módulo.
 
@@ -1300,5 +1300,5 @@ velocidad del sonido que atrapa energía (el canal SOFAR), reflexiones en la
 superficie y el fondo en aguas someras, o una distancia de detección que
 oscila con la elección de la ley de divergencia. La forma cerrada
 $PL = \text{divergencia} + \alpha R$ es honesta para caminos cortos,
-directos y sin contornos, y para presupuestos de sonar de primera pasada;
+directos y sin contornos, y para balances de sonar de primera pasada;
 más allá, calcula el campo.

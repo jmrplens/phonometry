@@ -10334,9 +10334,13 @@ in the same order.
   $\sum_{i=1}^{N} 10^{0{,}1 L_{p\mathrm{A}i}}$, and the where-list line
   itself speaks of the $i^\mathrm{th}$ position; $L_{p\mathrm{A}I}$ names no
   quantity of the standard.
-- **Evidence:** Equation (2), its where-list and the NOTE on PDF page 15
+- **Evidence:** Equation (2), its where-list and the NOTE on PDF page 29
+  (printed p. 27) of IEC 61063:1991, the bilingual first edition of 1991-04,
+  whose French text on PDF page 28 (printed p. 26) prints the same
+  $L_{p\mathrm{A}I}$ in the where-list and in the NOTE; and on PDF page 15
   (printed p. 9) of BS EN 61063:1996, the English text of EN 61063:1996,
-  which reproduces IEC 1063:1991 without modification.
+  which reproduces that same IEC 61063:1991, numbered IEC 1063:1991 there,
+  without modification.
 - **Library behaviour:** `turbine_sound_power` averages the corrected
   position levels $L_{p\mathrm{A}i}$ by Equation (2), and
   `arithmetic_mean_allowed` reads the NOTE on the range of the same levels

@@ -850,7 +850,7 @@ def test_spanish_labels_are_translated() -> None:
     ax = _budget_i2().plot(language="es")
     labels = [tick.get_text() for tick in ax.get_yticklabels()]
     assert "a15: Repetibilidad" in labels
-    assert "Presupuesto de incertidumbre" in ax.get_title()
+    assert "Balance de incertidumbre" in ax.get_title()
     plt.close("all")
     ax = _correction().plot(language="es")
     assert ax.get_ylabel() == "Corrección [dB]"

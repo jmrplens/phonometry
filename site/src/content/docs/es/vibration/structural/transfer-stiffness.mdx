@@ -1,6 +1,6 @@
 ---
 title: "Rigidez dinámica de transferencia (ISO 10846)"
-description: "La rigidez dinámica de transferencia k₂₁ = F₂,b/u₁ de elementos resilientes según ISO 10846: el nivel Lₖ re 1 N/m y el factor de pérdidas, los métodos directo e indirecto (Partes 2 a 4), la media en bandas de tercio de octava que pide cada parte, las comprobaciones de adecuación del banco, la masa de bloqueo efectiva, el método de punto de excitación con su frecuencia límite superior y el presupuesto del Anexo B (Parte 5), y la relación del Anexo A con la impedancia mecánica y la masa efectiva."
+description: "La rigidez dinámica de transferencia k₂₁ = F₂,b/u₁ de elementos resilientes según ISO 10846: el nivel Lₖ re 1 N/m y el factor de pérdidas, los métodos directo e indirecto (Partes 2 a 4), la media en bandas de tercio de octava que pide cada parte, las comprobaciones de adecuación del banco, la masa de bloqueo efectiva, el método de punto de excitación con su frecuencia límite superior y el balance del Anexo B (Parte 5), y la relación del Anexo A con la impedancia mecánica y la masa efectiva."
 references:
   - type: book
     authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
@@ -42,7 +42,7 @@ references:
     year: 2008
     title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 5: Driving point method for determination of the low-frequency transfer stiffness of resilient supports for translatory motion"
     designation: "ISO 10846-5:2008"
-    note: "La rigidez en el punto de excitación k₁,₁ de la Fórmula (3), la frecuencia límite superior del 6.2, las medias en banda de las Fórmulas (6) y (7), las Desigualdades (1) y (2) y el presupuesto del Anexo B. Tampoco trae ejemplo resuelto; la Tabla B.1 redondea hacia arriba a una décima sus tres términos rectangulares (el de linealidad, 1,5/(2√3) = 0,433 dB, queda en 0,5 dB), y la biblioteca conserva las expresiones."
+    note: "La rigidez en el punto de excitación k₁,₁ de la Fórmula (3), la frecuencia límite superior del 6.2, las medias en banda de las Fórmulas (6) y (7), las Desigualdades (1) y (2) y el balance del Anexo B. Tampoco trae ejemplo resuelto; la Tabla B.1 redondea hacia arriba a una décima sus tres términos rectangulares (el de linealidad, 1,5/(2√3) = 0,433 dB, queda en 0,5 dB), y la biblioteca conserva las expresiones."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -341,7 +341,7 @@ previo de fondo y el resto se dejan al operador.
   linealidad, y se lee exactamente como la lee la
   [lista del Anexo A.1 de la guía de movilidad](/phonometry/es/vibration/structural/mechanical-mobility/).
 
-El Anexo B de la Parte 2 dice cuánto vale cada una de estas cosas. Su presupuesto
+El Anexo B de la Parte 2 dice cuánto vale cada una de estas cosas. Su balance
 de incertidumbre asigna 0,3 dB al procesado de señal y al ruido de fondo,
 **0,5 dB** a la instrumentación cuando solo se cumplen los requisitos mínimos
 anteriores, **0,5 dB** al banco de ensayo (por el movimiento de salida residual
@@ -579,7 +579,7 @@ línea a línea y deja fuera de todo las líneas que no las cumplen, como pide e
 $f_\mathrm{UL}$ o por debajo (el 8.3 enuncia los 2 dB «si
 $f \le f_\mathrm{UL}$»). Para esas bandas, los 2 dB de la Fórmula (7) son una
 afirmación de la propia norma, que el Anexo B vuelve a suponer para su
-presupuesto (B.3.5): el criterio del 6.2 solo vigila que $k_{1,1}$ caiga por
+balance (B.3.5): el criterio del 6.2 solo vigila que $k_{1,1}$ caiga por
 debajo de su propio valor de baja frecuencia, así que nada en la media prueba
 la cota línea a línea. Por debajo de 20 Hz el 7.5 pide un paso de 0,2 Hz entre
 líneas en lugar de cinco líneas por banda, lo que deja las bandas más bajas por
@@ -650,7 +650,7 @@ la rigidez de transferencia según sube la frecuencia; a 52,2 Hz está 2 dB por 
 quedan dentro de los ±2 dB de la Fórmula (7); la última, a 50 Hz, promedia solo
 las 37 líneas por debajo de $f_\mathrm{UL}$ y queda 1,8 dB por debajo.*
 
-**El presupuesto de incertidumbre** (Anexo B) escribe el nivel por banda como
+**El balance de incertidumbre** (Anexo B) escribe el nivel por banda como
 el medido más cinco correcciones de estimación nula, todas con coeficiente de
 sensibilidad 1 (Fórmula (B.1)), las combina por raíz de la suma de cuadrados
 (B.2) y toma $U = 2u$ para una cobertura del 95 % (B.3).
@@ -824,7 +824,7 @@ de bloqueo efectiva de la Fórmula (6) de la ISO 10846-4 con su $f_3$
 (`effective_blocking_mass`). La rigidez en el punto de excitación de la
 Fórmula (3) de la ISO 10846-5:2008, su frecuencia límite superior (6.2) y las
 medias por banda de la Fórmula (7) (`driving_point_stiffness`), y el
-presupuesto de incertidumbre del Anexo B (`driving_point_uncertainty`).
+balance de incertidumbre del Anexo B (`driving_point_uncertainty`).
 Ninguna de las dos partes trae un ejemplo resuelto, así que la conformidad se
 ancla en formas cerradas.
 </ScopeClaim>

@@ -130,10 +130,14 @@ nothing verifies how the measurement was made: the position counts and
 placements, the corner positions the ISO 16283 low-frequency procedure is fed
 from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
 are the operator's job. The exception is the ISO 16032 engineering method for
-service-equipment noise, which checks its own position ladder, the distances
-of its 7.3 and the height of its corner position (7.2). Measuring the
-background noise is the operator's job too, and two corrections are
-implemented: the ISO 10140-4
+service-equipment noise,
+which checks its own position ladder, the distances of its 7.3 and the height
+of its corner position and its 0.2 m from obstacles (7.2), and the numbers its
+draft sets for the measurement itself: the calibration deviation, the
+background measured over approximately 30 s against the tolerance the operator
+gives, a background that varies, disturbed periods and the calculation against
+the instrument. Elsewhere, measuring the background noise is the operator's
+job too, and two corrections are implemented: the ISO 10140-4
 laboratory one, warning when its 6 dB floor is broken, and the Clause 9 field
 correction of ISO 16032 for service equipment, held at 2.2 dB below a 4 dB
 margin. The field levels of an insulation index must arrive already

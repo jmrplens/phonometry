@@ -1228,3 +1228,554 @@ def test_position_figure_of_its_own_keeps_key_and_title_on_the_canvas(
             assert canvas.y0 <= box.y0
             assert box.y1 <= canvas.y1
         plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# On-site checks: 7.2, Clause 5, 7.6, 7.8 and Clause 9
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("distance", "ok"),
+    [(0.2, True), (0.7 - 0.5, True), (0.19, False), (0.0, False), (1.0, True)],
+    ids=["0.2 m", "0.2 m in binary", "0.19 m", "touching", "1 m"],
+)
+def test_corner_at_least_0_2_m_from_any_obstacle(distance: float, *, ok: bool) -> None:
+    # "The microphone position shall be at least 0,2 m away from any obstacle"
+    # (7.2, folio 7): at least, so 0,2 m itself passes, and 0,7 - 0,5 m, a
+    # hair under 0,2 in binary, is still 0,2 m.
+    check = _positions(corner_obstacle_distance_m=distance)
+    assert check.corner_obstacle_ok is ok
+    assert check.passes is ok
+
+
+def test_obstacle_distances_take_the_nearest_obstacle() -> None:
+    check = _positions(corner_obstacle_distance_m=[0.45, 0.25, 0.8])
+    assert check.corner_obstacle_distance_m == pytest.approx(0.25)
+    assert check.corner_obstacle_ok is True
+
+
+def test_an_obstacle_distance_not_given_is_not_judged() -> None:
+    check = _positions()
+    assert check.corner_obstacle_distance_m is None
+    assert check.corner_obstacle_ok is None
+    assert check.passes
+
+
+@pytest.mark.parametrize(
+    "distance",
+    [
+        -0.1,
+        math.nan,
+        [],
+        "0.3",
+        True,
+        [0.3, "0.4"],
+        [[0.3], [0.4]],
+        [[0.3], [0.4, 0.5]],
+    ],
+    ids=repr,
+)
+def test_an_obstacle_distance_is_refused_by_name(distance: object) -> None:
+    with pytest.raises(ValueError, match="corner_obstacle_distance_m"):
+        _positions(corner_obstacle_distance_m=distance)
+
+
+@pytest.mark.parametrize(
+    "readings",
+    [[93.8, 94.3], [127.8, 128.3]],
+    ids=["exact in binary", "a hair over in binary"],
+)
+def test_calibrations_0_5_db_apart_pass(readings: list[float]) -> None:
+    # "more than 0,5 dB" (Clause 5, folio 5): exactly 0,5 dB does not take the
+    # equipment out of use. Two readings in the same binade subtract exactly,
+    # so 94,3 - 93,8 is 0,5 on the dot; 127,8 and 128,3 straddle 128 and come
+    # out 0,500 000 000 000 014 2 in binary, which must still read as 0,5.
+    check = building.verify_calibration_deviation(readings)
+    assert math.isnan(check.deviations_db[0])
+    assert check.deviations_db[1] == pytest.approx(0.5)
+    assert check.passes
+
+
+def test_calibrations_more_than_0_5_db_apart_take_the_equipment_out_of_use() -> None:
+    check = building.verify_calibration_deviation([93.8, 94.4])
+    assert check.largest_deviation_db == pytest.approx(0.6)
+    assert not check.passes
+
+
+def test_each_calibration_is_held_to_every_earlier_one() -> None:
+    # The end is 0,2 dB from the beginning but 0,6 dB from an earlier
+    # calibration of the same instrumentation: it "deviates from previous
+    # calibrations by more than 0,5 dB".
+    check = building.verify_calibration_deviation(
+        [94.0, 94.2], previous_levels_db=[93.6, 93.9]
+    )
+    np.testing.assert_allclose(check.deviations_db, [0.4, 0.6])
+    assert not check.passes
+    np.testing.assert_array_equal(check.previous_levels_db, [93.6, 93.9])
+
+
+def test_the_end_is_held_to_the_beginning_as_well_as_to_earlier_calibrations() -> None:
+    # The end is 0,25 dB from the earlier calibration but 0,55 dB from the
+    # beginning of the same measurement, also a previous calibration.
+    check = building.verify_calibration_deviation(
+        [93.7, 94.25], previous_levels_db=[94.0]
+    )
+    np.testing.assert_allclose(check.deviations_db, [0.3, 0.55])
+    assert not check.passes
+
+
+def test_the_beginning_alone_is_judged_against_earlier_calibrations() -> None:
+    check = building.verify_calibration_deviation(
+        94.0, previous_levels_db=[94.1, 93.9, 94.2]
+    )
+    np.testing.assert_allclose(check.deviations_db, [0.2])
+    assert check.passes
+
+
+def test_one_calibration_alone_has_nothing_to_be_compared_with() -> None:
+    with pytest.raises(ValueError, match="earlier one to be compared with"):
+        building.verify_calibration_deviation([94.0])
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "blamed"),
+    [
+        ({"calibration_levels_db": [94.0, math.inf]}, "'calibration_levels_db'"),
+        ({"calibration_levels_db": [[94.0, 94.1]]}, "'calibration_levels_db'"),
+        (
+            {"calibration_levels_db": [94.0], "previous_levels_db": [math.nan]},
+            "'previous_levels_db'",
+        ),
+        ({"calibration_levels_db": ["94.0", "94.1"]}, "'calibration_levels_db'"),
+    ],
+    ids=["infinite", "two-dimensional", "nan earlier", "text"],
+)
+def test_calibration_readings_are_refused_when_not_finite_levels(
+    kwargs: dict[str, object], blamed: str
+) -> None:
+    with pytest.raises(ValueError, match=blamed):
+        building.verify_calibration_deviation(**kwargs)  # type: ignore[arg-type]
+
+
+def test_calibration_result_checks_its_deviations() -> None:
+    with pytest.raises(ValueError, match="one value per reading"):
+        building.CalibrationDeviationResult(
+            levels_db=np.array([94.0, 94.1]),
+            previous_levels_db=np.empty(0),
+            deviations_db=np.array([0.1]),
+        )
+
+
+@pytest.mark.parametrize(
+    ("durations", "tolerance", "passes", "largest"),
+    [
+        ([30.0, 30.0, 30.0], 0.0, True, 0.0),
+        ([31.0], 0.0, False, 1.0),
+        ([29.0], 0.0, False, 1.0),
+        ([29.0, 31.0], 1.0, True, 1.0),
+        ([31.1], 1.0, False, 1.1),
+        ([28.9], 1.0, False, 1.1),
+        ([30.3], 0.3, True, 0.3),
+        ([30.0, 28.0, 33.5], 2.0, False, 3.5),
+    ],
+    ids=[
+        "30 s held exactly",
+        "31 s held exactly",
+        "29 s held exactly",
+        "29 s and 31 s within 1 s",
+        "31.1 s beyond 1 s",
+        "28.9 s beyond 1 s",
+        "30.3 s within 0.3 s, a hair over in binary",
+        "33.5 s beyond 2 s",
+    ],
+)
+def test_background_durations_against_approximately_30_s(
+    durations: list[float], tolerance: float, largest: float, *, passes: bool
+) -> None:
+    # 7.6 (folio 8) reads "approximately 30 s" and prints no tolerance: the
+    # operator names it, and each side of 30 s is held to it on its own.
+    check = building.check_background_duration(durations, tolerance_s=tolerance)
+    assert check.passes is passes
+    assert check.largest_departure_s == pytest.approx(largest)
+    assert check.nominal_duration_s == 30.0
+    assert check.tolerance_s == tolerance
+    np.testing.assert_allclose(check.departures_s, np.asarray(durations) - 30.0)
+
+
+def test_each_background_is_judged_against_the_tolerance() -> None:
+    check = building.check_background_duration([30.0, 27.5, 32.0], tolerance_s=2.0)
+    np.testing.assert_array_equal(check.within_tolerance, [True, False, True])
+
+
+def test_the_background_tolerance_is_never_set_by_the_library() -> None:
+    with pytest.raises(TypeError, match="tolerance_s"):
+        building.check_background_duration([30.0])  # type: ignore[call-arg]
+
+
+@pytest.mark.parametrize(
+    "durations", [0.0, -30.0, math.nan, [], [[30.0]], "30", True], ids=repr
+)
+def test_background_durations_are_refused_unless_positive(durations: object) -> None:
+    with pytest.raises(ValueError, match="durations_s"):
+        building.check_background_duration(
+            durations,  # type: ignore[arg-type]
+            tolerance_s=1.0,
+        )
+
+
+@pytest.mark.parametrize(
+    "tolerance", [-1.0, math.nan, math.inf, "1", True, [1.0]], ids=repr
+)
+def test_the_background_tolerance_is_one_duration_of_0_s_or_more(
+    tolerance: object,
+) -> None:
+    with pytest.raises(ValueError, match="tolerance_s"):
+        building.check_background_duration(
+            [30.0],
+            tolerance_s=tolerance,  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.parametrize(
+    ("observation", "ok"),
+    [(600.0, True), (900.0, True), (720.0, True), (599.0, False), (901.0, False)],
+)
+def test_the_background_maximum_is_watched_for_10_to_15_min(
+    observation: float, *, ok: bool
+) -> None:
+    check = building.check_varying_background(
+        [30.0], [45.0], observation_time_s=observation
+    )
+    assert check.observation_ok is ok
+    assert check.passes is ok
+
+
+def test_a_background_maximum_10_db_below_lets_the_result_stand() -> None:
+    # "10 dB or more below": 20,4 dB under 30,4 dB is exactly 10 dB, and
+    # 30,3 dB under 40,3 dB is 9,999 999 999 999 996 in binary; both are the
+    # 10 dB and stand, and 9,9 dB does not.
+    check = building.check_varying_background(
+        [20.4, 30.3, 30.6, 15.0],
+        [30.4, 40.3, 40.5, 40.0],
+        observation_time_s=600.0,
+        frequencies_hz=[125.0, 250.0, 500.0, 1000.0],
+    )
+    np.testing.assert_array_equal(check.margin_ok, [True, True, False, True])
+    np.testing.assert_allclose(check.margin_db, [10.0, 10.0, 9.9, 25.0])
+    assert check.margin_db[1] < 10.0
+    assert not check.passes
+
+
+def test_varying_background_inputs_are_refused_by_name() -> None:
+    with pytest.raises(ValueError, match="the same count"):
+        building.check_varying_background(
+            [30.0, 31.0], [45.0], observation_time_s=600.0
+        )
+
+
+@pytest.mark.parametrize("observation", [0.0, -600.0, "600", True, [600.0]], ids=repr)
+def test_the_observation_time_is_one_positive_number(observation: object) -> None:
+    with pytest.raises(ValueError, match="observation_time_s"):
+        building.check_varying_background(
+            [30.0],
+            [45.0],
+            observation_time_s=observation,  # type: ignore[arg-type]
+        )
+
+
+def test_varying_background_centres_need_one_per_band() -> None:
+    with pytest.raises(ValueError, match="one finite centre per band"):
+        building.check_varying_background(
+            [30.0, 31.0],
+            [45.0, 46.0],
+            observation_time_s=600.0,
+            frequencies_hz=[125.0],
+        )
+
+
+def test_varying_background_check_checks_its_bands() -> None:
+    with pytest.raises(ValueError, match="one value per band"):
+        building.VaryingBackgroundCheck(
+            background_maximum_db=np.array([30.0, 31.0]),
+            equipment_levels_db=np.array([45.0]),
+            observation_time_s=600.0,
+        )
+
+
+def test_a_maximum_5_db_above_the_equivalent_marks_the_period() -> None:
+    # "should be less than 5 dB" (Clause 9, folio 10): 45,3 - 40,3 is exactly
+    # 5 dB, and 35,01 - 30,01 is 4,999 999 999 999 996 in binary; both are
+    # the 5 dB, not less than it, and mark their periods.
+    check = building.check_measurement_disturbance(
+        [45.3, 44.0, 52.1, 43.9, 35.01], [40.3, 41.5, 42.0, 39.0, 30.01]
+    )
+    np.testing.assert_allclose(check.differences_db, [5.0, 2.5, 10.1, 4.9, 5.0])
+    assert check.differences_db[4] < 5.0
+    np.testing.assert_array_equal(check.undisturbed, [False, True, False, True, False])
+    assert check.disturbed_periods == (0, 2, 4)
+    assert not check.passes
+
+
+def test_undisturbed_periods_pass() -> None:
+    check = building.check_measurement_disturbance([44.0, 43.0], [40.0, 39.5])
+    assert check.passes
+    assert check.disturbed_periods == ()
+
+
+def test_disturbance_check_needs_one_pair_per_period() -> None:
+    with pytest.raises(ValueError, match="the same count"):
+        building.check_measurement_disturbance([44.0, 43.0], [40.0])
+
+
+def test_disturbance_check_checks_its_periods() -> None:
+    with pytest.raises(ValueError, match="one maximum and one equivalent"):
+        building.MeasurementDisturbanceCheck(
+            maximum_levels_db=np.array([44.0, 43.0]),
+            equivalent_levels_db=np.array([40.0]),
+        )
+
+
+def test_the_calculation_within_2_db_of_the_instrument_agrees() -> None:
+    # "If the difference is more than 2 dB, the calculations should be
+    # checked" (NOTE to 7.8, folio 9): exactly 2 dB agrees, 2,1 dB does not.
+    res = _chain()
+    la, lc = res.ratings["LA,eq"], res.ratings["LC,eq"]
+    check = building.check_instrument_agreement(
+        res, {"LA,eq": la - 2.0, "LC,eq": lc + 2.1}
+    )
+    assert check.calculated_db == {"LA,eq": float(la), "LC,eq": float(lc)}
+    assert check.differences_db["LA,eq"] == pytest.approx(2.0)
+    assert check.disagreeing == ("LC,eq",)
+    assert not check.passes
+
+
+def test_a_calculation_above_the_instrument_is_held_to_2_db_too() -> None:
+    # "the difference": either way. A calculation 2 dB above the meter agrees,
+    # one 2,1 dB above it does not.
+    res = _chain()
+    la, lc = res.ratings["LA,eq"], res.ratings["LC,eq"]
+    check = building.check_instrument_agreement(
+        res, {"LA,eq": la - 2.1, "LC,eq": lc - 2.0}
+    )
+    assert check.differences_db["LA,eq"] == pytest.approx(2.1)
+    assert check.differences_db["LC,eq"] == pytest.approx(2.0)
+    assert check.disagreeing == ("LA,eq",)
+    assert not check.passes
+
+
+def test_instrument_readings_at_each_position_are_energy_averaged() -> None:
+    res = _chain()
+    readings = [res.ratings["LA,eq"] - 1.0, res.ratings["LA,eq"] + 1.0]
+    check = building.check_instrument_agreement(res, {"LA,eq": readings})
+    assert check.instrument_db["LA,eq"] == pytest.approx(
+        10.0 * math.log10(np.mean(10.0 ** (0.1 * np.asarray(readings))))
+    )
+    assert check.passes
+
+
+def test_one_instrument_reading_is_kept_as_read() -> None:
+    check = building.check_instrument_agreement(_chain(), {"LA,eq": 46.2})
+    assert check.instrument_db["LA,eq"] == 46.2
+
+
+def test_instrument_agreement_names_a_single_number_the_result_carries() -> None:
+    res = _chain()
+    with pytest.raises(ValueError, match="carries no single number 'LA,Fmax'"):
+        building.check_instrument_agreement(res, {"LA,Fmax": 45.0})
+
+
+def test_instrument_agreement_needs_a_single_number() -> None:
+    res = _chain()
+    with pytest.raises(ValueError, match="at least one single number"):
+        building.check_instrument_agreement(res, {})
+
+
+def test_instrument_agreement_needs_a_service_equipment_result() -> None:
+    with pytest.raises(TypeError, match="ServiceEquipmentResult"):
+        building.check_instrument_agreement(
+            {"LA,eq": 45},  # type: ignore[arg-type]
+            {"LA,eq": 45.0},
+        )
+
+
+def test_instrument_agreement_mappings_refuse_writes() -> None:
+    check = building.check_instrument_agreement(_chain(), {"LA,eq": 46.0})
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        check.instrument_db["LA,eq"] = 0.0  # type: ignore[index]
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        check.differences_db["LA,eq"] = 0.0  # type: ignore[index]
+
+
+def test_instrument_agreement_pairs_its_single_numbers() -> None:
+    with pytest.raises(ValueError, match="name the same single numbers"):
+        building.InstrumentAgreementCheck(
+            calculated_db={"LA,eq": 45.0}, instrument_db={"LC,eq": 50.0}
+        )
+
+
+def test_a_plain_dict_is_frozen_by_the_agreement_check() -> None:
+    check = building.InstrumentAgreementCheck(
+        calculated_db={"LA,eq": 45.0}, instrument_db={"LA,eq": 46.0}
+    )
+    assert isinstance(check.calculated_db, types.MappingProxyType)
+    assert isinstance(check.instrument_db, types.MappingProxyType)
+
+
+def _on_site_checks() -> list[object]:
+    return [
+        building.verify_calibration_deviation([93.9, 94.1]),
+        building.check_background_duration([30.0], tolerance_s=0.0),
+        building.check_varying_background([30.0], [45.0], observation_time_s=600.0),
+        building.check_measurement_disturbance([44.0], [40.0]),
+        building.check_instrument_agreement(_chain(), {"LA,eq": 46.0}),
+    ]
+
+
+@pytest.mark.parametrize(
+    "check",
+    _on_site_checks(),
+    ids=["calibration", "duration", "varying", "disturbance", "agreement"],
+)
+def test_on_site_checks_have_no_truth_value(check: object) -> None:
+    with pytest.raises(TypeError, match="passes"):
+        bool(check)
+
+
+@pytest.mark.parametrize(
+    "check",
+    _on_site_checks(),
+    ids=["calibration", "duration", "varying", "disturbance", "agreement"],
+)
+def test_on_site_checks_are_frozen(check: object) -> None:
+    field = dataclasses.fields(check)[0].name  # type: ignore[arg-type]
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        setattr(check, field, None)
+
+
+@pytest.mark.parametrize(
+    ("check", "limit"),
+    list(zip(_on_site_checks(), [0.5, 30.0, 10.0, 5.0, 2.0], strict=True)),
+    ids=["calibration", "duration", "varying", "disturbance", "agreement"],
+)
+def test_the_printed_limits_are_not_constructor_fields(
+    check: object, limit: float
+) -> None:
+    # A verdict cannot be built against another limit than the draft's, so
+    # its figure, which names the printed limit, cannot be drawn against one.
+    names = {f.name for f in dataclasses.fields(check)}  # type: ignore[arg-type]
+    printed = (
+        check.nominal_duration_s  # type: ignore[attr-defined]
+        if isinstance(check, building.BackgroundDurationCheck)
+        else check.limit_db  # type: ignore[attr-defined]
+    )
+    assert printed == limit
+    assert not names & {"limit_db", "nominal_duration_s"}
+
+
+def test_calibration_figure_names_beginning_and_end() -> None:
+    fig, ax = plt.subplots()
+    building.verify_calibration_deviation(
+        [93.9, 94.1], previous_levels_db=[94.0, 93.8]
+    ).plot(ax=ax)
+    names = [t.get_text() for t in ax.get_xticklabels()]
+    assert names == ["earlier 1", "earlier 2", "beginning", "end"]
+    assert "within 0.5 dB of every earlier calibration" in _legend_texts(ax)
+    assert ax.get_title().endswith("0.30 dB: equipment may be used")
+    assert {t.get_text() for t in ax.texts} == {"0.10 dB", "0.30 dB"}
+    plt.close(fig)
+
+
+def test_calibration_figure_in_spanish_says_the_equipment_is_out_of_use() -> None:
+    fig, ax = plt.subplots()
+    building.verify_calibration_deviation([93.8, 94.4]).plot(ax=ax, language="es")
+    names = [t.get_text() for t in ax.get_xticklabels()]
+    assert names == ["inicio", "final"]
+    assert ax.get_title().endswith("0,60 dB: equipo fuera de uso hasta aclararlo")
+    plt.close(fig)
+
+
+def test_calibration_figure_numbers_more_than_two_readings() -> None:
+    fig, ax = plt.subplots()
+    building.verify_calibration_deviation([93.9, 94.0, 94.1]).plot(ax=ax)
+    assert [t.get_text() for t in ax.get_xticklabels()] == ["1", "2", "3"]
+    plt.close(fig)
+
+
+def test_duration_figure_states_the_largest_departure() -> None:
+    fig, ax = plt.subplots()
+    building.check_background_duration([30.0, 27.5], tolerance_s=1.0).plot(
+        ax=ax, language="es"
+    )
+    assert ax.get_title().endswith(
+        "mayor desviación 2,5 s, fuera de la tolerancia aceptada de 1 s"
+    )
+    legend = _legend_texts(ax)
+    assert {"30 s del apartado 7.6", "tolerancia aceptada"} <= set(legend)
+    assert "fuera de la tolerancia" in legend
+    plt.close(fig)
+    fig, ax = plt.subplots()
+    building.check_background_duration([30.0, 31.5], tolerance_s=1.5).plot(ax=ax)
+    assert ax.get_title().endswith("every background within 1.5 s of 30 s")
+    assert "beyond the tolerance" not in _legend_texts(ax)
+    plt.close(fig)
+
+
+def test_duration_figure_held_exactly_draws_no_tolerance_band() -> None:
+    fig, ax = plt.subplots()
+    building.check_background_duration([30.0], tolerance_s=0.0).plot(ax=ax)
+    assert "tolerance accepted" not in _legend_texts(ax)
+    assert ax.get_title().endswith("every background within 0 s of 30 s")
+    plt.close(fig)
+
+
+def test_varying_background_figure_marks_the_bands_short_of_10_db() -> None:
+    fig, ax = plt.subplots()
+    building.check_varying_background(
+        [20.4, 30.6, 15.0],
+        [30.4, 40.5, 40.0],
+        observation_time_s=720.0,
+        frequencies_hz=[125.0, 250.0, 500.0],
+    ).plot(ax=ax)
+    marks = next(
+        line for line in ax.get_lines() if line.get_label() == "less than 10 dB below"
+    )
+    assert np.asarray(marks.get_xdata()).size == 1
+    assert ax.get_title().endswith("not valid without correction, watched for 12 min")
+    plt.close(fig)
+
+
+def test_varying_background_figure_without_centres_in_spanish() -> None:
+    fig, ax = plt.subplots()
+    building.check_varying_background(
+        [30.0, 31.0], [45.0, 46.0], observation_time_s=630.0
+    ).plot(ax=ax, language="es")
+    assert ax.get_xlabel() == "Índice de banda"
+    assert ax.get_title().endswith("válido sin corrección, observado durante 10,5 min")
+    plt.close(fig)
+
+
+def test_disturbance_figure_names_the_disturbed_periods() -> None:
+    fig, ax = plt.subplots()
+    building.check_measurement_disturbance([45.3, 44.0, 52.1], [40.3, 41.5, 42.0]).plot(
+        ax=ax
+    )
+    assert ax.get_title().endswith("disturbed periods: 1, 3")
+    assert "5 dB of Clause 9" in _legend_texts(ax)
+    plt.close(fig)
+    fig, ax = plt.subplots()
+    building.check_measurement_disturbance([44.0], [40.0]).plot(ax=ax, language="es")
+    assert ax.get_title().endswith("ningún periodo perturbado")
+    plt.close(fig)
+
+
+def test_agreement_figure_writes_the_single_numbers_in_table_1_notation() -> None:
+    res = _chain()
+    fig, ax = plt.subplots()
+    building.check_instrument_agreement(
+        res, {"LA,eq": res.ratings["LA,eq"], "LC,eq": res.ratings["LC,eq"] + 3.0}
+    ).plot(ax=ax)
+    names = [t.get_text() for t in ax.get_xticklabels()]
+    assert names == [r"$L_\mathrm{A,eq}$", r"$L_\mathrm{C,eq}$"]
+    assert ax.get_title().endswith("more than 2 dB apart: check the calculation")
+    plt.close(fig)

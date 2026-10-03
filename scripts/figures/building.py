@@ -3413,3 +3413,77 @@ def generate_service_equipment_positions(output_dir: str) -> None:
     check.plot(ax=ax, language=_LANG)
     save_figure(output_dir, "service_equipment_positions.png")
     plt.close()
+
+
+def generate_service_equipment_calibration(output_dir: str) -> None:
+    """ISO/DIS 16032 Clause 5: two calibrations against two earlier ones."""
+    print("Generating service_equipment_calibration...")
+    from phonometry import building
+
+    check = building.verify_calibration_deviation(
+        [94.0, 94.2], previous_levels_db=[93.9, 94.0]
+    )
+    _fig, ax = plt.subplots(figsize=(9, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_calibration.png")
+    plt.close()
+
+
+def generate_service_equipment_background_duration(output_dir: str) -> None:
+    """ISO/DIS 16032 7.6: four backgrounds against a 2 s tolerance."""
+    print("Generating service_equipment_background_duration...")
+    from phonometry import building
+
+    check = building.check_background_duration(
+        [30.0, 31.0, 30.0, 26.5], tolerance_s=2.0
+    )
+    _fig, ax = plt.subplots(figsize=(9, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_background_duration.png")
+    plt.close()
+
+
+def generate_service_equipment_varying_background(output_dir: str) -> None:
+    """ISO/DIS 16032, NOTE to Clause 9: road traffic watched for 12 min."""
+    print("Generating service_equipment_varying_background...")
+    from phonometry import building
+
+    check = building.check_varying_background(
+        [36.5, 35.0, 31.0, 27.5, 24.0, 21.0, 17.5],
+        [44.0, 46.5, 43.0, 39.5, 36.0, 32.5, 28.0],
+        observation_time_s=720.0,
+        frequencies_hz=[63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
+    )
+    _fig, ax = plt.subplots(figsize=(9, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_varying_background.png")
+    plt.close()
+
+
+def generate_service_equipment_disturbance(output_dir: str) -> None:
+    """ISO/DIS 16032 Clause 9: six periods, a door closed in the third."""
+    print("Generating service_equipment_disturbance...")
+    from phonometry import building
+
+    check = building.check_measurement_disturbance(
+        [41.6, 42.0, 48.9, 41.3, 41.8, 42.2], [39.0, 39.4, 41.1, 38.9, 39.2, 39.6]
+    )
+    _fig, ax = plt.subplots(figsize=(9, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_disturbance.png")
+    plt.close()
+
+
+def generate_service_equipment_instrument_agreement(output_dir: str) -> None:
+    """ISO/DIS 16032, NOTE to 7.8: the water closet against the meter."""
+    print("Generating service_equipment_instrument_agreement...")
+    from phonometry import building
+
+    check = building.check_instrument_agreement(
+        _service_equipment_measurement(),
+        {"LA,eq": [46.0, 44.5, 45.8], "LC,eq": [52.3, 50.8, 52.1]},
+    )
+    _fig, ax = plt.subplots(figsize=(9, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_instrument_agreement.png")
+    plt.close()

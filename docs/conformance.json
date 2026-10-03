@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1796,
-    "passing": 1796,
+    "checks": 1802,
+    "passing": 1802,
     "failing": 0,
     "domains": 109,
     "standards": 519,
-    "citations": 1252,
+    "citations": 1257,
     "designations": 223,
     "sources": 123
   },
@@ -185,8 +185,8 @@
     {
       "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
       "title": "Service-equipment sound in buildings (ISO/DIS 16032:2023)",
-      "checks": 16,
-      "passing": 16
+      "checks": 22,
+      "passing": 22
     },
     {
       "id": "building-prediction-uncertainty",
@@ -19048,6 +19048,210 @@
       "computed": {
         "value": 3.0,
         "label": "3/3 positions placed as 7.9 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-2/corner-microphone-at-least-0-2-m-from-any-obstacle",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.2"
+          }
+        ]
+      },
+      "quantity": "Corner microphone at least 0,2 m from any obstacle",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 obstacle distances judged as 7.2 reads"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 obstacle distances judged as 7.2 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-5/calibration-deviating-by-more-than-0-5-db",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 5"
+          }
+        ]
+      },
+      "quantity": "Calibration deviating by more than 0,5 dB",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 calibrations judged as Clause 5 reads"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 calibrations judged as Clause 5 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-6/background-measured-over-approximately-30-s",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.6"
+          }
+        ]
+      },
+      "quantity": "Background measured over approximately 30 s",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 durations held to 30 s within a tolerance"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 durations held to 30 s within a tolerance"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-9-note/varying-background-maximum-over-10-min-to-15-min-10-db-or-more-below",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 9, NOTE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 9, NOTE"
+          }
+        ]
+      },
+      "quantity": "Varying background: maximum over 10 min to 15 min, 10 dB or more below",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "7/7 cases judged as the NOTE reads"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 cases judged as the NOTE reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-9/maximum-less-than-5-db-above-the-equivalent-level-in-each-period",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 9"
+          }
+        ]
+      },
+      "quantity": "Maximum less than 5 dB above the equivalent level in each period",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 periods judged as Clause 9 reads"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 periods judged as Clause 9 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-8-note/calculated-single-numbers-within-2-db-of-the-instrument",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.8, NOTE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.8, NOTE"
+          }
+        ]
+      },
+      "quantity": "Calculated single numbers within 2 dB of the instrument",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 comparisons judged as 7.8 reads"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 comparisons judged as 7.8 reads"
       },
       "tolerance": {
         "mode": "absolute",

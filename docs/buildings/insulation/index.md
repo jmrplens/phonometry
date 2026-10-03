@@ -135,9 +135,13 @@ ISO 16283 low-frequency procedure is fed from, and not the test-facility and
 mounting requirements of ISO 10140-1. Those are the operator's
 responsibility and the report's, and
 they are what makes the numbers here mean something. The one method that
-checks its own positions is the ISO 16032 engineering method for
-service-equipment noise, with the position ladder of its 7.4.1, the
-distances of 7.3 and the corner height of 7.2 in a rectangular room.
+checks its own positions is the ISO 16032 engineering
+method for service-equipment noise, with the position ladder of its 7.4.1, the
+distances of 7.3 and the corner height and 0.2 m from obstacles of 7.2 in a
+rectangular room; it also checks the measurement itself: the calibration
+deviation, the background time against the operator's tolerance and a
+background that varies, disturbed periods and the calculation against the
+instrument.
 Background noise is the one correction genuinely left to the caller of the
 insulation routines: their
 field levels must arrive already corrected, their 6 dB signal-to-background

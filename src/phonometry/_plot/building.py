@@ -78,10 +78,15 @@ if TYPE_CHECKING:
         ReductionImprovementRating,
     )
     from ..building.measurement.service_equipment import (
+        BackgroundDurationCheck,
+        CalibrationDeviationResult,
+        InstrumentAgreementCheck,
+        MeasurementDisturbanceCheck,
         PositionSpreadCheck,
         ServiceEquipmentBackgroundResult,
         ServiceEquipmentPositionCheck,
         ServiceEquipmentResult,
+        VaryingBackgroundCheck,
     )
     from ..building.measurement.structure_borne_power import StructureBornePowerResult
     from ..building.measurement.uncertainty import BandUncertainty
@@ -185,10 +190,18 @@ _SERVICE_TITLE = "Service-equipment level (ISO/DIS 16032)"
 _BACKGROUND_TITLE = "Background correction (ISO/DIS 16032, Clause 9)"
 _SPREAD_TITLE = "Spread between positions (ISO/DIS 16032, 7.4.1)"
 _POSITIONS_TITLE = "Microphone positions (ISO/DIS 16032, 7.2 and 7.3)"
+_CALIBRATION_TITLE = "Calibration (ISO/DIS 16032, Clause 5)"
+_DURATION_TITLE = "Background measurement time (ISO/DIS 16032, 7.6)"
+_VARYING_TITLE = "Varying background (ISO/DIS 16032, NOTE to Clause 9)"
+_DISTURBANCE_TITLE = "Maximum against equivalent level (ISO/DIS 16032, Clause 9)"
+_AGREEMENT_TITLE = "Calculation against the instrument (ISO/DIS 16032, 7.8)"
 #: Legend labels the measurement and background figures of ISO/DIS 16032
 #: share.
 _BACKGROUND_L2_LABEL = "background $L_2$"
 _CORRECTED_LABEL = "corrected for background"
+#: Legend label of the measurement at hand, which the calibration figure of
+#: ISO/DIS 16032 and the curing figure of ISO 10140-1 share.
+_THIS_MEASUREMENT_LABEL = "this measurement"
 #: Size of a plan of the positions the renderer draws on a figure of its own,
 #: in inches: wide enough for the plan and the key beside it.
 _POSITIONS_FIGURE_SIZE_IN = (9.0, 6.0)
@@ -355,6 +368,54 @@ _STRINGS: dict[str, str] = {
     "Width $y$ [m]": "Anchura $y$ [m]",
     "requirements met": "requisitos cumplidos",
     "requirements not met": "requisitos no cumplidos",
+    _CALIBRATION_TITLE: "Calibración (ISO/DIS 16032, cap. 5)",
+    _DURATION_TITLE: "Tiempo de medición del ruido de fondo (ISO/DIS 16032, apartado 7.6)",
+    _VARYING_TITLE: "Ruido de fondo variable (ISO/DIS 16032, NOTA del cap. 9)",
+    _DISTURBANCE_TITLE: "Nivel máximo frente al equivalente (ISO/DIS 16032, cap. 9)",
+    _AGREEMENT_TITLE: "Cálculo frente al instrumento (ISO/DIS 16032, apartado 7.8)",
+    "Calibration": "Calibración",
+    "Calibrator reading [dB]": "Lectura del calibrador [dB]",
+    "earlier calibrations": "calibraciones anteriores",
+    "earlier": "anterior",
+    "beginning": "inicio",
+    "end": "final",
+    _THIS_MEASUREMENT_LABEL: "esta medición",
+    "within 0.5 dB of every earlier calibration": "a 0,5 dB o menos de cada calibración anterior",
+    "largest deviation": "desviación máxima",
+    "equipment may be used": "el equipo puede usarse",
+    "equipment out of use until clarified": "equipo fuera de uso hasta aclararlo",
+    "Background measurement": "Medición del ruido de fondo",
+    "Measurement time [s]": "Tiempo de medición [s]",
+    "measurement time": "tiempo de medición",
+    "30 s of 7.6": "30 s del apartado 7.6",
+    "tolerance accepted": "tolerancia aceptada",
+    "beyond the tolerance": "fuera de la tolerancia",
+    "every background within {tolerance} s of 30 s": (
+        "todo el ruido de fondo a {tolerance} s o menos de 30 s"
+    ),
+    "largest departure {departure} s, beyond the {tolerance} s accepted": (
+        "mayor desviación {departure} s, fuera de la tolerancia aceptada de {tolerance} s"
+    ),
+    "service equipment": "equipamiento",
+    "background maximum": "máximo del ruido de fondo",
+    "10 dB below the equipment": "10 dB por debajo del equipamiento",
+    "less than 10 dB below": "menos de 10 dB por debajo",
+    "valid without correction": "válido sin corrección",
+    "not valid without correction": "no válido sin corrección",
+    "watched for": "observado durante",
+    "Measurement period": "Periodo de medición",
+    "Maximum less equivalent level [dB]": "Nivel máximo menos nivel equivalente [dB]",
+    "difference per period": "diferencia por periodo",
+    "5 dB of Clause 9": "5 dB del cap. 9",
+    "disturbed": "perturbado",
+    "no period disturbed": "ningún periodo perturbado",
+    "disturbed periods": "periodos perturbados",
+    "Single number": "Valor único",
+    "Calculated less instrument [dB]": "Calculado menos instrumento [dB]",
+    "within 2 dB": "dentro de 2 dB",
+    "calculated less instrument": "calculado menos instrumento",
+    "calculation agrees": "el cálculo concuerda",
+    "more than 2 dB apart: check the calculation": "más de 2 dB de diferencia: revisar el cálculo",
 }
 
 #: Localised names of the two standard heavy and soft impact sources.
@@ -2982,6 +3043,415 @@ def plot_service_equipment_positions(
     return ax
 
 
+# --- ISO/DIS 16032 on-site checks (Clause 5, 7.6, 7.8 and Clause 9) ---------
+
+
+#: The two calibrations Clause 5 asks of a measurement, as the ticks name them.
+_CLAUSE_5_READINGS = ("beginning", "end")
+
+
+def _calibration_names(previous: int, current: int, language: str) -> list[str]:
+    """Tick names: the earlier calibrations, then beginning and end."""
+    earlier = _t("earlier", language)
+    names = (
+        [earlier] if previous == 1 else [f"{earlier} {i + 1}" for i in range(previous)]
+    )
+    if current <= len(_CLAUSE_5_READINGS):
+        names += [_t(name, language) for name in _CLAUSE_5_READINGS[:current]]
+    else:
+        names += [str(i + 1) for i in range(current)]
+    return names
+
+
+def plot_calibration_deviation(
+    result: CalibrationDeviationResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each calibration reading against the window the earlier ones leave it.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.CalibrationDeviationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers of this measurement's readings.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from .geometry._draft import _chip
+
+    ax = ax if ax is not None else _new_axes()
+    previous = np.asarray(result.previous_levels_db, dtype=np.float64)
+    levels = np.asarray(result.levels_db, dtype=np.float64)
+    history = np.concatenate((previous, levels))
+    x_previous = np.arange(previous.size, dtype=np.float64)
+    x_levels = previous.size + np.arange(levels.size, dtype=np.float64)
+    shade = theme_fill(_C_TERTIARY, ax)
+    drawn_window = False
+    for i, x in enumerate(x_levels):
+        earlier = history[: previous.size + i]
+        if not earlier.size:
+            continue
+        # Inside this window a reading is no more than the limit from every
+        # earlier calibration: above the highest less the limit, below the
+        # lowest plus it.
+        low = float(np.max(earlier)) - result.limit_db
+        high = float(np.min(earlier)) + result.limit_db
+        if high > low:
+            ax.fill_between(
+                [x - 0.3, x + 0.3],
+                [low, low],
+                [high, high],
+                color=shade,
+                lw=0,
+                zorder=0,
+                label=(
+                    None
+                    if drawn_window
+                    else _t("within 0.5 dB of every earlier calibration", language)
+                ),
+            )
+            drawn_window = True
+    if previous.size:
+        ax.plot(
+            x_previous,
+            previous,
+            ls="",
+            marker="s",
+            ms=8,
+            color=_C_MUTED,
+            zorder=4,
+            label=_t("earlier calibrations", language),
+        )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 9)
+    kwargs.setdefault("label", _t(_THIS_MEASUREMENT_LABEL, language))
+    ax.plot(x_levels, levels, ls="", zorder=5, **kwargs)
+    for x, level, deviation in zip(x_levels, levels, result.deviations_db, strict=True):
+        if not np.isfinite(deviation):
+            continue
+        ax.annotate(
+            f"{format_number(float(deviation), language, decimals=2)} dB",
+            (x, level),
+            xytext=(14, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize="small",
+            zorder=7,
+            bbox=_chip(ax, 0.2),
+        )
+    ax.set_xticks(np.concatenate((x_previous, x_levels)))
+    ax.set_xticklabels(_calibration_names(previous.size, levels.size, language))
+    ax.set_xlim(-0.6, history.size - 0.4)
+    span = max(float(np.ptp(history)), result.limit_db)
+    ax.set_ylim(
+        float(np.min(history)) - 1.2 * span, float(np.max(history)) + 1.6 * span
+    )
+    ax.set_xlabel(_t("Calibration", language))
+    ax.set_ylabel(_t("Calibrator reading [dB]", language))
+    verdict = (
+        "equipment may be used"
+        if result.passes
+        else "equipment out of use until clarified"
+    )
+    ax.set_title(
+        f"{_t(_CALIBRATION_TITLE, language)}\n"
+        f"{_t('largest deviation', language)} "
+        f"{format_number(result.largest_deviation_db, language, decimals=2)} dB: "
+        f"{_t(verdict, language)}"
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_background_duration(
+    result: BackgroundDurationCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each background measurement time against the 30 s of 7.6 and the tolerance.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.BackgroundDurationCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers of the durations.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    durations = np.asarray(result.durations_s, dtype=np.float64)
+    x = np.arange(1, durations.size + 1, dtype=np.float64)
+    nominal = result.nominal_duration_s
+    tolerance = result.tolerance_s
+    if tolerance > 0.0:
+        ax.fill_between(
+            [0.4, durations.size + 0.6],
+            [nominal - tolerance] * 2,
+            [nominal + tolerance] * 2,
+            color=theme_fill(_C_TERTIARY, ax),
+            lw=0,
+            zorder=0,
+            label=_t("tolerance accepted", language),
+        )
+    ax.axhline(
+        nominal,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        zorder=2,
+        label=_t("30 s of 7.6", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 9)
+    kwargs.setdefault("label", _t("measurement time", language))
+    ax.plot(x, durations, ls="", zorder=5, **kwargs)
+    outside = ~np.asarray(result.within_tolerance)
+    if np.any(outside):
+        # A ring round each duration beyond the tolerance, which leaves the
+        # marker of the duration itself in sight.
+        ax.plot(
+            x[outside],
+            durations[outside],
+            ls="",
+            marker="o",
+            ms=17,
+            mfc="none",
+            mew=2.0,
+            color=_C_SECONDARY,
+            zorder=6,
+            label=_t("beyond the tolerance", language),
+        )
+    ax.set_xticks(x)
+    ax.set_xlim(0.4, durations.size + 0.6)
+    # Centred on 30 s and wide enough for the band and the largest departure,
+    # so that a departure of a second or two stays visible.
+    reach = 1.8 * max(result.largest_departure_s, tolerance, 1.0)
+    ax.set_ylim(max(0.0, nominal - reach), nominal + reach)
+    ax.set_xlabel(_t("Background measurement", language))
+    ax.set_ylabel(_t("Measurement time [s]", language))
+    tolerance_text = format_number(tolerance, language, trim=True)
+    if result.passes:
+        verdict = _t("every background within {tolerance} s of 30 s", language).format(
+            tolerance=tolerance_text
+        )
+    else:
+        verdict = _t(
+            "largest departure {departure} s, beyond the {tolerance} s accepted",
+            language,
+        ).format(
+            departure=format_number(result.largest_departure_s, language, trim=True),
+            tolerance=tolerance_text,
+        )
+    ax.set_title(f"{_t(_DURATION_TITLE, language)}\n{verdict}")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_varying_background(
+    result: VaryingBackgroundCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The equipment level, the background maximum and the 10 dB line, per band.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.VaryingBackgroundCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the curve of the equipment level.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = result.frequencies_hz
+    equipment = np.asarray(result.equipment_levels_db, dtype=np.float64)
+    background = np.asarray(result.background_maximum_db, dtype=np.float64)
+    labels = freqs if freqs is not None else np.arange(equipment.size) + 1.0
+    positions = _band_axis(
+        ax,
+        labels,
+        # Translated here, for the reason given in _plot_shaded_band_pair.
+        xlabel=_t(_FREQ_LABEL if freqs is not None else _BAND_INDEX_LABEL, language),
+        language=language,
+    )
+    threshold = equipment - result.limit_db
+    ax.plot(
+        positions,
+        threshold,
+        "--",
+        color=_C_TERTIARY,
+        lw=1.2,
+        label=_t("10 dB below the equipment", language),
+    )
+    ax.plot(
+        positions,
+        background,
+        ":",
+        color=_C_MUTED,
+        lw=1.6,
+        marker=".",
+        label=_t("background maximum", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "s")
+    kwargs.setdefault("label", _t("service equipment", language))
+    ax.plot(positions, equipment, "-", **kwargs)
+    short = ~np.asarray(result.margin_ok)
+    if np.any(short):
+        ax.plot(
+            positions[short],
+            background[short],
+            ls="",
+            marker="v",
+            ms=10,
+            color=_C_SECONDARY,
+            zorder=6,
+            label=_t("less than 10 dB below", language),
+        )
+    ax.set_ylabel(_t(_SPL_LABEL, language))
+    verdict = (
+        "valid without correction" if result.passes else "not valid without correction"
+    )
+    minutes = format_number(result.observation_time_s / 60.0, language, trim=True)
+    ax.set_title(
+        f"{_t(_VARYING_TITLE, language)}\n{_t(verdict, language)}, "
+        f"{_t('watched for', language)} {minutes} min"
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_measurement_disturbance(
+    result: MeasurementDisturbanceCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each period's maximum less equivalent level against the 5 dB of Clause 9.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.MeasurementDisturbanceCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers of the differences.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    differences = np.asarray(result.differences_db, dtype=np.float64)
+    x = np.arange(1, differences.size + 1, dtype=np.float64)
+    top = max(float(np.max(differences)), result.limit_db) + 0.5 * result.limit_db
+    ax.fill_between(
+        [0.4, differences.size + 0.6],
+        [result.limit_db] * 2,
+        [top] * 2,
+        color=theme_fill(_C_SECONDARY, ax),
+        lw=0,
+        zorder=0,
+        label=_t("disturbed", language),
+    )
+    ax.axhline(
+        result.limit_db,
+        color=_C_SECONDARY,
+        ls="--",
+        lw=1.2,
+        zorder=2,
+        label=_t("5 dB of Clause 9", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 9)
+    kwargs.setdefault("label", _t("difference per period", language))
+    ax.plot(x, differences, ls="", zorder=5, **kwargs)
+    ax.set_xticks(x)
+    ax.set_xlim(0.4, differences.size + 0.6)
+    ax.set_ylim(min(0.0, float(np.min(differences))), top)
+    ax.set_xlabel(_t("Measurement period", language))
+    ax.set_ylabel(_t("Maximum less equivalent level [dB]", language))
+    if result.passes:
+        verdict = _t("no period disturbed", language)
+    else:
+        periods = ", ".join(str(i + 1) for i in result.disturbed_periods)
+        verdict = f"{_t('disturbed periods', language)}: {periods}"
+    ax.set_title(f"{_t(_DISTURBANCE_TITLE, language)}\n{verdict}")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_instrument_agreement(
+    result: InstrumentAgreementCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each calculated-less-instrument difference against the 2 dB of 7.8.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.InstrumentAgreementCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers of the differences.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    keys = list(result.differences_db)
+    differences = np.array([result.differences_db[k] for k in keys], dtype=np.float64)
+    x = np.arange(differences.size, dtype=np.float64)
+    limit = result.limit_db
+    ax.fill_between(
+        [-0.6, differences.size - 0.4],
+        [-limit] * 2,
+        [limit] * 2,
+        color=theme_fill(_C_TERTIARY, ax),
+        lw=0,
+        zorder=0,
+        label=_t("within 2 dB", language),
+    )
+    ax.axhline(0.0, color=_C_REFERENCE, lw=0.8, zorder=1)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 9)
+    kwargs.setdefault("label", _t("calculated less instrument", language))
+    ax.plot(x, differences, ls="", zorder=5, **kwargs)
+    ax.set_xticks(x)
+    ax.set_xticklabels([_rating_symbol(k) for k in keys])
+    ax.set_xlim(-0.6, differences.size - 0.4)
+    reach = max(float(np.max(np.abs(differences))), limit) + 0.8 * limit
+    ax.set_ylim(-reach, reach)
+    ax.set_xlabel(_t("Single number", language))
+    ax.set_ylabel(_t("Calculated less instrument [dB]", language))
+    verdict = (
+        "calculation agrees"
+        if result.passes
+        else "more than 2 dB apart: check the calculation"
+    )
+    ax.set_title(f"{_t(_AGREEMENT_TITLE, language)}\n{_t(verdict, language)}")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
 # --- ISO 10140-1:2021 Annexes G, H and K ------------------------------------
 
 #: Labels of the laboratory improvement and rainfall figures, kept as names so
@@ -3024,7 +3494,6 @@ _LAB_STRINGS: dict[str, str] = {
     "admissible": "admisible",
     "lag = curing time / 3": "intervalo = tiempo de curado / 3",
     "required curing": "curado exigido",
-    "this measurement": "esta medición",
     "rainfall rate": "intensidad de lluvia",
     "drop diameter": "diámetro de gota",
     "fall velocity": "velocidad de caída",
@@ -3250,7 +3719,7 @@ def plot_lining_curing_check(
     kwargs.setdefault("marker", "o" if result.passes else "X")
     style_default(kwargs, "ms", 10)
     style_default(kwargs, "ls", "")
-    kwargs.setdefault("label", _t("this measurement", language))
+    kwargs.setdefault("label", _t(_THIS_MEASUREMENT_LABEL, language))
     ax.plot([result.curing_time_days], [result.time_lag_days], **kwargs)
     ax.set_xlim(0.0, x_max)
     ax.set_ylim(0.0, y_max)

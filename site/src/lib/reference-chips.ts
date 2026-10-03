@@ -16,6 +16,11 @@
  *     is attributed to, shown as author and year.
  * `type: web` and numberless reports carry no designation and no citable
  * author-date pair, so they stay in the bibliography only.
+ *
+ * The standards run states what the page implements and nothing else. A
+ * normative document the page only requires or cites is marked
+ * `implemented: false` in the frontmatter: it keeps its entry and its anchor in
+ * the References section, but makes no chip and is not counted in "+N more".
  */
 
 import type { CollectionEntry } from 'astro:content';
@@ -106,6 +111,9 @@ function authorDate(
 }
 
 function chipFor(ref: Reference, isEs: boolean): { text: string; kind: ChipKind } | undefined {
+	// Cited, required or compared with, but not implemented here: the entry is
+	// in the bibliography and nowhere in the header.
+	if (ref.implemented === false) return undefined;
 	if (ref.type === 'standard') {
 		const text = standardFamily(ref.designation);
 		return isEditionOnly(text) ? undefined : { text, kind: 'standard' };

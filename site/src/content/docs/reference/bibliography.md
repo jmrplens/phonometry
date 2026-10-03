@@ -11,13 +11,21 @@ page's frontmatter, renders every source in APA style, standards and books and
 papers alike, each with a DOI or an official publisher link and half a sentence
 on what it supports.
 
-A normative document appears in a References list whenever a guide cites it as
-the *source* of something it uses rather than as the method it implements:
-ISO 3740 as the selection guide that decides which sound-power method applies,
-ISO 1996-2 for the tonal-audibility criterion IEC 61400-11 reuses. What a page
-implements clause by clause is in its chip run, and collected for the whole
-library in the [conformance report](/phonometry/reference/conformance/), not
-here.
+The chip run and the References section differ on purpose. The standards in
+the chip run are what the page implements and nothing else: the standards whose
+formulas, tables or tests the page's own functions compute. Beside them, the
+run names by author and year the books and papers the page's method is
+attributed to. A normative document the page only requires, cites or compares
+with is printed in its References like any other source but has no chip: the
+calibrator a periodic test presupposes (IEC 60942 on the sound level meter's
+periodic tests), the vocabulary a page takes its terms from (ISO 2041), the
+selection guide that decides which sound-power method applies (ISO 3740), the
+ISO 1996-2 mapping the wind-turbine guide hands its tonal audibility to. The
+site search follows the standards chips: a search for a designation ranks first
+the guides that implement it, and finds the ones that only cite it after them,
+through their text. What a page implements
+clause by clause is collected for the whole library in the
+[conformance report](/phonometry/reference/conformance/), not here.
 
 This page collects those sources in one list, grouped by the same eleven areas the
 guides are grouped into, with General acoustics and Metrology as the two

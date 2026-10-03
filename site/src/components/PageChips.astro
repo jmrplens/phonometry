@@ -1,8 +1,10 @@
 ---
 /**
- * Page header chips: one run under the H1 stating which standards govern the
- * page and which named works its methods are attributed to (see
- * TOC-REDESIGN-NOTES.md).
+ * Page header chips: one run under the H1 stating which standards the page
+ * implements and which named works its methods are attributed to (see
+ * TOC-REDESIGN-NOTES.md). A standard the page only requires or cites is marked
+ * `implemented: false` in the frontmatter and has no chip; it is in the
+ * References section with the rest.
  *
  * Everything comes from the page's own `references` frontmatter through
  * src/lib/reference-chips.ts, so the header cannot disagree with the

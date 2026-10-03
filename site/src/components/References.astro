@@ -4,6 +4,9 @@
  * the page frontmatter (schema in src/content.config.ts) as one APA-7
  * "References" section at the end of the article. Injected on every page by
  * the MarkdownContent override; pages without `references` render nothing.
+ * Every entry is printed, including a standard marked `implemented: false`:
+ * that flag takes a cited document out of the header chips and the search
+ * field, never out of the bibliography.
  * The matching "On this page" entry is added by src/routeData.ts.
  *
  * Three deliberate departures from strict APA 7, and nothing else:

@@ -2306,6 +2306,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **A guide's standards chips and its search field name only what the guide
+  implements.** A normative document a guide only requires, cites or compares
+  with, such as the calibrator a periodic test presupposes, the vocabulary a
+  page takes its terms from or the method a measurement is contrasted with,
+  is still printed in the guide's References but no longer gets a chip under
+  the title, a token in the weighted search field or a place among the works
+  the page's structured data says it is based on. A bibliography entry marks
+  such a document with `implemented: false`, which the content schema accepts
+  on a standard or a numbered report only and never beside `primary: true`.
+  Every guide was swept in both languages: 89 references on 61 guides are now
+  cited only, among them IEC 60942 on the sound level meter's periodic tests,
+  IEC/TS 61094-7 on comparison calibration, ISO 2041 on impact mobility and
+  ISO 9613-1 on the room and diffuser guides that take the absorption of air
+  from the outdoor propagation guide. A search for one of those designations
+  now ranks the guides that implement it first and finds the others after
+  them, through their text. The landing page's table of the standards each
+  area implements, and the aircraft entry of the guides index, now name
+  SAE ARP 866A, the absorption the library computes, where they named
+  ARP 866B, whose method no function runs.
 - **The sound power guides on an enveloping surface have an llms shard of
   their own.** With the steam turbine guide, `llms-devices-emission.txt` went
   over the 200 000-byte budget, so the pressure methods of ISO 3744, ISO 3746

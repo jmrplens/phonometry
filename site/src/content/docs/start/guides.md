@@ -770,7 +770,7 @@ regulatory mapping.
 Certification levels, airport contours and the rotorcraft hemisphere
 method: the noise of flight measured the way the certification and
 airport-planning documents prescribe. Implements ICAO Annex 16, IEC 61265,
-SAE ARP 866A/866B/5534, ISO 3891 and ECAC Doc 29/32.
+SAE ARP 866A/5534, ISO 3891 and ECAC Doc 29/32.
 
 - [Aircraft noise: Effective Perceived Noise Level](/phonometry/aircraft/aircraft-noise/):
   perceived noisiness and PNL, the tone correction, the duration correction and

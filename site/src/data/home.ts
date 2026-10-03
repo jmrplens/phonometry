@@ -228,7 +228,7 @@ export const en: HomeContent = {
 				name: 'Aircraft noise',
 				href: '/phonometry/aircraft/',
 				summary: 'Certification levels, airport contours and the rotorcraft hemisphere method.',
-				standards: ['ICAO Annex 16', 'IEC 61265', 'SAE ARP 866B/5534', 'ECAC Doc 29', 'ECAC Doc 32'],
+				standards: ['ICAO Annex 16', 'IEC 61265', 'SAE ARP 866A/5534', 'ECAC Doc 29', 'ECAC Doc 32'],
 			},
 			{
 				name: 'Underwater acoustics',
@@ -383,7 +383,7 @@ export const es: HomeContent = {
 				name: 'Ruido de aeronaves',
 				href: '/phonometry/es/aircraft/',
 				summary: 'Niveles de certificación, contornos de aeropuerto y el método de hemisferio para helicópteros.',
-				standards: ['Anexo 16 OACI', 'IEC 61265', 'SAE ARP 866B/5534', 'ECAC Doc 29', 'ECAC Doc 32'],
+				standards: ['Anexo 16 OACI', 'IEC 61265', 'SAE ARP 866A/5534', 'ECAC Doc 29', 'ECAC Doc 32'],
 			},
 			{
 				name: 'Acústica submarina',

@@ -125,11 +125,14 @@ export function referenceNode(ref, bibliographyUrl) {
  * The citation properties for one page.
  *
  * The three are deliberately different claims, and the frontmatter already
- * carries the flag that separates them:
+ * carries the flags that separate them:
  *   - `about`      what the page is about: the software plus the standards it
  *                  actually implements (the `primary` entries).
  *   - `isBasedOn`  the same primary standards, stated as provenance.
- *   - `citation`   the full bibliography, primary or not.
+ *   - `citation`   the full bibliography, primary or not, implemented or not.
+ *
+ * An entry marked `implemented: false` is a document the page cites without
+ * being written to it, so it is only ever a `citation`.
  *
  * @param {object} options
  * @param {Array | undefined} options.references Frontmatter `references`, possibly undefined.
@@ -145,10 +148,10 @@ export function citationsFor({ references, bibliographyUrl, full = false }) {
 
   const primary = refs.filter((ref) => ref.primary);
   // A page that marks nothing still has a governing source; fall back to the
-  // standards it lists, and to the first entry if it lists none.
+  // first standards it lists among those it implements.
   const governing = primary.length
     ? primary
-    : refs.filter((ref) => ref.type === 'standard').slice(0, 3);
+    : refs.filter((ref) => ref.type === 'standard' && ref.implemented !== false).slice(0, 3);
 
   return {
     citation: refs.map(node),

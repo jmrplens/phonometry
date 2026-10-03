@@ -50,9 +50,12 @@ const LANGS = ['en', 'es'];
  * cannot. Paths are the English ones; the Spanish twin of each is checked too,
  * unless `langs` narrows the query to the language it is written in.
  */
+// The workroom guide (ISO 14257) used to be on this list. It names the ISO 3744
+// background correction its 5.1.4 asks for and deliberately leaves applying it
+// to the sound power guide, so it cites ISO 3744 (`implemented: false`) and no
+// longer declares it.
 const ISO_3744 = [
   '/devices/emission/sound-power-pressure/',
-  '/buildings/rooms/workroom-sound-decay/',
   '/reference/theory/environment-transport/',
 ];
 const ISO_8041_1 = ['/vibration/human/meter-verification/', '/vibration/human/human-vibration/'];
@@ -68,6 +71,7 @@ const ISO_717_1 = [
   '/buildings/insulation/lab-application-rules/',
   '/buildings/insulation/low-frequency-procedure/',
   '/devices/noise-control/enclosure-cabin-insulation/',
+  '/materials/reading-a-datasheet/',
   '/reference/theory/rooms-buildings/',
 ];
 
@@ -145,18 +149,24 @@ const CONTROLS = [
  * word the field carries must leave the search for that word exactly as it was,
  * and that is checked for every one of them rather than for a hand-picked few.
  *
- * "air" (SAE AIR 5662) and "noise" (the NOISE research project) are deliberately
- * absent: they are ordinary words on an acoustics site first. "en" is here even
- * though it is the Spanish preposition, because a search is never "en" alone and
- * the Spanish searches built around it are in CONTROLS. "bek" is the series of
- * Danish statutory orders, as Retsinformation files them ("BEK nr 135 af
- * 07/02/2019"), in the way "rd" is the Spanish Real Decreto.
+ * "noise" (the NOISE research project) is deliberately absent: it is an
+ * ordinary word on an acoustics site first, and so would "air" be, were SAE AIR
+ * 5662 ever declared again. "en" is here even though it is the Spanish
+ * preposition, because a search is never "en" alone and the Spanish searches
+ * built around it are in CONTROLS.
+ *
+ * The list holds only the words some page carries, which the check enforces at
+ * the end. A field lists only what its page implements, so an issuer whose
+ * every document is cited and implemented nowhere leaves the list with it: BEK
+ * (the Danish order behind a table of IEC TS 61400-11-2), BS (BS 7445-1), DHHS
+ * and NIOSH (the criteria document 98-126) and EUR (the CNOSSOS-EU report) went
+ * when those references were marked `implemented: false`. One comes back here
+ * the day a page implements a document of its issuer.
  */
 const ISSUER_WORDS = new Set([
-  'acou', 'aes', 'ahri', 'ansi', 'arp', 'asa', 'astm', 'bek', 'bs', 'ceac', 'cte',
-  'dbhr', 'dhhs', 'din', 'ebu', 'ecac', 'en', 'eur', 'icao', 'iec', 'iso', 'itu',
-  'jcgm', 'jis', 'nasa', 'niosh', 'noaa', 'nt', 'oj', 'pas', 'rd', 'rfc', 'sae',
-  'tr', 'ts', 'uit', 'vdi',
+  'acou', 'aes', 'ahri', 'ansi', 'arp', 'asa', 'astm', 'ceac', 'cte', 'dbhr',
+  'din', 'ebu', 'ecac', 'en', 'icao', 'iec', 'iso', 'itu', 'jcgm', 'jis', 'nasa',
+  'noaa', 'nt', 'oj', 'pas', 'rd', 'rfc', 'sae', 'tr', 'ts', 'uit', 'vdi',
 ]);
 
 /** Score ratio a declaring page must keep over the best page that does not declare. */
@@ -174,9 +184,15 @@ const STANDARDS_META =
 
 /** @type {Map<string, {lang: string, tokens: string[]}>} url -> field as built */
 const built = new Map();
+/** Every page built, with the field or without it. */
+const builtPages = new Set();
 for (const file of await filesUnder(distDir, (name) => name === 'index.html')) {
   const html = await readFile(file, 'utf8');
-  // Redirect stubs carry neither a body marker nor this field.
+  // Redirect stubs are a <meta refresh> and nothing else: not pages, and they
+  // carry no field.
+  if (/http-equiv=["']?refresh/i.test(html)) continue;
+  const url = `/${path.relative(distDir, path.dirname(file))}/`.replace(/^\/\.\/$/, '/');
+  builtPages.add(url);
   const match = STANDARDS_META.exec(html);
   if (!match) continue;
   const content = /\bcontent=["']([^"']*)["']/i.exec(match[0]);
@@ -184,7 +200,6 @@ for (const file of await filesUnder(distDir, (name) => name === 'index.html')) {
     fail(`${file}: the standards meta tag carries no content attribute`);
     continue;
   }
-  const url = `/${path.relative(distDir, path.dirname(file))}/`.replace(/^\/\.\/$/, '/');
   built.set(url, {
     lang: url.startsWith('/es/') ? 'es' : 'en',
     tokens: content[1].split(/\s+/).filter(Boolean),
@@ -207,15 +222,37 @@ for (const [url, page] of built) {
 // The frontmatter: the designations each page declares.
 // ---------------------------------------------------------------------------
 
-const { declared, designations, problems } = await readDeclaredDesignations(contentDir);
+const { declared, designations, routes, problems } = await readDeclaredDesignations(contentDir);
 for (const problem of problems) fail(problem);
 
-// Every designation must tokenise. designationTokens throws on one that cannot,
-// which already fails the site build; calling it here names the file too.
-for (const designation of designations) designationTokens(designation);
-
-// The cross-check: what the frontmatter says, against what the page published.
+// Every declared designation must tokenise. designationTokens throws on one
+// that cannot, which already fails the site build; calling it here names the
+// page too. A designation a page only cites (`implemented: false`) never
+// reaches the field, so it is not held to this; it is still in `designations`,
+// and the searches below are run for it like for any other, so that the pages
+// that implement it are seen to come first.
 for (const [route, list] of declared) {
+  for (const designation of list) {
+    try {
+      designationTokens(designation);
+    } catch (error) {
+      throw new Error(`${route}: ${error.message}`, { cause: error });
+    }
+  }
+}
+
+// The cross-check: what the frontmatter says, against what the page published,
+// both ways. Every route that declares standards must publish exactly their
+// tokens, and every route that publishes tokens must declare them. The second
+// half is what sees a page whose standards are all cited (`implemented: false`)
+// and which therefore declares nothing: such a page is in no list above, and a
+// field that indexed its cited standards would otherwise go unread.
+for (const route of new Set([...declared.keys(), ...built.keys()])) {
+  let list = declared.get(route);
+  // A Spanish route with no content file of its own is the English page served
+  // as a fallback, and publishes what the English one declares.
+  if (!list && !routes.has(route) && route.startsWith('/es/')) list = declared.get(route.replace(/^\/es\//, '/'));
+  list ??= [];
   const page = built.get(route);
   const expected = new Set();
   for (const designation of list) for (const token of designationTokens(designation)) expected.add(token);
@@ -225,6 +262,13 @@ for (const [route, list] of declared) {
     // a route that is built but silent about standards it declares is not.
     if (expected.size > 0 && built.has(route.replace(/^\/es\//, '/'))) continue;
     if (expected.size > 0) fail(`${route}: declares ${list.length} standards but published no tokens`);
+    continue;
+  }
+  if (list.length === 0) {
+    fail(
+      `${route}: publishes the tokens ${page.tokens.join(' ')} but its bibliography declares no standard ` +
+        'it implements (every one there is marked implemented: false, or it has none)',
+    );
     continue;
   }
   const got = new Set(page.tokens);
@@ -239,14 +283,45 @@ for (const [route, list] of declared) {
   }
 }
 
-// F. Both languages index the same standards.
-for (const [url, page] of built) {
-  if (page.lang !== 'es') continue;
-  const twin = built.get(url.replace(/^\/es\//, '/'));
-  if (!twin) continue;
-  const a = [...new Set(page.tokens)].sort().join(' ');
-  const b = [...new Set(twin.tokens)].sort().join(' ');
-  if (a !== b) fail(`${url}: Spanish and English twins index different standards\n  es: ${a}\n  en: ${b}`);
+// F. Both languages index the same standards. A twin built without the field
+// indexes none, and is compared as such: a guide that implements nothing in one
+// language and something in the other is exactly the asymmetry to catch, and
+// skipping every pair with a silent half would never see it.
+for (const url of builtPages) {
+  if (!url.startsWith('/es/')) continue;
+  const enUrl = url.replace(/^\/es\//, '/');
+  if (!builtPages.has(enUrl)) continue;
+  const a = [...new Set(built.get(url)?.tokens ?? [])].sort().join(' ');
+  const b = [...new Set(built.get(enUrl)?.tokens ?? [])].sort().join(' ');
+  if (a !== b) {
+    fail(`${url}: Spanish and English twins index different standards\n  es: ${a || '(no field)'}\n  en: ${b || '(no field)'}`);
+  }
+}
+
+// C'. The anchored list against the frontmatter. The list is written by hand
+// so that it does not lean on the reader above, and so it does not follow a
+// guide that comes to declare one of its standards later, or one that stops
+// declaring it: C below would read the first as a stranger and pass or fail on
+// where it happens to rank, and would hold the second to an order its field no
+// longer asks for. The standard a query names is its designation without the
+// edition, as the normalizer leaves it; a query that names it inside other
+// words ("la norma UNE-EN ISO 3744") matches no designation and is left to the
+// query that names it alone, which shares its list. Both languages declare the
+// same (F above), so the English routes are compared.
+for (const { query, routes: anchored } of ANCHORED) {
+  const named = bareDesignation(normalizeDesignationQuery(query)).toLowerCase();
+  const declarers = new Set();
+  for (const [route, list] of declared) {
+    if (route.startsWith('/es/')) continue;
+    if (list.some((designation) => bareDesignation(designation).toLowerCase() === named)) declarers.add(route);
+  }
+  if (declarers.size === 0) continue;
+  for (const route of declarers) {
+    if (!anchored.includes(route)) fail(`"${query}": ${route} declares the standard but is missing from the anchored list`);
+  }
+  for (const route of anchored) {
+    if (!declarers.has(route)) fail(`"${query}": ${route} is on the anchored list but does not declare the standard`);
+  }
 }
 
 // ---------------------------------------------------------------------------

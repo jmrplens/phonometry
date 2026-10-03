@@ -20,7 +20,11 @@ if TYPE_CHECKING:
         ComparisonUncertaintyBudget,
         EnvironmentalSensitivityCorrection,
         FreeFieldRegion,
+        ImpedancePressureRatio,
         JigDiameterCorrection,
+        RectangularPulse,
+        SteppedSineImpulseResponse,
+        TimeSelectiveResponse,
     )
     from ..metrology.conformance import ConformanceVerification
     from ..metrology.data_qualification import (
@@ -2879,5 +2883,473 @@ def plot_free_field_region(
     # Beside the axes rather than on them: inside, a legend covers the region
     # it describes or the source and the microphone on its axis.
     ax.legend(fontsize="small", loc="center left", bbox_to_anchor=(1.02, 0.5))
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# IEC 61094-5 and IEC 61094-8: phase, impedance and time-selective processing
+# ---------------------------------------------------------------------------
+
+#: The title of the phase of a calibration, by field.
+_COMPARISON_PHASE_TITLES: dict[str, str] = {
+    "pressure": "Phase of the pressure sensitivity by comparison (IEC 61094-5)",
+    "free_field": "Phase of the free-field sensitivity by comparison (IEC 61094-8)",
+}
+
+#: The second title line of a pressure ratio, by coupling.
+_IMPEDANCE_COUPLINGS: dict[str, str] = {
+    "coupler": "Closed coupler, IEC 61094-2 Formula (3)",
+    "series": "Air between the microphones in series (Table D.1)",
+}
+
+#: The first title line of a pressure ratio.
+_IMPEDANCE_TITLE = "Different acoustic impedances (IEC 61094-5 7.4, 7.5)"
+
+#: Axis label of a phase in degrees.
+_PHASE_AXIS_LABEL = "Phase [°]"
+
+#: Axis label of a time in milliseconds.
+_TIME_MS_LABEL = "Time [ms]"
+
+#: The second title line of a rectangular pulse: its duration and amplitude.
+_PULSE_SUBTITLE = "$T = 2b$ = {t} µs, $a$ = {a} V"
+
+#: Legend label of a pulse spectrum re its value at 0 Hz.
+_PULSE_SPECTRUM_LABEL = r"$|X(f)/X(0)|$"
+
+#: Legend label of an impulse response.
+_IMPULSE_RESPONSE_LABEL = "Impulse response"
+
+#: Axis label of an impulse response normalised to its peak.
+_IMPULSE_RESPONSE_AXIS_LABEL = "Impulse response, normalised"
+
+#: The lowest level a pulse spectrum is drawn to, in dB: its zeros fall to
+#: minus infinity.
+_PULSE_FLOOR_DB = -40.0
+
+#: How far past its first zero a pulse spectrum is drawn, as a multiple of it.
+_PULSE_SPAN = 2.5
+
+#: Points drawn along a pulse spectrum.
+_PULSE_POINTS = 1001
+
+#: Points of a time-selective frequency response drawn by default.
+_RESPONSE_POINTS = 200
+
+#: The highest frequency of a time-selective response drawn by default, as a
+#: fraction of the sample rate.
+_RESPONSE_TOP_FRACTION = 0.25
+
+#: With a pulse as excitation, the response divides by the pulse's spectrum and
+#: is refused at its first zero; IEC 61094-8 B.6.1 puts that zero "an order of
+#: magnitude higher than the upper limit of the frequency range of interest",
+#: so the default range stops a tenth of the way to it.
+_PULSE_ZERO_RATIO = 10.0
+
+_STRINGS.update(
+    {
+        _COMPARISON_PHASE_TITLES[
+            "pressure"
+        ]: "Fase de la sensibilidad en presión por comparación (IEC 61094-5)",
+        _COMPARISON_PHASE_TITLES[
+            "free_field"
+        ]: "Fase de la sensibilidad en campo libre por comparación (IEC 61094-8)",
+        r"$\varphi_\mathrm{test}$, microphone under test": r"$\varphi_\mathrm{test}$, micrófono en ensayo",
+        r"$\varphi_\mathrm{ref}$, reference microphone": r"$\varphi_\mathrm{ref}$, micrófono de referencia",
+        "Sensitivity phase [°]": "Fase de la sensibilidad [°]",
+        _IMPEDANCE_TITLE: "Impedancias distintas (IEC 61094-5, apartados 7.4 y 7.5)",
+        _IMPEDANCE_COUPLINGS["coupler"]: "Acoplador cerrado, IEC 61094-2, fórmula (3)",
+        _IMPEDANCE_COUPLINGS[
+            "series"
+        ]: "Aire entre los micrófonos en serie (tabla D.1)",
+        r"$20\lg|R_P|$, test re reference": r"$20\lg|R_P|$, ensayo re referencia",
+        r"Standard uncertainty, $|20\lg|R_P||/\sqrt{3}$": r"Incertidumbre típica, $|20\lg|R_P||/\sqrt{3}$",
+        r"$\arg R_P$, test re reference": r"$\arg R_P$, ensayo re referencia",
+        "Level difference [dB]": "Diferencia de nivel [dB]",
+        _PHASE_AXIS_LABEL: "Fase [°]",
+        "Rectangular pulse of the direct impulse method (IEC 61094-8 B.6, Formula (B.10))": "Pulso rectangular del método de impulso directo (IEC 61094-8, B.6, fórmula (B.10))",
+        _PULSE_SUBTITLE: _PULSE_SUBTITLE,
+        _PULSE_SPECTRUM_LABEL: _PULSE_SPECTRUM_LABEL,
+        "First zero, $1/(2b)$ = {f} kHz": "Primer cero, $1/(2b)$ = {f} kHz",
+        "Upper limit of interest, {f} kHz: {d} dB": "Límite superior de interés, {f} kHz: {d} dB",
+        "Frequency [kHz]": "Frecuencia [kHz]",
+        "Level re 0 Hz [dB]": "Nivel re 0 Hz [dB]",
+        "Time-selective processing (IEC 61094-8 B.1.3)": "Procesado con ventana temporal (IEC 61094-8, B.1.3)",
+        _IMPULSE_RESPONSE_LABEL: "Respuesta al impulso",
+        "Time window, {shape}, {t} ms": "Ventana temporal, {shape}, {t} ms",
+        "Windowed impulse response": "Respuesta al impulso enventanada",
+        _IMPULSE_RESPONSE_AXIS_LABEL: "Respuesta al impulso, normalizada",
+        _TIME_MS_LABEL: "Tiempo [ms]",
+        "Frequency response through the time window (IEC 61094-8 B.2)": "Respuesta en frecuencia a través de la ventana temporal (IEC 61094-8, B.2)",
+        "Whole record, reflections included": "Registro completo, con las reflexiones",
+        "Through the window, the direct sound": "A través de la ventana, el sonido directo",
+        "Level re the windowed maximum [dB]": "Nivel respecto al máximo tras la ventana [dB]",
+        "Impulse response of a stepped-sine measurement (IEC 61094-8 B.2, Formula (B.3))": "Respuesta al impulso de una medida con sinusoide por pasos (IEC 61094-8, B.2, fórmula (B.3))",
+        r"$\Delta f$ = {df} Hz, length $1/\Delta f$ = {t} ms": r"$\Delta f$ = {df} Hz, duración $1/\Delta f$ = {t} ms",
+    }
+)
+
+#: Display names of the window shapes: proper names, and "rectangular",
+#: spelled the same in both languages.
+_WINDOW_NAMES: dict[str, str] = {
+    "tukey": "Tukey",
+    "hann": "Hann",
+    "hamming": "Hamming",
+    "rectangular": "rectangular",
+}
+
+
+def plot_comparison_phase(
+    result: ComparisonCalibration,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The phase of the sensitivity of a microphone calibrated by
+    comparison, with the reference's phase it was compared with.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.ComparisonCalibration`
+        that carries phases.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :math:`\varphi_\mathrm{test}` curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    kwargs.setdefault(
+        "label", _t(r"$\varphi_\mathrm{test}$, microphone under test", language)
+    )
+    ax.plot(frequencies, np.asarray(result.sensitivity_phase_deg), **kwargs)
+    ax.plot(
+        frequencies,
+        np.asarray(result.reference_sensitivity_phase_deg),
+        color=_C_SECONDARY,
+        lw=1.2,
+        ls="--",
+        marker="s",
+        ms=4.0,
+        mfc="none",
+        label=_t(r"$\varphi_\mathrm{ref}$, reference microphone", language),
+    )
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t("Sensitivity phase [°]", language))
+    ax.set_title(_t(_COMPARISON_PHASE_TITLES[result.field], language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_impedance_pressure_ratio(
+    result: ImpedancePressureRatio,
+    ax: Axes | None = None,
+    *,
+    quantity: str = "level",
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The pressure ratio that different acoustic impedances cause: its
+    level with the standard uncertainty it stands for, or its phase.
+
+    :param result: An
+        :class:`~phonometry.metrology.comparison_calibration.ImpedancePressureRatio`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param quantity: ``"level"`` (default) or ``"phase"``.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the curve of :math:`R_P`.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    if quantity == "level":
+        kwargs.setdefault("label", _t(r"$20\lg|R_P|$, test re reference", language))
+        ax.plot(frequencies, result.level_difference_db, **kwargs)
+        ax.plot(
+            frequencies,
+            result.standard_uncertainty_db,
+            color=_C_SECONDARY,
+            lw=1.2,
+            ls="--",
+            label=_t(
+                r"Standard uncertainty, $|20\lg|R_P||/\sqrt{3}$",
+                language,
+            ),
+        )
+        ax.set_ylabel(_t("Level difference [dB]", language))
+    else:
+        kwargs.setdefault("label", _t(r"$\arg R_P$, test re reference", language))
+        ax.plot(frequencies, result.phase_difference_deg, **kwargs)
+        ax.set_ylabel(_t(_PHASE_AXIS_LABEL, language))
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_title(
+        _t(_IMPEDANCE_TITLE, language)
+        + "\n"
+        + _t(_IMPEDANCE_COUPLINGS[result.coupling], language)
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_rectangular_pulse(
+    result: RectangularPulse,
+    ax: Axes | None = None,
+    *,
+    upper_frequency_hz: float | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The spectrum of the pulse of IEC 61094-8 B.6 relative to its value at
+    0 Hz, with its first zero and the upper limit of the frequencies of
+    interest.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.RectangularPulse`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param upper_frequency_hz: The upper limit of interest, in Hz, or ``None``.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the spectrum.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    zero = result.first_zero_hz
+    frequencies = np.linspace(0.0, _PULSE_SPAN * zero, _PULSE_POINTS)
+    level = np.maximum(result.level_db_at(frequencies), _PULSE_FLOOR_DB)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    kwargs.setdefault("label", _t(_PULSE_SPECTRUM_LABEL, language))
+    ax.plot(frequencies / 1000.0, level, **kwargs)
+    ax.axvline(
+        zero / 1000.0,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t(
+            "First zero, $1/(2b)$ = {f} kHz",
+            language,
+            f=format_number(zero / 1000.0, language, decimals=0),
+        ),
+    )
+    if upper_frequency_hz is not None:
+        droop = float(result.level_db_at([upper_frequency_hz])[0])
+        ax.axvline(
+            upper_frequency_hz / 1000.0,
+            color=_C_TERTIARY,
+            ls=":",
+            lw=1.4,
+            label=_t(
+                "Upper limit of interest, {f} kHz: {d} dB",
+                language,
+                f=format_number(upper_frequency_hz / 1000.0, language, decimals=0),
+                d=format_number(droop, language, decimals=2),
+            ),
+        )
+    ax.set_xlim(0.0, _PULSE_SPAN * zero / 1000.0)
+    ax.set_ylim(_PULSE_FLOOR_DB, 3.0)
+    ax.set_xlabel(_t("Frequency [kHz]", language))
+    ax.set_ylabel(_t("Level re 0 Hz [dB]", language))
+    ax.set_title(
+        _t(
+            "Rectangular pulse of the direct impulse method (IEC 61094-8 B.6, Formula (B.10))",
+            language,
+        )
+        + "\n"
+        + _t(
+            _PULSE_SUBTITLE,
+            language,
+            t=format_number(1e6 * result.duration_s, language, decimals=1),
+            a=format_number(result.amplitude_v, language, decimals=0),
+        )
+    )
+    ax.grid(visible=True, alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_time_selective_response(
+    result: TimeSelectiveResponse,
+    ax: Axes | None = None,
+    *,
+    quantity: str = "impulse",
+    frequencies_hz: NDArray[np.float64] | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The impulse response with the time window over it, or the frequency
+    response through the window against that of the whole record.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.TimeSelectiveResponse`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param quantity: ``"impulse"`` (default) or ``"response"``.
+    :param frequencies_hz: The frequencies of the response, in Hz, or
+        ``None`` for 200 from the frequency resolution to a quarter of the
+        sample rate, or, with a pulse as excitation, to a tenth of the first
+        zero of its spectrum if that is lower (IEC 61094-8 B.6.1).
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the windowed curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.5)
+    if quantity == "impulse":
+        _draw_time_window(result, ax, language, kwargs)
+    else:
+        _draw_windowed_response(result, ax, frequencies_hz, language, kwargs)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def _draw_time_window(
+    result: TimeSelectiveResponse, ax: Axes, language: str, kwargs: dict[str, Any]
+) -> None:
+    """The impulse response, normalised, with the window and what it keeps."""
+    from .._i18n import format_number
+
+    time_ms = 1000.0 * np.asarray(result.time_s)
+    response = np.asarray(result.impulse_response, dtype=np.float64)
+    scale = float(np.max(np.abs(response)))
+    ax.plot(
+        time_ms,
+        response / scale,
+        color=_C_MUTED,
+        lw=1.0,
+        label=_t(_IMPULSE_RESPONSE_LABEL, language),
+    )
+    ax.plot(
+        time_ms,
+        result.window,
+        color=_C_SECONDARY,
+        lw=1.4,
+        ls="--",
+        label=_t(
+            "Time window, {shape}, {t} ms",
+            language,
+            shape=_WINDOW_NAMES[result.window_shape],
+            t=format_number(1000.0 * result.window_length_s, language, decimals=2),
+        ),
+    )
+    kwargs.setdefault("label", _t("Windowed impulse response", language))
+    ax.plot(time_ms, result.windowed_impulse_response / scale, **kwargs)
+    ax.set_xlabel(_t(_TIME_MS_LABEL, language))
+    ax.set_ylabel(_t(_IMPULSE_RESPONSE_AXIS_LABEL, language))
+    ax.set_title(_t("Time-selective processing (IEC 61094-8 B.1.3)", language))
+
+
+def _draw_windowed_response(
+    result: TimeSelectiveResponse,
+    ax: Axes,
+    frequencies_hz: NDArray[np.float64] | None,
+    language: str,
+    kwargs: dict[str, Any],
+) -> None:
+    """The level of the response through the window and of the whole record,
+    both re the highest level through the window.
+    """
+    if frequencies_hz is None:
+        top = _RESPONSE_TOP_FRACTION * result.sample_rate_hz
+        if result.excitation is not None:
+            top = min(top, result.excitation.first_zero_hz / _PULSE_ZERO_RATIO)
+        frequencies = np.geomspace(
+            result.frequency_resolution_hz, top, _RESPONSE_POINTS
+        )
+    else:
+        frequencies = np.asarray(frequencies_hz, dtype=np.float64)
+    windowed = np.abs(result.response_at(frequencies))
+    record = np.abs(result.record_response_at(frequencies))
+    peak = float(np.max(windowed))
+    ax.plot(
+        frequencies,
+        20.0 * np.log10(record / peak),
+        color=_C_MUTED,
+        lw=1.0,
+        label=_t("Whole record, reflections included", language),
+    )
+    kwargs.setdefault("label", _t("Through the window, the direct sound", language))
+    ax.plot(frequencies, 20.0 * np.log10(windowed / peak), **kwargs)
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t("Level re the windowed maximum [dB]", language))
+    ax.set_title(
+        _t("Frequency response through the time window (IEC 61094-8 B.2)", language)
+    )
+
+
+def plot_stepped_sine_impulse_response(
+    result: SteppedSineImpulseResponse,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The impulse response of a stepped-sine measurement against time.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.SteppedSineImpulseResponse`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    response = np.asarray(result.impulse_response, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.2)
+    kwargs.setdefault("label", _t(_IMPULSE_RESPONSE_LABEL, language))
+    ax.plot(
+        1000.0 * np.asarray(result.time_s),
+        response / float(np.max(np.abs(response))),
+        **kwargs,
+    )
+    ax.set_xlabel(_t(_TIME_MS_LABEL, language))
+    ax.set_ylabel(_t(_IMPULSE_RESPONSE_AXIS_LABEL, language))
+    ax.set_title(
+        _t(
+            "Impulse response of a stepped-sine measurement (IEC 61094-8 B.2, Formula (B.3))",
+            language,
+        )
+        + "\n"
+        + _t(
+            r"$\Delta f$ = {df} Hz, length $1/\Delta f$ = {t} ms",
+            language,
+            df=format_number(result.frequency_step_hz, language, decimals=0),
+            t=format_number(1000.0 * result.duration_s, language, decimals=2),
+        )
+    )
+    ax.grid(visible=True, alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
     return ax

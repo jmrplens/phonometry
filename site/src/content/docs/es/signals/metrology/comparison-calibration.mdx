@@ -1,6 +1,6 @@
 ---
 title: "Calibrar un micrófono por comparación (IEC 61094-5/-8)"
-description: "Cómo la IEC 61094-5:2016 y la IEC 61094-8:2012 trasladan la sensibilidad de un micrófono de referencia a un micrófono patrón de trabajo: el intercambio del Anexo C en un acoplador, los cocientes frente al micrófono monitor de una sustitución en campo libre, las correcciones ambiental, del soporte y de campo libre, los balances de incertidumbre de la Tabla D.1 y de la Tabla 2 con k = 2, y la región de campo libre efectiva de una ventana temporal."
+description: "Cómo la IEC 61094-5:2016 y la IEC 61094-8:2012 trasladan la sensibilidad de un micrófono de referencia a un micrófono patrón de trabajo, en nivel y en fase: el intercambio del Anexo C en un acoplador, los cocientes frente al micrófono monitor de una sustitución en campo libre, el procesado con ventana temporal del Anexo B, las correcciones ambiental, del soporte, de impedancia y de campo libre, y los balances de incertidumbre de la Tabla D.1 y de la Tabla 2 con k = 2."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -8,20 +8,26 @@ references:
     title: "Electroacoustics – Measurement microphones – Part 5: Methods for pressure calibration of working standard microphones by comparison"
     designation: "IEC 61094-5:2016"
     primary: true
-    note: "Los métodos implementados: el modelo en niveles del D.2, la excitación simultánea con el intercambio del apartado 5.1.2 y del Anexo C (Fórmulas (C.1) a (C.3)), la excitación secuencial con micrófono monitor del apartado 5.1.3 y del Anexo B, la corrección ambiental del apartado 6.6, las correcciones del WS3 de la Tabla A.1 y el balance de ejemplo de la Tabla D.1 combinado como pide el D.3. Leída en la edición 2.0 (2016-05), inglés y francés."
+    note: "Los métodos implementados: el modelo en niveles del D.2 y la fase del apartado 5.1.1, la excitación simultánea con el intercambio del apartado 5.1.2 y del Anexo C (Fórmulas (C.1) a (C.3)), la excitación secuencial con micrófono monitor del apartado 5.1.3 y del Anexo B, la corrección ambiental del apartado 6.6, el efecto de las impedancias acústicas distintas de los apartados 7.4 y 7.5, las correcciones del WS3 de la Tabla A.1 y el balance de ejemplo de la Tabla D.1 combinado como pide el D.3. Leída en la edición 2.0 (2016-05), inglés y francés."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2012
     title: "Electroacoustics – Measurement microphones – Part 8: Methods for determining the free-field sensitivity of working standard microphones by comparison"
     designation: "IEC 61094-8:2012"
     primary: true
-    note: "La parte de campo libre: la sustitución secuencial con micrófono monitor de los apartados 5.2 y A.2, la excitación simultánea del apartado 5.3, las opciones de calibración de la referencia de la Tabla 1, las componentes de incertidumbre de la Tabla 2 con la incertidumbre expandida del apartado 8.8, y la región de campo libre efectiva de la Fórmula (B.1). Leída en BS EN 61094-8:2012, el texto inglés de EN 61094-8:2012, que es IEC 61094-8:2012 sin cambios."
+    note: "La parte de campo libre: la sustitución secuencial con micrófono monitor de los apartados 5.2 y A.2, la excitación simultánea del apartado 5.3, la fase del apartado 5.1, las opciones de calibración de la referencia de la Tabla 1, las componentes de incertidumbre de la Tabla 2 con la incertidumbre expandida del apartado 8.8, y el procesado con ventana temporal del Anexo B: la región de campo libre efectiva de la Fórmula (B.1), la ventana temporal del B.1.3, la sinusoide por pasos del B.2 (Fórmulas (B.2) y (B.3)) y el pulso del método de impulso directo del B.6 (Fórmula (B.10)). Leída en BS EN 61094-8:2012, el texto inglés de EN 61094-8:2012, que es IEC 61094-8:2012 sin cambios."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2009
     title: "Electroacoustics – Measurement microphones – Part 2: Primary method for pressure calibration of laboratory standard microphones by the reciprocity technique"
     designation: "IEC 61094-2:2009"
-    note: "El Anexo D da los coeficientes de presión estática y de temperatura de los micrófonos patrón de laboratorio en dB/kPa y dB/K, las unidades en que los toma la corrección ambiental; el Anexo F es el aire húmedo cuya velocidad del sonido fija la región de campo libre de una ventana temporal."
+    note: "El Anexo D da los coeficientes de presión estática y de temperatura de los micrófonos patrón de laboratorio en dB/kPa y dB/K, las unidades en que los toma la corrección ambiental; el Anexo F es el aire húmedo cuya velocidad del sonido fija la región de campo libre de una ventana temporal; la Fórmula (3) es el acoplador cerrado y el E.4 la impedancia acústica concentrada de un micrófono con que se escribe el cociente de impedancias."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2000
+    title: "Measurement microphones – Part 1: Specifications for laboratory standard microphones"
+    designation: "IEC 61094-1:2000"
+    note: "El apartado 6.2.2 define el volumen equivalente de un micrófono a partir de su impedancia acústica, con la razón de calores específicos en las condiciones de referencia tomada como 1,40; la Tabla 3 da los 10 mm³ ± 5 mm³ de un LS2P. Leída en BS EN 61094-1:2001, el texto inglés de EN 61094-1:2000."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2006
@@ -66,9 +72,12 @@ correcciones que pide cada parte. `metrology.comparison_calibration` calcula la
 forma de la derecha, en niveles de sensibilidad en dB re 1 V/Pa.
 
 Esta página recorre una calibración en presión de un WS2P frente a un LS2P y
-una calibración en campo libre de un WS2F, con sus balances; las lecturas
-son sintéticas, construidas a partir de sensibilidades que la página conoce,
-así que cada paso se puede comprobar frente a ellas.
+una calibración en campo libre de un WS2F, con sus balances, y después el
+procesado con ventana temporal del Anexo B de la IEC 61094-8, la fase de la
+sensibilidad y el efecto de las impedancias acústicas distintas (apartados
+7.4 y 7.5 de la IEC 61094-5); las lecturas son sintéticas, construidas a
+partir de sensibilidades que la página conoce, así que cada paso se puede
+comprobar frente a ellas.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_calibration.svg" alt="Dos paneles del nivel de sensibilidad en dB re 1 V/Pa frente a la frecuencia. Izquierda, la calibración en presión por la IEC 61094-5 de 250 Hz a 20 kHz: la referencia LS2P en trazos, cerca de -38,0 dB y bajando a -38,2 dB a 20 kHz, y el WS2P en ensayo en línea continua, subiendo de -38,64 dB a 250 Hz a -38,34 dB a 16 kHz y -38,43 dB a 20 kHz, dentro de una banda sombreada de más o menos su incertidumbre expandida, 0,09 dB hasta 8 kHz, 0,10 dB a 10 kHz y ensanchándose a 0,2 dB a 20 kHz. Derecha, la calibración en campo libre por la IEC 61094-8 de 500 Hz a 20 kHz: el nivel en campo libre de la referencia en trazos, su nivel en presión más su diferencia de campo libre, que sube de -37,99 dB a 500 Hz a -37,26 dB a 8 kHz y -35,75 dB a 20 kHz, y el WS2F en ensayo en línea continua de -38,33 dB a -38,23 dB a 8 kHz y -38,47 dB a 20 kHz, dentro de una banda de más o menos 0,16 dB que se ensancha a 0,51 dB a 20 kHz" width="100%" />
 
@@ -305,7 +314,8 @@ voltage to the reference microphone output voltage, corrected for any
 variation in the sound pressure generated by the source». Con
 $V_\mathrm{ref}$ y $V_\mathrm{mon,1}$ las tensiones de salida de la
 referencia y del monitor en la primera lectura, y $V_\mathrm{test}$ y
-$V_\mathrm{mon,2}$ las de la segunda,
+$V_\mathrm{mon,2}$ las de la segunda, con las dos lecturas del monitor juntas
+en un `metrology.MonitorReadings`,
 
 $$
 20\lg R_V = 20\lg\frac{V_\mathrm{test}}{V_\mathrm{mon,2}} - 20\lg\frac{V_\mathrm{ref}}{V_\mathrm{mon,1}}
@@ -352,8 +362,9 @@ free = metrology.sequential_comparison(
     l_ref_p,
     l_ref_p + c_ff + field_1,     # la salida de la referencia, dB re 1 V
     l_ws2f + field_2,             # la salida del WS2F en su lugar
-    reference_monitor_level_db=monitor + field_1,
-    test_monitor_level_db=monitor + field_2,
+    monitor=metrology.MonitorReadings(
+        reference_level_db=monitor + field_1, test_level_db=monitor + field_2
+    ),
     field="free_field",
     reference_free_field_difference_db=c_ff,
     expanded_uncertainty_db=[free_field_budget(fx).expanded_uncertainty_db for fx in ff],
@@ -412,7 +423,321 @@ de camino entre fuente y micrófono, y una varilla que se prolongue más de
 *La región de una ventana de 5 ms a 1 m, con la varilla que tiene que salir de
 ella.*
 
-## 7. La comparación en campo difuso de la IEC 61183
+## 7. Procesado con ventana temporal
+
+Donde la sala no es suficientemente anecoica, el Anexo B se queda con el
+sonido directo y descarta las reflexiones: una respuesta al impulso separa
+los dos en el tiempo, una ventana se queda con el primero y una transformada
+de Fourier da la respuesta en frecuencia del sonido directo solo (B.1.1). La
+respuesta al impulso puede venir de una sinusoide por pasos llevada al
+dominio del tiempo por la transformada inversa,
+
+$$
+H(f) = \int_{-\infty}^{\infty} h(t)\,\mathrm{e}^{-\mathrm{j}2\pi f t}\,\mathrm{d}t,
+\qquad
+h(t) = \int_{-\infty}^{\infty} H(f)\,\mathrm{e}^{\mathrm{j}2\pi f t}\,\mathrm{d}f
+\tag{B.2, B.3}
+$$
+
+(`metrology.stepped_sine_impulse_response`), de un barrido o de una secuencia
+de longitud máxima (`room.impulse_response`, `room.mls_impulse_response`), o
+de un impulso directo. `metrology.time_selective_response` la pondera con una
+ventana temporal y evalúa (B.2) a cualquier frecuencia. «In order not to
+produce artefacts in the transformed data, the time window normally has
+'tapered' edges» (B.1.2); el B.1.3 enumera las ventanas de Hann, Hamming,
+Tukey, coseno de Butterworth y gaussiana, y no recomienda la rectangular,
+«because it usually leads to spectral leakage». La ventana por defecto es una
+de Tukey, plana en el centro con un octavo suavizado en cada borde, una
+proporción que eligió la biblioteca, porque ningún apartado la imprime.
+
+Aquí una referencia LS2P y un WS2F ocupan por turnos un punto a 1 m de la
+fuente, y una reflexión en el montaje llega por un camino de 1,48 m. El WS2F
+la oye fuera del eje, así que no se anula en el cociente de las dos salidas
+como el sonido directo: «it cannot be assumed that the reference microphone
+and microphone under test will deviate in the same way» (8.5). Cada uno se
+mide con una sinusoide por pasos de 0 Hz a 100 kHz en pasos de 50 Hz, más allá de
+tres veces la resonancia como pide el B.2.1; los micrófonos son ilustrativos:
+
+```python
+c0 = metrology.free_field_region(1.0, 0.005).speed_of_sound   # 345.9 m/s a 23.0 °C
+f_step = np.arange(0.0, 100000.0 + 1.0, 50.0)   # de 0 Hz a 100 kHz en pasos de 50 Hz
+
+
+def mic(fx, level_db, f0, d):   # la sensibilidad de un micrófono, V/Pa: ilustrativa
+    return 10 ** (level_db / 20) / (1 - (fx / f0) ** 2 + 1j * d * fx / f0)
+
+
+direct, rig = 1.0 / c0, 1.48 / c0   # el sonido directo en 1 m, la reflexión en el montaje en 1.48 m
+
+
+def heard(m, off_axis):   # cada paso: el sonido directo y la reflexión en el montaje
+    return m * (
+        np.exp(-2j * np.pi * f_step * direct)
+        + 0.25 * off_axis * np.exp(-2j * np.pi * f_step * rig)
+    )
+
+
+ir_ref = metrology.stepped_sine_impulse_response(f_step, heard(mic(f_step, -38.0, 22000, 1.1), 1.0))
+ir_ws2f = metrology.stepped_sine_impulse_response(
+    f_step, heard(mic(f_step, -26.4, 18000, 0.9), 1 / (1 + 1j * f_step / 6000))
+)   # el WS2F oye la reflexión fuera del eje
+print(ir_ref.duration_s, round(ir_ref.sample_rate_hz))   # 0.02 200050
+```
+
+La respuesta al impulso dura el inverso del paso en frecuencia, 20 ms. El
+B.2.2 dimensiona el paso según la sala: 120 Hz basta en una cámara anecoica
+pequeña «because the primary reflections all occur before 8 ms», unos 30 Hz
+en una grande. (El B.2.1 dice que el incremento «will determine the time
+domain resolution»; lo que fija es la duración, como dice el B.2.2, y el
+[registro de erratas](/phonometry/es/reference/errata/) recoge la frase.)
+`ir_ws2f.plot()` dibuja el registro completo:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response.svg" alt="La respuesta al impulso del WS2F obtenida con la sinusoide por pasos de 0 Hz a 100 kHz en pasos de 50 Hz, normalizada a su pico, a lo largo de todo el registro de 20 ms: el sonido directo a 2,89 ms con una breve oscilación, la reflexión en el montaje a 4,28 ms, a una décima del pico, y nada más hasta los 20 ms. El título da el paso de 50 Hz y la duración de 20,00 ms" width="88%" />
+
+*La respuesta al impulso del WS2F obtenida con la sinusoide por pasos, todo
+su $1/\Delta f$, con `ir_ws2f.plot()`.*
+
+La ventana tiene que acabar antes de que llegue la reflexión. Un punto del
+límite de la región de la Fórmula (B.1) refleja por un camino
+igual al diámetro mayor $A = d + \tau c$, así que una reflexión cuyo camino es
+$L$ queda fuera mientras
+
+$$
+\tau \le \frac{L - d}{c}
+$$
+
+que da `metrology.reflection_free_window_s`, con la velocidad del sonido del
+aire del Anexo F de la IEC 61094-2:
+
+```python
+tau = metrology.reflection_free_window_s(1.0, 1.48)
+window = {"window_start_s": direct - 0.0005, "window_end_s": direct + tau}
+ref = metrology.time_selective_response(ir_ref.impulse_response, ir_ref.sample_rate_hz, **window)
+ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.sample_rate_hz, **window)
+print(round(1000 * tau, 2), round(ref.frequency_resolution_hz))   # 1.39 530
+```
+
+Una ventana de 1,89 ms no distingue frecuencias más próximas que 530 Hz, el
+límite de baja frecuencia del que avisa el apartado 6.2.3 para las técnicas
+con ventana temporal; las frecuencias más bajas necesitan otro método. Los
+niveles y las fases a través de la ventana son las dos salidas de una
+sustitución:
+
+```python
+fw = metrology.exact_frequencies(1900, 20000, fraction=3)   # de 2 kHz a 20 kHz
+m_ref = mic(fw, -38.0, 22000, 1.1)   # la sensibilidad en campo libre de la referencia, de su certificado
+tsel = metrology.sequential_comparison(
+    fw,
+    20 * np.log10(np.abs(m_ref)),
+    ref.level_db_at(fw),
+    ws2f.level_db_at(fw),
+    field="free_field",
+    phase=metrology.SequentialComparisonPhase(
+        reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
+        reference_output_phase_deg=ref.phase_deg_at(fw),
+        test_output_phase_deg=ws2f.phase_deg_at(fw),
+    ),
+)
+m_ws2f = mic(fw, -26.4, 18000, 0.9)   # lo que la página sabe que es el WS2F
+print(tsel.sensitivity_level_db[[0, 6, 10]].round(2))   # [-26.34 -25.46 -26.6 ]
+print(bool(np.abs(tsel.sensitivity_level_db - 20 * np.log10(np.abs(m_ws2f))).max() < 1e-4))   # True
+record = 20 * np.log10(np.abs(ws2f.record_response_at(fw) / ref.record_response_at(fw)))
+print(np.abs(record - 20 * np.log10(np.abs(m_ws2f / m_ref))).max().round(2))   # 1.91
+```
+
+A través de la ventana la sensibilidad del WS2F se recupera con un error por
+debajo de 0,0001 dB; con el registro completo, reflexión incluida, se iría
+hasta 1,91 dB.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_selective_response.svg" alt="A la izquierda, la respuesta al impulso del WS2F obtenida con una sinusoide por pasos, con su sonido directo a 2,89 ms y la reflexión en el montaje a 4,28 ms, y una ventana de Tukey de 1,89 ms que empieza a 2,39 ms y termina cuando llega la reflexión. A la derecha, su respuesta en frecuencia de 1 kHz a 40 kHz: a través de la ventana es la respuesta suave del sonido directo, y con el registro completo oscila a su alrededor, de 2,45 dB por debajo a 1,89 dB por encima hasta 16 kHz" width="100%" />
+
+*La respuesta al impulso del WS2F con la ventana encima (izquierda), y su
+respuesta a través de la ventana y con el registro completo (derecha).*
+
+**El método de impulso directo** (B.6), que el B.6.2 da por «largely
+superseded», excita la fuente con un pulso rectangular corto de amplitud $a$.
+Su espectro es
+
+$$
+X(f) = \frac{2ab\sin(2\pi f b)}{2\pi f b}
+\tag{B.10}
+$$
+
+cuyo primer cero, $1/(2b)$, «must be approximately an order of magnitude
+higher than the upper limit of the frequency range of interest». La fórmula y
+su primer cero son los de un pulso que dura $2b$, aunque el texto llama a $b$
+la duración (está en el [registro de erratas](/phonometry/es/reference/errata/));
+`metrology.rectangular_pulse` toma la duración completa $T = 2b$:
+
+```python
+T = metrology.rectangular_pulse_duration_s(20000)   # un primer cero diez veces 20 kHz
+pulse = metrology.rectangular_pulse(T, amplitude_v=10.0)
+print(T, pulse.half_duration_s, round(pulse.first_zero_hz))   # 5e-06 2.5e-06 200000
+print(pulse.level_db_at([20000.0]).round(2))                  # [-0.14]
+```
+
+Las respuestas a varios pulsos, promediadas en sincronía
+(`signals.time_synchronous_average`; el B.6.2 cuenta con $10\lg n$ dB de
+relación señal a ruido con $n$ de ellos), van a `time_selective_response` con
+`excitation=pulse`, que divide por el espectro del pulso, como un pulso que
+empieza al principio del registro.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rectangular_pulse.svg" alt="El espectro de un pulso rectangular de 5 microsegundos relativo a su valor a 0 Hz, de 0 a 500 kHz: plano dentro de 0,14 dB hasta el límite superior de 20 kHz, cae a su primer cero a 200 kHz y a un segundo a 400 kHz" width="88%" />
+
+*La Fórmula (B.10) para un pulso de 5 µs: 0,14 dB por debajo a 20 kHz y el
+primer cero a 200 kHz.*
+
+## 8. La fase de la sensibilidad
+
+Las dos partes llevan la fase junto con el módulo: el apartado 5.1.1 de la
+IEC 61094-5 calcula «the sensitivity (both modulus and phase) of the test
+microphone», y el apartado 5.1 de la IEC 61094-8, «both the modulus and phase
+of the free-field sensitivity of the microphone under test». El D.2 vale para los cocientes complejos, así que la fase
+sigue al nivel término a término, y el intercambio del Anexo C anula los
+desfases de los dos canales y del acoplador como la (C.3) anula sus
+ganancias:
+
+$$
+\varphi_\mathrm{test} = \varphi_\mathrm{ref} + \arg R_V - \arg R_P,
+\qquad
+\varphi_\mathrm{ref} - \varphi_\mathrm{test} = \tfrac12\left(\Phi_\mathrm{C12} - \Phi_\mathrm{C21}\right)
+$$
+
+con $\Phi_\mathrm{C12}$ la fase de la lectura del canal 1 respecto a la del
+canal 2. Ninguna de las dos partes imprime esta forma; es la (C.3) escrita
+para el cociente complejo. La calibración en presión del apartado 2, con la
+fase de cada lectura:
+
+```python
+phi_ref = np.degrees(np.angle(1 / (1 - (f / 22000) ** 2 + 1.1j * f / 22000)))   # el certificado del LS2P: ilustrativo
+phi_true = np.degrees(np.angle(1 / (1 - (f / 18000) ** 2 + 0.9j * f / 18000)))   # el WS2P: desconocido
+shift_1, shift_2 = 1.5 * x, -0.8 * x   # los desfases de los dos canales, en grados
+late_a = 0.4 * x                       # el puerto A oye el campo más tarde, en grados
+jitter = np.random.default_rng(5).normal(0.0, 0.02, (2, 3, f.size))
+p12 = (phi_ref + shift_1) - (phi_true + shift_2) + late_a + jitter[0]   # referencia en el canal 1
+p21 = (phi_true + shift_1) - (phi_ref + shift_2) + late_a + jitter[1]   # intercambiados
+cp = metrology.simultaneous_comparison(
+    f, l_ref, l_c12, l_c21,
+    phase=metrology.SimultaneousComparisonPhase(
+        reference_sensitivity_phase_deg=phi_ref,
+        channel_phase_difference_deg=p12,
+        interchanged_channel_phase_difference_deg=p21,
+    ),
+)
+print(cp.sensitivity_phase_deg[[2, 8, 16, 19]].round(1))   # [  -1.1   -4.6  -35.9 -102.9]
+print(np.abs(cp.sensitivity_phase_deg - phi_true).max().round(3))   # 0.016
+```
+
+La diferencia de las dos lecturas es el doble de la diferencia de fase de
+los micrófonos, así que se lleva a una vuelta antes de dividirla por dos: el
+resultado es único mientras difieran en menos de 90°. Los datos de fase van
+juntos, aquí en un `metrology.SimultaneousComparisonPhase`. En una
+calibración secuencial van en un `metrology.SequentialComparisonPhase`, las
+fases de las dos salidas se leen frente a las del monitor, que van con sus
+niveles en su `metrology.MonitorReadings`, o frente a la señal que excita la
+fuente, y su cociente es $\arg R_V$. En campo
+libre, «determination of the phase of the free-field sensitivity requires the
+definition of consistent reference phases at the acoustic centres of the
+microphones» (apartado 5.1 de la IEC 61094-8). El apartado 7.3 sitúa los
+centros «at the measurement points»; en una sustitución secuencial cada uno
+va por turnos al mismo punto, donde $\arg R_P$ es 0, y un retardo común a
+las dos lecturas, como el tiempo de viaje desde la fuente del apartado 7, se
+anula en su cociente.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_phase.svg" alt="La fase de la sensibilidad frente a la frecuencia. A la izquierda, el WS2P calibrado en un acoplador con el intercambio, de 250 Hz a 20 kHz: cerca de la fase de la referencia LS2P hasta 4 kHz, y después cae más deprisa, a -35,9 grados a 10 kHz y -102,9 grados a 20 kHz frente a los -32,2 y -79,9 de la referencia. A la derecha, el WS2F calibrado a través de la ventana temporal de 2 kHz a 20 kHz, con la misma forma" width="100%" />
+
+*La fase del WS2P con el intercambio (izquierda) y la del WS2F a través de
+la ventana del apartado 7 (derecha), con `.plot(quantity="phase")`.*
+
+## 9. Micrófonos de distinta impedancia acústica
+
+«Differences in the acoustic impedance between the test and reference
+microphones can cause the sound pressure at the test and reference
+microphones to differ» (7.4), sobre todo cuando un micrófono de presión y uno
+de campo libre se encuentran por encima de 10 kHz, «because of differing
+volume velocities at the diaphragms» (7.5). Ninguno de los dos apartados
+imprime un modelo: el 7.4 remite a la bibliografía, y el 7.5 pide estimar el
+error y sumarlo al balance cuando no hay una referencia de impedancia
+parecida. `metrology.impedance_pressure_ratio` escribe el efecto para dos
+circuitos con el volumen equivalente de cada micrófono, que el
+apartado 6.2.2 de la IEC 61094-1 define como
+$V_\mathrm{e} = \kappa_\mathrm{r} p_{s,\mathrm{r}} / (\mathrm{j}\omega
+Z_\mathrm{a})$ con $\kappa_\mathrm{r} = 1{,}40$:
+
+$$
+R_P = \frac{V_x + V_\mathrm{e,ref}}{V_x + V_\mathrm{e,test}}
+$$
+
+En un acoplador cerrado pequeño frente a la longitud de onda, la fuente
+excita la suma de las admitancias del gas y de cada micrófono que hay en él,
+la Fórmula (3) de la IEC 61094-2, así que poner el micrófono en ensayo en el
+lugar de la referencia cambia la presión en el cociente de las dos sumas,
+siendo $V_x$ el resto de la carga: el gas, la fuente, un monitor. En la
+excitación simultánea, la Tabla D.1 pone «the acoustical impedance of the
+microphone [...] in series with that of the air in the space between the two
+microphones», de modo que los dos «see slightly different pressures», y no
+imprime ningún circuito. La biblioteca lo lee como un divisor, cada diafragma
+detrás de la misma impedancia en serie desde el campo común, y $V_x$ es el
+volumen equivalente de esa impedancia; la forma es de esta biblioteca, no de
+la parte. `metrology.ReciprocityMicrophone`, el micrófono de
+[la calibración por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/),
+guarda los parámetros concentrados del E.4 de la IEC 61094-2, el volumen a
+baja frecuencia, la frecuencia de resonancia y el factor de pérdidas, y su
+`complex_equivalent_volume_m3` da $V_\mathrm{e}$ a partir de ellos. Su
+cociente con el volumen a baja frecuencia no contiene $\kappa_\mathrm{r}$,
+así que con los 10 mm³ que la Tabla 3 de la IEC 61094-1 da a un LS2P,
+$V_\mathrm{e}$ es el volumen del apartado 6.2.2 con su 1,40. El E.4
+considera esa representación «of sufficient accuracy» hasta «about 1,3 times
+the resonance frequency of the microphone»: 20,8 kHz para el WS2F de abajo,
+así que el ejemplo queda dentro. La cavidad frontal que también guarda el
+micrófono entra en la impedancia de transferencia de un acoplador, no en
+$V_\mathrm{e}$.
+
+```python
+fi = metrology.exact_frequencies(1000, 20000, fraction=3)
+front = {"front_cavity_volume_m3": 34e-9, "front_cavity_depth_m": 0.5e-3,
+         "front_cavity_diameter_m": 9.3e-3}   # la de un LS2aP (Tabla C.1 de la IEC 61094-2)
+lumped_ls2p = metrology.ReciprocityMicrophone(
+    equivalent_volume_m3=10e-9, resonance_frequency_hz=22000, loss_factor=1.1, **front
+)   # un LS2P: 10 mm³ (Tabla 3 de la IEC 61094-1); la resonancia y las pérdidas: ilustrativas
+lumped_ws2f = metrology.ReciprocityMicrophone(
+    equivalent_volume_m3=30e-9, resonance_frequency_hz=16000, loss_factor=0.5, **front
+)   # un WS2F más flexible: ilustrativo
+rp = metrology.impedance_pressure_ratio(
+    fi,
+    reference_equivalent_volume_m3=lumped_ls2p.complex_equivalent_volume_m3(fi),
+    test_equivalent_volume_m3=lumped_ws2f.complex_equivalent_volume_m3(fi),
+    coupling_equivalent_volume_m3=600e-9,   # el gas, la fuente y el monitor del acoplador: ilustrativos
+)
+print(rp.level_difference_db[[0, 10, 13]].round(3))      # [-0.281 -0.421  0.37 ]
+print(rp.standard_uncertainty_db[[0, 10, 13]].round(3))  # [0.163 0.243 0.213]
+```
+
+Un monitor que «shall accurately sense changes in the sound pressure at the
+test/reference microphone position» (5.1.3) elimina este cociente. Sin él,
+`rp.level_difference_db` y `rp.phase_difference_deg` van a la comparación
+como `pressure_level_difference_db` y como el `pressure_phase_difference_deg`
+de sus datos de fase. Cuando
+el cociente se estima en lugar de corregirse, `rp.standard_uncertainty_db` es
+la componente `"impedance"` del balance: la diferencia de nivel leída como la
+semiamplitud de una distribución rectangular, como la Tabla D.1 lee sus
+0,005 dB a 2 kHz, «equivalent to a standard uncertainty of 0,005/√3 dB =
+0,003 dB». La misma fila avisa justo de esta pareja: «When microphones have
+significantly differing impedances (for example WS2F microphone compared
+against LS2P at frequencies above 10 kHz), the measurement uncertainty can
+be considerably larger and should be established experimentally.» Por
+encima de 10 kHz el valor de aquí es la estimación del modelo, no ese
+experimento; donde el cociente cruza los 0 dB, cerca de 16 kHz, no da casi
+nada.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_impedance.svg" alt="El cociente de presiones de un WS2F en el lugar de un LS2P en un acoplador cerrado, de 1 kHz a 20 kHz. A la izquierda, su nivel: -0,28 dB a 1 kHz, que baja a -0,44 dB a 12,5 kHz, cruza los 0 dB a 16 kHz, más allá de la resonancia del WS2F, y llega a +0,37 dB a 20 kHz, con su incertidumbre típica en trazos de 0,16 dB a 0,25 dB, que cae casi a cero a 16 kHz, donde el nivel cruza los 0 dB. A la derecha, su fase, de unos 0,7 grados a 8 kHz con un máximo de 4,86 grados a 16 kHz" width="100%" />
+
+*Un WS2F en el lugar de un LS2P en un acoplador cerrado: el nivel de $R_P$
+con su semiamplitud leída como incertidumbre típica (izquierda), que por
+encima de 10 kHz la Tabla D.1 pide establecer experimentalmente, y su fase
+(derecha).*
+
+## 10. La comparación en campo difuso de la IEC 61183
 
 El método en campo difuso del apartado 5 de la IEC 61183 es una comparación
 secuencial sin monitor: un sonómetro y un sonómetro de referencia leen por
@@ -453,6 +778,30 @@ fig.tight_layout()
 fig, ax = plt.subplots(figsize=(10, 6))
 r.plot(ax, language="es")
 fig.tight_layout()
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ir_ws2f.plot(ax, language="es")
+fig.tight_layout()
+
+fig, (ax_time, ax_response) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+ws2f.plot(ax_time, language="es")
+ax_time.set_xlim(1000 * (direct - 0.0015), 1000 * (direct + 0.0035))
+ws2f.plot(ax_response, quantity="response", frequencies_hz=np.geomspace(1000, 40000, 300), language="es")
+fig.tight_layout()
+
+fig, ax = plt.subplots(figsize=(10, 6))
+pulse.plot(ax, upper_frequency_hz=20000, language="es")
+fig.tight_layout()
+
+fig, (ax_pressure, ax_free) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+cp.plot(ax_pressure, quantity="phase", language="es")
+tsel.plot(ax_free, quantity="phase", language="es")
+fig.tight_layout()
+
+fig, (ax_level, ax_phase) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+rp.plot(ax_level, language="es")
+rp.plot(ax_phase, quantity="phase", language="es")
+fig.tight_layout()
 plt.show()
 ```
 
@@ -473,9 +822,19 @@ WS3 de la Tabla A.1 con su incertidumbre; los balances de la Tabla D.1 y
 de la Tabla 2 sobre la GUM con $k = 2$ (7.9, D.2, D.3, 8.8), y la combinación
 en forma lineal que menciona el D.3; las Tablas A.1, D.1, 1 y 2 como datos
 publicados; y la región de campo libre efectiva de la Fórmula (B.1), con la
-velocidad del sonido del Anexo F de la IEC 61094-2. La comparación del
-apartado 5 de la IEC 61183 se calcula con el mismo modelo. La Tabla D.1 y la
-Tabla A.1 se reproducen.
+velocidad del sonido del Anexo F de la IEC 61094-2, y la ventana más larga
+que admite para una reflexión. La fase de la sensibilidad (5.1.1 de la
+61094-5, 5.1 de la 61094-8) con el intercambio y con los cocientes frente al
+monitor. **El Anexo B de la IEC 61094-8:** la ventana temporal del B.1.3
+(Tukey, Hann, Hamming, y la rectangular que no recomienda) con los bordes
+suavizados del B.1.2, la Fórmula (B.2) a través de ella, la sinusoide por
+pasos del B.2 por la Fórmula (B.3) y el pulso
+rectangular del método de impulso directo (B.6, Fórmula (B.10)). **Los
+apartados 7.4 y 7.5 de la IEC 61094-5:** el cociente de presiones de
+micrófonos de distinta impedancia acústica en un acoplador cerrado (Fórmula
+(3) de la IEC 61094-2), con el volumen equivalente concentrado del E.4 de la
+IEC 61094-2 y del 6.2.2 de la IEC 61094-1. La comparación del apartado 5 de la IEC 61183 se calcula con el
+mismo modelo. La Tabla D.1 y la Tabla A.1 se reproducen.
 </ScopeClaim>
 
 <ScopeClaim status="covered" label="Cubierto, con una lectura del texto">
@@ -490,25 +849,42 @@ NOTA de la Tabla A.1 y el caso especial de la Tabla D.1 dan su incertidumbre
 expandida como el 10 % de cada corrección sin factor de cobertura; se lee con
 el $k = 2$ con que los apartados 7.9 y D.2 informan de toda incertidumbre
 expandida, así que la incertidumbre típica es el 5 % de la corrección.
+**La fase.** Ninguna de las dos partes imprime una forma en fase de la (C.3)
+ni de los cocientes frente al monitor; son las formas en nivel escritas para
+el cociente complejo que el apartado 5.1.1 llama la sensibilidad «both
+modulus and phase», con la semidiferencia del intercambio tomada en una
+vuelta. **El cociente de impedancias.** Los apartados 7.4 y 7.5 dejan el
+modelo a la bibliografía. El acoplador es la Fórmula (3) impresa de la
+IEC 61094-2; para la excitación simultánea, la fila «Microphone impedance»
+de la Tabla D.1 solo dice, con palabras, que cada micrófono está en serie con
+el aire entre los dos, y el divisor escrito a partir de ella, cada diafragma
+detrás de la misma impedancia en serie desde el campo común, es de esta
+biblioteca. La incertidumbre típica lee la diferencia de nivel como una
+semiamplitud, como hace esa fila; por encima de 10 kHz, para un WS2F frente
+a un LS2P, la fila pide establecerla experimentalmente. **La Fórmula (B.10)** se
+lee como el espectro de un pulso que dura $2b$, como dicen la fórmula y su
+primer cero y no el texto.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-Las mediciones en sí, y la fase de la sensibilidad, que admiten el apartado
-5.1.1 de la IEC 61094-5 y el 5.1 de la IEC 61094-8. Las correcciones por la diferencia entre las
-impedancias acústicas de los micrófonos (7.4, 7.5) y por una presión no
-uniforme sobre diafragmas de distinto diámetro fuera de la Tabla A.1 (6.5),
-que las normas dejan a modelos de la bibliografía; la validación de un
-soporte o de un acoplador frente a otros montajes (6.7). El procesado con
-ventana temporal del Anexo B (seno por pasos, barridos, ruido, MLS, impulsos
-directos) y la cualificación del campo libre según la ISO 26101. Los valores
-de la IEC/TS 61094-7, que aquí son entradas; la calibración por reciprocidad
-de la referencia (IEC 61094-2, -3) es el objeto de
-[Calibrar un micrófono por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/). El segundo caso especial de la
-Tabla D.1, un micrófono calibrado como sistema con su preamplificador
+Las mediciones en sí. El valor de la impedancia en serie del aire entre dos
+micrófonos, que las partes dejan a la bibliografía y al experimento, y las
+correcciones por una presión no uniforme sobre diafragmas de distinto
+diámetro fuera de la Tabla A.1 (6.5); la validación de un soporte o de un
+acoplador frente a otros montajes (6.7). Los barridos, las secuencias de
+longitud máxima y el ruido aleatorio del B.3 al B.5 son
+`room.impulse_response`, `room.mls_impulse_response` y
+`electroacoustics.transfer_function`, y el promedio síncrono del B.6.2 es
+`signals.time_synchronous_average`, en sus propias páginas; la cualificación
+del campo libre según la ISO 26101 está en
+[su propia página](/phonometry/es/devices/emission/free-field-qualification/).
+Los valores de la IEC/TS 61094-7, que aquí son entradas; la calibración por
+reciprocidad de la referencia (IEC 61094-2, -3) es el objeto de
+[Calibrar un micrófono por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/). El segundo caso especial
+de la Tabla D.1, un micrófono calibrado como sistema con su preamplificador
 (0,002 dB, y para la tensión de polarización y la capacidad, dependiente de
 la frecuencia y menos de 0,02 dB por encima de 200 Hz), no se guarda como
-dato; un balance que lo
-necesite lo toma por `additional_components`.
+dato; un balance que lo necesite lo toma por `additional_components`.
 </ScopeClaim>
 </Scope>
 

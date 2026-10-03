@@ -112,6 +112,7 @@ UNITS: frozenset[str] = frozenset(
         "µH",
         "µT",
         "µm",
+        "µs",
         "nm",
         "ohm",
         "ohm·mm²/m",

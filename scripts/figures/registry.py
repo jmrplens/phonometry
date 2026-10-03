@@ -428,7 +428,9 @@ from .metrology import (
     generate_calibrator_verification,
     generate_comparison_budget,
     generate_comparison_calibration,
+    generate_comparison_impedance,
     generate_comparison_jig_correction,
+    generate_comparison_phase,
     generate_conformance_rule_examples,
     generate_dbfs_versus_spl,
     generate_diffuse_field_sensitivity,
@@ -439,6 +441,7 @@ from .metrology import (
     generate_free_field_verification,
     generate_random_incidence_correction,
     generate_random_incidence_directivity,
+    generate_rectangular_pulse,
     generate_rice_level_crossings,
     generate_rice_nongaussian_screen,
     generate_rice_peak_distribution,
@@ -447,6 +450,8 @@ from .metrology import (
     generate_slm_periodic_verdict,
     generate_stationarity_glide_blind_spot,
     generate_stationarity_test,
+    generate_stepped_sine_impulse_response,
+    generate_time_selective_response,
     generate_trend_test,
     generate_uncertainty,
     generate_uncertainty_correlation,
@@ -1178,6 +1183,13 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_comparison_budget,
     generate_comparison_jig_correction,
     generate_free_field_region,
+    # The phase, the impedance ratio, the time window and the pulse of the
+    # direct impulse method.
+    generate_comparison_phase,
+    generate_comparison_impedance,
+    generate_stepped_sine_impulse_response,
+    generate_time_selective_response,
+    generate_rectangular_pulse,
     # IEC 61094-2 and IEC 61094-3: laboratory standard microphones calibrated
     # by reciprocity, in a coupler and in a free field.
     generate_reciprocity_pressure,

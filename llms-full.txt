@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1838 numerical conformance checks against 520 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1851 numerical conformance checks against 520 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1838 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 110 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1851 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 110 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -53283,9 +53283,12 @@ documents, one page per module.
 | `ELECTRICAL_TEST_FREQUENCIES_HZ` | `mapping` | **IEC 61672-3:2013 13.4 by class**: the nine octaves from 63 Hz to 16 kHz for class 1, the eight to 8 kHz for class 2 | `metrology.ELECTRICAL_TEST_FREQUENCIES_HZ[2][-1]  # 8000.0` |
 | `TONEBURST_TEST_DURATIONS_MS` | `mapping` | **IEC 61672-3:2013 18.5 to 18.7**: 200 ms, 2 ms and 0.25 ms for `'F'` and `'E'`, 200 ms and 2 ms for `'S'` | `metrology.TONEBURST_TEST_DURATIONS_MS['S']  # (200.0, 2.0)` |
 | `PERIODIC_TEST_ENVIRONMENT` | `mapping` | **IEC 61672-3:2013 7.1**: 80 kPa to 105 kPa, 20 °C to 26 °C, 25 % to 70 %, keyed by the record field of each | `metrology.PERIODIC_TEST_ENVIRONMENT['air_temperatures_c']  # (20.0, 26.0)` |
-| `simultaneous_comparison` | `function` | **Sensitivity level by comparison with both microphones in the field at once (IEC 61094-5 5.1.2 and Annex C; IEC 61094-8 5.3).**<br>• `frequencies_hz` [Hz]; `reference_sensitivity_level_db` L_ref [dB re 1 V/Pa]<br>• `channel_difference_db` L_C12, reference on channel 1, and `interchanged_channel_difference_db` L_C21 [dB], one row per determination; 20 lg R_V = -(L_C12 - L_C21)/2 (C.3); required for `field="pressure"` (Default: None)<br>• keyword-only: `field` ('pressure' / 'free_field', Default: 'pressure'); `pressure_level_difference_db` 20 lg R_P [dB] (Default: 0); `corrections_db` by name [dB]; `reference_environment` (added) and `test_environment` (subtracted), `EnvironmentalSensitivityCorrection`; `reference_free_field_difference_db` [dB], free field only; `expanded_uncertainty_db` [dB] (all Default: None) | `c = metrology.simultaneous_comparison(f, l_ref, l_c12, l_c21)`<br><br>• `ComparisonCalibration` |
-| `sequential_comparison` | `function` | **Sensitivity level by comparison with the microphones in the field in turn (IEC 61094-5 5.1.3 and Annex B; IEC 61094-8 5.2 and A.2).**<br>• `frequencies_hz` [Hz]; `reference_sensitivity_level_db` [dB re 1 V/Pa]; `reference_output_level_db` 20 lg V_ref, `test_output_level_db` 20 lg V_test [dB], one row per determination<br>• keyword-only: `reference_monitor_level_db` 20 lg V_mon,1 and `test_monitor_level_db` 20 lg V_mon,2 [dB], both or neither (Default: None); 20 lg R_V = 20 lg(V_test/V_mon,2) - 20 lg(V_ref/V_mon,1)<br>• `field`, `pressure_level_difference_db`, `corrections_db`, `reference_environment`, `test_environment`, `reference_free_field_difference_db`, `expanded_uncertainty_db` as in `simultaneous_comparison` | `metrology.sequential_comparison(f, l_ref, v_ref, v_test, field="free_field")`<br><br>• `ComparisonCalibration` |
-| `ComparisonCalibration` | `dataclass` | **The sensitivity level of a microphone calibrated by comparison, L_test = L_ref + 20 lg R_V - 20 lg R_P + Σ C_j (IEC 61094-5 D.2).**<br>• `frequencies_hz` [Hz], `reference_sensitivity_level_db`, `output_level_differences_db` (determinations × frequencies), `pressure_level_difference_db` [dB], `corrections_db` (read-only mapping) [dB], `field`, `excitation`, `expanded_uncertainty_db` [dB] or None<br>• `.sensitivity_level_db` [dB re 1 V/Pa], `.sensitivity_mv_per_pa` [mV/Pa], `.output_level_difference_db`, `.correction_db` [dB], `.determinations`, `.standard`<br>• `.plot()`: L_test with its U band and the reference's level (its free-field level, L_ref plus the free-field difference, against a pressure-calibrated reference in a free field) | `c.sensitivity_level_db, c.standard  # ..., 'IEC 61094-5:2016'` |
+| `simultaneous_comparison` | `function` | **Sensitivity level by comparison with both microphones in the field at once (IEC 61094-5 5.1.2 and Annex C; IEC 61094-8 5.3).**<br>• `frequencies_hz` [Hz]; `reference_sensitivity_level_db` L_ref [dB re 1 V/Pa]<br>• `channel_difference_db` L_C12, reference on channel 1, and `interchanged_channel_difference_db` L_C21 [dB], one row per determination; 20 lg R_V = -(L_C12 - L_C21)/2 (C.3); required for `field="pressure"` (Default: None)<br>• keyword-only: `field` ('pressure' / 'free_field', Default: 'pressure'); `pressure_level_difference_db` 20 lg R_P [dB] (Default: 0); `corrections_db` by name [dB]; `reference_environment` (added) and `test_environment` (subtracted), `EnvironmentalSensitivityCorrection`; `reference_free_field_difference_db` [dB], free field only; `expanded_uncertainty_db` [dB] (all Default: None)<br>• `phase`: a `SimultaneousComparisonPhase` (5.1.1) (Default: None, a calibration of the level alone) | `c = metrology.simultaneous_comparison(f, l_ref, l_c12, l_c21)`<br><br>• `ComparisonCalibration` |
+| `SimultaneousComparisonPhase` | `dataclass` | **The phase inputs of a simultaneous comparison (IEC 61094-5 5.1.1, IEC 61094-8 5.1), all keyword-only.**<br>• `reference_sensitivity_phase_deg` φ_ref [°]<br>• `channel_phase_difference_deg` Φ_C12 and `interchanged_channel_phase_difference_deg` Φ_C21 [°], one row per determination, the second given exactly as the interchanged level reading is (Default: None); arg R_V = -(Φ_C12 - Φ_C21)/2 taken in one turn<br>• `pressure_phase_difference_deg` arg R_P [°] (Default: None, 0) | `metrology.SimultaneousComparisonPhase(reference_sensitivity_phase_deg=phi_ref, channel_phase_difference_deg=p12, interchanged_channel_phase_difference_deg=p21)` |
+| `sequential_comparison` | `function` | **Sensitivity level by comparison with the microphones in the field in turn (IEC 61094-5 5.1.3 and Annex B; IEC 61094-8 5.2 and A.2).**<br>• `frequencies_hz` [Hz]; `reference_sensitivity_level_db` [dB re 1 V/Pa]; `reference_output_level_db` 20 lg V_ref, `test_output_level_db` 20 lg V_test [dB], one row per determination<br>• keyword-only: `monitor`: a `MonitorReadings` (Default: None, no monitor); 20 lg R_V = 20 lg(V_test/V_mon,2) - 20 lg(V_ref/V_mon,1)<br>• `field`, `pressure_level_difference_db`, `corrections_db`, `reference_environment`, `test_environment`, `reference_free_field_difference_db`, `expanded_uncertainty_db` as in `simultaneous_comparison`<br>• `phase`: a `SequentialComparisonPhase` (Default: None, a calibration of the level alone; the monitor's phases need it) | `metrology.sequential_comparison(f, l_ref, v_ref, v_test, field="free_field")`<br><br>• `ComparisonCalibration` |
+| `MonitorReadings` | `dataclass` | **The monitor microphone's readings in a sequential comparison (IEC 61094-5 5.1.3, IEC 61094-8 A.2), all keyword-only.**<br>• `reference_level_db` 20 lg V_mon,1 and `test_level_db` 20 lg V_mon,2 [dB], in the measurements of the reference and of the test microphone, one row per determination<br>• `reference_phase_deg` φ_mon,1 and `test_phase_deg` φ_mon,2 [°], both or neither (Default: None) | `metrology.MonitorReadings(reference_level_db=l_m1, test_level_db=l_m2)` |
+| `SequentialComparisonPhase` | `dataclass` | **The phase inputs of a sequential comparison (IEC 61094-5 5.1.1, IEC 61094-8 5.1), all keyword-only.**<br>• `reference_sensitivity_phase_deg` φ_ref [°]<br>• `reference_output_phase_deg` and `test_output_phase_deg` [°], one row per determination, each taken re the monitor's phase when the `MonitorReadings` carries it; arg R_V = (φ_test - φ_mon,2) - (φ_ref - φ_mon,1)<br>• `pressure_phase_difference_deg` arg R_P [°] (Default: None, 0) | `metrology.SequentialComparisonPhase(reference_sensitivity_phase_deg=phi_ref, reference_output_phase_deg=p_ref, test_output_phase_deg=p_test)` |
+| `ComparisonCalibration` | `dataclass` | **The sensitivity level of a microphone calibrated by comparison, L_test = L_ref + 20 lg R_V - 20 lg R_P + Σ C_j (IEC 61094-5 D.2).**<br>• `frequencies_hz` [Hz], `reference_sensitivity_level_db`, `output_level_differences_db` (determinations × frequencies), `pressure_level_difference_db` [dB], `corrections_db` (read-only mapping) [dB], `field`, `excitation`, `expanded_uncertainty_db` [dB] or None; keyword-only `reference_sensitivity_phase_deg`, `output_phase_differences_deg` (determinations × frequencies), `pressure_phase_difference_deg` [°], all None for a calibration of the level alone<br>• `.sensitivity_level_db` [dB re 1 V/Pa], `.sensitivity_mv_per_pa` [mV/Pa], `.output_level_difference_db`, `.correction_db` [dB], `.determinations`, `.standard`; `.output_phase_difference_deg` and `.sensitivity_phase_deg` φ_test = φ_ref + arg R_V - arg R_P [°] (None without phases)<br>• `.plot(quantity='level' / 'phase')`: L_test with its U band and the reference's level (its free-field level, L_ref plus the free-field difference, against a pressure-calibrated reference in a free field), or φ_test and φ_ref | `c.sensitivity_level_db, c.standard  # ..., 'IEC 61094-5:2016'` |
 | `environmental_sensitivity_correction` | `function` | **First-order correction of a sensitivity level between two sets of environmental conditions (IEC 61094-5 6.6, IEC 61094-8 7.6).**<br>• `frequencies_hz` [Hz]<br>• keyword-only: `static_pressure_kpa` [kPa], `temperature_c` [°C], `relative_humidity_percent` [%], where the level is wanted; `static_pressure_coefficient_db_per_kpa` [dB/kPa] and `temperature_coefficient_db_per_k` [dB/K], the microphone's own (IEC 61094-2 Annex D units); `humidity_coefficient_db_per_percent` [dB/%] (Default: 0); `reference_static_pressure_kpa`, `reference_temperature_c`, `reference_relative_humidity_percent` (Default: 101.325 kPa, 23.0 °C, 50 %, clause 4) | `metrology.environmental_sensitivity_correction(f, static_pressure_kpa=97.0, temperature_c=26.0, relative_humidity_percent=40.0, static_pressure_coefficient_db_per_kpa=-0.005, temperature_coefficient_db_per_k=0.003)`<br><br>• `EnvironmentalSensitivityCorrection` |
 | `EnvironmentalSensitivityCorrection` | `dataclass` | **C_env = δp (p_s - p_s,0) + δt (t - t_0) + δH (H - H_0), at each frequency.**<br>• `frequencies_hz` [Hz], the conditions and the reference conditions, the three coefficient columns, read-only<br>• `.static_pressure_term_db`, `.temperature_term_db`, `.humidity_term_db`, `.correction_db` [dB]<br>• `.plot()`: the three terms and the total | `e.correction_db` |
 | `jig_diameter_correction` | `function` | **Corrections of a WS3 microphone against an LS2aP in the jig of Figure A.4 (IEC 61094-5 Table A.1).**<br>• `frequencies_hz` [Hz], rows of the table, an exact base-ten frequency within 2 % reading as its row (Default: None, the 14 rows from 1 kHz to 20 kHz)<br>• refuses a frequency the table does not print | `metrology.jig_diameter_correction([8000.0]).correction_db  # [-0.235]`<br><br>• `JigDiameterCorrection` |
@@ -53300,6 +53303,16 @@ documents, one page per module.
 | `ReferenceCalibrationRow` | `dataclass` | **One row of Table 1.**<br>• `microphone_types`, `method`, `references`, `expanded_uncertainty_1khz_db`, `expanded_uncertainty_10khz_db` [dB, k = 2] | `metrology.IEC61094_8_TABLE_1["primary_free_field"].references  # ('IEC 61094-3',)` |
 | `free_field_region` | `function` | **The effective free-field region of a time window, A = d + τc (IEC 61094-8 B.1).**<br>• `source_distance_m` d [m], `window_time_s` τ [s]<br>• keyword-only: `temperature_c` [°C], `static_pressure_kpa` [kPa], `relative_humidity_percent` [%] (Default: 23.0, 101.325, 50, clause 4); c from the IEC 61094-2 Annex F air | `metrology.free_field_region(1.0, 0.005).major_axis_m  # 2.73`<br><br>• `FreeFieldRegion` |
 | `FreeFieldRegion` | `dataclass` | **The prolate spheroid with the source and the microphone at its foci.**<br>• `source_distance_m` [m], `window_time_s` [s], `speed_of_sound` [m/s]<br>• `.major_axis_m` A, `.semi_minor_axis_m` b, `.rod_clearance_m` τc/2 [m]<br>• `.plot()`: the region as Figure B.1 draws it | `r.semi_minor_axis_m  # 1.27` |
+| `reflection_free_window_s` | `function` | **The longest time window that keeps a reflection out of the effective free-field region, τ = (L - d)/c (IEC 61094-8 B.1, B.1.3 a)).**<br>• `source_distance_m` d [m], `reflected_path_m` L [m], the shortest path by the reflector<br>• keyword-only: `temperature_c` [°C], `static_pressure_kpa` [kPa], `relative_humidity_percent` [%] (Default: clause 4) | `metrology.reflection_free_window_s(1.0, 1.48)  # 0.00139` |
+| `time_selective_response` | `function` | **The frequency response of the direct sound through a time window (IEC 61094-8 B.1.3, Formula (B.2)).**<br>• `impulse_response` (one value per sample), `sample_rate_hz` [Hz]<br>• keyword-only: `window_start_s`, `window_end_s` [s] from the start of the record; `window_shape` ('tukey' / 'hann' / 'hamming' / 'rectangular', Default: 'tukey'); `taper_fraction` (Default: 0.25); `excitation`: a `RectangularPulse` divided out (Default: None) | `ts = metrology.time_selective_response(h, 96000.0, window_start_s=0.0025, window_end_s=0.006)`<br><br>• `TimeSelectiveResponse` |
+| `TimeSelectiveResponse` | `dataclass` | **An impulse response, its time window and its transform.**<br>• `impulse_response`, `sample_rate_hz` [Hz], `window_start_s`, `window_end_s` [s], `window_shape`, `taper_fraction`, `excitation`, read-only<br>• `.time_s`, `.window`, `.windowed_impulse_response`, `.window_length_s` [s], `.frequency_resolution_hz` [Hz]<br>• `.response_at(f)` H(f) by (B.2), `.level_db_at(f)` [dB], `.phase_deg_at(f)` [°], `.record_response_at(f)` without the window<br>• `.free_field_region(d, arrival_time_s)`: the region of the window, τ from the arrival<br>• `.plot(quantity='impulse' / 'response')` | `ts.level_db_at([1000.0, 10000.0])` |
+| `stepped_sine_impulse_response` | `function` | **The impulse response of a stepped-sine measurement (IEC 61094-8 B.2, Formula (B.3)).**<br>• `frequencies_hz` [Hz], k Δf from 0 Hz, equally spaced; `response` H(k Δf), complex<br>• the negative frequencies are the conjugates; N = 2K + 1 samples at N Δf | `metrology.stepped_sine_impulse_response(np.arange(0.0, 24001.0, 120.0), h).duration_s  # 0.00833`<br><br>• `SteppedSineImpulseResponse` |
+| `SteppedSineImpulseResponse` | `dataclass` | **The impulse response of a stepped sine.**<br>• `frequency_step_hz` Δf [Hz], `impulse_response`, read-only<br>• `.sample_rate_hz` [Hz], `.duration_s` 1/Δf [s] (B.2.2), `.time_s`<br>• `.plot()` | `ir.impulse_response, ir.sample_rate_hz` |
+| `rectangular_pulse` | `function` | **The rectangular pulse of the direct impulse method (IEC 61094-8 B.6.1, Formula (B.10)).**<br>• `duration_s` T = 2b [s] (Formula (B.10) is the spectrum of a pulse lasting 2b, which the text calls b, an erratum)<br>• keyword-only: `amplitude_v` a [V] (Default: 1) | `metrology.rectangular_pulse(5e-6, amplitude_v=10.0).level_db_at([20000.0])  # [-0.143]`<br><br>• `RectangularPulse` |
+| `RectangularPulse` | `dataclass` | **A pulse of duration T and amplitude a.**<br>• `duration_s` [s], `amplitude_v` [V]<br>• `.half_duration_s` b, `.first_zero_hz` 1/(2b) [Hz], `.area_v_s` 2ab [V·s]<br>• `.spectrum_at(f)` X(f) of (B.10), `.level_db_at(f)` re X(0) [dB]<br>• `.plot(upper_frequency_hz=...)` | `metrology.rectangular_pulse(5e-6).half_duration_s  # 2.5e-06` |
+| `rectangular_pulse_duration_s` | `function` | **The pulse duration whose first spectral zero lies a factor above the frequencies of interest (IEC 61094-8 B.6.1).**<br>• `upper_frequency_hz` [Hz]<br>• keyword-only: `zero_ratio` (Default: 10, "approximately an order of magnitude") | `metrology.rectangular_pulse_duration_s(20000.0)  # 5e-06` |
+| `impedance_pressure_ratio` | `function` | **The pressure ratio two microphones of different acoustic impedance see, R_P = (V_x + V_e,ref)/(V_x + V_e,test) (IEC 61094-5 7.4, 7.5).**<br>• `frequencies_hz` [Hz]<br>• keyword-only: `reference_equivalent_volume_m3`, `test_equivalent_volume_m3` [m³], complex, such as `ReciprocityMicrophone.complex_equivalent_volume_m3(f)` gives them (IEC 61094-2 E.4)<br>• exactly one of `coupling_equivalent_volume_m3` [m³], a closed coupler (IEC 61094-2 Formula (3)), or `coupling_impedance_pa_s_m3` [Pa·s/m³], the air in series with each microphone (a divider, the library's reading of Table D.1) | `rp = metrology.impedance_pressure_ratio(f, reference_equivalent_volume_m3=v1, test_equivalent_volume_m3=v2, coupling_equivalent_volume_m3=600e-9)`<br><br>• `ImpedancePressureRatio` |
+| `ImpedancePressureRatio` | `dataclass` | **The pressure ratio of different acoustic impedances.**<br>• `frequencies_hz` [Hz], `ratio` R_P (complex), `coupling` ('coupler' / 'series'), `coupling_equivalent_volume_m3` [m³], read-only<br>• `.level_difference_db` [dB] and `.phase_difference_deg` [°], the pressure ratio of a comparison<br>• `.standard_uncertainty_db` [dB], the level read as a rectangular semi-range (Table D.1)<br>• `.plot(quantity='level' / 'phase')` | `rp.standard_uncertainty_db` |
 | `pressure_reciprocity` | `function` | **Pressure sensitivities of three microphones calibrated in pairs in a coupler (IEC 61094-2:2009 5.7.1, Formula (7)).**<br>• `frequencies_hz` [Hz]; `electrical_transfer_impedances_ohm` Z_e,12, Z_e,23, Z_e,31, complex [Ω]; `acoustic_transfer_impedances` Z_a,12, Z_a,23, Z_a,31, each a `CouplerTransferImpedance` or complex [Pa·s/m³]<br>• keyword-only: `corrections_db` by name [dB], added to every level (Default: None); `expanded_uncertainty_db` [dB] (Default: None)<br>• products M_i M_j = Z_e,ij/Z_a,ij; M_1 = (P_12 P_31/P_23)^½ on the branch continuous in frequency with a non-negative real part at the lowest one, M_2 = P_12/M_1, M_3 = P_31/M_1 | `c = metrology.pressure_reciprocity(f, (ze12, ze23, ze31), (za12, za23, za31))`<br><br>• `ReciprocityCalibration` |
 | `pressure_reciprocity_pair` | `function` | **Pressure sensitivities of two microphones and an auxiliary sound source (IEC 61094-2:2009 5.7.2, Formula (8)).**<br>• `frequencies_hz` [Hz]; `electrical_transfer_impedance_ohm` Z_e,12 [Ω]; `acoustic_transfer_impedance` Z_a,12; `sensitivity_ratio` M_1/M_2, complex<br>• keyword-only: `corrections_db`, `expanded_uncertainty_db` as in `pressure_reciprocity` | `metrology.pressure_reciprocity_pair(f, ze12, za12, r12)`<br><br>• `ReciprocityCalibration` of two microphones |
 | `free_field_reciprocity` | `function` | **Free-field sensitivities of three microphones calibrated in pairs (IEC 61094-3:2016 5.7.1, Formula (8), with the factor -j of Formula (7)).**<br>• `frequencies_hz` [Hz]; `electrical_transfer_impedances_ohm` Z_e,12, Z_e,23, Z_e,31 [Ω]<br>• keyword-only: `diaphragm_distances_m` d_m,12, d_m,23, d_m,31 [m]; `temperature_c` [°C], `static_pressure_pa` [Pa], `relative_humidity_percent` [%]; `acoustic_centres_m` of microphones 1 to 3, positive in front of the diaphragm, a value or one per frequency [m] (Default: 0, the diaphragms); `dispersion` in k = ω/c (Default: True, IEC 61094-2 F.3 NOTE); `corrections_db`, `expanded_uncertainty_db` | `metrology.free_field_reciprocity(f, (ze12, ze23, ze31), diaphragm_distances_m=(0.3, 0.25, 0.2), temperature_c=23.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0)`<br><br>• `ReciprocityCalibration` |
@@ -62675,7 +62688,10 @@ with `R_V` the ratio of the output voltages, `R_P` that of the effective sound
 pressures (reduced to unity by the procedure) and `C_j` the corrections each
 part asks for. This page runs a pressure calibration of a WS2P against an
 LS2P and a free-field calibration of a WS2F on synthetic readings, so every
-step can be checked against the sensitivities that built them.
+step can be checked against the sensitivities that built them, then the
+time-selective processing of IEC 61094-8 Annex B, the phase of the
+sensitivity and the effect of different acoustic impedances (IEC 61094-5 7.4
+and 7.5).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_calibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_calibration.svg" alt="The sensitivity level of a WS2P calibrated in a pressure field against an LS2P, 250 Hz to 20 kHz, and of a WS2F calibrated in a free field by substitution, 500 Hz to 20 kHz, each with a band of its expanded uncertainty and the reference's level it was compared with: the pressure level in the coupler, the free-field level in the free field" width="100%"></picture>
 
@@ -62821,6 +62837,7 @@ quotient of the two ratios is the output ratio corrected for any change of
 the source: `20 lg R_V = 20 lg(V_test / V_mon,2) - 20 lg(V_ref / V_mon,1)`,
 with `V_ref` and `V_mon,1` the output voltages of the reference and the
 monitor in the first reading and `V_test` and `V_mon,2` those of the second.
+The monitor's two readings go together, as a `metrology.MonitorReadings`.
 The reference here is an LS2P calibrated in a pressure field, so it takes
 the free-field to pressure difference of IEC/TS 61094-7 (illustrative values
 below), and the source drifts by 0,25 dB between the readings:
@@ -62859,8 +62876,9 @@ free = metrology.sequential_comparison(
     l_ref_p,
     l_ref_p + c_ff + field_1,     # the reference's output, dB re 1 V
     l_ws2f + field_2,             # the WS2F's output in its place
-    reference_monitor_level_db=monitor + field_1,
-    test_monitor_level_db=monitor + field_2,
+    monitor=metrology.MonitorReadings(
+        reference_level_db=monitor + field_1, test_level_db=monitor + field_2
+    ),
     field="free_field",
     reference_free_field_difference_db=c_ff,
     expanded_uncertainty_db=[free_field_budget(fx).expanded_uncertainty_db for fx in ff],
@@ -62893,6 +62911,244 @@ print(round(r.semi_minor_axis_m, 2), round(r.rod_clearance_m, 2))   # 1.27 0.86
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_region_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_region.svg" alt="The effective free-field region of a 5 ms window at 1 m, an ellipse 2.73 m long with the source and the microphone at its foci, and the mounting rod running out past its end" width="88%"></picture>
 
+## Time-selective processing (Annex B)
+
+Annex B turns a room that is not anechoic into a free field: an impulse
+response separates the direct sound from the reflections in time, a window
+keeps the first, and a Fourier transform gives the frequency response of the
+direct sound alone (B.1.1). The impulse response can come from a stepped sine
+taken to the time domain by Formula (B.3)
+(`metrology.stepped_sine_impulse_response`), from a sweep or a maximum length
+sequence (`room.impulse_response`, `room.mls_impulse_response`), or from a
+direct impulse. `metrology.time_selective_response` weights it with a time
+window and evaluates Formula (B.2) at any frequency. The window "normally has
+'tapered' edges" (B.1.2) and a rectangular one "is not recommended because it
+usually leads to spectral leakage" (B.1.3), so the default is a Tukey window
+with an eighth of it tapered at each edge, a proportion the library chose.
+
+Here an LS2P reference and a WS2F stand in turn 1 m from the source, and a
+reflection off the rig arrives along a path of 1,48 m. The WS2F hears it off
+axis, so it does not cancel in the ratio of the two outputs as the direct
+sound does (8.5). Each is measured by a stepped sine from 0 Hz to 100 kHz in
+50 Hz steps; the microphones are illustrative:
+
+```python
+c0 = metrology.free_field_region(1.0, 0.005).speed_of_sound   # 345.9 m/s at 23.0 °C
+f_step = np.arange(0.0, 100000.0 + 1.0, 50.0)   # 0 Hz to 100 kHz in 50 Hz steps
+
+
+def mic(fx, level_db, f0, d):   # a microphone's sensitivity, V/Pa: illustrative
+    return 10 ** (level_db / 20) / (1 - (fx / f0) ** 2 + 1j * d * fx / f0)
+
+
+direct, rig = 1.0 / c0, 1.48 / c0   # the direct sound over 1 m, the rig's reflection over 1.48 m
+
+
+def heard(m, off_axis):   # each step: the direct sound and the rig's reflection
+    return m * (
+        np.exp(-2j * np.pi * f_step * direct)
+        + 0.25 * off_axis * np.exp(-2j * np.pi * f_step * rig)
+    )
+
+
+ir_ref = metrology.stepped_sine_impulse_response(f_step, heard(mic(f_step, -38.0, 22000, 1.1), 1.0))
+ir_ws2f = metrology.stepped_sine_impulse_response(
+    f_step, heard(mic(f_step, -26.4, 18000, 0.9), 1 / (1 + 1j * f_step / 6000))
+)   # the WS2F hears the reflection off axis
+print(ir_ref.duration_s, round(ir_ref.sample_rate_hz))   # 0.02 200050
+```
+
+The impulse response lasts the inverse of the frequency step, 20 ms (B.2.2:
+120 Hz is enough in a small anechoic room "because the primary reflections
+all occur before 8 ms", about 30 Hz in a large one). B.2.1 says the
+increment "will determine the time domain resolution"; it is the length it
+sets, as B.2.2 says (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)). `ir_ws2f.plot()` draws
+the whole record:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response.svg" alt="The WS2F's impulse response from the stepped sine of 0 Hz to 100 kHz in 50 Hz steps, normalised to its peak, over the whole 20 ms record: the direct sound at 2.89 ms with a short ringing, the rig's reflection at 4.28 ms at about a tenth of the peak, and nothing after them up to 20 ms. The title gives the 50 Hz step and the 20.00 ms length" width="88%"></picture>
+
+The window has to end before the reflection arrives. A point on the boundary of the region of
+Formula (B.1) reflects along a path of `A = d + tau c`, so a reflection whose
+path is `L` stays outside while `tau <= (L - d) / c`:
+
+```python
+tau = metrology.reflection_free_window_s(1.0, 1.48)
+window = {"window_start_s": direct - 0.0005, "window_end_s": direct + tau}
+ref = metrology.time_selective_response(ir_ref.impulse_response, ir_ref.sample_rate_hz, **window)
+ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.sample_rate_hz, **window)
+print(round(1000 * tau, 2), round(ref.frequency_resolution_hz))   # 1.39 530
+```
+
+A window of 1,89 ms tells frequencies apart no closer than 530 Hz, the
+low-frequency limit 6.2.3 warns time-selective techniques have. The levels
+and phases through the window are the two outputs of a substitution:
+
+```python
+fw = metrology.exact_frequencies(1900, 20000, fraction=3)   # 2 kHz to 20 kHz
+m_ref = mic(fw, -38.0, 22000, 1.1)   # the reference's free-field sensitivity, from its certificate
+tsel = metrology.sequential_comparison(
+    fw,
+    20 * np.log10(np.abs(m_ref)),
+    ref.level_db_at(fw),
+    ws2f.level_db_at(fw),
+    field="free_field",
+    phase=metrology.SequentialComparisonPhase(
+        reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
+        reference_output_phase_deg=ref.phase_deg_at(fw),
+        test_output_phase_deg=ws2f.phase_deg_at(fw),
+    ),
+)
+m_ws2f = mic(fw, -26.4, 18000, 0.9)   # what the page knows the WS2F to be
+print(tsel.sensitivity_level_db[[0, 6, 10]].round(2))   # [-26.34 -25.46 -26.6 ]
+print(bool(np.abs(tsel.sensitivity_level_db - 20 * np.log10(np.abs(m_ws2f))).max() < 1e-4))   # True
+record = 20 * np.log10(np.abs(ws2f.record_response_at(fw) / ref.record_response_at(fw)))
+print(np.abs(record - 20 * np.log10(np.abs(m_ws2f / m_ref))).max().round(2))   # 1.91
+```
+
+Through the window the WS2F's sensitivity comes back to within 0,0001 dB;
+from the whole record, the reflection included, it would be up to 1,91 dB
+off.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_selective_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_selective_response.svg" alt="Left, the WS2F's impulse response from a stepped-sine measurement, its direct sound at 2.89 ms and the rig's reflection at 4.28 ms, with a Tukey window 1.89 ms long from 2.39 ms that ends as the reflection arrives. Right, its frequency response from 1 kHz to 40 kHz: through the window it is the smooth response of the direct sound, and from the whole record it ripples round it, from 2.45 dB below to 1.89 dB above up to 16 kHz" width="100%"></picture>
+
+**The direct impulse method** (B.6) drives the source with a short
+rectangular pulse, whose spectrum is Formula (B.10); its first zero, `1/(2b)`,
+"must be approximately an order of magnitude higher than the upper limit of
+the frequency range of interest". The formula is that of a pulse lasting
+`2b`, although the text calls `b` the duration (an
+[erratum](https://jmrplens.github.io/phonometry/reference/errata/)), and `metrology.rectangular_pulse` takes the
+whole duration:
+
+```python
+T = metrology.rectangular_pulse_duration_s(20000)   # a first zero ten times 20 kHz
+pulse = metrology.rectangular_pulse(T, amplitude_v=10.0)
+print(T, pulse.half_duration_s, round(pulse.first_zero_hz))   # 5e-06 2.5e-06 200000
+print(pulse.level_db_at([20000.0]).round(2))                  # [-0.14]
+```
+
+The responses to several pulses, averaged synchronously
+(`signals.time_synchronous_average`; B.6.2 counts on `10 lg n` dB of
+signal-to-noise ratio from `n` of them), go to `time_selective_response` with
+`excitation=pulse`, which divides the pulse's spectrum out.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rectangular_pulse_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rectangular_pulse.svg" alt="The spectrum of a 5 microsecond rectangular pulse relative to its value at 0 Hz, from 0 to 500 kHz: flat to within 0.14 dB up to the 20 kHz upper limit, falling to its first zero at 200 kHz and a second at 400 kHz" width="88%"></picture>
+
+## The phase of the sensitivity
+
+Both parts carry the phase over with the modulus: IEC 61094-5 5.1.1
+calculates "the sensitivity (both modulus and phase) of the test
+microphone", and IEC 61094-8 5.1 "both the modulus and phase of the
+free-field sensitivity of the microphone under test". D.2 holds for the complex
+ratios, so the phase follows the level term by term,
+`phi_test = phi_ref + arg R_V - arg R_P`, and the interchange of Annex C
+cancels the phase shifts of the two channels and of the coupler as (C.3)
+cancels their gains: `phi_ref - phi_test = (Phi_C12 - Phi_C21) / 2`, with
+`Phi_C12` the phase of channel 1's reading re channel 2's. Neither part prints
+this form; it is (C.3) written for the complex ratio. The phase inputs go
+together, as a `metrology.SimultaneousComparisonPhase` here and a
+`metrology.SequentialComparisonPhase` in a sequential calibration, whose
+monitor's phases go with its levels in its `metrology.MonitorReadings`. The
+pressure calibration above, with the phase of each reading:
+
+```python
+phi_ref = np.degrees(np.angle(1 / (1 - (f / 22000) ** 2 + 1.1j * f / 22000)))   # the LS2P's certificate: illustrative
+phi_true = np.degrees(np.angle(1 / (1 - (f / 18000) ** 2 + 0.9j * f / 18000)))   # the WS2P: unknown
+shift_1, shift_2 = 1.5 * x, -0.8 * x   # the two channels' phase shifts, degrees
+late_a = 0.4 * x                       # port A hears the field later, degrees
+jitter = np.random.default_rng(5).normal(0.0, 0.02, (2, 3, f.size))
+p12 = (phi_ref + shift_1) - (phi_true + shift_2) + late_a + jitter[0]   # reference on channel 1
+p21 = (phi_true + shift_1) - (phi_ref + shift_2) + late_a + jitter[1]   # interchanged
+cp = metrology.simultaneous_comparison(
+    f, l_ref, l_c12, l_c21,
+    phase=metrology.SimultaneousComparisonPhase(
+        reference_sensitivity_phase_deg=phi_ref,
+        channel_phase_difference_deg=p12,
+        interchanged_channel_phase_difference_deg=p21,
+    ),
+)
+print(cp.sensitivity_phase_deg[[2, 8, 16, 19]].round(1))   # [  -1.1   -4.6  -35.9 -102.9]
+print(np.abs(cp.sensitivity_phase_deg - phi_true).max().round(3))   # 0.016
+```
+
+The difference of the two readings is twice the phase difference of the
+microphones, so it is taken into one turn before it is halved: the result is
+unique while they differ by less than 90°. In a free field the phases are
+those at the acoustic centres (IEC 61094-8 5.1), which 7.3 positions "at the
+measurement points"; in a sequential substitution each goes in turn to the
+same point, where `arg R_P` is 0, and a delay common to the two readings,
+like the travel time from the source in the time-selective example, cancels
+in their quotient.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_phase_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_phase.svg" alt="The phase of the sensitivity against frequency. Left, the WS2P calibrated in a coupler through the interchange, from 250 Hz to 20 kHz: near the LS2P reference's phase up to 4 kHz, then falling faster, to -35.9 degrees at 10 kHz and -102.9 degrees at 20 kHz against the reference's -32.2 and -79.9. Right, the WS2F calibrated through the time window from 2 kHz to 20 kHz, the same shape" width="100%"></picture>
+
+## Microphones of different acoustic impedance
+
+"Differences in the acoustic impedance between the test and reference
+microphones can cause the sound pressure at the test and reference
+microphones to differ" (7.4), most where a pressure and a free-field
+microphone meet above 10 kHz (7.5). Neither clause prints a model: 7.4 sends
+the reader to the literature and 7.5 asks for the error to be estimated and
+added to the budget. `metrology.impedance_pressure_ratio` writes the effect
+for two circuits with each microphone's equivalent volume,
+`V_e = kappa_r p_s,r / (j omega Z_a)` (IEC 61094-1 6.2.2, `kappa_r` = 1,40):
+`R_P = (V_x + V_e,ref) / (V_x + V_e,test)`. In a closed coupler small against
+the wavelength a sequential substitution changes the pressure by the ratio of
+the two admittance sums of IEC 61094-2 Formula (3), `V_x` being the rest of
+the load (the gas, the source, a monitor); for a simultaneous excitation
+Table D.1 puts "the acoustical impedance of the microphone [...] in series
+with that of the air in the space between the two microphones" and prints no
+circuit; the library reads it as a divider, each diaphragm behind the same
+series impedance from the common field, and `V_x` is the equivalent volume
+of that impedance. That form is the library's reading, not the part's.
+`metrology.ReciprocityMicrophone`, the microphone of
+[the reciprocity calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/), holds the lumped
+parameters of IEC 61094-2 E.4, the low-frequency volume, the resonance
+frequency and the loss factor, and its `complex_equivalent_volume_m3` gives
+`V_e` from them. Its ratio to the low-frequency volume holds no `kappa_r`, so
+with the 10 mm³ that Table 3 of IEC 61094-1 gives an LS2P, `V_e` is the
+volume of 6.2.2 with its 1,40. E.4 finds the representation "of sufficient
+accuracy" up to "about 1,3 times the resonance frequency of the microphone",
+20,8 kHz for the WS2F below. The front cavity the microphone also holds
+enters the transfer impedance of a coupler, not `V_e`:
+
+```python
+fi = metrology.exact_frequencies(1000, 20000, fraction=3)
+front = {"front_cavity_volume_m3": 34e-9, "front_cavity_depth_m": 0.5e-3,
+         "front_cavity_diameter_m": 9.3e-3}   # an LS2aP's (Table C.1 of IEC 61094-2)
+lumped_ls2p = metrology.ReciprocityMicrophone(
+    equivalent_volume_m3=10e-9, resonance_frequency_hz=22000, loss_factor=1.1, **front
+)   # an LS2P: 10 mm³ (IEC 61094-1 Table 3); the resonance and loss: illustrative
+lumped_ws2f = metrology.ReciprocityMicrophone(
+    equivalent_volume_m3=30e-9, resonance_frequency_hz=16000, loss_factor=0.5, **front
+)   # a more compliant WS2F: illustrative
+rp = metrology.impedance_pressure_ratio(
+    fi,
+    reference_equivalent_volume_m3=lumped_ls2p.complex_equivalent_volume_m3(fi),
+    test_equivalent_volume_m3=lumped_ws2f.complex_equivalent_volume_m3(fi),
+    coupling_equivalent_volume_m3=600e-9,   # the coupler's gas, source and monitor: illustrative
+)
+print(rp.level_difference_db[[0, 10, 13]].round(3))      # [-0.281 -0.421  0.37 ]
+print(rp.standard_uncertainty_db[[0, 10, 13]].round(3))  # [0.163 0.243 0.213]
+```
+
+A monitor that senses "changes in the sound pressure at the test/reference
+microphone position" (5.1.3) takes this ratio out. Without one,
+`rp.level_difference_db` and `rp.phase_difference_deg` go to the comparison
+as `pressure_level_difference_db` and as the `pressure_phase_difference_deg`
+of its phase inputs. Where
+the ratio is estimated rather than corrected for, `rp.standard_uncertainty_db`
+is the `"impedance"` component of the budget: the level difference read as
+the semi-range of a rectangular distribution, as Table D.1 reads its
+0,005 dB at 2 kHz. The same row warns about exactly this pairing: "When
+microphones have significantly differing impedances (for example WS2F
+microphone compared against LS2P at frequencies above 10 kHz), the
+measurement uncertainty can be considerably larger and should be established
+experimentally." Above 10 kHz the value here is the model's estimate, not
+that experiment; where the ratio crosses 0 dB, near 16 kHz, it gives almost
+nothing at all.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_impedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_impedance.svg" alt="The pressure ratio of a WS2F in the place of an LS2P in a closed coupler, from 1 kHz to 20 kHz. Left, its level: -0.28 dB at 1 kHz, falling to -0.44 dB at 12.5 kHz, crossing 0 dB at 16 kHz past the WS2F's resonance and reaching +0.37 dB at 20 kHz, with its standard uncertainty dashed from 0.16 dB to 0.25 dB, dropping to almost nothing at 16 kHz where the level crosses 0 dB. Right, its phase, about 0.7 degrees at 8 kHz and peaking at 4.86 degrees at 16 kHz" width="100%"></picture>
+
 ## The diffuse-field comparison of IEC 61183
 
 The diffuse-field method of IEC 61183 clause 5 is a sequential comparison
@@ -62912,18 +63168,34 @@ print(d.diffuse_field_level_db, s.sensitivity_level_db)   # [-25.7 -25.7] [-25.7
 Implemented: the level model of IEC 61094-5 D.2; the simultaneous excitation
 with the interchange of Annex C (Formulas (C.1) to (C.3)), required for a
 pressure calibration; the sequential excitation against a monitor microphone;
-the average over the determinations; the environmental correction to first
-order (this library's reading of 6.6 and 7.6, which print no formula); the
-reference's free-field to pressure difference in a free-field calibration;
-the WS3 corrections of Table A.1, whose 10 % expanded uncertainty, printed
-without a coverage factor, is read with the `k = 2` of 7.9 and D.2; the
-budgets of Table D.1 and IEC 61094-8 Table 2 with `k = 2`; Tables A.1, D.1,
-1 and 2 as published data; and the effective free-field region of Formula
-(B.1). Not implemented: the
-measurements themselves and the phase of the sensitivity; the corrections for
-the difference of the acoustic impedances (7.4, 7.5) and for non-uniform
-pressure beyond Table A.1 (6.5); the time-selective processing of IEC 61094-8
-Annex B and the qualification of the free field by ISO 26101; the values of
+the average over the determinations; the phase of the sensitivity (61094-5
+5.1.1, 61094-8 5.1), the phase form of (C.3) and of the monitor ratios being
+this library's reading of the complex ratio, as neither part prints it; the
+environmental correction to first order (this library's reading of 6.6 and
+7.6, which print no formula); the reference's free-field to pressure
+difference in a free-field calibration; the WS3 corrections of Table A.1,
+whose 10 % expanded uncertainty, printed without a coverage factor, is read
+with the `k = 2` of 7.9 and D.2; the pressure ratio of microphones of
+different acoustic impedance (7.4, 7.5) in a closed coupler by the printed
+IEC 61094-2 Formula (3) and, for a simultaneous excitation, in series with
+the air between them, a divider that is this library's reading of the one
+sentence of Table D.1 that describes it, with the lumped equivalent volume
+of IEC 61094-2 E.4 and IEC 61094-1 6.2.2, and its standard uncertainty as
+Table D.1 reads a semi-range (which, above 10 kHz for a WS2F against an
+LS2P, the row asks to be established experimentally); the budgets of Table D.1 and IEC 61094-8 Table 2 with `k = 2`;
+Tables A.1, D.1, 1 and 2 as published data; the effective free-field region
+of Formula (B.1) and the longest window it allows for a reflection; the time
+window of B.1.3 with the tapered edges of B.1.2, Formula (B.2) through it, the stepped sine of B.2 by Formula
+(B.3) and the rectangular pulse of B.6 (Formula (B.10)). Not implemented: the
+measurements themselves; the value of the series impedance of the air between
+two microphones, which the parts leave to the literature and to experiment,
+and the corrections for non-uniform pressure beyond Table A.1 (6.5); the
+sweeps, the maximum length sequences and the random noise of B.3 to B.5,
+which are `room.impulse_response`, `room.mls_impulse_response` and
+`electroacoustics.transfer_function` elsewhere in the library, and the
+synchronous averaging of B.6.2, which is `signals.time_synchronous_average`;
+the qualification of the free field by ISO 26101, on [its own
+page](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/); the values of
 IEC/TS 61094-7, which are inputs, and the reciprocity calibration of the
 reference, which is in
 [Microphone calibration by reciprocity](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/); the second special case of Table D.1, a microphone calibrated as a
@@ -62942,7 +63214,7 @@ which a budget takes through `additional_components`.
 - [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
   the budgets are combined by.
 - [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): IEC 61094-5 D.3, UNE-EN
-  61094-5:2017 Table D.1, IEC 61094-8 8.4 and Formula (B.10).
+  61094-5:2017 Table D.1, IEC 61094-8 8.4, B.2.1 and Formula (B.10).
 - API reference: [`metrology.comparison_calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/comparison-calibration/).
 
 ---
@@ -64316,9 +64588,9 @@ budgets that are specialisations of the GUM machinery described here.
   and B.1 of IEC 61672-1, and the statement of Clause 22.
 - [Microphone Calibration by Comparison (IEC 61094-5/-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/):
   the simultaneous comparison with the interchange of Annex C, the sequential
-  one against a monitor, the environmental and WS3 jig corrections, the
-  budgets of Table D.1 and Table 2 with k = 2, and the free-field region of a
-  time window.
+  one against a monitor, in level and phase, the environmental, WS3 jig and
+  acoustic impedance corrections, the budgets of Table D.1 and Table 2 with
+  k = 2, and the time-selective processing of IEC 61094-8 Annex B.
 - [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/):
   three microphones calibrated in pairs, the transfer impedance of a
   plane-wave or large-volume coupler with the heat conduction of Annex A and
@@ -70746,7 +71018,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1838 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1851 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -71754,7 +72026,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1838 numerical conformance checks across 110 domains and 520 standards, covering
+1851 numerical conformance checks across 110 domains and 520 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

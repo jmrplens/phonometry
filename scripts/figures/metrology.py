@@ -1804,8 +1804,10 @@ def _free_field_comparison() -> "ComparisonCalibration":
         l_ref_p,
         l_ref_p + c_ff + field_1,
         l_ws2f + field_2,
-        reference_monitor_level_db=monitor + field_1,
-        test_monitor_level_db=monitor + field_2,
+        monitor=metrology.MonitorReadings(
+            reference_level_db=monitor + field_1,
+            test_level_db=monitor + field_2,
+        ),
         field="free_field",
         reference_free_field_difference_db=c_ff,
         expanded_uncertainty_db=[
@@ -1849,6 +1851,226 @@ def generate_comparison_jig_correction(output_dir: str) -> None:
     metrology.jig_diameter_correction().plot(ax, language=_LANG)
     fig.tight_layout()
     save_figure(output_dir, "comparison_jig_correction.svg")
+    plt.close()
+
+
+#: The guide's stepped sine: 0 Hz to 100 kHz in 50 Hz steps (IEC 61094-8 B.2).
+_STEP_FREQUENCIES_HZ = np.arange(0.0, 100000.0 + 1.0, 50.0)
+
+
+def _lumped_microphone(
+    frequencies: np.ndarray, level_db: float, resonance_hz: float, loss: float
+) -> np.ndarray:
+    """The guide's illustrative microphone, V/Pa: a second-order response."""
+    ratio = frequencies / resonance_hz
+    return 10 ** (level_db / 20) / (1 - ratio**2 + 1j * loss * ratio)
+
+
+def _stepped_sine_pair() -> tuple[Any, Any, float]:
+    """The guide's ``ir_ref`` and ``ir_ws2f``: the impulse responses of an
+    LS2P and a WS2F 1 m from the source, with the rig's reflection 1.48 m
+    away, from a stepped sine of 0 Hz to 100 kHz in 50 Hz steps.
+    """
+    from phonometry import metrology
+
+    speed = metrology.free_field_region(1.0, 0.005).speed_of_sound
+    direct, rig = 1.0 / speed, 1.48 / speed
+    f_step = _STEP_FREQUENCIES_HZ
+
+    def heard(response: np.ndarray, off_axis: complex | np.ndarray) -> np.ndarray:
+        field = np.exp(-2j * np.pi * f_step * direct) + 0.25 * off_axis * np.exp(
+            -2j * np.pi * f_step * rig
+        )
+        return np.asarray(response * field, dtype=np.complex128)
+
+    ir_ref = metrology.stepped_sine_impulse_response(
+        f_step, heard(_lumped_microphone(f_step, -38.0, 22000, 1.1), 1.0)
+    )
+    ir_ws2f = metrology.stepped_sine_impulse_response(
+        f_step,
+        heard(
+            _lumped_microphone(f_step, -26.4, 18000, 0.9),
+            1 / (1 + 1j * f_step / 6000),
+        ),
+    )
+    return ir_ref, ir_ws2f, direct
+
+
+def _time_selective_pair() -> tuple[Any, Any, float]:
+    """The guide's ``ref`` and ``ws2f``: the stepped-sine responses of the
+    LS2P and the WS2F through the longest window that keeps the rig's
+    reflection out.
+    """
+    from phonometry import metrology
+
+    ir_ref, ir_ws2f, direct = _stepped_sine_pair()
+    tau = metrology.reflection_free_window_s(1.0, 1.48)
+    start, end = direct - 0.0005, direct + tau
+    ref = metrology.time_selective_response(
+        ir_ref.impulse_response,
+        ir_ref.sample_rate_hz,
+        window_start_s=start,
+        window_end_s=end,
+    )
+    ws2f = metrology.time_selective_response(
+        ir_ws2f.impulse_response,
+        ir_ws2f.sample_rate_hz,
+        window_start_s=start,
+        window_end_s=end,
+    )
+    return ref, ws2f, direct
+
+
+def _time_selective_calibration() -> "ComparisonCalibration":
+    """The guide's ``tsel``: the WS2F calibrated from the two windowed
+    responses, level and phase, 2 kHz to 20 kHz.
+    """
+    from phonometry import metrology
+
+    ref, ws2f, _ = _time_selective_pair()
+    fw = metrology.exact_frequencies(1900, 20000, fraction=3)
+    m_ref = _lumped_microphone(fw, -38.0, 22000, 1.1)
+    return metrology.sequential_comparison(
+        fw,
+        20 * np.log10(np.abs(m_ref)),
+        ref.level_db_at(fw),
+        ws2f.level_db_at(fw),
+        field="free_field",
+        phase=metrology.SequentialComparisonPhase(
+            reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
+            reference_output_phase_deg=ref.phase_deg_at(fw),
+            test_output_phase_deg=ws2f.phase_deg_at(fw),
+        ),
+    )
+
+
+def _pressure_phase_comparison() -> "ComparisonCalibration":
+    """The guide's ``cp``: the WS2P of the pressure calibration with the phase
+    readings of the two channels.
+    """
+    from phonometry import metrology
+
+    f = metrology.exact_frequencies(250, 20000, fraction=3)
+    x = f / 1000
+    l_ref = -38.0 + 0.04 * np.log10(x) - 0.25 * (x / 20) ** 2
+    l_true = -38.6 + 0.08 * np.log10(x) + 0.2 * (x / 12) ** 2 - 0.5 * (x / 20) ** 4
+    gain_1, gain_2 = 0.35, -0.20
+    field_a = 0.03 * np.sqrt(x)
+    rng = np.random.default_rng(61094)
+    noise = rng.normal(0.0, 0.004, (2, 3, f.size))
+    l_c12 = (l_ref + gain_1) - (l_true + gain_2) + field_a + noise[0]
+    l_c21 = (l_true + gain_1) - (l_ref + gain_2) + field_a + noise[1]
+    phi_ref = np.degrees(np.angle(1 / (1 - (f / 22000) ** 2 + 1.1j * f / 22000)))
+    phi_true = np.degrees(np.angle(1 / (1 - (f / 18000) ** 2 + 0.9j * f / 18000)))
+    shift_1, shift_2 = 1.5 * x, -0.8 * x
+    late_a = 0.4 * x
+    jitter = np.random.default_rng(5).normal(0.0, 0.02, (2, 3, f.size))
+    p12 = (phi_ref + shift_1) - (phi_true + shift_2) + late_a + jitter[0]
+    p21 = (phi_true + shift_1) - (phi_ref + shift_2) + late_a + jitter[1]
+    return metrology.simultaneous_comparison(
+        f,
+        l_ref,
+        l_c12,
+        l_c21,
+        phase=metrology.SimultaneousComparisonPhase(
+            reference_sensitivity_phase_deg=phi_ref,
+            channel_phase_difference_deg=p12,
+            interchanged_channel_phase_difference_deg=p21,
+        ),
+    )
+
+
+def generate_comparison_phase(output_dir: str) -> None:
+    """IEC 61094-5 5.1.1 and IEC 61094-8 5.1: the phase of the sensitivity, in
+    a coupler through the interchange and in a free field through a window.
+    """
+    print("Generating comparison_phase...")
+    fig, (ax_pressure, ax_free) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    _pressure_phase_comparison().plot(ax_pressure, quantity="phase", language=_LANG)
+    _time_selective_calibration().plot(ax_free, quantity="phase", language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_phase.svg")
+    plt.close()
+
+
+def generate_comparison_impedance(output_dir: str) -> None:
+    """IEC 61094-5 7.4 and 7.5: a WS2F in the place of an LS2P in a coupler."""
+    print("Generating comparison_impedance...")
+    from phonometry import metrology
+
+    fi = metrology.exact_frequencies(1000, 20000, fraction=3)
+    # The lumped impedance of IEC 61094-2 E.4; the front cavity, that of an
+    # LS2aP in Table C.1, does not enter the equivalent volume.
+    ls2p, ws2f = (
+        metrology.ReciprocityMicrophone(
+            equivalent_volume_m3=volume,
+            resonance_frequency_hz=resonance,
+            loss_factor=loss,
+            front_cavity_volume_m3=34e-9,
+            front_cavity_depth_m=0.5e-3,
+            front_cavity_diameter_m=9.3e-3,
+        )
+        for volume, resonance, loss in ((10e-9, 22000, 1.1), (30e-9, 16000, 0.5))
+    )
+    ratio = metrology.impedance_pressure_ratio(
+        fi,
+        reference_equivalent_volume_m3=ls2p.complex_equivalent_volume_m3(fi),
+        test_equivalent_volume_m3=ws2f.complex_equivalent_volume_m3(fi),
+        coupling_equivalent_volume_m3=600e-9,
+    )
+    fig, (ax_level, ax_phase) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    ratio.plot(ax_level, language=_LANG)
+    ratio.plot(ax_phase, quantity="phase", language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_impedance.svg")
+    plt.close()
+
+
+def generate_stepped_sine_impulse_response(output_dir: str) -> None:
+    """IEC 61094-8 B.2: the WS2F's impulse response from the stepped sine,
+    the whole record of 1/(50 Hz).
+    """
+    print("Generating stepped_sine_impulse_response...")
+    _ir_ref, ir_ws2f, _direct = _stepped_sine_pair()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ir_ws2f.plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "stepped_sine_impulse_response.svg")
+    plt.close()
+
+
+def generate_time_selective_response(output_dir: str) -> None:
+    """IEC 61094-8 B.1.3 and B.2: the WS2F's impulse response through the
+    window, and its response with and without the reflection.
+    """
+    print("Generating time_selective_response...")
+    _ref, ws2f, direct = _time_selective_pair()
+    fig, (ax_time, ax_response) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    ws2f.plot(ax_time, language=_LANG)
+    ax_time.set_xlim(1000.0 * (direct - 0.0015), 1000.0 * (direct + 0.0035))
+    ws2f.plot(
+        ax_response,
+        quantity="response",
+        frequencies_hz=np.geomspace(1000.0, 40000.0, 300),
+        language=_LANG,
+    )
+    fig.tight_layout()
+    save_figure(output_dir, "time_selective_response.svg")
+    plt.close()
+
+
+def generate_rectangular_pulse(output_dir: str) -> None:
+    """IEC 61094-8 B.6: the pulse of Formula (B.10) for a 20 kHz upper limit."""
+    print("Generating rectangular_pulse...")
+    from phonometry import metrology
+
+    pulse = metrology.rectangular_pulse(
+        metrology.rectangular_pulse_duration_s(20000), amplitude_v=10.0
+    )
+    fig, ax = plt.subplots(figsize=(10, 6))
+    pulse.plot(ax, upper_frequency_hz=20000.0, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "rectangular_pulse.svg")
     plt.close()
 
 

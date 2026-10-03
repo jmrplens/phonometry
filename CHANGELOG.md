@@ -133,6 +133,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   pressure. A new guide under Calibration and uncertainty, with a diagram of
   the readings, runs a pressure and a free-field calibration with their
   budgets, in English and Spanish.
+
+- **Calibrate the phase of a working standard microphone by comparison,
+  correct for microphones of different acoustic impedance, and keep only the
+  direct sound of a free-field calibration with a time window (IEC 61094-5,
+  IEC 61094-8 Annex B).** `metrology.simultaneous_comparison` and
+  `metrology.sequential_comparison` take the phase of the reference's
+  sensitivity and the phase readings beside the level ones, together as a
+  `metrology.SimultaneousComparisonPhase` or a
+  `metrology.SequentialComparisonPhase`, the sequential one takes its
+  monitor microphone's levels and phases as one `metrology.MonitorReadings`
+  in place of its `reference_monitor_level_db` and `test_monitor_level_db`,
+  and the `ComparisonCalibration` they return gives `sensitivity_phase_deg`: the
+  interchange of Annex C cancels the phase shifts of the channels and of the
+  coupler as it cancels their gains, and the monitor cancels a source that
+  drifts in phase; `.plot(quantity="phase")` draws it. `metrology.impedance_pressure_ratio`
+  gives the ratio of the sound pressures on two microphones of different
+  acoustic impedance (7.4, 7.5), in a closed coupler by IEC 61094-2
+  Formula (3) or with the air between them in series, a divider that is the
+  library's reading of the sentence of Table D.1 that describes it, from each
+  microphone's equivalent volume, which the lumped parameters of
+  IEC 61094-2 E.4 that a `metrology.ReciprocityMicrophone` holds give through
+  its `complex_equivalent_volume_m3`; its level and phase go to a comparison as
+  the pressure ratio, or its standard uncertainty to the budget as the
+  impedance component, which above 10 kHz for a WS2F against an LS2P
+  Table D.1 asks to be established experimentally. For IEC 61094-8 Annex B,
+  `metrology.time_selective_response` weights an impulse response with a
+  time window of the shapes B.1.3 names, with the tapered edges B.1.2 says
+  it normally has, and transforms what is left at any frequency (Formula
+  (B.2)), with the response of the whole record beside it;
+  `metrology.stepped_sine_impulse_response` takes a stepped-sine measurement
+  to the time domain (Formula (B.3)); `metrology.reflection_free_window_s`
+  gives the longest window that keeps a reflection out of the region of
+  Formula (B.1); and `metrology.rectangular_pulse` and
+  `metrology.rectangular_pulse_duration_s` are the pulse of the direct
+  impulse method (B.6, Formula (B.10)), read as the pulse of duration $2b$
+  its formula describes. Every result object has `.plot()` (the two window
+  and pulse durations are plain numbers), the new pieces are
+  conformance rows on the printed numbers of B.2.2, B.6.1 and Table D.1 and
+  on the formulas they come from, two defects of B.2.1 are in the errata (a
+  cross-reference to Formula (B.2) where (B.3) is meant, and the frequency
+  increment said to set the time resolution where B.2.2 has it set the
+  length), and the comparison-calibration guide gains three sections in
+  English and Spanish.
+
 - **Take a solid's row into the elastic simulation and the detailed building
   model, and a ground's into the outdoor models.** A solid's catalogue row,
   one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your

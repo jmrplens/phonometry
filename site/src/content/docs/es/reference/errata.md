@@ -2671,6 +2671,65 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
   numérica).
 
+## IEC 61094-8:2012, B.2.1 (el rango de frecuencias que se exige a la transformada en el tiempo)
+
+- **Ubicación:** Anexo B, B.2.1 «Outline of method» del método de la
+  sinusoide por pasos (folio impreso 25), el párrafo que sigue a las
+  Fórmulas (B.2) y (B.3).
+- **El impreso:** «The other requirement evident from **Equation B.2** is that
+  the frequency range must effectively extend from -∞ to ∞, or 0 to ∞ for a
+  single-sided frequency response.» Las fórmulas son, en el folio 24,
+  $H(f) = \int_{-\infty}^{\infty} h(t)\exp(-\mathrm{j}2\pi f t)\,\mathrm{d}t$
+  (B.2) y
+  $h(t) = \int_{-\infty}^{\infty} H(f)\exp(\mathrm{j}2\pi f t)\,\mathrm{d}f$
+  (B.3).
+- **El problema:** (B.2) integra en el tiempo; la integral en frecuencia, de
+  $-\infty$ a $\infty$, es la de (B.3), la transformada inversa que el mismo
+  subapartado aplica primero para llevar la respuesta en frecuencia medida al
+  dominio del tiempo («an inverse Fourier transform, Equation B.3, can be
+  applied to transform this response to the time domain»). La exigencia sobre
+  el rango de frecuencias de la medida se desprende de la **Ecuación B.3**.
+- **Evidencia:** la variable de integración de las dos fórmulas, leída frente
+  al orden en que B.2.1 las aplica. Verificado en las páginas 26 y 27 del PDF
+  (pp. 24 y 25 impresas) de BS EN 61094-8:2012, el texto inglés de
+  EN 61094-8:2012, que es IEC 61094-8:2012 sin cambios.
+- **Comportamiento de la biblioteca:** `metrology.stepped_sine_impulse_response`
+  calcula (B.3) y pide la respuesta medida desde 0 Hz, la forma de un solo
+  lado del rango que describe la frase; no hizo falta ningún cambio.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 61094-8:2012, B.2.1 (el incremento de frecuencia, al que se atribuye la resolución temporal)
+
+- **Ubicación:** Anexo B, B.2.1 «Outline of method» del método de la
+  sinusoide por pasos (folio impreso 25), el párrafo sobre la transformada
+  rápida de Fourier.
+- **El impreso:** «These require the frequency response to be measured at
+  discrete frequencies and linearly spaced frequency increments. The
+  frequency increment chosen will determine the **time domain resolution**.»
+  El B.2.2, en la misma página: «Because the **length** of the impulse
+  response will be the inverse of the size of the frequency step, the size
+  of the room will influence the choice of frequency resolution», y fija el
+  paso por la duración: 120 Hz «because the primary reflections all occur
+  before 8 ms».
+- **El problema:** una respuesta medida en $K + 1$ frecuencias $k\,\Delta f$
+  desde 0 Hz se transforma en $N = 2K + 1$ muestras separadas
+  $1/(N\,\Delta f)$, en torno a $1/(2 f_\mathrm{max})$, a lo largo de una
+  duración $1/\Delta f$. El incremento fija la duración de la respuesta al
+  impulso, como dice el B.2.2; el paso temporal, la resolución, lo fija el
+  rango de frecuencias, que el propio B.2.1 sitúa en «about three times the
+  resonance frequency of the microphones». La frase ha de leerse «time domain
+  length» o «the length of the time record».
+- **Evidencia:** el B.2.1 leído frente al B.2.2 y frente a la transformada
+  que aplican los dos. Verificado en la página 27 del PDF (p. 25 impresa) de
+  BS EN 61094-8:2012, el texto inglés de EN 61094-8:2012, que es
+  IEC 61094-8:2012 sin cambios.
+- **Comportamiento de la biblioteca:** `metrology.SteppedSineImpulseResponse`
+  sigue el B.2.2: su `duration_s` es $1/\Delta f$ y su `sample_rate_hz` es
+  $N\,\Delta f$; no hizo falta ningún cambio.
+- **Estado:** sin notificar (defecto de redacción, sin consecuencia
+  numérica).
+
 ## IEC 61094-8:2012, B.6.1, Fórmula (B.10) (el espectro de un pulso de duración 2b llamado de duración b)
 
 - **Ubicación:** Anexo B, B.6.1 «Outline of methods» del método de excitación
@@ -2695,9 +2754,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cero y en su primer cero. Verificado en la página 30 del PDF (p. 28 impresa)
   de BS EN 61094-8:2012, el texto inglés de EN 61094-8:2012, que es
   IEC 61094-8:2012 sin cambios.
-- **Comportamiento de la biblioteca:** el método de impulso directo, que B.6.2
-  da por «largely superseded», no está implementado; no hizo falta ningún
-  cambio.
+- **Comportamiento de la biblioteca:** `metrology.rectangular_pulse` sigue la
+  fórmula y su primer cero y lee $b$ como la semiduración: toma la duración
+  completa $T = 2b$, su `first_zero_hz` es $1/T = 1/(2b)$ y su espectro es
+  (B.10) con $b = T/2$. `metrology.rectangular_pulse_duration_s` da
+  $T$ = 5 µs para 20 kHz, y las filas de conformidad de B.6.1
+  ([`scripts/conformance/domains/comparison_calibration.py`](https://github.com/jmrplens/phonometry/blob/main/scripts/conformance/domains/comparison_calibration.py))
+  y los tests fijan el espectro tal como se imprime frente a él
+  ([`tests/metrology/test_comparison_phase_impedance_time.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_comparison_phase_impedance_time.py)).
 - **Estado:** sin notificar.
 
 ## IEC 61094-2:2009, Tablas B.1 y B.2 (un radio impreso con cuatro cifras, un punto decimal y una cifra perdida)

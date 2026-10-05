@@ -54,7 +54,7 @@ funciones de transferencia y no de una norma: los **pares complementarios de
 Golay** (una tercera excitación cuya deconvolución está *exactamente* libre
 de ruido de correlación), los **barridos conformados** cuyo espectro de
 magnitud sigue cualquier objetivo prescrito conservando el factor de cresta
-de un seno barrido, y la **inversión regularizada** de una respuesta medida -
+de un barrido sinusoidal, y la **inversión regularizada** de una respuesta medida -
 la herramienta que convierte la respuesta medida de un altavoz o micrófono en
 un ecualizador seguro, y el puente entre las dos anteriores: la inversa de
 una respuesta medida es el objetivo espectral natural para el barrido de la
@@ -238,7 +238,7 @@ $$
 (Ecs. (11)-(12)), integrar el retardo de grupo en una fase, y aplicar la FFT
 inversa. El barrido sigue entonces *cualquier* forma espectral con una
 envolvente casi constante, manteniendo el factor de cresta cerca del ideal
-de 3,01 dB de un seno barrido - a diferencia de una señal de ruido con el
+de 3,01 dB de un barrido sinusoidal - a diferencia de una señal de ruido con el
 mismo espectro, que queda ~6 dB por encima. `shaped_sweep_signal` implementa
 la construcción con los detalles de limitación en banda y de fase en Nyquist
 del artículo; `target` es `"pink"` (el énfasis clásico de medición de salas,
@@ -258,7 +258,7 @@ sweep.plot(language="es")
 *Los dos paneles son la misma afirmación vista dos veces. La envolvente es plana
 porque la forma se compró con tiempo de permanencia y no con amplitud, que es
 por lo que el factor de cresta es de 4,22 dB: 1,2 dB por encima del ideal de
-3,01 dB de un seno barrido y unos 6 dB por debajo del ruido conformado con el
+3,01 dB de un barrido sinusoidal y unos 6 dB por debajo del ruido conformado con el
 mismo espectro. El espectro de Welch medido ajusta −3,013 dB/octava y se queda
 a menos de 0,74 dB del objetivo rosa en toda la banda de 50 Hz a 5 kHz, así que
 lo que ve el amplificador es el objetivo y no una aproximación suya.*
@@ -586,7 +586,7 @@ correlación de un *montaje estacionario* (bancos de HRTF, útiles de
 calibración), donde 3 dB de relación señal-ruido salen baratos y a lo que se ha
 venido es al último decimal de la respuesta al impulso. El análisis armónico de
 lo que los barridos *descartan* vive en
-[distorsión con seno barrido](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+[distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
 La maquinaria de Welch usada para verificar el barrido conformado es la
 página de [análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/),
 y las respuestas ecualizadas alimentan la misma cadena posterior que
@@ -622,7 +622,7 @@ de su Ec. 17.
 ## Véase también
 
 - [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): las excitaciones de barrido y MLS de ISO 18233 junto a las que se sitúa el par de Golay.
-- [Distorsión con seno barrido](/phonometry/es/devices/electroacoustics/swept-sine-distortion/): leer los paquetes armónicos que un barrido separa.
+- [Distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/): leer los paquetes armónicos que un barrido separa.
 - [Altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/): el eje de referencia, la distancia y las condiciones de campo libre que necesita la respuesta medida.
 - [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/): la maquinaria de Welch que verifica el barrido conformado, y el suavizado que la inversión quiere antes.
 - [Correlación y retardo](/phonometry/es/signals/spectra/correlation-delay/): la medida de retorno que alinea los dos registros de Golay.

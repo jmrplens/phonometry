@@ -194,7 +194,11 @@ decimal-comma:
 # and "aqui", and every other gate was green: the language gate saw translated
 # strings and the figures matched their generator. This fails on a Spanish
 # value carrying a form that is never correct without its accent or eñe, in the
-# tables and in the example fiches whose builders ask for Spanish.
+# tables, in the labels of every published Spanish figure and in the example
+# fiches whose builders ask for Spanish. It also holds the translation glossary,
+# there and in the Spanish pages: «seno» for the waveform (the glossary's
+# «sinusoide») and «incertidumbre extendida» (the GUM's «incertidumbre
+# expandida») shipped in about fifty places with every gate green.
 spanish-accents:
 	$(PYTHON) scripts/check_spanish_accents.py
 

@@ -200,7 +200,7 @@ print(f"  raíz de la media de los cuadrados entre 3 = {np.sqrt(np.mean(counted*
 **Empieza el registro antes del suceso.** Todos los filtros de aquí arrancan en
 reposo, así que un registro que empieza con la señal ya a plena amplitud lleva
 dentro el transitorio de arranque del propio filtro, y el pico es un retenedor
-de máximo que se lo queda. Un seno de 1 mm/s arrancado en un paso por cero
+de máximo que se lo queda. Una sinusoide de 1 mm/s arrancada en un paso por cero
 marca 1,06 mm/s en lugar de los 1,00 mm/s del 6.2.3.12. Eso es una propiedad del
 registro, no de la cadena, y un segundo de silencio por delante del suceso lo
 quita.
@@ -208,7 +208,7 @@ quita.
 ## 3. Los números que la norma imprime para que un vibrómetro los reproduzca
 
 Dos tablas hacen que la cadena se pueda comprobar y no solo especificar. La
-tabla 9 (folio impreso 35) dice qué tiene que marcar un seno de 1 mm/s en cinco
+tabla 9 (folio impreso 35) dice qué tiene que marcar una sinusoide de 1 mm/s en cinco
 frecuencias, y la tabla 8, en la redacción que le da la [corrección
 1](/phonometry/es/reference/errata/), dice lo mismo para un tren de ráfagas.
 Están publicadas aquí como datos, y el informe de conformidad las ejecuta:
@@ -224,7 +224,7 @@ print(vibration.KB_REFERENCE_INDICATIONS)
 ```
 
 Que `KB_Fmax` esté por encima de `KB_F` en todas las filas no es una ganancia:
-es la **ondulación** del valor eficaz móvil de un seno, de la que trata el anexo
+es la **ondulación** del valor eficaz móvil de una sinusoide, de la que trata el anexo
 B, y es lo que hace que estos valores merezcan la pena como oráculo. En ningún
 sitio hay una forma cerrada para la pareja, así que una comprobación que los
 reproduce comprueba la cadena entera: filtro, cuadrado, promediado y máximo a la

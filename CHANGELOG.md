@@ -1833,6 +1833,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The Spanish edition calls a sine wave a sinusoide, and an expanded
+  uncertainty an incertidumbre expandida.** Thirty-nine places of the Spanish
+  guides, the Spanish errata register, the site's glossary and the BS.1770
+  diagram named the waveform "seno", which in Spanish is the trigonometric
+  function: "un seno de 1 kHz", "seno escalonado", "seno por pasos", "seno
+  barrido". They now say "sinusoide", "sinusoide por pasos" and "barrido
+  sinusoidal", as the Spanish signal-processing literature does, and the five
+  places built on the adjective "senoidal", two figures among them, now say
+  "sinusoidal" ("semisinusoidal" for a half-sine pulse, which the
+  heavy-impact example had also called a "semiseno"). A tone-audibility
+  fiche built with `language="es"` printed the ISO/PAS 20065 uncertainty
+  as "Incertidumbre extendida"; it now prints the GUM's Spanish,
+  "Incertidumbre expandida". The function keeps its name where it is the
+  function: the sine of an angle, the sine terms of a printed formula, the
+  discrete sine transform. `make spanish-accents` now reads the Spanish
+  pages, the site's Spanish strings, data and components and the Spanish
+  twins under `docs/` for the translation glossary as well as the
+  translation tables, the scripts and components as written, since their
+  dollars and backticks are JavaScript and not mathematics or code. It also
+  reads the labels of every published Spanish figure, for the accents and
+  the glossary alike, so a Spanish string that a figure module draws on its
+  own, past both translation tables, is read as well. It fails on
+  "incertidumbre extendida", on "senoide", "senoidal" and "semiseno", and on
+  every "seno" that is not in one of the trigonometric contexts it lists
+  with their reasons.
+
 - **A type checker accepts a `bool` held in a variable for the form of a
   survey's reverberation index and for a calibration's tone estimate.**
   `building.estimate_reverberation_index` was typed for `weighted=True` and

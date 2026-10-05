@@ -242,13 +242,13 @@ ISO 10846-2; en la práctica el suelo lo fijan el banco y su instrumentación)
 hasta donde se cuelan las resonancias propias del banco, típicamente unos pocos
 cientos de hercios para elementos grandes.
 
-**Excitación y promediado** (ISO 10846-2, 7.5). La fuente puede ser un seno
-escalonado discretamente, un seno barrido, un seno barrido periódicamente o
-ruido de banda limitada. Debe aplicarse el tiempo suficiente para que duplicar
-el tiempo de promediado cambie el resultado como mucho **0,1 dB**; y para el
-seno escalonado o barrido periódicamente, las frecuencias de la fuente deben
-espaciarse de modo que cada banda de tercio de octava para la que se declare
-rigidez contenga al menos **cinco** de ellas.
+**Excitación y promediado** (ISO 10846-2, 7.5). La fuente puede ser una
+sinusoide por pasos discretos, un barrido sinusoidal, un barrido sinusoidal
+periódico o ruido de banda limitada. Debe aplicarse el tiempo suficiente para
+que duplicar el tiempo de promediado cambie el resultado como mucho
+**0,1 dB**; y para la sinusoide por pasos o el barrido periódico, las
+frecuencias de la fuente deben espaciarse de modo que cada banda de tercio de
+octava para la que se declare rigidez contenga al menos **cinco** de ellas.
 
 **Las demás direcciones.** Un apoyo bajo una máquina trabaja a cortante además
 de a compresión, y su rigidez transversal suele ser la menor de las dos. El
@@ -438,8 +438,8 @@ $$
 cuadrado y no el nivel da peso a los máximos, que las partes llaman
 «normalmente los más importantes», y la fase se pierde. Las cinco líneas son
 además un requisito de la medida: el analizador debe resolver al menos cinco
-frecuencias distintas por banda, y un seno por pasos o en barrido debe poner
-cinco en cada banda de la que se declare un valor. Por eso
+frecuencias distintas por banda, y una sinusoide por pasos o un barrido debe
+poner cinco en cada banda de la que se declare un valor. Por eso
 `band_averaged_stiffness` deja sin valor (NaN) una banda de una a cuatro líneas
 y emite un `TransferStiffnessWarning`, en lugar de promediar demasiado pocas.
 Asigna cada línea a la banda de base diez que la contiene, nombra las bandas

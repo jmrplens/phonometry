@@ -2871,7 +2871,7 @@ export const glossary = [
         guide: "devices/electroacoustics/electroacoustics",
         definition: {
           en: "Dynamic intermodulation distortion, measured with a 15 kHz sine against a filtered 3.15 kHz square wave.",
-          es: "Distorsión de intermodulación dinámica, medida con un seno de 15 kHz frente a una onda cuadrada de 3,15 kHz filtrada.",
+          es: "Distorsión de intermodulación dinámica, medida con una sinusoide de 15 kHz frente a una onda cuadrada de 3,15 kHz filtrada.",
         },
       },
       {

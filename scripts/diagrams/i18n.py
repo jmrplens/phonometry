@@ -2218,7 +2218,7 @@ _ES: dict[str, str] = {
     "overhead at 45° (≈ 212 m)": "micrófonos a 1,2 m del suelo; el par lateral ve el helicóptero en "
     "la vertical con 45° (oblicua ≈ 212 m)",
     # Swept-sine distortion (Farina / Novak)
-    "Swept-sine distortion: deconvolution and harmonic pre-arrivals": "Distorsión por barrido senoidal: deconvolución y prellegadas "
+    "Swept-sine distortion: deconvolution and harmonic pre-arrivals": "Distorsión por barrido sinusoidal: deconvolución y prellegadas "
     "armónicas",
     "Exponential sweep $x(t)$": "Barrido exponencial $x(t)$",
     "20 Hz → 6 kHz in $T$ = 4 s": "20 Hz → 6 kHz en $T$ = 4 s",
@@ -2548,7 +2548,7 @@ _ES: dict[str, str] = {
     # Programme loudness (ITU-R BS.1770 / EBU R 128)
     "Programme loudness: the BS.1770 / R 128 metering chain": "Sonoridad de programa: la cadena de medición BS.1770 / R 128",
     "Programme $x$, channel weights $G_i$: 1.0 front, 1.41 surround": "Programa $x$, pesos de canal $G_i$: 1,0 frontales, 1,41 envolventes",
-    "anchor: a 0 dB FS 997 Hz sine on one front channel reads −3.01 LKFS": "ancla: un seno de 997 Hz a 0 dB FS en un canal frontal marca "
+    "anchor: a 0 dB FS 997 Hz sine on one front channel reads −3.01 LKFS": "ancla: una sinusoide de 997 Hz a 0 dB FS en un canal frontal marca "
     "−3,01 LKFS",
     "K-weighting: +4 dB spherical-head shelf + RLB high-pass": "Ponderación K: estante de +4 dB (cabeza esférica) + paso alto RLB",
     "$L_K = −0.691 + 10·log_{10} Σ G_i·z_i$;  LKFS ≡ LUFS, 1 LU = 1 dB": "$L_K = −0,691 + 10·log_{10} Σ G_i·z_i$;  LKFS ≡ LUFS, 1 LU = 1 dB",

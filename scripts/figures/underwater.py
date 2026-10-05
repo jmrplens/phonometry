@@ -12,7 +12,12 @@ from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
 import numpy as np
 
-from phonometry._plot.common import format_frequency_axis, theme_fill, theme_line
+from phonometry._plot.common import (
+    _OFFSET_POINTS,
+    format_frequency_axis,
+    theme_fill,
+    theme_line,
+)
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -346,7 +351,7 @@ def generate_weston_regimes(output_dir: str) -> None:
             name,
             xy=(boundary, 22.0),
             xytext=(4, 0),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             fontsize=9,
             color=COLOR_SECONDARY,
         )
@@ -1260,7 +1265,7 @@ def generate_sonar_budget(output_dir: str) -> None:
                 f"{r50:.1f} km",
                 xy=(r50, fom),
                 xytext=(0, dy + step * k),
-                textcoords="offset points",
+                textcoords=_OFFSET_POINTS,
                 fontsize=8.5,
                 color=color,
                 ha="center",
@@ -1383,7 +1388,7 @@ def generate_ray_turning_point(output_dir: str) -> None:
                 f"traced      = {deepest:.1f} m",
                 xy=(r_turn, z_turn),
                 xytext=(26, -62),
-                textcoords="offset points",
+                textcoords=_OFFSET_POINTS,
                 fontsize=8.5,
                 color=COLOR_FG,
                 bbox={
@@ -1508,7 +1513,7 @@ def generate_gaussian_beam_caustic(output_dir: str) -> None:
         "source at 992.5 m",
         xy=(0.0, z_src),
         xytext=(16, 20),
-        textcoords="offset points",
+        textcoords=_OFFSET_POINTS,
         fontsize=9,
         color=COLOR_FG,
         bbox={
@@ -1679,7 +1684,7 @@ def generate_eigenray_arrivals(output_dir: str) -> None:
         "one surface touch: sign flipped,\n4.4 ms behind the direct",
         xy=(float(t_ms[1]), float(loss[1])),
         xytext=(20, 42),
-        textcoords="offset points",
+        textcoords=_OFFSET_POINTS,
         fontsize=9,
         color=COLOR_FG,
         ha="left",
@@ -2206,7 +2211,7 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
                     f"{n_cross:.0f}",
                     xy=(n_cross, level),
                     xytext=(0, -6),
-                    textcoords="offset points",
+                    textcoords=_OFFSET_POINTS,
                     fontsize=8.5,
                     color=color,
                     ha="center",

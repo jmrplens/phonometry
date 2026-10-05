@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
 
-from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry._plot.common import _OFFSET_POINTS, format_frequency_axis, theme_fill
 from phonometry.environment import (
     PassByMeasurement,
     ReferenceTrackCheck,
@@ -491,7 +491,7 @@ def generate_cnossos_road_speed_law(output_dir: str) -> None:
             f"crossover {speeds[crossing]:.0f} km/h",
             xy=(speeds[crossing], rolling[crossing]),
             xytext=(6, -16),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             fontsize=9,
             color=color,
         )

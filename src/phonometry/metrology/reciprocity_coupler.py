@@ -105,6 +105,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.special import jn_zeros, jv
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.validation import (
     require_choice,
@@ -1772,7 +1773,13 @@ class CouplerCheck:
 
 
 def _within(value: float, bounds: tuple[float, float]) -> bool:
-    return bounds[0] <= value <= bounds[1]
+    """Whether a value is in a printed range, ends included, read in decimal.
+
+    The length-to-diameter ratio of a coupler is a sum of decimal lengths over
+    a decimal diameter, and one that is 0,5 in decimal comes out
+    0,499 999 999 999 999 9 in binary; settled, it is on the range.
+    """
+    return bool(bounds[0] <= float(settled(value)) <= bounds[1])
 
 
 def check_coupler(

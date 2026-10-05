@@ -925,6 +925,34 @@ jobs:
     - name: Check that no reference value is a copy or has no document
       run: python scripts/check_reference_values.py
 
+  # A standard prints its limits in decimal, and a margin of two readings that
+  # is 6 dB in decimal comes out 5,999 999 999 999 996 or 6,000 000 000 000 004
+  # in binary, so a verdict read straight off the comparison turns on the last
+  # bit. The sweep that settled this class fixed more than a hundred sites;
+  # this keeps the next one out. It fails on a computed decimal compared with a
+  # printed limit, or with zero, that is neither settled through
+  # phonometry._internal.boundary nor compared with a named slack, unless
+  # scripts/boundary_comparison_exemptions.tsv lists it with its reason, and on
+  # an exemption that no longer matches anything. Telling a computed value from
+  # a caller's means following it through assignments, calls and dataclass
+  # fields, so it is an AST data-flow walk rather than a grep. Static and
+  # dependency-free, so it runs on its own.
+  boundary-comparisons:
+    name: No verdict hangs on the last bits of a computed decimal
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that every boundary comparison is settled or exempted with a reason
+      run: python scripts/check_boundary_comparisons.py
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass

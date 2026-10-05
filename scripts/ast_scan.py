@@ -6,6 +6,9 @@ files, name a finding by the file and the function that holds it, and keep an
 escape hatch keyed the same way, which reports itself once it covers nothing.
 The walking, the naming and the hatch live here once, so that the guards agree
 on what a key is and a hatch entry written for one reads the same in the other.
+``check_boundary_comparisons.py`` keeps a hatch of its own: its key names the
+comparison as well as the function, and a line excuses one copy of it, so a
+split by ``(file, function)`` would let a new comparison in under an old line.
 """
 
 from __future__ import annotations

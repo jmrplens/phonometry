@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from phonometry.aircraft import RotorcraftHemisphere
 
 from phonometry._plot.common import (
+    _OFFSET_POINTS,
     format_frequency_axis,
     theme_fill,
     theme_fill_alpha,
@@ -1553,7 +1554,7 @@ def generate_rotorcraft_mean_ground_plane(output_dir: str) -> None:
             label,
             xy=((px + fx) / 2, (py + m * fx + c) / 2),
             xytext=(10 * side, 8),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             fontsize=9,
             color=color,
             ha="left" if side > 0 else "right",
@@ -1683,7 +1684,7 @@ def generate_rotorcraft_flight_conditions(output_dir: str) -> None:
                 f"{weight:.2f}",
                 xy=(px, py),
                 xytext=(7, 6),
-                textcoords="offset points",
+                textcoords=_OFFSET_POINTS,
                 fontsize=9,
                 color=COLOR_TERTIARY,
                 fontweight="bold",

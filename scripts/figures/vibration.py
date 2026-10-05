@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 
-from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry._plot.common import _OFFSET_POINTS, format_frequency_axis, theme_fill
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -1632,7 +1632,7 @@ def generate_bearing_fault_envelope(output_dir: str) -> None:
             f"{order}×BPFO" if order > 1 else "BPFO",
             xy=(line, 1.02 * top),
             xytext=(3, 0),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             rotation=90,
             fontsize=8.5,
             color=COLOR_SECONDARY,
@@ -1808,7 +1808,7 @@ def generate_experimental_sea_clf(output_dir: str) -> None:
             _sci_math(value),
             xy=(label, value),
             xytext=(0, 4),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             fontsize=8.5,
             color=COLOR_FG,
@@ -2393,7 +2393,7 @@ def generate_mobility_random_error(output_dir: str) -> None:
             f"{needed:.0f}",
             xy=(needed, 5.0),
             xytext=(0, -14),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             fontsize=9,
             color=colour,
@@ -3216,7 +3216,7 @@ def generate_machine_alarm_trip(output_dir: str) -> None:
             f"{note}: {alarm:.3g} mm/s",
             xy=(x + 0.28, alarm),
             xytext=(0.0, 2.0),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="left",
             va="bottom",
             fontsize=9,
@@ -3485,7 +3485,7 @@ def generate_machine_vibration_trend(output_dir: str) -> None:
             str(zone),
             xy=(month, reading),
             xytext=(0, 11),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             va="bottom",
             fontsize=9.5,

@@ -13,7 +13,7 @@ standing on it. Everything here is embedded by a page under
 import matplotlib.pyplot as plt
 import numpy as np
 
-from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry._plot.common import _OFFSET_POINTS, format_frequency_axis, theme_fill
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -1096,7 +1096,7 @@ def generate_impact_prediction_terms(output_dir: str) -> None:
             _fmt_minus(value, "+.1f"),
             xy=(bar.get_x() + bar.get_width() / 2.0, value),
             xytext=(0, 5 if value >= 0 else -14),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             fontsize=10,
             color=COLOR_FG,

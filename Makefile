@@ -287,6 +287,15 @@ raises-blocks:
 reference-values:
 	$(PYTHON) scripts/check_reference_values.py
 
+# A margin of two readings that is 6 dB in decimal comes out either side of
+# 6 dB in binary, so a verdict read straight off the comparison turns on the
+# last bit. This fails on a computed decimal compared with a printed limit, or
+# with zero, that is neither settled through phonometry._internal.boundary nor
+# compared with a named slack, unless scripts/boundary_comparison_exemptions.tsv
+# lists it with the reason it cannot sit on the limit. Stdlib only.
+boundary-comparisons:
+	$(PYTHON) scripts/check_boundary_comparisons.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -663,5 +672,6 @@ check: lint security test
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
+	boundary-comparisons \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

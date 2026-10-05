@@ -96,7 +96,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-perf = ["numba>=0.67.0"]
+perf = ["numba>=0.68.0"]
 plot = ["matplotlib>=3.11.2"]
 report = ["reportlab>=5.0.0", "svglib>=2.1.0"]
 # The base install already reads the whole linear WAV family (PCM, float,
@@ -105,7 +105,7 @@ report = ["reportlab>=5.0.0", "svglib>=2.1.0"]
 # python-soundfile, whose wheel bundles libsndfile (LGPL-2.1, dynamically
 # linked).
 audio = ["soundfile>=0.14.0"]
-full = ["numba>=0.67.0", "matplotlib>=3.11.2", "reportlab>=5.0.0", "svglib>=2.1.0", "soundfile>=0.14.0"]
+full = ["numba>=0.68.0", "matplotlib>=3.11.2", "reportlab>=5.0.0", "svglib>=2.1.0", "soundfile>=0.14.0"]
 
 [project.urls]
 "Homepage" = "https://jmrp.io/docs/phonometry"

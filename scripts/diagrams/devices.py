@@ -15,9 +15,18 @@ import itertools
 import math
 from typing import TYPE_CHECKING, NamedTuple
 
-from .parts import _accel, _box_solid, _box_wire, _motion_arrows, _rot_arrow
+from .parts import (
+    _accel,
+    _box_solid,
+    _box_wire,
+    _hatch_rect,
+    _motion_arrows,
+    _rot_arrow,
+)
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .canvas import SVG, Theme
 
 # ---------------------------------------------------------------------------
@@ -5316,3 +5325,811 @@ def _d_headphone_measurement(s: SVG, th: Theme) -> None:
     for k, txt in enumerate(rules):
         s.circle(54, 452 + k * 24, 4.0, th.secondary)
         s.text(70, 457 + k * 24, txt, 12, th.muted, anchor="start")
+
+
+# ---------------------------------------------------------------------------
+# ISO 8297: the measurement contour round a multisource plant
+# ---------------------------------------------------------------------------
+
+
+def _nearest_on_polygon(
+    px: float, py: float, poly: Sequence[tuple[float, float]]
+) -> tuple[float, float]:
+    """The point of the closed polygon *poly* nearest to ``(px, py)``."""
+    best = poly[0]
+    best_d2 = math.inf
+    for (ax, ay), (bx, by) in itertools.pairwise((*poly, poly[0])):
+        vx, vy = bx - ax, by - ay
+        t = ((px - ax) * vx + (py - ay) * vy) / (vx * vx + vy * vy)
+        t = min(1.0, max(0.0, t))
+        qx, qy = ax + t * vx, ay + t * vy
+        d2 = (px - qx) ** 2 + (py - qy) ** 2
+        if d2 < best_d2:
+            best, best_d2 = (qx, qy), d2
+    return best
+
+
+def _d_plant_contour(s: SVG, th: Theme) -> None:
+    """ISO 8297: the contour round the plant, the microphone on it, the readings.
+
+    Left, the plan of Figure 1 (BS ISO 8297:1994, PDF page 12, printed p. 4):
+    the plant area S_p with a notch, the measurement contour of length l
+    round it, the measurement area S_m it encloses, positions spaced equally
+    along it (9.1.2.4) no more than twice the average measurement distance
+    apart (9.1.1 c), the distance d_i from a position to the nearest point of
+    the plant perimeter (9.1.2.2), the aspect angle of at most 180° (9.1.1 b)
+    and the reference direction of each microphone, horizontal and at 90° to
+    the contour (9.4). The window of the average distance is 9.1.1 a), on PDF
+    page 13 (p. 5) with the mean of 9.1.2.2 and the characteristic height of
+    9.2, the mean height of the midpoints of the sources. Right, the section:
+    the microphone at h = H + 0.025 √S_m or 5 m, whichever is the greater
+    (9.3, PDF page 14, p. 6), and the readings of 9.5.1 with the background
+    corrections of Table 2 on the same page; the calibrator is 7.3 (p. 5),
+    the environment clause 6 (p. 4), and the 5 dB rule step 2 of 10.2 (PDF
+    page 15, p. 7). The plan is a scheme, not to scale: the standard fixes the
+    distances by rule, not by number.
+    """
+    # ----- Plan (Figure 1) ----------------------------------------------------
+    s.text(285, 66, "On the plot plan (Figure 1)", 15, th.fg, bold=True)
+    cx0, cy0, cx1, cy1 = 50.0, 104.0, 520.0, 470.0
+    plant = (
+        (170.0, 196.0),
+        (360.0, 196.0),
+        (360.0, 262.0),
+        (430.0, 262.0),
+        (430.0, 380.0),
+        (170.0, 380.0),
+    )
+    # The measurement area: everything the contour encloses, the plant too.
+    s.rect(cx0, cy0, cx1 - cx0, cy1 - cy0, th.panel, "none")
+    pts = " L ".join(f"{x:.0f} {y:.0f}" for x, y in plant)
+    s.path(f"M {pts} Z", fill=th.bg, stroke="none")
+    # Cross-hatch of the plant area: the L is two rectangles, hatched on one
+    # set of diagonals so the strokes run on across the seam.
+    _hatch_rect(s, 170.0, 196.0, 360.0, 380.0, 22.0, th.secondary)
+    _hatch_rect(s, 360.0, 262.0, 430.0, 380.0, 22.0, th.secondary)
+    s.path(f"M {pts} Z", stroke=th.secondary, sw=2.4)
+    s.rect(186, 270, 168, 46, th.bg, th.secondary, rx=4, sw=1.0)
+    s.text(270, 290, "plant area $S_p$", 14, th.secondary, bold=True)
+    s.text(270, 308, "every source inside it", 11, th.muted)
+    s.rect(cx0, cy0, cx1 - cx0, cy1 - cy0, "none", th.primary, sw=2.4)
+
+    # Positions spaced equally along the contour, starting half a step in.
+    w_c, h_c = cx1 - cx0, cy1 - cy0
+    perimeter = 2 * (w_c + h_c)
+    n_pos = 14
+    step = perimeter / n_pos
+
+    def along(dist: float) -> tuple[float, float, float, float]:
+        """Point at *dist* along the contour and its inward normal."""
+        d = dist % perimeter
+        if d < w_c:
+            return cx0 + d, cy1, 0.0, -1.0
+        d -= w_c
+        if d < h_c:
+            return cx1, cy1 - d, -1.0, 0.0
+        d -= h_c
+        if d < w_c:
+            return cx1 - d, cy0, 0.0, 1.0
+        return cx0, cy0 + d - w_c, 1.0, 0.0
+
+    positions = [along(step * (k + 0.5)) for k in range(n_pos)]
+    for px, py, nx, ny in positions:
+        s.arrow(px + nx * 9, py + ny * 9, px + nx * 30, py + ny * 30, th.accent, 1.6)
+    # The measurement distance to the nearest point of the plant perimeter,
+    # drawn for two positions.
+    for k in (5, 12):
+        px, py, _, _ = positions[k]
+        qx, qy = _nearest_on_polygon(px, py, plant)
+        s.line(px, py, qx, qy, th.muted, 1.2, dash="2,4")
+    for px, py, _, _ in positions:
+        s.circle(px, py, 6.5, th.bg, th.primary, 2.0)
+    _, p12y, _, _ = positions[12]
+    s.text(126, p12y - 8, "$d_i$", 14, th.fg)
+
+    # D_m between two neighbours on the bottom side, under the contour.
+    (ax_, ay_, _, _), (bx_, by_, _, _) = positions[2], positions[3]
+    s.dim(ax_, ay_, bx_, by_, "$D_m ≤ 2d̄$", offset=34, size=13)
+    s.text(cx0, 500, "measurement contour, length $l$", 13, th.primary, anchor="start")
+
+    # The aspect angle at a position on the top side: the plant seen inside it.
+    tx, ty, _, _ = positions[8]
+    ends = (plant[0], plant[3])
+    for ex, ey in ends:
+        s.line(tx, ty, ex, ey, th.muted, 1.0, dash="5,4")
+    a0 = math.atan2(ends[0][1] - ty, ends[0][0] - tx)
+    a1 = math.atan2(ends[1][1] - ty, ends[1][0] - tx)
+    r_arc = 34.0
+    s.path(
+        f"M {tx + r_arc * math.cos(a0):.1f} {ty + r_arc * math.sin(a0):.1f} "
+        f"A {r_arc:.0f} {r_arc:.0f} 0 0 0 {tx + r_arc * math.cos(a1):.1f} "
+        f"{ty + r_arc * math.sin(a1):.1f}",
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.text(tx, 90, "aspect angle ≤ 180°", 13, th.fg)
+    s.text(270, 404, "measurement area $S_m$: all the contour encloses", 12, th.muted)
+    s.text(
+        270, 424, "the positions spaced equally, pointing at the plant", 12, th.accent
+    )
+    s.text(
+        285,
+        536,
+        "average distance $d̄ = (1/N) Σ d_i$ (9.1.2.2): above $0.05√S_p$",
+        12,
+        th.fg,
+    )
+    s.text(285, 556, "and 5 m, at most $0.5√S_p$ and 35 m (9.1.1 a)", 12, th.fg)
+
+    # ----- Section ------------------------------------------------------------
+    s.text(735, 66, "In section", 15, th.fg, bold=True)
+    gy = 296.0
+    s.ground(gy, 590, 884)
+    mx = 626.0
+    mic_y = 146.0
+    s.mic(mx, mic_y - 6, gy, scale=0.8)
+    s.arrow(mx + 10, mic_y, mx + 62, mic_y, th.accent, 2.0)
+    s.dim(mx - 24, gy, mx - 24, mic_y, "$h$", size=14)
+    sources = ((714.0, 46.0, 34.0), (768.0, 92.0, 30.0), (824.0, 62.0, 40.0))
+    for sx, sh, sw_ in sources:
+        s.rect(sx - sw_ / 2, gy - sh, sw_, sh, th.panel, th.secondary, sw=1.6)
+        s.circle(sx, gy - sh / 2, 3.2, th.secondary)
+    h_mean = sum(sh / 2 for _, sh, _ in sources) / len(sources)
+    s.line(692, gy - h_mean, 856, gy - h_mean, th.secondary, 1.3, dash="6,4")
+    s.text(862, gy - h_mean + 5, "$H$", 14, th.secondary, anchor="start")
+    s.text(768, 186, "midpoints $h_k$", 12, th.secondary)
+    s.text(735, 324, "$h = H + 0.025√S_m$, at least 5 m (9.3)", 13, th.fg)
+    s.text(735, 344, "$H = (1/n) Σ h_k$, the mean height (9.2)", 13, th.fg)
+    s.text(735, 364, "horizontal, at 90° to the contour (9.4)", 12, th.accent)
+
+    # ----- What is read at every position -----------------------------------
+    col, cw, ctop = 560.0, 324.0, 384.0
+    lines = (
+        ("plant running, in the mode described:", th.fg),
+        ("octave bands 63 Hz to 4 kHz,", th.muted),
+        ("at least 1 min in each", th.muted),
+        ("plant stopped: the background (Table 2)", th.fg),
+        ("under 6 dB invalid, 6 to 8 dB −1 dB,", th.muted),
+        ("9 and 10 dB −0.5 dB, over 10 dB none", th.muted),
+        ("class 1 calibrator in each series (7.3)", th.fg),
+        ("a level over 5 dB above the mean:", th.fg),
+        ("a contour further out (10.2)", th.fg),
+    )
+    s.rect(col, ctop, cw, 58 + 19 * len(lines), th.panel, th.fg, rx=6, sw=1.4)
+    s.text(col + cw / 2, ctop + 24, "At every position", 14, th.fg, bold=True)
+    size = s.fit_size([txt for txt, _ in lines], (12, 11), cw - 28)
+    for k, (txt, colour) in enumerate(lines):
+        s.text(col + 14, ctop + 50 + k * 19, txt, size, colour, anchor="start")
+
+    # ----- The rules the drawing cannot dimension ----------------------------
+    s.text(
+        450,
+        634,
+        "$l$, $S_m$ and $H$ read on the plan to ±5 % (9.2); one iteration on the "
+        "plan is usually enough (NOTE 6)",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        656,
+        "no reflecting surface outside the contour, the wind steady over a set, "
+        "the background at least 6 dB down (clause 6)",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        678,
+        "more than 10 % of the positions left out: another contour (9.1.2.4)",
+        12,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# IEC 61063: a turbine set measured in its own hall
+# ---------------------------------------------------------------------------
+
+
+def _key_cross(s: SVG, x: float, y: float, colour: str, label: str = "") -> None:
+    """A key microphone position, the X of IEC 61063 Figure 2."""
+    s.line(x - 6, y - 6, x + 6, y + 6, colour, 2.4)
+    s.line(x - 6, y + 6, x + 6, y - 6, colour, 2.4)
+    if label:
+        s.text(x + 9, y - 8, label, 13, colour, anchor="start", bold=True)
+
+
+def _d_turbine_hall(s: SVG, th: Theme) -> None:
+    """IEC 61063: the turbine set in its hall, the surface round it, the readings.
+
+    The arrangement is Figure 2 b) of BS EN 61063:1996 (PDF page 13, printed
+    p. 7), a large set with its HP and IP casings, its LP turbine, its
+    generator and its exciter: one reference box per part, holding it with
+    its lagging and any screen and standing on the reflecting plane (7.1, PDF
+    page 12, p. 6), and the measurement surface of parallelepipeds 1 m out
+    from them (7.1, p. 7). The five key positions are where Figure 2 b) puts
+    them, 1 and 5 at the centres of the two ends and 2, 3 and 4 in the plane
+    between the LP turbine and the generator, 3 overhead (7.2.1); the
+    additional positions start from them at equal distances, at least one
+    section on each casing (7.2.2, PDF page 14, p. 8). The operating floor is
+    the reflecting plane when it is continuous and free of openings, and what
+    stands below it is not part of the set (1.1.1, 1.1.2 and Figure 1, PDF
+    page 9, p. 3). The readings are 5.1, 5.2 and 6.2 (PDF page 12, p. 6),
+    the background correction Table 2 and its NOTE 1 (PDF page 14, p. 8) with
+    the 3 dB of 4.2 (PDF page 11, p. 5), Equations (2) and (3) of 8.3 and 8.4
+    and the 7 dB ceiling on K (PDF page 15, p. 9), Annex A with A.3.3 and the
+    outdoor clause A.4 (PDF pages 17 to 19, pp. 11 to 13), and the wind of
+    4.3 (PDF page 12, p. 6). The boxes are drawn at one scale with the 1 m
+    of 7.1 at that scale; their sizes are a drawing, not data.
+    """
+    sc = 20.0
+    x0 = 92.0
+    parts = (
+        ("HP + IP", 6.0, 4.0, 3.5),
+        ("LP", 5.0, 5.0, 4.5),
+        ("generator", 7.0, 3.5, 3.0),
+        ("exciter", 3.0, 2.5, 2.2),
+    )
+    joints = [x0]
+    for _, length, _, _ in parts:
+        joints.append(joints[-1] + length * sc)
+    x_end = joints[-1]
+    key_x = joints[2]  # the plane between the LP turbine and the generator
+
+    # ----- Plan (Figure 2 b) ---------------------------------------------------
+    s.text(300, 62, "In plan and in elevation (Figure 2 b)", 15, th.fg, bold=True)
+    cy = 172.0
+    for k, (name, length, width, _) in enumerate(parts):
+        bx = joints[k]
+        s.rect(
+            bx, cy - width / 2 * sc, length * sc, width * sc, th.panel, th.fg, sw=1.6
+        )
+        size = s.fit_size([name], (12, 11, 10), length * sc - 8)
+        s.text(bx + length * sc / 2, cy + 5, name, size, th.fg)
+    top = [cy - (width / 2 + 1.0) * sc for _, _, width, _ in parts]
+    path = [f"M {x0 - sc:.0f} {cy:.0f}", f"L {x0 - sc:.0f} {top[0]:.0f}"]
+    for k in range(len(parts)):
+        path.append(
+            f"L {joints[k + 1] + (sc if k == len(parts) - 1 else 0):.0f} {top[k]:.0f}"
+        )
+        if k + 1 < len(parts):
+            path.append(f"L {joints[k + 1]:.0f} {top[k + 1]:.0f}")
+    path.append(f"L {x_end + sc:.0f} {cy:.0f}")
+    upper = " ".join(path)
+    s.path(upper, stroke=th.primary, sw=1.8, dash="7,5")
+    mirrored = []
+    for chunk in path:
+        verb, xs, ys = chunk.split()
+        mirrored.append(f"{verb} {xs} {2 * cy - float(ys):.0f}")
+    s.path(" ".join(mirrored), stroke=th.primary, sw=1.8, dash="7,5")
+
+    # Additional positions: one at each casing's mid-length on both sides,
+    # and on the two ends either side of 1 and 5.
+    for k, (_, length, width, _) in enumerate(parts):
+        mx = joints[k] + length * sc / 2
+        for sign in (-1, 1):
+            s.circle(
+                mx, cy + sign * (width / 2 + 1.0) * sc, 5.0, th.bg, th.primary, 1.8
+            )
+    for ex, half in (
+        (x0 - sc, parts[0][2] / 2 + 1.0),
+        (x_end + sc, parts[-1][2] / 2 + 1.0),
+    ):
+        for sign in (-1, 1):
+            s.circle(ex, cy + sign * half * sc * 0.55, 5.0, th.bg, th.primary, 1.8)
+    lp_half = (parts[1][2] / 2 + 1.0) * sc
+    _key_cross(s, x0 - sc, cy, th.secondary, "1")
+    _key_cross(s, key_x, cy - lp_half, th.secondary, "2")
+    _key_cross(s, key_x, cy, th.secondary, "3")
+    _key_cross(s, key_x, cy + lp_half, th.secondary)
+    s.text(
+        key_x + 9, cy + lp_half + 18, "4", 13, th.secondary, anchor="start", bold=True
+    )
+    _key_cross(s, x_end + sc, cy, th.secondary, "5")
+
+    # ----- Elevation ------------------------------------------------------------
+    fy = 428.0
+    for k, (_, length, _, height) in enumerate(parts):
+        bx = joints[k]
+        s.rect(bx, fy - height * sc, length * sc, height * sc, th.panel, th.fg, sw=1.6)
+    tops = [fy - (height + 1.0) * sc for _, _, _, height in parts]
+    elev = [f"M {x0 - sc:.0f} {fy:.0f}", f"L {x0 - sc:.0f} {tops[0]:.0f}"]
+    for k in range(len(parts)):
+        elev.append(
+            f"L {joints[k + 1] + (sc if k == len(parts) - 1 else 0):.0f} {tops[k]:.0f}"
+        )
+        if k + 1 < len(parts):
+            elev.append(f"L {joints[k + 1]:.0f} {tops[k + 1]:.0f}")
+    elev.append(f"L {x_end + sc:.0f} {fy:.0f}")
+    s.path(" ".join(elev), stroke=th.primary, sw=1.8, dash="7,5")
+    row = fy - 1.6 * sc
+    for k, (_, length, _, _) in enumerate(parts):
+        mx = joints[k] + length * sc / 2
+        s.circle(mx, row, 5.0, th.bg, th.primary, 1.8)
+        s.circle(mx, tops[k], 5.0, th.bg, th.primary, 1.8)
+    s.circle(x0 - sc, (row + tops[0]) / 2, 5.0, th.bg, th.primary, 1.8)
+    _key_cross(s, x0 - sc, row, th.secondary)
+    _key_cross(s, key_x, tops[1], th.secondary)
+    _key_cross(s, key_x, row, th.secondary)
+    _key_cross(s, x_end + sc, row, th.secondary)
+    gen_mid = joints[2] + parts[2][1] * sc / 2 + 30
+    s.dim(gen_mid, fy - parts[2][3] * sc, gen_mid, tops[2], "", size=12)
+    s.text(gen_mid + 8, tops[2] - 8, "$d$ = 1 m", 12, th.fg, anchor="start")
+
+    # The operating floor, and what stands below it.
+    s.line(40, fy, 560, fy, th.fg, 3.0)
+    s.text(
+        40,
+        fy + 22,
+        "operating floor: the reflecting plane if continuous (1.1.2)",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        40,
+        fy + 42,
+        "below it the condenser, pumps and auxiliaries: not the set, no positions",
+        12,
+        th.muted,
+        anchor="start",
+    )
+
+    # Key to the two drawings.
+    ky = fy + 72
+    _key_cross(s, 48, ky - 5, th.secondary)
+    s.text(62, ky, "key positions 1 to 5 (7.2.1)", 12, th.fg, anchor="start")
+    s.circle(292, ky - 5, 5.0, th.bg, th.primary, 1.8)
+    s.text(304, ky, "additional, equally spaced (7.2.2)", 12, th.fg, anchor="start")
+
+    # ----- What is read at every position ------------------------------------
+    col, cw = 584.0, 300.0
+
+    def panel(top: float, head: str, rows: Sequence[str]) -> None:
+        s.rect(col, top, cw, 44 + 19 * len(rows), th.panel, th.fg, rx=6, sw=1.4)
+        s.text(col + cw / 2, top + 24, head, 14, th.fg, bold=True)
+        size = s.fit_size(rows, (12, 11), cw - 26)
+        for k, txt in enumerate(rows):
+            s.text(col + 13, top + 48 + 19 * k, txt, size, th.fg, anchor="start")
+
+    panel(
+        78,
+        "At every position",
+        (
+            "A-weighted levels, slow, on a sound level",
+            "meter to IEC 651 (5.1, 7.4)",
+            "on a cable or a rod, nobody standing",
+            "between the microphone and the set (5.1)",
+            "calibrator ±0.5 dB before each series,",
+            "a frequency in 250 Hz to 1 kHz (5.2)",
+            "rated load, steady; 25, 50 and 75 % too",
+            "to find the noisiest condition (6.2)",
+            "the set running, then the background (7.4)",
+        ),
+    )
+    panel(
+        306,
+        "The hall (Annex A)",
+        (
+            "$K$ from $A/S$ by Figure A.3, $A = 0.16 V/T$,",
+            "or from a calibrated reference source",
+            "at mid-length on each side (A.3.2)",
+            "$K$ ≤ 7 dB, so $A/S$ ≥ 1 (A.3.3)",
+            "outdoors $K$ = 0 (8.3, A.4), wind under 6 m/s,",
+            "a windscreen above 1 m/s (4.3)",
+        ),
+    )
+
+    # ----- Background and result --------------------------------------------
+    by = 540.0
+    s.rect(40, by, 520, 126, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(300, by + 24, "Background, Table 2 (8.1)", 14, th.fg, bold=True)
+    diffs = ("3", "4", "5", "6", "7", "8", "9", "10", "> 10")
+    corrs = ("3", "2", "2", "1", "1", "1", "0.5", "0.5", "0")
+    hx = 214.0
+    s.text(hx - 12, by + 52, "difference, dB", 12, th.muted, anchor="end")
+    s.text(hx - 12, by + 76, "subtract, dB", 12, th.muted, anchor="end")
+    for k, (dv, cv) in enumerate(zip(diffs, corrs, strict=True)):
+        x = hx + 14 + 37 * k
+        s.text(x, by + 52, dv, 12, th.fg)
+        s.text(x, by + 76, cv, 12, th.secondary, bold=True)
+    s.text(
+        300,
+        by + 104,
+        "under 3 dB no valid result (4.2); with the set running it is",
+        12,
+        th.muted,
+    )
+    s.text(
+        300,
+        by + 120,
+        "computed from the auxiliaries and the hall (NOTE 1)",
+        12,
+        th.muted,
+    )
+
+    s.rect(col, by - 30, cw, 156, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(col + cw / 2, by - 6, "The result (8.3, 8.4)", 14, th.fg, bold=True)
+    s.text(col + cw / 2, by + 22, "$L̄_{pA}$: the energy mean of the", 12, th.fg)
+    s.text(col + cw / 2, by + 40, "corrected levels, minus $K$ (2)", 12, th.fg)
+    s.text(col + cw / 2, by + 70, "$L_{WA} = L̄_{pA} + 10 lg(S/S_0)$ (3)", 14, th.fg)
+    s.text(col + cw / 2, by + 96, "$S$ by Equation (1), $S_0$ = 1 m²,", 12, th.muted)
+    s.text(col + cw / 2, by + 114, "rounded to the whole decibel (9.4)", 12, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# ISO 9295: the 16 kHz octave in a reverberation room
+# ---------------------------------------------------------------------------
+
+
+def _d_high_frequency_room(s: SVG, th: Theme) -> None:
+    """ISO 9295: the boom, the equipment, the three methods in the room.
+
+    Read in UNE-EN ISO 9295:2015, whose folios match its PDF pages. The plan
+    is drawn at one scale, 60 px to the metre, and each of the three
+    distances the standard sets is drawn at its minimum: the microphone at
+    the end of a rotating
+    boom that sweeps a circle at least 2 m across, pointing upwards with the
+    normal to its membrane parallel to the axis of rotation (5.4, PDF page
+    10); the equipment on the floor at least 1 m from any wall and at least
+    1.8 m from the nearest microphone location, turned through four
+    orientations from the operator's side facing the centre of the path, or
+    on a turntable not synchronous with the boom (5.5, page 10). The
+    reverberation time is read at three or four points equally spaced on the
+    path (6.2, page 12), the room constant follows from Formulae (4) and (5)
+    and the level from Formula (6) (page 13), and Formula (7) takes the air
+    absorption instead and feeds the same Formula (6) (7.2 and 7.5, page 14).
+    Those are the two direct methods; the third compares (5.1, page 9): a
+    calibrated reference source stands where the equipment stood, in one
+    orientation, at least 10 dB above the background in the 16 kHz octave,
+    and Formula (8) gives the level with no room constant (8.1, 8.3, 8.5.1,
+    page 17). The weather rule and
+    the instrument tolerance are 5.2 and 5.3 (page 9), the calibration 5.6
+    (page 10) and the averaging 5.7 (page 11). The room itself is sized by
+    ISO 3741, not here, and is drawn without dimensions.
+    """
+    sc = 60.0
+    # The boom and the equipment first, so the right-hand wall can stand at
+    # the 1 m minimum from the equipment, as the other two minima are drawn.
+    bcx, bcy, br = 196.0, 280.0, 1.0 * sc
+    ew, eh = 0.6 * sc, 0.5 * sc
+    ex0 = bcx + br + 1.8 * sc
+    ey0 = bcy - eh / 2
+    rx0, ry0, ry1 = 40.0, 96.0, 462.0
+    rx1 = ex0 + ew + 1.0 * sc
+    s.text((rx0 + rx1) / 2, 70, "In plan, the distances to scale", 15, th.fg, bold=True)
+    s.rect(rx0, ry0, rx1 - rx0, ry1 - ry0, th.bg, th.fg, sw=3.0)
+    for x in range(int(rx0) + 14, int(rx1), 24):
+        s.line(x, ry0, x - 8, ry0 - 9, th.muted, 1.0)
+    s.text(rx1, ry1 + 22, "reverberation room (ISO 3741)", 12, th.muted, anchor="end")
+
+    # The boom and the path its microphone sweeps.
+    s.circle(bcx, bcy, br, "none", th.primary, 1.8)
+    s.circle(bcx, bcy, 5.0, th.fg)
+    arm = math.radians(-35.0)
+    mx_, my_ = bcx + br * math.cos(arm), bcy + br * math.sin(arm)
+    s.line(bcx, bcy, mx_, my_, th.fg, 2.4)
+    s.circle(mx_, my_, 6.0, th.primary, th.fg, 1.4)
+    _rot_arrow(s, bcx, bcy, br + 16, 200.0, 250.0, th.primary, 1.8)
+    for k in range(4):
+        a = math.radians(45.0 + 90.0 * k)
+        px, py = bcx + br * math.cos(a), bcy + br * math.sin(a)
+        s.path(
+            f"M {px:.1f} {py - 7:.1f} L {px + 7:.1f} {py:.1f} L {px:.1f} {py + 7:.1f} "
+            f"L {px - 7:.1f} {py:.1f} Z",
+            fill=th.accent,
+        )
+    s.dim(bcx - br, bcy, bcx + br, bcy, "diameter ≥ 2 m", offset=96, size=12)
+    s.text(
+        bcx, ry0 + 30, "$T$ at three or four points of the path (6.2)", 12, th.accent
+    )
+
+    # The equipment, 1.8 m from the path and 1 m from the wall.
+    s.rect(ex0, ey0, ew, eh, th.panel, th.secondary, sw=2.0)
+    s.line(ex0, ey0, ex0, ey0 + eh, th.secondary, 4.0)
+    s.dim(bcx + br, bcy, ex0, bcy, "≥ 1.8 m", size=12)
+    s.dim(ex0 + ew, bcy, rx1, bcy, "≥ 1 m", size=12)
+    s.text(ex0 + ew / 2, ey0 + eh + 26, "equipment", 12, th.secondary, bold=True)
+    s.text(ex0 + ew / 2, ey0 + eh + 44, "operator's side", 11, th.secondary)
+    s.text(ex0 + ew / 2, ey0 + eh + 60, "to the path (5.5)", 11, th.secondary)
+
+    # ----- The boom in elevation ---------------------------------------------
+    s.text(712, 70, "The boom in elevation (5.4)", 15, th.fg, bold=True)
+    gy = 210.0
+    s.ground(gy, 560, 870)
+    px_ = 640.0
+    s.rect(px_ - 6, 140, 12, gy - 140, th.panel, th.fg, sw=1.4)
+    s.line(px_, 140, 800, 140, th.fg, 2.6)
+    s.rect(796, 118, 8, 22, th.primary, th.fg, rx=2, sw=1.2)
+    s.arrow(800, 116, 800, 88, th.accent, 1.8)
+    s.line(px_, 132, px_, 96, th.muted, 1.2, dash="4,3")
+    s.text(px_, 90, "axis", 11, th.muted)
+    s.text(812, 102, "pointing up", 12, th.accent, anchor="start")
+    s.text(720, 160, "rotating boom", 12, th.fg)
+    s.text(712, 236, "the normal to its membrane parallel to the", 12, th.muted)
+    s.text(712, 254, "axis, to keep the direct field out", 12, th.muted)
+
+    # ----- The three methods: two find R, the third needs none (5.1) --------
+    col, cw, top = 548.0, 336.0, 270.0
+    methods = (
+        ("measured $T$, the Eyring $R$ of (4) and (5),", "and $L_W$ by (6): clause 6"),
+        ("the air alone, $α$ of Annex A, $R$ by (7),", "and $L_W$ by (6): clause 7"),
+        (
+            "a calibrated reference source where the",
+            "equipment was, ≥ 10 dB over the background,",
+            "and $L_W$ by comparison (8), no $R$: clause 8",
+        ),
+    )
+    s.rect(col, top, cw, 188, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(col + cw / 2, top + 24, "Three methods in the room", 14, th.fg, bold=True)
+    size = s.fit_size([txt for m in methods for txt in m], (12, 11), cw - 44)
+    y = top + 50
+    for lines in methods:
+        s.circle(col + 18, y - 4, 3.5, th.primary)
+        for j, txt in enumerate(lines):
+            s.text(col + 30, y, txt, size, th.muted if j else th.fg, anchor="start")
+            y += 19
+        y += 6
+
+    # ----- The four orientations ---------------------------------------------
+    s.text(712, 482, "Four orientations, or a turntable (5.5)", 13, th.fg, bold=True)
+    for k in range(4):
+        cx_ = 594.0 + 78.0 * k
+        cy_ = 516.0
+        s.rect(cx_ - 15, cy_ - 13, 30, 26, th.panel, th.secondary, sw=1.6)
+        side = (
+            (cx_ - 15, cy_ - 13, cx_ - 15, cy_ + 13),
+            (cx_ - 15, cy_ - 13, cx_ + 15, cy_ - 13),
+            (cx_ + 15, cy_ - 13, cx_ + 15, cy_ + 13),
+            (cx_ - 15, cy_ + 13, cx_ + 15, cy_ + 13),
+        )[k]
+        s.line(*side, th.secondary, 4.0)
+        s.text(cx_, cy_ + 34, f"{90 * k}°", 12, th.fg)
+    s.text(712, 572, "clockwise; a turntable never in step with the boom", 12, th.muted)
+
+    # ----- The level, and the conditions round it ----------------------------
+    s.rect(40, 588, 820, 48, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(
+        450,
+        619,
+        "$L_W = L̄_{p(ST)} − 10 lg(4/R)$ dB, the mean of the four orientations (6),"
+        " in clauses 6 and 7",
+        16,
+        th.fg,
+    )
+    s.text(
+        450,
+        662,
+        "$h_r$ × ($θ$ + 5 °C) steady within ±10 % (5.2); the chain flat within "
+        "±1.0 dB from 11.2 kHz to 22.4 kHz (5.3)",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        684,
+        "one-third octaves for broadband noise, narrow bands for a tone, over "
+        "whole revolutions (5.7); the background read too",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        706,
+        "calibrated as ISO 3741, the response over the 16 kHz octave checked at "
+        "most two years apart (5.6)",
+        12,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ISO 26101 and ISO 3745 Annex A: qualifying a free-field room
+# ---------------------------------------------------------------------------
+
+
+def _wedge_edge(
+    s: SVG, x0: float, y0: float, x1: float, y1: float, depth: float, colour: str
+) -> None:
+    """A zig-zag of wedge tips from ``(x0, y0)`` to ``(x1, y1)``, *depth* inwards.
+
+    The inward side is the left of the direction of travel, so a room drawn
+    clockwise in screen coordinates gets its wedges pointing into it.
+    """
+    length = math.hypot(x1 - x0, y1 - y0)
+    n = max(2, int(length // 16))
+    ux, uy = (x1 - x0) / length, (y1 - y0) / length
+    nx, ny = uy, -ux
+    pts = []
+    for k in range(2 * n + 1):
+        t = k / (2 * n)
+        off = depth if k % 2 else 0.0
+        pts.append(
+            f"{x0 + ux * length * t - nx * off:.1f} {y0 + uy * length * t - ny * off:.1f}"
+        )
+    s.path("M " + " L ".join(pts), stroke=colour, sw=1.2)
+
+
+def _d_free_field_traverses(s: SVG, th: Theme) -> None:
+    """ISO 26101 with ISO 3745 Annex A: the traverses that qualify a free field.
+
+    The paths follow the amended ISO 3745 Annex A (ISO 3745:2012/Amd.1:2017,
+    PDF page 8, printed p. 4): at least five and at most eight straight paths
+    from one mathematical origin inside the test source, in the working area,
+    towards a dihedral corner, a trihedral corner, the centre of the most
+    uniform boundary, the closest boundary and a boundary with a door,
+    window or opening (A.3.3); in a hemi-anechoic room the source sits on
+    the reflecting floor with its radiating area at most 150 mm above it
+    (A.3.2.2). Each path starts at most a quarter of a wavelength out and
+    runs at least a quarter of a wavelength, to the boundary of the space to
+    be qualified, at equally spaced points (ISO 26101:2017, 5.1.4.3, PDF page
+    11, p. 5), no more than a tenth of a wavelength apart below 250 Hz and
+    100 mm above it, at least ten on each path and at least fifty in all
+    (Amd.1, A.4.3, PDF page 9, p. 5), so the five paths drawn carry ten
+    points each. The deviations are read against Formula (2) of ISO 26101
+    (PDF page 12, p. 6), corrected by a monitor microphone with Formula (1)
+    and the background margins of 5.1.2.2 (PDF page 10, p. 4), and judged by
+    Table A.1 with the reflecting plane of A.2.5 (Amd.1, PDF pages 6 and 7,
+    pp. 2 and 3). The room is drawn without dimensions: the standard sizes it
+    by what it qualifies, not by a number.
+    """
+    # ----- Plan --------------------------------------------------------------
+    s.text(251, 62, "In plan, a hemi-anechoic room", 15, th.fg, bold=True)
+    ox0, oy0, ox1, oy1 = 36.0, 86.0, 466.0, 430.0
+    ix0, iy0, ix1, iy1 = 58.0, 108.0, 444.0, 408.0
+    s.rect(ox0, oy0, ox1 - ox0, oy1 - oy0, th.panel, th.fg, sw=2.6)
+    s.rect(ix0, iy0, ix1 - ix0, iy1 - iy0, th.bg, "none")
+    _wedge_edge(s, ix0, iy0, ix1, iy0, -14.0, th.muted)
+    _wedge_edge(s, ix1, iy0, ix1, iy1, -14.0, th.muted)
+    _wedge_edge(s, ix1, iy1, ix0, iy1, -14.0, th.muted)
+    _wedge_edge(s, ix0, iy1, ix0, iy0, -14.0, th.muted)
+    door_y0, door_y1 = 330.0, 386.0
+    s.rect(
+        ox0 - 2, door_y0, ix0 - ox0 + 4, door_y1 - door_y0, th.bg, th.secondary, sw=2.0
+    )
+    wx0, wy0, wx1, wy1 = 96.0, 140.0, 406.0, 384.0
+    s.rect(wx0, wy0, wx1 - wx0, wy1 - wy0, "none", th.primary, sw=1.4, dash="6,5")
+    s.text(wx0 + 6, wy1 - 8, "working area", 12, th.primary, anchor="start")
+
+    sx, sy = 251.0, 266.0
+    targets = (
+        ("a", ix0, iy0),
+        ("b", ix1, iy0),
+        ("c", ix1, (iy0 + iy1) / 2),
+        ("d", sx, iy1),
+        ("e", ix0, (door_y0 + door_y1) / 2),
+    )
+
+    def to_box(tx: float, ty: float) -> tuple[float, float]:
+        """Where the ray from the origin towards ``(tx, ty)`` leaves the area."""
+        dx, dy = tx - sx, ty - sy
+        ts = []
+        if dx:
+            ts += [(wx0 - sx) / dx, (wx1 - sx) / dx]
+        if dy:
+            ts += [(wy0 - sy) / dy, (wy1 - sy) / dy]
+        t = min(v for v in ts if v > 0)
+        return sx + dx * t, sy + dy * t
+
+    for _, tx, ty in targets:
+        ex, ey = to_box(tx, ty)
+        s.line(ex, ey, tx, ty, th.muted, 1.0, dash="2,4")
+        s.line(sx, sy, ex, ey, th.accent, 1.8)
+        dist = math.hypot(ex - sx, ey - sy)
+        for k in range(10):
+            t = (24.0 + k * (dist - 24.0) / 9) / dist
+            s.circle(sx + (ex - sx) * t, sy + (ey - sy) * t, 2.6, th.accent)
+    s.rect(sx - 13, sy - 11, 26, 22, th.panel, th.fg, sw=1.6)
+    s.circle(sx, sy, 3.0, th.secondary)
+    # The labels of the five targets, outside the lining where there is room.
+    s.text(ox0, oy0 - 8, "a) dihedral corner", 12, th.fg, anchor="start")
+    s.text(ox1, oy0 - 8, "b) trihedral corner", 12, th.fg, anchor="end")
+    s.text(ox1 + 6, (iy0 + iy1) / 2 - 6, "c) the most", 11, th.fg, anchor="start")
+    s.text(ox1 + 6, (iy0 + iy1) / 2 + 9, "uniform wall", 11, th.fg, anchor="start")
+    s.text(sx, oy1 + 20, "d) closest boundary", 12, th.fg)
+    s.text(ox0, oy1 + 20, "e) a door", 12, th.secondary, anchor="start")
+    s.text(sx + 18, sy + 28, "origin in the source", 11, th.secondary, anchor="start")
+    mx, my = sx, 192.0
+    s.circle(mx, my, 5.5, th.primary, th.fg, 1.2)
+    s.text(mx, my - 14, "monitor, fixed", 11, th.primary)
+
+    # ----- Section along the path to the trihedral corner ---------------------
+    s.text(712, 62, "In section, towards the trihedral corner", 15, th.fg, bold=True)
+    fx0, fx1, fy, cy = 548.0, 880.0, 300.0, 96.0
+    s.rect(fx0, cy - 10, fx1 - fx0, 10, th.panel, "none")
+    _wedge_edge(s, fx1 - 18, cy, fx0, cy, 12.0, th.muted)
+    s.rect(fx1 - 12, cy - 10, 12, fy - cy + 10, th.panel, "none")
+    _wedge_edge(s, fx1 - 12, fy, fx1 - 12, cy, 12.0, th.muted)
+    s.ground(fy, fx0, fx1)
+    src_x = 590.0
+    s.rect(src_x - 12, fy - 14, 24, 14, th.panel, th.fg, sw=1.4)
+    s.circle(src_x, fy - 6, 2.6, th.secondary)
+    s.text(
+        src_x - 12,
+        fy + 32,
+        "radiating ≤ 150 mm above the floor (A.3.2.2)",
+        11,
+        th.fg,
+        anchor="start",
+    )
+    end_x, end_y = 812.0, 150.0
+    s.line(end_x, end_y, fx1 - 24, cy + 16, th.muted, 1.0, dash="2,4")
+    s.line(src_x, fy - 6, end_x, end_y, th.accent, 1.8)
+    dist = math.hypot(end_x - src_x, end_y - fy + 6)
+    for k in range(10):
+        t = (26.0 + k * (dist - 26.0) / 9) / dist
+        s.circle(
+            src_x + (end_x - src_x) * t, fy - 6 + (end_y - fy + 6) * t, 2.6, th.accent
+        )
+    # Raised clear of the dotted run to the corner, which the longer Spanish
+    # line would otherwise reach.
+    s.text(
+        560,
+        130,
+        "from at most $λ/4$ out, at least $λ/4$ long,",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(560, 148, "to the edge of the space to qualify", 12, th.fg, anchor="start")
+    s.text(
+        712, 358, "reflecting plane: $α$ ≤ 0.06, and at least $λ/4$ and", 12, th.muted
+    )
+    s.text(712, 376, "0.75 m beyond the measurement surface (A.2.5)", 12, th.muted)
+
+    # ----- Table A.1 -----------------------------------------------------------
+    tx0, ty0 = 548.0, 392.0
+    s.rect(tx0, ty0, 332, 112, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(tx0 + 166, ty0 + 22, "Allowed deviation, Table A.1", 13, th.fg, bold=True)
+    cols = (708.0, 778.0, 848.0)
+    for x, head in zip(cols, ("≤ 630 Hz", "0.8–5 kHz", "≥ 6.3 kHz"), strict=True):
+        s.text(x, ty0 + 46, head, 11, th.muted)
+    for k, (room, vals) in enumerate(
+        (
+            ("anechoic", ("±1.5", "±1.0", "±1.5")),
+            ("hemi-anechoic", ("±2.5", "±2.0", "±3.0")),
+        )
+    ):
+        y = ty0 + 72 + 24 * k
+        s.text(tx0 + 12, y, room, 12, th.fg, anchor="start")
+        for x, v in zip(cols, vals, strict=True):
+            s.text(x, y, v, 12, th.fg, bold=True)
+    s.text(
+        tx0 + 166, ty0 + 128, "dB, every path, every frequency (A.2.4)", 11, th.muted
+    )
+
+    # ----- What is read, and the two formulae ---------------------------------
+    s.rect(30, 542, 840, 48, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(
+        450,
+        572,
+        "$L_{p}(r_i) = b − 20 lg(r_i/r_0)$ dB, $r_0$ = 1 m (2);   with a monitor "
+        "$L_{pi} = L′_{pi} − L_{p,ref,i} + L_{p,ref,0}$ (1)",
+        14,
+        th.fg,
+    )
+    s.text(
+        450,
+        618,
+        "five to eight straight paths from one origin inside the source, in the "
+        "working area (A.3.3)",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        640,
+        "points equally spaced, at most $λ/10$ apart below 250 Hz and 100 mm above; "
+        "at least 10 on each path and 50 in all (A.4.3)",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        662,
+        "the background more than 6 dB down, better 15 dB (5.1.2.2); tones, unless "
+        "every source to be measured is broadband (A.4.1)",
+        12,
+        th.muted,
+    )

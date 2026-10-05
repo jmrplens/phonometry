@@ -15,7 +15,7 @@ import math
 from typing import TYPE_CHECKING
 
 from .canvas import signed
-from .parts import _accel, _accel_wall, _rot_arrow, _spring_v
+from .parts import _accel, _accel_wall, _hatch_rect, _rot_arrow, _spring_v
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -5456,6 +5456,234 @@ def _d_source_qualification(s: SVG, th: Theme) -> None:
         450,
         696,
         "a source close to its Table 1 limits: repeat with it turned in at least three steps, and average arithmetically",
+        12,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ISO 10140-1:2021 Annexes G, H, J and K: four laboratory measurements
+# ---------------------------------------------------------------------------
+
+
+def _lab_speaker(s: SVG, th: Theme, x: float, y: float) -> None:
+    """A small loudspeaker cabinet facing right, centred on ``(x, y)``."""
+    s.rect(x - 11, y - 14, 22, 28, th.panel, th.primary, rx=3, sw=1.6)
+    s.circle(x + 2, y - 3, 5.5, th.primary)
+    s.circle(x + 2, y + 8, 2.8, th.primary)
+
+
+def _lab_mic(s: SVG, th: Theme, x: float, y: float) -> None:
+    """A measurement microphone head, its tip at ``(x, y)``, pointing up."""
+    s.rect(x - 3, y, 6, 8, th.fg, rx=1.5)
+    s.rect(x - 4.5, y + 8, 9, 18, th.primary, rx=3)
+
+
+def _lab_hatch(s: SVG, th: Theme, x0: float, y0: float, x1: float, y1: float) -> None:
+    """A building element in section: a filled block with 45° hatching."""
+    s.rect(x0, y0, x1 - x0, y1 - y0, th.panel, th.fg, sw=1.6)
+    _hatch_rect(s, x0, y0, x1, y1, 9.0, th.muted)
+
+
+def _d_lab_application_rules(s: SVG, th: Theme) -> None:
+    """ISO 10140-1:2021: a lining, a floor covering, a joint and rain on a roof.
+
+    Four sections through the laboratory, one per annex, each with what the
+    annex sets. Annex G (PDF pages 27 and 28, printed pp. 21 and 22): the
+    lining on a basic element filling the test opening, the heavy wall of
+    about 350 kg/m² with its critical frequency around 125 Hz or the
+    lightweight wall of about 70 kg/m² around 500 Hz (G.2), mounted as in
+    practice and not rigidly at its edges (G.3), the two readings within
+    the curing rule of G.4, and the improvement of G.1. Annex H (PDF pages 29
+    to 32, pp. 23 to 26): the improvement of H.1, the small specimens of
+    category I, at least 650 mm × 350 mm with the hammers 100 mm in from
+    their edges (H.4.6.1.1), the large ones of 10 m² or more with the
+    shorter side 2,3 m or more (H.2.2.2), the load of H.4.1, the floor
+    temperature of H.4.5 and the four or six tapping positions of
+    H.4.6.1.2 and H.4.6.2.2. Annex J (PDF pages 43 and 44, pp. 37 and 38):
+    Formula (J.1), the maximum of the sealed arrangement and its 10 dB
+    margin, a joint longer than 1 m and no wider than 50 mm (J.2.1), 5,0 m
+    for the gaps of windows and doors (J.2.2), the gap width read at four
+    places at least, within 0,3 mm (J.2.2, PDF page 45, p. 39), and the
+    three widths of J.4 (PDF pages 48 and 49, pp. 42 and 43). Annex K (PDF
+    pages 54 to 56, pp. 48 to 50): an opening of 10 m² to 20 m² with the
+    shorter edge 2,3 m or more and a slope of at least 5° for roofs and
+    rooflights and 30° for roof windows (K.2.1), heavy rain held steady for
+    at least 5 min before any reading, one tank position on a small element and
+    three on a larger one of 10 m² to 20 m², the drops landing slightly
+    off-centre to avoid symmetry (K.4.1, PDF page 55, p. 49), and Formula
+    (K.1). The slope is drawn as the angle the specimen's underside makes
+    with the horizontal. The sections are schemes: the annexes set the
+    rules, not the drawings.
+    """
+
+    def frame(x0: float, y0: float, title: str) -> None:
+        s.rect(x0, y0, 420, 302, "none", th.muted, rx=8, sw=1.2)
+        s.text(x0 + 14, y0 + 24, title, 14, th.fg, anchor="start", bold=True)
+
+    def notes(x0: float, y0: float, rows: Sequence[tuple[str, str]]) -> None:
+        size = s.fit_size([txt for txt, _ in rows], (12, 11), 392)
+        for k, (txt, colour) in enumerate(rows):
+            s.text(x0 + 14, y0 + 19 * k, txt, size, colour, anchor="start")
+
+    # ----- G: a lining ----------------------------------------------------------
+    gx, gy = 20.0, 50.0
+    frame(gx, gy, "A lining (Annex G)")
+    top, bot = gy + 40, gy + 148
+    s.line(gx + 20, top, gx + 400, top, th.fg, 2.0)
+    s.line(gx + 20, bot, gx + 400, bot, th.fg, 2.0)
+    _lab_hatch(s, th, gx + 196, top, gx + 218, bot)
+    s.rect(gx + 226, top + 6, 8, bot - top - 12, th.panel, th.accent, sw=1.6)
+    for y in (top + 22, (top + bot) / 2, bot - 22):
+        s.line(gx + 218, y, gx + 226, y, th.accent, 1.2)
+    _lab_speaker(s, th, gx + 70, (top + bot) / 2)
+    _lab_mic(s, th, gx + 330, (top + bot) / 2 - 12)
+    s.text(gx + 108, top + 20, "source room", 11, th.muted)
+    s.text(gx + 330, top + 20, "receiving room", 11, th.muted)
+    s.text(gx + 207, bot + 18, "basic element", 11, th.fg)
+    s.text(gx + 240, (top + bot) / 2 + 4, "lining", 11, th.accent, anchor="start")
+    notes(
+        gx,
+        bot + 40,
+        (
+            ("$R$ without the lining, then with it (ISO 10140-2):", th.fg),
+            ("$ΔR$ is the difference, band by band (G.1)", th.fg),
+            (
+                "heavy wall ≈ 350 kg/m², $f_c$ ≈ 125 Hz, or the concrete floor;",
+                th.muted,
+            ),
+            ("lightweight wall ≈ 70 kg/m², $f_c$ ≈ 500 Hz (G.2)", th.muted),
+            ("no rigid fixing at the edges; cured, or the two", th.muted),
+            ("readings within a third of the curing time (G.3, G.4)", th.muted),
+        ),
+    )
+
+    # ----- H: a floor covering ------------------------------------------------
+    hx, hy = 460.0, 50.0
+    frame(hx, hy, "A floor covering (Annex H)")
+    slab_t, slab_b = hy + 112, hy + 130
+    _lab_hatch(s, th, hx + 20, slab_t, hx + 400, slab_b)
+    for k in range(3):
+        px0 = hx + 60 + 92 * k
+        s.rect(px0, slab_t - 6, 64, 6, th.accent, "none")
+    # The tapping machine on the first specimen.
+    tm0 = hx + 64
+    s.rect(tm0, slab_t - 40, 56, 18, th.panel, th.fg, rx=3, sw=1.4)
+    for k in range(5):
+        x = tm0 + 8 + 10 * k
+        s.line(x, slab_t - 22, x, slab_t - 8, th.fg, 1.4)
+        s.circle(x, slab_t - 8, 2.2, th.fg)
+    s.text(tm0 + 28, slab_t - 48, "tapping machine", 11, th.fg)
+    s.text(
+        hx + 150, slab_t - 26, "category I: three pieces", 11, th.accent, anchor="start"
+    )
+    _lab_mic(s, th, hx + 300, slab_b + 26)
+    s.text(hx + 210, slab_b + 40, "receiving room", 11, th.muted)
+    s.text(hx + 110, slab_b + 16, "reference floor", 11, th.fg)
+    notes(
+        hx,
+        hy + 212,
+        (
+            ("$ΔL = L_{n0} − L_n$, the same positions bare and covered (H.1)", th.fg),
+            ("category I: ≥ 3 pieces of 650 mm × 350 mm or more,", th.muted),
+            ("the hammers ≥ 100 mm from their edges (H.4.6.1.1)", th.muted),
+            ("II and III: wall to wall, or ≥ 10 m² and ≥ 2.3 m (H.2.2)", th.muted),
+            ("≥ 4 positions on the heavy floor, ≥ 6 on a light one (H.4.6)", th.muted),
+        ),
+    )
+
+    # ----- J: a joint ---------------------------------------------------------------
+    jx, jy = 20.0, 366.0
+    frame(jx, jy, "A joint (Annex J)")
+    top, bot = jy + 44, jy + 168
+    s.line(jx + 20, top, jx + 250, top, th.fg, 2.0)
+    s.line(jx + 20, bot, jx + 250, bot, th.fg, 2.0)
+    mid = (top + bot) / 2
+    _lab_hatch(s, th, jx + 120, top, jx + 146, mid - 4)
+    _lab_hatch(s, th, jx + 120, mid + 4, jx + 146, bot)
+    s.rect(jx + 120, mid - 4, 26, 8, th.secondary, "none")
+    _lab_speaker(s, th, jx + 50, mid)
+    _lab_mic(s, th, jx + 210, mid - 12)
+    s.text(jx + 56, top + 20, "$L_1$", 13, th.fg)
+    s.text(jx + 210, top + 20, "$L_2$", 13, th.fg)
+    s.text(jx + 133, bot + 18, "high-$R$ element", 11, th.fg)
+    # The element in elevation, the joint across it and the four readings.
+    ex0, ey0, ex1, ey1 = jx + 270, top + 8, jx + 400, bot - 8
+    s.rect(ex0, ey0, ex1 - ex0, ey1 - ey0, th.panel, th.fg, sw=1.4)
+    jy_mid = (ey0 + ey1) / 2
+    s.line(ex0 + 8, jy_mid, ex1 - 8, jy_mid, th.secondary, 3.0)
+    for k in range(4):
+        x = ex0 + 8 + (ex1 - ex0 - 16) * (k + 0.5) / 4
+        s.line(x, jy_mid - 9, x, jy_mid + 9, th.fg, 1.2)
+    s.text((ex0 + ex1) / 2, ey0 - 6, "in elevation", 11, th.muted)
+    s.text((ex0 + ex1) / 2, jy_mid - 16, "$l$ > 1 m", 11, th.secondary)
+    s.text((ex0 + ex1) / 2, jy_mid + 28, "$b$ ≤ 50 mm", 11, th.secondary)
+    notes(
+        jx,
+        bot + 42,
+        (
+            ("$R_s = L_1 − L_2 + 10 lg(S_n l/(A l_n))$ dB per metre (J.1)", th.fg),
+            ("sealed both sides gives $R_{s,max}$: within 10 dB, correct (J.2)", th.fg),
+            ("width read at ≥ 4 places within 0.3 mm; window or door", th.muted),
+            ("gaps 5.0 m long at least (J.2.2); a variable slit at its", th.muted),
+            ("nominal width, its minimum and 3 mm wider (J.4)", th.muted),
+        ),
+    )
+
+    # ----- K: rain on a roof ------------------------------------------------------
+    kx, ky = 460.0, 366.0
+    frame(kx, ky, "Rain on a roof (Annex K)")
+    room_t, room_b = ky + 128, ky + 186
+    s.line(kx + 40, room_t, kx + 40, room_b, th.fg, 2.0)
+    s.line(kx + 380, room_t - 46, kx + 380, room_b, th.fg, 2.0)
+    s.line(kx + 40, room_b, kx + 380, room_b, th.fg, 2.0)
+    # The specimen at its slope, from the low eave to the high one.
+    s.path(
+        f"M {kx + 40:.0f} {room_t:.0f} L {kx + 380:.0f} {room_t - 46:.0f} "
+        f"L {kx + 380:.0f} {room_t - 36:.0f} L {kx + 40:.0f} {room_t + 10:.0f} Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=1.6,
+    )
+    # The slope, read under the specimen where nothing else is drawn: the
+    # horizontal from the low end of the underside and the arc up to it.
+    ang = math.atan2(46.0, 340.0)
+    vx, vy, rad = kx + 40, room_t + 10, 120.0
+    s.line(vx, vy, vx + rad + 4, vy, th.muted, 1.0, dash="3,3")
+    s.path(
+        f"M {vx + rad:.0f} {vy:.0f} A {rad:.0f} {rad:.0f} 0 0 0 "
+        f"{vx + rad * math.cos(ang):.1f} {vy - rad * math.sin(ang):.1f}",
+        stroke=th.muted,
+        sw=1.2,
+    )
+    s.text(vx + rad + 10, vy + 2, "slope", 11, th.muted, anchor="start")
+    # The tank above, slightly off-centre, and its drops.
+    tx0, tx1 = kx + 190, kx + 276
+    s.rect(tx0, ky + 42, tx1 - tx0, 16, th.panel, th.primary, sw=1.6)
+    s.text(tx1 + 8, ky + 55, "rain tank", 11, th.primary, anchor="start")
+    for k in range(5):
+        x = tx0 + 9 + 17 * k
+        y_roof = room_t - (x - (kx + 40)) * 46.0 / 340.0
+        for yd in range(int(ky + 66), int(y_roof) - 8, 12):
+            s.line(x, yd, x, yd + 5, th.primary, 1.4)
+    _lab_mic(s, th, kx + 300, room_b - 34)
+    s.text(kx + 150, room_b - 12, "test room", 11, th.muted)
+    notes(
+        kx,
+        ky + 210,
+        (
+            ("heavy rain, steady at least 5 min before reading (K.4.1)", th.fg),
+            ("slope ≥ 5° for roofs and rooflights, ≥ 30° for roof", th.muted),
+            ("windows; opening 10 m² to 20 m², edge ≥ 2.3 m (K.2.1)", th.muted),
+            ("one tank position on a small element, three on a", th.muted),
+            ("larger one, 10 m² to 20 m²; drops slightly off-centre (K.4.1)", th.muted),
+        ),
+    )
+    s.text(
+        450,
+        694,
+        "$L_I$ from the room level, $T$, $V$ and the wetted area (K.1); each annex "
+        "runs on its basic part, ISO 10140-2 or ISO 10140-3",
         12,
         th.muted,
     )

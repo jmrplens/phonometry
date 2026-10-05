@@ -1813,6 +1813,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   tildes in a line or matches them with a regular expression, however the
   string is built, and on a line of the site's code that spells them at all.
 
+- **Six more guides show how their measurement is set up.** The guides to
+  the sound power of a whole plant (ISO 8297), of a turbine set in its own hall
+  (IEC 61063) and of the 16 kHz octave (ISO 9295), to the qualification of a
+  free-field room (ISO 26101), to wind turbine noise at a dwelling
+  (IEC TS 61400-11-2) and to the laboratory rules of ISO 10140-1 now open their
+  "How the measurement goes" section with a diagram, in English and Spanish
+  and in light and dark: the measurement contour, the aspect angle and the
+  microphone height of ISO 8297 9.1 to 9.4; the reference boxes, the 1 m
+  surface and the five key positions of IEC 61063 Figure 2 b with the
+  background and hall corrections; the boom, its 2 m circle and the 1.8 m and
+  1 m clearances of ISO 9295 5.4 and 5.5 with its three methods, two through
+  the room constant and one by comparison with a reference source; the five
+  traverses of the amended ISO 3745 Annex A, with at least ten points on each,
+  and the deviations of Table A.1; the free-field and façade microphones and
+  the wind bins of IEC TS 61400-11-2; and the lining, floor covering, joint and
+  rain set-ups of ISO 10140-1 Annexes G, H, J and K. Every distance and limit
+  a diagram shows is the one its clause prints.
+
 ### Fixed
 
 - **A type checker accepts a `bool` held in a variable for the form of a

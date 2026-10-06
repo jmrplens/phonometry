@@ -243,9 +243,61 @@ dos ediciones con las mismas entradas y en el mismo orden.
   da las dos valoraciones que pide H.5 i) y ningún
   $C_{I,r,50\text{–}2\,500}$; el término de rango ampliado del suelo desnudo
   medido, que sí está definido, sale de
-  `building.weighted_impact_rating_extended`. Ningún número de la biblioteca
-  depende del formulario, y no hizo falta ningún cambio.
+  `building.weighted_impact_rating_extended`. El formulario mismo lo imprime
+  `LabFloorCoveringImprovementResult.report()`, que pone esas dos valoraciones
+  junto a $\Delta L_w$ y $C_{I\Delta}$ y escribe, donde iría
+  $C_{I,r,50\text{–}2\,500}$, que no se forma porque la Tabla 4 empieza en
+  100 Hz. Ningún número de la biblioteca depende del formulario, y no hizo
+  falta ningún cambio.
 - **Estado:** sin notificar.
+
+## ISO 10140-1:2021, Anexo J, Figura J.7 («weighing curve» por «weighting curve»)
+
+- **Ubicación:** Anexo J, J.5.1, Figura J.7 «Sample form for expression of
+  results» (página 50 del PDF, p. 44 impresa), la clave junto a las dos
+  últimas filas de la cabecera del formulario.
+- **El impreso:** «................ frequency range of weighing curve» sobre
+  «__________ test curve».
+- **El problema:** «weighing» (pesada) por «weighting» (ponderación). La línea
+  de puntos marca el intervalo de frecuencias de la curva de referencia que
+  desplaza la valoración de ISO 717-1, la curva de ponderación; una «curva de
+  pesada» no es un término de ninguno de los dos documentos. El formulario de
+  BS EN ISO 10140-1:2010+A2:2014, Figura J.7, imprime «frequency range of
+  weighting curve» en el mismo sitio, así que la letra se perdió en la edición
+  de 2021.
+- **Evidencia:** verificado en la página 50 del PDF (p. 44 impresa) de
+  ISO 10140-1:2021 frente a la página 49 del PDF (p. 40 impresa) de
+  BS EN ISO 10140-1:2010+A2:2014.
+- **Comportamiento de la biblioteca:** nada que hacer; ningún número depende
+  de ello. El formulario que imprime `LabJointInsulationResult.report()`
+  rotula la curva «curva de referencia desplazada (ISO 717-1)» y la dibuja
+  solo sobre el intervalo de la valoración.
+- **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
+
+## ISO 10140-1:2021, Anexo J, Figura J.8 (el intervalo de trabajo dibujado como Δb y explicado como Δbn)
+
+- **Ubicación:** Anexo J, J.5.1, Figura J.8 (página 52 del PDF, p. 46
+  impresa), la cota bajo el eje de abscisas y la última línea de la clave. La
+  Figura J.8 de BS EN ISO 10140-1:2010+A2:2014 (página 50 del PDF, p. 41
+  impresa) imprime la misma pareja.
+- **El impreso:** la flecha entre $b_\mathrm{n}$ y $b_\mathrm{n} + 3$ lleva
+  la etiqueta «$\Delta b$»; la clave dice «$\Delta b_\mathrm{n}$ working range,
+  3 mm».
+- **El problema:** una misma magnitud con dos símbolos, y el símbolo que
+  explica la clave no es el que está dibujado. El texto que presenta la figura
+  solo la nombra con palabras, «indicating the working range of 3 mm» (J.5.1,
+  página 51 del PDF, p. 45 impresa), así que nada más en el anexo decide entre
+  los dos.
+- **Evidencia:** verificado en la página 52 del PDF (p. 46 impresa) de
+  ISO 10140-1:2021, el dibujo frente a su clave, con el texto de J.5.1 en la
+  página 51 del PDF (p. 45 impresa); y en la página 50 del PDF (p. 41 impresa)
+  de BS EN ISO 10140-1:2010+A2:2014.
+- **Comportamiento de la biblioteca:** `JointGapSeries.working_range_mm`
+  devuelve los dos extremos, $(b_\mathrm{n}, b_\mathrm{n} + 3)$, y su gráfico
+  rotula el intervalo sombreado «intervalo de trabajo $\Delta b$ = 3 mm», el
+  símbolo del dibujo. Ningún número depende del símbolo, y no hizo falta
+  ningún cambio.
+- **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
 
 ## ISO 2631-5:2018, ejemplos resueltos del Anexo C (fórmula masculina desplegada, R femenino)
 

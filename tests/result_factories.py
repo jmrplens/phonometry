@@ -941,6 +941,47 @@ def _lab_floor_covering_improvement() -> ph.building.LabFloorCoveringImprovement
     )
 
 
+def _lab_joint_insulation() -> ph.building.LabJointInsulationResult:
+    """A rebate seal 4 dB to 15 dB under its arrangement (ISO 10140-1 Annex J)."""
+    maximum = np.linspace(40.0, 69.0, 18)
+    measured = maximum - np.concatenate([np.linspace(7.0, 15.0, 15), [9.0, 5.0, 2.0]])
+    return ph.building.lab_joint_insulation(
+        measured, maximum, _LAB_BANDS, joint_length_m=5.4
+    )
+
+
+def _joint_open_band_rating() -> ph.building.JointOpenBandRating:
+    """That seal rated with its indicative 5000 Hz band taken as open (J.1)."""
+    opened = _lab_joint_insulation().open_band_rating
+    assert opened is not None
+    return opened
+
+
+def _joint_test_element_check() -> ph.building.JointTestElementCheck:
+    """A 5,4 m window gap 5 mm wide (ISO 10140-1 J.2.1, J.2.2)."""
+    return ph.building.check_joint_test_element(5.4, 5.0, window_or_door_gap=True)
+
+
+def _gap_width_check() -> ph.building.GapWidthCheck:
+    """Five gap readings within 0,25 mm (ISO 10140-1 J.2.2)."""
+    return ph.building.check_gap_width([5.1, 4.9, 5.0, 5.15, 4.95])
+
+
+def _joint_gap_series() -> ph.building.JointGapSeries:
+    """The seal at 3 mm, 5 mm and 8 mm (ISO 10140-1 J.4)."""
+    maximum = np.linspace(40.0, 69.0, 18)
+    results = [
+        ph.building.lab_joint_insulation(maximum - drop, maximum, _LAB_BANDS)
+        for drop in (6.0, 10.0, 18.0)
+    ]
+    return ph.building.joint_gap_series([3.0, 5.0, 8.0], results, minimum_gap_mm=3.0)
+
+
+def _joint_gap_series_check() -> ph.building.JointGapSeriesCheck:
+    """That seal measured at bmin, bn and bn + 3 (ISO 10140-1 J.4)."""
+    return ph.building.check_joint_gap_series(_joint_gap_series())
+
+
 def _heavy_impact_improvement() -> ph.building.HeavyImpactImprovementResult:
     """The rubber-ball improvement of ISO 10140-1 H.6.1 in four octaves."""
     return ph.building.heavy_impact_improvement(

@@ -287,9 +287,10 @@ their own pages: intensity (ISO 15186), the floor-covering improvement
 
 ## See also
 
-- [Linings, Floor Coverings and Rain (ISO 10140-1)](lab-application-rules.md):
-  what ISO 10140-1 Annexes G, H and K do with these measurements: the
-  improvement of a lining or a floor covering, and rain on a roof.
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](lab-application-rules.md):
+  what ISO 10140-1 Annexes G, H, J and K do with these measurements: the
+  improvement of a lining or a floor covering, a sealed joint per metre, and
+  rain on a roof.
 - [Field Insulation Measurement (ISO 16283)](insulation-field.md):
   the in-building airborne, impact and façade measurements, their single-number
   ratings and their uncertainty.

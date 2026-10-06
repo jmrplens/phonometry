@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1809,
-    "passing": 1809,
+    "checks": 1816,
+    "passing": 1816,
     "failing": 0,
     "domains": 109,
     "standards": 519,
-    "citations": 1261,
+    "citations": 1268,
     "designations": 224,
     "sources": 123
   },
@@ -125,8 +125,8 @@
     {
       "id": "room-building-acoustics",
       "title": "Room & building acoustics",
-      "checks": 153,
-      "passing": 153
+      "checks": 160,
+      "passing": 160
     },
     {
       "id": "room-acoustics",
@@ -15523,6 +15523,250 @@
         "value": 0.0
       },
       "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-formula-j-1/a-5-4-m-joint-l1-l2-37-db-over-a-8-m2-rs-37-10-lg-1-m2-x-5-4-m-8-m2-x-1-m",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Formula (J.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Formula (J.1)"
+          }
+        ]
+      },
+      "quantity": "A 5,4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5,4 m / (8 m2 x 1 m))",
+      "kind": "scalar",
+      "expected": {
+        "value": 35.29303772831025
+      },
+      "computed": {
+        "value": 35.293038
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-formula-j-2-with-iso-10140-2-2021-a-3/the-fixed-1-3-db-below-a-6-db-margin-over-rs-max-is-formula-j-2-at-6-db-to-the-printed-decimal",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Formula (J.2) with ISO 10140-2:2021 A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Formula (J.2)"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-2",
+            "edition": "2021",
+            "clause": "A.3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "The fixed 1,3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, to the printed decimal",
+      "kind": "record",
+      "expected": {
+        "label": "1.3 dB at and below a 6 dB margin"
+      },
+      "computed": {
+        "label": "Formula (J.2) at 6 dB 1.3 dB, applied below 1.3 dB"
+      },
+      "deviation": {
+        "label": "exact"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-j-1/r-s-within-3-db-of-rs-max-50-4-db-the-lower-limit-as-printed-rs-50-4-db",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 J.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "J.1"
+          }
+        ]
+      },
+      "quantity": "R's within 3 dB of Rs,max = 50,4 dB: the lower limit as printed, (Rs >= 50,4 dB)",
+      "kind": "record",
+      "expected": {
+        "label": "(Rs >= 50.4 dB)"
+      },
+      "computed": {
+        "label": "Rs = 50.4 dB, a minimum value"
+      },
+      "deviation": {
+        "label": "exact"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-j-1-with-iso-717-1-2020-4-4-and-4-5/indicative-bands-400-hz-to-800-hz-rated-again-as-infinitely-high-by-hand-rs-w-51-db-becomes-59-db-with-c-0-db-more-than-1-db-so-in-brackets",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 J.1 with ISO 717-1:2020 4.4 and 4.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "J.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "4.4 and 4.5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Indicative bands 400 Hz to 800 Hz rated again as infinitely high, by hand: Rs,w = 51 dB becomes 59 dB with C = 0 dB, more than 1 dB, so in brackets",
+      "kind": "record",
+      "expected": {
+        "label": "Rs,w = 51 dB; opened 59 dB, C = 0 dB; in brackets"
+      },
+      "computed": {
+        "label": "Rs,w = 51 dB; opened 59 dB, C = 0 dB; in brackets"
+      },
+      "deviation": {
+        "label": "exact"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-2-2021-table-a-1/the-printed-r-f-of-the-small-test-opening-carried-through-the-joint-front-end-uncorrected-r-f-w-c-ctr-59-2-7-db-as-printed",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-2:2021 Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-2",
+            "edition": "2021",
+            "clause": "Table A.1"
+          }
+        ]
+      },
+      "quantity": "The printed R'F of the small test opening, carried through the joint front end uncorrected: R'F,w (C; Ctr) = 59 (-2; -7) dB as printed",
+      "kind": "record",
+      "expected": {
+        "label": "Rw = 59 dB; C = -2 dB; Ctr = -7 dB",
+        "record": {
+          "Rw": 59.0,
+          "C": -2.0,
+          "Ctr": -7.0
+        }
+      },
+      "computed": {
+        "label": "Rw = 59 dB; C = -2 dB; Ctr = -7 dB",
+        "record": {
+          "Rw": 59.0,
+          "C": -2.0,
+          "Ctr": -7.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-j-2-1-j-2-2/joint-longer-than-1-m-1-m-fails-at-most-50-mm-wide-50-mm-passes-a-window-or-door-gap-at-least-5-0-m-5-0-m-passes-four-gap-readings-within-0-3-mm",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 J.2.1, J.2.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "J.2.1, J.2.2"
+          }
+        ]
+      },
+      "quantity": "Joint longer than 1 m (1 m fails), at most 50 mm wide (50 mm passes), a window or door gap at least 5,0 m (5,0 m passes); four gap readings within 0,3 mm",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 bounds"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 bounds"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-j-4/a-variable-slit-at-bmin-bn-5-mm-taken-when-unknown-and-bn-3-8-mm-passes-without-8-mm-without-bmin-named-or-at-6-mm-nominal-without-9-mm-it-fails",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 J.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "J.4"
+          }
+        ]
+      },
+      "quantity": "A variable slit at bmin, bn = 5 mm (taken when unknown) and bn + 3 = 8 mm passes; without 8 mm, without bmin named, or at 6 mm nominal without 9 mm it fails",
+      "kind": "count",
+      "expected": {
+        "value": 5.0,
+        "label": "5/5 series"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5/5 series"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

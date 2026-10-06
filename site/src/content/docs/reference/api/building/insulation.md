@@ -651,6 +651,7 @@ ReportMetadata(
     client: str | None = None,
     mounted_by: str | None = None,
     manufacturer: str | None = None,
+    product: str | None = None,
     area: float | None = None,
     mass_per_area: float | None = None,
     source_volume: float | None = None,
@@ -681,6 +682,9 @@ ReportMetadata(
     required_class: int | None = None,
     notes: str | None = None,
     tube_shape: str | None = None,
+    curing_time_h: float | None = None,
+    separating_element: str | None = None,
+    test_signal: str | None = None,
 )
 ```
 
@@ -690,10 +694,11 @@ All fields are optional (default `None`); the report renders only the
 fields that are supplied, so a partially populated instance is valid. The
 numeric fields are validated on construction by physical range: the
 dimension, mass, volume and pressure fields must be finite and strictly
-positive; the temperature and requirement fields need only be finite (0
-degrees Celsius or below is a valid test condition, and a programme-loudness
-target in LUFS is negative); and the relative-humidity fields must lie
-within 0..100 %. A violation raises `ValueError`.
+positive; the curing time must be finite and not negative; the temperature
+and requirement fields need only be finite (0 degrees Celsius or below is a
+valid test condition, and a programme-loudness target in LUFS is negative);
+and the relative-humidity fields must lie within 0..100 %. A violation
+raises `ValueError`.
 
 **Attributes**
 
@@ -703,6 +708,7 @@ within 0..100 %. A violation raises `ValueError`.
 | `client` | Client the test was carried out for. |
 | `mounted_by` | Who mounted the specimen in the test opening. |
 | `manufacturer` | Manufacturer of the tested element. |
+| `product` | Product identification of the tested element (its commercial designation), which the floor-covering form of ISO 10140-1:2021 Figure H.4 prints beside the manufacturer. |
 | `area` | Specimen area `S`, in m^2 (the free test opening area). |
 | `mass_per_area` | Measured mass per unit area, in kg/m^2. |
 | `source_volume` | Source-room volume, in m^3. |
@@ -725,6 +731,9 @@ within 0..100 %. A violation raises `ValueError`.
 | `tube_shape` | Cross-section of the impedance tube: `"circular"`, `"rectangular"` or `"square"`. Printed by the impedance-tube fiche (ISO 10534-2) next to the tube diameter, which it qualifies (inner diameter for a circular tube, maximum lateral dimension otherwise). |
 | `thickness` | Specimen thickness under the applied static load, in metres. Printed by the dynamic-stiffness fiche (EN 29052-1 / ISO 9052-1), where EN 29052-1:1992 Clause 9 b) requires reporting the thickness of the resilient layer under load; it is shown in millimetres. |
 | `mounting` | Mounting condition of the specimen (e.g. the ISO 10140-1 mounting code or a short description). |
+| `curing_time_h` | Curing time of the specimen before the test, in hours (zero or more); the floor-covering form of ISO 10140-1:2021 Figure H.4 prints it, and H.5 d) asks for the curing time of a floating slab. |
+| `separating_element` | The element the specimen is mounted in, as free text: the separation wall of the joint form of ISO 10140-1:2021 Figure J.7. |
+| `test_signal` | The sound the source room is excited with, as free text (e.g. `"pink noise"`): the test noise of the joint form of ISO 10140-1:2021 Figure J.7. |
 | `measurement_standard` | Measurement standard the spectrum was obtained under (e.g. `"ISO 10140-2"` or `"ISO 16283-1"`); it forms the report's standard-basis line together with the ISO 717 rating part. |
 | `test_date` | Date of the test, as a free-form string. |
 | `laboratory` | Testing laboratory / institute name (footer). |
@@ -738,7 +747,7 @@ within 0..100 %. A violation raises `ValueError`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a temperature or requirement is not finite, a relative humidity is outside 0..100 %, a required class is not one of 0, 1, 2, a position count is not a finite, positive integer, or a tube shape is not one of `"circular"`, `"rectangular"`, `"square"`. |
+| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a curing time is negative or not finite, a temperature or requirement is not finite, a relative humidity is outside 0..100 %, a required class is not one of 0, 1, 2, a position count is not a finite, positive integer, or a tube shape is not one of `"circular"`, `"rectangular"`, `"square"`. |
 
 ### ReportMetadata.is_empty()
 

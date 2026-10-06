@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1809/1809 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1816/1816 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -194,7 +194,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Room &amp; building acoustics</b>: 100% (153/153)</summary>
+<summary><b>Room &amp; building acoustics</b>: 100% (160/160)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -261,6 +261,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10140-1:2021 Formula (K.2) with Table K.2 | Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0,1 C_j), printed C_j | 60.997267 dB (+/-0 dB) | 60.997267 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10140-1:2021 Formula (K.1) | Rain in a 100 m³ room, T = 2 s, Se = 4 m²: LI = Lpr - 10 lg 2 + 10 lg 100 - 14 - 10 lg 4 | 56.9691 dB (+/-0 dB) | 56.9691 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10140-1:2021 Formula (K.4) | Direct intensity over Sm = 4 m² of a 1 m² specimen: LI = LIm + 10 lg 4 | 56.0206 dB (+/-0 dB) | 56.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Formula (J.1) | A 5,4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5,4 m / (8 m2 x 1 m)) | 35.293038 dB (+/-0 dB) | 35.293038 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Formula (J.2) with ISO 10140-2:2021 A.3 | The fixed 1,3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, to the printed decimal | 1.3 dB at and below a 6 dB margin | Formula (J.2) at 6 dB 1.3 dB, applied below 1.3 dB | exact | - | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 J.1 | R's within 3 dB of Rs,max = 50,4 dB: the lower limit as printed, (Rs >= 50,4 dB) | (Rs >= 50.4 dB) | Rs = 50.4 dB, a minimum value | exact | - | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 J.1 with ISO 717-1:2020 4.4 and 4.5 | Indicative bands 400 Hz to 800 Hz rated again as infinitely high, by hand: Rs,w = 51 dB becomes 59 dB with C = 0 dB, more than 1 dB, so in brackets | Rs,w = 51 dB; opened 59 dB, C = 0 dB; in brackets | Rs,w = 51 dB; opened 59 dB, C = 0 dB; in brackets | exact | - | ![Pass][cv-pass] Pass |
+| ISO 10140-2:2021 Table A.1 | The printed R'F of the small test opening, carried through the joint front end uncorrected: R'F,w (C; Ctr) = 59 (-2; -7) dB as printed | Rw = 59 dB; C = -2 dB; Ctr = -7 dB | Rw = 59 dB; C = -2 dB; Ctr = -7 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 J.2.1, J.2.2 | Joint longer than 1 m (1 m fails), at most 50 mm wide (50 mm passes), a window or door gap at least 5,0 m (5,0 m passes); four gap readings within 0,3 mm | 8/8 bounds | 8/8 bounds | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 J.4 | A variable slit at bmin, bn = 5 mm (taken when unknown) and bn + 3 = 8 mm passes; without 8 mm, without bmin named, or at 6 mm nominal without 9 mm it fails | 5/5 series | 5/5 series | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10140-5:2021 Table I.1 | Reference pane: the 36 cells, 10 lg(ηref) and LIc,ref in 18 bands, as printed | 36/36 printed cells | 36/36 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10140-5:2021 Annex I, Formulas (I.1) to (I.3) | Reference pane at twice the reference loss factor and at the printed LIc,ref: ΔLIc = 10 lg 2 in all 18 bands | 18/18 bands | 18/18 bands | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10140-5:2021 Tables H.1 and H.2 | Intense and heavy rain: rate, drop diameter, fall velocity, holes, hole density and fall height as printed | 12/12 printed cells | 12/12 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |

@@ -37,6 +37,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   back, meet no class of EN 61260, and that EN 61260:1995 labels its base-two
   octave ratio base-ten.
 
+- **Rate a sealed joint per metre by ISO 10140-1:2021 Annex J.**
+  `building.joint_sound_reduction_index` turns the two room levels and the
+  receiving room's absorption into the sound reduction index of a joint per
+  metre of its length (Formula (J.1)), for the joint as tested and for the
+  arrangement with it sealed on both sides. `building.lab_joint_insulation`
+  corrects the first against the second band by band, by the rules of
+  ISO 10140-2:2021 A.3 that J.1 calls in: no correction from a 10 dB margin,
+  Formula (J.2) down to 6 dB, the fixed 1,3 dB below it as a minimum value,
+  and below 3 dB the lower limit at the maximum of the arrangement, which the
+  form prints in brackets. The result carries the ISO 717-1 single numbers
+  with C100-5000 and Ctr,100-5000, the rating of the maximum, and the rating
+  again with the indicative bands taken as infinitely high, which puts the
+  single numbers in brackets when it moves them by more than 1 dB.
+  `building.check_joint_test_element` checks the length and width of J.2.1
+  and the 5,0 m of a window or door gap (J.2.2), `building.check_gap_width`
+  the four readings within 0,3 mm that give the gap width, and
+  `building.joint_gap_series` collects a variable slit at its gap widths
+  (J.4) with the single numbers against the width, read on the lines between
+  the measured widths, as Figures J.8 and J.9 draw them, the octave figure
+  with the closed and sealed element as Rs,max above the widths, and
+  `building.check_joint_gap_series` says whether the three widths J.4 asks
+  for, bn, bmin and bn + 3 mm, are among them. Two misprints found
+  on the way are in the errata: the form of Figure J.7 calls the reference
+  curve a "weighing curve", and Figure J.8 draws the working range as Δb but
+  keys it as Δbn.
+
+- **Print the floor-covering form of ISO 10140-1:2021 Figure H.4 and the joint
+  form of Figure J.7.** `LabFloorCoveringImprovementResult.report()` fills the
+  form H.6.3 lets a laboratory copy: the product and specimen header, the type
+  of reference floor, the curing time and the climate of the source room, the
+  table of Ln,0 and ΔL beside the ΔL diagram with the frequency range of the
+  ISO 717-2 rating marked, and ΔLw with CIΔ and the two floor ratings of
+  H.5 i); where the form asks for a CI,r,50-2500 that the reference floor
+  cannot give, the sheet says so. `LabJointInsulationResult.report()` writes
+  the data sheet J.5.2 b) asks for, the form of Figure J.7, with its diagram
+  over the printed 30 dB to 80 dB, the climate of both test rooms, its minimum
+  values marked, and every single number in brackets when J.1 puts them there,
+  with a note that gives each of them rated with the indicative bands open.
+  `ReportMetadata` gains the fields the two forms print that no other sheet
+  did: `product`, `curing_time_h`, `separating_element` and `test_signal`, and
+  `LabFloorCoveringImprovementResult.plot(rating_range=True)` draws the ΔL
+  diagram with the frequency range of the rating marked, as the H.4 sheet
+  does.
+
 - **Take a solid's row into the elastic simulation and the detailed building
   model, and a ground's into the outdoor models.** A solid's catalogue row,
   one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your

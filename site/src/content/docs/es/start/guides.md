@@ -462,10 +462,12 @@ ASTM E413/E1414.
   el tiempo de reverberación de la octava de 63 Hz que la acompaña.
 - [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
   la caracterización ISO 10140 de un elemento con los flancos suprimidos.
-- [Trasdosados, revestimientos y lluvia (ISO 10140-1)](/phonometry/es/buildings/insulation/lab-application-rules/):
+- [Trasdosados, revestimientos, juntas, lluvia (ISO 10140-1)](/phonometry/es/buildings/insulation/lab-application-rules/):
   la mejora que un trasdosado o un revestimiento de suelo da al elemento sobre
-  el que se coloca, valorada sobre las curvas de referencia de ISO 717, y el
-  ruido de la lluvia artificial sobre una cubierta o un lucernario.
+  el que se coloca, valorada sobre las curvas de referencia de ISO 717, el
+  índice de reducción acústica de una junta sellada por metro, los formularios
+  de las Figuras H.4 y J.7, y el ruido de la lluvia artificial sobre una
+  cubierta o un lucernario.
 - [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/):
   la potencia transmitida leída sobre la cara radiante, del elemento completo o
   elemento a elemento.

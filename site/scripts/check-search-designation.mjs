@@ -65,6 +65,7 @@ const ISO_717_1 = [
   '/buildings/insulation/insulation-ratings/',
   '/buildings/insulation/insulation-field/',
   '/buildings/insulation/facade-insulation/',
+  '/buildings/insulation/lab-application-rules/',
   '/buildings/insulation/low-frequency-procedure/',
   '/devices/noise-control/enclosure-cabin-insulation/',
   '/reference/theory/rooms-buildings/',

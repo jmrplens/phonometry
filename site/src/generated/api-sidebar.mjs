@@ -174,6 +174,7 @@ export const apiSections = {
       'reference/api/building/aperture-transmission',
       'reference/api/building/lab-insulation',
       'reference/api/building/lab-improvement',
+      'reference/api/building/joint-insulation',
       'reference/api/building/rainfall-sound',
       'reference/api/building/survey-insulation',
       'reference/api/building/service-equipment',

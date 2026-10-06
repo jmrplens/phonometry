@@ -28,16 +28,20 @@ class ReportMetadata:
     fields that are supplied, so a partially populated instance is valid. The
     numeric fields are validated on construction by physical range: the
     dimension, mass, volume and pressure fields must be finite and strictly
-    positive; the temperature and requirement fields need only be finite (0
-    degrees Celsius or below is a valid test condition, and a programme-loudness
-    target in LUFS is negative); and the relative-humidity fields must lie
-    within 0..100 %. A violation raises :class:`ValueError`.
+    positive; the curing time must be finite and not negative; the temperature
+    and requirement fields need only be finite (0 degrees Celsius or below is a
+    valid test condition, and a programme-loudness target in LUFS is negative);
+    and the relative-humidity fields must lie within 0..100 %. A violation
+    raises :class:`ValueError`.
 
     :ivar specimen: Specimen description printed in the header (the tested
         element, e.g. ``"200 mm concrete wall"``).
     :ivar client: Client the test was carried out for.
     :ivar mounted_by: Who mounted the specimen in the test opening.
     :ivar manufacturer: Manufacturer of the tested element.
+    :ivar product: Product identification of the tested element (its
+        commercial designation), which the floor-covering form of
+        ISO 10140-1:2021 Figure H.4 prints beside the manufacturer.
     :ivar area: Specimen area ``S``, in m^2 (the free test opening area).
     :ivar mass_per_area: Measured mass per unit area, in kg/m^2.
     :ivar source_volume: Source-room volume, in m^3.
@@ -94,6 +98,16 @@ class ReportMetadata:
         thickness of the resilient layer under load; it is shown in millimetres.
     :ivar mounting: Mounting condition of the specimen (e.g. the ISO 10140-1
         mounting code or a short description).
+    :ivar curing_time_h: Curing time of the specimen before the test, in
+        hours (zero or more); the floor-covering form of ISO 10140-1:2021
+        Figure H.4 prints it, and H.5 d) asks for the curing time of a
+        floating slab.
+    :ivar separating_element: The element the specimen is mounted in, as free
+        text: the separation wall of the joint form of ISO 10140-1:2021
+        Figure J.7.
+    :ivar test_signal: The sound the source room is excited with, as free text
+        (e.g. ``"pink noise"``): the test noise of the joint form of
+        ISO 10140-1:2021 Figure J.7.
     :ivar measurement_standard: Measurement standard the spectrum was obtained
         under (e.g. ``"ISO 10140-2"`` or ``"ISO 16283-1"``); it forms the
         report's standard-basis line together with the ISO 717 rating part.
@@ -119,17 +133,18 @@ class ReportMetadata:
         row.
     :ivar notes: Free-form remarks printed in the footer.
     :raises ValueError: If a supplied dimension/mass/volume/pressure is not
-        finite and strictly positive, a temperature or requirement is not
-        finite, a relative humidity is outside 0..100 %, a required class is
-        not one of 0, 1, 2, a position count is not a finite, positive
-        integer, or a tube shape is not one of ``"circular"``,
-        ``"rectangular"``, ``"square"``.
+        finite and strictly positive, a curing time is negative or not finite,
+        a temperature or requirement is not finite, a relative humidity is
+        outside 0..100 %, a required class is not one of 0, 1, 2, a position
+        count is not a finite, positive integer, or a tube shape is not one of
+        ``"circular"``, ``"rectangular"``, ``"square"``.
     """
 
     specimen: str | None = None
     client: str | None = None
     mounted_by: str | None = None
     manufacturer: str | None = None
+    product: str | None = None
     area: float | None = None
     mass_per_area: float | None = None
     source_volume: float | None = None
@@ -160,6 +175,9 @@ class ReportMetadata:
     required_class: int | None = None
     notes: str | None = None
     tube_shape: str | None = None
+    curing_time_h: float | None = None
+    separating_element: str | None = None
+    test_signal: str | None = None
 
     #: Numeric fields that must be finite and strictly positive.
     _POSITIVE_FIELDS = (
@@ -190,6 +208,9 @@ class ReportMetadata:
         "receiving_temperature_c",
         "requirement",
     )
+    #: Durations that may be zero but never negative: a covering laid loose
+    #: needs no curing at all.
+    _NON_NEGATIVE_FIELDS = ("curing_time_h",)
     #: Relative-humidity fields: finite and within 0..100 %.
     _HUMIDITY_FIELDS = (
         "relative_humidity_percent",
@@ -214,7 +235,16 @@ class ReportMetadata:
             raise ValueError(msg)
 
     def __post_init__(self) -> None:
-        """Validate the supplied numeric fields by physical range."""
+        """Validate the supplied fields: the quantities, the counts, the choices."""
+        self._validate_quantities()
+        self._validate_counts()
+        self._validate_choices()
+
+    def _validate_quantities(self) -> None:
+        """Hold each supplied physical quantity to its range.
+
+        :raises ValueError: If a quantity is out of its range.
+        """
         for name in self._POSITIVE_FIELDS:
             self._require(
                 name,
@@ -223,6 +253,12 @@ class ReportMetadata:
             )
         for name in self._FINITE_FIELDS:
             self._require(name, math.isfinite, "finite")
+        for name in self._NON_NEGATIVE_FIELDS:
+            self._require(
+                name,
+                lambda x: math.isfinite(x) and x >= 0.0,
+                "a finite, non-negative number",
+            )
         for name in self._HUMIDITY_FIELDS:
             self._require(
                 name,
@@ -231,6 +267,12 @@ class ReportMetadata:
                 ),
                 "a relative humidity in 0..100 %",
             )
+
+    def _validate_counts(self) -> None:
+        """Hold each supplied count of positions to a positive whole number.
+
+        :raises ValueError: If a count is not a positive integer.
+        """
         for name in self._POSITIVE_INT_FIELDS:
             value = getattr(self, name)
             if value is None:
@@ -244,6 +286,12 @@ class ReportMetadata:
                     f"given; got {value!r}."
                 )
                 raise ValueError(msg)
+
+    def _validate_choices(self) -> None:
+        """Hold each supplied choice to the values it can take.
+
+        :raises ValueError: If a required class or a tube shape is unknown.
+        """
         if self.required_class is not None and self.required_class not in (0, 1, 2):
             msg = (
                 "ReportMetadata.required_class must be 0, 1 or 2 when given; "

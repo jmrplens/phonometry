@@ -1,10 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Figures for the laboratory application rules of ISO 10140-1:2021.
 
-The three annexes that measure what a product adds rather than what an element
+The four annexes that measure what a product adds rather than what an element
 is: a lining on a standard basic element (Annex G), a floor covering on a
-reference floor (Annex H), and rain on a rooflight (Annex K). Every panel is
-drawn by the library's own ``.plot()``, so the figure is what a user gets.
+reference floor (Annex H), a sealed joint per metre of its length with a
+variable slit at its gap widths (Annex J), and rain on a rooflight (Annex K).
+Every panel is drawn by the library's own ``.plot()``, so the figure is what a
+user gets.
 Everything here is embedded by
 ``buildings/insulation/lab-application-rules``.
 """
@@ -166,4 +168,61 @@ def generate_rainfall_sound(output_dir: str) -> None:
     res.plot(ax=ax2, language=_LANG, color=COLOR_PRIMARY)
     plt.tight_layout()
     save_figure(output_dir, "rainfall_sound.png")
+    plt.close()
+
+
+#: The maximum of a door test arrangement, the joint sealed on both sides
+#: (ISO 10140-1:2021 J.1), 100 Hz to 5000 Hz.
+_JOINT_MAXIMUM = np.array(
+    [40.2, 42.8, 45.1, 48.6, 51.9, 54.3, 56.8, 58.9, 60.7]
+    + [62.4, 63.8, 65.1, 66.2, 67.0, 67.6, 68.1, 68.5, 69.0]
+)
+#: An EPDM rebate seal at its nominal gap of 5 mm, as measured: its dip near
+#: 1000 Hz is the seal's own resonance, and above 3150 Hz it reaches within
+#: a few decibels of what the arrangement can show.
+_JOINT_SEAL = np.array(
+    [33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0]
+    + [46.2, 45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2]
+)
+#: How much the seal loses against its nominal gap at each gap width, in dB at
+#: mid frequency: compressed it gains a little, opened it leaks, more at high
+#: frequency than at low.
+_JOINT_GAP_LOSS_DB = {
+    3.0: -2.5,
+    4.0: -1.2,
+    5.0: 0.0,
+    6.0: 2.5,
+    8.0: 8.0,
+    10.0: 12.5,
+    12.0: 13.0,
+}
+
+
+def generate_joint_insulation(output_dir: str) -> None:
+    """ISO 10140-1 Annex J: a rebate seal per metre, and the seal against its gap."""
+    print("Generating joint_insulation...")
+    from phonometry import building
+
+    seal = building.lab_joint_insulation(
+        _JOINT_SEAL, _JOINT_MAXIMUM, _BANDS_100_5000, joint_length_m=5.4
+    )
+    slope = np.linspace(0.6, 1.4, len(_BANDS_100_5000))
+    widths = list(_JOINT_GAP_LOSS_DB)
+    results = [
+        building.lab_joint_insulation(
+            np.minimum(
+                _JOINT_SEAL - _JOINT_GAP_LOSS_DB[w] * slope, _JOINT_MAXIMUM - 0.5
+            ),
+            _JOINT_MAXIMUM,
+            _BANDS_100_5000,
+        )
+        for w in widths
+    ]
+    series = building.joint_gap_series(widths, results, minimum_gap_mm=3.0)
+
+    _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.0, 5.6))
+    seal.plot(ax=ax1, language=_LANG, color=COLOR_PRIMARY)
+    series.plot(ax=ax2, language=_LANG, color=COLOR_PRIMARY)
+    plt.tight_layout()
+    save_figure(output_dir, "joint_insulation.png")
     plt.close()

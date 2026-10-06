@@ -190,9 +190,55 @@ in the same order.
 - **Library behaviour:** `building.lab_floor_covering_improvement` reports the
   two ratings H.5 i) asks for and no $C_{I,r,50\text{–}2\,500}$; the
   enlarged-range term of the measured bare floor, which is defined, comes from
-  `building.weighted_impact_rating_extended`. No number the library reports
-  depends on the form, and no change was required.
+  `building.weighted_impact_rating_extended`. The form itself is printed by
+  `LabFloorCoveringImprovementResult.report()`, which puts those two ratings
+  beside $\Delta L_w$ and $C_{I\Delta}$ and writes, where
+  $C_{I,r,50\text{–}2\,500}$ would go, that it is not formed because Table 4
+  starts at 100 Hz. No number the library reports depends on the form, and no
+  change was required.
 - **Status:** unreported.
+
+## ISO 10140-1:2021, Annex J, Figure J.7 ("weighing curve" for "weighting curve")
+
+- **Location:** Annex J, J.5.1, Figure J.7 "Sample form for expression of
+  results" (PDF page 50, printed p. 44), the key beside the last two rows of
+  the header of the form.
+- **The print:** "................ frequency range of weighing curve" above
+  "__________ test curve".
+- **The problem:** "weighing" for "weighting". The dotted line marks the
+  frequency range of the reference curve that the ISO 717-1 rating shifts, the
+  weighting curve; a weighing curve is a term of neither document. The form of
+  BS EN ISO 10140-1:2010+A2:2014, Figure J.7, prints "frequency range of
+  weighting curve" in the same place, so the letter was lost in the 2021
+  edition.
+- **Evidence:** Verified on PDF page 50 (printed p. 44) of ISO 10140-1:2021
+  against PDF page 49 (printed p. 40) of BS EN ISO 10140-1:2010+A2:2014.
+- **Library behaviour:** none to take; no number depends on it. The form that
+  `LabJointInsulationResult.report()` prints labels the curve "shifted
+  reference (ISO 717-1)" and draws it over the rating range only.
+- **Status:** unreported (typographic, no numerical consequence).
+
+## ISO 10140-1:2021, Annex J, Figure J.8 (the working range drawn as Δb and keyed as Δbn)
+
+- **Location:** Annex J, J.5.1, Figure J.8 (PDF page 52, printed p. 46), the
+  dimension under the abscissa and the last line of the key. Figure J.8 of
+  BS EN ISO 10140-1:2010+A2:2014 (PDF page 50, printed p. 41) prints the same
+  pair.
+- **The print:** the arrow between $b_\mathrm{n}$ and $b_\mathrm{n} + 3$ is
+  labelled "$\Delta b$"; the key reads "$\Delta b_\mathrm{n}$ working range,
+  3 mm".
+- **The problem:** one quantity under two symbols, and the symbol the key
+  explains is not the one drawn. The text that introduces the figure names it
+  only in words, "indicating the working range of 3 mm" (J.5.1, PDF page 51,
+  printed p. 45), so nothing else in the annex decides between the two.
+- **Evidence:** Verified on PDF page 52 (printed p. 46) of ISO 10140-1:2021,
+  the drawing against its key, with the text of J.5.1 on PDF page 51 (printed
+  p. 45); and on PDF page 50 (printed p. 41) of BS EN ISO 10140-1:2010+A2:2014.
+- **Library behaviour:** `JointGapSeries.working_range_mm` returns the two
+  ends, $(b_\mathrm{n}, b_\mathrm{n} + 3)$, and its plot labels the shaded
+  range "working range $\Delta b$ = 3 mm", the symbol of the drawing. No number
+  depends on the symbol, and no change was required.
+- **Status:** unreported (typographic, no numerical consequence).
 
 ## ISO 2631-5:2018, Annex C worked examples (male displayed formula, female R)
 

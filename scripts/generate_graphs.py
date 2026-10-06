@@ -92,6 +92,7 @@ from figures.building_design import (
     generate_structure_borne_power,
 )
 from figures.building_lab_rules import (
+    generate_joint_insulation,
     generate_lab_floor_covering_improvement,
     generate_lab_lining_improvement,
     generate_rainfall_sound,
@@ -708,6 +709,7 @@ __all__ = [
     "generate_intensity_insulation",
     "generate_intensity_scan_power",
     "generate_ir_alignment",
+    "generate_joint_insulation",
     "generate_junction_kij_thickness",
     "generate_junction_plate_geometry",
     "generate_junction_transmission",

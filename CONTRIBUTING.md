@@ -645,6 +645,28 @@ Spanish names its language (`{"language": "es"}` among the keywords its
 builder returns) even where that is the renderer's default, because that is
 how the check finds the header and labels the builder writes into the page.
 
+The labels of every published Spanish figure are read the same way, from the
+text comment Matplotlib writes into the SVG before each string it draws, so a
+Spanish string a figure module draws on its own, past both translation tables,
+is held to the same list once the figure is regenerated.
+
+The same check holds the translation glossary, because a word the glossary has
+replaced reads as correct Spanish to every other gate. Besides the tables and
+the figures it reads the Spanish pages for it: the site's Spanish edition, its
+strings (`site/src/content/i18n/es.json`), its data files and components, and
+the Spanish twins under `docs/`. A Markdown page has its mathematics and inline
+code blanked; a script, a component or a data file is read as written, since
+its dollars and backticks are JavaScript. The rulings it enforces are in its
+`GLOSSARY_TERMS` and `GLOSSARY_PHRASES`: "diezmado" for decimation,
+"sinusoide" (with "sinusoidal" and "semisinusoidal") for the waveform, never
+"senoide", "senoidal" or "semiseno", and "incertidumbre expandida" for the
+GUM's expanded uncertainty. The bare word "seno" fails wherever it stands,
+because "seno" is the trigonometric function and a word cannot tell the two
+senses apart. Where it really is the function (the sine of an angle, the sine
+terms of a printed formula, the discrete sine transform), add a pattern for
+that context to its `TRIGONOMETRIC` table with the reason; a pattern that no
+longer exempts any "seno" fails the run, like a stale `ALLOWED` entry.
+
 ### 7c. Defaulting a style the caller may spell either way
 
 Matplotlib gives seven artist properties two names: `color` is also `c`,

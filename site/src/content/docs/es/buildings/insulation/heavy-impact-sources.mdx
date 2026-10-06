@@ -192,7 +192,7 @@ from phonometry import building, filters
 
 fs = 48_000
 t = np.arange(0.0, 0.020, 1.0 / fs)          # el tiempo de contacto de 20 ms
-force = 1500.0 * np.sin(np.pi * t / 0.020)   # un impulso semisenoidal de pico único
+force = 1500.0 * np.sin(np.pi * t / 0.020)   # un impulso semisinusoidal de pico único
 
 # Banda ancha, la energía del impulso completo: 10 lg(Fp^2 t / 2) = 43,5 dB.
 # No es un valor por banda ni es comparable con la tabla anterior.
@@ -206,8 +206,8 @@ freqs, bands = filtered.frequencies, filtered.bands
 lfe = [building.impact_force_exposure_level(b, fs) for b in bands]
 print([round(v, 1) for v in lfe])   # [-1.4, 14.0, 22.1, 20.2, 17.1]
 
-# Esos cinco van a la comprobación de conformidad; este semiseno sintético no
-# es una pelota de caucho, así que no cumple:
+# Esos cinco van a la comprobación de conformidad; este impulso semisinusoidal
+# sintético no es una pelota de caucho, así que no cumple:
 #   check_heavy_impact_source(lfe).passes  ->  False
 ```
 

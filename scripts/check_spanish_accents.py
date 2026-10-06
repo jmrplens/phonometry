@@ -2,9 +2,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Refuse a Spanish label written without its accent or its eñe.
 
-Every Spanish word the figures, the diagrams and the library's own renderers
-draw comes out of a translation table, and a table entry typed on a keyboard
-without the Spanish layout reads fine to every other gate: the language gate
+Nearly every Spanish word the figures, the diagrams and the library's own
+renderers draw comes out of a translation table, and a table entry typed on a
+keyboard without the Spanish layout reads fine to every other gate: the language gate
 sees a translated string, the parity check sees a pair, and the figure matches
 its generator. Twenty-nine entries of the building-acoustics figures shipped
 that way ("Correccion por ruido de fondo", "limite de medicion (1,3 dB fijos,
@@ -12,7 +12,10 @@ senalar la banda)", "la regla in situ termina aqui") with every gate green,
 and so did the RD 1367/2007 example fiche, whose builder writes its phase
 labels and header straight into the page ("Maquina ruidosa activa",
 "Sonometro integrador-promediador"). The example builders that ask for a
-Spanish fiche are therefore read as well (:data:`BUILDERS`).
+Spanish fiche are therefore read as well (:data:`BUILDERS`). A figure module
+can also draw a Spanish string of its own, past both tables, so the labels of
+every published Spanish figure are read too, as the figure carries them
+(:data:`FIGURES`).
 
 A spelling check proper would need a dictionary, and a dictionary is exactly
 what cannot tell ``limite`` the verb from ``límite`` the noun. So the rule is
@@ -30,6 +33,27 @@ case goes in :data:`ALLOWED`, keyed by the Spanish value and the word, with
 the reason. An entry whose value has left the tables, or no longer carries
 the word, fails, so the list cannot outlive its reason.
 
+The translation glossary is held here too, because a word the glossary has
+replaced reads as correct Spanish to every other gate. Its single-word rulings
+(:data:`GLOSSARY_TERMS`) and its phrases (:data:`GLOSSARY_PHRASES`) are read in
+the tables and the figures, and also in the Spanish pages (:data:`PAGES`: the
+site's Spanish edition, its strings, data and components, and the Spanish
+twins under ``docs/``), where the accent list is not applied: page prose
+carries code, identifiers and quotations that only a label is free of. A
+Markdown page has its mathematics and inline code blanked; a script, a
+component or a data file of the site is read as written, since its dollars
+and backticks are JavaScript and the Spanish sits between them.
+
+The waveform is the case that needs more than a list. Spanish names it
+«sinusoide», and «seno» is the trigonometric function; «un seno de 1 kHz»,
+«seno escalonado» and «seno barrido» shipped in about fifty places, and
+«Incertidumbre extendida» in a report fiche, with every gate green. A word
+cannot tell the two senses apart, so every «seno» fails unless it stands in
+one of the trigonometric contexts of :data:`TRIGONOMETRIC`, each with its
+reason; a context that no longer matches anything fails as well. The words
+built on «seno» for the waveform («senoidal», «semiseno», ...) are single
+words, and the glossary's list names them.
+
 The tables are read as source, not imported, so the check needs nothing but
 the standard library and runs before anything is installed.
 
@@ -45,10 +69,14 @@ from __future__ import annotations
 
 import argparse
 import ast
+import html
 import pathlib
 import re
 import sys
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -74,6 +102,51 @@ SOURCES: tuple[tuple[str, tuple[str, ...]], ...] = (
 #: why a builder of a Spanish fiche names the language even where it is the
 #: renderer's default. The directory must hold at least one such builder.
 BUILDERS: tuple[str, ...] = ("scripts/reports",)
+
+#: The Spanish pages, as glob patterns relative to the tree: the site's Spanish
+#: edition, the strings of its interface, the data files whose ``es`` fields it
+#: renders (the glossary cards, the topic labels, the catalogue names), the
+#: components that carry their own Spanish strings, and the Spanish twins of
+#: ``docs/``. Only the glossary is read in them (see the module docstring), and
+#: every pattern must match a file with text in it.
+PAGES: tuple[str, ...] = (
+    "site/src/content/docs/es/**/*.md",
+    "site/src/content/docs/es/**/*.mdx",
+    "site/src/content/i18n/es.json",
+    "site/src/data/*.mjs",
+    "site/src/data/*.ts",
+    "site/src/data/*.json",
+    "site/src/components/**/*.astro",
+    "docs/*.es.md",
+)
+
+#: The published Spanish figures, as glob patterns relative to the tree. A
+#: figure module may draw Spanish of its own, past both translation tables: a
+#: ``_wt_text(english, spanish)`` pair, or the ``(english, spanish, ...)`` rows
+#: of a table the module keeps for one figure. Matplotlib writes every string
+#: it draws into the SVG as a ``<!-- ... -->`` comment before its outlines,
+#: so the comments are every Spanish label a reader sees, whatever wrote it,
+#: and the figure gate keeps them equal to what the generators draw now. Each
+#: label is read as a table value, accents and glossary alike, and every
+#: pattern must match a figure with a label in it. A raster figure (the few
+#: kept as WebP because their SVG would be heavier) carries no text at all,
+#: so its Spanish is read only where it comes from a table.
+FIGURES: tuple[str, ...] = (
+    ".github/images/*_es.svg",
+    ".github/images/*_es_dark.svg",
+)
+
+#: A page written in Markdown, whose dollars delimit mathematics and whose
+#: backticks delimit code. Every other page (a script, a component, a data or
+#: strings file of the site) is JavaScript or JSON, where a dollar opens a
+#: ``${...}`` substitution or ends a regular expression and a backtick opens a
+#: template literal: blanking between them would hide the Spanish strings they
+#: hold, so such a page is read as written.
+_MARKDOWN: frozenset[str] = frozenset({".md", ".mdx"})
+
+#: A text comment of a Matplotlib SVG: the string drawn by the outlines that
+#: follow it, with ``&``, ``<`` and ``>`` escaped.
+_SVG_LABEL = re.compile(r"<!-- (.*?) -->", re.DOTALL)
 
 #: Unaccented forms that are never correct Spanish in this corpus, with the
 #: spelling each one stands for. Only a form that is not also a common word
@@ -271,7 +344,65 @@ GLOSSARY_TERMS: dict[str, str] = {
     "decimada": "diezmada",
     "decimadas": "diezmadas",
     "decimar": "diezmar",
+    # The waveform is a sinusoide: «senoide» is not in the Real Academia's
+    # dictionary, and the Spanish signal-processing literature writes the
+    # adjective «sinusoidal» nine times out of ten. The noun «seno» is the
+    # trigonometric function and needs its context, so it is read apart
+    # (:data:`TRIGONOMETRIC`).
+    "senoide": "sinusoide",
+    "senoides": "sinusoides",
+    "senoidal": "sinusoidal",
+    "senoidales": "sinusoidales",
+    "senoidalmente": "sinusoidalmente",
+    "semisenoidal": "semisinusoidal",
+    "semisenoidales": "semisinusoidales",
+    # A half-sine pulse is a «semisinusoide»; «semiseno» shipped once in a
+    # code comment beside a «semisinusoidal» of the same example.
+    "semiseno": "semisinusoide",
+    "semisenos": "semisinusoides",
+    "semisenoide": "semisinusoide",
+    "semisenoides": "semisinusoides",
 }
+
+#: Rulings of the glossary that take more than one word, as a pattern (read
+#: without regard to case, across a line break) and the Spanish it stands for.
+#: «Incertidumbre expandida» is the GUM's own Spanish for expanded uncertainty;
+#: the calque «incertidumbre extendida» reached a report fiche through a table.
+GLOSSARY_PHRASES: dict[str, str] = {
+    r"(?<!\w)incertidumbres?\s+extendidas?(?!\w)": "incertidumbre expandida",
+}
+
+#: The contexts in which «seno» is the trigonometric function (or the noun of
+#: "en el seno de", the bosom of a medium) and not the waveform, as a pattern
+#: read without regard to case on the text as written, mathematics included,
+#: and the reason. Outside them every «seno» is the waveform and fails: the
+#: waveform is «sinusoide». A context that matches no «seno» of the tree fails
+#: the run, so the list cannot outlive its reason.
+TRIGONOMETRIC: dict[str, str] = {
+    r"(?<!\w)seno\s*/\s*coseno(?!\w)": (
+        "a demodulator correlates with the sine and the cosine functions"
+    ),
+    r"(?<!\w)coseno\s+y\s+(?:el\s+)?seno\s+de(?!\w)": (
+        "the cosine and the sine of an argument"
+    ),
+    r"(?<!\w)seno\s+del\s+ángulo(?!\w)": "the sine of an angle",
+    r"(?<!\w)seno\s+de\s+(?:theta|θ)(?!\w)": (
+        "the sine of an angle, spelt out for a screen reader"
+    ),
+    r"(?<!\w)transformada\s+(?:discreta\s+)?de\s+senos(?!\w)": (
+        "the discrete sine transform, built on the function"
+    ),
+    r"(?<!\w)términos\s+seno(?!\w)": "the sine terms of a printed formula",
+    r"(?<!\w)seno\s+lleva\s+\$k_\{33\}\$": (
+        "the sine term of a printed formula, named by the argument it carries"
+    ),
+    r"(?<!\w)en\s+el\s+seno\s+del\s+material(?!\w)": (
+        "the bosom of a medium, not a function at all"
+    ),
+}
+
+#: The noun the waveform and the function share.
+_SENO = re.compile(r"(?<!\w)senos?(?!\w)", re.IGNORECASE)
 
 #: A singular in -ción, -sión, -xión or -gión written without its accent. The
 #: plural (-ciones) ends in -es and is never matched, and ``guion`` (which the
@@ -289,6 +420,15 @@ ALLOWED: dict[tuple[str, str], str] = {}
 #: does not open it.
 _NOT_PROSE = re.compile(r"\{[^{}]*\}|<[^<>]*>|&#?\w+;|`[^`]*`")
 
+#: What is not prose in a page: an inline code span on one line. A page's tags
+#: stay, because the alternative text of a figure is Spanish a reader hears,
+#: and so does a fenced block, whose comments and labels are Spanish too.
+_NOT_PAGE_PROSE = re.compile(r"`[^`\n]*`")
+
+#: A paragraph of a page: a run of lines up to the next blank one. Mathematics
+#: is paired inside a paragraph, so one stray dollar cannot hide the page.
+_PARAGRAPH = re.compile(r"(?:[^\n]|\n(?![ \t]*\n))+")
+
 #: A run of word characters. A token that holds a digit or an underscore is an
 #: identifier or a quantity, not a word, and is skipped whole: split on the
 #: underscore, ``numero_bandas`` would read as a misspelt ``número``.
@@ -296,19 +436,30 @@ _TOKEN = re.compile(r"\w+")
 
 
 class Value(NamedTuple):
-    """One Spanish value, with where it is written."""
+    """One Spanish value, with where it is written.
+
+    A table entry is one value, and so is a label of a figure; a page is read
+    paragraph by paragraph, each one a value whose *line* is its first and
+    whose *text* is the page as written, so the line of a word inside it can
+    be counted. A page that is not Markdown (*script*: a script, a component,
+    a data or strings file) is read with nothing blanked, since its dollars
+    and backticks are JavaScript (see :data:`_MARKDOWN`).
+    """
 
     path: str
     line: int
     text: str
+    page: bool = False
+    script: bool = False
 
 
 class Offence(NamedTuple):
-    """A word of a value that needs its accent or its eñe."""
+    """A word of a value that needs its accent or its eñe, or its glossary term."""
 
     value: Value
     word: str
     spelling: str
+    line: int
 
 
 def _maths_runs(text: str) -> list[tuple[int, int]]:
@@ -355,6 +506,83 @@ def words_needing_marks(text: str) -> list[tuple[str, str]]:
         right = _spelling(word)
         if right is not None:
             found.append((word, right))
+    return found
+
+
+def page_prose(text: str, *, script: bool = False) -> str:
+    """A page paragraph with its mathematics and its inline code blanked.
+
+    Unlike :func:`prose`, a tag and a fenced block stay readable: the
+    alternative text of a figure and the comments of an example are Spanish a
+    reader meets (see :data:`_NOT_PAGE_PROSE`).
+
+    :param text: The paragraph as written.
+    :param script: The page is not Markdown (see :data:`_MARKDOWN`), and
+        *text* comes back as written.
+    """
+    if script:
+        return text
+    chars = list(text)
+    for lo, hi in _maths_runs(text):
+        chars[lo : hi + 1] = " " * (hi + 1 - lo)
+    return _NOT_PAGE_PROSE.sub(lambda m: " " * len(m.group(0)), "".join(chars))
+
+
+def _cased(word: str, right: str) -> str:
+    """*right* with the capital *word* starts with, if it starts with one."""
+    return right[0].upper() + right[1:] if word[0].isupper() else right
+
+
+def glossary_departures(
+    text: str,
+    *,
+    page: bool = False,
+    script: bool = False,
+    contexts: dict[str, str] | None = None,
+    used: set[str] | None = None,
+) -> list[tuple[str, str, int]]:
+    """Every place *text* departs from the glossary, with the glossary's term.
+
+    :param text: A table value, or a page paragraph as written.
+    :param page: Read *text* as a page (:func:`page_prose`), and read the
+        single-word rulings of :data:`GLOSSARY_TERMS` here too; in a table
+        they come with the accents, from :func:`words_needing_marks`.
+    :param script: With *page*, the page is not Markdown and nothing of it
+        is blanked (see :data:`_MARKDOWN`).
+    :param contexts: The trigonometric contexts of «seno»,
+        :data:`TRIGONOMETRIC` by default.
+    :param used: A set that receives every context that exempted a «seno».
+    :return: ``(as written, glossary term, offset in text)`` in text order.
+    """
+    contexts = TRIGONOMETRIC if contexts is None else contexts
+    readable = page_prose(text, script=script) if page else prose(text)
+    found: list[tuple[str, str, int]] = []
+    for pattern, right in GLOSSARY_PHRASES.items():
+        for match in re.finditer(pattern, readable, re.IGNORECASE):
+            written = " ".join(match.group(0).split())
+            found.append((written, _cased(written, right), match.start()))
+    if page:
+        for match in _TOKEN.finditer(readable):
+            word = match.group(0)
+            term = GLOSSARY_TERMS.get(word.lower())
+            if term is not None and word.isalpha():
+                found.append((word, _cased(word, term), match.start()))
+    senos = list(_SENO.finditer(readable))
+    spans = [
+        (match.start(), match.end(), pattern)
+        for pattern in (contexts if senos else ())
+        for match in re.finditer(pattern, text, re.IGNORECASE)
+    ]
+    for match in senos:
+        exempt = {p for lo, hi, p in spans if lo <= match.start() and match.end() <= hi}
+        if exempt:
+            if used is not None:
+                used.update(exempt)
+            continue
+        word = match.group(0)
+        right = "sinusoides" if word.lower() == "senos" else "sinusoide"
+        found.append((word, _cased(word, right), match.start()))
+    found.sort(key=lambda item: item[2])
     return found
 
 
@@ -481,6 +709,51 @@ def builder_values(path: pathlib.Path) -> list[Value]:
     return [Value(name, c.lineno, str(c.value)) for c in constants]
 
 
+def page_values(path: pathlib.Path) -> list[Value]:
+    """The paragraphs of a Spanish page, each one a value read as a page.
+
+    :param path: A page, or a data file of the site, read as text.
+    :return: One :class:`Value` per paragraph that holds anything but blanks,
+        its line the paragraph's first, its text the paragraph as written,
+        marked *script* unless the page is Markdown.
+    """
+    text = path.read_text(encoding="utf-8")
+    name = _named(path)
+    script = path.suffix not in _MARKDOWN
+    return [
+        Value(name, line, match.group(0), page=True, script=script)
+        for line, match in _numbered(text, _PARAGRAPH)
+        if match.group(0).strip()
+    ]
+
+
+def figure_values(path: pathlib.Path) -> list[Value]:
+    """The labels of a published Spanish figure, each one a value.
+
+    :param path: A Matplotlib SVG.
+    :return: One :class:`Value` per text comment that holds anything but
+        blanks, its line the comment's, its text the string as drawn.
+    """
+    text = path.read_text(encoding="utf-8")
+    name = _named(path)
+    return [
+        Value(name, line, html.unescape(match.group(1)))
+        for line, match in _numbered(text, _SVG_LABEL)
+        if match.group(1).strip()
+    ]
+
+
+def _numbered(
+    text: str, pattern: re.Pattern[str]
+) -> Iterator[tuple[int, re.Match[str]]]:
+    """Every match of *pattern* in *text*, with the line it starts on."""
+    line, counted = 1, 0
+    for match in pattern.finditer(text):
+        line += text.count("\n", counted, match.start())
+        counted = match.start()
+        yield line, match
+
+
 def _named(path: pathlib.Path) -> str:
     """The path as a report prints it: relative to the tree, forward slashes."""
     try:
@@ -493,14 +766,20 @@ def read_sources(
     sources: tuple[tuple[str, tuple[str, ...]], ...] = SOURCES,
     root: pathlib.Path = ROOT,
     builders: tuple[str, ...] = BUILDERS,
+    pages: tuple[str, ...] = PAGES,
+    figures: tuple[str, ...] = FIGURES,
 ) -> tuple[list[Value], list[str]]:
-    """Every Spanish value of the tables, and the sources that yielded none.
+    """Every Spanish value of the tables, figures and pages, and the empty sources.
 
     :param sources: Pairs of a file or directory (relative to *root*) and the
         table names to read in it.
     :param root: The tree the paths are relative to.
     :param builders: Directories of example-fiche builders (relative to
         *root*), read with :func:`builder_values`.
+    :param pages: Glob patterns of Spanish pages (relative to *root*), read
+        with :func:`page_values`.
+    :param figures: Glob patterns of Spanish figures (relative to *root*),
+        read with :func:`figure_values`.
     :return: The values, and the source paths that gave no value at all.
     """
     values: list[Value] = []
@@ -526,16 +805,31 @@ def read_sources(
         if not found:
             empty.append(where)
         values.extend(found)
+    for patterns, read in ((pages, page_values), (figures, figure_values)):
+        for pattern in patterns:
+            found = [
+                value
+                for path in sorted(root.glob(pattern))
+                if path.is_file()
+                for value in read(path)
+            ]
+            if not found:
+                empty.append(pattern)
+            values.extend(found)
     return values, empty
 
 
 def check(
-    values: list[Value], allowed: dict[tuple[str, str], str] | None = None
+    values: list[Value],
+    allowed: dict[tuple[str, str], str] | None = None,
+    contexts: dict[str, str] | None = None,
 ) -> tuple[list[Offence], list[tuple[str, str]]]:
-    """The words that need a mark, and the stale :data:`ALLOWED` entries.
+    """The words that need a mark or a glossary term, and the stale exemptions.
 
     :param values: The Spanish values to read.
     :param allowed: The exemptions, :data:`ALLOWED` by default.
+    :param contexts: The trigonometric contexts of «seno»,
+        :data:`TRIGONOMETRIC` by default.
     :return: One :class:`Offence` per word not exempted, and the exemptions
         that matched no word of any value.
     """
@@ -543,45 +837,96 @@ def check(
     offences: list[Offence] = []
     used: set[tuple[str, str]] = set()
     for value in values:
-        for word, right in words_needing_marks(value.text):
+        found = [
+            (word, right, value.line)
+            for word, right in ([] if value.page else words_needing_marks(value.text))
+        ]
+        for word, right, offset in glossary_departures(
+            value.text, page=value.page, script=value.script, contexts=contexts
+        ):
+            line = value.line
+            if value.page:
+                line += value.text.count("\n", 0, offset)
+            found.append((word, right, line))
+        for word, right, line in found:
             key = (value.text, word)
             if key in allowed:
                 used.add(key)
                 continue
-            offences.append(Offence(value, word, right))
+            offences.append(Offence(value, word, right, line))
     return offences, sorted(set(allowed) - used)
 
 
+def unused_contexts(
+    values: list[Value], contexts: dict[str, str] | None = None
+) -> list[str]:
+    """The trigonometric contexts that exempt no «seno» of *values*.
+
+    :param values: The Spanish values to read.
+    :param contexts: The contexts, :data:`TRIGONOMETRIC` by default.
+    :return: The patterns that matched no «seno», in their listed order.
+    """
+    contexts = TRIGONOMETRIC if contexts is None else contexts
+    used: set[str] = set()
+    for value in values:
+        glossary_departures(
+            value.text,
+            page=value.page,
+            script=value.script,
+            contexts=contexts,
+            used=used,
+        )
+    return [pattern for pattern in contexts if pattern not in used]
+
+
+def _quoted(offence: Offence) -> str:
+    """The line of the value that holds the offence, as the report quotes it."""
+    lines = offence.value.text.splitlines() or [""]
+    index = offence.line - offence.value.line if offence.value.page else 0
+    return lines[min(index, len(lines) - 1)].strip()[:100]
+
+
 def main(argv: list[str] | None = None) -> int:
-    """Report every Spanish value that lost an accent or an eñe."""
+    """Report every Spanish value that lost an accent, an eñe or its term."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.parse_args(argv)
 
     values, empty = read_sources()
     offences, stale = check(values)
-    if not offences and not stale and not empty:
+    unused = unused_contexts(values)
+    if not offences and not stale and not empty and not unused:
         print(
-            f"Every accent and eñe is in place: {len(values)} Spanish values "
-            f"across {len(SOURCES) + len(BUILDERS)} sources."
+            f"Every accent, eñe and glossary term is in place: {len(values)} "
+            "Spanish values across "
+            f"{len(SOURCES) + len(BUILDERS) + len(PAGES) + len(FIGURES)} sources."
         )
         return 0
     for where in empty:
         print(f"::error::no Spanish found in {where}; was a table renamed?")
     if offences:
-        print(f"::error::{len(offences)} Spanish word(s) without their accent or eñe")
+        print(
+            f"::error::{len(offences)} Spanish word(s) without their accent, "
+            "eñe or glossary term"
+        )
         for offence in offences:
             print(
-                f"  {offence.value.path}:{offence.value.line}: "
+                f"  {offence.value.path}:{offence.line}: "
                 f"{offence.word!r} is written {offence.spelling!r}"
             )
-            print(f"      {offence.value.text[:100]!r}")
+            print(f"      {_quoted(offence)!r}")
         print(
-            "  -> write the accent. A verb that really is spelt without one "
-            "goes in ALLOWED with its reason."
+            "  -> write the accent or the glossary's term. A verb that really "
+            "is spelt without an accent goes in ALLOWED, and a trigonometric "
+            "«seno» in TRIGONOMETRIC, with its reason."
         )
     for text, word in stale:
         print(
             f"::error::ALLOWED lists {word!r} in {text[:60]!r}, which no longer needs it"
+        )
+    for pattern in unused:
+        print(
+            f"::error::TRIGONOMETRIC lists {pattern!r}, which no longer exempts "
+            "any «seno»"
         )
     return 1
 

@@ -743,14 +743,18 @@ jobs:
       # alike; a standard's title reproduced as printed keeps its own. Static,
       # stdlib only, so it runs here with the markdown checks.
       run: python scripts/check_em_dashes.py
-    - name: Every Spanish label keeps its accents and eñes
+    - name: Every Spanish label keeps its accents, eñes and glossary terms
       # A translation typed without the Spanish keyboard layout reads fine to
       # every other gate, and twenty-nine figure labels shipped as
       # "Correccion", "medicion" and "aqui". This reads the translation tables
-      # of the figures, the diagrams and the library's renderers, and the
-      # example fiches built in Spanish, and fails on a form that is never
-      # correct Spanish without its mark. Static, stdlib only, so it runs here
-      # with the other checks on published text.
+      # of the figures, the diagrams and the library's renderers, the labels
+      # of every committed Spanish figure, and the example fiches built in
+      # Spanish, and fails on a form that is never correct Spanish without
+      # its mark. It reads the Spanish pages too for the translation
+      # glossary, which a word it has replaced passes every other gate:
+      # «seno» for the waveform and «incertidumbre extendida» shipped in
+      # about fifty places. Static, stdlib only, so it runs here with the
+      # other checks on published text.
       run: python scripts/check_spanish_accents.py
 
   # A form feed is one invisible byte, and inside a raw docstring it is the

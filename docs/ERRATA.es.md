@@ -1864,7 +1864,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Entretanto, el apartado definitorio 14.12.9.1 declara la razón de la suma
   r.m.s. de las tensiones de productos de intermodulación de la Table 2 «to
   the amplitude of the output voltage at the frequency f_s», es decir, la
-  componente senoidal de 15 kHz $U_s$, el convenio de Otala, y el punto d)
+  componente sinusoidal de 15 kHz $U_s$, el convenio de Otala, y el punto d)
   mide «the amplitudes of the sinusoidal signal $U_s$» precisamente para que
   pueda usarse, cosa que la fórmula de f) no hace nunca. El denominador
   debería ser $U_s$. Una revisión anterior de esta entrada decía que «U2 se
@@ -1872,7 +1872,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   el impreso inglés como en el francés.
 - **Evidencia:** la Table 2, el punto d) y el punto f) leídos juntos en ambas
   columnas de idioma de la edición bilingüe; la literatura histórica del DIM
-  (Otala) define la razón respecto a la amplitud del seno. Verificado en la
+  (Otala) define la razón respecto a la amplitud de la sinusoide. Verificado en la
   página 41 del PDF (p. 39 impresa), la página 40 del PDF (p. 38 impresa),
   que lleva la Table 2, y la página 102 del PDF (p. 100 impresa), que lleva
   el mismo punto f) en la columna francesa, de IEC 60268-3:2013.
@@ -7843,7 +7843,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $f_u = 1$ Hz y $f_o = 80$ Hz esa fórmula da $|H_{u\mathrm{Soll}}|$ = 0,995 a
   31,5 Hz y 0,100 a 315 Hz, frente a los 1,000 y 0,249 impresos. La fila $KB_F$
   resuelve cuál de las dos es la lectura pretendida: $KB_F$ es
-  $|H_{B\mathrm{Soll}}|/\sqrt{2}$ para un seno de 1 mm/s, y a 31,5 Hz eso es
+  $|H_{B\mathrm{Soll}}|/\sqrt{2}$ para una sinusoide de 1 mm/s, y a 31,5 Hz eso es
   0,6928 partiendo de 0,995 y 0,6962 partiendo de 1,000, así que el 0,693
   impreso es lo primero; a 315 Hz es 0,0709 partiendo de 0,100 y 0,176
   partiendo de 0,249, así que el 0,071 impreso vuelve a ser lo primero, por un
@@ -7855,8 +7855,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   DIN 45669-1:2010-09; las dos filas son celdas contiguas de una misma columna, así que no hay ninguna cuestión de
   desplazamiento ni de transcripción. Con lo que sí encajan las dos celdas
   anómalas es con el máximo que muestra un retenedor de máximo cuando se
-  incluye el transitorio de arranque de la limitación de banda: un seno de
-  1 mm/s arrancado en un paso por cero da 0,852 a 1 Hz y 0,248 a 315 Hz a
+  incluye el transitorio de arranque de la limitación de banda: una sinusoide de
+  1 mm/s arrancada en un paso por cero da 0,852 a 1 Hz y 0,248 a 315 Hz a
   través de ese mismo filtro. Esa lectura, sin embargo, no es la que muestran
   las otras tres celdas de la fila, así que la fila no sigue de forma
   consistente ni un criterio ni el otro.
@@ -7867,7 +7867,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:**
   [`KB_TEST_INDICATIONS`](../src/phonometry/vibration/immission/vibration_meter.py)
   publica las tres filas de la Tabla 9 que siguen a las fórmulas, y el informe
-  de conformidad pasa un seno de 1 mm/s por la cadena entera y reproduce los
+  de conformidad pasa una sinusoide de 1 mm/s por la cadena entera y reproduce los
   quince valores con los tres decimales con que están impresos. La fila de pico
   ni se publica ni se comprueba; el docstring del módulo dice por qué, y el pico
   que muestra un registro se calcula del registro y no de una tabla.
@@ -7934,7 +7934,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % tras $4\tau$: más o menos la mitad de lo
   impreso.
 - **Evidencia:** la fórmula (1) en la misma página y la Figura 3 en la
-  siguiente, que dibuja $\tilde v_F/\hat v$ de un seno de 8 Hz y de uno de
+  siguiente, que dibuja $\tilde v_F/\hat v$ de una sinusoide de 8 Hz y de una de
   20 Hz frente al tiempo en unidades de $\tau$, con la media marcada en 0,707.
   En $2\tau$ las dos curvas oscilan alrededor de 0,66, que es el 93 % de 0,707,
   y en $4\tau$ alrededor de 0,70. Verificado en la página 3 del PDF (p.

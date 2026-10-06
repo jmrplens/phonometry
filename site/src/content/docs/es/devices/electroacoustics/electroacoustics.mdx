@@ -48,7 +48,7 @@ de frecuencias, la intermodulación dinámica (DIM) y la THD ponderada UIT-R BS.
 y los estimadores de respuesta en frecuencia $H_1$/$H_2$ de Bendat y
 Piersol con la coherencia ordinaria $\gamma^2$. Toda magnitud tiene un oráculo
 analítico exacto (señales sintéticas con amplitudes armónicas y de
-intermodulación conocidas, un oráculo de Fourier de seno recortado, una
+intermodulación conocidas, un oráculo de Fourier de sinusoide recortada, una
 síntesis completa de la señal de ensayo DIM y un camino LTI conocido), así que
 los valores son verificables y no ajustados.
 
@@ -115,7 +115,7 @@ al lado del número.
 
 ## 1. Distorsión armónica (IEC 60268-3 14.12.2–5)
 
-Un dispositivo no lineal alimentado con un seno puro en $f_1$ devuelve el
+Un dispositivo no lineal alimentado con una sinusoide pura en $f_1$ devuelve el
 fundamental más armónicos en $2f_1, 3f_1, \dots$. La **distorsión armónica
 total** combina las amplitudes armónicas $a_n$, ya sea respecto al fundamental
 (`kind='F'`) o respecto al RMS total (`kind='R'`):
@@ -346,7 +346,7 @@ ITU-R BS.468-4 desplazada un valor plano de -5,63 dB para que sea unidad a
 2 kHz. El **rango dinámico** (6.4.1) excita el dispositivo con una sinusoide de
 997 Hz 60 dB por debajo de plena escala, elimina el fundamental con la muesca
 normalizada (5.2.8) y pondera el residuo de ruido-más-distorsión, y luego
-informa de la razón del seno de plena escala a ese residuo ponderado (también
+informa de la razón de la sinusoide de plena escala a ese residuo ponderado (también
 conocida como relación señal-ruido). El **ruido de canal en reposo** (6.4.2) es
 el mismo nivel ponderado medido con el dispositivo excitado por cero digital,
 referido a plena escala:
@@ -417,8 +417,8 @@ segundo con los tonos fijados, y los puntos van en orden de apartado:
   cuadrada de 3,15 kHz filtrada en paso bajo (1:4 pico a pico). La DIM es el
   RMS de los productos de intermodulación
   $|k\,f_\text{square} \pm f_\text{sine}|$ que caen por
-  debajo de $f_\text{sine}$ (Tabla 2 de la IEC 60268-3), respecto a la amplitud del
-  seno de 15 kHz (la definición de 14.12.9.1; el denominador impreso en
+  debajo de $f_\text{sine}$ (Tabla 2 de la IEC 60268-3), respecto a la amplitud de la
+  sinusoide de 15 kHz (la definición de 14.12.9.1; el denominador impreso en
   14.12.9.2 f) es un defecto editorial, véase el
   [registro de erratas](/phonometry/es/reference/errata/)).
 - **Distorsión total por diferencia de frecuencias** (14.12.10): el ensayo de

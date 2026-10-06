@@ -777,7 +777,7 @@ _STRINGS: dict[str, str] = {
     "Tonal audibility &#916;L<sub>ta</sub> = <b>{dl} dB</b> &nbsp; tonal adjustment K = <b>{k} dB</b>": "Audibilidad tonal &#916;L<sub>ta</sub> = <b>{dl} dB</b> &nbsp; ajuste tonal K = <b>{k} dB</b>",
     "Decisive tone f<sub>T</sub> = {f} Hz": "Tono decisivo f<sub>T</sub> = {f} Hz",
     "Analysis line spacing &#916;f = {df} Hz": "Resolución del análisis &#916;f = {df} Hz",
-    "Extended uncertainty U = {u} dB (90 % coverage)": "Incertidumbre extendida U = {u} dB (cobertura del 90 %)",
+    "Extended uncertainty U = {u} dB (90 % coverage)": "Incertidumbre expandida U = {u} dB (cobertura del 90 %)",
     "&#916;L<sub>ta</sub> = {dl} dB, required &#8804; {req} dB": "&#916;L<sub>ta</sub> = {dl} dB, exigido &#8804; {req} dB",
     "A prominent tone is present (decisive &#916;L<sub>ta</sub> = {dl} dB &gt; 0); the tonal adjustment K = {k} dB (ISO 1996-2:2017 Table J.1) applies.": "Existe un tono destacado (&#916;L<sub>ta</sub> decisiva = {dl} dB &gt; 0); se aplica el ajuste tonal K = {k} dB (Tabla J.1 de la ISO 1996-2:2017).",
     "No prominent tone is present (decisive &#916;L<sub>ta</sub> = {dl} dB &#8804; 0); no tonal adjustment applies (K = 0 dB).": "No existe ningún tono destacado (&#916;L<sub>ta</sub> decisiva = {dl} dB &#8804; 0); no se aplica ajuste tonal (K = 0 dB).",

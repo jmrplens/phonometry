@@ -69,7 +69,7 @@ Todo nivel de la norma se refiere a una intensidad del campo magnético de
 elegida para que un promedio a largo plazo de −12 dB, 100 mA/m, dé al audífono
 la misma salida acústica que un nivel de presión acústica de 70 dB en su
 micrófono (4.3), mientras que los 0 dB son la intensidad de campo máxima de
-8.2.7, leída con un seno de 1 kHz o la señal combi en el medidor de valor
+8.2.7, leída con una sinusoide de 1 kHz o la señal combi en el medidor de valor
 eficaz verdadero. La intensidad de campo se expresa en amperios por
 metro porque es proporcional a la corriente del bucle y cae con la distancia al
 conductor; en el aire la densidad de flujo es $B = \mu_0 H$, así que 400 mA/m
@@ -259,8 +259,8 @@ su valor eficaz en un minuto a 48 kHz, 21 dB pico a pico, que cumple lo primero
 y no lo segundo, así que `loop_test_noise` recorta a 4 veces el valor eficaz y
 reescala, lo que cumple las dos. La **señal combi** de 6.6 y la tabla 2 alterna
 ráfagas de tono de 1 kHz de al menos 1 s, con rampas de 5 ms, con al menos el
-cuádruple de ese ruido 6 dB más bajo: los picos del seno quedan 3 dB por debajo
-de los del ruido, y el amplificador se calienta menos que con un seno continuo
+cuádruple de ese ruido 6 dB más bajo: los picos de la sinusoide quedan 3 dB por debajo
+de los del ruido, y el amplificador se calienta menos que con una sinusoide continua
 mientras el nivel todavía se lee en las ráfagas.
 
 ```python
@@ -269,7 +269,7 @@ print(electroacoustics.band_limit_response([100.0, 5000.0]).round(2))  # [-0.71 
 noise = electroacoustics.loop_test_noise(fs, 30.0, seed=7)
 print(round(20 * np.log10(np.ptp(noise) / np.sqrt(np.mean(noise**2))), 2))  # 18.06 dB
 
-combi = 0.4 * electroacoustics.combi_signal(fs, cycles=2, seed=7)  # ráfagas de seno a 400 mA/m
+combi = 0.4 * electroacoustics.combi_signal(fs, cycles=2, seed=7)  # ráfagas de sinusoide a 400 mA/m
 reading = electroacoustics.field_strength_meter(combi, fs)
 print(round(reading.maximum_db, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
 ```
@@ -282,10 +282,10 @@ apartado pide en inglés filtros «at least one-third-order», un desliz por el
 tercer orden que nombran su B.2.3, su propia NOTA 2 e IEC 62489-1, y que la UNE
 ya traduce «de tercer orden»; los dos están en el registro de erratas.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/induction_loop_combi.svg" alt="La lectura del medidor de valor eficaz verdadero con ponderación F de dos ciclos de la señal combi escalada a 400 mA/m, durante 10 segundos: cada ráfaga de seno de 1 segundo sube a 0 dB en unos cientos de milisegundos y se mantiene, y cada tramo de 4 segundos de ruido rosa se asienta en unos −6 dB con fluctuaciones de unas décimas de decibelio; la indicación máxima, 0,0 dB, está marcada con un rombo donde se produce, sobre la línea de referencia" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/induction_loop_combi.svg" alt="La lectura del medidor de valor eficaz verdadero con ponderación F de dos ciclos de la señal combi escalada a 400 mA/m, durante 10 segundos: cada ráfaga de sinusoide de 1 segundo sube a 0 dB en unos cientos de milisegundos y se mantiene, y cada tramo de 4 segundos de ruido rosa se asienta en unos −6 dB con fluctuaciones de unas décimas de decibelio; la indicación máxima, 0,0 dB, está marcada con un rombo donde se produce, sobre la línea de referencia" width="88%" />
 
 *El medidor con la señal combi. Las ráfagas leen 0 dB, el ruido 6 dB menos, y
-la indicación máxima, la que lee 8.2.7, es la del seno; el nivel del registro
+la indicación máxima, la que lee 8.2.7, es la de la sinusoide; el nivel del registro
 completo queda 4 dB por debajo, que es lo que ahorra al amplificador.*
 
 <details>
@@ -309,7 +309,7 @@ plt.show()
    del volumen previsto, a 1,2 m para oyentes sentados y 1,7 m para oyentes de
    pie, y conviene también escucharlo, porque su espectro decide cuánto
    molesta.
-2. **Ajustar el nivel** (8.2). Con un seno de 1 kHz, o la señal combi, y el
+2. **Ajustar el nivel** (8.2). Con una sinusoide de 1 kHz, o la señal combi, y el
    medidor de valor eficaz verdadero, los controles del amplificador se ajustan
    para que el campo alcance 400 mA/m; con voz o ruido rosa el objetivo es la
    lectura que declara el fabricante para 400 mA/m (la tabla 3 da −6 dB para
@@ -494,7 +494,7 @@ plt.show()
 ## 7. Puesta en servicio y ensayo de sobrecarga (IEC 60118-4 10.2, 10.3 modificados)
 
 La Modificación 1 sustituye el ensayo de sobrecarga a 1,6 kHz por uno ligado al
-programa. Con un seno de 1 kHz ajustado **7 dB por debajo** del campo requerido
+programa. Con una sinusoide de 1 kHz ajustada **7 dB por debajo** del campo requerido
 en un punto, se mide la tensión en el bucle y se sube la frecuencia con la misma
 entrada hasta que esa tensión **se duplica** o se alcanza la frecuencia de la
 **tabla 4**, la que sea más alta (10.3.2), y no debe aparecer recorte a la
@@ -506,7 +506,7 @@ frecuencia de la tabla 4 y a ese nivel (10.3.3):
 | Voz (por defecto) | 1,6 kHz | 3,15 kHz |
 | Música | 2,0 kHz | 4,0 kHz |
 
-La frecuencia de ensayo es cerca del doble del límite superior porque un seno
+La frecuencia de ensayo es cerca del doble del límite superior porque una sinusoide
 en el propio límite sacaría de la fuente de alimentación una corriente
 irrealmente alta; el nivel reducido al doble de frecuencia la carga como lo
 hace el programa real (10.3.1). De las tres maneras que da la modificación de
@@ -577,7 +577,7 @@ normales de medida ponen la corriente de salida 10 dB por debajo de la asignada
 - **Tensión de cumplimiento** (5.4.8): las tensiones de pico máximas positiva y
   negativa en la carga asignada, durante al menos 60 s del ruido rosa
   especificado con el AGC en pleno funcionamiento, promediadas y divididas por
-  $\sqrt{2}$: la tensión eficaz del seno con los mismos picos.
+  $\sqrt{2}$: la tensión eficaz de la sinusoide con los mismos picos.
 - **Ruido** (5.4.9): la tensión de ruido equivalente a la entrada
   $U_\mathrm{n} = U I_\mathrm{n} / I$, la entrada de 1 kHz que da la misma
   corriente que el ruido, o la relación señal-ruido

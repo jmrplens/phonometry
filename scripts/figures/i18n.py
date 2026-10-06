@@ -1181,7 +1181,7 @@ _ES_EXACT = {
     "Raw PSD": "PSD sin filtrar",
     "Raw Signal Spectrum (PSD)": "Espectro de la se\u00f1al (PSD)",
     "Relative Attenuation vs IEC 61260-1:2014 Class Limits": "Atenuaci\u00f3n relativa vs l\u00edmites de clase de IEC 61260-1:2014",
-    "Right Channel: Log Sine Sweep": "Canal derecho: barrido senoidal logar\u00edtmico",
+    "Right Channel: Log Sine Sweep": "Canal derecho: barrido sinusoidal logar\u00edtmico",
     "Slow (1000ms)": "Slow (1000 ms)",
     "Stateful blocks (state carried)": "Bloques con estado (estado conservado)",
     "Statistical Levels $L_{10}$ / $L_{50}$ / $L_{90}$ (Fast envelope)": "Niveles estad\u00edsticos $L_{10}$ / $L_{50}$ / $L_{90}$ (envolvente Fast)",

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1796 numerical conformance checks against 519 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1802 numerical conformance checks against 519 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1796 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1802 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -6158,10 +6158,14 @@ nothing verifies how the measurement was made: the position counts and
 placements, the corner positions the ISO 16283 low-frequency procedure is fed
 from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
 are the operator's job. The exception is the ISO 16032 engineering method for
-service-equipment noise, which checks its own position ladder, the distances
-of its 7.3 and the height of its corner position (7.2). Measuring the
-background noise is the operator's job too, and two corrections are
-implemented: the ISO 10140-4
+service-equipment noise,
+which checks its own position ladder, the distances of its 7.3 and the height
+of its corner position and its 0.2 m from obstacles (7.2), and the numbers its
+draft sets for the measurement itself: the calibration deviation, the
+background measured over approximately 30 s against the tolerance the operator
+gives, a background that varies, disturbed periods and the calculation against
+the instrument. Elsewhere, measuring the background noise is the operator's
+job too, and two corrections are implemented: the ISO 10140-4
 laboratory one, warning when its 6 dB floor is broken, and the Clause 9 field
 correction of ISO 16032 for service equipment, held at 2.2 dB below a 4 dB
 margin. The field levels of an insulation index must arrive already
@@ -7643,9 +7647,13 @@ ISO 16283 low-frequency procedure is fed from, and not the test-facility and
 mounting requirements of ISO 10140-1. Those are the operator's
 responsibility and the report's, and
 they are what makes the numbers here mean something. The one method that
-checks its own positions is the ISO 16032 engineering method for
-service-equipment noise, with the position ladder of its 7.4.1, the
-distances of 7.3 and the corner height of 7.2 in a rectangular room.
+checks its own positions is the ISO 16032 engineering
+method for service-equipment noise, with the position ladder of its 7.4.1, the
+distances of 7.3 and the corner height and 0.2 m from obstacles of 7.2 in a
+rectangular room; it also checks the measurement itself: the calibration
+deviation, the background time against the operator's tolerance and a
+background that varies, disturbed periods and the calculation against the
+instrument.
 Background noise is the one correction genuinely left to the caller of the
 insulation routines: their
 field levels must arrive already corrected, their 6 dB signal-to-background
@@ -11184,8 +11192,21 @@ ceiling and position 2 is 1.2 m high, so the two are 1.88 m apart although
 they look closer. The figure joins each source to its nearest position and
 writes the true distance on the line.*
 
-The 0.2 m from obstacles and the choice of corner cannot be judged from a room
-outline, and the check leaves them to the person placing the microphone.
+A room outline cannot show furniture, so the 0.2 m that 7.2 asks between the
+corner microphone and any obstacle is judged from the distance measured on
+site. Pass it as `corner_obstacle_distance_m`, one value or one per obstacle
+near the microphone: the nearest decides `corner_obstacle_ok`, which then
+enters `passes`, and 0.2 m itself is "at least 0.2 m". Left out, it is not
+judged. The choice of corner stays with the person placing the microphone.
+
+```python
+positions = building.check_service_equipment_positions(
+    (4.2, 3.4, 2.5), (3.7, 2.9, 0.5), [(1.4, 1.9, 1.2), (3.1, 0.8, 1.5)],
+    source_positions_m=[(0.6, 3.0, 2.5)],
+    corner_obstacle_distance_m=[0.35, 0.25],    # a wardrobe and a radiator [m]
+)
+print(positions.corner_obstacle_distance_m, positions.passes)   # 0.25 True
+```
 
 **A source in the room gets a position of its own (7.9).** Where a source
 stands in the room itself, a ventilation outlet in the wall or in the ceiling
@@ -11262,9 +11283,12 @@ $$
 
 **The background (Clause 9).** The background is measured as the equivalent
 level over about 30 s just before or after each set of measurements, at the
-same positions. With $\Delta L = L_1 - L_2$ between the measured band and the
-background band, nothing is corrected at 10 dB or more; from 4 dB to 10 dB
-the band is corrected by Formulae (7) to (9),
+same positions (7.6; the [checks on site](#checks-on-site) hold the time to
+30 s within the tolerance you accept, and offer the route for a background
+that varies). With
+$\Delta L = L_1 - L_2$ between the measured band and the background band,
+nothing is corrected at 10 dB or more; from 4 dB to 10 dB the band is
+corrected by Formulae (7) to (9),
 
 $$
 L = L_1 - K, \qquad K = -10 \lg \left[ 1 - 10^{-0.1 \Delta L} \right]\ \mathrm{dB}
@@ -11315,7 +11339,9 @@ The A-weighted value is summed over the restricted range 50 Hz to 5000 Hz or
 the extended range 25 Hz to 10 000 Hz, and the C-weighted value over the
 extended range; the report names the range. The draft's NOTE to 7.8 suggests
 comparing the result with the weighted level the instrument showed: more
-than 2 dB apart, the calculation deserves a second look.
+than 2 dB apart, the calculation deserves a second look, and
+`check_instrument_agreement` makes the comparison (see
+[checks on site](#checks-on-site)).
 
 `service_equipment_level` runs the whole chain. Here a water closet is flushed
 and refilled (Annex B.2.6) and heard in the bedroom next door, three readings
@@ -11381,6 +11407,161 @@ bands cover the extended range.
 For the octave counterpart of the restricted A-weighting range the draft
 gives no range of its own; the library uses 63 Hz to 4000 Hz, the octave
 range the draft pairs with 50 Hz to 5000 Hz for the standardization.
+
+## Checks on site
+
+Beside the method, the draft sets numbers for the measurement itself: how far
+the calibration may drift, how long the background is measured, when a
+varying background still lets the result stand, when a period was disturbed,
+and how far the calculation may stand from the meter. Each check below
+returns a verdict with `passes` (and refuses to be read as `True` or `False`
+itself) and a `.plot()`.
+
+### The calibration (Clause 5)
+
+At the beginning and at the end of the measurements the sensitivity of the
+instrumentation is verified with a class 1 sound calibrator (IEC 60942). A
+calibration that deviates from previous calibrations by more than 0.5 dB
+takes the equipment out of use until the reason is clarified and the
+sensitivity put right. The limit is new in the revision: the 2004 edition
+asked for the two calibrations and set no number.
+`verify_calibration_deviation` holds each reading to every calibration
+before it, the earlier ones given and, for the end, the beginning as well; a
+deviation of exactly 0.5 dB is not "more than 0.5 dB" and passes. The
+readings are compared as levels, so they come from the same calibrator at the
+same stated level.
+
+```python
+cal = building.verify_calibration_deviation(
+    [94.0, 94.2],                       # beginning and end of this measurement [dB]
+    previous_levels_db=[93.9, 94.0],    # earlier calibrations of the instrumentation [dB]
+)
+print(np.round(cal.deviations_db, 2), cal.passes)   # [0.1 0.3] True
+cal.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_calibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_calibration.svg" alt="Four calibrator readings in order: two earlier calibrations at 93.9 and 94.0 dB, then this measurement's beginning at 94.0 dB and end at 94.2 dB. Over the beginning and the end a shaded band from 93.5 to 94.4 dB marks where a reading stays within 0.5 dB of every calibration before it; both readings lie inside it, labelled 0.10 dB and 0.30 dB. The title gives the largest deviation, 0.30 dB, and says the equipment may be used." width="80%"></picture>
+
+*The band over each reading of this measurement is where it would stay within
+0.5 dB of every calibration before it. The end, 94.2 dB, is 0.3 dB from the
+earliest calibration and 0.2 dB from the beginning, so the equipment may be
+used.*
+
+### The background measurement (7.6)
+
+The background is the equivalent level in bands over approximately 30 s just
+before or after each set of measurements, at the same microphone positions.
+The draft prints no tolerance for "approximately", so the library sets none:
+`check_background_duration` asks for the departure from 30 s, either way,
+that your report accepts as approximate (`tolerance_s`, a required keyword),
+holds each time to it, and reports every departure whatever the verdict. A
+departure of exactly the tolerance is within it, and `tolerance_s=0.0` holds
+each time to 30 s exactly. Whether the background was taken just before or
+after each set, and at the same positions, is not a number and stays with the
+operator.
+
+```python
+duration = building.check_background_duration(
+    [30.0, 31.0, 30.0, 26.5],   # measurement time of each background [s]
+    tolerance_s=2.0,            # what the report accepts as "approximately" [s]
+)
+print(duration.departures_s, duration.within_tolerance, duration.passes)
+# [ 0.   1.   0.  -3.5] [ True  True  True False] False
+duration.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_background_duration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_background_duration.svg" alt="Four background measurement times against a dashed line at 30 s and a shaded band from 28 to 32 s, the 2 s accepted either way. The first three, at 30, 31 and 30 s, lie inside the band; the fourth, at 26.5 s, lies under it and is ringed in orange as beyond the tolerance. The title gives the largest departure, 3.5 s, beyond the 2 s accepted." width="80%"></picture>
+
+*With 2 s accepted either way, the first three backgrounds are approximately
+30 s and the fourth, 3.5 s short, is not. Every departure goes in the report,
+and the tolerance written beside them is what decides.*
+
+### A background that varies (NOTE to Clause 9)
+
+The correction of Clause 9 assumes a background roughly constant in time.
+Where it is not, road traffic for example, a reliable correction cannot be
+made, and the NOTE to Clause 9 offers another route: watch the maximum level
+of the background for 10 min to 15 min at the corner position; if it lies
+10 dB or more below the equipment, the result can be regarded valid without
+correction. The NOTE asks to check "the validity in all relevant
+octave-bands", words kept from the 2004 edition, which measured in octaves;
+`check_varying_background` judges the margin in every band it is given,
+one-third octaves or octaves. Both ends of the period are included, and so is
+a margin of exactly 10 dB. The 2004 edition watched "one of the microphone
+positions"; the draft names the corner.
+
+```python
+octaves = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+varying = building.check_varying_background(
+    [36.5, 35.0, 31.0, 27.5, 24.0, 21.0, 17.5],   # background maximum over 12 min [dB]
+    [44.0, 46.5, 43.0, 39.5, 36.0, 32.5, 28.0],   # the equipment, same bands [dB]
+    observation_time_s=720.0,
+    frequencies_hz=octaves,
+)
+print(varying.margin_ok, varying.passes)
+# [False  True  True  True  True  True  True] False
+varying.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_varying_background_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_varying_background.svg" alt="Octave bands from 63 Hz to 4 kHz. The equipment level, solid with square markers, falls from 46.5 dB at 125 Hz to 28 dB at 4 kHz. A dashed line runs 10 dB under it. The background maximum, dotted, lies under the dashed line from 125 Hz up, but at 63 Hz it reaches 36.5 dB, above the dashed line at 34 dB, and an orange triangle marks that band as less than 10 dB below. The title reads not valid without correction, watched for 12 min." width="80%"></picture>
+
+*The traffic peaks reach 36.5 dB at 63 Hz, only 7.5 dB under the equipment,
+so that band is short of the 10 dB the NOTE asks and the result cannot stand
+without correction there; from 125 Hz up the margin is 10.5 dB to 12 dB.*
+
+### Disturbed periods (Clause 9)
+
+"A simple check on-site" closes Clause 9: compare the maximum level with the
+equivalent level in the middle of the frequency range during each
+measurement period. For many stable sources the difference should be less
+than 5 dB; a larger one says the period was disturbed, by a closing door or
+footfall for example. The check is new in the revision. It holds for stable
+sources, not for one whose own level varies, and the draft names the band
+only as "the middle of the frequency range", so the operator chooses it. A
+difference of exactly 5 dB is not less than 5 dB and marks the period.
+
+```python
+periods = building.check_measurement_disturbance(
+    [41.6, 42.0, 48.9, 41.3, 41.8, 42.2],   # maximum of a mid-range band, per period [dB]
+    [39.0, 39.4, 41.1, 38.9, 39.2, 39.6],   # equivalent level, same band and periods [dB]
+)
+print(np.round(periods.differences_db, 1), periods.disturbed_periods)
+# [2.6 2.6 7.8 2.4 2.6 2.6] (2,)
+periods.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_disturbance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_disturbance.svg" alt="Six measurement periods with the maximum level less the equivalent level of each: 2.6, 2.6, 7.8, 2.4, 2.6 and 2.6 dB. A dashed line at 5 dB bounds a shaded region above it labelled disturbed; only the third period lies in it. The title reads disturbed periods: 3." width="80%"></picture>
+
+*In five periods the maximum sits 2.4 dB to 2.6 dB above the equivalent
+level; in the third it sits 7.8 dB above, and that period was disturbed.
+`disturbed_periods` counts from 0, the figure from 1.*
+
+### The calculation against the instrument (NOTE to 7.8)
+
+The NOTE to 7.8 suggests comparing the corrected and calculated A- and
+C-weighted results with the values the instrument registered: more than
+2 dB apart, the calculations should be checked for possible explanations. The
+NOTE is new in the revision. `check_instrument_agreement` takes the result and
+the instrument's value for each single number, keyed by its Table 1 notation;
+a reading at each position is energy-averaged by Formula (1). The calculated
+value is the single number as 7.8 rounds it, and exactly 2 dB agrees. A
+background correction or a standardization can account for a difference by
+itself, which is the kind of explanation the NOTE asks for.
+
+```python
+agreement = building.check_instrument_agreement(
+    res, {"LA,eq": [46.0, 44.5, 45.8], "LC,eq": [52.3, 50.8, 52.1]})
+print({k: round(v, 1) for k, v in agreement.differences_db.items()}, agreement.passes)
+# {'LA,eq': -0.5, 'LC,eq': 0.2} True
+agreement.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_instrument_agreement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_instrument_agreement.svg" alt="The calculated less the instrument's value for two single numbers, L A,eq and L C,eq, against a shaded band from minus 2 to plus 2 dB. L A,eq sits at minus 0.5 dB and L C,eq at plus 0.2 dB, both inside the band. The title says the calculation agrees." width="80%"></picture>
+
+*The meter read 44.5 dB to 46.0 dB A-weighted and 50.8 dB to 52.3 dB
+C-weighted at the three positions of the water closet example. Their energy
+averages lie 0.5 dB above the calculated $L_\mathrm{A,eq}$ = 45 dB and 0.2 dB
+below $L_\mathrm{C,eq}$ = 52 dB, well inside 2 dB.*
 
 ## Operating conditions (Annex B)
 
@@ -11468,7 +11649,14 @@ Against the withdrawn ISO 16032:2004, the draft:
 - relaxes the reverberant-field positions: 1.0 m apart at least (2004 asked
   1.5 m), 0.50 m from surfaces (0.75 m) and up to 2.0 m high (1.5 m);
 - raises the low-frequency reproducibility of Table 2 from 1.5 dB to 1.9 dB
-  and the C-weighted one from 1.1 dB to 1.2 dB.
+  and the C-weighted one from 1.1 dB to 1.2 dB;
+- takes the equipment out of use when a calibration deviates from previous
+  calibrations by more than 0.5 dB, where 2004 asked for the calibrations and
+  set no limit;
+- adds two on-site checks, a maximum less than 5 dB above the equivalent
+  level in each period and calculated results within 2 dB of the instrument;
+- watches the maximum of a varying background at the corner position, where
+  2004 used any one of the positions.
 
 ## Verifying it without a worked example
 
@@ -11485,7 +11673,16 @@ their rounding half up to whole decibels, the thresholds of Clause 9 met by
 levels given to 0.1 dB, the thresholds of 7.4.1 at their boundaries, every
 distance and height limit of 7.3, and the corner height and preferred wall
 distance of 7.2, met exactly and missed by 0.01 m, and the positions 7.9
-places in front of a wall source and below a ceiling one.
+places in front of a wall source and below a ceiling one. The checks on site
+stand on the limits the draft prints, each met exactly and missed: the 0.2 m
+from an obstacle, the 0.5 dB calibration deviation, the 10 min to 15 min and
+the 10 dB of a varying background, the 5 dB between the maximum and the
+equivalent level, and the 2 dB between calculation and instrument, with the
+instrument above the calculation and below it. A difference of decimal
+readings that lands a hair off its limit in binary, 40.3 dB over 30.3 dB for
+the 10 dB for instance, still reads as the limit. Since the draft prints no
+tolerance for its 30 s, the background row gives its own (0 s, 0.3 s and
+1 s) and holds 30 s to each, met exactly and missed above and below.
 
 ## Quick answers
 
@@ -11515,6 +11712,15 @@ periods in its loudest hour, and treat each set of three positions exactly as
 for a service equipment. Where the sound is too irregular to find the loudest
 corner, use the most reflective one and report the deviation.
 
+### Does a background measured over 28 s pass?
+
+Only if the tolerance you give allows it. 7.6 asks for "approximately 30 s"
+and prints no tolerance, so `check_background_duration` asks you for one
+(`tolerance_s`) rather than decide how much "approximately" allows: with 2 s
+accepted, 28 s passes; with 1 s, it does not. Either way the 2 s departure is
+reported, the tolerance goes in the report beside it, and nothing else in the
+method changes.
+
 ### Is the result an upper limit?
 
 When a band of the weighted range was within 4 dB of the background, yes:
@@ -11539,17 +11745,26 @@ at 2.2 dB, standardization and normalization by Formulae (5) and (6) over
 50 Hz to 5000 Hz, the A- and C-weighted sums of Formulae (2) and (3) over the
 ranges of 7.8 rounded to whole decibels, Table A.1 (with the misprinted
 C-weighting cells from IEC 61672-1), Table 2, and the operating conditions of
-Annex B as data, the activities of B.10 included.
+Annex B as data, the activities of B.10 included. The checks on site: the
+0.2 m from obstacles of 7.2 from a measured distance, the 0.5 dB calibration
+deviation of Clause 5, the 30 s background of 7.6 against the tolerance the
+operator gives, the 10 min to 15 min
+maximum of a varying background and its 10 dB margin (NOTE to Clause 9), the
+5 dB between the maximum and the equivalent level of Clause 9, and the 2 dB
+comparison with the instrument of the NOTE to 7.8.
 
 **Not covered.** The draft is not the published standard: where ISO 16032:2024 differs, this
 page follows the draft. The library does not record the multispectral time
 trace or find the instant of the maximum: it takes the band levels at that
-instant as given. Nothing checks the 0.2 m from obstacles, the calibrator
-drift of 0.5 dB (Clause 5), the 30 s of the background measurement, the
-10 min to 15 min maximum background of the NOTE to Clause 9, the 5 dB
-maximum-to-equivalent check that follows it, or the 2 dB comparison of the
-NOTE to 7.8. Nor does anything check the room volume of about 300 m³ or less
-that Clause 1 intends the method for. The "specific frequency range" that 4.2 admits
+instant as given. The checks on site judge numbers the operator measures
+and passes in; they do not decide what is not a number: which corner is the
+loudest, whether the background was taken just before or after each set and
+at the same positions, which band is "the middle of the frequency range", or
+whether a source is stable enough for the 5 dB check. "Approximately 30 s"
+has no tolerance in the draft, so the library sets none: the operator names
+the one the report accepts. Nothing checks the room volume of about 300 m³ or
+less that Clause 1
+intends the method for. The "specific frequency range" that 4.2 admits
 beside the two ranges, and that the form of Annex C has a box for, is not
 offered: 7.8 forms the weighted values over the restricted or the extended
 range only, and a band set that does not cover the chosen range is refused.
@@ -51301,8 +51516,13 @@ documents, one page per module.
 | `service_equipment_level` / `ServiceEquipmentResult` | `function` / `dataclass` | **Service-equipment sound pressure level, engineering method (ISO/DIS 16032:2023, the draft of the second edition).**<br>• `levels_db`: band levels of every reading, `(readings, bands)` [dB]; `frequencies_hz` [Hz]<br>• `quantity`: 'Smax' / 'Fmax' / 'eq' (Table 1)<br>• `background_db` (Clause 9), `reverberation_time_s` and `volume_m3` (Formulae (5) and (6), 50-5000 Hz only), `reference_reverberation_time_s` (0.5 s)<br>• `band`: 'third' / 'octave'; `a_weighting_range`: 'restricted' (50-5000 Hz) / 'extended' (25-10 000 Hz)<br>• `.plot()` | `res = building.service_equipment_level(levels, freqs, quantity='eq', reverberation_time_s=t)`<br><br>• `ratings` keyed by Table 1 (`'LA,eq'`, `'LA,eq,nT'`, `'LC,eq'`...), `average_db`, `corrected_db`, `standardized_db`, `normalized_db`, `upper_limit('A')`, `unstandardized_bands_hz`, `reproducibility_db`, `weighted_reproducibility_db` (Table 2: 0.8 dB A, 1.2 dB C) |
 | `service_equipment_background_correction` / `ServiceEquipmentBackgroundResult` | `function` / `dataclass` | **Background correction of ISO/DIS 16032:2023 Clause 9.**<br>• `levels_db`, `background_db` [dB], one per band<br>• none at 10 dB or more, Formula (8) from 4 dB, held at 2.2 dB below 4 dB (an upper limit)<br>• `.plot()` | `bg = building.service_equipment_background_correction([50, 48], [38, 45])`<br><br>• `corrected_db`, `correction_db`, `regime`, `limited`, `influenced` |
 | `check_position_spread` / `PositionSpreadCheck` | `function` / `dataclass` | **How many positions: the ladder of ISO/DIS 16032:2023 7.4.1.**<br>• `levels_db`: 3, 6 or 9 uncorrected A-weighted readings (corner, 2, 3, then corner, 4, 5 and corner, 6, 7)<br>• spread up to 3.0 dB, under 6.0 dB, under 9.0 dB<br>• `.plot()` | `chk = building.check_position_spread([35.0, 32.1, 36.2])`<br><br>• `passes`, `action` ('proceed' / 'add_positions' / 'interrupt'), `next_positions`, `corner_standard_deviation_db` |
-| `check_service_equipment_positions` / `ServiceEquipmentPositionCheck` / `loudest_corner` | `function` / `dataclass` | **Where the microphones go (ISO/DIS 16032:2023 7.2 and 7.3).**<br>• `room_dimensions_m`, `corner_position_m`, `room_positions_m`, `source_positions_m` [m]; `small_room`<br>• 1.0 m between positions (1.5 m preferred), 1.5 m from sources, 0.50 m (0.30 m) from surfaces, 0.5-2.0 m high; corner 0.5-1.5 m high<br>• `loudest_corner(c_weighted_levels_db, excluded=...)`: position 1<br>• `.plot()` | `pos = building.check_service_equipment_positions((5, 4, 2.6), (0.5, 0.5, 0.5), [(2.5, 2, 1.2), (4, 3.2, 1.5)])`<br><br>• `passes`, `separation_ok`, `surface_ok`, `source_ok`, `height_ok` |
+| `check_service_equipment_positions` / `ServiceEquipmentPositionCheck` / `loudest_corner` | `function` / `dataclass` | **Where the microphones go (ISO/DIS 16032:2023 7.2 and 7.3).**<br>• `room_dimensions_m`, `corner_position_m`, `room_positions_m`, `source_positions_m` [m]; `small_room`; `corner_obstacle_distance_m` [m], measured on site<br>• 1.0 m between positions (1.5 m preferred), 1.5 m from sources, 0.50 m (0.30 m) from surfaces, 0.5-2.0 m high; corner 0.5-1.5 m high and at least 0.2 m from any obstacle<br>• `loudest_corner(c_weighted_levels_db, excluded=...)`: position 1<br>• `.plot()` | `pos = building.check_service_equipment_positions((5, 4, 2.6), (0.5, 0.5, 0.5), [(2.5, 2, 1.2), (4, 3.2, 1.5)])`<br><br>• `passes`, `separation_ok`, `surface_ok`, `source_ok`, `height_ok`, `corner_obstacle_ok` |
 | `additional_microphone_position` | `function` | **The extra position for a source in the room (ISO/DIS 16032:2023 7.9).**<br>• `room_dimensions_m`, `source_position_m` [m]<br>• `mounting`: 'wall' (1 m in front of the source, 1.5 m high) / 'ceiling' (1.5 m high, directly below)<br>• the reading there is reported separately, never standardized, never averaged with positions 1, 2 and 3 | `p = building.additional_microphone_position((4.2, 3.4, 2.5), (0.6, 3.0, 2.5), mounting='ceiling')`<br><br>• `(x, y, z)` [m] |
+| `verify_calibration_deviation` / `CalibrationDeviationResult` | `function` / `dataclass` | **May the instrumentation be used, by its calibrations (ISO/DIS 16032:2023 Clause 5).**<br>• `calibration_levels_db`: this measurement's calibrator readings, beginning and end [dB]<br>• `previous_levels_db`: earlier calibrations of the instrumentation [dB]<br>• each reading held to every calibration before it; more than 0.5 dB takes the equipment out of use<br>• `.plot()` | `cal = building.verify_calibration_deviation([94.0, 94.2], previous_levels_db=[93.9])`<br><br>• `passes`, `deviations_db`, `largest_deviation_db`, `limit_db` |
+| `check_background_duration` / `BackgroundDurationCheck` | `function` / `dataclass` | **The background measured over approximately 30 s (ISO/DIS 16032:2023 7.6).**<br>• `durations_s`: the measurement time of each background equivalent level [s]<br>• `tolerance_s` (required): the departure from 30 s, either way, accepted as approximate [s]; the draft prints none<br>• every departure reported<br>• `.plot()` | `dur = building.check_background_duration([30.0, 28.0], tolerance_s=2.0)`<br><br>• `passes`, `departures_s`, `largest_departure_s`, `within_tolerance` |
+| `check_varying_background` / `VaryingBackgroundCheck` | `function` / `dataclass` | **A result that stands without correction for a varying background (NOTE to ISO/DIS 16032:2023 Clause 9).**<br>• `background_maximum_db`: background maximum at the corner, per band [dB]; `equipment_levels_db` [dB]<br>• `observation_time_s`: 10 min to 15 min [s]; `frequencies_hz` [Hz], for the plot<br>• 10 dB or more below in every band<br>• `.plot()` | `var = building.check_varying_background([30.0], [45.0], observation_time_s=720.0)`<br><br>• `passes`, `margin_db`, `margin_ok`, `observation_ok` |
+| `check_measurement_disturbance` / `MeasurementDisturbanceCheck` | `function` / `dataclass` | **Disturbed measurement periods (ISO/DIS 16032:2023 Clause 9).**<br>• `maximum_levels_db`, `equivalent_levels_db`: a mid-range band, one per period [dB]<br>• maximum less than 5 dB above the equivalent level<br>• `.plot()` | `per = building.check_measurement_disturbance([44.0, 48.9], [40.3, 41.1])`<br><br>• `passes`, `differences_db`, `undisturbed`, `disturbed_periods` |
+| `check_instrument_agreement` / `InstrumentAgreementCheck` | `function` / `dataclass` | **The calculation against the instrument (NOTE to ISO/DIS 16032:2023 7.8).**<br>• `result`: a `ServiceEquipmentResult`<br>• `instrument_levels_db`: the instrument's value per single number, keyed `'LA,eq'`, `'LC,eq'`... [dB]; several readings are energy-averaged<br>• more than 2 dB apart: the calculation is checked<br>• `.plot()` | `agr = building.check_instrument_agreement(res, {'LA,eq': 45.6})`<br><br>• `passes`, `differences_db`, `disagreeing`, `calculated_db`, `instrument_db` |
 | `SERVICE_EQUIPMENT_WEIGHTING` / `SERVICE_EQUIPMENT_REPRODUCIBILITY` / `SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY` | `mapping` | **Annex A and Clause 10 of ISO/DIS 16032:2023.**<br>• Table A.1 A- and C-weighting [dB] by band width and centre; the one-third-octave C cells the draft misprints (25 Hz, 1600-10 000 Hz) are IEC 61672-1<br>• Table 2 reproducibility standard deviation [dB] per band, and 0.8 dB (A) / 1.2 dB (C) | `building.SERVICE_EQUIPMENT_WEIGHTING['third']['C'][4000.0]  # -0.8` |
 | `SERVICE_EQUIPMENT_OPERATING_CONDITIONS` / `OperatingCondition` | `mapping` / `dataclass` | **Operating conditions and cycles of ISO/DIS 16032:2023 Annex B.**<br>• taps, showers, baths, water closets, ventilation, heating, cooling, lifts, rubbish chutes, auxiliary equipment, car park doors, other equipment and the activities of B.10 (`'unknown_source'`)<br>• `clause`, `maximum_level`, `equivalent_level`, `nominal_integration_time_s` (30 s or a cycle), `parameters` | `building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS['lift'].parameters['repetitions_min']  # 3.0` |
 | `background_correction` | `function` | **Background-noise correction (ISO 10140-4 §4.3).**<br>• `signal_and_background`: Combined Lsb per band [dB]<br>• `background`: Lb per band [dB]<br>• 6–15 dB margin corrected, ≤6 dB capped at 1.3 dB, ≥15 dB unchanged | `L = building.background_correction(lsb, lb)`<br><br>• Corrected levels [dB] (`LabInsulationWarning` at the limit of measurement) |
@@ -69782,7 +70002,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1796 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1802 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -70790,7 +71010,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1796 numerical conformance checks across 109 domains and 519 standards, covering
+1802 numerical conformance checks across 109 domains and 519 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

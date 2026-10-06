@@ -611,6 +611,47 @@ def _service_equipment_positions() -> ph.building.ServiceEquipmentPositionCheck:
     )
 
 
+def _calibration_deviation() -> ph.building.CalibrationDeviationResult:
+    """Two calibrations of a measurement against three earlier ones (Clause 5)."""
+    return ph.building.verify_calibration_deviation(
+        [93.9, 94.1], previous_levels_db=[94.0, 93.8, 94.1]
+    )
+
+
+def _background_duration() -> ph.building.BackgroundDurationCheck:
+    """Three backgrounds, the last 2 s short of 30 s, against 1 s (7.6)."""
+    return ph.building.check_background_duration([30.0, 30.0, 28.0], tolerance_s=1.0)
+
+
+def _varying_background() -> ph.building.VaryingBackgroundCheck:
+    """A background maximum watched for 12 min, one band short (Clause 9)."""
+    return ph.building.check_varying_background(
+        [28.0, 27.0, 22.0, 20.0],
+        [41.0, 35.4, 36.0, 33.5],
+        observation_time_s=720.0,
+        frequencies_hz=[125.0, 250.0, 500.0, 1000.0],
+    )
+
+
+def _measurement_disturbance() -> ph.building.MeasurementDisturbanceCheck:
+    """Four measurement periods, a door slammed in the third (Clause 9)."""
+    return ph.building.check_measurement_disturbance(
+        [44.0, 43.6, 52.1, 43.9], [40.3, 41.5, 42.0, 39.8]
+    )
+
+
+def _instrument_agreement() -> ph.building.InstrumentAgreementCheck:
+    """The calculated single numbers against the meter's readings (7.8)."""
+    result = _service_equipment()
+    return ph.building.check_instrument_agreement(
+        result,
+        {
+            "LA,eq": result.ratings["LA,eq"] + 0.6,
+            "LC,eq": result.ratings["LC,eq"] - 2.4,
+        },
+    )
+
+
 def _soundscape_answers() -> tuple[np.ndarray, list[str]]:
     """Twelve Method A part 2 answers at three sites (ISO/TS 12913-3 A.3)."""
     answers = np.array(

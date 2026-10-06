@@ -128,9 +128,22 @@ en el techo y la posición 2 a 1,2 m de altura, así que están a 1,88 m aunque
 parezcan más cerca. La figura une cada fuente con su posición más cercana y
 escribe sobre la línea la distancia real.*
 
-Los 0,2 m a los obstáculos y la elección de la esquina no se pueden juzgar
-desde el contorno del recinto, y la comprobación los deja a quien coloca el
-micrófono.
+El contorno del recinto no muestra los muebles, así que los 0,2 m que el 7.2
+pide entre el micrófono de la esquina y cualquier obstáculo se juzgan con la
+distancia medida en obra. Se pasa como `corner_obstacle_distance_m`, un valor
+o uno por cada obstáculo cerca del micrófono: el más cercano decide
+`corner_obstacle_ok`, que entonces entra en `passes`, y 0,2 m justos son «al
+menos 0,2 m». Si no se da, no se juzga. La elección de la esquina sigue en
+manos de quien coloca el micrófono.
+
+```python
+positions = building.check_service_equipment_positions(
+    (4.2, 3.4, 2.5), (3.7, 2.9, 0.5), [(1.4, 1.9, 1.2), (3.1, 0.8, 1.5)],
+    source_positions_m=[(0.6, 3.0, 2.5)],
+    corner_obstacle_distance_m=[0.35, 0.25],    # un armario y un radiador [m]
+)
+print(positions.corner_obstacle_distance_m, positions.passes)   # 0.25 True
+```
 
 **Una fuente en el recinto tiene su propia posición (apartado 7.9).** Cuando
 hay una fuente en el propio recinto, por ejemplo una boca de ventilación en la
@@ -209,9 +222,13 @@ $$
 
 **El ruido de fondo (capítulo 9).** El ruido de fondo se mide como nivel
 equivalente durante unos 30 s justo antes o después de cada serie de medidas,
-en las mismas posiciones. Con $\Delta L = L_1 - L_2$ entre la banda medida y
-la del ruido de fondo, no se corrige nada a 10 dB o más; de 4 dB a 10 dB la
-banda se corrige con las fórmulas (7) a (9),
+en las mismas posiciones (apartado 7.6; las
+[comprobaciones en obra](#comprobaciones-en-obra) contrastan el tiempo con
+30 s dentro de la tolerancia que usted acepte, y ofrecen la vía para un ruido
+de fondo que varía). Con
+$\Delta L = L_1 - L_2$ entre la banda medida y la del ruido de fondo, no se
+corrige nada a 10 dB o más; de 4 dB a 10 dB la banda se corrige con las
+fórmulas (7) a (9),
 
 $$
 L = L_1 - K, \qquad K = -10 \lg \left[ 1 - 10^{-0{,}1 \Delta L} \right]\ \mathrm{dB}
@@ -263,7 +280,8 @@ El valor ponderado A se suma sobre el rango restringido de 50 Hz a 5000 Hz o
 sobre el ampliado de 25 Hz a 10 000 Hz, y el ponderado C sobre el ampliado; el
 informe nombra el rango. La NOTA al 7.8 sugiere comparar el resultado con el
 nivel ponderado que mostró el instrumento: si difieren más de 2 dB, conviene
-revisar el cálculo.
+revisar el cálculo, y `check_instrument_agreement` hace la comparación
+(véanse las [comprobaciones en obra](#comprobaciones-en-obra)).
 
 `service_equipment_level` recorre la cadena entera. Aquí se descarga y se
 vuelve a llenar la cisterna de un inodoro (anexo B.2.6) y se escucha en el
@@ -330,6 +348,166 @@ Para el equivalente en octavas del rango restringido de la ponderación A el
 borrador no da un rango propio; la biblioteca usa de 63 Hz a 4000 Hz, el rango
 en octavas que el borrador empareja con 50 Hz a 5000 Hz para la
 estandarización.
+
+## Comprobaciones en obra
+
+Junto al método, el borrador fija números para la propia medición: cuánto
+puede desviarse la calibración, cuánto dura la medida del ruido de fondo,
+cuándo un ruido de fondo que varía deja el resultado en pie, cuándo un
+periodo estuvo perturbado y cuánto puede separarse el cálculo del sonómetro.
+Cada comprobación devuelve un veredicto con `passes` (el objeto no se deja
+leer directamente como `True` o `False`) y un `.plot()`.
+
+### La calibración (capítulo 5)
+
+Al principio y al final de las medidas se verifica la sensibilidad de la
+cadena de medida con un calibrador acústico de clase 1 (IEC 60942). Una
+calibración que se desvía de las anteriores más de 0,5 dB deja el equipo
+fuera de uso hasta aclarar la causa y corregir la sensibilidad. El límite es
+nuevo en la revisión: la edición de 2004 pedía las dos calibraciones y no
+fijaba ningún número. `verify_calibration_deviation` compara cada lectura con
+todas las calibraciones anteriores a ella, las anteriores que se le dan y,
+para la del final, también la del principio; una desviación de 0,5 dB justos
+no es «más de 0,5 dB» y pasa. Las lecturas se comparan como niveles, así que
+proceden del mismo calibrador al mismo nivel declarado.
+
+```python
+cal = building.verify_calibration_deviation(
+    [94.0, 94.2],                       # principio y final de esta medición [dB]
+    previous_levels_db=[93.9, 94.0],    # calibraciones anteriores de la cadena [dB]
+)
+print(np.round(cal.deviations_db, 2), cal.passes)   # [0.1 0.3] True
+cal.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_calibration.svg" alt="Cuatro lecturas del calibrador en orden: dos calibraciones anteriores a 93,9 y 94,0 dB, y después el inicio de esta medición a 94,0 dB y el final a 94,2 dB. Sobre el inicio y el final una franja sombreada de 93,5 a 94,4 dB marca dónde una lectura queda a 0,5 dB o menos de todas las calibraciones anteriores; las dos lecturas caen dentro, rotuladas 0,10 dB y 0,30 dB. El título da la desviación máxima, 0,30 dB, y dice que el equipo puede usarse." width="80%" />
+
+*La franja sobre cada lectura de esta medición marca dónde quedaría a 0,5 dB o
+menos de todas las calibraciones anteriores. La del final, 94,2 dB, está a
+0,3 dB de la calibración más antigua y a 0,2 dB de la del principio, así que
+el equipo puede usarse.*
+
+### La medida del ruido de fondo (apartado 7.6)
+
+El ruido de fondo es el nivel equivalente por bandas durante aproximadamente
+30 s justo antes o después de cada serie de medidas, en las mismas posiciones
+de micrófono. El borrador no imprime ninguna tolerancia para
+«aproximadamente», así que la biblioteca no fija ninguna:
+`check_background_duration` pide la desviación respecto de los 30 s, por
+arriba o por abajo, que su informe acepta como aproximada (`tolerance_s`, un
+argumento de palabra clave obligatorio), contrasta cada tiempo con ella e
+informa de cada desviación sea cual sea el veredicto. Una desviación igual a
+la tolerancia queda dentro, y `tolerance_s=0.0` exige exactamente 30 s a cada
+tiempo. Si el ruido de fondo se tomó justo antes o después de cada serie, y
+en las mismas posiciones, no es un número y queda en manos del operador.
+
+```python
+duration = building.check_background_duration(
+    [30.0, 31.0, 30.0, 26.5],   # tiempo de medición de cada ruido de fondo [s]
+    tolerance_s=2.0,            # lo que el informe acepta como «aproximadamente» [s]
+)
+print(duration.departures_s, duration.within_tolerance, duration.passes)
+# [ 0.   1.   0.  -3.5] [ True  True  True False] False
+duration.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_background_duration.svg" alt="Cuatro tiempos de medición del ruido de fondo frente a una línea discontinua en 30 s y una franja sombreada de 28 a 32 s, los 2 s aceptados por arriba y por abajo. Los tres primeros, a 30, 31 y 30 s, caen dentro de la franja; el cuarto, a 26,5 s, queda por debajo y lleva un anillo naranja que lo marca fuera de la tolerancia. El título da la mayor desviación, 3,5 s, fuera de la tolerancia aceptada de 2 s." width="80%" />
+
+*Con 2 s aceptados por arriba y por abajo, los tres primeros ruidos de fondo
+duran aproximadamente 30 s y el cuarto, 3,5 s más corto, no. Todas las
+desviaciones van al informe, y lo que decide es la tolerancia escrita a su
+lado.*
+
+### Un ruido de fondo que varía (NOTA al capítulo 9)
+
+La corrección del capítulo 9 supone un ruido de fondo aproximadamente
+constante en el tiempo. Cuando no lo es, por el tráfico por ejemplo, no se
+puede hacer una corrección fiable, y la NOTA al capítulo 9 ofrece otra vía:
+observar el nivel máximo del ruido de fondo durante 10 min a 15 min en la
+posición de esquina; si queda 10 dB o más por debajo del equipamiento, el
+resultado puede considerarse válido sin corrección. La NOTA pide comprobar
+«la validez en todas las bandas de octava pertinentes», palabras que vienen
+de la edición de 2004, que medía en octavas; `check_varying_background` juzga
+el margen en cada banda que recibe, tercios de octava u octavas. Los dos
+extremos del periodo cuentan, y también un margen de 10 dB justos. La edición de 2004 observaba «una de las
+posiciones de micrófono»; el borrador nombra la esquina.
+
+```python
+octaves = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+varying = building.check_varying_background(
+    [36.5, 35.0, 31.0, 27.5, 24.0, 21.0, 17.5],   # máximo del ruido de fondo en 12 min [dB]
+    [44.0, 46.5, 43.0, 39.5, 36.0, 32.5, 28.0],   # el equipamiento, mismas bandas [dB]
+    observation_time_s=720.0,
+    frequencies_hz=octaves,
+)
+print(varying.margin_ok, varying.passes)
+# [False  True  True  True  True  True  True] False
+varying.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_varying_background.svg" alt="Bandas de octava de 63 Hz a 4 kHz. El nivel del equipamiento, continuo con marcadores cuadrados, baja de 46,5 dB a 125 Hz a 28 dB a 4 kHz. Una línea discontinua corre 10 dB por debajo. El máximo del ruido de fondo, en puntos, queda por debajo de la discontinua de 125 Hz en adelante, pero a 63 Hz llega a 36,5 dB, por encima de la discontinua en 34 dB, y un triángulo naranja marca esa banda como menos de 10 dB por debajo. El título dice no válido sin corrección, observado durante 12 min." width="80%" />
+
+*Los picos del tráfico llegan a 36,5 dB a 63 Hz, solo 7,5 dB por debajo del
+equipamiento, así que esa banda no alcanza los 10 dB que pide la NOTA y el
+resultado no puede quedar sin corrección en ella; de 125 Hz en adelante el
+margen va de 10,5 dB a 12 dB.*
+
+### Periodos perturbados (capítulo 9)
+
+«Una comprobación sencilla en obra» cierra el capítulo 9: comparar el nivel
+máximo con el nivel equivalente en el centro del rango de frecuencias durante
+cada periodo de medición. En muchas fuentes estables la diferencia debería
+ser menor que 5 dB; una mayor indica que el periodo estuvo perturbado, por
+una puerta que se cierra o por pisadas, por ejemplo. La comprobación es nueva
+en la revisión. Vale para fuentes estables, no para una cuyo propio nivel
+varía, y el borrador nombra la banda solo como «el centro del rango de
+frecuencias», así que la elige el operador. Una diferencia de 5 dB justos no
+es menor que 5 dB y marca el periodo.
+
+```python
+periods = building.check_measurement_disturbance(
+    [41.6, 42.0, 48.9, 41.3, 41.8, 42.2],   # máximo de una banda central, por periodo [dB]
+    [39.0, 39.4, 41.1, 38.9, 39.2, 39.6],   # nivel equivalente, misma banda y periodos [dB]
+)
+print(np.round(periods.differences_db, 1), periods.disturbed_periods)
+# [2.6 2.6 7.8 2.4 2.6 2.6] (2,)
+periods.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_disturbance.svg" alt="Seis periodos de medición con el nivel máximo menos el nivel equivalente de cada uno: 2,6, 2,6, 7,8, 2,4, 2,6 y 2,6 dB. Una línea discontinua en 5 dB limita una región sombreada por encima rotulada perturbado; solo el tercer periodo cae en ella. El título dice periodos perturbados: 3." width="80%" />
+
+*En cinco periodos el máximo queda entre 2,4 dB y 2,6 dB por encima del
+equivalente; en el tercero queda 7,8 dB por encima, y ese periodo estuvo
+perturbado. `disturbed_periods` cuenta desde 0 y la figura desde 1.*
+
+### El cálculo frente al instrumento (NOTA al 7.8)
+
+La NOTA al 7.8 sugiere comparar los resultados ponderados A y C corregidos y
+calculados con los valores que registró directamente el instrumento: si
+difieren más de 2 dB, conviene revisar los cálculos en busca de una
+explicación. La NOTA es nueva en la revisión. `check_instrument_agreement`
+toma el resultado y el valor del instrumento para cada valor único, con la
+clave de su notación de la tabla 1; una lectura por posición se promedia en
+energía con la fórmula (1). El valor calculado es el valor único tal como lo
+redondea el 7.8, y 2 dB justos concuerdan. Una corrección por ruido de fondo
+o una estandarización pueden explicar por sí solas una diferencia, que es el
+tipo de explicación que pide la NOTA.
+
+```python
+agreement = building.check_instrument_agreement(
+    res, {"LA,eq": [46.0, 44.5, 45.8], "LC,eq": [52.3, 50.8, 52.1]})
+print({k: round(v, 1) for k, v in agreement.differences_db.items()}, agreement.passes)
+# {'LA,eq': -0.5, 'LC,eq': 0.2} True
+agreement.plot()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_instrument_agreement.svg" alt="El valor calculado menos el del instrumento para dos valores únicos, L A,eq y L C,eq, frente a una franja sombreada de menos 2 a más 2 dB. L A,eq queda en menos 0,5 dB y L C,eq en más 0,2 dB, los dos dentro de la franja. El título dice que el cálculo concuerda." width="80%" />
+
+*El sonómetro leyó de 44,5 dB a 46,0 dB con ponderación A y de 50,8 dB a
+52,3 dB con ponderación C en las tres posiciones del ejemplo del inodoro. Sus
+promedios en energía quedan 0,5 dB por encima del $L_\mathrm{A,eq}$ = 45 dB
+calculado y 0,2 dB por debajo del $L_\mathrm{C,eq}$ = 52 dB, muy dentro de
+2 dB.*
 
 ## Condiciones de funcionamiento (anexo B)
 
@@ -422,7 +600,15 @@ Frente a la ISO 16032:2004, anulada, el borrador:
   de 2004 pedía 1,5 m), 0,50 m a las superficies (0,75 m) y hasta 2,0 m de
   altura (1,5 m);
 - sube la reproducibilidad de la tabla 2 en baja frecuencia de 1,5 dB a
-  1,9 dB, y la del ponderado C de 1,1 dB a 1,2 dB.
+  1,9 dB, y la del ponderado C de 1,1 dB a 1,2 dB;
+- deja el equipo fuera de uso cuando una calibración se desvía de las
+  anteriores más de 0,5 dB, donde la de 2004 pedía las calibraciones sin
+  fijar ningún límite;
+- añade dos comprobaciones en obra: un máximo menos de 5 dB por encima del
+  equivalente en cada periodo, y resultados calculados a 2 dB o menos del
+  instrumento;
+- observa el máximo de un ruido de fondo que varía en la posición de
+  esquina, donde la de 2004 usaba una cualquiera de las posiciones.
 
 ## Cómo se verifica sin un ejemplo resuelto
 
@@ -441,7 +627,17 @@ capítulo 9 con niveles dados a 0,1 dB, los umbrales del 7.4.1 en sus límites,
 cada límite de distancia y de altura del apartado 7.3, y la altura de la
 esquina y los 0,5 m a sus paredes que prefiere el 7.2, cumplidos exactamente e
 incumplidos por 0,01 m, y las posiciones que el 7.9 pone delante de una fuente
-en pared y bajo una en el techo.
+en pared y bajo una en el techo. Las comprobaciones en obra se apoyan en los
+límites que imprime el borrador, cada uno cumplido exactamente e incumplido:
+los 0,2 m a un obstáculo, la desviación de 0,5 dB de la calibración, los
+10 min a 15 min y los 10 dB de un ruido de fondo que varía, los 5 dB entre el
+máximo y el equivalente, y los 2 dB entre el cálculo y el instrumento, con el
+instrumento por encima del cálculo y por debajo. Una diferencia de lecturas
+decimales que en binario cae una fracción mínima fuera de su límite, 40,3 dB
+sobre 30,3 dB para los 10 dB por ejemplo, sigue leyéndose como el límite. Como el
+borrador no imprime tolerancia para sus 30 s, la fila del ruido de fondo da
+las suyas (0 s, 0,3 s y 1 s) y contrasta los 30 s con cada una, cumplidas
+exactamente e incumplidas por arriba y por abajo.
 
 ## Respuestas rápidas
 
@@ -473,6 +669,15 @@ tres posiciones exactamente como la de un equipamiento. Si el sonido es
 demasiado irregular para encontrar la esquina más ruidosa, use la más
 reflectante e informe de la desviación.
 
+### ¿Pasa un ruido de fondo medido en 28 s?
+
+Solo si la tolerancia que usted da lo admite. El 7.6 pide «aproximadamente
+30 s» y no imprime ninguna tolerancia, así que `check_background_duration` le
+pide una (`tolerance_s`) en lugar de decidir cuánto admite «aproximadamente»:
+con 2 s aceptados, 28 s pasan; con 1 s, no. En los dos casos se informa de
+los 2 s de desviación, la tolerancia va al informe a su lado, y nada más del
+método cambia.
+
 ### ¿El resultado es un límite superior?
 
 Cuando una banda del rango ponderado quedó a menos de 4 dB del ruido de fondo,
@@ -495,19 +700,28 @@ estandarización y la normalización con las fórmulas (5) y (6) de 50 Hz a
 del 7.8 redondeadas a decibelios enteros, la tabla A.1 (con las celdas de
 ponderación C mal impresas tomadas de la IEC 61672-1), la tabla 2, y las
 condiciones de funcionamiento del anexo B como datos, incluidas las
-actividades del B.10.
+actividades del B.10. Las comprobaciones en obra: los 0,2 m a los obstáculos
+del 7.2 a partir de una distancia medida, la desviación de calibración de
+0,5 dB del capítulo 5, los 30 s del ruido de fondo del 7.6 frente a la
+tolerancia que da el operador, el máximo de un
+ruido de fondo que varía durante 10 min a 15 min y su margen de 10 dB (NOTA
+al capítulo 9), los 5 dB entre el máximo y el equivalente del capítulo 9, y
+la comparación de 2 dB con el instrumento de la NOTA al 7.8.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
 El borrador no es la norma publicada: donde ISO 16032:2024 difiera, esta
 página sigue al borrador. La biblioteca no registra el trazado temporal
 multiespectral ni busca el instante del máximo: toma como dados los niveles
-por banda de ese instante. Nada comprueba los 0,2 m a los obstáculos, la
-deriva del calibrador de 0,5 dB (capítulo 5), los 30 s de la medida del ruido
-de fondo, el máximo del ruido de fondo durante 10 min a 15 min de la NOTA al
-capítulo 9, la comprobación de 5 dB entre el máximo y el equivalente que la
-sigue, ni la comparación de 2 dB de la NOTA al 7.8. Tampoco se comprueba el
-volumen de unos 300 m³ o menos al que el capítulo 1 destina el método. El
+por banda de ese instante. Las comprobaciones en obra juzgan los números que
+el operador mide y les pasa; no deciden lo que no es un número: qué esquina
+es la más ruidosa, si el ruido de fondo se tomó justo antes o después de cada
+serie y en las mismas posiciones, qué banda es «el centro del rango de
+frecuencias» ni si una fuente es lo bastante estable para la comprobación de
+5 dB. «Aproximadamente 30 s» no tiene tolerancia en el borrador, así que la
+biblioteca no fija ninguna: el operador nombra la que acepta el informe. Nada
+comprueba el volumen de unos
+300 m³ o menos al que el capítulo 1 destina el método. El
 «rango de frecuencias específico» que el 4.2 admite junto a los dos rangos, y
 para el que el formulario del anexo C tiene una casilla, no se ofrece: el 7.8
 forma los valores ponderados solo sobre el rango restringido o el ampliado, y

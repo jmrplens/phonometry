@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1796/1796 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1802/1802 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -669,7 +669,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Service-equipment sound in buildings (ISO/DIS 16032:2023)</b>: 100% (16/16)</summary>
+<summary><b>Service-equipment sound in buildings (ISO/DIS 16032:2023)</b>: 100% (22/22)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -689,6 +689,12 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/DIS 16032:2023 7.4.1 | Position ladder at its thresholds | 8/8 stages decided as 7.4.1 reads | 8/8 stages decided as 7.4.1 reads | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO/DIS 16032:2023 7.2 and 7.3 | Distances and heights of the positions at each limit | 26/26 limits decided as 7.2 and 7.3 read | 26/26 limits decided as 7.2 and 7.3 read | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO/DIS 16032:2023 7.9 | Additional position for a source in the room | 3/3 positions placed as 7.9 reads | 3/3 positions placed as 7.9 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.2 | Corner microphone at least 0,2 m from any obstacle | 3/3 obstacle distances judged as 7.2 reads | 3/3 obstacle distances judged as 7.2 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 5 | Calibration deviating by more than 0,5 dB | 4/4 calibrations judged as Clause 5 reads | 4/4 calibrations judged as Clause 5 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.6 | Background measured over approximately 30 s | 8/8 durations held to 30 s within a tolerance | 8/8 durations held to 30 s within a tolerance | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 9, NOTE | Varying background: maximum over 10 min to 15 min, 10 dB or more below | 7/7 cases judged as the NOTE reads | 7/7 cases judged as the NOTE reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 Clause 9 | Maximum less than 5 dB above the equivalent level in each period | 4/4 periods judged as Clause 9 reads | 4/4 periods judged as Clause 9 reads | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/DIS 16032:2023 7.8, NOTE | Calculated single numbers within 2 dB of the instrument | 4/4 comparisons judged as 7.8 reads | 4/4 comparisons judged as 7.8 reads | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

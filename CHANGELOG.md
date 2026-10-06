@@ -665,6 +665,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   IEC 61672-1; that defect and five more of the draft are in the errata
   registry.
 
+- **Check an ISO 16032 measurement on site: the calibration, the
+  background, disturbed periods and the calculation against the meter.** The
+  numbers the ISO/DIS 16032:2023 draft sets for the measurement itself are
+  now verdicts, each with `passes` and `.plot()`.
+  `verify_calibration_deviation` takes the equipment out of use when a
+  calibration deviates from previous calibrations by more than 0.5 dB
+  (Clause 5), holding the reading at the end to the one at the beginning and
+  both to the earlier calibrations you give.
+  `check_service_equipment_positions` takes `corner_obstacle_distance_m`, the
+  distance measured on site from the corner microphone to the nearest
+  obstacle, and holds it to the 0.2 m of 7.2. `check_background_duration`
+  reports how far each background measurement departs from the
+  approximately 30 s of 7.6 and holds it to the tolerance you give as the
+  required `tolerance_s`, since the draft prints none.
+  `check_varying_background` is the route the NOTE to Clause 9 offers for a
+  background that varies in time: its maximum, watched for 10 min to 15 min
+  at the corner and 10 dB or more below the equipment in every band, lets
+  the result stand without correction. `check_measurement_disturbance` marks
+  each period whose maximum is not less than 5 dB above its equivalent level
+  in the middle of the frequency range (Clause 9), and
+  `check_instrument_agreement` compares the calculated single numbers with
+  the instrument's readings and names those more than 2 dB apart (NOTE to
+  7.8). Six conformance rows hold each limit met exactly and missed, and the
+  guide gains a section on the checks, each with its figure, in both
+  languages.
+
 - **Linings, floor coverings and rain in the laboratory (ISO 10140-1:2021
   Annexes G, H and K).** A lining measured without and with it now gives its
   improvement band by band, `building.lab_lining_improvement`, with the single

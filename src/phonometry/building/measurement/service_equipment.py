@@ -95,6 +95,24 @@ flat sound at least 10 dB above the background. A result carries them as
 :attr:`ServiceEquipmentResult.weighted_reproducibility_db`; the draft states no
 coverage factor, so no expanded uncertainty is formed.
 
+**On-site checks.** The draft also sets numbers the operator meets while
+measuring, and each is a verdict here. The corner microphone keeps at least
+0,2 m from any obstacle (7.2), judged from the distance measured on site by
+:func:`check_service_equipment_positions`. A calibration that deviates from
+previous calibrations by more than 0,5 dB takes the equipment out of use
+(Clause 5, :func:`verify_calibration_deviation`). The background is measured
+over approximately 30 s (7.6, :func:`check_background_duration`, which
+reports each departure from 30 s and judges it against the tolerance the
+operator names, because the draft prints none). Where
+the background varies in time, its maximum watched for 10 min to 15 min at the
+corner and 10 dB or more below the equipment lets the result stand without
+correction (NOTE to Clause 9, :func:`check_varying_background`). A maximum
+less than 5 dB above the equivalent level in the middle of the frequency range
+says a period was not disturbed by doors or footsteps (Clause 9,
+:func:`check_measurement_disturbance`), and calculated single numbers more
+than 2 dB from the instrument's reading send the calculation back for a check
+(NOTE to 7.8, :func:`check_instrument_agreement`).
+
 **Operating conditions (Annex B).** How each kind of equipment is to be run
 while it is measured, and for how long the equivalent level is integrated, is
 the data of :data:`SERVICE_EQUIPMENT_OPERATING_CONDITIONS`, including the
@@ -113,7 +131,8 @@ apart), are registered in ``docs/ERRATA.md``.
 
 **No numeric oracle.** The draft prints no worked example. The conformance of
 this module rests on closed forms and on the numbers the draft prints: the
-2,2 dB of a 4 dB background difference, Table A.1 and Table 2.
+2,2 dB of a 4 dB background difference, Table A.1, Table 2, and the limits of
+the on-site checks met exactly and missed.
 """
 
 from __future__ import annotations
@@ -145,17 +164,27 @@ __all__ = [
     "SERVICE_EQUIPMENT_REPRODUCIBILITY",
     "SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY",
     "SERVICE_EQUIPMENT_WEIGHTING",
+    "BackgroundDurationCheck",
+    "CalibrationDeviationResult",
+    "InstrumentAgreementCheck",
+    "MeasurementDisturbanceCheck",
     "OperatingCondition",
     "PositionSpreadCheck",
     "ServiceEquipmentBackgroundResult",
     "ServiceEquipmentPositionCheck",
     "ServiceEquipmentResult",
+    "VaryingBackgroundCheck",
     "additional_microphone_position",
+    "check_background_duration",
+    "check_instrument_agreement",
+    "check_measurement_disturbance",
     "check_position_spread",
     "check_service_equipment_positions",
+    "check_varying_background",
     "loudest_corner",
     "service_equipment_background_correction",
     "service_equipment_level",
+    "verify_calibration_deviation",
 ]
 
 # ---------------------------------------------------------------------------
@@ -728,6 +757,27 @@ _CORNER_WALL_DISTANCE_M = 0.5
 #: wall source, and 1,5 m above the floor for a wall or a ceiling source, in m.
 _ADDITIONAL_WALL_DISTANCE_M = 1.0
 _ADDITIONAL_HEIGHT_M = 1.5
+#: 7.2: the corner microphone "at least 0,2 m away from any obstacle", in m.
+_MIN_OBSTACLE_DISTANCE_M = 0.2
+
+#: Clause 5: a calibration that "deviates from previous calibrations by more
+#: than 0,5 dB" takes the equipment out of use, in dB.
+_CALIBRATION_DEVIATION_DB = 0.5
+#: 7.6: the background measured "over a period of approximately 30 s", in s;
+#: the draft prints no tolerance for "approximately".
+_BACKGROUND_DURATION_S = 30.0
+#: The NOTE to Clause 9: the maximum background level "over a period of
+#: 10 min to 15 min", in s, and "10 dB or more below" the equipment, in dB.
+_VARYING_BACKGROUND_TIME_S: Final = (600.0, 900.0)
+_VARYING_BACKGROUND_MARGIN_DB = 10.0
+#: Clause 9, after its NOTE: the maximum less the equivalent level "should be
+#: less than 5 dB", in dB.
+_MAX_TO_EQUIVALENT_DB = 5.0
+#: The NOTE to 7.8: a calculated value "more than 2 dB" from the instrument's
+#: sends the calculation back for a check, in dB.
+_INSTRUMENT_AGREEMENT_DB = 2.0
+#: Calibrations a deviation needs: one reading and one before it.
+_MIN_CALIBRATIONS = 2
 
 _Band = Literal["third", "octave"]
 _Quantity = Literal["Smax", "Fmax", "eq"]
@@ -841,6 +891,27 @@ def _positive_number(value: ArrayLike, name: str) -> float:
     if arr.ndim != 0 or isinstance(arr.item(), _NOT_A_NUMBER_TYPES):
         raise ValueError(msg)
     return require_positive(float(_as_float64(value, name)), name)
+
+
+def _numbers(value: ArrayLike, name: str) -> np.ndarray:
+    """A float array of what was given, refusing text and flags by name.
+
+    ``np.asarray("0.3", dtype=float)`` is 0,3 and ``True`` is 1,0: read
+    without this guard, a distance typed as text, or a flag passed by
+    mistake, would each become a measurement.
+    """
+    try:
+        raw = np.asarray(value)
+    except (TypeError, ValueError) as exc:  # a ragged nesting of lists
+        msg = f"'{name}' must be numeric."
+        raise ValueError(msg) from exc
+    if raw.dtype.kind in "USb" or (
+        raw.dtype.kind == "O"
+        and any(isinstance(item, _NOT_A_NUMBER_TYPES) for item in raw.ravel())
+    ):
+        msg = f"'{name}' must be numbers, not text or flags."
+        raise ValueError(msg)
+    return _as_float64(value, name)
 
 
 def _room(room_dimensions_m: ArrayLike) -> np.ndarray:
@@ -969,7 +1040,8 @@ def service_equipment_background_correction(
     The method assumes a background roughly constant in time. Where it is not,
     the NOTE to Clause 9 suggests the maximum level of the background over 10
     to 15 minutes at the corner position instead: if it is 10 dB or more below
-    the equipment, the result stands without correction.
+    the equipment, the result stands without correction
+    (:func:`check_varying_background`).
 
     :param levels_db: Measured band levels :math:`L_1`, background included,
         in dB.
@@ -1614,6 +1686,11 @@ class ServiceEquipmentPositionCheck:
     :ivar source_ok: At least 1,5 m from every source.
     :ivar height_ok: Every room position from 0,5 m to 2,0 m high.
     :ivar corner_height_ok: The corner position from 0,5 m to 1,5 m high.
+    :ivar corner_obstacle_distance_m: The distance from the corner microphone
+        to the nearest obstacle, as measured on site, in m; ``None`` when it
+        was not given.
+    :ivar corner_obstacle_ok: At least 0,2 m from any obstacle (7.2); ``None``
+        when the distance was not given, and then not judged.
     """
 
     room_dimensions_m: np.ndarray
@@ -1632,6 +1709,8 @@ class ServiceEquipmentPositionCheck:
     source_ok: bool
     height_ok: bool
     corner_height_ok: bool
+    corner_obstacle_distance_m: float | None = None
+    corner_obstacle_ok: bool | None = None
 
     @property
     def surface_limit_m(self) -> float:
@@ -1682,23 +1761,28 @@ class ServiceEquipmentPositionCheck:
 
     @property
     def passes(self) -> bool:
-        """Whether the distances and heights of 7.3 and the corner height of 7.2 hold.
+        """Whether the distances and heights of 7.3 and the corner of 7.2 hold.
 
-        The corner position enters through its height alone: the 0,5 m from
-        its walls is a preference (:attr:`preferred_corner_wall_distance`),
-        like the 1,5 m between positions (:attr:`preferred_separation`), and
-        the 0,2 m from any obstacle that 7.2 also asks is not judged.
+        The corner position enters through its height and, when its distance
+        to the nearest obstacle was given, through the 0,2 m that 7.2 asks of
+        it. The 0,5 m from its walls is a preference
+        (:attr:`preferred_corner_wall_distance`), like the 1,5 m between
+        positions (:attr:`preferred_separation`).
 
-        :return: ``True`` when all five requirements hold.
+        :return: ``True`` when the five requirements hold, and the sixth, the
+            obstacle distance, holds or was not given.
         """
-        return all(
-            (
-                self.separation_ok,
-                self.surface_ok,
-                self.source_ok,
-                self.height_ok,
-                self.corner_height_ok,
+        return (
+            all(
+                (
+                    self.separation_ok,
+                    self.surface_ok,
+                    self.source_ok,
+                    self.height_ok,
+                    self.corner_height_ok,
+                )
             )
+            and self.corner_obstacle_ok is not False
         )
 
     def __bool__(self) -> bool:
@@ -1757,16 +1841,18 @@ def check_service_equipment_positions(
     *,
     source_positions_m: ArrayLike | None = None,
     small_room: bool = False,
+    corner_obstacle_distance_m: ArrayLike | None = None,
 ) -> ServiceEquipmentPositionCheck:
     """Are the microphone positions far enough apart (ISO/DIS 16032:2023 7.2, 7.3)?
 
     The corner position is preferably 0,5 m from the two walls and the floor,
-    raised to 1,0 m or 1,5 m where furniture is in the way. The reverberant-
-    field positions keep at least 1,0 m from each other and from the corner
-    (1,5 m preferred), 1,5 m from any sound source in the room, 0,50 m from
-    every room surface (0,30 m in a small room where 0,50 m cannot be met) and
-    a height from 0,5 m to 2,0 m. Pass the positions of one stage of 7.4.1 at
-    a time: positions 4 and 5 keep the distances of 7.3 like 2 and 3.
+    raised to 1,0 m or 1,5 m where furniture is in the way, and at least
+    0,2 m from any obstacle. The reverberant-field positions keep at least
+    1,0 m from each other and from the corner (1,5 m preferred), 1,5 m from
+    any sound source in the room, 0,50 m from every room surface (0,30 m in a
+    small room where 0,50 m cannot be met) and a height from 0,5 m to 2,0 m.
+    Pass the positions of one stage of 7.4.1 at a time: positions 4 and 5
+    keep the distances of 7.3 like 2 and 3.
 
     The verdict holds the corner position to its height of 0,5 m to 1,5 m and
     the reverberant-field positions to every distance and height of 7.3. The
@@ -1775,8 +1861,12 @@ def check_service_equipment_positions(
     (:attr:`~ServiceEquipmentPositionCheck.preferred_corner_wall_distance`,
     :attr:`~ServiceEquipmentPositionCheck.preferred_separation`).
 
-    The draft also asks 0,2 m between the corner microphone and any obstacle,
-    which a room outline cannot show and this check does not judge.
+    A room outline cannot show furniture, so the 0,2 m that 7.2 asks between
+    the corner microphone and any obstacle is judged from the distance
+    measured on site, when it is given: "The microphone position shall be at
+    least 0,2 m away from any obstacle", inclusive. The draft states it in the
+    clause on the corner position and nowhere for the reverberant-field
+    positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
     :param room_dimensions_m: Length, width and height of a rectangular room,
         in m.
@@ -1787,10 +1877,14 @@ def check_service_equipment_positions(
         one ``(x, y, z)`` per row, in m; ``None`` or an empty list for none.
     :param small_room: Whether the room is too small for 0,50 m from the
         surfaces, so 0,30 m applies.
+    :param corner_obstacle_distance_m: The distance from the corner microphone
+        to the nearest obstacle, or one distance per obstacle near it, in m,
+        measured on site; ``None`` (default) leaves the 0,2 m of 7.2 unjudged.
     :return: :class:`ServiceEquipmentPositionCheck`.
     :raises ValueError: If a dimension is not positive, a coordinate is not a
         finite real number, no room position is given, a position lies
-        outside the room, or ``small_room`` is not ``True`` or ``False``.
+        outside the room, ``small_room`` is not ``True`` or ``False``, or an
+        obstacle distance is not a finite distance of 0 m or more.
     """
     dims = _room(room_dimensions_m)
     if not isinstance(small_room, (bool, np.bool_)):
@@ -1839,6 +1933,7 @@ def check_service_equipment_positions(
         _MIN_SURFACE_DISTANCE_SMALL_ROOM_M if small_room else _MIN_SURFACE_DISTANCE_M
     )
     slack = _LIMIT_SLACK
+    obstacle = _corner_obstacle_distance(corner_obstacle_distance_m)
     return ServiceEquipmentPositionCheck(
         room_dimensions_m=dims.copy(),
         corner_position_m=c.copy(),
@@ -1865,7 +1960,34 @@ def check_service_equipment_positions(
             <= float(c[2])
             <= _CORNER_HEIGHT_RANGE_M[1] + slack
         ),
+        corner_obstacle_distance_m=obstacle,
+        corner_obstacle_ok=(
+            None if obstacle is None else obstacle >= _MIN_OBSTACLE_DISTANCE_M - slack
+        ),
     )
+
+
+def _corner_obstacle_distance(value: ArrayLike | None) -> float | None:
+    """The shortest of the measured obstacle distances of 7.2, in m, or ``None``.
+
+    :raises ValueError: for an empty input, or a distance that is not finite
+        or is negative.
+    """
+    if value is None:
+        return None
+    gaps = np.atleast_1d(_numbers(value, "corner_obstacle_distance_m"))
+    if (
+        gaps.ndim != 1
+        or gaps.size == 0
+        or not np.all(np.isfinite(gaps))
+        or np.any(gaps < 0.0)
+    ):
+        msg = (
+            "'corner_obstacle_distance_m' must be one or more finite distances "
+            "of 0 m or more."
+        )
+        raise ValueError(msg)
+    return float(np.min(gaps))
 
 
 def additional_microphone_position(
@@ -1925,3 +2047,749 @@ def additional_microphone_position(
         )
         raise ValueError(msg)
     return position
+
+
+# ---------------------------------------------------------------------------
+# On-site checks (Clause 5, 7.6, 7.8 and Clause 9)
+# ---------------------------------------------------------------------------
+
+
+def _readings(value: ArrayLike, name: str) -> np.ndarray:
+    """One or more finite levels as a one-dimensional array, or a ``ValueError``."""
+    arr = np.atleast_1d(_as_levels(_numbers(value, name), name))
+    if arr.ndim != 1:
+        msg = f"'{name}' must be one level or a one-dimensional list of levels."
+        raise ValueError(msg)
+    return arr
+
+
+@dataclass(frozen=True)
+class CalibrationDeviationResult:
+    r"""Whether the instrumentation may be used, by its calibrations (Clause 5).
+
+    :ivar levels_db: The calibrator readings of this measurement in the order
+        they were taken, at the beginning and at the end, in dB.
+    :ivar previous_levels_db: The readings of earlier calibrations of the same
+        instrumentation with the same calibrator, in dB; empty when none were
+        given.
+    :ivar deviations_db: Per reading of :attr:`levels_db`, the largest absolute
+        difference from every calibration taken before it, the earlier ones
+        and the readings of this measurement already taken, in dB; ``nan`` for
+        a first reading with nothing before it.
+    """
+
+    levels_db: np.ndarray
+    previous_levels_db: np.ndarray
+    deviations_db: np.ndarray
+
+    @property
+    def limit_db(self) -> float:
+        """The 0,5 dB of Clause 5, fixed by the draft.
+
+        :return: The largest deviation that still lets the equipment be used,
+            in dB.
+        """
+        return _CALIBRATION_DEVIATION_DB
+
+    def __post_init__(self) -> None:
+        """Reject a verdict whose deviations do not follow its readings.
+
+        :raises ValueError: if :attr:`deviations_db` does not hold one value
+            per reading of :attr:`levels_db`.
+        """
+        if np.asarray(self.deviations_db).shape != np.asarray(self.levels_db).shape:
+            msg = "CalibrationDeviationResult: 'deviations_db' needs one value per reading."
+            raise ValueError(msg)
+
+    @property
+    def largest_deviation_db(self) -> float:
+        """The largest deviation of a reading from the calibrations before it.
+
+        :return: The largest of :attr:`deviations_db`, in dB.
+        """
+        return float(np.nanmax(self.deviations_db))
+
+    @property
+    def passes(self) -> bool:
+        """Whether no reading deviates from an earlier one by more than 0,5 dB.
+
+        :return: ``True`` when the equipment may be used; ``False`` takes it
+            out of use until the reason is clarified and the sensitivity put
+            right (Clause 5).
+        """
+        compared = np.asarray(self.deviations_db)[
+            np.isfinite(np.asarray(self.deviations_db))
+        ]
+        return bool(np.all(compared <= self.limit_db + _LIMIT_SLACK))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        raise TypeError(_refuse_truth_value("CalibrationDeviationResult"))
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot each reading against the window the earlier calibrations leave it.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the markers of this measurement's readings.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_calibration_deviation
+
+        return plot_calibration_deviation(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def verify_calibration_deviation(
+    calibration_levels_db: ArrayLike,
+    *,
+    previous_levels_db: ArrayLike | None = None,
+) -> CalibrationDeviationResult:
+    r"""Has the sensitivity moved more than 0,5 dB (ISO/DIS 16032:2023 Clause 5)?
+
+    "At the beginning and at the end of the measurements, verify the
+    sensitivity of the instrumentation with a sound calibrator class 1
+    according to IEC 60942. If the calibration measurement deviates from
+    previous calibrations by more than 0,5 dB, do not use this equipment until
+    the reason for this deviation has been clarified and appropriate actions
+    have been taken." Each reading of this measurement is held to every
+    calibration before it: the earlier calibrations given, and for the
+    reading at the end, the one at the beginning as well. A deviation of
+    exactly 0,5 dB is not "more than" it and passes. The 2004 edition asked
+    for the two calibrations without a limit; the 0,5 dB is new in the
+    revision.
+
+    The readings are compared as levels, so they must come from the same
+    calibrator at the same stated level; readings taken at different stated
+    levels are passed instead as each one's departure from its stated level.
+
+    :param calibration_levels_db: The calibrator readings of this measurement
+        in the order taken, the one at the beginning and the one at the end,
+        in dB. One reading alone is judged against ``previous_levels_db``,
+        which lets the beginning be checked before measuring.
+    :param previous_levels_db: Readings of earlier calibrations of the same
+        instrumentation, in dB; ``None`` (default) to compare the end with the
+        beginning only.
+    :return: :class:`CalibrationDeviationResult`.
+    :raises ValueError: If a reading is not a finite level, or there is
+        nothing to compare: one reading and no earlier calibration.
+    """
+    levels = _readings(calibration_levels_db, "calibration_levels_db")
+    previous = (
+        np.empty(0)
+        if previous_levels_db is None
+        else _readings(previous_levels_db, "previous_levels_db")
+    )
+    if levels.size + previous.size < _MIN_CALIBRATIONS:
+        msg = (
+            "A calibration needs an earlier one to be compared with: give the "
+            "readings at the beginning and at the end, or 'previous_levels_db'."
+        )
+        raise ValueError(msg)
+    history = np.concatenate((previous, levels))
+    deviations = np.full(levels.size, np.nan)
+    for i, level in enumerate(levels):
+        earlier = history[: previous.size + i]
+        if earlier.size:
+            deviations[i] = float(np.max(np.abs(level - earlier)))
+    return CalibrationDeviationResult(
+        levels_db=levels.copy(),
+        previous_levels_db=previous.copy(),
+        deviations_db=deviations,
+    )
+
+
+@dataclass(frozen=True)
+class BackgroundDurationCheck:
+    r"""Whether each background was measured over approximately 30 s (7.6).
+
+    :ivar durations_s: The time over which each background equivalent level
+        was measured, in s.
+    :ivar tolerance_s: The departure from 30 s, either way, that the operator
+        accepts as "approximately", in s. The draft prints none.
+    """
+
+    durations_s: np.ndarray
+    tolerance_s: float
+
+    @property
+    def nominal_duration_s(self) -> float:
+        """The 30 s of 7.6, fixed by the draft.
+
+        :return: The nominal background measurement time, in s.
+        """
+        return _BACKGROUND_DURATION_S
+
+    @property
+    def departures_s(self) -> np.ndarray:
+        """How far each duration departs from 30 s, in s.
+
+        :return: The duration less 30 s, one per background measurement.
+        """
+        return np.asarray(self.durations_s) - self.nominal_duration_s
+
+    @property
+    def largest_departure_s(self) -> float:
+        """The largest departure from 30 s, either way, in s.
+
+        :return: The largest absolute value of :attr:`departures_s`.
+        """
+        return float(np.max(np.abs(self.departures_s)))
+
+    @property
+    def within_tolerance(self) -> np.ndarray:
+        """Per background, whether it departs from 30 s by no more than the tolerance.
+
+        A departure of exactly :attr:`tolerance_s` is within it.
+
+        :return: One boolean per background measurement.
+        """
+        return np.abs(self.departures_s) <= self.tolerance_s + _LIMIT_SLACK
+
+    @property
+    def passes(self) -> bool:
+        """Whether every background was measured over approximately 30 s.
+
+        "Approximately" is the operator's :attr:`tolerance_s`, not a number
+        of the draft.
+
+        :return: ``True`` when no duration departs from 30 s by more than
+            :attr:`tolerance_s`.
+        """
+        return bool(np.all(self.within_tolerance))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        raise TypeError(_refuse_truth_value("BackgroundDurationCheck"))
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot each duration against the 30 s of 7.6 and the tolerance accepted.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the markers of the durations.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_background_duration
+
+        return plot_background_duration(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def check_background_duration(
+    durations_s: ArrayLike, *, tolerance_s: float
+) -> BackgroundDurationCheck:
+    r"""Was the background measured over approximately 30 s (ISO/DIS 16032:2023 7.6)?
+
+    "The background sound pressure level shall be determined in frequency
+    bands as the equivalent continuous sound pressure levels over a period of
+    approximately 30 s just before or after each set of measurements. The same
+    microphone positions as used for the service equipment sound pressure
+    level measurements shall be used."
+
+    The draft writes approximately and prints no tolerance, so the library
+    sets none: the operator names the departure from 30 s, either way, that
+    their report accepts as approximate, and each duration is held to it. A
+    departure of exactly the tolerance is within it, and ``tolerance_s=0``
+    holds every background to 30 s exactly. Each departure is reported
+    (:attr:`BackgroundDurationCheck.departures_s`) whatever the verdict.
+    Whether the background was taken just before or after each set, and at
+    the same positions, is not a number and is left to the operator.
+
+    :param durations_s: The measurement time of each background equivalent
+        level, one per position or per set, in s.
+    :param tolerance_s: The departure from 30 s, either way, accepted as
+        "approximately", in s. Required: the draft prints none.
+    :return: :class:`BackgroundDurationCheck`.
+    :raises ValueError: If a duration is not a positive, finite number, or
+        the tolerance is not one finite number of 0 s or more.
+    """
+    durations = np.atleast_1d(_numbers(durations_s, "durations_s"))
+    if (
+        durations.ndim != 1
+        or durations.size == 0
+        or not np.all(np.isfinite(durations))
+        or np.any(durations <= 0.0)
+    ):
+        msg = "'durations_s' must be one or more positive, finite durations in seconds."
+        raise ValueError(msg)
+    tolerance = _numbers(tolerance_s, "tolerance_s")
+    if tolerance.ndim != 0 or not np.isfinite(tolerance) or tolerance < 0.0:
+        msg = "'tolerance_s' must be one finite duration of 0 s or more."
+        raise ValueError(msg)
+    return BackgroundDurationCheck(
+        durations_s=durations.copy(), tolerance_s=float(tolerance)
+    )
+
+
+@dataclass(frozen=True)
+class VaryingBackgroundCheck:
+    r"""Whether a result stands without correction for a varying background.
+
+    The route the NOTE to Clause 9 offers when the background varies in time.
+
+    :ivar background_maximum_db: The maximum level of the background over the
+        observation period at the corner position, per band (or one weighted
+        value), in dB.
+    :ivar equipment_levels_db: The service equipment sound pressure level,
+        the same bands, in dB.
+    :ivar observation_time_s: How long the background maximum was watched for,
+        in s.
+    :ivar frequencies_hz: The band centres, in Hz, or ``None`` when not given.
+    """
+
+    background_maximum_db: np.ndarray
+    equipment_levels_db: np.ndarray
+    observation_time_s: float
+    frequencies_hz: np.ndarray | None = None
+
+    @property
+    def limit_db(self) -> float:
+        """The 10 dB of the NOTE to Clause 9, fixed by the draft.
+
+        :return: How far below the equipment the background maximum must lie,
+            at least, in dB.
+        """
+        return _VARYING_BACKGROUND_MARGIN_DB
+
+    def __post_init__(self) -> None:
+        """Reject a check whose band arrays disagree in length.
+
+        :raises ValueError: if the levels or the centres do not share one
+            band count.
+        """
+        shape = np.asarray(self.background_maximum_db).shape
+        if np.asarray(self.equipment_levels_db).shape != shape or (
+            self.frequencies_hz is not None
+            and np.asarray(self.frequencies_hz).shape != shape
+        ):
+            msg = (
+                "VaryingBackgroundCheck: every band quantity needs one value per band."
+            )
+            raise ValueError(msg)
+
+    @property
+    def margin_db(self) -> np.ndarray:
+        """How far the background maximum lies below the equipment, per band.
+
+        :return: The equipment level less the background maximum, in dB.
+        """
+        return np.asarray(
+            np.asarray(self.equipment_levels_db, dtype=np.float64)
+            - np.asarray(self.background_maximum_db, dtype=np.float64),
+            dtype=np.float64,
+        )
+
+    @property
+    def margin_ok(self) -> np.ndarray:
+        """Per band, whether the background maximum is 10 dB or more below.
+
+        :return: One boolean per band.
+        """
+        return self.margin_db >= self.limit_db - _LIMIT_SLACK
+
+    @property
+    def observation_ok(self) -> bool:
+        """Whether the background maximum was watched for 10 min to 15 min.
+
+        :return: ``True`` from 600 s to 900 s, both included.
+        """
+        low, high = _VARYING_BACKGROUND_TIME_S
+        return low - _LIMIT_SLACK <= self.observation_time_s <= high + _LIMIT_SLACK
+
+    @property
+    def passes(self) -> bool:
+        """Whether the result can be regarded valid without correction.
+
+        :return: ``True`` when the background maximum, watched for 10 min to
+            15 min, lies 10 dB or more below the equipment in every band.
+        """
+        return self.observation_ok and bool(np.all(self.margin_ok))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        raise TypeError(_refuse_truth_value("VaryingBackgroundCheck"))
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the equipment level against the background maximum, per band.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the curve of the equipment level.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_varying_background
+
+        return plot_varying_background(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def check_varying_background(
+    background_maximum_db: ArrayLike,
+    equipment_levels_db: ArrayLike,
+    *,
+    observation_time_s: float,
+    frequencies_hz: ArrayLike | None = None,
+) -> VaryingBackgroundCheck:
+    r"""Can the result stand without correction (NOTE to ISO/DIS 16032:2023 Clause 9)?
+
+    Clause 9 corrects the bands for a background roughly constant in time,
+    and its NOTE says that for a background varying in time, road traffic for
+    example, "a reliable correction cannot be made. However, the maximum sound
+    pressure levels of the background noise could be determined over a period
+    of 10 min to 15 min in the corner microphone position. If the maximum
+    level is 10 dB or more below the service equipment sound pressure level
+    the result can be regarded valid without correction." The NOTE also
+    suggests checking "the validity in all relevant octave-bands", words kept
+    from the 2004 edition, which measured in octaves: the margin is judged in
+    every band given, one-third octaves or octaves, and a single weighted
+    value is one band.
+
+    Both ends of the 10 min to 15 min are included, and so is a margin of
+    exactly 10 dB ("10 dB or more"). The 2004 edition took the maximum "in one
+    of the microphone positions"; the draft names the corner.
+
+    :param background_maximum_db: The maximum level of the background over the
+        observation period, at the corner position, per band, in dB.
+    :param equipment_levels_db: The service equipment sound pressure level in
+        the same bands, in dB.
+    :param observation_time_s: How long the background maximum was watched
+        for, in s.
+    :param frequencies_hz: Band centres in Hz, kept for the plot only.
+    :return: :class:`VaryingBackgroundCheck`.
+    :raises ValueError: If a level is not finite, the shapes differ, or the
+        observation time is not one positive number.
+    """
+    background = _readings(background_maximum_db, "background_maximum_db")
+    equipment = _readings(equipment_levels_db, "equipment_levels_db")
+    if equipment.shape != background.shape:
+        msg = "'background_maximum_db' and 'equipment_levels_db' must give one level per band, the same count."
+        raise ValueError(msg)
+    observation = _positive_number(observation_time_s, "observation_time_s")
+    freqs = None
+    if frequencies_hz is not None:
+        freqs = np.atleast_1d(_as_float64(frequencies_hz, "frequencies_hz"))
+        if freqs.shape != background.shape or not np.all(np.isfinite(freqs)):
+            msg = "'frequencies_hz' must give one finite centre per band."
+            raise ValueError(msg)
+    return VaryingBackgroundCheck(
+        background_maximum_db=background.copy(),
+        equipment_levels_db=equipment.copy(),
+        observation_time_s=observation,
+        frequencies_hz=None if freqs is None else freqs.copy(),
+    )
+
+
+@dataclass(frozen=True)
+class MeasurementDisturbanceCheck:
+    r"""Whether each measurement period was free of disturbances (Clause 9).
+
+    :ivar maximum_levels_db: The maximum level in the middle of the frequency
+        range, one per measurement period, in dB.
+    :ivar equivalent_levels_db: The equivalent level in the same band, one per
+        period, in dB.
+    """
+
+    maximum_levels_db: np.ndarray
+    equivalent_levels_db: np.ndarray
+
+    @property
+    def limit_db(self) -> float:
+        """The 5 dB of Clause 9, fixed by the draft.
+
+        :return: The difference a period must stay under, in dB.
+        """
+        return _MAX_TO_EQUIVALENT_DB
+
+    def __post_init__(self) -> None:
+        """Reject a check whose two level arrays disagree in length.
+
+        :raises ValueError: if the maximum and the equivalent levels do not
+            share one period count.
+        """
+        if (
+            np.asarray(self.maximum_levels_db).shape
+            != np.asarray(self.equivalent_levels_db).shape
+        ):
+            msg = "MeasurementDisturbanceCheck: one maximum and one equivalent level per period."
+            raise ValueError(msg)
+
+    @property
+    def differences_db(self) -> np.ndarray:
+        """The maximum less the equivalent level of each period, in dB.
+
+        :return: One difference per measurement period.
+        """
+        return np.asarray(
+            np.asarray(self.maximum_levels_db, dtype=np.float64)
+            - np.asarray(self.equivalent_levels_db, dtype=np.float64),
+            dtype=np.float64,
+        )
+
+    @property
+    def undisturbed(self) -> np.ndarray:
+        """Per period, whether the difference is less than 5 dB.
+
+        A difference of exactly 5,0 dB is not "less than 5 dB".
+
+        :return: One boolean per measurement period.
+        """
+        return self.differences_db < self.limit_db - _LIMIT_SLACK
+
+    @property
+    def disturbed_periods(self) -> tuple[int, ...]:
+        """The periods whose difference reaches 5 dB, counted from 0.
+
+        :return: Their indices, in the order given.
+        """
+        return tuple(int(i) for i in np.flatnonzero(~self.undisturbed))
+
+    @property
+    def passes(self) -> bool:
+        """Whether no period shows a disturbance.
+
+        :return: ``True`` when every period's maximum lies less than 5 dB
+            above its equivalent level.
+        """
+        return bool(np.all(self.undisturbed))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        raise TypeError(_refuse_truth_value("MeasurementDisturbanceCheck"))
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot each period's maximum-to-equivalent difference against 5 dB.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the markers of the differences.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_measurement_disturbance
+
+        return plot_measurement_disturbance(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def check_measurement_disturbance(
+    maximum_levels_db: ArrayLike, equivalent_levels_db: ArrayLike
+) -> MeasurementDisturbanceCheck:
+    r"""Was a measurement period disturbed (ISO/DIS 16032:2023 Clause 9)?
+
+    "A simple check on-site is to compare the maximum level to the equivalent
+    level in the middle of the frequency range during each measurement
+    period, for many stable sources this difference should be less than 5 dB
+    to indicate that the measurement has not been disturbed by closing doors,
+    footfall noise etcetera." The check is the paragraph's, new in the
+    revision: it holds for many stable sources, not for a source whose own
+    level varies, and the draft does not name the band beyond "the middle of
+    the frequency range", which the operator chooses. A difference of exactly
+    5 dB is not "less than 5 dB" and marks the period.
+
+    :param maximum_levels_db: The maximum level of a band in the middle of the
+        frequency range, one per measurement period, in dB.
+    :param equivalent_levels_db: The equivalent level of the same band over
+        the same period, one per period, in dB.
+    :return: :class:`MeasurementDisturbanceCheck`.
+    :raises ValueError: If a level is not finite or the two counts differ.
+    """
+    maxima = _readings(maximum_levels_db, "maximum_levels_db")
+    equivalents = _readings(equivalent_levels_db, "equivalent_levels_db")
+    if maxima.shape != equivalents.shape:
+        msg = "'maximum_levels_db' and 'equivalent_levels_db' must give one level per period, the same count."
+        raise ValueError(msg)
+    return MeasurementDisturbanceCheck(
+        maximum_levels_db=maxima.copy(), equivalent_levels_db=equivalents.copy()
+    )
+
+
+@dataclass(frozen=True)
+class InstrumentAgreementCheck:
+    r"""Whether the calculated single numbers agree with the instrument (7.8).
+
+    :ivar calculated_db: The single numbers of the result compared, as 7.8
+        rounds them, keyed by their Table 1 notation (``"LA,eq"``...), in dB.
+    :ivar instrument_db: The value the instrument registered for each, in dB;
+        the energy average when several readings were given.
+    """
+
+    calculated_db: Mapping[str, float]
+    instrument_db: Mapping[str, float]
+
+    @property
+    def limit_db(self) -> float:
+        """The 2 dB of the NOTE to 7.8, fixed by the draft.
+
+        :return: The largest difference, either way, that agrees, in dB.
+        """
+        return _INSTRUMENT_AGREEMENT_DB
+
+    def __post_init__(self) -> None:
+        """Freeze the two mappings and reject keys that do not pair up.
+
+        :raises ValueError: if the two mappings do not name the same single
+            numbers, or name none.
+        """
+        if not self.calculated_db or set(self.calculated_db) != set(self.instrument_db):
+            msg = "InstrumentAgreementCheck: the calculated and instrument values must name the same single numbers."
+            raise ValueError(msg)
+        for name in ("calculated_db", "instrument_db"):
+            value = getattr(self, name)
+            if not isinstance(value, MappingProxyType):
+                object.__setattr__(self, name, MappingProxyType(dict(value)))
+
+    @property
+    def differences_db(self) -> Mapping[str, float]:
+        """The calculated value less the instrument's, per single number, in dB.
+
+        :return: Keyed like :attr:`calculated_db`.
+        """
+        return MappingProxyType(
+            {
+                key: self.calculated_db[key] - self.instrument_db[key]
+                for key in self.calculated_db
+            }
+        )
+
+    @property
+    def disagreeing(self) -> tuple[str, ...]:
+        """The single numbers more than 2 dB from the instrument.
+
+        :return: Their notations, in the order of :attr:`calculated_db`.
+        """
+        return tuple(
+            key
+            for key, difference in self.differences_db.items()
+            if abs(difference) > self.limit_db + _LIMIT_SLACK
+        )
+
+    @property
+    def passes(self) -> bool:
+        """Whether every calculated value is within 2 dB of the instrument.
+
+        :return: ``True`` when no single number calls for a second look at
+            the calculation.
+        """
+        return not self.disagreeing
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        raise TypeError(_refuse_truth_value("InstrumentAgreementCheck"))
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot each calculated-less-instrument difference against 2 dB.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the markers of the differences.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_instrument_agreement
+
+        return plot_instrument_agreement(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def check_instrument_agreement(
+    result: ServiceEquipmentResult,
+    instrument_levels_db: Mapping[str, ArrayLike],
+) -> InstrumentAgreementCheck:
+    r"""Does the calculation agree with the instrument (NOTE to ISO/DIS 16032:2023 7.8)?
+
+    "It can be useful to compare the corrected and calculated A- and
+    C-weighted results with the values registered directly by the
+    instrument. If the difference is more than 2 dB, the calculations should
+    be checked for possible explanations." The NOTE is new in the revision.
+    The calculated value is the single number of the result as 7.8 rounds
+    it, and a difference of exactly 2 dB is not "more than 2 dB".
+
+    The instrument registers the level as measured, so a single number
+    corrected for the background, or standardized, may differ from it for
+    those reasons alone: the NOTE asks for an explanation, not a fault. Name
+    the single number each instrument value is compared with; ``"LA,eq"``
+    against the A-weighted equivalent level the meter showed is the plain
+    case.
+
+    :param result: The :class:`ServiceEquipmentResult` whose single numbers
+        are compared.
+    :param instrument_levels_db: The instrument's value for each single number
+        compared, keyed by its notation in ``result.ratings`` (``"LA,eq"``,
+        ``"LC,Fmax"``...), in dB: one value, or the reading at each position,
+        which is energy-averaged by Formula (1).
+    :return: :class:`InstrumentAgreementCheck`.
+    :raises TypeError: If ``result`` is not a :class:`ServiceEquipmentResult`.
+    :raises ValueError: If ``instrument_levels_db`` is empty, names a single
+        number the result does not carry, or holds a level that is not
+        finite.
+    """
+    if not isinstance(result, ServiceEquipmentResult):
+        msg = (
+            "'result' must be the ServiceEquipmentResult of service_equipment_level()."
+        )
+        raise TypeError(msg)
+    if not instrument_levels_db:
+        msg = "'instrument_levels_db' must name at least one single number, such as 'LA,eq'."
+        raise ValueError(msg)
+    calculated: dict[str, float] = {}
+    instrument: dict[str, float] = {}
+    for key, value in instrument_levels_db.items():
+        if key not in result.ratings:
+            carried = ", ".join(repr(k) for k in result.ratings)
+            msg = f"The result carries no single number {key!r}; it carries {carried}."
+            raise ValueError(msg)
+        readings = _readings(value, f"instrument_levels_db[{key!r}]")
+        calculated[key] = float(result.ratings[key])
+        # One reading is its own average: Formula (1) would hand 46,2 dB back
+        # as 46,199 999 999 999 996.
+        instrument[key] = (
+            float(readings[0]) if readings.size == 1 else energy_mean(readings)
+        )
+    return InstrumentAgreementCheck(
+        calculated_db=MappingProxyType(calculated),
+        instrument_db=MappingProxyType(instrument),
+    )

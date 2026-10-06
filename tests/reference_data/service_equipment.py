@@ -11,7 +11,9 @@ German publication of the draft prEN ISO 16032:2023 (ISO/DIS 16032:2023),
 whose English text runs from PDF page 35 on with its own folios: Clause 9 on
 folio 9 and 10 (PDF pages 47 and 48), Table 2 on folio 10 (PDF page 48) and
 Table A.1 on folio 12 (PDF page 50). The German text on folio 19 (PDF page 23)
-prints the same Table A.1, with the same cells.
+prints the same Table A.1, with the same cells. The limits of the on-site
+checks are on folios 5 (Clause 5), 7 (7.2), 8 (7.6), 9 (the NOTE to 7.8) and
+10 (Clause 9), PDF pages 43, 45, 46, 47 and 48.
 
 Stdlib only, like every module of this package.
 """
@@ -120,3 +122,34 @@ ISO16032_TABLE_2_BANDS: tuple[
 
 #: Table 2, folio 10 (PDF page 48): the A- and C-weighted rows, in dB.
 ISO16032_TABLE_2_WEIGHTED: tuple[tuple[str, float], ...] = (("A", 0.8), ("C", 1.2))
+
+# The limits of the on-site checks, each read on its printed page of the
+# English text. None of them comes with a worked case; the rows that use them
+# hold each limit met exactly and missed.
+
+#: 7.2, folio 7 (PDF page 45): "The microphone position shall be at least
+#: 0,2 m away from any obstacle." In metres.
+ISO16032_OBSTACLE_DISTANCE_M: float = 0.2
+
+#: Clause 5, folio 5 (PDF page 43): "If the calibration measurement deviates
+#: from previous calibrations by more than 0,5 dB, do not use this equipment".
+#: In dB.
+ISO16032_CALIBRATION_DEVIATION_DB: float = 0.5
+
+#: 7.6, folio 8 (PDF page 46): the background "over a period of approximately
+#: 30 s just before or after each set of measurements". In seconds.
+ISO16032_BACKGROUND_DURATION_S: float = 30.0
+
+#: NOTE to Clause 9, folio 10 (PDF page 48): the maximum background level
+#: "over a period of 10 min to 15 min in the corner microphone position", and
+#: "10 dB or more below the service equipment sound pressure level". The two
+#: ends of the period in seconds, and the margin in dB.
+ISO16032_VARYING_BACKGROUND: tuple[float, float, float] = (600.0, 900.0, 10.0)
+
+#: Clause 9, folio 10 (PDF page 48), after its NOTE: the maximum level less the
+#: equivalent level "should be less than 5 dB". In dB.
+ISO16032_MAX_TO_EQUIVALENT_DB: float = 5.0
+
+#: NOTE to 7.8, folio 9 (PDF page 47): "If the difference is more than 2 dB,
+#: the calculations should be checked". In dB.
+ISO16032_INSTRUMENT_AGREEMENT_DB: float = 2.0

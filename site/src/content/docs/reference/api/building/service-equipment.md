@@ -98,6 +98,24 @@ flat sound at least 10 dB above the background. A result carries them as
 [`ServiceEquipmentResult.weighted_reproducibility_db`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresultweighted_reproducibility_db); the draft states no
 coverage factor, so no expanded uncertainty is formed.
 
+**On-site checks.** The draft also sets numbers the operator meets while
+measuring, and each is a verdict here. The corner microphone keeps at least
+0,2 m from any obstacle (7.2), judged from the distance measured on site by
+[`check_service_equipment_positions`](/phonometry/reference/api/building/service-equipment/#check_service_equipment_positions). A calibration that deviates from
+previous calibrations by more than 0,5 dB takes the equipment out of use
+(Clause 5, [`verify_calibration_deviation`](/phonometry/reference/api/building/service-equipment/#verify_calibration_deviation)). The background is measured
+over approximately 30 s (7.6, [`check_background_duration`](/phonometry/reference/api/building/service-equipment/#check_background_duration), which
+reports each departure from 30 s and judges it against the tolerance the
+operator names, because the draft prints none). Where
+the background varies in time, its maximum watched for 10 min to 15 min at the
+corner and 10 dB or more below the equipment lets the result stand without
+correction (NOTE to Clause 9, [`check_varying_background`](/phonometry/reference/api/building/service-equipment/#check_varying_background)). A maximum
+less than 5 dB above the equivalent level in the middle of the frequency range
+says a period was not disturbed by doors or footsteps (Clause 9,
+[`check_measurement_disturbance`](/phonometry/reference/api/building/service-equipment/#check_measurement_disturbance)), and calculated single numbers more
+than 2 dB from the instrument's reading send the calculation back for a check
+(NOTE to 7.8, [`check_instrument_agreement`](/phonometry/reference/api/building/service-equipment/#check_instrument_agreement)).
+
 **Operating conditions (Annex B).** How each kind of equipment is to be run
 while it is measured, and for how long the equivalent level is integrated, is
 the data of [`SERVICE_EQUIPMENT_OPERATING_CONDITIONS`](/phonometry/reference/api/building/service-equipment/#service_equipment_operating_conditions), including the
@@ -116,7 +134,8 @@ apart), are registered in `docs/ERRATA.md`.
 
 **No numeric oracle.** The draft prints no worked example. The conformance of
 this module rests on closed forms and on the numbers the draft prints: the
-2,2 dB of a 4 dB background difference, Table A.1 and Table 2.
+2,2 dB of a 4 dB background difference, Table A.1, Table 2, and the limits of
+the on-site checks met exactly and missed.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -162,6 +181,279 @@ source along that wall's inward normal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, the source lies outside the room, or the position would. |
+
+## BackgroundDurationCheck
+
+```python
+BackgroundDurationCheck(durations_s: np.ndarray, tolerance_s: float)
+```
+
+Whether each background was measured over approximately 30 s (7.6).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `durations_s` | The time over which each background equivalent level was measured, in s. |
+| `tolerance_s` | The departure from 30 s, either way, that the operator accepts as "approximately", in s. The draft prints none. |
+
+### BackgroundDurationCheck.departures_s
+
+*property*
+
+How far each duration departs from 30 s, in s.
+
+**Returns:** The duration less 30 s, one per background measurement.
+
+### BackgroundDurationCheck.largest_departure_s
+
+*property*
+
+The largest departure from 30 s, either way, in s.
+
+**Returns:** The largest absolute value of `departures_s`.
+
+### BackgroundDurationCheck.nominal_duration_s
+
+*property*
+
+The 30 s of 7.6, fixed by the draft.
+
+**Returns:** The nominal background measurement time, in s.
+
+### BackgroundDurationCheck.passes
+
+*property*
+
+Whether every background was measured over approximately 30 s.
+
+"Approximately" is the operator's `tolerance_s`, not a number
+of the draft.
+
+**Returns:** `True` when no duration departs from 30 s by more than `tolerance_s`.
+
+### BackgroundDurationCheck.plot()
+
+```python
+BackgroundDurationCheck.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot each duration against the 30 s of 7.6 and the tolerance accepted.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the markers of the durations. |
+
+**Returns:** The axes.
+
+### BackgroundDurationCheck.within_tolerance
+
+*property*
+
+Per background, whether it departs from 30 s by no more than the tolerance.
+
+A departure of exactly `tolerance_s` is within it.
+
+**Returns:** One boolean per background measurement.
+
+## CalibrationDeviationResult
+
+```python
+CalibrationDeviationResult(
+    levels_db: np.ndarray,
+    previous_levels_db: np.ndarray,
+    deviations_db: np.ndarray,
+)
+```
+
+Whether the instrumentation may be used, by its calibrations (Clause 5).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `levels_db` | The calibrator readings of this measurement in the order they were taken, at the beginning and at the end, in dB. |
+| `previous_levels_db` | The readings of earlier calibrations of the same instrumentation with the same calibrator, in dB; empty when none were given. |
+| `deviations_db` | Per reading of `levels_db`, the largest absolute difference from every calibration taken before it, the earlier ones and the readings of this measurement already taken, in dB; `nan` for a first reading with nothing before it. |
+
+### CalibrationDeviationResult.largest_deviation_db
+
+*property*
+
+The largest deviation of a reading from the calibrations before it.
+
+**Returns:** The largest of `deviations_db`, in dB.
+
+### CalibrationDeviationResult.limit_db
+
+*property*
+
+The 0,5 dB of Clause 5, fixed by the draft.
+
+**Returns:** The largest deviation that still lets the equipment be used, in dB.
+
+### CalibrationDeviationResult.passes
+
+*property*
+
+Whether no reading deviates from an earlier one by more than 0,5 dB.
+
+**Returns:** `True` when the equipment may be used; `False` takes it out of use until the reason is clarified and the sensitivity put right (Clause 5).
+
+### CalibrationDeviationResult.plot()
+
+```python
+CalibrationDeviationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot each reading against the window the earlier calibrations leave it.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the markers of this measurement's readings. |
+
+**Returns:** The axes.
+
+## check_background_duration
+
+```python
+check_background_duration(
+    durations_s: ArrayLike,
+    *,
+    tolerance_s: float,
+) -> BackgroundDurationCheck
+```
+
+Was the background measured over approximately 30 s (ISO/DIS 16032:2023 7.6)?
+
+"The background sound pressure level shall be determined in frequency
+bands as the equivalent continuous sound pressure levels over a period of
+approximately 30 s just before or after each set of measurements. The same
+microphone positions as used for the service equipment sound pressure
+level measurements shall be used."
+
+The draft writes approximately and prints no tolerance, so the library
+sets none: the operator names the departure from 30 s, either way, that
+their report accepts as approximate, and each duration is held to it. A
+departure of exactly the tolerance is within it, and `tolerance_s=0`
+holds every background to 30 s exactly. Each departure is reported
+([`BackgroundDurationCheck.departures_s`](/phonometry/reference/api/building/service-equipment/#backgrounddurationcheckdepartures_s)) whatever the verdict.
+Whether the background was taken just before or after each set, and at
+the same positions, is not a number and is left to the operator.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `durations_s` | The measurement time of each background equivalent level, one per position or per set, in s. |
+| `tolerance_s` | The departure from 30 s, either way, accepted as "approximately", in s. Required: the draft prints none. |
+
+**Returns:** [`BackgroundDurationCheck`](/phonometry/reference/api/building/service-equipment/#backgrounddurationcheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a duration is not a positive, finite number, or the tolerance is not one finite number of 0 s or more. |
+
+## check_instrument_agreement
+
+```python
+check_instrument_agreement(
+    result: ServiceEquipmentResult,
+    instrument_levels_db: Mapping[str, ArrayLike],
+) -> InstrumentAgreementCheck
+```
+
+Does the calculation agree with the instrument (NOTE to ISO/DIS 16032:2023 7.8)?
+
+"It can be useful to compare the corrected and calculated A- and
+C-weighted results with the values registered directly by the
+instrument. If the difference is more than 2 dB, the calculations should
+be checked for possible explanations." The NOTE is new in the revision.
+The calculated value is the single number of the result as 7.8 rounds
+it, and a difference of exactly 2 dB is not "more than 2 dB".
+
+The instrument registers the level as measured, so a single number
+corrected for the background, or standardized, may differ from it for
+those reasons alone: the NOTE asks for an explanation, not a fault. Name
+the single number each instrument value is compared with; `"LA,eq"`
+against the A-weighted equivalent level the meter showed is the plain
+case.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `result` | The [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult) whose single numbers are compared. |
+| `instrument_levels_db` | The instrument's value for each single number compared, keyed by its notation in `result.ratings` (`"LA,eq"`, `"LC,Fmax"`...), in dB: one value, or the reading at each position, which is energy-averaged by Formula (1). |
+
+**Returns:** [`InstrumentAgreementCheck`](/phonometry/reference/api/building/service-equipment/#instrumentagreementcheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | If `result` is not a [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult). |
+| ValueError | If `instrument_levels_db` is empty, names a single number the result does not carry, or holds a level that is not finite. |
+
+## check_measurement_disturbance
+
+```python
+check_measurement_disturbance(
+    maximum_levels_db: ArrayLike,
+    equivalent_levels_db: ArrayLike,
+) -> MeasurementDisturbanceCheck
+```
+
+Was a measurement period disturbed (ISO/DIS 16032:2023 Clause 9)?
+
+"A simple check on-site is to compare the maximum level to the equivalent
+level in the middle of the frequency range during each measurement
+period, for many stable sources this difference should be less than 5 dB
+to indicate that the measurement has not been disturbed by closing doors,
+footfall noise etcetera." The check is the paragraph's, new in the
+revision: it holds for many stable sources, not for a source whose own
+level varies, and the draft does not name the band beyond "the middle of
+the frequency range", which the operator chooses. A difference of exactly
+5 dB is not "less than 5 dB" and marks the period.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `maximum_levels_db` | The maximum level of a band in the middle of the frequency range, one per measurement period, in dB. |
+| `equivalent_levels_db` | The equivalent level of the same band over the same period, one per period, in dB. |
+
+**Returns:** [`MeasurementDisturbanceCheck`](/phonometry/reference/api/building/service-equipment/#measurementdisturbancecheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a level is not finite or the two counts differ. |
 
 ## check_position_spread
 
@@ -222,18 +514,20 @@ check_service_equipment_positions(
     *,
     source_positions_m: ArrayLike | None = None,
     small_room: bool = False,
+    corner_obstacle_distance_m: ArrayLike | None = None,
 ) -> ServiceEquipmentPositionCheck
 ```
 
 Are the microphone positions far enough apart (ISO/DIS 16032:2023 7.2, 7.3)?
 
 The corner position is preferably 0,5 m from the two walls and the floor,
-raised to 1,0 m or 1,5 m where furniture is in the way. The reverberant-
-field positions keep at least 1,0 m from each other and from the corner
-(1,5 m preferred), 1,5 m from any sound source in the room, 0,50 m from
-every room surface (0,30 m in a small room where 0,50 m cannot be met) and
-a height from 0,5 m to 2,0 m. Pass the positions of one stage of 7.4.1 at
-a time: positions 4 and 5 keep the distances of 7.3 like 2 and 3.
+raised to 1,0 m or 1,5 m where furniture is in the way, and at least
+0,2 m from any obstacle. The reverberant-field positions keep at least
+1,0 m from each other and from the corner (1,5 m preferred), 1,5 m from
+any sound source in the room, 0,50 m from every room surface (0,30 m in a
+small room where 0,50 m cannot be met) and a height from 0,5 m to 2,0 m.
+Pass the positions of one stage of 7.4.1 at a time: positions 4 and 5
+keep the distances of 7.3 like 2 and 3.
 
 The verdict holds the corner position to its height of 0,5 m to 1,5 m and
 the reverberant-field positions to every distance and height of 7.3. The
@@ -242,8 +536,12 @@ positions, are reported beside it and do not decide it
 ([`preferred_corner_wall_distance`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_corner_wall_distance),
 [`preferred_separation`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_separation)).
 
-The draft also asks 0,2 m between the corner microphone and any obstacle,
-which a room outline cannot show and this check does not judge.
+A room outline cannot show furniture, so the 0,2 m that 7.2 asks between
+the corner microphone and any obstacle is judged from the distance
+measured on site, when it is given: "The microphone position shall be at
+least 0,2 m away from any obstacle", inclusive. The draft states it in the
+clause on the corner position and nowhere for the reverberant-field
+positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 **Parameters**
 
@@ -254,6 +552,7 @@ which a room outline cannot show and this check does not judge.
 | `room_positions_m` | The reverberant-field positions, one `(x, y, z)` per row, in m. |
 | `source_positions_m` | Sound sources in the room (outlets, radiators), one `(x, y, z)` per row, in m; `None` or an empty list for none. |
 | `small_room` | Whether the room is too small for 0,50 m from the surfaces, so 0,30 m applies. |
+| `corner_obstacle_distance_m` | The distance from the corner microphone to the nearest obstacle, or one distance per obstacle near it, in m, measured on site; `None` (default) leaves the 0,2 m of 7.2 unjudged. |
 
 **Returns:** [`ServiceEquipmentPositionCheck`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheck).
 
@@ -261,7 +560,129 @@ which a room outline cannot show and this check does not judge.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a dimension is not positive, a coordinate is not a finite real number, no room position is given, a position lies outside the room, or `small_room` is not `True` or `False`. |
+| ValueError | If a dimension is not positive, a coordinate is not a finite real number, no room position is given, a position lies outside the room, `small_room` is not `True` or `False`, or an obstacle distance is not a finite distance of 0 m or more. |
+
+## check_varying_background
+
+```python
+check_varying_background(
+    background_maximum_db: ArrayLike,
+    equipment_levels_db: ArrayLike,
+    *,
+    observation_time_s: float,
+    frequencies_hz: ArrayLike | None = None,
+) -> VaryingBackgroundCheck
+```
+
+Can the result stand without correction (NOTE to ISO/DIS 16032:2023 Clause 9)?
+
+Clause 9 corrects the bands for a background roughly constant in time,
+and its NOTE says that for a background varying in time, road traffic for
+example, "a reliable correction cannot be made. However, the maximum sound
+pressure levels of the background noise could be determined over a period
+of 10 min to 15 min in the corner microphone position. If the maximum
+level is 10 dB or more below the service equipment sound pressure level
+the result can be regarded valid without correction." The NOTE also
+suggests checking "the validity in all relevant octave-bands", words kept
+from the 2004 edition, which measured in octaves: the margin is judged in
+every band given, one-third octaves or octaves, and a single weighted
+value is one band.
+
+Both ends of the 10 min to 15 min are included, and so is a margin of
+exactly 10 dB ("10 dB or more"). The 2004 edition took the maximum "in one
+of the microphone positions"; the draft names the corner.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `background_maximum_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
+| `equipment_levels_db` | The service equipment sound pressure level in the same bands, in dB. |
+| `observation_time_s` | How long the background maximum was watched for, in s. |
+| `frequencies_hz` | Band centres in Hz, kept for the plot only. |
+
+**Returns:** [`VaryingBackgroundCheck`](/phonometry/reference/api/building/service-equipment/#varyingbackgroundcheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a level is not finite, the shapes differ, or the observation time is not one positive number. |
+
+## InstrumentAgreementCheck
+
+```python
+InstrumentAgreementCheck(
+    calculated_db: Mapping[str, float],
+    instrument_db: Mapping[str, float],
+)
+```
+
+Whether the calculated single numbers agree with the instrument (7.8).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `calculated_db` | The single numbers of the result compared, as 7.8 rounds them, keyed by their Table 1 notation (`"LA,eq"`...), in dB. |
+| `instrument_db` | The value the instrument registered for each, in dB; the energy average when several readings were given. |
+
+### InstrumentAgreementCheck.differences_db
+
+*property*
+
+The calculated value less the instrument's, per single number, in dB.
+
+**Returns:** Keyed like `calculated_db`.
+
+### InstrumentAgreementCheck.disagreeing
+
+*property*
+
+The single numbers more than 2 dB from the instrument.
+
+**Returns:** Their notations, in the order of `calculated_db`.
+
+### InstrumentAgreementCheck.limit_db
+
+*property*
+
+The 2 dB of the NOTE to 7.8, fixed by the draft.
+
+**Returns:** The largest difference, either way, that agrees, in dB.
+
+### InstrumentAgreementCheck.passes
+
+*property*
+
+Whether every calculated value is within 2 dB of the instrument.
+
+**Returns:** `True` when no single number calls for a second look at the calculation.
+
+### InstrumentAgreementCheck.plot()
+
+```python
+InstrumentAgreementCheck.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot each calculated-less-instrument difference against 2 dB.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the markers of the differences. |
+
+**Returns:** The axes.
 
 ## loudest_corner
 
@@ -297,6 +718,91 @@ ventilation outlet for example, is left out.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite, `excluded` is not a sequence of whole numbers, an index is out of range, or every corner is excluded. |
+
+## MeasurementDisturbanceCheck
+
+```python
+MeasurementDisturbanceCheck(
+    maximum_levels_db: np.ndarray,
+    equivalent_levels_db: np.ndarray,
+)
+```
+
+Whether each measurement period was free of disturbances (Clause 9).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `maximum_levels_db` | The maximum level in the middle of the frequency range, one per measurement period, in dB. |
+| `equivalent_levels_db` | The equivalent level in the same band, one per period, in dB. |
+
+### MeasurementDisturbanceCheck.differences_db
+
+*property*
+
+The maximum less the equivalent level of each period, in dB.
+
+**Returns:** One difference per measurement period.
+
+### MeasurementDisturbanceCheck.disturbed_periods
+
+*property*
+
+The periods whose difference reaches 5 dB, counted from 0.
+
+**Returns:** Their indices, in the order given.
+
+### MeasurementDisturbanceCheck.limit_db
+
+*property*
+
+The 5 dB of Clause 9, fixed by the draft.
+
+**Returns:** The difference a period must stay under, in dB.
+
+### MeasurementDisturbanceCheck.passes
+
+*property*
+
+Whether no period shows a disturbance.
+
+**Returns:** `True` when every period's maximum lies less than 5 dB above its equivalent level.
+
+### MeasurementDisturbanceCheck.plot()
+
+```python
+MeasurementDisturbanceCheck.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot each period's maximum-to-equivalent difference against 5 dB.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the markers of the differences. |
+
+**Returns:** The axes.
+
+### MeasurementDisturbanceCheck.undisturbed
+
+*property*
+
+Per period, whether the difference is less than 5 dB.
+
+A difference of exactly 5,0 dB is not "less than 5 dB".
+
+**Returns:** One boolean per measurement period.
 
 ## OperatingCondition
 
@@ -420,7 +926,8 @@ left undefined.
 The method assumes a background roughly constant in time. Where it is not,
 the NOTE to Clause 9 suggests the maximum level of the background over 10
 to 15 minutes at the corner position instead: if it is 10 dB or more below
-the equipment, the result stands without correction.
+the equipment, the result stands without correction
+([`check_varying_background`](/phonometry/reference/api/building/service-equipment/#check_varying_background)).
 
 **Parameters**
 
@@ -610,6 +1117,8 @@ ServiceEquipmentPositionCheck(
     source_ok: bool,
     height_ok: bool,
     corner_height_ok: bool,
+    corner_obstacle_distance_m: float | None = None,
+    corner_obstacle_ok: bool | None = None,
 )
 ```
 
@@ -639,19 +1148,22 @@ height above the floor.
 | `source_ok` | At least 1,5 m from every source. |
 | `height_ok` | Every room position from 0,5 m to 2,0 m high. |
 | `corner_height_ok` | The corner position from 0,5 m to 1,5 m high. |
+| `corner_obstacle_distance_m` | The distance from the corner microphone to the nearest obstacle, as measured on site, in m; `None` when it was not given. |
+| `corner_obstacle_ok` | At least 0,2 m from any obstacle (7.2); `None` when the distance was not given, and then not judged. |
 
 ### ServiceEquipmentPositionCheck.passes
 
 *property*
 
-Whether the distances and heights of 7.3 and the corner height of 7.2 hold.
+Whether the distances and heights of 7.3 and the corner of 7.2 hold.
 
-The corner position enters through its height alone: the 0,5 m from
-its walls is a preference (`preferred_corner_wall_distance`),
-like the 1,5 m between positions (`preferred_separation`), and
-the 0,2 m from any obstacle that 7.2 also asks is not judged.
+The corner position enters through its height and, when its distance
+to the nearest obstacle was given, through the 0,2 m that 7.2 asks of
+it. The 0,5 m from its walls is a preference
+(`preferred_corner_wall_distance`), like the 1,5 m between
+positions (`preferred_separation`).
 
-**Returns:** `True` when all five requirements hold.
+**Returns:** `True` when the five requirements hold, and the sixth, the obstacle distance, holds or was not given.
 
 ### ServiceEquipmentPositionCheck.plot()
 
@@ -848,3 +1360,135 @@ sound with a relatively flat spectrum from 25 Hz to 10 000 Hz, at least
 of all, is more uncertain, and the draft states no coverage factor.
 
 **Returns:** The reproducibility standard deviation keyed like `ratings` (`"LA,eq"`, `"LC,Fmax,nT"`...).
+
+## VaryingBackgroundCheck
+
+```python
+VaryingBackgroundCheck(
+    background_maximum_db: np.ndarray,
+    equipment_levels_db: np.ndarray,
+    observation_time_s: float,
+    frequencies_hz: np.ndarray | None = None,
+)
+```
+
+Whether a result stands without correction for a varying background.
+
+The route the NOTE to Clause 9 offers when the background varies in time.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `background_maximum_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
+| `equipment_levels_db` | The service equipment sound pressure level, the same bands, in dB. |
+| `observation_time_s` | How long the background maximum was watched for, in s. |
+| `frequencies_hz` | The band centres, in Hz, or `None` when not given. |
+
+### VaryingBackgroundCheck.limit_db
+
+*property*
+
+The 10 dB of the NOTE to Clause 9, fixed by the draft.
+
+**Returns:** How far below the equipment the background maximum must lie, at least, in dB.
+
+### VaryingBackgroundCheck.margin_db
+
+*property*
+
+How far the background maximum lies below the equipment, per band.
+
+**Returns:** The equipment level less the background maximum, in dB.
+
+### VaryingBackgroundCheck.margin_ok
+
+*property*
+
+Per band, whether the background maximum is 10 dB or more below.
+
+**Returns:** One boolean per band.
+
+### VaryingBackgroundCheck.observation_ok
+
+*property*
+
+Whether the background maximum was watched for 10 min to 15 min.
+
+**Returns:** `True` from 600 s to 900 s, both included.
+
+### VaryingBackgroundCheck.passes
+
+*property*
+
+Whether the result can be regarded valid without correction.
+
+**Returns:** `True` when the background maximum, watched for 10 min to 15 min, lies 10 dB or more below the equipment in every band.
+
+### VaryingBackgroundCheck.plot()
+
+```python
+VaryingBackgroundCheck.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the equipment level against the background maximum, per band.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the curve of the equipment level. |
+
+**Returns:** The axes.
+
+## verify_calibration_deviation
+
+```python
+verify_calibration_deviation(
+    calibration_levels_db: ArrayLike,
+    *,
+    previous_levels_db: ArrayLike | None = None,
+) -> CalibrationDeviationResult
+```
+
+Has the sensitivity moved more than 0,5 dB (ISO/DIS 16032:2023 Clause 5)?
+
+"At the beginning and at the end of the measurements, verify the
+sensitivity of the instrumentation with a sound calibrator class 1
+according to IEC 60942. If the calibration measurement deviates from
+previous calibrations by more than 0,5 dB, do not use this equipment until
+the reason for this deviation has been clarified and appropriate actions
+have been taken." Each reading of this measurement is held to every
+calibration before it: the earlier calibrations given, and for the
+reading at the end, the one at the beginning as well. A deviation of
+exactly 0,5 dB is not "more than" it and passes. The 2004 edition asked
+for the two calibrations without a limit; the 0,5 dB is new in the
+revision.
+
+The readings are compared as levels, so they must come from the same
+calibrator at the same stated level; readings taken at different stated
+levels are passed instead as each one's departure from its stated level.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `calibration_levels_db` | The calibrator readings of this measurement in the order taken, the one at the beginning and the one at the end, in dB. One reading alone is judged against `previous_levels_db`, which lets the beginning be checked before measuring. |
+| `previous_levels_db` | Readings of earlier calibrations of the same instrumentation, in dB; `None` (default) to compare the end with the beginning only. |
+
+**Returns:** [`CalibrationDeviationResult`](/phonometry/reference/api/building/service-equipment/#calibrationdeviationresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a reading is not a finite level, or there is nothing to compare: one reading and no earlier calibration. |

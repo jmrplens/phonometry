@@ -429,7 +429,6 @@ InverseSquareLawResult(
     deviations_db: tuple[np.ndarray, ...],
     traverse_radius_m: np.ndarray,
     band_radius_m: np.ndarray,
-    tolerance_db: np.ndarray,
 )
 ```
 
@@ -456,7 +455,6 @@ Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
 | `deviations_db` | $\Delta L_{pi}$ of Formula (4) at every point, `(N, NF)` per traverse. |
 | `traverse_radius_m` | The qualified distance of each traverse at each frequency, `(NT, NF)`, in metres. |
 | `band_radius_m` | The distance to which each frequency is qualified on every traverse at once, `(NF,)`, in metres. |
-| `tolerance_db` | The Table A.1 limit of each frequency, in dB. |
 
 ### InverseSquareLawResult.largest_deviation_db
 
@@ -498,6 +496,14 @@ Draw the deviations along every traverse at one frequency.
 | `kwargs` | Forwarded to the deviation curves. |
 
 **Returns:** The axes.
+
+### InverseSquareLawResult.tolerance_db
+
+*property*
+
+The Table A.1 limit of each frequency, in dB, read from the room.
+
+**Returns:** [`inverse_square_law_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_tolerance_db) of `frequencies_hz` in `room`.
 
 ## MicrophoneTraverse
 
@@ -606,7 +612,6 @@ SourceDirectionalityResult(
     mean_level_db: np.ndarray,
     maximum_positive_deviation_db: np.ndarray,
     maximum_negative_deviation_db: np.ndarray,
-    tolerance_db: np.ndarray,
 )
 ```
 
@@ -621,7 +626,6 @@ Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 | `mean_level_db` | The arithmetic mean of the decibel levels per band. |
 | `maximum_positive_deviation_db` | The largest level above the mean. |
 | `maximum_negative_deviation_db` | The largest level below the mean, a negative number. |
-| `tolerance_db` | The Table B.1 limit per band, in dB. |
 
 ### SourceDirectionalityResult.passes
 
@@ -653,6 +657,14 @@ Draw the extreme deviations per band against Table B.1.
 | `kwargs` | Forwarded to the deviation bars. |
 
 **Returns:** The axes.
+
+### SourceDirectionalityResult.tolerance_db
+
+*property*
+
+The Table B.1 limit per band, in dB, read from the room.
+
+**Returns:** [`directionality_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#directionality_tolerance_db) of `frequencies_hz` in `room`.
 
 ### SourceDirectionalityResult.within_tolerance
 

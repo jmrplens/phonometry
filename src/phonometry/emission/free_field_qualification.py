@@ -862,6 +862,14 @@ def _chebyshev_centre(y: np.ndarray, inside: np.ndarray) -> np.ndarray:
     return np.asarray((hi + lo) / 2.0, dtype=np.float64)
 
 
+def _same_radii(given: ArrayLike, qualified: np.ndarray) -> bool:
+    """Whether ``given`` holds the radii :func:`_evaluate` qualified."""
+    radii = np.asarray(given, dtype=np.float64)
+    return radii.shape == qualified.shape and bool(
+        np.allclose(radii, qualified, rtol=0.0, atol=_SLACK, equal_nan=True)
+    )
+
+
 @dataclass(frozen=True)
 class InverseSquareLawResult:
     r"""Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
@@ -900,7 +908,6 @@ class InverseSquareLawResult:
         frequency, ``(NT, NF)``, in metres.
     :ivar band_radius_m: The distance to which each frequency is qualified on
         every traverse at once, ``(NF,)``, in metres.
-    :ivar tolerance_db: The Table A.1 limit of each frequency, in dB.
     """
 
     frequencies_hz: np.ndarray
@@ -920,7 +927,48 @@ class InverseSquareLawResult:
     deviations_db: tuple[np.ndarray, ...]
     traverse_radius_m: np.ndarray
     band_radius_m: np.ndarray
-    tolerance_db: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a room, a frequency or a radius Table A.1 does not give.
+
+        The qualified radii are the verdict judged against the Table A.1
+        limits of the room, so they are checked against the radii the
+        corrected levels reach from the origin within those limits: a result
+        cannot be built, or rewritten with :func:`dataclasses.replace`, with a
+        radius the levels do not qualify.
+
+        :raises ValueError: for an unknown room, a frequency that is not
+            positive, or radii other than the ones the levels qualify.
+        """
+        _check_room(self.room)
+        _lookup_bands(self.frequencies_hz)
+        evaluation = _evaluate(
+            np.asarray(self.origin_m, dtype=np.float64),
+            self.positions_m,
+            self.levels_db,
+            self.tolerance_db,
+        )
+        if not (
+            _same_radii(self.traverse_radius_m, evaluation.traverse_radius)
+            and _same_radii(self.band_radius_m, evaluation.band_radius)
+        ):
+            msg = (
+                "InverseSquareLawResult: the qualified radii are not the ones "
+                "the levels reach within the Table A.1 limits of the room."
+            )
+            raise ValueError(msg)
+
+    @property
+    def tolerance_db(self) -> np.ndarray:
+        """The Table A.1 limit of each frequency, in dB, read from the room.
+
+        :return: :func:`inverse_square_law_tolerance_db` of
+            :attr:`frequencies_hz` in :attr:`room`.
+        """
+        return np.array(
+            [_table_a1(k, self.room) for k in _lookup_bands(self.frequencies_hz)],
+            dtype=np.float64,
+        )
 
     @property
     def maximum_qualified_radius_m(self) -> float:
@@ -1148,7 +1196,6 @@ def inverse_square_law_deviations(
         deviations_db=tuple(deviations),
         traverse_radius_m=evaluation.traverse_radius,
         band_radius_m=evaluation.band_radius,
-        tolerance_db=tolerance,
     )
 
 
@@ -1199,7 +1246,6 @@ class SourceDirectionalityResult:
     :ivar maximum_positive_deviation_db: The largest level above the mean.
     :ivar maximum_negative_deviation_db: The largest level below the mean, a
         negative number.
-    :ivar tolerance_db: The Table B.1 limit per band, in dB.
     """
 
     frequencies_hz: np.ndarray
@@ -1207,7 +1253,27 @@ class SourceDirectionalityResult:
     mean_level_db: np.ndarray
     maximum_positive_deviation_db: np.ndarray
     maximum_negative_deviation_db: np.ndarray
-    tolerance_db: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a room or a frequency Table B.1 cannot be read for.
+
+        :raises ValueError: for an unknown room or a frequency that is not
+            positive.
+        """
+        _check_room(self.room)
+        _lookup_bands(self.frequencies_hz)
+
+    @property
+    def tolerance_db(self) -> np.ndarray:
+        """The Table B.1 limit per band, in dB, read from the room.
+
+        :return: :func:`directionality_tolerance_db` of :attr:`frequencies_hz`
+            in :attr:`room`.
+        """
+        return np.array(
+            [_table_b1(k, self.room) for k in _lookup_bands(self.frequencies_hz)],
+            dtype=np.float64,
+        )
 
     @property
     def within_tolerance(self) -> np.ndarray:
@@ -1281,7 +1347,7 @@ def verify_source_directionality(
     """
     _check_room(room)
     freqs = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
-    ks = _band_indices(freqs)
+    _band_indices(freqs)  # refuses two frequencies in one band
     levels = np.asarray(levels_db, dtype=np.float64)
     if levels.ndim == 1:
         levels = levels[:, np.newaxis]
@@ -1303,7 +1369,6 @@ def verify_source_directionality(
         mean_level_db=mean,
         maximum_positive_deviation_db=deviation.max(axis=0),
         maximum_negative_deviation_db=deviation.min(axis=0),
-        tolerance_db=np.array([_table_b1(int(k), room) for k in ks], dtype=np.float64),
     )
 
 

@@ -1795,10 +1795,10 @@ def _damage_curves(ax: Axes, result: DamageAssessment, language: str) -> float:
     )
 
     if result.frequency_hz is None:
-        # DamageAssessment is public, so one can be built by hand with the
-        # short-term foundation case and no frequency, which is the one case
-        # Table 1 does not cover. Parking the point at the axis limit and
-        # labelling it "at 100 Hz" would report a frequency nobody measured.
+        # DamageAssessment reads its guideline from Table 1 and refuses the
+        # short-term foundation case without a frequency, so this only keeps
+        # the figure from parking the point at the axis limit and labelling
+        # it "at 100 Hz" should that ever change.
         msg = (
             "A short-term foundation assessment is read off Bild 1 at the "
             "dominant frequency, and this one carries none; there is nowhere "

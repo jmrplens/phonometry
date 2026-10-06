@@ -179,11 +179,12 @@ says nothing, so the number is an extrapolation rather than the rule.
 ```python
 DamageAssessment(
     velocity_mm_s: float,
-    guideline_mm_s: float,
     building_class: str,
     location: str,
     duration: str,
     frequency_hz: float | None,
+    *,
+    massive_structure: bool = False,
 )
 ```
 
@@ -194,11 +195,21 @@ One measured velocity against the guideline value it is judged by.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured peak velocity, in millimetres per second: the largest of the three components at the foundation, or the larger of the two horizontal components in the topmost floor plane. |
-| `guideline_mm_s` | The guideline value it is compared with. |
 | `building_class` | The row of Table 1 or Table 3 that was used. |
 | `location` | Where the velocity was measured. |
 | `duration` | Which clause the guideline came from. |
 | `frequency_hz` | The frequency the guideline was read at, or `None` where the guideline does not depend on frequency. |
+| `massive_structure` | Whether the row 1 values were raised by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), the allowance 5.1 leaves to the assessor for a massive engineering structure. |
+
+The guideline value (`guideline_mm_s`) is read from Table 1 or
+Table 3 with those, so an assessment cannot be built against another
+value.
+
+### DamageAssessment.guideline_mm_s
+
+*property*
+
+The guideline value the velocity is compared with, in mm/s.
 
 ### DamageAssessment.plot()
 

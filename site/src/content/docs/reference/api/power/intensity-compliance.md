@@ -108,11 +108,8 @@ IntensityInstrumentComplianceResult(
     bands: tuple[dict[str, Any], ...],
     frequencies: np.ndarray,
     residual_index: np.ndarray,
-    limit_class1: np.ndarray,
-    limit_class2: np.ndarray,
     device: str,
     spacing: float,
-    spacing_offset_db: float,
     *,
     range_limited: bool = False,
 )
@@ -132,11 +129,8 @@ result can redraw itself and render an accredited fiche.
 | `bands` | The per-band verdicts, as an immutable tuple. |
 | `frequencies` | Nominal band centre frequencies, in Hz. |
 | `residual_index` | Measured `delta_pI0` per band, in dB. |
-| `limit_class1` | Class 1 minimum `delta_pI0` per band, in dB, already rescaled to `spacing`. |
-| `limit_class2` | Class 2 minimum per band, in dB, likewise rescaled. |
 | `device` | `"probe"`, `"processor"` or `"instrument"`. |
 | `spacing` | Microphone separation the verdict applies to, in metres. |
-| `spacing_offset_db` | The Table 2 Note 1 term $10 \log_{10}(x/25)$ added to the printed 25 mm figures, in dB. |
 | `range_limited` | `True` when the verified bands cover neither the 22 one-third-octave bands nor the 7 octave bands of clause 6.1, so the stated class attests only the bands supplied. |
 
 ### IntensityInstrumentComplianceResult.binding_margin()
@@ -176,6 +170,22 @@ Nominal centre frequencies of the bands that miss a class, in Hz.
 | Name | Description |
 | :--- | :--- |
 | `device_class` | 1 or 2; `None` (default) uses `reference_class`. |
+
+### IntensityInstrumentComplianceResult.limit_class1
+
+*property*
+
+Class 1 minimum `delta_pI0` per band, in dB, rescaled to `spacing`.
+
+**Returns:** Table 2 for `device`, plus `spacing_offset_db`.
+
+### IntensityInstrumentComplianceResult.limit_class2
+
+*property*
+
+Class 2 minimum `delta_pI0` per band, in dB, rescaled to `spacing`.
+
+**Returns:** Table 2 for `device`, plus `spacing_offset_db`.
 
 ### IntensityInstrumentComplianceResult.phase_mismatch()
 
@@ -271,6 +281,14 @@ class result, an optional verdict row against a supplied
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+
+### IntensityInstrumentComplianceResult.spacing_offset_db
+
+*property*
+
+The Table 2 Note 1 term $10 \log_{10}(x/25)$, in dB.
+
+**Returns:** What the separation adds to the printed 25 mm figures.
 
 ## phase_mismatch_from_residual_index
 

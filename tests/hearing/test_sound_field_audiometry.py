@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import math
 
 import numpy as np
@@ -216,6 +217,44 @@ def test_the_axial_pair_is_judged_against_the_inverse_distance_law() -> None:
     )
     np.testing.assert_allclose(check.inverse_distance_deviation_db, 0.0, atol=1e-12)
     assert check.passes
+
+
+def test_the_axial_offset_and_the_law_are_read_from_the_field() -> None:
+    """ISO 8253-2:2009 5.2 c) and 5.4 c): 0,15 m and 0,10 m, as printed.
+
+    PDF pages 12 and 13, printed folios 6 and 7. Neither the offset nor the
+    inverse distance difference is a field, so a check cannot be judged
+    against another offset or another law.
+    """
+    lateral, reference, front, back = _free(0.0, 1.5, 0.15)
+    check = hearing.check_free_sound_field(
+        lateral,
+        reference,
+        front_levels_db=front,
+        back_levels_db=back,
+        loudspeaker_distance_m=1.5,
+    )
+    names = {f.name for f in dataclasses.fields(check)}
+    assert not names & {"axis_offset_m", "inverse_distance_difference_db"}
+    assert check.axis_offset_m == pytest.approx(0.15)
+    quasi = dataclasses.replace(check, field="quasi-free")
+    assert quasi.axis_offset_m == pytest.approx(0.10)
+    assert quasi.inverse_distance_difference_db == pytest.approx(
+        20.0 * math.log10(1.6 / 1.4)
+    )
+
+
+def test_a_field_the_clause_does_not_name_is_refused() -> None:
+    lateral, reference, front, back = _free(0.0, 1.5, 0.15)
+    check = hearing.check_free_sound_field(
+        lateral,
+        reference,
+        front_levels_db=front,
+        back_levels_db=back,
+        loudspeaker_distance_m=1.5,
+    )
+    with pytest.raises(ValueError, match="'field' must be one of"):
+        dataclasses.replace(check, field="diffuse")
 
 
 def test_the_free_field_tolerance_widens_above_4_khz() -> None:

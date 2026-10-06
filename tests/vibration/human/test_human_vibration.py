@@ -843,11 +843,6 @@ def test_an_assessment_refuses_an_unknown_tag(
             value=3.2,
             kind=kind,
             metric=metric,
-            action_value=2.5,
-            limit_value=5.0,
-            exceeds_action=True,
-            exceeds_limit=False,
-            zone="action",
         )
 
 
@@ -869,11 +864,6 @@ def test_an_assessment_refuses_a_hand_arm_vdv_pair() -> None:
         value=3.5,
         kind="wbv",
         metric="vdv",
-        action_value=hv.WBV_EAV_VDV,
-        limit_value=hv.WBV_ELV_VDV,
-        exceeds_action=False,
-        exceeds_limit=False,
-        zone="below action",
     )
     assert whole_body.metric == "vdv"
 
@@ -882,11 +872,6 @@ def test_an_assessment_refuses_a_hand_arm_vdv_pair() -> None:
             value=3.5,
             kind="hav",
             metric="vdv",
-            action_value=hv.WBV_EAV_VDV,
-            limit_value=hv.WBV_ELV_VDV,
-            exceeds_action=False,
-            exceeds_limit=False,
-            zone="below action",
         )
     with pytest.raises(ValueError, match="kind must be 'hav' or 'wbv'") as entry:
         hv.exposure_assessment(3.5, kind="hav", metric="vdv")

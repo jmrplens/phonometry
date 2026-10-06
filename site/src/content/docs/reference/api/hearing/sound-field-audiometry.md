@@ -249,7 +249,7 @@ DiffuseSoundFieldCheck(
     position_deviation_db: np.ndarray,
     left_right_difference_db: np.ndarray,
     directional_variation_db: np.ndarray,
-    allowable_variation_db: np.ndarray,
+    front_to_random_index_db: np.ndarray | None,
     standard: str,
     positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
@@ -270,15 +270,27 @@ into the variation it may read.
 | `position_deviation_db` | The level at each of the six positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
 | `left_right_difference_db` | The difference between the right and left positions per band, as an absolute value, in dB. |
 | `directional_variation_db` | The largest less the smallest level the directional microphone read at the reference point per band, in dB, or NaN where no reading was given or the band is below 500 Hz. |
-| `allowable_variation_db` | What the Table 1 allows that variation per band, in dB, or NaN where it is not judged: below 500 Hz, without a directional reading, or where the microphone's index is below the table's last row. |
-| `standard` | The clause this check applies, for the figure and the messages. |
+| `front_to_random_index_db` | The directional microphone's front-to-random sensitivity index per band, in dB, or `None` when no directional reading was given. |
+| `standard` | The clause this check applies, `"ISO 8253-2 5.3"` or `"ISO 4869-3 5.2.2"`, which picks the Table 1 the index is read against. |
 | `positions` | The position names, in row order. |
+
+What Table 1 allows the variation (`allowable_variation_db`) is read
+from the microphone's index and the standard's table, not stored, so a
+check cannot be built against another table.
 
 The directional test is a requirement, not an option: a band from 500 Hz
 up without a suitable microphone's reading is not judged,
 `directionality_judged` says so, and `passes` is `False`
 until it is. `uniform` and `balanced` still give the verdict
 of the six positions on their own.
+
+### DiffuseSoundFieldCheck.allowable_variation_db
+
+*property*
+
+What the Table 1 allows the directional variation per band, in dB.
+
+**Returns:** The allowance, or NaN where it is not judged: below 500 Hz, without a directional reading, or where the microphone's index is below the table's last row.
 
 ### DiffuseSoundFieldCheck.balanced
 
@@ -370,9 +382,7 @@ FreeSoundFieldCheck(
     frequencies: np.ndarray,
     lateral_deviation_db: np.ndarray,
     axis_difference_db: np.ndarray,
-    inverse_distance_difference_db: float,
     loudspeaker_distance_m: float,
-    axis_offset_m: float,
     positions: tuple[str, ...] = ('left', 'right', 'up', 'down'),
 )
 ```
@@ -389,10 +399,22 @@ The verdict of ISO 8253-2:2009, 5.2 (free) or 5.4 (quasi-free).
 | `frequencies` | The frequencies of the test signals, in hertz. |
 | `lateral_deviation_db` | The level at each of the four positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
 | `axis_difference_db` | The level at the axial point in front of the reference point, towards the loudspeaker, less the level at the one behind it, per band, in dB. |
-| `inverse_distance_difference_db` | What the inverse distance law gives for that difference, $20 \lg((r + d)/(r - d))$, in dB. |
 | `loudspeaker_distance_m` | $r$, the distance from the loudspeaker to the reference point, in metres. |
-| `axis_offset_m` | $d$, how far the axial points sit from the reference point: 0,15 m for a free field, 0,10 m for a quasi-free one. |
 | `positions` | The lateral position names, in row order. |
+
+Where the axial points sit (`axis_offset_m`) is the clause's, and
+so is the difference the inverse distance law gives there
+(`inverse_distance_difference_db`): both are read from the field and
+the loudspeaker distance and are not fields, so a check cannot be built
+against another offset or another law.
+
+### FreeSoundFieldCheck.axis_offset_m
+
+*property*
+
+$d$, how far the axial points sit from the reference point.
+
+**Returns:** 0,15 m for a free field (5.2 c)), 0,10 m for a quasi-free one (5.4 c)), in metres.
 
 ### FreeSoundFieldCheck.balanced
 
@@ -436,6 +458,14 @@ Per band, whether the axial difference is within ±1 dB of the law.
 The axial difference less what the inverse distance law gives, in dB.
 
 **Returns:** One value per band.
+
+### FreeSoundFieldCheck.inverse_distance_difference_db
+
+*property*
+
+What the inverse distance law gives for the axial difference, in dB.
+
+**Returns:** $20 \lg((r + d)/(r - d))$ with $r$ the loudspeaker distance and $d$ the axial offset.
 
 ### FreeSoundFieldCheck.lateral_tolerance_db
 

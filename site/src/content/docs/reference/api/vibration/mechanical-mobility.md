@@ -304,7 +304,6 @@ rigid_mass_calibration_check(
     mass: float,
     *,
     quantity: str = 'accelerance',
-    tolerance: float = 0.05,
 ) -> RigidMassCalibrationResult
 ```
 
@@ -317,7 +316,8 @@ mobility magnitude
 $\lvert Y \rvert = 1/(2 \pi f m)$. All components of the
 measurement chain (including
 the attachment hardware) are connected as in the test series, so a failure
-flags transducer, chain or attachment-compliance errors.
+flags transducer, chain or attachment-compliance errors. The 5 % is the
+clause's and is not a parameter.
 
 **Parameters**
 
@@ -327,7 +327,6 @@ flags transducer, chain or attachment-compliance errors.
 | `frequencies` | Frequencies of *frf*, in hertz (> 0, same shape). |
 | `mass` | Known mass `m` of the calibration block, in kg (> 0). |
 | `quantity` | `"accelerance"` ($\lvert A \rvert = 1/m$) or `"mobility"` ($\lvert Y \rvert = 1/(\omega m)$). (Default: `"accelerance"`.) |
-| `tolerance` | Relative tolerance (Default: 0.05, the +/- 5 % of 7.5.2). |
 
 **Returns:** A [`RigidMassCalibrationResult`](/phonometry/reference/api/vibration/mechanical-mobility/#rigidmasscalibrationresult) with per-band pass flags.
 
@@ -335,7 +334,7 @@ flags transducer, chain or attachment-compliance errors.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an unknown quantity, non-positive mass, tolerance or frequency, or mismatched shapes. |
+| ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |
 
 ## RigidMassCalibrationResult
 
@@ -343,18 +342,17 @@ flags transducer, chain or attachment-compliance errors.
 RigidMassCalibrationResult(
     frequencies: np.ndarray,
     measured: np.ndarray,
-    expected: np.ndarray,
-    deviation: np.ndarray,
-    within_tolerance: np.ndarray,
     *,
-    passes: bool,
     mass: float,
     quantity: str,
-    tolerance: float,
 )
 ```
 
 Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
+
+Only what was measured and the block are fields. The block's known
+response, the deviation from it, the +/- 5 % of 7.5.2 and the verdict are
+read from them, so a check cannot be built against another tolerance.
 
 **Attributes**
 
@@ -362,13 +360,28 @@ Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
 | :--- | :--- |
 | `frequencies` | Frequencies of the calibration FRF, in hertz. |
 | `measured` | Measured FRF magnitude per frequency (`1/kg` for accelerance, `m/(N.s)` for mobility). |
-| `expected` | Known correct magnitude of the rigid calibration block per frequency: $1/m$ (accelerance) or $1/(2 \pi f m)$ (mobility). |
-| `deviation` | Relative deviation `measured/expected - 1` per frequency. |
-| `within_tolerance` | Per-frequency pass flag `\|deviation\| <= tolerance`. |
-| `passes` | `True` if every frequency is within the tolerance. |
 | `mass` | Mass `m` of the calibration block, in kg. |
 | `quantity` | FRF kind checked (`"accelerance"` or `"mobility"`). |
-| `tolerance` | Relative tolerance applied (the standard's is 0.05). |
+
+### RigidMassCalibrationResult.deviation
+
+*property*
+
+Relative deviation `measured/expected - 1` per frequency.
+
+### RigidMassCalibrationResult.expected
+
+*property*
+
+Known correct magnitude of the block per frequency.
+
+**Returns:** $1/m$ (accelerance) or $1/(2 \pi f m)$ (mobility).
+
+### RigidMassCalibrationResult.passes
+
+*property*
+
+`True` if every frequency is within the tolerance.
 
 ### RigidMassCalibrationResult.plot()
 
@@ -389,6 +402,22 @@ no `ax` a two-panel figure is drawn and its axes array returned; with
 `ax` the deviation diagnostic is drawn on it and that axes returned.
 
 Requires matplotlib (`pip install phonometry[plot]`).
+
+### RigidMassCalibrationResult.tolerance
+
+*property*
+
+The +/- 5 % of 7.5.2, as a relative tolerance (0.05).
+
+### RigidMassCalibrationResult.within_tolerance
+
+*property*
+
+Per-frequency pass flag `|deviation| <= tolerance`.
+
+Judged as a settled share of the tolerance, so that a block exactly
+5 % off in decimal is within the +/- 5 % whichever side of it the last
+bits of the ratio fall.
 
 ## sdof_accelerance
 

@@ -349,28 +349,82 @@ class WeightedEnclosureInsulation:
 class TestEnvironmentApplicability:
     r"""Whether a room is good enough for a base standard, Annex C of part 2.
 
-    :ivar base_standard: The standard asked about.
-    :ivar environmental_correction_limit_db: The largest :math:`K_2` Table C.1
-        allows it, in decibels, or ``None`` where the standard states none.
-    :ivar background_margin_limit_db: The smallest margin over the background
-        Table C.1 asks of it, in decibels, or ``None`` where the table states
-        none.
-    :ivar required_area_ratio: The smallest :math:`S_V/S` that meets the
-        :math:`K_2` limit at this absorption coefficient.
+    Table C.1 is the annex's, so its two columns, the area ratio they call for
+    and the verdict are read from the standard asked about and the room, not
+    stored beside them: an answer cannot be built against another limit.
+
+    :ivar base_standard: The standard asked about, one of the keys of
+        :data:`TEST_ENVIRONMENT_REQUIREMENTS`.
     :ivar actual_area_ratio: The :math:`S_V/S` of the room and the measurement
         surface given.
-    :ivar applicable: Whether the room meets the limit.
     :ivar mean_absorption_coefficient: The :math:`\alpha` the answer was read
         at.
     """
 
     base_standard: str
-    environmental_correction_limit_db: float | None
-    background_margin_limit_db: float | None
-    required_area_ratio: float | None
     actual_area_ratio: float
-    applicable: bool
     mean_absorption_coefficient: float
+
+    def __post_init__(self) -> None:
+        """Reject a standard Table C.1 does not list, or an impossible room.
+
+        :raises ValueError: For an unknown standard, a coefficient outside
+            ``(0, 1]`` or a ratio that is not positive.
+        """
+        require_choice(
+            str(self.base_standard),
+            "base_standard",
+            tuple(TEST_ENVIRONMENT_REQUIREMENTS),
+        )
+        alpha = require_positive(
+            self.mean_absorption_coefficient, "mean_absorption_coefficient"
+        )
+        if alpha > 1.0:
+            msg = "'mean_absorption_coefficient' must be in the range (0, 1]."
+            raise ValueError(msg)
+        require_positive(self.actual_area_ratio, "actual_area_ratio")
+
+    @property
+    def environmental_correction_limit_db(self) -> float | None:
+        """The largest :math:`K_2` Table C.1 allows the standard, in decibels.
+
+        :return: The limit, or ``None`` where the standard states none.
+        """
+        return TEST_ENVIRONMENT_REQUIREMENTS[self.base_standard][0]
+
+    @property
+    def background_margin_limit_db(self) -> float | None:
+        """The smallest margin over the background Table C.1 asks, in decibels.
+
+        :return: The margin, or ``None`` where the table states none.
+        """
+        return TEST_ENVIRONMENT_REQUIREMENTS[self.base_standard][1]
+
+    @property
+    def required_area_ratio(self) -> float | None:
+        r"""The smallest :math:`S_V/S` that meets the :math:`K_2` limit.
+
+        :math:`4 / ((10^{K_2/10} - 1)\,\alpha)` at
+        :attr:`mean_absorption_coefficient`.
+
+        :return: The ratio, or ``None`` where the standard states no
+            :math:`K_2` limit.
+        """
+        limit = self.environmental_correction_limit_db
+        if limit is None:
+            return None
+        alpha = float(self.mean_absorption_coefficient)
+        return float(4.0 / ((10.0 ** (limit / 10.0) - 1.0) * alpha))
+
+    @property
+    def applicable(self) -> bool:
+        """Whether the room meets the :math:`K_2` limit of the standard.
+
+        ``True`` for a standard with no :math:`K_2` limit, whose answer turns
+        on the background margin alone, which this check does not see.
+        """
+        required = self.required_area_ratio
+        return required is None or self.actual_area_ratio >= required
 
 
 @dataclass(frozen=True)
@@ -850,20 +904,9 @@ def test_environment_applicability(
     surface = require_positive(
         measurement_surface_area_m2, "measurement_surface_area_m2"
     )
-    limit, margin = TEST_ENVIRONMENT_REQUIREMENTS[name]
-    ratio = room / surface
-    required: float | None = None
-    applicable = True
-    if limit is not None:
-        required = 4.0 / ((10.0 ** (limit / 10.0) - 1.0) * alpha)
-        applicable = ratio >= required
     return TestEnvironmentApplicability(
         base_standard=name,
-        environmental_correction_limit_db=limit,
-        background_margin_limit_db=margin,
-        required_area_ratio=required,
-        actual_area_ratio=ratio,
-        applicable=applicable,
+        actual_area_ratio=room / surface,
         mean_absorption_coefficient=alpha,
     )
 

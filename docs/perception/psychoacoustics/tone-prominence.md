@@ -164,7 +164,10 @@ calibration (the ratios are level differences).
 | `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
 | `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
 
-Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
+Both return a `ToneAssessment(frequency, ratio_db, method)`, where `method`
+says which ratio was taken (`"tone_to_noise_ratio"` or `"prominence_ratio"`);
+`criterion_db` and `prominent` are read from the standard's formula for that
+ratio, so an assessment cannot carry another criterion.
 
 The `prominent` verdict is the numeric criterion only. The standard also
 requires a prominent tone to be confirmed by aural examination (clauses

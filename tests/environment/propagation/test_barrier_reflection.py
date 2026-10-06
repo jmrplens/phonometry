@@ -29,6 +29,7 @@ pin:
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import warnings
 
@@ -906,6 +907,31 @@ class TestPositionChecks:
             ValueError, match="'time_delays_s' must hold nine finite delays"
         ):
             prop.check_reflection_grid_position(np.zeros(8), speed_of_sound=_C)
+
+    def test_the_nominal_values_and_the_tolerance_are_table_3s(self) -> None:
+        """The check holds what was measured and reads Table 3 for the rest.
+
+        BS EN 1793-5:2016 Table 3 (PDF page 43, printed folio 41): a check
+        rewritten with the measured path differences as its own nominal values
+        would pass a grid 100 mm off; it cannot be, since the nominal values
+        and the 25 mm are not fields.
+        """
+        distances = np.array([dk for _, dk in oracle.TABLE_3]) + 0.100
+        check = prop.check_reflection_grid_position(distances / _C, speed_of_sound=_C)
+        names = [f.name for f in dataclasses.fields(check)]
+        assert names == ["check", "path_differences_m"]
+        np.testing.assert_array_equal(check.nominal_m, [dk for _, dk in oracle.TABLE_3])
+        np.testing.assert_allclose(check.deviations_m, 0.100, atol=1e-12)
+        assert not check.passes
+        nominal = dataclasses.replace(
+            check, path_differences_m=[dk for _, dk in oracle.TABLE_3]
+        )
+        assert nominal.passes
+
+    def test_a_check_with_eight_path_differences_is_refused(self) -> None:
+        eight = np.zeros(8)
+        with pytest.raises(ValueError, match="ReflectionGridCheck"):
+            prop.ReflectionGridCheck(check="grid", path_differences_m=eight)
 
 
 def test_the_module_publishes_what_it_says() -> None:

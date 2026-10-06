@@ -514,16 +514,47 @@ def ambient_noise_limits(
     return limits
 
 
+def _table_rows(presentation: str, frequencies: np.ndarray) -> np.ndarray:
+    """The row of the presentation's table each frequency is a band of.
+
+    :param presentation: ``"air"``, ``"bone"`` or ``"sound field"``.
+    :param frequencies: The mid-frequencies, in hertz.
+    :return: One row index per frequency.
+    :raises ValueError: for a frequency the table does not list, or bands
+        that are not distinct and in increasing order.
+    """
+    table = np.asarray(_table_for(presentation)[1], dtype=np.float64)
+    rows: list[int] = []
+    for f in frequencies:
+        matches = np.isclose(table, f, rtol=_FREQUENCY_RTOL, atol=0.0)
+        if not matches.any():
+            msg = (
+                f"{f:g} Hz is not a band of the {presentation!r} table "
+                f"({table[0]:g} Hz to {table[-1]:g} Hz)."
+            )
+            raise ValueError(msg)
+        rows.append(int(np.argmax(matches)))
+    indices = np.array(rows, dtype=np.int64)
+    if np.any(np.diff(indices) <= 0):
+        msg = "'frequencies' must be distinct bands in increasing order."
+        raise ValueError(msg)
+    return indices
+
+
 @dataclass(frozen=True)
 class AmbientNoiseCheck:
     """Whether a test room is quiet enough for the audiometry, band by band.
 
+    The fields hold what was measured and what the standard lets the tester
+    choose: the presentation, the lowest test frequency, the lowest hearing
+    level to be measured, the earphone and the threshold shift accepted. The
+    limits themselves (:attr:`limits_db`) are read from the tables with those
+    choices, so a check cannot be built against another table.
+
     :ivar presentation: ``"air"``, ``"bone"`` or ``"sound field"``.
-    :ivar frequencies: The one-third-octave mid-frequencies judged, in hertz.
+    :ivar frequencies: The one-third-octave mid-frequencies judged, in hertz,
+        each one of :attr:`table_bands_hz`.
     :ivar levels_db: The measured ambient sound pressure level per band, in dB.
-    :ivar limits_db: The maximum permissible level per band, in dB, with every
-        adjustment of :func:`ambient_noise_limits` applied.
-    :ivar table_bands_hz: Every band the table sets a limit for, in hertz.
     :ivar lowest_test_frequency_hz: The lowest test tone frequency, in hertz.
     :ivar lowest_hearing_level_db: The lowest hearing threshold level to be
         measured the limits were raised for, in dB.
@@ -532,6 +563,11 @@ class AmbientNoiseCheck:
     :ivar earphone: For air conduction, the earphone the limits were written
         for: a column of Table 3, or ``"own attenuation"`` for an attenuation
         given band by band; ``None`` for bone conduction and sound field.
+    :ivar earphone_attenuation_db: The earphone's own attenuation per band of
+        :data:`AMBIENT_NOISE_BANDS_HZ`, in dB, when ``earphone`` is
+        ``"own attenuation"``; ``None`` otherwise.
+    :ivar allowed_threshold_shift_db: The threshold shift accepted from the
+        ambient noise, 2 (default) or 5, in dB.
 
     A band the measurement leaves out is a band the room is not shown to meet,
     so :attr:`passes` needs every band of the table.
@@ -540,12 +576,75 @@ class AmbientNoiseCheck:
     presentation: str
     frequencies: np.ndarray
     levels_db: np.ndarray
-    limits_db: np.ndarray
-    table_bands_hz: tuple[float, ...]
     lowest_test_frequency_hz: float
     lowest_hearing_level_db: float
     noise_floor_db: np.ndarray | None = None
     earphone: str | None = None
+    earphone_attenuation_db: np.ndarray | None = None
+    allowed_threshold_shift_db: float = _BASE_THRESHOLD_SHIFT_DB
+
+    def __post_init__(self) -> None:
+        """Reject a check whose bands or choices the tables cannot be read for.
+
+        :raises ValueError: for the reasons :func:`ambient_noise_limits` gives,
+            an earphone named where the presentation takes none or an own
+            attenuation without the ``"own attenuation"`` name, a frequency
+            the table does not list or listed out of order, or levels that do
+            not match the bands.
+        """
+        own = self.earphone_attenuation_db is not None
+        if (self.presentation == "air") != (self.earphone is not None) or own != (
+            self.earphone == "own attenuation"
+        ):
+            msg = (
+                "AmbientNoiseCheck: 'earphone' names a column of Table 3, or "
+                "'own attenuation' with 'earphone_attenuation_db', for air "
+                "conduction only."
+            )
+            raise ValueError(msg)
+        rows = self._rows
+        if np.asarray(self.levels_db).shape != rows.shape:
+            msg = "AmbientNoiseCheck: 'levels_db' must hold one level per band."
+            raise ValueError(msg)
+        floor = self.noise_floor_db
+        if floor is not None and np.asarray(floor).shape != rows.shape:
+            msg = "AmbientNoiseCheck: 'noise_floor_db' must hold one level per band."
+            raise ValueError(msg)
+        if self.limits_db.shape != rows.shape:  # reading them validates the choices
+            msg = "AmbientNoiseCheck: the tables give no limit for these bands."
+            raise ValueError(msg)
+
+    @property
+    def table_bands_hz(self) -> tuple[float, ...]:
+        """Every band the table sets a limit for, in hertz."""
+        return tuple(float(b) for b in _table_for(self.presentation)[1])
+
+    @property
+    def _rows(self) -> np.ndarray:
+        return _table_rows(
+            self.presentation, np.atleast_1d(np.asarray(self.frequencies, np.float64))
+        )
+
+    @property
+    def limits_db(self) -> np.ndarray:
+        """The maximum permissible level per band, in dB.
+
+        :return: :func:`ambient_noise_limits` of the presentation and the
+            tester's choices, at :attr:`frequencies`.
+        """
+        own = self.earphone_attenuation_db
+        column = (
+            "supra-aural" if self.earphone is None or own is not None else self.earphone
+        )
+        limits = ambient_noise_limits(
+            self.presentation,
+            lowest_test_frequency_hz=self.lowest_test_frequency_hz,
+            earphone=column,
+            earphone_attenuation_db=own,
+            lowest_hearing_level_db=self.lowest_hearing_level_db,
+            allowed_threshold_shift_db=self.allowed_threshold_shift_db,
+        )
+        return np.asarray(limits[self._rows], dtype=np.float64)
 
     @property
     def exceedance_db(self) -> np.ndarray:
@@ -682,7 +781,8 @@ def check_audiometric_ambient_noise(
         bands.
     """
     _table, bands = _table_for(presentation)
-    limits = ambient_noise_limits(
+    # Validates the tester's choices against the tables before anything else.
+    ambient_noise_limits(
         presentation,
         lowest_test_frequency_hz=lowest_test_frequency_hz,
         earphone=earphone,
@@ -691,26 +791,11 @@ def check_audiometric_ambient_noise(
         allowed_threshold_shift_db=allowed_threshold_shift_db,
     )
     table = np.asarray(bands, dtype=np.float64)
-    if frequencies is None:
-        freqs = table.copy()
-        rows = np.arange(table.size)
-    else:
-        freqs = _levels(frequencies, "frequencies")
-        rows_list: list[int] = []
-        for f in freqs:
-            matches = np.isclose(table, f, rtol=_FREQUENCY_RTOL, atol=0.0)
-            if not matches.any():
-                msg = (
-                    f"{f:g} Hz is not a band of the {presentation!r} table "
-                    f"({table[0]:g} Hz to {table[-1]:g} Hz)."
-                )
-                raise ValueError(msg)
-            rows_list.append(int(np.argmax(matches)))
-        rows = np.array(rows_list)
-        if np.any(np.diff(rows) <= 0):
-            msg = "'frequencies' must be distinct bands in increasing order."
-            raise ValueError(msg)
-        freqs = table[rows]
+    freqs = (
+        table.copy()
+        if frequencies is None
+        else table[_table_rows(presentation, _levels(frequencies, "frequencies"))]
+    )
     levels = _levels(levels_db, "levels_db")
     if levels.size != freqs.size:
         msg = f"'levels_db' must hold one level per band; got {levels.size} for {freqs.size}."
@@ -728,12 +813,16 @@ def check_audiometric_ambient_noise(
         presentation=presentation,
         frequencies=freqs,
         levels_db=levels,
-        limits_db=limits[rows],
-        table_bands_hz=tuple(float(b) for b in bands),
         lowest_test_frequency_hz=float(lowest_test_frequency_hz),
         lowest_hearing_level_db=float(lowest_hearing_level_db),
         noise_floor_db=floor,
         earphone=_earphone_name(presentation, earphone, earphone_attenuation_db),
+        earphone_attenuation_db=(
+            None
+            if presentation != "air" or earphone_attenuation_db is None
+            else _levels(earphone_attenuation_db, "earphone_attenuation_db").copy()
+        ),
+        allowed_threshold_shift_db=float(allowed_threshold_shift_db),
     )
 
 

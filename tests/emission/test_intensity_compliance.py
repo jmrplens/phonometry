@@ -489,9 +489,7 @@ def test_a_verdict_whose_device_is_not_a_table_2_column_is_refused() -> None:
         dataclasses.replace(result, device="microphone")
 
 
-@pytest.mark.parametrize(
-    "field_name", ["frequencies", "residual_index", "limit_class1", "limit_class2"]
-)
+@pytest.mark.parametrize("field_name", ["frequencies", "residual_index"])
 def test_a_non_finite_band_of_the_verdict_is_refused(field_name: str) -> None:
     """A NaN band prints as ``nan`` under a boxed verdict that still complies.
 
@@ -590,8 +588,6 @@ def test_a_verdict_refuses_a_class_attested_over_no_bands() -> None:
             bands=(),
             frequencies=empty,
             residual_index=empty,
-            limit_class1=empty,
-            limit_class2=empty,
         )
 
 
@@ -636,3 +632,81 @@ def test_a_narrow_numpy_nan_per_band_value_is_refused() -> None:
     bands[1]["margin_class1_db"] = np.float32("nan")
     with pytest.raises(ValueError, match=r"'bands' must carry finite per-band"):
         dataclasses.replace(result, bands=bands)
+
+
+def test_the_table_2_masks_are_read_from_the_device_and_separation() -> None:
+    """The minima are the standard's: no constructor field can move them."""
+    import dataclasses
+
+    frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
+    result = emission.verify_intensity_class(
+        np.full(frequencies.size, 20.0), frequencies, device="processor", spacing=0.05
+    )
+    names = {field.name for field in dataclasses.fields(result)}
+    assert not names & {"limit_class1", "limit_class2", "spacing_offset_db"}
+    # EN 61043:1994 Table 2 (BS EN 61043:1994, PDF page 13, printed folio 9):
+    # the processor needs 26 dB for class 1 and 20 dB for class 2 at 25 mm
+    # from 250 Hz to 2 000 Hz, and Note 1 adds 10 lg(50/25) at 50 mm.
+    offset = 10.0 * math.log10(2.0)
+    np.testing.assert_allclose(result.limit_class1, 26.0 + offset, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(result.limit_class2, 20.0 + offset, rtol=0, atol=1e-12)
+    assert result.spacing_offset_db == pytest.approx(offset)
+
+
+def test_a_band_row_against_another_minimum_is_refused() -> None:
+    """A row that carries a looser mask than Table 2 is not this verdict."""
+    import copy
+    import dataclasses
+
+    frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
+    result = emission.verify_intensity_class(
+        np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
+    )
+    bands = tuple(copy.deepcopy(band) for band in result.bands)
+    bands[2]["limit_class1_db"] -= 3.0
+    with pytest.raises(ValueError, match=r"'bands' must restate IEC 61043 Table 2"):
+        dataclasses.replace(result, bands=bands)
+
+
+def _quiet_processor() -> emission.IntensityInstrumentComplianceResult:
+    """A processor whose 3 dB index meets neither class at 25 mm."""
+    frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
+    return emission.verify_intensity_class(
+        np.full(frequencies.size, 3.0), frequencies, device="processor", spacing=0.025
+    )
+
+
+def test_a_band_class_its_index_does_not_reach_is_refused() -> None:
+    """A 3 dB index cannot be relabelled class 1 against a 26 dB minimum."""
+    import copy
+    import dataclasses
+
+    result = _quiet_processor()
+    assert result.overall_class is None
+    relabel = {"class": 1, "margin_class1_db": 5.0, "margin_class2_db": 11.0}
+    bands = tuple({**copy.deepcopy(band), **relabel} for band in result.bands)
+    with pytest.raises(ValueError, match=r"'bands' must restate IEC 61043 Table 2"):
+        dataclasses.replace(result, bands=bands, overall_class=1)
+
+
+def test_a_band_class_alone_relabelled_is_refused() -> None:
+    """The margins may stay true; the class has to be the one they give."""
+    import copy
+    import dataclasses
+
+    result = _quiet_processor()
+    bands = tuple({**copy.deepcopy(band), "class": 1} for band in result.bands)
+    with pytest.raises(
+        ValueError, match=r"'bands' must carry the class its margins give"
+    ):
+        dataclasses.replace(result, bands=bands, overall_class=1)
+
+
+def test_a_residual_index_the_rows_do_not_carry_is_refused() -> None:
+    """The measured spectrum and the band rows have to be the same readings."""
+    import dataclasses
+
+    result = _quiet_processor()
+    raised = np.full(result.frequencies.size, 40.0)
+    with pytest.raises(ValueError, match=r"residual_index_db=3\.0, expected 40\.0"):
+        dataclasses.replace(result, residual_index=raised)

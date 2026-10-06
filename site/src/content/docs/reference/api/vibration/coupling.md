@@ -202,27 +202,53 @@ MASS_LOADING_RATIO_LIMIT = 0.01
 
 ```python
 MountingCheck(
-    acceptable: bool,
-    frequency_limit_hz: float,
-    peak_acceleration_limit_m_s2: float,
+    peak_acceleration_m_s2: float,
+    upper_frequency_hz: float,
     direction: str,
     surface: str,
-    device: str,
 )
 ```
 
 Whether a transducer may be set down without fastening (5.3.2, 5.3.3).
 
+Only what is asked about is a field: the peak acceleration, the highest
+frequency, the direction and the surface. The limits of 5.3.2.1, what
+the transducer stands on and the verdict are read from them, so a check
+cannot be built against other limits.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `acceptable` | `True` when both the peak acceleration and the highest frequency of interest are within what a loose mounting carries. |
-| `frequency_limit_hz` | The frequency the direction allows a loose mounting up to, in hertz. |
-| `peak_acceleration_limit_m_s2` | The 3 m/s² of 5.3.2.1. |
+| `peak_acceleration_m_s2` | The largest peak acceleration expected in any direction, in metres per second squared. |
+| `upper_frequency_hz` | The highest frequency the measurement has to carry, in hertz. |
 | `direction` | `"vertical"` or `"horizontal"`. |
 | `surface` | `"hard"` or `"soft"`. |
-| `device` | What the transducer has to stand on for the verdict to hold. |
+
+### MountingCheck.acceptable
+
+*property*
+
+`True` when both the peak acceleration and the highest frequency
+of interest are within what a loose mounting carries.
+
+### MountingCheck.device
+
+*property*
+
+What the transducer has to stand on for the verdict to hold.
+
+### MountingCheck.frequency_limit_hz
+
+*property*
+
+The frequency the direction allows a loose mounting up to, in hertz.
+
+### MountingCheck.peak_acceleration_limit_m_s2
+
+*property*
+
+The 3 m/s² of 5.3.2.1.
 
 ## SPIKED_DEVICE_MASS_KG
 

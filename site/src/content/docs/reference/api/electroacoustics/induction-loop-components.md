@@ -1013,7 +1013,6 @@ NeckLoopVerification(
     neck_loop_type: int,
     dc_resistance_ohm: float,
     input_voltage_v: float,
-    limits: NeckLoopType,
 )
 ```
 
@@ -1026,7 +1025,16 @@ A neck loop judged against one type of the draft Annex D (prA2:2017).
 | `neck_loop_type` | The type it was judged as, 1 or 2. |
 | `dc_resistance_ohm` | The measured DC input resistance, in ohms. |
 | `input_voltage_v` | The input voltage that produces 400 mA/m on the jig, in volts. |
-| `limits` | The [`NeckLoopType`](/phonometry/reference/api/electroacoustics/induction-loop-components/#necklooptype) judged against. |
+
+The limits of the type (`limits`) are read from
+[`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types), so a verification cannot be built against other
+limits.
+
+### NeckLoopVerification.limits
+
+*property*
+
+The [`NeckLoopType`](/phonometry/reference/api/electroacoustics/induction-loop-components/#necklooptype) judged against.
 
 ### NeckLoopVerification.passes
 

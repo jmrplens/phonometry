@@ -631,6 +631,96 @@ print(octave.overall_class, octave.requirement_class("relative_attenuation"))
 # 1 1
 ```
 
+## A verdict reads its printed limit from the standard
+
+A verdict used to carry the limit it was judged against as a constructor
+field. In 3.3.0 three did: `ToneAssessment.criterion_db`,
+`ExposureAssessment.action_value` and `limit_value`, and
+`RigidMassCalibrationResult.tolerance`. Six more that are newer than 3.3.0
+did in 4.0.0rc1, and the rest of the table arrived after 4.0.0rc1. Anything
+that built one by hand, or rewrote one with `dataclasses.replace`, could
+judge a measurement against any number and still print the standard's name
+over the result. In 4.0 every limit a standard prints is a read-only
+property, read from the fields that select it: the bands, the condition, the
+source, the class, the room. A verdict that was stored beside its limit is
+read from the measured fields too, or checked against them when the result
+is built, so it cannot contradict the limit. The functions that return these
+verdicts take the same arguments and give the same answers, and every name
+below still reads the same value; only code that constructs a verdict
+directly, or replaces one of these fields, has to change. The last column
+says where each verdict first shipped.
+
+| Verdict | No longer constructor fields | Fields it keeps or gains | Since |
+| --- | --- | --- | --- |
+| `building.PositionSpreadCheck` | `limit_db`, `stage`, `spread_db`, `action`, `next_positions`, `corner_standard_deviation_db` | `levels_db`, which all of them are read from | after 4.0.0rc1 |
+| `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
+| `noise_control.BandFlatnessCheck` | `limit_db`, `satisfied` | `octave_centres_hz`, `spread_db` | after 4.0.0rc1 |
+| `noise_control.SourcePositionCheck` | `required_positions`, `satisfied`, `exceeds_maximum` | `positions_used`, `max_octave_spread_db` | after 4.0.0rc1 |
+| `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | after 4.0.0rc1 |
+| `environment.ReflectionGridCheck` | `nominal_m`, `deviations_m`, `within` | `check`, `path_differences_m` | after 4.0.0rc1 |
+| `emission.HardWalledRoomCheck` | `limit_db`, `minimum_volume_m3`, `box_dimension_limit_m`, `minimum_microphone_distance_m` | the bands, the room and the box | after 4.0.0rc1 |
+| `emission.ReferenceSoundSourceVerdict` | every `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | the bands, the levels and the measured figures | after 4.0.0rc1 |
+| `emission.ReferenceSourceDriftResult`, `emission.SpecialRoomSuitabilityCheck` | `limit_db` | the bands | after 4.0.0rc1 |
+| `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | the bands | after 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing`; a band row must restate the Table 2 minima, its index, its margins and its class | 4.0.0rc1 |
+| `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | `room` selects it; the qualified radii must be the ones the levels reach | after 4.0.0rc1 |
+| `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gains `earphone_attenuation_db` and `allowed_threshold_shift_db` | after 4.0.0rc1 |
+| `hearing.FixtureIsolationCheck` | `required_db` | the bands | after 4.0.0rc1 |
+| `hearing.ReatSoundFieldCheck` | `allowable_variation_db` | gains `free_field_rejection_db` | after 4.0.0rc1 |
+| `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gains `front_to_random_index_db` | after 4.0.0rc1 |
+| `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference_db` | `field` and `loudspeaker_distance_m` select them | after 4.0.0rc1 |
+| `electroacoustics.ProgrammeSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies_hz`, `band_levels_db` | after 4.0.0rc1 |
+| `electroacoustics.NeckLoopVerification` | `limits` | `neck_loop_type` selects it | after 4.0.0rc1 |
+| `psychoacoustics.ToneAssessment` | `criterion_db`, `prominent` | gains `method`, `"tone_to_noise_ratio"` or `"prominence_ratio"` | 3.3.0 |
+| `underwater.WeightedExposureResult` | `criteria` | gains `impulsive` | 4.0.0rc1 |
+| `vibration.ExposureAssessment` | `action_value`, `limit_value`, `exceeds_action`, `exceeds_limit`, `zone` | `value`, `kind`, `metric` | 3.3.0 |
+| `vibration.PhaseVerification`, `vibration.WeightingVerification` | `tolerance_deg` (phase), `within_tolerance` | the weighting and the frequencies | 4.0.0rc1 |
+| `vibration.RunningRmsDecayVerification` | `printed_time_s`, `tolerance_s` | `method`, `integration_time_s`, `measured_time_s` | after 4.0.0rc1 |
+| `vibration.SignalBurstVerification` | `printed`, `deviation_percent`, `tolerance_percent`, `within_tolerance` | the table row, the columns and `measured` | 4.0.0rc1 |
+| `vibration.VibrationMeterVerification` | `lower_percent`, `upper_percent`, `within_tolerance` | gains `measured_response` | after 4.0.0rc1 |
+| `vibration.AssessmentVelocity` | `guide_value_mm_s` | `building_class` selects it | after 4.0.0rc1 |
+| `vibration.MountingCheck` | `acceptable`, `frequency_limit_hz`, `peak_acceleration_limit_m_s2`, `device` | gains `peak_acceleration_m_s2` and `upper_frequency_hz` | after 4.0.0rc1 |
+| `vibration.DamageAssessment` | `guideline_mm_s` | gains `massive_structure`, by name only | 4.0.0rc1 |
+| `vibration.RigidMassCalibrationResult` | `expected`, `deviation`, `within_tolerance`, `passes`, `tolerance` | `frequencies`, `measured`, `mass`, `quantity` | 3.3.0 |
+| `vibration.LevelDifferenceCheck` | `limit_db` | `condition` selects it | after 4.0.0rc1 |
+| `vibration.OutputMassCheck` | `mass_limit_kg` | gains `output_apparent_mass_kg`, the measured output force over output acceleration | after 4.0.0rc1 |
+
+Two calls change too. `rigid_mass_calibration_check` no longer takes
+`tolerance`: ISO 7626-2:2015 7.5.2 says the block "shall agree within ±5 %",
+so a tighter in-house acceptance is read from `.deviation` instead. And
+`HeavyImpactSourceCheck` and `RigidMassCalibrationResult`, whose `passes` was a
+stored field, refuse to be read as a truth value like every other verdict, so
+`if check:` raises `TypeError` and the verdict is `.passes`.
+
+```python
+import dataclasses
+
+from phonometry import vibration
+
+check = vibration.check_blocked_output([100.0, 200.0], [90.0, 95.0], [60.0, 70.0])
+print(check.limit_db, check.passes)
+# 20.0 True
+try:
+    dataclasses.replace(check, limit_db=10.0)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+calibration = vibration.rigid_mass_calibration_check([0.104, 0.093], [50.0, 500.0], 10.0)
+print(calibration.tolerance, calibration.within_tolerance.tolist())
+# 0.05 [True, False]
+```
+
+The limits a standard leaves to the user stay fields: the "default" roughness
+and decay-rate limits of ISO 3095, the tolerance ISO/DIS 16032 7.6 does not
+print for "approximately 30 s", the curing period a product specification
+sets under ISO 10140-1 G.4, the threshold shift ISO 8253-1 lets the tester
+accept, and the specification limits, test-case limits and limit rows the
+caller passes to the conformance, ISO 17534-1 and RD 1367/2007 checks. The
+requirement records of ISO 8297 and IEC 60118-4, `PlantRequirement` and
+`LoopRequirement`, also keep each row's limit as a field: one record type
+holds requirements whose limits mix printed figures with the plant's geometry,
+the specified field strength or the noise measured with the loop off.
+
 ## The ten names that are gone
 
 Everything else moved. These ten exist in no public module:

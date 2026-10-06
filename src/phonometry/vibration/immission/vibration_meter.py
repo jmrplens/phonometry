@@ -435,24 +435,73 @@ class VibrationMeterVerification:
     :ivar deviation_percent: ``F(f)`` of Formula (7) at each of them: the
         measured response over the design response, both normalised at the
         reference frequency, as a percentage departure from unity.
-    :ivar lower_percent: The Table 2 limit at each frequency.
-    :ivar upper_percent: The Table 3 limit at each frequency.
-    :ivar within_tolerance: Whether each frequency keeps to both limits.
+    :ivar measured_response: The measured amplitude response at each of them,
+        as supplied, which footnote a of Table 3 reads.
     :ivar weighting: ``"kb"`` or ``"unweighted"``, which design response the
         deviation is against.
     :ivar working_range: The working range the limits were read for.
     :ivar reference_frequency_hz: The frequency both responses were
         normalised at.
+
+    The Table 2 and Table 3 limits (:attr:`lower_percent`,
+    :attr:`upper_percent`) and the verdict are read from the frequencies, the
+    working range and the measured response, so a verification cannot be
+    built against other limits.
     """
 
     frequencies_hz: NDArray[np.float64]
     deviation_percent: NDArray[np.float64]
-    lower_percent: NDArray[np.float64]
-    upper_percent: NDArray[np.float64]
-    within_tolerance: NDArray[np.bool_]
+    measured_response: NDArray[np.float64]
     weighting: str
     working_range: str
     reference_frequency_hz: float
+
+    def __post_init__(self) -> None:
+        """Reject a range or a weighting the standard does not define.
+
+        :raises ValueError: for an unknown working range or weighting, a
+            frequency that is not positive, or columns of different lengths.
+        """
+        require_choice(str(self.weighting), "weighting", _WEIGHTINGS)
+        response_tolerance_percent(
+            self.frequencies_hz, working_range=self.working_range
+        )
+        shape = np.shape(self.frequencies_hz)
+        if np.shape(self.deviation_percent) != shape or (
+            np.shape(self.measured_response) != shape
+        ):
+            msg = (
+                "VibrationMeterVerification: 'deviation_percent' and "
+                "'measured_response' must hold one value per frequency."
+            )
+            raise ValueError(msg)
+
+    @property
+    def lower_percent(self) -> NDArray[np.float64]:
+        """The Table 2 limit at each frequency, in per cent."""
+        return response_tolerance_percent(
+            self.frequencies_hz, working_range=self.working_range
+        )[0]
+
+    @property
+    def upper_percent(self) -> NDArray[np.float64]:
+        """The Table 3 limit at each frequency, in per cent.
+
+        Infinite where the measured response is at or below 0,01, which
+        footnote a of Table 3 leaves unconstrained from above.
+        """
+        upper = response_tolerance_percent(
+            self.frequencies_hz, working_range=self.working_range
+        )[1]
+        measured = np.asarray(self.measured_response, dtype=np.float64)
+        return np.where(measured > _UPPER_TOLERANCE_FLOOR, upper, math.inf)
+
+    @property
+    def within_tolerance(self) -> NDArray[np.bool_]:
+        """Whether each frequency keeps to both limits."""
+        deviation = np.asarray(self.deviation_percent, dtype=np.float64)
+        within = (deviation >= -self.lower_percent) & (deviation <= self.upper_percent)
+        return np.asarray(within, dtype=np.bool_)
 
     @property
     def passes(self) -> bool:
@@ -545,15 +594,10 @@ def verify_vibration_meter(
         float(design[at_reference][0]) / float(measured[at_reference][0])
     )
     deviation = (ratio - 1.0) * 100.0
-    lower, upper = response_tolerance_percent(f[graded], working_range=working_range)
-    upper = np.where(measured[graded] > _UPPER_TOLERANCE_FLOOR, upper, math.inf)
-    within = (deviation >= -lower) & (deviation <= upper)
     return VibrationMeterVerification(
         frequencies_hz=f[graded],
         deviation_percent=deviation,
-        lower_percent=lower,
-        upper_percent=upper,
-        within_tolerance=within,
+        measured_response=measured[graded],
         weighting=which,
         working_range=str(working_range),
         reference_frequency_hz=reference_hz,
@@ -942,17 +986,34 @@ class AssessmentVelocity:
 
     :ivar assessment_velocity_mm_s: :math:`|v_{Bn}|_\mathrm{max}`, the peak
         of the weighted velocity, in millimetres per second.
-    :ivar guide_value_mm_s: The Table E.2 value it is compared with.
     :ivar building_class: The row of DIN 4150-3 Table 1 that was used.
     :ivar velocity_mm_s: The weighted velocity itself, one value per sample.
     :ivar fs_hz: The sampling frequency the record was read at.
+
+    The Table E.2 value (:attr:`guide_value_mm_s`) is read from the building
+    class, so a record cannot be judged against another value.
     """
 
     assessment_velocity_mm_s: float
-    guide_value_mm_s: float
     building_class: str
     velocity_mm_s: NDArray[np.float64]
     fs_hz: float
+
+    def __post_init__(self) -> None:
+        """Reject a building class Table E.2 does not list.
+
+        :raises ValueError: For an unknown class.
+        """
+        require_choice(
+            str(self.building_class),
+            "building_class",
+            tuple(ASSESSMENT_GUIDE_VALUES_MM_S),
+        )
+
+    @property
+    def guide_value_mm_s(self) -> float:
+        """The Table E.2 value the peak is compared with, in mm/s."""
+        return ASSESSMENT_GUIDE_VALUES_MM_S[self.building_class]
 
     @property
     def ratio(self) -> float:
@@ -1015,7 +1076,6 @@ def assess_short_term_vibration(
     )
     return AssessmentVelocity(
         assessment_velocity_mm_s=float(np.max(np.abs(weighted))),
-        guide_value_mm_s=ASSESSMENT_GUIDE_VALUES_MM_S[name],
         building_class=name,
         velocity_mm_s=weighted,
         fs_hz=float(fs_hz),

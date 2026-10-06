@@ -283,7 +283,6 @@ WeightedExposureResult(
     cumulative_sel: float,
     peak_spl: float | None,
     n_events: int,
-    criteria: ExposureCriteria,
     sel_margin: float | None,
     tts_margin: float | None,
     peak_margin: float | None,
@@ -293,6 +292,7 @@ WeightedExposureResult(
     exceeds_tts: bool,
     guidance: str,
     group: str,
+    impulsive: bool,
 )
 ```
 
@@ -311,7 +311,6 @@ Weighted exposure of a spectrum against a hearing group's criteria.
 | `cumulative_sel` | `weighted_sel` plus $10 \log_{10}(N)$ for the `n_events` accumulated events, in dB. |
 | `peak_spl` | The unweighted peak sound pressure level supplied, in dB (`None` when not given). |
 | `n_events` | Number of accumulated events (e.g. hammer strikes). |
-| `criteria` | The [`ExposureCriteria`](/phonometry/reference/api/underwater/weighting/#exposurecriteria) compared against. |
 | `sel_margin` | `cumulative_sel - injury_sel`, in dB (`None` when the criterion is not published); positive means the criterion is exceeded. |
 | `tts_margin` | `cumulative_sel - tts_sel`, in dB (or `None`). |
 | `peak_margin` | `peak_spl - injury_peak_spl`, in dB (or `None`). |
@@ -320,6 +319,19 @@ Weighted exposure of a spectrum against a hearing group's criteria.
 | `exceeds_tts` | Whether any TTS-onset criterion is reached, on the same `margin >= 0` convention as `exceeds_injury`. |
 | `guidance` | The guidance version. |
 | `group` | Hearing-group code. |
+| `impulsive` | Whether the impulsive criteria were compared against. |
+
+The published criteria (`criteria`) are read from the guidance, the
+group and `impulsive`, so an assessment cannot be built against other
+criteria.
+
+### WeightedExposureResult.criteria
+
+*property*
+
+The [`ExposureCriteria`](/phonometry/reference/api/underwater/weighting/#exposurecriteria) compared against.
+
+**Returns:** [`exposure_criteria`](/phonometry/reference/api/underwater/weighting/#exposure_criteria) of `group` under `guidance`, impulsive or not.
 
 ### WeightedExposureResult.plot()
 

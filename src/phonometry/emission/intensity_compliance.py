@@ -390,15 +390,8 @@ def verify_intensity_class(
         residual_index=np.asarray(
             [b["residual_index_db"] for b in bands], dtype=np.float64
         ),
-        limit_class1=np.asarray(
-            [b["limit_class1_db"] for b in bands], dtype=np.float64
-        ),
-        limit_class2=np.asarray(
-            [b["limit_class2_db"] for b in bands], dtype=np.float64
-        ),
         device=device,
         spacing=float(spacing),
-        spacing_offset_db=_spacing_offset(spacing),
         range_limited=range_limited,
     )
 
@@ -417,13 +410,8 @@ class IntensityInstrumentComplianceResult:
     :ivar bands: The per-band verdicts, as an immutable tuple.
     :ivar frequencies: Nominal band centre frequencies, in Hz.
     :ivar residual_index: Measured ``delta_pI0`` per band, in dB.
-    :ivar limit_class1: Class 1 minimum ``delta_pI0`` per band, in dB, already
-        rescaled to ``spacing``.
-    :ivar limit_class2: Class 2 minimum per band, in dB, likewise rescaled.
     :ivar device: ``"probe"``, ``"processor"`` or ``"instrument"``.
     :ivar spacing: Microphone separation the verdict applies to, in metres.
-    :ivar spacing_offset_db: The Table 2 Note 1 term :math:`10 \log_{10}(x/25)`
-        added to the printed 25 mm figures, in dB.
     :ivar range_limited: ``True`` when the verified bands cover neither the 22
         one-third-octave bands nor the 7 octave bands of clause 6.1, so the
         stated class attests only the bands supplied.
@@ -433,11 +421,8 @@ class IntensityInstrumentComplianceResult:
     bands: tuple[dict[str, Any], ...]
     frequencies: np.ndarray
     residual_index: np.ndarray
-    limit_class1: np.ndarray
-    limit_class2: np.ndarray
     device: str
     spacing: float
-    spacing_offset_db: float
     _: KW_ONLY
     range_limited: bool = False
 
@@ -454,8 +439,16 @@ class IntensityInstrumentComplianceResult:
         ``KeyError`` from one, a silently wrong "complete instrument" label
         from the other.
 
-        The masks, the measured spectrum, the separation figures and the
-        numeric per-band verdict values are pinned finite.
+        The two Table 2 masks are not fields: they are read from the device,
+        the separation and the bands (:attr:`limit_class1`,
+        :attr:`limit_class2`). Every band row has to carry those masks, the
+        measured index of its band, the margins that index leaves to them and
+        the class those margins give, so a verdict cannot be built, or
+        rewritten with :func:`dataclasses.replace`, against another minimum or
+        with a class its index does not reach.
+
+        The measured spectrum, the separation and the numeric per-band
+        verdict values are pinned finite.
         :func:`verify_intensity_class` validates its inputs finite and every
         derived figure with them, so no producer emits a NaN here; one
         smuggled in through :func:`dataclasses.replace` either dies inside
@@ -466,33 +459,22 @@ class IntensityInstrumentComplianceResult:
         scalar such as ``np.float32("nan")`` would otherwise pass unread.
 
         :raises ValueError: if the per-band entries disagree, the device tag
-            is not a Table 2 column group, or any numeric field is not
-            finite.
+            is not a Table 2 column group, any numeric field is not finite, a
+            band is not tabulated, or a band row carries another minimum than
+            Table 2 rescaled to the separation, another index than
+            :attr:`residual_index`, or a margin or a class that index does not
+            give.
         """
         _check_device(self.device)
-        require_ranks(
-            self,
-            frequencies=1,
-            residual_index=1,
-            limit_class1=1,
-            limit_class2=1,
-        )
-        require_same_length(
-            self,
-            "bands",
-            "frequencies",
-            "residual_index",
-            "limit_class1",
-            "limit_class2",
-        )
-        for name in ("frequencies", "residual_index", "limit_class1", "limit_class2"):
+        require_ranks(self, frequencies=1, residual_index=1)
+        require_same_length(self, "bands", "frequencies", "residual_index")
+        for name in ("frequencies", "residual_index"):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"'{name}' must be finite."
                 raise ValueError(msg)
-        for name in ("spacing", "spacing_offset_db"):
-            if not math.isfinite(getattr(self, name)):
-                msg = f"'{name}' must be finite."
-                raise ValueError(msg)
+        if not math.isfinite(self.spacing):
+            msg = "'spacing' must be finite."
+            raise ValueError(msg)
         for band in self.bands:
             for key, value in band.items():
                 if isinstance(value, (float, np.floating)) and not math.isfinite(value):
@@ -502,7 +484,76 @@ class IntensityInstrumentComplianceResult:
                         f"{key}={value!r}."
                     )
                     raise ValueError(msg)
+        self._require_band_rows()
         require_summary_class(self, self.bands, self.overall_class, (1, 2))
+
+    def _require_band_rows(self) -> None:
+        """Refuse a band row that does not restate Table 2 and the index.
+
+        Each row is rebuilt from :attr:`frequencies`, :attr:`residual_index`
+        and the masks, exactly as :func:`verify_intensity_class` builds it,
+        and has to match: the band, the index, both minima, both margins and
+        the class.
+
+        :raises ValueError: if a row's band, index, minimum, margin or class
+            differs from the one rebuilt for it.
+        """
+        expected = _band_verdicts(
+            self.frequencies, self.residual_index, self.limit_class1, self.limit_class2
+        )
+        numeric = (
+            "freq",
+            "residual_index_db",
+            "limit_class1_db",
+            "limit_class2_db",
+            "margin_class1_db",
+            "margin_class2_db",
+        )
+        for band, rebuilt in zip(self.bands, expected, strict=True):
+            for key in numeric:
+                carried = float(band.get(key, math.nan))
+                if not math.isclose(carried, rebuilt[key], abs_tol=1e-9):
+                    msg = (
+                        "'bands' must restate IEC 61043 Table 2 at this "
+                        f"separation and the measured index; the {rebuilt['freq']:g} "
+                        f"Hz entry has {key}={carried!r}, expected {rebuilt[key]!r}."
+                    )
+                    raise ValueError(msg)
+            if band.get("class") != rebuilt["class"]:
+                msg = (
+                    f"'bands' must carry the class its margins give; the "
+                    f"{rebuilt['freq']:g} Hz entry has class={band.get('class')!r}, "
+                    f"its index reaches {rebuilt['class']!r}."
+                )
+                raise ValueError(msg)
+
+    @property
+    def limit_class1(self) -> np.ndarray:
+        """Class 1 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing``.
+
+        :return: Table 2 for :attr:`device`, plus :attr:`spacing_offset_db`.
+        """
+        return residual_index_limits(
+            self.device, spacing=self.spacing, frequencies=self.frequencies
+        )[1]
+
+    @property
+    def limit_class2(self) -> np.ndarray:
+        """Class 2 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing``.
+
+        :return: Table 2 for :attr:`device`, plus :attr:`spacing_offset_db`.
+        """
+        return residual_index_limits(
+            self.device, spacing=self.spacing, frequencies=self.frequencies
+        )[2]
+
+    @property
+    def spacing_offset_db(self) -> float:
+        r"""The Table 2 Note 1 term :math:`10 \log_{10}(x/25)`, in dB.
+
+        :return: What the separation adds to the printed 25 mm figures.
+        """
+        return _spacing_offset(self.spacing)
 
     def reference_class(self) -> int:
         """The class whose mask the fiche and the plot read margins against.

@@ -674,26 +674,38 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ## ReflectionGridCheck
 
 ```python
-ReflectionGridCheck(
-    check: str,
-    path_differences_m: NDArray[np.float64],
-    nominal_m: NDArray[np.float64],
-    deviations_m: NDArray[np.float64],
-    within: NDArray[np.bool_],
-)
+ReflectionGridCheck(check: str, path_differences_m: NDArray[np.float64])
 ```
 
 The position check of 5.6.2.5 or 5.6.2.6, against Table 3.
+
+The nominal path differences and the tolerance are Table 3's, so they are
+read from the check and are not fields: a check cannot be built, or
+rewritten with `dataclasses.replace`, against other nominal values
+or another tolerance.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `check` | `"relative"` (5.6.2.5, the loudspeaker against the grid, $\Delta d_{k5}$) or `"grid"` (5.6.2.6, the grid against the reference plane, $\Delta d_k$). |
-| `path_differences_m` | $c\,\Delta t$, Formula (10) or (11), per microphone; microphone 5 does not take part in the relative check. |
-| `nominal_m` | The nominal values of Table 3. |
-| `deviations_m` | Measured minus nominal. |
-| `within` | Per microphone, whether the deviation is within $\pm\varepsilon_k$ = 25 mm; `True` for microphone 5 in the relative check. |
+| `path_differences_m` | $c\,\Delta t$, Formula (10) or (11), per microphone, microphone 1 first, in metres; microphone 5 does not take part in the relative check. |
+
+### ReflectionGridCheck.deviations_m
+
+*property*
+
+Measured minus nominal, in metres.
+
+**Returns:** One deviation per microphone; zero for microphone 5 in the relative check, which does not take part in it.
+
+### ReflectionGridCheck.nominal_m
+
+*property*
+
+The nominal values of Table 3 for this check, in metres.
+
+**Returns:** $\Delta d_{k5}$ for the relative check, $\Delta d_k$ for the grid check, microphone 1 first.
 
 ### ReflectionGridCheck.passes
 
@@ -727,6 +739,14 @@ Requires matplotlib (`pip install phonometry[plot]`).
 | `kwargs` | Forwarded to the deviation `Axes.plot` call. |
 
 **Returns:** The `Axes`.
+
+### ReflectionGridCheck.within
+
+*property*
+
+Per microphone, whether the deviation is within $\pm\varepsilon_k$.
+
+**Returns:** `True` where the deviation is within the 25 mm of Table 3 ([`REFLECTION_PATH_TOLERANCE_M`](/phonometry/reference/api/environment/barrier-reflection/#reflection_path_tolerance_m)).
 
 ## ReflectionIndexResult
 

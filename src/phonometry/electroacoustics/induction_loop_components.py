@@ -1711,13 +1711,32 @@ class NeckLoopVerification:
     :ivar dc_resistance_ohm: The measured DC input resistance, in ohms.
     :ivar input_voltage_v: The input voltage that produces 400 mA/m on the
         jig, in volts.
-    :ivar limits: The :class:`NeckLoopType` judged against.
+
+    The limits of the type (:attr:`limits`) are read from
+    :data:`NECK_LOOP_TYPES`, so a verification cannot be built against other
+    limits.
     """
 
     neck_loop_type: int
     dc_resistance_ohm: float
     input_voltage_v: float
-    limits: NeckLoopType
+
+    def __post_init__(self) -> None:
+        """Reject a type the draft Annex D does not define.
+
+        :raises ValueError: if ``neck_loop_type`` is not 1 or 2.
+        """
+        if self.neck_loop_type not in NECK_LOOP_TYPES:
+            msg = (
+                f"'neck_loop_type' must be one of {tuple(NECK_LOOP_TYPES)}; "
+                f"got {self.neck_loop_type!r}."
+            )
+            raise ValueError(msg)
+
+    @property
+    def limits(self) -> NeckLoopType:
+        """The :class:`NeckLoopType` judged against."""
+        return NECK_LOOP_TYPES[self.neck_loop_type]
 
     @property
     def resistance_passes(self) -> bool:
@@ -1797,5 +1816,4 @@ def verify_neck_loop(
         neck_loop_type=kind,
         dc_resistance_ohm=resistance,
         input_voltage_v=voltage,
-        limits=NECK_LOOP_TYPES[kind],
     )

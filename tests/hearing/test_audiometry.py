@@ -141,6 +141,29 @@ def test_a_quiet_room_passes_and_a_loud_band_fails() -> None:
     assert failed.lowest_measurable_hearing_level_db == pytest.approx(3.0)
 
 
+def test_the_room_check_judges_against_the_testers_choices() -> None:
+    """The check's limits follow the shift and the earphone it was given.
+
+    A 5 dB shift raises Table 2 by the printed allowance, and an ER-3A insert
+    earphone adds its Table 3 attenuation beyond the supra-aural column; a
+    check that dropped either choice would judge against the default table.
+    """
+    levels = np.asarray(ISO8253_1_TABLE_2[125.0], dtype=float)
+    relaxed = hearing.check_audiometric_ambient_noise(
+        levels, allowed_threshold_shift_db=5.0
+    )
+    assert relaxed.allowed_threshold_shift_db == pytest.approx(5.0)
+    np.testing.assert_allclose(
+        relaxed.limits_db,
+        np.add(ISO8253_1_TABLE_2[125.0], ISO8253_1_RELAXED_ALLOWANCE_DB),
+    )
+    insert = hearing.check_audiometric_ambient_noise(levels, earphone="ER-3A")
+    extra = np.subtract(ISO8253_1_TABLE_3["ER-3A"], ISO8253_1_TABLE_3["supra-aural"])
+    np.testing.assert_allclose(
+        insert.limits_db, np.add(ISO8253_1_TABLE_2[125.0], extra)
+    )
+
+
 def test_a_level_on_its_limit_is_within_it() -> None:
     """A reading that lands on the limit through arithmetic is on it."""
     levels = np.asarray(ISO8253_1_TABLE_4[125.0], dtype=float) + 0.1 - 0.1

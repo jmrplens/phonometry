@@ -843,30 +843,54 @@ of the document with the chosen conditions reported in detail.
 ## PositionSpreadCheck
 
 ```python
-PositionSpreadCheck(
-    levels_db: np.ndarray,
-    stage: int,
-    spread_db: float,
-    limit_db: float,
-    action: Literal['proceed', 'add_positions', 'interrupt'],
-    next_positions: tuple[int, ...],
-    corner_standard_deviation_db: float | None,
-)
+PositionSpreadCheck(levels_db: np.ndarray)
 ```
 
 Whether the readings so far are enough to average (7.4.1).
+
+The readings are the only field. The stage, the spread, the limit of the
+stage and the action the draft prescribes are all read from them, so a
+check cannot be built, or rewritten with `dataclasses.replace`, with
+an action the readings do not lead to.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `levels_db` | The A-weighted levels read directly from the instrument, uncorrected, in the order of 7.4.1: corner, position 2, position 3, then (corner, 4, 5) and (corner, 6, 7) for each further stage, in dB. |
-| `stage` | 1, 2 or 3: how many sets of three readings there are. |
-| `spread_db` | The difference between the highest and lowest reading, in dB. |
-| `limit_db` | The spread this stage allows: 3,0 dB (inclusive), 6,0 dB or 9,0 dB (strict). |
-| `action` | `"proceed"` to the corrections of 7.5 to 7.7, `"add_positions"` for the corner again and two new room positions, or `"interrupt"` when no further stage can pass: after nine readings, or sooner when the spread already reaches 9,0 dB. |
-| `next_positions` | The room positions to add, `(4, 5)` or `(6, 7)`, or `()`. |
-| `corner_standard_deviation_db` | Sample standard deviation of the corner readings, in dB, which 7.4.1 takes as representative of the room average when a statistical value (a 5 % value, the n-th highest) is wanted; `None` with a single corner reading. |
+
+### PositionSpreadCheck.action
+
+*property*
+
+What 7.4.1 prescribes for these readings.
+
+**Returns:** `"proceed"` to the corrections of 7.5 to 7.7 when the spread is within `limit_db`, `"add_positions"` for the corner again and two new room positions while a later stage can still pass, or `"interrupt"` when none can: after nine readings, or sooner when the spread already reaches 9,0 dB, since more readings can only widen it.
+
+### PositionSpreadCheck.corner_standard_deviation_db
+
+*property*
+
+Sample standard deviation of the corner readings, in dB.
+
+7.4.1 takes it as representative of the room average when a
+statistical value (a 5 % value, the n-th highest) is wanted.
+
+**Returns:** The deviation, or `None` with a single corner reading.
+
+### PositionSpreadCheck.limit_db
+
+*property*
+
+The spread this stage allows, fixed by the draft for the stage.
+
+**Returns:** 3,0 dB after three readings (inclusive), 6,0 dB after six or 9,0 dB after nine (strict), in dB.
+
+### PositionSpreadCheck.next_positions
+
+*property*
+
+The room positions to add, `(4, 5)` or `(6, 7)`, or `()`.
 
 ### PositionSpreadCheck.passes
 
@@ -900,6 +924,18 @@ Requires matplotlib (`pip install phonometry[plot]`).
 | `kwargs` | Forwarded to the markers of the room positions. |
 
 **Returns:** The axes.
+
+### PositionSpreadCheck.spread_db
+
+*property*
+
+The difference between the highest and lowest reading, in dB.
+
+### PositionSpreadCheck.stage
+
+*property*
+
+How many sets of three readings there are: 1, 2 or 3.
 
 ## service_equipment_background_correction
 

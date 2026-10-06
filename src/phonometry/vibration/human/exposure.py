@@ -59,6 +59,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -80,7 +81,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
 
     from matplotlib.axes import Axes
 
@@ -1191,31 +1192,32 @@ _KIND_METRIC_MSG = (
     "kind must be 'hav' or 'wbv'; metric 'a8' (both) or 'vdv' (wbv only)."
 )
 
+#: Article 3 of Directive 2002/44/EC: the (EAV, ELV) pair of each quantity.
+_DIRECTIVE_VALUES: Mapping[tuple[str, str], tuple[float, float]] = MappingProxyType(
+    {
+        ("hav", "a8"): (HAV_EAV_A8, HAV_ELV_A8),
+        ("wbv", "a8"): (WBV_EAV_A8, WBV_ELV_A8),
+        ("wbv", "vdv"): (WBV_EAV_VDV, WBV_ELV_VDV),
+    }
+)
+
 
 @dataclass(frozen=True)
 class ExposureAssessment:
     """A daily exposure assessed against the Directive 2002/44/EC values.
 
+    The two values of Article 3 are the Directive's, read from ``kind`` and
+    ``metric`` as properties together with the verdicts they give, so an
+    assessment cannot be built against other values.
+
     :ivar value: The assessed daily exposure ``A(8)`` (or VDV), in its unit.
     :ivar kind: ``"hav"`` or ``"wbv"``.
     :ivar metric: ``"a8"`` (m/s2) or ``"vdv"`` (m/s^1,75).
-    :ivar action_value: The exposure action value (EAV).
-    :ivar limit_value: The exposure limit value (ELV).
-    :ivar exceeds_action: Whether ``value`` reaches or exceeds the EAV.
-    :ivar exceeds_limit: Whether ``value`` reaches or exceeds the ELV.
-    :ivar zone: ``"below action"``, ``"action"`` (EAV<=value<ELV) or
-        ``"limit"`` (value>=ELV).
     """
 
     value: float
     kind: str
     metric: str
-    action_value: float
-    limit_value: float
-    _: KW_ONLY
-    exceeds_action: bool
-    exceeds_limit: bool
-    zone: str
 
     def __post_init__(self) -> None:
         """Reject an assessment whose kind or metric tag is unknown or unpaired.
@@ -1243,6 +1245,40 @@ class ExposureAssessment:
         require_choice(self.metric, "metric", ("a8", "vdv"))
         if self.kind == "hav" and self.metric == "vdv":
             raise ValueError(_KIND_METRIC_MSG)
+        # A NaN exposure fails both `>= EAV` comparisons and would be assessed
+        # "below action"; refuse it instead of letting the verdict claim safety.
+        if not math.isfinite(self.value) or self.value < 0.0:
+            msg = "'value' must be finite and non-negative."
+            raise ValueError(msg)
+
+    @property
+    def action_value(self) -> float:
+        """The exposure action value (EAV) of Article 3 for the kind and metric."""
+        return _DIRECTIVE_VALUES[(self.kind, self.metric)][0]
+
+    @property
+    def limit_value(self) -> float:
+        """The exposure limit value (ELV) of Article 3 for the kind and metric."""
+        return _DIRECTIVE_VALUES[(self.kind, self.metric)][1]
+
+    @property
+    def exceeds_action(self) -> bool:
+        """Whether ``value`` reaches or exceeds the EAV."""
+        return self.value >= self.action_value
+
+    @property
+    def exceeds_limit(self) -> bool:
+        """Whether ``value`` reaches or exceeds the ELV."""
+        return self.value >= self.limit_value
+
+    @property
+    def zone(self) -> str:
+        """``"below action"``, ``"action"`` (EAV<=value<ELV) or ``"limit"`` (value>=ELV)."""
+        if self.exceeds_limit:
+            return "limit"
+        if self.exceeds_action:
+            return "action"
+        return "below action"
 
 
 def exposure_assessment(
@@ -1261,38 +1297,9 @@ def exposure_assessment(
     :raises ValueError: for an unknown ``kind``/``metric`` combination or a
         non-finite or negative ``value``.
     """
-    v = float(value)
-    # A NaN exposure fails both `>= EAV` comparisons and would be assessed
-    # "below action"; refuse it instead of letting the verdict claim safety.
-    if not math.isfinite(v) or v < 0.0:
-        msg = "'value' must be finite and non-negative."
-        raise ValueError(msg)
-    if kind == "hav" and metric == "a8":
-        eav, elv = HAV_EAV_A8, HAV_ELV_A8
-    elif kind == "wbv" and metric == "a8":
-        eav, elv = WBV_EAV_A8, WBV_ELV_A8
-    elif kind == "wbv" and metric == "vdv":
-        eav, elv = WBV_EAV_VDV, WBV_ELV_VDV
-    else:
+    if (kind, metric) not in _DIRECTIVE_VALUES:
         raise ValueError(_KIND_METRIC_MSG)
-    exceeds_action = v >= eav
-    exceeds_limit = v >= elv
-    if exceeds_limit:
-        zone = "limit"
-    elif exceeds_action:
-        zone = "action"
-    else:
-        zone = "below action"
-    return ExposureAssessment(
-        value=v,
-        kind=kind,
-        metric=metric,
-        action_value=eav,
-        limit_value=elv,
-        exceeds_action=exceeds_action,
-        exceeds_limit=exceeds_limit,
-        zone=zone,
-    )
+    return ExposureAssessment(value=float(value), kind=kind, metric=metric)
 
 
 @dataclass(frozen=True)

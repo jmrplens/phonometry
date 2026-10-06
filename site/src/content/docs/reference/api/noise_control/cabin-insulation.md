@@ -84,27 +84,44 @@ BAND_FLATNESS_LIMIT_DB = {125.0: 6.0, 250.0: 5.0}
 BandFlatnessCheck(
     octave_centres_hz: NDArray[np.float64],
     spread_db: NDArray[np.float64],
-    limit_db: NDArray[np.float64],
-    satisfied: NDArray[np.bool_],
 )
 ```
 
 How flat the driving spectrum is inside each octave, 6.4 and 7.2.1.
 
+The limits are the clause's, so they are read from the octave and are not
+fields: a check cannot be built against another limit.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `octave_centres_hz` | The octave centre frequencies read, in hertz. |
+| `octave_centres_hz` | The nominal octave centre frequencies read, in hertz. |
 | `spread_db` | The difference between the loudest and the quietest of the three one-third-octave bands in each, in decibels. |
-| `limit_db` | What 6.4 allows in each, in decibels, and `nan` in the octaves below 125 Hz, for which the clause prints no limit. |
-| `satisfied` | Whether each octave meets its limit. An octave with no printed limit is reported as satisfied. |
 
 ### BandFlatnessCheck.all_satisfied
 
 *property*
 
 Whether every octave with a printed limit meets it.
+
+### BandFlatnessCheck.limit_db
+
+*property*
+
+What 6.4 allows in each octave, in decibels.
+
+**Returns:** 6 dB at 125 Hz, 5 dB at 250 Hz and 4 dB above, and `nan` in the octaves below 125 Hz, for which the clause prints no limit.
+
+### BandFlatnessCheck.satisfied
+
+*property*
+
+Whether each octave meets its limit.
+
+Judged settled: three readings 6,0 dB apart in decimal are within the
+6 dB of 125 Hz whichever way the last bits of their difference fall.
+An octave with no printed limit is reported as satisfied.
 
 ## cabin_insulation
 
@@ -658,16 +675,15 @@ PREFERRED_SIGNAL_TO_BACKGROUND_DB = 12.0
 ## SourcePositionCheck
 
 ```python
-SourcePositionCheck(
-    positions_used: int,
-    max_octave_spread_db: float,
-    required_positions: int,
-    satisfied: bool,
-    exceeds_maximum: bool,
-)
+SourcePositionCheck(positions_used: int, max_octave_spread_db: float)
 ```
 
 Whether enough loudspeaker positions were used, 7.2.1.
+
+The rule is the clause's, so only what was measured is a field: the
+positions used and the spread between them. How many the spread calls for,
+and the verdict, are read from those two the way 7.2.1 reads them, so a
+check cannot be built against another rule.
 
 **Attributes**
 
@@ -675,9 +691,28 @@ Whether enough loudspeaker positions were used, 7.2.1.
 | :--- | :--- |
 | `positions_used` | $N$, the number of source positions measured. |
 | `max_octave_spread_db` | The largest difference in $D'_p$ between any two positions, over the octave bands, in decibels. |
-| `required_positions` | The fewest positions that spread calls for, never below [`MIN_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ). |
-| `satisfied` | Whether `positions_used` reaches that number. |
-| `exceeds_maximum` | Whether the spread runs past [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ), which 7.2.1 says shall be stated in the report. |
+
+### SourcePositionCheck.exceeds_maximum
+
+*property*
+
+Whether the spread runs past [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
+
+7.2.1 says so shall be stated in the report.
+
+### SourcePositionCheck.required_positions
+
+*property*
+
+The fewest positions the spread calls for, 7.2.1.
+
+**Returns:** The spread in decibels rounded up, never below [`MIN_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) nor above [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
+
+### SourcePositionCheck.satisfied
+
+*property*
+
+Whether `positions_used` reaches `required_positions`.
 
 ## STATED_UNCERTAINTY_BAND_RANGE_HZ
 

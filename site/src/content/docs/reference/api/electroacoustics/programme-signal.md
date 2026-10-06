@@ -172,10 +172,6 @@ conventions the figure's notes state.
 ProgrammeSignalCheck(
     frequencies_hz: NDArray[np.float64],
     band_levels_db: NDArray[np.float64],
-    offset_db: float,
-    relative_levels_db: NDArray[np.float64],
-    tolerance_plus_db: NDArray[np.float64],
-    tolerance_minus_db: NDArray[np.float64],
 )
 ```
 
@@ -187,10 +183,10 @@ A one-third-octave spectrum judged against IEC 60268-1:1985 Table II.
 | :--- | :--- |
 | `frequencies_hz` | The nominal frequencies of the bands judged, in Hz, ascending. |
 | `band_levels_db` | The band levels as given, in dB, in the order of `frequencies_hz`. |
-| `offset_db` | The level added to the band levels to refer them to Table II, in dB: the middle of the window of levels that keeps every band inside its tolerance, or, when no level does, the level that shares the worst excursion equally between the two sides. |
-| `relative_levels_db` | Table II's relative levels at the bands, in dB. |
-| `tolerance_plus_db` | The upper tolerances, in dB. |
-| `tolerance_minus_db` | The lower tolerances, in dB. |
+
+Table II's relative levels and tolerances at the bands, and the offset
+that refers the levels to them, are read from the table, so a check
+cannot be built against other tolerances.
 
 ### ProgrammeSignalCheck.binding_bands_hz
 
@@ -217,6 +213,16 @@ The smallest distance of a band from its nearer limit, in dB.
 
 Negative when the spectrum cannot be placed inside the tolerances: its
 magnitude is then the excursion of the worst band.
+
+### ProgrammeSignalCheck.offset_db
+
+*property*
+
+The level added to the band levels to refer them to Table II, in dB.
+
+The middle of the window of levels that keeps every band inside its
+tolerance, or, when no level does, the level that shares the worst
+excursion equally between the two sides.
 
 ### ProgrammeSignalCheck.passes
 
@@ -248,6 +254,24 @@ Requires matplotlib (`pip install phonometry[plot]`).
 | `kwargs` | Forwarded to the band levels' `Axes.plot`. |
 
 **Returns:** The axes.
+
+### ProgrammeSignalCheck.relative_levels_db
+
+*property*
+
+Table II's relative levels at the bands, in dB.
+
+### ProgrammeSignalCheck.tolerance_minus_db
+
+*property*
+
+The lower tolerances of Table II at the bands, in dB.
+
+### ProgrammeSignalCheck.tolerance_plus_db
+
+*property*
+
+The upper tolerances of Table II at the bands, in dB.
 
 ## ProgrammeSpectrumBand
 

@@ -421,14 +421,13 @@ The combined standard uncertainty per band (Formula (B.2)), in dB.
 ## FixtureIsolationCheck
 
 ```python
-FixtureIsolationCheck(
-    frequencies: np.ndarray,
-    isolation_db: np.ndarray,
-    required_db: np.ndarray,
-)
+FixtureIsolationCheck(frequencies: np.ndarray, isolation_db: np.ndarray)
 ```
 
 Whether the test fixture isolates its microphone well enough (5.1.4).
+
+The requirement is the clause's, read from the bands as
+`required_db`, so a check cannot be built against another one.
 
 **Attributes**
 
@@ -436,7 +435,6 @@ Whether the test fixture isolates its microphone well enough (5.1.4).
 | :--- | :--- |
 | `frequencies` | The centre frequencies, in hertz. |
 | `isolation_db` | The acoustic isolation (3.7), the level with the isolation cup absent less the level with it sealed on, per band, in dB. |
-| `required_db` | The least isolation 5.1.4 asks per band, in dB: 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; NaN below 63 Hz, where it asks nothing. |
 
 ### FixtureIsolationCheck.margin_db
 
@@ -476,6 +474,14 @@ Draw the isolation against the requirement, band by band.
 | `kwargs` | Forwarded to the isolation curve. |
 
 **Returns:** The axes.
+
+### FixtureIsolationCheck.required_db
+
+*property*
+
+The least isolation 5.1.4 asks per band, in dB.
+
+**Returns:** 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; NaN below 63 Hz, where it asks nothing.
 
 ### FixtureIsolationCheck.sufficient
 

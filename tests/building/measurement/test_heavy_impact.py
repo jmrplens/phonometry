@@ -259,28 +259,24 @@ def test_unknown_source_name_is_rejected() -> None:
         building.heavy_impact_source_specification("tapping_machine")
 
 
-def test_check_source_rejects_a_deviation_of_another_length() -> None:
-    """``deviation`` is the one column the conformance figure never draws.
-
-    The others stop matplotlib on their own; a deviation a band out would
-    otherwise sit in the result beside a mask it no longer explains.
-    """
+def test_check_source_rejects_a_measurement_of_another_length() -> None:
+    """The five octaves are the standard's, so a band more is not a check."""
     check = building.check_heavy_impact_source([v for v, _ in RUBBER_BALL_LFE])
-    stretched = np.append(check.deviation, 0.0)
-    with pytest.raises(ValueError, match="'deviation'"):
-        dataclasses.replace(check, deviation=stretched)
+    stretched = np.append(check.measured, 0.0)
+    with pytest.raises(ValueError, match="'measured' must hold 5 finite"):
+        dataclasses.replace(check, measured=stretched)
 
 
-def test_check_source_rejects_a_conforming_mask_of_another_length() -> None:
-    """The figure indexes ``within_tolerance`` only to cross the failing bands.
-
-    A mask that marks every band as conforming never reaches that indexing, so
-    on a check that passes it is as quiet as ``deviation`` beside it.
-    """
+def test_check_source_reads_the_printed_tolerance_band_from_the_source() -> None:
+    """The printed spectrum and its tolerance are not constructor fields."""
     check = building.check_heavy_impact_source([v for v, _ in RUBBER_BALL_LFE])
-    stretched = np.append(check.within_tolerance, True)
-    with pytest.raises(ValueError, match="'within_tolerance'"):
-        dataclasses.replace(check, within_tolerance=stretched)
+    names = {field.name for field in dataclasses.fields(check)}
+    assert names == {"source", "measured"}
+    # ISO 16283-2:2020 Table A.1 (PDF page 29, printed folio 23), as printed.
+    np.testing.assert_array_equal(check.nominal, [v for v, _ in RUBBER_BALL_LFE])
+    np.testing.assert_array_equal(check.tolerance, [t for _, t in RUBBER_BALL_LFE])
+    with pytest.raises(TypeError, match="passes"):
+        bool(check)
 
 
 def test_check_source_rejects_a_source_name_the_standard_does_not_define() -> None:

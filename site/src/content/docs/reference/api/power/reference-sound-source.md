@@ -282,46 +282,62 @@ ReferenceSoundSourceVerdict(
     frequencies_hz: np.ndarray,
     sound_power_level_db: np.ndarray,
     repeatability_db: np.ndarray | None,
-    repeatability_limit_db: np.ndarray,
     supply_variation_db: np.ndarray | None,
-    supply_limit_db: float,
-    adjacent_step_db: np.ndarray,
-    adjacent_limit_db: np.ndarray,
-    core_range_db: float,
-    core_range_limit_db: float,
-    extended_range_db: float,
-    extended_range_limit_db: float,
     directivity_index_db: np.ndarray | None,
-    directivity_limit_db: float,
     reverberation_rooms_only: bool,
-    frequency_range_met: bool,
-    not_judged: tuple[str, ...],
 )
 ```
 
 Whether a source meets the performance requirements of ISO 6926 clause 5.
 
+Only what was measured is a field. The limits of clause 5 (Table 1, the
+0,3 dB of the supply, the 12 dB and 16 dB ranges, the 3 dB and 4 dB steps,
+the +6 dB of the directivity) are read from the bands as properties, and so
+are the spectrum figures they are compared with, so a verdict cannot be
+built against another limit.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third octave bands, ascending, in hertz. |
+| `frequencies_hz` | The one-third octave bands, contiguous and ascending, in hertz. |
 | `sound_power_level_db` | The calibrated $L_W$ per band. |
 | `repeatability_db` | $\sigma_r$ of Formula (1) per band, or `None` when no repetitions were given. |
-| `repeatability_limit_db` | The Table 1 limit per band. |
 | `supply_variation_db` | The largest change of $L_W$ per band over the declared range of the electrical or mechanical supply (5.2), or `None` when not given. |
-| `supply_limit_db` | 0,3 dB either way (5.2). |
-| `adjacent_step_db` | The largest difference from a neighbouring band, per band (5.4). |
-| `adjacent_limit_db` | The step that band is held to: 3 dB from 100 Hz to 10 000 Hz, 4 dB where a neighbour lies in an extended range. |
-| `core_range_db` | The spread of $L_W$ from 100 Hz to 10 000 Hz. |
-| `core_range_limit_db` | 12 dB (5.4). |
-| `extended_range_db` | The spread over every band when the range is extended beyond 100 Hz to 10 000 Hz, else `nan`. |
-| `extended_range_limit_db` | 16 dB (5.4). |
 | `directivity_index_db` | The highest directivity index per band, or `None` when not given. |
-| `directivity_limit_db` | +6 dB (5.5). |
 | `reverberation_rooms_only` | Whether the source is labelled "For use as a reference sound source in reverberation test rooms complying with ISO 3741", which lifts 5.5. |
-| `frequency_range_met` | Whether every band from 100 Hz to 10 000 Hz is present (5.4). |
-| `not_judged` | The requirements without data, by name. |
+
+### ReferenceSoundSourceVerdict.adjacent_limit_db
+
+*property*
+
+The step each band is held to (5.4), in dB.
+
+**Returns:** 3 dB from 100 Hz to 10 000 Hz, 4 dB where a neighbour lies in an extended range; per band, the pair that comes closest to its limit.
+
+### ReferenceSoundSourceVerdict.adjacent_step_db
+
+*property*
+
+The largest difference from a neighbouring band, per band (5.4), in dB.
+
+### ReferenceSoundSourceVerdict.core_range_db
+
+*property*
+
+The spread of $L_W$ from 100 Hz to 10 000 Hz, in dB.
+
+### ReferenceSoundSourceVerdict.core_range_limit_db
+
+*property*
+
+The 12 dB of 5.4, in dB.
+
+### ReferenceSoundSourceVerdict.directivity_limit_db
+
+*property*
+
+The +6 dB of 5.5, in dB.
 
 ### ReferenceSoundSourceVerdict.directivity_met
 
@@ -330,6 +346,30 @@ Whether a source meets the performance requirements of ISO 6926 clause 5.
 5.5: the directivity index at most +6 dB from 100 Hz to 10 000 Hz.
 
 **Returns:** The verdict, `True` for a source labelled for reverberation rooms only, or `None` when not judged.
+
+### ReferenceSoundSourceVerdict.extended_range_db
+
+*property*
+
+The spread over every band when the range is extended, else `nan`.
+
+### ReferenceSoundSourceVerdict.extended_range_limit_db
+
+*property*
+
+The 16 dB of 5.4, in dB.
+
+### ReferenceSoundSourceVerdict.frequency_range_met
+
+*property*
+
+Whether every band from 100 Hz to 10 000 Hz is present (5.4).
+
+### ReferenceSoundSourceVerdict.not_judged
+
+*property*
+
+The requirements without data, by name.
 
 ### ReferenceSoundSourceVerdict.passes
 
@@ -362,6 +402,14 @@ Draw each requirement as a share of its limit, per band.
 
 **Returns:** The axes.
 
+### ReferenceSoundSourceVerdict.repeatability_limit_db
+
+*property*
+
+The Table 1 limit on $\sigma_r$ per band, in dB (5.2).
+
+**Returns:** 0,8 dB up to 80 Hz, 0,4 dB up to 160 Hz, 0,2 dB above.
+
 ### ReferenceSoundSourceVerdict.spectrum_met
 
 *property*
@@ -377,6 +425,12 @@ Draw each requirement as a share of its limit, per band.
 5.2: $\sigma_r$ within Table 1 in every band.
 
 **Returns:** The verdict, or `None` when not judged.
+
+### ReferenceSoundSourceVerdict.supply_limit_db
+
+*property*
+
+The 0,3 dB either way of 5.2, in dB.
 
 ### ReferenceSoundSourceVerdict.supply_met
 
@@ -532,11 +586,13 @@ calibrated.
 ReferenceSourceDriftResult(
     frequencies_hz: np.ndarray,
     change_db: np.ndarray,
-    limit_db: np.ndarray,
 )
 ```
 
 Whether a reference sound source has drifted enough to be recalibrated.
+
+The limit is the clause's, 2,83 times Table 1, read from the bands as
+`limit_db`, so a result cannot be built against another one.
 
 **Attributes**
 
@@ -544,7 +600,12 @@ Whether a reference sound source has drifted enough to be recalibrated.
 | :--- | :--- |
 | `frequencies_hz` | The one-third octave bands, in hertz. |
 | `change_db` | The latest level less the reference one, per band. |
-| `limit_db` | 2,83 times the Table 1 value of each band (5.6). |
+
+### ReferenceSourceDriftResult.limit_db
+
+*property*
+
+2,83 times the Table 1 value of each band (5.6), in dB.
 
 ### ReferenceSourceDriftResult.passes
 

@@ -810,7 +810,7 @@ def test_the_decay_verdict_is_frozen_and_keyword_only() -> None:
     with pytest.raises(AttributeError):
         result.measured_time_s = 0.5  # type: ignore[misc]
     with pytest.raises(TypeError):
-        ins.RunningRmsDecayVerification("linear", 1.0, 0.99, 0.99, 0.05)  # type: ignore[misc]
+        ins.RunningRmsDecayVerification("linear", 1.0, 0.99)  # type: ignore[misc]
 
 
 def test_a_time_constant_the_tables_do_not_print_is_refused() -> None:

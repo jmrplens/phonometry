@@ -414,41 +414,151 @@ class WeightedCabinInsulation:
 class SourcePositionCheck:
     r"""Whether enough loudspeaker positions were used, 7.2.1.
 
+    The rule is the clause's, so only what was measured is a field: the
+    positions used and the spread between them. How many the spread calls for,
+    and the verdict, are read from those two the way 7.2.1 reads them, so a
+    check cannot be built against another rule.
+
     :ivar positions_used: :math:`N`, the number of source positions measured.
     :ivar max_octave_spread_db: The largest difference in :math:`D'_p` between
         any two positions, over the octave bands, in decibels.
-    :ivar required_positions: The fewest positions that spread calls for, never
-        below :data:`MIN_SOURCE_POSITIONS_IN_SITU`.
-    :ivar satisfied: Whether ``positions_used`` reaches that number.
-    :ivar exceeds_maximum: Whether the spread runs past
-        :data:`MAX_SOURCE_POSITIONS_IN_SITU`, which 7.2.1 says shall be stated
-        in the report.
     """
 
     positions_used: int
     max_octave_spread_db: float
-    required_positions: int
-    satisfied: bool
-    exceeds_maximum: bool
+
+    def __post_init__(self) -> None:
+        """Reject a check the clause could not have produced.
+
+        :raises ValueError: For fewer than
+            :data:`MIN_SOURCE_POSITIONS_IN_SITU` positions or a spread that is
+            negative or not finite.
+        """
+        if int(self.positions_used) < MIN_SOURCE_POSITIONS_IN_SITU:
+            msg = (
+                "SourcePositionCheck: 'positions_used' must be at least "
+                f"{MIN_SOURCE_POSITIONS_IN_SITU}, where 7.2.1 starts."
+            )
+            raise ValueError(msg)
+        spread = require_finite(self.max_octave_spread_db, "max_octave_spread_db")
+        if spread < 0.0:
+            msg = "SourcePositionCheck: 'max_octave_spread_db' must not be negative."
+            raise ValueError(msg)
+
+    @property
+    def _judged_spread_db(self) -> float:
+        # A spread of 3,0 dB worked from two readings can be 3,000 000 000 000 004 in
+        # binary; settled, it asks for three positions and not four.
+        return float(settled(self.max_octave_spread_db))
+
+    @property
+    def required_positions(self) -> int:
+        """The fewest positions the spread calls for, 7.2.1.
+
+        :return: The spread in decibels rounded up, never below
+            :data:`MIN_SOURCE_POSITIONS_IN_SITU` nor above
+            :data:`MAX_SOURCE_POSITIONS_IN_SITU`.
+        """
+        return max(
+            MIN_SOURCE_POSITIONS_IN_SITU,
+            min(MAX_SOURCE_POSITIONS_IN_SITU, int(np.ceil(self._judged_spread_db))),
+        )
+
+    @property
+    def satisfied(self) -> bool:
+        """Whether :attr:`positions_used` reaches :attr:`required_positions`."""
+        return int(self.positions_used) >= self.required_positions
+
+    @property
+    def exceeds_maximum(self) -> bool:
+        """Whether the spread runs past :data:`MAX_SOURCE_POSITIONS_IN_SITU`.
+
+        7.2.1 says so shall be stated in the report.
+        """
+        return self._judged_spread_db > MAX_SOURCE_POSITIONS_IN_SITU
+
+
+def _flatness_limit_db(octave_centre_hz: float) -> float:
+    """What 6.4 allows inside one octave, ``nan`` below 125 Hz.
+
+    :param octave_centre_hz: A nominal octave centre frequency, in hertz.
+    :return: The limit, in decibels.
+    """
+    if octave_centre_hz < _LOWEST_FLATNESS_OCTAVE_HZ:
+        return float("nan")
+    for centre, limit in BAND_FLATNESS_LIMIT_DB.items():
+        if math.isclose(octave_centre_hz, centre, rel_tol=_NOMINAL_CENTRE_TOLERANCE):
+            return limit
+    return DEFAULT_BAND_FLATNESS_LIMIT_DB
 
 
 @dataclass(frozen=True)
 class BandFlatnessCheck:
     r"""How flat the driving spectrum is inside each octave, 6.4 and 7.2.1.
 
-    :ivar octave_centres_hz: The octave centre frequencies read, in hertz.
+    The limits are the clause's, so they are read from the octave and are not
+    fields: a check cannot be built against another limit.
+
+    :ivar octave_centres_hz: The nominal octave centre frequencies read, in
+        hertz.
     :ivar spread_db: The difference between the loudest and the quietest of the
         three one-third-octave bands in each, in decibels.
-    :ivar limit_db: What 6.4 allows in each, in decibels, and ``nan`` in the
-        octaves below 125 Hz, for which the clause prints no limit.
-    :ivar satisfied: Whether each octave meets its limit. An octave with no
-        printed limit is reported as satisfied.
     """
 
     octave_centres_hz: NDArray[np.float64]
     spread_db: NDArray[np.float64]
-    limit_db: NDArray[np.float64]
-    satisfied: NDArray[np.bool_]
+
+    def __post_init__(self) -> None:
+        """Hold the arrays read-only and reject octaves the clause does not name.
+
+        :raises ValueError: For arrays of different lengths, a spread that is
+            negative or not finite, or a centre that is not a nominal octave
+            centre frequency.
+        """
+        centres = read_only_copy(self.octave_centres_hz, dtype=np.float64)
+        spread = read_only_copy(self.spread_db, dtype=np.float64)
+        if centres.ndim != 1 or spread.shape != centres.shape:
+            msg = "BandFlatnessCheck: one spread per octave centre."
+            raise ValueError(msg)
+        if not np.all(np.isfinite(spread)) or np.any(spread < 0.0):
+            msg = "BandFlatnessCheck: 'spread_db' must be finite and not negative."
+            raise ValueError(msg)
+        for centre in centres.tolist():
+            if not any(
+                math.isclose(centre, nominal, rel_tol=_NOMINAL_CENTRE_TOLERANCE)
+                for nominal in _THIRDS_OF_OCTAVE_HZ
+            ):
+                msg = (
+                    f"BandFlatnessCheck: {centre:g} Hz is not a nominal octave "
+                    "centre frequency."
+                )
+                raise ValueError(msg)
+        object.__setattr__(self, "octave_centres_hz", centres)
+        object.__setattr__(self, "spread_db", spread)
+
+    @property
+    def limit_db(self) -> NDArray[np.float64]:
+        """What 6.4 allows in each octave, in decibels.
+
+        :return: 6 dB at 125 Hz, 5 dB at 250 Hz and 4 dB above, and ``nan`` in
+            the octaves below 125 Hz, for which the clause prints no limit.
+        """
+        return np.array(
+            [_flatness_limit_db(c) for c in self.octave_centres_hz.tolist()],
+            dtype=np.float64,
+        )
+
+    @property
+    def satisfied(self) -> NDArray[np.bool_]:
+        """Whether each octave meets its limit.
+
+        Judged settled: three readings 6,0 dB apart in decimal are within the
+        6 dB of 125 Hz whichever way the last bits of their difference fall.
+        An octave with no printed limit is reported as satisfied.
+        """
+        limit = self.limit_db
+        held = np.isnan(limit) | (settled(self.spread_db) <= limit)
+        return np.asarray(held, dtype=np.bool_)
 
     @property
     def all_satisfied(self) -> bool:
@@ -770,20 +880,7 @@ def check_source_positions(
         )
         raise ValueError(msg)
     spread = float(np.max(np.max(values, axis=0) - np.min(values, axis=0)))
-    # A spread of 3,0 dB worked from two readings can be 3,000 000 000 000 004 in
-    # binary; settled, it asks for three positions and not four.
-    judged = float(settled(spread))
-    required = max(
-        MIN_SOURCE_POSITIONS_IN_SITU,
-        min(MAX_SOURCE_POSITIONS_IN_SITU, int(np.ceil(judged))),
-    )
-    return SourcePositionCheck(
-        positions_used=positions,
-        max_octave_spread_db=spread,
-        required_positions=required,
-        satisfied=positions >= required,
-        exceeds_maximum=judged > MAX_SOURCE_POSITIONS_IN_SITU,
-    )
+    return SourcePositionCheck(positions_used=positions, max_octave_spread_db=spread)
 
 
 def _nominal_third(frequency: float) -> tuple[float, int]:
@@ -845,7 +942,6 @@ def check_band_flatness(
         band[place] = float(level)
     centres: list[float] = []
     spreads: list[float] = []
-    limits: list[float] = []
     for centre in sorted(groups):
         members = list(groups[centre].values())
         if len(members) != _THIRDS_PER_OCTAVE:
@@ -857,22 +953,9 @@ def check_band_flatness(
             raise ValueError(msg)
         centres.append(centre)
         spreads.append(max(members) - min(members))
-        if centre < _LOWEST_FLATNESS_OCTAVE_HZ:
-            limits.append(float("nan"))
-        else:
-            limits.append(
-                BAND_FLATNESS_LIMIT_DB.get(centre, DEFAULT_BAND_FLATNESS_LIMIT_DB)
-            )
-    spread = np.asarray(spreads, dtype=np.float64)
-    limit = np.asarray(limits, dtype=np.float64)
-    # Judged settled: three readings 6,0 dB apart in decimal are within the
-    # 6 dB of 125 Hz whichever way the last bits of their difference fall.
-    satisfied = np.isnan(limit) | (settled(spread) <= limit)
     return BandFlatnessCheck(
         octave_centres_hz=np.asarray(centres, dtype=np.float64),
-        spread_db=spread,
-        limit_db=limit,
-        satisfied=np.asarray(satisfied, dtype=np.bool_),
+        spread_db=np.asarray(spreads, dtype=np.float64),
     )
 
 

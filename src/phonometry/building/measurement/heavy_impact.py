@@ -97,7 +97,7 @@ used when the *measurement* is reported in octaves.
 
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -407,77 +407,84 @@ def impact_force_exposure_level(
 class HeavyImpactSourceCheck:
     """Conformance of a measured heavy impact source to its printed spectrum.
 
+    Only the source and the measurement are fields. The printed spectrum, its
+    tolerance and the verdict are read from the source's specification
+    (:func:`heavy_impact_source_specification`), so a check cannot be built
+    against another tolerance band.
+
     :ivar source: ``"rubber_ball"`` or ``"bang_machine"``.
-    :ivar frequencies: Octave-band centre frequencies, in Hz.
-    :ivar measured: Measured impact force exposure level ``LFE``, in dB re 1 N.
-    :ivar nominal: Printed nominal ``LFE`` per band, in dB re 1 N.
-    :ivar tolerance: Printed tolerance per band, in dB.
-    :ivar deviation: ``measured - nominal`` per band, in dB.
-    :ivar within_tolerance: Per-band boolean mask of conforming bands.
-    :ivar passes: ``True`` when every band conforms.
+    :ivar measured: Measured impact force exposure level ``LFE`` in the five
+        octave bands 31,5 Hz to 500 Hz, in dB re 1 N.
     """
 
     source: str
-    frequencies: np.ndarray
     measured: np.ndarray
-    nominal: np.ndarray
-    tolerance: np.ndarray
-    deviation: np.ndarray
-    within_tolerance: np.ndarray
-    _: KW_ONLY
-    passes: bool
 
     def __post_init__(self) -> None:
-        """Reject a check whose measurement and printed spectrum differ in length.
+        """Reject an unknown source or a measurement of another length.
 
-        The conformance figure draws the measured ``LFE`` inside a tolerance
-        band built band by band from ``nominal`` and ``tolerance``, and crosses
-        the bands ``within_tolerance`` reports as failing. ``frequencies``,
-        ``measured``, ``nominal`` and ``tolerance`` stop it at any other
-        length, in both directions, with a shape complaint that names neither
-        the field nor the type.
+        ``source`` is pinned to the two standard sources: the conformance
+        figure titles itself by looking the name up in a label table after
+        everything is drawn, so a check rewritten by hand would otherwise die
+        mid-render with a bare ``KeyError``. The five octaves are fixed by the
+        standard, so the measurement reads as a band count.
 
-        The other two columns are quiet. ``deviation`` is never drawn at all,
-        and ``within_tolerance`` is indexed only to place the crosses, which a
-        mask marking every band as conforming never reaches: on a check that
-        passes, either column can be a band out and the figure comes back
-        unchanged, the deviations no longer explaining the mask beside them.
-
-        The five octaves are fixed by the standard, so the check reads as a
-        band count rather than as a range; it is written here because the type
-        is exported and can be built directly from figures the tables never
-        supplied.
-
-        ``source`` is pinned to the two standard sources for the same
-        reason: :func:`check_heavy_impact_source` validates the name at the
-        call, but the figure titles itself by looking the name up in a label
-        table after everything is drawn, so a check rewritten by hand dies
-        mid-render with a bare ``KeyError`` naming the string alone, neither
-        the field nor the two names it could have held.
-
-        :raises ValueError: if any per-band column disagrees with the rest,
-            or ``source`` is not a standard source name.
+        :raises ValueError: if ``source`` is not a standard source name, or
+            ``measured`` does not hold one finite level per printed band.
         """
         require_choice(self.source, "source", tuple(_SPECS))
-        require_ranks(
-            self,
-            frequencies=1,
-            measured=1,
-            nominal=1,
-            tolerance=1,
-            deviation=1,
-            within_tolerance=1,
+        n = len(_SPECS[self.source].frequencies)
+        measured = np.asarray(self.measured, dtype=np.float64)
+        if measured.shape != (n,) or not np.all(np.isfinite(measured)):
+            msg = (
+                f"HeavyImpactSourceCheck: 'measured' must hold {n} finite "
+                "octave-band values (31.5 Hz to 500 Hz)."
+            )
+            raise ValueError(msg)
+
+    @property
+    def frequencies(self) -> np.ndarray:
+        """Octave-band centre frequencies, in Hz."""
+        return np.asarray(_SPECS[self.source].frequencies, dtype=np.float64)
+
+    @property
+    def nominal(self) -> np.ndarray:
+        """Printed nominal ``LFE`` per band, in dB re 1 N."""
+        return np.asarray(_SPECS[self.source].force_exposure_level, dtype=np.float64)
+
+    @property
+    def tolerance(self) -> np.ndarray:
+        """Printed tolerance per band, in dB."""
+        return np.asarray(_SPECS[self.source].tolerance, dtype=np.float64)
+
+    @property
+    def deviation(self) -> np.ndarray:
+        """``measured - nominal`` per band, in dB."""
+        return np.asarray(
+            np.asarray(self.measured, dtype=np.float64) - self.nominal,
+            dtype=np.float64,
         )
-        require_same_length(
-            self,
-            "frequencies",
-            "measured",
-            "nominal",
-            "tolerance",
-            "deviation",
-            "within_tolerance",
-            axis="octave band",
+
+    @property
+    def within_tolerance(self) -> np.ndarray:
+        """Per-band boolean mask of conforming bands."""
+        return np.asarray(np.abs(self.deviation) <= self.tolerance, dtype=bool)
+
+    @property
+    def passes(self) -> bool:
+        """``True`` when every band conforms."""
+        return bool(np.all(self.within_tolerance))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = (
+            "a HeavyImpactSourceCheck has no truth value; read its '.passes' "
+            "for the verdict"
         )
+        raise TypeError(msg)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -519,20 +526,7 @@ def check_heavy_impact_source(
             f"(31.5 Hz to 500 Hz)."
         )
         raise ValueError(msg)
-    nominal = np.asarray(spec.force_exposure_level, dtype=np.float64)
-    tol = np.asarray(spec.tolerance, dtype=np.float64)
-    deviation = measured - nominal
-    within = np.abs(deviation) <= tol
-    return HeavyImpactSourceCheck(
-        source=spec.name,
-        frequencies=np.asarray(spec.frequencies, dtype=np.float64),
-        measured=read_only_copy(measured),
-        nominal=nominal,
-        tolerance=tol,
-        deviation=deviation,
-        within_tolerance=within,
-        passes=bool(np.all(within)),
-    )
+    return HeavyImpactSourceCheck(source=spec.name, measured=read_only_copy(measured))
 
 
 def _fast_peak_factor(c: np.ndarray) -> np.ndarray:

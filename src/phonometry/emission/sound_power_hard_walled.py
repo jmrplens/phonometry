@@ -1057,40 +1057,88 @@ class HardWalledRoomCheck:
 
     ``level_range_db`` is, per octave band, the largest difference between
     the mean levels of any two of the directional source's orientations
-    (4.4), and ``limit_db`` the Table 3 value it may not exceed.
+    (4.4), and :attr:`limit_db` the Table 3 value it may not exceed.
     ``volume_m3`` is the room, ``reference_box_volume_m3`` and
     ``largest_box_dimension_m`` the reference box of 4.1, and
-    ``minimum_volume_m3`` / ``box_dimension_limit_m`` what 4.2 asks of them.
-    ``max_absorption_coefficient`` is the largest sound absorption coefficient
-    of any portion of the boundary surfaces, ``NaN`` when none was supplied,
-    against the 0,20 of 4.3. ``minimum_microphone_distance_m`` is the
-    :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3 that keeps the microphones
-    in the reverberant field, stated for the setup rather than judged.
+    :attr:`minimum_volume_m3` / :attr:`box_dimension_limit_m` what 4.2 asks
+    of them. ``max_absorption_coefficient`` is the largest sound absorption
+    coefficient of any portion of the boundary surfaces, ``NaN`` when none was
+    supplied, against the 0,20 of 4.3. :attr:`minimum_microphone_distance_m`
+    is the :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3 that keeps the
+    microphones in the reverberant field, stated for the setup rather than
+    judged. The limits are the standard's and are read from the bands, the
+    room and the box, so a check cannot be built against other ones.
     """
 
     frequencies: np.ndarray
     level_range_db: np.ndarray
-    limit_db: np.ndarray
     orientations: int
     volume_m3: float
     reference_box_volume_m3: float
     largest_box_dimension_m: float
-    minimum_volume_m3: float
-    box_dimension_limit_m: float
     max_absorption_coefficient: float
-    minimum_microphone_distance_m: float
 
     def __post_init__(self) -> None:
-        """Reject a check whose per-band arrays disagree.
+        """Reject a check whose per-band arrays disagree or name no Table 3 band.
 
-        :raises ValueError: if the three per-band arrays differ in length or
-            rank, or fewer than two orientations are recorded.
+        :raises ValueError: if the two per-band arrays differ in length or
+            rank, a band lies outside 125 Hz to 8 kHz, fewer than two
+            orientations are recorded, or the room or the box is not
+            positive.
         """
-        require_ranks(self, frequencies=1, level_range_db=1, limit_db=1)
-        require_same_length(self, "frequencies", "level_range_db", "limit_db")
+        require_ranks(self, frequencies=1, level_range_db=1)
+        require_same_length(self, "frequencies", "level_range_db")
+        if any(round(float(f)) not in _SIGMA_R0_DB for f in self.frequencies):
+            msg = (
+                "HardWalledRoomCheck: 'frequencies' must lie in 125 Hz to 8 kHz, "
+                f"the bands of Table 3 ({_STANDARD})."
+            )
+            raise ValueError(msg)
         if self.orientations < 2:  # noqa: PLR2004
             msg = "HardWalledRoomCheck: 'orientations' must be at least 2."
             raise ValueError(msg)
+        require_positive(self.volume_m3, "volume_m3")
+        require_positive(self.reference_box_volume_m3, "reference_box_volume_m3")
+        require_positive(self.largest_box_dimension_m, "largest_box_dimension_m")
+
+    @property
+    def limit_db(self) -> np.ndarray:
+        """The Table 3 standard deviation of reproducibility of each band, in dB.
+
+        :return: The spread 4.4 allows each band.
+        """
+        return _table3_sigma(np.asarray(self.frequencies, dtype=np.float64))
+
+    @property
+    def minimum_volume_m3(self) -> float:
+        """The volume 4.2 asks of the room: 40 m³ and forty reference boxes.
+
+        :return: The larger of the two, in cubic metres.
+        """
+        return max(
+            _MIN_ROOM_VOLUME_M3,
+            _ROOM_TO_BOX_VOLUME_RATIO * self.reference_box_volume_m3,
+        )
+
+    @property
+    def box_dimension_limit_m(self) -> float:
+        """The largest reference-box dimension 4.2 allows in this room.
+
+        :return: 1,0 m in a room of up to 100 m³, 2,0 m in a larger one, in
+            metres.
+        """
+        if self.volume_m3 <= _SMALL_ROOM_LIMIT_M3:
+            return _BOX_LIMIT_SMALL_ROOM_M
+        return _BOX_LIMIT_LARGE_ROOM_M
+
+    @property
+    def minimum_microphone_distance_m(self) -> float:
+        r"""The :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3, in metres.
+
+        :return: The least distance from the source that keeps a microphone
+            in the reverberant field.
+        """
+        return float(_REVERBERANT_DISTANCE_FACTOR * self.volume_m3 ** (1 / 3))
 
     @property
     def band_adequate(self) -> np.ndarray:
@@ -1251,21 +1299,11 @@ def check_hard_walled_room(
     return HardWalledRoomCheck(
         frequencies=freqs,
         level_range_db=np.asarray(np.ptp(levels, axis=0), dtype=np.float64),
-        limit_db=_table3_sigma(freqs),
         orientations=n_orientations,
         volume_m3=volume,
         reference_box_volume_m3=box_volume,
         largest_box_dimension_m=float(np.max(box)),
-        minimum_volume_m3=max(
-            _MIN_ROOM_VOLUME_M3, _ROOM_TO_BOX_VOLUME_RATIO * box_volume
-        ),
-        box_dimension_limit_m=(
-            _BOX_LIMIT_SMALL_ROOM_M
-            if volume <= _SMALL_ROOM_LIMIT_M3
-            else _BOX_LIMIT_LARGE_ROOM_M
-        ),
         max_absorption_coefficient=alpha_max,
-        minimum_microphone_distance_m=_REVERBERANT_DISTANCE_FACTOR * volume ** (1 / 3),
     )
 
 

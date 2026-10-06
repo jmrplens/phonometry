@@ -359,8 +359,6 @@ PhaseVerification(
     deviation_deg: NDArray[np.float64],
     characteristic_frequencies_hz: NDArray[np.float64],
     characteristic_deviation_deg: NDArray[np.float64],
-    tolerance_deg: NDArray[np.float64],
-    within_tolerance: NDArray[np.bool_],
 )
 ```
 
@@ -377,8 +375,10 @@ One measured phase response against the ISO 8041-1 Table 5 phase band.
 | `deviation_deg` | The phase error, measured minus design, in degrees. |
 | `characteristic_frequencies_hz` | The frequencies the characteristic phase deviations are attributed to, which are all but the highest (H.2.1, Formula (H.3)). |
 | `characteristic_deviation_deg` | The characteristic phase deviation of Formula (6) at each of those, in degrees. |
-| `tolerance_deg` | The Table 5 limit at each of those, in degrees, infinite in the two tails. |
-| `within_tolerance` | Whether each characteristic phase deviation is inside its limit. |
+
+The Table 5 limit (`tolerance_deg`) and the verdict it gives are
+read from the weighting and the frequencies, so a verification cannot be
+built against another band.
 
 ### PhaseVerification.failing_frequencies_hz
 
@@ -429,6 +429,20 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_phase_verification`. |
+
+### PhaseVerification.tolerance_deg
+
+*property*
+
+The Table 5 limit at each characteristic frequency, in degrees.
+
+**Returns:** [`phase_tolerance_degrees`](/phonometry/reference/api/vibration/instrumentation/#phase_tolerance_degrees) of the weighting, infinite in the two tails.
+
+### PhaseVerification.within_tolerance
+
+*property*
+
+Whether each characteristic phase deviation is inside its limit.
 
 ## PVEM_INDICATION_TOLERANCES_PERCENT
 
@@ -559,8 +573,6 @@ RunningRmsDecayVerification(
     method: str,
     integration_time_s: float,
     measured_time_s: float,
-    printed_time_s: float,
-    tolerance_s: float,
 )
 ```
 
@@ -568,9 +580,10 @@ One measured decay time against its row of ISO 8041-1 Table 10 or 11.
 
 The row is the whole criterion: a printed time to 10 % of the initial
 indicated value and the tolerance printed beside it, for one averaging
-and one time constant. The verdict is derived from those fields rather
-than stored beside them, so a result cannot say it passed over numbers
-that do not.
+and one time constant. The row is read from the method and the time
+constant (`printed_time_s`, `tolerance_s`) and the verdict
+from the row, so a result can neither say it passed over numbers that do
+not nor be built against another row.
 
 **Attributes**
 
@@ -579,8 +592,6 @@ that do not.
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
 | `integration_time_s` | The printed time constant the row is for, in seconds. |
 | `measured_time_s` | The measured time to 10 % of the initial indicated value, as supplied, in seconds. |
-| `printed_time_s` | The decay time the row prints, in seconds. |
-| `tolerance_s` | The tolerance printed beside it, in seconds. |
 
 ### RunningRmsDecayVerification.deviation_s
 
@@ -627,6 +638,18 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_running_rms_decay_verification`. |
+
+### RunningRmsDecayVerification.printed_time_s
+
+*property*
+
+The decay time the row prints, in seconds.
+
+### RunningRmsDecayVerification.tolerance_s
+
+*property*
+
+The tolerance printed beside it, in seconds.
 
 ### RunningRmsDecayVerification.upper_time_s
 
@@ -864,7 +887,6 @@ WeightingVerification(
     measured: NDArray[np.float64],
     design: NDArray[np.float64],
     deviation_percent: NDArray[np.float64],
-    within_tolerance: NDArray[np.bool_],
     expanded_uncertainty_percent: float = 0.0,
 )
 ```
@@ -880,8 +902,11 @@ One measured weighting response against its ISO 8041-1 tolerances.
 | `measured` | The measured weighting factors, as supplied. |
 | `design` | The design-goal factors of ISO 8041-1 Table 3 at the same frequencies. |
 | `deviation_percent` | `(measured / design - 1) * 100` elementwise, which is the quantity the standard's acceptance test is written in. |
-| `within_tolerance` | Whether each frequency is inside its band, with the deviation extended by `expanded_uncertainty_percent` as 13.1 and 14.1 require. |
 | `expanded_uncertainty_percent` | The testing laboratory's own expanded uncertainty, in per cent, that the verdict was reached with. `0,0` when the caller supplied none, which compares the bare deviation. |
+
+The Table 5 band ([`weighting_tolerance_percent`](/phonometry/reference/api/vibration/instrumentation/#weighting_tolerance_percent)) and the verdict it
+gives (`within_tolerance`) are read from the weighting and the
+frequencies, so a verification cannot be built against another band.
 
 ### WeightingVerification.failing_frequencies_hz
 
@@ -922,6 +947,18 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_weighting_verification`. |
+
+### WeightingVerification.within_tolerance
+
+*property*
+
+Whether each frequency is inside its band.
+
+The deviation is extended by `expanded_uncertainty_percent` as 13.1
+and 14.1 require. The -100 % of the two tails is the absence of a
+lower limit rather than a wide one, so it is the one place the
+laboratory's uncertainty is not subtracted: a response of exactly zero
+deviates by -100 % and still conforms.
 
 ### WeightingVerification.worst_deviation_percent
 

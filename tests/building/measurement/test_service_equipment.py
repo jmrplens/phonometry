@@ -716,6 +716,46 @@ def test_spread_check_needs_whole_stages() -> None:
         building.check_position_spread([35.0, 34.0, 36.0, 35.0])
 
 
+@pytest.mark.parametrize(
+    ("levels", "stage", "limit"),
+    [
+        # ISO/DIS 16032:2023 7.4.1 (E DIN EN ISO 16032:2023-05, PDF page 46,
+        # printed folio 8): "equal to, or less than 3,0 dB" after three
+        # readings, "less than 6,0 dB" after six, "less than 9,0 dB" after nine.
+        ([35.0, 34.0, 36.0], 1, 3.0),
+        ([35.0, 34.0, 36.0, 35.0, 33.0, 37.0], 2, 6.0),
+        ([35.0, 34.0, 36.0, 35.0, 33.0, 37.0, 35.0, 32.0, 38.0], 3, 9.0),
+    ],
+)
+def test_the_spread_limit_is_the_drafts_for_the_stage(
+    levels: list[float], stage: int, limit: float
+) -> None:
+    check = building.check_position_spread(levels)
+    assert check.stage == stage
+    assert check.limit_db == limit
+
+
+def test_the_spread_verdict_is_read_from_the_readings() -> None:
+    # The readings are the only field: an action, a spread or a stage cannot
+    # be handed to the check, so it cannot proceed on readings 8 dB apart.
+    real = building.check_position_spread([50.0, 58.0, 52.0])
+    assert [f.name for f in dataclasses.fields(real)] == ["levels_db"]
+    assert (real.spread_db, real.action, real.passes) == (8.0, "add_positions", False)
+    narrow = dataclasses.replace(real, levels_db=[50.0, 51.0, 52.0])
+    assert (narrow.spread_db, narrow.action, narrow.next_positions) == (
+        2.0,
+        "proceed",
+        (),
+    )
+    assert not real.levels_db.flags.writeable
+
+
+def test_a_spread_check_built_with_a_partial_stage_is_refused() -> None:
+    levels = [35.0, 34.0, 36.0, 35.0]
+    with pytest.raises(ValueError, match="PositionSpreadCheck"):
+        building.PositionSpreadCheck(levels_db=levels)
+
+
 def _positions(**kwargs: object) -> building.ServiceEquipmentPositionCheck:
     base: dict[str, object] = {
         "room_dimensions_m": (5.0, 4.0, 2.6),

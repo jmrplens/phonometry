@@ -1457,44 +1457,91 @@ def _standardize(
 class PositionSpreadCheck:
     r"""Whether the readings so far are enough to average (7.4.1).
 
+    The readings are the only field. The stage, the spread, the limit of the
+    stage and the action the draft prescribes are all read from them, so a
+    check cannot be built, or rewritten with :func:`dataclasses.replace`, with
+    an action the readings do not lead to.
+
     :ivar levels_db: The A-weighted levels read directly from the instrument,
         uncorrected, in the order of 7.4.1: corner, position 2, position 3,
         then (corner, 4, 5) and (corner, 6, 7) for each further stage, in dB.
-    :ivar stage: 1, 2 or 3: how many sets of three readings there are.
-    :ivar spread_db: The difference between the highest and lowest reading, in
-        dB.
-    :ivar limit_db: The spread this stage allows: 3,0 dB (inclusive), 6,0 dB or
-        9,0 dB (strict).
-    :ivar action: ``"proceed"`` to the corrections of 7.5 to 7.7,
-        ``"add_positions"`` for the corner again and two new room positions, or
-        ``"interrupt"`` when no further stage can pass: after nine readings, or
-        sooner when the spread already reaches 9,0 dB.
-    :ivar next_positions: The room positions to add, ``(4, 5)`` or ``(6, 7)``,
-        or ``()``.
-    :ivar corner_standard_deviation_db: Sample standard deviation of the corner
-        readings, in dB, which 7.4.1 takes as representative of the room
-        average when a statistical value (a 5 % value, the n-th highest) is
-        wanted; ``None`` with a single corner reading.
     """
 
     levels_db: np.ndarray
-    stage: int
-    spread_db: float
-    limit_db: float
-    action: Literal["proceed", "add_positions", "interrupt"]
-    next_positions: tuple[int, ...]
-    corner_standard_deviation_db: float | None
 
     def __post_init__(self) -> None:
-        """Reject a check whose readings do not make a whole number of stages.
+        """Hold the readings read-only and reject a partial stage.
 
-        :raises ValueError: if the level count is not 3, 6 or 9 or disagrees
-            with :attr:`stage`.
+        :raises ValueError: if the levels are not 3, 6 or 9 finite readings
+            in one row.
         """
-        n = np.asarray(self.levels_db).size
-        if n != _READINGS_PER_STAGE * self.stage or self.stage not in (1, 2, 3):
+        levels = np.atleast_1d(_as_levels(self.levels_db, "levels_db"))
+        if levels.ndim != 1 or levels.size not in (3, 6, 9):
             msg = "PositionSpreadCheck: 'levels_db' must hold 3, 6 or 9 readings, three per stage."
             raise ValueError(msg)
+        object.__setattr__(self, "levels_db", read_only_copy(levels))
+
+    @property
+    def stage(self) -> int:
+        """How many sets of three readings there are: 1, 2 or 3."""
+        return int(self.levels_db.size // _READINGS_PER_STAGE)
+
+    @property
+    def spread_db(self) -> float:
+        """The difference between the highest and lowest reading, in dB."""
+        return float(np.max(self.levels_db) - np.min(self.levels_db))
+
+    @property
+    def limit_db(self) -> float:
+        """The spread this stage allows, fixed by the draft for the stage.
+
+        :return: 3,0 dB after three readings (inclusive), 6,0 dB after six or
+            9,0 dB after nine (strict), in dB.
+        """
+        return _SPREAD_LIMITS[self.stage - 1]
+
+    @property
+    def action(self) -> Literal["proceed", "add_positions", "interrupt"]:
+        """What 7.4.1 prescribes for these readings.
+
+        :return: ``"proceed"`` to the corrections of 7.5 to 7.7 when the spread
+            is within :attr:`limit_db`, ``"add_positions"`` for the corner
+            again and two new room positions while a later stage can still
+            pass, or ``"interrupt"`` when none can: after nine readings, or
+            sooner when the spread already reaches 9,0 dB, since more readings
+            can only widen it.
+        """
+        spread, limit = self.spread_db, self.limit_db
+        within = (
+            spread <= limit + _LIMIT_SLACK
+            if self.stage == 1
+            else spread < limit - _LIMIT_SLACK
+        )
+        if within:
+            return "proceed"
+        reachable = spread < _SPREAD_LIMITS[-1] - _LIMIT_SLACK
+        if self.stage < len(_SPREAD_LIMITS) and reachable:
+            return "add_positions"
+        return "interrupt"
+
+    @property
+    def next_positions(self) -> tuple[int, ...]:
+        """The room positions to add, ``(4, 5)`` or ``(6, 7)``, or ``()``."""
+        first = 2 * self.stage + 2
+        count = 2 if self.action == "add_positions" else 0
+        return tuple(range(first, first + count))
+
+    @property
+    def corner_standard_deviation_db(self) -> float | None:
+        """Sample standard deviation of the corner readings, in dB.
+
+        7.4.1 takes it as representative of the room average when a
+        statistical value (a 5 % value, the n-th highest) is wanted.
+
+        :return: The deviation, or ``None`` with a single corner reading.
+        """
+        corners = self.levels_db[::_READINGS_PER_STAGE]
+        return float(np.std(corners, ddof=1)) if corners.size > 1 else None
 
     @property
     def passes(self) -> bool:
@@ -1571,34 +1618,7 @@ def check_position_spread(levels_db: ArrayLike) -> PositionSpreadCheck:
     if levels.ndim != 1 or levels.size not in (3, 6, 9):
         msg = "'levels_db' must hold 3, 6 or 9 readings: [corner, 2, 3] and each later stage."
         raise ValueError(msg)
-    stage = levels.size // _READINGS_PER_STAGE
-    limit = _SPREAD_LIMITS[stage - 1]
-    spread = float(np.max(levels) - np.min(levels))
-    within = (
-        spread <= limit + _LIMIT_SLACK if stage == 1 else spread < limit - _LIMIT_SLACK
-    )
-    # A spread can only widen as readings are added, and the last stage
-    # needs it under 9,0 dB: once it reaches that, no stage is left to pass.
-    reachable = spread < _SPREAD_LIMITS[-1] - _LIMIT_SLACK
-    action: Literal["proceed", "add_positions", "interrupt"]
-    following: tuple[int, ...]
-    if within:
-        action, following = "proceed", ()
-    elif stage < len(_SPREAD_LIMITS) and reachable:
-        action, following = "add_positions", (2 * stage + 2, 2 * stage + 3)
-    else:
-        action, following = "interrupt", ()
-    corners = levels[::_READINGS_PER_STAGE]
-    corner_sd = float(np.std(corners, ddof=1)) if corners.size > 1 else None
-    return PositionSpreadCheck(
-        levels_db=levels.copy(),
-        stage=stage,
-        spread_db=spread,
-        limit_db=limit,
-        action=action,
-        next_positions=following,
-        corner_standard_deviation_db=corner_sd,
-    )
+    return PositionSpreadCheck(levels_db=levels)
 
 
 # ---------------------------------------------------------------------------

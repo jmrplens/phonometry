@@ -226,23 +226,25 @@ def test_rigid_mass_calibration_validation() -> None:
         vibration.rigid_mass_calibration_check([0.1], [0.0], 10.0)
 
 
-def test_a_tolerance_mask_short_of_its_frequencies_is_refused() -> None:
-    """A mask that stops early would leave a pass standing over the rest.
-
-    :attr:`within_tolerance` is what carries the 7.5.2 verdict frequency by
-    frequency, and ``passed`` is stored rather than re-derived, so a mask
-    covering the first frequencies of the range says nothing about the ones
-    it never reached while the overall pass still reads true over all of
-    them. Only :meth:`plot` protests, and then from inside numpy's boolean
-    indexing, naming neither field.
-    """
+def test_a_measurement_short_of_its_frequencies_is_refused() -> None:
+    """A measurement that stops early would leave a pass over the rest."""
     f = np.geomspace(20.0, 2000.0, 12)
     res = vibration.rigid_mass_calibration_check(np.full(12, 0.1), f, mass=10.0)
-    short = res.within_tolerance[:8]
+    short = res.measured[:8]
     with pytest.raises(
-        ValueError, match=r"'within_tolerance' \(8\).*must each carry one value"
+        ValueError, match=r"'measured' \(8\).*must each carry one value"
     ):
-        dataclasses.replace(res, within_tolerance=short)
+        dataclasses.replace(res, measured=short)
+
+
+def test_the_five_percent_of_7_5_2_is_not_a_constructor_field() -> None:
+    """ISO 7626-2:2015 7.5.2 prints +/-5 %, so no check holds another one."""
+    res = vibration.rigid_mass_calibration_check([0.1], [100.0], mass=10.0)
+    names = {field.name for field in dataclasses.fields(res)}
+    assert names == {"frequencies", "measured", "mass", "quantity"}
+    assert res.tolerance == pytest.approx(0.05)
+    with pytest.raises(TypeError, match="passes"):
+        bool(res)
 
 
 # ---------------------------------------------------------------------------

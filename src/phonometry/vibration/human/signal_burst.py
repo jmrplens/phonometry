@@ -86,7 +86,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.validation import require_choice
+from ..._internal.validation import require_choice, require_positive
 from .exposure import (
     _params,
     frequency_weighting,
@@ -683,12 +683,11 @@ class SignalBurstVerification:
     :ivar quantities: The columns that were graded, in printed order.
     :ivar measured: The indications as supplied, one row per burst length and
         one column per quantity.
-    :ivar printed: The Table 7, 8 or 9 cells they are judged against, scaled
-        by ``amplitude_m_s2``.
-    :ivar deviation_percent: ``(measured / printed - 1) * 100``, elementwise.
-    :ivar tolerance_percent: The printed tolerance of each column, from
-        :data:`BURST_TOLERANCE_PERCENT`.
-    :ivar within_tolerance: Whether each cell is inside its tolerance.
+
+    The printed cells (:attr:`printed`), their tolerances
+    (:attr:`tolerance_percent`) and the verdict are read from the tables with
+    the application, the row, the burst lengths and the columns, so a
+    verification cannot be built against other cells.
     """
 
     application: str
@@ -697,10 +696,68 @@ class SignalBurstVerification:
     cycle_counts: tuple[int | None, ...]
     quantities: tuple[str, ...]
     measured: NDArray[np.float64]
-    printed: NDArray[np.float64]
-    deviation_percent: NDArray[np.float64]
-    tolerance_percent: NDArray[np.float64]
-    within_tolerance: NDArray[np.bool_]
+
+    def __post_init__(self) -> None:
+        """Reject cells the tables do not print, or indications of another shape.
+
+        :raises ValueError: if a burst length or a column is not printed for
+            the application and row, the amplitude is not positive, or the
+            indications are not one row per burst length and one column per
+            quantity.
+        """
+        require_positive(self.amplitude_m_s2, "amplitude_m_s2")
+        for cycles in self.cycle_counts:
+            cells = SIGNAL_BURST_RESPONSE.get(
+                (self.application, self.weighting, cycles)
+            )
+            if cells is None or any(q not in cells for q in self.quantities):
+                msg = (
+                    "SignalBurstVerification: Tables 7 to 9 print no cell for "
+                    f"{self.application!r}, {self.weighting!r}, {cycles} cycles "
+                    f"and {self.quantities}."
+                )
+                raise ValueError(msg)
+        shape = (len(self.cycle_counts), len(self.quantities))
+        if np.shape(self.measured) != shape:
+            msg = (
+                "SignalBurstVerification: 'measured' must hold one row per burst "
+                f"length and one column per quantity, {shape}."
+            )
+            raise ValueError(msg)
+
+    @property
+    def printed(self) -> NDArray[np.float64]:
+        """The Table 7, 8 or 9 cells, scaled by ``amplitude_m_s2``."""
+        return self.amplitude_m_s2 * np.array(
+            [
+                [
+                    SIGNAL_BURST_RESPONSE[self.application, self.weighting, cycles][q]
+                    for q in self.quantities
+                ]
+                for cycles in self.cycle_counts
+            ],
+            dtype=np.float64,
+        )
+
+    @property
+    def deviation_percent(self) -> NDArray[np.float64]:
+        """``(measured / printed - 1) * 100``, elementwise."""
+        return (
+            np.asarray(self.measured, dtype=np.float64) / self.printed - 1.0
+        ) * 100.0
+
+    @property
+    def tolerance_percent(self) -> NDArray[np.float64]:
+        """The printed tolerance of each column, from :data:`BURST_TOLERANCE_PERCENT`."""
+        return np.array(
+            [BURST_TOLERANCE_PERCENT[q] for q in self.quantities], dtype=np.float64
+        )
+
+    @property
+    def within_tolerance(self) -> NDArray[np.bool_]:
+        """Whether each cell is inside its tolerance."""
+        within = settled(np.abs(self.deviation_percent)) <= self.tolerance_percent
+        return np.asarray(within, dtype=np.bool_)
 
     @property
     def passes(self) -> bool:
@@ -833,21 +890,6 @@ def verify_signal_burst_response(
         # failing meter, it is a misread column.
         msg = "'measured' must be non-negative and finite."
         raise ValueError(msg)
-    printed = amplitude * np.array(
-        [
-            [
-                SIGNAL_BURST_RESPONSE[test.application, row, cycles][q]
-                for q in quantities
-            ]
-            for cycles in cycle_counts
-        ],
-        dtype=np.float64,
-    )
-    tolerance = np.array(
-        [BURST_TOLERANCE_PERCENT[q] for q in quantities], dtype=np.float64
-    )
-    deviation = (values / printed - 1.0) * 100.0
-    within = settled(np.abs(deviation)) <= tolerance[np.newaxis, :]
     return SignalBurstVerification(
         application=test.application,
         weighting=row,
@@ -855,8 +897,4 @@ def verify_signal_burst_response(
         cycle_counts=cycle_counts,
         quantities=quantities,
         measured=values,
-        printed=printed,
-        deviation_percent=deviation,
-        tolerance_percent=tolerance,
-        within_tolerance=np.asarray(within, dtype=np.bool_),
     )

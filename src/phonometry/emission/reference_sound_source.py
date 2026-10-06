@@ -926,52 +926,147 @@ def reference_source_calibration(
 class ReferenceSoundSourceVerdict:
     r"""Whether a source meets the performance requirements of ISO 6926 clause 5.
 
-    :ivar frequencies_hz: The one-third octave bands, ascending, in hertz.
+    Only what was measured is a field. The limits of clause 5 (Table 1, the
+    0,3 dB of the supply, the 12 dB and 16 dB ranges, the 3 dB and 4 dB steps,
+    the +6 dB of the directivity) are read from the bands as properties, and so
+    are the spectrum figures they are compared with, so a verdict cannot be
+    built against another limit.
+
+    :ivar frequencies_hz: The one-third octave bands, contiguous and
+        ascending, in hertz.
     :ivar sound_power_level_db: The calibrated :math:`L_W` per band.
     :ivar repeatability_db: :math:`\sigma_r` of Formula (1) per band, or
         ``None`` when no repetitions were given.
-    :ivar repeatability_limit_db: The Table 1 limit per band.
     :ivar supply_variation_db: The largest change of :math:`L_W` per band over
         the declared range of the electrical or mechanical supply (5.2), or
         ``None`` when not given.
-    :ivar supply_limit_db: 0,3 dB either way (5.2).
-    :ivar adjacent_step_db: The largest difference from a neighbouring band,
-        per band (5.4).
-    :ivar adjacent_limit_db: The step that band is held to: 3 dB from 100 Hz
-        to 10 000 Hz, 4 dB where a neighbour lies in an extended range.
-    :ivar core_range_db: The spread of :math:`L_W` from 100 Hz to 10 000 Hz.
-    :ivar core_range_limit_db: 12 dB (5.4).
-    :ivar extended_range_db: The spread over every band when the range is
-        extended beyond 100 Hz to 10 000 Hz, else ``nan``.
-    :ivar extended_range_limit_db: 16 dB (5.4).
     :ivar directivity_index_db: The highest directivity index per band, or
         ``None`` when not given.
-    :ivar directivity_limit_db: +6 dB (5.5).
     :ivar reverberation_rooms_only: Whether the source is labelled "For use as
         a reference sound source in reverberation test rooms complying with
         ISO 3741", which lifts 5.5.
-    :ivar frequency_range_met: Whether every band from 100 Hz to 10 000 Hz is
-        present (5.4).
-    :ivar not_judged: The requirements without data, by name.
     """
 
     frequencies_hz: np.ndarray
     sound_power_level_db: np.ndarray
     repeatability_db: np.ndarray | None
-    repeatability_limit_db: np.ndarray
     supply_variation_db: np.ndarray | None
-    supply_limit_db: float
-    adjacent_step_db: np.ndarray
-    adjacent_limit_db: np.ndarray
-    core_range_db: float
-    core_range_limit_db: float
-    extended_range_db: float
-    extended_range_limit_db: float
     directivity_index_db: np.ndarray | None
-    directivity_limit_db: float
     reverberation_rooms_only: bool
-    frequency_range_met: bool
-    not_judged: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        """Reject a verdict whose bands are not contiguous one-third octaves.
+
+        :raises ValueError: for bands that are not ascending contiguous
+            one-third octaves, levels that are not finite and one per band, or
+            a per-band figure of another length.
+        """
+        freqs = np.atleast_1d(np.asarray(self.frequencies_hz, dtype=np.float64))
+        lw = np.atleast_1d(np.asarray(self.sound_power_level_db, dtype=np.float64))
+        if lw.shape != freqs.shape or not np.all(np.isfinite(lw)):
+            msg = "the sound power levels must be finite, one per band."
+            raise ValueError(msg)
+        if np.any(np.diff(self._band_indices) != 1):
+            msg = "the bands must be contiguous one-third octaves, ascending."
+            raise ValueError(msg)
+        for name in ("repeatability_db", "supply_variation_db", "directivity_index_db"):
+            value = getattr(self, name)
+            if value is not None and np.asarray(value).shape != freqs.shape:
+                msg = f"'{name}' must hold one value per band."
+                raise ValueError(msg)
+
+    @property
+    def _band_indices(self) -> np.ndarray:
+        return np.array(
+            [_band_index(float(f)) for f in np.atleast_1d(self.frequencies_hz)],
+            dtype=np.int64,
+        )
+
+    @property
+    def _core(self) -> np.ndarray:
+        ks = self._band_indices
+        return (ks >= _K_100) & (ks <= _K_10000)
+
+    @property
+    def repeatability_limit_db(self) -> np.ndarray:
+        r"""The Table 1 limit on :math:`\sigma_r` per band, in dB (5.2).
+
+        :return: 0,8 dB up to 80 Hz, 0,4 dB up to 160 Hz, 0,2 dB above.
+        """
+        return np.array(
+            [_repeatability_limit(int(k)) for k in self._band_indices],
+            dtype=np.float64,
+        )
+
+    @property
+    def supply_limit_db(self) -> float:
+        """The 0,3 dB either way of 5.2, in dB."""
+        return _SUPPLY_VARIATION_DB
+
+    @property
+    def adjacent_step_db(self) -> np.ndarray:
+        """The largest difference from a neighbouring band, per band (5.4), in dB."""
+        return _spectrum_steps(
+            self._band_indices, np.asarray(self.sound_power_level_db, np.float64)
+        )[0]
+
+    @property
+    def adjacent_limit_db(self) -> np.ndarray:
+        """The step each band is held to (5.4), in dB.
+
+        :return: 3 dB from 100 Hz to 10 000 Hz, 4 dB where a neighbour lies in
+            an extended range; per band, the pair that comes closest to its
+            limit.
+        """
+        return _spectrum_steps(
+            self._band_indices, np.asarray(self.sound_power_level_db, np.float64)
+        )[1]
+
+    @property
+    def core_range_db(self) -> float:
+        """The spread of :math:`L_W` from 100 Hz to 10 000 Hz, in dB."""
+        core = np.asarray(self.sound_power_level_db, dtype=np.float64)[self._core]
+        return float(np.ptp(core)) if core.size else float("nan")
+
+    @property
+    def core_range_limit_db(self) -> float:
+        """The 12 dB of 5.4, in dB."""
+        return _CORE_RANGE_DB
+
+    @property
+    def extended_range_db(self) -> float:
+        """The spread over every band when the range is extended, else ``nan``."""
+        if not bool(np.any(~self._core)):
+            return float("nan")
+        return float(np.ptp(np.asarray(self.sound_power_level_db, dtype=np.float64)))
+
+    @property
+    def extended_range_limit_db(self) -> float:
+        """The 16 dB of 5.4, in dB."""
+        return _EXTENDED_RANGE_DB
+
+    @property
+    def directivity_limit_db(self) -> float:
+        """The +6 dB of 5.5, in dB."""
+        return _MAX_DIRECTIVITY_DB
+
+    @property
+    def frequency_range_met(self) -> bool:
+        """Whether every band from 100 Hz to 10 000 Hz is present (5.4)."""
+        return bool(np.sum(self._core) == _K_10000 - _K_100 + 1)
+
+    @property
+    def not_judged(self) -> tuple[str, ...]:
+        """The requirements without data, by name."""
+        unjudged = (
+            ("temporal steadiness", self.repeatability_db is None),
+            ("supply variation", self.supply_variation_db is None),
+            (
+                "directivity",
+                self.directivity_index_db is None and not self.reverberation_rooms_only,
+            ),
+        )
+        return tuple(name for name, missing in unjudged if missing)
 
     @property
     def stability_met(self) -> bool | None:
@@ -1206,47 +1301,19 @@ def verify_reference_sound_source(
     freqs, lw, directivity = _clause5_levels(
         calibration, frequencies_hz, directivity_index_db
     )
-    if lw.shape != freqs.shape or not np.all(np.isfinite(lw)):
+    if lw.shape != freqs.shape:
         msg = "the sound power levels must be finite, one per band."
-        raise ValueError(msg)
-    ks = np.array([_band_index(float(f)) for f in freqs], dtype=np.int64)
-    if np.any(np.diff(ks) != 1):
-        msg = "the bands must be contiguous one-third octaves, ascending."
         raise ValueError(msg)
     directivity = _highest_directivity(directivity, freqs)
     repeat = _repeatability_of(repeated_levels_db, freqs.size)
     supply = _supply_variation_of(supply_variation_db, freqs)
-    limits = np.array([_repeatability_limit(int(k)) for k in ks], dtype=np.float64)
-    core = (ks >= _K_100) & (ks <= _K_10000)
-    range_met = bool(np.sum(core) == _K_10000 - _K_100 + 1)
-    core_levels = lw[core]
-    core_range = float(np.ptp(core_levels)) if core_levels.size else float("nan")
-    extended_range = float(np.ptp(lw)) if bool(np.any(~core)) else float("nan")
-    step, step_limit = _spectrum_steps(ks, lw)
-    unjudged = (
-        ("temporal steadiness", repeat is None),
-        ("supply variation", supply is None),
-        ("directivity", directivity is None and not reverberation_rooms_only),
-    )
-    not_judged = [name for name, missing in unjudged if missing]
     return ReferenceSoundSourceVerdict(
         frequencies_hz=read_only_copy(freqs),
         sound_power_level_db=read_only_copy(lw),
         repeatability_db=repeat,
-        repeatability_limit_db=limits,
         supply_variation_db=read_only_copy(supply),
-        supply_limit_db=_SUPPLY_VARIATION_DB,
-        adjacent_step_db=step,
-        adjacent_limit_db=step_limit,
-        core_range_db=core_range,
-        core_range_limit_db=_CORE_RANGE_DB,
-        extended_range_db=extended_range,
-        extended_range_limit_db=_EXTENDED_RANGE_DB,
         directivity_index_db=read_only_copy(directivity),
-        directivity_limit_db=_MAX_DIRECTIVITY_DB,
         reverberation_rooms_only=reverberation_rooms_only,
-        frequency_range_met=range_met,
-        not_judged=tuple(not_judged),
     )
 
 
@@ -1254,14 +1321,40 @@ def verify_reference_sound_source(
 class ReferenceSourceDriftResult:
     """Whether a reference sound source has drifted enough to be recalibrated.
 
+    The limit is the clause's, 2,83 times Table 1, read from the bands as
+    :attr:`limit_db`, so a result cannot be built against another one.
+
     :ivar frequencies_hz: The one-third octave bands, in hertz.
     :ivar change_db: The latest level less the reference one, per band.
-    :ivar limit_db: 2,83 times the Table 1 value of each band (5.6).
     """
 
     frequencies_hz: np.ndarray
     change_db: np.ndarray
-    limit_db: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a result whose changes do not follow its bands.
+
+        :raises ValueError: for a change per band that does not match the
+            bands or is not finite, or a band outside Table 1.
+        """
+        freqs = np.atleast_1d(np.asarray(self.frequencies_hz, dtype=np.float64))
+        change = np.atleast_1d(np.asarray(self.change_db, dtype=np.float64))
+        if change.shape != freqs.shape or not np.all(np.isfinite(change)):
+            msg = "'change_db' must hold one finite value per band."
+            raise ValueError(msg)
+        for f in freqs:
+            _repeatability_limit(_band_index(float(f)))
+
+    @property
+    def limit_db(self) -> np.ndarray:
+        """2,83 times the Table 1 value of each band (5.6), in dB."""
+        return _DRIFT_FACTOR * np.array(
+            [
+                _repeatability_limit(_band_index(float(f)))
+                for f in np.atleast_1d(self.frequencies_hz)
+            ],
+            dtype=np.float64,
+        )
 
     @property
     def passes(self) -> bool:
@@ -1338,13 +1431,9 @@ def verify_reference_source_drift(
     if not (np.all(np.isfinite(reference)) and np.all(np.isfinite(latest))):
         msg = "the levels must be finite."
         raise ValueError(msg)
-    limit = _DRIFT_FACTOR * np.array(
-        [_repeatability_limit(_band_index(float(f))) for f in freqs], dtype=np.float64
-    )
     return ReferenceSourceDriftResult(
         frequencies_hz=read_only_copy(freqs),
         change_db=latest - reference,
-        limit_db=limit,
     )
 
 

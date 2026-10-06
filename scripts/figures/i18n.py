@@ -2079,7 +2079,7 @@ _ES_EXACT = {
     "reception threshold:\nthe speech is barely above\nthe room's own noise": "umbral de recepción:\nla voz apenas supera\nel ruido propio de la sala",
     "auditory masking:\nloud low bands mask\nthe high ones": "enmascaramiento auditivo:\nlas bandas graves intensas\nenmascaran las agudas",
     "the standard's fallback level:\n60 dB(A) at 1 m from the source": "el nivel por defecto de la norma:\n60 dB(A) a 1 m de la fuente",
-    "ISO 9612 Annex D: the Annex C budget, term by term": "Anexo D de ISO 9612: el presupuesto del anexo C, término a término",
+    "ISO 9612 Annex D: the Annex C budget, term by term": "Anexo D de ISO 9612: el balance del anexo C, término a término",
     "Contribution to $u^2$ [dB²]": "Contribución a $u^2$ [dB²]",
     r"sampling  $(c_{1\mathrm{a}}u_{1\mathrm{a}})^2$": r"muestreo  $(c_{1\mathrm{a}}u_{1\mathrm{a}})^2$",
     r"duration  $(c_{1\mathrm{b}}u_{1\mathrm{b}})^2$": r"duración  $(c_{1\mathrm{b}}u_{1\mathrm{b}})^2$",
@@ -2111,7 +2111,7 @@ _ES_EXACT = {
     "the worked case: $H$ = 20.2, $N$ = 24.8\n45.0 dB sum → 40.8 dB HTLAN, "
     "4.2 dB removed": "el caso del ejemplo: $H$ = 20,2, $N$ = 24,8\n"
     "suma de 45,0 dB → 40,8 dB de HTLAN, 4,2 dB restados",
-    "GUM uncertainty budget": "Presupuesto de incertidumbre (GUM)",
+    "GUM uncertainty budget": "Balance de incertidumbre (GUM)",
     "Contribution to combined uncertainty [dB]": "Contribución a la incertidumbre combinada [dB]",
     "Monte Carlo (Suppl 1)": "Monte Carlo (Supl. 1)",
     "GUM Gaussian": "Gaussiana GUM",

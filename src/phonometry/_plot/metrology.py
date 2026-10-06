@@ -124,7 +124,7 @@ _SLM_EVERY_RESULT = "Every result of the clause"
 
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
-    "GUM uncertainty budget: $y$ = {value}": "Presupuesto de incertidumbre (GUM): $y$ = {value}",
+    "GUM uncertainty budget: $y$ = {value}": "Balance de incertidumbre (GUM): $y$ = {value}",
     "{pct} % coverage interval": "Intervalo de cobertura {pct} %",
     "Output quantity $y$": "Magnitud de salida $y$",
     "Probability density": "Densidad de probabilidad",
@@ -243,7 +243,7 @@ _STRINGS: dict[str, str] = {
     "{label}, mean": "{label}, media",
     r"$f_0$ = {f} Hz, where it is zero": r"$f_0$ = {f} Hz, donde es nula",
     _STANDARD_UNCERTAINTY_LABEL: r"Incertidumbre típica $u_i$ [dB]",
-    "Uncertainty budget at {f} Hz (IEC 62585 Annex I)": "Presupuesto de incertidumbre a {f} Hz (IEC 62585, anexo I)",
+    "Uncertainty budget at {f} Hz (IEC 62585 Annex I)": "Balance de incertidumbre a {f} Hz (IEC 62585, anexo I)",
     "Type B": "Tipo B",
     "Type A, from repeat measurements": "Tipo A, de medidas repetidas",
     "Maximum, clause {n}": "Máximo, apartado {n}",

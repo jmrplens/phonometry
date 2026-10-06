@@ -2131,7 +2131,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   dígito de guarda se imprimiría **0,12(1)**; el 0,12(4) impreso es
   $2{,}11 \times 0{,}0590 = 0{,}124\,49$ dB. Con los dos decimales con que se
   da la corrección (componente a14), ambos se leen 0,12 dB.
-- **Evidencia:** el presupuesto recalculado a partir de los quince valores y
+- **Evidencia:** el balance recalculado a partir de los quince valores y
   divisores impresos, y el cuantil de Student evaluado en los grados de
   libertad impresos. Verificado en la página 40 del PDF (p. 38 impresa) de
   BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012
@@ -5933,7 +5933,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   impreso:
   [`static_pressure_from_altitude`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_in_situ.py)
   evalúa la Ec. (C.2) y el `c2` del resultado la corrección, así que un
-  emplazamiento a 500 m recibe los 0,26 dB que da el anexo. El presupuesto
+  emplazamiento a 500 m recibe los 0,26 dB que da el anexo. El balance
   del Anexo E no está modelado. Fijado por
   `test_static_pressure_from_altitude_eq_c2` en
   [`tests/emission/test_sound_power_in_situ.py`](https://github.com/jmrplens/phonometry/blob/main/tests/emission/test_sound_power_in_situ.py)
@@ -5974,7 +5974,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El impreso:** $c_i = 0{,}5$.
 - **El problema:** el apartado E.4.2.6.3, que deduce esa misma fila, imprime lo
   contrario junto con su razón: «Sampling directly affects the total
-  uncertainty so $c_\mathrm{mic} = 1$». El presupuesto de E.4.2.12 se pone del
+  uncertainty so $c_\mathrm{mic} = 1$». El balance de E.4.2.12 se pone del
   lado del apartado y no de la tabla: su sexto término es $0{,}7^2$, que es la
   contribución de 0,7 dB que cita E.4.2.6.3 tomada con $c_\mathrm{mic} = 1$. La
   fila vecina zanja que el 0,5 no es una convención general de las filas de
@@ -5992,7 +5992,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $\delta_\mathrm{mic}$ correspondiente de la Tabla H.2 de ISO 3744:2010 lleva
   $c_i = 1$, y su H.4.2.9 imprime también $c_\mathrm{mic} = 1$.
 - **Evidencia:** la celda de la tabla, el apartado que la deduce y el
-  presupuesto que la suma, leídos en las páginas 44, 47 y 50 del PDF (pp. 35,
+  balance que la suma, leídos en las páginas 44, 47 y 50 del PDF (pp. 35,
   38 y 41 impresas) de BS EN ISO 3747:2010; la comparación con la familia en
   las páginas 79 y 82 del PDF (pp. 70 y 73 impresas) de BS EN ISO 3744:2010.
 - **Comportamiento de la biblioteca:** el balance de incertidumbre del
@@ -10983,8 +10983,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   lista habla de la posición $i^\mathrm{th}$; $L_{p\mathrm{A}I}$ no nombra
   ninguna magnitud de la norma.
 - **Evidencia:** la Ecuación (2), su lista de definiciones y la NOTA en la
-  página 15 del PDF (p. 9 impresa) de BS EN 61063:1996, el texto inglés de
-  EN 61063:1996, que reproduce IEC 1063:1991 sin modificaciones.
+  página 29 del PDF (p. 27 impresa) de la IEC 61063:1991, la primera edición
+  bilingüe de 1991-04, cuyo texto francés de la página 28 del PDF (p. 26
+  impresa) imprime el mismo $L_{p\mathrm{A}I}$ en la lista y en la NOTA; y en
+  la página 15 del PDF (p. 9 impresa) de BS EN 61063:1996, el texto inglés de
+  EN 61063:1996, que reproduce sin modificaciones esa misma IEC 61063:1991,
+  allí numerada IEC 1063:1991.
 - **Comportamiento de la biblioteca:** `turbine_sound_power` promedia los
   niveles corregidos de cada posición, $L_{p\mathrm{A}i}$, por la
   Ecuación (2), y `arithmetic_mean_allowed` lee la NOTA sobre el rango de

@@ -2576,6 +2576,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ratio, and where one of them counted the figures in the documentation it now
   counts the material values read from printed pages and links to the
   catalogue that holds them. The fiche number links to the new index.
+- **The Spanish edition calls an uncertainty budget a "balance de
+  incertidumbre".** It said "presupuesto de incertidumbre", a calque of the
+  English "budget"; the Spanish adoption of ISO 3746 titles its Table D.2
+  "Balance de incertidumbre". The Spanish titles that
+  `metrology.UncertaintyResult.plot` and
+  `metrology.CorrectionUncertaintyBudget.plot` draw with `language="es"` now
+  read "Balance de incertidumbre (GUM)" and "Balance de incertidumbre a ... Hz
+  (IEC 62585, anexo I)", as the comparison calibration budgets of
+  IEC 61094-5 and IEC 61094-8 already did, and the Spanish guides, figures and
+  errata register use the same words for every uncertainty budget. The sonar
+  budget of the underwater propagation solvers guide says "balance de sonar"
+  too, the word its figure already used. A budget in any other sense, a noise
+  or absorption budget, keeps its word.
 
 ### Fixed
 

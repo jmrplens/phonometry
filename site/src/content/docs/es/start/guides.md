@@ -270,7 +270,7 @@ IEC 61094-2, IEC 61094-3, IEC 61094-5, IEC 61094-8 y la GUM.
   incidencia aleatoria y en campo difuso.
 - [Correcciones de campo libre de un sonómetro (IEC 62585)](/phonometry/es/signals/metrology/free-field-corrections/):
   el valor de ajuste a la frecuencia de comprobación de la calibración, las
-  correcciones para un calibrador, un acoplador y un actuador, su presupuesto
+  correcciones para un calibrador, un acoplador y un actuador, su balance
   de incertidumbre y los máximos de los apartados 9 a 14 como dictamen y como
   ficha.
 - [Ensayos periódicos de un sonómetro (IEC 61672-3)](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/):
@@ -623,7 +623,7 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 y DIN 4150-3.
   la rigidez dinámica de transferencia y el factor de pérdidas de un aislador por
   los métodos directo, indirecto y de punto de excitación, promediada en bandas
   de tercio de octava, con las comprobaciones de adecuación del banco y el
-  presupuesto de incertidumbre del Anexo B.
+  balance de incertidumbre del Anexo B.
 - [Daños en estructuras por vibración (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
   las velocidades de pico de referencia con las que se juzgan un cimiento, el
   plano de la última planta y una tubería enterrada, y la tensión de flexión que

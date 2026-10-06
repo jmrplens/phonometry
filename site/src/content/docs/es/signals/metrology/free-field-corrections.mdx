@@ -1,6 +1,6 @@
 ---
 title: "Correcciones de campo libre de un sonómetro (IEC 62585)"
-description: "Lo que la IEC 62585:2012 pide a las correcciones que necesita el ensayo periódico de un sonómetro: el valor de ajuste a la frecuencia de comprobación de la calibración, las correcciones de campo libre para un calibrador multifrecuencia, un acoplador de comparación y un actuador electrostático, el presupuesto de incertidumbre del Anexo I con su factor de cobertura de Welch-Satterthwaite, los máximos de los apartados 9 a 14 como dictamen y como ficha, y las frecuencias exactas del Anexo H."
+description: "Lo que la IEC 62585:2012 pide a las correcciones que necesita el ensayo periódico de un sonómetro: el valor de ajuste a la frecuencia de comprobación de la calibración, las correcciones de campo libre para un calibrador multifrecuencia, un acoplador de comparación y un actuador electrostático, el balance de incertidumbre del Anexo I con su factor de cobertura de Welch-Satterthwaite, los máximos de los apartados 9 a 14 como dictamen y como ficha, y las frecuencias exactas del Anexo H."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -8,7 +8,7 @@ references:
     title: "Electroacoustics — Methods to determine corrections to obtain the free-field response of a sound level meter"
     designation: "IEC 62585:2012"
     primary: true
-    note: "Los métodos implementados: el valor de ajuste del Anexo A, las correcciones de las Fórmulas (D.7), (E.6) y (F.13), el presupuesto de incertidumbre del Anexo I (Tablas I.1 a I.3), las incertidumbres expandidas máximas de los apartados 9 a 14, la componente de presión estática del apartado 6 y las frecuencias exactas del Anexo H (Tabla H.1). Leída en BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012 sin cambios."
+    note: "Los métodos implementados: el valor de ajuste del Anexo A, las correcciones de las Fórmulas (D.7), (E.6) y (F.13), el balance de incertidumbre del Anexo I (Tablas I.1 a I.3), las incertidumbres expandidas máximas de los apartados 9 a 14, la componente de presión estática del apartado 6 y las frecuencias exactas del Anexo H (Tabla H.1). Leída en BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012 sin cambios."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2013
@@ -29,7 +29,7 @@ references:
     publisher: "BIPM"
     url: "https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf"
     doi: "10.59161/JCGM100-2008E"
-    note: "La ley de propagación de la incertidumbre y los grados de libertad efectivos de Welch-Satterthwaite (anexo G.4) sobre los que se construye el presupuesto del Anexo I. Publicada también como ISO/IEC Guide 98-3:2008."
+    note: "La ley de propagación de la incertidumbre y los grados de libertad efectivos de Welch-Satterthwaite (anexo G.4) sobre los que se construye el balance del Anexo I. Publicada también como ISO/IEC Guide 98-3:2008."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -52,7 +52,7 @@ correcciones, la incertidumbre que pueden llevar y el valor de ajuste que el
 manual da a la frecuencia de comprobación de la calibración.
 
 Esta página recorre cada paso sobre un sonómetro sintético de clase 1 y sobre
-los dos presupuestos resueltos que imprime la norma.
+los dos balances resueltos que imprime la norma.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="Dos paneles frente a la frecuencia en las nueve octavas exactas de 63 Hz a 16 kHz. Izquierda: la corrección de campo libre de un sonómetro sintético con un calibrador multifrecuencia por la Fórmula (D.7), cerca de 0 dB hasta 1 kHz y subiendo a 0,6 dB a 4 kHz, 1,7 dB a 8 kHz y 5 dB a 16 kHz, una banda estrecha a su alrededor para el intervalo de tres micrófonos, y la corrección de campo libre del micrófono de referencia en trazos, por encima de ella hasta 500 Hz, igual a 1 kHz y por debajo más arriba. Derecha: la corrección del mismo sonómetro con un actuador electrostático por la Fórmula (F.13), nula a 1 kHz por construcción y subiendo a 7,4 dB a 16 kHz, con la sensibilidad normalizada del canal de referencia en trazos" width="100%" />
 
@@ -145,7 +145,7 @@ ninguno de los dos necesita una calibración absoluta.
 
 | Requisito | Valor | Apartado |
 | :--- | :--- | :--- |
-| Ambiente | De 80 kPa a 105 kPa, de 20 °C a 26 °C, de 25 % a 70 % de humedad relativa; por debajo de 97 kPa entra una componente más en el presupuesto | 6 |
+| Ambiente | De 80 kPa a 105 kPa, de 20 °C a 26 °C, de 25 % a 70 % de humedad relativa; por debajo de 97 kPa entra una componente más en el balance | 6 |
 | Condiciones de referencia | 23 °C, 101,325 kPa, 50 % de humedad relativa | 4 |
 | Montaje en campo libre | Sobre una varilla del diámetro del micrófono; la fuente a más de 1 m y a no menos de seis veces la mayor dimensión del sonómetro; sonido en la dirección de referencia | 6 |
 | Soporte del sonómetro | Una varilla no vertical por detrás, métodos 1 o 2 de la Figura 1 (el 2 con menos de 60°); el método 3 no se usa | 6 |
@@ -263,7 +263,7 @@ frecuencia, de modo que su nivel simulado es el mismo a $f$ y a $f_0$ (NOTA 4);
 se pasa `actuator_level_db=` cuando no es así, y `reference_channel_gain_db=`
 para un canal de referencia que no sea plano.
 
-## 4. El presupuesto de incertidumbre del Anexo I
+## 4. El balance de incertidumbre del Anexo I
 
 La Tabla I.1 enumera quince componentes probables de la incertidumbre de una
 corrección medida con un acoplador de comparación, cada una con la
@@ -272,7 +272,7 @@ rectangular entre $\sqrt{3}$ para la mayoría, la incertidumbre expandida de
 $C_\mathrm{FF,RM}$ según la IEC/TS 61094-7 entre 2, y la repetibilidad de las
 medidas repetidas entre 1, con sus grados de libertad. Las Tablas I.2 e I.3 la
 rellenan a 1 kHz y a 8 kHz. `metrology.correction_uncertainty_budget`
-construye el presupuesto sobre `metrology.combine_uncertainty`, con cada
+construye el balance sobre `metrology.combine_uncertainty`, con cada
 componente como una corrección que entra en la Fórmula (E.6) con coeficiente
 de sensibilidad $\pm 1$, y toma el factor de cobertura de los grados de
 libertad efectivos de Welch-Satterthwaite para un nivel de confianza del 95 %
@@ -321,7 +321,7 @@ excitación de un actuador.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty.svg" alt="Dos gráficos de barras de la incertidumbre típica de cada una de las quince componentes de la Tabla I.1 de la IEC 62585, rotuladas de a1 a a15. Izquierda, a 1000 Hz: las barras mayores son a7, la corrección de campo libre del micrófono de referencia, y a15, la repetibilidad, ambas de 0,030 dB, y después a5 con 0,029 dB; la incertidumbre típica combinada de 0,0590 dB se marca en trazos y el título dice nu_eff = 29,98, k = 2,04, U = 0,121 dB. Derecha, a 8000 Hz: a7 crece a 0,085 dB y a11 y a12, el campo libre y los soportes, a 0,060 dB cada una, con la repetibilidad en 0,060 dB; la incertidumbre típica combinada es 0,1400 dB y el título dice nu_eff = 59,33, k = 2,00, U = 0,280 dB. La barra de la repetibilidad lleva un segundo color como única componente de tipo A" width="100%" />
 
-*Los presupuestos de las Tablas I.2 e I.3, una barra por componente y la
+*Los balances de las Tablas I.2 e I.3, una barra por componente y la
 estadística aparte.*
 
 ## 5. La incertidumbre máxima permitida, y el dictamen
@@ -347,7 +347,7 @@ micrófono no es adecuado para esa fuente salvo que más muestras demuestren lo
 contrario. `metrology.verify_correction_uncertainty` juzga los dos, y una
 frecuencia a menos del 2 % de un límite se lee como ese límite, así que los
 3 981 Hz exactos de la banda de 4 kHz quedan «hasta 4 kHz inclusive». Aquí cada
-octava de la corrección del calibrador recibe un presupuesto como el de la
+octava de la corrección del calibrador recibe un balance como el de la
 Tabla I.2 por debajo de 1 kHz, con una referencia, un campo y una repetibilidad
 que crecen por encima:
 
@@ -470,7 +470,7 @@ calibrador acústico multifrecuencia (Fórmula (D.7)), un acoplador de
 comparación (Fórmula (E.6), con las lecturas nombradas por lo que miden) y un
 actuador electrostático (Fórmula (F.13), normalizada a la frecuencia de
 comprobación de la calibración), promediadas entre las determinaciones y
-conservando su intervalo entre micrófonos; el presupuesto de incertidumbre del
+conservando su intervalo entre micrófonos; el balance de incertidumbre del
 Anexo I con las quince componentes de la Tabla I.1, la componente de presión
 estática del apartado 6 y el factor de cobertura de Welch-Satterthwaite; los
 máximos de los apartados 9 a 14 y el requisito sobre el intervalo de los
@@ -516,7 +516,7 @@ un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests
   aleatoria.
 - [Incertidumbre de medida](/phonometry/es/signals/metrology/gum-uncertainty/):
   la ley de propagación de la GUM y los grados de libertad de
-  Welch-Satterthwaite sobre los que se construye el presupuesto.
+  Welch-Satterthwaite sobre los que se construye el balance.
 - [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/):
   lo que afirma la clase de un sonómetro según la IEC 61672-1, y cuáles de sus
   ensayos ejecuta la biblioteca.

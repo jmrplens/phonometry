@@ -68,6 +68,9 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`metrology.free_field_corrections`](/phonometry/reference/api/metrology/free-field-corrections/) | Corrections that bring a sound level meter to its free-field response (IEC 62585:2012). |
 | [`metrology.sound_level_meter`](/phonometry/reference/api/metrology/sound-level-meter/) | Periodic tests of a sound level meter (IEC 61672-3:2013): the verdict. |
 | [`metrology.comparison_calibration`](/phonometry/reference/api/metrology/comparison-calibration/) | Calibration of a measurement microphone by comparison with a reference microphone (IEC 61094-5:2016, pressure; IEC 61094-8:2012, free field). |
+| [`metrology.reciprocity_calibration`](/phonometry/reference/api/metrology/reciprocity-calibration/) | Primary calibration of laboratory standard microphones by reciprocity: the sensitivities that come out of three pair measurements, and the uncertainty budget that goes with them (IEC 61094-2:2009 clause 5.7 and clause 7, IEC 61094-3:2016 clause 5.7 and clause 7). |
+| [`metrology.reciprocity_coupler`](/phonometry/reference/api/metrology/reciprocity-coupler/) | Pressure calibration of laboratory standard microphones by reciprocity in a closed coupler (IEC 61094-2:2009). |
+| [`metrology.reciprocity_free_field`](/phonometry/reference/api/metrology/reciprocity-free-field/) | Free-field calibration of laboratory standard microphones by reciprocity (IEC 61094-3:2016 with its corrigendum IEC 61094-3:2016/COR1:2016). |
 
 ## Fluids
 

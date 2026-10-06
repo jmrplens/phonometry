@@ -2475,6 +2475,112 @@ in the same order.
   "been largely superseded", is not implemented; no change was required.
 - **Status:** unreported.
 
+## IEC 61094-2:2009, Tables B.1 and B.2 (a radius printed to four figures, a decimal point and a dropped digit)
+
+- **Location:** Annex B, Table B.1 "Real part of $Z_{\mathrm{a,C}}$ in
+  gigapascal-seconds per cubic metre" (printed folio 24) and Table B.2
+  "Imaginary part of $Z_{\mathrm{a,C}}$" (printed folio 25), which B.1 says
+  "are intended to be used when testing a calculation program based upon
+  Equations B.1 to B.3".
+- **The print:** the first and fourth columns are headed "$a_\mathrm{t}$ =
+  **0,1667**" (mm). Table B.1 prints its last entry, 20 kHz for the 100 mm tube
+  of 0,25 mm radius, as "**2.021**", with a decimal point where every other
+  entry of both tables has a comma, and Table B.2 prints the entry at 800 Hz
+  for the 100 mm tube of 0,1667 mm as "**–3,89**", with two decimals where
+  every other entry has three.
+- **The problem:** the two 0,1667 mm columns were computed with a radius of 1/6
+  mm, 0,166 67 mm. The impedance goes as the fourth power of the radius (B.1),
+  so the rounding of the header moves the result by 0,08 %, more than the last
+  printed figure: Formulas (B.1) to (B.3) at the reference conditions give
+  3,013 and 6,029 GPa·s/m³ at 20 Hz for the 50 mm and 100 mm tubes with 0,1667
+  mm, and the printed 3,015 and 6,034 with 1/6 mm. A program tested against the
+  table with the radius as printed fails the test by up to five units of the
+  last figure. The other two slips are typographical: "2.021" is 2,021, and
+  "–3,89" is the only entry with two decimals (the formulas give –3,892 with the
+  1/6 mm of the column).
+- **Evidence:** Formulas (B.1) to (B.3) evaluated with the air of Annex F at 23
+  °C, 101,325 kPa and 50 %, with both radii, against the printed columns.
+  Verified on PDF pages 26 and 27 (printed pp. 24 and 25) of BS EN
+  61094-2:2009, the English text of EN 61094-2:2009, which is IEC 61094-2:2009
+  unchanged.
+- **Library behaviour:** `metrology.capillary_tube_impedance` takes the radius
+  it is given; the tests and the conformance rows on Tables B.1 and B.2 pass
+  1/6 mm for the columns headed 0,1667 mm and read "2.021" and "–3,89" as the
+  numbers they write
+  ([`tests/metrology/test_reciprocity_coupler.py`](../tests/metrology/test_reciprocity_coupler.py)).
+- **Status:** unreported.
+
+## IEC 61094-3:2016, Formulas (8) and (9) (the factor −j of Formula (7) dropped)
+
+- **Location:** 5.7.1 "Method using three microphones", Formula (8) (printed
+  folio 11), and 5.7.2 "Method using two microphones and an auxiliary sound
+  source", Formula (9) (printed folio 12); Formula (7), from which both are
+  built, is on folio 11.
+- **The print:** Formula (7):
+  $\underline{M}_{\mathrm{f},1}\underline{M}_{\mathrm{f},2} =
+  -\mathrm{j}\,\dfrac{2d_{12}}{\rho
+  f}\,\dfrac{\underline{U}_2}{\underline{i}_1}\,\mathrm{e}^{\mathrm{j}kd_{12}}\,\mathrm{e}^{\alpha
+  d_{\mathrm{m}12}}$. Formula (8): $\underline{M}_{\mathrm{f},1} =
+  \left(\dfrac{2}{\rho
+  f}\,\dfrac{d_{12}d_{31}}{d_{23}}\,\dfrac{\underline{Z}_{\mathrm{e},12}\underline{Z}_{\mathrm{e},31}}{\underline{Z}_{\mathrm{e},23}}\,\mathrm{e}^{\mathrm{j}k(d_{12}+d_{31}-d_{23})}\,\mathrm{e}^{\alpha(d_{\mathrm{m}12}+d_{\mathrm{m}31}-d_{\mathrm{m}23})}\right)^{1/2}$,
+  introduced as "the final expression for the **complex** free-field
+  sensitivity". Formula (9): $\underline{M}_{\mathrm{f},1} =
+  \left(\underline{r}_{12}\,\dfrac{2d_{12}}{\rho
+  f}\,\underline{Z}_{\mathrm{e},12}\,\mathrm{e}^{\mathrm{j}kd_{12}}\,\mathrm{e}^{\alpha
+  d_{\mathrm{m}12}}\right)^{1/2}$, which COR1 makes "the final expression for
+  the complex free-field sensitivity" in place of "the modulus of the".
+- **The problem:** Formula (8) is the quotient $\underline{M}_{\mathrm{f},1}^2
+  =
+  (\underline{M}_{\mathrm{f},1}\underline{M}_{\mathrm{f},2})(\underline{M}_{\mathrm{f},3}\underline{M}_{\mathrm{f},1})/(\underline{M}_{\mathrm{f},2}\underline{M}_{\mathrm{f},3})$
+  of three products of the form (7), and carries
+  $(-\mathrm{j})(-\mathrm{j})/(-\mathrm{j}) = -\mathrm{j}$; Formula (9) is
+  $\underline{r}_{12}$ times one product, and carries $-\mathrm{j}$ as well.
+  Both drop it. The modulus is unaffected, which is why the omission did no
+  harm while (9) gave the modulus only; the complex sensitivity of the printed
+  formulas has a phase in error by $\arg(-\mathrm{j})/2 = -45°$ at every
+  frequency. Formula (D.1), "obtained from re-arranging Formula (7)", keeps
+  the factor ($\mathrm{j}\rho f/2d_{12}$), so the printed (8) and (9) are also
+  inconsistent with the annex that extends their data.
+- **Evidence:** the products of Formula (7) multiplied and divided as (8) and
+  (9) prescribe, and Formula (D.1) read against (7). Verified on PDF pages 13,
+  14 and 29 (printed pp. 11, 12 and 27) of IEC 61094-3:2016, Edition 2.0
+  (2016-06), English-French, with IEC 61094-3:2016/COR1:2016 (2016-12).
+- **Library behaviour:** `metrology.free_field_reciprocity` and
+  `metrology.free_field_reciprocity_pair` keep the factor $-\mathrm{j}$ of
+  Formula (7); electrical transfer impedances built by Formula (D.1) from known
+  complex sensitivities give them back exactly, which the printed formulas
+  would not
+  ([`tests/metrology/test_reciprocity_free_field.py`](../tests/metrology/test_reciprocity_free_field.py)).
+- **Status:** unreported.
+
+## IEC 61094-3:2016, B.2 Step 1 (a coefficient of the saturation vapour pressure misprinted)
+
+- **Location:** Annex B, B.2 "Calculation procedure", Step 1 (printed folio
+  20), which determines the saturation water vapour pressure "(see also IEC
+  61094-2:2009, F.2)".
+- **The print:** $p_\mathrm{sv}(t) = \exp(1{,}237\,884\,7\cdot10^{-5}\cdot T^2 -
+  1{,}912\,131\,6\cdot10^{-2}\cdot T + 33{,}937\,110\,47 -
+  \mathbf{6{,}3343\,184\,5}\cdot10^3\cdot T^{-1})$. Table F.2 of IEC
+  61094-2:2009 (printed folio 41), which the step refers to, prints the same
+  four coefficients with the last as $a_3 = \mathbf{-6{,}343\,164\,5}\times10^3$.
+- **The problem:** the digits are transposed and mis-grouped: 6 334,318 45
+  against 6 343,164 5. The first three coefficients agree with Table F.2 to the
+  last digit, and the Table F.2 value is the one of the CIPM-2007 formula that
+  IEC 61094-2 F.2 cites. With the printed coefficient the saturation vapour
+  pressure at 23 °C is 2 896,1 Pa instead of 2 810,9 Pa, 3,0 % high, and the
+  attenuation of Step 5 moves by up to 0,028 dB/m (3,2 %) at the nine
+  conditions of Table B.1.
+- **Evidence:** the two prints read side by side, and the saturation vapour
+  pressure and the attenuation computed with each. Verified on PDF page 22
+  (printed p. 20) of IEC 61094-3:2016, Edition 2.0 (2016-06), English-French,
+  and on PDF page 43 (printed p. 41) of BS EN 61094-2:2009, the English text of
+  EN 61094-2:2009, which is IEC 61094-2:2009 unchanged.
+- **Library behaviour:** `metrology.reciprocity_air_attenuation` computes Step
+  1 with the Table F.2 coefficient, so its water vapour mole fraction is that
+  of `fluids.air`; a conformance row pins the equality
+  ([`tests/metrology/test_reciprocity_free_field.py`](../tests/metrology/test_reciprocity_free_field.py)).
+- **Status:** unreported.
+
 ## UNE-EN ISO 9614-1:2010, clause 9.1 (the sign dropped from "signed magnitude" in translation)
 
 - **Location:** clause 9.1, the symbol list under Formula (11)

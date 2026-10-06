@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1816 numerical conformance checks against 519 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1838 numerical conformance checks against 520 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1816 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1838 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 110 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -91,6 +91,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Free-field corrections of a sound level meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/)
 - [Periodic tests of a sound level meter (IEC 61672-3)](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
 - [Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/)
+- [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/)
 
 ## The medium
 
@@ -625,6 +626,9 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [metrology/data-qualification](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/)
 - [metrology/free-field-corrections](https://jmrplens.github.io/phonometry/reference/api/metrology/free-field-corrections/)
 - [metrology/random-incidence](https://jmrplens.github.io/phonometry/reference/api/metrology/random-incidence/)
+- [metrology/reciprocity-calibration](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-calibration/)
+- [metrology/reciprocity-coupler](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-coupler/)
+- [metrology/reciprocity-free-field](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-free-field/)
 - [metrology/reference-values](https://jmrplens.github.io/phonometry/reference/api/metrology/reference-values/)
 - [metrology/sound-calibrator](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/)
 - [metrology/sound-level-meter](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-level-meter/)

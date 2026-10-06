@@ -81,6 +81,12 @@ output voltages, in a coupler by IEC 61094-5 or in a free field by IEC
 61094-8, with the environmental, jig and free-field corrections each part asks
 for and the uncertainty budget of Table D.1 or Table 2.
 
+[Calibration by reciprocity](reciprocity-calibration.md)
+is the top of that chain: the reference itself, a laboratory standard
+microphone, calibrated with no other microphone to compare it with, from
+three pair measurements and the acoustic transfer impedance of a coupler by
+IEC 61094-2 or of a free field by IEC 61094-3.
+
 The same discipline extends into the frequency domain: the
 [Signals and spectra](../spectra/index.md) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
@@ -124,6 +130,11 @@ budgets that are specialisations of the GUM machinery described here.
   one against a monitor, the environmental and WS3 jig corrections, the
   budgets of Table D.1 and Table 2 with k = 2, and the free-field region of a
   time window.
+- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](reciprocity-calibration.md):
+  three microphones calibrated in pairs, the transfer impedance of a
+  plane-wave or large-volume coupler with the heat conduction of Annex A and
+  the capillary tubes of Annex B, the free field with the attenuation of
+  Annex B and the acoustic centres, and the budgets of Table 1.
 
 ## What this section does not cover
 

@@ -335,6 +335,13 @@ from figures.perception import (
     generate_tone_audibility_levels,
     generate_tone_prominence_assessment,
 )
+from figures.reciprocity import (
+    generate_reciprocity_acoustic_centre,
+    generate_reciprocity_budgets,
+    generate_reciprocity_coupler_physics,
+    generate_reciprocity_free_field,
+    generate_reciprocity_pressure,
+)
 from figures.registry import (
     _ANIMATIONS,
     _FIGURE_FUNCS,
@@ -931,6 +938,11 @@ __all__ = [
     "main",
     "measure_weighting_response",
     "plot_psd",
+    "generate_reciprocity_acoustic_centre",
+    "generate_reciprocity_budgets",
+    "generate_reciprocity_coupler_physics",
+    "generate_reciprocity_free_field",
+    "generate_reciprocity_pressure",
     "save_figure",
     "set_lang",
     "set_theme",

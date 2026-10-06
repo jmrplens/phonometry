@@ -52,6 +52,9 @@ export const apiSections = {
       'reference/api/metrology/free-field-corrections',
       'reference/api/metrology/sound-level-meter',
       'reference/api/metrology/comparison-calibration',
+      'reference/api/metrology/reciprocity-calibration',
+      'reference/api/metrology/reciprocity-coupler',
+      'reference/api/metrology/reciprocity-free-field',
     ],
   },
   'fluids': {

@@ -1306,6 +1306,30 @@ from .random_incidence import (
 from .random_incidence import (
     IEC61183_TABLE_B1_PRINTED as IEC61183_TABLE_B1_PRINTED,
 )
+from .reciprocity_calibration import IEC61094_2_A3_LOWEST_HZ as IEC61094_2_A3_LOWEST_HZ
+from .reciprocity_calibration import IEC61094_2_TABLE_1_TEXT as IEC61094_2_TABLE_1_TEXT
+from .reciprocity_calibration import IEC61094_2_TABLE_A1 as IEC61094_2_TABLE_A1
+from .reciprocity_calibration import (
+    IEC61094_2_TABLE_A1_RATIOS as IEC61094_2_TABLE_A1_RATIOS,
+)
+from .reciprocity_calibration import IEC61094_2_TABLE_B as IEC61094_2_TABLE_B
+from .reciprocity_calibration import (
+    IEC61094_2_TABLE_B_TUBES as IEC61094_2_TABLE_B_TUBES,
+)
+from .reciprocity_calibration import IEC61094_2_TABLE_C1_MM as IEC61094_2_TABLE_C1_MM
+from .reciprocity_calibration import IEC61094_2_TABLE_C2_MM as IEC61094_2_TABLE_C2_MM
+from .reciprocity_calibration import (
+    IEC61094_2_TABLE_C2_TOLERANCE_MM as IEC61094_2_TABLE_C2_TOLERANCE_MM,
+)
+from .reciprocity_calibration import IEC61094_2_TABLE_C3_DB as IEC61094_2_TABLE_C3_DB
+from .reciprocity_calibration import IEC61094_3_TABLE_1_TEXT as IEC61094_3_TABLE_1_TEXT
+from .reciprocity_calibration import IEC61094_3_TABLE_B1 as IEC61094_3_TABLE_B1
+from .reciprocity_calibration import (
+    IEC61094_3_TABLE_B1_CONDITIONS as IEC61094_3_TABLE_B1_CONDITIONS,
+)
+from .reciprocity_calibration import (
+    IEC61094_RECIPROCITY_REFERENCE_CONDITIONS as IEC61094_RECIPROCITY_REFERENCE_CONDITIONS,
+)
 from .resistive_sheets import VER_BERANEK_8_5 as VER_BERANEK_8_5
 from .resistive_sheets import VER_BERANEK_8_5_COLUMNS as VER_BERANEK_8_5_COLUMNS
 from .resistive_sheets import VER_BERANEK_8_6 as VER_BERANEK_8_6

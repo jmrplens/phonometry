@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1816/1816 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1838/1838 conformance checks pass** across 110 domains and 520 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2263,6 +2263,36 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61094-8:2012 Table 1 | Typical expanded uncertainty of the 5 reference calibration options at 1 kHz and 10 kHz | 10/10 cells of Table 1 | 10/10 cells of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 Table 2 | Source of uncertainty and subclause references of the 12 typical components | 12/12 rows of Table 2 | 12/12 rows of Table 2 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 Formula (B.1), Figure B.1 | A reflection from the boundary of the effective free-field region arrives at the end of a 5 ms window | 5 ms (+/-0 ms) | 5 ms | 0 ms | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Microphone calibration by reciprocity (IEC 61094-2, IEC 61094-3)</b>: 100% (22/22)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 61094-2:2009 Table A.1 | Gerber's E_V by the full solution, 96 entries at R = 0,2, 0,5 and 1, X = 1 to 800 | all 96 entries within the stated 0.00001 | max deviation 0.0000059 | 0.0000059 | 59 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formula (A.2) | Modulus of the approximation against Table A.1 where A.2 states 0,01 %, X > 5 | within 0.01 % at every entry | max relative deviation 0.0000060 | 0.000006 | 6 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 A.3 | Lowest whole frequency at which check_coupler holds Formulas (A.3) and (A.4) valid, LS1P and LS2aP plane-wave couplers of Table C.1 | LS1P = 3 Hz; LS2aP = 12 Hz | LS1P = 3 Hz; LS2aP = 12 Hz | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Table B.1 | Real part of the input impedance of six open capillary tubes, 20 Hz to 20 kHz, 186 entries | all 186 entries within 0.002 GPa·s/m³ | max deviation 0.0011 (20 Hz to 250 Hz: 0.0005) | 0.0011 GPa·s/m³ | 55 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Table B.2 | Imaginary part of the input impedance of six open capillary tubes, 20 Hz to 20 kHz, 186 entries | all 186 entries within 0.002 GPa·s/m³ | max deviation 0.0018 (20 Hz to 250 Hz: 0.0007) | 0.0018 GPa·s/m³ | 90 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Table C.1 | Nominal dimensions of the plane-wave couplers of LS1P, LS2aP and LS2bP microphones | 18/18 cells of Table C.1 | 18/18 cells of Table C.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Table C.2 | Nominal dimensions and tolerance of the large-volume couplers of LS1P, LS2aP and LS2bP microphones | 21/21 cells of Table C.2 | 21/21 cells of Table C.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Table C.3 | Wave-motion corrections of the air-filled large-volume coupler for LS1P microphones | 6/6 rows of Table C.3 | 6/6 rows of Table C.3 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Table 1 | The 35 uncertainty components and the subclauses each is referred to | 35/35 rows of Table 1 | 35/35 rows of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formulas (2) and (7) | Three LS1P microphones through the plane-wave coupler give their sensitivities back | the three sensitivities at all 8 frequencies | max relative deviation below 1e-12 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formula (8) | Two microphones and the ratio from an auxiliary source give their sensitivities back | both sensitivities at all 8 frequencies | max relative deviation below 1e-12 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formula (4) | The lossless plane-wave line at 20 Hz is the compliance of its gas (stiffness rho c^2), the excess front-cavity volumes and the equivalent volumes | the compliances of the line, rho c**2, to (k l0)**2 | relative deviation 3.39e-06 | 0.00000339 | 34 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formula (A.1) | Heat-conduction factor from isothermal (kappa) to adiabatic (1) in the large-volume coupler of Table C.2 | kappa at 0.01 Hz, 1 at 1 MHz | max relative deviation 2.20e-04 | 0.00022 | 11 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formulas (3) and (A.1) with Table A.1 | Heat-conducting transfer impedance of a large-volume coupler of R = 0,5 at the X = 2 and X = 20 of Table A.1, at 23 °C and at 20 °C, 95 kPa | Formula (3) with Table A.1, within its 0.00001 | max relative deviation 1.49e-06 | 0.00000149 | 15 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formulas (4) and (A.3) to (A.5) | Heat-conducting and viscous transfer impedance of the LS1P plane-wave coupler at 250 Hz, 1 kHz and 8 kHz | Formulas (4), (A.3), (A.4) and (A.5) at 3 frequencies | max relative deviation below 1e-12 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 Table B.1 | Attenuation of sound pressure in air by ISO 9613-1, 1 kHz to 50 kHz at nine conditions, 162 entries | 162/162 entries of Table B.1 | 162/162 entries of Table B.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 B.2 | Attenuation by the five steps of B.2 against Table B.1, within the ±10 % B.2 states | within ±10 % of all 162 entries | max relative deviation 0.0108 | 0.0108 | 11 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 B.2 Step 1 vs IEC 61094-2:2009 Table F.2 | Water vapour mole fraction at 23 °C, 101,325 kPa, 50 % with the saturation pressure of Table F.2 | 0.01392758, the x_w of IEC 61094-2 Annex F | 0.01392758 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 Formulas (7), (8) and (D.1) | Three microphones at 0,20 m to 0,30 m give their complex free-field sensitivities back | the three complex sensitivities at all 6 frequencies | max relative deviation below 1e-12 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 Formula (9) | Two microphones and the ratio from an auxiliary source give their complex sensitivities back, as COR1 makes the formula | both complex sensitivities at all 6 frequencies | max relative deviation below 1e-12 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 6.5 | Acoustic centre where the inverse of the pressure, corrected for attenuation, crosses the axis | 4 mm (+/-0 mm) | 4 mm | 0 mm | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-3:2016 Table 1 | The 23 uncertainty components and the subclauses each is referred to | 23/23 rows of Table 1 | 23/23 rows of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

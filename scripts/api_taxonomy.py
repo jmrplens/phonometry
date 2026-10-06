@@ -101,6 +101,9 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.free_field_corrections",
             "phonometry.metrology.sound_level_meter",
             "phonometry.metrology.comparison_calibration",
+            "phonometry.metrology.reciprocity_calibration",
+            "phonometry.metrology.reciprocity_coupler",
+            "phonometry.metrology.reciprocity_free_field",
         ),
     ),
     Section(
@@ -717,6 +720,14 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "IEC61094_5_TABLE_D1": "phonometry.metrology.comparison_calibration",
     "IEC61094_8_TABLE_1": "phonometry.metrology.comparison_calibration",
     "IEC61094_8_TABLE_2": "phonometry.metrology.comparison_calibration",
+    # So are the tables of the reciprocity calibration: Table 1 of both parts
+    # with the budget that reads it, the coupler tables of IEC 61094-2 Annex C
+    # with the coupler physics.
+    "IEC61094_2_TABLE_1": "phonometry.metrology.reciprocity_calibration",
+    "IEC61094_3_TABLE_1": "phonometry.metrology.reciprocity_calibration",
+    "IEC61094_2_TABLE_C1": "phonometry.metrology.reciprocity_coupler",
+    "IEC61094_2_TABLE_C2": "phonometry.metrology.reciprocity_coupler",
+    "IEC61094_2_TABLE_C3": "phonometry.metrology.reciprocity_coupler",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

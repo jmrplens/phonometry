@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1816,
-    "passing": 1816,
+    "checks": 1838,
+    "passing": 1838,
     "failing": 0,
-    "domains": 109,
-    "standards": 519,
-    "citations": 1268,
-    "designations": 224,
+    "domains": 110,
+    "standards": 520,
+    "citations": 1290,
+    "designations": 225,
     "sources": 123
   },
   "units": [
@@ -21,6 +21,7 @@
     "A/m",
     "Cam",
     "EPNdB",
+    "GPa·s/m³",
     "Hz",
     "J",
     "LKFS",
@@ -667,6 +668,12 @@
       "title": "Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)",
       "checks": 12,
       "passing": 12
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "title": "Microphone calibration by reciprocity (IEC 61094-2, IEC 61094-3)",
+      "checks": 22,
+      "passing": 22
     },
     {
       "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
@@ -49885,6 +49892,769 @@
         "value": 0.0
       },
       "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-a-1/gerber-s-e-v-by-the-full-solution-96-entries-at-r-0-2-0-5-and-1-x-1-to-800",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table A.1"
+          }
+        ]
+      },
+      "quantity": "Gerber's E_V by the full solution, 96 entries at R = 0,2, 0,5 and 1, X = 1 to 800",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "all 96 entries within the stated 0.00001"
+      },
+      "computed": {
+        "value": 5.9e-06,
+        "label": "max deviation 0.0000059"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-05
+      },
+      "deviation": {
+        "value": 5.9e-06
+      },
+      "precision": 7,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formula-a-2/modulus-of-the-approximation-against-table-a-1-where-a-2-states-0-01-x-5",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formula (A.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formula (A.2)"
+          }
+        ]
+      },
+      "quantity": "Modulus of the approximation against Table A.1 where A.2 states 0,01 %, X > 5",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "within 0.01 % at every entry"
+      },
+      "computed": {
+        "value": 6e-06,
+        "label": "max relative deviation 0.0000060"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 6e-06
+      },
+      "precision": 7,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-a-3/lowest-whole-frequency-at-which-check-coupler-holds-formulas-a-3-and-a-4-valid-ls1p-and-ls2ap-plane-wave-couplers-of-table-c-1",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "A.3"
+          }
+        ]
+      },
+      "quantity": "Lowest whole frequency at which check_coupler holds Formulas (A.3) and (A.4) valid, LS1P and LS2aP plane-wave couplers of Table C.1",
+      "kind": "record",
+      "expected": {
+        "label": "LS1P = 3 Hz; LS2aP = 12 Hz",
+        "record": {
+          "LS1P": 3.0,
+          "LS2aP": 12.0
+        }
+      },
+      "computed": {
+        "label": "LS1P = 3 Hz; LS2aP = 12 Hz",
+        "record": {
+          "LS1P": 3.0,
+          "LS2aP": 12.0
+        }
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-b-1/real-part-of-the-input-impedance-of-six-open-capillary-tubes-20-hz-to-20-khz-186-entries",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "Real part of the input impedance of six open capillary tubes, 20 Hz to 20 kHz, 186 entries",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "all 186 entries within 0.002 GPa·s/m³"
+      },
+      "computed": {
+        "value": 0.0011,
+        "label": "max deviation 0.0011 (20 Hz to 250 Hz: 0.0005)"
+      },
+      "unit": "GPa·s/m³",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.002
+      },
+      "deviation": {
+        "value": 0.0011
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-b-2/imaginary-part-of-the-input-impedance-of-six-open-capillary-tubes-20-hz-to-20-khz-186-entries",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table B.2"
+          }
+        ]
+      },
+      "quantity": "Imaginary part of the input impedance of six open capillary tubes, 20 Hz to 20 kHz, 186 entries",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "all 186 entries within 0.002 GPa·s/m³"
+      },
+      "computed": {
+        "value": 0.0018,
+        "label": "max deviation 0.0018 (20 Hz to 250 Hz: 0.0007)"
+      },
+      "unit": "GPa·s/m³",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.002
+      },
+      "deviation": {
+        "value": 0.0018
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-c-1/nominal-dimensions-of-the-plane-wave-couplers-of-ls1p-ls2ap-and-ls2bp-microphones",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Nominal dimensions of the plane-wave couplers of LS1P, LS2aP and LS2bP microphones",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 cells of Table C.1"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 cells of Table C.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-c-2/nominal-dimensions-and-tolerance-of-the-large-volume-couplers-of-ls1p-ls2ap-and-ls2bp-microphones",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table C.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table C.2"
+          }
+        ]
+      },
+      "quantity": "Nominal dimensions and tolerance of the large-volume couplers of LS1P, LS2aP and LS2bP microphones",
+      "kind": "count",
+      "expected": {
+        "value": 21.0,
+        "label": "21/21 cells of Table C.2"
+      },
+      "computed": {
+        "value": 21.0,
+        "label": "21/21 cells of Table C.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-c-3/wave-motion-corrections-of-the-air-filled-large-volume-coupler-for-ls1p-microphones",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table C.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table C.3"
+          }
+        ]
+      },
+      "quantity": "Wave-motion corrections of the air-filled large-volume coupler for LS1P microphones",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 rows of Table C.3"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 rows of Table C.3"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-table-1/the-35-uncertainty-components-and-the-subclauses-each-is-referred-to",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "The 35 uncertainty components and the subclauses each is referred to",
+      "kind": "count",
+      "expected": {
+        "value": 35.0,
+        "label": "35/35 rows of Table 1"
+      },
+      "computed": {
+        "value": 35.0,
+        "label": "35/35 rows of Table 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formulas-2-and-7/three-ls1p-microphones-through-the-plane-wave-coupler-give-their-sensitivities-back",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formulas (2) and (7)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formulas (2) and (7)"
+          }
+        ]
+      },
+      "quantity": "Three LS1P microphones through the plane-wave coupler give their sensitivities back",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the three sensitivities at all 8 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation below 1e-12"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formula-8/two-microphones-and-the-ratio-from-an-auxiliary-source-give-their-sensitivities-back",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formula (8)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formula (8)"
+          }
+        ]
+      },
+      "quantity": "Two microphones and the ratio from an auxiliary source give their sensitivities back",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "both sensitivities at all 8 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation below 1e-12"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formula-4/the-lossless-plane-wave-line-at-20-hz-is-the-compliance-of-its-gas-stiffness-rho-c-2-the-excess-front-cavity-volumes-and-the-equivalent-volumes",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formula (4)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formula (4)"
+          }
+        ]
+      },
+      "quantity": "The lossless plane-wave line at 20 Hz is the compliance of its gas (stiffness rho c^2), the excess front-cavity volumes and the equivalent volumes",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the compliances of the line, rho c**2, to (k l0)**2"
+      },
+      "computed": {
+        "value": 3.39e-06,
+        "label": "relative deviation 3.39e-06"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-05
+      },
+      "deviation": {
+        "value": 3.39e-06
+      },
+      "precision": 8,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formula-a-1/heat-conduction-factor-from-isothermal-kappa-to-adiabatic-1-in-the-large-volume-coupler-of-table-c-2",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formula (A.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formula (A.1)"
+          }
+        ]
+      },
+      "quantity": "Heat-conduction factor from isothermal (kappa) to adiabatic (1) in the large-volume coupler of Table C.2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "kappa at 0.01 Hz, 1 at 1 MHz"
+      },
+      "computed": {
+        "value": 0.00022,
+        "label": "max relative deviation 2.20e-04"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.002
+      },
+      "deviation": {
+        "value": 0.00022
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formulas-3-and-a-1-with-table-a-1/heat-conducting-transfer-impedance-of-a-large-volume-coupler-of-r-0-5-at-the-x-2-and-x-20-of-table-a-1-at-23-c-and-at-20-c-95-kpa",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formulas (3) and (A.1) with Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formulas (3) and (A.1) with Table A.1"
+          }
+        ]
+      },
+      "quantity": "Heat-conducting transfer impedance of a large-volume coupler of R = 0,5 at the X = 2 and X = 20 of Table A.1, at 23 °C and at 20 °C, 95 kPa",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "Formula (3) with Table A.1, within its 0.00001"
+      },
+      "computed": {
+        "value": 1.49e-06,
+        "label": "max relative deviation 1.49e-06"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-05
+      },
+      "deviation": {
+        "value": 1.49e-06
+      },
+      "precision": 8,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-2-2009-formulas-4-and-a-3-to-a-5/heat-conducting-and-viscous-transfer-impedance-of-the-ls1p-plane-wave-coupler-at-250-hz-1-khz-and-8-khz",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formulas (4) and (A.3) to (A.5)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formulas (4) and (A.3) to (A.5)"
+          }
+        ]
+      },
+      "quantity": "Heat-conducting and viscous transfer impedance of the LS1P plane-wave coupler at 250 Hz, 1 kHz and 8 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "Formulas (4), (A.3), (A.4) and (A.5) at 3 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation below 1e-12"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-table-b-1/attenuation-of-sound-pressure-in-air-by-iso-9613-1-1-khz-to-50-khz-at-nine-conditions-162-entries",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "Attenuation of sound pressure in air by ISO 9613-1, 1 kHz to 50 kHz at nine conditions, 162 entries",
+      "kind": "count",
+      "expected": {
+        "value": 162.0,
+        "label": "162/162 entries of Table B.1"
+      },
+      "computed": {
+        "value": 162.0,
+        "label": "162/162 entries of Table B.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-b-2/attenuation-by-the-five-steps-of-b-2-against-table-b-1-within-the-10-b-2-states",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "B.2"
+          }
+        ]
+      },
+      "quantity": "Attenuation by the five steps of B.2 against Table B.1, within the ±10 % B.2 states",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "within ±10 % of all 162 entries"
+      },
+      "computed": {
+        "value": 0.0108,
+        "label": "max relative deviation 0.0108"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": 0.0108
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-b-2-step-1-vs-iec-61094-2-2009-table-f-2/water-vapour-mole-fraction-at-23-c-101-325-kpa-50-with-the-saturation-pressure-of-table-f-2",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 B.2 Step 1 vs IEC 61094-2:2009 Table F.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "B.2 Step 1"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Table F.2",
+            "lead": " vs ",
+            "relation": "compares"
+          }
+        ]
+      },
+      "quantity": "Water vapour mole fraction at 23 °C, 101,325 kPa, 50 % with the saturation pressure of Table F.2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.013927575669384445,
+        "label": "0.01392758, the x_w of IEC 61094-2 Annex F"
+      },
+      "computed": {
+        "value": 0.01392758
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 8,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-formulas-7-8-and-d-1/three-microphones-at-0-20-m-to-0-30-m-give-their-complex-free-field-sensitivities-back",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 Formulas (7), (8) and (D.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "Formulas (7), (8) and (D.1)"
+          }
+        ]
+      },
+      "quantity": "Three microphones at 0,20 m to 0,30 m give their complex free-field sensitivities back",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the three complex sensitivities at all 6 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation below 1e-12"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-formula-9/two-microphones-and-the-ratio-from-an-auxiliary-source-give-their-complex-sensitivities-back-as-cor1-makes-the-formula",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 Formula (9)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "Formula (9)"
+          }
+        ]
+      },
+      "quantity": "Two microphones and the ratio from an auxiliary source give their complex sensitivities back, as COR1 makes the formula",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "both complex sensitivities at all 6 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation below 1e-12"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-6-5/acoustic-centre-where-the-inverse-of-the-pressure-corrected-for-attenuation-crosses-the-axis",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 6.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "6.5"
+          }
+        ]
+      },
+      "quantity": "Acoustic centre where the inverse of the pressure, corrected for attenuation, crosses the axis",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.0
+      },
+      "computed": {
+        "value": 4.0
+      },
+      "unit": "mm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3/iec-61094-3-2016-table-1/the-23-uncertainty-components-and-the-subclauses-each-is-referred-to",
+      "domain": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
+      "reference": {
+        "cite": "IEC 61094-3:2016 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-3",
+            "edition": "2016",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "The 23 uncertainty components and the subclauses each is referred to",
+      "kind": "count",
+      "expected": {
+        "value": 23.0,
+        "label": "23/23 rows of Table 1"
+      },
+      "computed": {
+        "value": 23.0,
+        "label": "23/23 rows of Table 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

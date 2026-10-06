@@ -4296,3 +4296,104 @@ def _d_comparison_calibration_setup(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# IEC 61094-2 and IEC 61094-3: a triad calibrated by reciprocity
+# ---------------------------------------------------------------------------
+
+
+def _d_reciprocity_setup(s: SVG, th: Theme) -> None:
+    """IEC 61094-2 and IEC 61094-3: the readings of a reciprocity calibration.
+
+    Left, a pair in a coupler: the transmitter driven by a current measured
+    across a series impedance, the receiver read by the insert voltage
+    technique (5.3); the three pairs of the triad give three products, and
+    Formula (7) the sensitivities. Right, the same pair face to face in a free
+    field, with the distance between the diaphragms and the shorter one
+    between the acoustic centres that Formula (7) of the second part takes.
+    """
+    s.text(225, 66, "Pressure field, in a coupler", 15, th.fg, bold=True)
+    s.text(225, 86, "IEC 61094-2, 5.3 to 5.7", 13, th.muted)
+    s.text(675, 66, "Free field, face to face", 15, th.fg, bold=True)
+    s.text(675, 86, "IEC 61094-3, 5.5 to 5.7", 13, th.muted)
+    s.line(450, 54, 450, 400, th.muted, 1.0, dash="4,4")
+
+    # ----- Left: one pair in the coupler -----------------------------------
+    y = 168.0
+    left, right = 205.0, 245.0
+    s.rect(left, y - 18, right - left, 36, th.panel, th.fg, rx=3, sw=1.5)
+    _reference_side(s, th, left - 2, y, 1.0)
+    _reference_side(s, th, right + 2, y, -1.0)
+    s.arrow(24, y, 106, y, th.primary, 1.6)
+    s.text(64, y - 12, "$i_1$", 15, th.fg)
+    s.arrow(344, y, 426, y, th.secondary, 1.6)
+    s.text(386, y - 12, "$U_2$", 15, th.fg)
+    s.text(158, y + 32, "transmitter (1)", 12, th.muted)
+    s.text(292, y + 32, "receiver (2)", 12, th.muted)
+    s.text(
+        225,
+        122,
+        "$i_1$ across a series impedance, $U_2$ by insert voltage",
+        12,
+        th.muted,
+    )
+    s.text(225, 232, "the pairs 1-2, 2-3 and 3-1 in turn", 12, th.muted)
+    s.text(225, 268, "Formula (2)", 13, th.fg, bold=True)
+    s.text(225, 290, "$M_1 M_2 = Z_{e,12}/Z_{a,12}$,  $Z_{e,12} = U_2/i_1$", 14, th.fg)
+    s.text(
+        225,
+        310,
+        "$Z_{a,12}$ computed: Formula (3) or (4), Annexes A and B",
+        12,
+        th.muted,
+    )
+    s.text(225, 344, "Formula (7)", 13, th.fg, bold=True)
+    s.text(
+        225, 366, "$M_1 = (P_{12} P_{31}/P_{23})^{1/2}$,  $P_{ij} = M_i M_j$", 14, th.fg
+    )
+
+    # ----- Right: the same pair in a free field ------------------------------
+    first, second = 585.0, 765.0
+    centre_1, centre_2 = first + 14.0, second - 14.0
+    _reference_side(s, th, first, y, 1.0)
+    _reference_side(s, th, second, y, -1.0)
+    for x in (centre_1, centre_2):
+        s.circle(x, y, 3.2, th.accent, th.fg, 1.0)
+    s.arrow(centre_1 + 10, y, centre_2 - 10, y, th.muted, 1.4)
+    s.dim(centre_1, y, centre_2, y, "$d_{12}$", offset=-34)
+    s.dim(first, y, second, y, "$d_{m12}$", offset=34)
+    s.text(540, y + 66, "transmitter (1)", 12, th.muted)
+    s.text(810, y + 66, "receiver (2)", 12, th.muted)
+    s.text(675, 268, "Formula (7)", 13, th.fg, bold=True)
+    s.text(
+        675,
+        290,
+        "$M_1 M_2 = −j (2d_{12}/ρf)(U_2/i_1) exp(jkd_{12}) exp(αd_{m12})$",
+        14,
+        th.fg,
+    )
+    s.text(
+        675,
+        310,
+        "phase and spreading over $d_{12}$, attenuation over $d_{m12}$",
+        12,
+        th.muted,
+    )
+    s.text(675, 344, "Formula (8)", 13, th.fg, bold=True)
+    s.text(675, 366, "$M_1$ from the three products, as in the coupler", 14, th.fg)
+
+    # ----- Key ---------------------------------------------------------------
+    ky = 424.0
+    _reference_side(s, th, 30, ky, -1.0)
+    s.text(132, ky + 5, "laboratory standard microphone", 13, th.fg, anchor="start")
+    s.circle(560, ky, 3.2, th.accent, th.fg, 1.0)
+    s.text(572, ky + 5, "acoustic centre (6.5)", 13, th.fg, anchor="start")
+    s.text(
+        450,
+        462,
+        "Free field: distance above ten diameters (7.3), "
+        "supports twenty diameters long (6.4).",
+        13,
+        th.muted,
+    )

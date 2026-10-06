@@ -858,6 +858,178 @@ def _free_field_region() -> ph.metrology.FreeFieldRegion:
     return ph.metrology.free_field_region(1.0, 0.005)
 
 
+#: The reference conditions of IEC 61094-2 and IEC 61094-3 clause 4.
+_RECIPROCITY_CONDITIONS = {
+    "temperature_c": 23.0,
+    "static_pressure_pa": 101325.0,
+    "relative_humidity_percent": 50.0,
+}
+
+
+def _reciprocity_microphones() -> tuple[ph.metrology.ReciprocityMicrophone, ...]:
+    """Three LS1P-like microphones."""
+    return tuple(
+        ph.metrology.ReciprocityMicrophone(
+            equivalent_volume_m3=volume,
+            resonance_frequency_hz=resonance,
+            loss_factor=1.0,
+            front_cavity_volume_m3=0.534e-6,
+            front_cavity_depth_m=1.95e-3,
+            front_cavity_diameter_m=18.6e-3,
+        )
+        for volume, resonance in ((144e-9, 8200.0), (140e-9, 8300.0), (150e-9, 8000.0))
+    )
+
+
+def _reciprocity_coupler() -> ph.metrology.PlaneWaveCoupler:
+    """The LS1P plane-wave coupler of Table C.1 with two capillary tubes."""
+    return ph.metrology.PlaneWaveCoupler(
+        length_m=7.5e-3,
+        diameter_m=18.6e-3,
+        capillary=ph.metrology.CapillaryTube(
+            length_m=0.05, radius_m=1.0 / 6000.0, count=2
+        ),
+    )
+
+
+def _coupler_transfer_impedance() -> ph.metrology.CouplerTransferImpedance:
+    """The acoustic transfer impedance of two LS1P in the plane-wave coupler."""
+    mics = _reciprocity_microphones()
+    return ph.metrology.coupler_transfer_impedance(
+        [63.0, 250.0, 1000.0, 4000.0],
+        _reciprocity_coupler(),
+        mics[0],
+        mics[1],
+        **_RECIPROCITY_CONDITIONS,
+    )
+
+
+def _pressure_reciprocity() -> ph.metrology.ReciprocityCalibration:
+    """Three LS1P calibrated in the plane-wave coupler (IEC 61094-2 5.7.1)."""
+    frequencies = np.array([250.0, 1000.0, 4000.0])
+    mics = _reciprocity_microphones()
+    true = [
+        -0.05 * m.complex_equivalent_volume_m3(frequencies) / m.equivalent_volume_m3
+        for m in mics
+    ]
+    acoustic = [
+        ph.metrology.coupler_transfer_impedance(
+            frequencies,
+            _reciprocity_coupler(),
+            mics[i],
+            mics[j],
+            **_RECIPROCITY_CONDITIONS,
+        )
+        for i, j in ((0, 1), (1, 2), (2, 0))
+    ]
+    electrical = [
+        true[i] * true[j] * z.transfer_impedance_pa_s_m3
+        for (i, j), z in zip(((0, 1), (1, 2), (2, 0)), acoustic, strict=True)
+    ]
+    return ph.metrology.pressure_reciprocity(
+        frequencies, electrical, acoustic, expanded_uncertainty_db=0.03
+    )
+
+
+def _reciprocity_budget() -> ph.metrology.ReciprocityUncertaintyBudget:
+    """Three components of IEC 61094-2 Table 1 at three frequencies."""
+    return ph.metrology.reciprocity_uncertainty_budget(
+        [250.0, 1000.0, 4000.0],
+        {
+            "voltage_ratio": 0.003,
+            "coupler_length": 0.004,
+            "repeatability": [0.005, 0.004, 0.008],
+        },
+    )
+
+
+def _heat_conduction_correction() -> ph.metrology.HeatConductionCorrection:
+    """The LS1P large-volume coupler of Table C.2 in air."""
+    return ph.metrology.heat_conduction_correction(
+        [20.0, 100.0, 500.0, 2000.0],
+        volume_m3=19.2e-6,
+        surface_area_m2=4.6e-3,
+        length_to_diameter_ratio=0.29,
+        gas=ph.fluids.air(**_RECIPROCITY_CONDITIONS),
+    )
+
+
+def _capillary_tube_impedance() -> ph.metrology.CapillaryTubeImpedance:
+    """The 50 mm tube of 1/6 mm radius of Tables B.1 and B.2."""
+    return ph.metrology.capillary_tube_impedance(
+        [20.0, 200.0, 1000.0, 2000.0],
+        length_m=0.05,
+        radius_m=1.0 / 6000.0,
+        gas=ph.fluids.air(**_RECIPROCITY_CONDITIONS),
+    )
+
+
+def _wave_motion_correction() -> ph.metrology.WaveMotionCorrection:
+    """Table C.3 at its printed frequencies."""
+    return ph.metrology.large_volume_wave_motion_correction(
+        [800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0]
+    )
+
+
+def _coupler_check() -> ph.metrology.CouplerCheck:
+    """The plane-wave coupler of Table C.1 for LS1P."""
+    return ph.metrology.check_coupler(
+        [20.0, 1000.0],
+        _reciprocity_coupler(),
+        _reciprocity_microphones(),
+        **_RECIPROCITY_CONDITIONS,
+    )
+
+
+def _coupler_parameter_uncertainty() -> ph.metrology.CouplerParameterUncertainty:
+    """Two parameters of the plane-wave coupler moved one at a time."""
+    return ph.metrology.coupler_parameter_uncertainty(
+        [250.0, 1000.0, 4000.0],
+        _reciprocity_coupler(),
+        _reciprocity_microphones(),
+        ph.metrology.CouplerInputUncertainties(
+            u_coupler_length_m=5e-6, u_equivalent_volume_m3=1e-9
+        ),
+        **_RECIPROCITY_CONDITIONS,
+    )
+
+
+def _reciprocity_air_attenuation() -> ph.metrology.ReciprocityAirAttenuation:
+    """IEC 61094-3 Annex B at the reference conditions."""
+    return ph.metrology.reciprocity_air_attenuation(
+        [1000.0, 4000.0, 16000.0, 40000.0], **_RECIPROCITY_CONDITIONS
+    )
+
+
+def _acoustic_centre() -> ph.metrology.AcousticCentre:
+    """An acoustic centre 8 mm in front of the diaphragm."""
+    distances = np.array([0.15, 0.2, 0.3, 0.4])
+    return ph.metrology.acoustic_centre(distances, 1.0 / (distances - 0.008))
+
+
+def _free_field_arrangement() -> ph.metrology.FreeFieldArrangementCheck:
+    """Three LS2 pairs at 200 mm to 300 mm on supports 300 mm long."""
+    return ph.metrology.check_free_field_arrangement(
+        [1000.0, 20000.0],
+        diaphragm_distances_m=(0.2, 0.25, 0.3),
+        microphone_diameter_m=13.2e-3,
+        support_length_m=0.3,
+        **_RECIPROCITY_CONDITIONS,
+    )
+
+
+def _free_field_parameter_uncertainty() -> ph.metrology.FreeFieldParameterUncertainty:
+    """Distance and acoustic centres moved one at a time."""
+    return ph.metrology.free_field_parameter_uncertainty(
+        [1000.0, 4000.0, 16000.0],
+        ph.metrology.FreeFieldInputUncertainties(
+            u_distance_m=1e-4, u_acoustic_centre_m=5e-4
+        ),
+        diaphragm_distances_m=(0.2, 0.25, 0.3),
+        **_RECIPROCITY_CONDITIONS,
+    )
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

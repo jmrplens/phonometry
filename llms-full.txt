@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1884 numerical conformance checks against 521 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1891 numerical conformance checks against 523 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1884 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1891 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -90,6 +90,10 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Random-incidence and diffuse-field response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/)
 - [Free-field corrections of a sound level meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/)
 - [Periodic tests of a sound level meter (IEC 61672-3)](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
+
+### Microphone calibration (IEC 61094)
+
+- [Overview](https://jmrplens.github.io/phonometry/signals/metrology/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-signals-metrology-microphones.txt)
 - [Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/)
 - [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/)
 
@@ -439,6 +443,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Levels and weighting](https://jmrplens.github.io/phonometry/llms/llms-signals-levels.txt)
 - [Signals and spectra](https://jmrplens.github.io/phonometry/llms/llms-signals-spectra.txt)
 - [Calibration and uncertainty](https://jmrplens.github.io/phonometry/llms/llms-signals-metrology.txt)
+- [Microphone calibration (IEC 61094)](https://jmrplens.github.io/phonometry/llms/llms-signals-metrology-microphones.txt)
 - [The medium](https://jmrplens.github.io/phonometry/llms/llms-fluids.txt)
 - [Elastic solids](https://jmrplens.github.io/phonometry/llms/llms-solids.txt)
 - [Files](https://jmrplens.github.io/phonometry/llms/llms-io.txt)
@@ -53953,6 +53958,10 @@ documents, one page per module.
 | `EnvironmentalSensitivityCorrection` | `dataclass` | **C_env = δp (p_s - p_s,0) + δt (t - t_0) + δH (H - H_0), at each frequency.**<br>• `frequencies_hz` [Hz], the conditions and the reference conditions, the three coefficient columns, read-only<br>• `.static_pressure_term_db`, `.temperature_term_db`, `.humidity_term_db`, `.correction_db` [dB]<br>• `.plot()`: the three terms and the total | `e.correction_db` |
 | `jig_diameter_correction` | `function` | **Corrections of a WS3 microphone against an LS2aP in the jig of Figure A.4 (IEC 61094-5 Table A.1).**<br>• `frequencies_hz` [Hz], rows of the table, an exact base-ten frequency within 2 % reading as its row (Default: None, the 14 rows from 1 kHz to 20 kHz)<br>• refuses a frequency the table does not print | `metrology.jig_diameter_correction([8000.0]).correction_db  # [-0.235]`<br><br>• `JigDiameterCorrection` |
 | `JigDiameterCorrection` | `dataclass` | **The Table A.1 corrections at the frequencies asked for.**<br>• `frequencies_hz` [Hz], `correction_db` [dB], read-only<br>• `.expanded_uncertainty_db` [dB], a tenth of the correction (NOTE); `.standard_uncertainty_db` [dB], its half, read with the k = 2 of 7.9 and D.2 since the 10 % comes without one, the special-case component of Table D.1<br>• `.plot()`: the corrections and their band | `j.expanded_uncertainty_db` |
+| `diameter_sound_field_correction` | `function` | **The correction of a test microphone smaller than its reference, facing it across a narrow gap, by the model IEC 61094-5 6.5 refers to (Barham et al. 2014, the origin of Table A.1).**<br>• `frequencies_hz` [Hz], each below both resonance frequencies<br>• keyword-only: `reference_radius_m`, `test_diaphragm_radius_m`, `test_outer_radius_m`, `separation_m` [m]; `reference_resonance_frequency_hz`, `test_resonance_frequency_hz` [Hz]; `temperature_c` [°C] (Default: 23.0), `static_pressure_kpa` [kPa] (Default: 101.325), `relative_humidity_percent` [%] (Default: 50), the Annex F air its speed of sound comes from; `gas` (Default: None)<br>• read with Formula (4) less 1 and the annulus of Formula (2) from the outer radius, the readings that give Table A.1 (an erratum) | `metrology.diameter_sound_field_correction([20000.0], reference_radius_m=4.65e-3, test_diaphragm_radius_m=2.065e-3, test_outer_radius_m=2.975e-3, separation_m=0.5e-3, reference_resonance_frequency_hz=22e3, test_resonance_frequency_hz=100e3).correction_db  # [-1.434]`<br><br>• `DiameterSoundFieldCorrection` |
+| `DiameterSoundFieldCorrection` | `dataclass` | **The model's correction for microphones of different diameters.**<br>• `frequencies_hz` [Hz], `ratio` and `doubled_separation_ratio` R_P (complex), read-only; the geometry and `speed_of_sound` [m/s]<br>• `.correction_db` [dB], -20 lg\|R_P\|, added to the test microphone's level; `.doubled_separation_correction_db` [dB]; `.separation_change_db` [dB], the change A.2 names as approximately the uncertainty of Table A.1; `.phase_difference_deg` [°]<br>• `.plot()`: the correction and the correction at twice the separation | `model.separation_change_db` |
+| `verify_jig_or_coupler` | `function` | **Validate a jig or a coupler: a pressure calibration made in it against another calibration of the same microphone, by comparison elsewhere or by reciprocity (IEC 61094-5 6.7).**<br>• `calibration`: the `ComparisonCalibration` from the jig or coupler; `validation`: a `ComparisonCalibration` or a `ReciprocityCalibration`, both in a pressure field and with an expanded uncertainty<br>• keyword-only: `microphone`, the index of the microphone in a reciprocity calibration (Default: None)<br>• compared at the frequencies the two share; agreement within the root-sum-square of the two expanded uncertainties, the library's reading (the clause prints no criterion) | `v = metrology.verify_jig_or_coupler(jig, coupler)`<br><br>• `JigCouplerVerification` |
+| `JigCouplerVerification` | `dataclass` | **The verdict on a jig or a coupler.**<br>• `frequencies_hz` [Hz]; `calibration_level_db`, `validation_level_db` [dB re 1 V/Pa]; `calibration_uncertainty_db`, `validation_uncertainty_db` [dB]; `validation` ('comparison' / 'reciprocity'); `unvalidated_frequencies_hz` [Hz], read-only<br>• `.difference_db`, `.expanded_uncertainty_db` [dB], `.normalised_difference`, `.agrees`, `.failing_frequencies_hz` [Hz]<br>• `.passes`: every shared frequency agrees; `bool()` raises<br>• `.plot()`: the difference inside the band of its expanded uncertainty | `v.passes`, `v.failing_frequencies_hz` |
 | `comparison_uncertainty_budget` | `function` | **The uncertainty budget of a comparison calibration at one frequency (IEC 61094-5 Annex D; IEC 61094-8 8.8, Table 2).**<br>• `standard_uncertainties_db`: each component a standard uncertainty [dB] or a `Quantity`, keyed as `IEC61094_5_TABLE_D1` (pressure) or `IEC61094_8_TABLE_2` (free field); a subset is allowed<br>• keyword-only: `frequency_hz` [Hz]; `field` (Default: 'pressure'); `additional_components`: named `Quantity` objects (Default: none); `coverage_factor` (Default: 2)<br>• on `combine_uncertainty`, sensitivities 1, U = k u_c | `b = metrology.comparison_uncertainty_budget(d1, frequency_hz=2000.0)`<br><br>• `b.expanded_uncertainty_db  # 0.087 (D.3 prints 0,08, an erratum)` |
 | `ComparisonUncertaintyBudget` | `dataclass` | **One comparison budget at one frequency.**<br>• `frequency_hz` [Hz], `field`, `names`, `components`, `standard_uncertainties_db` [dB], `uncertainty` (the `UncertaintyResult`, refused unless it is their root-sum-square), `coverage_factor`<br>• `.combined_uncertainty_db`, `.expanded_uncertainty_db`, `.linear_combined_uncertainty_db` [dB], `.standard`<br>• `.plot()`: one bar per component, with u_c, k and U | `b.combined_uncertainty_db  # 0.0437` |
 | `IEC61094_5_TABLE_D1` | `mapping` | **IEC 61094-5:2016 Table D.1, the example budget at 2 kHz, keyed 'reference', 'capacitance', 'non_linearity', 'impedance', 'polarizing_voltage', 'repeatability', 'drift', 'rounding'.**<br>• each value a `ComparisonUncertaintyRow` with the printed standard uncertainty and, for the seven rows that state one, the stated value and its divisor (√3 or 2); the repeatability states none | `metrology.IEC61094_5_TABLE_D1["drift"].standard_uncertainty_db  # 0.017` |
@@ -53971,8 +53980,9 @@ documents, one page per module.
 | `rectangular_pulse` | `function` | **The rectangular pulse of the direct impulse method (IEC 61094-8 B.6.1, Formula (B.10)).**<br>• `duration_s` T = 2b [s] (Formula (B.10) is the spectrum of a pulse lasting 2b, which the text calls b, an erratum)<br>• keyword-only: `amplitude_v` a [V] (Default: 1) | `metrology.rectangular_pulse(5e-6, amplitude_v=10.0).level_db_at([20000.0])  # [-0.143]`<br><br>• `RectangularPulse` |
 | `RectangularPulse` | `dataclass` | **A pulse of duration T and amplitude a.**<br>• `duration_s` [s], `amplitude_v` [V]<br>• `.half_duration_s` b, `.first_zero_hz` 1/(2b) [Hz], `.area_v_s` 2ab [V·s]<br>• `.spectrum_at(f)` X(f) of (B.10), `.level_db_at(f)` re X(0) [dB]<br>• `.plot(upper_frequency_hz=...)` | `metrology.rectangular_pulse(5e-6).half_duration_s  # 2.5e-06` |
 | `rectangular_pulse_duration_s` | `function` | **The pulse duration whose first spectral zero lies a factor above the frequencies of interest (IEC 61094-8 B.6.1).**<br>• `upper_frequency_hz` [Hz]<br>• keyword-only: `zero_ratio` (Default: 10, "approximately an order of magnitude") | `metrology.rectangular_pulse_duration_s(20000.0)  # 5e-06` |
-| `impedance_pressure_ratio` | `function` | **The pressure ratio two microphones of different acoustic impedance see, R_P = (V_x + V_e,ref)/(V_x + V_e,test) (IEC 61094-5 7.4, 7.5).**<br>• `frequencies_hz` [Hz]<br>• keyword-only: `reference_equivalent_volume_m3`, `test_equivalent_volume_m3` [m³], complex, such as `ReciprocityMicrophone.complex_equivalent_volume_m3(f)` gives them (IEC 61094-2 E.4)<br>• exactly one of `coupling_equivalent_volume_m3` [m³], a closed coupler (IEC 61094-2 Formula (3)), or `coupling_impedance_pa_s_m3` [Pa·s/m³], the air in series with each microphone (a divider, the library's reading of Table D.1) | `rp = metrology.impedance_pressure_ratio(f, reference_equivalent_volume_m3=v1, test_equivalent_volume_m3=v2, coupling_equivalent_volume_m3=600e-9)`<br><br>• `ImpedancePressureRatio` |
+| `impedance_pressure_ratio` | `function` | **The pressure ratio two microphones of different acoustic impedance see, R_P = (V_x + V_e,ref)/(V_x + V_e,test) (IEC 61094-5 7.4, 7.5).**<br>• `frequencies_hz` [Hz]<br>• keyword-only: `reference_equivalent_volume_m3`, `test_equivalent_volume_m3` [m³], complex, such as `ReciprocityMicrophone.complex_equivalent_volume_m3(f)` gives them (IEC 61094-2 E.4)<br>• exactly one of `coupling_equivalent_volume_m3` [m³], a closed coupler (IEC 61094-2 Formula (3)), or `coupling_impedance_pa_s_m3` [Pa·s/m³], the air in series with each microphone (Table D.1, the circuit of Jarvis 1996, which `air_gap_series_impedance_pa_s_m3` gives) | `rp = metrology.impedance_pressure_ratio(f, reference_equivalent_volume_m3=v1, test_equivalent_volume_m3=v2, coupling_equivalent_volume_m3=600e-9)`<br><br>• `ImpedancePressureRatio` |
 | `ImpedancePressureRatio` | `dataclass` | **The pressure ratio of different acoustic impedances.**<br>• `frequencies_hz` [Hz], `ratio` R_P (complex), `coupling` ('coupler' / 'series'), `coupling_equivalent_volume_m3` [m³], read-only<br>• `.level_difference_db` [dB] and `.phase_difference_deg` [°], the pressure ratio of a comparison<br>• `.standard_uncertainty_db` [dB], the level read as a rectangular semi-range (Table D.1)<br>• `.plot(quantity='level' / 'phase')` | `rp.standard_uncertainty_db` |
+| `air_gap_series_impedance_pa_s_m3` | `function` | **The impedance of the air between two microphones in series with each, Z_x = Z_L + Z_L Z_c/(Z_L + Z_c), by the symmetric-coupler circuit of Jarvis (1996) Appendix B, the reference [2] of IEC 61094-5 Table D.1 and 7.4.**<br>• `frequencies_hz` [Hz]<br>• keyword-only: `gap_length_m`, `gap_radius_m` [m]; `temperature_c` [°C] (Default: 23.0), `static_pressure_kpa` [kPa] (Default: 101.325), `relative_humidity_percent` [%] (Default: 50), the Annex F air its density and ratio of specific heats come from; `gas` (Default: None)<br>• returns a read-only complex array [Pa·s/m³] | `z_x = metrology.air_gap_series_impedance_pa_s_m3(f, gap_length_m=2e-3, gap_radius_m=6.35e-3)`<br><br>• passed to `impedance_pressure_ratio(..., coupling_impedance_pa_s_m3=z_x)` |
 | `pressure_reciprocity` | `function` | **Pressure sensitivities of three microphones calibrated in pairs in a coupler (IEC 61094-2:2009 5.7.1, Formula (7)).**<br>• `frequencies_hz` [Hz]; `electrical_transfer_impedances_ohm` Z_e,12, Z_e,23, Z_e,31, complex [Ω]; `acoustic_transfer_impedances` Z_a,12, Z_a,23, Z_a,31, each a `CouplerTransferImpedance` or complex [Pa·s/m³]<br>• keyword-only: `corrections_db` by name [dB], added to every level (Default: None); `expanded_uncertainty_db` [dB] (Default: None)<br>• products M_i M_j = Z_e,ij/Z_a,ij; M_1 = (P_12 P_31/P_23)^½ on the branch continuous in frequency with a non-negative real part at the lowest one, M_2 = P_12/M_1, M_3 = P_31/M_1 | `c = metrology.pressure_reciprocity(f, (ze12, ze23, ze31), (za12, za23, za31))`<br><br>• `ReciprocityCalibration` |
 | `pressure_reciprocity_pair` | `function` | **Pressure sensitivities of two microphones and an auxiliary sound source (IEC 61094-2:2009 5.7.2, Formula (8)).**<br>• `frequencies_hz` [Hz]; `electrical_transfer_impedance_ohm` Z_e,12 [Ω]; `acoustic_transfer_impedance` Z_a,12; `sensitivity_ratio` M_1/M_2, complex<br>• keyword-only: `corrections_db`, `expanded_uncertainty_db` as in `pressure_reciprocity` | `metrology.pressure_reciprocity_pair(f, ze12, za12, r12)`<br><br>• `ReciprocityCalibration` of two microphones |
 | `free_field_reciprocity` | `function` | **Free-field sensitivities of three microphones calibrated in pairs (IEC 61094-3:2016 5.7.1, Formula (8), with the factor -j of Formula (7)).**<br>• `frequencies_hz` [Hz]; `electrical_transfer_impedances_ohm` Z_e,12, Z_e,23, Z_e,31 [Ω]<br>• keyword-only: `diaphragm_distances_m` d_m,12, d_m,23, d_m,31 [m]; `temperature_c` [°C], `static_pressure_pa` [Pa], `relative_humidity_percent` [%]; `acoustic_centres_m` of microphones 1 to 3, positive in front of the diaphragm, a value or one per frequency [m] (Default: 0, the diaphragms); `dispersion` in k = ω/c (Default: True, IEC 61094-2 F.3 NOTE); `corrections_db`, `expanded_uncertainty_db` | `metrology.free_field_reciprocity(f, (ze12, ze23, ze31), diaphragm_distances_m=(0.3, 0.25, 0.2), temperature_c=23.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0)`<br><br>• `ReciprocityCalibration` |
@@ -54457,7 +54467,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `ReciprocityCalibration`, `ReciprocityUncertaintyBudget`, `CouplerTransferImpedance`, `HeatConductionCorrection`, `CapillaryTubeImpedance`, `WaveMotionCorrection`, `CouplerCheck`, `CouplerParameterUncertainty`, `ReciprocityAirAttenuation`, `AcousticCentre`, `FreeFieldArrangementCheck`, `FreeFieldParameterUncertainty`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AgcCharacteristic`, `QuadraturePhaseError`, `MaximumOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `ProgrammeSignalCheck`, `RatedImpedanceVerification`, `ProgrammeCharacteristicVoltage`, `LimitingTestSignalCheck`, `ProtectionVoltage`, `CouplerFrequencyResponse`, `CrosstalkAttenuation`, `FieldComparisonResponse`, `EarCanalFrequencyResponse`, `EarCanalMicrophoneVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `DiameterSoundFieldCorrection`, `JigCouplerVerification`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `ReciprocityCalibration`, `ReciprocityUncertaintyBudget`, `CouplerTransferImpedance`, `HeatConductionCorrection`, `CapillaryTubeImpedance`, `WaveMotionCorrection`, `CouplerCheck`, `CouplerParameterUncertainty`, `ReciprocityAirAttenuation`, `AcousticCentre`, `FreeFieldArrangementCheck`, `FreeFieldParameterUncertainty`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AgcCharacteristic`, `QuadraturePhaseError`, `MaximumOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `ProgrammeSignalCheck`, `RatedImpedanceVerification`, `ProgrammeCharacteristicVoltage`, `LimitingTestSignalCheck`, `ProtectionVoltage`, `CouplerFrequencyResponse`, `CrosstalkAttenuation`, `FieldComparisonResponse`, `EarCanalFrequencyResponse`, `EarCanalMicrophoneVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -63470,8 +63480,10 @@ part asks for. This page runs a pressure calibration of a WS2P against an
 LS2P and a free-field calibration of a WS2F on synthetic readings, so every
 step can be checked against the sensitivities that built them, then the
 time-selective processing of IEC 61094-8 Annex B, the phase of the
-sensitivity and the effect of different acoustic impedances (IEC 61094-5 7.4
-and 7.5).
+sensitivity, the effect of different acoustic impedances (IEC 61094-5 7.4
+and 7.5) with the air between two microphones by the circuit the part refers
+to, the correction for microphones of different diameters by the model it
+refers to (6.5), and the validation of a jig or a coupler (6.7).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_calibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_calibration.svg" alt="The sensitivity level of a WS2P calibrated in a pressure field against an LS2P, 250 Hz to 20 kHz, and of a WS2F calibrated in a free field by substitution, 500 Hz to 20 kHz, each with a band of its expanded uncertainty and the reference's level it was compared with: the pressure level in the coupler, the free-field level in the free field" width="100%"></picture>
 
@@ -63609,6 +63621,70 @@ print(j.standard_uncertainty_db[13].round(4))   # 0.0722
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_correction.svg" alt="The corrections of IEC 61094-5 Table A.1 from -0.004 dB at 1 kHz to -1.443 dB at 20 kHz, with a band of a tenth of each" width="88%"></picture>
+
+### Beyond Table A.1: microphones of different diameters
+
+"The effect of a non-uniform pressure distribution over the surface of the
+diaphragm will be significantly greater if the test and reference
+microphones are of different diameters. A theoretical model which can be
+used to apply corrections and assess the uncertainties in this case is given
+in the literature (for example [1])" (6.5). Its reference [1], Barham,
+Barrera-Figueroa and Avison, Metrologia 51 (2014) 129, is where Table A.1
+comes from. The gap between the diaphragms is a cylinder of the reference's
+front-cavity radius `a` and length `L`, closed by the reference and driven,
+in a radially symmetrical field, through the annulus round the smaller
+microphone. Its pressure is a series of the radial modes of the cavity,
+`p(r, z) = sum C_n cosh(mu_n z) J0(k_n r/a)` with `J1(k_n) = 0`, and each
+microphone reads it averaged over its diaphragm with its radial sensitivity,
+the deflection of a membrane under a uniform pressure,
+`J0(j01 (f/f0) r/a)/J0(j01 f/f0) - 1`, `f0` being the diaphragm's resonance
+frequency and `b` taking the place of `a` for the test microphone. The correction is the ratio of the two averages,
+`-20 lg|R_P|`. `metrology.diameter_sound_field_correction` computes it from
+the geometry and the two resonance frequencies, at the speed of sound of the
+IEC 61094-2 Annex F air:
+
+```python
+ws3 = {
+    "reference_radius_m": 4.650e-3,        # an LS2: its front cavity and diaphragm
+    "test_diaphragm_radius_m": 2.065e-3,   # a WS3: its diaphragm
+    "test_outer_radius_m": 2.975e-3,       # and its outline
+    "separation_m": 0.5e-3,                # Figure A.4
+    "reference_resonance_frequency_hz": 22000,
+    "test_resonance_frequency_hz": 100000,
+}   # the inputs of Table 1 of [1]
+model = metrology.diameter_sound_field_correction(j.frequencies_hz, **ws3)
+print(round(model.speed_of_sound, 1), model.correction_db[[0, 9, 13]].round(3))   # 345.9 [-0.004 -0.233 -1.434]
+print(np.abs(model.correction_db - j.correction_db).max().round(4))               # 0.0093
+print((model.separation_change_db / np.abs(model.correction_db))[[0, 13]].round(3))   # [0.063 0.054]
+```
+
+At the reference air of clause 4 the model is within 0,0093 dB of every row
+of Table A.1, inside the 0,144 dB the NOTE gives the largest correction as
+its expanded uncertainty; the paper prints no speed of sound, and at
+344,8 m/s the model gives every row to the thousandth printed. As printed,
+the paper's formulas with its own inputs do not give its own table: the
+library reads the radial sensitivity of its Formula (4) less 1 and the
+annulus of its Formula (2) from the WS3's overall radius, the two readings
+that do (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)). A.2 sets the expanded uncertainty of
+Table A.1 at 10 % of each correction, "which is approximately the change
+observed by doubling the distance between the microphones";
+`separation_change_db` is that change by the model, of the order A.2 states
+and below it. Table A.1 holds for one pair of microphones at the one
+separation of Figure A.4 and at fourteen frequencies; the model holds for any
+test microphone that fits inside its reference's front cavity, any
+separation, and any frequency below the two resonance frequencies:
+
+```python
+f12 = metrology.exact_frequencies(1000, 20000, fraction=12)   # every twelfth of an octave
+fine = metrology.diameter_sound_field_correction(f12, **ws3)
+print(f12.size, round(f12[50]), fine.correction_db[50].round(3))   # 53 17783 -1.141
+```
+
+`fine.correction_db` goes to a calibration through `corrections_db=` as
+Table A.1 does. The model assumes a radially symmetrical field, which is why
+6.5 and A.2 ask for a coaxial source in the far field or a diffuse field.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_diameter_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_diameter_correction.svg" alt="The correction of a WS3 microphone against an LS2 by the model of IEC 61094-5 6.5, at every twelfth of an octave from 1 kHz to 20 kHz, from -0.004 dB at 1 kHz to -0.233 dB at 8 kHz and -1.427 dB just under 20 kHz, with the fourteen rows of Table A.1 as diamonds on it, and dashed above it the correction at twice the separation, 1 mm, about 6 % smaller" width="88%"></picture>
 
 ## A free-field calibration by substitution
 
@@ -63876,10 +63952,10 @@ the wavelength a sequential substitution changes the pressure by the ratio of
 the two admittance sums of IEC 61094-2 Formula (3), `V_x` being the rest of
 the load (the gas, the source, a monitor); for a simultaneous excitation
 Table D.1 puts "the acoustical impedance of the microphone [...] in series
-with that of the air in the space between the two microphones" and prints no
-circuit; the library reads it as a divider, each diaphragm behind the same
-series impedance from the common field, and `V_x` is the equivalent volume
-of that impedance. That form is the library's reading, not the part's.
+with that of the air in the space between the two microphones", so that the
+two "see slightly different pressures [...] (see 7.4 and [2])": each diaphragm takes the pressure of a common source behind the same
+series impedance, and `V_x` is the equivalent volume of that impedance,
+which the circuit of [2] gives (below).
 `metrology.ReciprocityMicrophone`, the microphone of
 [the reciprocity calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/), holds the lumped
 parameters of IEC 61094-2 E.4, the low-frequency volume, the resonance
@@ -63929,6 +64005,58 @@ nothing at all.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_impedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_impedance.svg" alt="The pressure ratio of a WS2F in the place of an LS2P in a closed coupler, from 1 kHz to 20 kHz. Left, its level: -0.28 dB at 1 kHz, falling to -0.44 dB at 12.5 kHz, crossing 0 dB at 16 kHz past the WS2F's resonance and reaching +0.37 dB at 20 kHz, with its standard uncertainty dashed from 0.16 dB to 0.25 dB, dropping to almost nothing at 16 kHz where the level crosses 0 dB. Right, its phase, about 0.7 degrees at 8 kHz and peaking at 4.86 degrees at 16 kHz" width="100%"></picture>
 
+### The air between the two microphones
+
+The "Microphone impedance" row of Table D.1 refers the simultaneous
+excitation to its reference [2], Jarvis, NPL Report CIRA(EXT) 010 (1996).
+Its Appendix B models a symmetric coupler as a ladder from a source in its
+middle: on each side a mass `Z_L`, the compliance `Z_c` of that side's half
+of the volume, a second `Z_L` and the microphone, with
+`Z_c = kappa p0 / (j omega V/2)`, `Z_L = j omega rho (L/4) / (3 pi r^2)` and
+`V = pi r^2 L` for a tube of length `L` and radius `r`. Seen from each
+diaphragm, the middle of the ladder is a pressure common to both behind one
+impedance, `Z_x = Z_L + Z_L Z_c/(Z_L + Z_c)`, so each diaphragm takes
+`p Z_a/(Z_a + Z_x)`, the divider above, and the ratio of the two is the one
+Appendix B prints. `metrology.air_gap_series_impedance_pa_s_m3` gives `Z_x`
+for a coupler of known length and radius. Appendix B's example is an LS2P
+against a high sensitivity WS2P in a tube 2 mm long and 12,7 mm across, each
+microphone a resistance, a mass and a compliance in series:
+
+```python
+fj = np.arange(100.0, 20000.0 + 1.0, 100.0)   # Appendix B's frequencies
+w = 2 * np.pi * fj
+
+
+def z_mic(r, c, m):   # Z_m = r + j w m + 1/(j w c), Appendix B
+    return r + 1j * w * m + 1 / (1j * w * c)
+
+
+def v_e(z):           # the equivalent volume of IEC 61094-1 6.2.2
+    return 1.40 * 101325 / (1j * w * z)
+
+
+z_x = metrology.air_gap_series_impedance_pa_s_m3(fj, gap_length_m=2e-3, gap_radius_m=6.35e-3)
+gap = metrology.impedance_pressure_ratio(
+    fj,
+    reference_equivalent_volume_m3=v_e(z_mic(330e6, 48e-15, 1210)),   # the LS2P of Appendix B
+    test_equivalent_volume_m3=v_e(z_mic(7e7, 2.6e-13, 820)),           # its high sensitivity WS2P
+    coupling_impedance_pa_s_m3=z_x,
+)
+print(gap.level_difference_db[[69, 199]].round(4))   # [ 0.0064 -0.025 ]
+print(gap.phase_difference_deg[124].round(3))         # -0.158
+```
+
+The WS2P hears 0,0064 dB more than the LS2P at 7 kHz and 0,025 dB less at
+20 kHz, and lags it by up to 0,158° at 12,5 kHz. Appendix B draws the same
+curves for `P1/P2`, the LS2P re the WS2P, so the other way up, with its
+1,21 kg/m³ for the density of the air; with that density the conformance
+report reproduces them. In the published scan its impedance of the LS2P
+shows no imaginary unit on the mass term, where blank space stands; the
+second microphone's has it, and the graph needs it (an
+[erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_air_gap_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_air_gap.svg" alt="The pressure ratio of the high sensitivity WS2P re the LS2P of Jarvis (1996) Appendix B in a coupler 2 mm long and 12.7 mm across, from 100 Hz to 20 kHz. Left, its level: nothing up to 1 kHz, rising to +0.0064 dB at 7 kHz, crossing 0 dB near 10 kHz and falling to -0.025 dB at 20 kHz, with its standard uncertainty dashed. Right, its phase: nothing up to 2 kHz, falling to -0.158 degrees at 12.5 kHz and back to -0.09 degrees at 20 kHz" width="100%"></picture>
+
 ## The diffuse-field comparison of IEC 61183
 
 The diffuse-field method of IEC 61183 clause 5 is a sequential comparison
@@ -63942,6 +64070,66 @@ d = metrology.diffuse_field_sensitivity(
 s = metrology.sequential_comparison([1000.0, 2000.0], [-26.0, -26.2], [94.0, 94.1], [94.3, 94.6])
 print(d.diffuse_field_level_db, s.sensitivity_level_db)   # [-25.7 -25.7] [-25.7 -25.7]
 ```
+
+## Validating a jig or a coupler
+
+"Calibrations performed in any particular jig or coupler shall be validated
+by comparison with calibrations performed in other jigs and couplers and
+alternative sound sources. A separate validation is necessary for each
+different type of microphone. If the test microphone is a laboratory
+standard microphone, then the jig or coupler can be validated by comparing
+a comparison calibration with a reciprocity calibration. For some
+microphones, it can be necessary to use more than one jig and/or coupler to
+cover a full frequency range with low uncertainty" (6.7).
+`metrology.verify_jig_or_coupler` sets a calibration made in the jig or
+coupler beside another calibration of the same microphone, a comparison made
+elsewhere or, for a laboratory standard microphone, the
+`ReciprocityCalibration` of [the reciprocity
+calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/) with the index of that microphone,
+and compares them at the frequencies they share. The clause prints no
+criterion. The library reads "validated" as the two agreeing within the
+expanded uncertainty of their difference,
+`|L_cal - L_val| <= sqrt(U_cal^2 + U_val^2)`, the two taken as independent;
+two calibrations that share a reference are correlated, and the
+root-sum-square then overstates the uncertainty of their difference.
+
+Here the jig of A.2 is validated against the coupler of A.1 for the WS2P of
+the first example, the coupler used up to the 10 kHz it is for. Near
+6,3 kHz the jig has a standing wave close to the microphones, the anomaly
+Barham et al. found in a test box at that frequency, and the field moves
+between the reading and the interchange, so (C.3) no longer cancels it:
+
+```python
+fv = f[6:]   # the jig of A.2, 1 kHz to 20 kHz
+mode = 0.5 * np.exp(-(((fv / 1000 - 6.3) / 0.6) ** 2))   # the field moves near 6.3 kHz
+jitter = np.random.default_rng(42).normal(0.0, 0.01, (2, 3, fv.size))
+j12 = (l_ref[6:] + gain_1) - (l_true[6:] + gain_2) + field_a[6:] + mode + jitter[0]
+j21 = (l_true[6:] + gain_1) - (l_ref[6:] + gain_2) + field_a[6:] + jitter[1]
+jig = metrology.simultaneous_comparison(fv, l_ref[6:], j12, j21, expanded_uncertainty_db=u[6:])
+coupler = metrology.simultaneous_comparison(
+    f[:17], l_ref[:17], l_c12[:, :17], l_c21[:, :17], expanded_uncertainty_db=u[:17]
+)   # the coupler of A.1, up to 10 kHz
+check = metrology.verify_jig_or_coupler(jig, coupler)
+print(check.passes, check.failing_frequencies_hz.round())    # False [6310.]
+print(check.unvalidated_frequencies_hz.round())              # [12589. 15849. 19953.]
+print(check.difference_db[8].round(3), check.expanded_uncertainty_db[8].round(3))   # -0.247 0.128
+```
+
+The jig agrees with the coupler at every frequency they share but 6,3 kHz,
+where they differ by 0,247 dB against 0,128 dB, and above 10 kHz it is not
+validated at all, the coupler not reaching there: a second set-up has to
+validate it there, as 6.7 allows. `check.normalised_difference` is the
+difference in units of its expanded uncertainty, -1,93 at 6,3 kHz.
+
+Both calibrations here take the same LS2P as their reference, so its row of
+Table D.1, 0,05 dB at $k = 2$, cancels in the difference while the
+root-sum-square counts it twice: without it the band at 6,3 kHz is 0,106 dB
+rather than 0,128 dB. The verdict does not change here; for a pair this
+correlated, budgets without the shared components give the uncertainty of
+the difference. The clause prints neither a criterion nor an example, so the
+conformance report checks the verdict against its own definition.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="The difference between the WS2P calibrated in the jig and in the coupler at the eleven frequencies they share, 1 kHz to 10 kHz, inside a shaded band of plus or minus the expanded uncertainty of the difference, 0.124 dB widening to 0.143 dB at 10 kHz: within 0.008 dB of zero everywhere but 6.3 kHz, where it falls to -0.247 dB, outside the band and marked with a cross; three dashed vertical lines at 12.6 kHz, 15.8 kHz and 20 kHz mark the frequencies of the jig the coupler does not cover" width="88%"></picture>
 
 ## What this guide covers
 
@@ -63958,19 +64146,29 @@ whose 10 % expanded uncertainty, printed without a coverage factor, is read
 with the `k = 2` of 7.9 and D.2; the pressure ratio of microphones of
 different acoustic impedance (7.4, 7.5) in a closed coupler by the printed
 IEC 61094-2 Formula (3) and, for a simultaneous excitation, in series with
-the air between them, a divider that is this library's reading of the one
-sentence of Table D.1 that describes it, with the lumped equivalent volume
-of IEC 61094-2 E.4 and IEC 61094-1 6.2.2, and its standard uncertainty as
-Table D.1 reads a semi-range (which, above 10 kHz for a WS2F against an
-LS2P, the row asks to be established experimentally); the budgets of Table D.1 and IEC 61094-8 Table 2 with `k = 2`;
+the air between them, by the circuit of Appendix B of Jarvis (1996), the
+part's reference [2], whose series impedance the library gives for a coupler
+of known length and radius (read with the imaginary unit its first
+microphone's mass term has lost in the published scan), with the lumped equivalent
+volume of IEC 61094-2 E.4 and IEC 61094-1 6.2.2, and its standard
+uncertainty as Table D.1 reads a semi-range (which, above 10 kHz for a WS2F
+against an LS2P, the row asks to be established experimentally); the
+correction for a test microphone smaller than its reference (6.5) by the
+model of Barham et al. (2014), the part's reference [1], for any geometry
+and separation, read with the radial sensitivity of its Formula (4) less 1
+and the annulus of its Formula (2) from the overall radius, the readings
+that give its Table 2, which is Table A.1, with the change on doubling the
+separation that A.2 names, its uncertainty left to the caller; the
+validation of a jig or a coupler against another calibration of the same
+microphone (6.7), whose criterion, agreement within the root-sum-square of
+the two expanded uncertainties, is this library's reading, the clause
+printing none; the budgets of Table D.1 and IEC 61094-8 Table 2 with `k = 2`;
 Tables A.1, D.1, 1 and 2 as published data; the effective free-field region
 of Formula (B.1) and the longest window it allows for a reflection; the time
 window of B.1.3 with the tapered edges of B.1.2, Formula (B.2) through it, the stepped sine of B.2 by Formula
 (B.3) and the rectangular pulse of B.6 (Formula (B.10)). Not implemented: the
-measurements themselves; the value of the series impedance of the air between
-two microphones, which the parts leave to the literature and to experiment,
-and the corrections for non-uniform pressure beyond Table A.1 (6.5); the
-sweeps, the maximum length sequences and the random noise of B.3 to B.5,
+measurements themselves, and the choice of the set-ups a jig or a coupler
+is validated against, for each type of microphone (6.7); the sweeps, the maximum length sequences and the random noise of B.3 to B.5,
 which are `room.impulse_response`, `room.mls_impulse_response` and
 `electroacoustics.transfer_function` elsewhere in the library, and the
 synchronous averaging of B.6.2, which is `signals.time_synchronous_average`;
@@ -63994,7 +64192,9 @@ which a budget takes through `additional_components`.
 - [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
   the budgets are combined by.
 - [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): IEC 61094-5 D.3, UNE-EN
-  61094-5:2017 Table D.1, IEC 61094-8 8.4, B.2.1 and Formula (B.10).
+  61094-5:2017 Table D.1, IEC 61094-8 8.4, B.2.1 and Formula (B.10),
+  Barham et al. (2014) Formulas (1), (2) and (4), and Jarvis (1996)
+  Appendix B.
 - API reference: [`metrology.comparison_calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/comparison-calibration/).
 
 ---
@@ -65368,9 +65568,11 @@ budgets that are specialisations of the GUM machinery described here.
   and B.1 of IEC 61672-1, and the statement of Clause 22.
 - [Microphone Calibration by Comparison (IEC 61094-5/-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/):
   the simultaneous comparison with the interchange of Annex C, the sequential
-  one against a monitor, in level and phase, the environmental, WS3 jig and
-  acoustic impedance corrections, the budgets of Table D.1 and Table 2 with
-  k = 2, and the time-selective processing of IEC 61094-8 Annex B.
+  one against a monitor, in level and phase, the environmental, WS3 jig,
+  different-diameter and acoustic impedance corrections with the air between
+  two microphones, the validation of a jig or coupler, the budgets of Table
+  D.1 and Table 2 with k = 2, and the time-selective processing of IEC
+  61094-8 Annex B.
 - [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/):
   three microphones calibrated in pairs, the transfer impedance of a
   plane-wave or large-volume coupler with the heat conduction of Annex A and
@@ -71807,7 +72009,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1884 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1891 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -72955,7 +73157,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1884 numerical conformance checks across 111 domains and 521 standards, covering
+1891 numerical conformance checks across 111 domains and 523 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

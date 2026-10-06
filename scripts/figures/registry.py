@@ -432,10 +432,13 @@ from .metrology import (
     generate_calibration_narrowband_bias,
     generate_calibration_stability,
     generate_calibrator_verification,
+    generate_comparison_air_gap,
     generate_comparison_budget,
     generate_comparison_calibration,
+    generate_comparison_diameter_correction,
     generate_comparison_impedance,
     generate_comparison_jig_correction,
+    generate_comparison_jig_validation,
     generate_comparison_phase,
     generate_conformance_rule_examples,
     generate_dbfs_versus_spl,
@@ -1193,6 +1196,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # direct impulse method.
     generate_comparison_phase,
     generate_comparison_impedance,
+    # IEC 61094-5 6.5 and 6.7, and the air between two microphones of
+    # Table D.1: the model of [1], the circuit of [2], and the validation of
+    # a jig or a coupler.
+    generate_comparison_diameter_correction,
+    generate_comparison_air_gap,
+    generate_comparison_jig_validation,
     generate_stepped_sine_impulse_response,
     generate_time_selective_response,
     generate_rectangular_pulse,

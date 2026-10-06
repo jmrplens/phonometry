@@ -194,6 +194,13 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     r"$L_\mathrm{test} \pm U$ ($k$ = 2)": "the level of the test microphone, whose test subscript "
     "is the one IEC 61094-5 D.2 prints in M_test, with its expanded uncertainty; a subscript "
     "follows its source (ComparisonCalibration.plot)",
+    r"$\Delta = L_\mathrm{cal} - L_\mathrm{val}$": "the difference of the two calibrations "
+    "IEC 61094-5 6.7 compares, the one under validation and the one it is validated against; "
+    "cal and val abbreviate calibración and validación as well, so the symbol reads the same "
+    "in Spanish (JigCouplerVerification.plot)",
+    r"$\pm U_\Delta = \pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$": "the expanded "
+    "uncertainty of that difference, the two calibrations' combined; cal and val abbreviate "
+    "calibración and validación as well (JigCouplerVerification.plot)",
     r"$Z_\mathrm{a,C}$ [GPa·s/m³]": "the symbol of IEC 61094-2 Formula (B.1) and its unit, "
     "which read the same in Spanish (CapillaryTubeImpedance.plot)",
     r"$\alpha$, total": "the attenuation symbol of IEC 61094-3 B.2 and the word total, "

@@ -61,7 +61,10 @@ correction data are available.
 order from the coefficients of the microphone, in the units IEC 61094-2
 Annex D gives them. :func:`jig_diameter_correction` returns the corrections of
 IEC 61094-5 Table A.1 for a type WS3 microphone calibrated against an LS2aP in
-the jig of Figure A.4. A free-field calibration against a reference calibrated
+the jig of Figure A.4, and :func:`diameter_sound_field_correction` computes
+them for any test microphone smaller than its reference by the model 6.5
+refers to, Barham, Barrera-Figueroa and Avison (2014), from which Table A.1
+was calculated. A free-field calibration against a reference calibrated
 in a pressure field takes the reference's free-field to pressure sensitivity
 level difference of IEC/TS 61094-7 (IEC 61094-8 Table 1 and 8.2).
 
@@ -122,11 +125,20 @@ against the equivalent volume :math:`V_x` of what it works into,
 
 for two circuits: a closed coupler, the printed Formula (3) of IEC 61094-2,
 for a sequential substitution; and, for a simultaneous excitation, each
-microphone behind the air between the two, a divider that is this library's
-reading of the sentence of Table D.1 ("Microphone impedance") that puts them
-in series, which prints no circuit.
+microphone in series with the air between the two, as the "Microphone
+impedance" row of Table D.1 has it, by the circuit of its reference [2],
+Jarvis (1996), whose series impedance
+:func:`air_gap_series_impedance_pa_s_m3` gives.
 :meth:`ReciprocityMicrophone.complex_equivalent_volume_m3` gives
 :math:`V_\mathrm{e}` from the lumped parameters of IEC 61094-2 E.4.
+
+**Validation** (IEC 61094-5 6.7). Calibrations made in a jig or a coupler
+"shall be validated by comparison with calibrations performed in other jigs
+and couplers and alternative sound sources", or, for a laboratory standard
+microphone, with its reciprocity calibration.
+:func:`verify_jig_or_coupler` sets the two calibrations side by side; the
+clause prints no criterion, and the library reads it as their agreeing
+within the expanded uncertainty of their difference.
 
 **Time-selective processing** (IEC 61094-8 Annex B). A free field can be
 simulated by keeping only the direct sound of an impulse response:
@@ -141,8 +153,8 @@ impulse method of B.6, :func:`rectangular_pulse` is the pulse of Formula
 (B.10) and :func:`rectangular_pulse_duration_s` the duration whose first
 spectral zero lies an order of magnitude above the frequencies of interest.
 
-Two printed values the library does not follow
-----------------------------------------------
+Printed values the library does not follow
+------------------------------------------
 
 **IEC 61094-5 D.3.** The root-sum-square of the eight components Table D.1
 prints is 0,0437 dB, not the 0,040 dB D.3 states; with :math:`k = 2` it is
@@ -155,6 +167,23 @@ The formula and the first zero it puts at :math:`1/(2b)` agree, so the library
 follows them and reads :math:`b` as the half-duration:
 :func:`rectangular_pulse` takes the whole duration :math:`T = 2b`. The defect
 is in ``docs/ERRATA.md``.
+
+**Barham et al. (2014), Formulas (1), (2) and (4).** With the inputs of its
+Table 1, the model as printed gives -0.986 dB at 20 kHz at 344,8 m/s, where
+its Table 2 (Table A.1 of IEC 61094-5) prints -1.443 dB. Read with the radial
+sensitivity of Formula (4) less 1, the deflection of a membrane under a
+uniform pressure, the annulus of Formula (2) from the test microphone's
+overall radius, and :math:`k_n r/a` in Formula (1) as in (2) and (3), it
+gives every row of the table; :func:`diameter_sound_field_correction`
+follows that reading. The defects are in ``docs/ERRATA.md``.
+
+**Jarvis (1996), Appendix B.** In the published scan the impedance of the
+first microphone reads :math:`r_1 + w\,m + 1/(\mathrm{i}\,w c_1)`, its mass
+term without the imaginary unit the second microphone's carries: blank space
+stands where the glyphs belong, as it does for others the scan loses on the
+same folio. Only :math:`\mathrm{i}\,w\,m_1` gives the graphs computed from
+it, and :func:`air_gap_series_impedance_pa_s_m3` is checked against that. The
+defect is in ``docs/ERRATA.md``.
 
 The IEC 61183 diffuse-field comparison of clause 5
 (:func:`~phonometry.metrology.diffuse_field_sensitivity`) is the same
@@ -170,7 +199,9 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from scipy import special
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     require_above_absolute_zero,
@@ -193,6 +224,9 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..fluids import Fluid
+    from .reciprocity_calibration import ReciprocityCalibration
+
 __all__ = [
     "IEC61094_5_TABLE_A1",
     "IEC61094_5_TABLE_D1",
@@ -201,9 +235,11 @@ __all__ = [
     "ComparisonCalibration",
     "ComparisonUncertaintyBudget",
     "ComparisonUncertaintyRow",
+    "DiameterSoundFieldCorrection",
     "EnvironmentalSensitivityCorrection",
     "FreeFieldRegion",
     "ImpedancePressureRatio",
+    "JigCouplerVerification",
     "JigDiameterCorrection",
     "MonitorReadings",
     "RectangularPulse",
@@ -212,7 +248,9 @@ __all__ = [
     "SimultaneousComparisonPhase",
     "SteppedSineImpulseResponse",
     "TimeSelectiveResponse",
+    "air_gap_series_impedance_pa_s_m3",
     "comparison_uncertainty_budget",
+    "diameter_sound_field_correction",
     "environmental_sensitivity_correction",
     "free_field_region",
     "impedance_pressure_ratio",
@@ -224,6 +262,7 @@ __all__ = [
     "simultaneous_comparison",
     "stepped_sine_impulse_response",
     "time_selective_response",
+    "verify_jig_or_coupler",
 ]
 
 # ---------------------------------------------------------------------------
@@ -338,6 +377,14 @@ _TRANSFORM_BLOCK = 1 << 22
 #: How close a stepped-sine frequency axis has to be to a uniform one, and its
 #: first frequency to 0 Hz, relative to the step.
 _STEP_REL_TOL = 1e-9
+
+#: Relative agreement asked of a given gas's static pressure and that of the
+#: conditions: the rounding of a value that went through arithmetic.
+_SAME_PRESSURE_REL_TOL = 1e-9
+
+#: :math:`j_{01}`, the first zero of :math:`J_0`, in the radial sensitivity of
+#: a diaphragm (Formula (4) of Barham et al. 2014, which prints it as 2.405).
+_J01 = float(special.jn_zeros(0, 1)[0])
 
 
 # ---------------------------------------------------------------------------
@@ -1026,6 +1073,431 @@ def jig_diameter_correction(
     )
     correction = np.array([_table_a1_value(float(f)) for f in frequencies])
     return JigDiameterCorrection(frequencies_hz=frequencies, correction_db=correction)
+
+
+# ---------------------------------------------------------------------------
+# Microphones of different diameters (IEC 61094-5 6.5): the model of [1]
+# ---------------------------------------------------------------------------
+
+#: The number of radial modes of the cavity between the microphones summed in
+#: the Fourier-Bessel series of Formulas (1) to (3) of Barham et al. (2014),
+#: after the plane mode. The averages of Formula (5) converge long before: for
+#: the WS3 jig of Figure A.4, 50 modes and 4 000 give the same correction to
+#: the hundred-thousandth of a decibel.
+_FOURIER_BESSEL_MODES = 400
+
+
+@dataclass(frozen=True)
+class DiameterSoundFieldCorrection:
+    r"""The sound-field correction of a test microphone smaller than its
+    reference, facing it across a narrow gap (IEC 61094-5:2016 6.5, by the
+    model of Barham, Barrera-Figueroa and Avison 2014, reference [1] of the
+    part).
+
+    :math:`R_P` is the ratio of the effective sound pressures on the test and
+    the reference microphone of D.2, each the pressure of the cavity between
+    them averaged over its diaphragm with its radial sensitivity, and the
+    correction to add to the test microphone's sensitivity level is
+    :math:`-20\lg\lvert R_P\rvert`, the form Table A.1 prints. The same
+    correction at twice the separation, which A.2 names as what the 10 %
+    uncertainty of Table A.1 approximately is, comes with it.
+
+    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar ratio: :math:`R_P` at each frequency, complex: the test microphone's
+        effective pressure re the reference's.
+    :ivar doubled_separation_ratio: :math:`R_P` with the diaphragms twice as
+        far apart, complex.
+    :ivar reference_radius_m: :math:`a`, the radius of the reference
+        microphone's front cavity and diaphragm, in m.
+    :ivar test_diaphragm_radius_m: :math:`b`, the radius of the test
+        microphone's diaphragm, in m.
+    :ivar test_outer_radius_m: The overall radius of the test microphone, in
+        m: the sound reaches the gap through the annulus between it and
+        :math:`a`.
+    :ivar separation_m: :math:`L`, the distance between the diaphragms, in m.
+    :ivar speed_of_sound: The speed of sound of the air in the gap, in m/s.
+    """
+
+    frequencies_hz: NDArray[np.float64]
+    ratio: NDArray[np.complex128]
+    doubled_separation_ratio: NDArray[np.complex128]
+    reference_radius_m: float
+    test_diaphragm_radius_m: float
+    test_outer_radius_m: float
+    separation_m: float
+    speed_of_sound: float
+
+    def __post_init__(self) -> None:
+        """Refuse columns that disagree and publish them read-only.
+
+        :raises ValueError: for frequencies that are not positive and
+            increasing, or a column that is not one finite value per
+            frequency.
+        """
+        frequencies = _frequency_axis(self.frequencies_hz)
+        count = frequencies.size
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        for name in ("ratio", "doubled_separation_ratio"):
+            column = _complex_column(getattr(self, name), name, count)
+            object.__setattr__(self, name, read_only(column.copy()))
+
+    @property
+    def correction_db(self) -> NDArray[np.float64]:
+        r""":math:`-20\lg\lvert R_P\rvert`, in dB: to be added to the
+        sensitivity level of the test microphone, as Table A.1 is.
+        """
+        return -20.0 * np.log10(np.abs(self.ratio))
+
+    @property
+    def doubled_separation_correction_db(self) -> NDArray[np.float64]:
+        """The correction with the diaphragms twice as far apart, in dB."""
+        return -20.0 * np.log10(np.abs(self.doubled_separation_ratio))
+
+    @property
+    def separation_change_db(self) -> NDArray[np.float64]:
+        """How much the correction changes when the separation is doubled, in
+        dB, as a magnitude.
+
+        A.2 estimates the expanded uncertainty of the corrections of Table A.1
+        as 10 % of their value, "which is approximately the change observed by
+        doubling the distance between the microphones". This is that change,
+        by the model, for any geometry. 6.5 offers the model "to apply
+        corrections and assess the uncertainties" for microphones of
+        different diameters and prints no rule for that assessment; A.2's
+        doubling is the one estimate the part gives, for Table A.1. Whether
+        to take this change as the expanded uncertainty is the caller's
+        estimate to make.
+        """
+        return np.abs(self.doubled_separation_correction_db - self.correction_db)
+
+    @property
+    def phase_difference_deg(self) -> NDArray[np.float64]:
+        r""":math:`\arg R_P`, in degrees."""
+        return np.degrees(np.angle(self.ratio))
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the correction and the correction at twice the separation
+        against frequency.
+
+        :param ax: Existing axes to draw on, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the correction curve.
+        :return: The axes. Requires matplotlib
+            (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.metrology import plot_diameter_sound_field_correction
+
+        return plot_diameter_sound_field_correction(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def _gap_amplitudes(
+    omega: NDArray[np.float64],
+    roots: NDArray[np.float64],
+    *,
+    cavity_radius: float,
+    inner_radius: float,
+    separation: float,
+    speed_of_sound: float,
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
+    r"""The amplitude of each radial mode of the pressure in the gap on the
+    reference diaphragm (:math:`z = 0`) and on the test one (:math:`z = L`),
+    Formulas (2) and (3) of Barham et al. (2014) without the factor
+    :math:`\mathrm{j}\omega\rho` they share, which cancels in :math:`R_P`.
+
+    The source velocity is uniform over the annulus from ``inner_radius`` to
+    the wall, :math:`D_0 = 1 - (b'/a)^2` and, with :math:`J_1(k_n) = 0`,
+    :math:`D_n = -2b' J_1(k_n b'/a)/(a k_n J_0^2(k_n))`; :math:`1/\sinh` and
+    :math:`\coth` are written through :math:`\mathrm{e}^{-2\mu L}`, which
+    neither overflows for a mode that decays fast nor loses the plane mode.
+
+    Near the half-wave resonances of the gap, :math:`L` a whole number of
+    half wavelengths, and near the cut-off of a radial mode, the lossless
+    pressures grow without bound while their ratio stays finite: the plane
+    mode's own ratio is :math:`\cos(\omega L/c)`, -1 at the first
+    resonance, where that mode dominates. Only a mode exactly at its
+    cut-off, :math:`\mu_n = 0` in the arithmetic, has no finite pressure.
+
+    :raises ValueError: at a frequency where a mode of the gap is exactly at
+        its cut-off: a radial mode at :math:`j_{1n}c/(2\pi a)`, or the plane
+        mode at a frequency whose wavenumber squared underflows to 0.
+    """
+    with np.errstate(divide="ignore", invalid="ignore"):
+        plane = 1.0 - (inner_radius / cavity_radius) ** 2
+        modes = roots[1:]
+        weights = (
+            -2.0
+            * inner_radius
+            * special.j1(modes * inner_radius / cavity_radius)
+            / (cavity_radius * modes * special.j0(modes) ** 2)
+        )
+        source = np.concatenate(([plane], weights))
+        wavenumber = omega[:, None] / speed_of_sound
+        mu = np.sqrt((roots / cavity_radius) ** 2 - wavenumber**2 + 0j)
+        decay = np.exp(-2.0 * mu * separation)
+        amplitude = source / mu
+        at_reference = amplitude * 2.0 * np.exp(-mu * separation) / (1.0 - decay)
+        at_test = amplitude * (1.0 + decay) / (1.0 - decay)
+    if not (np.all(np.isfinite(at_reference)) and np.all(np.isfinite(at_test))):
+        msg = (
+            "A mode of the gap is exactly at its cut-off at some frequency "
+            "(mu = 0): the lossless model has no finite pressure there; move the "
+            "frequency off it."
+        )
+        raise ValueError(msg)
+    return (
+        np.asarray(at_reference, dtype=np.complex128),
+        np.asarray(at_test, dtype=np.complex128),
+    )
+
+
+def _diaphragm_average(
+    amplitudes: NDArray[np.complex128],
+    roots: NDArray[np.float64],
+    *,
+    cavity_radius: float,
+    diaphragm_radius: float,
+    normalised_frequency: NDArray[np.float64],
+) -> NDArray[np.complex128]:
+    r"""Formula (5) of Barham et al. (2014): the pressure of the modes
+    averaged over a diaphragm of radius :math:`R` with its radial sensitivity
+    :math:`S(r) = J_0(K r) - J_0(K R)`, :math:`K = j_{01}\varpi/R`, in closed
+    form.
+
+    The integrals are Lommel's: :math:`\int_0^R J_0(Kr)J_0(\beta r)r\,dr =
+    R[\beta J_0(KR)J_1(\beta R) - K J_1(KR)J_0(\beta R)]/(\beta^2 - K^2)`,
+    :math:`\int_0^R J_0(\beta r)r\,dr = R J_1(\beta R)/\beta` and the
+    denominator :math:`\int_0^R S r\,dr = R^2 J_2(KR)/2`.
+    """
+    radius = diaphragm_radius
+    kr = _J01 * normalised_frequency
+    k = (kr / radius)[:, None]
+    beta = (roots / cavity_radius)[None, :]
+    j0_kr = special.j0(kr)[:, None]
+    j1_kr = special.j1(kr)[:, None]
+    beta_r = beta * radius
+    with np.errstate(divide="ignore", invalid="ignore"):
+        lommel = (
+            radius
+            * (beta * j0_kr * special.j1(beta_r) - k * j1_kr * special.j0(beta_r))
+            / (beta**2 - k**2)
+        )
+        coincident = (radius**2 / 2.0) * (j0_kr**2 + j1_kr**2)
+        lommel = np.where(np.isclose(beta, k, rtol=1e-9, atol=0.0), coincident, lommel)
+        plain = np.where(
+            beta > 0.0, radius * special.j1(beta_r) / beta, radius**2 / 2.0
+        )
+    lommel[:, 0] = radius * j1_kr[:, 0] / k[:, 0]
+    weighted = lommel - j0_kr * plain
+    denominator = radius**2 * special.jv(2, kr) / 2.0
+    return np.asarray(
+        np.sum(amplitudes * weighted, axis=1) / denominator, dtype=np.complex128
+    )
+
+
+def _gap_ratio(
+    frequencies: NDArray[np.float64],
+    *,
+    reference_radius: float,
+    test_diaphragm_radius: float,
+    test_outer_radius: float,
+    separation: float,
+    reference_resonance: float,
+    test_resonance: float,
+    speed_of_sound: float,
+) -> NDArray[np.complex128]:
+    """:math:`R_P` of the model at one separation: the test microphone's
+    average at :math:`z = L` re the reference's at :math:`z = 0`.
+    """
+    roots = np.concatenate(([0.0], special.jn_zeros(1, _FOURIER_BESSEL_MODES)))
+    omega = 2.0 * np.pi * frequencies
+    at_reference, at_test = _gap_amplitudes(
+        omega,
+        roots,
+        cavity_radius=reference_radius,
+        inner_radius=test_outer_radius,
+        separation=separation,
+        speed_of_sound=speed_of_sound,
+    )
+    reference = _diaphragm_average(
+        at_reference,
+        roots,
+        cavity_radius=reference_radius,
+        diaphragm_radius=reference_radius,
+        normalised_frequency=frequencies / reference_resonance,
+    )
+    test = _diaphragm_average(
+        at_test,
+        roots,
+        cavity_radius=reference_radius,
+        diaphragm_radius=test_diaphragm_radius,
+        normalised_frequency=frequencies / test_resonance,
+    )
+    return np.asarray(test / reference, dtype=np.complex128)
+
+
+def diameter_sound_field_correction(
+    frequencies_hz: ArrayLike,
+    *,
+    reference_radius_m: float,
+    test_diaphragm_radius_m: float,
+    test_outer_radius_m: float,
+    separation_m: float,
+    reference_resonance_frequency_hz: float,
+    test_resonance_frequency_hz: float,
+    temperature_c: float = _REFERENCE_TEMPERATURE_C,
+    static_pressure_kpa: float = _REFERENCE_STATIC_PRESSURE_KPA,
+    relative_humidity_percent: float = _REFERENCE_RELATIVE_HUMIDITY_PERCENT,
+    gas: Fluid | None = None,
+) -> DiameterSoundFieldCorrection:
+    r"""The correction for a test microphone smaller than the reference it
+    faces in a jig (IEC 61094-5:2016 6.5 and A.2), by the model of Barham,
+    Barrera-Figueroa and Avison (2014), the reference [1] of the part.
+
+    "The effect of a non-uniform pressure distribution over the surface of
+    the diaphragm will be significantly greater if the test and reference
+    microphones are of different diameters. A theoretical model which can be
+    used to apply corrections and assess the uncertainties in this case is
+    given in the literature (for example [1])" (6.5). The model is the origin
+    of Table A.1: the space between the diaphragms is a cylinder of the
+    reference's front-cavity radius :math:`a` and length :math:`L`, closed by
+    the reference at :math:`z = 0` and driven, in a radially symmetrical
+    field, through the annulus around the smaller microphone at :math:`z =
+    L`. The pressure is a Fourier-Bessel series of the radial modes of the
+    cavity, Formulas (1) to (3),
+
+    .. math::
+
+       p(r, z) = \sum_n C_n \cosh(\mu_n z) J_0(k_n r/a),\qquad
+       \mu_n^2 = (k_n/a)^2 - (\omega/c)^2,\qquad J_1(k_n) = 0
+
+    and each microphone reads it averaged over its diaphragm with its radial
+    sensitivity, Formula (5), the reference at :math:`z = 0` over :math:`a`
+    and the test microphone at :math:`z = L` over :math:`b`. The correction
+    is the ratio of the two averages, :math:`-20\lg\lvert R_P\rvert`.
+
+    As printed, the formulas with the inputs of the paper's Table 1 do not
+    give its Table 2, which is Table A.1 (an erratum in ``docs/ERRATA.md``).
+    They give it, every row to its printed rounding, read as follows, which
+    is what this function computes: the radial sensitivity of Formula (4) is
+    the deflection of a membrane under a uniform pressure,
+    :math:`J_0(j_{01}\varpi r/a)/J_0(j_{01}\varpi) - 1` (printed without the
+    :math:`-1`), with :math:`\varpi` the frequency over the diaphragm's
+    resonance frequency; the annulus that drives the gap starts at the test
+    microphone's overall radius, which Table 1 lists and no formula uses,
+    while the average of Formula (5) runs over its diaphragm radius
+    :math:`b`; and the argument of Formula (1) is :math:`k_n r/a`, as in (2)
+    and (3). The paper prints no speed of sound: at the reference air of
+    clause 4 the result is within 0,01 dB of every row of Table A.1, and at
+    344,8 m/s it is every row.
+
+    The circular symmetry it assumes is the reason a calibration it corrects
+    is made with a coaxial source in a free field or in a diffuse field
+    averaged long enough (6.5, A.2). The radial sensitivity of Formula (4)
+    divides by :math:`J_0(j_{01}\varpi)`, which vanishes at the resonance, so
+    the frequencies are held below the resonance frequency of each
+    microphone, as the paper's are (20 kHz against 22 kHz and 100 kHz).
+    Near the half-wave resonances of the gap, :math:`c/2L` and its
+    multiples, and near the cut-offs of its radial modes, the pressures of
+    the lossless model grow without bound while :math:`R_P`, their ratio,
+    stays finite and is returned; the plane mode alone gives
+    :math:`R_P = -1` at :math:`c/2L`.
+
+    :param frequencies_hz: The frequencies, in Hz, increasing, each below
+        both resonance frequencies.
+    :param reference_radius_m: :math:`a`, the radius of the reference
+        microphone's front cavity, which the model also takes for its
+        diaphragm, in m (an LS2: 4,650 mm, Table 1 of the paper).
+    :param test_diaphragm_radius_m: :math:`b`, the radius of the test
+        microphone's diaphragm, in m (a WS3: 2,065 mm).
+    :param test_outer_radius_m: The overall radius of the test microphone, in
+        m, at least :math:`b` and less than :math:`a` (a WS3: 2,975 mm).
+    :param separation_m: :math:`L`, the distance between the diaphragms, in
+        m (Figure A.4: 0,5 mm, "the only one for which the corrections
+        specified in Table A.1 are valid").
+    :param reference_resonance_frequency_hz: The resonance frequency of the
+        reference microphone's diaphragm, in Hz (an LS2: 22 kHz).
+    :param test_resonance_frequency_hz: That of the test microphone, in Hz
+        (a WS3: 100 kHz).
+    :param temperature_c: The air temperature, in °C (Default: 23,0, the
+        reference conditions of clause 4).
+    :param static_pressure_kpa: The static pressure, in kPa (Default:
+        101,325).
+    :param relative_humidity_percent: The relative humidity, in % (Default:
+        50).
+    :param gas: A :class:`~phonometry.fluids.Fluid` whose speed of sound is
+        used instead of that of the IEC 61094-2 Annex F air at the three
+        conditions, at the same static pressure (Default: None).
+    :return: The :class:`DiameterSoundFieldCorrection`.
+    :raises ValueError: for frequencies that are not positive and increasing
+        or not below both resonances, a dimension that is not positive, an
+        outer radius smaller than the diaphragm's or not smaller than
+        :math:`a`, conditions Annex F refuses, a gas at another pressure, or a
+        frequency at which a mode of the gap is exactly at its cut-off.
+    """
+    frequencies = _frequency_axis(frequencies_hz)
+    lengths = {
+        name: require_positive(value, name)
+        for name, value in (
+            ("reference_radius_m", reference_radius_m),
+            ("test_diaphragm_radius_m", test_diaphragm_radius_m),
+            ("test_outer_radius_m", test_outer_radius_m),
+            ("separation_m", separation_m),
+        )
+    }
+    resonances = {
+        name: require_positive(value, name)
+        for name, value in (
+            ("reference_resonance_frequency_hz", reference_resonance_frequency_hz),
+            ("test_resonance_frequency_hz", test_resonance_frequency_hz),
+        )
+    }
+    if not (
+        lengths["test_diaphragm_radius_m"]
+        <= lengths["test_outer_radius_m"]
+        < lengths["reference_radius_m"]
+    ):
+        msg = (
+            "The test microphone has to fit inside the reference's front cavity "
+            "with its diaphragm within its outline: 'test_diaphragm_radius_m' <= "
+            "'test_outer_radius_m' < 'reference_radius_m'."
+        )
+        raise ValueError(msg)
+    for name, resonance in resonances.items():
+        if not np.all(frequencies < resonance):
+            msg = (
+                f"Every frequency has to lie below '{name}' ({resonance:g} Hz): "
+                "the radial sensitivity of Formula (4) divides by J0(j01 f/f0), "
+                "which vanishes at the resonance."
+            )
+            raise ValueError(msg)
+    medium = _medium(temperature_c, static_pressure_kpa, relative_humidity_percent, gas)
+    speed = float(medium.speed_of_sound)
+    geometry = {
+        "reference_radius": lengths["reference_radius_m"],
+        "test_diaphragm_radius": lengths["test_diaphragm_radius_m"],
+        "test_outer_radius": lengths["test_outer_radius_m"],
+        "reference_resonance": resonances["reference_resonance_frequency_hz"],
+        "test_resonance": resonances["test_resonance_frequency_hz"],
+        "speed_of_sound": speed,
+    }
+    separation = lengths["separation_m"]
+    return DiameterSoundFieldCorrection(
+        frequencies_hz=frequencies,
+        ratio=_gap_ratio(frequencies, separation=separation, **geometry),
+        doubled_separation_ratio=_gap_ratio(
+            frequencies, separation=2.0 * separation, **geometry
+        ),
+        reference_radius_m=lengths["reference_radius_m"],
+        test_diaphragm_radius_m=lengths["test_diaphragm_radius_m"],
+        test_outer_radius_m=lengths["test_outer_radius_m"],
+        separation_m=separation,
+        speed_of_sound=speed,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -2169,6 +2641,312 @@ def comparison_uncertainty_budget(
 
 
 # ---------------------------------------------------------------------------
+# The validation of a jig or a coupler (IEC 61094-5 6.7)
+# ---------------------------------------------------------------------------
+
+#: What a jig or a coupler can be validated against (IEC 61094-5:2016 6.7):
+#: "calibrations performed in other jigs and couplers and alternative sound
+#: sources", or, for a laboratory standard microphone, "a reciprocity
+#: calibration".
+_VALIDATIONS = ("comparison", "reciprocity")
+
+
+@dataclass(frozen=True)
+class JigCouplerVerification:
+    r"""A calibration made in a jig or a coupler set against another
+    calibration of the same microphone (IEC 61094-5:2016 6.7).
+
+    The difference of the two sensitivity levels at each frequency both
+    calibrated, :math:`\Delta = L_\mathrm{cal} - L_\mathrm{val}`, is judged
+    against the expanded uncertainty of that difference,
+    :math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}`, the two
+    calibrations taken as independent: the jig or coupler agrees at a
+    frequency where :math:`\lvert\Delta\rvert \le U_\Delta`. 6.7 asks for the
+    validation and prints no criterion; this is the library's reading of it.
+
+    :ivar frequencies_hz: The frequencies the two calibrations share, in Hz.
+    :ivar calibration_level_db: :math:`L_\mathrm{cal}`, the sensitivity level
+        from the jig or coupler being validated, in dB re 1 V/Pa.
+    :ivar calibration_uncertainty_db: :math:`U_\mathrm{cal}`, its expanded
+        uncertainty (:math:`k = 2`), in dB.
+    :ivar validation_level_db: :math:`L_\mathrm{val}`, the sensitivity level
+        it is validated against, in dB re 1 V/Pa.
+    :ivar validation_uncertainty_db: :math:`U_\mathrm{val}`, its expanded
+        uncertainty (:math:`k = 2`), in dB.
+    :ivar validation: ``"comparison"``, a calibration in another jig or
+        coupler or with another source, or ``"reciprocity"``.
+    :ivar unvalidated_frequencies_hz: The frequencies of the calibration the
+        validation does not cover, in Hz: 6.7 allows "more than one jig
+        and/or coupler to cover a full frequency range", each validated
+        where it is used.
+    """
+
+    frequencies_hz: NDArray[np.float64]
+    calibration_level_db: NDArray[np.float64]
+    calibration_uncertainty_db: NDArray[np.float64]
+    validation_level_db: NDArray[np.float64]
+    validation_uncertainty_db: NDArray[np.float64]
+    validation: str
+    unvalidated_frequencies_hz: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Refuse columns that disagree and publish them read-only.
+
+        :raises ValueError: for frequencies that are not positive and
+            increasing, a column that is not one finite value per frequency,
+            a negative uncertainty, two uncertainties of 0 dB at the same
+            frequency, or an unknown validation.
+        """
+        require_choice(self.validation, "validation", _VALIDATIONS)
+        frequencies = _frequency_axis(self.frequencies_hz)
+        count = frequencies.size
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        for name in (
+            "calibration_level_db",
+            "calibration_uncertainty_db",
+            "validation_level_db",
+            "validation_uncertainty_db",
+        ):
+            column = _band_column(getattr(self, name), name, count)
+            if name.endswith("uncertainty_db") and np.any(column < 0.0):
+                msg = f"JigCouplerVerification: '{name}' must be non-negative."
+                raise ValueError(msg)
+            object.__setattr__(self, name, read_only(column.copy()))
+        if not np.all(
+            np.hypot(self.calibration_uncertainty_db, self.validation_uncertainty_db)
+            > 0.0
+        ):
+            msg = (
+                "JigCouplerVerification: at every frequency at least one of the two "
+                "calibrations must carry an expanded uncertainty above 0 dB."
+            )
+            raise ValueError(msg)
+        uncovered = np.asarray(self.unvalidated_frequencies_hz, dtype=np.float64)
+        object.__setattr__(
+            self, "unvalidated_frequencies_hz", read_only(uncovered.reshape(-1).copy())
+        )
+
+    @property
+    def difference_db(self) -> NDArray[np.float64]:
+        r""":math:`\Delta = L_\mathrm{cal} - L_\mathrm{val}`, in dB."""
+        return self.calibration_level_db - self.validation_level_db
+
+    @property
+    def expanded_uncertainty_db(self) -> NDArray[np.float64]:
+        r""":math:`U_\Delta`, the root-sum-square of the two expanded
+        uncertainties, in dB.
+        """
+        return np.hypot(self.calibration_uncertainty_db, self.validation_uncertainty_db)
+
+    @property
+    def normalised_difference(self) -> NDArray[np.float64]:
+        r""":math:`\Delta/U_\Delta`, the difference in units of its expanded
+        uncertainty: within :math:`\pm 1` where the two agree.
+        """
+        return self.difference_db / self.expanded_uncertainty_db
+
+    @property
+    def agrees(self) -> NDArray[np.bool_]:
+        r"""Whether :math:`\lvert\Delta\rvert \le U_\Delta` at each frequency,
+        both sides settled to a nanodecibel before they meet.
+        """
+        return np.asarray(
+            settled(np.abs(self.difference_db))
+            <= settled(self.expanded_uncertainty_db),
+            dtype=np.bool_,
+        )
+
+    @property
+    def failing_frequencies_hz(self) -> NDArray[np.float64]:
+        """The frequencies where the two calibrations disagree, in Hz."""
+        return self.frequencies_hz[~self.agrees]
+
+    @property
+    def passes(self) -> bool:
+        """The verdict: the two calibrations agree within the expanded
+        uncertainty of their difference at every frequency they share.
+
+        True says the jig or coupler is validated for this type of microphone
+        over these frequencies, and no wider: 6.7 asks for "a separate
+        validation [...] for each different type of microphone", and the
+        frequencies in :attr:`unvalidated_frequencies_hz` are not covered.
+        """
+        return bool(np.all(self.agrees))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        An object is always true, so ``if verify_jig_or_coupler(...):`` would
+        validate every jig. The verdict is :attr:`passes`.
+
+        :raises TypeError: Always.
+        """
+        msg = "a JigCouplerVerification has no truth value; read its '.passes' for the verdict"
+        raise TypeError(msg)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the difference of the two calibrations against the expanded
+        uncertainty of the difference, marking where they disagree, with the
+        frequencies the validation does not cover as dashed vertical lines.
+
+        :param ax: Existing axes to draw on, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the difference curve.
+        :return: The axes. Requires matplotlib
+            (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.metrology import plot_jig_coupler_verification
+
+        return plot_jig_coupler_verification(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def _validation_columns(
+    validation: ComparisonCalibration | ReciprocityCalibration,
+    microphone: int | None,
+) -> tuple[str, NDArray[np.float64], NDArray[np.float64]]:
+    """The kind, the level and the expanded uncertainty of a validation.
+
+    :raises ValueError: for a free-field calibration, a reciprocity
+        calibration without the microphone that was compared or a comparison
+        given one, a microphone the reciprocity calibration does not hold, or
+        a validation without an expanded uncertainty.
+    :raises TypeError: for anything but the two calibrations.
+    """
+    from .reciprocity_calibration import ReciprocityCalibration
+
+    if isinstance(validation, ReciprocityCalibration):
+        kind = "reciprocity"
+        if microphone is None:
+            msg = (
+                "A reciprocity calibration holds several microphones: give the "
+                "index of the one compared as 'microphone'."
+            )
+            raise ValueError(msg)
+        if not 0 <= microphone < validation.microphones:
+            msg = (
+                f"'microphone' must be one of the {validation.microphones} "
+                f"microphones of the reciprocity calibration; got {microphone}."
+            )
+            raise ValueError(msg)
+        level = np.asarray(
+            validation.sensitivity_level_db[microphone], dtype=np.float64
+        )
+    elif isinstance(validation, ComparisonCalibration):
+        kind = "comparison"
+        if microphone is not None:
+            msg = "'microphone' only picks a microphone of a reciprocity calibration."
+            raise ValueError(msg)
+        level = np.asarray(validation.sensitivity_level_db, dtype=np.float64)
+    else:
+        msg = (
+            "'validation' must be a ComparisonCalibration or a ReciprocityCalibration."
+        )
+        raise TypeError(msg)
+    if validation.field != "pressure":
+        msg = (
+            "IEC 61094-5 6.7 validates a pressure calibration: 'validation' "
+            "must be a pressure calibration too."
+        )
+        raise ValueError(msg)
+    if validation.expanded_uncertainty_db is None:
+        msg = "'validation' must carry its expanded uncertainty."
+        raise ValueError(msg)
+    return kind, level, np.asarray(validation.expanded_uncertainty_db, dtype=np.float64)
+
+
+def verify_jig_or_coupler(
+    calibration: ComparisonCalibration,
+    validation: ComparisonCalibration | ReciprocityCalibration,
+    *,
+    microphone: int | None = None,
+) -> JigCouplerVerification:
+    r"""Does a jig or coupler give the same calibration as another way of
+    calibrating the same microphone (IEC 61094-5:2016 6.7)?
+
+    "Calibrations performed in any particular jig or coupler shall be
+    validated by comparison with calibrations performed in other jigs and
+    couplers and alternative sound sources. A separate validation is
+    necessary for each different type of microphone. If the test microphone
+    is a laboratory standard microphone, then the jig or coupler can be
+    validated by comparing a comparison calibration with a reciprocity
+    calibration" (6.7). Pass the calibration from the jig or coupler under
+    validation, and either a calibration of the same microphone by
+    comparison elsewhere (another jig or coupler, another source) or its
+    reciprocity calibration with ``microphone``, the index of the
+    microphone among those the reciprocity calibration holds. The two are
+    compared at the frequencies they share.
+
+    The clause prints no criterion. The library reads "validated" as the two
+    agreeing within the expanded uncertainty of their difference, each
+    calibration's expanded uncertainty (:math:`k = 2`, 7.9) combined as
+    independent: :math:`\lvert L_\mathrm{cal} - L_\mathrm{val}\rvert \le
+    \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}`. Two calibrations that share
+    a reference, or a reciprocity calibration that is the reference's own,
+    are correlated, and the root-sum-square then overstates the uncertainty
+    of the difference.
+
+    :param calibration: The pressure calibration by comparison made in the
+        jig or coupler, with its expanded uncertainty.
+    :param validation: The calibration it is validated against: a
+        :class:`ComparisonCalibration` or a
+        :class:`~phonometry.metrology.ReciprocityCalibration`, in a pressure
+        field, with its expanded uncertainty.
+    :param microphone: For a reciprocity calibration, the index of the
+        microphone that was compared (Default: None).
+    :return: The :class:`JigCouplerVerification`.
+    :raises ValueError: for a calibration or validation that is not a
+        pressure calibration or carries no expanded uncertainty, a
+        reciprocity calibration without ``microphone`` (or a comparison with
+        one), a microphone it does not hold, or no frequency in common.
+    :raises TypeError: for a validation that is neither calibration.
+    """
+    if not isinstance(calibration, ComparisonCalibration):
+        msg = "'calibration' must be a ComparisonCalibration."
+        raise TypeError(msg)
+    if calibration.field != "pressure":
+        msg = (
+            "IEC 61094-5 6.7 validates a jig or a coupler, a pressure calibration: "
+            "'calibration' is a free-field one."
+        )
+        raise ValueError(msg)
+    if calibration.expanded_uncertainty_db is None:
+        msg = "'calibration' must carry its expanded uncertainty."
+        raise ValueError(msg)
+    kind, level, uncertainty = _validation_columns(validation, microphone)
+    own = np.asarray(calibration.frequencies_hz, dtype=np.float64)
+    other = np.asarray(validation.frequencies_hz, dtype=np.float64)
+    shared = np.array(
+        [
+            int(np.argmin(np.abs(other / frequency - 1.0)))
+            if np.min(np.abs(other / frequency - 1.0)) <= _SAME_FREQUENCY_REL_TOL
+            else -1
+            for frequency in own
+        ],
+        dtype=np.int64,
+    )
+    covered = shared >= 0
+    if not np.any(covered):
+        msg = "The calibration and the validation share no frequency."
+        raise ValueError(msg)
+    return JigCouplerVerification(
+        frequencies_hz=own[covered],
+        calibration_level_db=np.asarray(calibration.sensitivity_level_db)[covered],
+        calibration_uncertainty_db=np.asarray(calibration.expanded_uncertainty_db)[
+            covered
+        ],
+        validation_level_db=level[shared[covered]],
+        validation_uncertainty_db=uncertainty[shared[covered]],
+        validation=kind,
+        unvalidated_frequencies_hz=own[~covered],
+    )
+
+
+# ---------------------------------------------------------------------------
 # The effective free-field region of a time window (IEC 61094-8 B.1)
 # ---------------------------------------------------------------------------
 
@@ -2286,6 +3064,41 @@ def free_field_region(
     )
 
 
+def _medium(
+    temperature_c: float,
+    static_pressure_kpa: float,
+    relative_humidity_percent: float,
+    gas: Fluid | None = None,
+) -> Fluid:
+    """The air of the test: the IEC 61094-2 Annex F air at the conditions, or
+    the fluid given, which has to hold at the same static pressure.
+
+    :raises ValueError: for conditions Annex F refuses, a pressure that is
+        not positive, or a gas at another pressure.
+    """
+    pressure_kpa = require_positive(static_pressure_kpa, "static_pressure_kpa")
+    if gas is not None:
+        if not math.isclose(
+            gas.static_pressure_pa,
+            1000.0 * pressure_kpa,
+            rel_tol=_SAME_PRESSURE_REL_TOL,
+        ):
+            msg = (
+                f"'gas' holds at {gas.static_pressure_pa:g} Pa but "
+                f"'static_pressure_kpa' is {pressure_kpa:g} kPa: give the fluid at "
+                "the pressure of the test."
+            )
+            raise ValueError(msg)
+        return gas
+    from ..fluids.air import air
+
+    return air(
+        temperature_c=temperature_c,
+        static_pressure_pa=1000.0 * pressure_kpa,
+        relative_humidity_percent=relative_humidity_percent,
+    )
+
+
 def _speed_of_sound(
     temperature_c: float, static_pressure_kpa: float, relative_humidity_percent: float
 ) -> float:
@@ -2294,14 +3107,7 @@ def _speed_of_sound(
     :raises ValueError: for conditions Annex F refuses or a pressure that is
         not positive.
     """
-    from ..fluids.air import air
-
-    pressure_kpa = require_positive(static_pressure_kpa, "static_pressure_kpa")
-    medium = air(
-        temperature_c=temperature_c,
-        static_pressure_pa=1000.0 * pressure_kpa,
-        relative_humidity_percent=relative_humidity_percent,
-    )
+    medium = _medium(temperature_c, static_pressure_kpa, relative_humidity_percent)
     return float(medium.speed_of_sound)
 
 
@@ -2410,8 +3216,8 @@ class ImpedancePressureRatio:
     :ivar ratio: :math:`R_P` at each frequency, complex.
     :ivar coupling: ``"coupler"``, a closed coupler small against the
         wavelength (IEC 61094-2 Formula (3)), or ``"series"``, the air between
-        the microphones in series with each, this library's reading of
-        IEC 61094-5 Table D.1.
+        the microphones in series with each (IEC 61094-5 Table D.1, by the
+        circuit of Jarvis 1996).
     :ivar coupling_equivalent_volume_m3: :math:`V_x` at each frequency,
         complex, in m³.
     """
@@ -2515,9 +3321,9 @@ def impedance_pressure_ratio(
     response microphone meet above 10 kHz (7.5). Neither clause prints a
     model; both refer the effect to the uncertainty, and 7.4 to the
     literature for a model. This function writes two circuits: the closed
-    coupler that IEC 61094-2 prints as Formula (3), and a series divider that
-    is this library's reading of the one sentence Table D.1 gives the
-    simultaneous excitation. Each microphone enters by its equivalent volume
+    coupler that IEC 61094-2 prints as Formula (3), and the series divider of
+    the simultaneous excitation of Table D.1, the circuit of its reference
+    [2], Jarvis (1996). Each microphone enters by its equivalent volume
     :math:`V_\mathrm{e} = \kappa_\mathrm{r} p_{s,\mathrm{r}}/(\mathrm{j}\omega
     Z_\mathrm{a})` (IEC 61094-1 6.2.2, with :math:`\kappa_\mathrm{r} = 1{,}40`
     and :math:`p_{s,\mathrm{r}}` = 101,325 kPa):
@@ -2541,17 +3347,19 @@ def impedance_pressure_ratio(
       series with that of the air in the space between the two microphones.
       Microphones with different acoustic impedance therefore see slightly
       different pressures when simultaneously exposed to the same pressure
-      field" (Table D.1, "Microphone impedance"). The row prints no circuit;
-      this library reads it as a divider, each diaphragm taking the pressure
-      :math:`p_0 Z_\mathrm{a}/(Z_\mathrm{a} + Z_x)` of the common field
-      :math:`p_0` behind the same series impedance :math:`Z_x`, the reading
-      in which the two microphones see the different pressures the row
-      concludes they do. Written with volumes this is
-      the same ratio, :math:`V_x` being the equivalent volume of
-      :math:`Z_x`, :math:`\kappa_\mathrm{r} p_{s,\mathrm{r}}/(\mathrm{j}\omega
-      Z_x)`. Pass ``coupling_impedance_pa_s_m3``; the parts print no value
-      for it, and Table D.1 asks for the effect to be "established
-      experimentally" when the impedances differ significantly.
+      field" (Table D.1, "Microphone impedance"). The row refers to [2],
+      Jarvis (1996), whose Appendix B draws the coupler as a ladder from a
+      source at its middle; seen from each microphone, that is a common
+      pressure :math:`p_0` behind one series impedance :math:`Z_x`, so each
+      diaphragm takes :math:`p_0 Z_\mathrm{a}/(Z_\mathrm{a} + Z_x)` and the
+      ratio of the two is the one Appendix B prints, exactly. Written with
+      volumes this is the same ratio, :math:`V_x` being the equivalent volume
+      of :math:`Z_x`, :math:`\kappa_\mathrm{r}
+      p_{s,\mathrm{r}}/(\mathrm{j}\omega Z_x)`. Pass
+      ``coupling_impedance_pa_s_m3``, which
+      :func:`air_gap_series_impedance_pa_s_m3` gives for a coupler of known
+      length and radius; Table D.1 still asks for the effect to be
+      "established experimentally" when the impedances differ significantly.
 
     :param frequencies_hz: The frequencies, in Hz, increasing.
     :param reference_equivalent_volume_m3: :math:`V_\mathrm{e,ref}`, complex,
@@ -2627,6 +3435,94 @@ def impedance_pressure_ratio(
         coupling=coupling,
         coupling_equivalent_volume_m3=volume,
     )
+
+
+#: Jarvis (1996), NPL Report CIRA(EXT) 010, Appendix B, printed folio 26: the
+#: air of the coupler is two compliances, one for the volume on each side of
+#: the reference plane, and four masses, each "approximated by" a third of
+#: the mass of a quarter of its length.
+_AIR_GAP_MASS_FRACTION = 1.0 / 12.0
+
+
+def air_gap_series_impedance_pa_s_m3(
+    frequencies_hz: ArrayLike,
+    *,
+    gap_length_m: float,
+    gap_radius_m: float,
+    temperature_c: float = _REFERENCE_TEMPERATURE_C,
+    static_pressure_kpa: float = _REFERENCE_STATIC_PRESSURE_KPA,
+    relative_humidity_percent: float = _REFERENCE_RELATIVE_HUMIDITY_PERCENT,
+    gas: Fluid | None = None,
+) -> NDArray[np.complex128]:
+    r"""The acoustic impedance of the air between two microphones that each
+    acts in series with, in a symmetric coupler driven at its middle
+    (IEC 61094-5:2016 Table D.1 and 7.4, by the circuit of Jarvis 1996,
+    reference [2] of the part).
+
+    "The acoustical impedance of the microphone acts in series with that of
+    the air in the space between the two microphones. Microphones with
+    different acoustic impedance therefore see slightly different pressures
+    when simultaneously exposed to the same pressure field (see 7.4 and
+    [2])" (Table D.1, "Microphone impedance"). Reference [2], NPL Report
+    CIRA(EXT) 010, models the coupler in its Appendix B as a ladder: the
+    source at the reference plane in the middle, and on each side a mass
+    :math:`Z_L`, the compliance :math:`Z_c` of that side's half of the volume
+    to ground, a second :math:`Z_L` and the microphone,
+
+    .. math::
+
+       Z_c = \frac{\kappa p_0}{\mathrm{j}\omega V/2},\qquad
+       Z_L = \frac{\mathrm{j}\omega}{3}\,\frac{\rho L/4}{\pi r^2},\qquad
+       V = \pi r^2 L
+
+    for a tube of length :math:`L` and radius :math:`r`. It prints the ratio
+    of the two pressures, :math:`R = Z_{s1}Z_{m1}Z_{o2}(Z_L + Z_{m2}) /
+    [Z_{o1}(Z_L + Z_{m1})Z_{s2}Z_{m2}]` with :math:`Z_{s} = Z_c \parallel
+    (Z_L + Z_m)` and :math:`Z_o = Z_L + Z_s`. Seen from each microphone, the
+    pressure of the middle behind the ladder is a source of pressure
+    :math:`p_c Z_c/(Z_L + Z_c)`, common to both, behind the impedance this
+    function returns,
+
+    .. math::
+
+       Z_x = Z_L + \frac{Z_L Z_c}{Z_L + Z_c}
+
+    so each diaphragm takes that pressure times :math:`Z_m/(Z_m + Z_x)`, and
+    the printed ratio is the divider of :func:`impedance_pressure_ratio`
+    given ``coupling_impedance_pa_s_m3`` = :math:`Z_x`, exactly.
+
+    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param gap_length_m: :math:`L`, the length of the space between the two
+        diaphragms, in m (Appendix B's example: 2 mm).
+    :param gap_radius_m: :math:`r`, its radius, in m (Appendix B's example:
+        half of 12,7 mm).
+    :param temperature_c: The air temperature, in °C (Default: 23,0, the
+        reference conditions of clause 4).
+    :param static_pressure_kpa: The static pressure :math:`p_0`, in kPa
+        (Default: 101,325).
+    :param relative_humidity_percent: The relative humidity, in % (Default:
+        50).
+    :param gas: A :class:`~phonometry.fluids.Fluid` whose density and ratio
+        of specific heats are used instead of those of the IEC 61094-2
+        Annex F air at the three conditions, at the same static pressure
+        (Default: None). Appendix B takes 1,21 kg/m³, 1,4 and 101 325 Pa.
+    :return: :math:`Z_x` at each frequency, complex, in Pa·s/m³, read-only.
+    :raises ValueError: for frequencies that are not positive and increasing,
+        a length or radius that is not positive, conditions Annex F refuses,
+        or a gas at another pressure.
+    """
+    frequencies = _frequency_axis(frequencies_hz)
+    length = require_positive(gap_length_m, "gap_length_m")
+    radius = require_positive(gap_radius_m, "gap_radius_m")
+    medium = _medium(temperature_c, static_pressure_kpa, relative_humidity_percent, gas)
+    omega = 2.0 * np.pi * frequencies
+    area = np.pi * radius**2
+    volume = area * length
+    stiffness = float(medium.heat_capacity_ratio) * float(medium.static_pressure_pa)
+    compliance = stiffness / (1j * omega * volume / 2.0)
+    mass = 1j * omega * _AIR_GAP_MASS_FRACTION * float(medium.density) * length / area
+    impedance = mass + mass * compliance / (mass + compliance)
+    return read_only(np.asarray(impedance, dtype=np.complex128))
 
 
 # ---------------------------------------------------------------------------

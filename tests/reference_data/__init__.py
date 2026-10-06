@@ -430,6 +430,15 @@ from .calibrators import IEC60942_TABLE_E1 as IEC60942_TABLE_E1
 from .calibrators import IEC61672_1_TABLE_C1 as IEC61672_1_TABLE_C1
 from .calibrators import TC29_REASONS as TC29_REASONS
 from .comparison_calibration import (
+    BARHAM_2014_SPEED_OF_SOUND as BARHAM_2014_SPEED_OF_SOUND,
+)
+from .comparison_calibration import (
+    BARHAM_2014_TABLE_1 as BARHAM_2014_TABLE_1,
+)
+from .comparison_calibration import (
+    BARHAM_2014_TABLE_2_CALCULATED_DB as BARHAM_2014_TABLE_2_CALCULATED_DB,
+)
+from .comparison_calibration import (
     IEC61094_1_KAPPA_REFERENCE as IEC61094_1_KAPPA_REFERENCE,
 )
 from .comparison_calibration import (
@@ -480,6 +489,33 @@ from .comparison_calibration import (
 )
 from .comparison_calibration import (
     IEC61094_REFERENCE_CONDITIONS as IEC61094_REFERENCE_CONDITIONS,
+)
+from .comparison_calibration import (
+    JARVIS_1996_AIR as JARVIS_1996_AIR,
+)
+from .comparison_calibration import (
+    JARVIS_1996_GRAPH_AT_20KHZ_DB as JARVIS_1996_GRAPH_AT_20KHZ_DB,
+)
+from .comparison_calibration import (
+    JARVIS_1996_GRAPH_DIP as JARVIS_1996_GRAPH_DIP,
+)
+from .comparison_calibration import (
+    JARVIS_1996_GRAPH_PHASE_AT_20KHZ_DEG as JARVIS_1996_GRAPH_PHASE_AT_20KHZ_DEG,
+)
+from .comparison_calibration import (
+    JARVIS_1996_GRAPH_PHASE_PEAK as JARVIS_1996_GRAPH_PHASE_PEAK,
+)
+from .comparison_calibration import (
+    JARVIS_1996_LS2P as JARVIS_1996_LS2P,
+)
+from .comparison_calibration import (
+    JARVIS_1996_TUBE as JARVIS_1996_TUBE,
+)
+from .comparison_calibration import (
+    JARVIS_1996_VOLUME_M3 as JARVIS_1996_VOLUME_M3,
+)
+from .comparison_calibration import (
+    JARVIS_1996_WS2P as JARVIS_1996_WS2P,
 )
 from .damping import VER_BERANEK_14_1 as VER_BERANEK_14_1
 from .damping import VER_BERANEK_14_1_COLUMNS as VER_BERANEK_14_1_COLUMNS

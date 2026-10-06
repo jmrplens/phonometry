@@ -14,7 +14,11 @@ from typing import TYPE_CHECKING, Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry._plot.common import (
+    format_frequency_axis,
+    place_legend_clear,
+    theme_fill,
+)
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -36,6 +40,8 @@ if TYPE_CHECKING:
         ComparisonUncertaintyBudget,
         DirectivityFactor,
         FreeFieldCorrection,
+        ImpedancePressureRatio,
+        JigCouplerVerification,
         RandomIncidenceSensitivity,
         SoundLevelMeterPeriodicVerification,
     )
@@ -1727,8 +1733,11 @@ _TABLE_D1_DB = {
 }
 
 
-def _pressure_comparison() -> "ComparisonCalibration":
-    """The guide's ``c``: a WS2P against an LS2P, interchanged in a coupler."""
+def _coupler_readings() -> dict[str, Any]:
+    """The guide's coupler: the frequencies, the two microphones' levels, the
+    gains of the channels, the asymmetry of the field, the readings before and
+    after the interchange, and the expanded uncertainty of each frequency.
+    """
     from phonometry import metrology
 
     f = metrology.exact_frequencies(250, 20000, fraction=3)
@@ -1739,8 +1748,32 @@ def _pressure_comparison() -> "ComparisonCalibration":
     field_a = 0.03 * np.sqrt(x)
     rng = np.random.default_rng(61094)
     noise = rng.normal(0.0, 0.004, (2, 3, f.size))
-    l_c12 = (l_ref + gain_1) - (l_true + gain_2) + field_a + noise[0]
-    l_c21 = (l_true + gain_1) - (l_ref + gain_2) + field_a + noise[1]
+    budgets = [
+        metrology.comparison_uncertainty_budget(
+            {**_TABLE_D1_DB, "impedance": 0.003 + 0.09 * (fx / 20000) ** 2},
+            frequency_hz=fx,
+        )
+        for fx in f
+    ]
+    return {
+        "f": f,
+        "l_ref": l_ref,
+        "l_true": l_true,
+        "gain_1": gain_1,
+        "gain_2": gain_2,
+        "field_a": field_a,
+        "l_c12": (l_ref + gain_1) - (l_true + gain_2) + field_a + noise[0],
+        "l_c21": (l_true + gain_1) - (l_ref + gain_2) + field_a + noise[1],
+        "u": [b.expanded_uncertainty_db for b in budgets],
+    }
+
+
+def _pressure_comparison() -> "ComparisonCalibration":
+    """The guide's ``c``: a WS2P against an LS2P, interchanged in a coupler."""
+    from phonometry import metrology
+
+    readings = _coupler_readings()
+    f = readings["f"]
     env = metrology.environmental_sensitivity_correction(
         f,
         static_pressure_kpa=99.2,
@@ -1749,20 +1782,13 @@ def _pressure_comparison() -> "ComparisonCalibration":
         static_pressure_coefficient_db_per_kpa=-0.005,
         temperature_coefficient_db_per_k=0.002,
     )
-    budgets = [
-        metrology.comparison_uncertainty_budget(
-            {**_TABLE_D1_DB, "impedance": 0.003 + 0.09 * (fx / 20000) ** 2},
-            frequency_hz=fx,
-        )
-        for fx in f
-    ]
     return metrology.simultaneous_comparison(
         f,
-        l_ref,
-        l_c12,
-        l_c21,
+        readings["l_ref"],
+        readings["l_c12"],
+        readings["l_c21"],
         reference_environment=env,
-        expanded_uncertainty_db=[b.expanded_uncertainty_db for b in budgets],
+        expanded_uncertainty_db=readings["u"],
     )
 
 
@@ -1851,6 +1877,133 @@ def generate_comparison_jig_correction(output_dir: str) -> None:
     metrology.jig_diameter_correction().plot(ax, language=_LANG)
     fig.tight_layout()
     save_figure(output_dir, "comparison_jig_correction.svg")
+    plt.close()
+
+
+#: Table 1 of Barham, Barrera-Figueroa and Avison (2014), the inputs of the
+#: model of IEC 61094-5 6.5 for an LS2 reference and a WS3 test microphone.
+_WS3_GEOMETRY: dict[str, Any] = {
+    "reference_radius_m": 4.650e-3,
+    "test_diaphragm_radius_m": 2.065e-3,
+    "test_outer_radius_m": 2.975e-3,
+    "separation_m": 0.5e-3,
+    "reference_resonance_frequency_hz": 22000,
+    "test_resonance_frequency_hz": 100000,
+}
+
+
+def generate_comparison_diameter_correction(output_dir: str) -> None:
+    """IEC 61094-5 6.5: the model of its reference [1] for a WS3 against an
+    LS2 at every twelfth of an octave, with the rows of Table A.1.
+    """
+    print("Generating comparison_diameter_correction...")
+    from phonometry import metrology
+
+    f12 = metrology.exact_frequencies(1000, 20000, fraction=12)
+    fine = metrology.diameter_sound_field_correction(f12, **_WS3_GEOMETRY)
+    table = metrology.jig_diameter_correction()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fine.plot(ax, language=_LANG, marker="none")
+    ax.plot(
+        table.frequencies_hz,
+        table.correction_db,
+        ls="none",
+        marker="D",
+        ms=5,
+        color=COLOR_TERTIARY,
+        label="Table A.1",
+    )
+    place_legend_clear(ax.legend(fontsize="small"))
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_diameter_correction.svg")
+    plt.close()
+
+
+def _air_gap_ratio() -> "ImpedancePressureRatio":
+    """The guide's ``gap``: Appendix B of Jarvis (1996), an LS2P and a high
+    sensitivity WS2P in a coupler 2 mm long and 6.35 mm in radius.
+    """
+    from phonometry import metrology
+
+    fj = np.arange(100.0, 20000.0 + 1.0, 100.0)
+    w = 2 * np.pi * fj
+
+    def z_mic(r: float, c: float, m: float) -> np.ndarray:
+        return np.asarray(r + 1j * w * m + 1 / (1j * w * c))
+
+    def v_e(z: np.ndarray) -> np.ndarray:
+        return np.asarray(1.40 * 101325 / (1j * w * z))
+
+    z_x = metrology.air_gap_series_impedance_pa_s_m3(
+        fj, gap_length_m=2e-3, gap_radius_m=6.35e-3
+    )
+    return metrology.impedance_pressure_ratio(
+        fj,
+        reference_equivalent_volume_m3=v_e(z_mic(330e6, 48e-15, 1210)),
+        test_equivalent_volume_m3=v_e(z_mic(7e7, 2.6e-13, 820)),
+        coupling_impedance_pa_s_m3=z_x,
+    )
+
+
+def generate_comparison_air_gap(output_dir: str) -> None:
+    """IEC 61094-5 Table D.1 and 7.4: the air between an LS2P and a high
+    sensitivity WS2P in series with each, by the circuit of Jarvis (1996).
+    """
+    print("Generating comparison_air_gap...")
+    gap = _air_gap_ratio()
+    fig, (ax_level, ax_phase) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    gap.plot(ax_level, language=_LANG, marker="none")
+    gap.plot(ax_phase, quantity="phase", language=_LANG, marker="none")
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_air_gap.svg")
+    plt.close()
+
+
+def _jig_validation() -> "JigCouplerVerification":
+    """The guide's ``check``: a jig from 1 kHz to 20 kHz with a standing wave
+    near 6.3 kHz, validated against the coupler up to 10 kHz.
+    """
+    from phonometry import metrology
+
+    r = _coupler_readings()
+    f, l_ref, l_true = r["f"], r["l_ref"], r["l_true"]
+    fj = f[6:]
+    xj = fj / 1000
+    mode = 0.5 * np.exp(-(((xj - 6.3) / 0.6) ** 2))
+    jitter = np.random.default_rng(42).normal(0.0, 0.01, (2, 3, fj.size))
+    j12 = (
+        (l_ref[6:] + r["gain_1"])
+        - (l_true[6:] + r["gain_2"])
+        + r["field_a"][6:]
+        + mode
+        + jitter[0]
+    )
+    j21 = (
+        (l_true[6:] + r["gain_1"])
+        - (l_ref[6:] + r["gain_2"])
+        + r["field_a"][6:]
+        + jitter[1]
+    )
+    jig = metrology.simultaneous_comparison(
+        fj, l_ref[6:], j12, j21, expanded_uncertainty_db=r["u"][6:]
+    )
+    coupler = metrology.simultaneous_comparison(
+        f[:17],
+        l_ref[:17],
+        r["l_c12"][:, :17],
+        r["l_c21"][:, :17],
+        expanded_uncertainty_db=r["u"][:17],
+    )
+    return metrology.verify_jig_or_coupler(jig, coupler)
+
+
+def generate_comparison_jig_validation(output_dir: str) -> None:
+    """IEC 61094-5 6.7: a jig validated against a coupler."""
+    print("Generating comparison_jig_validation...")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    _jig_validation().plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_jig_validation.svg")
     plt.close()
 
 

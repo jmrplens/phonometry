@@ -7,8 +7,9 @@ shipped that way. These tests fix the reading of those entries, of the words
 the gate must leave alone (a plural in -ciones, ``lineal``, ``periodo``,
 anything inside mathematics), of the tables it reads and of the exemptions it
 keeps honest. The glossary the gate also holds is fixed the same way, against
-the sentences that shipped «seno» for the waveform and «incertidumbre
-extendida» for the GUM's expanded uncertainty.
+the sentences that shipped «seno» for the waveform, «incertidumbre
+extendida» for the GUM's expanded uncertainty, and «media cuadrática» and
+«cuadrado medio» for the mean square.
 """
 
 from __future__ import annotations
@@ -431,6 +432,161 @@ def test_a_context_that_exempts_nothing_is_reported() -> None:
     assert csa.unused_contexts(values, contexts) == [r"seno\s+de\s+psi"]
     offences, _stale = csa.check(values, allowed={}, contexts=contexts)
     assert offences == []
+
+
+@pytest.mark.parametrize(
+    ("text", "found"),
+    [
+        # The data qualification and programme loudness diagrams.
+        (
+            "Media cuadrática por intervalo: $N$ = 20 segmentos iguales",
+            [("Media cuadrática", "Valor cuadrático medio")],
+        ),
+        (
+            "Media cuadrática en bloques de 400 ms, 75 % de solape",
+            [("Media cuadrática", "Valor cuadrático medio")],
+        ),
+        # The stationarity figure and the level renderer.
+        ("Media cuadrática [FS²]", [("Media cuadrática", "Valor cuadrático medio")]),
+        (
+            "20 medias cuadráticas por segmento; el conteo $A$ de pares",
+            [("medias cuadráticas", "valores cuadráticos medios")],
+        ),
+        # A page wraps the phrase at any space, and an accent can go missing.
+        (
+            "el procedimiento de estacionariedad por medias\ncuadráticas de segmento",
+            [("medias cuadráticas", "valores cuadráticos medios")],
+        ),
+        ("una media cuadratica", [("media cuadratica", "valor cuadrático medio")]),
+    ],
+)
+def test_a_mean_square_called_media_cuadratica_is_found(
+    text: str, found: list[tuple[str, str]]
+) -> None:
+    """The labels and sentences that named the mean square a quadratic mean."""
+    assert _departures(text) == found
+    assert _departures(text, page=True) == found
+
+
+def test_the_old_figure_table_entries_fail_the_check() -> None:
+    """The entries as they shipped in the diagram and figure tables."""
+    values = [
+        csa.Value(
+            "scripts/diagrams/i18n.py",
+            2424,
+            "Media cuadrática por intervalo: $N$ = 20 segmentos iguales",
+        ),
+        csa.Value("scripts/figures/i18n.py", 2533, "Media cuadrática por segmento"),
+    ]
+    offences, _stale = csa.check(values, allowed={})
+    assert [(o.line, o.word, o.spelling) for o in offences] == [
+        (2424, "Media cuadrática", "Valor cuadrático medio"),
+        (2533, "Media cuadrática", "Valor cuadrático medio"),
+    ]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # The quadratic mean, in each context the tree writes it.
+        "la media cuadrática de las dos velocidades verdaderas de los extremos",
+        "la\n  media cuadrática de los dos valores de los extremos es un número distinto",
+        "lo sitúa en la media cuadrática de los extremos",
+        "construida exactamente sobre esta media cuadrática y es autoconsistente",
+        "así que la media cuadrática supera a la\n  media aritmética, que supera al "
+        "valor de media altitud",
+        "la media aritmética 323.944 ft largo y la media cuadrática impresa",
+        "la parte de tipo B es la media cuadrática de las incertidumbres de cada",
+        "las combinaciones\nbinaurales de media cuadrática de la Fórmula 112",
+        # The mean square written as the glossary writes it.
+        "Valor cuadrático medio por segmento, 20 valores cuadráticos medios",
+        "la presión cuadrática media y las presiones cuadráticas medias",
+    ],
+)
+def test_the_quadratic_mean_and_the_right_terms_are_left_alone(text: str) -> None:
+    """What must never fire, in a table and in a page."""
+    assert _departures(text) == []
+    assert _departures(text, page=True) == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # A mean square set against an arithmetic mean, as energy averaging is.
+        "la media cuadrática por segmento frente a la media aritmética del registro",
+        "La media aritmética de las bandas y la media cuadrática por segmento",
+        # A mean square of two values, of the end points or of two speeds.
+        "la media cuadrática de los dos valores de presión por banda",
+        "la media cuadrática de los extremos del bloque",
+        "la media cuadrática de las dos velocidades medidas",
+        "sobre esta media cuadrática se calcula el nivel",
+    ],
+)
+def test_a_quadratic_mean_context_holds_only_its_own_sentence(text: str) -> None:
+    """The Doc 9911 contexts are its words, not the shapes a mean square takes."""
+    found = [("media cuadrática", "valor cuadrático medio")]
+    assert _departures(text) == found
+    assert _departures(text, page=True) == found
+
+
+@pytest.mark.parametrize(
+    ("text", "found"),
+    [
+        # The running mean square of the DIN 45672-2 erratum and its guide.
+        (
+            "es lo que le falta al cuadrado medio móvil",
+            [("cuadrado medio", "valor cuadrático medio")],
+        ),
+        (
+            "y eso es lo que le falta al **cuadrado\nmedio**, `e⁻²` y `e⁻⁴`",
+            [("cuadrado medio", "valor cuadrático medio")],
+        ),
+        # The block processing guide, in the plural.
+        (
+            "(promediar los cuadrados medios de cada bloque)",
+            [("cuadrados medios", "valores cuadráticos medios")],
+        ),
+        # A table cell of the time weighting guide.
+        ("Cuadrado medio de $x$", [("Cuadrado medio", "Valor cuadrático medio")]),
+    ],
+)
+def test_a_mean_square_called_cuadrado_medio_is_found(
+    text: str, found: list[tuple[str, str]]
+) -> None:
+    """The statistician's term for the mean square, which the glossary rules out."""
+    assert _departures(text) == found
+    assert _departures(text, page=True) == found
+
+
+def test_a_context_exempts_only_its_own_quadratic_mean() -> None:
+    """The quadratic mean in a sentence does not let the mean square through."""
+    text = "la media cuadrática de las incertidumbres y la media cuadrática por banda"
+    assert csa.glossary_departures(text) == [
+        ("media cuadrática", "valor cuadrático medio", text.rindex("media"))
+    ]
+
+
+def test_a_quadratic_mean_context_that_exempts_nothing_is_reported() -> None:
+    """A context of the quadratic mean must keep matching, like a «seno» one."""
+    values = [csa.Value("page.md", 1, "la media cuadrática de las incertidumbres")]
+    unused = csa.unused_contexts(values)
+    assert r"(?<!\w)binaurales\s+de\s+media\s+cuadrática(?!\w)" in unused
+    assert r"(?<!\w)media\s+cuadrática\s+de\s+las\s+incertidumbres(?!\w)" not in unused
+    assert set(csa.TRIGONOMETRIC) <= set(unused)
+
+
+def test_a_stale_context_is_reported_under_its_own_table(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The report names the table a stale context sits in, and its term."""
+    values = [csa.Value("page.md", 1, "el seno del ángulo de incidencia", page=True)]
+    monkeypatch.setattr(csa, "read_sources", lambda: (values, []))
+    assert csa.main([]) == 1
+    out = capsys.readouterr().out
+    assert "::error::QUADRATIC_MEAN lists" in out
+    assert "which no longer exempts any «media cuadrática»" in out
+    assert "::error::TRIGONOMETRIC lists" in out
+    assert r"seno\s+del\s+ángulo" not in out
 
 
 _PAGE = """---

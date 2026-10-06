@@ -7914,7 +7914,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   así que una edición de vuelta a lo impreso falla.
 - **Estado:** sin comunicar.
 
-## DIN 45672-2:1995-07, apartado 4 (el arranque del valor eficaz móvil, dado en cuadrado medio)
+## DIN 45672-2:1995-07, apartado 4 (el arranque del valor eficaz móvil, dado en valor cuadrático medio)
 
 - **Localización:** apartado 4, último párrafo de la página impresa 3, y la
   Figura 3 de la página impresa 4 (páginas 3 y 4 del PDF de la copia leída
@@ -7925,12 +7925,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   für ein harmonisches Signal zugrunde gelegt wurde (siehe Bild 3)»: solo está
   disponible tras $2\tau$ con un 14 % y tras $4\tau$ con un 2 %, tomando la
   media del valor eficaz móvil de una señal armónica.
-- **El problema:** el 14 % y el 2 % son lo que le falta al cuadrado medio móvil,
-  $e^{-2} = 13{,}5$ % y $e^{-4} = 1{,}8$ %, y no al valor eficaz móvil que nombra
-  la frase. La fórmula (1) arrancada desde reposo da un cuadrado medio que crece
-  como $(1 - e^{-t/\tau})$ de su valor final una vez promediado el rizado, así
-  que el valor eficaz crece como la raíz de eso, y le falta
-  $1 - \sqrt{1 - e^{-2}} = 7{,}0$ % tras $2\tau$ y
+- **El problema:** el 14 % y el 2 % son lo que le falta al valor cuadrático
+  medio móvil, $e^{-2} = 13{,}5$ % y $e^{-4} = 1{,}8$ %, y no al valor eficaz
+  móvil que nombra la frase. La fórmula (1) arrancada desde reposo da un valor
+  cuadrático medio que crece como $(1 - e^{-t/\tau})$ de su valor final una vez
+  promediado el rizado, así que el valor eficaz crece como la raíz de eso, y le
+  falta $1 - \sqrt{1 - e^{-2}} = 7{,}0$ % tras $2\tau$ y
   $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % tras $4\tau$: más o menos la mitad de lo
   impreso.
 - **Evidencia:** la fórmula (1) en la misma página y la Figura 3 en la
@@ -7946,7 +7946,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:**
   [`running_velocity_rms`](../src/phonometry/vibration/immission/railway.py)
   dice a qué magnitud pertenece cada cifra, y el informe de conformidad
-  reproduce el 14 % y el 2 % impresos a partir del cuadrado medio de la
+  reproduce el 14 % y el 2 % impresos a partir del valor cuadrático medio de la
   fórmula (1) arrancada desde reposo, que es la lectura que encaja con ellos.
 - **Estado:** sin comunicar.
 

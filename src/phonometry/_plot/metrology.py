@@ -130,7 +130,7 @@ _STRINGS: dict[str, str] = {
     "Probability density": "Densidad de probabilidad",
     "Monte Carlo distribution (GUM Supplement 1): $u(y)$ = {uy}": "Distribución de Monte Carlo (GUM Suplemento 1): $u(y)$ = {uy}",
     "Sample": "Muestra",
-    "Segment mean square": "Media cuadrática por segmento",
+    "Segment mean square": "Valor cuadrático medio por segmento",
     "Segment RMS": "RMS por segmento",
     "Segment mean": "Media por segmento",
     "Segment variance": "Varianza por segmento",

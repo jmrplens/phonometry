@@ -54,6 +54,22 @@ reason; a context that no longer matches anything fails as well. The words
 built on «seno» for the waveform («senoidal», «semiseno», ...) are single
 words, and the glossary's list names them.
 
+The mean square is the other such case. The glossary writes it «valor
+cuadrático medio», or with the adjective after its noun, «presión cuadrática
+media», as the Spanish adoptions of the standards do, and keeps «media
+cuadrática» for the quadratic mean: the root of the mean of the squares, the
+effective value, which is another number. «Media cuadrática por segmento» and
+«Media cuadrática en bloques de 400 ms» shipped for the mean square in two
+diagrams, two figures, two renderers and three pages, with every gate green.
+Where the English says root mean square or quadratic mean the phrase is right,
+so every «media cuadrática» fails unless it stands in one of the contexts of
+:data:`QUADRATIC_MEAN`, each with its reason, read the way the contexts of
+«seno» are (:data:`SENSES`). A context is written on the words of the one
+sentence it exempts, never on a shape such as «de los extremos» or «beside
+an arithmetic mean», which a mean square can take as well. The statistician's
+«cuadrado medio» names nothing else in acoustics, so it is a plain ruling of
+the glossary, read as «incertidumbre extendida» is.
+
 The tables are read as source, not imported, so the check needs nothing but
 the standard library and runs before anything is installed.
 
@@ -370,6 +386,11 @@ GLOSSARY_TERMS: dict[str, str] = {
 #: the calque «incertidumbre extendida» reached a report fiche through a table.
 GLOSSARY_PHRASES: dict[str, str] = {
     r"(?<!\w)incertidumbres?\s+extendidas?(?!\w)": "incertidumbre expandida",
+    # The mean square is a «valor cuadrático medio» (:data:`QUADRATIC_MEAN`);
+    # the statistician's «cuadrado medio» reached four guides and the
+    # DIN 45672-2 erratum, beside a «valor cuadrático medio» on the same page.
+    r"(?<!\w)cuadrado\s+medio(?!\w)": "valor cuadrático medio",
+    r"(?<!\w)cuadrados\s+medios(?!\w)": "valores cuadráticos medios",
 }
 
 #: The contexts in which «seno» is the trigonometric function (or the noun of
@@ -401,8 +422,93 @@ TRIGONOMETRIC: dict[str, str] = {
     ),
 }
 
-#: The noun the waveform and the function share.
-_SENO = re.compile(r"(?<!\w)senos?(?!\w)", re.IGNORECASE)
+#: The contexts in which «media cuadrática» is the quadratic mean, the root of
+#: the mean of the squares, and not the mean square, as a pattern read without
+#: regard to case on the text as written, and the reason. Outside them every
+#: «media cuadrática» is the mean square and fails: the mean square is «valor
+#: cuadrático medio». A context that matches no «media cuadrática» of the tree
+#: fails the run, as a trigonometric one does.
+QUADRATIC_MEAN: dict[str, str] = {
+    r"(?<!\w)media\s+cuadrática\s+de\s+las\s+dos\s+velocidades\s+verdaderas\s+"
+    r"de\s+los\s+extremos(?!\w)": (
+        "the root of the mean of the two squared end-point speeds that ICAO "
+        "Doc 9911 prints under its Eq. (B-12), in the erratum that reads it"
+    ),
+    r"(?<!\w)media\s+cuadrática\s+de\s+los\s+dos\s+valores\s+de\s+los\s+"
+    r"extremos\s+es\s+un\s+número\s+distinto(?!\w)": (
+        "the same Doc 9911 end-point speed, set against the mid-step one"
+    ),
+    r"(?<!\w)lo\s+sitúa\s+en\s+la\s+media\s+cuadrática\s+de\s+los\s+"
+    r"extremos(?!\w)": (
+        "the same Doc 9911 end-point speed, where the Eq. (B-12) branch puts "
+        "the aircraft"
+    ),
+    r"(?<!\w)construida\s+exactamente\s+sobre\s+esta\s+media\s+"
+    r"cuadrática(?!\w)": (
+        "the same root-mean-square speed, which Doc 9911 B6.1.3 is built on"
+    ),
+    r"(?<!\w)media\s+cuadrática\s+supera\s+a\s+la\s+media\s+aritmética,\s+"
+    r"que\s+supera\s+al\s+valor\s+de\s+media\s+altitud(?!\w)": (
+        "the Doc 9911 root-mean-square speed ranked above the arithmetic mean "
+        "of the end points and the mid-altitude speed"
+    ),
+    r"(?<!\w)media\s+aritmética\s+323\.944\s+ft\s+largo\s+y\s+la\s+media\s+"
+    r"cuadrática\s+impresa(?!\w)": (
+        "the printed root-mean-square candidate of Doc 9911 case 56, set "
+        "beside the arithmetic one"
+    ),
+    r"(?<!\w)media\s+cuadrática\s+de\s+las\s+incertidumbres(?!\w)": (
+        "the root mean square of the per-period uncertainties of IEC 61400-11"
+    ),
+    r"(?<!\w)binaurales\s+de\s+media\s+cuadrática(?!\w)": (
+        "the quadratic-mean combination of the two ears in ECMA-418-2"
+    ),
+}
+
+
+class Sense(NamedTuple):
+    """A term that names two things, of which the glossary keeps one apart.
+
+    Each match of *word* fails with the glossary's term, *singular* or
+    *plural* as the form is, unless it stands in one of *contexts*, where the
+    term has its other sense. *table* is the name the contexts are bound to
+    and *term* the term as a report names it.
+    """
+
+    word: re.Pattern[str]
+    singular: str
+    plural: str
+    contexts: dict[str, str]
+    table: str
+    term: str
+
+
+#: The terms read by sense: the noun the waveform and the function share, and
+#: the phrase the mean square and the quadratic mean share.
+SENSES: tuple[Sense, ...] = (
+    Sense(
+        re.compile(r"(?<!\w)senos?(?!\w)", re.IGNORECASE),
+        "sinusoide",
+        "sinusoides",
+        TRIGONOMETRIC,
+        "TRIGONOMETRIC",
+        "«seno»",
+    ),
+    Sense(
+        re.compile(r"(?<!\w)medias?\s+cuadr[aá]ticas?(?!\w)", re.IGNORECASE),
+        "valor cuadrático medio",
+        "valores cuadráticos medios",
+        QUADRATIC_MEAN,
+        "QUADRATIC_MEAN",
+        "«media cuadrática»",
+    ),
+)
+
+#: Every context of every term read by sense. The patterns of one term never
+#: match another's, so one mapping serves them all.
+CONTEXTS: dict[str, str] = {
+    pattern: reason for sense in SENSES for pattern, reason in sense.contexts.items()
+}
 
 #: A singular in -ción, -sión, -xión or -gión written without its accent. The
 #: plural (-ciones) ends in -es and is never matched, and ``guion`` (which the
@@ -549,12 +655,13 @@ def glossary_departures(
         they come with the accents, from :func:`words_needing_marks`.
     :param script: With *page*, the page is not Markdown and nothing of it
         is blanked (see :data:`_MARKDOWN`).
-    :param contexts: The trigonometric contexts of «seno»,
-        :data:`TRIGONOMETRIC` by default.
-    :param used: A set that receives every context that exempted a «seno».
+    :param contexts: The contexts in which a term of :data:`SENSES` keeps
+        its other sense, :data:`CONTEXTS` (the trigonometric «seno» and the
+        quadratic mean) by default.
+    :param used: A set that receives every context that exempted a term.
     :return: ``(as written, glossary term, offset in text)`` in text order.
     """
-    contexts = TRIGONOMETRIC if contexts is None else contexts
+    contexts = CONTEXTS if contexts is None else contexts
     readable = page_prose(text, script=script) if page else prose(text)
     found: list[tuple[str, str, int]] = []
     for pattern, right in GLOSSARY_PHRASES.items():
@@ -567,22 +674,46 @@ def glossary_departures(
             term = GLOSSARY_TERMS.get(word.lower())
             if term is not None and word.isalpha():
                 found.append((word, _cased(word, term), match.start()))
-    senos = list(_SENO.finditer(readable))
+    for sense in SENSES:
+        found.extend(_departures_by_sense(sense, text, readable, contexts, used))
+    found.sort(key=lambda item: item[2])
+    return found
+
+
+def _departures_by_sense(
+    sense: Sense,
+    text: str,
+    readable: str,
+    contexts: dict[str, str],
+    used: set[str] | None,
+) -> list[tuple[str, str, int]]:
+    """Every match of one term read by sense that stands in none of *contexts*.
+
+    :param sense: The term and its glossary terms.
+    :param text: The value as written, where the contexts are matched.
+    :param readable: The same value with what is not prose blanked, where the
+        term is matched; both have the same length, so offsets agree.
+    :param contexts: The contexts that exempt a match lying inside one.
+    :param used: A set that receives every context that exempted a match.
+    :return: ``(as written, glossary term, offset in text)`` per match.
+    """
+    matches = list(sense.word.finditer(readable))
     spans = [
         (match.start(), match.end(), pattern)
-        for pattern in (contexts if senos else ())
+        for pattern in (contexts if matches else ())
         for match in re.finditer(pattern, text, re.IGNORECASE)
     ]
-    for match in senos:
+    found: list[tuple[str, str, int]] = []
+    for match in matches:
         exempt = {p for lo, hi, p in spans if lo <= match.start() and match.end() <= hi}
         if exempt:
             if used is not None:
                 used.update(exempt)
             continue
-        word = match.group(0)
-        right = "sinusoides" if word.lower() == "senos" else "sinusoide"
-        found.append((word, _cased(word, right), match.start()))
-    found.sort(key=lambda item: item[2])
+        written = " ".join(match.group(0).split())
+        plural = written.split()[0].lower().endswith("s")
+        right = sense.plural if plural else sense.singular
+        found.append((written, _cased(written, right), match.start()))
     return found
 
 
@@ -828,8 +959,8 @@ def check(
 
     :param values: The Spanish values to read.
     :param allowed: The exemptions, :data:`ALLOWED` by default.
-    :param contexts: The trigonometric contexts of «seno»,
-        :data:`TRIGONOMETRIC` by default.
+    :param contexts: The contexts of the terms read by sense,
+        :data:`CONTEXTS` by default.
     :return: One :class:`Offence` per word not exempted, and the exemptions
         that matched no word of any value.
     """
@@ -860,13 +991,13 @@ def check(
 def unused_contexts(
     values: list[Value], contexts: dict[str, str] | None = None
 ) -> list[str]:
-    """The trigonometric contexts that exempt no «seno» of *values*.
+    """The contexts that exempt no term of *values* read by sense.
 
     :param values: The Spanish values to read.
-    :param contexts: The contexts, :data:`TRIGONOMETRIC` by default.
-    :return: The patterns that matched no «seno», in their listed order.
+    :param contexts: The contexts, :data:`CONTEXTS` by default.
+    :return: The patterns that exempted nothing, in their listed order.
     """
-    contexts = TRIGONOMETRIC if contexts is None else contexts
+    contexts = CONTEXTS if contexts is None else contexts
     used: set[str] = set()
     for value in values:
         glossary_departures(
@@ -916,17 +1047,19 @@ def main(argv: list[str] | None = None) -> int:
             print(f"      {_quoted(offence)!r}")
         print(
             "  -> write the accent or the glossary's term. A verb that really "
-            "is spelt without an accent goes in ALLOWED, and a trigonometric "
-            "«seno» in TRIGONOMETRIC, with its reason."
+            "is spelt without an accent goes in ALLOWED, a trigonometric "
+            "«seno» in TRIGONOMETRIC and a quadratic mean, the root of a mean "
+            "square, in QUADRATIC_MEAN, with its reason."
         )
     for text, word in stale:
         print(
             f"::error::ALLOWED lists {word!r} in {text[:60]!r}, which no longer needs it"
         )
     for pattern in unused:
+        sense = next(sense for sense in SENSES if pattern in sense.contexts)
         print(
-            f"::error::TRIGONOMETRIC lists {pattern!r}, which no longer exempts "
-            "any «seno»"
+            f"::error::{sense.table} lists {pattern!r}, which no longer exempts "
+            f"any {sense.term}"
         )
     return 1
 

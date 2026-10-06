@@ -198,7 +198,10 @@ decimal-comma:
 # fiches whose builders ask for Spanish. It also holds the translation glossary,
 # there and in the Spanish pages: «seno» for the waveform (the glossary's
 # «sinusoide») and «incertidumbre extendida» (the GUM's «incertidumbre
-# expandida») shipped in about fifty places with every gate green.
+# expandida») shipped in about fifty places with every gate green, and «media
+# cuadrática», the quadratic mean, or «cuadrado medio» for the mean square
+# («valor cuadrático medio») in two diagrams, two figures, two renderers, seven
+# pages and an erratum.
 spanish-accents:
 	$(PYTHON) scripts/check_spanish_accents.py
 
@@ -270,11 +273,12 @@ fence-names:
 dead-constants:
 	$(PYTHON) scripts/check_dead_constants.py
 
-# A pytest.raises or pytest.warns block passes on whatever call inside it
-# raises, so a block that also builds its input passes on a refusal from the
-# builder. Ruff holds the block to one statement; this holds the statement to
-# one call that could raise, as SonarCloud does (S5778, S9088) once a pull
-# request is already open. Stdlib only.
+# A pytest.raises, pytest.warns or pytest.deprecated_call block passes on
+# whatever call inside it raises or warns, so a block that also builds its
+# input passes on a refusal from the builder. Ruff holds the block to one
+# statement; this holds the statement to one call that could raise or warn, as
+# SonarCloud does (S5778, S9088) once a pull request is already open. Stdlib
+# only.
 raises-blocks:
 	$(PYTHON) scripts/check_raises_blocks.py
 

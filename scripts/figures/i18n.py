@@ -2530,11 +2530,10 @@ _ES_EXACT = {
     "Steady noise: $A$ = 91, accepted (stationary)": "Ruido estable: $A$ = 91, aceptado (estacionario)",
     "+20 % gain ramp: $A$ = 7, rejected (nonstationary)": "Rampa de ganancia del +20 %: $A$ = 7, rechazado (no estacionario)",
     "Segment index": "Índice de segmento",
-    "Segment mean square": "Media cuadrática por segmento",
+    "Segment mean square": "Valor cuadrático medio por segmento",
     "20 segment mean squares; the count $A$ of pairs $i < j$ with\n"
-    "$x_i > x_j$ must fall in (64, 125] at the 5 % level (Table A.6)": "20 medias cuadráticas por segmento; el conteo $A$ de pares "
-    "$i < j$ con\n"
-    "$x_i > x_j$ debe caer en (64, 125] al nivel del 5 % (Tabla A.6)",
+    "$x_i > x_j$ must fall in (64, 125] at the 5 % level (Table A.6)": "20 valores cuadráticos medios por segmento; el conteo $A$ de pares\n"
+    "$i < j$ con $x_i > x_j$ debe caer en (64, 125] al nivel del 5 % (Tabla A.6)",
     "Level-Crossing Rates of Bandlimited Gaussian Noise (Rice)": "Tasas de cruce por nivel de ruido gaussiano de banda limitada "
     "(Rice)",
     r"Rice: $N_0\,\exp(-a^2/2\sigma_x^2)$ (Eq. 5.196)": r"Rice: $N_0\,\exp(-a^2/2\sigma_x^2)$ (Ec. 5.196)",

@@ -395,7 +395,7 @@ through. Implements ISO 3382-1/-2/-3, ISO 14257, ISO 11690-3,
 ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2, ISO 16251-1,
 ISO 717-1/-2, EN 12354-1 to -6, ISO 18233, ISO 12999-1, ISO 10052,
 ISO 16032 (from the ISO/DIS 16032:2023 draft), ANSI/ASA S12.2 and
-ASTM E413/E1414.
+ASTM E413.
 
 **[Room acoustics](/phonometry/buildings/rooms/)**
 

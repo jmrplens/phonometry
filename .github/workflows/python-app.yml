@@ -753,7 +753,9 @@ jobs:
       # its mark. It reads the Spanish pages too for the translation
       # glossary, which a word it has replaced passes every other gate:
       # «seno» for the waveform and «incertidumbre extendida» shipped in
-      # about fifty places. Static, stdlib only, so it runs here with the
+      # about fifty places, and «media cuadrática» or «cuadrado medio» for
+      # the mean square in two diagrams, two figures, two renderers, seven
+      # pages and an erratum. Static, stdlib only, so it runs here with the
       # other checks on published text.
       run: python scripts/check_spanish_accents.py
 
@@ -876,13 +878,14 @@ jobs:
     - name: Check that every private constant is read somewhere
       run: python scripts/check_dead_constants.py
 
-  # A pytest.raises or pytest.warns block passes on whatever call inside it
-  # raises. Seven writer tests built their catalogue inside the block of the
-  # write they checked, and six warning tests built their case inside the block
-  # of the model, so a refusal from the builder would have passed for the one
-  # under test. Ruff holds the block to one statement; this holds the statement
-  # to one call that could raise, with SonarCloud's own definition (S5778,
-  # S9088), so the mistake is caught before a pull request rather than after.
+  # A pytest.raises, pytest.warns or pytest.deprecated_call block passes on
+  # whatever call inside it raises or warns. Seven writer tests built their
+  # catalogue inside the block of the write they checked, and six warning
+  # tests built their case inside the block of the model, so a refusal from
+  # the builder would have passed for the one under test. Ruff holds the block
+  # to one statement; this holds the statement to one call that could raise
+  # or warn, with SonarCloud's own definition (S5778, S9088), so the mistake
+  # is caught before a pull request rather than after.
   # Static and dependency-free, so it runs on its own.
   raises-blocks:
     name: Every exception test waits on one call
@@ -897,7 +900,7 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    - name: Check that no raises or warns block holds a second call
+    - name: Check that no raises, warns or deprecated_call block holds a second call
       run: python scripts/check_raises_blocks.py
 
   # A level is a ratio to a reference value, and ISO 1683 fixes one per

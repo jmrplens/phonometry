@@ -154,11 +154,11 @@ print(f"{level[-fs_hz:].mean():.2f} dB")  # 86.02 dB
 El promedio arranca en reposo, así que el primer trozo de cualquier registro
 lee bajo, y el apartado 4 dice por qué importa: el promediado tiene que estar en
 marcha antes de que llegue el tren. Cifra el coste en un 14 % tras `2τ` y un 2 %
-tras `4τ`, y eso es lo que le falta al **cuadrado medio**, `e⁻²` y `e⁻⁴`. Al
-valor eficaz móvil del que habla la frase, y el que dibuja su propia figura 3,
-le falta un 7 % y un 0,9 %. El consejo vale; el tamaño del error está exagerado
-al doble, y la [página de erratas](/phonometry/es/reference/errata/) tiene el
-detalle.
+tras `4τ`, y eso es lo que le falta al **valor cuadrático medio**, `e⁻²` y
+`e⁻⁴`. Al valor eficaz móvil del que habla la frase, y el que dibuja su propia
+figura 3, le falta un 7 % y un 0,9 %. El consejo vale; el tamaño del error está
+exagerado al doble, y la [página de erratas](/phonometry/es/reference/errata/)
+tiene el detalle.
 
 ## 3. El valor de suceso, y una hora de trenes
 
@@ -273,7 +273,7 @@ Los tercios de octava son gruesos donde resuena un forjado, así que el apartado
 promedio lineal de los bloques. La resolución que recomienda es 1,25 Hz, lo
 bastante fina para la resonancia de un forjado corriente, que con los 500 Hz y
 las 400 líneas de un analizador habitual es un bloque de 0,8 s. Las líneas vuelven
-a sumar el cuadrado medio del tramo, que es la fórmula (14).
+a sumar el valor cuadrático medio del tramo, que es la fórmula (14).
 
 Para comparar un resultado en banda estrecha con uno en tercios de octava, la
 fórmula (23) vuelve a sumar las líneas de cada banda, y la tabla 1 dice cuántas
@@ -339,8 +339,8 @@ La **pérdida por inserción** de un elemento elástico (anexo B, fórmula (B.1)
 la caída de cada nivel en tercio de octava en un punto al montar el elemento, y el
 anexo añade un aviso que vale la pena repetir: pertenece al punto donde se midió.
 Y los resultados de una clase de trenes se **promedian energéticamente**
-(apartado 9): los valores eficaces como la raíz del cuadrado medio, los niveles
-como el nivel de la energía media.
+(apartado 9): los valores eficaces como la raíz del valor cuadrático medio, los
+niveles como el nivel de la energía media.
 
 ```python
 from phonometry import vibration

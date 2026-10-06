@@ -24,6 +24,8 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { codeLines, splitLines } from '../src/lib/markdown-fences.mjs';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, '..');
 const REPO = resolve(SITE, '..');
@@ -79,11 +81,11 @@ function delimiterProblems(sourceDirs) {
   const problems = [];
   for (const dir of sourceDirs) {
     for (const file of walk(dir, ['.md', '.mdx'])) {
-      const lines = readFileSync(file, 'utf8').split('\n');
-      let inFence = false;
+      const lines = splitLines(readFileSync(file, 'utf8'));
+      // A formula shown inside a code block is a sample, not a formula.
+      const code = codeLines(lines);
       lines.forEach((line, index) => {
-        if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
-        if (inFence) return;
+        if (code[index]) return;
         // Prose that talks *about* `$$` writes it inside a code span.
         const trimmed = line.replace(/`[^`]*`/g, '').trim();
         if (!trimmed.includes('$$')) return;

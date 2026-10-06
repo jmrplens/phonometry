@@ -74,6 +74,9 @@ _LEGEND_UPPER_RIGHT: Final = "upper right"
 _LEGEND_LOWER_LEFT: Final = "lower left"
 #: Legend placement for the figures whose curves fall to the left instead.
 _LEGEND_UPPER_LEFT: Final = "upper left"
+#: Matplotlib ``textcoords`` mode for an annotation set a few points from its
+#: anchor, shared by every renderer that places one.
+_OFFSET_POINTS: Final = "offset points"
 
 # ---------------------------------------------------------------------------
 # Shared artist colors (matplotlib "tab10" hues plus neutral greys).
@@ -1115,7 +1118,7 @@ def _annotate_impact_500(
             annotation,
             xy=(band_centers[idx], read_value),
             xytext=(0.0, -32.0),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             fontsize="small",
             arrowprops={"arrowstyle": "->", "color": _C_EDGE},

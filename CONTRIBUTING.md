@@ -88,6 +88,16 @@ To check coverage locally:
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
 
+A test that expects an error or a warning holds **one call that could raise**
+inside its `pytest.raises` or `pytest.warns` block: build the input first,
+then call the code under test alone in the block. A block that also builds its
+input passes on a refusal from the builder, and goes on passing the day the
+code under test stops refusing. Ruff holds the block to one statement, and
+[`scripts/check_raises_blocks.py`](scripts/check_raises_blocks.py)
+(`make raises-blocks`) holds that statement to one call, with the definition
+SonarCloud uses for python:S5778 and S9088; conversions such as
+`float("nan")`, containers and NumPy calls do not count.
+
 ### 3b. Oracle data (committed vs local)
 
 Some suites are validated against reference material that is too large or not
@@ -734,6 +744,22 @@ needed, at the price of a fence that cannot run. A page's language twins
 (site English, site Spanish, `docs/` mirror) are fixed together, never one
 at a time; the `docs/` mirror is hand-written for GitHub and may carry fewer
 examples, but what it does carry follows the same rules.
+
+A script that reads a page reads its fences through
+[`scripts/markdown_fences.py`](scripts/markdown_fences.py): `code_lines()` says
+which lines are code, and `fences()` and `python_fences()` hand out the blocks.
+The site's own code reads them through
+[`site/src/lib/markdown-fences.mjs`](site/src/lib/markdown-fences.mjs), the
+same reading in JavaScript (`codeLines()`, `prose()` and `fences()`), and a
+test holds the two to the same answer on every page. A fence closes only on a
+run of its own marker at least as long as the one that opened it, so a reader
+that works this out for itself reads a page that shows a fence inside another
+one inside out.
+[`scripts/check_fence_readers.py`](scripts/check_fence_readers.py)
+(`make fence-readers`) fails on a Python script that flips a flag on a fence,
+looks for three backticks or tildes in a line or matches them with a regular
+expression, however the string is built, and on a line of the site's code that
+spells them at all.
 
 ## 🏷️ Naming Conventions
 

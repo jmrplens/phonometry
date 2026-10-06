@@ -266,6 +266,14 @@ fence-names:
 dead-constants:
 	$(PYTHON) scripts/check_dead_constants.py
 
+# A pytest.raises or pytest.warns block passes on whatever call inside it
+# raises, so a block that also builds its input passes on a refusal from the
+# builder. Ruff holds the block to one statement; this holds the statement to
+# one call that could raise, as SonarCloud does (S5778, S9088) once a pull
+# request is already open. Stdlib only.
+raises-blocks:
+	$(PYTHON) scripts/check_raises_blocks.py
+
 # Every level is a ratio to an ISO 1683 reference value, and the package
 # publishes them once, in phonometry.metrology.ISO1683_REFERENCE_VALUES. This
 # fails on a reference value in src that is typed out again instead of read
@@ -484,6 +492,16 @@ snippets-static:
 hazards:
 	$(PYTHON) scripts/check_markdown_hazards.py
 
+# Where a fence of a page closes is decided once, the way CommonMark decides
+# it, in scripts/markdown_fences.py and in its JavaScript twin for the site,
+# site/src/lib/markdown-fences.mjs. This fails on a script or a piece of the
+# site's code that works it out by itself (a flag flipped on three backticks, a
+# slice compared with a marker, a regular expression for one), which is how
+# eight readers each came to read a fence shown inside another fence inside
+# out. Stdlib only.
+fence-readers:
+	$(PYTHON) scripts/check_fence_readers.py
+
 # Catch a C0 control character in a text file. A form feed in a raw docstring
 # is what \frac looks like once the backslash and the f have been eaten, and
 # the published formula then loses its fraction with nothing reporting it.
@@ -639,7 +657,7 @@ check: lint security test
 	assets animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
-	fence-names decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
-	figure-text-clearance figure-minus-sign control-characters hazards dead-constants reference-values \
+	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
+	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

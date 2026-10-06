@@ -37,13 +37,25 @@ export const TARGET = join(siteDir, 'src', 'data', 'redirects.mjs');
 /**
  * The first commit that deployed the site.
  *
- * `1114b84b1` added `site/` and `.github/workflows/docs.yml` together, and the
+ * `08a02a302` added `site/` and `.github/workflows/docs.yml` together, and the
  * Deploy Docs run for it succeeded at 2026-07-05T22:39:10Z. Nothing before it
  * was ever published, so nothing before it can have a dead address; every
  * commit after it that touches `site/**` deploys, which is why the replay can
  * treat each step of the main line as a published state of the site.
+ *
+ * That run deployed it as `1114b84b1`. The history was rewritten on
+ * 2026-09-18 to take the media out of the repository, which gave every commit
+ * a new hash: `08a02a302` is the same commit, with the same author date, the
+ * same subject and the same `site/` tree; only the raster images under
+ * `.github/images/` are gone from it. The old hash is reachable from no branch
+ * any more. The partial clone the docs workflow makes still found it, by
+ * fetching it on demand from a remote that had not yet collected it, but a
+ * full clone, or a mirror that never held it, could not resolve
+ * `FIRST_DEPLOY^`, and the replay stopped there before it read a single
+ * rename. Where the old hash still resolved, the two list the same steps and
+ * derive the same map.
  */
-export const FIRST_DEPLOY = '1114b84b17ad7607dd20e8222867b4855ac5b109';
+export const FIRST_DEPLOY = '08a02a302e768344828c7b5db491d57672fa784a';
 
 /**
  * Pages whose content was split across several new pages, or dropped.

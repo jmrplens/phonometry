@@ -16,6 +16,7 @@ from .common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _C_TERTIARY,
+    _OFFSET_POINTS,
     _band_axis,
     _bar_width,
     _format_freq,
@@ -120,8 +121,6 @@ _NOT_QUALIFIED = "not qualified"
 _LWA_SYMBOL = "$L_{W\\mathrm{A}}$"
 #: Legend corner of the ISO 3743 renderers whose curves leave it free.
 _LEGEND_LOWER_RIGHT: Final = "lower right"
-#: Text coordinates of an annotation placed a few points from its anchor.
-_OFFSET_POINTS: Final = "offset points"
 #: Title of the IEC 61063 position plot, the same in both languages.
 _IEC_61063_TITLE = r"IEC 61063: $L_{{W\mathrm{{A}}}}$ = {power} dB re 1 pW"
 #: Legend of a band the standard makes an upper bound: the source under test's

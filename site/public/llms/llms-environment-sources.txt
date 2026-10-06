@@ -1080,6 +1080,43 @@ limit is Figure 2 of ISO 3095, which prints its twenty-two values beside the
 points (`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`); the Annex B listing of EN 15610
 prints them again.
 
+**Method B (EN 15610 7.4.3).** The record runs through digital one-third
+octave band filters and each band is the mean square of its output, once 2 m
+are discarded at either end for the filter transients; a record needs 5 m
+(NOTE 1) and the records of a line 15 m analysed in total, which
+`check_reference_track` judges. The filters "shall comply with EN 61260", the
+1995 edition: `roughness_filter_bank` is the library's own `OctaveFilterBank`
+run at the record's samples per metre, order 4 Butterworth sections on the
+base-ten bands Method A reports, class 0 of EN 61260:1995 on Table 1, on the
+integrated response of 4.5.3 and on the summation of 4.9. Every band runs at
+the record's own rate, without the band-by-band decimation the library's banks
+use by default: decimated, the wavenumbers that fold onto a band would come
+through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks beyond
+$G^{\pm 4}$, so the grade here reaches the Nyquist wavenumber of the record and
+covers all a record goes through. A band is reported
+when its filter has settled to within 0,15 dB (the class 0 tolerance of 4.5.3)
+over the length analysed: a 5 m record reports from 0,25 m, a 20 m one from
+0,5 m.
+
+```python
+from phonometry import filters
+
+bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
+print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+# 4 24 0
+x = np.arange(0.0, 20.0, 1.0e-3)
+record = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength
+raw = {"spike_removal": False, "curvature_processing": False}
+filtered = environment.filtered_roughness_spectrum(record, sample_spacing_m=1.0e-3, **raw)
+fourier = environment.acoustic_roughness_spectrum(record, sample_spacing_m=1.0e-3, **raw)
+print(filtered.record_length_m, filtered.wavelengths_m[0])
+# 16.0 0.5
+print(round(filtered.level_at(0.01), 3), round(fourier.level_at(0.01), 3))
+# 6.532 6.532   10 lg(9/2) dB re 1 um by both methods
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg" alt="Roughness level in dB re 1 µm against wavelength of one 20 m record by both methods: Method A from 25 cm and Method B from 50 cm down to 0.25 cm, within a few tenths of a decibel of each other where both report, about 3 dB under the Figure 2 limit" width="88%"></picture>
+
 **Track decay rate (EN 15461).** From the band magnitudes of the responses on
 the hammer grid of Figure 2, Formula 1 gives
 $\mathrm{DR} = 4{,}343 / \sum |A(x_n)|^2/|A(x_0)|^2\,\Delta x_n$ dB/m, with the floor
@@ -1110,8 +1147,12 @@ G.6). `pass_by_uncertainty` reproduces the worked budget of Table G.2:
 The printed tables disagree in three places (the 25 m distance of Table G.1
 printed as 0,004 dB; the ground level at 7,5 m, 0,55 dB in Table G.1 and
 0,30 dB in Table G.2; the wind screen interval with its bounds out of order),
-and the spike-removal loop of the EN 15610 listing leaves out the change of
-sign of 7.2 c) and never ends on a sharp bend of the rail; see the
+the spike-removal loop of the EN 15610 listing leaves out the change of sign
+of 7.2 c) and never ends on a sharp bend of the rail, and the Method B filters
+of the same listing, third-order Butterworth run forward and back, are 6,02 dB
+down at their band edges (just inside them, where Table 1 allows at most 5,5 dB
+for class 2) and read a flat band about 0,6 dB low, outside every class of
+EN 61260 that 7.4.3 requires; see the
 [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
 
 ## What this page does not cover
@@ -1119,8 +1160,9 @@ sign of 7.2 c) and never ends on a sharp bend of the rail; see the
 The measurement itself (the stationary mesh, finding $T_1$ and $T_2$ inside a
 train, the site and weather checks, Annex B beyond Formula B.1), the speed
 normalisation of 6.7.1, which has no formula, the tonal difference of 6.7.2,
-Annex F, the editing of rail defects and Method B of EN 15610, the measurement
-of the frequency response functions of EN 15461, and the roughness of wheels.
+Annex F, the editing of rail defects and the concatenation of records of
+EN 15610 7.5, the measurement of the frequency response functions of
+EN 15461, and the roughness of wheels.
 
 ## See also
 

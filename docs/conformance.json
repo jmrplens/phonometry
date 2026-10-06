@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1802,
-    "passing": 1802,
+    "checks": 1809,
+    "passing": 1809,
     "failing": 0,
     "domains": 109,
     "standards": 519,
-    "citations": 1257,
-    "designations": 223,
+    "citations": 1261,
+    "designations": 224,
     "sources": 123
   },
   "units": [
@@ -743,8 +743,8 @@
     {
       "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
       "title": "Railway rolling stock noise and its reference track (ISO 3095)",
-      "checks": 16,
-      "passing": 16
+      "checks": 23,
+      "passing": 23
     }
   ],
   "panels": [
@@ -63776,6 +63776,266 @@
         "value": 0.0
       },
       "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-4-3-and-en-61260-1995-table-1/bands-of-the-method-b-filter-bank-at-1-mm-sampling-within-the-class-0-limits-of-table-1-on-relative-attenuation-graded-up-to-the-nyquist-wavenumber-of-the-record-0-5-m-to-2-5-mm",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.4.3 and EN 61260:1995 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.4.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "EN 61260",
+            "edition": "1995",
+            "clause": "Table 1",
+            "lead": " and ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Bands of the Method B filter bank at 1 mm sampling within the class 0 limits of Table 1 on relative attenuation, graded up to the Nyquist wavenumber of the record, 0,5 m to 2,5 mm",
+      "kind": "count",
+      "expected": {
+        "value": 24.0,
+        "label": "24/24 bands"
+      },
+      "computed": {
+        "value": 24.0,
+        "label": "24/24 bands"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-4-3-and-en-61260-1995-4-8-and-table-1/unit-sinusoids-run-through-the-method-b-bank-on-a-40-m-record-sampled-every-millimetre-at-the-normalized-frequencies-g-and-g-map-to-equation-10-about-every-band-and-at-the-two-wavenumbers-a-decimated-bank-lets-through-74-773-and-88-202-per-metre-band-outputs-at-and-beyond-them-at-least-the-75-db-of-class-0-below-the-midband-tone",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.4.3 and EN 61260:1995 4.8 and Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.4.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "EN 61260",
+            "edition": "1995",
+            "clause": "4.8 and Table 1",
+            "lead": " and ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Unit sinusoids run through the Method B bank on a 40 m record sampled every millimetre, at the normalized frequencies G⁴ and G⁻⁴ map to (equation 10) about every band and at the two wavenumbers a decimated bank lets through (74,773 and 88,202 per metre): band outputs at and beyond them at least the +75 dB of class 0 below the midband tone",
+      "kind": "count",
+      "expected": {
+        "value": 554.0,
+        "label": "554/554 band outputs"
+      },
+      "computed": {
+        "value": 554.0,
+        "label": "554/554 band outputs"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-annex-b-9-2/bands-method-b-reports-on-a-19-m-record-sampled-every-millimetre-against-wl-d-the-24-band-centres-the-listing-filters-0-5-m-to-2-5-mm",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 Annex B.9.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "Annex B.9.2"
+          }
+        ]
+      },
+      "quantity": "Bands Method B reports on a 19 m record sampled every millimetre, against wl_d, the 24 band centres the listing filters, 0,5 m to 2,5 mm",
+      "kind": "count",
+      "expected": {
+        "value": 24.0,
+        "label": "24/24 bands"
+      },
+      "computed": {
+        "value": 24.0,
+        "label": "24/24 bands"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-4-3-and-en-61260-1995-table-1/band-level-of-a-3-m-sinusoidal-roughness-at-the-1-cm-band-centre-method-b-10-lg-a-2-within-the-0-15-db-of-class-0-at-the-midband-db-re-1-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.4.3 and EN 61260:1995 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.4.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "EN 61260",
+            "edition": "1995",
+            "clause": "Table 1",
+            "lead": " and ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Band level of a 3 µm sinusoidal roughness at the 1 cm band centre, Method B: 10 lg(A²/2) within the ±0,15 dB of class 0 at the midband, dB re 1 µm",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.532125137753438
+      },
+      "computed": {
+        "value": 6.532125
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.15
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-4-3/length-analysed-by-method-b-in-a-20-m-record-once-2-m-are-discarded-at-either-end-after-filtering-20-2-2-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.4.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.4.3"
+          }
+        ]
+      },
+      "quantity": "Length analysed by Method B in a 20 m record, once 2 m are discarded at either end after filtering: 20 - 2 × 2, m",
+      "kind": "scalar",
+      "expected": {
+        "value": 16.0
+      },
+      "computed": {
+        "value": 16.0
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-4-3-note-1/the-shortest-record-method-b-analyses-5-m-a-5-m-record-is-analysed-and-one-a-millimetre-shorter-is-refused",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.4.3 NOTE 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.4.3 NOTE 1"
+          }
+        ]
+      },
+      "quantity": "The shortest record Method B analyses, 5 m: a 5 m record is analysed and one a millimetre shorter is refused",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 records"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 records"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-4-3/a-line-analysed-by-method-b-needs-15-m-of-record-once-2-m-are-discarded-at-either-end-of-each-a-15-m-line-holds-a-14-9-m-one-does-not",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.4.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.4.3"
+          }
+        ]
+      },
+      "quantity": "A line analysed by Method B needs 15 m of record once 2 m are discarded at either end of each: a 15 m line holds, a 14,9 m one does not",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 lines"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 lines"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

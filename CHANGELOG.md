@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Analyse rail roughness by EN 15610 Method B, through digital one-third
+  octave filters.** `environment.filtered_roughness_spectrum` runs a roughness
+  record through one-third octave band filters along the rail, discards 2 m of
+  every band's output at either end for the filter transients and reports the
+  mean square of what is left, as 7.4.3 asks; a record needs 5 m, and the
+  spectrum carries the length it analysed. The filters are the library's own
+  bank, `environment.roughness_filter_bank`, an `OctaveFilterBank` running at
+  the record's samples per metre on the same base-ten bands Method A reports,
+  of order 4 Butterworth sections: class 0 of EN 61260:1995, the edition 7.4.3
+  requires, on Table 1, on the filter integrated response and on the summation
+  of outputs, and the lowest order that is, so that it settles soonest inside
+  the 2 m. Every band runs at the record's own rate, without the band-by-band
+  decimation of the library's default banks, whose anti-alias filter would let
+  the wavenumbers folding onto a band through only about 73 dB to 75 dB down,
+  short of the 75 dB class 0 asks beyond G^±4; Table 1 is graded up to the
+  Nyquist wavenumber of the record. A band is reported once its filter has
+  settled to within 0.15 dB over the length analysed, from the 0.25 m band on
+  a 5 m record and from the 0.5 m band on a 20 m one. Every `AcousticRoughnessSpectrum` now says which
+  method made it, `average_roughness_spectra` keeps a method its spectra
+  share, and `check_reference_track` holds each line analysed by Method B to
+  the 15 m of record 7.4.3 asks once those ends are gone. The guide compares
+  the two methods on one record, the conformance suite pins the lengths of
+  7.4.3, the bands the Annex B listing filters, the class of the bank band by
+  band and the attenuation of tones run through it beyond G^±4, and the errata
+  register records that the listing's own Method B filters, run forward and
+  back, meet no class of EN 61260, and that EN 61260:1995 labels its base-two
+  octave ratio base-ten.
+
 - **Take a solid's row into the elastic simulation and the detailed building
   model, and a ground's into the outdoor models.** A solid's catalogue row,
   one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your

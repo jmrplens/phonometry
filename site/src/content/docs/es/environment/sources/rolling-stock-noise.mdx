@@ -20,7 +20,7 @@ references:
     year: 2009
     title: "Railway applications — Noise emission — Rail roughness measurement related to rolling noise generation"
     designation: "EN 15610:2009"
-    note: "La rugosidad del carril con la que se juzga la vía de referencia del apartado 6.2.5 de la ISO 3095: la eliminación de picos de 7.2, el procesado por curvatura de 7.3, el método A de 7.4.2 con la síntesis por bandas del anexo C, el promedio de 7.6 y las líneas de medida de 6.4.3. Leída de la BS EN 15610:2009, idéntica a ella."
+    note: "La rugosidad del carril con la que se juzga la vía de referencia del apartado 6.2.5 de la ISO 3095: la eliminación de picos de 7.2, el procesado por curvatura de 7.3, el método A de 7.4.2 con la síntesis por bandas del anexo C, el método B de 7.4.3 con sus filtros sujetos a la EN 61260:1995, el promedio de 7.6 y las líneas de medida de 6.4.3. Leída de la BS EN 15610:2009, idéntica a ella."
   - type: standard
     organization: "European Committee for Standardization"
     year: 2010
@@ -309,6 +309,77 @@ se mide un carril según la anchura de su banda de rodadura
 menos en 4 cm y 3,15 cm, donde lo superan los dos, y en 2,5 cm, donde lo supera
 uno. La vía solo cumple gracias al anexo C (apartado 4.4), y el título lo dice.*
 
+**El método B, filtros a lo largo del carril (7.4.3).** El otro camino hacia
+el mismo espectro pasa el registro procesado por filtros digitales de bandas de
+tercio de octava y toma el valor cuadrático medio de lo que sale de cada uno.
+Un filtro arranca en reposo al principio del registro y tarda en asentarse,
+así que se descartan 2 m de cada salida en cada extremo; un registro necesita
+5 m para dejar el metro que pide un espectro (NOTA 1), y los registros de una
+línea necesitan al menos 15 m analizados en total una vez quitados esos
+extremos. Los filtros «shall comply with EN 61260», la edición de 1995 que la
+EN 15610 fecha en sus referencias. El banco es el de la propia biblioteca,
+`filters.OctaveFilterBank`, que funciona con las muestras por metro del
+registro, de modo que sus frecuencias son números de onda y sus bandas son las
+de base diez que da el método A (`roughness_filter_bank`). Evaluado con
+`filters.verify_filter_class` frente a esa edición es de clase 0, la más
+estricta, y su respuesta integrada (4.5.3) y la suma de sus salidas (4.9)
+también quedan dentro de la clase 0. Cada banda funciona a la frecuencia de
+muestreo del propio registro, sin el diezmado banda a banda que los bancos de
+la biblioteca usan por defecto. Una banda diezmada deja pasar los números de
+onda que se pliegan sobre ella alrededor de la frecuencia diezmada con solo
+unos 73 dB a 75 dB de atenuación, por debajo de los 75 dB que la clase 0 pide
+en $G^{\pm 4}$ y más allá, y el apartado 4.8 pide a los filtros antialias de
+un sistema muestreado que esos alias no saquen al filtro de la tabla 1; sin
+diezmar, una banda no tiene alias y la evaluación llega hasta el número de
+onda de Nyquist del registro.
+
+El banco es de orden 4, el más bajo que es de clase 0, por una razón que la
+norma no dice: el filtro tarda en asentarse más cuanto más larga es la
+longitud de onda de su banda, y el apartado 7.4.3 concede 2 m sea cual sea la
+banda. Una banda solo se da cuando, sobre la longitud analizada, su filtro ha
+llegado a menos de 0,15 dB de su salida estacionaria, la tolerancia de la
+clase 0 en 4.5.3; por eso un registro de 5 m da bandas desde la de 0,25 m, la
+cuarta parte del metro que analiza (7.5), y los registros de 20 m de este
+ejemplo desde la de 0,5 m. El listado del anexo B pasa sus filtros hacia
+delante y hacia atrás con `filtfilt`, lo que eleva al cuadrado su respuesta y
+los saca de todas las clases de la EN 61260 (apartado 7).
+
+```python
+from phonometry import filters
+
+bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
+print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+# 4 24 0   orden, bandas de 0,5 m a 2,5 mm, clase según la EN 61260:1995
+filtered = [
+    environment.filtered_roughness_spectrum(r, sample_spacing_m=1.0e-3)
+    for r in (left, right)
+]
+print(filtered[0].method, filtered[0].record_length_m, filtered[0].wavelengths_m[0])
+# B 16.0 0.5   20 m menos 2 m en cada extremo, y la banda más larga cuyo filtro se asienta
+print(round(filtered[0].level_at(0.0315), 1), round(spectra[0].level_at(0.0315), 1))
+# -2.5 -2.6   dB re 1 um en la banda de 3,15 cm, método B y método A
+```
+
+Sobre un registro estacionario los dos métodos coinciden con la precisión que
+permiten sus estimaciones. Un tono que el método A lee exactamente lo lee el
+método B dentro de los límites de la clase 0 para la atenuación relativa de su
+filtro, y un registro repartido por igual a lo largo de una banda queda dentro
+de los 0,15 dB de su respuesta integrada; en estos carriles los dos espectros
+se separan unas décimas de decibelio, la dispersión de promediar unos pocos
+metros de rugosidad aleatoria. `check_reference_track` exige sus 15 m a cada
+línea analizada con el método B: los dos carriles de arriba, con 16 m cada
+uno, los cumplen.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg"
+  alt="Nivel de rugosidad por bandas de tercio de octava en dB re 1 µm frente a la longitud de onda, de 50 cm a 0,25 cm, de un registro de 20 m analizado por los dos métodos: el método A, con segmentos de Fourier de 1 m, empieza en 25 cm, y el método B, con filtros de tercio de octava de orden 4 y 2 m descartados en cada extremo, empieza en 50 cm; de 25 cm hacia abajo las dos curvas quedan a unas décimas de decibelio una de otra, unos 3 dB por debajo del límite de la figura 2, dibujado a trazos de 40 cm a 0,315 cm"
+  width="88%"
+/>
+
+*Un registro, dos análisis: el método B llega a la banda de 0,5 m con 16 m de
+registro, el método A se queda en la cuarta parte de sus segmentos de 1 m, y
+donde los dos dan banda coinciden dentro de la dispersión de la estimación.*
+
 ### 4.2 Con qué rapidez decae la vibración a lo largo del carril (EN 15461)
 
 La **tasa de decaimiento de la vía** es la atenuación de la vibración a lo
@@ -564,7 +635,16 @@ derivada esté por debajo del umbral, sin el cambio de signo que el apartado
 pendiente del carril que no es ningún pico. Ni él ni el «until no further spike
 is detected» del apartado, leído al pie de la letra, acaban con un pico que se
 detecta y que la prueba de altura conserva; la biblioteca termina la pasada
-cuando una vuelta no elimina nada, que es como lee el apartado.
+cuando una vuelta no elimina nada, que es como lee el apartado. El mismo
+listado hace el método B con filtros de Butterworth de tercer orden pasados
+hacia delante y hacia atrás (`filtfilt`), lo que eleva al cuadrado su
+respuesta: 6,02 dB de caída justo dentro de los bordes de banda, donde la
+tabla 1 de la EN 61260:1995 admite como mucho 5,5 dB para la clase 2, y una
+respuesta integrada del filtro de $-0{,}58$ dB a $-0{,}59$ dB, donde 4.5.3 admite
+$\pm 0{,}5$ dB. El apartado 7.4.3 pide filtros conformes con la EN 61260; los
+del listado no lo son en ninguna banda ni en ninguna clase, y leen unos 0,6 dB
+de menos una banda de espectro plano. El banco de la biblioteca es de clase 0
+en ambas cosas.
 
 ## Qué cubre esta guía
 
@@ -584,7 +664,10 @@ ensayos a velocidad constante, de arranque y de frenado con la dispersión de
 `roughness_comparability` (anexo E), `check_reference_track` (6.2) y
 `pass_by_uncertainty` (anexo G). De la EN 15610:2009, la eliminación de picos,
 el procesado por curvatura, el método A con la síntesis por bandas del anexo C,
-el promedio de 7.6 y las líneas de 6.4.3; de la EN 15461:2008+A1:2010, la tasa
+el método B con su banco de filtros evaluado frente a la EN 61260:1995
+(`filtered_roughness_spectrum`, `roughness_filter_bank`) y los 15 m que pide a
+cada línea, el promedio de 7.6 y las líneas de 6.4.3; de la
+EN 15461:2008+A1:2010, la tasa
 de decaimiento de la fórmula 1 en la malla de la figura 2 con el suelo de la
 fórmula 2 y la caída de 10 dB. Los límites de las figuras 2 y 3 son tablas de
 solo lectura, y todos los resultados se dibujan con `.plot()`.
@@ -599,8 +682,9 @@ referencia que menciona 6.7.1, para la que la norma no da fórmula; la
 diferencia tonal, que 6.7.2 remite a la ISO 1996-2 o a la DIN 45681; las
 mediciones en andenes, paradas y puentes del anexo F. En la EN 15610, la
 supresión de juntas, soldaduras y defectos (el anexo A muestra cómo son; lo
-hace el operador) y el método B, los filtros digitales de tercio de octava de
-7.4.3. En la EN 15461, la medición de las funciones de respuesta en frecuencia:
+hace el operador), y la concatenación de registros solapados que el apartado
+7.5 permite para longitudes de onda mayores. En la EN 15461, la medición de las
+funciones de respuesta en frecuencia:
 las tasas se calculan a partir de sus magnitudes por banda. La rugosidad de
 las ruedas, que las normas del carril no cubren.
 </ScopeClaim>

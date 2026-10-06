@@ -10,7 +10,13 @@ and 51) is a worked uncertainty budget.
 
 BS EN 15610:2009, identical to EN 15610:2009: the Annex B.9.2 listing (PDF
 page 28, folio 26) prints the same roughness limit as a table of numbers, the
-"2007 TSI limit", which is a second, independent printing of Figure 2.
+"2007 TSI limit", which is a second, independent printing of Figure 2. Its
+7.4.3 (PDF page 17, folio 15) sets the lengths of Method B, and the listing
+(PDF page 27, folio 25) the bands it filters.
+
+BS EN 61260:1996, which is EN 61260:1995 (IEC 61260:1995), the edition 7.4.3
+holds the Method B filters to: Table 1 (PDF page 14, folio 10) prints the
+least relative attenuation of each class beyond G^+4 and G^-4.
 
 BS EN ISO 3095:2005 (second edition), 3.14 (PDF pages 12 and 13, folios 4 and
 5): the transit exposure level the 2013 edition dropped.
@@ -46,6 +52,29 @@ EN15610_LISTING_LIMIT_DB: tuple[float, ...] = (
     17.1, 15.0, 13.0, 11.0, 9.0, 7.0, 4.9, 2.9, 0.9, -1.1, -3.2, -5.0, -5.6,
     -6.2, -6.8, -7.4, -8.0, -8.6, -9.2, -9.8, -10.4, -11.0,
 )  # fmt: skip
+
+# ---------------------------------------------------------------------------
+# EN 15610:2009 7.4.3 (PDF page 17, folio 15), Method B: the length discarded
+# at either end of a record after filtering, the shortest record of NOTE 1 and
+# the least length analysed in total, in metres. Annex B.9.2 (PDF page 27,
+# folio 25): wl_d, the band centres the listing filters, in metres.
+# ---------------------------------------------------------------------------
+EN15610_FILTER_TRANSIENT_M = 2.0
+EN15610_SHORTEST_FILTERED_RECORD_M = 5.0
+EN15610_FILTERED_TOTAL_M = 15.0
+EN15610_LISTING_FILTER_WAVELENGTHS_M: tuple[float, ...] = (
+    0.5, 0.4, 0.315, 0.25, 0.2, 0.16, 0.125, 0.1, 0.08, 0.063, 0.05, 0.04,
+    0.0315, 0.025, 0.02, 0.016, 0.0125, 0.01, 0.008, 0.0063, 0.005, 0.004,
+    0.00315, 0.0025,
+)  # fmt: skip
+
+# ---------------------------------------------------------------------------
+# EN 61260:1995 Table 1 (BS EN 61260:1996, PDF page 14, folio 10), which the
+# Method B filters "shall comply with": the least relative attenuation of a
+# class 0 filter at and beyond the normalized frequencies G^+4 and G^-4 map
+# to, in decibels.
+# ---------------------------------------------------------------------------
+EN61260_1995_CLASS_0_BEYOND_G4_DB = 75.0
 
 # ---------------------------------------------------------------------------
 # ISO 3095:2013 Figure 3 (folio 13): the table beside the curves, frequency in

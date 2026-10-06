@@ -9586,6 +9586,31 @@ in the same order.
   holds Formula (3) to what the running bank reads.
 - **Status:** unreported.
 
+## EN 61260:1995, 3.2, NOTE 3 (the base-two octave ratio labelled base-ten)
+
+- **Location:** clause 3.2, "octave ratio", NOTE 3 and equation (2), printed
+  p. 4; clause 3.7, printed p. 5.
+- **The print:** NOTE 1 of 3.2 reads "This standard permits two options,
+  designated base-ten and base-two, for determining an octave-band, or
+  fractional-octave-band, frequency ratio." NOTE 2 reads "For base-ten
+  systems, $G_{10} = 10^{3/10}$" as equation (1), and NOTE 3 reads "For
+  base-ten systems, $G_2 = 2$" as equation (2).
+- **The problem:** NOTE 3 gives the base-two ratio, $G_2 = 2$, under the name
+  of the other system, so the clause names the base-ten system twice and the
+  base-two system never. Clause 3.7 reads equation (2) the intended way: "G
+  represents an octave frequency ratio calculated according to equation (1)
+  for base-ten systems or (2) for base-two systems". NOTE 3 should read "For
+  base-two systems".
+- **Evidence:** read on PDF page 8 (printed p. 4) and PDF page 9 (printed
+  p. 5) of BS EN 61260:1996, which is EN 61260:1995 (IEC 61260:1995)
+  incorporating amendment A1, the copy dated "© BSI 23 August 2002".
+- **Library behaviour:** no change required. The filter banks and
+  [`verify_filter_class`](../src/phonometry/filters/compliance.py) with
+  `edition="1995"` use the base-ten ratio $G = 10^{3/10}$ of equation (1), the
+  one NOTE 4 prefers, and nothing in the library reads equation (2) by its
+  label.
+- **Status:** unreported.
+
 ## IEC 61672-1:2013, Table 3 (the class 1 lower limit at 6 300 Hz printed with a decimal point)
 
 - **Location:** Table 3, "Frequency weightings and acceptance limits", row
@@ -10238,6 +10263,67 @@ in the same order.
   `test_a_broad_ridge_is_kept_and_the_sweep_ends` in
   [`tests/environment/sources/test_acoustic_roughness.py`](../tests/environment/sources/test_acoustic_roughness.py)
   hold it on both.
+- **Status:** unreported.
+
+## EN 15610:2009, Annex B, B.9.2 (Method B filters run forward and back, outside every class of EN 61260)
+
+- **Location:** Annex B (informative), B.9.2, the digital filtering section of
+  the listing of RoughProcess.m, printed p. 25, described in B.6, printed
+  p. 20; clause 7.4.3, printed p. 15, and clause 2, printed p. 5.
+- **The print:** the listing sets the band edges `fsmin=fsc/(2^(1/6))` and
+  `fsmax=fsc*(2^(1/6))` about the centres `fsc=1./wl_d`, designs each band
+  with `order=3;` and `[b,a]=butter(order,Wn);`, filters with
+  `rf=filtfilt(b,a,rraw);` and reports `specdf(q)=std(rf);` of the record
+  left once 2 m are cut from either end. Clause 7.4.3 reads: "The digital
+  filters shall comply with EN 61260", and clause 2 dates that reference as
+  EN 61260 (IEC 61260:1995).
+- **The problem:** `butter(3,Wn)` designs a band-pass filter 3 dB down at
+  `fsmin` and `fsmax`, and `filtfilt` runs it forward and then backward, so
+  the filter the record actually goes through has the square of its
+  magnitude response: 6,02 dB down at its own band edges. Taking the
+  listing's `fsc` as the exact midband frequency and the base-two ratio its
+  edges are built on, Table 1 of EN 61260:1995 allows a relative attenuation
+  just inside a band edge of at most 4,5 dB, 5,0 dB and 5,5 dB for classes 0,
+  1 and 2, and 4.5.3 limits the filter integrated response
+  $\Delta B = 10 \lg (B_\mathrm{e}/B_\mathrm{r})$, with $B_\mathrm{e}$ of
+  equation (14) and $B_\mathrm{r} = G^{1/(2b)} - G^{-1/(2b)}$ of equation (9),
+  to $\pm 0{,}15$ dB, $\pm 0{,}3$ dB and $\pm 0{,}5$ dB. The squared
+  response gives $\Delta B = -0{,}59$ dB in every band of `wl_d` from 0,5 m
+  to 4 mm at 1 mm sampling, and $-0{,}58$ dB in the 3,15 mm and 2,5 mm bands,
+  where the sampling bends the response. The filters
+  of the listing therefore meet no class of EN 61260 in any band, on either
+  requirement, which is what 7.4.3 asks of them, and a band whose spectrum is
+  flat across it reads about 0,6 dB low. The same filter run forward once
+  would be 3,01 dB down at the edges, with $\Delta B$ from $+0{,}15$ dB to
+  $+0{,}20$ dB, inside class 1. A comment of the same section, "used later for fsc(q)<50 ie lambda
+  >0.02", disagrees with the test the code makes, `if fsc(q)>=20` and
+  `elseif fsc(q)<20`, which sends the bands longer than 0,05 m to the
+  decimated record.
+- **Evidence:** the listing read on PDF page 27 (printed p. 25), B.6 on PDF
+  page 22 (printed p. 20), clause 7.4.3 on PDF page 17 (printed p. 15) and
+  clause 2 on PDF page 7 (printed p. 5) of BS EN 15610:2009, the UK
+  implementation of EN 15610:2009; Table 1 on PDF page 14 (printed p. 10),
+  equation (9) on PDF page 10 (printed p. 6), equations (13) and (14) on PDF
+  page 15 (printed p. 11) and 4.5.3 on PDF page 16 (printed p. 12) of
+  BS EN 61260:1996, which is IEC 61260:1995. The attenuations and $\Delta B$
+  are a recomputation: the listing's filters designed with
+  `scipy.signal.butter`, the same design as the MATLAB function, at 1 mm
+  sampling (and on the record decimated by 10 for `fsc<20`), their response
+  squared, read at the band edges and integrated by equation (14).
+- **Library behaviour:**
+  [`filtered_roughness_spectrum`](../src/phonometry/environment/sources/acoustic_roughness.py)
+  runs each band forward once through the order 4 Butterworth sections of
+  [`roughness_filter_bank`](../src/phonometry/environment/sources/acoustic_roughness.py),
+  at the record's own rate, a bank that is class 0 of EN 61260:1995 on
+  Table 1 up to the Nyquist wavenumber of the record, on 4.5.3 and on 4.9;
+  `test_the_bank_is_class_0_on_table_1_of_en_61260_1995`,
+  `test_the_bank_attenuates_class_0_beyond_g4_on_a_record`,
+  `test_the_integrated_response_of_every_band_is_within_class_0` and
+  `test_the_summation_of_outputs_is_within_class_0` in
+  [`tests/environment/sources/test_roughness_method_b.py`](../tests/environment/sources/test_roughness_method_b.py)
+  hold it there, and the conformance checks "EN 15610:2009 7.4.3 and
+  EN 61260:1995 Table 1" and "EN 15610:2009 7.4.3 and EN 61260:1995 4.8 and
+  Table 1" grade it band by band and on tones run through it.
 - **Status:** unreported.
 
 ## Related source properties that are not errata

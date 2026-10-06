@@ -8,8 +8,10 @@ from .acoustic_roughness import (
     acoustic_roughness_spectrum,
     average_roughness_spectra,
     curvature_processed_roughness,
+    filtered_roughness_spectrum,
     redistributed_band_energies,
     remove_roughness_spikes,
+    roughness_filter_bank,
     roughness_measurement_lines,
 )
 from .cnossos_rail import (
@@ -158,8 +160,10 @@ __all__ = [
     "acoustic_roughness_spectrum",
     "average_roughness_spectra",
     "curvature_processed_roughness",
+    "filtered_roughness_spectrum",
     "redistributed_band_energies",
     "remove_roughness_spikes",
+    "roughness_filter_bank",
     "roughness_measurement_lines",
     "PREFERRED_PASS_BY_SPEEDS_KMH",
     "REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M",

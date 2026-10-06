@@ -284,6 +284,7 @@ from .environment import (
     generate_refraction_homogeneous_check,
     generate_road_device_ratings,
     generate_rolling_stock_pass_by,
+    generate_rolling_stock_roughness_methods,
     generate_rolling_stock_small_deviation,
     generate_rolling_stock_track_decay,
     generate_rolling_stock_track_roughness,
@@ -970,6 +971,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # ISO 3095 rolling stock noise on a track judged by EN 15610 and EN 15461.
     generate_rolling_stock_pass_by,
     generate_rolling_stock_track_roughness,
+    generate_rolling_stock_roughness_methods,
     generate_rolling_stock_track_decay,
     generate_rolling_stock_small_deviation,
     generate_rolling_stock_uncertainty,

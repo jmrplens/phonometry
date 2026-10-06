@@ -20,7 +20,7 @@ references:
     year: 2009
     title: "Railway applications — Noise emission — Rail roughness measurement related to rolling noise generation"
     designation: "EN 15610:2009"
-    note: "The rail roughness the reference track of ISO 3095 6.2.5 is judged by: the spike removal of 7.2, the curvature processing of 7.3, Method A of 7.4.2 with the band synthesis of Annex C, the average of 7.6 and the measurement lines of 6.4.3. Read from BS EN 15610:2009, which is identical to it."
+    note: "The rail roughness the reference track of ISO 3095 6.2.5 is judged by: the spike removal of 7.2, the curvature processing of 7.3, Method A of 7.4.2 with the band synthesis of Annex C, Method B of 7.4.3 with its filters held to EN 61260:1995, the average of 7.6 and the measurement lines of 6.4.3. Read from BS EN 15610:2009, which is identical to it."
   - type: standard
     organization: "European Committee for Standardization"
     year: 2010
@@ -305,6 +305,72 @@ many lines a rail is measured on by the width of its running band
 4 cm and 3,15 cm, where both exceed it, and at 2,5 cm, where one does. The
 track passes only through Annex C (section 4.4), and the title says so.*
 
+**Method B, filters along the rail (7.4.3).** The other way to the same
+spectrum runs the processed record through digital one-third octave band
+filters and takes the mean square of what comes out of each. A filter starts
+from rest at the head of the record and rings for a while, so 2 m of every
+output are discarded at either end; a record needs 5 m to leave the 1 m a
+spectrum needs (NOTE 1), and the records of one line need at least 15 m
+analysed in total once those ends are gone. The filters "shall comply with
+EN 61260", the 1995 edition EN 15610 dates in its references. The bank here
+is the library's own `filters.OctaveFilterBank`, run at the record's samples
+per metre, so that its frequencies are wavenumbers and its bands are the
+base-ten bands Method A reports (`roughness_filter_bank`). Graded by
+`filters.verify_filter_class` against that edition, it is class 0, the
+tightest, and its integrated response (4.5.3) and the sum of its outputs
+(4.9) are within class 0 as well. Every band runs at the record's own rate,
+without the band-by-band decimation the library's banks use by default. A
+decimated band lets the wavenumbers that fold onto it around the decimated
+rate through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks
+at and beyond $G^{\pm 4}$, and 4.8 asks the anti-alias filters of a
+sampled-data system to keep such aliases within Table 1; undecimated, a band
+has no alias, and the grade reaches the Nyquist wavenumber of the record.
+
+The bank is of order 4, the lowest that is class 0, for a reason the standard
+leaves unsaid: a filter's ringing lasts longer the longer the wavelength of
+its band, and 7.4.3 allows 2 m whatever the band. A band is reported only
+when, over the length analysed, its filter has built up to within 0,15 dB of
+its steady output, the class 0 tolerance of 4.5.3; a 5 m record therefore
+reports from the 0,25 m band, the quarter of the metre it analyses (7.5), and
+the 20 m records here from the 0,5 m band. The listing of Annex B runs its
+filters forward and back with `filtfilt`, which squares their response and
+takes them out of every class of EN 61260 (section 7).
+
+```python
+from phonometry import filters
+
+bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
+print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+# 4 24 0   order, bands from 0,5 m to 2,5 mm, class of EN 61260:1995
+filtered = [
+    environment.filtered_roughness_spectrum(r, sample_spacing_m=1.0e-3)
+    for r in (left, right)
+]
+print(filtered[0].method, filtered[0].record_length_m, filtered[0].wavelengths_m[0])
+# B 16.0 0.5   20 m less 2 m at either end, and the longest band whose filter settles
+print(round(filtered[0].level_at(0.0315), 1), round(spectra[0].level_at(0.0315), 1))
+# -2.5 -2.6   dB re 1 um in the 3,15 cm band, Method B and Method A
+```
+
+On a stationary record the two methods agree to the precision their
+estimates allow. A tone read by Method A exactly reads within the class 0
+limits of the filter's relative attenuation by Method B, and a record spread
+evenly across a band reads within the 0,15 dB of its integrated response; on
+these rails the two spectra differ by a few tenths of a decibel, the scatter
+of averaging a few metres of random roughness. `check_reference_track` holds
+each line analysed by Method B to its 15 m: the two rails above, at 16 m each,
+meet it.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg"
+  alt="One-third octave band roughness level in dB re 1 µm against wavelength from 50 cm to 0.25 cm of one 20 m record analysed by both methods: Method A, on 1 m Fourier segments, starts at 25 cm, and Method B, through order 4 one-third octave filters with 2 m discarded at either end, starts at 50 cm; from 25 cm down the two curves lie within a few tenths of a decibel of each other, about 3 dB under the Figure 2 limit drawn dashed from 40 cm to 0.315 cm"
+  width="88%"
+/>
+
+*One record, two analyses: Method B reaches the 0,5 m band from 16 m of
+record, Method A stops at a quarter of its 1 m segments, and where both report
+they agree to the scatter of the estimate.*
+
 ### 4.2 How fast vibration decays along the rail (EN 15461)
 
 The **track decay rate** is the attenuation of the vibration along the rail,
@@ -556,7 +622,14 @@ clause 7.2 c) also asks of a spike, so it never ends on a sharp bend of the
 rail that is no spike at all. Neither it nor the clause's "until no further
 spike is detected", read literally, ends on a peak that is detected and then
 kept by the height test; the library ends the sweep when a pass removes
-nothing, which is how it reads the clause.
+nothing, which is how it reads the clause. The same listing does Method B with
+third-order Butterworth filters run forward and back (`filtfilt`), which
+squares their response: 6,02 dB down just inside the band edges, where
+Table 1 of EN 61260:1995 allows at most 5,5 dB for class 2, and a filter
+integrated response of $-0{,}58$ dB to $-0{,}59$ dB, where 4.5.3 allows $\pm 0{,}5$ dB.
+Clause 7.4.3 asks for filters that comply with EN 61260; the listing's do not,
+in any band or class, and read a band whose spectrum is flat about 0,6 dB low.
+The library's bank is class 0 on both.
 
 ## What this guide covers
 
@@ -574,8 +647,10 @@ braking tests with the spread of 9.3, `type_test_speeds`,
 (6.3.4), `background_level_increase` (Annex D), `check_small_roughness_deviations`
 (Annex C), `roughness_comparability` (Annex E), `check_reference_track` (6.2)
 and `pass_by_uncertainty` (Annex G). From EN 15610:2009, the spike removal,
-the curvature processing, Method A with the band synthesis of Annex C, the
-average of 7.6 and the lines of 6.4.3; from EN 15461:2008+A1:2010, the decay
+the curvature processing, Method A with the band synthesis of Annex C, Method B
+with its filter bank graded against EN 61260:1995 (`filtered_roughness_spectrum`,
+`roughness_filter_bank`) and the 15 m it asks of each line, the average of 7.6
+and the lines of 6.4.3; from EN 15461:2008+A1:2010, the decay
 rate of Formula 1 on the grid of Figure 2 with the floor of Formula 2 and the
 10 dB drop. The limits of Figures 2 and 3 are read-only tables, and every
 result draws itself with `.plot()`.
@@ -588,8 +663,9 @@ the special cases of Annex B beyond Formula B.1. The speed normalisation 6.7.1
 mentions, for which the standard gives no formula; the tonal difference, which
 6.7.2 hands to ISO 1996-2 or DIN 45681; the platform, stopping-point and bridge
 measurements of Annex F. In EN 15610, the editing out of joints, welds and
-defects (Annex A shows what they look like; the operator does it) and Method B,
-the digital one-third octave filters of 7.4.3. In EN 15461, the measurement of
+defects (Annex A shows what they look like; the operator does it), and the
+concatenation of overlapping records 7.5 allows for longer wavelengths. In
+EN 15461, the measurement of
 the frequency response functions: the rates are computed from their band
 magnitudes. The roughness of the wheels, which the rail standards do not
 cover.

@@ -829,6 +829,101 @@ def test_no_source_compares_a_float_for_equality() -> None:
     )
 
 
+def _overload_sets(tree: ast.Module) -> list[list[ast.FunctionDef]]:
+    """Every set of ``@overload`` definitions of one name in one scope."""
+    found: list[list[ast.FunctionDef]] = []
+    for scope in ast.walk(tree):
+        body = getattr(scope, "body", None)
+        if not isinstance(body, list):
+            continue
+        by_name: dict[str, list[ast.FunctionDef]] = {}
+        for node in body:
+            if isinstance(node, ast.FunctionDef) and any(
+                (isinstance(d, ast.Name) and d.id == "overload")
+                or (isinstance(d, ast.Attribute) and d.attr == "overload")
+                for d in node.decorator_list
+            ):
+                by_name.setdefault(node.name, []).append(node)
+        found.extend(by_name.values())
+    return found
+
+
+def _is_bool_literal(annotation: ast.expr | None) -> bool:
+    """Whether an annotation is ``Literal[True]`` or ``Literal[False]``."""
+    if isinstance(annotation, ast.Constant) and isinstance(annotation.value, str):
+        annotation = ast.parse(annotation.value, mode="eval").body
+    if not isinstance(annotation, ast.Subscript):
+        return False
+    head = annotation.value
+    name = head.id if isinstance(head, ast.Name) else getattr(head, "attr", None)
+    if name != "Literal":
+        return False
+    items = (
+        annotation.slice.elts
+        if isinstance(annotation.slice, ast.Tuple)
+        else [annotation.slice]
+    )
+    return any(
+        isinstance(item, ast.Constant) and isinstance(item.value, bool)
+        for item in items
+    )
+
+
+def test_an_overload_on_a_true_or_false_literal_also_takes_a_bool() -> None:
+    """A flag held in a variable is a ``bool``, and mypy has to accept it.
+
+    A function whose return type follows a flag states it with one overload
+    for ``Literal[True]`` and one for ``Literal[False]``. mypy does not split
+    a ``bool`` argument into those two literals to try each overload, so with
+    only the two, a caller whose flag comes from a setting or a parameter of
+    its own gets "No overload variant matches" for a call that runs.
+    ``estimate_reverberation_index(weighted=)`` and
+    ``metrology.sensitivity(narrowband=)`` had only the two, while
+    ``weighted_impact_improvement`` and ``impact_improvement_adaptation_term``
+    came with a third from the start. An overload that types the flag as
+    ``bool`` returns the union of the two forms, and ``tests/static_typing``
+    calls each of them with a variable, in every place the call can take
+    the other arguments, since this test sees only the flag's type.
+
+    The overloads are read through the parser, so an overload set is the
+    run of ``@overload`` definitions of one name in one scope, whatever their
+    layout over lines.
+    """
+    missing: list[str] = []
+    keyed_sets = 0
+    for path in sorted(SRC.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for overloads in _overload_sets(tree):
+            keyed: set[str] = set()
+            plain: set[str] = set()
+            for definition in overloads:
+                arguments = definition.args
+                for parameter in (
+                    *arguments.posonlyargs,
+                    *arguments.args,
+                    *arguments.kwonlyargs,
+                ):
+                    if _is_bool_literal(parameter.annotation):
+                        keyed.add(parameter.arg)
+                    elif (
+                        parameter.annotation is not None
+                        and ast.unparse(parameter.annotation) == "bool"
+                    ):
+                        plain.add(parameter.arg)
+            keyed_sets += bool(keyed)
+            missing.extend(
+                f"{path.relative_to(SRC.parent)}:{overloads[0].lineno} "
+                f"{overloads[0].name}({name}=)"
+                for name in sorted(keyed - plain)
+            )
+
+    assert keyed_sets >= 4, f"only {keyed_sets} overload sets keyed on a flag"
+    assert not missing, (
+        "overloads typed for Literal[True] and Literal[False] with none for a "
+        "bool:\n  " + "\n  ".join(missing)
+    )
+
+
 def test_no_suppression_comment_hides_its_reason_from_the_parser() -> None:
     """A `# noqa` directive ends at its codes, and the reason goes above it.
 

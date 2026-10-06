@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Literal, overload
+from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
@@ -12,6 +12,9 @@ from .._internal.warnings import PhonometryWarning
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .reference_values import ISO1683_REFERENCE_VALUES
 from .sound_calibrator import _designation, _fluctuation_limit_db
+
+if TYPE_CHECKING:
+    from ..io._signal import Signal
 
 # Minimum sample count for the Hann-windowed coherent (Goertzel) tone
 # estimate; a shorter take falls back to broadband RMS.
@@ -26,6 +29,21 @@ class CalibrationWarning(PhonometryWarning):
 
 @overload
 def sensitivity(
+    ref_signal: Signal,
+    target_spl: float = ...,
+    reference_pressure_pa: float = ...,
+    fs: int | None = ...,
+    *,
+    validate: bool = ...,
+    max_fluctuation_db: float | None = ...,
+    frequency: float = ...,
+    calibrator_class: str = ...,
+    narrowband: bool = ...,
+) -> float: ...
+
+
+@overload
+def sensitivity(
     ref_signal: SignalInput,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
@@ -35,7 +53,22 @@ def sensitivity(
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
     calibrator_class: str = ...,
-    narrowband: Literal[True],
+    narrowband: bool = ...,
+) -> float: ...
+
+
+@overload
+def sensitivity(
+    ref_signal: SignalInput,
+    target_spl: float,
+    reference_pressure_pa: float,
+    fs: int,
+    *,
+    validate: bool = ...,
+    max_fluctuation_db: float | None = ...,
+    frequency: float = ...,
+    calibrator_class: str = ...,
+    narrowband: bool = ...,
 ) -> float: ...
 
 
@@ -112,7 +145,8 @@ def sensitivity(
     :param calibrator_class: The calibrator's class designation, ``"LS"``,
         ``"LS/M"``, ``"1"`` (default), ``"1/M"`` or ``"2"``
         (IEC 60942:2017 Table 1), used to select the Table 2 column.
-    :param narrowband: If True (requires ``fs``), estimate the tone level with
+    :param narrowband: If True (requires the rate, as ``fs`` or carried by a
+        :class:`~phonometry.io.Signal`), estimate the tone level with
         a coherent single-frequency (Goertzel) detector locked to the tone
         near ``frequency`` instead of the full-band RMS. This rejects
         broadband hum/noise in the reference take, which otherwise inflates

@@ -317,8 +317,10 @@ def test_monitor_ratio_cancels_a_drifting_source() -> None:
         _L_REF,
         _L_REF + field_ref,
         _L_TEST + field_test,
-        reference_monitor_level_db=monitor_gain + field_ref,
-        test_monitor_level_db=monitor_gain + field_test,
+        monitor=metrology.MonitorReadings(
+            reference_level_db=monitor_gain + field_ref,
+            test_level_db=monitor_gain + field_test,
+        ),
         field="free_field",
     )
     np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
@@ -330,16 +332,18 @@ def test_without_a_monitor_the_readings_are_differenced() -> None:
     np.testing.assert_allclose(result.sensitivity_level_db, _L_TEST, atol=1e-12)
 
 
-def test_one_monitor_reading_without_the_other_is_refused() -> None:
-    reference_output = _L_REF + 94.0
-    test_output = _L_TEST + 94.0
-    with pytest.raises(ValueError, match=r"or neither"):
+def test_monitor_levels_disagreeing_in_determinations_are_refused() -> None:
+    monitor = metrology.MonitorReadings(
+        reference_level_db=np.full((2, _F.size), 80.0),
+        test_level_db=np.full((3, _F.size), 80.0),
+    )
+    with pytest.raises(ValueError, match=r"same number of determinations"):
         metrology.sequential_comparison(
             _F,
             _L_REF,
-            reference_output,
-            test_output,
-            reference_monitor_level_db=80.0,
+            _L_REF + 94.0,
+            _L_TEST + 94.0,
+            monitor=monitor,
         )
 
 

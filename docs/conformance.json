@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1838,
-    "passing": 1838,
+    "checks": 1851,
+    "passing": 1851,
     "failing": 0,
     "domains": 110,
     "standards": 520,
-    "citations": 1290,
-    "designations": 225,
+    "citations": 1301,
+    "designations": 226,
     "sources": 123
   },
   "units": [
@@ -90,7 +90,8 @@
     "yr",
     "µH",
     "µT",
-    "µm"
+    "µm",
+    "µs"
   ],
   "domains": [
     {
@@ -666,8 +667,8 @@
     {
       "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
       "title": "Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)",
-      "checks": 12,
-      "passing": 12
+      "checks": 25,
+      "passing": 25
     },
     {
       "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
@@ -49887,6 +49888,463 @@
       "tolerance": {
         "mode": "absolute",
         "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-5-1-1-formulas-c-1-to-c-3/phase-of-the-test-microphone-through-the-interchange-whatever-the-channel-phase-shifts-one-inverting-and-field-asymmetry",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 5.1.1, Formulas (C.1) to (C.3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "5.1.1, Formulas (C.1) to (C.3)"
+          }
+        ]
+      },
+      "quantity": "Phase of the test microphone through the interchange, whatever the channel phase shifts (one inverting) and field asymmetry",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the test microphone's phase at all 5 frequencies, both channel pairs"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max deviation 0.000000000 deg"
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-5-1-a-2/monitor-phases-cancel-a-source-that-drifts-in-phase-between-the-two-measurements",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 5.1, A.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "5.1, A.2"
+          }
+        ]
+      },
+      "quantity": "Monitor phases cancel a source that drifts in phase between the two measurements",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the test microphone's phase at all 5 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max deviation 0.000000000 deg"
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-table-d-1-microphone-impedance/a-semi-range-of-0-005-db-of-the-impedance-effect-as-a-standard-uncertainty",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Table D.1 (Microphone impedance)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Table D.1 (Microphone impedance)"
+          }
+        ]
+      },
+      "quantity": "A semi-range of 0,005 dB of the impedance effect as a standard uncertainty",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.003,
+        "label": "0.003 dB (0.005/1.7321, printed)"
+      },
+      "computed": {
+        "value": 0.003
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-2-2009-formula-3-iec-61094-5-2016-7-4/pressure-ratio-of-a-substitution-in-a-closed-coupler-against-the-admittance-sums-of-formula-3-7-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-2:2009 Formula (3); IEC 61094-5:2016 7.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "Formula (3)"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "7.4",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Pressure ratio of a substitution in a closed coupler against the admittance sums of Formula (3), 7 frequencies",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the ratio of the two sums of Formula (3) at all 7 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation 0.000000000000"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-table-d-1-microphone-impedance-7-4/pressure-on-each-microphone-behind-the-air-between-them-in-series-7-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Table D.1 (Microphone impedance), 7.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Table D.1 (Microphone impedance), 7.4"
+          }
+        ]
+      },
+      "quantity": "Pressure on each microphone behind the air between them, in series, 7 frequencies",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "p0 Z_a/(Z_a + Z_x) for each microphone, at all 7 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation 0.000000000000"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-2-2009-e-4-iec-61094-1-2000-6-2-2/lumped-equivalent-volume-no-imaginary-impedance-at-the-resonance-and-the-loss-factor-r-a-2-pi-f0-c-a",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-2:2009 E.4; IEC 61094-1:2000 6.2.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-2",
+            "edition": "2009",
+            "clause": "E.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-1",
+            "edition": "2000",
+            "clause": "6.2.2",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Lumped equivalent volume: no imaginary impedance at the resonance, and the loss factor r_a 2 pi f0 c_a",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 relations of E.4"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 relations of E.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-b-6-1-formula-b-10/spectrum-of-a-rectangular-pulse-of-a-10-v-and-b-2-5-s-at-6-frequencies-as-printed",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 B.6.1, Formula (B.10)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "B.6.1, Formula (B.10)"
+          }
+        ]
+      },
+      "quantity": "Spectrum of a rectangular pulse of a = 10 V and b = 2,5 µs at 6 frequencies, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "Formula (B.10) at all 6 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max deviation 0.000000000000 of 2ab"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-b-6-1/first-zero-of-the-pulse-spectrum-f-1-2b-for-b-2-5-s",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 B.6.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "B.6.1"
+          }
+        ]
+      },
+      "quantity": "First zero of the pulse spectrum, f = 1/(2b), for b = 2,5 µs",
+      "kind": "scalar",
+      "expected": {
+        "value": 199999.99999999997
+      },
+      "computed": {
+        "value": 200000.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-b-6-1/half-duration-b-for-a-first-zero-an-order-of-magnitude-above-20-khz-just-a-few-microseconds",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 B.6.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "B.6.1"
+          }
+        ]
+      },
+      "quantity": "Half-duration b for a first zero an order of magnitude above 20 kHz, 'just a few microseconds'",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.5,
+        "label": "2.5 µs ('just a few microseconds')"
+      },
+      "computed": {
+        "value": 2.5
+      },
+      "unit": "µs",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-b-2-2/length-of-the-impulse-response-of-a-120-hz-step-against-the-8-ms-of-the-primary-reflections",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 B.2.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "B.2.2"
+          }
+        ]
+      },
+      "quantity": "Length of the impulse response of a 120 Hz step, against the 8 ms of the primary reflections",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "1/120 Hz = 8.333 ms, past the 8 ms printed"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 conditions of B.2.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-b-2-2/length-of-the-impulse-response-of-the-30-hz-step-of-a-large-free-field-room",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 B.2.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "B.2.2"
+          }
+        ]
+      },
+      "quantity": "Length of the impulse response of the 30 Hz step of a large free-field room",
+      "kind": "scalar",
+      "expected": {
+        "value": 33.333333333333336
+      },
+      "computed": {
+        "value": 33.333
+      },
+      "unit": "ms",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-b-2-1-formulas-b-2-and-b-3-8-6/a-reflection-removed-by-the-time-window-on-data-simulated-with-and-without-it-6-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 B.2.1, Formulas (B.2) and (B.3); 8.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "B.2.1, Formulas (B.2) and (B.3); 8.6"
+          }
+        ]
+      },
+      "quantity": "A reflection removed by the time window, on data simulated with and without it, 6 frequencies",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the direct sound alone, with and without the reflection"
+      },
+      "computed": {
+        "value": 1e-06,
+        "label": "max deviation 0.000001 of the direct sound"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 1e-06
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-formula-b-1-b-1-3-a/the-longest-window-for-a-reflected-path-of-2-2-m-at-1-m-puts-that-path-on-the-boundary-of-the-region",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 Formula (B.1), B.1.3 a)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "Formula (B.1), B.1.3 a)"
+          }
+        ]
+      },
+      "quantity": "The longest window for a reflected path of 2,2 m at 1 m puts that path on the boundary of the region",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.2
+      },
+      "computed": {
+        "value": 2.2
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
       },
       "deviation": {
         "value": 0.0

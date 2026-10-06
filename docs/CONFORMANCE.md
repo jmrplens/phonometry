@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1838/1838 conformance checks pass** across 110 domains and 520 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1851/1851 conformance checks pass** across 110 domains and 520 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2247,7 +2247,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (12/12)</summary>
+<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (25/25)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -2263,6 +2263,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61094-8:2012 Table 1 | Typical expanded uncertainty of the 5 reference calibration options at 1 kHz and 10 kHz | 10/10 cells of Table 1 | 10/10 cells of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 Table 2 | Source of uncertainty and subclause references of the 12 typical components | 12/12 rows of Table 2 | 12/12 rows of Table 2 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 Formula (B.1), Figure B.1 | A reflection from the boundary of the effective free-field region arrives at the end of a 5 ms window | 5 ms (+/-0 ms) | 5 ms | 0 ms | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 5.1.1, Formulas (C.1) to (C.3) | Phase of the test microphone through the interchange, whatever the channel phase shifts (one inverting) and field asymmetry | the test microphone's phase at all 5 frequencies, both channel pairs | max deviation 0.000000000 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 5.1, A.2 | Monitor phases cancel a source that drifts in phase between the two measurements | the test microphone's phase at all 5 frequencies | max deviation 0.000000000 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 Table D.1 (Microphone impedance) | A semi-range of 0,005 dB of the impedance effect as a standard uncertainty | 0.003 dB (0.005/1.7321, printed) | 0.003 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 Formula (3); IEC 61094-5:2016 7.4 | Pressure ratio of a substitution in a closed coupler against the admittance sums of Formula (3), 7 frequencies | the ratio of the two sums of Formula (3) at all 7 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 Table D.1 (Microphone impedance), 7.4 | Pressure on each microphone behind the air between them, in series, 7 frequencies | p0 Z_a/(Z_a + Z_x) for each microphone, at all 7 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-2:2009 E.4; IEC 61094-1:2000 6.2.2 | Lumped equivalent volume: no imaginary impedance at the resonance, and the loss factor r_a 2 pi f0 c_a | 2/2 relations of E.4 | 2/2 relations of E.4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 B.6.1, Formula (B.10) | Spectrum of a rectangular pulse of a = 10 V and b = 2,5 µs at 6 frequencies, as printed | Formula (B.10) at all 6 frequencies | max deviation 0.000000000000 of 2ab | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 B.6.1 | First zero of the pulse spectrum, f = 1/(2b), for b = 2,5 µs | 200000 Hz (+/-0 Hz) | 200000 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 B.6.1 | Half-duration b for a first zero an order of magnitude above 20 kHz, 'just a few microseconds' | 2.5 µs ('just a few microseconds') | 2.5 µs | 0 µs | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 B.2.2 | Length of the impulse response of a 120 Hz step, against the 8 ms of the primary reflections | 1/120 Hz = 8.333 ms, past the 8 ms printed | 2/2 conditions of B.2.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 B.2.2 | Length of the impulse response of the 30 Hz step of a large free-field room | 33.333 ms (+/-0 ms) | 33.333 ms | 0 ms | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 B.2.1, Formulas (B.2) and (B.3); 8.6 | A reflection removed by the time window, on data simulated with and without it, 6 frequencies | the direct sound alone, with and without the reflection | max deviation 0.000001 of the direct sound | 0.000001 | 1 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 Formula (B.1), B.1.3 a) | The longest window for a reflected path of 2,2 m at 1 m puts that path on the boundary of the region | 2.2 m (+/-0 m) | 2.2 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

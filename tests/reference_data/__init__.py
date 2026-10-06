@@ -430,6 +430,9 @@ from .calibrators import IEC60942_TABLE_E1 as IEC60942_TABLE_E1
 from .calibrators import IEC61672_1_TABLE_C1 as IEC61672_1_TABLE_C1
 from .calibrators import TC29_REASONS as TC29_REASONS
 from .comparison_calibration import (
+    IEC61094_1_KAPPA_REFERENCE as IEC61094_1_KAPPA_REFERENCE,
+)
+from .comparison_calibration import (
     IEC61094_5_D3_COMBINED_DB as IEC61094_5_D3_COMBINED_DB,
 )
 from .comparison_calibration import (
@@ -455,6 +458,15 @@ from .comparison_calibration import (
 )
 from .comparison_calibration import (
     IEC61094_5_TABLE_D1_STATED as IEC61094_5_TABLE_D1_STATED,
+)
+from .comparison_calibration import (
+    IEC61094_8_B22_LARGE_ROOM_STEP_HZ as IEC61094_8_B22_LARGE_ROOM_STEP_HZ,
+)
+from .comparison_calibration import (
+    IEC61094_8_B22_SMALL_ROOM as IEC61094_8_B22_SMALL_ROOM,
+)
+from .comparison_calibration import (
+    IEC61094_8_B61_ZERO_RATIO as IEC61094_8_B61_ZERO_RATIO,
 )
 from .comparison_calibration import IEC61094_8_TABLE_1_DB as IEC61094_8_TABLE_1_DB
 from .comparison_calibration import (

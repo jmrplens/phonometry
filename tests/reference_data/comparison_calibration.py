@@ -179,3 +179,23 @@ IEC61094_8_TABLE_2_SUBCLAUSES: dict[str, tuple[str, ...]] = {
 #: IEC 61094-5 clause 4 and IEC 61094-8 clause 4: the reference environmental
 #: conditions, 23,0 °C, 101,325 kPa and 50 %.
 IEC61094_REFERENCE_CONDITIONS: tuple[float, float, float] = (23.0, 101.325, 50.0)
+
+#: BS EN 61094-8:2012 B.2.2, folio 25 (PDF page 27): "in small anechoic
+#: rooms, with typical internal dimensions of around 1,5 m, it is enough to
+#: have a frequency resolution of 120 Hz because the primary reflections all
+#: occur before 8 ms": the step in Hz and the arrival in s.
+IEC61094_8_B22_SMALL_ROOM: tuple[float, float] = (120.0, 0.008)
+
+#: B.2.2, the same page: in a large high performance free-field room "a
+#: frequency resolution of approximately 30 Hz is appropriate", in Hz.
+IEC61094_8_B22_LARGE_ROOM_STEP_HZ = 30.0
+
+#: BS EN 61094-8:2012 B.6.1, folio 28 (PDF page 30): the first zero of the
+#: pulse spectrum "must be approximately an order of magnitude higher than
+#: the upper limit of the frequency range of interest".
+IEC61094_8_B61_ZERO_RATIO = 10.0
+
+#: BS EN 61094-1:2001 6.2.2, page 9 (PDF page 11), the English text of
+#: EN 61094-1:2000 which is IEC 61094-1:2000: "The value of κr shall be taken
+#: as 1,40" in the definition of the equivalent volume.
+IEC61094_1_KAPPA_REFERENCE = 1.40

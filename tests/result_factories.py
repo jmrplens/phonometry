@@ -1030,6 +1030,75 @@ def _free_field_parameter_uncertainty() -> ph.metrology.FreeFieldParameterUncert
     )
 
 
+def _comparison_phase() -> ph.metrology.ComparisonCalibration:
+    """A comparison that carries the phase of the sensitivity
+    (IEC 61094-5 5.1.1), interchanged in a coupler.
+    """
+    return ph.metrology.simultaneous_comparison(
+        [1000.0, 2000.0, 4000.0],
+        [-38.0, -37.98, -37.95],
+        [-11.2, -11.3, -11.4],
+        [11.4, 11.5, 11.6],
+        phase=ph.metrology.SimultaneousComparisonPhase(
+            reference_sensitivity_phase_deg=[-1.5, -3.1, -6.4],
+            channel_phase_difference_deg=[2.1, 4.4, 9.0],
+            interchanged_channel_phase_difference_deg=[-0.5, -0.8, -2.0],
+        ),
+    )
+
+
+def _impedance_pressure_ratio() -> ph.metrology.ImpedancePressureRatio:
+    """A free-field WS2 microphone against an LS2P in a closed coupler
+    (IEC 61094-5 7.5).
+    """
+    frequencies = [1000.0, 4000.0, 10000.0, 16000.0]
+    reference, test = (
+        ph.metrology.ReciprocityMicrophone(
+            equivalent_volume_m3=volume,
+            resonance_frequency_hz=resonance,
+            loss_factor=loss,
+            front_cavity_volume_m3=34e-9,
+            front_cavity_depth_m=0.5e-3,
+            front_cavity_diameter_m=9.3e-3,
+        )
+        for volume, resonance, loss in ((10e-9, 22000.0, 1.1), (30e-9, 14000.0, 0.5))
+    )
+    return ph.metrology.impedance_pressure_ratio(
+        frequencies,
+        reference_equivalent_volume_m3=reference.complex_equivalent_volume_m3(
+            frequencies
+        ),
+        test_equivalent_volume_m3=test.complex_equivalent_volume_m3(frequencies),
+        coupling_equivalent_volume_m3=600e-9,
+    )
+
+
+def _rectangular_pulse() -> ph.metrology.RectangularPulse:
+    """The pulse of IEC 61094-8 B.6 for an upper limit of 20 kHz."""
+    return ph.metrology.rectangular_pulse(
+        ph.metrology.rectangular_pulse_duration_s(20000.0), amplitude_v=10.0
+    )
+
+
+def _time_selective_response() -> ph.metrology.TimeSelectiveResponse:
+    """A direct impulse at 3 ms and a reflection at 6.5 ms, windowed
+    (IEC 61094-8 B.1.3).
+    """
+    response = np.zeros(4800)
+    response[288] = FS
+    response[624] = 0.3 * FS
+    return ph.metrology.time_selective_response(
+        response, FS * 2, window_start_s=0.0025, window_end_s=0.006
+    )
+
+
+def _stepped_sine_impulse_response() -> ph.metrology.SteppedSineImpulseResponse:
+    """A stepped-sine measurement at 120 Hz steps (IEC 61094-8 B.2)."""
+    frequencies = np.arange(0.0, 24001.0, 120.0)
+    response = np.exp(-2j * np.pi * frequencies * 0.003)
+    return ph.metrology.stepped_sine_impulse_response(frequencies, response)
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

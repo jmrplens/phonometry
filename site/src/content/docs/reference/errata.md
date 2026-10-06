@@ -2474,6 +2474,58 @@ in the same order.
   was required.
 - **Status:** unreported (cross-reference defect, no numerical consequence).
 
+## IEC 61094-8:2012, B.2.1 (the frequency range required of the transform over time)
+
+- **Location:** Annex B, B.2.1 "Outline of method" of the stepped-sine method
+  (printed folio 25), the paragraph after Formulas (B.2) and (B.3).
+- **The print:** "The other requirement evident from **Equation B.2** is that
+  the frequency range must effectively extend from -∞ to ∞, or 0 to ∞ for a
+  single-sided frequency response." The formulas are, on folio 24,
+  $H(f) = \int_{-\infty}^{\infty} h(t)\exp(-\mathrm{j}2\pi f t)\,\mathrm{d}t$
+  (B.2) and
+  $h(t) = \int_{-\infty}^{\infty} H(f)\exp(\mathrm{j}2\pi f t)\,\mathrm{d}f$
+  (B.3).
+- **The problem:** (B.2) integrates over time; the integral over frequency,
+  from $-\infty$ to $\infty$, is that of (B.3), the inverse transform that the
+  same subclause applies first to take the measured frequency response to
+  the time domain ("an inverse Fourier transform, Equation B.3, can be
+  applied to transform this response to the time domain"). The requirement on
+  the frequency range of the measurement is evident from **Equation B.3**.
+- **Evidence:** the variable of integration of the two formulas, read against
+  the order in which B.2.1 applies them. Verified on PDF pages 26 and 27
+  (printed pp. 24 and 25) of BS EN 61094-8:2012, the English text of
+  EN 61094-8:2012, which is IEC 61094-8:2012 unchanged.
+- **Library behaviour:** `metrology.stepped_sine_impulse_response` computes
+  (B.3) and asks for the measured response from 0 Hz, the single-sided form
+  of the range the sentence describes; no change was required.
+- **Status:** unreported (cross-reference defect, no numerical consequence).
+
+## IEC 61094-8:2012, B.2.1 (the frequency increment said to set the time resolution)
+
+- **Location:** Annex B, B.2.1 "Outline of method" of the stepped-sine method
+  (printed folio 25), the paragraph on the Fast Fourier Transform.
+- **The print:** "These require the frequency response to be measured at
+  discrete frequencies and linearly spaced frequency increments. The
+  frequency increment chosen will determine the **time domain resolution**."
+  B.2.2, on the same page: "Because the **length** of the impulse response
+  will be the inverse of the size of the frequency step, the size of the room
+  will influence the choice of frequency resolution", and it sizes the step by
+  the length: 120 Hz "because the primary reflections all occur before 8 ms".
+- **The problem:** a response measured at $K + 1$ frequencies $k\,\Delta f$
+  from 0 Hz transforms to $N = 2K + 1$ samples spaced $1/(N\,\Delta f)$,
+  about $1/(2 f_\mathrm{max})$, over a length $1/\Delta f$. The increment
+  sets the length of the impulse response, as B.2.2 says; the time step, the
+  resolution, is set by the frequency range, which B.2.1 itself fixes at
+  "about three times the resonance frequency of the microphones". The
+  sentence reads "time domain length" or "the length of the time record".
+- **Evidence:** B.2.1 read against B.2.2 and against the transform both
+  apply. Verified on PDF page 27 (printed p. 25) of BS EN 61094-8:2012, the
+  English text of EN 61094-8:2012, which is IEC 61094-8:2012 unchanged.
+- **Library behaviour:** `metrology.SteppedSineImpulseResponse` follows
+  B.2.2: its `duration_s` is $1/\Delta f$ and its `sample_rate_hz` is
+  $N\,\Delta f$; no change was required.
+- **Status:** unreported (wording defect, no numerical consequence).
+
 ## IEC 61094-8:2012, B.6.1, Formula (B.10) (the spectrum of a pulse of duration 2b called one of duration b)
 
 - **Location:** Annex B, B.6.1 "Outline of methods" of the direct impulse
@@ -2497,8 +2549,14 @@ in the same order.
   frequency and at its first zero. Verified on PDF page 30 (printed p. 28) of
   BS EN 61094-8:2012, the English text of EN 61094-8:2012, which is
   IEC 61094-8:2012 unchanged.
-- **Library behaviour:** the direct impulse method, which B.6.2 says has
-  "been largely superseded", is not implemented; no change was required.
+- **Library behaviour:** `metrology.rectangular_pulse` follows the formula
+  and its first zero and reads $b$ as the half-duration: it takes the whole
+  duration $T = 2b$, its `first_zero_hz` is $1/T = 1/(2b)$, and its spectrum
+  is (B.10) with $b = T/2$. `metrology.rectangular_pulse_duration_s` gives
+  $T$ = 5 µs for 20 kHz, and the conformance rows on B.6.1
+  ([`scripts/conformance/domains/comparison_calibration.py`](https://github.com/jmrplens/phonometry/blob/main/scripts/conformance/domains/comparison_calibration.py))
+  and the tests pin the spectrum as printed against it
+  ([`tests/metrology/test_comparison_phase_impedance_time.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_comparison_phase_impedance_time.py)).
 - **Status:** unreported.
 
 ## IEC 61094-2:2009, Tables B.1 and B.2 (a radius printed to four figures, a decimal point and a dropped digit)

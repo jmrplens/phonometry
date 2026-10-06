@@ -1429,7 +1429,7 @@ implementación.
   ISBN 978-0-419-19810-9.
   [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
   La monografía sobre el flujo de energía sonora: intensidad activa y
-  reactiva, el estimador p-p y su presupuesto de error por desfase.
+  reactiva, el estimador p-p y su balance de error por desfase.
   Citado por [Potencia acústica por barrido de intensidad](/phonometry/es/devices/emission/sound-power-intensity/)
   e [Intensidad acústica (p-p)](/phonometry/es/devices/emission/intensity/).
 - International Organization for Standardization. (2019). *Acoustics —

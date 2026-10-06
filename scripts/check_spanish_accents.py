@@ -37,12 +37,13 @@ The translation glossary is held here too, because a word the glossary has
 replaced reads as correct Spanish to every other gate. Its single-word rulings
 (:data:`GLOSSARY_TERMS`) and its phrases (:data:`GLOSSARY_PHRASES`) are read in
 the tables and the figures, and also in the Spanish pages (:data:`PAGES`: the
-site's Spanish edition, its strings, data and components, and the Spanish
-twins under ``docs/``), where the accent list is not applied: page prose
-carries code, identifiers and quotations that only a label is free of. A
-Markdown page has its mathematics and inline code blanked; a script, a
-component or a data file of the site is read as written, since its dollars
-and backticks are JavaScript and the Spanish sits between them.
+site's Spanish edition, its strings, data, components and generated modules,
+and the Spanish twins under ``docs/``), where the accent list is not applied:
+page prose carries code, identifiers and quotations that only a label is free
+of. A Markdown page has its mathematics and inline code blanked; a script, a
+component, a data file or a generated module of the site is read as written,
+since its dollars and backticks are JavaScript and the Spanish sits between
+them.
 
 The waveform is the case that needs more than a list. Spanish names it
 «sinusoide», and «seno» is the trigonometric function; «un seno de 1 kHz»,
@@ -69,6 +70,25 @@ sentence it exempts, never on a shape such as «de los extremos» or «beside
 an arithmetic mean», which a mean square can take as well. The statistician's
 «cuadrado medio» names nothing else in acoustics, so it is a plain ruling of
 the glossary, read as «incertidumbre extendida» is.
+
+A budget is the third. The glossary writes every budget of quantities that
+add up «balance», as UNE-EN ISO 3746:2011 Table D.2 writes the uncertainty
+budget «balance de incertidumbre», and keeps «presupuesto» for money.
+«Presupuesto de ruido», «presupuesto de absorción», «presupuesto de error» and
+«un problema de control de ruido es un presupuesto» shipped in sixteen pages
+and a diagram table, with every gate green, beside the «balance de
+incertidumbre» of the same edition. So every word of the family
+(«presupuesto», «presupuestos», «presupuestario», the verb «presupuestar» in
+any of its forms, «presupuéstese» with its written accent among them) fails,
+unless it stands in one of the contexts of :data:`MONEY`, where it means
+money, each with its reason, read the way the contexts of «seno» are. A
+code identifier built on the word (``presupuesto_ruido``) is not prose and is
+left alone, as every token with a digit or an underscore is. The word has a
+third sense, a premise or the participle of «presuponer» («los presupuestos
+del modelo», «lo presupuesto»), which is neither money nor a budget: such a
+sentence is reworded («los supuestos», «las hipótesis», «lo que se
+presupone»), or, where it must keep the word, goes in :data:`ALLOWED` with its
+reason, never written «balance» and never listed in :data:`MONEY`.
 
 The tables are read as source, not imported, so the check needs nothing but
 the standard library and runs before anything is installed.
@@ -122,7 +142,9 @@ BUILDERS: tuple[str, ...] = ("scripts/reports",)
 #: The Spanish pages, as glob patterns relative to the tree: the site's Spanish
 #: edition, the strings of its interface, the data files whose ``es`` fields it
 #: renders (the glossary cards, the topic labels, the catalogue names), the
-#: components that carry their own Spanish strings, and the Spanish twins of
+#: components that carry their own Spanish strings, the generated modules the
+#: site imports (the Spanish labels of the API sidebar, written from
+#: ``scripts/api_taxonomy.py``, and the catalogues), and the Spanish twins of
 #: ``docs/``. Only the glossary is read in them (see the module docstring), and
 #: every pattern must match a file with text in it.
 PAGES: tuple[str, ...] = (
@@ -133,6 +155,7 @@ PAGES: tuple[str, ...] = (
     "site/src/data/*.ts",
     "site/src/data/*.json",
     "site/src/components/**/*.astro",
+    "site/src/generated/*.mjs",
     "docs/*.es.md",
 )
 
@@ -465,6 +488,16 @@ QUADRATIC_MEAN: dict[str, str] = {
     ),
 }
 
+#: The contexts in which «presupuesto» (or a word of its family) is money and
+#: not a budget of quantities that add up, as a pattern read without regard to
+#: case on the text as written, and the reason. Outside them every such word
+#: fails: the budget is a «balance» (de ruido, de absorción, de error, ...).
+#: Only money belongs here: a premise («los presupuestos del modelo») is
+#: reworded instead (see the module docstring). No sentence of the tree means
+#: money, so the table is empty; a context added for one must keep matching
+#: it, as a trigonometric one must.
+MONEY: dict[str, str] = {}
+
 
 class Sense(NamedTuple):
     """A term that names two things, of which the glossary keeps one apart.
@@ -472,7 +505,11 @@ class Sense(NamedTuple):
     Each match of *word* fails with the glossary's term, *singular* or
     *plural* as the form is, unless it stands in one of *contexts*, where the
     term has its other sense. *table* is the name the contexts are bound to
-    and *term* the term as a report names it.
+    and *term* the term as a report names it. When *noun* is given, only the
+    forms it matches whole are nouns that the glossary's term replaces; any
+    other form of the family (a verb, an adjective) gets
+    :data:`REWORD_PREFIX` and the term instead, because no noun can stand in
+    its place and the sentence has to be reworded around the term.
     """
 
     word: re.Pattern[str]
@@ -481,10 +518,20 @@ class Sense(NamedTuple):
     contexts: dict[str, str]
     table: str
     term: str
+    noun: re.Pattern[str] | None = None
 
 
-#: The terms read by sense: the noun the waveform and the function share, and
-#: the phrase the mean square and the quadratic mean share.
+#: What a form that is not a noun is told to do, followed by the glossary term.
+REWORD_PREFIX = "reword around "
+
+
+#: The terms read by sense: the noun the waveform and the function share, the
+#: phrase the mean square and the quadratic mean share, and the word a budget
+#: of summed quantities and money share. The family of «presupuesto» is matched
+#: whole, the accented stem of «presupuéstese» included, so the verb and the
+#: adjective built on it cannot carry the budget past the gate; like every
+#: other word, it stops at a digit or an underscore, so an identifier such as
+#: ``presupuesto_ruido`` is not read as prose.
 SENSES: tuple[Sense, ...] = (
     Sense(
         re.compile(r"(?<!\w)senos?(?!\w)", re.IGNORECASE),
@@ -501,6 +548,15 @@ SENSES: tuple[Sense, ...] = (
         QUADRATIC_MEAN,
         "QUADRATIC_MEAN",
         "«media cuadrática»",
+    ),
+    Sense(
+        re.compile(r"(?<!\w)presupu[eé]st[^\W\d_]*(?!\w)", re.IGNORECASE),
+        "balance",
+        "balances",
+        MONEY,
+        "MONEY",
+        "«presupuesto»",
+        re.compile(r"presupuestos?", re.IGNORECASE),
     ),
 )
 
@@ -656,8 +712,8 @@ def glossary_departures(
     :param script: With *page*, the page is not Markdown and nothing of it
         is blanked (see :data:`_MARKDOWN`).
     :param contexts: The contexts in which a term of :data:`SENSES` keeps
-        its other sense, :data:`CONTEXTS` (the trigonometric «seno» and the
-        quadratic mean) by default.
+        its other sense, :data:`CONTEXTS` (the trigonometric «seno», the
+        quadratic mean and money) by default.
     :param used: A set that receives every context that exempted a term.
     :return: ``(as written, glossary term, offset in text)`` in text order.
     """
@@ -711,6 +767,9 @@ def _departures_by_sense(
                 used.update(exempt)
             continue
         written = " ".join(match.group(0).split())
+        if sense.noun is not None and not sense.noun.fullmatch(written):
+            found.append((written, f"{REWORD_PREFIX}«{sense.singular}»", match.start()))
+            continue
         plural = written.split()[0].lower().endswith("s")
         right = sense.plural if plural else sense.singular
         found.append((written, _cased(written, right), match.start()))
@@ -1040,16 +1099,20 @@ def main(argv: list[str] | None = None) -> int:
             "eñe or glossary term"
         )
         for offence in offences:
-            print(
-                f"  {offence.value.path}:{offence.line}: "
-                f"{offence.word!r} is written {offence.spelling!r}"
+            advice = (
+                offence.spelling
+                if offence.spelling.startswith(REWORD_PREFIX)
+                else f"is written {offence.spelling!r}"
             )
+            print(f"  {offence.value.path}:{offence.line}: {offence.word!r} {advice}")
             print(f"      {_quoted(offence)!r}")
         print(
             "  -> write the accent or the glossary's term. A verb that really "
             "is spelt without an accent goes in ALLOWED, a trigonometric "
-            "«seno» in TRIGONOMETRIC and a quadratic mean, the root of a mean "
-            "square, in QUADRATIC_MEAN, with its reason."
+            "«seno» in TRIGONOMETRIC, a quadratic mean, the root of a mean "
+            "square, in QUADRATIC_MEAN and a «presupuesto» that is money in "
+            "MONEY, with its reason. A «presupuesto» that is a premise is "
+            "reworded («supuesto», «hipótesis»), never written «balance»."
         )
     for text, word in stale:
         print(

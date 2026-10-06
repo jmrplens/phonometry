@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .hearing_protectors import (
     AssumedProtectionResult,
     HMLRatingResult,
@@ -652,7 +653,7 @@ class AnrLinearityResult:
         """
         external = np.diff(self.external_levels_db)
         deviation = np.abs(self.increments_db - external[None, :])
-        return np.asarray(deviation <= _LINEARITY_TOLERANCE_DB, dtype=bool)
+        return np.asarray(settled(deviation) <= _LINEARITY_TOLERANCE_DB, dtype=bool)
 
     @property
     def maximum_linear_level_db(self) -> float:
@@ -754,7 +755,9 @@ def assess_anr_linearity(
         msg = "'external_levels_db' must hold at least two finite levels, in dB."
         raise ValueError(msg)
     steps = np.diff(external)
-    if np.any(np.abs(steps - _LINEARITY_STEP_DB) > _STEP_READING_DB):
+    # Settled: 60,02 - 54,97 dB is a 5,05 dB step, on the reading tolerance
+    # in decimal and a last bit past it in binary.
+    if np.any(settled(np.abs(steps - _LINEARITY_STEP_DB)) > _STEP_READING_DB):
         msg = (
             "'external_levels_db' must rise in the 5 dB steps of 5.4.4; got "
             f"steps of {steps.tolist()} dB."

@@ -108,6 +108,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.validation import (
     require_non_negative,
     require_positive,
@@ -255,9 +256,12 @@ def background_noise_correction_at_workstation(
     delta = measured - background
     clamped = np.clip(delta, floor, None)
     correction = -10.0 * np.log10(1.0 - np.power(10.0, -0.1 * clamped))
-    correction = np.where(delta > NEGLIGIBLE_BACKGROUND_MARGIN_DB, 0.0, correction)
+    # The criteria are judged on the settled margin, so a difference of two
+    # readings that is 15 dB in decimal is not taken as above it in binary.
+    judged = settled(delta)
+    correction = np.where(judged > NEGLIGIBLE_BACKGROUND_MARGIN_DB, 0.0, correction)
 
-    held = bool(np.any(delta < floor))
+    held = bool(np.any(judged < floor))
     if held:
         warnings.warn(
             f"the background is within {floor:g} dB of the source in at least "

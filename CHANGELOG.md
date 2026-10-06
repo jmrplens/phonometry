@@ -1527,6 +1527,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   bare array with `narrowband=True`, or with a `bool` that may hold it,
   still needs `fs`, by keyword or in position. Nothing changes at run time.
 
+- **A quantity that sits exactly on a printed limit is judged by its decimal
+  value, on every machine.** A margin of two readings, a spread, a mean or a
+  ratio that is exactly on a limit a standard prints came out a unit or two in
+  the last place either side of it in binary, and the verdict followed that
+  last bit: 32,3 - 26,3 dB is 5,999 999 999 999 996 and 32,2 - 26,2 dB is
+  6,000 000 000 000 004, so a background criterion read the same 6 dB margin
+  as two. Such a quantity is now settled to nine decimal places before it
+  meets its limit, and a half is rounded on the settled value; a result keeps
+  the value it computed. This changes, for readings exactly on the limit only,
+  the background corrections of `building.background_corrected_level`,
+  `building.background_correction`, `emission.background_noise_correction`,
+  `emission.precision_background_correction`,
+  `emission.reverberation_background_correction`,
+  `emission.background_noise_correction_at_workstation`,
+  `noise_control.background_corrected_level_db`,
+  `noise_control.internal_noise_level`,
+  `noise_control.silencer_background_correction_db`,
+  `environment.barrier_background_correction_db` and
+  `room.check_background_margin`; the positions `noise_control.check_source_positions`
+  and `noise_control.microphone_positions_required` ask for; the checks of
+  `environment.residual_sound_correction`, `environment.tonal_seeking_survey`,
+  `environment.uncertainty_from_repeated_measurements`, the Spanish
+  `tonal_correction`, `hearing.full_day_exposure` and `hearing.task_based_exposure`,
+  `hearing.check_reat_sound_field`, `hearing.assess_attenuation_difference` and
+  `hearing.assess_anr_linearity`; `building.satisfies_lower_requirement`,
+  `building.satisfies_upper_requirement` and
+  `building.strong_coupling_satisfied`; `emission.precision_qualification`,
+  `environment.is_short_distance`, `noise_control.substitution_area_ratio`,
+  `noise_control.fit_operating_line`, `noise_control.impulse_mean_level_db`,
+  `noise_control.uncertainty_conditions`, `materials.limp_frame_applicable`,
+  `materials.air_absorption_correction`, `materials.installed_dynamic_stiffness`,
+  `materials.alternating_airflow_resistance`, `room.perceptibly_different`,
+  `electroacoustics.feedback_stability`, `environment.wind_turbine_tonality`,
+  `vibration.rigid_mass_calibration_check`,
+  `vibration.verify_signal_burst_response` and
+  `vibration.assess_railway_change`; the tone corrections and 10 dB-down
+  points of the aircraft certification levels, the VDI 2081 branch flow noise
+  at a Strouhal number of one, the ISO 15186-3 low-frequency check and the
+  ISO 3741 room advisories; and the halves rounded by the declared values of
+  ISO 4871, the ISO 717 reductions, the ISO 11654 practical coefficients, the
+  DB-HR results, the statistical pass-by levels, the protector levels of
+  ISO 4869-2 and the loudness fields written into a BWF `bext` chunk. The
+  open-plan distraction and privacy distances of `room.open_plan_metrics` are
+  NaN for an STI that does not fall with distance, where a constant STI used
+  to put one of them some 1e16 m away when its fitted slope came out a few
+  units in the last place negative, and `environment.sound_absorption_rating`
+  reaches the 0,99 limit of EN 1793-1 Clause 5 for absorption coefficients
+  that weigh to 0,99 in decimal. `building.force_pulse`,
+  `building.tapping_force_spectrum` and `building.tapping_cut_off_frequency`
+  read the damping regime of the tapping hammer off one settled number, so a
+  hammer and floor critically damped in decimal (K m = 4 Zdp²) give the
+  critically damped pulse instead of NaN, which the square root of a
+  discriminant a few units in the last place below zero used to return.
+  `vibration.assess_people_in_buildings` takes a `KB_Fmax` exactly 15 % above
+  `A_u`, 0,46 against 0,4, as inside the measurement uncertainty of
+  DIN 4150-2:1999 5.4, where the product 0,4 x 1,15 used to land a last bit
+  under it. The sign of a net sound power or of a mean normal intensity, which
+  ISO 9614-1, ISO 9614-2 and ISO 9614-3 judge against zero, is read off the
+  sum as a settled share of the sum of the magnitudes: intensities that cancel
+  in decimal leave a band with no net power in `emission.sound_power_intensity`,
+  `emission.sound_power_intensity_precision` and
+  `emission.sound_power_intensity_points`, and no F1 in
+  `emission.temporal_variability_indicator`, whichever way the last bits of
+  their sum fall. `emission.partial_power_concentration` takes one segment
+  more when the strongest ones carry exactly half the power, as the "more than
+  half" of ISO 9614-1 B.1.3 asks. The whole decibels reported by the
+  `rounded()` methods of `noise_control.screen_attenuation`,
+  `noise_control.cabin_insulation`, the ISO 11546 enclosure insulations and
+  the ISO 10847 measured insertion losses, and the NC-(SIL) rating of
+  `room.noise_criterion` and the RC rating of `room.room_criterion`, send a
+  difference or a mean that is a half in decimal to the even decibel as they
+  say they do, where it used to go to whichever neighbour its last bits fell
+  nearer: 30,9 - 15,4 dB is reported as 16 dB, and a mid-frequency average of
+  36,5 dB rates RC-36. The same settling now judges the band flatness of
+  `noise_control.check_band_flatness`, the 6 dB and 15 dB margins of
+  `emission.sound_power_in_situ`, criterion 5 of
+  `emission.precision_qualification` (a ratio of 2,46 to 2,05 is the 1,2 it
+  allows), the decay time of `vibration.verify_running_rms_decay` on the edge
+  of its printed interval, the level differences of
+  `vibration.check_blocked_output` and `vibration.check_unwanted_input`, the
+  Spanish `low_frequency_correction` and `impulsive_correction` at 10 dB and
+  15 dB, area weights that add up to 1 in
+  `materials.directional_diffusion_coefficient` (refused, as Formula (6)
+  divides by their total less one), the 5 dB steps read to 0,05 dB by
+  `hearing.assess_anr_linearity`, and a velocity on the guideline
+  `vibration.assess_building_vibration` interpolates between the frequencies
+  of DIN 4150-3 Table 1. A temporal variability F1 of exactly 0,6 counts as
+  stationary in `emission.field_indicators` and
+  `emission.sound_power_intensity_points`, and N positions that equal C F4²
+  of ISO 9614-1 criterion 2 in decimal do not meet it. Partial powers that
+  cancel in decimal are refused by `emission.partial_power_concentration`
+  with the clause 9.2 message in whichever order they come, and a remainder
+  that uses up the whole error factor of Table B.1 is refused there too,
+  where a `subset_error_factor` a few units in the last place above zero
+  used to ask for some 1e30 more positions; the A-weighted F4 of
+  `emission.sound_power_intensity_points` is NaN, not a refusal, for
+  intensities per position that cancel. The 9.1.1 c) row of
+  `emission.check_plant_measurement` holds, and
+  `emission.plant_measurement_contour` lays no extra position, when the
+  positions are exactly twice the mean distance apart, and
+  `hearing.job_based_exposure` and `hearing.full_day_exposure` raise the
+  Table C.4 advisory of ISO 9612 only above 3,5 dB, not at a contribution
+  that reads the 3,5 dB node itself.
+
 - **A calibration sidecar no reader can take is refused as a `ValueError`,
   and none is written into a pipe.** `io.read_sidecar`, which `io.read` and
   `io.read_blocks` call for every audio file they open, read the file at the
@@ -3884,7 +3988,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   decimals the figure prints; a sensitive area is refused, since 6.5.4.2 says
   the table does not apply there. `assess_people_in_buildings` reads them in
   the order of 6.2: `A_u` settles it, and so, as a rule, does a `KB_Fmax`
-  above it by less than the 15 % of 5.4, which is how Example 3 concludes and
+  above it by up to the 15 % of 5.4, which is how Example 3 concludes and
   what `within_uncertainty` says; `A_o` settles it the other way unless the
   events are rare, and between the two `KB_FTr` decides against `A_r`. The
   verdict carries the criterion that decided it, and compares at the decimals

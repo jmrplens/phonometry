@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -285,7 +286,7 @@ def air_absorption_correction(
         4.0 * volume * (with_specimen - empty) / area, dtype=np.float64
     )
     worst = float(np.max(np.abs(correction)))
-    if worst > AIR_CORRECTION_LIMIT:
+    if float(settled(worst)) > AIR_CORRECTION_LIMIT:
         msg = (
             f"The air-absorption correction reaches {worst:.3f} at one band, "
             f"over the {AIR_CORRECTION_LIMIT:g} of 4.2.1: the test conditions "

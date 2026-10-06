@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import round_half_even
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
     require_choice,
@@ -300,7 +301,7 @@ class EnclosureInsulationResult:
 
     def rounded(self) -> NDArray[np.int_]:
         """The band values as clause 9.4 reports them, to the nearest decibel."""
-        return np.asarray(np.rint(self.insulation), dtype=np.int_)
+        return np.asarray(round_half_even(self.insulation), dtype=np.int_)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

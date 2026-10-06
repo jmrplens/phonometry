@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import round_half_up
 from .sound_field_audiometry import DiffuseSoundFieldCheck, _diffuse_field_check
 
 if TYPE_CHECKING:
@@ -186,15 +187,14 @@ _OPEN_LEVEL_U_DB = 0.5
 _OCCLUDED_LEVEL_U_DB = 1.0
 #: B.4: the coverage factor for about 95 %.
 _COVERAGE_FACTOR = 2.0
-#: Clause 6: the insertion loss is reported to this.
-_REPORT_STEP_DB = 0.1
+#: Clause 6: the insertion loss is reported to 0,1 dB, one decimal place.
+_REPORT_DECIMALS = 1
 #: A limit reached through floating-point arithmetic is on the limit.
 _BOUNDARY_SLACK_DB = 1e-9
 _GRID_RANK = 2
 #: 5.2.3: the two points the centres of the fixture's end faces occupy.
 _END_FACE_POSITIONS = 2
 _MINIMUM_ROWS_FOR_SPREAD = 2
-_ROUNDING_DECIMALS = 9
 
 
 def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
@@ -432,8 +432,7 @@ class EarmuffInsertionLossResult:
 
         :return: One value per band, halves rounded upwards.
         """
-        scaled = np.round(self.insertion_loss_db / _REPORT_STEP_DB, _ROUNDING_DECIMALS)
-        return np.round(np.floor(scaled + 0.5) * _REPORT_STEP_DB, 1)
+        return round_half_up(self.insertion_loss_db, _REPORT_DECIMALS)
 
     @property
     def standard_uncertainty_db(self) -> np.ndarray:

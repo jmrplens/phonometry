@@ -29,8 +29,9 @@ only the regressions and threshold read-offs of Clause 6.
 The distraction and privacy distances are read from the fitted STI line,
 extrapolating beyond the measured range when necessary (the regression-line
 method of Clause 6.3, Figure 3 b). A distance is reported as `nan` when
-the STI does not decrease with distance (non-negative fitted slope) or when
-the crossing would fall at or before the source, realising the standard's
+the STI does not decrease with distance (a fitted slope that does not fall by
+more than a billionth of STI per metre, which is how a constant STI fits) or
+when the crossing would fall at or before the source, realising the standard's
 note that it "can prove impossible to determine the privacy distance if
 STI > 0.20 in all positions" (Clause 6.3).
 

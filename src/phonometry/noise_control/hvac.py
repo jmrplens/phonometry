@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
@@ -1749,7 +1750,11 @@ def _vdi2081_branch_flow_noise(
         + 50.0 * math.log10(branch_velocity)
         + correction
     )
-    return np.asarray(np.where(strouhal > 1.0, level, -np.inf), dtype=np.float64)
+    # Judged settled: a band, a bore and a speed whose Strouhal number is 1 in
+    # decimal are outside the fits whichever way the last bits fall.
+    return np.asarray(
+        np.where(settled(strouhal) > 1.0, level, -np.inf), dtype=np.float64
+    )
 
 
 def _vdi2081_limit_frequency(shape: str, size: float, speed_of_sound: float) -> float:

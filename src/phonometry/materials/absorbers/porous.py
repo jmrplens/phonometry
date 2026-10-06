@@ -75,6 +75,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy import special
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
@@ -592,7 +593,7 @@ def limp_frame_applicable(
     key = require_choice(criterion, "criterion", tuple(LIMP_FRAME_CRITERIA))
     k_c = require_non_negative(frame_bulk_modulus, "frame_bulk_modulus")
     k_f = require_positive(fluid_bulk_modulus, "fluid_bulk_modulus")
-    return bool(k_c / k_f <= LIMP_FRAME_CRITERIA[key])
+    return bool(settled(k_c / k_f) <= LIMP_FRAME_CRITERIA[key])
 
 
 def limp_frame(

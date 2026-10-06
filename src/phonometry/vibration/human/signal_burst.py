@@ -85,6 +85,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import require_choice
 from .exposure import (
     _params,
@@ -846,7 +847,7 @@ def verify_signal_burst_response(
         [BURST_TOLERANCE_PERCENT[q] for q in quantities], dtype=np.float64
     )
     deviation = (values / printed - 1.0) * 100.0
-    within = np.abs(deviation) <= tolerance[np.newaxis, :]
+    within = settled(np.abs(deviation)) <= tolerance[np.newaxis, :]
     return SignalBurstVerification(
         application=test.application,
         weighting=row,

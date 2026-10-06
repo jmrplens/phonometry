@@ -52,6 +52,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import require_choice, require_equal_shapes
 
 if TYPE_CHECKING:
@@ -819,9 +820,11 @@ def satisfies_lower_requirement(
     Returns ``True`` when
     :math:`\text{value} - U > \text{requirement}`, e.g. an apparent sound
     reduction index ``R'w`` provably exceeds a minimum. ``U`` should be computed
-    with the one-sided coverage factor.
+    with the one-sided coverage factor. The margin is settled before it is
+    judged, so a value exactly ``U`` above the requirement in decimal does not
+    pass on the last bits of the subtraction.
     """
-    return (value - expanded_uncertainty_value) > requirement
+    return bool(settled(value - expanded_uncertainty_value - requirement) > 0.0)
 
 
 def satisfies_upper_requirement(
@@ -834,9 +837,11 @@ def satisfies_upper_requirement(
     Returns ``True`` when
     :math:`\text{value} + U < \text{requirement}`, e.g. a normalized impact
     level ``L'n,w`` provably stays below a maximum. ``U`` should be computed with
-    the one-sided coverage factor.
+    the one-sided coverage factor. The margin is settled before it is judged,
+    so a value exactly ``U`` below the requirement in decimal does not pass on
+    the last bits of the sum.
     """
-    return (value + expanded_uncertainty_value) < requirement
+    return bool(settled(value + expanded_uncertainty_value - requirement) < 0.0)
 
 
 #: Coverage factors of Table 8 keyed by ``(confidence, one_sided)`` (read-only view).

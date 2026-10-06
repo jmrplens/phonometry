@@ -90,6 +90,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -571,7 +572,7 @@ def microphone_positions_required(levels: ArrayLike, frequency: float) -> int:
             f"three levels are expected; got shape {measured.shape}."
         )
         raise ValueError(msg)
-    spread = float(np.max(measured) - np.min(measured))
+    spread = float(settled(np.max(measured) - np.min(measured)))
     return 5 if spread > microphone_spread_limit(frequency) else 3
 
 
@@ -665,7 +666,7 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
     element = require_positive(element_area, "element_area")
     ratio = duct / element
     low, high = SURVEY_AREA_RATIO_RANGE
-    if not low <= ratio <= high:
+    if not low <= float(settled(ratio)) <= high:
         msg = (
             f"ISO 11691 4.5 asks for a test duct between {low} and {high} "
             f"times the area of the silencer or the substitution duct; this "
@@ -1391,7 +1392,7 @@ def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
         raise ValueError(msg)
     slope, intercept = np.polyfit(abscissa, measured, 1)
     deviation = float(np.max(np.abs(measured - (slope * abscissa + intercept))))
-    if deviation > EXTRAPOLATION_MAX_DEVIATION_DB:
+    if float(settled(deviation)) > EXTRAPOLATION_MAX_DEVIATION_DB:
         msg = (
             f"5.5.2 asks for the measured points to sit within "
             f"{EXTRAPOLATION_MAX_DEVIATION_DB:.0f} dB of the fitted line; the "

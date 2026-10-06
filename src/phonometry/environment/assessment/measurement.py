@@ -52,6 +52,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import require_equal_counts
 from ..._internal.warnings import PhonometryWarning
 
@@ -328,7 +329,7 @@ def tonal_seeking_survey(
     for i in range(1, lev.size - 1):
         threshold = _survey_threshold(freq[i])
         margin = lev[i] - max(lev[i - 1], lev[i + 1])
-        flags[i] = margin >= threshold
+        flags[i] = settled(margin) >= threshold
     return flags
 
 
@@ -398,7 +399,7 @@ def residual_sound_correction(
         msg = "'residual_level' must be below 'measured_level' to correct."
         raise ValueError(msg)
     corrected = 10.0 * np.log10(10.0 ** (lp / 10.0) - 10.0 ** (lres / 10.0))
-    reliable = margin > _MIN_CORRECTION_MARGIN_DB
+    reliable = bool(settled(margin) > _MIN_CORRECTION_MARGIN_DB)
     if not reliable:
         warnings.warn(
             "Residual is within 3 dB of the measured level; no correction is "
@@ -650,7 +651,7 @@ def uncertainty_from_repeated_measurements(
     sk = float(np.sqrt(np.sum((energies - mean_energy) ** 2) / (n - 1)))
     uk = 10.0 * np.log10(mean_energy + sk) - mean_level
     uk_approx = float(np.sqrt(np.sum((lev - mean_level) ** 2) / (n - 1)))
-    if float(np.max(lev) - np.min(lev)) > _LEVEL_SPREAD_WARNING_DB:
+    if float(settled(np.max(lev) - np.min(lev))) > _LEVEL_SPREAD_WARNING_DB:
         warnings.warn(
             "The repeated levels spread by more than 3 dB: the Formula (20) "
             "approximation (approximate_uncertainty) is unreliable there; "

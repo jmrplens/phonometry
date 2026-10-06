@@ -93,6 +93,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import round_half_up, settled
 from .._internal.frozen import read_only
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_BANDS_HZ as _SOUND_FIELD_BANDS_HZ,
@@ -290,9 +291,6 @@ _CROSS_HEARING_LEVEL_DB = 40.0
 #: 8.4 NOTE: the vibrotactile levels for forehead placement lie this much lower.
 _FOREHEAD_OFFSET_DB = 10.0
 _PLACEMENTS: tuple[str, ...] = ("mastoid", "forehead")
-#: Decimals kept before rounding a threshold, so that a mean such as
-#: 12,000000000000002 dB is not rounded up to 13 dB by a last-bit excess.
-_ROUNDING_DECIMALS = 9
 
 #: Annex A: where "up to 4 kHz" ends.
 _UNCERTAINTY_SPLIT_HZ = 4000.0
@@ -358,7 +356,7 @@ def _round_half_up(value: float, step: float) -> float:
     :param step: The step.
     :return: The rounded value.
     """
-    return step * math.floor(round(value / step, _ROUNDING_DECIMALS) + 0.5)
+    return step * float(round_half_up(value / step))
 
 
 # ---------------------------------------------------------------------------
@@ -1396,7 +1394,9 @@ def automatic_audiometry_threshold(
         is_peak=kinds,
         retained=retained,
         mean_db=mean,
-        threshold_db=float(math.ceil(round(mean, _ROUNDING_DECIMALS))),
+        # Settled first, so a mean such as 12,000 000 000 000 002 dB is not
+        # taken up to 13 dB by a last-bit excess.
+        threshold_db=float(math.ceil(float(settled(mean)))),
     )
 
 

@@ -82,6 +82,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -875,7 +876,7 @@ class PeopleAssessment:
     :ivar complies: Whether the requirement of the standard is met.
     :ivar criterion: The comparison that decided it: ``"A_u"`` when
         :math:`KB_{F\mathrm{max}}` kept to the lower value, or exceeded it by
-        less than the measurement is uncertain by; ``"A_o"`` when it exceeded
+        no more than the measurement is uncertain by; ``"A_o"`` when it exceeded
         the upper one or, for a rare short event, kept to it; and ``"A_r"``
         when :math:`KB_{FTr}` decided.
     :ivar kb_fmax: :math:`KB_{F\mathrm{max}}` as assessed.
@@ -883,7 +884,7 @@ class PeopleAssessment:
     :ivar guide: The three guide values it was held to.
     :ivar source: The kind of source the rules were read for.
     :ivar within_uncertainty: Whether the verdict rests on the 15 % of 5.4:
-        :math:`KB_{F\mathrm{max}}` above :math:`A_u` but by less than a
+        :math:`KB_{F\mathrm{max}}` above :math:`A_u` but by no more than a
         measurement of :math:`KB_F` is uncertain by, which Annex C Example 3
         concludes "can as a rule still be regarded as met". A stricter reading
         treats such a verdict as open.
@@ -957,10 +958,12 @@ def assess_people_in_buildings(
     r"""Read the guide values in the order of Clause 6.2 (Figure 2).
 
     :math:`KB_{F\mathrm{max}}` at or below :math:`A_u` meets the requirement,
-    and so, as a rule, does one above it by less than the 15 % of 5.4 that a
+    and so, as a rule, does one above it by up to the 15 % of 5.4 that a
     measurement of :math:`KB_F` is uncertain by, which is how the standard's
     own Example 3 concludes on 0,17 against an :math:`A_u` of 0,15; the
-    verdict says so in ``within_uncertainty``. Above :math:`A_o` it is not
+    verdict says so in ``within_uncertainty``. A value exactly 15 % above,
+    0,46 against 0,4, is inside it whichever way the last bits of the product
+    fall. Above :math:`A_o` it is not
     met, unless the source is a railway, which 6.5.3.1 judges on :math:`A_u`
     and :math:`A_r` alone. Between the two, up to three short events a day
     are met as they are (6.5.1), and anything else is decided by
@@ -1035,7 +1038,10 @@ def assess_people_in_buildings(
 
     if _keeps_to(peak, guide.a_u):
         return verdict(complies=True, criterion="A_u", kb_ftr=None)
-    if year == "1999" and peak <= guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0):
+    # Judged settled: 0,46 is 15 % above an A_u of 0,4 in decimal, and the
+    # product 0,4 x 1,15 is 0,459 999 999 999 999 96 in binary.
+    reach = guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0)
+    if year == "1999" and float(settled(peak - reach)) <= 0.0:
         return verdict(complies=True, criterion="A_u", kb_ftr=None, uncertain=True)
     if not _skips_upper_value(year, kind, guide):
         if not _keeps_to(peak, guide.a_o):

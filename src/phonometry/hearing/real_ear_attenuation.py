@@ -76,6 +76,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .hearing_protectors import _octave_axis
 
 if TYPE_CHECKING:
@@ -704,7 +705,7 @@ def assess_attenuation_difference(
     return AttenuationDifferenceResult(
         difference_db=difference,
         criterion_db=criterion,
-        significant=np.asarray(difference > criterion, dtype=bool),
+        significant=np.asarray(settled(difference - criterion) > 0.0, dtype=bool),
         first_mean_db=m1,
         second_mean_db=m2,
         first_expanded_uncertainty_db=u1,
@@ -776,7 +777,8 @@ class ReatSoundFieldCheck:
         :return: One boolean per band.
         """
         return np.all(
-            np.abs(self.position_deviation_db) <= _POSITION_TOLERANCE_DB, axis=0
+            settled(np.abs(self.position_deviation_db)) <= _POSITION_TOLERANCE_DB,
+            axis=0,
         )
 
     @property
@@ -785,7 +787,7 @@ class ReatSoundFieldCheck:
 
         :return: One boolean per band.
         """
-        return self.left_right_difference_db <= _LEFT_RIGHT_TOLERANCE_DB
+        return settled(self.left_right_difference_db) <= _LEFT_RIGHT_TOLERANCE_DB
 
     @property
     def diffuse(self) -> np.ndarray:
@@ -800,7 +802,9 @@ class ReatSoundFieldCheck:
         if self.allowable_variation_db is None:
             return np.ones(self.frequencies.size, dtype=bool)
         judged = np.isfinite(self.rotation_variation_db)
-        within = self.rotation_variation_db <= self.allowable_variation_db
+        within = (
+            settled(self.rotation_variation_db - self.allowable_variation_db) <= 0.0
+        )
         return np.asarray(~judged | within, dtype=bool)
 
     @property

@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     check_engine,
     require_finite,
@@ -1029,7 +1030,10 @@ class LevelDifferenceCheck:
 
         :return: One boolean per frequency.
         """
-        return np.asarray(self.difference_db, dtype=np.float64) >= self.limit_db
+        # Judged settled: a difference of two readings that is 20 dB in
+        # decimal reaches the limit whichever way its last bits fall.
+        difference = np.asarray(self.difference_db, dtype=np.float64)
+        return np.asarray(settled(difference) >= self.limit_db, dtype=bool)
 
     @property
     def passes(self) -> bool:

@@ -41,6 +41,7 @@ import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from .._internal.boundary import round_half_up
 from .._internal.validation import check_engine
 
 if TYPE_CHECKING:
@@ -57,9 +58,10 @@ def _round_db(value: float) -> int:
 
     The declared values are stated to the nearest decibel; a manufacturer that
     already declares rounded integers is unaffected, and a value derived from an
-    unrounded measurement is rounded here.
+    unrounded measurement is rounded here, settled first so that a level that
+    is a half in decimal and a last bit under it in binary rounds up.
     """
-    return math.floor(float(value) + 0.5)
+    return int(round_half_up(float(value)))
 
 
 @dataclass(frozen=True)

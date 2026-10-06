@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -170,8 +171,11 @@ def background_corrected_level(
     with np.errstate(invalid="ignore", divide="ignore"):
         subtracted = 10.0 * np.log10(np.where(diff > 0.0, diff, 1.0))
     # >= 15: unchanged; 6 <= margin < 15: energy subtraction; < 6: 1,3 dB limit.
-    corrected = np.where(margin >= _MARGIN_NEGLIGIBLE, lp, subtracted)
-    limited = margin < _MARGIN_LIMIT
+    # The margin is judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996
+    # in binary and still the 6 dB it is.
+    judged = settled(margin)
+    corrected = np.where(judged >= _MARGIN_NEGLIGIBLE, lp, subtracted)
+    limited = judged < _MARGIN_LIMIT
     corrected = np.where(limited, lp - _LIMIT_CORRECTION, corrected)
     return corrected, limited
 

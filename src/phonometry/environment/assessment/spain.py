@@ -85,6 +85,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -482,9 +483,12 @@ def _band_tonal_corrections(
         lt = float(band_levels[i] - neighbour_mean)
         differences[i] = lt
         lower, upper = thresholds
-        if lt < lower:
+        # Judged settled: a difference worked from decimal band levels that is
+        # the printed threshold in decimal is on it, whichever bit it ends on.
+        judged = float(settled(lt))
+        if judged < lower:
             band_kt[i] = 0.0
-        elif lt <= upper:
+        elif judged <= upper:
             band_kt[i] = 3.0
         else:
             band_kt[i] = 6.0
@@ -549,10 +553,15 @@ def tonal_correction(
 
 
 def _graded_correction(difference: float) -> float:
-    """0/3/6 dB from a level difference on the ``Kf`` / ``Ki`` thresholds."""
-    if difference <= _LEVEL_DIFFERENCE_LOW:
+    """0/3/6 dB from a level difference on the ``Kf`` / ``Ki`` thresholds.
+
+    The difference of two readings is judged settled, so one that is 10 dB
+    or 15 dB in decimal is on its threshold whichever bit it ends on.
+    """
+    judged = float(settled(difference))
+    if judged <= _LEVEL_DIFFERENCE_LOW:
         return 0.0
-    if difference <= _LEVEL_DIFFERENCE_HIGH:
+    if judged <= _LEVEL_DIFFERENCE_HIGH:
         return 3.0
     return 6.0
 

@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from ..._internal.boundary import round_half_away_from_zero, round_half_up
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
@@ -845,9 +846,11 @@ def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
         not occur with realistic (positive-level) insulation data; the
         difference is documented here rather than unified so each function
         keeps the literal form of its clause.
+
+    The scaled value is settled before the half is judged, so a level that is
+    a half in decimal and a last bit under it in binary still rounds outwards.
     """
-    rounded: np.ndarray = np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
-    return rounded
+    return round_half_away_from_zero(values, 1)
 
 
 def _resolve_band_set(
@@ -1371,9 +1374,7 @@ def _reduce(value: float, *, one_decimal: bool) -> float:
     levels and differences of levels that are positive in practice, so the two
     never part company here.
     """
-    if one_decimal:
-        return math.floor(value * 10.0 + 0.5) / 10.0
-    return float(math.floor(value + 0.5))
+    return float(round_half_up(value, 1 if one_decimal else 0))
 
 
 def _match_bands(

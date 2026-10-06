@@ -117,6 +117,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
+from .._internal.boundary import round_half_up
 from .._internal.frozen import read_only
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
@@ -211,12 +212,6 @@ _OVERHEAD_EFFECT_LIMIT_DB = 1.0
 #: place either side of 1,0, which side depending on the machine.
 _BOUNDARY_SLACK_DB = 1e-9
 
-#: Decimals a level is cut to before it is rounded half up: far below any
-#: level a meter reads, far above the binary error of a decimal level, so a
-#: difference of 20,4 - 14,9 dB, 5,499 999 999 999 998 in binary, still
-#: rounds to 6 as the 5,5 dB it is.
-_BINARY_SLACK_DECIMALS = 9
-
 #: The NOTE of 8.3: a simple arithmetic average may be used when the range of
 #: the position levels does not exceed this, in dB.
 _ARITHMETIC_RANGE_DB = 5.0
@@ -250,10 +245,10 @@ _CONFORMITY_STATEMENT = (
 def _round_half_up(value: float) -> int:
     """Round to the nearest whole number, halves upwards (4.5 to 5).
 
-    The value is first cut to nine decimals, so a half that comes out a hair
-    under it in binary still rounds up.
+    The value is first settled to nine decimals, so a half that comes out a
+    hair under it in binary, 20,4 - 14,9 dB for one, still rounds up.
     """
-    return math.floor(round(value, _BINARY_SLACK_DECIMALS) + 0.5)
+    return int(round_half_up(value))
 
 
 def _below_criterion(level_difference_db: ArrayLike) -> np.ndarray:

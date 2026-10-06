@@ -311,11 +311,13 @@ def _chk_limp_heavy_frame_limit() -> Outcome:
     "Limp-frame bulk-modulus limit for air, kPa",
 )
 def _chk_limp_frame_criterion_limit() -> Outcome:
-    # The book states "lower than 20 kPa" for |Kc/Kf| < 0.2 with Kf = P0.
+    # The book states "lower than 20 kPa" for |Kc/Kf| < 0.2 with Kf = P0. The
+    # ratio is judged settled to nine decimals, so the probe past the limit is
+    # a millionth of it rather than a part in a billion.
     limit = 0.2 * 101325.0
     ok = ph.materials.limp_frame_applicable(
         limit
-    ) and not ph.materials.limp_frame_applicable(limit * (1.0 + 1e-9))
+    ) and not ph.materials.limp_frame_applicable(limit * (1.0 + 1e-6))
     return numeric(
         20.0, limit / 1000.0 if ok else float("nan"), 0.3, unit="kPa", places=2
     )

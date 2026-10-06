@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
@@ -548,8 +549,11 @@ def background_noise_correction(
     delta = src - bg
     clamped = np.maximum(delta, low)
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * clamped))
-    k1 = np.where(delta > high, 0.0, k1)
-    if np.any(delta < low):
+    # The criteria are judged on the settled margin, so a difference of two
+    # readings that is 10 dB in decimal is not taken as above it in binary.
+    judged = settled(delta)
+    k1 = np.where(judged > high, 0.0, k1)
+    if np.any(judged < low):
         warnings.warn(
             f"Background margin below {low:g} dB in one or more bands; K1 "
             "clamped to the criterion value and levels are upper bounds "

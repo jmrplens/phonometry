@@ -52,6 +52,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     check_engine,
@@ -625,7 +626,12 @@ def _task_contribution(
     sample_range = (
         float(samples.max() - samples.min()) if n >= _MIN_SAMPLES_FOR_SPREAD else 0.0
     )
-    spread = n >= _MIN_SAMPLES_FOR_SPREAD and sample_range >= _SPREAD_ADVISORY_THRESHOLD
+    # Judged settled: three readings 3 dB apart in decimal span 3 dB whichever
+    # way the subtraction's last bits fall; the result keeps the computed range.
+    spread = (
+        n >= _MIN_SAMPLES_FOR_SPREAD
+        and float(settled(sample_range)) >= _SPREAD_ADVISORY_THRESHOLD
+    )
 
     u1a = _task_sampling_uncertainty(task.samples)
     # c1a (Eq C.4): (T_m/T0) * 10^(0.1 (Lp - LEX,8h)); L* ~ Lp since Q2,Q3 ~ 0.
@@ -761,8 +767,11 @@ def _sampled_exposure(
     # Eq C.9 with c2 = c3 = 1.
     u = sqrt(c1u1**2 + u2**2 + u3**2)
 
-    advisory = c1u1 > _C4_ADVISORY_THRESHOLD or spread_advisory
-    if warn and c1u1 > _C4_ADVISORY_THRESHOLD:
+    # Judged settled: seven samples whose standard deviation is 4,0 dB in
+    # decimal read the 3,5 dB of Table C.4 itself, which is not above it.
+    over = float(settled(c1u1)) > _C4_ADVISORY_THRESHOLD
+    advisory = over or spread_advisory
+    if warn and over:
         warnings.warn(
             f"Job/full-day sampling contribution c1*u1 = {c1u1:.1f} dB exceeds "
             "3.5 dB (ISO 9612 Table C.4 / Clause 10.4); revise the exposure group "
@@ -872,7 +881,7 @@ def full_day_exposure(
     arr = np.asarray(samples, dtype=float)
     spread = (
         arr.size == _MIN_FULL_DAY_SAMPLES
-        and float(arr.max() - arr.min()) >= _SPREAD_ADVISORY_THRESHOLD
+        and float(settled(arr.max() - arr.min())) >= _SPREAD_ADVISORY_THRESHOLD
     )
     if spread and warn:
         warnings.warn(

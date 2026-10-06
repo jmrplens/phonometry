@@ -96,6 +96,7 @@ if TYPE_CHECKING:
 
     from .reference_sound_source import ReferenceSourceCalibration
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     _as_float64,
@@ -444,9 +445,12 @@ def _background_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         raw = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * delta))
     raw = np.where(np.isnan(raw), np.inf, raw)
     k1 = np.minimum(raw, _K1_MAX_DB)
-    k1 = np.where(delta > _K1_NEGLIGIBLE_DB, 0.0, k1)
+    # The criteria are judged on the settled margin, so a difference of two
+    # readings that is 15 dB or 6 dB in decimal is on its criterion.
+    judged = settled(delta)
+    k1 = np.where(judged > _K1_NEGLIGIBLE_DB, 0.0, k1)
     return np.asarray(k1, dtype=np.float64), np.asarray(
-        delta >= _K1_VALID_DB, dtype=bool
+        judged >= _K1_VALID_DB, dtype=bool
     )
 
 

@@ -71,7 +71,7 @@ $$
 L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,A,S,4\text{m}} = a + b\ \log_{10}(4/r_0).
 $$
 
-The distraction distance rD and privacy distance rP are the distances where a **linear** (not logarithmic) regression of STI against distance crosses 0.50 and 0.20; a non-negative fitted slope (STI not falling with distance) makes them undefined, realising the standard's "can prove impossible to determine" note.
+The distraction distance rD and privacy distance rP are the distances where a **linear** (not logarithmic) regression of STI against distance crosses 0.50 and 0.20; a fitted slope that does not fall (STI not decreasing with distance; a constant STI fits to a slope a few units in the last place either side of zero, read as no decrease) makes them undefined, realising the standard's "can prove impossible to determine" note.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.svg" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
 

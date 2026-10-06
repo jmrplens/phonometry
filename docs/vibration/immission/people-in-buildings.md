@@ -81,7 +81,7 @@ axes[0].legend()
 The verdict compares at the decimals the guide value is printed with, half
 up as a hand rounds, because that is what the standard does: its Example 4
 forms a `KB_FTr` of 0,154, writes it as 0,15 and finds it at the `A_r` of
-0,15, met. And it follows Example 3 on a `KB_Fmax` above `A_u` by less than
+0,15, met. And it follows Example 3 on a `KB_Fmax` above `A_u` by up to
 the 15 % a measurement of `KB_F` is uncertain by: the requirement "can as a
 rule still be regarded as met", the standard concludes, and the verdict says
 so, with `within_uncertainty` set for anyone who wants to read it more

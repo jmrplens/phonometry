@@ -76,6 +76,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     require_axis_count,
     require_choice,
@@ -288,11 +289,26 @@ def covering_contact_stiffness(
     return float(e * np.pi * r**2 / d)
 
 
+def _critical_excess(stiffness: float, impedance: float, mass: float) -> float:
+    r"""How far the hammer-floor oscillation is past critical damping.
+
+    :math:`K m / (4 Z_\mathrm{dp}^{2}) - 1`, settled: positive over-critical,
+    negative under-critical and zero critically damped (Eq. 3.95). The regime
+    is read off this one number, settled, because the formulas that follow
+    take the square root of :math:`(K/(2 Z_\mathrm{dp}))^{2} - K/m` or of its
+    negative, which at critical damping worked from decimal inputs comes out
+    a few units in the last place either side of zero; read off a separate
+    comparison it could land on the wrong side and leave a square root of a
+    negative number.
+    """
+    return float(settled(stiffness * mass / (4.0 * impedance**2) - 1.0))
+
+
 def _is_over_critical(stiffness: float, impedance: float, mass: float) -> bool:
     r"""``True`` for an over-critical oscillation,
     :math:`K m \ge 4 Z_\mathrm{dp}^{2}` (Eq. 3.95).
     """
-    return stiffness * mass >= 4.0 * impedance**2
+    return _critical_excess(stiffness, impedance, mass) >= 0.0
 
 
 def tapping_cut_off_frequency(
@@ -327,7 +343,8 @@ def tapping_cut_off_frequency(
     if not _is_over_critical(k, z, m):
         return float(np.sqrt(k / m) / (2.0 * np.pi))
     a = k / (2.0 * z)
-    return float((a - np.sqrt(a**2 - k / m)) / (2.0 * np.pi))
+    # At critical damping the root is zero to the last bits, either side.
+    return float((a - np.sqrt(max(a**2 - k / m, 0.0))) / (2.0 * np.pi))
 
 
 def hammer_limiting_frequency(
@@ -409,12 +426,9 @@ def force_pulse(
         raise ValueError(msg)
     decay = k / (2.0 * z)
     omega0_sq = k / m
-    if _is_over_critical(k, z, m):
+    excess = _critical_excess(k, z, m)
+    if excess > 0.0:
         gamma = np.sqrt(decay**2 - omega0_sq)
-        if gamma <= 0.0:
-            # A zero discriminant is the critically damped limit, v0 K t e^-at,
-            # which is also the γ → 0 limit of the expression below.
-            return np.asarray(v0 * k * t * np.exp(-decay * t), dtype=np.float64)
         # e^(-a t) sinh(γ t)/γ is regrouped as
         # e^(-(a-γ) t) (1 − e^(-2 γ t))/(2 γ) rather than evaluated as written.
         # Both a − γ and a + γ are positive (a² − γ² = ωo² > 0), so neither
@@ -431,9 +445,13 @@ def force_pulse(
             / (2.0 * gamma)
         )
         return np.asarray(pulse, dtype=np.float64)
-    beta = np.sqrt(omega0_sq - decay**2)
-    pulse = v0 * k * np.exp(-decay * t) * np.sin(beta * t) / beta
-    return np.asarray(np.where(t <= np.pi / beta, pulse, 0.0), dtype=np.float64)
+    if excess < 0.0:
+        beta = np.sqrt(omega0_sq - decay**2)
+        pulse = v0 * k * np.exp(-decay * t) * np.sin(beta * t) / beta
+        return np.asarray(np.where(t <= np.pi / beta, pulse, 0.0), dtype=np.float64)
+    # Critically damped: v0 K t e^-at, the γ → 0 limit of the over-critical
+    # expression and the β → 0 limit of the under-critical one.
+    return np.asarray(v0 * k * t * np.exp(-decay * t), dtype=np.float64)
 
 
 def short_pulse_mean_square_force(

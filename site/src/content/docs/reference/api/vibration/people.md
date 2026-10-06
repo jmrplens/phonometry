@@ -158,10 +158,12 @@ assess_people_in_buildings(
 Read the guide values in the order of Clause 6.2 (Figure 2).
 
 $KB_{F\mathrm{max}}$ at or below $A_u$ meets the requirement,
-and so, as a rule, does one above it by less than the 15 % of 5.4 that a
+and so, as a rule, does one above it by up to the 15 % of 5.4 that a
 measurement of $KB_F$ is uncertain by, which is how the standard's
 own Example 3 concludes on 0,17 against an $A_u$ of 0,15; the
-verdict says so in `within_uncertainty`. Above $A_o$ it is not
+verdict says so in `within_uncertainty`. A value exactly 15 % above,
+0,46 against 0,4, is inside it whichever way the last bits of the product
+fall. Above $A_o$ it is not
 met, unless the source is a railway, which 6.5.3.1 judges on $A_u$
 and $A_r$ alone. Between the two, up to three short events a day
 are met as they are (6.5.1), and anything else is decided by
@@ -559,12 +561,12 @@ The verdict of Clause 6.2 on one immission, and how it was reached.
 | Name | Description |
 | :--- | :--- |
 | `complies` | Whether the requirement of the standard is met. |
-| `criterion` | The comparison that decided it: `"A_u"` when $KB_{F\mathrm{max}}$ kept to the lower value, or exceeded it by less than the measurement is uncertain by; `"A_o"` when it exceeded the upper one or, for a rare short event, kept to it; and `"A_r"` when $KB_{FTr}$ decided. |
+| `criterion` | The comparison that decided it: `"A_u"` when $KB_{F\mathrm{max}}$ kept to the lower value, or exceeded it by no more than the measurement is uncertain by; `"A_o"` when it exceeded the upper one or, for a rare short event, kept to it; and `"A_r"` when $KB_{FTr}$ decided. |
 | `kb_fmax` | $KB_{F\mathrm{max}}$ as assessed. |
 | `kb_ftr` | $KB_{FTr}$, or `None` when it was not needed. |
 | `guide` | The three guide values it was held to. |
 | `source` | The kind of source the rules were read for. |
-| `within_uncertainty` | Whether the verdict rests on the 15 % of 5.4: $KB_{F\mathrm{max}}$ above $A_u$ but by less than a measurement of $KB_F$ is uncertain by, which Annex C Example 3 concludes "can as a rule still be regarded as met". A stricter reading treats such a verdict as open. |
+| `within_uncertainty` | Whether the verdict rests on the 15 % of 5.4: $KB_{F\mathrm{max}}$ above $A_u$ but by no more than a measurement of $KB_F$ is uncertain by, which Annex C Example 3 concludes "can as a rule still be regarded as met". A stricter reading treats such a verdict as open. |
 
 ### PeopleAssessment.plot()
 

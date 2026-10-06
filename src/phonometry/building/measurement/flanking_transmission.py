@@ -76,6 +76,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -1033,7 +1034,9 @@ def strong_coupling_satisfied(
     fc_i = _positive(critical_frequency_i, "critical_frequency_i")
     fc_j = _positive(critical_frequency_j, "critical_frequency_j")
     threshold = 3.0 - 10.0 * np.log10((m_i * fc_j) / (m_j * fc_i))
-    return np.asarray(dv >= threshold, dtype=np.bool_)
+    # Judged settled: for two like elements the threshold is 3 dB to the last
+    # bits of the logarithm of a ratio that is 1 in decimal.
+    return np.asarray(settled(dv - threshold) >= 0.0, dtype=np.bool_)
 
 
 def modal_density(

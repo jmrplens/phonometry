@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.boundary import settled
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -485,7 +486,9 @@ def directional_diffusion_coefficient(
             msg = "'area_weights' values must be positive."
             raise ValueError(msg)
     weight_sum = float(np.sum(weights))
-    if weight_sum <= 1.0:
+    # Settled: weights that add up to 1 in decimal leave Formula (6) with a
+    # zero denominator whichever way the last bits of their sum fall.
+    if float(settled(weight_sum)) <= 1.0:
         msg = "The total area weight must exceed 1."
         raise ValueError(msg)
     weighted_energy = np.sum(p * weights)

@@ -84,6 +84,8 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
+from .._internal.boundary import settled
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -281,7 +283,9 @@ def feedback_stability(
         stability_margin=margin_required,
         margin=-loop,
         headroom=-margin_required - loop,
-        is_stable=loop <= -margin_required,
+        # Judged settled: a loop gain summed from decimal levels that meets the
+        # margin in decimal meets it whichever way the last bits fall.
+        is_stable=bool(settled(loop + margin_required) <= 0.0),
         maximum_open_loop_gain=-margin_required - g_s - d_nom,
         maximum_level_at_microphone=l_hl - d_m - margin_required - z_s - d_nom,
         level_loudspeaker_at_microphone=l_hm,

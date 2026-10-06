@@ -116,6 +116,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
+from .._internal.boundary import settled
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -132,7 +133,6 @@ from ._shared import (
     _background_exposure,
     _c2_correction,
     _reference_power_levels,
-    _settled,
     _single_event_mean,
     _validate_meteorology,
 )
@@ -250,7 +250,7 @@ def _k1_eq13(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     :param delta: Margin of the mean level over the mean background, in dB.
     :return: ``(K1, margin at least 6 dB)``, elementwise.
     """
-    margin = _settled(delta)
+    margin = settled(delta)
     within = np.maximum(margin, _K1_VALID_DB)
     formula = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * within))
     k1 = np.where(
@@ -1093,7 +1093,7 @@ class HardWalledRoomCheck:
     @property
     def band_adequate(self) -> np.ndarray:
         """Per band, whether the spread stays within Table 3 (4.4)."""
-        return np.asarray(_settled(self.level_range_db) <= self.limit_db, dtype=bool)
+        return np.asarray(settled(self.level_range_db) <= self.limit_db, dtype=bool)
 
     @property
     def acoustically_adequate(self) -> bool:
@@ -1109,8 +1109,8 @@ class HardWalledRoomCheck:
         last bit above a room volume that equals it, and 4.2 asks for "at
         least".
         """
-        volume = float(_settled(self.volume_m3))
-        return volume >= float(_settled(self.minimum_volume_m3))
+        volume = float(settled(self.volume_m3))
+        return volume >= float(settled(self.minimum_volume_m3))
 
     @property
     def box_fits(self) -> bool:
@@ -1404,7 +1404,7 @@ def hard_walled_source_locations(
         )
     freqs = _octave_frequencies(frequencies, n_bands)
     s_m = np.asarray(np.std(arr, axis=0, ddof=1), dtype=np.float64)  # Eq. (7), (8)
-    row = _settled(s_m)
+    row = settled(s_m)
     locations = np.where(row <= _TABLE2_ONE_LOCATION_DB, 1, 2).astype(np.int64)
     other = np.where(
         row > _TABLE2_TWO_LOCATIONS_DB, _TABLE2_OTHER_ROOM_LOCATIONS, 0

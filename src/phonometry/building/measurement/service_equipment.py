@@ -125,6 +125,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
+from ..._internal.boundary import round_half_up
 from ..._internal.levels_math import energy_mean
 from ..._internal.validation import (
     _as_float64,
@@ -713,10 +714,6 @@ _NOT_A_NUMBER_TYPES = (bool, np.bool_, str, bytes)
 #: and must still read as 10.
 _LIMIT_SLACK = 1e-9
 
-#: Decimals a scaled level is cut to before it is rounded half up: far below
-#: any level a meter reads, far above the binary error of a decimal level.
-_BINARY_SLACK_DECIMALS = 9
-
 #: Position distances of 7.2 and 7.3, in metres.
 _MIN_SEPARATION_M = 1.0
 _PREFERRED_SEPARATION_M = 1.5
@@ -753,16 +750,12 @@ def _round_half_up_array(values: ArrayLike, decimals: int) -> np.ndarray:
     7.5 rounds the band average to one decimal and 7.8 the weighted values to
     whole decibels without naming a rule for the half; the half is taken
     upward, the rule of ISO 717-1 and ISO 717-2 that the same laboratories
-    apply to the same spectra. The scaled value is first cut to nine decimals,
+    apply to the same spectra. The scaled value is first settled to nine decimals,
     so a level that is a half in decimal but comes out a hair under it in
     binary still rounds up: three readings of 40,65 dB average to
     40,649 999 999 999 99 by Formula (1), and 7.5 makes it 40,7 dB.
     """
-    scale = 10.0**decimals
-    scaled = np.round(
-        np.asarray(values, dtype=np.float64) * scale, _BINARY_SLACK_DECIMALS
-    )
-    return np.floor(scaled + 0.5) / scale
+    return round_half_up(values, decimals)
 
 
 def _round_half_up(value: float, decimals: int = 0) -> float:

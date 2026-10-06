@@ -173,11 +173,15 @@ SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
 #: coefficient above one cannot leave the logarithm without an argument.
 ABSORPTION_RATIO_LIMIT = 0.99
 
-#: Slack on the 0,99 maximum of EN 1793-5 Clause 5.8, so a weighted ratio
-#: that is 0,99 in decimal is not taken as above it for the last bits of the
-#: energy mean: every index read as 0,99 from 500 Hz weighs to two units in
-#: the last place above 0,99 in binary. A millionth of a millionth is far
-#: below the two decimals an index is reported to.
+#: Slack on the 0,99 limit of the weighted ratio, so a ratio that is 0,99 in
+#: decimal is on the limit whichever way the last bits of the weighted mean
+#: fall. EN 1793-1 Clause 5 and EN 16272-3-1 Clause 5 limit a ratio that
+#: reaches 0,99, so the slack widens that inclusive bound downwards: absorption
+#: coefficients that weigh to 0,99 in decimal can come out
+#: 0,989 999 999 999 999 8 in binary. EN 1793-5 Clause 5.8 limits a ratio that exceeds 0,99, so
+#: there it lifts the bound: every index read as 0,99 from 500 Hz weighs to two
+#: units in the last place above 0,99. A millionth of a millionth is far below
+#: the two decimals a coefficient or an index is reported to.
 _RATIO_SLACK = 1e-12
 
 #: How far, as a natural logarithm, a requested band may sit from a printed
@@ -324,7 +328,7 @@ def sound_absorption_rating(
     )
     energy = 10.0 ** (0.1 * weights)
     ratio = float(np.sum(alpha * energy) / np.sum(energy))
-    if ratio >= ABSORPTION_RATIO_LIMIT:
+    if ratio >= ABSORPTION_RATIO_LIMIT - _RATIO_SLACK:
         clause = "EN 1793-1" if spectrum == "road" else "EN 16272-3-1"
         msg = (
             "the weighted absorption ratio reached the "

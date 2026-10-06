@@ -89,6 +89,22 @@ def _power(**kwargs: object) -> emission.HardWalledSoundPowerResult:
 # --------------------------------------------------------------------------
 # Eq. (14) and the means of Eq. (10), (11)
 # --------------------------------------------------------------------------
+def test_results_keep_frequencies_of_their_own() -> None:
+    """A result read from the caller's float array keeps its own copy:
+    changing the caller's afterwards relabels no band.
+    """
+    freqs = FREQS.copy()
+    results = (
+        emission.sound_power_hard_walled(
+            ST, RSS, LW_RSS, freqs, background_levels=BACKGROUND
+        ),
+        emission.hard_walled_source_locations(_survey(1.0), freqs),
+    )
+    freqs[0] = 63.0
+    for result in results:
+        np.testing.assert_array_equal(result.frequencies, FREQS)
+
+
 def test_sound_power_is_eq14_with_the_background_negligible() -> None:
     """With every margin above 15 dB, K1 = K1(RSS) = 0 and Eq. (14) is the
     calibrated power carried across by the difference of the energy means.

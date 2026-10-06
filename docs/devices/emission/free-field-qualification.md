@@ -587,7 +587,9 @@ and reads the bands it needs: `sound_power_comparison` and
 and `sound_energy_hard_walled` (ISO 3743-1),
 `sound_power_special_room_comparison` (ISO 3743-2), `sound_power_in_situ` and
 `sound_energy_in_situ` (ISO 3747) in octaves, each the energy sum of its
-three one-third octave bands. `sound_power_level_at` reads it directly.
+three one-third octave bands. The suitability evaluation of ISO 3743-2 6.7,
+`check_special_room_suitability`, takes it as the calibration the room is
+judged against, in octaves too. `sound_power_level_at` reads it directly.
 
 The calibration holds $L_W$ under the reference conditions, and $C_2$ is what
 carried the power the source radiated during the calibration there. ISO 3741

@@ -222,6 +222,7 @@ from .devices import (
     generate_spacer_bandwidth,
     generate_special_room_reverberation,
     generate_special_room_sound_power,
+    generate_special_room_suitability,
     generate_swept_sine_harmonic_responses,
     generate_swept_sine_methods,
     generate_swept_sine_thd,
@@ -1036,10 +1037,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_in_situ_sound_power,
     # ISO 3743-1 and -2 small test rooms: the hard-walled comparison, the
     # special room's reverberation time within its curves, and the survey
-    # of 9.4 with the direct and comparison methods.
+    # of 9.4 with the direct and comparison methods, and the suitability
+    # evaluation of 6.7 against an ISO 6926 calibration read at the test.
     generate_hard_walled_sound_power,
     generate_special_room_reverberation,
     generate_special_room_sound_power,
+    generate_special_room_suitability,
     # ISO 8297 multisource plants: the contour round an example plant, its
     # sound power against the power its sources radiate, Table 3 against the
     # ISO 3891 coefficient, the proximity term and Table 1, the verdict, and

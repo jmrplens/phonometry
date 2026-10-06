@@ -49,7 +49,9 @@ _AREA_TERM = 10.0 * math.log10(2.0 * math.pi * 2.0**2)
 def _calibration(
     levels: float | np.ndarray = 80.0, **kwargs: object
 ) -> emission.ReferenceSourceCalibration:
-    grid = np.full((20, _THIRDS.size), 80.0) if np.ndim(levels) == 0 else levels
+    grid = (
+        np.full((20, _THIRDS.size), float(levels)) if np.ndim(levels) == 0 else levels
+    )
     return emission.reference_source_calibration(
         grid,
         frequencies_hz=_THIRDS,
@@ -280,6 +282,22 @@ def test_traverse_maxima_give_the_directivity_index() -> None:
     )
 
 
+#: Unequal one-third octaves in the 125 Hz octave (100, 125 and 160 Hz), dB:
+#: their energy sum, 85,31 dB, is neither the middle third plus 10 lg 3,
+#: 84,77 dB, nor their arithmetic mean plus 10 lg 3, 84,44 dB.
+_UNEQUAL_THIRDS_DB = (76.0, 80.0, 83.0)
+
+
+def _unequal_calibration() -> emission.ReferenceSourceCalibration:
+    levels = np.full((20, _THIRDS.size), 80.0)
+    levels[:, :3] = _UNEQUAL_THIRDS_DB
+    return _calibration(levels)
+
+
+def _energy_sum_of_the_unequal_thirds() -> float:
+    return 10.0 * math.log10(sum(10.0 ** (0.1 * lv) for lv in _UNEQUAL_THIRDS_DB))
+
+
 def test_octave_bands_are_the_energy_sum_of_their_thirds() -> None:
     cal = _calibration()
     one_third = cal.sound_power_level_db[_THIRDS == 1000.0][0]
@@ -287,6 +305,24 @@ def test_octave_bands_are_the_energy_sum_of_their_thirds() -> None:
     assert got == pytest.approx(one_third + 10.0 * math.log10(3.0), abs=1e-12)
     with pytest.raises(ValueError, match="does not cover"):
         cal.sound_power_level_at([12500.0])
+
+
+def test_an_octave_of_unequal_thirds_is_their_energy_sum() -> None:
+    """76, 80 and 83 dB at the surface sum to 85,31 dB, away from both the
+    middle third and the arithmetic mean plus 10 lg 3.
+    """
+    cal = _unequal_calibration()
+    to_power = (
+        _AREA_TERM + 5.0 * math.log10(296.15 / 314.0) + 7.5 * math.log10(296.15 / 296.0)
+    )
+    got = cal.sound_power_level_at([125.0, 250.0], bandwidth="octave")
+    expected = np.array(
+        [_energy_sum_of_the_unequal_thirds(), 80.0 + 10.0 * math.log10(3.0)]
+    )
+    np.testing.assert_allclose(got, expected + to_power, rtol=0, atol=1e-12)
+    shortcuts = (80.0, sum(_UNEQUAL_THIRDS_DB) / 3.0)
+    for shortcut in shortcuts:
+        assert abs(expected[0] - shortcut - 10.0 * math.log10(3.0)) > 0.5
 
 
 def test_an_octave_is_read_only_at_an_octave_mid_band() -> None:
@@ -906,6 +942,136 @@ def test_iso_3743_2_comparison_reads_the_calibration() -> None:
         rtol=0,
         atol=1e-12,
     )
+
+
+_SUITABILITY_FREQS = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+_TABLE_1_DB = np.array([5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 4.0])
+
+
+def test_iso_3743_2_suitability_reads_the_calibration_at_the_test() -> None:
+    """6.7 compares the room's Formula (9) level, which Annex E reads as the
+    power under the conditions of the test, with the calibration read there:
+    each octave three equal thirds plus 10 lg 3, less the calibration's own
+    C2 at 20 degC and 90 kPa (A.5, radiation unknown), 0,483 dB.
+    """
+    cal = _calibration()
+    octave = (
+        cal.sound_power_level_at(_SUITABILITY_FREQS)
+        + 10.0 * math.log10(3.0)
+        - _c2_at_20_degc_and_90_kpa(7.5)
+    )
+    measured = octave - _TABLE_1_DB  # every band on its Table 1 limit, low
+    check = emission.check_special_room_suitability(
+        measured, cal, _SUITABILITY_FREQS, temperature_c=20.0, static_pressure_kpa=90.0
+    )
+    np.testing.assert_allclose(
+        check.calibrated_power_level_db, octave, rtol=0, atol=1e-12
+    )
+    np.testing.assert_allclose(check.measured_power_level_db, measured, rtol=0, atol=0)
+    np.testing.assert_allclose(check.difference_db, -_TABLE_1_DB, rtol=0, atol=1e-9)
+    assert check.passes
+
+
+def test_iso_3743_2_suitability_sums_unequal_thirds_at_the_test() -> None:
+    """The 125 Hz octave of thirds at 76, 80 and 83 dB, by hand: their energy
+    sum over the 2 m hemisphere, with C1 and C2 at the reference conditions,
+    less the calibration's C2 at 20 degC and 90 kPa (A.5, radiation unknown).
+    """
+    cal = _unequal_calibration()
+    as_calibrated = (
+        _AREA_TERM + 5.0 * math.log10(296.15 / 314.0) + 7.5 * math.log10(296.15 / 296.0)
+    )
+    octave = (
+        np.array(
+            [_energy_sum_of_the_unequal_thirds()]
+            + [80.0 + 10.0 * math.log10(3.0)] * (_SUITABILITY_FREQS.size - 1)
+        )
+        + as_calibrated
+        - _c2_at_20_degc_and_90_kpa(7.5)
+    )
+    check = emission.check_special_room_suitability(
+        octave + 1.0,
+        cal,
+        _SUITABILITY_FREQS,
+        temperature_c=20.0,
+        static_pressure_kpa=90.0,
+    )
+    np.testing.assert_allclose(
+        check.calibrated_power_level_db, octave, rtol=0, atol=1e-12
+    )
+    np.testing.assert_allclose(check.difference_db, 1.0, rtol=0, atol=1e-9)
+    assert check.passes
+
+
+def test_iso_3743_2_suitability_fails_against_the_calibration_left_at_23_degc() -> None:
+    """Read at the default conditions instead, the calibration stands 0,482 dB
+    higher, and a room on its Table 1 limits at the test is beyond them.
+    """
+    cal = _calibration()
+    at_test = cal.sound_power_level_at(
+        _SUITABILITY_FREQS,
+        bandwidth="octave",
+        temperature_c=20.0,
+        static_pressure_kpa=90.0,
+    )
+    check = emission.check_special_room_suitability(
+        at_test - _TABLE_1_DB, cal, _SUITABILITY_FREQS
+    )
+    shift = _c2_at_20_degc_and_90_kpa(7.5) - 7.5 * math.log10(296.15 / 296.0)
+    np.testing.assert_allclose(
+        check.difference_db, -_TABLE_1_DB - shift, rtol=0, atol=1e-9
+    )
+    assert not bool(np.any(check.band_within))
+    assert not check.passes
+
+
+def test_iso_3743_2_suitability_from_the_levels_read_at_the_test() -> None:
+    """The calibration and the levels it gives at the test judge alike, and
+    levels are taken as they are whatever the conditions say.
+    """
+    cal = _calibration()
+    at_test = cal.sound_power_level_at(
+        _SUITABILITY_FREQS,
+        bandwidth="octave",
+        temperature_c=20.0,
+        static_pressure_kpa=90.0,
+    )
+    measured = at_test + np.array([1.0, -0.5, 0.2, 0.0, 0.4, -1.1, 2.0])
+    from_object = emission.check_special_room_suitability(
+        measured, cal, _SUITABILITY_FREQS, temperature_c=20.0, static_pressure_kpa=90.0
+    )
+    from_levels = emission.check_special_room_suitability(
+        measured,
+        at_test,
+        _SUITABILITY_FREQS,
+        temperature_c=20.0,
+        static_pressure_kpa=90.0,
+    )
+    at_default = emission.check_special_room_suitability(
+        measured, at_test, _SUITABILITY_FREQS
+    )
+    for other in (from_levels, at_default):
+        np.testing.assert_array_equal(
+            other.calibrated_power_level_db, from_object.calibrated_power_level_db
+        )
+        np.testing.assert_array_equal(other.difference_db, from_object.difference_db)
+
+
+def test_iso_3743_2_suitability_refuses_a_calibration_it_cannot_read() -> None:
+    """The 125 Hz octave needs the 100 Hz third, and a manufacturer's C2 has
+    no value at the test but the manufacturer's.
+    """
+    above_200 = emission.reference_source_calibration(
+        np.full((20, 16), 80.0), frequencies_hz=_THIRDS[3:19], arrangement="fixed"
+    )
+    manufacturers = _calibration(c2_db=0.3)
+    measured = np.full(_SUITABILITY_FREQS.size, 92.0)
+    with pytest.raises(ValueError, match="does not cover the 100 Hz"):
+        emission.check_special_room_suitability(measured, above_200, _SUITABILITY_FREQS)
+    with pytest.raises(ValueError, match="manufacturer"):
+        emission.check_special_room_suitability(
+            measured, manufacturers, _SUITABILITY_FREQS
+        )
 
 
 def test_iso_3743_refuses_a_calibration_it_cannot_read() -> None:

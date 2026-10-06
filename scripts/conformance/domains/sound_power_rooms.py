@@ -506,6 +506,154 @@ def _chk_iso3743_2_suitability_verdicts() -> Outcome:
     return count(agree, total, subject="Table 1 verdicts")
 
 
+# --- ISO 3743 reading an ISO 6926 calibration ---------------------------------
+#: The test both parts read a calibration at: 20 degC and 90 kPa. Annex A of
+#: ISO 6926 gives a source of unknown radiation C2 = -10 lg(ps/ps0) +
+#: 7,5 lg(theta/296 K), 0,483 dB there, and the 15 lg of ISO 3743-1 Annex A
+#: and ISO 3743-2 Annex E gives 0,452 dB.
+_TEST_C = 20.0
+_TEST_KPA = 90.0
+_PRESSURE_TERM = -10.0 * math.log10(_TEST_KPA / 101.325)
+_RATIO = math.log10((273.15 + _TEST_C) / 296.0)
+_C2_UNKNOWN = _PRESSURE_TERM + 7.5 * _RATIO
+_C2_3743 = _PRESSURE_TERM + 15.0 * _RATIO
+#: From the level over the 2 m hemisphere to the power calibrated at the
+#: reference conditions: ISO 6926 Formula (2), C1 and C2 at 23,0 degC and
+#: 101,325 kPa, no air absorption.
+_TO_POWER_AS_CALIBRATED = (
+    10.0 * math.log10(2.0 * math.pi * 2.0**2)
+    + 5.0 * math.log10(296.15 / 314.0)
+    + 7.5 * math.log10(296.15 / 296.0)
+)
+#: The octave of a uniform 80 dB over the hemisphere: three equal one-third
+#: octaves summed.
+_OCTAVE_AS_CALIBRATED = 80.0 + 10.0 * math.log10(3.0) + _TO_POWER_AS_CALIBRATED
+#: One-third octaves of 76, 80 and 83 dB over the hemisphere at 800 Hz, 1 kHz
+#: and 1,25 kHz: the 1 kHz octave is their energy sum, 85,31 dB at the
+#: surface, which neither the middle third plus 10 lg 3 (84,77 dB) nor their
+#: arithmetic mean plus 10 lg 3 (84,44 dB) gives.
+_UNEQUAL_THIRDS_DB = (76.0, 80.0, 83.0)
+_UNEQUAL_OCTAVE_AS_CALIBRATED = (
+    10.0 * math.log10(sum(10.0 ** (0.1 * level) for level in _UNEQUAL_THIRDS_DB))
+    + _TO_POWER_AS_CALIBRATED
+)
+_TABLE_1_LIMITS = np.array([5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 4.0])
+
+
+def _uniform_calibration() -> ph.emission.ReferenceSourceCalibration:
+    return ph.emission.reference_source_calibration(
+        np.full((20, _THIRDS.size), 80.0), frequencies_hz=_THIRDS, arrangement="fixed"
+    )
+
+
+def _unequal_calibration() -> ph.emission.ReferenceSourceCalibration:
+    levels = np.full((20, _THIRDS.size), 80.0)
+    first = int(np.flatnonzero(_THIRDS == 800.0)[0])
+    levels[:, first : first + 3] = _UNEQUAL_THIRDS_DB
+    return ph.emission.reference_source_calibration(
+        levels, frequencies_hz=_THIRDS, arrangement="fixed"
+    )
+
+
+@register(
+    _DOMAIN,
+    "ISO 6926:2016 8.4 / ISO 3743-2:2018 6.7",
+    "The calibration as the suitability evaluation reads it at 20 degC and 90 kPa: "
+    "one-third octaves of 76, 80 and 83 dB over the 2 m hemisphere, the 1 kHz "
+    "octave their energy sum less the calibration's own C2 of 0,483 dB for a "
+    "source of unknown radiation, dB (closed form)",
+)
+def _chk_iso3743_2_suitability_calibration() -> Outcome:
+    check = ph.emission.check_special_room_suitability(
+        np.full(_FREQS.size, 90.0),
+        _unequal_calibration(),
+        _FREQS,
+        temperature_c=_TEST_C,
+        static_pressure_kpa=_TEST_KPA,
+    )
+    return numeric(
+        _UNEQUAL_OCTAVE_AS_CALIBRATED - _C2_UNKNOWN,
+        float(check.calibrated_power_level_db[3]),
+        1e-9,
+        unit="dB",
+        places=4,
+    )
+
+
+@register(
+    _DOMAIN,
+    "ISO 3743-2:2018 6.7 / Table 1",
+    "With a calibration read at 20 degC and 90 kPa, each band is suitable at its "
+    "Table 1 difference below the calibration and not 0,1 dB beyond it; with the "
+    "calibration read at the default 23,0 degC and 101,325 kPa instead, 0,482 dB "
+    "higher, the band at its limit is not",
+)
+def _chk_iso3743_2_suitability_calibration_verdicts() -> Outcome:
+    calibration = _uniform_calibration()
+    at_test = np.full(_FREQS.size, _OCTAVE_AS_CALIBRATED - _C2_UNKNOWN)
+    agree = total = 0
+    for band, limit in enumerate(_TABLE_1_LIMITS):
+        for offset, within, read_at_test in ((-limit, True, True),
+                                             (-limit - 0.1, False, True),
+                                             (-limit, False, False)):  # fmt: skip
+            measured = at_test.copy()
+            measured[band] += offset
+            check = (
+                ph.emission.check_special_room_suitability(
+                    measured,
+                    calibration,
+                    _FREQS,
+                    temperature_c=_TEST_C,
+                    static_pressure_kpa=_TEST_KPA,
+                )
+                if read_at_test
+                else ph.emission.check_special_room_suitability(
+                    measured, calibration, _FREQS
+                )
+            )
+            agree += int(
+                bool(check.band_within[band]) is within and check.passes is within
+            )
+            total += 1
+    return count(agree, total, subject="Table 1 verdicts with a calibration")
+
+
+@register(
+    _DOMAIN,
+    "ISO 6926:2016 8.4 / ISO 3743-1:2010 Eq. 14 / ISO 3743-2:2018 Formula 10",
+    "Both comparisons read a calibration at 20 degC and 90 kPa: the 1 kHz octave "
+    "less its own C2 of 0,483 dB, plus the 4 dB the source under test is louder, "
+    "and carried to the reference conditions by the 0,452 dB C2 of Annex A "
+    "(Part 1) and Annex E (Part 2), dB (closed form)",
+)
+def _chk_iso3743_comparison_calibration() -> Outcome:
+    calibration = _uniform_calibration()
+    st = np.full((6, _FREQS.size), 74.0)
+    rss = np.full((6, _FREQS.size), 70.0)
+    background = np.full(_FREQS.size, 40.0)  # above 15 dB: K1 = 0, no Table 4 step
+    conditions = {"temperature_c": _TEST_C, "static_pressure_kpa": _TEST_KPA}
+    part1 = ph.emission.sound_power_hard_walled(
+        st, rss, calibration, _FREQS, background_levels=background, **conditions
+    )
+    part2 = ph.emission.sound_power_special_room_comparison(
+        st, rss, calibration, _FREQS, background_levels=background, **conditions
+    )
+    at_test = _OCTAVE_AS_CALIBRATED - _C2_UNKNOWN + 4.0
+    expected = {
+        "ISO 3743-1 LW": round(at_test, 9),
+        "ISO 3743-1 LW ref": round(at_test + _C2_3743, 9),
+        "ISO 3743-2 LW": round(at_test, 9),
+        "ISO 3743-2 LW ref": round(at_test + _C2_3743, 9),
+    }
+    computed = {
+        "ISO 3743-1 LW": round(float(part1.sound_power_level[3]), 9),
+        "ISO 3743-1 LW ref": round(float(part1.sound_power_level_ref[3]), 9),
+        "ISO 3743-2 LW": round(float(part2.sound_power_level[3]), 9),
+        "ISO 3743-2 LW ref": round(float(part2.sound_power_level_ref[3]), 9),
+    }
+    return record(expected, computed, unit="dB")
+
+
 #: Table 3 of ISO 3743-2:2018 typed in from the printed page: (band, class)
 #: -> the minimum number of source locations for 3, 6 and 12 microphones.
 _TABLE_3 = {

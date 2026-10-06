@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1793/1793 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1796/1796 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -520,7 +520,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Intensity &amp; sound power</b>: 100% (85/85)</summary>
+<summary><b>Intensity &amp; sound power</b>: 100% (88/88)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -603,6 +603,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 3743-2:2018 6.3 | Limiting curves 0,9 and 1,1 times R Tnom up to 6,3 kHz, 0,8 and 1,2 above | 6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2 | 6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-2:2018 Table 1 | Maximum permitted differences of the reference-source evaluation of 6.7 | 125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 3 dB; 1 kHz = 3 dB; 2 kHz = 3 dB; 4 kHz = 3 dB; 8 kHz = 4 dB | 125 Hz = 5 dB; 250 Hz = 3 dB; 500 Hz = 3 dB; 1 kHz = 3 dB; 2 kHz = 3 dB; 4 kHz = 3 dB; 8 kHz = 4 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-2:2018 6.7 / Table 1 | Each band is suitable at its Table 1 difference read high or low, and not 0,1 dB beyond it on either side | 28/28 Table 1 verdicts | 28/28 Table 1 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 6926:2016 8.4 / ISO 3743-2:2018 6.7 | The calibration as the suitability evaluation reads it at 20 degC and 90 kPa: one-third octaves of 76, 80 and 83 dB over the 2 m hemisphere, the 1 kHz octave their energy sum less the calibration's own C2 of 0,483 dB for a source of unknown radiation, dB (closed form) | 98.7 dB (+/-0 dB) | 98.7 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3743-2:2018 6.7 / Table 1 | With a calibration read at 20 degC and 90 kPa, each band is suitable at its Table 1 difference below the calibration and not 0,1 dB beyond it; with the calibration read at the default 23,0 degC and 101,325 kPa instead, 0,482 dB higher, the band at its limit is not | 21/21 Table 1 verdicts with a calibration | 21/21 Table 1 verdicts with a calibration | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 6926:2016 8.4 / ISO 3743-1:2010 Eq. 14 / ISO 3743-2:2018 Formula 10 | Both comparisons read a calibration at 20 degC and 90 kPa: the 1 kHz octave less its own C2 of 0,483 dB, plus the 4 dB the source under test is louder, and carried to the reference conditions by the 0,452 dB C2 of Annex A (Part 1) and Annex E (Part 2), dB (closed form) | ISO 3743-1 LW = 102.1649 dB; ISO 3743-1 LW ref = 102.6167 dB; ISO 3743-2 LW = 102.1649 dB; ISO 3743-2 LW ref = 102.6167 dB | ISO 3743-1 LW = 102.1649 dB; ISO 3743-1 LW ref = 102.6167 dB; ISO 3743-2 LW = 102.1649 dB; ISO 3743-2 LW ref = 102.6167 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-2:2018 Table 3 | Minimum number of source locations for 3, 6 and 12 microphone positions, every band row and the A-weighted row | 45/45 Table 3 cells | 45/45 Table 3 cells | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-2:2018 Table 4 | Background corrections: 2, 2, 1, 1, 1, 0,5, 0,5 dB for 4 dB to 10 dB, 0 above | 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB | 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-2:2018 Formula 9 | Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0,73 s (closed form) | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |

@@ -530,6 +530,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the amended Annex A sets for one traverse, and the $d_0$ that ISO 6926
   Formula (A.1) halves twice.
 
+- **Judge a special reverberation test room against the reference source's
+  ISO 6926 calibration itself (ISO 3743-2 6.7).**
+  `emission.check_special_room_suitability` takes the
+  `ReferenceSourceCalibration` of ISO 6926 where it took the calibrated
+  octave-band levels, with the temperature and the static pressure of the room
+  test as the keyword arguments `temperature_c` and `static_pressure_kpa`
+  (23.0 °C and 101.325 kPa by default). The level Formula 9 gives is the power
+  under the meteorological conditions of the test (Annex E), so the
+  calibration is read there, as its $L_W$ less its own $C_2$ by the Annex A
+  formula it used, each octave the energy sum of its three one-third octave
+  bands, as the comparison method of 10.3 already read it; levels passed as
+  such are taken as already carried to the test. The room's levels to pass
+  are the `sound_power_level` of `sound_power_special_room`, the level at the
+  test, and not its `sound_power_level_ref`, which would count $C_2$ twice.
+  `SpecialRoomSuitabilityCheck` now holds both spectra,
+  `measured_power_level_db` and `calibrated_power_level_db` as read, and
+  derives `difference_db` from them. Every ISO 3743-1 and ISO 3743-2 result
+  now keeps its own copy of the band frequencies, so changing the caller's
+  array afterwards no longer relabels its bands. The guide checks its 72 m³
+  room against the source's calibration at 22 °C and 97.5 kPa, with a new
+  figure, and three conformance rows pin the calibration as the evaluation
+  reads it, an octave of unequal one-third octaves summed by energy, the
+  Table 1 verdicts against it at their edges, and both comparisons of
+  ISO 3743 reading a calibration and carrying the result back by Annex A and
+  Annex E.
+
 - **Wind turbine sound at a dwelling, with its amplitude modulation rating
   (IEC TS 61400-11-2:2024).** IEC 61400-11 measures what a turbine emits; the
   new `environment.assessment.wind_turbine_receptor` and

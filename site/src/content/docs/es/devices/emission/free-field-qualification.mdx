@@ -637,8 +637,10 @@ niveles, y leen las bandas que necesitan: `sound_power_comparison` y
 y `sound_energy_hard_walled` (ISO 3743-1),
 `sound_power_special_room_comparison` (ISO 3743-2), `sound_power_in_situ` y
 `sound_energy_in_situ` (ISO 3747) en octavas, cada una la suma energética de
-sus tres bandas de tercio de octava. `sound_power_level_at` la lee
-directamente.
+sus tres bandas de tercio de octava. La evaluación de idoneidad de la
+ISO 3743-2, apartado 6.7, `check_special_room_suitability`, la toma como la
+calibración frente a la que se juzga la sala, también en octavas.
+`sound_power_level_at` la lee directamente.
 
 La calibración guarda $L_W$ en las condiciones de referencia, y $C_2$ es lo
 que llevó hasta ellas la potencia que radiaba la fuente durante la

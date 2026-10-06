@@ -65,9 +65,10 @@ The room is qualified by [`check_special_room_reverberation`](/phonometry/refere
 and the climate of 6.6), [`check_special_room_surfaces`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_surfaces) (6.4) and
 [`check_special_room_suitability`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_suitability) (6.7, the octave-band power of a
 calibrated reference source determined in the room against its calibration,
-Table 1). The number of source locations and microphone positions follows
-from the survey of 9.4 by [`special_room_source_locations`](/phonometry/reference/api/power/sound-power-special-room/#special_room_source_locations) (Table 3),
-which also reads the spectral character of 9.5.
+Table 1, an ISO 6926 calibration read at the conditions of the test). The
+number of source locations and microphone positions follows from the survey
+of 9.4 by [`special_room_source_locations`](/phonometry/reference/api/power/sound-power-special-room/#special_room_source_locations) (Table 3), which also reads
+the spectral character of 9.5.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -160,8 +161,11 @@ but keeps it out of the verdict, the clause saying "should".
 ```python
 check_special_room_suitability(
     measured_power_levels: ArrayLike,
-    calibrated_power_levels: ArrayLike,
+    calibrated_power_levels: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
+    *,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> SpecialRoomSuitabilityCheck
 ```
 
@@ -169,17 +173,32 @@ Is the room suitable for broad-band sources? ISO 3743-2:2018, 6.7.
 
 A small broad-band reference sound source calibrated by ISO 3741, or by
 ISO 6926 and ISO 3745 (step 1), has its octave-band power levels
-determined in the room by this standard (step 2); the differences from
-the calibration (step 3) may not exceed Table 1 (step 4): ±5 dB at
-125 Hz, ±3 dB from 250 Hz to 4 kHz and ±4 dB at 8 kHz.
+determined in the room by this standard, under identical operating
+conditions (step 2); the differences from the calibration (step 3) may
+not exceed Table 1 (step 4): ±5 dB at 125 Hz, ±3 dB from 250 Hz to
+4 kHz and ±4 dB at 8 kHz.
+
+The level Formula 9 gives is, in the words of Annex E, the sound power
+level "under the meteorological conditions which occurred at the time
+and place of the test", and a calibration holds the power under the
+reference conditions, 23,0 °C and 101,325 kPa. The two are compared
+where the room measured: a
+[`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926 is
+read at the temperature and static pressure of the test as
+$L_W - C_2$, with $C_2$ evaluated there by the Annex A
+formula the calibration used (ISO 6926:2016, 8.4), each octave the
+energy sum of its three one-third octave bands, exactly as
+[`sound_power_special_room_comparison`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room_comparison) reads it.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `measured_power_levels` | The reference source's octave-band power levels determined in the room, in decibels. |
-| `calibrated_power_levels` | Its calibrated levels, in decibels. |
+| `measured_power_levels` | The reference source's octave-band power levels determined in the room, in decibels: the `sound_power_level` of [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room), the level at the test, and not its `sound_power_level_ref`, which the Annex E $C_2$ has already carried to the reference conditions: against a calibration read at the conditions of the test, it would count $C_2$ twice. |
+| `calibrated_power_levels` | Its calibrated octave-band levels, in decibels, already under the meteorological conditions of the test; or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), which is read there. |
 | `frequencies` | Octave centres from 125 Hz to 8 kHz, ascending. |
+| `temperature_c` | Air temperature in the room during step 2, in degrees Celsius; it reads a calibration and is otherwise only validated. |
+| `static_pressure_kpa` | Static pressure in the room during step 2, in kilopascals, likewise. |
 
 **Returns:** The verdict, as a [`SpecialRoomSuitabilityCheck`](/phonometry/reference/api/power/sound-power-special-room/#specialroomsuitabilitycheck).
 
@@ -187,7 +206,7 @@ the calibration (step 3) may not exceed Table 1 (step 4): ±5 dB at
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for non-finite levels, mismatched lengths, or bands outside Table 1. |
+| ValueError | for non-finite levels, mismatched lengths, bands outside Table 1, a climate out of range, or a calibration that does not cover the one-third octave bands of an octave or used the manufacturer's $C_2$, whose value at the test only the manufacturer gives. |
 
 ## check_special_room_surfaces
 
@@ -647,8 +666,9 @@ test room.
 
 `method` is `'direct'` (Formula 9) or `'comparison'` (Formula 10).
 `sound_power_level` is the octave-band $L_W$ at the
-meteorological conditions of the test; the `..._ref` properties add the
-Annex E correction `c2`, which 10.2 and 10.3 require above 500 m.
+meteorological conditions of the test, the level the suitability
+evaluation of 6.7 compares; the `..._ref` properties add the Annex E
+correction `c2`, which 10.2 and 10.3 require above 500 m.
 
 `mean_pressure_level` is the mean background-corrected level of the
 source under test, $\overline{L_p}$ (Formula 8) or
@@ -790,22 +810,32 @@ The Annex F total of `sound_power_level_ref`, `LWA + C2`.
 ```python
 SpecialRoomSuitabilityCheck(
     frequencies: np.ndarray,
-    difference_db: np.ndarray,
+    measured_power_level_db: np.ndarray,
+    calibrated_power_level_db: np.ndarray,
     limit_db: np.ndarray,
 )
 ```
 
 The suitability evaluation of ISO 3743-2:2018, 6.7 (Table 1).
 
-`difference_db` is, per octave band, the sound power level of a
-calibrated broad-band reference source determined in the room less its
-calibrated value, and `limit_db` the Table 1 bound on its magnitude.
+Per octave band, `measured_power_level_db` is the sound power level of
+a calibrated broad-band reference source determined in the room by this
+standard (step 2), `calibrated_power_level_db` its calibration as the
+evaluation read it, under the meteorological conditions of the test
+(step 1), and `limit_db` the Table 1 bound on the magnitude of their
+difference (step 4).
 
 ### SpecialRoomSuitabilityCheck.band_within
 
 *property*
 
 Per band, whether the difference stays within Table 1.
+
+### SpecialRoomSuitabilityCheck.difference_db
+
+*property*
+
+Per band, the level determined in the room less the calibration (step 3).
 
 ### SpecialRoomSuitabilityCheck.passes
 

@@ -42,6 +42,7 @@ from .buildings import (
     _d_iso12999,
     _d_iso16251_mockup,
     _d_junction_catalogue,
+    _d_lab_application_rules,
     _d_low_frequency_corners,
     _d_open_plan,
     _d_open_plan_setup,
@@ -67,7 +68,9 @@ from .devices import (
     _d_distortion_bench,
     _d_duct_path,
     _d_enclosure_cabin_measurement,
+    _d_free_field_traverses,
     _d_headphone_measurement,
+    _d_high_frequency_room,
     _d_in_duct_rig,
     _d_induction_loop_measurement,
     _d_intensity_scan,
@@ -79,6 +82,7 @@ from .devices import (
     _d_noise_control,
     _d_noise_declaration_chain,
     _d_open_end_solid_angles,
+    _d_plant_contour,
     _d_pp_probe,
     _d_precision_anechoic,
     _d_program_loudness,
@@ -95,6 +99,7 @@ from .devices import (
     _d_surfaces,
     _d_sweep_bench,
     _d_swept_sine,
+    _d_turbine_hall,
     _d_valve_noise_place,
     _d_vdi2081_sheet,
     _d_vibration_sound_power,
@@ -117,6 +122,7 @@ from .environment import (
     _d_statistical_pass_by_site,
     _d_wind_turbine,
     _d_wind_turbine_board,
+    _d_wind_turbine_receptor,
 )
 from .fluids import _d_humid_air_chain
 from .materials import (
@@ -426,6 +432,26 @@ DIAGRAMS = {
         _d_sound_power_in_situ,
         "How sound power is measured in situ (ISO 3747)",
         744,
+    ),
+    "diagram_plant_contour": (
+        _d_plant_contour,
+        "How a whole plant's sound power is measured round it (ISO 8297)",
+        700,
+    ),
+    "diagram_turbine_hall": (
+        _d_turbine_hall,
+        "How a turbine set is measured in its own hall (IEC 61063)",
+        690,
+    ),
+    "diagram_high_frequency_room": (
+        _d_high_frequency_room,
+        "How the 16 kHz octave is measured in a reverberation room (ISO 9295)",
+        728,
+    ),
+    "diagram_free_field_traverses": (
+        _d_free_field_traverses,
+        "How a free-field room is qualified along its traverses (ISO 26101)",
+        684,
     ),
     "diagram_box_array": (
         _d_box_array,
@@ -1058,6 +1084,11 @@ DIAGRAMS = {
         "The four diffracted paths of a barrier on finite-impedance ground",
         596,
     ),
+    "diagram_lab_application_rules": (
+        _d_lab_application_rules,
+        "Four laboratory measurements of ISO 10140-1 Annexes G, H, J and K",
+        712,
+    ),
     "diagram_cnossos_road": (
         _d_cnossos_road,
         "CNOSSOS-EU road source line geometry",
@@ -1082,6 +1113,11 @@ DIAGRAMS = {
         _d_wind_turbine_board,
         "IEC 61400-11 ground-board microphone mounting",
         600,
+    ),
+    "diagram_wind_turbine_receptor": (
+        _d_wind_turbine_receptor,
+        "How wind farm noise is measured at a dwelling (IEC TS 61400-11-2)",
+        668,
     ),
     "diagram_rd1367_chain": (
         _d_rd1367_chain,

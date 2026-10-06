@@ -3,15 +3,16 @@
 
 A part earns its place here when diagrams of different guides draw the
 same object: the oblique-projected box that stands for a machine under a
-measurement surface, the curved rotation arrow of a turntable, and the
+measurement surface, the curved rotation arrow of a turntable, the
 pieces every structure-borne rig is assembled from (spring, accelerometer,
-exciter, motion arrows, plates). They take the same ``(s, th)`` the
-builders do, so a part reads inside a builder exactly like a canvas
-primitive.
+exciter, motion arrows, plates), and the 45° hatching that marks a cut
+element or a built-up area. They take the same ``(s, th)`` the builders
+do, so a part reads inside a builder exactly like a canvas primitive.
 """
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -253,3 +254,25 @@ def _accel_wall(s: SVG, x: float, y: float, size: float = 13.0) -> None:
     th = s.th
     s.rect(x - size / 2, y - size / 2, size, size, th.secondary, th.fg, rx=2.5, sw=1.3)
     s.line(x + size / 2, y, x + size / 2 + 8, y, th.fg, 1.3)
+
+
+def _hatch_rect(
+    s: SVG,
+    x0: float,
+    y0: float,
+    x1: float,
+    y1: float,
+    spacing: float,
+    colour: str,
+) -> None:
+    """Diagonals ``x + y = c`` across a rectangle, ``c`` a multiple of *spacing*.
+
+    Keyed on the sheet rather than on the rectangle, so two rectangles that
+    share an edge are hatched as one area.
+    """
+    c = math.ceil((x0 + y0) / spacing) * spacing
+    while c < x1 + y1:
+        x_hi, x_lo = min(x1, c - y0), max(x0, c - y1)
+        if x_hi > x_lo:
+            s.line(x_hi, c - x_hi, x_lo, c - x_lo, colour, 0.8)
+        c += spacing

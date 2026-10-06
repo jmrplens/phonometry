@@ -10,6 +10,7 @@ draw what happens to the level once it has arrived.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -1774,3 +1775,193 @@ def _d_rolling_stock_site(s: SVG, th: Theme) -> None:
         th.fg,
         anchor="start",
     )
+
+
+# ---------------------------------------------------------------------------
+# IEC TS 61400-11-2: wind turbine noise at a dwelling
+# ---------------------------------------------------------------------------
+
+
+def _small_turbine(
+    s: SVG, th: Theme, x: float, gy: float, hub_y: float, rr: float
+) -> None:
+    """A wind turbine seen from the side: tower, nacelle and the rotor edge-on."""
+    s.path(
+        f"M {x - 7:.0f} {gy:.0f} L {x - 3:.0f} {hub_y + 8:.0f} "
+        f"L {x + 3:.0f} {hub_y + 8:.0f} L {x + 7:.0f} {gy:.0f} Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=1.5,
+    )
+    s.rect(x - 18, hub_y - 8, 36, 16, th.panel, th.fg, rx=4, sw=1.5)
+    rx = x - 22
+    s.ellipse(rx, hub_y, 6.0, rr, stroke=th.muted, sw=1.1, dash="5,4")
+    s.line(rx, hub_y - 6, rx - 3, hub_y - rr + 3, th.fg, 2.6)
+    s.line(rx, hub_y + 6, rx + 2, hub_y + rr - 3, th.fg, 2.6)
+    s.circle(rx, hub_y, 4.5, th.fg)
+
+
+def _d_wind_turbine_receptor(s: SVG, th: Theme) -> None:
+    """IEC TS 61400-11-2: the microphone at the dwelling and the wind it is binned by.
+
+    Read in IEC TS 61400-11-2:2024. The microphone stands away from any large
+    reflecting surface but the ground, ideally five wavelengths of the lowest
+    frequency of interest, typically 15 m to 20 m (8.1.1, PDF page 25,
+    printed p. 23), free-field and inside a two-stage or oversize wind screen
+    on a tripod or a pole (8.1.3, same page). The façade alternative is plane
+    within ±0,05 m within 1 m of the microphone, with the edges of the façade
+    more than 1 m away, the relevant turbines within 45° of its normal, and no
+    use for tonal audibility, amplitude modulation or impulsivity (8.1.3,
+    PDF pages 25 and 26, pp. 23 and 24). Wind and the turbines' power are
+    sampled at 1 Hz or faster and averaged over 10 s to 10 min (9.2, PDF page
+    26, p. 24); the binning wind speed comes from the power curve and the
+    nacelle anemometer, recalculated to 10 m (9.3.2.1, PDF page 28, p. 26),
+    or from a mast or remote sensing device with one height within ±40 % of
+    the hub height and a second at least 15 m from it (9.3.2.3, same page).
+    Temperature and humidity are read 1 m to 1.5 m above ground between the
+    farm and the receptor (9.6, PDF page 31, p. 29). The bins are 1 m/s wide
+    and 30° sectors from north, the downwind sector ±45° of the line from
+    the turbines (10.1, same page), and the amplitude modulation analysis
+    takes 100 ms one-third-octave L_Aeq from 20 Hz to 10 kHz, 10 s blocks
+    and 10 min periods, with integer-centred speed bins (13.6.1, PDF page
+    51, p. 49). The section is not to scale: the standard fixes the
+    distances by rule.
+    """
+    s.text(
+        450, 62, "In section, from the turbines to the dwelling", 15, th.fg, bold=True
+    )
+    gy = 330.0
+    s.ground(gy, 30, 870)
+    for x, hub_y, rr in ((96.0, 140.0, 56.0), (196.0, 152.0, 52.0)):
+        _small_turbine(s, th, x, gy, hub_y, rr)
+    s.text(
+        34, gy + 28, "binning wind: power curve or nacelle", 12, th.fg, anchor="start"
+    )
+    s.text(
+        34,
+        gy + 44,
+        "anemometer, recalculated to 10 m (9.3.2.1)",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        34,
+        gy + 60,
+        "sampled at 1 Hz or faster, averaged over 10 s to 10 min (9.2)",
+        12,
+        th.muted,
+        anchor="start",
+    )
+
+    # The mast: one height near the hub, another 15 m from it.
+    mx = 296.0
+    s.line(mx, gy, mx, 128, th.fg, 2.0)
+    for y in (140.0, 214.0):
+        s.line(mx - 10, y, mx + 10, y, th.fg, 1.6)
+        s.circle(mx - 10, y - 5, 3.6, th.panel, th.fg, 1.2)
+        s.circle(mx + 10, y - 5, 3.6, th.panel, th.fg, 1.2)
+    s.dim(mx + 26, 140, mx + 26, 214, "≥ 15 m", size=11, label_side="right")
+    s.text(mx, 104, "mast or remote sensing", 12, th.fg)
+    s.text(mx, 120, "one height within ±40 % of the hub", 11, th.muted)
+
+    # Temperature and humidity between the farm and the receptor.
+    wx = 420.0
+    s.line(wx, gy, wx, gy - 30, th.fg, 1.8)
+    s.rect(wx - 8, gy - 42, 16, 12, th.panel, th.fg, sw=1.2)
+    s.text(wx, gy - 70, "temperature, humidity", 11, th.fg)
+    s.text(wx, gy - 55, "1 m to 1.5 m up (9.6)", 11, th.fg)
+
+    # The dwelling and its façade.
+    hx0, hx1 = 684.0, 820.0
+    s.rect(hx0, 226, hx1 - hx0, gy - 226, th.panel, th.fg, sw=1.8)
+    s.path(
+        f"M {hx0 - 8:.0f} 226 L {(hx0 + hx1) / 2:.0f} 178 L {hx1 + 8:.0f} 226 Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=1.8,
+    )
+    s.rect(hx0 + 46, 270, 22, 60, th.bg, th.fg, sw=1.2)
+    s.text((hx0 + hx1) / 2, 170, "dwelling", 12, th.fg, bold=True)
+    # Façade microphone.
+    s.rect(hx0 - 9, 262, 9, 7, th.secondary, th.fg, rx=1.5, sw=1.0)
+    s.text(hx0 - 14, 296, "microphone", 11, th.secondary, anchor="end")
+    s.text(hx0 - 14, 311, "on the façade", 11, th.secondary, anchor="end")
+
+    # The free-field microphone, in its wind screen, on a tripod.
+    fx = 520.0
+    my = 270.0
+    s.line(fx, my + 10, fx, gy, th.fg, 1.8)
+    s.line(fx, gy - 22, fx - 12, gy, th.fg, 1.4)
+    s.line(fx, gy - 22, fx + 12, gy, th.fg, 1.4)
+    s.circle(fx, my, 18.0, th.panel, th.primary, 1.6)
+    s.circle(fx, my, 11.0, "none", th.primary, 1.2)
+    s.rect(fx - 2.5, my - 4, 5, 10, th.fg, rx=1.2)
+    s.text(fx, 202, "free field, inside a", 12, th.primary)
+    s.text(fx, 218, "two-stage or oversize", 12, th.primary)
+    s.text(fx, 234, "wind screen (8.1.3)", 12, th.primary)
+    s.dim(fx, gy + 26, hx0, gy + 26, "", size=11)
+    s.text((fx + hx0) / 2, gy + 50, "5 $λ$ of the lowest frequency,", 12, th.fg)
+    s.text((fx + hx0) / 2, gy + 66, "typically 15 m to 20 m (8.1.1)", 12, th.fg)
+
+    # ----- What the façade has to be -------------------------------------------
+    s.text(
+        450,
+        422,
+        "A façade microphone (8.1.3) only where the signal needs it:",
+        13,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        442,
+        "plane within ±0.05 m within 1 m, edges more than 1 m away, the turbines "
+        "within 45° of its normal",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        460,
+        "and never for tonal audibility, amplitude modulation or impulsivity; a "
+        "proxy location is of limited use for them (8.1.2)",
+        12,
+        th.muted,
+    )
+
+    # ----- The bins ------------------------------------------------------------
+    rcx, rcy, rr = 110.0, 578.0, 56.0
+    s.text(
+        40, 498, "Binned by wind (10.1, 13.6.1)", 14, th.fg, anchor="start", bold=True
+    )
+    for k in range(12):
+        a = math.radians(-90.0 + 15.0 + 30.0 * k)
+        s.line(rcx, rcy, rcx + rr * math.cos(a), rcy + rr * math.sin(a), th.muted, 1.0)
+    s.circle(rcx, rcy, rr, "none", th.fg, 1.4)
+    s.circle(rcx, rcy, rr * 0.5, "none", th.muted, 1.0)
+    s.text(rcx, rcy - rr - 6, "N", 12, th.fg, bold=True)
+    tx_ = 190.0
+    s.text(tx_, 530, "12 sectors 30° wide, the first", 12, th.fg, anchor="start")
+    s.text(tx_, 548, "from 345° to 15°", 12, th.fg, anchor="start")
+    s.text(tx_, 572, "1 m/s wide, integer centred:", 12, th.fg, anchor="start")
+    s.text(tx_, 590, "5 m/s is 4.5 m/s to 5.5 m/s", 12, th.fg, anchor="start")
+    s.text(tx_, 614, "downwind: the line from the", 12, th.muted, anchor="start")
+    s.text(tx_, 632, "turbines ±45°", 12, th.muted, anchor="start")
+
+    # ----- Amplitude modulation --------------------------------------------------
+    col, cw, top = 500.0, 370.0, 488.0
+    s.rect(col, top, cw, 156, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(
+        col + cw / 2, top + 24, "Amplitude modulation (13.6.1)", 14, th.fg, bold=True
+    )
+    rows = (
+        "100 ms $L_{Aeq}$ in one-third octaves,",
+        "20 Hz to 10 kHz at least",
+        "10 s blocks, 60 of them to a 10 min period",
+        "wind referenced to 10 min averages",
+        "free field only, not on the façade",
+    )
+    size = s.fit_size(rows, (12, 11), cw - 28)
+    for k, txt in enumerate(rows):
+        s.text(col + 14, top + 52 + 21 * k, txt, size, th.fg, anchor="start")

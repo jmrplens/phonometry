@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -1302,7 +1303,7 @@ def low_frequency_intensity_reduction(
         r_i=r_i,
         surface_pressure_intensity_indicator=f_pi,
         qualified=qualified,
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         area=s,
         measurement_area=sm,
         absorbing_specimen_surface=absorbing,
@@ -1479,7 +1480,7 @@ def low_frequency_element_normalized_difference(
         d_i_n_e=d_i_n_e,
         surface_pressure_intensity_indicator=f_pi,
         qualified=qualified,
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         measurement_area=sm,
         elements=n,
         absorbing_specimen_surface=_validated_absorbing_flag(

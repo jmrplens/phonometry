@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -642,7 +643,7 @@ def normal_modes(
         wavenumbers=kr,
         mode_depths=z,
         mode_functions=psi,
-        ranges=r,
+        ranges=read_only_copy(r),
         propagation_loss=np.asarray(pl, dtype=np.float64),
         receiver_depth=zr,
         source_depth=zs,
@@ -954,7 +955,7 @@ def ray_trace(
         ray_s = np.where(gone, np.nan, ray_s)
 
     return RayTraceResult(
-        launch_angles_deg=angles,
+        launch_angles_deg=read_only_copy(angles),
         ranges=ray_r,
         depths=ray_z,
         travel_times=ray_t,
@@ -968,10 +969,10 @@ def ray_trace(
         bottom_reflections=np.cumsum(march.upper_reflections, axis=1),
         source_depth=zs,
         water_depth=water_depth,
-        profile_depths=z_prof,
-        profile_speeds=c_prof,
-        bathymetry_ranges=None if bathy is None else bathy[0],
-        bathymetry_depths=None if bathy is None else bathy[1],
+        profile_depths=read_only_copy(z_prof),
+        profile_speeds=read_only_copy(c_prof),
+        bathymetry_ranges=None if bathy is None else read_only_copy(bathy[0]),
+        bathymetry_depths=None if bathy is None else read_only_copy(bathy[1]),
     )
 
 
@@ -3448,8 +3449,8 @@ def gaussian_beams(
 
     return GaussianBeamResult(
         frequency=f,
-        ranges=ranges,
-        depths=receivers,
+        ranges=read_only_copy(ranges),
+        depths=read_only_copy(receivers),
         propagation_loss=np.asarray(pl, dtype=np.float64),
         pressure=np.asarray(pressure, dtype=np.complex128),
         launch_angles_deg=np.degrees(launch),
@@ -3466,8 +3467,8 @@ def gaussian_beams(
         seabed_sound_speed=None if seabed is None else seabed[2],
         source_depth=zs,
         water_depth=water_depth,
-        bathymetry_ranges=None if bathy is None else bathy[0],
-        bathymetry_depths=None if bathy is None else bathy[1],
+        bathymetry_ranges=None if bathy is None else read_only_copy(bathy[0]),
+        bathymetry_depths=None if bathy is None else read_only_copy(bathy[1]),
     )
 
 

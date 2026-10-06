@@ -94,6 +94,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_choice,
@@ -1193,9 +1194,9 @@ def sound_power_in_duct(
     # Annex C, Eq. (C.1): the energy sum with the C_j of Table C.1.
     cj = np.asarray([_TABLE_C1[band] for band in _band_keys(freqs)], dtype=np.float64)
     return InDuctSoundPowerResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_power_level=lw,
-        mean_pressure_level=np.asarray(mean_level, dtype=np.float64),
+        mean_pressure_level=read_only_copy(mean_level, dtype=np.float64),
         corrected_pressure_level=np.asarray(corrected, dtype=np.float64),
         microphone_correction=c1,
         shield_correction=c2,

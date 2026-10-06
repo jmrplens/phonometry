@@ -171,6 +171,18 @@ def test_revised_npd_data_is_table_d6b() -> None:
         assert np.all(np.abs(rev.revised.levels - printed) <= _HALF_DECI)
 
 
+def test_revised_curves_keep_axes_of_their_own() -> None:
+    """The revised curves used to share the powers and distances of the
+    curves passed in, so editing those moved the revision too.
+    """
+    curves = _curves("A", TABLE_D6A)
+    rev = revise_npd_curves(curves, _DB.spectral_class(205), **_AIR)
+    assert not np.shares_memory(rev.revised.distances, curves.distances)
+    assert not np.shares_memory(rev.revised.powers, curves.powers)
+    np.testing.assert_array_equal(rev.revised.distances, curves.distances)
+    np.testing.assert_array_equal(rev.revised.powers, curves.powers)
+
+
 def test_revised_npd_data_is_table_d6c_but_its_misprinted_row() -> None:
     for operation, class_id in (("A", 205), ("D", 103)):
         rev = revise_npd_curves(

@@ -94,6 +94,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_count,
     require_finite,
@@ -702,7 +703,10 @@ def check_double_hit(
         msg = "'force' holds no force: every sample is zero."
         raise ValueError(msg)
     return DoubleHitCheck(
-        force=record, fs=rate, impact_indices=peaks, threshold_ratio=threshold
+        force=read_only_copy(record),
+        fs=rate,
+        impact_indices=peaks,
+        threshold_ratio=threshold,
     )
 
 
@@ -1238,11 +1242,11 @@ def exponential_window_correction(
         damping reaches a mode's apparent damping.
     """
     return ExponentialWindowCorrection(
-        damped_natural_frequency_hz=np.atleast_1d(
-            np.asarray(damped_natural_frequency_hz, dtype=np.float64)
+        damped_natural_frequency_hz=read_only_copy(
+            np.atleast_1d(np.asarray(damped_natural_frequency_hz, dtype=np.float64))
         ),
-        apparent_damping_ratio=np.atleast_1d(
-            np.asarray(apparent_damping_ratio, dtype=np.float64)
+        apparent_damping_ratio=read_only_copy(
+            np.atleast_1d(np.asarray(apparent_damping_ratio, dtype=np.float64))
         ),
         exponential_decay_rate_per_s=float(exponential_decay_rate_per_s),
     )
@@ -1840,7 +1844,7 @@ def check_overload(
     rate = require_positive(resolve_fs(record, fs, name="record"), "fs")
     x = _record(record, "record")
     return OverloadCheck(
-        record=x,
+        record=read_only_copy(x),
         fs=rate,
         full_scale=require_positive(full_scale, "full_scale"),
     )
@@ -2124,7 +2128,7 @@ def check_response_decay(
         else require_positive(segment_s, "segment_s")
     )
     return ResponseDecayCheck(
-        record=x,
+        record=read_only_copy(x),
         fs=rate,
         segment_s=float(segment),
         exponential_window=bool(exponential_window),

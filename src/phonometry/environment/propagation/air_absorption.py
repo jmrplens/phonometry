@@ -72,6 +72,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_same_shape,
@@ -522,7 +523,7 @@ def atmospheric_attenuation(
     if exact_midband:
         freqs = _exact_midband(freqs)
     return AtmosphericAttenuation(
-        frequencies=np.atleast_1d(freqs),
+        frequencies=read_only_copy(np.atleast_1d(freqs)),
         attenuation_coefficient=np.atleast_1d(alpha),
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),

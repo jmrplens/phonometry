@@ -99,6 +99,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
@@ -1571,7 +1572,7 @@ def in_situ_element(
     )
     return InSituElementResult(
         label=element.label,
-        frequencies=f,
+        frequencies=read_only_copy(f),
         area=require_positive(element.area, "area"),
         radiation_factor=sigma,
         forced_radiation_factor=sigma_f,
@@ -1945,7 +1946,7 @@ def detailed_airborne_prediction(
     direct = BandPath(
         label=direct_label,
         kind="Dd",
-        values=_band_array(direct_index, f.size, "direct_index"),
+        values=read_only_copy(_band_array(direct_index, f.size, "direct_index")),
     )
     paths = (direct, *flanking_paths)
     tau = 10.0 ** (-_path_matrix(paths, f.size) / 10.0)
@@ -1953,7 +1954,7 @@ def detailed_airborne_prediction(
     r_prime = np.asarray(-10.0 * np.log10(total), dtype=np.float64)
     rating_values = _rating_slice(f, r_prime, bands)
     return DetailedAirborneResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         paths=paths,
         r_prime=r_prime,
         fractions=np.asarray(tau / total, dtype=np.float64),
@@ -2006,7 +2007,7 @@ def detailed_impact_prediction(
         direct = BandPath(
             label=direct_label,
             kind="Dd",
-            values=_band_array(direct_level, f.size, "direct_level"),
+            values=read_only_copy(_band_array(direct_level, f.size, "direct_level")),
         )
         paths = (direct, *paths)
     energy = 10.0 ** (_path_matrix(paths, f.size) / 10.0)
@@ -2014,7 +2015,7 @@ def detailed_impact_prediction(
     l_prime_n = np.asarray(10.0 * np.log10(total), dtype=np.float64)
     rating_values = _rating_slice(f, l_prime_n, bands)
     return DetailedImpactResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         paths=paths,
         l_prime_n=l_prime_n,
         fractions=np.asarray(energy / total, dtype=np.float64),

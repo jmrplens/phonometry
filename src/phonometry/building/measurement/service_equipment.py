@@ -145,6 +145,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from ..._internal.boundary import round_half_up
+from ..._internal.frozen import read_only_copy
 from ..._internal.levels_math import energy_mean
 from ..._internal.validation import (
     _as_float64,
@@ -1087,7 +1088,7 @@ def service_equipment_background_correction(
         correction_db=np.asarray(correction, dtype=np.float64),
         corrected_db=measured - correction,
         regime=regime,
-        frequencies_hz=freqs,
+        frequencies_hz=read_only_copy(freqs),
     )
 
 

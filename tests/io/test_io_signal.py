@@ -196,3 +196,16 @@ def test_plot_rejects_unknown_language() -> None:
     sig = Signal(data=_tone(), fs=FS)
     with pytest.raises(ValueError, match=r"Unknown language 'fr'"):
         sig.plot(language="fr")
+
+
+def test_a_signal_keeps_samples_of_its_own() -> None:
+    """A Signal built around the caller's array keeps a copy: editing the
+    array afterwards changes no recording, and the copy stays writeable for
+    processing in place.
+    """
+    samples = np.zeros(8)
+    signal = Signal(samples, fs=48_000)
+    samples[0] = 1.0
+    assert signal.data[0, 0] == 0.0
+    assert not np.shares_memory(signal.data, samples)
+    assert signal.data.flags.writeable

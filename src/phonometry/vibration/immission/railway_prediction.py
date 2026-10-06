@@ -84,6 +84,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -880,8 +881,8 @@ def predict_train_category(
     kb_ftm = takt_maximum_kb(weighted)
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(
-        frequencies_hz=freqs,
-        emission_db=levels,
+        frequencies_hz=read_only_copy(freqs),
+        emission_db=read_only_copy(levels),
         floor_db=floor,
         weighted_frequencies_hz=freqs[inside],
         weighted_db=weighted,

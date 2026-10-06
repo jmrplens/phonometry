@@ -118,7 +118,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     check_engine,
     is_class_designation,
@@ -1160,8 +1160,8 @@ def verify_filter_class(
         bands=tuple(bands),
         fraction=int(bank.fraction),
         edition=edition,
-        sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
-        band_frequencies=np.asarray(bank.freq, dtype=np.float64),
+        sos=tuple(read_only_copy(s, dtype=np.float64) for s in bank.sos),
+        band_frequencies=read_only_copy(bank.freq, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
         num_points=int(num_points),

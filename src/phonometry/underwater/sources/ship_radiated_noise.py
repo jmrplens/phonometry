@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_equal_shapes,
     require_finite_array,
@@ -253,8 +254,8 @@ def monopole_source_level(
     source_depth = _SOURCE_DEPTH_FRACTION * d
     delta_l = _surface_correction(freqs, source_depth, speed)
     return ShipSourceLevelResult(
-        frequencies=freqs,
-        radiated_noise_level=rnl_arr,
+        frequencies=read_only_copy(freqs),
+        radiated_noise_level=read_only_copy(rnl_arr),
         surface_correction=delta_l,
         source_level=rnl_arr + delta_l,
         source_depth=source_depth,

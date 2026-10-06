@@ -67,7 +67,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import require_choice, require_positive
 from .free_field_corrections import _band_column, _frequency_axis
 
@@ -339,8 +339,8 @@ def _calibration(
     """Build the result; shared by the pressure and the free-field routes."""
     return ReciprocityCalibration(
         frequencies_hz=frequencies,
-        sensitivity_v_per_pa=sensitivities,
-        products_v2_per_pa2=products,
+        sensitivity_v_per_pa=read_only_copy(sensitivities),
+        products_v2_per_pa2=read_only_copy(products),
         field=field,
         method=method,
         corrections_db=dict(corrections_db or {}),  # type: ignore[arg-type]

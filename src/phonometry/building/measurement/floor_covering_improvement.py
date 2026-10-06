@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -461,7 +462,7 @@ def impact_improvement(
         limited = limited_pos
     delta_lw, ci_delta = _rating(improvement, freqs)
     return FloorCoveringImprovementResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         improvement=improvement,
         limited=limited,
         delta_lw=delta_lw,

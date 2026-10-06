@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -258,7 +258,7 @@ def sae_band_attenuation(
     delta_t = alpha * s
     delta_b = _sae_band(delta_t)
     return AircraftBandAttenuation(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         band_attenuation=delta_b,
         midband_attenuation=np.asarray(delta_t, dtype=np.float64),
         coefficient=alpha,

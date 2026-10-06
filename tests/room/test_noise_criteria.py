@@ -495,3 +495,14 @@ def test_an_nc_rating_inside_the_family_cannot_be_flagged_out_of_it() -> None:
     assert result.out_of_range is None
     with pytest.raises(ValueError, match="'rating' must be NaN"):
         dataclasses.replace(result, out_of_range="above")
+
+
+def test_the_nc_result_keeps_levels_of_its_own() -> None:
+    """The ten bands passed in were kept as given, so editing them afterwards
+    moved the levels the rating was read from.
+    """
+    levels = np.array([60.0, 58.0, 55.0, 52.0, 50.0, 48.0, 45.0, 42.0, 40.0, 38.0])
+    result = rn.noise_criterion(levels)
+    levels[0] = 0.0
+    assert result.levels[0] == 60.0
+    assert not result.levels.flags.writeable

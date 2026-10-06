@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_above_absolute_zero_array,
@@ -745,7 +746,7 @@ def two_microphone_impedance(
         )
         _warn_frequency_range(f, f_lower, f_upper, stacklevel=2)
     return ImpedanceTubeResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         reflection=r,
         surface_impedance=surface_impedance(r, characteristic_impedance),
         normalized_impedance=normalized_surface_impedance(r),

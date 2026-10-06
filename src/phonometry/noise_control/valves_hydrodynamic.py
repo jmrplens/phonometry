@@ -70,6 +70,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -1500,7 +1501,7 @@ def valve_hydrodynamic_noise(
         ),
         transmission_loss=float(loss),
         external_level=float(internal + loss - spreading),
-        frequencies=bands,
+        frequencies=read_only_copy(bands),
         band_internal_level=band_internal,
         band_transmission_loss=np.asarray(band_loss, dtype=np.float64),
         band_external_level=np.asarray(

@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     require_finite_fields,
@@ -573,6 +574,6 @@ def pile_strike_metrics(
         peak_spl=peak_sound_pressure_level(sig),
         spl=sound_pressure_level(sig),
         pulse_duration=_pulse_duration(sig, fs_v),
-        pressure=like_input(pressure, sig),
+        pressure=like_input(pressure, read_only_copy(sig)),
         fs=fs_v,
     )

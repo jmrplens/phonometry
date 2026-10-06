@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -444,7 +445,7 @@ def enclosure_insertion_loss(
         owner="enclosure_insertion_loss",
     )
     return EnclosureResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         panel_transmission_loss=r_b,
         correction=correction,
         insertion_loss=r_b - correction,
@@ -502,7 +503,7 @@ def enclosure_required_transmission_loss(
         owner="enclosure_required_transmission_loss",
     )
     return EnclosureResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         panel_transmission_loss=il_b + correction,
         correction=correction,
         insertion_loss=il_b,

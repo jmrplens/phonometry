@@ -493,3 +493,17 @@ def test_plot_language_spanish_and_validation() -> None:
     assert ax_en.get_ylabel() == "Loss [dB]"
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
+
+
+def test_a_chain_keeps_a_frequency_grid_of_its_own() -> None:
+    """The chain kept the caller's grid, and the chain snapshot inside its
+    result followed every later edit while ``result.frequencies`` did not.
+    """
+    f = np.array([125.0, 250.0, 500.0])
+    chain = sl.SilencerChain(f).duct(0.30, 0.0314).duct(0.60, 0.1257)
+    result = chain.result(inlet_area=0.0314, outlet_area=0.0314)
+    f[0] = 4000.0
+    np.testing.assert_array_equal(chain.frequencies, [125.0, 250.0, 500.0])
+    np.testing.assert_array_equal(result.chain.frequencies, result.frequencies)
+    assert not chain.frequencies.flags.writeable
+    assert not result.chain.frequencies.flags.writeable

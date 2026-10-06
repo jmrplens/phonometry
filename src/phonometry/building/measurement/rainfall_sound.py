@@ -66,6 +66,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     require_choice,
@@ -533,10 +534,10 @@ def verify_rain_generator(
         rainfall_rate_mm_h=rate,
         rate_deviation_mm_h=deviation,
         rate_ok=rate_ok,
-        drop_diameters_mm=drops,
+        drop_diameters_mm=read_only_copy(drops),
         drop_share=drop_share,
         drops_ok=drops_ok,
-        fall_velocities_m_s=velocities,
+        fall_velocities_m_s=read_only_copy(velocities),
         velocity_share=velocity_share,
         velocities_ok=velocities_ok,
         passes=passes,
@@ -675,9 +676,9 @@ def rainfall_reference_correction(
     eta_ref = 10.0 ** (eta_ref_db / 10.0)
     l_i_m_ref = level + 10.0 * np.log10(eta / eta_ref)  # Formula (I.2)
     return RainfallReferenceCorrection(
-        frequencies_hz=freqs,
-        l_i_ref_db=level,
-        structural_reverberation_time_s=t_s,
+        frequencies_hz=read_only_copy(freqs),
+        l_i_ref_db=read_only_copy(level),
+        structural_reverberation_time_s=read_only_copy(t_s),
         loss_factor=eta,
         reference_loss_factor=eta_ref,
         l_i_m_ref_db=l_i_m_ref,
@@ -915,11 +916,11 @@ def rainfall_sound(
     )  # Formula (K.1)
     correction, l_i_norm, l_ia_norm = _normalized(freqs, l_i, reference_correction)
     return RainfallSoundResult(
-        frequencies_hz=freqs,
+        frequencies_hz=read_only_copy(freqs),
         l_i_db=l_i,
         l_ia_db=_a_weighted(l_i, freqs),
         method="pressure",
-        correction_db=correction,
+        correction_db=read_only_copy(correction),
         l_i_norm_db=l_i_norm,
         l_ia_norm_db=l_ia_norm,
     )
@@ -968,11 +969,11 @@ def rainfall_sound_from_intensity(
     l_i = l_im + 10.0 * np.log10(measuring / excited)  # Formula (K.4)
     correction, l_i_norm, l_ia_norm = _normalized(freqs, l_i, reference_correction)
     return RainfallSoundResult(
-        frequencies_hz=freqs,
+        frequencies_hz=read_only_copy(freqs),
         l_i_db=l_i,
         l_ia_db=_a_weighted(l_i, freqs),
         method="intensity",
-        correction_db=correction,
+        correction_db=read_only_copy(correction),
         l_i_norm_db=l_i_norm,
         l_ia_norm_db=l_ia_norm,
     )

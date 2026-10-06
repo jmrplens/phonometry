@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import require_finite_array, require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -349,7 +350,7 @@ def sound_absorption_rating(
         quantity="absorption",
         spectrum=spectrum,
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
-        values=alpha,
+        values=read_only_copy(alpha),
         weights=weights,
     )
 
@@ -387,7 +388,7 @@ def airborne_insulation_rating(
         quantity="insulation",
         spectrum=spectrum,
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
-        values=reduction,
+        values=read_only_copy(reduction),
         weights=weights,
     )
 

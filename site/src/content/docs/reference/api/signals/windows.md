@@ -90,7 +90,7 @@ window is sampled DFT-even (periodic), exactly as
 
 | Name | Description |
 | :--- | :--- |
-| `window` | The window specification as given (any name or `(name, param)` tuple `scipy.signal.get_window` accepts). |
+| `window` | The window specification as given (any name or `(name, param)` tuple `scipy.signal.get_window` accepts), with an array parameter kept as a read-only copy of its own and a list parameter as a tuple of the same numbers. |
 | `n` | Window length, in samples. |
 | `taps` | The window samples `w[m]` (DFT-even). |
 | `coherent_gain` | Normalized DC gain $\sum w / n$ (1 for rectangular); the amplitude a bin-centered tone is scaled by before correction. |

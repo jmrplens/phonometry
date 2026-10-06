@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -313,9 +314,9 @@ def lab_lining_improvement(
                 delta[inside], freqs[inside], basic_element=basic_element
             )
     return LabLiningImprovementResult(
-        frequencies_hz=freqs,
-        r_without_db=without,
-        r_with_db=with_,
+        frequencies_hz=read_only_copy(freqs),
+        r_without_db=read_only_copy(without),
+        r_with_db=read_only_copy(with_),
         delta_r_db=delta,
         basic_element=basic_element,
         rating=rating,
@@ -660,9 +661,9 @@ def lab_floor_covering_improvement(
         reference_rating = weighted_impact_rating(curve - rated)
         bare_rating = weighted_impact_rating(bare[core])
     return LabFloorCoveringImprovementResult(
-        frequencies_hz=freqs,
-        l_n0_db=bare,
-        l_n_db=covered,
+        frequencies_hz=read_only_copy(freqs),
+        l_n0_db=read_only_copy(bare),
+        l_n_db=read_only_copy(covered),
         improvement_db=improvement,
         reference_floor=reference_floor,
         delta_lw_db=delta_lw,
@@ -751,8 +752,8 @@ def heavy_impact_improvement(
         ("l_i_fmax_db", l_i_fmax_db),
     )
     return HeavyImpactImprovementResult(
-        frequencies_hz=freqs,
-        l_i_fmax_0_db=bare,
-        l_i_fmax_db=covered,
+        frequencies_hz=read_only_copy(freqs),
+        l_i_fmax_0_db=read_only_copy(bare),
+        l_i_fmax_db=read_only_copy(covered),
         improvement_db=bare - covered,
     )

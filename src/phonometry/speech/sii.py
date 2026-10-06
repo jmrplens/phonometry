@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     check_engine,
     require_axis_count,
@@ -1210,9 +1210,9 @@ def speech_intelligibility_index(
     return SIIResult(
         sii=sii,
         band_audibility=a,
-        band_importance=importance,
+        band_importance=read_only_copy(importance),
         frequencies=proc.frequencies.copy(),
-        speech_spectrum=e,
+        speech_spectrum=read_only_copy(e),
         disturbance=d,
         masking=z,
         level_distortion=level_factor,

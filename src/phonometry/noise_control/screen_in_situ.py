@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even, settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     require_choice,
@@ -473,9 +474,9 @@ def screen_attenuation(
             a_weighted_screened_level_db or 0.0, "a_weighted_screened_level_db"
         )
     return ScreenInSituResult(
-        frequencies=freqs,
-        unscreened_levels_db=unscreened,
-        screened_levels_db=screened,
+        frequencies=read_only_copy(freqs),
+        unscreened_levels_db=read_only_copy(unscreened),
+        screened_levels_db=read_only_copy(screened),
         attenuation_db=np.asarray(unscreened - screened, dtype=np.float64),
         a_weighted_attenuation_db=weighted,
         source_kind=kind,

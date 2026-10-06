@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_ranks,
@@ -356,7 +357,7 @@ def propagation_loss(
     )
     absorption = alpha * (r / _M_PER_KM)
     return PropagationLossResult(
-        range_m=r,
+        range_m=read_only_copy(r),
         pl=spreading + absorption,
         spreading=spreading,
         absorption=absorption,

@@ -94,6 +94,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 from scipy import signal
 
+from .._internal.frozen import read_only_copy
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import require_positive
 from ..io._resolve import (
@@ -752,7 +753,7 @@ def _as_envelope(
     if not isinstance(x, Signal):
         return mean_square
     return TimeWeightedEnvelope(
-        mean_square=mean_square,
+        mean_square=read_only_copy(mean_square),
         fs=fs,
         mode=mode,
         calibrated=x.calibration_factor is not None,

@@ -76,6 +76,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy import special
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
@@ -294,9 +295,9 @@ def _medium_from_zc_k(
     """Package ``(Zc, k)`` into a :class:`PorousMediumResult`."""
     omega = 2.0 * np.pi * f
     return PorousMediumResult(
-        frequencies=f,
-        characteristic_impedance=zc,
-        wavenumber=k,
+        frequencies=read_only_copy(f),
+        characteristic_impedance=read_only_copy(zc),
+        wavenumber=read_only_copy(k),
         effective_density=np.asarray(zc * k / omega, dtype=np.complex128),
         bulk_modulus=np.asarray(zc * omega / k, dtype=np.complex128),
         model=model,
@@ -516,7 +517,7 @@ def johnson_champoux_allard(
     zc = np.sqrt(k_e * rho_e)
     k = omega * np.sqrt(rho_e / k_e)
     return PorousMediumResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         characteristic_impedance=np.asarray(zc, dtype=np.complex128),
         wavenumber=np.asarray(k, dtype=np.complex128),
         effective_density=np.asarray(rho_e, dtype=np.complex128),
@@ -677,11 +678,11 @@ def limp_frame(
     zc = np.sqrt(k_e * rho_limp)
     k = omega * np.sqrt(rho_limp / k_e)
     return PorousMediumResult(
-        frequencies=medium.frequencies,
+        frequencies=read_only_copy(medium.frequencies),
         characteristic_impedance=np.asarray(zc, dtype=np.complex128),
         wavenumber=np.asarray(k, dtype=np.complex128),
         effective_density=np.asarray(rho_limp, dtype=np.complex128),
-        bulk_modulus=k_e,
+        bulk_modulus=read_only_copy(k_e),
         model=f"limp_frame({medium.model})",
         flow_resistivity=medium.flow_resistivity,
         speed_of_sound=medium.speed_of_sound,

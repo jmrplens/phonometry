@@ -795,6 +795,44 @@ excuses one comparison, so a function that writes the same comparison twice
 lists it twice, and an entry that no longer matches anything fails the gate
 too. The docstring of the script lists what it cannot see.
 
+### 7f. Keeping an array a function was given
+
+`np.asarray(levels, dtype=np.float64)` hands back the caller's own array when
+it is already `float64`, and so do the validation helpers of
+`phonometry._internal.validation`, which are built on it. A result that
+stores what they return shares memory with the caller, so the caller's next
+`levels[0] = 0.0` changes a result already computed, and nothing raises. A
+view does the same: `levels[:, 0]`, `levels.T`, `levels.reshape(-1)`. Store a
+copy of its own instead, through `phonometry._internal.frozen.read_only_copy`,
+which copies and clears the `writeable` flag on the copy; never call
+`read_only` on an array that came in as an argument, because it clears the
+flag on the caller's array, or on a view of it while the result still shares
+its memory. A record that normalises its fields in `__post_init__` copies them
+there, and then every factory that builds it is covered.
+
+```bash
+python scripts/check_array_aliasing.py   # or: make array-aliasing
+```
+
+The gate follows every parameter of every function through assignments,
+views, containers and the package's own helpers to the places an array is
+kept: a field of a public record (when its annotation can hold an array),
+`object.__setattr__` on a public record, `dataclasses.replace` on a record
+that came in as an argument, an attribute a plain public class sets on itself
+in any of its methods (`self._grid = grid`, `self._layers.append(layer)`),
+and `read_only` anywhere. An attribute with no annotation of its own is read
+through the annotation of the parameter it came from, so `self.fs = fs` with
+`fs: float` keeps a number and `self._grid = grid` with `grid: ArrayLike`
+keeps an array; the package's type aliases are read too. Arithmetic, a copy,
+a mask or a stack ends the trail, and a helper used as an index counts as a
+mask only when every return of its own is one. It reads names, not types, so
+a private helper is held to the rule whatever its callers pass today, and a
+value that only looks like an array to it can go into `EXEMPT` at the top of
+the script with the reason; an entry that no longer covers anything fails the
+gate too. The docstring of the script lists what it does not read: records a
+caller builds by hand, records a result holds whole, and arrays returned
+bare.
+
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

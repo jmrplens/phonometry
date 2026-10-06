@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import round_half_away_from_zero
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
@@ -619,7 +620,9 @@ def _rate(
             [u / 20.0 for u in shifted_units], dtype=np.float64
         ),
         third_octave_alpha_s=(
-            None if third_octave is None else np.asarray(third_octave, dtype=np.float64)
+            None
+            if third_octave is None
+            else read_only_copy(third_octave, dtype=np.float64)
         ),
         third_octave_bands=(
             None

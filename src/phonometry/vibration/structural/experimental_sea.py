@@ -79,6 +79,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -543,7 +544,7 @@ def power_injection_clf(
     eta_21 = eta_12 * ratio
     power_in = 2.0 * np.pi * f * (eta_1 * e_1 + eta_2 * e_2)
     return PowerInjectionResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         coupling_loss_factor12=np.asarray(eta_12, dtype=np.float64),
         coupling_loss_factor21=np.asarray(eta_21, dtype=np.float64),
         internal_loss_factor1=eta_1,
@@ -637,14 +638,14 @@ def power_injection_matrix(
     eta_1 = ab[:, 0] - eta_12
     eta_2 = cd[:, 0] - eta_21
     return PowerInjectionResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         coupling_loss_factor12=np.asarray(eta_12, dtype=np.float64),
         coupling_loss_factor21=np.asarray(eta_21, dtype=np.float64),
         internal_loss_factor1=np.asarray(eta_1, dtype=np.float64),
         internal_loss_factor2=np.asarray(eta_2, dtype=np.float64),
-        energy1=np.asarray(e[0, 0], dtype=np.float64),
-        energy2=np.asarray(e[1, 0], dtype=np.float64),
-        input_power1=np.asarray(p[0], dtype=np.float64),
+        energy1=read_only_copy(e[0, 0], dtype=np.float64),
+        energy2=read_only_copy(e[1, 0], dtype=np.float64),
+        input_power1=read_only_copy(p[0], dtype=np.float64),
         input_power2=np.zeros_like(f),
         modal_density1=None,
         modal_density2=None,

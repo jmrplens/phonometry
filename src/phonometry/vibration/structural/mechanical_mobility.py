@@ -86,6 +86,7 @@ if TYPE_CHECKING:
 
 
 from ..._internal.boundary import settled_ratio
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -422,7 +423,7 @@ def rigid_mass_calibration_check(
     # its own scale rather than on nine decimals of a ratio.
     within = settled_ratio(np.abs(deviation), tolerance) <= 1.0
     return RigidMassCalibrationResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         measured=np.asarray(measured, dtype=np.float64),
         expected=np.asarray(expected, dtype=np.float64),
         deviation=np.asarray(deviation, dtype=np.float64),
@@ -636,4 +637,6 @@ def sdof_mobility_result(
     """
     freq = np.asarray(frequency, dtype=np.float64)
     y = sdof_mobility(freq, mass, stiffness, damping)
-    return MobilityResult(frequencies=freq, mobility=y, driving_point=True)
+    return MobilityResult(
+        frequencies=read_only_copy(freq), mobility=y, driving_point=True
+    )

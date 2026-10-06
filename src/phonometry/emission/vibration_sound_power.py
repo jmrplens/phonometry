@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -493,9 +494,9 @@ def sound_power_from_vibration(
             "band",
         )
     return VibrationSoundPowerResult(
-        velocity_level=lv,
+        velocity_level=read_only_copy(lv),
         sound_power_level=np.asarray(lw, dtype=np.float64),
         radiation_factor=eps,
         area=float(area),
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
     )

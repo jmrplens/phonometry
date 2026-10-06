@@ -105,6 +105,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.special import fresnel, wofz
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -420,12 +421,12 @@ def ground_effect(
     ratio = 1.0 + q * (r1 / r2) * np.exp(1j * k * (r2 - r1))
     d_l = 20.0 * np.log10(np.abs(ratio))
     return SphericalGroundResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         excess_attenuation=np.asarray(d_l, dtype=np.float64),
         reflection_coefficient=np.asarray(q, dtype=np.complex128),
         plane_reflection_coefficient=np.asarray(rp, dtype=np.complex128),
         boundary_loss=np.asarray(f_w, dtype=np.complex128),
-        normalized_impedance=z,
+        normalized_impedance=read_only_copy(z),
         r_direct=r1,
         r_reflected=r2,
     )
@@ -960,7 +961,7 @@ def barrier_insertion_loss(
         msg = f"unknown method {method!r}; options: {_BARRIER_METHODS}."
         raise ValueError(msg)
     return BarrierInsertionLoss(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         insertion_loss=np.asarray(il, dtype=np.float64),
         fresnel_number=n,
         method=method,

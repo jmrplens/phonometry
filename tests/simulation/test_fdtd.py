@@ -749,3 +749,24 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
         res.plot(kind="field")
     with pytest.raises(ValueError, match=r"the result holds no snapshots"):
         res.plot(kind="snapshot")
+
+
+def test_the_simulation_keeps_a_medium_of_its_own() -> None:
+    """``sim.c`` was the caller's map, so editing it afterwards made the
+    reported medium disagree with the ``dt`` and ``kappa`` built from it.
+    """
+    c_map = np.full((12, 16), C0)
+    rho_map = np.full((12, 16), RHO0)
+    left = np.full(12, 400.0)
+    sim = FDTD2D(
+        c=c_map, dx=0.01, rho=rho_map, edge_impedance={"left": left, "top": 415}
+    )
+    c_map[:] = 10.0 * C0
+    rho_map[:] = 2.0
+    left[:] = 1.0
+    assert float(sim.c.max()) == C0
+    assert float(sim.rho.max()) == RHO0
+    assert float(sim.edge_impedance["left"].max()) == 400.0
+    assert sim.edge_impedance["top"] == 415.0
+    for kept in (sim.c, sim.rho, sim.edge_impedance["left"]):
+        assert not kept.flags.writeable

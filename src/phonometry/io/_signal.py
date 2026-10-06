@@ -111,7 +111,12 @@ class Signal:
         if data.ndim != 2:  # noqa: PLR2004
             msg = f"data must be 1-D or (channels, samples); got {data.ndim}-D"
             raise ValueError(msg)
-        object.__setattr__(self, "data", np.ascontiguousarray(data))
+        # A copy of its own: a Signal built around the caller's array would
+        # otherwise share its memory, and the caller's next in-place edit
+        # would change a recording already read, levelled or written. Unlike
+        # a result's arrays it stays writeable, as a recording read from a
+        # file is, for processing in place.
+        object.__setattr__(self, "data", np.array(data, order="C"))
         if self.channel_labels is not None:
             require_equal_counts(
                 type(self).__name__,

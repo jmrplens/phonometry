@@ -97,6 +97,7 @@ if TYPE_CHECKING:
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     _as_float64,
@@ -817,14 +818,14 @@ def _determine(
     )
     is_power = quantity == "power"
     return InSituSoundPowerResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_power_level=level if is_power else nan_band,
         sound_energy_level=nan_band if is_power else level,
-        mean_source_level=np.asarray(mean_source, dtype=np.float64),
+        mean_source_level=read_only_copy(mean_source, dtype=np.float64),
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
         reference_levels=np.asarray(per_location, dtype=np.float64),
         reference_power_level=np.asarray(ref_power, dtype=np.float64),
-        background_correction=np.asarray(background_correction, dtype=np.float64),
+        background_correction=read_only_copy(background_correction, dtype=np.float64),
         background_correction_ref=np.asarray(k1_ref, dtype=np.float64),
         background_requirement_met=np.asarray(met_source & met_ref, dtype=bool),
         # 8.1 reads the upper bound off the source under test's margin; a band

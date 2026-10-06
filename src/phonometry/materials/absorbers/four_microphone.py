@@ -34,6 +34,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_above_absolute_zero_array,
     require_positive,
@@ -689,11 +690,7 @@ def _measurement_context(
         "thickness": thickness,
         "diameter_m": diameter_m,
         "shape": shape if diameter_m is not None else None,
-        "frequencies": (
-            np.asarray(frequencies, dtype=np.float64)
-            if frequencies is not None
-            else None
-        ),
+        "frequencies": read_only_copy(frequencies, dtype=np.float64),
         "air_characteristic_impedance": characteristic_impedance,
     }
 

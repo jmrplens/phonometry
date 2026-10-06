@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -913,8 +914,8 @@ def flight_path_kinematics(
     bank = np.degrees(np.arctan(dtheta_dt * vg / g0))
     path_angle_deg = np.degrees(np.arctan2(vz, vg))
     return FlightPathKinematics(
-        times=t,
-        positions=p,
+        times=read_only_copy(t),
+        positions=read_only_copy(p),
         ground_speed=vg,
         airspeed=va,
         heading=heading,
@@ -1985,8 +1986,8 @@ def rotorcraft_event_level(
         setup.frequencies, trec[:, 0], la[:, 0], spectra
     )
     return RotorcraftEventResult(
-        frequencies=setup.frequencies,
-        emission_times=setup.times,
+        frequencies=read_only_copy(setup.frequencies),
+        emission_times=read_only_copy(setup.times),
         times=trec[:, 0],
         distances=dist,
         azimuth=phi,
@@ -2116,5 +2117,8 @@ def rotorcraft_noise_contour(
     trec, la, _ = _event_histories(setup, receivers)
     level = _exposure_level(la, trec) if key == "exposure" else np.max(la, axis=0)
     return RotorcraftNoiseContourResult(
-        x=gx, y=gy, levels=level.reshape(gy.size, gx.size), metric=key
+        x=read_only_copy(gx),
+        y=read_only_copy(gy),
+        levels=level.reshape(gy.size, gx.size),
+        metric=key,
     )

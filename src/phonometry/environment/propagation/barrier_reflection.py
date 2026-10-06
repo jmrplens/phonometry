@@ -108,7 +108,7 @@ import numpy as np
 from scipy.fft import next_fast_len
 from scipy.optimize import minimize_scalar
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import read_only, read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -1198,18 +1198,18 @@ def _result(
     return ReflectionIndexResult(
         bands_hz=read_only(np.asarray(_BANDS_HZ, dtype=np.float64)),
         reflection_index=read_only(average),
-        position_values=read_only(position_values),
+        position_values=read_only_copy(position_values),
         lowest_band_hz=rating.lowest_band_hz,
         rating=rating,
         microphone_values=None
         if microphone_values is None
-        else read_only(microphone_values),
+        else read_only_copy(microphone_values),
         gain_corrections=None
         if gain_corrections is None
-        else read_only(gain_corrections),
+        else read_only_copy(gain_corrections),
         subtraction_reductions_db=None
         if reductions_db is None
-        else read_only(reductions_db),
+        else read_only_copy(reductions_db),
     )
 
 

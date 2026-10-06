@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -658,7 +658,7 @@ def noise_criterion(
             rating=rating,
             governing_frequency=governing_frequency,
             frequencies=OCTAVE_BANDS.copy(),
-            levels=aligned,
+            levels=read_only_copy(aligned),
             sil=sil,
             tangency_rating=tangency_rating,
             method=method,
@@ -760,5 +760,5 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
         classification=classification,
         reference_curve=reference,
         frequencies=OCTAVE_BANDS.copy(),
-        levels=aligned,
+        levels=read_only_copy(aligned),
     )

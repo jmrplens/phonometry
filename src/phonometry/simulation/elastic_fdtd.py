@@ -75,6 +75,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 from .._internal.catalogue import CatalogueRow
+from .._internal.frozen import read_only_copy
 from .._internal.validation import require_ranks, require_same_length
 from .fdtd import (
     _SIDES,
@@ -591,9 +592,11 @@ class ElasticFDTD2D:
         )
 
         self.dx = _positive_finite("dx", dx)
-        self.c_p = cp_map
-        self.c_s = cs_map
-        self.rho = rho_map
+        # Read-only copies of their own, so the maps the simulation reports
+        # stay the ones mu, lam and dt were computed from.
+        self.c_p = read_only_copy(cp_map)
+        self.c_s = read_only_copy(cs_map)
+        self.rho = read_only_copy(rho_map)
         c_max = float(cp_map.max())
         self.dt = cfl * self.dx / (c_max * float(np.sqrt(2.0)))
         #: Shear modulus ``mu = rho c_s**2`` at cell centres.

@@ -104,6 +104,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_choice,
     require_non_negative,
@@ -620,15 +621,15 @@ def room_to_room_transmission(
     direct = _partition_direct_field(s_w, r_2)
     nr = tl - 10.0 * np.log10(s_w / total_absorption + direct) - penalty
     return RoomToRoomResult(
-        frequencies=f,
-        source_level=lp1,
-        transmission_loss=tl,
+        frequencies=read_only_copy(f),
+        source_level=read_only_copy(lp1),
+        transmission_loss=read_only_copy(tl),
         partition_area=s_w,
-        receiving_absorption=absorption,
+        receiving_absorption=read_only_copy(absorption),
         noise_reduction=nr,
         received_level=lp1 - nr,
         flanking_penalty=penalty,
-        source_power_level=lw,
+        source_power_level=read_only_copy(lw),
         criterion=family,
         target=goal,
         label=label,

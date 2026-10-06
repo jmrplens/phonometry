@@ -91,6 +91,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -1407,6 +1408,6 @@ def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
         maximum_deviation=deviation,
         smallest_duty=float(np.min(duties)),
         largest_duty=float(np.max(duties)),
-        duty=duties,
-        levels=measured,
+        duty=read_only_copy(duties),
+        levels=read_only_copy(measured),
     )

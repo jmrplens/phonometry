@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -64,7 +65,9 @@ class WindowMetricsResult:
     :mod:`phonometry.signals.spectra` use it.
 
     :ivar window: The window specification as given (any name or
-        ``(name, param)`` tuple :func:`scipy.signal.get_window` accepts).
+        ``(name, param)`` tuple :func:`scipy.signal.get_window` accepts),
+        with an array parameter kept as a read-only copy of its own and a
+        list parameter as a tuple of the same numbers.
     :ivar n: Window length, in samples.
     :ivar taps: The window samples ``w[m]`` (DFT-even).
     :ivar coherent_gain: Normalized DC gain :math:`\sum w / n` (1 for
@@ -146,6 +149,26 @@ class WindowMetricsResult:
 
         check_language(language)
         return plot_window_metrics(self, ax=ax, language=language, **kwargs)
+
+
+def _own_window(window: str | tuple[Any, ...]) -> str | tuple[Any, ...]:
+    """The window specification with no parameter the caller can still edit.
+
+    A name or a number is kept as given; an array parameter, such as the
+    weights of ``("general_cosine", weights)``, becomes a read-only copy and a
+    list one a tuple, so editing the caller's weights afterwards does not
+    rename the window the metrics were computed for.
+    """
+    if not isinstance(window, tuple):
+        return window
+    return tuple(
+        read_only_copy(item)
+        if isinstance(item, np.ndarray)
+        else tuple(item)
+        if isinstance(item, list)
+        else item
+        for item in window
+    )
 
 
 def _window_spectrum_db(w: NDArray[np.float64], oversample: int) -> NDArray[np.float64]:
@@ -231,7 +254,7 @@ def window_metrics(
     edge = _mainlobe_edge(level_db)
     highest_sidelobe = float(np.max(level_db[edge:]))
     return WindowMetricsResult(
-        window=window,
+        window=_own_window(window),
         n=n_v,
         taps=w,
         coherent_gain=coherent_gain,

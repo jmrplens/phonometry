@@ -71,6 +71,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -512,7 +513,7 @@ def facade_sound_reduction(
         c_tr=None if r_tr is None else r_tr[1],
         frequencies=None
         if frequencies is None
-        else np.asarray(frequencies, dtype=np.float64),
+        else read_only_copy(frequencies, dtype=np.float64),
         elements=tuple(elements),
     )
 
@@ -575,7 +576,7 @@ def radiated_sound_power(
             l_w_dba = float(10.0 * np.log10(np.sum(10.0 ** ((l_w + a_weights) / 10.0))))
     freqs = None if octave_bands is None else np.asarray(octave_bands, dtype=np.float64)
     return RadiatedPowerResult(
-        l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=freqs
+        l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=read_only_copy(freqs)
     )
 
 

@@ -47,6 +47,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_non_negative,
     require_positive_array,
@@ -789,7 +790,7 @@ def layered_absorber(
     r = (cos_t - rc * g) / (cos_t + rc * g)
     alpha = 1.0 - np.abs(r) ** 2
     return LayeredAbsorberResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         angle_rad=theta,
         surface_impedance=np.asarray(zs, dtype=np.complex128),
         normalized_impedance=np.asarray(zs / rc, dtype=np.complex128),
@@ -860,7 +861,7 @@ def diffuse_field_absorption(
         total += wt * res.absorption * np.cos(th) * np.sin(th)
     alpha_dif = 2.0 * total / np.sin(lim) ** 2
     return DiffuseFieldAbsorptionResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         absorption=np.asarray(alpha_dif, dtype=np.float64),
         angle_limit_rad=lim,
     )

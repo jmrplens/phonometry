@@ -86,6 +86,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import require_positive
 from ._shared import (
@@ -899,10 +900,10 @@ def reference_source_calibration(
         freqs, environment="hemi-anechoic", arrangement=arrangement
     )
     return ReferenceSourceCalibration(
-        frequencies_hz=freqs,
+        frequencies_hz=read_only_copy(freqs),
         sound_power_level_db=np.asarray(lw, dtype=np.float64),
         surface_pressure_level_db=np.asarray(lp_bar, dtype=np.float64),
-        directivity_index_db=np.asarray(directivity, dtype=np.float64),
+        directivity_index_db=read_only_copy(directivity, dtype=np.float64),
         c1_db=float(c1),
         c2_db=np.asarray(c2, dtype=np.float64),
         c3_db=np.asarray(c3, dtype=np.float64),
@@ -1229,11 +1230,11 @@ def verify_reference_sound_source(
     )
     not_judged = [name for name, missing in unjudged if missing]
     return ReferenceSoundSourceVerdict(
-        frequencies_hz=freqs,
-        sound_power_level_db=lw,
+        frequencies_hz=read_only_copy(freqs),
+        sound_power_level_db=read_only_copy(lw),
         repeatability_db=repeat,
         repeatability_limit_db=limits,
-        supply_variation_db=supply,
+        supply_variation_db=read_only_copy(supply),
         supply_limit_db=_SUPPLY_VARIATION_DB,
         adjacent_step_db=step,
         adjacent_limit_db=step_limit,
@@ -1241,7 +1242,7 @@ def verify_reference_sound_source(
         core_range_limit_db=_CORE_RANGE_DB,
         extended_range_db=extended_range,
         extended_range_limit_db=_EXTENDED_RANGE_DB,
-        directivity_index_db=directivity,
+        directivity_index_db=read_only_copy(directivity),
         directivity_limit_db=_MAX_DIRECTIVITY_DB,
         reverberation_rooms_only=reverberation_rooms_only,
         frequency_range_met=range_met,
@@ -1341,7 +1342,9 @@ def verify_reference_source_drift(
         [_repeatability_limit(_band_index(float(f))) for f in freqs], dtype=np.float64
     )
     return ReferenceSourceDriftResult(
-        frequencies_hz=freqs, change_db=latest - reference, limit_db=limit
+        frequencies_hz=read_only_copy(freqs),
+        change_db=latest - reference,
+        limit_db=limit,
     )
 
 

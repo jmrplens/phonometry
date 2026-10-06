@@ -100,6 +100,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 from .._internal.boundary import settled, settled_net_share
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, weighted_energy_mean
 from .._internal.validation import (
     check_engine,
@@ -618,7 +619,7 @@ def sound_power_intensity(
 
     freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
     return SoundPowerIntensityResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         partial_power=partial_power,
         partial_power_level=partial_power_level,
         sound_power=np.asarray(total_power, dtype=np.float64),
@@ -1500,7 +1501,7 @@ def sound_power_intensity_precision(
     lwa = _precision_a_weighted_total(lw, not_applicable, freqs, n_bands)
 
     return PrecisionIntensityResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         partial_power=np.asarray(partial_power, dtype=np.float64),
         sound_power=np.asarray(total_power, dtype=np.float64),
         sound_power_level=np.asarray(lw, dtype=np.float64),

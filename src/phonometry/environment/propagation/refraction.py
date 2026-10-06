@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -560,7 +561,7 @@ def atmospheric_ray_paths(
     ray_r = np.broadcast_to(ranges, ray_z.shape).copy()
 
     return AtmosphericRayResult(
-        launch_angles_deg=angles,
+        launch_angles_deg=read_only_copy(angles),
         ranges=ray_r,
         heights=ray_z,
         travel_times=ray_t,

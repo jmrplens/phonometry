@@ -120,6 +120,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import require_finite, require_positive
 
 if TYPE_CHECKING:
@@ -1130,14 +1131,14 @@ def inverse_square_law_deviations(
     strengths, initial, deviations = _source_strengths(evaluation, levels)
 
     return InverseSquareLawResult(
-        frequencies_hz=freqs,
+        frequencies_hz=read_only_copy(freqs),
         room=room,
-        origin_m=np.asarray(origin, dtype=np.float64),
+        origin_m=read_only_copy(origin, dtype=np.float64),
         origin_fitted=box is not None,
-        source_box_m=box,
+        source_box_m=read_only_copy(box),
         traverse_names=tuple(t.name for t in traverses),
         traverse_targets=tuple(tuple(t.targets) for t in traverses),
-        positions_m=tuple(positions),
+        positions_m=tuple(read_only_copy(p) for p in positions),
         distances_m=evaluation.distances,
         levels_db=tuple(levels),
         background_margin_db=prepared.margins,
@@ -1297,7 +1298,7 @@ def verify_source_directionality(
     mean = levels.mean(axis=0)
     deviation = levels - mean[np.newaxis, :]
     return SourceDirectionalityResult(
-        frequencies_hz=freqs,
+        frequencies_hz=read_only_copy(freqs),
         room=room,
         mean_level_db=mean,
         maximum_positive_deviation_db=deviation.max(axis=0),

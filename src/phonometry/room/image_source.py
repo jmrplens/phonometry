@@ -74,6 +74,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_axis_count,
     require_axis_rank,
@@ -680,7 +681,7 @@ def image_source_rir(
     return ImageSourceResult(
         ir=ir_out,
         fs=int(fs),
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         times=times,
         distances=distances,
         orders=orders,

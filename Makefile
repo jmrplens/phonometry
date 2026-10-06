@@ -300,6 +300,16 @@ reference-values:
 boundary-comparisons:
 	$(PYTHON) scripts/check_boundary_comparisons.py
 
+# np.asarray hands back the caller's own array when it is already of the asked
+# type, so a result that keeps it shares memory with the caller, and the
+# caller's next in-place edit changes a result already computed. This follows
+# every parameter through the package to the record fields, object.__setattr__
+# and read_only calls where an array is kept, and fails on one that is not a
+# copy of its own (phonometry._internal.frozen.read_only_copy). On the tree it
+# was written against it found 349, in 121 files. Stdlib only.
+array-aliasing:
+	$(PYTHON) scripts/check_array_aliasing.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -676,6 +686,6 @@ check: lint security test
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
-	boundary-comparisons \
+	boundary-comparisons array-aliasing \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

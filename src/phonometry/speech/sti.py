@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from ..io._signal import Signal
 from scipy import signal
 
+from .._internal.frozen import read_only_copy
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     check_engine,
@@ -549,10 +550,10 @@ def _index_from_corrected_mtf(
     return STIResult(
         sti=sti,
         mti=mti,
-        mtf=m,
-        band_levels=band_levels,
+        mtf=read_only_copy(m),
+        band_levels=read_only_copy(band_levels),
         rating=_rating(sti),
-        ambient_levels=ambient_levels,
+        ambient_levels=read_only_copy(ambient_levels),
     )
 
 

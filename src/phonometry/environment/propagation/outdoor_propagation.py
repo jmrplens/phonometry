@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_finite_array,
@@ -1129,7 +1130,7 @@ def outdoor_propagation_attenuation(
 
     a_total = a_div + a_atm + a_gr + a_bar
     return OutdoorAttenuation(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         a_div=a_div,
         a_atm=a_atm,
         a_gr=a_gr,

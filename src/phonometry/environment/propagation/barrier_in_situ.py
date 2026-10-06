@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.boundary import round_half_even, settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_finite,
@@ -636,11 +637,11 @@ def measured_insertion_loss_direct(
     )
     loss = (ref_a - ref_b) - (rec_a - rec_b)
     return MeasuredBarrierInsertionLoss(
-        frequencies=freqs,
-        reference_before_db=ref_b,
-        reference_after_db=ref_a,
-        receiver_before_db=rec_b,
-        receiver_after_db=rec_a,
+        frequencies=read_only_copy(freqs),
+        reference_before_db=read_only_copy(ref_b),
+        reference_after_db=read_only_copy(ref_a),
+        receiver_before_db=read_only_copy(rec_b),
+        receiver_after_db=read_only_copy(rec_a),
         insertion_loss_db=np.asarray(loss, dtype=np.float64),
         method="direct",
         receiver_correction_before_db=0.0,
@@ -725,11 +726,11 @@ def measured_insertion_loss_indirect(
     delta_before = ref_b - (rec_b - correction_before)
     delta_after = ref_a - (rec_a - correction_after)
     return MeasuredBarrierInsertionLoss(
-        frequencies=freqs,
-        reference_before_db=ref_b,
-        reference_after_db=ref_a,
-        receiver_before_db=rec_b,
-        receiver_after_db=rec_a,
+        frequencies=read_only_copy(freqs),
+        reference_before_db=read_only_copy(ref_b),
+        reference_after_db=read_only_copy(ref_a),
+        receiver_before_db=read_only_copy(rec_b),
+        receiver_after_db=read_only_copy(rec_a),
         insertion_loss_db=np.asarray(delta_after - delta_before, dtype=np.float64),
         method="indirect",
         receiver_correction_before_db=correction_before,

@@ -160,7 +160,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import read_only, read_only_copy
 from ..._internal.validation import (
     require_count,
     require_finite_array,
@@ -965,8 +965,12 @@ def verify_calculation_results(
         else tuple(labels)
     )
     return CalculationVerification(
-        results_db=results,
-        lower_limits_db=require_finite_array(lower_limits_db, "lower_limits_db"),
-        upper_limits_db=require_finite_array(upper_limits_db, "upper_limits_db"),
+        results_db=read_only_copy(results),
+        lower_limits_db=read_only_copy(
+            require_finite_array(lower_limits_db, "lower_limits_db")
+        ),
+        upper_limits_db=read_only_copy(
+            require_finite_array(upper_limits_db, "upper_limits_db")
+        ),
         labels=names,
     )

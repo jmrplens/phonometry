@@ -1138,7 +1138,7 @@ class CouplerTransferImpedance:
             "capillary_correction",
         ):
             column = _complex_column(getattr(self, name), name, frequencies.size)
-            object.__setattr__(self, name, read_only(column))
+            object.__setattr__(self, name, read_only(column.copy()))
 
     @property
     def transfer_impedance_pa_s_m3(self) -> NDArray[np.complex128]:

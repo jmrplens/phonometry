@@ -956,6 +956,32 @@ jobs:
     - name: Check that every boundary comparison is settled or exempted with a reason
       run: python scripts/check_boundary_comparisons.py
 
+  # np.asarray hands back the caller's own array when it is already of the
+  # asked type, and so does every validation helper built on it, so a result
+  # that keeps what it was given shares memory with the caller: changing the
+  # caller's array afterwards changes a result already computed, judged and
+  # perhaps printed, and nothing raises. Clearing the writeable flag on such an
+  # array is worse, because it freezes the caller's own. This follows every
+  # parameter through assignments, views, containers and the package's own
+  # helpers to the record fields where an array is kept, and fails on one that
+  # is not a read-only copy of its own. An AST data-flow walk, static and
+  # dependency-free, so it runs on its own.
+  array-aliasing:
+    name: Every result keeps its own copy of the arrays it was given
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no result keeps an array it was handed
+      run: python scripts/check_array_aliasing.py
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass

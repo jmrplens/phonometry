@@ -65,6 +65,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..._internal.frozen import read_only_copy
 from .scattering_diffusion import (
     DiffusionSpectrum,
     diffusion_spectrum,
@@ -478,12 +479,14 @@ def predict_diffuser_polar_response(
     coefficient = directional_diffusion_coefficient(levels)
     return DiffuserPolarResponse(
         frequency=f,
-        angles_deg=ang,
+        angles_deg=read_only_copy(ang),
         levels=levels,
         coefficient=coefficient,
         source_angle_deg=psi,
         well_width=w,
-        depths=(np.asarray(depths, dtype=np.float64) if depths is not None else None),
+        depths=(
+            read_only_copy(depths, dtype=np.float64) if depths is not None else None
+        ),
         repetitions=n_periods,
     )
 

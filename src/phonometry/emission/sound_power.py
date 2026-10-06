@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
@@ -1060,7 +1061,7 @@ def sound_power_pressure(
     )
 
     return SoundPowerResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_power_level=np.asarray(lw, dtype=np.float64),
         surface_pressure_level=np.asarray(surface_spl, dtype=np.float64),
         mean_pressure_level=mean_level,
@@ -1530,7 +1531,7 @@ def sound_energy_pressure(
     )
 
     return SoundEnergyResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_energy_level=np.asarray(lj, dtype=np.float64),
         surface_event_level=np.asarray(surface_level, dtype=np.float64),
         mean_event_level=mean_level,

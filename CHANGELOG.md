@@ -1978,6 +1978,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Table C.4 advisory of ISO 9612 only above 3,5 dB, not at a contribution
   that reads the 3,5 dB node itself.
 
+- **Three more verdicts on a printed limit read the decimal value, and a check
+  keeps the next one out.** Requirement b) of IEC 60268-7 Annex B in
+  `electroacoustics.verify_ear_canal_microphone` asks for a section "less than
+  0,6" of the canal's, and a section of 20,22 mm² in a canal of 33,7 mm², which
+  is 0,6 of it, came out a last bit under 0,6 and passed. The length to
+  diameter ratio `metrology.check_coupler` recommends by IEC 61094-2 C.2, 0,5
+  to 0,75 with the front cavities counted, was not recommended at 0,5 for a
+  5,4 mm coupler of 18,6 mm closed by microphones with 1,95 mm cavities. And
+  `within_stated_accuracy` of `metrology.reciprocity_air_attenuation` put
+  36,01 Hz at 90,025 kPa, 0,4 Hz/kPa, outside the domain IEC 61094-3 B.2 gives
+  for its accuracy. Each is now settled before it meets its limit.
+  `scripts/check_boundary_comparisons.py` (`make boundary-comparisons`, and a
+  job of its own in CI) found them: it follows a value through assignments,
+  calls and dataclass fields and fails on a computed decimal compared
+  unsettled with a printed limit, or with zero where its sign can be wrong,
+  unless `scripts/boundary_comparison_exemptions.tsv` lists the comparison
+  with the reason it cannot sit on the limit. Run on the tree as it stood
+  before the settling above, it names both comparisons that started it, the
+  slope of `room.open_plan_metrics` against zero and the absorption ratio of
+  `environment.sound_absorption_rating` against 0,99.
+
 - **A calibration sidecar no reader can take is refused as a `ValueError`,
   and none is written into a pipe.** `io.read_sidecar`, which `io.read` and
   `io.read_blocks` call for every audio file they open, read the file at the

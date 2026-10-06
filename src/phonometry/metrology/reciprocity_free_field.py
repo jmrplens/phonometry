@@ -76,6 +76,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.validation import require_non_negative, require_positive
 from .free_field_corrections import _band_column, _frequency_axis
@@ -238,7 +239,9 @@ class ReciprocityAirAttenuation:
             <= self.water_vapour_mole_fraction
             <= _ACCURACY_WATER_FRACTION[1]
         )
-        per_kpa = self.frequencies_hz / (self.static_pressure_pa / 1000.0)
+        # f/p_s of decimal readings is decimal: 40,8 Hz at 102 kPa is 0,4 Hz/kPa
+        # and comes out 0,399 999 999 999 999 97 in binary; settled, it is 0,4.
+        per_kpa = settled(self.frequencies_hz / (self.static_pressure_pa / 1000.0))
         return np.asarray(
             conditions
             & (per_kpa >= _ACCURACY_FREQUENCY_PER_KPA[0])

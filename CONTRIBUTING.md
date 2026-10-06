@@ -732,6 +732,37 @@ other string may be data, and one of them is: the CNOSSOS traction table is
 keyed by names such as `"diesel locomotive, c. 2 200 kW"` that a caller passes
 in, and an invisible character inside a key breaks the lookup on the spot. A
 first pass over the corpus did exactly that and the conformance run caught it.
+
+### 7e. Judging a computed value at a printed limit
+
+A standard prints its limits in decimal, and the value judged against one is
+usually computed: the difference of two readings, a mean, a ratio of two
+areas. In binary a margin that is 6 dB in decimal comes out
+5,999 999 999 999 996 or 6,000 000 000 000 004 depending on the readings, so
+`margin >= 6.0` gives two verdicts for the same 6 dB. Settle the computed side
+before it meets the limit, through `phonometry._internal.boundary`: `settled`
+for a quantity of ordinary size, `settled_ratio` for one in the caller's own
+unit, `settled_net_share` for a signed sum judged against zero, and the
+`round_half_*` helpers for a half. A named slack (`_RATIO_SLACK = 1e-12`) is
+the other way out, added to the computed side, taken from the limit or as a
+constant factor `1 + _REL_TOL`; an epsilon that keeps a divisor off zero is no
+slack. The result keeps the value it computed either way.
+
+```bash
+python scripts/check_boundary_comparisons.py   # or: make boundary-comparisons
+```
+
+The gate follows a value through assignments, calls and dataclass fields and
+refuses a computed decimal compared unsettled with a published constant or a
+field of a published table row, or with zero when its sign can be wrong (a
+fit, a sum of terms that can cancel). It cannot tell whether a value can
+really sit on its limit, so a comparison of that shape that cannot (a level
+through a logarithm, a band edge at an irrational ratio) goes into
+`scripts/boundary_comparison_exemptions.tsv` with the reason. A line there
+excuses one comparison, so a function that writes the same comparison twice
+lists it twice, and an entry that no longer matches anything fails the gate
+too. The docstring of the script lists what it cannot see.
+
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

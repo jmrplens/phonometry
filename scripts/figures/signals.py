@@ -21,7 +21,7 @@ import numpy as np
 from scipy import signal as scipy_signal
 
 from phonometry import filters
-from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry._plot.common import _OFFSET_POINTS, format_frequency_axis, theme_fill
 
 from .i18n import _LANG, _fmt_minus, localize_panel
 from .theme import (
@@ -1945,7 +1945,7 @@ def generate_level_distribution(output_dir: str) -> None:
                 xy=(p, float(curve[p])),
                 fontsize=8,
                 color=color,
-                textcoords="offset points",
+                textcoords=_OFFSET_POINTS,
                 xytext=(4, 5),
             )
         spread = float(curve[10]) - float(curve[90])
@@ -2576,7 +2576,7 @@ def generate_architecture_tradeoff(output_dir: str) -> None:
             va="top",
             fontsize=9,
             xytext=(0, -4),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
         )
     for xi, value in zip(x + 0.19, four_fm, strict=True):
         ax_a.annotate(
@@ -2586,7 +2586,7 @@ def generate_architecture_tradeoff(output_dir: str) -> None:
             va="top",
             fontsize=9,
             xytext=(0, -4),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
         )
     ax_a.set_title("Relative attenuation out of band", pad=12)
     ax_a.set_ylabel("Relative attenuation [dB]")
@@ -2604,7 +2604,7 @@ def generate_architecture_tradeoff(output_dir: str) -> None:
             va="bottom",
             fontsize=9,
             xytext=(0, 3),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
         )
     ax_b.set_title("Group delay at the band mid frequency", pad=12)
     ax_b.set_ylabel("Group delay [ms]")

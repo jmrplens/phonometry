@@ -18,7 +18,7 @@ from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
 from scipy import signal as scipy_signal
 
-from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry._plot.common import _OFFSET_POINTS, format_frequency_axis, theme_fill
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -1718,7 +1718,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     # _room_criteria_axis leaves the margin it needs on the right.
     family_label = {
         "xytext": (7, 0),
-        "textcoords": "offset points",
+        "textcoords": _OFFSET_POINTS,
         "fontsize": 7,
         "color": "#999999",
         "va": "center",
@@ -3009,7 +3009,7 @@ def generate_decay_range_bias(output_dir: str) -> None:
             label,
             xy=(limit, 9.4),
             xytext=(-2.0, 0.0),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             rotation=90,
             fontsize=8,
             ha="right",
@@ -3115,7 +3115,7 @@ def generate_sound_strength_routes(output_dir: str) -> None:
             f"{value:.4f} dB",
             xy=(value, position),
             xytext=(-10 if value > exact else 10, 12),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="right" if value > exact else "left",
             fontsize=9,
             color=COLOR_FG,
@@ -3195,7 +3195,7 @@ def generate_sound_strength_routes(output_dir: str) -> None:
         f"critical distance, {critical:.1f} m",
         xy=(critical, 12.0),
         xytext=(6, 0),
-        textcoords="offset points",
+        textcoords=_OFFSET_POINTS,
         ha="left",
         va="top",
         fontsize=8.5,

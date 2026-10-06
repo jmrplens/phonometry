@@ -436,6 +436,10 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
             T(f"{name}, $T$ = {t_line * 1e3:.0f} ms"),
             (t_pk + t_line * 1e3 * frac, -60.0 * frac),
             xytext=(6.0 if name == "Sabine" else -6.0, 0.0),
+            # The one literal left of the shared _OFFSET_POINTS: the published
+            # clip records a fingerprint of this code, and spelling the
+            # constant here would mark the clip stale until it is drawn
+            # again, for no change to a single frame.
             textcoords="offset points",
             fontsize=7.6,
             color=COLOR_MUTED,

@@ -27,6 +27,7 @@ from phonometry import (
     environment,
     hearing,
     materials,
+    metrology,
     noise_control,
     room,
     vibration,
@@ -1426,3 +1427,78 @@ def test_a_velocity_on_the_interpolated_guideline_keeps_to_it(
         velocity, building_class="commercial", frequency_hz=frequency
     )
     assert assessment.within_guideline
+
+
+@pytest.mark.parametrize(("section", "canal"), [(20.22, 33.7), (18.12, 30.2)])
+def test_a_canal_section_of_six_tenths_of_the_canal_is_not_less_than_that(
+    section: float, canal: float
+) -> None:
+    # IEC 60268-7 Annex B b): in the rest of the canal "an area less than 0,6"
+    # of the canal's. 20,22 / 33,7 is 0,6 and comes out under it in binary.
+    check = electroacoustics.verify_ear_canal_microphone(
+        entrance_area_mm2=4.0,
+        canal_section_area_mm2=section,
+        volume_mm3=100.0,
+        pink_noise_band_levels_db=[60.0, 61.0],
+        open_levels_db=[80.0],
+        sealed_levels_db=[60.0],
+        ear_canal_area_mm2=canal,
+    )
+    assert not check.requirements["b"]
+
+
+def _coupler_check(
+    length_mm: float, depth_mm: float, diameter_mm: float
+) -> metrology.CouplerCheck:
+    microphone = metrology.ReciprocityMicrophone(
+        equivalent_volume_m3=144e-9,
+        resonance_frequency_hz=8200.0,
+        loss_factor=1.05,
+        front_cavity_volume_m3=0.534e-6,
+        front_cavity_depth_m=depth_mm / 1000.0,
+        front_cavity_diameter_m=18.6e-3,
+    )
+    coupler = metrology.PlaneWaveCoupler(
+        length_m=length_mm / 1000.0, diameter_m=diameter_mm / 1000.0
+    )
+    return metrology.check_coupler(
+        [250.0, 1000.0],
+        coupler,
+        (microphone, microphone),
+        temperature_c=23.0,
+        static_pressure_pa=101325.0,
+        relative_humidity_percent=50.0,
+    )
+
+
+@pytest.mark.parametrize(
+    ("length_mm", "depth_mm", "diameter_mm"),
+    [(5.4, 1.95, 18.6), (7.9, 0.7, 18.6), (10.05, 1.95, 18.6), (5.9, 2.0, 13.2)],
+)
+def test_a_coupler_on_the_ends_of_the_recommended_ratio_is_recommended(
+    length_mm: float, depth_mm: float, diameter_mm: float
+) -> None:
+    # IEC 61094-2 C.2: a length to diameter ratio "within the range of 0,5 to
+    # 0,75", the length between the diaphragms. 5,4 + 2 x 1,95 mm over
+    # 18,6 mm is 0,5 and comes out under it in binary; 5,9 + 2 x 2 mm over
+    # 13,2 mm is 0,75 and comes out over it.
+    check = _coupler_check(length_mm, depth_mm, diameter_mm)
+    assert check.ratio_recommended is True
+
+
+@pytest.mark.parametrize(
+    ("frequency", "pressure"), [(36.01, 90025.0), (36.09, 90225.0)]
+)
+def test_a_frequency_of_four_tenths_hz_per_kpa_is_inside_the_stated_accuracy(
+    frequency: float, pressure: float
+) -> None:
+    # IEC 61094-3 B.2: the attenuation is accurate to 10 % for a ratio of
+    # frequency to static pressure of 0,4 Hz/kPa to 10^4 Hz/kPa. 36,01 Hz at
+    # 90,025 kPa is 0,4 Hz/kPa and comes out under it in binary.
+    attenuation = metrology.reciprocity_air_attenuation(
+        [frequency],
+        temperature_c=23.0,
+        static_pressure_pa=pressure,
+        relative_humidity_percent=50.0,
+    )
+    assert bool(attenuation.within_stated_accuracy[0])

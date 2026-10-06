@@ -173,6 +173,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.boundary import settled
 from .._internal.frozen import read_only
 from .._internal.validation import require_count, require_positive
 from .programme_signal import ProgrammeSignalCheck, check_programme_signal
@@ -1883,7 +1884,9 @@ class EarCanalMicrophoneVerification:
             {
                 "a": self.entrance_area_mm2
                 <= _MAX_ENTRANCE_AREA_MM2 * (1.0 + _LIMIT_SLACK),
-                "b": self.area_ratio < _MAX_CANAL_AREA_RATIO,
+                # A ratio of two decimal areas that is 0,6 in decimal comes
+                # out either side of it in binary; settled, it is 0,6.
+                "b": float(settled(self.area_ratio)) < _MAX_CANAL_AREA_RATIO,
                 "c": self.volume_mm3 < _MAX_VOLUME_MM3,
                 "d": self.neighbour_difference_db
                 <= _MAX_NEIGHBOUR_DIFFERENCE_DB * (1.0 + _LIMIT_SLACK),

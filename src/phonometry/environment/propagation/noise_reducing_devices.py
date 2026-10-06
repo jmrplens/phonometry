@@ -328,7 +328,7 @@ def sound_absorption_rating(
     )
     energy = 10.0 ** (0.1 * weights)
     ratio = float(np.sum(alpha * energy) / np.sum(energy))
-    if ratio >= ABSORPTION_RATIO_LIMIT - _RATIO_SLACK:
+    if ratio >= ABSORPTION_RATIO_LIMIT:
         clause = "EN 1793-1" if spectrum == "road" else "EN 16272-3-1"
         msg = (
             "the weighted absorption ratio reached the "

@@ -256,16 +256,16 @@ def _gpu_encode_target() -> dict[str, str] | None:
         print(f"note: encoding on the CPU as VP9, {reason}", file=sys.stderr)
 
     try:
-        import fdtd_gpu_remote
+        import repo_env
 
-        fdtd_gpu_remote.load_env()
+        repo_env.load_env()
     except ImportError:
-        decline("fdtd_gpu_remote is not importable")
+        decline("repo_env is not importable")
         return None
     if os.environ.get("PHONO_GPU_ENCODE", "").lower() != "av1":
         decline(
-            "PHONO_GPU_ENCODE is not 'av1' (a linked worktree has no .env of "
-            "its own, so export the PHONO_GPU_* settings to render there)"
+            "PHONO_GPU_ENCODE is not 'av1' in the environment or in "
+            f"{repo_env.ENV_FILE}"
         )
         return None
     host = os.environ.get("PHONO_GPU_HOST", "")

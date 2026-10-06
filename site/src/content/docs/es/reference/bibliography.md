@@ -11,12 +11,21 @@ bibliografía tipada del frontmatter de la página, que compone todas las fuente
 en estilo APA, normas, libros y artículos por igual, cada una con un DOI o un
 enlace oficial del editor y media frase sobre qué sustenta.
 
-Un documento normativo aparece en una lista de Referencias siempre que una guía
-lo cite como *fuente* de algo que usa y no como el método que implementa:
-ISO 3740 como la guía de selección que decide qué método de potencia acústica
-aplica, ISO 1996-2 por el criterio de audibilidad tonal que reutiliza
-IEC 61400-11. Lo que una página implementa apartado por apartado está en su
-fila de chips, y reunido para toda la biblioteca en el
+La fila de chips y la sección de Referencias difieren a propósito. Las normas
+de la fila de chips son lo que la página implementa y nada más: las normas cuyas
+fórmulas, tablas o ensayos calculan las funciones de la propia página. Junto a
+ellas, la fila nombra por autor y año los libros y artículos a los que se
+atribuye el método de la página. Un documento normativo que la página solo
+exige, cita o con el que se compara figura en sus Referencias como cualquier
+otra fuente, pero no tiene chip: el calibrador que presupone un ensayo
+periódico (IEC 60942 en los ensayos periódicos del sonómetro), el vocabulario
+del que una página toma sus términos (ISO 2041), la guía de selección que
+decide qué método de potencia acústica aplica (ISO 3740), la correspondencia de
+ISO 1996-2 a la que la guía de aerogeneradores entrega su audibilidad tonal. El
+buscador del sitio sigue a los chips de normas: una búsqueda por designación
+pone primero las guías que la implementan, y encuentra después, por su texto,
+las que solo la citan. Lo que una página
+implementa apartado por apartado está reunido para toda la biblioteca en el
 [informe de conformidad](/phonometry/es/reference/conformance/), no aquí.
 
 Esta página reúne esas fuentes en una sola lista, agrupadas por las mismas once

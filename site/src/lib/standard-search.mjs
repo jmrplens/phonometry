@@ -11,6 +11,14 @@
  * References section already come from, so there is no second source of truth
  * to keep in step and no page to migrate.
  *
+ * What a page declares is what it implements. A normative document the page
+ * only requires or cites (the calibrator its test presupposes, the vocabulary
+ * it takes a definition from, the method it compares with) is marked
+ * `implemented: false` in the frontmatter and stays out of the field, exactly
+ * as it stays out of the chips: a search for it should find the guides written
+ * to it, not every guide that needs it. The reference itself is still printed
+ * in the bibliography, where it is indexed as prose like any other text.
+ *
  * Written as .mjs with JSDoc rather than .ts on purpose: the build-time check
  * in scripts/check-search-designation.mjs imports it under plain Node, which
  * must not depend on type stripping being available.
@@ -312,20 +320,41 @@ export function designationTokens(designation) {
 }
 
 /**
+ * The designation an entry declares, or undefined when it declares none.
+ *
+ * A standard declares its designation and a numbered report its number, unless
+ * the entry is marked `implemented: false`: the page cites that document but is
+ * not written to it, so it declares nothing. Exported for the frontmatter reader
+ * of the build-time checks (readDeclaredDesignations in
+ * scripts/shared/search-index.mjs), which reads the frontmatter on its own and
+ * applies the rule through this function rather than a copy of it.
+ *
+ * @param {{type?: string, designation?: string, number?: string, implemented?: boolean}|undefined} ref
+ * @returns {string|undefined}
+ */
+export function declaredDesignation(ref) {
+  if (ref?.implemented === false) return undefined;
+  if (ref?.type === 'standard') return ref.designation;
+  if (ref?.type === 'report') return ref.number;
+  return undefined;
+}
+
+/**
  * The search tokens for a page, from its `references` frontmatter.
  *
- * Every declared standard is indexed, including the ones whose chip does not
- * fit under the nine-chip cap: the cap is a layout budget, not a statement
- * about which standards govern the page, and the "+N more" chip points at the
- * bibliography where those standards are printed in full.
+ * Every standard the page implements is indexed, including the ones whose chip
+ * does not fit under the nine-chip cap: the cap is a layout budget, not a
+ * statement about which standards govern the page, and the "+N more" chip
+ * points at the bibliography where those standards are printed in full. A
+ * standard marked `implemented: false` is not indexed here at all.
  *
- * @param {Array<{type?: string, designation?: string, number?: string}>|undefined} references
+ * @param {Array<{type?: string, designation?: string, number?: string, implemented?: boolean}>|undefined} references
  * @returns {string[]} deduplicated, in the order the bibliography declares them
  */
 export function pageStandardTokens(references) {
   const out = [];
   for (const ref of references ?? []) {
-    const literal = ref?.type === 'standard' ? ref.designation : ref?.type === 'report' ? ref.number : undefined;
+    const literal = declaredDesignation(ref);
     if (!literal) continue;
     for (const token of designationTokens(literal)) {
       if (!out.includes(token)) out.push(token);

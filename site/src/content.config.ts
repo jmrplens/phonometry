@@ -32,6 +32,26 @@ const referenceBase = {
    * Optional: a page that marks nothing simply falls back to that order.
    */
   primary: z.boolean().optional(),
+  /**
+   * `false` on a normative document the page cites but does not implement:
+   * one its method requires (the calibrator a periodic test presupposes, the
+   * instrument class a survey asks for), one it takes a definition or a value
+   * from, or one it names to compare with. A page's standards field is what
+   * the page implements and nothing else, so such an entry stays in the
+   * References section and keeps its anchor, but makes no header chip
+   * (src/lib/reference-chips.ts), adds no token to the weighted search field
+   * (src/lib/standard-search.mjs) and is never one of the works the page is
+   * said to be based on in its structured data (src/lib/citations.mjs). The
+   * build is held to all of that by scripts/check-cited-standards.mjs (chips,
+   * structured data, the entry still printed) and
+   * scripts/check-search-designation.mjs (the search field).
+   *
+   * Absent means implemented, so only the exceptions carry it, and `false` is
+   * the one value it takes. Allowed only where a designation exists to be
+   * dropped: `type: standard`, and `type: report` with a `number`. Never
+   * together with `primary: true`.
+   */
+  implemented: z.literal(false).optional(),
 };
 
 /** Pre-formatted APA names, one per author: "Surname, I. I.". */
@@ -101,6 +121,25 @@ const references = z
           path: [i],
           message: `references[${i}] (${ref.type}) needs "authors" or "organization"`,
         });
+      }
+      if (ref.implemented !== undefined) {
+        const designated = ref.type === 'standard' || (ref.type === 'report' && Boolean(ref.number));
+        if (!designated) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [i, 'implemented'],
+            message:
+              `references[${i}] (${ref.type}) carries "implemented", which only a standard or a ` +
+              'numbered report can: nothing else makes a standards chip or a search token to drop',
+          });
+        }
+        if (ref.primary) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [i],
+            message: `references[${i}] is marked both "primary: true" and "implemented: false"`,
+          });
+        }
       }
     }
   });

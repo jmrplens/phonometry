@@ -263,6 +263,17 @@ jobs:
         # server.
         run: pnpm run check:search
         working-directory: site
+      - name: Check a standard a guide only cites stays out of its chips and structured data
+        # A bibliography entry marked `implemented: false` is a standard the
+        # guide requires, cites or compares with but is not written to. Three
+        # views drop it: the header chips, the search field and the works the
+        # structured data says the page is based on. Each is one filter, and
+        # with any of them gone the site still builds, validates and ranks as
+        # before. check:search crosses the search field against the frontmatter;
+        # this crosses the other two over the build, and checks that every
+        # cited entry is still printed in the page's References section.
+        run: pnpm run check:cited-standards
+        working-directory: site
       - name: Check the structured data every page publishes
         # The JSON-LD graph is the only part of a page written for machines
         # alone, and nothing else here reads it: html-validate does not look

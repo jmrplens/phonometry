@@ -3,7 +3,7 @@
 
 The certification side: the ICAO Annex 16 effective perceived noise level
 chain (noy conversion, tone correction, duration correction) and the IEC 61265
-requirements on the equipment that measures it, with the SAE ARP 866B/5534
+requirements on the equipment that measures it, with the SAE ARP 866A and 5534
 atmospheric absorption underneath.
 
 The airport-contour side: the ECAC Doc 29 single-event chain - noise-power

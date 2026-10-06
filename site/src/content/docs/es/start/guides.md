@@ -811,7 +811,7 @@ para la cartografía reglamentaria.
 Niveles de certificación, contornos de aeropuerto y el método del
 hemisferio para helicópteros: el ruido del vuelo medido como lo prescriben
 los documentos de certificación y de planificación aeroportuaria.
-Implementa el Anexo 16 de la OACI, IEC 61265, SAE ARP 866A/866B/5534,
+Implementa el Anexo 16 de la OACI, IEC 61265, SAE ARP 866A/5534,
 ISO 3891 y ECAC Doc 29/32.
 
 - [Ruido de aeronaves: nivel efectivo de ruido percibido](/phonometry/es/aircraft/aircraft-noise/):

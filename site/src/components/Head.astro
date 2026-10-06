@@ -42,6 +42,8 @@ interface ReferenceEntry {
   doi?: string;
   note?: string;
   primary?: boolean;
+  /** `false` on a document the page cites but does not implement. */
+  implemented?: false;
   [key: string]: unknown;
 }
 interface RouteData {
@@ -268,8 +270,9 @@ const breadcrumbList = crumbs
     }
   : null;
 
-// Search tokens for the standards this page declares, from the same
-// `references` frontmatter the chips and the References section come from. They
+// Search tokens for the standards this page implements, from the same
+// `references` frontmatter the chips and the References section come from (an
+// entry marked `implemented: false` is printed there and indexed nowhere else). They
 // become a Pagefind metadata field, weighted in src/lib/search-ranking.mjs, so
 // that a search for a designation ranks the guides written to it first instead
 // of the pages that happen to say the number most often.

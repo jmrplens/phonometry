@@ -1,8 +1,9 @@
 // Shared plumbing for the two scripts that read the built search index in Node:
 // check-search-designation.mjs, which asserts on it, and search-ranks.mjs, which
-// prints where the pages written to a standard land for a list of searches.
+// prints where the pages written to a standard land for a list of searches. The
+// frontmatter reader below also serves check-cited-standards.mjs.
 //
-// Neither needs a browser, a server or a port. The built `pagefind.js` is a
+// None needs a browser, a server or a port. The built `pagefind.js` is a
 // module that reads its index through `fetch`, and both `fetch` and the one
 // `document` lookup it makes are answered from the file system here.
 import { readFile, readdir } from 'node:fs/promises';
@@ -11,7 +12,7 @@ import { pathToFileURL } from 'node:url';
 
 import { normalizeDesignationQuery } from '../../src/lib/designation-query.mjs';
 import { STARLIGHT_RANKING_DEFAULTS } from '../../src/lib/search-ranking.mjs';
-import { foldPartWords } from '../../src/lib/standard-search.mjs';
+import { declaredDesignation, foldPartWords } from '../../src/lib/standard-search.mjs';
 
 const FAKE_BASE = 'http://pagefind.invalid/pagefind/';
 
@@ -29,49 +30,132 @@ export async function filesUnder(dir, keep) {
   return out;
 }
 
+/** The keys of a references entry that decide what it declares. */
+const READ_KEYS = new Set(['type', 'designation', 'number', 'implemented']);
+
+/** One frontmatter scalar as written: unquoted, with a trailing comment taken off. */
+function scalarValue(raw) {
+  const value = raw.trim();
+  const quoted = /^(["'])(.*)\1(?:\s+#.*)?$/.exec(value);
+  if (quoted) return quoted[2];
+  return value.replace(/\s+#.*$/, '');
+}
+
 /**
  * The designations each page declares, read out of its frontmatter.
  *
  * A deliberately narrow reader rather than a YAML parser, because site/ has
  * none installed and this does not need one. The check that uses it crosses the
- * result against the tokens already emitted in the HTML, so a designation it
- * fails to see makes the two sets differ: it cannot read too little in silence.
+ * result against the tokens already emitted in the HTML, in both directions, so
+ * a designation it fails to see makes the two sets differ: it cannot read too
+ * little in silence. What it cannot follow at all (a bibliography in flow
+ * style, a designation as a block scalar) it reports as a problem rather than
+ * reading as nothing.
+ *
+ * A page declares the standards it implements. Which entry declares what is
+ * decided by declaredDesignation in src/lib/standard-search.mjs, the function
+ * the site itself builds the field with, so the rule exists once: a standard
+ * declares its designation and a numbered report its number, unless the entry
+ * is marked `implemented: false`, which the page cites but is not written to.
+ * To apply it, the reader collects each entry's keys: an entry opens at a list
+ * item under `references:`, and its keys are the lines at the column its first
+ * key starts at, so a nested list (the authors of a report) neither splits an
+ * entry nor lends it keys.
+ *
+ * Besides what each page implements, the reader returns what each page only
+ * cites, for the check that those entries stay out of the chips and the
+ * structured data; every designation the bibliographies print, which is what
+ * the search check measures searches over (a search for a cited standard must
+ * still find the guides that implement it first); and every route that has a
+ * content file, so a page built at a route nothing declares can be told from an
+ * English fallback served under the Spanish tree.
  *
  * @param {string} contentDir site/src/content/docs
- * @returns {Promise<{declared: Map<string, string[]>, designations: Set<string>, problems: string[]}>}
- *   route -> designations in frontmatter order, every distinct designation, and
+ * @returns {Promise<{declared: Map<string, string[]>, cited: Map<string, string[]>, designations: Set<string>, routes: Set<string>, problems: string[]}>}
+ *   route -> implemented designations in frontmatter order; route -> the
+ *   designations of the entries marked `implemented: false`; every distinct
+ *   designation printed in a bibliography; every route with a content file; and
  *   the entries this reader could not follow
  */
 export async function readDeclaredDesignations(contentDir) {
   const declared = new Map();
+  const cited = new Map();
   const designations = new Set();
+  const routes = new Set();
   const problems = [];
   for (const file of await filesUnder(contentDir, (name) => /\.mdx?$/.test(name))) {
     const text = await readFile(file, 'utf8');
     if (!text.startsWith('---')) continue;
     const end = text.indexOf('\n---', 3);
     if (end < 0) continue;
-    const found = [];
-    for (const line of text.slice(3, end).split('\n')) {
-      const match = /^\s{2,}(?:designation|number):\s*(.+?)\s*$/.exec(line);
-      if (!match) continue;
-      let value = match[1];
-      if (/^[>|]/.test(value)) {
-        problems.push(`${file}: designation written as a block scalar, which this reader cannot follow`);
-        continue;
-      }
-      if (/^(["']).*\1$/s.test(value)) value = value.slice(1, -1);
-      found.push(value);
-      designations.add(value);
-    }
-    if (found.length === 0) continue;
     const route = `/${path
       .relative(contentDir, file)
       .replace(/\.mdx?$/, '')
       .replace(/(^|\/)index$/, '')}/`.replace(/\/\/+/g, '/');
-    declared.set(route, found);
+    routes.add(route);
+    /** @type {Array<Record<string, string>>} */
+    const entries = [];
+    /** The `references` line, when the frontmatter has one. */
+    let referencesKey;
+    let inReferences = false;
+    /** Indent of the dash that opens an entry, set by the first one. */
+    let itemIndent = -1;
+    /** Column the keys of the current entry start at. */
+    let keyColumn = -1;
+    for (const line of text.slice(3, end).split('\n')) {
+      if (/^\S/.test(line)) {
+        // A top-level key opens or closes the bibliography; a comment after it
+        // is still the block form.
+        if (/^references\s*:/.test(line)) referencesKey = line;
+        inReferences = /^references:\s*(?:#.*)?$/.test(line);
+        itemIndent = -1;
+        continue;
+      }
+      if (!inReferences) continue;
+      const item = /^(\s*)-(\s+)\S/.exec(line);
+      if (item && (itemIndent === -1 || item[1].length === itemIndent)) {
+        itemIndent = item[1].length;
+        keyColumn = itemIndent + 1 + item[2].length;
+        entries.push({});
+      } else if (item || /^\s*(?:#.*)?$/.test(line) || line.length - line.trimStart().length !== keyColumn) {
+        // An item of a nested list, a blank line, a comment, or a line inside
+        // a nested value.
+        continue;
+      }
+      const entry = entries.at(-1);
+      if (!entry) continue;
+      const key = /^([A-Za-z_][\w-]*):(?:\s+(.*))?$/.exec(line.slice(keyColumn));
+      if (!key) {
+        problems.push(`${file}: a references entry not written as one key per line, which this reader cannot follow`);
+        continue;
+      }
+      const raw = key[2] ?? '';
+      if (/^[>|]/.test(raw.trim())) {
+        // A note or a title often is one, and neither is read here.
+        if (READ_KEYS.has(key[1])) {
+          problems.push(`${file}: ${key[1]} written as a block scalar, which this reader cannot follow`);
+        }
+        continue;
+      }
+      entry[key[1]] = scalarValue(raw);
+    }
+    if (referencesKey !== undefined && entries.length === 0) {
+      problems.push(`${file}: "${referencesKey.trim()}" opens no entry this reader can follow`);
+    }
+    const found = [];
+    const citedHere = [];
+    for (const entry of entries) {
+      const ref = { ...entry, implemented: entry.implemented === 'false' ? false : undefined };
+      // What the entry would declare if the page implemented it.
+      const printed = declaredDesignation({ ...ref, implemented: undefined });
+      if (!printed) continue;
+      designations.add(printed);
+      (declaredDesignation(ref) ? found : citedHere).push(printed);
+    }
+    if (found.length) declared.set(route, found);
+    if (citedHere.length) cited.set(route, citedHere);
   }
-  return { declared, designations, problems };
+  return { declared, cited, designations, routes, problems };
 }
 
 /**

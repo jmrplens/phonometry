@@ -75,22 +75,44 @@ def _band_margin(band: dict[str, Any], cls: int) -> float:
     return min(float(band[k]) for k in keys if band.get(k) is not None)
 
 
-#: The requirement rows of the fiche: the requirement, its label and the
-#: per-band keys of the range it quotes (``None`` for the Table 1 mask, whose
-#: margin is the reading).
-_REQUIREMENT_ROWS: tuple[tuple[str, str, tuple[str, str] | None], ...] = (
-    ("relative_attenuation", "Relative attenuation (5.10, Table 1)", None),
-    (
-        "effective_bandwidth",
-        "Effective bandwidth deviation (5.12)",
-        ("bandwidth_deviation_db", "bandwidth_deviation_db"),
+#: The requirement rows of the fiche, per edition: the requirement, its label
+#: and the per-band keys of the range it quotes (``None`` for the Table 1
+#: mask, whose margin is the reading).
+_REQUIREMENT_ROWS: dict[str, tuple[tuple[str, str, tuple[str, str] | None], ...]] = {
+    "2014": (
+        ("relative_attenuation", "Relative attenuation (5.10, Table 1)", None),
+        (
+            "effective_bandwidth",
+            "Effective bandwidth deviation (5.12)",
+            ("bandwidth_deviation_db", "bandwidth_deviation_db"),
+        ),
+        (
+            "summation",
+            "Summation of output signals (5.16)",
+            ("summation_min_db", "summation_max_db"),
+        ),
     ),
-    (
-        "summation",
-        "Summation of output signals (5.16)",
-        ("summation_min_db", "summation_max_db"),
+    "1995": (
+        ("relative_attenuation", "Relative attenuation (4.4, Table 1)", None),
+        (
+            "effective_bandwidth",
+            "Filter integrated response (4.5.3)",
+            ("bandwidth_deviation_db", "bandwidth_deviation_db"),
+        ),
+        (
+            "summation",
+            "Summation of output signals (4.9)",
+            ("summation_min_db", "summation_max_db"),
+        ),
     ),
-)
+}
+
+#: The caption of the requirement table, per edition: the standard and the
+#: test procedure the requirements are graded by.
+_REQUIREMENT_CAPTIONS: dict[str, str] = {
+    "2014": "Requirements of IEC 61260-1:2014, graded as IEC 61260-2:2016 tests them",
+    "1995": "Requirements of IEC 61260:1995, graded as its clause 5 tests them",
+}
 
 
 def _requirement_rows(
@@ -100,7 +122,7 @@ def _requirement_rows(
     from .._i18n import fmt_minus
 
     rows: list[tuple[str, str]] = []
-    for name, label, span in _REQUIREMENT_ROWS:
+    for name, label, span in _REQUIREMENT_ROWS[result.edition]:
         if name not in result.requirements:
             continue
         cls = result.requirement_class(name)
@@ -117,9 +139,15 @@ def _requirement_rows(
         if span is not None:
             lows = [float(b[span[0]]) for b in result.bands if b[span[0]] is not None]
             highs = [float(b[span[1]]) for b in result.bands if b[span[1]] is not None]
+            # Rounded to the printed places, plus zero, so a sum a hair under
+            # the input does not print as -0.00.
             value += t(", {low} to {high} dB", language).format(
-                low=decimal_comma(fmt_minus(min(lows), "+.2f"), language),
-                high=decimal_comma(fmt_minus(max(highs), "+.2f"), language),
+                low=decimal_comma(
+                    fmt_minus(round(min(lows), 2) + 0.0, "+.2f"), language
+                ),
+                high=decimal_comma(
+                    fmt_minus(round(max(highs), 2) + 0.0, "+.2f"), language
+                ),
             )
         rows.append((t(label, language), value))
     return rows
@@ -134,7 +162,13 @@ def _basis(
 ) -> str:
     """The standard-basis line for the fiche: the clauses the verdict grades."""
     if edition != "2014":
-        table = t("IEC 61260:1995 / ANSI S1.11-2004, Table 1", language)
+        if "summation" in requirements:
+            basis = "IEC 61260:1995 / ANSI S1.11-2004, Table 1, 4.5.3 and 4.9"
+        elif "effective_bandwidth" in requirements:
+            basis = "IEC 61260:1995 / ANSI S1.11-2004, Table 1 and 4.5.3"
+        else:
+            basis = "IEC 61260:1995 / ANSI S1.11-2004, Table 1"
+        table = t(basis, language)
     elif "summation" in requirements:
         table = t("IEC 61260-1:2014, Table 1, 5.12 and 5.16", language)
     elif "effective_bandwidth" in requirements:
@@ -334,7 +368,7 @@ def render_iec61260_report(
     basis_strip_key = (
         "{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260-1 Formula 8)."
         if result.edition == "2014"
-        else "{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260:1995, 3.13 Note)."
+        else "{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260:1995, 3.14 Note, equation (8))."
     )
     flow.append(
         fiche_paragraph(
@@ -366,7 +400,7 @@ def render_iec61260_report(
             Spacer(1, 4),
             fiche_paragraph(
                 t(
-                    "Requirements of IEC 61260-1:2014, graded as IEC 61260-2:2016 tests them",
+                    _REQUIREMENT_CAPTIONS[result.edition],
                     language,
                 ),
                 caption_style,
@@ -378,17 +412,11 @@ def render_iec61260_report(
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if getattr(result, "range_limited", False):
-        # The verifier cannot exercise the stop-band mask beyond a band's
-        # processing Nyquist, so the stated class attests the verified range
-        # and says so. Why nothing reaches past it depends on the bank: a
-        # decimated band has its anti-aliasing filter, a band filtered at the
-        # full rate has no frequency above half the sampling rate at all.
-        decimated = max(result.factors) > 1
-        note = (
-            "Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
-            if decimated
-            else "Stop-band limits verified up to half the sampling frequency, above which a digital filter has no frequency to respond at; the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
-        )
+        # The verifier grades every band, alias images included, up to half
+        # the input rate; above it no input of a digital bank has a
+        # frequency, so the stated class attests the verified range and says
+        # so.
+        note = "Stop-band limits verified up to half the sampling frequency, above which a digital filter has no frequency to respond at; the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
         flow.append(fiche_paragraph(t(note, language), basis_strip_style))
     if metadata is not None and metadata.required_class is not None:
         if metadata.required_class not in result.available_classes():

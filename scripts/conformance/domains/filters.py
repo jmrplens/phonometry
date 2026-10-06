@@ -14,16 +14,28 @@ about the same filter.
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import reference_data as ref
 
 import phonometry as ph
 from phonometry import filters
+from phonometry.filters.compliance import (
+    _effective_bandwidth_1995,
+    _reference_bandwidth_1995,
+    _test_frequencies,
+)
+from phonometry.filters.core import _decimate_and_filter
 from phonometry.filters.weighting import _runtime_frequency_response
 
-from ..registry import Outcome, numeric, register
+from ..registry import Outcome, count, numeric, register
 from ..render import _snap
 from ..shared import _filter_class, _weighting_deviation
+
+#: IEC 61260:1995 Table 1: the greatest value of the minimum relative
+#: attenuation of class 0, the limit 5.7.3 holds an alias tone to, dB.
+_CLASS_0_GREATEST_MINIMUM_DB = 75.0
 
 
 def _filter_class_check(arch: str, fraction: float, label: str) -> Outcome:
@@ -72,17 +84,181 @@ def _chk_butter_class0_1995() -> Outcome:
     )
     result = ph.filters.verify_filter_class(bank, edition="1995")
     margin = min(b["margin_class0_db"] for b in result.bands)
-    ok = result.overall_class == 0
+    achieved = result.requirement_class("relative_attenuation")
     return Outcome(
         expected="class 0",
-        computed=(
-            f"class {result.overall_class}"
-            if result.overall_class is not None
-            else "none"
-        )
+        computed=(f"class {achieved}" if achieved is not None else "none")
         + f" (margin {margin:+.3f} dB)",
         delta=f"{margin:+.3f} dB",
-        passed=ok,
+        passed=achieved == 0,
+    )
+
+
+def _bank_1995(fraction: int) -> ph.filters.OctaveFilterBank:
+    """The default Butterworth bank at 48 kHz, 125 Hz to 4 kHz."""
+    return ph.filters.OctaveFilterBank(
+        48000, fraction=fraction, order=6, limits=[125, 4000]
+    )
+
+
+def _integrated_response_check(fraction: int) -> Outcome:
+    result = ph.filters.verify_filter_class(_bank_1995(fraction), edition="1995")
+    worst = max(abs(b["bandwidth_deviation_db"]) for b in result.bands)
+    achieved = result.requirement_class("effective_bandwidth")
+    margin = result.binding_margin_db("effective_bandwidth", 0)
+    return Outcome(
+        expected="class 0 (|Delta B| <= 0.15 dB)",
+        computed=f"class {achieved} (|Delta B| <= {worst:.3f} dB)",
+        delta=f"{margin:+.3f} dB",
+        passed=achieved == 0,
+    )
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 4.5.3 and 5.4",
+    "Octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): largest |Delta B| "
+    "of equations (13), (14) and (16) within the class 0 +/-0.15 dB",
+)
+def _chk_integrated_response_octave_1995() -> Outcome:
+    return _integrated_response_check(1)
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 4.5.3 and 5.4",
+    "One-third-octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): largest "
+    "|Delta B| of equations (13), (14) and (16) within the class 0 +/-0.15 dB",
+)
+def _chk_integrated_response_third_1995() -> Outcome:
+    return _integrated_response_check(3)
+
+
+def _summation_check(fraction: int) -> Outcome:
+    result = ph.filters.verify_filter_class(_bank_1995(fraction), edition="1995")
+    # Rounded before printing, plus zero, so a sum a hair under the input does
+    # not print as -0.000.
+    low = round(min(b["summation_min_db"] for b in result.bands), 3) + 0.0
+    high = round(max(b["summation_max_db"] for b in result.bands), 3) + 0.0
+    achieved = result.requirement_class("summation")
+    margin = result.binding_margin_db("summation", 0)
+    return Outcome(
+        expected="class 0 (-1.0 dB <= Delta P <= +1.0 dB)",
+        computed=f"class {achieved} ({low:+.3f} dB to {high:+.3f} dB)",
+        delta=f"{margin:+.3f} dB",
+        passed=achieved == 0,
+    )
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 4.9 and 5.8",
+    "Octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): summed outputs of "
+    "equation (19), lowest to highest mid-band frequency, within the class 0 "
+    "+/-1.0 dB",
+)
+def _chk_summation_octave_1995() -> Outcome:
+    return _summation_check(1)
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 4.9 and 5.8",
+    "One-third-octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): summed "
+    "outputs of equation (19), lowest to highest mid-band frequency, within "
+    "the class 0 +/-1.0 dB",
+)
+def _chk_summation_third_1995() -> Outcome:
+    return _summation_check(3)
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 equations (9) and (16)",
+    "Ideal octave band, S = 24, N = 5S: filter integrated response of the "
+    "trapezoidal sum equals its hand sum interval by interval (closed form)",
+)
+def _chk_ideal_integrated_response_1995() -> Outcome:
+    points = 24
+    half = points // 2
+    n = 5 * points
+    omega = _test_frequencies(1, points, -n, n + 1)
+    i = np.arange(-n, n + 2)
+    half_power = 10.0 * math.log10(2.0)
+    delta_a = np.where(
+        np.abs(i) < half, 0.0, np.where(np.abs(i) == half, half_power, np.inf)
+    )
+    # The base-ten octave ratio of equation (1), and from it the reference
+    # bandwidth of equation (9) for b = 1, both written out here so that the
+    # row holds the library's equation (9) as well as its equation (16).
+    g = 10.0 ** (3.0 / 10.0)
+    reference_by_hand = g ** (1.0 / 2.0) - g ** (-1.0 / 2.0)
+    r = g ** (1.0 / points)
+    by_hand = (
+        (r ** (half - 1) - r ** -(half - 1))
+        + 0.75 * (r ** -(half - 1) - r**-half)
+        + 0.75 * (r**half - r ** (half - 1))
+        + 0.25 * (r**-half - r ** -(half + 1))
+        + 0.25 * (r ** (half + 1) - r**half)
+    )
+    computed = 10.0 * math.log10(
+        _effective_bandwidth_1995(omega, delta_a) / _reference_bandwidth_1995(1)
+    )
+    return numeric(
+        10.0 * math.log10(by_hand / reference_by_hand),
+        computed,
+        1e-12,
+        unit="dB",
+        places=6,
+    )
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 4.8 and 5.7",
+    "Tones at the decimated sampling frequency minus the nominal mid-band "
+    "frequency of the 20 Hz and 200 Hz bands of the default one-third-octave "
+    "bank (fs=48 kHz), run through the bank: band output at least the +75 dB "
+    "of class 0 below the input",
+)
+def _chk_anti_alias_tones_1995() -> Outcome:
+    fs = 48000
+    bank = ph.filters.OctaveFilterBank(fs, fraction=3)
+    t = np.arange(4 * fs) / fs
+    nominal = list(bank.nominal_freq)
+    held = 0
+    picks = (20.0, 200.0)
+    for target in picks:
+        index = nominal.index(f"{target:g}")
+        factor = int(bank.factor[index])
+        tone_hz = fs / factor - target
+        x = np.sqrt(2.0) * np.sin(2.0 * np.pi * tone_hz * t)
+        y = _decimate_and_filter(x, bank.sos[index], factor)
+        settled = y[y.size // 2 :]
+        below = -10.0 * math.log10(float(np.mean(settled**2)))
+        held += int(factor > 1 and below >= _CLASS_0_GREATEST_MINIMUM_DB)
+    return count(held, len(picks), subject="band outputs")
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260-1:2014 5.15 and Table 1",
+    "Default octave bank at fs=16 kHz graded at its input rate, alias images "
+    "of the decimated bands included: class 1 on Table 1",
+)
+def _chk_alias_images_2014() -> Outcome:
+    # The default bank at 16 kHz keeps the bands up to 4 kHz; asking for
+    # them spares the warning about the ones above the Nyquist frequency.
+    bank = ph.filters.OctaveFilterBank(16000, 1, limits=[12, 5000])
+    result = ph.filters.verify_filter_class(bank)
+    margin = min(b["margin_class1_db"] for b in result.bands)
+    achieved = result.requirement_class("relative_attenuation")
+    return Outcome(
+        expected="class 1",
+        computed=(f"class {achieved}" if achieved is not None else "none")
+        + f" (margin {margin:+.3f} dB)",
+        delta=f"{margin:+.3f} dB",
+        passed=achieved == 1,
     )
 
 

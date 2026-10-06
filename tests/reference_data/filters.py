@@ -216,6 +216,17 @@ IEC61260_1_TIME_INVARIANCE_LIMITS_DB = {1: 0.4, 2: 0.6}
 # instruments and +1,8 dB and -3,8 dB for class 2 instruments", as
 # (lower, upper).
 IEC61260_1_SUMMATION_LIMITS_DB = {1: (-1.8, 0.8), 2: (-3.8, 1.8)}
+# BS EN 61260:1996 (IEC 61260:1995, "© BSI 23 August 2002") 4.5.3 (printed
+# p. 12, PDF page 16): "the filter integrated response shall not exceed
+# +/-0,15 dB, +/-0,3 dB, and +/-0,5 dB for classes 0, 1 and 2 instruments".
+IEC61260_1995_INTEGRATED_RESPONSE_LIMITS_DB = {0: 0.15, 1: 0.3, 2: 0.5}
+# BS EN 61260:1996 4.9 (printed p. 12, PDF page 16): the summation of output
+# signals "shall not exceed +/-1,0 dB; +1,0 dB, -2,0 dB and +2,0 dB, -4,0 dB
+# for classes 0, 1, and 2 instruments", as (lower, upper).
+IEC61260_1995_SUMMATION_LIMITS_DB = {0: (-1.0, 1.0), 1: (-2.0, 1.0), 2: (-4.0, 2.0)}
+# BS EN 61260:1996 5.4.2 (printed p. 14, PDF page 18): N of equation (16)
+# "shall be equal to or greater than 5S = 120".
+IEC61260_1995_INTEGRATION_SPAN_BANDWIDTHS = 5
 # BS EN 61260-1:2014 Table B.1 (printed p. 29, PDF page 31): the
 # maximum-permitted expanded uncertainty of a relative attenuation, "0,20 dB
 # for DeltaA <= 2 dB, 0,30 dB for 2 dB < DeltaA <= 40 dB, 0,50 dB for

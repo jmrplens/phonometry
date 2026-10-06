@@ -3153,8 +3153,9 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
     breakpoint, so every limit is a straight line between breakpoints, which
     is what Formula (11) says. The band is an order-6 Butterworth one-third
     octave at 1 kHz, which the default bank at 48 kHz walks to the end of the
-    mask: its Nyquist frequency is 24 f_m, and a decimated band keeps its own
-    at least sixteen times its upper edge. The solid box at the top right
+    mask: the check reads every band up to half the input rate, 24 f_m here,
+    a decimated band on the alias images it reads as well. The solid box at
+    the top right
     is what the verifier also computes on the design, the IEC 61260-2 tests
     that need no specimen (the Formula (1) grid, 5.12, 5.16 and the swept
     test of 5.14); the dashed column below it is IEC 61260-2 and IEC 61260-3
@@ -3358,7 +3359,7 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
     s.text(
         320,
         678,
-        "past a band's own Nyquist nothing is walked, and range_limited says so",
+        "past half the input rate nothing is walked, and range_limited says so",
         12,
         th.muted,
     )

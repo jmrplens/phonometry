@@ -673,19 +673,19 @@ L 1259 0
 L 628 0 
 L 628 4666 
 z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-36"/><use xlink:href="#DejaVuSans-37" transform="translate(63.48 0)"/><use xlink:href="#DejaVuSans-2c" transform="translate(124.56 0)"/></g></g></g><g id="line2d_31"><path d="M 71.56 249.29 
-L 94.43 221.92 
-L 117.31 196 
-L 140.19 172.4 
-L 163.06 152.01 
-L 185.94 135.04 
-L 208.82 121.53 
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-36"/><use xlink:href="#DejaVuSans-37" transform="translate(63.48 0)"/><use xlink:href="#DejaVuSans-2c" transform="translate(124.56 0)"/></g></g></g><g id="line2d_31"><path d="M 71.56 249.28 
+L 94.43 221.91 
+L 117.31 195.98 
+L 140.19 172.39 
+L 163.06 152 
+L 185.94 135.03 
+L 208.82 121.52 
 L 231.7 111.23 
-L 254.57 103.71 
+L 254.57 103.7 
 L 277.45 98.44 
-L 300.33 94.93 
+L 300.33 94.92 
 L 323.21 92.69 
-L 346.08 91.58 
+L 346.08 91.57 
 L 368.96 91.32 
 L 391.84 91.33 
 L 414.71 92.11 
@@ -721,10 +721,10 @@ L 648.06 358.2
 " style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/></g><g id="patch_6"><path d="M 44.1 26.8 
 L 648.06 26.8 
 " style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/></g><g id="patch_7"><path d="M 137.96 294.72 
-Q 127.84 246.34 117.95 199.05 
-" style="fill: none; stroke: #ffffff; stroke-linecap: round"/><path d="M 116.81 203.37 
-L 117.95 199.05 
-L 120.72 202.55 
+Q 127.84 246.33 117.95 199.03 
+" style="fill: none; stroke: #ffffff; stroke-linecap: round"/><path d="M 116.81 203.36 
+L 117.95 199.03 
+L 120.72 202.54 
 " style="fill: none; stroke: #ffffff; stroke-linecap: round"/></g><g id="text_18"><!-- umbral de recepción: --><g style="fill: #ffffff" transform="translate(80.71 307.68) scale(0.1 -0.1)"><defs><path id="DejaVuSans-58" d="M 544 1381 
 L 544 3500 
 L 1119 3500 

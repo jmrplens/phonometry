@@ -29,7 +29,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from reference_data import rolling_stock_noise as ref
-from scipy import signal
 
 from phonometry import environment
 from phonometry.environment.sources.acoustic_roughness import (
@@ -45,6 +44,7 @@ from phonometry.filters import (
     class_limits,
     verify_filter_class,
 )
+from phonometry.filters.compliance import _band_relative_attenuation
 
 _DX = 1.0e-3
 
@@ -142,9 +142,9 @@ def test_the_bank_attenuates_class_0_beyond_g4_on_a_record() -> None:
     Table 1 of EN 61260:1995 asks class 0 for a relative attenuation of at
     least 75 dB at and beyond the normalized frequencies :math:`G^{\pm 4}`
     maps to. Tones from 0,3 per metre to just under the Nyquist wavenumber,
-    and the two wavenumbers a decimated bank lets through only about 73 dB to
-    75 dB down (74,773 per metre onto the 0,5 m band, 88,202 per metre onto
-    the 0,4 m band), are filtered on a 40 m record; the mean square of the
+    and the two wavenumbers that fold onto bands of a decimated bank
+    (74,773 per metre onto the 0,5 m band, 88,202 per metre onto the 0,4 m
+    band), are filtered on a 40 m record; the mean square of the
     last 15 m, once every filter has rung out, is compared with that of a
     tone at the band's midband wavenumber.
     """
@@ -183,15 +183,15 @@ def test_the_bank_attenuates_class_0_beyond_g4_on_a_record() -> None:
 def _relative_attenuation_db(
     bank: OctaveFilterBank, index: int, omega: np.ndarray
 ) -> np.ndarray:
-    """Relative attenuation of one band at normalized frequencies, dB (equation 8)."""
+    """Relative attenuation of one band at normalized frequencies, dB (equation 8).
+
+    Read as the class check reads it: the response the band has at the
+    record's own rate, a decimated band's alias images included.
+    """
     mid = float(bank.freq[index])
-    rate = bank.fs / int(bank.factor[index])
-    _, reference = signal.sosfreqz(bank.sos[index], worN=[mid], fs=rate)
-    out = np.full(omega.shape, np.inf)
-    reachable = omega * mid < rate / 2.0
-    _, h = signal.sosfreqz(bank.sos[index], worN=omega[reachable] * mid, fs=rate)
-    out[reachable] = 20.0 * np.log10(np.abs(reference[0]) / np.abs(h))
-    return out
+    return _band_relative_attenuation(
+        bank.sos[index], int(bank.factor[index]), float(bank.fs), mid, omega * mid
+    )
 
 
 def test_the_integrated_response_of_every_band_is_within_class_0() -> None:

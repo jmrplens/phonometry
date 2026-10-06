@@ -1874,7 +1874,10 @@ critical strategies:
    +0.94 dB, past the +0.8 dB of class 1 in IEC 61260-1:2014 5.16, and at 16
    the bend moves that sum by at most 0.005 dB. The band level is computed on
    the decimated signal; only `sigbands=True` brings the band signal back to
-   the input rate, with `resample_poly(M, 1)`. A Chebyshev II band of low order
+   the input rate, with `resample_poly(M, 1)`. Both directions run through the
+   same linear-phase Kaiser-windowed filter, sized for a 120 dB stopband so
+   that the images the decimation folds onto a band stay more than 125 dB
+   below it. A Chebyshev II band of low order
    and deep stopband, whose stopband edge would sit above sixteen times its
    upper edge, reserves more so its stopband edge stays below the decimated
    Nyquist.

@@ -48,7 +48,7 @@ from scipy import signal
 
 from .._internal.frozen import read_only
 from .._internal.validation import require_non_negative, require_positive
-from .compliance import _G, _band_relative_attenuation
+from .compliance import _G, _band_relative_attenuation, _reference_attenuation_db
 from .core import _decimate_and_filter
 
 if TYPE_CHECKING:
@@ -235,23 +235,29 @@ def _time_invariance_class(worst_db: float) -> int | None:
 
 
 def _edge_frequency_hz(
-    sos: np.ndarray, mid_hz: float, rate_hz: float, edge_hz: float, *, below: bool
+    sos: np.ndarray,
+    factor: int,
+    fs_hz: float,
+    mid_hz: float,
+    edge_hz: float,
+    *,
+    below: bool,
 ) -> float | None:
     """Where a band's skirt first reaches 55 dB beyond one of its edges.
 
     Searched on a logarithmic grid three decades out from the edge (below the
-    lower edge or above the upper one, up to the band's processing Nyquist
-    frequency), as IEC 61260-2 7.4.2 places the start and the end of the
-    sweep.
+    lower edge or above the upper one, up to half the input rate), as
+    IEC 61260-2 7.4.2 places the start and the end of the sweep, on the
+    response the band has at the input rate, its decimation included.
 
     :return: The frequency, or ``None`` when the skirt does not reach 55 dB
-        on that side before the processing Nyquist frequency.
+        on that side below half the input rate.
     """
     span = np.logspace(0.0, -3.0 if below else 3.0, 3001)
     grid = edge_hz * span
     if not below:
-        grid = grid[grid < rate_hz / 2.0]
-    attenuation = _band_relative_attenuation(sos, mid_hz, rate_hz, grid)
+        grid = grid[grid < fs_hz / 2.0]
+    attenuation = _band_relative_attenuation(sos, factor, fs_hz, mid_hz, grid)
     hits = np.nonzero(attenuation >= _SWEEP_EDGE_ATTENUATION_DB)[0]
     return float(grid[hits[0]]) if hits.size else None
 
@@ -501,14 +507,15 @@ def verify_time_invariance(
     mids = [float(f) for f in bank.freq]
     rates_hz = [fs / float(f) for f in bank.factor]
     guard = 10.0**_SWEEP_GUARD_DECADES
+    factors = [int(f) for f in bank.factor]
     lowest = _edge_frequency_hz(
-        bank.sos[0], mids[0], rates_hz[0], float(bank.freq_d[0]), below=True
+        bank.sos[0], factors[0], fs, mids[0], float(bank.freq_d[0]), below=True
     )
     start_hz = (
         lowest if lowest is not None else float(bank.freq_d[0]) / 1000.0
     ) / guard
     highest = _edge_frequency_hz(
-        bank.sos[-1], mids[-1], rates_hz[-1], float(bank.freq_u[-1]), below=False
+        bank.sos[-1], factors[-1], fs, mids[-1], float(bank.freq_u[-1]), below=False
     )
     end_hz = min(highest * guard, fs / 2.0) if highest is not None else fs / 2.0
     decay_s = max(
@@ -530,13 +537,12 @@ def verify_time_invariance(
         sweeps.append(t_sweep)
         averages.append(t_avg)
         for idx in range(bank.num_bands):
-            y = _decimate_and_filter(x, bank.sos[idx], int(bank.factor[idx]))
+            y = _decimate_and_filter(x, bank.sos[idx], factors[idx])
             energy = float(np.sum(y * y)) / rates_hz[idx]
             outputs[row, idx] = 10.0 * math.log10(energy / t_avg)
-            _, h_ref = signal.sosfreqz(
-                bank.sos[idx], worN=np.array([mids[idx]]), fs=rates_hz[idx]
+            a_ref = _reference_attenuation_db(
+                bank.sos[idx], factors[idx], fs, mids[idx]
             )
-            a_ref = -20.0 * math.log10(abs(h_ref[0]) + np.finfo(float).eps)
             expected[row, idx] = swept_band_level(
                 0.0,
                 fraction=bank.fraction,

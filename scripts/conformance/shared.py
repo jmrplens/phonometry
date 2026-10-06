@@ -21,10 +21,16 @@ from dataclasses import dataclass
 
 import numpy as np
 import reference_data as ref
-from scipy import signal as sg
 
 from phonometry import filters
-from phonometry.filters.compliance import class_limits, verify_filter_class
+from phonometry.filters.compliance import (
+    _FILTER_EDITIONS,
+    _band_relative_attenuation,
+    _BandGrid,
+    _map_breakpoint,
+    class_limits,
+    verify_filter_class,
+)
 from phonometry.filters.weighting import _runtime_frequency_response
 
 _FILTER_ARCHS = ["butter", "cheby1", "cheby2", "ellip", "bessel"]
@@ -79,8 +85,9 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
     the rows this feeds cite Table 1, and the effective bandwidth and the
     summation of outputs have rows of their own in ``filter_tests``. The binding measured value and
     limit are re-derived here with the same public ``class_limits`` on the
-    same designed SOS, so they cannot disagree with the library margin (a
-    smoke-test guard asserts the re-derived margin equals the library's).
+    same response the verifier reads, the alias images of a decimated band
+    included, so they cannot disagree with the library margin (a smoke-test
+    guard asserts the re-derived margin equals the library's).
     """
     bank = filters.OctaveFilterBank(
         48000,
@@ -94,14 +101,34 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
     worst = min(bands, key=lambda b: b["margin_class1_db"])
     idx = [b["freq"] for b in bands].index(worst["freq"])
     fm = float(bank.freq[idx])
-    fsd = bank.fs / float(bank.factor[idx])
-    w, h = sg.sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
-    attenuation = -20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
-    a_ref = float(np.interp(fm, w, attenuation))
-    delta = attenuation - a_ref
-    omega = w / fm
-    valid = omega > 0
-    omega, delta = omega[valid], delta[valid]
+    # The points the verifier reads: the band's response at the input rate on
+    # its decimated half-band, on the Table 1 breakpoints and on every alias
+    # image up to half the input rate.
+    grid = _BandGrid(
+        np.asarray(bank.sos[idx], dtype=np.float64),
+        int(bank.factor[idx]),
+        float(bank.fs),
+        fm,
+        2**15,
+    )
+    freqs, delta = grid.baseband()
+    spec = _FILTER_EDITIONS["2014"]
+    exponents = [row[0] for row in (*spec["passband_max"], *spec["stopband_min"])]
+    ratios = np.array([_map_breakpoint(x, bank.fraction) for x in exponents])
+    breakpoints = fm * np.concatenate([1.0 / ratios, ratios])
+    breakpoints = breakpoints[breakpoints < bank.fs / 2.0]
+    parts = [
+        (freqs, delta),
+        (
+            breakpoints,
+            _band_relative_attenuation(
+                grid.sos, grid.factor, grid.fs_hz, fm, breakpoints
+            ),
+        ),
+        *grid.images(0, grid.num_points),
+    ]
+    omega = np.concatenate([f for f, _ in parts]) / fm
+    delta = np.concatenate([d for _, d in parts])
     minimum, maximum = class_limits(bank.fraction, 1, omega)
     low_margin = delta - minimum
     finite = np.isfinite(maximum)

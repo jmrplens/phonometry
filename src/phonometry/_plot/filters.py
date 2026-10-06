@@ -114,6 +114,12 @@ _STRINGS: dict[str, str] = {
     r"Binding band, $f_{{\mathrm{{m}}}}$ = {fm} Hz": r"Banda determinante, $f_{{\mathrm{{m}}}}$ = {fm} Hz",
     "IEC 61260-1 §5.16 summation of outputs: class {cls}": "Suma de salidas IEC 61260-1 §5.16: clase {cls}",
     "IEC 61260-1 §5.16 summation of outputs: no class": "Suma de salidas IEC 61260-1 §5.16: ninguna clase",
+    r"IEC 61260:1995 class {cls} mask: $f_{{\mathrm{{m}}}}$ = {fm} Hz": r"Máscara clase {cls} IEC 61260:1995: $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+    r"Filter integrated response $\Delta B$ [dB]": r"Respuesta integrada del filtro $\Delta B$ [dB]",
+    "IEC 61260:1995 §4.5 filter integrated response: class {cls}": "Respuesta integrada del filtro IEC 61260:1995 §4.5: clase {cls}",
+    "IEC 61260:1995 §4.5 filter integrated response: no class": "Respuesta integrada del filtro IEC 61260:1995 §4.5: ninguna clase",
+    "IEC 61260:1995 §4.9 summation of outputs: class {cls}": "Suma de salidas IEC 61260:1995 §4.9: clase {cls}",
+    "IEC 61260:1995 §4.9 summation of outputs: no class": "Suma de salidas IEC 61260:1995 §4.9: ninguna clase",
     r"Deviation from $L_{\mathrm{c}}$ [dB]": r"Desviación respecto a $L_{\mathrm{c}}$ [dB]",
     "{rate} s per decade": "{rate} s por década",
     "IEC 61260-1 §5.14 time-invariant operation: class {cls}": "Funcionamiento invariante en el tiempo IEC 61260-1 §5.14: clase {cls}",
@@ -140,6 +146,28 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
 
+
+#: The fixed strings of the requirement figures that name their edition: the
+#: Table 1 mask title, the effective-bandwidth axis label and title pair, and
+#: the summation title pair.
+_EDITION_LABELS: dict[str, dict[str, str]] = {
+    "2014": {
+        "mask": r"IEC 61260-1 class {cls} mask: $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+        "bandwidth_axis": r"Effective bandwidth deviation $\Delta B$ [dB]",
+        "bandwidth": "IEC 61260-1 §5.12 effective bandwidth: class {cls}",
+        "bandwidth_none": "IEC 61260-1 §5.12 effective bandwidth: no class",
+        "summation": "IEC 61260-1 §5.16 summation of outputs: class {cls}",
+        "summation_none": "IEC 61260-1 §5.16 summation of outputs: no class",
+    },
+    "1995": {
+        "mask": r"IEC 61260:1995 class {cls} mask: $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+        "bandwidth_axis": r"Filter integrated response $\Delta B$ [dB]",
+        "bandwidth": "IEC 61260:1995 §4.5 filter integrated response: class {cls}",
+        "bandwidth_none": "IEC 61260:1995 §4.5 filter integrated response: no class",
+        "summation": "IEC 61260:1995 §4.9 summation of outputs: class {cls}",
+        "summation_none": "IEC 61260:1995 §4.9 summation of outputs: no class",
+    },
+}
 
 #: The Table 1 breakpoint, as the exponent of G, past which the class figure
 #: of a band does not open its window: G**2, where the stop band asks for
@@ -179,32 +207,26 @@ def plot_filter_class(
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
     :return: The axes.
     """
-    from scipy import signal
-
     from .._i18n import format_number, localize_axes
-    from ..filters.compliance import _map_breakpoint, class_limits
+    from ..filters.compliance import _BandGrid, _map_breakpoint, class_limits
 
     ax = ax if ax is not None else _new_axes()
     cls = result.reference_class()
     idx = _worst_band_index(result)
     fm = float(result.band_frequencies[idx])
-    fsd = result.fs / float(result.factors[idx])
-    sos = np.asarray(result.sos[idx], dtype=np.float64)
 
-    # Recompute the relative attenuation exactly as verify_filter_class does:
-    # -20 log10|H| minus the attenuation at the exact mid-band frequency.
-    eps = np.finfo(float).eps
-    w, h = signal.sosfreqz(sos, worN=result.num_points, fs=fsd)
-    attenuation = -20.0 * np.log10(np.abs(h) + eps)
-    _, h_ref = signal.sosfreqz(sos, worN=np.array([fm]), fs=fsd)
-    a_ref = float(-20.0 * np.log10(np.abs(h_ref[0]) + eps))
-    delta_a = attenuation - a_ref
-    omega = w / fm
-
-    keep = omega > 0.0
-    omega, delta_a = omega[keep], delta_a[keep]
-    order = np.argsort(omega)
-    omega, delta_a = omega[order], delta_a[order]
+    # The relative attenuation exactly as verify_filter_class reads it, on
+    # the same grid: the band's response at the input rate, its
+    # anti-aliasing filter included, below its decimated Nyquist frequency.
+    grid = _BandGrid(
+        np.asarray(result.sos[idx], dtype=np.float64),
+        int(result.factors[idx]),
+        float(result.fs),
+        fm,
+        int(result.num_points),
+    )
+    freqs, delta_a = grid.baseband()
+    omega = freqs / fm
 
     lower, upper = class_limits(result.fraction, cls, omega, edition=result.edition)
 
@@ -279,7 +301,7 @@ def plot_filter_class(
     ax.set_ylabel(_t("Relative attenuation [dB]", language))
     ax.set_title(
         _t(
-            r"IEC 61260-1 class {cls} mask: $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+            _EDITION_LABELS[result.edition]["mask"],
             language,
             cls=cls,
             fm=format_number(fm, language, decimals=0),
@@ -326,8 +348,8 @@ def _limit_lines(
     language: str,
 ) -> None:
     """Dashed horizontal acceptance limits, one colour per class."""
-    colours = {1: _C_TERTIARY, 2: _C_SECONDARY}
-    styles = {1: "--", 2: ":"}
+    colours = {0: _C_QUATERNARY, 1: _C_TERTIARY, 2: _C_SECONDARY}
+    styles = {0: "-.", 1: "--", 2: ":"}
     for cls, (lower, upper) in limits.items():
         ax.axhline(
             upper,
@@ -351,15 +373,17 @@ def plot_filter_bandwidth(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    r"""The effective bandwidth deviation of every band against 5.12.2.
+    r"""The effective bandwidth deviation of every band against its limits.
 
-    One marker per band at its mid-band frequency, :math:`\Delta B` from
-    IEC 61260-2:2016 Formulas (1), (2) and IEC 61260-1:2014 Formula (16),
-    between the class 1 and class 2 acceptance limits.
+    One marker per band at its mid-band frequency, :math:`\Delta B` between
+    the acceptance limits of every class of the result's edition: the
+    effective bandwidth deviation of IEC 61260-1:2014 5.12.2 (IEC 61260-2:2016
+    Formulas (1), (2) and IEC 61260-1:2014 Formula (16)), or the filter
+    integrated response of IEC 61260:1995 4.5.3 (its equations (13), (15)
+    and (16)).
 
     :param result: A
-        :class:`~phonometry.filters.compliance.FilterComplianceResult` of the
-        2014 edition.
+        :class:`~phonometry.filters.compliance.FilterComplianceResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the marker ``plot`` call.
@@ -371,9 +395,10 @@ def plot_filter_bandwidth(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.band_frequencies, dtype=np.float64)
     deviation = np.array([float(b["bandwidth_deviation_db"]) for b in result.bands])
+    edition_limits = _BANDWIDTH_LIMITS_DB[result.edition]
+    labels = _EDITION_LABELS[result.edition]
     limits = {
-        c: (-_BANDWIDTH_LIMITS_DB[c], _BANDWIDTH_LIMITS_DB[c])
-        for c in result.available_classes()
+        c: (-edition_limits[c], edition_limits[c]) for c in result.available_classes()
     }
     _limit_lines(ax, limits, language)
     style_default(kwargs, "color", _C_PRIMARY)
@@ -389,11 +414,11 @@ def plot_filter_bandwidth(
     format_frequency_axis(ax, language=language)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xlabel(_t(_MID_BAND_LABEL, language))
-    ax.set_ylabel(_t(r"Effective bandwidth deviation $\Delta B$ [dB]", language))
+    ax.set_ylabel(_t(labels["bandwidth_axis"], language))
     ax.set_title(
         _class_title(
-            "IEC 61260-1 §5.12 effective bandwidth: class {cls}",
-            "IEC 61260-1 §5.12 effective bandwidth: no class",
+            labels["bandwidth"],
+            labels["bandwidth_none"],
             result.requirement_class("effective_bandwidth"),
             language,
         )
@@ -411,16 +436,20 @@ def plot_filter_summation(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The summation of adjacent outputs across every inner band, against 5.16.
+    """The summation of adjacent outputs across every band it applies to.
 
-    Each band that has a neighbour on both sides draws its Formula (3) curve
-    of IEC 61260-2:2016 over its own test frequencies, from its lower to its
-    upper band edge; the band that comes closest to a limit is drawn heavier.
-    The acceptance limits of IEC 61260-1:2014 5.16 are the dashed lines.
+    Each band the result grades the summation on draws its curve over its
+    own test frequencies, from its lower to its upper band edge (Formula (3)
+    of IEC 61260-2:2016 on every band with a neighbour on each side, or
+    equation (19) of IEC 61260:1995 from the lowest to the highest mid-band
+    frequency, so the end bands draw the half facing the set); the band that
+    comes closest to a limit is drawn heavier. The acceptance limits of
+    IEC 61260-1:2014 5.16 or IEC 61260:1995 4.9 are the dashed lines.
 
     :param result: A
-        :class:`~phonometry.filters.compliance.FilterComplianceResult` of the
-        2014 edition with at least three bands.
+        :class:`~phonometry.filters.compliance.FilterComplianceResult` that
+        grades the summation (three bands or more for the 2014 edition, two
+        or more for the 1995 edition).
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the binding band's curve.
@@ -429,27 +458,42 @@ def plot_filter_summation(
     import matplotlib.ticker as mticker
 
     from .._i18n import decimal_comma, format_number, localize_axes
-    from ..filters.compliance import _SUMMATION_LIMITS_DB, _bank_summation
+    from ..filters.compliance import (
+        _SUMMATION_LIMITS_DB,
+        _bank_summation,
+        _test_frequencies,
+    )
 
     ax = ax if ax is not None else _new_axes()
     mids = np.asarray(result.band_frequencies, dtype=np.float64)
-    rates = np.asarray([result.fs / float(f) for f in result.factors])
-    inner = [
+    graded = [
         k for k, band in enumerate(result.bands) if band["summation_min_db"] is not None
     ]
     cls = result.requirement_class("summation")
     reference = cls if cls is not None else max(result.available_classes())
     key = f"summation_margin_class{reference}_db"
-    binding = min(inner, key=lambda k: float(result.bands[k][key]))
-    limits = {c: _SUMMATION_LIMITS_DB[c] for c in result.available_classes()}
+    binding = min(graded, key=lambda k: float(result.bands[k][key]))
+    edition_limits = _SUMMATION_LIMITS_DB[result.edition]
+    limits = {c: edition_limits[c] for c in result.available_classes()}
     _limit_lines(ax, limits, language)
     shade = theme_line(_C_PRIMARY, ax, quiet=0.45)
+
+    def curve_of(k: int) -> tuple[np.ndarray, np.ndarray]:
+        return _bank_summation(
+            result.sos,
+            result.factors,
+            result.fs,
+            mids,
+            result.fraction,
+            result.points_per_bandwidth,
+            k,
+            result.edition,
+        )
+
     first = True
     drawn: list[np.ndarray] = []
-    for k in inner:
-        omega, curve = _bank_summation(
-            result.sos, mids, rates, result.fraction, result.points_per_bandwidth, k
-        )
+    for k in graded:
+        omega, curve = curve_of(k)
         drawn.append(curve)
         if k == binding:
             continue
@@ -461,9 +505,7 @@ def plot_filter_summation(
             label=_t(r"$\Delta P_j$ of each band", language) if first else "_nolegend_",
         )
         first = False
-    omega, curve = _bank_summation(
-        result.sos, mids, rates, result.fraction, result.points_per_bandwidth, binding
-    )
+    omega, curve = curve_of(binding)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 2.0)
     kwargs.setdefault(
@@ -476,7 +518,10 @@ def plot_filter_summation(
     )
     ax.plot(omega, curve, **kwargs)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
-    lo_x, hi_x = float(omega[0]), float(omega[-1])
+    # The band edges, however far the binding band's own curve reaches.
+    half = result.points_per_bandwidth // 2
+    span = _test_frequencies(result.fraction, result.points_per_bandwidth, -half, half)
+    lo_x, hi_x = float(span[0]), float(span[-1])
     ax.set_xscale("log")
     ax.set_xlim(lo_x, hi_x)
     # The band edges and the mid-band: the three frequencies the test is
@@ -494,8 +539,8 @@ def plot_filter_summation(
     ax.set_ylabel(_t(r"Summed output $\Delta P_j$ [dB]", language))
     ax.set_title(
         _class_title(
-            "IEC 61260-1 §5.16 summation of outputs: class {cls}",
-            "IEC 61260-1 §5.16 summation of outputs: no class",
+            _EDITION_LABELS[result.edition]["summation"],
+            _EDITION_LABELS[result.edition]["summation_none"],
             cls,
             language,
         )

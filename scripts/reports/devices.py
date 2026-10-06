@@ -48,8 +48,10 @@ def _filter_class_1995_example() -> tuple[object, ReportMetadata, str]:
 
     IEC 61260-1:2014 dropped class 0; the older IEC 61260:1995 /
     ANSI S1.11-2004 retains it. Selecting ``edition="1995"`` verifies against
-    that mask, and the default (order 6) octave bank clears the stricter
-    class 0, so the fiche boxes a Class 0 COMPLIES result.
+    that edition's Table 1, filter integrated response (4.5.3) and summation
+    of output signals (4.9), and the default (order 6) octave bank clears the
+    stricter class 0 on all three, so the fiche boxes a Class 0 COMPLIES
+    result above its requirement table.
     """
     bank = ph.filters.OctaveFilterBank(
         fs=48000, fraction=1, order=6, limits=[250, 4000]

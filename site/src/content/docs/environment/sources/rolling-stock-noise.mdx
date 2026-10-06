@@ -319,12 +319,11 @@ base-ten bands Method A reports (`roughness_filter_bank`). Graded by
 `filters.verify_filter_class` against that edition, it is class 0, the
 tightest, and its integrated response (4.5.3) and the sum of its outputs
 (4.9) are within class 0 as well. Every band runs at the record's own rate,
-without the band-by-band decimation the library's banks use by default. A
-decimated band lets the wavenumbers that fold onto it around the decimated
-rate through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks
-at and beyond $G^{\pm 4}$, and 4.8 asks the anti-alias filters of a
-sampled-data system to keep such aliases within Table 1; undecimated, a band
-has no alias, and the grade reaches the Nyquist wavenumber of the record.
+without the band-by-band decimation the library's banks use by default.
+4.8 asks the anti-alias filters of a sampled-data system to keep the
+wavenumbers that fold onto a band within Table 1; undecimated, a band has no
+alias at all, and the grade reaches the Nyquist wavenumber of the record and
+covers exactly what a record goes through.
 
 The bank is of order 4, the lowest that is class 0, for a reason the standard
 leaves unsaid: a filter's ringing lasts longer the longer the wavelength of

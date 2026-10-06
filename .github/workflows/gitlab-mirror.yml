@@ -110,28 +110,42 @@ jobs:
 
           gitlab_api="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}"
 
-          request_json() {
+          # Every write and listing goes through here, so a failed request
+          # prints GitLab's response body instead of a bare curl exit 22.
+          gitlab_request() {
             local method="$1"
             local url="$2"
-            local payload="$3"
-            curl --fail --show-error --silent \
-              --request "$method" \
-              --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
-              --header "Content-Type: application/json" \
-              --data "$payload" \
-              "$url" >/dev/null
+            local payload="${3:-}"
+            local response
+            local args=(--fail-with-body --show-error --silent --request "$method" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}")
+            if [ -n "$payload" ]; then
+              args+=(--header "Content-Type: application/json" --data "$payload")
+            fi
+            if ! response=$(curl "${args[@]}" "$url"); then
+              echo "::error::GitLab ${method} ${url#"$gitlab_api"} failed: ${response}" >&2
+              return 1
+            fi
+            printf '%s' "$response"
           }
 
-          release_exists() {
+          request_json() {
+            gitlab_request "$1" "$2" "$3" >/dev/null
+          }
+
+          # Prints the GitLab release for the tag, or nothing when GitLab
+          # does not have it yet.
+          current_release() {
             local tag_encoded="$1"
+            local response
             local status
-            status=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" \
+            response=$(curl --silent --show-error --write-out '\n%{http_code}' \
               --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
               "${gitlab_api}/releases/${tag_encoded}")
+            status=${response##*$'\n'}
             case "$status" in
-              200) return 0 ;;
-              404) return 1 ;;
-              *) echo "Unexpected GitLab release lookup status: ${status}" >&2; exit 1 ;;
+              200) printf '%s' "${response%$'\n'*}" ;;
+              404) ;;
+              *) echo "::error::Unexpected GitLab release lookup status ${status}: ${response%$'\n'*}" >&2; exit 1 ;;
             esac
           }
 
@@ -142,19 +156,20 @@ jobs:
             local url="$4"
             local link_type="$5"
             local payload
-            local link_id
+            local existing
 
             payload=$(jq -cn \
               --arg name "$name" \
               --arg url "$url" \
               --arg link_type "$link_type" \
               '{name: $name, url: $url, link_type: $link_type}')
-            link_id=$(jq -r --arg name "$name" '.[] | select(.name == $name) | .id' <<<"$existing_links" | head -n 1)
+            existing=$(jq -c --arg name "$name" 'first(.[] | select(.name == $name)) // empty' <<<"$existing_links")
 
-            if [ -n "$link_id" ]; then
-              request_json PUT "${gitlab_api}/releases/${tag_encoded}/assets/links/${link_id}" "$payload"
-            else
+            if [ -z "$existing" ]; then
               request_json POST "${gitlab_api}/releases/${tag_encoded}/assets/links" "$payload"
+            elif ! jq -e --arg url "$url" --arg link_type "$link_type" \
+              '.url == $url and .link_type == $link_type' <<<"$existing" >/dev/null; then
+              request_json PUT "${gitlab_api}/releases/${tag_encoded}/assets/links/$(jq -r '.id' <<<"$existing")" "$payload"
             fi
           }
 
@@ -172,18 +187,13 @@ jobs:
               desired_names["$link_name"]=1
             done < <(jq -r '.[].name' <<<"$desired_links")
 
-            current_links=$(curl --fail --show-error --silent \
-              --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
-              "${gitlab_api}/releases/${tag_encoded}/assets/links")
+            current_links=$(gitlab_request GET "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100")
 
             while IFS= read -r link; do
               link_id=$(jq -r '.id' <<<"$link")
               link_name=$(jq -r '.name' <<<"$link")
               if [ -z "${desired_names[$link_name]+x}" ] || [ -n "${seen_names[$link_name]+x}" ]; then
-                curl --fail --show-error --silent \
-                  --request DELETE \
-                  --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
-                  "${gitlab_api}/releases/${tag_encoded}/assets/links/${link_id}" >/dev/null
+                gitlab_request DELETE "${gitlab_api}/releases/${tag_encoded}/assets/links/${link_id}" >/dev/null
               else
                 seen_names["$link_name"]=1
               fi
@@ -217,15 +227,22 @@ jobs:
               --arg released_at "$released_at" \
               '{name: $name, description: $description, released_at: $released_at}')
 
-            if release_exists "$tag_encoded"; then
-              request_json PUT "${gitlab_api}/releases/${tag_encoded}" "$update_release_payload"
-            else
+            # Write only what differs. GitLab answers 500 to a PUT that
+            # rewrites v4.0.0rc1 with the values it already holds, and a
+            # run that rewrote every release stopped there. GitLab stores
+            # released_at with milliseconds, so the instants are compared.
+            current=$(current_release "$tag_encoded")
+            if [ -z "$current" ]; then
               request_json POST "${gitlab_api}/releases" "$create_release_payload"
+            elif ! jq -e --argjson want "$update_release_payload" '
+                def instant: if . == null or . == "" then null else sub("\\.[0-9]+"; "") | fromdateiso8601 end;
+                .name == $want.name
+                and .description == $want.description
+                and (.released_at | instant) == ($want.released_at | instant)' <<<"$current" >/dev/null; then
+              request_json PUT "${gitlab_api}/releases/${tag_encoded}" "$update_release_payload"
             fi
 
-            existing_links=$(curl --fail --show-error --silent \
-              --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
-              "${gitlab_api}/releases/${tag_encoded}/assets/links")
+            existing_links=$(gitlab_request GET "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100")
             desired_links=$(jq -c '[{name: "GitHub Release", url: .url, link_type: "other"}] + [.assets[]? | {name: .name, url: .url, link_type: "package"}]' <<<"$release_json")
 
             jq -c '.[]' <<<"$desired_links" |

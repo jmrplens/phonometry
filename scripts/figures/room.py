@@ -3256,7 +3256,7 @@ def generate_lateral_energy_measures(output_dir: str) -> None:
         cosine**2,
         color=COLOR_PRIMARY,
         lw=2.2,
-        label="$J_{LF}$: $\\cos^2\\theta$  (A.14)",
+        label="$J_\\mathrm{LF}$: $\\cos^2\\theta$  (A.14)",
     )
     ax.plot(
         angle,
@@ -3264,7 +3264,7 @@ def generate_lateral_energy_measures(output_dir: str) -> None:
         color=COLOR_SECONDARY,
         ls="--",
         lw=1.8,
-        label="$J_{LFC}$: $|\\cos\\theta|$  (A.15)",
+        label="$J_\\mathrm{LFC}$: $|\\cos\\theta|$  (A.15)",
     )
     for null in (-90.0, 90.0):
         ax.axvline(null, color=COLOR_MUTED, ls=":", lw=1.4)
@@ -3320,7 +3320,7 @@ def generate_lateral_energy_measures(output_dir: str) -> None:
         "o-",
         color=COLOR_PRIMARY,
         lw=2.0,
-        label="$J_{LF}$",
+        label="$J_\\mathrm{LF}$",
     )
     ax2.plot(
         bands,
@@ -3328,7 +3328,7 @@ def generate_lateral_energy_measures(output_dir: str) -> None:
         "s--",
         color=COLOR_SECONDARY,
         lw=1.6,
-        label="$J_{LFC}$",
+        label="$J_\\mathrm{LFC}$",
     )
     ax2.set_xticks(bands)
     ax2.set_xticklabels(["125", "250", "500", "1k", "2k", "4k"][: bands.size])
@@ -3675,7 +3675,7 @@ def generate_directivity_and_tables(output_dir: str) -> None:
         "C80": "$C_{80}$",
         "D50": "$D_{50}$",
         "Ts": "$T_S$",
-        "J_LF": "$J_{LF}$",
+        "J_LF": "$J_\\mathrm{LF}$",
         "L_J": "$L_J$",
     }
     for row, symbol in enumerate(symbols):

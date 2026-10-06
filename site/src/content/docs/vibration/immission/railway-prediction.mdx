@@ -174,7 +174,7 @@ for ax, floor in zip(axes, ("concrete", "timber"), strict=True):
             positions,
             vibration.ground_to_floor_transfer_db(floor, floor_natural_frequency_hz=natural),
             marker="o",
-            label=f"$f_e$ = {natural:g} Hz",
+            label=rf"$f_\mathrm{{e}}$ = {natural:g} Hz",
         )
     ax.set_xticks(positions[::2], [f"{b:g}" for b in bands[::2]])
     ax.set_title(floor)

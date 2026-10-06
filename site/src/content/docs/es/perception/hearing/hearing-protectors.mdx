@@ -310,7 +310,7 @@ protección supuesta banda a banda del espectro ponderado A y se suma lo que
 queda.
 
 $$
-L'_{p,Ax} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)}\ \mathrm{dB}
+L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)}\ \mathrm{dB}
 $$
 
 ```python
@@ -331,18 +331,18 @@ resultado al entero más próximo, que es lo que hace `reported_level`;
 
 Tres números en lugar de un espectro. $H$, $M$ y $L$ son la reducción prevista
 del nivel de ruido que da este protector para ruidos de referencia cuya
-$(L_{p,C} - L_{p,A})$ vale $-2$, $+2$ y $+10$ dB, ajustados sobre los ocho
+$(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$ vale $-2$, $+2$ y $+10$ dB, ajustados sobre los ocho
 espectros de referencia de la Tabla 2. Aplicarlos solo necesita los niveles
 ponderados C y A del ruido real:
 
 $$
-PNR_x = M_x - \frac{H_x - M_x}{4}\left(L_{p,C} - L_{p,A} - 2\right)
-\quad\text{si } (L_{p,C} - L_{p,A}) \leq 2\ \mathrm{dB}
+PNR_x = M_x - \frac{H_x - M_x}{4}\left(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\right)
+\quad\text{si } (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) \leq 2\ \mathrm{dB}
 $$
 
 $$
-PNR_x = M_x - \frac{M_x - L_x}{8}\left(L_{p,C} - L_{p,A} - 2\right)
-\quad\text{en otro caso},\qquad L'_{p,Ax} = L_{p,A} - PNR_x
+PNR_x = M_x - \frac{M_x - L_x}{8}\left(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\right)
+\quad\text{en otro caso},\qquad L'_{p,\mathrm{A}x} = L_{p,\mathrm{A}} - PNR_x
 $$
 
 ```python
@@ -365,7 +365,7 @@ la aplicación.
 Un número, contra un ruido rosa, restado del nivel ponderado C.
 
 $$
-L'_{p,Ax} = L_{p,C} - SNR_x
+L'_{p,\mathrm{A}x} = L_{p,\mathrm{C}} - SNR_x
 $$
 
 ```python

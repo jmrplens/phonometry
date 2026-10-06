@@ -55,7 +55,7 @@ Una sonda p-p (véase la
 [guía de Intensidad acústica](/phonometry/es/devices/emission/intensity/)) se
 barre de forma continua sobre cada uno de los $N$ segmentos de una superficie
 que encierra la fuente, informando de la intensidad normal con signo promediada
-por segmento $\langle I_{n,i} \rangle$: una fila por segmento, una columna por
+por segmento $\langle I_{\mathrm{n},i} \rangle$: una fila por segmento, una columna por
 banda.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Una sonda de intensidad acústica p-p de dos micrófonos: dos micrófonos de presión separados por un espaciador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" width="70%" />
@@ -63,7 +63,7 @@ banda.
 Las potencias parciales suman el total:
 
 $$
-P_i = \langle I_{n,i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
+P_i = \langle I_{\mathrm{n},i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
 L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
 
@@ -94,7 +94,7 @@ superar la distancia media del segmento a la fuente** (apartado 8.1). La
 velocidad de barrido es de 0,1 m/s a 0,5 m/s a mano y de 0 m/s a 1 m/s de forma
 mecánica; cada segmento lleva **al menos 20 s**, arrancando y parando la
 promediación temporal en los límites del segmento para que el
-$\langle I_{n,i} \rangle$ declarado pertenezca a ese segmento y a nada más. El
+$\langle I_{\mathrm{n},i} \rangle$ declarado pertenezca a ese segmento y a nada más. El
 eje de la sonda se mantiene normal a la superficie durante todo el recorrido, y
 quien mide se coloca al lado del segmento que está barriendo, no delante.
 
@@ -195,7 +195,7 @@ res.plot()   # espectro LW; bandas no positivas (indeterminables) con trama (req
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.svg" alt="El espectro de nivel de potencia acústica por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" width="88%" />
 
-*Las potencias parciales $\langle I_{n,i} \rangle\,S_i$ de los seis segmentos
+*Las potencias parciales $\langle I_{\mathrm{n},i} \rangle\,S_i$ de los seis segmentos
 suman el $L_W$ de cada banda; aquí todas las bandas tienen potencia neta
 positiva y superan los criterios de indicadores de campo en grado de
 ingeniería, así que las seis barras se sostienen, y el total ponderado A de
@@ -330,7 +330,7 @@ informe de los criterios por separado en lugar de con un único booleano.
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `normal_intensity` | array 2D | W/m² | `(N_seg, N_bands)` | Intensidad normal con signo promediada por segmento $\langle I_{n,i} \rangle$ (primer barrido) |
+| `normal_intensity` | array 2D | W/m² | `(N_seg, N_bands)` | Intensidad normal con signo promediada por segmento $\langle I_{\mathrm{n},i} \rangle$ (primer barrido) |
 | `areas` | array 1D | m² | > 0, `(N_seg,)` | Áreas de los segmentos $S_i$ |
 | `normal_intensity_2` | array 2D | W/m² | misma forma | Segundo barrido → criterio 3 y promediado |
 | `pressure_levels` | array 2D | dB | misma forma | SPL por segmento $L_{pi}$ → $F_{pI}$ |
@@ -413,7 +413,7 @@ incertidumbre explícito.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="Barrido de intensidad acústica de precisión de ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida a lo largo de un recorrido en serpentina sobre cada segmento, y la potencia acústica formada sumando la intensidad normal por el área del segmento, sujeta a los criterios de aceptación de los indicadores de campo" width="92%" />
 
 **Potencia y nivel (apartado 7).** La potencia parcial de cada segmento es
-$P_i = I_{n,i}\,S_i$; el total $P = \sum_i P_i$ da
+$P_i = I_{\mathrm{n},i}\,S_i$; el total $P = \sum_i P_i$ da
 $L_W = 10\log_{10}(P/P_0)$, $P_0 = 1\ \text{pW}$. Una banda cuya potencia neta no
 es positiva ($P \le 0$) se marca no aplicable en lugar de
 registrarse. Los indicadores de campo (variabilidad temporal $F_\mathrm{T}$, los
@@ -519,18 +519,18 @@ cálculo con los criterios quitados.
 
 `precision_field_indicators` calcula los indicadores del Anexo B a partir de los
 mismos arrays por segmento: los indicadores presión-intensidad con y sin signo
-$F_{pI_n}$, la no uniformidad del campo $F_\mathrm{S}$ y la variabilidad temporal $F_\mathrm{T}$
+$F_{pI_\mathrm{n}}$, la no uniformidad del campo $F_\mathrm{S}$ y la variabilidad temporal $F_\mathrm{T}$
 cuando se aporta una intensidad por ventana temporal. `precision_qualification`
 evalúa después los cinco criterios del Anexo C por banda:
 
 1. **repetibilidad del barrido**,
-   $\lvert L_{I_n}(1) - L_{I_n}(2) \rvert \le s/2$ con $s$ de la Tabla 1
+   $\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2$ con $s$ de la Tabla 1
    (Ec. C.1): la mitad de la tolerancia que admite la ISO 9614-2, que es casi
    todo lo que cuesta la «precisión»;
 2. **suficiencia de la capacidad dinámica**,
-   $L_\mathrm{d} \ge F_{pI_n}^{\text{con signo}}$ con $L_\mathrm{d} = \delta_{pI0} - K$ y
+   $L_\mathrm{d} \ge F_{pI_\mathrm{n}}^{\text{con signo}}$ con $L_\mathrm{d} = \delta_{pI0} - K$ y
    $K = 10$ dB (Ec. C.2);
-3. $F_{pI_n}^{\text{con signo}} - F_{pI_n}^{\text{sin signo}} \le 3$ dB
+3. $F_{pI_\mathrm{n}}^{\text{con signo}} - F_{pI_\mathrm{n}}^{\text{sin signo}} \le 3$ dB
    (Ec. C.3), la contrapartida de precisión del límite de $F_{+/-}$ de la
    ISO 9614-2;
 4. **no uniformidad del campo**, $F_\mathrm{S} \le 2$ (Ec. C.4);
@@ -587,7 +587,7 @@ por intensidad no tiene incertidumbre expandida $U$). `verbose=True` añade los
 indicadores de campo $F_{pI}$ (superficial de presión-intensidad) y $F_{+/-}$
 (potencia parcial negativa) y el grado alcanzado por banda; la franja de base
 indica el modelo de potencia parcial (las potencias parciales de segmento
-$P_i = I_{n,i} S_i$ que suman $P$) y los criterios de cualificación del Anexo B.
+$P_i = I_{\mathrm{n},i} S_i$ que suman $P$) y los criterios de cualificación del Anexo B.
 Una banda cuya potencia neta no es positiva no es determinable (apartado 9.2) y
 se imprime una raya.
 
@@ -644,7 +644,7 @@ determinación, porque el apartado 4.3 lo exige cuando ese rango es más estrech
 que de 50 Hz a 6,3 kHz. Un conjunto de tercios de octava se imprime en dos
 grupos de columnas contiguos, como una hoja acreditada encaja tantas bandas en
 una página. `verbose=True` tabula por banda los cuatro indicadores del Anexo B
-$F_\mathrm{T}$, $F_{p|I_n|}$, $F_{pI_n}$ y $F_\mathrm{S}$, la tabulación que pide el punto f) 1)
+$F_\mathrm{T}$, $F_{p|I_\mathrm{n}|}$, $F_{pI_\mathrm{n}}$ y $F_\mathrm{S}$, la tabulación que pide el punto f) 1)
 del capítulo 10, sobre la superficie de medición tal como los define el Anexo B,
 y la celda de cualificación que deciden los criterios.
 

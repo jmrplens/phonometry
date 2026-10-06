@@ -83,13 +83,10 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
         anchor="start",
     )
 
-    # Lateral distance at the CPA and the water depth. The d_CPA and l_DW
-    # labels stay plain for now: ISO 17208-1 prints the CPA and DW
-    # subscripts upright (3.3 Note 1, 3.6) and the composer's curated roman
-    # list does not carry them, so $d_{CPA}$ would set them as italic
-    # indices; the sibling strings with L ride along so the plate keeps one
-    # style.
-    s.dim(shx, 100, bx, 100, "dCPA ≥ 100 m (or 1·L)", offset=0, size=15)
+    # Lateral distance at the CPA and the water depth. ISO 17208-1:2016
+    # prints the CPA of d_CPA and the DW of l_DW upright (3.3 Note 1, 3.6,
+    # p. 2) and the ship length L italic.
+    s.dim(shx, 100, bx, 100, "$d_{CPA}$ ≥ 100 m (or 1·$L$)", offset=0, size=15)
     s.line(shx, 130, shx, 106, th.muted, 0.9, dash="3,3")
     s.line(bx, 116, bx, 106, th.muted, 0.9, dash="3,3")
     s.ground(540, 50, 600)
@@ -99,7 +96,7 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
         surf,
         70,
         540,
-        "water depth ≥ 150 m (or 1.5·L)",
+        "water depth ≥ 150 m (or 1.5·$L$)",
         offset=0,
         size=14,
         label_side="right",
@@ -111,11 +108,11 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
     s.text(852, 156, "course", 12, th.muted, anchor="end")
     s.rect(676, 162, 28, 14, th.panel, th.fg, rx=3, sw=1.4)
     s.circle(750, 170, 3.5, th.fg)
-    # dCPA line drawn in three runs so it crosses none of the labels on it.
+    # d_CPA line drawn in three runs so it crosses none of the labels on it.
     s.line(750, 170, 750, 184, th.muted, 1.1, dash="5,4")
     s.line(750, 208, 750, 282, th.muted, 1.1, dash="5,4")
     s.line(750, 302, 750, 330, th.muted, 1.1, dash="5,4")
-    s.text(758, 256, "dCPA", 12, th.fg, anchor="start", mono=True)
+    s.text(758, 256, "$d_{CPA}$", 12, th.fg, anchor="start")
     s.circle(750, 330, 6, th.secondary)
     s.circle(750, 330, 2.2, th.bg)
     win = 160 * math.tan(math.radians(30))
@@ -126,7 +123,7 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
     s.text(750, 200, "data window", 13, th.accent)
     # Under the apex, outside the window: inside it, the window's two rays
     # ran through both ends of the line.
-    s.text(750, 354, "lDW = 2 dCPA tan 30°", 12, th.fg, mono=True)
+    s.text(750, 354, "$l_{DW} = 2 d_{CPA}$ tan 30°", 12, th.fg)
 
     # Run schedule: what the data window sits inside (Clause 5.5-5.6).
     s.text(752, 384, "Run schedule (not to scale)", 15, th.fg, bold=True)
@@ -160,7 +157,7 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
     s.text(
         80,
         620,
-        "Hydrophone depths from the 15°, 30° and 45° depression angles at r = dCPA; L = ship length",
+        "Hydrophone depths from the 15°, 30° and 45° depression angles at $r = d_{CPA}$; $L$ = ship length",
         15,
         th.fg,
         anchor="start",

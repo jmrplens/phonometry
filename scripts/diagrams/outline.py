@@ -55,7 +55,7 @@ from matplotlib.ft2font import FT2Font, GlyphIndexType, LoadFlags
 from matplotlib.path import Path as MplPath
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
 #: Combining diacritics a symbol may carry (T̂, L̄, x̃); each travels with
 #: the base letter it modifies, so the pair shapes, styles and falls back
@@ -409,8 +409,12 @@ def _census_labels() -> list[_Label]:
             bold: bool = False,
             mono: bool = False,
             italic: bool = False,
+            upright: Iterable[str] = (),
+            sloped: Iterable[str] = (),
         ) -> str:
-            runs = canvas._label_runs(s, mono=mono, bold=bold, italic=italic)
+            runs = self._runs(
+                s, mono=mono, bold=bold, italic=italic, upright=upright, sloped=sloped
+            )
             if runs:
                 width = measure(runs, size)
                 x0 = x - {"start": 0.0, "middle": width / 2, "end": width}[anchor]
@@ -538,8 +542,12 @@ def _collisions() -> list[_Hit]:
             bold: bool = False,
             mono: bool = False,
             italic: bool = False,
+            upright: Iterable[str] = (),
+            sloped: Iterable[str] = (),
         ) -> str:
-            runs = canvas._label_runs(s, mono=mono, bold=bold, italic=italic)
+            runs = self._runs(
+                s, mono=mono, bold=bold, italic=italic, upright=upright, sloped=sloped
+            )
             if runs:
                 width = measure(runs, size)
                 x0 = x - {"start": 0.0, "middle": width / 2, "end": width}[anchor]

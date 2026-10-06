@@ -40,7 +40,7 @@ about the noise:
   spectrum and is the most faithful.
 - The **HML method** (Clause 7) collapses the protector to three numbers, its
   high-, medium- and low-frequency attenuation values, each the predicted noise
-  level reduction for a reference noise of a stated $(L_{p,C} - L_{p,A})$.
+  level reduction for a reference noise of a stated $(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$.
   It needs only the C- and A-weighted levels of the noise.
 - The **SNR method** (Clause 8) collapses it to one number against a pink noise
   and subtracts it from the C-weighted level. It needs only that level.
@@ -173,18 +173,18 @@ hml_protected_level(
 Effective A-weighted level by the `HML` method (Formulas (16) to (18)).
 
 Two straight segments through the three anchors, in
-$(L_{p,C} - L_{p,A})$:
+$(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$:
 
 $$
-PNR_x = M_x - \frac{H_x - M_x}{4}(L_{p,C} - L_{p,A} - 2\ \mathrm{dB}) \quad\text{for } (L_{p,C} - L_{p,A}) \leq 2\ \mathrm{dB} \tag{16}
-$$
-
-$$
-PNR_x = M_x - \frac{M_x - L_x}{8}(L_{p,C} - L_{p,A} - 2\ \mathrm{dB}) \quad\text{for } (L_{p,C} - L_{p,A}) > 2\ \mathrm{dB} \tag{17}
+PNR_x = M_x - \frac{H_x - M_x}{4}(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\ \mathrm{dB}) \quad\text{for } (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) \leq 2\ \mathrm{dB} \tag{16}
 $$
 
 $$
-L'_{p,Ax} = L_{p,A} - PNR_x \tag{18}
+PNR_x = M_x - \frac{M_x - L_x}{8}(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\ \mathrm{dB}) \quad\text{for } (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) > 2\ \mathrm{dB} \tag{17}
+$$
+
+$$
+L'_{p,\mathrm{A}x} = L_{p,\mathrm{A}} - PNR_x \tag{18}
 $$
 
 Both branches pass through $M_x$ at $+2$ dB, which is where the
@@ -194,7 +194,7 @@ and $L_x$ to the nearest integer, so that is what a protector is
 published with and what this consumes, whatever the unrounded fit behind
 them was. Clause 7.3 allows the unweighted level in place of the
 C-weighted one, which for very low-frequency noise returns a higher, safer
-$L'_{p,Ax}$.
+$L'_{p,\mathrm{A}x}$.
 
 **Parameters**
 
@@ -372,7 +372,7 @@ The most faithful of the three methods, and the only one that sees the
 shape of the noise:
 
 $$
-L'_{p,Ax} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
+L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
 $$
 
 The summation runs over the eight octaves from 63 Hz, or over seven from
@@ -423,8 +423,8 @@ The A-weighted level left at the ear behind a protector.
 
 | Name | Description |
 | :--- | :--- |
-| `effective_level` | $L'_{p,Ax}$, in dB, unrounded. Clauses 6, 7.3 and 8.3 all report it to the nearest integer, which `reported_level` does. |
-| `noise_reduction` | $PNR_x = L_{p,A} - L'_{p,Ax}$, in dB, or `None` where it cannot be formed. The `SNR` method given only a C-weighted level never learns $L_{p,A}$, and the difference between the C-weighted level and the answer is the rating itself rather than a noise reduction. |
+| `effective_level` | $L'_{p,\mathrm{A}x}$, in dB, unrounded. Clauses 6, 7.3 and 8.3 all report it to the nearest integer, which `reported_level` does. |
+| `noise_reduction` | $PNR_x = L_{p,\mathrm{A}} - L'_{p,\mathrm{A}x}$, in dB, or `None` where it cannot be formed. The `SNR` method given only a C-weighted level never learns $L_{p,\mathrm{A}}$, and the difference between the C-weighted level and the answer is the rating itself rather than a noise reduction. |
 | `performance` | The protection performance `x`, in per cent, or `None` when the rating that produced it did not carry one. |
 | `method` | `"octave-band"`, `"HML"` or `"SNR"`. |
 | `band_levels` | The A-weighted band levels behind the protector, in dB, for the octave-band method, and `None` for the other two, which never see a spectrum. |
@@ -506,11 +506,11 @@ snr_protected_level(
 Effective A-weighted level by the `SNR` method (Formulas (23) and (24)).
 
 $$
-L'_{p,Ax} = L_{p,C} - SNR_x \tag{23}
+L'_{p,\mathrm{A}x} = L_{p,\mathrm{C}} - SNR_x \tag{23}
 $$
 
 $$
-L'_{p,Ax} = L_{p,A} + (L_{p,C} - L_{p,A}) - SNR_x \tag{24}
+L'_{p,\mathrm{A}x} = L_{p,\mathrm{A}} + (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) - SNR_x \tag{24}
 $$
 
 Formula (24) is Formula (23) with the C-weighted level reassembled from an
@@ -518,7 +518,7 @@ A-weighted measurement and an estimate of the difference, for the common
 case where only the A-weighted level was recorded. Pass `l_p_c`, or pass
 `l_p_a` together with `c_minus_a`. Clause 8.3 allows the unweighted
 level in place of the C-weighted one, which for very low-frequency noise
-returns a higher, safer $L'_{p,Ax}$.
+returns a higher, safer $L'_{p,\mathrm{A}x}$.
 
 The rating is used as Clause 8.2 reports it, rounded to the nearest
 integer.
@@ -530,7 +530,7 @@ integer.
 | `rating` | The protector's [`SNRRatingResult`](/phonometry/reference/api/hearing/hearing-protectors/#snrratingresult). |
 | `l_p_c` | C-weighted sound pressure level of the noise, in dB, for Formula (23). |
 | `l_p_a` | A-weighted sound pressure level of the noise, in dB, for Formula (24). |
-| `c_minus_a` | The difference $(L_{p,C} - L_{p,A})$, in dB, for Formula (24). |
+| `c_minus_a` | The difference $(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$, in dB, for Formula (24). |
 
 **Returns:** [`ProtectedLevelResult`](/phonometry/reference/api/hearing/hearing-protectors/#protectedlevelresult).
 

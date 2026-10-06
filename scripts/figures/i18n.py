@@ -552,9 +552,9 @@ _ES_EXACT = {
     "The guide values of DIN 4150-2 Table 1 by kind of area": "Los valores de referencia de la tabla 1 de la DIN 4150-2 por tipo de zona",
     "by day, 16 h": "de día, 16 h",
     "by night, 8 h": "de noche, 8 h",
-    "$A_u$, the lower value": "$A_u$, el valor inferior",
+    "$A_\\mathrm{u}$, the lower value": "$A_\\mathrm{u}$, el valor inferior",
     "$A_r$, for the assessment severity": "$A_r$, para la intensidad de valoración",
-    "$A_o$, the upper value": "$A_o$, el valor superior",
+    "$A_\\mathrm{o}$, the upper value": "$A_\\mathrm{o}$, el valor superior",
     "Guide value, dimensionless KB": "Valor de referencia, KB adimensional",
     "industrial": "industrial",
     "commercial": "comercial",
@@ -574,7 +574,7 @@ _ES_EXACT = {
     # railway_prediction_chain and building_transfer_spectra (E DIN 45672-3):
     # the Annex C chain and the ground-to-floor spectra of Figures 6 and 7.
     "A tram predicted on a concrete floor (E DIN 45672-3 Annex C)": "Un tranvía previsto en un forjado de hormigón (E DIN 45672-3, anexo C)",
-    "emission $L_{v,E}$ at the foundation": "emisión $L_{v,E}$ en la cimentación",
+    r"emission $L_{v,\mathrm{E}}$ at the foundation": r"emisión $L_{v,\mathrm{E}}$ en la cimentación",
     "on the floor $L_v$, Formula (1)": "en el forjado $L_v$, fórmula (1)",
     "KB-weighted $L_{v,KB}$, Formula (8), 4 Hz to 80 Hz": "ponderado KB $L_{v,KB}$, fórmula (8), de 4 Hz a 80 Hz",
     "the floor's 20 Hz resonance,\n+17.3 dB from Annex A": "la resonancia del forjado a 20 Hz,\n+17,3 dB del anexo A",
@@ -582,10 +582,10 @@ _ES_EXACT = {
     "What a floor adds to the ground's vibration (E DIN 45672-3 Figures 6 and 7)": "Lo que un forjado añade a la vibración del terreno (E DIN 45672-3, figuras 6 y 7)",
     "concrete floors, Table A.1": "forjados de hormigón, tabla A.1",
     "timber floors, Table A.2": "forjados de madera, tabla A.2",
-    "$f_e$ = 8 Hz": "$f_e$ = 8 Hz",
-    "$f_e$ = 16 Hz": "$f_e$ = 16 Hz",
-    "$f_e$ = 63 Hz": "$f_e$ = 63 Hz",
-    "Level difference ground to floor $\\Delta L_{v,DB}$ [dB]": "Diferencia de nivel del terreno al forjado $\\Delta L_{v,DB}$ [dB]",
+    "$f_\\mathrm{e}$ = 8 Hz": "$f_\\mathrm{e}$ = 8 Hz",
+    "$f_\\mathrm{e}$ = 16 Hz": "$f_\\mathrm{e}$ = 16 Hz",
+    "$f_\\mathrm{e}$ = 63 Hz": "$f_\\mathrm{e}$ = 63 Hz",
+    "Level difference ground to floor $\\Delta L_{v,\\mathrm{DB}}$ [dB]": "Diferencia de nivel del terreno al forjado $\\Delta L_{v,\\mathrm{DB}}$ [dB]",
     "15 dB at the natural frequency,\nwhatever the storey": "15 dB en la frecuencia propia,\nsea cual sea la planta",
     # railway_change_example (E DIN 4150-2:2023-08 Example 9): the second track.
     "A line extended by a second track (E DIN 4150-2:2023-08 Example 9)": "Una línea ampliada con una segunda vía (E DIN 4150-2:2023-08, ejemplo 9)",
@@ -1202,11 +1202,11 @@ _ES_EXACT = {
     "Class 2 corridor": "Corredor de clase 2",
     # intensity_insulation figure (ISO 15186-1)
     r"ISO 15186-1 Intensity Sound Reduction Index "
-    r"($R_\mathrm{I}$ and $R_\mathrm{I,M}$)": "Índice de reducción acústica por intensidad ISO 15186-1 "
-    r"($R_\mathrm{I}$ y $R_\mathrm{I,M}$)",
+    r"($R_I$ and $R_{I,\mathrm{M}}$)": "Índice de reducción acústica por intensidad ISO 15186-1 "
+    r"($R_I$ y $R_{I,\mathrm{M}}$)",
     "Sound reduction index [dB]": "Índice de reducción acústica [dB]",
     r"$K_\mathrm{c}$ adaptation": r"Adaptación $K_\mathrm{c}$",
-    r"$R_\mathrm{I}$ (intensity)": r"$R_\mathrm{I}$ (intensidad)",
+    r"$R_I$ (intensity)": r"$R_I$ (intensidad)",
     # hearing_protector_methods figure (ISO 4869-2)
     "What 84 % of wearers get (Clause 5)": "Lo que obtiene el 84 % de los usuarios (apartado 5)",
     "The same protector, judged three ways": "El mismo protector, juzgado de tres maneras",
@@ -1216,8 +1216,11 @@ _ES_EXACT = {
     r"$PNR_{84}$ from $H$=24, $M$=18, $L$=13 dB": r"$PNR_{84}$ a partir de $H$=24, $M$=18, $L$=13 dB",
     r"$H$, $M$, $L$ anchors": r"anclas $H$, $M$, $L$",
     "the 8 reference noises, per subject": "los 8 ruidos de referencia, por sujeto",
-    "this noise, $L_{p,C} - L_{p,A}$ = \u22121 dB": "este ruido, $L_{p,C} - L_{p,A}$ = \u22121 dB",
-    "octave band: $L'_{p,A84}$ = 81 dB\nHML: 82 dB\nSNR (21 dB): 82 dB": "por bandas de octava: $L'_{p,A84}$ = 81 dB\nHML: 82 dB\nSNR (21 dB): 82 dB",
+    r"this noise, $L_{p,\mathrm{C}} - L_{p,\mathrm{A}}$ = "
+    "\u22121 dB": r"este ruido, $L_{p,\mathrm{C}} - L_{p,\mathrm{A}}$ = " "\u22121 dB",
+    r"octave band: $L'_{p,\mathrm{A}84}$ = 81 dB"
+    "\nHML: 82 dB\nSNR (21 dB): 82 dB": r"por bandas de octava: $L'_{p,\mathrm{A}84}$ = 81 dB"
+    "\nHML: 82 dB\nSNR (21 dB): 82 dB",
     # hearing_protector_reat figure (ISO 4869-1)
     "Sixteen subjects, one mean (Annex A)": "Dieciséis sujetos, una media (anexo A)",
     "Two tests of one earmuff (Annex B)": "Dos ensayos de una misma orejera (anexo B)",
@@ -1240,7 +1243,7 @@ _ES_EXACT = {
     "Low-frequency index and its field indicator": "Índice a baja frecuencia y su indicador de campo",
     "Qualifying the facility on a limp panel": "Calificación de la instalación con un panel flexible",
     "Surface pressure-intensity indicator [dB]": "Indicador presión-intensidad superficial [dB]",
-    r"$R_\mathrm{I}$ (ISO 15186-3)": r"$R_\mathrm{I}$ (ISO 15186-3)",
+    r"$R_I$ (ISO 15186-3)": r"$R_I$ (ISO 15186-3)",
     "not qualified (6.4.2)": "no cualificada (6.4.2)",
     "$F_{pI}$ limit = 10 dB": "límite de $F_{pI}$ = 10 dB",
     "4.0 dB tolerance (Annex A)": "tolerancia de 4,0 dB (anexo A)",
@@ -4658,8 +4661,8 @@ _ES_EXACT = {
     ),
     # --- lateral_energy_measures (A.2.4, A.2.5, Annex B) ---
     "Two weightings for one reflection": "Dos ponderaciones para una reflexión",
-    "$J_{LF}$: $\\cos^2\\theta$  (A.14)": "$J_{LF}$: $\\cos^2\\theta$  (A.14)",
-    "$J_{LFC}$: $|\\cos\\theta|$  (A.15)": "$J_{LFC}$: $|\\cos\\theta|$  (A.15)",
+    "$J_\\mathrm{LF}$: $\\cos^2\\theta$  (A.14)": "$J_\\mathrm{LF}$: $\\cos^2\\theta$  (A.14)",
+    "$J_\\mathrm{LFC}$: $|\\cos\\theta|$  (A.15)": "$J_\\mathrm{LFC}$: $|\\cos\\theta|$  (A.15)",
     "the null points at the source,\nso the direct sound weighs nothing": (
         "el nulo apunta a la fuente,\nasí que el sonido directo no pesa nada"
     ),
@@ -4669,8 +4672,8 @@ _ES_EXACT = {
     "Weight of one reflection": "Peso de una reflexión",
     "A hall with 2.0 s of decay": "Una sala con 2,0 s de decaimiento",
     "Early lateral energy fraction": "Fracción de energía lateral temprana",
-    "$J_{LF}$": "$J_{LF}$",
-    "$J_{LFC}$": "$J_{LFC}$",
+    "$J_\\mathrm{LF}$": "$J_\\mathrm{LF}$",
+    "$J_\\mathrm{LFC}$": "$J_\\mathrm{LFC}$",
     "the shaded band is the typical range of Table A.1,\n"
     "0.05 to 0.35, and it is the range of the single number": (
         "la banda sombreada es el rango habitual de la Tabla A.1,\n"

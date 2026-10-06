@@ -465,10 +465,17 @@ def _d_impact(s: SVG, th: Theme) -> None:
         (224, "$A = 0.16 V/T$  (Sabine)", th.muted),
         (256, "$T_0$ = 0.5 s , $A_0$ = 10 m²", th.accent),
     ]
+    # ISO 16283-2 prints the impact level L_i and the normalized L'_n with
+    # upright i and n, and ISO 717-2 the C_I of the impact spectrum.
+    impact = ("L_i", "L′_n", "L_n", "C_I")
     for y, txt, col in box_items:
-        s.text(lx, y, txt, 12, col, anchor="start", bold=(col != th.muted))
+        s.text(
+            lx, y, txt, 12, col, anchor="start", bold=(col != th.muted), upright=impact
+        )
     s.rect(lx - 10, 292, 236, 100, "none", th.muted, rx=10, dash="6,5")
-    s.text(lx, 320, "$L_i$ = energy-averaged", 13, th.fg, anchor="start")
+    s.text(
+        lx, 320, "$L_i$ = energy-averaged", 13, th.fg, anchor="start", upright=impact
+    )
     s.text(lx, 342, "band level (Formula 10)", 13, th.fg, anchor="start")
     s.text(
         lx,
@@ -478,6 +485,7 @@ def _d_impact(s: SVG, th: Theme) -> None:
         th.secondary,
         anchor="start",
         bold=True,
+        upright=impact,
     )
 
 
@@ -892,6 +900,7 @@ def _d_open_plan_setup(s: SVG, th: Theme) -> None:
         "only 2 m to 16 m enter $D_{2,S}$",
         offset=0,
         size=13,
+        upright=("D_S",),
     )
     for xx in (w_lo, w_hi):
         s.line(xx, y1 - 36, xx, y1 - 12, th.fg, 1.2, dash="4,3")
@@ -1550,19 +1559,21 @@ def _d_open_plan(s: SVG, th: Theme) -> None:
 
     chips = [
         ("$D_{2,S}$", "spatial decay rate", "dB per doubling · Cl. 6.2", th.primary),
-        # The 4 m of the level's subscript is a value with its unit, which
-        # the composer has no roman run for yet; the chip stays plain until
-        # that case is adjudicated.
-        ("Lp,A,S,4m", "speech level at 4 m", "A-weighted · Cl. 3.3", th.primary),
+        # The p stays italic and the A, the S and the 4 m upright, as the
+        # guide writes L_p,A,S,4 m.
+        ("$L_{p,A,S,4 m}$", "speech level at 4 m", "A-weighted · Cl. 3.3", th.primary),
         ("$r_D$", "distraction distance", "fitted STI = 0.50 · Cl. 3.6", th.secondary),
         ("$r_P$", "privacy distance", "fitted STI = 0.20 · Cl. 3.7", th.secondary),
     ]
     cw, cgap = 190.0, 14.0
     cx = (900 - (len(chips) * cw + (len(chips) - 1) * cgap)) / 2
     s.text(450, 306, "what open_plan_metrics returns", 12, th.muted, "middle")
+    # ISO 3382-3 sets the S of speech, the A-weighting and the B of the
+    # background upright, as the guide writes them.
+    decay = ("D_S", "L_A", "L_S")
     for sym, name, note, color in chips:
         s.rect(cx, 320, cw, 118, th.panel, color, rx=10, sw=2)
-        s.text(cx + cw / 2, 356, sym, 19, th.fg, "middle", bold=True)
+        s.text(cx + cw / 2, 356, sym, 19, th.fg, "middle", bold=True, upright=decay)
         s.text(cx + cw / 2, 384, name, 13, color, "middle", bold=True)
         s.text(cx + cw / 2, 412, note, 10, th.muted, "middle")
         cx += cw + cgap
@@ -1574,6 +1585,7 @@ def _d_open_plan(s: SVG, th: Theme) -> None:
         11,
         th.muted,
         "middle",
+        upright=("L_A", "L_B"),
     )
 
 
@@ -1601,6 +1613,7 @@ def _d_iso12999(s: SVG, th: Theme) -> None:
         11,
         th.muted,
         "middle",
+        upright=("σ_r",),
     )
     s.arrow(cx, 108, cx, 138, th.fg, 1.8)
 
@@ -1795,7 +1808,7 @@ def _d_installed_paths(s: SVG, th: Theme) -> None:
     y = 164.0
     for k, (term, caption, col, size) in enumerate(steps):
         s.text(760, y, term, size, col, bold=True, mono="$" not in term)
-        s.text(760, y + 22, caption, 12, th.muted)
+        s.text(760, y + 22, caption, 12, th.muted, upright=("L_n",))
         if k < len(steps) - 1:
             s.arrow(760, y + 34, 760, y + 56, th.muted, 1.6)
         y += 84
@@ -2116,7 +2129,13 @@ def _d_intensity_insulation(s: SVG, th: Theme) -> None:
 
     # The two results and the conditions on them.
     s.rect(30, 744, 840, 72, th.panel, th.fg, rx=6, sw=1.6)
-    s.text(450, 772, "$R_I = L_{p1} − 6 − [L_{In} + 10 lg(S_m/S)]$", 17, th.primary)
+    s.text(
+        450,
+        772,
+        "$R_I = L_{p1} − 6 − [L_{In} + 10 lg(S_m/S)]$",
+        17,
+        th.primary,
+    )
     s.text(
         450,
         800,
@@ -2661,6 +2680,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
         "source mobility $|Y_{S,eq}|$ (19)",
         13,
         th.fg,
+        upright=("Y_S",),
     )
 
 
@@ -3546,14 +3566,12 @@ def _d_facade_setup(s: SVG, th: Theme) -> None:
                 "comparable with a laboratory $R$."
             ),
         ),
-        # The 2 m of the quantity's subscript is a value with its unit,
-        # which the composer has no roman run for yet; that one symbol
-        # stays plain until the case is adjudicated (as does the L1,2m
-        # label above), while the R beside it is set like its twin.
+        # The 2 m of D_2m,nT is set upright with the nT beside it, as the
+        # guide writes it.
         (
             626,
             (
-                "Global method → D2m,nT: the whole facade as built, "
+                "Global method → $D_{2m,nT}$: the whole facade as built, "
                 "not comparable with a laboratory $R$."
             ),
         ),
@@ -4943,13 +4961,31 @@ def _d_iso717_rating_chain(s: SVG, th: Theme) -> None:
     s.arrow(480.0, 397.0, 480.0, 344.0, th.secondary, 1.8)  # 62 dB to 81 dB
     s.text(490, 376, "+19 dB", 13, th.secondary, "start", bold=True)
     s.text(600, 432, "Table 3", 11, th.muted)
-    s.text(708, 390, "measured $L_n$", 11, th.fg)
-    s.text(660, sum_y + 18, "$C_I$ reads 15 bands, 3150 Hz left out", 12, th.secondary)
+    # ISO 717-2 prints the n of the normalized level and the I of the impact
+    # adaptation term upright.
+    rating = ("L_n", "L′_n", "C_I")
+    s.text(708, 390, "measured $L_n$", 11, th.fg, upright=rating)
+    s.text(
+        660,
+        sum_y + 18,
+        "$C_I$ reads 15 bands, 3150 Hz left out",
+        12,
+        th.secondary,
+        upright=rating,
+    )
 
     # ---- what each engine reads off -------------------------------------------
     s.text(245, 578, "$R_w$ = 52 − 22 = 30 dB", 16, th.primary, bold=True)
     s.text(245, 598, "31.8 dB of deviations below the curve", 12, th.fg)
-    s.text(655, 578, "$L_{n,w}$ = 60 + 19 = 79 dB", 16, th.secondary, bold=True)
+    s.text(
+        655,
+        578,
+        "$L_{n,w}$ = 60 + 19 = 79 dB",
+        16,
+        th.secondary,
+        bold=True,
+        upright=rating,
+    )
     s.text(655, 598, "28.0 dB of deviations above the curve", 12, th.fg)
     s.text(655, 616, "in octave bands, the value at 500 Hz less 5 dB", 12, th.muted)
 
@@ -4968,29 +5004,41 @@ def _d_iso717_rating_chain(s: SVG, th: Theme) -> None:
         "and the $C_{tr}$ counterparts",
         "enlarged ranges: $C_{I,50–2500}$ or $C_{I,63–2000}$",
     )
-    size_ranges = s.fit_size(ranges, (12, 11), 380.0)
+    size_ranges = s.fit_size(ranges, (12, 11), 380.0, upright=rating)
     s.text(245, 680, ranges[0], size_ranges, th.muted)
     s.text(245, 702, "stated as $R_{w}(C;C_{tr})$ = 30 (−2; −3) dB", 13, th.primary)
     s.text(655, 640, "no source spectrum: the unweighted energy sum", 13, th.fg)
     s.text(655, 660, "over 125 Hz to 2000 Hz when the bands are octaves", 13, th.fg)
-    s.text(655, 680, ranges[1], size_ranges, th.muted)
+    s.text(655, 680, ranges[1], size_ranges, th.muted, upright=rating)
     s.text(
-        655, 702, "a requirement may be written on $L′_{n,w} + C_I$", 13, th.secondary
+        655,
+        702,
+        "a requirement may be written on $L′_{n,w} + C_I$",
+        13,
+        th.secondary,
+        upright=rating,
     )
 
     # ---- the adaptation terms, as the two parts write them --------------------
     eq_y = 722.0
     s.rect(40, eq_y, 820, 80, th.panel, th.fg, rx=6, sw=1.6)
     s.text(245, eq_y + 32, "$C_j = X_{Aj} − X_w$", 18, th.primary)
-    s.text(655, eq_y + 32, "$C_I = L_{n,sum} − 15 − L_{n,w}$", 18, th.secondary)
+    s.text(
+        655,
+        eq_y + 32,
+        "$C_I = L_{n,sum} − 15 − L_{n,w}$",
+        18,
+        th.secondary,
+        upright=rating,
+    )
     notes = (
         "$X_{Aj}$: minus the energy sum of $L_{i,j} − X_i$, to an integer",
         "$L_{n,sum}$: the energy sum of the bands, to an integer",
     )
     # The Spanish of both notes runs past the 380 px of a half box at 12 px.
-    size = s.fit_size(notes, (12, 11), 380.0)
+    size = s.fit_size(notes, (12, 11), 380.0, upright=rating)
     s.text(245, eq_y + 60, notes[0], size, th.fg)
-    s.text(655, eq_y + 60, notes[1], size, th.fg)
+    s.text(655, eq_y + 60, notes[1], size, th.fg, upright=rating)
 
 
 def _d_db_hr_requirements(s: SVG, th: Theme) -> None:
@@ -5521,10 +5569,23 @@ def _d_lab_application_rules(s: SVG, th: Theme) -> None:
         s.rect(x0, y0, 420, 302, "none", th.muted, rx=8, sw=1.2)
         s.text(x0 + 14, y0 + 24, title, 14, th.fg, anchor="start", bold=True)
 
+    # ISO 10140-1 prints the n of the normalized impact level (L_n0, L_n) and
+    # of the reference area and length of a joint (S_n, l_n) upright.
+    normalized = ("L_n", "S_n", "l_n")
+
     def notes(x0: float, y0: float, rows: Sequence[tuple[str, str]]) -> None:
-        size = s.fit_size([txt for txt, _ in rows], (12, 11), 392)
+        labels = [txt for txt, _ in rows]
+        size = s.fit_size(labels, (12, 11), 392, upright=normalized)
         for k, (txt, colour) in enumerate(rows):
-            s.text(x0 + 14, y0 + 19 * k, txt, size, colour, anchor="start")
+            s.text(
+                x0 + 14,
+                y0 + 19 * k,
+                txt,
+                size,
+                colour,
+                anchor="start",
+                upright=normalized,
+            )
 
     # ----- G: a lining ----------------------------------------------------------
     gx, gy = 20.0, 50.0

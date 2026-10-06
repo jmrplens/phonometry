@@ -8276,7 +8276,7 @@ it, and the absorption area converts the room level back into a power. The
 direct reading: a p-p intensity probe scans a measurement surface that
 encloses the specimen and measures the power radiated by the test element
 alone, so flanking transmission stays out of the number. This guide covers
-the intensity sound reduction index $R_\mathrm{I}$ and its $K_\mathrm{c}$-modified form, the
+the intensity sound reduction index $R_I$ and its $K_\mathrm{c}$-modified form, the
 element-normalized level difference of small building elements, the surface
 qualification indicator and the accredited test fiches. The pressure-based
 laboratory chain lives in
@@ -8299,14 +8299,14 @@ average normal intensity level $L_{I\mathrm{n}}$ over the surface (area $S_\math
 specimen of area $S$,
 
 $$
-R_\mathrm{I} = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right],
+R_I = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right],
 $$
 
 where the $6$ dB is the diffuse-field offset between the sound pressure level
 and the incident intensity level. The same formula gives the apparent index
-$R'_\mathrm{I}$ in the field (ISO 15186-2). Because the intensity method slightly
+$R'_I$ in the field (ISO 15186-2). Because the intensity method slightly
 *underestimates* the power radiated into a real receiving room, a **modified
-index** $R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$ reproduces the ISO 10140-2 pressure result; the
+index** $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ reproduces the ISO 10140-2 pressure result; the
 adaptation term $K_\mathrm{c}$ (Annex B) is $10 \log_{10}(1 + S_{\mathrm{b}2}\lambda/8V_2)$ for a
 well-defined room, or the room-independent $10 \log_{10}(1 + 61.4/f)$. For small
 elements the **element normalized level difference** replaces $10\log_{10}(S_\mathrm{m}/S)$
@@ -8338,7 +8338,7 @@ res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation.svg" alt="Intensity sound reduction index RI and the Kc-modified index RI,M across the one-third-octave bands, with the Annex B adaptation lift shaded between the two curves" width="80%"></picture>
 
-*The modified index $R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$ lifts $R_\mathrm{I}$ (most at the low bands,
+*The modified index $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ lifts $R_I$ (most at the low bands,
 where $K_\mathrm{c}$ is largest), so an intensity measurement reproduces the ISO 10140-2
 pressure result. The automatic rating is formed only for exactly 16
 one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
@@ -8424,15 +8424,15 @@ arrays.
 ## ISO 15186-1 intensity test report (`.report()`)
 
 `IntensityReductionResult.report()` writes the one-page ISO 15186-1:2000 test
-report of the intensity sound reduction index $R_\mathrm{I}$, reusing the same
+report of the intensity sound reduction index $R_I$, reusing the same
 accredited two-panel layout as the ISO 10140 and ISO 16283 fiches. Because
-$R_\mathrm{I}$ is an ordinary sound reduction index, its single-number rating $R_\mathrm{I,w}$
+$R_I$ is an ordinary sound reduction index, its single-number rating $R_{I,\mathrm{w}}$
 is the ISO 717-1 airborne rating evaluated on the intensity spectrum: the fiche
-names ISO 15186-1 in its basis line, tabulates $R_\mathrm{I}$ to one decimal place
+names ISO 15186-1 in its basis line, tabulates $R_I$ to one decimal place
 beside the measured-versus-shifted-reference curve, boxes `RI,w (C; Ctr)` and
 prints the statement that the transmitted sound power was measured directly
 over the measurement surface. `verbose=True` annexes the $K_\mathrm{c}$-modified index
-$R_\mathrm{I,M}$ (Formula (9)) beside $R_\mathrm{I}$ when an adaptation term was supplied.
+$R_{I,\mathrm{M}}$ (Formula (9)) beside $R_I$ when an adaptation term was supplied.
 
 The applicable `ReportMetadata` fields describe the intensity measurement:
 `specimen` (the tested element), `area` (specimen area $S$), `client`,
@@ -8474,12 +8474,12 @@ repository. Click the preview to open the PDF:
 
 [![Intensity ISO 15186-1 example report: metadata header, one-third-octave RI table beside the measured-versus-shifted-reference curve, boxed RI,w (C; Ctr), the intensity-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_intensity_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_intensity_example.pdf)
 
-*Intensity fiche (`IntensityReductionResult.report`), $R_\mathrm{I,w}(C; C_\mathrm{tr})$.*
+*Intensity fiche (`IntensityReductionResult.report`), $R_{I,\mathrm{w}}(C; C_\mathrm{tr})$.*
 
 ## Small building elements: the element-normalized level difference
 
 For a **small building element** (a ventilator, a socket, a small window) the
-intensity method reports the element-normalized level difference $D_\mathrm{I,n,e}$
+intensity method reports the element-normalized level difference $D_{I,\mathrm{n,e}}$
 (Formula (8)) instead, normalized to the reference absorption area
 $A_0 = 10\ \text{m}^2$.
 `IntensityElementNormalizedResult.report()` writes the same one-page fiche
@@ -8510,9 +8510,9 @@ res.report("DIne.pdf", metadata=metadata)               # DI,n,e,w (C; Ctr)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_element_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_element_insulation.svg" alt="Element-normalized level difference DI,n,e of a trickle ventilator per one-third-octave band against the shifted ISO 717-1 reference curve, with the unfavourable deviations shaded and the DI,n,e,w rating annotated" width="80%"></picture>
 
-*The small element is rated exactly like a wall: $D_\mathrm{I,n,e}$ feeds the
+*The small element is rated exactly like a wall: $D_{I,\mathrm{n,e}}$ feeds the
 ISO 717-1 engine and the unfavourable deviations (reference above the
-measurement) set $D_\mathrm{I,n,e,w}$. The $10\log_{10}(S_\mathrm{m}/A_0)$ normalization replaces
+measurement) set $D_{I,\mathrm{n,e,w}}$. The $10\log_{10}(S_\mathrm{m}/A_0)$ normalization replaces
 the specimen-area term, so the number describes the element irrespective of
 the wall it sits in.*
 
@@ -8556,15 +8556,15 @@ plt.show()
 
 [![Intensity ISO 15186-1 element example report: metadata header, one-third-octave DI,n,e table beside the measured-versus-shifted-reference curve, boxed DI,n,e,w (C; Ctr), the intensity-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.pdf)
 
-*Element intensity fiche (`IntensityElementNormalizedResult.report`), $D_\mathrm{I,n,e,w}(C; C_\mathrm{tr})$.*
+*Element intensity fiche (`IntensityElementNormalizedResult.report`), $D_{I,\mathrm{n,e,w}}(C; C_\mathrm{tr})$.*
 
 ## Laboratory or field (ISO 15186-2)
 
 Part 1 is a laboratory method: the specimen sits in a test opening between
-two rooms, and the suppressed flanking of the facility makes $R_\mathrm{I}$ a
+two rooms, and the suppressed flanking of the facility makes $R_I$ a
 property of the element. ISO 15186-2 takes the same probe, the same surface
 scan and the same formula into the finished building, where the result is
-the apparent index $R'_\mathrm{I}$ of the installed element, flanking radiation and
+the apparent index $R'_I$ of the installed element, flanking radiation and
 all. The selectivity that motivated the method in the laboratory doubles in
 the field: because the probe reads only what its measurement surface
 radiates, partial surfaces isolate which element (the wall itself, a window,
@@ -8588,7 +8588,7 @@ and changes the other end of the measurement: the source-room level is read
 than 50 mm from it (Clause 6.3):
 
 $$
-R_\mathrm{I} = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} + 10\lg\frac{S_\mathrm{m}}{S} \right]\ \mathrm{dB}
+R_I = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} + 10\lg\frac{S_\mathrm{m}}{S} \right]\ \mathrm{dB}
 $$
 
 **Nine decibels, not six.** That single constant is the whole difference from
@@ -8719,7 +8719,7 @@ steel of the stated thickness. It too is in [ERRATA](https://jmrplens.github.io/
   Measurement of sound insulation in buildings and of building elements
   using sound intensity — Part 2: Field measurements* (ISO 15186-2:2003).
   [iso.org catalogue](https://www.iso.org/standard/30105.html).
-  The field counterpart, giving the apparent index $R'_\mathrm{I}$ of the installed
+  The field counterpart, giving the apparent index $R'_I$ of the installed
   element.
 - International Organization for Standardization (2002). *Acoustics —
   Measurement of sound insulation in buildings and of building elements
@@ -8732,11 +8732,11 @@ steel of the stated thickness. It too is in [ERRATA](https://jmrplens.github.io/
 
 ## Standards
 
-ISO 15186-1:2000, which defines the intensity sound reduction index $R_\mathrm{I}$,
-its $K_\mathrm{c}$-modified form $R_\mathrm{I,M}$ (Annex B), the element normalized level
-difference $D_\mathrm{I,n,e}$ and the surface pressure-intensity indicator;
+ISO 15186-1:2000, which defines the intensity sound reduction index $R_I$,
+its $K_\mathrm{c}$-modified form $R_{I,\mathrm{M}}$ (Annex B), the element normalized level
+difference $D_{I,\mathrm{n,e}}$ and the surface pressure-intensity indicator;
 ISO 15186-2:2003, which carries the same quantities into the field as the
-apparent $R'_\mathrm{I}$; and ISO 15186-3:2002, which reads the source level on the
+apparent $R'_I$; and ISO 15186-3:2002, which reads the source level on the
 surface of the specimen so the method reaches 50 Hz, and qualifies the
 facility on a limp panel (Annex A). The single-number ratings reuse ISO 717-1,
 which Part 3's six bands cannot feed.
@@ -8748,7 +8748,7 @@ which Part 3's six bands cannot feed.
 - [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/): the
   pressure-based field quantities and their single-number ratings.
 - [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the
-  reference-curve engine behind $R_\mathrm{I,w}$ and $D_\mathrm{I,n,e,w}$.
+  reference-curve engine behind $R_{I,\mathrm{w}}$ and $D_{I,\mathrm{n,e,w}}$.
 - [Sound Intensity](https://jmrplens.github.io/phonometry/devices/emission/intensity/): the two-microphone probe, its field
   indicators and the residual-index qualification behind every scan.
 - API reference: [`building.measurement.intensity_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/intensity-insulation/).
@@ -23552,14 +23552,14 @@ which is why the intensity method tolerates background noise that would
 defeat the pressure methods. A p-p probe (see the
 [Sound Intensity guide](https://jmrplens.github.io/phonometry/devices/emission/intensity/)) is swept continuously over each of
 $N$ segments of a surface enclosing the source, reporting the segment-averaged
-signed normal intensity $\langle I_{n,i} \rangle$.
+signed normal intensity $\langle I_{\mathrm{n},i} \rangle$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="70%"></picture>
 
 The partial powers sum to the total:
 
 $$
-P_i = \langle I_{n,i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
+P_i = \langle I_{\mathrm{n},i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
 L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
 
@@ -23617,7 +23617,7 @@ res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs m
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.svg" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" width="88%"></picture>
 
-*The partial powers $\langle I_{n,i} \rangle\,S_i$ of the six segments sum to
+*The partial powers $\langle I_{\mathrm{n},i} \rangle\,S_i$ of the six segments sum to
 each band's $L_W$; every band here nets positive power and passes the
 field-indicator criteria at engineering grade, so all six bars stand, and the
 A-weighted total of 90.9 dB(A) heads the title.*
@@ -23676,7 +23676,7 @@ frequency-dependent bias handled in the [intensity guide](https://jmrplens.githu
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `normal_intensity` | 2D array | W/m² | `(N_seg, N_bands)` | Signed segment-averaged normal intensity $\langle I_{n,i} \rangle$ (first sweep) |
+| `normal_intensity` | 2D array | W/m² | `(N_seg, N_bands)` | Signed segment-averaged normal intensity $\langle I_{\mathrm{n},i} \rangle$ (first sweep) |
 | `areas` | 1D array | m² | > 0, `(N_seg,)` | Segment areas $S_i$ |
 | `normal_intensity_2` | 2D array | W/m² | same shape | Second sweep → criterion 3 and averaging |
 | `pressure_levels` | 2D array | dB | same shape | Segment SPL $L_{pi}$ → $F_{pI}$ |
@@ -23702,7 +23702,7 @@ scan, tighter field-indicator criteria and an explicit uncertainty budget.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" width="92%"></picture>
 
 **Power and level (Clause 7).** The partial power of each segment is
-$P_i = I_{n,i}\,S_i$; the total $P = \sum_i P_i$ gives
+$P_i = I_{\mathrm{n},i}\,S_i$; the total $P = \sum_i P_i$ gives
 $L_W = 10\log_{10}(P/P_0)$, $P_0 = 1\ \text{pW}$. A band whose net intensity is
 negative (more power flowing in than out) is flagged not-applicable rather than
 logged. The field indicators (temporal variability $F_\mathrm{T}$, the signed and
@@ -23812,7 +23812,7 @@ the total $L_W$, the measurement surface $S$ and the determination grade
 (the intensity result has no expanded uncertainty $U$). `verbose=True` adds the
 field indicators $F_{pI}$ (surface pressure-intensity) and $F_{+/-}$
 (negative partial power) and the per-band achieved grade; the basis strip
-states the partial-power model (the segment partial powers $P_i = I_{n,i} S_i$
+states the partial-power model (the segment partial powers $P_i = I_{\mathrm{n},i} S_i$
 summing to $P$) and the Annex B qualification criteria. A band whose net power
 is non-positive is not determinable (clause 9.2) and prints an em dash.
 
@@ -23866,7 +23866,7 @@ band; the caption names the frequency range the determination covers, because
 clause 4.3 asks for it whenever that range is narrower than 50 Hz to 6.3 kHz.
 A one-third-octave set is printed in two column groups side by side, the way
 an accredited sheet fits that many bands on a page. `verbose=True` tabulates
-the four Annex B indicators $F_\mathrm{T}$, $F_{p|I_n|}$, $F_{pI_n}$ and $F_\mathrm{S}$ per band,
+the four Annex B indicators $F_\mathrm{T}$, $F_{p|I_\mathrm{n}|}$, $F_{pI_\mathrm{n}}$ and $F_\mathrm{S}$ per band,
 the tabulation clause 10 f) 1) asks for, over the measurement surface as
 Annex B defines them, and the qualification cell the criteria decide.
 
@@ -44096,6 +44096,14 @@ the normalised autocorrelation of the polar energy distribution.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" width="92%"></picture>
 
+*A note on symbols before the formulas.* ISO 17497-2 writes the normalised
+coefficient $d_\mathrm{n}$; this page writes it $d_\mathrm{norm}$, because section 3
+needs the subscript $n$ for the well index and writes $d_n$ for a well
+**depth**. In the same spirit, the $s_n$ of section 3 is a quadratic-residue
+depth index, not the scattering coefficient $s$ of section 1; the area factor
+$N_i$ below is unrelated to the sequence order $N$ of section 3; and the $n$
+of Formula (5) counts receivers, not wells.
+
 **Autocorrelation (Formula (5)).** For $n$ receivers at equal angular spacing,
 with $p_i = 10^{L_i/10}$ the band energy at receiver $i$,
 
@@ -44291,8 +44299,8 @@ one-page diffusion test report (ISO 17497-2, Clause 8.5): the per-band table of
 $d$ beside the $d(f)$ band-axis curve, with a boxed characterisation headline.
 Per Clause 8.4 the random-incidence coefficient is itself a per-band quantity,
 the average of the directional coefficients over the source positions band by
-band (not a mean across frequency). `verbose=True` adds the normalised $d_n$
-column to the table (the curve always draws $d_n$ as a companion when present).
+band (not a mean across frequency). `verbose=True` adds the normalised $d_\mathrm{norm}$
+column to the table (the curve always draws $d_\mathrm{norm}$ as a companion when present).
 
 ```python
 import numpy as np
@@ -44597,7 +44605,7 @@ not mean uniform; decent $d$ does not mean much energy was scattered at all.
 - **The diffusion coefficient qualifies diffusers.** When the task is to break
   up an echo, a flutter or a focusing reflection, what matters is that the
   reflected energy is spread over angle, and $d$ measures exactly that. The
-  normalised $d_n$ (Formula (7)) additionally subtracts the edge diffraction
+  normalised $d_\mathrm{norm}$ (Formula (7)) additionally subtracts the edge diffraction
   that every finite panel exhibits, so products of different sizes can be
   compared fairly.
 
@@ -44664,7 +44672,7 @@ no longer small against the wavelength; a frequency-blind single number
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [iso.org catalogue](https://www.iso.org/standard/55293.html).
   The goniometer autocorrelation coefficient behind section 2 of this page,
-  its area weighting and the normalised $d_n$.
+  its area weighting and the normalised $d_\mathrm{norm}$.
 
 ## Standards
 
@@ -46976,7 +46984,7 @@ band from the A-weighted spectrum and sum what is left (Formula (2)).
 
 **The HML method (Clause 7)** collapses the protector to three numbers, the
 predicted noise level reduction it gives for reference noises whose
-$(L_{p,C} - L_{p,A})$ is $-2$, $+2$ and $+10$ dB, fitted across the eight
+$(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$ is $-2$, $+2$ and $+10$ dB, fitted across the eight
 reference spectra of Table 2. Applying them needs only the C- and A-weighted
 levels of the real noise, through two straight segments that meet at $+2$ dB.
 
@@ -56326,8 +56334,8 @@ check that pins each quantity to its standard's own expected value.
 | $R'_{45°}$ | Apparent sound reduction index of a facade element under loudspeaker sound at 45 degrees: the level difference corrected by the specimen area over the receiving-room absorption area, with a further $-1{,}5$ dB that carries the single-angle geometry. It is apparent, so flanking and any other component of the facade are inside the number. | dB | ISO 16283-3:2016, 3.12 | [Façade Sound Insulation](https://jmrplens.github.io/phonometry/buildings/insulation/facade-insulation/) |
 | $R_\mathrm{A}$, $R_\mathrm{A,tr}$ | Global airborne index: the A-weighted level a partition transmits when it is excited by a normalised spectrum (pink noise for $R_\mathrm{A}$, road traffic for $R_\mathrm{A,tr}$), summed energetically over eighteen one-third-octave bands from 100 Hz to 5 kHz. It is a close relative of $R_\mathrm{w} + C$ and $R_\mathrm{w} + C_\mathrm{tr}$ but is computed directly, not by shifting a reference curve, and it uses two bands the ISO 717-1 range does not. | dBA | CTE DB-HR, Annex A, Formulae (A.5) and (A.6) | [Spanish Building Code (CTE DB-HR)](https://jmrplens.github.io/phonometry/buildings/insulation/spanish-building-code/) |
 | $D_\mathrm{nT,A}$, $D_{2\mathrm{m,nT,Atr}}$ | The same global index applied to a standardized level difference: between two rooms ($D_\mathrm{nT,A}$, pink noise) and between the outside and a protected room ($D_{2\mathrm{m,nT,Atr}}$, road traffic or aircraft). These are the quantities the DB-HR requirement tables are written against, so a project is checked in them and not in the ISO 717-1 ratings. | dBA | CTE DB-HR, Annex A, Formulae (A.5) and (A.6); requirements in clause 2 | [Spanish Building Code (CTE DB-HR)](https://jmrplens.github.io/phonometry/buildings/insulation/spanish-building-code/) |
-| $R_\mathrm{I}$ | Intensity sound reduction index: the source-room level minus the intensity level scanned over the radiating face, so the transmitted power is measured directly instead of inferred from the receiving room. It is the method of choice where flanking is strong; add the $K_c$ adaptation to get $R_\mathrm{I,M}$, the value the ISO 10140 pressure method would have produced. | dB | ISO 15186-1:2000, 3.8, Equation (7) | [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/) |
-| $D_\mathrm{I,n,e}$ | Intensity element-normalized level difference: the small-element counterpart of $D_\mathrm{n,e}$, measured by scanning the element and normalised to a reference absorption area of 10 m². It is rated through the same ISO 717-1 procedure, as $D_\mathrm{I,n,e,w}$, so a ventilator or a transit sealing system can be compared with a wall on one scale. | dB | ISO 15186-2:2003, Formula (12) | [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/) |
+| $R_I$ | Intensity sound reduction index: the source-room level minus the intensity level scanned over the radiating face, so the transmitted power is measured directly instead of inferred from the receiving room. It is the method of choice where flanking is strong; add the $K_c$ adaptation to get $R_{I,\mathrm{M}}$, the value the ISO 10140 pressure method would have produced. | dB | ISO 15186-1:2000, 3.8, Equation (7) | [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/) |
+| $D_{I,\mathrm{n,e}}$ | Intensity element-normalized level difference: the small-element counterpart of $D_\mathrm{n,e}$, measured by scanning the element and normalised to a reference absorption area of 10 m². It is rated through the same ISO 717-1 procedure, as $D_{I,\mathrm{n,e,w}}$, so a ventilator or a transit sealing system can be compared with a wall on one scale. | dB | ISO 15186-2:2003, Formula (12) | [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/) |
 
 ## Materials and surfaces
 
@@ -78073,9 +78081,9 @@ x = np.arange(len(areas))
 fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
 for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
     values = [vibration.guide_values(a, time_of_day=time_of_day) for a in areas]
-    ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label="$A_u$")
+    ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label=r"$A_\mathrm{u}$")
     ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label="$A_r$")
-    ax.plot(x, [v.a_o for v in values], "v", label="$A_o$")
+    ax.plot(x, [v.a_o for v in values], "v", label=r"$A_\mathrm{o}$")
     ax.set_yscale("log")
     ax.set_xticks(x, areas)
     ax.set_title(time_of_day)
@@ -78875,7 +78883,7 @@ for ax, floor in zip(axes, ("concrete", "timber"), strict=True):
             positions,
             vibration.ground_to_floor_transfer_db(floor, floor_natural_frequency_hz=natural),
             marker="o",
-            label=f"$f_e$ = {natural:g} Hz",
+            label=rf"$f_\mathrm{{e}}$ = {natural:g} Hz",
         )
     ax.set_xticks(positions[::2], [f"{b:g}" for b in bands[::2]])
     ax.set_title(floor)

@@ -4072,9 +4072,12 @@ def generate_hearing_protector_methods(output_dir: str) -> None:
         linestyle=":",
         linewidth=1.8,
         zorder=3,
-        label=f"this noise, $L_{{p,C}} - L_{{p,A}}$ = {_fmt_minus(l_p_c - l_p_a, '.0f')} dB",
+        label=(
+            r"this noise, $L_{p,\mathrm{C}} - L_{p,\mathrm{A}}$ = "
+            f"{_fmt_minus(l_p_c - l_p_a, '.0f')} dB"
+        ),
     )
-    ax_hml.set_xlabel(r"$L_{p,C} - L_{p,A}$ [dB]")
+    ax_hml.set_xlabel(r"$L_{p,\mathrm{C}} - L_{p,\mathrm{A}}$ [dB]")
     ax_hml.set_ylabel("Predicted noise level reduction [dB]")
     ax_hml.set_title("The same protector, judged three ways", pad=12)
     ax_hml.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
@@ -4086,7 +4089,7 @@ def generate_hearing_protector_methods(output_dir: str) -> None:
         0.03,
         "\n".join(
             (
-                rf"octave band: $L'_{{p,A84}}$ = {octave.reported_level} dB",
+                rf"octave band: $L'_{{p,\mathrm{{A}}84}}$ = {octave.reported_level} dB",
                 rf"HML: {by_hml.reported_level} dB",
                 rf"SNR ({snr.reported} dB): {by_snr.reported_level} dB",
             )

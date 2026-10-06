@@ -301,7 +301,7 @@ the assumed protection value band by band from the A-weighted spectrum and sum
 what is left.
 
 $$
-L'_{p,Ax} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)}\ \mathrm{dB}
+L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)}\ \mathrm{dB}
 $$
 
 ```python
@@ -322,18 +322,18 @@ rounds the result to the nearest integer, which is what `reported_level` does;
 
 Three numbers instead of a spectrum. $H$, $M$ and $L$ are the predicted noise
 level reduction this protector gives for reference noises whose
-$(L_{p,C} - L_{p,A})$ is $-2$, $+2$ and $+10$ dB, fitted across the eight
+$(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$ is $-2$, $+2$ and $+10$ dB, fitted across the eight
 reference spectra of Table 2. Applying them needs only the C- and A-weighted
 levels of the real noise:
 
 $$
-PNR_x = M_x - \frac{H_x - M_x}{4}\left(L_{p,C} - L_{p,A} - 2\right)
-\quad\text{for } (L_{p,C} - L_{p,A}) \leq 2\ \mathrm{dB}
+PNR_x = M_x - \frac{H_x - M_x}{4}\left(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\right)
+\quad\text{for } (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) \leq 2\ \mathrm{dB}
 $$
 
 $$
-PNR_x = M_x - \frac{M_x - L_x}{8}\left(L_{p,C} - L_{p,A} - 2\right)
-\quad\text{otherwise},\qquad L'_{p,Ax} = L_{p,A} - PNR_x
+PNR_x = M_x - \frac{M_x - L_x}{8}\left(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\right)
+\quad\text{otherwise},\qquad L'_{p,\mathrm{A}x} = L_{p,\mathrm{A}} - PNR_x
 $$
 
 ```python
@@ -355,7 +355,7 @@ a protector is published with, so that is what the application consumes.
 One number, against a pink noise, subtracted from the C-weighted level.
 
 $$
-L'_{p,Ax} = L_{p,C} - SNR_x
+L'_{p,\mathrm{A}x} = L_{p,\mathrm{C}} - SNR_x
 $$
 
 ```python

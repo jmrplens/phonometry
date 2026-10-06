@@ -50,7 +50,7 @@ from .outline import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 
 
 @dataclass(frozen=True)
@@ -132,14 +132,34 @@ DARK = Theme(
 #: (Corner, LF, a word and an abbreviation all three parts print upright,
 #: which also sets the early lateral energy fraction $J_{LF}$ of ISO 3382-1
 #: upright, as its guide writes it), the airborne descriptors (AF, AFmax,
-#: ASmax, Cpeak, sa) and the upper guide value of DIN 4150-2:1999-06, 6.2
+#: ASmax, AS, Cpeak, sa) and the upper guide value of DIN 4150-2:1999-06, 6.2
 #: (o for "oberer", the adjective the clause spells out beside the letter,
-#: as it does the "unterer" of the u already here).
+#: as it does the "unterer" of the u already here, both printed upright
+#: there in $A_u$ and $A_o$).
+#:
+#: The words and the abbreviations that no plate uses as an index came in
+#: with the pass that held every plate against the page that embeds it: the
+#: room, the cabin and the measurements with and without the enclosure of
+#: ISO 11957 (room, cabin, with, without, which the guide writes in
+#: ``\text``), the nominal reverberation time of the small-room method
+#: (nom, ``T_\mathrm{nom}`` on its guide), the daily dose of ISO 2631-5
+#: (zd, ``D_\mathrm{zd}``), the standardized impact level of ISO 16283-2
+#: (nT, ``L'_\mathrm{nT}``) and the A-weighted Slow level beside the AF of
+#: IEC 61672-1 (AS).
+#:
+#: The last words came in with the labels that the plates used to draw as
+#: plain text because their subscript was missing here: the path lengths,
+#: the meteorological correction and the barrier of ISO 9613-2 (sr beside
+#: the ss already here, met, bar), the closest point of approach and the
+#: data window of ISO 17208-1 (CPA, DW), the static stress and the age term
+#: of ISO 2631-5, Annex C (stat, age), the median of ISO 7029 (md), the line
+#: source of the CNOSSOS-EU road emission (line), the Hearing Model of
+#: Sottek of ECMA-418-2 (HMS) and the threshold in quiet of ISO 532-1 (TQ).
 #:
 #: This set is keyed on the letter run alone and knows nothing of the
-#: symbol it belongs to, so a run is upright everywhere or nowhere. Ten
-#: runs the prose sets upright somewhere are therefore deliberately absent,
-#: because the same run has to stay italic elsewhere: ``i`` and ``n``
+#: symbol it belongs to, so a run in it is upright everywhere or nowhere.
+#: Ten runs the prose sets upright somewhere are therefore deliberately
+#: absent, because the same run has to stay italic elsewhere: ``i`` and ``n``
 #: (indices in $S_i$, $L_i$, $H_n$), ``d`` and ``r`` (the direct and
 #: reflected path lengths $r_d$ and $r_r$ of the echo geometry, neither
 #: expanded anywhere), ``p`` ($L_p$), ``v`` ($L_v$), ``S`` ($w_S$), ``a``
@@ -149,21 +169,26 @@ DARK = Theme(
 #: of the two positions of ISO 10847, Formula (1) ($L_{ref,B}$, $L_{r,B}$),
 #: where it pairs with an ``A`` this set cannot romanise, so romanising it
 #: would set the two halves of one formula in two styles. Romanising those
-#: would romanise a quantity symbol or an index, which is the error the
-#: whole policy exists to avoid; those labels keep the italic default.
+#: here would romanise a quantity symbol or an index, which is the error the
+#: whole policy exists to avoid, so they keep the italic default and the
+#: label where one of them is descriptive says so itself (below).
 #: Every other letter run inside a script is an index and is set in italic
 #: ($K_{ij}$, $η_{ij}$); extend this set only for a subscript that
 #: abbreviates a word, never for letter-indices.
 #:
-#: Being keyed on the run alone is also why the plates sit outside the
-#: file-level rule the prose follows, where a symbol is set by what it
-#: means in the module or the guide that carries it and two files may
-#: legitimately disagree (CONTRIBUTING.md, "Setting a subscript"). A plate
-#: has no such scope to appeal to, so a run that has to be italic anywhere
-#: stays italic everywhere. That is why the plates still draw $n_d$ and
-#: $K_r$ sloped where the prose, holding one page against one standard,
-#: now sets both upright: the ``d`` and the ``r`` they share are spoken
-#: for by the two path lengths above.
+#: Those runs are set upright where they are descriptive by the call that
+#: draws them, not here: :meth:`SVG.text` takes ``upright`` keys that name
+#: the symbol and the run (``"S_p"``, ``"L′_n"``, ``"h_r"``), so the plant
+#: area of ISO 8297 and the receiver height of ISO 9613-2 are upright on
+#: their plates while $L_i$ stays an italic index on the next one. That is
+#: what brings the plates under the file-level rule the prose follows,
+#: where a symbol is set by what it means in the guide that carries it and
+#: two files may legitimately disagree (CONTRIBUTING.md, "Setting a
+#: subscript"): a plate is set as the page that embeds it is, and
+#: ``scripts/check_subscript_slope.py`` reads the plates beside the page's
+#: own mathematics to keep it so. The ``sloped`` keys are the other
+#: direction, for the source that prints a letter of this set italic, as
+#: ISO 3747 prints the f of $ΔL_f$.
 _ROMAN_SCRIPTS = frozenset(
     (
         "Aeq",
@@ -251,6 +276,44 @@ _ROMAN_SCRIPTS = frozenset(
         "sum",
         "Corner",
         "LF",
+        # room/cabin/with/without: ISO 11957, written in \text on the guide.
+        "room",
+        "cabin",
+        "with",
+        "without",
+        # nom: the nominal reverberation time of the small-room method.
+        "nom",
+        # zd: the daily dose of ISO 2631-5, D_zd.
+        "zd",
+        # nT: the standardized impact level of ISO 16283-2, L'_nT.
+        "nT",
+        # AS: A-weighted, time weighting S, beside the AF of IEC 61672-1.
+        "AS",
+        # sr/met/bar: the second edge to the receiver, the meteorological
+        # correction and the barrier of ISO 9613-2:1996, 7.4, printed upright
+        # in d_sr, K_met and A_bar (Equations (12), (14) and (16), p. 9).
+        "sr",
+        "met",
+        "bar",
+        # CPA/DW: the closest point of approach and the data window of
+        # ISO 17208-1:2016, printed upright in d_CPA and l_DW (3.3, 3.6, p. 2).
+        "CPA",
+        "DW",
+        # stat/age: the static stress and the age term of ISO 2631-5:2018,
+        # printed upright in S_stat,i and S_age (Formulae (C.3), (C.4)).
+        "stat",
+        "age",
+        # md: the median of ISO 7029:2017, printed upright in ΔH_md,Y (4.2).
+        "md",
+        # line: the line source of the CNOSSOS-EU road emission, upright in
+        # L'_W,eq,line,i as the guide that carries the plate writes it.
+        "line",
+        # HMS: the Hearing Model of Sottek of ECMA-418-2, in Bark_HMS,
+        # tu_HMS and vacil_HMS.
+        "HMS",
+        # TQ: the threshold in quiet of ISO 532-1:2017, printed upright in
+        # L_TQ (A.2 and Table A.6).
+        "TQ",
         "Fmax",
         "FTm",
         "MG",
@@ -319,6 +382,21 @@ _ROMAN_SCRIPTS = frozenset(
 #: the other way round: in ``X_Aj`` the A is the A-weighting and printed
 #: upright, while the j counts the source spectra and stays italic.
 #:
+#: The same split covers the rest of the quantity-and-descriptor runs the
+#: guides write that way: the G-weighted level ``L_{p\mathrm{G}}`` of
+#: ISO 7196, the A-weighted Fast level ``L_{p\mathrm{AF}}`` of the Nordtest
+#: method, the pressure-intensity indicator ``F_{pI_\mathrm{n}}`` of ISO 9614
+#: (p and I the two quantities it compares, n the normal), the structure-borne power and blocked force of EN 15657
+#: (``L_{W\mathrm{s}}``, ``L_{W\mathrm{sn}}``, ``L_{F\mathrm{b,eq}}``), the
+#: levels of the equipment and the reference source of the small-room
+#: comparison method (``L_{W\mathrm{e}}``, ``L_{W\mathrm{r}}``,
+#: ``L_{p\mathrm{e}}``, ``L_{p\mathrm{r}}``), and two that split the other
+#: way: the A-weighted sound exposure level of IEC 61672-1:2013, Equation
+#: (4), ``L_{AE}``, whose E is the sound exposure, a quantity, printed
+#: italic there beside an upright A, and the effective A-weighted level of
+#: ISO 4869-2:2018, Formula (23), ``L'_{p,Ax}``, whose x counts the
+#: protection levels and is printed italic beside the same upright A.
+#:
 #: So does the end correction of a slit mouth, ``Δl`` (Jiménez et al. 2017,
 #: Sci. Rep. 7:5389, Eq. (5)), in ``M_Δl`` and ``Z_Δl``: the Δ is an operator and
 #: upright at every level, the ``l`` is the length it qualifies and italic, and
@@ -328,15 +406,27 @@ _ROMAN_SCRIPTS = frozenset(
 #: in :func:`_math_tokens`, where the letter scan would otherwise stop at the
 #: change of script.
 _MIXED_SCRIPTS: dict[str, str] = {
+    "AE": "uv",
     "Aj": "uv",
+    "Ax": "uv",
     "FE": "vu",
     "FTi": "uuv",
     "FTr": "uuv",
+    "Fb": "vu",
     "In": "vu",
     "WA": "vu",
     "WAd": "vuu",
+    "We": "vu",
+    "Wr": "vu",
+    "Ws": "vu",
+    "Wsn": "vuu",
     "pA": "vu",
+    "pAF": "vuu",
+    "pG": "vu",
+    "pIn": "vvu",
     "pS": "vu",
+    "pe": "vu",
+    "pr": "vu",
     "vA": "vu",
     "Δl": "uv",
 }
@@ -349,6 +439,10 @@ _MIXED_SCRIPTS: dict[str, str] = {
 #: ``L_ind3b``, upright throughout (Figure E.1, Table I.1), and so do the
 #: guide and the budget plot.
 _ROMAN_SCRIPT_RUNS = frozenset({"ind3a", "ind3b"})
+
+#: The primes a symbol may carry before its subscript (``L′_n``, ``R″``):
+#: part of the symbol the script hangs from, as its combining marks are.
+_PRIMES = "′″‴"
 
 #: Script metrics of the ``$...$`` composer, as fractions of the font size:
 #: how far a subscript drops, how far a superscript rises, and the glyph
@@ -429,7 +523,53 @@ def _comment(s: str) -> str:
     return f"<!-- {_esc(s).replace('--', '‐‐')} -->"
 
 
-def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, str]]:
+def _script_base(run: str, end: int) -> str:
+    """The symbol a script at *end* of a math run hangs from, as it is written.
+
+    The letters before the ``_`` together with their combining marks and
+    primes, so ``L′_{n,w}`` hangs from ``L′``, ``ΔL_a`` from ``ΔL`` and
+    ``KB_{FTr}`` from ``KB``: the symbol a reader names, which is what the
+    ``upright`` keys of :meth:`SVG.text` are spelled against.
+    """
+    k = end
+    while k > 0 and (
+        run[k - 1].isalpha() or run[k - 1] in _COMBINING or run[k - 1] in _PRIMES
+    ):
+        k -= 1
+    return run[k:end]
+
+
+def _script_table(keys: Iterable[str], kind: str) -> dict[str, frozenset[str]]:
+    """Parse the ``upright`` or ``sloped`` keys of one call into ``{base: runs}``.
+
+    A key is ``"<base>_<letter run>"`` (``"S_p"``, ``"L′_n"``, ``"ΔL_f"``):
+    the symbol as the label writes it and the run of Latin letters in its
+    subscript. Anything else raises, because a key that cannot match is a
+    typo that would publish the slope it was written to change.
+    """
+    table: dict[str, set[str]] = {}
+    for key in keys:
+        base, sep, letters = key.partition("_")
+        if not (sep and base and letters.isascii() and letters.isalpha()):
+            msg = (
+                f"{kind} key {key!r} is not '<base>_<letters>': name the "
+                "symbol as the label writes it and the letter run of its "
+                "subscript, as 'S_p' or 'L′_n'"
+            )
+            raise ValueError(msg)
+        table.setdefault(base, set()).add(letters)
+    return {base: frozenset(runs) for base, runs in table.items()}
+
+
+def _math_tokens(
+    run: str,
+    s: str,
+    *,
+    script: bool = False,
+    upright: frozenset[str] = frozenset(),
+    sloped: frozenset[str] = frozenset(),
+    matched: set[str] | None = None,
+) -> list[tuple[str, str, str]]:
     r"""Split one math run into ``(kind, text)`` chunks.
 
     ``var`` is set in italic: at the baseline a single letter -- Latin or
@@ -447,7 +587,14 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
     whole script of :data:`_ROMAN_SCRIPT_RUNS` (``ind3a``) is one upright
     run, though it runs through a digit. ``sub`` and ``sup``
     carry the payload of ``_``/``^``, braced or single character, to be
-    tokenized again at script size.
+    tokenized again at script size, and the third element of their token is
+    the symbol the script hangs from (:func:`_script_base`); the other
+    tokens carry an empty one. *upright* is the set of letter runs one call
+    asks for upright in this script, beside those of :data:`_ROMAN_SCRIPTS`,
+    and *sloped* the set it asks for italic although :data:`_ROMAN_SCRIPTS`
+    holds them; each run either sets is added to *matched*. A run of
+    :data:`_MIXED_SCRIPTS` keeps its letter-by-letter styles and is never
+    matched.
 
     Malformed markup raises :class:`ValueError` naming the whole string *s*
     and the offending piece, so a typo breaks the generation instead of
@@ -460,8 +607,8 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
     which the composer cannot set.
     """
     if script and run in _ROMAN_SCRIPT_RUNS:
-        return [("up", run)]
-    out: list[tuple[str, str]] = []
+        return [("up", run, "")]
+    out: list[tuple[str, str, str]] = []
     i = 0
     while i < len(run):
         ch = run[i]
@@ -473,6 +620,7 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
                 )
                 raise ValueError(msg)
             kind = "sub" if ch == "_" else "sup"
+            base = _script_base(run, i)
             if i + 1 == len(run):
                 msg = f"empty script {ch!r} at the end of a math run in {s!r}"
                 raise ValueError(msg)
@@ -484,7 +632,7 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
                 if end == i + 2:
                     msg = f"empty script {run[i : end + 1]!r} in {s!r}"
                     raise ValueError(msg)
-                out.append((kind, run[i + 2 : end]))
+                out.append((kind, run[i + 2 : end], base))
                 i = end + 1
             else:
                 nxt = run[i + 2 : i + 3]
@@ -516,7 +664,7 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
                         "comma off"
                     )
                     raise ValueError(msg)
-                out.append((kind, run[i + 1 : i + 2]))
+                out.append((kind, run[i + 1 : i + 2], base))
                 i += 2
         elif ch.isalpha():
             latin = ch.isascii()
@@ -545,7 +693,7 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
                 # loop's own bookkeeping continues from j, so the run is
                 # consumed exactly once either way.
                 for letter, letter_kind in zip(run[i:j], mixed, strict=True):
-                    out.append(("up" if letter_kind == "u" else "var", letter))
+                    out.append(("up" if letter_kind == "u" else "var", letter, ""))
                 i = j
                 continue
             if not latin and ch.isupper():
@@ -553,22 +701,31 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
                 # it is an operator or a descriptor, never an index.
                 kind = "up"
             elif script:
-                kind = "up" if run[i:j] in _ROMAN_SCRIPTS else "var"
+                name = run[i:j]
+                if matched is not None and (name in upright or name in sloped):
+                    matched.add(name)
+                roman = name in _ROMAN_SCRIPTS or name in upright
+                kind = "up" if roman and name not in sloped else "var"
             else:
                 letters = sum(1 for c in run[i:j] if c not in _COMBINING)
                 kind = "var" if letters == 1 else "up"
-            out.append((kind, run[i:j]))
+            out.append((kind, run[i:j], ""))
             i = j
         else:
             j = i
             while j < len(run) and run[j] not in "_^" and not run[j].isalpha():
                 j += 1
-            out.append(("up", run[i:j]))
+            out.append(("up", run[i:j], ""))
             i = j
     return out
 
 
-def _math_runs(s: str) -> list[tuple[str, bool, float, float]]:
+def _math_runs(
+    s: str,
+    upright: Iterable[str] = (),
+    sloped: Iterable[str] = (),
+    hits: set[str] | None = None,
+) -> list[tuple[str, bool, float, float]]:
     r"""Chunk a translated ``$...$`` string into styled runs.
 
     Each run is ``(text, italic, shift, scale)``: the glyphs, whether they
@@ -600,11 +757,20 @@ def _math_runs(s: str) -> list[tuple[str, bool, float, float]]:
     grid steps ``dx``/``dt`` follow that baseline rule inside a formula
     (upright, per the roman d of ISO 80000-2); in plain prose ("dt from
     the Courant number") they are not mathematics and take no ``$...$``.
+
+    *upright* adds, for this string alone, the subscripts that the curated
+    set cannot hold because the same letters are an index or a quantity
+    somewhere else, and *sloped* takes out of it the runs a source prints
+    italic though the same letters abbreviate a word elsewhere
+    (:meth:`SVG.text` explains the keys). Each key that sets a run is added
+    to *hits*, so the canvas can refuse a key that matched nothing.
     """
     segments = s.split("$")
     if len(segments) % 2 == 0:
         msg = f"unbalanced $ markup in {s!r}"
         raise ValueError(msg)
+    table = _script_table(upright, "upright")
+    table_sloped = _script_table(sloped, "sloped")
     chunks: list[tuple[str, bool, float, float]] = []
 
     def add(
@@ -627,18 +793,31 @@ def _math_runs(s: str) -> list[tuple[str, bool, float, float]]:
                 "commands here, write the glyph itself (θ, √, ·, …)"
             )
             raise ValueError(msg)
-        for kind, payload in _math_tokens(segment, s):
+        for kind, payload, base in _math_tokens(segment, s):
             if kind in ("var", "up"):
                 add(payload, italic=kind == "var")
             else:
                 shift = _SUB_DROP if kind == "sub" else _SUP_RISE
-                for kind2, payload2 in _math_tokens(payload, s, script=True):
+                empty: frozenset[str] = frozenset()
+                wanted = table.get(base, empty) if kind == "sub" else empty
+                unwanted = table_sloped.get(base, empty) if kind == "sub" else empty
+                matched: set[str] = set()
+                for kind2, payload2, _ in _math_tokens(
+                    payload,
+                    s,
+                    script=True,
+                    upright=wanted,
+                    sloped=unwanted,
+                    matched=matched,
+                ):
                     add(
                         payload2,
                         italic=kind2 == "var",
                         shift=shift,
                         scale=_SCRIPT_SCALE,
                     )
+                if hits is not None:
+                    hits.update(f"{base}_{letters}" for letters in matched)
     return chunks
 
 
@@ -650,12 +829,21 @@ _WS_RUN = re.compile(r"[ \t\r\n]+")
 
 
 def _label_runs(
-    s: str, *, mono: bool = False, bold: bool = False, italic: bool = False
+    s: str,
+    *,
+    mono: bool = False,
+    bold: bool = False,
+    italic: bool = False,
+    upright: Iterable[str] = (),
+    sloped: Iterable[str] = (),
+    hits: set[str] | None = None,
 ) -> list[Run]:
     """Compose a translated label into the styled runs the engine sets.
 
     A ``$...$`` label takes the composer's runs, with the call's ``bold``
-    styling the italic variable runs into BoldItalic; ``mono`` and
+    styling the italic variable runs into BoldItalic and its ``upright`` and
+    ``sloped`` keys setting the named subscripts upright or italic (keys that
+    set one are added to *hits*); ``mono`` and
     whole-string ``italic`` cannot coexist with markup and are refused
     (silently dropping either published a mis-set label). A plain label
     is one run of the requested face, after the ASCII whitespace collapse
@@ -679,7 +867,7 @@ def _label_runs(
             raise ValueError(msg)
         return [
             Run(text, (False, bold, run_italic), shift, scale)
-            for text, run_italic, shift, scale in _math_runs(s)
+            for text, run_italic, shift, scale in _math_runs(s, upright, sloped, hits)
         ]
     s = _WS_RUN.sub(" ", s).strip(" ")
     if not s:
@@ -695,6 +883,10 @@ class SVG:
         self.lang = lang
         self.parts: list[str] = []
         self._glyphs = GlyphStore()
+        # The ``upright`` and ``sloped`` keys the builder asked for and those
+        # a label used, held against each other when the plate is rendered.
+        self._upright_asked: set[str] = set()
+        self._upright_hit: set[str] = set()
 
     def tr(self, s: str) -> str:
         """Translate a user-visible string for the current language."""
@@ -777,6 +969,8 @@ class SVG:
         bold: bool = False,
         mono: bool = False,
         italic: bool = False,
+        upright: Iterable[str] = (),
+        sloped: Iterable[str] = (),
     ) -> float:
         """Pen advance the label ``s`` will occupy, in the sheet's language.
 
@@ -784,10 +978,41 @@ class SVG:
         step short of drawing, so a caller that has to fit a label into a
         box decides on what the reader will actually see rather than on the
         length of the English string. A label that composes to nothing
-        occupies nothing.
+        occupies nothing. ``upright`` and ``sloped`` are the key sets of
+        :meth:`text`.
         """
-        runs = _label_runs(self.tr(s), mono=mono, bold=bold, italic=italic)
+        runs = self._runs(
+            self.tr(s),
+            mono=mono,
+            bold=bold,
+            italic=italic,
+            upright=upright,
+            sloped=sloped,
+        )
         return measure(runs, size) if runs else 0.0
+
+    def _runs(
+        self,
+        s: str,
+        *,
+        mono: bool,
+        bold: bool,
+        italic: bool,
+        upright: Iterable[str],
+        sloped: Iterable[str] = (),
+    ) -> list[Run]:
+        """:func:`_label_runs`, keeping the account of the slope keys."""
+        up, down = tuple(upright), tuple(sloped)
+        self._upright_asked.update(up, down)
+        return _label_runs(
+            s,
+            mono=mono,
+            bold=bold,
+            italic=italic,
+            upright=up,
+            sloped=down,
+            hits=self._upright_hit,
+        )
 
     def fit_size(
         self,
@@ -798,6 +1023,8 @@ class SVG:
         bold: bool = False,
         mono: bool = False,
         italic: bool = False,
+        upright: Iterable[str] = (),
+        sloped: Iterable[str] = (),
     ) -> int:
         """The first of ``sizes`` at which every label fits ``width``.
 
@@ -814,7 +1041,16 @@ class SVG:
         """
         for size in sizes:
             if all(
-                self.text_width(s, size, bold=bold, mono=mono, italic=italic) <= width
+                self.text_width(
+                    s,
+                    size,
+                    bold=bold,
+                    mono=mono,
+                    italic=italic,
+                    upright=upright,
+                    sloped=sloped,
+                )
+                <= width
                 for s in labels
             ):
                 return size
@@ -848,7 +1084,25 @@ class SVG:
         bold: bool = False,
         mono: bool = False,
         italic: bool = False,
+        upright: Iterable[str] = (),
+        sloped: Iterable[str] = (),
     ) -> None:
+        """Draw the label ``s`` at ``(x, y)``, translated for the sheet.
+
+        ``upright`` names subscripts this label sets upright although the
+        letters are not in :data:`_ROMAN_SCRIPTS`, each as ``"<base>_<letter
+        run>"``: ``("S_p",)`` for the plant area of ISO 8297, ``("L′_n",)``
+        for a normalized level. The set is keyed on the letters alone, so it
+        cannot romanise a letter that is an index or a quantity somewhere
+        else (the i of $L_i$, the p of $L_p$); this sets the descriptive one
+        where it is drawn and leaves the index italic everywhere else. A key
+        is matched against the symbol it is spelled with, so a call may pass
+        one set to every label of a list and each label takes what is its own;
+        a key no label of the plate uses is a typo, and :meth:`render`
+        refuses it. ``sloped`` is the other direction, for the rarer source
+        that prints a letter of the curated set italic (the f of $ΔL_f$ in
+        ISO 3747, where RD 1367 sets the f of $K_f$ upright).
+        """
         if anchor not in ("start", "middle", "end"):
             msg = f"'anchor' must be one of ('start', 'middle', 'end'); got {anchor!r}."
             raise ValueError(msg)
@@ -863,6 +1117,8 @@ class SVG:
             bold=bold,
             mono=mono,
             italic=italic,
+            upright=upright,
+            sloped=sloped,
         )
         if fragment:
             self.add(fragment)
@@ -879,6 +1135,8 @@ class SVG:
         bold: bool = False,
         mono: bool = False,
         italic: bool = False,
+        upright: Iterable[str] = (),
+        sloped: Iterable[str] = (),
     ) -> str:
         """The emission core of :meth:`text`: one already-translated label.
 
@@ -892,7 +1150,9 @@ class SVG:
         as ``<use>`` groups behind an XML comment carrying the source
         string. A label that composes to nothing emits nothing.
         """
-        runs = _label_runs(s, mono=mono, bold=bold, italic=italic)
+        runs = self._runs(
+            s, mono=mono, bold=bold, italic=italic, upright=upright, sloped=sloped
+        )
         if not runs:
             return ""
         width = measure(runs, size)
@@ -949,12 +1209,16 @@ class SVG:
         offset: float = 0.0,
         size: int = 15,
         label_side: str = "left",
+        *,
+        upright: Iterable[str] = (),
+        sloped: Iterable[str] = (),
     ) -> None:
         """Dimension between two measured points, drafting style.
 
         The dimension line is placed ``offset`` px away (perpendicular);
         dashed witness lines connect it to the measured points. With
         ``offset=0`` the caller is responsible for any witness lines.
+        ``upright`` and ``sloped`` are the key sets of :meth:`text`.
         """
         if label_side not in ("left", "right"):
             msg = f"'label_side' must be one of ('left', 'right'); got {label_side!r}."
@@ -969,7 +1233,9 @@ class SVG:
             mid = (x1 + x2) / 2
             self.arrow(mid - 4, y, x1, y, th.muted, 1.2)
             self.arrow(mid + 4, y, x2, y, th.muted, 1.2)
-            self.text(mid, y - 7, label, size, th.fg, "middle")
+            self.text(
+                mid, y - 7, label, size, th.fg, "middle", upright=upright, sloped=sloped
+            )
         else:
             x = x1 + offset
             if offset:
@@ -981,9 +1247,27 @@ class SVG:
             # Label beside the line, on whichever side is clear of the
             # measured object (masts, people, furniture).
             if label_side == "right":
-                self.text(x + 9, mid + 6, label, size, th.fg, "start")
+                self.text(
+                    x + 9,
+                    mid + 6,
+                    label,
+                    size,
+                    th.fg,
+                    "start",
+                    upright=upright,
+                    sloped=sloped,
+                )
             else:
-                self.text(x - 9, mid + 6, label, size, th.fg, "end")
+                self.text(
+                    x - 9,
+                    mid + 6,
+                    label,
+                    size,
+                    th.fg,
+                    "end",
+                    upright=upright,
+                    sloped=sloped,
+                )
 
     def mic(
         self, x: float, capsule_top: float, ground: float, scale: float = 1.0
@@ -1044,6 +1328,14 @@ class SVG:
         content-derived, so document order stays deterministic either way.
         """
         th = self.th
+        unused = sorted(self._upright_asked - self._upright_hit)
+        if unused:
+            msg = (
+                f"slope keys {unused} set no subscript on the plate "
+                f"{title!r}: spell each as the label writes the symbol, "
+                "'<base>_<letter run>'"
+            )
+            raise ValueError(msg)
         t = self.tr(title)
         title_fragment = self._emit_text(
             self.w / 2, 30, t, self.title_size(t), th.fg, "middle", bold=True

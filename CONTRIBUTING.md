@@ -462,10 +462,18 @@ to arrive with the sentence in this corpus, or the clause in its standard,
 that expands the letter.
 
 The drawn labels reach the same result by another route. The plate composer
-keys the slope on the letter run alone (`_ROMAN_SCRIPTS` in
-`scripts/diagrams/canvas.py`), so a run is upright in every plate or in none,
-and the nine runs that have to stay italic somewhere are deliberately absent
-from that set. Extend it only for a run that abbreviates a word.
+keys the slope on the letter run (`_ROMAN_SCRIPTS` in
+`scripts/diagrams/canvas.py`), so a run in that set is upright in every plate,
+and the runs that have to stay italic somewhere (the i of an index, the p of
+$L_p$) are deliberately absent from it. Extend it only for a run that
+abbreviates a word and is never an index. Where one of those absent letters is
+descriptive, the call that draws it says so: `SVG.text` (and `text_width`,
+`fit_size` and `dim`) take `upright=("S_p", "h_r")`, keys that name the symbol
+as the label writes it and the letter run of its subscript, so the plant area
+of ISO 8297 is upright on its plate while $L_i$ stays an italic index on the
+next one. `sloped=` is the other direction, for the rarer source that prints a
+letter of the set italic, as ISO 3747 prints the f of $\Delta L_f$. A key no
+label of the plate uses is refused when the plate is written.
 
 **One meaning per subscript per file.** The rule above settles a subscript
 once its meaning is known, and some glyphs honestly have two meanings. $D_z$
@@ -521,7 +529,18 @@ It fails when one file writes the same base and subscript both ways, and
 prints the lines of each. A comma-separated subscript is read component by
 component, because that is how it is written: $\alpha_{\mathrm{s},i}$ is one
 abbreviation and one index, and the run inside a single wrapper
-($L_\mathrm{n,w,eq}$) is upright throughout.
+($L_\mathrm{n,w,eq}$) is upright throughout, also where it follows an index
+inside the same braces: $D_{I,\mathrm{n,e}}$ is an italic intensity and an
+upright n and e.
+
+It also reads the diagram plates each page embeds, from the committed SVG
+under `.github/images`: a plate keeps the source string of every label in a
+comment and draws each glyph from a named face, so the slope a reader sees is
+recoverable without a font. A page and its plates are one scope, so a plate
+that draws $L_i$ sloped on a page that sets the impact level
+$L_\mathrm{i}$ upright fails here, and a Spanish page is held against the
+Spanish plate. After changing a plate, regenerate it
+(`python scripts/generate_diagrams.py`) before running the check.
 
 It cannot check that the slope a file chose is the right one for its
 standard: that is a reading of a source document, and no script does it. It
@@ -531,7 +550,7 @@ does not. And it does not read the drawing modules (`src/phonometry/_plot`,
 `src/phonometry/_report`, `scripts/`), which are filed by domain rather than
 by standard: one plotting module holds the figures of a dozen of them, so the
 file is not the scope in which a letter has one meaning. The guide that embeds
-the figure is, and its snippets are read here.
+the figure is, and its snippets are read here, as are its plates.
 
 The other half of the same subject is the backslash, and it has its own gate:
 

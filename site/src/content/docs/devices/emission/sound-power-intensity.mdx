@@ -53,14 +53,14 @@ A p-p probe (see the
 [Sound Intensity guide](/phonometry/devices/emission/intensity/)) is swept
 continuously over each of $N$ segments of a surface enclosing the source,
 reporting the segment-averaged signed normal intensity
-$\langle I_{n,i} \rangle$: one row per segment, one column per band.
+$\langle I_{\mathrm{n},i} \rangle$: one row per segment, one column per band.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="70%" />
 
 The partial powers sum to the total:
 
 $$
-P_i = \langle I_{n,i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
+P_i = \langle I_{\mathrm{n},i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
 L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
 
@@ -90,7 +90,7 @@ spacing shall not exceed the mean distance from the segment to the source**
 (clause 8.1). Sweep speed is 0,1 m/s to 0,5 m/s by hand, 0 m/s to 1 m/s
 mechanically; each segment takes **at least 20 s**, with the time-averaging
 started and stopped at the segment boundaries so that the reported
-$\langle I_{n,i} \rangle$ belongs to that segment and nothing else. The probe
+$\langle I_{\mathrm{n},i} \rangle$ belongs to that segment and nothing else. The probe
 axis stays normal to the surface throughout, and the operator stands to the side
 of the segment being scanned, not in front of it.
 
@@ -185,7 +185,7 @@ res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs m
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.svg" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" width="88%" />
 
-*The partial powers $\langle I_{n,i} \rangle\,S_i$ of the six segments sum to
+*The partial powers $\langle I_{\mathrm{n},i} \rangle\,S_i$ of the six segments sum to
 each band's $L_W$; every band here nets positive power and passes the
 field-indicator criteria at engineering grade, so all six bars stand, and the
 A-weighted total of 90.9 dB(A) heads the title.*
@@ -313,7 +313,7 @@ instead of one boolean.
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `normal_intensity` | 2D array | W/m² | `(N_seg, N_bands)` | Signed segment-averaged normal intensity $\langle I_{n,i} \rangle$ (first sweep) |
+| `normal_intensity` | 2D array | W/m² | `(N_seg, N_bands)` | Signed segment-averaged normal intensity $\langle I_{\mathrm{n},i} \rangle$ (first sweep) |
 | `areas` | 1D array | m² | > 0, `(N_seg,)` | Segment areas $S_i$ |
 | `normal_intensity_2` | 2D array | W/m² | same shape | Second sweep → criterion 3 and averaging |
 | `pressure_levels` | 2D array | dB | same shape | Segment SPL $L_{pi}$ → $F_{pI}$ |
@@ -393,7 +393,7 @@ scan, tighter field-indicator criteria and an explicit uncertainty budget.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" width="92%" />
 
 **Power and level (Clause 7).** The partial power of each segment is
-$P_i = I_{n,i}\,S_i$; the total $P = \sum_i P_i$ gives
+$P_i = I_{\mathrm{n},i}\,S_i$; the total $P = \sum_i P_i$ gives
 $L_W = 10\log_{10}(P/P_0)$, $P_0 = 1\ \text{pW}$. A band whose net power is
 non-positive ($P \le 0$) is flagged not-applicable rather than
 logged. The field indicators (temporal variability $F_\mathrm{T}$, the signed and
@@ -499,16 +499,16 @@ computation with its criteria removed.
 
 `precision_field_indicators` computes the Annex B indicators from the same
 segment arrays: the signed and unsigned pressure-intensity indicators
-$F_{pI_n}$, the field non-uniformity $F_\mathrm{S}$, and the temporal variability $F_\mathrm{T}$
+$F_{pI_\mathrm{n}}$, the field non-uniformity $F_\mathrm{S}$, and the temporal variability $F_\mathrm{T}$
 when a per-time-window intensity is supplied. `precision_qualification` then
 evaluates the five Annex C criteria per band:
 
-1. **scan repeatability**, $\lvert L_{I_n}(1) - L_{I_n}(2) \rvert \le s/2$ with
+1. **scan repeatability**, $\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2$ with
    $s$ from Table 1 (Eq. C.1): half the tolerance ISO 9614-2 allows, which is
    most of what "precision" costs;
-2. **dynamic-capability adequacy**, $L_\mathrm{d} \ge F_{pI_n}^{\text{signed}}$ with
+2. **dynamic-capability adequacy**, $L_\mathrm{d} \ge F_{pI_\mathrm{n}}^{\text{signed}}$ with
    $L_\mathrm{d} = \delta_{pI0} - K$ and $K = 10$ dB (Eq. C.2);
-3. $F_{pI_n}^{\text{signed}} - F_{pI_n}^{\text{unsigned}} \le 3$ dB (Eq. C.3),
+3. $F_{pI_\mathrm{n}}^{\text{signed}} - F_{pI_\mathrm{n}}^{\text{unsigned}} \le 3$ dB (Eq. C.3),
    the precision counterpart of ISO 9614-2's $F_{+/-}$ limit;
 4. **field non-uniformity**, $F_\mathrm{S} \le 2$ (Eq. C.4);
 5. **scan-density convergence**, $0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2$ between the
@@ -559,7 +559,7 @@ the total $L_W$, the measurement surface $S$ and the determination grade
 (the intensity result has no expanded uncertainty $U$). `verbose=True` adds the
 field indicators $F_{pI}$ (surface pressure-intensity) and $F_{+/-}$
 (negative partial power) and the per-band achieved grade; the basis strip
-states the partial-power model (the segment partial powers $P_i = I_{n,i} S_i$
+states the partial-power model (the segment partial powers $P_i = I_{\mathrm{n},i} S_i$
 summing to $P$) and the Annex B qualification criteria. A band whose net power
 is non-positive is not determinable (clause 9.2) and prints an em dash.
 
@@ -614,7 +614,7 @@ band; the caption names the frequency range the determination covers, because
 clause 4.3 asks for it whenever that range is narrower than 50 Hz to 6.3 kHz. A
 one-third-octave set is printed in two column groups side by side, the way an
 accredited sheet fits that many bands on a page. `verbose=True` tabulates the
-four Annex B indicators $F_\mathrm{T}$, $F_{p|I_n|}$, $F_{pI_n}$ and $F_\mathrm{S}$ per band, the
+four Annex B indicators $F_\mathrm{T}$, $F_{p|I_\mathrm{n}|}$, $F_{pI_\mathrm{n}}$ and $F_\mathrm{S}$ per band, the
 tabulation clause 10 f) 1) asks for, over the measurement surface as Annex B
 defines them, and the qualification cell the criteria decide.
 

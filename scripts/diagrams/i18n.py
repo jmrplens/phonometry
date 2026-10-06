@@ -214,7 +214,7 @@ _ES: dict[str, str] = {
     "Plan: two-lane urban arterial": "Planta: vía urbana de dos carriles",
     "source line,": "línea fuente,",
     "one per lane centre": "una por eje de carril",
-    "each segment carries L'W,eq,line,i + 10 lg(dL)": "cada segmento lleva L'W,eq,line,i + 10 lg(dL)",
+    "each segment carries $L′_{W,eq,line,i}$ + 10 lg(dL)": "cada segmento lleva $L′_{W,eq,line,i}$ + 10 lg(dL)",
     "signal-controlled junction": "intersección semaforizada",
     "$max(1 − |x|/100, 0)$": "$max(1 − |x|/100, 0)$",
     "dwelling façade": "fachada de vivienda",
@@ -305,8 +305,8 @@ _ES: dict[str, str] = {
     "Element method → $R′_{45°}$ or $R′_{tr,s}$: one component, comparable "
     "with a laboratory $R$.": "Método de elemento → $R′_{45°}$ o $R′_{tr,s}$: un componente, "
     "comparable con una $R$ de laboratorio.",
-    "Global method → D2m,nT: the whole facade as built, "
-    "not comparable with a laboratory $R$.": "Método global → D2m,nT: la fachada tal como está; no comparable con "
+    "Global method → $D_{2m,nT}$: the whole facade as built, "
+    "not comparable with a laboratory $R$.": "Método global → $D_{2m,nT}$: la fachada tal como está; no comparable con "
     "una $R$ de laboratorio.",
     "Road traffic replaces the loudspeaker at all angles: inside and outside "
     "at once, ≥ 50 pass-bys.": "El tráfico rodado incide desde todos los ángulos: dentro y fuera a "
@@ -570,11 +570,11 @@ _ES: dict[str, str] = {
     "Age $Y$,  sex,  population fractile $Q$": "Edad $Y$,  sexo,  fractil poblacional $Q$",
     "audiometric frequencies 125 Hz – 8000 Hz": "frecuencias audiométricas 125 Hz – 8000 Hz",
     "Median deviation from age 18   (ISO 7029, 4.2)": "Desviación mediana respecto a los 18 años   (ISO 7029, 4.2)",
-    "dHmd = a · (Y − 18) ^ b   (Table 1, by sex)": "dHmd = a · (Y − 18) ^ b   (Tabla 1, por sexo)",
-    "Spread su / sl   (ISO 7029, 4.3)": "Dispersión su / sl   (ISO 7029, 4.3)",
+    "$ΔH_{md} = a·(Y − 18)^b$   (Table 1, by sex)": "$ΔH_{md} = a·(Y − 18)^b$   (Tabla 1, por sexo)",
+    "Spread $s_u$ / $s_l$   (ISO 7029, 4.3)": "Dispersión $s_u$ / $s_l$   (ISO 7029, 4.3)",
     "degree-5 polynomials in $(Y − 18)$   (Tables 2–5)": "polinomios de grado 5 en $(Y − 18)$   (Tablas 2–5)",
     "Fractile threshold   (ISO 7029, 4.4)": "Umbral del fractil   (ISO 7029, 4.4)",
-    "dHQ = dHmd + z(Q) * s   (su if Q >= 0.5, else sl)": "dHQ = dHmd + z(Q) * s   (su si Q >= 0.5, si no sl)",
+    "$ΔH_Q = ΔH_{md} + z(Q)·s$   ($s_u$ if $Q ≥ 0.5$, else $s_l$)": "$ΔH_Q = ΔH_{md} + z(Q)·s$   ($s_u$ si $Q ≥ 0,5$; si no, $s_l$)",
     "Expected hearing threshold level (dB HL)": "Nivel del umbral de audición esperado (dB HL)",
     "referenced to the audiometric zero": "referido al cero audiométrico",
     "Audiometric zero = ISO 389-7 reference threshold": "Cero audiométrico = umbral de referencia ISO 389-7",
@@ -603,14 +603,14 @@ _ES: dict[str, str] = {
     "Noise-induced hearing loss (ISO 1999): NIPTS and HTLAN": "Pérdida auditiva inducida por ruido (ISO 1999): NIPTS y HTLAN",
     "Age $Y$,  sex,  fractile $Q$": "Edad $Y$,  sexo,  fractil $Q$",
     "database A = ISO 7029": "base de datos A = ISO 7029",
-    "Exposure L_EX,8h,  t years": "Exposición L_EX,8h,  t años",
+    "Exposure $L_{EX,8h}$,  $t$ years": "Exposición $L_{EX,8h}$,  $t$ años",
     "normalized to 8 h / 5 days": "normalizada a 8 h / 5 días",
     "Age threshold  $H$  (HTLA)": "Umbral por edad  $H$  (HTLA)",
     "ISO 7029 fractile, dB": "fractil ISO 7029, dB",
     "Median NIPTS  $N_{50}$  (6.3.1)": "NIPTS mediana  $N_{50}$  (6.3.1)",
     "$N_{50} = [u + v·log_{10}(t/t_0)]·(L − L_0)^2$": "$N_{50} = [u + v·log_{10}(t/t_0)]·(L − L_0)^2$",
     "Fractile NIPTS  $N$  (6.3.2)": "NIPTS del fractil  $N$  (6.3.2)",
-    "N = N50 + z·(du if z ≥ 0 else dl)": "N = N50 + z·(du si z ≥ 0, si no dl)",
+    "$N = N_{50} + z·d$   ($d_u$ if $z ≥ 0$, else $d_l$)": "$N = N_{50} + z·d$   ($d_u$ si $z ≥ 0$; si no, $d_l$)",
     "HTLAN   $H′ = H + N − H·N / 120$": "HTLAN   $H′ = H + N − H·N / 120$",
     "threshold from age and noise  (Formula 1, 6.1)": "umbral por edad y ruido  (Fórmula 1, 6.1)",
     # Impulsive-sound prominence (NT ACOU 112)
@@ -622,7 +622,7 @@ _ES: dict[str, str] = {
     "Predicted prominence  $P$   (clause 7, Formula 1)": "Prominencia prevista  $P$   (cláusula 7, Fórmula 1)",
     "$P = 3·log_{10}(OR) + 2·log_{10}(LD)$;   highest $P$ over 30 min governs": "$P = 3·log_{10}(OR) + 2·log_{10}(LD)$;   la $P$ más alta en 30 min gobierna",
     "Adjustment  $K_I$   (clause 8, Formula 2)": "Ajuste  $K_I$   (cláusula 8, Fórmula 2)",
-    "$K_I = 1.8·(P − 5)$ dB for $P > 5$, else 0": "$K_I = 1.8·(P − 5)$ dB si $P > 5$, si no 0",
+    "$K_I = 1.8·(P − 5)$ dB for $P > 5$, else 0": "$K_I = 1,8·(P − 5)$ dB si $P > 5$, si no 0",
     "Rating level  LAr,T = 10·log10( (1/T) Σ Δt·10^((LAeq+KI)/10) )": "Nivel de evaluación  LAr,T = 10·log10( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
     "impulse-adjusted level over the reference time  (Note 1)": "nivel ajustado por impulsos sobre el tiempo de referencia  (Nota 1)",
     "Vertical seat acceleration  $a_{z}(t)$": "Aceleración vertical del asiento  $a_{z}(t)$",
@@ -636,8 +636,8 @@ _ES: dict[str, str] = {
     "$D_{zd} = D_z·(t_d/t_m)^{1/6}$",
     "Compressive stress  $S_d = m_z·D_{zd}$  (Annex C, Formula C.1)": "Tensión compresiva  $S_d = m_z·D_{zd}$  (Anexo C, Fórmula C.1)",
     "$m_z$ = 0.029 (male) / 0.025 (female) MPa per m/s²": "$m_z$ = 0,029 (hombre) / 0,025 (mujer) MPa por m/s²",
-    "Stress variable  R = [Σ (Sd·N^(1/6) / (Su − Sstat))^6]^(1/6)": "Variable de tensión  R = [Σ (Sd·N^(1/6) / (Su − Sstat))^6]^(1/6)",
-    "Su = 6.75 − Sage·(b+i) MPa, cumulated over exposure years (C.3/C.4)": "Su = 6.75 − Sage·(b+i) MPa, acumulada sobre los años de exposición (C.3/C.4)",
+    "Stress variable  $R = [Σ (S_d·N^{1/6} / (S_{u,i} − S_{stat}))^6]^{1/6}$": "Variable de tensión  $R = [Σ (S_d·N^{1/6} / (S_{u,i} − S_{stat}))^6]^{1/6}$",
+    "$S_{u,i}$ = 6.75 MPa − $S_{age}·(b + i)$, cumulated over exposure years (C.3/C.4)": "$S_{u,i}$ = 6,75 MPa − $S_{age}·(b + i)$, acumulada sobre los años de exposición (C.3/C.4)",
     "Injury probability  $P(R) = 1 − exp(−(R/α)^β)$  (Formula C.5)": "Probabilidad de lesión  $P(R) = 1 − exp(−(R/α)^β)$  (Fórmula C.5)",
     "Weibull risk of lumbar injury, by sex (Table C.1/C.2)": "riesgo de lesión lumbar de Weibull, por sexo (Tabla C.1/C.2)",
     "Multiple-shock spinal-response dose and injury risk (ISO 2631-5)": "Dosis espinal por choques múltiples y riesgo de lesión (ISO 2631-5)",
@@ -692,7 +692,7 @@ _ES: dict[str, str] = {
     "grip and push force change the reading: report the": "las fuerzas de agarre y empuje alteran la lectura:",
     "posture and the applied forces (7.1, clause 9 g))": "documéntense postura y fuerzas (7.1, capítulo 9 g))",
     "basicentric frame (ISO 5349-1 Fig. 1):": "sistema basicéntrico (ISO 5349-1 Fig. 1):",
-    "rotated so that y_h lies along the": "girado para que y_h siga el eje de",
+    "rotated so that $y_h$ lies along the": "girado para que $y_h$ siga el eje de",
     "handle axis. All three axes are": "la empuñadura. Se miden los tres",
     "measured, and every $k = 1$.": "ejes, y todo $k = 1$.",
     "Wh-weighted, one per axis (ISO 5349-1 A.1)": "ponderada Wh, una por eje (ISO 5349-1 A.1)",
@@ -964,17 +964,17 @@ _ES: dict[str, str] = {
     "1.00 m": "1,00 m",
     # Loudness capture geometry (perception/psychoacoustics/loudness).
     "Where the microphone goes for a loudness measurement (ISO 532-1)": "Dónde va el micrófono en una medida de sonoridad (ISO 532-1)",
-    "A: Free field  (NF)": "A: Campo libre  (NF)",
+    "A: Free field  ($N_F$)": "A: Campo libre  ($N_F$)",
     "hemi-anechoic room, one frontal source": "sala semianecoica, una sola fuente frontal",
     "listener absent:": "sin oyente:",
     "the result is diotic": "el resultado es diótico",
     "frontal incidence, 0°": "incidencia frontal, 0°",
     "1.50 m": "1,50 m",
-    'field="free"  →  quote N as NF': 'field="free"  →  cita N como NF',
-    "B: Diffuse field  (ND)": "B: Campo difuso  (ND)",
+    'field="free"  →  quote $N$ as $N_F$': 'field="free"  →  cita $N$ como $N_F$',
+    "B: Diffuse field  ($N_D$)": "B: Campo difuso  ($N_D$)",
     "reverberant or in-situ room": "sala reverberante o in situ",
     "direct sound plus the reflected field, from every direction": "sonido directo más el campo reflejado, desde todas las direcciones",
-    'field="diffuse"  →  quote N as ND': 'field="diffuse"  →  cita N como ND',
+    'field="diffuse"  →  quote $N$ as $N_D$': 'field="diffuse"  →  cita $N$ como $N_D$',
     "C: Head-and-torso simulator (Annex D)": "C: Simulador de cabeza y torso (Anexo D)",
     "at the listening position": "en la posición de escucha",
     "Equalization matched": "Ecualización acorde",
@@ -986,8 +986,8 @@ _ES: dict[str, str] = {
     "free-field equalization only for one frontal source beyond 1.5 m; "
     "diffuse-field in reflective rooms; ID in vehicles": "ecualización de campo libre solo con una fuente frontal a más de "
     "1,5 m; de campo difuso en salas reflectantes; ID en vehículos",
-    "each channel is analysed separately: report NL and NR, and quote the "
-    "maximum or the mean as the single value": "cada canal se analiza por separado: se informan NL y NR y se cita "
+    "each channel is analysed separately: report $N_L$ and $N_R$, and quote the "
+    "maximum or the mean as the single value": "cada canal se analiza por separado: se informan $N_L$ y $N_R$ y se cita "
     "el máximo o la media como valor único",
     # The spectra behind an ISO/PAS 20065 assessment
     # (perception/psychoacoustics/tone-audibility).
@@ -1176,11 +1176,11 @@ _ES: dict[str, str] = {
     "Ground ($G_s$, $G_m$, $G_r$)": "Suelo ($G_s$, $G_m$, $G_r$)",
     "diffracted path": "trayecto difractado",
     "direct path (blocked)": "trayecto directo (bloqueado)",
-    "z = dss + dsr − d   (path difference)": "z = dss + dsr − d   (diferencia de camino)",
+    "$z = d_{ss} + d_{sr} − d$   (path difference)": "$z = d_{ss} + d_{sr} − d$   (diferencia de camino)",
     # ISO 9613-2 Eq. (14) symbols, identical in the Spanish edition.
-    "dss": "dss",
-    "dsr": "dsr",
-    "Dz = 10 log10[ 3 + (C₂/λ) C₃ z Kmet ]   (Eq. 14)": "Dz = 10 log10[ 3 + (C₂/λ) C₃ z Kmet ]   (Ec. 14)",
+    "$d_{ss}$": "$d_{ss}$",
+    "$d_{sr}$": "$d_{sr}$",
+    "$D_z = 10 log10[ 3 + (C_2/λ) C_3 z K_{met} ]$   (Eq. 14)": "$D_z = 10 log10[ 3 + (C_2/λ) C_3 z K_{met} ]$   (Ec. 14)",
     # Impedance tube (ISO 10534) setup
     "Impedance tube: two-microphone method (ISO 10534-2)": "Tubo de impedancia: método de dos micrófonos (ISO 10534-2)",
     "Test specimen": "Probeta de ensayo",
@@ -1535,9 +1535,9 @@ _ES: dict[str, str] = {
     "(Cláusula 5.4, Tabla A.3)",
     "the 11 lowest bands grouped into 3 critical bands, 25-250 Hz": "las 11 bandas más bajas agrupadas en 3 bandas críticas, 25-250 Hz",
     "Core loudness of the 20 critical bands  (Tables A.4-A.7)": "Sonoridad de núcleo de las 20 bandas críticas  (Tablas A.4-A.7)",
-    "a₀ transmission (A.4), diffuse-field DDF (A.5), threshold in quiet "
-    "LTQ (A.6)": "transmisión a₀ (A.4), DDF de campo difuso (A.5), umbral en silencio "
-    "LTQ (A.6)",
+    "$a_0$ transmission (A.4), diffuse-field $ΔL_{DF}$ (A.5), threshold in "
+    "quiet $L_{TQ}$ (A.6)": "transmisión $a_0$ (A.4), $ΔL_{DF}$ de campo difuso (A.5), "
+    "umbral en silencio $L_{TQ}$ (A.6)",
     "Specific loudness  $N′(z)$  over 0.1-Bark steps to 24 Bark": "Sonoridad específica  $N′(z)$  en pasos de 0,1 Bark hasta 24 Bark",
     "upper masking slopes added band to band (Table A.9)": "pendientes de enmascaramiento superior sumadas banda a banda (Tabla A.9)",
     "Total loudness  $N = ∫ N′(z) dz$  [sone]": "Sonoridad total  $N = ∫ N′(z) dz$  [sone]",
@@ -1706,7 +1706,7 @@ _ES: dict[str, str] = {
     "Task 2": "Tarea 2",
     "Task 3": "Tarea 3",
     "day 1": "día 1",
-    "by work pattern (Table B.1)  →  LEX,8h + Annex C uncertainty": "según el patrón de trabajo (Tabla B.1)  →  LEX,8h + U del Anexo C",
+    "by work pattern (Table B.1)  →  $L_{EX,8h}$ + Annex C uncertainty": "según el patrón de trabajo (Tabla B.1)  →  $L_{EX,8h}$ + U del Anexo C",
     # Dynamic-stiffness resonance rig (EN 29052-1)
     "Dynamic-stiffness resonance rig (EN 29052-1)": "Banco de resonancia de rigidez dinámica (EN 29052-1)",
     "The three excitation arrangements (Figures 1 to 3)": "Las tres disposiciones de excitación (Figuras 1 a 3)",
@@ -2051,16 +2051,16 @@ _ES: dict[str, str] = {
     "Plan view": "Vista en planta",
     "course": "rumbo",
     "data window": "ventana de datos",
-    "dCPA ≥ 100 m (or 1·L)": "dCPA ≥ 100 m (o 1·L)",
+    "$d_{CPA}$ ≥ 100 m (or 1·$L$)": "$d_{CPA}$ ≥ 100 m (o 1·$L$)",
     # The standard's own symbols, the same in both languages (tan is the
     # Spanish abbreviation of tangente too).
-    "dCPA": "dCPA",
-    "lDW = 2 dCPA tan 30°": "lDW = 2 dCPA tan 30°",
-    "water depth ≥ 150 m (or 1.5·L)": "profundidad ≥ 150 m (o 1,5·L)",
+    "$d_{CPA}$": "$d_{CPA}$",
+    "$l_{DW} = 2 d_{CPA}$ tan 30°": "$l_{DW} = 2 d_{CPA}$ tan 30°",
+    "water depth ≥ 150 m (or 1.5·$L$)": "profundidad ≥ 150 m (o 1,5·$L$)",
     "Four runs, two per side; levels averaged while the ship crosses the data window": "Cuatro pasadas, dos por banda; niveles promediados mientras el buque "
     "cruza la ventana",
-    "Hydrophone depths from the 15°, 30° and 45° depression angles at r = dCPA; L = ship length": "Profundidades de hidrófono por los ángulos de depresión 15°, 30° y "
-    "45° a r = dCPA; L = eslora",
+    "Hydrophone depths from the 15°, 30° and 45° depression angles at $r = d_{CPA}$; $L$ = ship length": "Profundidades de hidrófono por los ángulos de depresión 15°, 30° y "
+    "45° a $r = d_{CPA}$; $L$ = eslora",
     "Run schedule (not to scale)": "Orden de pasadas (sin escala)",
     "reverse course; 4 runs, 2 per side": "vuelta en redondo; 4 pasadas, 2/banda",
     "background: stopped, ≥ 2 km, ≥ 30 s,": "fondo: buque parado, ≥ 2 km, ≥ 30 s,",
@@ -2447,7 +2447,7 @@ _ES: dict[str, str] = {
     "Specific loudness $N′(z)$": "Sonoridad específica $N′(z)$",
     "Zwicker pattern over 24 Bark": "patrón de Zwicker sobre 24 Bark",
     "Sottek Hearing Model front end (ECMA-418-2)": "Etapa de entrada del modelo de Sottek (ECMA-418-2)",
-    "outer/middle-ear filter + 53 auditory bands (Bark_HMS)": "filtro de oído externo/medio + 53 bandas auditivas (Bark_HMS)",
+    "outer/middle-ear filter + 53 auditory bands ($Bark_{HMS}$)": "filtro de oído externo/medio + 53 bandas auditivas ($Bark_{HMS}$)",
     "Sharpness $S$": "Agudeza $S$",
     "$g(z)$-weighted first moment": "primer momento ponderado por $g(z)$",
     "of $N′(z)$, with $k$ = 0.108": "de $N′(z)$, con $k$ = 0,108",
@@ -2459,7 +2459,7 @@ _ES: dict[str, str] = {
     "band autocorrelation finds": "la autocorrelación por banda",
     "periodic components": "detecta componentes periódicas",
     "1 kHz tone at 40 dB": "tono de 1 kHz a 40 dB",
-    "→ $T$ = 1.000 tu_HMS (999 Hz)": "→ $T$ = 1,000 tu_HMS (999 Hz)",
+    "→ $T$ = 1.000 $tu_{HMS}$ (999 Hz)": "→ $T$ = 1,000 $tu_{HMS}$ (999 Hz)",
     "Roughness $R$": "Aspereza $R$",
     "ECMA-418-2 clause 7": "ECMA-418-2, cláusula 7",
     "fast envelope modulation,": "modulación rápida de la envolvente,",
@@ -2471,7 +2471,7 @@ _ES: dict[str, str] = {
     "slow envelope modulation,": "modulación lenta de la envolvente,",
     "band-pass peaking near 4 Hz": "paso banda con pico hacia 4 Hz",
     "1 kHz, 100 % AM at 4 Hz, 60 dB": "1 kHz, AM 100 % a 4 Hz, 60 dB",
-    "→ $F$ = 0.9957 vacil_HMS": "→ $F$ = 0,9957 vacil_HMS",
+    "→ $F$ = 0.9957 $vacil_{HMS}$": "→ $F$ = 0,9957 $vacil_{HMS}$",
     "Downstream, the sensations combine into annoyance": "Aguas abajo, las sensaciones se combinan en molestia",
     "$N_5$, $S$, $R$ and $F$ feed the Fastl and Zwicker psychoacoustic annoyance $PA = N_5·(1 + √(w_S^2 + w_{FR}^2))$": "$N_5$, $S$, $R$ y $F$ alimentan la molestia psicoacústica de Fastl y "
     "Zwicker $PA = N_5·(1 + √(w_S^2 + w_{FR}^2))$",
@@ -2650,9 +2650,9 @@ _ES: dict[str, str] = {
     "4.0 m": "4,0 m",
     "path difference $δ = A + B − d$ = 0.15 m; Fresnel number $N = 2δ/λ$ = 0.44 at 500 Hz": "diferencia de caminos $δ = A + B − d$ = 0,15 m; Fresnel $N = 2δ/λ$ = "
     "0,44 (500 Hz)",
-    "Kurze–Anderson: Δbar = 5 + 20 log10( √(2πN) / tanh √(2πN) ) = 10.0 dB, "
-    "500 Hz": "Kurze–Anderson: Δbar = 5 + 20 log10( √(2πN) / tanh √(2πN) ) = "
-    "10,0 dB, 500 Hz",
+    "Kurze–Anderson: $Δ_{bar}$ = 5 + 20 log10( √(2π$N$) / tanh √(2π$N$) ) = "
+    "10.0 dB, 500 Hz": "Kurze–Anderson: $Δ_{bar}$ = 5 + 20 log10( √(2π$N$) / "
+    "tanh √(2π$N$) ) = 10,0 dB, 500 Hz",
     "$N$ grows with frequency: the same screen gives 15.5 dB at 2 kHz (vertical scale exaggerated)": "$N$ crece con la frecuencia: la misma pantalla da 15,5 dB a 2 kHz "
     "(escala vertical exagerada)",
     # Image-source lattice in plan
@@ -2704,6 +2704,8 @@ _ES: dict[str, str] = {
     "The sound level meter pipeline: one function per stage": "La cadena del sonómetro: una función por etapa",
     "Calibrator tone": "Tono del calibrador",
     "94 dB at 1 kHz  (IEC 60942)": "94 dB a 1 kHz  (IEC 60942)",
+    # The calibrator readout, with the decimal comma of the Spanish plates.
+    "94.0 dB": "94,0 dB",
     "Measurement recording": "Grabación de medición",
     "same microphone, same gain": "mismo micrófono, misma ganancia",
     "the factor $S$ in pascals per digital unit": "el factor $S$ en pascales por unidad digital",

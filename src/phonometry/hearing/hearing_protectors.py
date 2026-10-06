@@ -34,7 +34,7 @@ about the noise:
   spectrum and is the most faithful.
 - The **HML method** (Clause 7) collapses the protector to three numbers, its
   high-, medium- and low-frequency attenuation values, each the predicted noise
-  level reduction for a reference noise of a stated :math:`(L_{p,C} - L_{p,A})`.
+  level reduction for a reference noise of a stated :math:`(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})`.
   It needs only the C- and A-weighted levels of the noise.
 - The **SNR method** (Clause 8) collapses it to one number against a pink noise
   and subtracts it from the C-weighted level. It needs only that level.
@@ -400,12 +400,12 @@ def _octave_axis(
 class ProtectedLevelResult:
     r"""The A-weighted level left at the ear behind a protector.
 
-    :ivar effective_level: :math:`L'_{p,Ax}`, in dB, unrounded. Clauses 6, 7.3
+    :ivar effective_level: :math:`L'_{p,\mathrm{A}x}`, in dB, unrounded. Clauses 6, 7.3
         and 8.3 all report it to the nearest integer, which
         :attr:`reported_level` does.
-    :ivar noise_reduction: :math:`PNR_x = L_{p,A} - L'_{p,Ax}`, in dB, or
+    :ivar noise_reduction: :math:`PNR_x = L_{p,\mathrm{A}} - L'_{p,\mathrm{A}x}`, in dB, or
         ``None`` where it cannot be formed. The ``SNR`` method given only a
-        C-weighted level never learns :math:`L_{p,A}`, and the difference
+        C-weighted level never learns :math:`L_{p,\mathrm{A}}`, and the difference
         between the C-weighted level and the answer is the rating itself
         rather than a noise reduction.
     :ivar performance: The protection performance ``x``, in per cent, or
@@ -463,7 +463,7 @@ def octave_band_protected_level(
 
     .. math::
 
-       L'_{p,Ax} = 10 \lg \sum_{k=1}^{8}
+       L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8}
        10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
 
     The summation runs over the eight octaves from 63 Hz, or over seven from
@@ -714,17 +714,17 @@ def hml_protected_level(
     r"""Effective A-weighted level by the ``HML`` method (Formulas (16) to (18)).
 
     Two straight segments through the three anchors, in
-    :math:`(L_{p,C} - L_{p,A})`:
+    :math:`(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})`:
 
     .. math::
 
-       PNR_x = M_x - \frac{H_x - M_x}{4}(L_{p,C} - L_{p,A} - 2\ \mathrm{dB})
-       \quad\text{for } (L_{p,C} - L_{p,A}) \leq 2\ \mathrm{dB} \tag{16}
+       PNR_x = M_x - \frac{H_x - M_x}{4}(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\ \mathrm{dB})
+       \quad\text{for } (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) \leq 2\ \mathrm{dB} \tag{16}
 
-       PNR_x = M_x - \frac{M_x - L_x}{8}(L_{p,C} - L_{p,A} - 2\ \mathrm{dB})
-       \quad\text{for } (L_{p,C} - L_{p,A}) > 2\ \mathrm{dB} \tag{17}
+       PNR_x = M_x - \frac{M_x - L_x}{8}(L_{p,\mathrm{C}} - L_{p,\mathrm{A}} - 2\ \mathrm{dB})
+       \quad\text{for } (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) > 2\ \mathrm{dB} \tag{17}
 
-       L'_{p,Ax} = L_{p,A} - PNR_x \tag{18}
+       L'_{p,\mathrm{A}x} = L_{p,\mathrm{A}} - PNR_x \tag{18}
 
     Both branches pass through :math:`M_x` at :math:`+2` dB, which is where the
     medium-frequency value is defined (Clause 3.6). The three values that enter
@@ -733,7 +733,7 @@ def hml_protected_level(
     published with and what this consumes, whatever the unrounded fit behind
     them was. Clause 7.3 allows the unweighted level in place of the
     C-weighted one, which for very low-frequency noise returns a higher, safer
-    :math:`L'_{p,Ax}`.
+    :math:`L'_{p,\mathrm{A}x}`.
 
     :param l_p_a: A-weighted sound pressure level of the noise, in dB.
     :param l_p_c: C-weighted sound pressure level of the noise, in dB.
@@ -878,16 +878,16 @@ def snr_protected_level(
 
     .. math::
 
-       L'_{p,Ax} = L_{p,C} - SNR_x \tag{23}
+       L'_{p,\mathrm{A}x} = L_{p,\mathrm{C}} - SNR_x \tag{23}
 
-       L'_{p,Ax} = L_{p,A} + (L_{p,C} - L_{p,A}) - SNR_x \tag{24}
+       L'_{p,\mathrm{A}x} = L_{p,\mathrm{A}} + (L_{p,\mathrm{C}} - L_{p,\mathrm{A}}) - SNR_x \tag{24}
 
     Formula (24) is Formula (23) with the C-weighted level reassembled from an
     A-weighted measurement and an estimate of the difference, for the common
     case where only the A-weighted level was recorded. Pass ``l_p_c``, or pass
     ``l_p_a`` together with ``c_minus_a``. Clause 8.3 allows the unweighted
     level in place of the C-weighted one, which for very low-frequency noise
-    returns a higher, safer :math:`L'_{p,Ax}`.
+    returns a higher, safer :math:`L'_{p,\mathrm{A}x}`.
 
     The rating is used as Clause 8.2 reports it, rounded to the nearest
     integer.
@@ -897,7 +897,7 @@ def snr_protected_level(
         Formula (23).
     :param l_p_a: A-weighted sound pressure level of the noise, in dB, for
         Formula (24).
-    :param c_minus_a: The difference :math:`(L_{p,C} - L_{p,A})`, in dB, for
+    :param c_minus_a: The difference :math:`(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})`, in dB, for
         Formula (24).
     :return: :class:`ProtectedLevelResult`.
     :raises ValueError: if neither pairing is complete, if both are given, or

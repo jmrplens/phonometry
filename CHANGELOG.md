@@ -2394,6 +2394,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The railway rolling stock guide says what EN 15610 7.5 asks of longer
+  wavelengths, and why the library computes none of it.** The guide listed the
+  concatenation of overlapping records among what it does not cover, as if 7.5
+  gave a method to leave out. It gives none: a record reaches a quarter of its
+  length, which the spectra already apply, and beyond that 7.5 has the records
+  concatenated by overlapping them, rules that "the overlap shall not be used
+  for spectral components of 0,1 m or less" and asks for the method to be
+  described in the report, with no length of overlap, no way to line two
+  records up or match their heights, no rule for how the samples they share
+  are combined and no test of a join. The scope section now says so in
+  English and Spanish, so a reader knows the joining is theirs to do and to
+  report.
+
 - **A guide's standards chips and its search field name only what the guide
   implements.** A normative document a guide only requires, cites or compares
   with, such as the calibrator a periodic test presupposes, the vocabulary a

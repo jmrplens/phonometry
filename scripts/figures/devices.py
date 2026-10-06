@@ -8912,3 +8912,202 @@ def generate_plant_measurement_check(output_dir: str) -> None:
     check.plot(ax=ax, language=_LANG)
     save_figure(output_dir, "plant_measurement_check.svg")
     plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# IEC 60268-1:1985 Clause 7 and IEC 60268-7:2010: the simulated programme
+# signal and headphones.
+# ---------------------------------------------------------------------------
+#
+# The figures of the guide devices/electroacoustics/headphones, built with the
+# code the guide prints: the programme signal from the filter of Figure 2 and
+# from the generator, clipped for the limiting voltages; a 32 ohm headphone's
+# impedance; its programme characteristic voltage on an ear simulator; its
+# coupler response and crosstalk; a panel of eight test persons; and the
+# protective device and the probe microphone.
+
+#: The sample rate the guide generates its programme signal at, in hertz.
+_HEADPHONE_FS = 48000
+
+#: One-third-octave centres from 100 Hz to 10 kHz.
+_HEADPHONE_BANDS = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0]
+    + [1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0]
+    + [10000.0]
+)
+
+
+def _headphone_impedance() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """A 32 ohm moving-coil headphone: its resonance at 90 Hz and the coil's rise."""
+    f = np.geomspace(10.0, 30000.0, 241)
+    z = 31.0 + 22.0 / (1.0 + ((f / 90.0 - 90.0 / f) / 0.9) ** 2) + 4.0 * (f / 20000.0)
+    return f, z
+
+
+def _ear_simulator_bands() -> NDArray[np.float64]:
+    """Band levels of a headphone on an ear simulator at 0,1 V of programme signal.
+
+    The programme signal's own spectrum, from 100 Hz to 10 kHz, lifted by the
+    ear simulator's rise towards its canal resonance near 3 kHz.
+    """
+    from phonometry import electroacoustics
+
+    table = electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
+    f = np.array(list(table))
+    levels = np.array([band.relative_level_db for band in table.values()])
+    keep = (f >= 100.0) & (f <= 10000.0)
+    resonance = 9.0 / (1.0 + ((f[keep] / 3000.0 - 3000.0 / f[keep]) / 0.8) ** 2)
+    return np.asarray(72.0 + levels[keep] + resonance)
+
+
+def generate_headphones_programme_signal(output_dir: str) -> None:
+    """IEC 60268-1 Clause 7: Figure 2 against Table II, and the clipped signal of 8.3.2."""
+    print("Generating headphones_programme_signal...")
+    from phonometry import electroacoustics
+    from phonometry.filters import octave_filter
+
+    x = electroacoustics.simulated_programme_signal(
+        _HEADPHONE_FS, 60.0, spectrum="figure_2", seed=2
+    )
+    bands = octave_filter(x, _HEADPHONE_FS, fraction=3, limits=[19.95, 19952.6])
+    figure_2 = electroacoustics.check_programme_signal(
+        bands.frequencies, np.asarray(bands.levels)
+    )
+    clipped = electroacoustics.simulated_programme_signal(
+        _HEADPHONE_FS, 60.0, peak_to_rms=2.0, seed=2
+    )
+    limiting = electroacoustics.check_limiting_test_signal(clipped, _HEADPHONE_FS)
+    fig, (ax_figure_2, ax_limiting) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    figure_2.plot(ax_figure_2, language=_LANG)
+    limiting.plot(ax_limiting, language=_LANG)
+    for ax in (ax_figure_2, ax_limiting):
+        ax.set_ylim(-27.0, 5.0)
+    fig.tight_layout()
+    save_figure(output_dir, "headphones_programme_signal.svg")
+    plt.close()
+
+
+def generate_headphones_impedance(output_dir: str) -> None:
+    """IEC 60268-7 8.2: a 32 ohm headphone's impedance and its rated value."""
+    print("Generating headphones_impedance...")
+    from phonometry import electroacoustics
+
+    f, z = _headphone_impedance()
+    verdict = electroacoustics.verify_rated_impedance(
+        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
+    )
+    fig, ax = plt.subplots(figsize=(10, 5.4))
+    verdict.plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "headphones_impedance.svg")
+    plt.close()
+
+
+def generate_headphones_characteristic_voltage(output_dir: str) -> None:
+    """IEC 60268-7 8.3.4 and 8.3.5: three fittings on an ear simulator, A-weighted only.
+
+    The free-field compensation 8.3.5 adds needs the response of a head and
+    torso simulator, which is an input the library does not hold, so the
+    figure stops at the A-weighting and its title says so.
+    """
+    print("Generating headphones_characteristic_voltage...")
+    from phonometry import electroacoustics
+
+    bands = _ear_simulator_bands()
+    fittings = np.vstack([bands, bands + 0.6, bands - 0.4])
+    result = electroacoustics.programme_characteristic_voltage(
+        0.1, _HEADPHONE_BANDS, fittings, a_weighted=True
+    )
+    fig, ax = plt.subplots(figsize=(10, 5.4))
+    result.plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "headphones_characteristic_voltage.svg")
+    plt.close()
+
+
+def generate_headphones_coupler_response(output_dir: str) -> None:
+    """IEC 60268-7 8.6.2 and 8.12: the coupler response at 50 dB a decade, and crosstalk."""
+    print("Generating headphones_coupler_response...")
+    from phonometry import electroacoustics
+
+    f = np.geomspace(20.0, 20000.0, 241)
+    level = (
+        104.0
+        - 10.0 * np.log10(1.0 + (60.0 / f) ** 4)
+        + 6.0 / (1.0 + ((f / 3200.0 - 3200.0 / f) / 0.6) ** 2)
+        - 10.0 * np.log10(1.0 + (f / 12000.0) ** 6)
+    )
+    response = electroacoustics.coupler_frequency_response(
+        f, level, rated_frequency_range_hz=(20.0, 20000.0)
+    )
+    crosstalk = electroacoustics.crosstalk_attenuation(
+        _HEADPHONE_BANDS,
+        np.full(_HEADPHONE_BANDS.size, 100.0),
+        52.0 - 12.0 * np.log10(_HEADPHONE_BANDS / 1000.0) ** 2,
+    )
+    fig, (ax_response, ax_crosstalk) = plt.subplots(1, 2, figsize=(13.5, 5.2))
+    response.plot(ax_response, language=_LANG)
+    crosstalk.plot(ax_crosstalk, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "headphones_coupler_response.svg")
+    plt.close()
+
+
+def generate_headphones_test_persons(output_dir: str) -> None:
+    """IEC 60268-7 8.6.3 and 8.6.5: eight persons, by loudness and in the ear canal.
+
+    Both responses at the 50 dB to the decade the part prefers, one above the
+    other so each keeps the full width that scale needs.
+    """
+    print("Generating headphones_test_persons...")
+    from phonometry import electroacoustics
+
+    rng = np.random.default_rng(7)
+    persons = 8
+    shape_db = 3.0 / (
+        1.0 + ((_HEADPHONE_BANDS / 2500.0 - 2500.0 / _HEADPHONE_BANDS) / 0.7) ** 2
+    )
+    spread = rng.normal(0.0, 1.2, (persons, _HEADPHONE_BANDS.size))
+    emf = 0.05 * 10.0 ** (-(shape_db + spread) / 20.0)
+    comparison = electroacoustics.field_comparison_response(
+        _HEADPHONE_BANDS, 70.0, emf, field="free"
+    )
+    field = 70.0 + rng.normal(0.0, 0.4, (persons, 2, _HEADPHONE_BANDS.size))
+    earphone = (
+        field + shape_db + rng.normal(0.0, 0.6, (persons, 2, _HEADPHONE_BANDS.size))
+    )
+    ear_canal = electroacoustics.ear_canal_frequency_response(
+        _HEADPHONE_BANDS, earphone, field
+    )
+    fig, (ax_comparison, ax_ear) = plt.subplots(2, 1, figsize=(10, 9.6))
+    comparison.plot(ax_comparison, language=_LANG)
+    ear_canal.plot(ax_ear, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "headphones_test_persons.svg")
+    plt.close()
+
+
+def generate_headphones_protection_microphone(output_dir: str) -> None:
+    """IEC 60268-7 8.3.6 and Annex B: a limiter's operating point, a probe microphone."""
+    print("Generating headphones_protection_microphone...")
+    from phonometry import electroacoustics
+
+    emf = np.array([0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0])
+    shortfall = np.array([0.0, 0.0, 0.05, 0.2, 0.7, 1.6, 3.5, 7.0])
+    protection = electroacoustics.protection_voltage(
+        emf, 94.0 + 20.0 * np.log10(emf / 0.1) - shortfall
+    )
+    microphone = electroacoustics.verify_ear_canal_microphone(
+        entrance_area_mm2=3.8,
+        canal_section_area_mm2=19.0,
+        volume_mm3=95.0,
+        pink_noise_band_levels_db=[61.0, 62.2, 63.1, 62.5, 61.4],
+        open_levels_db=[62.0, 63.0, 62.5],
+        sealed_levels_db=[41.0, 44.0, 45.5],
+    )
+    fig, (ax_protection, ax_microphone) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+    protection.plot(ax_protection, language=_LANG)
+    microphone.plot(ax_microphone, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "headphones_protection_microphone.svg")
+    plt.close()

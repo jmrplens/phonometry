@@ -1,0 +1,623 @@
+---
+title: "Auriculares (IEC 60268-7)"
+description: "Auriculares según IEC 60268-7 con la señal de programa simulado de IEC 60268-1: el código de clasificación, la impedancia asignada, las tensiones características con la señal de programa y la suma energética de la figura 3, las potencias y niveles de trabajo, las tensiones límite, el dispositivo de protección, las respuestas en acoplador, por comparación y en el conducto auditivo, la diafonía, las señales de distorsión, el micrófono de sonda del anexo B y cómo se hace la medida."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2010
+    title: "Sound system equipment – Part 7: Headphones and earphones"
+    designation: "IEC 60268-7:2010"
+    primary: true
+    note: "Edición 3.0. El código de clasificación (capítulo 4), las condiciones normales y la medida con la señal de programa simulado (7.2, 7.4, la figura 3 y su NOTA), la impedancia (8.2), las tensiones (8.3: los valores límite con la señal de programa recortada, la tensión característica, las tensiones características con señal de programa y los dispositivos de protección), las potencias (8.4), los niveles de presión acústica (8.5), las respuestas en frecuencia (8.6: en acoplador, por comparación en campo libre y en campo difuso, en el conducto auditivo por la fórmula (1)), las señales de ensayo de distorsión (8.7), la atenuación acústica (8.11, por ISO 4869-1), la atenuación de diafonía (8.12) y el micrófono de sonda del anexo B."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1985
+    title: "Sound system equipment – Part 1: General"
+    designation: "IEC 60268-1:1985"
+    primary: true
+    note: "Con su Modificación 1 (1988-01) y su Modificación 2 (1988-06), ninguna de las cuales toca el capítulo 7. La frecuencia normal de referencia del capítulo 3 y la señal de programa simulado: el capítulo 7 con su nota, la tabla II (el espectro de potencia y sus tolerancias) y la figura 2 (el filtro para una fuente de ruido rosa)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Sound system equipment – Part 3: Amplifiers"
+    designation: "IEC 60268-3:2013"
+    note: "La distorsión por diferencia de frecuencias de 14.12.8.1 b), la lectura que necesita la fórmula (5) de IEC 60268-7 donde sus paréntesis no cuadran."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics – Sound level meters – Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    note: "La ponderación A con cuyos coeficientes de banda suma la NOTA bajo la figura 3 de IEC 60268-7, tabla 3."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un auricular se mide en un simulador de oído, en un acoplador o en un
+simulador de cabeza y torso, nunca en una sala, así que las preguntas de
+IEC 60268-7 son sobre el transductor y la tensión que lo excita: qué impedancia
+presenta, qué f.e.m. le hace producir 94 dB, cuánto aguanta, cómo es su
+respuesta en un acoplador y para un grupo de oyentes. Varias de esas respuestas
+se dan con un ruido que hace las veces de programa, la **señal de programa
+simulado** de IEC 60268-1. Esta guía construye primero esa señal, a partir de
+su tabla y del filtro que dibuja la norma, y después lleva unos auriculares
+dinámicos de 32 Ω por las características de IEC 60268-7 que son cálculos: el
+código que los nombra, su impedancia asignada, sus tensiones, potencias y
+niveles, su dispositivo de protección, sus respuestas en frecuencia, sus
+señales de ensayo de distorsión y el micrófono de sonda que los mide en el
+conducto auditivo.
+
+## 1. La señal de programa simulado (IEC 60268-1, capítulo 7)
+
+El capítulo 7 define un ruido gaussiano estacionario cuyo espectro de
+potencia, leído en bandas de tercio de octava, sigue la **tabla II**: 0 dB de
+250 Hz a 800 Hz, cayendo a −13,5 dB a 20 Hz y a −21,6 dB a 20 kHz, con
+tolerancias de ±0,5 dB en el centro que se abren hasta ±3 dB en los extremos.
+La tabla es relativa: su 0 dB es el nivel de una banda, y la nota bajo el
+capítulo da la señal entera como «approximately 12.5 dB higher». Es la suma
+energética de las 31 bandas.
+
+```python
+import numpy as np
+from phonometry import electroacoustics
+from phonometry.filters import octave_filter
+
+table = electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
+levels = np.array([band.relative_level_db for band in table.values()])
+print(len(table), table[20.0].relative_level_db, table[20000.0].relative_level_db)
+# 31 -13.5 -21.6
+print(round(10 * np.log10(np.sum(10 ** (levels / 10))), 2))  # 12.56
+```
+
+«Such a signal may be obtained from a pink-noise source by means of the
+filter circuit shown in Figure 2»: una escalera pasiva de 430 Ω y 2,2 µF sobre
+3,3 kΩ y 91 nF, luego 330 Ω y 2,2 µF sobre 3,3 kΩ y 68 nF, y por último
+0,47 µF sobre 10 kΩ. `programme_signal_filter` es su función de transferencia
+exacta, unos −4 dB en la banda de paso. El ruido rosa que la atraviesa cae
+dentro de todas las tolerancias de la tabla II, pero justo: en bandas ideales
+el menor margen es de 0,18 dB, a 400 Hz por un lado y a 5 kHz por el otro, así
+que un registro corto puede quedarse fuera. Por eso `simulated_programme_signal`
+ofrece dos formas. La predeterminada pone cada banda en su nivel impreso: un
+espectro recto en decibelios entre los centros de banda, con los nodos
+ajustados para que cada banda, integrada en forma cerrada, sea exactamente la
+tabla. `spectrum="figure_2"` es el circuito.
+
+`check_programme_signal` juzga niveles de banda frente a la tabla II. Como la
+tabla es relativa, busca el nivel que pone cada banda dentro de su ventana y
+cumple cuando existe; informa del margen y de las bandas que lo fijan.
+
+```python
+fs = 48000
+x = electroacoustics.simulated_programme_signal(fs, 60.0, spectrum="figure_2", seed=2)
+bands = octave_filter(x, fs, fraction=3, limits=[19.95, 19952.6])
+check = electroacoustics.check_programme_signal(bands.frequencies, bands.levels)
+print(check.passes, round(check.margin_db, 2), check.binding_bands_hz)
+# True 0.12 (315.0, 5000.0)
+
+y = electroacoustics.simulated_programme_signal(fs, 60.0, seed=2)
+bands_y = octave_filter(y, fs, fraction=3, limits=[19.95, 19952.6])
+check_y = electroacoustics.check_programme_signal(bands_y.frequencies, bands_y.levels)
+print(check_y.passes, round(check_y.margin_db, 2))  # True 0.34
+```
+
+Con la misma semilla, la forma de la propia tabla conserva 0,34 dB de margen y
+el circuito 0,12 dB: el circuito ha gastado casi todo su margen antes de que el
+registro añada su propia fluctuación.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_programme_signal.svg" alt="Dos paneles de niveles de banda de tercio de octava de 20 Hz a 20 kHz, cada uno referido al nivel que lo centra en las tolerancias de la tabla II de IEC 60268-1, dibujados sobre los niveles relativos de la tabla y su banda de tolerancia sombreada. A la izquierda, sesenta segundos de ruido rosa a través del filtro de la figura 2: la curva va cerca de 1 dB por debajo de la tabla en los dos hombros, hacia 40 Hz y hacia 5 kHz, pero queda dentro de la banda en todas partes; el título dice cumple. A la derecha, sesenta segundos del espectro de la tabla II del generador recortado a una relación pico/eficaz de 2,00, que sigue de cerca la tabla en todas las bandas; el título dice Señal de programa recortada, pico/eficaz 2,00: cumple" width="100%" />
+
+*A la izquierda, el filtro de la figura 2: dentro de las tolerancias, pero
+pegado al borde inferior en los dos hombros de la curva. A la derecha, el
+espectro del generador recortado para las tensiones límite de IEC 60268-7
+(apartado 5 de esta guía), que sigue la tabla: recortar al doble del valor
+eficaz solo lleva un poco de potencia a las bandas altas, que son débiles.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+clipped = electroacoustics.simulated_programme_signal(fs, 60.0, peak_to_rms=2.0, seed=2)
+limiting = electroacoustics.check_limiting_test_signal(clipped, fs)
+fig, (ax_figure_2, ax_limiting) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+check.plot(ax_figure_2, language="es")
+limiting.plot(ax_limiting, language="es")
+plt.show()
+```
+
+</details>
+
+## 2. Cómo se hace la medida (IEC 60268-7, capítulo 7)
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_headphone_measurement.svg" alt="La cadena de medida de la figura 3 de IEC 60268-7 en dos filas y un panel. Fila superior, de izquierda a derecha: un generador de señal que da una sinusoide de 500 Hz o la señal de programa, un amplificador cuyo voltímetro lee la f.e.m. E, la impedancia de fuente asignada Rs y el auricular sobre un simulador de oído IEC 60711 o un simulador de cabeza y torso IEC 60959. Segunda fila, de derecha a izquierda: el amplificador de medida del micrófono del simulador, una compensación de campo libre y una ponderación A de IEC 61672-1, las dos con borde discontinuo y usadas si hace falta (8.3.5), y un analizador en bandas de tercio de octava; debajo, la nota de que la misma corrección puede hacerse numéricamente como la suma energética de las bandas Lk + Ak − Fk (NOTA bajo la figura 3). El panel inferior enumera qué da cada lectura: 94 dB con la sinusoide de 500 Hz, la tensión característica (8.3.3); 94 dB con la señal de programa y las bandas sumadas en energía, 8.3.4 y 8.3.5 con A y F sobre 3 a 5 colocaciones; 1 mW en la impedancia asignada o en bornes del auricular, el nivel de trabajo (8.5.2 b, 8.5.3 c); la f.e.m. asignada barrida en frecuencia, la respuesta en el acoplador con 50 dB por década (8.6.2); la señal de programa recortada con una relación pico/eficaz de 1,8 a 2,2, las tensiones límite (8.3.2); y sujetos de ensayo en lugar del simulador, comparación de sonoridad (8.6.3, 8.6.4) y micrófono de sonda (8.6.5)" width="100%" />
+
+1. **Las condiciones normales** (7.2, 7.3). Un auricular se coloca, con su
+   fuerza de aplicación asignada, sobre el acoplador o el simulador de oído que
+   nombra su norma (IEC 60318, IEC 60711 o el oído del simulador de cabeza y
+   torso de IEC 60959, con el simulador de pabellón auricular del anexo A
+   cuando procede), y el tipo se declara con los resultados. La señal es una
+   f.e.m. de la fuente aplicada a través de la impedancia de fuente asignada,
+   120 Ω para una salida de auriculares según IEC 61938, en el punto por el
+   que un amplificador la excita en uso, y ajustada para 94 dB a la frecuencia
+   normal de medida de 500 Hz; el fabricante puede fijar en su lugar 1 mW en
+   la impedancia asignada. Los controles de volumen quedan en la atenuación
+   mínima.
+2. **Con la señal de programa** (7.4, figura 3). Lo mismo, con la señal de
+   programa simulado de IEC 60268-1 desde un generador y un amplificador cuyo
+   voltímetro lee la f.e.m.; la salida del simulador pasa, cuando un apartado
+   lo pide, por la ponderación A de IEC 61672-1 y por un filtro con la inversa
+   de la respuesta en campo libre del simulador de cabeza y torso, y luego por
+   un analizador de tercios de octava. La NOTA bajo la figura permite hacer la
+   misma corrección numéricamente, que es lo que hace el apartado 5 de esta
+   guía. Una lectura de ruido fluctúa, así que se repite y se promedia (NOTA 2
+   de 8.3.4.2), y para 8.3.5 los auriculares se quitan y se vuelven a colocar
+   entre 3 y 5 lecturas.
+3. **Con sujetos de ensayo** (7.5, 7.6). Las respuestas por comparación ponen
+   a un oyente en un campo libre, una onda plana progresiva (7.5.2), o en un
+   campo difuso (7.5.3), y le piden igual sonoridad banda a banda; las
+   respuestas en el conducto auditivo ponen un micrófono de sonda que cumple el
+   anexo B al menos 4 mm dentro del conducto y leen niveles en su lugar. Los
+   anexos C a E dan los detalles prácticos.
+
+## 3. El código de unos auriculares (capítulo 4)
+
+IEC 60268-7 nombra unos auriculares con un código, `60268-7-IEC-XXXX-NNRN-N`:
+cuatro letras para el principio del transductor, el tipo de auricular, el
+acoplamiento acústico con el conducto auditivo y la radiación al exterior, la
+impedancia en ohmios en forma de «mantisa y exponente», y el número de
+canales. El capítulo da tres impedancias, 8 Ω como `08R0`, 32 Ω como `32R0` y
+600 Ω como `06R2`; la última decide la elección que la regla deja abierta,
+entre `06R2` y `60R1`, a favor de dar al exponente todos los ceros finales.
+
+```python
+code = electroacoustics.HeadphoneClassification("D", "C", "S", "C", 32.0, 2).code
+print(code)  # 60268-7-IEC-DCSC-32R0-2
+print([electroacoustics.impedance_code(ohm) for ohm in (8, 32, 600, 150)])
+# ['08R0', '32R0', '06R2', '15R1']
+earbud = electroacoustics.parse_classification_code("60268-7 - IEC - DELO - 16R0 - 2")
+print(earbud.description)
+# electrodynamic (moving coil), intra-concha, acoustically open (controlled
+# leakage), open-back
+```
+
+## 4. Impedancia (8.2)
+
+La impedancia asignada es una resistencia pura que declara el fabricante,
+«chosen so that the lowest value of the modulus of the actual impedance within
+the rated frequency range is not less than 80 % of the rated value»; una caída
+por debajo de ese valor en cualquier punto hasta 20 kHz debe declararse, y el
+módulo se mide «at least over the frequency range 20 Hz to 20 kHz».
+`verify_rated_impedance` juzga lo primero, enumera lo segundo y comprueba lo
+tercero.
+
+```python
+f = np.geomspace(10.0, 30000.0, 241)
+z = 31.0 + 22.0 / (1.0 + ((f / 90.0 - 90.0 / f) / 0.9) ** 2) + 4.0 * (f / 20000.0)
+impedance = electroacoustics.verify_rated_impedance(
+    f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
+)
+print(impedance.passes, round(impedance.minimum_ohm, 1), round(impedance.minimum_ratio, 3))
+# True 31.3 0.979
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_impedance.svg" alt="El módulo de la impedancia de unos auriculares de 32 ohmios de 10 Hz a 30 kHz: unos 31 ohmios abajo, un pico de resonancia de unos 53 ohmios a 90 Hz, un mínimo amplio de 31,3 ohmios hacia 1,1 kHz marcado con un círculo que la leyenda nombra como el módulo mínimo en el rango, y una subida lenta hasta unos 37 ohmios a 30 kHz, frente a una línea discontinua en los 32 ohmios asignados y una línea de puntos en 25,6 ohmios, el 80 % de ellos, con el rango de frecuencias asignado de 15 Hz a 25 kHz sombreado; el título dice Impedancia asignada (8.2.1): cumple" width="88%" />
+
+*La resistencia de la bobina marca el suelo, la resonancia del sistema móvil
+el pico y la inductancia de la bobina la subida. El mínimo, 31,3 Ω, es el 98 %
+de los 32 Ω asignados, muy por encima del 80 % que permite el apartado.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+ax = impedance.plot(language="es")
+plt.show()
+```
+
+</details>
+
+## 5. Tensiones, potencias y niveles (8.3 a 8.5)
+
+Toda entrada de IEC 60268-7 es una f.e.m. de la fuente aplicada a través de la
+impedancia de fuente asignada, 120 Ω para una salida de auriculares según
+IEC 61938 (NOTA de 7.1). La **tensión característica** (8.3.3) es la f.e.m.
+senoidal de 500 Hz que produce 94 dB en el acoplador o en el simulador de oído;
+los auriculares son lineales ahí, así que una lectura basta para escalarla.
+Cada tensión tiene su potencia (8.4), la que disiparía en una resistencia igual
+a la impedancia asignada a través de la impedancia de fuente asignada,
+$P = E^2 R/(R + R_\mathrm{s})^2$, y el **nivel de presión acústica de trabajo**
+(8.5.2) es el nivel a la f.e.m. que disipa así 1 mW.
+
+```python
+characteristic = electroacoustics.characteristic_voltage(0.1, 100.0)
+print(round(characteristic, 4))  # 0.0501 V
+impedances = {"rated_impedance_ohm": 32.0, "rated_source_impedance_ohm": 120.0}
+print(round(electroacoustics.headphone_source_emf(1e-3, **impedances), 3))  # 0.85 V
+print(round(1e3 * electroacoustics.headphone_input_power(5.0, **impedances), 1))
+# 34.6 mW con la f.e.m. asignada de 5 V de la NOTA 2 de 8.3.1
+print(round(20 * np.log10(5.0 / characteristic), 1))  # 40.0 dB por encima de ella
+```
+
+La NOTA 3 de 8.3.1 llama la atención sobre el daño auditivo y dice que la
+f.e.m. asignada «should, preferably, not exceed the characteristic voltage (see
+8.3.3) by more than 10 dB to 15 dB». Los 5 V de IEC 61938 quedan en estos
+auriculares 40 dB por encima de ella. La NOTA 3 enuncia una preferencia sobre
+un intervalo, así que la cifra queda para quien la lea; la biblioteca no da
+veredicto sobre ella.
+
+La **tensión característica con señal de programa simulado** (8.3.4) es esos
+mismos 94 dB con la señal de programa, y 8.3.5 la lee después de la
+ponderación A de IEC 61672-1 y de la inversa de la respuesta en campo libre del
+simulador de cabeza y torso. La NOTA bajo la figura 3 prescinde de filtros: los
+niveles de banda de tercio de octava en el simulador de oído se multiplican por
+los coeficientes de los filtros y se suman energéticamente,
+
+$$
+L = 10\lg \sum_k 10^{(L_k + A_k - F_k)/10},
+$$
+
+con $A_k$ la ponderación A en el centro exacto de la banda $k$ y $F_k$ la
+respuesta en campo libre. El punto g) de 8.3.5 quita y vuelve a colocar los
+auriculares entre lecturas y promedia la f.e.m. de 3 a 5 colocaciones.
+
+```python
+centres = np.array(list(table))
+in_range = (centres >= 100.0) & (centres <= 10000.0)
+bands_hz = centres[in_range]
+resonance = 9.0 / (1.0 + ((bands_hz / 3000.0 - 3000.0 / bands_hz) / 0.8) ** 2)
+reading = 72.0 + levels[in_range] + resonance  # dB ref. 20 µPa con 0,1 V
+fittings = np.vstack([reading, reading + 0.6, reading - 0.4])
+plain = electroacoustics.programme_characteristic_voltage(0.1, bands_hz, fittings)
+weighted = electroacoustics.programme_characteristic_voltage(
+    0.1, bands_hz, fittings, a_weighted=True
+)
+print(round(plain.characteristic_voltage_v, 3), round(weighted.characteristic_voltage_v, 3))
+# 0.241 0.253
+print(weighted.fittings_conform)  # True, tres colocaciones
+working = electroacoustics.working_sound_pressure_level(plain.levels_db[0], 0.1, **impedances)
+print(round(working, 1))  # 104.9 dB con 1 mW
+```
+
+La llamada `weighted` se queda en la ponderación A. 8.3.5 compensa además la
+respuesta en campo libre del simulador de cabeza y torso de IEC 60959, que es
+un dato propio de ese maniquí y no una tabla que guarde la biblioteca; una
+lectura real de 8.3.5 la pasa como `free_field_response_db`. Los 0,253 V son,
+por tanto, la f.e.m. para 94 dB solo con ponderación A, no la tensión
+característica corregida de 8.3.5, y la figura lo dice en su título.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_characteristic_voltage.svg" alt="Diagrama de barras de los niveles de banda de tercio de octava ponderados A en el simulador de oído, de 100 Hz a 10 kHz, a la f.e.m. de 0,253 V que da 94 dB con ponderación A: unos 60 dB a 100 Hz que suben de forma continua hasta un máximo de unos 88 dB a 3,15 kHz, donde la resonancia del conducto del simulador se suma a la señal, y bajan hasta unos 66 dB a 10 kHz; una línea discontinua en 94,0 dB marca su suma energética; el título dice F.e.m. con señal de programa para 94 dB, solo ponderada A: 0,253 V" width="88%" />
+
+*Los niveles de banda a la f.e.m. que da 94 dB con ponderación A: su suma
+energética es de 94 dB, aportada sobre todo por las cuatro bandas de alrededor
+de la resonancia del conducto del simulador de oído, hacia 3 kHz. Con la
+compensación en campo libre de un simulador de cabeza y torso, la misma
+llamada da la tensión característica corregida de 8.3.5.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+ax = weighted.plot(language="es")
+plt.show()
+```
+
+</details>
+
+El método de 8.5.3 c) fija la f.e.m. de 1 mW de otra manera: para que la
+tensión en el conector de entrada del propio auricular sea la que entregaría
+1 mW a la impedancia asignada. Las dos coinciden solo cuando el auricular
+presenta su impedancia asignada a 500 Hz. Con la impedancia medida,
+`working_sound_pressure_level` da también la lectura del método; para un
+auricular de 32 Ω que a 500 Hz presenta 40 Ω es 1,49 dB menor, y el registro
+de erratas recoge el desacuerdo.
+
+```python
+by_definition = electroacoustics.working_sound_pressure_level(100.0, 0.5, **impedances)
+by_method = electroacoustics.working_sound_pressure_level(
+    100.0, 0.5, **impedances, headphone_impedance_ohm=40.0
+)
+print(round(by_definition, 2), round(by_method, 2))  # 104.61 103.11
+```
+
+Las **tensiones límite** de 8.3.2 son las f.e.m. que soportan los
+auriculares, durante diez ráfagas de un minuto o durante 100 h, con la señal de
+programa «with additional clipping»: su espectro sigue siendo el de
+IEC 60268-1 y su relación pico/eficaz está «between 1,8 and 2,2». Esa ventana
+es de la propia IEC 60268-7: IEC 60268-1 pide un ruido «without amplitude
+limiting» y no especifica ningún factor de cresta, diga lo que diga la NOTA 1
+de 8.3.4.2. `peak_to_rms` recorta el generador exactamente a esa relación, y
+`check_limiting_test_signal` juzga un registro en los dos aspectos.
+
+```python
+print(round(limiting.peak_to_rms, 2), limiting.passes)  # 2.0 True
+unclipped = electroacoustics.check_limiting_test_signal(y, fs)
+print(round(unclipped.peak_to_rms, 2), unclipped.passes)  # 4.92 False
+```
+
+## 6. El dispositivo de protección (8.3.6)
+
+Un dispositivo de protección «causes a change of at least 1 dB in the
+sensitivity» a su tensión de protección, y la impedancia y el nivel se miden
+después 1 dB por debajo y 1 dB por encima de ella. `protection_voltage` toma un
+barrido de f.e.m. y nivel, lee la sensibilidad de cada escalón frente al
+primero e interpola dónde la variación llega a 1 dB.
+
+```python
+emf = np.array([0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0])
+shortfall = np.array([0.0, 0.0, 0.05, 0.2, 0.7, 1.6, 3.5, 7.0])
+protection = electroacoustics.protection_voltage(
+    emf, 94.0 + 20 * np.log10(emf / 0.1) - shortfall
+)
+print(round(protection.protection_voltage_v, 2))  # 1.65 V
+print([round(v, 2) for v in protection.measurement_voltages_v])  # [1.47, 1.85]
+```
+
+## 7. Respuestas en frecuencia (8.6) y diafonía (8.12)
+
+La **respuesta en frecuencia en acoplador o simulador de oído** (8.6.2) es el
+nivel frente a la frecuencia con la f.e.m. asignada, al menos en el rango de
+frecuencias asignado, y su gráfica se dibuja con «the same length representing
+50 dB as represents one decade of frequency». La **atenuación de diafonía**
+(8.12) es la diferencia entre el nivel en el acoplador de un canal excitado por
+ese canal y por otro.
+
+```python
+fr = np.geomspace(20.0, 20000.0, 241)
+level = (
+    104.0
+    - 10.0 * np.log10(1.0 + (60.0 / fr) ** 4)
+    + 6.0 / (1.0 + ((fr / 3200.0 - 3200.0 / fr) / 0.6) ** 2)
+    - 10.0 * np.log10(1.0 + (fr / 12000.0) ** 6)
+)
+response = electroacoustics.coupler_frequency_response(
+    fr, level, rated_frequency_range_hz=(20.0, 20000.0)
+)
+crosstalk = electroacoustics.crosstalk_attenuation(
+    bands_hz, np.full(bands_hz.size, 100.0), 52.0 - 12.0 * np.log10(bands_hz / 1000.0) ** 2
+)
+print(response.covers_rated_range, round(crosstalk.minimum_db, 1))  # True 48.0
+```
+
+Ninguna de estas respuestas tiene tolerancia: «It is not at present possible to
+set limits for the frequency range based on deviations from a flat, or
+defined, frequency response» (NOTA 2 de 8.6.6). El rango de frecuencias
+asignado lo declara el fabricante, con los criterios con que eligió sus
+límites, y aquí solo entra como el rango que una medida tiene que cubrir.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_coupler_response.svg" alt="Dos paneles. A la izquierda, una respuesta en acoplador dibujada para que 50 dB midan lo mismo que una década: sube de 85 dB a 20 Hz a una meseta de 104 dB desde unos 100 Hz, un pico de 110 dB a 3,2 kHz y una caída hasta unos 90 dB a 20 kHz, con líneas discontinuas en los límites del rango asignado, 20 Hz y 20 kHz. A la derecha, la atenuación de diafonía de 100 Hz a 10 kHz, 60 dB en los dos extremos y 48,0 dB en su mínimo, a 1 kHz; el título dice Atenuación de diafonía (apartado 8.12), mínimo 48,0 dB" width="100%" />
+
+*Con 50 dB por década una respuesta en acoplador se ve tan plana como la oye el
+oído: el pico de 6 dB hacia 3 kHz, que un eje estirado convierte en una
+montaña, es un abultamiento discreto.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, (ax_response, ax_crosstalk) = plt.subplots(1, 2, figsize=(13.5, 5.2))
+response.plot(ax_response, language="es")
+crosstalk.plot(ax_crosstalk, language="es")
+plt.show()
+```
+
+</details>
+
+Las demás respuestas se miden con **sujetos de ensayo**. En los métodos por
+comparación (8.6.3, 8.6.4) cada sujeto ajusta la f.e.m. hasta que los
+auriculares suenan tan fuerte como un campo de referencia libre o difuso en
+cada banda de tercio de octava de ruido rosa; la respuesta es la presión
+acústica del campo dividida por esa f.e.m., «expressed in decibels referred to
+the value at the standard reference frequency», promediada sobre al menos ocho
+sujetos con la desviación típica en cada banda, y unos auriculares medidos con
+al menos 16 pueden servir de referencia del método por sustitución. El método
+del conducto auditivo (8.6.5) pone un micrófono de sonda en el conducto en
+lugar de pedir un juicio, y lee la fórmula (1),
+
+$$
+L_\mathrm{f} = L_\mathrm{e} - L_\mathrm{s} - (L_\mathrm{e} - L_\mathrm{s})_{500},
+$$
+
+tras promediar dos colocaciones de los auriculares y dos lecturas del campo
+sonoro; el procedimiento se repite cuando las colocaciones difieren en más de
+2,5 dB en alguna banda, y la banda de 500 Hz se iguala a la del campo sin
+diferir en más de 3 dB; 16 sujetos calibran los auriculares que sustituyen al
+campo sonoro en el método indirecto (8.6.5.3).
+
+Las dos usan bandas de referencia distintas. La fórmula (1) imprime la suya,
+500 Hz, la frecuencia normal de medida del punto b) de 7.2. «The standard
+reference frequency» de las respuestas por comparación es un término que
+IEC 60268-7 no define nunca; el capítulo 3 de IEC 60268-1, que cita, la fija
+en 1 000 Hz «in the absence of a clear reason to the contrary», la banda en
+la que el punto c) de 8.6.3.2 empieza y termina la secuencia de ensayo, así que
+`field_comparison_response` refiere a 1 kHz salvo que reciba
+`reference_frequency_hz`.
+
+```python
+rng = np.random.default_rng(7)
+shape_db = 3.0 / (1.0 + ((bands_hz / 2500.0 - 2500.0 / bands_hz) / 0.7) ** 2)
+equal_loudness_emf = 0.05 * 10.0 ** (
+    -(shape_db + rng.normal(0.0, 1.2, (8, bands_hz.size))) / 20.0
+)
+comparison = electroacoustics.field_comparison_response(
+    bands_hz, 70.0, equal_loudness_emf, field="free"
+)
+field = 70.0 + rng.normal(0.0, 0.4, (8, 2, bands_hz.size))
+earphone = field + shape_db + rng.normal(0.0, 0.6, (8, 2, bands_hz.size))
+ear_canal = electroacoustics.ear_canal_frequency_response(bands_hz, earphone, field)
+band = list(bands_hz).index(2500.0)
+print(comparison.meets_panel_size, round(comparison.mean_db[band], 1))  # True 2.8
+print(round(ear_canal.mean_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True
+print(comparison.reference_frequency_hz, ear_canal.reference_frequency_hz)  # 1000.0 500.0
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_test_persons.svg" alt="Dos paneles, uno sobre otro, para un grupo de ocho sujetos de ensayo, bandas de tercio de octava de 100 Hz a 10 kHz, cada uno dibujado para que 50 dB midan lo mismo que una década, sobre un eje de −20 dB a 20 dB. Arriba, la respuesta por comparación en campo libre en barras, referida a 1000 Hz: a menos de 1 dB de cero por debajo de 1 kHz y por encima de 5 kHz, y subiendo hasta una media de 2,8 dB a 2,5 kHz, cada barra con una barra de error roja de unos ±0,7 dB a 1,6 dB para la desviación típica de los sujetos, y ninguna en la banda de referencia de 1 kHz. Abajo, la respuesta en el conducto auditivo de la fórmula (1), referida a 500 Hz: ocho curvas grises finas, una por sujeto, una banda sombreada de desviación típica y su media, plana hasta 1 kHz con pocas décimas de decibelio, con un máximo de 3,2 dB a 2,5 kHz y de vuelta cerca de cero a 5 kHz" width="100%" />
+
+*Los mismos auriculares ante dos métodos, con los 50 dB por década que prefiere
+la parte, donde una subida de 3 dB es el abultamiento discreto que es. Los
+juicios de sonoridad se dispersan de 0,7 dB a 1,6 dB en cada banda salvo la de
+referencia; el micrófono de sonda, que no necesita juicio alguno, se dispersa
+de 0,2 dB a 0,8 dB y muestra la misma subida de 3 dB a 2,5 kHz.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, (ax_comparison, ax_ear) = plt.subplots(2, 1, figsize=(10, 9.6))
+comparison.plot(ax_comparison, language="es")
+ear_canal.plot(ax_ear, language="es")
+plt.show()
+```
+
+</details>
+
+## 8. Las señales de ensayo de distorsión (8.7)
+
+Las distorsiones de unos auriculares son las de IEC 60268-2, que se leen con
+`harmonic_distortion`, `modulation_distortion` y
+`difference_frequency_distortion` y se expresan como $20\lg$ de la razón. Lo que
+añade IEC 60268-7 son las señales. Para la distorsión de modulación, 70 Hz y
+600 Hz en la razón de amplitudes 4:1 con el pico de la tensión de entrada
+asignada, «−1,9 dB at 70 Hz and −14,0 dB at 600 Hz» (NOTA 1 de 8.7.3.3); para
+la distorsión por diferencia de frecuencias, dos tonos separados 80 Hz, cada
+uno a la mitad de la tensión de entrada asignada. Los dos generadores empiezan
+cada tono en su cresta, así que la suma alcanza el pico asignado. Abajo, una
+excitación con un poco de ley cuadrática pone el producto de segundo orden de
+los dos tonos en 80 Hz, 35,1 dB por debajo de ellos.
+
+```python
+modulation = electroacoustics.headphone_modulation_signal(fs, 1.0, rated_source_emf_v=1.0)
+products = electroacoustics.modulation_distortion(modulation, fs, f_low=70.0, f_high=600.0)
+print(round(float(np.max(np.abs(modulation))), 4))  # 1.4142, el pico de 1 V eficaz
+print(products.sideband_frequencies)  # [460. 530. 670. 740.]
+difference = electroacoustics.headphone_difference_frequency_signal(
+    fs, 1.0, upper_frequency_hz=1000.0, rated_source_emf_v=1.0
+)
+driven = difference + 0.05 * difference**2  # una excitación con un 5 % de ley cuadrática
+second = electroacoustics.difference_frequency_distortion(driven, fs, f1=920.0, f2=1000.0)
+print(round(20 * np.log10(second), 1))  # -35.1 dB, el producto en 80 Hz
+```
+
+Los productos de tercer orden están en 460 Hz y 740 Hz, como dice el punto b)
+de 8.7.3.3. La fórmula (3) que lo sigue imprime $U_{470}$, y la fórmula (5) de
+la distorsión por diferencia de frecuencias cierra un paréntesis que nunca
+abrió; el [registro de erratas](/phonometry/es/reference/errata/) recoge las
+dos, junto con las referencias cruzadas de 8.6.3 a 8.6.5 y de la tabla 1 que
+nombran otro apartado, la NOTA bajo la figura 3 que cita el simulador de
+cabeza y torso como IEC 60969, la NOTA de 8.3.4.2 que atribuye a IEC 60268-1
+un factor de cresta, y las dos formas de fijar la f.e.m. de 1 mW de 8.5.2 b)
+y 8.5.3 c).
+
+## 9. El micrófono de sonda (anexo B)
+
+El micrófono en el conducto auditivo de 8.6.5 lo especifica el anexo B, que es
+normativo: una sección de 5 mm² o menos en la concha y en los primeros 4 mm del
+conducto, menos de 0,6 veces la sección del conducto más adentro (la de un
+adulto mide 45 mm² de media), un volumen inferior a 130 mm³, respuestas a
+bandas contiguas de tercio de octava de ruido rosa que no difieran en más de
+3 dB, y una salida al menos 15 dB menor con la entrada sellada.
+`verify_ear_canal_microphone` juzga los cinco puntos.
+
+```python
+microphone = electroacoustics.verify_ear_canal_microphone(
+    entrance_area_mm2=3.8,
+    canal_section_area_mm2=19.0,
+    volume_mm3=95.0,
+    pink_noise_band_levels_db=[61.0, 62.2, 63.1, 62.5, 61.4],
+    open_levels_db=[62.0, 63.0, 62.5],
+    sealed_levels_db=[41.0, 44.0, 45.5],
+)
+print(microphone.passes, round(microphone.area_ratio, 3))  # True 0.422
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/headphones_protection_microphone.svg" alt="Dos paneles. A la izquierda, la variación de la sensibilidad de unos auriculares frente a la f.e.m. de la fuente de 0,1 V a 5 V en un eje logarítmico: plana en 0 dB hasta 0,5 V, −0,2 dB a 1 V, −0,7 dB a 1,5 V y luego una caída fuerte hasta −7 dB a 5 V, con una línea discontinua en −1 dB y una vertical de puntos en la tensión de protección de 1,65 V, donde se cruzan. A la derecha, los cinco puntos medibles del anexo B en barras, en porcentaje de sus límites: área en la entrada 76 %, relación de áreas 70 %, volumen 73 %, bandas contiguas 40 % y entrada sellada 113 % de su mínimo de 15 dB, todas en verde, con una línea discontinua en el 100 %; la barra de la entrada sellada va rayada y rotulada como mínimo, porque tiene que llegar a la línea en lugar de quedarse por debajo, y la leyenda explica la línea, el verde de una barra dentro de su límite y el rayado; el título dice Micrófono en el conducto auditivo (anexo B): cumple" width="100%" />
+
+*A la izquierda, un limitador que entra con suavidad: la sensibilidad ha
+perdido 1 dB a 1,65 V, donde el punto b) de 8.3.6.2 lee la tensión de
+protección. A la derecha, el micrófono de sonda del anexo B: cuatro límites
+superiores cumplidos con holgura y la entrada sellada 17 dB por debajo frente
+a los 15 dB exigidos.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, (ax_protection, ax_microphone) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+protection.plot(ax_protection, language="es")
+microphone.plot(ax_microphone, language="es")
+plt.show()
+```
+
+</details>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+IEC 60268-1:1985, capítulo 7, con sus dos modificaciones de 1988: la tabla II y
+su nota, el filtro de la figura 2 como función de transferencia exacta, un
+generador de la señal de programa con los niveles de banda de la tabla o a
+través del filtro, recortado si se pide a una relación pico/eficaz, y el
+veredicto sobre un espectro de tercio de octava. IEC 60268-7:2010: el código de
+clasificación del capítulo 4; la impedancia asignada y el rango medido de 8.2;
+la tensión característica (8.3.3), las tensiones características con señal de
+programa de 8.3.4 y 8.3.5 por la suma energética de la NOTA bajo la figura 3,
+con el promedio de 3 a 5 colocaciones, la señal de programa recortada de las
+tensiones límite (8.3.2.2 b) y la tensión de protección (8.3.6.2 b); las
+potencias de 8.4 y los niveles de presión acústica de trabajo de 8.5.2, por la
+definición o por el método de 8.5.3 c); la respuesta en acoplador o simulador
+de oído (8.6.2), las respuestas por comparación en campo libre y en campo
+difuso con el tamaño de su grupo, referidas a la frecuencia normal de
+referencia del capítulo 3 de IEC 60268-1 (8.6.3, 8.6.4), la respuesta en el
+conducto auditivo por la fórmula (1) con sus comprobaciones de colocación y de
+nivel y los 16 sujetos de una referencia (8.6.5); las señales de ensayo de
+distorsión de 8.7.3 y 8.7.4; la atenuación acústica de 8.11, que es
+ISO 4869-1 y calcula `hearing.real_ear_attenuation`, con
+`hearing.anr_total_attenuation` de ISO 4869-6 para unos auriculares con
+compensación activa del ruido; la atenuación de diafonía (8.12); y el
+micrófono de sonda del anexo B, puntos a) a e).
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Las condiciones asignadas (7.1, 8.6.6, 8.8, 8.13, 8.14) las declara el
+fabricante, las respuestas en frecuencia no tienen tolerancia que juzgar (NOTA
+2 de 8.6.6), y los ensayos de resistencia de 8.3.2 son un calendario de
+ensayo, no un cálculo. La preferencia de la NOTA 3 de 8.3.1, una f.e.m.
+asignada no más de 10 dB a 15 dB por encima de la tensión característica, es
+un intervalo, así que recibe una cifra y ningún veredicto. El campo externo
+(8.9) y la radiación sonora no deseada (8.10) son lecturas. La respuesta en campo libre
+del simulador de cabeza y torso de IEC 60959 es un dato de entrada, no una tabla
+que guarde la biblioteca. El anexo A es la geometría de un simulador de
+pabellón auricular, y los anexos C a E son condiciones prácticas informativas;
+el límite de 85 dB de nivel de presión acústica y la relación señal-ruido de
+10 dB del punto b) de 8.6.5.2 necesitan lecturas calibradas que la función de
+respuesta no recibe.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/):
+  las distorsiones armónica, de modulación y por diferencia de frecuencias de
+  IEC 60268-3 que leen las señales de ensayo del apartado 8 de esta guía.
+- [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):
+  el transductor de la misma familia que radia a una sala en lugar de a un
+  acoplador.
+- [Caracterización de micrófonos (IEC 60268-4)](/phonometry/es/devices/electroacoustics/microphones/):
+  el micrófono de medida que hay detrás de cada lectura en acoplador.
+- [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/): el análisis
+  en tercios de octava que lee la tabla II.
+- [Protectores auditivos (ISO 4869-1, -2, -3 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
+  la atenuación acústica de 8.11, que ISO 4869-1 mide sobre sujetos de ensayo,
+  y la reducción activa del ruido de ISO 4869-6.
+- [Señales de prueba y herramientas de muestreo](/phonometry/es/signals/spectra/test-signals/):
+  las ráfagas tonales del anexo A de IEC 60268-1, la otra parte de esa norma
+  que implementa la biblioteca.
+- Referencia de la API: [`electroacoustics.programme_signal`](/phonometry/es/reference/api/electroacoustics/programme-signal/)
+  y [`electroacoustics.headphones`](/phonometry/es/reference/api/electroacoustics/headphones/).
+
+</SeeAlso>

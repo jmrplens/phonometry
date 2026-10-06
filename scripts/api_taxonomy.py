@@ -423,6 +423,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.electroacoustics.sound_reinforcement",
             "phonometry.electroacoustics.induction_loop",
             "phonometry.electroacoustics.induction_loop_components",
+            "phonometry.electroacoustics.programme_signal",
+            "phonometry.electroacoustics.headphones",
         ),
     ),
     Section(

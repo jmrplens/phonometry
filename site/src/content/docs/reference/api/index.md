@@ -356,6 +356,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`electroacoustics.sound_reinforcement`](/phonometry/reference/api/electroacoustics/sound-reinforcement/) | Gain before feedback of a sound-reinforcement system. |
 | [`electroacoustics.induction_loop`](/phonometry/reference/api/electroacoustics/induction-loop/) | Audio-frequency induction-loop systems for hearing aids: the performance of an installed system. |
 | [`electroacoustics.induction_loop_components`](/phonometry/reference/api/electroacoustics/induction-loop-components/) | Components of an audio-frequency induction-loop system: the loop, its amplifier, the neck loop. |
+| [`electroacoustics.programme_signal`](/phonometry/reference/api/electroacoustics/programme-signal/) | The simulated programme signal of IEC 60268-1:1985, Clause 7. |
+| [`electroacoustics.headphones`](/phonometry/reference/api/electroacoustics/headphones/) | Headphones and earphones: the characteristics of IEC 60268-7:2010 that are computations. |
 
 ## Industrial noise control
 

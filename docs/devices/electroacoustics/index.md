@@ -49,6 +49,13 @@ hearing loop drives a current round a room so a hearing aid's telecoil picks
 the voice up as a magnetic field, and that page judges the installed system by
 IEC 60118-4 and its components, the amplifier, the loop as a load and the neck
 loop, by IEC 62489-1.
+[Headphones and Earphones (IEC 60268-7)](headphones.md)
+takes the transducer off the loudspeaker baffle and onto an ear simulator: it
+builds the simulated programme signal of IEC 60268-1, the noise that stands in
+for programme, and measures a headphone with it by IEC 60268-7, from the code
+that names it and its rated impedance to its characteristic voltages, its
+responses on a coupler and to a panel of listeners, and the probe microphone
+that reads it in the ear canal.
 
 [Programme loudness](../broadcast/program-loudness.md) covers the signal
 the devices carry: the ITU-R BS.1770-5 loudness of a broadcast or streaming
@@ -83,6 +90,10 @@ are the place to start.
   the installed hearing loop judged by IEC 60118-4 and its Amendment 1, over a
   room's useful volume or at the points of a refuge and a counter, and its
   amplifier, loop and neck loop measured by IEC 62489-1.
+- [Headphones and Earphones (IEC 60268-7)](headphones.md):
+  the headphone on its ear simulator, measured by IEC 60268-7 with the
+  simulated programme signal of IEC 60268-1: impedance, voltages, levels,
+  frequency responses and the probe microphone of Annex B.
 - [Broadcast](../broadcast/index.md): the loudness problem solved
   with a measurement rather than a compressor, one gated number per programme
   and the range that says how much it moves.

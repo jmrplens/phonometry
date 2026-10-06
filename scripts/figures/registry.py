@@ -151,6 +151,12 @@ from .devices import (
     generate_free_field_deviations,
     generate_frequency_response,
     generate_hard_walled_sound_power,
+    generate_headphones_characteristic_voltage,
+    generate_headphones_coupler_response,
+    generate_headphones_impedance,
+    generate_headphones_programme_signal,
+    generate_headphones_protection_microphone,
+    generate_headphones_test_persons,
     generate_helmholtz_branch_geometry,
     generate_high_frequency_air_absorption,
     generate_high_frequency_sound_power,
@@ -1269,6 +1275,13 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_induction_loop_overload,
     generate_induction_loop_amplifier,
     generate_induction_loop_neck_loop,
+    # IEC 60268-1 and IEC 60268-7: the programme signal and headphones.
+    generate_headphones_programme_signal,
+    generate_headphones_impedance,
+    generate_headphones_characteristic_voltage,
+    generate_headphones_coupler_response,
+    generate_headphones_test_persons,
+    generate_headphones_protection_microphone,
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,

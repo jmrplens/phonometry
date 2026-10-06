@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1851,
-    "passing": 1851,
+    "checks": 1877,
+    "passing": 1877,
     "failing": 0,
-    "domains": 110,
-    "standards": 520,
-    "citations": 1301,
-    "designations": 226,
+    "domains": 111,
+    "standards": 521,
+    "citations": 1325,
+    "designations": 227,
     "sources": 123
   },
   "units": [
@@ -681,6 +681,12 @@
       "title": "Audio-frequency induction loops (IEC 60118-4:2014+A1, IEC 62489-1:2010+A1)",
       "checks": 67,
       "passing": 67
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "title": "Headphones and the programme signal (IEC 60268-7:2010, IEC 60268-1:1985)",
+      "checks": 26,
+      "passing": 26
     },
     {
       "id": "industrial-noise-control",
@@ -53477,6 +53483,995 @@
           "type 2 at 32 ohm": 1.0,
           "type 2 below 32 ohm": 0.0,
           "1,07 V for 400 mA/m": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-1-1985-table-ii/the-31-bands-of-the-simulated-programme-signal-as-published",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-1:1985 Table II",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-1",
+            "edition": "1985",
+            "clause": "Table II"
+          }
+        ]
+      },
+      "quantity": "The 31 bands of the simulated programme signal, as published",
+      "kind": "count",
+      "expected": {
+        "value": 31.0,
+        "label": "31/31 bands of Table II"
+      },
+      "computed": {
+        "value": 31.0,
+        "label": "31/31 bands of Table II"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-1-1985-clause-7-note/power-over-the-full-range-above-the-0-db-of-one-band",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-1:1985 Clause 7 Note",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-1",
+            "edition": "1985",
+            "clause": "Clause 7 Note"
+          }
+        ]
+      },
+      "quantity": "Power over the full range above the 0 dB of one band",
+      "kind": "scalar",
+      "expected": {
+        "value": 12.5,
+        "label": "approximately 12.5 dB"
+      },
+      "computed": {
+        "value": 12.56
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": 0.058
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-1-1985-figure-2/pink-noise-through-the-filter-of-figure-2-inside-every-tolerance-of-table-ii",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-1:1985 Figure 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-1",
+            "edition": "1985",
+            "clause": "Figure 2"
+          }
+        ]
+      },
+      "quantity": "Pink noise through the filter of Figure 2 inside every tolerance of Table II",
+      "kind": "mask",
+      "expected": {
+        "label": "one level puts all 31 bands inside Table II"
+      },
+      "computed": {
+        "label": "smallest margin 0.178 dB, at 400 Hz and 5000 Hz"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "mask",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.178
+      },
+      "binding": {
+        "lower": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-1-1985-table-ii/band-levels-of-the-generator-s-table-ii-density-integrated-numerically",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-1:1985 Table II",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-1",
+            "edition": "1985",
+            "clause": "Table II"
+          }
+        ]
+      },
+      "quantity": "Band levels of the generator's Table II density, integrated numerically",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB from every printed level"
+      },
+      "computed": {
+        "value": 5.68e-10,
+        "label": "largest difference 5.7e-10 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 5.68e-10
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-1-1985-clause-7/a-60-s-record-of-the-generator-judged-in-one-third-octave-bands",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-1:1985 Clause 7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-1",
+            "edition": "1985",
+            "clause": "Clause 7"
+          }
+        ]
+      },
+      "quantity": "A 60 s record of the generator judged in one-third-octave bands",
+      "kind": "mask",
+      "expected": {
+        "label": "all 31 bands inside Table II"
+      },
+      "computed": {
+        "label": "smallest margin 0.371 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "mask",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.371
+      },
+      "binding": {
+        "lower": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-clause-4/impedance-in-mantissa-and-exponent-form-8-32-and-600-ohm-both-ways",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 Clause 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "Clause 4"
+          }
+        ]
+      },
+      "quantity": "Impedance in mantissa and exponent form: 8, 32 and 600 ohm both ways",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 printed codes (\"08R0\", \"32R0\", \"06R2\")"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 printed codes"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-2-1-b/lowest-modulus-in-the-rated-range-at-80-and-at-79-9-of-the-rated-value",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.2.1 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.2.1 b)"
+          }
+        ]
+      },
+      "quantity": "Lowest modulus in the rated range at 80 % and at 79,9 % of the rated value",
+      "kind": "record",
+      "expected": {
+        "label": "80 % passes, 79,9 % fails",
+        "record": {
+          "80 %": 1.0,
+          "79.9 %": 0.0
+        }
+      },
+      "computed": {
+        "label": "80 % = 1; 79.9 % = 0",
+        "record": {
+          "80 %": 1.0,
+          "79.9 %": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-3-3/characteristic-voltage-from-100-db-at-0-1-v-the-e-m-f-for-94-db",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.3.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.3.3"
+          }
+        ]
+      },
+      "quantity": "Characteristic voltage from 100 dB at 0,1 V: the e.m.f. for 94 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.05011872336272723
+      },
+      "computed": {
+        "value": 0.050119
+      },
+      "unit": "V",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-5-2-b-with-7-1-note/source-e-m-f-for-1-mw-in-32-ohm-through-the-120-ohm-of-iec-61938",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.5.2 b) with 7.1 NOTE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.5.2 b) with 7.1 NOTE"
+          }
+        ]
+      },
+      "quantity": "Source e.m.f. for 1 mW in 32 ohm through the 120 ohm of IEC 61938",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.8497058314499201
+      },
+      "computed": {
+        "value": 0.849706
+      },
+      "unit": "V",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-5-2-b-and-8-5-3-c/working-level-of-a-32-ohm-headphone-that-is-40-ohm-at-500-hz-on-120-ohm",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.5.2 b) and 8.5.3 c)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.5.2 b) and 8.5.3 c)"
+          }
+        ]
+      },
+      "quantity": "Working level of a 32 ohm headphone that is 40 ohm at 500 Hz, on 120 ohm",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.4926723659380836,
+        "label": "20 lg(4.75/4) = 1.4927 dB below the definition"
+      },
+      "computed": {
+        "value": 1.4927
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-4-with-8-3-1-note-2/power-of-the-5-v-rated-source-e-m-f-in-32-ohm-through-120-ohm",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.4 with 8.3.1 NOTE 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.4 with 8.3.1 NOTE 2"
+          }
+        ]
+      },
+      "quantity": "Power of the 5 V rated source e.m.f. in 32 ohm through 120 ohm",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.03462603878116344
+      },
+      "computed": {
+        "value": 0.034626
+      },
+      "unit": "W",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-figure-3-note-with-iec-61672-1-2013-table-3/a-weighting-coefficient-of-each-band-of-table-ii-in-the-power-summation",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 Figure 3 NOTE with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "Figure 3 NOTE"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "A-weighting coefficient of each band of Table II in the power summation",
+      "kind": "count",
+      "expected": {
+        "value": 31.0,
+        "label": "31/31 bands matching Table 3"
+      },
+      "computed": {
+        "value": 31.0,
+        "label": "31/31 bands matching Table 3"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-3-4-figure-3-note/programme-characteristic-voltage-of-a-flat-headphone-21-bands-at-80-db-from-0-1-v",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.3.4, Figure 3 NOTE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.3.4, Figure 3 NOTE"
+          }
+        ]
+      },
+      "quantity": "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0,1 V",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.10936802073535674
+      },
+      "computed": {
+        "value": 0.109368
+      },
+      "unit": "V",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-3-5-g/corrected-characteristic-voltage-the-mean-e-m-f-of-three-fittings",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.3.5 g)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.3.5 g)"
+          }
+        ]
+      },
+      "quantity": "Corrected characteristic voltage, the mean e.m.f. of three fittings",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.10985176979770815
+      },
+      "computed": {
+        "value": 0.109852
+      },
+      "unit": "V",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-3-2-2-b/clipped-programme-signal-at-the-two-ends-of-the-1-8-to-2-2-window",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.3.2.2 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.3.2.2 b)"
+          }
+        ]
+      },
+      "quantity": "Clipped programme signal at the two ends of the 1,8 to 2,2 window",
+      "kind": "record",
+      "expected": {
+        "label": "1,8 and 2,2 pass with the Table II spectrum; 1,7, 2,3 and unclipped fail",
+        "record": {
+          "1.7": 0.0,
+          "1.8": 1.0,
+          "2.2": 1.0,
+          "2.3": 0.0,
+          "unclipped": 0.0
+        }
+      },
+      "computed": {
+        "label": "1.7 = 0; 1.8 = 1; 2.2 = 1; 2.3 = 0; unclipped = 0",
+        "record": {
+          "1.7": 0.0,
+          "1.8": 1.0,
+          "2.2": 1.0,
+          "2.3": 0.0,
+          "unclipped": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-3-6-2-b/protection-voltage-where-the-sensitivity-has-changed-1-db",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.3.6.2 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.3.6.2 b)"
+          }
+        ]
+      },
+      "quantity": "Protection voltage where the sensitivity has changed 1 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0079368399158986
+      },
+      "computed": {
+        "value": 1.007937
+      },
+      "unit": "V",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-6-3-2-d-8-6-3-3/panel-sizes-eight-persons-for-a-measurement-16-for-a-reference",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.6.3.2 d), 8.6.3.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.6.3.2 d), 8.6.3.3"
+          }
+        ]
+      },
+      "quantity": "Panel sizes: eight persons for a measurement, 16 for a reference",
+      "kind": "record",
+      "expected": {
+        "label": "8 persons measure, 16 qualify a reference",
+        "record": {
+          "7 measure": 0.0,
+          "7 reference": 0.0,
+          "8 measure": 1.0,
+          "8 reference": 0.0,
+          "15 measure": 1.0,
+          "15 reference": 0.0,
+          "16 measure": 1.0,
+          "16 reference": 1.0
+        }
+      },
+      "computed": {
+        "label": "7 measure = 0; 7 reference = 0; 8 measure = 1; 8 reference = 0; 15 measure = 1; 15 reference = 0; 16 measure = 1; 16 reference = 1",
+        "record": {
+          "7 measure": 0.0,
+          "7 reference": 0.0,
+          "8 measure": 1.0,
+          "8 reference": 0.0,
+          "15 measure": 1.0,
+          "15 reference": 0.0,
+          "16 measure": 1.0,
+          "16 reference": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-6-3-1-with-iec-60268-1-1985-clause-3/comparison-response-referred-to-the-standard-reference-frequency-of-1-000-hz",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.6.3.1 with IEC 60268-1:1985 Clause 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.6.3.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-1",
+            "edition": "1985",
+            "clause": "Clause 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Comparison response referred to the standard reference frequency of 1 000 Hz",
+      "kind": "record",
+      "expected": {
+        "label": "1 000 Hz by default, and 0 dB on that band",
+        "record": {
+          "reference": 1000.0,
+          "response there": 0.0
+        }
+      },
+      "computed": {
+        "label": "reference = 1000; response there = 0",
+        "record": {
+          "reference": 1000.0,
+          "response there": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-6-5-3-with-8-6-5-2-h/ear-canal-panel-eight-persons-for-a-measurement-16-to-calibrate-a-reference",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.6.5.3 with 8.6.5.2 h)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.6.5.3 with 8.6.5.2 h)"
+          }
+        ]
+      },
+      "quantity": "Ear canal panel: eight persons for a measurement, 16 to calibrate a reference",
+      "kind": "record",
+      "expected": {
+        "label": "8 persons measure, 16 calibrate a reference",
+        "record": {
+          "7 measure": 0.0,
+          "7 reference": 0.0,
+          "8 measure": 1.0,
+          "8 reference": 0.0,
+          "15 measure": 1.0,
+          "15 reference": 0.0,
+          "16 measure": 1.0,
+          "16 reference": 1.0
+        }
+      },
+      "computed": {
+        "label": "7 measure = 0; 7 reference = 0; 8 measure = 1; 8 reference = 0; 15 measure = 1; 15 reference = 0; 16 measure = 1; 16 reference = 1",
+        "record": {
+          "7 measure": 0.0,
+          "7 reference": 0.0,
+          "8 measure": 1.0,
+          "8 reference": 0.0,
+          "15 measure": 1.0,
+          "15 reference": 0.0,
+          "16 measure": 1.0,
+          "16 reference": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-6-5-2-g-formula-1/ear-canal-response-of-a-headphone-3-db-up-at-2-khz-and-level-elsewhere",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.6.5.2 g), Formula (1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.6.5.2 g), Formula (1)"
+          }
+        ]
+      },
+      "quantity": "Ear canal response of a headphone 3 dB up at 2 kHz and level elsewhere",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-6-5-2-c-and-f/fittings-2-5-db-apart-and-a-500-hz-band-3-db-off-inclusive",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.6.5.2 c) and f)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.6.5.2 c) and f)"
+          }
+        ]
+      },
+      "quantity": "Fittings 2,5 dB apart and a 500 Hz band 3 dB off, inclusive",
+      "kind": "record",
+      "expected": {
+        "label": "2,5 dB and 3 dB are inside, 2,6 dB and 3,1 dB not",
+        "record": {
+          "2.5 dB apart": 1.0,
+          "2.6 dB apart": 0.0,
+          "3.0 dB off": 1.0,
+          "3.1 dB off": 0.0
+        }
+      },
+      "computed": {
+        "label": "2.5 dB apart = 1; 2.6 dB apart = 0; 3.0 dB off = 1; 3.1 dB off = 0",
+        "record": {
+          "2.5 dB apart": 1.0,
+          "2.6 dB apart": 0.0,
+          "3.0 dB off": 1.0,
+          "3.1 dB off": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-7-3-3-note-1/level-of-the-70-hz-tone-re-the-rated-input-voltage",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.7.3.3 NOTE 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.7.3.3 NOTE 1"
+          }
+        ]
+      },
+      "quantity": "Level of the 70 Hz tone re the rated input voltage",
+      "kind": "scalar",
+      "expected": {
+        "value": -1.9
+      },
+      "computed": {
+        "value": -1.94
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.038
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-7-3-3-note-1/level-of-the-600-hz-tone-re-the-rated-input-voltage",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.7.3.3 NOTE 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.7.3.3 NOTE 1"
+          }
+        ]
+      },
+      "quantity": "Level of the 600 Hz tone re the rated input voltage",
+      "kind": "scalar",
+      "expected": {
+        "value": -14.0
+      },
+      "computed": {
+        "value": -13.98
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.021
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-7-3-3-b-and-formula-3/modulation-products-read-at-530-670-460-and-740-hz",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.7.3.3 b) and Formula (3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.7.3.3 b) and Formula (3)"
+          }
+        ]
+      },
+      "quantity": "Modulation products read at 530, 670, 460 and 740 Hz",
+      "kind": "record",
+      "expected": {
+        "label": "460, 530, 670 and 740 Hz (item b; Formula (3) prints 470 Hz, see ERRATA)",
+        "record": {
+          "third lower": 460.0,
+          "second lower": 530.0,
+          "second upper": 670.0,
+          "third upper": 740.0
+        }
+      },
+      "computed": {
+        "label": "third lower = 460 Hz; second lower = 530 Hz; second upper = 670 Hz; third upper = 740 Hz",
+        "record": {
+          "third lower": 460.0,
+          "second lower": 530.0,
+          "second upper": 670.0,
+          "third upper": 740.0
+        }
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-8-7-4-1/each-tone-of-the-difference-frequency-signal-at-half-the-rated-voltage",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 8.7.4.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "8.7.4.1"
+          }
+        ]
+      },
+      "quantity": "Each tone of the difference-frequency signal at half the rated voltage",
+      "kind": "scalar",
+      "expected": {
+        "value": -6.020599913279624,
+        "label": "-6.021 dB each, 80 Hz apart"
+      },
+      "computed": {
+        "value": -6.021
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985/iec-60268-7-2010-annex-b-a-to-e/a-probe-microphone-on-each-printed-limit",
+      "domain": "headphones-and-the-programme-signal-iec-60268-7-2010-iec-60268-1-1985",
+      "reference": {
+        "cite": "IEC 60268-7:2010 Annex B a) to e)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60268-7",
+            "edition": "2010",
+            "clause": "Annex B a) to e)"
+          }
+        ]
+      },
+      "quantity": "A probe microphone on each printed limit",
+      "kind": "record",
+      "expected": {
+        "label": "a, d, e pass on the limit; b, c fail on it",
+        "record": {
+          "a": 1.0,
+          "b": 0.0,
+          "c": 0.0,
+          "d": 1.0,
+          "e": 1.0
+        }
+      },
+      "computed": {
+        "label": "a = 1; b = 0; c = 0; d = 1; e = 1",
+        "record": {
+          "a": 1.0,
+          "b": 0.0,
+          "c": 0.0,
+          "d": 1.0,
+          "e": 1.0
         }
       },
       "tolerance": {

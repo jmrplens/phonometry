@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1851 numerical conformance checks against 520 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1877 numerical conformance checks against 521 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1851 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 110 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1877 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -358,6 +358,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Microphone Characterisation (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/)
 - [Swept-sine distortion and phase utilities (Farina / Novak)](https://jmrplens.github.io/phonometry/devices/electroacoustics/swept-sine-distortion/)
 - [Audio-Frequency Induction Loops (IEC 60118-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/induction-loops/)
+- [Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/)
 
 ### Broadcast
 
@@ -534,6 +535,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [building/uncertainty](https://jmrplens.github.io/phonometry/reference/api/building/uncertainty/)
 - [electroacoustics/distortion](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/distortion/)
 - [electroacoustics/frequency-response](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/frequency-response/)
+- [electroacoustics/headphones](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/headphones/)
 - [electroacoustics/induction-loop](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/induction-loop/)
 - [electroacoustics/induction-loop-components](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/induction-loop-components/)
 - [electroacoustics/intermodulation](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/intermodulation/)
@@ -541,6 +543,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [electroacoustics/microphone](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/microphone/)
 - [electroacoustics/noise-measurements](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/noise-measurements/)
 - [electroacoustics/piston](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/piston/)
+- [electroacoustics/programme-signal](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/programme-signal/)
 - [electroacoustics/sound-reinforcement](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/sound-reinforcement/)
 - [electroacoustics/swept-sine](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/swept-sine/)
 - [environment/acoustic-roughness](https://jmrplens.github.io/phonometry/reference/api/environment/acoustic-roughness/)

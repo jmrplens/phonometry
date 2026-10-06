@@ -233,11 +233,20 @@ anti-alias requirement, turned into an explicit, checkable specification by
 `resample_signal`'s stopband attenuation and transition width.
 
 **Not covered.** IEC 60268-1:1985 is a general standard for sound system
-equipment, and only its Annex A tone-burst clauses are implemented; amplifiers,
-loudspeakers, connectors and the rest are untouched. `fractional_delay` and the
-coloured-noise generators of `noise_signal` are general-purpose DSP tools with
-no governing standard of their own, and their accuracy claims are closed-form,
-not normative.
+equipment; only the Annex A tone-burst clauses are implemented on this page.
+Its Clause 7, the simulated programme signal, is in
+`electroacoustics.programme_signal` and has its walk-through in the
+[Headphones and Earphones (IEC 60268-7)](../../devices/electroacoustics/headphones.md)
+guide. The device parts are not covered here, but they are not untouched
+either: amplifiers (IEC 60268-3), microphones (IEC 60268-4), loudspeakers
+(IEC 60268-5) and headphones (IEC 60268-7) have their own guides under
+[Electroacoustics](../../devices/electroacoustics/index.md), and the speech
+transmission index of IEC 60268-16 has the
+[Speech Transmission Index](../../perception/speech/speech-transmission.md)
+guide; only the connector parts are absent from the library altogether.
+`fractional_delay` and the coloured-noise generators of `noise_signal` are
+general-purpose DSP tools with no governing standard of their own, and their
+accuracy claims are closed-form, not normative.
 
 ## See also
 

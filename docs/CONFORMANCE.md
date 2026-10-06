@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1851/1851 conformance checks pass** across 110 domains and 520 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1877/1877 conformance checks pass** across 111 domains and 521 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2381,6 +2381,40 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 62489-1:2010+A1 5.4.14.1 | Rise where the fields add at 85 degrees | 0.72 dB (+/-0.01 dB) | 0.726 dB | 0.006 dB | 60 % | ![Pass][cv-pass] Pass |
 | IEC 62489-1:2010+A1 5.4.14.1 | Fall where the fields subtract at 85 degrees | -0.792 dB, 20 lg(1 - cos 85) (printed as 0,72 dB, see ERRATA) | -0.792 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | E DIN EN 62489-1/A2:2017-10 Annex D, D.1.2 and D.1.3 | Neck-loop types of the draft: DC resistance and input voltage for 400 mA/m | type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0 | type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Headphones and the programme signal (IEC 60268-7:2010, IEC 60268-1:1985)</b>: 100% (26/26)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 60268-1:1985 Table II | The 31 bands of the simulated programme signal, as published | 31/31 bands of Table II | 31/31 bands of Table II | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-1:1985 Clause 7 Note | Power over the full range above the 0 dB of one band | approximately 12.5 dB | 12.56 dB | 0.058 dB | 58 % | ![Pass][cv-pass] Pass |
+| IEC 60268-1:1985 Figure 2 | Pink noise through the filter of Figure 2 inside every tolerance of Table II | one level puts all 31 bands inside Table II | smallest margin 0.178 dB, at 400 Hz and 5000 Hz | headroom 0.178 dB | - | ![Pass][cv-pass] Pass |
+| IEC 60268-1:1985 Table II | Band levels of the generator's Table II density, integrated numerically | 0 dB from every printed level | largest difference 5.7e-10 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-1:1985 Clause 7 | A 60 s record of the generator judged in one-third-octave bands | all 31 bands inside Table II | smallest margin 0.371 dB | headroom 0.371 dB | - | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 Clause 4 | Impedance in mantissa and exponent form: 8, 32 and 600 ohm both ways | 3/3 printed codes ("08R0", "32R0", "06R2") | 3/3 printed codes | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.2.1 b) | Lowest modulus in the rated range at 80 % and at 79,9 % of the rated value | 80 % passes, 79,9 % fails | 80 % = 1; 79.9 % = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.3.3 | Characteristic voltage from 100 dB at 0,1 V: the e.m.f. for 94 dB | 0.050119 V (+/-0 V) | 0.050119 V | 0 V | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.5.2 b) with 7.1 NOTE | Source e.m.f. for 1 mW in 32 ohm through the 120 ohm of IEC 61938 | 0.849706 V (+/-0 V) | 0.849706 V | 0 V | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.5.2 b) and 8.5.3 c) | Working level of a 32 ohm headphone that is 40 ohm at 500 Hz, on 120 ohm | 20 lg(4.75/4) = 1.4927 dB below the definition | 1.4927 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.4 with 8.3.1 NOTE 2 | Power of the 5 V rated source e.m.f. in 32 ohm through 120 ohm | 0.034626 W (+/-0 W) | 0.034626 W | 0 W | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 Figure 3 NOTE with IEC 61672-1:2013 Table 3 | A-weighting coefficient of each band of Table II in the power summation | 31/31 bands matching Table 3 | 31/31 bands matching Table 3 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.3.4, Figure 3 NOTE | Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0,1 V | 0.109368 V (+/-0 V) | 0.109368 V | 0 V | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.3.5 g) | Corrected characteristic voltage, the mean e.m.f. of three fittings | 0.109852 V (+/-0 V) | 0.109852 V | 0 V | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.3.2.2 b) | Clipped programme signal at the two ends of the 1,8 to 2,2 window | 1,8 and 2,2 pass with the Table II spectrum; 1,7, 2,3 and unclipped fail | 1.7 = 0; 1.8 = 1; 2.2 = 1; 2.3 = 0; unclipped = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.3.6.2 b) | Protection voltage where the sensitivity has changed 1 dB | 1.007937 V (+/-0 V) | 1.007937 V | 0 V | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.6.3.2 d), 8.6.3.3 | Panel sizes: eight persons for a measurement, 16 for a reference | 8 persons measure, 16 qualify a reference | 7 measure = 0; 7 reference = 0; 8 measure = 1; 8 reference = 0; 15 measure = 1; 15 reference = 0; 16 measure = 1; 16 reference = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.6.3.1 with IEC 60268-1:1985 Clause 3 | Comparison response referred to the standard reference frequency of 1 000 Hz | 1 000 Hz by default, and 0 dB on that band | reference = 1000; response there = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.6.5.3 with 8.6.5.2 h) | Ear canal panel: eight persons for a measurement, 16 to calibrate a reference | 8 persons measure, 16 calibrate a reference | 7 measure = 0; 7 reference = 0; 8 measure = 1; 8 reference = 0; 15 measure = 1; 15 reference = 0; 16 measure = 1; 16 reference = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.6.5.2 g), Formula (1) | Ear canal response of a headphone 3 dB up at 2 kHz and level elsewhere | 3 dB (+/-0 dB) | 3 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.6.5.2 c) and f) | Fittings 2,5 dB apart and a 500 Hz band 3 dB off, inclusive | 2,5 dB and 3 dB are inside, 2,6 dB and 3,1 dB not | 2.5 dB apart = 1; 2.6 dB apart = 0; 3.0 dB off = 1; 3.1 dB off = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.7.3.3 NOTE 1 | Level of the 70 Hz tone re the rated input voltage | -1.9 dB (+/-0.05 dB) | -1.94 dB | -0.038 dB | 76 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.7.3.3 NOTE 1 | Level of the 600 Hz tone re the rated input voltage | -14 dB (+/-0.05 dB) | -13.98 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.7.3.3 b) and Formula (3) | Modulation products read at 530, 670, 460 and 740 Hz | 460, 530, 670 and 740 Hz (item b; Formula (3) prints 470 Hz, see ERRATA) | third lower = 460 Hz; second lower = 530 Hz; second upper = 670 Hz; third upper = 740 Hz | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 8.7.4.1 | Each tone of the difference-frequency signal at half the rated voltage | -6.021 dB each, 80 Hz apart | -6.021 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-7:2010 Annex B a) to e) | A probe microphone on each printed limit | a, d, e pass on the limit; b, c fail on it | a = 1; b = 0; c = 0; d = 1; e = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

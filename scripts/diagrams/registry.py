@@ -67,6 +67,7 @@ from .devices import (
     _d_distortion_bench,
     _d_duct_path,
     _d_enclosure_cabin_measurement,
+    _d_headphone_measurement,
     _d_in_duct_rig,
     _d_induction_loop_measurement,
     _d_intensity_scan,
@@ -666,6 +667,11 @@ DIAGRAMS = {
         _d_induction_loop_measurement,
         "Where an induction loop is measured, and what it meets (IEC 60118-4)",
         560,
+    ),
+    "diagram_headphone_measurement": (
+        _d_headphone_measurement,
+        "How a headphone is measured, and what each reading gives (IEC 60268-7)",
+        620,
     ),
     "diagram_distortion_bench": (
         _d_distortion_bench,

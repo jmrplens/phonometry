@@ -177,6 +177,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   length), and the comparison-calibration guide gains three sections in
   English and Spanish.
 
+- **Measure headphones and earphones by IEC 60268-7:2010 with the simulated
+  programme signal of IEC 60268-1:1985.** Two new modules.
+  `electroacoustics.programme_signal` holds the noise that stands in for
+  programme: `SIMULATED_PROGRAMME_SPECTRUM` is Table II of IEC 60268-1, the
+  31 one-third-octave levels and their tolerances; `programme_signal_filter`
+  is the exact transfer function of the filter of its Figure 2, which with
+  pink noise lands inside every tolerance of the table by 0.18 dB at its
+  closest; `simulated_programme_signal` generates the stationary Gaussian
+  signal with every band on its printed level or through that filter, and
+  clips it to a peak-to-RMS ratio when asked; and `check_programme_signal`
+  judges a one-third-octave spectrum against the table, up to the constant a
+  relative spectrum leaves free. Neither amendment of 1988 touches the
+  clause. `electroacoustics.headphones` holds the characteristics of
+  IEC 60268-7 that are computations: the classification code of Clause 4
+  (`HeadphoneClassification`, `impedance_code`, `parse_classification_code`,
+  with 600 ohm as `06R2` as printed); `verify_rated_impedance`, the 80 % of
+  8.2.1 with the dips up to 20 kHz to be stated; `characteristic_voltage`
+  (8.3.3) and `programme_characteristic_voltage` (8.3.4, and 8.3.5 with the
+  A-weighting and the free-field compensation summed over the bands as the
+  note under Figure 3 describes, averaged over 3 to 5 fittings), with
+  `programme_signal_level` for that power sum; `headphone_input_power` and
+  `headphone_source_emf` for the powers of 8.4 and
+  `working_sound_pressure_level` for the 1 mW level of 8.5.2, which also
+  gives the reading of the method of 8.5.3 c) when it is passed the
+  headphone's impedance at 500 Hz (the two disagree whenever that impedance
+  is not the rated one); `check_limiting_test_signal`, the clipped programme
+  signal of 8.3.2 with its peak-to-RMS ratio from 1.8 to 2.2;
+  `protection_voltage`, the 1 dB sensitivity change of 8.3.6;
+  `coupler_frequency_response` and `crosstalk_attenuation` (8.6.2, 8.12);
+  `field_comparison_response` for the free-field and diffuse-field comparison
+  responses with their panels of eight and 16 persons (8.6.3, 8.6.4),
+  referred by default to 1 000 Hz, the standard reference frequency of
+  IEC 60268-1 Clause 3; and `ear_canal_frequency_response` for Formula (1),
+  referred to the 500 Hz it prints, with its 2.5 dB and 3 dB checks and the
+  16 persons that calibrate the reference of the indirect method (8.6.5);
+  `headphone_modulation_signal` and `headphone_difference_frequency_signal`
+  for the distortion test signals of 8.7.3 and 8.7.4; and
+  `verify_ear_canal_microphone`, the probe microphone of Annex B. Every
+  result draws its own figure, the three frequency responses at the 50 dB to
+  the decade the part prefers. The sound attenuation of 8.11 is the ISO
+  4869-1 measurement `hearing.real_ear_attenuation` already computes. A new
+  guide in both languages walks a 32 ohm headphone through both standards,
+  the conformance report gains 26 rows, and eight printed defects of
+  IEC 60268-7 are in the errata register, among them Formula (3), which
+  names a product at 470 Hz that its own item puts at 460 Hz, and a note
+  that credits IEC 60268-1 with a crest factor it does not specify.
+
 - **Take a solid's row into the elastic simulation and the detailed building
   model, and a ground's into the outdoor models.** A solid's catalogue row,
   one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your

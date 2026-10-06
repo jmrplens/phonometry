@@ -1,6 +1,6 @@
 ---
 title: "Electroacústica"
-description: "Dispositivos que deben producir sonido, y los programas que transportan: el conjunto de distorsión de IEC 60268-3 y las respuestas en frecuencia H1/H2, los ensayos de tipo de altavoces IEC 60268-5 y de micrófonos IEC 60268-4, el bucle magnético IEC 60118-4 con sus componentes IEC 62489-1, la separación armónica con barridos y THD(f) (Farina / Novak), y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
+description: "Dispositivos que deben producir sonido, y los programas que transportan: el conjunto de distorsión de IEC 60268-3 y las respuestas en frecuencia H1/H2, los ensayos de tipo de altavoces IEC 60268-5 y de micrófonos IEC 60268-4, el bucle magnético IEC 60118-4 con sus componentes IEC 62489-1, las medidas de auriculares de IEC 60268-7 con la señal de programa de IEC 60268-1, la separación armónica con barridos y THD(f) (Farina / Novak), y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -57,6 +57,13 @@ un bucle magnético hace circular una corriente alrededor de una sala para que
 la telebobina de un audífono capte la voz como un campo magnético, y esa
 página juzga el sistema instalado según IEC 60118-4 y sus componentes, el
 amplificador, el bucle como carga y el bucle de cuello, según IEC 62489-1.
+[Auriculares (IEC 60268-7)](/phonometry/es/devices/electroacoustics/headphones/)
+saca el transductor del bafle del altavoz y lo lleva a un simulador de oído:
+construye la señal de programa simulado de IEC 60268-1, el ruido que hace las
+veces de programa, y mide con ella unos auriculares según IEC 60268-7, desde el
+código que los nombra y su impedancia asignada hasta sus tensiones
+características, sus respuestas en un acoplador y ante un grupo de oyentes, y
+el micrófono de sonda que los lee en el conducto auditivo.
 
 [Sonoridad de programa](/phonometry/es/devices/broadcast/program-loudness/) cubre la
 señal que transportan esos dispositivos: la sonoridad de un programa de
@@ -93,6 +100,10 @@ partida son las páginas de
   sobre el volumen útil de una sala o en los puntos de un refugio y de un
   mostrador, y su amplificador, su bucle y su bucle de cuello medidos según
   IEC 62489-1.
+- [Auriculares (IEC 60268-7)](/phonometry/es/devices/electroacoustics/headphones/):
+  los auriculares en su simulador de oído, medidos según IEC 60268-7 con la
+  señal de programa simulado de IEC 60268-1: impedancia, tensiones, niveles,
+  respuestas en frecuencia y el micrófono de sonda del anexo B.
 - [Radiodifusión](/phonometry/es/devices/broadcast/): el problema de la
   sonoridad resuelto con una medición y no con un compresor, un número con
   puerta por programa y el rango que dice cuánto se mueve.

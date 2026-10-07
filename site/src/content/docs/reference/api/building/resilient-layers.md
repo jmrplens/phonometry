@@ -19,8 +19,8 @@ The chain is one story told in three steps.
 
 **1. The excitation (Hopkins 3.6.3).** The ISO tapping machine drops a 0.5 kg
 hammer from 40 mm, ten impacts per second, so the impact velocity is
-$v_o = \sqrt{2 g h} = 0.886$ m/s (Eq. 3.85) and, for a short impact, the
-peak force per Fourier line is $|F_n| = 2 m v_o/T_i$ (Eq. 3.90), giving
+$v_0 = \sqrt{2 g h} = 0.886$ m/s (Eq. 3.85) and, for a short impact, the
+peak force per Fourier line is $|F_n| = 2 m v_0/T_\mathrm{i}$ (Eq. 3.90), giving
 the band mean-square force $F_\mathrm{rms}^{2} = 3.9 B$ (Eq. 3.92). Real floors
 are not that simple: the hammer, the contact stiffness `K` it deforms and the
 floor's driving-point impedance `Zdp` form a mass-spring-dashpot (Fig. 3.28)
@@ -29,8 +29,8 @@ when $K m \ge 4 Z_\mathrm{dp}^{2}$ (a single positive pulse, no rebound) and
 **under-critical** otherwise (a rebound; only the first positive lobe is
 transformed). Its spectrum ([`tapping_force_spectrum`](/phonometry/reference/api/building/resilient-layers/#tapping_force_spectrum)) is flat up to the
 cut-off `fco` (Eqs. 3.101/3.102) and falls above it, and it asymptotes at low
-frequency between $|F_n|_{\text{lower}} = m v_o/T_i$ and
-$|F_n|_{\text{upper}} = 2 m v_o/T_i$, 6 dB apart in mean square
+frequency between $|F_n|_{\text{lower}} = m v_0/T_\mathrm{i}$ and
+$|F_n|_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, 6 dB apart in mean square
 (Eqs. 3.99/3.100).
 
 **2. Soft floor coverings (Hopkins 4.4.3.1).** A soft covering on a heavyweight
@@ -231,7 +231,7 @@ Predicted improvement `ΔL` of a soft floor covering
 | `two_line` | The two-line estimate, in dB: 0 below `fco` and 12 dB/octave (40 dB/decade) above it. |
 | `cut_off_frequency` | Cut-off frequency `fco` of the covered floor, in Hz. |
 | `bare_cut_off_frequency` | Cut-off frequency of the bare plate, in Hz. |
-| `lines` | Fourier line frequencies $n f_i$ of the tapping machine, in Hz, covering every band in `frequencies`. |
+| `lines` | Fourier line frequencies $n f_\mathrm{i}$ of the tapping machine, in Hz, covering every band in `frequencies`. |
 | `line_improvement` | The per-line ratio $\Delta L = 20 \log_{10}(\lvert F_n \rvert_{\text{without}}/\lvert F_n \rvert_{\text{with}})$ of Eq. (4.114) at `lines`, in dB. It carries the deep troughs at odd multiples of `fco` that Hopkins notes below Fig. 4.64, which are an artefact of the undamped model and disappear from `improvement`. |
 | `bare` | The bare-plate [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult), at `lines`. |
 | `covered` | The [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult) with the covering, at `lines`. |
@@ -525,11 +525,11 @@ hammer_impact_velocity(
 ) -> float
 ```
 
-Hammer velocity at impact $v_o = \sqrt{2 g h}$ (Hopkins
+Hammer velocity at impact $v_0 = \sqrt{2 g h}$ (Hopkins
 Eq. 3.85).
 
 The ISO tapping machine's nominal 40 mm drop gives
-$v_o = 0.886$ m/s.
+$v_0 = 0.886$ m/s.
 
 **Parameters**
 
@@ -694,8 +694,8 @@ Band mean-square force of a short impact
 $F_\mathrm{rms}^{2} = 3.9 B$ (Eq. 3.92).
 
 The limiting case in which the impact is short enough that the hammer's
-momentum alone sets the force: combining $|F_n| = 2 m v_o/T_i$
-(Eq. 3.90) with $F_\mathrm{rms}^{2} = |F_n|^{2} B/(2 f_i)$ (Eq. 3.91)
+momentum alone sets the force: combining $|F_n| = 2 m v_0/T_\mathrm{i}$
+(Eq. 3.90) with $F_\mathrm{rms}^{2} = |F_n|^{2} B/(2 f_\mathrm{i})$ (Eq. 3.91)
 gives 3.925 B, printed as 3.9 B. Hopkins finds it adequate for bare
 concrete slabs of at least 100 mm.
 
@@ -779,9 +779,9 @@ Force spectrum of the ISO tapping machine on a floor (Hopkins 3.6.3.1).
 
 The Fourier transform of the single-impact force pulse
 ([`force_pulse`](/phonometry/reference/api/building/resilient-layers/#force_pulse)), scaled by the impact repetition rate. Writing
-$a = K/(2 Z_\mathrm{dp})$ and $\omega_o^{2} = K/m$, the transform of
+$a = K/(2 Z_\mathrm{dp})$ and $\omega_0^{2} = K/m$, the transform of
 Eqs. (3.95)/(3.96) is the same rational function in both critical cases,
-$\hat{F}(\omega) = v_o K/(\omega_o^{2} - \omega^{2} + 2 i a \omega)$,
+$\hat{F}(\omega) = v_0 K/(\omega_0^{2} - \omega^{2} + 2 i a \omega)$,
 multiplied for the under-critical case by
 $1 + e^{-a \pi/\beta} e^{-i \omega \pi/\beta}$ because only the
 first positive lobe (of duration $\pi/\beta$) is transformed. That
@@ -791,8 +791,8 @@ the covering's internal damping is included and the spectrum is averaged
 into bands.
 
 The transform is normalised so that the low-frequency asymptote is
-$m v_o/T_i$ for an over-critical impact (no rebound) and
-$2 m v_o/T_i$ for a lightly damped under-critical one (full
+$m v_0/T_\mathrm{i}$ for an over-critical impact (no rebound) and
+$2 m v_0/T_\mathrm{i}$ for a lightly damped under-critical one (full
 rebound), the two limits of Eqs. (3.99)/(3.100).
 
 **Parameters**
@@ -874,8 +874,8 @@ Force spectrum of the ISO tapping machine on one walking surface.
 | `over_critical` | `True` when $K m \ge 4 Z_\mathrm{dp}^{2}$, i.e. the hammer does not rebound. |
 | `contact_stiffness` | Contact stiffness `K` used, in N/m. |
 | `impedance` | Driving-point impedance `Zdp` used, in N.s/m. |
-| `lower_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{lower}} = m v_o/T_i$, in N (Eq. 3.99). |
-| `upper_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{upper}} = 2 m v_o/T_i$, in N (Eq. 3.100); 6 dB above `lower_limit` in mean square. |
+| `lower_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{lower}} = m v_0/T_\mathrm{i}$, in N (Eq. 3.99). |
+| `upper_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, in N (Eq. 3.100); 6 dB above `lower_limit` in mean square. |
 | `band` | Band width used for `mean_square_force`. |
 
 ### TappingForceResult.plot()

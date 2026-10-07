@@ -1790,9 +1790,10 @@ def _d_loudspeaker_freefield(s: SVG, th: Theme) -> None:
     s.line(155, 383, 155, 345, th.fg, 1.6)
     s.line(155, 345, fx - 62, 345, th.fg, 1.6)
 
-    # Governing relations. The Up, Lp(1 m) and LM relations stay plain: each
-    # carries a unit as a factor or an argument (1 W, 1 m, 1 V/Pa), and the
-    # composer has no upright run for a single-letter unit inside math.
+    # Governing relations. Each carries a unit as a factor or an argument
+    # (1 W, 1 m, 1 V/Pa), which stays outside the math so it is set upright,
+    # and the p of the test voltage U_p is upright as IEC 60268-5, 20.3.2,
+    # prints it.
     for y, txt, col, bold in (
         (
             508,
@@ -1805,24 +1806,26 @@ def _d_loudspeaker_freefield(s: SVG, th: Theme) -> None:
         ),
         (
             534,
-            "Up = √(R · 1 W): 2.83 V is 1 W into 8 Ω but 2 W into 4 Ω (+3 dB)",
+            "$U_p$ = √($R$ · 1 W): 2.83 V is 1 W into 8 Ω but 2 W into 4 Ω (+3 dB)",
             th.secondary,
             True,
         ),
         (
             559,
-            "Lp(1 m) = Lp(r) + 20 log10(r / 1 m)   (far field, inverse-distance law)",
+            "$L_p$(1 m) = $L_{p}(r)$ + 20 $log_{10}$($r$ / 1 m)   "
+            "(far field, inverse-distance law)",
             th.primary,
             True,
         ),
         (
             583,
-            "Microphone (IEC 60268-4): M in mV/Pa, or LM = 20 log10(M / 1 V/Pa) dB",
+            "Microphone (IEC 60268-4): $M$ in mV/Pa, or $L_M$ = 20 $log_{10}$($M$ "
+            "/ 1 V/Pa) dB",
             th.muted,
             False,
         ),
     ):
-        s.text(450, y, txt, 16 if bold else 15, col, bold=bold)
+        s.text(450, y, txt, 16 if bold else 15, col, bold=bold, upright=("U_p",))
 
 
 # ---------------------------------------------------------------------------

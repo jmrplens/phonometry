@@ -7477,13 +7477,13 @@ in the same order.
   f_u = 1 Hz und f_o = 80 Hz" and "KB_F(t) ± 2 % Schwankung".
 - **The print:** for a sinusoidal input at the test frequencies, the peak row
   reads 0,852 at 1 Hz, 1,000 at 5,6 Hz, 1,000 at 31,5 Hz, 0,843 at 80 Hz and
-  0,249 at 315 Hz; the $KB_F$ row of the same five columns reads 0,103, 0,500,
+  0,249 at 315 Hz; the $KB_\mathrm{F}$ row of the same five columns reads 0,103, 0,500,
   0,693, 0,594 and 0,071.
 - **The problem:** the two rows are computed on different band limitations, and
   the peak row does not follow the standard's own Formula (5). With
   $f_u = 1$ Hz and $f_o = 80$ Hz that formula gives $|H_{u\mathrm{Soll}}|$ =
   0,995 at 31,5 Hz and 0,100 at 315 Hz, against the 1,000 and 0,249 printed. The
-  $KB_F$ row settles which of the two is the intended reading: $KB_F$ is
+  $KB_\mathrm{F}$ row settles which of the two is the intended reading: $KB_\mathrm{F}$ is
   $|H_{B\mathrm{Soll}}|/\sqrt{2}$ for a 1 mm/s sine, and at 31,5 Hz that is
   0,6928 from 0,995 and 0,6962 from 1,000, so the printed 0,693 is the first;
   at 315 Hz it is 0,0709 from 0,100 and 0,176 from 0,249, so the printed 0,071
@@ -7572,9 +7572,10 @@ in the same order.
   $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % after $4\tau$: about half the printed
   figures.
 - **Evidence:** Formula (1) on the same page and Figure 3 on the next, which
-  draws $\tilde v_F/\hat v$ of an 8 Hz and a 20 Hz sine against time in units
-  of $\tau$ with the mean marked at 0,707. At $2\tau$ both curves oscillate
-  around 0,66, which is 93 % of 0,707, and at $4\tau$ around 0,70. Verified on
+  draws $\tilde v_\mathrm{F}/\hat v$ of an 8 Hz and a 20 Hz sine against
+  time in units of $\tau$ with the mean marked at 0,707. At $2\tau$ both
+  curves oscillate around 0,66, which is 93 % of 0,707, and at $4\tau$
+  around 0,70. Verified on
   PDF page 3 (printed p. 3) and PDF page 4 (printed p. 4) of
   DIN 45672-2:1995-07.
 - **Consequence for the standard's own tables:** none. The advice the sentence
@@ -7620,20 +7621,20 @@ in the same order.
 
 - **Location:** Annex A, Formulae (A.1a) and (A.1b) on printed page 11 (PDF
   page 11 of the copy read here, which prints its folios without an offset).
-- **The print:** Formula (A.1a) reads $KB_{FTm,j} = \sqrt{\frac{1}{M_j}
-  \sum_{i=1}^{M_j} KB^2_{FTi,j}}$ and, "oder", Formula (A.1b) reads
-  $KB_{FTm,j} = \frac{1}{Z_j} \sum_{i=1}^{Z_j} KB^2_{FTi,j}$, for the case
-  that only $Z_j$ occupied clock intervals of class $j$ were measured.
+- **The print:** Formula (A.1a) reads $KB_\mathrm{FTm,j} = \sqrt{\frac{1}{M_\mathrm{j}}
+  \sum_{\mathrm{i}=1}^{M_\mathrm{j}} KB^2_\mathrm{FTi,j}}$ and, "oder", Formula (A.1b) reads
+  $KB_\mathrm{FTm,j} = \frac{1}{Z\mathrm{j}} \sum_{\mathrm{i}=1}^{Z\mathrm{j}} KB^2_\mathrm{FTi,j}$, for the case
+  that only $Z\mathrm{j}$ occupied clock intervals of class $\mathrm{j}$ were measured.
 - **The problem:** the second formula has no root over its sum, so its left
   side is a clock maximum r.m.s. and its right side a mean of squares. The two
   formulas are printed as alternatives for the same quantity and differ in
   nothing but the count they average over, so both need the root or neither
-  does; Formula (A.2) beneath them takes $KB^2_{FTm,j}$ as the mean of the
+  does; Formula (A.2) beneath them takes $KB^2_\mathrm{FTm,j}$ as the mean of the
   squares, which is what the right side of (A.1b) is, and the worked Example
-  8 on printed page 17 applies (A.1b) with the root: $KB_{FTm,1} =
+  8 on printed page 17 applies (A.1b) with the root: $KB_\mathrm{FTm,1} =
   \sqrt{\tfrac{1}{3}(0{,}92^2 + 0{,}6^2 + 0{,}9^2)} = 0{,}82$ "aus Gleichung
   (A.1b)". Either the root was lost from (A.1b) or its left side should read
-  $KB^2_{FTm,j}$.
+  $KB^2_\mathrm{FTm,j}$.
 - **Evidence:** the two formulas on printed page 11 and the example on
   printed page 17. Verified on PDF page 11 (printed p. 11) and PDF page 17
   (printed p. 17) of DIN 4150-2:1999-06: the radical of (A.1a) is drawn and
@@ -7650,18 +7651,18 @@ in the same order.
 - **Location:** B.9.3.3, the two night-time formulas on printed page 44 (PDF
   page 44 of the copy read here, which prints its folios without an offset),
   against 6.5.3.2 on printed page 19.
-- **The print:** $KB_{FTr,\mathrm{nachts}} = \sqrt{\tfrac{1}{920} \cdot (12 \cdot
+- **The print:** $KB_\mathrm{FTr,nachts} = \sqrt{\tfrac{1}{920} \cdot (12 \cdot
   (0{,}9 \cdot 0{,}24)^2 + 18 \cdot (1{,}0 \cdot 0{,}44)^2)} = 0{,}066$ for the
   case without the project and, with the same divisor, $0{,}096 > 0{,}07$
   for the planned case; the daytime formulas on the same page divide by 1920.
-- **The problem:** 6.5.3.2 fixes $N_r$ of Formula (6) at 1920 clock
+- **The problem:** 6.5.3.2 fixes $N_\mathrm{r}$ of Formula (6) at 1920 clock
   intervals by day and 960 by night, which is what 8 h of 30 s intervals
   are. The two night results reproduce 920 exactly, 0,0663 and 0,0957, and
   with 960 they are 0,0649 and 0,0937, which print as 0,065 and 0,094. The
   25 % test that follows, $0{,}096 > 1{,}25 \cdot 0{,}066 = 0{,}082$, becomes
   $0{,}094 > 1{,}25 \cdot 0{,}065 = 0{,}081$ and reaches the same conclusion.
 - **Evidence:** the divisor 920 in both night formulas on printed page 44
-  and the definition of $N_r$ on printed page 19. Verified on PDF page 44
+  and the definition of $N_\mathrm{r}$ on printed page 19. Verified on PDF page 44
   (printed p. 44) and PDF page 19 (printed p. 19) of E DIN 4150-2:2023-08.
 - **Consequence for the standard's own tables:** none; the example's
   conclusion holds either way.
@@ -7676,8 +7677,8 @@ in the same order.
 - **Location:** Figure B.2 b) on printed page 33 (PDF page 33) and the text
   of B.4.3.3 on printed page 34.
 - **The print:** the figure labels the ten clock intervals of hammer B with
-  $KB_{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, and
-  the text sets the 0,04 to zero and finds "$KB_{FTmb}$ = 0,39".
+  $KB_\mathrm{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, and
+  the text sets the 0,04 to zero and finds "$KB_\mathrm{FTmb}$ = 0,39".
 - **The problem:** the r.m.s. of those ten values with the 0,04 as zero is
   $\sqrt{1{,}3759 / 10} = 0{,}371$, not 0,39. The labels of hammer A on the
   same figure do give the 0,16 the text uses. The 1999 edition's Figure C.3
@@ -7687,7 +7688,7 @@ in the same order.
   0,154 and 0,195.
 - **Evidence:** the ten labels on printed page 33 and, on printed page 34,
   the sentence "Somit ergibt sich aus Bild B.2." with the line
-  "$KB_{FTma}$ = 0,16 und $KB_{FTmb}$ = 0,39" under it. Verified on PDF page 33 (printed p. 33) and PDF page 34
+  "$KB_\mathrm{FTma}$ = 0,16 und $KB_\mathrm{FTmb}$ = 0,39" under it. Verified on PDF page 33 (printed p. 33) and PDF page 34
   (printed p. 34) of E DIN 4150-2:2023-08.
 - **Consequence for the standard's own tables:** none; Examples 4 and 5
   conclude the same with either value.
@@ -7745,15 +7746,15 @@ in the same order.
   B.9.4 on printed page 44.
 - **The print:** "Falls eine der folgenden Bedingungen für den
   Prognoseplanfall vorliegt, gelten die Anforderungen dieses Dokuments als
-  eingehalten:", followed by a) for $KB_{F\mathrm{max}}$ by day, b) for
-  $KB_{F\mathrm{max}}$ by night and c) for $KB_{FTr}$, each met either by
+  eingehalten:", followed by a) for $KB_\mathrm{Fmax}$ by day, b) for
+  $KB_\mathrm{Fmax}$ by night and c) for $KB_\mathrm{FTr}$, each met either by
   keeping to its guide value or by an increase under 25 % against the case
   without the project.
 - **The problem:** read as printed, one condition is enough. Example 9 has
-  b) met, "Für den Prognosefall bleibt der $KB_{F\mathrm{max}}$-Wert
+  b) met, "Für den Prognosefall bleibt der $KB_\mathrm{Fmax}$-Wert
   unverändert bei 0,66", an increase of nought, and still concludes in B.9.4
-  that mitigation is to be looked into because $KB_{FTr}$ by night exceeds
-  $A_r$ and grows by more than 25 %. The three letters are three assessments
+  that mitigation is to be looked into because $KB_\mathrm{FTr}$ by night exceeds
+  $A_\mathrm{r}$ and grows by more than 25 %. The three letters are three assessments
   of two quantities, and the example applies every one that fits the case;
   "eine der" says the opposite.
 - **Evidence:** the sentence and its three letters on printed page 22, and
@@ -7772,7 +7773,7 @@ in the same order.
 
 - **Location:** the last formula of B.8.3.4 on printed page 39 (PDF page
   39), against Table B.1 on printed page 38.
-- **The print:** $KB_{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
+- **The print:** $KB_\mathrm{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
   \cdot 0)^2 + 144 \cdot (1{,}0 \cdot 0)^2 + 80 \cdot (0{,}7 \cdot 0{,}406\,1)^2 +
   80 \cdot (0{,}7 \cdot 0{,}567\,6)^2)} = 0{,}099\,8 > 0{,}07$.
 - **The problem:** with the four-decimal 0,406 1 and 0,567 6 the formula
@@ -7795,9 +7796,9 @@ in the same order.
 - **Location:** B.4.3.3 on printed page 34 (PDF page 34), against 4.2.5 on
   printed page 12 and 6.4.2 on printed page 16.
 - **The print:** "Wegen der Annahme, dass Bild B.2 repräsentativ für die
-  gesamten Teileinwirkungszeiten $T_{ea}$ und $T_{eb}$ sei, gilt nach
-  Gleichung (2):", followed by $KB_{FTma} = \sqrt{\tfrac{1}{10} \sum_{i=1}^{10}
-  KB^2_{FTia}}$ and the same for hammer B.
+  gesamten Teileinwirkungszeiten $T_\mathrm{ea}$ und $T_\mathrm{eb}$ sei, gilt nach
+  Gleichung (2):", followed by $KB_\mathrm{FTma} = \sqrt{\tfrac{1}{10} \sum_{i=1}^{10}
+  KB^2_\mathrm{FTia}}$ and the same for hammer B.
 - **The problem:** that is Formula (1) of 4.2.5, the clock maximum r.m.s.
   over $N$ intervals. Formula (2) of 6.4.2 is the assessment vibration
   severity from partial exposures, which the example applies two lines
@@ -7816,10 +7817,10 @@ in the same order.
 
 - **Location:** the last bullet of B.3.2 on printed page 31 (PDF page 31),
   against the note under 6.3 on printed page 15.
-- **The print:** "Es ist zu prüfen, ob das $A_r$-Kriterium hier nicht zu
+- **The print:** "Es ist zu prüfen, ob das $A_\mathrm{r}$-Kriterium hier nicht zu
   berücksichtigen ist (siehe Anmerkung zu 6.2)."
-- **The problem:** the note on the $A_r$ criterion, the 4 h by day and 2 h
-  by night above which a steady vibration makes $KB_{FTr}$ not worth
+- **The problem:** the note on the $A_\mathrm{r}$ criterion, the 4 h by day and 2 h
+  by night above which a steady vibration makes $KB_\mathrm{FTr}$ not worth
   forming, is printed under 6.3 in the draft; 6.2 is the guide values. In
   the 1999 edition the same note stood under 6.2, the procedure, and the
   example's cross-reference was not moved with it.
@@ -7837,12 +7838,12 @@ in the same order.
 - **Location:** the fourth bullet of 6.3 on printed page 15 (PDF page 15),
   against 6.5.1.1 on printed page 17 and Figure 2 on printed page 15.
 - **The print:** "Für selten auftretende, kurzzeitige Einwirkungen ist die
-  Anforderung dieses Dokuments eingehalten, wenn $KB_{F\mathrm{max}}$ kleiner
-  als $A_o$ ist (siehe 6.5.1)"; 6.5.1.1 reads "wenn die maximale bewertete
-  Schwingstärke $KB_{F\mathrm{max}}$ kleiner oder gleich dem (oberen)
-  Anhaltswert $A_o$ nach Tabelle 1 ist", and the diamond of Figure 2 asks
-  "$KB_{F\mathrm{max}} \le A_o$?".
-- **The problem:** a rare event whose $KB_{F\mathrm{max}}$ equals $A_o$ is
+  Anforderung dieses Dokuments eingehalten, wenn $KB_\mathrm{Fmax}$ kleiner
+  als $A_\mathrm{o}$ ist (siehe 6.5.1)"; 6.5.1.1 reads "wenn die maximale bewertete
+  Schwingstärke $KB_\mathrm{Fmax}$ kleiner oder gleich dem (oberen)
+  Anhaltswert $A_\mathrm{o}$ nach Tabelle 1 ist", and the diamond of Figure 2 asks
+  "$KB_\mathrm{Fmax} \le A_\mathrm{o}$?".
+- **The problem:** a rare event whose $KB_\mathrm{Fmax}$ equals $A_\mathrm{o}$ is
   met by the clause and the figure and not by the bullet that refers to
   them.
 - **Evidence:** the bullet and the diamond on printed page 15 and the
@@ -7860,10 +7861,10 @@ in the same order.
   which prints its folios without an offset) and printed page 35, against
   Formula (11) on printed page 23 and Annex E on printed page 37.
 - **The print:** with 200 passages by day and 20 by night, the factor
-  $\alpha$ = 0,7 of a surface tram and $KB_{FTm,Zug}$ = 0,4, Formula (11)
-  gives "$KB_{FTr,Zug,Tag}$ = 0,11" and "$KB_{FTr,Zug,Nacht}$ = 0,05", and C.4
-  finds the day exceeded, "0,11 > $A_{r,Tag}$ = 0,1".
-- **The problem:** Formula (11) with those inputs and $N_r$ = 1920 by day and
+  $\alpha$ = 0,7 of a surface tram and $KB_\mathrm{FTm,Zug}$ = 0,4, Formula (11)
+  gives "$KB_\mathrm{FTr,Zug,Tag}$ = 0,11" and "$KB_\mathrm{FTr,Zug,Nacht}$ = 0,05", and C.4
+  finds the day exceeded, "0,11 > $A_\mathrm{r,Tag}$ = 0,1".
+- **The problem:** Formula (11) with those inputs and $N_\mathrm{r}$ = 1920 by day and
   960 by night is $0{,}7 \cdot 0{,}4 \cdot \sqrt{200/1920} = 0{,}090$ and
   $0{,}7 \cdot 0{,}4 \cdot \sqrt{20/960} = 0{,}040$. The printed values are
   what the same inputs give with $\alpha$ under the root once instead of
@@ -7871,10 +7872,10 @@ in the same order.
   $0{,}4 \sqrt{0{,}7 \cdot 20/960} = 0{,}048$: the example weights the energy
   of the category by the factor where Formula (11) weights its amplitude.
   With the 0,090 of the formula the verdict of C.4 on the day turns round:
-  0,09 is below the $A_r$ of 0,1 and the requirement is met.
+  0,09 is below the $A_\mathrm{r}$ of 0,1 and the requirement is met.
 - **Evidence:** the inputs on printed page 34, the two results at the top
   of printed page 35 and the assessment below them, the formula and its
-  $N_r$ on printed page 23 and the factors on printed page 37. Verified on PDF page 34 (printed p. 34), PDF
+  $N_\mathrm{r}$ on printed page 23 and the factors on printed page 37. Verified on PDF page 34 (printed p. 34), PDF
   page 35 (printed p. 35), PDF page 23 (printed p. 23) and PDF page 37
   (printed p. 37) of E DIN 45672-3:2023-02.
 - **Consequence for the standard's own tables:** the example's daytime
@@ -7893,9 +7894,9 @@ in the same order.
   page 34), against Formulae (8) and (9) on printed pages 21 and 22.
 - **The print:** the table closes with the row
   "Schwinggeschwindigkeitssummenpegel der betrachteten Zugkategorie
-  ($L_{v,Zug}$):" and 78,1 dB in its last column, and C.3 feeds it to
+  ($L_{v,\mathrm{Zug}}$):" and 78,1 dB in its last column, and C.3 feeds it to
   Formula (9),
-  $KB_{FTm,Zug} = c_{T1} v_0 10^{L/20} = 0{,}4$, then 0,6 by Formula (10) and
+  $KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L/20} = 0{,}4$, then 0,6 by Formula (10) and
   "$v_{\max}$ = 1,81 mm/s" by Formula (12).
 - **The problem:** Clause 7.1 a) first adds the KB weighting of Table 2 to
   each band (Formula (8)) and sums the bands from 4 Hz to 80 Hz. The energy
@@ -7920,7 +7921,7 @@ in the same order.
 ## E DIN 45672-3:2023-02, Annex C, C.2 and Table C.1 (a floor transfer that comes from no table of Annex A, and a figure cited by the wrong number)
 
 - **Location:** C.2 on printed page 33 (PDF page 33) and the column
-  $\Delta L_{v,DF}$ of Table C.1 on printed page 34, against Table A.5 on
+  $\Delta L_{v,\mathrm{DF}}$ of Table C.1 on printed page 34, against Table A.5 on
   printed page 27 and Figure 4 on printed page 15.
 - **The print:** C.2 says the foundation-to-floor transfer of the example
   is "die Übertragungen vom Fundament zur Geschossdecke mit einer
@@ -7985,12 +7986,12 @@ in the same order.
   und Obergeschosse bei Holzbalkendecken" with "(D–u)", "(D–m)" and
   "(D–o)"; Figures 6
   and 7, the ground-to-floor transfer, label their vertical axis
-  "Pegeldifferenz $\Delta L_{v,DF}(f_{Tn})$ in dB".
+  "Pegeldifferenz $\Delta L_{v,\mathrm{DF}}(f_\mathrm{Tn})$ in dB".
 - **The problem:** the table Figure 5 draws, Table A.6, names its columns
   E–u, E–m and E–o; D–u, D–m and D–o are the columns of Table A.5, the
-  concrete floor of Figure 4. And Figures 6 and 7 draw $\Delta L_{v,DB}$,
+  concrete floor of Figure 4. And Figures 6 and 7 draw $\Delta L_{v,\mathrm{DB}}$,
   the ground-to-floor difference of Tables A.1 and A.2, as their captions
-  say; $\Delta L_{v,DF}$ is the foundation-to-floor difference of Figures 4
+  say; $\Delta L_{v,\mathrm{DF}}$ is the foundation-to-floor difference of Figures 4
   and 5.
 - **Evidence:** the legends on printed pages 16, 17 and 18 and the column
   headings on printed pages 28, 24 and 25. Verified on PDF page 16 (printed
@@ -8026,15 +8027,17 @@ in the same order.
 - **Location:** Formula (11) and its symbols on printed page 23 (PDF page
   23), against Formula (6) of E DIN 4150-2:2023-08 on its printed pages 19
   and 20.
-- **The print:** "$KB_{FTr} = \sqrt{\sum_{Zug=1}^{N_Z} \tfrac{n_{Zug}}{N_r}
-  (\alpha_{Zug} \cdot KB_{FTm,Zug})^2}$", introduced by "Berechnung der
-  Beurteilungs-Schwingstärke ($KB_{FTr}$) für den jeweiligen
-  Beurteilungszeitraum entsprechend DIN 4150-2", with $N_r$, $N_Z$,
-  $n_{Zug}$, $KB_{FTm,Zug}$ and $\alpha_{Zug}$ "nach informativem Anhang E"
-  listed under it and nothing else.
+- **The print:** "$KB_\mathrm{FTr} = \sqrt{\sum_{\mathrm{Zug}=1}^{N_\mathrm{Z}}
+  \tfrac{n_\mathrm{Zug}}{N_\mathrm{r}} (\alpha_\mathrm{Zug} \cdot
+  KB_\mathrm{FTm,Zug})^2}$", introduced by "Berechnung der
+  Beurteilungs-Schwingstärke ($KB_\mathrm{FTr}$) für den jeweiligen
+  Beurteilungszeitraum entsprechend DIN 4150-2", with $N_\mathrm{r}$,
+  $N_\mathrm{Z}$, $n_\mathrm{Zug}$, $KB_\mathrm{FTm,Zug}$ and
+  $\alpha_\mathrm{Zug}$ "nach informativem Anhang E" listed under it and
+  nothing else.
 - **The problem:** the sum, its symbols and the factors of Annex E are
   Formula (6) and Table 2 of the draft of DIN 4150-2, which prints under
-  its formula that a category whose $KB_{FTm,Zug}$ is at or below 0,1 enters
+  its formula that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0,1 enters
   as zero. The sentence is not reproduced, so a predicted category at or
   below 0,1 counts here and not in the assessment the formula says it
   performs.

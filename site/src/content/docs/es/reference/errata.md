@@ -7966,13 +7966,13 @@ dos ediciones con las mismas entradas y en el mismo orden.
   bei f_u = 1 Hz und f_o = 80 Hz» y «KB_F(t) ± 2 % Schwankung».
 - **Lo impreso:** para una entrada sinusoidal en las frecuencias de ensayo, la
   fila de pico marca 0,852 a 1 Hz, 1,000 a 5,6 Hz, 1,000 a 31,5 Hz, 0,843 a
-  80 Hz y 0,249 a 315 Hz; la fila $KB_F$ de esas mismas cinco columnas marca
+  80 Hz y 0,249 a 315 Hz; la fila $KB_\mathrm{F}$ de esas mismas cinco columnas marca
   0,103, 0,500, 0,693, 0,594 y 0,071.
 - **El problema:** las dos filas están calculadas sobre limitaciones de banda
   distintas, y la fila de pico no sigue la fórmula (5) de la propia norma. Con
   $f_u = 1$ Hz y $f_o = 80$ Hz esa fórmula da $|H_{u\mathrm{Soll}}|$ = 0,995 a
-  31,5 Hz y 0,100 a 315 Hz, frente a los 1,000 y 0,249 impresos. La fila $KB_F$
-  resuelve cuál de las dos es la lectura pretendida: $KB_F$ es
+  31,5 Hz y 0,100 a 315 Hz, frente a los 1,000 y 0,249 impresos. La fila $KB_\mathrm{F}$
+  resuelve cuál de las dos es la lectura pretendida: $KB_\mathrm{F}$ es
   $|H_{B\mathrm{Soll}}|/\sqrt{2}$ para una sinusoide de 1 mm/s, y a 31,5 Hz eso es
   0,6928 partiendo de 0,995 y 0,6962 partiendo de 1,000, así que el 0,693
   impreso es lo primero; a 315 Hz es 0,0709 partiendo de 0,100 y 0,176
@@ -8064,11 +8064,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % tras $4\tau$: más o menos la mitad de lo
   impreso.
 - **Evidencia:** la fórmula (1) en la misma página y la Figura 3 en la
-  siguiente, que dibuja $\tilde v_F/\hat v$ de una sinusoide de 8 Hz y de una de
-  20 Hz frente al tiempo en unidades de $\tau$, con la media marcada en 0,707.
-  En $2\tau$ las dos curvas oscilan alrededor de 0,66, que es el 93 % de 0,707,
-  y en $4\tau$ alrededor de 0,70. Verificado en la página 3 del PDF (p.
-  impresa 3) y en la página 4 del PDF (p. impresa 4) de la DIN 45672-2:1995-07.
+  siguiente, que dibuja $\tilde v_\mathrm{F}/\hat v$ de una sinusoide de
+  8 Hz y de una de 20 Hz frente al tiempo en unidades de $\tau$, con la
+  media marcada en 0,707. En $2\tau$ las dos curvas oscilan alrededor de
+  0,66, que es el 93 % de 0,707, y en $4\tau$ alrededor de 0,70. Verificado
+  en la página 3 del PDF (p. impresa 3) y en la página 4 del PDF
+  (p. impresa 4) de la DIN 45672-2:1995-07.
 - **Consecuencia para las tablas de la propia norma:** ninguna. El consejo que
   da la frase, arrancar el promediado antes de que llegue el tren, vale de las
   dos maneras; lo que queda sobrestimado es el tamaño del error que cuesta un
@@ -8116,20 +8117,20 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Localización:** anexo A, fórmulas (A.1a) y (A.1b) en la página impresa 11
   (página 11 del PDF de la copia leída aquí, que imprime sus folios sin
   desplazamiento).
-- **Lo impreso:** la fórmula (A.1a) dice $KB_{FTm,j} = \sqrt{\frac{1}{M_j}
-  \sum_{i=1}^{M_j} KB^2_{FTi,j}}$ y, «oder», la fórmula (A.1b) dice
-  $KB_{FTm,j} = \frac{1}{Z_j} \sum_{i=1}^{Z_j} KB^2_{FTi,j}$, para el caso en
-  que de la clase $j$ solo se midieron $Z_j$ intervalos ocupados.
+- **Lo impreso:** la fórmula (A.1a) dice $KB_\mathrm{FTm,j} = \sqrt{\frac{1}{M_\mathrm{j}}
+  \sum_{\mathrm{i}=1}^{M_\mathrm{j}} KB^2_\mathrm{FTi,j}}$ y, «oder», la fórmula (A.1b) dice
+  $KB_\mathrm{FTm,j} = \frac{1}{Z\mathrm{j}} \sum_{\mathrm{i}=1}^{Z\mathrm{j}} KB^2_\mathrm{FTi,j}$, para el caso en
+  que de la clase $\mathrm{j}$ solo se midieron $Z\mathrm{j}$ intervalos ocupados.
 - **El problema:** la segunda fórmula no lleva raíz sobre la suma, así que su
   lado izquierdo es un eficaz de máximos por intervalo y el derecho una media
   de cuadrados. Las dos están impresas como alternativas para la misma
   magnitud y solo difieren en el número sobre el que promedian, así que o
   llevan raíz las dos o ninguna; la fórmula (A.2) de debajo toma
-  $KB^2_{FTm,j}$ como la media de los cuadrados, que es lo que es el lado
+  $KB^2_\mathrm{FTm,j}$ como la media de los cuadrados, que es lo que es el lado
   derecho de (A.1b), y el ejemplo 8 resuelto en la página impresa 17 aplica
-  (A.1b) con la raíz: $KB_{FTm,1} = \sqrt{\tfrac{1}{3}(0{,}92^2 + 0{,}6^2 +
+  (A.1b) con la raíz: $KB_\mathrm{FTm,1} = \sqrt{\tfrac{1}{3}(0{,}92^2 + 0{,}6^2 +
   0{,}9^2)} = 0{,}82$ «aus Gleichung (A.1b)». O a (A.1b) se le perdió la raíz
-  o su lado izquierdo debería decir $KB^2_{FTm,j}$.
+  o su lado izquierdo debería decir $KB^2_\mathrm{FTm,j}$.
 - **Evidencia:** las dos fórmulas de la página impresa 11 y el ejemplo de la
   página impresa 17. Verificado en la página 11 del PDF (p. impresa 11) y en la
   página 17 del PDF (p. impresa 17) de la DIN 4150-2:1999-06: el radical de
@@ -8146,18 +8147,18 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Localización:** B.9.3.3, las dos fórmulas de la noche en la página impresa
   44 (página 44 del PDF de la copia leída aquí, que imprime sus folios sin
   desplazamiento), frente al 6.5.3.2 de la página impresa 19.
-- **Lo impreso:** $KB_{FTr,\mathrm{nachts}} = \sqrt{\tfrac{1}{920} \cdot (12 \cdot
+- **Lo impreso:** $KB_\mathrm{FTr,nachts} = \sqrt{\tfrac{1}{920} \cdot (12 \cdot
   (0{,}9 \cdot 0{,}24)^2 + 18 \cdot (1{,}0 \cdot 0{,}44)^2)} = 0{,}066$ para el
   caso sin el proyecto y, con el mismo divisor, $0{,}096 > 0{,}07$ para el caso
   planificado; las fórmulas del día de la misma página dividen por 1920.
-- **El problema:** el 6.5.3.2 fija $N_r$ de la fórmula (6) en 1920 intervalos
+- **El problema:** el 6.5.3.2 fija $N_\mathrm{r}$ de la fórmula (6) en 1920 intervalos
   de día y 960 de noche, que es lo que son 8 h de intervalos de 30 s. Los dos
   resultados de la noche reproducen 920 exactamente, 0,0663 y 0,0957, y con
   960 son 0,0649 y 0,0937, que se imprimen 0,065 y 0,094. La prueba del 25 %
   que sigue, $0{,}096 > 1{,}25 \cdot 0{,}066 = 0{,}082$, pasa a ser $0{,}094 >
   1{,}25 \cdot 0{,}065 = 0{,}081$ y llega a la misma conclusión.
 - **Evidencia:** el divisor 920 en las dos fórmulas de la noche de la página
-  impresa 44 y la definición de $N_r$ en la página impresa 19. Verificado en la
+  impresa 44 y la definición de $N_\mathrm{r}$ en la página impresa 19. Verificado en la
   página 44 del PDF (p. impresa 44) y en la página 19 del PDF (p. impresa 19)
   de la E DIN 4150-2:2023-08.
 - **Consecuencia para las tablas de la propia norma:** ninguna; la conclusión
@@ -8173,8 +8174,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Localización:** figura B.2 b) en la página impresa 33 (página 33 del PDF) y
   el texto de B.4.3.3 en la página impresa 34.
 - **Lo impreso:** la figura rotula los diez intervalos del martillo B con
-  $KB_{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, y el
-  texto pone el 0,04 a cero y encuentra «$KB_{FTmb}$ = 0,39».
+  $KB_\mathrm{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, y el
+  texto pone el 0,04 a cero y encuentra «$KB_\mathrm{FTmb}$ = 0,39».
 - **El problema:** el eficaz de esos diez valores con el 0,04 a cero es
   $\sqrt{1{,}3759 / 10} = 0{,}371$, no 0,39. Los rótulos del martillo A de la
   misma figura sí dan el 0,16 que usa el texto. La figura C.3 de la edición de
@@ -8183,7 +8184,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   veredictos no cambian con 0,37: 0,150 y 0,188 en lugar de 0,154 y 0,195.
 - **Evidencia:** los diez rótulos de la página impresa 33 y, en la página
   impresa 34, la frase «Somit ergibt sich aus Bild B.2.» con la línea
-  «$KB_{FTma}$ = 0,16 und $KB_{FTmb}$ = 0,39» debajo. Verificado en la página 33 del PDF (p. impresa 33) y en la
+  «$KB_\mathrm{FTma}$ = 0,16 und $KB_\mathrm{FTmb}$ = 0,39» debajo. Verificado en la página 33 del PDF (p. impresa 33) y en la
   página 34 del PDF (p. impresa 34) de la E DIN 4150-2:2023-08.
 - **Consecuencia para las tablas de la propia norma:** ninguna; los ejemplos 4
   y 5 concluyen lo mismo con cualquiera de los dos valores.
@@ -8244,15 +8245,15 @@ dos ediciones con las mismas entradas y en el mismo orden.
   B.9.3.3 y B.9.4 en la página impresa 44.
 - **Lo impreso:** «Falls eine der folgenden Bedingungen für den
   Prognoseplanfall vorliegt, gelten die Anforderungen dieses Dokuments als
-  eingehalten:», seguido de a) para $KB_{F\mathrm{max}}$ de día, b) para
-  $KB_{F\mathrm{max}}$ de noche y c) para $KB_{FTr}$, cada una cumplida bien
+  eingehalten:», seguido de a) para $KB_\mathrm{Fmax}$ de día, b) para
+  $KB_\mathrm{Fmax}$ de noche y c) para $KB_\mathrm{FTr}$, cada una cumplida bien
   respetando su valor de referencia, bien con un aumento inferior al 25 %
   frente al caso sin el proyecto.
 - **El problema:** leído tal como está impreso, basta una condición. El
   ejemplo 9 tiene la b) cumplida, «Für den Prognosefall bleibt der
-  $KB_{F\mathrm{max}}$-Wert unverändert bei 0,66», un aumento nulo, y aun así
+  $KB_\mathrm{Fmax}$-Wert unverändert bei 0,66», un aumento nulo, y aun así
   concluye en B.9.4 que hay que estudiar medidas correctoras porque
-  $KB_{FTr}$ de noche supera $A_r$ y crece más de un 25 %. Las tres letras
+  $KB_\mathrm{FTr}$ de noche supera $A_\mathrm{r}$ y crece más de un 25 %. Las tres letras
   son tres valoraciones de dos magnitudes, y el ejemplo aplica todas las que
   encajan en el caso; «eine der» dice lo contrario.
 - **Evidencia:** la frase y sus tres letras en la página impresa 22, y el
@@ -8271,7 +8272,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Localización:** la última fórmula de B.8.3.4 en la página impresa 39
   (página 39 del PDF), frente a la tabla B.1 en la página impresa 38.
-- **Lo impreso:** $KB_{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
+- **Lo impreso:** $KB_\mathrm{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
   \cdot 0)^2 + 144 \cdot (1{,}0 \cdot 0)^2 + 80 \cdot (0{,}7 \cdot 0{,}406\,1)^2 +
   80 \cdot (0{,}7 \cdot 0{,}567\,6)^2)} = 0{,}099\,8 > 0{,}07$.
 - **El problema:** con los 0,406 1 y 0,567 6 de cuatro decimales la fórmula
@@ -8296,9 +8297,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Localización:** B.4.3.3 en la página impresa 34 (página 34 del PDF),
   frente a 4.2.5 en la página impresa 12 y 6.4.2 en la página impresa 16.
 - **Lo impreso:** «Wegen der Annahme, dass Bild B.2 repräsentativ für die
-  gesamten Teileinwirkungszeiten $T_{ea}$ und $T_{eb}$ sei, gilt nach
-  Gleichung (2):», seguido de $KB_{FTma} = \sqrt{\tfrac{1}{10} \sum_{i=1}^{10}
-  KB^2_{FTia}}$ y lo mismo para el martillo B.
+  gesamten Teileinwirkungszeiten $T_\mathrm{ea}$ und $T_\mathrm{eb}$ sei, gilt nach
+  Gleichung (2):», seguido de $KB_\mathrm{FTma} = \sqrt{\tfrac{1}{10} \sum_{i=1}^{10}
+  KB^2_\mathrm{FTia}}$ y lo mismo para el martillo B.
 - **El problema:** eso es la fórmula (1) de 4.2.5, el eficaz de los máximos
   por intervalo sobre $N$ intervalos. La fórmula (2) de 6.4.2 es la
   intensidad de valoración a partir de exposiciones parciales, que el
@@ -8317,11 +8318,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Localización:** el último guion de B.3.2 en la página impresa 31 (página
   31 del PDF), frente a la nota bajo 6.3 en la página impresa 15.
-- **Lo impreso:** «Es ist zu prüfen, ob das $A_r$-Kriterium hier nicht zu
+- **Lo impreso:** «Es ist zu prüfen, ob das $A_\mathrm{r}$-Kriterium hier nicht zu
   berücksichtigen ist (siehe Anmerkung zu 6.2).»
-- **El problema:** la nota sobre el criterio $A_r$, las 4 h de día y 2 h de
+- **El problema:** la nota sobre el criterio $A_\mathrm{r}$, las 4 h de día y 2 h de
   noche por encima de las cuales una vibración estacionaria hace que no
-  merezca la pena formar $KB_{FTr}$, está impresa bajo 6.3 en el borrador;
+  merezca la pena formar $KB_\mathrm{FTr}$, está impresa bajo 6.3 en el borrador;
   6.2 son los valores de referencia. En la edición de 1999 la misma nota
   estaba bajo 6.2, el procedimiento, y la referencia cruzada del ejemplo no
   se movió con ella.
@@ -8341,12 +8342,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   15 del PDF), frente a 6.5.1.1 en la página impresa 17 y la figura 2 en la
   página impresa 15.
 - **Lo impreso:** «Für selten auftretende, kurzzeitige Einwirkungen ist die
-  Anforderung dieses Dokuments eingehalten, wenn $KB_{F\mathrm{max}}$ kleiner
-  als $A_o$ ist (siehe 6.5.1)»; 6.5.1.1 dice «wenn die maximale bewertete
-  Schwingstärke $KB_{F\mathrm{max}}$ kleiner oder gleich dem (oberen)
-  Anhaltswert $A_o$ nach Tabelle 1 ist», y el rombo de la figura 2 pregunta
-  «$KB_{F\mathrm{max}} \le A_o$?».
-- **El problema:** un suceso raro cuyo $KB_{F\mathrm{max}}$ es igual a $A_o$
+  Anforderung dieses Dokuments eingehalten, wenn $KB_\mathrm{Fmax}$ kleiner
+  als $A_\mathrm{o}$ ist (siehe 6.5.1)»; 6.5.1.1 dice «wenn die maximale bewertete
+  Schwingstärke $KB_\mathrm{Fmax}$ kleiner oder gleich dem (oberen)
+  Anhaltswert $A_\mathrm{o}$ nach Tabelle 1 ist», y el rombo de la figura 2 pregunta
+  «$KB_\mathrm{Fmax} \le A_\mathrm{o}$?».
+- **El problema:** un suceso raro cuyo $KB_\mathrm{Fmax}$ es igual a $A_\mathrm{o}$
   cumple según el apartado y la figura y no según el guion que remite a
   ellos.
 - **Evidencia:** el guion y el rombo en la página impresa 15 y la frase de
@@ -8366,10 +8367,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   35, frente a la fórmula (11) de la página impresa 23 y al anexo E de la
   página impresa 37.
 - **Lo impreso:** con 200 pasos de día y 20 de noche, el factor $\alpha$ = 0,7
-  de un tranvía en superficie y $KB_{FTm,Zug}$ = 0,4, la fórmula (11) da
-  «$KB_{FTr,Zug,Tag}$ = 0,11» y «$KB_{FTr,Zug,Nacht}$ = 0,05», y C.4 encuentra el
-  día superado, «0,11 > $A_{r,Tag}$ = 0,1».
-- **El problema:** la fórmula (11) con esas entradas y $N_r$ = 1920 de día y
+  de un tranvía en superficie y $KB_\mathrm{FTm,Zug}$ = 0,4, la fórmula (11) da
+  «$KB_\mathrm{FTr,Zug,Tag}$ = 0,11» y «$KB_\mathrm{FTr,Zug,Nacht}$ = 0,05», y C.4 encuentra el
+  día superado, «0,11 > $A_\mathrm{r,Tag}$ = 0,1».
+- **El problema:** la fórmula (11) con esas entradas y $N_\mathrm{r}$ = 1920 de día y
   960 de noche es $0{,}7 \cdot 0{,}4 \cdot \sqrt{200/1920} = 0{,}090$ y $0{,}7
   \cdot 0{,}4 \cdot \sqrt{20/960} = 0{,}040$. Los valores impresos son lo que
   dan esas mismas entradas con $\alpha$ bajo la raíz una vez en lugar de al
@@ -8377,10 +8378,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $0{,}4 \sqrt{0{,}7 \cdot 20/960} = 0{,}048$: el ejemplo pondera por el factor
   la energía de la categoría donde la fórmula (11) pondera su amplitud. Con
   el 0,090 de la fórmula el veredicto de C.4 sobre el día se invierte: 0,09
-  está por debajo del $A_r$ de 0,1 y el requisito se cumple.
+  está por debajo del $A_\mathrm{r}$ de 0,1 y el requisito se cumple.
 - **Evidencia:** las entradas de la página impresa 34, los dos resultados al
   principio de la página impresa 35 y la valoración debajo de ellos, la
-  fórmula y su $N_r$ en la página impresa 23 y los factores en la página
+  fórmula y su $N_\mathrm{r}$ en la página impresa 23 y los factores en la página
   impresa 37. Verificado en la página 34 del PDF
   (p. impresa 34), la página 35 del PDF (p. impresa 35), la página 23 del PDF
   (p. impresa 23) y la página 37 del PDF (p. impresa 37) de la
@@ -8402,9 +8403,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   21 y 22.
 - **Lo impreso:** la tabla cierra con la fila
   «Schwinggeschwindigkeitssummenpegel der betrachteten Zugkategorie
-  ($L_{v,Zug}$):» y 78,1 dB en su última columna, y C.3 lo lleva a la
+  ($L_{v,\mathrm{Zug}}$):» y 78,1 dB en su última columna, y C.3 lo lleva a la
   fórmula (9),
-  $KB_{FTm,Zug} = c_{T1} v_0 10^{L/20} = 0{,}4$, luego 0,6 por la fórmula (10) y
+  $KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L/20} = 0{,}4$, luego 0,6 por la fórmula (10) y
   «$v_{\max}$ = 1,81 mm/s» por la fórmula (12).
 - **El problema:** el apartado 7.1 a) suma primero a cada banda la ponderación
   KB de la tabla 2 (fórmula (8)) y suma las bandas de 4 Hz a 80 Hz. La suma
@@ -8430,7 +8431,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 ## E DIN 45672-3:2023-02, anexo C, C.2 y tabla C.1 (una transmisión al forjado que no sale de ninguna tabla del anexo A, y una figura citada con el número equivocado)
 
 - **Localización:** C.2 en la página impresa 33 (página 33 del PDF) y la
-  columna $\Delta L_{v,DF}$ de la tabla C.1 en la página impresa 34, frente a la
+  columna $\Delta L_{v,\mathrm{DF}}$ de la tabla C.1 en la página impresa 34, frente a la
   tabla A.5 de la página impresa 27 y la figura 4 de la página impresa 15.
 - **Lo impreso:** C.2 dice que la transmisión de la cimentación al forjado del
   ejemplo es «die Übertragungen vom Fundament zur Geschossdecke mit einer
@@ -8497,12 +8498,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   los forjados de madera, rotula sus curvas 1, 2 y 3 «Übertragung Fundament →
   Erdgeschoss und Obergeschosse bei Holzbalkendecken» con «(D–u)», «(D–m)» y
   «(D–o)»; las figuras 6 y 7, la transmisión del terreno al forjado, rotulan su eje
-  vertical «Pegeldifferenz $\Delta L_{v,DF}(f_{Tn})$ in dB».
+  vertical «Pegeldifferenz $\Delta L_{v,\mathrm{DF}}(f_\mathrm{Tn})$ in dB».
 - **El problema:** la tabla que dibuja la figura 5, la A.6, llama a sus
   columnas E–u, E–m y E–o; D–u, D–m y D–o son las columnas de la tabla A.5, el
   forjado de hormigón de la figura 4. Y las figuras 6 y 7 dibujan
-  $\Delta L_{v,DB}$, la diferencia del terreno al forjado de las tablas A.1 y
-  A.2, como dicen sus pies; $\Delta L_{v,DF}$ es la diferencia de la
+  $\Delta L_{v,\mathrm{DB}}$, la diferencia del terreno al forjado de las tablas A.1 y
+  A.2, como dicen sus pies; $\Delta L_{v,\mathrm{DF}}$ es la diferencia de la
   cimentación al forjado de las figuras 4 y 5.
 - **Evidencia:** las leyendas de las páginas impresas 16, 17 y 18 y las
   cabeceras de columna de las páginas impresas 28, 24 y 25. Verificado en la
@@ -8541,15 +8542,17 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Localización:** la fórmula (11) y sus símbolos en la página impresa 23
   (página 23 del PDF), frente a la fórmula (6) de la E DIN 4150-2:2023-08 en
   sus páginas impresas 19 y 20.
-- **Lo impreso:** «$KB_{FTr} = \sqrt{\sum_{Zug=1}^{N_Z} \tfrac{n_{Zug}}{N_r}
-  (\alpha_{Zug} \cdot KB_{FTm,Zug})^2}$», introducida por «Berechnung der
-  Beurteilungs-Schwingstärke ($KB_{FTr}$) für den jeweiligen
-  Beurteilungszeitraum entsprechend DIN 4150-2», con $N_r$, $N_Z$,
-  $n_{Zug}$, $KB_{FTm,Zug}$ y $\alpha_{Zug}$ «nach informativem Anhang E»
-  listados debajo y nada más.
+- **Lo impreso:** «$KB_\mathrm{FTr} = \sqrt{\sum_{\mathrm{Zug}=1}^{N_\mathrm{Z}}
+  \tfrac{n_\mathrm{Zug}}{N_\mathrm{r}} (\alpha_\mathrm{Zug} \cdot
+  KB_\mathrm{FTm,Zug})^2}$», introducida por «Berechnung der
+  Beurteilungs-Schwingstärke ($KB_\mathrm{FTr}$) für den jeweiligen
+  Beurteilungszeitraum entsprechend DIN 4150-2», con $N_\mathrm{r}$,
+  $N_\mathrm{Z}$, $n_\mathrm{Zug}$, $KB_\mathrm{FTm,Zug}$ y
+  $\alpha_\mathrm{Zug}$ «nach informativem Anhang E» listados debajo y nada
+  más.
 - **El problema:** la suma, sus símbolos y los factores del anexo E son la
   fórmula (6) y la tabla 2 del borrador de la DIN 4150-2, que imprime bajo
-  su fórmula que una categoría cuyo $KB_{FTm,Zug}$ es igual o inferior a 0,1
+  su fórmula que una categoría cuyo $KB_\mathrm{FTm,Zug}$ es igual o inferior a 0,1
   entra como cero. La frase no se reproduce, así que una categoría predicha
   igual o inferior a 0,1 cuenta aquí y no en la valoración que la fórmula
   dice realizar.

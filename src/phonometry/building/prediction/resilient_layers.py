@@ -13,8 +13,8 @@ The chain is one story told in three steps.
 
 **1. The excitation (Hopkins 3.6.3).** The ISO tapping machine drops a 0.5 kg
 hammer from 40 mm, ten impacts per second, so the impact velocity is
-:math:`v_o = \sqrt{2 g h} = 0.886` m/s (Eq. 3.85) and, for a short impact, the
-peak force per Fourier line is :math:`|F_n| = 2 m v_o/T_i` (Eq. 3.90), giving
+:math:`v_0 = \sqrt{2 g h} = 0.886` m/s (Eq. 3.85) and, for a short impact, the
+peak force per Fourier line is :math:`|F_n| = 2 m v_0/T_\mathrm{i}` (Eq. 3.90), giving
 the band mean-square force :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92). Real floors
 are not that simple: the hammer, the contact stiffness ``K`` it deforms and the
 floor's driving-point impedance ``Zdp`` form a mass-spring-dashpot (Fig. 3.28)
@@ -23,8 +23,8 @@ when :math:`K m \ge 4 Z_\mathrm{dp}^{2}` (a single positive pulse, no rebound) a
 **under-critical** otherwise (a rebound; only the first positive lobe is
 transformed). Its spectrum (:func:`tapping_force_spectrum`) is flat up to the
 cut-off ``fco`` (Eqs. 3.101/3.102) and falls above it, and it asymptotes at low
-frequency between :math:`|F_n|_{\text{lower}} = m v_o/T_i` and
-:math:`|F_n|_{\text{upper}} = 2 m v_o/T_i`, 6 dB apart in mean square
+frequency between :math:`|F_n|_{\text{lower}} = m v_0/T_\mathrm{i}` and
+:math:`|F_n|_{\text{upper}} = 2 m v_0/T_\mathrm{i}`, 6 dB apart in mean square
 (Eqs. 3.99/3.100).
 
 **2. Soft floor coverings (Hopkins 4.4.3.1).** A soft covering on a heavyweight
@@ -218,11 +218,11 @@ def _band_factor(band: BandWidth) -> float:
 def hammer_impact_velocity(
     drop_height: float = TAPPING_DROP_HEIGHT, *, gravity: float = _GRAVITY
 ) -> float:
-    r"""Hammer velocity at impact :math:`v_o = \sqrt{2 g h}` (Hopkins
+    r"""Hammer velocity at impact :math:`v_0 = \sqrt{2 g h}` (Hopkins
     Eq. 3.85).
 
     The ISO tapping machine's nominal 40 mm drop gives
-    :math:`v_o = 0.886` m/s.
+    :math:`v_0 = 0.886` m/s.
 
     :param drop_height: Drop height ``h``, in m (Default: 0,04).
     :param gravity: Acceleration of free fall ``g``, in m/s² (Default: 9,81).
@@ -462,8 +462,8 @@ def short_pulse_mean_square_force(
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
 
     The limiting case in which the impact is short enough that the hammer's
-    momentum alone sets the force: combining :math:`|F_n| = 2 m v_o/T_i`
-    (Eq. 3.90) with :math:`F_\mathrm{rms}^{2} = |F_n|^{2} B/(2 f_i)` (Eq. 3.91)
+    momentum alone sets the force: combining :math:`|F_n| = 2 m v_0/T_\mathrm{i}`
+    (Eq. 3.90) with :math:`F_\mathrm{rms}^{2} = |F_n|^{2} B/(2 f_\mathrm{i})` (Eq. 3.91)
     gives 3.925 B, printed as 3.9 B. Hopkins finds it adequate for bare
     concrete slabs of at least 100 mm.
 
@@ -497,9 +497,9 @@ class TappingForceResult:
     :ivar contact_stiffness: Contact stiffness ``K`` used, in N/m.
     :ivar impedance: Driving-point impedance ``Zdp`` used, in N.s/m.
     :ivar lower_limit: Low-frequency asymptote
-        :math:`\lvert F_n \rvert_{\text{lower}} = m v_o/T_i`, in N (Eq. 3.99).
+        :math:`\lvert F_n \rvert_{\text{lower}} = m v_0/T_\mathrm{i}`, in N (Eq. 3.99).
     :ivar upper_limit: Low-frequency asymptote
-        :math:`\lvert F_n \rvert_{\text{upper}} = 2 m v_o/T_i`, in N
+        :math:`\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}`, in N
         (Eq. 3.100); 6 dB above ``lower_limit`` in mean square.
     :ivar band: Band width used for ``mean_square_force``.
     """
@@ -581,9 +581,9 @@ def tapping_force_spectrum(
 
     The Fourier transform of the single-impact force pulse
     (:func:`force_pulse`), scaled by the impact repetition rate. Writing
-    :math:`a = K/(2 Z_\mathrm{dp})` and :math:`\omega_o^{2} = K/m`, the transform of
+    :math:`a = K/(2 Z_\mathrm{dp})` and :math:`\omega_0^{2} = K/m`, the transform of
     Eqs. (3.95)/(3.96) is the same rational function in both critical cases,
-    :math:`\hat{F}(\omega) = v_o K/(\omega_o^{2} - \omega^{2} + 2 i a \omega)`,
+    :math:`\hat{F}(\omega) = v_0 K/(\omega_0^{2} - \omega^{2} + 2 i a \omega)`,
     multiplied for the under-critical case by
     :math:`1 + e^{-a \pi/\beta} e^{-i \omega \pi/\beta}` because only the
     first positive lobe (of duration :math:`\pi/\beta`) is transformed. That
@@ -593,8 +593,8 @@ def tapping_force_spectrum(
     into bands.
 
     The transform is normalised so that the low-frequency asymptote is
-    :math:`m v_o/T_i` for an over-critical impact (no rebound) and
-    :math:`2 m v_o/T_i` for a lightly damped under-critical one (full
+    :math:`m v_0/T_\mathrm{i}` for an over-critical impact (no rebound) and
+    :math:`2 m v_0/T_\mathrm{i}` for a lightly damped under-critical one (full
     rebound), the two limits of Eqs. (3.99)/(3.100).
 
     :param frequencies: Band centre frequencies ``f``, in Hz.
@@ -669,7 +669,7 @@ class CoveringImprovementResult:
     :ivar cut_off_frequency: Cut-off frequency ``fco`` of the covered floor,
         in Hz.
     :ivar bare_cut_off_frequency: Cut-off frequency of the bare plate, in Hz.
-    :ivar lines: Fourier line frequencies :math:`n f_i` of the tapping
+    :ivar lines: Fourier line frequencies :math:`n f_\mathrm{i}` of the tapping
         machine, in Hz, covering every band in ``frequencies``.
     :ivar line_improvement: The per-line ratio
         :math:`\Delta L = 20 \log_{10}(\lvert F_n \rvert_{\text{without}}/\lvert

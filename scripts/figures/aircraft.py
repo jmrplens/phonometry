@@ -597,9 +597,9 @@ def generate_rotorcraft_insertion_loss(output_dir: str) -> None:
     # figure now plots, higher up (where it used to sit) the 250 Hz curve
     # cuts straight through the text.
     ax.annotate(
-        r"$10\,C_\mathrm{h}\,\mathrm{lg}\,3$ at grazing incidence ($\delta = 0$):"
+        r"$10\,C_h\,\mathrm{lg}\,3$ at grazing incidence ($\delta = 0$):"
         "\n"
-        rf"{grazing:.1f} dB where $C_\mathrm{{h}}$ = 1, {grazing_63:.1f} dB at 63 Hz",
+        rf"{grazing:.1f} dB where $C_h$ = 1, {grazing_63:.1f} dB at 63 Hz",
         xy=(0.0, grazing),
         xytext=(0.45, 1.6),
         fontsize=9,

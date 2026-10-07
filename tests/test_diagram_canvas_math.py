@@ -295,15 +295,44 @@ def test_consecutive_scripts_stay_legal() -> None:
     assert _group_ys(element) == ["100", "104.4", "92.4"]
 
 
-def test_nested_script_raises() -> None:
+def test_a_subscript_inside_an_exponent_is_set_against_the_exponent() -> None:
+    # The energy sums of the standards print the level inside the exponent
+    # with its own subscript: 10^{L_i/10}. The subscript drops by 0.22 of the
+    # exponent's size from the exponent's baseline and is set at 0.70 of it.
+    runs = _math_runs("$10^{L_i/10}$")
+    assert [(text, italic) for text, italic, _, _ in runs] == [
+        ("10", False),
+        ("L", True),
+        ("i", True),
+        ("/10", False),
+    ]
+    assert runs[1][2:] == pytest.approx((-0.38, 0.70))
+    assert runs[2][2:] == pytest.approx((-0.38 + 0.70 * 0.22, 0.70 * 0.70))
+    assert runs[3][2:] == pytest.approx((-0.38, 0.70))
+
+
+def test_the_braces_of_an_exponent_close_after_its_own_subscript() -> None:
+    # The first closing brace after "^{" is the subscript's; the exponent
+    # runs on to the brace that matches its own.
+    runs = _math_runs("$10^{L_{Keq,Ti}/10}$")
+    assert [text for text, _, _, _ in runs] == ["10", "L", "Keq,", "Ti", "/10"]
+
+
+def test_a_superscript_keeps_its_letters_italic() -> None:
+    # The curated runs are subscript abbreviations: in an exponent a letter
+    # is a variable, the order m of 2^m - 1 or the level L of 10^{L/10},
+    # though m and L are both on the curated list.
+    assert _math_runs("$2^m$")[1] == ("m", True, -0.38, 0.70)
+    assert _math_runs("$10^{L/10}$")[1] == ("L", True, -0.38, 0.70)
+    assert _math_runs("$f_m$")[1] == ("m", False, 0.22, 0.70)
+
+
+def test_a_third_script_level_raises() -> None:
     with pytest.raises(
-        ValueError, match="nested script '_1' inside a script"
+        ValueError, match="nested script '_d' inside a script of a script"
     ) as excinfo:
-        _element("$L_{p_1}$")
-    assert "nested script" in str(excinfo.value)
-    assert "'$L_{p_1}$'" in str(excinfo.value)
-    with pytest.raises(ValueError, match=r"nested script '\^2' inside a script"):
-        _element("$a_{b^2}$")
+        _element("$a^{b_{c_d}}$")
+    assert "'$a^{b_{c_d}}$'" in str(excinfo.value)
 
 
 def test_empty_script_payload_raises() -> None:
@@ -532,7 +561,9 @@ def _style_runs(s: str) -> list[list[tuple[str, str]]]:
             else:
                 pieces = [
                     (kind, kind2)
-                    for kind2, _, _ in canvas._math_tokens(payload, s, script=True)
+                    for kind2, _, _ in canvas._math_tokens(
+                        payload, s, depth=1, superscript=kind == "sup"
+                    )
                 ]
             for piece in pieces:
                 if not runs or runs[-1] != piece:

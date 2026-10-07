@@ -6088,14 +6088,14 @@ def generate_kb_time_response(output_dir: str) -> None:
         reading.kbf,
         color=COLOR_PRIMARY,
         linewidth=1.2,
-        label="$KB_F(t)$, running r.m.s. with $\\tau$ = 0.125 s",
+        label="$KB_\\mathrm{F}(t)$, running r.m.s. with $\\tau$ = 0.125 s",
     )
     axes[1].axhline(
         reading.kbf_max,
         color=COLOR_SECONDARY,
         linestyle="--",
         linewidth=1.4,
-        label=f"$KB_{{F\\mathrm{{max}}}}$ = {reading.kbf_max:.3f}",
+        label=f"$KB_\\mathrm{{Fmax}}$ = {reading.kbf_max:.3f}",
     )
     takt_s = vibration.TAKT_DURATION_S
     centres = (np.arange(reading.takt_maxima.size) + 0.5) * takt_s
@@ -6113,12 +6113,12 @@ def generate_kb_time_response(output_dir: str) -> None:
         color=COLOR_TERTIARY,
         linestyle=":",
         linewidth=1.4,
-        label=f"$KB_{{FTm}}$ = {reading.kbf_takt_rms:.3f}",
+        label=f"$KB_\\mathrm{{FTm}}$ = {reading.kbf_takt_rms:.3f}",
     )
     for edge in np.arange(takt_s, 90.0, takt_s):
         axes[1].axvline(edge, color=COLOR_GRID, linewidth=0.8, alpha=0.8)
     axes[1].set_xlabel("Time [s]")
-    axes[1].set_ylabel("Weighted vibration severity $KB_F$")
+    axes[1].set_ylabel("Weighted vibration severity $KB_\\mathrm{F}$")
     axes[1].set_xlim(0.0, 90.0)
     axes[1].set_ylim(0.0, 1.55)
     axes[1].grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
@@ -6231,14 +6231,14 @@ def generate_railway_passage(output_dir: str) -> None:
         passage.running_rms_mm_s,
         color=COLOR_PRIMARY,
         linewidth=1.8,
-        label="running r.m.s. $\\tilde v_F(t)$, $\\tau$ = 0.125 s",
+        label="running r.m.s. $\\tilde v_\\mathrm{F}(t)$, $\\tau$ = 0.125 s",
     )
     ax.axhline(
         passage.running_rms_max_mm_s,
         color=COLOR_SECONDARY,
         linestyle="--",
         linewidth=1.4,
-        label=f"$\\tilde v_{{F\\mathrm{{max}}}}$ = {passage.running_rms_max_mm_s:.3f} mm/s",
+        label=f"$\\tilde v_\\mathrm{{Fmax}}$ = {passage.running_rms_max_mm_s:.3f} mm/s",
     )
     bracket_axes = ax.get_xaxis_transform()
     for index, ((start, end), row) in enumerate(
@@ -6308,7 +6308,7 @@ def generate_railway_spectra(output_dir: str) -> None:
         linewidth=1.8,
         marker="o",
         markersize=5,
-        label="maximum level $L_{vF\\mathrm{max}}$ over $T_3$, Formula (7)",
+        label="maximum level $L_{v\\mathrm{Fmax}}$ over $T_3$, Formula (7)",
     )
     ax.plot(
         positions,
@@ -6318,7 +6318,7 @@ def generate_railway_spectra(output_dir: str) -> None:
         linestyle="--",
         marker="s",
         markersize=5,
-        label="interval level $L_{vF2}$ over $T_2$, Formula (6)",
+        label="interval level $L_{v\\mathrm{F}2}$ over $T_2$, Formula (6)",
     )
     ax.plot(
         positions,
@@ -6449,7 +6449,7 @@ def generate_people_guide_values(output_dir: str) -> None:
             [v.a_r for v in values],
             width,
             color=COLOR_TERTIARY,
-            label="$A_r$, for the assessment severity",
+            label=r"$A_\mathrm{r}$, for the assessment severity",
         )
         ax.plot(
             positions,
@@ -6500,14 +6500,20 @@ def generate_people_trains_per_hour(output_dir: str) -> None:
     for a_r, colour in colours.items():
         # KB_FTm at which n trains an hour reach A_r: A_r sqrt(120 / n).
         kb_ftm = a_r * np.sqrt(takte_per_hour / trains)
-        ax.loglog(trains, kb_ftm, color=colour, linewidth=1.8, label=f"$A_r$ = {a_r:g}")
+        ax.loglog(
+            trains,
+            kb_ftm,
+            color=colour,
+            linewidth=1.8,
+            label=rf"$A_\mathrm{{r}}$ = {a_r:g}",
+        )
     for a_r in (0.05, 0.07):
         n = vibration.admissible_trains_per_hour(0.2, a_r)
         ax.plot(
             [n], [0.2], color=colours[a_r], marker="o", markersize=7, linestyle="none"
         )
         ax.annotate(
-            f"{int(n)} trains an hour at $KB_{{FTm}}$ = 0.2",
+            f"{int(n)} trains an hour at $KB_\\mathrm{{FTm}}$ = 0.2",
             xy=(n, 0.2),
             xytext=(n * 1.9, 0.2 * (1.55 if a_r == 0.05 else 0.6)),
             fontsize=9,
@@ -6520,12 +6526,12 @@ def generate_people_trains_per_hour(output_dir: str) -> None:
             },
         )
     ax.set_title(
-        "A railway class against $A_r$, one clock interval per train "
+        r"A railway class against $A_\mathrm{r}$, one clock interval per train "
         "(DIN 4150-2 Figure D.1)",
         pad=12,
     )
     ax.set_xlabel("Trains an hour")
-    ax.set_ylabel("Clock maximum r.m.s. $KB_{FTm}$")
+    ax.set_ylabel("Clock maximum r.m.s. $KB_\\mathrm{FTm}$")
     ax.set_xlim(0.5, 100.0)
     ax.set_ylim(0.1, 5.0)
     ax.set_xticks([0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0])
@@ -6614,7 +6620,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
     ax.text(
         0.02,
         0.04,
-        f"$KB_{{FTm}}$ = {prediction.kb_ftm:.2f}, $KB_{{F\\mathrm{{max}}}}$ = "
+        f"$KB_\\mathrm{{FTm}}$ = {prediction.kb_ftm:.2f}, $KB_\\mathrm{{Fmax}}$ = "
         f"{prediction.kb_fmax:.2f}, $v_{{\\max}}$ = {prediction.peak_velocity_mm_s:.2f} mm/s",
         transform=ax.transAxes,
         fontsize=9,
@@ -6744,7 +6750,7 @@ def generate_railway_change_example(output_dir: str) -> None:
         ax.text(
             x[i] + 0.46,
             a_r,
-            f"$A_r$ = {a_r:g}",
+            rf"$A_\mathrm{{r}}$ = {a_r:g}",
             va="center",
             fontsize=9,
             color=COLOR_SECONDARY,
@@ -6776,7 +6782,7 @@ def generate_railway_change_example(output_dir: str) -> None:
         },
     )
     ax.annotate(
-        "0.094 against 0.065: over 25 %,\nand above $A_r$, so mitigation",
+        "0.094 against 0.065: over 25 %,\nand above $A_\\mathrm{r}$, so mitigation",
         xy=(x[1] + 0.19, after[1]),
         xytext=(x[1] + 0.02, 0.106),
         fontsize=9,
@@ -6790,7 +6796,7 @@ def generate_railway_change_example(output_dir: str) -> None:
     )
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
-    ax.set_ylabel("Assessment vibration severity $KB_{FTr}$")
+    ax.set_ylabel("Assessment vibration severity $KB_\\mathrm{FTr}$")
     ax.set_ylim(0.0, 0.13)
     ax.set_xlim(-0.7, 1.7)
     ax.set_title(

@@ -561,14 +561,15 @@ referencia, y los micrófonos deben responder a todo camino de reflexión
 concebible dentro de $\pm 1$ dB y $\pm 10°$ (apartado 7.2). Y **la misma
 cadena, sobre el mismo banco, debe ejecutarse de nuevo sobre un panel plano de
 referencia de la misma huella**: ese segundo juego de niveles es el que aporta
-el $d_\mathrm{ref}$ del coeficiente normalizado $d_\mathrm{norm}$ de la fórmula (7).
+el $d_\mathrm{ref}$ del coeficiente normalizado $d_\mathrm{n}$ de la fórmula (7).
 Un coeficiente normalizado citado contra una referencia medida en otro sitio no
 es un coeficiente normalizado.
 
 *Una nota sobre los símbolos, antes de las fórmulas.* La ISO 17497-2 escribe el
-coeficiente normalizado como $d_\mathrm{n}$; esta página lo escribe $d_\mathrm{norm}$,
-porque la sección 3 necesita el subíndice $n$ para el índice de pozo y escribe
-$d_n$ para una **profundidad** de pozo. En el mismo espíritu, el $s_n$ de la
+coeficiente normalizado como $d_\mathrm{n}$, con la n recta porque abrevia
+«normalizado», y esta página lo escribe igual; la sección 3 escribe $d_n$, con
+la n cursiva, para la **profundidad** del pozo $n$, de modo que es la
+inclinación del subíndice la que distingue los dos. En el mismo espíritu, el $s_n$ de la
 sección 3 es un índice de profundidad de residuo cuadrático y no el coeficiente
 de dispersión $s$ de la sección 1; el factor de área $N_i$ de abajo no tiene
 relación con el orden de secuencia $N$ de la sección 3; y la $n$ de la
@@ -763,11 +764,9 @@ d_ref = materials.directional_diffusion_coefficient(flat.levels)
 print(round(float(d_ref), 4))        # 0.0049
 
 # Normaliza frente a la referencia plana para aislar el efecto propio del
-# difusor (fórmula (7)): d_norm = (d - d_ref) / (1 - d_ref). La ISO 17497-2 lo
-# escribe d_n; esta página reserva el subíndice n para el índice de pozo de la
-# sección 3.
-d_norm = materials.normalized_diffusion_coefficient(d, d_ref)
-print(round(float(d_norm), 4))       # 0.1055
+# difusor (fórmula (7)): d_n = (d - d_ref) / (1 - d_ref).
+d_n = materials.normalized_diffusion_coefficient(d, d_ref)
+print(round(float(d_n), 4))          # 0.1055
 
 # Valor de incidencia aleatoria: promedia los coeficientes de banda sobre las
 # posiciones de fuente, con la ponderación 2-D de la norma (0 grados -> 1,
@@ -855,12 +854,12 @@ que exige el 1, no existe.
 Porque es una frecuencia, una dirección de fuente y seis repeticiones de un
 periodo: los lóbulos de red de un array periódico dominan una respuesta polar
 monofrecuencia, y la fórmula (5) lee un abanico de lóbulos como mala
-uniformidad. La magnitud que clasifica un producto es el $d_\mathrm{norm}$ de
+uniformidad. La magnitud que clasifica un producto es el $d_\mathrm{n}$ de
 incidencia aleatoria banda a banda, promediado sobre las posiciones de fuente
 del apartado 8.4, que es a la vez más alto y más suave. De ahí salen tres reglas
 de lectura:
 
-- Compara $d_\mathrm{norm}$, nunca $d$, entre productos de tamaños distintos: la
+- Compara $d_\mathrm{n}$, nunca $d$, entre productos de tamaños distintos: la
   normalización es lo que quita la difracción de borde que enseña todo panel
   finito y que crece según encoge el panel.
 - Lee el espectro entero. La difusión cae por debajo de la frecuencia a la que
@@ -880,7 +879,7 @@ caracterización enmarcado. Según el apartado 8.4, el coeficiente de incidencia
 aleatoria es a su vez una magnitud por banda, la media de los coeficientes
 direccionales sobre las posiciones de fuente banda a banda (**no** una media a
 través de las frecuencias), de modo que aquí $d$ es un coeficiente por banda.
-`verbose=True` añade la columna del coeficiente normalizado $d_\mathrm{norm}$ a
+`verbose=True` añade la columna del coeficiente normalizado $d_\mathrm{n}$ a
 la tabla (la curva siempre lo dibuja como acompañante cuando está presente).
 
 ```python
@@ -1289,7 +1288,7 @@ decente no significa que se dispersara mucha energía.
 - **El coeficiente de difusión valora difusores.** Cuando la tarea es
   deshacer un eco, un flutter o una reflexión focalizada, lo que importa es
   que la energía reflejada se reparta en ángulo, y $d$ mide exactamente eso.
-  El $d_\mathrm{norm}$ normalizado (fórmula (7)) resta además la difracción de
+  El $d_\mathrm{n}$ normalizado (fórmula (7)) resta además la difracción de
   borde que exhibe todo panel finito, de modo que productos de tamaños distintos
   puedan compararse con justicia.
 

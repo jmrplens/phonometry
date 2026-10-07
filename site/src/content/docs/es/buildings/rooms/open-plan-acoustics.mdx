@@ -538,12 +538,12 @@ No sobrevive ni $L_W$ ni $N$. Una sala más llena no es intrínsecamente peor,
 porque cada mesa nueva aporta a la vez un hablante y su propia cuota de
 absorción. Lo que decide si un restaurante funciona es la absorción **por
 mesa**, no la absorción de la sala. Exigir $L_\mathrm{SN} > -6$ dB para una
-comunicación adecuada a una separación $r_s$ a través de la mesa, y
-$L_\mathrm{SN} < -9$ dB para que no se escuche a una mesa vecina situada a $r_t$, se
+comunicación adecuada a una separación $r_\mathrm{s}$ a través de la mesa, y
+$L_\mathrm{SN} < -9$ dB para que no se escuche a una mesa vecina situada a $r_\mathrm{t}$, se
 traduce en un par de cotas de diseño (ecs. (17.53) y (17.54)):
 
 $$
-A_\text{mesa} > 6,31\,r_s^2, \qquad A_\text{mesa} < 3,16\,r_t^2 \qquad (Q = 2).
+A_\text{mesa} > 6,31\,r_\mathrm{s}^2, \qquad A_\text{mesa} < 3,16\,r_\mathrm{t}^2 \qquad (Q = 2).
 $$
 
 :::caution
@@ -570,17 +570,17 @@ crowd.plot()      # ruido autogenerado vs ocupación, frente al límite de -6 dB
 ```
 
 Las dos cotas son una **ventana**, y puede estar vacía. Exigir
-$6{,}31\,r_s^2 < A_\text{mesa} < 3{,}16\,r_t^2$ significa que la ventana solo
-existe cuando $r_t/r_s > \sqrt{6{,}31/3{,}16} \approx 1{,}41$: junta las mesas más
+$6{,}31\,r_\mathrm{s}^2 < A_\text{mesa} < 3{,}16\,r_\mathrm{t}^2$ significa que la ventana solo
+existe cuando $r_\mathrm{t}/r_\mathrm{s} > \sqrt{6{,}31/3{,}16} \approx 1{,}41$: junta las mesas más
 que eso y no hay absorción alguna que permita conversar a través de tu propia
 mesa sin que te oigan en la de al lado. La distribución de arriba pasa, con
-$r_t/r_s = 1{,}67$ y 3,6 m² de margen entre las cotas.
+$r_\mathrm{t}/r_\mathrm{s} = 1{,}67$ y 3,6 m² de margen entre las cotas.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_per_table.svg" alt="Dos paneles. A la izquierda, la absorción por mesa ocupada frente a la separación, con la cota de comunicación 6,31 r al cuadrado por encima de la cota de privacidad 3,16 r al cuadrado, los dos puntos calculados a 1 metro y a 2,5 metros marcados, y la banda factible de 9,1 a 12,7 metros cuadrados sombreada para una distribución con 1,2 metros a través de la mesa y 2,0 metros entre mesas. A la derecha, la anchura de esa ventana factible frente a la razón entre el paso de mesas y la separación a través de la mesa, cruzando el cero en 1,41 y alcanzando 3,6 metros cuadrados en la razón 1,67 de esta distribución" width="94%" />
 
 *Izquierda: para una distribución, las dos desigualdades dejan una banda de
 absorción por mesa factible. Derecha: cuánto mide esa banda a medida que las
-mesas se separan: por debajo de $r_t/r_s = 1{,}41$ tiene anchura negativa, que es
+mesas se separan: por debajo de $r_\mathrm{t}/r_\mathrm{s} = 1{,}41$ tiene anchura negativa, que es
 el enunciado geométrico de que conversación y privacidad se han vuelto
 incompatibles sea cual sea el material del techo.*
 

@@ -245,18 +245,21 @@ def _d_impulse_prominence(s: SVG, th: Theme) -> None:
     s.arrow(cx, 394, cx, 426, th.fg, 1.8)
 
     # --- Output -------------------------------------------------------------
-    # The rating-level formula stays uncomposed for now: the exponent
-    # carries the subscripts of LAeq and KI, and the composer sets a single
-    # script level (same 10^(L/10) family as the energy sums elsewhere).
+    # Note 1 to clause 8, as the guide writes it: the A-weighting, the rating
+    # and the adjustment upright, the reference time T and the interval
+    # index N italic.
     s.rect(x0, 426, bw, 60, "none", th.primary, rx=10, sw=2.4)
     s.text(
         cx,
         452,
-        "Rating level  LAr,T = 10·log10( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
+        "Rating level  $L_{Ar,T} = 10 log_{10}((1/T) Σ_N Δt_N·"
+        "10^{(L_{Aeq,N} + K_{I,N})/10})$",
         15,
         th.fg,
         "middle",
         bold=True,
+        upright=("K_I",),
+        sloped=("L_T",),
     )
     s.text(
         cx,
@@ -517,13 +520,14 @@ def _d_ground_reflection(s: SVG, th: Theme) -> None:
     # Governing relations (top block, clear of the geometry).
     s.text(560.0, 88.0, "path difference  $δ = r_2 − r_1$", 17, th.fg, bold=True)
     s.text(560.0, 114.0, "phase difference  $Δφ = 2π δ / λ$  (+ $arg Q$)", 15, th.fg)
-    # The pressure sum stays uncomposed for now: each exponent carries
-    # the subscripts of r1 and r2, and the composer sets a single script
-    # level (nested-script family).
+    # The two-ray sum of Salomons (2001), Equation (3.2), written as he
+    # prints it, with exp() for the exponential and the italic i of the
+    # imaginary unit, over the path lengths this plate labels r_1 and r_2.
     s.text(
         560.0,
         142.0,
-        "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = ground reflection coefficient)",
+        "$p ∝ exp(i\u2009k\u2009r_1)/r_1 + Q·exp(i\u2009k\u2009r_2)/r_2$   "
+        "($Q$ = ground reflection coefficient)",
         14,
         th.muted,
     )
@@ -1445,18 +1449,17 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
-    # The LKeq strings of this builder stay uncomposed for now: the
-    # tokenizer reads "Keq" as one run, so it cannot set it as the roman
-    # "Aeq" of _ROMAN_SCRIPTS beside it, and the period level also nests
-    # the LKeq,Ti subscript inside the 10^(L/10) exponent.
+    # The corrected levels as the guide writes them: Keq upright beside the
+    # Aeq it corrects, the phase duration Ti italic, the three penalties
+    # upright, and the phase level inside the exponent of the period sum.
     s.text(
         x0 + 14,
         y1 + 56,
-        "LKeq,Ti = LAeq,Ti + Kt + Kf + Ki",
+        "$L_{Keq,Ti} = L_{Aeq,Ti} + K_t + K_f + K_i$",
         15,
         th.fg,
         anchor="start",
-        mono=True,
+        upright=("K_i",),
     )
     s.text(
         x0 + 14,
@@ -1477,21 +1480,11 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
     )
     s.text(
         x0 + 450,
-        y1 + 54,
-        "LKeq,x = 10 lg[ (1/T) Σ Ti",
+        y1 + 62,
+        "$L_{Keq,x} = 10 lg[(1/T) Σ_i T_i·10^{L_{Keq,Ti}/10}]$",
         14,
         th.fg,
         anchor="start",
-        mono=True,
-    )
-    s.text(
-        x0 + 450,
-        y1 + 74,
-        "                10^(LKeq,Ti/10) ]",
-        14,
-        th.fg,
-        anchor="start",
-        mono=True,
     )
     s.text(
         x0 + 450,
@@ -1529,7 +1522,7 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
     for i, (label, value) in enumerate(
         (
             ("worst phase ≤ limit + 5 dB", "59 ≤ 60 ✓"),
-            ("daily LKeq,x ≤ limit + 3 dB", "57 ≤ 58 ✓"),
+            ("daily $L_{Keq,x}$ ≤ limit + 3 dB", "57 ≤ 58 ✓"),
             ("annual $L_{K,x}$ ≤ limit", "56 > 55 ✗"),
         )
     ):

@@ -552,7 +552,7 @@ measurement_distance_downstream_m(
 
 How far downstream the measurement surface stands, Equation (16).
 
-$d_d = 12 \sqrt{S_d} - 10 \sqrt{S_f}$, with $S_f$ the free
+$d_\mathrm{d} = 12 \sqrt{S_\mathrm{d}} - 10 \sqrt{S_\mathrm{f}}$, with $S_\mathrm{f}$ the free
 cross-sectional area of the silencer, which NOTE 18 warns is not the same
 thing as its total intake cross-section.
 
@@ -565,10 +565,10 @@ reported rather than returned as a distance nobody can stand at.
 
 | Name | Description |
 | :--- | :--- |
-| `downstream_area_m2` | $S_d$, in square metres. |
-| `free_area_m2` | $S_f$, in square metres. |
+| `downstream_area_m2` | $S_\mathrm{d}$, in square metres. |
+| `free_area_m2` | $S_\mathrm{f}$, in square metres. |
 
-**Returns:** $d_d$, in metres.
+**Returns:** $d_\mathrm{d}$, in metres.
 
 **Raises**
 
@@ -584,16 +584,16 @@ measurement_distance_upstream_m(upstream_area_m2: float) -> float
 
 How far upstream the measurement surface stands, Equation (15).
 
-$d_u = 1,5 \sqrt{4 S_u / \pi}$, which is one and a half equivalent
+$d_\mathrm{u} = 1,5 \sqrt{4 S_\mathrm{u} / \pi}$, which is one and a half equivalent
 diameters of the upstream measurement cross-section.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `upstream_area_m2` | $S_u$, in square metres. |
+| `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
 
-**Returns:** $d_u$, in metres.
+**Returns:** $d_\mathrm{u}$, in metres.
 
 **Raises**
 
@@ -741,7 +741,7 @@ silencer_flow_velocity_m_s(
 
 The mean velocity inside the silencer, Equation (31).
 
-$\overline{w_f} = (S_u / S_f) \, \overline{w_u}$, the upstream mean
+$\overline{w_\mathrm{f}} = (S_\mathrm{u} / S_\mathrm{f}) \, \overline{w_\mathrm{u}}$, the upstream mean
 velocity scaled by how much the silencer narrows the passage. It is the
 velocity the regenerated noise of the installation answers to, which is
 why 9.2 asks for it rather than for the duct velocity.
@@ -750,11 +750,11 @@ why 9.2 asks for it rather than for the duct velocity.
 
 | Name | Description |
 | :--- | :--- |
-| `upstream_mean_velocity_m_s` | $\overline{w_u}$, in metres per second, the arithmetic mean of Equation (30). |
-| `upstream_area_m2` | $S_u$, in square metres. |
-| `free_area_m2` | $S_f$, the free cross-section, in square metres. |
+| `upstream_mean_velocity_m_s` | $\overline{w_\mathrm{u}}$, in metres per second, the arithmetic mean of Equation (30). |
+| `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
+| `free_area_m2` | $S_\mathrm{f}$, the free cross-section, in square metres. |
 
-**Returns:** $\overline{w_f}$, in metres per second.
+**Returns:** $\overline{w_\mathrm{f}}$, in metres per second.
 
 **Raises**
 
@@ -881,7 +881,7 @@ static_pressure_difference_pa(
 The static pressure difference behind a change of area, Equation (14).
 
 $$
-\Delta p_S = \Delta p_T - \frac{\rho \, q_V^2}{2} \left(\frac{1}{S_u^2} - \frac{1}{S_d^2}\right)
+\Delta p_S = \Delta p_T - \frac{\rho \, q_V^2}{2} \left(\frac{1}{S_\mathrm{u}^2} - \frac{1}{S_\mathrm{d}^2}\right)
 $$
 
 For a silencer whose inlet and outlet areas differ, where the gas
@@ -896,8 +896,8 @@ says in words.
 | `total_pressure_loss_pa` | $\Delta p_T$, in pascals. |
 | `volume_flow_m3_s` | $q_V$, in cubic metres per second. |
 | `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
-| `upstream_area_m2` | $S_u$, in square metres. |
-| `downstream_area_m2` | $S_d$, in square metres. |
+| `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
+| `downstream_area_m2` | $S_\mathrm{d}$, in square metres. |
 
 **Returns:** $\Delta p_S$, in pascals.
 

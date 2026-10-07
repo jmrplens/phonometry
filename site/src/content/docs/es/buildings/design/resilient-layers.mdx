@@ -70,9 +70,9 @@ la predicción significa algo siquiera.
 Todo lo que sigue depende de la fuerza que la máquina de impactos normalizada
 inyecta realmente, y esa fuerza no es una propiedad solo de la máquina. Cada
 martillo es una masa de 0,5 kg que cae desde 40 mm, de modo que llega a
-$v_\text{h} = \sqrt{2gh} = 0{,}886\ \text{m/s}$, diez veces por segundo. Si el impacto
+$v_0 = \sqrt{2gh} = 0{,}886\ \text{m/s}$, diez veces por segundo. Si el impacto
 fuese corto frente a los 0,1 s entre golpes, la cantidad de movimiento fijaría
-por sí sola la fuerza y daría el espectro de líneas $|F_n| = 2 m v_\text{h} / T_i$ y
+por sí sola la fuerza y daría el espectro de líneas $|F_n| = 2 m v_0 / T_\mathrm{i}$ y
 la fuerza cuadrática media por banda $F_\mathrm{rms}^2 = 3{,}9 B$ con la que se
 reducen habitualmente las medidas ISO 10140 sobre hormigón.
 
@@ -82,11 +82,11 @@ un sistema masa-resorte-amortiguador cuyo impulso se divide en dos casos:
 
 - **sobrecrítico**, $K m \ge 4 Z_\mathrm{dp}^2$: un único impulso positivo, sin
   rebote. Es el caso de una superficie de paso ligera (tablero de partículas,
-  OSB), donde el espectro tiende a $|F_n|_\text{lower} = m v_\text{h}/T_i$;
+  OSB), donde el espectro tiende a $|F_n|_\text{lower} = m v_0/T_\mathrm{i}$;
 - **subcrítico**, $K m < 4 Z_\mathrm{dp}^2$: el martillo rebota y solo cuenta el
   primer lóbulo positivo. Es el caso de una losa de hormigón o una solera,
   donde el espectro queda a menos de 1 dB de
-  $|F_n|_\text{upper} = 2 m v_\text{h}/T_i$ por debajo de 4 kHz y la estimación de
+  $|F_n|_\text{upper} = 2 m v_0/T_\mathrm{i}$ por debajo de 4 kHz y la estimación de
   impulso corto es suficiente.
 
 Los dos límites distan 6 dB en valor cuadrático medio, que es justo la razón
@@ -129,13 +129,13 @@ res.plot()                    # el espectro de fuerza con ambas asíntotas
 
 *La misma máquina, dos suelos. Sobre el hormigón el martillo rebota
 (**subcrítico**) y el espectro se pega a la asíntota superior
-$|F_n|_\text{upper} = 2mv_\text{h}/T_i$ con menos de 1 dB de diferencia en todo
+$|F_n|_\text{upper} = 2mv_0/T_\mathrm{i}$ con menos de 1 dB de diferencia en todo
 el rango de la acústica de la edificación, con su corte en 6948 Hz y su
 frecuencia límite del martillo en 120 kHz: las dos muy fuera de lo que se
 valora. Sobre el tablero de partículas de 22 mm la superficie cede, el martillo
 no rebota (**sobrecrítico**) y las dos frecuencias se desploman hasta la mitad
 del rango: $f_\mathrm{co}$ = 589 Hz y $f_\mathrm{limit}$ = 555 Hz, así que el
-espectro se dobla hacia la asíntota inferior $mv_\text{h}/T_i$ justo donde cae
+espectro se dobla hacia la asíntota inferior $mv_0/T_\mathrm{i}$ justo donde cae
 una banda valorada. Las dos asíntotas están separadas 6,0 dB en valor cuadrático
 medio, y ese salto es toda la razón por la que un nivel de máquina de impactos
 medido sobre un forjado de madera no se puede comparar con uno medido sobre

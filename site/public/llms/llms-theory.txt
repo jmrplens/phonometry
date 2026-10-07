@@ -1262,7 +1262,7 @@ $$
 C_{te} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_\mathrm{s} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ and $T_\mathrm{s} = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
+with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ and $T_\mathrm{S} = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands.svg" alt="ISO 3382 per-band parameters of a synthetic room impulse response: grouped EDT, T20 and T30 bars per octave band falling from about 1.4 s at 125 Hz to 0.7 s at 4 kHz, over a second panel where C50 and C80 rise with frequency" width="92%"></picture>
 
@@ -1275,10 +1275,10 @@ more of it the room has already removed.*
 
 ### Open-plan spatial decay (ISO 3382-3, Clause 6)
 
-The spatial decay rate of A-weighted speech is the ordinary least-squares slope of $L_{p,A,S}$ against $\log_{10}(r/r_0)$ ($r_0 = 1$ m) over the 2–16 m positions, rescaled to a per-doubling figure, and the nominal level is read off the same line at 4 m:
+The spatial decay rate of A-weighted speech is the ordinary least-squares slope of $L_{p,\mathrm{A,S}}$ against $\log_{10}(r/r_0)$ ($r_0 = 1$ m) over the 2–16 m positions, rescaled to a per-doubling figure, and the nominal level is read off the same line at 4 m:
 
 $$
-L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,A,S,4\text{m}} = a + b\ \log_{10}(4/r_0).
+L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,\mathrm{A,S},4\,\mathrm{m}} = a + b\ \log_{10}(4/r_0).
 $$
 
 The distraction distance rD and privacy distance rP are the distances where a **linear** (not logarithmic) regression of STI against distance crosses 0.50 and 0.20; a fitted slope that does not fall (STI not decreasing with distance; a constant STI fits to a slope a few units in the last place either side of zero, read as no decrease) makes them undefined, realising the standard's "can prove impossible to determine" note.
@@ -1288,7 +1288,7 @@ The distraction distance rD and privacy distance rP are the distances where a **
 *Two regressions on two different axes, which is what makes this clause hard to
 hold in the head. The level line is fitted against $\log_{10}(r/r_0)$ and read
 twice, as the slope $D_{2,\mathrm{S}}$ per doubling, and at $r = 4$ m for
-$L_{p,A,S,4\text{m}}$. The STI line is fitted against $r$ itself, **linearly**,
+$L_{p,\mathrm{A,S},4\,\mathrm{m}}$. The STI line is fitted against $r$ itself, **linearly**,
 and read where it crosses 0.50 and 0.20 for the distraction and privacy
 distances. If that second fit comes out flat or rising, the two distances do
 not exist rather than being large.*
@@ -1409,7 +1409,7 @@ and the separating element is where $S_\mathrm{s}$ is measured. Each junction co
 three flanking terms, so a room with four flanking elements sums thirteen paths.*
 
 $$
-R'_w = -10 \log_{10}\Big[ 10^{-R_\mathrm{Dd,w}/10}
+R'_\mathrm{w} = -10 \log_{10}\Big[ 10^{-R_\mathrm{Dd,w}/10}
        + \sum 10^{-R_\mathrm{Ff,w}/10} + \sum 10^{-R_\mathrm{Df,w}/10}
        + \sum 10^{-R_\mathrm{Fd,w}/10} \Big].
 $$
@@ -1436,7 +1436,7 @@ $K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
 subtraction $L'_{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, with the bare-floor
 equivalent level $L_\mathrm{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the
 covering improvement $\Delta L_\mathrm{w}$ (ISO 717-2) and the flanking correction $K$
-from Table 1. The EN 12354-1 Annex H.3 ($R'_w = 52$ dB) and EN 12354-2 Annex E.3
+from Table 1. The EN 12354-1 Annex H.3 ($R'_\mathrm{w} = 52$ dB) and EN 12354-2 Annex E.3
 ($L'_{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
 model is stated to have about a 2 dB standard deviation (Clause 5).
 

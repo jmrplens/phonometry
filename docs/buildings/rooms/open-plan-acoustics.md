@@ -276,13 +276,13 @@ Neither $L_W$ nor $N$ survives. A busier room is not intrinsically worse,
 because each new table brings both a talker and its own share of absorption.
 What decides whether a restaurant works is the absorption **per table**, not
 the absorption of the room. Requiring $L_\mathrm{SN} > -6$ dB for adequate
-cross-table communication at a separation $r_s$, and $L_\mathrm{SN} < -9$ dB so a
-neighbouring table $r_t$ away is not overheard, turns into a pair of design
+cross-table communication at a separation $r_\mathrm{s}$, and $L_\mathrm{SN} < -9$ dB so a
+neighbouring table $r_\mathrm{t}$ away is not overheard, turns into a pair of design
 bounds:
 
 $$
-A_\text{tab} > 6.31\,r_s^2 \quad \text{(Eq. (17.53))}, \qquad
-A_\text{tab} < 3.16\,r_t^2 \quad \text{(Eq. (17.54))},
+A_\text{tab} > 6.31\,r_\mathrm{s}^2 \quad \text{(Eq. (17.53))}, \qquad
+A_\text{tab} < 3.16\,r_\mathrm{t}^2 \quad \text{(Eq. (17.54))},
 \qquad \text{both for } Q = 2
 $$
 

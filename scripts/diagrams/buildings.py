@@ -615,10 +615,12 @@ def _d_flanking(s: SVG, th: Theme) -> None:
         s.line(bl + 4, ly - 6, bl + 44, ly - 6, col, 4.0)
         s.text(bl + 58, ly, txt, 16, th.fg, anchor="start")
         ly += 32
+    # EN 12354-1:2000, Formula (26), sums the four path indices in the
+    # exponent; its paths are written ij here, as the guide writes R_{ij,w}.
     s.text(
         450.0,
         ly + 12,
-        "R'w = −10 log10 Σ 10^(−Rij,w /10) dB   (EN 12354-1, Formula 26)",
+        "$R′_w = −10 lg Σ 10^{−R_{ij,w}/10}$ dB   (EN 12354-1, Formula 26)",
         16,
         th.muted,
         bold=True,
@@ -1715,14 +1717,14 @@ def _d_reception_plate(s: SVG, th: Theme) -> None:
     s.text(735, 394, "equivalent blocked force $L_{Fb,eq}$ ,", 13, th.muted)
     s.text(735, 418, "$L_{Wsn}$ consumed by EN 12354-5", 13, th.muted)
 
-    # Footer: the spatial velocity average.
+    # Footer: the spatial velocity average of Formula (12), the position
+    # levels in the exponent of the energy sum.
     s.text(
         450,
         516,
-        "spatial average:  Lv = 10 log10[(1/N)·Σ 10^(Lv,i/10)]   (Formula 12)",
+        "spatial average:  $L_v = 10 lg[(1/N)·Σ_i 10^{L_{v,i}/10}]$   (Formula 12)",
         15,
         th.fg,
-        mono=True,
     )
 
 
@@ -1793,21 +1795,23 @@ def _d_installed_paths(s: SVG, th: Theme) -> None:
 
     # ===== Right column: the prediction cascade =====
     s.text(760, 120, "Prediction cascade", 17, th.fg, bold=True)
-    # The energetic sum is far longer than the other terms, so it carries its
-    # own face to stay inside the column instead of running off the canvas.
     steps = [
         ("$L_{Ws,c}$", "characteristic power (EN 15657)", th.fg, 16),
         ("$− D_C$", "coupling at the contacts (19b)", th.secondary, 16),
         ("$L_{Ws,inst}$", "installed power (18b)", th.fg, 16),
         ("$− D_{sa} − R_{ij,ref}$", "per transmission path (18a)", th.primary, 16),
-        # The energetic sum sets a subscripted level inside an exponent,
-        # which the composer's single script level cannot carry yet; the
-        # term stays plain until that case is adjudicated.
-        ("10 log10 Σ 10^(L_n,s,ij/10)", "energetic sum $L_{n,s}$ (17)", th.accent, 13),
+        # Formula (17) of EN 12354-5: the path level sits in the exponent of
+        # the energetic sum, a subscript of a superscript.
+        (
+            "$10 lg Σ_j 10^{L_{n,s,ij}/10}$",
+            "energetic sum $L_{n,s}$ (17)",
+            th.accent,
+            16,
+        ),
     ]
     y = 164.0
     for k, (term, caption, col, size) in enumerate(steps):
-        s.text(760, y, term, size, col, bold=True, mono="$" not in term)
+        s.text(760, y, term, size, col, bold=True, upright=("L_n",))
         s.text(760, y + 22, caption, 12, th.muted, upright=("L_n",))
         if k < len(steps) - 1:
             s.arrow(760, y + 34, 760, y + 56, th.muted, 1.6)
@@ -5284,17 +5288,11 @@ def _d_db_hr_requirements(s: SVG, th: Theme) -> None:
         anchor="start",
     )
 
-    # Formulae (A.5) to (A.7): the exponent is set as its own raised run,
-    # because the composer takes one script level and the exponent carries two.
+    # Formulae (A.5) to (A.7): the band level and insulation sit in the
+    # exponent of the energy sum, the subscript of a superscript.
     ey = 752.0
     s.rect(160, ey, 580, 76, th.panel, th.fg, rx=6, sw=1.6)
-    base = "$I_x = −10 lg Σ_i 10$"
-    exponent = "$(L_{x,i} − X_i)/10$"
-    w_base = s.text_width(base, 18)
-    w_exp = s.text_width(exponent, 13)
-    x0 = 450 - (w_base + 2 + w_exp) / 2
-    s.text(x0, ey + 34, base, 18, th.fg, anchor="start")
-    s.text(x0 + w_base + 2, ey + 26, exponent, 13, th.fg, anchor="start")
+    s.text(450, ey + 34, "$I_x = −10 lg Σ_i 10^{(L_{x,i} − X_i)/10}$", 18, th.fg)
     s.text(
         450,
         ey + 60,

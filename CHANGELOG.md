@@ -1999,6 +1999,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   subscript, as in $D_{I,\mathrm{n,e}}$, as upright; on the pages and
   diagrams as they were, it finds 193 such places.
 
+- **The figures, the KB family and the formulas the diagrams drew as plain
+  text set each subscript the way its standard prints it.** `make subscripts`
+  now also reads the figures each page embeds, from the mathtext source
+  matplotlib keeps beside every label, and reads a run of letters as one
+  symbol, so $TL_n$ is no longer taken for a level $L_n$. On the pages and
+  images as they were it finds 21 places where a figure and its page disagree.
+  Most were settled against the printed page: the $C_h$ of the NORAH2
+  guidance behind ECAC Doc 32 is italic in the rotorcraft figure, and the
+  impact period $T_\mathrm{i}$ and $f_\mathrm{i}$ of Hopkins's tapping-force
+  spectrum, the table separations $r_\mathrm{s}$ and $r_\mathrm{t}$ of Long's
+  restaurant bounds and the $L_{p,\mathrm{A,S}}$ of ISO 3382-3:2012 are
+  upright on their pages. Where the print cannot decide, the meaning did: the
+  Official Journal sets every subscript of CNOSSOS-EU italic and the BOE sets
+  the text of RD 1367/2007 upright and its formula images italic, so the
+  $L_{\mathrm{R,TOT}}$ of CNOSSOS-EU and the $L_{\mathrm{K},x}$ and
+  $L_{\mathrm{Keq},x}$ of RD 1367/2007 follow their guides and modules,
+  upright in their figures and in what `ActivityAssessment.plot()` draws, and
+  the low-frequency difference $L_\mathrm{f}$ of RD 1367/2007 is upright beside
+  the italic band level $L_f$ the regulation also calls Lf. The subscripts of
+  the KB family are one family across the library, the figures, the
+  docstrings, the guides and the errata register: $KB_\mathrm{F}$,
+  $KB_\mathrm{Fmax}$, $KB_\mathrm{FTm}$, $KB_\mathrm{FTr}$ and
+  $KB_\mathrm{FTm,Zug}$ upright after the KB, as DIN 45669-1, DIN 4150-2 and
+  E DIN 4150-2 print them. The clock index of $KB_{\mathrm{FT}i}$ stays
+  italic: the three standards print that i upright inside the subscript and,
+  in their main formulas, italic under the sum it runs over, and the library
+  sets an index that runs over a sum italic wherever it stands. The r of
+  "Beurteilung" in the guide value $A_\mathrm{r}$, the assessment time
+  $T_\mathrm{r}$ and the clock count $N_\mathrm{r}$ is upright, as
+  DIN 4150-2:1999 and E DIN 4150-2 print it and as the r of
+  $KB_\mathrm{FTr}$ already was, and so are the $A_\mathrm{u}$ and
+  $A_\mathrm{o}$ beside it and the exposure times $T_\mathrm{e}$ and
+  $T_{\mathrm{e},j}$, in the docstrings, the figures, the diagrams and the
+  errata transcriptions; `make subscripts` now holds the letters of one
+  family like that to one slope in a file, so a page cannot set
+  $KB_\mathrm{FTr}$ beside an italic $A_r$ again. The running r.m.s.
+  $\tilde v_\mathrm{F}$, its maximum $\tilde v_\mathrm{Fmax}$, the event value
+  $v_\mathrm{E}$, the hourly sum $v_{\mathrm{E\,ges}}$, the levels
+  $L_{v\mathrm{F}}$, $L_{v\mathrm{Fmax}}$ and $L_{v\mathrm{E}}$, the band
+  centre $f_{\mathrm{T}n}$ and the insertion loss $D_\mathrm{e}$ of
+  DIN 45672-2 are upright where that standard prints them so, in the
+  docstrings, the figures and what `TrainPassage.plot()` and
+  `TrainPassage.plot_spectrum()` draw. The docstrings of the E DIN 45672-3
+  prediction chain and of the E DIN 4150-2 train categories write the
+  descriptive parts the two drafts print upright that way too: the E of
+  $L_{v,\mathrm{E}}$, the paths of $\Delta L_{v,\mathrm{BB}}$,
+  $\Delta L_{v,\mathrm{FB}}$, $\Delta L_{v,\mathrm{DF}}$ and
+  $\Delta L_{v,\mathrm{DB}}$, the e of $D_\mathrm{e}$ and $f_\mathrm{e}$, the
+  T of the band centre $f_{\mathrm{T}n}$, and ges, Korr, Punkt and Zug
+  wherever they stand. The diagrams now set a subscript inside an exponent,
+  so the energy sums they used to print as plain text, or as an exponent laid
+  out by hand, are composed: the rating level of NT ACOU 112, the corrected
+  levels of RD 1367/2007, Formula 5 of ISO 17497-2, Formula 26 of
+  EN 12354-1, Formula 12 of EN 15657, Formula 17 of EN 12354-5, Formulae A.5
+  to A.7 of the DB-HR and the calibration factor. The exponential detector
+  and the two-ray sum are written with exp(), since ISO 80000-2 prints the e
+  of the exponential upright and Salomons writes the two-ray sum that way;
+  the bottom condition of the waveguide sets the differential d upright as
+  ISO 80000-2 asks, the test voltage $U_\mathrm{p}$ of IEC 60268-5 has its
+  upright p and the units of the loudspeaker relations are upright, and the
+  letters of an exponent stay italic, so the register order of $2^m − 1$ and
+  the level of $10^{ΔL/20}$ no longer come out upright. The intensity fiches
+  set the p and the I of their indicators italic, as ISO 15186-1,
+  ISO 9614-2 and ISO 9614-3 print them: $R_{I,\mathrm{w}}$,
+  $D_{I,\mathrm{n,e}}$ (its plot axis and its note on element units
+  included), $F_{pI}$ and $\delta_{pI0}$ on the ISO 15186 fiches, and
+  $F_{pI}$, $F_{pI_\mathrm{n}}$, $F_{p|I_\mathrm{n}|}$ and $\delta_{pI0}$ on
+  the ISO 9614 and IEC 61043 fiches. The diffusers and metadiffusers guides
+  write the normalised coefficient $d_\mathrm{n}$ of ISO 17497-2, 3.12, as its
+  own symbol, beside the italic well depth $d_n$, and so do the diagrams. The
+  areas, distances and velocities of ISO 11820 are upright in
+  `silencer_in_situ`, the hammer velocity of Hopkins's tapping-force model is
+  $v_0$ with a zero, as Hopkins prints it, in the docstrings, the
+  resilient-layers guide and its figure, where it used to be $v_o$ or
+  $v_\mathrm{h}$, and the centre time of ISO 3382-1 is $T_\mathrm{S}$, with
+  the capital S of its Table A.1, in the guides, the glossary, the figure and
+  the room-acoustics fiche, apart from the structural reverberation time
+  $T_\mathrm{s}$.
+
 - **A result keeps its own copy of the arrays it was given.** `np.asarray`
   hands back the caller's own array when it is already `float64`, and so does
   every validation helper built on it, so a result built from one kept the

@@ -92,7 +92,7 @@ así que el mismo margen gobierna las correcciones de carácter y no solo el niv
 | Corrección | Magnitud de entrada | Umbrales | Función |
 | :--- | :--- | :--- | :--- |
 | $K_\mathrm{t}$, componentes tonales emergentes | Espectro **sin ponderar** en tercios de octava; $L_\mathrm{t} = L_f - L_s$, con $L_s$ la media **aritmética** de las dos bandas adyacentes | 8/12 dB (20 a 125 Hz), 5/8 dB (160 a 400 Hz), 3/5 dB (500 Hz a 10 kHz) | `tonal_correction()` |
-| $K_\mathrm{f}$, componentes de baja frecuencia | $L_f = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ | 0 dB hasta 10 dB, 3 dB si $10 < L_f \le 15$, 6 dB por encima | `low_frequency_correction()` |
+| $K_\mathrm{f}$, componentes de baja frecuencia | $L_\mathrm{f} = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ | 0 dB hasta 10 dB, 3 dB si $10 < L_\mathrm{f} \le 15$, 6 dB por encima | `low_frequency_correction()` |
 | $K_\mathrm{i}$, componentes impulsivas | $L_\mathrm{i} = L_{\mathrm{AIeq},Ti} - L_{\mathrm{Aeq},Ti}$ | los mismos 10 y 15 dB | `impulsive_correction()` |
 
 Para $K_\mathrm{t}$ se evalúa banda a banda y, cuando hay varios tonos emergentes,

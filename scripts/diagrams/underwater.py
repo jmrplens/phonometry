@@ -691,14 +691,13 @@ def _d_underwater_waveguide(s: SVG, th: Theme) -> None:
         anchor="start",
     )
     s.ground(bot, x0, x1, hatch=30)
-    # The bottom condition stays plain for now: in $dΨ/dz$ the composer
-    # would set the differential d italic (single-letter default before a
-    # Greek letter) while the dz run composes upright, and there is no
-    # mechanism for the roman d of ISO 80000-2 next to Ψ.
+    # The bottom condition: the differential d is upright, the roman d of
+    # ISO 80000-2, so it is written outside the math beside the italic
+    # depth z and the italic water depth D.
     s.text(
         x0 + 8,
         bot + 30,
-        "bottom: Ψ(D) = 0 (pressure release) or dΨ/dz = 0 (rigid)",
+        "bottom: Ψ($D$) = 0 (pressure release) or dΨ/d$z$ = 0 (rigid)",
         13,
         th.fg,
         anchor="start",

@@ -524,10 +524,10 @@ _ES_EXACT = {
     "5.6 Hz, the corner of Formula (4)": "5,6 Hz, la esquina de la fórmula (4)",
     "One record, and the four numbers a meter shows for it (DIN 45669-1)": "Un registro, y los cuatro números que muestra de él un vibrómetro (DIN 45669-1)",
     "Velocity $v$ [mm/s]": "Velocidad $v$ [mm/s]",
-    "Weighted vibration severity $KB_F$": "Intensidad de vibración ponderada $KB_F$",
-    "$KB_F(t)$, running r.m.s. with $\\tau$ = 0.125 s": "$KB_F(t)$, valor eficaz móvil con $\\tau$ = 0,125 s",
-    "$KB_{F\\mathrm{max}}$ = 1.210": "$KB_{F\\mathrm{max}}$ = 1,210",
-    "$KB_{FTm}$ = 0.785": "$KB_{FTm}$ = 0,785",
+    "Weighted vibration severity $KB_\\mathrm{F}$": "Intensidad de vibración ponderada $KB_\\mathrm{F}$",
+    "$KB_\\mathrm{F}(t)$, running r.m.s. with $\\tau$ = 0.125 s": "$KB_\\mathrm{F}(t)$, valor eficaz móvil con $\\tau$ = 0,125 s",
+    "$KB_\\mathrm{Fmax}$ = 1.210": "$KB_\\mathrm{Fmax}$ = 1,210",
+    "$KB_\\mathrm{FTm}$ = 0.785": "$KB_\\mathrm{FTm}$ = 0,785",
     "clock maxima, one per 30 s": "máximos por intervalo, uno cada 30 s",
     # railway_passage, railway_spectra and ground_wave_speeds (DIN 45672): one
     # passage with its three stretches, the spectra of Figure 6 with Table 1
@@ -535,12 +535,12 @@ _ES_EXACT = {
     # The maximum carries its own digits, as the readings above do.
     "One train passage and the three stretches of DIN 45672-2": "Un paso de tren y los tres tramos de la DIN 45672-2",
     "velocity $v(t)$": "velocidad $v(t)$",
-    "running r.m.s. $\\tilde v_F(t)$, $\\tau$ = 0.125 s": "valor eficaz móvil $\\tilde v_F(t)$, $\\tau$ = 0,125 s",
-    "$\\tilde v_{F\\mathrm{max}}$ = 0.218 mm/s": "$\\tilde v_{F\\mathrm{max}}$ = 0,218 mm/s",
+    "running r.m.s. $\\tilde v_\\mathrm{F}(t)$, $\\tau$ = 0.125 s": "valor eficaz móvil $\\tilde v_\\mathrm{F}(t)$, $\\tau$ = 0,125 s",
+    "$\\tilde v_\\mathrm{Fmax}$ = 0.218 mm/s": "$\\tilde v_\\mathrm{Fmax}$ = 0,218 mm/s",
     "Velocity [mm/s]": "Velocidad [mm/s]",
     "The third-octave spectra of one passage (DIN 45672-2 Figure 6)": "Los espectros en tercios de octava de un paso (DIN 45672-2, figura 6)",
-    "maximum level $L_{vF\\mathrm{max}}$ over $T_3$, Formula (7)": "nivel máximo $L_{vF\\mathrm{max}}$ en $T_3$, fórmula (7)",
-    "interval level $L_{vF2}$ over $T_2$, Formula (6)": "nivel de intervalo $L_{vF2}$ en $T_2$, fórmula (6)",
+    "maximum level $L_{v\\mathrm{Fmax}}$ over $T_3$, Formula (7)": "nivel máximo $L_{v\\mathrm{Fmax}}$ en $T_3$, fórmula (7)",
+    "interval level $L_{v\\mathrm{F}2}$ over $T_2$, Formula (6)": "nivel de intervalo $L_{v\\mathrm{F}2}$ en $T_2$, fórmula (6)",
     "$T_2$ from the narrow band, Formula (23) and Table 1": "$T_2$ desde la banda estrecha, fórmula (23) y tabla 1",
     "Velocity level [dB re 5·10⁻⁸ m/s]": "Nivel de velocidad [dB re 5·10⁻⁸ m/s]",
     "Compression-wave speed over shear-wave speed (DIN 45672-1)": "Velocidad de la onda de compresión sobre la de cizalla (DIN 45672-1)",
@@ -555,7 +555,7 @@ _ES_EXACT = {
     "by day, 16 h": "de día, 16 h",
     "by night, 8 h": "de noche, 8 h",
     "$A_\\mathrm{u}$, the lower value": "$A_\\mathrm{u}$, el valor inferior",
-    "$A_r$, for the assessment severity": "$A_r$, para la intensidad de valoración",
+    r"$A_\mathrm{r}$, for the assessment severity": r"$A_\mathrm{r}$, para la intensidad de valoración",
     "$A_\\mathrm{o}$, the upper value": "$A_\\mathrm{o}$, el valor superior",
     "Guide value, dimensionless KB": "Valor de referencia, KB adimensional",
     "industrial": "industrial",
@@ -563,16 +563,16 @@ _ES_EXACT = {
     "mixed": "mixta",
     "residential": "residencial",
     "sensitive": "sensible",
-    "A railway class against $A_r$, one clock interval per train (DIN 4150-2 Figure D.1)": "Una clase de tren frente a $A_r$, un intervalo por tren (DIN 4150-2, figura D.1)",
+    r"A railway class against $A_\mathrm{r}$, one clock interval per train (DIN 4150-2 Figure D.1)": r"Una clase de tren frente a $A_\mathrm{r}$, un intervalo por tren (DIN 4150-2, figura D.1)",
     "Trains an hour": "Trenes por hora",
-    "Clock maximum r.m.s. $KB_{FTm}$": "Eficaz de los máximos por intervalo $KB_{FTm}$",
-    "7 trains an hour at $KB_{FTm}$ = 0.2": "7 trenes por hora con $KB_{FTm}$ = 0,2",
-    "14 trains an hour at $KB_{FTm}$ = 0.2": "14 trenes por hora con $KB_{FTm}$ = 0,2",
-    "$A_r$ = 0.2": "$A_r$ = 0,2",
-    "$A_r$ = 0.15": "$A_r$ = 0,15",
-    "$A_r$ = 0.1": "$A_r$ = 0,1",
-    "$A_r$ = 0.07": "$A_r$ = 0,07",
-    "$A_r$ = 0.05": "$A_r$ = 0,05",
+    "Clock maximum r.m.s. $KB_\\mathrm{FTm}$": "Eficaz de los máximos por intervalo $KB_\\mathrm{FTm}$",
+    "7 trains an hour at $KB_\\mathrm{FTm}$ = 0.2": "7 trenes por hora con $KB_\\mathrm{FTm}$ = 0,2",
+    "14 trains an hour at $KB_\\mathrm{FTm}$ = 0.2": "14 trenes por hora con $KB_\\mathrm{FTm}$ = 0,2",
+    r"$A_\mathrm{r}$ = 0.2": r"$A_\mathrm{r}$ = 0,2",
+    r"$A_\mathrm{r}$ = 0.15": r"$A_\mathrm{r}$ = 0,15",
+    r"$A_\mathrm{r}$ = 0.1": r"$A_\mathrm{r}$ = 0,1",
+    r"$A_\mathrm{r}$ = 0.07": r"$A_\mathrm{r}$ = 0,07",
+    r"$A_\mathrm{r}$ = 0.05": r"$A_\mathrm{r}$ = 0,05",
     # railway_prediction_chain and building_transfer_spectra (E DIN 45672-3):
     # the Annex C chain and the ground-to-floor spectra of Figures 6 and 7.
     "A tram predicted on a concrete floor (E DIN 45672-3 Annex C)": "Un tranvía previsto en un forjado de hormigón (E DIN 45672-3, anexo C)",
@@ -580,7 +580,7 @@ _ES_EXACT = {
     "on the floor $L_v$, Formula (1)": "en el forjado $L_v$, fórmula (1)",
     "KB-weighted $L_{v,KB}$, Formula (8), 4 Hz to 80 Hz": "ponderado KB $L_{v,KB}$, fórmula (8), de 4 Hz a 80 Hz",
     "the floor's 20 Hz resonance,\n+17.3 dB from Annex A": "la resonancia del forjado a 20 Hz,\n+17,3 dB del anexo A",
-    "$KB_{FTm}$ = 0.38, $KB_{F\\mathrm{max}}$ = 0.58, $v_{\\max}$ = 1.73 mm/s": "$KB_{FTm}$ = 0,38, $KB_{F\\mathrm{max}}$ = 0,58, $v_{\\max}$ = 1,73 mm/s",
+    "$KB_\\mathrm{FTm}$ = 0.38, $KB_\\mathrm{Fmax}$ = 0.58, $v_{\\max}$ = 1.73 mm/s": "$KB_\\mathrm{FTm}$ = 0,38, $KB_\\mathrm{Fmax}$ = 0,58, $v_{\\max}$ = 1,73 mm/s",
     "What a floor adds to the ground's vibration (E DIN 45672-3 Figures 6 and 7)": "Lo que un forjado añade a la vibración del terreno (E DIN 45672-3, figuras 6 y 7)",
     "concrete floors, Table A.1": "forjados de hormigón, tabla A.1",
     "timber floors, Table A.2": "forjados de madera, tabla A.2",
@@ -594,8 +594,8 @@ _ES_EXACT = {
     "without the project": "sin el proyecto",
     "with the second track": "con la segunda vía",
     "25 % above the existing exposure,\nthe least increase people notice": "25 % sobre la exposición existente,\nel menor aumento que la gente nota",
-    "0.094 against 0.065: over 25 %,\nand above $A_r$, so mitigation": "0,094 frente a 0,065: más del 25 %,\ny por encima de $A_r$, así que medidas",
-    "Assessment vibration severity $KB_{FTr}$": "Intensidad de valoración $KB_{FTr}$",
+    "0.094 against 0.065: over 25 %,\nand above $A_\\mathrm{r}$, so mitigation": "0,094 frente a 0,065: más del 25 %,\ny por encima de $A_\\mathrm{r}$, así que medidas",
+    "Assessment vibration severity $KB_\\mathrm{FTr}$": "Intensidad de valoración $KB_\\mathrm{FTr}$",
     # ground_propagation_decay and machine_count_correction (DIN 4150-1):
     # Figure A.19 and the nomogram of Figure 3.
     "The decay of Formula (2) against a machine hall's measurements (DIN 4150-1 Figure A.19)": "El decaimiento de la fórmula (2) frente a las medidas de una nave de máquinas (DIN 4150-1, figura A.19)",
@@ -1056,11 +1056,11 @@ _ES_EXACT = {
     "25 dB cap (§A.4.5)": "tope de 25 dB (§A.4.5)",
     r"Diffraction attenuation $\Delta L_\mathrm{d}$ [dB]": r"Atenuación por difracción $\Delta L_\mathrm{d}$ [dB]",
     r"Path difference $\delta$ [m]": r"Diferencia de camino $\delta$ [m]",
-    r"$10\,C_\mathrm{h}\,\mathrm{lg}\,3$ at grazing incidence ($\delta = 0$):"
+    r"$10\,C_h\,\mathrm{lg}\,3$ at grazing incidence ($\delta = 0$):"
     "\n"
-    r"4.8 dB where $C_\mathrm{h}$ = 1, 3.0 dB at 63 Hz": r"$10\,C_\mathrm{h}\,\mathrm{lg}\,3$ en incidencia rasante ($\delta = 0$):"
+    r"4.8 dB where $C_h$ = 1, 3.0 dB at 63 Hz": r"$10\,C_h\,\mathrm{lg}\,3$ en incidencia rasante ($\delta = 0$):"
     "\n"
-    r"4,8 dB donde $C_\mathrm{h}$ = 1, 3,0 dB en 63 Hz",
+    r"4,8 dB donde $C_h$ = 1, 3,0 dB en 63 Hz",
     "A-weighted sound pressure level [dB(A)]": "Nivel de presión acústica ponderado A [dB(A)]",
     r"Received level $L_\mathrm{A}(t)$": r"Nivel recibido $L_\mathrm{A}(t)$",
     "One-third-octave-band centre frequency [Hz]": "Frecuencia central de banda de 1/3 de octava [Hz]",
@@ -3035,7 +3035,7 @@ _ES_EXACT = {
     "CNOSSOS-EU Total Effective Roughness against Speed "
     r"($f = v/\lambda$, $\lambda$ in the wavelength domain)": "Rugosidad efectiva total CNOSSOS-EU frente a la velocidad "
     r"($f = v/\lambda$, $\lambda$ en el dominio de longitud de onda)",
-    r"Total effective roughness $L_{R,\mathrm{TOT}}$ [dB re 1 μm]": r"Rugosidad efectiva total $L_{R,\mathrm{TOT}}$ [dB re 1 μm]",
+    r"Total effective roughness $L_{\mathrm{R,TOT}}$ [dB re 1 μm]": r"Rugosidad efectiva total $L_{\mathrm{R,TOT}}$ [dB re 1 μm]",
     "Attenuation A [dB]": "Atenuación A [dB]",
     "Attenuation $A$ [dB]": "Atenuación $A$ [dB]",
     "CNOSSOS-EU Road Source Line Power (urban arterial, 50 km/h)": "Potencia de la línea fuente viaria CNOSSOS-EU (vía urbana, 50 km/h)",
@@ -4240,9 +4240,9 @@ _ES_EXACT = {
     "izquierda: fuente de velocidad (un receptor rígido acepta más)\n"
     "derecha: fuente de fuerza (un receptor rígido acepta menos)",
     # tapping_force_spectrum (buildings/design/resilient-layers)
-    r"$|F_n|_{\mathrm{upper}} = 2\,m\,v_\mathrm{h}/T_\mathrm{i}$  (rebound)": r"$|F_n|_{\mathrm{upper}} = 2\,m\,v_\mathrm{h}/T_\mathrm{i}$"
+    r"$|F_n|_{\mathrm{upper}} = 2\,m\,v_0/T_\mathrm{i}$  (rebound)": r"$|F_n|_{\mathrm{upper}} = 2\,m\,v_0/T_\mathrm{i}$"
     r"  (con rebote)",
-    r"$|F_n|_{\mathrm{lower}} = m\,v_\mathrm{h}/T_\mathrm{i}$  (no rebound)": r"$|F_n|_{\mathrm{lower}} = m\,v_\mathrm{h}/T_\mathrm{i}$"
+    r"$|F_n|_{\mathrm{lower}} = m\,v_0/T_\mathrm{i}$  (no rebound)": r"$|F_n|_{\mathrm{lower}} = m\,v_0/T_\mathrm{i}$"
     r"  (sin rebote)",
     r"Line force $|F_n|$ [N]": r"Fuerza por línea $|F_n|$ [N]",
     "Tapping-Machine Force: the Floor Decides the Excitation": "Fuerza de la máquina de impactos: el forjado decide la excitación",

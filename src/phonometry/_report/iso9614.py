@@ -183,7 +183,7 @@ def _value_table(
     header = [
         t(_COL_FREQ, language),
         _COL_LW,
-        "F<sub>pI</sub> [dB]",
+        "F<sub><i>pI</i></sub> [dB]",
         "F<sub>+/&#8722;</sub> [dB]",
         t("Grade", language),
     ]
@@ -250,7 +250,7 @@ def _indicator_strip(result: SoundPowerIntensityResult, language: str = "en") ->
         "L<sub>W</sub> = 10 lg(P/P<sub>0</sub>), with the total power P the sum "
         "of the segment partial powers P<sub>i</sub> = I<sub>n,i</sub> "
         "S<sub>i</sub>, P<sub>0</sub> = 1 pW (ISO 9614-2:1996 Eq. 6/12/13). "
-        "Surface pressure-intensity indicator F<sub>pI</sub> = {fpi} dB, "
+        "Surface pressure-intensity indicator F<sub><i>pI</i></sub> = {fpi} dB, "
         "negative-partial-power indicator F<sub>+/&#8722;</sub> = {fpm} dB, "
         "dynamic capability L<sub>d</sub> = {ld} dB (bias factor K = {k} dB).",
         language,
@@ -265,7 +265,7 @@ def _indicator_strip(result: SoundPowerIntensityResult, language: str = "en") ->
 def _criteria_strip(result: SoundPowerIntensityResult, language: str = "en") -> str:
     """The Annex B qualification / A-weighting line for the basis strip."""
     text = t(
-        "A band reaches engineering grade when L<sub>d</sub> &gt; F<sub>pI</sub>"
+        "A band reaches engineering grade when L<sub>d</sub> &gt; F<sub><i>pI</i></sub>"
         ", F<sub>+/&#8722;</sub> &#8804; 3 dB and the two sweeps repeat within "
         "the ISO 9614-2:1996 Table 2 limit s per segment; survey grade drops "
         "the F<sub>+/&#8722;</sub> criterion (Annex B). The A-weighted L"
@@ -504,8 +504,8 @@ def _precision_value_table(
         "L<sub>W0</sub> [dB]",
         "U [dB]",
         "F<sub>T</sub>",
-        "F<sub>p|In|</sub> [dB]",
-        "F<sub>pIn</sub> [dB]",
+        "F<sub><i>p</i>|<i>I</i>n|</sub> [dB]",
+        "F<sub><i>pI</i>n</sub> [dB]",
         "F<sub>S</sub>",
         t("Qualified", language),
     ]
@@ -677,9 +677,9 @@ def _precision_model_strip(
         "L<sub>W</sub> &#8722; 15 lg[(B/101 325)(296,15/(273,15 + &#952;))] "
         "refers it to 23 &#176;C, 101 325 Pa (Eq. 10), applied normalization "
         "{offset} dB. Annex B indicators F<sub>T</sub> = {ft}, "
-        "F<sub>p|In|</sub> = {unsigned} dB, F<sub>pIn</sub> = {signed} dB, "
+        "F<sub><i>p</i>|<i>I</i>n|</sub> = {unsigned} dB, F<sub><i>pI</i>n</sub> = {signed} dB, "
         "F<sub>S</sub> = {fs}; pressure-residual intensity index "
-        "&#948;<sub>pI0</sub> = {residual} dB (IEC 61043), dynamic capability "
+        "&#948;<sub><i>pI</i>0</sub> = {residual} dB (IEC 61043), dynamic capability "
         "L<sub>d</sub> = {ld} dB.",
         language,
     ).format(
@@ -781,8 +781,8 @@ def _precision_criteria_strip(
     text = t(
         "Annex C qualifies a band when the two scans repeat within "
         "|L<sub>In</sub>(1) &#8722; L<sub>In</sub>(2)| &#8804; s/2, s from "
-        "Table 1 (criterion 1), L<sub>d</sub> &#8805; F<sub>pIn</sub> with "
-        "K = 10 dB (2), F<sub>pIn</sub> &#8722; F<sub>p|In|</sub> &#8804; 3 dB "
+        "Table 1 (criterion 1), L<sub>d</sub> &#8805; F<sub><i>pI</i>n</sub> with "
+        "K = 10 dB (2), F<sub><i>pI</i>n</sub> &#8722; F<sub><i>p</i>|<i>I</i>n|</sub> &#8804; 3 dB "
         "(3) and F<sub>S</sub> &#8804; 2 (4), or a doubled scan-line density "
         "gives 0,83 &#8804; F<sub>S</sub>(1)/F<sub>S</sub>(2) &#8804; 1,2 (5), "
         "which qualifies the band even where F<sub>S</sub>(2) &#8805; 2. The "

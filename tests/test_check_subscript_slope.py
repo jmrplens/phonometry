@@ -282,18 +282,88 @@ def test_a_spanish_page_is_held_against_the_spanish_plate(
     assert "diagram_impact_es.svg" in failures[0]
 
 
-def test_a_figure_beside_the_plates_is_not_read_as_one(tmp_path: pathlib.Path) -> None:
-    """matplotlib writes an XML declaration first; a plate never does."""
-    images = tmp_path / "images"
-    images.mkdir()
-    (images / "levels.svg").write_text(
-        '<?xml version="1.0"?><svg><!-- $L_i$ --><g transform="translate(1 2) '
-        'scale(0.1 -0.1)"><use href="#DejaVuSans-Oblique-2f"/></g></svg>',
+def _figure(directory: pathlib.Path, name: str, *labels: str) -> pathlib.Path:
+    """A matplotlib SVG as the figures write it: each text's source in a comment."""
+    comments = "".join(f"<!-- {label} -->\n" for label in labels)
+    path = directory / f"{name}.svg"
+    path.write_text(
+        '<?xml version="1.0" encoding="utf-8" standalone="no"?>\n'
+        f"<svg>{comments}</svg>",
         encoding="utf-8",
     )
+    return path
+
+
+def test_a_figure_is_read_from_the_source_matplotlib_keeps(
+    tmp_path: pathlib.Path,
+) -> None:
+    """mathtext sets the slope the source writes, and the comment holds it."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _figure(images, "levels", "Impact level $L_i$ [dB]")
+    page = _write(tmp_path, "levels.md", "$L_\\mathrm{i}$\n" + _EMBED.format("levels"))
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert 'L_i: italic in levels.svg: "Impact level $L_i$ [dB]"' in failures[0]
+    assert "upright on line 1" in failures[0]
+
+
+def test_a_figure_that_agrees_with_its_page_passes(tmp_path: pathlib.Path) -> None:
+    """An escaped comment reads back as the source it was written from."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _figure(images, "levels", "$L_\\mathrm{i}$ &lt; 60 dB")
     page = _write(tmp_path, "levels.md", "$L_\\mathrm{i}$\n" + _EMBED.format("levels"))
     _, failures = css.check([page], images)
     assert failures == []
+
+
+def test_a_spanish_page_is_held_against_the_spanish_figure(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The figures carry an ``_es`` twin too, and that is what the page shows."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _figure(images, "levels", "$L_\\mathrm{i}$")
+    _figure(images, "levels_es", "$L_i$")
+    (tmp_path / "es").mkdir()
+    page = _write(
+        tmp_path, "es/niveles.md", "$L_\\mathrm{i}$\n" + _EMBED.format("levels")
+    )
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert "levels_es.svg" in failures[0]
+
+
+def test_a_letter_run_is_one_base() -> None:
+    """``TL_n`` is a transmission loss, not a level L carrying a subscript."""
+    found = css.sightings("$TL_\\mathrm{n}$ and $L_n$ and $KB_\\mathrm{F}$", ".md")
+    assert found[("TL", "n")] == {"upright": [1]}
+    assert found[("L", "n")] == {"italic": [1]}
+    assert found[("KB", "F")] == {"upright": [1]}
+    assert ("B", "F") not in found
+
+
+def test_a_plate_reads_a_letter_run_as_one_base() -> None:
+    """The plate reading names the same symbol the page reading does."""
+    from diagrams.canvas import LIGHT, SVG
+
+    svg = SVG(900, 200, LIGHT)
+    svg.text(450, 100, "$SNR_x$ and $L_x$", 16)
+    found, unreadable = css.plate_sightings(svg.render("A plate"))
+    assert unreadable == []
+    assert set(found) == {("SNR", "x"), ("L", "x")}
+
+
+def test_a_subscript_inside_an_exponent_is_read_on_a_plate() -> None:
+    """The level inside an energy sum's exponent hangs from its own base."""
+    from diagrams.canvas import LIGHT, SVG
+
+    svg = SVG(900, 200, LIGHT)
+    svg.text(450, 100, "$10 lg Σ 10^{L_i/10}$ and $L_{Aeq}$", 16)
+    found, unreadable = css.plate_sightings(svg.render("A plate"))
+    assert unreadable == []
+    assert found[("L", "i")]["italic"] == ["$10 lg Σ 10^{L_i/10}$ and $L_{Aeq}$"]
 
 
 def test_a_ligature_in_a_script_is_read_through() -> None:
@@ -336,6 +406,57 @@ def test_a_doubled_brace_in_a_formatted_label_is_upright(
     _, failures = css.check([path])
     assert len(failures) == 1
     assert "upright on line 1" in failures[0]
+
+
+def test_a_linked_letter_set_two_ways_on_one_page_fails(tmp_path: pathlib.Path) -> None:
+    r"""The r of KB_FTr and of A_r is one letter, though the symbols are two."""
+    path = _write(
+        tmp_path,
+        "people.md",
+        "$KB_\\mathrm{FTr}$ is held to $A_r$ over $T_\\mathrm{r}$.\n",
+    )
+    _, failures = css.check([path])
+    assert len(failures) == 1
+    assert "Beurteilung" in failures[0]
+    assert "italic: A_r on line 1" in failures[0]
+    assert "KB_FTr on line 1" in failures[0]
+
+
+def test_a_linked_letter_set_one_way_passes(tmp_path: pathlib.Path) -> None:
+    """Every member upright, as DIN 4150-2 prints them, is no collision."""
+    path = _write(
+        tmp_path,
+        "people.md",
+        "$KB_{\\mathrm{FTr}} = \\sqrt{\\frac{1}{N_\\mathrm{r}} \\sum_j M_j}$ "
+        "against $A_\\mathrm{r}$.\n",
+    )
+    _, failures = css.check([path])
+    assert failures == []
+
+
+def test_a_plate_setting_the_linked_letter_two_ways_fails(
+    tmp_path: pathlib.Path,
+) -> None:
+    """On a plate the roman FTr beside an unkeyed A_r is the same split."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_people", "$KB_{FTr}$ ≤ $A_r$ ?")
+    page = _write(tmp_path, "people.md", _EMBED.format("diagram_people"))
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert 'italic: A_r in diagram_people.svg: "$KB_{FTr}$ ≤ $A_r$ ?"' in failures[0]
+
+
+def test_a_plate_keying_the_linked_letter_upright_passes(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The ``upright`` key brings the A_r of the plate into line with its FTr."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_people", "$KB_{FTr}$ ≤ $A_r$ ?", upright=("A_r",))
+    page = _write(tmp_path, "people.md", _EMBED.format("diagram_people"))
+    _, failures = css.check([page], images)
+    assert failures == []
 
 
 def test_the_tree_it_ships_with_passes() -> None:

@@ -9,17 +9,17 @@ railway's verdict altogether. The draft keeps the two assessment quantities
 and changes what feeds them:
 
 - every train passage counts as **one** clock interval, however long it
-  lasts (6.5.3.2), so :math:`KB_{FTm,Zug}` of Formula (5) is the r.m.s. of one
+  lasts (6.5.3.2), so :math:`KB_\mathrm{FTm,Zug}` of Formula (5) is the r.m.s. of one
   clock maximum per passage, with nothing set to zero below 0,1;
-- :math:`KB_{F\mathrm{max}}` of a railway is not the largest clock maximum
-  observed but **1,5 times** :math:`KB_{FTm,Zug}` of each category and the
+- :math:`KB_\mathrm{Fmax}` of a railway is not the largest clock maximum
+  observed but **1,5 times** :math:`KB_\mathrm{FTm,Zug}` of each category and the
   largest of those (Formulae (7) and (8)), because a single passage with a
   flat spot on a wheel is not what the line is like;
 - the assessment vibration severity of Formula (6) weights each category by
   the number of its trains in the period, out of the 1920 or 960 clock
   intervals of the day or the night, and by a **weighting factor**
-  :math:`\alpha_{Zug}` of Table 2 for the kind of train and whether the line
-  runs on the surface or underground: 0,7 for a tram on the surface, 1,3 for
+  :math:`\alpha_\mathrm{Zug}` of Table 2 for the kind of train and whether the
+  line runs on the surface or underground: 0,7 for a tram on the surface, 1,3 for
   a freight train over 600 m anywhere. A category whose r.m.s. is at or below
   0,1 enters Formula (6) as zero;
 - a line to be built new is held at night to an upper value of its own
@@ -27,14 +27,14 @@ and changes what feeds them:
   value in an industrial or commercial area and 0,3 elsewhere;
 - an existing line that is altered or extended is judged by the **change**
   it brings (6.5.3.6): the planned case is first held to the guide values as
-  any immission is, and where :math:`A_o` or :math:`A_r` is exceeded the
-  requirement still counts as met if :math:`KB_{F\mathrm{max}}` or
-  :math:`KB_{FTr}` grows by less than 25 % against the case without the
+  any immission is, and where :math:`A_\mathrm{o}` or :math:`A_\mathrm{r}` is exceeded the
+  requirement still counts as met if :math:`KB_\mathrm{Fmax}` or
+  :math:`KB_\mathrm{FTr}` grows by less than 25 % against the case without the
   project, which is the least increase a laboratory study found people to
   notice. The clause says the requirements are met if *one* of its
   conditions holds, and its own Example 9 sends a line whose
-  :math:`KB_{F\mathrm{max}}` does not change at all to mitigation because
-  :math:`KB_{FTr}` grows by more; every condition that applies has to hold
+  :math:`KB_\mathrm{Fmax}` does not change at all to mitigation because
+  :math:`KB_\mathrm{FTr}` grows by more; every condition that applies has to hold
   here, as in the example, and the sentence is in ``docs/ERRATA.md``.
 
 E DIN 45672-3:2023-02, the draft prediction method for railways, takes the
@@ -96,8 +96,8 @@ __all__ = [
     "train_weighting_factor",
 ]
 
-#: The factor Formula (7) puts on :math:`KB_{FTm,Zug}` to estimate the
-#: :math:`KB_{F\mathrm{max}}` of a category of train: 1,5. E DIN 45672-3
+#: The factor Formula (7) puts on :math:`KB_\mathrm{FTm,Zug}` to estimate the
+#: :math:`KB_\mathrm{Fmax}` of a category of train: 1,5. E DIN 45672-3
 #: Formula (10) is the same number.
 TRAIN_KB_FMAX_FACTOR: float = 1.5
 
@@ -112,11 +112,11 @@ TRAIN_KINDS: tuple[str, ...] = (
     "freight_long",
 )
 
-#: Table 2 (printed page 20): the weighting factor :math:`\alpha_{Zug}` of
-#: Formula (6) by kind of train and alignment of the line, ``"surface"`` or
+#: Table 2 (printed page 20): the weighting factor :math:`\alpha_\mathrm{Zug}`
+#: of Formula (6) by kind of train and alignment of the line, ``"surface"`` or
 #: ``"underground"``. E DIN 45672-3:2023-02 Table E.1 prints the same ten
-#: values. A people mover or any other very short vehicle with a short
-#: passage takes the tram row.
+#: values. A people mover or any other very short vehicle with a short passage
+#: takes the tram row.
 TRAIN_WEIGHTING_FACTORS: Mapping[str, Mapping[str, float]] = MappingProxyType(
     {
         "tram_metro": MappingProxyType({"surface": 0.7, "underground": 1.0}),
@@ -127,16 +127,16 @@ TRAIN_WEIGHTING_FACTORS: Mapping[str, Mapping[str, float]] = MappingProxyType(
     }
 )
 
-#: The upper guide value :math:`A_o` a line to be built new is held to at
+#: The upper guide value :math:`A_\mathrm{o}` a line to be built new is held to at
 #: night (6.5.3.5): 0,6 on the surface in any area; underground, the night
-#: :math:`A_o` of Table 1 in an industrial or commercial area and 0,3 in a
+#: :math:`A_\mathrm{o}` of Table 1 in an industrial or commercial area and 0,3 in a
 #: mixed, residential or sensitive one. The same values bound the planned
 #: case of an altered line (6.5.3.6 b)).
 RAILWAY_NEW_LINE_NIGHT_A_O: Mapping[str, float] = MappingProxyType(
     {"surface": 0.6, "underground": 0.3}
 )
 
-#: The least increase of :math:`KB_{F\mathrm{max}}` or :math:`KB_{FTr}` that
+#: The least increase of :math:`KB_\mathrm{Fmax}` or :math:`KB_\mathrm{FTr}` that
 #: an altered or extended line may bring where a guide value is exceeded
 #: (6.5.3.6): 25 %, below which a laboratory study found no one notices.
 RAILWAY_CHANGE_TOLERANCE_PERCENT: float = 25.0
@@ -151,11 +151,11 @@ _DRAFT = "2023"
 
 
 def train_weighting_factor(kind: str, *, alignment: str = "surface") -> float:
-    r"""The weighting factor :math:`\alpha_{Zug}` of Table 2 for one category.
+    r"""The weighting factor :math:`\alpha_\mathrm{Zug}` of Table 2 for one category.
 
     :param kind: The kind of train, as :data:`TRAIN_KINDS` lists them.
     :param alignment: ``"surface"`` (default) or ``"underground"``.
-    :return: :math:`\alpha_{Zug}`, dimensionless.
+    :return: :math:`\alpha_\mathrm{Zug}`, dimensionless.
     :raises ValueError: For an unknown kind or alignment.
     """
     row = TRAIN_WEIGHTING_FACTORS[require_choice(str(kind), "kind", TRAIN_KINDS)]
@@ -173,15 +173,15 @@ def _passages(kb_fti_zug: ArrayLike) -> NDArray[np.float64]:
 def train_category_rms(kb_fti_zug: ArrayLike) -> float:
     r"""The clock maximum r.m.s. of one category of train, Formula (5).
 
-    :math:`KB_{FTm,Zug} = \sqrt{\frac{1}{Z}\sum_{i=1}^{Z} KB^2_{FTi,Zug}}` over
+    :math:`KB_\mathrm{FTm,Zug} = \sqrt{\frac{1}{Z}\sum_{i=1}^{Z} KB^2_{\mathrm{FT}i,\mathrm{Zug}}}` over
     the :math:`Z` passages measured, one clock maximum per passage whatever
     the passage lasted. Unlike Formula (1) and the 1999 edition's (A.1), a
     maximum at or below 0,1 enters as it is: the suppression is applied to
     the category's r.m.s. in Formula (6), not to the passages (C.2), because
-    :math:`KB_{F\mathrm{max}}` of Formula (7) is formed from this value.
+    :math:`KB_\mathrm{Fmax}` of Formula (7) is formed from this value.
 
-    :param kb_fti_zug: :math:`KB_{FTi,Zug}` of each passage, dimensionless.
-    :return: :math:`KB_{FTm,Zug}`.
+    :param kb_fti_zug: :math:`KB_{\mathrm{FT}i,\mathrm{Zug}}` of each passage, dimensionless.
+    :return: :math:`KB_\mathrm{FTm,Zug}`.
     :raises ValueError: For an empty, non-finite or negative input.
     """
     values = _passages(kb_fti_zug)
@@ -189,16 +189,16 @@ def train_category_rms(kb_fti_zug: ArrayLike) -> float:
 
 
 def train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]:
-    r"""The :math:`KB_{F\mathrm{max},Zug}` of each category, Formula (7).
+    r"""The :math:`KB_\mathrm{Fmax,Zug}` of each category, Formula (7).
 
-    :math:`KB_{F\mathrm{max},Zug} = 1{,}5 \cdot KB_{FTm,Zug}`, the estimate the
+    :math:`KB_\mathrm{Fmax,Zug} = 1{,}5 \cdot KB_\mathrm{FTm,Zug}`, the estimate the
     draft uses instead of the largest clock maximum observed, which a single
     passage with an out-of-round wheel would decide. Formed from the value
     before rounding: Table B.1 prints 0,851 for a category whose r.m.s. it
     prints as 0,568.
 
-    :param kb_ftm_zug: :math:`KB_{FTm,Zug}` of each category.
-    :return: :math:`KB_{F\mathrm{max},Zug}` of each, in the same order.
+    :param kb_ftm_zug: :math:`KB_\mathrm{FTm,Zug}` of each category.
+    :return: :math:`KB_\mathrm{Fmax,Zug}` of each, in the same order.
     :raises ValueError: For an empty, non-finite or negative input.
     """
     values = require_finite_array(kb_ftm_zug, "kb_ftm_zug")
@@ -209,14 +209,14 @@ def train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]:
 
 
 def railway_kb_fmax(kb_ftm_zug: ArrayLike) -> float:
-    r"""The :math:`KB_{F\mathrm{max}}` of a railway, Formula (8).
+    r"""The :math:`KB_\mathrm{Fmax}` of a railway, Formula (8).
 
-    The largest :math:`KB_{F\mathrm{max},Zug}` of Formula (7) over the
-    categories, which is what the draft compares with :math:`A_u` and
-    :math:`A_o`.
+    The largest :math:`KB_\mathrm{Fmax,Zug}` of Formula (7) over the
+    categories, which is what the draft compares with :math:`A_\mathrm{u}` and
+    :math:`A_\mathrm{o}`.
 
-    :param kb_ftm_zug: :math:`KB_{FTm,Zug}` of each category.
-    :return: :math:`KB_{F\mathrm{max}}`.
+    :param kb_ftm_zug: :math:`KB_\mathrm{FTm,Zug}` of each category.
+    :return: :math:`KB_\mathrm{Fmax}`.
     :raises ValueError: For an empty, non-finite or negative input.
     """
     return float(np.max(train_kb_fmax(kb_ftm_zug)))
@@ -231,25 +231,25 @@ def train_assessment_severity(
 ) -> float:
     r"""The assessment vibration severity of a railway, Formula (6).
 
-    :math:`KB_{FTr} = \sqrt{\sum_{Zug} \frac{n_{Zug}}{N_r} (\alpha_{Zug}
-    KB_{FTm,Zug})^2}`: each category weighted by the trains it runs in the
-    period, out of the :math:`N_r` = 1920 clock intervals of the day or 960
-    of the night, and by its factor of Table 2. A category whose r.m.s. is
-    at or below 0,1 enters as zero. The rest hours of the day are not
-    applied to a railway (6.5.3.2). E DIN 45672-3:2023-02 Formula (11) is
-    the same sum, printed without the sentence on 0,1. The categories are at
+    :math:`KB_\mathrm{FTr} = \sqrt{\sum_\mathrm{Zug} \frac{n_\mathrm{Zug}}{N_\mathrm{r}}
+    (\alpha_\mathrm{Zug} KB_\mathrm{FTm,Zug})^2}`: each category weighted by the
+    trains it runs in the period, out of the :math:`N_\mathrm{r}` = 1920 clock intervals
+    of the day or 960 of the night, and by its factor of Table 2. A category
+    whose r.m.s. is at or below 0,1 enters as zero. The rest hours of the day
+    are not applied to a railway (6.5.3.2). E DIN 45672-3:2023-02 Formula (11)
+    is the same sum, printed without the sentence on 0,1. The categories are at
     least one per track or direction and kind of train, and their trains are
-    counted apart, so nothing bounds their sum by the intervals of the
-    period: two tracks can each carry a train in the same interval.
+    counted apart, so nothing bounds their sum by the intervals of the period:
+    two tracks can each carry a train in the same interval.
 
-    :param kb_ftm_zug: :math:`KB_{FTm,Zug}` of each category, as
+    :param kb_ftm_zug: :math:`KB_\mathrm{FTm,Zug}` of each category, as
         :func:`train_category_rms` gives them.
-    :param trains: :math:`n_{Zug}`, the trains of each category in the
+    :param trains: :math:`n_\mathrm{Zug}`, the trains of each category in the
         period, from the timetable.
-    :param alpha: :math:`\alpha_{Zug}` of each category, from
+    :param alpha: :math:`\alpha_\mathrm{Zug}` of each category, from
         :func:`train_weighting_factor`, or one value for all.
     :param time_of_day: ``"day"`` (default) or ``"night"``.
-    :return: :math:`KB_{FTr}`.
+    :return: :math:`KB_\mathrm{FTr}`.
     :raises ValueError: For mismatched, negative or non-finite inputs, a
         count that is not whole, or an unknown time of day.
     """
@@ -287,8 +287,8 @@ def railway_guide_values(
 ) -> GuideValues:
     r"""The guide values a line to be built new is held to (6.5.3.5).
 
-    :math:`A_u` and :math:`A_r` are Table 1 of the draft, by day and by
-    night, and :math:`A_o` is Table 1 by day. At night the upper value is the
+    :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` are Table 1 of the draft, by day and by
+    night, and :math:`A_\mathrm{o}` is Table 1 by day. At night the upper value is the
     line's own: 0,6 on the surface whatever the area; underground, the
     Table 1 value in an industrial or commercial area and 0,3 in a mixed,
     residential or sensitive one. The same values bound the planned case of
@@ -322,18 +322,18 @@ class RailwayChange:
     r"""The verdict of 6.5.3.6 on an altered or extended line.
 
     :ivar complies: Whether the requirements count as met for the planned
-        case: :math:`KB_{F\mathrm{max}}` keeps to :math:`A_u`, or both the
-        :math:`KB_{F\mathrm{max}}` and the :math:`KB_{FTr}` condition hold.
-    :ivar kb_fmax_met: Whether :math:`KB_{F\mathrm{max}}` of the planned
-        case keeps to :math:`A_u` or :math:`A_o`, or exceeds :math:`A_o` by
+        case: :math:`KB_\mathrm{Fmax}` keeps to :math:`A_\mathrm{u}`, or both the
+        :math:`KB_\mathrm{Fmax}` and the :math:`KB_\mathrm{FTr}` condition hold.
+    :ivar kb_fmax_met: Whether :math:`KB_\mathrm{Fmax}` of the planned
+        case keeps to :math:`A_\mathrm{u}` or :math:`A_\mathrm{o}`, or exceeds :math:`A_\mathrm{o}` by
         an increase under 25 % against the case without the project.
-    :ivar kb_ftr_met: Whether :math:`KB_{FTr}` of the planned case keeps to
-        :math:`A_r`, or exceeds it by an increase under 25 %; true without
-        looking when :math:`KB_{F\mathrm{max}}` keeps to :math:`A_u`, which
+    :ivar kb_ftr_met: Whether :math:`KB_\mathrm{FTr}` of the planned case keeps to
+        :math:`A_\mathrm{r}`, or exceeds it by an increase under 25 %; true without
+        looking when :math:`KB_\mathrm{Fmax}` keeps to :math:`A_\mathrm{u}`, which
         settles the verdict on its own.
-    :ivar kb_fmax_increase_percent: The increase of :math:`KB_{F\mathrm{max}}`,
+    :ivar kb_fmax_increase_percent: The increase of :math:`KB_\mathrm{Fmax}`,
         planned against existing, in per cent.
-    :ivar kb_ftr_increase_percent: The same for :math:`KB_{FTr}`.
+    :ivar kb_ftr_increase_percent: The same for :math:`KB_\mathrm{FTr}`.
     :ivar guide: The guide values the planned case was held to.
     :ivar time_of_day: ``"day"`` or ``"night"``.
     """
@@ -370,26 +370,26 @@ def assess_railway_change(
     line with its present or its forecast timetable; the planned case, the
     Prognoseplanfall, is the line with the project. The planned case is
     first held to the guide values in the order of 6.3: a
-    :math:`KB_{F\mathrm{max}}` at or below :math:`A_u` meets the
-    requirements on its own, and so does one at or below :math:`A_o` with a
-    :math:`KB_{FTr}` at or below :math:`A_r`, and then the change is beside
-    the point. Where :math:`KB_{F\mathrm{max}}` exceeds :math:`A_o`, or
-    :math:`KB_{FTr}` exceeds :math:`A_r`, the requirements still count as
+    :math:`KB_\mathrm{Fmax}` at or below :math:`A_\mathrm{u}` meets the
+    requirements on its own, and so does one at or below :math:`A_\mathrm{o}` with a
+    :math:`KB_\mathrm{FTr}` at or below :math:`A_\mathrm{r}`, and then the change is beside
+    the point. Where :math:`KB_\mathrm{Fmax}` exceeds :math:`A_\mathrm{o}`, or
+    :math:`KB_\mathrm{FTr}` exceeds :math:`A_\mathrm{r}`, the requirements still count as
     met if the quantity grows by less than 25 % against the case without the
     project; otherwise mitigation is to be looked into. Example 9 of Annex B
-    finds a night-time :math:`KB_{FTr}` of 0,096 against 0,066 before, an
-    increase of over 25 % above an :math:`A_r` of 0,07, and sends the
-    project to mitigation although its :math:`KB_{F\mathrm{max}}` does not
+    finds a night-time :math:`KB_\mathrm{FTr}` of 0,096 against 0,066 before, an
+    increase of over 25 % above an :math:`A_\mathrm{r}` of 0,07, and sends the
+    project to mitigation although its :math:`KB_\mathrm{Fmax}` does not
     change, which is why every condition that applies has to hold here and
     not one of them, as the clause is printed.
 
-    :param kb_fmax_before: :math:`KB_{F\mathrm{max}}` of Formula (8) without
+    :param kb_fmax_before: :math:`KB_\mathrm{Fmax}` of Formula (8) without
         the project.
     :param kb_fmax_after: The same with the project.
-    :param kb_ftr_before: :math:`KB_{FTr}` of Formula (6) without the project.
+    :param kb_ftr_before: :math:`KB_\mathrm{FTr}` of Formula (6) without the project.
     :param kb_ftr_after: The same with the project.
     :param guide: The guide values of the planned case, from
-        :func:`railway_guide_values` for the night-time :math:`A_o` of
+        :func:`railway_guide_values` for the night-time :math:`A_\mathrm{o}` of
         6.5.3.6 b); they must be of the 2023 edition and of the same period.
     :param time_of_day: ``"day"`` (default) or ``"night"``.
     :return: The verdict, as a :class:`RailwayChange`.

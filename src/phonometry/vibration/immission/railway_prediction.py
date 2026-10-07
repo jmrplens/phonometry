@@ -15,14 +15,17 @@ an emission spectrum plus four level differences, band by band from 4 Hz to
 
 .. math::
 
-   L_v(f_{Tn}) = L_{v,E}(f_{Tn}) + \Delta L_{v,BB}(f_{Tn}) + \Delta L_{v,FB}(f_{Tn})
-   + \Delta L_{v,DF}(f_{Tn}) + D_e(f_{Tn})
+   L_v(f_{\mathrm{T}n}) = L_{v,\mathrm{E}}(f_{\mathrm{T}n})
+   + \Delta L_{v,\mathrm{BB}}(f_{\mathrm{T}n})
+   + \Delta L_{v,\mathrm{FB}}(f_{\mathrm{T}n})
+   + \Delta L_{v,\mathrm{DF}}(f_{\mathrm{T}n}) + D_\mathrm{e}(f_{\mathrm{T}n})
 
-the emission :math:`L_{v,E}` as a Max Hold spectrum of the Zuggattung at a
-known distance (Clause 5.2), the transmission :math:`\Delta L_{v,BB}` through
-the ground to the building (Clause 5.3), the transfer :math:`\Delta L_{v,FB}`
-from the ground into the foundation and :math:`\Delta L_{v,DF}` from the
-foundation to the floor (Clause 5.4), and the insertion loss :math:`D_e` of
+the emission :math:`L_{v,\mathrm{E}}` as a Max Hold spectrum of the Zuggattung
+at a known distance (Clause 5.2), the transmission
+:math:`\Delta L_{v,\mathrm{BB}}` through the ground to the building
+(Clause 5.3), the transfer :math:`\Delta L_{v,\mathrm{FB}}` from the ground
+into the foundation and :math:`\Delta L_{v,\mathrm{DF}}` from the foundation
+to the floor (Clause 5.4), and the insertion loss :math:`D_\mathrm{e}` of
 whatever mitigation is planned (Clause 5.5). Every term is added as printed,
 so a mitigation enters as a negative number.
 
@@ -51,13 +54,13 @@ have, never with the envelope over all of them.
 table of third-octave corrections (Table 2, Formula (8)) is added to the
 predicted spectrum, the bands from 4 Hz to 80 Hz are summed, and the sum
 level gives the clock maximum r.m.s. of the category (Formula (9)),
-:math:`KB_{FTm,Zug} = c_{T1} v_0 10^{L/20}` with :math:`c_{T1} = 1` and
-:math:`v_0 = 5 \cdot 10^{-5}` mm/s; 1,5 times it is :math:`KB_{F\mathrm{max},Zug}`
-(Formula (10)), three times that the peak velocity a DIN 4150-3 comparison
-wants (Formula (12)), and Formula (11) is the sum of Formula (6) of E DIN
-4150-2:2023-08, printed without that formula's rule that a category whose
-:math:`KB_{FTm,Zug}` is at or below 0,1 enters as zero; the assessment the
-draft says it performs is that of DIN 4150-2, so
+:math:`KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L/20}` with
+:math:`c_{\mathrm{T}1} = 1` and :math:`v_0 = 5 \cdot 10^{-5}` mm/s; 1,5 times
+it is :math:`KB_\mathrm{Fmax,Zug}` (Formula (10)), three times that the peak
+velocity a DIN 4150-3 comparison wants (Formula (12)), and Formula (11) is the
+sum of Formula (6) of E DIN 4150-2:2023-08, printed without that formula's
+rule that a category whose :math:`KB_\mathrm{FTm,Zug}` is at or below 0,1
+enters as zero; the assessment the draft says it performs is that of DIN 4150-2, so
 :func:`~phonometry.vibration.train_assessment_severity` of
 :mod:`phonometry.vibration.immission.train_categories`, which applies the
 rule, is what the chain ends in. Formula (13) turns a level spectrum back
@@ -195,12 +198,12 @@ GEOMETRIC_DECAY_EXPONENT_RANGE: tuple[float, float] = (0.2, 0.4)
 #: moves, and the spectrum with it (Clause 5.2).
 SPEED_RESCALING_LIMIT: float = 0.3
 
-#: :math:`c_{T1}` of Formula (9): 1 for the Max Hold spectra with the time
+#: :math:`c_{\mathrm{T}1}` of Formula (9): 1 for the Max Hold spectra with the time
 #: weighting Fast that Clause 5.2 asks for.
 TAKT_MAXIMUM_FACTOR: float = 1.0
 
 #: :math:`\beta` of Formula (12): the peak velocity is 3 times
-#: :math:`KB_{F\mathrm{max},Zug}`, an empirical factor.
+#: :math:`KB_\mathrm{Fmax,Zug}`, an empirical factor.
 PEAK_VELOCITY_FACTOR: float = 3.0
 
 #: Annex B: what to take off the exponent measured with a point excitation
@@ -221,7 +224,7 @@ FLOOR_NATURAL_FREQUENCIES_HZ: tuple[float, ...] = (
 )  # fmt: skip
 
 #: Tables A.1 and A.2 (printed pages 24 and 25): the level difference
-#: :math:`\Delta L_{v,DB}` from the ground to a floor, in decibels, for a
+#: :math:`\Delta L_{v,\mathrm{DB}}` from the ground to a floor, in decibels, for a
 #: building with concrete floors and one with timber floors, by the natural
 #: frequency of the floor (the key) and along :data:`PREDICTION_BAND_CENTRES_HZ`.
 #: Valid for every storey. From building measurements, not a formula.
@@ -321,10 +324,10 @@ GROUND_TO_FLOOR_DB: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingPro
 })  # fmt: skip
 
 #: Tables A.3 and A.4 (printed pages 26 and 27): the level difference
-#: :math:`\Delta L_{v,FB}` from the ground into the foundation, in decibels,
-#: for a basement and for a ground floor, as a mean over the buildings
-#: measured with the deviation either way, along the 14 bands from 4 Hz to
-#: 80 Hz. The print writes the 12,5 Hz row as 12.
+#: :math:`\Delta L_{v,\mathrm{FB}}` from the ground into the foundation, in
+#: decibels, for a basement and for a ground floor, as a mean over the
+#: buildings measured with the deviation either way, along the 14 bands from
+#: 4 Hz to 80 Hz. The print writes the 12,5 Hz row as 12.
 GROUND_TO_FOUNDATION_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
     "basement": MappingProxyType({
         "lower": (
@@ -356,16 +359,17 @@ GROUND_TO_FOUNDATION_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = Mapping
     }),
 })  # fmt: skip
 
-#: The ratios :math:`f_{Tn} / f_e` of the band to the natural frequency of
-#: the floor that Tables A.5 and A.6 tabulate, on the third-octave grid from
-#: 0,05 to 8; the print writes 0,06, 0,12, 0,31 and 3,10 for four of them.
+#: The ratios :math:`f_{\mathrm{T}n} / f_\mathrm{e}` of the band to the natural
+#: frequency of the floor that Tables A.5 and A.6 tabulate, on the third-octave
+#: grid from 0,05 to 8; the print writes 0,06, 0,12, 0,31 and 3,10 for four of
+#: them.
 FOUNDATION_TO_FLOOR_RATIOS: tuple[float, ...] = (
     0.05, 0.063, 0.08, 0.1, 0.125, 0.16, 0.2, 0.25, 0.315, 0.4, 0.5, 0.63, 0.8,
     1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0,
 )  # fmt: skip
 
 #: Tables A.5 and A.6 (printed pages 27 to 29): the level difference
-#: :math:`\Delta L_{v,DF}` from the foundation to a floor, in decibels, for
+#: :math:`\Delta L_{v,\mathrm{DF}}` from the foundation to a floor, in decibels, for
 #: concrete and for timber floors, against :data:`FOUNDATION_TO_FLOOR_RATIOS`,
 #: as a mean with the deviation either way; ``nan`` where the table prints
 #: no value. The concrete table stops at a ratio of 5, the timber one begins
@@ -457,18 +461,18 @@ def predict_floor_spectrum(
     into the foundation, the transfer to the floor and the effect of the
     mitigation. The Annex A tables are negative where they attenuate, and a
     mitigation must be too, which is why the term is not called an insertion
-    loss here: the formula prints :math:`D_e` with a plus sign and names
+    loss here: the formula prints :math:`D_\mathrm{e}` with a plus sign and names
     DIN 45673-1 for it, and an insertion loss in the sense of DIN 45672-2
     Annex B, :func:`~phonometry.vibration.elastic_insertion_loss`, is
     positive where the element reduces the level, so it goes in with its
     sign changed. An emission spectrum measured at the foundation makes the
     foundation term zero (Annex C does exactly that).
 
-    :param emission_db: :math:`L_{v,E}`, one level per band, in decibels.
-    :param ground_db: :math:`\Delta L_{v,BB}`, per band or one value.
-    :param foundation_db: :math:`\Delta L_{v,FB}`, per band or one value.
-    :param floor_db: :math:`\Delta L_{v,DF}`, per band or one value.
-    :param mitigation_db: :math:`D_e`, per band or one value, added as
+    :param emission_db: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
+    :param ground_db: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
+    :param foundation_db: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
+    :param floor_db: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
+    :param mitigation_db: :math:`D_\mathrm{e}`, per band or one value, added as
         printed, so negative for a mitigation.
     :return: :math:`L_v`, one level per band.
     :raises ValueError: For a non-finite input or a term that does not
@@ -499,17 +503,18 @@ def rescale_emission_for_speed(
 ) -> NDArray[np.float64]:
     r"""An emission spectrum carried to another train speed, Formula (3).
 
-    :math:`L_{v,E2} = L_{v,E1} + 20 \lg (v_2 / v_1)`, the same shift in every
-    band, for the same category of train under the same conditions and a
-    change of speed of up to 30 %. Beyond that the frequencies bound to a
-    length, the sleeper-passing frequency :math:`f_a = v / a` for one, move
-    with the speed while the resonances do not, and the shift is refused.
+    :math:`L_{v,\mathrm{E2}} = L_{v,\mathrm{E1}} + 20 \lg (v_2 / v_1)`, the
+    same shift in every band, for the same category of train under the same
+    conditions and a change of speed of up to 30 %. Beyond that the frequencies
+    bound to a length, the sleeper-passing frequency :math:`f_a = v / a` for
+    one, move with the speed while the resonances do not, and the shift is
+    refused.
 
-    :param levels_db: :math:`L_{v,E1}`, the spectrum measured at the first
+    :param levels_db: :math:`L_{v,\mathrm{E1}}`, the spectrum measured at the first
         speed, in decibels.
     :param speed_from_km_h: :math:`v_1`, the speed it was measured at.
     :param speed_to_km_h: :math:`v_2`, the speed wanted, in the same unit.
-    :return: :math:`L_{v,E2}`.
+    :return: :math:`L_{v,\mathrm{E2}}`.
     :raises ValueError: For a non-positive speed, a change of more than 30 %,
         or a non-finite spectrum.
     """
@@ -582,7 +587,7 @@ def ground_transmission_db(
     :param damping_ratio: :math:`D` of the ground; ``None`` (default) leaves
         the material damping out.
     :param shear_wave_speed_m_s: :math:`c_s`, needed with a damping ratio.
-    :return: :math:`\Delta L_{v,BB}`, in decibels, one per band; negative
+    :return: :math:`\Delta L_{v,\mathrm{BB}}`, in decibels, one per band; negative
         where the building is further from the source than the reference.
     :raises ValueError: For a non-positive distance, a negative exponent or
         damping, a damping ratio without a wave speed, or an exponent that
@@ -618,19 +623,19 @@ def ground_to_floor_transfer_db(
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground to a floor, Tables A.1 and A.2.
 
-    :math:`\Delta L_{v,DB}` for a building with concrete or with timber floors
-    whose floors have the given natural frequency, along
+    :math:`\Delta L_{v,\mathrm{DB}}` for a building with concrete or with
+    timber floors whose floors have the given natural frequency, along
     :data:`PREDICTION_BAND_CENTRES_HZ`, for any storey. The tables print a
-    column for each of :data:`FLOOR_NATURAL_FREQUENCIES_HZ` and no rule for
-    a frequency between two, so the frequency has to be one of them. Clause
-    5.4.4: run the prediction once for each natural frequency the building
-    may have, and never with the envelope over all of them, which
-    overestimates considerably.
+    column for each of :data:`FLOOR_NATURAL_FREQUENCIES_HZ` and no rule for a
+    frequency between two, so the frequency has to be one of them. Clause
+    5.4.4: run the prediction once for each natural frequency the building may
+    have, and never with the envelope over all of them, which overestimates
+    considerably.
 
     :param floor: ``"concrete"`` or ``"timber"``.
-    :param floor_natural_frequency_hz: :math:`f_e`, one of the tabulated
+    :param floor_natural_frequency_hz: :math:`f_\mathrm{e}`, one of the tabulated
         frequencies.
-    :return: :math:`\Delta L_{v,DB}`, in decibels, one per band.
+    :return: :math:`\Delta L_{v,\mathrm{DB}}`, in decibels, one per band.
     :raises ValueError: For an unknown floor or a frequency the tables have
         no column for.
     """
@@ -644,17 +649,17 @@ def ground_to_foundation_transfer_db(
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground into the foundation, Tables A.3 and A.4.
 
-    :math:`\Delta L_{v,FB}` for a basement or for a foundation at ground
-    level, along the 14 bands from 4 Hz to 80 Hz, as the mean of the
-    buildings measured or the mean less or plus its deviation. The tables
-    stop at 80 Hz where the others run to 250 Hz, so the result enters
+    :math:`\Delta L_{v,\mathrm{FB}}` for a basement or for a foundation at
+    ground level, along the 14 bands from 4 Hz to 80 Hz, as the mean of the
+    buildings measured or the mean less or plus its deviation. The tables stop
+    at 80 Hz where the others run to 250 Hz, so the result enters
     :func:`predict_floor_spectrum` only with an emission spectrum cut to the
     same 14 bands, or padded with zeros above them by the caller.
 
     :param level: ``"basement"`` or ``"ground_floor"``.
     :param statistic: ``"mean"`` (default), ``"lower"`` or ``"upper"``.
-    :return: :math:`\Delta L_{v,FB}`, in decibels, one per band from 4 Hz to
-        80 Hz.
+    :return: :math:`\Delta L_{v,\mathrm{FB}}`, in decibels, one per band from
+        4 Hz to 80 Hz.
     :raises ValueError: For an unknown level or statistic.
     """
     table = GROUND_TO_FOUNDATION_DB[require_choice(str(level), "level", _LEVELS)]
@@ -670,7 +675,7 @@ def foundation_to_floor_transfer_db(
 ) -> NDArray[np.float64]:
     r"""The level difference from the foundation to a floor, Tables A.5 and A.6.
 
-    :math:`\Delta L_{v,DF}` against the ratio of the band to the natural
+    :math:`\Delta L_{v,\mathrm{DF}}` against the ratio of the band to the natural
     frequency of the floor, for concrete or for timber floors, as the mean
     or the mean less or plus its deviation. The tables are read at the ratio
     of each band; a ratio between two tabulated ones is interpolated
@@ -679,9 +684,9 @@ def foundation_to_floor_transfer_db(
 
     :param frequencies_hz: The band centres, in hertz.
     :param floor: ``"concrete"`` or ``"timber"``.
-    :param floor_natural_frequency_hz: :math:`f_e`, positive.
+    :param floor_natural_frequency_hz: :math:`f_\mathrm{e}`, positive.
     :param statistic: ``"mean"`` (default), ``"lower"`` or ``"upper"``.
-    :return: :math:`\Delta L_{v,DF}`, in decibels, one per band, ``nan``
+    :return: :math:`\Delta L_{v,\mathrm{DF}}`, in decibels, one per band, ``nan``
         outside the table.
     :raises ValueError: For an unknown floor or statistic, a non-positive
         frequency, or a non-finite input.
@@ -710,10 +715,11 @@ def kb_weighted_levels_db(
 ) -> NDArray[np.float64]:
     r"""The KB-weighted third-octave levels, Formula (8) with Table 2.
 
-    :math:`L_{v,KB}(f_{Tn}) = L_v(f_{Tn}) + L_{KB}(f_{Tn})`: the correction of
-    Table 2, the KB weighting of DIN 45669-1 rounded to a tenth of a
-    decibel, added to each band from 4 Hz to 80 Hz. Bands outside those are
-    not weighted by the table and are refused.
+    :math:`L_{v,KB}(f_{\mathrm{T}n}) = L_v(f_{\mathrm{T}n}) +
+    L_{KB}(f_{\mathrm{T}n})`: the correction of Table 2, the KB weighting of
+    DIN 45669-1 rounded to a tenth of a decibel, added to each band from 4 Hz
+    to 80 Hz. Bands outside those are not weighted by the table and are
+    refused.
 
     :param levels_db: :math:`L_v`, one level per band, in decibels.
     :param frequencies_hz: The band centres, nominal, 4 Hz to 80 Hz.
@@ -732,16 +738,17 @@ def kb_weighted_levels_db(
 def takt_maximum_kb(weighted_levels_db: ArrayLike) -> float:
     r"""The clock maximum r.m.s. of a category from its spectrum, Formula (9).
 
-    :math:`KB_{FTm,Zug} = c_{T1} v_0 10^{L_{v,ges}/20}` with :math:`L_{v,ges}`
-    the energy sum of the KB-weighted bands from 4 Hz to 80 Hz,
-    :math:`c_{T1}` = 1 for Max Hold spectra with the time weighting Fast and
-    :math:`v_0 = 5 \cdot 10^{-5}` mm/s, the reference of the velocity level;
-    the value is the KB quantity because KB is the velocity in millimetres
-    per second. Annex C prints 0,4 for a sum level of 78,1 dB.
+    :math:`KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0
+    10^{L_{v,\mathrm{ges}}/20}` with :math:`L_{v,\mathrm{ges}}` the energy sum
+    of the KB-weighted bands from 4 Hz to 80 Hz, :math:`c_{\mathrm{T}1}` = 1
+    for Max Hold spectra with the time weighting Fast and :math:`v_0 = 5 \cdot
+    10^{-5}` mm/s, the reference of the velocity level; the value is the KB
+    quantity because KB is the velocity in millimetres per second. Annex C
+    prints 0,4 for a sum level of 78,1 dB.
 
     :param weighted_levels_db: :math:`L_{v,KB}`, as
         :func:`kb_weighted_levels_db` gives them, one per band.
-    :return: :math:`KB_{FTm,Zug}`, dimensionless.
+    :return: :math:`KB_\mathrm{FTm,Zug}`, dimensionless.
     :raises ValueError: For an empty or non-finite input.
     """
     levels = _levels(weighted_levels_db, "weighted_levels_db")
@@ -754,10 +761,10 @@ def takt_maximum_kb(weighted_levels_db: ArrayLike) -> float:
 def peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float:
     r"""The peak velocity of a category, Formula (12).
 
-    :math:`v_{\max} = \beta \, KB_{F\mathrm{max},Zug}` with :math:`\beta` = 3,
+    :math:`v_{\max} = \beta \, KB_\mathrm{Fmax,Zug}` with :math:`\beta` = 3,
     an empirical factor, which is the number a DIN 4150-3 comparison wants.
 
-    :param kb_fmax_zug: :math:`KB_{F\mathrm{max},Zug}` of Formula (10).
+    :param kb_fmax_zug: :math:`KB_\mathrm{Fmax,Zug}` of Formula (10).
     :return: :math:`v_{\max}`, in millimetres per second.
     :raises ValueError: For a negative input.
     """
@@ -767,11 +774,12 @@ def peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float:
 def velocity_spectrum_um_s(levels_db: ArrayLike) -> NDArray[np.float64]:
     r"""A level spectrum as a velocity spectrum, Formula (13).
 
-    :math:`v_{RMS}(f_{Tn}) = 1000 \, v_0 \, 10^{L_v(f_{Tn})/20}` in micrometres
-    per second, the form the VC curves of VDI 2038 Blatt 2 are drawn in.
+    :math:`v_\mathrm{RMS}(f_{\mathrm{T}n}) = 1000 \, v_0 \,
+    10^{L_v(f_{\mathrm{T}n})/20}` in micrometres per second, the form the VC
+    curves of VDI 2038 Blatt 2 are drawn in.
 
     :param levels_db: :math:`L_v`, one level per band, in decibels.
-    :return: :math:`v_{RMS}`, one per band, in micrometres per second.
+    :return: :math:`v_\mathrm{RMS}`, one per band, in micrometres per second.
     :raises ValueError: For a non-finite input.
     """
     levels = _levels(levels_db, "levels_db")
@@ -783,15 +791,15 @@ class TrainCategoryPrediction:
     r"""The prediction for one category of train, Clauses 5 and 7.
 
     :ivar frequencies_hz: The band centres.
-    :ivar emission_db: :math:`L_{v,E}` the prediction started from.
+    :ivar emission_db: :math:`L_{v,\mathrm{E}}` the prediction started from.
     :ivar floor_db: :math:`L_v` of Formula (1), the spectrum on the floor.
     :ivar weighted_frequencies_hz: The band centres from 4 Hz to 80 Hz the
         KB assessment sums.
     :ivar weighted_db: :math:`L_{v,KB}` of Formula (8) over those bands.
-    :ivar sum_level_db: :math:`L_{v,ges}` of Formula (9), the energy sum of
+    :ivar sum_level_db: :math:`L_{v,\mathrm{ges}}` of Formula (9), the energy sum of
         the weighted bands.
-    :ivar kb_ftm: :math:`KB_{FTm,Zug}` of Formula (9).
-    :ivar kb_fmax: :math:`KB_{F\mathrm{max},Zug}` of Formula (10).
+    :ivar kb_ftm: :math:`KB_\mathrm{FTm,Zug}` of Formula (9).
+    :ivar kb_fmax: :math:`KB_\mathrm{Fmax,Zug}` of Formula (10).
     :ivar peak_velocity_mm_s: :math:`v_{\max}` of Formula (12).
     """
 
@@ -838,20 +846,20 @@ def predict_train_category(
 
     Formula (1) for the spectrum on the floor, Formula (8) for the
     KB-weighted bands from 4 Hz to 80 Hz, Formula (9) for the clock maximum
-    r.m.s. of the category, Formula (10) for its :math:`KB_{F\mathrm{max}}`
+    r.m.s. of the category, Formula (10) for its :math:`KB_\mathrm{Fmax}`
     and Formula (12) for the peak velocity. The assessment vibration
     severity over the categories of a timetable is Formula (11), the sum of
     :func:`~phonometry.vibration.train_assessment_severity`, which also
     applies the rule of E DIN 4150-2:2023-08 that Formula (11) leaves out, a
     category at or below 0,1 counting as zero.
 
-    :param emission_db: :math:`L_{v,E}`, one level per band, in decibels.
+    :param emission_db: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
     :param frequencies_hz: The band centres, nominal; the 19 bands from 4 Hz
         to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz.
-    :param ground_db: :math:`\Delta L_{v,BB}`, per band or one value.
-    :param foundation_db: :math:`\Delta L_{v,FB}`, per band or one value.
-    :param floor_db: :math:`\Delta L_{v,DF}`, per band or one value.
-    :param mitigation_db: :math:`D_e`, per band or one value, added as
+    :param ground_db: :math:`\Delta L_{v,\mathrm{BB}}`, per band or one value.
+    :param foundation_db: :math:`\Delta L_{v,\mathrm{FB}}`, per band or one value.
+    :param floor_db: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
+    :param mitigation_db: :math:`D_\mathrm{e}`, per band or one value, added as
         printed, so negative for a mitigation.
     :return: The chain, as a :class:`TrainCategoryPrediction`.
     :raises ValueError: For a spectrum that does not hold the 14 bands of
@@ -918,15 +926,15 @@ def line_source_correction_db(
 ) -> float:
     r"""The correction of a point-source decay to a train, Formula (B.2).
 
-    :math:`\Delta L_{v,Korr} = 20 \, n_{Korr} \lg(r / r_0)`, added to the level
-    a point excitation predicts, with :math:`n_{Korr}` between 0,3 and 0,5:
-    the train spreads less than the point did, up to the distance of
-    Formula (B.1).
+    :math:`\Delta L_{v,\mathrm{Korr}} = 20 \, n_\mathrm{Korr} \lg(r / r_0)`,
+    added to the level a point excitation predicts, with
+    :math:`n_\mathrm{Korr}` between 0,3 and 0,5: the train spreads less than
+    the point did, up to the distance of Formula (B.1).
 
     :param distance_m: :math:`r`, in metres.
     :param reference_distance_m: :math:`r_0`, in metres.
-    :param exponent_correction: :math:`n_{Korr}`, 0,3 to 0,5.
-    :return: :math:`\Delta L_{v,Korr}`, in decibels.
+    :param exponent_correction: :math:`n_\mathrm{Korr}`, 0,3 to 0,5.
+    :return: :math:`\Delta L_{v,\mathrm{Korr}}`, in decibels.
     :raises ValueError: For a non-positive distance or a correction outside
         0,3 to 0,5.
     """
@@ -945,16 +953,16 @@ def train_decay_exponent(
 ) -> float:
     r"""The decay exponent of a train from that of a point excitation, Annex B.
 
-    :math:`n_{Zug} = n_{Punkt} - 0{,}3` when the point measurement was fitted
-    with spreading and damping apart (Formula (5)), :math:`n_{Punkt} - 0{,}5`
-    when it was fitted as a power law alone (Formula (6)); both up to the
-    transition distance of Formula (B.1), beyond which the point exponent
-    holds as it is. The annex prints no floor, so a point exponent below the
-    correction gives a negative result, as printed.
+    :math:`n_\mathrm{Zug} = n_\mathrm{Punkt} - 0{,}3` when the point
+    measurement was fitted with spreading and damping apart (Formula (5)),
+    :math:`n_\mathrm{Punkt} - 0{,}5` when it was fitted as a power law alone
+    (Formula (6)); both up to the transition distance of Formula (B.1), beyond
+    which the point exponent holds as it is. The annex prints no floor, so a
+    point exponent below the correction gives a negative result, as printed.
 
-    :param point_exponent: :math:`n_{Punkt}`, not negative.
+    :param point_exponent: :math:`n_\mathrm{Punkt}`, not negative.
     :param fitted_with: ``"power_and_damping"`` (default) or ``"power_law"``.
-    :return: :math:`n_{Zug}`.
+    :return: :math:`n_\mathrm{Zug}`.
     :raises ValueError: For a negative exponent or an unknown fit.
     """
     exponent = require_non_negative(point_exponent, "point_exponent")
@@ -975,17 +983,17 @@ def train_velocity_ratio(
     r"""The decay of a train's vibration with distance, Figure B.1.
 
     The ratio of the velocity at :math:`r` to that at :math:`r_0`, as the
-    figure draws it: a power law with the exponent
-    :math:`n_{Punkt} - n_{Korr}` up to the transition distance :math:`R_0` of
-    Formula (B.1), and the point exponent :math:`n_{Punkt}` beyond it,
+    figure draws it: a power law with the exponent :math:`n_\mathrm{Punkt} -
+    n_\mathrm{Korr}` up to the transition distance :math:`R_0` of Formula
+    (B.1), and the point exponent :math:`n_\mathrm{Punkt}` beyond it,
     continuous at :math:`R_0`. The figure is a sketch and prints no closed
     form; this is its reading.
 
     :param distance_m: :math:`r`, in metres, one or many.
     :param reference_distance_m: :math:`r_0`, in metres.
     :param transition_distance_m: :math:`R_0`, in metres.
-    :param point_exponent: :math:`n_{Punkt}`.
-    :param exponent_correction: :math:`n_{Korr}`, 0,3 to 0,5.
+    :param point_exponent: :math:`n_\mathrm{Punkt}`.
+    :param exponent_correction: :math:`n_\mathrm{Korr}`, 0,3 to 0,5.
     :return: :math:`v(r) / v(r_0)`, one per distance.
     :raises ValueError: For a non-positive distance, a reference beyond the
         transition, a negative exponent or a correction outside Annex B.

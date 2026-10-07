@@ -1025,7 +1025,7 @@ def static_pressure_difference_pa(
     .. math::
 
        \Delta p_S = \Delta p_T - \frac{\rho \, q_V^2}{2}
-       \left(\frac{1}{S_u^2} - \frac{1}{S_d^2}\right)
+       \left(\frac{1}{S_\mathrm{u}^2} - \frac{1}{S_\mathrm{d}^2}\right)
 
     For a silencer whose inlet and outlet areas differ, where the gas
     temperature does not vary markedly. With equal areas the bracket vanishes
@@ -1035,8 +1035,8 @@ def static_pressure_difference_pa(
     :param total_pressure_loss_pa: :math:`\Delta p_T`, in pascals.
     :param volume_flow_m3_s: :math:`q_V`, in cubic metres per second.
     :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
-    :param upstream_area_m2: :math:`S_u`, in square metres.
-    :param downstream_area_m2: :math:`S_d`, in square metres.
+    :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
+    :param downstream_area_m2: :math:`S_\mathrm{d}`, in square metres.
     :return: :math:`\Delta p_S`, in pascals.
     :raises ValueError: For a value that is not finite, or a non-positive
         density or area.
@@ -1053,11 +1053,11 @@ def static_pressure_difference_pa(
 def measurement_distance_upstream_m(upstream_area_m2: float) -> float:
     r"""How far upstream the measurement surface stands, Equation (15).
 
-    :math:`d_u = 1,5 \sqrt{4 S_u / \pi}`, which is one and a half equivalent
+    :math:`d_\mathrm{u} = 1,5 \sqrt{4 S_\mathrm{u} / \pi}`, which is one and a half equivalent
     diameters of the upstream measurement cross-section.
 
-    :param upstream_area_m2: :math:`S_u`, in square metres.
-    :return: :math:`d_u`, in metres.
+    :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
+    :return: :math:`d_\mathrm{u}`, in metres.
     :raises ValueError: For a non-positive area.
     """
     area = require_positive(upstream_area_m2, "upstream_area_m2")
@@ -1069,7 +1069,7 @@ def measurement_distance_downstream_m(
 ) -> float:
     r"""How far downstream the measurement surface stands, Equation (16).
 
-    :math:`d_d = 12 \sqrt{S_d} - 10 \sqrt{S_f}`, with :math:`S_f` the free
+    :math:`d_\mathrm{d} = 12 \sqrt{S_\mathrm{d}} - 10 \sqrt{S_\mathrm{f}}`, with :math:`S_\mathrm{f}` the free
     cross-sectional area of the silencer, which NOTE 18 warns is not the same
     thing as its total intake cross-section.
 
@@ -1078,9 +1078,9 @@ def measurement_distance_downstream_m(
     which is agreement between the parties on the distances, and the case is
     reported rather than returned as a distance nobody can stand at.
 
-    :param downstream_area_m2: :math:`S_d`, in square metres.
-    :param free_area_m2: :math:`S_f`, in square metres.
-    :return: :math:`d_d`, in metres.
+    :param downstream_area_m2: :math:`S_\mathrm{d}`, in square metres.
+    :param free_area_m2: :math:`S_\mathrm{f}`, in square metres.
+    :return: :math:`d_\mathrm{d}`, in metres.
     :raises ValueError: For a non-positive area.
     """
     downstream = require_positive(downstream_area_m2, "downstream_area_m2")
@@ -1193,17 +1193,17 @@ def silencer_flow_velocity_m_s(
 ) -> float:
     r"""The mean velocity inside the silencer, Equation (31).
 
-    :math:`\overline{w_f} = (S_u / S_f) \, \overline{w_u}`, the upstream mean
+    :math:`\overline{w_\mathrm{f}} = (S_\mathrm{u} / S_\mathrm{f}) \, \overline{w_\mathrm{u}}`, the upstream mean
     velocity scaled by how much the silencer narrows the passage. It is the
     velocity the regenerated noise of the installation answers to, which is
     why 9.2 asks for it rather than for the duct velocity.
 
-    :param upstream_mean_velocity_m_s: :math:`\overline{w_u}`, in metres per
+    :param upstream_mean_velocity_m_s: :math:`\overline{w_\mathrm{u}}`, in metres per
         second, the arithmetic mean of Equation (30).
-    :param upstream_area_m2: :math:`S_u`, in square metres.
-    :param free_area_m2: :math:`S_f`, the free cross-section, in square
+    :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
+    :param free_area_m2: :math:`S_\mathrm{f}`, the free cross-section, in square
         metres.
-    :return: :math:`\overline{w_f}`, in metres per second.
+    :return: :math:`\overline{w_\mathrm{f}}`, in metres per second.
     :raises ValueError: For a non-positive area.
     """
     upstream = require_positive(upstream_area_m2, "upstream_area_m2")

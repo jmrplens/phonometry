@@ -20,14 +20,15 @@ an emission spectrum plus four level differences, band by band from 4 Hz to
 250 Hz:
 
 $$
-L_v(f_{Tn}) = L_{v,E}(f_{Tn}) + \Delta L_{v,BB}(f_{Tn}) + \Delta L_{v,FB}(f_{Tn}) + \Delta L_{v,DF}(f_{Tn}) + D_e(f_{Tn})
+L_v(f_{\mathrm{T}n}) = L_{v,\mathrm{E}}(f_{\mathrm{T}n}) + \Delta L_{v,\mathrm{BB}}(f_{\mathrm{T}n}) + \Delta L_{v,\mathrm{FB}}(f_{\mathrm{T}n}) + \Delta L_{v,\mathrm{DF}}(f_{\mathrm{T}n}) + D_\mathrm{e}(f_{\mathrm{T}n})
 $$
 
-the emission $L_{v,E}$ as a Max Hold spectrum of the Zuggattung at a
-known distance (Clause 5.2), the transmission $\Delta L_{v,BB}$ through
-the ground to the building (Clause 5.3), the transfer $\Delta L_{v,FB}$
-from the ground into the foundation and $\Delta L_{v,DF}$ from the
-foundation to the floor (Clause 5.4), and the insertion loss $D_e$ of
+the emission $L_{v,\mathrm{E}}$ as a Max Hold spectrum of the Zuggattung
+at a known distance (Clause 5.2), the transmission
+$\Delta L_{v,\mathrm{BB}}$ through the ground to the building
+(Clause 5.3), the transfer $\Delta L_{v,\mathrm{FB}}$ from the ground
+into the foundation and $\Delta L_{v,\mathrm{DF}}$ from the foundation
+to the floor (Clause 5.4), and the insertion loss $D_\mathrm{e}$ of
 whatever mitigation is planned (Clause 5.5). Every term is added as printed,
 so a mitigation enters as a negative number.
 
@@ -55,13 +56,13 @@ have, never with the envelope over all of them.
 table of third-octave corrections (Table 2, Formula (8)) is added to the
 predicted spectrum, the bands from 4 Hz to 80 Hz are summed, and the sum
 level gives the clock maximum r.m.s. of the category (Formula (9)),
-$KB_{FTm,Zug} = c_{T1} v_0 10^{L/20}$ with $c_{T1} = 1$ and
-$v_0 = 5 \cdot 10^{-5}$ mm/s; 1,5 times it is $KB_{F\mathrm{max},Zug}$
-(Formula (10)), three times that the peak velocity a DIN 4150-3 comparison
-wants (Formula (12)), and Formula (11) is the sum of Formula (6) of E DIN
-4150-2:2023-08, printed without that formula's rule that a category whose
-$KB_{FTm,Zug}$ is at or below 0,1 enters as zero; the assessment the
-draft says it performs is that of DIN 4150-2, so
+$KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L/20}$ with
+$c_{\mathrm{T}1} = 1$ and $v_0 = 5 \cdot 10^{-5}$ mm/s; 1,5 times
+it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)), three times that the peak
+velocity a DIN 4150-3 comparison wants (Formula (12)), and Formula (11) is the
+sum of Formula (6) of E DIN 4150-2:2023-08, printed without that formula's
+rule that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0,1
+enters as zero; the assessment the draft says it performs is that of DIN 4150-2, so
 [`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity) of
 [`phonometry.vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/), which applies the
 rule, is what the chain ends in. Formula (13) turns a level spectrum back
@@ -118,7 +119,7 @@ foundation_to_floor_transfer_db(
 
 The level difference from the foundation to a floor, Tables A.5 and A.6.
 
-$\Delta L_{v,DF}$ against the ratio of the band to the natural
+$\Delta L_{v,\mathrm{DF}}$ against the ratio of the band to the natural
 frequency of the floor, for concrete or for timber floors, as the mean
 or the mean less or plus its deviation. The tables are read at the ratio
 of each band; a ratio between two tabulated ones is interpolated
@@ -131,10 +132,10 @@ table has no value for gives `nan`.
 | :--- | :--- |
 | `frequencies_hz` | The band centres, in hertz. |
 | `floor` | `"concrete"` or `"timber"`. |
-| `floor_natural_frequency_hz` | $f_e$, positive. |
+| `floor_natural_frequency_hz` | $f_\mathrm{e}$, positive. |
 | `statistic` | `"mean"` (default), `"lower"` or `"upper"`. |
 
-**Returns:** $\Delta L_{v,DF}$, in decibels, one per band, `nan` outside the table.
+**Returns:** $\Delta L_{v,\mathrm{DF}}$, in decibels, one per band, `nan` outside the table.
 
 **Raises**
 
@@ -200,23 +201,23 @@ ground_to_floor_transfer_db(
 
 The level difference from the ground to a floor, Tables A.1 and A.2.
 
-$\Delta L_{v,DB}$ for a building with concrete or with timber floors
-whose floors have the given natural frequency, along
+$\Delta L_{v,\mathrm{DB}}$ for a building with concrete or with
+timber floors whose floors have the given natural frequency, along
 [`PREDICTION_BAND_CENTRES_HZ`](/phonometry/reference/api/vibration/railway-prediction/#prediction_band_centres_hz), for any storey. The tables print a
-column for each of [`FLOOR_NATURAL_FREQUENCIES_HZ`](/phonometry/reference/api/vibration/railway-prediction/#floor_natural_frequencies_hz) and no rule for
-a frequency between two, so the frequency has to be one of them. Clause
-5.4.4: run the prediction once for each natural frequency the building
-may have, and never with the envelope over all of them, which
-overestimates considerably.
+column for each of [`FLOOR_NATURAL_FREQUENCIES_HZ`](/phonometry/reference/api/vibration/railway-prediction/#floor_natural_frequencies_hz) and no rule for a
+frequency between two, so the frequency has to be one of them. Clause
+5.4.4: run the prediction once for each natural frequency the building may
+have, and never with the envelope over all of them, which overestimates
+considerably.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `floor` | `"concrete"` or `"timber"`. |
-| `floor_natural_frequency_hz` | $f_e$, one of the tabulated frequencies. |
+| `floor_natural_frequency_hz` | $f_\mathrm{e}$, one of the tabulated frequencies. |
 
-**Returns:** $\Delta L_{v,DB}$, in decibels, one per band.
+**Returns:** $\Delta L_{v,\mathrm{DB}}$, in decibels, one per band.
 
 **Raises**
 
@@ -244,10 +245,10 @@ ground_to_foundation_transfer_db(
 
 The level difference from the ground into the foundation, Tables A.3 and A.4.
 
-$\Delta L_{v,FB}$ for a basement or for a foundation at ground
-level, along the 14 bands from 4 Hz to 80 Hz, as the mean of the
-buildings measured or the mean less or plus its deviation. The tables
-stop at 80 Hz where the others run to 250 Hz, so the result enters
+$\Delta L_{v,\mathrm{FB}}$ for a basement or for a foundation at
+ground level, along the 14 bands from 4 Hz to 80 Hz, as the mean of the
+buildings measured or the mean less or plus its deviation. The tables stop
+at 80 Hz where the others run to 250 Hz, so the result enters
 [`predict_floor_spectrum`](/phonometry/reference/api/vibration/railway-prediction/#predict_floor_spectrum) only with an emission spectrum cut to the
 same 14 bands, or padded with zeros above them by the caller.
 
@@ -258,7 +259,7 @@ same 14 bands, or padded with zeros above them by the caller.
 | `level` | `"basement"` or `"ground_floor"`. |
 | `statistic` | `"mean"` (default), `"lower"` or `"upper"`. |
 
-**Returns:** $\Delta L_{v,FB}$, in decibels, one per band from 4 Hz to 80 Hz.
+**Returns:** $\Delta L_{v,\mathrm{FB}}$, in decibels, one per band from 4 Hz to 80 Hz.
 
 **Raises**
 
@@ -304,7 +305,7 @@ measured with a point excitation.
 | `damping_ratio` | $D$ of the ground; `None` (default) leaves the material damping out. |
 | `shear_wave_speed_m_s` | $c_s$, needed with a damping ratio. |
 
-**Returns:** $\Delta L_{v,BB}$, in decibels, one per band; negative where the building is further from the source than the reference.
+**Returns:** $\Delta L_{v,\mathrm{BB}}$, in decibels, one per band; negative where the building is further from the source than the reference.
 
 **Raises**
 
@@ -331,10 +332,10 @@ kb_weighted_levels_db(
 
 The KB-weighted third-octave levels, Formula (8) with Table 2.
 
-$L_{v,KB}(f_{Tn}) = L_v(f_{Tn}) + L_{KB}(f_{Tn})$: the correction of
-Table 2, the KB weighting of DIN 45669-1 rounded to a tenth of a
-decibel, added to each band from 4 Hz to 80 Hz. Bands outside those are
-not weighted by the table and are refused.
+$L_{v,KB}(f_{\mathrm{T}n}) = L_v(f_{\mathrm{T}n}) + L_{KB}(f_{\mathrm{T}n})$: the correction of Table 2, the KB weighting of
+DIN 45669-1 rounded to a tenth of a decibel, added to each band from 4 Hz
+to 80 Hz. Bands outside those are not weighted by the table and are
+refused.
 
 **Parameters**
 
@@ -372,10 +373,10 @@ line_source_correction_db(
 
 The correction of a point-source decay to a train, Formula (B.2).
 
-$\Delta L_{v,Korr} = 20 \, n_{Korr} \lg(r / r_0)$, added to the level
-a point excitation predicts, with $n_{Korr}$ between 0,3 and 0,5:
-the train spreads less than the point did, up to the distance of
-Formula (B.1).
+$\Delta L_{v,\mathrm{Korr}} = 20 \, n_\mathrm{Korr} \lg(r / r_0)$,
+added to the level a point excitation predicts, with
+$n_\mathrm{Korr}$ between 0,3 and 0,5: the train spreads less than
+the point did, up to the distance of Formula (B.1).
 
 **Parameters**
 
@@ -383,9 +384,9 @@ Formula (B.1).
 | :--- | :--- |
 | `distance_m` | $r$, in metres. |
 | `reference_distance_m` | $r_0$, in metres. |
-| `exponent_correction` | $n_{Korr}$, 0,3 to 0,5. |
+| `exponent_correction` | $n_\mathrm{Korr}$, 0,3 to 0,5. |
 
-**Returns:** $\Delta L_{v,Korr}$, in decibels.
+**Returns:** $\Delta L_{v,\mathrm{Korr}}$, in decibels.
 
 **Raises**
 
@@ -417,14 +418,14 @@ peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float
 
 The peak velocity of a category, Formula (12).
 
-$v_{\max} = \beta \, KB_{F\mathrm{max},Zug}$ with $\beta$ = 3,
+$v_{\max} = \beta \, KB_\mathrm{Fmax,Zug}$ with $\beta$ = 3,
 an empirical factor, which is the number a DIN 4150-3 comparison wants.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `kb_fmax_zug` | $KB_{F\mathrm{max},Zug}$ of Formula (10). |
+| `kb_fmax_zug` | $KB_\mathrm{Fmax,Zug}$ of Formula (10). |
 
 **Returns:** $v_{\max}$, in millimetres per second.
 
@@ -486,7 +487,7 @@ emission spectrum, the transmission through the ground, the transfer
 into the foundation, the transfer to the floor and the effect of the
 mitigation. The Annex A tables are negative where they attenuate, and a
 mitigation must be too, which is why the term is not called an insertion
-loss here: the formula prints $D_e$ with a plus sign and names
+loss here: the formula prints $D_\mathrm{e}$ with a plus sign and names
 DIN 45673-1 for it, and an insertion loss in the sense of DIN 45672-2
 Annex B, [`elastic_insertion_loss`](/phonometry/reference/api/vibration/railway/#elastic_insertion_loss), is
 positive where the element reduces the level, so it goes in with its
@@ -497,11 +498,11 @@ foundation term zero (Annex C does exactly that).
 
 | Name | Description |
 | :--- | :--- |
-| `emission_db` | $L_{v,E}$, one level per band, in decibels. |
-| `ground_db` | $\Delta L_{v,BB}$, per band or one value. |
-| `foundation_db` | $\Delta L_{v,FB}$, per band or one value. |
-| `floor_db` | $\Delta L_{v,DF}$, per band or one value. |
-| `mitigation_db` | $D_e$, per band or one value, added as printed, so negative for a mitigation. |
+| `emission_db` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
+| `ground_db` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
+| `foundation_db` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
+| `floor_db` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
+| `mitigation_db` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
 
 **Returns:** $L_v$, one level per band.
 
@@ -529,7 +530,7 @@ Run the chain from an emission spectrum to the assessment quantities.
 
 Formula (1) for the spectrum on the floor, Formula (8) for the
 KB-weighted bands from 4 Hz to 80 Hz, Formula (9) for the clock maximum
-r.m.s. of the category, Formula (10) for its $KB_{F\mathrm{max}}$
+r.m.s. of the category, Formula (10) for its $KB_\mathrm{Fmax}$
 and Formula (12) for the peak velocity. The assessment vibration
 severity over the categories of a timetable is Formula (11), the sum of
 [`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity), which also
@@ -540,12 +541,12 @@ category at or below 0,1 counting as zero.
 
 | Name | Description |
 | :--- | :--- |
-| `emission_db` | $L_{v,E}$, one level per band, in decibels. |
+| `emission_db` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
 | `frequencies_hz` | The band centres, nominal; the 19 bands from 4 Hz to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz. |
-| `ground_db` | $\Delta L_{v,BB}$, per band or one value. |
-| `foundation_db` | $\Delta L_{v,FB}$, per band or one value. |
-| `floor_db` | $\Delta L_{v,DF}$, per band or one value. |
-| `mitigation_db` | $D_e$, per band or one value, added as printed, so negative for a mitigation. |
+| `ground_db` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
+| `foundation_db` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
+| `floor_db` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
+| `mitigation_db` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
 
 **Returns:** The chain, as a [`TrainCategoryPrediction`](/phonometry/reference/api/vibration/railway-prediction/#traincategoryprediction).
 
@@ -584,21 +585,22 @@ rescale_emission_for_speed(
 
 An emission spectrum carried to another train speed, Formula (3).
 
-$L_{v,E2} = L_{v,E1} + 20 \lg (v_2 / v_1)$, the same shift in every
-band, for the same category of train under the same conditions and a
-change of speed of up to 30 %. Beyond that the frequencies bound to a
-length, the sleeper-passing frequency $f_a = v / a$ for one, move
-with the speed while the resonances do not, and the shift is refused.
+$L_{v,\mathrm{E2}} = L_{v,\mathrm{E1}} + 20 \lg (v_2 / v_1)$, the
+same shift in every band, for the same category of train under the same
+conditions and a change of speed of up to 30 %. Beyond that the frequencies
+bound to a length, the sleeper-passing frequency $f_a = v / a$ for
+one, move with the speed while the resonances do not, and the shift is
+refused.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{v,E1}$, the spectrum measured at the first speed, in decibels. |
+| `levels_db` | $L_{v,\mathrm{E1}}$, the spectrum measured at the first speed, in decibels. |
 | `speed_from_km_h` | $v_1$, the speed it was measured at. |
 | `speed_to_km_h` | $v_2$, the speed wanted, in the same unit. |
 
-**Returns:** $L_{v,E2}$.
+**Returns:** $L_{v,\mathrm{E2}}$.
 
 **Raises**
 
@@ -630,12 +632,11 @@ takt_maximum_kb(weighted_levels_db: ArrayLike) -> float
 
 The clock maximum r.m.s. of a category from its spectrum, Formula (9).
 
-$KB_{FTm,Zug} = c_{T1} v_0 10^{L_{v,ges}/20}$ with $L_{v,ges}$
-the energy sum of the KB-weighted bands from 4 Hz to 80 Hz,
-$c_{T1}$ = 1 for Max Hold spectra with the time weighting Fast and
-$v_0 = 5 \cdot 10^{-5}$ mm/s, the reference of the velocity level;
-the value is the KB quantity because KB is the velocity in millimetres
-per second. Annex C prints 0,4 for a sum level of 78,1 dB.
+$KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L_{v,\mathrm{ges}}/20}$ with $L_{v,\mathrm{ges}}$ the energy sum
+of the KB-weighted bands from 4 Hz to 80 Hz, $c_{\mathrm{T}1}$ = 1
+for Max Hold spectra with the time weighting Fast and $v_0 = 5 \cdot 10^{-5}$ mm/s, the reference of the velocity level; the value is the KB
+quantity because KB is the velocity in millimetres per second. Annex C
+prints 0,4 for a sum level of 78,1 dB.
 
 **Parameters**
 
@@ -643,7 +644,7 @@ per second. Annex C prints 0,4 for a sum level of 78,1 dB.
 | :--- | :--- |
 | `weighted_levels_db` | $L_{v,KB}$, as [`kb_weighted_levels_db`](/phonometry/reference/api/vibration/railway-prediction/#kb_weighted_levels_db) gives them, one per band. |
 
-**Returns:** $KB_{FTm,Zug}$, dimensionless.
+**Returns:** $KB_\mathrm{FTm,Zug}$, dimensionless.
 
 **Raises**
 
@@ -663,21 +664,21 @@ train_decay_exponent(
 
 The decay exponent of a train from that of a point excitation, Annex B.
 
-$n_{Zug} = n_{Punkt} - 0{,}3$ when the point measurement was fitted
-with spreading and damping apart (Formula (5)), $n_{Punkt} - 0{,}5$
-when it was fitted as a power law alone (Formula (6)); both up to the
-transition distance of Formula (B.1), beyond which the point exponent
-holds as it is. The annex prints no floor, so a point exponent below the
-correction gives a negative result, as printed.
+$n_\mathrm{Zug} = n_\mathrm{Punkt} - 0{,}3$ when the point
+measurement was fitted with spreading and damping apart (Formula (5)),
+$n_\mathrm{Punkt} - 0{,}5$ when it was fitted as a power law alone
+(Formula (6)); both up to the transition distance of Formula (B.1), beyond
+which the point exponent holds as it is. The annex prints no floor, so a
+point exponent below the correction gives a negative result, as printed.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `point_exponent` | $n_{Punkt}$, not negative. |
+| `point_exponent` | $n_\mathrm{Punkt}$, not negative. |
 | `fitted_with` | `"power_and_damping"` (default) or `"power_law"`. |
 
-**Returns:** $n_{Zug}$.
+**Returns:** $n_\mathrm{Zug}$.
 
 **Raises**
 
@@ -701,9 +702,8 @@ train_velocity_ratio(
 The decay of a train's vibration with distance, Figure B.1.
 
 The ratio of the velocity at $r$ to that at $r_0$, as the
-figure draws it: a power law with the exponent
-$n_{Punkt} - n_{Korr}$ up to the transition distance $R_0$ of
-Formula (B.1), and the point exponent $n_{Punkt}$ beyond it,
+figure draws it: a power law with the exponent $n_\mathrm{Punkt} - n_\mathrm{Korr}$ up to the transition distance $R_0$ of Formula
+(B.1), and the point exponent $n_\mathrm{Punkt}$ beyond it,
 continuous at $R_0$. The figure is a sketch and prints no closed
 form; this is its reading.
 
@@ -714,8 +714,8 @@ form; this is its reading.
 | `distance_m` | $r$, in metres, one or many. |
 | `reference_distance_m` | $r_0$, in metres. |
 | `transition_distance_m` | $R_0$, in metres. |
-| `point_exponent` | $n_{Punkt}$. |
-| `exponent_correction` | $n_{Korr}$, 0,3 to 0,5. |
+| `point_exponent` | $n_\mathrm{Punkt}$. |
+| `exponent_correction` | $n_\mathrm{Korr}$, 0,3 to 0,5. |
 
 **Returns:** $v(r) / v(r_0)$, one per distance.
 
@@ -748,13 +748,13 @@ The prediction for one category of train, Clauses 5 and 7.
 | Name | Description |
 | :--- | :--- |
 | `frequencies_hz` | The band centres. |
-| `emission_db` | $L_{v,E}$ the prediction started from. |
+| `emission_db` | $L_{v,\mathrm{E}}$ the prediction started from. |
 | `floor_db` | $L_v$ of Formula (1), the spectrum on the floor. |
 | `weighted_frequencies_hz` | The band centres from 4 Hz to 80 Hz the KB assessment sums. |
 | `weighted_db` | $L_{v,KB}$ of Formula (8) over those bands. |
-| `sum_level_db` | $L_{v,ges}$ of Formula (9), the energy sum of the weighted bands. |
-| `kb_ftm` | $KB_{FTm,Zug}$ of Formula (9). |
-| `kb_fmax` | $KB_{F\mathrm{max},Zug}$ of Formula (10). |
+| `sum_level_db` | $L_{v,\mathrm{ges}}$ of Formula (9), the energy sum of the weighted bands. |
+| `kb_ftm` | $KB_\mathrm{FTm,Zug}$ of Formula (9). |
+| `kb_fmax` | $KB_\mathrm{Fmax,Zug}$ of Formula (10). |
 | `peak_velocity_mm_s` | $v_{\max}$ of Formula (12). |
 
 ### TrainCategoryPrediction.plot()
@@ -790,8 +790,8 @@ velocity_spectrum_um_s(levels_db: ArrayLike) -> NDArray[np.float64]
 
 A level spectrum as a velocity spectrum, Formula (13).
 
-$v_{RMS}(f_{Tn}) = 1000 \, v_0 \, 10^{L_v(f_{Tn})/20}$ in micrometres
-per second, the form the VC curves of VDI 2038 Blatt 2 are drawn in.
+$v_\mathrm{RMS}(f_{\mathrm{T}n}) = 1000 \, v_0 \, 10^{L_v(f_{\mathrm{T}n})/20}$ in micrometres per second, the form the VC
+curves of VDI 2038 Blatt 2 are drawn in.
 
 **Parameters**
 
@@ -799,7 +799,7 @@ per second, the form the VC curves of VDI 2038 Blatt 2 are drawn in.
 | :--- | :--- |
 | `levels_db` | $L_v$, one level per band, in decibels. |
 
-**Returns:** $v_{RMS}$, one per band, in micrometres per second.
+**Returns:** $v_\mathrm{RMS}$, one per band, in micrometres per second.
 
 **Raises**
 

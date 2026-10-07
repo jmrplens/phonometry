@@ -23,6 +23,17 @@ invariant this checks: **no file writes the same (base, subscript) pair both
 ways.** Across files it says nothing, deliberately -- that is where the
 legitimate duals live.
 
+A second invariant covers the letter that keeps one meaning under several
+bases. DIN 4150-2 names its assessment quantities by the r of "Beurteilung":
+the assessment severity :math:`KB_\mathrm{FTr}`, the guide value it is held to,
+:math:`A_\mathrm{r}`, the assessment time :math:`T_\mathrm{r}` and the count of
+clock intervals in it, :math:`N_\mathrm{r}`, all with one upright r. Those are
+four symbols, so the first rule sees four single-valued pairs even when one of
+them leans: a page setting :math:`KB_\mathrm{FTr}` against an italic
+:math:`A_r` is consistent symbol by symbol and still sets one letter two ways
+inside one formula. The members of each family in :data:`LINKED` therefore take
+one slope in a file, whichever of them it writes.
+
 What a failure means, in order of how often it is the answer
 ------------------------------------------------------------
 
@@ -42,21 +53,28 @@ What a failure means, in order of how often it is the answer
    meant to stay short: it is the escape hatch for a page whose subject is the
    collision, not a way to land one.
 
-The plates a page embeds
+The images a page embeds
 ------------------------
 
-A guide is not only its prose. The figures it embeds are read through the
-plotting snippets on the page, and the diagram plates it embeds are read here
-from the plates themselves, because a plate's source never writes a slope: the
-composer in ``scripts/diagrams/canvas.py`` decides it, run by run, and the
-committed SVG is the only place the decision is visible. Each label of a plate
-carries its source string in an XML comment and its glyphs in groups whose ids
-name the face, so the oblique face marks an italic letter without reading a
-font file; :func:`plate_sightings` lines the two up. A page and the plates it
-embeds are then one scope: a plate that draws $L_i$ sloped on a page whose
-prose sets the impact level $L_\mathrm{i}$ upright is the page contradicting
-itself, in the place a reader looks first. A Spanish page is held against the
-Spanish plate, which is the file the site shows there.
+A guide is not only its prose. The diagram plates and the figures it embeds
+are read here from the committed SVG, because that is what a reader sees, and
+neither is reliably in the prose: a plate's source never writes a slope, and a
+figure's source is a generator in ``scripts/figures`` that no page quotes. A
+page and the images it embeds are then one scope: a plate that draws $L_i$
+sloped on a page whose prose sets the impact level $L_\mathrm{i}$ upright is
+the page contradicting itself, in the place a reader looks first. A Spanish
+page is held against the Spanish image, which is the file the site shows there.
+
+The two kinds are read differently. The composer in
+``scripts/diagrams/canvas.py`` decides a plate's slope run by run, so the
+plate is read from its glyphs: each label carries its source string in an XML
+comment and its glyphs in groups whose ids name the face, so the oblique face
+marks an italic letter without reading a font file, and
+:func:`plate_sightings` lines the two up. A figure is set by matplotlib's
+mathtext, whose slope is the source's own (a bare letter italic, a
+``\mathrm`` run upright), and matplotlib keeps that source in an XML comment
+ahead of the glyphs of every text it draws, so :func:`figure_sightings` reads
+the comments the way :func:`sightings` reads a page.
 
 What this cannot check
 ----------------------
@@ -99,10 +117,11 @@ _SUFFIXES = {".py", ".md", ".mdx"}
 #: The drawing modules are filed by domain rather than by standard -- one
 #: ``_plot`` module holds the figures of a dozen of them -- so a file there is
 #: not the scope in which a letter has one meaning; the guide that embeds the
-#: figure is, and that is read here. The builders of the diagram plates are
-#: left out for another reason: their sources never write a slope, which the
-#: composer in ``scripts/diagrams/canvas.py`` decides, so the plates are read
-#: from the committed SVG instead, page by page (:func:`embedded`).
+#: figure is, and that is read here. The generators of the plates and the
+#: figures are never collected, for the same reason and one more: a plate's
+#: source never writes a slope, which the composer in
+#: ``scripts/diagrams/canvas.py`` decides, so both are read from the committed
+#: SVG instead, page by page (:func:`embedded`).
 _EXCLUDED = re.compile(r"errata|/_plot/|/_report/", re.IGNORECASE)
 
 #: Pages that carry both meanings on purpose, with the reason. Keyed on the
@@ -135,9 +154,21 @@ _DIFFUSERS: dict[tuple[str, str], str] = {
         "the normalised diffusion coefficient of ISO 17497-2, Formula (7), "
         "whose n stands for normalised and is printed upright, as the "
         "goniometer plate the page embeds draws it, against the well depth "
-        "of the quadratic-residue diffuser, whose n counts the wells. The "
-        "guide's note on symbols is about this pair, and writes the "
-        "coefficient d_norm wherever it is its own"
+        "of the quadratic-residue diffuser, whose n counts the wells. Both "
+        "pages write both, as their sources do, and the diffusers guide's "
+        "note on symbols says that the slope is what tells them apart"
+    ),
+}
+
+_RD1367: dict[tuple[str, str], str] = {
+    ("L", "f"): (
+        "RD 1367/2007, Annex IV A.3.3, names two quantities Lf on consecutive "
+        "pages: the level of the band f that holds an emergent tone, whose f "
+        "is the band and stays italic, and the difference LCeq,Ti - LAeq,Ti "
+        "that sets the low-frequency correction, whose f names the "
+        "low-frequency component as the f of Kf does and is upright beside "
+        "the upright i of the impulsive Li. The BOE sets both in one upright "
+        "face, so the print cannot tell them apart and the meaning does"
     ),
 }
 
@@ -148,7 +179,39 @@ DECLARED: dict[str, dict[tuple[str, str], str]] = {
     "docs/materials/diffusers/diffusers.md": _DIFFUSERS,
     "site/src/content/docs/materials/diffusers/diffusers.mdx": _DIFFUSERS,
     "site/src/content/docs/es/materials/diffusers/diffusers.mdx": _DIFFUSERS,
+    "docs/materials/diffusers/metadiffusers.md": _DIFFUSERS,
+    "site/src/content/docs/materials/diffusers/metadiffusers.mdx": _DIFFUSERS,
+    "site/src/content/docs/es/materials/diffusers/metadiffusers.mdx": _DIFFUSERS,
+    "src/phonometry/environment/assessment/spain.py": _RD1367,
+    "site/src/content/docs/reference/api/environment/spain.md": _RD1367,
+    "docs/environment/assessment/spanish-noise-regulation.md": _RD1367,
+    "site/src/content/docs/environment/assessment/spanish-noise-regulation.mdx": (
+        _RD1367
+    ),
+    "site/src/content/docs/es/environment/assessment/spanish-noise-regulation.mdx": (
+        _RD1367
+    ),
 }
+
+
+#: Letters that keep one meaning under several bases, each family keyed on what
+#: the letter means. A member is a ``(base, subscript)`` pair as
+#: :func:`sightings` reads it; a member whose subscript is a run of letters
+#: names the run whose last letter is the shared one (the r of ``FTr``), and
+#: is read only to be held against its family, as :data:`_LINKED_RUNS` says.
+LINKED: dict[str, frozenset[tuple[str, str]]] = {
+    (
+        'the r of "Beurteilung" in DIN 4150-2:1999-06 (6.2, Table 1, Formulae '
+        "(4a), (4b) and (A.3)) and E DIN 4150-2:2023-08 (6.5.3.2, Formula (6)), "
+        "printed upright in every one of them"
+    ): frozenset({("KB", "FTr"), ("A", "r"), ("T", "r"), ("N", "r")}),
+}
+
+#: The members of :data:`LINKED` whose subscript is a run of letters. The
+#: single-letter reading passes runs over, so these are recorded by name.
+_LINKED_RUNS = frozenset(
+    member for members in LINKED.values() for member in members if len(member[1]) > 1
+)
 
 
 def math_regions(text: str, suffix: str) -> list[tuple[int, str]]:
@@ -186,14 +249,17 @@ def math_regions(text: str, suffix: str) -> list[tuple[int, str]]:
 #: not mathematics. The Spanish translation tables are made of these.
 _PATTERN_SHAPE = re.compile(r"\\\\|\(\.\+\)|\(\\d|\(\.\*\)|\\\d")
 
-#: ``base_subscript``: a single letter or a Greek command, an optional prime,
+#: ``base_subscript``: a Greek command or a run of letters, an optional prime,
 #: then the subscript, braced or bare. The prime stays with the base, so the
-#: apparent quantity :math:`R'` and the quantity :math:`R` are two symbols. A
-#: plotting snippet that formats its label writes the braces of an upright
-#: subscript twice (``rf"$f_\mathrm{{e}}$ = {f:g} Hz"``), and that is read as
-#: the upright subscript it renders.
+#: apparent quantity :math:`R'` and the quantity :math:`R` are two symbols, and
+#: so does the whole run: the transmission loss ``TL_n``, the signal-to-noise
+#: ratio ``SNR_s`` and the vibration rating ``KB_F`` are symbols of their own,
+#: not an ``L``, an ``R`` or a ``B`` carrying a subscript. A plotting snippet that
+#: formats its label writes the braces of an upright subscript twice
+#: (``rf"$f_\mathrm{{e}}$ = {f:g} Hz"``), and that is read as the upright
+#: subscript it renders.
 _SUBSCRIPTED = re.compile(
-    r"(\\[A-Za-z]+|[A-Za-z])('*)"
+    r"(\\[A-Za-z]+|[A-Za-z]+)('*)"
     r"_(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}|\\(?:mathrm|text)\{\{[^{}]*\}\}"
     r"|\\mathrm\{[^{}]*\}|\\text\{[^{}]*\}|.)"
 )
@@ -274,21 +340,25 @@ def sightings(text: str, suffix: str) -> Sightings:
                 upright = _UPRIGHT.match(part)
                 if upright:
                     for inner in (p.strip() for p in upright.group(1).split(",")):
-                        if _ITALIC.match(inner):
+                        if (
+                            _ITALIC.match(inner)
+                            or (base + prime, inner) in _LINKED_RUNS
+                        ):
                             found[(base + prime, inner)]["upright"].append(line)
-                elif _ITALIC.match(part):
+                elif _ITALIC.match(part) or (base + prime, part) in _LINKED_RUNS:
                     slope = "upright" if whole else "italic"
                     found[(base + prime, part)][slope].append(line)
     return found
 
 
-#: Where the generator writes the plates, and where every page embeds them from.
+#: Where the generators write the plates and the figures, and where every page
+#: embeds them from.
 PLATES = ".github/images"
 
 #: An image a page embeds from :data:`PLATES`, by its base name. A page names
 #: the light English file and the site derives the dark and the Spanish twins
 #: from it, so the suffixes are read off and the language chosen here. The
-#: figures live in the same directory; :func:`_plate` tells the two apart.
+#: plates and the figures share the directory; :func:`_image` tells them apart.
 _IMAGE_REF = re.compile(r"\.github/images/([A-Za-z0-9_]+?)(?:_es)?(?:_dark)?\.svg")
 
 #: How a plate opens, and a figure never does: the canvas writes the root
@@ -314,33 +384,57 @@ _PLATE_GROUP = re.compile(
 #: the composer sets a letter italic by taking it from an oblique face.
 _PLATE_GLYPH = re.compile(r'<use href="#([^"]*)-[0-9a-f]+"')
 
-#: A script group is set at 0.70 of its label's size, and the labels never
-#: mix sizes otherwise, so anything clearly smaller than the largest group of
-#: a label is a script.
+#: A script group is set at 0.70 of the size of what it hangs from, and the
+#: labels never mix sizes otherwise, so anything clearly smaller than the
+#: largest group of a label is a script, and anything clearly smaller than a
+#: script (0.49 of the label, the subscripted level inside an exponent) is a
+#: script of a script. The second bound sits halfway between the two scales.
 _SCRIPT_RATIO = 0.85
+_NESTED_RATIO = 0.595
 
 #: How a page writes a base the plates write as a glyph: a Greek letter as its
 #: command, a prime as an apostrophe.
 _PRIMES = {"′": "'", "″": "''"}
 
+#: A character's script level, as the path of markers that put it there: ""
+#: on the baseline, "_" in a subscript, "^" in a superscript, "^_" in the
+#: subscript of a superscript (the ``i`` of ``10^{L_i/10}``).
+Level = str
 
-def _base_symbol(chars: list[tuple[str, int]], end: int) -> str | None:
+
+def _is_ascii_letter(char: str) -> bool:
+    """Whether *char* is one of the letters a base run is made of."""
+    return char.isascii() and char.isalpha()
+
+
+def _base_symbol(chars: list[tuple[str, Level]], end: int) -> str | None:
     r"""The symbol a script at *end* attaches to, as a page would write it.
 
-    ``None`` for anything a page cannot write the same way: a base carrying a
+    The base sits one level up from the script, on the baseline for a
+    subscript and in the exponent for the subscript of an exponent. ``None``
+    for anything a page cannot write the same way: a base carrying a
     combining mark (a page writes ``\bar{L}``, which the reading of
-    :func:`sightings` passes over too), or no letter at all.
+    :func:`sightings` passes over too), or no letter at all. A run of letters
+    is one base, as :data:`_SUBSCRIPTED` reads it on a page.
     """
+    parent = chars[end][1][:-1]
     prime = ""
     k = end - 1
-    while k >= 0 and chars[k][0] in _PRIMES and chars[k][1] == 0:
+    while k >= 0 and chars[k][0] in _PRIMES and chars[k][1] == parent:
         prime = _PRIMES[chars[k][0]] + prime
         k -= 1
-    if k < 0 or chars[k][1] != 0:
+    if k < 0 or chars[k][1] != parent:
         return None
     letter = chars[k][0]
-    if letter.isascii() and letter.isalpha():
-        return letter + prime
+    if _is_ascii_letter(letter):
+        start = k
+        while (
+            start > 0
+            and chars[start - 1][1] == parent
+            and _is_ascii_letter(chars[start - 1][0])
+        ):
+            start -= 1
+        return "".join(c for c, _ in chars[start : k + 1]) + prime
     name = unicodedata.name(letter, "")
     if name.startswith("GREEK SMALL LETTER "):
         return "\\" + name.removeprefix("GREEK SMALL LETTER ").lower() + prime
@@ -349,39 +443,57 @@ def _base_symbol(chars: list[tuple[str, int]], end: int) -> str | None:
     return None
 
 
-def _label_levels(source: str) -> list[tuple[str, int]]:
-    """Each character of a plate label with its level: 0, 1 (sub) or -1 (sup).
+def _close_brace(run: str, opening: int) -> int:
+    """The index of the ``}`` closing the ``{`` at *opening*, or -1."""
+    depth = 0
+    for index in range(opening, len(run)):
+        if run[index] == "{":
+            depth += 1
+        elif run[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    return -1
+
+
+def _math_levels(run: str, level: Level, out: list[tuple[str, Level]]) -> None:
+    """Append each character of the math *run* with its level, *level* first."""
+    i = 0
+    while i < len(run):
+        ch = run[i]
+        if ch in "_^" and i + 1 < len(run):
+            if run[i + 1] == "{":
+                end = _close_brace(run, i + 1)
+                end = len(run) if end < 0 else end
+                payload, i = run[i + 2 : end], end + 1
+            else:
+                payload, i = run[i + 1], i + 2
+            _math_levels(payload, level + ch, out)
+        else:
+            out.append((ch, level))
+            i += 1
+
+
+def _label_levels(source: str) -> list[tuple[str, Level]]:
+    """Each character of a plate label with its :data:`Level`.
 
     The composer's own reading of the markup, without its style decisions:
     outside ``$...$`` everything sits on the baseline, and inside, ``_`` and
-    ``^`` take the braced run or the single character after them.
+    ``^`` take the braced run or the single character after them, one level
+    further down or up, a script inside a script included.
     """
-    out: list[tuple[str, int]] = []
+    out: list[tuple[str, Level]] = []
     for k, segment in enumerate(source.split("$")):
         if k % 2 == 0:
-            out.extend((ch, 0) for ch in segment)
-            continue
-        i = 0
-        while i < len(segment):
-            ch = segment[i]
-            if ch in "_^" and i + 1 < len(segment):
-                level = 1 if ch == "_" else -1
-                if segment[i + 1] == "{":
-                    end = segment.find("}", i + 2)
-                    end = len(segment) if end < 0 else end
-                    payload, i = segment[i + 2 : end], end + 1
-                else:
-                    payload, i = segment[i + 1], i + 2
-                out.extend((c, level) for c in payload)
-            else:
-                out.append((ch, 0))
-                i += 1
+            out.extend((ch, "") for ch in segment)
+        else:
+            _math_levels(segment, "", out)
     return out
 
 
-def _chunks(levels: list[int]) -> list[tuple[int, int]]:
+def _chunks(levels: list[Level]) -> list[tuple[Level, int]]:
     """``(level, count)`` for each run of one level, adjacent runs merged."""
-    out: list[tuple[int, int]] = []
+    out: list[tuple[Level, int]] = []
     for level in levels:
         if out and out[-1][0] == level:
             out[-1] = (level, out[-1][1] + 1)
@@ -390,7 +502,36 @@ def _chunks(levels: list[int]) -> list[tuple[int, int]]:
     return out
 
 
-def _read_label(source: str, body: str) -> list[tuple[str, int, bool | None]] | None:
+def _drawn_levels(
+    groups: list[tuple[float, float, list[bool]]],
+) -> list[tuple[Level, list[bool]]]:
+    """The :data:`Level` of each glyph group, adjacent groups of one level merged.
+
+    The scale says how deep a group sits and the baseline whether it hangs
+    below or rises above what it belongs to: the label's baseline for a
+    script, the script before it for a script of a script.
+    """
+    size = max(scale for _, scale, _ in groups)
+    baseline = next(y for y, scale, _ in groups if scale == size)
+    parents: dict[int, tuple[float, Level]] = {0: (baseline, "")}
+    drawn: list[tuple[Level, list[bool]]] = []
+    for y, scale, faces in groups:
+        ratio = scale / size
+        depth = 0 if ratio > _SCRIPT_RATIO else (1 if ratio > _NESTED_RATIO else 2)
+        if depth == 0:
+            level = ""
+        else:
+            parent_y, parent = parents.get(depth - 1, (baseline, ""))
+            level = parent + ("_" if y > parent_y else "^")
+            parents[depth] = (y, level)
+        if drawn and drawn[-1][0] == level:
+            drawn[-1][1].extend(faces)
+        else:
+            drawn.append((level, list(faces)))
+    return drawn
+
+
+def _read_label(source: str, body: str) -> list[tuple[str, Level, bool | None]] | None:
     """``(character, level, italic)`` along one label, or ``None`` if unreadable.
 
     Blank characters draw nothing, so the drawn glyphs line up with the
@@ -411,22 +552,14 @@ def _read_label(source: str, body: str) -> list[tuple[str, int, bool | None]] | 
     ]
     if not groups:
         return None
-    size = max(scale for _, scale, _ in groups)
-    baseline = next(y for y, scale, _ in groups if scale == size)
-    drawn: list[tuple[int, list[bool]]] = []
-    for y, scale, faces in groups:
-        level = 0 if scale > _SCRIPT_RATIO * size else (1 if y > baseline else -1)
-        if drawn and drawn[-1][0] == level:
-            drawn[-1][1].extend(faces)
-        else:
-            drawn.append((level, list(faces)))
+    drawn = _drawn_levels(groups)
     written = _chunks([chars[i][1] for i in inked])
     if [level for level, _ in written] != [level for level, _ in drawn]:
         return None
-    out: list[tuple[str, int, bool | None]] = [(ch, lv, None) for ch, lv in chars]
+    out: list[tuple[str, Level, bool | None]] = [(ch, lv, None) for ch, lv in chars]
     start = 0
     for (level, count), (_, faces) in zip(written, drawn, strict=True):
-        if level != 0:
+        if level:
             if count != len(faces):
                 # A ligature (the ff of "eff" and "diff") draws two letters
                 # as one glyph, and it only forms inside one run, so a script
@@ -449,9 +582,10 @@ def plate_sightings(svg: str) -> tuple[PlateSightings, list[str]]:
 
     Read as :func:`sightings` reads a page: a comma-separated subscript
     component by component, and only the components that are one letter. A
-    label whose glyphs do not line up with its source is returned by name
-    rather than skipped, so a plate the gate cannot read fails it instead of
-    passing unread.
+    subscript inside an exponent is read like any other, against the symbol
+    in the exponent it hangs from. A label whose glyphs do not line up with
+    its source is returned by name rather than skipped, so a plate the gate
+    cannot read fails it instead of passing unread.
     """
     found: PlateSightings = collections.defaultdict(
         lambda: collections.defaultdict(list)
@@ -467,52 +601,94 @@ def plate_sightings(svg: str) -> tuple[PlateSightings, list[str]]:
             continue
         i = 0
         while i < len(chars):
-            if chars[i][1] != 1:
+            level = chars[i][1]
+            if not level.endswith("_"):
                 i += 1
                 continue
             j = i
-            while j < len(chars) and chars[j][1] == 1:
+            while j < len(chars) and chars[j][1] == level:
                 j += 1
             base = _base_symbol([(c, lv) for c, lv, _ in chars], i)
-            component: list[tuple[str, int, bool | None]] = []
-            for item in [*chars[i:j], (",", 1, None)]:
+            component: list[tuple[str, Level, bool | None]] = []
+            for item in [*chars[i:j], (",", level, None)]:
                 if item[0] != ",":
                     component.append(item)
                     continue
                 letters = [c for c in component if not c[0].isspace()]
+                run = "".join(c[0] for c in letters)
                 if base and len(letters) == 1 and _ITALIC.match(letters[0][0]):
                     slope = "italic" if letters[0][2] else "upright"
                     found[(base, letters[0][0])][slope].append(source)
+                elif (
+                    base
+                    and (base, run) in _LINKED_RUNS
+                    and len({c[2] for c in letters}) == 1
+                ):
+                    slope = "italic" if letters[-1][2] else "upright"
+                    found[(base, run)][slope].append(source)
                 component = []
             i = j
     return found, unreadable
 
 
-#: What each image file holds: the reading of a plate, ``"figure"`` for any
-#: other image, ``None`` for a file that is not there.
-_PLATE_CACHE: dict[pathlib.Path, tuple[PlateSightings, list[str]] | str | None] = {}
+#: One text a figure draws: matplotlib writes the string it was handed, its
+#: mathtext source included, in an XML comment ahead of the glyphs.
+_FIGURE_TEXT = re.compile(r"<!-- (.*?) -->", re.DOTALL)
 
 
-def _plate(path: pathlib.Path) -> tuple[PlateSightings, list[str]] | str | None:
-    """:func:`plate_sightings` of *path*, ``"figure"`` for a figure, ``None`` if absent."""
-    if path not in _PLATE_CACHE:
+def figure_sightings(svg: str) -> PlateSightings:
+    r"""Every one-letter subscript a matplotlib figure draws.
+
+    mathtext sets a bare letter italic and a ``\mathrm`` run upright, so the
+    slope a reader sees is the slope the source writes, and the source is in
+    the comment: each text is read as :func:`sightings` reads a page.
+    """
+    found: PlateSightings = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    for match in _FIGURE_TEXT.finditer(svg):
+        source = html.unescape(match.group(1))
+        if "$" not in source or "_" not in source:
+            continue
+        for symbol, slopes in sightings(source, ".md").items():
+            for slope in slopes:
+                found[symbol][slope].append(source)
+    return found
+
+
+#: What each image file holds, as :func:`_image` reads it, or ``None`` for a
+#: file that is not there.
+_IMAGE_CACHE: dict[pathlib.Path, tuple[PlateSightings, list[str]] | None] = {}
+
+
+def _image(path: pathlib.Path) -> tuple[PlateSightings, list[str]] | None:
+    """What the image at *path* sets, and the labels that keep it from being read.
+
+    A plate is read from its glyphs (:func:`plate_sightings`) and a figure
+    from its comments (:func:`figure_sightings`), which are always readable.
+    ``None`` if there is no such file.
+    """
+    if path not in _IMAGE_CACHE:
         try:
             text = path.read_text(encoding="utf-8")
         except OSError:
-            _PLATE_CACHE[path] = None
+            _IMAGE_CACHE[path] = None
         else:
-            plate = text.startswith(_PLATE_HEAD)
-            _PLATE_CACHE[path] = plate_sightings(text) if plate else "figure"
-    return _PLATE_CACHE[path]
+            _IMAGE_CACHE[path] = (
+                plate_sightings(text)
+                if text.startswith(_PLATE_HEAD)
+                else (figure_sightings(text), [])
+            )
+    return _IMAGE_CACHE[path]
 
 
 def embedded(
     text: str, path: pathlib.Path, plates: pathlib.Path
 ) -> tuple[dict[tuple[str, str], dict[str, list[str]]], list[str]]:
-    """What the plates *text* embeds set, and what keeps one from being read.
+    """What the images *text* embeds set, and what keeps one from being read.
 
     Each sighting is a location, ``diagram_x.svg: "label"``; a Spanish page
-    (one under an ``es`` directory) is held against the Spanish plate.
+    (one under an ``es`` directory) is held against the Spanish image.
     """
     spanish = "es" in path.parts
     found: dict[tuple[str, str], dict[str, list[str]]] = collections.defaultdict(
@@ -521,14 +697,14 @@ def embedded(
     problems: list[str] = []
     for name in sorted(set(_IMAGE_REF.findall(text))):
         plate = f"{name}_es.svg" if spanish else f"{name}.svg"
-        read = _plate(plates / plate)
+        read = _image(plates / plate)
         if read is None and spanish:
-            # A figure drawn once for both languages has no Spanish file.
+            # An image drawn once for both languages has no Spanish file.
             plate = f"{name}.svg"
-            read = _plate(plates / plate)
-        if read is None or isinstance(read, str):
-            # A figure, or an image this directory does not hold: a broken
-            # embed is the link checker's to report, not this gate's.
+            read = _image(plates / plate)
+        if read is None:
+            # An image this directory does not hold: a broken embed is the
+            # link checker's to report, not this gate's.
             continue
         symbols, unreadable = read
         problems.extend(
@@ -574,7 +750,7 @@ def declared(path: pathlib.Path) -> dict[tuple[str, str], str]:
 
 
 def _where(lines: list[int], plates: list[str]) -> str:
-    """Where one slope was written: the page's lines, then the plates' labels."""
+    """Where one slope was written: the page's lines, then the images' labels."""
     parts: list[str] = []
     if lines:
         parts.append("on line " + ", ".join(str(n) for n in sorted(set(lines))))
@@ -587,8 +763,8 @@ def check(
 ) -> tuple[int, list[str]]:
     """``(files read, one report per undeclared collision)``.
 
-    *plates* is the directory the embedded plates are read from, the
-    repository's :data:`PLATES` by default.
+    *plates* is the directory the embedded plates and figures are read from,
+    the repository's :data:`PLATES` by default.
     """
     plate_dir = pathlib.Path(PLATES) if plates is None else plates
     failures: list[str] = []
@@ -615,7 +791,33 @@ def check(
                 f"      {base}_{sub}: italic {italic}\n"
                 f"      {' ' * len(base)}  upright {upright}"
             )
+        failures.extend(
+            f"  {path}\n      {problem}" for problem in _family_splits(prose, drawn)
+        )
     return len(paths), failures
+
+
+def _family_splits(
+    prose: Sightings, drawn: dict[tuple[str, str], dict[str, list[str]]]
+) -> list[str]:
+    """One report per :data:`LINKED` family set both ways in one file."""
+    out: list[str] = []
+    for meaning, members in LINKED.items():
+        by_slope: dict[str, list[str]] = collections.defaultdict(list)
+        for base, sub in sorted(members):
+            lines = prose.get((base, sub), {})
+            labels = drawn.get((base, sub), {})
+            for slope in set(lines) | set(labels):
+                where = _where(lines.get(slope, []), labels.get(slope, []))
+                by_slope[slope].append(f"{base}_{sub} {where}")
+        if len(by_slope) < 2:
+            continue
+        out.append(
+            f"one letter set two ways, {meaning}:\n"
+            f"        italic: {'; '.join(by_slope['italic'])}\n"
+            f"        upright: {'; '.join(by_slope['upright'])}"
+        )
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -629,13 +831,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--plates",
         default=PLATES,
-        help=f"directory the embedded plates are read from (default: {PLATES})",
+        help=(
+            "directory the embedded plates and figures are read from "
+            f"(default: {PLATES})"
+        ),
     )
     args = parser.parse_args(argv)
 
     plates = pathlib.Path(args.plates)
     if not any(plates.glob("*.svg")):
-        # Read from the wrong directory, every plate would simply be absent
+        # Read from the wrong directory, every image would simply be absent
         # and the gate would pass having read none of them.
         print(f"No images in {plates}: run from the repository root.", file=sys.stderr)
         return 1
@@ -644,13 +849,13 @@ def main(argv: list[str] | None = None) -> int:
     if not failures:
         print(
             f"Every subscript is single-valued in each of {read} files "
-            "and the plates they embed."
+            "and the images they embed."
         )
         return 0
 
     print(
         f"{len(failures)} subscripts carry both slopes inside one file "
-        "or the plates it embeds:\n",
+        "or the images it embeds:\n",
         file=sys.stderr,
     )
     for failure in failures:
@@ -658,8 +863,8 @@ def main(argv: list[str] | None = None) -> int:
     print(
         "\nRe-letter the index, set the lagging one the way its neighbours "
         "are set, or\ndeclare the page in DECLARED naming both meanings. A "
-        "plate's slope is set\nin scripts/diagrams; regenerate the plate "
-        "after changing it.",
+        "plate's slope is set\nin scripts/diagrams and a figure's in "
+        "scripts/figures; regenerate the image\nafter changing it.",
         file=sys.stderr,
     )
     return 1

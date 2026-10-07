@@ -108,7 +108,11 @@ DARK = Theme(
 #: indications of DIN 45669-1:2010-09, 3.10.1.2 to 3.10.1.5 (Fmax, FTm,
 #: where F abbreviates "Fast", the standard's own name for τ = 0,125 s, T
 #: the clock duration and m the averaging duration, so all three letters
-#: describe rather than stand for a quantity), the test track and the train
+#: describe rather than stand for a quantity), the assessment vibration
+#: severity of DIN 4150-2:1999-06, 6.4.1, Formulae (4a) and (4b) (FTr, whose
+#: r is the "Beurteilung" of the assessment time T_r and is printed upright
+#: there and in E DIN 4150-2:2023-08, Formula (6), as the F and the T
+#: are), the test track and the train
 #: of DIN 45672-1:2009-12, the note to 7.3.1 (MG for Messgleis, Z for Zug,
 #: both printed upright there), the train category the railway clause of
 #: E DIN 4150-2:2023-08, 6.5.3.2, groups the passages into (Zug, written
@@ -314,8 +318,17 @@ _ROMAN_SCRIPTS = frozenset(
         # TQ: the threshold in quiet of ISO 532-1:2017, printed upright in
         # L_TQ (A.2 and Table A.6).
         "TQ",
+        # Ar: the A-weighted rating level L_Ar,T of NT ACOU 112:2002, clause
+        # 8, Note 1, upright on its guide as the Aeq beside it is. Keq: the
+        # corrected equivalent level L_Keq,T of RD 1367/2007, Annex I, upright
+        # on its guide for the same reason (K for "corregido"). Both
+        # documents set every subscript in one face, italic in the Nordtest
+        # method and upright in the BOE, so the guides decide by meaning.
+        "Ar",
+        "Keq",
         "Fmax",
         "FTm",
+        "FTr",
         "MG",
         "Z",
         "Zug",
@@ -356,10 +369,10 @@ _ROMAN_SCRIPTS = frozenset(
 #: Formula (2), ``KB_FTi``, whose F and T describe the Fast time constant and
 #: the clock duration, as Fmax and FTm do above, while its i is the index that
 #: counts the clock intervals and stays italic, the one letter the note on
-#: :data:`_ROMAN_SCRIPTS` refuses to romanise anywhere. ``FTr``, the assessment
-#: vibration severity of DIN 4150-2:1999-06, 6.4.1, splits the same way: F and
-#: T describe as they do in FTi, while the r of "Beurteilung" is never expanded
-#: into a word and keeps the italic the two path lengths above hold it to.
+#: :data:`_ROMAN_SCRIPTS` refuses to romanise anywhere. The prints set that i
+#: upright inside the KB subscript too, as they set the whole subscript, but
+#: set the same index italic under the sum it runs over, so the plates keep
+#: it the index it is.
 #:
 #: The emission levels split the same way, and are the largest family here: the
 #: first letter is the quantity the level is of, italic (``W`` sound power,
@@ -411,7 +424,6 @@ _MIXED_SCRIPTS: dict[str, str] = {
     "Ax": "uv",
     "FE": "vu",
     "FTi": "uuv",
-    "FTr": "uuv",
     "Fb": "vu",
     "In": "vu",
     "WA": "vu",
@@ -450,6 +462,12 @@ _PRIMES = "′″‴"
 _SUB_DROP = 0.22
 _SUP_RISE = -0.38
 _SCRIPT_SCALE = 0.70
+
+#: How many script levels the composer sets: a script, and a script of that
+#: script (the subscripted level inside an exponent). Each level drops or
+#: rises by the fractions above of its parent's size and is set at
+#: :data:`_SCRIPT_SCALE` of it.
+_SCRIPT_DEPTH = 2
 
 #: Font sizes :meth:`SVG.render` will set the title across the top at,
 #: largest first, the first that leaves :data:`_TITLE_MARGIN` of white at
@@ -561,11 +579,29 @@ def _script_table(keys: Iterable[str], kind: str) -> dict[str, frozenset[str]]:
     return {base: frozenset(runs) for base, runs in table.items()}
 
 
+def _close_brace(run: str, opening: int) -> int:
+    """The index of the ``}`` that closes the ``{`` at *opening*, or -1.
+
+    Counted, not searched: ``10^{L_{i}/10}`` closes its exponent at the last
+    brace, where the first ``}`` after the opening one is the subscript's.
+    """
+    depth = 0
+    for index in range(opening, len(run)):
+        if run[index] == "{":
+            depth += 1
+        elif run[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    return -1
+
+
 def _math_tokens(
     run: str,
     s: str,
     *,
-    script: bool = False,
+    depth: int = 0,
+    superscript: bool = False,
     upright: frozenset[str] = frozenset(),
     sloped: frozenset[str] = frozenset(),
     matched: set[str] | None = None,
@@ -574,9 +610,13 @@ def _math_tokens(
 
     ``var`` is set in italic: at the baseline a single letter -- Latin or
     lowercase Greek, with any combining marks -- and at script level
-    (*script* true, tokenizing the payload of a ``_``/``^``) also letter
+    (*depth* 1 or 2, tokenizing the payload of a ``_``/``^``) also letter
     runs, which there are indices (``$K_{ij}$``), unless the run is one of
     the descriptive subscripts of :data:`_ROMAN_SCRIPTS` (``$L_{Aeq}$``).
+    Those descriptive runs are subscripts by nature, so the curated sets are
+    read in a subscript only: in a superscript (*superscript* true) a letter
+    is an exponent's variable, the order ``m`` of ``2^m − 1`` or the level
+    ``L`` of ``10^{L/10}``, and keeps the italic default.
     ``up`` stays upright: digits, operators, primes, brackets, capital
     Greek letters at every level (``Δ``, ``Φ``: operators and descriptors
     per the roman Δ of ISO 80000-2, the ``Δ_SOR`` print of ECAC Doc 29 and
@@ -603,20 +643,24 @@ def _math_tokens(
     the baseline), a comma glued to an unbraced script (``L_p,s`` would push
     ",s" back to the baseline; spaced-off commas as in ``a_x , a_y`` stay
     legal), a script marker with an empty payload (``L_``, ``L_{}``), an
-    unclosed script brace, and a script inside a script (``L_{p_1}``),
-    which the composer cannot set.
+    unclosed script brace, and a third script level (``a^{b_{c_d}}``), which
+    the composer cannot set. Two levels it does set: the subscripted level
+    inside an exponent, ``10^{L_i/10}``, is how the energy sums of the
+    standards are printed.
     """
-    if script and run in _ROMAN_SCRIPT_RUNS:
+    script = depth > 0
+    words = script and not superscript
+    if words and run in _ROMAN_SCRIPT_RUNS:
         return [("up", run, "")]
     out: list[tuple[str, str, str]] = []
     i = 0
     while i < len(run):
         ch = run[i]
         if ch in "_^":
-            if script:
+            if depth >= _SCRIPT_DEPTH:
                 msg = (
-                    f"nested script {run[i:]!r} inside a script of {s!r}: "
-                    "the composer sets a single script level"
+                    f"nested script {run[i:]!r} inside a script of a script "
+                    f"of {s!r}: the composer sets {_SCRIPT_DEPTH} script levels"
                 )
                 raise ValueError(msg)
             kind = "sub" if ch == "_" else "sup"
@@ -625,7 +669,7 @@ def _math_tokens(
                 msg = f"empty script {ch!r} at the end of a math run in {s!r}"
                 raise ValueError(msg)
             if run[i + 1] == "{":
-                end = run.find("}", i + 2)
+                end = _close_brace(run, i + 1)
                 if end < 0:
                     msg = f"unclosed script brace {run[i:]!r} in {s!r}"
                     raise ValueError(msg)
@@ -674,8 +718,8 @@ def _math_tokens(
                 or (latin and run[j].isascii() and run[j].isalpha())
             ):
                 j += 1
-            mixed = _MIXED_SCRIPTS.get(run[i:j]) if script else None
-            if mixed is None and script and not latin and ch.isupper():
+            mixed = _MIXED_SCRIPTS.get(run[i:j]) if words else None
+            if mixed is None and words and not latin and ch.isupper():
                 # A script that opens with a capital Greek letter and runs
                 # on in Latin is one name, though the scan above stops at
                 # the change of script: read it whole before the
@@ -704,7 +748,7 @@ def _math_tokens(
                 name = run[i:j]
                 if matched is not None and (name in upright or name in sloped):
                     matched.add(name)
-                roman = name in _ROMAN_SCRIPTS or name in upright
+                roman = (words and name in _ROMAN_SCRIPTS) or name in upright
                 kind = "up" if roman and name not in sloped else "var"
             else:
                 letters = sum(1 for c in run[i:j] if c not in _COMBINING)
@@ -745,7 +789,9 @@ def _math_runs(
     set in italic (``$K_{ij}$``, ``$η_{ij}$``), except the descriptive
     subscripts curated in :data:`_ROMAN_SCRIPTS`, which are abbreviations
     of words and stay upright as the standards print them (``$L_{Aeq}$``,
-    ``$f_{max}$``). At the baseline the opposite rule holds: a run of two
+    ``$f_{max}$``); an exponent's letters are variables and keep the italic.
+    A script may carry one script of its own, placed and scaled against it,
+    which is how ``$10^{L_i/10}$`` sets the level inside an energy sum. At the baseline the opposite rule holds: a run of two
     or more Latin letters is an operator name or an acronym (log, grad,
     CN, TL) and stays upright, single letters are italic variables. Greek
     letters split by case at every level: lowercase are italic variables
@@ -783,6 +829,34 @@ def _math_runs(
         else:
             chunks.append((text, italic, shift, scale))
 
+    def script(
+        kind: str, payload: str, base: str, shift: float, scale: float, depth: int
+    ) -> None:
+        # A script drops or rises by a fraction of the size of what it hangs
+        # from and is set at a fraction of that size, so a script of a script
+        # is placed against its parent script, not against the baseline.
+        shift += scale * (_SUB_DROP if kind == "sub" else _SUP_RISE)
+        scale *= _SCRIPT_SCALE
+        empty: frozenset[str] = frozenset()
+        wanted = table.get(base, empty) if kind == "sub" else empty
+        unwanted = table_sloped.get(base, empty) if kind == "sub" else empty
+        matched: set[str] = set()
+        for kind2, payload2, base2 in _math_tokens(
+            payload,
+            s,
+            depth=depth,
+            superscript=kind == "sup",
+            upright=wanted,
+            sloped=unwanted,
+            matched=matched,
+        ):
+            if kind2 in ("sub", "sup"):
+                script(kind2, payload2, base2, shift, scale, depth + 1)
+            else:
+                add(payload2, italic=kind2 == "var", shift=shift, scale=scale)
+        if hits is not None:
+            hits.update(f"{base}_{letters}" for letters in matched)
+
     for k, segment in enumerate(segments):
         if k % 2 == 0:
             add(segment)
@@ -797,27 +871,7 @@ def _math_runs(
             if kind in ("var", "up"):
                 add(payload, italic=kind == "var")
             else:
-                shift = _SUB_DROP if kind == "sub" else _SUP_RISE
-                empty: frozenset[str] = frozenset()
-                wanted = table.get(base, empty) if kind == "sub" else empty
-                unwanted = table_sloped.get(base, empty) if kind == "sub" else empty
-                matched: set[str] = set()
-                for kind2, payload2, _ in _math_tokens(
-                    payload,
-                    s,
-                    script=True,
-                    upright=wanted,
-                    sloped=unwanted,
-                    matched=matched,
-                ):
-                    add(
-                        payload2,
-                        italic=kind2 == "var",
-                        shift=shift,
-                        scale=_SCRIPT_SCALE,
-                    )
-                if hits is not None:
-                    hits.update(f"{base}_{letters}" for letters in matched)
+                script(kind, payload, base, 0.0, 1.0, 1)
     return chunks
 
 

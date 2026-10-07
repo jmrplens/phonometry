@@ -35,6 +35,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_positive,
     require_positive_array,
@@ -275,7 +276,7 @@ def ship_source_spectrum(
         raise ValueError(msg)
     band = psd + 10.0 * np.log10(0.231 * f)
     return ShipTrafficSpectrum(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         source_psd=psd,
         band_level=np.asarray(band, dtype=np.float64),
         model=key,

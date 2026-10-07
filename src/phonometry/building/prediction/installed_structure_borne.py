@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -1251,5 +1252,5 @@ def installed_source_prediction(
         path_levels=path_levels,
         total_level=np.asarray(total, dtype=np.float64),
         installed_power_level=np.broadcast_to(lw_inst, (n_bands,)).copy(),
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
     )

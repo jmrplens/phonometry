@@ -33,6 +33,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_above_absolute_zero_array,
@@ -536,10 +537,10 @@ def scattering_coefficient_spectrum(
     )
     s = scattering_coefficient(spec, rand, truncate_negative=truncate_negative)
     return ScatteringResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         scattering=np.asarray(s, dtype=np.float64),
-        random_incidence=rand,
-        specular=spec,
+        random_incidence=read_only_copy(rand),
+        specular=read_only_copy(spec),
     )
 
 

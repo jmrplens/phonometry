@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.special import hankel2
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import require_equal_shapes
 from ..fluids import Fluid
 
@@ -177,11 +178,12 @@ class ContourPhasors:
             msg = "contour phasor arrays must be finite"
             raise ValueError(msg)
         # Store the converted arrays so hand-built instances (lists, mixed
-        # dtypes) behave exactly like probe-built ones downstream.
-        object.__setattr__(self, "positions", pos)
-        object.__setattr__(self, "normals", nrm)
-        object.__setattr__(self, "pressure", p)
-        object.__setattr__(self, "normal_velocity", v)
+        # dtypes) behave exactly like probe-built ones downstream, each a
+        # read-only copy of its own rather than the caller's array.
+        object.__setattr__(self, "positions", read_only_copy(pos))
+        object.__setattr__(self, "normals", read_only_copy(nrm))
+        object.__setattr__(self, "pressure", read_only_copy(p))
+        object.__setattr__(self, "normal_velocity", read_only_copy(v))
 
     def subtract(self, reference: ContourPhasors) -> ContourPhasors:
         """Phasor difference on the same contour: ``self - reference``.

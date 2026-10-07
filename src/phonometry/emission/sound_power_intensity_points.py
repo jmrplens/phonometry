@@ -129,6 +129,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 from .._internal.boundary import settled, settled_net_share, settled_ratio
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     is_at_most,
     is_positive,
@@ -1924,7 +1925,7 @@ def sound_power_intensity_points(
     )
 
     return DiscretePointIntensityResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         partial_power=partial_power,
         sound_power=np.asarray(sound_power, dtype=np.float64),
         sound_power_level=np.asarray(sound_power_level, dtype=np.float64),

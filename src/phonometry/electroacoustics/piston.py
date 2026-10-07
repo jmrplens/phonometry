@@ -82,6 +82,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import special
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_finite_fields,
     require_positive,
@@ -320,8 +321,8 @@ def piston_directivity_pattern(
     tiny = np.finfo(np.float64).tiny
     directivity_db = 20.0 * np.log10(np.maximum(np.abs(directivity), tiny))
     return PistonDirectivity(
-        angles_rad=angle_arr,
-        ka=ka_arr,
+        angles_rad=read_only_copy(angle_arr),
+        ka=read_only_copy(ka_arr),
         directivity=directivity,
         directivity_db=directivity_db,
     )
@@ -557,7 +558,7 @@ def radiating_piston(
         )
 
     return RadiatingPistonResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         ka=ka,
         resistance=r1,
         reactance=x1,
@@ -565,7 +566,7 @@ def radiating_piston(
         radiation_reactance=rho_c_s * x1,
         radiation_mass=radiation_mass,
         directivity_index=di,
-        angles_rad=angle_arr,
+        angles_rad=read_only_copy(angle_arr),
         directivity=directivity,
         radius=a,
         speed_of_sound=c,

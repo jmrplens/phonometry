@@ -65,6 +65,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy import signal as sig
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -499,7 +500,7 @@ def _response_result(
         mag_db = 20.0 * np.log10(mag)
     return WeightingResponse(
         name=name,
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         response=resp,
         magnitude=mag,
         magnitude_db=mag_db,
@@ -774,8 +775,8 @@ def weighted_acceleration(
     weighted = factors * accel
     overall = float(np.sqrt(np.sum(weighted**2)))
     return WeightedSpectrum(
-        frequencies=freq,
-        band_accelerations=accel,
+        frequencies=read_only_copy(freq),
+        band_accelerations=read_only_copy(accel),
         weighting_name=weighting,
         weighting_factors=factors,
         weighted=weighted,
@@ -1476,8 +1477,8 @@ def daily_vibration_exposure(
     return DailyVibrationExposure(
         a8=a8,
         labels=labels,
-        total_values=ahv,
-        durations_s=t,
+        total_values=read_only_copy(ahv),
+        durations_s=read_only_copy(t),
         partials=partials,
         assessment=exposure_assessment(a8, kind=kind, metric="a8"),
     )

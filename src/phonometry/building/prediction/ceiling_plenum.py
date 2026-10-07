@@ -109,6 +109,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -467,7 +468,7 @@ def ceiling_attenuation_class(
     reference = contour + shift
     return CeilingAttenuationResult(
         frequencies=bands,
-        measured=values,
+        measured=read_only_copy(values),
         rounded=rounded,
         shifted_reference=reference,
         deficiencies=deficiencies,
@@ -687,11 +688,11 @@ def plenum_flanking_reduction_index(
         _require_transmission_factor(tau)
         rcl = rs + rr - geometry
         return PlenumFlankingResult(
-            frequencies=freqs,
+            frequencies=read_only_copy(freqs),
             reduction_index=np.asarray(rcl, dtype=np.float64),
             transmission_factor=np.asarray(tau, dtype=np.float64),
-            reduction_index_source=rs,
-            reduction_index_receiving=rr,
+            reduction_index_source=read_only_copy(rs),
+            reduction_index_receiving=read_only_copy(rr),
             geometry_term=geometry,
             penalty=np.full(rs.shape, geometry),
             model="undamped",
@@ -737,11 +738,11 @@ def plenum_flanking_reduction_index(
     _require_transmission_factor(tau)
     rcl = -10.0 * np.log10(tau)
     return PlenumFlankingResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         reduction_index=np.asarray(rcl, dtype=np.float64),
         transmission_factor=np.asarray(tau, dtype=np.float64),
-        reduction_index_source=rs,
-        reduction_index_receiving=rr,
+        reduction_index_source=read_only_copy(rs),
+        reduction_index_receiving=read_only_copy(rr),
         geometry_term=None,
         penalty=np.asarray(rs + rr - rcl, dtype=np.float64),
         model="attenuated",

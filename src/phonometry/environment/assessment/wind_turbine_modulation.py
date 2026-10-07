@@ -86,7 +86,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import read_only, read_only_copy
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     is_class_designation,
@@ -756,10 +756,10 @@ def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
 def _excluded(block: ModulationBlock) -> ModulationBlock:
     """The same block, marked as excluded by the practitioner."""
     return ModulationBlock(
-        levels_db=block.levels_db,
-        detrended_db=block.detrended_db,
-        frequencies_hz=block.frequencies_hz,
-        power_spectrum=block.power_spectrum,
+        levels_db=read_only_copy(block.levels_db),
+        detrended_db=read_only_copy(block.detrended_db),
+        frequencies_hz=read_only_copy(block.frequencies_hz),
+        power_spectrum=read_only_copy(block.power_spectrum),
         modulation_frequency_range_hz=block.modulation_frequency_range_hz,
         status=ModulationBlockStatus.EXCLUDED,
         fundamental_frequency_hz=block.fundamental_frequency_hz,

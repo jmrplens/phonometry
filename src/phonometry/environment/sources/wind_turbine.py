@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -531,6 +532,6 @@ def wind_turbine_tonality(
         tonal_audibility=delta_la,
         is_audible=bool(delta_la > 0.0 and has_identified_tone),
         has_identified_tone=has_identified_tone,
-        frequencies=fr,
-        levels=lv,
+        frequencies=read_only_copy(fr),
+        levels=read_only_copy(lv),
     )

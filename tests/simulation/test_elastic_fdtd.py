@@ -885,3 +885,21 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
         ValueError, match=r"holds no snapshots; rerun .* with snapshot_every"
     ):
         res.plot(kind="snapshot")
+
+
+def test_the_elastic_simulation_keeps_maps_of_its_own() -> None:
+    """``c_p``, ``c_s`` and ``rho`` were the caller's maps, which an edit
+    afterwards set apart from the ``mu``, ``lam`` and ``dt`` built from them.
+    """
+    c_p = np.full((10, 12), 5900.0)
+    c_s = np.full((10, 12), 3100.0)
+    rho = np.full((10, 12), 7800.0)
+    sim = ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=0.01, rho=rho)
+    c_p[:] = 1.0
+    c_s[:] = 0.0
+    rho[:] = 1.0
+    assert float(sim.c_p.min()) == 5900.0
+    assert float(sim.c_s.min()) == 3100.0
+    assert float(sim.rho.min()) == 7800.0
+    for kept in (sim.c_p, sim.c_s, sim.rho):
+        assert not kept.flags.writeable

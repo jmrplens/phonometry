@@ -453,6 +453,44 @@ A table with tables inside it needs each level copied, as in
 needed before a table is pickled, deep-copied or written out as JSON, because
 a read-only mapping supports none of the three.
 
+## A result keeps its own copy of the arrays it was given
+
+In 3.3.0 and in 4.0.0rc1 a result kept the very array it was handed whenever
+that array was already of the type the function reads, `float64` for levels
+and frequencies, because `np.asarray` hands its argument back unchanged in
+that case. Changing the caller's array afterwards, `levels[0] = 0.0` or
+`frequencies *= 2`, changed a result already computed and perhaps already
+printed. In 4.0 every array that a function or a method of the library
+keeps from the arguments it was given is a copy of its own, made read-only
+like the published tables, and the caller's array is left as it was. That
+holds for the objects that keep arrays to hand out later as well: the
+frequency grid of a `noise_control.SilencerChain`, the axes and flight paths
+an `aircraft.AnpDatabase` is built from, and the medium maps of
+`simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
+and `c_s` now stay the ones the time step was computed from. A `Signal`
+keeps a copy of its own samples too, which stays writeable for processing in
+place, as the samples of a file read with `io.read` always were. A result
+record built by hand, by calling its class directly, holds the arrays it is
+handed, as a tuple does. Writing into one of those arrays now raises
+`ValueError`, so code that edited one in place has to copy it first:
+
+```python
+import numpy as np
+
+from phonometry import io, room
+
+levels = np.array([60.0, 58.0, 55.0, 52.0, 50.0, 48.0, 45.0, 42.0, 40.0, 38.0])
+nc = room.noise_criterion(levels)
+levels[0] = 0.0
+samples = np.zeros(4)
+signal = io.Signal(samples, fs=48_000)
+samples[0] = 1.0
+edited = nc.levels.copy()
+edited[0] = 62.0
+print(nc.levels[0], nc.levels.flags.writeable, signal.data[0, 0], signal.data.flags.writeable)
+# 60.0 False 0.0 True
+```
+
 ## A catalogue row says what its source claims for each cell
 
 The published catalogues of materials are new in 4.0: neither 3.3.0 nor

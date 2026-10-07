@@ -172,6 +172,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.integrate import quad
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -855,7 +856,7 @@ def junction_transmission(
         psi=psi,
         critical_frequency1=_critical_frequency(thickness1, wave_speed1),
         critical_frequency2=_critical_frequency(thickness2, wave_speed2),
-        angles_deg=grid,
+        angles_deg=read_only_copy(grid),
         corner=corner,
         straight=straight,
         corner_average=corner_avg,

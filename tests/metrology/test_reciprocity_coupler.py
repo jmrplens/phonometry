@@ -1050,3 +1050,21 @@ def test_published_tables_are_read_only() -> None:
     )
     with pytest.raises(ValueError, match="read-only"):
         z.capillary_correction[0] = 2.0
+
+
+def test_a_coupler_impedance_keeps_columns_of_its_own() -> None:
+    """The record used to publish read-only views of the caller's complex
+    columns, so editing them changed the transfer impedance.
+    """
+    adiabatic = np.array([1.0 + 1.0j, 2.0 + 2.0j])
+    record = metrology.CouplerTransferImpedance(
+        frequencies_hz=np.array([100.0, 200.0]),
+        coupler="plane_wave",
+        adiabatic_impedance_pa_s_m3=adiabatic,
+        heat_conducting_impedance_pa_s_m3=adiabatic.copy(),
+        capillary_correction=np.ones(2, dtype=np.complex128),
+    )
+    adiabatic[0] = 0.0
+    assert record.adiabatic_impedance_pa_s_m3[0] == 1.0 + 1.0j
+    assert not record.adiabatic_impedance_pa_s_m3.flags.writeable
+    assert adiabatic.flags.writeable

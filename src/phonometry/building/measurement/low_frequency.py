@@ -98,6 +98,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.levels_math import energy_mean
 from ..._internal.warnings import PhonometryWarning
 
@@ -774,7 +775,7 @@ def apply_low_frequency_procedure(
     t63 = procedure.reverberation_63_octave
 
     return LowFrequencyResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         levels=corrected,
         reverberation_time=substituted,
         low_frequency_bands=freqs[indices],

@@ -68,6 +68,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 from .._internal.boundary import settled, settled_net_share
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean
 from .._internal.utils import _typesignal
 from .._internal.validation import (
@@ -1023,12 +1024,18 @@ def field_indicators(
 
     if lp.ndim == 1:
         f2, f3, f4 = _field_indicators_1d(lp, i_n)
-        return FieldIndicators(f2=f2, f3=f3, f4=f4, frequencies=freqs, f1=f1)
+        return FieldIndicators(
+            f2=f2, f3=f3, f4=f4, frequencies=read_only_copy(freqs), f1=f1
+        )
 
     per_band = [_field_indicators_1d(lp[:, b], i_n[:, b]) for b in range(lp.shape[1])]
     values = np.asarray(per_band, dtype=np.float64)
     return FieldIndicators(
-        f2=values[:, 0], f3=values[:, 1], f4=values[:, 2], frequencies=freqs, f1=f1
+        f2=values[:, 0],
+        f3=values[:, 1],
+        f4=values[:, 2],
+        frequencies=read_only_copy(freqs),
+        f1=f1,
     )
 
 

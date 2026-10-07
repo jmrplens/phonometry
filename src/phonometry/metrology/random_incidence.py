@@ -130,7 +130,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     require_count,
     require_finite,
@@ -677,7 +677,7 @@ def _from_planes(
     return DirectivityFactor(
         incidence_angles_deg=angles,
         plane_angles_deg=plane_angles,
-        levels_db=flat,
+        levels_db=read_only_copy(flat),
         weights=weights,
         reference_level_db=lrd,
         gamma=_gamma(flat, weights, lrd),
@@ -1001,8 +1001,8 @@ def random_incidence_sensitivity(
     index = _band_column(directivity_index_db, "directivity_index_db", frequencies)
     return RandomIncidenceSensitivity(
         frequencies_hz=frequencies,
-        free_field_level_db=free_field,
-        directivity_index_db=index,
+        free_field_level_db=read_only_copy(free_field),
+        directivity_index_db=read_only_copy(index),
         random_incidence_level_db=free_field - index,
     )
 

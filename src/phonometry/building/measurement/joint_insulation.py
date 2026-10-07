@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
@@ -665,9 +666,9 @@ def lab_joint_insulation(
         if bool(np.any(open_mask)):
             opened = _open_band_rating(r_s, freqs, core, open_mask)
     return LabJointInsulationResult(
-        frequencies_hz=freqs,
-        r_s_measured_db=measured,
-        r_s_max_db=maximum,
+        frequencies_hz=read_only_copy(freqs),
+        r_s_measured_db=read_only_copy(measured),
+        r_s_max_db=read_only_copy(maximum),
         r_s_db=np.asarray(r_s, dtype=np.float64),
         regime=regime,
         joint_length_m=length,

@@ -103,6 +103,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -525,7 +526,7 @@ def check_heavy_impact_source(
     return HeavyImpactSourceCheck(
         source=spec.name,
         frequencies=np.asarray(spec.frequencies, dtype=np.float64),
-        measured=measured,
+        measured=read_only_copy(measured),
         nominal=nominal,
         tolerance=tol,
         deviation=deviation,
@@ -711,13 +712,13 @@ def standardized_maximum_impact_level(
     correction = fast_reverberation_correction(t, reference_time=reference_time)
     volume_term = float(10.0 * np.log10(v / v0))
     return StandardizedMaximumImpactResult(
-        frequencies=freqs,
-        measured=li,
+        frequencies=read_only_copy(freqs),
+        measured=read_only_copy(li),
         standardized=np.asarray(li + volume_term - correction, dtype=np.float64),
         volume_term=volume_term,
         reverberation_correction=correction,
         volume=v,
-        reverberation_time=t,
+        reverberation_time=read_only_copy(t),
     )
 
 
@@ -883,7 +884,7 @@ def a_weighted_maximum_impact_level(
     return AWeightedMaximumImpactResult(
         frequencies=bands,
         band=chosen,
-        levels=x,
+        levels=read_only_copy(x),
         a_weighting=a_weighting,
         corrected=corrected,
         unrounded=unrounded,

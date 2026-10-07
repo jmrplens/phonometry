@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_above_absolute_zero_array,
     require_ranks,
@@ -142,7 +143,7 @@ def sound_speed_profile(
     )
     gradient_per_s = np.gradient(c, z)
     return SoundSpeedProfile(
-        depth=z,
+        depth=read_only_copy(z),
         speed_of_sound=c,
         gradient_per_s=gradient_per_s,
         model=model.strip().lower(),

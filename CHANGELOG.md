@@ -1934,6 +1934,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   subscript, as in $D_{I,\mathrm{n,e}}$, as upright; on the pages and
   diagrams as they were, it finds 193 such places.
 
+- **A result keeps its own copy of the arrays it was given.** `np.asarray`
+  hands back the caller's own array when it is already `float64`, and so does
+  every validation helper built on it, so a result built from one kept the
+  caller's array, or a view of it: changing that array afterwards
+  (`levels[0] = 0.0`, `frequencies *= 2`) changed a result already computed,
+  judged and perhaps printed, and nothing raised. The ISO 3743 layer had
+  closed this for its band frequencies only, and its mean background and
+  reference levels still shared the caller's memory. Run over the test suite,
+  156 public functions and methods returned a result sharing memory with a
+  writeable argument, across every domain: the band frequencies of nearly
+  every spectrum result, `io.Signal`, which kept the samples it was built
+  around, `metrology.CouplerTransferImpedance`, which kept views of the
+  caller's complex columns, `aircraft.revise_npd_curves`, whose revised
+  curves shared the axes of the curves passed in, and
+  `room.noise_criterion`, among them. So did the objects that keep arrays to
+  hand out later: `noise_control.SilencerChain` kept the caller's frequency
+  grid, which the chain inside its result went on following,
+  `aircraft.AnpDatabase` built by hand kept the distances, NPD tables and
+  flight paths its curves and profiles were then read from, and
+  `simulation.FDTD2D` and `simulation.ElasticFDTD2D` kept the caller's medium
+  maps, which an edit afterwards set apart from the time step computed from
+  them. `signals.window_metrics` kept an array parameter of the window
+  specification as given. Every such array is now a copy the result or the
+  object owns, made read-only like the published tables through the new
+  private helper `read_only_copy`; a `Signal`'s copy stays writeable, as the
+  samples of a file read with `io.read` always were. A result record built by
+  hand, by calling its class directly, holds the arrays it is handed, as a
+  tuple does. The values are the same, and writing into one of those arrays
+  now raises `ValueError`. `make array-aliasing` and a CI job of its own keep
+  the next one out: an AST data-flow walk follows every parameter through
+  assignments, views, containers and the package's own helpers to the record
+  fields, `object.__setattr__` calls, `dataclasses.replace` copies, the
+  attributes a plain public class sets on itself and `read_only` calls where
+  an array is kept, and fails on one that is not a copy. On the tree it was
+  written against it found 357 such places in 123 modules. The migration
+  guide says what changes for code that edited a result's array in place.
+
 - **The Spanish edition calls a sine wave a sinusoide, and an expanded
   uncertainty an incertidumbre expandida.** Thirty-nine places of the Spanish
   guides, the Spanish errata register, the site's glossary and the BS.1770

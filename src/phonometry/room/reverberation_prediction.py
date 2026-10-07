@@ -75,6 +75,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike, NDArray
 
+from .._internal.frozen import read_only_copy
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
@@ -811,7 +812,7 @@ def reverberation_time_models(
         return np.broadcast_to(arr, (n_bands,)).astype(np.float64)
 
     return ReverberationModelResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         sabine=_fit(sabine),
         eyring=_fit(eyring),
         millington_sette=_fit(millington),

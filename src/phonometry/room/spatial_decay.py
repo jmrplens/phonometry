@@ -95,6 +95,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_finite,
     require_finite_array,
@@ -1056,8 +1057,8 @@ def spatial_decay_curve(
         raise ValueError(msg)
     chosen, chosen_radii = values[keep], radii[keep]
     return SpatialDecayResult(
-        distances_m=chosen_radii,
-        distribution_values_db=chosen,
+        distances_m=read_only_copy(chosen_radii),
+        distribution_values_db=read_only_copy(chosen),
         reference_values_db=reference_distribution_value(chosen_radii),
         level_excess_db=level_excess(chosen, chosen_radii),
         decay_rate_db=spatial_decay_rate(chosen, chosen_radii),

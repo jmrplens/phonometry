@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -872,7 +872,7 @@ def _vdi2081_bend_result(
         bend_type=bend_type, vanes=vanes, lined=lined, lined_side=side
     )
     return HvacSpectrumResult(
-        frequencies=bands,
+        frequencies=read_only_copy(bands),
         values=_vdi2081_bend(
             bands, bend_type=key, shape=shape, size=size, speed_of_sound=c
         ),

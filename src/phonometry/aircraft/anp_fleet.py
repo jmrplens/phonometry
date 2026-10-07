@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_axis_count,
     require_choice,
@@ -644,9 +645,15 @@ class AnpDatabase:
         spectral_classes: Mapping[str, SpectralClass] | None = None,
     ) -> None:
         self._aircraft = dict(aircraft)
-        self._npd = dict(npd)
-        self._distances = distances
-        self._profiles = dict(profiles)
+        # The curves and paths handed out later are read-only copies of the
+        # database's own, so editing the arrays a database was built from
+        # moves nothing it returns.
+        self._npd = {
+            key: (read_only_copy(powers), read_only_copy(levels))
+            for key, (powers, levels) in npd.items()
+        }
+        self._distances = read_only_copy(distances)
+        self._profiles = {key: read_only_copy(path) for key, path in profiles.items()}
         self._performance = (
             performance if performance is not None else _PerformanceTables()
         )

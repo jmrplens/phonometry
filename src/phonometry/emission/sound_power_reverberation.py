@@ -91,6 +91,7 @@ if TYPE_CHECKING:
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -786,9 +787,9 @@ def sound_power_reverberation(
     lw = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
     return ReverberationSoundPowerResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_power_level=lw,
-        mean_pressure_level=mean_level,
+        mean_pressure_level=read_only_copy(mean_level),
         absorption_area=terms.absorption_area,
         waterhouse_correction=terms.waterhouse_correction,
         background_correction=k1,
@@ -875,9 +876,9 @@ def sound_power_comparison(
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     return ReverberationSoundPowerResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_power_level=lw,
-        mean_pressure_level=lp_st,
+        mean_pressure_level=read_only_copy(lp_st),
         absorption_area=nan_band,
         waterhouse_correction=nan_band,
         background_correction=k1_st,
@@ -1142,9 +1143,9 @@ def sound_energy_reverberation(
     lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
     return ReverberationSoundEnergyResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_energy_level=lj,
-        mean_event_level=mean_level,
+        mean_event_level=read_only_copy(mean_level),
         absorption_area=terms.absorption_area,
         waterhouse_correction=terms.waterhouse_correction,
         background_correction=k1,
@@ -1250,9 +1251,9 @@ def sound_energy_comparison(
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     return ReverberationSoundEnergyResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_energy_level=lj,
-        mean_event_level=le_st,
+        mean_event_level=read_only_copy(le_st),
         absorption_area=nan_band,
         waterhouse_correction=nan_band,
         background_correction=k1_st,

@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_choice,
@@ -546,7 +547,7 @@ def steady_state_field(
         dtype=np.float64,
     )
     return SteadyFieldResult(
-        distances=r,
+        distances=read_only_copy(r),
         direct=direct,
         reverberant=reverberant,
         total=total,

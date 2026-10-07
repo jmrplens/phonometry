@@ -88,6 +88,7 @@ if TYPE_CHECKING:
 
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_finite,
@@ -653,7 +654,7 @@ def indirect_transfer_stiffness_result(
     magnitude = np.abs(np.asarray(transmissibility, dtype=np.complex128))
     valid = np.broadcast_to(magnitude <= TRANSMISSIBILITY_LIMIT, k.shape).copy()
     return TransferStiffnessResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         transfer_stiffness=k,
         blocking_mass=float(blocking_mass),
         valid=valid,
@@ -1155,7 +1156,7 @@ def check_blocked_output(
         )
         raise ValueError(msg)
     check = LevelDifferenceCheck(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         difference_db=first - second,
         limit_db=_BLOCKED_OUTPUT_LIMIT_DB,
         condition="blocked_output",
@@ -1217,7 +1218,7 @@ def check_unwanted_input(
         raise ValueError(msg)
     loudest = unwanted if unwanted.ndim == 1 else np.max(unwanted, axis=0)
     check = LevelDifferenceCheck(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         difference_db=excitation - loudest,
         limit_db=_UNWANTED_INPUT_LIMIT_DB,
         condition="unwanted_input",
@@ -1409,7 +1410,9 @@ def check_output_mass(
         * 10.0 ** ((force_db - acceleration_db) / 20.0)
     )
     check = OutputMassCheck(
-        frequencies=freq, output_mass_kg=output_mass_kg, mass_limit_kg=limit
+        frequencies=read_only_copy(freq),
+        output_mass_kg=output_mass_kg,
+        mass_limit_kg=limit,
     )
     if not check.passes:
         worst = int(np.argmin(limit))
@@ -1648,7 +1651,7 @@ def effective_blocking_mass(
         msg = f"{owner}: the effective mass must be finite and positive at every frequency."
         raise ValueError(msg)
     return EffectiveBlockingMass(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         effective_mass_kg=np.asarray(m_eff, dtype=np.float64),
         blocking_mass_kg=blocking_mass_kg,
     )
@@ -1960,7 +1963,7 @@ def driving_point_stiffness(
         )
         adequate = holds if adequate is None else adequate & holds
     return DrivingPointStiffnessResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         driving_point_stiffness=np.asarray(k11, dtype=np.complex128),
         adequate=adequate,
     )

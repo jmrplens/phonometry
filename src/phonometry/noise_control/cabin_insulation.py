@@ -74,6 +74,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even, settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_choice,
@@ -575,9 +576,9 @@ def cabin_insulation(
             a_weighted_room_level, "a_weighted_room_level"
         ) - require_finite(a_weighted_cabin_level, "a_weighted_cabin_level")
     return CabinInsulationResult(
-        frequencies=freqs,
-        room_levels=room,
-        cabin_levels=cabin,
+        frequencies=read_only_copy(freqs),
+        room_levels=read_only_copy(room),
+        cabin_levels=read_only_copy(cabin),
         insulation=np.asarray(room - cabin, dtype=np.float64),
         apparent=how in _IN_SITU_METHODS,
         a_weighted_insulation=weighted,

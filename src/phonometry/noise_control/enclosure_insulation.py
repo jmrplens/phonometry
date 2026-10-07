@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
     require_choice,
@@ -444,9 +445,9 @@ def _insulation(
         # such is what keeps the result from passing a total off as a band.
         weighted = float(insulation[0])
     return EnclosureInsulationResult(
-        frequencies=freqs,
-        level_without=without,
-        level_with=with_,
+        frequencies=read_only_copy(freqs),
+        level_without=read_only_copy(without),
+        level_with=read_only_copy(with_),
         insulation=np.asarray(insulation, dtype=np.float64),
         quantity=quantity,
         a_weighted_insulation=weighted,

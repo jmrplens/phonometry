@@ -171,7 +171,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -1374,9 +1374,15 @@ def _calibration(
             if expanded_uncertainty_db is None
             else np.asarray(expanded_uncertainty_db, dtype=np.float64)
         ),
-        reference_sensitivity_phase_deg=None if phases is None else phases.reference,
-        output_phase_differences_deg=None if phases is None else phases.output,
-        pressure_phase_difference_deg=None if phases is None else phases.pressure,
+        reference_sensitivity_phase_deg=None
+        if phases is None
+        else read_only_copy(phases.reference),
+        output_phase_differences_deg=None
+        if phases is None
+        else read_only_copy(phases.output),
+        pressure_phase_difference_deg=None
+        if phases is None
+        else read_only_copy(phases.pressure),
     )
 
 

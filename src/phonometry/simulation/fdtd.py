@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_equal_counts,
     require_positive,
@@ -813,8 +814,11 @@ class FDTD2D:
         )
 
         self.dx = _positive_finite("dx", dx)
-        self.c = c_map
-        self.rho = rho_map
+        # The medium the simulation was built on, as read-only copies of its
+        # own: an edit to the caller's maps cannot make them disagree with
+        # dt and kappa, which were computed from them here.
+        self.c = read_only_copy(c_map)
+        self.rho = read_only_copy(rho_map)
         c_max = float(c_map.max())
         self.dt = cfl * self.dx / (c_max * float(np.sqrt(2.0)))
         #: Mean sound speed, cached for the plane-wave machinery.
@@ -838,12 +842,21 @@ class FDTD2D:
         self.sponge_width = int(sponge_width)
         #: Sides carrying a sponge layer when ``sponge_width > 0``.
         self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
-        #: Per-side impedance boundaries as supplied (immutable record).
-        self.edge_impedance: Mapping[str, float | NDArray[np.float64]] = (
-            MappingProxyType(dict(edge_impedance) if edge_impedance else {})
-        )
         self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
         self._edges = self._build_edges(edge_impedance, sponge_width, sides, ny, nx)
+        #: Per-side impedance boundaries as supplied (immutable record), read
+        #: once the edges have validated them; an array profile is kept as a
+        #: read-only copy of its own.
+        self.edge_impedance: Mapping[str, float | NDArray[np.float64]] = (
+            MappingProxyType(
+                {
+                    side: float(value)
+                    if np.ndim(value) == 0
+                    else read_only_copy(value, np.float64)
+                    for side, value in (edge_impedance or {}).items()
+                }
+            )
+        )
         self._init_obstacle(obstacle_mask, ny, nx)
 
     def _init_decay(

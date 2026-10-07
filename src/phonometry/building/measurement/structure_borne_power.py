@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_finite_array,
@@ -409,7 +410,7 @@ def reception_plate_power(
         loss_factor=eta,
         mass_per_area=float(mass_per_area),
         area=float(area),
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
     )
 
 

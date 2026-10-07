@@ -49,7 +49,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import read_only, read_only_copy
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -408,8 +408,8 @@ def npd_atmosphere_increment(
     specified_levels = _a_weighted_sum(spread - specified_attenuation)
     return NpdAtmosphereIncrement(
         frequencies_hz=frequencies,
-        distances_m=d,
-        spectrum_db=levels,
+        distances_m=read_only_copy(d),
+        spectrum_db=read_only_copy(levels),
         source_spectrum_db=source,
         reference_attenuation_db=reference_attenuation,
         specified_attenuation_db=np.asarray(specified_attenuation, dtype=np.float64),
@@ -513,6 +513,11 @@ def revise_npd_curves(
     )
     return RevisedNpdCurves(
         original=curves,
-        revised=dataclasses.replace(curves, levels=levels),
+        revised=dataclasses.replace(
+            curves,
+            powers=read_only_copy(curves.powers),
+            distances=read_only_copy(curves.distances),
+            levels=levels,
+        ),
         increment=increment,
     )

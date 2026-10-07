@@ -468,6 +468,46 @@ hace falta antes de serializar una tabla con pickle, copiarla en profundidad o
 escribirla como JSON, porque un mapeo de sólo lectura no admite ninguna de las
 tres cosas.
 
+## Un resultado guarda una copia propia de los arrays que recibe
+
+En la 3.3.0 y en la 4.0.0rc1 un resultado guardaba el mismo array que se le
+pasaba siempre que ese array ya era del tipo que lee la función, `float64`
+para niveles y frecuencias, porque en ese caso `np.asarray` devuelve su
+argumento sin tocarlo. Cambiar después el array de quien llamaba,
+`levels[0] = 0.0` o `frequencies *= 2`, cambiaba un resultado ya calculado y
+quizá ya impreso. En la 4.0 todo array que una función o un método de la
+biblioteca guarda de los argumentos que recibe es una copia propia, de sólo
+lectura como las tablas publicadas, y el array de quien llama queda como
+estaba. Lo mismo vale para los objetos que guardan arrays para entregarlos
+después: la rejilla de frecuencias de una `noise_control.SilencerChain`, los
+ejes y las trayectorias con los que se construye una `aircraft.AnpDatabase`
+y los mapas del medio de `simulation.FDTD2D` y `simulation.ElasticFDTD2D`,
+cuyos `c`, `rho`, `c_p` y `c_s` siguen siendo ahora aquellos con los que se
+calculó el paso de tiempo. Una `Signal` también guarda una copia propia de
+sus muestras, que sigue siendo escribible para procesarla en su sitio, como
+siempre lo fueron las muestras de un fichero leído con `io.read`. Un registro
+de resultado construido a mano, llamando directamente a su clase, guarda los
+arrays que se le dan, como hace una tupla. Escribir en uno de esos arrays
+lanza ahora `ValueError`, así que el código que retocaba uno en su sitio
+tiene que copiarlo antes:
+
+```python
+import numpy as np
+
+from phonometry import io, room
+
+levels = np.array([60.0, 58.0, 55.0, 52.0, 50.0, 48.0, 45.0, 42.0, 40.0, 38.0])
+nc = room.noise_criterion(levels)
+levels[0] = 0.0
+samples = np.zeros(4)
+signal = io.Signal(samples, fs=48_000)
+samples[0] = 1.0
+edited = nc.levels.copy()
+edited[0] = 62.0
+print(nc.levels[0], nc.levels.flags.writeable, signal.data[0, 0], signal.data.flags.writeable)
+# 60.0 False 0.0 True
+```
+
 ## Una fila de catálogo dice lo que su fuente afirma de cada celda
 
 Los catálogos publicados de materiales son nuevos en la 4.0: ni la 3.3.0 ni

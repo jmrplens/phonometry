@@ -33,6 +33,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -384,9 +385,9 @@ def diffusion_spectrum(
             "band",
         )
     return DiffusionSpectrum(
-        frequencies=freq,
-        diffusion=d,
-        normalized=d_n,
+        frequencies=read_only_copy(freq),
+        diffusion=read_only_copy(d),
+        normalized=read_only_copy(d_n),
     )
 
 
@@ -418,7 +419,9 @@ def directional_diffusion(
         "receiver",
     )
     d = float(directional_diffusion_coefficient(lev, area_weights=weights))
-    return DiffusionResult(angles_deg=ang, levels=lev, coefficient=d)
+    return DiffusionResult(
+        angles_deg=read_only_copy(ang), levels=read_only_copy(lev), coefficient=d
+    )
 
 
 # ---------------------------------------------------------------------------

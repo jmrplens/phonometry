@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -855,10 +856,10 @@ def loudspeaker_characteristics(
         ),
         impedance_frequencies=imp_f,
         impedance_modulus=imp_z,
-        thd_frequencies=thd_f,
+        thd_frequencies=read_only_copy(thd_f),
         thd_percent=thd_p,
-        polar_angles_deg=p_ang,
-        polar_db=p_db,
+        polar_angles_deg=read_only_copy(p_ang),
+        polar_db=read_only_copy(p_db),
         polar_frequency=p_freq,
         directivity_index_db=di,
     )

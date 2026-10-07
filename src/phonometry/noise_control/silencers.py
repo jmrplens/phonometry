@@ -115,6 +115,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     check_engine,
     require_non_negative,
@@ -753,12 +754,12 @@ def _result(
             radiation_impedance=radiation_impedance,
         )
     return ReactiveSilencerResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         transmission_loss=tl,
         insertion_loss=il,
-        transfer_matrix=t,
+        transfer_matrix=read_only_copy(t),
         kind=kind,
-        resonances=resonances,
+        resonances=read_only_copy(resonances),
         geometry=geometry,
         plane_wave_limit=limit,
         chain=chain,
@@ -1133,7 +1134,7 @@ class SilencerChain:
         speed_of_sound: float = _C_AIR,
         density: float = _RHO_AIR,
     ) -> None:
-        self._frequencies = _frequencies(frequencies)
+        self._frequencies = read_only_copy(_frequencies(frequencies))
         self._c = require_positive(speed_of_sound, "speed_of_sound")
         self._rho = require_positive(density, "density")
         self._elements: list[SilencerChainElement] = []

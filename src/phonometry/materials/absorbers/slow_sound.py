@@ -73,6 +73,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.optimize import root
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -742,7 +743,7 @@ def slit_helmholtz_absorber(
     k_eff = np.arccos((t11 + t22) / 2.0) / length
     z_eff = np.sqrt(t12 / t21)
     return SlitResonatorAbsorberResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         angle_rad=theta,
         surface_impedance=np.asarray(z_in, dtype=np.complex128),
         normalized_impedance=np.asarray(z_in / z0, dtype=np.complex128),

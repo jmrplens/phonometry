@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
 from .._internal.types import as_float_or_array
 from .._internal.validation import check_engine, require_ranks, require_same_length
@@ -946,7 +947,7 @@ def sound_power_anechoic(
     )
 
     return PrecisionSoundPowerResult(
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         sound_power_level=np.asarray(lw, dtype=np.float64),
         surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
         mean_pressure_level=mean_level,

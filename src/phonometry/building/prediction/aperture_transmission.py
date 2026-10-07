@@ -59,6 +59,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.special import j1, struve
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_equal_counts,
@@ -287,7 +288,7 @@ def slit_transmission_coefficient(
     )
     tau = numerator / denominator
     return ApertureTransmissionResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         transmission_coefficient=np.asarray(tau, dtype=np.float64),
         kind="slit",
         width=float(width),
@@ -386,7 +387,7 @@ def circular_aperture_transmission_coefficient(
     term_b = ((r0**2 - x0**2 + 1.0) * np.sin(kd) + 2.0 * x0 * np.cos(kd)) ** 2
     tau = 4.0 * r0 / (term_a + term_b)
     return ApertureTransmissionResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         transmission_coefficient=np.asarray(tau, dtype=np.float64),
         kind="circular",
         radius=float(radius),

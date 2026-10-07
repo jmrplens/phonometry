@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.boundary import round_half_away_from_zero, round_half_up
+from ..._internal.frozen import read_only_copy
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
@@ -1507,7 +1508,7 @@ def weighted_rating_extended(
         ctr_50_5000=extended["ctr_50_5000"],
         ctr_100_5000=extended["ctr_100_5000"],
         core=weighted_rating(np.asarray(values_by_band, dtype=np.float64)[core_idx]),
-        band_centers=freqs,
+        band_centers=read_only_copy(freqs),
         measured=measured,
     )
 
@@ -1570,7 +1571,7 @@ def weighted_impact_rating_extended(
         core=weighted_impact_rating(
             np.asarray(values_by_band, dtype=np.float64)[core_idx]
         ),
-        band_centers=freqs,
+        band_centers=read_only_copy(freqs),
         measured=measured,
     )
 

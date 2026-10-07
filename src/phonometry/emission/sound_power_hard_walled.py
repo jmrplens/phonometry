@@ -117,6 +117,7 @@ if TYPE_CHECKING:
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
+from .._internal.frozen import read_only_copy
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -713,9 +714,9 @@ def _determine(
         frequencies=freqs,
         sound_power_level=level if is_power else nan_band.copy(),
         sound_energy_level=nan_band.copy() if is_power else level,
-        mean_source_level=np.asarray(mean_source, dtype=np.float64),
-        mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
-        mean_background_level=np.asarray(mean_bg, dtype=np.float64),
+        mean_source_level=read_only_copy(mean_source, dtype=np.float64),
+        mean_reference_level=read_only_copy(mean_ref, dtype=np.float64),
+        mean_background_level=read_only_copy(mean_bg, dtype=np.float64),
         reference_power_level=np.asarray(power, dtype=np.float64).copy(),
         background_correction=k1,
         background_correction_ref=k1_ref,

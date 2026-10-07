@@ -47,6 +47,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
@@ -334,8 +335,8 @@ def _band_uncertainty(
     return AbsorptionUncertaintyResult(
         quantity=quantity,
         condition=condition,
-        frequencies=frequencies,
-        values=values,
+        frequencies=read_only_copy(frequencies),
+        values=read_only_copy(values),
         standard_uncertainty=u,
         coverage_factor=k,
         expanded_uncertainty=k * u,
@@ -412,8 +413,8 @@ def equivalent_area_uncertainty(
     return AbsorptionUncertaintyResult(
         quantity="equivalent_area",
         condition=cond,
-        frequencies=f,
-        values=a,
+        frequencies=read_only_copy(f),
+        values=read_only_copy(a),
         standard_uncertainty=u,
         coverage_factor=k,
         expanded_uncertainty=k * u,

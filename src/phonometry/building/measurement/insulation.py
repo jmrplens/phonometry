@@ -125,6 +125,7 @@ if TYPE_CHECKING:
 # The ISO 717 rating machinery now lives in :mod:`.ratings`. Until every caller
 # in the tree reads it from there, the names this module used to define stay
 # importable from this path, unchanged; the ``__all__`` below re-exports them.
+from ..._internal.frozen import read_only_copy
 from .ratings import (
     _INDEX_500_THIRD,
     _REF_IMPACT_THIRD_OCTAVE,
@@ -1132,9 +1133,9 @@ def airborne_insulation(
         d=d,
         dnt=dnt,
         r_prime=r_prime,
-        l1=l1_bands,
-        l2=l2_bands,
-        t2=t,
+        l1=read_only_copy(l1_bands),
+        l2=read_only_copy(l2_bands),
+        t2=read_only_copy(t),
         t0=t0,
         source_low_frequency=source_lf,
         receiver_low_frequency=receiver_lf,
@@ -1262,8 +1263,8 @@ def impact_insulation(
     return ImpactInsulationResult(
         l_n_t=l_n_t,
         l_n=l_n,
-        li=li_bands,
-        t2=t,
+        li=read_only_copy(li_bands),
+        t2=read_only_copy(t),
         t0=t0,
         low_frequency=low_frequency_result,
     )
@@ -1495,7 +1496,7 @@ def facade_insulation(
         d_2m_nt=d_2m_nt,
         d_2m_n=d_2m_n,
         r_prime=r_prime,
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         method=method,
         low_frequency=low_frequency_result,
     )

@@ -937,3 +937,31 @@ def test_an_npd_only_export_says_what_it_is_missing(tmp_path: object) -> None:
     db = _synthetic_db(tmp_path, ["747100;D;DEFAULT;1;1;0.0;0.0;30.0;40000.0"])
     with pytest.raises(ValueError, match=r"no performance tables"):
         db.performance_aircraft("747100")
+
+
+def test_a_database_built_by_hand_keeps_arrays_of_its_own() -> None:
+    """The constructor kept the caller's distances, powers, levels and paths,
+    so the curves and profiles it handed out moved with every later edit.
+    """
+    distances = np.array([60.0, 120.0, 240.0])
+    powers = np.array([8000.0, 12000.0])
+    levels = np.array([[95.0, 90.0, 85.0], [99.0, 94.0, 89.0]])
+    path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0], [1000.0, 0.0, 300.0, 8000.0, 80.0]])
+    db = AnpDatabase(
+        aircraft={"X": {"ACFT_ID": "X", "NPD_ID": "NX", "Power Parameter": "CNT"}},
+        npd={("NX", "SEL", "D"): (powers, levels)},
+        distances=distances,
+        profiles={("X", "D", "DEFAULT", 1): path},
+    )
+    curves = db.npd_curves("X", "departure", "SEL")
+    profile = db.profile("X", "departure")
+    distances[0] = 1.0
+    powers[0] = 1.0
+    levels[0, 0] = 0.0
+    path[1, 2] = 0.0
+    np.testing.assert_array_equal(curves.distances, [60.0, 120.0, 240.0])
+    np.testing.assert_array_equal(curves.powers, [8000.0, 12000.0])
+    assert curves.levels[0, 0] == 95.0
+    assert profile.path[1, 2] == 300.0
+    for kept in (curves.distances, curves.powers, curves.levels, profile.path):
+        assert not kept.flags.writeable

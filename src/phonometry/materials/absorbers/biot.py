@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -490,7 +491,7 @@ def biot_waves(
     mu3 = -rho12 / rho22
 
     return BiotWavesResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         porosity=phi,
         tortuosity=alpha_inf,
         frame_density=rho1,

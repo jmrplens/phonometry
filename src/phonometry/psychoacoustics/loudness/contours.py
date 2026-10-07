@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import require_ranks, require_same_length
 
 if TYPE_CHECKING:
@@ -283,5 +284,8 @@ def equal_loudness_contours(
         ]
     )
     return EqualLoudnessContours(
-        frequencies=grid, phons=phon_tuple, contours=contours, threshold=threshold
+        frequencies=read_only_copy(grid),
+        phons=phon_tuple,
+        contours=contours,
+        threshold=threshold,
     )

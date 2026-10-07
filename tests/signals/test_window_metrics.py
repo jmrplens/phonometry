@@ -171,3 +171,17 @@ def test_window_metrics_plot_two_panels_and_single_axes() -> None:
         plt.matplotlib.colors.to_rgba(line.get_color()) == red for line in ax.lines
     )
     plt.close("all")
+
+
+def test_the_window_specification_keeps_weights_of_its_own() -> None:
+    """``("general_cosine", weights)`` kept the caller's weights, so editing
+    them renamed the window the metrics had been computed for.
+    """
+    weights = np.array([0.5, 0.5])
+    metrics = ph.signals.window_metrics(("general_cosine", weights))
+    weights[0] = 0.1
+    np.testing.assert_array_equal(metrics.window[1], [0.5, 0.5])
+    assert not metrics.window[1].flags.writeable
+    listed = ph.signals.window_metrics(("general_cosine", [0.5, 0.5]))
+    assert listed.window == ("general_cosine", (0.5, 0.5))
+    assert ph.signals.window_metrics("hann").window == "hann"

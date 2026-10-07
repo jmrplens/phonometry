@@ -72,6 +72,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -821,7 +822,9 @@ def survey_impact_insulation(
     if volume is not None:
         l_n = l_i - k - _normalization_term(_positive(volume, "volume"))
 
-    return SurveyImpactResult(l_i=l_i, l_nt=l_nt, l_n=l_n, rating=_rate_impact(l_nt))
+    return SurveyImpactResult(
+        l_i=read_only_copy(l_i), l_nt=l_nt, l_n=l_n, rating=_rate_impact(l_nt)
+    )
 
 
 def survey_facade_insulation(

@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -285,7 +286,7 @@ def radiation_efficiency(
         sigma[at_fc] = (0.5 - 0.15 * l1 / l2) * np.sqrt(k_fc * l1)
 
     return RadiationEfficiencyResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         radiation_efficiency=np.asarray(sigma, dtype=np.float64),
         critical_frequency=fc,
         length_x=lx,

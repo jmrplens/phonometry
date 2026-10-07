@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_positive,
     require_ranks,
@@ -229,7 +230,7 @@ def bottom_reflection_loss(
         loss = -20.0 * np.log10(np.abs(r))
     phi_c = critical_angle(c1, c2) if float(c2) > float(c1) else None
     return BottomLossResult(
-        grazing_angle_deg=phi,
+        grazing_angle_deg=read_only_copy(phi),
         reflection_loss=np.asarray(loss, dtype=np.float64),
         reflection_coefficient=r,
         critical_angle_deg=phi_c,
@@ -381,7 +382,7 @@ def seabed_reflection(
         loss = -20.0 * np.log10(magnitude)
     phi_c = critical_angle(c1, c2) if float(c2) > float(c1) else None
     return SeabedReflection(
-        grazing_angle_deg=phi,
+        grazing_angle_deg=read_only_copy(phi),
         reflection_coefficient=r,
         magnitude=np.asarray(magnitude, dtype=np.float64),
         bottom_loss=np.asarray(loss, dtype=np.float64),

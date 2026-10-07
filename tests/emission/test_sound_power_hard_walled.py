@@ -105,6 +105,21 @@ def test_results_keep_frequencies_of_their_own() -> None:
         np.testing.assert_array_equal(result.frequencies, FREQS)
 
 
+def test_results_keep_background_levels_of_their_own() -> None:
+    """A background already averaged to one spectrum is kept as a copy:
+    changing the caller's afterwards moves no mean, and the copy refuses
+    writes while the caller's array still takes them.
+    """
+    background = BACKGROUND.copy()
+    result = emission.sound_power_hard_walled(
+        ST, RSS, LW_RSS, FREQS, background_levels=background
+    )
+    background[0] = 0.0
+    np.testing.assert_array_equal(result.mean_background_level, BACKGROUND)
+    assert not result.mean_background_level.flags.writeable
+    assert background.flags.writeable
+
+
 def test_sound_power_is_eq14_with_the_background_negligible() -> None:
     """With every margin above 15 dB, K1 = K1(RSS) = 0 and Eq. (14) is the
     calibrated power carried across by the difference of the energy means.

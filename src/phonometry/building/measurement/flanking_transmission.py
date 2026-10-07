@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -626,7 +627,7 @@ def vibration_reduction_index(
 
     k_ij = dv + 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
     return VibrationReductionResult(
-        frequencies=freq,
+        frequencies=read_only_copy(freq),
         k_ij=k_ij,
         single_number=_single_number_kij(
             freq, k_ij, bracketed=bracketed, band_type=_detect_band_type(freq)

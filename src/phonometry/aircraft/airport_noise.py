@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -459,10 +460,10 @@ def npd_curve(
     level = npd_level(p, d, lv, power, dq)
     row = npd_level(p, d, lv, power, d)  # tabulated levels at the queried power
     return NpdLevelResult(
-        distances=dq,
+        distances=read_only_copy(dq),
         levels=level,
         power=float(power),
-        table_distances=d,
+        table_distances=read_only_copy(d),
         table_levels=row,
     )
 
@@ -1400,7 +1401,9 @@ def event_level(
     total, seg_arr = _event_level_core(
         pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr, lr, bk
     )
-    return FlyoverResult(level=total, metric=key, segment_levels=seg_arr, observer=obs)
+    return FlyoverResult(
+        level=total, metric=key, segment_levels=seg_arr, observer=read_only_copy(obs)
+    )
 
 
 @dataclass(frozen=True)
@@ -1520,5 +1523,8 @@ def noise_contour(
         pts, obs, p, d, le, lm, vref, imp, mounting, key, gr, lr, bk
     )
     return NoiseContourResult(
-        x=gx, y=gy, levels=levels.reshape(gy.size, gx.size), metric=key
+        x=read_only_copy(gx),
+        y=read_only_copy(gy),
+        levels=levels.reshape(gy.size, gx.size),
+        metric=key,
     )

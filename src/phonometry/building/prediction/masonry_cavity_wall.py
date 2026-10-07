@@ -83,6 +83,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_finite_array,
     require_positive,
@@ -304,7 +305,7 @@ def wall_tie_coupling_loss_factor(
     eta = n / (omega * m1) * y2 / denominator
     rigid = n / (omega * m1) * y2 / (y1 + y2) ** 2
     return WallTieCouplingResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         coupling_loss_factor=np.asarray(eta, dtype=np.float64),
         mobility1=y1,
         mobility2=y2,

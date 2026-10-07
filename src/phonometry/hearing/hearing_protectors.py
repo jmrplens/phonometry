@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_away_from_zero
+from .._internal.frozen import read_only_copy
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -359,7 +360,7 @@ def assumed_protection_value(
         standard_deviation=spread,
         performance=int(performance),
         alpha=alpha,
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
         subjects=int(grid.shape[0]),
     )
 
@@ -523,7 +524,7 @@ def octave_band_protected_level(
         performance=performance,
         method="octave-band",
         band_levels=np.asarray(band, dtype=np.float64),
-        frequencies=freqs,
+        frequencies=read_only_copy(freqs),
     )
 
 

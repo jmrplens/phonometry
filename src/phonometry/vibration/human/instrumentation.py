@@ -79,6 +79,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -579,8 +580,8 @@ def verify_weighting(
     )
     return WeightingVerification(
         weighting=weighting,
-        frequencies_hz=f,
-        measured=measured,
+        frequencies_hz=read_only_copy(f),
+        measured=read_only_copy(measured),
         design=design,
         deviation_percent=deviation,
         within_tolerance=np.asarray(within, dtype=np.bool_),
@@ -1026,11 +1027,11 @@ def verify_phase_response(
     tolerance = phase_tolerance_degrees(weighting, f[:-1])
     return PhaseVerification(
         weighting=weighting,
-        frequencies_hz=f,
-        measured_phase_deg=measured,
+        frequencies_hz=read_only_copy(f),
+        measured_phase_deg=read_only_copy(measured),
         design_phase_deg=design,
         deviation_deg=deviation,
-        characteristic_frequencies_hz=np.asarray(f[:-1], dtype=np.float64),
+        characteristic_frequencies_hz=read_only_copy(f[:-1], dtype=np.float64),
         characteristic_deviation_deg=characteristic,
         tolerance_deg=tolerance,
         within_tolerance=np.asarray(characteristic <= tolerance, dtype=np.bool_),

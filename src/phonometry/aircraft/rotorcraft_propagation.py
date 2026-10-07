@@ -57,6 +57,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_equal_shapes,
     require_non_negative,
@@ -440,7 +441,9 @@ def mean_ground_plane(
     """
     d, z = _validated_section(distances, heights)
     a, b = _mean_plane_coefficients(d, z)
-    return MeanGroundPlaneResult(slope=a, intercept=b, distances=d, heights=z)
+    return MeanGroundPlaneResult(
+        slope=a, intercept=b, distances=read_only_copy(d), heights=read_only_copy(z)
+    )
 
 
 def _validated_section(
@@ -717,7 +720,7 @@ def terrain_screening_adjustment(
     d, z, sigma_seg = _cropped_section(d, z, sigma_seg, src[0], rcv[0])
     adjustment, screened, delta, points = _screening_core(f, src, rcv, d, z, sigma_seg)
     return TerrainScreeningResult(
-        frequencies=f,
+        frequencies=read_only_copy(f),
         adjustment=adjustment,
         screened=screened,
         path_difference=delta,

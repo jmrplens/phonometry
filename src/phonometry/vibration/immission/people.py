@@ -83,6 +83,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import read_only_copy
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -815,7 +816,7 @@ def railway_assessment_severity(
         upper = severity(squares + spreads)
     return RailwayAssessment(
         kb_ftr=severity(squares),
-        kb_ftm=severities,
+        kb_ftm=read_only_copy(severities),
         occupied_takte=takte.astype(np.int64),
         lower=lower,
         upper=upper,

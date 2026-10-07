@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only_copy
 from .._internal.validation import (
     require_axis_rank,
     require_equal_shapes,
@@ -237,7 +238,7 @@ def passive_sonar_equation(
         signal_excess=signal_excess,
         snr=snr,
         figure_of_merit=float(fom),
-        propagation_loss=pl,
+        propagation_loss=read_only_copy(pl),
         source_level=sl,
         noise_level=nl,
         directivity_index=di,
@@ -297,7 +298,7 @@ def active_sonar_equation(
         signal_excess=signal_excess,
         snr=snr,
         figure_of_merit=float(fom),
-        propagation_loss=pl,
+        propagation_loss=read_only_copy(pl),
         source_level=sl,
         noise_level=nl,
         directivity_index=di,

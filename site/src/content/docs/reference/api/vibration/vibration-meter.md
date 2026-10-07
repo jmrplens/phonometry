@@ -23,10 +23,10 @@ next to a railway, which is where DIN 45672-1 works. Frequency weighting
 (Formula (4)) divides that by $1 - \mathrm{j}\,5{,}6\,\mathrm{Hz}/f$,
 one more pole and one more zero, and normalising by 1 mm/s turns the result
 into the dimensionless **KB signal**. Its running r.m.s. with
-$\tau = 0{,}125$ s (Formula (1)) is $KB_F(t)$, the *weighted
+$\tau = 0{,}125$ s (Formula (1)) is $KB_\mathrm{F}(t)$, the *weighted
 vibration severity*, and the quantities a meter displays are its maximum
-$KB_{F\mathrm{max}}$, the maximum within each 30 s clock interval
-(*Takt*) and the r.m.s. of those clock maxima $KB_{FTm}$ (Formula (2)).
+$KB_\mathrm{Fmax}$, the maximum within each 30 s clock interval
+(*Takt*) and the r.m.s. of those clock maxima $KB_\mathrm{FTm}$ (Formula (2)).
 
 **Two rules of Formula (2) that are easy to miss.** A clock maximum at or
 below 0,1 enters the sum as zero but still counts in $N$, so a quiet
@@ -47,12 +47,12 @@ linear phase, which is why this module designs them as symmetric FIRs.
 
 **Where the printed check values come from, and where one of them does not.**
 Table 9 (folio 35) prints what a meter must display for a 1 mm/s sine at five
-frequencies, and its $KB_F$, $KB_{F\mathrm{max}}$ and
-$KB_{FTm}$ rows are reproduced by this module to the three decimals they
+frequencies, and its $KB_\mathrm{F}$, $KB_\mathrm{Fmax}$ and
+$KB_\mathrm{FTm}$ rows are reproduced by this module to the three decimals they
 are printed with, ripple and all. Its $|v|_\mathrm{max}$ row is not, and
 cannot be: at 31,5 Hz it prints 1,000 where Formula (5) gives 0,995, and at
 315 Hz it prints 0,249 where Formula (5) gives 0,100, while the
-$KB_F$ row of the same column follows Formula (5) at both. The table
+$KB_\mathrm{F}$ row of the same column follows Formula (5) at both. The table
 contradicts itself rather than the formula, so [`KB_TEST_INDICATIONS`](/phonometry/reference/api/vibration/vibration-meter/#kb_test_indications)
 carries the rows that agree with it and the other row is left to
 `docs/ERRATA.md`.
@@ -772,9 +772,9 @@ What a meter displays for one record (5.1.6.1).
 | :--- | :--- |
 | `peak_velocity_mm_s` | $\vert v\vert _\mathrm{max}$, the largest absolute value of the band-limited velocity over the measuring time. |
 | `kbf` | The `KB_F(t)` signal, one value per sample. |
-| `kbf_max` | $KB_{F\mathrm{max}}$, its maximum. |
+| `kbf_max` | $KB_\mathrm{Fmax}$, its maximum. |
 | `takt_maxima` | The clock maxima, one per whole clock interval. |
-| `kbf_takt_rms` | $KB_{FTm}$ of Formula (2). |
+| `kbf_takt_rms` | $KB_\mathrm{FTm}$ of Formula (2). |
 | `fs_hz` | The sampling frequency the record was read at. |
 | `measuring_time_s` | $T_M$, the length of the record. |
 | `averaging_time_s` | $T_m$, the whole clock intervals in it. |

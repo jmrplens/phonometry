@@ -531,7 +531,10 @@ component, because that is how it is written: $\alpha_{\mathrm{s},i}$ is one
 abbreviation and one index, and the run inside a single wrapper
 ($L_\mathrm{n,w,eq}$) is upright throughout, also where it follows an index
 inside the same braces: $D_{I,\mathrm{n,e}}$ is an italic intensity and an
-upright n and e.
+upright n and e. A run of letters is one base: $TL_n$ is a transmission loss
+and $KB_\mathrm{F}$ a weighted vibration severity, not a level $L$ or a $B$
+carrying a subscript, so they are compared with themselves and never with
+$L_n$.
 
 It also reads the diagram plates each page embeds, from the committed SVG
 under `.github/images`: a plate keeps the source string of every label in a
@@ -539,8 +542,30 @@ comment and draws each glyph from a named face, so the slope a reader sees is
 recoverable without a font. A page and its plates are one scope, so a plate
 that draws $L_i$ sloped on a page that sets the impact level
 $L_\mathrm{i}$ upright fails here, and a Spanish page is held against the
-Spanish plate. After changing a plate, regenerate it
+Spanish plate. A subscript inside an exponent, the $i$ of
+$10^{L_i/10}$, is read against the symbol in the exponent it hangs from.
+After changing a plate, regenerate it
 (`python scripts/generate_diagrams.py`) before running the check.
+
+The matplotlib figures a page embeds are read the same way, from the same
+directory: mathtext sets a bare letter italic and a `\mathrm` run upright, so
+the slope is the source's own, and matplotlib keeps that source in a comment
+ahead of the glyphs of every text it draws. A figure that labels a curve
+$L_{K,x}$ on a page that writes $L_{\mathrm{K},x}$ fails here, and a Spanish
+page is held against the `_es` figure. After changing a label in
+`scripts/figures` or in `src/phonometry/_plot`, regenerate the figure
+(`python scripts/generate_graphs.py --figure NAME`) before running the check.
+
+One letter can keep its meaning under several bases, and then it takes one
+slope in a file whichever symbol carries it. DIN 4150-2 names its assessment
+quantities by the r of "Beurteilung": $KB_\mathrm{FTr}$, the guide value
+$A_\mathrm{r}$, the assessment time $T_\mathrm{r}$ and the clock count
+$N_\mathrm{r}$, all printed with the same upright r. Four symbols are four
+single-valued pairs even when one of them leans, so the checker holds the
+families listed in its `LINKED` table to one slope per file, and a page that
+sets $KB_\mathrm{FTr}$ beside an italic $A_r$ fails there. On a plate, where
+the composer keeps a bare r italic for the reflected path $r_r$, the label
+names the symbol in its `upright` key (`upright=("A_r",)`).
 
 It cannot check that the slope a file chose is the right one for its
 standard: that is a reading of a source document, and no script does it. It
@@ -550,7 +575,8 @@ does not. And it does not read the drawing modules (`src/phonometry/_plot`,
 `src/phonometry/_report`, `scripts/`), which are filed by domain rather than
 by standard: one plotting module holds the figures of a dozen of them, so the
 file is not the scope in which a letter has one meaning. The guide that embeds
-the figure is, and its snippets are read here, as are its plates.
+the figure is, and its snippets are read here, as are its plates and its
+figures.
 
 The other half of the same subject is the backslash, and it has its own gate:
 

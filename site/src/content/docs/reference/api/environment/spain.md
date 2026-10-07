@@ -24,9 +24,9 @@ and impulsive character. Each is 0, 3 or 6 dB and their sum is capped at 9 dB
   band levels. `Kt` is 0/3/6 dB by the thresholds 8/12 dB (20 to 125 Hz),
   5/8 dB (160 to 400 Hz) and 3/5 dB (500 Hz to 10 kHz); with several emergent
   tones the largest applies.
-* `Kf`: $L_f = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ (background-corrected),
+* `Kf`: $L_\mathrm{f} = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ (background-corrected),
   giving 0 dB for
-  $L_f \le 10$, 3 dB for $10 < L_f \le 15$ and 6 dB above.
+  $L_\mathrm{f} \le 10$, 3 dB for $10 < L_\mathrm{f} \le 15$ and 6 dB above.
 * `Ki`: $L_\mathrm{i} = L_{\mathrm{AIeq},Ti} - L_{\mathrm{Aeq},Ti}$ (background-corrected),
   with the same
   0/3/6 dB thresholds as `Kf`.
@@ -489,16 +489,16 @@ Low-frequency correction `Kf` (Annex IV A.3.3).
 
 From the C- and A-weighted equivalent levels of the same noise phase, both
 already corrected for background noise,
-$L_f = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ gives
-$K_\mathrm{f} = 0$ for $L_f \le 10$ dB, $K_\mathrm{f} = 3$ for
-$10 < L_f \le 15$ dB and
+$L_\mathrm{f} = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ gives
+$K_\mathrm{f} = 0$ for $L_\mathrm{f} \le 10$ dB, $K_\mathrm{f} = 3$ for
+$10 < L_\mathrm{f} \le 15$ dB and
 $K_\mathrm{f} = 6$ above.
 
 :::note
 The printed table reads "Si 10 >Lf \<=15" for the 3 dB row, a misprint
-for $10 < L_f \le 15$; the bracketing rows ($L_f \le 10$
+for $10 < L_\mathrm{f} \le 15$; the bracketing rows ($L_\mathrm{f} \le 10$
 and
-$L_f > 15$) leave no other consistent reading. See
+$L_\mathrm{f} > 15$) leave no other consistent reading. See
 `docs/ERRATA.md`.
 :::
 

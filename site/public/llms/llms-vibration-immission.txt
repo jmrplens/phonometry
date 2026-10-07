@@ -1173,7 +1173,7 @@ fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
 for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
     values = [vibration.guide_values(a, time_of_day=time_of_day) for a in areas]
     ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label=r"$A_\mathrm{u}$")
-    ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label="$A_r$")
+    ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label=r"$A_\mathrm{r}$")
     ax.plot(x, [v.a_o for v in values], "v", label=r"$A_\mathrm{o}$")
     ax.set_yscale("log")
     ax.set_xticks(x, areas)
@@ -1356,12 +1356,14 @@ from phonometry import vibration
 trains = np.geomspace(0.5, 100.0, 200)
 fig, ax = plt.subplots(figsize=(10, 6.2))
 for a_r in (0.2, 0.15, 0.1, 0.07, 0.05):
-    ax.loglog(trains, a_r * np.sqrt(120.0 / trains), label=f"$A_r$ = {a_r:g}")
+    ax.loglog(
+        trains, a_r * np.sqrt(120.0 / trains), label=rf"$A_\mathrm{{r}}$ = {a_r:g}"
+    )
 for a_r in (0.05, 0.07):
     n = vibration.admissible_trains_per_hour(0.2, a_r)
     ax.plot([n], [0.2], "o")
 ax.set_xlabel("Trains an hour")
-ax.set_ylabel("$KB_{FTm}$")
+ax.set_ylabel(r"$KB_\mathrm{FTm}$")
 ax.legend()
 ```
 

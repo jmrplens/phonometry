@@ -525,12 +525,12 @@ Neither $L_W$ nor $N$ survives. A busier room is not intrinsically worse,
 because each new table brings both a talker and its own share of absorption.
 What decides whether a restaurant works is the absorption **per table**, not
 the absorption of the room. Requiring $L_\mathrm{SN} > -6$ dB for adequate
-cross-table communication at a separation $r_s$, and $L_\mathrm{SN} < -9$ dB so a
-neighbouring table $r_t$ away is not overheard, turns into a pair of design
+cross-table communication at a separation $r_\mathrm{s}$, and $L_\mathrm{SN} < -9$ dB so a
+neighbouring table $r_\mathrm{t}$ away is not overheard, turns into a pair of design
 bounds (Eqs. (17.53) and (17.54)):
 
 $$
-A_\text{tab} > 6.31\,r_s^2, \qquad A_\text{tab} < 3.16\,r_t^2 \qquad (Q = 2).
+A_\text{tab} > 6.31\,r_\mathrm{s}^2, \qquad A_\text{tab} < 3.16\,r_\mathrm{t}^2 \qquad (Q = 2).
 $$
 
 :::caution
@@ -557,17 +557,17 @@ crowd.plot()      # self-noise vs occupancy, against the -6 dB limit
 ```
 
 The two bounds are a **window**, and it can be empty. Requiring
-$6.31\,r_s^2 < A_\text{tab} < 3.16\,r_t^2$ means the window exists only when
-$r_t/r_s > \sqrt{6.31/3.16} \approx 1.41$: pack the tables closer than that and
+$6.31\,r_\mathrm{s}^2 < A_\text{tab} < 3.16\,r_\mathrm{t}^2$ means the window exists only when
+$r_\mathrm{t}/r_\mathrm{s} > \sqrt{6.31/3.16} \approx 1.41$: pack the tables closer than that and
 there is no absorption at all that lets you converse across your own table
 without being overheard at the next one. The layout above passes, with
-$r_t/r_s = 1.67$ and 3.6 m² of room between the bounds.
+$r_\mathrm{t}/r_\mathrm{s} = 1.67$ and 3.6 m² of room between the bounds.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_per_table.svg" alt="Two panels. On the left, absorption per occupied table against separation, with the communication bound 6.31 r squared rising above the privacy bound 3.16 r squared, the two worked points at 1 metre and 2.5 metres marked, and the feasible band from 9.1 to 12.7 square metres shaded for a layout with 1.2 metres across the table and 2.0 metres between tables. On the right, the width of that feasible window against the ratio of table spacing to cross-table separation, crossing zero at 1.41 and reaching 3.6 square metres at the ratio 1.67 of this layout" width="94%" />
 
 *Left: for one layout the two inequalities leave a band of feasible absorption
 per table. Right: how wide that band is as the tables move apart, below
-$r_t/r_s = 1.41$ it has negative width, which is the geometric statement that
+$r_\mathrm{t}/r_\mathrm{s} = 1.41$ it has negative width, which is the geometric statement that
 conversation and privacy have become incompatible whatever the ceiling is made
 of.*
 

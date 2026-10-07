@@ -24,12 +24,12 @@ falls back to it. $T_3$ is the whole event, and it is the one an event
 value is formed over. Every quantity below carries the index of the stretch it
 came from.
 
-**The quantities** (Clause 6). The running r.m.s. $\tilde v_F(t)$ with
+**The quantities** (Clause 6). The running r.m.s. $\tilde v_\mathrm{F}(t)$ with
 $\tau = 125$ ms (Formula (1)) and its level against
 $v_0 = 5 \cdot 10^{-8}$ m/s (Formula (2)); the interval r.m.s.
 $\tilde v_j$ of Formula (4), or the approximation of Formula (5) formed
 from the running r.m.s.; and the **event value** of Formula (8), the interval
-r.m.s. of $T_3$ referred to one hour, $v_E = \tilde v_3 \sqrt{T_3/3600\,\mathrm{s}}$, whose square adds across the passages of an hour
+r.m.s. of $T_3$ referred to one hour, $v_\mathrm{E} = \tilde v_3 \sqrt{T_3/3600\,\mathrm{s}}$, whose square adds across the passages of an hour
 (Formula (10)). The same quantities in third-octave bands from 4 Hz to 315 Hz
 give the interval and maximum third-octave levels of Formulae (6) and (7).
 
@@ -106,7 +106,7 @@ band_sum_level(levels_db: ArrayLike) -> float
 
 The sum level $\Sigma L$ of a spectrum, Annex B, Formula (B.3).
 
-$10 \lg \sum 10^{0,1 L(f_{Tn})}$, the energy sum of the bands.
+$10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 
 **Parameters**
 
@@ -165,7 +165,7 @@ combined_event_velocity(event_velocities_mm_s: ArrayLike) -> float
 The event value of every passage in one hour, Formula (10), in mm/s.
 
 Event values add in square, because each is already the energy of its
-passage spread over the same hour: $v_{E,\mathrm{ges}} = \sqrt{\sum v_{En}^2}$.
+passage spread over the same hour: $v_{\mathrm{E\,ges}} = \sqrt{\sum v_{\mathrm{E}n}^2}$.
 
 **Parameters**
 
@@ -173,7 +173,7 @@ passage spread over the same hour: $v_{E,\mathrm{ges}} = \sqrt{\sum v_{En}^2}$.
 | :--- | :--- |
 | `event_velocities_mm_s` | The event values of the passages, in millimetres per second. |
 
-**Returns:** $v_{E,\mathrm{ges}}$, in millimetres per second.
+**Returns:** $v_{\mathrm{E\,ges}}$, in millimetres per second.
 
 **Raises**
 
@@ -190,7 +190,7 @@ elastic_insertion_loss(
 ) -> NDArray[np.float64]
 ```
 
-The insertion loss $D_e(f_{Tn})$ of Annex B, Formula (B.1), in dB.
+The insertion loss $D_\mathrm{e}(f_{\mathrm{T}n})$ of Annex B, Formula (B.1), in dB.
 
 The drop in the third-octave structure-borne level at one point of a
 transmission path when an elastic element is built in. Annex B says it and
@@ -268,20 +268,20 @@ EVENT_REFERENCE_DURATION_S = 3600.0
 event_velocity(interval_rms_mm_s: float, duration_s: float) -> float
 ```
 
-The event value $v_E$ of Formula (8), in mm/s.
+The event value $v_\mathrm{E}$ of Formula (8), in mm/s.
 
 The interval r.m.s. of the whole event referred to one hour,
-$v_E = \tilde v_3 \sqrt{T_3 / 3600\,\mathrm{s}}$: the constant
+$v_\mathrm{E} = \tilde v_3 \sqrt{T_3 / 3600\,\mathrm{s}}$: the constant
 velocity that, held for an hour, carries the energy the passage carried.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `interval_rms_mm_s` | $\tilde v_3$, in millimetres per second. Clause 6.2 allows $\tilde v_{F3}$ of Formula (5) in its place. |
+| `interval_rms_mm_s` | $\tilde v_3$, in millimetres per second. Clause 6.2 allows $\tilde v_{\mathrm{F}3}$ of Formula (5) in its place. |
 | `duration_s` | $T_3$, in seconds. |
 
-**Returns:** $v_E$, in millimetres per second.
+**Returns:** $v_\mathrm{E}$, in millimetres per second.
 
 **Raises**
 
@@ -295,7 +295,7 @@ velocity that, held for an hour, carries the energy the passage carried.
 event_velocity_level(interval_rms_mm_s: float, duration_s: float) -> float
 ```
 
-The event level $L_{vE}$ of Formula (9), in dB.
+The event level $L_{v\mathrm{E}}$ of Formula (9), in dB.
 
 $20 \lg(\tilde v_3 / v_0) + 10 \lg(T_3 / 3600\,\mathrm{s})$, which
 is [`event_velocity`](/phonometry/reference/api/vibration/railway/#event_velocity) as a level against
@@ -308,7 +308,7 @@ is [`event_velocity`](/phonometry/reference/api/vibration/railway/#event_velocit
 | `interval_rms_mm_s` | $\tilde v_3$, in millimetres per second, positive. |
 | `duration_s` | $T_3$, in seconds. |
 
-**Returns:** $L_{vE}$, in decibels.
+**Returns:** $L_{v\mathrm{E}}$, in decibels.
 
 **Raises**
 
@@ -529,7 +529,7 @@ running_velocity_level(
 ) -> NDArray[np.float64]
 ```
 
-The running velocity level $L_{vF}(t)$ of Formula (2), in dB.
+The running velocity level $L_{v\mathrm{F}}(t)$ of Formula (2), in dB.
 
 **Parameters**
 
@@ -539,7 +539,7 @@ The running velocity level $L_{vF}(t)$ of Formula (2), in dB.
 | `fs_hz` | Sampling frequency, in hertz. |
 | `time_constant_s` | See [`running_velocity_rms`](/phonometry/reference/api/vibration/railway/#running_velocity_rms). |
 
-**Returns:** $20 \lg(\tilde v_F / v_0)$ with $v_0$ = [`VELOCITY_LEVEL_REFERENCE_MM_S`](/phonometry/reference/api/vibration/railway/#velocity_level_reference_mm_s), one value per sample. A sample whose running r.m.s. is still exactly zero, before the first nonzero sample, is `-inf`.
+**Returns:** $20 \lg(\tilde v_\mathrm{F} / v_0)$ with $v_0$ = [`VELOCITY_LEVEL_REFERENCE_MM_S`](/phonometry/reference/api/vibration/railway/#velocity_level_reference_mm_s), one value per sample. A sample whose running r.m.s. is still exactly zero, before the first nonzero sample, is `-inf`.
 
 **Raises**
 
@@ -558,7 +558,7 @@ running_velocity_rms(
 ) -> NDArray[np.float64]
 ```
 
-The running r.m.s. $\tilde v_F(t)$ of Formula (1), in mm/s.
+The running r.m.s. $\tilde v_\mathrm{F}(t)$ of Formula (1), in mm/s.
 
 The exponential average the formula integrates, started from rest. Clause
 4 says what that costs at the start of a record and so why the averaging
@@ -575,7 +575,7 @@ which is what Figure 3 draws, is 7 % and 0,9 % short.
 | `fs_hz` | Sampling frequency, in hertz. |
 | `time_constant_s` | The time constant, in seconds (default 0,125 s, "Fast"). |
 
-**Returns:** $\tilde v_F(t)$, one value per sample, in mm/s.
+**Returns:** $\tilde v_\mathrm{F}(t)$, one value per sample, in mm/s.
 
 **Raises**
 
@@ -696,17 +696,17 @@ One passage reduced the way Clauses 5 to 7 reduce it.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity the meter's railway band limitation leaves, one value per sample. |
-| `running_rms_mm_s` | $\tilde v_F(t)$ of it. |
+| `running_rms_mm_s` | $\tilde v_\mathrm{F}(t)$ of it. |
 | `peak_velocity_mm_s` | $v_\mathrm{max}$, the largest absolute velocity of the passage (Clause 6.3). |
-| `running_rms_max_mm_s` | $\tilde v_{F\mathrm{max}}$, the maximum of the running r.m.s. |
-| `kbf_max` | $KB_{F\mathrm{max}}$, the maximum of the weighted severity of DIN 45669-1 over the same stretch, which DIN 4150-2 reads. |
+| `running_rms_max_mm_s` | $\tilde v_\mathrm{Fmax}$, the maximum of the running r.m.s. |
+| `kbf_max` | $KB_\mathrm{Fmax}$, the maximum of the weighted severity of DIN 45669-1 over the same stretch, which DIN 4150-2 reads. |
 | `interval_rms_mm_s` | $\tilde v_1$, $\tilde v_2$ and $\tilde v_3$ of Formula (4), in that order. |
 | `intervals_s` | The three stretches `(start, end)`, in seconds. |
-| `event_velocity_mm_s` | $v_E$ of Formula (8), from $T_3$. |
-| `event_level_db` | $L_{vE}$ of Formula (9). |
+| `event_velocity_mm_s` | $v_\mathrm{E}$ of Formula (8), from $T_3$. |
+| `event_level_db` | $L_{v\mathrm{E}}$ of Formula (9). |
 | `band_centres_hz` | The nominal third-octave centres analysed. |
-| `band_interval_levels_db` | $L_{vFj}(f_{Tn})$ of Formula (6), one row per stretch, $T_1$ to $T_3$. |
-| `band_max_levels_db` | $L_{vF\mathrm{max}}(f_{Tn})$ of Formula (7), over $T_3$. |
+| `band_interval_levels_db` | $L_{v\mathrm{F}j}(f_{\mathrm{T}n})$ of Formula (6), one row per stretch, $T_1$ to $T_3$. |
+| `band_max_levels_db` | $L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})$ of Formula (7), over $T_3$. |
 | `fs_hz` | The sampling frequency of the record. |
 
 ### TrainPassage.plot()

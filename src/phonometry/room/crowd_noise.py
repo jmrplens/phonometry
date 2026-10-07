@@ -38,11 +38,11 @@ a distance ``rt`` apart, turns into a pair of design bounds
 
 .. math::
 
-   A_{\text{tab}} > 16 \pi\, 10^{-0.6}\, r_s^2 / Q
-   \approx 6.31\, r_s^2 \quad (Q = 2)
+   A_{\text{tab}} > 16 \pi\, 10^{-0.6}\, r_\mathrm{s}^2 / Q
+   \approx 6.31\, r_\mathrm{s}^2 \quad (Q = 2)
 
-   A_{\text{tab}} < 16 \pi\, 10^{-0.9}\, r_t^2 / Q
-   \approx 3.16\, r_t^2 \quad (Q = 2)
+   A_{\text{tab}} < 16 \pi\, 10^{-0.9}\, r_\mathrm{t}^2 / Q
+   \approx 3.16\, r_\mathrm{t}^2 \quad (Q = 2)
 
 .. note::
    Long prints the first constant as ``6.33``; the closed form with the same

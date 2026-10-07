@@ -70,9 +70,9 @@ anything at all.
 Everything downstream depends on the force the standard tapping machine
 actually injects, and that force is not a property of the machine alone. Each
 hammer is a 0.5 kg mass dropped 40 mm, so it lands at
-$v_\text{h} = \sqrt{2gh} = 0.886\ \text{m/s}$, ten times a second. If the impact were
+$v_0 = \sqrt{2gh} = 0.886\ \text{m/s}$, ten times a second. If the impact were
 short compared with the 0.1 s between impacts, the momentum alone would fix
-the force, giving the line spectrum $|F_n| = 2 m v_\text{h} / T_i$ and the band
+the force, giving the line spectrum $|F_n| = 2 m v_0 / T_\mathrm{i}$ and the band
 mean-square force $F_\mathrm{rms}^2 = 3.9 B$ that ISO 10140 measurements on
 concrete are usually reduced with.
 
@@ -82,10 +82,10 @@ mass-spring-dashpot whose pulse splits into two cases:
 
 - **over-critical**, $K m \ge 4 Z_\mathrm{dp}^2$: a single positive pulse, no
   rebound. This is a lightweight walking surface (chipboard, OSB), where the
-  spectrum tends to $|F_n|_\text{lower} = m v_\text{h}/T_i$;
+  spectrum tends to $|F_n|_\text{lower} = m v_0/T_\mathrm{i}$;
 - **under-critical**, $K m < 4 Z_\mathrm{dp}^2$: the hammer rebounds and only the
   first positive lobe counts. This is a concrete slab or a screed, where the
-  spectrum sits within 1 dB of $|F_n|_\text{upper} = 2 m v_\text{h}/T_i$ below 4 kHz
+  spectrum sits within 1 dB of $|F_n|_\text{upper} = 2 m v_0/T_\mathrm{i}$ below 4 kHz
   and the short-pulse estimate is adequate.
 
 The two limits are 6 dB apart in mean square, which is the whole reason a
@@ -127,12 +127,12 @@ res.plot()                   # the force spectrum with both asymptotes
 
 *The same machine, two floors. On concrete the hammer rebounds
 (**under-critical**) and the spectrum hugs the upper asymptote
-$|F_n|_\text{upper} = 2mv_\text{h}/T_i$ to within 1 dB right across the building
+$|F_n|_\text{upper} = 2mv_0/T_\mathrm{i}$ to within 1 dB right across the building
 acoustics range, its cut-off sitting at 6 948 Hz and its hammer limiting
 frequency at 120 kHz, both far outside anything that is rated. On 22 mmchipboard the surface gives way, the hammer does not rebound
 (**over-critical**), and both frequencies collapse into the middle of the range:
 $f_\mathrm{co}$ = 589 Hz and $f_\mathrm{limit}$ = 555 Hz, so the spectrum bends
-towards the lower asymptote $mv_\text{h}/T_i$ where a rated band actually sits.
+towards the lower asymptote $mv_0/T_\mathrm{i}$ where a rated band actually sits.
 The two asymptotes are 6.0 dB apart in mean square, and that gap is the whole
 reason a tapping-machine level measured on a timber floor cannot be compared with
 one measured on concrete: the machine is injecting a different force.*

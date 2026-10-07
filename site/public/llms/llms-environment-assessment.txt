@@ -727,7 +727,7 @@ derives from an A-weighted level, the regulation expresses it in dB.
 | Correction | Input quantity | Thresholds | Function |
 | :--- | :--- | :--- | :--- |
 | $K_\mathrm{t}$, emergent tonal components | **Unweighted** one-third-octave spectrum; $L_\mathrm{t} = L_f - L_s$, with $L_s$ the **arithmetic** mean of the two adjacent bands | 8/12 dB (20 to 125 Hz), 5/8 dB (160 to 400 Hz), 3/5 dB (500 Hz to 10 kHz) | `tonal_correction()` |
-| $K_\mathrm{f}$, low-frequency components | $L_f = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ | 0 dB up to 10 dB, 3 dB for $10 < L_f \le 15$, 6 dB above | `low_frequency_correction()` |
+| $K_\mathrm{f}$, low-frequency components | $L_\mathrm{f} = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ | 0 dB up to 10 dB, 3 dB for $10 < L_\mathrm{f} \le 15$, 6 dB above | `low_frequency_correction()` |
 | $K_\mathrm{i}$, impulsive components | $L_\mathrm{i} = L_{\mathrm{AIeq},Ti} - L_{\mathrm{Aeq},Ti}$ | the same 10 and 15 dB | `impulsive_correction()` |
 
 $K_\mathrm{t}$ is evaluated band by band and, when several emergent tones are present,

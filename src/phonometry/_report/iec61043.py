@@ -248,7 +248,7 @@ def _basis_strip(
     """
     device = _device_phrase(result.device, language)
     return t(
-        "Pressure-residual intensity index &#948;<sub>pI0</sub> = L<sub>p</sub> "
+        "Pressure-residual intensity index &#948;<sub><i>pI</i>0</sub> = L<sub>p</sub> "
         "&#8722; L<sub>I,res</sub> with identical pink-noise signals on both "
         "channels, for an air density of 1.2048 kg/m<super>3</super> "
         "(IEC 61043:1993, 3.11). Judged against the Table 2 minima for a "

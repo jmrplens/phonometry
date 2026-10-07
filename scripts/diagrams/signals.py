@@ -558,20 +558,19 @@ def _d_time_weighting(s: SVG, th: Theme) -> None:
             s.arrow(x + bw + 1, y + bh / 2, x + bw + gap - 2, y + bh / 2, th.fg, 2)
         x += bw + gap
 
-    # Discrete realization of the detector. Parked: the exponent of
-    # α = 1 − e^(−1/(fs·τ)) carries a subscript inside the superscript,
-    # one script level more than the composer sets, so the whole line
-    # stays plain until that family is adjudicated.
+    # Discrete realization of the detector, as the guide writes it. The
+    # exponential is written exp(): ISO 80000-2:2019, Table 9 (items 2-13.1
+    # and 2-13.3), prints the e of the natural exponential upright, and the
+    # composer sets any single baseline letter in math italic.
     s.rect(130, 246, 640, 70, th.panel, th.muted, rx=10, sw=1.6)
     s.text(
         450,
         275,
-        "y[n] = α·x²[n] + (1 − α)·y[n−1],   α = 1 − e^(−1/(fs·τ))",
+        "$y[n] = α·x²[n] + (1 − α)·y[n − 1]$,   $α = 1 − exp(−1/(f_s·τ))$",
         15,
         th.fg,
         "middle",
         bold=True,
-        mono=True,
     )
     s.text(
         450,
@@ -2696,10 +2695,9 @@ def _d_calibration_dataflow(s: SVG, th: Theme) -> None:
         bold=True,
         mono=True,
     )
-    # Parked: the 10^(L_cal / 20) exponent carries a subscript inside
-    # the superscript, one script level more than the composer sets, so
-    # the formula stays plain until that family is adjudicated.
-    s.text(220, 222, "S = p_ref · 10^(L_cal / 20) / x̃_ref", 14, th.fg)
+    # The calibration level sits in the exponent, a subscript of a
+    # superscript, as the guide writes it.
+    s.text(220, 222, "$S = p_{ref}·10^{L_{cal}/20}/x̃_{ref}$", 14, th.fg)
     s.text(220, 244, "fs enables the IEC 60942 stability check", 12, th.muted)
 
     # --- The factor itself --------------------------------------------------

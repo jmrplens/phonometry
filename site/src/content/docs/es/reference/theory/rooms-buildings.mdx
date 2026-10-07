@@ -232,7 +232,7 @@ de un significado entre ellas:
 | $C$ | Claridad, dB (con subíndice 50 u 80) | parámetros de ISO 3382-1 |
 | $C$ | Curvatura del decaimiento, % | validez de ISO 3382-2 |
 | $C$, $C_\mathrm{tr}$ | Términos de adaptación espectral, dB | índices de ISO 717 |
-| $T$ | Tiempo de reverberación, s ($T_\mathrm{s}$ es el tiempo central) | en toda la página |
+| $T$ | Tiempo de reverberación, s ($T_\mathrm{S}$ es el tiempo central) | en toda la página |
 
 ## Criterios de ruido de salas (ANSI S12.2)
 
@@ -364,7 +364,7 @@ $$
 C_{te} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0{,}05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-con $t_\mathrm{e} = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_\mathrm{s} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ y $T_\mathrm{s} = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms, los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
+con $t_\mathrm{e} = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ y $T_\mathrm{S} = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms, los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands.svg" alt="Parámetros por banda de ISO 3382 de una respuesta al impulso de sala sintética: barras agrupadas de EDT, T20 y T30 por banda de octava que caen desde unos 1,4 s a 125 Hz hasta 0,7 s a 4 kHz, sobre un segundo panel donde C50 y C80 crecen con la frecuencia" width="92%" />
 
@@ -378,10 +378,10 @@ más tardía es la energía, mayor parte de ella ha eliminado ya la sala.*
 
 ### Decaimiento espacial en oficinas diáfanas (ISO 3382-3, apartado 6)
 
-La tasa de decaimiento espacial del habla ponderada A es la pendiente por mínimos cuadrados ordinarios de $L_{p,A,S}$ frente a $\log_{10}(r/r_0)$ ($r_0 = 1$ m) sobre las posiciones de 2–16 m, reescalada a una cifra por duplicación, y el nivel nominal se lee en la misma recta a 4 m:
+La tasa de decaimiento espacial del habla ponderada A es la pendiente por mínimos cuadrados ordinarios de $L_{p,\mathrm{A,S}}$ frente a $\log_{10}(r/r_0)$ ($r_0 = 1$ m) sobre las posiciones de 2–16 m, reescalada a una cifra por duplicación, y el nivel nominal se lee en la misma recta a 4 m:
 
 $$
-L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,A,S,4\text{m}} = a + b\ \log_{10}(4/r_0).
+L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,\mathrm{A,S},4\,\mathrm{m}} = a + b\ \log_{10}(4/r_0).
 $$
 
 La distancia de distracción rD y la distancia de privacidad rP son las
@@ -397,7 +397,7 @@ de que «puede resultar imposible de determinar».
 *Dos regresiones sobre dos ejes distintos, que es lo que hace difícil de
 retener este apartado. La recta de nivel se ajusta frente a
 $\log_{10}(r/r_0)$ y se lee dos veces: como la pendiente $D_{2,\mathrm{S}}$ por
-duplicación y en $r = 4$ m para $L_{p,A,S,4\text{m}}$. La recta del STI se
+duplicación y en $r = 4$ m para $L_{p,\mathrm{A,S},4\,\mathrm{m}}$. La recta del STI se
 ajusta frente a $r$ mismo, de forma **lineal**, y se lee donde cruza 0,50 y
 0,20 para las distancias de distracción y de privacidad. Si ese segundo ajuste
 sale plano o creciente, las dos distancias no existen, no es que sean grandes.*
@@ -586,7 +586,7 @@ flanco, así que un recinto con cuatro elementos de flanco suma trece
 trayectorias.*
 
 $$
-R'_w = -10 \log_{10}\Big[ 10^{-R_\mathrm{Dd,w}/10}
+R'_\mathrm{w} = -10 \log_{10}\Big[ 10^{-R_\mathrm{Dd,w}/10}
        + \sum 10^{-R_\mathrm{Ff,w}/10} + \sum 10^{-R_\mathrm{Df,w}/10}
        + \sum 10^{-R_\mathrm{Fd,w}/10} \Big].
 $$
@@ -615,7 +615,7 @@ $\max(a,b) + \min(a,b)/2$ (Fórmulas 30/31). La contrapartida a impactos
 $L'_{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, con el nivel equivalente del suelo
 desnudo $L_\mathrm{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Anexo B), la mejora del
 revestimiento $\Delta L_\mathrm{w}$ (ISO 717-2) y la corrección por flancos $K$ de la
-Tabla 1. Los ejemplos resueltos del Anexo H.3 de EN 12354-1 ($R'_w = 52$ dB) y del
+Tabla 1. Los ejemplos resueltos del Anexo H.3 de EN 12354-1 ($R'_\mathrm{w} = 52$ dB) y del
 Anexo E.3 de EN 12354-2 ($L'_{n,w} = 45$ dB) se reproducen exactamente.
 
 **Dónde se aplica el modelo simplificado.** Supone elementos homogéneos cuya

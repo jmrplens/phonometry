@@ -150,27 +150,35 @@ _DECAY_DESIGN_LABEL = "closed-form decay"
 #: key its translation is filed under cannot drift apart.
 _TIME_LABEL = "Time [s]"
 _KB_SEVERITY = "Weighted vibration severity"
-_KBF_LABEL = f"{_KB_SEVERITY} $KB_F$"
-_KBF_MAX_LABEL = r"$KB_{{F\mathrm{{max}}}}$ = {value}"
-_KBFTM_LABEL = r"$KB_{{FTm}}$ = {value}"
+_KBF_LABEL = rf"{_KB_SEVERITY} $KB_\mathrm{{F}}$"
+_KBF_MAX_LABEL = r"$KB_\mathrm{{Fmax}}$ = {value}"
+_KBFTM_LABEL = r"$KB_\mathrm{{FTm}}$ = {value}"
 #: The DIN 45672-2 passage figures: the running r.m.s. of Formula (1), its
-#: maximum, and the two third-octave spectra of Figure 6.
-_RUNNING_RMS_LABEL = r"running r.m.s. $\tilde v_F(t)$"
-_RUNNING_MAX_LABEL = r"$\tilde v_{{F\mathrm{{max}}}}$ = {value} mm/s"
+#: maximum, and the two third-octave spectra of Figure 6. DIN 45672-2:1995-07,
+#: 6.1 and 6.2, prints the F of "FAST", its max and the E of the event value
+#: upright.
+_RUNNING_RMS_LABEL = r"running r.m.s. $\tilde v_\mathrm{F}(t)$"
+_RUNNING_MAX_LABEL = r"$\tilde v_\mathrm{{Fmax}}$ = {value} mm/s"
+_PASSAGE_TITLE = r"Train passage by DIN 45672-2: $v_\mathrm{{E}}$ = {value} mm/s"
 _BAND_LEVEL_LABEL = "Velocity level [dB re 5·10⁻⁸ m/s]"
-_INTERVAL_LEVEL_LABEL = r"interval level $L_{vF2}$"
-_MAX_LEVEL_LABEL = r"maximum level $L_{vF\mathrm{max}}$"
+_INTERVAL_LEVEL_LABEL = r"interval level $L_{v\mathrm{F}2}$"
+_MAX_LEVEL_LABEL = r"maximum level $L_{v\mathrm{Fmax}}$"
 _EMISSION_LABEL = r"emission $L_{v,\mathrm{E}}$"
 _FLOOR_LABEL = r"floor $L_v$"
 _WEIGHTED_LABEL = r"KB-weighted $L_{v,KB}$"
 #: Where the brackets of T_1, T_2 and T_3 sit, as fractions of the axes height.
 _BRACKET_ROWS = (0.93, 0.855, 0.78)
 #: The DIN 4150-2 verdict figure: the two assessment quantities and the three
-#: guide values they are read against. DIN 4150-2:1999-06, 6.2, prints the u
-#: of "unterer" and the o of "oberer" upright, and the r of A_r italic.
-_KB_FMAX_LABEL = r"$KB_{F\mathrm{max}}$"
-_KB_FTR_LABEL = r"$KB_{FTr}$"
-_GUIDE_LABELS = {"a_u": r"$A_\mathrm{u}$", "a_o": r"$A_\mathrm{o}$", "a_r": "$A_r$"}
+#: guide values they are read against. DIN 4150-2:1999-06, 6.2 and Table 1,
+#: prints the u of "unterer", the o of "oberer" and the r of "Beurteilung"
+#: upright, the r as it is in KB_FTr and T_r.
+_KB_FMAX_LABEL = r"$KB_\mathrm{Fmax}$"
+_KB_FTR_LABEL = r"$KB_\mathrm{FTr}$"
+_GUIDE_LABELS = {
+    "a_u": r"$A_\mathrm{u}$",
+    "a_o": r"$A_\mathrm{o}$",
+    "a_r": r"$A_\mathrm{r}$",
+}
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
@@ -390,7 +398,7 @@ _STRINGS: dict[str, str] = {
     "{weighting} response against DIN 45669-1: {verdict}": "Respuesta {weighting} frente a DIN 45669-1: {verdict}",
     "KB": "KB",
     "unweighted": "sin ponderar",
-    _KBF_LABEL: "Intensidad de vibración ponderada $KB_F$",
+    _KBF_LABEL: r"Intensidad de vibración ponderada $KB_\mathrm{F}$",
     _KBF_MAX_LABEL: _KBF_MAX_LABEL,
     _KBFTM_LABEL: _KBFTM_LABEL,
     "clock maximum": "máximo por intervalo",
@@ -403,13 +411,13 @@ _STRINGS: dict[str, str] = {
     "Short-term vibration by DIN 45669-1 Annex E ({cls}): {verdict}": "Vibración de corta duración según DIN 45669-1, anexo E ({cls}): {verdict}",
     # Railway vibration evaluation (DIN 45672-2 Figures 2, 4 and 6).
     "velocity $v(t)$": "velocidad $v(t)$",
-    _RUNNING_RMS_LABEL: r"valor eficaz móvil $\tilde v_F(t)$",
+    _RUNNING_RMS_LABEL: r"valor eficaz móvil $\tilde v_\mathrm{F}(t)$",
     _RUNNING_MAX_LABEL: _RUNNING_MAX_LABEL,
     "Velocity [mm/s]": "Velocidad [mm/s]",
-    "Train passage by DIN 45672-2: $v_E$ = {value} mm/s": "Paso de tren según DIN 45672-2: $v_E$ = {value} mm/s",
+    _PASSAGE_TITLE: r"Paso de tren según DIN 45672-2: $v_\mathrm{{E}}$ = {value} mm/s",
     _BAND_LEVEL_LABEL: "Nivel de velocidad [dB re 5·10⁻⁸ m/s]",
-    _INTERVAL_LEVEL_LABEL: r"nivel de intervalo $L_{vF2}$",
-    _MAX_LEVEL_LABEL: r"nivel máximo $L_{vF\mathrm{max}}$",
+    _INTERVAL_LEVEL_LABEL: r"nivel de intervalo $L_{v\mathrm{F}2}$",
+    _MAX_LEVEL_LABEL: r"nivel máximo $L_{v\mathrm{Fmax}}$",
     "Third-octave spectra of one passage (DIN 45672-2)": "Espectros en tercios de octava de un paso (DIN 45672-2)",
     # People in buildings (DIN 4150-2 Clause 6.2).
     _KB_SEVERITY: "Intensidad de vibración ponderada",
@@ -426,7 +434,7 @@ _STRINGS: dict[str, str] = {
     _EMISSION_LABEL: r"emisión $L_{v,\mathrm{E}}$",
     _FLOOR_LABEL: r"forjado $L_v$",
     _WEIGHTED_LABEL: r"ponderado KB $L_{v,KB}$",
-    "Predicted spectrum on the floor (E DIN 45672-3): $KB_{{FTm}}$ = {kb}": "Espectro previsto en el forjado (E DIN 45672-3): $KB_{{FTm}}$ = {kb}",
+    r"Predicted spectrum on the floor (E DIN 45672-3): $KB_\mathrm{{FTm}}$ = {kb}": r"Espectro previsto en el forjado (E DIN 45672-3): $KB_\mathrm{{FTm}}$ = {kb}",
     # Resilient elements (ISO 10846-2 to -5): band average, adequacy checks,
     # effective blocking mass, driving-point method and its uncertainty.
     _BAND_AVERAGE_LABEL: r"media en banda $L_{k,\mathrm{av}}$",
@@ -3065,7 +3073,7 @@ def plot_train_passage(
     ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t("Velocity [mm/s]", language))
     ax.set_title(
-        _t("Train passage by DIN 45672-2: $v_E$ = {value} mm/s", language).format(
+        _t(_PASSAGE_TITLE, language).format(
             value=format_number(
                 result.event_velocity_mm_s, language, decimals=4, trim=True
             )
@@ -3202,11 +3210,11 @@ def plot_train_category_prediction(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The emission spectrum, the predicted floor spectrum and the KB-weighted bands.
+    r"""The emission spectrum, the predicted floor spectrum and the KB-weighted bands.
 
     Formula (1) band by band, from the emission the prediction started
     from to the level on the floor, and the bands from 4 Hz to 80 Hz after
-    the Table 2 weighting that Formula (9) sums into :math:`KB_{FTm,Zug}`.
+    the Table 2 weighting that Formula (9) sums into :math:`KB_\mathrm{FTm,Zug}`.
 
     :param result: A
         :class:`~phonometry.vibration.immission.railway_prediction.TrainCategoryPrediction`.
@@ -3249,7 +3257,7 @@ def plot_train_category_prediction(
     ax.set_ylabel(_t(_BAND_LEVEL_LABEL, language))
     ax.set_title(
         _t(
-            "Predicted spectrum on the floor (E DIN 45672-3): $KB_{{FTm}}$ = {kb}",
+            r"Predicted spectrum on the floor (E DIN 45672-3): $KB_\mathrm{{FTm}}$ = {kb}",
             language,
         ).format(kb=format_number(result.kb_ftm, language, decimals=2))
     )

@@ -536,7 +536,7 @@ D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt},
 $$
 
 with $te = 50$ ms → C50 (speech) and $te = 80$ ms → C80 (music), plus the
-**centre time** $T_\mathrm{s} = \int t\ p^2\ dt / \int p^2\ dt$. Each parameter has a
+**centre time** $T_\mathrm{S} = \int t\ p^2\ dt / \int p^2\ dt$. Each parameter has a
 **just-noticeable difference** (ISO 3382-1 Table A.1: EDT 5 %, C80 1 dB,
 D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
@@ -751,7 +751,7 @@ room-acoustics measurement report (a performance space per ISO 3382-1:2009 or
 an ordinary room per ISO 3382-2:2008, both evaluated by the integrated
 impulse-response method): a standard-basis line, an optional metadata header
 block, the full-width per-band parameter table ($T_{20}$, $T_{30}$, EDT,
-$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band
+$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{S}$) above the result's own per-band
 decay-time plot (`.plot()`), the boxed mid-frequency reverberation time
 $T_\text{mid}$ (the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the
 mid-frequency EDT alongside, and a footer with the fixed disclaimer. ISO
@@ -1170,13 +1170,13 @@ Neither $L_W$ nor $N$ survives. A busier room is not intrinsically worse,
 because each new table brings both a talker and its own share of absorption.
 What decides whether a restaurant works is the absorption **per table**, not
 the absorption of the room. Requiring $L_\mathrm{SN} > -6$ dB for adequate
-cross-table communication at a separation $r_s$, and $L_\mathrm{SN} < -9$ dB so a
-neighbouring table $r_t$ away is not overheard, turns into a pair of design
+cross-table communication at a separation $r_\mathrm{s}$, and $L_\mathrm{SN} < -9$ dB so a
+neighbouring table $r_\mathrm{t}$ away is not overheard, turns into a pair of design
 bounds:
 
 $$
-A_\text{tab} > 6.31\,r_s^2 \quad \text{(Eq. (17.53))}, \qquad
-A_\text{tab} < 3.16\,r_t^2 \quad \text{(Eq. (17.54))},
+A_\text{tab} > 6.31\,r_\mathrm{s}^2 \quad \text{(Eq. (17.53))}, \qquad
+A_\text{tab} < 3.16\,r_\mathrm{t}^2 \quad \text{(Eq. (17.54))},
 \qquad \text{both for } Q = 2
 $$
 

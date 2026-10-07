@@ -5367,7 +5367,7 @@ actually injects, and that force is not a property of the machine alone. Each
 hammer is a 0.5 kg mass dropped 40 mm, so it lands at
 $v_0 = \sqrt{2gh} = 0.886\ \text{m/s}$, ten times a second. If the impact were
 short compared with the 0.1 s between impacts, the momentum alone would fix
-the force, giving the line spectrum $|F_n| = 2 m v_0 / T_i$ and the band
+the force, giving the line spectrum $|F_n| = 2 m v_0 / T_\mathrm{i}$ and the band
 mean-square force $F_\mathrm{rms}^2 = 3.9 B$ that ISO 10140 measurements on
 concrete are usually reduced with.
 
@@ -5377,10 +5377,10 @@ mass-spring-dashpot whose pulse splits into two cases:
 
 - **over-critical**, $K m \ge 4 Z_\mathrm{dp}^2$: a single positive pulse, no
   rebound. This is a lightweight walking surface (chipboard, OSB), where the
-  spectrum tends to $|F_n|_\text{lower} = m v_0/T_i$;
+  spectrum tends to $|F_n|_\text{lower} = m v_0/T_\mathrm{i}$;
 - **under-critical**, $K m < 4 Z_\mathrm{dp}^2$: the hammer rebounds and only the
   first positive lobe counts. This is a concrete slab or a screed, where the
-  spectrum sits within 1 dB of $|F_n|_\text{upper} = 2 m v_0/T_i$ below 4 kHz
+  spectrum sits within 1 dB of $|F_n|_\text{upper} = 2 m v_0/T_\mathrm{i}$ below 4 kHz
   and the short-pulse estimate is adequate.
 
 The two limits are 6 dB apart in mean square, which is the whole reason a
@@ -13174,13 +13174,13 @@ Neither $L_W$ nor $N$ survives. A busier room is not intrinsically worse,
 because each new table brings both a talker and its own share of absorption.
 What decides whether a restaurant works is the absorption **per table**, not
 the absorption of the room. Requiring $L_\mathrm{SN} > -6$ dB for adequate
-cross-table communication at a separation $r_s$, and $L_\mathrm{SN} < -9$ dB so a
-neighbouring table $r_t$ away is not overheard, turns into a pair of design
+cross-table communication at a separation $r_\mathrm{s}$, and $L_\mathrm{SN} < -9$ dB so a
+neighbouring table $r_\mathrm{t}$ away is not overheard, turns into a pair of design
 bounds:
 
 $$
-A_\text{tab} > 6.31\,r_s^2 \quad \text{(Eq. (17.53))}, \qquad
-A_\text{tab} < 3.16\,r_t^2 \quad \text{(Eq. (17.54))},
+A_\text{tab} > 6.31\,r_\mathrm{s}^2 \quad \text{(Eq. (17.53))}, \qquad
+A_\text{tab} < 3.16\,r_\mathrm{t}^2 \quad \text{(Eq. (17.54))},
 \qquad \text{both for } Q = 2
 $$
 
@@ -13999,7 +13999,7 @@ D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt},
 $$
 
 with $te = 50$ ms → C50 (speech) and $te = 80$ ms → C80 (music), plus the
-**centre time** $T_\mathrm{s} = \int t\ p^2\ dt / \int p^2\ dt$. Each parameter has a
+**centre time** $T_\mathrm{S} = \int t\ p^2\ dt / \int p^2\ dt$. Each parameter has a
 **just-noticeable difference** (ISO 3382-1 Table A.1: EDT 5 %, C80 1 dB,
 D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
@@ -14214,7 +14214,7 @@ room-acoustics measurement report (a performance space per ISO 3382-1:2009 or
 an ordinary room per ISO 3382-2:2008, both evaluated by the integrated
 impulse-response method): a standard-basis line, an optional metadata header
 block, the full-width per-band parameter table ($T_{20}$, $T_{30}$, EDT,
-$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band
+$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{S}$) above the result's own per-band
 decay-time plot (`.plot()`), the boxed mid-frequency reverberation time
 $T_\text{mid}$ (the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the
 mid-frequency EDT alongside, and a footer with the fixed disclaimer. ISO
@@ -15568,7 +15568,7 @@ that a calibrated source is needed for, the other being the late lateral
 sound level, which is referred to the same free field. Everything else on
 the
 [room acoustic parameters page](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)
-(EDT, T20, T30, C50, C80, D50, $T_\mathrm{s}$) is a decay time, a ratio of
+(EDT, T20, T30, C50, C80, D50, $T_\mathrm{S}$) is a decay time, a ratio of
 energies or a centre time read from one recording alone, and survives any
 gain you put in front of it. $G$ does not.
 
@@ -33577,7 +33577,7 @@ derives from an A-weighted level, the regulation expresses it in dB.
 | Correction | Input quantity | Thresholds | Function |
 | :--- | :--- | :--- | :--- |
 | $K_\mathrm{t}$, emergent tonal components | **Unweighted** one-third-octave spectrum; $L_\mathrm{t} = L_f - L_s$, with $L_s$ the **arithmetic** mean of the two adjacent bands | 8/12 dB (20 to 125 Hz), 5/8 dB (160 to 400 Hz), 3/5 dB (500 Hz to 10 kHz) | `tonal_correction()` |
-| $K_\mathrm{f}$, low-frequency components | $L_f = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ | 0 dB up to 10 dB, 3 dB for $10 < L_f \le 15$, 6 dB above | `low_frequency_correction()` |
+| $K_\mathrm{f}$, low-frequency components | $L_\mathrm{f} = L_{\mathrm{Ceq},Ti} - L_{\mathrm{Aeq},Ti}$ | 0 dB up to 10 dB, 3 dB for $10 < L_\mathrm{f} \le 15$, 6 dB above | `low_frequency_correction()` |
 | $K_\mathrm{i}$, impulsive components | $L_\mathrm{i} = L_{\mathrm{AIeq},Ti} - L_{\mathrm{Aeq},Ti}$ | the same 10 and 15 dB | `impulsive_correction()` |
 
 $K_\mathrm{t}$ is evaluated band by band and, when several emergent tones are present,
@@ -44102,9 +44102,10 @@ the normalised autocorrelation of the polar energy distribution.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" width="92%"></picture>
 
 *A note on symbols before the formulas.* ISO 17497-2 writes the normalised
-coefficient $d_\mathrm{n}$; this page writes it $d_\mathrm{norm}$, because section 3
-needs the subscript $n$ for the well index and writes $d_n$ for a well
-**depth**. In the same spirit, the $s_n$ of section 3 is a quadratic-residue
+coefficient $d_\mathrm{n}$, its n upright because it stands for "normalized",
+and this page writes it the same way; section 3 writes $d_n$, its n italic,
+for the **depth** of well $n$, so the slope of the subscript is what tells
+the two apart. In the same spirit, the $s_n$ of section 3 is a quadratic-residue
 depth index, not the scattering coefficient $s$ of section 1; the area factor
 $N_i$ below is unrelated to the sequence order $N$ of section 3; and the $n$
 of Formula (5) counts receivers, not wells.
@@ -44304,8 +44305,8 @@ one-page diffusion test report (ISO 17497-2, Clause 8.5): the per-band table of
 $d$ beside the $d(f)$ band-axis curve, with a boxed characterisation headline.
 Per Clause 8.4 the random-incidence coefficient is itself a per-band quantity,
 the average of the directional coefficients over the source positions band by
-band (not a mean across frequency). `verbose=True` adds the normalised $d_\mathrm{norm}$
-column to the table (the curve always draws $d_\mathrm{norm}$ as a companion when present).
+band (not a mean across frequency). `verbose=True` adds the normalised $d_\mathrm{n}$
+column to the table (the curve always draws $d_\mathrm{n}$ as a companion when present).
 
 ```python
 import numpy as np
@@ -44610,7 +44611,7 @@ not mean uniform; decent $d$ does not mean much energy was scattered at all.
 - **The diffusion coefficient qualifies diffusers.** When the task is to break
   up an echo, a flutter or a focusing reflection, what matters is that the
   reflected energy is spread over angle, and $d$ measures exactly that. The
-  normalised $d_\mathrm{norm}$ (Formula (7)) additionally subtracts the edge diffraction
+  normalised $d_\mathrm{n}$ (Formula (7)) additionally subtracts the edge diffraction
   that every finite panel exhibits, so products of different sizes can be
   compared fairly.
 
@@ -44677,7 +44678,7 @@ no longer small against the wavelength; a frequency-blind single number
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [iso.org catalogue](https://www.iso.org/standard/55293.html).
   The goniometer autocorrelation coefficient behind section 2 of this page,
-  its area weighting and the normalised $d_\mathrm{norm}$.
+  its area weighting and the normalised $d_\mathrm{n}$.
 
 ## Standards
 
@@ -56182,7 +56183,7 @@ the one case the grouping by domain cannot serve.
 | $H$ | The **receptance** of ISO 7626-1, the **frequency response estimators** $H_1$ and $H_2$, and the **harmonic transfer functions** $H_n$ of a swept-sine measurement (where $H_2$ is the second harmonic, not the noise-on-input estimator). |
 | $\eta$ | The **loss factor** of a resilient element, the **coupling loss factor** $\eta_{ij}$ of a junction, and the **internal** and **total** loss factors of a building element. |
 | $\tau$ | The **transmission factor** of a partition, the **time constant** of a detector, the **lag** of a correlation, and the **air temperature** in CNOSSOS-EU. |
-| $T_\mathrm{s}$ | The ISO 3382-1 **centre time** of a room impulse response, typically tens of milliseconds; the **structural reverberation time** of a plate, which is seconds; and the number of **months per year that studded tyres are fitted** in CNOSSOS-EU. |
+| $T_\mathrm{s}$ | The **structural reverberation time** of a plate, which is seconds, and the number of **months per year that studded tyres are fitted** in CNOSSOS-EU. The ISO 3382-1 **centre time** of a room impulse response, tens of milliseconds, is $T_\mathrm{S}$, with the capital S its standard prints. |
 | $R$ | The **sound reduction index** in building acoustics, the **airflow resistance** in materials, the **roughness** in psychoacoustics, and the **cumulative stress variable** of ISO 2631-5. |
 | $\sigma$ | The **airflow resistivity** of a porous material, the **radiation efficiency** of a plate, and the **standard deviation** $\sigma_\mathrm{R}$ of a building-acoustics measurement situation. |
 | $L_N$, $L_\mathrm{N}$, $L_\mathrm{n}$ | $L_N$, with a sloped N, is a **percentile level** in environmental noise, where the N is the percentage. $L_\mathrm{N}$, with an upright one, is a **loudness level** in phon, which is how ISO 226:2023 prints it, and the level equivalent to a microphone's **inherent noise**. $L_\mathrm{n}$, with a lower-case subscript, is the **normalized impact sound pressure level** of ISO 10140-3. In building acoustics the case of the subscript is the whole difference; here so is its slope. |
@@ -56293,7 +56294,7 @@ check that pins each quantity to its standard's own expected value.
 | $C_{50}$ | Clarity for speech: the energy ratio between the first 50 ms of the impulse response and everything after it. | dB | ISO 3382-1:2009 | [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) |
 | $C_{80}$ | Clarity for music: the same ratio with the boundary at 80 ms. | dB | ISO 3382-1:2009 (just-noticeable difference in Table A.1) | [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) |
 | $D_{50}$ | Definition, or Deutlichkeit: the fraction of the total energy arriving in the first 50 ms. | dimensionless | ISO 3382-1:2009 (just-noticeable difference in Table A.1) | [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) |
-| $T_\mathrm{s}$ (centre time) | Centre time: the centre of gravity of the squared impulse response in time, a boundary-free alternative to the clarity indices. It runs to tens of milliseconds in a room; the building-prediction guides write $T_\mathrm{s}$ for something else entirely, the structural reverberation time of a plate, which is seconds. | s | ISO 3382-1:2009, Equation (A.13) | [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) |
+| $T_\mathrm{S}$ (centre time) | Centre time: the centre of gravity of the squared impulse response in time, a boundary-free alternative to the clarity indices. It runs to tens of milliseconds in a room; the building-prediction guides write $T_\mathrm{s}$, with a lowercase s, for something else entirely, the structural reverberation time of a plate, which is seconds. | s | ISO 3382-1:2009, Equation (A.13) | [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) |
 | $A$ | Equivalent sound absorption area of a room: the area of a perfectly absorbing surface that would give the same reverberation time. | m² | ISO 354:2003, Equations (5) and (7) | [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/) |
 | NC | Noise criteria rating of a background spectrum: the speech interference level selects the curve, and the tangency method rates the spectrum when a band exceeds it. | dB (index) | ANSI/ASA S12.2-2019, 5.2.2 and 5.2.3 (curves in Table 1) | [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/) |
 | SIL | Speech interference level: the average of the 500, 1000, 2000 and 4000 Hz octave-band levels. | dB | ANSI/ASA S12.2-2019, clause 3.2 | [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/) |
@@ -57743,7 +57744,7 @@ $$
 C_{te} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_\mathrm{s} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ and $T_\mathrm{s} = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
+with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ and $T_\mathrm{S} = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands.svg" alt="ISO 3382 per-band parameters of a synthetic room impulse response: grouped EDT, T20 and T30 bars per octave band falling from about 1.4 s at 125 Hz to 0.7 s at 4 kHz, over a second panel where C50 and C80 rise with frequency" width="92%"></picture>
 
@@ -57756,10 +57757,10 @@ more of it the room has already removed.*
 
 ### Open-plan spatial decay (ISO 3382-3, Clause 6)
 
-The spatial decay rate of A-weighted speech is the ordinary least-squares slope of $L_{p,A,S}$ against $\log_{10}(r/r_0)$ ($r_0 = 1$ m) over the 2–16 m positions, rescaled to a per-doubling figure, and the nominal level is read off the same line at 4 m:
+The spatial decay rate of A-weighted speech is the ordinary least-squares slope of $L_{p,\mathrm{A,S}}$ against $\log_{10}(r/r_0)$ ($r_0 = 1$ m) over the 2–16 m positions, rescaled to a per-doubling figure, and the nominal level is read off the same line at 4 m:
 
 $$
-L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,A,S,4\text{m}} = a + b\ \log_{10}(4/r_0).
+L = a + b\ \log_{10}(r/r_0), \qquad D_{2,\mathrm{S}} = -\log_{10}(2)\ b, \qquad L_{p,\mathrm{A,S},4\,\mathrm{m}} = a + b\ \log_{10}(4/r_0).
 $$
 
 The distraction distance rD and privacy distance rP are the distances where a **linear** (not logarithmic) regression of STI against distance crosses 0.50 and 0.20; a fitted slope that does not fall (STI not decreasing with distance; a constant STI fits to a slope a few units in the last place either side of zero, read as no decrease) makes them undefined, realising the standard's "can prove impossible to determine" note.
@@ -57769,7 +57770,7 @@ The distraction distance rD and privacy distance rP are the distances where a **
 *Two regressions on two different axes, which is what makes this clause hard to
 hold in the head. The level line is fitted against $\log_{10}(r/r_0)$ and read
 twice, as the slope $D_{2,\mathrm{S}}$ per doubling, and at $r = 4$ m for
-$L_{p,A,S,4\text{m}}$. The STI line is fitted against $r$ itself, **linearly**,
+$L_{p,\mathrm{A,S},4\,\mathrm{m}}$. The STI line is fitted against $r$ itself, **linearly**,
 and read where it crosses 0.50 and 0.20 for the distraction and privacy
 distances. If that second fit comes out flat or rising, the two distances do
 not exist rather than being large.*
@@ -57890,7 +57891,7 @@ and the separating element is where $S_\mathrm{s}$ is measured. Each junction co
 three flanking terms, so a room with four flanking elements sums thirteen paths.*
 
 $$
-R'_w = -10 \log_{10}\Big[ 10^{-R_\mathrm{Dd,w}/10}
+R'_\mathrm{w} = -10 \log_{10}\Big[ 10^{-R_\mathrm{Dd,w}/10}
        + \sum 10^{-R_\mathrm{Ff,w}/10} + \sum 10^{-R_\mathrm{Df,w}/10}
        + \sum 10^{-R_\mathrm{Fd,w}/10} \Big].
 $$
@@ -57917,7 +57918,7 @@ $K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
 subtraction $L'_{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, with the bare-floor
 equivalent level $L_\mathrm{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the
 covering improvement $\Delta L_\mathrm{w}$ (ISO 717-2) and the flanking correction $K$
-from Table 1. The EN 12354-1 Annex H.3 ($R'_w = 52$ dB) and EN 12354-2 Annex E.3
+from Table 1. The EN 12354-1 Annex H.3 ($R'_\mathrm{w} = 52$ dB) and EN 12354-2 Annex E.3
 ($L'_{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
 model is stated to have about a 2 dB standard deviation (Clause 5).
 
@@ -74908,7 +74909,7 @@ $$
 $$
 
 with a pressure-release surface at $z = 0$ and, at the bottom $z = D$,
-$\Psi(D) = 0$ for a pressure-release bed or $d\Psi/dz|_{D} = 0$ for a
+$\Psi(D) = 0$ for a pressure-release bed or $\mathrm{d}\Psi/\mathrm{d}z|_{D} = 0$ for a
 rigid one. Each eigenfunction $\Psi_m(z)$ is a standing wave in depth that
 travels in range as $e^{\,i k_{rm} r}$ with its own horizontal wavenumber
 $k_{rm}$; only the modes with real $k_{rm}$ **propagate**, the rest are
@@ -78483,7 +78484,7 @@ fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
 for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
     values = [vibration.guide_values(a, time_of_day=time_of_day) for a in areas]
     ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label=r"$A_\mathrm{u}$")
-    ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label="$A_r$")
+    ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label=r"$A_\mathrm{r}$")
     ax.plot(x, [v.a_o for v in values], "v", label=r"$A_\mathrm{o}$")
     ax.set_yscale("log")
     ax.set_xticks(x, areas)
@@ -78666,12 +78667,14 @@ from phonometry import vibration
 trains = np.geomspace(0.5, 100.0, 200)
 fig, ax = plt.subplots(figsize=(10, 6.2))
 for a_r in (0.2, 0.15, 0.1, 0.07, 0.05):
-    ax.loglog(trains, a_r * np.sqrt(120.0 / trains), label=f"$A_r$ = {a_r:g}")
+    ax.loglog(
+        trains, a_r * np.sqrt(120.0 / trains), label=rf"$A_\mathrm{{r}}$ = {a_r:g}"
+    )
 for a_r in (0.05, 0.07):
     n = vibration.admissible_trains_per_hour(0.2, a_r)
     ax.plot([n], [0.2], "o")
 ax.set_xlabel("Trains an hour")
-ax.set_ylabel("$KB_{FTm}$")
+ax.set_ylabel(r"$KB_\mathrm{FTm}$")
 ax.legend()
 ```
 

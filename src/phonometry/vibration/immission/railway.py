@@ -18,12 +18,12 @@ falls back to it. :math:`T_3` is the whole event, and it is the one an event
 value is formed over. Every quantity below carries the index of the stretch it
 came from.
 
-**The quantities** (Clause 6). The running r.m.s. :math:`\tilde v_F(t)` with
+**The quantities** (Clause 6). The running r.m.s. :math:`\tilde v_\mathrm{F}(t)` with
 :math:`\tau = 125` ms (Formula (1)) and its level against
 :math:`v_0 = 5 \cdot 10^{-8}` m/s (Formula (2)); the interval r.m.s.
 :math:`\tilde v_j` of Formula (4), or the approximation of Formula (5) formed
 from the running r.m.s.; and the **event value** of Formula (8), the interval
-r.m.s. of :math:`T_3` referred to one hour, :math:`v_E = \tilde v_3
+r.m.s. of :math:`T_3` referred to one hour, :math:`v_\mathrm{E} = \tilde v_3
 \sqrt{T_3/3600\,\mathrm{s}}`, whose square adds across the passages of an hour
 (Formula (10)). The same quantities in third-octave bands from 4 Hz to 315 Hz
 give the interval and maximum third-octave levels of Formulae (6) and (7).
@@ -191,7 +191,7 @@ def running_velocity_rms(
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
 ) -> NDArray[np.float64]:
-    r"""The running r.m.s. :math:`\tilde v_F(t)` of Formula (1), in mm/s.
+    r"""The running r.m.s. :math:`\tilde v_\mathrm{F}(t)` of Formula (1), in mm/s.
 
     The exponential average the formula integrates, started from rest. Clause
     4 says what that costs at the start of a record and so why the averaging
@@ -205,7 +205,7 @@ def running_velocity_rms(
     :param fs_hz: Sampling frequency, in hertz.
     :param time_constant_s: The time constant, in seconds (default 0,125 s,
         "Fast").
-    :return: :math:`\tilde v_F(t)`, one value per sample, in mm/s.
+    :return: :math:`\tilde v_\mathrm{F}(t)`, one value per sample, in mm/s.
     :raises ValueError: For a bad record or a non-positive rate or constant.
     """
     return _exponential_running_rms(
@@ -225,12 +225,12 @@ def running_velocity_level(
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
 ) -> NDArray[np.float64]:
-    r"""The running velocity level :math:`L_{vF}(t)` of Formula (2), in dB.
+    r"""The running velocity level :math:`L_{v\mathrm{F}}(t)` of Formula (2), in dB.
 
     :param velocity_mm_s: The velocity, in millimetres per second (1-D).
     :param fs_hz: Sampling frequency, in hertz.
     :param time_constant_s: See :func:`running_velocity_rms`.
-    :return: :math:`20 \lg(\tilde v_F / v_0)` with :math:`v_0` =
+    :return: :math:`20 \lg(\tilde v_\mathrm{F} / v_0)` with :math:`v_0` =
         :data:`VELOCITY_LEVEL_REFERENCE_MM_S`, one value per sample. A sample
         whose running r.m.s. is still exactly zero, before the first nonzero
         sample, is ``-inf``.
@@ -314,16 +314,16 @@ def interval_rms(
 
 
 def event_velocity(interval_rms_mm_s: float, duration_s: float) -> float:
-    r"""The event value :math:`v_E` of Formula (8), in mm/s.
+    r"""The event value :math:`v_\mathrm{E}` of Formula (8), in mm/s.
 
     The interval r.m.s. of the whole event referred to one hour,
-    :math:`v_E = \tilde v_3 \sqrt{T_3 / 3600\,\mathrm{s}}`: the constant
+    :math:`v_\mathrm{E} = \tilde v_3 \sqrt{T_3 / 3600\,\mathrm{s}}`: the constant
     velocity that, held for an hour, carries the energy the passage carried.
 
     :param interval_rms_mm_s: :math:`\tilde v_3`, in millimetres per second.
-        Clause 6.2 allows :math:`\tilde v_{F3}` of Formula (5) in its place.
+        Clause 6.2 allows :math:`\tilde v_{\mathrm{F}3}` of Formula (5) in its place.
     :param duration_s: :math:`T_3`, in seconds.
-    :return: :math:`v_E`, in millimetres per second.
+    :return: :math:`v_\mathrm{E}`, in millimetres per second.
     :raises ValueError: For a negative velocity or a non-positive duration.
     """
     v = float(interval_rms_mm_s)
@@ -335,7 +335,7 @@ def event_velocity(interval_rms_mm_s: float, duration_s: float) -> float:
 
 
 def event_velocity_level(interval_rms_mm_s: float, duration_s: float) -> float:
-    r"""The event level :math:`L_{vE}` of Formula (9), in dB.
+    r"""The event level :math:`L_{v\mathrm{E}}` of Formula (9), in dB.
 
     :math:`20 \lg(\tilde v_3 / v_0) + 10 \lg(T_3 / 3600\,\mathrm{s})`, which
     is :func:`event_velocity` as a level against
@@ -344,7 +344,7 @@ def event_velocity_level(interval_rms_mm_s: float, duration_s: float) -> float:
     :param interval_rms_mm_s: :math:`\tilde v_3`, in millimetres per second,
         positive.
     :param duration_s: :math:`T_3`, in seconds.
-    :return: :math:`L_{vE}`, in decibels.
+    :return: :math:`L_{v\mathrm{E}}`, in decibels.
     :raises ValueError: For a non-positive velocity or duration.
     """
     v = require_positive(interval_rms_mm_s, "interval_rms_mm_s")
@@ -367,12 +367,12 @@ def combined_event_velocity(event_velocities_mm_s: ArrayLike) -> float:
     r"""The event value of every passage in one hour, Formula (10), in mm/s.
 
     Event values add in square, because each is already the energy of its
-    passage spread over the same hour: :math:`v_{E,\mathrm{ges}} =
-    \sqrt{\sum v_{En}^2}`.
+    passage spread over the same hour: :math:`v_{\mathrm{E\,ges}} =
+    \sqrt{\sum v_{\mathrm{E}n}^2}`.
 
     :param event_velocities_mm_s: The event values of the passages, in
         millimetres per second.
-    :return: :math:`v_{E,\mathrm{ges}}`, in millimetres per second.
+    :return: :math:`v_{\mathrm{E\,ges}}`, in millimetres per second.
     :raises ValueError: For an empty, non-finite or negative input.
     """
     values = _non_negative(event_velocities_mm_s, "event_velocities_mm_s")
@@ -670,7 +670,7 @@ def third_octaves_from_narrowband(
 def elastic_insertion_loss(
     levels_before_db: ArrayLike, levels_after_db: ArrayLike
 ) -> NDArray[np.float64]:
-    r"""The insertion loss :math:`D_e(f_{Tn})` of Annex B, Formula (B.1), in dB.
+    r"""The insertion loss :math:`D_\mathrm{e}(f_{\mathrm{T}n})` of Annex B, Formula (B.1), in dB.
 
     The drop in the third-octave structure-borne level at one point of a
     transmission path when an elastic element is built in. Annex B says it and
@@ -695,7 +695,7 @@ def elastic_insertion_loss(
 def band_sum_level(levels_db: ArrayLike) -> float:
     r"""The sum level :math:`\Sigma L` of a spectrum, Annex B, Formula (B.3).
 
-    :math:`10 \lg \sum 10^{0,1 L(f_{Tn})}`, the energy sum of the bands.
+    :math:`10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}`, the energy sum of the bands.
 
     :param levels_db: The band levels, in decibels.
     :return: :math:`\Sigma L`, in decibels.
@@ -740,22 +740,22 @@ class TrainPassage:
 
     :ivar velocity_mm_s: The velocity the meter's railway band limitation
         leaves, one value per sample.
-    :ivar running_rms_mm_s: :math:`\tilde v_F(t)` of it.
+    :ivar running_rms_mm_s: :math:`\tilde v_\mathrm{F}(t)` of it.
     :ivar peak_velocity_mm_s: :math:`v_\mathrm{max}`, the largest absolute
         velocity of the passage (Clause 6.3).
-    :ivar running_rms_max_mm_s: :math:`\tilde v_{F\mathrm{max}}`, the maximum
+    :ivar running_rms_max_mm_s: :math:`\tilde v_\mathrm{Fmax}`, the maximum
         of the running r.m.s.
-    :ivar kbf_max: :math:`KB_{F\mathrm{max}}`, the maximum of the weighted
+    :ivar kbf_max: :math:`KB_\mathrm{Fmax}`, the maximum of the weighted
         severity of DIN 45669-1 over the same stretch, which DIN 4150-2 reads.
     :ivar interval_rms_mm_s: :math:`\tilde v_1`, :math:`\tilde v_2` and
         :math:`\tilde v_3` of Formula (4), in that order.
     :ivar intervals_s: The three stretches ``(start, end)``, in seconds.
-    :ivar event_velocity_mm_s: :math:`v_E` of Formula (8), from :math:`T_3`.
-    :ivar event_level_db: :math:`L_{vE}` of Formula (9).
+    :ivar event_velocity_mm_s: :math:`v_\mathrm{E}` of Formula (8), from :math:`T_3`.
+    :ivar event_level_db: :math:`L_{v\mathrm{E}}` of Formula (9).
     :ivar band_centres_hz: The nominal third-octave centres analysed.
-    :ivar band_interval_levels_db: :math:`L_{vFj}(f_{Tn})` of Formula (6), one
+    :ivar band_interval_levels_db: :math:`L_{v\mathrm{F}j}(f_{\mathrm{T}n})` of Formula (6), one
         row per stretch, :math:`T_1` to :math:`T_3`.
-    :ivar band_max_levels_db: :math:`L_{vF\mathrm{max}}(f_{Tn})` of Formula
+    :ivar band_max_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
         (7), over :math:`T_3`.
     :ivar fs_hz: The sampling frequency of the record.
     """

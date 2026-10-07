@@ -29,6 +29,13 @@ if TYPE_CHECKING:
 
     from .canvas import SVG, Theme
 
+# The r of "Beurteilung" in the guide value, the assessment time and the
+# count of clock intervals: DIN 4150-2:1999-06 prints A_r (6.2, Table 1), T_r
+# (Formulae (4a) and (4b)) and N_r (Formula (A.3)) with the same upright r as
+# KB_FTr, and E DIN 4150-2:2023-08 does in Formula (6) and 6.5.3.2. The single
+# letter r cannot join the roman set, which keeps the reflected path r_r
+# italic, so each label that carries one of the three names it in ``upright``.
+
 
 def _d_human_vibration(s: SVG, th: Theme) -> None:
     """Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)."""
@@ -2237,6 +2244,7 @@ def _d_railway_monitoring(s: SVG, th: Theme) -> None:
         "be shown; an exceedance cannot be reliably proven there",
         13,
         th.fg,
+        upright=("A_r",),
     )
 
     # --- The passages: one interval each, grouped by train category -------
@@ -2305,7 +2313,13 @@ def _d_railway_monitoring(s: SVG, th: Theme) -> None:
     s.text(766, 766, "(7)", 12, th.muted, anchor="start")
     s.text(240, 802, "$KB_{Fmax} = max{KB_{Fmax,Zug}}$", 15, th.primary)
     s.text(374, 802, "(8)", 12, th.muted, anchor="start")
-    s.text(640, 802, "$KB_{FTr} = √(Σ (n_{Zug}/N_r) · (α_{Zug} · KB_{FTm,Zug})^2)$", 15)
+    s.text(
+        640,
+        802,
+        "$KB_{FTr} = √(Σ (n_{Zug}/N_r) · (α_{Zug} · KB_{FTm,Zug})^2)$",
+        15,
+        upright=("N_r",),
+    )
     s.text(802, 802, "(6)", 12, th.muted, anchor="start")
     s.text(
         450,
@@ -2314,6 +2328,7 @@ def _d_railway_monitoring(s: SVG, th: Theme) -> None:
         "is at or below 0.1 enters $KB_{FTr}$ as zero",
         12,
         th.muted,
+        upright=("N_r",),
     )
     s.text(
         450,
@@ -3234,8 +3249,22 @@ def _d_people_in_buildings(s: SVG, th: Theme) -> None:
     s.text(686, 492, "rest hours on working days, recorded apart", 11, th.accent)
 
     s.text(686, 530, "guide values of a residential area", 12, th.fg, bold=True)
-    s.text(686, 550, "by day: $A_u$ = 0.15, $A_o$ = 3, $A_r$ = 0.07", 12, th.fg)
-    s.text(686, 568, "by night: $A_u$ = 0.1, $A_o$ = 0.2, $A_r$ = 0.05", 12, th.muted)
+    s.text(
+        686,
+        550,
+        "by day: $A_u$ = 0.15, $A_o$ = 3, $A_r$ = 0.07",
+        12,
+        th.fg,
+        upright=("A_r",),
+    )
+    s.text(
+        686,
+        568,
+        "by night: $A_u$ = 0.1, $A_o$ = 0.2, $A_r$ = 0.05",
+        12,
+        th.muted,
+        upright=("A_r",),
+    )
 
     # --- Bottom: the order of Figure 2, walked with those numbers -------------
     cy, dw, dh = 712.0, 140.0, 56.0
@@ -3252,7 +3281,7 @@ def _d_people_in_buildings(s: SVG, th: Theme) -> None:
     s.rect(cols[3] - 56, cy - 17, 112, 34, th.panel, th.primary, rx=5, sw=1.8)
     s.text(cols[3], cy + 5, "form $KB_{FTr}$", 13, th.primary)
     diamond(cols[4], cy, dw, dh)
-    s.text(cols[4], cy + 5, "$KB_{FTr}$ ≤ $A_r$ ?", 13, th.fg)
+    s.text(cols[4], cy + 5, "$KB_{FTr}$ ≤ $A_r$ ?", 13, th.fg, upright=("A_r",))
     for i_from, i_to in ((0, 1), (1, 2), (2, 3), (3, 4)):
         s.arrow(
             cols[i_from] + half.get(i_from, dw / 2),
@@ -3288,7 +3317,14 @@ def _d_people_in_buildings(s: SVG, th: Theme) -> None:
     # --- Foot: Formulae (3) and (4b) -----------------------------------------
     s.rect(30, 806, 840, 56, th.panel, th.fg, rx=6, sw=1.6)
     s.text(245, 840, "$KB_{FTm} = √((1/N) · Σ KB_{FTi}^2)$", 16, th.primary)
-    s.text(660, 840, "$KB_{FTr} = KB_{FTm} · √(T_e / T_r)$", 16, th.secondary)
+    s.text(
+        660,
+        840,
+        "$KB_{FTr} = KB_{FTm} · √(T_e / T_r)$",
+        16,
+        th.secondary,
+        upright=("T_r",),
+    )
 
 
 def _d_structural_damage_points(s: SVG, th: Theme) -> None:
@@ -4020,8 +4056,16 @@ def _d_railway_prediction_chain(s: SVG, th: Theme) -> None:
         "$KB_{FTr} = √(Σ n_{Zug}/N_r · (α_{Zug} · KB_{FTm,Zug})^2)$",
         13,
         th.fg,
+        upright=("N_r",),
     )
-    s.text(660, box_y + 74, "$N_r$ = 1920 by day, 960 by night", 12, th.fg)
+    s.text(
+        660,
+        box_y + 74,
+        "$N_r$ = 1920 by day, 960 by night",
+        12,
+        th.fg,
+        upright=("N_r",),
+    )
     s.text(660, box_y + 94, "$α_{Zug}$ = 0.7 for a tram on the surface", 12, th.fg)
 
     s.text(

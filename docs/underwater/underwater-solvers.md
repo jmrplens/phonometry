@@ -125,7 +125,7 @@ $$
 $$
 
 with a pressure-release surface at $z = 0$ and, at the bottom $z = D$,
-$\Psi(D) = 0$ for a pressure-release bed or $d\Psi/dz|_{D} = 0$ for a
+$\Psi(D) = 0$ for a pressure-release bed or $\mathrm{d}\Psi/\mathrm{d}z|_{D} = 0$ for a
 rigid one. Each eigenfunction $\Psi_m(z)$ is a standing wave in depth that
 travels in range as $e^{\,i k_{rm} r}$ with its own horizontal wavenumber
 $k_{rm}$; only the modes with real $k_{rm}$ **propagate**, the rest are

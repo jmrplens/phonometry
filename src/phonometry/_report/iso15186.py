@@ -65,12 +65,12 @@ if TYPE_CHECKING:
 _SPEC: dict[str, str] = {
     "title": "Laboratory sound insulation by sound intensity",
     "basis": (
-        "Intensity sound reduction index R<sub>I</sub> measured in "
+        "Intensity sound reduction index R<sub><i>I</i></sub> measured in "
         "accordance with ISO 15186-1:2000 (transmitted sound power measured "
         "directly with an intensity probe). Rating per ISO 717-1:2020."
     ),
-    "symbol": "R<sub>I</sub>",
-    "rating_symbol": "R<sub>I,w</sub>",
+    "symbol": "R<sub><i>I</i></sub>",
+    "rating_symbol": "R<sub><i>I</i>,w</sub>",
     "ylabel": "$R_I$ [dB]",
     "statement": (
         "Evaluation based on laboratory measurement results obtained by the "
@@ -104,8 +104,8 @@ def _qualification_columns(
     """
     columns: list[Column] = []
     for name, header, values in (
-        ("fpi", "F<sub>pI</sub> [dB]", fpi),
-        ("residual_index", "&#948;<sub>pI0</sub> [dB]", residual_index),
+        ("fpi", "F<sub><i>pI</i></sub> [dB]", fpi),
+        ("residual_index", "&#948;<sub><i>pI</i>0</sub> [dB]", residual_index),
     ):
         if values is None:
             continue
@@ -213,7 +213,7 @@ def render_iso15186_report(
             columns: list[Column] = [
                 (value_header, curve, 1),
                 (
-                    t("R<sub>I,M</sub> [dB]", language),
+                    t("R<sub><i>I</i>,M</sub> [dB]", language),
                     np.asarray(modified, dtype=np.float64),
                     1,
                 ),
@@ -267,15 +267,15 @@ def render_iso15186_report(
 _DINE_SPEC: dict[str, str] = {
     "title": "Element sound insulation by sound intensity",
     "basis": (
-        "Element-normalized level difference D<sub>I,n,e</sub> measured in "
+        "Element-normalized level difference D<sub><i>I</i>,n,e</sub> measured in "
         "accordance with ISO 15186-1:2000 (transmitted sound power measured "
         "directly with an intensity probe, normalized to the reference "
         "absorption area A<sub>0</sub> = 10 m<sup>2</sup>). Rating per "
         "ISO 717-1:2020."
     ),
-    "symbol": "D<sub>I,n,e</sub>",
-    "rating_symbol": "D<sub>I,n,e,w</sub>",
-    "ylabel": "$D_{I,n,e}$ [dB]",
+    "symbol": "D<sub><i>I</i>,n,e</sub>",
+    "rating_symbol": "D<sub><i>I</i>,n,e,w</sub>",
+    "ylabel": r"$D_{I,\mathrm{n,e}}$ [dB]",
     "statement": (
         "Evaluation based on laboratory measurement results obtained by the "
         "sound-intensity method (transmitted sound power measured directly "
@@ -294,7 +294,8 @@ def _element_extras_sentence(
     n = int(getattr(result, "n", 1))
     if n > 1:
         note = t(
-            "DI,n,e is the per-unit value of N = {n} element units measured together.",
+            "D<sub><i>I</i>,n,e</sub> is the per-unit value of N = {n} element units "
+            "measured together.",
             language,
         ).format(n=n)
         sentence = f"{sentence} {note}" if sentence else f" {note}"

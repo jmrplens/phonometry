@@ -49,7 +49,7 @@ D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt},
 $$
 
 with $te = 50$ ms → C50 (speech) and $te = 80$ ms → C80 (music), plus the
-**centre time** $T_\mathrm{s} = \int t\ p^2\ dt / \int p^2\ dt$. Each parameter has a
+**centre time** $T_\mathrm{S} = \int t\ p^2\ dt / \int p^2\ dt$. Each parameter has a
 **just-noticeable difference** (ISO 3382-1 Table A.1: EDT 5 %, C80 1 dB,
 D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
@@ -264,7 +264,7 @@ room-acoustics measurement report (a performance space per ISO 3382-1:2009 or
 an ordinary room per ISO 3382-2:2008, both evaluated by the integrated
 impulse-response method): a standard-basis line, an optional metadata header
 block, the full-width per-band parameter table ($T_{20}$, $T_{30}$, EDT,
-$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band
+$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{S}$) above the result's own per-band
 decay-time plot (`.plot()`), the boxed mid-frequency reverberation time
 $T_\text{mid}$ (the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the
 mid-frequency EDT alongside, and a footer with the fixed disclaimer. ISO

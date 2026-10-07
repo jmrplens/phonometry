@@ -3674,7 +3674,7 @@ def generate_directivity_and_tables(output_dir: str) -> None:
         "EDT": "EDT",
         "C80": "$C_{80}$",
         "D50": "$D_{50}$",
-        "Ts": "$T_S$",
+        "Ts": "$T_\\mathrm{S}$",
         "J_LF": "$J_\\mathrm{LF}$",
         "L_J": "$L_J$",
     }

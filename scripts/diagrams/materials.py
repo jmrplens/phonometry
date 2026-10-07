@@ -529,15 +529,13 @@ def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
     # Below the ground's hatching, which ran through the word at gy + 12.
     s.text(cx + 150, gy + 26, "Turntable", 14, th.fg, bold=True, anchor="start")
 
-    # Governing relations. Formula 5 stays plain for now: its 10^(L_i/10)
-    # terms put a subscript inside the exponent, one script level more than
-    # the composer sets (the same energy-sum family the flanking and
-    # reception-plate sums parked).
+    # Governing relations: Formula 5 with the receiver levels L_i inside the
+    # exponents, the subscript of a superscript, as ISO 17497-2 prints it.
     s.text(
         450,
         476,
-        "d = [(Σ10^(L_i/10))² − Σ(10^(L_i/10))²] / "
-        "[(n−1)·Σ(10^(L_i/10))²]   (Formula 5)",
+        "$d = [(Σ10^{L_i/10})² − Σ(10^{L_i/10})²] / "
+        "[(n − 1)·Σ(10^{L_i/10})²]$   (Formula 5)",
         15,
         th.fg,
         bold=True,
@@ -904,10 +902,13 @@ def _d_metadiffuser_chain(s: SVG, th: Theme) -> None:
     s.text(
         682,
         858,
-        "$d_{norm} = (d − d_{ref}) / (1 − d_{ref})$",
+        "$d_n = (d − d_{ref}) / (1 − d_{ref})$",
         14,
         th.primary,
         bold=True,
+        # The normalized diffusion coefficient of ISO 17497-2, 3.12, whose n
+        # stands for "normalized" and is printed upright.
+        upright=("d_n",),
     )
     s.text(682, 882, "$I_i = |p_{s}(θ_i)|²$ every 5° from −90° to +90°", 12, th.muted)
     s.text(682, 902, "$d_{ref}$: the same sums over a flat panel as wide", 12, th.muted)

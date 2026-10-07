@@ -259,9 +259,6 @@ _ES: dict[str, str] = {
     "reflections from structures < 0,2 dB": "reflexiones de estructuras < 0,2 dB",
     # RD 1367/2007 chain (environment/assessment/spanish-noise-regulation).
     "RD 1367/2007: from a noise phase to the three acceptance criteria": "RD 1367/2007: de la fase de ruido a los tres criterios de aceptación",
-    "LKeq,Ti = LAeq,Ti + Kt + Kf + Ki": "LKeq,Ti = LAeq,Ti + Kt + Kf + Ki",
-    "LKeq,x = 10 lg[ (1/T) Σ Ti": "LKeq,x = 10 lg[ (1/T) Σ Ti",
-    "                10^(LKeq,Ti/10) ]": "                10^(LKeq,Ti/10) ]",
     "Article 25.2 drops the third criterion for an activity already in "
     "operation": "El artículo 25.2 suprime el tercer criterio para una actividad ya "
     "en funcionamiento",
@@ -281,7 +278,7 @@ _ES: dict[str, str] = {
     "$L_{K,x}$ over the operating days": "$L_{K,x}$ sobre los días de actividad",
     "303 open / 62 closed → 56 dB": "303 abierta / 62 cerrada → 56 dB",
     "worst phase ≤ limit + 5 dB": "peor fase ≤ límite + 5 dB",
-    "daily LKeq,x ≤ limit + 3 dB": "LKeq,x diario ≤ límite + 3 dB",
+    "daily $L_{Keq,x}$ ≤ limit + 3 dB": "$L_{Keq,x}$ diario ≤ límite + 3 dB",
     "annual $L_{K,x}$ ≤ limit": "$L_{K,x}$ anual ≤ límite",
     "Article 25.2 drops the third criterion for an ": "El artículo 25.2 suprime el tercer criterio para una ",
     "activity already in operation": "actividad ya en funcionamiento",
@@ -623,7 +620,7 @@ _ES: dict[str, str] = {
     "$P = 3·log_{10}(OR) + 2·log_{10}(LD)$;   highest $P$ over 30 min governs": "$P = 3·log_{10}(OR) + 2·log_{10}(LD)$;   la $P$ más alta en 30 min gobierna",
     "Adjustment  $K_I$   (clause 8, Formula 2)": "Ajuste  $K_I$   (cláusula 8, Fórmula 2)",
     "$K_I = 1.8·(P − 5)$ dB for $P > 5$, else 0": "$K_I = 1,8·(P − 5)$ dB si $P > 5$, si no 0",
-    "Rating level  LAr,T = 10·log10( (1/T) Σ Δt·10^((LAeq+KI)/10) )": "Nivel de evaluación  LAr,T = 10·log10( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
+    "Rating level  $L_{Ar,T} = 10 log_{10}((1/T) Σ_N Δt_N·10^{(L_{Aeq,N} + K_{I,N})/10})$": "Nivel de evaluación  $L_{Ar,T} = 10 log_{10}((1/T) Σ_N Δt_N·10^{(L_{Aeq,N} + K_{I,N})/10})$",
     "impulse-adjusted level over the reference time  (Note 1)": "nivel ajustado por impulsos sobre el tiempo de referencia  (Nota 1)",
     "Vertical seat acceleration  $a_{z}(t)$": "Aceleración vertical del asiento  $a_{z}(t)$",
     "conditioned per 5.1.3:  HP 0.01 Hz (2nd order) / LP 80 Hz (4th order)": "acondicionada según 5.1.3:  PA 0,01 Hz (2.º orden) / PB 80 Hz "
@@ -1168,7 +1165,7 @@ _ES: dict[str, str] = {
     "Ff: flanking–flanking, flanking element both sides": "Ff: flanco–flanco, elemento de flanco en ambos lados",
     "Fd: flanking (source) → separating (receiving)": "Fd: flanco (emisor) → separador (receptor)",
     "Df: separating (source) → flanking (receiving)": "Df: separador (emisor) → flanco (receptor)",
-    "R'w = −10 log10 Σ 10^(−Rij,w /10) dB   (EN 12354-1, Formula 26)": "R'w = −10 log10 Σ 10^(−Rij,w /10) dB   (EN 12354-1, Fórmula 26)",
+    "$R′_w = −10 lg Σ 10^{−R_{ij,w}/10}$ dB   (EN 12354-1, Formula 26)": "$R′_w = −10 lg Σ 10^{−R_{ij,w}/10}$ dB   (EN 12354-1, Fórmula 26)",
     # d14 - ISO 9613-2 outdoor propagation geometry
     "ISO 9613-2 source–barrier–receiver geometry": "Geometría fuente–barrera–receptor (ISO 9613-2)",
     "Receiver": "Receptor",
@@ -1323,7 +1320,7 @@ _ES: dict[str, str] = {
     "Fixed source": "Fuente fija",
     "polar response $L_i$": "respuesta polar $L_i$",
     "receiver arc (5° steps)": "arco de receptores (pasos de 5°)",
-    "d = [(Σ10^(L_i/10))² − Σ(10^(L_i/10))²] / [(n−1)·Σ(10^(L_i/10))²]   (Formula 5)": "d = [(Σ10^(L_i/10))² − Σ(10^(L_i/10))²] / [(n−1)·Σ(10^(L_i/10))²]   (Fórmula 5)",
+    "$d = [(Σ10^{L_i/10})² − Σ(10^{L_i/10})²] / [(n − 1)·Σ(10^{L_i/10})²]$   (Formula 5)": "$d = [(Σ10^{L_i/10})² − Σ(10^{L_i/10})²] / [(n − 1)·Σ(10^{L_i/10})²]$   (Fórmula 5)",
     "$d_n = (d − d_{ref}) / (1 − d_{ref})$   (Formula 7)": "$d_n = (d − d_{ref}) / (1 − d_{ref})$   (Fórmula 7)",
     "5° receiver steps · turntable rotates the sample · source fixed": "pasos de 5° entre receptores · la plataforma gira la probeta · fuente fija",
     # The metadiffuser chain (materials/diffusers/metadiffusers).
@@ -1549,9 +1546,9 @@ _ES: dict[str, str] = {
     "Amplifier": "Amplificador",
     "2.83 V (8 Ω)": "2,83 V (8 Ω)",
     "Characteristic sensitivity: $L_p$ at 1 m for 1 W into the rated impedance": "Sensibilidad característica: $L_p$ a 1 m para 1 W en la impedancia nominal",
-    "Up = √(R · 1 W): 2.83 V is 1 W into 8 Ω but 2 W into 4 Ω (+3 dB)": "Up = √(R · 1 W): 2,83 V es 1 W en 8 Ω pero 2 W en 4 Ω (+3 dB)",
-    "Lp(1 m) = Lp(r) + 20 log10(r / 1 m)   (far field, inverse-distance law)": "Lp(1 m) = Lp(r) + 20 log10(r / 1 m)   (campo lejano, ley 1/r)",
-    "Microphone (IEC 60268-4): M in mV/Pa, or LM = 20 log10(M / 1 V/Pa) dB": "Micrófono (IEC 60268-4): M en mV/Pa, o LM = 20 log10(M / 1 V/Pa) dB",
+    "$U_p$ = √($R$ · 1 W): 2.83 V is 1 W into 8 Ω but 2 W into 4 Ω (+3 dB)": "$U_p$ = √($R$ · 1 W): 2,83 V es 1 W en 8 Ω pero 2 W en 4 Ω (+3 dB)",
+    "$L_p$(1 m) = $L_{p}(r)$ + 20 $log_{10}$($r$ / 1 m)   (far field, inverse-distance law)": "$L_p$(1 m) = $L_{p}(r)$ + 20 $log_{10}$($r$ / 1 m)   (campo lejano, ley 1/r)",
+    "Microphone (IEC 60268-4): $M$ in mV/Pa, or $L_M$ = 20 $log_{10}$($M$ / 1 V/Pa) dB": "Micrófono (IEC 60268-4): $M$ en mV/Pa, o $L_M$ = 20 $log_{10}$($M$ / 1 V/Pa) dB",
     # Polar directional response (IEC 60268-5 clause 23)
     "Polar directional response measurement (IEC 60268-5 clause 23)": "Medición de la respuesta polar (IEC 60268-5, apartado 23)",
     "Anechoic room, plan view": "Cámara anecoica, vista en planta",
@@ -1924,7 +1921,7 @@ _ES: dict[str, str] = {
     "→ source quantities (Formulae 15–19):": "→ magnitudes de fuente (15–19):",
     "equivalent blocked force $L_{Fb,eq}$ ,": "fuerza bloqueada equivalente $L_{Fb,eq}$ ,",
     "$L_{Wsn}$ consumed by EN 12354-5": "$L_{Wsn}$ que consume EN 12354-5",
-    "spatial average:  Lv = 10 log10[(1/N)·Σ 10^(Lv,i/10)]   (Formula 12)": "promedio espacial:  Lv = 10 log10[(1/N)·Σ 10^(Lv,i/10)]   (Fórmula 12)",
+    "spatial average:  $L_v = 10 lg[(1/N)·Σ_i 10^{L_{v,i}/10}]$   (Formula 12)": "promedio espacial:  $L_v = 10 lg[(1/N)·Σ_i 10^{L_{v,i}/10}]$   (Fórmula 12)",
     # Installed structure-borne sound (EN 12354-5)
     "Installed structure-borne sound paths (EN 12354-5)": "Vías del sonido estructural de equipos instalados (EN 12354-5)",
     "Service equipment (pump)": "Equipo de servicio (bomba)",
@@ -1938,7 +1935,6 @@ _ES: dict[str, str] = {
     "per transmission path (18a)": "por vía de transmisión (18a)",
     "energetic sum $L_{n,s}$ (17)": "suma energética $L_{n,s}$ (17)",
     # Formula 17, symbols only: reads the same in Spanish.
-    "10 log10 Σ 10^(L_n,s,ij/10)": "10 log10 Σ 10^(L_n,s,ij/10)",
     "each path $i$ → $j$: excited element $i$, radiating element $j$ "
     "in the receiving room": "cada vía $i$ → $j$: elemento excitado $i$, elemento radiante $j$ "
     "en el recinto receptor",
@@ -1964,7 +1960,7 @@ _ES: dict[str, str] = {
     "equal angles": "ángulos iguales",
     "path difference  $δ = r_2 − r_1$": "diferencia de camino  $δ = r_2 − r_1$",
     "phase difference  $Δφ = 2π δ / λ$  (+ $arg Q$)": "diferencia de fase  $Δφ = 2π δ / λ$  (+ $arg Q$)",
-    "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = ground reflection coefficient)": "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = coeficiente de reflexión del suelo)",
+    "$p ∝ exp(i\u2009k\u2009r_1)/r_1 + Q·exp(i\u2009k\u2009r_2)/r_2$   ($Q$ = ground reflection coefficient)": "$p ∝ exp(i\u2009k\u2009r_1)/r_1 + Q·exp(i\u2009k\u2009r_2)/r_2$   ($Q$ = coeficiente de reflexión del suelo)",
     "in phase ($δ ≈ nλ$): up to +6 dB    ·    out of phase ($δ ≈ λ/2$ on hard ground): a deep dip": "en fase ($δ ≈ nλ$): hasta +6 dB  ·  en oposición ($δ ≈ λ/2$, suelo "
     "duro): mínimo profundo",
     # 2D FDTD wave simulation
@@ -2138,7 +2134,7 @@ _ES: dict[str, str] = {
     "métodos",
     "channel axis": "eje del canal",
     "sea surface: pressure release, $p = 0$": "superficie: presión nula, $p = 0$",
-    "bottom: Ψ(D) = 0 (pressure release) or dΨ/dz = 0 (rigid)": "fondo: Ψ(D) = 0 (presión nula) o dΨ/dz = 0 (rígido)",
+    "bottom: Ψ($D$) = 0 (pressure release) or dΨ/d$z$ = 0 (rigid)": "fondo: Ψ($D$) = 0 (presión nula) o dΨ/d$z$ = 0 (rígido)",
     "source, $z_s$": "fuente, $z_s$",
     "receiver, $z$": "receptor, $z$",
     "turning depth $z_t$:  $c(z_t) = c(z_s)/cos θ_0$": "profundidad de retorno $z_t$:  $c(z_t) = c(z_s)/cos θ_0$",
@@ -4367,8 +4363,7 @@ _ES: dict[str, str] = {
     "against 50 dBA": "frente a 50 dBA",
     "impact: L′nT (A.21) → L′nT,w on the ISO 717-2 reference curve of Table A.1, with no spectrum": "impactos: L′nT (A.21) → L′nT,w con la curva de referencia ISO 717-2 de la Tabla A.1, sin espectro",
     "a window: catalogue RA and RA,tr less 1 dB above 2.7 m², 2 dB above 3.6 m², 3 dB above 4.6 m²": "una ventana: RA y RA,tr de catálogo, 1 dB menos por encima de 2,7 m², 2 dB por encima de 3,6 m², 3 dB por encima de 4,6 m²",
-    "$I_x = −10 lg Σ_i 10$": "$I_x = −10 lg Σ_i 10$",
-    "$(L_{x,i} − X_i)/10$": "$(L_{x,i} − X_i)/10$",
+    "$I_x = −10 lg Σ_i 10^{(L_{x,i} − X_i)/10}$": "$I_x = −10 lg Σ_i 10^{(L_{x,i} − X_i)/10}$",
     "$X_i$: the band insulation; $L_{x,i}$: the spectrum of step 2; $i$: the eighteen bands": "$X_i$: el aislamiento de la banda; $L_{x,i}$: el espectro del paso 2; $i$: las dieciocho bandas",
     # From sixteen subjects to the effective A-weighted level (perception/hearing/hearing-protectors).
     "From sixteen subjects to the effective A-weighted level (ISO 4869-2)": "De dieciséis sujetos al nivel efectivo ponderado A (ISO 4869-2)",

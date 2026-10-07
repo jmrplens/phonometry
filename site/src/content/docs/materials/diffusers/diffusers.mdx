@@ -543,13 +543,14 @@ and the microphones must respond to every conceivable reflection path within
 $\pm 1$ dB and $\pm 10°$ (Clause 7.2). And the **same chain, on the same rig,
 must be run again over a flat reference panel of the same footprint**: that
 second set of levels is what supplies the $d_\mathrm{ref}$ of the normalised
-coefficient $d_\mathrm{norm}$ of Formula (7). A normalised coefficient quoted
+coefficient $d_\mathrm{n}$ of Formula (7). A normalised coefficient quoted
 against a reference measured elsewhere is not a normalised coefficient.
 
 *A note on symbols before the formulas.* ISO 17497-2 writes the normalised
-coefficient $d_\mathrm{n}$; this page writes it $d_\mathrm{norm}$, because section 3
-needs the subscript $n$ for the well index and writes $d_n$ for a well
-**depth**. In the same spirit, the $s_n$ of section 3 is a quadratic-residue
+coefficient $d_\mathrm{n}$, its n upright because it stands for "normalized",
+and this page writes it the same way; section 3 writes $d_n$, its n italic,
+for the **depth** of well $n$, so the slope of the subscript is what tells
+the two apart. In the same spirit, the $s_n$ of section 3 is a quadratic-residue
 depth index, not the scattering coefficient $s$ of section 1; the area factor
 $N_i$ below is unrelated to the sequence order $N$ of section 3; and the $n$
 of Formula (5) counts receivers, not wells.
@@ -734,10 +735,9 @@ d_ref = materials.directional_diffusion_coefficient(flat.levels)
 print(round(float(d_ref), 4))        # 0.0049
 
 # Normalise against the flat reference to isolate the diffuser's own effect
-# (Formula (7)): d_norm = (d - d_ref) / (1 - d_ref). ISO 17497-2 writes this
-# d_n; this page keeps the subscript n for the well index of section 3.
-d_norm = materials.normalized_diffusion_coefficient(d, d_ref)
-print(round(float(d_norm), 4))       # 0.1055
+# (Formula (7)): d_n = (d - d_ref) / (1 - d_ref).
+d_n = materials.normalized_diffusion_coefficient(d, d_ref)
+print(round(float(d_n), 4))          # 0.1055
 
 # Random-incidence value: average the band coefficients over source positions,
 # with the standard's 2-D weighting (0 deg -> 1, +/-30/+/-60 deg -> 3).
@@ -823,10 +823,10 @@ Because it is one frequency, one source direction and six repeats of one
 period: the grating lobes of a periodic array dominate a single-frequency
 polar response, and Formula (5) reads a fan of lobes as poor uniformity. The
 quantity that grades a product is the band-by-band random-incidence
-$d_\mathrm{norm}$, averaged over the source positions of Clause 8.4, which is
+$d_\mathrm{n}$, averaged over the source positions of Clause 8.4, which is
 both higher and smoother. Three reading rules follow:
 
-- Compare $d_\mathrm{norm}$, never $d$, between products of different size:
+- Compare $d_\mathrm{n}$, never $d$, between products of different size:
   the normalisation is what removes the edge diffraction that every finite
   panel shows and that grows as the panel shrinks.
 - Read the whole spectrum. Diffusion falls away below the frequency at which
@@ -845,7 +845,7 @@ $d(f)$ band-axis curve, with a boxed characterisation headline. Per Clause 8.4,
 the random-incidence coefficient is itself a per-band quantity, the average of
 the directional coefficients over the source positions band by band (**not** a
 mean across frequency), so `d` here is one coefficient per band. `verbose=True`
-adds the normalised $d_\mathrm{norm}$ column to the table (the curve always
+adds the normalised $d_\mathrm{n}$ column to the table (the curve always
 draws it as a companion when it is present).
 
 ```python
@@ -1236,7 +1236,7 @@ not mean uniform; decent $d$ does not mean much energy was scattered at all.
 - **The diffusion coefficient qualifies diffusers.** When the task is to break
   up an echo, a flutter or a focusing reflection, what matters is that the
   reflected energy is spread over angle, and $d$ measures exactly that. The
-  normalised $d_\mathrm{norm}$ (Formula (7)) additionally subtracts the edge
+  normalised $d_\mathrm{n}$ (Formula (7)) additionally subtracts the edge
   diffraction that every finite panel exhibits, so products of different sizes can be
   compared fairly.
 

@@ -1525,7 +1525,7 @@ def generate_cnossos_rail_roughness_shift(output_dir: str) -> None:
         pad=12,
     )
     ax.set_xlabel("1/3-octave band centre frequency [Hz]")
-    ax.set_ylabel(r"Total effective roughness $L_{R,\mathrm{TOT}}$ [dB re 1 μm]")
+    ax.set_ylabel(r"Total effective roughness $L_{\mathrm{R,TOT}}$ [dB re 1 μm]")
     ax.set_xlim(50.0, 10000.0)
     format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)

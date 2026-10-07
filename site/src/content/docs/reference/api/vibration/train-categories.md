@@ -15,17 +15,17 @@ railway's verdict altogether. The draft keeps the two assessment quantities
 and changes what feeds them:
 
 - every train passage counts as **one** clock interval, however long it
-  lasts (6.5.3.2), so $KB_{FTm,Zug}$ of Formula (5) is the r.m.s. of one
+  lasts (6.5.3.2), so $KB_\mathrm{FTm,Zug}$ of Formula (5) is the r.m.s. of one
   clock maximum per passage, with nothing set to zero below 0,1;
-- $KB_{F\mathrm{max}}$ of a railway is not the largest clock maximum
-  observed but **1,5 times** $KB_{FTm,Zug}$ of each category and the
+- $KB_\mathrm{Fmax}$ of a railway is not the largest clock maximum
+  observed but **1,5 times** $KB_\mathrm{FTm,Zug}$ of each category and the
   largest of those (Formulae (7) and (8)), because a single passage with a
   flat spot on a wheel is not what the line is like;
 - the assessment vibration severity of Formula (6) weights each category by
   the number of its trains in the period, out of the 1920 or 960 clock
   intervals of the day or the night, and by a **weighting factor**
-  $\alpha_{Zug}$ of Table 2 for the kind of train and whether the line
-  runs on the surface or underground: 0,7 for a tram on the surface, 1,3 for
+  $\alpha_\mathrm{Zug}$ of Table 2 for the kind of train and whether the
+  line runs on the surface or underground: 0,7 for a tram on the surface, 1,3 for
   a freight train over 600 m anywhere. A category whose r.m.s. is at or below
   0,1 enters Formula (6) as zero;
 - a line to be built new is held at night to an upper value of its own
@@ -33,14 +33,14 @@ and changes what feeds them:
   value in an industrial or commercial area and 0,3 elsewhere;
 - an existing line that is altered or extended is judged by the **change**
   it brings (6.5.3.6): the planned case is first held to the guide values as
-  any immission is, and where $A_o$ or $A_r$ is exceeded the
-  requirement still counts as met if $KB_{F\mathrm{max}}$ or
-  $KB_{FTr}$ grows by less than 25 % against the case without the
+  any immission is, and where $A_\mathrm{o}$ or $A_\mathrm{r}$ is exceeded the
+  requirement still counts as met if $KB_\mathrm{Fmax}$ or
+  $KB_\mathrm{FTr}$ grows by less than 25 % against the case without the
   project, which is the least increase a laboratory study found people to
   notice. The clause says the requirements are met if *one* of its
   conditions holds, and its own Example 9 sends a line whose
-  $KB_{F\mathrm{max}}$ does not change at all to mitigation because
-  $KB_{FTr}$ grows by more; every condition that applies has to hold
+  $KB_\mathrm{Fmax}$ does not change at all to mitigation because
+  $KB_\mathrm{FTr}$ grows by more; every condition that applies has to hold
   here, as in the example, and the sentence is in `docs/ERRATA.md`.
 
 E DIN 45672-3:2023-02, the draft prediction method for railways, takes the
@@ -79,16 +79,16 @@ The case without the project, the Prognosenullfall, is the existing
 line with its present or its forecast timetable; the planned case, the
 Prognoseplanfall, is the line with the project. The planned case is
 first held to the guide values in the order of 6.3: a
-$KB_{F\mathrm{max}}$ at or below $A_u$ meets the
-requirements on its own, and so does one at or below $A_o$ with a
-$KB_{FTr}$ at or below $A_r$, and then the change is beside
-the point. Where $KB_{F\mathrm{max}}$ exceeds $A_o$, or
-$KB_{FTr}$ exceeds $A_r$, the requirements still count as
+$KB_\mathrm{Fmax}$ at or below $A_\mathrm{u}$ meets the
+requirements on its own, and so does one at or below $A_\mathrm{o}$ with a
+$KB_\mathrm{FTr}$ at or below $A_\mathrm{r}$, and then the change is beside
+the point. Where $KB_\mathrm{Fmax}$ exceeds $A_\mathrm{o}$, or
+$KB_\mathrm{FTr}$ exceeds $A_\mathrm{r}$, the requirements still count as
 met if the quantity grows by less than 25 % against the case without the
 project; otherwise mitigation is to be looked into. Example 9 of Annex B
-finds a night-time $KB_{FTr}$ of 0,096 against 0,066 before, an
-increase of over 25 % above an $A_r$ of 0,07, and sends the
-project to mitigation although its $KB_{F\mathrm{max}}$ does not
+finds a night-time $KB_\mathrm{FTr}$ of 0,096 against 0,066 before, an
+increase of over 25 % above an $A_\mathrm{r}$ of 0,07, and sends the
+project to mitigation although its $KB_\mathrm{Fmax}$ does not
 change, which is why every condition that applies has to hold here and
 not one of them, as the clause is printed.
 
@@ -96,11 +96,11 @@ not one of them, as the clause is printed.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_fmax_before` | $KB_{F\mathrm{max}}$ of Formula (8) without the project. |
+| `kb_fmax_before` | $KB_\mathrm{Fmax}$ of Formula (8) without the project. |
 | `kb_fmax_after` | The same with the project. |
-| `kb_ftr_before` | $KB_{FTr}$ of Formula (6) without the project. |
+| `kb_ftr_before` | $KB_\mathrm{FTr}$ of Formula (6) without the project. |
 | `kb_ftr_after` | The same with the project. |
-| `guide` | The guide values of the planned case, from [`railway_guide_values`](/phonometry/reference/api/vibration/train-categories/#railway_guide_values) for the night-time $A_o$ of 6.5.3.6 b); they must be of the 2023 edition and of the same period. |
+| `guide` | The guide values of the planned case, from [`railway_guide_values`](/phonometry/reference/api/vibration/train-categories/#railway_guide_values) for the night-time $A_\mathrm{o}$ of 6.5.3.6 b); they must be of the 2023 edition and of the same period. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 
 **Returns:** The verdict, as a [`RailwayChange`](/phonometry/reference/api/vibration/train-categories/#railwaychange).
@@ -132,8 +132,8 @@ railway_guide_values(
 
 The guide values a line to be built new is held to (6.5.3.5).
 
-$A_u$ and $A_r$ are Table 1 of the draft, by day and by
-night, and $A_o$ is Table 1 by day. At night the upper value is the
+$A_\mathrm{u}$ and $A_\mathrm{r}$ are Table 1 of the draft, by day and by
+night, and $A_\mathrm{o}$ is Table 1 by day. At night the upper value is the
 line's own: 0,6 on the surface whatever the area; underground, the
 Table 1 value in an industrial or commercial area and 0,3 in a mixed,
 residential or sensitive one. The same values bound the planned case of
@@ -161,19 +161,19 @@ an altered or extended line (6.5.3.6 b)).
 railway_kb_fmax(kb_ftm_zug: ArrayLike) -> float
 ```
 
-The $KB_{F\mathrm{max}}$ of a railway, Formula (8).
+The $KB_\mathrm{Fmax}$ of a railway, Formula (8).
 
-The largest $KB_{F\mathrm{max},Zug}$ of Formula (7) over the
-categories, which is what the draft compares with $A_u$ and
-$A_o$.
+The largest $KB_\mathrm{Fmax,Zug}$ of Formula (7) over the
+categories, which is what the draft compares with $A_\mathrm{u}$ and
+$A_\mathrm{o}$.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm_zug` | $KB_{FTm,Zug}$ of each category. |
+| `kb_ftm_zug` | $KB_\mathrm{FTm,Zug}$ of each category. |
 
-**Returns:** $KB_{F\mathrm{max}}$.
+**Returns:** $KB_\mathrm{Fmax}$.
 
 **Raises**
 
@@ -209,11 +209,11 @@ The verdict of 6.5.3.6 on an altered or extended line.
 
 | Name | Description |
 | :--- | :--- |
-| `complies` | Whether the requirements count as met for the planned case: $KB_{F\mathrm{max}}$ keeps to $A_u$, or both the $KB_{F\mathrm{max}}$ and the $KB_{FTr}$ condition hold. |
-| `kb_fmax_met` | Whether $KB_{F\mathrm{max}}$ of the planned case keeps to $A_u$ or $A_o$, or exceeds $A_o$ by an increase under 25 % against the case without the project. |
-| `kb_ftr_met` | Whether $KB_{FTr}$ of the planned case keeps to $A_r$, or exceeds it by an increase under 25 %; true without looking when $KB_{F\mathrm{max}}$ keeps to $A_u$, which settles the verdict on its own. |
-| `kb_fmax_increase_percent` | The increase of $KB_{F\mathrm{max}}$, planned against existing, in per cent. |
-| `kb_ftr_increase_percent` | The same for $KB_{FTr}$. |
+| `complies` | Whether the requirements count as met for the planned case: $KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, or both the $KB_\mathrm{Fmax}$ and the $KB_\mathrm{FTr}$ condition hold. |
+| `kb_fmax_met` | Whether $KB_\mathrm{Fmax}$ of the planned case keeps to $A_\mathrm{u}$ or $A_\mathrm{o}$, or exceeds $A_\mathrm{o}$ by an increase under 25 % against the case without the project. |
+| `kb_ftr_met` | Whether $KB_\mathrm{FTr}$ of the planned case keeps to $A_\mathrm{r}$, or exceeds it by an increase under 25 %; true without looking when $KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, which settles the verdict on its own. |
+| `kb_fmax_increase_percent` | The increase of $KB_\mathrm{Fmax}$, planned against existing, in per cent. |
+| `kb_ftr_increase_percent` | The same for $KB_\mathrm{FTr}$. |
 | `guide` | The guide values the planned case was held to. |
 | `time_of_day` | `"day"` or `"night"`. |
 
@@ -231,26 +231,26 @@ train_assessment_severity(
 
 The assessment vibration severity of a railway, Formula (6).
 
-$KB_{FTr} = \sqrt{\sum_{Zug} \frac{n_{Zug}}{N_r} (\alpha_{Zug} KB_{FTm,Zug})^2}$: each category weighted by the trains it runs in the
-period, out of the $N_r$ = 1920 clock intervals of the day or 960
-of the night, and by its factor of Table 2. A category whose r.m.s. is
-at or below 0,1 enters as zero. The rest hours of the day are not
-applied to a railway (6.5.3.2). E DIN 45672-3:2023-02 Formula (11) is
-the same sum, printed without the sentence on 0,1. The categories are at
+$KB_\mathrm{FTr} = \sqrt{\sum_\mathrm{Zug} \frac{n_\mathrm{Zug}}{N_\mathrm{r}} (\alpha_\mathrm{Zug} KB_\mathrm{FTm,Zug})^2}$: each category weighted by the
+trains it runs in the period, out of the $N_\mathrm{r}$ = 1920 clock intervals
+of the day or 960 of the night, and by its factor of Table 2. A category
+whose r.m.s. is at or below 0,1 enters as zero. The rest hours of the day
+are not applied to a railway (6.5.3.2). E DIN 45672-3:2023-02 Formula (11)
+is the same sum, printed without the sentence on 0,1. The categories are at
 least one per track or direction and kind of train, and their trains are
-counted apart, so nothing bounds their sum by the intervals of the
-period: two tracks can each carry a train in the same interval.
+counted apart, so nothing bounds their sum by the intervals of the period:
+two tracks can each carry a train in the same interval.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm_zug` | $KB_{FTm,Zug}$ of each category, as [`train_category_rms`](/phonometry/reference/api/vibration/train-categories/#train_category_rms) gives them. |
-| `trains` | $n_{Zug}$, the trains of each category in the period, from the timetable. |
-| `alpha` | $\alpha_{Zug}$ of each category, from [`train_weighting_factor`](/phonometry/reference/api/vibration/train-categories/#train_weighting_factor), or one value for all. |
+| `kb_ftm_zug` | $KB_\mathrm{FTm,Zug}$ of each category, as [`train_category_rms`](/phonometry/reference/api/vibration/train-categories/#train_category_rms) gives them. |
+| `trains` | $n_\mathrm{Zug}$, the trains of each category in the period, from the timetable. |
+| `alpha` | $\alpha_\mathrm{Zug}$ of each category, from [`train_weighting_factor`](/phonometry/reference/api/vibration/train-categories/#train_weighting_factor), or one value for all. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 
-**Returns:** $KB_{FTr}$.
+**Returns:** $KB_\mathrm{FTr}$.
 
 **Raises**
 
@@ -266,20 +266,20 @@ train_category_rms(kb_fti_zug: ArrayLike) -> float
 
 The clock maximum r.m.s. of one category of train, Formula (5).
 
-$KB_{FTm,Zug} = \sqrt{\frac{1}{Z}\sum_{i=1}^{Z} KB^2_{FTi,Zug}}$ over
+$KB_\mathrm{FTm,Zug} = \sqrt{\frac{1}{Z}\sum_{i=1}^{Z} KB^2_{\mathrm{FT}i,\mathrm{Zug}}}$ over
 the $Z$ passages measured, one clock maximum per passage whatever
 the passage lasted. Unlike Formula (1) and the 1999 edition's (A.1), a
 maximum at or below 0,1 enters as it is: the suppression is applied to
 the category's r.m.s. in Formula (6), not to the passages (C.2), because
-$KB_{F\mathrm{max}}$ of Formula (7) is formed from this value.
+$KB_\mathrm{Fmax}$ of Formula (7) is formed from this value.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `kb_fti_zug` | $KB_{FTi,Zug}$ of each passage, dimensionless. |
+| `kb_fti_zug` | $KB_{\mathrm{FT}i,\mathrm{Zug}}$ of each passage, dimensionless. |
 
-**Returns:** $KB_{FTm,Zug}$.
+**Returns:** $KB_\mathrm{FTm,Zug}$.
 
 **Raises**
 
@@ -293,9 +293,9 @@ $KB_{F\mathrm{max}}$ of Formula (7) is formed from this value.
 train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]
 ```
 
-The $KB_{F\mathrm{max},Zug}$ of each category, Formula (7).
+The $KB_\mathrm{Fmax,Zug}$ of each category, Formula (7).
 
-$KB_{F\mathrm{max},Zug} = 1{,}5 \cdot KB_{FTm,Zug}$, the estimate the
+$KB_\mathrm{Fmax,Zug} = 1{,}5 \cdot KB_\mathrm{FTm,Zug}$, the estimate the
 draft uses instead of the largest clock maximum observed, which a single
 passage with an out-of-round wheel would decide. Formed from the value
 before rounding: Table B.1 prints 0,851 for a category whose r.m.s. it
@@ -305,9 +305,9 @@ prints as 0,568.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm_zug` | $KB_{FTm,Zug}$ of each category. |
+| `kb_ftm_zug` | $KB_\mathrm{FTm,Zug}$ of each category. |
 
-**Returns:** $KB_{F\mathrm{max},Zug}$ of each, in the same order.
+**Returns:** $KB_\mathrm{Fmax,Zug}$ of each, in the same order.
 
 **Raises**
 
@@ -337,7 +337,7 @@ TRAIN_KINDS = ('tram_metro', 's_bahn', 'passenger', 'freight', 'freight_long')
 train_weighting_factor(kind: str, *, alignment: str = 'surface') -> float
 ```
 
-The weighting factor $\alpha_{Zug}$ of Table 2 for one category.
+The weighting factor $\alpha_\mathrm{Zug}$ of Table 2 for one category.
 
 **Parameters**
 
@@ -346,7 +346,7 @@ The weighting factor $\alpha_{Zug}$ of Table 2 for one category.
 | `kind` | The kind of train, as [`TRAIN_KINDS`](/phonometry/reference/api/vibration/train-categories/#train_kinds) lists them. |
 | `alignment` | `"surface"` (default) or `"underground"`. |
 
-**Returns:** $\alpha_{Zug}$, dimensionless.
+**Returns:** $\alpha_\mathrm{Zug}$, dimensionless.
 
 **Raises**
 

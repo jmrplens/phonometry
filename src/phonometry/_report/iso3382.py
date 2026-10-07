@@ -248,7 +248,7 @@ def _parameter_table(result: RoomAcousticsResult, language: str = "en") -> Table
         fiche_paragraph("C<sub>50</sub> [dB]", head_style),
         fiche_paragraph("C<sub>80</sub> [dB]", head_style),
         fiche_paragraph("D<sub>50</sub>", head_style),
-        fiche_paragraph("T<sub>s</sub> [ms]", head_style),
+        fiche_paragraph("T<sub>S</sub> [ms]", head_style),
     ]
     rows: list[list[Any]] = [header]
     rows.extend(
@@ -632,9 +632,9 @@ def render_iso3382_report(
     flow.append(
         fiche_paragraph(
             t(
-                "C50/C80, D50 and Ts follow ISO 3382-1:2009 Equations (A.10), "
+                "C50/C80, D50 and TS follow ISO 3382-1:2009 Equations (A.10), "
                 "(A.11) and (A.13). The just-noticeable differences (Table A.1) "
-                "are 5 % for EDT/T, 1 dB for C80, 0.05 for D50 and 10 ms for Ts.",
+                "are 5 % for EDT/T, 1 dB for C80, 0.05 for D50 and 10 ms for TS.",
                 language,
             ),
             basis_strip_style,

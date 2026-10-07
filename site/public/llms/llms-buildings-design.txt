@@ -2244,7 +2244,7 @@ actually injects, and that force is not a property of the machine alone. Each
 hammer is a 0.5 kg mass dropped 40 mm, so it lands at
 $v_0 = \sqrt{2gh} = 0.886\ \text{m/s}$, ten times a second. If the impact were
 short compared with the 0.1 s between impacts, the momentum alone would fix
-the force, giving the line spectrum $|F_n| = 2 m v_0 / T_i$ and the band
+the force, giving the line spectrum $|F_n| = 2 m v_0 / T_\mathrm{i}$ and the band
 mean-square force $F_\mathrm{rms}^2 = 3.9 B$ that ISO 10140 measurements on
 concrete are usually reduced with.
 
@@ -2254,10 +2254,10 @@ mass-spring-dashpot whose pulse splits into two cases:
 
 - **over-critical**, $K m \ge 4 Z_\mathrm{dp}^2$: a single positive pulse, no
   rebound. This is a lightweight walking surface (chipboard, OSB), where the
-  spectrum tends to $|F_n|_\text{lower} = m v_0/T_i$;
+  spectrum tends to $|F_n|_\text{lower} = m v_0/T_\mathrm{i}$;
 - **under-critical**, $K m < 4 Z_\mathrm{dp}^2$: the hammer rebounds and only the
   first positive lobe counts. This is a concrete slab or a screed, where the
-  spectrum sits within 1 dB of $|F_n|_\text{upper} = 2 m v_0/T_i$ below 4 kHz
+  spectrum sits within 1 dB of $|F_n|_\text{upper} = 2 m v_0/T_\mathrm{i}$ below 4 kHz
   and the short-pulse estimate is adequate.
 
 The two limits are 6 dB apart in mean square, which is the whole reason a

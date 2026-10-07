@@ -1802,7 +1802,7 @@ def generate_tapping_force_spectrum(output_dir: str) -> None:
         linestyle="--",
         linewidth=1.6,
         zorder=4,
-        label=r"$|F_n|_{\mathrm{upper}} = 2\,m\,v_\mathrm{h}/T_\mathrm{i}$"
+        label=r"$|F_n|_{\mathrm{upper}} = 2\,m\,v_0/T_\mathrm{i}$"
         r"  (rebound)",
     )
     ax.axhline(
@@ -1811,7 +1811,7 @@ def generate_tapping_force_spectrum(output_dir: str) -> None:
         linestyle="-.",
         linewidth=1.6,
         zorder=4,
-        label=r"$|F_n|_{\mathrm{lower}} = m\,v_\mathrm{h}/T_\mathrm{i}$"
+        label=r"$|F_n|_{\mathrm{lower}} = m\,v_0/T_\mathrm{i}$"
         r"  (no rebound)",
     )
     ax.annotate(

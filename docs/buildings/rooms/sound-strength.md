@@ -10,7 +10,7 @@ that a calibrated source is needed for, the other being the late lateral
 sound level, which is referred to the same free field. Everything else on
 the
 [room acoustic parameters page](room-acoustics.md)
-(EDT, T20, T30, C50, C80, D50, $T_\mathrm{s}$) is a decay time, a ratio of
+(EDT, T20, T30, C50, C80, D50, $T_\mathrm{S}$) is a decay time, a ratio of
 energies or a centre time read from one recording alone, and survives any
 gain you put in front of it. $G$ does not.
 

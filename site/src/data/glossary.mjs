@@ -1089,7 +1089,7 @@ export const glossary = [
       },
       {
         id: "t-s",
-        symbol: "$T_\\mathrm{s}$",
+        symbol: "$T_\\mathrm{S}$",
         qualifier: {
           en: "centre time",
           es: "tiempo central",
@@ -1102,8 +1102,8 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Centre time: the centre of gravity of the squared impulse response in time, a boundary-free alternative to the clarity indices. It runs to tens of milliseconds in a room; the building-prediction guides write $T_\\mathrm{s}$ for something else entirely, the structural reverberation time of a plate, which is seconds.",
-          es: "Tiempo central: el centro de gravedad temporal de la respuesta al impulso al cuadrado, una alternativa a los índices de claridad sin frontera arbitraria. En una sala llega a decenas de milisegundos; las guías de predicción en edificación escriben $T_\\mathrm{s}$ para algo muy distinto, el tiempo de reverberación estructural de una placa, que se mide en segundos.",
+          en: "Centre time: the centre of gravity of the squared impulse response in time, a boundary-free alternative to the clarity indices. It runs to tens of milliseconds in a room; the building-prediction guides write $T_\\mathrm{s}$, with a lowercase s, for something else entirely, the structural reverberation time of a plate, which is seconds.",
+          es: "Tiempo central: el centro de gravedad temporal de la respuesta al impulso al cuadrado, una alternativa a los índices de claridad sin frontera arbitraria. En una sala llega a decenas de milisegundos; las guías de predicción en edificación escriben $T_\\mathrm{s}$, con s minúscula, para algo muy distinto, el tiempo de reverberación estructural de una placa, que se mide en segundos.",
         },
       },
       {

@@ -955,23 +955,7 @@ L 658.45 93.8
 L 658.45 87.5 
 L 640.45 87.5 
 z
-" style="fill: #2ca02c"/></g><g id="text_24"><!-- $A_r$, for the assessment severity --><g style="fill: #ffffff" transform="translate(665.65 93.8) scale(0.09 -0.09)"><defs><path id="DejaVuSans-Oblique-55" d="M 2853 2969 
-Q 2766 3016 2653 3041 
-Q 2541 3066 2413 3066 
-Q 1953 3066 1609 2717 
-Q 1266 2369 1153 1784 
-L 800 0 
-L 225 0 
-L 909 3500 
-L 1484 3500 
-L 1375 2956 
-Q 1603 3259 1920 3421 
-Q 2238 3584 2597 3584 
-Q 2691 3584 2781 3573 
-Q 2872 3563 2963 3538 
-L 2853 2969 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-49" d="M 2375 4863 
+" style="fill: #2ca02c"/></g><g id="text_24"><!-- $A_\mathrm{r}$, for the assessment severity --><g style="fill: #ffffff" transform="translate(665.65 93.8) scale(0.09 -0.09)"><defs><path id="DejaVuSans-49" d="M 2375 4863 
 L 2375 4384 
 L 1825 4384 
 Q 1516 4384 1395 4259 
@@ -991,7 +975,7 @@ Q 697 4328 969 4595
 Q 1241 4863 1831 4863 
 L 2375 4863 
 z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-24" transform="translate(0 0.02)"/><use xlink:href="#DejaVuSans-Oblique-55" transform="translate(68.41 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-f" transform="translate(99.92 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(131.71 0.02)"/><use xlink:href="#DejaVuSans-49" transform="translate(163.5 0.02)"/><use xlink:href="#DejaVuSans-52" transform="translate(198.7 0.02)"/><use xlink:href="#DejaVuSans-55" transform="translate(259.88 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(301 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(332.78 0.02)"/><use xlink:href="#DejaVuSans-4b" transform="translate(371.99 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(435.37 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(496.89 0.02)"/><use xlink:href="#DejaVuSans-44" transform="translate(528.68 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(589.96 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(642.06 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(694.16 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(755.68 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(807.78 0.02)"/><use xlink:href="#DejaVuSans-50" transform="translate(859.88 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(957.29 0.02)"/><use xlink:href="#DejaVuSans-51" transform="translate(1018.82 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(1082.2 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(1121.41 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(1153.19 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(1205.29 0.02)"/><use xlink:href="#DejaVuSans-59" transform="translate(1266.82 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(1326 0.02)"/><use xlink:href="#DejaVuSans-55" transform="translate(1387.52 0.02)"/><use xlink:href="#DejaVuSans-4c" transform="translate(1428.63 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(1456.42 0.02)"/><use xlink:href="#DejaVuSans-5c" transform="translate(1495.62 0.02)"/></g></g></g></g><g id="text_25"><!-- The guide values of DIN 4150-2 Table 1 by kind of area --><g style="fill: #ffffff" transform="translate(245.55 16.32) scale(0.12 -0.12)"><defs><path id="DejaVuSans-37" d="M -19 4666 
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-24" transform="translate(0 0.02)"/><use xlink:href="#DejaVuSans-55" transform="translate(68.41 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-f" transform="translate(99.92 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(131.71 0.02)"/><use xlink:href="#DejaVuSans-49" transform="translate(163.5 0.02)"/><use xlink:href="#DejaVuSans-52" transform="translate(198.7 0.02)"/><use xlink:href="#DejaVuSans-55" transform="translate(259.88 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(301 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(332.78 0.02)"/><use xlink:href="#DejaVuSans-4b" transform="translate(371.99 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(435.37 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(496.89 0.02)"/><use xlink:href="#DejaVuSans-44" transform="translate(528.68 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(589.96 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(642.06 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(694.16 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(755.68 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(807.78 0.02)"/><use xlink:href="#DejaVuSans-50" transform="translate(859.88 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(957.29 0.02)"/><use xlink:href="#DejaVuSans-51" transform="translate(1018.82 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(1082.2 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(1121.41 0.02)"/><use xlink:href="#DejaVuSans-56" transform="translate(1153.19 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(1205.29 0.02)"/><use xlink:href="#DejaVuSans-59" transform="translate(1266.82 0.02)"/><use xlink:href="#DejaVuSans-48" transform="translate(1326 0.02)"/><use xlink:href="#DejaVuSans-55" transform="translate(1387.52 0.02)"/><use xlink:href="#DejaVuSans-4c" transform="translate(1428.63 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(1456.42 0.02)"/><use xlink:href="#DejaVuSans-5c" transform="translate(1495.62 0.02)"/></g></g></g></g><g id="text_25"><!-- The guide values of DIN 4150-2 Table 1 by kind of area --><g style="fill: #ffffff" transform="translate(245.55 16.32) scale(0.12 -0.12)"><defs><path id="DejaVuSans-37" d="M -19 4666 
 L 3928 4666 
 L 3928 4134 
 L 2272 4134 

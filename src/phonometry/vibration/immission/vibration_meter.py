@@ -17,10 +17,10 @@ next to a railway, which is where DIN 45672-1 works. Frequency weighting
 (Formula (4)) divides that by :math:`1 - \mathrm{j}\,5{,}6\,\mathrm{Hz}/f`,
 one more pole and one more zero, and normalising by 1 mm/s turns the result
 into the dimensionless **KB signal**. Its running r.m.s. with
-:math:`\tau = 0{,}125` s (Formula (1)) is :math:`KB_F(t)`, the *weighted
+:math:`\tau = 0{,}125` s (Formula (1)) is :math:`KB_\mathrm{F}(t)`, the *weighted
 vibration severity*, and the quantities a meter displays are its maximum
-:math:`KB_{F\mathrm{max}}`, the maximum within each 30 s clock interval
-(*Takt*) and the r.m.s. of those clock maxima :math:`KB_{FTm}` (Formula (2)).
+:math:`KB_\mathrm{Fmax}`, the maximum within each 30 s clock interval
+(*Takt*) and the r.m.s. of those clock maxima :math:`KB_\mathrm{FTm}` (Formula (2)).
 
 **Two rules of Formula (2) that are easy to miss.** A clock maximum at or
 below 0,1 enters the sum as zero but still counts in :math:`N`, so a quiet
@@ -41,12 +41,12 @@ linear phase, which is why this module designs them as symmetric FIRs.
 
 **Where the printed check values come from, and where one of them does not.**
 Table 9 (folio 35) prints what a meter must display for a 1 mm/s sine at five
-frequencies, and its :math:`KB_F`, :math:`KB_{F\mathrm{max}}` and
-:math:`KB_{FTm}` rows are reproduced by this module to the three decimals they
+frequencies, and its :math:`KB_\mathrm{F}`, :math:`KB_\mathrm{Fmax}` and
+:math:`KB_\mathrm{FTm}` rows are reproduced by this module to the three decimals they
 are printed with, ripple and all. Its :math:`|v|_\mathrm{max}` row is not, and
 cannot be: at 31,5 Hz it prints 1,000 where Formula (5) gives 0,995, and at
 315 Hz it prints 0,249 where Formula (5) gives 0,100, while the
-:math:`KB_F` row of the same column follows Formula (5) at both. The table
+:math:`KB_\mathrm{F}` row of the same column follows Formula (5) at both. The table
 contradicts itself rather than the formula, so :data:`KB_TEST_INDICATIONS`
 carries the rows that agree with it and the other row is left to
 ``docs/ERRATA.md``.
@@ -763,9 +763,9 @@ class VibrationMeterReading:
     :ivar peak_velocity_mm_s: :math:`|v|_\mathrm{max}`, the largest absolute
         value of the band-limited velocity over the measuring time.
     :ivar kbf: The ``KB_F(t)`` signal, one value per sample.
-    :ivar kbf_max: :math:`KB_{F\mathrm{max}}`, its maximum.
+    :ivar kbf_max: :math:`KB_\mathrm{Fmax}`, its maximum.
     :ivar takt_maxima: The clock maxima, one per whole clock interval.
-    :ivar kbf_takt_rms: :math:`KB_{FTm}` of Formula (2).
+    :ivar kbf_takt_rms: :math:`KB_\mathrm{FTm}` of Formula (2).
     :ivar fs_hz: The sampling frequency the record was read at.
     :ivar measuring_time_s: :math:`T_M`, the length of the record.
     :ivar averaging_time_s: :math:`T_m`, the whole clock intervals in it.

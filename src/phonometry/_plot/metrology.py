@@ -18,9 +18,11 @@ if TYPE_CHECKING:
     from ..metrology.comparison_calibration import (
         ComparisonCalibration,
         ComparisonUncertaintyBudget,
+        DiameterSoundFieldCorrection,
         EnvironmentalSensitivityCorrection,
         FreeFieldRegion,
         ImpedancePressureRatio,
+        JigCouplerVerification,
         JigDiameterCorrection,
         RectangularPulse,
         SteppedSineImpulseResponse,
@@ -94,6 +96,7 @@ _SENSITIVITY_LEVEL_LABEL = "Sensitivity level [dB]"
 _FREQUENCY_LABEL = "Frequency [Hz]"
 _DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
 _CORRECTION_AXIS_LABEL = "Correction [dB]"
+_LEVEL_DIFFERENCE_LABEL = "Level difference [dB]"
 _REFERENCE_MIC_LABEL = r"$C_\mathrm{FF,RM}$, reference microphone"
 
 #: The axis of the uncertainty budgets of IEC 62585 Annex I, IEC 61094-5
@@ -2715,6 +2718,193 @@ def plot_jig_diameter_correction(
     return ax
 
 
+#: The title of a diameter correction and its second line, the geometry.
+_DIAMETER_TITLE = "Microphones of different diameters (IEC 61094-5 6.5)"
+_DIAMETER_SUBTITLE = r"$a$ = {a} mm, $b$ = {b} mm, outer {o} mm, $L$ = {l} mm"
+_DIAMETER_DOUBLED_LABEL = r"Correction at $2L$ = {l} mm"
+
+#: The title of the validation of a jig or coupler and its second line, what
+#: it was validated against.
+_VALIDATION_TITLE = "Validation of a jig or coupler (IEC 61094-5 6.7)"
+_VALIDATION_AGAINST: dict[str, str] = {
+    "comparison": "Against a calibration in another jig, coupler or field",
+    "reciprocity": "Against a reciprocity calibration",
+}
+_VALIDATION_BAND_LABEL = (
+    r"$\pm U_\Delta = \pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$"
+)
+_VALIDATION_DIFFERENCE_LABEL = r"$\Delta = L_\mathrm{cal} - L_\mathrm{val}$"
+_VALIDATION_FAILING_LABEL = r"$|\Delta| > U_\Delta$"
+_VALIDATION_UNCOVERED_LABEL = "Not covered by the validation"
+
+_STRINGS.update(
+    {
+        _DIAMETER_TITLE: "Micrófonos de distinto diámetro (IEC 61094-5, apartado 6.5)",
+        _DIAMETER_SUBTITLE: r"$a$ = {a} mm, $b$ = {b} mm, exterior {o} mm, $L$ = {l} mm",
+        r"Correction, $-20\lg|R_P|$": r"Corrección, $-20\lg|R_P|$",
+        _DIAMETER_DOUBLED_LABEL: r"Corrección a $2L$ = {l} mm",
+        _VALIDATION_TITLE: (
+            "Validación de un soporte o un acoplador (IEC 61094-5, apartado 6.7)"
+        ),
+        _VALIDATION_AGAINST[
+            "comparison"
+        ]: "Frente a una calibración en otro soporte, acoplador o campo",
+        _VALIDATION_AGAINST["reciprocity"]: "Frente a una calibración por reciprocidad",
+        _VALIDATION_BAND_LABEL: _VALIDATION_BAND_LABEL,
+        _VALIDATION_DIFFERENCE_LABEL: _VALIDATION_DIFFERENCE_LABEL,
+        _VALIDATION_FAILING_LABEL: _VALIDATION_FAILING_LABEL,
+        _VALIDATION_UNCOVERED_LABEL: "Sin cubrir por la validación",
+    }
+)
+
+
+def plot_diameter_sound_field_correction(
+    result: DiameterSoundFieldCorrection,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The correction of a test microphone smaller than its reference, by
+    the model of IEC 61094-5 6.5, and the same correction at twice the
+    separation.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.DiameterSoundFieldCorrection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the correction curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+
+    def millimetres(value: float) -> str:
+        return format_number(1000.0 * value, language, decimals=3)
+
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    style_default(kwargs, "zorder", 3)
+    kwargs.setdefault("label", _t(r"Correction, $-20\lg|R_P|$", language))
+    ax.plot(frequencies, result.correction_db, **kwargs)
+    ax.plot(
+        frequencies,
+        result.doubled_separation_correction_db,
+        color=_C_SECONDARY,
+        lw=1.2,
+        ls="--",
+        label=_t(
+            _DIAMETER_DOUBLED_LABEL,
+            language,
+            l=millimetres(2.0 * result.separation_m),
+        ),
+    )
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
+    ax.set_title(
+        _t(_DIAMETER_TITLE, language)
+        + "\n"
+        + _t(
+            _DIAMETER_SUBTITLE,
+            language,
+            a=millimetres(result.reference_radius_m),
+            b=millimetres(result.test_diaphragm_radius_m),
+            o=millimetres(result.test_outer_radius_m),
+            l=millimetres(result.separation_m),
+        )
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_jig_coupler_verification(
+    result: JigCouplerVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The difference of a calibration made in a jig or coupler and the one
+    it is validated against, inside the expanded uncertainty of the
+    difference, with the frequencies where they disagree marked and those of
+    the calibration the validation does not cover drawn as dashed vertical
+    lines (IEC 61094-5 6.7).
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.JigCouplerVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the difference curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    difference = np.asarray(result.difference_db, dtype=np.float64)
+    uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
+    ax.fill_between(
+        frequencies,
+        -uncertainty,
+        uncertainty,
+        color=theme_fill(_C_PRIMARY, ax),
+        lw=0.0,
+        label=_t(_VALIDATION_BAND_LABEL, language),
+    )
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    kwargs.setdefault("label", _t(_VALIDATION_DIFFERENCE_LABEL, language))
+    ax.plot(frequencies, difference, **kwargs)
+    failing = ~np.asarray(result.agrees, dtype=bool)
+    if np.any(failing):
+        ax.plot(
+            frequencies[failing],
+            difference[failing],
+            ls="none",
+            marker="x",
+            ms=8.0,
+            mew=2.0,
+            color=_C_REFERENCE,
+            label=_t(_VALIDATION_FAILING_LABEL, language),
+        )
+    uncovered = np.asarray(result.unvalidated_frequencies_hz, dtype=np.float64)
+    for index, frequency in enumerate(uncovered):
+        ax.axvline(
+            frequency,
+            color=_C_SECONDARY,
+            lw=1.4,
+            ls="--",
+            label=_t(_VALIDATION_UNCOVERED_LABEL, language)
+            if index == 0
+            else "_nolegend_",
+        )
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_LEVEL_DIFFERENCE_LABEL, language))
+    ax.set_title(
+        _t(_VALIDATION_TITLE, language)
+        + "\n"
+        + _t(_VALIDATION_AGAINST[result.validation], language)
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
 def _comparison_component_label(name: str, language: str) -> str:
     """The tick label of one component: its short name, or its own name."""
     label = _COMPARISON_COMPONENT_LABELS.get(name)
@@ -2966,7 +3156,7 @@ _STRINGS.update(
         r"$20\lg|R_P|$, test re reference": r"$20\lg|R_P|$, ensayo re referencia",
         r"Standard uncertainty, $|20\lg|R_P||/\sqrt{3}$": r"Incertidumbre típica, $|20\lg|R_P||/\sqrt{3}$",
         r"$\arg R_P$, test re reference": r"$\arg R_P$, ensayo re referencia",
-        "Level difference [dB]": "Diferencia de nivel [dB]",
+        _LEVEL_DIFFERENCE_LABEL: "Diferencia de nivel [dB]",
         _PHASE_AXIS_LABEL: "Fase [°]",
         "Rectangular pulse of the direct impulse method (IEC 61094-8 B.6, Formula (B.10))": "Pulso rectangular del método de impulso directo (IEC 61094-8, B.6, fórmula (B.10))",
         _PULSE_SUBTITLE: _PULSE_SUBTITLE,
@@ -3094,7 +3284,7 @@ def plot_impedance_pressure_ratio(
                 language,
             ),
         )
-        ax.set_ylabel(_t("Level difference [dB]", language))
+        ax.set_ylabel(_t(_LEVEL_DIFFERENCE_LABEL, language))
     else:
         kwargs.setdefault("label", _t(r"$\arg R_P$, test re reference", language))
         ax.plot(frequencies, result.phase_difference_deg, **kwargs)

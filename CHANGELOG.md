@@ -32,6 +32,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and 5.8.3 take the summation difference the other way round from equation
   (19), which the check follows as 5.8.5 instructs.
 
+- **Correct a working standard microphone smaller than its reference, for
+  any geometry, by the model IEC 61094-5 6.5 refers to.**
+  `metrology.diameter_sound_field_correction` computes the correction for a
+  test microphone facing a larger reference across a narrow gap, by the model
+  of Barham, Barrera-Figueroa and Avison (2014), the reference [1] of 6.5 and
+  the origin of Table A.1: the pressure in the gap as a series of the radial
+  modes of the cavity, averaged over each diaphragm with its radial
+  sensitivity. It takes the radii, the separation and the two resonance
+  frequencies, so it holds beyond the one jig and the fourteen frequencies of
+  Table A.1, and carries the correction at twice the separation, the change
+  A.2 names as approximately the uncertainty of the table. With the inputs of
+  the paper's Table 1 it is within 0.01 dB of every row of Table A.1 at the
+  reference air, and gives every row at 344.8 m/s. The paper's formulas, as
+  printed, do not give its own table; the library reads the radial
+  sensitivity less 1 and the annulus from the test microphone's outer radius,
+  which do, and the errata register records the defect.
+
+- **Give the impedance of the air between two microphones in a coupler.**
+  `metrology.air_gap_series_impedance_pa_s_m3` is the series impedance of the
+  air each microphone works into in a symmetric coupler driven at its middle,
+  from the circuit of Appendix B of Jarvis, NPL Report CIRA(EXT) 010 (1996),
+  the reference [2] of IEC 61094-5 Table D.1 and 7.4. Passed to
+  `impedance_pressure_ratio` as `coupling_impedance_pa_s_m3`, it gives the
+  ratio Appendix B prints, exactly, so the simultaneous excitation of Table
+  D.1 now has a value where it had a form; the conformance report reproduces
+  the appendix's example and its graphs, and the errata register records the
+  imaginary unit its first microphone's mass term has lost in the published
+  scan of the report.
+
+- **Validate a jig or a coupler by IEC 61094-5 6.7.**
+  `metrology.verify_jig_or_coupler` sets a pressure calibration made in a jig
+  or a coupler beside another calibration of the same microphone, a comparison
+  made elsewhere or the reciprocity calibration of a laboratory standard
+  microphone, and returns a `JigCouplerVerification`: the difference at every
+  frequency the two share against the root-sum-square of their expanded
+  uncertainties, the frequencies where they disagree and those the validation
+  does not cover, with `.passes` and a `.plot()` that draws the uncovered
+  frequencies beside the verdict. The clause prints no criterion; agreement
+  within that uncertainty is the library's reading.
+
 - **Analyse rail roughness by EN 15610 Method B, through digital one-third
   octave filters.** `environment.filtered_roughness_spectrum` runs a roughness
   record through one-third octave band filters along the rail, discards 2 m of

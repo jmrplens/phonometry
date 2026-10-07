@@ -199,3 +199,76 @@ IEC61094_8_B61_ZERO_RATIO = 10.0
 #: EN 61094-1:2000 which is IEC 61094-1:2000: "The value of κr shall be taken
 #: as 1,40" in the definition of the equivalent volume.
 IEC61094_1_KAPPA_REFERENCE = 1.40
+
+#: Barham, Barrera-Figueroa and Avison, "Secondary pressure calibration of
+#: measurement microphones", Metrologia 51 (2014) 129-138, reference [1] of
+#: IEC 61094-5:2016 6.5. Table 1 on page 135 (PDF page 8 of the IOPscience
+#: download, whose first page is a cover): the inputs of the model of its
+#: Formulas (1) to (5) for a type LS2 reference and a type WS3 test
+#: microphone, in mm and kHz as printed, keyed by the quantity's name.
+BARHAM_2014_TABLE_1: dict[str, float] = {
+    "ws3_overall_radius_mm": 2.975,
+    "ws3_diaphragm_radius_mm": 2.065,
+    "ls2_front_cavity_radius_mm": 4.650,
+    "ls2_diaphragm_radius_mm": 4.650,
+    "ls2_resonance_frequency_khz": 22.0,
+    "ws3_resonance_frequency_khz": 100.0,
+    "diaphragm_separation_mm": 0.5,
+}
+
+#: Barham et al. (2014) Table 2, the same page: the column "Correction/dB
+#: calculated with input data from table 1", keyed by frequency in Hz as the
+#: table prints it. IEC 61094-5:2016 adopts it as its Table A.1; a test holds
+#: the two transcriptions to each other row by row.
+BARHAM_2014_TABLE_2_CALCULATED_DB: dict[float, float] = {
+    1000.0: -0.004,
+    1250.0: -0.006,
+    1600.0: -0.009,
+    2000.0: -0.015,
+    2500.0: -0.023,
+    3150.0: -0.036,
+    4000.0: -0.059,
+    5000.0: -0.092,
+    6300.0: -0.146,
+    8000.0: -0.235,
+    10000.0: -0.367,
+    12500.0: -0.572,
+    16000.0: -0.933,
+    20000.0: -1.443,
+}
+
+#: The speed of sound, in m/s, at which the model reproduces every row of
+#: Table 2 to its printed rounding: the paper prints none. Any value from
+#: 344,78 m/s to 344,84 m/s does it; 344,8 m/s is about air at 21 °C.
+BARHAM_2014_SPEED_OF_SOUND = 344.8
+
+#: Jarvis, "Methods for determining the pressure sensitivity of working
+#: standard microphones: a report on Euromet project A311", NPL Report
+#: CIRA(EXT) 010 (1996), reference [2] of IEC 61094-5:2016, Appendix B on
+#: folio 25 (PDF page 28): the "typical values" of the acoustic impedance of an
+#: LS2P (r1, c1, m1) and a high sensitivity WS2P (r2, c2, m2), in N s m^-5,
+#: N^-1 m^5 and kg m^-4.
+JARVIS_1996_LS2P: tuple[float, float, float] = (330e6, 48e-15, 1210.0)
+JARVIS_1996_WS2P: tuple[float, float, float] = (7e7, 2.6e-13, 820.0)
+
+#: The same folio: the density of the air, kg m^-3, the ratio of principal
+#: specific heats and the static pressure, Pa, "taken to be".
+JARVIS_1996_AIR: tuple[float, float, float] = (1.21, 1.4, 101325.0)
+
+#: Folio 26 (PDF page 29): the coupler, "a tube of length L = .002 m and
+#: radius r = 1.27e-2/2 m giving a volume of v = 2.534e-7", in m and m^3.
+JARVIS_1996_TUBE: tuple[float, float] = (0.002, 1.27e-2 / 2.0)
+JARVIS_1996_VOLUME_M3 = 2.534e-7
+
+#: Folio 27 (PDF page 30): read off the two printed graphs of x = 20 lg|R|
+#: and arg R, for f = 100, 200 .. 20000 Hz, against their axes (each
+#: slightly skewed in the scan, corrected by the axis line beside the
+#: curve): the dip of the error in level, dB, and the frequency it is at, Hz;
+#: the error in level at 20 kHz, dB; the peak of the error in phase, degrees,
+#: and its frequency; and the error in phase at 20 kHz, where the curve ends,
+#: degrees. Each is a graph reading: about half a thousandth of a decibel
+#: and a hundredth of a degree.
+JARVIS_1996_GRAPH_DIP: tuple[float, float] = (-0.0065, 7000.0)
+JARVIS_1996_GRAPH_AT_20KHZ_DB = 0.025
+JARVIS_1996_GRAPH_PHASE_PEAK: tuple[float, float] = (0.16, 12500.0)
+JARVIS_1996_GRAPH_PHASE_AT_20KHZ_DEG = 0.09

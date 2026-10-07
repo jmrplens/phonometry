@@ -2427,6 +2427,94 @@ in the same order.
   tests and the conformance rows read; no change was required.
 - **Status:** unreported (national translation, not the issuing body's text).
 
+## Barham, Barrera-Figueroa & Avison (2014), Metrologia 51, 129, Formulas (1), (2) and (4) (a model that does not give its own Table 2)
+
+- **Location:** section 3.4 "Dissimilarity in reference and test microphones",
+  Formulas (1) to (5), Table 1 and Table 2 (printed p. 135). The paper is
+  reference [1] of IEC 61094-5:2016 6.5, which refers microphones of
+  different diameters to it, and the origin of the corrections of its Table
+  A.1. Non-normative source: a journal paper.
+- **The print:** Formula (1),
+  $u(r) = \sum D_n J_0(k_n r)\,\mathrm{e}^{\mathrm{i}\omega t}$, with "$k_n$ the
+  roots of $J_1(k_n) = 0$"; Formula (2),
+  $D_n = \frac{2}{a^2 J_0^2(k_n)} \int_b^a J_0(k_n r/a)\,r\,\mathrm{d}r$;
+  Formula (4), $S(r) = J_0(j_{01}\varpi r/a)/J_0(j_{01}\varpi)$. Table 1 lists
+  "WS3 microphone overall radius 2.975 mm" and "WS3 microphone diaphragm
+  radius (b) 2.065 mm", and no formula uses the first. Table 2 prints,
+  "calculated with input data from table 1", -0.004 dB at 1000 Hz,
+  -0.235 dB at 8000 Hz and -1.443 dB at 20 000 Hz, the column IEC 61094-5:2016
+  adopts as Table A.1.
+- **The problem:** evaluated as printed, with $b$ = 2.065 mm in (2) and in
+  (5), the model gives -0.003 dB, -0.190 dB and -0.986 dB at those
+  frequencies at 344.8 m/s, and no speed of sound gives the table: at
+  291.7 m/s its two ends round to the printed -0.004 dB and -1.443 dB, but
+  8000 Hz is then 0.033 dB off and 16 000 Hz 0.091 dB, and the best
+  compromise, about 296.5 m/s, still misses a row by 0.054 dB. Two readings
+  together give every row of Table 2 to its printed rounding, and neither
+  alone does: the radial sensitivity of (4) is the deflection of a membrane under a uniform
+  pressure, $J_0(j_{01}\varpi r/a)/J_0(j_{01}\varpi) - 1$, which is greatest
+  at the centre, as IEC 61094-5 6.5 says a microphone's sensitivity is, where
+  (4) as printed tends to a uniform sensitivity at low frequency; and the
+  lower limit of (2), the inner edge of the annulus through which the sound
+  enters the gap, is the overall radius, 2.975 mm, while the average of (5)
+  over the test microphone runs over its diaphragm radius $b$. Formula (1)
+  besides writes $J_0(k_n r)$ where (2) and (3) write $J_0(k_n r/a)$: with
+  $k_n$ a pure number, the argument of (1) has the dimension of a length. The
+  paper prints no speed of sound; at 344.8 m/s the two readings reproduce all
+  fourteen rows to the thousandth of a decibel, and at the 345.9 m/s of the
+  air of IEC 61094-5 clause 4 within 0.01 dB.
+- **Evidence:** the model recomputed as printed and in the two readings,
+  against Table 2. Verified on PDF page 8 (printed p. 135) of Metrologia 51
+  (2014) 129-138, doi:10.1088/0026-1394/51/3/129, the IOPscience download whose
+  first page is a cover sheet.
+- **Library behaviour:** `metrology.diameter_sound_field_correction` computes
+  the model in the two readings, with $k_n r/a$ in (1); the conformance rows on
+  IEC 61094-5 6.5 reproduce Table A.1 from the inputs of Table 1
+  ([`tests/metrology/test_comparison_diameter_gap_validation.py`](../tests/metrology/test_comparison_diameter_gap_validation.py)).
+- **Status:** unreported (journal paper rather than a standard).
+
+## Jarvis (1996), NPL Report CIRA(EXT) 010, Appendix B (the imaginary unit of the first microphone's mass missing from the published scan)
+
+- **Location:** Appendix B "Uncertainties caused by differences in acoustic
+  impedance between the test and reference microphones" (printed folio 25),
+  the acoustic impedances of the two microphones of the example. The report
+  is reference [2] of IEC 61094-5:2016, which refers the air between two
+  microphones to it in Table D.1 and in 7.4. Non-normative source: a
+  laboratory report.
+- **The print:** the parameters are listed as $r_1$, "$c$ = 48·10^-15" and
+  $m_1$ for the LS2P, and $r_2$, $c_2$ and $m_2$ for the high sensitivity WS2P;
+  the impedances read
+  $Z_{m1}(w) = r_1 + w\cdot\ m + \frac{1}{\mathrm{i}\cdot w\cdot c_1}$ and
+  $Z_{m2}(w)\ \ r_2 + w\cdot\mathrm{i}\cdot m_2 + \frac{1}{\mathrm{i}\cdot w\cdot c_2}$.
+- **The problem:** the mass term of the first microphone shows neither the
+  imaginary unit of the second's nor its subscript, and its compliance is
+  listed as $c$ against the $c_1$ the formula uses. Read literally, $w\,m_1$
+  is a resistance, not the reactance of a mass, and the circuit then gives
+  0.117° and 0.0273 dB at 20 kHz, where the two graphs printed on folio 27
+  end at about 0.09° and 0.025 dB;
+  $r_1 + \mathrm{i}\,w\,m_1 + 1/(\mathrm{i}\,w\,c_1)$ gives 0.089° and
+  0.0255 dB there, and the dip of about -0.0065 dB near 7 kHz and the phase
+  peak of about 0.16° near 12.5 kHz that the graphs show. The glyphs were
+  most likely lost in the reproduction rather than left out by the author:
+  the folio is a worksheet whose graphs are computed from the expressions it
+  displays, and blank space stands exactly where "i·" and the subscript "1"
+  belong, as it does where the same folio loses other thin glyphs, the
+  ":=" after $Z_{m2}(w)$, $\kappa$ and $p_0$ and the subscript of $c_1$ in
+  its definition.
+- **Evidence:** the two impedances as the scan shows them, the blank space
+  in place of the missing glyphs, and the circuit of the same appendix
+  recomputed with each reading against the printed graphs, the phase at
+  20 kHz telling the two apart most clearly. Verified on PDF pages 28 and 30
+  (printed pp. 25 and 27) of NPL Report CIRA(EXT) 010 (1996), the scan the
+  National Physical Laboratory publishes.
+- **Library behaviour:** `metrology.air_gap_series_impedance_pa_s_m3` is
+  checked against the ratio Appendix B prints, with $\mathrm{i}\,w\,m_1$, and
+  against the extremes of the graphs and their values at 20 kHz (the
+  conformance rows on Jarvis 1996,
+  [`tests/metrology/test_comparison_diameter_gap_validation.py`](../tests/metrology/test_comparison_diameter_gap_validation.py)).
+- **Status:** unreported (laboratory report rather than a standard, and a
+  defect of the published scan).
+
 ## IEC 61094-8:2012, 8.4 (an unresolved cross-reference)
 
 - **Location:** subclause 8.4 "Differences between the sound pressure applied

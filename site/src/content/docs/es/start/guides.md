@@ -280,8 +280,8 @@ IEC 61094-2, IEC 61094-3, IEC 61094-5, IEC 61094-8 y la GUM.
 - [Calibrar un micrófono por comparación (IEC 61094-5/-8)](/phonometry/es/signals/metrology/comparison-calibration/):
   un micrófono patrón de trabajo calibrado frente a una referencia en un
   acoplador o en campo libre, con el intercambio del Anexo C, el monitor de
-  una sustitución, las correcciones y los balances de la Tabla D.1 y de la
-  Tabla 2.
+  una sustitución, las correcciones, la validación de un soporte o un
+  acoplador y los balances de la Tabla D.1 y de la Tabla 2.
 - [Calibración por reciprocidad (IEC 61094-2/-3)](/phonometry/es/signals/metrology/reciprocity-calibration/):
   micrófonos patrón de laboratorio calibrados por pares sin referencia, en un
   acoplador con sus correcciones por conducción térmica y por tubos capilares

@@ -3,14 +3,14 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1884,
-    "passing": 1884,
+    "checks": 1891,
+    "passing": 1891,
     "failing": 0,
     "domains": 111,
-    "standards": 521,
-    "citations": 1330,
+    "standards": 523,
+    "citations": 1337,
     "designations": 227,
-    "sources": 123
+    "sources": 125
   },
   "units": [
     "%",
@@ -667,8 +667,8 @@
     {
       "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
       "title": "Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)",
-      "checks": 25,
-      "passing": 25
+      "checks": 32,
+      "passing": 32
     },
     {
       "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
@@ -49909,6 +49909,135 @@
       "verdict": "pass"
     },
     {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-6-5-table-a-1-barham-et-al-2014-formulas-1-to-5-tables-1-and-2/correction-of-a-ws3-microphone-by-the-model-of-1-from-the-inputs-of-its-table-1-14-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 6.5, Table A.1; Barham et al. (2014) Formulas (1) to (5), Tables 1 and 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "6.5, Table A.1"
+          },
+          {
+            "kind": "article",
+            "designation": "Barham et al.",
+            "edition": "(2014)",
+            "clause": "Formulas (1) to (5), Tables 1 and 2",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Correction of a WS3 microphone by the model of [1] from the inputs of its Table 1, 14 frequencies",
+      "kind": "count",
+      "expected": {
+        "value": 14.0,
+        "label": "14/14 corrections of Table A.1"
+      },
+      "computed": {
+        "value": 14.0,
+        "label": "14/14 corrections of Table A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-6-5-table-a-1-and-its-note-barham-et-al-2014-table-1/largest-deviation-of-the-model-at-the-reference-air-of-clause-4-from-table-a-1-against-a-tenth-of-the-10-its-note-allows",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 6.5, Table A.1 and its NOTE; Barham et al. (2014) Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "6.5, Table A.1 and its NOTE"
+          },
+          {
+            "kind": "article",
+            "designation": "Barham et al.",
+            "edition": "(2014)",
+            "clause": "Table 1",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Largest deviation of the model at the reference air of clause 4 from Table A.1, against a tenth of the 10 % its NOTE allows",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "Table A.1, within 0.0144 dB (a tenth of 10 % of 1.443 dB)"
+      },
+      "computed": {
+        "value": 0.0093,
+        "label": "max deviation 0.0093 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.014430000000000004
+      },
+      "deviation": {
+        "value": 0.0093
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-a-2-table-a-1-note-barham-et-al-2014-formulas-1-to-5/correction-at-twice-the-separation-the-change-a-2-names-against-the-model-evaluated-at-twice-the-distance-14-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 A.2, Table A.1 NOTE; Barham et al. (2014) Formulas (1) to (5)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "A.2, Table A.1 NOTE"
+          },
+          {
+            "kind": "article",
+            "designation": "Barham et al.",
+            "edition": "(2014)",
+            "clause": "Formulas (1) to (5",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Correction at twice the separation, the change A.2 names, against the model evaluated at twice the distance, 14 frequencies",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the model at L = 1.0 mm, every row"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max deviation 0.000000000000 dB; the change is 5.4 % to 6.3 % of each correction, where A.2 observed approximately 10 %"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
       "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-formulas-c-1-to-c-3/sensitivity-level-of-the-test-microphone-through-the-interchange-whatever-the-channel-gains-source-drift-and-field-asymmetry",
       "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
       "reference": {
@@ -50324,6 +50453,151 @@
       "computed": {
         "value": 2.0,
         "label": "2/2 relations of E.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-table-d-1-microphone-impedance-7-4-jarvis-1996-npl-cira-ext-010-appendix-b/ratio-of-the-pressures-on-an-ls2p-and-a-high-sensitivity-ws2p-in-the-coupler-of-2-against-the-ladder-it-prints-200-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Table D.1 (Microphone impedance), 7.4; Jarvis (1996) NPL CIRA(EXT) 010 Appendix B",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Table D.1 (Microphone impedance), 7.4"
+          },
+          {
+            "kind": "article",
+            "designation": "Jarvis",
+            "edition": "(1996)",
+            "clause": "NPL CIRA(EXT) 010 Appendix B",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Ratio of the pressures on an LS2P and a high sensitivity WS2P in the coupler of [2], against the ladder it prints, 200 frequencies",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "P1/P2 of Appendix B at all 200 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation 0.000000000000"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/jarvis-1996-npl-cira-ext-010-appendix-b-folio-26/volume-of-the-coupler-of-the-example-v-pi-r-2-l",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, folio 26",
+        "documents": [
+          {
+            "kind": "article",
+            "designation": "Jarvis",
+            "edition": "(1996)",
+            "clause": "NPL CIRA(EXT) 010 Appendix B, folio 26"
+          }
+        ]
+      },
+      "quantity": "Volume of the coupler of the example, v = pi r^2 L",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.534e-07,
+        "label": "2.534e-7 m³ as printed (+/-0.0005e-7 m³, its last digit)"
+      },
+      "computed": {
+        "value": 2.5335e-07,
+        "label": "2.53353e-07 m³"
+      },
+      "unit": "m³",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-11
+      },
+      "deviation": {
+        "value": -5e-11
+      },
+      "precision": 11,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/jarvis-1996-npl-cira-ext-010-appendix-b-graph-on-folio-27/dip-and-value-at-20-khz-of-the-error-in-level-and-peak-and-value-at-20-khz-of-the-error-in-phase-read-off-the-printed-graphs",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, graph on folio 27",
+        "documents": [
+          {
+            "kind": "article",
+            "designation": "Jarvis",
+            "edition": "(1996)",
+            "clause": "NPL CIRA(EXT) 010 Appendix B, graph on folio 27"
+          }
+        ]
+      },
+      "quantity": "Dip and value at 20 kHz of the error in level, and peak and value at 20 kHz of the error in phase, read off the printed graphs",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 readings of the graphs"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 readings of the graphs"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-6-7/a-jig-validated-against-a-reciprocity-calibration-on-a-grid-of-its-own-agreement-within-the-root-sum-square-of-the-two-expanded-uncertainties-5-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 6.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "6.7"
+          }
+        ]
+      },
+      "quantity": "A jig validated against a reciprocity calibration on a grid of its own: agreement within the root-sum-square of the two expanded uncertainties, 5 frequencies",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 verdicts"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 verdicts"
       },
       "tolerance": {
         "mode": "absolute",

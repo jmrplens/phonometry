@@ -268,7 +268,8 @@ and the GUM.
 - [Microphone Calibration by Comparison (IEC 61094-5/-8)](/phonometry/signals/metrology/comparison-calibration/):
   a working standard microphone calibrated against a reference in a coupler
   or a free field, with the interchange of Annex C, the monitor of a
-  substitution, the corrections and the budgets of Table D.1 and Table 2.
+  substitution, the corrections, the validation of a jig or coupler and the
+  budgets of Table D.1 and Table 2.
 - [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](/phonometry/signals/metrology/reciprocity-calibration/):
   laboratory standard microphones calibrated in pairs with no reference, in a
   coupler with its heat-conduction and capillary corrections or in a free

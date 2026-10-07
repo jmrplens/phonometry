@@ -362,6 +362,14 @@ def _area_members() -> dict[str, list[str]]:
 #: therefore carry several splits, and each is a grouping the domain already
 #: makes rather than a cut chosen to fit the budget.
 #:
+#: ``signals/metrology`` has nine, and its own overview climbs a chain: the
+#: instruments a laboratory grades, then "one step up the chain, to the
+#: microphone itself", the comparison of IEC 61094-5 and IEC 61094-8, and "the
+#: top of that chain", the reciprocity of IEC 61094-2 and IEC 61094-3. The two
+#: microphone calibrations of the IEC 61094 series carve out, which leaves the
+#: calibration of a recording, the uncertainty, the data qualification and the
+#: verdicts on meters and their corrections in the folder's own shard.
+#:
 #: In all of them, the leaf names are guide filenames and the label mirrors the
 #: heading. The carved-out shard has no page of its own, so its Overview link
 #: still resolves to the parent folder (see _shard_folders and _shard_label
@@ -424,6 +432,13 @@ MANUAL_SPLITS: dict[str, tuple[tuple[str, str, tuple[str, ...]], ...]] = {
                 "enclosure-cabin-insulation",
                 "in-situ-noise-control",
             ),
+        ),
+    ),
+    "signals/metrology": (
+        (
+            "signals-metrology-microphones",
+            "Microphone calibration (IEC 61094)",
+            ("comparison-calibration", "reciprocity-calibration"),
         ),
     ),
     "buildings/rooms": (

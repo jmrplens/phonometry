@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1884/1884 conformance checks pass** across 111 domains and 521 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1891/1891 conformance checks pass** across 111 domains and 523 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -37,12 +37,12 @@
 | DIN 4150-2:1999-06 Annex C, Example 5 | KB_FTr with hammer b) in the rest hours, Formula (5) | 0.195 | -0.005 | 100 % |
 | DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm over the record with the passage maxima alone | 0.3175 | -0.0005 | 100 % |
 | E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the metro north by Formula (5) | 0.0365 | -0.0005 | 100 % |
+| Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, folio 26 | Volume of the coupler of the example, v = pi r^2 L | 2.53353e-07 m³ | -0.00000000005 m³ | 100 % |
 | Long 2e Table 14.9 (worked duct-borne sheet, supply path) | Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver | 1 dB | 1 dB | 100 % |
 | ISO 11820:1996 Eq. (31) / VDI 2081 Blatt 2:2005-05 Tabelle 1, PDF page 12, folio 12 | The mean velocity in the passages of a splitter silencer carrying 16 000 m3/h, from the face velocity and the area ratio | 14.815 m/s | 0.005 m/s | 100 % |
 | E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 4 Hz by Formula (1) | 28.8 dB | -0.1 dB | 100 % |
 | ISO 11820:1996 Table 1 | The printed table is a rounded version of the logarithmic subtraction and departs from it by under 0,35 dB | largest departure 0.349 dB | 0.3491 dB | 100 % |
 | IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
-| ISO 11820:1996 Eqs. (17) and (18) / Barron (2003) Table 3-4, PDF page 84, folio 72 | The energy subtraction at one measuring point, over the twenty-two printed margins from 1 dB to 20 dB | worst departure 0.050 dB | 0.0496 dB | 99 % |
 
 <details>
 <summary><b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
@@ -2254,7 +2254,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (25/25)</summary>
+<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (32/32)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -2264,6 +2264,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61094-5:2016 D.3 | Combined standard uncertainty by the strict calculation in linear form | 0.043614 dB (0.043669 dB in decibels) | 0.043614 dB | 0 dB | 24 % | ![Pass][cv-pass] Pass |
 | IEC 61094-5:2016 Table A.1 | Correction of a WS3 microphone against an LS2aP in the jig of Figure A.4, 14 frequencies | 14/14 corrections of Table A.1 | 14/14 corrections of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-5:2016 Table A.1 NOTE | Expanded uncertainty of the correction at 20 kHz, a tenth of its value | 0.1443 dB (+/-0 dB) | 0.1443 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 6.5, Table A.1; Barham et al. (2014) Formulas (1) to (5), Tables 1 and 2 | Correction of a WS3 microphone by the model of [1] from the inputs of its Table 1, 14 frequencies | 14/14 corrections of Table A.1 | 14/14 corrections of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 6.5, Table A.1 and its NOTE; Barham et al. (2014) Table 1 | Largest deviation of the model at the reference air of clause 4 from Table A.1, against a tenth of the 10 % its NOTE allows | Table A.1, within 0.0144 dB (a tenth of 10 % of 1.443 dB) | max deviation 0.0093 dB | 0.0093 dB | 64 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 A.2, Table A.1 NOTE; Barham et al. (2014) Formulas (1) to (5) | Correction at twice the separation, the change A.2 names, against the model evaluated at twice the distance, 14 frequencies | the model at L = 1.0 mm, every row | max deviation 0.000000000000 dB; the change is 5.4 % to 6.3 % of each correction, where A.2 observed approximately 10 % | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-5:2016 Formulas (C.1) to (C.3) | Sensitivity level of the test microphone through the interchange, whatever the channel gains, source drift and field asymmetry | the test microphone's level at all 5 frequencies | max deviation 0.000000000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-5:2016 D.2 | M_test = M_ref x R_V / R_P in linear form against the level form | M_ref x R_V / R_P at all 5 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 A.2 | Monitor ratios cancel a source that drifts between the two measurements | the test microphone's level at all 5 frequencies | max deviation 0.000000000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
@@ -2276,6 +2279,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61094-2:2009 Formula (3); IEC 61094-5:2016 7.4 | Pressure ratio of a substitution in a closed coupler against the admittance sums of Formula (3), 7 frequencies | the ratio of the two sums of Formula (3) at all 7 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-5:2016 Table D.1 (Microphone impedance), 7.4 | Pressure on each microphone behind the air between them, in series, 7 frequencies | p0 Z_a/(Z_a + Z_x) for each microphone, at all 7 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-2:2009 E.4; IEC 61094-1:2000 6.2.2 | Lumped equivalent volume: no imaginary impedance at the resonance, and the loss factor r_a 2 pi f0 c_a | 2/2 relations of E.4 | 2/2 relations of E.4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 Table D.1 (Microphone impedance), 7.4; Jarvis (1996) NPL CIRA(EXT) 010 Appendix B | Ratio of the pressures on an LS2P and a high sensitivity WS2P in the coupler of [2], against the ladder it prints, 200 frequencies | P1/P2 of Appendix B at all 200 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, folio 26 | Volume of the coupler of the example, v = pi r^2 L | 2.534e-7 m³ as printed (+/-0.0005e-7 m³, its last digit) | 2.53353e-07 m³ | -0.00000000005 m³ | 100 % | ![Pass][cv-pass] Pass |
+| Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, graph on folio 27 | Dip and value at 20 kHz of the error in level, and peak and value at 20 kHz of the error in phase, read off the printed graphs | 6/6 readings of the graphs | 6/6 readings of the graphs | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 6.7 | A jig validated against a reciprocity calibration on a grid of its own: agreement within the root-sum-square of the two expanded uncertainties, 5 frequencies | 6/6 verdicts | 6/6 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 B.6.1, Formula (B.10) | Spectrum of a rectangular pulse of a = 10 V and b = 2,5 µs at 6 frequencies, as printed | Formula (B.10) at all 6 frequencies | max deviation 0.000000000000 of 2ab | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 B.6.1 | First zero of the pulse spectrum, f = 1/(2b), for b = 2,5 µs | 200000 Hz (+/-0 Hz) | 200000 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 B.6.1 | Half-duration b for a first zero an order of magnitude above 20 kHz, 'just a few microseconds' | 2.5 µs ('just a few microseconds') | 2.5 µs | 0 µs | 0 % | ![Pass][cv-pass] Pass |

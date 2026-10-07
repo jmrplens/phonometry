@@ -46,6 +46,8 @@ _LANG = "en"
 _LANG_SUFFIX = ""
 
 _ES_EXACT = {
+    # IEC 61094-5 6.5: the rows of Table A.1 beside the model they come from.
+    "Table A.1": "Tabla A.1",
     "One surface, two laboratories and a solver": "Una superficie, dos laboratorios y un solver",
     "Measured, team 1 (ISO 17497-1)": "Medido, equipo 1 (ISO 17497-1)",
     "Measured, team 2 (ISO 17497-1)": "Medido, equipo 2 (ISO 17497-1)",

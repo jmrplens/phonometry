@@ -2610,6 +2610,97 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Estado:** sin notificar (traducción nacional, no el texto del organismo
   emisor).
 
+## Barham, Barrera-Figueroa & Avison (2014), Metrologia 51, 129, fórmulas (1), (2) y (4) (un modelo que no da su propia tabla 2)
+
+- **Ubicación:** apartado 3.4 «Dissimilarity in reference and test
+  microphones», fórmulas (1) a (5), tabla 1 y tabla 2 (p. 135 impresa). El
+  artículo es la referencia [1] de IEC 61094-5:2016 6.5, que remite a él los
+  micrófonos de distinto diámetro, y el origen de las correcciones de su tabla
+  A.1. Fuente no normativa: un artículo de revista.
+- **El impreso:** la fórmula (1),
+  $u(r) = \sum D_n J_0(k_n r)\,\mathrm{e}^{\mathrm{i}\omega t}$, con «$k_n$ the
+  roots of $J_1(k_n) = 0$»; la fórmula (2),
+  $D_n = \frac{2}{a^2 J_0^2(k_n)} \int_b^a J_0(k_n r/a)\,r\,\mathrm{d}r$; la
+  fórmula (4), $S(r) = J_0(j_{01}\varpi r/a)/J_0(j_{01}\varpi)$. La tabla 1
+  recoge «WS3 microphone overall radius 2.975 mm» y «WS3 microphone diaphragm
+  radius (b) 2.065 mm», y ninguna fórmula usa el primero. La tabla 2 imprime,
+  «calculated with input data from table 1», -0.004 dB a 1000 Hz, -0.235 dB a
+  8000 Hz y -1.443 dB a 20 000 Hz, la columna que IEC 61094-5:2016 adopta como
+  tabla A.1.
+- **El problema:** evaluado tal como se imprime, con $b$ = 2.065 mm en (2) y en
+  (5), el modelo da -0.003 dB, -0.190 dB y -0.986 dB a esas frecuencias a
+  344.8 m/s, y ninguna velocidad del sonido da la tabla: a 291.7 m/s sus dos
+  extremos redondean a los -0.004 dB y -1.443 dB impresos, pero entonces
+  8000 Hz se desvía 0.033 dB y 16 000 Hz 0.091 dB, y el mejor compromiso,
+  unos 296.5 m/s, aún falla una fila por 0.054 dB. Dos lecturas
+  juntas dan todas las filas de la tabla 2 con su redondeo impreso, y ninguna
+  de las dos sola lo hace: la sensibilidad radial de (4) es la deflexión de una
+  membrana bajo una presión uniforme,
+  $J_0(j_{01}\varpi r/a)/J_0(j_{01}\varpi) - 1$, que es máxima en el centro,
+  como dice IEC 61094-5 6.5 que es la sensibilidad de un micrófono, mientras
+  que (4) tal como se imprime tiende a una sensibilidad uniforme a baja
+  frecuencia; y el límite inferior de (2), el borde interior de la corona por
+  la que el sonido entra en el hueco, es el radio exterior, 2.975 mm, mientras
+  que el promedio de (5) sobre el micrófono en ensayo recorre el radio de su
+  membrana, $b$. La fórmula (1) escribe además $J_0(k_n r)$ donde (2) y (3)
+  escriben $J_0(k_n r/a)$: siendo $k_n$ un número puro, el argumento de (1)
+  tiene dimensión de longitud. El artículo no imprime ninguna velocidad del
+  sonido; a 344.8 m/s las dos lecturas reproducen las catorce filas a la
+  milésima de decibelio, y a los 345.9 m/s del aire del apartado 4 de
+  IEC 61094-5, con menos de 0.01 dB de diferencia.
+- **Evidencia:** el modelo recalculado tal como se imprime y con las dos
+  lecturas, frente a la tabla 2. Verificado en la página 8 del PDF (p. 135
+  impresa) de Metrologia 51 (2014) 129-138, doi:10.1088/0026-1394/51/3/129, la
+  descarga de IOPscience cuya primera página es una portada.
+- **Comportamiento de la biblioteca:** `metrology.diameter_sound_field_correction`
+  calcula el modelo con las dos lecturas, con $k_n r/a$ en (1); las filas de
+  conformidad sobre IEC 61094-5 6.5 reproducen la tabla A.1 a partir de los
+  datos de la tabla 1
+  ([`tests/metrology/test_comparison_diameter_gap_validation.py`](../tests/metrology/test_comparison_diameter_gap_validation.py)).
+- **Estado:** sin notificar (artículo de revista, no una norma).
+
+## Jarvis (1996), NPL Report CIRA(EXT) 010, apéndice B (la unidad imaginaria de la masa del primer micrófono, perdida en el escaneo publicado)
+
+- **Ubicación:** apéndice B «Uncertainties caused by differences in acoustic
+  impedance between the test and reference microphones» (folio 25 impreso),
+  las impedancias acústicas de los dos micrófonos del ejemplo. El informe es la
+  referencia [2] de IEC 61094-5:2016, que le remite el aire entre dos
+  micrófonos en la tabla D.1 y en 7.4. Fuente no normativa: un informe de
+  laboratorio.
+- **El impreso:** los parámetros figuran como $r_1$, «$c$ = 48·10^-15» y $m_1$
+  para el LS2P, y $r_2$, $c_2$ y $m_2$ para el WS2P de alta sensibilidad; las
+  impedancias dicen
+  $Z_{m1}(w) = r_1 + w\cdot\ m + \frac{1}{\mathrm{i}\cdot w\cdot c_1}$ y
+  $Z_{m2}(w)\ \ r_2 + w\cdot\mathrm{i}\cdot m_2 + \frac{1}{\mathrm{i}\cdot w\cdot c_2}$.
+- **El problema:** el término de masa del primer micrófono no muestra ni la
+  unidad imaginaria del segundo ni su subíndice, y su compliancia figura como
+  $c$ frente al $c_1$ que usa la fórmula. Leído literalmente, $w\,m_1$ es una
+  resistencia, no la reactancia de una masa, y el circuito da entonces 0.117°
+  y 0.0273 dB a 20 kHz, donde las dos gráficas impresas en el folio 27
+  terminan en unos 0.09° y 0.025 dB;
+  $r_1 + \mathrm{i}\,w\,m_1 + 1/(\mathrm{i}\,w\,c_1)$ da allí 0.089° y
+  0.0255 dB, y el mínimo de unos -0.0065 dB cerca de 7 kHz y el máximo de fase
+  de unos 0.16° cerca de 12.5 kHz que muestran las gráficas. Lo más probable
+  es que los glifos se perdieran en la reproducción y no que el autor los
+  omitiera: el folio es una hoja de cálculo cuyas gráficas salen de las
+  expresiones que muestra, y hay un hueco en blanco justo donde van «i·» y el
+  subíndice «1», como lo hay donde el mismo folio pierde otros glifos finos,
+  el «:=» tras $Z_{m2}(w)$, $\kappa$ y $p_0$ y el subíndice de $c_1$ en su
+  definición.
+- **Evidencia:** las dos impedancias tal como las muestra el escaneo, el hueco
+  en blanco en lugar de los glifos que faltan, y el circuito del mismo
+  apéndice recalculado con cada lectura frente a las gráficas impresas, con la
+  fase a 20 kHz como lo que mejor separa las dos. Verificado en las páginas 28
+  y 30 del PDF (pp. 25 y 27 impresas) del NPL Report CIRA(EXT) 010 (1996), el
+  escaneo que publica el National Physical Laboratory.
+- **Comportamiento de la biblioteca:** `metrology.air_gap_series_impedance_pa_s_m3`
+  se comprueba frente al cociente que imprime el apéndice B, con
+  $\mathrm{i}\,w\,m_1$, y frente a los extremos de las gráficas y sus valores a
+  20 kHz (las filas de conformidad sobre Jarvis 1996,
+  [`tests/metrology/test_comparison_diameter_gap_validation.py`](../tests/metrology/test_comparison_diameter_gap_validation.py)).
+- **Estado:** sin notificar (informe de laboratorio, no una norma, y un
+  defecto del escaneo publicado).
+
 ## IEC 61094-8:2012, 8.4 (una referencia cruzada sin resolver)
 
 - **Ubicación:** subapartado 8.4 «Differences between the sound pressure

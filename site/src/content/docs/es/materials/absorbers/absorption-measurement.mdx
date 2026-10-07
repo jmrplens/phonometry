@@ -43,7 +43,7 @@ import Video from '../../../../../components/Video.astro';
 De todos los números que produce un laboratorio de materiales, el coeficiente
 de absorción acústica es el que más lejos viaja: sale de la cámara
 reverberante en una hoja de características, entra en una estimación de Sabine, en un
-presupuesto de absorción EN 12354-6 o en el pliego de un concurso, y rara vez
+balance de absorción EN 12354-6 o en el pliego de un concurso, y rara vez
 vuelve a cuestionarse. Esta guía cubre toda la vida de laboratorio de ese
 número. La **medición** es ISO 354: una probeta de 10 m² a 12 m² sobre el
 suelo de una cámara reverberante, dos tiempos de decaimiento, y la fórmula de
@@ -298,8 +298,8 @@ biblioteca no realiza ninguna: `measure_sound_absorption` solo emite un
    además ser suave, sin ningún valle ni pico que difiera más del 15 % de la
    media de las dos bandas de tercio de octava adyacentes. Es la única
    comprobación que dice si la sala es de por sí acústicamente lo bastante
-   silenciosa como para ver siquiera una probeta: una sala con fugas, revestida
-   o abarrotada gasta en sí misma su presupuesto de absorción.
+   silenciosa como para ver siquiera una probeta: en una sala con fugas,
+   revestida o abarrotada, el balance de absorción se lo lleva la propia sala.
 3. **Difusividad (Anexo A).** Los difusores son láminas de baja absorción, de
    unos 5 kg/m², de 0,8 m² a 3 m² por cara cada una, ligeramente curvadas,
    orientadas al azar y repartidas por la sala; la alternativa son las palas
@@ -867,7 +867,7 @@ con respaldo rígido ($\sigma = 20$ kPa·s/m², Miki): el tubo mide $\alpha(0°)
 la curva discontinua, mientras que la cámara mide el promedio de Paris sobre
 todos los ángulos, la continua. La brecha es más ancha donde la capa es delgada
 frente a la longitud de onda, justo la región de baja frecuencia en la que un
-número a incidencia normal sustituido en un presupuesto de Sabine o de
+número a incidencia normal sustituido en un balance de Sabine o de
 EN 12354-6 subestimaría la absorción instalada, y se cierra a medida que la capa
 se hace eléctricamente gruesa. Es una comparación de modelos sobre una capa
 infinita, así que es una cota inferior de la diferencia real: una probeta finita
@@ -912,7 +912,7 @@ aplica su propio dominio matemático, de modo que Sabine y Eyring aceptan los
 valores de ISO 354 iguales o superiores a uno tal cual (Eyring siempre que la
 absorción media quede por debajo de uno), mientras que Millington-Sette los
 rechaza (su logaritmo por superficie diverge en uno) y cualquier ajuste por
-debajo de uno queda en manos de quien llama. El presupuesto de área de
+debajo de uno queda en manos de quien llama. El balance de área de
 absorción equivalente de
 [EN 12354-6](/phonometry/es/buildings/rooms/enclosed-space-absorption/) también acepta
 los coeficientes tal cual se suministran.
@@ -931,7 +931,7 @@ Allard y Atalla, con la
 [resistividad al flujo](/phonometry/es/materials/absorbers/airflow-resistance/) como
 primera entrada; el modelo ajustado predice después la capa a cualquier ángulo,
 espesor o respaldo. Lo que el número del tubo *no* es, es un sustituto directo
-de $\alpha_\mathrm{s}$: alimentar coeficientes a incidencia normal en un presupuesto de
+de $\alpha_\mathrm{s}$: alimentar coeficientes a incidencia normal en un balance de
 Sabine o de EN 12354-6 subestima sistemáticamente la absorción instalada.
 
 
@@ -1000,7 +1000,7 @@ está.
   los estimadores de Sabine, Eyring y Millington-Sette que consumen
   $\alpha_\mathrm{s}$.
 - [Área de absorción equivalente de recintos amueblados](/phonometry/es/buildings/rooms/enclosed-space-absorption/):
-  el presupuesto de absorción EN 12354-6 que alimentan estos coeficientes.
+  el balance de absorción EN 12354-6 que alimentan estos coeficientes.
 - [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
   la norma de incertidumbre hermana del aislamiento acústico, ISO 12999-1.
 - Referencia de la API: [`materials.absorbers.sound_absorption`](/phonometry/es/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](/phonometry/es/reference/api/materials/rating/) y [`materials.absorbers.uncertainty`](/phonometry/es/reference/api/materials/uncertainty/).

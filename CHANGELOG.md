@@ -2059,6 +2059,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   exempts, with its reason. The Spanish data qualification diagram is titled
   "Cualificación de datos", as its guide is.
 
+- **The Spanish edition calls every budget of quantities that add up a
+  balance.** Twenty-six places in sixteen Spanish pages said "presupuesto",
+  which is money, for a budget of decibels, absorption or error: "un problema
+  de control de ruido es un presupuesto", "el presupuesto de absorción
+  EN 12354-6", the "presupuesto de ruido" of the duct path and control valve
+  guides, the "presupuesto de error por desfase" of the intensity guide and
+  its references. They now say "balance" ("balance de ruido", "balance de
+  absorción", "balance de error"), as the same edition already said "balance
+  de incertidumbre" after the Spanish adoption of ISO 3746 and "balance de
+  sonar". Where the English "budget" is an allowance rather than a sum, the
+  Spanish names the allowance: the four porous absorber constructions fit
+  "dentro de los mismos 50 mm", the reach a range-marched tail is trusted to
+  is a "tope", and the FDTD sponge is sized from "las celdas que se le puedan
+  dedicar". `make spanish-accents` now fails on "presupuesto" and every word
+  of its family, the verb included with its accented forms such as
+  "presupuéstese", unless it stands in one of the money contexts it lists
+  with their reasons; no sentence of the tree means money, so that list is
+  empty. A premise ("los presupuestos del modelo") is reworded, never written
+  "balance", and a code identifier such as `presupuesto_ruido` is left alone.
+  The check also reads the modules generated for the site, so the Spanish
+  labels of the API sidebar now hold the glossary as well.
+
 - **The landing page and the guides index no longer list ASTM E1414 among
   the building standards implemented.** The library computes the normalized
   ceiling attenuation of ISO 140-9 and rates it with the contour of
@@ -2991,8 +3013,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   IEC 61094-5 and IEC 61094-8 already did, and the Spanish guides, figures and
   errata register use the same words for every uncertainty budget. The sonar
   budget of the underwater propagation solvers guide says "balance de sonar"
-  too, the word its figure already used. A budget in any other sense, a noise
-  or absorption budget, keeps its word.
+  too, the word its figure already used.
 
 ### Fixed
 

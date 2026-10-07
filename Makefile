@@ -201,7 +201,8 @@ decimal-comma:
 # expandida») shipped in about fifty places with every gate green, and «media
 # cuadrática», the quadratic mean, or «cuadrado medio» for the mean square
 # («valor cuadrático medio») in two diagrams, two figures, two renderers, seven
-# pages and an erratum.
+# pages and an erratum, and «presupuesto», which is money, for a budget of
+# decibels, absorption or error (a «balance») in sixteen pages and a diagram.
 spanish-accents:
 	$(PYTHON) scripts/check_spanish_accents.py
 

@@ -8,8 +8,9 @@ the gate must leave alone (a plural in -ciones, ``lineal``, ``periodo``,
 anything inside mathematics), of the tables it reads and of the exemptions it
 keeps honest. The glossary the gate also holds is fixed the same way, against
 the sentences that shipped «seno» for the waveform, «incertidumbre
-extendida» for the GUM's expanded uncertainty, and «media cuadrática» and
-«cuadrado medio» for the mean square.
+extendida» for the GUM's expanded uncertainty, «media cuadrática» and
+«cuadrado medio» for the mean square, and «presupuesto» for a budget of
+quantities that add up, which the glossary calls a «balance».
 """
 
 from __future__ import annotations
@@ -587,6 +588,244 @@ def test_a_stale_context_is_reported_under_its_own_table(
     assert "which no longer exempts any «media cuadrática»" in out
     assert "::error::TRIGONOMETRIC lists" in out
     assert r"seno\s+del\s+ángulo" not in out
+
+
+@pytest.mark.parametrize(
+    ("text", "found"),
+    [
+        # The opening line of the noise-control overview.
+        (
+            "Un problema de control de ruido es un **presupuesto**, no una elección de",
+            [("presupuesto", "balance")],
+        ),
+        # The spectral analysis guide and the intensity references.
+        (
+            "El **sesgo de resolución** es la otra mitad del presupuesto de error: un",
+            [("presupuesto", "balance")],
+        ),
+        (
+            "intensidad activa y reactiva, el estimador p-p y el presupuesto de "
+            "error por desfase que hay detrás de esta página.",
+            [("presupuesto", "balance")],
+        ),
+        # The absorption guide, wrapped where the page wrapped it.
+        (
+            "entra en una estimación de Sabine, en un\npresupuesto de absorción "
+            "EN 12354-6 o en el pliego de un concurso",
+            [("presupuesto", "balance")],
+        ),
+        # The verb, at the start of a sentence of the enclosure caption.
+        (
+            "y un interior duro sin revestir costaría mucho más. Presupuesta\n"
+            "el revestimiento junto con los paneles",
+            [("Presupuesta", csa.REWORD_PREFIX + "«balance»")],
+        ),
+        # The same instruction worded as an impersonal or with a pronoun,
+        # where the stem carries its written accent.
+        (
+            "Presupuéstese el revestimiento junto con los paneles.",
+            [("Presupuéstese", csa.REWORD_PREFIX + "«balance»")],
+        ),
+        (
+            "presupuéstalo antes de cotizar",
+            [("presupuéstalo", csa.REWORD_PREFIX + "«balance»")],
+        ),
+        ("PRESUPUÉSTALO", [("PRESUPUÉSTALO", csa.REWORD_PREFIX + "«balance»")]),
+        # The plural, and the rest of the family.
+        ("dos presupuestos de ruido", [("presupuestos", "balances")]),
+        (
+            "Presupuesto de ruido presupuestado y presupuestario",
+            [
+                ("Presupuesto", "Balance"),
+                ("presupuestado", csa.REWORD_PREFIX + "«balance»"),
+                ("presupuestario", csa.REWORD_PREFIX + "«balance»"),
+            ],
+        ),
+    ],
+)
+def test_a_budget_called_presupuesto_is_found(
+    text: str, found: list[tuple[str, str]]
+) -> None:
+    """The sentences that named a budget of summed quantities after money."""
+    assert _departures(text) == found
+    assert _departures(text, page=True) == found
+
+
+def test_a_form_that_is_not_a_noun_is_told_to_reword(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A verb or an adjective of the family gets a rewording, not «balance»."""
+    value = csa.Value("site/x.mdx", 3, "Presupuéstese el revestimiento.")
+    offences, _stale = csa.check([value], allowed={})
+    assert [(o.word, o.spelling) for o in offences] == [
+        ("Presupuéstese", "reword around «balance»")
+    ]
+    monkeypatch.setattr(csa, "read_sources", lambda: ([value], []))
+    assert csa.main([]) == 1
+    out = capsys.readouterr().out
+    assert "'Presupuéstese' reword around «balance»" in out
+    assert "is written 'reword" not in out
+
+
+def test_the_old_diagram_table_entry_fails_the_check() -> None:
+    """The decay-range title as it sat in the diagram table."""
+    value = csa.Value(
+        "scripts/diagrams/i18n.py",
+        2879,
+        "El presupuesto de rango de caída de una banda: INR, truncamiento y "
+        "ventanas de evaluación (ISO 3382)",
+    )
+    offences, _stale = csa.check([value], allowed={})
+    assert [(o.line, o.word, o.spelling) for o in offences] == [
+        (2879, "presupuesto", "balance")
+    ]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # The budget written as the glossary writes it.
+        "el balance de incertidumbre de la Tabla D.2 y dos balances de error",
+        "Un problema de control de ruido es un **balance**, no una elección",
+        "el balance de absorción EN 12354-6 y el balance de ruido de válvula",
+        # Words that share letters with the family and are not in it.
+        "el modelo presupone una capa infinita, por supuesto, y lo supuesto",
+    ],
+)
+def test_a_balance_and_its_neighbours_are_left_alone(text: str) -> None:
+    """What must never fire, in a table and in a page."""
+    assert _departures(text) == []
+    assert _departures(text, page=True) == []
+
+
+_IDENTIFIERS = """Con el balance de ruido:
+
+```python
+presupuesto_ruido = balance(3)
+presupuesto2 = 3
+mi_presupuesto = presupuesto_ruido + presupuesto2
+```
+"""
+
+
+def test_an_identifier_built_on_presupuesto_is_not_prose() -> None:
+    """A token with an underscore or a digit is code, wherever the word sits in it.
+
+    The rest of the gate skips such a token whole (``numero_bandas`` is not a
+    misspelt ``número``), so the family of «presupuesto» does too, whether
+    the word opens the identifier or closes it.
+    """
+    assert _departures(_IDENTIFIERS) == []
+    assert _departures(_IDENTIFIERS, page=True) == []
+    assert _departures("el presupuesto_ruido y su presupuesto", page=True) == [
+        ("presupuesto", "balance")
+    ]
+
+
+_PREMISE = "los presupuestos teóricos del modelo de Sabine no valen aquí"
+
+
+def test_a_premise_is_not_money_and_takes_its_exemption_from_allowed(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A premise fails like a budget, and the report says to reword it.
+
+    The check cannot tell a premise from a budget, so it fails; the hint
+    sends the author to «supuesto» rather than «balance», and a sentence that
+    must keep the word is exempted in ALLOWED, never in MONEY.
+    """
+    value = csa.Value("page.md", 1, _PREMISE, page=True)
+    offences, _stale = csa.check([value], allowed={})
+    assert [(o.word, o.spelling) for o in offences] == [("presupuestos", "balances")]
+    offences, stale = csa.check(
+        [value], allowed={(_PREMISE, "presupuestos"): "a premise of the model"}
+    )
+    assert offences == []
+    assert stale == []
+    monkeypatch.setattr(csa, "read_sources", lambda: ([value], []))
+    assert csa.main([]) == 1
+    out = capsys.readouterr().out
+    assert "premise is reworded («supuesto», «hipótesis»)" in out
+
+
+_SIDEBAR = """// Auto-generated by scripts/generate_api_docs.py (make api-docs).
+export const apiSections = {
+  'signals': {
+    label: 'Signal analysis',
+    translations: { es: 'Análisis de señal' },
+  },
+  'noise': {
+    label: 'Noise budget',
+    translations: { es: 'Presupuesto de ruido' },
+  },
+};
+"""
+
+
+def test_a_generated_module_of_the_site_is_read(tmp_path: pathlib.Path) -> None:
+    """The Spanish labels of the API sidebar are read as the site imports them.
+
+    They are written from ``scripts/api_taxonomy.py`` into a generated module
+    that no other source of the check reaches.
+    """
+    (tmp_path / "generated").mkdir()
+    (tmp_path / "generated" / "api-sidebar.mjs").write_text(_SIDEBAR, encoding="utf-8")
+    values, empty = csa.read_sources(
+        (), root=tmp_path, builders=(), pages=("generated/*.mjs",), figures=()
+    )
+    assert empty == []
+    assert all(value.script for value in values)
+    offences, _stale = csa.check(values, allowed={})
+    assert [(o.line, o.word, o.spelling) for o in offences] == [
+        (9, "Presupuesto", "Balance")
+    ]
+
+
+def test_the_generated_api_sidebar_is_among_the_pages() -> None:
+    """The committed sidebar is read, so its Spanish labels hold the glossary."""
+    assert "site/src/generated/*.mjs" in csa.PAGES
+    values, _empty = csa.read_sources()
+    assert any(
+        value.path == "site/src/generated/api-sidebar.mjs" and "es:" in value.text
+        for value in values
+    )
+
+
+_MONEY = {
+    r"(?<!\w)presupuesto\s+del\s+proyecto(?!\w)": "the money a project is given",
+}
+
+
+def test_a_money_context_exempts_only_its_own_presupuesto() -> None:
+    """Money in a sentence does not let the budget of decibels beside it through."""
+    text = "el presupuesto del proyecto no cubre el presupuesto de ruido"
+    assert csa.glossary_departures(text, contexts=_MONEY) == [
+        ("presupuesto", "balance", text.rindex("presupuesto"))
+    ]
+
+
+def test_a_money_context_that_exempts_nothing_is_reported() -> None:
+    """A money context must keep matching a «presupuesto», as a «seno» one must."""
+    values = [csa.Value("page.md", 1, "el presupuesto del proyecto", page=True)]
+    contexts = {**_MONEY, r"presupuesto\s+de\s+obra": "left behind"}
+    assert csa.unused_contexts(values, contexts) == [r"presupuesto\s+de\s+obra"]
+    offences, _stale = csa.check(values, allowed={}, contexts=contexts)
+    assert offences == []
+
+
+def test_a_stale_money_context_is_reported_under_its_own_table(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The report names MONEY and the term when a money context goes stale."""
+    pattern = r"(?<!\w)presupuesto\s+de\s+obra(?!\w)"
+    monkeypatch.setitem(csa.MONEY, pattern, "left behind")
+    monkeypatch.setitem(csa.CONTEXTS, pattern, "left behind")
+    values = [csa.Value("page.md", 1, "un balance de ruido", page=True)]
+    monkeypatch.setattr(csa, "read_sources", lambda: (values, []))
+    assert csa.main([]) == 1
+    out = capsys.readouterr().out
+    assert f"::error::MONEY lists {pattern!r}" in out
+    assert "which no longer exempts any «presupuesto»" in out
 
 
 _PAGE = """---

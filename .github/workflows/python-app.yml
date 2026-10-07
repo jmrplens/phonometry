@@ -755,7 +755,9 @@ jobs:
       # «seno» for the waveform and «incertidumbre extendida» shipped in
       # about fifty places, and «media cuadrática» or «cuadrado medio» for
       # the mean square in two diagrams, two figures, two renderers, seven
-      # pages and an erratum. Static, stdlib only, so it runs here with the
+      # pages and an erratum, and «presupuesto», which is money, for a
+      # budget of decibels, absorption or error (a «balance») in sixteen
+      # pages and a diagram. Static, stdlib only, so it runs here with the
       # other checks on published text.
       run: python scripts/check_spanish_accents.py
 

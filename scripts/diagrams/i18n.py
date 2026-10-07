@@ -2876,9 +2876,8 @@ _ES: dict[str, str] = {
     "the same board, two fixings: nearly 23 dB between them, and no formula here can see which one was built": "la misma placa, dos fijaciones: casi 23 dB entre ellas, y ninguna fórmula de aquí ve cuál se construyó",
     "$s′$ is the EN 29052-1 value measured WITHOUT pre-load, and the series law (C.6) holds only for an uncut layer": "$s′$ es el valor EN 29052-1 medido SIN precarga, y la ley en serie (C.6) solo vale si la capa no está cortada",
     # --- B9 reconstruction of B10b's decay-range plate ---
-    "The decay-range budget of one band: INR, truncation and the evaluation windows (ISO 3382)": "El presupuesto de rango de caída de una banda: INR, truncamiento y ventanas de evaluación (ISO 3382)",
-    # The plate's current registry title; "balance" and "rango de
-    # decaimiento" as the embedding page words them.
+    # The plate's registry title; "balance" and "rango de decaimiento" as
+    # the embedding page words them.
     "The decay-range budget of one band (ISO 3382)": "El balance del rango de decaimiento de una banda (ISO 3382)",
     "Level [dB]": "Nivel [dB]",
     "peak": "pico",

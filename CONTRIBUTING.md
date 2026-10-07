@@ -673,10 +673,12 @@ is held to the same list once the figure is regenerated.
 The same check holds the translation glossary, because a word the glossary has
 replaced reads as correct Spanish to every other gate. Besides the tables and
 the figures it reads the Spanish pages for it: the site's Spanish edition, its
-strings (`site/src/content/i18n/es.json`), its data files and components, and
-the Spanish twins under `docs/`. A Markdown page has its mathematics and inline
-code blanked; a script, a component or a data file is read as written, since
-its dollars and backticks are JavaScript. The rulings it enforces are in its
+strings (`site/src/content/i18n/es.json`), its data files and components, the
+modules generated for it under `site/src/generated` (the Spanish labels of the
+API sidebar among them), and the Spanish twins under `docs/`. A Markdown page
+has its mathematics and inline code blanked; a script, a component, a data file
+or a generated module is read as written, since its dollars and backticks are
+JavaScript. The rulings it enforces are in its
 `GLOSSARY_TERMS` and `GLOSSARY_PHRASES`: "diezmado" for decimation,
 "sinusoide" (with "sinusoidal" and "semisinusoidal") for the waveform, never
 "senoide", "senoidal" or "semiseno", and "incertidumbre expandida" for the
@@ -698,6 +700,18 @@ sentence it exempts, never on a shape such as "de los extremos" or "beside an
 arithmetic mean", which a mean square can take as well. The statistician's
 "cuadrado medio" is a plain ruling in `GLOSSARY_PHRASES`: it fails wherever it
 stands, as "incertidumbre extendida" does.
+
+A budget is read the same way. Every budget of quantities that add up (an
+uncertainty, a noise, an absorption, an error or a link budget) is a "balance"
+in Spanish, as the Spanish adoption of ISO 3746 titles its uncertainty table
+"Balance de incertidumbre", and "presupuesto" is money. So "presupuesto" and
+every word of its family ("presupuestos", "presupuestario", the verb with its
+accented forms such as "presupuéstese") fail wherever they stand; an
+identifier such as `presupuesto_ruido` is code and is left alone. Where a
+sentence really means money, its context goes in the `MONEY` table with the
+reason, written on the words of that one sentence, under the same rule as
+`TRIGONOMETRIC`. A "presupuesto" that is a premise ("los presupuestos del
+modelo") is neither: reword it ("los supuestos", "las hipótesis").
 
 ### 7c. Defaulting a style the caller may spell either way
 

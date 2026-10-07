@@ -67,9 +67,28 @@ so every «media cuadrática» fails unless it stands in one of the contexts of
 :data:`QUADRATIC_MEAN`, each with its reason, read the way the contexts of
 «seno» are (:data:`SENSES`). A context is written on the words of the one
 sentence it exempts, never on a shape such as «de los extremos» or «beside
-an arithmetic mean», which a mean square can take as well. The statistician's
-«cuadrado medio» names nothing else in acoustics, so it is a plain ruling of
-the glossary, read as «incertidumbre extendida» is.
+an arithmetic mean», which a mean square can take as well.
+
+The statistician's «cuadrado medio» reached four guides and the DIN 45672-2
+erratum for the mean square of a signal, and is read by sense too: it is the
+right term only in an analysis of variance, so every «cuadrado medio» fails
+unless the sentence that holds it is one of the analysis, by the vocabulary
+of :data:`ANALYSIS_OF_VARIANCE`. No analysis of variance is written in the
+tree, so those contexts are not the words of one sentence each but the
+vocabulary of the analysis, and they stand when no sentence matches them. A
+sentence is one of the analysis when it names the analysis («análisis de la
+varianza», «ANOVA»), names the mean square by its row of the table
+(«cuadrado medio entre grupos», «cuadrado medio dentro de los grupos», or
+«cuadrado medio residual» beside its «grados de libertad»), or is the header
+of the table, a sum of squares, its degrees of freedom and their mean square
+side by side. A word of the analysis that a signal says as well (degrees of
+freedom, a sum of squares, a residual, groups) lets nothing through on its
+own. A sentence ends at a stop, and also at an item of a list or a heading,
+which carry none; a wrapped line and the rows of a table run on. Each term is
+read against its own table only, so a sentence of an analysis of variance
+cannot carry a waveform, a quadratic mean or a budget beside it past the
+gate, and a label of the analysis that is none of these goes in
+:data:`ALLOWED` with its reason.
 
 A budget is the third. The glossary writes every budget of quantities that
 add up «balance», as UNE-EN ISO 3746:2011 Table D.2 writes the uncertainty
@@ -105,6 +124,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import bisect
 import html
 import pathlib
 import re
@@ -409,11 +429,6 @@ GLOSSARY_TERMS: dict[str, str] = {
 #: the calque «incertidumbre extendida» reached a report fiche through a table.
 GLOSSARY_PHRASES: dict[str, str] = {
     r"(?<!\w)incertidumbres?\s+extendidas?(?!\w)": "incertidumbre expandida",
-    # The mean square is a «valor cuadrático medio» (:data:`QUADRATIC_MEAN`);
-    # the statistician's «cuadrado medio» reached four guides and the
-    # DIN 45672-2 erratum, beside a «valor cuadrático medio» on the same page.
-    r"(?<!\w)cuadrado\s+medio(?!\w)": "valor cuadrático medio",
-    r"(?<!\w)cuadrados\s+medios(?!\w)": "valores cuadráticos medios",
 }
 
 #: The contexts in which «seno» is the trigonometric function (or the noun of
@@ -488,6 +503,117 @@ QUADRATIC_MEAN: dict[str, str] = {
     ),
 }
 
+#: Where a sentence ends. A full stop, a semicolon, a colon, or a question or
+#: exclamation mark ends it, with any closing quote, bracket or emphasis after
+#: it, before a blank or the end of the value; a point or a colon between
+#: digits («118.94», «ISO 5725-2:1994») ends nothing. A line break ends it
+#: with no stop when the next line opens an item of a list or a heading, so
+#: an item without a stop is a sentence of its own. Any other line break runs
+#: on: a term wrapped across two lines stays whole, and the rows of a table
+#: are one sentence with its header (:data:`_TABLE_EDGE` closes the table off
+#: from the prose around it).
+_SENTENCE_BREAK = re.compile(
+    r"[.;:!?][*_»”\"')\]]*(?:\s|$)|\n(?=[ \t]*(?:[-*+]|\d+[.)]|#{1,6})[ \t])"
+)
+
+#: The line break that closes a heading, which ends its sentence too: a
+#: heading carries no stop, and the paragraph under it is another sentence.
+_HEADING_END = re.compile(r"^[ \t]*#{1,6}[ \t][^\n]*(\n)", re.MULTILINE)
+
+#: The line break between a row of a table and a line that is not one, either
+#: way round: a table is one sentence with its header, and the prose written
+#: right after or right before it, with no blank line between, is another.
+_TABLE_EDGE = re.compile(
+    r"^[ \t]*\|[^\n]*(\n)(?![ \t]*\|)|^(?![ \t]*\|)[^\n]*(\n)(?=[ \t]*\|)",
+    re.MULTILINE,
+)
+
+
+def _sentences(text: str, terms: list[tuple[int, int]]) -> list[str]:
+    """The sentence of *text* that holds each ``text[start:end]`` of *terms*.
+
+    Each break of :data:`_SENTENCE_BREAK`, :data:`_HEADING_END` and
+    :data:`_TABLE_EDGE` closes a sentence; the one returned for a term runs, as written, from the last
+    break before it to the first after it. The breaks are found once for all
+    the terms, so a long run of text with no stop costs its length, not its
+    square.
+    """
+    breaks = [match.span() for match in _SENTENCE_BREAK.finditer(text)]
+    breaks += [match.span(1) for match in _HEADING_END.finditer(text)]
+    breaks += [
+        match.span(1) if match.group(1) is not None else match.span(2)
+        for match in _TABLE_EDGE.finditer(text)
+    ]
+    closed = sorted(hi for _lo, hi in breaks)
+    opened = sorted(lo for lo, _hi in breaks)
+    found: list[str] = []
+    for start, end in terms:
+        before = bisect.bisect_right(closed, start)
+        after = bisect.bisect_left(opened, end)
+        opens = closed[before - 1] if before else 0
+        closes = opened[after] if after < len(opened) else len(text)
+        found.append(text[opens:closes])
+    return found
+
+
+def _all_said(*words: str) -> str:
+    """A pattern that matches a sentence saying every one of *words*."""
+    return r"\A" + "".join(rf"(?=[\s\S]*?(?<!\w)(?:{w})(?!\w))" for w in words)
+
+
+#: The mean square, singular or plural, as a context that qualifies it writes
+#: it.
+_MEAN_SQUARE = r"cuadrad(?:o\s+medio|os\s+medios)"
+
+#: The groups an analysis of variance compares, not a group of something
+#: («grupos de bandas», «grupos de máquinas»), which a signal is split into.
+_GROUPS = r"(?:los\s+)?grupos(?!\s+del?(?!\w))"
+
+#: The contexts in which «cuadrado medio» is the statistician's mean square, a
+#: sum of squares of an analysis of variance over its degrees of freedom, and
+#: not the mean square of a signal, as a pattern read without regard to case
+#: on the text as written, and the reason. Outside them every «cuadrado medio»
+#: fails: the mean square of a signal is a «valor cuadrático medio». No
+#: analysis of variance is written in the tree, so these are not the words of
+#: one sentence each but the vocabulary of the analysis, searched in the
+#: sentence that holds the term (:func:`_sentences`), and they stand when no
+#: sentence matches them. The sentence counts as one of the analysis when it
+#: names the analysis, names the mean square by the row of the table it is
+#: (between the groups, within them, residual), or is the header of the table
+#: itself, and a sentence that counts exempts every «cuadrado medio» it holds.
+#: A word the mean square of a signal takes as well is no context on its own:
+#: «grados de libertad» (the time-weighting guide shipped «estimación ... del
+#: cuadrado medio (un grado de libertad)», and every Welch or multitaper
+#: estimate counts its own), «suma de cuadrados» (what a level accumulates
+#: block by block), «residual» (the noise a synchronous average leaves) and
+#: «entre grupos» (the ECMA-418-2 loudness guide recalculates its bands «entre
+#: grupos»). Nor are the treatments or the laboratories some texts compare,
+#: since a room takes an acoustic treatment and a sound level its
+#: interlaboratory comparison.
+ANALYSIS_OF_VARIANCE: dict[str, str] = {
+    _all_said(r"análisis\s+de\s+(?:la\s+)?varianza"): (
+        "the analysis named, with the article or without it, as the Spanish "
+        "edition of the GUM names it in H.5"
+    ),
+    _all_said(r"ANOVA"): "the analysis named by its acronym",
+    _all_said(rf"{_MEAN_SQUARE}\s+(?:entre|dentro\s+de)\s+{_GROUPS}"): (
+        "the mean square between the groups or within them, of the first two "
+        "rows of a one-factor table"
+    ),
+    _all_said(rf"{_MEAN_SQUARE}\s+residual(?:es)?", r"grados\s+de\s+libertad"): (
+        "the residual mean square, beside the degrees of freedom its sum of "
+        "squares is divided by"
+    ),
+    r"(?m)^[ \t]*\|"
+    r"(?=[^\n]*\|[ \t]*sumas?\s+de\s+cuadrados[ \t]*\|)"
+    r"(?=[^\n]*\|[ \t]*grados\s+de\s+libertad[ \t]*\|)"
+    rf"(?=[^\n]*\|[ \t]*{_MEAN_SQUARE}[ \t]*\|)": (
+        "the header of the table, a sum of squares, its degrees of freedom and "
+        "their mean square side by side, as Montgomery's Diseño y análisis de "
+        "experimentos prints its Tables 3-3 and 3-4"
+    ),
+}
+
 #: The contexts in which «presupuesto» (or a word of its family) is money and
 #: not a budget of quantities that add up, as a pattern read without regard to
 #: case on the text as written, and the reason. Outside them every such word
@@ -509,7 +635,13 @@ class Sense(NamedTuple):
     forms it matches whole are nouns that the glossary's term replaces; any
     other form of the family (a verb, an adjective) gets
     :data:`REWORD_PREFIX` and the term instead, because no noun can stand in
-    its place and the sentence has to be reworded around the term.
+    its place and the sentence has to be reworded around the term. The
+    contexts are the words of one sentence each: a match lying inside one is
+    exempt, and each must keep matching its sentence. When *vocabulary* is
+    set they are instead the vocabulary of a field, searched in the sentence
+    that holds the match (:func:`_sentences`), which exempts it when any of
+    them is found there, and they stand with no sentence of the tree to
+    match.
     """
 
     word: re.Pattern[str]
@@ -519,6 +651,7 @@ class Sense(NamedTuple):
     table: str
     term: str
     noun: re.Pattern[str] | None = None
+    vocabulary: bool = False
 
 
 #: What a form that is not a noun is told to do, followed by the glossary term.
@@ -526,12 +659,13 @@ REWORD_PREFIX = "reword around "
 
 
 #: The terms read by sense: the noun the waveform and the function share, the
-#: phrase the mean square and the quadratic mean share, and the word a budget
-#: of summed quantities and money share. The family of «presupuesto» is matched
-#: whole, the accented stem of «presupuéstese» included, so the verb and the
-#: adjective built on it cannot carry the budget past the gate; like every
-#: other word, it stops at a digit or an underscore, so an identifier such as
-#: ``presupuesto_ruido`` is not read as prose.
+#: phrase the mean square and the quadratic mean share, the phrase the mean
+#: square of a signal and of an analysis of variance share, and the word a
+#: budget of summed quantities and money share. The family of «presupuesto»
+#: is matched whole, the accented stem of «presupuéstese» included, so the
+#: verb and the adjective built on it cannot carry the budget past the gate;
+#: like every other word, it stops at a digit or an underscore, so an
+#: identifier such as ``presupuesto_ruido`` is not read as prose.
 SENSES: tuple[Sense, ...] = (
     Sense(
         re.compile(r"(?<!\w)senos?(?!\w)", re.IGNORECASE),
@@ -550,6 +684,15 @@ SENSES: tuple[Sense, ...] = (
         "«media cuadrática»",
     ),
     Sense(
+        re.compile(r"(?<!\w)cuadrad(?:o\s+medio|os\s+medios)(?!\w)", re.IGNORECASE),
+        "valor cuadrático medio",
+        "valores cuadráticos medios",
+        ANALYSIS_OF_VARIANCE,
+        "ANALYSIS_OF_VARIANCE",
+        "«cuadrado medio»",
+        vocabulary=True,
+    ),
+    Sense(
         re.compile(r"(?<!\w)presupu[eé]st[^\W\d_]*(?!\w)", re.IGNORECASE),
         "balance",
         "balances",
@@ -560,10 +703,14 @@ SENSES: tuple[Sense, ...] = (
     ),
 )
 
-#: Every context of every term read by sense. The patterns of one term never
-#: match another's, so one mapping serves them all.
+#: Every context written on the words of one sentence, of every term read by
+#: sense: each must keep exempting a term (:func:`unused_contexts`). The
+#: vocabulary of the analysis of variance is not among them.
 CONTEXTS: dict[str, str] = {
-    pattern: reason for sense in SENSES for pattern, reason in sense.contexts.items()
+    pattern: reason
+    for sense in SENSES
+    if not sense.vocabulary
+    for pattern, reason in sense.contexts.items()
 }
 
 #: A singular in -ción, -sión, -xión or -gión written without its accent. The
@@ -573,7 +720,10 @@ _SINGULAR_ION = re.compile(r"[^\W\d_]*[cgsx]ion")
 
 #: Legitimate uses of a listed form, keyed by the Spanish value that carries it
 #: and the word, with the reason. The verb a listed noun can also spell is the
-#: case this is for; an entry that no longer matches anything fails the run.
+#: case this is for, and so is a label of an analysis of variance whose
+#: «cuadrado medio» stands in no sentence of :data:`ANALYSIS_OF_VARIANCE` (the
+#: axis label of a figure, an entry of a translation table); an entry that no
+#: longer matches anything fails the run.
 ALLOWED: dict[tuple[str, str], str] = {}
 
 #: What is not prose inside a value: a ``{placeholder}`` a renderer fills, an
@@ -712,12 +862,14 @@ def glossary_departures(
     :param script: With *page*, the page is not Markdown and nothing of it
         is blanked (see :data:`_MARKDOWN`).
     :param contexts: The contexts in which a term of :data:`SENSES` keeps
-        its other sense, :data:`CONTEXTS` (the trigonometric «seno», the
-        quadratic mean and money) by default.
+        its other sense, read for every term the way its own table is read.
+        By default each term reads its own table (the trigonometric «seno»,
+        the quadratic mean, the analysis of variance and money), so the
+        vocabulary of the analysis, read across the whole sentence that
+        holds a «cuadrado medio», exempts no other term the sentence holds.
     :param used: A set that receives every context that exempted a term.
     :return: ``(as written, glossary term, offset in text)`` in text order.
     """
-    contexts = CONTEXTS if contexts is None else contexts
     readable = page_prose(text, script=script) if page else prose(text)
     found: list[tuple[str, str, int]] = []
     for pattern, right in GLOSSARY_PHRASES.items():
@@ -731,7 +883,8 @@ def glossary_departures(
             if term is not None and word.isalpha():
                 found.append((word, _cased(word, term), match.start()))
     for sense in SENSES:
-        found.extend(_departures_by_sense(sense, text, readable, contexts, used))
+        own = sense.contexts if contexts is None else contexts
+        found.extend(_departures_by_sense(sense, text, readable, own, used))
     found.sort(key=lambda item: item[2])
     return found
 
@@ -749,19 +902,33 @@ def _departures_by_sense(
     :param text: The value as written, where the contexts are matched.
     :param readable: The same value with what is not prose blanked, where the
         term is matched; both have the same length, so offsets agree.
-    :param contexts: The contexts that exempt a match lying inside one.
+    :param contexts: The contexts that exempt a match: one lying inside a
+        match of a context, or, for a term whose contexts are a vocabulary,
+        one whose sentence holds a context.
     :param used: A set that receives every context that exempted a match.
     :return: ``(as written, glossary term, offset in text)`` per match.
     """
     matches = list(sense.word.finditer(readable))
-    spans = [
-        (match.start(), match.end(), pattern)
-        for pattern in (contexts if matches else ())
-        for match in re.finditer(pattern, text, re.IGNORECASE)
-    ]
+    if not matches:
+        return []
+    if sense.vocabulary:
+        sentences = _sentences(text, [match.span() for match in matches])
+        exemptions = [
+            {p for p in contexts if re.search(p, sentence, re.IGNORECASE)}
+            for sentence in sentences
+        ]
+    else:
+        spans = [
+            (hit.start(), hit.end(), pattern)
+            for pattern in contexts
+            for hit in re.finditer(pattern, text, re.IGNORECASE)
+        ]
+        exemptions = [
+            {p for lo, hi, p in spans if lo <= match.start() and match.end() <= hi}
+            for match in matches
+        ]
     found: list[tuple[str, str, int]] = []
-    for match in matches:
-        exempt = {p for lo, hi, p in spans if lo <= match.start() and match.end() <= hi}
+    for match, exempt in zip(matches, exemptions, strict=True):
         if exempt:
             if used is not None:
                 used.update(exempt)
@@ -1018,8 +1185,8 @@ def check(
 
     :param values: The Spanish values to read.
     :param allowed: The exemptions, :data:`ALLOWED` by default.
-    :param contexts: The contexts of the terms read by sense,
-        :data:`CONTEXTS` by default.
+    :param contexts: The contexts of the terms read by sense, read for every
+        term; by default each term reads its own table.
     :return: One :class:`Offence` per word not exempted, and the exemptions
         that matched no word of any value.
     """
@@ -1053,10 +1220,11 @@ def unused_contexts(
     """The contexts that exempt no term of *values* read by sense.
 
     :param values: The Spanish values to read.
-    :param contexts: The contexts, :data:`CONTEXTS` by default.
+    :param contexts: The contexts, read for every term. By default each term
+        reads its own table and the contexts written on one sentence,
+        :data:`CONTEXTS`, are the ones that must keep matching.
     :return: The patterns that exempted nothing, in their listed order.
     """
-    contexts = CONTEXTS if contexts is None else contexts
     used: set[str] = set()
     for value in values:
         glossary_departures(
@@ -1066,7 +1234,8 @@ def unused_contexts(
             contexts=contexts,
             used=used,
         )
-    return [pattern for pattern in contexts if pattern not in used]
+    listed = CONTEXTS if contexts is None else contexts
+    return [pattern for pattern in listed if pattern not in used]
 
 
 def _quoted(offence: Offence) -> str:
@@ -1112,7 +1281,13 @@ def main(argv: list[str] | None = None) -> int:
             "«seno» in TRIGONOMETRIC, a quadratic mean, the root of a mean "
             "square, in QUADRATIC_MEAN and a «presupuesto» that is money in "
             "MONEY, with its reason. A «presupuesto» that is a premise is "
-            "reworded («supuesto», «hipótesis»), never written «balance»."
+            "reworded («supuesto», «hipótesis»), never written «balance». A "
+            "«cuadrado medio» passes only in a sentence of an analysis of "
+            "variance (ANALYSIS_OF_VARIANCE): one that names the analysis, "
+            "names the mean square between or within the groups, or the "
+            "residual one beside its degrees of freedom, or the header of its "
+            "table; any other label of the analysis goes in ALLOWED with its "
+            "reason."
         )
     for text, word in stale:
         print(

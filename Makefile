@@ -203,6 +203,9 @@ decimal-comma:
 # («valor cuadrático medio») in two diagrams, two figures, two renderers, seven
 # pages and an erratum, and «presupuesto», which is money, for a budget of
 # decibels, absorption or error (a «balance») in sixteen pages and a diagram.
+# «Cuadrado medio» passes only in a sentence of an analysis of variance, one
+# that names the analysis, the mean square by its row, or the header of its
+# table.
 spanish-accents:
 	$(PYTHON) scripts/check_spanish_accents.py
 

@@ -865,30 +865,50 @@ class FreeFieldArrangementCheck:
     falls outside what the standard recommends and what its uncertainty
     figures assume.
 
-    Built by :func:`check_free_field_arrangement`.
+    Built by :func:`check_free_field_arrangement`. The verdicts are read from
+    the distances, the diameter, the support and the attenuation the check
+    holds, against the numbers 7.3, 6.4, Annex A and B.2 print, so they are
+    not fields.
 
     :ivar diaphragm_distances_m: The distances between the microphones, in m.
     :ivar microphone_diameter_m: The nominal diameter of the microphones, in m.
-    :ivar distances_ok: Every distance is greater than ten nominal diameters,
-        as 7.3 recommends.
     :ivar support_length_m: The length of the cylinder each microphone is
         attached to, in m, or ``None``.
-    :ivar support_ok: It is at least twenty diameters, as 6.4 recommends, or
-        ``None``.
-    :ivar annex_a_range: Every distance is within 150 mm to 500 mm, where Annex
-        A allows the published acoustic centres. Advisory: it does not enter
-        :attr:`passes`.
-    :ivar attenuation_accuracy: The conditions and every frequency are within
-        the domain in which B.2 states the accuracy of the attenuation.
+    :ivar air_attenuation: The :class:`ReciprocityAirAttenuation` at the
+        frequencies and conditions of the calibration.
     """
 
     diaphragm_distances_m: tuple[float, ...]
     microphone_diameter_m: float
-    distances_ok: bool
     support_length_m: float | None
-    support_ok: bool | None
-    annex_a_range: bool
-    attenuation_accuracy: bool
+    air_attenuation: ReciprocityAirAttenuation
+
+    @property
+    def distances_ok(self) -> bool:
+        """Every distance is greater than ten nominal diameters, as 7.3 recommends."""
+        limit = _DISTANCE_DIAMETERS * self.microphone_diameter_m
+        return all(d > limit for d in self.diaphragm_distances_m)
+
+    @property
+    def support_ok(self) -> bool | None:
+        """The support is at least twenty diameters long, as 6.4 recommends, or ``None``."""
+        if self.support_length_m is None:
+            return None
+        return self.support_length_m >= _SUPPORT_DIAMETERS * self.microphone_diameter_m
+
+    @property
+    def annex_a_range(self) -> bool:
+        """Every distance is within 150 mm to 500 mm, where Annex A allows the published acoustic centres.
+
+        Advisory: it does not enter :attr:`passes`.
+        """
+        low, high = _ANNEX_A_RANGE_M
+        return all(low <= d <= high for d in self.diaphragm_distances_m)
+
+    @property
+    def attenuation_accuracy(self) -> bool:
+        """The conditions and every frequency are within the domain in which B.2 states the accuracy of the attenuation."""
+        return bool(np.all(self.air_attenuation.within_stated_accuracy))
 
     @property
     def passes(self) -> bool:
@@ -972,12 +992,8 @@ def check_free_field_arrangement(
         msg = "'diaphragm_distances_m' must hold at least one distance."
         raise ValueError(msg)
     diameter = require_positive(microphone_diameter_m, "microphone_diameter_m")
-    support_ok = None
     if support_length_m is not None:
-        support_ok = (
-            require_positive(support_length_m, "support_length_m")
-            >= _SUPPORT_DIAMETERS * diameter
-        )
+        require_positive(support_length_m, "support_length_m")
     attenuation = reciprocity_air_attenuation(
         frequencies_hz,
         temperature_c=temperature_c,
@@ -987,13 +1003,8 @@ def check_free_field_arrangement(
     return FreeFieldArrangementCheck(
         diaphragm_distances_m=distances,
         microphone_diameter_m=diameter,
-        distances_ok=all(d > _DISTANCE_DIAMETERS * diameter for d in distances),
         support_length_m=None if support_length_m is None else float(support_length_m),
-        support_ok=support_ok,
-        annex_a_range=all(
-            _ANNEX_A_RANGE_M[0] <= d <= _ANNEX_A_RANGE_M[1] for d in distances
-        ),
-        attenuation_accuracy=bool(np.all(attenuation.within_stated_accuracy)),
+        air_attenuation=attenuation,
     )
 
 

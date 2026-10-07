@@ -423,11 +423,14 @@ class CalibrationConditions(OwnsArrays):
 class ReferenceSourceCalibration(OwnsArrays):
     r"""Calibrated sound power levels of a reference sound source (ISO 6926 8.4).
 
+    The levels, the Annex B comparison and the room verdict are read from the
+    surface levels, the corrections, the intensity levels and the room
+    qualification the calibration holds, so they are not fields: a
+    calibration cannot be built to take its low bands from an intensity
+    measurement Table B.1 refuses.
+
     :ivar frequencies_hz: Nominal one-third octave mid-band frequencies, in
         hertz, ascending.
-    :ivar sound_power_level_db: :math:`L_W` under the reference meteorological
-        conditions, per band, in dB re 1 pW; the 50 Hz to 80 Hz bands come
-        from sound intensity where Annex B validated them.
     :ivar surface_pressure_level_db: :math:`\overline{L_p}` over the 2 m
         hemisphere after the background correction, per band.
     :ivar directivity_index_db: :math:`D_{\mathrm{I}i}` per position or
@@ -438,21 +441,17 @@ class ReferenceSourceCalibration(OwnsArrays):
     :ivar expanded_uncertainty_db: :math:`k \sigma_R` of Table 2 per band.
     :ivar coverage_factor: :math:`k`.
     :ivar arrangement: ``"paths"`` or ``"fixed"``.
-    :ivar intensity_bands: Per band, whether the level came from the sound
-        intensity of Annex B.
-    :ivar intensity_agreement: Whether the pressure and intensity levels
-        agree within Table B.1 from 50 Hz to 315 Hz, or ``None`` without
-        intensity levels.
-    :ivar room_qualified: Whether the room qualification given meets 8.1 for
-        these bands at 2 m, or ``None`` when none was given.
     :ivar radiation: The radiation character whose Annex A :math:`C_2` the
         calibration used, or ``None`` when it used the manufacturer's value.
     :ivar knee_frequency_hz: The knee frequency of that :math:`C_2`, or
         ``None``.
+    :ivar intensity_sound_power_level_db: The sound power level determined
+        by sound intensity per band (Annex B), or ``None``.
+    :ivar room_qualification: The :class:`FreeFieldCheck` of the room, or
+        ``None`` when none was given.
     """
 
     frequencies_hz: np.ndarray
-    sound_power_level_db: np.ndarray
     surface_pressure_level_db: np.ndarray
     directivity_index_db: np.ndarray
     c1_db: float
@@ -461,11 +460,87 @@ class ReferenceSourceCalibration(OwnsArrays):
     expanded_uncertainty_db: np.ndarray
     coverage_factor: float
     arrangement: str
-    intensity_bands: np.ndarray
-    intensity_agreement: bool | None
-    room_qualified: bool | None
     radiation: str | None
     knee_frequency_hz: float | None
+    intensity_sound_power_level_db: np.ndarray | None = None
+    room_qualification: FreeFieldCheck | None = None
+
+    def __post_init__(self) -> None:
+        """Reject intensity levels Annex B cannot compare.
+
+        :raises ValueError: if the intensity levels do not carry one value
+            per band, or are not finite from 50 Hz to 315 Hz, or no band lies
+            there.
+        """
+        if self.intensity_sound_power_level_db is not None:
+            self._annex_b()
+
+    def _bands(self) -> np.ndarray:
+        return np.array(
+            [_band_index(float(f)) for f in self.frequencies_hz], dtype=np.int64
+        )
+
+    def _pressure_level_db(self) -> np.ndarray:
+        area = 2.0 * math.pi * _RADIUS_M**2
+        return np.asarray(
+            self.surface_pressure_level_db
+            + 10.0 * math.log10(area / _S0)
+            + self.c1_db
+            + self.c2_db
+            + self.c3_db,
+            dtype=np.float64,
+        )
+
+    def _annex_b(self) -> tuple[np.ndarray, bool | None]:
+        intensity = self.intensity_sound_power_level_db
+        ks = self._bands()
+        if intensity is None:
+            return np.zeros(ks.size, dtype=bool), None
+        values = np.asarray(intensity, dtype=np.float64)
+        if values.shape != ks.shape:
+            msg = "'intensity_sound_power_level_db' needs one value per band."
+            raise ValueError(msg)
+        return _annex_b(ks, self._pressure_level_db(), values)
+
+    @property
+    def intensity_bands(self) -> np.ndarray:
+        """Per band, whether the level came from the sound intensity of Annex B."""
+        return self._annex_b()[0]
+
+    @property
+    def intensity_agreement(self) -> bool | None:
+        """Whether the pressure and intensity levels agree within Table B.1 from 50 Hz to 315 Hz.
+
+        ``None`` without intensity levels.
+        """
+        return self._annex_b()[1]
+
+    @property
+    def sound_power_level_db(self) -> np.ndarray:
+        """:math:`L_W` under the reference meteorological conditions, per band, in dB re 1 pW.
+
+        Formula (2) from the surface levels and the three corrections; the
+        50 Hz to 80 Hz bands come from sound intensity where Annex B validated
+        them.
+        """
+        bands = self.intensity_bands
+        if not np.any(bands):
+            return self._pressure_level_db()
+        intensity = np.asarray(self.intensity_sound_power_level_db, dtype=np.float64)
+        return np.asarray(
+            np.where(bands, intensity, self._pressure_level_db()), dtype=np.float64
+        )
+
+    @property
+    def room_qualified(self) -> bool | None:
+        """Whether the room qualification meets 8.1 for the pressure bands at 2 m.
+
+        ``None`` when none was given.
+        """
+        if self.room_qualification is None:
+            return None
+        freqs = np.asarray(self.frequencies_hz)[~self.intensity_bands]
+        return _room_qualified(self.room_qualification, freqs)
 
     @property
     def maximum_directivity_index_db(self) -> np.ndarray:
@@ -889,19 +964,18 @@ def reference_source_calibration(
             knee_frequency_hz=knee_frequency_hz,
         )
     c3 = _c3_correction(air.air_absorption_db_per_m, freqs)
-    lw, intensity_bands, agreement = _with_annex_b(
+    _, intensity_bands, _ = _with_annex_b(
         lp_bar + 10.0 * math.log10(area / _S0) + c1 + c2 + c3,
         ks,
         intensity_sound_power_level_db,
     )
     directivity = _calibration_directivity(precision, maximum_levels_db)
-    qualified = _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
+    _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
     uncertainty = k * reference_source_reproducibility_db(
         freqs, environment="hemi-anechoic", arrangement=arrangement
     )
     return ReferenceSourceCalibration(
         frequencies_hz=freqs,
-        sound_power_level_db=np.asarray(lw, dtype=np.float64),
         surface_pressure_level_db=np.asarray(lp_bar, dtype=np.float64),
         directivity_index_db=np.asarray(directivity, dtype=np.float64),
         c1_db=float(c1),
@@ -910,15 +984,18 @@ def reference_source_calibration(
         expanded_uncertainty_db=np.asarray(uncertainty, dtype=np.float64),
         coverage_factor=k,
         arrangement=arrangement,
-        intensity_bands=intensity_bands,
-        intensity_agreement=agreement,
-        room_qualified=qualified,
         radiation=None if c2_db is not None else radiation,
         knee_frequency_hz=(
             None
             if c2_db is not None or knee_frequency_hz is None
             else float(knee_frequency_hz)
         ),
+        intensity_sound_power_level_db=(
+            None
+            if intensity_sound_power_level_db is None
+            else np.asarray(intensity_sound_power_level_db, dtype=np.float64)
+        ),
+        room_qualification=room_qualification,
     )
 
 

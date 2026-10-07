@@ -63,7 +63,7 @@ ISO 9614 dynamic capability :math:`L_\mathrm{d} = \delta_{pI0} - K` follows from
 from __future__ import annotations
 
 import math
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -74,7 +74,6 @@ from .._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
-    require_summary_class,
 )
 
 if TYPE_CHECKING:
@@ -365,35 +364,11 @@ def verify_intensity_class(
         )
         raise ValueError(msg)
 
-    _, class1, class2 = residual_index_limits(
-        device, spacing=spacing, frequencies=freqs
-    )
-    bands = _band_verdicts(freqs, measured, class1, class2)
-
-    classes = [band["class"] for band in bands]
-    overall: int | None = None if None in classes else max(classes)
-
-    covered = set(freqs.tolist())
-    # Clause 6.1 gives the one-third-octave range to class 1 and offers the
-    # octave range only to class 2, so the octave set can attest a class 2
-    # verdict but never a class 1 one. A probe has no analysis bands of its
-    # own and clause 12.4 tests it in one-third octaves, so the alternative is
-    # not open to it at all.
-    full_range = covered.issuperset(_THIRD_OCTAVE_BANDS) or (
-        device != "probe" and overall == 2 and covered.issuperset(_OCTAVE_BANDS)  # noqa: PLR2004
-    )
-    range_limited = not full_range
-
     return IntensityInstrumentComplianceResult(
-        overall_class=overall,
-        bands=tuple(bands),
-        frequencies=np.asarray([b["freq"] for b in bands], dtype=np.float64),
-        residual_index=np.asarray(
-            [b["residual_index_db"] for b in bands], dtype=np.float64
-        ),
+        frequencies=freqs,
+        residual_index=measured,
         device=device,
         spacing=float(spacing),
-        range_limited=range_limited,
     )
 
 
@@ -401,38 +376,26 @@ def verify_intensity_class(
 class IntensityInstrumentComplianceResult(OwnsArrays):
     r"""IEC 61043:1993 class verdict of a p-p sound-intensity chain.
 
-    What :func:`verify_intensity_class` returns: the verdict together with the
-    measured spectrum and the two Table 2 masks it was judged against, so the
-    result can redraw itself and render an accredited fiche.
+    What :func:`verify_intensity_class` returns: the measured spectrum, the
+    device and the separation it was judged at. The two Table 2 masks, the
+    band rows, the classes and the range are read from them, so none of them
+    is a field: a verdict cannot be built, or rewritten with
+    :func:`dataclasses.replace`, against another minimum or with a class its
+    index does not reach.
 
-    :ivar overall_class: The strictest class every band meets (1 or 2), or
-        ``None`` when at least one band meets neither. It is the *largest*
-        per-band class, because a band meeting class 1 meets class 2 as well.
-    :ivar bands: The per-band verdicts, as an immutable tuple.
     :ivar frequencies: Nominal band centre frequencies, in Hz.
     :ivar residual_index: Measured ``delta_pI0`` per band, in dB.
     :ivar device: ``"probe"``, ``"processor"`` or ``"instrument"``.
     :ivar spacing: Microphone separation the verdict applies to, in metres.
-    :ivar range_limited: ``True`` when the verified bands cover neither the 22
-        one-third-octave bands nor the 7 octave bands of clause 6.1, so the
-        stated class attests only the bands supplied.
     """
 
-    overall_class: int | None
-    bands: tuple[dict[str, Any], ...]
     frequencies: np.ndarray
     residual_index: np.ndarray
     device: str
     spacing: float
-    _: KW_ONLY
-    range_limited: bool = False
 
     def __post_init__(self) -> None:
-        """Reject a verdict whose per-band entries disagree.
-
-        The fiche prints one row per band and, in its box, the overall class
-        of the whole instrument, so a band list short of an entry gives a
-        sheet whose verdict covers a band that is nowhere in its table.
+        """Reject a spectrum the verdict cannot be read from.
 
         The device tag is pinned to the three Table 2 column groups. Two
         readers dispatch on it -- the fiche's basis strip and the plot's
@@ -440,35 +403,19 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         ``KeyError`` from one, a silently wrong "complete instrument" label
         from the other.
 
-        The two Table 2 masks are not fields: they are read from the device,
-        the separation and the bands (:attr:`limit_class1`,
-        :attr:`limit_class2`). Every band row has to carry those masks, the
-        measured index of its band, the margins that index leaves to them and
-        the class those margins give, so a verdict cannot be built, or
-        rewritten with :func:`dataclasses.replace`, against another minimum or
-        with a class its index does not reach.
+        The measured spectrum and the separation are pinned finite: every
+        comparison the class rests on is ``>=`` against a mask, and a NaN
+        loses each of them silently. A verdict over no band is refused, since
+        a class attested over nothing is not a verdict, and so is a band
+        Table 2 does not print or one given twice.
 
-        The measured spectrum, the separation and the numeric per-band
-        verdict values are pinned finite.
-        :func:`verify_intensity_class` validates its inputs finite and every
-        derived figure with them, so no producer emits a NaN here; one
-        smuggled in through :func:`dataclasses.replace` either dies inside
-        matplotlib's axis autoscaling naming no field, or prints ``nan`` in
-        an accredited table whose boxed verdict still declares COMPLIES. The
-        per-band scan tests :class:`numpy.floating` alongside :class:`float`
-        because only ``np.float64`` subclasses ``float``: a narrower NumPy
-        scalar such as ``np.float32("nan")`` would otherwise pass unread.
-
-        :raises ValueError: if the per-band entries disagree, the device tag
-            is not a Table 2 column group, any numeric field is not finite, a
-            band is not tabulated, or a band row carries another minimum than
-            Table 2 rescaled to the separation, another index than
-            :attr:`residual_index`, or a margin or a class that index does not
-            give.
+        :raises ValueError: if the spectra disagree in length or are empty,
+            the device tag is not a Table 2 column group, a value is not
+            finite, or a band is not tabulated or is repeated.
         """
         _check_device(self.device)
         require_ranks(self, frequencies=1, residual_index=1)
-        require_same_length(self, "bands", "frequencies", "residual_index")
+        require_same_length(self, "frequencies", "residual_index")
         for name in ("frequencies", "residual_index"):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"'{name}' must be finite."
@@ -476,57 +423,63 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         if not math.isfinite(self.spacing):
             msg = "'spacing' must be finite."
             raise ValueError(msg)
-        for band in self.bands:
-            for key, value in band.items():
-                if isinstance(value, (float, np.floating)) and not math.isfinite(value):
-                    msg = (
-                        "'bands' must carry finite per-band values; the "
-                        f"{band.get('freq', math.nan):g} Hz entry has "
-                        f"{key}={value!r}."
-                    )
-                    raise ValueError(msg)
-        self._require_band_rows()
-        require_summary_class(self, self.bands, self.overall_class, (1, 2))
+        if np.size(self.frequencies) == 0:
+            msg = "At least one measurement band is required."
+            raise ValueError(msg)
+        bands = [_match_band(float(f)) for f in np.asarray(self.frequencies)]
+        if len(set(bands)) != len(bands):
+            msg = (
+                "'frequencies' repeats an IEC 61043 Table 2 band; supply one "
+                "measured value per band."
+            )
+            raise ValueError(msg)
 
-    def _require_band_rows(self) -> None:
-        """Refuse a band row that does not restate Table 2 and the index.
+    @property
+    def bands(self) -> tuple[dict[str, Any], ...]:
+        """The per-band verdicts, read from the spectrum and Table 2.
 
-        Each row is rebuilt from :attr:`frequencies`, :attr:`residual_index`
-        and the masks, exactly as :func:`verify_intensity_class` builds it,
-        and has to match: the band, the index, both minima, both margins and
-        the class.
-
-        :raises ValueError: if a row's band, index, minimum, margin or class
-            differs from the one rebuilt for it.
+        One ``{"freq", "class", "residual_index_db", "limit_class1_db",
+        "limit_class2_db", "margin_class1_db", "margin_class2_db"}`` per band:
+        a band meets a class when its index is at least that class's minimum,
+        so a band exactly on the limit passes. A fresh copy at every read.
         """
-        expected = _band_verdicts(
-            self.frequencies, self.residual_index, self.limit_class1, self.limit_class2
+        return tuple(
+            _band_verdicts(
+                np.asarray(self.frequencies, dtype=np.float64),
+                np.asarray(self.residual_index, dtype=np.float64),
+                self.limit_class1,
+                self.limit_class2,
+            )
         )
-        numeric = (
-            "freq",
-            "residual_index_db",
-            "limit_class1_db",
-            "limit_class2_db",
-            "margin_class1_db",
-            "margin_class2_db",
+
+    @property
+    def overall_class(self) -> int | None:
+        """The strictest class every band meets (1 or 2), or ``None``.
+
+        ``None`` when at least one band meets neither. It is the *largest*
+        per-band class, because a band meeting class 1 meets class 2 as well.
+        """
+        classes = [band["class"] for band in self.bands]
+        return None if None in classes else max(classes)
+
+    @property
+    def range_limited(self) -> bool:
+        """Whether the verified bands fall short of the range of clause 6.1.
+
+        ``True`` when they cover neither the 22 one-third-octave bands nor,
+        for a class 2 processor or instrument, the 7 octave bands, so the
+        stated class attests only the bands supplied. Clause 6.1 gives the
+        one-third-octave range to class 1 and offers the octave range only to
+        class 2; a probe has no analysis bands of its own and clause 12.4
+        tests it in one-third octaves, so the alternative is not open to it.
+        """
+        covered = set(np.asarray(self.frequencies, dtype=np.float64).tolist())
+        full_range = covered.issuperset(_THIRD_OCTAVE_BANDS) or (
+            self.device != "probe"
+            and self.overall_class == 2  # noqa: PLR2004
+            and covered.issuperset(_OCTAVE_BANDS)
         )
-        for band, rebuilt in zip(self.bands, expected, strict=True):
-            for key in numeric:
-                carried = float(band.get(key, math.nan))
-                if not math.isclose(carried, rebuilt[key], abs_tol=1e-9):
-                    msg = (
-                        "'bands' must restate IEC 61043 Table 2 at this "
-                        f"separation and the measured index; the {rebuilt['freq']:g} "
-                        f"Hz entry has {key}={carried!r}, expected {rebuilt[key]!r}."
-                    )
-                    raise ValueError(msg)
-            if band.get("class") != rebuilt["class"]:
-                msg = (
-                    f"'bands' must carry the class its margins give; the "
-                    f"{rebuilt['freq']:g} Hz entry has class={band.get('class')!r}, "
-                    f"its index reaches {rebuilt['class']!r}."
-                )
-                raise ValueError(msg)
+        return not full_range
 
     @property
     def limit_class1(self) -> np.ndarray:

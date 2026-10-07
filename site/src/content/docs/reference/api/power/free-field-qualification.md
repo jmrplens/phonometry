@@ -98,7 +98,7 @@ and the traverse length of ISO 26101 5.1.4.3, which A.2.4 cites; the 6 dB
 above background of ISO 26101 5.1.2.2 c); the directionality of the test
 source (ISO 26101 Annex B, [`verify_source_directionality`](/phonometry/reference/api/power/free-field-qualification/#verify_source_directionality)); and, in a
 hemi-anechoic room, the reflecting plane of A.2.5. A requirement whose data
-were not given is listed in [`FreeFieldCheck.not_judged`](/phonometry/reference/api/power/free-field-qualification/#freefieldcheck), and the
+were not given is listed in [`FreeFieldCheck.not_judged`](/phonometry/reference/api/power/free-field-qualification/#freefieldchecknot_judged), and the
 verdict does not pass until it is judged.
 
 Two readings are this module's, since no source settles them. The spacing
@@ -222,29 +222,14 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
 ```python
 FreeFieldCheck(
-    room: str,
     bandwidth: str,
     results: tuple[InverseSquareLawResult, ...],
-    frequencies_hz: np.ndarray,
-    band_radius_m: np.ndarray,
-    maximum_qualified_radius_m: float,
+    source_directionality: tuple[SourceDirectionalityResult | None, ...],
     measurement_radius_m: float | None,
-    points_met: np.ndarray,
-    equal_spacing_met: np.ndarray,
-    spacing_met: np.ndarray,
-    iso26101_spacing_met: np.ndarray,
-    length_met: np.ndarray,
-    background_met: np.ndarray | None,
-    directionality_met: np.ndarray | None,
-    traverse_count_met: bool,
-    path_targets_met: bool | None,
-    working_area_met: bool | None,
-    path_angles_met: bool | None,
-    reflecting_plane_met: bool | None,
-    full_frequency_range: bool,
-    conforming_range_hz: tuple[float, float] | None,
-    conforming_radius_m: float,
-    not_judged: tuple[str, ...],
+    reflecting_plane_absorption_coefficient: float | None,
+    reflecting_plane_margin_m: float | None,
+    paths_in_working_area: bool | None,
+    speed_of_sound: float,
 )
 ```
 
@@ -255,33 +240,33 @@ evaluated, with the ISO 26101:2017 clauses it defers to. Every per-band
 array is aligned with `frequencies_hz` (ascending) and judged within
 `maximum_qualified_radius_m`.
 
+Every verdict, the radius and the reduced range are read from the
+analyses and the declarations the check holds, against the figures the
+two standards print, so they are not fields: a check cannot be built to
+qualify a room its traverses do not qualify. The reading is done once,
+when the check is built.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `room` | `"anechoic"` or `"hemi-anechoic"`. |
 | `bandwidth` | `"discrete-frequency"` or `"broadband"` (A.4.1): a room qualified with broadband noise is qualified only for sources that radiate broadband noise. |
 | `results` | The inverse-square-law analysis of each test source. |
-| `frequencies_hz` | Every evaluated frequency, ascending, in hertz. |
-| `band_radius_m` | The distance to which each frequency is qualified on every traverse, in metres. |
-| `maximum_qualified_radius_m` | The A.2.4 radius over every evaluated frequency, in metres. |
+| `source_directionality` | The [`verify_source_directionality`](/phonometry/reference/api/power/free-field-qualification/#verify_source_directionality) result of each test source, aligned with `results`, `None` for a source whose directionality was not judged. |
 | `measurement_radius_m` | The measurement radius to be used, if given. |
-| `points_met` | At least 10 points on each traverse and 50 in total within the radius (A.4.3), per band. |
-| `equal_spacing_met` | The points of every traverse within the radius equally spaced at the frequency (A.4.3, ISO 26101 5.1.4.3), points added between two of them near a peak deviation allowed (see the module notes for the tolerance), per band. |
-| `spacing_met` | Spacing at most a tenth of a wavelength below 250 Hz and 100 mm above (amended ISO 3745 A.4.3), per band; the band that contains 250 Hz is held to the stricter of the two. |
-| `iso26101_spacing_met` | Spacing at most a tenth of a wavelength below 1 kHz and 25 mm above (ISO 26101 A.4.3, cited by A.2.4), per band; the band that contains 1 kHz is held to the stricter of the two. |
-| `length_met` | Traverse starting at most, and running at least, a quarter wavelength at the lowest frequency (ISO 26101 5.1.4.3), per band. |
-| `background_met` | Levels at least 6 dB above the background at every point (ISO 26101 5.1.2.2 c)), per band, or `None` when a traverse came without background. |
-| `directionality_met` | The test source within Table B.1 in the band, or `None` without a directionality result for its source. |
-| `traverse_count_met` | Five to eight traverses for every source (A.3.3). |
-| `path_targets_met` | Every source has traverses towards each of the five targets of A.3.3 a) to e), or `None` when a source names no target on any traverse. |
-| `working_area_met` | The traverse paths lie in the working area of the room, the part normally used for measurements (A.3.3), as declared, or `None` when not declared. |
-| `path_angles_met` | In a hemi-anechoic room, the direction of every traverse within the 20 deg to 80 deg from the vertical of the directionality test (A.3.3); `None` in an anechoic room, where A.3.3 sets no such limit. |
-| `reflecting_plane_met` | A.2.5 in a hemi-anechoic room, `None` when not judged or in an anechoic room. |
-| `full_frequency_range` | Whether every frequency A.2.3 requires from 100 Hz to 10 000 Hz was evaluated. |
-| `conforming_range_hz` | The widest contiguous range (in the A.2.3 sense) over which every judged requirement is met, `(low, high)` in hertz, or `None`; with `not_judged` empty it is the reduced range A.2.3 lets a report state "in conformity". |
-| `conforming_radius_m` | The radius qualified over that range, in metres, or `nan`. |
-| `not_judged` | The requirements without data, by name. |
+| `reflecting_plane_absorption_coefficient` | The largest sound absorption coefficient of the reflecting plane (A.2.5), or `None`; always `None` in an anechoic room. |
+| `reflecting_plane_margin_m` | How far the reflecting plane extends beyond the projection of the measurement surface (A.2.5), in metres, or `None`; always `None` in an anechoic room. |
+| `paths_in_working_area` | Whether the traverse paths lie in the working area of the room (A.3.3), as declared, or `None`. |
+| `speed_of_sound` | Speed of sound, in m/s, for the wavelengths of A.4.3, ISO 26101 5.1.4.3 and A.2.5. |
+
+### FreeFieldCheck.background_met
+
+*property*
+
+Levels at least 6 dB above the background at every point, per band.
+
+ISO 26101 5.1.2.2 c); `None` when a traverse came without
+background.
 
 ### FreeFieldCheck.band_met
 
@@ -291,6 +276,36 @@ Per band, whether every judged per-band requirement is met.
 
 **Returns:** One boolean per evaluated frequency.
 
+### FreeFieldCheck.band_radius_m
+
+*property*
+
+The distance to which each frequency is qualified on every traverse, in metres.
+
+### FreeFieldCheck.conforming_radius_m
+
+*property*
+
+The radius qualified over `conforming_range_hz`, in metres, or `nan`.
+
+### FreeFieldCheck.conforming_range_hz
+
+*property*
+
+The widest contiguous range over which every judged requirement is met.
+
+In the A.2.3 sense, `(low, high)` in hertz, or `None`; with
+`not_judged` empty it is the reduced range A.2.3 lets a report
+state "in conformity".
+
+### FreeFieldCheck.directionality_met
+
+*property*
+
+The test source within Table B.1 in the band.
+
+`None` without a directionality result for its source.
+
 ### FreeFieldCheck.discrete_frequency
 
 *property*
@@ -298,6 +313,56 @@ Per band, whether every judged per-band requirement is met.
 Whether the qualification holds for tonal sources too (A.4.1).
 
 **Returns:** `True` for a discrete-frequency qualification.
+
+### FreeFieldCheck.equal_spacing_met
+
+*property*
+
+The points of every traverse within the radius equally spaced at the frequency, per band.
+
+A.4.3 and ISO 26101 5.1.4.3; points added between two of them near a
+peak deviation are allowed (see the module notes for the tolerance).
+
+### FreeFieldCheck.frequencies_hz
+
+*property*
+
+Every evaluated frequency, ascending, in hertz.
+
+### FreeFieldCheck.full_frequency_range
+
+*property*
+
+Whether every frequency A.2.3 requires from 100 Hz to 10 000 Hz was evaluated.
+
+### FreeFieldCheck.iso26101_spacing_met
+
+*property*
+
+Spacing at most a tenth of a wavelength below 1 kHz and 25 mm above, per band.
+
+ISO 26101 A.4.3, cited by A.2.4; the band that contains 1 kHz is held
+to the stricter of the two.
+
+### FreeFieldCheck.length_met
+
+*property*
+
+Traverse starting at most, and running at least, a quarter wavelength at the lowest frequency, per band.
+
+ISO 26101 5.1.4.3.
+
+### FreeFieldCheck.maximum_qualified_radius_m
+
+*property*
+
+The A.2.4 radius over every evaluated frequency, in metres.
+
+### FreeFieldCheck.not_judged
+
+*property*
+
+The requirements without data, by name.
 
 ### FreeFieldCheck.passes
 
@@ -310,6 +375,23 @@ whole of 100 Hz to 10 000 Hz evaluated (A.2.3), and the measurement
 radius, if given, within the qualified one.
 
 **Returns:** `True` for a room in full conformity.
+
+### FreeFieldCheck.path_angles_met
+
+*property*
+
+In a hemi-anechoic room, every traverse within 20 deg to 80 deg from the vertical.
+
+The directionality test's angles (A.3.3); `None` in an anechoic
+room, where A.3.3 sets no such limit.
+
+### FreeFieldCheck.path_targets_met
+
+*property*
+
+Every source has traverses towards each of the five targets of A.3.3 a) to e).
+
+`None` when a source names no target on any traverse.
 
 ### FreeFieldCheck.plot()
 
@@ -333,6 +415,47 @@ Draw the qualified distance per frequency against the radius judged.
 | `kwargs` | Forwarded to the radius bars. |
 
 **Returns:** The axes.
+
+### FreeFieldCheck.points_met
+
+*property*
+
+At least 10 points on each traverse and 50 in total within the radius (A.4.3), per band.
+
+### FreeFieldCheck.reflecting_plane_met
+
+*property*
+
+A.2.5 in a hemi-anechoic room, `None` when not judged or in an anechoic room.
+
+### FreeFieldCheck.room
+
+*property*
+
+`"anechoic"` or `"hemi-anechoic"`, the room of the analyses.
+
+### FreeFieldCheck.spacing_met
+
+*property*
+
+Spacing at most a tenth of a wavelength below 250 Hz and 100 mm above, per band.
+
+Amended ISO 3745 A.4.3; the band that contains 250 Hz is held to the
+stricter of the two.
+
+### FreeFieldCheck.traverse_count_met
+
+*property*
+
+Five to eight traverses for every source (A.3.3).
+
+### FreeFieldCheck.working_area_met
+
+*property*
+
+The traverse paths lie in the working area of the room (A.3.3), as declared.
+
+`None` when not declared.
 
 ## inverse_square_law_deviations
 

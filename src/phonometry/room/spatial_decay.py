@@ -296,24 +296,48 @@ STABILITY_TOLERANCE_DB: Mapping[tuple[float, float], float] = MappingProxyType(
 class BackgroundMarginCheck(OwnsArrays):
     """Whether the levels clear the background by what 5.1.4 asks.
 
-    :param margins_db: The level of the source less the background at each
+    The verdicts are read from the margins and the 10 dB and 6 dB of 5.1.4,
+    so they are not fields.
+
+    :ivar margins_db: The level of the source less the background at each
         position and band given, in decibels, in the shape they came in.
-    :param needs_correction: True where the margin is under
-        :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` and over
-        :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`, which is the window where the
-        clause asks for the ISO 3744 background correction.
-    :param unusable: True where the margin is at or under
-        :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`, which the clause offers no
-        correction for.
-    :param satisfied: True when every margin clears
-        :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`, which is the only case that needs
-        nothing done to it.
     """
 
     margins_db: NDArray[np.float64]
-    needs_correction: NDArray[np.bool_]
-    unusable: NDArray[np.bool_]
-    satisfied: bool
+
+    @property
+    def unusable(self) -> NDArray[np.bool_]:
+        """True where the margin is at or under :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`.
+
+        The clause offers no correction for those. Judged settled.
+        """
+        return np.asarray(
+            settled(self.margins_db) <= ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB,
+            dtype=np.bool_,
+        )
+
+    @property
+    def needs_correction(self) -> NDArray[np.bool_]:
+        """True where the margin is under the preferred 10 dB and over the 6 dB.
+
+        :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` and
+        :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` bound the window where
+        the clause asks for the ISO 3744 background correction.
+        """
+        judged = settled(self.margins_db)
+        return np.asarray(
+            (judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB) & ~self.unusable,
+            dtype=np.bool_,
+        )
+
+    @property
+    def satisfied(self) -> bool:
+        """True when every margin clears :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`.
+
+        That is the only case that needs nothing done to it.
+        """
+        judged = settled(self.margins_db)
+        return not bool(np.any(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
 
 
 def check_background_margin(
@@ -356,11 +380,10 @@ def check_background_margin(
     margins = np.asarray(levels - background, dtype=np.float64)
     # Judged settled, so a margin of two readings that is 6 dB in decimal is
     # judged as 6 dB whichever side of it binary arithmetic leaves it.
+    check = BackgroundMarginCheck(margins_db=margins)
     judged = settled(margins)
-    unusable = judged <= ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB
-    needs_correction = (judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB) & ~unusable
-    satisfied = not bool(np.any(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
-    if not satisfied:
+    unusable = check.unusable
+    if not check.satisfied:
         worst = float(np.min(margins))
         detail = (
             f"{int(np.count_nonzero(unusable))} of them at or under "
@@ -381,12 +404,7 @@ def check_background_margin(
             SpatialDecayWarning,
             stacklevel=2,
         )
-    return BackgroundMarginCheck(
-        margins_db=margins,
-        needs_correction=needs_correction,
-        unusable=unusable,
-        satisfied=satisfied,
-    )
+    return check
 
 
 @dataclass(frozen=True)

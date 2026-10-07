@@ -93,24 +93,49 @@ room shape has to go and gather a level-4 description of it.
 ```python
 DetailVerdict(
     category: str,
-    satisfied: bool,
-    room_ok: bool,
-    fittings_ok: bool,
-    sources_ok: bool,
+    room_detail: int,
+    fitting_detail: int,
+    source_detail: int,
 )
 ```
 
 Whether the data in hand is what a category of method asks for.
 
-**Parameters**
+The verdicts are read from the three levels and the row of Table E.1 the
+category selects, so they are not fields.
+
+**Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `category` | The category asked about. |
-| `satisfied` | Whether all three levels fall inside Table E.1. |
-| `room_ok` | Whether the room description does. |
-| `fittings_ok` | Whether the fitting description does. |
-| `sources_ok` | Whether the source description does. |
+| `room_detail` | The level of Table 1 the room is described at. |
+| `fitting_detail` | The level of Table 2 the fittings are described at. |
+| `source_detail` | The level of Table 3 the sources are described at. |
+
+### DetailVerdict.fittings_ok
+
+*property*
+
+Whether the fitting description falls inside Table E.1.
+
+### DetailVerdict.room_ok
+
+*property*
+
+Whether the room description falls inside Table E.1.
+
+### DetailVerdict.satisfied
+
+*property*
+
+Whether all three levels fall inside Table E.1.
+
+### DetailVerdict.sources_ok
+
+*property*
+
+Whether the source description falls inside Table E.1.
 
 ## fitting_density
 

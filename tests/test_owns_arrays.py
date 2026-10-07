@@ -499,7 +499,7 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                 background_correction_db=0.0,
                 local_correction_db=0.0,
                 grade="engineering",
-                upper_bound=False,
+                background_margin_db=15.0,
                 standard="ISO 11201",
             ),
             "level_db",

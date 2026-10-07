@@ -396,34 +396,21 @@ def rainfall_rate(
 class RainGeneratorVerification(OwnsArrays):
     """Whether an artificial rain generator makes the rain it should (H.1, H.2.3).
 
+    The windows are the rows of Table H.1 the rain type selects, so the
+    shares and the verdicts are read from the measured samples and are not
+    fields: a verification cannot be built to pass a rain the table fails.
+
     :ivar rain_type: ``"intense"`` or ``"heavy"``.
     :ivar rainfall_rate_mm_h: The measured rainfall rate, in mm/h.
-    :ivar rate_deviation_mm_h: Measured minus nominal rate, in mm/h.
-    :ivar rate_ok: Whether the rate is within the tolerance ("shall").
     :ivar drop_diameters_mm: The measured drop diameters, in mm, or ``None``.
-    :ivar drop_share: Share of those drops within the diameter window, or
-        ``None``.
-    :ivar drops_ok: Whether at least half of them are ("should"), or ``None``.
     :ivar fall_velocities_m_s: The measured fall velocities, in m/s, or
         ``None``.
-    :ivar velocity_share: Share of those drops within the velocity window, or
-        ``None``.
-    :ivar velocities_ok: Whether at least half of them are ("should"), or
-        ``None``.
-    :ivar passes: Whether every judged requirement holds.
     """
 
     rain_type: str
     rainfall_rate_mm_h: float
-    rate_deviation_mm_h: float
-    rate_ok: bool
     drop_diameters_mm: np.ndarray | None
-    drop_share: float | None
-    drops_ok: bool | None
     fall_velocities_m_s: np.ndarray | None
-    velocity_share: float | None
-    velocities_ok: bool | None
-    passes: bool
 
     def __post_init__(self) -> None:
         """Reject a rain type the table does not print.
@@ -437,6 +424,63 @@ class RainGeneratorVerification(OwnsArrays):
     def nominal(self) -> ArtificialRain:
         """The row of :data:`ARTIFICIAL_RAIN` the generator was verified against."""
         return ARTIFICIAL_RAIN[self.rain_type]
+
+    @property
+    def rate_deviation_mm_h(self) -> float:
+        """Measured minus nominal rate, in mm/h."""
+        return self.rainfall_rate_mm_h - self.nominal.rainfall_rate_mm_h
+
+    @property
+    def rate_ok(self) -> bool:
+        """Whether the rate is within the tolerance ("shall"), bounds included."""
+        return abs(
+            self.rate_deviation_mm_h
+        ) <= self.nominal.rainfall_rate_tolerance_mm_h * (1.0 + _BOUND_SLACK)
+
+    @property
+    def drop_share(self) -> float | None:
+        """Share of the measured drops within the diameter window, or ``None``."""
+        if self.drop_diameters_mm is None:
+            return None
+        nominal = self.nominal
+        return _share_of(
+            self.drop_diameters_mm,
+            nominal.median_drop_diameter_mm,
+            nominal.drop_diameter_tolerance_mm,
+        )
+
+    @property
+    def drops_ok(self) -> bool | None:
+        """Whether at least half of the drops are within it ("should"), or ``None``."""
+        share = self.drop_share
+        return None if share is None else share >= _DROP_SHARE
+
+    @property
+    def velocity_share(self) -> float | None:
+        """Share of the measured drops within the velocity window, or ``None``."""
+        if self.fall_velocities_m_s is None:
+            return None
+        nominal = self.nominal
+        return _share_of(
+            self.fall_velocities_m_s,
+            nominal.fall_velocity_m_s,
+            nominal.fall_velocity_tolerance_m_s,
+        )
+
+    @property
+    def velocities_ok(self) -> bool | None:
+        """Whether at least half of the drops fall within it ("should"), or ``None``."""
+        share = self.velocity_share
+        return None if share is None else share >= _DROP_SHARE
+
+    @property
+    def passes(self) -> bool:
+        """Whether every judged requirement holds."""
+        return (
+            self.rate_ok
+            and self.drops_ok is not False
+            and self.velocities_ok is not False
+        )
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -465,13 +509,10 @@ class RainGeneratorVerification(OwnsArrays):
         )
 
 
-def _share_within(
-    samples: ArrayLike, name: str, centre: float, half_width: float
-) -> tuple[np.ndarray, float]:
-    """The samples and the share of them within ``centre ± half_width``."""
-    values = require_positive_array(samples, name)
+def _share_of(values: np.ndarray, centre: float, half_width: float) -> float:
+    """The share of *values* within ``centre ± half_width``, bounds included."""
     within = np.abs(values - centre) <= half_width * (1.0 + _BOUND_SLACK)
-    return values, float(np.mean(within))
+    return float(np.mean(within))
 
 
 def verify_rain_generator(
@@ -505,42 +546,21 @@ def verify_rain_generator(
     """
     require_choice(rain_type, "rain_type", tuple(ARTIFICIAL_RAIN))
     rate = require_positive(rainfall_rate_mm_h, "rainfall_rate_mm_h")
-    nominal = ARTIFICIAL_RAIN[rain_type]
-    deviation = rate - nominal.rainfall_rate_mm_h
-    rate_ok = abs(deviation) <= nominal.rainfall_rate_tolerance_mm_h * (
-        1.0 + _BOUND_SLACK
+    drops = (
+        None
+        if drop_diameters_mm is None
+        else require_positive_array(drop_diameters_mm, "drop_diameters_mm")
     )
-    drops = drop_share = drops_ok = None
-    if drop_diameters_mm is not None:
-        drops, drop_share = _share_within(
-            drop_diameters_mm,
-            "drop_diameters_mm",
-            nominal.median_drop_diameter_mm,
-            nominal.drop_diameter_tolerance_mm,
-        )
-        drops_ok = drop_share >= _DROP_SHARE
-    velocities = velocity_share = velocities_ok = None
-    if fall_velocities_m_s is not None:
-        velocities, velocity_share = _share_within(
-            fall_velocities_m_s,
-            "fall_velocities_m_s",
-            nominal.fall_velocity_m_s,
-            nominal.fall_velocity_tolerance_m_s,
-        )
-        velocities_ok = velocity_share >= _DROP_SHARE
-    passes = rate_ok and drops_ok is not False and velocities_ok is not False
+    velocities = (
+        None
+        if fall_velocities_m_s is None
+        else require_positive_array(fall_velocities_m_s, "fall_velocities_m_s")
+    )
     return RainGeneratorVerification(
         rain_type=rain_type,
         rainfall_rate_mm_h=rate,
-        rate_deviation_mm_h=deviation,
-        rate_ok=rate_ok,
         drop_diameters_mm=drops,
-        drop_share=drop_share,
-        drops_ok=drops_ok,
         fall_velocities_m_s=velocities,
-        velocity_share=velocity_share,
-        velocities_ok=velocities_ok,
-        passes=passes,
     )
 
 

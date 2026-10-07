@@ -60,9 +60,6 @@ def _band_categories(language: str) -> Axes:
         d50=np.full(n, 0.5),
         ts=np.full(n, 0.1),
         dynamic_range=np.full(n, 60.0),
-        edt_valid=np.ones(n, dtype=bool),
-        t20_valid=np.ones(n, dtype=bool),
-        t30_valid=np.ones(n, dtype=bool),
         curvature=np.zeros(n),
     )
     # The two panels share the band axis; the lower one carries its labels.

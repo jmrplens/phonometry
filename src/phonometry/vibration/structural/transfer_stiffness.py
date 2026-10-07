@@ -436,18 +436,15 @@ class TransferStiffnessResult(OwnsArrays):
     :ivar transfer_stiffness: Complex :math:`k_{2,1}` per frequency, in N/m.
     :ivar blocking_mass: Blocking mass ``m2`` used (indirect method), in kg, or
         ``None`` for the direct method.
-    :ivar valid: Per frequency, whether the line meets the adequacy conditions
-        of its part and so enters the band average (results that fail them
-        "shall be excluded from the evaluation of the dynamic stiffness
-        function", ISO 10846-2, -4 and -5 7.6.1, ISO 10846-3 7.5.1), or
-        ``None`` when every line does. The indirect method sets it from
-        Inequality (2), :math:`|T| \le 0.1`.
+    :ivar transmissibility: The measured vibration transmissibility
+        :math:`T = u_2/u_1` per frequency of the indirect method, or ``None``
+        for the direct method; :attr:`valid` is read from it.
     """
 
     frequencies: np.ndarray
     transfer_stiffness: np.ndarray
     blocking_mass: float | None = None
-    valid: np.ndarray | None = None
+    transmissibility: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         r"""Reject a spectrum whose stiffnesses do not run over its own frequencies.
@@ -483,23 +480,41 @@ class TransferStiffnessResult(OwnsArrays):
         fiche headline, with a loss factor of ``nan`` beside it and nothing
         on the page qualifying either.
 
-        The validity flags, when given, are one boolean per frequency: a count
+        The transmissibility, when given, is one value per frequency: a count
         that disagrees would drop lines from the band average, or keep lines
-        the adequacy conditions refused, without any figure showing which.
+        Inequality (2) refused, without any figure showing which.
 
-        :raises ValueError: if ``transfer_stiffness`` or ``valid`` does not
-            carry one value per frequency, a field carries an extra axis,
-            ``valid`` is not boolean, or either numeric field carries a
-            non-finite value.
+        :raises ValueError: if ``transfer_stiffness`` or ``transmissibility``
+            does not carry one value per frequency, a field carries an extra
+            axis, or a numeric field carries a non-finite value.
         """
-        require_ranks(self, frequencies=1, transfer_stiffness=1, valid=1)
+        require_ranks(self, frequencies=1, transfer_stiffness=1, transmissibility=1)
         require_same_length(
-            self, "frequencies", "transfer_stiffness", "valid", axis="frequency"
+            self,
+            "frequencies",
+            "transfer_stiffness",
+            "transmissibility",
+            axis="frequency",
         )
-        require_finite_fields(self, "frequencies", "transfer_stiffness")
-        if self.valid is not None and np.asarray(self.valid).dtype != np.bool_:
-            msg = "TransferStiffnessResult: 'valid' must be boolean, one flag per frequency."
-            raise ValueError(msg)
+        require_finite_fields(
+            self, "frequencies", "transfer_stiffness", "transmissibility"
+        )
+
+    @property
+    def valid(self) -> np.ndarray | None:
+        r"""Per frequency, whether the line meets the adequacy condition of its method.
+
+        Lines that fail it are left out of the band average (results that
+        fail "shall be excluded from the evaluation of the dynamic stiffness
+        function", ISO 10846-2, -4 and -5 7.6.1, ISO 10846-3 7.5.1). The
+        indirect method reads it from Inequality (2), :math:`|T| \le 0.1`;
+        ``None`` for the direct method, whose conditions are judged by
+        :func:`check_blocked_output` and :func:`check_unwanted_input`.
+        """
+        if self.transmissibility is None:
+            return None
+        magnitude = np.abs(np.asarray(self.transmissibility, dtype=np.complex128))
+        return np.asarray(magnitude <= TRANSMISSIBILITY_LIMIT, dtype=bool)
 
     @property
     def magnitude(self) -> np.ndarray:
@@ -654,13 +669,12 @@ def indirect_transfer_stiffness_result(
     k = transfer_stiffness_indirect(
         freq, transmissibility, blocking_mass, flange_mass=flange_mass
     )
-    magnitude = np.abs(np.asarray(transmissibility, dtype=np.complex128))
-    valid = np.broadcast_to(magnitude <= TRANSMISSIBILITY_LIMIT, k.shape)
+    measured = np.asarray(transmissibility, dtype=np.complex128)
     return TransferStiffnessResult(
         frequencies=freq,
         transfer_stiffness=k,
         blocking_mass=float(blocking_mass),
-        valid=valid,
+        transmissibility=np.broadcast_to(measured, k.shape),
     )
 
 
@@ -1731,29 +1745,41 @@ class DrivingPointStiffnessResult(OwnsArrays):
     :ivar frequencies: Frequencies, in hertz, strictly increasing.
     :ivar driving_point_stiffness: Complex :math:`k_{1,1}` at each frequency,
         in N/m.
-    :ivar adequate: Per frequency, whether Inequalities (1) and (2) hold, or
-        ``None`` when they were not checked.
+    :ivar blocked_output_difference_db: :math:`\Delta L_{1,2} = L_{a1} -
+        L_{a2}` per frequency, in dB, or ``None`` when Inequality (1) was not
+        checked.
+    :ivar unwanted_input_difference_db: The input acceleration level less the
+        loudest unwanted one per frequency, in dB, or ``None`` when
+        Inequality (2) was not checked.
     """
 
     frequencies: np.ndarray
     driving_point_stiffness: np.ndarray
-    adequate: np.ndarray | None = None
+    blocked_output_difference_db: np.ndarray | None = None
+    unwanted_input_difference_db: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject a sweep that cannot give a low-frequency value or an ordered limit.
 
         :raises ValueError: if the fields disagree in length or rank, a value
             is not finite, a stiffness is zero, the frequencies do not rise
-            strictly, ``adequate`` is not boolean, or no adequate line lies
-            between 1 Hz and 20 Hz.
+            strictly, a level difference is NaN or ``-inf``, or no adequate
+            line lies between 1 Hz and 20 Hz.
         """
         owner = type(self).__name__
-        require_ranks(self, frequencies=1, driving_point_stiffness=1, adequate=1)
+        require_ranks(
+            self,
+            frequencies=1,
+            driving_point_stiffness=1,
+            blocked_output_difference_db=1,
+            unwanted_input_difference_db=1,
+        )
         require_same_length(
             self,
             "frequencies",
             "driving_point_stiffness",
-            "adequate",
+            "blocked_output_difference_db",
+            "unwanted_input_difference_db",
             axis="frequency",
         )
         require_finite_fields(self, "frequencies", "driving_point_stiffness")
@@ -1762,8 +1788,6 @@ class DrivingPointStiffnessResult(OwnsArrays):
         if not np.all(np.abs(np.asarray(self.driving_point_stiffness)) > 0.0):
             msg = f"{owner}: 'driving_point_stiffness' must be non-zero."
             raise ValueError(msg)
-        if self.adequate is not None:
-            _as_flags(self.adequate, freq.shape, owner, "adequate")
         if not np.any(self._low_frequency_lines()):
             low, high = _LOW_FREQUENCY_RANGE_HZ
             msg = (
@@ -1773,12 +1797,48 @@ class DrivingPointStiffnessResult(OwnsArrays):
             )
             raise ValueError(msg)
 
-    def _adequate(self) -> NDArray[np.bool_]:
-        """The adequacy flags, every line adequate when none were given."""
+    def _checks(self) -> list[LevelDifferenceCheck]:
         freq = np.asarray(self.frequencies, dtype=np.float64)
-        if self.adequate is None:
-            return np.ones(freq.shape, dtype=bool)
-        return np.asarray(self.adequate, dtype=bool)
+        checks = []
+        if self.blocked_output_difference_db is not None:
+            checks.append(
+                LevelDifferenceCheck(
+                    frequencies=freq,
+                    difference_db=self.blocked_output_difference_db,
+                    condition="blocked_output",
+                )
+            )
+        if self.unwanted_input_difference_db is not None:
+            checks.append(
+                LevelDifferenceCheck(
+                    frequencies=freq,
+                    difference_db=self.unwanted_input_difference_db,
+                    condition="unwanted_input",
+                )
+            )
+        return checks
+
+    @property
+    def adequate(self) -> NDArray[np.bool_] | None:
+        """Per frequency, whether Inequalities (1) and (2) hold.
+
+        Read from the level differences against the 20 dB and 15 dB of the
+        series; ``None`` when neither was checked.
+        """
+        checks = self._checks()
+        if not checks:
+            return None
+        held = np.ones(np.shape(self.frequencies), dtype=bool)
+        for check in checks:
+            held = held & check.holds
+        return held
+
+    def _adequate(self) -> NDArray[np.bool_]:
+        """The adequacy flags, every line adequate when none were checked."""
+        adequate = self.adequate
+        if adequate is None:
+            return np.ones(np.shape(self.frequencies), dtype=bool)
+        return adequate
 
     def _low_frequency_lines(self) -> NDArray[np.bool_]:
         """The adequate lines from 1 Hz to 20 Hz, both included."""
@@ -1974,7 +2034,8 @@ def driving_point_stiffness(
         )
         raise ValueError(msg)
     k11 = -((2.0 * np.pi * freq) ** 2) * force / a1
-    adequate: NDArray[np.bool_] | None = None
+    blocked: NDArray[np.float64] | None = None
+    unwanted: NDArray[np.float64] | None = None
     input_level = _acceleration_level(a1, freq.shape, owner, "input_acceleration_m_s2")
     if output_acceleration_m_s2 is not None:
         output_level = _acceleration_level(
@@ -1985,21 +2046,23 @@ def driving_point_stiffness(
                 f"{owner}: 'output_acceleration_m_s2' must be one phasor per frequency."
             )
             raise ValueError(msg)
-        adequate = np.asarray(
-            check_blocked_output(freq, input_level, output_level).holds, dtype=bool
+        blocked = np.asarray(
+            check_blocked_output(freq, input_level, output_level).difference_db,
+            dtype=np.float64,
         )
     if unwanted_acceleration_m_s2 is not None:
         unwanted_level = _acceleration_level(
             unwanted_acceleration_m_s2, freq.shape, owner, "unwanted_acceleration_m_s2"
         )
-        holds = np.asarray(
-            check_unwanted_input(freq, input_level, unwanted_level).holds, dtype=bool
+        unwanted = np.asarray(
+            check_unwanted_input(freq, input_level, unwanted_level).difference_db,
+            dtype=np.float64,
         )
-        adequate = holds if adequate is None else adequate & holds
     return DrivingPointStiffnessResult(
         frequencies=freq,
         driving_point_stiffness=np.asarray(k11, dtype=np.complex128),
-        adequate=adequate,
+        blocked_output_difference_db=blocked,
+        unwanted_input_difference_db=unwanted,
     )
 
 

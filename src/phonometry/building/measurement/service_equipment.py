@@ -950,14 +950,14 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         (Formula (8)) or ``"limited"`` (held at 2,2 dB: the band is an upper
         limit of the equipment level).
     :ivar frequencies_hz: The band centres, in Hz, or ``None`` when not given.
+
+    The difference, the regime, the correction and the corrected level are
+    read from the two measured levels and the 10 dB and 4 dB of Clause 9, so
+    they are read-only properties and not fields.
     """
 
     measured_db: np.ndarray
     background_db: np.ndarray
-    difference_db: np.ndarray
-    correction_db: np.ndarray
-    corrected_db: np.ndarray
-    regime: tuple[str, ...]
     frequencies_hz: np.ndarray | None = None
 
     def __post_init__(self) -> None:
@@ -967,13 +967,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
             count.
         """
         n = np.asarray(self.measured_db).shape
-        arrays = (
-            self.background_db,
-            self.difference_db,
-            self.correction_db,
-            self.corrected_db,
-        )
-        if any(np.asarray(a).shape != n for a in arrays) or len(self.regime) != n[0]:
+        if len(n) != 1 or np.asarray(self.background_db).shape != n:
             msg = "ServiceEquipmentBackgroundResult: every band quantity needs one value per band."
             raise ValueError(msg)
         if (
@@ -982,6 +976,31 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         ):
             msg = "ServiceEquipmentBackgroundResult: 'frequencies_hz' needs one centre per band."
             raise ValueError(msg)
+
+    @property
+    def difference_db(self) -> np.ndarray:
+        r""":math:`\Delta L = L_1 - L_2` per band, in dB (Formula (9))."""
+        return np.asarray(
+            np.asarray(self.measured_db) - np.asarray(self.background_db),
+            dtype=np.float64,
+        )
+
+    @property
+    def regime(self) -> tuple[str, ...]:
+        """Per band, ``"none"``, ``"corrected"`` or ``"limited"`` (Clause 9)."""
+        return _background_regime(self.difference_db)[1]
+
+    @property
+    def correction_db(self) -> np.ndarray:
+        """The correction :math:`K` per band, in dB (Formulae (7) to (9))."""
+        return _background_regime(self.difference_db)[0]
+
+    @property
+    def corrected_db(self) -> np.ndarray:
+        """:math:`L = L_1 - K` per band, in dB (Formula (7))."""
+        return np.asarray(
+            np.asarray(self.measured_db) - self.correction_db, dtype=np.float64
+        )
 
     @property
     def limited(self) -> np.ndarray:
@@ -1063,7 +1082,17 @@ def service_equipment_background_correction(
         if freqs.shape != measured.shape or not np.all(np.isfinite(freqs)):
             msg = "'frequencies_hz' must give one finite centre per band."
             raise ValueError(msg)
-    difference = measured - background
+    # The difference, the regime and the correction are read by the result
+    # from the two levels it keeps.
+    return ServiceEquipmentBackgroundResult(
+        measured_db=measured,
+        background_db=background,
+        frequencies_hz=freqs,
+    )
+
+
+def _background_regime(difference: np.ndarray) -> tuple[np.ndarray, tuple[str, ...]]:
+    r"""The Clause 9 correction and regime of each band, from :math:`\Delta L`."""
     # The thresholds are read with the slack of a decimal difference: 20,4 dB
     # over 10,4 dB is a 10 dB margin to Clause 9 and a hair under it in binary.
     uncorrected = difference >= _NO_CORRECTION_DB - _LIMIT_SLACK
@@ -1081,15 +1110,7 @@ def service_equipment_background_correction(
         "none" if none else "corrected" if formed else "limited"
         for none, formed in zip(uncorrected, corrected_regime, strict=True)
     )
-    return ServiceEquipmentBackgroundResult(
-        measured_db=measured,
-        background_db=background,
-        difference_db=difference,
-        correction_db=np.asarray(correction, dtype=np.float64),
-        corrected_db=measured - correction,
-        regime=regime,
-        frequencies_hz=freqs,
-    )
+    return np.asarray(correction, dtype=np.float64), regime
 
 
 # ---------------------------------------------------------------------------
@@ -1119,7 +1140,8 @@ class ServiceEquipmentResult(OwnsArrays):
     :ivar corrected_db: The average corrected for the background, in dB (the
         average itself when there is no background).
     :ivar standardizable: Per band, whether 7.7 lets it be standardized or
-        normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz).
+        normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from
+        ``frequencies_hz`` and ``band``, so it is not a field.
     :ivar standardized_db: :math:`L_\mathrm{nT}` per band (Formula (5)), in dB,
         or ``None`` without a reverberation time. Bands outside the range are
         the corrected level, unstandardized.
@@ -1142,7 +1164,6 @@ class ServiceEquipmentResult(OwnsArrays):
     average_db: np.ndarray
     background: ServiceEquipmentBackgroundResult | None
     corrected_db: np.ndarray
-    standardizable: np.ndarray
     standardized_db: np.ndarray | None
     normalized_db: np.ndarray | None
     ratings: Mapping[str, int]
@@ -1159,7 +1180,6 @@ class ServiceEquipmentResult(OwnsArrays):
         bands = [
             self.average_db,
             self.corrected_db,
-            self.standardizable,
             self.reproducibility_db,
         ]
         bands += [
@@ -1174,6 +1194,20 @@ class ServiceEquipmentResult(OwnsArrays):
         if readings.ndim != _PER_POSITION_RANK or readings.shape[1:] != shape:
             msg = "ServiceEquipmentResult: 'readings_db' must be (readings, bands)."
             raise ValueError(msg)
+
+    @property
+    def standardizable(self) -> np.ndarray:
+        """Per band, whether 7.7 lets it be standardized or normalized.
+
+        :return: One boolean per band, ``True`` inside the range 7.7 gives for
+            :attr:`band`.
+        """
+        return np.asarray(
+            _in_range(
+                np.asarray(self.frequencies_hz), _STANDARDIZATION_RANGE[self.band]
+            ),
+            dtype=bool,
+        )
 
     @property
     def reading_count(self) -> int:
@@ -1398,7 +1432,6 @@ def service_equipment_level(
         average_db=average,
         background=background,
         corrected_db=corrected,
-        standardizable=standardizable,
         standardized_db=standardized,
         normalized_db=normalized,
         ratings=MappingProxyType(ratings),
@@ -1683,6 +1716,10 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
     at the origin: ``x`` along the length, ``y`` along the width and ``z`` the
     height above the floor.
 
+    The distances, the heights and the verdicts are read from the positions
+    and the distances the clauses print, so they are not fields: a check
+    cannot be built to pass positions the clauses fail.
+
     :ivar room_dimensions_m: Length, width and height of the room, in m.
     :ivar corner_position_m: Position 1, in m.
     :ivar room_positions_m: The reverberant-field positions, shape ``(k, 3)``,
@@ -1690,28 +1727,9 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
     :ivar source_positions_m: Sound sources in the room, shape ``(m, 3)``, in
         m (empty when none were given).
     :ivar small_room: Whether the small-room surface distance of 7.3 applies.
-    :ivar separation_m: The shortest distance between any two positions,
-        corner included, in m.
-    :ivar surface_distance_m: The shortest distance from a room position to a
-        wall, the floor or the ceiling, in m.
-    :ivar source_distance_m: The shortest distance from a room position to a
-        source, in m, or ``None`` without sources.
-    :ivar heights_m: The heights of the room positions, in m.
-    :ivar corner_height_m: The height of the corner position, in m.
-    :ivar corner_wall_distances_m: The corner position's distances to the two
-        walls nearest to it, in m; 7.2 prefers 0,5 m
-        (:attr:`preferred_corner_wall_distance`, advisory).
-    :ivar separation_ok: At least 1,0 m between positions.
-    :ivar surface_ok: At least 0,50 m (0,30 m in a small room) from every
-        surface.
-    :ivar source_ok: At least 1,5 m from every source.
-    :ivar height_ok: Every room position from 0,5 m to 2,0 m high.
-    :ivar corner_height_ok: The corner position from 0,5 m to 1,5 m high.
     :ivar corner_obstacle_distance_m: The distance from the corner microphone
         to the nearest obstacle, as measured on site, in m; ``None`` when it
         was not given.
-    :ivar corner_obstacle_ok: At least 0,2 m from any obstacle (7.2); ``None``
-        when the distance was not given, and then not judged.
     """
 
     room_dimensions_m: np.ndarray
@@ -1719,19 +1737,99 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
     room_positions_m: np.ndarray
     source_positions_m: np.ndarray
     small_room: bool
-    separation_m: float
-    surface_distance_m: float
-    source_distance_m: float | None
-    heights_m: np.ndarray
-    corner_height_m: float
-    corner_wall_distances_m: tuple[float, float]
-    separation_ok: bool
-    surface_ok: bool
-    source_ok: bool
-    height_ok: bool
-    corner_height_ok: bool
     corner_obstacle_distance_m: float | None = None
-    corner_obstacle_ok: bool | None = None
+
+    @property
+    def separation_m(self) -> float:
+        """The shortest distance between any two positions, corner included, in m."""
+        everything = np.vstack(
+            (self.corner_position_m[np.newaxis, :], self.room_positions_m)
+        )
+        gaps = np.linalg.norm(
+            everything[:, np.newaxis, :] - everything[np.newaxis, :, :], axis=-1
+        )
+        return float(np.min(gaps[np.triu_indices(everything.shape[0], k=1)]))
+
+    @property
+    def surface_distance_m(self) -> float:
+        """The shortest distance from a room position to a wall, the floor or the ceiling, in m."""
+        rooms = self.room_positions_m
+        return float(np.min(np.minimum(rooms, self.room_dimensions_m - rooms)))
+
+    @property
+    def source_distance_m(self) -> float | None:
+        """The shortest distance from a room position to a source, in m, or ``None`` without sources."""
+        sources = self.source_positions_m
+        if sources.shape[0] == 0:
+            return None
+        to_source = np.linalg.norm(
+            self.room_positions_m[:, np.newaxis, :] - sources[np.newaxis, :, :], axis=-1
+        )
+        return float(np.min(to_source))
+
+    @property
+    def heights_m(self) -> np.ndarray:
+        """The heights of the room positions, in m."""
+        return self.room_positions_m[:, 2].copy()
+
+    @property
+    def corner_height_m(self) -> float:
+        """The height of the corner position, in m."""
+        return float(self.corner_position_m[2])
+
+    @property
+    def corner_wall_distances_m(self) -> tuple[float, float]:
+        """The corner position's distances to the two walls nearest to it, in m.
+
+        7.2 prefers 0,5 m (:attr:`preferred_corner_wall_distance`, advisory).
+        """
+        corner = self.corner_position_m
+        walls = np.minimum(corner[:2], self.room_dimensions_m[:2] - corner[:2])
+        return (float(walls[0]), float(walls[1]))
+
+    @property
+    def separation_ok(self) -> bool:
+        """At least 1,0 m between positions."""
+        return self.separation_m >= _MIN_SEPARATION_M - _LIMIT_SLACK
+
+    @property
+    def surface_ok(self) -> bool:
+        """At least 0,50 m (0,30 m in a small room) from every surface."""
+        return self.surface_distance_m >= self.surface_limit_m - _LIMIT_SLACK
+
+    @property
+    def source_ok(self) -> bool:
+        """At least 1,5 m from every source; ``True`` without sources."""
+        distance = self.source_distance_m
+        return distance is None or distance >= _MIN_SOURCE_DISTANCE_M - _LIMIT_SLACK
+
+    @property
+    def height_ok(self) -> bool:
+        """Every room position from 0,5 m to 2,0 m high."""
+        heights = self.heights_m
+        return bool(
+            np.all(
+                (heights >= _MIN_HEIGHT_M - _LIMIT_SLACK)
+                & (heights <= _MAX_HEIGHT_M + _LIMIT_SLACK)
+            )
+        )
+
+    @property
+    def corner_height_ok(self) -> bool:
+        """The corner position from 0,5 m to 1,5 m high."""
+        low, high = _CORNER_HEIGHT_RANGE_M
+        return low - _LIMIT_SLACK <= self.corner_height_m <= high + _LIMIT_SLACK
+
+    @property
+    def corner_obstacle_ok(self) -> bool | None:
+        """At least 0,2 m from any obstacle (7.2).
+
+        ``None`` when the distance was not given, and then not judged.
+        """
+        distance = self.corner_obstacle_distance_m
+        if distance is None:
+            return None
+        return distance >= _MIN_OBSTACLE_DISTANCE_M - _LIMIT_SLACK
 
     @property
     def surface_limit_m(self) -> float:
@@ -1935,55 +2033,14 @@ def check_service_equipment_positions(
             msg = f"'{name}' has a position outside the room."
             raise ValueError(msg)
 
-    everything = np.vstack((corner, rooms))
-    gaps = np.linalg.norm(
-        everything[:, np.newaxis, :] - everything[np.newaxis, :, :], axis=-1
-    )
-    separation = float(np.min(gaps[np.triu_indices(everything.shape[0], k=1)]))
-    surface = float(np.min(np.minimum(rooms, dims - rooms)))
-    source_distance = None
-    if sources.shape[0] > 0:
-        to_source = np.linalg.norm(
-            rooms[:, np.newaxis, :] - sources[np.newaxis, :, :], axis=-1
-        )
-        source_distance = float(np.min(to_source))
-    heights = rooms[:, 2]
-    c = corner[0]
-    walls = np.minimum(c[:2], dims[:2] - c[:2])
-    surface_limit = (
-        _MIN_SURFACE_DISTANCE_SMALL_ROOM_M if small_room else _MIN_SURFACE_DISTANCE_M
-    )
-    slack = _LIMIT_SLACK
-    obstacle = _corner_obstacle_distance(corner_obstacle_distance_m)
     return ServiceEquipmentPositionCheck(
         room_dimensions_m=dims,
-        corner_position_m=c,
+        corner_position_m=corner[0],
         room_positions_m=rooms,
         source_positions_m=sources,
         small_room=bool(small_room),
-        separation_m=separation,
-        surface_distance_m=surface,
-        source_distance_m=source_distance,
-        heights_m=heights,
-        corner_height_m=float(c[2]),
-        corner_wall_distances_m=(float(walls[0]), float(walls[1])),
-        separation_ok=separation >= _MIN_SEPARATION_M - slack,
-        surface_ok=surface >= surface_limit - slack,
-        source_ok=source_distance is None
-        or source_distance >= _MIN_SOURCE_DISTANCE_M - slack,
-        height_ok=bool(
-            np.all(
-                (heights >= _MIN_HEIGHT_M - slack) & (heights <= _MAX_HEIGHT_M + slack)
-            )
-        ),
-        corner_height_ok=(
-            _CORNER_HEIGHT_RANGE_M[0] - slack
-            <= float(c[2])
-            <= _CORNER_HEIGHT_RANGE_M[1] + slack
-        ),
-        corner_obstacle_distance_m=obstacle,
-        corner_obstacle_ok=(
-            None if obstacle is None else obstacle >= _MIN_OBSTACLE_DISTANCE_M - slack
+        corner_obstacle_distance_m=_corner_obstacle_distance(
+            corner_obstacle_distance_m
         ),
     )
 

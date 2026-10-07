@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import functools
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import reference_data as ref
@@ -36,6 +36,9 @@ import reference_data as ref
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 _QUASI_PEAK = "Quasi-peak meter (ITU-R BS.468-4)"
 
@@ -45,7 +48,7 @@ _FS = 48000.0
 
 
 @functools.cache
-def _dynamics() -> dict[str, dict[str, Any]]:
+def _dynamics() -> dict[str, Mapping[str, Any]]:
     """The eleven readings, keyed by the stimulus label, computed once."""
     report = ph.broadcast.verify_quasi_peak_dynamics(_FS)
     return {row["stimulus"]: row for row in report.stimuli}

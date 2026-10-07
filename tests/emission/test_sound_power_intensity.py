@@ -568,14 +568,7 @@ def _five_band_determination() -> object:
 
 @pytest.mark.parametrize(
     "field_name",
-    [
-        "sound_power_level",
-        "negative_band",
-        "surface_pressure_intensity_index",
-        "negative_partial_power_index",
-        "dynamic_capability_index",
-        "a_weighting_omitted_bands",
-    ],
+    ["surface_pressure_intensity_index", "pressure_residual_index_db"],
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_per_band_quantity_off_the_band_axis_is_refused(

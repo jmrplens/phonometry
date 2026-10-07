@@ -360,7 +360,7 @@ def _result(**overrides: object) -> ws.EmissionPressureResult:
         "background_correction_db": 0.0,
         "local_correction_db": 3.7,
         "grade": "engineering",
-        "upper_bound": False,
+        "background_margin_db": 20.0,
         "standard": "ISO 11202",
     }
     fields.update(overrides)
@@ -407,7 +407,7 @@ def test_the_figure_says_when_the_level_is_an_upper_bound() -> None:
     assert all(bar.get_hatch() is None for bar in plain.patches[:4])
     plt.close("all")
 
-    bounded = _result(upper_bound=True).plot()
+    bounded = _result(background_margin_db=4.0).plot()
     hatches = [bar.get_hatch() for bar in bounded.patches[:4]]
     assert hatches[0] == "//"
     assert hatches[3] == "//"
@@ -457,3 +457,18 @@ def test_the_figure_rejects_an_unknown_language() -> None:
     result = _result()
     with pytest.raises(ValueError, match="Unknown language"):
         result.plot(language="xx")
+
+
+@pytest.mark.parametrize(
+    ("grade", "margin_db", "bounded"),
+    [("engineering", 6.0, False), ("engineering", 5.9, True), ("survey", 3.0, False)],
+)
+def test_the_upper_bound_is_read_from_the_margin_and_the_grade(
+    grade: str, margin_db: float, *, bounded: bool
+) -> None:
+    """6 dB for grade 2 and 3 dB for grade 3, a margin on its minimum included."""
+    import dataclasses
+
+    result = _result(grade=grade, background_margin_db=margin_db)
+    assert result.upper_bound is bounded
+    assert "upper_bound" not in {field.name for field in dataclasses.fields(result)}

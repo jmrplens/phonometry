@@ -115,27 +115,19 @@ DEFAULT_ASSESSMENT_PERIOD_MIN: float = 30.0
 class ImpulseProminenceResult(OwnsArrays):
     """Prominence of a set of candidate impulses (NT ACOU 112:2002).
 
+    The prominences, which events qualify and the adjustment are read from the
+    onset rates and level differences, by Formulas 1 and 2 and the 10 dB/s of
+    clause 4.5, so they are not fields: a result cannot be built to adjust for
+    an event the standard does not count.
+
     :ivar onset_rates: Onset rate of each impulse, in dB/s.
     :ivar level_differences: Level difference of each impulse, in dB.
-    :ivar per_impulse: Predicted prominence ``P`` of each impulse (Formula 1).
-    :ivar qualifies: Whether each event qualifies as an impulse: onset rate
-        above 10 dB/s (clause 4.5; clause 8 applies the adjustment "for
-        sounds with onset rates larger than 10 dB/s" only).
-    :ivar prominence: The governing prominence: the highest ``P`` among the
-        qualifying impulses (clause 7), or the highest overall (informational)
-        when none qualifies.
-    :ivar adjustment: The LAeq adjustment ``KI``, in dB, of the governing
-        qualifying impulse (Formula 2); 0 dB when no event qualifies.
     :ivar assessment_period_min: The assessment time interval the impulses were
         selected over, in minutes (Clause 5; 30 min by default).
     """
 
     onset_rates: np.ndarray
     level_differences: np.ndarray
-    per_impulse: np.ndarray
-    qualifies: np.ndarray
-    prominence: float
-    adjustment: float
     _: KW_ONLY
     assessment_period_min: float = DEFAULT_ASSESSMENT_PERIOD_MIN
 
@@ -161,41 +153,58 @@ class ImpulseProminenceResult(OwnsArrays):
         :raises ValueError: if the per-impulse columns disagree, are empty,
             or carry a non-finite value.
         """
-        require_ranks(
-            self,
-            onset_rates=1,
-            level_differences=1,
-            per_impulse=1,
-            qualifies=1,
-        )
-        require_same_length(
-            self,
-            "onset_rates",
-            "level_differences",
-            "per_impulse",
-            "qualifies",
-            axis="impulse",
-        )
+        require_ranks(self, onset_rates=1, level_differences=1)
+        require_same_length(self, "onset_rates", "level_differences", axis="impulse")
         if np.asarray(self.onset_rates).size == 0:
             msg = (
                 "ImpulseProminenceResult: 'onset_rates' must carry at least "
                 "one impulse; all per-impulse columns are empty."
             )
             raise ValueError(msg)
-        for name in ("onset_rates", "level_differences", "per_impulse"):
-            if not np.all(np.isfinite(np.asarray(getattr(self, name), np.float64))):
+        for name in ("onset_rates", "level_differences"):
+            values = np.asarray(getattr(self, name), np.float64)
+            if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
                 msg = (
                     f"ImpulseProminenceResult: '{name}' must contain only "
-                    "finite values."
+                    "positive, finite values."
                 )
                 raise ValueError(msg)
-        for name in ("prominence", "adjustment"):
-            value = getattr(self, name)
-            if not math.isfinite(float(value)):
-                msg = (
-                    f"ImpulseProminenceResult: '{name}' must be finite; got {value!r}."
-                )
-                raise ValueError(msg)
+
+    @property
+    def per_impulse(self) -> np.ndarray:
+        """Predicted prominence ``P`` of each impulse (Formula 1)."""
+        return predicted_prominence(self.onset_rates, self.level_differences)
+
+    @property
+    def qualifies(self) -> np.ndarray:
+        """Whether each event qualifies as an impulse.
+
+        Onset rate above 10 dB/s (clause 4.5; clause 8 applies the adjustment
+        "for sounds with onset rates larger than 10 dB/s" only).
+        """
+        return np.asarray(np.asarray(self.onset_rates) > ONSET_RATE_LIMIT, dtype=bool)
+
+    @property
+    def prominence(self) -> float:
+        """The governing prominence.
+
+        The highest ``P`` among the qualifying impulses (clause 7), or the
+        highest overall (informational) when none qualifies.
+        """
+        per_impulse, qualifies = self.per_impulse, self.qualifies
+        if np.any(qualifies):
+            return float(np.max(per_impulse[qualifies]))
+        return float(np.max(per_impulse))
+
+    @property
+    def adjustment(self) -> float:
+        """The LAeq adjustment ``KI``, in dB, of the governing qualifying impulse.
+
+        Formula 2; 0 dB when no event qualifies.
+        """
+        if not np.any(self.qualifies):
+            return 0.0
+        return float(impulse_adjustment(self.prominence))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -358,7 +367,7 @@ def impulse_prominence(
         {"onset_rates": orate.shape, "level_differences": ld.shape},
         "impulse",
     )
-    per_impulse = predicted_prominence(orate, ld)
+    predicted_prominence(orate, ld)  # refuses a non-positive rate or difference
     qualifies = orate > ONSET_RATE_LIMIT
     if not np.all(qualifies):
         warnings.warn(
@@ -368,19 +377,9 @@ def impulse_prominence(
             ImpulseProminenceWarning,
             stacklevel=2,
         )
-    if np.any(qualifies):
-        governing = float(np.max(per_impulse[qualifies]))
-        adjustment = float(impulse_adjustment(governing))
-    else:
-        governing = float(np.max(per_impulse))  # informational only
-        adjustment = 0.0
     return ImpulseProminenceResult(
         onset_rates=orate,
         level_differences=ld,
-        per_impulse=per_impulse,
-        qualifies=qualifies,
-        prominence=governing,
-        adjustment=adjustment,
         assessment_period_min=float(assessment_period_min),
     )
 
@@ -489,13 +488,8 @@ class ImpulseOnset:
     :ivar time_end: Time of the end point, in seconds.
     :ivar level_start: Level ``Ls`` at the starting point, in dB.
     :ivar level_end: Level ``Le`` at the end point, in dB.
-    :ivar level_difference: Level difference :math:`\mathrm{LD} = L_\mathrm{e} - L_\mathrm{s}`,
-        in dB (3.4).
     :ivar onset_rate: Onset rate ``OR``, in dB/s, the least-squares slope over
         the onset (3.5).
-    :ivar prominence: Predicted prominence ``P`` of this onset (Formula 2).
-    :ivar qualifies: Whether the onset rate exceeds 10 dB/s, so the onset can
-        contribute an adjustment (Clause 6).
     """
 
     index_start: int
@@ -504,11 +498,26 @@ class ImpulseOnset:
     time_end: float
     level_start: float
     level_end: float
-    level_difference: float
     onset_rate: float
-    prominence: float
-    _: KW_ONLY
-    qualifies: bool
+
+    @property
+    def level_difference(self) -> float:
+        r"""Level difference :math:`\mathrm{LD} = L_\mathrm{e} - L_\mathrm{s}`, in dB (3.4)."""
+        return float(self.level_end - self.level_start)
+
+    @property
+    def prominence(self) -> float:
+        """Predicted prominence ``P`` of this onset (Formula 2), ``nan`` for a fall or a flat."""
+        if self.onset_rate > 0.0 and self.level_difference > 0.0:
+            return float(predicted_prominence(self.onset_rate, self.level_difference))
+        return float("nan")
+
+    @property
+    def qualifies(self) -> bool:
+        """Whether the onset rate exceeds 10 dB/s on a rise, so the onset can contribute an adjustment (Clause 6)."""
+        return bool(
+            self.onset_rate > ONSET_GRADIENT_LIMIT and self.level_difference > 0.0
+        )
 
 
 @dataclass(frozen=True)
@@ -519,25 +528,18 @@ class ImpulsiveSoundResult(OwnsArrays):
     :ivar levels: A-weighted, F time-weighted level ``LpAF``, in dB.
     :ivar dt: Sampling interval of ``levels``, in seconds.
     :ivar onsets: The detected onsets, ordered in time (Clause 4).
-    :ivar prominence: Governing prominence ``P``: the highest ``P`` among the
-        qualifying onsets (Clause 5); ``nan`` when none qualifies.
-    :ivar adjustment: The ``LAeq`` adjustment ``KI``, in dB (Formula 3); 0 dB
-        when no onset qualifies.
-    :ivar category: Source category (Clause 7): ``"not impulsive"``,
-        ``"regular impulsive"`` or ``"highly impulsive"``.
     :ivar laeq: A-weighted equivalent level of the interval, in dB.
-    :ivar adjusted_laeq: ``laeq + adjustment``, in dB.
+
+    The governing prominence, the adjustment, the category and the adjusted
+    level are read from the onsets and the limits of Clauses 6 and 7, so they
+    are read-only properties and not fields.
     """
 
     times: np.ndarray
     levels: np.ndarray
     dt: float
     onsets: tuple[ImpulseOnset, ...]
-    prominence: float
-    adjustment: float
-    category: str
     laeq: float
-    adjusted_laeq: float
 
     def __post_init__(self) -> None:
         """Reject a trace whose levels and time axis do not line up.
@@ -573,6 +575,32 @@ class ImpulsiveSoundResult(OwnsArrays):
         if not qualifying:
             return None
         return max(qualifying, key=lambda o: o.prominence)
+
+    @property
+    def prominence(self) -> float:
+        """Governing prominence ``P``: the highest among the qualifying onsets (Clause 5).
+
+        ``nan`` when no onset qualifies.
+        """
+        qualifying = [o.prominence for o in self.onsets if o.qualifies]
+        return max(qualifying) if qualifying else float("nan")
+
+    @property
+    def adjustment(self) -> float:
+        """The ``LAeq`` adjustment ``KI``, in dB (Formula 3); 0 dB when no onset qualifies."""
+        if not any(o.qualifies for o in self.onsets):
+            return 0.0
+        return float(impulse_adjustment(self.prominence))
+
+    @property
+    def category(self) -> str:
+        """Source category (Clause 7): ``"not impulsive"``, ``"regular impulsive"`` or ``"highly impulsive"``."""
+        return _categorise(self.adjustment)
+
+    @property
+    def adjusted_laeq(self) -> float:
+        """``laeq + adjustment``, in dB."""
+        return float(self.laeq + self.adjustment)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -857,13 +885,7 @@ def detect_onsets(
 
     onsets: list[ImpulseOnset] = []
     for s, e in runs:
-        ld = float(lev[e] - lev[s])
         orate = _onset_rate(times[s : e + 1], lev[s : e + 1], onset_rate_method)
-        qualifies = orate > ONSET_GRADIENT_LIMIT and ld > 0.0
-        if orate > 0.0 and ld > 0.0:
-            prominence = float(predicted_prominence(orate, ld))
-        else:
-            prominence = float("nan")
         onsets.append(
             ImpulseOnset(
                 index_start=int(s),
@@ -872,10 +894,7 @@ def detect_onsets(
                 time_end=float(times[e]),
                 level_start=float(lev[s]),
                 level_end=float(lev[e]),
-                level_difference=ld,
                 onset_rate=orate,
-                prominence=prominence,
-                qualifies=bool(qualifies),
             )
         )
     return tuple(onsets)
@@ -946,13 +965,7 @@ def impulsive_sound_adjustment(
     realised_dt = float(times[1] - times[0]) if times.size > 1 else dt
     onsets = detect_onsets(levels, realised_dt, onset_rate_method=onset_rate_method)
 
-    qualifying = [o for o in onsets if o.qualifies]
-    if qualifying:
-        prominence = max(o.prominence for o in qualifying)
-        adjustment = float(impulse_adjustment(prominence))
-    else:
-        prominence = float("nan")
-        adjustment = 0.0
+    if not any(o.qualifies for o in onsets):
         warnings.warn(
             "No onset with a gradient above 10 dB/s was found; the interval is "
             "not impulsive and the adjustment is 0 dB (ISO/PAS 1996-3, Clause 6).",
@@ -968,11 +981,7 @@ def impulsive_sound_adjustment(
         levels=levels,
         dt=realised_dt,
         onsets=onsets,
-        prominence=prominence,
-        adjustment=adjustment,
-        category=_categorise(adjustment),
         laeq=float(laeq),
-        adjusted_laeq=float(laeq + adjustment),
     )
 
 

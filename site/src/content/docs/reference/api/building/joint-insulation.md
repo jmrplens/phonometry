@@ -161,28 +161,37 @@ number and are not judged here.
 ## GapWidthCheck
 
 ```python
-GapWidthCheck(
-    readings_mm: tuple[float, ...],
-    gap_width_mm: float,
-    spread_mm: float,
-    enough_positions: bool,
-    uniform: bool,
-    passes: bool,
-)
+GapWidthCheck(readings_mm: tuple[float, ...])
 ```
 
 The gap width read along the joint, and whether the readings agree (J.2.2).
+
+Everything else is read from the readings, so a check cannot be built to
+pass readings the clause fails.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `readings_mm` | The gap widths read along the joint, in mm. |
-| `gap_width_mm` | Their average, the gap width `b`, in mm. |
-| `spread_mm` | The largest difference between two readings, in mm. |
-| `enough_positions` | Whether there are at least four readings. |
-| `uniform` | Whether no two readings differ by more than 0,3 mm. |
-| `passes` | Whether both hold; otherwise J.2.2 says to readjust the mounting. |
+
+### GapWidthCheck.enough_positions
+
+*property*
+
+Whether there are at least four readings.
+
+### GapWidthCheck.gap_width_mm
+
+*property*
+
+The average of the readings, the gap width `b`, in mm.
+
+### GapWidthCheck.passes
+
+*property*
+
+Whether both hold; otherwise J.2.2 says to readjust the mounting.
 
 ### GapWidthCheck.plot()
 
@@ -199,6 +208,18 @@ Plot the readings with their average and the 0,3 mm band.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### GapWidthCheck.spread_mm
+
+*property*
+
+The largest difference between two readings, in mm.
+
+### GapWidthCheck.uniform
+
+*property*
+
+Whether no two readings differ by more than 0,3 mm.
 
 ## joint_gap_series
 
@@ -413,14 +434,14 @@ JointGapSeriesCheck(
     gap_widths_mm: tuple[float, ...],
     nominal_gap_mm: float,
     minimum_gap_mm: float | None,
-    nominal_measured: bool,
-    minimum_measured: bool,
-    working_range_measured: bool,
-    passes: bool,
 )
 ```
 
 Whether a variable slit was measured at the three gap widths of J.4.
+
+The three widths J.4 asks for are read from the nominal and the minimal
+gap width, so the verdicts are not fields: a check cannot be built to pass
+a series that misses one.
 
 **Attributes**
 
@@ -429,10 +450,27 @@ Whether a variable slit was measured at the three gap widths of J.4.
 | `gap_widths_mm` | The gap widths measured, ascending, in mm. |
 | `nominal_gap_mm` | The nominal gap width $b_\mathrm{n}$, in mm. |
 | `minimum_gap_mm` | The minimal gap width $b_\mathrm{min}$, in mm, or `None` when the series does not name it. |
-| `nominal_measured` | Whether a measured width is $b_\mathrm{n}$ (J.4 a)). |
-| `minimum_measured` | Whether a measured width is $b_\mathrm{min}$ (J.4 b)); `False` when the series names no $b_\mathrm{min}$, since nothing then shows it was measured. |
-| `working_range_measured` | Whether a measured width is $b_\mathrm{n} + 3$ mm (J.4 c)). |
-| `passes` | Whether all three were measured. |
+
+### JointGapSeriesCheck.minimum_measured
+
+*property*
+
+Whether a measured width is $b_\mathrm{min}$ (J.4 b)).
+
+`False` when the series names no $b_\mathrm{min}$, since
+nothing then shows it was measured.
+
+### JointGapSeriesCheck.nominal_measured
+
+*property*
+
+Whether a measured width is $b_\mathrm{n}$ (J.4 a)).
+
+### JointGapSeriesCheck.passes
+
+*property*
+
+Whether all three were measured.
 
 ### JointGapSeriesCheck.plot()
 
@@ -455,6 +493,12 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 *property*
 
 How far a measured width may lie from a required one, in mm (0,3 mm, J.2.2).
+
+### JointGapSeriesCheck.working_range_measured
+
+*property*
+
+Whether a measured width is $b_\mathrm{n} + 3$ mm (J.4 c)).
 
 ## JointOpenBandRating
 
@@ -513,13 +557,14 @@ JointTestElementCheck(
     joint_length_m: float,
     joint_width_mm: float,
     window_or_door_gap: bool,
-    length_ok: bool,
-    width_ok: bool,
-    passes: bool,
 )
 ```
 
 Whether a joint is long and narrow enough to be tested (J.2.1, J.2.2).
+
+The bounds are the clause's, so the verdicts are read from the length and
+the width and are not fields: a check cannot be built to pass a joint the
+clause fails.
 
 **Attributes**
 
@@ -528,9 +573,21 @@ Whether a joint is long and narrow enough to be tested (J.2.1, J.2.2).
 | `joint_length_m` | Length of the joint, in m. |
 | `joint_width_mm` | Width of the joint, in mm. |
 | `window_or_door_gap` | Whether the joint is a gap between the parts of a window or door, which J.2.2 asks to be at least 5,0 m long. |
-| `length_ok` | Whether the length is greater than 1 m and, for a window or door gap, at least 5,0 m. |
-| `width_ok` | Whether the width is no greater than 50 mm. |
-| `passes` | Whether both hold. |
+
+### JointTestElementCheck.length_ok
+
+*property*
+
+Whether the length is greater than 1 m and, for a window or door gap, at least 5,0 m.
+
+The 1 m bound is exclusive and the 5,0 m bound inclusive, read with a
+relative slack so that a length on it is not failed by rounding.
+
+### JointTestElementCheck.passes
+
+*property*
+
+Whether both the length and the width hold.
 
 ### JointTestElementCheck.plot()
 
@@ -547,6 +604,12 @@ Plot the length and width of the joint against their bounds.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### JointTestElementCheck.width_ok
+
+*property*
+
+Whether the width is no greater than 50 mm.
 
 ## lab_joint_insulation
 

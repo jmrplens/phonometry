@@ -480,17 +480,14 @@ Plot the achieved values against their DB-HR limits.
 ## DbHrCheck
 
 ```python
-DbHrCheck(
-    requirement: DbHrRequirement,
-    value: float,
-    reported: float,
-    margin: float,
-    *,
-    complies: bool,
-)
+DbHrCheck(requirement: DbHrRequirement, value: float)
 ```
 
 A DB-HR requirement checked against an achieved value.
+
+The rounding, the margin and the verdict are read from the achieved value
+and the requirement, so they are not fields: a check cannot be built to
+comply with a value DB-HR fails.
 
 **Attributes**
 
@@ -498,9 +495,31 @@ A DB-HR requirement checked against an achieved value.
 | :--- | :--- |
 | `requirement` | The [`DbHrRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) checked. |
 | `value` | The achieved value, unrounded. |
-| `reported` | The achieved value rounded as DB-HR prescribes. |
-| `margin` | `reported - limit` for a `"min"` requirement and `limit - reported` for a `"max"` one; non-negative when compliant. |
-| `complies` | Whether the requirement is met. |
+
+### DbHrCheck.complies
+
+*property*
+
+Whether the requirement is met.
+
+The value exactly at the limit after the rounding complies, with a
+billionth of a decibel of slack so that binary representation error
+in the subtraction cannot turn it into a failure.
+
+### DbHrCheck.margin
+
+*property*
+
+How far the reported value clears the limit.
+
+`reported - limit` for a `"min"` requirement and
+`limit - reported` for a `"max"` one; non-negative when compliant.
+
+### DbHrCheck.reported
+
+*property*
+
+The achieved value rounded half-up as DB-HR prescribes for the quantity.
 
 ## DbHrGlobalIndexResult
 

@@ -358,10 +358,7 @@ presentations, a new call with `shortened=False`.
 ```python
 AscendingThresholdResult(
     ascent_levels_db: np.ndarray,
-    threshold_db: float,
-    determined: bool,
     shortened: bool,
-    series_exhausted: bool,
     next_level_db: float,
     presentation_levels_db: np.ndarray | None = None,
     responses: np.ndarray | None = None,
@@ -370,18 +367,27 @@ AscendingThresholdResult(
 
 The hearing threshold level by the ascending method (6.2.4.2).
 
+The threshold and the state of the series are read from the ascents by
+the stopping rule of 6.2.3.2, so they are not fields: a result cannot
+state a threshold its ascents do not reach.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `ascent_levels_db` | The level at which each ascent ended in a response, in presentation order, in dB. |
-| `threshold_db` | The hearing threshold level, in dB: the lowest level at which responses occur in more than half of the ascents, once the stopping rule of 6.2.3.2 is met; NaN until then. |
-| `determined` | Whether the stopping rule is met: three responses at one level (two in the shortened version). |
 | `shortened` | Whether the shortened version was applied. |
-| `series_exhausted` | Whether the series used up its ascents (five, or three shortened) without a threshold. The full method then starts a new series 10 dB above the last response. |
 | `next_level_db` | The level to present next, in dB, when the presentations were given and no threshold is determined yet; NaN otherwise. |
 | `presentation_levels_db` | The levels presented, in dB, or `None` when only the ascents were given. |
 | `responses` | Whether each presentation drew a response, or `None`. |
+
+### AscendingThresholdResult.determined
+
+*property*
+
+Whether the stopping rule is met.
+
+Three responses at one level (two in the shortened version).
 
 ### AscendingThresholdResult.doubtful
 
@@ -425,6 +431,15 @@ How many ascents ended at the threshold level.
 
 **Returns:** The count, 0 when no threshold is determined.
 
+### AscendingThresholdResult.series_exhausted
+
+*property*
+
+Whether the series used up its ascents without a threshold.
+
+Five ascents, or three shortened. The full method then starts a new
+series 10 dB above the last response.
+
 ### AscendingThresholdResult.span_db
 
 *property*
@@ -432,6 +447,15 @@ How many ascents ended at the threshold level.
 The spread of the ascents' response levels, in dB.
 
 **Returns:** The largest less the smallest, 0 for fewer than two ascents.
+
+### AscendingThresholdResult.threshold_db
+
+*property*
+
+The hearing threshold level, in dB.
+
+The lowest level at which responses occur in more than half of the
+ascents, once the stopping rule of 6.2.3.2 is met; NaN until then.
 
 ## audiogram_cautions
 

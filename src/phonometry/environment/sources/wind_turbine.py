@@ -203,8 +203,6 @@ class WindTurbineTonalityResult(OwnsArrays):
     :ivar audibility_criterion: The criterion ``L_a`` (Formula 34), in dB.
     :ivar tonal_audibility: Tonal audibility
         :math:`\Delta L_\mathrm{a} = \Delta L_\mathrm{tn} - L_\mathrm{a}`, in dB.
-    :ivar is_audible: Whether an identified tone is audible
-        (:math:`\Delta L_\mathrm{a} > 0` *and* ``has_identified_tone``).
     :ivar has_identified_tone: Whether the candidate passed the 9.5.2
         possible-tone screening *and* at least one spectral line was
         classified as "tone" (subclause 9.5.4). When ``False`` the numeric
@@ -223,10 +221,17 @@ class WindTurbineTonalityResult(OwnsArrays):
     audibility_criterion: float
     tonal_audibility: float
     _: KW_ONLY
-    is_audible: bool
     has_identified_tone: bool
     frequencies: NDArray[np.float64]
     levels: NDArray[np.float64]
+
+    @property
+    def is_audible(self) -> bool:
+        r"""Whether an identified tone is audible.
+
+        :math:`\Delta L_\mathrm{a} > 0` *and* ``has_identified_tone``.
+        """
+        return bool(self.tonal_audibility > 0.0 and self.has_identified_tone)
 
     def __post_init__(self) -> None:
         """Reject a spectrum whose lines and levels do not pair up.
@@ -530,7 +535,6 @@ def wind_turbine_tonality(
         tonality=float(tonality),
         audibility_criterion=float(l_a),
         tonal_audibility=delta_la,
-        is_audible=bool(delta_la > 0.0 and has_identified_tone),
         has_identified_tone=has_identified_tone,
         frequencies=fr,
         levels=lv,

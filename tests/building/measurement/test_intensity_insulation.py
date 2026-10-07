@@ -557,16 +557,23 @@ def test_low_frequency_result_rejects_arrays_that_disagree() -> None:
         area=10.0,
         l_p=[70.0, 71.0],
     )
-    with pytest.raises(ValueError, match="qualified"):
-        dataclasses.replace(r, qualified=np.array([True]))
+    with pytest.raises(ValueError, match="surface_pressure_intensity_indicator"):
+        dataclasses.replace(r, surface_pressure_intensity_indicator=np.array([10.0]))
 
 
-def test_low_frequency_result_rejects_half_an_indicator() -> None:
-    """The indicator and the qualification are one answer, given together."""
+def test_low_frequency_result_reads_its_qualification_from_the_indicator() -> None:
+    """The indicator and the qualification are one answer: the second is read from the first."""
     r = building.low_frequency_intensity_reduction(
         [80.0], [60.0], measurement_area=10.0, area=10.0, l_p=[70.0]
     )
-    with pytest.raises(ValueError, match="two\\s+halves"):
+    assert r.qualified is not None
+    assert r.qualified.tolist() == [True]
+    louder = dataclasses.replace(
+        r, surface_pressure_intensity_indicator=np.array([10.5])
+    )
+    assert louder.qualified is not None
+    assert louder.qualified.tolist() == [False]
+    with pytest.raises(TypeError, match="qualified"):
         dataclasses.replace(r, qualified=None)
 
 
@@ -667,9 +674,9 @@ def test_low_frequency_element_result_rejects_arrays_that_disagree() -> None:
     r = building.low_frequency_element_normalized_difference(
         [90.0, 91.0], [60.0, 61.0], measurement_area=10.0, l_p=[68.0, 69.0]
     )
-    with pytest.raises(ValueError, match="qualified"):
-        dataclasses.replace(r, qualified=np.array([True]))
-    with pytest.raises(ValueError, match="two\\s+halves"):
+    with pytest.raises(ValueError, match="surface_pressure_intensity_indicator"):
+        dataclasses.replace(r, surface_pressure_intensity_indicator=np.array([8.0]))
+    with pytest.raises(TypeError, match="qualified"):
         dataclasses.replace(r, qualified=None)
 
 

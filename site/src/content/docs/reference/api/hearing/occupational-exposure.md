@@ -74,9 +74,11 @@ ExposureResult(
     u3: float | None = None,
     n_samples: int | None = None,
     *,
-    sampling_advisory: bool = False,
     instrument: InstrumentClass | None = None,
     tasks: tuple[TaskContribution, ...] = ...,
+    sample_range_db: float | None = None,
+    n_workers: int | None = None,
+    sample_duration_hours: float | None = None,
 )
 ```
 
@@ -91,6 +93,9 @@ Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 | `expanded_uncertainty` | Expanded uncertainty $U = 1.65 u$ for a one-sided 95 % confidence interval, dB. |
 | `strategy` | `"task"`, `"job"` or `"full_day"`. |
 | `instrument` | Instrument class the measurement was made with (the call default; individual tasks may override it): `"class1"`, `"class2"` or `"personal_exposimeter"`. Printed on the `.report()` fiche (ISO 9612:2009 Clause 15 c). |
+| `sample_range_db` | The largest less the smallest sample of a job-based or full-day determination, dB, or `None`. |
+| `n_workers` | The homogeneous-group size `n_G` of a job-based determination whose cumulative duration is checked against Table 1, or `None`. |
+| `sample_duration_hours` | The duration of each sample of that check, hours, or `None`. |
 | `upper_limit` | $L_\mathrm{EX,8h} + U$, the value 95 % of readings fall below. |
 
 ### ExposureResult.plot()
@@ -157,6 +162,18 @@ a footer identity/disclaimer block.
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
 | ImportError | If reportlab (or, for a task-based result's chart, matplotlib) is not installed (`pip install phonometry[report]`). |
+
+### ExposureResult.sampling_advisory
+
+*property*
+
+Whether the sampling calls for more measurements.
+
+A task-based determination: a task whose samples trip the 3 dB spread
+rule of Clause 9.3. A job-based or full-day one: a Table C.4
+contribution `c1*u1` above 3.5 dB (Clause 10.4), three full-day
+samples spanning 3 dB or more (Clause 11.3), or a cumulative duration
+short of Table 1 for the group. Each figure is judged settled.
 
 ### ExposureResult.upper_limit
 
@@ -354,7 +371,6 @@ TaskContribution(
     n_samples: int,
     sample_range_db: float,
     *,
-    spread_advisory: bool,
     u1a: float,
     c1a: float,
     u1b: float,
@@ -365,6 +381,18 @@ TaskContribution(
 ```
 
 Per-task results and uncertainty terms of a task-based determination.
+
+The Clause 9.3 spread advisory is read from the number of samples and
+their range, so it is not a field.
+
+### TaskContribution.spread_advisory
+
+*property*
+
+Whether the 3 dB spread rule of Clause 9.3 is triggered.
+
+Judged settled: three readings 3 dB apart in decimal span 3 dB
+whichever way the subtraction's last bits fall.
 
 ### TaskContribution.variance_contribution
 

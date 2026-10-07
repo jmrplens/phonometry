@@ -745,8 +745,30 @@ def test_result_refuses_disagreeing_shapes() -> None:
         dataclasses.replace(res, reference_levels=two_locations)
     with pytest.raises(ValueError, match="'quantity' must be one of"):
         dataclasses.replace(res, quantity="intensity")
-    with pytest.raises(ValueError, match="'grade' must be one of"):
-        dataclasses.replace(res, grade="precision")
+    with pytest.raises(ValueError, match="'excess_levels' must carry one finite value"):
+        dataclasses.replace(res, excess_levels_db=np.full(3, 8.0))
+    with pytest.raises(ValueError, match="'directivity_range' must be finite"):
+        dataclasses.replace(res, directivity_range_db=-1.0)
+
+
+@pytest.mark.parametrize(
+    "field", ["grade", "sigma_r0", "sigma_tot", "expanded_uncertainty"]
+)
+def test_the_grade_and_its_uncertainty_are_read_from_the_indicators(field: str) -> None:
+    """Table 2 grants the grade from the two indicators the result keeps."""
+    res = _power()
+    with pytest.raises(TypeError, match=field):
+        dataclasses.replace(res, **{field: "engineering"})
+
+
+def test_a_hand_built_grade_follows_its_indicators() -> None:
+    res = _power()
+    engineering = dataclasses.replace(
+        res, excess_levels_db=np.full(4, 7.0), directivity_range_db=7.0
+    )
+    survey = dataclasses.replace(engineering, directivity_range_db=7.1)
+    assert (engineering.grade, survey.grade) == ("engineering", "survey")
+    assert (engineering.sigma_r0, survey.sigma_r0) == (1.5, 4.0)
 
 
 # --------------------------------------------------------------------------
@@ -799,3 +821,81 @@ def test_plot_rejects_an_unknown_language() -> None:
     res = _power()
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
+
+
+# --------------------------------------------------------------------------
+# The smallest margin is the one each band is judged by (8.1, 8.4)
+# --------------------------------------------------------------------------
+def test_one_quiet_event_takes_its_band_off_the_requirement() -> None:
+    """Eq. (14) one event at a time: the band is valid only if every event at
+    every position clears the background by 6 dB, so one event 4 dB above it
+    is enough to fail the band, and the margin kept is that 4 dB.
+    """
+    events = np.repeat(ST[:, None, :], 5, axis=1)
+    background = ST - 20.0
+    events[2, 3, 4] = background[2, 4] + 4.0
+    res = emission.sound_energy_in_situ(
+        events,
+        RSS,
+        LW_RSS,
+        FREQS,
+        background_levels=background,
+        background_levels_ref=RSS - 20.0,
+    )
+    expected = np.full(FREQS.size, 20.0)
+    expected[4] = 4.0
+    np.testing.assert_allclose(res.background_margin_db, expected, atol=1e-9)
+    assert res.background_requirement_met.tolist() == [True] * 4 + [False, True, True]
+    assert res.upper_bound.tolist() == [False] * 4 + [True, False, False]
+
+
+def test_one_quiet_position_over_n_events_takes_its_band_off_the_requirement() -> None:
+    """Eq. (16), N events in one measurement: the smallest margin over the
+    positions decides the band.
+    """
+    measured = ST + 10.0 * np.log10(5.0)
+    background = measured - 20.0
+    background[1, 2] = measured[1, 2] - 4.0
+    res = emission.sound_energy_in_situ(
+        measured,
+        RSS,
+        LW_RSS,
+        FREQS,
+        events=5,
+        background_levels=background,
+        background_levels_ref=RSS - 20.0,
+    )
+    expected = np.full(FREQS.size, 20.0)
+    expected[2] = 4.0
+    np.testing.assert_allclose(res.background_margin_db, expected, atol=1e-9)
+    assert res.background_requirement_met.tolist() == [True, True, False] + [True] * 4
+
+
+def test_one_quiet_position_takes_the_source_band_off_the_requirement() -> None:
+    """Eq. (5): the source's band is judged by its smallest margin over the
+    positions, and a source margin short of 6 dB is an upper bound.
+    """
+    background = ST - 20.0
+    background[3, 1] = ST[3, 1] - 4.0
+    res = _power(background_levels=background, background_levels_ref=RSS - 20.0)
+    expected = np.full(FREQS.size, 20.0)
+    expected[1] = 4.0
+    np.testing.assert_allclose(res.background_margin_db, expected, atol=1e-9)
+    np.testing.assert_allclose(res.background_margin_ref_db, 20.0, atol=1e-9)
+    assert res.background_requirement_met.tolist() == [True, False] + [True] * 5
+    assert res.upper_bound.tolist() == [False, True] + [False] * 5
+
+
+def test_one_quiet_reference_position_fails_the_band_without_an_upper_bound() -> None:
+    """The reference source is held to 6 dB at every position as well; its
+    capped correction enters with a plus sign, so the band is no upper bound.
+    """
+    background_ref = RSS - 20.0
+    background_ref[0, 6] = RSS[0, 6] - 4.0
+    res = _power(background_levels=ST - 20.0, background_levels_ref=background_ref)
+    expected = np.full(FREQS.size, 20.0)
+    expected[6] = 4.0
+    np.testing.assert_allclose(res.background_margin_ref_db, expected, atol=1e-9)
+    np.testing.assert_allclose(res.background_margin_db, 20.0, atol=1e-9)
+    assert res.background_requirement_met.tolist() == [True] * 6 + [False]
+    assert not bool(np.any(res.upper_bound))

@@ -2231,17 +2231,47 @@ def test_a_result_whose_bands_disagree_is_refused() -> None:
     import dataclasses
 
     with pytest.raises(ValueError, match="one value per band"):
-        dataclasses.replace(result, criterion_1=np.array([True, False]))
+        dataclasses.replace(result, f2=np.array([1.0, 2.0]))
 
 
-def test_a_result_with_a_non_finite_surface_area_is_refused() -> None:
-    """The surface area is what a report prints beside the boxed level."""
+@pytest.mark.parametrize(
+    "name",
+    [
+        "criterion_1",
+        "negative_power_within_limit",
+        "criterion_2",
+        "not_applicable_band",
+        "achieved_grade",
+        "achieved_grade_a",
+        "a_weighting_omitted_bands",
+    ],
+)
+def test_the_verdicts_are_read_from_the_indicators(name: str) -> None:
+    """Every Annex B verdict is a comparison of the readings with its limit, not a field."""
+    intensity, areas = _uniform_surface()
+    result = emission.sound_power_intensity_points(
+        intensity,
+        areas,
+        pressure_levels=np.full((10, 1), 80.0),
+        pressure_residual_index=30.0,
+    )
+    import dataclasses
+
+    assert name not in {field.name for field in dataclasses.fields(result)}
+    with pytest.raises(TypeError, match=name):
+        dataclasses.replace(result, **{name: None})
+
+
+def test_a_result_with_a_non_finite_segment_area_is_refused() -> None:
+    """The surface area a report prints beside the boxed level is read from the segments."""
     intensity, areas = _uniform_surface()
     result = emission.sound_power_intensity_points(intensity, areas)
     import dataclasses
 
-    with pytest.raises(ValueError, match="surface_area"):
-        dataclasses.replace(result, surface_area=math.nan)
+    broken = np.asarray(areas, dtype=float).copy()
+    broken[0] = math.nan
+    with pytest.raises(ValueError, match="segment_areas_m2"):
+        dataclasses.replace(result, segment_areas_m2=broken)
 
 
 @pytest.mark.filterwarnings("ignore:The A-weighted total sums every")

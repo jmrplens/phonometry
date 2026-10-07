@@ -199,38 +199,129 @@ class CeilingSpecimenCheck:
     CE marking depth, since 4.1.1.2.3.1 recommends 200 mm and requires it only
     of the data CE marking is compiled from.
 
-    :param area_m2: The specimen area as built, in square metres.
-    :param area_error_m2: How far it sits from the 10,80 m2 the code aims at,
-        reported and not judged.
-    :param mounting: The mounting letter the arrangement uses.
-    :param depth_mm: The overall depth of construction, in millimetres, for a
+    The verdicts are read from the measured figures the check holds and the
+    limits clause 4 prints, so they are not fields: a check cannot be built to
+    pass an arrangement the clause fails.
+
+    :ivar area_m2: The specimen area as built, in square metres.
+    :ivar mounting: The mounting letter the arrangement uses.
+    :ivar depth_mm: The overall depth of construction, in millimetres, for a
         type E mounting, or ``None`` for the others.
-    :param deflection_ok: Whether the deflection stays inside 5 mm.
-    :param substructure_ok: Whether the profile stays inside 30 mm by 50 mm.
-    :param fixture_ok: Whether the mounting fixture is heavy enough.
-    :param supports_ok: Whether the support units stay inside 50 mm by 50 mm
-        in cross-section and, when their centre distance was given, stand at
-        least 1,2 m apart.
-    :param humidity_ok: Whether every measurement was made at 50 % relative
-        humidity or more, or ``None`` when no humidity was given.
-    :param ce_marking_depth: Whether the depth is the 200 mm the CE marking
-        data rests on, reported and not judged.
-    :param satisfied: Whether every judged limit holds: the fixture, the
-        substructure, the deflection, the supports and, when it was given, the
-        humidity.
+    :ivar deflection_mm: The largest deflection of the specimen, in
+        millimetres.
+    :ivar substructure_width_mm: The substructure profile width, in
+        millimetres.
+    :ivar substructure_height_mm: Its height, in millimetres.
+    :ivar fixture_density_kg_m2: The surface density of the mounting fixture,
+        in kilograms per square metre.
+    :ivar support_width_mm: One side of the cross-section of the support
+        units, in millimetres.
+    :ivar support_height_mm: The other side, in millimetres.
+    :ivar support_centre_distance_m: The centre distance between support
+        units, in metres, or ``None``.
+    :ivar lowest_relative_humidity_percent: The driest of the measurements,
+        in percent, or ``None`` when no humidity was given.
     """
 
     area_m2: float
-    area_error_m2: float
     mounting: str
     depth_mm: float | None
-    deflection_ok: bool
-    substructure_ok: bool
-    fixture_ok: bool
-    supports_ok: bool
-    humidity_ok: bool | None
-    ce_marking_depth: bool
-    satisfied: bool
+    deflection_mm: float
+    substructure_width_mm: float
+    substructure_height_mm: float
+    fixture_density_kg_m2: float
+    support_width_mm: float
+    support_height_mm: float
+    support_centre_distance_m: float | None
+    lowest_relative_humidity_percent: float | None
+
+    @property
+    def area_error_m2(self) -> float:
+        """How far the area sits from the 10,80 m2 the code aims at, reported and not judged."""
+        return self.area_m2 - TARGET_SPECIMEN_AREA_M2
+
+    @property
+    def deflection_ok(self) -> bool:
+        """Whether the deflection stays inside 5 mm (4.1.1.2.3.5)."""
+        return self.deflection_mm <= MAX_DEFLECTION_MM
+
+    @property
+    def substructure_ok(self) -> bool:
+        """Whether the profile stays inside 30 mm by 50 mm (4.1.1.2.3.4)."""
+        max_width, max_height = SUBSTRUCTURE_LIMITS_MM
+        return (
+            self.substructure_width_mm <= max_width
+            and self.substructure_height_mm <= max_height
+        )
+
+    @property
+    def fixture_ok(self) -> bool:
+        """Whether the mounting fixture is heavy enough (4.1.1.1.6)."""
+        return self.fixture_density_kg_m2 >= MIN_FIXTURE_DENSITY_KG_M2
+
+    @property
+    def support_section_ok(self) -> bool:
+        """Whether the support units stay inside 50 mm by 50 mm in cross-section (4.1.1.2.3.6)."""
+        max_width, max_height = SUPPORT_SECTION_MM
+        return (
+            self.support_width_mm <= max_width and self.support_height_mm <= max_height
+        )
+
+    @property
+    def support_spacing_ok(self) -> bool:
+        """Whether the support units stand at least 1,2 m apart, when the distance was given (4.1.1.2.3.6)."""
+        spacing = self.support_centre_distance_m
+        return spacing is None or spacing >= MIN_SUPPORT_SPACING_M
+
+    @property
+    def supports_ok(self) -> bool:
+        """Whether the support units stay inside 50 mm by 50 mm and stand 1,2 m apart.
+
+        The centre distance is judged only when it was given (4.1.1.2.3.6).
+        """
+        return self.support_section_ok and self.support_spacing_ok
+
+    @property
+    def humidity_ok(self) -> bool | None:
+        """Whether every measurement was made at 50 % relative humidity or more (4.2.2).
+
+        ``None`` when no humidity was given.
+        """
+        lowest = self.lowest_relative_humidity_percent
+        if lowest is None:
+            return None
+        return lowest >= MIN_RELATIVE_HUMIDITY_PERCENT
+
+    @property
+    def ce_marking_depth(self) -> bool:
+        """Whether the depth is the 200 mm the CE marking data rests on, reported and not judged.
+
+        4.1.1.2.3.1 fixes the depth for the type E mounting alone, so a type A
+        specimen laid against a hard surface cannot reach it by being 200 mm
+        thick.
+        """
+        return (
+            self.mounting == "E"
+            and self.depth_mm is not None
+            and math.isclose(self.depth_mm, TYPE_E_DEPTH_MM, rel_tol=1e-6)
+        )
+
+    @property
+    def satisfied(self) -> bool:
+        """Whether every judged limit holds.
+
+        The fixture, the substructure, the deflection, the supports and, when
+        it was given, the humidity: a humidity that was not given is not
+        judged, so only a measured humidity under the floor fails the
+        arrangement.
+        """
+        return (
+            self.deflection_ok
+            and self.substructure_ok
+            and self.fixture_ok
+            and self.supports_ok
+            and self.humidity_ok is not False
+        )
 
 
 def mounting_type(letter: str) -> str:
@@ -351,15 +442,7 @@ def _lowest_humidity(relative_humidity_percent: ArrayLike | None) -> float | Non
     return float(np.min(humidity))
 
 
-def _warn_about(
-    *,
-    check: CeilingSpecimenCheck,
-    section_ok: bool,
-    spacing_ok: bool,
-    deflection_mm: float,
-    support_centre_distance_m: float | None,
-    lowest_humidity_percent: float | None,
-) -> None:
+def _warn_about(*, check: CeilingSpecimenCheck) -> None:
     """Say which printed limit of clause 4 the arrangement has left.
 
     Only the limits the verdict judges are warned about as leaving EN 16487.
@@ -375,7 +458,7 @@ def _warn_about(
     reasons = []
     if not check.deflection_ok:
         reasons.append(
-            f"the specimen deflects {deflection_mm:g} mm, over the "
+            f"the specimen deflects {check.deflection_mm:g} mm, over the "
             f"{MAX_DEFLECTION_MM:g} mm of 4.1.1.2.3.5"
         )
     if not check.substructure_ok:
@@ -388,19 +471,20 @@ def _warn_about(
             f"the mounting fixture is lighter than the "
             f"{MIN_FIXTURE_DENSITY_KG_M2:g} kg/m2 of 4.1.1.1.6"
         )
-    if not section_ok:
+    if not check.support_section_ok:
         reasons.append(
             f"the support units are larger in cross-section than the "
             f"{support_width:g} mm by {support_height:g} mm of 4.1.1.2.3.6"
         )
-    if not spacing_ok:
+    if not check.support_spacing_ok:
         reasons.append(
-            f"the support units stand {support_centre_distance_m:g} m apart, "
+            f"the support units stand {check.support_centre_distance_m:g} m apart, "
             f"closer than the {MIN_SUPPORT_SPACING_M:g} m of 4.1.1.2.3.6"
         )
     if check.humidity_ok is False:
         reasons.append(
-            f"the relative humidity falls to {lowest_humidity_percent:g} % in a "
+            f"the relative humidity falls to "
+            f"{check.lowest_relative_humidity_percent:g} % in a "
             f"measurement, under the {MIN_RELATIVE_HUMIDITY_PERCENT:g} % of 4.2.2"
         )
     sentences = []
@@ -520,57 +604,18 @@ def check_ceiling_specimen(
         if support_centre_distance_m is None
         else require_positive(support_centre_distance_m, "support_centre_distance_m")
     )
-    lowest_humidity = _lowest_humidity(relative_humidity_percent)
-    max_width, max_height = SUBSTRUCTURE_LIMITS_MM
-    max_support_width, max_support_height = SUPPORT_SECTION_MM
-    section_ok = (
-        support_width <= max_support_width and support_height <= max_support_height
-    )
-    spacing_ok = spacing is None or spacing >= MIN_SUPPORT_SPACING_M
-    humidity_ok = (
-        None
-        if lowest_humidity is None
-        else lowest_humidity >= MIN_RELATIVE_HUMIDITY_PERCENT
-    )
-    deflection_ok = deflection <= MAX_DEFLECTION_MM
-    substructure_ok = width <= max_width and height <= max_height
-    fixture_ok = fixture >= MIN_FIXTURE_DENSITY_KG_M2
-    supports_ok = section_ok and spacing_ok
-    # 4.1.1.2.3.1 fixes the depth for the type E mounting alone, so a type A
-    # specimen laid against a hard surface cannot reach the CE marking depth by
-    # being 200 mm thick.
-    ce_depth = (
-        letter == "E"
-        and depth is not None
-        and math.isclose(depth, TYPE_E_DEPTH_MM, rel_tol=1e-6)
-    )
     check = CeilingSpecimenCheck(
         area_m2=area,
-        area_error_m2=area - TARGET_SPECIMEN_AREA_M2,
         mounting=letter,
         depth_mm=depth,
-        deflection_ok=deflection_ok,
-        substructure_ok=substructure_ok,
-        fixture_ok=fixture_ok,
-        supports_ok=supports_ok,
-        humidity_ok=humidity_ok,
-        ce_marking_depth=ce_depth,
-        # A humidity that was not given is not judged, so only a measured
-        # humidity under the floor fails the arrangement.
-        satisfied=(
-            deflection_ok
-            and substructure_ok
-            and fixture_ok
-            and supports_ok
-            and humidity_ok is not False
-        ),
-    )
-    _warn_about(
-        check=check,
-        section_ok=section_ok,
-        spacing_ok=spacing_ok,
         deflection_mm=deflection,
+        substructure_width_mm=width,
+        substructure_height_mm=height,
+        fixture_density_kg_m2=fixture,
+        support_width_mm=support_width,
+        support_height_mm=support_height,
         support_centre_distance_m=spacing,
-        lowest_humidity_percent=lowest_humidity,
+        lowest_relative_humidity_percent=_lowest_humidity(relative_humidity_percent),
     )
+    _warn_about(check=check)
     return check

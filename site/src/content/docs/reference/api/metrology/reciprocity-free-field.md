@@ -437,11 +437,8 @@ sensitivity and the scattering factor (Formula (4)).
 FreeFieldArrangementCheck(
     diaphragm_distances_m: tuple[float, ...],
     microphone_diameter_m: float,
-    distances_ok: bool,
     support_length_m: float | None,
-    support_ok: bool | None,
-    annex_a_range: bool,
-    attenuation_accuracy: bool,
+    air_attenuation: ReciprocityAirAttenuation,
 )
 ```
 
@@ -457,7 +454,10 @@ of the attenuation; an arrangement that fails it is not forbidden, but
 falls outside what the standard recommends and what its uncertainty
 figures assume.
 
-Built by [`check_free_field_arrangement`](/phonometry/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement).
+Built by [`check_free_field_arrangement`](/phonometry/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement). The verdicts are read from
+the distances, the diameter, the support and the attenuation the check
+holds, against the numbers 7.3, 6.4, Annex A and B.2 print, so they are
+not fields.
 
 **Attributes**
 
@@ -465,11 +465,28 @@ Built by [`check_free_field_arrangement`](/phonometry/reference/api/metrology/re
 | :--- | :--- |
 | `diaphragm_distances_m` | The distances between the microphones, in m. |
 | `microphone_diameter_m` | The nominal diameter of the microphones, in m. |
-| `distances_ok` | Every distance is greater than ten nominal diameters, as 7.3 recommends. |
 | `support_length_m` | The length of the cylinder each microphone is attached to, in m, or `None`. |
-| `support_ok` | It is at least twenty diameters, as 6.4 recommends, or `None`. |
-| `annex_a_range` | Every distance is within 150 mm to 500 mm, where Annex A allows the published acoustic centres. Advisory: it does not enter `passes`. |
-| `attenuation_accuracy` | The conditions and every frequency are within the domain in which B.2 states the accuracy of the attenuation. |
+| `air_attenuation` | The [`ReciprocityAirAttenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuation) at the frequencies and conditions of the calibration. |
+
+### FreeFieldArrangementCheck.annex_a_range
+
+*property*
+
+Every distance is within 150 mm to 500 mm, where Annex A allows the published acoustic centres.
+
+Advisory: it does not enter `passes`.
+
+### FreeFieldArrangementCheck.attenuation_accuracy
+
+*property*
+
+The conditions and every frequency are within the domain in which B.2 states the accuracy of the attenuation.
+
+### FreeFieldArrangementCheck.distances_ok
+
+*property*
+
+Every distance is greater than ten nominal diameters, as 7.3 recommends.
 
 ### FreeFieldArrangementCheck.passes
 
@@ -501,6 +518,12 @@ Plot each distance against ten diameters and the range of Annex A.
 | `kwargs` | Forwarded to `barh`. |
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+
+### FreeFieldArrangementCheck.support_ok
+
+*property*
+
+The support is at least twenty diameters long, as 6.4 recommends, or `None`.
 
 ## FreeFieldInputUncertainties
 

@@ -302,7 +302,7 @@ def test_background_centres_are_refused_when_complex(centres: object) -> None:
 def test_background_result_checks_its_own_bands() -> None:
     res = building.service_equipment_background_correction([50.0, 50.0], [40.0, 41.0])
     with pytest.raises(ValueError, match="one value per band"):
-        dataclasses.replace(res, regime=("none",))
+        dataclasses.replace(res, background_db=np.array([40.0]))
 
 
 # ---------------------------------------------------------------------------

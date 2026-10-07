@@ -543,6 +543,7 @@ def test_a_weighted_levels_take_table4_before_formula9() -> None:
     room = -10.0 * math.log10(0.73) + 10.0 * math.log10(70.0) - 13.0
     assert res.mean_a_weighted_level == pytest.approx(82.0, abs=1e-12)
     assert res.sound_power_level_a_direct == pytest.approx(82.0 + room, abs=1e-12)
+    assert res.background_margin_a_db == pytest.approx(5.0, abs=1e-12)
     assert res.background_requirement_met_a
 
 

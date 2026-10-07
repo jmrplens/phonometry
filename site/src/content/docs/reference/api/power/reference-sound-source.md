@@ -212,7 +212,7 @@ carries. Annex B, the alternative at low frequencies, replaces the 50 Hz
 to 80 Hz bands by the intensity levels when both agree within Table B.1
 from 50 Hz to 315 Hz. B.2 asks for the directivity index of those three
 bands from the intensity measurements too; the result keeps the one
-from sound pressure, and [`ReferenceSourceCalibration.intensity_bands`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration)
+from sound pressure, and [`ReferenceSourceCalibration.intensity_bands`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibrationintensity_bands)
 marks the bands whose level was replaced, as B.2 asks the report to.
 
 **Parameters**
@@ -445,7 +445,6 @@ The 0,3 dB either way of 5.2, in dB.
 ```python
 ReferenceSourceCalibration(
     frequencies_hz: np.ndarray,
-    sound_power_level_db: np.ndarray,
     surface_pressure_level_db: np.ndarray,
     directivity_index_db: np.ndarray,
     c1_db: float,
@@ -454,22 +453,26 @@ ReferenceSourceCalibration(
     expanded_uncertainty_db: np.ndarray,
     coverage_factor: float,
     arrangement: str,
-    intensity_bands: np.ndarray,
-    intensity_agreement: bool | None,
-    room_qualified: bool | None,
     radiation: str | None,
     knee_frequency_hz: float | None,
+    intensity_sound_power_level_db: np.ndarray | None = None,
+    room_qualification: FreeFieldCheck | None = None,
 )
 ```
 
 Calibrated sound power levels of a reference sound source (ISO 6926 8.4).
+
+The levels, the Annex B comparison and the room verdict are read from the
+surface levels, the corrections, the intensity levels and the room
+qualification the calibration holds, so they are not fields: a
+calibration cannot be built to take its low bands from an intensity
+measurement Table B.1 refuses.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies_hz` | Nominal one-third octave mid-band frequencies, in hertz, ascending. |
-| `sound_power_level_db` | $L_W$ under the reference meteorological conditions, per band, in dB re 1 pW; the 50 Hz to 80 Hz bands come from sound intensity where Annex B validated them. |
 | `surface_pressure_level_db` | $\overline{L_p}$ over the 2 m hemisphere after the background correction, per band. |
 | `directivity_index_db` | $D_{\mathrm{I}i}$ per position or traverse and band (3.9), `(positions, bands)`. |
 | `c1_db` | $C_1$, in dB. |
@@ -478,11 +481,10 @@ Calibrated sound power levels of a reference sound source (ISO 6926 8.4).
 | `expanded_uncertainty_db` | $k \sigma_R$ of Table 2 per band. |
 | `coverage_factor` | $k$. |
 | `arrangement` | `"paths"` or `"fixed"`. |
-| `intensity_bands` | Per band, whether the level came from the sound intensity of Annex B. |
-| `intensity_agreement` | Whether the pressure and intensity levels agree within Table B.1 from 50 Hz to 315 Hz, or `None` without intensity levels. |
-| `room_qualified` | Whether the room qualification given meets 8.1 for these bands at 2 m, or `None` when none was given. |
 | `radiation` | The radiation character whose Annex A $C_2$ the calibration used, or `None` when it used the manufacturer's value. |
 | `knee_frequency_hz` | The knee frequency of that $C_2$, or `None`. |
+| `intensity_sound_power_level_db` | The sound power level determined by sound intensity per band (Annex B), or `None`. |
+| `room_qualification` | The [`FreeFieldCheck`](/phonometry/reference/api/power/free-field-qualification/#freefieldcheck) of the room, or `None` when none was given. |
 
 ### ReferenceSourceCalibration.a_weighted_expanded_uncertainty_db
 
@@ -499,6 +501,20 @@ The expanded uncertainty of `sound_power_level_a_db` (Table 2).
 The bands the A-weighted total covers: those of ISO 3744 Annex E.
 
 **Returns:** `(lowest, highest)` nominal frequency, in hertz.
+
+### ReferenceSourceCalibration.intensity_agreement
+
+*property*
+
+Whether the pressure and intensity levels agree within Table B.1 from 50 Hz to 315 Hz.
+
+`None` without intensity levels.
+
+### ReferenceSourceCalibration.intensity_bands
+
+*property*
+
+Per band, whether the level came from the sound intensity of Annex B.
 
 ### ReferenceSourceCalibration.maximum_directivity_index_db
 
@@ -530,6 +546,14 @@ Draw the calibrated spectrum with its expanded uncertainty.
 | `kwargs` | Forwarded to the level bars. |
 
 **Returns:** The axes.
+
+### ReferenceSourceCalibration.room_qualified
+
+*property*
+
+Whether the room qualification meets 8.1 for the pressure bands at 2 m.
+
+`None` when none was given.
 
 ### ReferenceSourceCalibration.sound_power_level_a_db
 
@@ -579,6 +603,16 @@ calibrated.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band the calibration does not cover, an octave asked at a frequency that is not an octave mid-band, only one of the two conditions, or conditions asked of a calibration that used the manufacturer's $C_2$, whose value at the test only the manufacturer gives. |
+
+### ReferenceSourceCalibration.sound_power_level_db
+
+*property*
+
+$L_W$ under the reference meteorological conditions, per band, in dB re 1 pW.
+
+Formula (2) from the surface levels and the three corrections; the
+50 Hz to 80 Hz bands come from sound intensity where Annex B validated
+them.
 
 ## ReferenceSourceDriftResult
 

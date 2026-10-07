@@ -182,9 +182,9 @@ class EmissionPressureResult(OwnsArrays):
     :ivar background_correction_db: :math:`K_1`, in decibels.
     :ivar local_correction_db: :math:`K_3`, in decibels.
     :ivar grade: Accuracy grade the determination earns.
-    :ivar upper_bound: ``True`` when the background margin fell below the
-        grade's minimum, so the level is an upper bound rather than a
-        determination.
+    :ivar background_margin_db: :math:`\Delta L = L'_p - L_p(B)`, the margin
+        of the reading over the background, in decibels, a scalar or one per
+        band; :attr:`upper_bound` is read from it and the grade's minimum.
     :ivar standard: The part of the group the determination followed.
     """
 
@@ -194,8 +194,19 @@ class EmissionPressureResult(OwnsArrays):
     local_correction_db: float | NDArray[np.float64]
     grade: Grade
     _: KW_ONLY
-    upper_bound: bool
+    background_margin_db: float | NDArray[np.float64]
     standard: str
+
+    @property
+    def upper_bound(self) -> bool:
+        """Whether the background margin fell below the grade's minimum.
+
+        The level is then an upper bound rather than a determination
+        (:data:`MINIMUM_BACKGROUND_MARGIN_DB`: 6 dB for grade 2, 3 dB for
+        grade 3), judged on the settled margin as :math:`K_1` is.
+        """
+        floor = MINIMUM_BACKGROUND_MARGIN_DB[_check_grade(self.grade)]
+        return bool(np.any(settled(np.asarray(self.background_margin_db)) < floor))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

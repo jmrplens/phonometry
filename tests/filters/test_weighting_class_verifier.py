@@ -313,59 +313,67 @@ def test_unknown_edition_is_rejected() -> None:
 def test_rows_carrying_another_edition_class_are_rejected() -> None:
     """A row whose margins name a class the edition does not define."""
     verdict = _a_verdict()
-    rows = [{**verdict.bands[0], "margin_class7_db": 1.0}, *verdict.bands[1:]]
+    rows = [
+        {**verdict.band_margins[0], "margin_class7_db": 1.0},
+        *verdict.band_margins[1:],
+    ]
     with pytest.raises(ValueError, match=r"must carry a margin for every class"):
-        dataclasses.replace(verdict, bands=tuple(rows))
+        dataclasses.replace(verdict, band_margins=tuple(rows))
 
 
 def test_rows_that_disagree_among_themselves_are_rejected() -> None:
     """Reading only the first row would let a later short one through."""
     verdict = _a_verdict()
-    thin = dict(verdict.bands[-1])
+    thin = dict(verdict.band_margins[-1])
     del thin["margin_class2_db"]
-    rows = [*verdict.bands[:-1], thin]
+    rows = [*verdict.band_margins[:-1], thin]
     with pytest.raises(ValueError, match=r"must carry the same classes"):
-        dataclasses.replace(verdict, bands=tuple(rows))
+        dataclasses.replace(verdict, band_margins=tuple(rows))
+
+
+def test_a_row_that_states_a_class_is_rejected() -> None:
+    """A row carries what the frequency was measured to; its class is read from it."""
+    verdict = _a_verdict()
+    rows = tuple({**row, "class": 1} for row in verdict.band_margins)
+    with pytest.raises(ValueError, match=r"'band_margins' must not state a class"):
+        dataclasses.replace(verdict, band_margins=rows)
 
 
 def test_a_sweep_without_rows_is_rejected() -> None:
     """The sweep runs between the rows, so it cannot outlive them."""
     verdict = _a_verdict()
     with pytest.raises(ValueError, match=r"present exactly when there is a row"):
-        dataclasses.replace(verdict, bands=())
+        dataclasses.replace(verdict, band_margins=())
 
 
-def test_a_class_that_is_no_designation_is_rejected() -> None:
-    """``1.0`` reads as class 1 and builds ``margin_class1.0_db``, a key nobody has."""
+@pytest.mark.parametrize("name", ["bands", "overall_class", "range_limited"])
+def test_the_classes_and_the_range_are_not_fields(name: str) -> None:
+    """A class 1 filter cannot be boxed as class 2, nor as no class at all.
+
+    The per-row classes, the summary and the range used to be fields, pinned
+    against the margins when the verdict was built; they are read from the
+    margins, the sweep and the edition's table now.
+    """
     verdict = _a_verdict()
-    with pytest.raises(ValueError, match=r"must be a class of \[1, 2\] or None"):
-        dataclasses.replace(verdict, overall_class=1.0)
-
-
-def test_a_class_the_margins_do_not_derive_is_rejected() -> None:
-    """A class 1 filter cannot be boxed as class 2, nor as no class at all."""
-    verdict = _a_verdict()
-    assert verdict.overall_class == 1
-    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
-        dataclasses.replace(verdict, overall_class=2)
-    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
-        dataclasses.replace(verdict, overall_class=None)
+    assert name not in {field.name for field in dataclasses.fields(verdict)}
+    stated = {name: getattr(verdict, name)}
+    with pytest.raises(TypeError, match=name):
+        dataclasses.replace(verdict, **stated)
 
 
 def test_the_sweep_can_only_loosen_the_class() -> None:
     """Every row clears class 1 and the sweep does not: the verdict is class 2.
 
     The summary is not the strictest class the rows meet, which is why it is
-    recomputed from both readings rather than checked against the per-row
-    classes.
+    read from both readings rather than from the per-row classes.
     """
     verdict = _a_verdict()
+    assert verdict.overall_class == 1
     assert all(row["margin_class1_db"] >= 0.0 for row in verdict.bands)
     dipped = {**verdict.between_nominals, "margin_class1_db": -0.5}
-    loosened = dataclasses.replace(verdict, between_nominals=dipped, overall_class=2)
+    loosened = dataclasses.replace(verdict, between_nominals=dipped)
     assert loosened.overall_class == 2
-    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
-        dataclasses.replace(verdict, between_nominals=dipped)
+    assert {row["class"] for row in loosened.bands} == {1}
 
 
 def test_a_sweep_read_for_other_classes_is_rejected() -> None:

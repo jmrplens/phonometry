@@ -785,15 +785,18 @@ def test_a_pressure_intensity_indicator_of_exactly_10_db_qualifies(
 ) -> None:
     # ISO 15186-3 6.4.2: F_pI at most 10 dB on a non-absorbing surface.
     from phonometry.building.measurement.intensity_insulation import (
+        _FPI_LIMIT_REFLECTING,
         _low_frequency_qualification,
+        _qualified,
     )
 
-    _, verdict = _low_frequency_qualification(
+    indicator = _low_frequency_qualification(
         np.array([pressure]),
         np.array([intensity]),
         owner="test",
         absorbing_specimen_surface=False,
     )
+    verdict = _qualified(indicator, _FPI_LIMIT_REFLECTING)
     assert verdict is not None
     assert bool(verdict[0])
 

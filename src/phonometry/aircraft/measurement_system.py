@@ -13,11 +13,15 @@ and is not repeated here.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 __all__ = [
     "AircraftSystemComplianceResult",
@@ -79,45 +83,128 @@ def _iec61265_directional_limit(frequency: float, angle: float) -> float:
 class AircraftSystemComplianceResult(OwnsArrays):
     """IEC 61265:1995 verdict on an aircraft-noise measurement chain.
 
-    What :func:`verify_aircraft_noise_system` returns: the verdict together
-    with the individual checks it is the conjunction of.
+    What :func:`verify_aircraft_noise_system` returns: the measurements it
+    was given, each as a read-only copy. The checks are read from them and
+    the limits the standard prints, and the verdict from the checks, so
+    neither is a field: a result cannot state a limit or a pass its
+    measurements do not reach.
 
-    :ivar passes: Whether every supplied measurement met its limit.
-    :ivar checks: One entry per checked quantity, ``{"quantity", "limit",
-        "value", "ok", ...}``, as an immutable tuple.
+    :ivar directional: The microphone directional response,
+        ``{frequency_hz: {angle_deg: |Δsensitivity| dB}}`` (Table 1,
+        4.4.2), or ``None`` when it was not measured.
+    :ivar frequency_response: The system response deviations
+        ``{frequency_hz: deviation_db}`` (4.5.1), or ``None``.
+    :ivar linearity: The level non-linearity ``{"reference": dB, "other":
+        dB}`` (4.5.2), or ``None``.
+    :ivar resolution: The readout resolution, in dB (4.7), or ``None``.
     """
 
-    passes: bool
-    checks: tuple[dict[str, Any], ...]
+    directional: Mapping[float, Mapping[float, float]] | None = None
+    frequency_response: Mapping[float, float] | None = None
+    linearity: Mapping[str, float] | None = None
+    resolution: float | None = None
 
     def __post_init__(self) -> None:
-        """Reject a verdict the checks under it do not support.
+        """Hold the measurements as read-only copies and refuse one no table covers.
+
+        :raises ValueError: If a frequency or angle is out of the tabulated
+            range, or a linearity key is neither ``"reference"`` nor
+            ``"other"``.
+        """
+        if self.directional is not None:
+            object.__setattr__(
+                self,
+                "directional",
+                MappingProxyType(
+                    {
+                        float(freq): MappingProxyType(
+                            {float(a): float(v) for a, v in per_angle.items()}
+                        )
+                        for freq, per_angle in self.directional.items()
+                    }
+                ),
+            )
+        if self.frequency_response is not None:
+            object.__setattr__(
+                self,
+                "frequency_response",
+                MappingProxyType(
+                    {float(f): float(v) for f, v in self.frequency_response.items()}
+                ),
+            )
+        if self.linearity is not None:
+            object.__setattr__(
+                self,
+                "linearity",
+                MappingProxyType({str(k): float(v) for k, v in self.linearity.items()}),
+            )
+        if self.resolution is not None:
+            object.__setattr__(self, "resolution", float(self.resolution))
+        # Every check is read once here, so a measurement no table covers is
+        # refused where the result is built.
+        self.__dict__["_checks"] = self._read_checks()
+
+    def _read_checks(self) -> tuple[Mapping[str, Any], ...]:
+        checks: list[dict[str, Any]] = []
+        if self.directional is not None:
+            checks += _directional_checks(self.directional)
+        if self.frequency_response is not None:
+            checks += _frequency_response_checks(self.frequency_response)
+        if self.linearity is not None:
+            checks += _linearity_checks(self.linearity)
+        if self.resolution is not None:
+            checks.append(_resolution_check(self.resolution))
+        return tuple(MappingProxyType(check) for check in checks)
+
+    @property
+    def checks(self) -> tuple[Mapping[str, Any], ...]:
+        """One read-only row per checked quantity, ``{"quantity", "limit", "value", "ok", ...}``.
+
+        The ``limit`` is the one the standard prints for the quantity (Table 1
+        by frequency and angle, 1,5 dB, 0,4 dB or 0,5 dB, 0,1 dB) and ``ok``
+        whether the measured ``value`` is within it.
+        """
+        checks: tuple[Mapping[str, Any], ...] = self.__dict__["_checks"]
+        return checks
+
+    @property
+    def passes(self) -> bool:
+        """Whether every supplied measurement met its limit.
 
         The chain is qualified by the conjunction of what was actually
-        measured, so a stated ``passes`` that does not restate the table
-        prints a pass over a row whose ``ok`` is ``False``. A call that
-        supplies no measurement carries no check and does not pass: nothing
-        was measured, so nothing was qualified.
-
-        :raises ValueError: if ``passes`` is not the conjunction of the
-            checks, or is stated over no check at all.
+        measured. A result that holds no measurement carries no check and
+        does not pass: nothing was measured, so nothing was qualified.
         """
-        derived = bool(self.checks) and all(bool(check["ok"]) for check in self.checks)
-        if self.passes != derived:
-            msg = (
-                f"{type(self).__name__}: 'passes' must be the conjunction of "
-                f"the checks, and False over no check at all; got "
-                f"{self.passes!r} over {len(self.checks)} check(s) where they "
-                f"give {derived!r}."
-            )
-            raise ValueError(msg)
+        return bool(self.checks) and all(bool(check["ok"]) for check in self.checks)
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are frozen again on arrival."""
+        return _rebuilt_result, (
+            type(self),
+            {
+                "directional": None
+                if self.directional is None
+                else {f: dict(row) for f, row in self.directional.items()},
+                "frequency_response": None
+                if self.frequency_response is None
+                else dict(self.frequency_response),
+                "linearity": None if self.linearity is None else dict(self.linearity),
+                "resolution": self.resolution,
+            },
+        )
+
+
+def _rebuilt_result(
+    cls: type[AircraftSystemComplianceResult], kwargs: dict[str, Any]
+) -> AircraftSystemComplianceResult:
+    return cls(**kwargs)
 
 
 def verify_aircraft_noise_system(
     *,
-    directional: dict[float, dict[float, float]] | None = None,
-    frequency_response: dict[float, float] | None = None,
-    linearity: dict[str, float] | None = None,
+    directional: Mapping[float, Mapping[float, float]] | None = None,
+    frequency_response: Mapping[float, float] | None = None,
+    linearity: Mapping[str, float] | None = None,
     resolution: float | None = None,
 ) -> AircraftSystemComplianceResult:
     """Verify measured performance against IEC 61265:1995 tolerances.
@@ -138,24 +225,16 @@ def verify_aircraft_noise_system(
         supplied.
     :raises ValueError: If a frequency or angle is out of the tabulated range.
     """
-    checks: list[dict[str, Any]] = []
-    if directional is not None:
-        checks += _directional_checks(directional)
-    if frequency_response is not None:
-        checks += _frequency_response_checks(frequency_response)
-    if linearity is not None:
-        checks += _linearity_checks(linearity)
-    if resolution is not None:
-        checks.append(_resolution_check(resolution))
-
     return AircraftSystemComplianceResult(
-        passes=bool(checks) and all(c["ok"] for c in checks),
-        checks=tuple(checks),
+        directional=directional,
+        frequency_response=frequency_response,
+        linearity=linearity,
+        resolution=resolution,
     )
 
 
 def _directional_checks(
-    directional: dict[float, dict[float, float]],
+    directional: Mapping[float, Mapping[float, float]],
 ) -> list[dict[str, Any]]:
     """Directional-response checks against Table 1 (§4.4.2).
 
@@ -181,7 +260,7 @@ def _directional_checks(
 
 
 def _frequency_response_checks(
-    frequency_response: dict[float, float],
+    frequency_response: Mapping[float, float],
 ) -> list[dict[str, Any]]:
     """System frequency-response checks against the ±1.5 dB limit (§4.5.1).
 
@@ -200,7 +279,7 @@ def _frequency_response_checks(
     ]
 
 
-def _linearity_checks(linearity: dict[str, float]) -> list[dict[str, Any]]:
+def _linearity_checks(linearity: Mapping[str, float]) -> list[dict[str, Any]]:
     """Level non-linearity checks against the ±0.4/±0.5 dB limits (§4.5.2).
 
     :param linearity: ``{"reference": dB, "other": dB}``.

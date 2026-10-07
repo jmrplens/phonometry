@@ -2803,9 +2803,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   stored beside its printed band, is now read from the measured fields too,
   or checked against them when the result is built: `PositionSpreadCheck`
   keeps only its readings and reads its stage, spread and action from them,
-  every band row of an IEC 61043 verdict has to restate the Table 2 minima,
-  its index, its margins and its class, and an ISO 26101 fit refuses qualified
-  radii its levels do not reach within Table A.1.
+  and an ISO 26101 fit refuses qualified radii its levels do not reach within
+  Table A.1.
   The functions that return the verdicts take the same arguments and return
   the same answers, and every limit still reads under the same name; code
   that constructs one of these classes directly keeps only the measured
@@ -2827,6 +2826,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   like a limit on a verdict, a verdict stored as a field included, that is not
   derived from the standard or listed with the reason it stays. The upgrading
   guide lists every class, what it keeps and the release it first shipped in.
+
+- **A verdict is read from the values it holds instead of being stored beside
+  them.** Sixty-two result classes stored the pass or fail flag their
+  function had worked out: `passes`, `complies`, `qualified`, the `*_met` and
+  `*_ok` flags, the advisories, the per-band and overall classes of the
+  IEC 61260-1, IEC 61672-1 and IEC 61043 verdicts, the per-band grade and
+  screening of ISO 9614-2, the background requirement and upper bound of
+  ISO 3743-1, ISO 3743-2, ISO 3747, ISO 16251-1 and the ISO 11200 group, the
+  criteria of ISO 9614-1 and ISO 9614-3, the ISO 3745 Annex A and ISO 26101
+  checks, the ISO 3095 reference track conditions, the RD 1367/2007 period
+  passes, the ISO/PAS 1996-3 category, the IEC TS 61400-11-2 block status,
+  the DIN 4150-2 and E DIN 4150-2 verdicts, the ISO 10846 validity of a
+  transfer stiffness and the adequacy of a driving-point stiffness, and the
+  rest of the table in the upgrading guide. A result built by hand or
+  rewritten with `dataclasses.replace` could hold readings that fail and a
+  flag that says they pass. Every one of those flags is now a read-only
+  property, read from the values the result holds and the limit the standard
+  prints, and so is any figure that only fed it, such as the rounded level of
+  a period, the share of raindrops within tolerance or the acceptance region
+  of a trend test. A result keeps what its verdict is read from, and a few
+  gain the field that was missing for it: the background margins of the
+  sound power and floor covering results, the measured figures of an
+  EN 16487 specimen, the ambient conditions of an IEC 61094-2 coupler check,
+  the transmissibility of an ISO 10846-3 measurement, the two level
+  differences of an ISO 10846-5 one, the modal overlap of an ISO 10848
+  junction, the eleven readings of a BS.468-4 run and the measurements of an
+  IEC 61265 chain. `FilterComplianceResult` and `WeightingComplianceResult`
+  hold their rows as `band_margins`, without the class, and `bands` adds the
+  class each row earns; a row that states one is refused, and the rows are
+  read-only copies, so a write into one, or into the dictionaries the result
+  was built from, cannot move the class afterwards. The functions take the
+  same arguments and return the same verdicts, and every conformance row
+  reads as before. A test now fails on any public result that stores a
+  verdict, found either by the field's type or name or by tracing the value
+  a function of the package gives it back to a comparison or a label one
+  chose, unless it is listed with the reason it stays, such as an option the
+  caller sets, a fact of the computation, a column of a published table, the
+  yes or no a tester observed under IEC 61672-3, or the ISO 8297 requirement
+  record. The upgrading guide lists every class, the fields it no longer
+  takes, what each verdict is read from and the release it first shipped in.
+
 - **A guide's standards chips and its search field name only what the guide
   implements.** A normative document a guide only requires, cites or compares
   with, such as the calibrator a periodic test presupposes, the vocabulary a

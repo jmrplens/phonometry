@@ -232,7 +232,7 @@ EmissionPressureResult(
     local_correction_db: float | NDArray[np.float64],
     grade: Grade,
     *,
-    upper_bound: bool,
+    background_margin_db: float | NDArray[np.float64],
     standard: str,
 )
 ```
@@ -248,7 +248,7 @@ An emission sound pressure level and the two corrections behind it.
 | `background_correction_db` | $K_1$, in decibels. |
 | `local_correction_db` | $K_3$, in decibels. |
 | `grade` | Accuracy grade the determination earns. |
-| `upper_bound` | `True` when the background margin fell below the grade's minimum, so the level is an upper bound rather than a determination. |
+| `background_margin_db` | $\Delta L = L'_p - L_p(B)$, the margin of the reading over the background, in decibels, a scalar or one per band; `upper_bound` is read from it and the grade's minimum. |
 | `standard` | The part of the group the determination followed. |
 
 ### EmissionPressureResult.plot()
@@ -263,6 +263,16 @@ EmissionPressureResult.plot(
 ```
 
 Plot the reading, the two corrections and what is left of them.
+
+### EmissionPressureResult.upper_bound
+
+*property*
+
+Whether the background margin fell below the grade's minimum.
+
+The level is then an upper bound rather than a determination
+([`MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#minimum_background_margin_db): 6 dB for grade 2, 3 dB for
+grade 3), judged on the settled margin as $K_1$ is.
 
 ## environmental_ratio_from_absorption
 

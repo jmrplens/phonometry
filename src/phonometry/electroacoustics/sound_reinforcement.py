@@ -173,7 +173,6 @@ class FeedbackStabilityResult:
     :ivar headroom: Gain that may still be added before the required margin is
         used up, ``-stability_margin - loop_gain``, dB; negative when the
         criterion of Equation (18.24) is already violated.
-    :ivar is_stable: Whether the criterion of Equation (18.24) holds.
     :ivar maximum_open_loop_gain: Largest :math:`Z_\mathrm{S}` the loop tolerates,
         dB.
     :ivar maximum_level_at_microphone: Largest :math:`L_{\mathrm{H}\text{-}\mathrm{M}}` the
@@ -194,13 +193,22 @@ class FeedbackStabilityResult:
     margin: float
     headroom: float
     _: KW_ONLY
-    is_stable: bool
     maximum_open_loop_gain: float
     maximum_level_at_microphone: float
     level_loudspeaker_at_microphone: float
     level_loudspeaker_at_listener: float
     microphone_directivity: float
     open_microphones: int
+
+    @property
+    def is_stable(self) -> bool:
+        """Whether the criterion of Equation (18.24) holds.
+
+        Read from :attr:`loop_gain` and :attr:`stability_margin`, settled: a
+        loop gain summed from decimal levels that meets the margin in decimal
+        meets it whichever way the last bits fall.
+        """
+        return bool(settled(self.loop_gain + self.stability_margin) <= 0.0)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -283,9 +291,6 @@ def feedback_stability(
         stability_margin=margin_required,
         margin=-loop,
         headroom=-margin_required - loop,
-        # Judged settled: a loop gain summed from decimal levels that meets the
-        # margin in decimal meets it whichever way the last bits fall.
-        is_stable=bool(settled(loop + margin_required) <= 0.0),
         maximum_open_loop_gain=-margin_required - g_s - d_nom,
         maximum_level_at_microphone=l_hl - d_m - margin_required - z_s - d_nom,
         level_loudspeaker_at_microphone=l_hm,

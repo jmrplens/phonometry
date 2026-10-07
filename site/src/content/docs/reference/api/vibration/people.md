@@ -544,29 +544,48 @@ PEAK_TO_KB_FACTORS = {'harmonic': 0.9, 'harmonic_distorted': 0.8, 'stochastic_re
 
 ```python
 PeopleAssessment(
-    complies: bool,
-    criterion: str,
     kb_fmax: float,
     kb_ftr: float | None,
     guide: GuideValues,
     source: str,
-    within_uncertainty: bool,
+    *,
+    rare_short_events: bool = False,
 )
 ```
 
 The verdict of Clause 6.2 on one immission, and how it was reached.
 
+The verdict, the comparison that decided it and whether it rests on the
+uncertainty of 5.4 are read from the two quantities, the guide values and
+the rules of the edition, so they are not fields: an assessment cannot be
+built to comply with an immission the standard fails.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `complies` | Whether the requirement of the standard is met. |
-| `criterion` | The comparison that decided it: `"A_u"` when $KB_\mathrm{Fmax}$ kept to the lower value, or exceeded it by no more than the measurement is uncertain by; `"A_o"` when it exceeded the upper one or, for a rare short event, kept to it; and `"A_r"` when $KB_\mathrm{FTr}$ decided. |
 | `kb_fmax` | $KB_\mathrm{Fmax}$ as assessed. |
 | `kb_ftr` | $KB_\mathrm{FTr}$, or `None` when it was not needed. |
 | `guide` | The three guide values it was held to. |
 | `source` | The kind of source the rules were read for. |
-| `within_uncertainty` | Whether the verdict rests on the 15 % of 5.4: $KB_\mathrm{Fmax}$ above $A_\mathrm{u}$ but by no more than a measurement of $KB_\mathrm{F}$ is uncertain by, which Annex C Example 3 concludes "can as a rule still be regarded as met". A stricter reading treats such a verdict as open. |
+| `rare_short_events` | Whether the immission is at most three short events a day, such as blasting, which 6.5.1 judges on $A_\mathrm{o}$ alone. |
+
+### PeopleAssessment.complies
+
+*property*
+
+Whether the requirement of the standard is met.
+
+### PeopleAssessment.criterion
+
+*property*
+
+The comparison that decided the verdict.
+
+`"A_u"` when $KB_\mathrm{Fmax}$ kept to the lower value, or
+exceeded it by no more than the measurement is uncertain by; `"A_o"`
+when it exceeded the upper one or, for a rare short event, kept to it;
+and `"A_r"` when $KB_\mathrm{FTr}$ decided.
 
 ### PeopleAssessment.plot()
 
@@ -592,6 +611,17 @@ Requires matplotlib (`pip install phonometry[plot]`).
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_people_assessment`. |
 
 **Returns:** The `Axes`.
+
+### PeopleAssessment.within_uncertainty
+
+*property*
+
+Whether the verdict rests on the 15 % of 5.4.
+
+$KB_\mathrm{Fmax}$ above $A_\mathrm{u}$ but by no more than a
+measurement of $KB_\mathrm{F}$ is uncertain by, which Annex C Example 3
+concludes "can as a rule still be regarded as met". A stricter reading
+treats such a verdict as open.
 
 ## railway_assessment_severity
 

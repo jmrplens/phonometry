@@ -1052,20 +1052,19 @@ def adjacent_premises_limits(building_use: str, room_type: str) -> RegulationLim
 class PeriodAssessment:
     """The assessment of one evaluation period against its limit.
 
+    The rounded levels and the three verdicts of Article 25.1 b are read from
+    the levels, the limit and the allowances the article prints, so they are
+    not fields: a period cannot be built to pass levels the article fails.
+
     :ivar period: ``"day"``, ``"evening"`` or ``"night"``.
     :ivar phases: The noise phases the period was split into.
     :ivar duration_hours: The period duration ``T``, in hours.
     :ivar evaluation_period_level: ``LKeq,x`` of the period, in dB, unrounded.
-    :ivar reported_level: ``LKeq,x`` rounded per Annex IV A.3.4.2.
     :ivar long_term_corrected_level: Annual ``LK,x``, in dB, unrounded, or ``None`` when
         no annual information was supplied.
-    :ivar reported_long_term: ``LK,x`` rounded, or ``None``.
     :ivar limit: The table limit of the period, in dB.
-    :ivar max_phase_level: The largest ``LKeq,Ti`` of the period, in dB.
-    :ivar phase_pass: Whether every ``LKeq,Ti`` stays within ``limit + 5`` dB.
-    :ivar daily_pass: Whether ``LKeq,x`` stays within ``limit + 3`` dB.
-    :ivar long_term_pass: Whether ``LK,x`` stays at or below ``limit``, or
-        ``None`` when the criterion was not evaluated.
+    :ivar new_activity: ``True`` when the activity is new, so the annual
+        criterion of Article 25.1 b i applies to the period.
     :raises ValueError: If ``period`` is not one of
         :data:`RD1367_EVALUATION_PERIODS`.
     """
@@ -1074,15 +1073,10 @@ class PeriodAssessment:
     phases: tuple[NoisePhase, ...]
     duration_hours: float
     evaluation_period_level: float
-    reported_level: int
     long_term_corrected_level: float | None
-    reported_long_term: int | None
     limit: float
-    max_phase_level: float
     _: KW_ONLY
-    phase_pass: bool
-    daily_pass: bool
-    long_term_pass: bool | None
+    new_activity: bool
 
     def __post_init__(self) -> None:
         """Pin the evaluation period to the three the regulation defines.
@@ -1100,10 +1094,56 @@ class PeriodAssessment:
         read as a key and a value normalised behind the caller's back would
         no longer be the one they passed.
 
+        The phase verdict is read from the phases, so a period without one
+        is refused here rather than when the verdict is first read.
+
         :raises ValueError: if ``period`` is not one of
-            :data:`RD1367_EVALUATION_PERIODS`.
+            :data:`RD1367_EVALUATION_PERIODS`, or the period carries no
+            noise phase.
         """
         require_choice(self.period, "period", RD1367_EVALUATION_PERIODS)
+        if not self.phases:
+            msg = f"PeriodAssessment: period {self.period!r} has no noise phases."
+            raise ValueError(msg)
+
+    @property
+    def reported_level(self) -> int:
+        """``LKeq,x`` rounded per Annex IV A.3.4.2."""
+        return round_reported_level(self.evaluation_period_level)
+
+    @property
+    def reported_long_term(self) -> int | None:
+        """``LK,x`` rounded per Annex IV A.3.4.2, or ``None``."""
+        if self.long_term_corrected_level is None:
+            return None
+        return round_reported_level(self.long_term_corrected_level)
+
+    @property
+    def max_phase_level(self) -> float:
+        """The largest ``LKeq,Ti`` of the period, in dB."""
+        return max(p.lkeq for p in self.phases)
+
+    @property
+    def phase_pass(self) -> bool:
+        """Whether every ``LKeq,Ti`` stays within ``limit + 5`` dB."""
+        return bool(self.max_phase_level <= self.phase_limit + 1e-9)
+
+    @property
+    def daily_pass(self) -> bool:
+        """Whether ``LKeq,x``, rounded, stays within ``limit + 3`` dB."""
+        return bool(self.reported_level <= self.daily_limit + 1e-9)
+
+    @property
+    def long_term_pass(self) -> bool | None:
+        """Whether ``LK,x``, rounded, stays at or below ``limit``.
+
+        ``None`` when the criterion was not evaluated: no annual information
+        was supplied, or the activity is not new.
+        """
+        reported = self.reported_long_term
+        if reported is None or not self.new_activity:
+            return None
+        return bool(reported <= self.limit + 1e-9)
 
     @property
     def phase_limit(self) -> float:
@@ -1157,15 +1197,24 @@ class ActivityAssessment:
 
         :func:`assess_activity` already refuses an empty ``measurements``
         mapping and a mapping whose keys name no evaluation period, so this
-        pins the same requirement on the result the function returns.
+        pins the same requirement on the result the function returns. Each
+        period reads its annual verdict from whether the activity is new, so
+        the periods have to say what the assessment says.
 
-        :raises ValueError: if ``periods`` is empty.
+        :raises ValueError: if ``periods`` is empty, or a period disagrees
+            with ``new_activity``.
         """
         if not self.periods:
             msg = (
                 "ActivityAssessment: 'periods' must carry at least one "
                 "evaluation period; an assessment over none complies "
                 "vacuously and renders an inspection report with no data."
+            )
+            raise ValueError(msg)
+        if any(p.new_activity != self.new_activity for p in self.periods):
+            msg = (
+                "ActivityAssessment: every period must be assessed as the "
+                f"activity is (new_activity={self.new_activity!r})."
             )
             raise ValueError(msg)
 
@@ -1336,24 +1385,14 @@ def _assess_period(
         year_days=year_days,
         closed_level=closed_level,
     )
-    max_phase = max(p.lkeq for p in phases)
     return PeriodAssessment(
         period=name,
         phases=phases,
         duration_hours=duration,
         evaluation_period_level=level,
-        reported_level=reported,
         long_term_corrected_level=annual,
-        reported_long_term=None if annual is None else round_reported_level(annual),
         limit=limit,
-        max_phase_level=max_phase,
-        phase_pass=bool(max_phase <= limit + _PHASE_ALLOWANCE + 1e-9),
-        daily_pass=bool(reported <= limit + _DAILY_ALLOWANCE + 1e-9),
-        long_term_pass=(
-            None
-            if annual is None or not new_activity
-            else bool(round_reported_level(annual) <= limit + 1e-9)
-        ),
+        new_activity=bool(new_activity),
     )
 
 

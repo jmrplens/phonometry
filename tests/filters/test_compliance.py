@@ -350,6 +350,15 @@ def test_map_breakpoint_reproduces_table_f1() -> None:
 # --------------------------------------------------------------------------
 # Per-band entries that do not agree
 # --------------------------------------------------------------------------
+def _octave_verdict() -> filters.FilterComplianceResult:
+    """A class 1 octave bank from 500 Hz to 16 kHz, as the tests below take it."""
+    from phonometry.filters.core import OctaveFilterBank
+
+    return filters.verify_filter_class(
+        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
+    )
+
+
 def test_a_filter_verdict_refuses_per_band_entries_that_disagree() -> None:
     """The fiche prints one row per band under the bank's overall class.
 
@@ -358,34 +367,98 @@ def test_a_filter_verdict_refuses_per_band_entries_that_disagree() -> None:
     """
     import dataclasses
 
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
-    )
-    short = result.bands[:-1]
+    result = _octave_verdict()
+    short = result.band_margins[:-1]
     # Every field of the result is named whichever one is short, so the count
-    # is the only part that says it was 'bands'. This test set that count.
-    with pytest.raises(ValueError, match=rf"'bands' \({len(short)}\)"):
-        dataclasses.replace(result, bands=short)
+    # is the only part that says it was 'band_margins'. This test set that count.
+    with pytest.raises(ValueError, match=rf"'band_margins' \({len(short)}\)"):
+        dataclasses.replace(result, band_margins=short)
 
 
-def test_a_filter_verdict_refuses_a_class_its_bands_carry_no_margins_for() -> None:
-    """Class 0 exists only in the 1995 edition, so a 2014 verdict has no
-    ``margin_class0_db`` keys; an unpinned class would die in a bare
-    ``KeyError`` halfway through the corridor figure.
+@pytest.mark.parametrize("name", ["bands", "overall_class", "range_limited"])
+def test_a_filter_verdict_reads_its_classes_from_the_margins(name: str) -> None:
+    """The per-band classes, the bank's class and the range are not fields.
+
+    They used to be, pinned against one another when the verdict was built:
+    a class the bands did not derive, a class over a band that met none, a
+    class that was no designation or one stated over no bands. All of them
+    are read from the margins and the edition's Table 1 now.
+    """
+    import dataclasses
+
+    result = _octave_verdict()
+    assert name not in {field.name for field in dataclasses.fields(result)}
+    stated = {name: getattr(result, name)}
+    with pytest.raises(TypeError, match=name):
+        dataclasses.replace(result, **stated)
+
+
+def test_a_band_margin_row_that_states_a_class_is_refused() -> None:
+    """A row carries what the band was measured to, and the class is read from it."""
+    import dataclasses
+
+    result = _octave_verdict()
+    rows = tuple({**band, "class": 1} for band in result.band_margins)
+    with pytest.raises(ValueError, match=r"'band_margins' must not state a class"):
+        dataclasses.replace(result, band_margins=rows)
+
+
+def test_a_band_that_misses_class_1_takes_the_bank_to_class_2() -> None:
+    """The boxed class restates the per-band classes under it, by construction.
+
+    Built by hand, the fiche once boxed ``Class 1 - COMPLIES (margin
+    -0.35 dB)`` above a table whose 1 kHz row read ``Class 2 (-0.35 dB)``.
+    A band that misses class 1 by a hair and meets class 2 now reads class 2,
+    and so does the bank.
     """
     import dataclasses
 
     from phonometry.filters.core import OctaveFilterBank
 
     result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
+        OctaveFilterBank(fs=48000, fraction=3, order=4, limits=[500, 2000])
     )
-    # 'got 0' is what separates this from the non-integer case below, which
-    # the library refuses with the same sentence.
-    with pytest.raises(ValueError, match=r"'overall_class' must be one of .*; got 0\."):
-        dataclasses.replace(result, overall_class=0)
+    assert result.overall_class == 1
+    rows = tuple(dict(band) for band in result.band_margins)
+    rows[1]["margin_class1_db"] = -0.35
+    lowered = dataclasses.replace(result, band_margins=rows)
+    assert lowered.bands[1]["class"] == 2
+    assert lowered.overall_class == 2
+
+
+def test_a_band_that_meets_no_class_leaves_the_bank_without_one() -> None:
+    """A bank is no better than its worst band: one row meeting no class reads ``None``."""
+    import dataclasses
+
+    result = _octave_verdict()
+    rows = tuple(dict(band) for band in result.band_margins)
+    for cls in result.available_classes():
+        rows[1][f"margin_class{cls}_db"] = -1.0
+    failed = dataclasses.replace(result, band_margins=rows)
+    assert failed.bands[1]["class"] is None
+    assert failed.overall_class is None
+
+
+def test_a_filter_verdict_over_no_bands_states_no_class() -> None:
+    """A bank with no bands in range is a real outcome, and it attests nothing.
+
+    A class stated over zero bands would print an accredited verdict box
+    above a table reportlab then refuses to build.
+    """
+    import dataclasses
+
+    import numpy as np
+
+    result = _octave_verdict()
+    empty = dataclasses.replace(
+        result,
+        band_margins=(),
+        sos=(),
+        band_frequencies=np.asarray([], dtype=float),
+        factors=(),
+    )
+    assert empty.bands == ()
+    assert empty.overall_class is None
 
 
 def test_a_filter_verdict_refuses_an_edition_that_disagrees_with_its_bands() -> None:
@@ -394,11 +467,7 @@ def test_a_filter_verdict_refuses_an_edition_that_disagrees_with_its_bands() -> 
     """
     import dataclasses
 
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
-    )
+    result = _octave_verdict()
     with pytest.raises(ValueError, match=r"'edition' \('1995'\) defines classes"):
         dataclasses.replace(result, edition="1995")
 
@@ -414,184 +483,95 @@ def test_a_filter_verdict_refuses_a_later_band_short_of_a_margin_key() -> None:
     reference class. The key dropped here is that one, so the band list is
     exactly the one that used to construct and then die mid-figure.
     """
-    import copy
     import dataclasses
 
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
-    )
+    result = _octave_verdict()
     # The producer's own bands all carry the same margin keys, so the guard
     # cannot refuse a verdict a bank emitted.
-    assert len({frozenset(band) for band in result.bands}) == 1
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
+    assert len({frozenset(band) for band in result.band_margins}) == 1
+    bands = tuple(dict(band) for band in result.band_margins)
     dropped = result.reference_class()
     kept = [c for c in result.available_classes() if c != dropped]
     del bands[1][f"margin_class{dropped}_db"]
     with pytest.raises(
-        ValueError, match=rf"entry of 'bands' carries margins for classes \{kept}"
+        ValueError,
+        match=rf"entry of 'band_margins' carries margins for classes \{kept}",
     ):
-        dataclasses.replace(result, bands=bands)
+        dataclasses.replace(result, band_margins=bands)
 
 
 def test_a_filter_verdict_refuses_a_non_finite_per_band_value() -> None:
     """Every margin is a ``min`` over the measured attenuation against the
     Table 1 mask, so no bank emits a NaN; one smuggled in prints
-    ``Class 1 (+nan dB)`` in the per-band table under a boxed verdict that
-    still reads COMPLIES, because the binding margin reads another band.
+    ``Class 1 (+nan dB)`` in the per-band table.
     """
-    import copy
     import dataclasses
 
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
-    )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
+    result = _octave_verdict()
+    bands = tuple(dict(band) for band in result.band_margins)
     bands[0][f"margin_class{result.reference_class()}_db"] = float("nan")
-    with pytest.raises(ValueError, match=r"'bands' must carry finite per-band"):
-        dataclasses.replace(result, bands=bands)
-
-
-def test_a_filter_verdict_refuses_a_class_stated_over_no_bands() -> None:
-    """A bank with no bands in range is a real outcome, always paired with
-    ``overall_class = None``. A class stated over zero bands would print an
-    accredited verdict box above a table reportlab then refuses to build,
-    complaining about a table with no rows and naming neither the bands nor
-    the bank.
-    """
-    import dataclasses
-
-    import numpy as np
-
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
-    )
-    empty = {
-        "bands": (),
-        "sos": (),
-        "band_frequencies": np.asarray([], dtype=float),
-        "factors": (),
-    }
-    # The same emptiness with overall_class None is the producer's own output.
-    assert dataclasses.replace(result, overall_class=None, **empty).bands == ()
-    with pytest.raises(ValueError, match=r"'overall_class' is 1 but 'bands' is empty"):
-        dataclasses.replace(result, overall_class=1, **empty)
+    with pytest.raises(ValueError, match=r"'band_margins' must carry finite per-band"):
+        dataclasses.replace(result, band_margins=bands)
 
 
 def test_a_filter_verdict_refuses_an_unknown_edition() -> None:
     """The edition is a pinned tag, refused by name at construction."""
     import dataclasses
 
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
-    )
+    result = _octave_verdict()
     with pytest.raises(ValueError, match="'edition' must be one of"):
         dataclasses.replace(result, edition="2003")
 
 
-def test_a_filter_verdict_refuses_a_class_its_bands_do_not_derive() -> None:
-    """The boxed class must restate the per-band classes under it.
-
-    ``verify_filter_class`` derives the overall class from the band verdicts
-    by one rule, the strictest class every band meets, so a summary that
-    contradicts a row is one no bank produced. Unpinned, the fiche boxed
-    ``Class 1 - COMPLIES (margin -0.35 dB)`` above a table whose 1 kHz row
-    read ``Class 2 (-0.35 dB)``, and passed the bank against a required
-    class 1.
-    """
-    import copy
-    import dataclasses
-
-    from phonometry.filters.core import OctaveFilterBank
-
+# ---------------------------------------------------------------------------
+# The rows a class is read from are the result's own, and read-only
+# ---------------------------------------------------------------------------
+def test_a_filter_verdict_row_cannot_be_written_into() -> None:
     result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=3, order=4, limits=[500, 2000])
+        filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     )
+    row = result.band_margins[0]
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        row["margin_class1_db"] = -50.0  # type: ignore[index]
     assert result.overall_class == 1
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    # A band that misses class 1 by a hair and meets class 2: the shape
-    # ``_verify_band`` emits for a filter just outside the tighter corridor.
-    bands[1].update({"class": 2, "margin_class1_db": -0.35})
-    with pytest.raises(
-        ValueError,
-        match=r"'overall_class' must be the class the bands derive.*band states 2",
-    ):
-        dataclasses.replace(result, bands=bands, overall_class=1)
 
 
-def test_a_filter_verdict_refuses_a_class_over_a_band_that_meets_none() -> None:
-    """A band that meets no class carries ``None``, and the producer then
-    states ``None`` for the bank too: a bank is no better than its worst
-    band. A class boxed over such a table attests compliance for a band whose
-    own row reads ``none``.
-    """
-    import copy
+def test_a_filter_verdict_keeps_a_copy_of_the_callers_rows() -> None:
+    """A write into the dictionaries a result was built from does not reach it."""
     import dataclasses
 
-    from phonometry.filters.core import OctaveFilterBank
-
     result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
+        filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    bands[1]["class"] = None
-    # The producer's own pairing of that band list is accepted.
-    assert dataclasses.replace(result, bands=bands, overall_class=None) is not None
-    with pytest.raises(
-        ValueError,
-        match=r"'overall_class' must be the class the bands derive.*band states None",
-    ):
-        dataclasses.replace(result, bands=bands, overall_class=1)
+    rows = [dict(band) for band in result.band_margins]
+    again = dataclasses.replace(result, band_margins=tuple(rows))
+    for row in rows:
+        row["margin_class1_db"] = -50.0
+        row["margin_class2_db"] = -50.0
+    assert again.overall_class == 1
+    assert all(band["class"] == 1 for band in again.bands)
 
 
-def test_a_filter_verdict_refuses_a_class_that_is_no_designation() -> None:
-    """The class is a designation, not a measured value.
-
-    Both halves are spliced into text and into a key: the overall class into
-    ``margin_class<c>_db``, which the boxed statement reads the binding margin
-    from, so ``1.0`` died in a bare ``KeyError`` for ``margin_class1.0_db``;
-    the per-band class into the table, which printed ``Class 1.0``. Equal to
-    a class is therefore not the same as being one.
-    """
-    import copy
-    import dataclasses
-
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
+def test_a_weighting_verdict_row_and_sweep_cannot_be_written_into() -> None:
+    result = filters.verify_weighting_class(
+        filters.WeightingFilter(fs=48000, curve="A")
     )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    bands[1]["class"] = 1.0
-    with pytest.raises(
-        ValueError, match=r"'overall_class' must be one of .*; got 1\.0"
-    ):
-        dataclasses.replace(result, overall_class=1.0)
-    with pytest.raises(ValueError, match=r"'bands' must state a 'class' of"):
-        dataclasses.replace(result, bands=bands)
+    row = result.band_margins[0]
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        row["margin_class1_db"] = -50.0  # type: ignore[index]
+    sweep = result.between_nominals
+    assert sweep is not None
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        sweep["margin_class1_db"] = -50.0  # type: ignore[index]
+    assert result.overall_class == 1
 
 
-def test_a_filter_verdict_refuses_a_band_carrying_no_class_at_all() -> None:
-    """Every band verdict carries its own class, and the fiche's per-band
-    table reads it by name; a band short of the key died in a bare
-    ``KeyError`` halfway through the table.
-    """
-    import copy
-    import dataclasses
+def test_a_weighting_verdict_survives_a_round_trip_through_pickle() -> None:
+    import pickle
 
-    from phonometry.filters.core import OctaveFilterBank
-
-    result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
+    result = filters.verify_weighting_class(
+        filters.WeightingFilter(fs=48000, curve="A")
     )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    del bands[1]["class"]
-    with pytest.raises(ValueError, match=r"'bands' must carry a 'class' per band"):
-        dataclasses.replace(result, bands=bands)
+    again = pickle.loads(pickle.dumps(result))  # noqa: S301 - our own bytes
+    assert again.overall_class == result.overall_class
+    assert again.bands == result.bands

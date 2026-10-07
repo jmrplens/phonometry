@@ -586,15 +586,20 @@ class WindShearProfile:
     :ivar speeds_m_s: The wind speeds measured there, in m/s.
     :ivar shear_exponent: The power-law exponent :math:`\alpha` through the
         two points (Equation (K.2)).
-    :ivar typical: Whether :math:`\alpha` lies in the typical range
-        :data:`TYPICAL_WIND_SHEAR_EXPONENT_RANGE` (K.4.3).
     """
 
     heights_m: tuple[float, float]
     speeds_m_s: tuple[float, float]
     shear_exponent: float
-    _: KW_ONLY
-    typical: bool
+
+    @property
+    def typical(self) -> bool:
+        r"""Whether :math:`\alpha` lies in the typical range (K.4.3).
+
+        The range is :data:`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`, bounds included.
+        """
+        low_alpha, high_alpha = TYPICAL_WIND_SHEAR_EXPONENT_RANGE
+        return low_alpha <= self.shear_exponent <= high_alpha
 
     def speed_at(self, height_m: ArrayLike) -> NDArray[np.float64] | float:
         """The power-law wind speed at ``height_m`` (Equation (K.1)), in m/s."""
@@ -663,12 +668,10 @@ def wind_shear_profile(
             reference_height_m=low_z,
         )
     )
-    low_alpha, high_alpha = TYPICAL_WIND_SHEAR_EXPONENT_RANGE
     return WindShearProfile(
         heights_m=(low_z, high_z),
         speeds_m_s=(float(lower_speed_m_s), float(upper_speed_m_s)),
         shear_exponent=alpha,
-        typical=low_alpha <= alpha <= high_alpha,
     )
 
 
@@ -1291,17 +1294,47 @@ def predicted_receptor_level(
 class SoundRelevantTurbines(OwnsArrays):
     """The turbines that set the binning wind speed at a receptor (9.3.2.3).
 
+    Which turbines are relevant is read from the predicted levels and the
+    1.0 dB of 9.3.2.3, so it is not a field.
+
     :ivar predicted_levels_db: Each turbine's predicted level at the
         receptor, in dB, in the order given.
-    :ivar relevant: Whether each turbine is sound relevant.
-    :ivar total_level_db: The predicted level of all turbines, in dB.
-    :ivar relevant_level_db: The predicted level of the relevant ones, in dB.
     """
 
     predicted_levels_db: NDArray[np.float64]
-    relevant: NDArray[np.bool_]
-    total_level_db: float
-    relevant_level_db: float
+
+    @property
+    def relevant(self) -> NDArray[np.bool_]:
+        """Whether each turbine is sound relevant.
+
+        The quietest is left out, and the next quietest after it, for as long
+        as the total of those that remain has dropped by no more than 1.0 dB
+        from the total of all ("reduced by more than 1,0 dB", 9.3.2.3: 1.0 dB
+        itself is not more, and a drop within a nanodecibel of it is 1.0 dB).
+        """
+        levels = np.asarray(self.predicted_levels_db, dtype=np.float64)
+        total = energy_sum(levels)
+        relevant = np.ones(levels.size, dtype=np.bool_)
+        for index in np.argsort(levels, kind="stable")[:-1]:
+            trial = relevant.copy()
+            trial[index] = False
+            if (
+                total - energy_sum(levels[trial])
+                > _RELEVANCE_DROP_DB + _BOUNDARY_SLACK_DB
+            ):
+                break
+            relevant = trial
+        return relevant
+
+    @property
+    def total_level_db(self) -> float:
+        """The predicted level of all turbines, in dB."""
+        return energy_sum(self.predicted_levels_db)
+
+    @property
+    def relevant_level_db(self) -> float:
+        """The predicted level of the relevant ones, in dB."""
+        return energy_sum(np.asarray(self.predicted_levels_db)[self.relevant])
 
     @property
     def indices(self) -> tuple[int, ...]:
@@ -1363,22 +1396,7 @@ def sound_relevant_turbines(predicted_levels_db: ArrayLike) -> SoundRelevantTurb
     :raises ValueError: If the levels are empty or not finite.
     """
     levels = require_finite_array(predicted_levels_db, "predicted_levels_db")
-    total = energy_sum(levels)
-    order = np.argsort(levels, kind="stable")
-    relevant = np.ones(levels.size, dtype=np.bool_)
-    for index in order[:-1]:
-        trial = relevant.copy()
-        trial[index] = False
-        # "Reduced by more than 1,0 dB" (9.3.2.3): 1.0 dB itself is not more.
-        if total - energy_sum(levels[trial]) > _RELEVANCE_DROP_DB + _BOUNDARY_SLACK_DB:
-            break
-        relevant = trial
-    return SoundRelevantTurbines(
-        predicted_levels_db=levels,
-        relevant=read_only(relevant),
-        total_level_db=total,
-        relevant_level_db=energy_sum(levels[relevant]),
-    )
+    return SoundRelevantTurbines(predicted_levels_db=levels)
 
 
 # ---------------------------------------------------------------------------

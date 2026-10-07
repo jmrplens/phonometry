@@ -99,24 +99,45 @@ ADJACENT_BAND_LIMIT_DB = 8.0
 ## BackgroundMarginCheck
 
 ```python
-BackgroundMarginCheck(
-    margins_db: NDArray[np.float64],
-    needs_correction: NDArray[np.bool_],
-    unusable: NDArray[np.bool_],
-    satisfied: bool,
-)
+BackgroundMarginCheck(margins_db: NDArray[np.float64])
 ```
 
 Whether the levels clear the background by what 5.1.4 asks.
 
-**Parameters**
+The verdicts are read from the margins and the 10 dB and 6 dB of 5.1.4,
+so they are not fields.
+
+**Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `margins_db` | The level of the source less the background at each position and band given, in decibels, in the shape they came in. |
-| `needs_correction` | True where the margin is under [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db) and over [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db), which is the window where the clause asks for the ISO 3744 background correction. |
-| `unusable` | True where the margin is at or under [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db), which the clause offers no correction for. |
-| `satisfied` | True when every margin clears [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db), which is the only case that needs nothing done to it. |
+
+### BackgroundMarginCheck.needs_correction
+
+*property*
+
+True where the margin is under the preferred 10 dB and over the 6 dB.
+
+[`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db) and
+[`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db) bound the window where
+the clause asks for the ISO 3744 background correction.
+
+### BackgroundMarginCheck.satisfied
+
+*property*
+
+True when every margin clears [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db).
+
+That is the only case that needs nothing done to it.
+
+### BackgroundMarginCheck.unusable
+
+*property*
+
+True where the margin is at or under [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db).
+
+The clause offers no correction for those. Judged settled.
 
 ## check_background_margin
 

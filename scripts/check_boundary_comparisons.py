@@ -689,7 +689,10 @@ class Module:
         self.constructions: dict[str, list[tuple[ast.Call, Function | None]]] = {}
         self._index_calls()
         self._memo: dict[object, Value] = {}
+        self._classes: dict[object, ast.ClassDef | None] = {}
         self._busy: set[object] = set()
+        self._provisional: dict[object, Value] = {}
+        self._cut = False
 
     # -- structure -----------------------------------------------------
 
@@ -820,17 +823,34 @@ class Module:
     # -- evaluation ----------------------------------------------------
 
     def _guarded(self, key: object, compute: Callable[[], Value]) -> Value:
-        """Memoised evaluation that reads a cycle (``x = x + d``) as opaque."""
+        """Memoised evaluation that reads a cycle (``x = x + d``) as opaque.
+
+        A value worked out while a cycle was cut short is what the key reads
+        from inside that cycle, not what it reads on its own: it is kept only
+        while the comparison being judged is read (:meth:`judge` forgets it),
+        so the verdict on one comparison does not depend on which comparison
+        of the file happened to be read first.
+        """
         if key in self._memo:
             return self._memo[key]
+        if key in self._provisional:
+            self._cut = True
+            return self._provisional[key]
         if key in self._busy:
+            self._cut = True
             return OPAQUE
+        outer_cut = self._cut
+        self._cut = False
         self._busy.add(key)
         try:
             result = compute()
         finally:
             self._busy.discard(key)
-        self._memo[key] = result
+        if self._cut:
+            self._provisional[key] = result
+        else:
+            self._memo[key] = result
+        self._cut = self._cut or outer_cut
         return result
 
     def value(self, node: ast.AST, context: Context) -> Value:  # noqa: C901, PLR0911, PLR0912
@@ -1100,8 +1120,12 @@ class Module:
 
         ``Result(...)`` is one, and so is a local name every binding of which
         builds the same class; its field then stands for what the file builds
-        it from, as ``self.field`` does inside the class. An instance that a
-        function or another module returns is not followed.
+        it from, as ``self.field`` does inside the class. So is the parameter
+        of a private function that every call in the file hands ``self`` of
+        one class, or one instance built here: a ``__post_init__`` that passes
+        ``self`` to a helper has the helper read the fields as the class
+        would. An instance that a function or another module returns is not
+        followed.
         """
         if isinstance(node, ast.Call):
             return (
@@ -1124,9 +1148,58 @@ class Module:
                 first = owners[0]
                 return first if all(owner is first for owner in owners) else None
             if _parameter(current, node.id) is not None:
-                return None
+                return self._guarded_class(
+                    ("parameter", current, node.id),
+                    functools.partial(self.parameter_class, current, node.id),
+                )
             current = self.enclosing(current)
         return None
+
+    def _guarded_class(
+        self, key: object, compute: Callable[[], ast.ClassDef | None]
+    ) -> ast.ClassDef | None:
+        """:meth:`parameter_class` once per parameter, reading a cycle as no class."""
+        if key in self._classes:
+            return self._classes[key]
+        if key in self._busy:
+            return None
+        self._busy.add(key)
+        try:
+            result = compute()
+        finally:
+            self._busy.discard(key)
+        self._classes[key] = result
+        return result
+
+    def parameter_class(self, function: Function, name: str) -> ast.ClassDef | None:
+        """The class a private function's parameter is an instance of, at every call.
+
+        ``None`` for a public function, whose parameter is the user's, and for
+        one that some call hands anything else.
+        """
+        public = not function.name.startswith("_") and self.enclosing(function) is None
+        sites = self.calls.get(function, [])
+        if public or not sites:
+            return None
+        method = self.owner_class(function) is not None and self.parent.get(
+            function
+        ) is self.owner_class(function)
+        skip = 1 if method and not _is_static(function) else 0
+        arguments = function.args
+        positional = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]][
+            skip:
+        ]
+        owners: list[ast.ClassDef | None] = []
+        for call, scope in sites:
+            argument = _argument(call, positional, name)
+            if isinstance(argument, ast.Name) and argument.id == "self":
+                owners.append(self.owner_class(scope))
+            elif argument is not None:
+                owners.append(self.instance_class(argument, Context(scope)))
+            else:
+                return None
+        first = owners[0]
+        return first if first is not None and all(o is first for o in owners) else None
 
     def member(self, owner: ast.ClassDef, attr: str) -> Value:
         """``self.attr``: a property's result, or what the file builds the field from."""
@@ -1310,6 +1383,7 @@ class Module:
 
     def judge(self, left: ast.expr, right: ast.expr, context: Context) -> str | None:
         """Why a pair of operands is a boundary comparison left unsettled, or None."""
+        self._provisional.clear()
         sides = (self.value(left, context), self.value(right, context))
         if any(side.slack for side in sides):
             # A slack moves the edge whichever side it is written on.

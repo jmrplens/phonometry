@@ -860,37 +860,24 @@ def _four_band_indicators() -> PrecisionFieldIndicators:
     return precision_field_indicators(i_n, lp)
 
 
-@pytest.mark.parametrize(
-    "field_name",
-    [
-        "frequencies",
-        "sound_power",
-        "sound_power_level",
-        "sound_power_level_normalized",
-        "not_applicable_band",
-    ],
-)
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_determination_column_off_the_band_axis_is_refused(
-    field_name: str, *, trim: bool
-) -> None:
-    """Every per-band quantity of the determination is pinned at construction.
+def test_band_centres_off_the_band_axis_are_refused(*, trim: bool) -> None:
+    """The band centres are pinned to the partial powers at construction.
 
-    ``sound_power`` is why the long direction matters as much as the short
-    one: the sheet prints the level, and the signed band total in watts is
-    the one column no reader in the library opens, so a band too many rides
-    all the way through a complete fiche.
+    Every other per-band quantity is read from the partial powers, so the
+    centres are the one column that can disagree with them; a band too many
+    would label a level the determination never measured.
     """
     import dataclasses
 
     result = _four_band_determination()
-    values = np.asarray(getattr(result, field_name))
+    values = np.asarray(result.frequencies)
     wrong = values[:-1] if trim else np.append(values, values[-1])
     with pytest.raises(
         ValueError,
-        match=rf"'{field_name}' \({wrong.size}\).*must each carry one value per band",
+        match=rf"'frequencies' \({wrong.size}\).*must each carry one value per band",
     ):
-        dataclasses.replace(result, **{field_name: wrong})
+        dataclasses.replace(result, frequencies=wrong)
 
 
 def test_partial_power_off_the_band_axis_is_refused() -> None:
@@ -961,11 +948,101 @@ def test_criterion_5_off_the_band_axis_is_refused() -> None:
         field_nonuniformity_2=indicators.fs.copy(),
     )
     assert criteria.criterion_5 is not None
-    one_band_criterion_5 = criteria.criterion_5[:1]
+    one_band = indicators.fs[:1].copy()
     with pytest.raises(
-        ValueError, match=r"'criterion_5' \(1\) must each carry one value per band"
+        ValueError, match=r"'field_nonuniformity_1' must carry one value per band"
     ):
-        dataclasses.replace(criteria, criterion_5=one_band_criterion_5)
+        dataclasses.replace(criteria, field_nonuniformity_1=one_band)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "criterion_1",
+        "criterion_2",
+        "criterion_3",
+        "criterion_4",
+        "criterion_5",
+        "qualified",
+    ],
+)
+def test_the_criteria_are_read_from_the_readings(name: str) -> None:
+    """A criterion is a comparison of the readings with Annex C, not a field."""
+    import dataclasses
+
+    indicators = _four_band_indicators()
+    criteria = precision_qualification(indicators)
+    assert name not in {field.name for field in dataclasses.fields(criteria)}
+    with pytest.raises(TypeError, match=name):
+        dataclasses.replace(criteria, **{name: None})
+
+
+def test_frequencies_beyond_table_1_are_kept_when_no_scan_needs_them() -> None:
+    """Table 1 is read for criterion 1 only, so it binds only with the scans."""
+    indicators = _four_band_indicators()
+    beyond = np.array([1000.0, 2000.0, 4000.0, 8000.0])
+    criteria = precision_qualification(indicators, frequencies=beyond)
+    assert criteria.criterion_1 is None
+    np.testing.assert_array_equal(criteria.criterion_3, [True] * 4)
+
+
+def test_a_scan_pair_over_a_band_table_1_does_not_print_is_refused() -> None:
+    """With the scans, Table 1 has to print every band it is read at."""
+    indicators = _four_band_indicators()
+    levels = np.full(indicators.fs.shape, 80.0)
+    beyond = np.array([1000.0, 2000.0, 4000.0, 8000.0])
+    with pytest.raises(ValueError, match="No ISO 9614-3:2002 Table 1 sigma_R0"):
+        precision_qualification(
+            indicators,
+            scan_intensity_level_1=levels,
+            scan_intensity_level_2=levels,
+            frequencies=beyond,
+        )
+
+
+def test_the_criterion_1_limit_is_table_1_or_the_callers() -> None:
+    """``s`` is Table 1 at the band centres unless the caller gives one."""
+    indicators = _four_band_indicators()
+    centres = np.array([125.0, 250.0, 1000.0, 6300.0])
+    from_table = precision_qualification(indicators, frequencies=centres)
+    own = precision_qualification(
+        indicators, frequencies=centres, repeatability_limit=0.5
+    )
+    np.testing.assert_array_equal(from_table.criterion_1_limit_db, [2.0, 1.5, 1.0, 2.0])
+    np.testing.assert_array_equal(own.criterion_1_limit_db, [0.5] * 4)
+
+
+def test_a_scan_pair_without_its_limit_is_refused() -> None:
+    """Criterion 1 compares the two scans with s, so the three come together."""
+    import dataclasses
+
+    indicators = _four_band_indicators()
+    criteria = precision_qualification(indicators)
+    levels = np.full(indicators.fs.shape, 80.0)
+    with pytest.raises(ValueError, match="Criterion 1 needs the limit s"):
+        dataclasses.replace(
+            criteria, scan_intensity_level_1=levels, scan_intensity_level_2=levels
+        )
+
+
+def test_the_missing_limit_message_names_the_field_to_give() -> None:
+    """The class names its own field, and following the message builds the criteria."""
+    import dataclasses
+
+    indicators = _four_band_indicators()
+    criteria = precision_qualification(indicators)
+    levels = np.full(indicators.fs.shape, 80.0)
+    with pytest.raises(ValueError, match=r"or 'repeatability_limit_db'\.$"):
+        dataclasses.replace(
+            criteria, scan_intensity_level_1=levels, scan_intensity_level_2=levels
+        )
+    given = dataclasses.replace(
+        criteria,
+        scan_intensity_level_1=levels,
+        scan_intensity_level_2=levels,
+        repeatability_limit_db=np.full(indicators.fs.shape, 1.0),
+    )
+    assert bool(np.all(given.criterion_1))
 
 
 def test_anechoic_result_plot_returns_axes() -> None:

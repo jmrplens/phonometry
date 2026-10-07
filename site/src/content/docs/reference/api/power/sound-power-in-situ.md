@@ -164,14 +164,12 @@ InSituSoundPowerResult(
     reference_power_level: np.ndarray,
     background_correction: np.ndarray,
     background_correction_ref: np.ndarray,
-    background_requirement_met: np.ndarray,
-    upper_bound: np.ndarray,
+    background_margin_db: np.ndarray,
+    background_margin_ref_db: np.ndarray,
     c2: float,
-    grade: str,
-    sigma_r0: float,
+    excess_levels_db: np.ndarray | None,
+    directivity_range_db: float | None,
     sigma_omc: float,
-    sigma_tot: float,
-    expanded_uncertainty: float,
     coverage_factor: float,
     sound_power_level_a: float,
     sound_energy_level_a: float,
@@ -203,7 +201,12 @@ energy-averaged over its locations (the first term of Eq. 12).
 for the source under test (Eq. 7; for `N` events measured one at a
 time it is the per-position shift the per-event corrections of Eq. 13
 produce in the mean of Eq. 15), `background_correction_ref` the same for
-the reference source at each location (Eq. 9, 10), and
+the reference source at each location (Eq. 9, 10).
+`background_margin_db` and `background_margin_ref_db` are the smallest
+margin over the background per band, of the source under test over its
+positions (and events) and of the reference source over its locations and
+positions, `NaN` where no background was measured; the two flags below
+are read from them and the 6 dB of 8.1, so they are not fields.
 `background_requirement_met` is `True` only where a background level
 reached every position (7.5) and every margin over it was at least 6 dB.
 Clause 8.1 writes that margin for the source under test alone
@@ -220,13 +223,43 @@ leaves the level too high. A band where the reference source's margin is
 short is not one, since its capped correction pulls the level down; it
 is flagged by `background_requirement_met` alone.
 
-`grade` is the accuracy grade Table 2 grants (`'engineering'` or
-`'survey'`) and `sigma_r0` its typical reproducibility; `sigma_omc`,
+`excess_levels_db` and `directivity_range_db` are the two indicators
+Table 2 grades the determination by, the A-weighted excess
+$\Delta L_{f\mathrm{A}}$ at each microphone position and the
+directivity range of the source, `None` where they were not determined.
+`grade` is the accuracy grade Table 2 grants from them (`'engineering'`
+or `'survey'`) and `sigma_r0` its typical reproducibility; `sigma_omc`,
 `sigma_tot` and `expanded_uncertainty` are the operating-and-mounting
 deviation, Eq. (22) and Eq. (23) for `coverage_factor`, `NaN` when no
-`sigma_omc` was supplied. `sound_power_level_a` and
+`sigma_omc` was supplied. The grade and the three figures read from it
+are read-only properties, so they are not fields. `sound_power_level_a` and
 `sound_energy_level_a` are the Annex D A-weighted totals of the level
 that was determined (`NaN` for the other).
+
+### InSituSoundPowerResult.background_requirement_met
+
+*property*
+
+Per band, whether every margin of both sources reached the 6 dB of 8.1.
+
+`False` where no background was measured. The margins are judged
+settled, as `K1` is read from them.
+
+### InSituSoundPowerResult.expanded_uncertainty
+
+*property*
+
+Eq. (23), `coverage_factor` times `sigma_tot`, in dB.
+
+### InSituSoundPowerResult.grade
+
+*property*
+
+The accuracy grade Table 2 grants, `'engineering'` or `'survey'`.
+
+Engineering only with an excess of at least 7 dB at every position and
+a directivity range within 7 dB; survey whenever either indicator
+fails or was not determined.
 
 ### InSituSoundPowerResult.plot()
 
@@ -248,6 +281,18 @@ otherwise is cross-hatched and named as that. Requires
 matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### InSituSoundPowerResult.sigma_r0
+
+*property*
+
+The typical reproducibility of Table 2 at `grade`, in dB.
+
+### InSituSoundPowerResult.sigma_tot
+
+*property*
+
+Eq. (22), $\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$, `NaN` without `sigma_omc`.
+
 ### InSituSoundPowerResult.sound_energy_level_ref
 
 *property*
@@ -261,6 +306,15 @@ matplotlib (`pip install phonometry[plot]`); returns the
 
 `LW` under the reference meteorological conditions, `LW + C2`
 (ISO 3747:2010 Annex C, Eq. C.1); `NaN` for an energy determination.
+
+### InSituSoundPowerResult.upper_bound
+
+*property*
+
+Per band, whether 8.1 calls the level an upper bound.
+
+The margin of the source under test was measured and fell below 6 dB
+while the reference source's margin met it everywhere.
 
 ## sound_energy_in_situ
 

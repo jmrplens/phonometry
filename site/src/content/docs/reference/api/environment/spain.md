@@ -635,19 +635,18 @@ PeriodAssessment(
     phases: tuple[NoisePhase, ...],
     duration_hours: float,
     evaluation_period_level: float,
-    reported_level: int,
     long_term_corrected_level: float | None,
-    reported_long_term: int | None,
     limit: float,
-    max_phase_level: float,
     *,
-    phase_pass: bool,
-    daily_pass: bool,
-    long_term_pass: bool | None,
+    new_activity: bool,
 )
 ```
 
 The assessment of one evaluation period against its limit.
+
+The rounded levels and the three verdicts of Article 25.1 b are read from
+the levels, the limit and the allowances the article prints, so they are
+not fields: a period cannot be built to pass levels the article fails.
 
 **Attributes**
 
@@ -657,14 +656,9 @@ The assessment of one evaluation period against its limit.
 | `phases` | The noise phases the period was split into. |
 | `duration_hours` | The period duration `T`, in hours. |
 | `evaluation_period_level` | `LKeq,x` of the period, in dB, unrounded. |
-| `reported_level` | `LKeq,x` rounded per Annex IV A.3.4.2. |
 | `long_term_corrected_level` | Annual `LK,x`, in dB, unrounded, or `None` when no annual information was supplied. |
-| `reported_long_term` | `LK,x` rounded, or `None`. |
 | `limit` | The table limit of the period, in dB. |
-| `max_phase_level` | The largest `LKeq,Ti` of the period, in dB. |
-| `phase_pass` | Whether every `LKeq,Ti` stays within `limit + 5` dB. |
-| `daily_pass` | Whether `LKeq,x` stays within `limit + 3` dB. |
-| `long_term_pass` | Whether `LK,x` stays at or below `limit`, or `None` when the criterion was not evaluated. |
+| `new_activity` | `True` when the activity is new, so the annual criterion of Article 25.1 b i applies to the period. |
 
 **Raises**
 
@@ -684,11 +678,50 @@ Whether every evaluated criterion of this period is met.
 
 The daily limit `limit + 3` dB (Article 25.1 b ii).
 
+### PeriodAssessment.daily_pass
+
+*property*
+
+Whether `LKeq,x`, rounded, stays within `limit + 3` dB.
+
+### PeriodAssessment.long_term_pass
+
+*property*
+
+Whether `LK,x`, rounded, stays at or below `limit`.
+
+`None` when the criterion was not evaluated: no annual information
+was supplied, or the activity is not new.
+
+### PeriodAssessment.max_phase_level
+
+*property*
+
+The largest `LKeq,Ti` of the period, in dB.
+
 ### PeriodAssessment.phase_limit
 
 *property*
 
 The phase limit `limit + 5` dB (Article 25.1 b iii).
+
+### PeriodAssessment.phase_pass
+
+*property*
+
+Whether every `LKeq,Ti` stays within `limit + 5` dB.
+
+### PeriodAssessment.reported_level
+
+*property*
+
+`LKeq,x` rounded per Annex IV A.3.4.2.
+
+### PeriodAssessment.reported_long_term
+
+*property*
+
+`LK,x` rounded per Annex IV A.3.4.2, or `None`.
 
 ## RD1367_CORRECTION_VALUES
 

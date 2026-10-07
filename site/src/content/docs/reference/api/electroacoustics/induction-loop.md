@@ -228,26 +228,33 @@ does not, and withholds that relaxation.
 ## BackgroundNoiseAssessment
 
 ```python
-BackgroundNoiseAssessment(
-    noise_levels_db: np.ndarray,
-    reference_signal_to_noise_ratio_db: float,
-    category: str,
-    report_required: bool,
-    noise_is_tonal: bool,
-)
+BackgroundNoiseAssessment(noise_levels_db: np.ndarray, noise_is_tonal: bool)
 ```
 
 The magnetic background noise of a site against 7.2 of IEC 60118-4:2014.
+
+The ratio, the category and the reporting duty are read from the noise
+levels and the 47 dB, 32 dB and 22 dB that 7.2 prints, so they are not
+fields: an assessment cannot be built to place a site in a class its
+noise does not reach.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `noise_levels_db` | The A-weighted noise level at each point with the loop switched off, in dB re 400 mA/m. |
-| `reference_signal_to_noise_ratio_db` | The reference level less the noisiest point, in dB: the "reference signal-to-noise ratio" of 7.2. |
-| `category` | `"ideal"` (above 47 dB), `"acceptable"` (32 dB to 47 dB), `"tolerable_for_short_periods"` (22 dB to 32 dB, only for noise without an undesirable tonal quality or mostly at low frequencies) or `"below_tolerable"`. |
-| `report_required` | Whether the ratio is below 32 dB, which "shall be reported and agreed with the system operator". |
 | `noise_is_tonal` | Whether the noise was declared tonal and not mostly at low frequencies, which withholds the 22 dB relaxation. |
+
+### BackgroundNoiseAssessment.category
+
+*property*
+
+The class 7.2 puts the site in.
+
+`"ideal"` (above 47 dB), `"acceptable"` (32 dB to 47 dB),
+`"tolerable_for_short_periods"` (22 dB to 32 dB, only for noise
+without an undesirable tonal quality or mostly at low frequencies) or
+`"below_tolerable"`.
 
 ### BackgroundNoiseAssessment.plot()
 
@@ -272,6 +279,25 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the noise levels' `Axes.plot`. |
+
+### BackgroundNoiseAssessment.reference_signal_to_noise_ratio_db
+
+*property*
+
+The reference level less the noisiest point, in dB.
+
+The "reference signal-to-noise ratio" of 7.2: the levels are in dB re
+400 mA/m, the reference level, so the ratio is the loudest level with
+its sign changed.
+
+### BackgroundNoiseAssessment.report_required
+
+*property*
+
+Whether the ratio is below 32 dB.
+
+7.2: such a ratio "shall be reported and agreed with the system
+operator".
 
 ## band_limit_response
 

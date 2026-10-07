@@ -322,8 +322,8 @@ HardWalledSoundPowerResult(
     reference_power_level: np.ndarray,
     background_correction: np.ndarray,
     background_correction_ref: np.ndarray,
-    background_requirement_met: np.ndarray,
-    upper_bound: np.ndarray,
+    background_margin_db: np.ndarray,
+    background_margin_ref_db: np.ndarray,
     c2: float,
     sigma_r0: np.ndarray,
     sigma_r0_a: float,
@@ -356,15 +356,19 @@ is $\overline{L_{p(\mathrm{B})}}$ (Eq. 12), `NaN` where no
 background was measured, and `reference_power_level` the calibrated
 $L_{W(\mathrm{RSS})}$. `background_correction` and
 `background_correction_ref` are $K_1$ and
-$K_{1(\mathrm{RSS})}$ per band, and `background_requirement_met`
-is `True` only where a background was measured and both margins reached
-the 6 dB of 4.5. `upper_bound` marks the bands that 8.1.3 calls upper
-bounds: the margin of the source under test was measured and fell below
-6 dB while the reference source's margin met it, so the capped
-$K_1$ leaves the level too high. A band where the reference source's
-margin falls short is not one: the capped $K_{1(\mathrm{RSS})}$
-pulls the level down, so it is flagged by `background_requirement_met`
-alone, and so is every band when no background was measured.
+$K_{1(\mathrm{RSS})}$ per band, and `background_margin_db` and
+`background_margin_ref_db` the two margins over the background they
+were read from (`NaN` where no background was measured).
+`background_requirement_met` and `upper_bound` are read from those
+margins and the 6 dB of 4.5, so they are not fields: the first is
+`True` only where both margins reached it, and the second marks the
+bands that 8.1.3 calls upper bounds, where the margin of the source under
+test was measured and fell below 6 dB while the reference source's margin
+met it, so the capped $K_1$ leaves the level too high. A band where
+the reference source's margin falls short is not one: the capped
+$K_{1(\mathrm{RSS})}$ pulls the level down, so it is flagged by
+`background_requirement_met` alone, and so is every band when no
+background was measured.
 
 `sigma_r0` is the Table 3 value per band (`NaN` at 63 Hz, which the
 table does not reach) and `sigma_r0_a` its A-weighted row; with
@@ -374,6 +378,15 @@ uncertainty (Eq. 23) for `coverage_factor`, all `NaN` without it.
 `source_positions` is $N_\mathrm{S}$, and
 `sound_power_level_a` / `sound_energy_level_a` are the Annex B totals
 of the level that was determined (`NaN` for the other).
+
+### HardWalledSoundPowerResult.background_requirement_met
+
+*property*
+
+Per band, whether both margins over the background reached the 6 dB of 4.5.
+
+`False` where no background was measured. Each margin is judged
+settled, as $K_1$ is read from it.
 
 ### HardWalledSoundPowerResult.expanded_uncertainty
 
@@ -508,6 +521,15 @@ unchanged: the total moves by `C2` too.
 
 `LW + C2` under the reference meteorological conditions (Eq. A.1);
 `NaN` for an energy determination.
+
+### HardWalledSoundPowerResult.upper_bound
+
+*property*
+
+Per band, whether 8.1.3 calls the level an upper bound.
+
+The margin of the source under test was measured and fell below
+6 dB while the reference source's margin met it.
 
 ## reproducibility_from_round_robin
 
@@ -691,10 +713,8 @@ SourceLocationPlan(
     source_locations: np.ndarray,
     additional_room_locations: np.ndarray,
     microphone_positions: int,
-    spectral_character: tuple[str, ...] | None = None,
     a_weighted_standard_deviation_db: float = nan,
     a_weighted_source_locations: int = 0,
-    a_weighted_spectral_character: str | None = None,
 )
 ```
 
@@ -716,7 +736,15 @@ Part 2's Table 3.
 band, `'broadband'`, `'narrow-band'` or `'discrete tone'`, and
 `None` for Part 1, which draws no such conclusion. The `a_weighted_...`
 fields are the same for the A-weighted row of Part 2 when A-weighted
-levels were surveyed, `NaN`, 0 and `None` otherwise.
+levels were surveyed, `NaN`, 0 and `None` otherwise. The two spectral
+characters are read from the deviations and the 2,3 dB and 4 dB of 9.5,
+so they are read-only properties and not fields.
+
+### SourceLocationPlan.a_weighted_spectral_character
+
+*property*
+
+The 9.5 reading of the A-weighted deviation, or `None` without one.
 
 ### SourceLocationPlan.other_room_required
 
@@ -757,3 +785,12 @@ Requires matplotlib (`pip install phonometry[plot]`).
 The largest $N_\mathrm{S}$ any band (or the A-weighted row)
 asks for in the test room, which is the number a single determination
 covering them all has to use.
+
+### SourceLocationPlan.spectral_character
+
+*property*
+
+Part 2's 9.5 reading of $s_\mathrm{M}$ per band, or `None` for Part 1.
+
+`'broadband'` below 2,3 dB, `'narrow-band'` up to 4 dB and
+`'discrete tone'` above.

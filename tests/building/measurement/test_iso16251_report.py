@@ -206,7 +206,6 @@ def test_manual_result_without_ci_delta_omits_adaptation_term(tmp_path: Path) ->
     result = FloorCoveringImprovementResult(
         frequencies=_FREQS,
         improvement=_DELTA_L,
-        limited=np.zeros(16, dtype=bool),
         delta_lw=15,
         ci_delta=None,
     )

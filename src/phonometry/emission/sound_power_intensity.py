@@ -85,9 +85,10 @@ state alike (clause 9.2).
 
 from __future__ import annotations
 
+import math
 import warnings
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from dataclasses import KW_ONLY, dataclass
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -210,8 +211,14 @@ class SoundPowerIntensityResult(OwnsArrays):
     a second scan; it is :math:`+\infty` where the two sweeps reverse the flow
     direction on a segment (opposite-sign partial powers), a gross
     non-repeatability that criterion 3 must reject even when the magnitudes
-    happen to match. ``dynamic_capability_index`` is ``Ld`` for the requested
-    grade. ``achieved_grade`` is the per-band class ``'engineering'``/
+    happen to match. ``pressure_residual_index_db`` is the
+    :math:`\delta_{pI0}` of the instrument per band, ``None`` when it was not
+    given, and ``dynamic_capability_index`` the ``Ld`` it gives for the
+    requested grade. ``repeatability_limit_db`` is the criterion-3 limit ``s``
+    the caller chose per band, ``None`` to read Table 2 by ``frequencies`` and
+    ``band_type``.
+
+    ``achieved_grade`` is the per-band class ``'engineering'``/
     ``'survey'``/``'none'`` (clause 8.4), ``None`` when the qualifying inputs
     (``delta_pI0`` and a second scan) are absent. ``sound_power_level_a`` is the
     A-weighted total over determinable bands (``NaN`` without ``frequencies``
@@ -220,24 +227,21 @@ class SoundPowerIntensityResult(OwnsArrays):
     ``a_weighting_omitted_bands`` flags the bands so omitted (per band,
     ``True`` = omitted); it is ``None`` when the criteria inputs
     (``pressure_levels`` and ``pressure_residual_index``) are absent, in which
-    case every determinable band is summed and a warning is emitted.
+    case every determinable band is summed and a warning is emitted. The
+    verdicts, the totals and the indicators read from the partial powers are
+    read-only properties, worked out from the fields and the limits Annex B
+    prints, so they are not fields.
     """
 
     frequencies: np.ndarray | None
     partial_power: np.ndarray
-    partial_power_level: np.ndarray
-    sound_power: np.ndarray
-    sound_power_level: np.ndarray
-    negative_band: np.ndarray
     surface_pressure_intensity_index: np.ndarray | None
-    negative_partial_power_index: np.ndarray | None
     repeatability: np.ndarray | None
-    dynamic_capability_index: np.ndarray | None
-    achieved_grade: np.ndarray | None
+    pressure_residual_index_db: np.ndarray | None
     surface_area: float
-    sound_power_level_a: float
-    a_weighting_omitted_bands: np.ndarray | None
+    band_type: str
     grade: str
+    repeatability_limit_db: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -259,47 +263,146 @@ class SoundPowerIntensityResult(OwnsArrays):
         totals. An unpinned surface reached the boxed result of the sheet as
         the literal "Measurement surface S = nan m2".
 
+        The per-band grade is read here, once: it needs the criterion-3
+        limit ``s``, from the caller or from Table 2, and a determination
+        whose bands Table 2 does not tabulate is refused where it is built
+        rather than where the grade is first read.
+
         :raises ValueError: if any per-band quantity disagrees with the rest,
-            or ``surface_area`` is not finite.
+            ``surface_area`` is not finite, the grade or the band type is
+            unknown, or the grade needs a limit ``s`` nothing gives.
         """
+        _check_grade(self.grade)
+        if self.band_type not in ("octave", "third"):
+            msg = "'band_type' must be 'octave' or 'third'."
+            raise ValueError(msg)
         require_ranks(
             self,
             frequencies=1,
             partial_power=2,
-            partial_power_level=2,
-            sound_power=1,
-            sound_power_level=1,
-            negative_band=1,
             surface_pressure_intensity_index=1,
-            negative_partial_power_index=1,
             repeatability=2,
-            dynamic_capability_index=1,
-            achieved_grade=1,
-            a_weighting_omitted_bands=1,
+            pressure_residual_index_db=1,
+            repeatability_limit_db=1,
         )
         require_same_length(
             self,
             "frequencies",
             ("partial_power", 1),
-            ("partial_power_level", 1),
-            "sound_power",
-            "sound_power_level",
-            "negative_band",
             "surface_pressure_intensity_index",
-            "negative_partial_power_index",
             ("repeatability", 1),
-            "dynamic_capability_index",
-            "achieved_grade",
-            "a_weighting_omitted_bands",
+            "pressure_residual_index_db",
+            "repeatability_limit_db",
         )
         require_same_length(
             self,
             "partial_power",
-            "partial_power_level",
             "repeatability",
             axis="measurement segment",
         )
         require_finite_fields(self, "surface_area")
+        self.__dict__["_achieved_grade"] = self._grade_per_band()
+
+    @property
+    def partial_power_level(self) -> np.ndarray:
+        r"""The magnitude level :math:`10 \log_{10}(|P_i|/P_0)` (Eq. 8), per segment and band."""
+        return _level_magnitude(np.asarray(self.partial_power, dtype=np.float64))
+
+    @property
+    def sound_power(self) -> np.ndarray:
+        r"""The signed band total :math:`P = \sum P_i` (Eq. 6), in watts."""
+        return np.asarray(np.sum(self.partial_power, axis=0), dtype=np.float64)
+
+    @property
+    def negative_band(self) -> np.ndarray:
+        """Per band, whether the net sound power is not positive (clause 9.2).
+
+        The sign is judged on the settled share of the gross power, so partial
+        powers that cancel in decimal are no net power whichever way the last
+        bits of their sum fall.
+        """
+        return np.asarray(
+            settled_net_share(self.partial_power, axis=0) <= 0.0, dtype=bool
+        )
+
+    @property
+    def sound_power_level(self) -> np.ndarray:
+        r"""The band level :math:`10 \log_{10}(P/P_0)` (Eq. 13), ``NaN`` where :math:`P \le 0`."""
+        with np.errstate(divide="ignore", invalid="ignore"):
+            level = np.where(
+                ~self.negative_band,
+                10.0
+                * np.log10(np.maximum(self.sound_power, np.finfo(float).tiny) / _W0),
+                np.nan,
+            )
+        return np.asarray(level, dtype=np.float64)
+
+    @property
+    def negative_partial_power_index(self) -> np.ndarray:
+        r"""The negative-partial-power indicator :math:`F_{+/-}` (Eq. A.2), per band."""
+        return _negative_partial_power_index(self.partial_power)
+
+    @property
+    def dynamic_capability_index(self) -> np.ndarray | None:
+        r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade, or ``None``."""
+        if self.pressure_residual_index_db is None:
+            return None
+        return np.array(
+            [
+                dynamic_capability_index(float(d), _K[self.grade])
+                for d in self.pressure_residual_index_db
+            ],
+            dtype=np.float64,
+        )
+
+    def _grade_per_band(self) -> np.ndarray | None:
+        fpi = self.surface_pressure_intensity_index
+        dpi0 = self.pressure_residual_index_db
+        if fpi is None or dpi0 is None or self.repeatability is None:
+            return None
+        return _classify(
+            np.asarray(fpi, dtype=np.float64),
+            self.negative_partial_power_index,
+            np.asarray(self.repeatability, dtype=np.float64),
+            np.asarray(dpi0, dtype=np.float64),
+            self.negative_band,
+            self.frequencies,
+            cast("BandType", self.band_type),
+            self.repeatability_limit_db,
+        )
+
+    @property
+    def achieved_grade(self) -> np.ndarray | None:
+        r"""The per-band class Annex B grants (clause 8.4), or ``None``.
+
+        One of ``'engineering'``, ``'survey'`` and ``'none'`` per band, read
+        from the indicators, the repeatability and :math:`\delta_{pI0}`
+        against criteria 1 to 3.
+        """
+        grade: np.ndarray | None = self.__dict__["_achieved_grade"]
+        return None if grade is None else grade.copy()
+
+    @property
+    def a_weighting_omitted_bands(self) -> np.ndarray | None:
+        """The bands clause 10.6 b keeps out of the A-weighted total, or ``None``."""
+        return _a_weighting_omission(
+            self.surface_pressure_intensity_index,
+            self.dynamic_capability_index,
+            self.negative_partial_power_index,
+            self.grade,
+            self.negative_band,
+        )
+
+    @property
+    def sound_power_level_a(self) -> float:
+        """The A-weighted total over the determinable, qualified bands, in dB."""
+        return _a_weighted_total(
+            self.sound_power_level,
+            self.negative_band,
+            self.a_weighting_omitted_bands,
+            self.frequencies,
+            int(np.shape(self.partial_power)[1]),
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -526,19 +629,12 @@ def sound_power_intensity(
         mean_intensity = intensity
 
     partial_power = mean_intensity * seg[:, None]  # Eq. 12
-    partial_power_level = _level_magnitude(partial_power)  # Eq. 8 (magnitude)
     total_power = np.sum(partial_power, axis=0)  # Eq. 6
+    s_total = float(np.sum(seg))
     # The sign of the net power is judged on its settled share of the gross,
     # so partial powers that cancel in decimal are no net power whichever way
     # the last bits of their sum fall.
     negative_band = settled_net_share(partial_power, axis=0) <= 0.0
-    with np.errstate(divide="ignore", invalid="ignore"):
-        sound_power_level = np.where(
-            ~negative_band,
-            10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _W0),
-            np.nan,
-        )
-    s_total = float(np.sum(seg))
 
     # --- field indicators ----------------------------------------------------
     abs_total = np.abs(total_power)
@@ -556,22 +652,17 @@ def sound_power_intensity(
         )
 
     # Eq. A.2: negative-partial-power indicator F+/-.
-    sum_abs = np.sum(np.abs(partial_power), axis=0)
-    f_plus_minus = np.asarray(
-        10.0 * np.log10(np.maximum(sum_abs, np.finfo(float).tiny) / guarded_abs),
-        dtype=np.float64,
-    )
+    f_plus_minus = _negative_partial_power_index(partial_power)
 
-    # --- dynamic capability index Ld (reused from ISO 9614-1 machinery) -------
-    ld: np.ndarray | None = None
     dpi0_arr: np.ndarray | None = None
     if pressure_residual_index is not None:
         dpi0_arr = np.broadcast_to(
             np.asarray(pressure_residual_index, dtype=np.float64), (n_bands,)
-        ).astype(np.float64)
-        ld = np.array(
-            [dynamic_capability_index(float(d), _K[grade]) for d in dpi0_arr],
-            dtype=np.float64,
+        )
+    s_arr: np.ndarray | None = None
+    if repeatability_limit is not None:
+        s_arr = np.broadcast_to(
+            np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
         )
 
     # --- warnings ------------------------------------------------------------
@@ -597,43 +688,41 @@ def sound_power_intensity(
             stacklevel=2,
         )
 
-    # --- achieved grade per band (clause 8.4) --------------------------------
-    achieved_grade: np.ndarray | None = None
-    if fpi is not None and ld is not None and repeatability is not None:
-        achieved_grade = _classify(
-            fpi,
-            f_plus_minus,
-            repeatability,
-            dpi0_arr,  # type: ignore[arg-type]
-            negative_band,
-            frequencies,
-            band_type,
-            repeatability_limit,
-        )
-
-    # --- A-weighted total over determinable, qualified bands (10.6 b) --------
-    omitted = _a_weighting_omission(fpi, ld, f_plus_minus, grade, negative_band)
-    lwa = _a_weighted_total(
-        sound_power_level, negative_band, omitted, frequencies, n_bands
-    )
-
     freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
-    return SoundPowerIntensityResult(
+    # The per-band grade (clause 8.4), the A-weighted screening (10.6 b) and
+    # the A-weighted total are read by the result from these fields.
+    result = SoundPowerIntensityResult(
         frequencies=freqs,
-        partial_power=partial_power,
-        partial_power_level=partial_power_level,
-        sound_power=np.asarray(total_power, dtype=np.float64),
-        sound_power_level=np.asarray(sound_power_level, dtype=np.float64),
-        negative_band=np.asarray(negative_band, dtype=bool),
+        partial_power=np.asarray(partial_power, dtype=np.float64),
         surface_pressure_intensity_index=fpi,
-        negative_partial_power_index=f_plus_minus,
         repeatability=repeatability,
-        dynamic_capability_index=ld,
-        achieved_grade=achieved_grade,
+        pressure_residual_index_db=dpi0_arr,
         surface_area=s_total,
-        sound_power_level_a=lwa,
-        a_weighting_omitted_bands=omitted,
+        band_type=band_type,
         grade=grade,
+        repeatability_limit_db=s_arr,
+    )
+    if freqs is not None and (fpi is None or dpi0_arr is None) and n_bands > 1:
+        warnings.warn(
+            "The A-weighted total sums every determinable band without "
+            "the ISO 9614-2:1996 clause 10.6 b screening (bands failing "
+            "criteria 1 and/or 2 must be omitted); supply "
+            "'pressure_levels' and 'pressure_residual_index' to "
+            "evaluate the criteria.",
+            SoundPowerWarning,
+            stacklevel=2,
+        )
+    return result
+
+
+def _negative_partial_power_index(partial_power: np.ndarray) -> np.ndarray:
+    r"""The negative-partial-power indicator :math:`F_{+/-}` (Eq. A.2), per band."""
+    total = np.abs(np.sum(partial_power, axis=0))
+    guarded = np.maximum(total, np.finfo(float).tiny)
+    sum_abs = np.sum(np.abs(partial_power), axis=0)
+    return np.asarray(
+        10.0 * np.log10(np.maximum(sum_abs, np.finfo(float).tiny) / guarded),
+        dtype=np.float64,
     )
 
 
@@ -658,7 +747,9 @@ def _classify(
         if frequencies is None:
             msg = (
                 "The achieved grade needs the criterion-3 limit s: provide "
-                "'frequencies' (Table 2 lookup) or 'repeatability_limit'."
+                "'frequencies' (Table 2 lookup) or the limit itself "
+                "('repeatability_limit' to sound_power_intensity, "
+                "'repeatability_limit_db' on the result)."
             )
             raise ValueError(msg)
         nominal = [round(float(f)) for f in np.asarray(frequencies)]
@@ -726,25 +817,12 @@ def _a_weighted_total(
     Sums the determinable bands (net power :math:`P > 0`, clause 9.2) minus the
     bands omitted per clause 10.6 b (criteria 1 and/or 2 failed). When the
     screening could not be evaluated (``omitted`` is ``None``) every
-    determinable band is summed and a :class:`SoundPowerWarning` is emitted.
+    determinable band is summed; :func:`sound_power_intensity` warns about it.
     """
     determinable = ~negative_band
     if frequencies is not None:
         freqs = np.asarray(frequencies, dtype=np.float64)
-        if freqs.shape[0] != n_bands:
-            raise ValueError(_FREQUENCIES_BAND_COUNT_MSG)
-        if omitted is None:
-            if n_bands > 1:
-                warnings.warn(
-                    "The A-weighted total sums every determinable band without "
-                    "the ISO 9614-2:1996 clause 10.6 b screening (bands failing "
-                    "criteria 1 and/or 2 must be omitted); supply "
-                    "'pressure_levels' and 'pressure_residual_index' to "
-                    "evaluate the criteria.",
-                    SoundPowerWarning,
-                    stacklevel=3,
-                )
-        else:
+        if omitted is not None:
             determinable = determinable & ~omitted
         ck = _a_weighting_corrections(freqs)
         contrib = 10.0 ** (0.1 * (sound_power_level + ck))
@@ -818,7 +896,12 @@ class PrecisionFieldIndicators(OwnsArrays):
 class PrecisionCriteria(OwnsArrays):
     r"""ISO 9614-3:2002 Annex C acceptance criteria (per band, pass/fail).
 
-    Each attribute is a boolean array (True = satisfied) or ``None`` when its
+    The check holds the readings the five criteria compare, and each
+    criterion is read from them and the limit Annex C prints, so none of them
+    is a field: a criteria set cannot be built to qualify a band its readings
+    do not qualify.
+
+    Each criterion is a boolean array (True = satisfied) or ``None`` when its
     inputs are absent. ``criterion_1`` scan repeatability
     :math:`\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2` (Eq. C.1);
     ``criterion_2`` dynamic-capability
@@ -833,55 +916,185 @@ class PrecisionCriteria(OwnsArrays):
     or, where evaluated, criterion 5 (C.1.6.2: a band satisfying criterion 5
     is qualified as a final result even if :math:`F_\mathrm{S}(2) \ge 2`); ``None``
     unless both criterion 1 and criterion 2 are evaluable.
+
+    :ivar indicators: The :class:`PrecisionFieldIndicators`, which give
+        criteria 3 and 4.
+    :ivar scan_intensity_level_1: ``LIn(1)`` per band, in dB, or ``None``.
+    :ivar scan_intensity_level_2: ``LIn(2)`` per band, in dB, or ``None``.
+    :ivar frequencies: Nominal mid-band frequencies per band, in Hz, from
+        which Table 1 gives the criterion-1 limit ``s``, or ``None``.
+    :ivar repeatability_limit_db: The caller's own ``s`` per band, in dB, in
+        place of Table 1, or ``None`` to read Table 1.
+    :ivar pressure_residual_index_db: ``delta_pI0`` per band, in dB, or
+        ``None``.
+    :ivar field_nonuniformity_1: ``FS(1)`` per band, or ``None``.
+    :ivar field_nonuniformity_2: ``FS(2)`` per band, or ``None``.
     """
 
-    criterion_1: np.ndarray | None
-    criterion_2: np.ndarray | None
-    criterion_3: np.ndarray
-    criterion_4: np.ndarray
-    criterion_5: np.ndarray | None
-    qualified: np.ndarray | None
+    indicators: PrecisionFieldIndicators
+    scan_intensity_level_1: np.ndarray | None = None
+    scan_intensity_level_2: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
+    repeatability_limit_db: np.ndarray | None = None
+    pressure_residual_index_db: np.ndarray | None = None
+    field_nonuniformity_1: np.ndarray | None = None
+    field_nonuniformity_2: np.ndarray | None = None
 
     def __post_init__(self) -> None:
-        """Reject a verdict set whose criteria do not span the same bands.
+        """Reject readings that do not span the bands of the indicators.
 
-        ``qualified`` is the conjunction of the others, and a conjunction is
-        taken with numpy's broadcasting: a criterion carrying a single value
-        decides every band at once. :func:`precision_qualification` reaches
-        that state on its own: it forms criterion 1 from the scan intensity
-        levels and the Table 1 limit read from ``frequencies``, and the rest
-        from the indicators, without comparing the two sets, so a
-        repeatability pair read on a single band leaves criterion 1 one band
-        long and ``qualified`` as long as the indicators, every band of it
-        decided by that one. The fiche is not where this surfaces:
-        ``PrecisionIntensityResult.report`` refuses a criteria set that does
-        not span the determination and names the criterion. What the
-        broadcast verdict reaches is ``qualified`` itself, at full length,
-        with nothing left in it to say that one band decided the rest. A
-        criterion is ``None`` when its inputs were not supplied, which is
-        not a disagreement.
+        Every criterion is a comparison taken with numpy's broadcasting: a
+        reading carrying a single value would decide every band at once, and
+        ``qualified`` would come back at full length with nothing left in it
+        to say that one band decided the rest. A reading is ``None`` when it
+        was not supplied, which is not a disagreement, but the two scans, and
+        the two densities, come together or not at all, and the scans need
+        their limit.
 
-        :raises ValueError: if two of the criteria span different numbers of
-            bands.
+        :raises ValueError: if a reading spans a different number of bands
+            than the indicators, or one of a pair is given without the other,
+            or the scans come without the limit ``s``.
         """
-        require_ranks(
-            self,
-            criterion_1=1,
-            criterion_2=1,
-            criterion_3=1,
-            criterion_4=1,
-            criterion_5=1,
-            qualified=1,
+        fields = (
+            "scan_intensity_level_1",
+            "scan_intensity_level_2",
+            "frequencies",
+            "repeatability_limit_db",
+            "pressure_residual_index_db",
+            "field_nonuniformity_1",
+            "field_nonuniformity_2",
         )
-        require_same_length(
-            self,
-            "criterion_1",
-            "criterion_2",
-            "criterion_3",
-            "criterion_4",
-            "criterion_5",
-            "qualified",
+        require_ranks(self, **dict.fromkeys(fields, 1))
+        n_bands = int(np.shape(self.indicators.f_pi_signed)[0])
+        for name in fields:
+            value = getattr(self, name)
+            if value is not None and np.shape(value) != (n_bands,):
+                msg = (
+                    f"PrecisionCriteria: '{name}' must carry one value per band "
+                    f"({n_bands} in 'indicators.f_pi_signed'); got shape "
+                    f"{np.shape(value)}."
+                )
+                raise ValueError(msg)
+        for first, second in (
+            ("scan_intensity_level_1", "scan_intensity_level_2"),
+            ("field_nonuniformity_1", "field_nonuniformity_2"),
+        ):
+            if (getattr(self, first) is None) != (getattr(self, second) is None):
+                msg = (
+                    f"PrecisionCriteria: '{first}' and '{second}' are one "
+                    "criterion's two readings and are given together or not at all."
+                )
+                raise ValueError(msg)
+        if (
+            self.scan_intensity_level_1 is not None
+            and self.frequencies is None
+            and self.repeatability_limit_db is None
+        ):
+            msg = (
+                "Criterion 1 needs the limit s: provide 'frequencies' (Table 1) "
+                "or 'repeatability_limit_db'."
+            )
+            raise ValueError(msg)
+        if (
+            self.scan_intensity_level_1 is not None
+            and self.repeatability_limit_db is None
+            and self.frequencies is not None
+        ):
+            # Table 1 is read for the scans it judges, once here, so a band it
+            # does not print is refused when the criteria are built.
+            _table_1_repeatability_db(self.frequencies)
+
+    @property
+    def criterion_1_limit_db(self) -> np.ndarray | None:
+        """The criterion-1 limit ``s`` per band, in dB.
+
+        The caller's :attr:`repeatability_limit_db`, or ISO 9614-3 Table 1 read
+        from :attr:`frequencies`; ``None`` with neither.
+
+        :raises ValueError: if Table 1 is read and does not print a band.
+        """
+        if self.repeatability_limit_db is not None:
+            return np.asarray(self.repeatability_limit_db, dtype=np.float64)
+        if self.frequencies is None:
+            return None
+        return _table_1_repeatability_db(self.frequencies)
+
+    @property
+    def criterion_1(self) -> np.ndarray | None:
+        r"""Scan repeatability :math:`\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2` (Eq. C.1).
+
+        Judged settled, so a difference on the limit in decimal is on it.
+        """
+        l1, l2 = self.scan_intensity_level_1, self.scan_intensity_level_2
+        if l1 is None or l2 is None:
+            return None
+        s = self.criterion_1_limit_db
+        if s is None:
+            return None
+        return np.asarray(settled(np.abs(l1 - l2) - s / 2.0) <= 0.0, dtype=bool)
+
+    @property
+    def criterion_2(self) -> np.ndarray | None:
+        r"""Dynamic capability :math:`L_\mathrm{d} = \delta_{pI0} - K \ge F_{pI_\mathrm{n}}^{\mathrm{signed}}` (Eq. C.2)."""
+        if self.pressure_residual_index_db is None:
+            return None
+        ld = self.pressure_residual_index_db - _K_9614_3
+        return np.asarray(ld >= self.indicators.f_pi_signed, dtype=bool)
+
+    @property
+    def criterion_3(self) -> np.ndarray:
+        r""":math:`F_{pI_\mathrm{n}}^{\mathrm{signed}} - F_{pI_\mathrm{n}}^{\mathrm{unsigned}} \le 3` dB (Eq. C.3)."""
+        indicators = self.indicators
+        difference = indicators.f_pi_signed - indicators.f_pi_unsigned
+        return np.asarray(difference <= _F_PI_DIFF_LIMIT, dtype=bool)
+
+    @property
+    def criterion_4(self) -> np.ndarray:
+        r"""Field non-uniformity :math:`F_\mathrm{S} \le 2` (Eq. C.4)."""
+        return np.asarray(self.indicators.fs <= _FS_LIMIT, dtype=bool)
+
+    @property
+    def criterion_5(self) -> np.ndarray | None:
+        r"""Scan-density convergence :math:`0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2` (Eq. C.5).
+
+        Judged settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
+        in binary, and the criterion includes 1,2.
+        """
+        fs1, fs2 = self.field_nonuniformity_1, self.field_nonuniformity_2
+        if fs1 is None or fs2 is None:
+            return None
+        with np.errstate(divide="ignore", invalid="ignore"):
+            ratio = settled(fs1 / fs2)
+        return np.asarray(
+            (ratio >= _FS_RATIO_LOW) & (ratio <= _FS_RATIO_HIGH), dtype=bool
         )
+
+    @property
+    def qualified(self) -> np.ndarray | None:
+        """Whether each band qualifies as a final result (C.1.6.2).
+
+        Criteria 1 to 3 with the field non-uniformity accepted through
+        criterion 4 or, where evaluated, criterion 5; ``None`` unless both
+        criterion 1 and criterion 2 are evaluable.
+        """
+        criterion_1, criterion_2 = self.criterion_1, self.criterion_2
+        if criterion_1 is None or criterion_2 is None:
+            return None
+        criterion_5 = self.criterion_5
+        non_uniformity_ok = (
+            self.criterion_4
+            if criterion_5 is None
+            else (self.criterion_4 | criterion_5)
+        )
+        return np.asarray(
+            criterion_1 & criterion_2 & self.criterion_3 & non_uniformity_ok, dtype=bool
+        )
+
+
+def _table_1_repeatability_db(frequencies: np.ndarray) -> np.ndarray:
+    """The criterion-1 limit ``s`` of ISO 9614-3 Table 1 at each band centre, in dB."""
+    nominal = [round(float(f)) for f in frequencies]
+    return np.array([_sigma_r0_9614_3(f) for f in nominal], dtype=np.float64)
 
 
 def _check_report_bands(
@@ -950,18 +1163,20 @@ class PrecisionIntensityResult(OwnsArrays):
     :math:`L_W = 10 \log_{10}(P/P_0)` (Eq. 9), ``NaN``
     where :math:`P \le 0` (``not_applicable_band`` True, clause 9.2).
     ``sound_power_level_normalized`` is ``LW0`` normalized to 23 deg C /
-    101 325 Pa (Eq. 10). ``sound_power_level_a`` is the A-weighted total over
-    applicable bands (``NaN`` without ``frequencies`` and more than one band).
+    101 325 Pa (Eq. 10) from the air temperature ``temperature_c`` and the
+    barometric pressure ``barometric_pressure_pa`` of the measurement.
+    ``sound_power_level_a`` is the A-weighted total over applicable bands
+    (``NaN`` without ``frequencies`` and more than one band). Everything read
+    from the partial powers is a read-only property, so the totals, the levels
+    and the clause 9.2 flag are not fields.
     """
 
     frequencies: np.ndarray | None
     partial_power: np.ndarray
-    sound_power: np.ndarray
-    sound_power_level: np.ndarray
-    sound_power_level_normalized: np.ndarray
-    not_applicable_band: np.ndarray
     surface_area: float
-    sound_power_level_a: float
+    _: KW_ONLY
+    temperature_c: float = 23.0
+    barometric_pressure_pa: float = 101325.0
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -996,25 +1211,60 @@ class PrecisionIntensityResult(OwnsArrays):
         :raises ValueError: if any per-band quantity disagrees with the rest,
             or ``surface_area`` is not finite.
         """
-        require_ranks(
-            self,
-            frequencies=1,
-            partial_power=2,
-            sound_power=1,
-            sound_power_level=1,
-            sound_power_level_normalized=1,
-            not_applicable_band=1,
-        )
-        require_same_length(
-            self,
-            "frequencies",
-            ("partial_power", 1),
-            "sound_power",
-            "sound_power_level",
-            "sound_power_level_normalized",
-            "not_applicable_band",
-        )
+        require_ranks(self, frequencies=1, partial_power=2)
+        require_same_length(self, "frequencies", ("partial_power", 1))
         require_finite_fields(self, "surface_area")
+        require_above_absolute_zero(float(self.temperature_c), "temperature_c")
+        pressure = self.barometric_pressure_pa
+        if math.isnan(pressure) or pressure <= 0.0:
+            msg = "'barometric_pressure_pa' must be positive (Pa)."
+            raise ValueError(msg)
+
+    @property
+    def sound_power(self) -> np.ndarray:
+        r"""The signed band total :math:`P = \sum P_i` (Eq. 8), in watts."""
+        return np.asarray(np.sum(self.partial_power, axis=0), dtype=np.float64)
+
+    @property
+    def not_applicable_band(self) -> np.ndarray:
+        """Per band, whether the net sound power is not positive (clause 9.2).
+
+        Judged on the settled share of the gross power, as in ISO 9614-2.
+        """
+        return np.asarray(
+            settled_net_share(self.partial_power, axis=0) <= 0.0, dtype=bool
+        )
+
+    @property
+    def sound_power_level(self) -> np.ndarray:
+        r"""The band level :math:`L_W = 10 \log_{10}(P/P_0)` (Eq. 9), ``NaN`` where :math:`P \le 0`."""
+        with np.errstate(divide="ignore", invalid="ignore"):
+            level = np.where(
+                ~self.not_applicable_band,
+                10.0
+                * np.log10(np.maximum(self.sound_power, np.finfo(float).tiny) / _W0),
+                np.nan,
+            )
+        return np.asarray(level, dtype=np.float64)
+
+    @property
+    def sound_power_level_normalized(self) -> np.ndarray:
+        """``LW0``, the band level normalized to 23 deg C and 101 325 Pa (Eq. 10)."""
+        norm = 15.0 * np.log10(
+            (self.barometric_pressure_pa / 101325.0)
+            * (296.15 / (273.15 + self.temperature_c))
+        )
+        return np.asarray(self.sound_power_level - norm, dtype=np.float64)
+
+    @property
+    def sound_power_level_a(self) -> float:
+        """The A-weighted total over the applicable bands, in dB."""
+        return _precision_a_weighted_total(
+            self.sound_power_level,
+            self.not_applicable_band,
+            self.frequencies,
+            int(np.shape(self.partial_power)[1]),
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1306,14 +1556,12 @@ def precision_qualification(
 
     freqs = _checked_band_centres(frequencies, f_pi_signed, n_bands)
 
-    # Criteria 3 and 4 are always available from the indicators.
-    criterion_3 = np.asarray(
-        (f_pi_signed - indicators.f_pi_unsigned) <= _F_PI_DIFF_LIMIT, dtype=bool
-    )
-    criterion_4 = np.asarray(indicators.fs <= _FS_LIMIT, dtype=bool)
-
-    # Criterion 1: |LIn(1) - LIn(2)| <= s/2.
-    criterion_1: np.ndarray | None = None
+    # Criterion 1 reads |LIn(1) - LIn(2)| against s/2.
+    l1 = l2 = s = None
+    if repeatability_limit is not None:
+        s = np.broadcast_to(
+            np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
+        )
     if scan_intensity_level_1 is not None and scan_intensity_level_2 is not None:
         l1 = require_per_band(
             scan_intensity_level_1,
@@ -1327,59 +1575,35 @@ def precision_qualification(
             f_pi_signed,
             "indicators.f_pi_signed",
         )
-        if repeatability_limit is not None:
-            s = np.broadcast_to(
-                np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
-            ).astype(np.float64)
-        elif freqs is not None:
-            nominal = [round(float(f)) for f in freqs]
-            s = np.array([_sigma_r0_9614_3(f) for f in nominal], dtype=np.float64)
-        else:
+        if s is None and freqs is None:
             msg = (
                 "Criterion 1 needs the limit s: provide 'frequencies' (Table 1) "
                 "or 'repeatability_limit'."
             )
             raise ValueError(msg)
-        criterion_1 = np.asarray(settled(np.abs(l1 - l2) - s / 2.0) <= 0.0, dtype=bool)
 
-    # Criterion 2: Ld >= F_pIn(signed), Ld = delta_pI0 - K.
-    criterion_2: np.ndarray | None = None
+    # Criterion 2 reads Ld = delta_pI0 - K against F_pIn(signed).
+    dpi0 = None
     if pressure_residual_index is not None:
         dpi0 = np.broadcast_to(
             np.asarray(pressure_residual_index, dtype=np.float64), (n_bands,)
-        ).astype(np.float64)
-        ld = dpi0 - _K_9614_3
-        criterion_2 = np.asarray(ld >= f_pi_signed, dtype=bool)
+        )
 
-    # Criterion 5: 0,83 <= FS(1)/FS(2) <= 1,2.
-    criterion_5: np.ndarray | None = None
+    # Criterion 5 reads FS(1)/FS(2).
+    fs1 = fs2 = None
     if field_nonuniformity_1 is not None and field_nonuniformity_2 is not None:
         fs1 = _spread_over_bands(field_nonuniformity_1, n_bands)
         fs2 = _spread_over_bands(field_nonuniformity_2, n_bands)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            # Settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
-            # in binary, and the criterion includes 1,2.
-            ratio = settled(fs1 / fs2)
-        criterion_5 = np.asarray(
-            (ratio >= _FS_RATIO_LOW) & (ratio <= _FS_RATIO_HIGH), dtype=bool
-        )
-
-    qualified: np.ndarray | None = None
-    if criterion_1 is not None and criterion_2 is not None:
-        # C.1.6.2: where the doubled-density scan satisfies criterion 5, the
-        # band qualifies as a final result even if FS(2) >= 2 fails criterion 4.
-        non_uniformity_ok = (
-            criterion_4 if criterion_5 is None else (criterion_4 | criterion_5)
-        )
-        qualified = criterion_1 & criterion_2 & criterion_3 & non_uniformity_ok
 
     return PrecisionCriteria(
-        criterion_1=criterion_1,
-        criterion_2=criterion_2,
-        criterion_3=criterion_3,
-        criterion_4=criterion_4,
-        criterion_5=criterion_5,
-        qualified=qualified,
+        indicators=indicators,
+        scan_intensity_level_1=l1,
+        scan_intensity_level_2=l2,
+        frequencies=freqs,
+        repeatability_limit_db=s,
+        pressure_residual_index_db=dpi0,
+        field_nonuniformity_1=fs1,
+        field_nonuniformity_2=fs2,
     )
 
 
@@ -1472,23 +1696,8 @@ def sound_power_intensity_precision(
         raise ValueError(_FREQUENCIES_BAND_COUNT_MSG)
 
     partial_power = intensity * seg[:, None]  # Eq. 5
-    total_power = np.sum(partial_power, axis=0)  # Eq. 8
     # Judged on the settled share of the gross power, as in ISO 9614-2.
-    not_applicable = settled_net_share(partial_power, axis=0) <= 0.0
-    with np.errstate(divide="ignore", invalid="ignore"):
-        lw = np.where(
-            ~not_applicable,
-            10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _W0),
-            np.nan,
-        )
-
-    # Eq. 10: meteorological normalization to 23 deg C / 101 325 Pa.
-    norm = 15.0 * np.log10(
-        (barometric_pressure_pa / 101325.0) * (296.15 / (273.15 + temperature_c))
-    )
-    lw0 = lw - norm
-
-    if np.any(not_applicable):
+    if np.any(settled_net_share(partial_power, axis=0) <= 0.0):
         warnings.warn(
             "Net sound power is non-positive in one or more bands; ISO "
             "9614-3:2002 is not applicable to those bands (clause 9.2).",
@@ -1496,17 +1705,13 @@ def sound_power_intensity_precision(
             stacklevel=2,
         )
 
-    # A-weighted total over applicable bands (clause 9.2 / 4.3).
+    # The levels, LW0 (Eq. 10) and the A-weighted total over the applicable
+    # bands (clause 9.2 / 4.3) are read by the result from these fields.
     freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
-    lwa = _precision_a_weighted_total(lw, not_applicable, freqs, n_bands)
-
     return PrecisionIntensityResult(
         frequencies=freqs,
         partial_power=np.asarray(partial_power, dtype=np.float64),
-        sound_power=np.asarray(total_power, dtype=np.float64),
-        sound_power_level=np.asarray(lw, dtype=np.float64),
-        sound_power_level_normalized=np.asarray(lw0, dtype=np.float64),
-        not_applicable_band=np.asarray(not_applicable, dtype=bool),
         surface_area=float(np.sum(seg)),
-        sound_power_level_a=lwa,
+        temperature_c=float(temperature_c),
+        barometric_pressure_pa=float(barometric_pressure_pa),
     )

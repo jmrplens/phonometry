@@ -21,31 +21,58 @@ and is not repeated here.
 
 ```python
 AircraftSystemComplianceResult(
-    passes: bool,
-    checks: tuple[dict[str, Any], ...],
+    directional: Mapping[float, Mapping[float, float]] | None = None,
+    frequency_response: Mapping[float, float] | None = None,
+    linearity: Mapping[str, float] | None = None,
+    resolution: float | None = None,
 )
 ```
 
 IEC 61265:1995 verdict on an aircraft-noise measurement chain.
 
-What [`verify_aircraft_noise_system`](/phonometry/reference/api/aeroacoustics/measurement-system/#verify_aircraft_noise_system) returns: the verdict together
-with the individual checks it is the conjunction of.
+What [`verify_aircraft_noise_system`](/phonometry/reference/api/aeroacoustics/measurement-system/#verify_aircraft_noise_system) returns: the measurements it
+was given, each as a read-only copy. The checks are read from them and
+the limits the standard prints, and the verdict from the checks, so
+neither is a field: a result cannot state a limit or a pass its
+measurements do not reach.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `passes` | Whether every supplied measurement met its limit. |
-| `checks` | One entry per checked quantity, `{"quantity", "limit", "value", "ok", ...}`, as an immutable tuple. |
+| `directional` | The microphone directional response, `{frequency_hz: {angle_deg: \|Δsensitivity\| dB}}` (Table 1, 4.4.2), or `None` when it was not measured. |
+| `frequency_response` | The system response deviations `{frequency_hz: deviation_db}` (4.5.1), or `None`. |
+| `linearity` | The level non-linearity `{"reference": dB, "other": dB}` (4.5.2), or `None`. |
+| `resolution` | The readout resolution, in dB (4.7), or `None`. |
+
+### AircraftSystemComplianceResult.checks
+
+*property*
+
+One read-only row per checked quantity, `{"quantity", "limit", "value", "ok", ...}`.
+
+The `limit` is the one the standard prints for the quantity (Table 1
+by frequency and angle, 1,5 dB, 0,4 dB or 0,5 dB, 0,1 dB) and `ok`
+whether the measured `value` is within it.
+
+### AircraftSystemComplianceResult.passes
+
+*property*
+
+Whether every supplied measurement met its limit.
+
+The chain is qualified by the conjunction of what was actually
+measured. A result that holds no measurement carries no check and
+does not pass: nothing was measured, so nothing was qualified.
 
 ## verify_aircraft_noise_system
 
 ```python
 verify_aircraft_noise_system(
     *,
-    directional: dict[float, dict[float, float]] | None = None,
-    frequency_response: dict[float, float] | None = None,
-    linearity: dict[str, float] | None = None,
+    directional: Mapping[float, Mapping[float, float]] | None = None,
+    frequency_response: Mapping[float, float] | None = None,
+    linearity: Mapping[str, float] | None = None,
     resolution: float | None = None,
 ) -> AircraftSystemComplianceResult
 ```

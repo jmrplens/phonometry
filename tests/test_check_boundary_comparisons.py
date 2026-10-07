@@ -217,7 +217,7 @@ class _Unsettle(ast.NodeTransformer):
             None,
         ),
         ("emission/sound_power_intensity_points.py", "_test_conditions_met", None),
-        ("noise_control/cabin_insulation.py", "uncertainty_conditions", None),
+        ("noise_control/cabin_insulation.py", "ratio_satisfied", None),
         ("emission/sound_power_in_situ.py", "_background_correction", None),
         ("hearing/real_ear_attenuation.py", "uniform", None),
         ("electroacoustics/headphones.py", "requirements", None),
@@ -458,6 +458,109 @@ def test_a_field_of_an_instance_built_in_place_is_followed(
         return abs(result.deviation_db) <= _TOLERANCE_DB
     """
     assert _texts(source, tmp_path) == ["abs(result.deviation_db) <= _TOLERANCE_DB"]
+
+
+def test_a_helper_handed_self_reads_the_fields_as_the_class(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``__post_init__`` that hands ``self`` to a helper has it read the fields."""
+    source = """
+    from dataclasses import dataclass
+    _TOLERANCE_DB = 0.5
+    @dataclass(frozen=True)
+    class Check:
+        deviation_db: float
+        def __post_init__(self):
+            object.__setattr__(self, "_verdict", _judge(self))
+    def _judge(check):
+        return abs(check.deviation_db) <= _TOLERANCE_DB
+    def check(measured, nominal):
+        return Check(deviation_db=measured - nominal)
+    """
+    assert _texts(source, tmp_path) == ["abs(check.deviation_db) <= _TOLERANCE_DB"]
+
+
+def test_a_helper_handed_another_value_is_not_read_as_the_class(
+    tmp_path: pathlib.Path,
+) -> None:
+    """One call that hands the helper something else leaves its parameter the caller's."""
+    source = """
+    from dataclasses import dataclass
+    _TOLERANCE_DB = 0.5
+    @dataclass(frozen=True)
+    class Check:
+        deviation_db: float
+        def __post_init__(self):
+            object.__setattr__(self, "_verdict", _judge(self))
+    def _judge(check):
+        return abs(check.deviation_db) <= _TOLERANCE_DB
+    def check(measured, nominal, other):
+        _judge(other)
+        return Check(deviation_db=measured - nominal)
+    """
+    assert _texts(source, tmp_path) == []
+
+
+def test_a_verdict_does_not_depend_on_which_comparison_is_read_first(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two fields built from each other are a cycle; reading it first must not hide one.
+
+    ``swapped`` builds ``f`` from ``g`` and ``g`` from ``f``. The property is
+    read first and reads ``f``, which reads ``g`` while ``f`` is still being
+    read, so ``g`` comes out of the cut cycle without the caller's decimal.
+    The helper read after it must still see that ``g`` carries the decimal
+    ``f`` is built from.
+    """
+    source = """
+    from dataclasses import dataclass
+    _TOLERANCE_DB = 0.5
+    @dataclass(frozen=True)
+    class Check:
+        f: float
+        g: float
+        def swapped(self):
+            return Check(f=self.g * 0.5, g=self.f * 2.0)
+        @property
+        def small(self):
+            return self.f * 2.0 < 1.0
+    def _judge(check):
+        for _ in range(1):
+            for _ in range(1):
+                return abs(check.g) <= _TOLERANCE_DB
+    def run(measured, nominal):
+        result = Check(f=measured - nominal, g=0.0)
+        return _judge(result)
+    """
+    assert _texts(source, tmp_path) == [
+        "self.f * 2.0 < 1.0",
+        "abs(check.g) <= _TOLERANCE_DB",
+    ]
+
+
+def test_an_unsettled_comparison_in_the_free_field_evaluation_is_refused() -> None:
+    """The ISO 3745 verdict runs from ``__post_init__`` through helpers handed ``self``.
+
+    A spread of the fitted radii judged against a limit, injected where the
+    band verdicts are read, is refused like any other.
+    """
+    path = (_SOURCE / "emission/free_field_qualification.py").resolve()
+    text = path.read_text(encoding="utf-8")
+    marker = "def _evaluate_free_field("
+    assert marker in text
+    head, tail = text.split(marker, 1)
+    signature, body = tail.split(":\n", 1)
+    injected = (
+        "    injected_spread = float(check.results[0].frequencies_hz[-1])"
+        " - float(check.results[0].frequencies_hz[0])\n"
+        "    if injected_spread >= _ORIGIN_RESOLUTION_M:\n"
+        "        pass\n"
+    )
+    mutated = head + marker + signature + ":\n" + injected + body
+    module = cbc.Package(_SOURCE, {path: mutated}).module(path)
+    assert module is not None
+    found = [f.text for f in module.findings()]
+    assert "injected_spread >= _ORIGIN_RESOLUTION_M" in found
 
 
 @pytest.mark.parametrize(

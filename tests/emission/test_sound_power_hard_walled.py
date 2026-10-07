@@ -189,6 +189,7 @@ def test_margin_of_the_source_below_6_db_is_an_upper_bound() -> None:
     background[0] = _energy_mean(ST, 0)[0] - 3.0
     with pytest.warns(emission.SoundPowerWarning, match="source under test.*upper"):
         res = _power(background_levels=background, background_levels_ref=BACKGROUND)
+    assert res.background_margin_db[0] == pytest.approx(3.0, abs=1e-9)
     assert not bool(res.background_requirement_met[0])
     assert bool(np.all(res.background_requirement_met[1:]))
     assert res.upper_bound.tolist() == [True] + [False] * 6
@@ -206,6 +207,7 @@ def test_reference_source_margin_fails_4_5_but_is_no_upper_bound() -> None:
     with pytest.warns(emission.SoundPowerWarning, match="not upper bounds"):
         res = _power(background_levels_ref=bg_ref)
     assert res.background_correction_ref[6] == pytest.approx(1.3)
+    assert res.background_margin_ref_db[6] == pytest.approx(4.0, abs=1e-9)
     assert not bool(res.background_requirement_met[6])
     assert not bool(np.any(res.upper_bound))
     expected = LW_RSS[6] - _energy_mean(RSS, 0)[6] + _energy_mean(ST, 0)[6] + 1.3

@@ -294,7 +294,9 @@ def test_the_headline_is_read_at_the_lowest_valid_line(tmp_path: Path) -> None:
 def test_a_result_with_no_valid_line_has_no_fiche(tmp_path: Path) -> None:
     pytest.importorskip("reportlab")
     pytest.importorskip("matplotlib")
-    res = dataclasses.replace(_direct_result(), valid=np.zeros(_FREQS.size, dtype=bool))
+    res = dataclasses.replace(
+        _direct_result(), transmissibility=np.full(_FREQS.size, 0.5 + 0j)
+    )
     out = str(tmp_path / "none.pdf")
     with pytest.raises(ValueError, match="no line meets the adequacy conditions"):
         res.report(out)

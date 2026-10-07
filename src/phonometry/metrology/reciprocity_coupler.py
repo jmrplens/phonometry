@@ -1686,45 +1686,103 @@ class CouplerCheck:
     r"""Whether the formulas of IEC 61094-2:2009 apply to a coupler at the
     frequencies and conditions of a calibration.
 
-    Built by :func:`check_coupler`.
+    Built by :func:`check_coupler`. The verdicts are read from the figures
+    and the conditions the check holds, against the ranges the standard
+    prints, so they are not fields.
 
     :ivar coupler: ``"plane_wave"`` or ``"large_volume"``.
     :ivar length_to_diameter_ratio: :math:`R`: for a plane-wave coupler the
         distance between the diaphragms, :math:`l_0`, over the diameter (C.2,
         5.4), for a large-volume one the length of the cavity over its
         diameter (A.2).
-    :ivar ratio_recommended: For a plane-wave coupler, whether :math:`R` is
-        within the 0,5 to 0,75 C.2 recommends; ``None`` for a large-volume one.
-        Advisory: it does not enter :attr:`passes`.
     :ivar broadband_margin: For a plane-wave coupler,
         :math:`\omega\rho a^2/(100\eta)` at the lowest frequency, which A.3
         requires above 1 for Formulas (A.3) and (A.4); ``None`` otherwise.
     :ivar lowest_x: For a large-volume coupler, :math:`X` at the lowest
         frequency; ``None`` otherwise. It binds only the approximation.
-    :ivar approximation_valid: For a large-volume coupler computed with
-        Formula (A.2), whether :math:`0{,}125 < R < 8` and :math:`X > 5`, where
-        A.2 states its accuracy; ``None`` with the full solution or for a
-        plane-wave coupler.
-    :ivar full_solution_advised: For a large-volume coupler computed with
-        Formula (A.2), whether a frequency is below 20 Hz, where A.2 asks for
-        the full solution "or the corresponding uncertainty component shall be
-        increased accordingly"; ``None`` with the full solution or for a
-        plane-wave coupler. Advisory: it does not enter :attr:`passes`,
-        because the larger uncertainty is the caller's to state.
-    :ivar conditions_valid: For air, whether the conditions are within the
-        domain Annex F states for its equations; ``None`` for another gas.
     :ivar lowest_frequency_hz: The lowest frequency of the calibration, in Hz.
+    :ivar heat_conduction_method: The method the calibration uses for
+        :math:`E_V`.
+    :ivar temperature_c: The temperature, in °C.
+    :ivar static_pressure_pa: The static pressure, in Pa.
+    :ivar relative_humidity_percent: The relative humidity, in %.
+    :ivar in_air: Whether the coupler is filled with air, the medium Annex F
+        states its domain for, rather than another gas.
     """
 
     coupler: str
     length_to_diameter_ratio: float
-    ratio_recommended: bool | None
     broadband_margin: float | None
     lowest_x: float | None
-    approximation_valid: bool | None
-    full_solution_advised: bool | None
-    conditions_valid: bool | None
     lowest_frequency_hz: float
+    _: KW_ONLY
+    heat_conduction_method: str
+    temperature_c: float
+    static_pressure_pa: float
+    relative_humidity_percent: float
+    in_air: bool
+
+    @property
+    def ratio_recommended(self) -> bool | None:
+        """For a plane-wave coupler, whether :math:`R` is within the 0,5 to 0,75 C.2 recommends.
+
+        ``None`` for a large-volume one. Advisory: it does not enter
+        :attr:`passes`.
+        """
+        if self.coupler != "plane_wave":
+            return None
+        return _within(self.length_to_diameter_ratio, _PLANE_WAVE_RATIO)
+
+    @property
+    def _approximation(self) -> bool:
+        return (
+            self.coupler == "large_volume"
+            and self.heat_conduction_method == "approximation"
+        )
+
+    @property
+    def approximation_valid(self) -> bool | None:
+        """For a large-volume coupler computed with Formula (A.2), whether A.2 states its accuracy.
+
+        :math:`0{,}125 < R < 8` and :math:`X > 5`; ``None`` with the full
+        solution or for a plane-wave coupler.
+        """
+        if not self._approximation or self.lowest_x is None:
+            return None
+        ratio = self.length_to_diameter_ratio
+        return (
+            _APPROXIMATION_RATIO[0] < ratio < _APPROXIMATION_RATIO[1]
+            and self.lowest_x > _APPROXIMATION_X
+        )
+
+    @property
+    def full_solution_advised(self) -> bool | None:
+        """For a large-volume coupler computed with Formula (A.2), whether a frequency is below 20 Hz.
+
+        A.2 then asks for the full solution "or the corresponding uncertainty
+        component shall be increased accordingly"; ``None`` with the full
+        solution or for a plane-wave coupler. Advisory: it does not enter
+        :attr:`passes`, because the larger uncertainty is the caller's to
+        state.
+        """
+        if not self._approximation:
+            return None
+        return self.lowest_frequency_hz < _APPROXIMATION_LOWEST_HZ
+
+    @property
+    def conditions_valid(self) -> bool | None:
+        """For air, whether the conditions are within the domain Annex F states for its equations.
+
+        15 °C to 27 °C, 60 kPa to 110 kPa and 10 % to 90 %, ends included;
+        ``None`` for another gas.
+        """
+        if not self.in_air:
+            return None
+        return (
+            _within(self.temperature_c, _ANNEX_F_TEMPERATURE_C)
+            and _within(self.static_pressure_pa, _ANNEX_F_PRESSURE_PA)
+            and _within(self.relative_humidity_percent, _ANNEX_F_HUMIDITY_PERCENT)
+        )
 
     @property
     def broadband_valid(self) -> bool | None:
@@ -1838,13 +1896,13 @@ def check_coupler(
     else:
         length = coupler.length_m
     ratio = length / coupler.diameter_m
-    conditions = None
-    if gas is None:
-        conditions = (
-            _within(temperature_c, _ANNEX_F_TEMPERATURE_C)
-            and _within(static_pressure_pa, _ANNEX_F_PRESSURE_PA)
-            and _within(relative_humidity_percent, _ANNEX_F_HUMIDITY_PERCENT)
-        )
+    conditions: dict[str, Any] = {
+        "heat_conduction_method": method,
+        "temperature_c": float(temperature_c),
+        "static_pressure_pa": float(static_pressure_pa),
+        "relative_humidity_percent": float(relative_humidity_percent),
+        "in_air": gas is None,
+    }
     if isinstance(coupler, PlaneWaveCoupler):
         radius = coupler.diameter_m / 2.0
         omega = 2.0 * math.pi * lowest
@@ -1857,13 +1915,10 @@ def check_coupler(
         return CouplerCheck(
             coupler="plane_wave",
             length_to_diameter_ratio=ratio,
-            ratio_recommended=_within(ratio, _PLANE_WAVE_RATIO),
             broadband_margin=margin,
             lowest_x=None,
-            approximation_valid=None,
-            full_solution_advised=None,
-            conditions_valid=conditions,
             lowest_frequency_hz=lowest,
+            **conditions,
         )
     volume, surface = _closed_cavity(coupler, pair)
     lowest_x = (
@@ -1871,23 +1926,13 @@ def check_coupler(
         * (volume / surface) ** 2
         / (medium.heat_capacity_ratio * medium.thermal_diffusivity)
     )
-    approximation = advised = None
-    if method == "approximation":
-        approximation = (
-            _APPROXIMATION_RATIO[0] < ratio < _APPROXIMATION_RATIO[1]
-            and lowest_x > _APPROXIMATION_X
-        )
-        advised = lowest < _APPROXIMATION_LOWEST_HZ
     return CouplerCheck(
         coupler="large_volume",
         length_to_diameter_ratio=ratio,
-        ratio_recommended=None,
         broadband_margin=None,
         lowest_x=lowest_x,
-        approximation_valid=approximation,
-        full_solution_advised=advised,
-        conditions_valid=conditions,
         lowest_frequency_hz=lowest,
+        **conditions,
     )
 
 

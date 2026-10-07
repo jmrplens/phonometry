@@ -86,7 +86,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -179,7 +179,12 @@ class InSituSoundPowerResult(OwnsArrays):
     for the source under test (Eq. 7; for ``N`` events measured one at a
     time it is the per-position shift the per-event corrections of Eq. 13
     produce in the mean of Eq. 15), ``background_correction_ref`` the same for
-    the reference source at each location (Eq. 9, 10), and
+    the reference source at each location (Eq. 9, 10).
+    ``background_margin_db`` and ``background_margin_ref_db`` are the smallest
+    margin over the background per band, of the source under test over its
+    positions (and events) and of the reference source over its locations and
+    positions, ``NaN`` where no background was measured; the two flags below
+    are read from them and the 6 dB of 8.1, so they are not fields.
     ``background_requirement_met`` is ``True`` only where a background level
     reached every position (7.5) and every margin over it was at least 6 dB.
     Clause 8.1 writes that margin for the source under test alone
@@ -196,11 +201,16 @@ class InSituSoundPowerResult(OwnsArrays):
     short is not one, since its capped correction pulls the level down; it
     is flagged by ``background_requirement_met`` alone.
 
-    ``grade`` is the accuracy grade Table 2 grants (``'engineering'`` or
-    ``'survey'``) and ``sigma_r0`` its typical reproducibility; ``sigma_omc``,
+    ``excess_levels_db`` and ``directivity_range_db`` are the two indicators
+    Table 2 grades the determination by, the A-weighted excess
+    :math:`\Delta L_{f\mathrm{A}}` at each microphone position and the
+    directivity range of the source, ``None`` where they were not determined.
+    ``grade`` is the accuracy grade Table 2 grants from them (``'engineering'``
+    or ``'survey'``) and ``sigma_r0`` its typical reproducibility; ``sigma_omc``,
     ``sigma_tot`` and ``expanded_uncertainty`` are the operating-and-mounting
     deviation, Eq. (22) and Eq. (23) for ``coverage_factor``, ``NaN`` when no
-    ``sigma_omc`` was supplied. ``sound_power_level_a`` and
+    ``sigma_omc`` was supplied. The grade and the three figures read from it
+    are read-only properties, so they are not fields. ``sound_power_level_a`` and
     ``sound_energy_level_a`` are the Annex D A-weighted totals of the level
     that was determined (``NaN`` for the other).
     """
@@ -214,14 +224,12 @@ class InSituSoundPowerResult(OwnsArrays):
     reference_power_level: np.ndarray
     background_correction: np.ndarray
     background_correction_ref: np.ndarray
-    background_requirement_met: np.ndarray
-    upper_bound: np.ndarray
+    background_margin_db: np.ndarray
+    background_margin_ref_db: np.ndarray
     c2: float
-    grade: str
-    sigma_r0: float
+    excess_levels_db: np.ndarray | None
+    directivity_range_db: float | None
     sigma_omc: float
-    sigma_tot: float
-    expanded_uncertainty: float
     coverage_factor: float
     sound_power_level_a: float
     sound_energy_level_a: float
@@ -233,7 +241,7 @@ class InSituSoundPowerResult(OwnsArrays):
 
         Every reader of this result indexes its arrays alongside each other:
         the plot draws one bar per ``frequencies`` entry from the level of
-        the same index and hatches it by ``background_requirement_met``, and
+        the same index and hatches it by :attr:`background_requirement_met`, and
         the two correction grids are read per position and per location. A
         quantity one entry short raises a bare ``IndexError`` downstream and
         one entry long is silently truncated, so the shapes are pinned here.
@@ -243,8 +251,12 @@ class InSituSoundPowerResult(OwnsArrays):
             disagrees with the rest in bands, positions or locations.
         """
         require_choice(self.quantity, "quantity", ("power", "energy"))
-        require_choice(self.grade, "grade", ("engineering", "survey"))
         require_positive(self.coverage_factor, "coverage_factor")
+        _check_grade_indicators(
+            self.excess_levels_db,
+            self.directivity_range_db,
+            int(np.shape(self.background_correction)[0]),
+        )
         require_ranks(
             self,
             frequencies=1,
@@ -256,8 +268,8 @@ class InSituSoundPowerResult(OwnsArrays):
             reference_power_level=1,
             background_correction=2,
             background_correction_ref=3,
-            background_requirement_met=1,
-            upper_bound=1,
+            background_margin_db=1,
+            background_margin_ref_db=1,
         )
         require_same_length(
             self,
@@ -270,8 +282,8 @@ class InSituSoundPowerResult(OwnsArrays):
             "reference_power_level",
             ("background_correction", 1),
             ("background_correction_ref", 2),
-            "background_requirement_met",
-            "upper_bound",
+            "background_margin_db",
+            "background_margin_ref_db",
         )
         owner = type(self).__name__
         require_equal_counts(
@@ -294,6 +306,61 @@ class InSituSoundPowerResult(OwnsArrays):
             },
             axis="microphone position",
         )
+
+    @property
+    def background_requirement_met(self) -> np.ndarray:
+        """Per band, whether every margin of both sources reached the 6 dB of 8.1.
+
+        ``False`` where no background was measured. The margins are judged
+        settled, as ``K1`` is read from them.
+        """
+        return np.asarray(
+            _margin_met(self.background_margin_db)
+            & _margin_met(self.background_margin_ref_db),
+            dtype=bool,
+        )
+
+    @property
+    def upper_bound(self) -> np.ndarray:
+        """Per band, whether 8.1 calls the level an upper bound.
+
+        The margin of the source under test was measured and fell below 6 dB
+        while the reference source's margin met it everywhere.
+        """
+        measured = np.isfinite(self.background_margin_db)
+        return np.asarray(
+            measured
+            & ~_margin_met(self.background_margin_db)
+            & _margin_met(self.background_margin_ref_db),
+            dtype=bool,
+        )
+
+    @property
+    def grade(self) -> str:
+        """The accuracy grade Table 2 grants, ``'engineering'`` or ``'survey'``.
+
+        Engineering only with an excess of at least 7 dB at every position and
+        a directivity range within 7 dB; survey whenever either indicator
+        fails or was not determined.
+        """
+        return _grade_from(self.excess_levels_db, self.directivity_range_db)
+
+    @property
+    def sigma_r0(self) -> float:
+        """The typical reproducibility of Table 2 at :attr:`grade`, in dB."""
+        return _SIGMA_R0_DB[cast("Grade", self.grade)]
+
+    @property
+    def sigma_tot(self) -> float:
+        r"""Eq. (22), :math:`\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}`, ``NaN`` without ``sigma_omc``."""
+        if np.isnan(self.sigma_omc):
+            return float("nan")
+        return float(np.sqrt(self.sigma_r0**2 + self.sigma_omc**2))
+
+    @property
+    def expanded_uncertainty(self) -> float:
+        """Eq. (23), ``coverage_factor`` times :attr:`sigma_tot`, in dB."""
+        return float(self.coverage_factor * self.sigma_tot)
 
     @property
     def sound_power_level_ref(self) -> np.ndarray:
@@ -455,6 +522,15 @@ def _background_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
 
 
+def _margin_met(margin: np.ndarray) -> np.ndarray:
+    """Where a smallest margin over the background reached 6 dB, judged settled.
+
+    A band with no background measured carries a ``NaN`` margin and is not met.
+    """
+    with np.errstate(invalid="ignore"):
+        return np.asarray(settled(margin) >= _K1_VALID_DB, dtype=bool)
+
+
 def _finite_grid(value: ArrayLike, name: str, ndim: tuple[int, ...]) -> np.ndarray:
     """A finite float array of one of the admissible ranks, or a refusal
     naming the argument.
@@ -576,57 +652,68 @@ class GradeConditions(OwnsArrays):
     directivity_range: float | None = None
 
 
-def _accuracy_grade(conditions: GradeConditions | None, n_positions: int) -> Grade:
+def _grade_indicators(
+    conditions: GradeConditions | None, n_positions: int
+) -> tuple[np.ndarray | None, float | None]:
+    """The two Table 2 indicators, each checked on its own as soon as it is supplied.
+
+    A mis-shaped or nonsensical indicator is refused rather than silently
+    downgrading the determination to grade 3; only a genuinely undetermined
+    indicator (``None``) falls through to survey.
+    """
+    if conditions is None:
+        return None, None
+    excess: np.ndarray | None = None
+    if conditions.excess_levels is not None:
+        excess = _as_float64(conditions.excess_levels, "excess_levels")
+    directivity = conditions.directivity_range
+    _check_grade_indicators(excess, directivity, n_positions)
+    return excess, None if directivity is None else float(directivity)
+
+
+def _check_grade_indicators(
+    excess: np.ndarray | None, directivity: float | None, n_positions: int
+) -> None:
+    """Refuse an excess that is not one finite value per position, or a
+    directivity range that is not finite and non-negative.
+    """
+    if excess is not None and (
+        np.shape(excess) != (n_positions,) or not np.all(np.isfinite(excess))
+    ):
+        msg = (
+            "'excess_levels' must carry one finite value per microphone "
+            f"position ({n_positions})."
+        )
+        raise ValueError(msg)
+    if directivity is not None and (not np.isfinite(directivity) or directivity < 0.0):
+        msg = "'directivity_range' must be finite and non-negative."
+        raise ValueError(msg)
+
+
+def _grade_from(excess: np.ndarray | None, directivity: float | None) -> Grade:
     """The grade Table 2 grants: engineering only with the excess of sound
     pressure level at least 7 dB at every position and a directivity range
     within 7 dB; survey whenever either indicator fails or was not determined.
-
-    Each indicator is checked on its own as soon as it is supplied, so a
-    mis-shaped or nonsensical one is refused rather than silently downgrading
-    the determination to grade 3; only a genuinely undetermined indicator
-    (``None``) falls through to survey.
     """
-    if conditions is None:
+    if excess is None or directivity is None:
         return "survey"
-    excess_levels = conditions.excess_levels
-    directivity_range = conditions.directivity_range
-    excess: np.ndarray | None = None
-    if excess_levels is not None:
-        excess = _as_float64(excess_levels, "excess_levels")
-        if excess.shape != (n_positions,) or not np.all(np.isfinite(excess)):
-            msg = (
-                "'excess_levels' must carry one finite value per microphone "
-                f"position ({n_positions})."
-            )
-            raise ValueError(msg)
-    if directivity_range is not None and (
-        not np.isfinite(directivity_range) or directivity_range < 0.0
-    ):
-        msg = "'directivity_range' must be finite and non-negative."
-        raise ValueError(msg)
-    if excess is None or directivity_range is None:
-        return "survey"
-    reverberant = bool(np.all(excess >= _EXCESS_LEVEL_MIN_DB))
-    if reverberant and directivity_range <= _DIRECTIVITY_RANGE_MAX_DB:
+    reverberant = bool(np.all(np.asarray(excess) >= _EXCESS_LEVEL_MIN_DB))
+    if reverberant and directivity <= _DIRECTIVITY_RANGE_MAX_DB:
         return "engineering"
     return "survey"
 
 
-def _uncertainty(
-    grade: Grade, sigma_omc: float | None, coverage_factor: float
-) -> tuple[float, float, float, float]:
-    """``sigma_R0`` from Table 2, ``sigma_omc`` as given, ``sigma_tot`` of
-    Eq. (22) and ``U`` of Eq. (23); the last three ``NaN`` without ``sigma_omc``.
+def _checked_sigma_omc(sigma_omc: float | None, coverage_factor: float) -> float:
+    """``sigma_omc`` as given, ``NaN`` when absent; ``sigma_R0``, Eq. (22) and
+    Eq. (23) are read from it by the result.
     """
     require_positive(coverage_factor, "coverage_factor")
-    sigma_r0 = _SIGMA_R0_DB[grade]
     if sigma_omc is None:
-        return sigma_r0, float("nan"), float("nan"), float("nan")
+        return float("nan")
     if not np.isfinite(sigma_omc) or sigma_omc < 0.0:
         msg = "'sigma_omc' must be finite and non-negative."
         raise ValueError(msg)
-    sigma_tot = float(np.sqrt(sigma_r0**2 + sigma_omc**2))
-    return sigma_r0, float(sigma_omc), sigma_tot, coverage_factor * sigma_tot
+    return float(sigma_omc)
 
 
 def _position_advisory(n_positions: int) -> None:
@@ -729,38 +816,40 @@ def _event_background(
     one_at_a_time: bool,
     n_bands: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """``K1``, the per-band verdict and the per-position levels of clause 8.4.
+    """``K1``, the smallest margin per band and the per-position levels of clause 8.4.
 
     With no background measured there is nothing to correct and nothing that
-    can be declared valid, so ``K1`` is zero and the verdict is ``False``
+    can be declared valid, so ``K1`` is zero and the margin is ``NaN``
     throughout. With one measured, Eq. (14) compares a time-integrated event
     level against a time-averaged background, which is a ratio of energies
     only over a one-second window; ``integration_time`` carries the
     background to the window actually used before the comparison.
 
-    :return: ``(K1 per position and band, verdict per band, per-position
-        levels)``.
+    :return: ``(K1 per position and band, smallest margin per band,
+        per-position levels)``.
     """
     n_positions = arr.shape[0]
     if bg is None:
         return (
             np.zeros((n_positions, n_bands), dtype=np.float64),
-            np.zeros(n_bands, dtype=bool),
+            np.full(n_bands, np.nan, dtype=np.float64),
             arr if not one_at_a_time else energy_mean(arr, axis=1),
         )
     bg_event = bg
     if integration_time is not None:
         bg_event = bg + 10.0 * np.log10(integration_time / _T0_S)
     if one_at_a_time:
-        k1_events, met_grid = _background_correction(arr - bg_event[:, None, :])
+        delta = arr - bg_event[:, None, :]
+        k1_events, _ = _background_correction(delta)
         per_position = energy_mean(arr - k1_events, axis=1)  # Eq. (13), (15)
         return (
             energy_mean(arr, axis=1) - per_position,
-            np.all(met_grid, axis=(0, 1)),
+            np.min(delta, axis=(0, 1)),
             per_position,
         )
-    k1, met_grid = _background_correction(arr - bg_event)
-    return k1, np.all(met_grid, axis=0), arr - k1  # Eq. (16)
+    delta = arr - bg_event
+    k1, _ = _background_correction(delta)
+    return k1, np.min(delta, axis=0), arr - k1  # Eq. (16)
 
 
 def _determine(
@@ -768,7 +857,7 @@ def _determine(
     quantity: str,
     mean_source: np.ndarray,
     background_correction: np.ndarray,
-    met_source: np.ndarray,
+    margin_source: np.ndarray,
     background_levels: np.ndarray | None,
     comparison: _Comparison,
 ) -> InSituSoundPowerResult:
@@ -798,12 +887,13 @@ def _determine(
     if bg_ref is None:
         # Nothing was measured, so 8.1 cannot declare the band valid (7.5).
         k1_ref = np.zeros((m, n_positions, n_bands), dtype=np.float64)
-        met_ref = np.zeros(n_bands, dtype=bool)
+        margin_ref = np.full(n_bands, np.nan, dtype=np.float64)
     else:
         # Eq. (10) prints K1i(RSS) without the location index, but the margin
         # it comes from is per location: evaluated per (j, i).
-        k1_ref, met = _background_correction(ref - bg_ref[None, :, :])
-        met_ref = np.all(met, axis=(0, 1))
+        delta_ref = ref - bg_ref[None, :, :]
+        k1_ref, _ = _background_correction(delta_ref)
+        margin_ref = np.min(delta_ref, axis=(0, 1))
     _validate_meteorology(comparison.temperature_c, comparison.static_pressure_kpa)
     corrected_ref = ref - k1_ref
     per_location = energy_mean(corrected_ref, axis=1)  # Eq. (9) / (10)
@@ -812,10 +902,8 @@ def _determine(
     level = np.asarray(ref_power - mean_ref + mean_source, dtype=np.float64)
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     total = energy_sum(level + _a_weighting_corrections(freqs))  # Eq. (D.1) / (D.2)
-    grade = _accuracy_grade(comparison.conditions, n_positions)
-    sigma_r0, omc, sigma_tot, expanded = _uncertainty(
-        grade, comparison.sigma_omc, comparison.coverage_factor
-    )
+    excess, directivity = _grade_indicators(comparison.conditions, n_positions)
+    omc = _checked_sigma_omc(comparison.sigma_omc, comparison.coverage_factor)
     is_power = quantity == "power"
     return InSituSoundPowerResult(
         frequencies=freqs,
@@ -827,18 +915,12 @@ def _determine(
         reference_power_level=np.asarray(ref_power, dtype=np.float64),
         background_correction=np.asarray(background_correction, dtype=np.float64),
         background_correction_ref=np.asarray(k1_ref, dtype=np.float64),
-        background_requirement_met=np.asarray(met_source & met_ref, dtype=bool),
-        # 8.1 reads the upper bound off the source under test's margin; a band
-        # where the reference source's margin is short as well is not one.
-        upper_bound=np.asarray(
-            (background_levels is not None) & ~met_source & met_ref, dtype=bool
-        ),
+        background_margin_db=np.asarray(margin_source, dtype=np.float64),
+        background_margin_ref_db=np.asarray(margin_ref, dtype=np.float64),
         c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
-        grade=grade,
-        sigma_r0=sigma_r0,
+        excess_levels_db=excess,
+        directivity_range_db=directivity,
         sigma_omc=omc,
-        sigma_tot=sigma_tot,
-        expanded_uncertainty=expanded,
         coverage_factor=comparison.coverage_factor,
         sound_power_level_a=total if is_power else float("nan"),
         sound_energy_level_a=float("nan") if is_power else total,
@@ -944,16 +1026,16 @@ def sound_power_in_situ(
     bg = _background_grid(background_levels, "background_levels", n_positions, n_bands)
     if bg is None:
         k1 = np.zeros_like(arr)
-        met = np.zeros(n_bands, dtype=bool)
+        margin = np.full(n_bands, np.nan, dtype=np.float64)
     else:
-        k1, met_grid = _background_correction(arr - bg)
-        met = np.all(met_grid, axis=0)
+        k1, _ = _background_correction(arr - bg)
+        margin = np.min(arr - bg, axis=0)
     mean_source = energy_mean(arr - k1, axis=0)  # Eq. (8)
     return _determine(
         quantity="power",
         mean_source=mean_source,
         background_correction=k1,
-        met_source=met,
+        margin_source=margin,
         background_levels=bg,
         comparison=_Comparison(
             levels_ref=levels_ref,
@@ -1059,7 +1141,7 @@ def sound_energy_in_situ(
     bg = _background_grid(background_levels, "background_levels", n_positions, n_bands)
     if integration_time is not None:
         require_positive(integration_time, "integration_time")
-    k1, met, per_position = _event_background(
+    k1, margin, per_position = _event_background(
         arr,
         bg,
         integration_time=integration_time,
@@ -1073,7 +1155,7 @@ def sound_energy_in_situ(
         quantity="energy",
         mean_source=mean_source,
         background_correction=np.asarray(k1, dtype=np.float64),
-        met_source=met,
+        margin_source=margin,
         background_levels=bg,
         comparison=_Comparison(
             levels_ref=levels_ref,

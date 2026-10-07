@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable
 
     from numpy.typing import ArrayLike, DTypeLike, NDArray
 
@@ -292,3 +292,56 @@ class OwnsArrays:
 
 
 _COMPOSED.add(OwnsArrays.__post_init__)
+
+
+def frozen_rows(rows: Iterable[Mapping[str, Any]]) -> tuple[Mapping[str, Any], ...]:
+    """Read-only copies of the rows a result keeps, for a verdict read from them.
+
+    A frozen dataclass stops a field from being rebound, not a dictionary in
+    it from being edited, so a verdict read from its rows would follow a
+    write into one of them after it was reached. Each row is copied, so the
+    caller's dictionaries stay theirs, and wrapped in
+    :class:`types.MappingProxyType`.
+
+    :param rows: The rows, each a mapping.
+    :return: A tuple of read-only copies.
+    """
+    return tuple(MappingProxyType(dict(row)) for row in rows)
+
+
+def frozen_row(row: Mapping[str, Any] | None) -> Mapping[str, Any] | None:
+    """A read-only copy of one row a result keeps, or ``None``."""
+    return None if row is None else MappingProxyType(dict(row))
+
+
+def _thawed(value: object) -> object:
+    if isinstance(value, MappingProxyType):
+        return dict(value)
+    if isinstance(value, tuple) and any(isinstance(v, MappingProxyType) for v in value):
+        return tuple(_thawed(v) for v in value)
+    return value
+
+
+def _rebuilt[T](cls: type[T], kwargs: dict[str, Any]) -> T:
+    return cls(**kwargs)
+
+
+def reduce_with_plain_rows(
+    result: object,
+) -> tuple[Any, tuple[type, dict[str, Any]]]:
+    """``__reduce__`` for a dataclass result that keeps read-only rows.
+
+    A :class:`types.MappingProxyType` can be neither pickled nor deep-copied,
+    so the result travels as its fields with every row a plain dictionary,
+    and its ``__post_init__`` freezes them again on arrival.
+
+    :param result: A dataclass instance whose rows were frozen by
+        :func:`frozen_rows` or :func:`frozen_row`.
+    :return: The callable and arguments that rebuild it by keyword.
+    """
+    kwargs = {
+        field.name: _thawed(getattr(result, field.name))
+        for field in dataclasses.fields(result)  # type: ignore[arg-type]
+        if field.init
+    }
+    return _rebuilt, (type(result), kwargs)

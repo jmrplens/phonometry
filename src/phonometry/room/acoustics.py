@@ -118,7 +118,8 @@ class RoomAcousticsResult(OwnsArrays):
 
     ``dynamic_range`` is the peak-to-noise-floor distance of the squared
     band impulse response in dB. ``edt_valid``, ``t20_valid`` and
-    ``t30_valid`` apply the ISO 3382-1:2009, 5.3.3 criterion (noise at
+    ``t30_valid`` are read from it and the decay times, so they are not
+    fields; they apply the ISO 3382-1:2009, 5.3.3 criterion (noise at
     least evaluation range + 15 dB below the maximum: 25 dB for EDT), with
     T20 and T30 tightened to 46 dB and 54 dB to absorb the positive bias of
     the tail compensation (5.3.3, Eq. (3)) and keep a flagged-valid value
@@ -137,9 +138,6 @@ class RoomAcousticsResult(OwnsArrays):
     d50: np.ndarray
     ts: np.ndarray
     dynamic_range: np.ndarray
-    edt_valid: np.ndarray
-    t20_valid: np.ndarray
-    t30_valid: np.ndarray
     curvature: np.ndarray
 
     def __post_init__(self) -> None:
@@ -159,11 +157,9 @@ class RoomAcousticsResult(OwnsArrays):
         renders without complaint and whose verdict row then compares that
         number with the target.
 
-        The validity flags travel the same axis: the plot greys and hatches
-        the bars of the bands they reject, pairing each bar with its flag
-        under a strict zip, so a flag array of another length stops the
-        drawing part-way through in either direction, leaving the bars it had
-        already reached on whatever axes the caller passed in.
+        The validity flags are read from ``dynamic_range`` along the same
+        axis, and the plot greys and hatches the bars of the bands they
+        reject, pairing each bar with its flag under a strict zip.
 
         :raises ValueError: if any per-band array disagrees with the rest.
         """
@@ -178,9 +174,6 @@ class RoomAcousticsResult(OwnsArrays):
             d50=1,
             ts=1,
             dynamic_range=1,
-            edt_valid=1,
-            t20_valid=1,
-            t30_valid=1,
             curvature=1,
         )
         require_same_length(
@@ -194,11 +187,45 @@ class RoomAcousticsResult(OwnsArrays):
             "d50",
             "ts",
             "dynamic_range",
-            "edt_valid",
-            "t20_valid",
-            "t30_valid",
             "curvature",
         )
+
+    @property
+    def edt_valid(self) -> np.ndarray:
+        """Per band, whether the EDT is evaluated with the noise far enough below.
+
+        At least 10 dB + 15 dB under the maximum (ISO 3382-1:2009, 5.3.3);
+        ``False`` where the value could not be evaluated.
+        """
+        return np.isfinite(self.edt) & (
+            self.dynamic_range >= _EDT_RANGE[1] + _NOISE_MARGIN_DB
+        )
+
+    @property
+    def t20_valid(self) -> np.ndarray:
+        """Per band, whether T20 is evaluated with the noise far enough below.
+
+        20 dB + 15 dB, tightened by the tail headroom to 46 dB so a
+        flagged-valid value stays within the 5 % JND; ``False`` where the
+        value could not be evaluated.
+        """
+        needed = (
+            _T20_RANGE[1] - _T20_RANGE[0] + _NOISE_MARGIN_DB + _T20_TAIL_HEADROOM_DB
+        )
+        return np.isfinite(self.t20) & (self.dynamic_range >= needed)
+
+    @property
+    def t30_valid(self) -> np.ndarray:
+        """Per band, whether T30 is evaluated with the noise far enough below.
+
+        30 dB + 15 dB, tightened by the tail headroom to 54 dB so a
+        flagged-valid value stays within the 5 % JND; ``False`` where the
+        value could not be evaluated.
+        """
+        needed = (
+            _T30_RANGE[1] - _T30_RANGE[0] + _NOISE_MARGIN_DB + _T30_TAIL_HEADROOM_DB
+        )
+        return np.isfinite(self.t30) & (self.dynamic_range >= needed)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -591,17 +618,6 @@ def room_parameters(
         d50=d50,
         ts=ts,
         dynamic_range=dyn,
-        edt_valid=np.isfinite(edt) & (dyn >= _EDT_RANGE[1] + _NOISE_MARGIN_DB),
-        t20_valid=np.isfinite(t20)
-        & (
-            dyn
-            >= _T20_RANGE[1] - _T20_RANGE[0] + _NOISE_MARGIN_DB + _T20_TAIL_HEADROOM_DB
-        ),
-        t30_valid=np.isfinite(t30)
-        & (
-            dyn
-            >= _T30_RANGE[1] - _T30_RANGE[0] + _NOISE_MARGIN_DB + _T30_TAIL_HEADROOM_DB
-        ),
         curvature=curvature,
     )
 

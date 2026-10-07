@@ -446,7 +446,6 @@ def test_result_dataclasses_are_frozen() -> None:
         lex_8h_contribution=85.0,
         n_samples=3,
         sample_range_db=0.0,
-        spread_advisory=False,
         u1a=0.0,
         c1a=1.0,
         u1b=0.0,

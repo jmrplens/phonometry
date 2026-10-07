@@ -104,34 +104,41 @@ reduces to the looser of the two component classes.
 
 ```python
 IntensityInstrumentComplianceResult(
-    overall_class: int | None,
-    bands: tuple[dict[str, Any], ...],
     frequencies: np.ndarray,
     residual_index: np.ndarray,
     device: str,
     spacing: float,
-    *,
-    range_limited: bool = False,
 )
 ```
 
 IEC 61043:1993 class verdict of a p-p sound-intensity chain.
 
-What [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) returns: the verdict together with the
-measured spectrum and the two Table 2 masks it was judged against, so the
-result can redraw itself and render an accredited fiche.
+What [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) returns: the measured spectrum, the
+device and the separation it was judged at. The two Table 2 masks, the
+band rows, the classes and the range are read from them, so none of them
+is a field: a verdict cannot be built, or rewritten with
+`dataclasses.replace`, against another minimum or with a class its
+index does not reach.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `overall_class` | The strictest class every band meets (1 or 2), or `None` when at least one band meets neither. It is the *largest* per-band class, because a band meeting class 1 meets class 2 as well. |
-| `bands` | The per-band verdicts, as an immutable tuple. |
 | `frequencies` | Nominal band centre frequencies, in Hz. |
 | `residual_index` | Measured `delta_pI0` per band, in dB. |
 | `device` | `"probe"`, `"processor"` or `"instrument"`. |
 | `spacing` | Microphone separation the verdict applies to, in metres. |
-| `range_limited` | `True` when the verified bands cover neither the 22 one-third-octave bands nor the 7 octave bands of clause 6.1, so the stated class attests only the bands supplied. |
+
+### IntensityInstrumentComplianceResult.bands
+
+*property*
+
+The per-band verdicts, read from the spectrum and Table 2.
+
+One `{"freq", "class", "residual_index_db", "limit_class1_db",
+"limit_class2_db", "margin_class1_db", "margin_class2_db"}` per band:
+a band meets a class when its index is at least that class's minimum,
+so a band exactly on the limit passes. A fresh copy at every read.
 
 ### IntensityInstrumentComplianceResult.binding_margin()
 
@@ -187,6 +194,15 @@ Class 2 minimum `delta_pI0` per band, in dB, rescaled to `spacing`.
 
 **Returns:** Table 2 for `device`, plus `spacing_offset_db`.
 
+### IntensityInstrumentComplianceResult.overall_class
+
+*property*
+
+The strictest class every band meets (1 or 2), or `None`.
+
+`None` when at least one band meets neither. It is the *largest*
+per-band class, because a band meeting class 1 meets class 2 as well.
+
 ### IntensityInstrumentComplianceResult.phase_mismatch()
 
 ```python
@@ -230,6 +246,19 @@ matplotlib (`pip install phonometry[plot]`) and returns the
 | Name | Description |
 | :--- | :--- |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+
+### IntensityInstrumentComplianceResult.range_limited
+
+*property*
+
+Whether the verified bands fall short of the range of clause 6.1.
+
+`True` when they cover neither the 22 one-third-octave bands nor,
+for a class 2 processor or instrument, the 7 octave bands, so the
+stated class attests only the bands supplied. Clause 6.1 gives the
+one-third-octave range to class 1 and offers the octave range only to
+class 2; a probe has no analysis bands of its own and clause 12.4
+tests it in one-third octaves, so the alternative is not open to it.
 
 ### IntensityInstrumentComplianceResult.reference_class()
 

@@ -508,10 +508,10 @@ def minimum_significant_difference(
 class AttenuationDifferenceResult(OwnsArrays):
     r"""Whether two mean attenuations differ significantly, band by band (B.1.2).
 
-    :ivar difference_db: :math:`|m_1 - m_2|` per band, in dB.
-    :ivar criterion_db: :math:`\sqrt{U_{95,1}^2 + U_{95,2}^2}` per band, in
-        dB. A difference larger than this is significant at the 5 % level.
-    :ivar significant: Whether each band's difference exceeds its criterion.
+    The difference, the criterion and the verdict are read from the two means
+    and their uncertainties, so they are not fields: a comparison cannot be
+    built to call significant a difference its uncertainties cover.
+
     :ivar first_mean_db: :math:`m_1` per band, in dB.
     :ivar second_mean_db: :math:`m_2` per band, in dB.
     :ivar first_expanded_uncertainty_db: :math:`U_{95,1}` per band, in dB.
@@ -519,14 +519,39 @@ class AttenuationDifferenceResult(OwnsArrays):
     :ivar frequencies: The centre frequencies of the test signals, in hertz.
     """
 
-    difference_db: np.ndarray
-    criterion_db: np.ndarray
-    significant: np.ndarray
     first_mean_db: np.ndarray
     second_mean_db: np.ndarray
     first_expanded_uncertainty_db: np.ndarray
     second_expanded_uncertainty_db: np.ndarray
     frequencies: np.ndarray
+
+    @property
+    def difference_db(self) -> np.ndarray:
+        """:math:`|m_1 - m_2|` per band, in dB."""
+        return np.asarray(
+            np.abs(self.first_mean_db - self.second_mean_db), dtype=np.float64
+        )
+
+    @property
+    def criterion_db(self) -> np.ndarray:
+        r""":math:`\sqrt{U_{95,1}^2 + U_{95,2}^2}` per band, in dB.
+
+        A difference larger than this is significant at the 5 % level.
+        """
+        return np.asarray(
+            np.hypot(
+                self.first_expanded_uncertainty_db,
+                self.second_expanded_uncertainty_db,
+            ),
+            dtype=np.float64,
+        )
+
+    @property
+    def significant(self) -> np.ndarray:
+        """Whether each band's difference exceeds its criterion, judged settled."""
+        return np.asarray(
+            settled(self.difference_db - self.criterion_db) > 0.0, dtype=bool
+        )
 
     @property
     def any_significant(self) -> bool:
@@ -701,12 +726,7 @@ def assess_attenuation_difference(
                 f"{axis.tolist()} against {freqs.tolist()}."
             )
             raise ValueError(msg)
-    difference = np.abs(m1 - m2)
-    criterion = np.hypot(u1, u2)
     return AttenuationDifferenceResult(
-        difference_db=difference,
-        criterion_db=criterion,
-        significant=np.asarray(settled(difference - criterion) > 0.0, dtype=bool),
         first_mean_db=m1,
         second_mean_db=m2,
         first_expanded_uncertainty_db=u1,

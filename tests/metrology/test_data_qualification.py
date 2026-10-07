@@ -702,3 +702,38 @@ def test_peak_plot_without_maxima_raises() -> None:
     with pytest.raises(ValueError, match=r"has no local maxima to plot"):
         ramp_result.plot()
     plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# The acceptance region is read from the sequence, the method and alpha
+# ---------------------------------------------------------------------------
+def test_a_trend_test_cannot_state_its_acceptance_region() -> None:
+    res = rd.trend_test(np.arange(20.0))
+    with pytest.raises(TypeError, match="bounds"):
+        dataclasses.replace(res, bounds=(-1, 10_000))
+
+
+def test_the_acceptance_region_follows_alpha() -> None:
+    """B&P Table A.6, N = 20: (64, 125) at 0.05; a wider alpha narrows it."""
+    res = rd.trend_test(np.arange(20.0))
+    assert res.bounds == (64, 125)
+    assert res.trend_free is False
+    wider = dataclasses.replace(res, alpha=0.5)
+    assert wider.bounds[0] > 64
+    assert wider.bounds[1] < 125
+
+
+@pytest.mark.parametrize(("field", "value"), [("alpha", 1.5), ("method", "kendall")])
+def test_a_trend_test_refuses_a_region_it_cannot_read(
+    field: str, value: object
+) -> None:
+    res = rd.trend_test(np.arange(20.0))
+    with pytest.raises(ValueError, match=f"'{field}' must"):
+        dataclasses.replace(res, **{field: value})
+
+
+def test_a_stationarity_test_cannot_state_its_acceptance_region() -> None:
+    rng = np.random.default_rng(1)
+    res = rd.stationarity_test(rng.standard_normal(4000), 1000.0)
+    with pytest.raises(TypeError, match="bounds"):
+        dataclasses.replace(res, bounds=(-1, 10_000))

@@ -47,7 +47,7 @@ repeated-measurement standard uncertainty (Formulae (17)–(20)) are provided.
 
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -358,16 +358,21 @@ class ResidualCorrectionResult:
         an upper bound of the specific sound level; this field carries that
         reportable value.
     :ivar margin: ``L' − Lres``, in dB (measured minus residual).
-    :ivar reliable: ``True`` when the residual is more than 3 dB below the
-        measured level; ``False`` when no correction is allowed and only the
-        uncorrected ``L'`` may be reported, as an upper bound.
     """
 
     corrected_level: float
     reportable_upper_bound: float
     margin: float
-    _: KW_ONLY
-    reliable: bool
+
+    @property
+    def reliable(self) -> bool:
+        """Whether the residual is more than 3 dB below the measured level.
+
+        Read from :attr:`margin`, settled, against the 3 dB of §10.4;
+        ``False`` when no correction is allowed and only the uncorrected
+        ``L'`` may be reported, as an upper bound.
+        """
+        return bool(settled(self.margin) > _MIN_CORRECTION_MARGIN_DB)
 
 
 def residual_sound_correction(
@@ -413,7 +418,6 @@ def residual_sound_correction(
         corrected_level=float(corrected),
         reportable_upper_bound=float(lp),
         margin=float(margin),
-        reliable=reliable,
     )
 
 

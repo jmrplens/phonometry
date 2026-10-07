@@ -75,7 +75,7 @@ one read off a curve, cell for cell what the interpolation gives.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
@@ -874,30 +874,61 @@ def kb_fmax_from_peak_velocity(
 class PeopleAssessment:
     r"""The verdict of Clause 6.2 on one immission, and how it was reached.
 
-    :ivar complies: Whether the requirement of the standard is met.
-    :ivar criterion: The comparison that decided it: ``"A_u"`` when
-        :math:`KB_\mathrm{Fmax}` kept to the lower value, or exceeded it by
-        no more than the measurement is uncertain by; ``"A_o"`` when it exceeded
-        the upper one or, for a rare short event, kept to it; and ``"A_r"``
-        when :math:`KB_\mathrm{FTr}` decided.
+    The verdict, the comparison that decided it and whether it rests on the
+    uncertainty of 5.4 are read from the two quantities, the guide values and
+    the rules of the edition, so they are not fields: an assessment cannot be
+    built to comply with an immission the standard fails.
+
     :ivar kb_fmax: :math:`KB_\mathrm{Fmax}` as assessed.
     :ivar kb_ftr: :math:`KB_\mathrm{FTr}`, or ``None`` when it was not needed.
     :ivar guide: The three guide values it was held to.
     :ivar source: The kind of source the rules were read for.
-    :ivar within_uncertainty: Whether the verdict rests on the 15 % of 5.4:
-        :math:`KB_\mathrm{Fmax}` above :math:`A_\mathrm{u}` but by no more than a
-        measurement of :math:`KB_\mathrm{F}` is uncertain by, which Annex C Example 3
-        concludes "can as a rule still be regarded as met". A stricter reading
-        treats such a verdict as open.
+    :ivar rare_short_events: Whether the immission is at most three short
+        events a day, such as blasting, which 6.5.1 judges on :math:`A_\mathrm{o}`
+        alone.
     """
 
-    complies: bool
-    criterion: str
     kb_fmax: float
     kb_ftr: float | None
     guide: GuideValues
     source: str
-    within_uncertainty: bool
+    _: KW_ONLY
+    rare_short_events: bool = False
+
+    def __post_init__(self) -> None:
+        r"""Reject an assessment whose verdict comes down to a missing :math:`KB_\mathrm{FTr}`.
+
+        :raises ValueError: if the verdict needs :math:`KB_\mathrm{FTr}` and none
+            was given.
+        """
+        _people_verdict(self)
+
+    @property
+    def complies(self) -> bool:
+        """Whether the requirement of the standard is met."""
+        return _people_verdict(self)[0]
+
+    @property
+    def criterion(self) -> str:
+        r"""The comparison that decided the verdict.
+
+        ``"A_u"`` when :math:`KB_\mathrm{Fmax}` kept to the lower value, or
+        exceeded it by no more than the measurement is uncertain by; ``"A_o"``
+        when it exceeded the upper one or, for a rare short event, kept to it;
+        and ``"A_r"`` when :math:`KB_\mathrm{FTr}` decided.
+        """
+        return _people_verdict(self)[1]
+
+    @property
+    def within_uncertainty(self) -> bool:
+        r"""Whether the verdict rests on the 15 % of 5.4.
+
+        :math:`KB_\mathrm{Fmax}` above :math:`A_\mathrm{u}` but by no more than a
+        measurement of :math:`KB_\mathrm{F}` is uncertain by, which Annex C Example 3
+        concludes "can as a rule still be regarded as met". A stricter reading
+        treats such a verdict as open.
+        """
+        return _people_verdict(self)[2]
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -931,6 +962,54 @@ def _edition_of(guide: GuideValues, edition: str | None) -> str:
         )
         raise ValueError(msg)
     return year
+
+
+def _people_decision(
+    peak: float, guide: GuideValues, kind: str, *, rare: bool
+) -> tuple[bool, str, bool] | None:
+    r"""Clause 6.2 on :math:`KB_\mathrm{Fmax}` alone, or ``None`` when :math:`KB_\mathrm{FTr}` decides.
+
+    :return: ``(complies, criterion, within uncertainty)``.
+    """
+    year = guide.edition
+    if _keeps_to(peak, guide.a_u):
+        return True, "A_u", False
+    # Judged settled: 0,46 is 15 % above an A_u of 0,4 in decimal, and the
+    # product 0,4 x 1,15 is 0,459 999 999 999 999 96 in binary.
+    reach = guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0)
+    if year == "1999" and float(settled(peak - reach)) <= 0.0:
+        return True, "A_u", True
+    if not _skips_upper_value(year, kind, guide):
+        if not _keeps_to(peak, guide.a_o):
+            return False, "A_o", False
+        if rare:
+            return True, "A_o", False
+    return None
+
+
+def _people_verdict(assessment: PeopleAssessment) -> tuple[bool, str, bool]:
+    r"""The verdict of a :class:`PeopleAssessment`, read from its fields.
+
+    :raises ValueError: if the verdict needs :math:`KB_\mathrm{FTr}` and none was
+        given.
+    """
+    rare = assessment.rare_short_events or assessment.source in (
+        "quarry_blasting",
+        "induced_seismic",
+    )
+    decided = _people_decision(
+        assessment.kb_fmax, assessment.guide, assessment.source, rare=rare
+    )
+    if decided is not None:
+        return decided
+    if assessment.kb_ftr is None:
+        msg = (
+            f"KB_Fmax = {assessment.kb_fmax:g} exceeds A_u = "
+            f"{assessment.guide.a_u:g}, so the verdict comes down to KB_FTr "
+            "against A_r; supply kb_ftr."
+        )
+        raise ValueError(msg)
+    return _keeps_to(assessment.kb_ftr, assessment.guide.a_r), "A_r", False
 
 
 def _skips_upper_value(year: str, kind: str, guide: GuideValues) -> bool:
@@ -1023,39 +1102,21 @@ def assess_people_in_buildings(
         str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
     )
     rare = rare_short_events or kind in ("quarry_blasting", "induced_seismic")
-
-    def verdict(
-        *, complies: bool, criterion: str, kb_ftr: float | None, uncertain: bool = False
-    ) -> PeopleAssessment:
-        return PeopleAssessment(
-            complies=complies,
-            criterion=criterion,
-            kb_fmax=peak,
-            kb_ftr=kb_ftr,
-            guide=guide,
-            source=kind,
-            within_uncertainty=uncertain,
-        )
-
-    if _keeps_to(peak, guide.a_u):
-        return verdict(complies=True, criterion="A_u", kb_ftr=None)
-    # Judged settled: 0,46 is 15 % above an A_u of 0,4 in decimal, and the
-    # product 0,4 x 1,15 is 0,459 999 999 999 999 96 in binary.
-    reach = guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0)
-    if year == "1999" and float(settled(peak - reach)) <= 0.0:
-        return verdict(complies=True, criterion="A_u", kb_ftr=None, uncertain=True)
-    if not _skips_upper_value(year, kind, guide):
-        if not _keeps_to(peak, guide.a_o):
-            return verdict(complies=False, criterion="A_o", kb_ftr=None)
-        if rare:
-            return verdict(complies=True, criterion="A_o", kb_ftr=None)
-    if kb_ftr is None:
+    needs_ftr = _people_decision(peak, guide, kind, rare=rare) is None
+    if needs_ftr and kb_ftr is None:
         msg = (
             f"KB_Fmax = {peak:g} exceeds A_u = {guide.a_u:g}, so the verdict comes "
             "down to KB_FTr against A_r; supply kb_ftr."
         )
         raise ValueError(msg)
-    severity = require_non_negative(kb_ftr, "kb_ftr")
-    return verdict(
-        complies=_keeps_to(severity, guide.a_r), criterion="A_r", kb_ftr=severity
+    return PeopleAssessment(
+        kb_fmax=peak,
+        kb_ftr=(
+            require_non_negative(kb_ftr, "kb_ftr")
+            if needs_ftr and kb_ftr is not None
+            else None
+        ),
+        guide=guide,
+        source=kind,
+        rare_short_events=bool(rare_short_events),
     )

@@ -1564,84 +1564,246 @@ class FreeFieldCheck(OwnsArrays):
     array is aligned with :attr:`frequencies_hz` (ascending) and judged within
     :attr:`maximum_qualified_radius_m`.
 
-    :ivar room: ``"anechoic"`` or ``"hemi-anechoic"``.
+    Every verdict, the radius and the reduced range are read from the
+    analyses and the declarations the check holds, against the figures the
+    two standards print, so they are not fields: a check cannot be built to
+    qualify a room its traverses do not qualify. The reading is done once,
+    when the check is built.
+
     :ivar bandwidth: ``"discrete-frequency"`` or ``"broadband"`` (A.4.1): a
         room qualified with broadband noise is qualified only for sources that
         radiate broadband noise.
     :ivar results: The inverse-square-law analysis of each test source.
-    :ivar frequencies_hz: Every evaluated frequency, ascending, in hertz.
-    :ivar band_radius_m: The distance to which each frequency is qualified on
-        every traverse, in metres.
-    :ivar maximum_qualified_radius_m: The A.2.4 radius over every evaluated
-        frequency, in metres.
+    :ivar source_directionality: The :func:`verify_source_directionality`
+        result of each test source, aligned with :attr:`results`, ``None``
+        for a source whose directionality was not judged.
     :ivar measurement_radius_m: The measurement radius to be used, if given.
-    :ivar points_met: At least 10 points on each traverse and 50 in total
-        within the radius (A.4.3), per band.
-    :ivar equal_spacing_met: The points of every traverse within the radius
-        equally spaced at the frequency (A.4.3, ISO 26101 5.1.4.3), points
-        added between two of them near a peak deviation allowed (see the
-        module notes for the tolerance), per band.
-    :ivar spacing_met: Spacing at most a tenth of a wavelength below 250 Hz
-        and 100 mm above (amended ISO 3745 A.4.3), per band; the band that
-        contains 250 Hz is held to the stricter of the two.
-    :ivar iso26101_spacing_met: Spacing at most a tenth of a wavelength below
-        1 kHz and 25 mm above (ISO 26101 A.4.3, cited by A.2.4), per band;
-        the band that contains 1 kHz is held to the stricter of the two.
-    :ivar length_met: Traverse starting at most, and running at least, a
-        quarter wavelength at the lowest frequency (ISO 26101 5.1.4.3), per
-        band.
-    :ivar background_met: Levels at least 6 dB above the background at every
-        point (ISO 26101 5.1.2.2 c)), per band, or ``None`` when a traverse
-        came without background.
-    :ivar directionality_met: The test source within Table B.1 in the band,
-        or ``None`` without a directionality result for its source.
-    :ivar traverse_count_met: Five to eight traverses for every source (A.3.3).
-    :ivar path_targets_met: Every source has traverses towards each of the
-        five targets of A.3.3 a) to e), or ``None`` when a source names no
-        target on any traverse.
-    :ivar working_area_met: The traverse paths lie in the working area of the
-        room, the part normally used for measurements (A.3.3), as declared,
-        or ``None`` when not declared.
-    :ivar path_angles_met: In a hemi-anechoic room, the direction of every
-        traverse within the 20 deg to 80 deg from the vertical of the
-        directionality test (A.3.3); ``None`` in an anechoic room, where A.3.3
-        sets no such limit.
-    :ivar reflecting_plane_met: A.2.5 in a hemi-anechoic room, ``None`` when
-        not judged or in an anechoic room.
-    :ivar full_frequency_range: Whether every frequency A.2.3 requires from
-        100 Hz to 10 000 Hz was evaluated.
-    :ivar conforming_range_hz: The widest contiguous range (in the A.2.3
-        sense) over which every judged requirement is met, ``(low, high)`` in
-        hertz, or ``None``; with :attr:`not_judged` empty it is the reduced
-        range A.2.3 lets a report state "in conformity".
-    :ivar conforming_radius_m: The radius qualified over that range, in
-        metres, or ``nan``.
-    :ivar not_judged: The requirements without data, by name.
+    :ivar reflecting_plane_absorption_coefficient: The largest sound
+        absorption coefficient of the reflecting plane (A.2.5), or ``None``;
+        always ``None`` in an anechoic room.
+    :ivar reflecting_plane_margin_m: How far the reflecting plane extends
+        beyond the projection of the measurement surface (A.2.5), in metres,
+        or ``None``; always ``None`` in an anechoic room.
+    :ivar paths_in_working_area: Whether the traverse paths lie in the
+        working area of the room (A.3.3), as declared, or ``None``.
+    :ivar speed_of_sound: Speed of sound, in m/s, for the wavelengths of
+        A.4.3, ISO 26101 5.1.4.3 and A.2.5.
     """
 
-    room: str
     bandwidth: str
     results: tuple[InverseSquareLawResult, ...]
-    frequencies_hz: np.ndarray
-    band_radius_m: np.ndarray
-    maximum_qualified_radius_m: float
+    source_directionality: tuple[SourceDirectionalityResult | None, ...]
     measurement_radius_m: float | None
-    points_met: np.ndarray
-    equal_spacing_met: np.ndarray
-    spacing_met: np.ndarray
-    iso26101_spacing_met: np.ndarray
-    length_met: np.ndarray
-    background_met: np.ndarray | None
-    directionality_met: np.ndarray | None
-    traverse_count_met: bool
-    path_targets_met: bool | None
-    working_area_met: bool | None
-    path_angles_met: bool | None
-    reflecting_plane_met: bool | None
-    full_frequency_range: bool
-    conforming_range_hz: tuple[float, float] | None
-    conforming_radius_m: float
-    not_judged: tuple[str, ...]
+    reflecting_plane_absorption_coefficient: float | None
+    reflecting_plane_margin_m: float | None
+    paths_in_working_area: bool | None
+    speed_of_sound: float
+
+    def __post_init__(self) -> None:
+        """Check the inputs and read the verdicts from them.
+
+        :raises ValueError: for results of different rooms, a frequency given
+            to two sources, directionality results that do not align with
+            ``results``, an unknown bandwidth, an absorption coefficient
+            outside 0 to 1, a margin that is not finite, or a working-area
+            declaration that is not ``True``, ``False`` or ``None``.
+        """
+        fits = _checked_fits(self.results, self.bandwidth)
+        room = fits[0].room
+        speed = require_positive(self.speed_of_sound, "speed_of_sound")
+        directionality = _aligned_directionality(
+            self.source_directionality, len(fits), room
+        )
+        measurement = (
+            None
+            if self.measurement_radius_m is None
+            else require_positive(self.measurement_radius_m, "measurement_radius_m")
+        )
+        absorption, margin = _checked_plane(
+            self.reflecting_plane_absorption_coefficient, self.reflecting_plane_margin_m
+        )
+        if room != "hemi-anechoic":
+            absorption = margin = None
+        working = _checked_declaration(
+            self.paths_in_working_area, "paths_in_working_area"
+        )
+        object.__setattr__(self, "results", fits)
+        object.__setattr__(self, "source_directionality", directionality)
+        object.__setattr__(self, "measurement_radius_m", measurement)
+        object.__setattr__(self, "reflecting_plane_absorption_coefficient", absorption)
+        object.__setattr__(self, "reflecting_plane_margin_m", margin)
+        object.__setattr__(self, "paths_in_working_area", working)
+        object.__setattr__(self, "speed_of_sound", speed)
+        # Read once, here: a frequency given to two sources is refused when
+        # the check is built, not when a verdict is first read.
+        self.__dict__["_evaluation"] = _evaluate_free_field(self)
+
+    @property
+    def _reading(self) -> _FreeFieldEvaluation:
+        reading: _FreeFieldEvaluation = self.__dict__["_evaluation"]
+        return reading
+
+    @property
+    def room(self) -> str:
+        """``"anechoic"`` or ``"hemi-anechoic"``, the room of the analyses."""
+        return self.results[0].room
+
+    @property
+    def frequencies_hz(self) -> np.ndarray:
+        """Every evaluated frequency, ascending, in hertz."""
+        return self._reading.frequencies_hz.copy()
+
+    @property
+    def band_radius_m(self) -> np.ndarray:
+        """The distance to which each frequency is qualified on every traverse, in metres."""
+        return self._reading.band_radius_m.copy()
+
+    @property
+    def maximum_qualified_radius_m(self) -> float:
+        """The A.2.4 radius over every evaluated frequency, in metres."""
+        return float(np.min(self._reading.band_radius_m))
+
+    @property
+    def points_met(self) -> np.ndarray:
+        """At least 10 points on each traverse and 50 in total within the radius (A.4.3), per band."""
+        return self._column("points")
+
+    @property
+    def equal_spacing_met(self) -> np.ndarray:
+        """The points of every traverse within the radius equally spaced at the frequency, per band.
+
+        A.4.3 and ISO 26101 5.1.4.3; points added between two of them near a
+        peak deviation are allowed (see the module notes for the tolerance).
+        """
+        return self._column("equal_spacing")
+
+    @property
+    def spacing_met(self) -> np.ndarray:
+        """Spacing at most a tenth of a wavelength below 250 Hz and 100 mm above, per band.
+
+        Amended ISO 3745 A.4.3; the band that contains 250 Hz is held to the
+        stricter of the two.
+        """
+        return self._column("spacing")
+
+    @property
+    def iso26101_spacing_met(self) -> np.ndarray:
+        """Spacing at most a tenth of a wavelength below 1 kHz and 25 mm above, per band.
+
+        ISO 26101 A.4.3, cited by A.2.4; the band that contains 1 kHz is held
+        to the stricter of the two.
+        """
+        return self._column("spacing_iso26101")
+
+    @property
+    def length_met(self) -> np.ndarray:
+        """Traverse starting at most, and running at least, a quarter wavelength at the lowest frequency, per band.
+
+        ISO 26101 5.1.4.3.
+        """
+        return self._column("length")
+
+    @property
+    def background_met(self) -> np.ndarray | None:
+        """Levels at least 6 dB above the background at every point, per band.
+
+        ISO 26101 5.1.2.2 c); ``None`` when a traverse came without
+        background.
+        """
+        return _judged_column(self._reading.verdicts, "background")
+
+    @property
+    def directionality_met(self) -> np.ndarray | None:
+        """The test source within Table B.1 in the band.
+
+        ``None`` without a directionality result for its source.
+        """
+        return _judged_column(self._reading.verdicts, "directionality")
+
+    @property
+    def traverse_count_met(self) -> bool:
+        """Five to eight traverses for every source (A.3.3)."""
+        return all(
+            _MIN_TRAVERSES <= len(fit.traverse_names) <= _MAX_TRAVERSES
+            for fit in self.results
+        )
+
+    @property
+    def path_targets_met(self) -> bool | None:
+        """Every source has traverses towards each of the five targets of A.3.3 a) to e).
+
+        ``None`` when a source names no target on any traverse.
+        """
+        return _path_targets_ok(self.results)
+
+    @property
+    def working_area_met(self) -> bool | None:
+        """The traverse paths lie in the working area of the room (A.3.3), as declared.
+
+        ``None`` when not declared.
+        """
+        return self.paths_in_working_area
+
+    @property
+    def path_angles_met(self) -> bool | None:
+        """In a hemi-anechoic room, every traverse within 20 deg to 80 deg from the vertical.
+
+        The directionality test's angles (A.3.3); ``None`` in an anechoic
+        room, where A.3.3 sets no such limit.
+        """
+        if self.room != "hemi-anechoic":
+            return None
+        radius = self.maximum_qualified_radius_m
+        return all(_path_angles_ok(fit, radius) for fit in self.results)
+
+    @property
+    def reflecting_plane_met(self) -> bool | None:
+        """A.2.5 in a hemi-anechoic room, ``None`` when not judged or in an anechoic room."""
+        if self.room != "hemi-anechoic":
+            return None
+        return _plane_ok(
+            self.reflecting_plane_absorption_coefficient,
+            self.reflecting_plane_margin_m,
+            float(self._reading.frequencies_hz[0]),
+            self.speed_of_sound,
+        )
+
+    @property
+    def full_frequency_range(self) -> bool:
+        """Whether every frequency A.2.3 requires from 100 Hz to 10 000 Hz was evaluated."""
+        evaluated = {_band_index(float(f)) for f in self._reading.frequencies_hz}
+        return _grid_contiguous(_K_CORE_LOW, _K_CORE_HIGH, evaluated)
+
+    @property
+    def conforming_range_hz(self) -> tuple[float, float] | None:
+        """The widest contiguous range over which every judged requirement is met.
+
+        In the A.2.3 sense, ``(low, high)`` in hertz, or ``None``; with
+        :attr:`not_judged` empty it is the reduced range A.2.3 lets a report
+        state "in conformity".
+        """
+        return self._reading.conforming_range_hz
+
+    @property
+    def conforming_radius_m(self) -> float:
+        """The radius qualified over :attr:`conforming_range_hz`, in metres, or ``nan``."""
+        return self._reading.conforming_radius_m
+
+    @property
+    def not_judged(self) -> tuple[str, ...]:
+        """The requirements without data, by name."""
+        hemi = self.room == "hemi-anechoic"
+        return _free_field_not_judged(
+            self._reading.verdicts,
+            self.source_directionality,
+            plane_unjudged=hemi and self.reflecting_plane_met is None,
+            targets=self.path_targets_met,
+            working=self.paths_in_working_area,
+        )
+
+    def _column(self, name: str) -> np.ndarray:
+        """One flag per band of a requirement every band is judged on."""
+        return np.array([getattr(v, name) for v in self._reading.verdicts], dtype=bool)
 
     @property
     def band_met(self) -> np.ndarray:
@@ -1954,86 +2116,73 @@ def check_free_field(
         0 to 1, a margin that is not finite, or a working-area declaration
         that is not ``True``, ``False`` or ``None``.
     """
-    fits = _checked_fits(results, bandwidth)
-    room = fits[0].room
-    speed = require_positive(speed_of_sound, "speed_of_sound")
-    directionality = _aligned_directionality(source_directionality, len(fits), room)
-    measurement = (
-        None
-        if measurement_radius_m is None
-        else require_positive(measurement_radius_m, "measurement_radius_m")
+    fits = (results,) if isinstance(results, InverseSquareLawResult) else tuple(results)
+    directionality = (
+        source_directionality
+        if source_directionality is None
+        or isinstance(source_directionality, SourceDirectionalityResult)
+        else tuple(source_directionality)
     )
-    hemi = room == "hemi-anechoic"
-    absorption, margin = _checked_plane(
-        reflecting_plane_absorption_coefficient, reflecting_plane_margin_m
+    return FreeFieldCheck(
+        bandwidth=bandwidth,
+        results=fits,
+        source_directionality=directionality,  # type: ignore[arg-type]
+        measurement_radius_m=measurement_radius_m,
+        reflecting_plane_absorption_coefficient=reflecting_plane_absorption_coefficient,
+        reflecting_plane_margin_m=reflecting_plane_margin_m,
+        paths_in_working_area=paths_in_working_area,
+        speed_of_sound=speed_of_sound,
     )
-    if not hemi:
-        absorption = margin = None
-    working = _checked_declaration(paths_in_working_area, "paths_in_working_area")
 
+
+@dataclass(frozen=True)
+class _FreeFieldEvaluation:
+    """What a :class:`FreeFieldCheck` reads from its analyses, once."""
+
+    frequencies_hz: np.ndarray
+    band_radius_m: np.ndarray
+    verdicts: tuple[_BandVerdict, ...]
+    conforming_range_hz: tuple[float, float] | None
+    conforming_radius_m: float
+
+
+def _evaluate_free_field(check: FreeFieldCheck) -> _FreeFieldEvaluation:
+    """Judge the analyses of a check against Annex A and ISO 26101."""
+    fits = check.results
+    directionality = check.source_directionality
+    speed = check.speed_of_sound
+    hemi = check.room == "hemi-anechoic"
     bands = _collect_bands(fits)
     band_radius = np.array(
         [fits[b.source].band_radius_m[b.column] for b in bands], dtype=np.float64
     )
     radius = float(band_radius.min())
     verdicts = _run_verdict(bands, fits, radius, directionality, speed)
+    targets = _path_targets_ok(fits)
+    working = check.paths_in_working_area
     traverse_count = all(
         _MIN_TRAVERSES <= len(fit.traverse_names) <= _MAX_TRAVERSES for fit in fits
     )
-    angles = all(_path_angles_ok(fit, radius) for fit in fits) if hemi else None
-    lowest = bands[0].frequency_hz
-    plane = _plane_ok(absorption, margin, lowest, speed) if hemi else None
-    targets = _path_targets_ok(fits)
-    not_judged = _free_field_not_judged(
-        verdicts,
-        directionality,
-        plane_unjudged=hemi and plane is None,
-        targets=targets,
-        working=working,
-    )
-
-    evaluated = {b.k for b in bands}
-    full = _grid_contiguous(_K_CORE_LOW, _K_CORE_HIGH, evaluated)
     conforming, conforming_radius = _widest_conforming_run(
         bands,
         fits,
         band_radius,
         directionality,
         speed,
-        measurement,
+        check.measurement_radius_m,
         room_level=traverse_count and targets is not False and working is not False,
         hemi=hemi,
-        absorption=absorption,
-        margin=margin,
+        absorption=check.reflecting_plane_absorption_coefficient,
+        margin=check.reflecting_plane_margin_m,
     )
-
-    def column(name: str) -> np.ndarray:
-        return np.array([getattr(v, name) for v in verdicts], dtype=bool)
-
-    return FreeFieldCheck(
-        room=room,
-        bandwidth=bandwidth,
-        results=fits,
-        frequencies_hz=np.array([b.frequency_hz for b in bands], dtype=np.float64),
-        band_radius_m=band_radius,
-        maximum_qualified_radius_m=radius,
-        measurement_radius_m=measurement,
-        points_met=column("points"),
-        equal_spacing_met=column("equal_spacing"),
-        spacing_met=column("spacing"),
-        iso26101_spacing_met=column("spacing_iso26101"),
-        length_met=column("length"),
-        background_met=_judged_column(verdicts, "background"),
-        directionality_met=_judged_column(verdicts, "directionality"),
-        traverse_count_met=traverse_count,
-        path_targets_met=targets,
-        working_area_met=working,
-        path_angles_met=angles,
-        reflecting_plane_met=plane,
-        full_frequency_range=full,
+    return _FreeFieldEvaluation(
+        frequencies_hz=read_only(
+            np.array([b.frequency_hz for b in bands], dtype=np.float64)
+        ),
+        band_radius_m=read_only(band_radius),
+        verdicts=tuple(verdicts),
         conforming_range_hz=conforming,
         conforming_radius_m=conforming_radius,
-        not_judged=not_judged,
     )
 
 

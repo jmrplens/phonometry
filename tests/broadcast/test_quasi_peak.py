@@ -666,11 +666,21 @@ def test_the_verifier_answers_for_the_ballistics_it_is_given() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_a_verdict_over_no_stimulus_is_rejected() -> None:
-    """Clause 2 has eleven windows; none of them is not a conformance run."""
+@pytest.mark.parametrize("count", [0, 10, 12])
+def test_a_verdict_over_other_than_eleven_stimuli_is_rejected(count: int) -> None:
+    """Clause 2 has eleven windows; fewer or more is not a conformance run."""
     report = verify_quasi_peak_dynamics()
-    with pytest.raises(ValueError, match=r"cannot be attested over no stimulus"):
-        replace(report, stimuli=(), passes=False)
+    readings = (report.readings_percent * 2)[:count]
+    with pytest.raises(ValueError, match=r"attested over the 11 stimuli of clause 2"):
+        replace(report, readings_percent=readings)
+
+
+@pytest.mark.parametrize("reading", [0.0, -5.0, float("nan"), float("inf")])
+def test_a_reading_that_is_no_reading_is_rejected(reading: float) -> None:
+    report = verify_quasi_peak_dynamics()
+    readings = (reading, *report.readings_percent[1:])
+    with pytest.raises(ValueError, match=r"'readings_percent' must be positive"):
+        replace(report, readings_percent=readings)
 
 
 def test_a_non_positive_sample_rate_is_rejected() -> None:
@@ -681,15 +691,43 @@ def test_a_non_positive_sample_rate_is_rejected() -> None:
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("passes", False), ("worst_margin_db", 99.0), ("worst_deviation_db", 0.0)],
+    [
+        ("passes", False),
+        ("worst_margin_db", 99.0),
+        ("worst_deviation_db", 0.0),
+        ("stimuli", ()),
+    ],
 )
-def test_a_summary_the_rows_do_not_derive_is_rejected(field: str, value: float) -> None:
+def test_the_summaries_are_read_from_the_rows(field: str, value: object) -> None:
     """The three summaries are the conjunction, the minimum and the maximum.
 
     A sheet that says the chain passed above a row whose margin is negative is
-    the one this refusal exists to make impossible, and every number on it is
-    inside its plausible range.
+    the one this class exists to make impossible: the summaries are read from
+    the rows and cannot be set.
     """
     report = verify_quasi_peak_dynamics()
-    with pytest.raises(ValueError, match=rf"'{field}' must be the value"):
+    with pytest.raises(TypeError, match=field):
         replace(report, **{field: value})
+
+
+def test_a_row_outside_its_window_fails_the_chain() -> None:
+    """One reading outside its window is enough, and its margin is the worst."""
+    report = verify_quasi_peak_dynamics()
+    readings = list(report.readings_percent)
+    # The 10 ms window of Table 2 is 41 % to 55 %: 60 % is 20 log10(55/60)
+    # below its upper limit.
+    readings[3] = 60.0
+    failed = replace(report, readings_percent=tuple(readings))
+    assert failed.stimuli[3]["stimulus"] == "10 ms"
+    assert failed.passes is False
+    assert failed.worst_margin_db == pytest.approx(20.0 * math.log10(55.0 / 60.0))
+
+
+def test_the_window_is_read_from_the_table_not_from_the_row() -> None:
+    """A row is read-only: its window and margin cannot be rewritten after the verdict."""
+    report = verify_quasi_peak_dynamics()
+    row = report.stimuli[0]
+    assert (row["lower_percent"], row["upper_percent"]) == (13.5, 21.4)
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        row["margin_db"] = -3.0  # type: ignore[index]
+    assert report.passes is True

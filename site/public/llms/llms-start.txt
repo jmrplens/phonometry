@@ -1275,7 +1275,7 @@ says where each verdict first shipped.
 | `emission.ReferenceSoundSourceVerdict` | every `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | the bands, the levels and the measured figures | after 4.0.0rc1 |
 | `emission.ReferenceSourceDriftResult`, `emission.SpecialRoomSuitabilityCheck` | `limit_db` | the bands | after 4.0.0rc1 |
 | `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | the bands | after 4.0.0rc1 |
-| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing`; a band row must restate the Table 2 minima, its index, its margins and its class | 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing`; the band rows are read from them, see the next section | 4.0.0rc1 |
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | `room` selects it; the qualified radii must be the ones the levels reach | after 4.0.0rc1 |
 | `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gains `earphone_attenuation_db` and `allowed_threshold_shift_db` | after 4.0.0rc1 |
 | `hearing.FixtureIsolationCheck` | `required_db` | the bands | after 4.0.0rc1 |
@@ -1333,6 +1333,144 @@ requirement records of ISO 8297 and IEC 60118-4, `PlantRequirement` and
 `LoopRequirement`, also keep each row's limit as a field: one record type
 holds requirements whose limits mix printed figures with the plant's geometry,
 the specified field strength or the noise measured with the loop off.
+
+## A verdict is read from the values it holds
+
+The section above took the printed limits out of the constructors. The verdict
+flags stayed in: `passes`, `complies`, `qualified`, every `*_met` and `*_ok`,
+the advisories, and the class of each band of a filter, weighting or intensity
+instrument verdict. The function that built a result worked them out and
+stored them beside the readings they came from, so a result built by hand, or
+rewritten with `dataclasses.replace`, could hold readings that fail and a flag
+that says they pass. In 4.0 every one of them is a read-only property, read
+from the values the result holds and the limit the standard prints. A result
+keeps what its verdict is read from: the readings, the margins, the positions,
+the measured figures. A figure that only fed the verdict, such as the rounded
+level of an RD 1367/2007 period or the share of raindrops inside their
+tolerance, is a property too. The functions that return these results take the
+same arguments and return the same verdicts, and every name in the table still
+reads the same value; only code that builds one of these results directly, or
+replaces one of the listed fields, has to change. "By name only" marks a field
+that is keyword-only.
+
+| Result | No longer constructor fields | Read from | Since |
+| --- | --- | --- | --- |
+| `building.JointTestElementCheck` | `length_ok`, `width_ok`, `passes` | `joint_length_m`, `joint_width_mm`, `window_or_door_gap` | after 4.0.0rc1 |
+| `building.GapWidthCheck` | `gap_width_mm`, `spread_mm`, `enough_positions`, `uniform`, `passes` | `readings_mm` | after 4.0.0rc1 |
+| `building.JointGapSeriesCheck` | `nominal_measured`, `minimum_measured`, `working_range_measured`, `passes` | `gap_widths_mm`, `nominal_gap_mm`, `minimum_gap_mm` | after 4.0.0rc1 |
+| `building.LiningCuringCheck` | `cured`, `lag_within_third`, `passes` | `curing_time_days`, `time_lag_days`, `required_curing_days` | after 4.0.0rc1 |
+| `building.RainGeneratorVerification` | `rate_deviation_mm_h`, `rate_ok`, `drop_share`, `drops_ok`, `velocity_share`, `velocities_ok`, `passes` | `rain_type`, `rainfall_rate_mm_h`, `drop_diameters_mm`, `fall_velocities_m_s` | after 4.0.0rc1 |
+| `building.ServiceEquipmentPositionCheck` | `separation_m`, `surface_distance_m`, `source_distance_m`, `heights_m`, `corner_height_m`, `corner_wall_distances_m` and the six `*_ok` | the room, the corner and the positions | after 4.0.0rc1 |
+| `building.DbHrCheck` | `reported`, `margin`, `complies` | `requirement`, `value` | 4.0.0rc1 |
+| `building.LowFrequencyIntensityResult`, `building.LowFrequencyElementResult` | `qualified` | `surface_pressure_intensity_indicator`, against the 6.4.2 limit `absorbing_specimen_surface` selects | 4.0.0rc1 |
+| `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels_db`, `noise_is_tonal` | after 4.0.0rc1 |
+| `electroacoustics.FeedbackStabilityResult` | `is_stable` | `loop_gain`, `stability_margin` | 4.0.0rc1 |
+| `emission.FreeFieldCheck` | `room`, `frequencies_hz`, `band_radius_m`, `maximum_qualified_radius_m`, every `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | the arguments of `check_free_field`: gains `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | after 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing` | 4.0.0rc1 |
+| `emission.ReferenceSourceCalibration` | `sound_power_level_db`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gains `intensity_sound_power_level_db` and `room_qualification` | after 4.0.0rc1 |
+| `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gains `background_margin_db`, `background_margin_ref_db` | after 4.0.0rc1 |
+| `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gains `background_margin_db`, `background_margin_ref_db`, the smallest over the positions, and `excess_levels_db`, `directivity_range_db`, the two indicators Table 2 grades by | 4.0.0rc1 |
+| `emission.SpecialRoomSoundPowerResult` | `background_requirement_met`, `background_requirement_met_a` | gains `background_margin_db`, `background_margin_ref_db`, `background_margin_a_db` | after 4.0.0rc1 |
+| `emission.EmissionPressureResult` | `upper_bound` | gains `background_margin_db`, by name only | 4.0.0rc1 |
+| `emission.PrecisionCriteria` | `criterion_1` to `criterion_5`, `qualified` | gains the readings: `indicators`, `scan_intensity_level_1`, `scan_intensity_level_2`, `frequencies`, `repeatability_limit_db`, `pressure_residual_index_db`, `field_nonuniformity_1`, `field_nonuniformity_2` | 3.3.0 |
+| `emission.DiscretePointIntensityResult` | everything but the indicators and the grade: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, both criteria, the A-weighted figures and the rest | gains `normal_intensity`, `segment_areas_m2`, `pressure_residual_index_db`, `band_type` | 4.0.0rc1 |
+| `emission.TurbineTestEnvironmentCheck` | `correction_ok`, `wind_ok`, `windscreen_advised` | `environmental_correction_db`, `ratio`, `wind_speed_m_s` | after 4.0.0rc1 |
+| `environment.ImpulseOnset` | `level_difference`, `prominence`, `qualifies` | `level_start`, `level_end`, `onset_rate` | 3.3.0 |
+| `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_min` | 3.3.0 |
+| `environment.ResidualCorrectionResult` | `reliable` | `margin` | 3.3.0 |
+| `environment.PeriodAssessment` | `reported_level`, `reported_long_term`, `max_phase_level`, `phase_pass`, `daily_pass`, `long_term_pass` | `phases`, the two levels and `limit`; gains `new_activity`, by name only | 4.0.0rc1 |
+| `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | after 4.0.0rc1 |
+| `environment.SoundRelevantTurbines` | `relevant`, `total_level_db`, `relevant_level_db` | `predicted_levels_db` | after 4.0.0rc1 |
+| `environment.WindShearProfile` | `typical` | `shear_exponent` | after 4.0.0rc1 |
+| `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone` | 3.3.0 |
+| `filters.FilterComplianceResult` | `bands`, `overall_class`, `range_limited` | gains `band_margins`, the rows without their class | 3.3.0 |
+| `filters.WeightingComplianceResult` | `bands`, `overall_class`, `range_limited` | gains `band_margins`, the rows without their class | 4.0.0rc1 |
+| `hearing.AscendingThresholdResult` | `threshold_db`, `determined`, `series_exhausted` | `ascent_levels_db`, `shortened` | after 4.0.0rc1 |
+| `hearing.TaskContribution` | `spread_advisory` | `n_samples`, `sample_range_db` | 3.3.0 |
+| `hearing.ExposureResult` | `sampling_advisory` | gains `sample_range_db`, `n_workers`, `sample_duration_hours`, by name only | 3.3.0 |
+| `hearing.AttenuationDifferenceResult` | `difference_db`, `criterion_db`, `significant` | the two means and their expanded uncertainties | after 4.0.0rc1 |
+| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gains the measured figures: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_centre_distance_m`, `lowest_relative_humidity_percent` | after 4.0.0rc1 |
+| `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, against the region `values`, `method`, `alpha` and `median` give | 3.3.0 |
+| `metrology.StationarityTestResult` | `stationary`, `bounds` | `count`, against the region `segment_values`, `method` and `alpha` give | 3.3.0 |
+| `metrology.CouplerCheck` | `ratio_recommended`, `approximation_valid`, `full_solution_advised`, `conditions_valid` | gains `heat_conduction_method`, `temperature_c`, `static_pressure_pa`, `relative_humidity_percent`, `in_air`, by name only | after 4.0.0rc1 |
+| `metrology.FreeFieldArrangementCheck` | `distances_ok`, `support_ok`, `annex_a_range`, `attenuation_accuracy` | gains `air_attenuation` | after 4.0.0rc1 |
+| `noise_control.CabinUncertainty` | `ratio_satisfied`, `stateable`, `stated_band_range_hz`, `increased_uncertainty_band_range_hz`, `excess_standard_deviation_db` | `method`, `volume_ratio` | after 4.0.0rc1 |
+| `room.RoomAcousticsResult` | `edt_valid`, `t20_valid`, `t30_valid` | `dynamic_range` and the decay times | 3.3.0 |
+| `room.BackgroundMarginCheck` | `needs_correction`, `unusable`, `satisfied` | `margins_db` | after 4.0.0rc1 |
+| `room.DetailVerdict` | `satisfied`, `room_ok`, `fittings_ok`, `sources_ok` | gains `room_detail`, `fitting_detail`, `source_detail` | after 4.0.0rc1 |
+| `underwater.WeightedExposureResult` | `exceeds_injury`, `exceeds_tts` | `sel_margin`, `peak_margin`, `tts_margin`, `tts_peak_margin` | 4.0.0rc1 |
+| `vibration.PeopleAssessment` | `complies`, `criterion`, `within_uncertainty` | `kb_fmax`, `kb_ftr`, `guide`, `source`; gains `rare_short_events`, by name only | after 4.0.0rc1 |
+| `vibration.RailwayChange` | `complies`, `kb_fmax_met`, `kb_ftr_met`, `kb_fmax_increase_percent`, `kb_ftr_increase_percent` | gains `kb_fmax_before`, `kb_fmax_after`, `kb_ftr_before`, `kb_ftr_after` | after 4.0.0rc1 |
+| `vibration.TransferStiffnessResult` | `valid` | gains `transmissibility`, \|T\| of the indirect method | 3.3.0 |
+| `vibration.DrivingPointStiffnessResult` | `adequate` | gains `blocked_output_difference_db`, `unwanted_input_difference_db` | after 4.0.0rc1 |
+| `aircraft.AircraftSystemComplianceResult` | `passes`, `checks` | gains `directional`, `frequency_response`, `linearity`, `resolution`, the arguments of `verify_aircraft_noise_system` | 4.0.0rc1 |
+| `broadcast.QuasiPeakDynamicsResult` | `passes`, `worst_margin_db`, `worst_deviation_db`, `stimuli` | gains `readings_percent`, the eleven readings in the order of Tables 2 and 3 | 4.0.0rc1 |
+| `building.FloorCoveringImprovementResult` | `limited` | gains `background_margin_db`, the smallest margin over the positions and both floors | 3.1.0 |
+| `building.VibrationReductionResult` | `single_number`, `bracketed` | `frequencies`, `k_ij`; gains `modal_overlap`, `band_type` | 3.1.0 |
+| `building.ServiceEquipmentBackgroundResult` | `difference_db`, `correction_db`, `corrected_db`, `regime` | `measured_db`, `background_db` | after 4.0.0rc1 |
+| `building.ServiceEquipmentResult` | `standardizable` | `frequencies_hz`, `band` | after 4.0.0rc1 |
+| `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` and the indicators; gains `pressure_residual_index_db`, `band_type`, `repeatability_limit_db` | 3.1.0 |
+| `emission.PrecisionIntensityResult` | `sound_power`, `sound_power_level`, `sound_power_level_normalized`, `not_applicable_band`, `sound_power_level_a` | `partial_power`; gains `temperature_c`, `barometric_pressure_pa`, by name only | 3.1.0 |
+| `emission.InDuctSoundPowerResult` | `information_only_band` | `frequencies`, `flow_velocity` | 4.0.0rc1 |
+| `emission.SourceLocationPlan` | `spectral_character`, `a_weighted_spectral_character` | `standard`, `standard_deviation_db`, `a_weighted_standard_deviation_db` | after 4.0.0rc1 |
+| `environment.ImpulsiveSoundResult` | `prominence`, `adjustment`, `category`, `adjusted_laeq` | `onsets`, `laeq` | 3.3.0 |
+| `environment.ModulationBlock` | `status` | `prominence`; gains `excluded`, by name only | after 4.0.0rc1 |
+| `environment.ReferenceTrackCheck` | `conditions` | the roughness, the decay rates and the limits; gains `curve_radius_m`, `track_gradient_ratio`, by name only | after 4.0.0rc1 |
+
+`FilterComplianceResult` and `WeightingComplianceResult` hold their per-band
+rows as `band_margins`: the rows `bands` held, without the `"class"` key. A
+row that states a class is refused, and the `bands` property adds to each row
+the class its margins earn, so `result.bands[i]["class"]` reads as before.
+`IntensityInstrumentComplianceResult` takes no band rows at all: it holds the
+frequencies and the measured pressure-residual intensity index, and reads the
+rows, the class and `range_limited` from them, the device and the microphone
+separation.
+
+The rows a verdict is read from are read-only. `band_margins` and
+`between_nominals` are copied into read-only mappings when the result is
+built, so a write into one raises `TypeError` and a later write into the
+dictionaries you built it from does not move the class; copy a row with
+`dict(row)` to change it, since `copy.deepcopy` cannot copy a read-only
+mapping. The rows of `AircraftSystemComplianceResult.checks`,
+`QuasiPeakDynamicsResult.stimuli` and `ReferenceTrackCheck.conditions` are
+built from what the result holds and the tables of the standard each time
+they are read.
+
+```python
+import dataclasses
+
+from phonometry import building, filters
+
+gap = building.check_gap_width([5.0, 5.1, 5.2, 5.1])
+print(gap.passes, round(gap.spread_mm, 1))
+# True 0.2
+try:
+    dataclasses.replace(gap, passes=False)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+wider = dataclasses.replace(gap, readings_mm=(5.0, 5.1, 5.6, 5.1))
+print(wider.uniform, wider.passes)
+# False False
+bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+result = filters.verify_filter_class(bank)
+print(result.overall_class, result.bands[0]["class"], "class" in result.band_margins[0])
+# 1 1 False
+```
+
+A flag stays a field where it is no verdict against a limit: an option the
+caller sets, such as `small_room` or `noise_is_tonal`; a fact of the
+computation, such as the branch a solver took; the outcome of an analysis
+that only running it again could give, such as
+`WindTurbineTonalityResult.has_identified_tone`; and a column of a published
+table row. `PlantRequirement` and `LoopRequirement` do not change: their rows
+keep each limit as a field for the reason the section above gives, and
+`PlantRequirement.holds` stays beside it. `TrackCondition` keeps its `holds`
+as a row of the report, but `ReferenceTrackCheck` builds its conditions from
+the track it holds, so no verdict reads one built elsewhere. The yes/no
+`checks` of `SoundLevelMeterPeriodicRequirement` stay as well: they are what
+the tester saw, an overload indicated or an indicator latched, not a limit
+judged.
 
 ## The ten names that are gone
 

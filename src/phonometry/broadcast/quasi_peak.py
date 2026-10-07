@@ -103,6 +103,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -120,6 +121,8 @@ from ..io._signal import Signal
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
 
 try:
@@ -720,66 +723,94 @@ def _window_row(
     }
 
 
+#: The eleven windows of clause 2 in the order they are read: the eight
+#: single bursts of Table 2, then the three repetition rates of Table 3, each
+#: ``(stimulus, table, lower, reference, upper)`` in percent.
+_WINDOWS: tuple[tuple[str, int, float, float, float], ...] = tuple(
+    (f"{duration:g} ms", 2, lower, reference, upper)
+    for duration, _, lower, reference, upper in _TABLE_2
+) + tuple(
+    (f"{rate:g} bursts/s", 3, lower, reference, upper)
+    for rate, lower, reference, upper in _TABLE_3
+)
+
+
 @dataclass(frozen=True)
 class QuasiPeakDynamicsResult(OwnsArrays):
     """The eleven acceptance windows of clause 2, read on one chain.
 
-    What :func:`verify_quasi_peak_dynamics` returns: the verdict together with
-    the eleven rows it is the conjunction of, and the sample rate they were
-    run at.
+    What :func:`verify_quasi_peak_dynamics` returns: the eleven readings, in
+    percent of the steady reading, and the sample rate they were run at. The
+    rows put each reading beside the window Table 2 or Table 3 prints for it,
+    and the verdict and the two summary numbers are the conjunction, the
+    minimum and the maximum of their columns, so all of them are read from
+    the readings and the tables and none is a field.
 
     :ivar fs: Sample rate the stimuli were run at, in Hz.
-    :ivar passes: Whether every reading fell inside its window.
-    :ivar worst_margin_db: The smallest of the eleven margins, negative when
-        one reading is outside its window.
-    :ivar worst_deviation_db: The largest departure from a printed reference
-        reading. It is a regression bound, not conformance: the reference is
-        printed to two significant figures on nine of the eleven cells.
-    :ivar stimuli: The eleven rows, ``{"stimulus", "table",
-        "reading_percent", "lower_percent", "reference_percent",
-        "upper_percent", "deviation_db", "margin_db"}`` each.
+    :ivar readings_percent: The eleven readings, in percent of the steady
+        reading: the eight single bursts of Table 2 from 1 ms to 200 ms,
+        then the 2, 10 and 100 bursts per second of Table 3.
     """
 
     fs: float
-    passes: bool
-    worst_margin_db: float
-    worst_deviation_db: float
-    stimuli: tuple[dict[str, Any], ...]
+    readings_percent: tuple[float, ...]
 
     def __post_init__(self) -> None:
-        """Reject a verdict its own eleven rows do not support.
+        """Reject a verdict over other than the eleven stimuli, or at a rate that is no rate.
 
-        The three summary numbers are not independent of the table: they are
-        the conjunction, the minimum and the maximum of the same column a
-        reader prints beside them. A verdict that says the chain passed above
-        a row whose margin is negative is the one sheet this class exists to
-        make impossible, and nothing further down objects to it, because every
-        number on it is inside its plausible range.
-
-        :raises ValueError: if there are no rows, or a summary is not the one
-            the rows derive.
+        :raises ValueError: if there are not eleven readings, one is not
+            positive and finite, or ``fs`` is not positive.
         """
-        if not self.stimuli:
+        readings = tuple(float(r) for r in self.readings_percent)
+        if len(readings) != len(_WINDOWS):
             msg = (
-                f"{type(self).__name__}: a verdict cannot be attested over no "
-                "stimulus; clause 2 has eleven."
+                f"{type(self).__name__}: a verdict is attested over the "
+                f"{len(_WINDOWS)} stimuli of clause 2, in the order of Tables 2 "
+                f"and 3; got {len(readings)} readings."
             )
             raise ValueError(msg)
+        if not all(math.isfinite(r) and r > 0.0 for r in readings):
+            msg = "'readings_percent' must be positive and finite."
+            raise ValueError(msg)
+        object.__setattr__(self, "readings_percent", readings)
         require_positive(self.fs, "fs")
-        margins = [float(row["margin_db"]) for row in self.stimuli]
-        deviations = [abs(float(row["deviation_db"])) for row in self.stimuli]
-        for field, stated, derived in (
-            ("passes", self.passes, all(m >= 0.0 for m in margins)),
-            ("worst_margin_db", self.worst_margin_db, min(margins)),
-            ("worst_deviation_db", self.worst_deviation_db, max(deviations)),
-        ):
-            if stated != derived:
-                msg = (
-                    f"{type(self).__name__}: '{field}' must be the value the "
-                    f"eleven rows derive; got {stated!r} where they give "
-                    f"{derived!r}."
-                )
-                raise ValueError(msg)
+
+    @property
+    def stimuli(self) -> tuple[Mapping[str, Any], ...]:
+        """The eleven rows, ``{"stimulus", "table", "reading_percent",
+        "lower_percent", "reference_percent", "upper_percent",
+        "deviation_db", "margin_db"}`` each, read-only.
+
+        The window is the one Table 2 or Table 3 prints for the stimulus, and
+        ``margin_db`` is positive when the reading is inside it.
+        """
+        return tuple(
+            MappingProxyType(
+                _window_row(stimulus, table, reading, lower, reference, upper)
+            )
+            for (stimulus, table, lower, reference, upper), reading in zip(
+                _WINDOWS, self.readings_percent, strict=True
+            )
+        )
+
+    @property
+    def passes(self) -> bool:
+        """Whether every reading fell inside its window."""
+        return all(float(row["margin_db"]) >= 0.0 for row in self.stimuli)
+
+    @property
+    def worst_margin_db(self) -> float:
+        """The smallest of the margins, negative when one reading is outside its window."""
+        return min(float(row["margin_db"]) for row in self.stimuli)
+
+    @property
+    def worst_deviation_db(self) -> float:
+        """The largest departure from a printed reference reading.
+
+        It is a regression bound, not conformance: the reference is printed
+        to two significant figures on nine of the eleven cells.
+        """
+        return max(abs(float(row["deviation_db"])) for row in self.stimuli)
 
 
 def verify_quasi_peak_dynamics(
@@ -823,38 +854,20 @@ def verify_quasi_peak_dynamics(
     :raises ValueError: If *fs* is not positive.
     """
     fs = require_positive(fs, "fs")
-    rows = [
-        _window_row(
-            f"{duration:g} ms",
-            2,
-            _burst_percent(fs, cycles, 1, None, ballistics),
-            lower,
-            reference,
-            upper,
-        )
-        for duration, cycles, lower, reference, upper in _TABLE_2
+    readings = [
+        _burst_percent(fs, cycles, 1, None, ballistics)
+        for _, cycles, _, _, _ in _TABLE_2
     ]
-    rows += [
-        _window_row(
-            f"{rate:g} bursts/s",
-            3,
-            _burst_percent(
-                fs,
-                _TABLE_3_CYCLES,
-                int(round(_SETTLING_SECONDS * rate)) + 1,
-                rate,
-                ballistics,
-            ),
-            lower,
-            reference,
-            upper,
+    readings += [
+        _burst_percent(
+            fs,
+            _TABLE_3_CYCLES,
+            int(round(_SETTLING_SECONDS * rate)) + 1,
+            rate,
+            ballistics,
         )
-        for rate, lower, reference, upper in _TABLE_3
+        for rate, _, _, _ in _TABLE_3
     ]
-    return QuasiPeakDynamicsResult(
-        fs=float(fs),
-        passes=all(row["margin_db"] >= 0.0 for row in rows),
-        worst_margin_db=min(row["margin_db"] for row in rows),
-        worst_deviation_db=max(abs(row["deviation_db"]) for row in rows),
-        stimuli=tuple(rows),
-    )
+    # Each reading is set beside its window, and the margins and the verdict
+    # read from them, by the result.
+    return QuasiPeakDynamicsResult(fs=float(fs), readings_percent=tuple(readings))

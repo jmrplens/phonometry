@@ -551,14 +551,22 @@ def test_the_direct_result_averages_every_line_by_default() -> None:
     assert res.band_average().stiffness == pytest.approx([5.0e6, 5.0e6])
 
 
-def test_a_result_refuses_validity_flags_that_are_not_boolean() -> None:
+def test_a_result_reads_its_validity_from_the_transmissibility() -> None:
+    """Inequality (2) of ISO 10846-3, |T| <= 0,1, inclusive; no flags are taken."""
     f = _TWO_BANDS_HZ[:3]
     k = np.full(3, 1.0e6 + 0j)
-    flags = np.array([1.0, 1.0, 0.0])
-    with pytest.raises(ValueError, match="'valid' must be boolean"):
-        vibration.TransferStiffnessResult(
-            frequencies=f, transfer_stiffness=k, valid=flags
-        )
+    t = np.array([0.05 + 0j, 0.1 + 0j, 0.2 + 0j])
+    res = vibration.TransferStiffnessResult(
+        frequencies=f, transfer_stiffness=k, transmissibility=t
+    )
+    assert res.valid is not None
+    assert res.valid.tolist() == [True, True, False]
+    assert (
+        vibration.TransferStiffnessResult(frequencies=f, transfer_stiffness=k).valid
+        is None
+    )
+    with pytest.raises(TypeError, match="valid"):
+        dataclasses.replace(res, valid=np.ones(3, dtype=bool))
 
 
 def test_the_indirect_warning_is_the_transfer_stiffness_warning() -> None:

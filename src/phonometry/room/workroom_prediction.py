@@ -224,18 +224,39 @@ RECOMMENDED_DETAIL: Mapping[
 class DetailVerdict:
     """Whether the data in hand is what a category of method asks for.
 
-    :param category: The category asked about.
-    :param satisfied: Whether all three levels fall inside Table E.1.
-    :param room_ok: Whether the room description does.
-    :param fittings_ok: Whether the fitting description does.
-    :param sources_ok: Whether the source description does.
+    The verdicts are read from the three levels and the row of Table E.1 the
+    category selects, so they are not fields.
+
+    :ivar category: The category asked about.
+    :ivar room_detail: The level of Table 1 the room is described at.
+    :ivar fitting_detail: The level of Table 2 the fittings are described at.
+    :ivar source_detail: The level of Table 3 the sources are described at.
     """
 
     category: str
-    satisfied: bool
-    room_ok: bool
-    fittings_ok: bool
-    sources_ok: bool
+    room_detail: int
+    fitting_detail: int
+    source_detail: int
+
+    @property
+    def room_ok(self) -> bool:
+        """Whether the room description falls inside Table E.1."""
+        return self.room_detail in prediction_method(self.category).room_detail
+
+    @property
+    def fittings_ok(self) -> bool:
+        """Whether the fitting description falls inside Table E.1."""
+        return self.fitting_detail in prediction_method(self.category).fitting_detail
+
+    @property
+    def sources_ok(self) -> bool:
+        """Whether the source description falls inside Table E.1."""
+        return self.source_detail in prediction_method(self.category).source_detail
+
+    @property
+    def satisfied(self) -> bool:
+        """Whether all three levels fall inside Table E.1."""
+        return self.room_ok and self.fittings_ok and self.sources_ok
 
 
 def prediction_method(category: str) -> PredictionMethod:
@@ -277,15 +298,11 @@ def detail_is_sufficient(
     _require_level(room_detail, ROOM_DETAIL_LEVELS, "room_detail", 1)
     _require_level(fitting_detail, FITTING_DETAIL_LEVELS, "fitting_detail", 2)
     _require_level(source_detail, SOURCE_DETAIL_LEVELS, "source_detail", 3)
-    room_ok = room_detail in method.room_detail
-    fittings_ok = fitting_detail in method.fitting_detail
-    sources_ok = source_detail in method.source_detail
     return DetailVerdict(
         category=method.category,
-        satisfied=room_ok and fittings_ok and sources_ok,
-        room_ok=room_ok,
-        fittings_ok=fittings_ok,
-        sources_ok=sources_ok,
+        room_detail=room_detail,
+        fitting_detail=fitting_detail,
+        source_detail=source_detail,
     )
 
 

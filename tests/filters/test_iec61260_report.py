@@ -259,8 +259,7 @@ def test_empty_bands_result_is_graceful() -> None:
     from phonometry.filters.compliance import FilterComplianceResult
 
     empty = FilterComplianceResult(
-        overall_class=None,
-        bands=(),
+        band_margins=(),
         fraction=1,
         edition="2014",
         sos=(),
@@ -270,6 +269,8 @@ def test_empty_bands_result_is_graceful() -> None:
         num_points=2048,
     )
     assert empty.available_classes() == []
+    assert empty.overall_class is None
+    assert not empty.range_limited
     with pytest.raises(ValueError, match=r"has no bands, so it has no reference class"):
         empty.reference_class()
     with pytest.raises(ValueError, match=r"has no bands, so it has no reference class"):

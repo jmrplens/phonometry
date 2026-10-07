@@ -193,11 +193,10 @@ RAILWAY_NEW_LINE_NIGHT_A_O = {'surface': 0.6, 'underground': 0.3}
 
 ```python
 RailwayChange(
-    complies: bool,
-    kb_fmax_met: bool,
-    kb_ftr_met: bool,
-    kb_fmax_increase_percent: float,
-    kb_ftr_increase_percent: float,
+    kb_fmax_before: float,
+    kb_fmax_after: float,
+    kb_ftr_before: float,
+    kb_ftr_after: float,
     guide: GuideValues,
     time_of_day: str,
 )
@@ -205,17 +204,61 @@ RailwayChange(
 
 The verdict of 6.5.3.6 on an altered or extended line.
 
+The increases and the verdicts are read from the two cases, the guide
+values and the 25 % of 6.5.3.6, so they are not fields.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `complies` | Whether the requirements count as met for the planned case: $KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, or both the $KB_\mathrm{Fmax}$ and the $KB_\mathrm{FTr}$ condition hold. |
-| `kb_fmax_met` | Whether $KB_\mathrm{Fmax}$ of the planned case keeps to $A_\mathrm{u}$ or $A_\mathrm{o}$, or exceeds $A_\mathrm{o}$ by an increase under 25 % against the case without the project. |
-| `kb_ftr_met` | Whether $KB_\mathrm{FTr}$ of the planned case keeps to $A_\mathrm{r}$, or exceeds it by an increase under 25 %; true without looking when $KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, which settles the verdict on its own. |
-| `kb_fmax_increase_percent` | The increase of $KB_\mathrm{Fmax}$, planned against existing, in per cent. |
-| `kb_ftr_increase_percent` | The same for $KB_\mathrm{FTr}$. |
+| `kb_fmax_before` | $KB_\mathrm{Fmax}$ of the case without the project. |
+| `kb_fmax_after` | $KB_\mathrm{Fmax}$ of the planned case. |
+| `kb_ftr_before` | $KB_\mathrm{FTr}$ of the case without the project. |
+| `kb_ftr_after` | $KB_\mathrm{FTr}$ of the planned case. |
 | `guide` | The guide values the planned case was held to. |
 | `time_of_day` | `"day"` or `"night"`. |
+
+### RailwayChange.complies
+
+*property*
+
+Whether the requirements count as met for the planned case.
+
+$KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, or both the
+$KB_\mathrm{Fmax}$ and the $KB_\mathrm{FTr}$ condition hold.
+
+### RailwayChange.kb_fmax_increase_percent
+
+*property*
+
+The increase of $KB_\mathrm{Fmax}$, planned against existing, in per cent.
+
+### RailwayChange.kb_fmax_met
+
+*property*
+
+Whether $KB_\mathrm{Fmax}$ of the planned case meets 6.5.3.6.
+
+It keeps to $A_\mathrm{u}$ or $A_\mathrm{o}$, or exceeds $A_\mathrm{o}$ by an
+increase under 25 % against the case without the project. The
+increase is judged settled: 0,28 to 0,35 is 25 % in decimal and
+24,999 999 999 999 98 % in binary, which must not decide the verdict.
+
+### RailwayChange.kb_ftr_increase_percent
+
+*property*
+
+The increase of $KB_\mathrm{FTr}$, planned against existing, in per cent.
+
+### RailwayChange.kb_ftr_met
+
+*property*
+
+Whether $KB_\mathrm{FTr}$ of the planned case meets 6.5.3.6.
+
+It keeps to $A_\mathrm{r}$, or exceeds it by an increase under 25 %;
+true without looking when $KB_\mathrm{Fmax}$ keeps to
+$A_\mathrm{u}$, which settles the verdict on its own.
 
 ## train_assessment_severity
 

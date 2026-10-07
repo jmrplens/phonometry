@@ -197,28 +197,14 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 ```python
 DiscretePointIntensityResult(
     frequencies: np.ndarray | None,
-    partial_power: np.ndarray,
-    sound_power: np.ndarray,
-    sound_power_level: np.ndarray,
-    not_applicable_band: np.ndarray,
+    normal_intensity: np.ndarray,
+    segment_areas_m2: np.ndarray,
     f1: np.ndarray | None,
     f2: np.ndarray | None,
     f3: np.ndarray | None,
     f4: np.ndarray | None,
-    dynamic_capability_index: np.ndarray | None,
-    criterion_1: np.ndarray | None,
-    negative_power_within_limit: np.ndarray | None,
-    criterion_2: np.ndarray | None,
-    minimum_positions: np.ndarray | None,
-    achieved_grade: np.ndarray | None,
-    confidence_interval: np.ndarray | None,
-    expanded_uncertainty: np.ndarray | None,
-    surface_area: float,
-    positions: int,
-    sound_power_level_a: float,
-    a_weighting_omitted_bands: np.ndarray | None,
-    field_nonuniformity_a: float,
-    achieved_grade_a: str | None,
+    pressure_residual_index_db: np.ndarray | None,
+    band_type: str,
     grade: str,
 )
 ```
@@ -268,6 +254,87 @@ prints no `s`, and `None` for the whole determination where
 10.5 b), those failing criteria 1 and/or 2, which
 `a_weighting_omitted_bands` flags.
 
+### DiscretePointIntensityResult.a_weighting_omitted_bands
+
+*property*
+
+The bands clause 10.5 b) keeps out of the A-weighted sum, or `None`.
+
+### DiscretePointIntensityResult.achieved_grade
+
+*property*
+
+The grade each band reaches over the gates of Figure B.1.
+
+One of `'precision'`, `'engineering'` and `'none'` per band, or
+`None` where it cannot be established.
+
+### DiscretePointIntensityResult.achieved_grade_a
+
+*property*
+
+The grade the A-weighted determination reaches, or `None`.
+
+### DiscretePointIntensityResult.confidence_interval
+
+*property*
+
+The 95 % interval $10 \lg (1 \pm 2 F_4 / \sqrt{N})$ (equation (B.3)), per band.
+
+### DiscretePointIntensityResult.criterion_1
+
+*property*
+
+Criterion 1, $L_\mathrm{d} > F_2$ (equation (B.1)), per band.
+
+### DiscretePointIntensityResult.criterion_2
+
+*property*
+
+Criterion 2, $N > C F_4^2$ (equation (B.2)), per band.
+
+### DiscretePointIntensityResult.dynamic_capability_index
+
+*property*
+
+$L_\mathrm{d} = \delta_{pI0} - K$ per band at the requested grade (Eq. (10)).
+
+### DiscretePointIntensityResult.expanded_uncertainty
+
+*property*
+
+Table 2 footnote 1's 2s per band, at the grade each band achieved.
+
+### DiscretePointIntensityResult.field_nonuniformity_a
+
+*property*
+
+The field non-uniformity of the A-weighted determination (B.1.2).
+
+### DiscretePointIntensityResult.minimum_positions
+
+*property*
+
+The $C F_4^2$ that criterion 2 compares `positions` against.
+
+### DiscretePointIntensityResult.negative_power_within_limit
+
+*property*
+
+Figure B.1's unnumbered $F_3 - F_2 \le 3$ dB gate, per band.
+
+### DiscretePointIntensityResult.not_applicable_band
+
+*property*
+
+Per band, whether the total sound power is not positive (clause 9.2).
+
+### DiscretePointIntensityResult.partial_power
+
+*property*
+
+The signed $P_i = I_{\mathrm{n}i} S_i$ per position and band (equation (11)).
+
 ### DiscretePointIntensityResult.plot()
 
 ```python
@@ -299,6 +366,12 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the band `bar`. |
+
+### DiscretePointIntensityResult.positions
+
+*property*
+
+The number $N$ of measurement positions.
 
 ### DiscretePointIntensityResult.required_actions()
 
@@ -336,6 +409,30 @@ selecting it is the default, so it is reported here; see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the determination was never qualified, i.e. it carries no `criterion_1` because `pressure_levels` and `pressure_residual_index` were not supplied. |
+
+### DiscretePointIntensityResult.sound_power
+
+*property*
+
+The signed band total of the partial powers (the sum of equation (12)).
+
+### DiscretePointIntensityResult.sound_power_level
+
+*property*
+
+The band sound power level (equation (12)), `NaN` outside the method.
+
+### DiscretePointIntensityResult.sound_power_level_a
+
+*property*
+
+The A-weighted sound power level of the bands the sum keeps, in dB.
+
+### DiscretePointIntensityResult.surface_area
+
+*property*
+
+The measurement surface, the sum of the segment areas, in m².
 
 ## error_factor
 

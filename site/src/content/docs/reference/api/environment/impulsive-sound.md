@@ -167,11 +167,7 @@ ImpulseOnset(
     time_end: float,
     level_start: float,
     level_end: float,
-    level_difference: float,
     onset_rate: float,
-    prominence: float,
-    *,
-    qualifies: bool,
 )
 ```
 
@@ -187,10 +183,25 @@ A single detected onset of `LpAF` (ISO/PAS 1996-3, Clause 3).
 | `time_end` | Time of the end point, in seconds. |
 | `level_start` | Level `Ls` at the starting point, in dB. |
 | `level_end` | Level `Le` at the end point, in dB. |
-| `level_difference` | Level difference $\mathrm{LD} = L_\mathrm{e} - L_\mathrm{s}$, in dB (3.4). |
 | `onset_rate` | Onset rate `OR`, in dB/s, the least-squares slope over the onset (3.5). |
-| `prominence` | Predicted prominence `P` of this onset (Formula 2). |
-| `qualifies` | Whether the onset rate exceeds 10 dB/s, so the onset can contribute an adjustment (Clause 6). |
+
+### ImpulseOnset.level_difference
+
+*property*
+
+Level difference $\mathrm{LD} = L_\mathrm{e} - L_\mathrm{s}$, in dB (3.4).
+
+### ImpulseOnset.prominence
+
+*property*
+
+Predicted prominence `P` of this onset (Formula 2), `nan` for a fall or a flat.
+
+### ImpulseOnset.qualifies
+
+*property*
+
+Whether the onset rate exceeds 10 dB/s on a rise, so the onset can contribute an adjustment (Clause 6).
 
 ## ImpulseProminenceResult
 
@@ -198,10 +209,6 @@ A single detected onset of `LpAF` (ISO/PAS 1996-3, Clause 3).
 ImpulseProminenceResult(
     onset_rates: np.ndarray,
     level_differences: np.ndarray,
-    per_impulse: np.ndarray,
-    qualifies: np.ndarray,
-    prominence: float,
-    adjustment: float,
     *,
     assessment_period_min: float = 30.0,
 )
@@ -209,17 +216,32 @@ ImpulseProminenceResult(
 
 Prominence of a set of candidate impulses (NT ACOU 112:2002).
 
+The prominences, which events qualify and the adjustment are read from the
+onset rates and level differences, by Formulas 1 and 2 and the 10 dB/s of
+clause 4.5, so they are not fields: a result cannot be built to adjust for
+an event the standard does not count.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `onset_rates` | Onset rate of each impulse, in dB/s. |
 | `level_differences` | Level difference of each impulse, in dB. |
-| `per_impulse` | Predicted prominence `P` of each impulse (Formula 1). |
-| `qualifies` | Whether each event qualifies as an impulse: onset rate above 10 dB/s (clause 4.5; clause 8 applies the adjustment "for sounds with onset rates larger than 10 dB/s" only). |
-| `prominence` | The governing prominence: the highest `P` among the qualifying impulses (clause 7), or the highest overall (informational) when none qualifies. |
-| `adjustment` | The LAeq adjustment `KI`, in dB, of the governing qualifying impulse (Formula 2); 0 dB when no event qualifies. |
 | `assessment_period_min` | The assessment time interval the impulses were selected over, in minutes (Clause 5; 30 min by default). |
+
+### ImpulseProminenceResult.adjustment
+
+*property*
+
+The LAeq adjustment `KI`, in dB, of the governing qualifying impulse.
+
+Formula 2; 0 dB when no event qualifies.
+
+### ImpulseProminenceResult.per_impulse
+
+*property*
+
+Predicted prominence `P` of each impulse (Formula 1).
 
 ### ImpulseProminenceResult.plot()
 
@@ -236,6 +258,24 @@ Plot the adjustment curve `KI(P)` with the impulses marked.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### ImpulseProminenceResult.prominence
+
+*property*
+
+The governing prominence.
+
+The highest `P` among the qualifying impulses (clause 7), or the
+highest overall (informational) when none qualifies.
+
+### ImpulseProminenceResult.qualifies
+
+*property*
+
+Whether each event qualifies as an impulse.
+
+Onset rate above 10 dB/s (clause 4.5; clause 8 applies the adjustment
+"for sounds with onset rates larger than 10 dB/s" only).
 
 ### ImpulseProminenceResult.report()
 
@@ -336,11 +376,7 @@ ImpulsiveSoundResult(
     levels: np.ndarray,
     dt: float,
     onsets: tuple[ImpulseOnset, ...],
-    prominence: float,
-    adjustment: float,
-    category: str,
     laeq: float,
-    adjusted_laeq: float,
 )
 ```
 
@@ -354,11 +390,29 @@ Objective prominence of an impulsive interval (ISO/PAS 1996-3:2022).
 | `levels` | A-weighted, F time-weighted level `LpAF`, in dB. |
 | `dt` | Sampling interval of `levels`, in seconds. |
 | `onsets` | The detected onsets, ordered in time (Clause 4). |
-| `prominence` | Governing prominence `P`: the highest `P` among the qualifying onsets (Clause 5); `nan` when none qualifies. |
-| `adjustment` | The `LAeq` adjustment `KI`, in dB (Formula 3); 0 dB when no onset qualifies. |
-| `category` | Source category (Clause 7): `"not impulsive"`, `"regular impulsive"` or `"highly impulsive"`. |
 | `laeq` | A-weighted equivalent level of the interval, in dB. |
-| `adjusted_laeq` | `laeq + adjustment`, in dB. |
+
+The governing prominence, the adjustment, the category and the adjusted
+level are read from the onsets and the limits of Clauses 6 and 7, so they
+are read-only properties and not fields.
+
+### ImpulsiveSoundResult.adjusted_laeq
+
+*property*
+
+`laeq + adjustment`, in dB.
+
+### ImpulsiveSoundResult.adjustment
+
+*property*
+
+The `LAeq` adjustment `KI`, in dB (Formula 3); 0 dB when no onset qualifies.
+
+### ImpulsiveSoundResult.category
+
+*property*
+
+Source category (Clause 7): `"not impulsive"`, `"regular impulsive"` or `"highly impulsive"`.
 
 ### ImpulsiveSoundResult.governing_onset
 
@@ -385,6 +439,14 @@ impulse, annotated with the prominence, adjustment and category.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### ImpulsiveSoundResult.prominence
+
+*property*
+
+Governing prominence `P`: the highest among the qualifying onsets (Clause 5).
+
+`nan` when no onset qualifies.
 
 ## ImpulsiveSoundWarning
 

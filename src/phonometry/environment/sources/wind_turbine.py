@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -188,7 +188,7 @@ _LA_OFFSET, _LA_PIVOT, _LA_EXP = -2.0, 502.0, 2.5
 
 
 @dataclass(frozen=True)
-class WindTurbineTonalityResult:
+class WindTurbineTonalityResult(OwnsArrays):
     r"""Tonal audibility of a narrowband spectrum (IEC 61400-11).
 
     :ivar tone_frequency: The frequency of the identified tone: the spectral
@@ -532,6 +532,6 @@ def wind_turbine_tonality(
         tonal_audibility=delta_la,
         is_audible=bool(delta_la > 0.0 and has_identified_tone),
         has_identified_tone=has_identified_tone,
-        frequencies=read_only_copy(fr),
-        levels=read_only_copy(lv),
+        frequencies=fr,
+        levels=lv,
     )

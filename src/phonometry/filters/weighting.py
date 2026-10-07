@@ -94,7 +94,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import require_positive
 from ..io._resolve import (
@@ -753,7 +753,7 @@ def _as_envelope(
     if not isinstance(x, Signal):
         return mean_square
     return TimeWeightedEnvelope(
-        mean_square=read_only_copy(mean_square),
+        mean_square=mean_square,
         fs=fs,
         mode=mode,
         calibrated=x.calibration_factor is not None,
@@ -761,7 +761,7 @@ def _as_envelope(
 
 
 @dataclass(frozen=True)
-class TimeWeightedEnvelope:
+class TimeWeightedEnvelope(OwnsArrays):
     """The exponentially averaged mean square of a record, and its rate.
 
     What :func:`time_weighting` computes is not a waveform: it is the

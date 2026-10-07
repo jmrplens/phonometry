@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_ranks,
@@ -103,7 +104,7 @@ _T30_RANGE = (5.0, 35.0)
 
 
 @dataclass(frozen=True)
-class RoomAcousticsResult:
+class RoomAcousticsResult(OwnsArrays):
     """Per-band room acoustic parameters from one impulse response.
 
     All arrays have one entry per analysis band (``frequencies`` holds the
@@ -368,7 +369,7 @@ def _band_parameters(x: np.ndarray, fs: int) -> tuple[float, ...]:
 
 
 @dataclass(frozen=True)
-class DecayCurve:
+class DecayCurve(OwnsArrays):
     """Schroeder backward-integrated decay curve of an impulse response.
 
     ``times`` holds the sample times in seconds from the direct sound and

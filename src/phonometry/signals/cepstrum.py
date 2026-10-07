@@ -71,6 +71,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import resolve_fs
 from .spectra import _positive, _validate_signal
@@ -176,7 +177,7 @@ def _complex_cepstrum(
 
 
 @dataclass(frozen=True)
-class CepstrumResult:
+class CepstrumResult(OwnsArrays):
     """A cepstrum over its full quefrency axis.
 
     The quefrency axis runs ``0 .. (nfft-1)/fs``; quefrencies above
@@ -325,7 +326,7 @@ def cepstrum(
 
 
 @dataclass(frozen=True)
-class LifterResult:
+class LifterResult(OwnsArrays):
     """A log spectrum split by liftering (Milner Sec. 4.3).
 
     :ivar frequencies: Frequency axis, in Hz.
@@ -500,7 +501,7 @@ def _parabolic_offset(
 
 
 @dataclass(frozen=True)
-class EchoDetectionResult:
+class EchoDetectionResult(OwnsArrays):
     r"""An echo delay and reflection coefficient read off the power cepstrum.
 
     :ivar quefrencies: Quefrency axis, in seconds.

@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_equal_shapes,
     require_finite_fields,
@@ -567,7 +568,7 @@ def _band_pass_db(
 
 
 @dataclass(frozen=True)
-class AuditoryWeightingResult:
+class AuditoryWeightingResult(OwnsArrays):
     r"""Auditory weighting and exposure functions of one hearing group.
 
     :ivar frequencies: Frequencies, in Hz.
@@ -716,7 +717,7 @@ def exposure_criteria(
 
 
 @dataclass(frozen=True)
-class WeightedExposureResult:
+class WeightedExposureResult(OwnsArrays):
     r"""Weighted exposure of a spectrum against a hearing group's criteria.
 
     :ivar frequencies: Band centre frequencies, in Hz.

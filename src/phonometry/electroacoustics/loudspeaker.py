@@ -53,7 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -252,7 +252,7 @@ def _effective_range(
 
 
 @dataclass(frozen=True)
-class LoudspeakerDirectivity:
+class LoudspeakerDirectivity(OwnsArrays):
     """Directional characteristics of the loudspeaker (IEC 60268-5 Clause 23).
 
     The clause's characteristics travel together: the directional response
@@ -360,7 +360,7 @@ def _require_frequency_pair(owner: object, name: str) -> None:
 
 
 @dataclass(frozen=True)
-class LoudspeakerCharacteristics:
+class LoudspeakerCharacteristics(OwnsArrays):
     """Rated loudspeaker characteristics for an IEC 60268-5 report.
 
     The on-axis response and the rated impedance are the required inputs; the
@@ -856,10 +856,10 @@ def loudspeaker_characteristics(
         ),
         impedance_frequencies=imp_f,
         impedance_modulus=imp_z,
-        thd_frequencies=read_only_copy(thd_f),
+        thd_frequencies=thd_f,
         thd_percent=thd_p,
-        polar_angles_deg=read_only_copy(p_ang),
-        polar_db=read_only_copy(p_db),
+        polar_angles_deg=p_ang,
+        polar_db=p_db,
         polar_frequency=p_freq,
         directivity_index_db=di,
     )

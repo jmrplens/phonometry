@@ -95,7 +95,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_finite,
     require_finite_array,
@@ -293,7 +293,7 @@ STABILITY_TOLERANCE_DB: Mapping[tuple[float, float], float] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class BackgroundMarginCheck:
+class BackgroundMarginCheck(OwnsArrays):
     """Whether the levels clear the background by what 5.1.4 asks.
 
     :param margins_db: The level of the source less the background at each
@@ -390,7 +390,7 @@ def check_background_margin(
 
 
 @dataclass(frozen=True)
-class SpatialDecayResult:
+class SpatialDecayResult(OwnsArrays):
     r"""A spatial sound distribution curve and what clause 6 reads off it.
 
     :param distances_m: The distance of each microphone position from the
@@ -1057,8 +1057,8 @@ def spatial_decay_curve(
         raise ValueError(msg)
     chosen, chosen_radii = values[keep], radii[keep]
     return SpatialDecayResult(
-        distances_m=read_only_copy(chosen_radii),
-        distribution_values_db=read_only_copy(chosen),
+        distances_m=chosen_radii,
+        distribution_values_db=chosen,
         reference_values_db=reference_distribution_value(chosen_radii),
         level_excess_db=level_excess(chosen, chosen_radii),
         decay_rate_db=spatial_decay_rate(chosen, chosen_radii),

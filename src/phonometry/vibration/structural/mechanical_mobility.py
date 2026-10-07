@@ -86,7 +86,7 @@ if TYPE_CHECKING:
 
 
 from ..._internal.boundary import settled_ratio
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -292,7 +292,7 @@ _RIGID_MASS_QUANTITIES: tuple[str, ...] = ("accelerance", "mobility")
 
 
 @dataclass(frozen=True)
-class RigidMassCalibrationResult:
+class RigidMassCalibrationResult(OwnsArrays):
     r"""Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
 
     Only what was measured and the block are fields. The block's known
@@ -440,7 +440,7 @@ def rigid_mass_calibration_check(
     )
     _omega(freq)
     return RigidMassCalibrationResult(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         measured=np.asarray(measured, dtype=np.float64),
         mass=mass,
         quantity=quantity,
@@ -484,7 +484,7 @@ def random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class MobilityResult:
+class MobilityResult(OwnsArrays):
     """A measured or modelled mobility FRF over frequency.
 
     :ivar frequencies: Frequencies, in hertz.
@@ -649,6 +649,4 @@ def sdof_mobility_result(
     """
     freq = np.asarray(frequency, dtype=np.float64)
     y = sdof_mobility(freq, mass, stiffness, damping)
-    return MobilityResult(
-        frequencies=read_only_copy(freq), mobility=y, driving_point=True
-    )
+    return MobilityResult(frequencies=freq, mobility=y, driving_point=True)

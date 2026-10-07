@@ -70,6 +70,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 from scipy import signal
 
+from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     require_equal_shapes,
@@ -145,7 +146,7 @@ _MLS_TAPS: dict[int, tuple[int, ...]] = {
 
 
 @dataclass(frozen=True)
-class ImpulseResponseResult:
+class ImpulseResponseResult(OwnsArrays):
     """Recovered broadband impulse response with its acquisition metadata.
 
     Returned by :func:`impulse_response` and :func:`mls_impulse_response`.
@@ -823,7 +824,7 @@ def golay_impulse_response(
 
 
 @dataclass(frozen=True)
-class ShapedSweepResult:
+class ShapedSweepResult(OwnsArrays):
     """A sweep synthesized to follow an arbitrary target magnitude spectrum.
 
     Returned by :func:`shaped_sweep_signal`. The playable samples live in

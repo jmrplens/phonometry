@@ -53,7 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -232,7 +232,7 @@ def _measurement(
 
 
 @dataclass(frozen=True)
-class TrackDecayRate:
+class TrackDecayRate(OwnsArrays):
     r"""The decay rates of a rail in one direction, by one-third octave band (EN 15461).
 
     Built by :func:`track_decay_rate` from a set of frequency responses, or
@@ -283,8 +283,8 @@ class TrackDecayRate:
         if frequencies.size != rates.size:
             msg = "'frequencies_hz' and 'decay_rates_db_per_m' need one value per band each."
             raise ValueError(msg)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
-        object.__setattr__(self, "decay_rates_db_per_m", read_only(rates.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "decay_rates_db_per_m", read_only(rates))
         if (self.distances_m is None) != (self.responses is None):
             msg = "'distances_m' and 'responses' come together or not at all."
             raise ValueError(msg)
@@ -292,8 +292,8 @@ class TrackDecayRate:
             distances, responses = _measurement(
                 self.distances_m, self.responses, frequencies.size
             )
-            object.__setattr__(self, "distances_m", read_only(distances.copy()))
-            object.__setattr__(self, "responses", read_only(responses.copy()))
+            object.__setattr__(self, "distances_m", read_only(distances))
+            object.__setattr__(self, "responses", read_only(responses))
 
     @property
     def minimum_measurable_db_per_m(self) -> float | None:

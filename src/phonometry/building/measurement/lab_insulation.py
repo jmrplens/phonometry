@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -101,7 +102,7 @@ class LabInsulationWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class LabAirborneInsulationResult:
+class LabAirborneInsulationResult(OwnsArrays):
     r"""Per-band laboratory airborne sound insulation (ISO 10140-2:2010).
 
     :ivar r: Sound reduction index :math:`R = L_1 - L_2 + 10 \log_{10}(S/A)` per
@@ -225,7 +226,7 @@ class LabAirborneInsulationResult:
 
 
 @dataclass(frozen=True)
-class LabImpactInsulationResult:
+class LabImpactInsulationResult(OwnsArrays):
     r"""Per-band laboratory impact sound insulation (ISO 10140-3:2010).
 
     :ivar l_n: Normalized impact sound pressure level

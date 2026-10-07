@@ -58,6 +58,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_equal_counts,
     require_ranks,
@@ -389,7 +390,7 @@ def _multiple_coherence_error(
 
 
 @dataclass(frozen=True)
-class MISOCoherenceResult:
+class MISOCoherenceResult(OwnsArrays):
     r"""Multiple and partial coherence of a MISO system (B&P Chapter 7).
 
     Every per-input array is indexed by the *original* input index (the order

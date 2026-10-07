@@ -117,7 +117,7 @@ if TYPE_CHECKING:
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -291,7 +291,7 @@ def _check_uncertainty_inputs(
 
 
 @dataclass(frozen=True)
-class HardWalledSoundPowerResult:
+class HardWalledSoundPowerResult(OwnsArrays):
     r"""Result of an ISO 3743-1:2010 determination in a hard-walled test room.
 
     ``quantity`` says which of the two determinations this is: ``'power'``
@@ -712,12 +712,12 @@ def _determine(
     is_power = quantity == "power"
     return HardWalledSoundPowerResult(
         frequencies=freqs,
-        sound_power_level=level if is_power else nan_band.copy(),
-        sound_energy_level=nan_band.copy() if is_power else level,
-        mean_source_level=read_only_copy(mean_source, dtype=np.float64),
-        mean_reference_level=read_only_copy(mean_ref, dtype=np.float64),
-        mean_background_level=read_only_copy(mean_bg, dtype=np.float64),
-        reference_power_level=np.asarray(power, dtype=np.float64).copy(),
+        sound_power_level=level if is_power else nan_band,
+        sound_energy_level=nan_band if is_power else level,
+        mean_source_level=np.asarray(mean_source, dtype=np.float64),
+        mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
+        mean_background_level=np.asarray(mean_bg, dtype=np.float64),
+        reference_power_level=np.asarray(power, dtype=np.float64),
         background_correction=k1,
         background_correction_ref=k1_ref,
         background_requirement_met=np.asarray(requirement, dtype=bool),
@@ -1052,7 +1052,7 @@ def reproducibility_from_round_robin(total_db: float, operating_db: float) -> fl
 
 
 @dataclass(frozen=True)
-class HardWalledRoomCheck:
+class HardWalledRoomCheck(OwnsArrays):
     r"""Qualification of a hard-walled test room (ISO 3743-1:2010, 4.2 to 4.4).
 
     ``level_range_db`` is, per octave band, the largest difference between
@@ -1308,7 +1308,7 @@ def check_hard_walled_room(
 
 
 @dataclass(frozen=True)
-class SourceLocationPlan:
+class SourceLocationPlan(OwnsArrays):
     r"""How many source locations a determination needs, from a preliminary
     survey of the room (ISO 3743-1:2010 7.4, Table 2; ISO 3743-2:2018 9.4,
     Table 3).
@@ -1445,10 +1445,13 @@ def hard_walled_source_locations(
     freqs = _octave_frequencies(frequencies, n_bands)
     s_m = np.asarray(np.std(arr, axis=0, ddof=1), dtype=np.float64)  # Eq. (7), (8)
     row = settled(s_m)
-    locations = np.where(row <= _TABLE2_ONE_LOCATION_DB, 1, 2).astype(np.int64)
-    other = np.where(
-        row > _TABLE2_TWO_LOCATIONS_DB, _TABLE2_OTHER_ROOM_LOCATIONS, 0
-    ).astype(np.int64)
+    locations = np.asarray(
+        np.where(row <= _TABLE2_ONE_LOCATION_DB, 1, 2), dtype=np.int64
+    )
+    other = np.asarray(
+        np.where(row > _TABLE2_TWO_LOCATIONS_DB, _TABLE2_OTHER_ROOM_LOCATIONS, 0),
+        dtype=np.int64,
+    )
     return SourceLocationPlan(
         standard=_STANDARD,
         frequencies=freqs,

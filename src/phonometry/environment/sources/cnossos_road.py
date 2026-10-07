@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -897,7 +898,7 @@ def road_vehicle_sound_power(
 
 
 @dataclass(frozen=True)
-class RoadEmissionResult:
+class RoadEmissionResult(OwnsArrays):
     """Directional sound power per metre of a CNOSSOS-EU road source line.
 
     :ivar frequencies: Octave-band midband frequencies, in Hz (63 Hz to 8 kHz).

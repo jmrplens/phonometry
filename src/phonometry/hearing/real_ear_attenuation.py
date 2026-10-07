@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import OwnsArrays
 from .hearing_protectors import _octave_axis
 
 if TYPE_CHECKING:
@@ -282,7 +283,7 @@ def _subject_grid(values: ArrayLike, name: str) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class RealEarAttenuationResult:
+class RealEarAttenuationResult(OwnsArrays):
     r"""The attenuation of a hearing protector on a panel of subjects (4.6).
 
     :ivar attenuation_db: The individual attenuations :math:`A_{j,f}`, one row
@@ -404,7 +405,7 @@ def real_ear_attenuation(
     spread = np.asarray(grid.std(axis=0, ddof=1), dtype=np.float64)
     standard = spread / math.sqrt(subjects)
     return RealEarAttenuationResult(
-        attenuation_db=np.array(grid, dtype=np.float64),
+        attenuation_db=np.asarray(grid, dtype=np.float64),
         mean_db=mean,
         standard_deviation_db=spread,
         standard_uncertainty_db=standard,
@@ -504,7 +505,7 @@ def minimum_significant_difference(
 
 
 @dataclass(frozen=True)
-class AttenuationDifferenceResult:
+class AttenuationDifferenceResult(OwnsArrays):
     r"""Whether two mean attenuations differ significantly, band by band (B.1.2).
 
     :ivar difference_db: :math:`|m_1 - m_2|` per band, in dB.
@@ -740,7 +741,7 @@ def allowable_field_variation(free_field_rejection_db: float) -> float:
 
 
 @dataclass(frozen=True)
-class ReatSoundFieldCheck:
+class ReatSoundFieldCheck(OwnsArrays):
     r"""Whether the test site's sound field qualifies for ISO 4869-1 (4.2.2).
 
     :ivar frequencies: The centre frequencies of the test signals, in hertz.

@@ -98,7 +98,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_1d_signal,
     require_choice,
@@ -479,7 +479,7 @@ def acceleration_test_positions(unit_length_m: float) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class PassByMeasurement:
+class PassByMeasurement(OwnsArrays):
     r"""The levels of one pass-by record, 6.5 and 6.6.3.
 
     :param times_s: The times of the stored level history, in seconds from the
@@ -516,10 +516,10 @@ class PassByMeasurement:
     def __post_init__(self) -> None:
         """Hold the history read-only."""
         object.__setattr__(
-            self, "times_s", read_only(np.array(self.times_s, dtype=np.float64))
+            self, "times_s", read_only(np.asarray(self.times_s, dtype=np.float64))
         )
         object.__setattr__(
-            self, "levels_db", read_only(np.array(self.levels_db, dtype=np.float64))
+            self, "levels_db", read_only(np.asarray(self.levels_db, dtype=np.float64))
         )
 
     @property
@@ -751,7 +751,7 @@ def _spread(values: NDArray[np.float64]) -> float:
 
 
 @dataclass(frozen=True)
-class StationaryTestResult:
+class StationaryTestResult(OwnsArrays):
     r"""The stationary test of a unit, 5.8.1.
 
     :param levels_db: :math:`L^i_{p\mathrm{Aeq},T}`, one row per set of
@@ -781,8 +781,8 @@ class StationaryTestResult:
         if levels.shape[0] < _MINIMUM_RUNS:
             msg = f"5.7 asks for at least {_MINIMUM_RUNS} sets; got {levels.shape[0]}."
             raise ValueError(msg)
-        object.__setattr__(self, "levels_db", read_only(levels.copy()))
-        object.__setattr__(self, "lengths_m", read_only(lengths.copy()))
+        object.__setattr__(self, "levels_db", read_only(levels))
+        object.__setattr__(self, "lengths_m", read_only(lengths))
 
     @property
     def set_levels_db(self) -> NDArray[np.float64]:
@@ -985,7 +985,7 @@ def rolling_stock_test(
 
 
 @dataclass(frozen=True)
-class RiseSpeedResult:
+class RiseSpeedResult(OwnsArrays):
     r"""The impulsive character of a level history, Annex A.
 
     :param times_s: The times of the history, in seconds.
@@ -1004,10 +1004,10 @@ class RiseSpeedResult:
     def __post_init__(self) -> None:
         """Hold the history read-only and the slopes and speeds as tuples."""
         object.__setattr__(
-            self, "times_s", read_only(np.array(self.times_s, dtype=np.float64))
+            self, "times_s", read_only(np.asarray(self.times_s, dtype=np.float64))
         )
         object.__setattr__(
-            self, "levels_db", read_only(np.array(self.levels_db, dtype=np.float64))
+            self, "levels_db", read_only(np.asarray(self.levels_db, dtype=np.float64))
         )
         object.__setattr__(
             self,
@@ -1298,7 +1298,7 @@ def _just_compliant_levels(
 
 
 @dataclass(frozen=True)
-class SmallRoughnessDeviation:
+class SmallRoughnessDeviation(OwnsArrays):
     r"""The acceptance of small roughness exceedances by their effect on the noise, Annex C.
 
     :param speed_kmh: The train speed of the pass-by, in km/h.
@@ -1342,7 +1342,7 @@ class SmallRoughnessDeviation:
             "noise_levels_db",
         ):
             object.__setattr__(
-                self, name, read_only(np.array(getattr(self, name), dtype=np.float64))
+                self, name, read_only(np.asarray(getattr(self, name), dtype=np.float64))
             )
         expected = _just_compliant_levels(self.roughness, limit)
         corrected = self.corrected_roughness_levels_db
@@ -1492,7 +1492,7 @@ def check_small_roughness_deviations(
 
 
 @dataclass(frozen=True)
-class RoughnessComparability:
+class RoughnessComparability(OwnsArrays):
     r"""How much two tracks' roughness could change a pass-by level, Annex E.
 
     :param speed_kmh: The train speed, in km/h.
@@ -1521,7 +1521,7 @@ class RoughnessComparability:
         """
         for name in ("frequencies_hz", "noise_levels_1_db", "noise_levels_2_db"):
             object.__setattr__(
-                self, name, read_only(np.array(getattr(self, name), dtype=np.float64))
+                self, name, read_only(np.asarray(getattr(self, name), dtype=np.float64))
             )
         differences = tuple(float(d) for d in self.level_differences_db)
         if len(differences) != _FORMULA_E4_TERMS:

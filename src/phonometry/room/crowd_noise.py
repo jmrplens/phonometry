@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_finite_fields,
@@ -236,7 +236,7 @@ def absorption_per_table(
 
 
 @dataclass(frozen=True)
-class CrowdNoiseResult:
+class CrowdNoiseResult(OwnsArrays):
     """Self-generated noise of an occupied room versus occupancy and absorption.
 
     :ivar talkers: Number of simultaneous talkers on the occupancy axis.
@@ -445,8 +445,8 @@ def crowd_noise(
         np.asarray(speech_direct_level(r, sound_power_level=lw, directivity=q))[()]
     )
     return CrowdNoiseResult(
-        talkers=read_only_copy(n),
-        absorption_areas=read_only_copy(areas),
+        talkers=n,
+        absorption_areas=areas,
         levels=levels,
         signal_level=signal,
         distance=float(r),

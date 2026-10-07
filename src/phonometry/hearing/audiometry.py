@@ -94,7 +94,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_up, settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_BANDS_HZ as _SOUND_FIELD_BANDS_HZ,
 )
@@ -542,7 +542,7 @@ def _table_rows(presentation: str, frequencies: np.ndarray) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class AmbientNoiseCheck:
+class AmbientNoiseCheck(OwnsArrays):
     """Whether a test room is quiet enough for the audiometry, band by band.
 
     The fields hold what was measured and what the standard lets the tester
@@ -792,7 +792,7 @@ def check_audiometric_ambient_noise(
     )
     table = np.asarray(bands, dtype=np.float64)
     freqs = (
-        table.copy()
+        table
         if frequencies is None
         else table[_table_rows(presentation, _levels(frequencies, "frequencies"))]
     )
@@ -820,7 +820,7 @@ def check_audiometric_ambient_noise(
         earphone_attenuation_db=(
             None
             if presentation != "air" or earphone_attenuation_db is None
-            else _levels(earphone_attenuation_db, "earphone_attenuation_db").copy()
+            else _levels(earphone_attenuation_db, "earphone_attenuation_db")
         ),
         allowed_threshold_shift_db=float(allowed_threshold_shift_db),
     )
@@ -847,7 +847,7 @@ def _earphone_name(
 
 
 @dataclass(frozen=True)
-class AscendingThresholdResult:
+class AscendingThresholdResult(OwnsArrays):
     """The hearing threshold level by the ascending method (6.2.4.2).
 
     :ivar ascent_levels_db: The level at which each ascent ended in a
@@ -1158,7 +1158,7 @@ def _threshold_from_ascents(
             )
             raise ValueError(msg)
     return AscendingThresholdResult(
-        ascent_levels_db=np.array(ascents, dtype=np.float64),
+        ascent_levels_db=np.asarray(ascents, dtype=np.float64),
         threshold_db=threshold,
         determined=determined,
         shortened=shortened,
@@ -1198,7 +1198,7 @@ def _threshold_from_sequence(
         familiarization_level_db=familiarization_level_db,
     )
     return AscendingThresholdResult(
-        ascent_levels_db=np.array(ascents, dtype=np.float64),
+        ascent_levels_db=np.asarray(ascents, dtype=np.float64),
         threshold_db=threshold,
         determined=determined,
         shortened=shortened,
@@ -1215,7 +1215,7 @@ def _threshold_from_sequence(
 
 
 @dataclass(frozen=True)
-class BracketingThresholdResult:
+class BracketingThresholdResult(OwnsArrays):
     """The hearing threshold level by the bracketing method (6.2.4.3).
 
     :ivar ascent_levels_db: The lowest response level of each ascent, in dB.
@@ -1366,7 +1366,7 @@ def _reversal_kinds(levels: np.ndarray, name: str) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class AutomaticThresholdResult:
+class AutomaticThresholdResult(OwnsArrays):
     """The hearing threshold level from an automatic recording (6.3.5).
 
     :ivar reversal_levels_db: The levels at the reversals of the tracing at
@@ -1495,7 +1495,7 @@ def automatic_audiometry_threshold(
 
 
 @dataclass(frozen=True)
-class SweepThresholdResult:
+class SweepThresholdResult(OwnsArrays):
     """Hearing threshold levels from a sweep-frequency tracing (7.5).
 
     :ivar reversal_frequencies: The frequency of each reversal, in hertz.
@@ -1639,7 +1639,7 @@ def sweep_audiometry_threshold(
         reversal_frequencies=freqs,
         reversal_levels_db=levels,
         is_peak=kinds,
-        frequencies=np.array(targets, dtype=np.float64),
+        frequencies=np.asarray(targets, dtype=np.float64),
         mean_db=means,
         threshold_db=np.array([_round_half_up(m, 1.0) for m in means]),
         spread_db=spreads,
@@ -1756,7 +1756,7 @@ def check_retest_agreement(
 
 
 @dataclass(frozen=True)
-class AudiogramCautions:
+class AudiogramCautions(OwnsArrays):
     """The levels of an audiogram that call for caution (6.2.3.2, 8.4).
 
     :ivar frequencies: The test frequencies, in hertz.

@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
 from .._internal.types import as_float_or_array
 from .._internal.validation import check_engine, require_ranks, require_same_length
@@ -237,7 +237,7 @@ _SIGMA_R0_3745_A = 0.5
 
 
 @dataclass(frozen=True)
-class MeteorologicalCorrection:
+class MeteorologicalCorrection(OwnsArrays):
     r"""Meteorological corrections C1, C2, C3 (ISO 3745:2012 Eq. 14 block).
 
     ``c1`` is the reference-quantity (impedance) correction and ``c2`` the
@@ -253,7 +253,7 @@ class MeteorologicalCorrection:
 
 
 @dataclass(frozen=True)
-class PrecisionSoundPowerResult:
+class PrecisionSoundPowerResult(OwnsArrays):
     r"""Result of an ISO 3745:2012 (precision) sound power determination.
 
     ``sound_power_level`` is the per-band
@@ -921,9 +921,7 @@ def sound_power_anechoic(
         air_absorption_coefficient=air_absorption_coefficient,
         radius=radius,
     )
-    c3 = np.broadcast_to(np.asarray(mc.c3, dtype=np.float64), (n_bands,)).astype(
-        np.float64
-    )
+    c3 = np.broadcast_to(np.asarray(mc.c3, dtype=np.float64), (n_bands,))
 
     lw = lp_bar + 10.0 * np.log10(area / _S0) + mc.c1 + mc.c2 + c3
 
@@ -947,7 +945,7 @@ def sound_power_anechoic(
     )
 
     return PrecisionSoundPowerResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_power_level=np.asarray(lw, dtype=np.float64),
         surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
         mean_pressure_level=mean_level,

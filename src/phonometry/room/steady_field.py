@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_choice,
@@ -405,7 +405,7 @@ def steady_state_spl(
 
 
 @dataclass(frozen=True)
-class SteadyFieldResult:
+class SteadyFieldResult(OwnsArrays):
     r"""Steady-state SPL versus distance in a room, split direct / reverberant.
 
     :ivar distances: Source-receiver distances ``r``, m.
@@ -547,7 +547,7 @@ def steady_state_field(
         dtype=np.float64,
     )
     return SteadyFieldResult(
-        distances=read_only_copy(r),
+        distances=r,
         direct=direct,
         reverberant=reverberant,
         total=total,

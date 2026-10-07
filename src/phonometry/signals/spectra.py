@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_equal_counts,
     require_ranks,
@@ -372,7 +373,7 @@ def _validate_scaling(scaling: str) -> str:
 
 
 @dataclass(frozen=True)
-class SpectralDensityResult:
+class SpectralDensityResult(OwnsArrays):
     r"""Welch autospectral density with its statistical error (B&P Ch. 8).
 
     :ivar frequencies: One-sided frequency axis, in Hz.
@@ -568,7 +569,7 @@ def resolution_bias_error(
 
 
 @dataclass(frozen=True)
-class CrossSpectralDensityResult:
+class CrossSpectralDensityResult(OwnsArrays):
     r"""Welch cross-spectral density with its statistical error (B&P Ch. 9).
 
     The error formulas replace the unknown true coherence with the computed
@@ -763,7 +764,7 @@ def cross_spectral_density(
 
 
 @dataclass(frozen=True)
-class CoherentOutputSpectrumResult:
+class CoherentOutputSpectrumResult(OwnsArrays):
     r"""Coherent output spectrum of a single-input/single-output model.
 
     The measured output autospectrum splits into the part linearly

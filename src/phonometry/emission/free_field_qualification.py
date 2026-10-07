@@ -120,7 +120,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_finite, require_positive
 
 if TYPE_CHECKING:
@@ -415,7 +415,9 @@ def _as_levels(value: ArrayLike, n_points: int, name: str) -> np.ndarray:
             "one column per frequency."
         )
         raise ValueError(msg)
-    return np.array(arr, dtype=np.float64)
+    # Contiguous, so that one background row broadcast over the points is
+    # held as a full array of its own rather than as a view of the row.
+    return np.ascontiguousarray(arr)
 
 
 def _checked_targets(targets: str | Sequence[str]) -> tuple[str, ...]:
@@ -433,7 +435,7 @@ def _checked_targets(targets: str | Sequence[str]) -> tuple[str, ...]:
 
 def _checked_positions(value: ArrayLike) -> np.ndarray:
     """An ``(N, 3)`` array of finite coordinates with at least two points."""
-    positions = np.array(value, dtype=np.float64)
+    positions = np.asarray(value, dtype=np.float64)
     if (
         positions.ndim != _POSITIONS_RANK
         or positions.shape[1] != _COORDINATES
@@ -501,7 +503,7 @@ def _checked_background(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class MicrophoneTraverse:
+class MicrophoneTraverse(OwnsArrays):
     r"""One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 
     :ivar positions_m: The measurement points, one row per point, as
@@ -544,7 +546,7 @@ class MicrophoneTraverse:
     targets: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        """Hold every array as a float64 copy and refuse inconsistent shapes.
+        """Hold every array as float64 and refuse inconsistent shapes.
 
         :raises ValueError: if the positions are not an ``(N, 3)`` array of
             finite coordinates with at least two points, a level array does
@@ -555,14 +557,14 @@ class MicrophoneTraverse:
         object.__setattr__(self, "targets", _checked_targets(self.targets))
         positions = _checked_positions(self.positions_m)
         levels = _checked_traverse_levels(self.levels_db, positions.shape[0])
-        object.__setattr__(self, "positions_m", positions)
-        object.__setattr__(self, "levels_db", levels)
+        object.__setattr__(self, "positions_m", read_only(positions))
+        object.__setattr__(self, "levels_db", read_only(levels))
         if self.monitor_levels_db is not None:
             monitor = _checked_monitor(self.monitor_levels_db, levels)
-            object.__setattr__(self, "monitor_levels_db", monitor)
+            object.__setattr__(self, "monitor_levels_db", read_only(monitor))
         if self.background_levels_db is not None:
             background = _checked_background(self.background_levels_db, levels)
-            object.__setattr__(self, "background_levels_db", background)
+            object.__setattr__(self, "background_levels_db", read_only(background))
 
     @classmethod
     def along(
@@ -871,7 +873,7 @@ def _same_radii(given: ArrayLike, qualified: np.ndarray) -> bool:
 
 
 @dataclass(frozen=True)
-class InverseSquareLawResult:
+class InverseSquareLawResult(OwnsArrays):
     r"""Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
 
     :ivar frequencies_hz: The test frequencies, in hertz, as given.
@@ -1179,14 +1181,14 @@ def inverse_square_law_deviations(
     strengths, initial, deviations = _source_strengths(evaluation, levels)
 
     return InverseSquareLawResult(
-        frequencies_hz=read_only_copy(freqs),
+        frequencies_hz=freqs,
         room=room,
-        origin_m=read_only_copy(origin, dtype=np.float64),
+        origin_m=np.asarray(origin, dtype=np.float64),
         origin_fitted=box is not None,
-        source_box_m=read_only_copy(box),
+        source_box_m=box,
         traverse_names=tuple(t.name for t in traverses),
         traverse_targets=tuple(tuple(t.targets) for t in traverses),
-        positions_m=tuple(read_only_copy(p) for p in positions),
+        positions_m=tuple(positions),
         distances_m=evaluation.distances,
         levels_db=tuple(levels),
         background_margin_db=prepared.margins,
@@ -1237,7 +1239,7 @@ def directionality_positions(
 
 
 @dataclass(frozen=True)
-class SourceDirectionalityResult:
+class SourceDirectionalityResult(OwnsArrays):
     """Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 
     :ivar frequencies_hz: The one-third octave mid-band frequencies, in hertz.
@@ -1364,7 +1366,7 @@ def verify_source_directionality(
     mean = levels.mean(axis=0)
     deviation = levels - mean[np.newaxis, :]
     return SourceDirectionalityResult(
-        frequencies_hz=read_only_copy(freqs),
+        frequencies_hz=freqs,
         room=room,
         mean_level_db=mean,
         maximum_positive_deviation_db=deviation.max(axis=0),
@@ -1554,7 +1556,7 @@ def _path_angles_ok(fit: InverseSquareLawResult, radius: float) -> bool:
 
 
 @dataclass(frozen=True)
-class FreeFieldCheck:
+class FreeFieldCheck(OwnsArrays):
     r"""Whether a room qualifies as anechoic or hemi-anechoic for ISO 3745.
 
     The verdict of the amended ISO 3745:2012 Annex A over the frequencies

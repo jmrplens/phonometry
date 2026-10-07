@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -139,7 +140,7 @@ def u_shaped(value: float, half_width: float, name: str = "") -> Quantity:
 
 
 @dataclass(frozen=True)
-class UncertaintyResult:
+class UncertaintyResult(OwnsArrays):
     r"""Result of the GUM law of propagation of uncertainty (Guide 98-3).
 
     :ivar value: The output estimate :math:`y = f(x_1, \ldots, x_N)`.
@@ -288,7 +289,7 @@ class UncertaintyResult:
 
 
 @dataclass(frozen=True)
-class MonteCarloResult:
+class MonteCarloResult(OwnsArrays):
     r"""Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
 
     :ivar value: Estimate ``y`` (the sample mean of the output).

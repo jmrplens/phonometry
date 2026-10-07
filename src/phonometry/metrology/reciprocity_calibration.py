@@ -67,7 +67,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_choice, require_positive
 from .free_field_corrections import _band_column, _frequency_axis
 
@@ -182,7 +182,7 @@ def _pair(
 
 
 @dataclass(frozen=True)
-class ReciprocityCalibration:
+class ReciprocityCalibration(OwnsArrays):
     r"""The complex sensitivities of microphones calibrated by reciprocity
     (IEC 61094-2:2009 5.7 in a coupler, IEC 61094-3:2016 5.7 in a free field).
 
@@ -229,14 +229,16 @@ class ReciprocityCalibration:
         require_choice(self.method, "method", _METHODS)
         frequencies = _frequency_axis(self.frequencies_hz)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         microphones = _TRIAD if self.method == "three_microphones" else _PAIR
         pairs = _TRIAD if self.method == "three_microphones" else 1
         for name, rows in (
             ("sensitivity_v_per_pa", microphones),
             ("products_v2_per_pa2", pairs),
         ):
-            array = np.array(getattr(self, name), dtype=np.complex128, ndmin=2)
+            array = np.array(
+                getattr(self, name), dtype=np.complex128, ndmin=2, copy=None
+            )
             if array.shape != (rows, count):
                 msg = (
                     f"ReciprocityCalibration: '{name}' must have shape "
@@ -248,9 +250,7 @@ class ReciprocityCalibration:
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(array))
         corrections = {
-            str(key): read_only(
-                _band_column(value, f"corrections_db[{key!r}]", count).copy()
-            )
+            str(key): read_only(_band_column(value, f"corrections_db[{key!r}]", count))
             for key, value in self.corrections_db.items()
         }
         object.__setattr__(self, "corrections_db", MappingProxyType(corrections))
@@ -264,9 +264,7 @@ class ReciprocityCalibration:
                     "non-negative."
                 )
                 raise ValueError(msg)
-            object.__setattr__(
-                self, "expanded_uncertainty_db", read_only(uncertainty.copy())
-            )
+            object.__setattr__(self, "expanded_uncertainty_db", read_only(uncertainty))
 
     @property
     def standard(self) -> str:
@@ -339,8 +337,8 @@ def _calibration(
     """Build the result; shared by the pressure and the free-field routes."""
     return ReciprocityCalibration(
         frequencies_hz=frequencies,
-        sensitivity_v_per_pa=read_only_copy(sensitivities),
-        products_v2_per_pa2=read_only_copy(products),
+        sensitivity_v_per_pa=sensitivities,
+        products_v2_per_pa2=products,
         field=field,
         method=method,
         corrections_db=dict(corrections_db or {}),  # type: ignore[arg-type]
@@ -583,7 +581,7 @@ _BUDGET_TABLES: Mapping[str, Mapping[str, ReciprocityUncertaintyRow]] = (
 
 
 @dataclass(frozen=True)
-class ReciprocityUncertaintyBudget:
+class ReciprocityUncertaintyBudget(OwnsArrays):
     r"""The uncertainty budget of a reciprocity calibration as a function of
     frequency (IEC 61094-2:2009 7.5 and Table 1, IEC 61094-3:2016 7.8 and
     Table 1).
@@ -622,7 +620,7 @@ class ReciprocityUncertaintyBudget:
         require_choice(self.field, "field", _FIELDS)
         require_positive(self.coverage_factor, "coverage_factor")
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         count = len(self.names)
         if count == 0 or len(self.components) != count:
             msg = (
@@ -630,7 +628,9 @@ class ReciprocityUncertaintyBudget:
                 "the same, non-zero, number of entries."
             )
             raise ValueError(msg)
-        matrix = np.array(self.standard_uncertainties_db, dtype=np.float64, ndmin=2)
+        matrix = np.array(
+            self.standard_uncertainties_db, dtype=np.float64, ndmin=2, copy=None
+        )
         if matrix.shape != (count, frequencies.size):
             msg = (
                 "ReciprocityUncertaintyBudget: 'standard_uncertainties_db' must "

@@ -83,7 +83,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_finite_array,
@@ -223,7 +223,7 @@ def structure_borne_power_level(
 
 
 @dataclass(frozen=True)
-class StructureBornePowerResult:
+class StructureBornePowerResult(OwnsArrays):
     """Structure-borne sound power injected into a reception plate (EN 15657).
 
     The power level is specific to the measured plate; derive the
@@ -410,7 +410,7 @@ def reception_plate_power(
         loss_factor=eta,
         mass_per_area=float(mass_per_area),
         area=float(area),
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
     )
 
 

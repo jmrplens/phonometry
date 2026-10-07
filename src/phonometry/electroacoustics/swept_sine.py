@@ -60,6 +60,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import apply_calibration, resolve_fs
 
@@ -194,7 +195,7 @@ def synchronized_sweep_signal(
 
 
 @dataclass(frozen=True)
-class SweptSineDistortionResult:
+class SweptSineDistortionResult(OwnsArrays):
     r"""Harmonic separation of a swept-sine measurement (Farina / Novak).
 
     Row ``k`` of the harmonic arrays describes order ``k + 1`` (row 0 is

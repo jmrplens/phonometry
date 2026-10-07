@@ -57,6 +57,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import (
@@ -215,7 +216,7 @@ def _validate_1d_finite(
 
 
 @dataclass(frozen=True)
-class ToneBurstResult:
+class ToneBurstResult(OwnsArrays):
     """Gated sine burst per IEC 60268-1:1985 (Annex A, Clause A2).
 
     The tone starts at a zero crossing (positive-going) and the gate stays
@@ -478,7 +479,7 @@ def tone_burst(
 
 
 @dataclass(frozen=True)
-class ResampledSignalResult:
+class ResampledSignalResult(OwnsArrays):
     r"""Resampled record with the designed anti-alias filter and its spec.
 
     The polyphase resampler filters at the intermediate rate
@@ -655,7 +656,7 @@ def resample_signal(
 
     if up == down:  # Same rate: nothing to do, and nothing to filter.
         return ResampledSignalResult(
-            signal=like_input(x, xa.copy(), round(fs_new_v)),
+            signal=like_input(x, xa, round(fs_new_v)),
             fs=fs_new_v,
             original_fs=fs_v,
             up=1,

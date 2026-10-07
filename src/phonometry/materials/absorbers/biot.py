@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -234,7 +234,7 @@ def frame_quarter_wave_resonance(
 
 
 @dataclass(frozen=True)
-class BiotWavesResult:
+class BiotWavesResult(OwnsArrays):
     r"""The three Biot waves of an isotropic air-saturated porous material.
 
     All arrays share the shape of ``frequencies``. ``compressional_wavenumber_1``
@@ -491,7 +491,7 @@ def biot_waves(
     mu3 = -rho12 / rho22
 
     return BiotWavesResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         porosity=phi,
         tortuosity=alpha_inf,
         frame_density=rho1,

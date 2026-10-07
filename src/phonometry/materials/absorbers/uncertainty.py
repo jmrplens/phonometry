@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
@@ -189,7 +189,7 @@ def absorption_coverage_factor(confidence: float = 0.95) -> float:
 
 
 @dataclass(frozen=True)
-class AbsorptionUncertaintyResult:
+class AbsorptionUncertaintyResult(OwnsArrays):
     r"""Standard and expanded uncertainty of an absorption quantity
     (ISO 12999-2).
 
@@ -335,8 +335,8 @@ def _band_uncertainty(
     return AbsorptionUncertaintyResult(
         quantity=quantity,
         condition=condition,
-        frequencies=read_only_copy(frequencies),
-        values=read_only_copy(values),
+        frequencies=frequencies,
+        values=values,
         standard_uncertainty=u,
         coverage_factor=k,
         expanded_uncertainty=k * u,
@@ -413,8 +413,8 @@ def equivalent_area_uncertainty(
     return AbsorptionUncertaintyResult(
         quantity="equivalent_area",
         condition=cond,
-        frequencies=read_only_copy(f),
-        values=read_only_copy(a),
+        frequencies=f,
+        values=a,
         standard_uncertainty=u,
         coverage_factor=k,
         expanded_uncertainty=k * u,

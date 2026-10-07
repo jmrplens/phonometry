@@ -112,7 +112,7 @@ import numpy as np
 from scipy import optimize, signal
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
     is_at_most,
@@ -419,7 +419,7 @@ def telecoil_response(angle_deg: ArrayLike) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class FieldStrengthReading:
+class FieldStrengthReading(OwnsArrays):
     """What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 
     :ivar fs: Sample rate of the record, in hertz.
@@ -731,7 +731,7 @@ def small_volume_measurement_points(layout: str) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class BackgroundNoiseAssessment:
+class BackgroundNoiseAssessment(OwnsArrays):
     """The magnetic background noise of a site against 7.2 of IEC 60118-4:2014.
 
     :ivar noise_levels_db: The A-weighted noise level at each point with the
@@ -799,7 +799,7 @@ def assess_background_noise(
         quality and is not mostly at low frequencies.
     :return: A :class:`BackgroundNoiseAssessment`.
     """
-    levels = require_finite_array(noise_levels_db, "noise_levels_db").copy()
+    levels = require_finite_array(noise_levels_db, "noise_levels_db")
     snr = -float(np.max(levels))
     if snr > _SNR_IDEAL_DB:
         category = _NOISE_CATEGORIES[0]
@@ -810,7 +810,7 @@ def assess_background_noise(
     else:
         category = _NOISE_CATEGORIES[3]
     return BackgroundNoiseAssessment(
-        noise_levels_db=read_only(levels),
+        noise_levels_db=levels,
         reference_signal_to_noise_ratio_db=snr,
         category=category,
         report_required=snr < _SNR_MINIMUM_DB,
@@ -1369,7 +1369,7 @@ OVERLOAD_TEST_FREQUENCIES: Mapping[str, OverloadTestFrequency] = MappingProxyTyp
 
 
 @dataclass(frozen=True)
-class AmplifierOverloadVerification:
+class AmplifierOverloadVerification(OwnsArrays):
     """The overload test of 10.3 as amended, judged on the compliance voltage.
 
     10.3.3 as amended asks for no clipping "a la frecuencia de ensayo

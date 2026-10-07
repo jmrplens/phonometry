@@ -79,7 +79,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -436,7 +436,7 @@ def _checked_uncertainty(value: float | None, name: str) -> float:
 
 
 @dataclass(frozen=True)
-class WeightingVerification:
+class WeightingVerification(OwnsArrays):
     """One measured weighting response against its ISO 8041-1 tolerances.
 
     :ivar weighting: The weighting the response was measured for.
@@ -602,8 +602,8 @@ def verify_weighting(
     deviation = (measured / design - 1.0) * 100.0
     return WeightingVerification(
         weighting=weighting,
-        frequencies_hz=read_only_copy(f),
-        measured=read_only_copy(measured),
+        frequencies_hz=f,
+        measured=measured,
         design=design,
         deviation_percent=deviation,
         expanded_uncertainty_percent=uncertainty,
@@ -896,7 +896,7 @@ def _warn_if_inverted(deviation_deg: NDArray[np.float64]) -> None:
 
 
 @dataclass(frozen=True)
-class PhaseVerification:
+class PhaseVerification(OwnsArrays):
     """One measured phase response against the ISO 8041-1 Table 5 phase band.
 
     :ivar weighting: The weighting the response was measured for.
@@ -1072,11 +1072,11 @@ def verify_phase_response(
     characteristic = characteristic_phase_deviation(f, deviation)
     return PhaseVerification(
         weighting=weighting,
-        frequencies_hz=read_only_copy(f),
-        measured_phase_deg=read_only_copy(measured),
+        frequencies_hz=f,
+        measured_phase_deg=measured,
         design_phase_deg=design,
         deviation_deg=deviation,
-        characteristic_frequencies_hz=read_only_copy(f[:-1], dtype=np.float64),
+        characteristic_frequencies_hz=np.asarray(f[:-1], dtype=np.float64),
         characteristic_deviation_deg=characteristic,
     )
 

@@ -57,7 +57,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.special import erf
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_positive, require_ranks, require_same_length
 
 if TYPE_CHECKING:
@@ -430,7 +430,7 @@ def _angle_and_gradient(
 
 
 @dataclass(frozen=True)
-class WestonPropagationResult:
+class WestonPropagationResult(OwnsArrays):
     r"""Weston regime propagation loss versus range.
 
     :ivar range_m: Ranges from the source, in metres.
@@ -653,7 +653,7 @@ def weston_propagation_loss(
     factor[in_sm] = f_sm[in_sm]
 
     return WestonPropagationResult(
-        range_m=read_only_copy(r),
+        range_m=r,
         propagation_loss=_to_db(factor),
         propagation_factor=factor,
         regime=labels,

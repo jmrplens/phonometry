@@ -118,7 +118,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     is_class_designation,
@@ -1160,8 +1160,8 @@ def verify_filter_class(
         bands=tuple(bands),
         fraction=int(bank.fraction),
         edition=edition,
-        sos=tuple(read_only_copy(s, dtype=np.float64) for s in bank.sos),
-        band_frequencies=read_only_copy(bank.freq, dtype=np.float64),
+        sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
+        band_frequencies=np.asarray(bank.freq, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
         num_points=int(num_points),
@@ -1237,7 +1237,7 @@ def _require_requirement_keys(
 
 
 @dataclass(frozen=True)
-class FilterComplianceResult:
+class FilterComplianceResult(OwnsArrays):
     r"""IEC 61260-1 class-compliance verdict of an :class:`OctaveFilterBank`.
 
     What :func:`verify_filter_class` returns: the verdict together with the

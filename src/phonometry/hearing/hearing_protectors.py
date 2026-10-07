@@ -62,7 +62,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_away_from_zero
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -274,7 +274,7 @@ def _round_half_up(value: float) -> int:
 
 
 @dataclass(frozen=True)
-class AssumedProtectionResult:
+class AssumedProtectionResult(OwnsArrays):
     r"""Assumed protection values of a hearing protector (Clause 5).
 
     :ivar apv: :math:`APV_{fx} = m_f - \alpha s_f` per octave band, in dB.
@@ -360,7 +360,7 @@ def assumed_protection_value(
         standard_deviation=spread,
         performance=int(performance),
         alpha=alpha,
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         subjects=int(grid.shape[0]),
     )
 
@@ -398,7 +398,7 @@ def _octave_axis(
 
 
 @dataclass(frozen=True)
-class ProtectedLevelResult:
+class ProtectedLevelResult(OwnsArrays):
     r"""The A-weighted level left at the ear behind a protector.
 
     :ivar effective_level: :math:`L'_{p,\mathrm{A}x}`, in dB, unrounded. Clauses 6, 7.3
@@ -524,7 +524,7 @@ def octave_band_protected_level(
         performance=performance,
         method="octave-band",
         band_levels=np.asarray(band, dtype=np.float64),
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
     )
 
 
@@ -570,7 +570,7 @@ def _a_weighting_axis(
 
 
 @dataclass(frozen=True)
-class HMLRatingResult:
+class HMLRatingResult(OwnsArrays):
     r"""The three ``HML`` attenuation values of a protector (Clause 7.2).
 
     :ivar high: :math:`H_x`, the high-frequency value, in dB, unrounded.
@@ -779,7 +779,7 @@ def _finite_levels(**levels: float) -> tuple[float, ...]:
 
 
 @dataclass(frozen=True)
-class SNRRatingResult:
+class SNRRatingResult(OwnsArrays):
     r"""The single number rating of a protector (Clause 8.2).
 
     :ivar snr: :math:`SNR_x`, in dB, unrounded.

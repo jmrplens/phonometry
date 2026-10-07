@@ -129,7 +129,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 from .._internal.boundary import settled, settled_net_share, settled_ratio
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     is_at_most,
     is_positive,
@@ -902,7 +902,7 @@ def partial_power_concentration(
 
 
 @dataclass(frozen=True)
-class DiscretePointIntensityResult:
+class DiscretePointIntensityResult(OwnsArrays):
     r"""Result of an ISO 9614-1:1993 discrete-point sound-power determination.
 
     ``partial_power`` is the signed :math:`P_i = I_{\mathrm{n}i} S_i` per
@@ -1925,7 +1925,7 @@ def sound_power_intensity_points(
     )
 
     return DiscretePointIntensityResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         partial_power=partial_power,
         sound_power=np.asarray(sound_power, dtype=np.float64),
         sound_power_level=np.asarray(sound_power_level, dtype=np.float64),

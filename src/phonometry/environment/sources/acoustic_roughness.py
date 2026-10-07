@@ -85,7 +85,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -449,7 +449,7 @@ def redistributed_band_energies(
 
 
 @dataclass(frozen=True)
-class AcousticRoughnessSpectrum:
+class AcousticRoughnessSpectrum(OwnsArrays):
     r"""A one-third octave band spectrum of acoustic rail roughness (EN 15610).
 
     Built by :func:`acoustic_roughness_spectrum` (Method A) or
@@ -500,8 +500,8 @@ class AcousticRoughnessSpectrum:
         if np.any(np.diff(bands) <= 0):
             msg = "'wavelengths_m' must name distinct bands from the longest wavelength down."
             raise ValueError(msg)
-        object.__setattr__(self, "wavelengths_m", read_only(wavelengths.copy()))
-        object.__setattr__(self, "levels_db", read_only(levels.copy()))
+        object.__setattr__(self, "wavelengths_m", read_only(wavelengths))
+        object.__setattr__(self, "levels_db", read_only(levels))
 
     @property
     def bands(self) -> tuple[int, ...]:
@@ -883,7 +883,7 @@ def filtered_roughness_spectrum(
     bands = [round(10.0 * math.log10(float(f))) for f in bank.freq]
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
-        levels_db=np.array(levels),
+        levels_db=np.asarray(levels),
         record_length_m=float(analysed_m),
         segment_count=None,
         method="B",

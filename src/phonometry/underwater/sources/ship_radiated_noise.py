@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_equal_shapes,
     require_finite_array,
@@ -145,7 +145,7 @@ def _surface_correction(
 
 
 @dataclass(frozen=True)
-class ShipSourceLevelResult:
+class ShipSourceLevelResult(OwnsArrays):
     r"""Equivalent monopole source level of a ship (ISO 17208-2).
 
     :ivar frequencies: Frequencies, in Hz.
@@ -254,8 +254,8 @@ def monopole_source_level(
     source_depth = _SOURCE_DEPTH_FRACTION * d
     delta_l = _surface_correction(freqs, source_depth, speed)
     return ShipSourceLevelResult(
-        frequencies=read_only_copy(freqs),
-        radiated_noise_level=read_only_copy(rnl_arr),
+        frequencies=freqs,
+        radiated_noise_level=rnl_arr,
         surface_correction=delta_l,
         source_level=rnl_arr + delta_l,
         source_depth=source_depth,

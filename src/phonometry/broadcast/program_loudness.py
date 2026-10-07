@@ -57,7 +57,7 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
@@ -261,7 +261,7 @@ def k_weighting(x: SignalInput, fs: float | None = None) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class KWeightingResponse:
+class KWeightingResponse(OwnsArrays):
     """Magnitude frequency response of the K-weighting pre-filter (BS.1770-5).
 
     The two-stage K-weighting of Annex 1 evaluated as a transfer function: the
@@ -397,7 +397,7 @@ def k_weighting_response(
     shelf_db = 20.0 * np.log10(np.abs(signal.freqz(b1, a1, worN=freqs, fs=fs)[1]))
     highpass_db = 20.0 * np.log10(np.abs(signal.freqz(b2, a2, worN=freqs, fs=fs)[1]))
     return KWeightingResponse(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         magnitude_db=shelf_db + highpass_db,
         shelf_db=shelf_db,
         highpass_db=highpass_db,
@@ -749,7 +749,7 @@ def _require_series_maximum(owner: object, field: str, series: str) -> None:
 
 
 @dataclass(frozen=True)
-class ProgramLoudnessResult:
+class ProgramLoudnessResult(OwnsArrays):
     """EBU Mode loudness measurement of a programme (BS.1770-5 / EBU R 128).
 
     :ivar integrated: Programme loudness ``I`` (gated, Annex 1), LUFS.
@@ -1024,6 +1024,6 @@ def program_loudness(
         lra_low=lra_low,
         lra_high=lra_high,
         true_peak_per_channel=tp_channels,
-        channel_weights=read_only_copy(w),
+        channel_weights=w,
         fs=fs,
     )

@@ -57,7 +57,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_equal_shapes,
     require_non_negative,
@@ -354,7 +354,7 @@ def _delany_bazley_impedance_grid(
 
 
 @dataclass(frozen=True)
-class MeanGroundPlaneResult:
+class MeanGroundPlaneResult(OwnsArrays):
     r"""A mean ground plane fitted to a terrain section (guidance Eq. 36-40).
 
     ECAC Doc 32, 1st ed., assumes flat terrain; its guidance (§A.4.4)
@@ -441,9 +441,7 @@ def mean_ground_plane(
     """
     d, z = _validated_section(distances, heights)
     a, b = _mean_plane_coefficients(d, z)
-    return MeanGroundPlaneResult(
-        slope=a, intercept=b, distances=read_only_copy(d), heights=read_only_copy(z)
-    )
+    return MeanGroundPlaneResult(slope=a, intercept=b, distances=d, heights=z)
 
 
 def _validated_section(
@@ -576,7 +574,7 @@ def diffraction_attenuation(
 
 
 @dataclass(frozen=True)
-class TerrainScreeningResult:
+class TerrainScreeningResult(OwnsArrays):
     r"""Ground and screening over a terrain section (guidance §A.4.4-A.4.5).
 
     :ivar frequencies: Band centre frequencies, in Hz, shape ``(F,)``.
@@ -720,7 +718,7 @@ def terrain_screening_adjustment(
     d, z, sigma_seg = _cropped_section(d, z, sigma_seg, src[0], rcv[0])
     adjustment, screened, delta, points = _screening_core(f, src, rcv, d, z, sigma_seg)
     return TerrainScreeningResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         adjustment=adjustment,
         screened=screened,
         path_difference=delta,

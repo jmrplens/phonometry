@@ -44,6 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_equal_shapes,
     require_ranks,
@@ -91,7 +92,7 @@ _EPS: float = float(np.finfo(np.float64).eps)
 
 
 @dataclass(frozen=True)
-class STOIResult:
+class STOIResult(OwnsArrays):
     """Result of a STOI or ESTOI intelligibility computation.
 
     :ivar value: The overall intelligibility index (a scalar with a monotonic

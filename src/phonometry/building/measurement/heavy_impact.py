@@ -103,7 +103,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -404,7 +404,7 @@ def impact_force_exposure_level(
 
 
 @dataclass(frozen=True)
-class HeavyImpactSourceCheck:
+class HeavyImpactSourceCheck(OwnsArrays):
     """Conformance of a measured heavy impact source to its printed spectrum.
 
     Only the source and the measurement are fields. The printed spectrum, its
@@ -526,7 +526,7 @@ def check_heavy_impact_source(
             f"(31.5 Hz to 500 Hz)."
         )
         raise ValueError(msg)
-    return HeavyImpactSourceCheck(source=spec.name, measured=read_only_copy(measured))
+    return HeavyImpactSourceCheck(source=spec.name, measured=measured)
 
 
 def _fast_peak_factor(c: np.ndarray) -> np.ndarray:
@@ -583,7 +583,7 @@ def fast_reverberation_correction(
 
 
 @dataclass(frozen=True)
-class StandardizedMaximumImpactResult:
+class StandardizedMaximumImpactResult(OwnsArrays):
     r"""Standardized maximum impact sound pressure level (ISO 16283-2 3.16).
 
     :ivar frequencies: Band centre frequencies, in Hz, or ``None``.
@@ -706,13 +706,13 @@ def standardized_maximum_impact_level(
     correction = fast_reverberation_correction(t, reference_time=reference_time)
     volume_term = float(10.0 * np.log10(v / v0))
     return StandardizedMaximumImpactResult(
-        frequencies=read_only_copy(freqs),
-        measured=read_only_copy(li),
+        frequencies=freqs,
+        measured=li,
         standardized=np.asarray(li + volume_term - correction, dtype=np.float64),
         volume_term=volume_term,
         reverberation_correction=correction,
         volume=v,
-        reverberation_time=read_only_copy(t),
+        reverberation_time=t,
     )
 
 
@@ -746,7 +746,7 @@ def heavy_impact_octave_levels(level: ArrayLike) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class AWeightedMaximumImpactResult:
+class AWeightedMaximumImpactResult(OwnsArrays):
     """A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 
     :ivar frequencies: Band centre frequencies, in Hz.
@@ -878,7 +878,7 @@ def a_weighted_maximum_impact_level(
     return AWeightedMaximumImpactResult(
         frequencies=bands,
         band=chosen,
-        levels=read_only_copy(x),
+        levels=x,
         a_weighting=a_weighting,
         corrected=corrected,
         unrounded=unrounded,

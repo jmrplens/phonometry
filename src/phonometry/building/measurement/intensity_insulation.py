@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -166,7 +166,7 @@ def _validate_intensity_report(
 
 
 @dataclass(frozen=True)
-class IntensityReductionResult:
+class IntensityReductionResult(OwnsArrays):
     r"""Per-band intensity sound reduction index (ISO 15186-1:2000).
 
     :ivar r_i: Intensity sound reduction index
@@ -339,7 +339,7 @@ class IntensityReductionResult:
 
 
 @dataclass(frozen=True)
-class IntensityElementNormalizedResult:
+class IntensityElementNormalizedResult(OwnsArrays):
     r"""Per-band intensity element normalized level difference (ISO 15186-1).
 
     :ivar d_i_n_e: Intensity element normalized level difference
@@ -1101,7 +1101,7 @@ def _check_indicator_pair(owner: object) -> None:
 
 
 @dataclass(frozen=True)
-class LowFrequencyIntensityResult:
+class LowFrequencyIntensityResult(OwnsArrays):
     r"""Per-band intensity sound reduction index at low frequencies.
 
     The result of ISO 15186-3:2002, Clause 3.8, Formula (7). It differs from
@@ -1303,7 +1303,7 @@ def low_frequency_intensity_reduction(
         r_i=r_i,
         surface_pressure_intensity_indicator=f_pi,
         qualified=qualified,
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         area=s,
         measurement_area=sm,
         absorbing_specimen_surface=absorbing,
@@ -1311,7 +1311,7 @@ def low_frequency_intensity_reduction(
 
 
 @dataclass(frozen=True)
-class LowFrequencyElementResult:
+class LowFrequencyElementResult(OwnsArrays):
     r"""Per-band element normalized level difference at low frequencies.
 
     The result of ISO 15186-3:2002, Clause 3.9, Formula (8), the small-element
@@ -1480,7 +1480,7 @@ def low_frequency_element_normalized_difference(
         d_i_n_e=d_i_n_e,
         surface_pressure_intensity_indicator=f_pi,
         qualified=qualified,
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         measurement_area=sm,
         elements=n,
         absorbing_specimen_surface=_validated_absorbing_flag(

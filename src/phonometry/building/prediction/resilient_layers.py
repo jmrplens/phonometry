@@ -96,7 +96,7 @@ if TYPE_CHECKING:
 # every caller in the tree reads it from there, the names this module used to
 # define stay importable from this path, unchanged; the ``__all__`` below
 # re-exports them.
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from .linings import (
     LiningImprovementResult,
     lining_improvement,
@@ -479,7 +479,7 @@ def short_pulse_mean_square_force(
 
 
 @dataclass(frozen=True)
-class TappingForceResult:
+class TappingForceResult(OwnsArrays):
     r"""Force spectrum of the ISO tapping machine on one walking surface.
 
     :ivar frequencies: Band centre frequencies ``f``, in Hz.
@@ -635,7 +635,7 @@ def tapping_force_spectrum(
     peak = np.abs(spectrum) * fi
     mean_square = peak**2 * (factor * f) / (2.0 * fi)
     return TappingForceResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         peak_force=np.asarray(peak, dtype=np.float64),
         mean_square_force=np.asarray(mean_square, dtype=np.float64),
         power_input=np.asarray(mean_square / z, dtype=np.float64),
@@ -654,7 +654,7 @@ def tapping_force_spectrum(
 # 2. Soft floor coverings on a heavyweight floor (Hopkins 4.4.3.1)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class CoveringImprovementResult:
+class CoveringImprovementResult(OwnsArrays):
     r"""Predicted improvement ``ΔL`` of a soft floor covering
     (Hopkins 4.4.3.1).
 
@@ -854,7 +854,7 @@ def covering_improvement(
     fco = covered.cut_off_frequency
     two_line = np.where(f > fco, _SLOPE_CREMER * np.log10(f / fco), 0.0)
     return CoveringImprovementResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         improvement=np.asarray(improvement, dtype=np.float64),
         two_line=np.asarray(two_line, dtype=np.float64),
         cut_off_frequency=fco,
@@ -999,7 +999,7 @@ def weighted_floating_floor_improvement(
 
 
 @dataclass(frozen=True)
-class FloatingFloorImprovementResult:
+class FloatingFloorImprovementResult(OwnsArrays):
     """Predicted improvement ``ΔL(f)`` of a floating floor.
 
     :ivar frequencies: Band centre frequencies ``f``, in Hz.
@@ -1182,7 +1182,7 @@ def floating_floor_improvement_spectrum(
             floor="screed" if model == "en12354" else "asphalt",
         )
     return FloatingFloorImprovementResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         improvement=np.asarray(improvement, dtype=np.float64),
         resonance_frequency=f0,
         model=model,

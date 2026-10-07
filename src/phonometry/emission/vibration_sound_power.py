@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -270,7 +270,7 @@ def extraneous_velocity_correction(level_difference: float) -> float:
 
 
 @dataclass(frozen=True)
-class VibrationSoundPowerResult:
+class VibrationSoundPowerResult(OwnsArrays):
     """Sound power radiated by surface vibration (ISO/TS 7849).
 
     :ivar frequencies: Band centre frequencies, in hertz, or ``None`` for a
@@ -494,9 +494,9 @@ def sound_power_from_vibration(
             "band",
         )
     return VibrationSoundPowerResult(
-        velocity_level=read_only_copy(lv),
+        velocity_level=lv,
         sound_power_level=np.asarray(lw, dtype=np.float64),
         radiation_factor=eps,
         area=float(area),
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
     )

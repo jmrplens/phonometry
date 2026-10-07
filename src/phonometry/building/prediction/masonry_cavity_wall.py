@@ -83,7 +83,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_finite_array,
     require_positive,
@@ -170,7 +170,7 @@ def wall_tie_stiffness_per_area(ties_per_area: float, tie: str | float) -> float
 
 
 @dataclass(frozen=True)
-class WallTieCouplingResult:
+class WallTieCouplingResult(OwnsArrays):
     r"""Structure-borne coupling of a wall-tie array (Hopkins Eqs. 4.87/4.88).
 
     :ivar frequencies: Frequencies, in hertz.
@@ -305,7 +305,7 @@ def wall_tie_coupling_loss_factor(
     eta = n / (omega * m1) * y2 / denominator
     rigid = n / (omega * m1) * y2 / (y1 + y2) ** 2
     return WallTieCouplingResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         coupling_loss_factor=np.asarray(eta, dtype=np.float64),
         mobility1=y1,
         mobility2=y2,

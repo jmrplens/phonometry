@@ -145,7 +145,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from ..._internal.boundary import round_half_up
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
 from ..._internal.validation import (
     _as_float64,
@@ -935,7 +935,7 @@ def _refuse_truth_value(owner: str) -> str:
 
 
 @dataclass(frozen=True)
-class ServiceEquipmentBackgroundResult:
+class ServiceEquipmentBackgroundResult(OwnsArrays):
     r"""Band levels corrected for the background by Clause 9.
 
     :ivar measured_db: The measured band levels :math:`L_1`, background
@@ -1082,13 +1082,13 @@ def service_equipment_background_correction(
         for none, formed in zip(uncorrected, corrected_regime, strict=True)
     )
     return ServiceEquipmentBackgroundResult(
-        measured_db=measured.copy(),
-        background_db=background.copy(),
+        measured_db=measured,
+        background_db=background,
         difference_db=difference,
         correction_db=np.asarray(correction, dtype=np.float64),
         corrected_db=measured - correction,
         regime=regime,
-        frequencies_hz=read_only_copy(freqs),
+        frequencies_hz=freqs,
     )
 
 
@@ -1098,7 +1098,7 @@ def service_equipment_background_correction(
 
 
 @dataclass(frozen=True)
-class ServiceEquipmentResult:
+class ServiceEquipmentResult(OwnsArrays):
     r"""Service-equipment sound pressure level, engineering method.
 
     Produced by :func:`service_equipment_level`. Every band array runs over
@@ -1354,7 +1354,7 @@ def service_equipment_level(
     average = _round_half_up_array(energy_mean(readings, axis=0), 1)
 
     background = None
-    corrected = average.copy()
+    corrected = average
     if background_db is not None:
         bg = _as_levels(background_db, "background_db")
         if bg.ndim == _PER_POSITION_RANK:
@@ -1362,7 +1362,7 @@ def service_equipment_level(
         background = service_equipment_background_correction(
             average, bg, frequencies_hz=nominal
         )
-        corrected = background.corrected_db.copy()
+        corrected = background.corrected_db
 
     standardizable = _in_range(nominal, _STANDARDIZATION_RANGE[band])
     standardized, normalized = _standardize(
@@ -1394,7 +1394,7 @@ def service_equipment_level(
         band=band,
         quantity=quantity,
         a_weighting_range=a_weighting_range,
-        readings_db=readings.copy(),
+        readings_db=readings,
         average_db=average,
         background=background,
         corrected_db=corrected,
@@ -1454,7 +1454,7 @@ def _standardize(
 
 
 @dataclass(frozen=True)
-class PositionSpreadCheck:
+class PositionSpreadCheck(OwnsArrays):
     r"""Whether the readings so far are enough to average (7.4.1).
 
     The readings are the only field. The stage, the spread, the limit of the
@@ -1479,7 +1479,7 @@ class PositionSpreadCheck:
         if levels.ndim != 1 or levels.size not in (3, 6, 9):
             msg = "PositionSpreadCheck: 'levels_db' must hold 3, 6 or 9 readings, three per stage."
             raise ValueError(msg)
-        object.__setattr__(self, "levels_db", read_only_copy(levels))
+        object.__setattr__(self, "levels_db", read_only(levels))
 
     @property
     def stage(self) -> int:
@@ -1676,7 +1676,7 @@ def loudest_corner(
 
 
 @dataclass(frozen=True)
-class ServiceEquipmentPositionCheck:
+class ServiceEquipmentPositionCheck(OwnsArrays):
     """Whether the positions keep the corner height of 7.2 and the distances of 7.3.
 
     Positions are coordinates in metres in a rectangular room with one corner
@@ -1947,7 +1947,7 @@ def check_service_equipment_positions(
             rooms[:, np.newaxis, :] - sources[np.newaxis, :, :], axis=-1
         )
         source_distance = float(np.min(to_source))
-    heights = rooms[:, 2].copy()
+    heights = rooms[:, 2]
     c = corner[0]
     walls = np.minimum(c[:2], dims[:2] - c[:2])
     surface_limit = (
@@ -1956,10 +1956,10 @@ def check_service_equipment_positions(
     slack = _LIMIT_SLACK
     obstacle = _corner_obstacle_distance(corner_obstacle_distance_m)
     return ServiceEquipmentPositionCheck(
-        room_dimensions_m=dims.copy(),
-        corner_position_m=c.copy(),
-        room_positions_m=rooms.copy(),
-        source_positions_m=sources.copy(),
+        room_dimensions_m=dims,
+        corner_position_m=c,
+        room_positions_m=rooms,
+        source_positions_m=sources,
         small_room=bool(small_room),
         separation_m=separation,
         surface_distance_m=surface,
@@ -2085,7 +2085,7 @@ def _readings(value: ArrayLike, name: str) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class CalibrationDeviationResult:
+class CalibrationDeviationResult(OwnsArrays):
     r"""Whether the instrumentation may be used, by its calibrations (Clause 5).
 
     :ivar levels_db: The calibrator readings of this measurement in the order
@@ -2223,14 +2223,14 @@ def verify_calibration_deviation(
         if earlier.size:
             deviations[i] = float(np.max(np.abs(level - earlier)))
     return CalibrationDeviationResult(
-        levels_db=levels.copy(),
-        previous_levels_db=previous.copy(),
+        levels_db=levels,
+        previous_levels_db=previous,
         deviations_db=deviations,
     )
 
 
 @dataclass(frozen=True)
-class BackgroundDurationCheck:
+class BackgroundDurationCheck(OwnsArrays):
     r"""Whether each background was measured over approximately 30 s (7.6).
 
     :ivar durations_s: The time over which each background equivalent level
@@ -2356,13 +2356,11 @@ def check_background_duration(
     if tolerance.ndim != 0 or not np.isfinite(tolerance) or tolerance < 0.0:
         msg = "'tolerance_s' must be one finite duration of 0 s or more."
         raise ValueError(msg)
-    return BackgroundDurationCheck(
-        durations_s=durations.copy(), tolerance_s=float(tolerance)
-    )
+    return BackgroundDurationCheck(durations_s=durations, tolerance_s=float(tolerance))
 
 
 @dataclass(frozen=True)
-class VaryingBackgroundCheck:
+class VaryingBackgroundCheck(OwnsArrays):
     r"""Whether a result stands without correction for a varying background.
 
     The route the NOTE to Clause 9 offers when the background varies in time.
@@ -2521,15 +2519,15 @@ def check_varying_background(
             msg = "'frequencies_hz' must give one finite centre per band."
             raise ValueError(msg)
     return VaryingBackgroundCheck(
-        background_maximum_db=background.copy(),
-        equipment_levels_db=equipment.copy(),
+        background_maximum_db=background,
+        equipment_levels_db=equipment,
         observation_time_s=observation,
-        frequencies_hz=None if freqs is None else freqs.copy(),
+        frequencies_hz=None if freqs is None else freqs,
     )
 
 
 @dataclass(frozen=True)
-class MeasurementDisturbanceCheck:
+class MeasurementDisturbanceCheck(OwnsArrays):
     r"""Whether each measurement period was free of disturbances (Clause 9).
 
     :ivar maximum_levels_db: The maximum level in the middle of the frequency
@@ -2656,7 +2654,7 @@ def check_measurement_disturbance(
         msg = "'maximum_levels_db' and 'equivalent_levels_db' must give one level per period, the same count."
         raise ValueError(msg)
     return MeasurementDisturbanceCheck(
-        maximum_levels_db=maxima.copy(), equivalent_levels_db=equivalents.copy()
+        maximum_levels_db=maxima, equivalent_levels_db=equivalents
     )
 
 

@@ -71,7 +71,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -106,7 +106,7 @@ def _as_array(value: float | Sequence[float] | np.ndarray, name: str) -> np.ndar
 
 
 @dataclass(frozen=True)
-class FacadeElement:
+class FacadeElement(OwnsArrays):
     """One façade element as a transmission path (EN 12354-3/-4).
 
     Provide exactly one of ``r`` (an area element, Formula 15 / Part 4 Formula 3),
@@ -203,7 +203,7 @@ def _band_count(elements: Sequence[FacadeElement], owner: str) -> int:
 
 
 @dataclass(frozen=True)
-class FacadePredictionResult:
+class FacadePredictionResult(OwnsArrays):
     r"""Predicted façade airborne insulation (EN 12354-3:2000).
 
     :ivar r_prime: Apparent sound reduction index ``R'`` per band, in dB
@@ -363,7 +363,7 @@ class FacadePredictionResult:
 
 
 @dataclass(frozen=True)
-class RadiatedPowerResult:
+class RadiatedPowerResult(OwnsArrays):
     """Predicted sound power radiated to the outside by a segment (EN 12354-4).
 
     :ivar l_w: Radiated sound power level ``LW`` per band, in dB re 1 pW
@@ -497,7 +497,7 @@ def facade_sound_reduction(
             {"frequencies": len(frequencies), "r_prime": r_prime.size},
         )
     r_45 = r_prime + 1.0
-    r_tr_s = r_prime.copy()
+    r_tr_s = r_prime
     d_2m_nt = r_prime + delta + 10.0 * log10(v / (6.0 * _T0 * float(area)))
 
     r_tr = _single_number(r_tr_s, bands)
@@ -513,7 +513,7 @@ def facade_sound_reduction(
         c_tr=None if r_tr is None else r_tr[1],
         frequencies=None
         if frequencies is None
-        else read_only_copy(frequencies, dtype=np.float64),
+        else np.asarray(frequencies, dtype=np.float64),
         elements=tuple(elements),
     )
 
@@ -576,7 +576,7 @@ def radiated_sound_power(
             l_w_dba = float(10.0 * np.log10(np.sum(10.0 ** ((l_w + a_weights) / 10.0))))
     freqs = None if octave_bands is None else np.asarray(octave_bands, dtype=np.float64)
     return RadiatedPowerResult(
-        l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=read_only_copy(freqs)
+        l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=freqs
     )
 
 

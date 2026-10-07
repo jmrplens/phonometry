@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -370,7 +371,7 @@ def _centred_scale(ratio: np.ndarray, half_width: np.ndarray) -> float:
 
 
 @dataclass(frozen=True)
-class SpecialRoomReverberationCheck:
+class SpecialRoomReverberationCheck(OwnsArrays):
     r"""Qualification of a special reverberation test room by its
     reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
 
@@ -719,8 +720,8 @@ def check_special_room_reverberation(
         else require_positive(source_volume_m3, "source_volume_m3")
     )
     check = SpecialRoomReverberationCheck(
-        frequencies=freqs.copy(),
-        reverberation_time_s=t.copy(),
+        frequencies=freqs,
+        reverberation_time_s=t,
         reverberation_parameter=np.asarray(r, dtype=np.float64),
         nominal_reverberation_time_s=float(nominal),
         centred=centred,
@@ -741,7 +742,7 @@ def check_special_room_reverberation(
 
 
 @dataclass(frozen=True)
-class SpecialRoomSurfaceCheck:
+class SpecialRoomSurfaceCheck(OwnsArrays):
     r"""Qualification of a special reverberation test room by its surfaces
     (ISO 3743-2:2018, 6.4).
 
@@ -929,15 +930,15 @@ def check_special_room_surfaces(
             raise ValueError(msg)
         mean = (areas[:, None] * surfaces).sum(axis=0) / areas.sum()
     return SpecialRoomSurfaceCheck(
-        frequencies=freqs.copy(),
-        surface_absorption=surfaces.copy(),
-        floor_absorption=floor.copy(),
+        frequencies=freqs,
+        surface_absorption=surfaces,
+        floor_absorption=floor,
         mean_absorption=np.asarray(mean, dtype=np.float64),
     )
 
 
 @dataclass(frozen=True)
-class SpecialRoomSuitabilityCheck:
+class SpecialRoomSuitabilityCheck(OwnsArrays):
     """The suitability evaluation of ISO 3743-2:2018, 6.7 (Table 1).
 
     Per octave band, ``measured_power_level_db`` is the sound power level of
@@ -1116,8 +1117,8 @@ def check_special_room_suitability(
         raise ValueError(msg)
     return SpecialRoomSuitabilityCheck(
         frequencies=freqs,
-        measured_power_level_db=measured.copy(),
-        calibrated_power_level_db=np.asarray(calibrated, dtype=np.float64).copy(),
+        measured_power_level_db=measured,
+        calibrated_power_level_db=np.asarray(calibrated, dtype=np.float64),
     )
 
 
@@ -1253,7 +1254,7 @@ def special_room_source_locations(
 
 
 @dataclass(frozen=True)
-class SpecialRoomSoundPowerResult:
+class SpecialRoomSoundPowerResult(OwnsArrays):
     r"""Result of an ISO 3743-2:2018 determination in a special reverberation
     test room.
 
@@ -1699,8 +1700,8 @@ def sound_power_special_room(
         mean_pressure_level=mean,
         background_correction=np.asarray(shift, dtype=np.float64),
         background_requirement_met=np.asarray(met, dtype=bool),
-        mean_reference_level=nan_band.copy(),
-        reference_power_level=nan_band.copy(),
+        mean_reference_level=nan_band,
+        reference_power_level=nan_band,
         volume_m3=volume,
         nominal_reverberation_time_s=nominal,
         c2=_c2_correction(temperature_c, static_pressure_kpa),
@@ -1845,7 +1846,7 @@ def sound_power_special_room_comparison(
         background_correction=np.asarray(shift, dtype=np.float64),
         background_requirement_met=np.asarray(requirement, dtype=bool),
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
-        reference_power_level=power.copy(),
+        reference_power_level=power,
         volume_m3=math.nan,
         nominal_reverberation_time_s=math.nan,
         c2=_c2_correction(temperature_c, static_pressure_kpa),

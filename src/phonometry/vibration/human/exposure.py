@@ -66,7 +66,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy import signal as sig
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -443,7 +443,7 @@ def _overall_weighting(p: _WParams, s: Complex) -> Complex:
 
 
 @dataclass(frozen=True)
-class WeightingResponse:
+class WeightingResponse(OwnsArrays):
     r"""A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 
     :ivar name: Weighting name (one of :data:`WEIGHTING_NAMES`).
@@ -501,7 +501,7 @@ def _response_result(
         mag_db = 20.0 * np.log10(mag)
     return WeightingResponse(
         name=name,
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         response=resp,
         magnitude=mag,
         magnitude_db=mag_db,
@@ -664,7 +664,7 @@ def _apply_response(
 # Band (spectrum) method (ISO 2631-1 Eq. (9); ISO 5349-1 Eq. (A.1)).
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
-class WeightedSpectrum:
+class WeightedSpectrum(OwnsArrays):
     """A weighted one-third-octave acceleration spectrum and its ``a_w``.
 
     :ivar frequencies: Band centre frequencies, in hertz.
@@ -776,8 +776,8 @@ def weighted_acceleration(
     weighted = factors * accel
     overall = float(np.sqrt(np.sum(weighted**2)))
     return WeightedSpectrum(
-        frequencies=read_only_copy(freq),
-        band_accelerations=read_only_copy(accel),
+        frequencies=freq,
+        band_accelerations=accel,
         weighting_name=weighting,
         weighting_factors=factors,
         weighted=weighted,
@@ -1303,7 +1303,7 @@ def exposure_assessment(
 
 
 @dataclass(frozen=True)
-class DailyVibrationExposure:
+class DailyVibrationExposure(OwnsArrays):
     """A daily exposure built from several operations, with its assessment.
 
     :ivar a8: The daily exposure ``A(8)``, in m/s2.
@@ -1484,8 +1484,8 @@ def daily_vibration_exposure(
     return DailyVibrationExposure(
         a8=a8,
         labels=labels,
-        total_values=read_only_copy(ahv),
-        durations_s=read_only_copy(t),
+        total_values=ahv,
+        durations_s=t,
         partials=partials,
         assessment=exposure_assessment(a8, kind=kind, metric="a8"),
     )

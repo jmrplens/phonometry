@@ -68,7 +68,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.special import hankel2
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_equal_shapes
 from ..fluids import Fluid
 
@@ -83,7 +83,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class ContourPhasors:
+class ContourPhasors(OwnsArrays):
     r"""Steady-state ``p`` and ``v_n`` phasors sampled on a closed contour.
 
     The phasors follow the library's :math:`e^{+j \omega t}` convention:
@@ -178,12 +178,12 @@ class ContourPhasors:
             msg = "contour phasor arrays must be finite"
             raise ValueError(msg)
         # Store the converted arrays so hand-built instances (lists, mixed
-        # dtypes) behave exactly like probe-built ones downstream, each a
-        # read-only copy of its own rather than the caller's array.
-        object.__setattr__(self, "positions", read_only_copy(pos))
-        object.__setattr__(self, "normals", read_only_copy(nrm))
-        object.__setattr__(self, "pressure", read_only_copy(p))
-        object.__setattr__(self, "normal_velocity", read_only_copy(v))
+        # dtypes) behave exactly like probe-built ones downstream; what they
+        # convert is already the record's own copy, so sealing it is enough.
+        object.__setattr__(self, "positions", read_only(pos))
+        object.__setattr__(self, "normals", read_only(nrm))
+        object.__setattr__(self, "pressure", read_only(p))
+        object.__setattr__(self, "normal_velocity", read_only(v))
 
     def subtract(self, reference: ContourPhasors) -> ContourPhasors:
         """Phasor difference on the same contour: ``self - reference``.

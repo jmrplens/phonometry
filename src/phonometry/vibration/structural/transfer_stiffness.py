@@ -91,7 +91,7 @@ if TYPE_CHECKING:
 
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_finite,
@@ -429,7 +429,7 @@ def base_transmissibility(
 
 
 @dataclass(frozen=True)
-class TransferStiffnessResult:
+class TransferStiffnessResult(OwnsArrays):
     r"""A dynamic transfer stiffness over frequency (ISO 10846).
 
     :ivar frequencies: Frequencies, in hertz.
@@ -655,9 +655,9 @@ def indirect_transfer_stiffness_result(
         freq, transmissibility, blocking_mass, flange_mass=flange_mass
     )
     magnitude = np.abs(np.asarray(transmissibility, dtype=np.complex128))
-    valid = np.broadcast_to(magnitude <= TRANSMISSIBILITY_LIMIT, k.shape).copy()
+    valid = np.broadcast_to(magnitude <= TRANSMISSIBILITY_LIMIT, k.shape)
     return TransferStiffnessResult(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         transfer_stiffness=k,
         blocking_mass=float(blocking_mass),
         valid=valid,
@@ -717,7 +717,7 @@ def _as_flags(
 
 
 @dataclass(frozen=True)
-class BandAveragedStiffness:
+class BandAveragedStiffness(OwnsArrays):
     r"""One-third-octave-band averages of a narrow-band dynamic stiffness (ISO 10846).
 
     Every part of the series reduces the narrow-band stiffness to one value
@@ -985,7 +985,7 @@ _CONDITIONS: tuple[str, ...] = tuple(_CONDITION_LIMITS_DB)
 
 
 @dataclass(frozen=True)
-class LevelDifferenceCheck:
+class LevelDifferenceCheck(OwnsArrays):
     r"""An ISO 10846 level-difference condition judged frequency by frequency.
 
     Two conditions of the series take this form. The output is blocked where
@@ -1174,7 +1174,7 @@ def check_blocked_output(
         )
         raise ValueError(msg)
     check = LevelDifferenceCheck(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         difference_db=first - second,
         condition="blocked_output",
     )
@@ -1235,7 +1235,7 @@ def check_unwanted_input(
         raise ValueError(msg)
     loudest = unwanted if unwanted.ndim == 1 else np.max(unwanted, axis=0)
     check = LevelDifferenceCheck(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         difference_db=excitation - loudest,
         condition="unwanted_input",
     )
@@ -1248,7 +1248,7 @@ def check_unwanted_input(
 
 
 @dataclass(frozen=True)
-class OutputMassCheck:
+class OutputMassCheck(OwnsArrays):
     r"""The mass in front of the output force transducers, against its limit.
 
     In the direct method the mass ``m0`` between the element and the output
@@ -1443,7 +1443,7 @@ def check_output_mass(
         (force_db - acceleration_db) / 20.0
     )
     check = OutputMassCheck(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         output_mass_kg=output_mass_kg,
         output_apparent_mass_kg=apparent,
     )
@@ -1504,7 +1504,7 @@ def _limit_crossing(
 
 
 @dataclass(frozen=True)
-class EffectiveBlockingMass:
+class EffectiveBlockingMass(OwnsArrays):
     r"""Effective mass of a blocking mass over frequency, and its limit ``f3``.
 
     The indirect method treats the blocking mass as rigid; above some
@@ -1685,7 +1685,7 @@ def effective_blocking_mass(
         msg = f"{owner}: the effective mass must be finite and positive at every frequency."
         raise ValueError(msg)
     return EffectiveBlockingMass(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         effective_mass_kg=np.asarray(m_eff, dtype=np.float64),
         blocking_mass_kg=blocking_mass_kg,
     )
@@ -1697,7 +1697,7 @@ def effective_blocking_mass(
 
 
 @dataclass(frozen=True)
-class DrivingPointStiffnessResult:
+class DrivingPointStiffnessResult(OwnsArrays):
     r"""A dynamic driving-point stiffness and the transfer stiffness it stands for (ISO 10846-5).
 
     With the output of the element blocked, the input force and acceleration
@@ -1997,7 +1997,7 @@ def driving_point_stiffness(
         )
         adequate = holds if adequate is None else adequate & holds
     return DrivingPointStiffnessResult(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         driving_point_stiffness=np.asarray(k11, dtype=np.complex128),
         adequate=adequate,
     )

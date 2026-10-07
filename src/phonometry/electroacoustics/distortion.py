@@ -35,6 +35,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..filters.weighting import _itu_r_468_prototype
 from ..io._resolve import apply_calibration, resolve_fs
@@ -659,7 +660,7 @@ def weighted_thd(
 # Result bundle
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class HarmonicDistortionResult:
+class HarmonicDistortionResult(OwnsArrays):
     r"""Harmonic analysis of a signal (IEC 60268-3 / AES17).
 
     :ivar fundamental: Fundamental frequency :math:`f_1`, in Hz.

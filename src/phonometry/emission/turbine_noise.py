@@ -118,7 +118,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_up
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     require_count,
@@ -302,7 +302,7 @@ class TurbineReferenceBox:
 
 
 @dataclass(frozen=True)
-class TurbineMeasurementSurface:
+class TurbineMeasurementSurface(OwnsArrays):
     r"""The measurement surface of a turbine set and its area (clause 7.1).
 
     Built by :func:`turbine_measurement_surface`. The parallelepipeds are the
@@ -479,7 +479,7 @@ def turbine_measurement_surface(
 
 
 @dataclass(frozen=True)
-class TurbineMicrophoneArray:
+class TurbineMicrophoneArray(OwnsArrays):
     """The key and additional microphone positions of Figure 2 (clause 7.2).
 
     Built by :func:`turbine_microphone_positions`. Coordinates are in metres:
@@ -835,7 +835,7 @@ def turbine_microphone_positions(
         surface=surface,
         positions_m=read_only(positions),
         labels=tuple(labels),
-        overhead_mask=read_only(np.array(overhead, dtype=bool)),
+        overhead_mask=np.asarray(overhead, dtype=bool),
         microphone_height_m=height,
         spacing_m=spacing,
         turbine_boxes=coupling,
@@ -912,7 +912,7 @@ def turbine_background_correction(level_difference_db: ArrayLike) -> float | np.
 
 
 @dataclass(frozen=True)
-class TurbineEnvironmentalCorrection:
+class TurbineEnvironmentalCorrection(OwnsArrays):
     """The environmental correction ``K`` of a test room (clause 8.2, Annex A).
 
     Built by :func:`turbine_environmental_correction` (A.3.1, Figure A.3) or
@@ -1110,7 +1110,7 @@ def turbine_reference_source_correction(
     return TurbineEnvironmentalCorrection(
         environmental_correction_db=k,
         method=_REFERENCE_SOURCE,
-        reference_levels_db=read_only(levels.copy()),
+        reference_levels_db=levels,
         calibrated_level_db=reference,
     )
 
@@ -1254,7 +1254,7 @@ def check_turbine_test_environment(
 
 
 @dataclass(frozen=True)
-class TurbineSoundPowerResult:
+class TurbineSoundPowerResult(OwnsArrays):
     r"""A-weighted surface sound pressure level and sound power level (8.3, 8.4).
 
     Built by :func:`turbine_sound_power`.
@@ -1537,7 +1537,6 @@ def turbine_sound_power(
                 f"position ({levels.size}); got shape {mask.shape}."
             )
             raise ValueError(msg)
-        mask = read_only(mask.copy())
     if not _within_k_limit(k):
         warnings.warn(
             f"An environmental correction of {k:.1f} dB exceeds the 7 dB "
@@ -1550,10 +1549,8 @@ def turbine_sound_power(
     surface_level = energy_mean(corrected) - k
     power = surface_level + 10.0 * math.log10(area / _S0)
     return TurbineSoundPowerResult(
-        pressure_levels_db=read_only(levels.copy()),
-        background_levels_db=None
-        if background is None
-        else read_only(background.copy()),
+        pressure_levels_db=levels,
+        background_levels_db=None if background is None else background,
         background_corrections_db=read_only(corrections),
         corrected_levels_db=read_only(corrected),
         environmental_correction_db=k,
@@ -1570,7 +1567,7 @@ def turbine_sound_power(
 
 
 @dataclass(frozen=True)
-class TurbineNoiseDeclaration:
+class TurbineNoiseDeclaration(OwnsArrays):
     """The minimum report of clause 10, one row per operating condition.
 
     Built by :func:`turbine_noise_declaration`.

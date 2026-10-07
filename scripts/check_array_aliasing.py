@@ -11,9 +11,22 @@ raises. A view does the same (``levels[:, 0]``, ``levels.T``, ``reshape``).
 the caller's own array, or on a view that still shares the caller's memory.
 
 The rule: an array a function was handed, or a view of one, is kept only as
-a copy of its own, through ``phonometry._internal.frozen.read_only_copy``.
-This reads every function of the package and follows each parameter through
-the statements of its body: the numpy calls that may hand back their
+a copy of its own. Every public record that can hold an array inherits
+``phonometry._internal.frozen.OwnsArrays``, which makes that copy when the
+record is built, whoever builds it: a function of the package or a caller
+writing the record by hand. Anything else that keeps an array (a plain
+class, a private record) copies it through
+``phonometry._internal.frozen.read_only_copy``. The check has three parts.
+
+The first reads the classes: a public record (a dataclass or a named tuple
+that a public module defines or lists in ``__all__``) with a field annotated
+as anything that may hold an array, and that does not inherit
+``OwnsArrays``, itself or through a record it extends, fails. No trail of
+the second part reaches a record a caller builds by hand, so the record has
+to copy for itself. :data:`RECORD_EXEMPT` is that part's escape hatch.
+
+The second reads every function of the package and follows each parameter
+through the statements of its body: the numpy calls that may hand back their
 argument or a view of it (``asarray``, ``atleast_1d``, ``reshape``, ``ravel``,
 ``diag`` and their kin), basic indexing, attribute access, containers and a
 dictionary's or a list's shallow ``copy``, records, and the package's own
@@ -24,22 +37,26 @@ first among them, summarised once for the whole tree). A copy
 the trail; a helper of the package counts as positions only when every
 return of its own is a mask or positions, so one that returns a ``slice``
 selects a view. A parameter annotated with a record of the package is read
-field by field, and a field the record copies in its own ``__post_init__``
-carries nothing. An annotation is read through the package's type aliases,
-so ``float | Field2D`` may hold an array when ``Field2D`` is
-``NDArray[np.float64]``. Five places are where an array is kept:
+field by field, and a field the record copies (every field of one that
+inherits ``OwnsArrays``, or one its own ``__post_init__`` copies) carries
+nothing; what a record that inherits ``OwnsArrays`` reads back from ``self``
+in its ``__post_init__`` is its own copy already. An annotation is read
+through the package's type aliases, so ``float | Field2D`` may hold an array
+when ``Field2D`` is ``NDArray[np.float64]``. Five places are where an array
+is kept:
 
 * a field of a public dataclass or named tuple, passed to its constructor
   (``cls(...)`` and ``type(self)(...)`` included), when the field is
-  annotated as an array or anything that may hold one; a class is public
-  when a public module defines it or lists it in ``__all__``;
+  annotated as an array or anything that may hold one and the record does
+  not copy it itself;
 * ``object.__setattr__(record, name, value)``: in a method of such a record,
   where the value read back from ``self`` in ``__post_init__`` is the
   constructor's argument, so a field normalised with
   ``np.asarray(self.levels)`` keeps the caller's array, and anywhere else on
   a public record, such as a factory patching the record it just built;
 * ``dataclasses.replace(record, ...)`` on a record parameter, which keeps
-  every array field it is not given;
+  every array field it is not given, unless the record inherits
+  ``OwnsArrays`` and copies them again;
 * an attribute of a plain public class set in any of its methods
   (``self.name = value``, ``self.name.append(value)``, or
   ``self.name[key] = value`` on an attribute annotated as a list or a
@@ -50,6 +67,21 @@ so ``float | Field2D`` may hold an array when ``Field2D`` is
   ``fs: float`` keeps a number;
 * ``read_only(value)`` anywhere.
 
+The third keeps the copy from being made twice: an argument handed to a
+public record that inherits ``OwnsArrays`` and written as a copy
+(``read_only_copy(x)``, ``np.copy(x)``, ``x.astype(t)``, ``read_only``
+around a copy, or ``x.copy()`` for a field annotated as an array alone)
+fails, because the record copies it again; a type that has to change is
+written ``np.asarray(x, dtype=t)``, which converts only when it must. So
+does a local name handed over bare or through ``read_only`` when every
+binding of it is such a copy and nothing in the function, or in a helper of
+the package it is passed to, writes into it, binds it again or keeps it or a
+view of it: the copy then does nothing the record does not do. The reading of that last part only vouches for what it
+can see (arithmetic, comparisons, sizes and shapes, numpy calls that build a
+new array, ``math``, a few builtins), so a copy it cannot vouch for is left
+alone and the rule never asks for a copy that keeps the caller's array whole
+to be dropped.
+
 A private helper is held to the rule whatever its callers pass today: the
 next caller may hand it the caller's array. The analysis reads names, not
 types, so a scalar that travels the same path as an array is read as one
@@ -57,13 +89,17 @@ where the field it lands in could hold an array. :data:`EXEMPT` is the
 escape hatch, keyed by file and function, and each entry carries the reason
 it is one; an entry that covers nothing fails the check too.
 
-What the check does not read: a record a caller builds by hand holds what it
-is given, as a tuple does, and a result that holds a record it was given
+What the check does not read: a result that holds a record it was given
 whole (``BandPath`` objects in a prediction's ``paths``) holds that record,
-not a copy of it; a function that returns the caller's array bare, not
-inside a result, is outside the rule; and a value whose path runs through
-code outside the package (a callback, a library call it does not know) is
-read as a new value.
+not a copy of it, and the record answers for its own arrays; a function that
+returns the caller's array bare, not inside a result, is outside the rule;
+a record whose fields are all annotated as something that holds no array is
+not required to inherit ``OwnsArrays``, so an array a caller puts in its
+``float`` field anyway is kept as it was handed; a copy made by a helper
+that returns it (``return values.copy()``) and handed to a record is not
+read as made twice, since the helper's other callers may need it; and a
+value whose path runs through code outside the package (a callback, a
+library call it does not know) is read as a new value.
 """
 
 from __future__ import annotations
@@ -83,19 +119,29 @@ if TYPE_CHECKING:
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
 
+#: The base a record inherits to copy every array it is built with
+#: (``phonometry._internal.frozen.OwnsArrays``).
+MECHANISM = "OwnsArrays"
+
+#: Public records that can hold an array and do not inherit :data:`MECHANISM`,
+#: keyed by file and class, each with the reason.
+RECORD_EXEMPT: dict[tuple[str, str], str] = {
+    ("src/phonometry/io/_signal.py", "Signal"): (
+        "copies its samples itself, into the C-ordered float64 layout it "
+        "promises, and keeps them writeable for processing in place, as "
+        "io.read's contract says (tests/io/test_io_read.py); its other "
+        "fields hold no array"
+    ),
+}
+
 #: Functions that may keep a parameter's array, keyed by file and qualified
 #: function, each with the reason.
 EXEMPT: dict[tuple[str, str], str] = {
-    ("src/phonometry/_report/duct_path.py", "render_duct_path_report"): (
-        "the copy made with dataclasses.replace only carries the requirement "
-        "onto the fiche being drawn; it is dropped when the page is written and "
-        "never reaches the caller"
-    ),
-    ("src/phonometry/signals/windows.py", "window_metrics"): (
-        "keeps the window's specification through _own_window, which hands a "
-        "name or a number on as given and an array parameter as a read-only "
-        "copy (a list one as a tuple); the check reads the pass-through branch "
-        "for the numbers as the caller's array"
+    ("src/phonometry/_internal/frozen.py", "_take_ownership"): (
+        f"the {MECHANISM} mechanism itself: what it stores on the record is "
+        "the read-only copy _owned makes of each array, or the value as it "
+        "was when it holds none; the check reads _owned's pass-through branch "
+        "for the values with no array as the caller's array"
     ),
 }
 
@@ -229,6 +275,76 @@ _PASS_THROUGH_BUILTINS = frozenset(
 
 #: Calls that wrap a container without copying what it holds.
 _WRAPPERS = frozenset({"MappingProxyType", "read_only", "cast"})
+
+#: The numpy functions that write into the array handed to them first
+#: (``np.add.at`` and the other ``ufunc.at`` read as ``at``).
+_NUMPY_WRITERS = frozenset(
+    {
+        "copyto",
+        "put",
+        "place",
+        "putmask",
+        "put_along_axis",
+        "fill_diagonal",
+        "shuffle",
+        "at",
+    }
+)
+
+#: Array methods that write into the array they are called on.
+_METHOD_WRITERS = frozenset(
+    {"sort", "fill", "resize", "put", "itemset", "setfield", "partition", "byteswap"}
+)
+
+#: Array methods whose result is a number or a new array, never the array
+#: they are called on nor a view of it.
+_METHOD_FRESH = frozenset(
+    {
+        "all",
+        "any",
+        "argmax",
+        "argmin",
+        "argsort",
+        "astype",
+        "clip",
+        "conj",
+        "conjugate",
+        "cumprod",
+        "cumsum",
+        "dot",
+        "item",
+        "max",
+        "mean",
+        "min",
+        "nonzero",
+        "prod",
+        "round",
+        "searchsorted",
+        "std",
+        "sum",
+        "tolist",
+        "var",
+    }
+)
+
+#: Attributes of an array that are views of its data.
+_VIEW_ATTRIBUTES = frozenset({"T", "mT", "real", "imag", "flat"})
+
+#: Builtins whose result holds none of the array they are handed.
+_READING_BUILTINS = frozenset(
+    {
+        "abs",
+        "bool",
+        "complex",
+        "float",
+        "format",
+        "int",
+        "isinstance",
+        "len",
+        "repr",
+        "str",
+    }
+)
 
 #: Methods that put their argument into the container they are called on.
 _CONTAINER_FILLERS = frozenset(
@@ -364,6 +480,7 @@ class ClassInfo:
     module: str
     record: bool
     bases: tuple[str, ...]
+    line: int = 0
     fields: list[tuple[str, str]] = field(default_factory=list)
     attributes: dict[str, str] = field(default_factory=dict)
     #: The fields ``__post_init__`` stores again, each with whether every
@@ -435,6 +552,11 @@ class Tree:
         self.array_aliases: set[str] = set()
         #: The functions whose every return is a mask or an array of positions.
         self.positions: set[tuple[str, str]] = set()
+        #: For each function read for a copy made twice, each node of its
+        #: body with the node that holds it, and each name with its uses.
+        self.syntax: dict[
+            ast.AST, tuple[dict[ast.AST, ast.AST], dict[str, list[ast.Name]]]
+        ] = {}
         for path in files:
             module = _module_name(path, root)
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -549,6 +671,7 @@ class Tree:
                     module,
                     record,
                     tuple(_base_name(b) for b in node.bases),
+                    node.lineno,
                 )
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(
@@ -638,11 +761,24 @@ class Tree:
         names = {name for name, _ in info.fields}
         return [f for f in fields if f[0] not in names] + info.fields
 
-    def owns(self, info: ClassInfo, name: str) -> bool:
-        """Whether a record copies a field itself, in its own or a base's
-        ``__post_init__``.
+    def copies_arrays(self, info: ClassInfo) -> bool:
+        """Whether a record inherits :data:`MECHANISM`, itself or through a
+        record it extends, and so copies every array it is built with.
         """
-        if info.owned.get(name):
+        if MECHANISM in info.bases:
+            return True
+        return any(
+            candidate.record and self.copies_arrays(candidate)
+            for base in info.bases
+            for candidate in self.class_by_name.get(base, [])
+        )
+
+    def owns(self, info: ClassInfo, name: str) -> bool:
+        """Whether a record copies a field itself: every field of one that
+        inherits :data:`MECHANISM`, or one its own or a base's
+        ``__post_init__`` copies.
+        """
+        if info.owned.get(name) or self.copies_arrays(info):
             return True
         for base in info.bases:
             for candidate in self.class_by_name.get(base, []):
@@ -652,7 +788,9 @@ class Tree:
 
     def seals(self, info: ClassInfo, name: str) -> bool:
         """Whether a record publishes a field as a read-only copy of its own."""
-        if info.sealed.get(name) and self.owns(info, name):
+        if self.copies_arrays(info) or (
+            info.sealed.get(name) and self.owns(info, name)
+        ):
             return True
         for base in info.bases:
             for candidate in self.class_by_name.get(base, []):
@@ -760,6 +898,41 @@ def _nested_statements(node: ast.stmt) -> list[ast.stmt]:
     return out
 
 
+#: Annotation words that say a field holds a container, whose ``copy`` is
+#: the container's.
+_CONTAINER_WORDS = frozenset(
+    {"dict", "Mapping", "MappingProxyType", "list", "Sequence", "tuple", "set"}
+)
+
+
+def _method_copy(node: ast.Call) -> bool:
+    """Whether a call is ``something.copy()``, with no argument."""
+    return (
+        isinstance(node.func, ast.Attribute)
+        and node.func.attr == "copy"
+        and not node.args
+        and not node.keywords
+    )
+
+
+def _method_astype(node: ast.Call) -> bool:
+    """Whether a call is ``something.astype(...)`` that copies.
+
+    It copies unless ``copy=False`` is written, even when the array already
+    has the type asked for.
+    """
+    return (
+        isinstance(node.func, ast.Attribute)
+        and node.func.attr == "astype"
+        and not any(
+            keyword.arg == "copy"
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is False
+            for keyword in node.keywords
+        )
+    )
+
+
 def holds_array(annotation: str | None) -> bool:
     """Whether a field so annotated may hold an array."""
     if annotation is None:
@@ -830,9 +1003,14 @@ class Reader:
                 env[name] = _CLEAN
                 continue
             env[name] = self.typed(name, annotations.get(name))
-        if self.post_init and self.function.owner is not None:
-            for name, _ in self.tree.record_fields(self.function.owner):
-                env[f"self.{name}"] = frozenset({f"self.{name}"})
+        owner = self.function.owner
+        if self.post_init and owner is not None:
+            # A record that copies its arrays has done so before its own
+            # ``__post_init__`` runs: what that reads back from ``self`` is
+            # the record's copy, not the constructor's argument.
+            copied = self.tree.copies_arrays(owner)
+            for name, _ in self.tree.record_fields(owner):
+                env[f"self.{name}"] = _CLEAN if copied else frozenset({f"self.{name}"})
         return env
 
     def typed(self, name: str, annotation: ast.expr | None) -> Value:
@@ -1537,6 +1715,12 @@ class Reader:
         """Report what a record keeps, and return the record as a value."""
         fields = self.tree.record_fields(info)
         annotations = dict(fields)
+        if self.tree.copies_arrays(info):
+            # Every array it is built with, however it is passed, is replaced
+            # by a copy of its own: the record carries nothing of the caller.
+            if public and self.findings is not None:
+                self.copied_twice(info, node, fields)
+            return Fields(tuple((name, _CLEAN) for name, _ in fields))
         kept: dict[str, Value] = {}
         spilled: list[Value] = []
         for index, value in enumerate(arguments):
@@ -1578,15 +1762,284 @@ class Reader:
             kept = {name: union(value, extra) for name, value in kept.items()}
         return Fields(tuple(kept.items()))
 
+    def is_copy(self, node: ast.expr, annotation: str) -> bool:
+        """Whether an argument is a copy made of an array.
+
+        ``read_only_copy(x)``, ``np.copy(x)``, ``x.astype(t)`` (whose default
+        ``copy=True`` copies even when ``x`` already has the type; written
+        ``np.asarray(x, dtype=t)`` it converts only when it has to) and
+        ``read_only`` around any of them or around ``np.array`` are copies
+        whatever ``x`` is; ``x.copy()`` is one when the field is annotated as
+        an array alone, since a mapping's or a list's ``copy`` copies the
+        container. ``np.array(x)`` is not read as one: it is how a list
+        becomes an array.
+        """
+        if isinstance(node, ast.IfExp):
+            return self.is_copy(node.body, annotation) or self.is_copy(
+                node.orelse, annotation
+            )
+        if not isinstance(node, ast.Call):
+            return False
+        name = node.func.id if isinstance(node.func, ast.Name) else None
+        if (
+            name == "read_only_copy"
+            or self.numpy_function(node.func) == "copy"
+            or _method_astype(node)
+        ):
+            return True
+        if name == "read_only" and node.args:
+            inner = node.args[0]
+            return isinstance(inner, ast.Call) and (
+                _method_copy(inner)
+                or _method_astype(inner)
+                or self.numpy_function(inner.func) in {"array", "copy"}
+            )
+        return _method_copy(node) and self.array_only(annotation)
+
+    def array_only(self, annotation: str) -> bool:
+        """Whether a field so annotated holds an array and no container."""
+        words = _words(annotation)
+        if any(word in _CONTAINER_WORDS for word in words):
+            return False
+        return any(
+            word in {"ndarray", "NDArray", "ArrayLike"}
+            or word in self.tree.array_aliases
+            for word in words
+        )
+
+    def copied_twice(
+        self, info: ClassInfo, node: ast.Call, fields: Sequence[tuple[str, str]]
+    ) -> None:
+        """Report a copy made of an array handed to a record that copies it.
+
+        The record makes a read-only copy of every array it is built with, so
+        a ``read_only_copy`` (or a ``.copy()``) written around the argument
+        copies the same array twice. So does a copy bound to a name first and
+        handed over by that name, bare or through ``read_only``, when the
+        copy does nothing else: see :meth:`copy_only_handed_over`.
+        """
+        annotations = dict(fields)
+        given: list[tuple[str, ast.expr]] = [
+            (fields[index][0], argument)
+            for index, argument in enumerate(node.args)
+            if index < len(fields) and not isinstance(argument, ast.Starred)
+        ]
+        given += [(k.arg, k.value) for k in node.keywords if k.arg in annotations]
+        for name, argument in given:
+            if self.is_copy(argument, annotations[name]):
+                self.mark(argument, f"{info.name}.{name} (copied twice)")
+                continue
+            local = _handed_name(argument)
+            if local is not None and self.copy_only_handed_over(
+                local, annotations[name]
+            ):
+                self.mark(argument, f"{info.name}.{name} (copied twice, as {local})")
+
+    # -- a copy bound to a name and handed over ----------------------------
+    def copy_only_handed_over(self, name: str, annotation: str) -> bool:
+        """Whether a local name holds a copy that only reaches a record.
+
+        Every binding of the name in the function is a copy (as
+        :meth:`is_copy` reads one, for a field so annotated), the name is not
+        a parameter, and every use of it is harmless (:meth:`harmless`):
+        nothing writes into the copy, keeps it or a view of it, or hands it
+        anywhere but to records that copy it again. Read this way, the copy
+        is never what makes the code right, and dropping it changes nothing
+        but the memory. Anything the reading cannot vouch for counts as a use
+        that needs the copy, so the rule never asks for a copy that matters
+        to be dropped.
+        """
+        function = self.function.node
+        if name in _parameter_names(function):
+            return False
+        parents, uses = self.syntax()
+        if not all(
+            isinstance(parents.get(use), ast.Assign | ast.AnnAssign)
+            for use in uses.get(name, ())
+            if isinstance(use.ctx, ast.Store)
+        ):
+            return False
+        bindings = _bindings(function, name)
+        if not bindings or any(
+            value is None or not self.is_copy(value, annotation) for value in bindings
+        ):
+            return False
+        return self.uses_harmless(name, depth=0)
+
+    def uses_harmless(self, name: str, depth: int) -> bool:
+        """Whether every read of *name* in the function is harmless.
+
+        A binding of the name is read as the caller's business: a parameter
+        rebound in the function, or deleted, is not vouched for.
+        """
+        parents, uses = self.syntax()
+        for node in uses.get(name, ()):
+            if isinstance(node.ctx, ast.Store | ast.Del):
+                if depth > 0:
+                    return False
+                continue
+            if not self.harmless(node, parents, depth):
+                return False
+        return True
+
+    def syntax(self) -> tuple[dict[ast.AST, ast.AST], dict[str, list[ast.Name]]]:
+        """Each node of the function with the node that holds it, and each
+        name with the places it is written, read once per function.
+        """
+        node = self.function.node
+        if node not in self.tree.syntax:
+            parents: dict[ast.AST, ast.AST] = {}
+            uses: dict[str, list[ast.Name]] = {}
+            for parent in ast.walk(node):
+                for child in ast.iter_child_nodes(parent):
+                    parents[child] = parent
+                if isinstance(parent, ast.Name):
+                    uses.setdefault(parent.id, []).append(parent)
+            self.tree.syntax[node] = (parents, uses)
+        return self.tree.syntax[node]
+
+    def harmless(  # noqa: C901, PLR0911, PLR0912
+        self, node: ast.expr, parents: Mapping[ast.AST, ast.AST], depth: int
+    ) -> bool:
+        """Whether what *node* holds (the array, or a view of it) is only read.
+
+        Read: an operand of arithmetic or of a comparison, a truth test, a
+        number in an f-string, its size or shape, a method or a numpy
+        function whose result is a new array, an index into something else,
+        a builtin that reads it, a record that copies it, and a function of
+        the package whose parameter is used the same way. A view of it
+        (indexing, ``.T``, ``read_only``, ``np.asarray``) is followed to its
+        own use. Anything else is not.
+        """
+        parent = parents.get(node)
+        if isinstance(parent, ast.BinOp | ast.UnaryOp | ast.Compare):
+            return True
+        if isinstance(parent, ast.BoolOp):
+            # ``a or levels`` is ``levels`` itself when ``a`` is false.
+            return self.harmless(parent, parents, depth)
+        if isinstance(parent, ast.FormattedValue):
+            return True
+        if isinstance(parent, ast.If | ast.While | ast.Assert) and parent.test is node:
+            return True
+        if isinstance(parent, ast.IfExp):
+            return parent.test is node or self.harmless(parent, parents, depth)
+        if isinstance(parent, ast.Subscript):
+            if parent.value is not node:
+                # An index into another array: indexing by an array copies.
+                return parent.slice is node
+            return isinstance(parent.ctx, ast.Load) and self.harmless(
+                parent, parents, depth
+            )
+        if isinstance(parent, ast.Attribute):
+            if not isinstance(parent.ctx, ast.Load):
+                return False
+            if parent.attr in _SCALAR_ATTRIBUTES - {"flags", "strides"}:
+                return True
+            if parent.attr in _VIEW_ATTRIBUTES:
+                return self.harmless(parent, parents, depth)
+            call = parents.get(parent)
+            if not isinstance(call, ast.Call) or call.func is not parent:
+                return False
+            if any(k.arg == "out" for k in call.keywords):
+                return False
+            if parent.attr in _METHOD_FRESH:
+                return _keyword_constant(call, "copy", default=True) is True
+            if parent.attr in _METHOD_ALIASING:
+                return self.harmless(call, parents, depth)
+            return False
+        if isinstance(parent, ast.keyword):
+            call = parents.get(parent)
+            if (
+                parent.arg is None
+                or parent.arg == "out"
+                or not isinstance(call, ast.Call)
+            ):
+                return False
+            return self.harmless_argument(call, node, parent.arg, parents, depth)
+        if (
+            isinstance(parent, ast.Call)
+            and parent.func is not node
+            and any(argument is node for argument in parent.args)
+        ):
+            return self.harmless_argument(parent, node, None, parents, depth)
+        if isinstance(parent, ast.List | ast.Tuple) and isinstance(
+            parent.ctx, ast.Load
+        ):
+            # ``np.concatenate([levels, extra])``: the items go into a new
+            # array when the list goes straight to a numpy function that
+            # builds one.
+            call = parents.get(parent)
+            return (
+                isinstance(call, ast.Call)
+                and any(argument is parent for argument in call.args)
+                and self.numpy_function(call.func)
+                not in {
+                    None,
+                    "array",
+                    *_NUMPY_ALIASING,
+                    *_NUMPY_ALIASING_EACH,
+                    *_NUMPY_WRITERS,
+                }
+            )
+        return False
+
+    def harmless_argument(  # noqa: PLR0911
+        self,
+        call: ast.Call,
+        node: ast.expr,
+        keyword: str | None,
+        parents: Mapping[ast.AST, ast.AST],
+        depth: int,
+    ) -> bool:
+        """Whether a call only reads the array *node* holds."""
+        func = call.func
+        if isinstance(func, ast.Name) and func.id in {"read_only", "cast"}:
+            return self.harmless(call, parents, depth)
+        if isinstance(func, ast.Name) and func.id in _READING_BUILTINS:
+            return True
+        if (
+            isinstance(func, ast.Attribute)
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "math"
+        ):
+            return True
+        numpy_name = self.numpy_function(func)
+        if numpy_name is not None:
+            first = keyword is None and bool(call.args) and call.args[0] is node
+            if numpy_name in _NUMPY_WRITERS and first:
+                return False
+            if numpy_name in _NUMPY_ALIASING | _NUMPY_ALIASING_EACH or (
+                numpy_name == "array"
+                and _keyword_constant(call, "copy", default=True) is not True
+            ):
+                return self.harmless(call, parents, depth)
+            return True
+        info = self.built_record(call)
+        if info is not None:
+            return self.tree.copies_arrays(info)
+        target = self.callee(func)
+        if target is None or target not in self.tree.functions or depth >= 3:
+            return False
+        function = self.tree.functions[target]
+        parameter = _bound_parameter(function, call, node, keyword)
+        if parameter is None:
+            return False
+        reader = Reader(self.tree, function, self.summaries, None)
+        return reader.uses_harmless(parameter, depth + 1)
+
     def replace_sink(
         self, node: ast.Call, arguments: list[Value], keywords: dict[str | None, Value]
     ) -> Value:
-        """``dataclasses.replace``: the new record keeps every field not named."""
+        """``dataclasses.replace``: the new record keeps every field not named.
+
+        A record that copies its arrays copies the kept ones again when the
+        new record is built, so nothing is kept there.
+        """
         if not node.args:
             return _CLEAN
         original = arguments[0]
         info = self.annotated_record(node.args[0])
-        if info is not None:
+        if info is not None and not self.tree.copies_arrays(info):
             annotations = dict(self.tree.record_fields(info))
             for name, annotation in annotations.items():
                 if name in keywords or not self.tree.holds_array(annotation):
@@ -1688,6 +2141,20 @@ class Reader:
             )
             if self.tree.holds_array(annotation):
                 self.flag(node, f"{label}.{name}", value)
+
+    def mark(self, node: ast.AST, sink: str) -> None:
+        """Record a finding that is not about a parameter carried."""
+        if self.findings is None:
+            return
+        self.findings.append(
+            Finding(
+                self.function.path,
+                self.function.qualname,
+                getattr(node, "lineno", 0),
+                sink,
+                (),
+            )
+        )
 
     def flag(self, node: ast.AST, sink: str, value: Value) -> None:
         carried = flat(value)
@@ -1851,6 +2318,111 @@ def _root_name(node: ast.expr) -> str | None:
     return node.id if isinstance(node, ast.Name) else None
 
 
+def _handed_name(node: ast.expr) -> str | None:
+    """The local name an argument hands over, bare or through ``read_only``."""
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "read_only"
+        and len(node.args) == 1
+        and not node.keywords
+    ):
+        node = node.args[0]
+    return node.id if isinstance(node, ast.Name) else None
+
+
+def _parameter_names(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    arguments = function.args
+    names = {
+        a.arg for a in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+    }
+    names.update(a.arg for a in (arguments.vararg, arguments.kwarg) if a is not None)
+    return names
+
+
+def _names_in(target: ast.AST, name: str) -> bool:
+    """Whether *name* is among the names a target or an expression holds."""
+    return any(isinstance(n, ast.Name) and n.id == name for n in ast.walk(target))
+
+
+def _bindings(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, name: str
+) -> list[ast.expr | None]:
+    """What each binding of *name* in the function binds it to.
+
+    A plain assignment binds it to its value; any other binding (an
+    augmented assignment, unpacking, a loop or ``with`` target, ``:=``, an
+    import, a nested definition, ``global``) to ``None``, a value the reading
+    does not know.
+    """
+    found: list[ast.expr | None] = []
+    for node in ast.walk(function):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == name:
+                    found.append(node.value)
+                elif isinstance(target, ast.Tuple | ast.List | ast.Starred) and (
+                    _names_in(target, name)
+                ):
+                    found.append(None)
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == name
+            and node.value is not None
+        ):
+            found.append(node.value)
+        elif _binds_unknown(node, name, function):
+            found.append(None)
+    return found
+
+
+def _binds_unknown(  # noqa: PLR0911
+    node: ast.AST, name: str, function: ast.FunctionDef | ast.AsyncFunctionDef
+) -> bool:
+    """Whether *node* binds *name* to something other than a plain value."""
+    if isinstance(node, ast.AugAssign | ast.NamedExpr):
+        return isinstance(node.target, ast.Name) and node.target.id == name
+    if isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
+        return _names_in(node.target, name)
+    if isinstance(node, ast.withitem):
+        return node.optional_vars is not None and _names_in(node.optional_vars, name)
+    if isinstance(node, ast.ExceptHandler):
+        return node.name == name
+    if isinstance(node, ast.Import | ast.ImportFrom):
+        return any((a.asname or a.name).split(".")[0] == name for a in node.names)
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return node is not function and node.name == name
+    if isinstance(node, ast.Global | ast.Nonlocal):
+        return name in node.names
+    return False
+
+
+def _bound_parameter(
+    function: FunctionInfo, call: ast.Call, node: ast.expr, keyword: str | None
+) -> str | None:
+    """The parameter of *function* a call binds *node* to, if it can tell."""
+    arguments = function.node.args
+    positional = [a.arg for a in (*arguments.posonlyargs, *arguments.args)]
+    bound = function.kind == "classmethod" or (
+        function.kind == "method"
+        and isinstance(call.func, ast.Attribute)
+        and isinstance(call.func.value, ast.Name)
+        and call.func.value.id == "self"
+    )
+    if bound:
+        positional = positional[1:]
+    if keyword is not None:
+        named = {a.arg for a in (*arguments.args, *arguments.kwonlyargs)}
+        return keyword if keyword in named else None
+    for index, argument in enumerate(call.args):
+        if isinstance(argument, ast.Starred):
+            return None
+        if argument is node:
+            return positional[index] if index < len(positional) else None
+    return None
+
+
 def _keyword_constant(node: ast.Call, name: str, *, default: object) -> object:
     for keyword in node.keywords:
         if keyword.arg == name:
@@ -1986,10 +2558,17 @@ def summarise(tree: Tree) -> dict[tuple[str, str], Summary]:
 
 
 def findings_in(
-    files: Sequence[pathlib.Path], root: pathlib.Path = SOURCE
+    files: Sequence[pathlib.Path],
+    root: pathlib.Path = SOURCE,
+    *,
+    tree: Tree | None = None,
 ) -> list[Finding]:
-    """Every place a function keeps an array it was handed without a copy."""
-    tree = Tree(files, root)
+    """Every place a function keeps an array it was handed without a copy.
+
+    *tree* is the package already read from *files*, when the caller has it.
+    """
+    if tree is None:
+        tree = Tree(files, root)
     find_positions(tree)
     summaries = summarise(tree)
     # What each record's ``__post_init__`` copies, read once more on the
@@ -2009,6 +2588,48 @@ def findings_in(
     return sorted(set(found), key=lambda f: (f.path, f.line, f.sink))
 
 
+def records_without_mechanism(
+    files: Sequence[pathlib.Path],
+    root: pathlib.Path = SOURCE,
+    *,
+    tree: Tree | None = None,
+) -> list[Finding]:
+    """Every public record that can hold an array and does not copy it.
+
+    A record a caller builds by hand never passes through a function of the
+    package, so no trail the analysis above follows reaches it; the record
+    has to copy for itself. One that inherits :data:`MECHANISM`, directly or
+    through a record it extends, does; any other public record with a field
+    annotated as something that can hold an array is reported, at its class.
+    *tree* is the package already read from *files*, when the caller has it.
+    """
+    if tree is None:
+        tree = Tree(files, root)
+    found: list[Finding] = []
+    for key in sorted(tree.public):
+        info = tree.classes[key]
+        if not info.record or tree.copies_arrays(info):
+            continue
+        annotations = dict(tree.record_fields(info)) | info.attributes
+        holding = sorted(
+            name
+            for name, annotation in annotations.items()
+            if tree.holds_array(annotation)
+        )
+        if holding:
+            found.append(
+                Finding(
+                    tree.paths[key[0]],
+                    key[1],
+                    info.line,
+                    f"{info.name} can hold an array ({', '.join(holding)}) and "
+                    f"does not inherit {MECHANISM}",
+                    (),
+                )
+            )
+    return found
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Report every array kept without a copy of its own."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -2024,25 +2645,49 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     root = arguments.package.resolve()
     files = python_files([], root)
-    found, stale = exempted(findings_in(files, root), EXEMPT)
-    if not found and not stale:
+    tree = Tree(files, root)
+    unequipped, stale_records = exempted(
+        records_without_mechanism(files, root, tree=tree), RECORD_EXEMPT
+    )
+    found, stale = exempted(findings_in(files, root, tree=tree), EXEMPT)
+    if not (found or stale or unequipped or stale_records):
         print("Every array a result keeps is a copy of its own.")
         return 0
+    if unequipped:
+        print(
+            "::error::a public record can hold an array and keeps whatever "
+            "array a caller hands it"
+        )
+        for finding in unequipped:
+            print(f"  {finding.path}:{finding.line}: {finding.sink}")
+        print(
+            f"  -> inherit {MECHANISM} from phonometry._internal.frozen, last "
+            "among the bases; a record that has to keep the caller's array goes "
+            "in RECORD_EXEMPT at the top of scripts/check_array_aliasing.py "
+            "with its reason."
+        )
     if found:
         print("::error::a result keeps an array it was handed, not a copy of it")
         for finding in found:
+            carried = (
+                f" <- {', '.join(finding.parameters)}" if finding.parameters else ""
+            )
             print(
-                f"  {finding.path}:{finding.line}: {finding.function}: {finding.sink} "
-                f"<- {', '.join(finding.parameters)}"
+                f"  {finding.path}:{finding.line}: {finding.function}: "
+                f"{finding.sink}{carried}"
             )
         print(
-            "  -> store read_only_copy(value) from phonometry._internal.frozen (a "
-            "copy of its own, read only); "
-            "a function that has to keep the caller's array goes in EXEMPT at the "
+            f"  -> hand a record that inherits {MECHANISM} the array as it is (it "
+            "makes the copy), or np.asarray(value, dtype=...) for a type it has "
+            "to change; anything else stores read_only_copy(value) from "
+            "phonometry._internal.frozen (a copy of its own, read only); a "
+            "function that has to keep the caller's array goes in EXEMPT at the "
             "top of scripts/check_array_aliasing.py with its reason."
         )
     for key in stale:
         print(f"::error::EXEMPT lists {key}, which keeps no array any more")
+    for key in stale_records:
+        print(f"::error::RECORD_EXEMPT lists {key}, which needs no exemption any more")
     return 1
 
 

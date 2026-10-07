@@ -43,6 +43,7 @@ from typing import Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import is_class_designation, require_choice
 from .weighting import WeightingFilter, _runtime_frequency_response
 
@@ -676,7 +677,7 @@ def _overall_class(
 
 
 @dataclass(frozen=True)
-class WeightingComplianceResult:
+class WeightingComplianceResult(OwnsArrays):
     """Class verdict of a :class:`~phonometry.WeightingFilter`.
 
     What :func:`verify_weighting_class` returns: the verdict together with the

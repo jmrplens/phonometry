@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import resolve_fs
 from .distortion import (
@@ -82,7 +83,7 @@ def _imd_component(
 
 
 @dataclass(frozen=True)
-class ModulationDistortionResult:
+class ModulationDistortionResult(OwnsArrays):
     r"""Modulation (intermodulation) distortion (IEC 60268-3 14.12.7).
 
     :ivar d2: Second-order modulation distortion :math:`d_{\mathrm{m},2}`

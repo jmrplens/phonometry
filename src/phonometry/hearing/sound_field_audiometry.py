@@ -73,7 +73,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_choice
 from .threshold import AUDIOMETRIC_FREQUENCIES as _AUDIOMETRIC_FREQUENCIES
 
@@ -415,7 +415,7 @@ def _variation_limits(standard: str) -> tuple[tuple[float, float], ...]:
 
 
 @dataclass(frozen=True)
-class DiffuseSoundFieldCheck:
+class DiffuseSoundFieldCheck(OwnsArrays):
     r"""Whether a sound field is diffuse enough, band by band.
 
     The verdict of ISO 8253-2:2009, 5.3, and of the random-incidence field of
@@ -788,7 +788,7 @@ def check_diffuse_sound_field(
 
 
 @dataclass(frozen=True)
-class FreeSoundFieldCheck:
+class FreeSoundFieldCheck(OwnsArrays):
     r"""Whether a free or quasi-free sound field is met, band by band.
 
     The verdict of ISO 8253-2:2009, 5.2 (free) or 5.4 (quasi-free).

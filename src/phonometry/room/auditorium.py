@@ -58,6 +58,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_choice, require_finite_array
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import resolve_fs
@@ -523,7 +524,7 @@ def sound_strength_from_power(
 
 
 @dataclass(frozen=True)
-class SoundStrengthResult:
+class SoundStrengthResult(OwnsArrays):
     """Per-band sound strength G and the two levels it is the difference of.
 
     ``frequencies`` holds the exact band centre frequencies in Hz, or is
@@ -716,7 +717,7 @@ def _window_energy(
 
 
 @dataclass(frozen=True)
-class LateralEnergyResult:
+class LateralEnergyResult(OwnsArrays):
     r"""Per-band early lateral energy fraction (ISO 3382-1:2009, A.2.4).
 
     ``frequencies`` holds the exact band centre frequencies in Hz, or is
@@ -854,7 +855,7 @@ def early_lateral_energy_fraction(
 
 
 @dataclass(frozen=True)
-class LateLateralResult:
+class LateLateralResult(OwnsArrays):
     """Per-band late lateral sound level (ISO 3382-1:2009, A.2.5).
 
     ``frequencies`` holds the exact band centre frequencies in Hz, or is
@@ -1045,7 +1046,7 @@ def late_lateral_average(levels: ArrayLike) -> float:
 
 
 @dataclass(frozen=True)
-class InterauralCorrelationResult:
+class InterauralCorrelationResult(OwnsArrays):
     r"""Per-band interaural cross correlation (ISO 3382-1:2009, Annex B).
 
     ``frequencies`` holds the exact band centre frequencies in Hz, or is
@@ -1291,7 +1292,7 @@ STAGE_SUPPORT_SINGLE_NUMBER_STANDARD_DEVIATION_DB = 0.3
 
 
 @dataclass(frozen=True)
-class StageSupportResult:
+class StageSupportResult(OwnsArrays):
     r"""Per-band stage support (ISO 3382-1:2009, Annex C).
 
     ``frequencies`` holds the exact band centre frequencies in Hz, or is

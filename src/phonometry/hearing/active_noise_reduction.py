@@ -78,6 +78,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import OwnsArrays
 from .hearing_protectors import (
     AssumedProtectionResult,
     HMLRatingResult,
@@ -201,7 +202,7 @@ def _default_bands(count: int, owner: str) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class ActiveInsertionLossResult:
+class ActiveInsertionLossResult(OwnsArrays):
     r"""The active insertion loss of an ANR earmuff on a panel of subjects.
 
     :ivar insertion_loss_db: :math:`\alpha` per subject and band, the ear with
@@ -400,13 +401,13 @@ def active_insertion_loss(
         standard_deviation_db=spread,
         standard_uncertainty_db=standard,
         expanded_uncertainty_db=_COVERAGE_FACTOR * standard,
-        frequencies=np.array(freqs, dtype=np.float64),
+        frequencies=np.asarray(freqs, dtype=np.float64),
         subjects=subjects,
     )
 
 
 @dataclass(frozen=True)
-class AnrTotalAttenuationResult:
+class AnrTotalAttenuationResult(OwnsArrays):
     r"""The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 
     :ivar total_octave_db: :math:`A_{\mathrm{total,oct},j}` per subject and
@@ -620,8 +621,8 @@ def anr_total_attenuation(
         total_third_octave_db=total_thirds,
         reat_third_octave_db=interpolated,
         insertion_loss_db=active,
-        frequencies=np.array(kept, dtype=np.float64),
-        third_octave_frequencies=np.array(thirds, dtype=np.float64),
+        frequencies=np.asarray(kept, dtype=np.float64),
+        third_octave_frequencies=np.asarray(thirds, dtype=np.float64),
         assumed_protection=assumed_protection_value(
             total_octaves, performance=_PERFORMANCE, frequencies=kept
         ),
@@ -631,7 +632,7 @@ def anr_total_attenuation(
 
 
 @dataclass(frozen=True)
-class AnrLinearityResult:
+class AnrLinearityResult(OwnsArrays):
     r"""How far up an ANR earmuff stays linear (5.4.4).
 
     :ivar external_levels_db: The external A-weighted levels applied, in dB,
@@ -798,7 +799,7 @@ def assess_anr_linearity(
         raise ValueError(msg)
     grid = levels.reshape(-1, external.size)
     return AnrLinearityResult(
-        external_levels_db=np.array(external, dtype=np.float64),
-        ear_levels_db=np.array(grid, dtype=np.float64),
+        external_levels_db=np.asarray(external, dtype=np.float64),
+        ear_levels_db=np.asarray(grid, dtype=np.float64),
         increments_db=np.diff(grid, axis=1),
     )

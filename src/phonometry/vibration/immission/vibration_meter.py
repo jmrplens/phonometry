@@ -69,6 +69,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from scipy import signal as sig
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -428,7 +429,7 @@ def response_tolerance_percent(
 
 
 @dataclass(frozen=True)
-class VibrationMeterVerification:
+class VibrationMeterVerification(OwnsArrays):
     """One measured amplitude response against Tables 2 and 3.
 
     :ivar frequencies_hz: The frequencies the response was measured at.
@@ -757,7 +758,7 @@ def takt_maximum_rms(maxima: ArrayLike) -> float:
 
 
 @dataclass(frozen=True)
-class VibrationMeterReading:
+class VibrationMeterReading(OwnsArrays):
     r"""What a meter displays for one record (5.1.6.1).
 
     :ivar peak_velocity_mm_s: :math:`|v|_\mathrm{max}`, the largest absolute
@@ -981,7 +982,7 @@ def assessment_velocity(
 
 
 @dataclass(frozen=True)
-class AssessmentVelocity:
+class AssessmentVelocity(OwnsArrays):
     r"""One record judged by Annex E, without a dominant frequency.
 
     :ivar assessment_velocity_mm_s: :math:`|v_{Bn}|_\mathrm{max}`, the peak

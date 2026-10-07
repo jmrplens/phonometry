@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only_copy
 from .._internal.validation import (
     require_equal_counts,
     require_positive,
@@ -182,7 +182,7 @@ class CWSource:
 
 
 @dataclass(frozen=True)
-class SignalSource:
+class SignalSource(OwnsArrays):
     """An arbitrary sampled waveform injected at one cell.
 
     The samples are interpreted as the source signal at ``fs`` and
@@ -209,7 +209,7 @@ class SignalSource:
         """Require a positive ``fs`` and freeze finite 1D ``samples``."""
         _positive_finite("fs", self.fs)
         _finite("amplitude", self.amplitude)
-        arr = np.array(self.samples, dtype=np.float64)
+        arr = np.asarray(self.samples, dtype=np.float64)
         if arr.ndim != 1:
             msg = "samples must be a 1D array"
             raise ValueError(msg)
@@ -1253,7 +1253,7 @@ def _require_grid_axes(
 
 
 @dataclass(frozen=True)
-class FDTDResult:
+class FDTDResult(OwnsArrays):
     r"""Frozen result of a :func:`fdtd_simulation` run.
 
     :ivar times: Time axis [s], length ``n_steps + 1`` (includes
@@ -1570,5 +1570,5 @@ def fdtd_simulation(
         snapshot_times=(
             np.asarray(frame_steps, dtype=np.float64) * sim.dt if frame_steps else None
         ),
-        obstacle_mask=(sim._obstacle.copy() if sim._obstacle is not None else None),
+        obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
     )

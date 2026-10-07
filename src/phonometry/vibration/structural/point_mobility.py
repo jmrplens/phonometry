@@ -62,7 +62,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
 from ..._internal.validation import require_positive
 from .mechanical_mobility import MobilityResult
 
@@ -393,9 +392,7 @@ def infinite_plate_point_mobility(
         raise ValueError(msg)
     y = infinite_plate_mobility(bending_stiffness, mass_per_area, location=location)
     mob = np.full(freq.shape, y, dtype=np.complex128)
-    return MobilityResult(
-        frequencies=read_only_copy(freq), mobility=mob, driving_point=True
-    )
+    return MobilityResult(frequencies=freq, mobility=mob, driving_point=True)
 
 
 def infinite_beam_point_mobility(
@@ -417,6 +414,4 @@ def infinite_beam_point_mobility(
     mob = infinite_beam_mobility(
         freq, bending_stiffness, mass_per_length, location=location
     )
-    return MobilityResult(
-        frequencies=read_only_copy(freq), mobility=mob, driving_point=True
-    )
+    return MobilityResult(frequencies=freq, mobility=mob, driving_point=True)

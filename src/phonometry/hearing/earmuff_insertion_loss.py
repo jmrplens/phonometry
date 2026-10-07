@@ -69,6 +69,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_up
+from .._internal.frozen import OwnsArrays
 from .sound_field_audiometry import (
     _RANDOM_INCIDENCE_CLAUSE,
     DiffuseSoundFieldCheck,
@@ -371,7 +372,7 @@ EARMUFF_INSERTION_LOSS_UNCERTAINTY = InsertionLossUncertaintyBudget(
 
 
 @dataclass(frozen=True)
-class EarmuffInsertionLossResult:
+class EarmuffInsertionLossResult(OwnsArrays):
     r"""The insertion loss of an earmuff on the test fixture (5.4, Annex B).
 
     A screening quantity, not an attenuation at the ear: Clause 1 says the
@@ -721,7 +722,7 @@ def check_random_incidence_field(
 
 
 @dataclass(frozen=True)
-class PlaneProgressiveWaveCheck:
+class PlaneProgressiveWaveCheck(OwnsArrays):
     """Whether the plane progressive wave of the test site is good enough (5.2.3).
 
     :ivar frequencies: The centre frequencies, in hertz.
@@ -925,7 +926,7 @@ def _isolation_requirement(frequencies: np.ndarray) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class FixtureIsolationCheck:
+class FixtureIsolationCheck(OwnsArrays):
     """Whether the test fixture isolates its microphone well enough (5.1.4).
 
     The requirement is the clause's, read from the bands as

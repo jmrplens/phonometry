@@ -107,6 +107,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_1d_signal,
     require_finite_fields,
@@ -437,7 +438,7 @@ def _calibration_factor(
 
 
 @dataclass(frozen=True)
-class QuasiPeakResult:
+class QuasiPeakResult(OwnsArrays):
     """A quasi-peak reading of one record (ITU-R BS.468-4 clause 2).
 
     :ivar reading: The quasi-peak reading: the largest value :attr:`trace`
@@ -720,7 +721,7 @@ def _window_row(
 
 
 @dataclass(frozen=True)
-class QuasiPeakDynamicsResult:
+class QuasiPeakDynamicsResult(OwnsArrays):
     """The eleven acceptance windows of clause 2, read on one chain.
 
     What :func:`verify_quasi_peak_dynamics` returns: the verdict together with

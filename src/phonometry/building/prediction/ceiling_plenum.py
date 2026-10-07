@@ -109,7 +109,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -332,7 +332,7 @@ def _require_deficiency_totals(result: CeilingAttenuationResult) -> None:
 
 
 @dataclass(frozen=True)
-class CeilingAttenuationResult:
+class CeilingAttenuationResult(OwnsArrays):
     """Ceiling attenuation class (ASTM E1414 rated through ASTM E413).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
@@ -468,7 +468,7 @@ def ceiling_attenuation_class(
     reference = contour + shift
     return CeilingAttenuationResult(
         frequencies=bands,
-        measured=read_only_copy(values),
+        measured=values,
         rounded=rounded,
         shifted_reference=reference,
         deficiencies=deficiencies,
@@ -480,7 +480,7 @@ def ceiling_attenuation_class(
 
 
 @dataclass(frozen=True)
-class PlenumFlankingResult:
+class PlenumFlankingResult(OwnsArrays):
     r"""Ceiling/plenum flanking path of a suspended ceiling (Vigran 9.2.3).
 
     :ivar frequencies: Band centre frequencies, in Hz, or ``None``.
@@ -688,11 +688,11 @@ def plenum_flanking_reduction_index(
         _require_transmission_factor(tau)
         rcl = rs + rr - geometry
         return PlenumFlankingResult(
-            frequencies=read_only_copy(freqs),
+            frequencies=freqs,
             reduction_index=np.asarray(rcl, dtype=np.float64),
             transmission_factor=np.asarray(tau, dtype=np.float64),
-            reduction_index_source=read_only_copy(rs),
-            reduction_index_receiving=read_only_copy(rr),
+            reduction_index_source=rs,
+            reduction_index_receiving=rr,
             geometry_term=geometry,
             penalty=np.full(rs.shape, geometry),
             model="undamped",
@@ -738,11 +738,11 @@ def plenum_flanking_reduction_index(
     _require_transmission_factor(tau)
     rcl = -10.0 * np.log10(tau)
     return PlenumFlankingResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         reduction_index=np.asarray(rcl, dtype=np.float64),
         transmission_factor=np.asarray(tau, dtype=np.float64),
-        reduction_index_source=read_only_copy(rs),
-        reduction_index_receiving=read_only_copy(rr),
+        reduction_index_source=rs,
+        reduction_index_receiving=rr,
         geometry_term=None,
         penalty=np.asarray(rs + rr - rcl, dtype=np.float64),
         model="attenuated",

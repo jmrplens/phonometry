@@ -51,6 +51,7 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
@@ -524,7 +525,7 @@ _FINE_SPACING_MAX_CENTRE_HZ = 125.0  # 1 Hz spacing at/below, 10 Hz above (claus
 
 
 @dataclass(frozen=True)
-class MooreGlasbergLoudness:
+class MooreGlasbergLoudness(OwnsArrays):
     """Result of an ISO 532-2:2017 Moore-Glasberg loudness calculation.
 
     ``loudness`` is the total loudness N in sone; ``loudness_level`` is the
@@ -822,8 +823,8 @@ def _result_from_components(
         loudness=loudness,
         loudness_level=_loudness_level(loudness),
         specific=n_spec,
-        erb_number=_I_GRID.copy(),
-        centre_frequencies=_FC_GRID.copy(),
+        erb_number=_I_GRID,
+        centre_frequencies=_FC_GRID,
         field=field,
         presentation=presentation,
     )

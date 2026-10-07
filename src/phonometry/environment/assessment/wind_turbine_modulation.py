@@ -86,7 +86,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only, read_only_copy
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     is_class_designation,
@@ -361,7 +361,7 @@ def _swing(series: NDArray[np.float64]) -> float:
 
 
 @dataclass(frozen=True)
-class ModulationBlock:
+class ModulationBlock(OwnsArrays):
     r"""The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
 
     :ivar levels_db: The 100 band-limited ``LAeq,100ms`` values analysed, in dB.
@@ -537,7 +537,7 @@ def amplitude_modulation_block(
     frequencies = lines / _BLOCK_DURATION_S
     low, high = (float(v) for v in modulation_frequency_range_hz)
     common: dict[str, Any] = {
-        "levels_db": read_only(levels.copy()),
+        "levels_db": levels,
         "detrended_db": read_only(detrended),
         "frequencies_hz": read_only(frequencies),
         "power_spectrum": read_only(spectrum),
@@ -596,7 +596,7 @@ def amplitude_modulation_block(
 
 
 @dataclass(frozen=True)
-class ModulationPeriod:
+class ModulationPeriod(OwnsArrays):
     """The AM rating of one 10 min period (IEC TS 61400-11-2:2024, 13.6.3).
 
     :ivar blocks: The sixty :class:`ModulationBlock` analyses, in time order.
@@ -756,10 +756,10 @@ def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
 def _excluded(block: ModulationBlock) -> ModulationBlock:
     """The same block, marked as excluded by the practitioner."""
     return ModulationBlock(
-        levels_db=read_only_copy(block.levels_db),
-        detrended_db=read_only_copy(block.detrended_db),
-        frequencies_hz=read_only_copy(block.frequencies_hz),
-        power_spectrum=read_only_copy(block.power_spectrum),
+        levels_db=block.levels_db,
+        detrended_db=block.detrended_db,
+        frequencies_hz=block.frequencies_hz,
+        power_spectrum=block.power_spectrum,
         modulation_frequency_range_hz=block.modulation_frequency_range_hz,
         status=ModulationBlockStatus.EXCLUDED,
         fundamental_frequency_hz=block.fundamental_frequency_hz,
@@ -778,7 +778,7 @@ def _mode_frequency(fundamentals: NDArray[np.float64]) -> float:
 
 
 @dataclass(frozen=True)
-class BinnedModulation:
+class BinnedModulation(OwnsArrays):
     """AM ratings binned by wind speed and direction (IEC TS 61400-11-2, 13.6.4).
 
     One row per occupied bin, sorted by wind direction sector then wind
@@ -947,17 +947,15 @@ def bin_amplitude_modulation(
     centres = [bins.centres(key) for key in occupied]
     return BinnedModulation(
         bands=band_tuple,
-        wind_speeds_m_s=read_only(np.array([c[1] for c in centres])),
+        wind_speeds_m_s=np.array([c[1] for c in centres]),
         wind_directions_deg=(
-            read_only(np.array([c[0] for c in centres])) if bins.by_direction else None
+            np.array([c[0] for c in centres]) if bins.by_direction else None
         ),
         counts=read_only(counts),
         nonzero_counts=read_only(nonzero),
         mean_ratings_db=read_only(means),
         type_a_uncertainty_db=read_only(type_a),
         exceedance_percent=read_only(exceed),
-        selected_bands=read_only(
-            np.array([band_tuple[j] for j in best], dtype=np.int64)
-        ),
+        selected_bands=np.array([band_tuple[j] for j in best], dtype=np.int64),
         selected_ratings_db=read_only(means[np.arange(n_bins), best]),
     )

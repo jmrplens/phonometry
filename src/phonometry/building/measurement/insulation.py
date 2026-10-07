@@ -125,7 +125,7 @@ if TYPE_CHECKING:
 # The ISO 717 rating machinery now lives in :mod:`.ratings`. Until every caller
 # in the tree reads it from there, the names this module used to define stay
 # importable from this path, unchanged; the ``__all__`` below re-exports them.
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from .ratings import (
     _INDEX_500_THIRD,
     _REF_IMPACT_THIRD_OCTAVE,
@@ -188,7 +188,7 @@ _FACADE_CORRECTION = {_FACADE_LOUDSPEAKER: 1.5, "road_traffic": 3.0}
 
 
 @dataclass(frozen=True)
-class AirborneInsulationResult:
+class AirborneInsulationResult(OwnsArrays):
     r"""Per-band field airborne sound insulation (ISO 16283-1:2014).
 
     :ivar d: Level difference :math:`D = L_1 - L_2` per band, in dB
@@ -337,7 +337,7 @@ class AirborneInsulationResult:
 
 
 @dataclass(frozen=True)
-class ImpactInsulationResult:
+class ImpactInsulationResult(OwnsArrays):
     r"""Per-band field impact sound insulation (ISO 16283-2).
 
     :ivar l_n_t: Standardized impact sound pressure level
@@ -477,7 +477,7 @@ class ImpactInsulationResult:
 
 
 @dataclass(frozen=True)
-class FacadeInsulationResult:
+class FacadeInsulationResult(OwnsArrays):
     r"""Per-band field façade sound insulation (ISO 16283-3).
 
     :ivar d_2m: Level difference :math:`D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2` per band,
@@ -1133,9 +1133,9 @@ def airborne_insulation(
         d=d,
         dnt=dnt,
         r_prime=r_prime,
-        l1=read_only_copy(l1_bands),
-        l2=read_only_copy(l2_bands),
-        t2=read_only_copy(t),
+        l1=l1_bands,
+        l2=l2_bands,
+        t2=t,
         t0=t0,
         source_low_frequency=source_lf,
         receiver_low_frequency=receiver_lf,
@@ -1263,8 +1263,8 @@ def impact_insulation(
     return ImpactInsulationResult(
         l_n_t=l_n_t,
         l_n=l_n,
-        li=read_only_copy(li_bands),
-        t2=read_only_copy(t),
+        li=li_bands,
+        t2=t,
         t0=t0,
         low_frequency=low_frequency_result,
     )
@@ -1496,7 +1496,7 @@ def facade_insulation(
         d_2m_nt=d_2m_nt,
         d_2m_n=d_2m_n,
         r_prime=r_prime,
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         method=method,
         low_frequency=low_frequency_result,
     )

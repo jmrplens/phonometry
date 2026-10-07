@@ -66,6 +66,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
@@ -438,7 +439,7 @@ def _risk_thresholds(sex: str) -> tuple[float, float, float]:
 
 
 @dataclass(frozen=True)
-class MultipleShockResult:
+class MultipleShockResult(OwnsArrays):
     r"""Multiple-shock health assessment (ISO 2631-5:2018, Clause 5 +
     Annex C).
 

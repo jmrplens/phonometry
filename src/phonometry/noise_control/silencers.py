@@ -115,7 +115,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only_copy
 from .._internal.validation import (
     check_engine,
     require_non_negative,
@@ -505,7 +505,7 @@ def _require_finite_dimension(key: str, value: float) -> None:
 
 
 @dataclass(frozen=True)
-class ReactiveSilencerResult:
+class ReactiveSilencerResult(OwnsArrays):
     """Transmission and insertion loss of a reactive silencer over frequency.
 
     :ivar frequencies: Frequencies ``f``, Hz.
@@ -754,12 +754,12 @@ def _result(
             radiation_impedance=radiation_impedance,
         )
     return ReactiveSilencerResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         transmission_loss=tl,
         insertion_loss=il,
-        transfer_matrix=read_only_copy(t),
+        transfer_matrix=t,
         kind=kind,
-        resonances=read_only_copy(resonances),
+        resonances=resonances,
         geometry=geometry,
         plane_wave_limit=limit,
         chain=chain,
@@ -1057,7 +1057,7 @@ _KIND_CHAIN = "element chain"
 
 
 @dataclass(frozen=True)
-class SilencerChainElement:
+class SilencerChainElement(OwnsArrays):
     """One recorded element of a :class:`SilencerChain`.
 
     The element carries its four-pole matrix and, with it, whatever geometry

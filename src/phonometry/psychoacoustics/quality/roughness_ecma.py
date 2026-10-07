@@ -61,6 +61,7 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
@@ -191,7 +192,7 @@ _HANN = (0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(_SB_TILDE) / _SB_TILDE)) / n
 
 
 @dataclass(frozen=True)
-class EcmaRoughness:
+class EcmaRoughness(OwnsArrays):
     """Result of an ECMA-418-2:2025 (Sottek) roughness calculation.
 
     ``roughness`` is the single representative roughness R in asper (the
@@ -646,8 +647,8 @@ def roughness_ecma(
     return EcmaRoughness(
         roughness=r_single,
         specific_roughness=r_spec,
-        bark=_Z.copy(),
-        centre_frequencies=_F_CENTRE.copy(),
+        bark=_Z,
+        centre_frequencies=_F_CENTRE,
         times=grid,
         roughness_vs_time=r_vs_time,
         specific_roughness_vs_time=r_time,

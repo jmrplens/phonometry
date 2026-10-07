@@ -54,7 +54,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -90,7 +90,7 @@ _MIN_RAY_STEPS = 2
 # Effective sound-speed profiles
 # ===========================================================================
 @dataclass(frozen=True)
-class EffectiveSoundSpeedProfile:
+class EffectiveSoundSpeedProfile(OwnsArrays):
     r"""Vertical profile of the effective sound speed ``c_eff(z)``.
 
     The profile is sampled on a strictly increasing height grid starting at the
@@ -354,7 +354,7 @@ def shadow_zone_distance(
 # Ray tracing (Snell's law, RK4)
 # ===========================================================================
 @dataclass(frozen=True)
-class AtmosphericRayResult:
+class AtmosphericRayResult(OwnsArrays):
     """Ray-tracing solution through an effective sound-speed profile.
 
     :ivar launch_angles_deg: Launch angles from the horizontal, in degrees.
@@ -558,10 +558,10 @@ def atmospheric_ray_paths(
         & (march.reflections[:, 1:] == 0)
         & (sign[:, :-1] != 0)
     ).sum(axis=1)
-    ray_r = np.broadcast_to(ranges, ray_z.shape).copy()
+    ray_r = np.broadcast_to(ranges, ray_z.shape)
 
     return AtmosphericRayResult(
-        launch_angles_deg=read_only_copy(angles),
+        launch_angles_deg=angles,
         ranges=ray_r,
         heights=ray_z,
         travel_times=ray_t,
@@ -575,7 +575,7 @@ def atmospheric_ray_paths(
 # Parabolic equation (Green's Function PE, split-step Fourier)
 # ===========================================================================
 @dataclass(frozen=True)
-class AtmosphericPEResult:
+class AtmosphericPEResult(OwnsArrays):
     r"""Parabolic-equation relative-level field in a refracting atmosphere.
 
     :ivar frequency: Source frequency, in Hz.

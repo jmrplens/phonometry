@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive, _validate_signal
@@ -72,7 +73,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class EnvelopeResult:
+class EnvelopeResult(OwnsArrays):
     r"""Envelope and instantaneous phase of a signal (B&P Chapter 13).
 
     All output arrays share the (possibly decimated) time axis
@@ -167,7 +168,7 @@ def _decimate_envelope(
 ) -> NDArray[np.float64]:
     """Decimate the envelope, anti-aliased (zero-phase FIR) or plain."""
     if not antialias:
-        return env[::factor].copy()
+        return env[::factor]
     from scipy import signal as sp_signal
 
     return np.asarray(
@@ -236,8 +237,8 @@ def envelope(
 
     if factor > 1:
         env = _decimate_envelope(env=env, factor=factor, antialias=antialias)
-        phase = phase[::factor].copy()
-        inst_freq = inst_freq[::factor].copy()
+        phase = phase[::factor]
+        inst_freq = inst_freq[::factor]
 
     out_fs = fs_v / factor
     times = np.arange(env.size, dtype=np.float64) / out_fs
@@ -247,7 +248,7 @@ def envelope(
         phase=phase,
         instantaneous_frequency=inst_freq,
         fs=out_fs,
-        signal=like_input(x, xa.copy()),
+        signal=like_input(x, xa),
         signal_fs=fs_v,
         decimation_factor=factor,
         antialias=bool(antialias),
@@ -255,7 +256,7 @@ def envelope(
 
 
 @dataclass(frozen=True)
-class EnvelopeSpectrumResult:
+class EnvelopeSpectrumResult(OwnsArrays):
     r"""Amplitude spectrum of a signal's envelope (B&P Section 13.3).
 
     :ivar frequencies: Frequency axis of the spectrum, in Hz.

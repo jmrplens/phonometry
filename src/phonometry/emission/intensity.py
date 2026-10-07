@@ -68,7 +68,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 from .._internal.boundary import settled, settled_net_share
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
 from .._internal.utils import _typesignal
 from .._internal.validation import (
@@ -185,7 +185,7 @@ def _require_total_restates(
 
 
 @dataclass(frozen=True)
-class IntensityResult:
+class IntensityResult(OwnsArrays):
     r"""Result of a p-p sound intensity measurement.
 
     Per-band arrays are ``None`` unless a band ``fraction`` was requested.
@@ -344,7 +344,7 @@ class IntensityResult:
 
 
 @dataclass(frozen=True)
-class FieldIndicators:
+class FieldIndicators(OwnsArrays):
     r"""ISO 9614-1:1993 Annex A field indicators over a measurement surface.
 
     ``f2`` is the surface pressure-intensity indicator (equation (A.3)),
@@ -1024,9 +1024,7 @@ def field_indicators(
 
     if lp.ndim == 1:
         f2, f3, f4 = _field_indicators_1d(lp, i_n)
-        return FieldIndicators(
-            f2=f2, f3=f3, f4=f4, frequencies=read_only_copy(freqs), f1=f1
-        )
+        return FieldIndicators(f2=f2, f3=f3, f4=f4, frequencies=freqs, f1=f1)
 
     per_band = [_field_indicators_1d(lp[:, b], i_n[:, b]) for b in range(lp.shape[1])]
     values = np.asarray(per_band, dtype=np.float64)
@@ -1034,7 +1032,7 @@ def field_indicators(
         f2=values[:, 0],
         f3=values[:, 1],
         f4=values[:, 2],
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         f1=f1,
     )
 

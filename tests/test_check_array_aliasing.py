@@ -40,6 +40,10 @@ def read_only_copy(array, dtype=None):
     if array is None:
         return None
     return read_only(np.array(array, dtype=dtype))
+
+class OwnsArrays:
+    def __post_init__(self):
+        pass
 """
 
 #: A validation helper of the kind ``_internal/validation.py`` holds: its
@@ -75,6 +79,22 @@ def _findings(tmp_path: pathlib.Path, **modules: str) -> set[tuple[str, str, str
     modules, so ``from ._internal.frozen import read_only_copy`` reads as it
     does in the tree.
     """
+    root = _package(tmp_path, modules)
+    found = caa.findings_in(sorted(root.rglob("*.py")), root)
+    return {(f.function, f.sink, ", ".join(f.parameters)) for f in found}
+
+
+def _unequipped(tmp_path: pathlib.Path, **modules: str) -> set[str]:
+    """The public records of the package that can hold an array and do not
+    inherit ``OwnsArrays``, by qualified class name.
+    """
+    root = _package(tmp_path, modules)
+    found = caa.records_without_mechanism(sorted(root.rglob("*.py")), root)
+    return {f.function for f in found}
+
+
+def _package(tmp_path: pathlib.Path, modules: dict[str, str]) -> pathlib.Path:
+    """Write ``pkg`` with the helpers above and *modules*, and return it."""
     root = tmp_path / "pkg"
     files = {
         "__init__.py": "",
@@ -88,8 +108,7 @@ def _findings(tmp_path: pathlib.Path, **modules: str) -> set[tuple[str, str, str
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(textwrap.dedent(source), encoding="utf-8")
-    found = caa.findings_in(sorted(root.rglob("*.py")), root)
-    return {(f.function, f.sink, ", ".join(f.parameters)) for f in found}
+    return root
 
 
 # ---------------------------------------------------------------------------
@@ -719,6 +738,363 @@ def test_a_field_patched_in_a_factory_is_refused(tmp_path: pathlib.Path) -> None
         """,
     )
     assert found == {("patched", "BandResult.levels_db", "levels")}
+
+
+# ---------------------------------------------------------------------------
+# Records that copy what they are handed
+# ---------------------------------------------------------------------------
+
+#: A public record that copies every array it is built with.
+_OWNING = """
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+@dataclass(frozen=True)
+class Spectrum(OwnsArrays):
+    frequencies: NDArray[np.float64]
+    levels_db: NDArray[np.float64] | None
+    columns: dict[str, np.ndarray]
+    label: str = ""
+"""
+
+
+def test_a_public_record_that_can_hold_an_array_must_copy_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``BandResult``, written by hand, would keep the caller's array.
+
+    No function of the package stands between a caller who builds the record
+    and the record, so no trail reaches it: the class itself is refused.
+    """
+    assert _unequipped(tmp_path) == {"BandResult"}
+
+
+def test_a_record_that_inherits_the_copy_passes(tmp_path: pathlib.Path) -> None:
+    """Directly, or through a record it extends; and a record of numbers, or
+    one only a private module holds, needs nothing.
+    """
+    found = _unequipped(
+        tmp_path,
+        results="""
+        from dataclasses import dataclass
+
+        import numpy as np
+
+        from ._internal.frozen import OwnsArrays
+
+        @dataclass(frozen=True)
+        class BandResult(OwnsArrays):
+            frequencies: np.ndarray
+
+        @dataclass(frozen=True)
+        class Rated(BandResult):
+            rating_db: np.ndarray
+
+        @dataclass(frozen=True)
+        class Single:
+            level_db: float
+            label: str
+        """,
+        _plumbing="""
+        from dataclasses import dataclass
+
+        import numpy as np
+
+        @dataclass(frozen=True)
+        class Grid:
+            nodes: np.ndarray
+        """,
+    )
+    assert found == set()
+
+
+def test_a_listed_record_and_a_named_tuple_are_held_to_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record of a private module that a public ``__all__`` lists reaches
+    callers; a named tuple cannot inherit the copy and is refused all the same.
+    """
+    found = _unequipped(
+        tmp_path,
+        _impl="""
+        from dataclasses import dataclass
+
+        import numpy as np
+
+        @dataclass(frozen=True)
+        class Listed:
+            nodes: np.ndarray
+        """,
+        api="""
+        from typing import NamedTuple
+
+        import numpy as np
+
+        from ._impl import Listed
+
+        __all__ = ["Listed", "Pair"]
+
+        class Pair(NamedTuple):
+            frequencies: np.ndarray
+            weight: float
+        """,
+    )
+    assert found == {"BandResult", "Listed", "Pair"}
+
+
+def test_a_record_that_copies_takes_the_caller_s_array_as_it_is(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Every field is the record's own, so a factory hands the array over as
+    it is, and what the record's own ``__post_init__`` reads back from
+    ``self`` is its copy: sealing it there touches nobody else's array.
+    """
+    found = _findings(
+        tmp_path,
+        owning=_OWNING,
+        spectra="""
+        import dataclasses
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only
+        from ._internal.validation import require_finite_array
+        from .owning import Spectrum
+
+        @dataclass(frozen=True)
+        class Coupler(OwnsArrays):
+            impedance: NDArray[np.complex128]
+
+            def __post_init__(self):
+                column = np.asarray(self.impedance, dtype=np.complex128).reshape(-1)
+                object.__setattr__(self, "impedance", read_only(column))
+
+        def spectrum(frequencies, levels):
+            f = require_finite_array(frequencies, "frequencies")
+            return Spectrum(frequencies=f, levels_db=levels[:, 0], columns={"a": f})
+
+        def revise(spectrum: Spectrum, levels):
+            return dataclasses.replace(spectrum, levels_db=levels)
+
+        def coupler(impedance):
+            return Coupler(impedance=impedance)
+        """,
+    )
+    assert found == set()
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        "read_only_copy(f)",
+        "read_only_copy(f, np.float64)",
+        "f.copy()",
+        "np.copy(f)",
+        "read_only(f.copy())",
+        "read_only(np.array(f))",
+        "None if f is None else read_only_copy(f)",
+        "f.astype(np.float64)",
+        "read_only(f.astype(np.float64))",
+    ],
+)
+def test_a_copy_handed_to_a_record_that_copies_is_refused(
+    tmp_path: pathlib.Path, argument: str
+) -> None:
+    """The record copies the array again: the first copy is wasted."""
+    found = _findings(
+        tmp_path,
+        owning=_OWNING,
+        spectra=f"""
+        import numpy as np
+
+        from ._internal.frozen import read_only, read_only_copy
+        from .owning import Spectrum
+
+        def spectrum(f):
+            return Spectrum(frequencies={argument}, levels_db=None, columns={{}})
+        """,
+    )
+    assert found == {("spectrum", "Spectrum.frequencies (copied twice)", "")}
+
+
+@pytest.mark.parametrize(
+    ("field", "argument"),
+    [
+        ("frequencies", "np.asarray(f, dtype=np.float64)"),
+        ("frequencies", "np.array([1.0, 2.0])"),
+        ("frequencies", "f"),
+        ("frequencies", "f.astype(np.float64, copy=False)"),
+        ("columns", "table.copy()"),
+    ],
+)
+def test_a_conversion_or_a_container_s_copy_is_not_a_second_copy(
+    tmp_path: pathlib.Path, field: str, argument: str
+) -> None:
+    """``np.array`` of a list builds the array; a mapping's ``copy`` copies
+    the mapping, which the record does not.
+    """
+    given = {"frequencies": "np.zeros(2)", "levels_db": "None", "columns": "{}"}
+    given[field] = argument
+    call = ", ".join(f"{name}={value}" for name, value in given.items())
+    found = _findings(
+        tmp_path,
+        owning=_OWNING,
+        spectra=f"""
+        import numpy as np
+
+        from .owning import Spectrum
+
+        def spectrum(f, table):
+            return Spectrum({call})
+        """,
+    )
+    assert found == set()
+
+
+#: A helper that only reads what it is handed, and two that write into it:
+#: one through a subscript, one through an augmented assignment to the name.
+_HELPERS = """
+import numpy as np
+
+def check_positive(values, name):
+    if np.any(values <= 0.0):
+        raise ValueError(f"{name} must be positive: {values}")
+
+def fill_gaps(values):
+    values[np.isnan(values)] = 0.0
+
+def shift_in_place(values):
+    values += 1.0
+    return float(values.sum())
+"""
+
+
+@pytest.mark.parametrize(
+    ("bound", "used"),
+    [
+        ("read_only_copy(x)", "Spectrum(frequencies=f, levels_db=None, columns={})"),
+        (
+            "x.copy()",
+            "Spectrum(frequencies=read_only(f), levels_db=f * 2.0, columns={})",
+        ),
+        (
+            "np.copy(x)",
+            "Spectrum(frequencies=f, levels_db=np.log10(f[1:]), columns={})",
+        ),
+        (
+            "x.astype(np.float64)",
+            "Spectrum(frequencies=read_only(f), levels_db=None, columns={})",
+        ),
+    ],
+)
+def test_a_copy_bound_to_a_name_and_handed_over_is_refused(
+    tmp_path: pathlib.Path, bound: str, used: str
+) -> None:
+    """The copy is read, checked and handed to a record that copies it again.
+
+    The shape the tree held after the copies at the call were dropped:
+    ``f = require_positive_array(...).copy()`` early in the function and
+    ``frequencies_hz=read_only(f)`` at the end, with only reads between.
+    """
+    found = _findings(
+        tmp_path,
+        owning=_OWNING,
+        helpers=_HELPERS,
+        spectra=f"""
+        import numpy as np
+
+        from ._internal.frozen import read_only, read_only_copy
+        from .helpers import check_positive
+        from .owning import Spectrum
+
+        def spectrum(x):
+            f = {bound}
+            check_positive(f, "x")
+            if f.size < 2 or f[0] > f[-1]:
+                raise ValueError(f"x must ascend: {{f}}")
+            return {used}
+        """,
+    )
+    assert found == {("spectrum", "Spectrum.frequencies (copied twice, as f)", "")}
+
+
+@pytest.mark.parametrize(
+    "middle",
+    [
+        "f[0] = 1.0",
+        "f += 1.0",
+        "f.sort()",
+        "np.copyto(f, x)",
+        "np.add.at(f, 0, 1.0)",
+        "np.multiply(f, 2.0, out=f)",
+        "fill_gaps(f)",
+        "shift_in_place(f)",
+        "view = f[1:]",
+        "kept = [f]",
+        "f = x if x.size > 3 else f",
+    ],
+)
+def test_a_copy_the_function_needs_is_not_a_second_copy(
+    tmp_path: pathlib.Path, middle: str
+) -> None:
+    """A copy that something writes into, keeps a view of, or binds again
+    is what keeps the caller's array whole: the rule never asks for it to
+    be dropped. A helper of the package that writes into its parameter
+    counts as writing.
+    """
+    found = _findings(
+        tmp_path,
+        owning=_OWNING,
+        helpers=_HELPERS,
+        spectra=f"""
+        import numpy as np
+
+        from .helpers import fill_gaps, shift_in_place
+        from .owning import Spectrum
+
+        def spectrum(x):
+            f = x.copy()
+            {middle}
+            return Spectrum(frequencies=f, levels_db=None, columns={{}})
+        """,
+    )
+    assert found == set()
+
+
+def test_a_parameter_copied_into_itself_is_not_read_as_a_second_copy(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``x = x.copy()`` binds a parameter: the reading does not vouch for it."""
+    found = _findings(
+        tmp_path,
+        owning=_OWNING,
+        spectra="""
+        from .owning import Spectrum
+
+        def spectrum(x):
+            x = x.copy()
+            return Spectrum(frequencies=x, levels_db=None, columns={})
+        """,
+    )
+    assert found == set()
+
+
+def test_a_record_exemption_silences_its_class_and_goes_stale_without_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    root = _package(tmp_path, {})
+    found = caa.records_without_mechanism(sorted(root.rglob("*.py")), root)
+    key = (found[0].path, "BandResult")
+    left, stale = ast_scan.exempted(found, {key: "reason"})
+    assert (left, stale) == ([], [])
+    left, stale = ast_scan.exempted([], {key: "reason"})
+    assert stale == [key]
 
 
 def test_an_exemption_silences_its_function_and_goes_stale_without_it(

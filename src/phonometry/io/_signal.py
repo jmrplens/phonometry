@@ -144,8 +144,14 @@ class Signal:
 
     @property
     def _view(self) -> NDArray[np.float64]:
-        """The array the object stands for: 1-D mono, 2-D multichannel."""
-        return self.data[0] if self.data.shape[0] == 1 else self.data
+        """The array the object stands for: 1-D mono, 2-D multichannel.
+
+        Always a view, never :attr:`data` itself: whoever clears the
+        ``writeable`` flag on what ``np.asarray`` hands back (a result that
+        seals the array it stores) clears it on the view, and the Signal's
+        own samples stay writeable.
+        """
+        return self.data[0] if self.data.shape[0] == 1 else self.data[...]
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None

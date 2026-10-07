@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
@@ -136,7 +136,7 @@ Surface = Literal["hemisphere", "box"]
 
 
 @dataclass(frozen=True)
-class RoomEnvironment:
+class RoomEnvironment(OwnsArrays):
     r"""Room data behind the environmental correction ``K2`` (ISO 3744 Annex A).
 
     The three routes the standard offers to the equivalent sound absorption area
@@ -282,7 +282,7 @@ _ALTITUDE_B = 5.2553
 
 
 @dataclass(frozen=True)
-class SoundPowerResult:
+class SoundPowerResult(OwnsArrays):
     r"""Result of a sound power determination from surface pressure levels.
 
     ``sound_power_level`` is the per-band ``LW`` (ISO 3744 Eq. 18);
@@ -1061,7 +1061,7 @@ def sound_power_pressure(
     )
 
     return SoundPowerResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_power_level=np.asarray(lw, dtype=np.float64),
         surface_pressure_level=np.asarray(surface_spl, dtype=np.float64),
         mean_pressure_level=mean_level,
@@ -1106,7 +1106,7 @@ class ReferenceAtmosphereCorrection:
 
 
 @dataclass(frozen=True)
-class SoundEnergyResult:
+class SoundEnergyResult(OwnsArrays):
     r"""Result of a sound energy level determination from surface single event
     levels (ISO 3744:2010 clause 8.3, ISO 3746:2010 clause 8.4).
 
@@ -1531,7 +1531,7 @@ def sound_energy_pressure(
     )
 
     return SoundEnergyResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_energy_level=np.asarray(lj, dtype=np.float64),
         surface_event_level=np.asarray(surface_level, dtype=np.float64),
         mean_event_level=mean_level,

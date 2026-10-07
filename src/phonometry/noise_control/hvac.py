@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -432,8 +432,8 @@ _FLEX_DIAMETERS_IN: NDArray[np.float64] = np.array(
     [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0]
 )
 _FLEX_LENGTHS_FT: NDArray[np.float64] = np.array([3.0, 6.0, 9.0, 12.0])
-_FLEX_BANDS: NDArray[np.float64] = np.array(
-    [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+_FLEX_BANDS: NDArray[np.float64] = read_only(
+    np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 )
 _FLEX_INSERTION_LOSS: NDArray[np.float64] = np.array(
     [
@@ -567,7 +567,7 @@ def _octave_slots(
     :return: ``(frequencies, indices)`` with one table index per frequency.
     """
     if frequencies is None:
-        return bands.copy(), np.arange(bands.size, dtype=np.intp)
+        return bands, np.arange(bands.size, dtype=np.intp)
     f = _frequencies(frequencies)
     ratio = np.abs(np.log2(f[:, None] / bands[None, :]))
     idx = np.asarray(np.argmin(ratio, axis=1), dtype=np.intp)
@@ -586,7 +586,7 @@ HvacQuantity = Literal["attenuation", "sound_power_level"]
 
 
 @dataclass(frozen=True)
-class HvacSpectrumResult:
+class HvacSpectrumResult(OwnsArrays):
     """A per-frequency HVAC quantity (attenuation or regenerated power level).
 
     :ivar frequencies: Frequencies ``f``, Hz.
@@ -872,7 +872,7 @@ def _vdi2081_bend_result(
         bend_type=bend_type, vanes=vanes, lined=lined, lined_side=side
     )
     return HvacSpectrumResult(
-        frequencies=read_only_copy(bands),
+        frequencies=bands,
         values=_vdi2081_bend(
             bands, bend_type=key, shape=shape, size=size, speed_of_sound=c
         ),
@@ -1634,7 +1634,7 @@ def fan_casing_attenuation(
     f, idx = _octave_slots(frequencies)
     return HvacSpectrumResult(
         frequencies=f,
-        values=_FAN_CASING_ATTENUATION[idx].copy(),
+        values=_FAN_CASING_ATTENUATION[idx],
         quantity="attenuation",
         label="Fan casing",
     )
@@ -2638,7 +2638,7 @@ def diffuser_sound_power(
     :raises ValueError: If a dimension is not positive, ``count`` is not a
         positive integer or ``shape`` is unknown.
     """
-    f = OCTAVE_BANDS.copy() if frequencies is None else _frequencies(frequencies)
+    f = OCTAVE_BANDS if frequencies is None else _frequencies(frequencies)
     area_ft2 = require_positive(face_area, "face_area") / _M_PER_FT**2
     flow_cfm = require_positive(volume_flow, "volume_flow") / _M3S_PER_CFM
     drop_in_wg = require_positive(pressure_drop_pa, "pressure_drop_pa") / _PA_PER_IN_WG

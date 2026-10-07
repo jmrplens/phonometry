@@ -108,7 +108,7 @@ import numpy as np
 from scipy.fft import next_fast_len
 from scipy.optimize import minimize_scalar
 
-from ..._internal.frozen import read_only, read_only_copy
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -620,7 +620,7 @@ def adrienne_low_frequency_limit_hz(window_length_s: float) -> float:
 # Signal subtraction (5.5.4, Formula (6))
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class DirectSoundSubtraction:
+class DirectSoundSubtraction(OwnsArrays):
     r"""The direct sound taken out of an impulse response, 5.5.4.
 
     :ivar in_front: The impulse response measured in front of the device.
@@ -756,7 +756,7 @@ def _subtract(
         else math.inf
     )
     return DirectSoundSubtraction(
-        in_front=read_only(in_front.copy()),
+        in_front=in_front,
         aligned_free_field=read_only(np.asarray(aligned, dtype=np.float64)),
         residual=read_only(np.asarray(residual, dtype=np.float64)),
         fs=fs,
@@ -1098,7 +1098,7 @@ def _agree_rate(
 # The sound reflection index (Formula (1))
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class ReflectionIndexResult:
+class ReflectionIndexResult(OwnsArrays):
     r"""The sound reflection index of a device, per one-third octave band.
 
     :ivar bands_hz: The eighteen band centres, 100 Hz to 5 kHz.
@@ -1198,18 +1198,12 @@ def _result(
     return ReflectionIndexResult(
         bands_hz=read_only(np.asarray(_BANDS_HZ, dtype=np.float64)),
         reflection_index=read_only(average),
-        position_values=read_only_copy(position_values),
+        position_values=position_values,
         lowest_band_hz=rating.lowest_band_hz,
         rating=rating,
-        microphone_values=None
-        if microphone_values is None
-        else read_only_copy(microphone_values),
-        gain_corrections=None
-        if gain_corrections is None
-        else read_only_copy(gain_corrections),
-        subtraction_reductions_db=None
-        if reductions_db is None
-        else read_only_copy(reductions_db),
+        microphone_values=None if microphone_values is None else microphone_values,
+        gain_corrections=None if gain_corrections is None else gain_corrections,
+        subtraction_reductions_db=None if reductions_db is None else reductions_db,
     )
 
 
@@ -1239,7 +1233,7 @@ def reflection_index_from_positions(
     if np.any(np.isinf(values)) or np.any(values[np.isfinite(values)] < 0.0):
         msg = "'position_values' must be non-negative, or nan where not measured."
         raise ValueError(msg)
-    return _result(values.copy(), values, lowest_band_hz)
+    return _result(values, values, lowest_band_hz)
 
 
 def reflection_index(
@@ -1428,7 +1422,7 @@ def _warn_gain(gain: float, where: str) -> None:
 # Low frequency limit and sample size (5.5.7)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class ReflectionFrequencyLimit:
+class ReflectionFrequencyLimit(OwnsArrays):
     r"""How far down a device of a given size can be measured, 5.5.7.
 
     :ivar device_height_m: :math:`h_B`, the height of the device.
@@ -1588,7 +1582,7 @@ def reflection_low_frequency_limit(
 # Position checks (5.6.2.5, 5.6.2.6)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class ReflectionGridCheck:
+class ReflectionGridCheck(OwnsArrays):
     r"""The position check of 5.6.2.5 or 5.6.2.6, against Table 3.
 
     The nominal path differences and the tolerance are Table 3's, so they are
@@ -1614,7 +1608,7 @@ class ReflectionGridCheck:
             or there are not nine finite path differences.
         """
         require_choice(self.check, "check", ("relative", "grid"))
-        measured = np.array(self.path_differences_m, dtype=np.float64)
+        measured = np.asarray(self.path_differences_m, dtype=np.float64)
         if measured.shape != (_MICROPHONES,) or not np.all(np.isfinite(measured)):
             msg = (
                 "ReflectionGridCheck: 'path_differences_m' must hold nine "

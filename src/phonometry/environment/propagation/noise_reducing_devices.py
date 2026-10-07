@@ -80,7 +80,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_finite_array, require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -216,7 +216,7 @@ class RoadDeviceWarning(UserWarning):
 
 
 @dataclass(frozen=True)
-class RoadDeviceRating:
+class RoadDeviceRating(OwnsArrays):
     """One single-number rating of a road traffic noise reducing device.
 
     :ivar rating: The rating before rounding, in dB. ``DLα`` (EN 1793-1),
@@ -350,7 +350,7 @@ def sound_absorption_rating(
         quantity="absorption",
         spectrum=spectrum,
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
-        values=read_only_copy(alpha),
+        values=alpha,
         weights=weights,
     )
 
@@ -388,7 +388,7 @@ def airborne_insulation_rating(
         quantity="insulation",
         spectrum=spectrum,
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
-        values=read_only_copy(reduction),
+        values=reduction,
         weights=weights,
     )
 
@@ -467,7 +467,7 @@ def sound_reflection_rating(
         quantity="reflection",
         spectrum="road",
         bands_hz=bands,
-        values=values.copy(),
+        values=values,
         weights=weights,
         lowest_band_hz=float(bands[first]),
     )

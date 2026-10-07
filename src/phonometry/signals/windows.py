@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -54,7 +54,7 @@ _MIN_WINDOW_LENGTH = 16
 
 
 @dataclass(frozen=True)
-class WindowMetricsResult:
+class WindowMetricsResult(OwnsArrays):
     r"""Figures of merit of a taper (Harris 1978), DFT-even sampling.
 
     Losses are positive dB (how much is lost), sidelobe levels negative dB
@@ -154,21 +154,15 @@ class WindowMetricsResult:
 def _own_window(window: str | tuple[Any, ...]) -> str | tuple[Any, ...]:
     """The window specification with no parameter the caller can still edit.
 
-    A name or a number is kept as given; an array parameter, such as the
-    weights of ``("general_cosine", weights)``, becomes a read-only copy and a
-    list one a tuple, so editing the caller's weights afterwards does not
-    rename the window the metrics were computed for.
+    A name, a number or an array is kept as given, and the result makes an
+    array parameter, such as the weights of ``("general_cosine", weights)``,
+    a read-only copy of its own; a list one becomes a tuple here, so editing
+    the caller's weights afterwards does not rename the window the metrics
+    were computed for.
     """
     if not isinstance(window, tuple):
         return window
-    return tuple(
-        read_only_copy(item)
-        if isinstance(item, np.ndarray)
-        else tuple(item)
-        if isinstance(item, list)
-        else item
-        for item in window
-    )
+    return tuple(tuple(item) if isinstance(item, list) else item for item in window)
 
 
 def _window_spectrum_db(w: NDArray[np.float64], oversample: int) -> NDArray[np.float64]:

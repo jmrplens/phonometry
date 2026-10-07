@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_equal_counts,
     require_ranks,
@@ -149,7 +150,7 @@ def _coefficient_correlation(
 
 
 @dataclass(frozen=True)
-class CorrelationResult:
+class CorrelationResult(OwnsArrays):
     r"""Auto- or cross-correlation estimate (B&P Sections 5.1, 8.4, 11.4).
 
     :ivar lags: Lag axis :math:`\tau`, in seconds, symmetric about zero.
@@ -489,7 +490,7 @@ def _validate_refinement(interpolation: str, upsample: int) -> int:
 
 
 @dataclass(frozen=True)
-class TimeDelayResult:
+class TimeDelayResult(OwnsArrays):
     r"""Time-delay estimate between two records.
 
     :ivar delay: Estimated delay :math:`\hat{\tau}_0` of the second
@@ -940,7 +941,7 @@ def impulse_response_delay(
 
 
 @dataclass(frozen=True)
-class AlignedImpulseResponseResult:
+class AlignedImpulseResponseResult(OwnsArrays):
     """An impulse response aligned onto a reference.
 
     :ivar aligned: The input IR advanced by the estimated delay (exact
@@ -1059,7 +1060,7 @@ def align_impulse_responses(
     aligned = _fractional_advance(ira, delay * fs_v)
     return AlignedImpulseResponseResult(
         aligned=like_input(ir, aligned),
-        reference=like_input(reference, refa.copy()),
+        reference=like_input(reference, refa),
         delay=delay,
         delay_samples=delay * fs_v,
         fs=fs_v,

@@ -72,7 +72,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -345,7 +345,7 @@ def estimate_reverberation_index(
 
 
 @dataclass(frozen=True)
-class SurveyAirborneResult:
+class SurveyAirborneResult(OwnsArrays):
     r"""Per-band airborne sound insulation, survey method (ISO 10052).
 
     :ivar d: Level difference :math:`D = L_1 - L_2` per band, dB (Clause 3.2).
@@ -468,7 +468,7 @@ class SurveyAirborneResult:
 
 
 @dataclass(frozen=True)
-class SurveyImpactResult:
+class SurveyImpactResult(OwnsArrays):
     r"""Per-band impact sound insulation, survey method (ISO 10052).
 
     :ivar l_i: Energy-average impact sound pressure level ``Li`` per band, in
@@ -566,7 +566,7 @@ class SurveyImpactResult:
 
 
 @dataclass(frozen=True)
-class SurveyFacadeResult:
+class SurveyFacadeResult(OwnsArrays):
     r"""Per-band façade sound insulation, survey method (ISO 10052).
 
     :ivar d_2m: Façade level difference :math:`D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2`
@@ -664,7 +664,7 @@ class SurveyFacadeResult:
 
 
 @dataclass(frozen=True)
-class SurveyServiceEquipmentResult:
+class SurveyServiceEquipmentResult(OwnsArrays):
     r"""Service-equipment sound pressure level, survey method (ISO 10052).
 
     :ivar l_xy: Service-equipment level ``LXY`` (Clause 3.16), the energy
@@ -822,9 +822,7 @@ def survey_impact_insulation(
     if volume is not None:
         l_n = l_i - k - _normalization_term(_positive(volume, "volume"))
 
-    return SurveyImpactResult(
-        l_i=read_only_copy(l_i), l_nt=l_nt, l_n=l_n, rating=_rate_impact(l_nt)
-    )
+    return SurveyImpactResult(l_i=l_i, l_nt=l_nt, l_n=l_n, rating=_rate_impact(l_nt))
 
 
 def survey_facade_insulation(

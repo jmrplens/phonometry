@@ -34,7 +34,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -238,7 +238,7 @@ def reverberation_time(
 
 
 @dataclass(frozen=True)
-class ReverberationResult:
+class ReverberationResult(OwnsArrays):
     """Absorption area and reverberation time of an enclosed space (Clause 4).
 
     :ivar frequencies: Octave-band centre frequencies, in hertz.

@@ -108,6 +108,7 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
@@ -199,7 +200,7 @@ _B_MEDIAN_LEN = 71  # moving-median length for B(l50) (below Formula 167)
 
 
 @dataclass(frozen=True)
-class EcmaFluctuationStrength:
+class EcmaFluctuationStrength(OwnsArrays):
     """Result of an ECMA-418-2:2025 (Sottek) fluctuation-strength calculation.
 
     ``fluctuation_strength`` is the single representative fluctuation
@@ -971,8 +972,8 @@ def fluctuation_strength_ecma(
     return EcmaFluctuationStrength(
         fluctuation_strength=f_single,
         specific_fluctuation_strength=f_spec,
-        bark=_Z.copy(),
-        centre_frequencies=_F_CENTRE.copy(),
+        bark=_Z,
+        centre_frequencies=_F_CENTRE,
         times=grid,
         fluctuation_strength_vs_time=f_vs_time,
         specific_fluctuation_strength_vs_time=f_time,

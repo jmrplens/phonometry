@@ -62,7 +62,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
@@ -327,7 +327,7 @@ def _single_numbers(
 
 
 @dataclass(frozen=True)
-class LabJointInsulationResult:
+class LabJointInsulationResult(OwnsArrays):
     r"""Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 
     :ivar frequencies_hz: One-third-octave band centre frequencies, in Hz.
@@ -666,9 +666,9 @@ def lab_joint_insulation(
         if bool(np.any(open_mask)):
             opened = _open_band_rating(r_s, freqs, core, open_mask)
     return LabJointInsulationResult(
-        frequencies_hz=read_only_copy(freqs),
-        r_s_measured_db=read_only_copy(measured),
-        r_s_max_db=read_only_copy(maximum),
+        frequencies_hz=freqs,
+        r_s_measured_db=measured,
+        r_s_max_db=maximum,
         r_s_db=np.asarray(r_s, dtype=np.float64),
         regime=regime,
         joint_length_m=length,
@@ -850,7 +850,7 @@ def check_gap_width(readings_mm: ArrayLike) -> GapWidthCheck:
 
 
 @dataclass(frozen=True)
-class JointGapSeries:
+class JointGapSeries(OwnsArrays):
     r"""Single numbers of a variable slit against its gap width (J.4, J.5.2 h), i)).
 
     :ivar gap_widths_mm: The gap widths measured, ascending, in mm.

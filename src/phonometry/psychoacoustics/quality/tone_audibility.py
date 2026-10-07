@@ -99,7 +99,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -1193,7 +1193,7 @@ def _require_line_spacing(spacing: float) -> None:
 
 
 @dataclass(frozen=True)
-class ToneAudibilityResult:
+class ToneAudibilityResult(OwnsArrays):
     r"""Audibility of the tones of a narrow-band spectrum (ISO/PAS 20065).
 
     :ivar tone_frequencies: Tone frequencies ``fT``, in Hz.
@@ -1561,9 +1561,9 @@ def assess_tones(
     av = np.array([masking_index(f) for f in freqs])
     delta = lt - lg - av
     return ToneAudibilityResult(
-        tone_frequencies=read_only_copy(freqs),
-        tone_levels=read_only_copy(lt),
-        mean_narrowband_levels=read_only_copy(ls),
+        tone_frequencies=freqs,
+        tone_levels=lt,
+        mean_narrowband_levels=ls,
         line_spacing=df,
         critical_bandwidths=dfc,
         lower_corners=f1,
@@ -1571,5 +1571,5 @@ def assess_tones(
         critical_band_levels=lg,
         masking_indices=av,
         audibilities=delta,
-        extended_uncertainties=read_only_copy(uncertainties),
+        extended_uncertainties=uncertainties,
     )

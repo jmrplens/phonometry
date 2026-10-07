@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.boundary import round_half_away_from_zero, round_half_up
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
@@ -501,7 +501,7 @@ def _require_unfavourable_sum(
 
 
 @dataclass(frozen=True)
-class WeightedRatingResult:
+class WeightedRatingResult(OwnsArrays):
     """Single-number weighted rating and adaptation terms (ISO 717-1).
 
     :ivar rating: Weighted rating (``Rw``, ``R'w``, ``DnT,w`` ...), the
@@ -650,7 +650,7 @@ class WeightedRatingResult:
 
 
 @dataclass(frozen=True)
-class ImpactRatingResult:
+class ImpactRatingResult(OwnsArrays):
     """Single-number weighted impact rating and CI (ISO 717-2).
 
     :ivar rating: Weighted impact rating (``Ln,w``, ``L'n,w``,
@@ -1128,7 +1128,7 @@ def weighted_impact_rating(
 
 
 @dataclass(frozen=True)
-class ImpactImprovementRatingResult:
+class ImpactImprovementRatingResult(OwnsArrays):
     r"""The weighted reduction of impact level of a covering, with its terms.
 
     ISO 717-2:2020 rates the reduction of impact sound pressure level
@@ -1204,7 +1204,7 @@ def _impact_improvement_rating(
         ci_delta=ci_delta,
         ci_r=_IMPACT_REFERENCE_FLOOR_CI - ci_delta,
         band_centers=np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64),
-        improvement=np.array(dl, dtype=np.float64),
+        improvement=np.asarray(dl, dtype=np.float64),
     )
 
 
@@ -1212,7 +1212,7 @@ def _impact_improvement_rating(
 
 
 @dataclass(frozen=True)
-class ExtendedWeightedRatingResult:
+class ExtendedWeightedRatingResult(OwnsArrays):
     """Weighted rating with the enlarged-range adaptation terms (ISO 717-1 Annex B).
 
     All values are integers unless the result was computed with
@@ -1297,7 +1297,7 @@ class ExtendedWeightedRatingResult:
 
 
 @dataclass(frozen=True)
-class ExtendedImpactRatingResult:
+class ExtendedImpactRatingResult(OwnsArrays):
     """Weighted impact rating with ``CI,50-2500`` (ISO 717-2:2020 A.2.1 NOTE).
 
     Values are integers unless computed with ``one_decimal=True``.
@@ -1508,7 +1508,7 @@ def weighted_rating_extended(
         ctr_50_5000=extended["ctr_50_5000"],
         ctr_100_5000=extended["ctr_100_5000"],
         core=weighted_rating(np.asarray(values_by_band, dtype=np.float64)[core_idx]),
-        band_centers=read_only_copy(freqs),
+        band_centers=freqs,
         measured=measured,
     )
 
@@ -1571,7 +1571,7 @@ def weighted_impact_rating_extended(
         core=weighted_impact_rating(
             np.asarray(values_by_band, dtype=np.float64)[core_idx]
         ),
-        band_centers=read_only_copy(freqs),
+        band_centers=freqs,
         measured=measured,
     )
 

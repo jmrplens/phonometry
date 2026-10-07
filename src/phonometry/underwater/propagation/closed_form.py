@@ -38,7 +38,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_ranks,
@@ -239,7 +239,7 @@ def seawater_absorption(
 
 
 @dataclass(frozen=True)
-class PropagationLossResult:
+class PropagationLossResult(OwnsArrays):
     r"""Propagation loss versus range (closed-form).
 
     :ivar range_m: Ranges from the source, in metres.
@@ -357,7 +357,7 @@ def propagation_loss(
     )
     absorption = alpha * (r / _M_PER_KM)
     return PropagationLossResult(
-        range_m=read_only_copy(r),
+        range_m=r,
         pl=spreading + absorption,
         spreading=spreading,
         absorption=absorption,

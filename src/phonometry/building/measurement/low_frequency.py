@@ -98,7 +98,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean
 from ..._internal.warnings import PhonometryWarning
 
@@ -463,7 +463,7 @@ def low_frequency_level(level: ArrayLike, corner: ArrayLike) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class LowFrequencyProcedure:
+class LowFrequencyProcedure(OwnsArrays):
     """The extra measurements ISO 16283 asks for in a room under 25 m³.
 
     One of these describes one room. Part 1 tests the source and the receiving
@@ -540,7 +540,7 @@ class LowFrequencyProcedure:
 
 
 @dataclass(frozen=True)
-class LowFrequencyResult:
+class LowFrequencyResult(OwnsArrays):
     r"""What the low-frequency procedure did to one room's band values.
 
     :ivar frequencies: Band centre frequencies of the whole measurement, in Hz,
@@ -775,7 +775,7 @@ def apply_low_frequency_procedure(
     t63 = procedure.reverberation_63_octave
 
     return LowFrequencyResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         levels=corrected,
         reverberation_time=substituted,
         low_frequency_bands=freqs[indices],

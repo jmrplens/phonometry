@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -384,7 +384,7 @@ def _ocean_ray_derivative(
 
 
 @dataclass(frozen=True)
-class NormalModeResult:
+class NormalModeResult(OwnsArrays):
     """Normal-mode solution of a range-independent waveguide.
 
     :ivar frequency: Source frequency, in Hz.
@@ -643,7 +643,7 @@ def normal_modes(
         wavenumbers=kr,
         mode_depths=z,
         mode_functions=psi,
-        ranges=read_only_copy(r),
+        ranges=r,
         propagation_loss=np.asarray(pl, dtype=np.float64),
         receiver_depth=zr,
         source_depth=zs,
@@ -656,7 +656,7 @@ def normal_modes(
 
 
 @dataclass(frozen=True)
-class RayTraceResult:
+class RayTraceResult(OwnsArrays):
     r"""Ray-tracing solution through a sound-speed profile.
 
     :ivar launch_angles_deg: Launch angles from the horizontal, in degrees.
@@ -938,7 +938,7 @@ def ray_trace(
         lower=0.0,
         upper=upper,
     )
-    ray_r = np.broadcast_to(ranges, march.positions.shape).copy()
+    ray_r = np.broadcast_to(ranges, march.positions.shape)
 
     ray_z, ray_t, ray_s = march.positions, march.times, march.arc_lengths
     if (
@@ -955,7 +955,7 @@ def ray_trace(
         ray_s = np.where(gone, np.nan, ray_s)
 
     return RayTraceResult(
-        launch_angles_deg=read_only_copy(angles),
+        launch_angles_deg=angles,
         ranges=ray_r,
         depths=ray_z,
         travel_times=ray_t,
@@ -969,10 +969,10 @@ def ray_trace(
         bottom_reflections=np.cumsum(march.upper_reflections, axis=1),
         source_depth=zs,
         water_depth=water_depth,
-        profile_depths=read_only_copy(z_prof),
-        profile_speeds=read_only_copy(c_prof),
-        bathymetry_ranges=None if bathy is None else read_only_copy(bathy[0]),
-        bathymetry_depths=None if bathy is None else read_only_copy(bathy[1]),
+        profile_depths=z_prof,
+        profile_speeds=c_prof,
+        bathymetry_ranges=None if bathy is None else bathy[0],
+        bathymetry_depths=None if bathy is None else bathy[1],
     )
 
 
@@ -1011,7 +1011,7 @@ _EIGENRAY_DISTINCT = 1e-9
 
 
 @dataclass(frozen=True)
-class EigenrayResult:
+class EigenrayResult(OwnsArrays):
     r"""The eigenrays connecting one source to one receiver, earliest first.
 
     Every per-arrival array has one entry per eigenray, sorted by travel time.
@@ -1671,7 +1671,7 @@ def eigenrays(
 
 
 @dataclass(frozen=True)
-class GaussianBeamResult:
+class GaussianBeamResult(OwnsArrays):
     r"""Gaussian beam solution of a range-independent waveguide.
 
     The propagation-loss field is on the same footing as
@@ -3449,14 +3449,12 @@ def gaussian_beams(
 
     return GaussianBeamResult(
         frequency=f,
-        ranges=read_only_copy(ranges),
-        depths=read_only_copy(receivers),
+        ranges=ranges,
+        depths=receivers,
         propagation_loss=np.asarray(pl, dtype=np.float64),
         pressure=np.asarray(pressure, dtype=np.complex128),
         launch_angles_deg=np.degrees(launch),
-        ray_ranges=np.broadcast_to(
-            np.arange(n_steps) * dr, march.positions.shape
-        ).copy(),
+        ray_ranges=np.broadcast_to(np.arange(n_steps) * dr, march.positions.shape),
         ray_depths=ray_depths,
         beam_widths=ray_widths,
         wavefront_curvatures=ray_curvatures,
@@ -3467,8 +3465,8 @@ def gaussian_beams(
         seabed_sound_speed=None if seabed is None else seabed[2],
         source_depth=zs,
         water_depth=water_depth,
-        bathymetry_ranges=None if bathy is None else read_only_copy(bathy[0]),
-        bathymetry_depths=None if bathy is None else read_only_copy(bathy[1]),
+        bathymetry_ranges=None if bathy is None else bathy[0],
+        bathymetry_depths=None if bathy is None else bathy[1],
     )
 
 
@@ -3588,7 +3586,7 @@ def _assemble_beam_field(
 
 
 @dataclass(frozen=True)
-class ParabolicEquationResult:
+class ParabolicEquationResult(OwnsArrays):
     """Parabolic-equation propagation-loss field.
 
     :ivar frequency: Source frequency, in Hz.

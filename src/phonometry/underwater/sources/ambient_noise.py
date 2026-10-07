@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_equal_shapes,
@@ -129,7 +129,7 @@ def thermal_noise_spectrum(
 
 
 @dataclass(frozen=True)
-class AmbientNoiseResult:
+class AmbientNoiseResult(OwnsArrays):
     """Composite ambient-noise spectrum (Wenz framework).
 
     :ivar frequencies: Frequencies, in Hz.
@@ -234,10 +234,10 @@ def ocean_ambient_noise(
         energies = energies + 10.0 ** (ship_arr / 10.0)
     spectrum = 10.0 * np.log10(energies)
     return AmbientNoiseResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         spectrum_level=np.asarray(spectrum, dtype=np.float64),
         wind=wind,
         thermal=thermal,
-        shipping=read_only_copy(ship_arr),
+        shipping=ship_arr,
         wind_speed_knots=float(wind_speed_knots),
     )

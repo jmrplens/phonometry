@@ -955,11 +955,12 @@ def test_vocal_effort_names_outside_the_one_third_octave_procedure() -> None:
 
 
 def test_sii_procedure_returns_copies() -> None:
+    """Each procedure holds its own copy of the tables, and refuses writes."""
     proc = sii.sii_procedure("critical-band")
-    proc.band_importance[0] = 99.0
-    assert sii.sii_procedure("critical-band").band_importance[0] == pytest.approx(
-        0.0103
-    )
+    again = sii.sii_procedure("critical-band")
+    assert not np.shares_memory(proc.band_importance, again.band_importance)
+    assert not proc.band_importance.flags.writeable
+    assert again.band_importance[0] == pytest.approx(0.0103)
 
 
 def test_sii_procedure_band_edges_without_the_closing_limit_is_refused() -> None:

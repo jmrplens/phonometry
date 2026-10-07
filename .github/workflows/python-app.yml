@@ -965,11 +965,14 @@ jobs:
   # that keeps what it was given shares memory with the caller: changing the
   # caller's array afterwards changes a result already computed, judged and
   # perhaps printed, and nothing raises. Clearing the writeable flag on such an
-  # array is worse, because it freezes the caller's own. This follows every
-  # parameter through assignments, views, containers and the package's own
-  # helpers to the record fields where an array is kept, and fails on one that
-  # is not a read-only copy of its own. An AST data-flow walk, static and
-  # dependency-free, so it runs on its own.
+  # array is worse, because it freezes the caller's own. A public record that
+  # can hold an array inherits OwnsArrays, which copies every array it is
+  # built with, so this fails on such a record that does not, and on a copy
+  # written around an array handed to one, which would be made twice. Then it
+  # follows every parameter through assignments, views, containers and the
+  # package's own helpers to the other places an array is kept, and fails on
+  # one that is not a read-only copy of its own. An AST data-flow walk, static
+  # and dependency-free, so it runs on its own.
   array-aliasing:
     name: Every result keeps its own copy of the arrays it was given
     runs-on: ubuntu-latest

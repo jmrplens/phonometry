@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_equal_shapes
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import (
@@ -642,7 +643,7 @@ def one_third_octave_absorption(
 
 
 @dataclass(frozen=True)
-class InsituAbsorptionResult:
+class InsituAbsorptionResult(OwnsArrays):
     """An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 
     :ivar frequencies: One-third-octave band centre frequencies, in hertz.

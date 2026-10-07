@@ -136,7 +136,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     is_at_most,
@@ -970,7 +970,7 @@ def _walk(contour: np.ndarray, count: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 @dataclass(frozen=True)
-class PlantMeasurementContour:
+class PlantMeasurementContour(OwnsArrays):
     r"""A measurement contour round a plant area on the plot plan, clauses 9.1 to 9.4.
 
     The plant area and the contour are polygons in metres, in any consistent
@@ -1008,10 +1008,11 @@ class PlantMeasurementContour:
             not enclose the plant area or touches it, a negative height, or a
             layout that leaves nothing to measure.
         """
-        # Copies of the caller's arrays, frozen: every derived quantity is read
-        # from these, and some are cached, so they must not change afterwards.
-        plant = read_only(np.array(_polygon(self.plant_outline_m, "plant_outline_m")))
-        contour = read_only(np.array(_polygon(self.contour_m, "contour_m")))
+        # The record's own copies of the caller's arrays, made before this
+        # hook runs, sealed: every derived quantity is read from these, and
+        # some are cached, so they must not change afterwards.
+        plant = read_only(np.asarray(_polygon(self.plant_outline_m, "plant_outline_m")))
+        contour = read_only(np.asarray(_polygon(self.contour_m, "contour_m")))
         object.__setattr__(self, "plant_outline_m", plant)
         object.__setattr__(self, "contour_m", contour)
         height = require_finite(self.characteristic_height_m, "characteristic_height_m")
@@ -1407,7 +1408,7 @@ def plant_measurement_contour(
 
 
 @dataclass(frozen=True)
-class PlantSoundPowerResult:
+class PlantSoundPowerResult(OwnsArrays):
     r"""The sound power level of a plant for the evaluation of levels in the
     environment, clause 10 of ISO 8297.
 
@@ -1461,10 +1462,11 @@ class PlantSoundPowerResult:
         """
         bands = read_only(_octave_bands(self.frequencies_hz))
         object.__setattr__(self, "frequencies_hz", bands)
-        # Copies, frozen: every step of clause 10 is derived from these on
-        # request, so a later write to the caller's array must not reach them.
+        # The record's own copies, sealed: every step of clause 10 is derived
+        # from these on request, so a later write to the caller's array must
+        # not reach them.
         levels = read_only(
-            np.array(
+            np.asarray(
                 require_finite_matrix(self.measured_levels_db, "measured_levels_db")
             )
         )
@@ -1483,7 +1485,7 @@ class PlantSoundPowerResult:
             raise ValueError(msg)
         if self.background_levels_db is not None:
             background = read_only(
-                np.array(
+                np.asarray(
                     require_finite_matrix(
                         self.background_levels_db, "background_levels_db"
                     )
@@ -1509,7 +1511,7 @@ class PlantSoundPowerResult:
         object.__setattr__(
             self,
             "directional_microphone_angle_deg",
-            None if angles is None else read_only(np.array(angles)),
+            None if angles is None else read_only(np.asarray(angles)),
         )
         theta, humidity = _weather(self.temperature_c, self.relative_humidity_percent)
         object.__setattr__(self, "temperature_c", theta)
@@ -2202,7 +2204,7 @@ def _integrated_reading_row(leq_range_db: float | ArrayLike) -> PlantRequirement
 
 
 @dataclass(frozen=True)
-class PartialPlantContributions:
+class PartialPlantContributions(OwnsArrays):
     """The sound power of a plant put together from parts measured on their
     own contours, and each part's share of it (0.2 b, c).
 
@@ -2225,7 +2227,7 @@ class PartialPlantContributions:
         bands = read_only(_octave_bands(self.frequencies_hz))
         object.__setattr__(self, "frequencies_hz", bands)
         levels = read_only(
-            np.array(require_finite_matrix(self.part_levels_db, "part_levels_db"))
+            np.asarray(require_finite_matrix(self.part_levels_db, "part_levels_db"))
         )
         object.__setattr__(self, "part_levels_db", levels)
         object.__setattr__(self, "names", tuple(str(n) for n in self.names))
@@ -2325,6 +2327,6 @@ def partial_plant_contributions(
     )
     return PartialPlantContributions(
         names=labels,
-        frequencies_hz=np.array(bands, dtype=np.float64),
+        frequencies_hz=np.asarray(bands, dtype=np.float64),
         part_levels_db=np.stack([p.sound_power_level_db for p in parts]),
     )

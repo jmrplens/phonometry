@@ -471,9 +471,21 @@ an `aircraft.AnpDatabase` is built from, and the medium maps of
 and `c_s` now stay the ones the time step was computed from. A `Signal`
 keeps a copy of its own samples too, which stays writeable for processing in
 place, as the samples of a file read with `io.read` always were. A result
-record built by hand, by calling its class directly, holds the arrays it is
-handed, as a tuple does. Writing into one of those arrays now raises
-`ValueError`, so code that edited one in place has to copy it first:
+record built by hand, by calling its class directly, makes the same copy:
+every public record that can hold an array copies the arrays it is handed
+when it is built, whoever builds it, also inside a tuple, a list or any
+mapping. A record held inside another one is kept whole and answers for its
+own arrays, and a `Signal` is no exception: the seven results that hand a
+waveform back as a `Signal` (`filters.OctaveFilterResult`,
+`signals.EnvelopeResult`, `signals.ResampledSignalResult`,
+`signals.AlignedImpulseResponseResult`, `signals.SynchronousAverageResult`,
+`environment.DirectSoundSubtraction` and `underwater.PileStrikeResult`) hold
+one of their own when the library builds them, whose samples stay writeable
+like any `Signal`'s, and hold the caller's own when built by hand around it.
+Every other array a result holds refuses in-place writes, the ones it
+computed as well as the ones it was given, where in 3.3.0 most computed
+arrays took them. Writing into one now raises `ValueError`, so code that
+edited one in place has to copy it first:
 
 ```python
 import numpy as np
@@ -486,10 +498,15 @@ levels[0] = 0.0
 samples = np.zeros(4)
 signal = io.Signal(samples, fs=48_000)
 samples[0] = 1.0
+measured = np.array([1.0, 0.5, 0.25, 0.125])
+response = room.ImpulseResponseResult(ir=measured, fs=48_000, method="farina")
+measured[0] = 0.0
 edited = nc.levels.copy()
 edited[0] = 62.0
-print(nc.levels[0], nc.levels.flags.writeable, signal.data[0, 0], signal.data.flags.writeable)
-# 60.0 False 0.0 True
+print(nc.levels[0], nc.levels.flags.writeable, response.ir[0], response.ir.flags.writeable)
+print(signal.data[0, 0], signal.data.flags.writeable)
+# 60.0 False 1.0 False
+# 0.0 True
 ```
 
 ## A catalogue row says what its source claims for each cell

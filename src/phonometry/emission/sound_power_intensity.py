@@ -100,7 +100,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 from .._internal.boundary import settled, settled_net_share
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, weighted_energy_mean
 from .._internal.validation import (
     check_engine,
@@ -192,7 +192,7 @@ def _table2_s(nominal: int, band_type: BandType) -> float:
 
 
 @dataclass(frozen=True)
-class SoundPowerIntensityResult:
+class SoundPowerIntensityResult(OwnsArrays):
     r"""Result of an ISO 9614-2:1996 sound-power-by-scanning determination.
 
     ``partial_power`` is the signed :math:`P_i = \langle I_{\mathrm{n},i} \rangle S_i`
@@ -619,7 +619,7 @@ def sound_power_intensity(
 
     freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
     return SoundPowerIntensityResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         partial_power=partial_power,
         partial_power_level=partial_power_level,
         sound_power=np.asarray(total_power, dtype=np.float64),
@@ -775,7 +775,7 @@ _MIN_STDDEV_SAMPLES = 2
 
 
 @dataclass(frozen=True)
-class PrecisionFieldIndicators:
+class PrecisionFieldIndicators(OwnsArrays):
     r"""ISO 9614-3:2002 Annex B field indicators (per band).
 
     ``ft`` is the temporal-variability indicator (= F1 of ISO 9614-1, Eq. B.1),
@@ -815,7 +815,7 @@ class PrecisionFieldIndicators:
 
 
 @dataclass(frozen=True)
-class PrecisionCriteria:
+class PrecisionCriteria(OwnsArrays):
     r"""ISO 9614-3:2002 Annex C acceptance criteria (per band, pass/fail).
 
     Each attribute is a boolean array (True = satisfied) or ``None`` when its
@@ -941,7 +941,7 @@ def _check_report_bands(
 
 
 @dataclass(frozen=True)
-class PrecisionIntensityResult:
+class PrecisionIntensityResult(OwnsArrays):
     r"""Result of an ISO 9614-3:2002 sound-power-by-scanning determination.
 
     ``partial_power`` is the signed :math:`P_i = I_{\mathrm{n},i} S_i` per partial
@@ -1501,7 +1501,7 @@ def sound_power_intensity_precision(
     lwa = _precision_a_weighted_total(lw, not_applicable, freqs, n_bands)
 
     return PrecisionIntensityResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         partial_power=np.asarray(partial_power, dtype=np.float64),
         sound_power=np.asarray(total_power, dtype=np.float64),
         sound_power_level=np.asarray(lw, dtype=np.float64),

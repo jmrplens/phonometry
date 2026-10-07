@@ -97,7 +97,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     require_count,
@@ -594,7 +594,7 @@ def _tolerance_column(
 
 
 @dataclass(frozen=True)
-class AdjustmentValue:
+class AdjustmentValue(OwnsArrays):
     r"""The adjustment value at the calibration check frequency
     (IEC 62585:2012, Annex A).
 
@@ -645,7 +645,7 @@ class AdjustmentValue:
             frequencies.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         columns = ["free_field_deviation_db"]
         if self.pressure_deviation_db is not None:
             columns.append("pressure_deviation_db")
@@ -657,7 +657,7 @@ class AdjustmentValue:
                     f"({frequencies.size}); got {column.size}."
                 )
                 raise ValueError(msg)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
         tolerance = _tolerance_column(self.tolerance_db, frequencies.size)
         if tolerance is not None:
             object.__setattr__(self, "tolerance_db", read_only(tolerance))
@@ -867,7 +867,7 @@ def adjustment_value(
 
 
 @dataclass(frozen=True)
-class FreeFieldCorrection:
+class FreeFieldCorrection(OwnsArrays):
     r"""The corrections that bring a meter on a source to its free-field
     response (IEC 62585:2012, Formulas (D.7), (E.6) and (F.13)).
 
@@ -924,8 +924,10 @@ class FreeFieldCorrection:
             )
             raise ValueError(msg)
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
-        corrections = np.array(self.corrections_db, dtype=np.float64, ndmin=2)
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        corrections = np.array(
+            self.corrections_db, dtype=np.float64, ndmin=2, copy=None
+        )
         if corrections.ndim != _MATRIX_RANK or corrections.shape[1] != frequencies.size:
             msg = (
                 "FreeFieldCorrection: 'corrections_db' must hold one row per "
@@ -948,7 +950,7 @@ class FreeFieldCorrection:
                 f"value per frequency ({frequencies.size}); got {reference.size}."
             )
             raise ValueError(msg)
-        object.__setattr__(self, "reference_correction_db", read_only(reference.copy()))
+        object.__setattr__(self, "reference_correction_db", read_only(reference))
         normalised = self.source == "electrostatic_actuator"
         if normalised != (self.check_frequency_hz is not None):
             msg = (
@@ -1377,7 +1379,7 @@ def electrostatic_actuator_correction(
 
 
 @dataclass(frozen=True)
-class CorrectionUncertaintyBudget:
+class CorrectionUncertaintyBudget(OwnsArrays):
     r"""The uncertainty budget of a correction at one frequency
     (IEC 62585:2012, Annex I, Tables I.1 to I.3).
 
@@ -1429,7 +1431,7 @@ class CorrectionUncertaintyBudget:
             msg = "CorrectionUncertaintyBudget: 'symbols' must hold one per component."
             raise ValueError(msg)
         for name in ("values_db", "divisors", "dofs"):
-            column = np.array(getattr(self, name), dtype=np.float64, ndmin=1)
+            column = np.array(getattr(self, name), dtype=np.float64, ndmin=1, copy=None)
             if column.shape != (count,):
                 msg = (
                     f"CorrectionUncertaintyBudget: '{name}' must hold one value per "
@@ -1735,8 +1737,8 @@ def correction_uncertainty_budget(
         frequency_hz=frequency,
         descriptors=tuple(descriptors),
         symbols=tuple(symbols),
-        values_db=np.array(values),
-        divisors=np.array(divisors),
+        values_db=np.asarray(values),
+        divisors=np.asarray(divisors),
         dofs=np.array([quantity.dof for quantity in quantities]),
         uncertainty=result,
         coverage=float(coverage),
@@ -1834,7 +1836,7 @@ def maximum_expanded_uncertainty(
 
 
 @dataclass(frozen=True)
-class CorrectionUncertaintyVerification:
+class CorrectionUncertaintyVerification(OwnsArrays):
     r"""The expanded uncertainties of a set of corrections against the maxima
     of their clause (IEC 62585:2012, clauses 5 and 9 to 14).
 
@@ -1883,7 +1885,7 @@ class CorrectionUncertaintyVerification:
         """
         _clause(self.clause)
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         maximum_expanded_uncertainty(frequencies, clause=self.clause)
         if self.correction_range_db is not None and self.clause not in _RANGE_CLAUSES:
             msg = (
@@ -1912,7 +1914,7 @@ class CorrectionUncertaintyVerification:
                     f"CorrectionUncertaintyVerification: '{name}' must be non-negative."
                 )
                 raise ValueError(msg)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def maximum_uncertainty_db(self) -> NDArray[np.float64]:

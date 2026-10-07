@@ -77,7 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import special
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -403,7 +403,7 @@ def _check_null_mean(
 
 
 @dataclass(frozen=True)
-class TrendTestResult:
+class TrendTestResult(OwnsArrays):
     r"""A nonparametric trend test on a sequence of parameter estimates.
 
     The hypothesis of *no underlying trend* is accepted at significance
@@ -531,7 +531,7 @@ def _trend_test_reverse(values: NDArray[np.float64], alpha: float) -> TrendTestR
     mean, std = _reverse_arrangement_moments(n)
     bounds = _reverse_arrangement_bounds(n, alpha)
     return TrendTestResult(
-        values=read_only_copy(values),
+        values=values,
         method="reverse_arrangements",
         statistic=statistic,
         n=n,
@@ -647,7 +647,7 @@ def trend_test(
 
 
 @dataclass(frozen=True)
-class StationarityTestResult:
+class StationarityTestResult(OwnsArrays):
     """A stationarity test on segment statistics of a single record.
 
     The record was divided into :attr:`n_segments` equal intervals, the
@@ -884,7 +884,7 @@ def _count_level_crossings(
 
 
 @dataclass(frozen=True)
-class LevelCrossingResult:
+class LevelCrossingResult(OwnsArrays):
     r"""Measured level-crossing rates against the Rice expectation.
 
     All rates count crossings with *both* slopes per unit time, following
@@ -1026,7 +1026,7 @@ def level_crossing_rate(
     rice = n0_rice * np.exp(-(level_arr**2) / (2.0 * m0))
 
     return LevelCrossingResult(
-        levels=read_only_copy(level_arr),
+        levels=level_arr,
         rates=np.asarray(counts / duration, dtype=np.float64),
         rice_rates=np.asarray(rice, dtype=np.float64),
         zero_crossing_rate=zero_count / duration,
@@ -1187,7 +1187,7 @@ def _check_rice_peak_rate(
 
 
 @dataclass(frozen=True)
-class PeakStatisticsResult:
+class PeakStatisticsResult(OwnsArrays):
     r"""Peak (maxima) statistics of a record against the Rice expectations.
 
     "Positive peaks" are the record's local maxima, positive or negative

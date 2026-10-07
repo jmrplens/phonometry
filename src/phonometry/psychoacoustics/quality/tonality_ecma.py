@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
@@ -79,7 +80,7 @@ _TRANSIENT_BLOCKS = 56  # discard l in [0, 56]
 
 
 @dataclass(frozen=True)
-class EcmaTonality:
+class EcmaTonality(OwnsArrays):
     """Result of an ECMA-418-2:2025 (Sottek) tonality calculation.
 
     ``tonality`` is the single representative tonality T in tu_HMS
@@ -320,8 +321,8 @@ def tonality_ecma(
     return EcmaTonality(
         tonality=t_single,
         specific_tonality=t_spec,
-        bark=_Z.copy(),
-        centre_frequencies=_F_CENTRE.copy(),
+        bark=_Z,
+        centre_frequencies=_F_CENTRE,
         tonal_frequencies=f_spec,
         times=time,
         tonality_vs_time=t_time,

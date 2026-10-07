@@ -37,7 +37,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_positive,
     require_ranks,
@@ -121,7 +121,7 @@ def reflection_coefficient(
 
 
 @dataclass(frozen=True)
-class BottomLossResult:
+class BottomLossResult(OwnsArrays):
     r"""Bottom reflection loss versus grazing angle (fluid-fluid Rayleigh
     model).
 
@@ -230,7 +230,7 @@ def bottom_reflection_loss(
         loss = -20.0 * np.log10(np.abs(r))
     phi_c = critical_angle(c1, c2) if float(c2) > float(c1) else None
     return BottomLossResult(
-        grazing_angle_deg=read_only_copy(phi),
+        grazing_angle_deg=phi,
         reflection_loss=np.asarray(loss, dtype=np.float64),
         reflection_coefficient=r,
         critical_angle_deg=phi_c,
@@ -238,7 +238,7 @@ def bottom_reflection_loss(
 
 
 @dataclass(frozen=True)
-class SeabedReflection:
+class SeabedReflection(OwnsArrays):
     r"""Plane-wave seabed reflection coefficient versus grazing angle.
 
     Bundles the complex Rayleigh reflection coefficient ``R`` over a
@@ -382,7 +382,7 @@ def seabed_reflection(
         loss = -20.0 * np.log10(magnitude)
     phi_c = critical_angle(c1, c2) if float(c2) > float(c1) else None
     return SeabedReflection(
-        grazing_angle_deg=read_only_copy(phi),
+        grazing_angle_deg=phi,
         reflection_coefficient=r,
         magnitude=np.asarray(magnitude, dtype=np.float64),
         bottom_loss=np.asarray(loss, dtype=np.float64),

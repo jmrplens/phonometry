@@ -74,7 +74,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even, settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_choice,
@@ -329,7 +329,7 @@ def _corrected(
 
 
 @dataclass(frozen=True)
-class CabinInsulationResult:
+class CabinInsulationResult(OwnsArrays):
     r"""The sound pressure insulation of a cabin, band by band.
 
     :ivar frequencies: Nominal band centre frequencies, in hertz, or ``None``
@@ -390,7 +390,7 @@ class CabinInsulationResult:
 
 
 @dataclass(frozen=True)
-class WeightedCabinInsulation:
+class WeightedCabinInsulation(OwnsArrays):
     r"""The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 
     :ivar rating: :math:`D_{p,w}` or :math:`D'_{p,w}`, in decibels.
@@ -493,7 +493,7 @@ def _flatness_limit_db(octave_centre_hz: float) -> float:
 
 
 @dataclass(frozen=True)
-class BandFlatnessCheck:
+class BandFlatnessCheck(OwnsArrays):
     r"""How flat the driving spectrum is inside each octave, 6.4 and 7.2.1.
 
     The limits are the clause's, so they are read from the octave and are not
@@ -515,8 +515,8 @@ class BandFlatnessCheck:
             negative or not finite, or a centre that is not a nominal octave
             centre frequency.
         """
-        centres = read_only_copy(self.octave_centres_hz, dtype=np.float64)
-        spread = read_only_copy(self.spread_db, dtype=np.float64)
+        centres = read_only(np.asarray(self.octave_centres_hz, dtype=np.float64))
+        spread = read_only(np.asarray(self.spread_db, dtype=np.float64))
         if centres.ndim != 1 or spread.shape != centres.shape:
             msg = "BandFlatnessCheck: one spread per octave centre."
             raise ValueError(msg)
@@ -686,9 +686,9 @@ def cabin_insulation(
             a_weighted_room_level, "a_weighted_room_level"
         ) - require_finite(a_weighted_cabin_level, "a_weighted_cabin_level")
     return CabinInsulationResult(
-        frequencies=read_only_copy(freqs),
-        room_levels=read_only_copy(room),
-        cabin_levels=read_only_copy(cabin),
+        frequencies=freqs,
+        room_levels=room,
+        cabin_levels=cabin,
         insulation=np.asarray(room - cabin, dtype=np.float64),
         apparent=how in _IN_SITU_METHODS,
         a_weighted_insulation=weighted,

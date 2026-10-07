@@ -160,7 +160,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
-from ..._internal.frozen import read_only, read_only_copy
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_count,
     require_finite_array,
@@ -331,7 +331,7 @@ def ranking_positions(sample_size: int) -> tuple[int, int]:
 
 
 @dataclass(frozen=True)
-class LevelDifferenceQuantiles:
+class LevelDifferenceQuantiles(OwnsArrays):
     r"""The characteristic values of a sample of level differences
     (ISO 17534-1:2015, C.4 and C.5).
 
@@ -353,7 +353,7 @@ class LevelDifferenceQuantiles:
             non-finite value, has fewer than 20 values or is not sorted in
             ascending order.
         """
-        values = np.array(
+        values = np.asarray(
             require_finite_array(self.sorted_differences_db, "sorted_differences_db"),
             dtype=np.float64,
         )
@@ -658,7 +658,7 @@ def _level_matrix(levels_db: ArrayLike) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class RoundRobinPrecision:
+class RoundRobinPrecision(OwnsArrays):
     r"""The precision of a method in a round robin of programs
     (ISO 17534-1:2015, 4.5.2 and A.3, Example 1).
 
@@ -786,7 +786,7 @@ def _inside(value: float, lower: float, upper: float) -> bool:
 
 
 @dataclass(frozen=True)
-class CalculationVerification:
+class CalculationVerification(OwnsArrays):
     r"""A program's results against the limits of the certified results: the
     TRC form of ISO 17534-1:2015 (clause 7.1, Tables B.1 and B.2).
 
@@ -818,7 +818,7 @@ class CalculationVerification:
         """
         columns = {}
         for name in ("results_db", "lower_limits_db", "upper_limits_db"):
-            columns[name] = np.array(
+            columns[name] = np.asarray(
                 require_finite_array(getattr(self, name), name), dtype=np.float64
             )
         sizes = {name: column.size for name, column in columns.items()}
@@ -965,12 +965,8 @@ def verify_calculation_results(
         else tuple(labels)
     )
     return CalculationVerification(
-        results_db=read_only_copy(results),
-        lower_limits_db=read_only_copy(
-            require_finite_array(lower_limits_db, "lower_limits_db")
-        ),
-        upper_limits_db=read_only_copy(
-            require_finite_array(upper_limits_db, "upper_limits_db")
-        ),
+        results_db=results,
+        lower_limits_db=require_finite_array(lower_limits_db, "lower_limits_db"),
+        upper_limits_db=require_finite_array(upper_limits_db, "upper_limits_db"),
         labels=names,
     )

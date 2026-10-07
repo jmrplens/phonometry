@@ -68,6 +68,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -397,7 +398,7 @@ def verify_intensity_class(
 
 
 @dataclass(frozen=True)
-class IntensityInstrumentComplianceResult:
+class IntensityInstrumentComplianceResult(OwnsArrays):
     r"""IEC 61043:1993 class verdict of a p-p sound-intensity chain.
 
     What :func:`verify_intensity_class` returns: the verdict together with the

@@ -182,9 +182,18 @@ EN 61260 that 7.4.3 requires; see the
 The measurement itself (the stationary mesh, finding $T_1$ and $T_2$ inside a
 train, the site and weather checks, Annex B beyond Formula B.1), the speed
 normalisation of 6.7.1, which has no formula, the tonal difference of 6.7.2,
-Annex F, the editing of rail defects and the concatenation of records of
-EN 15610 7.5, the measurement of the frequency response functions of
-EN 15461, and the roughness of wheels.
+Annex F, the editing of rail defects, the measurement of the frequency
+response functions of EN 15461, and the roughness of wheels.
+
+Nor does it join records for wavelengths longer than a quarter of a record,
+the reach the library applies. EN 15610 7.5 has the measured records
+concatenated by overlapping them, rules that "the overlap shall not be used
+for spectral components of 0,1 m or less" and asks for the concatenation
+method to be described in the report. It sets no length of overlap, no way to
+line two records up or to match their heights, no rule for how the samples
+they share are combined and no test that a join is valid (its NOTE only asks
+for attention to that), so the standard leaves the joining method to the
+tester, who must describe it in the report.
 
 ## See also
 

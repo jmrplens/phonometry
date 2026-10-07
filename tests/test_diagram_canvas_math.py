@@ -526,13 +526,13 @@ def _style_runs(s: str) -> list[list[tuple[str, str]]]:
         if k % 2 == 0:
             continue
         runs: list[tuple[str, str]] = []
-        for kind, payload in canvas._math_tokens(segment, s):
+        for kind, payload, _ in canvas._math_tokens(segment, s):
             if kind in ("var", "up"):
                 pieces = [("base", kind)]
             else:
                 pieces = [
                     (kind, kind2)
-                    for kind2, _ in canvas._math_tokens(payload, s, script=True)
+                    for kind2, _, _ in canvas._math_tokens(payload, s, script=True)
                 ]
             for piece in pieces:
                 if not runs or runs[-1] != piece:
@@ -583,3 +583,81 @@ def test_composition_is_deterministic() -> None:
     first = build()
     second = build()
     assert first == second
+
+
+def test_an_upright_key_sets_one_symbol_and_leaves_the_index_italic() -> None:
+    # The plant area of ISO 8297 and an index on one line: the key names the
+    # symbol, so the p of S_p is upright and the i of L_i keeps the index rule.
+    hits: set[str] = set()
+    runs = _math_runs("$S_p$ beside $L_i$ and $L_p$", ("S_p",), (), hits)
+    assert runs == [
+        ("S", True, 0.0, 1.0),
+        ("p", False, 0.22, 0.70),
+        (" beside ", False, 0.0, 1.0),
+        ("L", True, 0.0, 1.0),
+        ("i", True, 0.22, 0.70),
+        (" and ", False, 0.0, 1.0),
+        ("L", True, 0.0, 1.0),
+        ("p", True, 0.22, 0.70),
+    ]
+    assert hits == {"S_p"}
+
+
+def test_an_upright_key_reads_the_symbol_with_its_prime_and_its_operator() -> None:
+    # L′_n hangs from L′ and ΔL_a from ΔL; the n of a compound script and the
+    # n before a digit are both the run "n".
+    hits: set[str] = set()
+    runs = _math_runs("$L′_{n,w} = L_{n0} − ΔL_a$", ("L′_n", "L_n", "ΔL_a"), (), hits)
+    assert ("n,w", False, 0.22, 0.70) in runs
+    assert ("n0", False, 0.22, 0.70) in runs
+    assert runs[-1] == ("a", False, 0.22, 0.70)
+    assert hits == {"L′_n", "L_n", "ΔL_a"}
+
+
+def test_a_sloped_key_takes_a_curated_letter_back_to_italic() -> None:
+    # ISO 3747 prints the f of ΔL_f italic; RD 1367 keeps the f of K_f upright.
+    hits: set[str] = set()
+    runs = _math_runs("$ΔL_f$ and $K_f$", (), ("ΔL_f",), hits)
+    assert runs[2] == ("f", True, 0.22, 0.70)
+    assert runs[-1] == ("f", False, 0.22, 0.70)
+    assert hits == {"ΔL_f"}
+
+
+def test_a_key_never_reaches_a_mixed_run() -> None:
+    # L_pA splits letter by letter; a key on its p does not override that
+    # and is not counted as used.
+    hits: set[str] = set()
+    runs = _math_runs("$L_{pA}$", ("L_p",), (), hits)
+    assert runs[1] == ("p", True, 0.22, 0.70)
+    assert hits == set()
+
+
+def test_a_malformed_key_is_refused() -> None:
+    with pytest.raises(ValueError, match="upright key 'Sp' is not"):
+        _math_runs("$S_p$", ("Sp",))
+
+
+def test_a_plate_refuses_a_key_no_label_used() -> None:
+    svg = SVG(900, 560, LIGHT)
+    svg.text(450, 100, "$S_p$", upright=("S_p", "h_r"))
+    with pytest.raises(ValueError, match=r"slope keys \['h_r'\] set no subscript"):
+        svg.render("A title")
+
+
+def test_a_key_set_upright_draws_from_the_regular_face() -> None:
+    sloped = _element("$S_p$")
+    upright = _element("$S_p$", upright=("S_p",))
+    assert _uses(sloped, _ITAL) == 2
+    assert _uses(upright, _ITAL) == 1
+    assert _uses(upright, _REG) == 1
+
+
+def test_a_key_passed_to_a_measurement_is_accounted_for() -> None:
+    # A builder that sizes a box on a label measures it with the same keys it
+    # draws it with; the measurement alone already counts as a use.
+    svg = SVG(900, 560, LIGHT)
+    svg.fit_size(["$L_{n,sum}$"], (14, 12), 400.0, upright=("L_n",))
+    svg.render("A title")
+    svg.text_width("$L_{n,sum}$", 20, upright=("L_x",))
+    with pytest.raises(ValueError, match=r"slope keys \['L_x'\] set no subscript"):
+        svg.render("A title")

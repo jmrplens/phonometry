@@ -1886,6 +1886,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the same response, and the conformance suite runs the tones of
   IEC 61260:1995 5.7 through the bank.
 
+- **The diagrams set each subscript the way its standard prints it.** Sixty
+  diagrams drew a subscript that abbreviates a word in italic, because the
+  diagram composer decided the slope by the letters alone and a lone i, n, p,
+  r, d or S has to stay italic where it is an index or a quantity: the impact
+  level $L_\mathrm{i}$ and the normalized $L'_\mathrm{n}$ of ISO 16283-2, the
+  $L_\mathrm{n0}$, $S_\mathrm{n}$ and $l_\mathrm{n}$ of ISO 10140-1, the plant
+  area $S_\mathrm{p}$ of ISO 8297, the receiver height $h_\mathrm{r}$ and
+  region $G_\mathrm{r}$ of ISO 9613-2, the $C_\mathrm{I}$ of ISO 717-2, the
+  dose $D_\mathrm{z}$ of ISO 2631-5 and some forty more, most of them on a
+  page that already set them upright. The diagram canvas now takes the symbols
+  a label sets upright, or italic, with the call that draws it, so the
+  descriptive subscript is upright where it is drawn and the index stays
+  italic everywhere else; words such as room, cabin, with and without of
+  ISO 11957 are now upright on every diagram, and a level such as
+  $L_{p\mathrm{G}}$ sets its quantity italic and its weighting upright. The
+  labels that used to be drawn as plain text because no subscript could be set
+  upright are now set as their standards print them: $d_\mathrm{ss}$,
+  $d_\mathrm{sr}$ and $K_\mathrm{met}$ of ISO 9613-2, $d_\mathrm{CPA}$ and
+  $l_\mathrm{DW}$ of ISO 17208-1, the basicentric $x_\mathrm{h}$,
+  $y_\mathrm{h}$, $z_\mathrm{h}$ of ISO 5349-1, the stress variable of
+  ISO 2631-5 Annex C, $\Delta H_\mathrm{md}$, $s_\mathrm{u}$ and $s_\mathrm{l}$
+  of ISO 7029, $d_\mathrm{u}$, $d_\mathrm{l}$ and $L_\mathrm{EX,8h}$ of
+  ISO 1999, $N_\mathrm{F}$, $N_\mathrm{D}$, $\Delta L_\mathrm{DF}$ and
+  $L_\mathrm{TQ}$ of ISO 532-1, the HMS units of ECMA-418-2, the speech level
+  at 4 m of ISO 3382-3 and $D_{2\mathrm{m,nT}}$ of ISO 16283-3. The other
+  direction is settled too: ISO 3747 prints the f of $\Delta L_f$ italic and
+  ISO 4869-2 the m and s of $H_m$ and $SNR_s$, and their diagrams now do.
+  Where a page lagged behind its standard, the page now follows it: the C-
+  and A-weighted levels of ISO 4869-2, the downstream and free areas of
+  ISO 11820 and the normal intensity $I_\mathrm{n}$ of ISO 9614 are upright
+  on their guides, and the intensity $I$ of ISO 15186 is italic in $R_I$,
+  $R'_I$, $R_{I,\mathrm{M}}$ and $D_{I,\mathrm{n,e}}$ throughout the
+  insulation-intensity guide, the glossary and the figures, as all three
+  parts print it. The figures follow the same standards: $A_\mathrm{u}$ and
+  $A_\mathrm{o}$ of DIN 4150-2, $f_\mathrm{e}$, $L_{v,\mathrm{E}}$ and
+  $\Delta L_{v,\mathrm{DB}}$ of E DIN 45672-3, $L_{p,\mathrm{C}}$ and
+  $L_{p,\mathrm{A}}$ of ISO 4869-2 and $J_\mathrm{LF}$ and $J_\mathrm{LFC}$ of
+  ISO 3382-1, in the documentation figures and in what
+  `PeopleAssessment.plot()` and `HMLRating.plot()` draw. The docs edition of
+  the diffusers guide now writes the normalised coefficient $d_\mathrm{norm}$
+  with the note on symbols its site twin carries, and the four Spanish
+  diagrams that printed 1.8 or 94.0 now print 1,8 and 94,0. `make subscripts` now
+  reads the diagrams each page embeds beside the page itself, so a diagram
+  that sets a symbol one way on a page that sets it the other fails the
+  check, and it reads an upright run that follows an index inside one
+  subscript, as in $D_{I,\mathrm{n,e}}$, as upright; on the pages and
+  diagrams as they were, it finds 193 such places.
+
 - **The Spanish edition calls a sine wave a sinusoide, and an expanded
   uncertainty an incertidumbre expandida.** Thirty-nine places of the Spanish
   guides, the Spanish errata register, the site's glossary and the BS.1770

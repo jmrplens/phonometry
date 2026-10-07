@@ -67,9 +67,9 @@ x = np.arange(len(areas))
 fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
 for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
     values = [vibration.guide_values(a, time_of_day=time_of_day) for a in areas]
-    ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label="$A_u$")
+    ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label=r"$A_\mathrm{u}$")
     ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label="$A_r$")
-    ax.plot(x, [v.a_o for v in values], "v", label="$A_o$")
+    ax.plot(x, [v.a_o for v in values], "v", label=r"$A_\mathrm{o}$")
     ax.set_yscale("log")
     ax.set_xticks(x, areas)
     ax.set_title(time_of_day)

@@ -94,6 +94,29 @@ def test_an_index_beside_an_upright_run_is_not_a_collision(
     assert failures == []
 
 
+def test_a_wrapped_run_after_an_index_is_upright_throughout(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""``D_{I,\mathrm{n,e}}`` sets the n and the e upright beside an italic I.
+
+    Split on every comma, the wrapped run came apart into ``\mathrm{n`` and
+    ``e}``: the n went unread and the e was taken for an italic letter, so the
+    page that writes ``D_\mathrm{n,e}`` beside it failed with a collision it
+    does not have.
+    """
+    path = _write(
+        tmp_path,
+        "intensity.md",
+        "$D_{I,\\mathrm{n,e}}$ is the counterpart of $D_\\mathrm{n,e}$.\n",
+    )
+    found = css.sightings(path.read_text(encoding="utf-8"), ".md")
+    assert dict(found[("D", "I")]) == {"italic": [1]}
+    assert dict(found[("D", "e")]) == {"upright": [1, 1]}
+    assert dict(found[("D", "n")]) == {"upright": [1, 1]}
+    _, failures = css.check([path])
+    assert failures == []
+
+
 def test_a_translation_pattern_is_not_a_label(tmp_path: pathlib.Path) -> None:
     """A regex spells a backslash twice; nothing in it is mathematics."""
     path = _write(
@@ -157,9 +180,167 @@ def test_the_excluded_trees_are_not_collected(tmp_path: pathlib.Path) -> None:
     assert collected == {"guide.md"}
 
 
+def _plate(
+    directory: pathlib.Path,
+    name: str,
+    label: str,
+    *,
+    lang: str = "en",
+    upright: tuple[str, ...] = (),
+) -> pathlib.Path:
+    """Draw *label* on a plate the way the generator does and write it."""
+    from diagrams.canvas import LIGHT, SVG
+    from generated_assets import compact_svg
+
+    svg = SVG(900, 200, LIGHT, lang)
+    svg.text(450, 100, label, 16, upright=upright)
+    path = directory / f"{name}.svg"
+    path.write_text(compact_svg(svg.render("A plate")), encoding="utf-8")
+    return path
+
+
+_EMBED = "![x](https://raw.githubusercontent.com/o/r/main/.github/images/{}.svg)\n"
+
+
+def test_a_plate_sloped_against_its_page_fails(tmp_path: pathlib.Path) -> None:
+    r"""The defect the plate reading exists for: L_i sloped beside L_\mathrm{i}."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_impact", "$L_i$ = energy-averaged")
+    page = _write(
+        tmp_path,
+        "field.md",
+        "The impact level $L_\\mathrm{i}$.\n" + _EMBED.format("diagram_impact"),
+    )
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert "L_i: italic in diagram_impact.svg" in failures[0]
+    assert "upright on line 1" in failures[0]
+
+
+def test_a_plate_keyed_upright_agrees_with_its_page(tmp_path: pathlib.Path) -> None:
+    """The per-call key the plates set the descriptive subscript with."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_impact", "$L_i$ = energy-averaged", upright=("L_i",))
+    page = _write(
+        tmp_path,
+        "field.md",
+        "The impact level $L_\\mathrm{i}$.\n" + _EMBED.format("diagram_impact"),
+    )
+    _, failures = css.check([page], images)
+    assert failures == []
+
+
+def test_a_plate_is_one_scope_with_every_page_that_embeds_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two pages embedding one plate are each held against it."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_scan", "$I_n$ (normal intensity)", upright=("I_n",))
+    upright = _write(
+        tmp_path, "theory.md", "$I_\\mathrm{n}$\n" + _EMBED.format("diagram_scan")
+    )
+    sloped = _write(tmp_path, "guide.md", "$I_n$\n" + _EMBED.format("diagram_scan"))
+    _, failures = css.check([upright, sloped], images)
+    assert len(failures) == 1
+    assert "guide.md" in failures[0]
+
+
+def test_a_greek_letter_is_one_symbol_whichever_shape_the_page_writes(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""A plate draws one epsilon; ``\varepsilon`` and ``\epsilon`` name it."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_spectra", "random error $ε_r$")
+    page = _write(
+        tmp_path,
+        "spectra.md",
+        "$\\varepsilon_\\mathrm{r}$\n" + _EMBED.format("diagram_spectra"),
+    )
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert "\\epsilon_r" in failures[0]
+
+
+def test_a_spanish_page_is_held_against_the_spanish_plate(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The site shows ``_es`` on a Spanish page, so that is the file read."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _plate(images, "diagram_impact", "$L_i$", upright=("L_i",))
+    _plate(images, "diagram_impact_es", "$L_i$", lang="es")
+    (tmp_path / "es").mkdir()
+    page = _write(
+        tmp_path, "es/campo.md", "$L_\\mathrm{i}$\n" + _EMBED.format("diagram_impact")
+    )
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert "diagram_impact_es.svg" in failures[0]
+
+
+def test_a_figure_beside_the_plates_is_not_read_as_one(tmp_path: pathlib.Path) -> None:
+    """matplotlib writes an XML declaration first; a plate never does."""
+    images = tmp_path / "images"
+    images.mkdir()
+    (images / "levels.svg").write_text(
+        '<?xml version="1.0"?><svg><!-- $L_i$ --><g transform="translate(1 2) '
+        'scale(0.1 -0.1)"><use href="#DejaVuSans-Oblique-2f"/></g></svg>',
+        encoding="utf-8",
+    )
+    page = _write(tmp_path, "levels.md", "$L_\\mathrm{i}$\n" + _EMBED.format("levels"))
+    _, failures = css.check([page], images)
+    assert failures == []
+
+
+def test_a_ligature_in_a_script_is_read_through() -> None:
+    """DejaVu draws the ff of "eff" as one glyph; the script is still read."""
+    from diagrams.canvas import LIGHT, SVG
+
+    svg = SVG(900, 200, LIGHT)
+    svg.text(450, 100, "$m_{eff}$ and $L_i$", 16)
+    found, unreadable = css.plate_sightings(svg.render("A plate"))
+    assert unreadable == []
+    assert found[("L", "i")]["italic"] == ["$m_{eff}$ and $L_i$"]
+
+
+def test_a_label_whose_glyphs_do_not_line_up_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A plate the gate cannot read fails it rather than passing unread."""
+    images = tmp_path / "images"
+    images.mkdir()
+    path = _plate(images, "diagram_impact", "$L_i$")
+    text = path.read_text(encoding="utf-8")
+    path.write_text(
+        text.replace("<!-- $L_i$ -->", "<!-- $L_i^2$ -->"), encoding="utf-8"
+    )
+    page = _write(tmp_path, "field.md", _EMBED.format("diagram_impact"))
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert "cannot line up the glyphs of diagram_impact.svg" in failures[0]
+
+
+def test_a_doubled_brace_in_a_formatted_label_is_upright(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""``rf"$f_\mathrm{{e}}$ = {f:g} Hz"`` renders an upright e."""
+    path = _write(
+        tmp_path,
+        "railway.md",
+        'label=rf"$f_\\mathrm{{e}}$ = {natural:g} Hz"\n\nThe floor $f_e$.\n',
+    )
+    _, failures = css.check([path])
+    assert len(failures) == 1
+    assert "upright on line 1" in failures[0]
+
+
 def test_the_tree_it_ships_with_passes() -> None:
     """The gate is green on this repository, which is what CI asserts."""
     root = pathlib.Path(__file__).resolve().parent.parent
     paths = css.collect([str(root / r) for r in css.DEFAULT_ROOTS])
-    _, failures = css.check(paths)
+    _, failures = css.check(paths, root / css.PLATES)
     assert failures == []

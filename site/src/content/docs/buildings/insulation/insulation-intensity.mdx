@@ -45,7 +45,7 @@ it, and the absorption area converts the room level back into a power. The
 direct reading: a p-p intensity probe scans a measurement surface that
 encloses the specimen and measures the power radiated by the test element
 alone, so flanking transmission stays out of the number. This guide covers
-the intensity sound reduction index $R_\mathrm{I}$ and its $K_\mathrm{c}$-modified form, the
+the intensity sound reduction index $R_I$ and its $K_\mathrm{c}$-modified form, the
 element-normalized level difference of small building elements, the surface
 qualification indicator and the accredited test fiches. The pressure-based
 laboratory chain lives in
@@ -79,19 +79,19 @@ average normal intensity level $L_{I\mathrm{n}}$ over the surface (area $S_\math
 specimen of area $S$,
 
 $$
-R_\mathrm{I} = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right],
+R_I = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right],
 $$
 
 where the $6$ dB is the diffuse-field offset between the sound pressure level
 and the incident intensity level. The same formula gives the apparent index
-$R'_\mathrm{I}$ in the field (ISO 15186-2). The intensity scan measures the transmitted
+$R'_I$ in the field (ISO 15186-2). The intensity scan measures the transmitted
 power directly. The reverberation-room pressure method does not: it infers the
 power from the receiving-room level and so *underestimates* it, which makes the
 ISO 10140-2 $R$ come out slightly high. The **modified index**
-$R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$ adds that same bias back to the intensity result, so an
+$R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ adds that same bias back to the intensity result, so an
 intensity measurement can be quoted against pressure-method data
-(ISO 15186-1, Clause 3.10 NOTE 1). Report $R_\mathrm{I}$ when the aim is the true
-transmitted power; report $R_\mathrm{I,M}$ when the aim is comparability with an
+(ISO 15186-1, Clause 3.10 NOTE 1). Report $R_I$ when the aim is the true
+transmitted power; report $R_{I,\mathrm{M}}$ when the aim is comparability with an
 ISO 10140-2 result. Earlier revisions of this guide blamed the bias on the
 intensity method itself, which would have called for subtracting $K_\mathrm{c}$, not
 adding it. The adaptation term $K_\mathrm{c}$ (Annex B) is $10 \log_{10}(1 + S_{\mathrm{b}2}\lambda/8V_2)$ for a
@@ -130,7 +130,7 @@ res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation.svg" alt="Intensity sound reduction index RI and the Kc-modified index RI,M across the one-third-octave bands, with the Annex B adaptation lift shaded between the two curves" width="80%" loading="eager" />
 
-*The modified index $R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$ lifts $R_\mathrm{I}$ (most at the low bands,
+*The modified index $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ lifts $R_I$ (most at the low bands,
 where $K_\mathrm{c}$ is largest), so an intensity measurement reproduces the ISO 10140-2
 pressure result. The automatic rating is formed only for exactly 16
 one-third-octave or 5 octave values.*
@@ -193,7 +193,7 @@ receiving face absorbs), means moving the surface out by 5 cm to 10 cm before
 adding absorption. Scan again with the path turned 90°: the mean of the pair
 stands only if the two differ by less than 1.0 dB in every band. With $F_{pI}$
 below 10 dB, lower the source by 10 dB: if $F_{pI}$ moves by less than 1 dB,
-both levels clear the background by 10 dB. Report $R_\mathrm{I}$ to one decimal
+both levels clear the background by 10 dB. Report $R_I$ to one decimal
 beside $F_{pI}$ and the residual index in every band, with $S$, $S_\mathrm{m}$,
 the measurement distance and the probe's microphones and spacer.
 
@@ -330,7 +330,7 @@ enclosing surface is cutting through the field of something *outside* it (a
 flanking element, a second source in the receiving room), so the qualification
 of Clause 6.4.2 should be re-checked before the number is reported at all.
 $S_\mathrm{m}$ keeps the unsigned area because it is the area actually scanned, which
-is what the $10\log_{10}(S_\mathrm{m}/S)$ term of $R_\mathrm{I}$ needs.
+is what the $10\log_{10}(S_\mathrm{m}/S)$ term of $R_I$ needs.
 
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
 
@@ -360,15 +360,15 @@ rated.
 ## ISO 15186-1 intensity test report (`.report()`)
 
 `IntensityReductionResult.report()` writes the one-page ISO 15186-1:2000 test
-report of the intensity sound reduction index $R_\mathrm{I}$, reusing the same
+report of the intensity sound reduction index $R_I$, reusing the same
 accredited two-panel layout as the ISO 10140 and ISO 16283 fiches. Because
-$R_\mathrm{I}$ is an ordinary sound reduction index, its single-number rating $R_\mathrm{I,w}$
+$R_I$ is an ordinary sound reduction index, its single-number rating $R_{I,\mathrm{w}}$
 is the ISO 717-1 airborne rating evaluated on the intensity spectrum: the fiche
-names ISO 15186-1 in its basis line, tabulates $R_\mathrm{I}$ to one decimal place
+names ISO 15186-1 in its basis line, tabulates $R_I$ to one decimal place
 beside the measured-versus-shifted-reference curve, boxes `RI,w (C; Ctr)` and
 prints the statement that the transmitted sound power was measured directly
 over the measurement surface. `verbose=True` annexes the $K_\mathrm{c}$-modified index
-$R_\mathrm{I,M}$ (Formula (9)) beside $R_\mathrm{I}$ when an adaptation term was supplied.
+$R_{I,\mathrm{M}}$ (Formula (9)) beside $R_I$ when an adaptation term was supplied.
 
 The applicable `ReportMetadata` fields describe the intensity measurement:
 `specimen` (the tested element), `area` (specimen area $S$), `client`,
@@ -418,7 +418,7 @@ repository. Click the preview to open the PDF:
 ## Small building elements: the element-normalized level difference
 
 For a **small building element** (a ventilator, a socket, a small window) the
-intensity method reports the element-normalized level difference $D_\mathrm{I,n,e}$
+intensity method reports the element-normalized level difference $D_{I,\mathrm{n,e}}$
 (Formula (8)) instead, normalized to the reference absorption area
 $A_0 = 10\ \text{m}^2$. `IntensityElementNormalizedResult.report()` writes the
 same one-page fiche through the shared renderer, boxing `DI,n,e,w (C; Ctr)`
@@ -449,9 +449,9 @@ res.report("DIne.pdf", metadata=metadata)               # DI,n,e,w (C; Ctr)
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_element_insulation.svg" alt="Element-normalized level difference DI,n,e of a trickle ventilator per one-third-octave band against the shifted ISO 717-1 reference curve, with the unfavourable deviations shaded and the DI,n,e,w rating annotated" width="80%" />
 
-*The small element is rated exactly like a wall: $D_\mathrm{I,n,e}$ feeds the
+*The small element is rated exactly like a wall: $D_{I,\mathrm{n,e}}$ feeds the
 ISO 717-1 engine and the unfavourable deviations (reference above the
-measurement) set $D_\mathrm{I,n,e,w}$. The $10\log_{10}(S_\mathrm{m}/A_0)$ normalization replaces
+measurement) set $D_{I,\mathrm{n,e,w}}$. The $10\log_{10}(S_\mathrm{m}/A_0)$ normalization replaces
 the specimen-area term, so the number describes the element irrespective of
 the wall it sits in.*
 
@@ -504,10 +504,10 @@ plt.show()
 ## Laboratory or field (ISO 15186-2)
 
 Part 1 is a laboratory method: the specimen sits in a test opening between
-two rooms, and the suppressed flanking of the facility makes $R_\mathrm{I}$ a
+two rooms, and the suppressed flanking of the facility makes $R_I$ a
 property of the element. ISO 15186-2 takes the same probe, the same surface
 scan and the same formula into the finished building, where the result is
-the apparent index $R'_\mathrm{I}$ of the installed element, flanking radiation and
+the apparent index $R'_I$ of the installed element, flanking radiation and
 all. The selectivity that motivated the method in the laboratory doubles in
 the field: because the probe reads only what its measurement surface
 radiates, partial surfaces isolate which element (the wall itself, a window,
@@ -529,7 +529,7 @@ and changes the other end of the measurement: the source-room level is read
 than 50 mm from it (Clause 6.3):
 
 $$
-R_\mathrm{I} = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} + 10\lg\frac{S_\mathrm{m}}{S} \right]\ \mathrm{dB}
+R_I = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} + 10\lg\frac{S_\mathrm{m}}{S} \right]\ \mathrm{dB}
 $$
 
 **Nine decibels, not six.** That single constant is the whole difference from
@@ -762,8 +762,8 @@ cannot feed ISO 717-1.
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
-ISO 15186-1:2000's intensity sound reduction index $R_\mathrm{I}$ (Clause 3.8), its
-$K_\mathrm{c}$-modified $R_\mathrm{I,M}$ (Annex B) and the element-normalized $D_\mathrm{I,n,e}$
+ISO 15186-1:2000's intensity sound reduction index $R_I$ (Clause 3.8), its
+$K_\mathrm{c}$-modified $R_{I,\mathrm{M}}$ (Annex B) and the element-normalized $D_{I,\mathrm{n,e}}$
 (Clause 3.9), with the subarea combination of Formulas (11)-(12) and the
 surface pressure-intensity indicator, via
 `building.intensity_sound_reduction`, `building.adaptation_term_kc`,
@@ -772,7 +772,7 @@ surface pressure-intensity indicator, via
 `building.combine_subareas`; the single-number ratings reuse the verified ISO
 717-1 engine, and both results write the one-page test fiche through
 `.report()`. ISO 15186-3:2002's low-frequency variant is covered too: the
-surface-pressure index $R_\mathrm{I}$ of Formula (7), the element-normalized
+surface-pressure index $R_I$ of Formula (7), the element-normalized
 $D_{I\mathrm{n,e}}$ of Formula (8), the Clause 6.4.2 qualification against both of
 its limits, the Clause 6.6 band range and the normative limp-panel
 qualification of Annex A, via `building.low_frequency_intensity_reduction`,
@@ -811,7 +811,7 @@ the standard's Clause 8 report has no worked form here.
 - [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
   the pressure-based field quantities and their single-number ratings.
 - [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/):
-  the reference-curve engine behind $R_\mathrm{I,w}$ and $D_\mathrm{I,n,e,w}$.
+  the reference-curve engine behind $R_{I,\mathrm{w}}$ and $D_{I,\mathrm{n,e,w}}$.
 - [Sound Intensity](/phonometry/devices/emission/intensity/): the two-microphone
   probe, its field indicators and the residual-index qualification behind
   every scan.

@@ -81,8 +81,16 @@ def _d_outdoor(s: SVG, th: Theme) -> None:
     c_direct = th.muted  # blocked direct ray
     gy = 430.0  # ground line
     s.ground(gy, 60.0, 840.0)
+    # ISO 9613-2 names the source, middle and receiver regions by s, m and r,
+    # and the receiver height h_r, all upright on the guide.
     s.text(
-        66.0, gy + 26.0, "Ground ($G_s$, $G_m$, $G_r$)", 15, th.muted, anchor="start"
+        66.0,
+        gy + 26.0,
+        "Ground ($G_s$, $G_m$, $G_r$)",
+        15,
+        th.muted,
+        anchor="start",
+        upright=("G_r",),
     )
 
     # --- source (loudspeaker) on the left, acoustic centre at (sx, sy) -------
@@ -134,35 +142,48 @@ def _d_outdoor(s: SVG, th: Theme) -> None:
         anchor="middle",
         italic=True,
     )
-    # Diffracted ray up to the top edge, then down to the receiver.
-    # dss/dsr stay uncomposed for now: ISO 9613-2:1996 Eq. (16) prints both
-    # subscripts upright, but _ROMAN_SCRIPTS holds "ss" and not "sr", so
-    # $d_{ss}$/$d_{sr}$ would set the pair in two different styles.
+    # Diffracted ray up to the top edge, then down to the receiver. The
+    # ss and sr of the two path lengths print upright in ISO 9613-2:1996,
+    # Equation (16), p. 9.
     s.line(sx + 12, sy - 12, ex, ey, c_diff, 3.0)
     s.arrow(ex, ey, rx, ry + 2, c_diff, 3.0)
-    s.text(300.0, 208.0, "dss", 15, c_diff, anchor="middle")
-    s.text(610.0, 200.0, "dsr", 15, c_diff, anchor="middle")
+    s.text(300.0, 208.0, "$d_{ss}$", 15, c_diff, anchor="middle")
+    s.text(610.0, 200.0, "$d_{sr}$", 15, c_diff, anchor="middle")
     s.text(ex, ey - 22.0, "diffracted path", 15, c_diff, bold=True)
 
     # --- heights (witness dimensions) ---------------------------------------
     s.dim(sx - 44, gy, sx - 44, sy - 6, "$h_s$", offset=0, label_side="left")
     s.line(sx - 44, gy, sx, gy, th.muted, 0.9, dash="3,3")
     s.line(sx - 44, sy - 6, sx, sy - 6, th.muted, 0.9, dash="3,3")
-    s.dim(rx + 40, gy, rx + 40, ry + 6, "$h_r$", offset=0, label_side="right")
+    s.dim(
+        rx + 40,
+        gy,
+        rx + 40,
+        ry + 6,
+        "$h_r$",
+        offset=0,
+        label_side="right",
+        upright=("h_r",),
+    )
     s.line(rx, gy, rx + 40, gy, th.muted, 0.9, dash="3,3")
     s.line(rx, ry + 6, rx + 40, ry + 6, th.muted, 0.9, dash="3,3")
 
     # --- master relations ---------------------------------------------------
-    # Both stay uncomposed for now: the first carries the dss/dsr pair noted
-    # above, and Eq. (14) prints "met" upright (ISO 9613-2:1996, p. 9) while
-    # _ROMAN_SCRIPTS has no "met", so $K_{met}$ would set it as an index.
+    # Equation (14) of ISO 9613-2:1996, p. 9, prints the met of K_met upright
+    # and the z of D_z italic: z is the path difference the line above it
+    # defines, not a word.
     s.text(
-        450.0, gy + 58.0, "z = dss + dsr − d   (path difference)", 16, th.fg, bold=True
+        450.0,
+        gy + 58.0,
+        "$z = d_{ss} + d_{sr} − d$   (path difference)",
+        16,
+        th.fg,
+        bold=True,
     )
     s.text(
         450.0,
         gy + 84.0,
-        "Dz = 10 log10[ 3 + (C₂/λ) C₃ z Kmet ]   (Eq. 14)",
+        "$D_z = 10 log10[ 3 + (C_2/λ) C_3 z K_{met} ]$   (Eq. 14)",
         15,
         th.muted,
     )
@@ -197,8 +218,9 @@ def _d_impulse_prominence(s: SVG, th: Theme) -> None:
 
     def _step(y: float, l1: str, l2: str, color: str) -> None:
         s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
-        s.text(cx, y + 26, l1, 15, th.fg, "middle", bold=True)
-        s.text(cx, y + 47, l2, 11, th.muted, "middle")
+        # The I of the impulse adjustment is upright on the guide.
+        s.text(cx, y + 26, l1, 15, th.fg, "middle", bold=True, upright=("K_I",))
+        s.text(cx, y + 47, l2, 11, th.muted, "middle", upright=("K_I",))
 
     _step(
         150,
@@ -479,7 +501,16 @@ def _d_ground_reflection(s: SVG, th: Theme) -> None:
     s.dim(sx - 46, gy, sx - 46, sy, "$h_s$", offset=0, label_side="left")
     s.line(sx - 46, gy, sx - 8, gy, th.muted, 0.9, dash="3,3")
     s.line(sx - 46, sy, sx - 8, sy, th.muted, 0.9, dash="3,3")
-    s.dim(rx + 42, gy, rx + 42, ry, "$h_r$", offset=0, label_side="right")
+    s.dim(
+        rx + 42,
+        gy,
+        rx + 42,
+        ry,
+        "$h_r$",
+        offset=0,
+        label_side="right",
+        upright=("h_r",),
+    )
     s.line(rx + 8, gy, rx + 42, gy, th.muted, 0.9, dash="3,3")
     s.line(rx + 8, ry, rx + 42, ry, th.muted, 0.9, dash="3,3")
 
@@ -632,6 +663,7 @@ def _d_atmospheric_refraction(s: SVG, th: Theme) -> None:
         14,
         th.muted,
         anchor="start",
+        upright=("h_r",),
     )
 
 
@@ -704,13 +736,12 @@ def _d_ground_barrier(s: SVG, th: Theme) -> None:
         th.fg,
         anchor="start",
     )
-    # The Kurze-Anderson line stays uncomposed for now: ISO 9613-2:1996
-    # prints the "bar" subscript upright (Eq. 12, p. 9) and
-    # _ROMAN_SCRIPTS has no "bar", so $Δ_{bar}$ would set it as an index.
+    # The bar of the Kurze-Anderson attenuation names the barrier, as the
+    # upright bar of A_bar does in ISO 9613-2:1996, Equation (12), p. 9.
     s.text(
         80,
         448,
-        "Kurze–Anderson: Δbar = 5 + 20 log10( √(2πN) / tanh √(2πN) ) = 10.0 dB, 500 Hz",
+        "Kurze–Anderson: $Δ_{bar}$ = 5 + 20 log10( √(2π$N$) / tanh √(2π$N$) ) = 10.0 dB, 500 Hz",
         15,
         th.primary,
         anchor="start",
@@ -762,7 +793,18 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.text(x0 + 12, gy - hs - 18, "$h_s$ = 1,5 m", 15, th.muted, anchor="start")
     s.mic(x1, gy - hs, gy, 1.0)
     s.text(x1 - 12, gy - hs - 40, "Receiver", 17, th.fg, anchor="end", bold=True)
-    s.text(x1 - 12, gy - hs - 18, "$h_r$ = 1,5 m", 15, th.muted, anchor="end")
+    # The r of the receiver and the p of the projected distance d_p are
+    # upright in ISO 9613-2 and on the guide.
+    regions = ("h_r", "G_r", "d_p")
+    s.text(
+        x1 - 12,
+        gy - hs - 18,
+        "$h_r$ = 1,5 m",
+        15,
+        th.muted,
+        anchor="end",
+        upright=regions,
+    )
     s.line(x0, gy - hs, x1, gy - hs, th.muted, 1.4, dash="7,5")
 
     # Region dimensions along the ground. The two end regions are narrower
@@ -776,10 +818,10 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
         (rec_start, x1, "receiver region", "$30 h_r$ = 45 m"),
     ):
         s.text((left + right) / 2, gy + 64, name, 15, th.fg)
-        s.text((left + right) / 2, gy + 83, extent, 15, th.fg)
+        s.text((left + right) / 2, gy + 83, extent, 15, th.fg, upright=regions)
     for xv in (x0, src_end, rec_start, x1):
         s.line(xv, gy + 28, xv, gy + 92, th.muted, 0.9, dash="3,3")
-    s.dim(x0, gy + 118, x1, gy + 118, "$d_p$ = 200 m", 0, 16)
+    s.dim(x0, gy + 118, x1, gy + 118, "$d_p$ = 200 m", 0, 16, upright=regions)
 
     # Inset: the same path at 60 m, regions overlapping, no middle region.
     iy = gy + 190.0
@@ -796,6 +838,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
         "$d_p$ = 60 m: the regions overlap, so there is no middle region",
         0,
         15,
+        upright=regions,
     )
 
     # The two reading boxes, on one row under the drawing.
@@ -812,12 +855,24 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     )
     s.text(84.0, by + 54, "$G_s = 25/45$ = 0,55", 15, th.fg, anchor="start")
     s.text(
-        84.0, by + 78, "$G_m = 70/110$ = 0,64   $G_r$ = 1,00", 15, th.fg, anchor="start"
+        84.0,
+        by + 78,
+        "$G_m = 70/110$ = 0,64   $G_r$ = 1,00",
+        15,
+        th.fg,
+        anchor="start",
+        upright=regions,
     )
 
     s.rect(470.0, by, 380, 100, th.panel, th.muted, rx=8, sw=1.2)
     s.text(
-        484.0, by + 28, "$q = 1 − 30(h_s + h_r)/d_p$ = 0,55", 16, th.fg, anchor="start"
+        484.0,
+        by + 28,
+        "$q = 1 − 30(h_s + h_r)/d_p$ = 0,55",
+        16,
+        th.fg,
+        anchor="start",
+        upright=regions,
     )
     s.text(
         484.0,
@@ -826,6 +881,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
         15,
         th.secondary,
         anchor="start",
+        upright=regions,
     )
     s.text(
         484.0,
@@ -1076,14 +1132,13 @@ def _d_cnossos_road(s: SVG, th: Theme) -> None:
     # Far enough below the road for the label to clear its edge, which ran
     # along the top of the label at cy + 30.
     s.dim(rx0 + 5 * seg, cy + 44, rx0 + 6 * seg, cy + 44, "dL = 20 m", 0, 15)
-    # The per-segment level stays uncomposed for now: Directive (EU)
-    # 2015/996 Eq. (2.2.1) prints the whole subscript chain (W',eq,line,
-    # i,m) in italic while _ROMAN_SCRIPTS pins "eq" upright, so the
-    # composer can reproduce neither the source nor the house style.
+    # The per-segment level is set as the guide that carries this plate
+    # writes it, L'_{W,eq,line,i} with the eq and line upright and the W and
+    # i italic.
     s.text(
         rx0,
         cy + 70,
-        "each segment carries L'W,eq,line,i + 10 lg(dL)",
+        "each segment carries $L′_{W,eq,line,i}$ + 10 lg(dL)",
         15,
         th.fg,
         anchor="start",
@@ -1410,6 +1465,8 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
         15,
         th.secondary,
         anchor="start",
+        # The impulsive penalty beside the tonal and low-frequency ones.
+        upright=("K_i",),
     )
 
     # Stage 3: the duration-weighted mean.

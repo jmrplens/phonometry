@@ -110,8 +110,18 @@ def _d_multiple_shock(s: SVG, th: Theme) -> None:
 
     # --- Input --------------------------------------------------------------
     s.rect(x0, 48, bw, bh, th.panel, th.fg, rx=10, sw=2)
+    # ISO 2631-5 names the direction z and the daily d in its symbols, and
+    # the guide sets both upright.
+    dose = ("a_z", "A_z", "D_z", "t_d", "S_d", "m_z")
     s.text(
-        cx, 72, "Vertical seat acceleration  $a_{z}(t)$", 16, th.fg, "middle", bold=True
+        cx,
+        72,
+        "Vertical seat acceleration  $a_{z}(t)$",
+        16,
+        th.fg,
+        "middle",
+        bold=True,
+        upright=dose,
     )
     s.text(
         cx,
@@ -133,8 +143,8 @@ def _d_multiple_shock(s: SVG, th: Theme) -> None:
 
     def _step(y: float, l1: str, l2: str, color: str) -> None:
         s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
-        s.text(cx, y + 25, l1, 15, th.fg, "middle", bold=True)
-        s.text(cx, y + 45, l2, 11, th.muted, "middle")
+        s.text(cx, y + 25, l1, 15, th.fg, "middle", bold=True, upright=dose)
+        s.text(cx, y + 45, l2, 11, th.muted, "middle", upright=dose)
 
     _step(
         136,
@@ -154,16 +164,14 @@ def _d_multiple_shock(s: SVG, th: Theme) -> None:
         "$m_z$ = 0.029 (male) / 0.025 (female) MPa per m/s²",
         th.fg,
     )
-    # PARKED (controller adjudication): ISO 2631-5:2018(E) prints the
-    # descriptive subscripts of S_stat and S_age in roman (PDF page 24,
-    # folio 18: S_stat,i and S_age beside italic indices), but "stat" and
-    # "age" are not in _ROMAN_SCRIPTS and the sibling descriptors u/d of
-    # S_u/S_d are single letters the list cannot take; composing part of
-    # the pair would split one formula into two subscript styles.
+    # ISO 2631-5:2018, Formulae (C.3) and (C.4) (PDF pages 23 and 24, folios
+    # 17 and 18), print the d, u, stat and age of S_d,i, S_u,i, S_stat,i and
+    # S_age upright beside the italic year counter i; the plate writes them
+    # as the guide does, and the Spanish twin carries its own 6,75.
     _step(
         400,
-        "Stress variable  R = [Σ (Sd·N^(1/6) / (Su − Sstat))^6]^(1/6)",
-        "Su = 6.75 − Sage·(b+i) MPa, cumulated over exposure years (C.3/C.4)",
+        "Stress variable  $R = [Σ (S_d·N^{1/6} / (S_{u,i} − S_{stat}))^6]^{1/6}$",
+        "$S_{u,i}$ = 6.75 MPa − $S_{age}·(b + i)$, cumulated over exposure years (C.3/C.4)",
         th.secondary,
     )
     for y0, y1 in ((196, 224), (284, 312), (372, 400), (460, 488)):
@@ -302,23 +310,18 @@ def _d_hand_arm_vibration(s: SVG, th: Theme) -> None:
         "start",
     )
 
-    # The basicentric frame the three axes are reported in.
-    # PARKED (controller adjudication): ISO 5349-1:2001(E) prints the h
-    # subscript of the basicentric axes in roman (Figure 1 and its NOTE,
-    # PDF page 10, folio 4: italic x/y/z with roman h, like the roman
-    # hw/hv the curated list already carries), but a lone "h" cannot enter
-    # _ROMAN_SCRIPTS without setting every legitimate h index upright, and
-    # the italic default would put the same letter in two styles beside
-    # the composed a_hv/a_hwx chain of this very diagram.
+    # The basicentric frame the three axes are reported in. ISO 5349-1:2001
+    # prints italic x, y, z with a roman h (Figure 1 and its NOTE, PDF page
+    # 10, folio 4), like the roman hw/hv of the a_hv/a_hwx chain beside it.
     ox, oy = 110.0, 578.0
     s.arrow(ox, oy, ox + 74, oy, th.primary, 2.2)
-    s.text(ox + 80, oy + 5, "y_h", 15, th.primary, "start", bold=True)
+    s.text(ox + 80, oy + 5, "$y_h$", 15, th.primary, "start", bold=True)
     s.arrow(ox, oy, ox, oy - 46, th.primary, 2.2)
-    s.text(ox, oy - 54, "z_h", 15, th.primary, "middle", bold=True)
+    s.text(ox, oy - 54, "$z_h$", 15, th.primary, "middle", bold=True)
     s.arrow(ox, oy, ox - 40, oy + 28, th.primary, 2.2)
-    s.text(ox - 46, oy + 40, "x_h", 15, th.primary, "end", bold=True)
+    s.text(ox - 46, oy + 40, "$x_h$", 15, th.primary, "end", bold=True)
     s.text(236, 534, "basicentric frame (ISO 5349-1 Fig. 1):", 12, th.fg, "start")
-    s.text(236, 552, "rotated so that y_h lies along the", 12, th.fg, "start")
+    s.text(236, 552, "rotated so that $y_h$ lies along the", 12, th.fg, "start")
     s.text(236, 570, "handle axis. All three axes are", 12, th.fg, "start")
     s.text(236, 588, "measured, and every $k = 1$.", 12, th.fg, "start")
 
@@ -880,7 +883,15 @@ def _d_iso2631_5_setup(s: SVG, th: Theme) -> None:
             th.secondary,
             "middle",
         )
-    s.text(ax0, base + 118, "$a_{z}(t)$, conditioned per 5.1.3", 12, th.muted, "start")
+    s.text(
+        ax0,
+        base + 118,
+        "$a_{z}(t)$, conditioned per 5.1.3",
+        12,
+        th.muted,
+        "start",
+        upright=("a_z",),
+    )
     segments = (
         (0.0, 0.30, "segment 1"),
         (0.40, 0.66, "segment 2"),
@@ -1625,8 +1636,24 @@ def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
     s.rect(cx - 105, 328, 210, 26, th.panel, th.fg, sw=2)
     s.ground(354, cx - 125, cx + 125)
     s.text(cx, 388, "Rigid foundation", 13, th.muted)
-    s.text(cx, 470, "output blocked:  $u_2 ≈ 0$ → measure $F_{2,b}$", 14, th.fg)
-    s.text(cx, 500, "$k_{2,1} = F_{2,b} / u_1$", 17, th.primary, bold=True)
+    # The b of the blocked force is upright on the guide.
+    s.text(
+        cx,
+        470,
+        "output blocked:  $u_2 ≈ 0$ → measure $F_{2,b}$",
+        14,
+        th.fg,
+        upright=("F_b",),
+    )
+    s.text(
+        cx,
+        500,
+        "$k_{2,1} = F_{2,b} / u_1$",
+        17,
+        th.primary,
+        bold=True,
+        upright=("F_b",),
+    )
 
     # ===== Indirect output: blocking mass on soft supports ==================
     cx = 650.0
@@ -3634,7 +3661,10 @@ def _d_vibration_prediction_path(s: SVG, th: Theme) -> None:
             s.line(xb0, y, xb1, y, th.fg, 2.6)
     s.arrow(xm, top + 2 * storey + 4, xm, top + 2 * storey + 22, th.secondary, 2.0)
     s.text(xb0 - 10, top + 2 * storey + 6, "$V_D$", 15, th.secondary, "end")
-    s.text(xm, top + 3.5 * storey + 5, "$m_B$", 15, th.fg)
+    # DIN 4150-1:2001-06, Formula (3), prints the B of "Bauwerk" upright in
+    # f_B, k_B and m_B.
+    building = ("f_B", "k_B", "m_B")
+    s.text(xm, top + 3.5 * storey + 5, "$m_B$", 15, th.fg, upright=building)
     s.text(xb0 - 18, 312, "$V_F$", 15, th.secondary, "end")
 
     # Formula (4): the lowest horizontal natural frequency, a sway at the roof.
@@ -3656,7 +3686,7 @@ def _d_vibration_prediction_path(s: SVG, th: Theme) -> None:
         sw=1.8,
     )
     s.line(xm, 352, xm, base, th.accent, 1.8)
-    s.text(xb0 + 12, 348, "$k_B$", 14, th.accent, "end")
+    s.text(xb0 + 12, 348, "$k_B$", 14, th.accent, "end", upright=building)
     s.text(xm + 18, 348, "$D_0$", 14, th.accent, "start")
     s.text(xm, 396, "five storeys, the ground a spring", 12, th.muted)
     s.text(xm, 414, "under a mass moving in phase", 12, th.muted)
@@ -3712,7 +3742,7 @@ def _d_vibration_prediction_path(s: SVG, th: Theme) -> None:
         (164, "$V_D$: 10 to 25 at the floor resonance,"),
         (181, "with $0.02 < D_1 < 0.05$ in reinforced concrete"),
     ):
-        s.text(x + pw / 2, py + dy, row, 12, th.fg)
+        s.text(x + pw / 2, py + dy, row, 12, th.fg, upright=building)
 
     # The formulae the whole path is built from.
     by = 710.0
@@ -3721,7 +3751,7 @@ def _d_vibration_prediction_path(s: SVG, th: Theme) -> None:
     s.text(232, by + 60, "$v̄ = v̄_1 · (R/R_1)^{−n} · exp[−α(R − R_1)]$", 15, th.primary)
     s.text(232, by + 86, "Formulae (1) and (2), for the far field", 12, th.muted)
     s.rect(465, by, 405, 100, th.panel, th.secondary, rx=6, sw=1.8)
-    s.text(572, by + 30, "$f_B = √(k_B/m_B)/2π$", 15, th.secondary)
+    s.text(572, by + 30, "$f_B = √(k_B/m_B)/2π$", 15, th.secondary, upright=building)
     s.text(770, by + 30, "$f_1 ≈ 10/n$ Hz, $n ≥ 5$", 15, th.secondary)
     s.text(572, by + 60, "$V_F = 1/(2D_0)$", 15, th.secondary)
     s.text(770, by + 60, "$V_D = 1/(2D_1)$", 15, th.secondary)

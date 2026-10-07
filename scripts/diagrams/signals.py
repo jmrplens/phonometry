@@ -1292,7 +1292,8 @@ def _d_slm_chain(s: SVG, th: Theme) -> None:
     for by, l1, l2 in chain:
         s.rect(x0, by, bw, bh, th.panel, th.primary, rx=12, sw=2)
         s.text(cx, by + 33, l1, 18, th.fg, bold=True)
-        s.text(cx, by + 59, l2, 15, th.muted)
+        # The S of the Slow time constant, beside the F of Fast.
+        s.text(cx, by + 59, l2, 15, th.muted, upright=("τ_S",))
     s.rect(x0, 432.0, bw, bh, "none", th.accent, rx=12, sw=2.4)
     s.text(cx, 465.0, "Display", 18, th.fg, bold=True)
     s.text(cx, 491.0, "$L_{AF}(t)$, $L_{AS}(t)$ in dB re 20 µPa", 15, th.accent)
@@ -1561,10 +1562,14 @@ def _d_spectral_analysis(s: SVG, th: Theme) -> None:
     cx, bw = 450.0, 680.0
     x0 = cx - bw / 2
 
+    # The guide sets the d of the number of distinct averages upright, and
+    # the r of the random error the plate itself spells out.
+    averages = ("n_d", "ε_r")
+
     def step(y: float, l1: str, l2: str, color: str, h: float = 58.0) -> None:
         s.rect(x0, y, bw, h, th.panel, color, rx=10, sw=2)
         s.text(cx, y + 25, l1, 15, th.fg, bold=True)
-        s.text(cx, y + 45, l2, 11, th.muted)
+        s.text(cx, y + 45, l2, 11, th.muted, upright=averages)
 
     step(
         52,
@@ -1606,6 +1611,7 @@ def _d_spectral_analysis(s: SVG, th: Theme) -> None:
         "random error $ε_r = 1/√n_d$ = 4.8 %;  $2·n_d ≈ 885$ degrees of freedom",
         11,
         th.muted,
+        upright=averages,
     )
     for y0, y1 in ((110, 134), (196, 220), (282, 306), (368, 392), (456, 484)):
         s.arrow(cx, y0, cx, y1, th.fg, 1.8)
@@ -1626,6 +1632,7 @@ def _d_spectral_analysis(s: SVG, th: Theme) -> None:
         "$ε_r$); shorter → the reverse",
         11,
         th.fg,
+        upright=averages,
     )
 
 
@@ -1734,6 +1741,7 @@ def _d_miso_coherence(s: SVG, th: Theme) -> None:
         "ordered input carries $n_d − (i − 1)$; here $n_d$ = 242",
         12,
         th.fg,
+        upright=("n_d",),
     )
     s.text(
         450,
@@ -1812,6 +1820,7 @@ def _d_time_frequency(s: SVG, th: Theme) -> None:
         13,
         th.fg,
         bold=True,
+        upright=("n_d", "ε_r"),
     )
     s.text(
         450,
@@ -4341,13 +4350,22 @@ def _d_reciprocity_setup(s: SVG, th: Theme) -> None:
     )
     s.text(225, 232, "the pairs 1-2, 2-3 and 3-1 in turn", 12, th.muted)
     s.text(225, 268, "Formula (2)", 13, th.fg, bold=True)
-    s.text(225, 290, "$M_1 M_2 = Z_{e,12}/Z_{a,12}$,  $Z_{e,12} = U_2/i_1$", 14, th.fg)
+    # The acoustic transfer impedance beside the electrical one.
+    s.text(
+        225,
+        290,
+        "$M_1 M_2 = Z_{e,12}/Z_{a,12}$,  $Z_{e,12} = U_2/i_1$",
+        14,
+        th.fg,
+        upright=("Z_a",),
+    )
     s.text(
         225,
         310,
         "$Z_{a,12}$ computed: Formula (3) or (4), Annexes A and B",
         12,
         th.muted,
+        upright=("Z_a",),
     )
     s.text(225, 344, "Formula (7)", 13, th.fg, bold=True)
     s.text(

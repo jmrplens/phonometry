@@ -549,6 +549,9 @@ def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
         15,
         th.accent,
         bold=True,
+        # The normalized diffusion coefficient; the n of the receiver levels
+        # L_i to L_n on the same plate is a count and stays italic.
+        upright=("d_n",),
     )
     s.text(
         450,
@@ -995,8 +998,18 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
     s.circle(fx, fm_y - 9, 5, th.primary)
     s.arrow(fx, fs_y + 28, fx, fm_y - 14, th.accent, 2.0)
     s.text(fx, fs_y - 40, "Free-field reference", 15, th.fg, bold=True)
+    # The incident and reflected responses and the geometrical spreading
+    # factor are upright on the guide that embeds this plate.
+    paths = ("H_i", "H_r", "K_r")
     window = "$H_i$: no ground reflection in the window"
-    s.text(fx, fm_y + 34, window, s.fit_size([window], [12, 11], 266), th.muted)
+    s.text(
+        fx,
+        fm_y + 34,
+        window,
+        s.fit_size([window], [12, 11], 266, upright=paths),
+        th.muted,
+        upright=paths,
+    )
 
     # Governing relations.
     s.text(
@@ -1006,6 +1019,7 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
         15,
         th.fg,
         bold=True,
+        upright=paths,
     )
     s.text(
         450,
@@ -1014,6 +1028,7 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
         15,
         th.accent,
         bold=True,
+        upright=paths,
     )
     s.text(
         450,
@@ -1021,6 +1036,7 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
         "Adrienne time window isolates the reflected response $H_r$",
         14,
         th.muted,
+        upright=paths,
     )
 
 
@@ -1121,8 +1137,9 @@ def _d_iso11654(s: SVG, th: Theme) -> None:
         # "Desplazar la curva de referencia en pasos de 0,05 hasta el mejor
         # ajuste" is 735 px against the 522 of its English twin, and it is
         # the only line of the chart that has to drop a step.
-        size = s.fit_size([l1], (15, 14), bw - 28, bold=True)
-        s.text(cx, y + 23, l1, size, th.fg, "middle", bold=True)
+        # The p of the practical absorption coefficient of ISO 11654.
+        size = s.fit_size([l1], (15, 14), bw - 28, bold=True, upright=("α_p",))
+        s.text(cx, y + 23, l1, size, th.fg, "middle", bold=True, upright=("α_p",))
         s.text(cx, y + 42, l2, 11, th.muted, "middle")
 
     _step(
@@ -1359,7 +1376,14 @@ def _d_dynamic_stiffness_rig(s: SVG, th: Theme) -> None:
 
     # Headline relations, under the specimen half.
     s.text(
-        258, 776, "$s′_t = 4π^2 m′_t f_r^2$   (Formula 4)", 17, th.primary, bold=True
+        258,
+        776,
+        "$s′_t = 4π^2 m′_t f_r^2$   (Formula 4)",
+        17,
+        th.primary,
+        bold=True,
+        # The resonance frequency of ISO 9052-1.
+        upright=("f_r",),
     )
     s.text(258, 806, "$f_0 = (1/2π)·√(s′/m′)$   (Formula 2)", 14, th.muted)
 
@@ -1384,7 +1408,7 @@ def _d_dynamic_stiffness_rig(s: SVG, th: Theme) -> None:
         sw=2.4,
     )
     s.line(pk, base, pk, 712, th.muted, 1.2, dash="4,3")
-    s.text(pk, base + 20, "$f_r$", 15, th.secondary, bold=True)
+    s.text(pk, base + 20, "$f_r$", 15, th.secondary, bold=True, upright=("f_r",))
     s.text(
         (ax0 + ax1) / 2,
         base + 44,

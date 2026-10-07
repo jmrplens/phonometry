@@ -1778,7 +1778,7 @@ export const glossary = [
       },
       {
         id: "r-i",
-        symbol: "$R_\\mathrm{I}$",
+        symbol: "$R_I$",
         unit: "dB",
         standard: "ISO 15186-1:2000",
         clause: {
@@ -1787,13 +1787,13 @@ export const glossary = [
         },
         guide: "buildings/insulation/insulation-intensity",
         definition: {
-          en: "Intensity sound reduction index: the source-room level minus the intensity level scanned over the radiating face, so the transmitted power is measured directly instead of inferred from the receiving room. It is the method of choice where flanking is strong; add the $K_c$ adaptation to get $R_\\mathrm{I,M}$, the value the ISO 10140 pressure method would have produced.",
-          es: "Índice de reducción acústica por intensidad: el nivel del recinto emisor menos el nivel de intensidad barrido sobre la cara radiante, de modo que la potencia transmitida se mide directamente en vez de deducirse del recinto receptor. Es el método preferente cuando la transmisión por flancos es fuerte; con la adaptación $K_c$ se obtiene $R_\\mathrm{I,M}$, el valor que habría dado el método de presión de la ISO 10140.",
+          en: "Intensity sound reduction index: the source-room level minus the intensity level scanned over the radiating face, so the transmitted power is measured directly instead of inferred from the receiving room. It is the method of choice where flanking is strong; add the $K_c$ adaptation to get $R_{I,\\mathrm{M}}$, the value the ISO 10140 pressure method would have produced.",
+          es: "Índice de reducción acústica por intensidad: el nivel del recinto emisor menos el nivel de intensidad barrido sobre la cara radiante, de modo que la potencia transmitida se mide directamente en vez de deducirse del recinto receptor. Es el método preferente cuando la transmisión por flancos es fuerte; con la adaptación $K_c$ se obtiene $R_{I,\\mathrm{M}}$, el valor que habría dado el método de presión de la ISO 10140.",
         },
       },
       {
         id: "d-i-n-e",
-        symbol: "$D_\\mathrm{I,n,e}$",
+        symbol: "$D_{I,\\mathrm{n,e}}$",
         unit: "dB",
         standard: "ISO 15186-2:2003",
         clause: {
@@ -1802,8 +1802,8 @@ export const glossary = [
         },
         guide: "buildings/insulation/insulation-intensity",
         definition: {
-          en: "Intensity element-normalized level difference: the small-element counterpart of $D_\\mathrm{n,e}$, measured by scanning the element and normalised to a reference absorption area of 10 m². It is rated through the same ISO 717-1 procedure, as $D_\\mathrm{I,n,e,w}$, so a ventilator or a transit sealing system can be compared with a wall on one scale.",
-          es: "Diferencia de niveles normalizada de elemento por intensidad: la contrapartida para elementos pequeños de $D_\\mathrm{n,e}$, medida barriendo el elemento y normalizada a un área de absorción de referencia de 10 m². Se califica con el mismo procedimiento de la ISO 717-1, como $D_\\mathrm{I,n,e,w}$, de modo que un aireador o un sistema de sellado de pasos puede compararse con un muro en una única escala.",
+          en: "Intensity element-normalized level difference: the small-element counterpart of $D_\\mathrm{n,e}$, measured by scanning the element and normalised to a reference absorption area of 10 m². It is rated through the same ISO 717-1 procedure, as $D_{I,\\mathrm{n,e,w}}$, so a ventilator or a transit sealing system can be compared with a wall on one scale.",
+          es: "Diferencia de niveles normalizada de elemento por intensidad: la contrapartida para elementos pequeños de $D_\\mathrm{n,e}$, medida barriendo el elemento y normalizada a un área de absorción de referencia de 10 m². Se califica con el mismo procedimiento de la ISO 717-1, como $D_{I,\\mathrm{n,e,w}}$, de modo que un aireador o un sistema de sellado de pasos puede compararse con un muro en una única escala.",
         },
       },
     ],

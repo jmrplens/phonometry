@@ -6442,7 +6442,7 @@ def generate_people_guide_values(output_dir: str) -> None:
             [v.a_u for v in values],
             width,
             color=COLOR_PRIMARY,
-            label="$A_u$, the lower value",
+            label=r"$A_\mathrm{u}$, the lower value",
         )
         ax.bar(
             positions + width / 2,
@@ -6458,7 +6458,7 @@ def generate_people_guide_values(output_dir: str) -> None:
             marker="v",
             markersize=8,
             linestyle="none",
-            label="$A_o$, the upper value",
+            label=r"$A_\mathrm{o}$, the upper value",
         )
         ax.set_yscale("log")
         ax.set_ylim(0.03, 10.0)
@@ -6576,7 +6576,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
         linestyle="--",
         marker="s",
         markersize=5,
-        label="emission $L_{v,E}$ at the foundation",
+        label=r"emission $L_{v,\mathrm{E}}$ at the foundation",
     )
     ax.plot(
         positions,
@@ -6668,7 +6668,7 @@ def generate_building_transfer_spectra(output_dir: str) -> None:
                 linewidth=1.8,
                 marker="o",
                 markersize=4,
-                label=f"$f_e$ = {natural:g} Hz",
+                label=rf"$f_\mathrm{{e}}$ = {natural:g} Hz",
             )
         ax.set_title(title, pad=10)
         ax.set_xticks(positions[::2])
@@ -6677,7 +6677,9 @@ def generate_building_transfer_spectra(output_dir: str) -> None:
         ax.axhline(0.0, color=COLOR_MUTED, linewidth=0.9)
         ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
         ax.set_axisbelow(True)
-    axes[0].set_ylabel("Level difference ground to floor $\\Delta L_{v,DB}$ [dB]")
+    axes[0].set_ylabel(
+        "Level difference ground to floor $\\Delta L_{v,\\mathrm{DB}}$ [dB]"
+    )
     axes[0].set_ylim(-8.0, 24.0)
     axes[1].legend(loc="upper right", fontsize=9)
     axes[0].annotate(

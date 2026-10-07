@@ -17,7 +17,7 @@ in dB,
 
 .. math::
 
-   R_\mathrm{I} = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right]
+   R_I = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right]
 
 with the measurement-surface area ``Sm`` and the specimen area ``S``. The
 constant ``6`` dB is the diffuse-field relationship between the sound pressure
@@ -27,7 +27,7 @@ difference being the measurement condition (flanking is not suppressed), not
 the arithmetic.
 
 **Modified intensity sound reduction index (Clause 3.10, Formula (9)).**
-:math:`R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}` corrects ``RI`` so that it reproduces the
+:math:`R_{I,\mathrm{M}} = R_I + K_\mathrm{c}` corrects ``RI`` so that it reproduces the
 ISO 140-3 (now ISO 10140-2) pressure result, which slightly overestimates
 ``R`` because the power radiated into the receiving room is underestimated.
 The adaptation term ``Kc`` (Annex B) is
@@ -43,7 +43,7 @@ For small building elements, in dB,
 
 .. math::
 
-   D_\mathrm{I,n,e} = L_{p1} - 6 - \left( L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{A_0} \right)
+   D_{I,\mathrm{n,e}} = L_{p1} - 6 - \left( L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{A_0} \right)
    + 10 \log_{10} N
 
 with the reference absorption area :math:`A_0 = 10` m² and the number ``N``
@@ -169,10 +169,10 @@ class IntensityReductionResult:
     r"""Per-band intensity sound reduction index (ISO 15186-1:2000).
 
     :ivar r_i: Intensity sound reduction index
-        :math:`R_\mathrm{I} = L_{p1} - 6 - [L_{I\mathrm{n}} + 10 \log_{10}(S_\mathrm{m}/S)]` per band, in dB
+        :math:`R_I = L_{p1} - 6 - [L_{I\mathrm{n}} + 10 \log_{10}(S_\mathrm{m}/S)]` per band, in dB
         (Clause 3.8, Formula (7)). In
         the field (ISO 15186-2) this is the apparent index ``R'I``.
-    :ivar r_i_modified: Modified index :math:`R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}` per band, in dB
+    :ivar r_i_modified: Modified index :math:`R_{I,\mathrm{M}} = R_I + K_\mathrm{c}` per band, in dB
         (Clause 3.10, Formula (9)), or ``None`` when no adaptation term was
         supplied.
     :ivar rating: Single-number weighted rating ``RI,w`` with ``C`` / ``Ctr``
@@ -342,7 +342,7 @@ class IntensityElementNormalizedResult:
     r"""Per-band intensity element normalized level difference (ISO 15186-1).
 
     :ivar d_i_n_e: Intensity element normalized level difference
-        :math:`D_\mathrm{I,n,e} = L_{p1} - 6 - (L_{I\mathrm{n}} + 10 \log_{10}(S_\mathrm{m}/A_0)) +
+        :math:`D_{I,\mathrm{n,e}} = L_{p1} - 6 - (L_{I\mathrm{n}} + 10 \log_{10}(S_\mathrm{m}/A_0)) +
         10 \log_{10} N` per band, in dB
         (Clause 3.9, Formula (8) with the corrected sign of its
         :math:`10 \log_{10} N` term; see ``docs/ERRATA.md``).
@@ -497,7 +497,7 @@ def adaptation_term_kc(
 
     Returns, per one-third-octave midband frequency, the term ``Kc`` that
     turns the intensity sound reduction index ``RI`` into the modified index
-    :math:`R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}` (Clause 3.10). Two forms are available:
+    :math:`R_{I,\mathrm{M}} = R_I + K_\mathrm{c}` (Clause 3.10). Two forms are available:
 
     - **Well-defined receiving room (Formula (B.1)):** when both
       ``boundary_area`` (``Sb2``) and ``volume`` (``V2``) are supplied,
@@ -664,7 +664,7 @@ def intensity_sound_reduction(
 
     .. math::
 
-       R_\mathrm{I} = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right]
+       R_I = L_{p1} - 6 - \left[ L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{S} \right]
 
     from the average source-room sound pressure level ``Lp1`` and the average
     normal sound intensity level ``LIn`` over the measurement surface of area
@@ -672,7 +672,7 @@ def intensity_sound_reduction(
     same formula gives the apparent index ``R'I`` in the field (ISO 15186-2).
     When an adaptation term ``kc`` is supplied (see
     :func:`adaptation_term_kc`), the modified index
-    :math:`R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}` (Formula (9)) is also
+    :math:`R_{I,\mathrm{M}} = R_I + K_\mathrm{c}` (Formula (9)) is also
     formed. Weighted ratings ``RI,w`` (and ``RI,M,w``) are computed via
     :func:`phonometry.building.weighted_rating` (ISO 717-1) when exactly 16
     one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are
@@ -749,7 +749,7 @@ def intensity_element_normalized_difference(
 
     .. math::
 
-       D_\mathrm{I,n,e} = L_{p1} - 6 - \left( L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{A_0}
+       D_{I,\mathrm{n,e}} = L_{p1} - 6 - \left( L_{I\mathrm{n}} + 10 \log_{10}\frac{S_\mathrm{m}}{A_0}
        \right) + 10 \log_{10} N
 
     from the average source-room sound pressure level ``Lp1``, the average
@@ -1109,7 +1109,7 @@ class LowFrequencyIntensityResult:
     specimen, where part 1 subtracts 6 dB from a room average.
 
     :ivar r_i: Intensity sound reduction index
-        :math:`R_\mathrm{I} = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} + 10\lg(S_\mathrm{m}/S)]`
+        :math:`R_I = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} + 10\lg(S_\mathrm{m}/S)]`
         per band, in dB.
     :ivar surface_pressure_intensity_indicator: Surface-pressure intensity indicator
         :math:`F_{pI} = L_p - L_{I\mathrm{n}}` per band, in dB (Formula (5)),
@@ -1218,7 +1218,7 @@ def low_frequency_intensity_reduction(
 
     .. math::
 
-       R_\mathrm{I} = L_{p\mathrm{S}} - 9 -
+       R_I = L_{p\mathrm{S}} - 9 -
        \left[ L_{I\mathrm{n}} + 10 \lg \frac{S_\mathrm{m}}{S} \right] \mathrm{dB}
 
     The 9 dB is the whole difference from :func:`intensity_sound_reduction`,

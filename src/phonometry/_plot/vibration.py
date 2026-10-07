@@ -160,16 +160,17 @@ _RUNNING_MAX_LABEL = r"$\tilde v_{{F\mathrm{{max}}}}$ = {value} mm/s"
 _BAND_LEVEL_LABEL = "Velocity level [dB re 5·10⁻⁸ m/s]"
 _INTERVAL_LEVEL_LABEL = r"interval level $L_{vF2}$"
 _MAX_LEVEL_LABEL = r"maximum level $L_{vF\mathrm{max}}$"
-_EMISSION_LABEL = r"emission $L_{v,E}$"
+_EMISSION_LABEL = r"emission $L_{v,\mathrm{E}}$"
 _FLOOR_LABEL = r"floor $L_v$"
 _WEIGHTED_LABEL = r"KB-weighted $L_{v,KB}$"
 #: Where the brackets of T_1, T_2 and T_3 sit, as fractions of the axes height.
 _BRACKET_ROWS = (0.93, 0.855, 0.78)
 #: The DIN 4150-2 verdict figure: the two assessment quantities and the three
-#: guide values they are read against.
+#: guide values they are read against. DIN 4150-2:1999-06, 6.2, prints the u
+#: of "unterer" and the o of "oberer" upright, and the r of A_r italic.
 _KB_FMAX_LABEL = r"$KB_{F\mathrm{max}}$"
 _KB_FTR_LABEL = r"$KB_{FTr}$"
-_GUIDE_LABELS = {"a_u": "$A_u$", "a_o": "$A_o$", "a_r": "$A_r$"}
+_GUIDE_LABELS = {"a_u": r"$A_\mathrm{u}$", "a_o": r"$A_\mathrm{o}$", "a_r": "$A_r$"}
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
@@ -422,7 +423,7 @@ _STRINGS: dict[str, str] = {
     "road existing": "carretera existente",
     "induced seismic": "sismicidad inducida",
     # Railway prediction from third-octave spectra (E DIN 45672-3 Clauses 5 and 7).
-    _EMISSION_LABEL: r"emisión $L_{v,E}$",
+    _EMISSION_LABEL: r"emisión $L_{v,\mathrm{E}}$",
     _FLOOR_LABEL: r"forjado $L_v$",
     _WEIGHTED_LABEL: r"ponderado KB $L_{v,KB}$",
     "Predicted spectrum on the floor (E DIN 45672-3): $KB_{{FTm}}$ = {kb}": "Espectro previsto en el forjado (E DIN 45672-3): $KB_{{FTm}}$ = {kb}",

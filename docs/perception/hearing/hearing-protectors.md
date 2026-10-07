@@ -129,7 +129,7 @@ band from the A-weighted spectrum and sum what is left (Formula (2)).
 
 **The HML method (Clause 7)** collapses the protector to three numbers, the
 predicted noise level reduction it gives for reference noises whose
-$(L_{p,C} - L_{p,A})$ is $-2$, $+2$ and $+10$ dB, fitted across the eight
+$(L_{p,\mathrm{C}} - L_{p,\mathrm{A}})$ is $-2$, $+2$ and $+10$ dB, fitted across the eight
 reference spectra of Table 2. Applying them needs only the C- and A-weighted
 levels of the real noise, through two straight segments that meet at $+2$ dB.
 

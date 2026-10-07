@@ -566,7 +566,7 @@ def generate_intensity_insulation(output_dir: str) -> None:
         marker="o",
         markersize=6,
         zorder=5,
-        label=r"$R_\mathrm{I}$ (intensity)",
+        label=r"$R_I$ (intensity)",
     )
     ax.plot(
         x,
@@ -577,7 +577,7 @@ def generate_intensity_insulation(output_dir: str) -> None:
         marker="s",
         markersize=6,
         zorder=5,
-        label=r"$R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$",
+        label=r"$R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$",
     )
 
     ax.set_xticks(x)
@@ -588,7 +588,7 @@ def generate_intensity_insulation(output_dir: str) -> None:
     ax.set_ylabel("Sound reduction index [dB]")
     ax.set_title(
         r"ISO 15186-1 Intensity Sound Reduction Index "
-        r"($R_\mathrm{I}$ and $R_\mathrm{I,M}$)",
+        r"($R_I$ and $R_{I,\mathrm{M}}$)",
         pad=12,
     )
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
@@ -598,8 +598,8 @@ def generate_intensity_insulation(output_dir: str) -> None:
     # Data-only info box (language-neutral); the Kc lift is explained by the
     # shaded "Kc adaptation" legend entry, which the ES translator handles.
     info = [
-        rf"$R_\mathrm{{I,w}}$ = {result.rating.rating} dB",
-        rf"$R_\mathrm{{I,M,w}}$ = {result.rating_modified.rating} dB",
+        rf"$R_{{I,\mathrm{{w}}}}$ = {result.rating.rating} dB",
+        rf"$R_{{I,\mathrm{{M,w}}}}$ = {result.rating_modified.rating} dB",
     ]
     ax.text(
         0.985,
@@ -653,7 +653,7 @@ def generate_low_frequency_intensity(output_dir: str) -> None:
         width=0.68,
         color=COLOR_PRIMARY,
         zorder=2,
-        label=r"$R_\mathrm{I}$ (ISO 15186-3)",
+        label=r"$R_I$ (ISO 15186-3)",
     )
     if not result.qualified.all():
         ax_ri.bar(
@@ -2111,7 +2111,7 @@ def generate_intensity_element_insulation(output_dir: str) -> None:
 
     info = [
         (
-            rf"$D_\mathrm{{I,n,e,w}}$($C$;$C_\mathrm{{tr}}$) = {res.rating.rating}"
+            rf"$D_{{I,\mathrm{{n,e,w}}}}$($C$;$C_\mathrm{{tr}}$) = {res.rating.rating}"
             f"({_fmt_minus(res.rating.c)};{_fmt_minus(res.rating.ctr)}) dB"
         ),
         (

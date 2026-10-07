@@ -334,7 +334,8 @@ def _methods_relation(s: SVG, th: Theme, cx: float, top: float, m: _Method) -> N
     """Headline relation in its dashed box, then the limit that binds it."""
     s.rect(cx - 137, top, 274, 36, "none", m.color, rx=8, dash="5,4")
     s.text(cx, top + 23, m.relation, 10, th.fg, bold=True)
-    s.text(cx, top + 54, m.limit, 11, th.muted)
+    # The d of the dynamic capability index of ISO 9614, upright on the guide.
+    s.text(cx, top + 54, m.limit, 11, th.muted, upright=("L_d",))
 
 
 def _methods_attributes(s: SVG, th: Theme, cx: float, top: float, m: _Method) -> None:
@@ -642,8 +643,17 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
     # Normal-intensity arrows exiting the left column of segments.
     for yy in ys:
         s.arrow(fl, yy, fl - 34, yy + 8, th.secondary, 2.0)
+    # The n of the normal intensity and the S of the field indicator are
+    # upright on the guide, as ISO 9614 prints them.
+    normal = ("I_n", "F_S")
     s.text(
-        fl - 40, ys[1] + 30, "$I_n$ (normal intensity)", 13, th.secondary, anchor="end"
+        fl - 40,
+        ys[1] + 30,
+        "$I_n$ (normal intensity)",
+        13,
+        th.secondary,
+        anchor="end",
+        upright=normal,
     )
 
     # Governing relations.
@@ -658,7 +668,7 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
             False,
         ),
     ):
-        s.text(450, y, txt, 16 if bold else 15, col, bold=bold)
+        s.text(450, y, txt, 16 if bold else 15, col, bold=bold, upright=normal)
 
 
 # ---------------------------------------------------------------------------
@@ -1285,6 +1295,7 @@ def _d_sound_power_in_situ(s: SVG, th: Theme) -> None:
         "at least 7 dB where the microphones stand",
         13,
         th.muted,
+        sloped=("ΔL_f",),
     )
     s.text(836, 622, "Annex A", 12, th.muted, anchor="end")
     s.text(
@@ -1310,6 +1321,7 @@ def _d_sound_power_in_situ(s: SVG, th: Theme) -> None:
         "directivity range within ±7 dB; otherwise grade 3",
         12,
         th.muted,
+        sloped=("ΔL_f",),
     )
 
 
@@ -1537,7 +1549,16 @@ def _d_radiation_factor(s: SVG, th: Theme) -> None:
         (212, "$⟨v_j^2⟩$ : surface-averaged", th.muted, False),
         (238, "normal velocity, same bands", th.muted, False),
     ):
-        s.text(lx, y, txt, 14 if bold else 13, col, anchor="start", bold=bold)
+        s.text(
+            lx,
+            y,
+            txt,
+            14 if bold else 13,
+            col,
+            anchor="start",
+            bold=bold,
+            upright=("Z_n",),
+        )
     # 272 px wide: at 260 the longest Spanish line ran into the right edge.
     s.rect(lx - 10, 268, 272, 118, th.panel, th.secondary, rx=10, sw=2.0)
     for k, txt in enumerate(
@@ -1654,7 +1675,9 @@ def _d_residual_intensity_check(s: SVG, th: Theme) -> None:
         s.circle(cx - 14, yy, 5.5, th.fg)
         s.circle(cx + 14, yy, 5.5, th.fg)
         s.arrow(cx, yy - 20, cx + sgn * 38, yy - 20, col, 2.0)
-        s.text(cx + 50, yy + 5, lab, 13, col, bold=True, anchor="start")
+        s.text(
+            cx + 50, yy + 5, lab, 13, col, bold=True, anchor="start", upright=("I_n",)
+        )
     _rot_arrow(s, cx, cy, 46.0, 250.0, 470.0, th.muted, 1.8)
     s.text(cx - 52, cy + 5, "180°", 13, th.muted, anchor="end")
     s.text(cx, cy + 124, "acoustic centre held in place", 12, th.muted)
@@ -2556,6 +2579,7 @@ def _d_noise_control(s: SVG, th: Theme) -> None:
         13,
         th.fg,
         anchor="start",
+        upright=("R_i",),
     )
     s.text(
         80,
@@ -2821,6 +2845,7 @@ def _d_silencer_iso7235(s: SVG, th: Theme) -> None:
         15,
         th.fg,
         anchor="start",
+        upright=("D_i",),
     )
     left = (
         "modal filter: ≥ 3 dB on the fundamental at the low-frequency end,",
@@ -3060,7 +3085,17 @@ def _d_machine_enclosure(s: SVG, th: Theme) -> None:
         sw=1.4,
         dash="2,4",
     )
-    s.text(455, 240, "$S_i$ = 30 m², $ᾱ_i = 0.30$  →  $R_i$ = 12.9 m²", 13, th.fg)
+    # The i of the interior and the a of the apertures are upright on the
+    # guide that embeds this plate.
+    interior = ("S_i", "ᾱ_i", "R_i", "S_a")
+    s.text(
+        455,
+        240,
+        "$S_i$ = 30 m², $ᾱ_i = 0.30$  →  $R_i$ = 12.9 m²",
+        13,
+        th.fg,
+        upright=interior,
+    )
     s.text(
         455,
         262,
@@ -3113,6 +3148,7 @@ def _d_machine_enclosure(s: SVG, th: Theme) -> None:
         15,
         th.fg,
         anchor="start",
+        upright=interior,
     )
     s.text(
         40,
@@ -3130,6 +3166,7 @@ def _d_machine_enclosure(s: SVG, th: Theme) -> None:
         13,
         th.secondary,
         anchor="start",
+        upright=interior,
     )
     s.text(
         40,
@@ -3535,6 +3572,7 @@ def _d_loudspeaker_polar(s: SVG, th: Theme) -> None:
         "10 lg(V/V_0)$ + 25 dB",
         14,
         th.fg,
+        upright=("D_i",),
     )
     s.text(
         450,
@@ -3629,7 +3667,15 @@ def _d_microphone_references(s: SVG, th: Theme) -> None:
     s.text(x2 + w / 2, yc, "a coupler or a calibrator:", 12, th.muted)
     s.text(x2 + w / 2, yc + 18, "the pressure the capsule", 12, th.muted)
     s.text(x2 + w / 2, yc + 36, "itself replaces", 12, th.muted)
-    s.text(x2 + w / 2, yc + 64, "$M_p$ : pressure at", 14, th.secondary, bold=True)
+    s.text(
+        x2 + w / 2,
+        yc + 64,
+        "$M_p$ : pressure at",
+        14,
+        th.secondary,
+        bold=True,
+        upright=("M_p",),
+    )
     s.text(x2 + w / 2, yc + 83, "the acoustic entry", 13, th.muted)
 
     # --- the bench the first two are realised on ----------------------------
@@ -3975,9 +4021,17 @@ def _d_silencer_in_situ(s: SVG, th: Theme) -> None:
         duct_y + duct_h + 78,
         "$d_d$",
         size=14,
+        upright=("d_d",),
     )
     s.text(196, duct_y + duct_h + 104, "$d_u = 1,5 √(4S_u/π)$", 13, th.muted)
-    s.text(523, duct_y + duct_h + 104, "$d_d = 12√S_d − 10√S_f$", 13, th.muted)
+    s.text(
+        523,
+        duct_y + duct_h + 104,
+        "$d_d = 12√S_d − 10√S_f$",
+        13,
+        th.muted,
+        upright=("d_d", "S_d"),
+    )
 
     s.arrow(x_fan + w_fan, axis, x_sil - 8, axis, th.fg, 2.0)
     s.arrow(x_sil + w_sil + 8, axis, x_room - 8, axis, th.fg, 2.0)
@@ -5390,7 +5444,7 @@ def _d_plant_contour(s: SVG, th: Theme) -> None:
     _hatch_rect(s, 360.0, 262.0, 430.0, 380.0, 22.0, th.secondary)
     s.path(f"M {pts} Z", stroke=th.secondary, sw=2.4)
     s.rect(186, 270, 168, 46, th.bg, th.secondary, rx=4, sw=1.0)
-    s.text(270, 290, "plant area $S_p$", 14, th.secondary, bold=True)
+    s.text(270, 290, "plant area $S_p$", 14, th.secondary, bold=True, upright=("S_p",))
     s.text(270, 308, "every source inside it", 11, th.muted)
     s.rect(cx0, cy0, cx1 - cx0, cy1 - cy0, "none", th.primary, sw=2.4)
 
@@ -5458,8 +5512,16 @@ def _d_plant_contour(s: SVG, th: Theme) -> None:
         "average distance $d̄ = (1/N) Σ d_i$ (9.1.2.2): above $0.05√S_p$",
         12,
         th.fg,
+        upright=("S_p",),
     )
-    s.text(285, 556, "and 5 m, at most $0.5√S_p$ and 35 m (9.1.1 a)", 12, th.fg)
+    s.text(
+        285,
+        556,
+        "and 5 m, at most $0.5√S_p$ and 35 m (9.1.1 a)",
+        12,
+        th.fg,
+        upright=("S_p",),
+    )
 
     # ----- Section ------------------------------------------------------------
     s.text(735, 66, "In section", 15, th.fg, bold=True)
@@ -5905,6 +5967,7 @@ def _d_high_frequency_room(s: SVG, th: Theme) -> None:
         "±1.0 dB from 11.2 kHz to 22.4 kHz (5.3)",
         12,
         th.muted,
+        upright=("h_r",),
     )
     s.text(
         450,

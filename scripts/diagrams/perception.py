@@ -185,26 +185,25 @@ def _d_hearing_threshold(s: SVG, th: Theme) -> None:
         s.text(cx, y + 47, l2, 12, th.muted, "middle")
 
     # --- ISO 7029 chain ------------------------------------------------------
-    # The dHmd/dHQ formulas and the su/sl spreads stay out of $...$ markup:
-    # ISO 7029:2017 (4.2, Formulae (4)/(5)) prints the md, u and l
-    # subscripts upright, and the curated roman list cannot carry them (md
-    # is missing; a bare u or l would set every such index upright).
+    # ISO 7029:2017 prints the md of ΔH_md,Y and the u and l of s_u and s_l
+    # upright (4.2 and 4.3, Formulae (1) to (3)), and the fractile Q of
+    # ΔH_Q italic: it is the population fraction the input names.
     _step(
         152,
         "Median deviation from age 18   (ISO 7029, 4.2)",
-        "dHmd = a · (Y − 18) ^ b   (Table 1, by sex)",
+        "$ΔH_{md} = a·(Y − 18)^b$   (Table 1, by sex)",
         th.primary,
     )
     _step(
         244,
-        "Spread su / sl   (ISO 7029, 4.3)",
+        "Spread $s_u$ / $s_l$   (ISO 7029, 4.3)",
         "degree-5 polynomials in $(Y − 18)$   (Tables 2–5)",
         th.fg,
     )
     _step(
         336,
         "Fractile threshold   (ISO 7029, 4.4)",
-        "dHQ = dHmd + z(Q) * s   (su if Q >= 0.5, else sl)",
+        "$ΔH_Q = ΔH_{md} + z(Q)·s$   ($s_u$ if $Q ≥ 0.5$, else $s_l$)",
         th.fg,
     )
     s.arrow(cx, 212, cx, 244, th.fg, 1.8)
@@ -261,11 +260,12 @@ def _d_nihl(s: SVG, th: Theme) -> None:
             s.text(cxx, y + 48, l2, 11, th.muted, "middle")
 
     # --- Inputs -------------------------------------------------------------
-    # L_EX,8h stays plain: ISO 1999:2013 prints the whole EX,8h subscript
-    # upright, and the composer has no upright run for the "8h" unit inside
-    # a script, so $L_{EX,8h}$ would set the h as an italic index.
+    # ISO 1999:2013 prints the whole EX,8h subscript of L_EX,8h upright
+    # (6.3.2.2, PDF page 15, folio 7).
     _step(lxc, 56, "Age $Y$,  sex,  fractile $Q$", "database A = ISO 7029", th.fg)
-    _step(rxc, 56, "Exposure L_EX,8h,  t years", "normalized to 8 h / 5 days", th.fg)
+    _step(
+        rxc, 56, "Exposure $L_{EX,8h}$,  $t$ years", "normalized to 8 h / 5 days", th.fg
+    )
 
     # --- Left lane: age component H (HTLA) ----------------------------------
     s.arrow(lxc, 118, lxc, 150, th.fg, 1.8)
@@ -281,14 +281,13 @@ def _d_nihl(s: SVG, th: Theme) -> None:
         th.secondary,
     )
     s.arrow(rxc, 212, rxc, 244, th.fg, 1.8)
-    # The du/dl fractile arms stay plain: ISO 1999:2013, Formulae (4) and
-    # (5), prints d with an upright u/l subscript, which the roman list
-    # cannot carry letter by letter.
+    # ISO 1999:2013, 6.3.2.2 (PDF page 15, folio 7), prints the fractile
+    # arms d_u and d_l with an upright u and l.
     _step(
         rxc,
         244,
         "Fractile NIPTS  $N$  (6.3.2)",
-        "N = N50 + z·(du if z ≥ 0 else dl)",
+        "$N = N_{50} + z·d$   ($d_u$ if $z ≥ 0$, else $d_l$)",
         th.fg,
     )
 
@@ -356,15 +355,13 @@ def _d_zwicker(s: SVG, th: Theme) -> None:
         "the 11 lowest bands grouped into 3 critical bands, 25-250 Hz",
         th.primary,
     )
-    # The corrections line stays plain: ISO 532-1:2017 prints ΔL_DF and
-    # L_TQ (Tables A.5/A.6) with upright DF/TQ subscripts, and the roman
-    # list carries DF but not TQ, so composing the pair would set one of
-    # them italic; composing only the a₀ beside them would split one
-    # enumeration into two styles as well.
+    # ISO 532-1:2017, A.2, prints the a_0 of Table A.4 with its digit, and
+    # ΔL_DF and L_TQ of Tables A.5 and A.6 with an upright DF and TQ.
     _step(
         218,
         "Core loudness of the 20 critical bands  (Tables A.4-A.7)",
-        "a₀ transmission (A.4), diffuse-field DDF (A.5), threshold in quiet LTQ (A.6)",
+        "$a_0$ transmission (A.4), diffuse-field $ΔL_{DF}$ (A.5), "
+        "threshold in quiet $L_{TQ}$ (A.6)",
         th.fg,
     )
     _step(
@@ -394,6 +391,7 @@ def _d_zwicker(s: SVG, th: Theme) -> None:
         12,
         th.muted,
         "middle",
+        upright=("L_N",),
     )
 
 
@@ -409,13 +407,11 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     since ISO 532-1 itself prescribes no distance.
     """
     # --- Panel A: free field ------------------------------------------------
-    # NF, ND and the NL/NR pair stay plain in this diagram: ISO 532-1:2017
-    # (3.19 Note 1, Annex D) prints them as N with upright F/D/L/R
-    # descriptor subscripts, which the composer's roman list cannot carry
-    # letter by letter.
+    # ISO 532-1:2017 prints N_F and N_D (3.19 Note 1) and the N_L and N_R of
+    # the two ears (Annex D) with an upright F, D, L and R.
     ax0, pw = 26.0, 418.0
     s.rect(ax0, 48, pw, 330, th.panel, th.muted, rx=12, sw=1.6)
-    s.text(ax0 + pw / 2, 76, "A: Free field  (NF)", 17, th.fg, bold=True)
+    s.text(ax0 + pw / 2, 76, "A: Free field  ($N_F$)", 17, th.fg, bold=True)
     s.text(ax0 + pw / 2, 98, "hemi-anechoic room, one frontal source", 13, th.muted)
 
     gy = 336.0
@@ -454,14 +450,12 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     # Far enough in from the panel's edge for its label, which ran into it.
     s.dim(mx + 110, gy, mx + 110, cap, "1.50 m", offset=0, size=15, label_side="right")
     s.line(mx + 6, cap, mx + 110, cap, th.muted, 0.9, dash="3,3")
-    s.text(
-        ax0 + pw / 2, 366, 'field="free"  →  quote N as NF', 14, th.primary, mono=True
-    )
+    s.text(ax0 + pw / 2, 366, 'field="free"  →  quote $N$ as $N_F$', 14, th.primary)
 
     # --- Panel B: diffuse field --------------------------------------------
     bx0 = 456.0
     s.rect(bx0, 48, pw, 330, th.panel, th.muted, rx=12, sw=1.6)
-    s.text(bx0 + pw / 2, 76, "B: Diffuse field  (ND)", 17, th.fg, bold=True)
+    s.text(bx0 + pw / 2, 76, "B: Diffuse field  ($N_D$)", 17, th.fg, bold=True)
     s.text(bx0 + pw / 2, 98, "reverberant or in-situ room", 13, th.muted)
 
     rx0, ry0, rw, rh = bx0 + 26, 118.0, pw - 52, 196.0
@@ -491,10 +485,9 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     s.text(
         bx0 + pw / 2,
         366,
-        'field="diffuse"  →  quote N as ND',
+        'field="diffuse"  →  quote $N$ as $N_D$',
         14,
         th.primary,
-        mono=True,
     )
 
     # --- Panel C: head-and-torso simulator (Annex D) ------------------------
@@ -532,7 +525,7 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
         s.text(632, by + 24, ear, 13, th.fg)
         s.arrow(494, hy - 4, 548, by + 18, th.fg, 1.6)
         s.arrow(716, by + 18, 758, hy - 4, th.fg, 1.6)
-    s.text(812, hy - 10, "NL, NR", 15, th.fg, bold=True)
+    s.text(812, hy - 10, "$N_L$, $N_R$", 15, th.fg, bold=True)
     s.text(812, hy + 12, "both reported", 12, th.muted)
 
     s.text(
@@ -546,7 +539,7 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     s.text(
         450,
         610,
-        "each channel is analysed separately: report NL and NR, "
+        "each channel is analysed separately: report $N_L$ and $N_R$, "
         "and quote the maximum or the mean as the single value",
         12,
         th.muted,
@@ -947,13 +940,12 @@ def _d_dosimeter(s: SVG, th: Theme) -> None:
     s.rect(x0 + 8, y3 + 30, bw - 16, 7, th.panel, th.primary, rx=3, sw=1.2)
     s.rect(x0 + 16, y3 + 43, bw - 32, 7, th.panel, th.primary, rx=3, sw=1.2)
 
-    # All three land in the same deliverable. LEX,8h stays plain: same
-    # upright EX,8h subscript as on the ISO 1999 plate, not composable
-    # while the roman list has no run for the "8h" unit inside a script.
+    # All three land in the same deliverable, L_EX,8h with the upright
+    # EX,8h of ISO 9612 and ISO 1999.
     s.text(
         620,
         520,
-        "by work pattern (Table B.1)  →  LEX,8h + Annex C uncertainty",
+        "by work pattern (Table B.1)  →  $L_{EX,8h}$ + Annex C uncertainty",
         15,
         th.fg,
     )
@@ -989,11 +981,15 @@ def _d_sound_quality(s: SVG, th: Theme) -> None:
     s.text(
         615, 172, "Sottek Hearing Model front end (ECMA-418-2)", 13, th.fg, bold=True
     )
-    # The Bark_HMS, tu_HMS and vacil_HMS units keep their plain spelling in
-    # this diagram: ECMA-418-2 prints the HMS subscript upright, and the
-    # curated roman list does not carry HMS yet.
+    # ECMA-418-2:2025 prints the HMS of its units upright, as a subscript
+    # of an upright unit name (sone_HMS/Bark_HMS, 5.1.4, PDF page 22,
+    # folio 12).
     s.text(
-        615, 192, "outer/middle-ear filter + 53 auditory bands (Bark_HMS)", 10, th.muted
+        615,
+        192,
+        "outer/middle-ear filter + 53 auditory bands ($Bark_{HMS}$)",
+        10,
+        th.muted,
     )
     s.arrow(350, 108, 210, 144, th.fg, 1.8)
     s.arrow(550, 108, 605, 144, th.fg, 1.8)
@@ -1016,7 +1012,7 @@ def _d_sound_quality(s: SVG, th: Theme) -> None:
             "band autocorrelation finds",
             "periodic components",
             ("1 kHz tone at 40 dB",),
-            "→ $T$ = 1.000 tu_HMS (999 Hz)",
+            "→ $T$ = 1.000 $tu_{HMS}$ (999 Hz)",
         ),
         (
             482.0,
@@ -1034,7 +1030,7 @@ def _d_sound_quality(s: SVG, th: Theme) -> None:
             "slow envelope modulation,",
             "band-pass peaking near 4 Hz",
             ("1 kHz, 100 % AM at 4 Hz, 60 dB",),
-            "→ $F$ = 0.9957 vacil_HMS",
+            "→ $F$ = 0.9957 $vacil_{HMS}$",
         ),
     )
     for x0, name, std, m1, m2, refs, val in metrics:
@@ -1087,11 +1083,14 @@ def _d_tone_audibility(s: SVG, th: Theme) -> None:
     """
     cx, bw = 450.0, 620.0
     x0 = cx - bw / 2
+    # The S of the masking noise and the v of the masking index are upright
+    # on the guide that embeds this plate.
+    masking = ("L_S", "a_v")
 
     def step(y: float, l1: str, l2: str, color: str) -> None:
         s.rect(x0, y, bw, 58, th.panel, color, rx=10, sw=2)
         s.text(cx, y + 25, l1, 14, th.fg, bold=True)
-        s.text(cx, y + 45, l2, 10, th.muted)
+        s.text(cx, y + 45, l2, 10, th.muted, upright=masking)
 
     step(
         52,
@@ -1120,7 +1119,15 @@ def _d_tone_audibility(s: SVG, th: Theme) -> None:
         th.primary,
     )
     s.rect(x0, 396, bw, 60, "none", th.accent, rx=10, sw=2.4)
-    s.text(cx, 421, "Audibility $ΔL = L_T − L_G − a_v$ = 5.01 dB", 15, th.fg, bold=True)
+    s.text(
+        cx,
+        421,
+        "Audibility $ΔL = L_T − L_G − a_v$ = 5.01 dB",
+        15,
+        th.fg,
+        bold=True,
+        upright=masking,
+    )
     s.text(
         cx,
         443,
@@ -1896,8 +1903,10 @@ def _d_hearing_protector_chain(s: SVG, th: Theme) -> None:
     rounded to a tenth; recomputing them from the grid gives three of the
     eight a tenth lower, so they are quoted rather than derived. The mean and
     the standard deviation of Formula (1) stay in words: their f is the band,
-    and _ROMAN_SCRIPTS pins a lone f upright. The A of L_p,A sets italic,
-    which leaves the weighting unexpanded rather than claiming a wrong slope.
+    and _ROMAN_SCRIPTS pins a lone f upright. The A and the C of the
+    weighted levels are upright, as ISO 4869-2:2018, Formulae (23) and (24),
+    prints L_p,A, L_p,C and L'_p,Ax, and the x of the protection level stays
+    italic beside them.
     """
     attenuation = (
         (4, 8, 13, 18, 20, 30, 35, 30),
@@ -2101,8 +2110,17 @@ def _d_hearing_protector_chain(s: SVG, th: Theme) -> None:
     s.text(cx - 60, top - 6, "103 dB", 11, th.fg)
     s.text(cx - 48, floor - 3, "C", 12, th.muted, "start")
     # Formula (24): the same subtraction from an A-weighted measurement.
-    s.text(cx - 18, 560, "or $L_{p,A}$ and a known", 11, th.muted, "start")
-    s.text(cx - 18, 576, "$L_{p,C} − L_{p,A}$", 11, th.muted, "start")
+    weighted = ("L_A", "L′_A")
+    s.text(
+        cx - 18,
+        560,
+        "or $L_{p,A}$ and a known",
+        11,
+        th.muted,
+        "start",
+        upright=weighted,
+    )
+    s.text(cx - 18, 576, "$L_{p,C} − L_{p,A}$", 11, th.muted, "start", upright=weighted)
 
     # ---- the effective A-weighted level -------------------------------------
     cx = cols[0][0]
@@ -2110,7 +2128,7 @@ def _d_hearing_protector_chain(s: SVG, th: Theme) -> None:
     size = s.fit_size(list(lines), (12, 11), inner)
     s.text(cx, 650, lines[0], size, th.fg)
     s.text(cx, 667, lines[1], size, th.fg)
-    s.text(cx, 704, "$L′_{p,A84}$ = 81 dB", 18, th.primary, bold=True)
+    s.text(cx, 704, "$L′_{p,A84}$ = 81 dB", 18, th.primary, bold=True, upright=weighted)
 
     for cx, formula, note, colour in (
         (
@@ -2126,15 +2144,17 @@ def _d_hearing_protector_chain(s: SVG, th: Theme) -> None:
             th.accent,
         ),
     ):
-        s.text(cx, 652, formula, 14, th.fg)
+        s.text(cx, 652, formula, 14, th.fg, upright=weighted)
         s.text(cx, 670, note, s.fit_size([note], (11, 10), inner), th.muted)
-        s.text(cx, 704, "$L′_{p,A84}$ = 82 dB", 18, colour, bold=True)
+        s.text(cx, 704, "$L′_{p,A84}$ = 82 dB", 18, colour, bold=True, upright=weighted)
 
     # ---- foot: the one reduction, three places ------------------------------
     s.rect(40, 740, 820, 104, th.panel, th.fg, rx=6, sw=1.6)
     s.text(
         450, 770, "$APV_{fx}$ = mean attenuation − $α$ · standard deviation", 17, th.fg
     )
+    # ISO 4869-2:2018, Formulae (3) to (5) and (19), prints the m of the mean
+    # and the s of the standard deviation italic, beside the italic x.
     s.text(
         450,
         798,
@@ -2142,6 +2162,7 @@ def _d_hearing_protector_chain(s: SVG, th: Theme) -> None:
         "$SNR_x = SNR_m − α SNR_s$",
         15,
         th.fg,
+        sloped=("H_m", "H_s", "M_m", "M_s", "L_m", "L_s", "SNR_m", "SNR_s"),
     )
     s.text(
         450,

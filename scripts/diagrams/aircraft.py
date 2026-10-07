@@ -342,7 +342,9 @@ def _segment_panel(
         s.circle(xp, y_path, 5.0, th.accent)
         s.text(xp, y_path - 12.0, lab, 13, th.fg, bold=True)
     s.circle(x_sp, y_path, 4.0, th.bg, th.fg, 1.6)
-    s.text(x_sp, y_path - 12.0, "$S_p$", 13, th.muted)
+    # The foot of the perpendicular, whose p the guide expands with the
+    # perpendicular distance d_p beside it.
+    s.text(x_sp, y_path - 12.0, "$S_p$", 13, th.muted, upright=("S_p",))
     s.circle(ox, oy, 6.0, th.secondary)
     s.text(ox + 14.0, oy + 6.0, "$O$", 14, th.fg, bold=True, anchor="start")
     return ox, oy
@@ -377,7 +379,18 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
     s.line(ox, ya, ox, oy, th.primary, 2.0)  # dp
     # Low, where the d2 line has drawn in towards O: at mid-height it ran
     # through the words.
-    s.text(ox + 26.0, oy - 30.0, "$d_p$ = 526 m", 13, th.primary, anchor="start")
+    # The guide sets the p of the perpendicular distance and the s of the
+    # shortest one upright (section 4.4.1), so the plate does.
+    perpendicular = ("d_p",)
+    s.text(
+        ox + 26.0,
+        oy - 30.0,
+        "$d_p$ = 526 m",
+        13,
+        th.primary,
+        anchor="start",
+        upright=perpendicular,
+    )
     s.text(150.0, (ya + oy) / 2 + 26.0, "$d_1$ = 568 m", 12, th.muted, anchor="end")
     s.text(300.0, (ya + oy) / 2 + 26.0, "$d_2$ = 582 m", 12, th.muted, anchor="start")
     s.dim(118.0, ya - 32.0, ox, ya - 32.0, "$q$ = 214 m", offset=0, size=12)
@@ -397,6 +410,7 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
         12,
         th.muted,
         anchor="start",
+        upright=perpendicular,
     )
     s.text(
         60.0,
@@ -405,6 +419,7 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
         12,
         th.muted,
         anchor="start",
+        upright=perpendicular,
     )
 
     # --- (b) observer behind the segment (Fig. 4-2a) ------------------------
@@ -430,7 +445,13 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
     )
     s.line(obx, ya, obx, oby, th.primary, 1.4, dash="4,4")  # dp
     s.text(
-        obx - 10.0, (ya + oby) / 2 - 22.0, "$d_p$ = 520 m", 12, th.primary, anchor="end"
+        obx - 10.0,
+        (ya + oby) / 2 - 22.0,
+        "$d_p$ = 520 m",
+        12,
+        th.primary,
+        anchor="end",
+        upright=perpendicular,
     )
     s.dim(obx, ya - 32.0, x_s1b, ya - 32.0, "$q$ = −300 m", offset=0, size=12)
     s.text(
@@ -448,6 +469,7 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
         12,
         th.muted,
         anchor="start",
+        upright=perpendicular,
     )
 
     # --- (c) the plane normal to the flight path (Fig. 4-3) -----------------
@@ -540,6 +562,7 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
         13,
         th.muted,
         anchor="start",
+        upright=perpendicular,
     )
 
 
@@ -792,12 +815,28 @@ def _d_anp_records(s: SVG, th: Theme) -> None:
     s.line(x1, yb, ox, oy, th.muted, 1.2, dash="5,4")
     s.line(x1 + lam_px, yb, ox, oy, th.muted, 1.2, dash="5,4")
     s.line(ox, yb, ox, oy, th.primary, 2.0)
-    s.text(ox + 10, yb + 16, "$d_p$ = 612 m", 12, th.primary, anchor="start")
+    s.text(
+        ox + 10,
+        yb + 16,
+        "$d_p$ = 612 m",
+        12,
+        th.primary,
+        anchor="start",
+        upright=("d_p",),
+    )
     s.text(x1 + 22, yb + dp_px / 2 + 22, "$d_1$ = 912 m", 11, th.muted, anchor="end")
     s.text(x1 + lam_px - 8, yb + 40, "$d_2$ = 830 m", 11, th.muted, anchor="start")
     s.dim(x1, yb - 30, ox, yb - 30, "$q$ = 676 m", offset=0, size=11)
     s.dim(x1, yb - 56, x1 + lam_px, yb - 56, "$λ$ = 1 236 m", offset=0, size=11)
-    s.text(330, 590, "$0 ≤ q ≤ λ$, so $d_s = d_p$", 11, th.muted, anchor="start")
+    s.text(
+        330,
+        590,
+        "$0 ≤ q ≤ λ$, so $d_s = d_p$",
+        11,
+        th.muted,
+        anchor="start",
+        upright=("d_p",),
+    )
     s.text(330, 607, "$P$ = 20 159 lb (Eq. 4-12)", 11, th.primary, anchor="start")
     s.text(330, 624, "$V_{seg}$ = 171 kt (Eq. 4-13a)", 11, th.muted, anchor="start")
 
@@ -1218,6 +1257,8 @@ def _d_rotorcraft_hemisphere(s: SVG, th: Theme) -> None:
         13,
         th.fg,
         anchor="start",
+        # The atmospheric term beside the spherical and the ground ones.
+        upright=("ΔL_a",),
     )
     s.text(
         60.0,

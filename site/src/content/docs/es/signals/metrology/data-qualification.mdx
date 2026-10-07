@@ -1,6 +1,6 @@
 ---
 title: "Cualificación de datos: estacionariedad y picos"
-description: "Cualifica un registro aleatorio antes de analizarlo: los tests de inversiones de orden y de rachas de Bendat y Piersol para la estacionariedad sobre medias cuadráticas por segmento con las regiones de aceptación de la Tabla A.6, y las estadísticas de Rice de cruces por nivel, frecuencia aparente, tasas de picos y el factor de irregularidad que fija la distribución de alturas de pico entre Rayleigh y gaussiana."
+description: "Cualifica un registro aleatorio antes de analizarlo: los tests de inversiones de orden y de rachas de Bendat y Piersol para la estacionariedad sobre valores cuadráticos medios por segmento con las regiones de aceptación de la Tabla A.6, y las estadísticas de Rice de cruces por nivel, frecuencia aparente, tasas de picos y el factor de irregularidad que fija la distribución de alturas de pico entre Rayleigh y gaussiana."
 references:
   - type: book
     authors: ["Bendat, J. S.", "Piersol, A. G."]
@@ -9,7 +9,7 @@ references:
     edition: "4.ª ed."
     publisher: "Wiley"
     doi: "10.1002/9781118032428"
-    note: "Sección 4.5.2 con la Tabla A.6 (el test no paramétrico de tendencia por inversiones de orden, su media y varianza, los puntos porcentuales tabulados y el Ejemplo 4.4), Sección 10.3 (cualificación de datos: clasificación, validación, edición; el procedimiento de estacionariedad por medias cuadráticas de segmento de 10.3.1.1 y el Ejemplo 10.3) y Sección 5.5 (cruces por nivel y valores de pico: Ecs. (5.195)-(5.196), (5.206), (5.211), (5.217)-(5.223) y Ejemplos 5.12-5.15). ISBN 978-0-470-24877-5. El test de rachas complementario aparecía en los puntos porcentuales de la distribución de rachas de la tercera edición."
+    note: "Sección 4.5.2 con la Tabla A.6 (el test no paramétrico de tendencia por inversiones de orden, su media y varianza, los puntos porcentuales tabulados y el Ejemplo 4.4), Sección 10.3 (cualificación de datos: clasificación, validación, edición; el procedimiento de estacionariedad por valores cuadráticos medios de segmento de 10.3.1.1 y el Ejemplo 10.3) y Sección 5.5 (cruces por nivel y valores de pico: Ecs. (5.195)-(5.196), (5.206), (5.211), (5.217)-(5.223) y Ejemplos 5.12-5.15). ISBN 978-0-470-24877-5. El test de rachas complementario aparecía en los puntos porcentuales de la distribución de rachas de la tercera edición."
   - type: article
     authors: ["Wald, A.", "Wolfowitz, J."]
     year: 1940
@@ -53,7 +53,7 @@ La cualificación es una decisión, no un estadístico, así que se lee mejor
 como un flujo: segmentar el registro, contar inversiones, y dejar que la
 región de la Tabla A.6 diga si se puede promediar.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_data_qualification.svg" alt="Diagrama de flujo de decisión de la cualificación de datos: un registro temporal, antes de confiar en cualquier promedio PSD, Leq o GUM, se divide en 20 segmentos iguales cuyas medias cuadráticas forman una secuencia, el recuento de inversiones A con media sin tendencia 95 se compara con la región de aceptación de la Tabla A.6, mayor que 64 y como máximo 125, al nivel del 5 por ciento, y el rombo se bifurca hacia una caja verde de estacionario, ruido estable con A igual a 91 aceptado de modo que valen los intervalos chi-cuadrado y las fórmulas de error, o hacia una caja roja de no estacionario, una rampa de ganancia del 20 por ciento con A igual a 7 rechazada, aconsejando dividir en el cambio o pasar a análisis de corto plazo; las notas al pie nombran el test de rachas como compañero y el punto ciego del valor cuadrático medio ante deslizamientos de frecuencia" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_data_qualification.svg" alt="Diagrama de flujo de decisión de la cualificación de datos: un registro temporal, antes de confiar en cualquier promedio PSD, Leq o GUM, se divide en 20 segmentos iguales cuyos valores cuadráticos medios forman una secuencia, el recuento de inversiones A con media sin tendencia 95 se compara con la región de aceptación de la Tabla A.6, mayor que 64 y como máximo 125, al nivel del 5 por ciento, y el rombo se bifurca hacia una caja verde de estacionario, ruido estable con A igual a 91 aceptado de modo que valen los intervalos chi-cuadrado y las fórmulas de error, o hacia una caja roja de no estacionario, una rampa de ganancia del 20 por ciento con A igual a 7 rechazada, aconsejando dividir en el cambio o pasar a análisis de corto plazo; las notas al pie nombran el test de rachas como compañero y el punto ciego del valor cuadrático medio ante deslizamientos de frecuencia" width="92%" />
 
 ## 0. Antes de los tests: validar el registro
 
@@ -82,7 +82,7 @@ print(clipped, dead, round(offset, 4), spikes, round(kurtosis, 2))
 
 | Defecto | La comprobación | La decisión |
 | :--- | :--- | :--- |
-| Recorte | muestras iguales o superiores a 0,999 del fondo de escala | más de un puñado y el registro se edita o se rechaza: el recorte desinfla los cruces de nivel alto del §4 e infla todas las medias cuadráticas |
+| Recorte | muestras iguales o superiores a 0,999 del fondo de escala | más de un puñado y el registro se edita o se rechaza: el recorte desinfla los cruces de nivel alto del §4 e infla todos los valores cuadráticos medios |
 | Caídas, canal muerto | la racha más larga de muestras consecutivas idénticas | cualquier racha de más de unos pocos milisegundos es un fallo de transmisión, no una señal |
 | Desplazamiento de continua, deriva infrasónica | la media del registro frente a su desviación típica, y la parte de la PSD por debajo de 20 Hz frente a la banda de interés | elimina la media y filtra en paso alto antes del §4, cuyas fórmulas suponen un proceso de media nula |
 | Picos, contaminación transitoria | muestras más allá de 5σ, o una curtosis muy por encima de 3 en un registro supuestamente gaussiano | edítalos y dilo, o cualifica el registro por trozos |
@@ -222,7 +222,7 @@ fs = 8192.0
 n = 1 << 16
 noise = np.random.default_rng(42).standard_normal(n)
 
-res = metrology.stationarity_test(noise, fs)        # 20 segmentos, medias cuadráticas
+res = metrology.stationarity_test(noise, fs)        # 20 segmentos, valores cuadráticos medios
 print(res.stationary, res.count, res.bounds)   # True, 91, (64, 125)
 
 drifting = noise * np.linspace(1.0, 1.2, n)    # rampa de ganancia del +20 %
@@ -231,12 +231,12 @@ print(res.stationary, res.count)          # False, 7  (tendencia al alza -> A ba
 res.plot(language="es")
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_test.svg" alt="Veinte medias cuadráticas por segmento de dos registros de ruido: un registro estable cuyos valores fluctúan en torno a uno con un conteo de inversiones de orden de noventa y uno, aceptado como estacionario, y el mismo ruido con una rampa de ganancia del veinte por ciento cuyas medias cuadráticas por segmento suben de forma sostenida hasta uno coma cinco, dando solo siete inversiones de orden, rechazado como no estacionario al nivel del cinco por ciento" width="82%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_test.svg" alt="Veinte valores cuadráticos medios por segmento de dos registros de ruido: un registro estable cuyos valores fluctúan en torno a uno con un conteo de inversiones de orden de noventa y uno, aceptado como estacionario, y el mismo ruido con una rampa de ganancia del veinte por ciento cuyos valores cuadráticos medios por segmento suben de forma sostenida hasta uno coma cinco, dando solo siete inversiones de orden, rechazado como no estacionario al nivel del cinco por ciento" width="82%" loading="eager" />
 
 *La misma secuencia de veinte segmentos cuenta la estacionariedad con la misma
-aritmética. Las medias cuadráticas por segmento del registro estable se quedan
-entre 0,982 y 1,034 y dan $A = 91$, dentro de $(64, 125]$. La rampa de ganancia
-del 20 % las sube de 1,016 a 1,476, un cambio de un factor 1,45 que nadie
+aritmética. Los valores cuadráticos medios por segmento del registro estable se
+quedan entre 0,982 y 1,034 y dan $A = 91$, dentro de $(64, 125]$. La rampa de
+ganancia del 20 % los sube de 1,016 a 1,476, un cambio de un factor 1,45 que nadie
 llamaría dramático a ojo sobre una traza temporal, y $A$ se desploma a 7. Bastan
 veinte números y un recuento de pares comparado con una tabla; no entra nada del
 ancho de banda ni de las unidades del registro.*
@@ -264,7 +264,7 @@ ax.plot(index, res_steady.segment_values, "o-",
 ax.plot(index, res_ramp.segment_values, "s-",
         label=f"Rampa de ganancia del +20 %: A = {res_ramp.count}, rechazado")
 ax.set_xlabel("Índice de segmento")
-ax.set_ylabel("Media cuadrática por segmento")
+ax.set_ylabel("Valor cuadrático medio por segmento")
 ax.legend()
 plt.show()
 ```
@@ -292,7 +292,7 @@ seguir siendo largo frente a las frecuencias más bajas del registro para que lo
 valores sean independientes.
 
 **¿Cómo de pequeña es la deriva que llega a ver?** Cada valor cuadrático medio de
-segmento es ella misma una variable aleatoria: para una banda de anchura $B$
+segmento es él mismo una variable aleatoria: para una banda de anchura $B$
 observada durante $T_\text{seg}$ segundos, su error aleatorio normalizado es
 $1/\sqrt{B\,T_\text{seg}}$. Toma los 20 segmentos por defecto sobre un registro
 de 10 s de la banda de tercio de octava de 1 kHz ($B = 231$ Hz,
@@ -331,7 +331,7 @@ La primera salvedad es la que le cuesta un resultado equivocado a quien lee,
 porque hace que el test *acepte* un registro que debería rechazar. Merece la pena
 verla:
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_glide_blind_spot.svg" alt="Tres paneles apilados. Arriba: la frecuencia instantánea de un barrido de amplitud constante que sube linealmente de 200 Hz a 2 kHz en ocho segundos, con la banda de 200 a 400 Hz sombreada. En medio: las veinte medias cuadráticas de segmento del registro de banda completa, planas en 0,5 con un recuento de inversiones de 96 dentro de la región de aceptación, aceptado. Abajo: el mismo registro limitado a la banda de 200 a 400 Hz, cuyas medias cuadráticas de segmento se desploman a cero a partir del tercer segmento, dando un recuento de 173 por encima de la cota superior, rechazado" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_glide_blind_spot.svg" alt="Tres paneles apilados. Arriba: la frecuencia instantánea de un barrido de amplitud constante que sube linealmente de 200 Hz a 2 kHz en ocho segundos, con la banda de 200 a 400 Hz sombreada. En medio: los veinte valores cuadráticos medios de segmento del registro de banda completa, planos en 0,5 con un recuento de inversiones de 96 dentro de la región de aceptación, aceptado. Abajo: el mismo registro limitado a la banda de 200 a 400 Hz, cuyos valores cuadráticos medios de segmento se desploman a cero a partir del tercer segmento, dando un recuento de 173 por encima de la cota superior, rechazado" width="88%" />
 
 *Un barrido de amplitud constante de 200 Hz a 2 kHz es todo lo no estacionario
 que puede ser un registro, y el valor cuadrático medio de banda completa no lo ve: los
@@ -369,7 +369,7 @@ for ax, res, label in ((ax1, full, "banda completa"),
     ax.set_ylim(-0.03, 0.58)
     ax.set_title(f"{label}: A = {res.count}, aceptación {res.bounds}")
     ax.set_xlabel("Índice de segmento")
-    ax.set_ylabel("Media cuadrática por segmento")
+    ax.set_ylabel("Valor cuadrático medio por segmento")
 plt.show()
 ```
 
@@ -688,8 +688,8 @@ tranquila.
 La sección 4.5.2 con la Tabla A.6 de Bendat y Piersol (el test de tendencia
 por inversiones de orden, `trend_test`, su valor p exacto y por aproximación
 normal, y el Ejemplo 4.4), el test de rachas de Wald y Wolfowitz (1940)
-(`trend_test(method="runs")`), el procedimiento de estacionariedad por medias
-cuadráticas de segmento de la sección 10.3.1.1 con el Ejemplo 10.3
+(`trend_test(method="runs")`), el procedimiento de estacionariedad por valores
+cuadráticos medios de segmento de la sección 10.3.1.1 con el Ejemplo 10.3
 (`stationarity_test`), y las estadísticas de cruces por nivel y de picos de
 Rice (1945) de la sección 5.5 (`level_crossing_rate`, `peak_statistics`, el
 factor de irregularidad y sus límites Rayleigh y gaussiano para la altura de
@@ -700,7 +700,7 @@ pico).
 La sección 10.3 del libro se titula «cualificación de datos» en un sentido más
 amplio y también cubre la clasificación, la validación y la edición de
 registros; `phonometry.metrology` implementa solo su núcleo cuantitativo, el
-test de estacionariedad por medias cuadráticas. Clasificar el tipo de un
+test de estacionariedad por valores cuadráticos medios. Clasificar el tipo de un
 registro, validarlo frente a límites físicos o editar transitorios espurios
 siguen siendo pasos manuales tal como los describe el libro, fuera de este
 módulo.

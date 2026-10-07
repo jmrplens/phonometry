@@ -256,7 +256,7 @@ plt.show()
 | `x` | array 1D o 2D, o `Signal` | presión (cualquier escala) | no vacío | Se eleva al cuadrado internamente; la salida es una envolvente cuadrática media |
 | `fs` | int | Hz | > 0; tomada de `x` cuando `x` es un `Signal` | |
 | `mode` | str | — | `'fast'` (por defecto), `'slow'`, `'impulse'` | $\tau$ = 125 ms / 1 s / ataque de 35 ms + caída de 1,5 s |
-| `initial_state` | `None` / `'zero'` / `'first'` / float / array | cuadrado medio de $x$ | por defecto `None` (= `'zero'`) | Estado del integrador $y[-1]$; ver los apartados 5 y 6 |
+| `initial_state` | `None` / `'zero'` / `'first'` / float / array | valor cuadrático medio de $x$ | por defecto `None` (= `'zero'`) | Estado del integrador $y[-1]$; ver los apartados 5 y 6 |
 | `TimeWeighting(fs, mode)` (clase) | — | — | — | Variante con estado para streaming: `process(x)` conserva el estado del integrador entre bloques |
 | `TimeWeighting.reset()` | — | — | — | Descarta el estado arrastrado para que el siguiente `process()` arranque del reposo |
 
@@ -340,18 +340,18 @@ de dárselo.
   el reposo, así que el nivel sube por la rampa de establecimiento del
   apartado 1.
 - **`'first'` lo siembra con el cuadrado de la primerísima muestra**, $x[0]^2$.
-  Es una estimación insesgada pero extremadamente ruidosa del cuadrado medio
-  (un grado de libertad) y, para un tono, depende por completo de la fase en el
-  corte. En el fragmento de abajo vale *exactamente cero*, porque una sinusoide que
-  empieza en $t = 0$ empieza en un paso por cero, así que ahí `'first'` es
-  idéntico bit a bit a `'zero'`.
+  Es una estimación insesgada pero extremadamente ruidosa del valor cuadrático
+  medio (un grado de libertad) y, para un tono, depende por completo de la fase
+  en el corte. En el fragmento de abajo vale *exactamente cero*, porque una
+  sinusoide que empieza en $t = 0$ empieza en un paso por cero, así que ahí
+  `'first'` es idéntico bit a bit a `'zero'`.
 - **Un float** reanuda un estado que hayas guardado tú, que es lo que hace el
   procesado por bloques del apartado 6.
 - **Un array** compatible por broadcasting con la forma de la entrada sin el
   eje temporal hace lo mismo por canal.
 
 Si el registro es la continuación de una señal que ya venía sonando, siembra el
-integrador con algo robusto: el cuadrado medio del primer medio segundo,
+integrador con algo robusto: el valor cuadrático medio del primer medio segundo,
 `initial_state=float(np.mean(recording[:fs // 2] ** 2))`, es una estimación
 mucho mejor que una muestra suelta. Si el registro es el *comienzo* del suceso,
 no siembres nada: deja que arranque del reposo y descarta los primeros $5\tau$
@@ -366,7 +366,7 @@ from phonometry import filters
 fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
-# Semilla robusta: el cuadrado medio del primer medio segundo, no una muestra.
+# Semilla robusta: el valor cuadrático medio del primer medio segundo, no una muestra.
 energy_envelope = filters.time_weighting(
     recording, fs, mode='fast',
     initial_state=float(np.mean(recording[:fs // 2] ** 2)))

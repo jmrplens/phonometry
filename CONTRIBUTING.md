@@ -88,11 +88,12 @@ To check coverage locally:
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
 
-A test that expects an error or a warning holds **one call that could raise**
-inside its `pytest.raises` or `pytest.warns` block: build the input first,
-then call the code under test alone in the block. A block that also builds its
-input passes on a refusal from the builder, and goes on passing the day the
-code under test stops refusing. Ruff holds the block to one statement, and
+A test that expects an error or a warning holds **one call that could raise
+or warn** inside its `pytest.raises`, `pytest.warns` or `pytest.deprecated_call`
+block: build the input first, then call the code under test alone in the
+block. A block that also builds its input passes on a refusal from the
+builder, and goes on passing the day the code under test stops refusing. Ruff
+holds the block to one statement, and
 [`scripts/check_raises_blocks.py`](scripts/check_raises_blocks.py)
 (`make raises-blocks`) holds that statement to one call, with the definition
 SonarCloud uses for python:S5778 and S9088; conversions such as
@@ -666,6 +667,18 @@ senses apart. Where it really is the function (the sine of an angle, the sine
 terms of a printed formula, the discrete sine transform), add a pattern for
 that context to its `TRIGONOMETRIC` table with the reason; a pattern that no
 longer exempts any "seno" fails the run, like a stale `ALLOWED` entry.
+
+The mean square is read the same way. Spanish calls it "valor cuadrático
+medio", or puts the adjective after its noun ("presión cuadrática media"), and
+"media cuadrática" is the quadratic mean, the root of the mean of the squares,
+which is another number. So "media cuadrática" fails wherever it stands, and
+where the English says root mean square or quadratic mean, and the phrase is
+right, its context goes in the `QUADRATIC_MEAN` table with the reason, under
+the same rule as `TRIGONOMETRIC`. Write the context on the words of the one
+sentence it exempts, never on a shape such as "de los extremos" or "beside an
+arithmetic mean", which a mean square can take as well. The statistician's
+"cuadrado medio" is a plain ruling in `GLOSSARY_PHRASES`: it fails wherever it
+stands, as "incertidumbre extendida" does.
 
 ### 7c. Defaulting a style the caller may spell either way
 

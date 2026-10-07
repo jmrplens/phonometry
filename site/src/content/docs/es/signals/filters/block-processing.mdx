@@ -174,8 +174,9 @@ leq = 10 * np.log10(total_square / (n_samples * (2e-5) ** 2))
 ```
 
 En esas cuatro líneas hay dos trampas. Ponderar todos los bloques por igual
-(promediar los cuadrados medios de cada bloque) solo es correcto si todos los
-bloques tienen la misma longitud, y el último casi nunca la tiene; acumula la
+(promediar los valores cuadráticos medios de cada bloque) solo es correcto si
+todos los bloques tienen la misma longitud, y el último casi nunca la tiene;
+acumula la
 suma y el recuento por separado, como arriba, y de eso se encarga la
 aritmética. Y nunca promedies las lecturas en *decibelios* de cada bloque: ese
 es el error de la media aritmética de

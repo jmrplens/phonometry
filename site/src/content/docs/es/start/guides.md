@@ -415,7 +415,7 @@ produce al lado consigue pasar. Implementa ISO 3382-1/-2/-3, ISO 14257,
 ISO 11690-3, ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2,
 ISO 16251-1, ISO 717-1/-2, EN 12354-1 a -6, ISO 18233, ISO 12999-1,
 ISO 10052, ISO 16032 (desde el borrador ISO/DIS 16032:2023), ANSI/ASA S12.2 y
-ASTM E413/E1414.
+ASTM E413.
 
 **[Acústica de salas](/phonometry/es/buildings/rooms/)**
 

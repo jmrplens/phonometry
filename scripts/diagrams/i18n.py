@@ -2418,10 +2418,10 @@ _ES: dict[str, str] = {
     "the 'phase' route reads the same $τ_0$ from the slope of the unwrapped cross-spectrum phase": "la vía 'phase' lee el mismo $τ_0$ de la pendiente de la fase "
     "desenrollada del espectro cruzado",
     # Data qualification decision flow (Bendat & Piersol 10.3)
-    "Data qualification: the stationarity decision (Bendat & Piersol 10.3)": "Calificación de datos: decisión de estacionariedad (B&P 10.3)",
+    "Data qualification: the stationarity decision (Bendat & Piersol 10.3)": "Cualificación de datos: decisión de estacionariedad (B&P 10.3)",
     "Time record $x(t)$": "Registro temporal $x(t)$",
     "before trusting any PSD, Leq or GUM average": "antes de confiar en cualquier promedio PSD, Leq o GUM",
-    "Mean square per interval: $N$ = 20 equal segments": "Media cuadrática por intervalo: $N$ = 20 segmentos iguales",
+    "Mean square per interval: $N$ = 20 equal segments": "Valor cuadrático medio por intervalo: $N$ = 20 segmentos iguales",
     "each interval long against the record's lowest frequencies; also rms, mean or variance": "cada intervalo largo frente a las frecuencias más bajas del "
     "registro; también rms, media o varianza",
     "Reverse arrangement count $A$": "Recuento de inversiones $A$",
@@ -2552,7 +2552,7 @@ _ES: dict[str, str] = {
     "−3,01 LKFS",
     "K-weighting: +4 dB spherical-head shelf + RLB high-pass": "Ponderación K: estante de +4 dB (cabeza esférica) + paso alto RLB",
     "$L_K = −0.691 + 10·log_{10} Σ G_i·z_i$;  LKFS ≡ LUFS, 1 LU = 1 dB": "$L_K = −0,691 + 10·log_{10} Σ G_i·z_i$;  LKFS ≡ LUFS, 1 LU = 1 dB",
-    "Mean square in 400 ms blocks, 75 % overlap": "Media cuadrática en bloques de 400 ms, 75 % de solape",
+    "Mean square in 400 ms blocks, 75 % overlap": "Valor cuadrático medio en bloques de 400 ms, 75 % de solape",
     "absolute gate: blocks below −70 LUFS are dropped": "puerta absoluta: se descartan los bloques bajo −70 LUFS",
     "Relative gate: −10 LU below the survivors": "Puerta relativa: −10 LU bajo los supervivientes",
     "example: 10 s at −23 dBFS + 30 s of quiet → threshold −39.0 LUFS": "ejemplo: 10 s a −23 dBFS + 30 s de silencio → umbral −39,0 LUFS",
@@ -4653,7 +4653,7 @@ _ES: dict[str, str] = {
     "greatest $|p|$, either sign": "mayor $|p|$, de cualquier signo",
     "the running integral of $p^2$": "la integral acumulada de $p^2$",
     "$L_{eq}$, $L_{Aeq}$ over $T$": "$L_{eq}$, $L_{Aeq}$ en $T$",
-    "the mean square, in dB": "la media del cuadrado, en dB",
+    "the mean square, in dB": "valor cuadrático medio, en dB",
     "SEL: the same energy in 1 s": "SEL: igual energía en 1 s",
     "no time constant at all": "sin constante de tiempo",
     "reference $E_0$ = $p_0^2$ · 1 s": "referencia $E_0$ = $p_0^2$ · 1 s",

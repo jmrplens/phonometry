@@ -1859,6 +1859,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   every "seno" that is not in one of the trigonometric contexts it lists
   with their reasons.
 
+- **The Spanish edition calls a mean square a valor cuadrático medio.** The
+  data qualification and programme loudness diagrams, the two stationarity
+  figures, the data qualification and levels guides and the metrology
+  overview named the mean square "media cuadrática", and so did the Spanish
+  y axis of `StationarityTestResult.plot()` and of an uncalibrated
+  `TimeWeightedEnvelope.plot()`. In Spanish "media cuadrática" is the
+  quadratic mean, the root of the mean of the squares, which is another
+  number; they now say "valor cuadrático medio", as the Spanish adoptions of
+  the standards do. Where the English says root mean square or quadratic
+  mean, "media cuadrática" stays: the root-mean-square speed of the ICAO
+  Doc 9911 erratum, the per-period uncertainties of the wind turbine
+  receptor guide and the binaural combination of ECMA-418-2. The block
+  processing, time weighting, railway vibration and people in buildings
+  guides and the DIN 45672-2 erratum wrote the statistician's "cuadrado
+  medio" beside a "valor cuadrático medio" on the same page, and the levels
+  guide and its diagram "la media del cuadrado"; they say "valor cuadrático
+  medio" too. `make spanish-accents` now fails on every "cuadrado medio" and
+  on every "media cuadrática" that is not in one of the quadratic-mean
+  contexts it lists, each written on the words of the one sentence it
+  exempts, with its reason. The Spanish data qualification diagram is titled
+  "Cualificación de datos", as its guide is.
+
+- **The landing page and the guides index no longer list ASTM E1414 among
+  the building standards implemented.** The library computes the normalized
+  ceiling attenuation of ISO 140-9 and rates it with the contour of
+  ASTM E413, and takes from ASTM E1414 only its 12 m² reference area, which
+  a caller passes as `reference_area`, and the laboratory reports its
+  conformance checks are read from; no function runs the E1414 test method.
+  The rooms and buildings row now says ASTM E413, as the flanking guide that
+  documents the ceiling plenum already did.
+
 - **A type checker accepts a `bool` held in a variable for the form of a
   survey's reverberation index and for a calibration's tone estimate.**
   `building.estimate_reverberation_index` was typed for `weighted=True` and
@@ -9293,7 +9324,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ISO 10846-1/-2/-3`, `ISO 2631-1/-2/-4/-5`, `ISO 8041-1`, `EN 29052-1`),
   ISO 18233 moves to the area whose measurements use it, and ISO 9611,
   ISO 10848, ISO 15186-1/-2, ISO 16251-1, ISO 12999-2, ISO/PAS 20065,
-  ISO 389-7, DIN 45681 and ASTM E413/E1414 join the areas they are implemented
+  ISO 389-7, DIN 45681 and ASTM E413 join the areas they are implemented
   in. The area blurbs on the guides hub carried the same lists, disagreed with
   the landing on CNOSSOS-EU, and are now identical to it area by area; the
   Spanish side spells ECAC the way the rest of the Spanish documentation

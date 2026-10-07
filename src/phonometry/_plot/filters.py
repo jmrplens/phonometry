@@ -95,7 +95,7 @@ _STRINGS: dict[str, str] = {
     _CHANNEL_LABEL: "Canal {n}",
     "Time [s]": "Tiempo [s]",
     "Sound pressure level [dB re 20 uPa]": "Nivel de presión sonora [dB re 20 uPa]",
-    "Mean square [FS²]": "Media cuadrática [FS²]",
+    "Mean square [FS²]": "Valor cuadrático medio [FS²]",
     "{mode} time-weighted level": "Nivel con ponderación temporal {mode}",
     "fast": "rápida",
     "slow": "lenta",

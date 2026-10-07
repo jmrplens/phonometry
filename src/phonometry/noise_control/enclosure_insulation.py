@@ -81,7 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
     require_choice,
@@ -267,7 +267,7 @@ def _pair(
 
 
 @dataclass(frozen=True)
-class EnclosureInsulationResult:
+class EnclosureInsulationResult(OwnsArrays):
     r"""The insertion loss of an enclosure, band by band.
 
     :ivar frequencies: Nominal band centre frequencies, in hertz, or ``None``
@@ -325,7 +325,7 @@ class EnclosureInsulationResult:
 
 
 @dataclass(frozen=True)
-class WeightedEnclosureInsulation:
+class WeightedEnclosureInsulation(OwnsArrays):
     r"""The single-number rating of an insertion loss spectrum, ISO 717-1.
 
     :ivar rating: :math:`D_{W,w}` or :math:`D_{pr,w}`, in decibels.
@@ -499,9 +499,9 @@ def _insulation(
         # such is what keeps the result from passing a total off as a band.
         weighted = float(insulation[0])
     return EnclosureInsulationResult(
-        frequencies=read_only_copy(freqs),
-        level_without=read_only_copy(without),
-        level_with=read_only_copy(with_),
+        frequencies=freqs,
+        level_without=without,
+        level_with=with_,
         insulation=np.asarray(insulation, dtype=np.float64),
         quantity=quantity,
         a_weighted_insulation=weighted,

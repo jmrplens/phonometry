@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -76,7 +76,7 @@ _MIN_RECEIVERS = 2
 
 
 @dataclass(frozen=True)
-class DiffusionResult:
+class DiffusionResult(OwnsArrays):
     """A measured polar response and its diffusion coefficient (ISO 17497-2).
 
     :ivar angles_deg: Receiver angles of the polar response, in degrees.
@@ -209,7 +209,7 @@ class DiffusionResult:
 
 
 @dataclass(frozen=True)
-class DiffusionSpectrum:
+class DiffusionSpectrum(OwnsArrays):
     """A diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
 
     Where :class:`DiffusionResult` holds the polar response of a single
@@ -385,9 +385,9 @@ def diffusion_spectrum(
             "band",
         )
     return DiffusionSpectrum(
-        frequencies=read_only_copy(freq),
-        diffusion=read_only_copy(d),
-        normalized=read_only_copy(d_n),
+        frequencies=freq,
+        diffusion=d,
+        normalized=d_n,
     )
 
 
@@ -419,9 +419,7 @@ def directional_diffusion(
         "receiver",
     )
     d = float(directional_diffusion_coefficient(lev, area_weights=weights))
-    return DiffusionResult(
-        angles_deg=read_only_copy(ang), levels=read_only_copy(lev), coefficient=d
-    )
+    return DiffusionResult(angles_deg=ang, levels=lev, coefficient=d)
 
 
 # ---------------------------------------------------------------------------

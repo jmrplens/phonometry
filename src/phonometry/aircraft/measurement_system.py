@@ -17,6 +17,8 @@ from typing import Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
+
 __all__ = [
     "AircraftSystemComplianceResult",
     "verify_aircraft_noise_system",
@@ -74,7 +76,7 @@ def _iec61265_directional_limit(frequency: float, angle: float) -> float:
 
 
 @dataclass(frozen=True)
-class AircraftSystemComplianceResult:
+class AircraftSystemComplianceResult(OwnsArrays):
     """IEC 61265:1995 verdict on an aircraft-noise measurement chain.
 
     What :func:`verify_aircraft_noise_system` returns: the verdict together

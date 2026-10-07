@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -160,7 +160,7 @@ def _require_table1_bands(owner: str, frequencies: np.ndarray) -> None:
 
 
 @dataclass(frozen=True)
-class NCResult:
+class NCResult(OwnsArrays):
     """Result of a Noise Criteria (NC) rating (ANSI/ASA S12.2-2019, 5.2).
 
     :ivar rating: The reported NC designation, following the two-step
@@ -316,7 +316,7 @@ class NCResult:
 
 
 @dataclass(frozen=True)
-class RCResult:
+class RCResult(OwnsArrays):
     """Result of a Room Criteria Mark II rating (ANSI/ASA S12.2-2019, Annex D).
 
     :ivar rating: Numerical RC designation ``LMF`` rounded to the nearest dB.
@@ -657,8 +657,8 @@ def noise_criterion(
         return NCResult(
             rating=rating,
             governing_frequency=governing_frequency,
-            frequencies=OCTAVE_BANDS.copy(),
-            levels=read_only_copy(aligned),
+            frequencies=OCTAVE_BANDS,
+            levels=aligned,
             sil=sil,
             tangency_rating=tangency_rating,
             method=method,
@@ -759,6 +759,6 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
         lmf=lmf,
         classification=classification,
         reference_curve=reference,
-        frequencies=OCTAVE_BANDS.copy(),
-        levels=read_only_copy(aligned),
+        frequencies=OCTAVE_BANDS,
+        levels=aligned,
     )

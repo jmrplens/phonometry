@@ -74,7 +74,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
     require_axis_rank,
@@ -188,7 +188,7 @@ def _axis_images(
 
 
 @dataclass(frozen=True)
-class ImageSourceResult:
+class ImageSourceResult(OwnsArrays):
     r"""Synthetic room impulse response by the image-source method.
 
     ``ir`` is the sampled RIR: a 1D array for a broadband model, or a
@@ -681,7 +681,7 @@ def image_source_rir(
     return ImageSourceResult(
         ir=ir_out,
         fs=int(fs),
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         times=times,
         distances=distances,
         orders=orders,

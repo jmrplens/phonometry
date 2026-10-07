@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import resolve_fs
 from .spectra import (
@@ -96,7 +97,7 @@ def _taper(window: str, nperseg: int) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class SpectrogramResult:
+class SpectrogramResult(OwnsArrays):
     r"""Calibrated STFT power spectrogram (B&P Section 12.6.4.2).
 
     :ivar times: Segment-centre times, in seconds (one per column).
@@ -286,7 +287,7 @@ def spectrogram(
 
 
 @dataclass(frozen=True)
-class ZoomFFTResult:
+class ZoomFFTResult(OwnsArrays):
     r"""Narrow-band zoom spectrum on a fine frequency grid (B&P 11.5.4).
 
     :ivar frequencies: Zoom frequency grid from ``f_min`` to ``f_max``

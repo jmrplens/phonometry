@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_positive, require_positive_array
 from ..absorbers.porous import PUBLISHED_AIR, Complex
 from ..absorbers.slow_sound import HelmholtzResonator, slit_helmholtz_absorber
@@ -93,7 +93,7 @@ class MetadiffuserWell:
 
 
 @dataclass(frozen=True)
-class MetadiffuserResult:
+class MetadiffuserResult(OwnsArrays):
     r"""Spectra of a metadiffuser panel, one reflection row per well.
 
     ``reflection`` has shape ``(N, len(frequency))`` with the complex
@@ -231,7 +231,7 @@ def metadiffuser_reflection(
         rows[i] = prediction.reflection
     well_alpha = 1.0 - np.abs(rows) ** 2
     return MetadiffuserResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         reflection=rows,
         absorption=np.asarray(well_alpha.mean(axis=0), dtype=np.float64),
         well_absorption=np.asarray(well_alpha, dtype=np.float64),

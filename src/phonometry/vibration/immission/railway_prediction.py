@@ -87,7 +87,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -787,7 +787,7 @@ def velocity_spectrum_um_s(levels_db: ArrayLike) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class TrainCategoryPrediction:
+class TrainCategoryPrediction(OwnsArrays):
     r"""The prediction for one category of train, Clauses 5 and 7.
 
     :ivar frequencies_hz: The band centres.
@@ -889,8 +889,8 @@ def predict_train_category(
     kb_ftm = takt_maximum_kb(weighted)
     kb_fmax = TRAIN_KB_FMAX_FACTOR * kb_ftm
     return TrainCategoryPrediction(
-        frequencies_hz=read_only_copy(freqs),
-        emission_db=read_only_copy(levels),
+        frequencies_hz=freqs,
+        emission_db=levels,
         floor_db=floor,
         weighted_frequencies_hz=freqs[inside],
         weighted_db=weighted,

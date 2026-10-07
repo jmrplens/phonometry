@@ -86,7 +86,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import require_positive
 from ._shared import (
@@ -380,7 +380,7 @@ def _repeatability_limit(k: int) -> float:
 
 
 @dataclass(frozen=True)
-class CalibrationConditions:
+class CalibrationConditions(OwnsArrays):
     r"""The air of a calibration on the 2 m hemisphere (ISO 6926 8.4).
 
     The three travel together because Formula (2) reads them from the same
@@ -412,7 +412,7 @@ class CalibrationConditions:
         _validate_meteorology(self.temperature_c, self.static_pressure_kpa)
         if self.air_absorption_db_per_m is None:
             return
-        absorption = np.array(self.air_absorption_db_per_m, dtype=np.float64)
+        absorption = np.asarray(self.air_absorption_db_per_m, dtype=np.float64)
         if not np.all(np.isfinite(absorption)) or np.any(absorption < 0.0):
             msg = "'air_absorption_db_per_m' must be finite and non-negative."
             raise ValueError(msg)
@@ -420,7 +420,7 @@ class CalibrationConditions:
 
 
 @dataclass(frozen=True)
-class ReferenceSourceCalibration:
+class ReferenceSourceCalibration(OwnsArrays):
     r"""Calibrated sound power levels of a reference sound source (ISO 6926 8.4).
 
     :ivar frequencies_hz: Nominal one-third octave mid-band frequencies, in
@@ -900,10 +900,10 @@ def reference_source_calibration(
         freqs, environment="hemi-anechoic", arrangement=arrangement
     )
     return ReferenceSourceCalibration(
-        frequencies_hz=read_only_copy(freqs),
+        frequencies_hz=freqs,
         sound_power_level_db=np.asarray(lw, dtype=np.float64),
         surface_pressure_level_db=np.asarray(lp_bar, dtype=np.float64),
-        directivity_index_db=read_only_copy(directivity, dtype=np.float64),
+        directivity_index_db=np.asarray(directivity, dtype=np.float64),
         c1_db=float(c1),
         c2_db=np.asarray(c2, dtype=np.float64),
         c3_db=np.asarray(c3, dtype=np.float64),
@@ -923,7 +923,7 @@ def reference_source_calibration(
 
 
 @dataclass(frozen=True)
-class ReferenceSoundSourceVerdict:
+class ReferenceSoundSourceVerdict(OwnsArrays):
     r"""Whether a source meets the performance requirements of ISO 6926 clause 5.
 
     Only what was measured is a field. The limits of clause 5 (Table 1, the
@@ -1308,17 +1308,17 @@ def verify_reference_sound_source(
     repeat = _repeatability_of(repeated_levels_db, freqs.size)
     supply = _supply_variation_of(supply_variation_db, freqs)
     return ReferenceSoundSourceVerdict(
-        frequencies_hz=read_only_copy(freqs),
-        sound_power_level_db=read_only_copy(lw),
+        frequencies_hz=freqs,
+        sound_power_level_db=lw,
         repeatability_db=repeat,
-        supply_variation_db=read_only_copy(supply),
-        directivity_index_db=read_only_copy(directivity),
+        supply_variation_db=supply,
+        directivity_index_db=directivity,
         reverberation_rooms_only=reverberation_rooms_only,
     )
 
 
 @dataclass(frozen=True)
-class ReferenceSourceDriftResult:
+class ReferenceSourceDriftResult(OwnsArrays):
     """Whether a reference sound source has drifted enough to be recalibrated.
 
     The limit is the clause's, 2,83 times Table 1, read from the bands as
@@ -1432,7 +1432,7 @@ def verify_reference_source_drift(
         msg = "the levels must be finite."
         raise ValueError(msg)
     return ReferenceSourceDriftResult(
-        frequencies_hz=read_only_copy(freqs),
+        frequencies_hz=freqs,
         change_db=latest - reference,
     )
 

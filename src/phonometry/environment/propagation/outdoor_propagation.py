@@ -48,7 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_finite_array,
@@ -239,7 +239,7 @@ class DirectivityCorrection:
 
 
 @dataclass(frozen=True)
-class SourceEmission:
+class SourceEmission(OwnsArrays):
     r"""Source emission terms for the ISO 9613-2 downwind receiver level (Eq. (3)).
 
     Passed to :meth:`OutdoorAttenuation.report` so the prediction fiche can box
@@ -292,7 +292,7 @@ class SourceEmission:
 
 
 @dataclass(frozen=True)
-class OutdoorAttenuation:
+class OutdoorAttenuation(OwnsArrays):
     """Per-octave-band ISO 9613-2 attenuation breakdown (clause 7).
 
     Every array is aligned with :attr:`frequencies`. The terms sum, band by band,
@@ -1130,7 +1130,7 @@ def outdoor_propagation_attenuation(
 
     a_total = a_div + a_atm + a_gr + a_bar
     return OutdoorAttenuation(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         a_div=a_div,
         a_atm=a_atm,
         a_gr=a_gr,

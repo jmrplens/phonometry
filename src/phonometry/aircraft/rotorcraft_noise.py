@@ -55,7 +55,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -103,7 +103,7 @@ _MIN_SECTION_SPAN = 1e-6
 
 
 @dataclass(frozen=True)
-class RotorcraftHemisphere:
+class RotorcraftHemisphere(OwnsArrays):
     """A rotorcraft noise hemisphere (ECAC Doc 32 §A.3.2).
 
     One-third-octave-band sound pressure levels on a regular azimuth/polar grid at
@@ -181,10 +181,10 @@ class RotorcraftHemisphere:
         az = np.asarray(self.azimuth, dtype=np.float64)
         lv = np.asarray(self.levels, dtype=np.float64)
         return RotorcraftHemisphere(
-            frequencies=np.asarray(self.frequencies, dtype=np.float64).copy(),
-            azimuth=-az[::-1].copy(),
-            polar=np.asarray(self.polar, dtype=np.float64).copy(),
-            levels=lv[::-1, :, :].copy(),
+            frequencies=np.asarray(self.frequencies, dtype=np.float64),
+            azimuth=-az[::-1],
+            polar=np.asarray(self.polar, dtype=np.float64),
+            levels=lv[::-1, :, :],
             distance=self.distance,
         )
 
@@ -491,7 +491,7 @@ def hover_ring_hemisphere(
             energy = 0.5 * (10.0 ** (starboard / 10.0) + 10.0 ** (port / 10.0))
             grid[cells // 2] = 10.0 * np.log10(energy)
     return RotorcraftHemisphere(
-        frequencies=freqs.copy(), azimuth=az, polar=po, levels=grid, distance=dist
+        frequencies=freqs, azimuth=az, polar=po, levels=grid, distance=dist
     )
 
 
@@ -540,9 +540,9 @@ def hover_derived_hemisphere(
         msg = "'offset_db' must be finite."
         raise ValueError(msg)
     return RotorcraftHemisphere(
-        frequencies=np.asarray(hemisphere.frequencies, dtype=np.float64).copy(),
-        azimuth=np.asarray(hemisphere.azimuth, dtype=np.float64).copy(),
-        polar=np.asarray(hemisphere.polar, dtype=np.float64).copy(),
+        frequencies=np.asarray(hemisphere.frequencies, dtype=np.float64),
+        azimuth=np.asarray(hemisphere.azimuth, dtype=np.float64),
+        polar=np.asarray(hemisphere.polar, dtype=np.float64),
         levels=np.asarray(hemisphere.levels, dtype=np.float64) + offset,
         distance=hemisphere.distance,
     )
@@ -778,7 +778,7 @@ def _common_frequencies(
 
 
 @dataclass(frozen=True)
-class FlightPathKinematics:
+class FlightPathKinematics(OwnsArrays):
     r"""Kinematics of a rotorcraft track (guidance Eq. 16-21 / Doc 32 Eq. 8-10).
 
     All rates come from central finite differences around each track point.
@@ -914,8 +914,8 @@ def flight_path_kinematics(
     bank = np.degrees(np.arctan(dtheta_dt * vg / g0))
     path_angle_deg = np.degrees(np.arctan2(vz, vg))
     return FlightPathKinematics(
-        times=read_only_copy(t),
-        positions=read_only_copy(p),
+        times=t,
+        positions=p,
         ground_speed=vg,
         airspeed=va,
         heading=heading,
@@ -989,7 +989,7 @@ def _emission_angles(
 
 
 @dataclass(frozen=True)
-class RotorcraftEventResult:
+class RotorcraftEventResult(OwnsArrays):
     r"""A rotorcraft single-event time history at a receiver (Doc 32 §6.1).
 
     :ivar frequencies: Band centre frequencies, in Hz, shape ``(F,)``.
@@ -1130,7 +1130,7 @@ class RotorcraftEventResult:
 
 
 @dataclass(frozen=True)
-class RotorcraftNoiseContourResult:
+class RotorcraftNoiseContourResult(OwnsArrays):
     """Rotorcraft single-event noise level over a ground grid (Doc 32 §6.3).
 
     :ivar x: Grid x coordinates, in metres, shape ``(nx,)``.
@@ -1264,7 +1264,7 @@ class RotorcraftAtmosphere:
 
 
 @dataclass(frozen=True)
-class RotorcraftGround:
+class RotorcraftGround(OwnsArrays):
     """The ground a rotorcraft event stands on (guidance §A.4.3-A.4.5).
 
     Flat ground at the track datum by default: the microphone height, the
@@ -1320,7 +1320,7 @@ class RotorcraftGround:
 
 
 @dataclass(frozen=True)
-class RotorcraftTrackState:
+class RotorcraftTrackState(OwnsArrays):
     """Per-point flight state of a rotorcraft track (Eq. 16-21).
 
     Every field left unset is derived from the track itself by
@@ -1343,7 +1343,7 @@ class RotorcraftTrackState:
 
 
 @dataclass(frozen=True)
-class FlightConditionInterpolation:
+class FlightConditionInterpolation(OwnsArrays):
     """How a flight condition blends the database hemispheres (Eq. 3-10).
 
     The two settings of :func:`flight_condition_weights`, which the event and
@@ -1986,8 +1986,8 @@ def rotorcraft_event_level(
         setup.frequencies, trec[:, 0], la[:, 0], spectra
     )
     return RotorcraftEventResult(
-        frequencies=read_only_copy(setup.frequencies),
-        emission_times=read_only_copy(setup.times),
+        frequencies=setup.frequencies,
+        emission_times=setup.times,
         times=trec[:, 0],
         distances=dist,
         azimuth=phi,
@@ -2117,8 +2117,8 @@ def rotorcraft_noise_contour(
     trec, la, _ = _event_histories(setup, receivers)
     level = _exposure_level(la, trec) if key == "exposure" else np.max(la, axis=0)
     return RotorcraftNoiseContourResult(
-        x=read_only_copy(gx),
-        y=read_only_copy(gy),
+        x=gx,
+        y=gy,
         levels=level.reshape(gy.size, gx.size),
         metric=key,
     )

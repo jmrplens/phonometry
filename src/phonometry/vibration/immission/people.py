@@ -83,7 +83,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -735,7 +735,7 @@ def railway_takt_spread(kb_fti: ArrayLike) -> float:
 
 
 @dataclass(frozen=True)
-class RailwayAssessment:
+class RailwayAssessment(OwnsArrays):
     r"""The assessment vibration severity of a railway, Formula (A.3).
 
     :ivar kb_ftr: :math:`KB_\mathrm{FTr}` over the assessment period.
@@ -816,8 +816,8 @@ def railway_assessment_severity(
         upper = severity(squares + spreads)
     return RailwayAssessment(
         kb_ftr=severity(squares),
-        kb_ftm=read_only_copy(severities),
-        occupied_takte=takte.astype(np.int64),
+        kb_ftm=severities,
+        occupied_takte=np.asarray(takte, dtype=np.int64),
         lower=lower,
         upper=upper,
         time_of_day=which,

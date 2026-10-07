@@ -111,7 +111,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import round_half_up
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_finite,
@@ -377,7 +377,7 @@ def statistical_pass_by_index(
 
 
 @dataclass(frozen=True)
-class PassByRegression:
+class PassByRegression(OwnsArrays):
     r"""The regression line of one vehicle category and what 9.2 reads off it.
 
     The line is :math:`L = a + b \lg(v / 1\ \mathrm{km/h})`, fitted by least
@@ -571,8 +571,8 @@ def _fit(
     return PassByRegression(
         vehicle_category=vehicle_category,
         road_speed_category=road_speed_category,
-        speeds_kmh=read_only(np.array(speeds, dtype=np.float64)),
-        max_levels_db=read_only(np.array(levels, dtype=np.float64)),
+        speeds_kmh=np.asarray(speeds, dtype=np.float64),
+        max_levels_db=np.asarray(levels, dtype=np.float64),
         reference_speed_kmh=SPB_REFERENCE_SPEEDS_KMH[road_speed_category][
             vehicle_category
         ],

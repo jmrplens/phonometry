@@ -53,7 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_axis_count,
@@ -91,7 +91,7 @@ def _combine(a: NDArray[np.float64], b: NDArray[np.float64]) -> NDArray[np.float
 
 
 @dataclass(frozen=True)
-class DuctElement:
+class DuctElement(OwnsArrays):
     """One element of a duct path: what it attenuates and what it regenerates.
 
     :ivar label: Human description of the element, e.g.
@@ -115,7 +115,7 @@ class DuctElement:
 
 
 @dataclass(frozen=True)
-class DuctPathStage:
+class DuctPathStage(OwnsArrays):
     """The computed rows of one element of a duct path.
 
     The four spectra are exactly the four printed rows of a duct-borne
@@ -142,7 +142,7 @@ class DuctPathStage:
 
 
 @dataclass(frozen=True)
-class DuctPathResult:
+class DuctPathResult(OwnsArrays):
     """The end-to-end duct-borne noise calculation of one path (or of a sum).
 
     Built by :func:`duct_path` for a single fan-to-room path, and by
@@ -556,9 +556,9 @@ def duct_path(
             DuctPathStage(
                 label=element.label,
                 code=element.code or str(position),
-                attenuation=read_only_copy(attenuation),
+                attenuation=attenuation,
                 attenuated=attenuated,
-                self_noise=read_only_copy(self_noise),
+                self_noise=self_noise,
                 levels=level,
             )
         )
@@ -568,12 +568,12 @@ def duct_path(
     )
     received = level if room is None else level - room
     return DuctPathResult(
-        frequencies=read_only_copy(f),
-        source_level=read_only_copy(as_band_spectrum(source_level, n, "source_level")),
+        frequencies=f,
+        source_level=as_band_spectrum(source_level, n, "source_level"),
         source_label=source_label,
         stages=tuple(stages),
-        room_effect=read_only_copy(room),
-        received_level=read_only_copy(received),
+        room_effect=room,
+        received_level=received,
         criterion=family,
         target=goal,
         label=label,
@@ -624,7 +624,7 @@ def combine_duct_paths(
         np.sum([10.0 ** (np.asarray(p.received_level) / 10.0) for p in items], axis=0)
     )
     return DuctPathResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         source_level=total,
         source_label=label,
         stages=(),
@@ -634,6 +634,6 @@ def combine_duct_paths(
         target=goal,
         label=label,
         contributions=tuple(
-            (p.label, read_only_copy(p.received_level, dtype=np.float64)) for p in items
+            (p.label, np.asarray(p.received_level, dtype=np.float64)) for p in items
         ),
     )

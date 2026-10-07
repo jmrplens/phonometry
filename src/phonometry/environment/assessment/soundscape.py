@@ -111,7 +111,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from scipy import stats
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import require_choice
 
 if TYPE_CHECKING:
@@ -611,7 +611,7 @@ def method_a_scale_values(
 
 
 @dataclass(frozen=True)
-class MethodASummary:
+class MethodASummary(OwnsArrays):
     """Median and range of Method A responses per site and item
     (ISO/TS 12913-3 A.2 and Table A.1).
 
@@ -734,7 +734,7 @@ def _formulas_a1_a2(
 
 
 @dataclass(frozen=True)
-class PleasantnessEventfulness:
+class PleasantnessEventfulness(OwnsArrays):
     r"""Pleasantness and eventfulness of each site and each respondent
     (ISO/TS 12913-3 A.3, Formulas (A.1) and (A.2)).
 
@@ -922,8 +922,8 @@ def pleasantness_eventfulness(
         pleasantness=read_only(np.asarray(site_p, dtype=np.float64)),
         eventfulness=read_only(np.asarray(site_e, dtype=np.float64)),
         respondent_sites=tuple(str(s) for s in row_site),
-        respondent_pleasantness=read_only(respondent_p.astype(np.float64)),
-        respondent_eventfulness=read_only(respondent_e.astype(np.float64)),
+        respondent_pleasantness=np.asarray(respondent_p, dtype=np.float64),
+        respondent_eventfulness=np.asarray(respondent_e, dtype=np.float64),
         respondent_counts=read_only(
             np.asarray([int(np.sum(complete[rows])) for rows in groups], dtype=np.int64)
         ),
@@ -936,7 +936,7 @@ def pleasantness_eventfulness(
 
 
 @dataclass(frozen=True)
-class SoundscapeCorrelation:
+class SoundscapeCorrelation(OwnsArrays):
     r"""A correlation coefficient between two variables and its probability
     value (ISO/TS 12913-3 A.4 and B.3).
 
@@ -1113,8 +1113,8 @@ def spearman_rank_correlation(
     require_choice(alternative, "alternative", _ALTERNATIVES)
     x_arr, y_arr = _paired(x, y)
     n = x_arr.size
-    x_ranks = stats.rankdata(x_arr, method="average").astype(np.float64)
-    y_ranks = stats.rankdata(y_arr, method="average").astype(np.float64)
+    x_ranks = np.asarray(stats.rankdata(x_arr, method="average"), dtype=np.float64)
+    y_ranks = np.asarray(stats.rankdata(y_arr, method="average"), dtype=np.float64)
     d_squared = float(np.sum((x_ranks - y_ranks) ** 2))
     tie_x, tie_y = _tie_term(x_ranks), _tie_term(y_ranks)
     if tie_x > 0.0 or tie_y > 0.0:
@@ -1227,7 +1227,7 @@ def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.floa
 
 
 @dataclass(frozen=True)
-class MethodBSummary:
+class MethodBSummary(OwnsArrays):
     """Arithmetic mean, standard deviation and confidence interval of Method
     B ratings per site and scale (ISO/TS 12913-3 B.2 and Table B.1).
 
@@ -1369,7 +1369,7 @@ def method_b_summary(
 
 
 @dataclass(frozen=True)
-class SourceRanking:
+class SourceRanking(OwnsArrays):
     """The rank each recognised sound source was given, per site
     (ISO/TS 12913-3 B.2, part 2 of Method B, Table B.1).
 

@@ -486,10 +486,23 @@ cuyos `c`, `rho`, `c_p` y `c_s` siguen siendo ahora aquellos con los que se
 calculó el paso de tiempo. Una `Signal` también guarda una copia propia de
 sus muestras, que sigue siendo escribible para procesarla en su sitio, como
 siempre lo fueron las muestras de un fichero leído con `io.read`. Un registro
-de resultado construido a mano, llamando directamente a su clase, guarda los
-arrays que se le dan, como hace una tupla. Escribir en uno de esos arrays
-lanza ahora `ValueError`, así que el código que retocaba uno en su sitio
-tiene que copiarlo antes:
+de resultado construido a mano, llamando directamente a su clase, hace la
+misma copia: todo registro público que puede guardar un array copia los
+arrays que recibe al construirse, lo construya quien lo construya, también
+dentro de una tupla, una lista o cualquier diccionario. Un registro guardado
+dentro de otro se guarda entero y responde de sus propios arrays, y una
+`Signal` no es una excepción: los siete resultados que devuelven una forma de
+onda como `Signal` (`filters.OctaveFilterResult`, `signals.EnvelopeResult`,
+`signals.ResampledSignalResult`, `signals.AlignedImpulseResponseResult`,
+`signals.SynchronousAverageResult`, `environment.DirectSoundSubtraction` y
+`underwater.PileStrikeResult`) guardan una propia cuando los construye la
+biblioteca, cuyas muestras siguen siendo escribibles como las de cualquier
+`Signal`, y guardan la de quien llama cuando se construyen a mano con ella.
+Todos los demás arrays que guarda un resultado rechazan las escrituras en su
+sitio, tanto los que calculó como los que recibió, cuando en la 3.3.0 la
+mayoría de los calculados las aceptaban. Escribir en uno lanza ahora
+`ValueError`, así que el código que retocaba uno en su sitio tiene que
+copiarlo antes:
 
 ```python
 import numpy as np
@@ -502,10 +515,15 @@ levels[0] = 0.0
 samples = np.zeros(4)
 signal = io.Signal(samples, fs=48_000)
 samples[0] = 1.0
+measured = np.array([1.0, 0.5, 0.25, 0.125])
+response = room.ImpulseResponseResult(ir=measured, fs=48_000, method="farina")
+measured[0] = 0.0
 edited = nc.levels.copy()
 edited[0] = 62.0
-print(nc.levels[0], nc.levels.flags.writeable, signal.data[0, 0], signal.data.flags.writeable)
-# 60.0 False 0.0 True
+print(nc.levels[0], nc.levels.flags.writeable, response.ir[0], response.ir.flags.writeable)
+print(signal.data[0, 0], signal.data.flags.writeable)
+# 60.0 False 1.0 False
+# 0.0 True
 ```
 
 ## Una fila de catálogo dice lo que su fuente afirma de cada celda

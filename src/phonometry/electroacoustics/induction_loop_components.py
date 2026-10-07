@@ -152,7 +152,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import optimize
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
     require_choice,
@@ -373,7 +373,7 @@ def _axis_field_per_ampere(length_m: float, width_m: float, height_m: float) -> 
 
 
 @dataclass(frozen=True)
-class LoopField:
+class LoopField(OwnsArrays):
     """The magnetic field of a rectangular induction loop at a set of points.
 
     The loop lies in the plane :math:`z = 0`, centred on the origin, with its
@@ -535,12 +535,12 @@ def rectangular_loop_field(
         length_m=length,
         width_m=width,
         turns=n,
-        x_m=read_only(xs.copy()),
-        y_m=read_only(ys.copy()),
-        z_m=read_only(zs.copy()),
-        h_x_a_per_m=read_only(total[..., 0].copy()),
-        h_y_a_per_m=read_only(total[..., 1].copy()),
-        h_z_a_per_m=read_only(total[..., 2].copy()),
+        x_m=xs,
+        y_m=ys,
+        z_m=zs,
+        h_x_a_per_m=total[..., 0],
+        h_y_a_per_m=total[..., 1],
+        h_z_a_per_m=total[..., 2],
     )
 
 
@@ -805,7 +805,7 @@ def _frequencies_to_read(frequency_hz: ArrayLike) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class LoopImpedance:
+class LoopImpedance(OwnsArrays):
     r"""The impedance of a loop, a resistance in series with an inductance.
 
     IEC 62489-1:2010 5.4.3.2 states the rated load "as a series combination of
@@ -895,13 +895,13 @@ def loop_impedance(
     f = (
         np.array(_THIRD_OCTAVE_CENTRES_HZ, dtype=np.float64)
         if frequencies_hz is None
-        else require_positive_array(frequencies_hz, "frequencies_hz").copy()
+        else require_positive_array(frequencies_hz, "frequencies_hz")
     )
     magnitude = np.hypot(resistance, 2.0 * math.pi * f * inductance)
     return LoopImpedance(
         resistance_ohm=resistance,
         inductance_h=inductance,
-        frequencies_hz=read_only(f),
+        frequencies_hz=f,
         impedance_ohm=read_only(magnitude),
     )
 
@@ -912,7 +912,7 @@ def loop_impedance(
 
 
 @dataclass(frozen=True)
-class MaximumOutputCurrent:
+class MaximumOutputCurrent(OwnsArrays):
     """The maximum (distortion-limited) output current of an amplifier (5.4.7).
 
     :ivar resistor_voltage_v: The total RMS voltage across the resistive part
@@ -995,8 +995,8 @@ def maximum_output_current(
         exceeds it at the first step, so the current lies outside the steps
         measured.
     """
-    voltage = require_positive_array(resistor_voltage_v, "resistor_voltage_v").copy()
-    thd = require_finite_array(thd_percent, "thd_percent").copy()
+    voltage = require_positive_array(resistor_voltage_v, "resistor_voltage_v")
+    thd = require_finite_array(thd_percent, "thd_percent")
     if np.any(thd < 0.0):
         msg = (
             f"'thd_percent' must be non-negative, got {float(np.min(thd)):g} %: "
@@ -1030,9 +1030,9 @@ def maximum_output_current(
         t = (rated - float(thd[k - 1])) / (float(thd[k]) - float(thd[k - 1]))
         maximum = float(current[k - 1] + t * (current[k] - current[k - 1]))
     return MaximumOutputCurrent(
-        resistor_voltage_v=read_only(voltage),
+        resistor_voltage_v=voltage,
         load_current_a=read_only(current),
-        thd_percent=read_only(thd),
+        thd_percent=thd,
         load_resistance_ohm=resistance,
         rated_thd_percent=rated,
         maximum_current_a=maximum,
@@ -1140,7 +1140,7 @@ def _ascending(frequencies: np.ndarray, name: str) -> None:
 
 
 @dataclass(frozen=True)
-class AmplifierFrequencyResponse:
+class AmplifierFrequencyResponse(OwnsArrays):
     """The frequency response of an amplifier into its load (IEC 62489-1:2010 5.4.12).
 
     :ivar frequencies_hz: The measurement frequencies, in hertz, ascending.
@@ -1211,8 +1211,8 @@ def amplifier_frequency_response(
     :param output_current_a: The RMS load current at each, in amperes.
     :return: An :class:`AmplifierFrequencyResponse`.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz").copy()
-    current = require_positive_array(output_current_a, "output_current_a").copy()
+    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    current = require_positive_array(output_current_a, "output_current_a")
     if f.size != current.size:
         msg = "'frequencies_hz' and 'output_current_a' must have the same length."
         raise ValueError(msg)
@@ -1220,8 +1220,8 @@ def amplifier_frequency_response(
     ref = _reference_index(f, "frequencies_hz")
     response = 20.0 * np.log10(current / current[ref])
     return AmplifierFrequencyResponse(
-        frequencies_hz=read_only(f),
-        output_current_a=read_only(current),
+        frequencies_hz=f,
+        output_current_a=current,
         response_db=read_only(response),
     )
 
@@ -1322,7 +1322,7 @@ def _widest_window(x: np.ndarray, y: np.ndarray, spread: float) -> tuple[float, 
 
 
 @dataclass(frozen=True)
-class AgcCharacteristic:
+class AgcCharacteristic(OwnsArrays):
     """The steady-state output/input characteristic of an amplifier (5.4.13).
 
     :ivar source_emf_db: The source e.m.f. levels, in dB, ascending.
@@ -1396,16 +1396,16 @@ def agc_characteristic(
         maximum output current.
     :return: An :class:`AgcCharacteristic`.
     """
-    x = require_finite_array(source_emf_db, "source_emf_db").copy()
-    y = require_finite_array(output_level_db, "output_level_db").copy()
+    x = require_finite_array(source_emf_db, "source_emf_db")
+    y = require_finite_array(output_level_db, "output_level_db")
     if x.size != y.size or x.size < _MIN_CHARACTERISTIC_POINTS:
         msg = "'source_emf_db' and 'output_level_db' need the same length, at least 2."
         raise ValueError(msg)
     _ascending(x, "source_emf_db")
     start, end = _widest_window(x, y, _AGC_OUTPUT_CHANGE_DB)
     return AgcCharacteristic(
-        source_emf_db=read_only(x),
-        output_level_db=read_only(y),
+        source_emf_db=x,
+        output_level_db=y,
         agc_range_db=end - start,
         agc_range_start_db=start,
         agc_range_end_db=end,
@@ -1413,7 +1413,7 @@ def agc_characteristic(
 
 
 @dataclass(frozen=True)
-class QuadraturePhaseError:
+class QuadraturePhaseError(OwnsArrays):
     r"""The phase error of a quadrature network for a phased loop array (5.4.14).
 
     Two adjacent loops fed with currents about 90 degrees apart make a field
@@ -1495,8 +1495,8 @@ def quadrature_phase_error(
         each, in degrees.
     :return: A :class:`QuadraturePhaseError`.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz").copy()
-    phase = require_finite_array(phase_difference_deg, "phase_difference_deg").copy()
+    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    phase = require_finite_array(phase_difference_deg, "phase_difference_deg")
     if f.size != phase.size:
         msg = "'frequencies_hz' and 'phase_difference_deg' must have the same length."
         raise ValueError(msg)
@@ -1510,8 +1510,8 @@ def quadrature_phase_error(
     indices = np.flatnonzero(inside)
     worst = int(indices[np.argmax(deviation[inside])])
     return QuadraturePhaseError(
-        frequencies_hz=read_only(f),
-        phase_difference_deg=read_only(phase),
+        frequencies_hz=f,
+        phase_difference_deg=phase,
         deviation_deg=read_only(deviation),
         max_deviation_deg=float(deviation[worst]),
         max_deviation_frequency_hz=float(f[worst]),
@@ -1538,7 +1538,7 @@ def _crossings(f: np.ndarray, response: np.ndarray, level: float) -> tuple[float
 
 
 @dataclass(frozen=True)
-class NeckLoopCharacteristics:
+class NeckLoopCharacteristics(OwnsArrays):
     """What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 
     :ivar frequencies_hz: The measurement frequencies, in hertz.
@@ -1618,10 +1618,8 @@ def neck_loop_characteristics(
         volts.
     :return: A :class:`NeckLoopCharacteristics`.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz").copy()
-    level = require_finite_array(
-        field_strength_level_db, "field_strength_level_db"
-    ).copy()
+    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    level = require_finite_array(field_strength_level_db, "field_strength_level_db")
     try:
         complex_input = np.iscomplexobj(impedance_ohm)
     except (TypeError, ValueError) as exc:
@@ -1630,7 +1628,7 @@ def neck_loop_characteristics(
     z = require_positive_array(
         np.abs(np.asarray(impedance_ohm)) if complex_input else impedance_ohm,
         "impedance_ohm",
-    ).copy()
+    )
     if not f.size == level.size == z.size:
         msg = (
             "'frequencies_hz', 'field_strength_level_db' and 'impedance_ohm' "
@@ -1647,9 +1645,9 @@ def neck_loop_characteristics(
         f, response, _NECK_LOOP_RESPONSE_STEP_DB
     )
     return NeckLoopCharacteristics(
-        frequencies_hz=read_only(f),
-        field_strength_level_db=read_only(level),
-        impedance_ohm=read_only(z),
+        frequencies_hz=f,
+        field_strength_level_db=level,
+        impedance_ohm=z,
         input_voltage_v=voltage,
         reference_input_voltage_v=voltage * 10.0 ** (-float(level[ref]) / 20.0),
         minimum_impedance_ohm=float(math.floor(minimum + 0.5)),

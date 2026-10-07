@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import round_half_away_from_zero
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
@@ -250,7 +250,7 @@ def _unfavourable_deviation_sum(
 
 
 @dataclass(frozen=True)
-class AbsorptionRatingResult:
+class AbsorptionRatingResult(OwnsArrays):
     r"""Weighted sound absorption rating (ISO 11654:1997).
 
     :ivar alpha_w: Weighted sound absorption coefficient ``alpha_w``, the
@@ -614,15 +614,13 @@ def _rate(
         absorption_class=absorption_class(alpha_w_units / 20.0),
         shift=shift_units / 20.0,
         unfavourable_sum=unfav_units / 20.0,
-        band_centers=np.array(OCTAVE_BANDS, dtype=np.float64),
+        band_centers=np.asarray(OCTAVE_BANDS, dtype=np.float64),
         measured=np.asarray([u / 20.0 for u in measured_units], dtype=np.float64),
         shifted_reference=np.asarray(
             [u / 20.0 for u in shifted_units], dtype=np.float64
         ),
         third_octave_alpha_s=(
-            None
-            if third_octave is None
-            else read_only_copy(third_octave, dtype=np.float64)
+            None if third_octave is None else np.asarray(third_octave, dtype=np.float64)
         ),
         third_octave_bands=(
             None

@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
     require_axis_rank,
@@ -2286,7 +2287,7 @@ def octave_bands_from_third_octaves(levels: ArrayLike) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class RollingStock:
+class RollingStock(OwnsArrays):
     """The Appendix G data of one vehicle type, on its own wavelength grids.
 
     Every field is the spectrum the method needs, so a Member State substitutes
@@ -2340,7 +2341,7 @@ class RailwayVehicle:
 
 
 @dataclass(frozen=True)
-class RailwayTrack:
+class RailwayTrack(OwnsArrays):
     """The Appendix G data of one track section.
 
     :ivar rail_roughness: ``(wavelengths in mm, levels in dB)`` of Table G-1b.
@@ -2366,7 +2367,7 @@ class RailwayTrack:
 
 
 @dataclass(frozen=True)
-class RailwayEmissionResult:
+class RailwayEmissionResult(OwnsArrays):
     """Directional sound power per metre of a CNOSSOS-EU railway source.
 
     :ivar third_octave_frequencies: The 24 1/3-octave midband frequencies, Hz.

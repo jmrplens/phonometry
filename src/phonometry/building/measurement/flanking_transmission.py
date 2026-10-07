@@ -77,7 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_counts,
@@ -324,7 +324,7 @@ def _broadcast(values: np.ndarray, n_bands: int, name: str) -> np.ndarray:
 # Vibration reduction index (Part 1, Clause 3.9)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class VibrationReductionResult:
+class VibrationReductionResult(OwnsArrays):
     """Per-band vibration reduction index ``Kij`` (ISO 10848-1:2006).
 
     :ivar frequencies: Band centre frequencies, in Hz, or ``None`` when they
@@ -627,7 +627,7 @@ def vibration_reduction_index(
 
     k_ij = dv + 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
     return VibrationReductionResult(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         k_ij=k_ij,
         single_number=_single_number_kij(
             freq, k_ij, bracketed=bracketed, band_type=_detect_band_type(freq)
@@ -709,7 +709,7 @@ def vibration_reduction_index_from_flanking(
 # Overall flanking descriptors (Part 1, Clauses 3.2/3.3)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class FlankingLevelDifferenceResult:
+class FlankingLevelDifferenceResult(OwnsArrays):
     r"""Normalized flanking level difference ``Dn,f`` (airborne, Formula (4)).
 
     :ivar d_n_f: :math:`D_\mathrm{n,f} = L_1 - L_2 - 10 \log_{10}(A/A_0)` per band, in dB.
@@ -793,7 +793,7 @@ class FlankingLevelDifferenceResult:
 
 
 @dataclass(frozen=True)
-class FlankingImpactLevelResult:
+class FlankingImpactLevelResult(OwnsArrays):
     r"""Normalized flanking impact level ``Ln,f`` (Formula (5)).
 
     :ivar l_n_f: :math:`L_\mathrm{n,f} = L_2 + 10 \log_{10}(A/A_0)` per band, in dB.

@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -254,7 +255,7 @@ def _overload_spl(
 
 
 @dataclass(frozen=True)
-class MicrophoneDirectivity:
+class MicrophoneDirectivity(OwnsArrays):
     r"""Directional characteristics of the microphone (IEC 60268-4 Clause 13).
 
     The clause's two characteristics travel together: the directional pattern
@@ -282,7 +283,7 @@ _DEFAULT_DIRECTIVITY = MicrophoneDirectivity()
 
 
 @dataclass(frozen=True)
-class MicrophoneNoise:
+class MicrophoneNoise(OwnsArrays):
     """Inherent noise of the microphone (IEC 60268-4 Clause 17).
 
     The clause specifies the equivalent sound pressure level due to inherent
@@ -326,7 +327,7 @@ _NOISE_WEIGHTINGS = ("A", "468")
 
 
 @dataclass(frozen=True)
-class MicrophoneOverload:
+class MicrophoneOverload(OwnsArrays):
     """Overload sound pressure and the distortion it is read from (14.2/15.2).
 
     The limiting characteristic of IEC 60268-4 15.2 is the maximum sound
@@ -379,7 +380,7 @@ _DEFAULT_ELECTRICAL = MicrophoneElectrical()
 
 
 @dataclass(frozen=True)
-class MicrophoneCharacteristics:
+class MicrophoneCharacteristics(OwnsArrays):
     r"""Rated microphone characteristics for an IEC 60268-4 report.
 
     The free-field frequency response and the rated free-field sensitivity are

@@ -109,6 +109,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_non_negative,
     require_positive,
@@ -172,7 +173,7 @@ def _like(values: NDArray[np.float64]) -> float | NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class EmissionPressureResult:
+class EmissionPressureResult(OwnsArrays):
     r"""An emission sound pressure level and the two corrections behind it.
 
     :ivar level_db: Emission sound pressure level :math:`L_p`, in decibels

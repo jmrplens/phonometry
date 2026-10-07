@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     require_finite_fields,
@@ -150,7 +150,7 @@ def _warn_outside_domain(l_ex: float, years: float, fractile: float) -> None:
 
 
 @dataclass(frozen=True)
-class NiptsResult:
+class NiptsResult(OwnsArrays):
     """Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
 
     All arrays are in dB and aligned with :data:`NIPTS_FREQUENCIES`.
@@ -313,7 +313,7 @@ class NiptsResult:
 
 
 @dataclass(frozen=True)
-class HtlanResult:
+class HtlanResult(OwnsArrays):
     r"""Hearing threshold level associated with age and noise (clause 6.1).
 
     All arrays are in dB and aligned with :data:`NIPTS_FREQUENCIES`.
@@ -468,7 +468,7 @@ class HtlanResult:
 def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
-        return values.copy()
+        return values
     fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     idx = []
     for f in fr:

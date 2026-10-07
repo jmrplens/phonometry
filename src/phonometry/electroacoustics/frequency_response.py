@@ -29,6 +29,8 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
+
 # Shared Welch-core defaults and helpers (single source of truth for the
 # segment policy across the spectral estimators).
 from .._internal.validation import (
@@ -135,7 +137,7 @@ def _welch_params(
 
 
 @dataclass(frozen=True)
-class FrequencyResponseResult:
+class FrequencyResponseResult(OwnsArrays):
     r"""Estimated frequency response of an input/output path (Bendat &
     Piersol).
 

@@ -130,7 +130,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_count,
     require_finite,
@@ -483,7 +483,7 @@ def equal_area_incidence_angles() -> tuple[NDArray[np.float64], NDArray[np.float
 
 
 @dataclass(frozen=True)
-class DirectivityFactor:
+class DirectivityFactor(OwnsArrays):
     r"""The directivity factor of a sound level meter at one frequency
     (IEC 61183:1994, Formulas (A.3) to (A.5)).
 
@@ -542,7 +542,7 @@ class DirectivityFactor:
             raise ValueError(msg)
         columns = ("incidence_angles_deg", "plane_angles_deg", "levels_db", "weights")
         arrays = {
-            name: np.array(getattr(self, name), dtype=np.float64) for name in columns
+            name: np.asarray(getattr(self, name), dtype=np.float64) for name in columns
         }
         shapes = {name: array.shape for name, array in arrays.items()}
         if len(set(shapes.values())) != 1 or np.ndim(arrays["levels_db"]) != 1:
@@ -677,7 +677,7 @@ def _from_planes(
     return DirectivityFactor(
         incidence_angles_deg=angles,
         plane_angles_deg=plane_angles,
-        levels_db=read_only_copy(flat),
+        levels_db=flat,
         weights=weights,
         reference_level_db=lrd,
         gamma=_gamma(flat, weights, lrd),
@@ -887,7 +887,7 @@ def _frequency_axis(frequencies_hz: ArrayLike) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class RandomIncidenceSensitivity:
+class RandomIncidenceSensitivity(OwnsArrays):
     r"""The random-incidence sensitivity level of a sound level meter, band by
     band (IEC 61183:1994, Formulas (1) and (A.6)).
 
@@ -919,7 +919,7 @@ class RandomIncidenceSensitivity:
             "random_incidence_level_db",
         )
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in columns[1:]:
             column = require_finite_array(getattr(self, name), name)
             if column.size != frequencies.size:
@@ -928,7 +928,7 @@ class RandomIncidenceSensitivity:
                     f"frequency ({frequencies.size}); got {column.size}."
                 )
                 raise ValueError(msg)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def correction_db(self) -> NDArray[np.float64]:
@@ -1001,8 +1001,8 @@ def random_incidence_sensitivity(
     index = _band_column(directivity_index_db, "directivity_index_db", frequencies)
     return RandomIncidenceSensitivity(
         frequencies_hz=frequencies,
-        free_field_level_db=read_only_copy(free_field),
-        directivity_index_db=read_only_copy(index),
+        free_field_level_db=free_field,
+        directivity_index_db=index,
         random_incidence_level_db=free_field - index,
     )
 
@@ -1036,7 +1036,7 @@ def _table_b1_column(
 
 
 @dataclass(frozen=True)
-class DiffuseFieldSensitivity:
+class DiffuseFieldSensitivity(OwnsArrays):
     r"""The diffuse-field sensitivity level of a sound level meter, by
     comparison with a reference instrument (IEC 61183:1994, clause 5).
 
@@ -1090,7 +1090,7 @@ class DiffuseFieldSensitivity:
             )
             raise ValueError(msg)
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in (
             "indicated_level_db",
             "reference_indicated_level_db",
@@ -1104,7 +1104,7 @@ class DiffuseFieldSensitivity:
                     f"frequency ({frequencies.size}); got {column.size}."
                 )
                 raise ValueError(msg)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def level_difference_db(self) -> NDArray[np.float64]:

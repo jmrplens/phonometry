@@ -82,7 +82,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import require_count, require_finite, require_positive
 
 if TYPE_CHECKING:
@@ -401,7 +401,7 @@ def _merge_undefined_classes(
 
 
 @dataclass(frozen=True)
-class SelDistribution:
+class SelDistribution(OwnsArrays):
     r"""The statistical distribution of a single-event sound exposure level
     (ISO 13474:2009, clause 5).
 

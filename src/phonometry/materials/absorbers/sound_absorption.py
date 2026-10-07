@@ -59,7 +59,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_above_absolute_zero,
@@ -405,7 +405,7 @@ def absorption_coefficient(
 
 
 @dataclass(frozen=True)
-class SoundAbsorptionMeasurement:
+class SoundAbsorptionMeasurement(OwnsArrays):
     """A reverberation-room sound absorption measurement (ISO 354:2003).
 
     The one-third-octave outcome of a plane-absorber test: the mean
@@ -685,9 +685,9 @@ def measure_sound_absorption(
         m2=m_arr,
     )
     return SoundAbsorptionMeasurement(
-        frequencies=read_only_copy(freqs),
-        t_empty=read_only_copy(t1),
-        t_specimen=read_only_copy(t2),
+        frequencies=freqs,
+        t_empty=t1,
+        t_specimen=t2,
         volume=float(volume),
         area=float(area),
         temperature_c=float(temperature_c),

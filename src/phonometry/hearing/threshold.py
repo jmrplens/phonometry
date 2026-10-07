@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_ranks, require_same_length
 
 if TYPE_CHECKING:
@@ -188,7 +188,7 @@ _REFERENCE_AGE = 18.0  # lower age limit of the ISO 7029 formulae.
 
 
 @dataclass(frozen=True)
-class AgeThresholdResult:
+class AgeThresholdResult(OwnsArrays):
     """Age-related hearing threshold distribution (ISO 7029:2017).
 
     All arrays are in dB and aligned with :data:`AUDIOMETRIC_FREQUENCIES`.

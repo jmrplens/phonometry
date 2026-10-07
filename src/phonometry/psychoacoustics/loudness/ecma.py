@@ -58,6 +58,7 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
@@ -250,7 +251,7 @@ _G_Z = _g_of_z()
 
 
 @dataclass(frozen=True)
-class EcmaLoudness:
+class EcmaLoudness(OwnsArrays):
     """Result of an ECMA-418-2:2025 (Sottek) loudness calculation.
 
     ``loudness`` is the single representative loudness N in sone_HMS
@@ -759,8 +760,8 @@ def loudness_ecma(
     return EcmaLoudness(
         loudness=n_single,
         specific_loudness=n_spec,
-        bark=_Z.copy(),
-        centre_frequencies=_F_CENTRE.copy(),
+        bark=_Z,
+        centre_frequencies=_F_CENTRE,
         times=time,
         loudness_vs_time=n_time,
         field=field,

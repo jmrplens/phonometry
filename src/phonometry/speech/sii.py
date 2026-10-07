@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     require_axis_count,
@@ -727,7 +727,7 @@ def _procedure(method: str) -> _BandProcedure:
 
 
 @dataclass(frozen=True)
-class SIIResult:
+class SIIResult(OwnsArrays):
     """Result of a Speech Intelligibility Index computation (ANSI S3.5-1997).
 
     :ivar sii: The overall Speech Intelligibility Index in [0, 1] (clause 6).
@@ -915,7 +915,7 @@ def standard_speech_spectrum(vocal_effort: str = "normal") -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class StandardSpeechSpectrum:
+class StandardSpeechSpectrum(OwnsArrays):
     """The ANSI S3.5-1997 standard speech spectra by vocal effort (Table 3).
 
     Bundles the standard speech spectrum level ``Ui`` of one or more vocal
@@ -1018,7 +1018,7 @@ def standard_speech_spectra(
         dtype=np.float64,
     )
     return StandardSpeechSpectrum(
-        frequencies=BAND_CENTERS.copy(),
+        frequencies=BAND_CENTERS,
         vocal_efforts=efforts,
         levels=levels,
     )
@@ -1173,7 +1173,7 @@ def speech_intelligibility_index(
         else _as_band_vector(threshold, "threshold", proc)
     )
     importance = (
-        proc.band_importance.copy()
+        proc.band_importance
         if band_importance is None
         else _as_band_vector(band_importance, "band_importance", proc)
     )
@@ -1210,9 +1210,9 @@ def speech_intelligibility_index(
     return SIIResult(
         sii=sii,
         band_audibility=a,
-        band_importance=read_only_copy(importance),
-        frequencies=proc.frequencies.copy(),
-        speech_spectrum=read_only_copy(e),
+        band_importance=importance,
+        frequencies=proc.frequencies,
+        speech_spectrum=e,
         disturbance=d,
         masking=z,
         level_distortion=level_factor,
@@ -1221,7 +1221,7 @@ def speech_intelligibility_index(
 
 
 @dataclass(frozen=True)
-class SIIProcedure:
+class SIIProcedure(OwnsArrays):
     """The tabulated band table of one ANSI S3.5-1997 band procedure.
 
     Bundles the normative constants of one of the standard's four band
@@ -1349,9 +1349,9 @@ def sii_procedure(method: str = "one-third-octave") -> SIIProcedure:
     proc = _procedure(method)
     return SIIProcedure(
         method=proc.method,
-        frequencies=proc.frequencies.copy(),
-        band_edges=proc.band_edges.copy(),
-        band_importance=proc.band_importance.copy(),
-        internal_noise=proc.internal_noise.copy(),
-        speech_spectrum=proc.speech_spectrum.copy(),
+        frequencies=proc.frequencies,
+        band_edges=proc.band_edges,
+        band_importance=proc.band_importance,
+        internal_noise=proc.internal_noise,
+        speech_spectrum=proc.speech_spectrum,
     )

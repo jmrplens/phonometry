@@ -75,7 +75,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 from .._internal.catalogue import CatalogueRow
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only_copy
 from .._internal.validation import require_ranks, require_same_length
 from .fdtd import (
     _SIDES,
@@ -1098,7 +1098,7 @@ class ElasticFDTD2D:
 
 
 @dataclass(frozen=True)
-class ElasticFDTDResult:
+class ElasticFDTDResult(OwnsArrays):
     r"""Frozen result of an :func:`elastic_fdtd_simulation` run.
 
     :ivar times: Time axis [s], length ``n_steps + 1`` (includes
@@ -1502,6 +1502,6 @@ def elastic_fdtd_simulation(
             np.asarray(frame_steps, dtype=np.float64) * sim.dt if frame_steps else None
         ),
         snapshot_field=snapshot_field,
-        obstacle_mask=(sim._obstacle.copy() if sim._obstacle is not None else None),
+        obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
         free_sides=sim.free_sides,
     )

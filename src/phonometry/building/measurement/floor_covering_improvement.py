@@ -55,7 +55,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -182,7 +182,7 @@ def background_corrected_level(
 
 
 @dataclass(frozen=True)
-class FloorCoveringImprovementResult:
+class FloorCoveringImprovementResult(OwnsArrays):
     r"""Impact-sound improvement of a floor covering (ISO 16251-1).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
@@ -462,7 +462,7 @@ def impact_improvement(
         limited = limited_pos
     delta_lw, ci_delta = _rating(improvement, freqs)
     return FloorCoveringImprovementResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         improvement=improvement,
         limited=limited,
         delta_lw=delta_lw,

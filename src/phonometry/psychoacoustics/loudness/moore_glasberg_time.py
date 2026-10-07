@@ -71,6 +71,7 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_ranks, require_same_length
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .moore_glasberg import (
@@ -353,7 +354,7 @@ _LOG_T5_SONE = np.log10(_T5_SONE)
 
 
 @dataclass(frozen=True)
-class MooreGlasbergTimeVaryingLoudness:
+class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
     """Result of an ISO 532-3:2023 time-varying loudness calculation.
 
     ``times`` is the frame time axis in seconds (1 ms spacing, clause 7.3).

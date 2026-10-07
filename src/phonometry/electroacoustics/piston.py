@@ -82,7 +82,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import special
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_finite_fields,
     require_positive,
@@ -192,11 +192,11 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
 #: front hemisphere ``-90 deg`` to ``+90 deg`` (the baffle blocks the rear),
 #: 0.5 deg apart, so the beam pattern is smooth even for a narrow high-``ka``
 #: main lobe.
-_DEFAULT_DIRECTIVITY_ANGLES = np.radians(np.linspace(-90.0, 90.0, 361))
+_DEFAULT_DIRECTIVITY_ANGLES = read_only(np.radians(np.linspace(-90.0, 90.0, 361)))
 
 
 @dataclass(frozen=True)
-class PistonDirectivity:
+class PistonDirectivity(OwnsArrays):
     r"""Far-field directivity pattern of a baffled circular piston.
 
     Bundles the far-field directivity
@@ -304,7 +304,7 @@ def piston_directivity_pattern(
         raise ValueError(msg)
 
     if angles_rad is None:
-        angle_arr = _DEFAULT_DIRECTIVITY_ANGLES.copy()
+        angle_arr = _DEFAULT_DIRECTIVITY_ANGLES
     else:
         angle_arr = np.atleast_1d(np.asarray(angles_rad, dtype=np.float64))
         if angle_arr.ndim != 1 or angle_arr.size == 0:
@@ -321,8 +321,8 @@ def piston_directivity_pattern(
     tiny = np.finfo(np.float64).tiny
     directivity_db = 20.0 * np.log10(np.maximum(np.abs(directivity), tiny))
     return PistonDirectivity(
-        angles_rad=read_only_copy(angle_arr),
-        ka=read_only_copy(ka_arr),
+        angles_rad=angle_arr,
+        ka=ka_arr,
         directivity=directivity,
         directivity_db=directivity_db,
     )
@@ -347,7 +347,7 @@ def _directivity_index(ka: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class RadiatingPistonResult:
+class RadiatingPistonResult(OwnsArrays):
     r"""Radiation impedance and directivity of a baffled circular piston.
 
     :ivar frequencies: Frequencies ``f``, Hz.
@@ -558,7 +558,7 @@ def radiating_piston(
         )
 
     return RadiatingPistonResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         ka=ka,
         resistance=r1,
         reactance=x1,
@@ -566,7 +566,7 @@ def radiating_piston(
         radiation_reactance=rho_c_s * x1,
         radiation_mass=radiation_mass,
         directivity_index=di,
-        angles_rad=read_only_copy(angle_arr),
+        angles_rad=angle_arr,
         directivity=directivity,
         radius=a,
         speed_of_sound=c,

@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from .cepstrum import _fold_causal
 
@@ -239,7 +240,7 @@ def excess_phase(
 
 
 @dataclass(frozen=True)
-class PhaseDecompositionResult:
+class PhaseDecompositionResult(OwnsArrays):
     r"""Minimum-phase / all-pass decomposition of a frequency response.
 
     :ivar frequencies: Frequency axis, in Hz.

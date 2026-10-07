@@ -119,7 +119,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_choice,
@@ -455,7 +455,7 @@ def free_field_absorption_correction(
 
 
 @dataclass(frozen=True)
-class HighFrequencySoundPowerResult:
+class HighFrequencySoundPowerResult(OwnsArrays):
     r"""A sound power determination in the 16 kHz octave band (ISO 9295:2015).
 
     One value per band: a one-third octave band of the 16 kHz octave for
@@ -656,9 +656,9 @@ def high_frequency_sound_power(
     c2 = _c2_correction(temperature_c, static_pressure_kpa)
     level = mean_level - 10.0 * np.log10(_DIFFUSE_FIELD_FOUR / room_constant) + c1 + c2
     return HighFrequencySoundPowerResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_power_level=np.asarray(level, dtype=np.float64),
-        mean_pressure_level=read_only_copy(mean_level),
+        mean_pressure_level=mean_level,
         room_constant=room_constant,
         reference_sound_power_level=None,
         reference_pressure_level=None,
@@ -778,12 +778,12 @@ def high_frequency_sound_power_comparison(
     c2 = _c2_correction(temperature_c, static_pressure_kpa)
     level = reference_power - reference_level + mean_level + bandwidth_term + c2
     return HighFrequencySoundPowerResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_power_level=np.asarray(level, dtype=np.float64),
-        mean_pressure_level=read_only_copy(mean_level),
+        mean_pressure_level=mean_level,
         room_constant=None,
         reference_sound_power_level=reference_power,
-        reference_pressure_level=read_only_copy(reference_level),
+        reference_pressure_level=reference_level,
         noise_bandwidth_hz=bandwidth,
         c1=float("nan"),
         c2=c2,

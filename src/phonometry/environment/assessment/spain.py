@@ -86,6 +86,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -361,7 +362,7 @@ def round_reported_level(value: float) -> int:
 # Corrections Kt, Kf, Ki (Annex IV A.3.3)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class TonalCorrectionResult:
+class TonalCorrectionResult(OwnsArrays):
     r"""Tonal correction ``Kt`` of RD 1367/2007 (Annex IV A.3.3).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
@@ -541,10 +542,8 @@ def tonal_correction(
         correction = float(band_kt[best])
         governing = float(freqs[best]) if correction > 0.0 else None
     return TonalCorrectionResult(
-        # Copy so a later mutation of the caller's arrays cannot rewrite the
-        # spectrum this result reports.
-        frequencies=freqs.copy(),
-        levels=band_levels.copy(),
+        frequencies=freqs,
+        levels=band_levels,
         differences=differences,
         band_corrections=band_kt,
         correction=correction,

@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 from scipy import signal
 
+from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import (
@@ -424,7 +425,7 @@ def _section_sos(fs: float, section: EQSection) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class EQResponseResult:
+class EQResponseResult(OwnsArrays):
     """Frequency response of a parametric-EQ cascade (RBJ Audio EQ Cookbook).
 
     :ivar frequencies: Evaluation frequencies, in Hz (log-spaced).
@@ -633,7 +634,7 @@ class ParametricEQ:
             magnitude_db=20 * np.log10(np.abs(h) + tiny),
             phase_rad=np.unwrap(np.angle(h)),
             section_magnitude_db=20 * np.log10(np.abs(h_sections) + tiny),
-            sos=self.sos.copy(),
+            sos=self.sos,
             fs=self.fs,
             sections=self.sections,
         )

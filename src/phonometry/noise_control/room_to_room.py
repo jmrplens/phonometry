@@ -104,7 +104,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_non_negative,
@@ -129,7 +129,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class SourceRoom:
+class SourceRoom(OwnsArrays):
     r"""The source room of the chain: what drives the partition.
 
     Two ways to say the same thing, and exactly one of them is given. Either
@@ -210,7 +210,7 @@ class DesignCriterion:
 
 
 @dataclass(frozen=True)
-class RoomToRoomResult:
+class RoomToRoomResult(OwnsArrays):
     r"""The room-to-room chain of one partition (Norton 2e, 4.9).
 
     Built by :func:`room_to_room_transmission`. The four spectra are the four
@@ -621,15 +621,15 @@ def room_to_room_transmission(
     direct = _partition_direct_field(s_w, r_2)
     nr = tl - 10.0 * np.log10(s_w / total_absorption + direct) - penalty
     return RoomToRoomResult(
-        frequencies=read_only_copy(f),
-        source_level=read_only_copy(lp1),
-        transmission_loss=read_only_copy(tl),
+        frequencies=f,
+        source_level=lp1,
+        transmission_loss=tl,
         partition_area=s_w,
-        receiving_absorption=read_only_copy(absorption),
+        receiving_absorption=absorption,
         noise_reduction=nr,
         received_level=lp1 - nr,
         flanking_penalty=penalty,
-        source_power_level=read_only_copy(lw),
+        source_power_level=lw,
         criterion=family,
         target=goal,
         label=label,

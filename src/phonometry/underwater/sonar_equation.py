@@ -53,7 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_rank,
     require_equal_shapes,
@@ -99,7 +99,7 @@ def _finite_array(
 
 
 @dataclass(frozen=True)
-class SonarEquationResult:
+class SonarEquationResult(OwnsArrays):
     r"""Sonar-equation solution.
 
     :ivar mode: ``"passive"`` or ``"active"``.
@@ -238,7 +238,7 @@ def passive_sonar_equation(
         signal_excess=signal_excess,
         snr=snr,
         figure_of_merit=float(fom),
-        propagation_loss=read_only_copy(pl),
+        propagation_loss=pl,
         source_level=sl,
         noise_level=nl,
         directivity_index=di,
@@ -298,7 +298,7 @@ def active_sonar_equation(
         signal_excess=signal_excess,
         snr=snr,
         figure_of_merit=float(fom),
-        propagation_loss=read_only_copy(pl),
+        propagation_loss=pl,
         source_level=sl,
         noise_level=nl,
         directivity_index=di,
@@ -309,7 +309,7 @@ def active_sonar_equation(
 
 
 @dataclass(frozen=True)
-class DetectionRangeResult:
+class DetectionRangeResult(OwnsArrays):
     r"""Detection range obtained by inverting a propagation-loss law.
 
     :ivar detection_range: Range at which ``PL`` equals the figure of merit, in

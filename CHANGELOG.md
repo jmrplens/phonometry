@@ -2104,9 +2104,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   object owns, made read-only like the published tables through the new
   private helper `read_only_copy`; a `Signal`'s copy stays writeable, as the
   samples of a file read with `io.read` always were. A result record built by
-  hand, by calling its class directly, holds the arrays it is handed, as a
-  tuple does. The values are the same, and writing into one of those arrays
-  now raises `ValueError`. `make array-aliasing` and a CI job of its own keep
+  hand, by calling its class directly, makes the same copy, as the next entry
+  says. The values are the same, and writing into one of those arrays now
+  raises `ValueError`. `make array-aliasing` and a CI job of its own keep
   the next one out: an AST data-flow walk follows every parameter through
   assignments, views, containers and the package's own helpers to the record
   fields, `object.__setattr__` calls, `dataclasses.replace` copies, the
@@ -2114,6 +2114,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   an array is kept, and fails on one that is not a copy. On the tree it was
   written against it found 357 such places in 123 modules. The migration
   guide says what changes for code that edited a result's array in place.
+
+- **Every public record keeps a read-only copy of its own of the arrays it
+  holds, however it was built.** The copies above were made by the
+  library's functions, so a record a caller built by hand, by calling its
+  class directly (`room.ImpulseResponseResult(ir=measured, ...)`, or
+  `aircraft.AnpNpdCurves(...)` filled from the caller's own NPD data), still
+  kept the arrays it was handed, and editing them afterwards edited the
+  record. Every one of the 428 public records that can hold an array now
+  inherits one private base that replaces each array it is built with, also
+  inside a tuple, a list or any mapping, by a read-only C-ordered copy of
+  its own before the class's own checks run, whoever builds it; the
+  caller's array keeps its `writeable` flag. A mapping that holds an array
+  comes back as a plain `dict` (a `MappingProxyType` as one), never as the
+  caller's own container. A record held whole inside another is left as it
+  is and answers for its own arrays, and an `io.Signal` is no exception: the
+  seven results that hand a waveform back as a `Signal`
+  (`filters.OctaveFilterResult`, `signals.EnvelopeResult`,
+  `signals.ResampledSignalResult`, `signals.AlignedImpulseResponseResult`,
+  `signals.SynchronousAverageResult`, `environment.DirectSoundSubtraction`
+  and `underwater.PileStrikeResult`) hold one of their own when the library
+  builds them, whose samples stay writeable like any `Signal`'s, and the
+  caller's own when built by hand around it. Every other array a result
+  holds now refuses in-place writes, the arrays it computed as well as the
+  ones it was given, so code that edited a result's array in place copies
+  it first, as the migration guide shows. The functions of the library no
+  longer copy an array they hand to such a record, and the records' own
+  checks no longer copy one either, so no array is copied twice: 340
+  `read_only_copy`, 199 `.copy()` and 10 `.astype` calls are gone.
+  The copy takes no time worth the name beside the computation (43 ms for
+  the 269 MB that a 400 by 600 cell FDTD run with a snapshot every ten steps
+  holds, out of 7 s), but while the record is being built the solver's
+  arrays and the record's copy are both alive, so the peak memory of the
+  largest results grows by their size: from 587 to 855 MB for that FDTD run,
+  from 202 to 333 MB for a 20 km underwater parabolic equation on 4096
+  depths in 5 m steps, from 207 to 287 MB for an elastic FDTD run on 200 by
+  500 cells with its snapshots and from 112 to 139 MB for a 1 kHz
+  atmospheric GFPE field 3 km long and 100 m high. `make array-aliasing`
+  now also fails on a public record that can hold an array and does not
+  inherit the copy, which it finds 428 times on the tree before this
+  change, and on a copy written around an array handed to one (`.astype`
+  included) or made first into a name that is only read before it is
+  handed over.
 
 - **The Spanish edition calls a sine wave a sinusoide, and an expanded
   uncertainty an incertidumbre expandida.** Thirty-nine places of the Spanish

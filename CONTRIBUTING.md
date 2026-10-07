@@ -863,25 +863,47 @@ it is already `float64`, and so do the validation helpers of
 `phonometry._internal.validation`, which are built on it. A result that
 stores what they return shares memory with the caller, so the caller's next
 `levels[0] = 0.0` changes a result already computed, and nothing raises. A
-view does the same: `levels[:, 0]`, `levels.T`, `levels.reshape(-1)`. Store a
-copy of its own instead, through `phonometry._internal.frozen.read_only_copy`,
-which copies and clears the `writeable` flag on the copy; never call
-`read_only` on an array that came in as an argument, because it clears the
-flag on the caller's array, or on a view of it while the result still shares
-its memory. A record that normalises its fields in `__post_init__` copies them
-there, and then every factory that builds it is covered.
+view does the same: `levels[:, 0]`, `levels.T`, `levels.reshape(-1)`.
+
+A public record that can hold an array inherits
+`phonometry._internal.frozen.OwnsArrays`, last among its bases. It replaces
+every array the record is built with (also inside a tuple, a list or a
+mapping) by a read-only copy of its own, whoever builds the record, so a
+caller writing the class by hand is covered as surely as a factory, and it
+runs before the class's own `__post_init__`, which it wraps rather than
+replaces: what `__post_init__` reads back from `self` is already the
+record's copy, so normalise and seal it there with `read_only`, never with a
+second copy. A factory hands such a record the array as it is; a
+`read_only_copy`, a `.copy()` or an `.astype` around it copies the same
+array twice, and a type that has to change is written
+`np.asarray(values, dtype=...)`, which converts only when it must. A record
+held in a field is left alone and answers for its own arrays, an
+`io.Signal` included, whose samples stay writeable.
+
+Anything else that keeps an array it was handed (a plain class, a private
+record) stores a copy of its own through
+`phonometry._internal.frozen.read_only_copy`, which copies and clears the
+`writeable` flag on the copy; never call `read_only` on an array that came
+in as an argument, because it clears the flag on the caller's array, or on a
+view of it while the result still shares its memory.
 
 ```bash
 python scripts/check_array_aliasing.py   # or: make array-aliasing
 ```
 
-The gate follows every parameter of every function through assignments,
-views, containers and the package's own helpers to the places an array is
-kept: a field of a public record (when its annotation can hold an array),
-`object.__setattr__` on a public record, `dataclasses.replace` on a record
-that came in as an argument, an attribute a plain public class sets on itself
-in any of its methods (`self._grid = grid`, `self._layers.append(layer)`),
-and `read_only` anywhere. An attribute with no annotation of its own is read
+The gate first reads the classes: a public record with a field annotated as
+something that can hold an array and no `OwnsArrays` among its bases fails,
+and so does a copy written around an array handed to one that has it, or
+made first into a name (`f = levels.copy()`) that is only read before it is
+handed over (`frequencies_hz=read_only(f)`); a copy the function writes
+into, binds again or keeps a view of is left alone. Then
+it follows every parameter of every function through assignments, views,
+containers and the package's own helpers to the places an array is kept: a
+field of a public record that does not copy it, `object.__setattr__` on a
+public record, `dataclasses.replace` on a record that came in as an argument
+and does not copy, an attribute a plain public class sets on itself in any
+of its methods (`self._grid = grid`, `self._layers.append(layer)`), and
+`read_only` anywhere. An attribute with no annotation of its own is read
 through the annotation of the parameter it came from, so `self.fs = fs` with
 `fs: float` keeps a number and `self._grid = grid` with `grid: ArrayLike`
 keeps an array; the package's type aliases are read too. Arithmetic, a copy,
@@ -890,9 +912,9 @@ mask only when every return of its own is one. It reads names, not types, so
 a private helper is held to the rule whatever its callers pass today, and a
 value that only looks like an array to it can go into `EXEMPT` at the top of
 the script with the reason; an entry that no longer covers anything fails the
-gate too. The docstring of the script lists what it does not read: records a
-caller builds by hand, records a result holds whole, and arrays returned
-bare.
+gate too, and `RECORD_EXEMPT` does the same for a record class. The
+docstring of the script lists what it does not read: records a result holds
+whole, and arrays returned bare.
 
 ### 8. Writing the code fences of a documentation page
 

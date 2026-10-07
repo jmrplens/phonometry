@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.signal as sig
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.validation import (
     _as_float64,
@@ -422,7 +423,7 @@ def passage_average_level(
 
 
 @dataclass(frozen=True)
-class AmplitudeDistribution:
+class AmplitudeDistribution(OwnsArrays):
     r"""How often each velocity occurred in a stretch, Formula (11).
 
     :ivar edges_mm_s: The bin edges, in millimetres per second.
@@ -735,7 +736,7 @@ def centred_interval(
 
 
 @dataclass(frozen=True)
-class TrainPassage:
+class TrainPassage(OwnsArrays):
     r"""One passage reduced the way Clauses 5 to 7 reduce it.
 
     :ivar velocity_mm_s: The velocity the meter's railway band limitation

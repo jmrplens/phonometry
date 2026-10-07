@@ -255,8 +255,10 @@ def test_result_fields_and_copy() -> None:
     assert result.frequencies.shape == (10,)
     assert result.levels.shape == (10,)
     assert result.reference_curve.shape == (10,)
-    # The returned frequencies must not alias the module constant.
-    result.frequencies[0] = 0.0
+    # The returned frequencies are the result's own copy, not the module
+    # constant, and refuse writes like every array a result holds.
+    assert not np.shares_memory(result.frequencies, rn.OCTAVE_BANDS)
+    assert not result.frequencies.flags.writeable
     assert rn.OCTAVE_BANDS[0] == 16.0
 
 

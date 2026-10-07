@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     require_finite_fields,
@@ -250,7 +250,7 @@ def _band_energy_sum(band_sel: NDArray[np.float64]) -> float:
 
 
 @dataclass(frozen=True)
-class PileStrikeResult:
+class PileStrikeResult(OwnsArrays):
     """Per-strike pile-driving metrics (ISO 18406).
 
     :ivar single_strike_sel: Single-strike SEL, in dB re 1 µPa²·s.
@@ -338,7 +338,7 @@ class PileStrikeResult:
 
 
 @dataclass(frozen=True)
-class StrikeSelSpectrum:
+class StrikeSelSpectrum(OwnsArrays):
     """Single-strike sound exposure level resolved into fractional-octave bands.
 
     :ivar frequencies: Nominal band centre frequencies, in Hz.
@@ -574,6 +574,6 @@ def pile_strike_metrics(
         peak_spl=peak_sound_pressure_level(sig),
         spl=sound_pressure_level(sig),
         pulse_duration=_pulse_duration(sig, fs_v),
-        pressure=like_input(pressure, read_only_copy(sig)),
+        pressure=like_input(pressure, sig),
         fs=fs_v,
     )

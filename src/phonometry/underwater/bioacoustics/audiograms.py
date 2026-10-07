@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_ranks, require_same_length
 
 if TYPE_CHECKING:
@@ -174,7 +174,7 @@ def audiogram_parameters(
 
 
 @dataclass(frozen=True)
-class AudiogramResult:
+class AudiogramResult(OwnsArrays):
     """Hearing threshold versus frequency.
 
     :ivar frequencies: Frequencies, in Hz.
@@ -249,8 +249,8 @@ def _bundle(
 ) -> AudiogramResult:
     best = int(np.argmin(threshold))
     return AudiogramResult(
-        frequencies=read_only_copy(freq_hz),
-        threshold=read_only_copy(threshold),
+        frequencies=freq_hz,
+        threshold=threshold,
         group=group,
         source=source,
         in_air=in_air,

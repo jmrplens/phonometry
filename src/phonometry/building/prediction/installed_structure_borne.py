@@ -87,7 +87,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -1004,7 +1004,7 @@ def total_structure_borne_pressure_level(path_levels: ArrayLike) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class InstalledSourceResult:
+class InstalledSourceResult(OwnsArrays):
     """Installed structure-borne sound prediction (EN 12354-5).
 
     :ivar frequencies: Band centre frequencies, in hertz, or ``None``.
@@ -1251,6 +1251,6 @@ def installed_source_prediction(
     return InstalledSourceResult(
         path_levels=path_levels,
         total_level=np.asarray(total, dtype=np.float64),
-        installed_power_level=np.broadcast_to(lw_inst, (n_bands,)).copy(),
-        frequencies=read_only_copy(freq),
+        installed_power_level=np.broadcast_to(lw_inst, (n_bands,)),
+        frequencies=freq,
     )

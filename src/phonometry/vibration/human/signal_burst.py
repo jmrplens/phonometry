@@ -86,6 +86,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_choice, require_positive
 from .exposure import (
     _params,
@@ -670,7 +671,7 @@ def signal_burst_indications(
 
 
 @dataclass(frozen=True)
-class SignalBurstVerification:
+class SignalBurstVerification(OwnsArrays):
     """A meter's signal-burst indications against ISO 8041-1 Tables 7 to 9.
 
     :ivar application: The application whose table was used.

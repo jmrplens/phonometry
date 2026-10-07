@@ -66,6 +66,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import require_positive, require_ranks, require_same_length
 from .steady_field import schroeder_frequency
@@ -233,7 +234,7 @@ def room_modal_density(
 
 
 @dataclass(frozen=True)
-class RoomModesResult:
+class RoomModesResult(OwnsArrays):
     """The normal modes of a rectangular room up to a frequency limit.
 
     :ivar orders: Mode orders, an ``(N, 3)`` integer array of ``(nx, ny, nz)``
@@ -426,7 +427,7 @@ def room_modes(
         fs = float(np.asarray(schroeder_frequency(reverberation_time, volume))[()])
 
     return RoomModesResult(
-        orders=orders.astype(int),
+        orders=np.asarray(orders, dtype=int),
         frequencies=freqs,
         kinds=kinds,
         dimensions=(float(dims[0]), float(dims[1]), float(dims[2])),

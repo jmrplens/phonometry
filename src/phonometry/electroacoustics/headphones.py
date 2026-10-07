@@ -174,7 +174,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_count, require_positive
 from .programme_signal import ProgrammeSignalCheck, check_programme_signal
 
@@ -555,7 +555,7 @@ def _db20(ratio: ArrayLike) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class RatedImpedanceVerification:
+class RatedImpedanceVerification(OwnsArrays):
     """A rated impedance judged against the measured modulus (IEC 60268-7 8.2).
 
     :ivar frequencies_hz: The measurement frequencies, in Hz, ascending.
@@ -696,7 +696,7 @@ def verify_rated_impedance(
         msg = "No measurement frequency falls in the rated frequency range."
         raise ValueError(msg)
     return RatedImpedanceVerification(
-        frequencies_hz=read_only(f.copy()),
+        frequencies_hz=f,
         impedance_ohm=read_only(np.asarray(z, dtype=np.float64)),
         rated_impedance_ohm=rated,
         rated_frequency_range_hz=(lower, upper),
@@ -930,7 +930,7 @@ def programme_signal_level(
 
 
 @dataclass(frozen=True)
-class ProgrammeCharacteristicVoltage:
+class ProgrammeCharacteristicVoltage(OwnsArrays):
     """The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5).
 
     :ivar frequencies_hz: The band centre frequencies, in Hz.
@@ -1055,7 +1055,7 @@ def programme_characteristic_voltage(
         raise ValueError(msg)
     emf = np.broadcast_to(
         np.atleast_1d(np.asarray(source_emf_v, dtype=np.float64)), (levels.shape[0],)
-    ).copy()
+    )
     if not (np.all(np.isfinite(emf)) and np.all(emf > 0.0)):
         msg = "'source_emf_v' must be positive and finite."
         raise ValueError(msg)
@@ -1063,9 +1063,9 @@ def programme_characteristic_voltage(
         f, a_weighted=a_weighted, free_field_response_db=free_field_response_db
     )
     return ProgrammeCharacteristicVoltage(
-        frequencies_hz=read_only(f.copy()),
-        band_levels_db=read_only(levels.copy()),
-        source_emf_v=read_only(emf),
+        frequencies_hz=f,
+        band_levels_db=levels,
+        source_emf_v=emf,
         corrections_db=read_only(corrections),
         a_weighted=bool(a_weighted),
         free_field_compensated=free_field_response_db is not None,
@@ -1193,7 +1193,7 @@ def check_limiting_test_signal(
 
 
 @dataclass(frozen=True)
-class ProtectionVoltage:
+class ProtectionVoltage(OwnsArrays):
     """A protective device's operating point from a level sweep (IEC 60268-7 8.3.6).
 
     :ivar source_emf_v: The source e.m.f. of each step, in volts (RMS),
@@ -1284,8 +1284,8 @@ def protection_voltage(
         fraction = (_PROTECTION_STEP_DB - c0) / (c1 - c0) if c1 > c0 else 1.0
         voltage = 10.0 ** ((x0 + min(max(fraction, 0.0), 1.0) * (x1 - x0)) / 20.0)
     return ProtectionVoltage(
-        source_emf_v=read_only(emf.copy()),
-        sound_pressure_level_db=read_only(levels.copy()),
+        source_emf_v=emf,
+        sound_pressure_level_db=levels,
         protection_voltage_v=voltage,
     )
 
@@ -1296,7 +1296,7 @@ def protection_voltage(
 
 
 @dataclass(frozen=True)
-class CouplerFrequencyResponse:
+class CouplerFrequencyResponse(OwnsArrays):
     """The coupler or ear simulator frequency response (IEC 60268-7 8.6.2).
 
     :ivar frequencies_hz: The frequencies, in Hz, ascending.
@@ -1404,14 +1404,14 @@ def coupler_frequency_response(
             raise ValueError(msg)
         rated = (lower, upper)
     return CouplerFrequencyResponse(
-        frequencies_hz=read_only(f.copy()),
-        sound_pressure_level_db=read_only(levels.copy()),
+        frequencies_hz=f,
+        sound_pressure_level_db=levels,
         rated_frequency_range_hz=rated,
     )
 
 
 @dataclass(frozen=True)
-class CrosstalkAttenuation:
+class CrosstalkAttenuation(OwnsArrays):
     """The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).
 
     :ivar frequencies_hz: The frequencies, in Hz, ascending.
@@ -1479,9 +1479,9 @@ def crosstalk_attenuation(
         msg = "The levels must have one value per frequency."
         raise ValueError(msg)
     return CrosstalkAttenuation(
-        frequencies_hz=read_only(f.copy()),
-        driven_level_db=read_only(driven.copy()),
-        other_level_db=read_only(other.copy()),
+        frequencies_hz=f,
+        driven_level_db=driven,
+        other_level_db=other,
     )
 
 
@@ -1491,7 +1491,7 @@ def crosstalk_attenuation(
 
 
 @dataclass(frozen=True)
-class FieldComparisonResponse:
+class FieldComparisonResponse(OwnsArrays):
     """A free-field or diffuse-field comparison frequency response (IEC 60268-7 8.6.3, 8.6.4).
 
     :ivar field: ``"free"`` (8.6.3) or ``"diffuse"`` (8.6.4).
@@ -1640,14 +1640,14 @@ def field_comparison_response(
     response = quotient - quotient[:, reference : reference + 1]
     return FieldComparisonResponse(
         field=field,
-        frequencies_hz=read_only(f.copy()),
+        frequencies_hz=f,
         response_db=read_only(np.asarray(response, dtype=np.float64)),
         reference_frequency_hz=float(f[reference]),
     )
 
 
 @dataclass(frozen=True)
-class EarCanalFrequencyResponse:
+class EarCanalFrequencyResponse(OwnsArrays):
     """The ear canal sound pressure level frequency response (IEC 60268-7 8.6.5).
 
     :ivar frequencies_hz: The one-third-octave band centres, in Hz.
@@ -1834,9 +1834,9 @@ def ear_canal_frequency_response(
         raise ValueError(msg)
     reference = _band_index(f, float(reference_frequency_hz))
     return EarCanalFrequencyResponse(
-        frequencies_hz=read_only(f.copy()),
-        earphone_levels_db=read_only(earphone.copy()),
-        sound_field_levels_db=read_only(field.copy()),
+        frequencies_hz=f,
+        earphone_levels_db=earphone,
+        sound_field_levels_db=field,
         reference_frequency_hz=float(f[reference]),
     )
 

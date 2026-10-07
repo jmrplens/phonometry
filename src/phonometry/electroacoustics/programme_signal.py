@@ -104,7 +104,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_count, require_positive
 
 if TYPE_CHECKING:
@@ -459,7 +459,7 @@ def _nominal_band(frequency: float) -> float:
 
 
 @dataclass(frozen=True)
-class ProgrammeSignalCheck:
+class ProgrammeSignalCheck(OwnsArrays):
     r"""A one-third-octave spectrum judged against IEC 60268-1:1985 Table II.
 
     :ivar frequencies_hz: The nominal frequencies of the bands judged, in Hz,
@@ -648,5 +648,5 @@ def check_programme_signal(
     order = np.argsort(nominal)
     return ProgrammeSignalCheck(
         frequencies_hz=read_only(nominal[order]),
-        band_levels_db=read_only(levels[order].copy()),
+        band_levels_db=levels[order],
     )

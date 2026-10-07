@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from ..io._signal import Signal
 from scipy import signal
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     check_engine,
@@ -130,7 +130,7 @@ _RATING_LETTERS = ("U", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "A+")
 
 
 @dataclass(frozen=True)
-class STIResult:
+class STIResult(OwnsArrays):
     """Result of a Speech Transmission Index computation.
 
     ``mtf`` holds the modulation transfer values actually used for the
@@ -550,10 +550,10 @@ def _index_from_corrected_mtf(
     return STIResult(
         sti=sti,
         mti=mti,
-        mtf=read_only_copy(m),
-        band_levels=read_only_copy(band_levels),
+        mtf=m,
+        band_levels=band_levels,
         rating=_rating(sti),
-        ambient_levels=read_only_copy(ambient_levels),
+        ambient_levels=ambient_levels,
     )
 
 

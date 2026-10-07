@@ -91,7 +91,7 @@ if TYPE_CHECKING:
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
@@ -152,7 +152,7 @@ _THIRDS_PER_OCTAVE = 3
 
 
 @dataclass(frozen=True)
-class ReverberationSoundPowerResult:
+class ReverberationSoundPowerResult(OwnsArrays):
     r"""Result of an ISO 3741:2010 reverberation-room sound power determination.
 
     ``sound_power_level`` is the per-band ``LW`` (Eq. 20 direct method, Eq. 21
@@ -787,9 +787,9 @@ def sound_power_reverberation(
     lw = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
     return ReverberationSoundPowerResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_power_level=lw,
-        mean_pressure_level=read_only_copy(mean_level),
+        mean_pressure_level=mean_level,
         absorption_area=terms.absorption_area,
         waterhouse_correction=terms.waterhouse_correction,
         background_correction=k1,
@@ -876,9 +876,9 @@ def sound_power_comparison(
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     return ReverberationSoundPowerResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_power_level=lw,
-        mean_pressure_level=read_only_copy(lp_st),
+        mean_pressure_level=lp_st,
         absorption_area=nan_band,
         waterhouse_correction=nan_band,
         background_correction=k1_st,
@@ -920,7 +920,7 @@ def _reference_source_level(
 
 
 @dataclass(frozen=True)
-class ReverberationSoundEnergyResult:
+class ReverberationSoundEnergyResult(OwnsArrays):
     r"""Result of an ISO 3741:2010 reverberation-room sound energy level
     determination (clause 9.2).
 
@@ -1143,9 +1143,9 @@ def sound_energy_reverberation(
     lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
     return ReverberationSoundEnergyResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_energy_level=lj,
-        mean_event_level=read_only_copy(mean_level),
+        mean_event_level=mean_level,
         absorption_area=terms.absorption_area,
         waterhouse_correction=terms.waterhouse_correction,
         background_correction=k1,
@@ -1251,9 +1251,9 @@ def sound_energy_comparison(
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     return ReverberationSoundEnergyResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         sound_energy_level=lj,
-        mean_event_level=read_only_copy(le_st),
+        mean_event_level=le_st,
         absorption_area=nan_band,
         waterhouse_correction=nan_band,
         background_correction=k1_st,

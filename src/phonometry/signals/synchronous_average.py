@@ -83,6 +83,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive
@@ -161,7 +162,7 @@ def comb_filter_response(
 
 
 @dataclass(frozen=True)
-class SynchronousAverageResult:
+class SynchronousAverageResult(OwnsArrays):
     r"""Time synchronous average of a periodic waveform in noise.
 
     :ivar period_waveform: The averaged periodic waveform, one period of

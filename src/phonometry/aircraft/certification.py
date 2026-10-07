@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -522,7 +522,7 @@ def epnl_from_pnlt(
 
 
 @dataclass(frozen=True)
-class EPNLResult:
+class EPNLResult(OwnsArrays):
     r"""Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
 
     :ivar frequencies: The 24 one-third-octave band centre frequencies, in Hz.
@@ -762,7 +762,7 @@ def effective_perceived_noise_level(
     else:
         times = np.concatenate([[0.0], np.cumsum(dt_raw)[:-1]])
     return EPNLResult(
-        frequencies=NOY_BANDS.copy(),
+        frequencies=NOY_BANDS,
         times=times,
         pnl=pnl,
         tone_correction=corr,

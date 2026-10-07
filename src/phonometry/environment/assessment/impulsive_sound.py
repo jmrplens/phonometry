@@ -64,7 +64,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -112,7 +112,7 @@ DEFAULT_ASSESSMENT_PERIOD_MIN: float = 30.0
 
 
 @dataclass(frozen=True)
-class ImpulseProminenceResult:
+class ImpulseProminenceResult(OwnsArrays):
     """Prominence of a set of candidate impulses (NT ACOU 112:2002).
 
     :ivar onset_rates: Onset rate of each impulse, in dB/s.
@@ -375,8 +375,8 @@ def impulse_prominence(
         governing = float(np.max(per_impulse))  # informational only
         adjustment = 0.0
     return ImpulseProminenceResult(
-        onset_rates=read_only_copy(orate),
-        level_differences=read_only_copy(ld),
+        onset_rates=orate,
+        level_differences=ld,
         per_impulse=per_impulse,
         qualifies=qualifies,
         prominence=governing,
@@ -512,7 +512,7 @@ class ImpulseOnset:
 
 
 @dataclass(frozen=True)
-class ImpulsiveSoundResult:
+class ImpulsiveSoundResult(OwnsArrays):
     """Objective prominence of an impulsive interval (ISO/PAS 1996-3:2022).
 
     :ivar times: Time of each ``LpAF`` sample, in seconds.
@@ -595,7 +595,7 @@ class ImpulsiveSoundResult:
 
 
 @dataclass(frozen=True)
-class LevelHistory:
+class LevelHistory(OwnsArrays):
     """A frequency- and time-weighted level trace, and the axis it lives on.
 
     What :func:`sound_pressure_level_history` computes is ``LpAF``: the

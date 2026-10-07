@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import SignalInput, apply_calibration
@@ -144,7 +145,7 @@ def _require_band_flatness(result: InverseFilterResult) -> None:
 
 
 @dataclass(frozen=True)
-class InverseFilterResult:
+class InverseFilterResult(OwnsArrays):
     r"""A regularized inverse filter with its achieved equalization.
 
     Returned by :func:`regularized_inverse_filter`. The causal filter

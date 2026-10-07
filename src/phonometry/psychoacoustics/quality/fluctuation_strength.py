@@ -51,6 +51,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_ranks, require_same_length
 from ...io._resolve import apply_calibration, resolve_fs
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
@@ -209,7 +210,7 @@ def _g_weight(z: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class FluctuationStrengthResult:
+class FluctuationStrengthResult(OwnsArrays):
     """Fluctuation strength of a signal (Osses 2016 model).
 
     :ivar fluctuation_strength: Overall fluctuation strength ``F``, in vacil

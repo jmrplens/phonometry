@@ -77,7 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_non_negative, require_positive
 from .free_field_corrections import _band_column, _frequency_axis
 from .reciprocity_calibration import (
@@ -149,7 +149,7 @@ _ACCURACY_FREQUENCY_PER_KPA = (0.4, 1.0e4)
 
 
 @dataclass(frozen=True)
-class ReciprocityAirAttenuation:
+class ReciprocityAirAttenuation(OwnsArrays):
     r"""The attenuation of sound in air of a free-field reciprocity calibration
     (IEC 61094-3:2016 7.4 and Annex B), and the speed of sound with dispersion
     (IEC 61094-2:2009 F.3, NOTE).
@@ -189,10 +189,10 @@ class ReciprocityAirAttenuation:
             increasing, or columns of another length.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in ("classical_np_per_m", "oxygen_np_per_m", "nitrogen_np_per_m"):
             column = _band_column(getattr(self, name), name, frequencies.size)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def attenuation_np_per_m(self) -> NDArray[np.float64]:
@@ -718,7 +718,7 @@ _FEWEST_DISTANCES = 3
 
 
 @dataclass(frozen=True)
-class AcousticCentre:
+class AcousticCentre(OwnsArrays):
     r"""The position of the acoustic centre of a microphone from the
     inverse-distance law (IEC 61094-3:2016 6.5).
 
@@ -741,8 +741,8 @@ class AcousticCentre:
 
         :raises ValueError: for columns of different lengths.
         """
-        distances = np.array(self.distances_m, dtype=np.float64).reshape(-1)
-        inverse = np.array(self.inverse_readings, dtype=np.float64).reshape(-1)
+        distances = np.asarray(self.distances_m, dtype=np.float64).reshape(-1)
+        inverse = np.asarray(self.inverse_readings, dtype=np.float64).reshape(-1)
         if distances.size != inverse.size:
             msg = "AcousticCentre: one inverse pressure per distance."
             raise ValueError(msg)
@@ -1003,7 +1003,7 @@ def check_free_field_arrangement(
 
 
 @dataclass(frozen=True)
-class FreeFieldParameterUncertainty:
+class FreeFieldParameterUncertainty(OwnsArrays):
     """The standard uncertainty of a free-field sensitivity level that each
     parameter of the acoustic transfer impedance contributes (IEC
     61094-3:2016 7.8).
@@ -1031,10 +1031,10 @@ class FreeFieldParameterUncertainty:
             value per frequency.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         components = {}
         for name, value in self.components_db.items():
-            column = np.array(value, dtype=np.float64).reshape(-1)
+            column = np.asarray(value, dtype=np.float64).reshape(-1)
             if (
                 column.size != frequencies.size
                 or not np.all(np.isfinite(column))
@@ -1114,7 +1114,7 @@ def _pair_levels(
 
 
 @dataclass(frozen=True)
-class FreeFieldInputUncertainties:
+class FreeFieldInputUncertainties(OwnsArrays):
     r"""The standard uncertainty of each input quantity of the free-field
     acoustic transfer impedance that :func:`free_field_parameter_uncertainty`
     can move: the distance, the three conditions and the air attenuation, rows
@@ -1162,7 +1162,7 @@ class FreeFieldInputUncertainties:
             object.__setattr__(
                 self, name, require_non_negative(getattr(self, name), name)
             )
-        centre = np.array(self.u_acoustic_centre_m, dtype=np.float64)
+        centre = np.asarray(self.u_acoustic_centre_m, dtype=np.float64)
         if centre.ndim > 1 or not np.all(np.isfinite(centre)) or np.any(centre < 0.0):
             msg = (
                 "'u_acoustic_centre_m' must be one finite, non-negative value or "

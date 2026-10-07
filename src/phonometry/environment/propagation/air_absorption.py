@@ -72,7 +72,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_same_shape,
@@ -362,7 +362,7 @@ def air_attenuation_m(
 
 
 @dataclass(frozen=True)
-class AtmosphericAttenuation:
+class AtmosphericAttenuation(OwnsArrays):
     r"""A pure-tone atmospheric attenuation curve (ISO 9613-1:1993).
 
     Bundles the ISO 9613-1 attenuation coefficient ``alpha`` (Eq. (5)) over a
@@ -523,7 +523,7 @@ def atmospheric_attenuation(
     if exact_midband:
         freqs = _exact_midband(freqs)
     return AtmosphericAttenuation(
-        frequencies=read_only_copy(np.atleast_1d(freqs)),
+        frequencies=np.atleast_1d(freqs),
         attenuation_coefficient=np.atleast_1d(alpha),
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),

@@ -91,7 +91,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -1273,7 +1273,7 @@ def duct_sound_power_level(
 
 
 @dataclass(frozen=True)
-class OperatingLine:
+class OperatingLine(OwnsArrays):
     r"""ISO 5135 5.5.2: a level fitted against the logarithm of a duty.
 
     An air-terminal device is not tested at the one operating point a
@@ -1408,6 +1408,6 @@ def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
         maximum_deviation=deviation,
         smallest_duty=float(np.min(duties)),
         largest_duty=float(np.max(duties)),
-        duty=read_only_copy(duties),
-        levels=read_only_copy(measured),
+        duty=duties,
+        levels=measured,
     )

@@ -939,8 +939,8 @@ def test_a_default_band_axis_is_the_results_own_copy() -> None:
 
     The two VDI spectra used to hand that array back as their own
     ``frequencies``, so writing into a result edited the published bands for
-    every later caller; now it would raise instead. Either way the result has
-    to own its axis.
+    every later caller. The result owns its axis: a copy of its own, which
+    refuses writes like every array a result holds.
     """
     results = (
         hvac.unlined_circular_duct_attenuation(
@@ -959,4 +959,4 @@ def test_a_default_band_axis_is_the_results_own_copy() -> None:
     )
     for result in results:
         assert not np.shares_memory(result.frequencies, hvac.OCTAVE_BANDS)
-        assert result.frequencies.flags.writeable
+        assert not result.frequencies.flags.writeable

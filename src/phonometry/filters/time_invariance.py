@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_non_negative, require_positive
 from .compliance import _G, _band_relative_attenuation, _reference_attenuation_db
 from .core import _decimate_and_filter
@@ -95,7 +95,7 @@ _TAIL_ENERGY_FLOOR = 1e-9
 
 
 @dataclass(frozen=True)
-class TimeInvarianceResult:
+class TimeInvarianceResult(OwnsArrays):
     r"""The time-invariance verdict of a filter bank, IEC 61260-1:2014 5.14.
 
     What :func:`verify_time_invariance` returns. For every sweep rate and
@@ -145,9 +145,9 @@ class TimeInvarianceResult:
         :raises ValueError: if the level arrays are not one row per sweep rate
             and one column per band, or hold a non-finite value.
         """
-        freqs = np.array(self.band_frequencies, dtype=np.float64)
-        out = np.array(self.output_levels_db, dtype=np.float64)
-        expected = np.array(self.expected_levels_db, dtype=np.float64)
+        freqs = np.asarray(self.band_frequencies, dtype=np.float64)
+        out = np.asarray(self.output_levels_db, dtype=np.float64)
+        expected = np.asarray(self.expected_levels_db, dtype=np.float64)
         shape = (len(self.seconds_per_decade), freqs.size)
         for name, arr in (("output_levels_db", out), ("expected_levels_db", expected)):
             if arr.shape != shape:

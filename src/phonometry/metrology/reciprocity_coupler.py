@@ -106,7 +106,7 @@ import numpy as np
 from scipy.special import jn_zeros, jv
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -374,7 +374,7 @@ def temperature_transfer_function(
 
 
 @dataclass(frozen=True)
-class HeatConductionCorrection:
+class HeatConductionCorrection(OwnsArrays):
     r"""The heat-conduction correction of a closed cavity at low frequencies
     (IEC 61094-2:2009 5.5 and A.2, Formula (A.1)).
 
@@ -402,9 +402,9 @@ class HeatConductionCorrection:
             increasing, or columns of another length.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name, dtype in (("x", np.float64), ("transfer_function", np.complex128)):
-            column = np.array(getattr(self, name), dtype=dtype).reshape(-1)
+            column = np.asarray(getattr(self, name), dtype=dtype).reshape(-1)
             if column.size != frequencies.size:
                 msg = f"HeatConductionCorrection: '{name}' must hold one value per frequency."
                 raise ValueError(msg)
@@ -569,7 +569,7 @@ class CapillaryTube:
 
 
 @dataclass(frozen=True)
-class CapillaryTubeImpedance:
+class CapillaryTubeImpedance(OwnsArrays):
     r"""The acoustic input impedance of an open capillary tube (IEC
     61094-2:2009 Formulas (B.1) to (B.3)).
 
@@ -594,9 +594,9 @@ class CapillaryTubeImpedance:
             increasing, or columns of another length.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in ("propagation_coefficient_per_m", "wave_impedance_pa_s_m3"):
-            column = np.array(getattr(self, name), dtype=np.complex128).reshape(-1)
+            column = np.asarray(getattr(self, name), dtype=np.complex128).reshape(-1)
             if column.size != frequencies.size:
                 msg = f"CapillaryTubeImpedance: '{name}' must hold one value per frequency."
                 raise ValueError(msg)
@@ -1098,7 +1098,7 @@ _COUPLER_KINDS = ("plane_wave", "large_volume")
 
 
 @dataclass(frozen=True)
-class CouplerTransferImpedance:
+class CouplerTransferImpedance(OwnsArrays):
     r"""The acoustic transfer impedance of a coupler closed by two microphones,
     with its corrections (IEC 61094-2:2009 5.4 to 5.6).
 
@@ -1131,14 +1131,14 @@ class CouplerTransferImpedance:
         """
         require_choice(self.coupler, "coupler", _COUPLER_KINDS)
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in (
             "adiabatic_impedance_pa_s_m3",
             "heat_conducting_impedance_pa_s_m3",
             "capillary_correction",
         ):
             column = _complex_column(getattr(self, name), name, frequencies.size)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def transfer_impedance_pa_s_m3(self) -> NDArray[np.complex128]:
@@ -1547,7 +1547,7 @@ _NOMINAL_TOLERANCE = 0.02
 
 
 @dataclass(frozen=True)
-class WaveMotionCorrection:
+class WaveMotionCorrection(OwnsArrays):
     """The wave-motion correction of the large-volume coupler for LS1P
     microphones (IEC 61094-2:2009 C.3, Table C.3).
 
@@ -1572,9 +1572,9 @@ class WaveMotionCorrection:
             increasing, or columns of another length.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name, dtype in (("correction_db", np.float64), ("interpolated", np.bool_)):
-            column = np.array(getattr(self, name), dtype=dtype).reshape(-1)
+            column = np.asarray(getattr(self, name), dtype=dtype).reshape(-1)
             if column.size != frequencies.size:
                 msg = (
                     f"WaveMotionCorrection: '{name}' must hold one value per frequency."
@@ -1902,7 +1902,7 @@ _OPPOSITE_PAIR = MappingProxyType({1: "23", 2: "31", 3: "12"})
 
 
 @dataclass(frozen=True)
-class CouplerParameterUncertainty:
+class CouplerParameterUncertainty(OwnsArrays):
     """The standard uncertainty of a sensitivity level that each parameter of
     the acoustic transfer impedance contributes (IEC 61094-2:2009 7.5).
 
@@ -1928,10 +1928,10 @@ class CouplerParameterUncertainty:
             value per frequency.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         components = {}
         for name, value in self.components_db.items():
-            column = np.array(value, dtype=np.float64).reshape(-1)
+            column = np.asarray(value, dtype=np.float64).reshape(-1)
             if (
                 column.size != frequencies.size
                 or not np.all(np.isfinite(column))

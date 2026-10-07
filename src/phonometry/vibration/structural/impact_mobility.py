@@ -94,7 +94,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_count,
     require_finite,
@@ -491,7 +491,7 @@ def _impact_peaks(
 
 
 @dataclass(frozen=True)
-class DoubleHitCheck:
+class DoubleHitCheck(OwnsArrays):
     r"""Was there more than one impact in the force record? (ISO 7626-5, 6.4)
 
     If more than a single impact occurs within the record, the Fourier
@@ -703,7 +703,7 @@ def check_double_hit(
         msg = "'force' holds no force: every sample is zero."
         raise ValueError(msg)
     return DoubleHitCheck(
-        force=read_only_copy(record),
+        force=record,
         fs=rate,
         impact_indices=peaks,
         threshold_ratio=threshold,
@@ -716,7 +716,7 @@ def check_double_hit(
 
 
 @dataclass(frozen=True)
-class ImpactMobilityResult:
+class ImpactMobilityResult(OwnsArrays):
     r"""Mobility averaged over impacts at one point (ISO 7626-5:2019, 8.6).
 
     :ivar frequencies: DFT bin frequencies above 0 Hz, in hertz: up to the
@@ -819,8 +819,8 @@ class ImpactMobilityResult:
     def mobility_result(self) -> MobilityResult:
         """The estimate as a :class:`.MobilityResult` (ISO 7626-1 vocabulary)."""
         return MobilityResult(
-            frequencies=np.array(self.frequencies, dtype=np.float64),
-            mobility=np.array(self.mobility, dtype=np.complex128),
+            frequencies=np.asarray(self.frequencies, dtype=np.float64),
+            mobility=np.asarray(self.mobility, dtype=np.complex128),
             driving_point=self.driving_point,
         )
 
@@ -1095,7 +1095,7 @@ def impact_mobility(
 
 
 @dataclass(frozen=True)
-class ExponentialWindowCorrection:
+class ExponentialWindowCorrection(OwnsArrays):
     r"""The damping an exponential window added, taken away (Annex A).
 
     Formula (A.3), :math:`\zeta_r = \hat\zeta_r - a/\omega_r`, per mode, with
@@ -1242,18 +1242,18 @@ def exponential_window_correction(
         damping reaches a mode's apparent damping.
     """
     return ExponentialWindowCorrection(
-        damped_natural_frequency_hz=read_only_copy(
-            np.atleast_1d(np.asarray(damped_natural_frequency_hz, dtype=np.float64))
+        damped_natural_frequency_hz=np.atleast_1d(
+            np.asarray(damped_natural_frequency_hz, dtype=np.float64)
         ),
-        apparent_damping_ratio=read_only_copy(
-            np.atleast_1d(np.asarray(apparent_damping_ratio, dtype=np.float64))
+        apparent_damping_ratio=np.atleast_1d(
+            np.asarray(apparent_damping_ratio, dtype=np.float64)
         ),
         exponential_decay_rate_per_s=float(exponential_decay_rate_per_s),
     )
 
 
 @dataclass(frozen=True)
-class SingleModeFitResult:
+class SingleModeFitResult(OwnsArrays):
     r"""One mode fitted over a band: pole, residue and a direct term.
 
     The model is
@@ -1591,7 +1591,7 @@ def _frequency_range(
 
 
 @dataclass(frozen=True)
-class ForceSpectrumCheck:
+class ForceSpectrumCheck(OwnsArrays):
     r"""Does the force spectrum cover the frequency range of interest? (6.2, 6.3)
 
     The spectrum of a force pulse is a main lobe at low frequency followed by
@@ -1738,7 +1738,7 @@ def check_force_spectrum(
 
 
 @dataclass(frozen=True)
-class OverloadCheck:
+class OverloadCheck(OwnsArrays):
     """Did the record stay inside the linear range of its channel? (8.4)
 
     Impact excitation risks saturating the measurement system, because the
@@ -1844,14 +1844,14 @@ def check_overload(
     rate = require_positive(resolve_fs(record, fs, name="record"), "fs")
     x = _record(record, "record")
     return OverloadCheck(
-        record=read_only_copy(x),
+        record=x,
         fs=rate,
         full_scale=require_positive(full_scale, "full_scale"),
     )
 
 
 @dataclass(frozen=True)
-class ResponseDecayCheck:
+class ResponseDecayCheck(OwnsArrays):
     r"""Did the response decay far enough within the record? (8.3, 8.5.2)
 
     Without a window the response should decay to about 1 % of its initial
@@ -2128,7 +2128,7 @@ def check_response_decay(
         else require_positive(segment_s, "segment_s")
     )
     return ResponseDecayCheck(
-        record=read_only_copy(x),
+        record=x,
         fs=rate,
         segment_s=float(segment),
         exponential_window=bool(exponential_window),
@@ -2137,7 +2137,7 @@ def check_response_decay(
 
 
 @dataclass(frozen=True)
-class CoherenceCheck:
+class CoherenceCheck(OwnsArrays):
     r"""Is the coherence high, over enough impacts to trust it? (9.1)
 
     The coherence expresses how linearly the response follows the force at
@@ -2335,7 +2335,7 @@ def _exclusions(exclude_hz: object) -> list[tuple[float, float]]:
 
 
 @dataclass(frozen=True)
-class ChannelMatchVerification:
+class ChannelMatchVerification(OwnsArrays):
     """Do two analyser channels match in gain and phase? (8.1)
 
     The channel-to-channel match of the filters and the analyser is checked by

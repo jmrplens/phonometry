@@ -79,7 +79,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     require_finite,
@@ -702,7 +702,7 @@ def temperature_field_correction_db(
 
 
 @dataclass(frozen=True)
-class SilencerInSituResult:
+class SilencerInSituResult(OwnsArrays):
     r"""A silencer measured where it stands, ISO 11820 Equation (19) or (21).
 
     :ivar frequencies: Nominal band centres, in hertz, or ``None``.
@@ -802,8 +802,8 @@ def _loss(
             raise ValueError(msg)
     area_term = np.asarray(10.0 * np.log10(source / receiver), dtype=np.float64)
     return SilencerInSituResult(
-        frequencies=read_only_copy(freqs),
-        level_difference_db=read_only_copy(level_difference),
+        frequencies=freqs,
+        level_difference_db=level_difference,
         area_term_db=area_term,
         field_correction_difference_db=correction,
         loss_db=np.asarray(level_difference + area_term + correction, dtype=np.float64),

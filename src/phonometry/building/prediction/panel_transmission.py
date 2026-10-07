@@ -94,7 +94,7 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.special import ellipe
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
@@ -267,7 +267,7 @@ def _resolve_field_correction(band: str, override: float | None) -> float:
 
 
 @dataclass(frozen=True)
-class SoundReductionResult:
+class SoundReductionResult(OwnsArrays):
     """Predicted airborne sound reduction index ``R(f)`` of a construction.
 
     :ivar frequencies: Band centre frequencies, in hertz.
@@ -505,7 +505,7 @@ def single_panel_transmission_loss(
             )
         tl[above] = np.maximum(cremer, 0.0)
         return SoundReductionResult(
-            frequencies=read_only_copy(f),
+            frequencies=f,
             transmission_loss=np.asarray(tl, dtype=np.float64),
             model="cremer-single",
             critical_frequency=fc,
@@ -529,7 +529,7 @@ def single_panel_transmission_loss(
         )
         tl[middle] = tl_lo[0] + frac * (tl_hi[0] - tl_lo[0])
     return SoundReductionResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         transmission_loss=np.asarray(tl, dtype=np.float64),
         model="sharp-single",
         critical_frequency=fc,
@@ -782,7 +782,7 @@ def plateau_transmission_loss(
     # 10 dB per octave projected upwards from point B.
     tl[above] = height + 10.0 * np.log2(f[above] / f_b)
     return SoundReductionResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         transmission_loss=np.asarray(tl, dtype=np.float64),
         model="plateau",
         plateau_height=height,
@@ -1258,7 +1258,7 @@ def orthotropic_transmission_loss(
             correction=field_incidence_correction(band),
         )
         return SoundReductionResult(
-            frequencies=read_only_copy(f),
+            frequencies=f,
             transmission_loss=tl,
             model="orthotropic-heckl",
             critical_frequency=fc1,
@@ -1281,7 +1281,7 @@ def orthotropic_transmission_loss(
         dtype=np.float64,
     )
     return SoundReductionResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         transmission_loss=np.asarray(-10.0 * np.log10(tau), dtype=np.float64),
         model="orthotropic-integral",
         critical_frequency=fc1,
@@ -1429,7 +1429,7 @@ def double_wall_transmission_loss(
     tl[mid] = tl1[mid] + tl2[mid] + 20.0 * np.log10(2.0 * k[mid] * d)
     tl[high] = tl1[high] + tl2[high] + 6.0
     return SoundReductionResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         transmission_loss=np.asarray(tl, dtype=np.float64),
         model="double-wall",
         resonance_frequency=f0,

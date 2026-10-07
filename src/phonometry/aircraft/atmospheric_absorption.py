@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -143,7 +143,7 @@ def _arp5534_coefficient(
 
 
 @dataclass(frozen=True)
-class AircraftBandAttenuation:
+class AircraftBandAttenuation(OwnsArrays):
     r"""One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 
     :ivar frequencies: Nominal one-third-octave-band centre frequencies, in Hz.
@@ -258,7 +258,7 @@ def sae_band_attenuation(
     delta_t = alpha * s
     delta_b = _sae_band(delta_t)
     return AircraftBandAttenuation(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         band_attenuation=delta_b,
         midband_attenuation=np.asarray(delta_t, dtype=np.float64),
         coefficient=alpha,
@@ -413,7 +413,7 @@ def _table2_rows(frequencies: NDArray[np.float64]) -> NDArray[np.intp]:
 
 
 @dataclass(frozen=True)
-class Arp866aAttenuation:
+class Arp866aAttenuation(OwnsArrays):
     r"""Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 
     :ivar frequencies_hz: Nominal one-third-octave-band centre frequencies, in

@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from ...io._signal import Signal
 from scipy import signal
 
+from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     check_engine,
@@ -110,7 +111,7 @@ _N_CBR = len(_USL[0])  # 8 critical-band ranges (Table A.9)
 
 
 @dataclass(frozen=True)
-class ZwickerLoudness:
+class ZwickerLoudness(OwnsArrays):
     """Result of an ISO 532-1:2017 Zwicker loudness calculation.
 
     ``loudness`` is the total loudness N in sone (the stationary value, or
@@ -845,7 +846,7 @@ def loudness_zwicker_from_spectrum(
     return ZwickerLoudness(
         loudness=total,
         loudness_level=_sone_to_phon(total),
-        specific=specific[:, 0].copy(),
+        specific=specific[:, 0],
         field=field,
     )
 
@@ -983,7 +984,7 @@ def loudness_zwicker(
         return ZwickerLoudness(
             loudness=total,
             loudness_level=_sone_to_phon(total),
-            specific=specific[:, 0].copy(),
+            specific=specific[:, 0],
             field=field,
         )
 
@@ -996,7 +997,7 @@ def loudness_zwicker(
     # trace remains the public ``times``/``loudness_vs_time`` contract.
     dec_factor = _SR_LEVEL // _SR_LOUDNESS
     num_out = loudness.size // dec_factor
-    loudness_out = loudness[: num_out * dec_factor : dec_factor].copy()
+    loudness_out = loudness[: num_out * dec_factor : dec_factor]
 
     # N5/N10 percentiles are taken on the FULL-rate 2000 Hz weighted series
     # rather than the 4x-decimated 500 Hz trace: decimation keeps only one
@@ -1010,7 +1011,7 @@ def loudness_zwicker(
     # The reported pattern must correspond to the reported maximum: pick the
     # same decimated instant that produced n_max, mapped back to the 0.5 ms axis.
     idx_max = int(np.argmax(loudness_out)) * dec_factor
-    specific_at_max = specific[:, idx_max].copy()
+    specific_at_max = specific[:, idx_max]
     time = np.arange(num_out) / _SR_LOUDNESS
     return ZwickerLoudness(
         loudness=n_max,

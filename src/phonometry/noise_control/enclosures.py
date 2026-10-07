@@ -68,7 +68,7 @@ from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -99,7 +99,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class EnclosureResult:
+class EnclosureResult(OwnsArrays):
     r"""Insertion loss of a machine enclosure over frequency (Bies §7.4.2).
 
     :ivar frequencies: Frequencies ``f``, Hz, or ``None`` if the panel ``R``
@@ -445,7 +445,7 @@ def enclosure_insertion_loss(
         owner="enclosure_insertion_loss",
     )
     return EnclosureResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         panel_transmission_loss=r_b,
         correction=correction,
         insertion_loss=r_b - correction,
@@ -503,7 +503,7 @@ def enclosure_required_transmission_loss(
         owner="enclosure_required_transmission_loss",
     )
     return EnclosureResult(
-        frequencies=read_only_copy(freqs),
+        frequencies=freqs,
         panel_transmission_loss=il_b + correction,
         correction=correction,
         insertion_loss=il_b,

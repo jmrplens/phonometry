@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import read_only
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.utils import (
     _ZI_NDIM_MULTICHANNEL,
     _downsamplingfactor,
@@ -101,7 +101,7 @@ def _multirate_lowpass(factor: int) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class OctaveFilterResult:
+class OctaveFilterResult(OwnsArrays):
     """What a filter bank gives back for one signal.
 
     Every other computation in this library hands back a named result, and

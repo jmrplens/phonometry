@@ -65,7 +65,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.validation import (
     require_finite,
@@ -777,7 +777,7 @@ class _Averaging(StrEnum):
 
 
 @dataclass(frozen=True)
-class BinnedSoundLevels:
+class BinnedSoundLevels(OwnsArrays):
     """Interval levels averaged per wind speed bin and sector (10.1, 10.3).
 
     One row per occupied bin, sorted by sector and then wind speed.
@@ -991,9 +991,9 @@ def bin_sound_levels(
     combined = np.sqrt(type_a**2 + u_b**2)
     centres = [bins.centres(key) for key in occupied]
     return BinnedSoundLevels(
-        wind_speeds_m_s=read_only(np.array([c[1] for c in centres])),
+        wind_speeds_m_s=np.array([c[1] for c in centres]),
         wind_directions_deg=(
-            read_only(np.array([c[0] for c in centres])) if bins.by_direction else None
+            np.array([c[0] for c in centres]) if bins.by_direction else None
         ),
         counts=read_only(counts),
         mean_levels_db=read_only(means),
@@ -1001,8 +1001,8 @@ def bin_sound_levels(
         type_b_uncertainty_db=read_only(u_b),
         combined_uncertainty_db=read_only(combined),
         averaging=mode.value,
-        interval_levels_db=read_only(levels.copy()),
-        interval_wind_speeds_m_s=read_only(bins.speeds_m_s.copy()),
+        interval_levels_db=levels,
+        interval_wind_speeds_m_s=bins.speeds_m_s,
         bin_width_m_s=bins.bin_width_m_s,
         sector_width_deg=bins.sector_width_deg,
     )
@@ -1024,7 +1024,7 @@ class BackgroundCorrectionRegime(StrEnum):
 
 
 @dataclass(frozen=True)
-class TurbineSoundLevels:
+class TurbineSoundLevels(OwnsArrays):
     """Background-corrected wind turbine levels per bin (10.3.2, 11.7).
 
     :ivar total_levels_db: The total (turbines on) bin levels, in dB.
@@ -1157,8 +1157,8 @@ def turbine_sound_levels(
         else:
             regimes.append(BackgroundCorrectionRegime.UNDETERMINED)
     return TurbineSoundLevels(
-        total_levels_db=read_only(total.copy()),
-        background_levels_db=read_only(background.copy()),
+        total_levels_db=total,
+        background_levels_db=background,
         level_differences_db=read_only(difference),
         turbine_levels_db=read_only(corrected),
         turbine_uncertainty_db=read_only(uncertainty),
@@ -1175,18 +1175,18 @@ def turbine_sound_levels(
 def _optional_per_bin(
     values: ArrayLike | None, bins: int, name: str
 ) -> NDArray[np.float64] | None:
-    """A finite read-only copy with one value per bin, or ``None`` if not given."""
+    """A finite array with one value per bin, or ``None`` if not given."""
     if values is None:
         return None
     out = require_finite_array(values, name)
     if out.size != bins:
         msg = f"'{name}' must hold one value per bin."
         raise ValueError(msg)
-    return read_only(out.copy())
+    return out
 
 
 @dataclass(frozen=True)
-class PredictedReceptorLevel:
+class PredictedReceptorLevel(OwnsArrays):
     """A predicted receptor level and its uncertainty (10.3.4).
 
     :ivar turbine_levels_db: The predicted level from each turbine, in dB.
@@ -1263,7 +1263,7 @@ def predicted_receptor_level(
     levels = require_finite_array(turbine_levels_db, "turbine_levels_db")
     u_w = np.broadcast_to(
         np.asarray(sound_power_uncertainty_db, dtype=np.float64), levels.shape
-    ).astype(np.float64)
+    )
     if not np.all(np.isfinite(u_w)) or np.any(u_w < 0.0):
         msg = "'sound_power_uncertainty_db' must be finite and not negative."
         raise ValueError(msg)
@@ -1277,8 +1277,8 @@ def predicted_receptor_level(
     weights = 10.0 ** (levels / 10.0)
     propagated = float(np.sum(u_w * weights) / np.sum(weights))
     return PredictedReceptorLevel(
-        turbine_levels_db=read_only(levels.copy()),
-        sound_power_uncertainty_db=read_only(u_w),
+        turbine_levels_db=levels,
+        sound_power_uncertainty_db=u_w,
         level_db=energy_sum(levels),
         propagated_uncertainty_db=propagated,
         combined_uncertainty_db=math.sqrt(propagated**2 + u_model**2 + u_modelling**2),
@@ -1288,7 +1288,7 @@ def predicted_receptor_level(
 
 
 @dataclass(frozen=True)
-class SoundRelevantTurbines:
+class SoundRelevantTurbines(OwnsArrays):
     """The turbines that set the binning wind speed at a receptor (9.3.2.3).
 
     :ivar predicted_levels_db: Each turbine's predicted level at the
@@ -1374,7 +1374,7 @@ def sound_relevant_turbines(predicted_levels_db: ArrayLike) -> SoundRelevantTurb
             break
         relevant = trial
     return SoundRelevantTurbines(
-        predicted_levels_db=read_only(levels.copy()),
+        predicted_levels_db=levels,
         relevant=read_only(relevant),
         total_level_db=total,
         relevant_level_db=energy_sum(levels[relevant]),
@@ -1385,7 +1385,7 @@ def sound_relevant_turbines(predicted_levels_db: ArrayLike) -> SoundRelevantTurb
 # Low frequency sound (Annex C)
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
-class LowFrequencyLevel:
+class LowFrequencyLevel(OwnsArrays):
     r"""Low frequency sound at a receptor by Equation (C.1) (Annex C).
 
     Arrays with a turbine axis have one row per turbine and one column per
@@ -1554,13 +1554,13 @@ def wind_turbine_low_frequency_level(
     outdoor = np.asarray(energy_sum(outdoor_per_turbine, axis=0), dtype=np.float64)
     indoor = None if facade is None else outdoor - facade
     return LowFrequencyLevel(
-        frequencies_hz=read_only(freqs.copy()),
-        sound_power_levels_db=read_only(power.copy()),
+        frequencies_hz=freqs,
+        sound_power_levels_db=power,
         a_weighting_db=read_only(weighting),
         distance_terms_db=read_only(distance_terms),
-        ground_correction_db=read_only(ground),
+        ground_correction_db=ground,
         air_attenuation_db=read_only(air),
-        facade_insulation_db=None if facade is None else read_only(facade),
+        facade_insulation_db=facade,
         outdoor_levels_db=read_only(outdoor),
         indoor_levels_db=None if indoor is None else read_only(indoor),
         outdoor_level_db=energy_sum(outdoor),
@@ -1586,14 +1586,14 @@ def _per_band(
     if non_negative and np.any(out < 0.0):
         msg = f"'{name}' must not be negative; got {float(np.min(out)):g}."
         raise ValueError(msg)
-    return out.copy()
+    return out
 
 
 # ---------------------------------------------------------------------------
 # Emergence (Annex J) and the rating level (Annex A)
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
-class SoundEmergence:
+class SoundEmergence(OwnsArrays):
     r"""The emergence criterion per wind speed class (Annex J, Equation (J.1)).
 
     :ivar ambient_levels_db: The ambient sound criterion per class, in dB.
@@ -1658,10 +1658,9 @@ def sound_emergence(
         if speeds.size != ambient.size:
             msg = "'wind_speeds_m_s' must hold one value per class."
             raise ValueError(msg)
-        speeds = read_only(speeds.copy())
     return SoundEmergence(
-        ambient_levels_db=read_only(ambient.copy()),
-        background_levels_db=read_only(background.copy()),
+        ambient_levels_db=ambient,
+        background_levels_db=background,
         emergence_db=read_only(ambient - background),
         wind_speeds_m_s=speeds,
     )
@@ -1786,7 +1785,7 @@ def wind_turbine_rating_level(
 # Upper tone search frequency (12.5.2.4, Table 7)
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
-class ToneSearchLimit:
+class ToneSearchLimit(OwnsArrays):
     """The upper frequency of the tonal search range (12.5.2.4).
 
     :ivar distance_m: Distance from the nearest turbine, in m.
@@ -1874,7 +1873,7 @@ def upper_tone_search_frequency(
     )
     return ToneSearchLimit(
         distance_m=distance,
-        frequencies_hz=read_only(TONE_SEARCH_BANDS_HZ.copy()),
+        frequencies_hz=TONE_SEARCH_BANDS_HZ,
         attenuation_db=read_only(attenuation),
         upper_frequency_hz=upper,
         temperature_c=float(temperature_c),

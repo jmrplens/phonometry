@@ -70,7 +70,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -1146,7 +1146,7 @@ def _spreading(internal_diameter_m: float, wall_thickness: float) -> float:
 
 
 @dataclass(frozen=True)
-class HydrodynamicValveNoise:
+class HydrodynamicValveNoise(OwnsArrays):
     r"""What IEC 60534-8-4 says about one operating point on a liquid line.
 
     :ivar regime: ``"turbulent"`` or ``"cavitating"``, from the test of 5.1:
@@ -1501,7 +1501,7 @@ def valve_hydrodynamic_noise(
         ),
         transmission_loss=float(loss),
         external_level=float(internal + loss - spreading),
-        frequencies=read_only_copy(bands),
+        frequencies=bands,
         band_internal_level=band_internal,
         band_transmission_loss=np.asarray(band_loss, dtype=np.float64),
         band_external_level=np.asarray(

@@ -67,7 +67,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -121,7 +121,7 @@ def coincidence_frequency(
 
 
 @dataclass(frozen=True)
-class RadiationEfficiencyResult:
+class RadiationEfficiencyResult(OwnsArrays):
     """Frequency-averaged plate radiation efficiency (Hopkins 2.9.4).
 
     :ivar frequencies: Band centre frequencies, in hertz.
@@ -286,7 +286,7 @@ def radiation_efficiency(
         sigma[at_fc] = (0.5 - 0.15 * l1 / l2) * np.sqrt(k_fc * l1)
 
     return RadiationEfficiencyResult(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         radiation_efficiency=np.asarray(sigma, dtype=np.float64),
         critical_frequency=fc,
         length_x=lx,

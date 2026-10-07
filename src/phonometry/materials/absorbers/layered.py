@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_non_negative,
     require_positive_array,
@@ -230,7 +230,7 @@ Layer = (
 
 
 @dataclass(frozen=True)
-class LayeredAbsorberResult:
+class LayeredAbsorberResult(OwnsArrays):
     r"""Oblique-incidence prediction of a layered absorber.
 
     All arrays share the shape of ``frequencies``. ``surface_impedance`` is the
@@ -290,7 +290,7 @@ class LayeredAbsorberResult:
 
 
 @dataclass(frozen=True)
-class DiffuseFieldAbsorptionResult:
+class DiffuseFieldAbsorptionResult(OwnsArrays):
     r"""Random-incidence (Paris-integral) absorption of a layered absorber.
 
     ``absorption`` is :math:`\alpha_{\mathrm{dif}}(f)` from Mechel 2e
@@ -790,7 +790,7 @@ def layered_absorber(
     r = (cos_t - rc * g) / (cos_t + rc * g)
     alpha = 1.0 - np.abs(r) ** 2
     return LayeredAbsorberResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         angle_rad=theta,
         surface_impedance=np.asarray(zs, dtype=np.complex128),
         normalized_impedance=np.asarray(zs / rc, dtype=np.complex128),
@@ -861,7 +861,7 @@ def diffuse_field_absorption(
         total += wt * res.absorption * np.cos(th) * np.sin(th)
     alpha_dif = 2.0 * total / np.sin(lim) ** 2
     return DiffuseFieldAbsorptionResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         absorption=np.asarray(alpha_dif, dtype=np.float64),
         angle_limit_rad=lim,
     )

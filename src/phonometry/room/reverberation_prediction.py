@@ -75,7 +75,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike, NDArray
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
@@ -553,7 +553,7 @@ def arau_puchades_reverberation_time(
 
 
 @dataclass(frozen=True)
-class ReverberationModelResult:
+class ReverberationModelResult(OwnsArrays):
     """Predicted reverberation time of a rectangular room by five models.
 
     :ivar frequencies: Band centre frequencies, in hertz.
@@ -812,7 +812,7 @@ def reverberation_time_models(
         return np.broadcast_to(arr, (n_bands,)).astype(np.float64)
 
     return ReverberationModelResult(
-        frequencies=read_only_copy(freq),
+        frequencies=freq,
         sabine=_fit(sabine),
         eyring=_fit(eyring),
         millington_sette=_fit(millington),

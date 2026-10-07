@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import require_ranks, require_same_length
 
 if TYPE_CHECKING:
@@ -56,7 +56,7 @@ _TABLE1: dict[float, tuple[float, float, float]] = {
     12500.0: (0.354, -3.5, 12.3),
 }
 
-_FREQUENCIES = np.array(sorted(_TABLE1))
+_FREQUENCIES = read_only(np.array(sorted(_TABLE1)))
 
 # Validity range of ISO 226:2023 Formula (1), clause 4.1: contours are
 # specified from 20 phon to 90 phon between 20 Hz and 4 kHz, and only up to
@@ -168,7 +168,7 @@ _DEFAULT_PHONS: tuple[float, ...] = (
 
 
 @dataclass(frozen=True)
-class EqualLoudnessContours:
+class EqualLoudnessContours(OwnsArrays):
     """The ISO 226:2023 normal equal-loudness-level contour family.
 
     Bundles a set of equal-loudness contours (ISO 226:2023 Formula 1) with
@@ -261,7 +261,7 @@ def equal_loudness_contours(
     :return: An :class:`EqualLoudnessContours`.
     """
     if frequencies is None:
-        grid = _FREQUENCIES.copy()
+        grid = _FREQUENCIES
     else:
         grid = np.asarray(frequencies, dtype=float)
         for f in grid:
@@ -284,7 +284,7 @@ def equal_loudness_contours(
         ]
     )
     return EqualLoudnessContours(
-        frequencies=read_only_copy(grid),
+        frequencies=grid,
         phons=phon_tuple,
         contours=contours,
         threshold=threshold,

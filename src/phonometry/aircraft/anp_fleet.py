@@ -45,7 +45,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays, read_only_copy
 from .._internal.validation import (
     require_axis_count,
     require_choice,
@@ -263,7 +263,7 @@ def _distances_m(header: Iterable[str]) -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class AnpNpdCurves:
+class AnpNpdCurves(OwnsArrays):
     """ANP Noise-Power-Distance curves for one aircraft, metric and operation.
 
     :ivar aircraft_id: ANP aircraft identifier.
@@ -335,7 +335,7 @@ class AnpNpdCurves:
 
 
 @dataclass(frozen=True)
-class AnpProfile:
+class AnpProfile(OwnsArrays):
     """Default fixed-point trajectory of an ANP aircraft as a Doc 29 flight path.
 
     :ivar aircraft_id: ANP aircraft identifier.
@@ -420,7 +420,7 @@ class AnpProfile:
 
 
 @dataclass(frozen=True)
-class SpectralClass:
+class SpectralClass(OwnsArrays):
     """One ANP spectral class: the reference spectrum of a group of aircraft.
 
     ECAC Doc 29 Vol. 2 G4.3: the average unweighted spectrum at the time of the

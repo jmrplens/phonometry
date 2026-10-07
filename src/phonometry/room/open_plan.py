@@ -38,7 +38,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import check_engine, require_equal_shapes
 
 if TYPE_CHECKING:
@@ -82,7 +82,7 @@ _MIN_DECAY_FIT_POSITIONS = 2
 
 
 @dataclass(frozen=True)
-class OpenPlanResult:
+class OpenPlanResult(OwnsArrays):
     """Single-number open-plan-office quantities (ISO 3382-3:2012, Cl. 4).
 
     :ivar d2s: Spatial decay rate of the A-weighted SPL of speech in dB
@@ -311,5 +311,5 @@ def open_plan_metrics(
         lp_as_4m=lp_as_4m,
         rd=rd,
         rp=rp,
-        positions_m=read_only_copy(positions_m, dtype=np.float64),
+        positions_m=np.asarray(positions_m, dtype=np.float64),
     )

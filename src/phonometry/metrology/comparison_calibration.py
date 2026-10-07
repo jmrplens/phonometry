@@ -215,7 +215,7 @@ import numpy as np
 from scipy import special
 
 from .._internal.boundary import settled
-from .._internal.frozen import read_only, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -766,7 +766,7 @@ def _relative_humidity(value: float, name: str) -> float:
 
 
 @dataclass(frozen=True)
-class EnvironmentalSensitivityCorrection:
+class EnvironmentalSensitivityCorrection(OwnsArrays):
     r"""The change of a microphone's sensitivity level between two sets of
     environmental conditions, to first order in each.
 
@@ -817,7 +817,7 @@ class EnvironmentalSensitivityCorrection:
             per frequency.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in ("static_pressure_kpa", "reference_static_pressure_kpa"):
             object.__setattr__(self, name, require_positive(getattr(self, name), name))
         for name in ("temperature_c", "reference_temperature_c"):
@@ -836,7 +836,7 @@ class EnvironmentalSensitivityCorrection:
             "humidity_coefficient_db_per_percent",
         ):
             column = _band_column(getattr(self, name), name, frequencies.size)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def static_pressure_term_db(self) -> NDArray[np.float64]:
@@ -979,7 +979,7 @@ def environmental_sensitivity_correction(
 
 
 @dataclass(frozen=True)
-class JigDiameterCorrection:
+class JigDiameterCorrection(OwnsArrays):
     r"""The corrections of IEC 61094-5 Table A.1 at the frequencies asked for.
 
     Added to the sensitivity level of a type WS3 microphone calibrated against
@@ -1006,8 +1006,8 @@ class JigDiameterCorrection:
         """
         frequencies = _frequency_axis(self.frequencies_hz)
         correction = _band_column(self.correction_db, "correction_db", frequencies.size)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
-        object.__setattr__(self, "correction_db", read_only(correction.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "correction_db", read_only(correction))
 
     @property
     def expanded_uncertainty_db(self) -> NDArray[np.float64]:
@@ -1101,7 +1101,7 @@ _FOURIER_BESSEL_MODES = 400
 
 
 @dataclass(frozen=True)
-class DiameterSoundFieldCorrection:
+class DiameterSoundFieldCorrection(OwnsArrays):
     r"""The sound-field correction of a test microphone smaller than its
     reference, facing it across a narrow gap (IEC 61094-5:2016 6.5, by the
     model of Barham, Barrera-Figueroa and Avison 2014, reference [1] of the
@@ -1149,10 +1149,10 @@ class DiameterSoundFieldCorrection:
         """
         frequencies = _frequency_axis(self.frequencies_hz)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in ("ratio", "doubled_separation_ratio"):
             column = _complex_column(getattr(self, name), name, count)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def correction_db(self) -> NDArray[np.float64]:
@@ -1519,7 +1519,7 @@ def diameter_sound_field_correction(
 
 
 @dataclass(frozen=True)
-class ComparisonCalibration:
+class ComparisonCalibration(OwnsArrays):
     r"""The sensitivity level of a microphone calibrated by comparison
     (IEC 61094-5:2016 D.2 for a pressure field, IEC 61094-8:2012 for a free
     field).
@@ -1581,17 +1581,17 @@ class ComparisonCalibration:
         require_choice(self.excitation, "excitation", _EXCITATIONS)
         frequencies = _frequency_axis(self.frequencies_hz)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in ("reference_sensitivity_level_db", "pressure_level_difference_db"):
             column = _band_column(getattr(self, name), name, count)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
         rows = _determinations(
             self.output_level_differences_db, "output_level_differences_db", count
         )
-        object.__setattr__(self, "output_level_differences_db", read_only(rows.copy()))
+        object.__setattr__(self, "output_level_differences_db", read_only(rows))
         corrections = {
             str(name): read_only(
-                _band_column(value, f"corrections_db[{name!r}]", count).copy()
+                _band_column(value, f"corrections_db[{name!r}]", count)
             )
             for name, value in self.corrections_db.items()
         }
@@ -1603,9 +1603,7 @@ class ComparisonCalibration:
             if np.any(uncertainty < 0.0):
                 msg = "ComparisonCalibration: 'expanded_uncertainty_db' must be non-negative."
                 raise ValueError(msg)
-            object.__setattr__(
-                self, "expanded_uncertainty_db", read_only(uncertainty.copy())
-            )
+            object.__setattr__(self, "expanded_uncertainty_db", read_only(uncertainty))
         self._publish_phases(count, rows.shape[0])
 
     def _publish_phases(self, count: int, determinations: int) -> None:
@@ -1653,14 +1651,10 @@ class ComparisonCalibration:
             count,
         )
         object.__setattr__(
-            self, "reference_sensitivity_phase_deg", read_only(reference.copy())
+            self, "reference_sensitivity_phase_deg", read_only(reference)
         )
-        object.__setattr__(
-            self, "output_phase_differences_deg", read_only(phases.copy())
-        )
-        object.__setattr__(
-            self, "pressure_phase_difference_deg", read_only(pressure.copy())
-        )
+        object.__setattr__(self, "output_phase_differences_deg", read_only(phases))
+        object.__setattr__(self, "pressure_phase_difference_deg", read_only(pressure))
 
     @property
     def standard(self) -> str:
@@ -1859,15 +1853,9 @@ def _calibration(
             if expanded_uncertainty_db is None
             else np.asarray(expanded_uncertainty_db, dtype=np.float64)
         ),
-        reference_sensitivity_phase_deg=None
-        if phases is None
-        else read_only_copy(phases.reference),
-        output_phase_differences_deg=None
-        if phases is None
-        else read_only_copy(phases.output),
-        pressure_phase_difference_deg=None
-        if phases is None
-        else read_only_copy(phases.pressure),
+        reference_sensitivity_phase_deg=None if phases is None else phases.reference,
+        output_phase_differences_deg=None if phases is None else phases.output,
+        pressure_phase_difference_deg=None if phases is None else phases.pressure,
     )
 
 
@@ -1886,7 +1874,7 @@ class _Phases:
 
 
 @dataclass(frozen=True)
-class SimultaneousComparisonPhase:
+class SimultaneousComparisonPhase(OwnsArrays):
     r"""The phase inputs of a calibration by simultaneous excitation
     (IEC 61094-5:2016 5.1.1, IEC 61094-8:2012 5.1).
 
@@ -1919,7 +1907,7 @@ class SimultaneousComparisonPhase:
 
 
 @dataclass(frozen=True)
-class SequentialComparisonPhase:
+class SequentialComparisonPhase(OwnsArrays):
     r"""The phase inputs of a calibration by sequential excitation
     (IEC 61094-5:2016 5.1.1, IEC 61094-8:2012 5.1).
 
@@ -1950,7 +1938,7 @@ class SequentialComparisonPhase:
 
 
 @dataclass(frozen=True)
-class MonitorReadings:
+class MonitorReadings(OwnsArrays):
     r"""The readings of the monitor microphone that watches the source of a
     sequential calibration (IEC 61094-5:2016 5.1.3, IEC 61094-8:2012 A.2).
 
@@ -2422,7 +2410,7 @@ def sequential_comparison(
 
 
 @dataclass(frozen=True)
-class ComparisonUncertaintyBudget:
+class ComparisonUncertaintyBudget(OwnsArrays):
     r"""The uncertainty budget of a comparison calibration at one frequency
     (IEC 61094-5:2016 Annex D, IEC 61094-8:2012 8.8).
 
@@ -2467,7 +2455,9 @@ class ComparisonUncertaintyBudget:
         if len(self.components) != count:
             msg = "ComparisonUncertaintyBudget: 'components' must hold one per name."
             raise ValueError(msg)
-        column = np.array(self.standard_uncertainties_db, dtype=np.float64, ndmin=1)
+        column = np.array(
+            self.standard_uncertainties_db, dtype=np.float64, ndmin=1, copy=None
+        )
         if column.shape != (count,):
             msg = (
                 "ComparisonUncertaintyBudget: 'standard_uncertainties_db' must hold "
@@ -2684,7 +2674,7 @@ def _own_part_db(
 
 
 @dataclass(frozen=True)
-class JigCouplerVerification:
+class JigCouplerVerification(OwnsArrays):
     r"""A calibration made in a jig or a coupler set against another
     calibration of the same microphone (IEC 61094-5:2016 6.7).
 
@@ -2768,7 +2758,7 @@ class JigCouplerVerification:
         require_choice(self.validation, "validation", _VALIDATIONS)
         frequencies = _frequency_axis(self.frequencies_hz)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in (
             "calibration_level_db",
             "calibration_uncertainty_db",
@@ -2780,7 +2770,7 @@ class JigCouplerVerification:
             if name.endswith("uncertainty_db") and np.any(column < 0.0):
                 msg = f"JigCouplerVerification: '{name}' must be non-negative."
                 raise ValueError(msg)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
         shared = settled(self._shared_expanded_db)
         larger = (shared > settled(self.calibration_uncertainty_db)) | (
             shared > settled(self.validation_uncertainty_db)
@@ -2802,7 +2792,7 @@ class JigCouplerVerification:
             raise ValueError(msg)
         uncovered = np.asarray(self.unvalidated_frequencies_hz, dtype=np.float64)
         object.__setattr__(
-            self, "unvalidated_frequencies_hz", read_only(uncovered.reshape(-1).copy())
+            self, "unvalidated_frequencies_hz", read_only(uncovered.reshape(-1))
         )
 
     @property
@@ -3343,7 +3333,7 @@ def _complex_column(values: ArrayLike, name: str, count: int) -> NDArray[np.comp
 
 
 @dataclass(frozen=True)
-class ImpedancePressureRatio:
+class ImpedancePressureRatio(OwnsArrays):
     r"""The ratio of the sound pressures on the test and the reference
     microphone that their different acoustic impedances cause
     (IEC 61094-5:2016 7.4 and 7.5).
@@ -3382,10 +3372,10 @@ class ImpedancePressureRatio:
         require_choice(self.coupling, "coupling", ("coupler", "series"))
         frequencies = _frequency_axis(self.frequencies_hz)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
         for name in ("ratio", "coupling_equivalent_volume_m3"):
             column = _complex_column(getattr(self, name), name, count)
-            object.__setattr__(self, name, read_only(column.copy()))
+            object.__setattr__(self, name, read_only(column))
 
     @property
     def level_difference_db(self) -> NDArray[np.float64]:
@@ -3890,7 +3880,7 @@ def _fourier_transform(
 
 
 @dataclass(frozen=True)
-class TimeSelectiveResponse:
+class TimeSelectiveResponse(OwnsArrays):
     r"""The frequency response of the direct sound alone, an impulse response
     weighted with a time window and transformed (IEC 61094-8:2012 B.1.3 and
     B.2).
@@ -3936,7 +3926,7 @@ class TimeSelectiveResponse:
         if response.size < _MIN_WINDOW_SAMPLES:
             msg = "'impulse_response' must be one value per sample, at least two."
             raise ValueError(msg)
-        object.__setattr__(self, "impulse_response", read_only(response.copy()))
+        object.__setattr__(self, "impulse_response", read_only(response))
         rate = require_positive(self.sample_rate_hz, "sample_rate_hz")
         object.__setattr__(self, "sample_rate_hz", rate)
         require_choice(self.window_shape, "window_shape", _WINDOW_SHAPES)
@@ -4218,7 +4208,7 @@ def time_selective_response(
 
 
 @dataclass(frozen=True)
-class SteppedSineImpulseResponse:
+class SteppedSineImpulseResponse(OwnsArrays):
     r"""The impulse response of a stepped-sine measurement (IEC 61094-8:2012
     B.2, Formula (B.3)).
 
@@ -4247,7 +4237,7 @@ class SteppedSineImpulseResponse:
         if response.size < _MIN_WINDOW_SAMPLES:
             msg = "'impulse_response' must be one value per sample, at least two."
             raise ValueError(msg)
-        object.__setattr__(self, "impulse_response", read_only(response.copy()))
+        object.__setattr__(self, "impulse_response", read_only(response))
 
     @property
     def sample_rate_hz(self) -> float:

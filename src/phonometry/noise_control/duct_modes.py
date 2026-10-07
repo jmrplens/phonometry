@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_non_negative,
     require_positive,
@@ -100,7 +101,7 @@ class PlaneWaveWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class DuctModeResult:
+class DuctModeResult(OwnsArrays):
     r"""Cut-on frequencies of the higher-order acoustic modes of a duct.
 
     :ivar modes: Mode orders ``(p, q)``, ordered by ascending no-flow cut-on

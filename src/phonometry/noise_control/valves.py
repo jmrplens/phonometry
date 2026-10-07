@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_positive,
@@ -1049,7 +1050,7 @@ DEFAULT_EXPANDER = Expander()
 
 
 @dataclass(frozen=True)
-class ExpanderNoise:
+class ExpanderNoise(OwnsArrays):
     r"""What Clause 7 says the flow leaving the valve outlet makes.
 
     :ivar pipe_velocity: :math:`U_p` of Equation (34), in m/s, after the
@@ -1217,7 +1218,7 @@ def combine_internal_levels(
 
 
 @dataclass(frozen=True)
-class AerodynamicValveNoise:
+class AerodynamicValveNoise(OwnsArrays):
     r"""What IEC 60534-8-3 Clause 5 says about one operating point.
 
     :ivar regime: Which of the five regimes of Clause 5.2 the valve is in.

@@ -306,11 +306,16 @@ boundary-comparisons:
 
 # np.asarray hands back the caller's own array when it is already of the asked
 # type, so a result that keeps it shares memory with the caller, and the
-# caller's next in-place edit changes a result already computed. This follows
-# every parameter through the package to the record fields, object.__setattr__
-# and read_only calls where an array is kept, and fails on one that is not a
-# copy of its own (phonometry._internal.frozen.read_only_copy). On the tree it
-# was written against it found 349, in 121 files. Stdlib only.
+# caller's next in-place edit changes a result already computed. A public
+# record that can hold an array inherits phonometry._internal.frozen.OwnsArrays,
+# which copies every array it is built with, so this fails on such a record
+# that does not, and on a copy written around an array handed to one (the
+# record makes it; a second one is waste). Then it follows every parameter
+# through the package to the places an array is kept that make no copy of
+# their own (object.__setattr__, a plain class's attributes, read_only calls)
+# and fails on one that is not a copy (read_only_copy, for anything that is
+# not such a record). On the tree it was written against it found 349 places
+# in 121 files, and then 428 records without the base. Stdlib only.
 array-aliasing:
 	$(PYTHON) scripts/check_array_aliasing.py
 

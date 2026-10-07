@@ -105,7 +105,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.special import fresnel, wofz
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -230,7 +230,7 @@ def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Co
 # B1. Spherical-wave ground reflection (Weyl-Van der Pol)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class SphericalGroundResult:
+class SphericalGroundResult(OwnsArrays):
     r"""Spherical-wave ground-effect result (Weyl-Van der Pol).
 
     Every array is aligned with :attr:`frequencies`.
@@ -421,12 +421,12 @@ def ground_effect(
     ratio = 1.0 + q * (r1 / r2) * np.exp(1j * k * (r2 - r1))
     d_l = 20.0 * np.log10(np.abs(ratio))
     return SphericalGroundResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         excess_attenuation=np.asarray(d_l, dtype=np.float64),
         reflection_coefficient=np.asarray(q, dtype=np.complex128),
         plane_reflection_coefficient=np.asarray(rp, dtype=np.complex128),
         boundary_loss=np.asarray(f_w, dtype=np.complex128),
-        normalized_impedance=read_only_copy(z),
+        normalized_impedance=z,
         r_direct=r1,
         r_reflected=r2,
     )
@@ -612,7 +612,7 @@ def _screen_field(
 
 
 @dataclass(frozen=True)
-class BarrierInsertionLoss:
+class BarrierInsertionLoss(OwnsArrays):
     r"""Per-frequency barrier insertion loss (IL vs frequency).
 
     :ivar frequencies: Frequencies, in hertz.
@@ -961,7 +961,7 @@ def barrier_insertion_loss(
         msg = f"unknown method {method!r}; options: {_BARRIER_METHODS}."
         raise ValueError(msg)
     return BarrierInsertionLoss(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         insertion_loss=np.asarray(il, dtype=np.float64),
         fresnel_number=n,
         method=method,

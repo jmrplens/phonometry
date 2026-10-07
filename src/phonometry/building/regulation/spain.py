@@ -85,6 +85,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import round_half_up
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -357,7 +358,7 @@ def _normalise(value: str, aliases: Mapping[str, str], name: str) -> str:
 # Global indices (Annex A, Formulae (A.5) to (A.7))
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class DbHrGlobalIndexResult:
+class DbHrGlobalIndexResult(OwnsArrays):
     """A DB-HR A-weighted global insulation index.
 
     :ivar value: The index, in dBA, unrounded.
@@ -515,9 +516,7 @@ def db_hr_global_index(
             )
             raise ValueError(msg)
         freqs = np.asarray(DB_HR_FREQUENCIES, dtype=np.float64)
-        # Copy so a later mutation of the caller's array cannot rewrite the
-        # values this result reports.
-        selected = values.copy()
+        selected = values
     else:
         given = np.asarray(frequencies, dtype=np.float64)
         require_equal_shapes(

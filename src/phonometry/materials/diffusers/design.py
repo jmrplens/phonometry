@@ -65,7 +65,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from .scattering_diffusion import (
     DiffusionSpectrum,
     diffusion_spectrum,
@@ -254,7 +254,7 @@ def _polar_levels(pressure: Complex) -> Real:
 
 
 @dataclass(frozen=True)
-class DiffuserPolarResponse:
+class DiffuserPolarResponse(OwnsArrays):
     """A predicted far-field polar response of a diffuser at one frequency.
 
     :ivar frequency: Frequency of the prediction, in hertz.
@@ -479,14 +479,12 @@ def predict_diffuser_polar_response(
     coefficient = directional_diffusion_coefficient(levels)
     return DiffuserPolarResponse(
         frequency=f,
-        angles_deg=read_only_copy(ang),
+        angles_deg=ang,
         levels=levels,
         coefficient=coefficient,
         source_angle_deg=psi,
         well_width=w,
-        depths=(
-            read_only_copy(depths, dtype=np.float64) if depths is not None else None
-        ),
+        depths=(np.asarray(depths, dtype=np.float64) if depths is not None else None),
         repetitions=n_periods,
     )
 

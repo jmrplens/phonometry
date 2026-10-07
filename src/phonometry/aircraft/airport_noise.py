@@ -37,7 +37,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 
 import numpy as np
 
-from .._internal.frozen import read_only_copy
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -345,7 +345,7 @@ def _interp_distance(
 
 
 @dataclass(frozen=True)
-class NpdLevelResult:
+class NpdLevelResult(OwnsArrays):
     """NPD event level over a distance sweep at one power (ECAC Doc 29).
 
     :ivar distances: Slant distances, in metres.
@@ -460,10 +460,10 @@ def npd_curve(
     level = npd_level(p, d, lv, power, dq)
     row = npd_level(p, d, lv, power, d)  # tabulated levels at the queried power
     return NpdLevelResult(
-        distances=read_only_copy(dq),
+        distances=dq,
         levels=level,
         power=float(power),
-        table_distances=read_only_copy(d),
+        table_distances=d,
         table_levels=row,
     )
 
@@ -588,7 +588,7 @@ def _segment_geometry(
 
 
 @dataclass(frozen=True)
-class FlightSegmentState:
+class FlightSegmentState(OwnsArrays):
     r"""What each segment of a flight path is doing (§4.5.2/4.5.5-4.5.7).
 
     One entry per segment, so every field an ``N``-point path fills has length
@@ -660,7 +660,7 @@ def _checked_metric(metric: str) -> EventMetric:
 
 
 @dataclass(frozen=True)
-class FlyoverResult:
+class FlyoverResult(OwnsArrays):
     """Single-event noise level of an aircraft movement at a receiver.
 
     :ivar level: The event level, in dB (SEL for ``metric="exposure"``, else the
@@ -1401,13 +1401,11 @@ def event_level(
     total, seg_arr = _event_level_core(
         pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr, lr, bk
     )
-    return FlyoverResult(
-        level=total, metric=key, segment_levels=seg_arr, observer=read_only_copy(obs)
-    )
+    return FlyoverResult(level=total, metric=key, segment_levels=seg_arr, observer=obs)
 
 
 @dataclass(frozen=True)
-class NoiseContourResult:
+class NoiseContourResult(OwnsArrays):
     """Single-event noise level over a ground grid (ECAC Doc 29).
 
     :ivar x: Grid x coordinates, in metres.
@@ -1523,8 +1521,8 @@ def noise_contour(
         pts, obs, p, d, le, lm, vref, imp, mounting, key, gr, lr, bk
     )
     return NoiseContourResult(
-        x=read_only_copy(gx),
-        y=read_only_copy(gy),
+        x=gx,
+        y=gy,
         levels=levels.reshape(gy.size, gx.size),
         metric=key,
     )

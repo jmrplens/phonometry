@@ -172,7 +172,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.integrate import quad
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
     require_positive,
@@ -668,7 +668,7 @@ def wave_vibration_reduction_index(
 
 
 @dataclass(frozen=True)
-class JunctionTransmissionResult:
+class JunctionTransmissionResult(OwnsArrays):
     r"""Bending-wave transmission across a rigid plate junction (Hopkins 5.2.1.3).
 
     :ivar junction: Junction type (``"X"``, ``"T1"``, ``"T2"`` or ``"L"``).
@@ -856,7 +856,7 @@ def junction_transmission(
         psi=psi,
         critical_frequency1=_critical_frequency(thickness1, wave_speed1),
         critical_frequency2=_critical_frequency(thickness2, wave_speed2),
-        angles_deg=read_only_copy(grid),
+        angles_deg=grid,
         corner=corner,
         straight=straight,
         corner_average=corner_avg,

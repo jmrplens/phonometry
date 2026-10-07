@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_ranks, require_same_length
 from ..io._resolve import resolve_fs
 from .spectra import (
@@ -58,7 +59,7 @@ _ADAPTIVE_MAX_ITER = 100
 
 
 @dataclass(frozen=True)
-class MultitaperSpectralDensityResult:
+class MultitaperSpectralDensityResult(OwnsArrays):
     r"""Thomson multitaper spectral density (Percival & Walden Ch. 7).
 
     One whole-record estimate from ``K`` orthogonal Slepian (dpss) tapers:

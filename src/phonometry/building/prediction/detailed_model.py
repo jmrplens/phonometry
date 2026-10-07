@@ -99,7 +99,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import read_only_copy
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
@@ -1408,7 +1408,7 @@ class HomogeneousElement:
 
 
 @dataclass(frozen=True)
-class InSituElementResult:
+class InSituElementResult(OwnsArrays):
     """Per-band in-situ description of one element (Clause 4.2.2).
 
     :ivar label: The element name.
@@ -1572,7 +1572,7 @@ def in_situ_element(
     )
     return InSituElementResult(
         label=element.label,
-        frequencies=read_only_copy(f),
+        frequencies=f,
         area=require_positive(element.area, "area"),
         radiation_factor=sigma,
         forced_radiation_factor=sigma_f,
@@ -1588,7 +1588,7 @@ def in_situ_element(
 # Path assembly and totals (Clause 4.1)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class BandPath:
+class BandPath(OwnsArrays):
     """One transmission path of the detailed model, per band.
 
     :ivar label: Human-readable path name, e.g. ``"ext wall 1-Df"``.
@@ -1746,7 +1746,7 @@ def impact_flanking_path(
 
 
 @dataclass(frozen=True)
-class DetailedAirborneResult:
+class DetailedAirborneResult(OwnsArrays):
     """Per-band apparent sound reduction index ``R'`` (ISO 12354-1, 4.2).
 
     :ivar frequencies: Band centre frequencies, in Hz.
@@ -1831,7 +1831,7 @@ class DetailedAirborneResult:
 
 
 @dataclass(frozen=True)
-class DetailedImpactResult:
+class DetailedImpactResult(OwnsArrays):
     """Per-band apparent impact level ``L'n`` (ISO 12354-2, 4.2).
 
     :ivar frequencies: Band centre frequencies, in Hz.
@@ -1946,7 +1946,7 @@ def detailed_airborne_prediction(
     direct = BandPath(
         label=direct_label,
         kind="Dd",
-        values=read_only_copy(_band_array(direct_index, f.size, "direct_index")),
+        values=_band_array(direct_index, f.size, "direct_index"),
     )
     paths = (direct, *flanking_paths)
     tau = 10.0 ** (-_path_matrix(paths, f.size) / 10.0)
@@ -1954,7 +1954,7 @@ def detailed_airborne_prediction(
     r_prime = np.asarray(-10.0 * np.log10(total), dtype=np.float64)
     rating_values = _rating_slice(f, r_prime, bands)
     return DetailedAirborneResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         paths=paths,
         r_prime=r_prime,
         fractions=np.asarray(tau / total, dtype=np.float64),
@@ -2007,7 +2007,7 @@ def detailed_impact_prediction(
         direct = BandPath(
             label=direct_label,
             kind="Dd",
-            values=read_only_copy(_band_array(direct_level, f.size, "direct_level")),
+            values=_band_array(direct_level, f.size, "direct_level"),
         )
         paths = (direct, *paths)
     energy = 10.0 ** (_path_matrix(paths, f.size) / 10.0)
@@ -2015,7 +2015,7 @@ def detailed_impact_prediction(
     l_prime_n = np.asarray(10.0 * np.log10(total), dtype=np.float64)
     rating_values = _rating_slice(f, l_prime_n, bands)
     return DetailedImpactResult(
-        frequencies=read_only_copy(f),
+        frequencies=f,
         paths=paths,
         l_prime_n=l_prime_n,
         fractions=np.asarray(energy / total, dtype=np.float64),

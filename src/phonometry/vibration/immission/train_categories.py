@@ -321,30 +321,76 @@ def railway_guide_values(
 class RailwayChange:
     r"""The verdict of 6.5.3.6 on an altered or extended line.
 
-    :ivar complies: Whether the requirements count as met for the planned
-        case: :math:`KB_\mathrm{Fmax}` keeps to :math:`A_\mathrm{u}`, or both the
-        :math:`KB_\mathrm{Fmax}` and the :math:`KB_\mathrm{FTr}` condition hold.
-    :ivar kb_fmax_met: Whether :math:`KB_\mathrm{Fmax}` of the planned
-        case keeps to :math:`A_\mathrm{u}` or :math:`A_\mathrm{o}`, or exceeds :math:`A_\mathrm{o}` by
-        an increase under 25 % against the case without the project.
-    :ivar kb_ftr_met: Whether :math:`KB_\mathrm{FTr}` of the planned case keeps to
-        :math:`A_\mathrm{r}`, or exceeds it by an increase under 25 %; true without
-        looking when :math:`KB_\mathrm{Fmax}` keeps to :math:`A_\mathrm{u}`, which
-        settles the verdict on its own.
-    :ivar kb_fmax_increase_percent: The increase of :math:`KB_\mathrm{Fmax}`,
-        planned against existing, in per cent.
-    :ivar kb_ftr_increase_percent: The same for :math:`KB_\mathrm{FTr}`.
+    The increases and the verdicts are read from the two cases, the guide
+    values and the 25 % of 6.5.3.6, so they are not fields.
+
+    :ivar kb_fmax_before: :math:`KB_\mathrm{Fmax}` of the case without the
+        project.
+    :ivar kb_fmax_after: :math:`KB_\mathrm{Fmax}` of the planned case.
+    :ivar kb_ftr_before: :math:`KB_\mathrm{FTr}` of the case without the project.
+    :ivar kb_ftr_after: :math:`KB_\mathrm{FTr}` of the planned case.
     :ivar guide: The guide values the planned case was held to.
     :ivar time_of_day: ``"day"`` or ``"night"``.
     """
 
-    complies: bool
-    kb_fmax_met: bool
-    kb_ftr_met: bool
-    kb_fmax_increase_percent: float
-    kb_ftr_increase_percent: float
+    kb_fmax_before: float
+    kb_fmax_after: float
+    kb_ftr_before: float
+    kb_ftr_after: float
     guide: GuideValues
     time_of_day: str
+
+    @property
+    def kb_fmax_increase_percent(self) -> float:
+        r"""The increase of :math:`KB_\mathrm{Fmax}`, planned against existing, in per cent."""
+        return _increase_percent(self.kb_fmax_before, self.kb_fmax_after)
+
+    @property
+    def kb_ftr_increase_percent(self) -> float:
+        r"""The increase of :math:`KB_\mathrm{FTr}`, planned against existing, in per cent."""
+        return _increase_percent(self.kb_ftr_before, self.kb_ftr_after)
+
+    @property
+    def _keeps_to_lower(self) -> bool:
+        return _keeps_to(self.kb_fmax_after, self.guide.a_u)
+
+    @property
+    def kb_fmax_met(self) -> bool:
+        r"""Whether :math:`KB_\mathrm{Fmax}` of the planned case meets 6.5.3.6.
+
+        It keeps to :math:`A_\mathrm{u}` or :math:`A_\mathrm{o}`, or exceeds :math:`A_\mathrm{o}` by an
+        increase under 25 % against the case without the project. The
+        increase is judged settled: 0,28 to 0,35 is 25 % in decimal and
+        24,999 999 999 999 98 % in binary, which must not decide the verdict.
+        """
+        if self._keeps_to_lower:
+            return True
+        return _keeps_to(self.kb_fmax_after, self.guide.a_o) or bool(
+            settled(self.kb_fmax_increase_percent) < RAILWAY_CHANGE_TOLERANCE_PERCENT
+        )
+
+    @property
+    def kb_ftr_met(self) -> bool:
+        r"""Whether :math:`KB_\mathrm{FTr}` of the planned case meets 6.5.3.6.
+
+        It keeps to :math:`A_\mathrm{r}`, or exceeds it by an increase under 25 %;
+        true without looking when :math:`KB_\mathrm{Fmax}` keeps to
+        :math:`A_\mathrm{u}`, which settles the verdict on its own.
+        """
+        if self._keeps_to_lower:
+            return True
+        return _keeps_to(self.kb_ftr_after, self.guide.a_r) or bool(
+            settled(self.kb_ftr_increase_percent) < RAILWAY_CHANGE_TOLERANCE_PERCENT
+        )
+
+    @property
+    def complies(self) -> bool:
+        r"""Whether the requirements count as met for the planned case.
+
+        :math:`KB_\mathrm{Fmax}` keeps to :math:`A_\mathrm{u}`, or both the
+        :math:`KB_\mathrm{Fmax}` and the :math:`KB_\mathrm{FTr}` condition hold.
+        """
+        return self.kb_fmax_met and self.kb_ftr_met
 
 
 def _increase_percent(before: float, after: float) -> float:
@@ -407,26 +453,11 @@ def assess_railway_change(
             f"2023 edition and of the {which}, got {guide!r}."
         )
         raise ValueError(msg)
-    fmax_increase = _increase_percent(fmax_before, fmax_after)
-    ftr_increase = _increase_percent(ftr_before, ftr_after)
-    tolerable = RAILWAY_CHANGE_TOLERANCE_PERCENT
-    if _keeps_to(fmax_after, guide.a_u):
-        fmax_met = ftr_met = True
-    else:
-        # The increases are judged settled: 0,28 to 0,35 is 25 % in decimal and
-        # 24,999 999 999 999 98 % in binary, which must not decide the verdict.
-        fmax_met = _keeps_to(fmax_after, guide.a_o) or bool(
-            settled(fmax_increase) < tolerable
-        )
-        ftr_met = _keeps_to(ftr_after, guide.a_r) or bool(
-            settled(ftr_increase) < tolerable
-        )
     return RailwayChange(
-        complies=fmax_met and ftr_met,
-        kb_fmax_met=fmax_met,
-        kb_ftr_met=ftr_met,
-        kb_fmax_increase_percent=fmax_increase,
-        kb_ftr_increase_percent=ftr_increase,
+        kb_fmax_before=fmax_before,
+        kb_fmax_after=fmax_after,
+        kb_ftr_before=ftr_before,
+        kb_ftr_after=ftr_after,
         guide=guide,
         time_of_day=which,
     )

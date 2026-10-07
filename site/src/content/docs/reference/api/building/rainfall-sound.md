@@ -484,19 +484,16 @@ table prints the three lighter classes as "up to" a rate and cloudburst as
 RainGeneratorVerification(
     rain_type: str,
     rainfall_rate_mm_h: float,
-    rate_deviation_mm_h: float,
-    rate_ok: bool,
     drop_diameters_mm: np.ndarray | None,
-    drop_share: float | None,
-    drops_ok: bool | None,
     fall_velocities_m_s: np.ndarray | None,
-    velocity_share: float | None,
-    velocities_ok: bool | None,
-    passes: bool,
 )
 ```
 
 Whether an artificial rain generator makes the rain it should (H.1, H.2.3).
+
+The windows are the rows of Table H.1 the rain type selects, so the
+shares and the verdicts are read from the measured samples and are not
+fields: a verification cannot be built to pass a rain the table fails.
 
 **Attributes**
 
@@ -504,21 +501,32 @@ Whether an artificial rain generator makes the rain it should (H.1, H.2.3).
 | :--- | :--- |
 | `rain_type` | `"intense"` or `"heavy"`. |
 | `rainfall_rate_mm_h` | The measured rainfall rate, in mm/h. |
-| `rate_deviation_mm_h` | Measured minus nominal rate, in mm/h. |
-| `rate_ok` | Whether the rate is within the tolerance ("shall"). |
 | `drop_diameters_mm` | The measured drop diameters, in mm, or `None`. |
-| `drop_share` | Share of those drops within the diameter window, or `None`. |
-| `drops_ok` | Whether at least half of them are ("should"), or `None`. |
 | `fall_velocities_m_s` | The measured fall velocities, in m/s, or `None`. |
-| `velocity_share` | Share of those drops within the velocity window, or `None`. |
-| `velocities_ok` | Whether at least half of them are ("should"), or `None`. |
-| `passes` | Whether every judged requirement holds. |
+
+### RainGeneratorVerification.drop_share
+
+*property*
+
+Share of the measured drops within the diameter window, or `None`.
+
+### RainGeneratorVerification.drops_ok
+
+*property*
+
+Whether at least half of the drops are within it ("should"), or `None`.
 
 ### RainGeneratorVerification.nominal
 
 *property*
 
 The row of [`ARTIFICIAL_RAIN`](/phonometry/reference/api/building/rainfall-sound/#artificial_rain) the generator was verified against.
+
+### RainGeneratorVerification.passes
+
+*property*
+
+Whether every judged requirement holds.
 
 ### RainGeneratorVerification.plot()
 
@@ -537,6 +545,30 @@ Every quantity is drawn as its deviation from the nominal value in
 units of its tolerance, so the three share one axis and the window is
 -1 to 1. Requires matplotlib (`pip install phonometry[plot]`);
 returns the `Axes`.
+
+### RainGeneratorVerification.rate_deviation_mm_h
+
+*property*
+
+Measured minus nominal rate, in mm/h.
+
+### RainGeneratorVerification.rate_ok
+
+*property*
+
+Whether the rate is within the tolerance ("shall"), bounds included.
+
+### RainGeneratorVerification.velocities_ok
+
+*property*
+
+Whether at least half of the drops fall within it ("should"), or `None`.
+
+### RainGeneratorVerification.velocity_share
+
+*property*
+
+Share of the measured drops within the velocity window, or `None`.
 
 ## verify_rain_generator
 

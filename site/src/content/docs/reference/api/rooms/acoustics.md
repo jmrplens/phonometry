@@ -338,9 +338,6 @@ RoomAcousticsResult(
     d50: np.ndarray,
     ts: np.ndarray,
     dynamic_range: np.ndarray,
-    edt_valid: np.ndarray,
-    t20_valid: np.ndarray,
-    t30_valid: np.ndarray,
     curvature: np.ndarray,
 )
 ```
@@ -358,7 +355,8 @@ seconds (Equation (A.13); the Table A.1 JND is 10 ms).
 
 `dynamic_range` is the peak-to-noise-floor distance of the squared
 band impulse response in dB. `edt_valid`, `t20_valid` and
-`t30_valid` apply the ISO 3382-1:2009, 5.3.3 criterion (noise at
+`t30_valid` are read from it and the decay times, so they are not
+fields; they apply the ISO 3382-1:2009, 5.3.3 criterion (noise at
 least evaluation range + 15 dB below the maximum: 25 dB for EDT), with
 T20 and T30 tightened to 46 dB and 54 dB to absorb the positive bias of
 the tail compensation (5.3.3, Eq. (3)) and keep a flagged-valid value
@@ -366,6 +364,15 @@ within the 5 % JND (ISO 3382-1:2009, Table A.1); they are False when the
 value could not be evaluated. `curvature` is
 C = 100*(T30/T20 - 1) in percent (ISO 3382-2:2008, B.3); values
 above 10 % indicate an unreliable, non-straight decay.
+
+### RoomAcousticsResult.edt_valid
+
+*property*
+
+Per band, whether the EDT is evaluated with the noise far enough below.
+
+At least 10 dB + 15 dB under the maximum (ISO 3382-1:2009, 5.3.3);
+`False` where the value could not be evaluated.
 
 ### RoomAcousticsResult.plot()
 
@@ -438,3 +445,23 @@ band (the box names that band, the verdict line does not).
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+
+### RoomAcousticsResult.t20_valid
+
+*property*
+
+Per band, whether T20 is evaluated with the noise far enough below.
+
+20 dB + 15 dB, tightened by the tail headroom to 46 dB so a
+flagged-valid value stays within the 5 % JND; `False` where the
+value could not be evaluated.
+
+### RoomAcousticsResult.t30_valid
+
+*property*
+
+Per band, whether T30 is evaluated with the noise far enough below.
+
+30 dB + 15 dB, tightened by the tail headroom to 54 dB so a
+flagged-valid value stays within the 5 % JND; `False` where the
+value could not be evaluated.

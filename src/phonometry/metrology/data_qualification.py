@@ -402,6 +402,51 @@ def _check_null_mean(
     raise ValueError(msg)
 
 
+def _acceptance_region(
+    owner: str,
+    values: NDArray[np.float64],
+    method: str,
+    alpha: float,
+    median: float | None,
+) -> tuple[int, int]:
+    """The acceptance region ``(lower, upper)`` of the count, read from the sequence.
+
+    Reverse arrangements read B&P Table A.6's convention at the sequence's
+    length (:func:`_reverse_arrangement_bounds`); runs read the exact
+    percentage points of the counts above and below the classification
+    median (:func:`_runs_bounds`), on the values that differ from it.
+
+    :param owner: Name of the result type, used in the error message.
+    :param values: The sequence the statistic was counted on.
+    :param method: ``"reverse_arrangements"`` or ``"runs"``.
+    :param alpha: The significance level, inside (0, 1).
+    :param median: Classification median for ``"runs"``, else ignored.
+    :return: ``(lower, upper)``; the hypothesis is accepted when
+        ``lower < count <= upper``.
+    :raises ValueError: if the method is unknown, ``alpha`` is not inside
+        (0, 1), or a runs sequence has no median or nothing on one side of it.
+    """
+    if method not in _METHODS:
+        msg = f"{owner}: 'method' must be one of {_METHODS}, got {method!r}."
+        raise ValueError(msg)
+    if not 0.0 < alpha < 1.0:
+        msg = f"{owner}: 'alpha' must be inside (0, 1), got {alpha!r}."
+        raise ValueError(msg)
+    seq = np.asarray(values, dtype=np.float64)
+    if method == "reverse_arrangements":
+        return _reverse_arrangement_bounds(seq.size, alpha)
+    if median is None:
+        msg = f"{owner}: a runs test is read against its classification median."
+        raise ValueError(msg)
+    kept = seq[np.abs(seq - median) > 0.0]
+    above = int(np.count_nonzero(kept > median))
+    below = int(kept.size - above)
+    if above == 0 or below == 0:
+        msg = f"{owner}: a runs test needs observations on both sides of the median."
+        raise ValueError(msg)
+    return _runs_bounds(above, below, alpha)
+
+
 @dataclass(frozen=True)
 class TrendTestResult(OwnsArrays):
     r"""A nonparametric trend test on a sequence of parameter estimates.
@@ -420,20 +465,9 @@ class TrendTestResult(OwnsArrays):
     :ivar n: Number of observations used.
     :ivar mean: Null mean of the statistic (B&P Eq. (4.54) for ``A``).
     :ivar std: Null standard deviation (B&P Eq. (4.55) for ``A``).
-    :ivar bounds: Acceptance region ``(lower, upper)``: percentage points
-        such that the no-trend hypothesis is accepted when
-        ``lower < statistic <= upper``. For reverse arrangements these
-        follow B&P Table A.6's own convention (normal approximation with
-        continuity correction, which reproduces the book's tabulated
-        :math:`\alpha = 0.05` entries exactly; the table is not derivable
-        from the exact Mahonian distribution), so at an acceptance
-        boundary the verdict and the exact :attr:`p_value` can disagree
-        by one count.
     :ivar p_value: Two-sided p-value from the exact null distribution
         (normal approximation above :math:`n = 100` for reverse
         arrangements).
-    :ivar trend_free: ``True`` when the statistic falls inside the
-        acceptance region.
     :ivar alpha: Significance level of the region (default 0.05).
     :ivar median: For ``"runs"``, the median of the *original* sequence
         against which each value was classified (before values equal to it
@@ -446,12 +480,37 @@ class TrendTestResult(OwnsArrays):
     n: int
     mean: float
     std: float
-    bounds: tuple[int, int]
     p_value: float
     _: KW_ONLY
-    trend_free: bool
     alpha: float
     median: float | None = None
+
+    @property
+    def bounds(self) -> tuple[int, int]:
+        r"""Acceptance region ``(lower, upper)`` at :attr:`alpha`, read from the sequence.
+
+        Percentage points such that the no-trend hypothesis is accepted when
+        ``lower < statistic <= upper``. For reverse arrangements these follow
+        B&P Table A.6's own convention (normal approximation with continuity
+        correction, which reproduces the book's tabulated
+        :math:`\alpha = 0.05` entries exactly; the table is not derivable
+        from the exact Mahonian distribution), so at an acceptance boundary
+        the verdict and the exact :attr:`p_value` can disagree by one count.
+        For runs they are the exact percentage points of the counts above and
+        below :attr:`median`.
+        """
+        return _acceptance_region(
+            type(self).__name__, self.values, self.method, self.alpha, self.median
+        )
+
+    @property
+    def trend_free(self) -> bool:
+        """Whether the statistic falls inside the acceptance region.
+
+        ``lower < statistic <= upper``: the no-trend hypothesis is accepted at
+        :attr:`alpha`.
+        """
+        return self.bounds[0] < self.statistic <= self.bounds[1]
 
     def __post_init__(self) -> None:
         """Reject a sequence that disagrees with the count it was tested at.
@@ -498,6 +557,7 @@ class TrendTestResult(OwnsArrays):
         _check_null_mean(
             owner, "values", self.values, self.method, self.median, self.mean
         )
+        _acceptance_region(owner, self.values, self.method, self.alpha, self.median)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -529,7 +589,7 @@ def _trend_test_reverse(values: NDArray[np.float64], alpha: float) -> TrendTestR
     n = values.size
     statistic = _reverse_arrangements(values)
     mean, std = _reverse_arrangement_moments(n)
-    bounds = _reverse_arrangement_bounds(n, alpha)
+    # The acceptance region is read by the result from the sequence and alpha.
     return TrendTestResult(
         values=values,
         method="reverse_arrangements",
@@ -537,9 +597,7 @@ def _trend_test_reverse(values: NDArray[np.float64], alpha: float) -> TrendTestR
         n=n,
         mean=mean,
         std=std,
-        bounds=bounds,
         p_value=_reverse_arrangement_p_value(n, statistic),
-        trend_free=bounds[0] < statistic <= bounds[1],
         alpha=alpha,
     )
 
@@ -563,7 +621,8 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
         raise ValueError(msg)
     statistic = _count_runs(above)
     mean, std = _runs_moments(n1, n2)
-    bounds = _runs_bounds(n1, n2, alpha)
+    # The acceptance region is read by the result from the sequence, the
+    # median and alpha.
     return TrendTestResult(
         values=kept,
         method="runs",
@@ -571,9 +630,7 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
         n=int(kept.size),
         mean=mean,
         std=std,
-        bounds=bounds,
         p_value=_runs_p_value(n1, n2, statistic),
-        trend_free=bounds[0] < statistic <= bounds[1],
         alpha=alpha,
         median=median,
     )
@@ -665,9 +722,7 @@ class StationarityTestResult(OwnsArrays):
     :ivar count: Observed test statistic (reverse arrangements or runs).
     :ivar mean: Null mean of the count.
     :ivar std: Null standard deviation of the count.
-    :ivar bounds: Acceptance region ``(lower, upper)`` at :attr:`alpha`.
     :ivar p_value: Two-sided p-value of the observed count.
-    :ivar stationary: ``True`` when the count falls inside the region.
     :ivar alpha: Significance level (default 0.05).
     :ivar n_segments: Number of segments the record was divided into.
     :ivar segment_duration: Duration of each segment, in seconds.
@@ -681,14 +736,36 @@ class StationarityTestResult(OwnsArrays):
     count: int
     mean: float
     std: float
-    bounds: tuple[int, int]
     p_value: float
     _: KW_ONLY
-    stationary: bool
     alpha: float
     n_segments: int
     segment_duration: float
     fs: float
+
+    @property
+    def bounds(self) -> tuple[int, int]:
+        """Acceptance region ``(lower, upper)`` at :attr:`alpha`, read from the segment values.
+
+        The same region :func:`trend_test` reads on :attr:`segment_values`:
+        B&P Table A.6's convention for reverse arrangements, the exact
+        percentage points about the segment values' own median for runs.
+        """
+        return _acceptance_region(
+            type(self).__name__,
+            self.segment_values,
+            self.method,
+            self.alpha,
+            self._median(),
+        )
+
+    def _median(self) -> float | None:
+        return float(np.median(self.segment_values)) if self.method == "runs" else None
+
+    @property
+    def stationary(self) -> bool:
+        """Whether the count falls inside the acceptance region, ``lower < count <= upper``."""
+        return self.bounds[0] < self.count <= self.bounds[1]
 
     def __post_init__(self) -> None:
         """Reject a test whose per-segment sequences disagree.
@@ -730,12 +807,11 @@ class StationarityTestResult(OwnsArrays):
             },
             "segment",
         )
-        centre = (
-            float(np.median(self.segment_values)) if self.method == "runs" else None
-        )
+        centre = self._median()
         _check_null_mean(
             owner, "segment_values", self.segment_values, self.method, centre, self.mean
         )
+        _acceptance_region(owner, self.segment_values, self.method, self.alpha, centre)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -837,9 +913,7 @@ def stationarity_test(
         count=trend.statistic,
         mean=trend.mean,
         std=trend.std,
-        bounds=trend.bounds,
         p_value=trend.p_value,
-        stationary=trend.trend_free,
         alpha=alpha,
         n_segments=segments,
         segment_duration=duration,

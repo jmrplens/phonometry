@@ -118,15 +118,18 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import (
+    OwnsArrays,
+    frozen_rows,
+    read_only,
+    reduce_with_plain_rows,
+)
 from .._internal.validation import (
     check_engine,
-    is_class_designation,
     require_choice,
     require_count,
     require_ranks,
     require_same_length,
-    require_summary_class,
 )
 from .core import _multirate_lowpass
 
@@ -959,14 +962,7 @@ def _verify_band(
                 ),
             )
 
-    band_class: int | None = next(
-        (cls for cls in classes_ordered if margins[cls] >= 0), None
-    )
-    band_entry: dict[str, Any] = {
-        "freq": fm,
-        "class": band_class,
-        "checked_to_omega": nyquist / fm,
-    }
+    band_entry: dict[str, Any] = {"freq": fm, "checked_to_omega": nyquist / fm}
     for cls in classes_ordered:
         band_entry[f"margin_class{cls}_db"] = margins[cls]
     return band_entry
@@ -984,8 +980,9 @@ def _grade_pattern_requirements(
     Each band gets the deviation of its effective bandwidth and its margin
     to each class's limits; each band the summation applies to
     (:func:`_summation_graded`) gets the range of its summation curve and
-    its margins too, and the others carry ``None``. The band's class is
-    then the strictest class it meets on every requirement graded.
+    its margins too, and the others carry ``None``. The band's class, the
+    strictest class it meets on every requirement graded, is read from these
+    margins by :attr:`FilterComplianceResult.bands`.
     """
     factors = tuple(int(f) for f in bank.factor)
     fs = float(bank.fs)
@@ -1029,10 +1026,11 @@ def _grade_pattern_requirements(
             band["summation_max_db"] = None
             for cls in classes_ordered:
                 band[f"summation_margin_class{cls}_db"] = None
-        band["class"] = _band_class(band, classes_ordered)
 
 
-def _band_class(band: dict[str, Any], classes_ordered: tuple[int, ...]) -> int | None:
+def _band_class(
+    band: Mapping[str, Any], classes_ordered: tuple[int, ...]
+) -> int | None:
     """The strictest class one band meets on every requirement it carries."""
     for cls in classes_ordered:
         margins = [
@@ -1116,8 +1114,6 @@ def verify_filter_class(
         raise ValueError(msg)
     classes_ordered: tuple[int, ...] = spec["classes"]  # best -> worst
 
-    bands: list[dict[str, Any]] = []
-
     # Table 1 breakpoints (both sides) that must always be evaluated.
     rows = list(spec["passband_max"]) + list(spec["stopband_min"])
     breakpoint_omegas = np.array(
@@ -1125,39 +1121,18 @@ def verify_filter_class(
     )
     breakpoint_omegas = np.concatenate([1.0 / breakpoint_omegas, breakpoint_omegas])
 
-    # The outermost stop-band breakpoint (G**4 mapped to the bandwidth
-    # designator): a band whose input Nyquist frequency lies below it cannot
-    # have its full high-side stop-band mask demonstrated, so the verdict is
-    # then range-limited.
-    mask_top_omega = _map_breakpoint(spec["stopband_min"][-1][0], bank.fraction)
-    range_limited = False
-
-    for idx in range(bank.num_bands):
-        band_entry = _verify_band(
-            bank, idx, classes_ordered, breakpoint_omegas, edition, num_points
-        )
-        if band_entry["checked_to_omega"] < mask_top_omega:
-            range_limited = True
-        bands.append(band_entry)
+    bands = [
+        _verify_band(bank, idx, classes_ordered, breakpoint_omegas, edition, num_points)
+        for idx in range(bank.num_bands)
+    ]
     if edition == "1995":
         points_per_bandwidth = _settled_points_per_bandwidth(bank, points_per_bandwidth)
     _grade_pattern_requirements(
         bank, bands, classes_ordered, points_per_bandwidth, edition
     )
 
-    if not bands:
-        # No bands to verify: never report compliance vacuously.
-        overall: int | None = None
-        range_limited = False
-    else:
-        classes = [band["class"] for band in bands]
-        # The strictest class every band meets is the worst (largest) per-band
-        # class; None if any band meets no class.
-        overall = None if None in classes else max(classes)
-
     return FilterComplianceResult(
-        overall_class=overall,
-        bands=tuple(bands),
+        band_margins=tuple(bands),
         fraction=int(bank.fraction),
         edition=edition,
         sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
@@ -1165,12 +1140,11 @@ def verify_filter_class(
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
         num_points=int(num_points),
-        range_limited=range_limited,
         points_per_bandwidth=points_per_bandwidth,
     )
 
 
-def _margin_classes(band: dict[str, Any]) -> list[int]:
+def _margin_classes(band: Mapping[str, Any]) -> list[int]:
     """The classes one band verdict carries margins for, read off its keys."""
     prefix, suffix = "margin_class", "_db"
     return sorted(
@@ -1181,7 +1155,7 @@ def _margin_classes(band: dict[str, Any]) -> list[int]:
 
 
 def _require_margin_classes(
-    bands: tuple[dict[str, Any], ...], edition: str, expected: list[int]
+    bands: tuple[Mapping[str, Any], ...], edition: str, expected: list[int]
 ) -> None:
     """Pin the margin keys of every band to the classes the edition defines.
 
@@ -1202,14 +1176,14 @@ def _require_margin_classes(
         if carried != wanted:
             msg = (
                 f"'edition' ({edition!r}) defines classes {expected}, but the "
-                f"{band.get('freq', math.nan):g} Hz entry of 'bands' carries "
+                f"{band.get('freq', math.nan):g} Hz entry of 'band_margins' carries "
                 f"margins for classes {carried}."
             )
             raise ValueError(msg)
 
 
 def _require_requirement_keys(
-    bands: tuple[dict[str, Any], ...], classes: list[int]
+    bands: tuple[Mapping[str, Any], ...], classes: list[int]
 ) -> None:
     """Every band carries the same requirements, or none of them does.
 
@@ -1229,7 +1203,7 @@ def _require_requirement_keys(
         if any(carried) and not all(carried):
             missing = next(b for b, has in zip(bands, carried, strict=True) if not has)
             msg = (
-                f"'bands' must carry the {name!r} requirement in every band or "
+                f"'band_margins' must carry the {name!r} requirement in every band or "
                 f"in none; the {missing.get('freq', math.nan):g} Hz entry has "
                 f"no {key!r}."
             )
@@ -1245,10 +1219,15 @@ class FilterComplianceResult(OwnsArrays):
     curve, so the result exposes the standard ``plot`` / ``report`` pair without
     holding a reference to the (possibly stateful) bank.
 
-    :ivar overall_class: The strictest class every band meets (0/1/2), or
-        ``None`` when at least one band meets no class of the edition.
-    :ivar bands: The per-band verdicts (one ``{"freq", "class",
-        "margin_class<c>_db", ...}`` per band), as an immutable tuple.
+    The classes and the range are read from the per-band margins and the
+    edition's Table 1, so they are not fields: a verdict cannot be built to
+    state a class its margins do not reach.
+
+    :ivar band_margins: What each band was measured to, without its class:
+        one ``{"freq", "checked_to_omega", "margin_class<c>_db", ...}`` per
+        band, as an immutable tuple of read-only rows, copied at construction
+        so a write into a caller's dictionary cannot move the verdict;
+        :attr:`bands` adds the class each band reaches.
     :ivar fraction: Bandwidth designator ``b`` (1 for octave, 3 for
         one-third-octave).
     :ivar edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
@@ -1265,13 +1244,6 @@ class FilterComplianceResult(OwnsArrays):
     :ivar fs: The bank's full sampling rate in Hz.
     :ivar num_points: Frequency grid points per band used by the verification,
         retained so the redrawn curve matches the analysed grid.
-    :ivar range_limited: ``True`` when at least one band's outermost Table 1
-        breakpoint (:math:`G^{4}`, carried to the bandwidth) lies beyond half
-        the input sampling rate, so the verification could not exercise the
-        full Table 1 mask there (no input of a digital bank has a frequency
-        beyond it, but the limits are not demonstrated); the stated class
-        then attests the verified frequency range and the ``.report()``
-        fiche prints a qualifying note.
     :ivar points_per_bandwidth: ``S``, the test frequencies per bandwidth of
         IEC 61260-2:2016 Formula (1) (IEC 61260:1995 equation (15)) the
         effective bandwidth and the summation were evaluated on; in the 1995
@@ -1296,8 +1268,7 @@ class FilterComplianceResult(OwnsArrays):
     A band's ``class`` is then the strictest class it meets on all of them.
     """
 
-    overall_class: int | None
-    bands: tuple[dict[str, Any], ...]
+    band_margins: tuple[Mapping[str, Any], ...]
     fraction: int
     edition: str
     sos: tuple[np.ndarray, ...]
@@ -1306,7 +1277,6 @@ class FilterComplianceResult(OwnsArrays):
     fs: float
     num_points: int
     _: KW_ONLY
-    range_limited: bool = False
     points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH
 
     def __post_init__(self) -> None:
@@ -1316,78 +1286,109 @@ class FilterComplianceResult(OwnsArrays):
         of the whole bank, so a band list short of an entry gives a sheet
         whose verdict covers a band that is nowhere in its table.
 
-        The edition and the class are pinned against the band verdicts they
-        summarise, because the three travel together: the plot and the fiche
-        pick the corridor from :attr:`edition` and read
-        ``margin_class<overall_class>_db`` out of :attr:`bands`. A verdict
-        whose edition disagrees with its margin keys would draw the other
-        edition's corridor under this edition's title, and an overall class
-        the bands carry no margins for dies in a bare ``KeyError`` halfway
-        through the figure. The class is pinned as a designation, not merely
-        as a value equal to one: ``1.0`` and ``True`` compare equal to class 1
-        yet build ``margin_class1.0_db`` and print ``Class True``. Being one
-        of the edition's classes is not enough either, so the class is pinned
-        against the per-band classes it summarises as well; see
-        :func:`~.._internal.validation.require_summary_class`. Every band is checked, not just the
-        first:
-        :func:`verify_filter_class` fills each entry from the same list of
-        classes, so a band list whose entries disagree among themselves is
-        one no bank produced, and it is the later band that the fiche's
-        per-band table and the plot's worst-band search die on.
+        The edition is pinned against the margins the bands carry, because
+        the two travel together: the plot and the fiche pick the corridor
+        from :attr:`edition` and read ``margin_class<c>_db`` out of every
+        band. A verdict whose edition disagrees with its margin keys would
+        draw the other edition's corridor under this edition's title. Every
+        band is checked, not just the first: :func:`verify_filter_class`
+        fills each entry from the same list of classes, so a band list whose
+        entries disagree among themselves is one no bank produced.
 
-        A bank with no bands in range is an outcome
-        :func:`verify_filter_class` does produce, and it always pairs it with
-        ``overall_class = None`` so nothing is attested vacuously; the class
-        is therefore pinned against the emptiness too, because a stated class
-        over zero bands prints an accredited verdict box above a table that
-        reportlab then refuses to build, complaining about a table with no
-        rows and naming neither the bands nor the bank.
+        A band carries no class of its own: the class is read from its
+        margins (:attr:`bands`), so a row that states one is refused rather
+        than believed or silently replaced.
 
         The per-band numbers are pinned finite. Every margin comes from a
         ``min`` over the measured relative attenuation against the Table 1
         mask, so no bank emits a NaN here; one smuggled in through
-        :func:`dataclasses.replace` prints ``Class 1 (+nan dB)`` in the
-        per-band table under a boxed verdict that still reads COMPLIES,
-        because the binding margin reads whichever band is untouched.
+        :func:`dataclasses.replace` would print ``Class 1 (+nan dB)`` in the
+        per-band table.
 
         :raises ValueError: if the per-band entries disagree, the edition is
-            unknown or does not match the per-band margin keys, the overall
-            class is not one the bands carry margins for or not the one the
-            per-band classes derive, a band carries no class of the edition,
-            a class is stated over no bands at all, or a per-band value is not
-            finite.
+            unknown or does not match the per-band margin keys, a band states
+            a class, or a per-band value is not finite.
         """
+        object.__setattr__(self, "band_margins", frozen_rows(self.band_margins))
         require_ranks(self, band_frequencies=1)
-        require_same_length(self, "bands", "sos", "band_frequencies", "factors")
+        require_same_length(self, "band_margins", "sos", "band_frequencies", "factors")
         require_choice(self.edition, "edition", tuple(_FILTER_EDITIONS))
         expected = list(_FILTER_EDITIONS[self.edition]["classes"])
-        _require_margin_classes(self.bands, self.edition, expected)
-        if self.overall_class is not None and not is_class_designation(
-            self.overall_class, expected
-        ):
-            msg = (
-                f"'overall_class' must be one of {expected} for edition "
-                f"{self.edition!r} (or None); got {self.overall_class!r}."
-            )
-            raise ValueError(msg)
-        if self.overall_class is not None and not self.bands:
-            msg = (
-                f"'overall_class' is {self.overall_class!r} but 'bands' is "
-                "empty: a class cannot be attested over no verified band. A "
-                "bank with no bands in range carries 'overall_class' None."
-            )
-            raise ValueError(msg)
-        require_summary_class(self, self.bands, self.overall_class, expected)
-        _require_requirement_keys(self.bands, expected)
-        for band in self.bands:
+        _require_margin_classes(self.band_margins, self.edition, expected)
+        for band in self.band_margins:
+            if "class" in band:
+                msg = (
+                    "'band_margins' must not state a class: the class of a band "
+                    "is read from its margins. The "
+                    f"{band.get('freq', math.nan):g} Hz entry states "
+                    f"{band['class']!r}."
+                )
+                raise ValueError(msg)
+        _require_requirement_keys(self.band_margins, expected)
+        for band in self.band_margins:
             for key, value in band.items():
                 if isinstance(value, float) and not math.isfinite(value):
                     msg = (
-                        "'bands' must carry finite per-band values; the "
+                        "'band_margins' must carry finite per-band values; the "
                         f"{band.get('freq', math.nan):g} Hz entry has "
                         f"{key}={value!r}."
                     )
                     raise ValueError(msg)
+
+    @property
+    def bands(self) -> tuple[dict[str, Any], ...]:
+        """The per-band verdicts, each margin row with the class it reaches.
+
+        One ``{"freq", "class", "checked_to_omega", "margin_class<c>_db",
+        ...}`` per band: the ``class`` is the strictest class of the edition
+        the band meets on every requirement graded, or ``None``. A fresh copy
+        at every read.
+        """
+        classes = tuple(_FILTER_EDITIONS[self.edition]["classes"])
+        return tuple(
+            {
+                "freq": band["freq"],
+                "class": _band_class(band, classes),
+                **{key: value for key, value in band.items() if key != "class"},
+            }
+            for band in self.band_margins
+        )
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain rows, which pickle; they are frozen again on arrival."""
+        return reduce_with_plain_rows(self)
+
+    @property
+    def overall_class(self) -> int | None:
+        """The strictest class every band meets (0/1/2), or ``None``.
+
+        ``None`` when at least one band meets no class of the edition, and
+        for a bank with no bands in range, so nothing is attested vacuously.
+        The strictest class every band meets is the worst (largest) per-band
+        class.
+        """
+        classes = [band["class"] for band in self.bands]
+        if not classes or None in classes:
+            return None
+        return int(max(classes))
+
+    @property
+    def range_limited(self) -> bool:
+        """Whether a band's Table 1 mask reaches beyond half the input rate.
+
+        ``True`` when at least one band's outermost Table 1 breakpoint
+        (:math:`G^{4}`, carried to the bandwidth) lies beyond half the input
+        sampling rate, so the verification could not exercise the full
+        Table 1 mask there (no input of a digital bank has a frequency beyond
+        it, but the limits are not demonstrated); the stated class then
+        attests the verified frequency range and the ``.report()`` fiche
+        prints a qualifying note.
+        """
+        spec = _FILTER_EDITIONS[self.edition]
+        mask_top_omega = _map_breakpoint(spec["stopband_min"][-1][0], self.fraction)
+        return any(
+            band["checked_to_omega"] < mask_top_omega for band in self.band_margins
+        )
 
     def available_classes(self) -> list[int]:
         """The performance classes carried by the per-band verdict dictionaries.

@@ -1246,10 +1246,8 @@ def special_room_source_locations(
         source_locations=locations,
         additional_room_locations=np.zeros(n_bands, dtype=np.int64),
         microphone_positions=int(microphone_positions),
-        spectral_character=classes,
         a_weighted_standard_deviation_db=s_a,
         a_weighted_source_locations=n_a,
-        a_weighted_spectral_character=class_a,
     )
 
 
@@ -1267,10 +1265,14 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     ``mean_pressure_level`` is the mean background-corrected level of the
     source under test, :math:`\overline{L_p}` (Formula 8) or
     :math:`L_{p\mathrm{e}}`, and ``background_correction`` the per-band shift
-    the Table 4 corrections made to it. ``background_requirement_met`` is
-    ``True`` only where a background was measured and every margin, of the
-    source and, for the comparison method, of the reference source, reached
-    the 4 dB of 6.5 and 9.8. For the comparison method
+    the Table 4 corrections made to it. ``background_margin_db`` is the
+    smallest margin of the source over the background per band, and
+    ``background_margin_ref_db`` that of the reference source (the
+    comparison method only), ``NaN`` where nothing was measured.
+    ``background_requirement_met`` is read from them and the 4 dB of 6.5 and
+    9.8, so it is not a field: ``True`` only where a background was measured
+    and every margin, of the source and, for the comparison method, of the
+    reference source, reached it. For the comparison method
     ``mean_reference_level`` is :math:`L_{p\mathrm{r}}` and
     ``reference_power_level`` :math:`L_{W\mathrm{r}}`; for the direct method
     both are ``NaN`` and ``volume_m3`` and ``nominal_reverberation_time_s``
@@ -1281,8 +1283,9 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     A-weighted level ``mean_a_weighted_level``, which is how clause 4 reads
     the A-weighted level of the direct method, both ``NaN`` where the
     A-weighted levels were not measured or the method is the comparison one;
-    ``background_requirement_met_a`` is the 4 dB test of 6.5 on the
-    A-weighted levels, ``False`` where there was nothing to test.
+    ``background_margin_a_db`` is the smallest margin of the A-weighted
+    levels over their background, ``NaN`` where there was nothing to test,
+    and ``background_requirement_met_a`` the 4 dB test of 6.5 read from it.
     ``sigma_r0`` is Table 5 per band (``NaN`` at 63 Hz) and ``sigma_r0_a`` its
     A-weighted row; the uncertainty properties follow Formulae (12) and (13).
     """
@@ -1291,7 +1294,8 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     sound_power_level: np.ndarray
     mean_pressure_level: np.ndarray
     background_correction: np.ndarray
-    background_requirement_met: np.ndarray
+    background_margin_db: np.ndarray
+    background_margin_ref_db: np.ndarray
     mean_reference_level: np.ndarray
     reference_power_level: np.ndarray
     volume_m3: float
@@ -1304,7 +1308,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     sound_power_level_a: float
     sound_power_level_a_direct: float
     mean_a_weighted_level: float
-    background_requirement_met_a: bool
+    background_margin_a_db: float
     method: str
     microphone_positions: int
     source_positions: int
@@ -1330,13 +1334,35 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
             "sound_power_level",
             "mean_pressure_level",
             "background_correction",
-            "background_requirement_met",
+            "background_margin_db",
+            "background_margin_ref_db",
             "mean_reference_level",
             "reference_power_level",
             "sigma_r0",
         )
         require_ranks(self, **dict.fromkeys(bands, 1))
         require_same_length(self, *bands)
+
+    @property
+    def background_requirement_met(self) -> np.ndarray:
+        """Per band, whether every margin reached the 4 dB of 6.5 and 9.8.
+
+        The source's margins and, for the comparison method, the reference
+        source's too; ``False`` where no background was measured. The margins
+        are judged settled, as Table 4 is read from them.
+        """
+        met = _margin_met(self.background_margin_db)
+        if self.method == "comparison":
+            met = met & _margin_met(self.background_margin_ref_db)
+        return met
+
+    @property
+    def background_requirement_met_a(self) -> bool:
+        """Whether every A-weighted margin reached the 4 dB of 6.5.
+
+        ``False`` where there was nothing to test.
+        """
+        return bool(_margin_met(np.asarray(self.background_margin_a_db)))
 
     @property
     def sigma_tot(self) -> np.ndarray:
@@ -1482,19 +1508,31 @@ def _corrected_mean(
     :param grid: Levels ``(NS, NM, NB)``.
     :param background: Background ``(NM, NB)`` read at each position, or
         ``None``.
-    :return: ``(corrected mean, shift from the uncorrected mean, margin met per
-        band)``; with no background the shift is zero and nothing is met.
+    :return: ``(corrected mean, shift from the uncorrected mean, smallest
+        margin per band)``; with no background the shift is zero and the
+        margin ``NaN``.
     """
     flat = grid.reshape(-1, grid.shape[-1])
     raw = np.asarray(energy_mean(flat, axis=0), dtype=np.float64)
     if background is None:
-        return raw, np.zeros_like(raw), np.zeros(raw.shape, dtype=bool)
-    correction, met = _table4_correction(grid - background[None, :, :])
+        return raw, np.zeros_like(raw), np.full(raw.shape, np.nan, dtype=np.float64)
+    delta = grid - background[None, :, :]
+    correction, _ = _table4_correction(delta)
     corrected = np.asarray(
         energy_mean((grid - correction).reshape(-1, grid.shape[-1]), axis=0),
         dtype=np.float64,
     )
-    return corrected, raw - corrected, np.all(met.reshape(-1, grid.shape[-1]), axis=0)
+    margin = np.min(delta.reshape(-1, grid.shape[-1]), axis=0)
+    return corrected, raw - corrected, np.asarray(margin, dtype=np.float64)
+
+
+def _margin_met(margin: np.ndarray) -> np.ndarray:
+    """Where a smallest margin over the background reached 4 dB, judged settled.
+
+    A margin that was not measured is ``NaN`` and is not met.
+    """
+    with np.errstate(invalid="ignore"):
+        return np.asarray(settled(margin) >= _TABLE4_MIN_DB, dtype=bool)
 
 
 def _table5_sigma(frequencies: np.ndarray) -> np.ndarray:
@@ -1571,9 +1609,9 @@ def _microphone_advisory(n_positions: int, *, traverse: bool, stacklevel: int) -
 
 def _a_weighted_mean(
     levels: ArrayLike, background: ArrayLike | None
-) -> tuple[float, bool]:
-    """Formula (8) over the A-weighted levels after Table 4, and whether every
-    margin reached 4 dB (``False`` without a background).
+) -> tuple[float, float]:
+    """Formula (8) over the A-weighted levels after Table 4, and their smallest
+    margin over the background (``NaN`` without a background).
 
     :param levels: One traverse level, one per position ``(NM,)`` or one per
         source location and position ``(NS, NM)``.
@@ -1582,7 +1620,7 @@ def _a_weighted_mean(
     """
     arr = _finite(levels, "a_weighted_levels", (0, 1, 2))
     if background is None:
-        return float(energy_mean(arr.reshape(-1))), False
+        return float(energy_mean(arr.reshape(-1))), math.nan
     bg = _finite(background, "a_weighted_background_levels", (0, 1))
     if bg.ndim == 1 and (arr.ndim == 0 or arr.shape[-1] != bg.shape[0]):
         msg = (
@@ -1590,8 +1628,9 @@ def _a_weighted_mean(
             "microphone position of 'a_weighted_levels'."
         )
         raise ValueError(msg)
-    correction, met = _table4_correction(arr - bg)
-    return float(energy_mean((arr - correction).reshape(-1))), bool(np.all(met))
+    delta = arr - bg
+    correction, _ = _table4_correction(delta)
+    return float(energy_mean((arr - correction).reshape(-1))), float(np.min(delta))
 
 
 def _annex_f_total(level: np.ndarray, freqs: np.ndarray) -> float:
@@ -1677,8 +1716,10 @@ def sound_power_special_room(
             background_levels, "background_levels", n_positions, n_bands
         )
     )
-    mean, shift, met = _corrected_mean(grid, background)
-    _background_advisory(met, measured=background is not None, stacklevel=3)
+    mean, shift, margin = _corrected_mean(grid, background)
+    _background_advisory(
+        _margin_met(margin), measured=background is not None, stacklevel=3
+    )
     room_term = (
         -10.0 * math.log10(nominal / _T0_S)
         + 10.0 * math.log10(volume / _V0_M3)
@@ -1687,9 +1728,9 @@ def sound_power_special_room(
     level = np.asarray(mean + room_term, dtype=np.float64)
     mean_a = math.nan
     level_a_direct = math.nan
-    met_a = False
+    margin_a = math.nan
     if a_weighted_levels is not None:
-        mean_a, met_a = _a_weighted_mean(
+        mean_a, margin_a = _a_weighted_mean(
             a_weighted_levels, a_weighted_background_levels
         )
         level_a_direct = mean_a + room_term
@@ -1699,7 +1740,8 @@ def sound_power_special_room(
         sound_power_level=level,
         mean_pressure_level=mean,
         background_correction=np.asarray(shift, dtype=np.float64),
-        background_requirement_met=np.asarray(met, dtype=bool),
+        background_margin_db=margin,
+        background_margin_ref_db=nan_band,
         mean_reference_level=nan_band,
         reference_power_level=nan_band,
         volume_m3=volume,
@@ -1712,7 +1754,7 @@ def sound_power_special_room(
         sound_power_level_a=_annex_f_total(level, freqs),
         sound_power_level_a_direct=level_a_direct,
         mean_a_weighted_level=mean_a,
-        background_requirement_met_a=met_a,
+        background_margin_a_db=margin_a,
         method="direct",
         microphone_positions=n_positions,
         source_positions=n_sources,
@@ -1834,17 +1876,21 @@ def sound_power_special_room_comparison(
             ref_background_input, "background_levels_ref", n_ref_positions, n_bands
         )
     )
-    mean, shift, met = _corrected_mean(grid, background)
-    mean_ref, _, met_ref = _corrected_mean(ref_grid, ref_background)
-    requirement = met & met_ref
-    _background_advisory(requirement, measured=background is not None, stacklevel=3)
+    mean, shift, margin = _corrected_mean(grid, background)
+    mean_ref, _, margin_ref = _corrected_mean(ref_grid, ref_background)
+    _background_advisory(
+        _margin_met(margin) & _margin_met(margin_ref),
+        measured=background is not None,
+        stacklevel=3,
+    )
     level = np.asarray(mean + (power - mean_ref), dtype=np.float64)
     return SpecialRoomSoundPowerResult(
         frequencies=freqs,
         sound_power_level=level,
         mean_pressure_level=mean,
         background_correction=np.asarray(shift, dtype=np.float64),
-        background_requirement_met=np.asarray(requirement, dtype=bool),
+        background_margin_db=margin,
+        background_margin_ref_db=margin_ref,
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
         reference_power_level=power,
         volume_m3=math.nan,
@@ -1857,7 +1903,7 @@ def sound_power_special_room_comparison(
         sound_power_level_a=_annex_f_total(level, freqs),
         sound_power_level_a_direct=math.nan,
         mean_a_weighted_level=math.nan,
-        background_requirement_met_a=False,
+        background_margin_a_db=math.nan,
         method="comparison",
         microphone_positions=n_positions,
         source_positions=n_sources,

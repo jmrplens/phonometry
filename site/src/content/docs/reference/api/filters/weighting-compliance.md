@@ -186,32 +186,61 @@ footnote makes one mask govern every weighting characteristic, B included.
 
 ```python
 WeightingComplianceResult(
-    overall_class: int | None,
-    bands: tuple[dict[str, Any], ...],
-    between_nominals: dict[str, float] | None,
+    band_margins: tuple[Mapping[str, Any], ...],
+    between_nominals: Mapping[str, float] | None,
     curve: str,
     edition: str,
     fs: float,
     sweep_points: int,
-    range_limited: bool = False,
 )
 ```
 
 Class verdict of a [`WeightingFilter`](/phonometry/reference/api/filters/weighting/#weightingfilter).
 
-What [`verify_weighting_class`](/phonometry/reference/api/filters/weighting-compliance/#verify_weighting_class) returns: the verdict together with the
-two readings it rests on, the tabulated frequencies and the sweep between
-them, and the filter it was measured on.
+What [`verify_weighting_class`](/phonometry/reference/api/filters/weighting-compliance/#verify_weighting_class) returns: the two readings the verdict
+rests on, the tabulated frequencies and the sweep between them, and the
+filter it was measured on. The classes and the range are read from them
+and the edition's table, so they are not fields: a verdict cannot be
+built to state a class its margins do not reach.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `overall_class` | The strictest class of the edition met at every tabulated frequency *and* across the between-nominals sweep, or `None` when neither reading meets any class. |
-| `bands` | The per-frequency verdicts (one `{"freq", "class", "deviation_db", "margin_class<c>_db"}` per tabulated frequency below the Nyquist frequency), as an immutable tuple. |
-| `between_nominals` | The subclause 5.5.7 sweep, `{"worst_freq", "margin_class<c>_db"}`, or `None` when no tabulated frequency was in range and there was nothing to sweep between. |
+| `band_margins` | What each tabulated frequency below the Nyquist frequency was measured to, without its class: one `{"freq", "deviation_db", "margin_class<c>_db"}` per frequency, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each one reaches. |
+| `between_nominals` | The subclause 5.5.7 sweep, `{"worst_freq", "margin_class<c>_db"}`, read-only, or `None` when no tabulated frequency was in range and there was nothing to sweep between. |
 | `curve` | The weighting the verdict is about (`"A"`, `"B"`, `"C"`, `"AU"` or `"Z"`). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 | `fs` | Sampling rate of the verified filter, in Hz. It is what puts rows out of range, so the verdict carries it. |
 | `sweep_points` | Grid frequencies used by the 5.5.7 sweep. |
-| `range_limited` | `True` when a row carrying a finite lower limit falls at or above the Nyquist frequency, so the stated class attests the checked frequencies and not the standard's full range. |
+
+### WeightingComplianceResult.bands
+
+*property*
+
+The per-frequency verdicts, each margin row with the class it reaches.
+
+One `{"freq", "class", "deviation_db", "margin_class<c>_db"}` per
+tabulated frequency below the Nyquist frequency: the `class` is the
+strictest class of the edition whose margin is not negative, or
+`None`. A fresh copy at every read.
+
+### WeightingComplianceResult.overall_class
+
+*property*
+
+The strictest class met at every tabulated frequency *and* across the sweep.
+
+`None` when neither reading meets any class, and when no tabulated
+frequency was in range.
+
+### WeightingComplianceResult.range_limited
+
+*property*
+
+Whether a tabulated row lies at or above the Nyquist frequency.
+
+`True` when a row carrying a finite lower limit falls at or above
+half the sampling rate, so its acceptance limits and the adjacent
+between-nominal interval go unchecked and the stated class attests
+the checked frequencies, not the standard's full range.

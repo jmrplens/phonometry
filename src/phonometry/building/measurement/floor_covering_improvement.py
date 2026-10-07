@@ -188,10 +188,6 @@ class FloorCoveringImprovementResult(OwnsArrays):
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar improvement: Improvement of impact sound insulation ``ΔL`` per
         band, in dB.
-    :ivar limited: Per-band boolean mask of bands at the 1.3 dB limit of
-        measurement (reported as :math:`> \Delta L`); all ``False`` when no
-        background
-        correction was applied.
     :ivar delta_lw: Weighted improvement ``ΔLw`` (ISO 717-2), in dB, or ``None``
         when the spectrum does not contain the 16 one-third-octave rating
         bands 100-3150 Hz. A wider clause 6.3 spectrum (e.g. the 18 bands
@@ -200,13 +196,18 @@ class FloorCoveringImprovementResult(OwnsArrays):
     :ivar ci_delta: Spectrum adaptation term ``CI,Δ`` (ISO 717-2:2020
         Formula (A.4); required in the ISO 16251-1 Clause 8 e) statement of
         results), in dB, or ``None`` when ``delta_lw`` is ``None``.
+    :ivar background_margin_db: Per band, the smallest margin
+        :math:`L' - L_\mathrm{b}` of a measured level over the background,
+        over every position and both floors (Formula (2)), in dB; ``None`` when
+        no background correction was applied. :attr:`limited` is read from it
+        and the 6 dB of Formula (2), so it is not a field.
     """
 
     frequencies: np.ndarray
     improvement: np.ndarray
-    limited: np.ndarray
     delta_lw: int | None
     ci_delta: int | None = None
+    background_margin_db: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject an improvement spectrum whose columns cover different bands.
@@ -252,8 +253,8 @@ class FloorCoveringImprovementResult(OwnsArrays):
             ``None``), or if ``ci_delta`` is given while ``delta_lw`` is
             ``None``.
         """
-        require_ranks(self, frequencies=1, improvement=1, limited=1)
-        require_same_length(self, "frequencies", "improvement", "limited")
+        require_ranks(self, frequencies=1, improvement=1, background_margin_db=1)
+        require_same_length(self, "frequencies", "improvement", "background_margin_db")
         for name in ("delta_lw", "ci_delta"):
             value = getattr(self, name)
             # A bool is an int in Python, so it is excluded explicitly.
@@ -274,6 +275,21 @@ class FloorCoveringImprovementResult(OwnsArrays):
                 f"'delta_lw' is None; got ci_delta={self.ci_delta!r}."
             )
             raise ValueError(msg)
+
+    @property
+    def limited(self) -> np.ndarray:
+        r"""Per band, whether a position reached the 1.3 dB limit of measurement.
+
+        ``True`` where the smallest margin over the background fell below the
+        6 dB of Formula (2), so the band is reported as :math:`> \Delta L`; all
+        ``False`` when no background correction was applied. The margin is
+        judged settled, as Formula (2) itself is.
+        """
+        if self.background_margin_db is None:
+            return np.zeros(np.shape(self.frequencies), dtype=bool)
+        return np.asarray(
+            settled(self.background_margin_db) < _MARGIN_LIMIT, dtype=bool
+        )
 
     def octave_bands(self) -> tuple[np.ndarray, np.ndarray]:
         """Return ``(octave_freqs, ΔLoct)`` via Formula (5) (needs 16 1/3-oct bands)."""
@@ -438,7 +454,7 @@ def impact_improvement(
         )
         raise ValueError(msg)
 
-    limited_pos = np.zeros(l0.shape, dtype=bool)
+    margin: np.ndarray | None = None
     if background is not None:
         lb = _finite(background, "background")
         if lb.shape not in ((n_bands,), l0.shape):
@@ -448,25 +464,26 @@ def impact_improvement(
             )
             raise ValueError(msg)
         lb = np.broadcast_to(lb, l0.shape)
-        # Formula (2) per position, then Formula (3), then Formula (4).
-        l0, lim0 = background_corrected_level(l0, lb)
-        l1, lim1 = background_corrected_level(l1, lb)
-        limited_pos = lim0 | lim1
+        # Formula (2) per position, then Formula (3), then Formula (4). A band
+        # is at the limit of measurement where any position of either floor
+        # is, so the smallest margin is the one the result keeps.
+        margins = np.minimum(l0 - lb, l1 - lb)
+        margin = margins.min(axis=0) if margins.ndim == 2 else margins  # noqa: PLR2004
+        l0, _ = background_corrected_level(l0, lb)
+        l1, _ = background_corrected_level(l1, lb)
 
     delta_per_position = l0 - l1  # Formula (3)
     if delta_per_position.ndim == 2:  # noqa: PLR2004
         improvement = delta_per_position.mean(axis=0)  # Formula (4)
-        limited = np.any(limited_pos, axis=0)
     else:
         improvement = delta_per_position
-        limited = limited_pos
     delta_lw, ci_delta = _rating(improvement, freqs)
     return FloorCoveringImprovementResult(
         frequencies=freqs,
         improvement=improvement,
-        limited=limited,
         delta_lw=delta_lw,
         ci_delta=ci_delta,
+        background_margin_db=margin,
     )
 
 

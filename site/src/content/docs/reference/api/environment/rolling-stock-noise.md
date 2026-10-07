@@ -752,10 +752,12 @@ ReferenceTrackCheck(
     speed_kmh: float,
     roughness: tuple[AcousticRoughnessSpectrum, ...],
     decay_rates: tuple[TrackDecayRate, ...],
-    conditions: tuple[TrackCondition, ...],
     roughness_limit_db: Mapping[float, float],
     decay_limits_db_per_m: Mapping[str, Mapping[float, float]],
     small_deviations: SmallRoughnessDeviation | None = None,
+    *,
+    curve_radius_m: float | None = None,
+    track_gradient_ratio: float | None = None,
 )
 ```
 
@@ -768,10 +770,23 @@ The verdict on a test track against the reference conditions of ISO 3095 6.2.
 | `speed_kmh` | The test speed the track was judged for, in km/h. |
 | `roughness` | The roughness spectra of the rails, one per rail or line, each already averaged over its records. |
 | `decay_rates` | The decay rates, vertical and lateral, of each set of measurements. |
-| `conditions` | Every requirement judged, in the order of the clause. |
 | `roughness_limit_db` | The roughness limit judged against, held as a read-only copy. |
 | `decay_limits_db_per_m` | The decay-rate limits judged against, held as read-only copies. |
 | `small_deviations` | The Annex C verdict the roughness limit was judged by, when the roughness exceeds the limit and one was given; `None` otherwise. |
+| `curve_radius_m` | The radius of curvature of the track, in metres, or `None` when it was not judged. |
+| `track_gradient_ratio` | The gradient, rise over length, or `None` when it was not judged. |
+
+`conditions`, `passes` and `failed` are read from these
+fields and the limits of 6.2, so none of them is a field.
+
+### ReferenceTrackCheck.conditions
+
+*property*
+
+Every requirement judged, in the order of the clause.
+
+Read from the roughness, the decay rates, the limits, the Annex C
+verdict and the radius and gradient when given.
 
 ### ReferenceTrackCheck.failed
 
@@ -1344,6 +1359,9 @@ TrackCondition(
 ```
 
 One requirement of the reference track and whether it holds.
+
+[`ReferenceTrackCheck.conditions`](/phonometry/reference/api/environment/rolling-stock-noise/#referencetrackcheckconditions) builds these rows from the track
+it holds each time it is read; no verdict reads a row built elsewhere.
 
 **Parameters**
 

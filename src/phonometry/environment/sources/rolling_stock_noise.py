@@ -92,7 +92,7 @@ BS EN ISO 3095:2005 (second edition).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -1680,6 +1680,9 @@ _FILTERED_LENGTH_CLAUSE = "EN 15610 7.4.3"
 class TrackCondition:
     """One requirement of the reference track and whether it holds.
 
+    :attr:`ReferenceTrackCheck.conditions` builds these rows from the track
+    it holds each time it is read; no verdict reads a row built elsewhere.
+
     :param clause: Where the requirement is written (``"6.2.5"``).
     :param requirement: What it asks, in words.
     :param holds: Whether it holds; ``None`` when the input to judge it was not
@@ -1702,7 +1705,6 @@ class ReferenceTrackCheck:
         line, each already averaged over its records.
     :param decay_rates: The decay rates, vertical and lateral, of each set of
         measurements.
-    :param conditions: Every requirement judged, in the order of the clause.
     :param roughness_limit_db: The roughness limit judged against, held as a
         read-only copy.
     :param decay_limits_db_per_m: The decay-rate limits judged against, held
@@ -1710,31 +1712,45 @@ class ReferenceTrackCheck:
     :param small_deviations: The Annex C verdict the roughness limit was
         judged by, when the roughness exceeds the limit and one was given;
         ``None`` otherwise.
+    :param curve_radius_m: The radius of curvature of the track, in metres,
+        or ``None`` when it was not judged.
+    :param track_gradient_ratio: The gradient, rise over length, or ``None``
+        when it was not judged.
+
+    :attr:`conditions`, :attr:`passes` and :attr:`failed` are read from these
+    fields and the limits of 6.2, so none of them is a field.
     """
 
     speed_kmh: float
     roughness: tuple[AcousticRoughnessSpectrum, ...]
     decay_rates: tuple[TrackDecayRate, ...]
-    conditions: tuple[TrackCondition, ...]
     roughness_limit_db: Mapping[float, float]
     decay_limits_db_per_m: Mapping[str, Mapping[float, float]]
     small_deviations: SmallRoughnessDeviation | None = None
+    _: KW_ONLY
+    curve_radius_m: float | None = None
+    track_gradient_ratio: float | None = None
 
     def __post_init__(self) -> None:
         """Hold the sequences as tuples and the limits as read-only copies.
 
         The verdict shares no mapping with its caller, so the limits it
-        reports and draws stay the ones its conditions were judged against.
+        reports and draws stay the ones its conditions are judged against.
+        The conditions are read once here, so a track they cannot be read
+        from is refused where it is built.
 
-        :raises ValueError: For what :func:`check_reference_track` refuses:
-            decay limits that leave out a direction, limits with a band that
-            is not positive or two keys in one one-third octave band, or an
-            Annex C verdict of another speed, of another roughness or against
-            another roughness limit.
+        :raises ValueError: For what :func:`check_reference_track` refuses: a
+            speed or a radius that is not positive, a gradient that is not
+            finite, decay limits that leave out a direction, limits with a
+            band that is not positive or two keys in one one-third octave
+            band, or an Annex C verdict of another speed, of another
+            roughness or against another roughness limit.
         """
+        object.__setattr__(
+            self, "speed_kmh", require_positive(self.speed_kmh, "speed_kmh")
+        )
         object.__setattr__(self, "roughness", tuple(self.roughness))
         object.__setattr__(self, "decay_rates", tuple(self.decay_rates))
-        object.__setattr__(self, "conditions", tuple(self.conditions))
         object.__setattr__(
             self, "roughness_limit_db", _frozen_roughness_limit(self.roughness_limit_db)
         )
@@ -1743,6 +1759,18 @@ class ReferenceTrackCheck:
             "decay_limits_db_per_m",
             _frozen_decay_limits(self.decay_limits_db_per_m),
         )
+        if self.curve_radius_m is not None:
+            object.__setattr__(
+                self,
+                "curve_radius_m",
+                require_positive(self.curve_radius_m, "curve_radius_m"),
+            )
+        if self.track_gradient_ratio is not None:
+            object.__setattr__(
+                self,
+                "track_gradient_ratio",
+                require_finite(self.track_gradient_ratio, "track_gradient_ratio"),
+            )
         if self.small_deviations is not None:
             _require_annex_c_of_this_track(
                 self.small_deviations,
@@ -1750,6 +1778,17 @@ class ReferenceTrackCheck:
                 self.speed_kmh,
                 self.roughness_limit_db,
             )
+        self.__dict__["_conditions"] = _track_conditions(self)
+
+    @property
+    def conditions(self) -> tuple[TrackCondition, ...]:
+        """Every requirement judged, in the order of the clause.
+
+        Read from the roughness, the decay rates, the limits, the Annex C
+        verdict and the radius and gradient when given.
+        """
+        conditions: tuple[TrackCondition, ...] = self.__dict__["_conditions"]
+        return conditions
 
     @property
     def passes(self) -> bool:
@@ -2216,20 +2255,39 @@ def check_reference_track(
     """
     speed = require_positive(speed_kmh, "speed_kmh")
     roughness_limit = _frozen_roughness_limit(roughness_limit_db)
-    decay_limits = _frozen_decay_limits(decay_limits_db_per_m)
     if small_deviations is not None:
         _require_annex_c_of_this_track(
             small_deviations, roughness, speed, roughness_limit
         )
-    conditions, through_annex_c = _roughness_conditions(
+    # The Annex C verdict is kept only where the limit is judged through it;
+    # the conditions are read by the result from what it keeps.
+    _, through_annex_c = _roughness_conditions(
         roughness, speed, roughness_limit, small_deviations
     )
-    filtered_length = _filtered_length_condition(roughness)
+    return ReferenceTrackCheck(
+        speed_kmh=speed,
+        roughness=tuple(roughness),
+        decay_rates=tuple(decay_rates),
+        roughness_limit_db=roughness_limit,
+        decay_limits_db_per_m=decay_limits_db_per_m,
+        small_deviations=small_deviations if through_annex_c else None,
+        curve_radius_m=curve_radius_m,
+        track_gradient_ratio=track_gradient_ratio,
+    )
+
+
+def _track_conditions(check: ReferenceTrackCheck) -> tuple[TrackCondition, ...]:
+    """Every requirement of 6.2 judged on what *check* holds, in the order of the clause."""
+    speed = check.speed_kmh
+    conditions, _ = _roughness_conditions(
+        check.roughness, speed, check.roughness_limit_db, check.small_deviations
+    )
+    filtered_length = _filtered_length_condition(check.roughness)
     if filtered_length is not None:
         conditions.append(filtered_length)
-    conditions += _decay_conditions(decay_rates, decay_limits)
-    if curve_radius_m is not None:
-        radius = require_positive(curve_radius_m, "curve_radius_m")
+    conditions += _decay_conditions(check.decay_rates, check.decay_limits_db_per_m)
+    if check.curve_radius_m is not None:
+        radius = check.curve_radius_m
         needed = minimum_curve_radius(speed)
         conditions.append(
             TrackCondition(
@@ -2239,8 +2297,8 @@ def check_reference_track(
                 detail=f"{radius:g} m",
             )
         )
-    if track_gradient_ratio is not None:
-        gradient = abs(require_finite(track_gradient_ratio, "track_gradient_ratio"))
+    if check.track_gradient_ratio is not None:
+        gradient = abs(check.track_gradient_ratio)
         conditions.append(
             TrackCondition(
                 clause="6.2.2",
@@ -2249,15 +2307,7 @@ def check_reference_track(
                 detail=f"{gradient * 1000.0:g}:1 000",
             )
         )
-    return ReferenceTrackCheck(
-        speed_kmh=speed,
-        roughness=tuple(roughness),
-        decay_rates=tuple(decay_rates),
-        conditions=tuple(conditions),
-        roughness_limit_db=roughness_limit,
-        decay_limits_db_per_m=decay_limits,
-        small_deviations=small_deviations if through_annex_c else None,
-    )
+    return tuple(conditions)
 
 
 # ---------------------------------------------------------------------------

@@ -685,24 +685,19 @@ Plot the emergence of each wind speed class.
 ## SoundRelevantTurbines
 
 ```python
-SoundRelevantTurbines(
-    predicted_levels_db: NDArray[np.float64],
-    relevant: NDArray[np.bool_],
-    total_level_db: float,
-    relevant_level_db: float,
-)
+SoundRelevantTurbines(predicted_levels_db: NDArray[np.float64])
 ```
 
 The turbines that set the binning wind speed at a receptor (9.3.2.3).
+
+Which turbines are relevant is read from the predicted levels and the
+1.0 dB of 9.3.2.3, so it is not a field.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `predicted_levels_db` | Each turbine's predicted level at the receptor, in dB, in the order given. |
-| `relevant` | Whether each turbine is sound relevant. |
-| `total_level_db` | The predicted level of all turbines, in dB. |
-| `relevant_level_db` | The predicted level of the relevant ones, in dB. |
 
 ### SoundRelevantTurbines.binning_wind_speed_m_s()
 
@@ -756,6 +751,29 @@ Plot the turbines' levels, loudest first, the relevant ones marked.
 | `kwargs` | Forwarded to the turbine bars. |
 
 **Returns:** The axes.
+
+### SoundRelevantTurbines.relevant
+
+*property*
+
+Whether each turbine is sound relevant.
+
+The quietest is left out, and the next quietest after it, for as long
+as the total of those that remain has dropped by no more than 1.0 dB
+from the total of all ("reduced by more than 1,0 dB", 9.3.2.3: 1.0 dB
+itself is not more, and a drop within a nanodecibel of it is 1.0 dB).
+
+### SoundRelevantTurbines.relevant_level_db
+
+*property*
+
+The predicted level of the relevant ones, in dB.
+
+### SoundRelevantTurbines.total_level_db
+
+*property*
+
+The predicted level of all turbines, in dB.
 
 ## SWEDISH_LOW_FREQUENCY_LIMITS_DB
 
@@ -1151,8 +1169,6 @@ WindShearProfile(
     heights_m: tuple[float, float],
     speeds_m_s: tuple[float, float],
     shear_exponent: float,
-    *,
-    typical: bool,
 )
 ```
 
@@ -1165,7 +1181,6 @@ A wind profile through two measured heights (Annex K).
 | `heights_m` | The two measurement heights, lower first, in m. |
 | `speeds_m_s` | The wind speeds measured there, in m/s. |
 | `shear_exponent` | The power-law exponent $\alpha$ through the two points (Equation (K.2)). |
-| `typical` | Whether $\alpha$ lies in the typical range [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/phonometry/reference/api/environment/wind-turbine-receptor/#typical_wind_shear_exponent_range) (K.4.3). |
 
 ### WindShearProfile.plot()
 
@@ -1203,6 +1218,14 @@ WindShearProfile.speed_at(
 ```
 
 The power-law wind speed at `height_m` (Equation (K.1)), in m/s.
+
+### WindShearProfile.typical
+
+*property*
+
+Whether $\alpha$ lies in the typical range (K.4.3).
+
+The range is [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/phonometry/reference/api/environment/wind-turbine-receptor/#typical_wind_shear_exponent_range), bounds included.
 
 ## WindTurbineRatingLevel
 

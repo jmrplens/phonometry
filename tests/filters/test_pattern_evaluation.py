@@ -9,7 +9,6 @@ verifier is then held to what the formulas say about the library's own banks.
 
 from __future__ import annotations
 
-import copy
 import dataclasses
 import math
 
@@ -375,12 +374,12 @@ def test_binding_margin_reads_the_requirement_and_refuses_a_foreign_class() -> N
 def test_a_verdict_refuses_a_requirement_carried_by_some_bands_only() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
-    bands = tuple(copy.deepcopy(b) for b in result.bands)
+    bands = tuple(dict(b) for b in result.band_margins)
     del bands[2]["bandwidth_margin_class1_db"]
     with pytest.raises(
         ValueError, match="'effective_bandwidth' requirement in every band"
     ):
-        dataclasses.replace(result, bands=bands)
+        dataclasses.replace(result, band_margins=bands)
 
 
 @pytest.mark.parametrize("requirement", ["effective_bandwidth", "summation"])

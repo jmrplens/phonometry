@@ -738,12 +738,6 @@ class WeightedExposureResult(OwnsArrays):
     :ivar tts_peak_margin: ``peak_spl - tts_peak_spl``, in dB (or ``None``) --
         the peak-SPL half of the dual metric on the TTS side, which can trip
         ``exceeds_tts`` on its own.
-    :ivar exceeds_injury: Whether any injury-onset criterion is reached. The
-        test is ``margin >= 0``, so an exposure landing exactly **on** the
-        criterion counts as exceeding it; the criteria are onset thresholds and
-        the precautionary reading is the one an assessment wants.
-    :ivar exceeds_tts: Whether any TTS-onset criterion is reached, on the same
-        ``margin >= 0`` convention as ``exceeds_injury``.
     :ivar guidance: The guidance version.
     :ivar group: Hearing-group code.
     :ivar impulsive: Whether the impulsive criteria were compared against.
@@ -767,8 +761,6 @@ class WeightedExposureResult(OwnsArrays):
     peak_margin: float | None
     tts_peak_margin: float | None
     _: KW_ONLY
-    exceeds_injury: bool
-    exceeds_tts: bool
     guidance: str
     group: str
     impulsive: bool
@@ -812,15 +804,16 @@ class WeightedExposureResult(OwnsArrays):
         the non-impulsive tables publishing none at all.
 
         Nothing recomputes any of these downstream, and the readers all go the
-        wrong way round them: ``exceeds_injury`` and ``exceeds_tts`` are formed
-        from the margins and never look at the levels, and the guide prints
-        level and margin side by side. A variant built with a louder peak
-        therefore kept the quiet one's margins and was reported compliant
-        against criteria its own stored level clears.
+        wrong way round them: :attr:`exceeds_injury` and :attr:`exceeds_tts`
+        are read from the margins and never look at the levels, and the guide
+        prints level and margin side by side. A variant built with a louder
+        peak therefore kept the quiet one's margins and was reported compliant
+        against criteria its own stored level clears. The two verdicts are not
+        fields at all: they are read from the margins.
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
-            if ``peak_spl`` is not finite, or if a band row, a total, a margin
-            or a verdict does not restate what it is formed from.
+            if ``peak_spl`` is not finite, or if a band row, a total or a
+            margin does not restate what it is formed from.
         """
         require_ranks(self, frequencies=1, band_sel=1, weighting=1, weighted_band_sel=1)
         require_same_length(
@@ -830,7 +823,21 @@ class WeightedExposureResult(OwnsArrays):
         _require_rows_restate(self)
         _require_totals_restate(self)
         _require_margins_restate(self)
-        _require_verdicts_restate(self)
+
+    @property
+    def exceeds_injury(self) -> bool:
+        """Whether any injury-onset criterion is reached.
+
+        The test is ``margin >= 0``, so an exposure landing exactly **on** the
+        criterion counts as exceeding it; the criteria are onset thresholds
+        and the precautionary reading is the one an assessment wants.
+        """
+        return _any_positive(self.sel_margin, self.peak_margin)
+
+    @property
+    def exceeds_tts(self) -> bool:
+        """Whether any TTS-onset criterion is reached, on the same ``margin >= 0`` convention."""
+        return _any_positive(self.tts_margin, self.tts_peak_margin)
 
     @property
     def criteria(self) -> ExposureCriteria:
@@ -1026,41 +1033,6 @@ def _require_margins_restate(result: WeightedExposureResult) -> None:
         raise ValueError(msg)
 
 
-def _require_verdicts_restate(result: WeightedExposureResult) -> None:
-    """Pin the two verdicts against the margins they are formed from.
-
-    They are the fields an assessment is read for and the last link of the
-    chain: a variant that keeps its margins and flips a verdict reports
-    compliance its own stored numbers deny.
-
-    :param result: The assessment carrying the verdicts and their margins.
-    :raises ValueError: if a verdict is not what its margins say.
-    """
-    verdicts: tuple[tuple[str, tuple[float | None, float | None], str], ...] = (
-        (
-            "exceeds_injury",
-            (result.sel_margin, result.peak_margin),
-            "'sel_margin' or 'peak_margin'",
-        ),
-        (
-            "exceeds_tts",
-            (result.tts_margin, result.tts_peak_margin),
-            "'tts_margin' or 'tts_peak_margin'",
-        ),
-    )
-    for field, margins, named in verdicts:
-        expected = _any_positive(*margins)
-        stored = bool(getattr(result, field))
-        if stored == expected:
-            continue
-        msg = (
-            f"WeightedExposureResult: '{field}' must be True exactly when "
-            f"{named} has reached its criterion; got {stored!r} where the "
-            f"margins beside it state {expected!r}."
-        )
-        raise ValueError(msg)
-
-
 def weighted_exposure(
     frequency_hz: NDArray[np.float64] | list[float],
     band_sel: NDArray[np.float64] | list[float],
@@ -1149,8 +1121,6 @@ def weighted_exposure(
         tts_margin=tts_margin,
         peak_margin=peak_margin,
         tts_peak_margin=peak_tts_margin,
-        exceeds_injury=_any_positive(sel_margin, peak_margin),
-        exceeds_tts=_any_positive(tts_margin, peak_tts_margin),
         guidance=weights.guidance,
         group=weights.group,
         impulsive=bool(impulsive),

@@ -525,6 +525,34 @@ def test_assess_activity_flags_a_phase_that_exceeds_the_five_decibel_allowance()
     assert night.complies is False
 
 
+@pytest.mark.parametrize(
+    ("level", "daily", "phase"),
+    [
+        # Article 25.1 b: the rounded LKeq,d of the day at most 3 dB over the
+        # 55 dB limit (58 dB), and no phase more than 5 dB over it (60 dB).
+        (58.0, True, True),
+        (58.4, True, True),
+        (58.6, False, True),
+        (59.0, False, True),
+        (60.0, False, True),
+        (61.0, False, False),
+    ],
+)
+def test_the_daily_index_takes_three_decibels_and_a_phase_five(
+    level: float, *, daily: bool, phase: bool
+) -> None:
+    """Between the two allowances a period fails on the day and passes on the phase."""
+    verdict = rd.assess_activity(
+        {"day": [rd.NoisePhase(12.0, level)]},
+        rd.activity_limits("a"),
+        new_activity=False,
+    )
+    day = verdict.periods[0]
+    assert (day.daily_limit, day.phase_limit) == (58.0, 60.0)
+    assert (day.daily_pass, day.phase_pass) == (daily, phase)
+    assert day.complies is (daily and phase)
+
+
 def test_assess_activity_reports_only_the_periods_supplied() -> None:
     """A period absent from the measurements is not assessed (the night here)."""
     verdict = rd.assess_activity(
@@ -676,14 +704,9 @@ def _one_period(period: str = "day") -> rd.PeriodAssessment:
         phases=(rd.NoisePhase(hours=12.0, laeq=52.0, kt=3.0),),
         duration_hours=12.0,
         evaluation_period_level=55.2,
-        reported_level=55,
         long_term_corrected_level=None,
-        reported_long_term=None,
         limit=55.0,
-        max_phase_level=55.0,
-        phase_pass=True,
-        daily_pass=True,
-        long_term_pass=None,
+        new_activity=True,
     )
 
 
@@ -698,6 +721,15 @@ def test_a_period_the_regulation_does_not_define_is_refused(bad: str) -> None:
     """
     with pytest.raises(ValueError, match="'period' must be one of"):
         _one_period(bad)
+
+
+def test_a_period_without_a_noise_phase_is_refused() -> None:
+    """The phase verdict is read from the phases, so a period needs one."""
+    import dataclasses
+
+    period = _one_period()
+    with pytest.raises(ValueError, match="has no noise phases"):
+        dataclasses.replace(period, phases=())
 
 
 def test_the_three_evaluation_periods_are_accepted() -> None:

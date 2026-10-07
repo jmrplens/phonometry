@@ -469,13 +469,14 @@ LiningCuringCheck(
     curing_time_days: float,
     time_lag_days: float,
     required_curing_days: float,
-    cured: bool,
-    lag_within_third: bool,
-    passes: bool,
 )
 ```
 
 Whether the basic element was stable across the two measurements (G.4).
+
+The verdicts are read from the three times and the third G.4 prints, so
+they are not fields: a check cannot be built to pass times the clause
+fails.
 
 **Attributes**
 
@@ -484,9 +485,15 @@ Whether the basic element was stable across the two measurements (G.4).
 | `curing_time_days` | Time from the end of construction of the basic element to the first sound reduction measurement, in days. |
 | `time_lag_days` | Time between the measurement without and the measurement with the lining, in days. |
 | `required_curing_days` | The curing period that settles the element, 14 days unless the product specification sets another. |
-| `cured` | Whether the curing time reaches `required_curing_days`. |
-| `lag_within_third` | Whether the time lag is at most a third of the curing time, the alternative G.4 allows. |
-| `passes` | Whether either condition holds. |
+
+### LiningCuringCheck.cured
+
+*property*
+
+Whether the curing time reaches `required_curing_days`.
+
+Inclusive, and compared with a relative slack so that a time on the
+bound is not failed by the binary rounding of the product.
 
 ### LiningCuringCheck.earliest_start_days
 
@@ -497,6 +504,21 @@ The curing time at which the lag condition is first met, in days.
 Three times the time lag: the G.4 example reads it the other way
 round, two measurements carried out within 1 d "can be started not
 less than 3 d after the end of construction".
+
+### LiningCuringCheck.lag_within_third
+
+*property*
+
+Whether the time lag is at most a third of the curing time, the alternative G.4 allows.
+
+Inclusive, with the same slack: the printed 1 d and 3 d, or 2,1 d and
+6,3 d, are on the bound.
+
+### LiningCuringCheck.passes
+
+*property*
+
+Whether either condition holds.
 
 ### LiningCuringCheck.plot()
 

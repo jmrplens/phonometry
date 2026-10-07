@@ -319,7 +319,11 @@ class Task:
 
 @dataclass(frozen=True)
 class TaskContribution:
-    """Per-task results and uncertainty terms of a task-based determination."""
+    """Per-task results and uncertainty terms of a task-based determination.
+
+    The Clause 9.3 spread advisory is read from the number of samples and
+    their range, so it is not a field.
+    """
 
     label: str
     lp_aeqt: float  # Eq 7, energy average of the task samples, dB
@@ -328,7 +332,6 @@ class TaskContribution:
     n_samples: int
     sample_range_db: float  # max - min of the samples, dB
     _: KW_ONLY
-    spread_advisory: bool  # True when the 3 dB spread rule (9.3) is triggered
     u1a: float  # sampling standard uncertainty (Eq C.6), dB
     c1a: float  # noise sensitivity coefficient (Eq C.4)
     u1b: float  # duration standard uncertainty (Eq C.7), hours
@@ -365,6 +368,18 @@ class TaskContribution:
                 raise ValueError(msg)
 
     @property
+    def spread_advisory(self) -> bool:
+        """Whether the 3 dB spread rule of Clause 9.3 is triggered.
+
+        Judged settled: three readings 3 dB apart in decimal span 3 dB
+        whichever way the subtraction's last bits fall.
+        """
+        return (
+            self.n_samples >= _MIN_SAMPLES_FOR_SPREAD
+            and float(settled(self.sample_range_db)) >= _SPREAD_ADVISORY_THRESHOLD
+        )
+
+    @property
     def variance_contribution(self) -> float:
         r"""This task's contribution to :math:`u^2(L_\mathrm{EX,8h})` (a term of
         Eq C.3), dB².
@@ -389,6 +404,13 @@ class ExposureResult:
         default; individual tasks may override it): ``"class1"``, ``"class2"``
         or ``"personal_exposimeter"``. Printed on the ``.report()`` fiche
         (ISO 9612:2009 Clause 15 c).
+    :ivar sample_range_db: The largest less the smallest sample of a job-based
+        or full-day determination, dB, or ``None``.
+    :ivar n_workers: The homogeneous-group size ``n_G`` of a job-based
+        determination whose cumulative duration is checked against Table 1,
+        or ``None``.
+    :ivar sample_duration_hours: The duration of each sample of that check,
+        hours, or ``None``.
     :ivar upper_limit: :math:`L_\mathrm{EX,8h} + U`, the value 95 % of readings fall
         below.
     """
@@ -406,9 +428,43 @@ class ExposureResult:
     u3: float | None = None
     n_samples: int | None = None
     _: KW_ONLY
-    sampling_advisory: bool = False  # c1*u1 > 3.5 dB, or 3 dB spread on 3 samples
     instrument: InstrumentClass | None = None
     tasks: tuple[TaskContribution, ...] = field(default_factory=tuple)
+    sample_range_db: float | None = None
+    n_workers: int | None = None
+    sample_duration_hours: float | None = None
+
+    @property
+    def sampling_advisory(self) -> bool:
+        """Whether the sampling calls for more measurements.
+
+        A task-based determination: a task whose samples trip the 3 dB spread
+        rule of Clause 9.3. A job-based or full-day one: a Table C.4
+        contribution ``c1*u1`` above 3.5 dB (Clause 10.4), three full-day
+        samples spanning 3 dB or more (Clause 11.3), or a cumulative duration
+        short of Table 1 for the group. Each figure is judged settled.
+        """
+        if self.strategy == "task":
+            return any(task.spread_advisory for task in self.tasks)
+        over = self.c1u1 is not None and (
+            float(settled(self.c1u1)) > _C4_ADVISORY_THRESHOLD
+        )
+        spread = (
+            self.strategy == "full_day"
+            and self.n_samples == _MIN_FULL_DAY_SAMPLES
+            and self.sample_range_db is not None
+            and float(settled(self.sample_range_db)) >= _SPREAD_ADVISORY_THRESHOLD
+        )
+        short = False
+        if (
+            self.strategy == "job"
+            and self.n_workers is not None
+            and self.sample_duration_hours is not None
+            and self.n_samples is not None
+        ):
+            required = minimum_cumulative_duration_hours(self.n_workers)
+            short = self.n_samples * self.sample_duration_hours < required - 1e-9
+        return over or spread or short
 
     def __post_init__(self) -> None:
         """Pin the tags, the levels and the record the strategy owes the fiche.
@@ -659,7 +715,6 @@ def _task_contribution(
         lex_8h_contribution=lp + 10.0 * log10(t_m / _T0),
         n_samples=n,
         sample_range_db=sample_range,
-        spread_advisory=spread,
         u1a=u1a,
         c1a=c1a,
         u1b=u1b,
@@ -726,7 +781,6 @@ def task_based_exposure(
         expanded_uncertainty=COVERAGE_FACTOR * u,
         strategy="task",
         u3=u3,
-        sampling_advisory=any(c.spread_advisory for c in contributions),
         instrument=instrument,
         tasks=tuple(contributions),
     )
@@ -743,7 +797,6 @@ def _sampled_exposure(
     strategy: str,
     *,
     warn: bool,
-    spread_advisory: bool,
 ) -> ExposureResult:
     """Shared engine for job-based and full-day strategies (Eq 11-13, Eq C.9)."""
     arr = np.asarray(samples, dtype=float)
@@ -770,7 +823,6 @@ def _sampled_exposure(
     # Judged settled: seven samples whose standard deviation is 4,0 dB in
     # decimal read the 3,5 dB of Table C.4 itself, which is not above it.
     over = float(settled(c1u1)) > _C4_ADVISORY_THRESHOLD
-    advisory = over or spread_advisory
     if warn and over:
         warnings.warn(
             f"Job/full-day sampling contribution c1*u1 = {c1u1:.1f} dB exceeds "
@@ -791,8 +843,8 @@ def _sampled_exposure(
         u2=u2,
         u3=u3,
         n_samples=n,
-        sampling_advisory=advisory,
         instrument=instrument,
+        sample_range_db=float(arr.max() - arr.min()),
     )
 
 
@@ -837,20 +889,20 @@ def job_based_exposure(
         u3=u3,
         strategy="job",
         warn=warn,
-        spread_advisory=False,
     )
     if n_workers is not None and sample_duration_hours is not None:
         required = minimum_cumulative_duration_hours(n_workers)
         cumulative = len(samples) * sample_duration_hours
-        if cumulative < required - 1e-9:
-            if warn:
-                warnings.warn(
-                    f"Cumulative measurement duration {cumulative:.2f} h is below the "
-                    f"Table 1 minimum of {required:.2f} h for {n_workers} workers.",
-                    OccupationalExposureWarning,
-                    stacklevel=2,
-                )
-            result = replace(result, sampling_advisory=True)
+        if cumulative < required - 1e-9 and warn:
+            warnings.warn(
+                f"Cumulative measurement duration {cumulative:.2f} h is below the "
+                f"Table 1 minimum of {required:.2f} h for {n_workers} workers.",
+                OccupationalExposureWarning,
+                stacklevel=2,
+            )
+        result = replace(
+            result, n_workers=n_workers, sample_duration_hours=sample_duration_hours
+        )
     return result
 
 
@@ -897,5 +949,4 @@ def full_day_exposure(
         u3=u3,
         strategy="full_day",
         warn=warn,
-        spread_advisory=spread,
     )

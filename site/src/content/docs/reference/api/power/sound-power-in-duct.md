@@ -187,7 +187,6 @@ InDuctSoundPowerResult(
     combined_correction: np.ndarray,
     reproducibility_standard_deviation: np.ndarray,
     expanded_uncertainty: np.ndarray,
-    information_only_band: np.ndarray,
     duct_diameter_m: float,
     duct_area: float,
     characteristic_impedance: float,
@@ -216,14 +215,26 @@ band (Table 3 above 10 kHz) and `expanded_uncertainty` is twice it, the
 95 % figure clause 9.2 says to record. `information_only_band` marks the
 bands the standard gives for information rather than as part of itself:
 those above 10 kHz, and every band when the sampling tube is used between
-40 m/s and 60 m/s (5.3.3.4 NOTE, clause 4). Table 2 is stated for the
-sampling tube; clause 4 NOTE 5 expects the figures to grow for the other
-shields and gives no others, so the same values are reported for them.
+40 m/s and 60 m/s (5.3.3.4 NOTE, clause 4); it is read from
+`frequencies` and `flow_velocity`, so it is not a field. Table 2 is
+stated for the sampling tube; clause 4 NOTE 5 expects the figures to grow
+for the other shields and gives no others, so the same values are reported
+for them.
 
 `duct_diameter_m` and `duct_area` are $d$ and $S$,
 `characteristic_impedance` is the $\rho c$ of the duct air and
 `speed_of_sound` its $c$, `flow_velocity` is the signed $U$
 (negative on the inlet side) and `shield` names the microphone shield.
+
+### InDuctSoundPowerResult.information_only_band
+
+*property*
+
+Per band, whether the standard gives it for information only.
+
+`True` above 10 kHz (3.8, clause 4), and in every band when the
+flow at the microphone exceeds the 40 m/s of the sampling tube
+(5.3.3.4 NOTE).
 
 ### InDuctSoundPowerResult.plot()
 

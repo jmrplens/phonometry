@@ -1119,24 +1119,38 @@ def turbine_reference_source_correction(
 class TurbineTestEnvironmentCheck:
     r"""Whether the test environment qualifies for IEC 61063 (A.3.3, 4.3).
 
-    Built by :func:`check_turbine_test_environment`.
+    Built by :func:`check_turbine_test_environment`. The verdicts are read
+    from the correction and the wind speed against the 7 dB, 6 m/s and
+    1 m/s the standard prints, so they are not fields.
 
     :ivar environmental_correction_db: :math:`K`, in dB.
     :ivar ratio: :math:`A/S`, when the correction came from the room
         absorption, else ``None``.
-    :ivar correction_ok: :math:`K \le 7` dB (A.3.3).
     :ivar wind_speed_m_s: The wind speed outdoors, in m/s, or ``None``.
-    :ivar wind_ok: The wind speed is below 6 m/s (4.3), or ``None`` indoors.
-    :ivar windscreen_advised: The wind is above 1 m/s, where 4.3 asks for a
-        windscreen.
     """
 
     environmental_correction_db: float
     ratio: float | None
-    correction_ok: bool
     wind_speed_m_s: float | None = None
-    wind_ok: bool | None = None
-    windscreen_advised: bool = False
+
+    @property
+    def correction_ok(self) -> bool:
+        r""":math:`K \le 7` dB (A.3.3)."""
+        return _within_k_limit(self.environmental_correction_db)
+
+    @property
+    def wind_ok(self) -> bool | None:
+        """The wind speed is below 6 m/s (4.3), or ``None`` indoors."""
+        if self.wind_speed_m_s is None:
+            return None
+        return self.wind_speed_m_s < _WIND_LIMIT_M_S
+
+    @property
+    def windscreen_advised(self) -> bool:
+        """The wind is above 1 m/s, where 4.3 asks for a windscreen."""
+        return self.wind_speed_m_s is not None and (
+            self.wind_speed_m_s > _WINDSCREEN_ABOVE_M_S
+        )
 
     @property
     def passes(self) -> bool:
@@ -1226,8 +1240,6 @@ def check_turbine_test_environment(
             "'environmental_correction_db'."
         )
         raise ValueError(msg)
-    wind_ok: bool | None = None
-    advised = False
     wind: float | None = None
     if wind_speed_m_s is not None:
         wind = float(wind_speed_m_s)
@@ -1236,15 +1248,8 @@ def check_turbine_test_environment(
                 "check_turbine_test_environment: 'wind_speed_m_s' must be non-negative."
             )
             raise ValueError(msg)
-        wind_ok = wind < _WIND_LIMIT_M_S
-        advised = wind > _WINDSCREEN_ABOVE_M_S
     return TurbineTestEnvironmentCheck(
-        environmental_correction_db=k,
-        ratio=ratio,
-        correction_ok=_within_k_limit(k),
-        wind_speed_m_s=wind,
-        wind_ok=wind_ok,
-        windscreen_advised=advised,
+        environmental_correction_db=k, ratio=ratio, wind_speed_m_s=wind
     )
 
 

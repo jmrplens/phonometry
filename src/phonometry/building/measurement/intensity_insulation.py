@@ -1032,21 +1032,20 @@ def _low_frequency_qualification(
     *,
     owner: str,
     absorbing_specimen_surface: bool,
-) -> tuple[np.ndarray | None, np.ndarray | None]:
-    """Formula (5) and the Clause 6.4.2 verdict it feeds, or ``(None, None)``.
+) -> np.ndarray | None:
+    """Formula (5), which the Clause 6.4.2 verdict is read from, or ``None``.
 
     Clause 6.4.2 asks for the receiving-side pressure level "if possible", so
-    an absent ``l_p`` leaves both halves unanswered rather than guessed.
+    an absent ``l_p`` leaves the indicator and the verdict unanswered rather
+    than guessed.
     """
     if l_p is None:
-        return None, None
+        return None
     lp_receiving = _as_band_levels(l_p, "l_p")
     require_equal_shapes(owner, {"l_p": lp_receiving.shape, "l_in": l_in.shape}, "band")
     f_pi = surface_pressure_intensity_indicator(lp_receiving, l_in)
-    limit = _low_frequency_limit(
-        absorbing_specimen_surface=_validated_absorbing_flag(absorbing_specimen_surface)
-    )
-    return f_pi, np.asarray(settled(f_pi) <= limit, dtype=bool)
+    _validated_absorbing_flag(absorbing_specimen_surface)
+    return f_pi
 
 
 def _check_low_frequency_bands(
@@ -1087,17 +1086,11 @@ def _check_low_frequency_bands(
     return freqs
 
 
-def _check_indicator_pair(owner: object) -> None:
-    """Reject a result carrying only one half of the Clause 6.4.2 answer."""
-    indicator = owner.surface_pressure_intensity_indicator  # type: ignore[attr-defined]
-    qualified = owner.qualified  # type: ignore[attr-defined]
-    if (indicator is None) != (qualified is None):
-        msg = (
-            "'surface_pressure_intensity_indicator' and 'qualified' are the two "
-            "halves of one Clause 6.4.2 answer and are given together or "
-            "not at all."
-        )
-        raise ValueError(msg)
+def _qualified(indicator: np.ndarray | None, limit: float) -> np.ndarray | None:
+    """The Clause 6.4.2 verdict per band, read settled, or ``None`` without an indicator."""
+    if indicator is None:
+        return None
+    return np.asarray(settled(indicator) <= limit, dtype=bool)
 
 
 @dataclass(frozen=True)
@@ -1118,10 +1111,6 @@ class LowFrequencyIntensityResult(OwnsArrays):
         where the receiving-side pressure level was not measured alongside
         the intensity. Clause 6.4.2 only asks for that measurement "if
         possible".
-    :ivar qualified: ``True`` in each band whose ``FpI`` is within the limit
-        Clause 6.4.2 sets, ``False`` where the measurement surface is not
-        qualified and the index is not a result the standard admits, and
-        ``None`` throughout when the indicator itself is ``None``.
     :ivar frequencies: Mid-band frequencies, in hertz, or ``None``.
     :ivar area: Test-object area ``S``, in m².
     :ivar measurement_area: Measurement-surface area ``Sm``, in m².
@@ -1132,7 +1121,6 @@ class LowFrequencyIntensityResult(OwnsArrays):
 
     r_i: np.ndarray
     surface_pressure_intensity_indicator: np.ndarray | None
-    qualified: np.ndarray | None
     frequencies: np.ndarray | None
     area: float
     measurement_area: float
@@ -1143,22 +1131,19 @@ class LowFrequencyIntensityResult(OwnsArrays):
         """Reject a result whose per-band arrays do not index each other.
 
         Every reader of this result walks the four arrays together: the plot
-        draws one bar per band and hatches it by ``qualified``, and a report
-        prints the indicator beside the index. One array a band short raises
-        an ``IndexError`` somewhere else entirely, so the shapes are pinned
-        where they are built.
+        draws one bar per band and hatches it by :attr:`qualified`, and a
+        report prints the indicator beside the index. One array a band short
+        raises an ``IndexError`` somewhere else entirely, so the shapes are
+        pinned where they are built.
 
         :raises ValueError: if the per-band arrays disagree in length, if
             ``frequencies`` is given and does not match them, or if either
             area is not positive and finite.
         """
         require_ranks(self, r_i=1)
-        _check_indicator_pair(self)
         if self.surface_pressure_intensity_indicator is not None:
-            require_ranks(self, surface_pressure_intensity_indicator=1, qualified=1)
-            require_same_length(
-                self, "r_i", "surface_pressure_intensity_indicator", "qualified"
-            )
+            require_ranks(self, surface_pressure_intensity_indicator=1)
+            require_same_length(self, "r_i", "surface_pressure_intensity_indicator")
         if self.frequencies is not None:
             require_equal_counts(
                 "LowFrequencyIntensityResult",
@@ -1183,6 +1168,19 @@ class LowFrequencyIntensityResult(OwnsArrays):
         """
         return _low_frequency_limit(
             absorbing_specimen_surface=self.absorbing_specimen_surface
+        )
+
+    @property
+    def qualified(self) -> np.ndarray | None:
+        """The Clause 6.4.2 verdict per band, read from the indicator.
+
+        ``True`` in each band whose ``FpI`` is within :attr:`indicator_limit`,
+        ``False`` where the measurement surface is not qualified and the index
+        is not a result the standard admits, and ``None`` throughout when the
+        indicator itself is ``None``.
+        """
+        return _qualified(
+            self.surface_pressure_intensity_indicator, self.indicator_limit
         )
 
     def plot(
@@ -1288,7 +1286,7 @@ def low_frequency_intensity_reduction(
     freqs = _check_low_frequency_bands(
         frequencies, l_in_bands.size, owner="low_frequency_intensity_reduction"
     )
-    f_pi, qualified = _low_frequency_qualification(
+    f_pi = _low_frequency_qualification(
         l_p,
         l_in_bands,
         owner="low_frequency_intensity_reduction",
@@ -1302,7 +1300,6 @@ def low_frequency_intensity_reduction(
     return LowFrequencyIntensityResult(
         r_i=r_i,
         surface_pressure_intensity_indicator=f_pi,
-        qualified=qualified,
         frequencies=freqs,
         area=s,
         measurement_area=sm,
@@ -1326,8 +1323,6 @@ class LowFrequencyElementResult(OwnsArrays):
         :math:`F_{pI}` per band, in dB (Formula (5)), or ``None`` where the
         receiving-side pressure level was not measured alongside the
         intensity.
-    :ivar qualified: The Clause 6.4.2 verdict per band, or ``None`` throughout
-        when the indicator itself is ``None``.
     :ivar frequencies: Mid-band frequencies, in hertz, or ``None``.
     :ivar measurement_area: Measurement-surface area ``Sm``, in m².
     :ivar elements: Number ``N`` of element units installed within the
@@ -1338,7 +1333,6 @@ class LowFrequencyElementResult(OwnsArrays):
 
     d_i_n_e: np.ndarray
     surface_pressure_intensity_indicator: np.ndarray | None
-    qualified: np.ndarray | None
     frequencies: np.ndarray | None
     measurement_area: float
     elements: int
@@ -1353,12 +1347,9 @@ class LowFrequencyElementResult(OwnsArrays):
             measurement area is not positive and finite.
         """
         require_ranks(self, d_i_n_e=1)
-        _check_indicator_pair(self)
         if self.surface_pressure_intensity_indicator is not None:
-            require_ranks(self, surface_pressure_intensity_indicator=1, qualified=1)
-            require_same_length(
-                self, "d_i_n_e", "surface_pressure_intensity_indicator", "qualified"
-            )
+            require_ranks(self, surface_pressure_intensity_indicator=1)
+            require_same_length(self, "d_i_n_e", "surface_pressure_intensity_indicator")
         if self.frequencies is not None:
             require_equal_counts(
                 "LowFrequencyElementResult",
@@ -1381,6 +1372,16 @@ class LowFrequencyElementResult(OwnsArrays):
         """
         return _low_frequency_limit(
             absorbing_specimen_surface=self.absorbing_specimen_surface
+        )
+
+    @property
+    def qualified(self) -> np.ndarray | None:
+        """The Clause 6.4.2 verdict per band, read from the indicator, or ``None``.
+
+        ``None`` throughout when the indicator itself is ``None``.
+        """
+        return _qualified(
+            self.surface_pressure_intensity_indicator, self.indicator_limit
         )
 
     def plot(
@@ -1463,7 +1464,7 @@ def low_frequency_element_normalized_difference(
         l_in_bands.size,
         owner="low_frequency_element_normalized_difference",
     )
-    f_pi, qualified = _low_frequency_qualification(
+    f_pi = _low_frequency_qualification(
         l_p,
         l_in_bands,
         owner="low_frequency_element_normalized_difference",
@@ -1479,7 +1480,6 @@ def low_frequency_element_normalized_difference(
     return LowFrequencyElementResult(
         d_i_n_e=d_i_n_e,
         surface_pressure_intensity_indicator=f_pi,
-        qualified=qualified,
         frequencies=freqs,
         measurement_area=sm,
         elements=n,

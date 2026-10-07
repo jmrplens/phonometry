@@ -785,3 +785,50 @@ def test_the_clause_13_functions_refuse_what_they_cannot_rate(
 ) -> None:
     with pytest.raises(ValueError, match=match):
         call()
+
+
+# ---------------------------------------------------------------------------
+# The status is read from the prominence, not stated
+# ---------------------------------------------------------------------------
+def test_a_block_s_status_is_read_from_its_prominence() -> None:
+    """13.6.2.3 e): a prominence under 4 is LOW_PROMINENCE whatever is claimed."""
+    import dataclasses
+
+    block = env.amplitude_modulation_block(
+        _sample(2), modulation_frequency_range_hz=(0.4, 0.9)
+    )
+    assert block.status is env.ModulationBlockStatus.VALID
+    low = dataclasses.replace(block, prominence=3.9, modulation_depth_db=None)
+    assert low.status is env.ModulationBlockStatus.LOW_PROMINENCE
+    assert not low.valid
+
+
+def test_a_block_cannot_state_its_status() -> None:
+    import dataclasses
+
+    block = env.amplitude_modulation_block(
+        _sample(2), modulation_frequency_range_hz=(0.4, 0.9)
+    )
+    with pytest.raises(TypeError, match="status"):
+        dataclasses.replace(block, status=env.ModulationBlockStatus.VALID)
+
+
+def test_a_depth_on_a_block_that_is_not_valid_is_refused() -> None:
+    """A low prominence with a modulation depth beside it is no block 13.6.2.3 produces."""
+    import dataclasses
+
+    block = env.amplitude_modulation_block(
+        _sample(2), modulation_frequency_range_hz=(0.4, 0.9)
+    )
+    with pytest.raises(ValueError, match="modulation depth is read from a valid block"):
+        dataclasses.replace(block, prominence=1.0)
+
+
+def test_an_excluded_block_reads_as_excluded() -> None:
+    import dataclasses
+
+    block = env.amplitude_modulation_block(
+        _sample(2), modulation_frequency_range_hz=(0.4, 0.9)
+    )
+    excluded = dataclasses.replace(block, excluded=True, modulation_depth_db=None)
+    assert excluded.status is env.ModulationBlockStatus.EXCLUDED

@@ -78,7 +78,7 @@ about 1,8 m2 specimens; larger windows insulate less, and the CEC corrects
 from __future__ import annotations
 
 import math
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -745,77 +745,55 @@ class DbHrRequirement:
 class DbHrCheck:
     """A DB-HR requirement checked against an achieved value.
 
+    The rounding, the margin and the verdict are read from the achieved value
+    and the requirement, so they are not fields: a check cannot be built to
+    comply with a value DB-HR fails.
+
     :ivar requirement: The :class:`DbHrRequirement` checked.
     :ivar value: The achieved value, unrounded.
-    :ivar reported: The achieved value rounded as DB-HR prescribes.
-    :ivar margin: ``reported - limit`` for a ``"min"`` requirement and
-        ``limit - reported`` for a ``"max"`` one; non-negative when compliant.
-    :ivar complies: Whether the requirement is met.
     """
 
     requirement: DbHrRequirement
     value: float
-    reported: float
-    margin: float
-    _: KW_ONLY
-    complies: bool
 
     def __post_init__(self) -> None:
-        """Reject a check whose verdict contradicts its own comparison.
+        """Reject a value that is not a number.
 
-        The three derived fields are one statement made three ways:
-        ``reported`` is the achieved value rounded as DB-HR prescribes for
-        the quantity, the margin is that rounded value against the limit,
-        signed by the requirement's direction, and ``complies`` is that
-        margin's sign. The assessment figure colours each check by
-        ``complies`` alone and draws its stem to ``reported``, so a check
-        built by hand with the flag inverted, or with a ``reported`` its
-        own ``value`` never rounds to, would not fail anywhere; it would
-        paint a value short of its limit in the compliant colour, beside a
-        stem whose very geometry says otherwise.
+        :func:`check_db_hr_requirement` refuses a non-finite achieved value,
+        and a check built by hand around ``nan`` would reach the figure as a
+        verdict.
 
-        The rounding and margin comparisons allow a billionth of a decibel
-        so a caller who recomputed them along another floating-point path is
-        not refused over the last bit; the compliance slack below is DB-HR's
-        own boundary, the one :func:`check_db_hr_requirement` applies.
-
-        :raises ValueError: if ``value`` is not finite, ``reported`` does not
-            round ``value`` to the requirement's decimals, ``margin`` does not
-            restate ``reported`` against the limit, or ``complies``
-            contradicts ``margin``.
+        :raises ValueError: if ``value`` is not finite.
         """
         if not math.isfinite(self.value):
             msg = f"DbHrCheck: 'value' must be finite; got {self.value!r}."
             raise ValueError(msg)
-        rounded = _round_half_up(self.value, self.requirement.decimals)
-        if not math.isclose(self.reported, rounded, rel_tol=0.0, abs_tol=1e-9):
-            msg = (
-                "DbHrCheck: 'reported' must be 'value' rounded half-up to "
-                f"{self.requirement.decimals} decimal(s), the form DB-HR "
-                f"prescribes for the quantity; got {self.reported!r} where "
-                f"'value' {self.value!r} rounds to {rounded!r}."
-            )
-            raise ValueError(msg)
-        expected = (
-            self.reported - self.requirement.limit
-            if self.requirement.direction == "min"
-            else self.requirement.limit - self.reported
-        )
-        if not math.isclose(self.margin, expected, rel_tol=0.0, abs_tol=1e-9):
-            msg = (
-                "DbHrCheck: 'margin' must be 'reported' minus the limit for "
-                "a 'min' requirement and the limit minus 'reported' for a "
-                f"'max' one; got {self.margin!r} where the fields state "
-                f"{expected!r}."
-            )
-            raise ValueError(msg)
-        if bool(self.complies) != (self.margin >= _COMPLIANCE_SLACK):
-            msg = (
-                "DbHrCheck: 'complies' must agree with the sign of 'margin' "
-                f"(margin {self.margin!r} with complies "
-                f"{self.complies!r})."
-            )
-            raise ValueError(msg)
+
+    @property
+    def reported(self) -> float:
+        """The achieved value rounded half-up as DB-HR prescribes for the quantity."""
+        return _round_half_up(self.value, self.requirement.decimals)
+
+    @property
+    def margin(self) -> float:
+        """How far the reported value clears the limit.
+
+        ``reported - limit`` for a ``"min"`` requirement and
+        ``limit - reported`` for a ``"max"`` one; non-negative when compliant.
+        """
+        if self.requirement.direction == "min":
+            return self.reported - self.requirement.limit
+        return self.requirement.limit - self.reported
+
+    @property
+    def complies(self) -> bool:
+        """Whether the requirement is met.
+
+        The value exactly at the limit after the rounding complies, with a
+        billionth of a decibel of slack so that binary representation error
+        in the subtraction cannot turn it into a failure.
+        """
+        return bool(self.margin >= _COMPLIANCE_SLACK)
 
 
 @dataclass(frozen=True)
@@ -1270,19 +1248,7 @@ def check_db_hr_requirement(value: float, requirement: DbHrRequirement) -> DbHrC
     :return: A :class:`DbHrCheck`.
     :raises ValueError: If ``value`` is not finite.
     """
-    achieved = _finite(value, "value")
-    reported = _round_half_up(achieved, requirement.decimals)
-    if requirement.direction == "min":
-        margin = reported - requirement.limit
-    else:
-        margin = requirement.limit - reported
-    return DbHrCheck(
-        requirement=requirement,
-        value=achieved,
-        reported=reported,
-        margin=margin,
-        complies=bool(margin >= _COMPLIANCE_SLACK),
-    )
+    return DbHrCheck(requirement=requirement, value=_finite(value, "value"))
 
 
 def assess_db_hr(

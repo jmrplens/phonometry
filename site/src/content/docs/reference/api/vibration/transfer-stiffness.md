@@ -564,7 +564,8 @@ encourages, and the note to (B.3) allows doing so band by band.
 DrivingPointStiffnessResult(
     frequencies: np.ndarray,
     driving_point_stiffness: np.ndarray,
-    adequate: np.ndarray | None = None,
+    blocked_output_difference_db: np.ndarray | None = None,
+    unwanted_input_difference_db: np.ndarray | None = None,
 )
 ```
 
@@ -604,7 +605,17 @@ evaluation altogether, as 7.6.1 requires, and so are lines below the
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz, strictly increasing. |
 | `driving_point_stiffness` | Complex $k_{1,1}$ at each frequency, in N/m. |
-| `adequate` | Per frequency, whether Inequalities (1) and (2) hold, or `None` when they were not checked. |
+| `blocked_output_difference_db` | $\Delta L_{1,2} = L_{a1} - L_{a2}$ per frequency, in dB, or `None` when Inequality (1) was not checked. |
+| `unwanted_input_difference_db` | The input acceleration level less the loudest unwanted one per frequency, in dB, or `None` when Inequality (2) was not checked. |
+
+### DrivingPointStiffnessResult.adequate
+
+*property*
+
+Per frequency, whether Inequalities (1) and (2) hold.
+
+Read from the level differences against the 20 dB and 15 dB of the
+series; `None` when neither was checked.
 
 ### DrivingPointStiffnessResult.band_average()
 
@@ -950,7 +961,7 @@ Indirect-method transfer stiffness bundled as a [`TransferStiffnessResult`](/pho
 See [`transfer_stiffness_indirect`](/phonometry/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) for the ISO 10846-3 validity
 conditions (Inequalities (2) and (3)); bands with $|T| > 0.1$
 trigger a [`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning), and the result marks them
-not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresult), so that
+not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresultvalid), so that
 [`band_average`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresultband_average) leaves them out.
 
 **Parameters**
@@ -1336,7 +1347,7 @@ TransferStiffnessResult(
     frequencies: np.ndarray,
     transfer_stiffness: np.ndarray,
     blocking_mass: float | None = None,
-    valid: np.ndarray | None = None,
+    transmissibility: np.ndarray | None = None,
 )
 ```
 
@@ -1349,7 +1360,7 @@ A dynamic transfer stiffness over frequency (ISO 10846).
 | `frequencies` | Frequencies, in hertz. |
 | `transfer_stiffness` | Complex $k_{2,1}$ per frequency, in N/m. |
 | `blocking_mass` | Blocking mass `m2` used (indirect method), in kg, or `None` for the direct method. |
-| `valid` | Per frequency, whether the line meets the adequacy conditions of its part and so enters the band average (results that fail them "shall be excluded from the evaluation of the dynamic stiffness function", ISO 10846-2, -4 and -5 7.6.1, ISO 10846-3 7.5.1), or `None` when every line does. The indirect method sets it from Inequality (2), $\vert T\vert  \le 0.1$. |
+| `transmissibility` | The measured vibration transmissibility $T = u_2/u_1$ per frequency of the indirect method, or `None` for the direct method; `valid` is read from it. |
 
 ### TransferStiffnessResult.band_average()
 
@@ -1475,6 +1486,19 @@ Convert $k_{2,1}$ to an FRF (ISO 10846-1 Annex A / Table A.2).
 `target` is `"impedance"` ($Z = k/(j\omega)$) or
 `"apparent_mass"` ($m_{\mathrm{eff}} = -k/\omega^2$); see
 [`phonometry.vibration.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
+
+### TransferStiffnessResult.valid
+
+*property*
+
+Per frequency, whether the line meets the adequacy condition of its method.
+
+Lines that fail it are left out of the band average (results that
+fail "shall be excluded from the evaluation of the dynamic stiffness
+function", ISO 10846-2, -4 and -5 7.6.1, ISO 10846-3 7.5.1). The
+indirect method reads it from Inequality (2), $|T| \le 0.1$;
+`None` for the direct method, whose conditions are judged by
+[`check_blocked_output`](/phonometry/reference/api/vibration/transfer-stiffness/#check_blocked_output) and [`check_unwanted_input`](/phonometry/reference/api/vibration/transfer-stiffness/#check_unwanted_input).
 
 ## TransferStiffnessWarning
 

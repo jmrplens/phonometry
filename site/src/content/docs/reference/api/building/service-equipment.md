@@ -1069,10 +1069,6 @@ SERVICE_EQUIPMENT_WEIGHTING = {'third': {'A': {25.0: -44.7, 31.5: -39.4, 40.0: -
 ServiceEquipmentBackgroundResult(
     measured_db: np.ndarray,
     background_db: np.ndarray,
-    difference_db: np.ndarray,
-    correction_db: np.ndarray,
-    corrected_db: np.ndarray,
-    regime: tuple[str, ...],
     frequencies_hz: np.ndarray | None = None,
 )
 ```
@@ -1090,6 +1086,28 @@ Band levels corrected for the background by Clause 9.
 | `corrected_db` | $L = L_1 - K$ per band, in dB (Formula (7)). |
 | `regime` | Per band, `"none"` (no correction), `"corrected"` (Formula (8)) or `"limited"` (held at 2,2 dB: the band is an upper limit of the equipment level). |
 | `frequencies_hz` | The band centres, in Hz, or `None` when not given. |
+
+The difference, the regime, the correction and the corrected level are
+read from the two measured levels and the 10 dB and 4 dB of Clause 9, so
+they are read-only properties and not fields.
+
+### ServiceEquipmentBackgroundResult.corrected_db
+
+*property*
+
+$L = L_1 - K$ per band, in dB (Formula (7)).
+
+### ServiceEquipmentBackgroundResult.correction_db
+
+*property*
+
+The correction $K$ per band, in dB (Formulae (7) to (9)).
+
+### ServiceEquipmentBackgroundResult.difference_db
+
+*property*
+
+$\Delta L = L_1 - L_2$ per band, in dB (Formula (9)).
 
 ### ServiceEquipmentBackgroundResult.influenced
 
@@ -1133,6 +1151,12 @@ Bands held at 2,2 dB are marked as upper limits. Requires matplotlib
 
 **Returns:** The axes.
 
+### ServiceEquipmentBackgroundResult.regime
+
+*property*
+
+Per band, `"none"`, `"corrected"` or `"limited"` (Clause 9).
+
 ## ServiceEquipmentPositionCheck
 
 ```python
@@ -1142,19 +1166,7 @@ ServiceEquipmentPositionCheck(
     room_positions_m: np.ndarray,
     source_positions_m: np.ndarray,
     small_room: bool,
-    separation_m: float,
-    surface_distance_m: float,
-    source_distance_m: float | None,
-    heights_m: np.ndarray,
-    corner_height_m: float,
-    corner_wall_distances_m: tuple[float, float],
-    separation_ok: bool,
-    surface_ok: bool,
-    source_ok: bool,
-    height_ok: bool,
-    corner_height_ok: bool,
     corner_obstacle_distance_m: float | None = None,
-    corner_obstacle_ok: bool | None = None,
 )
 ```
 
@@ -1163,6 +1175,10 @@ Whether the positions keep the corner height of 7.2 and the distances of 7.3.
 Positions are coordinates in metres in a rectangular room with one corner
 at the origin: `x` along the length, `y` along the width and `z` the
 height above the floor.
+
+The distances, the heights and the verdicts are read from the positions
+and the distances the clauses print, so they are not fields: a check
+cannot be built to pass positions the clauses fail.
 
 **Attributes**
 
@@ -1173,19 +1189,47 @@ height above the floor.
 | `room_positions_m` | The reverberant-field positions, shape `(k, 3)`, in m. |
 | `source_positions_m` | Sound sources in the room, shape `(m, 3)`, in m (empty when none were given). |
 | `small_room` | Whether the small-room surface distance of 7.3 applies. |
-| `separation_m` | The shortest distance between any two positions, corner included, in m. |
-| `surface_distance_m` | The shortest distance from a room position to a wall, the floor or the ceiling, in m. |
-| `source_distance_m` | The shortest distance from a room position to a source, in m, or `None` without sources. |
-| `heights_m` | The heights of the room positions, in m. |
-| `corner_height_m` | The height of the corner position, in m. |
-| `corner_wall_distances_m` | The corner position's distances to the two walls nearest to it, in m; 7.2 prefers 0,5 m (`preferred_corner_wall_distance`, advisory). |
-| `separation_ok` | At least 1,0 m between positions. |
-| `surface_ok` | At least 0,50 m (0,30 m in a small room) from every surface. |
-| `source_ok` | At least 1,5 m from every source. |
-| `height_ok` | Every room position from 0,5 m to 2,0 m high. |
-| `corner_height_ok` | The corner position from 0,5 m to 1,5 m high. |
 | `corner_obstacle_distance_m` | The distance from the corner microphone to the nearest obstacle, as measured on site, in m; `None` when it was not given. |
-| `corner_obstacle_ok` | At least 0,2 m from any obstacle (7.2); `None` when the distance was not given, and then not judged. |
+
+### ServiceEquipmentPositionCheck.corner_height_m
+
+*property*
+
+The height of the corner position, in m.
+
+### ServiceEquipmentPositionCheck.corner_height_ok
+
+*property*
+
+The corner position from 0,5 m to 1,5 m high.
+
+### ServiceEquipmentPositionCheck.corner_obstacle_ok
+
+*property*
+
+At least 0,2 m from any obstacle (7.2).
+
+`None` when the distance was not given, and then not judged.
+
+### ServiceEquipmentPositionCheck.corner_wall_distances_m
+
+*property*
+
+The corner position's distances to the two walls nearest to it, in m.
+
+7.2 prefers 0,5 m (`preferred_corner_wall_distance`, advisory).
+
+### ServiceEquipmentPositionCheck.height_ok
+
+*property*
+
+Every room position from 0,5 m to 2,0 m high.
+
+### ServiceEquipmentPositionCheck.heights_m
+
+*property*
+
+The heights of the room positions, in m.
 
 ### ServiceEquipmentPositionCheck.passes
 
@@ -1248,6 +1292,24 @@ Whether the positions are 1,5 m apart, the distance 7.3 prefers.
 
 **Returns:** `True` at 1,5 m or more; advisory, not part of `passes`.
 
+### ServiceEquipmentPositionCheck.separation_m
+
+*property*
+
+The shortest distance between any two positions, corner included, in m.
+
+### ServiceEquipmentPositionCheck.separation_ok
+
+*property*
+
+At least 1,0 m between positions.
+
+### ServiceEquipmentPositionCheck.source_distance_m
+
+*property*
+
+The shortest distance from a room position to a source, in m, or `None` without sources.
+
 ### ServiceEquipmentPositionCheck.source_limit_m
 
 *property*
@@ -1256,6 +1318,18 @@ The distance 7.3 asks between a room position and a source, in m.
 
 **Returns:** 1,5 m.
 
+### ServiceEquipmentPositionCheck.source_ok
+
+*property*
+
+At least 1,5 m from every source; `True` without sources.
+
+### ServiceEquipmentPositionCheck.surface_distance_m
+
+*property*
+
+The shortest distance from a room position to a wall, the floor or the ceiling, in m.
+
 ### ServiceEquipmentPositionCheck.surface_limit_m
 
 *property*
@@ -1263,6 +1337,12 @@ The distance 7.3 asks between a room position and a source, in m.
 The surface distance 7.3 asks of this room, in m.
 
 **Returns:** 0,30 m in a small room, 0,50 m otherwise.
+
+### ServiceEquipmentPositionCheck.surface_ok
+
+*property*
+
+At least 0,50 m (0,30 m in a small room) from every surface.
 
 ## ServiceEquipmentResult
 
@@ -1276,7 +1356,6 @@ ServiceEquipmentResult(
     average_db: np.ndarray,
     background: ServiceEquipmentBackgroundResult | None,
     corrected_db: np.ndarray,
-    standardizable: np.ndarray,
     standardized_db: np.ndarray | None,
     normalized_db: np.ndarray | None,
     ratings: Mapping[str, int],
@@ -1302,7 +1381,7 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | `average_db` | Formula (1) over the readings, rounded to one decimal (7.5), in dB. |
 | `background` | The Clause 9 correction, or `None` when no background was given. |
 | `corrected_db` | The average corrected for the background, in dB (the average itself when there is no background). |
-| `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz). |
+| `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies_hz` and `band`, so it is not a field. |
 | `standardized_db` | $L_\mathrm{nT}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
 | `normalized_db` | $L_\mathrm{n}$ per band (Formula (6)), in dB, or `None` without a reverberation time and a volume. |
 | `ratings` | The weighted single numbers of Table 1, rounded to whole decibels (7.8), keyed by their notation: `"LA,eq"`, `"LA,Smax,nT"`, `"LC,Fmax,n"` and so on. The C-weighted ones are present only when the bands cover the extended range. |
@@ -1344,6 +1423,14 @@ A-weighted single numbers in the title. Requires matplotlib
 The number of readings averaged by Formula (1).
 
 **Returns:** The number of rows of `readings_db`.
+
+### ServiceEquipmentResult.standardizable
+
+*property*
+
+Per band, whether 7.7 lets it be standardized or normalized.
+
+**Returns:** One boolean per band, `True` inside the range 7.7 gives for `band`.
 
 ### ServiceEquipmentResult.unstandardized_bands_hz
 

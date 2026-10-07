@@ -682,8 +682,6 @@ def test_the_peak_metric_may_be_restated_whole_or_left_out_whole() -> None:
         peak_spl=None,
         peak_margin=None,
         tts_peak_margin=None,
-        exceeds_injury=False,
-        exceeds_tts=False,
     )
     assert (absent.peak_spl, absent.peak_margin, absent.tts_peak_margin) == (
         None,
@@ -716,19 +714,19 @@ def test_a_total_that_does_not_sum_the_row_beside_it_is_refused() -> None:
             dataclasses.replace(good, **{field: value})
 
 
-def test_a_verdict_that_contradicts_its_own_margins_is_refused() -> None:
+def test_the_verdicts_are_read_from_the_margins() -> None:
     """The two verdicts are what the stored margins say, and the last link.
 
     They are what an assessment is read for, and they are formed from the
-    margins and never from the levels. Before the guard, a result 28 dB over
-    the 202 dB auditory-injury peak criterion could be built reporting no
-    exceedance at all, every margin beside it still stating one.
+    margins and never from the levels. A result 28 dB over the 202 dB
+    auditory-injury peak criterion could once be built reporting no
+    exceedance at all; the verdicts are no fields now.
     """
     over = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=230.0)
     assert over.peak_margin == 28.0
     assert (over.exceeds_injury, over.exceeds_tts) == (True, True)
     for field in ("exceeds_injury", "exceeds_tts"):
-        with pytest.raises(ValueError, match=rf"'{field}' must be True exactly when"):
+        with pytest.raises(TypeError, match=field):
             dataclasses.replace(over, **{field: False})
 
 

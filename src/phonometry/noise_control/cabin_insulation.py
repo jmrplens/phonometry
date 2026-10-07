@@ -570,27 +570,60 @@ class BandFlatnessCheck(OwnsArrays):
 class CabinUncertainty:
     r"""What clause 10 will and will not say about a measurement.
 
+    Everything but the method and the volume ratio is what clause 10 prints
+    for that method and ratio, so it is read from them and is not a field.
+
     :ivar method: The method the statement is about.
     :ivar volume_ratio: :math:`V_{\text{room}} / V_{\text{cabin}}`.
-    :ivar ratio_satisfied: Whether that ratio reaches
-        :data:`MIN_ROOM_TO_CABIN_VOLUME_RATIO`.
-    :ivar stateable: Whether clause 10 offers any figure at all. It does not
-        for the actual-noise method, which it sends to ISO 4871 instead.
-    :ivar stated_band_range_hz: The range the statement covers, in hertz, or
-        ``None`` when nothing is stateable.
-    :ivar increased_uncertainty_band_range_hz: The range where a larger
-        uncertainty is expected, in hertz, or ``None``.
-    :ivar excess_standard_deviation_db: What this method adds to the standard
-        deviation of the laboratory one, in decibels, or ``None``.
     """
 
     method: str
     volume_ratio: float
-    ratio_satisfied: bool
-    stateable: bool
-    stated_band_range_hz: tuple[float, float] | None
-    increased_uncertainty_band_range_hz: tuple[float, float] | None
-    excess_standard_deviation_db: float | None
+
+    def __post_init__(self) -> None:
+        """Pin the method to the three clause 10 speaks of.
+
+        The statement is read from the method, so a method clause 10 does not
+        name would be given the laboratory figures without a word.
+
+        :raises ValueError: if ``method`` is not one of the three, or the
+            volume ratio is not positive and finite.
+        """
+        require_choice(self.method, "method", _METHODS)
+        require_positive(self.volume_ratio, "volume_ratio")
+
+    @property
+    def ratio_satisfied(self) -> bool:
+        """Whether the volume ratio reaches :data:`MIN_ROOM_TO_CABIN_VOLUME_RATIO`, judged settled."""
+        return bool(settled(self.volume_ratio) >= MIN_ROOM_TO_CABIN_VOLUME_RATIO)
+
+    @property
+    def stateable(self) -> bool:
+        """Whether clause 10 offers any figure at all.
+
+        It does not for the actual-noise method, which it sends to ISO 4871
+        instead.
+        """
+        return self.method != _ACTUAL_NOISE
+
+    @property
+    def stated_band_range_hz(self) -> tuple[float, float] | None:
+        """The range the statement covers, in hertz, or ``None`` when nothing is stateable."""
+        return STATED_UNCERTAINTY_BAND_RANGE_HZ if self.stateable else None
+
+    @property
+    def increased_uncertainty_band_range_hz(self) -> tuple[float, float] | None:
+        """The range where a larger uncertainty is expected, in hertz, or ``None``."""
+        return INCREASED_UNCERTAINTY_BAND_RANGE_HZ if self.stateable else None
+
+    @property
+    def excess_standard_deviation_db(self) -> float | None:
+        """What this method adds to the standard deviation of the laboratory one, in decibels, or ``None``."""
+        if not self.stateable:
+            return None
+        if self.method == "in-situ-loudspeaker":
+            return IN_SITU_EXCESS_STANDARD_DEVIATION_DB
+        return 0.0
 
 
 def cabin_insulation(
@@ -1023,36 +1056,15 @@ def uncertainty_conditions(
     cabin = require_positive(cabin_volume_m3, "cabin_volume_m3")
     how = require_choice(str(method), "method", _METHODS)
     ratio = room / cabin
-    satisfied = bool(settled(ratio) >= MIN_ROOM_TO_CABIN_VOLUME_RATIO)
-    if how == _ACTUAL_NOISE:
-        # Clause 10 states no uncertainty for this method at all, so the
-        # volume ratio it attaches its statement to has nothing to qualify:
-        # warning about it would report a condition on a number nobody gets.
-        return CabinUncertainty(
-            method=how,
-            volume_ratio=ratio,
-            ratio_satisfied=satisfied,
-            stateable=False,
-            stated_band_range_hz=None,
-            increased_uncertainty_band_range_hz=None,
-            excess_standard_deviation_db=None,
-        )
-    if not satisfied:
+    statement = CabinUncertainty(method=how, volume_ratio=ratio)
+    # Clause 10 states no uncertainty for the actual-noise method at all, so
+    # the volume ratio it attaches its statement to has nothing to qualify:
+    # warning about it would report a condition on a number nobody gets.
+    if how != _ACTUAL_NOISE and not statement.ratio_satisfied:
         msg = (
             f"ISO 11957 clause 10 states its uncertainty for a room at least "
             f"{MIN_ROOM_TO_CABIN_VOLUME_RATIO:g} times the volume of the cabin; "
             f"the ratio is {ratio:.1f}."
         )
         warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
-    excess = (
-        IN_SITU_EXCESS_STANDARD_DEVIATION_DB if how == "in-situ-loudspeaker" else 0.0
-    )
-    return CabinUncertainty(
-        method=how,
-        volume_ratio=ratio,
-        ratio_satisfied=satisfied,
-        stateable=True,
-        stated_band_range_hz=STATED_UNCERTAINTY_BAND_RANGE_HZ,
-        increased_uncertainty_band_range_hz=INCREASED_UNCERTAINTY_BAND_RANGE_HZ,
-        excess_standard_deviation_db=excess,
-    )
+    return statement

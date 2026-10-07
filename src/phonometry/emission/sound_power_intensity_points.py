@@ -133,6 +133,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     is_at_most,
     is_positive,
+    require_equal_counts,
     require_finite_fields,
     require_ranks,
     require_same_length,
@@ -950,28 +951,14 @@ class DiscretePointIntensityResult(OwnsArrays):
     """
 
     frequencies: np.ndarray | None
-    partial_power: np.ndarray
-    sound_power: np.ndarray
-    sound_power_level: np.ndarray
-    not_applicable_band: np.ndarray
+    normal_intensity: np.ndarray
+    segment_areas_m2: np.ndarray
     f1: np.ndarray | None
     f2: np.ndarray | None
     f3: np.ndarray | None
     f4: np.ndarray | None
-    dynamic_capability_index: np.ndarray | None
-    criterion_1: np.ndarray | None
-    negative_power_within_limit: np.ndarray | None
-    criterion_2: np.ndarray | None
-    minimum_positions: np.ndarray | None
-    achieved_grade: np.ndarray | None
-    confidence_interval: np.ndarray | None
-    expanded_uncertainty: np.ndarray | None
-    surface_area: float
-    positions: int
-    sound_power_level_a: float
-    a_weighting_omitted_bands: np.ndarray | None
-    field_nonuniformity_a: float
-    achieved_grade_a: str | None
+    pressure_residual_index_db: np.ndarray | None
+    band_type: str
     grade: str
 
     def __post_init__(self) -> None:
@@ -979,71 +966,236 @@ class DiscretePointIntensityResult(OwnsArrays):
 
         Every column here is read against another: the figure draws the level
         spectrum against ``frequencies`` and hatches it with
-        ``not_applicable_band``, :meth:`required_actions` walks the four gates
-        of Figure B.1 band by band, and a reader tabulating the result puts the
-        indicators, the verdicts and the confidence interval on one row with
-        the level. A column of the wrong length either raises somewhere inside
-        numpy about two shapes, naming no field, or is silently broadcast: a
-        single-band verdict array decides every band at once, and nothing in
-        the result then says that one band decided the rest.
+        :attr:`not_applicable_band`, :meth:`required_actions` walks the four
+        gates of Figure B.1 band by band, and a reader tabulating the result
+        puts the indicators, the verdicts and the confidence interval on one
+        row with the level. A column of the wrong length either raises
+        somewhere inside numpy about two shapes, naming no field, or is
+        silently broadcast: a single-band indicator decides every band at
+        once, and nothing in the result then says that one band decided the
+        rest.
 
-        ``partial_power`` carries the positions on its first axis and the bands
-        on its second, so its band axis is index 1, and ``confidence_interval``
-        carries the two interval ends on its second axis, so it is checked on
-        the first.
-
-        ``surface_area`` must be finite: it is the sum of segment areas the
-        determination already refused unless positive and finite, and it is
-        what a report prints beside the boxed level. The band levels stay
-        unpinned, ``NaN`` being clause 9.2's reading of a band the method does
-        not apply to.
+        ``normal_intensity`` carries the positions on its first axis and the
+        bands on its second, so its band axis is index 1, and it has one
+        position per segment area. The areas must be positive and finite:
+        they are what the partial powers and the surface area a report prints
+        beside the boxed level are read from. The A-weighted determination of
+        B.1.2 is read here, once.
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
-            or ``surface_area`` is not finite.
+            the positions and the areas disagree, an area is not positive and
+            finite, or the grade or the band type is unknown.
         """
+        _check_grade(self.grade)
+        _check_band_type(self.band_type)
         require_ranks(
             self,
             frequencies=1,
-            partial_power=2,
-            sound_power=1,
-            sound_power_level=1,
-            not_applicable_band=1,
+            normal_intensity=2,
+            segment_areas_m2=1,
             f1=1,
             f2=1,
             f3=1,
             f4=1,
-            dynamic_capability_index=1,
-            criterion_1=1,
-            negative_power_within_limit=1,
-            criterion_2=1,
-            minimum_positions=1,
-            achieved_grade=1,
-            confidence_interval=2,
-            expanded_uncertainty=1,
-            a_weighting_omitted_bands=1,
+            pressure_residual_index_db=1,
         )
         require_same_length(
             self,
             "frequencies",
-            ("partial_power", 1),
-            "sound_power",
-            "sound_power_level",
-            "not_applicable_band",
+            ("normal_intensity", 1),
             "f1",
             "f2",
             "f3",
             "f4",
-            "dynamic_capability_index",
-            "criterion_1",
-            "negative_power_within_limit",
-            "criterion_2",
-            "minimum_positions",
-            "achieved_grade",
-            "confidence_interval",
-            "expanded_uncertainty",
-            "a_weighting_omitted_bands",
+            "pressure_residual_index_db",
         )
-        require_finite_fields(self, "surface_area")
+        require_equal_counts(
+            "DiscretePointIntensityResult",
+            {
+                "normal_intensity": int(np.shape(self.normal_intensity)[0]),
+                "segment_areas_m2": int(np.size(self.segment_areas_m2)),
+            },
+            axis="position",
+        )
+        areas = np.asarray(self.segment_areas_m2, dtype=np.float64)
+        if not np.all(np.isfinite(areas)) or np.any(areas <= 0.0):
+            msg = (
+                "DiscretePointIntensityResult: 'segment_areas_m2' must be "
+                "positive and finite."
+            )
+            raise ValueError(msg)
+        self.__dict__["_a_weighted"] = _a_weighted_determination(
+            np.asarray(self.normal_intensity, dtype=np.float64),
+            self.sound_power_level,
+            self._applicable,
+            self.a_weighting_omitted_bands,
+            self.frequencies,
+            cast("BandType", self.band_type),
+            self.positions,
+            self.pressure_residual_index_db,
+            self.f1,
+            self.f2,
+            self.f3,
+        )
+
+    @property
+    def positions(self) -> int:
+        """The number :math:`N` of measurement positions."""
+        return int(np.shape(self.normal_intensity)[0])
+
+    @property
+    def surface_area(self) -> float:
+        """The measurement surface, the sum of the segment areas, in m²."""
+        return float(np.sum(self.segment_areas_m2))
+
+    @property
+    def partial_power(self) -> np.ndarray:
+        r"""The signed :math:`P_i = I_{\mathrm{n}i} S_i` per position and band (equation (11))."""
+        return np.asarray(
+            self.normal_intensity * np.asarray(self.segment_areas_m2)[:, None],
+            dtype=np.float64,
+        )
+
+    @property
+    def sound_power(self) -> np.ndarray:
+        """The signed band total of the partial powers (the sum of equation (12))."""
+        return np.asarray(np.sum(self.partial_power, axis=0), dtype=np.float64)
+
+    @property
+    def _applicable(self) -> np.ndarray:
+        # ``~(P > 0)`` and not ``P <= 0``: a NaN total answers every comparison
+        # False. The sign is that of the net power as a settled share of the
+        # gross, so partial powers that cancel in decimal leave a band with no
+        # net power whichever way the last bits of the sum fall.
+        return np.asarray(settled_net_share(self.partial_power, axis=0) > 0.0)
+
+    @property
+    def not_applicable_band(self) -> np.ndarray:
+        """Per band, whether the total sound power is not positive (clause 9.2)."""
+        return np.asarray(~self._applicable, dtype=bool)
+
+    @property
+    def sound_power_level(self) -> np.ndarray:
+        """The band sound power level (equation (12)), ``NaN`` outside the method."""
+        with np.errstate(divide="ignore", invalid="ignore"):
+            level = np.where(
+                self._applicable,
+                10.0
+                * np.log10(np.maximum(self.sound_power, np.finfo(float).tiny) / _W0),
+                np.nan,
+            )
+        return np.asarray(level, dtype=np.float64)
+
+    @property
+    def dynamic_capability_index(self) -> np.ndarray | None:
+        r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade (Eq. (10))."""
+        if self.pressure_residual_index_db is None:
+            return None
+        return _dynamic_capability(
+            self.pressure_residual_index_db, cast("DeterminationGrade", self.grade)
+        )
+
+    @property
+    def criterion_1(self) -> np.ndarray | None:
+        r"""Criterion 1, :math:`L_\mathrm{d} > F_2` (equation (B.1)), per band."""
+        ld = self.dynamic_capability_index
+        if ld is None or self.f2 is None:
+            return None
+        return np.asarray(ld > self.f2, dtype=bool)
+
+    @property
+    def negative_power_within_limit(self) -> np.ndarray | None:
+        r"""Figure B.1's unnumbered :math:`F_3 - F_2 \le 3` dB gate, per band."""
+        if self.f2 is None or self.f3 is None:
+            return None
+        return np.asarray((self.f3 - self.f2) <= _NEGATIVE_POWER_LIMIT, dtype=bool)
+
+    @property
+    def criterion_2(self) -> np.ndarray | None:
+        r"""Criterion 2, :math:`N > C F_4^2` (equation (B.2)), per band."""
+        if self.f4 is None:
+            return None
+        return self._criterion_2[0]
+
+    @property
+    def minimum_positions(self) -> np.ndarray | None:
+        r"""The :math:`C F_4^2` that criterion 2 compares :attr:`positions` against."""
+        if self.f4 is None:
+            return None
+        return self._criterion_2[1]
+
+    @property
+    def _criterion_2(self) -> tuple[np.ndarray | None, np.ndarray | None]:
+        f4 = np.asarray(self.f4, dtype=np.float64)
+        return _criterion_2(
+            f4,
+            self.positions,
+            self.frequencies,
+            cast("BandType", self.band_type),
+            cast("DeterminationGrade", self.grade),
+        )
+
+    @property
+    def achieved_grade(self) -> np.ndarray | None:
+        """The grade each band reaches over the gates of Figure B.1.
+
+        One of ``'precision'``, ``'engineering'`` and ``'none'`` per band, or
+        ``None`` where it cannot be established.
+        """
+        if self.f4 is None:
+            return None
+        return _per_band_grade(
+            self._applicable,
+            self.f1,
+            self.f2,
+            self.f3,
+            np.asarray(self.f4, dtype=np.float64),
+            self.pressure_residual_index_db,
+            self.positions,
+            self.frequencies,
+            cast("BandType", self.band_type),
+        )
+
+    @property
+    def confidence_interval(self) -> np.ndarray | None:
+        r"""The 95 % interval :math:`10 \lg (1 \pm 2 F_4 / \sqrt{N})` (equation (B.3)), per band."""
+        if self.f4 is None:
+            return None
+        return _confidence_interval(
+            np.asarray(self.f4, dtype=np.float64), self.positions
+        )
+
+    @property
+    def expanded_uncertainty(self) -> np.ndarray | None:
+        """Table 2 footnote 1's 2s per band, at the grade each band achieved."""
+        return _expanded_uncertainty(
+            self.achieved_grade, self.frequencies, cast("BandType", self.band_type)
+        )
+
+    @property
+    def a_weighting_omitted_bands(self) -> np.ndarray | None:
+        """The bands clause 10.5 b) keeps out of the A-weighted sum, or ``None``."""
+        return _a_weighting_omission(
+            self.criterion_1, self.criterion_2, self._applicable
+        )
+
+    @property
+    def sound_power_level_a(self) -> float:
+        """The A-weighted sound power level of the bands the sum keeps, in dB."""
+        level: float = self.__dict__["_a_weighted"][0]
+        return level
+
+    @property
+    def field_nonuniformity_a(self) -> float:
+        """The field non-uniformity of the A-weighted determination (B.1.2)."""
+        value: float = self.__dict__["_a_weighted"][1]
+        return value
+
+    @property
+    def achieved_grade_a(self) -> str | None:
+        """The grade the A-weighted determination reaches, or ``None``."""
+        grade: str | None = self.__dict__["_a_weighted"][2]
+        return grade
 
     def required_actions(self) -> tuple[tuple[ActionCode, ...], ...]:
         r"""The Table B.3 actions each band calls for, in Figure B.1's order.
@@ -1838,23 +1990,12 @@ def sound_power_intensity_points(
     residual = _checked_residual_index(pressure_residual_index, n_bands)
 
     partial_power = intensity * seg[:, None]  # Eq. (11)
-    sound_power = np.sum(partial_power, axis=0)  # the sum of Eq. (12)
-    # ``~(P > 0)`` and not ``P <= 0``: a NaN total answers every comparison
-    # False, so the second form would call an unusable band applicable. The
-    # sign is that of the net power as a settled share of the gross, so
-    # partial powers that cancel in decimal leave a band with no net power
-    # whichever way the last bits of the sum fall; a NaN share stays NaN.
+    # The sign is that of the net power as a settled share of the gross; see
+    # DiscretePointIntensityResult.not_applicable_band.
     applicable = settled_net_share(partial_power, axis=0) > 0.0
-    not_applicable = ~applicable
-    with np.errstate(divide="ignore", invalid="ignore"):
-        sound_power_level = np.where(
-            applicable,
-            10.0 * np.log10(np.maximum(sound_power, np.finfo(float).tiny) / _W0),
-            np.nan,
-        )
     surface_area = float(np.sum(seg))
 
-    if np.any(not_applicable):
+    if np.any(~applicable):
         warnings.warn(
             "The total sound power is not positive in one or more bands; ISO "
             "9614-1:1993 is not applicable to those bands (clause 9.2).",
@@ -1878,29 +2019,19 @@ def sound_power_intensity_points(
     f1 = _temporal_indicator(temporal_intensity, n_bands)
     f2, f3, f4 = _band_indicators(intensity, levels, conditions_met)
 
-    ld = None if residual is None else _dynamic_capability(residual, grade)
-    criterion_1 = None if ld is None or f2 is None else np.asarray(ld > f2, dtype=bool)
-    inward_ok = (
-        None
-        if f2 is None or f3 is None
-        else np.asarray((f3 - f2) <= _NEGATIVE_POWER_LIMIT, dtype=bool)
+    result = DiscretePointIntensityResult(
+        frequencies=freqs,
+        normal_intensity=np.asarray(intensity, dtype=np.float64),
+        segment_areas_m2=np.asarray(seg, dtype=np.float64),
+        f1=f1,
+        f2=f2,
+        f3=f3,
+        f4=f4,
+        pressure_residual_index_db=residual,
+        band_type=band_type,
+        grade=grade,
     )
-    criterion_2, minimum_positions = (
-        (None, None)
-        if f4 is None
-        else _criterion_2(f4, n_positions, freqs, band_type, grade)
-    )
-    achieved = (
-        None
-        if f4 is None
-        else _per_band_grade(
-            applicable, f1, f2, f3, f4, residual, n_positions, freqs, band_type
-        )
-    )
-    interval = None if f4 is None else _confidence_interval(f4, n_positions)
-
-    omitted = _a_weighting_omission(criterion_1, criterion_2, applicable)
-    if omitted is None and freqs is not None and n_bands > 1:
+    if result.a_weighting_omitted_bands is None and freqs is not None and n_bands > 1:
         warnings.warn(
             "The A-weighted total sums every applicable band without the ISO "
             "9614-1:1993 clause 10.5 b) screening (the bands failing criteria "
@@ -1910,43 +2041,4 @@ def sound_power_intensity_points(
             SoundPowerWarning,
             stacklevel=2,
         )
-    level_a, f4_a, grade_a = _a_weighted_determination(
-        intensity,
-        sound_power_level,
-        applicable,
-        omitted,
-        freqs,
-        band_type,
-        n_positions,
-        residual,
-        f1,
-        f2,
-        f3,
-    )
-
-    return DiscretePointIntensityResult(
-        frequencies=freqs,
-        partial_power=partial_power,
-        sound_power=np.asarray(sound_power, dtype=np.float64),
-        sound_power_level=np.asarray(sound_power_level, dtype=np.float64),
-        not_applicable_band=np.asarray(not_applicable, dtype=bool),
-        f1=f1,
-        f2=f2,
-        f3=f3,
-        f4=f4,
-        dynamic_capability_index=ld,
-        criterion_1=criterion_1,
-        negative_power_within_limit=inward_ok,
-        criterion_2=criterion_2,
-        minimum_positions=minimum_positions,
-        achieved_grade=achieved,
-        confidence_interval=interval,
-        expanded_uncertainty=_expanded_uncertainty(achieved, freqs, band_type),
-        surface_area=surface_area,
-        positions=int(n_positions),
-        sound_power_level_a=level_a,
-        a_weighting_omitted_bands=omitted,
-        field_nonuniformity_a=f4_a,
-        achieved_grade_a=grade_a,
-        grade=grade,
-    )
+    return result

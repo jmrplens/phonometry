@@ -1006,16 +1006,15 @@ indication of the upper limit of the sound power level.
 TurbineTestEnvironmentCheck(
     environmental_correction_db: float,
     ratio: float | None,
-    correction_ok: bool,
     wind_speed_m_s: float | None = None,
-    wind_ok: bool | None = None,
-    windscreen_advised: bool = False,
 )
 ```
 
 Whether the test environment qualifies for IEC 61063 (A.3.3, 4.3).
 
-Built by [`check_turbine_test_environment`](/phonometry/reference/api/power/turbine-noise/#check_turbine_test_environment).
+Built by [`check_turbine_test_environment`](/phonometry/reference/api/power/turbine-noise/#check_turbine_test_environment). The verdicts are read
+from the correction and the wind speed against the 7 dB, 6 m/s and
+1 m/s the standard prints, so they are not fields.
 
 **Attributes**
 
@@ -1023,10 +1022,13 @@ Built by [`check_turbine_test_environment`](/phonometry/reference/api/power/turb
 | :--- | :--- |
 | `environmental_correction_db` | $K$, in dB. |
 | `ratio` | $A/S$, when the correction came from the room absorption, else `None`. |
-| `correction_ok` | $K \le 7$ dB (A.3.3). |
 | `wind_speed_m_s` | The wind speed outdoors, in m/s, or `None`. |
-| `wind_ok` | The wind speed is below 6 m/s (4.3), or `None` indoors. |
-| `windscreen_advised` | The wind is above 1 m/s, where 4.3 asks for a windscreen. |
+
+### TurbineTestEnvironmentCheck.correction_ok
+
+*property*
+
+$K \le 7$ dB (A.3.3).
 
 ### TurbineTestEnvironmentCheck.passes
 
@@ -1056,3 +1058,15 @@ Draw Figure A.3 with the 7 dB limit and this environment on it.
 | `kwargs` | Forwarded to the curve of Figure A.3. |
 
 **Returns:** The axes.
+
+### TurbineTestEnvironmentCheck.wind_ok
+
+*property*
+
+The wind speed is below 6 m/s (4.3), or `None` indoors.
+
+### TurbineTestEnvironmentCheck.windscreen_advised
+
+*property*
+
+The wind is above 1 m/s, where 4.3 asks for a windscreen.

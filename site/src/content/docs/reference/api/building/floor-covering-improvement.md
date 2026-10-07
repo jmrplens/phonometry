@@ -115,9 +115,9 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 FloorCoveringImprovementResult(
     frequencies: np.ndarray,
     improvement: np.ndarray,
-    limited: np.ndarray,
     delta_lw: int | None,
     ci_delta: int | None = None,
+    background_margin_db: np.ndarray | None = None,
 )
 ```
 
@@ -129,9 +129,20 @@ Impact-sound improvement of a floor covering (ISO 16251-1).
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
 | `improvement` | Improvement of impact sound insulation `ΔL` per band, in dB. |
-| `limited` | Per-band boolean mask of bands at the 1.3 dB limit of measurement (reported as $> \Delta L$); all `False` when no background correction was applied. |
 | `delta_lw` | Weighted improvement `ΔLw` (ISO 717-2), in dB, or `None` when the spectrum does not contain the 16 one-third-octave rating bands 100-3150 Hz. A wider clause 6.3 spectrum (e.g. the 18 bands 100-5000 Hz, optionally extended down to 50 Hz) is rated on its 100-3150 Hz sub-range. |
 | `ci_delta` | Spectrum adaptation term `CI,Δ` (ISO 717-2:2020 Formula (A.4); required in the ISO 16251-1 Clause 8 e) statement of results), in dB, or `None` when `delta_lw` is `None`. |
+| `background_margin_db` | Per band, the smallest margin $L' - L_\mathrm{b}$ of a measured level over the background, over every position and both floors (Formula (2)), in dB; `None` when no background correction was applied. `limited` is read from it and the 6 dB of Formula (2), so it is not a field. |
+
+### FloorCoveringImprovementResult.limited
+
+*property*
+
+Per band, whether a position reached the 1.3 dB limit of measurement.
+
+`True` where the smallest margin over the background fell below the
+6 dB of Formula (2), so the band is reported as $> \Delta L$; all
+`False` when no background correction was applied. The margin is
+judged settled, as Formula (2) itself is.
 
 ### FloorCoveringImprovementResult.octave_bands()
 

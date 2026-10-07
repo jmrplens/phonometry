@@ -708,8 +708,8 @@ The standard warns this holds only for resonant-only transmission; measured
 VibrationReductionResult(
     frequencies: np.ndarray | None,
     k_ij: np.ndarray,
-    single_number: float | None,
-    bracketed: np.ndarray | None = None,
+    modal_overlap: np.ndarray | None = None,
+    band_type: str | None = None,
 )
 ```
 
@@ -723,6 +723,20 @@ Per-band vibration reduction index `Kij` (ISO 10848-1:2006).
 | `k_ij` | Vibration reduction index `Kij` per band, in dB (Formula (13) or the simplified Formula (14)). |
 | `single_number` | Arithmetic-mean single-number `K̄ij` over 200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave) per Annex A, in dB, or `None` when the frequencies do not cover the corresponding band set. Bands bracketed for poor modal overlap (ISO 10848-4:2010 Clause 9) are excluded from the mean. |
 | `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0,25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
+| `modal_overlap` | The modal overlap factor `M` per band the bands are bracketed by, or `None` when none was supplied. An octave band carries the smallest of its three one-third-octave bands, since it is bracketed when any of them is. |
+| `band_type` | `"third-octave"` or `"octave"`, the Annex A range the single number is averaged over; `None` reads it from the spacing of the frequencies. |
+
+`single_number` and `bracketed` are read from the fields, the
+0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
+fields.
+
+### VibrationReductionResult.bracketed
+
+*property*
+
+Per band, whether the modal overlap is below 0,25 (ISO 10848-4 Clause 9).
+
+`None` when no modal overlap was supplied.
 
 ### VibrationReductionResult.octave_bands()
 
@@ -806,3 +820,9 @@ excluded from the single number.
 | :--- | :--- |
 | ValueError | If `engine` is unknown or the result carries no band centre frequencies. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+
+### VibrationReductionResult.single_number
+
+*property*
+
+The Annex A mean `K̄ij` over the bands not bracketed, in dB, or `None`.

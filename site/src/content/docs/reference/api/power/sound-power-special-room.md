@@ -656,7 +656,8 @@ SpecialRoomSoundPowerResult(
     sound_power_level: np.ndarray,
     mean_pressure_level: np.ndarray,
     background_correction: np.ndarray,
-    background_requirement_met: np.ndarray,
+    background_margin_db: np.ndarray,
+    background_margin_ref_db: np.ndarray,
     mean_reference_level: np.ndarray,
     reference_power_level: np.ndarray,
     volume_m3: float,
@@ -669,7 +670,7 @@ SpecialRoomSoundPowerResult(
     sound_power_level_a: float,
     sound_power_level_a_direct: float,
     mean_a_weighted_level: float,
-    background_requirement_met_a: bool,
+    background_margin_a_db: float,
     method: str,
     microphone_positions: int,
     source_positions: int,
@@ -688,10 +689,14 @@ correction `c2`, which 10.2 and 10.3 require above 500 m.
 `mean_pressure_level` is the mean background-corrected level of the
 source under test, $\overline{L_p}$ (Formula 8) or
 $L_{p\mathrm{e}}$, and `background_correction` the per-band shift
-the Table 4 corrections made to it. `background_requirement_met` is
-`True` only where a background was measured and every margin, of the
-source and, for the comparison method, of the reference source, reached
-the 4 dB of 6.5 and 9.8. For the comparison method
+the Table 4 corrections made to it. `background_margin_db` is the
+smallest margin of the source over the background per band, and
+`background_margin_ref_db` that of the reference source (the
+comparison method only), `NaN` where nothing was measured.
+`background_requirement_met` is read from them and the 4 dB of 6.5 and
+9.8, so it is not a field: `True` only where a background was measured
+and every margin, of the source and, for the comparison method, of the
+reference source, reached it. For the comparison method
 `mean_reference_level` is $L_{p\mathrm{r}}$ and
 `reference_power_level` $L_{W\mathrm{r}}$; for the direct method
 both are `NaN` and `volume_m3` and `nominal_reverberation_time_s`
@@ -702,10 +707,29 @@ carry the room instead (`NaN` for the comparison method).
 A-weighted level `mean_a_weighted_level`, which is how clause 4 reads
 the A-weighted level of the direct method, both `NaN` where the
 A-weighted levels were not measured or the method is the comparison one;
-`background_requirement_met_a` is the 4 dB test of 6.5 on the
-A-weighted levels, `False` where there was nothing to test.
+`background_margin_a_db` is the smallest margin of the A-weighted
+levels over their background, `NaN` where there was nothing to test,
+and `background_requirement_met_a` the 4 dB test of 6.5 read from it.
 `sigma_r0` is Table 5 per band (`NaN` at 63 Hz) and `sigma_r0_a` its
 A-weighted row; the uncertainty properties follow Formulae (12) and (13).
+
+### SpecialRoomSoundPowerResult.background_requirement_met
+
+*property*
+
+Per band, whether every margin reached the 4 dB of 6.5 and 9.8.
+
+The source's margins and, for the comparison method, the reference
+source's too; `False` where no background was measured. The margins
+are judged settled, as Table 4 is read from them.
+
+### SpecialRoomSoundPowerResult.background_requirement_met_a
+
+*property*
+
+Whether every A-weighted margin reached the 4 dB of 6.5.
+
+`False` where there was nothing to test.
 
 ### SpecialRoomSoundPowerResult.expanded_uncertainty
 

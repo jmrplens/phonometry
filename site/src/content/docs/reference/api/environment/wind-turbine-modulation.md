@@ -294,7 +294,7 @@ highest mean.
 
 | Name | Description |
 | :--- | :--- |
-| `ratings_db` | The 10 min ratings, in dB, one row per period and one column per band of `bands` (see [`ModulationPeriod.rating_db`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationperiod)). |
+| `ratings_db` | The 10 min ratings, in dB, one row per period and one column per band of `bands` (see [`ModulationPeriod.rating_db`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationperiodrating_db)). |
 | `wind_speeds_m_s` | The reference wind speed of each period, in m/s. |
 | `wind_directions_deg` | The wind direction of each period, in degrees from north, or `None` to bin by wind speed alone. |
 | `bands` | The AM band numbers of the columns, as integers. |
@@ -385,12 +385,12 @@ ModulationBlock(
     power_spectrum: NDArray[np.float64],
     modulation_frequency_range_hz: tuple[float, float],
     *,
-    status: ModulationBlockStatus,
     fundamental_frequency_hz: float | None,
     prominence: float | None,
     harmonic_frequencies_hz: tuple[float, ...],
     reconstructed_db: NDArray[np.float64],
     modulation_depth_db: float | None,
+    excluded: bool = False,
 )
 ```
 
@@ -405,12 +405,15 @@ The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
 | `frequencies_hz` | The spectrum lines, 0.1 Hz to 4.9 Hz. |
 | `power_spectrum` | $S_{xx}$ of Equation (12) at those lines, from the positive frequencies (the half magnitude the TS allows). |
 | `modulation_frequency_range_hz` | The user's range of fundamental modulation frequencies, in Hz. |
-| `status` | [`ModulationBlockStatus`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblockstatus) of the block. |
 | `fundamental_frequency_hz` | The fundamental modulation frequency, the highest local maximum in the range, in Hz; `None` for `NO_PEAK`. |
 | `prominence` | The prominence ratio $p_\mathrm{AM}$ of Equation (13); `None` for `NO_PEAK`, infinite for a peak whose masking lines hold nothing above rounding. |
 | `harmonic_frequencies_hz` | The frequencies of the harmonics kept in the reconstruction, second before third; empty when none is. |
 | `reconstructed_db` | The reconstructed series, in dB about zero; empty for a prominence-failed block. |
 | `modulation_depth_db` | `L5 - L95` of the reconstructed series, in dB; `None` unless the block is valid. |
+| `excluded` | Whether the practitioner excluded the block by hand (13.6.2.2, third bullet). |
+
+`status` is read from the prominence, the threshold of 4 of
+13.6.2.3 e) and the exclusion, so it is not a field.
 
 ### ModulationBlock.included_frequencies_hz
 
@@ -449,6 +452,16 @@ of the reconstruction.
 
 **Returns:** The axes.
 
+### ModulationBlock.status
+
+*property*
+
+[`ModulationBlockStatus`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblockstatus-1) of the block (13.6.2.2 and 13.6.2.3).
+
+`EXCLUDED` when the practitioner excluded it, `NO_PEAK` without a
+local maximum in the range, `LOW_PROMINENCE` for a prominence under
+[`AM_PROMINENCE_THRESHOLD`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_prominence_threshold), `VALID` otherwise.
+
 ### ModulationBlock.valid
 
 *property*
@@ -475,33 +488,46 @@ third bullet).
 ## ModulationPeriod
 
 ```python
-ModulationPeriod(
-    blocks: tuple[ModulationBlock, ...],
-    modulation_depths_db: NDArray[np.float64],
-    fundamental_frequencies_hz: NDArray[np.float64],
-    *,
-    valid_blocks: int,
-    rated: bool,
-    rating_db: float,
-    mean_modulation_frequency_hz: float | None,
-    mode_modulation_frequency_hz: float | None,
-)
+ModulationPeriod(blocks: tuple[ModulationBlock, ...])
 ```
 
 The AM rating of one 10 min period (IEC TS 61400-11-2:2024, 13.6.3).
+
+Everything but the blocks is read from them, against the 30 valid blocks
+of 13.6.2.2 and the 90th percentile of 13.6.3, so a period cannot be
+built to rate blocks the TS does not count.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `blocks` | The sixty [`ModulationBlock`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblock) analyses, in time order. |
-| `modulation_depths_db` | The depth of each block, in dB; NaN where the block is not valid. |
-| `fundamental_frequencies_hz` | The fundamental of each valid block, in Hz; NaN elsewhere. |
-| `valid_blocks` | Number of valid blocks, the `n` number of 13.6.2.2. |
-| `rated` | Whether at least 30 blocks are valid (13.6.2.2). |
-| `rating_db` | The AM rating of the period, in dB: the 90th percentile of the valid depths when `rated`, else 0 dB (13.6.3). |
-| `mean_modulation_frequency_hz` | Mean fundamental of the valid blocks, in Hz; `None` when not `rated`. |
-| `mode_modulation_frequency_hz` | Most frequent fundamental of the valid blocks, in Hz, the lowest of equally frequent ones; `None` when not `rated`. |
+
+### ModulationPeriod.fundamental_frequencies_hz
+
+*property*
+
+The fundamental of each valid block, in Hz; NaN elsewhere.
+
+### ModulationPeriod.mean_modulation_frequency_hz
+
+*property*
+
+Mean fundamental of the valid blocks, in Hz; `None` when not `rated`.
+
+### ModulationPeriod.mode_modulation_frequency_hz
+
+*property*
+
+Most frequent fundamental of the valid blocks, in Hz.
+
+The lowest of equally frequent ones; `None` when not `rated`.
+
+### ModulationPeriod.modulation_depths_db
+
+*property*
+
+The depth of each block, in dB; NaN where the block is not valid.
 
 ### ModulationPeriod.plot()
 
@@ -525,3 +551,24 @@ Plot the 10 s depths through the period and the 10 min rating.
 | `kwargs` | Forwarded to the 10 s depths. |
 
 **Returns:** The axes.
+
+### ModulationPeriod.rated
+
+*property*
+
+Whether at least 30 blocks are valid (13.6.2.2).
+
+### ModulationPeriod.rating_db
+
+*property*
+
+The AM rating of the period, in dB.
+
+The 90th percentile of the valid depths when `rated`, else
+0 dB (13.6.3).
+
+### ModulationPeriod.valid_blocks
+
+*property*
+
+Number of valid blocks, the `n` number of 13.6.2.2.

@@ -156,8 +156,7 @@ exactly.
 
 ```python
 FilterComplianceResult(
-    overall_class: int | None,
-    bands: tuple[dict[str, Any], ...],
+    band_margins: tuple[Mapping[str, Any], ...],
     fraction: int,
     edition: str,
     sos: tuple[np.ndarray, ...],
@@ -166,7 +165,6 @@ FilterComplianceResult(
     fs: float,
     num_points: int,
     *,
-    range_limited: bool = False,
     points_per_bandwidth: int = 24,
 )
 ```
@@ -178,12 +176,15 @@ minimal filter-bank data needed to redraw the measured relative-attenuation
 curve, so the result exposes the standard `plot` / `report` pair without
 holding a reference to the (possibly stateful) bank.
 
+The classes and the range are read from the per-band margins and the
+edition's Table 1, so they are not fields: a verdict cannot be built to
+state a class its margins do not reach.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `overall_class` | The strictest class every band meets (0/1/2), or `None` when at least one band meets no class of the edition. |
-| `bands` | The per-band verdicts (one `{"freq", "class", "margin_class<c>_db", ...}` per band), as an immutable tuple. |
+| `band_margins` | What each band was measured to, without its class: one `{"freq", "checked_to_omega", "margin_class<c>_db", ...}` per band, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each band reaches. |
 | `fraction` | Bandwidth designator `b` (1 for octave, 3 for one-third-octave). |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2). |
 | `sos` | Per-band second-order sections of the analysed bank (one array per band), kept so the relative attenuation can be recomputed exactly as the verifier does. |
@@ -191,7 +192,6 @@ holding a reference to the (possibly stateful) bank.
 | `factors` | Per-band decimation factor; the band's processing sample rate is `fs / factor` (the multirate rate the SOS were designed at) and the factor fixes its anti-aliasing filter. Stored because the response is evaluated through both, which the verifier's public return does not otherwise expose. |
 | `fs` | The bank's full sampling rate in Hz. |
 | `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
-| `range_limited` | `True` when at least one band's outermost Table 1 breakpoint ($G^{4}$, carried to the bandwidth) lies beyond half the input sampling rate, so the verification could not exercise the full Table 1 mask there (no input of a digital bank has a frequency beyond it, but the limits are not demonstrated); the stated class then attests the verified frequency range and the `.report()` fiche prints a qualifying note. |
 | `points_per_bandwidth` | `S`, the test frequencies per bandwidth of IEC 61260-2:2016 Formula (1) (IEC 61260:1995 equation (15)) the effective bandwidth and the summation were evaluated on; in the 1995 edition, the S that 5.3.3 raised the one asked for to. |
 
 Every band entry carries, besides its Table 1 margins
@@ -228,6 +228,17 @@ carries no verdicts, so this returns an empty list.
 The first band answers for all of them: construction pins every band
 to the same margin classes.
 
+### FilterComplianceResult.bands
+
+*property*
+
+The per-band verdicts, each margin row with the class it reaches.
+
+One `{"freq", "class", "checked_to_omega", "margin_class<c>_db",
+...}` per band: the `class` is the strictest class of the edition
+the band meets on every requirement graded, or `None`. A fresh copy
+at every read.
+
 ### FilterComplianceResult.binding_margin_db()
 
 ```python
@@ -253,6 +264,17 @@ The smallest margin, in dB, of any band to one class on one requirement.
 | Exception | When |
 | :--- | :--- |
 | KeyError | for a requirement this verdict did not grade, or a class it carries no margins for. |
+
+### FilterComplianceResult.overall_class
+
+*property*
+
+The strictest class every band meets (0/1/2), or `None`.
+
+`None` when at least one band meets no class of the edition, and
+for a bank with no bands in range, so nothing is attested vacuously.
+The strictest class every band meets is the worst (largest) per-band
+class.
 
 ### FilterComplianceResult.plot()
 
@@ -292,6 +314,20 @@ every inner band between the limits of 5.16. Requires matplotlib
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a requirement this verdict did not grade. |
+
+### FilterComplianceResult.range_limited
+
+*property*
+
+Whether a band's Table 1 mask reaches beyond half the input rate.
+
+`True` when at least one band's outermost Table 1 breakpoint
+($G^{4}$, carried to the bandwidth) lies beyond half the input
+sampling rate, so the verification could not exercise the full
+Table 1 mask there (no input of a digital bank has a frequency beyond
+it, but the limits are not demonstrated); the stated class then
+attests the verified frequency range and the `.report()` fiche
+prints a qualifying note.
 
 ### FilterComplianceResult.reference_class()
 

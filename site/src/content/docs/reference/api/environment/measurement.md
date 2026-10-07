@@ -307,8 +307,6 @@ ResidualCorrectionResult(
     corrected_level: float,
     reportable_upper_bound: float,
     margin: float,
-    *,
-    reliable: bool,
 )
 ```
 
@@ -321,7 +319,16 @@ Residual-noise-corrected level (ISO 1996-2:2017 Clause 10.4).
 | `corrected_level` | The corrected level `L` (Formula (16)), in dB. When `reliable` is `False` the standard allows *no* correction; this value is then informative only (it estimates the source from below) and must not be reported as the result. |
 | `reportable_upper_bound` | The *measured* level `L'`, in dB. When the margin is 3 dB or less, §10.4 permits reporting the measured level as an upper bound of the specific sound level; this field carries that reportable value. |
 | `margin` | `L' − Lres`, in dB (measured minus residual). |
-| `reliable` | `True` when the residual is more than 3 dB below the measured level; `False` when no correction is allowed and only the uncorrected `L'` may be reported, as an upper bound. |
+
+### ResidualCorrectionResult.reliable
+
+*property*
+
+Whether the residual is more than 3 dB below the measured level.
+
+Read from `margin`, settled, against the 3 dB of §10.4;
+`False` when no correction is allowed and only the uncorrected
+`L'` may be reported, as an upper bound.
 
 ## tonal_adjustment
 

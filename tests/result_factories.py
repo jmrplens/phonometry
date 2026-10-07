@@ -1575,7 +1575,7 @@ def _room_with_one_invalid_band() -> ph.room.RoomAcousticsResult:
     """
     freq = np.array([250.0, 500.0, 1000.0])
     ones = np.ones(3)
-    valid = np.array([True, False, True])  # 500 Hz band invalid
+    # The 500 Hz band's 5 dB dynamic range leaves every decay time invalid.
     return ph.room.RoomAcousticsResult(
         frequencies=freq,
         edt=ones.copy(),
@@ -1586,9 +1586,6 @@ def _room_with_one_invalid_band() -> ph.room.RoomAcousticsResult:
         d50=np.zeros(3),
         ts=np.zeros(3),
         dynamic_range=np.array([60.0, 5.0, 60.0]),
-        edt_valid=valid.copy(),
-        t20_valid=valid.copy(),
-        t30_valid=valid.copy(),
         curvature=np.zeros(3),
     )
 

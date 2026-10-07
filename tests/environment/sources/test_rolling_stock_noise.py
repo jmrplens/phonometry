@@ -912,6 +912,37 @@ def test_a_track_inside_every_limit_passes() -> None:
     ]  # fmt: skip
 
 
+def _passing_track() -> ReferenceTrackCheck:
+    return check_reference_track(
+        [_limit_spectrum(-1.0), _limit_spectrum(-1.5)],
+        [_decay_at(1.1, "vertical"), _decay_at(1.1, "lateral")],
+        speed_kmh=160.0,
+        curve_radius_m=6000.0,
+        track_gradient_ratio=0.004,
+    )
+
+
+@pytest.mark.parametrize("field", ["conditions", "passes", "failed"])
+def test_a_track_check_cannot_state_its_conditions(field: str) -> None:
+    """A check built by hand reads its conditions from the track it holds."""
+    check = _passing_track()
+    with pytest.raises(TypeError, match=field):
+        dataclasses.replace(check, **{field: ()})
+
+
+def test_a_steeper_gradient_fails_the_same_track() -> None:
+    """6.2.2: 50:1 000 is ten times the 5:1 000 a powered unit is tested on."""
+    steep = dataclasses.replace(_passing_track(), track_gradient_ratio=0.05)
+    assert steep.passes is False
+    assert [c.clause for c in steep.failed] == ["6.2.2"]
+
+
+def test_a_tighter_curve_fails_the_same_track() -> None:
+    tight = dataclasses.replace(_passing_track(), curve_radius_m=100.0)
+    assert tight.passes is False
+    assert [c.requirement for c in tight.failed][0].startswith("curve radius")
+
+
 def test_the_roughness_limit_is_judged_in_every_band() -> None:
     """One band 0,5 dB over the limit fails 6.2.5 without Annex C."""
     roughness = _limit_spectrum(-1.0)

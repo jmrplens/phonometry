@@ -396,20 +396,24 @@ not change the result.
 CouplerCheck(
     coupler: str,
     length_to_diameter_ratio: float,
-    ratio_recommended: bool | None,
     broadband_margin: float | None,
     lowest_x: float | None,
-    approximation_valid: bool | None,
-    full_solution_advised: bool | None,
-    conditions_valid: bool | None,
     lowest_frequency_hz: float,
+    *,
+    heat_conduction_method: str,
+    temperature_c: float,
+    static_pressure_pa: float,
+    relative_humidity_percent: float,
+    in_air: bool,
 )
 ```
 
 Whether the formulas of IEC 61094-2:2009 apply to a coupler at the
 frequencies and conditions of a calibration.
 
-Built by [`check_coupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#check_coupler).
+Built by [`check_coupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#check_coupler). The verdicts are read from the figures
+and the conditions the check holds, against the ranges the standard
+prints, so they are not fields.
 
 **Attributes**
 
@@ -417,19 +421,50 @@ Built by [`check_coupler`](/phonometry/reference/api/metrology/reciprocity-coupl
 | :--- | :--- |
 | `coupler` | `"plane_wave"` or `"large_volume"`. |
 | `length_to_diameter_ratio` | $R$: for a plane-wave coupler the distance between the diaphragms, $l_0$, over the diameter (C.2, 5.4), for a large-volume one the length of the cavity over its diameter (A.2). |
-| `ratio_recommended` | For a plane-wave coupler, whether $R$ is within the 0,5 to 0,75 C.2 recommends; `None` for a large-volume one. Advisory: it does not enter `passes`. |
 | `broadband_margin` | For a plane-wave coupler, $\omega\rho a^2/(100\eta)$ at the lowest frequency, which A.3 requires above 1 for Formulas (A.3) and (A.4); `None` otherwise. |
 | `lowest_x` | For a large-volume coupler, $X$ at the lowest frequency; `None` otherwise. It binds only the approximation. |
-| `approximation_valid` | For a large-volume coupler computed with Formula (A.2), whether $0{,}125 < R < 8$ and $X > 5$, where A.2 states its accuracy; `None` with the full solution or for a plane-wave coupler. |
-| `full_solution_advised` | For a large-volume coupler computed with Formula (A.2), whether a frequency is below 20 Hz, where A.2 asks for the full solution "or the corresponding uncertainty component shall be increased accordingly"; `None` with the full solution or for a plane-wave coupler. Advisory: it does not enter `passes`, because the larger uncertainty is the caller's to state. |
-| `conditions_valid` | For air, whether the conditions are within the domain Annex F states for its equations; `None` for another gas. |
 | `lowest_frequency_hz` | The lowest frequency of the calibration, in Hz. |
+| `heat_conduction_method` | The method the calibration uses for $E_V$. |
+| `temperature_c` | The temperature, in °C. |
+| `static_pressure_pa` | The static pressure, in Pa. |
+| `relative_humidity_percent` | The relative humidity, in %. |
+| `in_air` | Whether the coupler is filled with air, the medium Annex F states its domain for, rather than another gas. |
+
+### CouplerCheck.approximation_valid
+
+*property*
+
+For a large-volume coupler computed with Formula (A.2), whether A.2 states its accuracy.
+
+$0{,}125 < R < 8$ and $X > 5$; `None` with the full
+solution or for a plane-wave coupler.
 
 ### CouplerCheck.broadband_valid
 
 *property*
 
 Whether Formulas (A.3) and (A.4) hold at every frequency.
+
+### CouplerCheck.conditions_valid
+
+*property*
+
+For air, whether the conditions are within the domain Annex F states for its equations.
+
+15 °C to 27 °C, 60 kPa to 110 kPa and 10 % to 90 %, ends included;
+`None` for another gas.
+
+### CouplerCheck.full_solution_advised
+
+*property*
+
+For a large-volume coupler computed with Formula (A.2), whether a frequency is below 20 Hz.
+
+A.2 then asks for the full solution "or the corresponding uncertainty
+component shall be increased accordingly"; `None` with the full
+solution or for a plane-wave coupler. Advisory: it does not enter
+`passes`, because the larger uncertainty is the caller's to
+state.
 
 ### CouplerCheck.passes
 
@@ -459,6 +494,15 @@ Plot each condition as its margin to the limit it is held to.
 | `kwargs` | Forwarded to `barh`. |
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+
+### CouplerCheck.ratio_recommended
+
+*property*
+
+For a plane-wave coupler, whether $R$ is within the 0,5 to 0,75 C.2 recommends.
+
+`None` for a large-volume one. Advisory: it does not enter
+`passes`.
 
 ## CouplerDimensions
 

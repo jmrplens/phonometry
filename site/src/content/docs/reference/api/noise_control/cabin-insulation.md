@@ -261,18 +261,13 @@ The measurement is outside a condition ISO 11957 states.
 ## CabinUncertainty
 
 ```python
-CabinUncertainty(
-    method: str,
-    volume_ratio: float,
-    ratio_satisfied: bool,
-    stateable: bool,
-    stated_band_range_hz: tuple[float, float] | None,
-    increased_uncertainty_band_range_hz: tuple[float, float] | None,
-    excess_standard_deviation_db: float | None,
-)
+CabinUncertainty(method: str, volume_ratio: float)
 ```
 
 What clause 10 will and will not say about a measurement.
+
+Everything but the method and the volume ratio is what clause 10 prints
+for that method and ratio, so it is read from them and is not a field.
 
 **Attributes**
 
@@ -280,11 +275,39 @@ What clause 10 will and will not say about a measurement.
 | :--- | :--- |
 | `method` | The method the statement is about. |
 | `volume_ratio` | $V_{\text{room}} / V_{\text{cabin}}$. |
-| `ratio_satisfied` | Whether that ratio reaches [`MIN_ROOM_TO_CABIN_VOLUME_RATIO`](/phonometry/reference/api/noise_control/cabin-insulation/#min_room_to_cabin_volume_ratio). |
-| `stateable` | Whether clause 10 offers any figure at all. It does not for the actual-noise method, which it sends to ISO 4871 instead. |
-| `stated_band_range_hz` | The range the statement covers, in hertz, or `None` when nothing is stateable. |
-| `increased_uncertainty_band_range_hz` | The range where a larger uncertainty is expected, in hertz, or `None`. |
-| `excess_standard_deviation_db` | What this method adds to the standard deviation of the laboratory one, in decibels, or `None`. |
+
+### CabinUncertainty.excess_standard_deviation_db
+
+*property*
+
+What this method adds to the standard deviation of the laboratory one, in decibels, or `None`.
+
+### CabinUncertainty.increased_uncertainty_band_range_hz
+
+*property*
+
+The range where a larger uncertainty is expected, in hertz, or `None`.
+
+### CabinUncertainty.ratio_satisfied
+
+*property*
+
+Whether the volume ratio reaches [`MIN_ROOM_TO_CABIN_VOLUME_RATIO`](/phonometry/reference/api/noise_control/cabin-insulation/#min_room_to_cabin_volume_ratio), judged settled.
+
+### CabinUncertainty.stateable
+
+*property*
+
+Whether clause 10 offers any figure at all.
+
+It does not for the actual-noise method, which it sends to ISO 4871
+instead.
+
+### CabinUncertainty.stated_band_range_hz
+
+*property*
+
+The range the statement covers, in hertz, or `None` when nothing is stateable.
 
 ## check_band_flatness
 

@@ -850,17 +850,13 @@ def _earphone_name(
 class AscendingThresholdResult(OwnsArrays):
     """The hearing threshold level by the ascending method (6.2.4.2).
 
+    The threshold and the state of the series are read from the ascents by
+    the stopping rule of 6.2.3.2, so they are not fields: a result cannot
+    state a threshold its ascents do not reach.
+
     :ivar ascent_levels_db: The level at which each ascent ended in a
         response, in presentation order, in dB.
-    :ivar threshold_db: The hearing threshold level, in dB: the lowest level
-        at which responses occur in more than half of the ascents, once the
-        stopping rule of 6.2.3.2 is met; NaN until then.
-    :ivar determined: Whether the stopping rule is met: three responses at
-        one level (two in the shortened version).
     :ivar shortened: Whether the shortened version was applied.
-    :ivar series_exhausted: Whether the series used up its ascents (five, or
-        three shortened) without a threshold. The full method then starts a
-        new series 10 dB above the last response.
     :ivar next_level_db: The level to present next, in dB, when the
         presentations were given and no threshold is determined yet; NaN
         otherwise.
@@ -870,13 +866,41 @@ class AscendingThresholdResult(OwnsArrays):
     """
 
     ascent_levels_db: np.ndarray
-    threshold_db: float
-    determined: bool
     shortened: bool
-    series_exhausted: bool
     next_level_db: float
     presentation_levels_db: np.ndarray | None = None
     responses: np.ndarray | None = None
+
+    def _rule(self) -> tuple[float, bool, bool]:
+        return _ascending_rule(
+            [float(level) for level in self.ascent_levels_db], shortened=self.shortened
+        )
+
+    @property
+    def threshold_db(self) -> float:
+        """The hearing threshold level, in dB.
+
+        The lowest level at which responses occur in more than half of the
+        ascents, once the stopping rule of 6.2.3.2 is met; NaN until then.
+        """
+        return self._rule()[0]
+
+    @property
+    def determined(self) -> bool:
+        """Whether the stopping rule is met.
+
+        Three responses at one level (two in the shortened version).
+        """
+        return self._rule()[1]
+
+    @property
+    def series_exhausted(self) -> bool:
+        """Whether the series used up its ascents without a threshold.
+
+        Five ascents, or three shortened. The full method then starts a new
+        series 10 dB above the last response.
+        """
+        return self._rule()[2]
 
     @property
     def span_db(self) -> float:
@@ -1146,11 +1170,8 @@ def _threshold_from_ascents(
         )
         raise ValueError(msg)
     ascents = [float(level) for level in levels]
-    threshold, determined, exhausted = math.nan, False, False
     for count in range(1, len(ascents) + 1):
-        threshold, determined, exhausted = _ascending_rule(
-            ascents[:count], shortened=shortened
-        )
+        _, determined, _ = _ascending_rule(ascents[:count], shortened=shortened)
         if determined and count < len(ascents):
             msg = (
                 f"the series ended at ascent {count}; the ascents after it "
@@ -1159,10 +1180,7 @@ def _threshold_from_ascents(
             raise ValueError(msg)
     return AscendingThresholdResult(
         ascent_levels_db=np.asarray(ascents, dtype=np.float64),
-        threshold_db=threshold,
-        determined=determined,
         shortened=shortened,
-        series_exhausted=exhausted,
         next_level_db=math.nan,
     )
 
@@ -1191,7 +1209,7 @@ def _threshold_from_sequence(
             "boolean per presentation."
         )
         raise ValueError(msg)
-    ascents, threshold, determined, exhausted, next_level = _replay_ascending(
+    ascents, _, _, _, next_level = _replay_ascending(
         levels,
         heard,
         shortened=shortened,
@@ -1199,10 +1217,7 @@ def _threshold_from_sequence(
     )
     return AscendingThresholdResult(
         ascent_levels_db=np.asarray(ascents, dtype=np.float64),
-        threshold_db=threshold,
-        determined=determined,
         shortened=shortened,
-        series_exhausted=exhausted,
         next_level_db=next_level,
         presentation_levels_db=levels,
         responses=heard,

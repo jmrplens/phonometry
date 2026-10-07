@@ -478,6 +478,17 @@ def test_the_loudspeaker_method_in_situ_adds_two_decibels() -> None:
     )
 
 
+def test_a_statement_for_a_method_clause_10_does_not_name_is_refused() -> None:
+    """The statement is read from the method, so a stranger to clause 10 is refused."""
+    import dataclasses
+
+    verdict = noise_control.uncertainty_conditions(
+        room_volume_m3=300.0, cabin_volume_m3=12.0
+    )
+    with pytest.raises(ValueError, match="'method' must be one of"):
+        dataclasses.replace(verdict, method="in-situ")
+
+
 def test_the_actual_noise_method_states_nothing() -> None:
     verdict = noise_control.uncertainty_conditions(
         room_volume_m3=300.0,

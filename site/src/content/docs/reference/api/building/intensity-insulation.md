@@ -700,7 +700,6 @@ energy-averaged. Sub-areas scanned separately are combined first with
 LowFrequencyElementResult(
     d_i_n_e: np.ndarray,
     surface_pressure_intensity_indicator: np.ndarray | None,
-    qualified: np.ndarray | None,
     frequencies: np.ndarray | None,
     measurement_area: float,
     elements: int,
@@ -722,7 +721,6 @@ and ISO 717-1 needs sixteen.
 | :--- | :--- |
 | `d_i_n_e` | Intensity element normalized level difference $D_{I\mathrm{n,e}} = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} - 10\lg(A_0/S_\mathrm{m}) - 10\lg N]$ per band, in dB. |
 | `surface_pressure_intensity_indicator` | Surface-pressure intensity indicator $F_{pI}$ per band, in dB (Formula (5)), or `None` where the receiving-side pressure level was not measured alongside the intensity. |
-| `qualified` | The Clause 6.4.2 verdict per band, or `None` throughout when the indicator itself is `None`. |
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. |
 | `measurement_area` | Measurement-surface area `Sm`, in m². |
 | `elements` | Number `N` of element units installed within the measurement surface. |
@@ -759,13 +757,20 @@ Draw `DI,n,e` per band, hatching any band Clause 6.4.2 refuses.
 
 **Returns:** The axes.
 
+### LowFrequencyElementResult.qualified
+
+*property*
+
+The Clause 6.4.2 verdict per band, read from the indicator, or `None`.
+
+`None` throughout when the indicator itself is `None`.
+
 ## LowFrequencyIntensityResult
 
 ```python
 LowFrequencyIntensityResult(
     r_i: np.ndarray,
     surface_pressure_intensity_indicator: np.ndarray | None,
-    qualified: np.ndarray | None,
     frequencies: np.ndarray | None,
     area: float,
     measurement_area: float,
@@ -787,7 +792,6 @@ specimen, where part 1 subtracts 6 dB from a room average.
 | :--- | :--- |
 | `r_i` | Intensity sound reduction index $R_I = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} + 10\lg(S_\mathrm{m}/S)]$ per band, in dB. |
 | `surface_pressure_intensity_indicator` | Surface-pressure intensity indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ per band, in dB (Formula (5)), which Clause 7 requires to be reported beside the index, or `None` where the receiving-side pressure level was not measured alongside the intensity. Clause 6.4.2 only asks for that measurement "if possible". |
-| `qualified` | `True` in each band whose `FpI` is within the limit Clause 6.4.2 sets, `False` where the measurement surface is not qualified and the index is not a result the standard admits, and `None` throughout when the indicator itself is `None`. |
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. |
 | `area` | Test-object area `S`, in m². |
 | `measurement_area` | Measurement-surface area `Sm`, in m². |
@@ -826,6 +830,17 @@ Draw the index per band, hatching any band Clause 6.4.2 refuses.
 | `kwargs` | Forwarded to the band bar. |
 
 **Returns:** The axes.
+
+### LowFrequencyIntensityResult.qualified
+
+*property*
+
+The Clause 6.4.2 verdict per band, read from the indicator.
+
+`True` in each band whose `FpI` is within `indicator_limit`,
+`False` where the measurement surface is not qualified and the index
+is not a result the standard admits, and `None` throughout when the
+indicator itself is `None`.
 
 ## surface_pressure_intensity_indicator
 

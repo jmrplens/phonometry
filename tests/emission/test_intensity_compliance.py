@@ -453,8 +453,8 @@ def test_result_phase_mismatch_matches_the_standalone_conversion() -> None:
 # --------------------------------------------------------------------------
 # Per-band entries that do not agree
 # --------------------------------------------------------------------------
-def test_an_instrument_verdict_refuses_per_band_entries_that_disagree() -> None:
-    """The fiche prints one row per band under the instrument's overall class."""
+def test_an_instrument_verdict_refuses_spectra_that_disagree() -> None:
+    """The fiche prints one row per band, read from the two spectra together."""
     import dataclasses
 
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
@@ -464,8 +464,8 @@ def test_an_instrument_verdict_refuses_per_band_entries_that_disagree() -> None:
         device="instrument",
         spacing=0.025,
     )
-    with pytest.raises(ValueError, match=r"'bands' \(3\)"):
-        dataclasses.replace(result, bands=result.bands[:-1])
+    with pytest.raises(ValueError, match="residual_index"):
+        dataclasses.replace(result, residual_index=result.residual_index[:-1])
 
 
 def test_a_verdict_whose_device_is_not_a_table_2_column_is_refused() -> None:
@@ -512,68 +512,35 @@ def test_a_non_finite_band_of_the_verdict_is_refused(field_name: str) -> None:
         dataclasses.replace(result, **{field_name: values})
 
 
-def test_a_non_finite_per_band_verdict_value_is_refused() -> None:
-    """The certificate's table and its boxed verdict read different keys.
+@pytest.mark.parametrize("name", ["bands", "overall_class", "range_limited"])
+def test_the_rows_the_class_and_the_range_are_not_fields(name: str) -> None:
+    """The box and the table are one statement, read from the measured index.
 
-    The per-band rows print ``residual_index_db`` and the margin taken from
-    it, while the box reads ``margin_class<n>_db``; a NaN in one of them gave
-    an accredited verification certificate reading ``nan`` and ``+nan`` in the
-    results table while still declaring ``Class 1 - COMPLIES``. Every one of
-    these numbers descends from a spectrum the verifier validated finite.
+    The certificate prints the per-band classes in its table and the class of
+    the whole instrument in its box. Both used to be fields, checked against
+    each other when the verdict was built; they are read from the spectrum
+    now, so a verdict cannot carry a row, a class or a range its index does
+    not give.
     """
-    import copy
     import dataclasses
 
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
     result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0),
-        frequencies,
-        device="instrument",
-        spacing=0.025,
+        np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
     )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    bands[0]["residual_index_db"] = float("nan")
-    with pytest.raises(ValueError, match=r"'bands' must carry finite per-band"):
-        dataclasses.replace(result, bands=bands)
+    fields = {field.name for field in dataclasses.fields(result)}
+    assert fields == {"frequencies", "residual_index", "device", "spacing"}
+    stated = {name: getattr(result, name)}
+    with pytest.raises(TypeError, match=name):
+        dataclasses.replace(result, **stated)
 
 
-def test_a_verdict_refuses_a_class_its_own_bands_do_not_derive() -> None:
-    """The box and the table are one statement, and the box is not measured.
-
-    The certificate prints the per-band classes in its table and the class of
-    the whole instrument in its box, so a summary that does not restate the
-    rows is the sheet contradicting itself. Built by hand it did: an
-    instrument with one band meeting no class at all, whose honest summary is
-    therefore ``None``, was accepted claiming class 1 and printed ``Class 1 -
-    COMPLIES (binding margin -6.81 dB)``, a negative binding margin beside the
-    word COMPLIES.
-
-    The producer cannot emit the pair: it derives the summary from the band
-    classes in one line. Only a result assembled by hand can hold it, which is
-    why the guard is at construction.
-    """
-    import dataclasses
-
-    frequencies = np.array([100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0])
-    measured = np.full(frequencies.size, 18.0)
-    measured[4] = 9.0  # this band meets neither class
-    result = emission.verify_intensity_class(
-        measured, frequencies, device="instrument", spacing=0.012
-    )
-    assert result.overall_class is None
-    with pytest.raises(
-        ValueError, match=r"'overall_class' must be the class the bands derive"
-    ):
-        dataclasses.replace(result, overall_class=1)
-
-
-def test_a_verdict_refuses_a_class_attested_over_no_bands() -> None:
+def test_a_verdict_over_no_bands_is_refused() -> None:
     """A class over nothing is not a verdict, and the readers cannot hold it.
 
-    An instrument stripped of its bands kept its class, so the certificate
-    would have boxed a compliance class with an empty results table under it;
-    :meth:`binding_margin` gave the anonymous "min() iterable argument is
-    empty" instead, naming neither the field nor the result.
+    An instrument stripped of its bands would box a compliance class with an
+    empty results table under it, and :meth:`binding_margin` would give the
+    anonymous "min() iterable argument is empty".
     """
     import dataclasses
 
@@ -582,56 +549,8 @@ def test_a_verdict_refuses_a_class_attested_over_no_bands() -> None:
         np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
     )
     empty = np.array([])
-    with pytest.raises(ValueError, match=r"'overall_class' is 1 but 'bands' is empty"):
-        dataclasses.replace(
-            result,
-            bands=(),
-            frequencies=empty,
-            residual_index=empty,
-        )
-
-
-def test_a_verdict_refuses_a_class_that_is_no_designation() -> None:
-    """A class is a label the readers splice into a key, not a number.
-
-    ``1.0`` reads as class 1 to every comparison and builds
-    ``margin_class1.0_db``, a key no band carries, so it reached the boxed
-    statement as a bare ``KeyError`` naming neither the field nor the result.
-    """
-    import dataclasses
-
-    frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
-    result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
-    )
-    with pytest.raises(
-        ValueError, match=r"'overall_class' must be a class of \[1, 2\] or None"
-    ):
-        dataclasses.replace(result, overall_class=1.0)
-
-
-def test_a_narrow_numpy_nan_per_band_value_is_refused() -> None:
-    """A NaN margin held as ``np.float32`` is a NaN the boxed verdict misses.
-
-    ``np.float64`` subclasses ``float`` and ``np.float32`` does not, so a
-    single-precision NaN margin used to reach :meth:`binding_margin`, where
-    :func:`min` compares it away against whichever value it meets first and
-    returns a finite binding margin for a band that has none.
-    """
-    import copy
-    import dataclasses
-
-    frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
-    result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0),
-        frequencies,
-        device="instrument",
-        spacing=0.025,
-    )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    bands[1]["margin_class1_db"] = np.float32("nan")
-    with pytest.raises(ValueError, match=r"'bands' must carry finite per-band"):
-        dataclasses.replace(result, bands=bands)
+    with pytest.raises(ValueError, match="At least one measurement band"):
+        dataclasses.replace(result, frequencies=empty, residual_index=empty)
 
 
 def test_the_table_2_masks_are_read_from_the_device_and_separation() -> None:
@@ -653,21 +572,6 @@ def test_the_table_2_masks_are_read_from_the_device_and_separation() -> None:
     assert result.spacing_offset_db == pytest.approx(offset)
 
 
-def test_a_band_row_against_another_minimum_is_refused() -> None:
-    """A row that carries a looser mask than Table 2 is not this verdict."""
-    import copy
-    import dataclasses
-
-    frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
-    result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
-    )
-    bands = tuple(copy.deepcopy(band) for band in result.bands)
-    bands[2]["limit_class1_db"] -= 3.0
-    with pytest.raises(ValueError, match=r"'bands' must restate IEC 61043 Table 2"):
-        dataclasses.replace(result, bands=bands)
-
-
 def _quiet_processor() -> emission.IntensityInstrumentComplianceResult:
     """A processor whose 3 dB index meets neither class at 25 mm."""
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
@@ -676,37 +580,20 @@ def _quiet_processor() -> emission.IntensityInstrumentComplianceResult:
     )
 
 
-def test_a_band_class_its_index_does_not_reach_is_refused() -> None:
-    """A 3 dB index cannot be relabelled class 1 against a 26 dB minimum."""
-    import copy
+def test_a_band_class_is_the_one_its_index_reaches() -> None:
+    """A 3 dB index reaches no class against a 26 dB minimum, and 40 dB reaches class 1.
+
+    The rows, their margins and the class are read from the measured index,
+    so changing the index is the only way to change the class.
+    """
     import dataclasses
 
     result = _quiet_processor()
     assert result.overall_class is None
-    relabel = {"class": 1, "margin_class1_db": 5.0, "margin_class2_db": 11.0}
-    bands = tuple({**copy.deepcopy(band), **relabel} for band in result.bands)
-    with pytest.raises(ValueError, match=r"'bands' must restate IEC 61043 Table 2"):
-        dataclasses.replace(result, bands=bands, overall_class=1)
-
-
-def test_a_band_class_alone_relabelled_is_refused() -> None:
-    """The margins may stay true; the class has to be the one they give."""
-    import copy
-    import dataclasses
-
-    result = _quiet_processor()
-    bands = tuple({**copy.deepcopy(band), "class": 1} for band in result.bands)
-    with pytest.raises(
-        ValueError, match=r"'bands' must carry the class its margins give"
-    ):
-        dataclasses.replace(result, bands=bands, overall_class=1)
-
-
-def test_a_residual_index_the_rows_do_not_carry_is_refused() -> None:
-    """The measured spectrum and the band rows have to be the same readings."""
-    import dataclasses
-
-    result = _quiet_processor()
-    raised = np.full(result.frequencies.size, 40.0)
-    with pytest.raises(ValueError, match=r"residual_index_db=3\.0, expected 40\.0"):
-        dataclasses.replace(result, residual_index=raised)
+    assert {band["class"] for band in result.bands} == {None}
+    raised = dataclasses.replace(
+        result, residual_index=np.full(result.frequencies.size, 40.0)
+    )
+    assert raised.overall_class == 1
+    assert [band["residual_index_db"] for band in raised.bands] == [40.0] * 4
+    assert raised.binding_margin(1) == pytest.approx(14.0)

@@ -116,16 +116,16 @@ CEILING_UNCERTAINTY = {125.0: 0.23, 250.0: 0.23, 500.0: 0.11, 1000.0: 0.1, 2000.
 ```python
 CeilingSpecimenCheck(
     area_m2: float,
-    area_error_m2: float,
     mounting: str,
     depth_mm: float | None,
-    deflection_ok: bool,
-    substructure_ok: bool,
-    fixture_ok: bool,
-    supports_ok: bool,
-    humidity_ok: bool | None,
-    ce_marking_depth: bool,
-    satisfied: bool,
+    deflection_mm: float,
+    substructure_width_mm: float,
+    substructure_height_mm: float,
+    fixture_density_kg_m2: float,
+    support_width_mm: float,
+    support_height_mm: float,
+    support_centre_distance_m: float | None,
+    lowest_relative_humidity_percent: float | None,
 )
 ```
 
@@ -141,21 +141,98 @@ since 4.1.1.1.1 asks for an area "as close to 10,80 m2 as possible", and the
 CE marking depth, since 4.1.1.2.3.1 recommends 200 mm and requires it only
 of the data CE marking is compiled from.
 
-**Parameters**
+The verdicts are read from the measured figures the check holds and the
+limits clause 4 prints, so they are not fields: a check cannot be built to
+pass an arrangement the clause fails.
+
+**Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `area_m2` | The specimen area as built, in square metres. |
-| `area_error_m2` | How far it sits from the 10,80 m2 the code aims at, reported and not judged. |
 | `mounting` | The mounting letter the arrangement uses. |
 | `depth_mm` | The overall depth of construction, in millimetres, for a type E mounting, or `None` for the others. |
-| `deflection_ok` | Whether the deflection stays inside 5 mm. |
-| `substructure_ok` | Whether the profile stays inside 30 mm by 50 mm. |
-| `fixture_ok` | Whether the mounting fixture is heavy enough. |
-| `supports_ok` | Whether the support units stay inside 50 mm by 50 mm in cross-section and, when their centre distance was given, stand at least 1,2 m apart. |
-| `humidity_ok` | Whether every measurement was made at 50 % relative humidity or more, or `None` when no humidity was given. |
-| `ce_marking_depth` | Whether the depth is the 200 mm the CE marking data rests on, reported and not judged. |
-| `satisfied` | Whether every judged limit holds: the fixture, the substructure, the deflection, the supports and, when it was given, the humidity. |
+| `deflection_mm` | The largest deflection of the specimen, in millimetres. |
+| `substructure_width_mm` | The substructure profile width, in millimetres. |
+| `substructure_height_mm` | Its height, in millimetres. |
+| `fixture_density_kg_m2` | The surface density of the mounting fixture, in kilograms per square metre. |
+| `support_width_mm` | One side of the cross-section of the support units, in millimetres. |
+| `support_height_mm` | The other side, in millimetres. |
+| `support_centre_distance_m` | The centre distance between support units, in metres, or `None`. |
+| `lowest_relative_humidity_percent` | The driest of the measurements, in percent, or `None` when no humidity was given. |
+
+### CeilingSpecimenCheck.area_error_m2
+
+*property*
+
+How far the area sits from the 10,80 m2 the code aims at, reported and not judged.
+
+### CeilingSpecimenCheck.ce_marking_depth
+
+*property*
+
+Whether the depth is the 200 mm the CE marking data rests on, reported and not judged.
+
+4.1.1.2.3.1 fixes the depth for the type E mounting alone, so a type A
+specimen laid against a hard surface cannot reach it by being 200 mm
+thick.
+
+### CeilingSpecimenCheck.deflection_ok
+
+*property*
+
+Whether the deflection stays inside 5 mm (4.1.1.2.3.5).
+
+### CeilingSpecimenCheck.fixture_ok
+
+*property*
+
+Whether the mounting fixture is heavy enough (4.1.1.1.6).
+
+### CeilingSpecimenCheck.humidity_ok
+
+*property*
+
+Whether every measurement was made at 50 % relative humidity or more (4.2.2).
+
+`None` when no humidity was given.
+
+### CeilingSpecimenCheck.satisfied
+
+*property*
+
+Whether every judged limit holds.
+
+The fixture, the substructure, the deflection, the supports and, when
+it was given, the humidity: a humidity that was not given is not
+judged, so only a measured humidity under the floor fails the
+arrangement.
+
+### CeilingSpecimenCheck.substructure_ok
+
+*property*
+
+Whether the profile stays inside 30 mm by 50 mm (4.1.1.2.3.4).
+
+### CeilingSpecimenCheck.support_section_ok
+
+*property*
+
+Whether the support units stay inside 50 mm by 50 mm in cross-section (4.1.1.2.3.6).
+
+### CeilingSpecimenCheck.support_spacing_ok
+
+*property*
+
+Whether the support units stand at least 1,2 m apart, when the distance was given (4.1.1.2.3.6).
+
+### CeilingSpecimenCheck.supports_ok
+
+*property*
+
+Whether the support units stay inside 50 mm by 50 mm and stand 1,2 m apart.
+
+The centre distance is judged only when it was given (4.1.1.2.3.6).
 
 ## check_ceiling_specimen
 

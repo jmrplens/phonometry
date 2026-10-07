@@ -174,8 +174,8 @@ def test_decision_matches_displayed_audibility_at_boundary(tmp_path: Path) -> No
     """
     import dataclasses
 
-    result = dataclasses.replace(_result(), tonal_audibility=0.03, is_audible=True)
-    assert result.is_audible is True  # raw flag is audible
+    result = dataclasses.replace(_result(), tonal_audibility=0.03)
+    assert result.is_audible is True  # the raw value is audible
     out = tmp_path / "boundary.pdf"
     result.report(str(out))
     assert_one_page(str(out))

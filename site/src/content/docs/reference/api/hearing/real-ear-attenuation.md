@@ -148,9 +148,6 @@ B.2).
 
 ```python
 AttenuationDifferenceResult(
-    difference_db: np.ndarray,
-    criterion_db: np.ndarray,
-    significant: np.ndarray,
     first_mean_db: np.ndarray,
     second_mean_db: np.ndarray,
     first_expanded_uncertainty_db: np.ndarray,
@@ -161,13 +158,14 @@ AttenuationDifferenceResult(
 
 Whether two mean attenuations differ significantly, band by band (B.1.2).
 
+The difference, the criterion and the verdict are read from the two means
+and their uncertainties, so they are not fields: a comparison cannot be
+built to call significant a difference its uncertainties cover.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `difference_db` | $\vert m_1 - m_2\vert $ per band, in dB. |
-| `criterion_db` | $\sqrt{U_{95,1}^2 + U_{95,2}^2}$ per band, in dB. A difference larger than this is significant at the 5 % level. |
-| `significant` | Whether each band's difference exceeds its criterion. |
 | `first_mean_db` | $m_1$ per band, in dB. |
 | `second_mean_db` | $m_2$ per band, in dB. |
 | `first_expanded_uncertainty_db` | $U_{95,1}$ per band, in dB. |
@@ -181,6 +179,20 @@ Whether two mean attenuations differ significantly, band by band (B.1.2).
 Whether the two measurements differ significantly in any band.
 
 **Returns:** `True` when at least one band's difference exceeds its criterion.
+
+### AttenuationDifferenceResult.criterion_db
+
+*property*
+
+$\sqrt{U_{95,1}^2 + U_{95,2}^2}$ per band, in dB.
+
+A difference larger than this is significant at the 5 % level.
+
+### AttenuationDifferenceResult.difference_db
+
+*property*
+
+$|m_1 - m_2|$ per band, in dB.
 
 ### AttenuationDifferenceResult.plot()
 
@@ -204,6 +216,12 @@ Draw each band's difference against the criterion it has to beat.
 | `kwargs` | Forwarded to the difference bars. |
 
 **Returns:** The axes.
+
+### AttenuationDifferenceResult.significant
+
+*property*
+
+Whether each band's difference exceeds its criterion, judged settled.
 
 ### AttenuationDifferenceResult.significant_frequencies
 

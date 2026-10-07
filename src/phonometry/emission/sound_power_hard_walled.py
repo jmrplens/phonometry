@@ -265,6 +265,15 @@ def _k1_eq13(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
 
 
+def _margin_met(margin: np.ndarray) -> np.ndarray:
+    """Where a margin over the background reached the 6 dB of 4.5, judged settled.
+
+    A band with no background measured carries a ``NaN`` margin and is not met.
+    """
+    with np.errstate(invalid="ignore"):
+        return np.asarray(settled(margin) >= _K1_VALID_DB, dtype=bool)
+
+
 def _table3_sigma(frequencies: np.ndarray) -> np.ndarray:
     """Table 3 per band; ``NaN`` at 63 Hz, which the table does not reach."""
     return np.array(
@@ -311,15 +320,19 @@ class HardWalledSoundPowerResult(OwnsArrays):
     background was measured, and ``reference_power_level`` the calibrated
     :math:`L_{W(\mathrm{RSS})}`. ``background_correction`` and
     ``background_correction_ref`` are :math:`K_1` and
-    :math:`K_{1(\mathrm{RSS})}` per band, and ``background_requirement_met``
-    is ``True`` only where a background was measured and both margins reached
-    the 6 dB of 4.5. ``upper_bound`` marks the bands that 8.1.3 calls upper
-    bounds: the margin of the source under test was measured and fell below
-    6 dB while the reference source's margin met it, so the capped
-    :math:`K_1` leaves the level too high. A band where the reference source's
-    margin falls short is not one: the capped :math:`K_{1(\mathrm{RSS})}`
-    pulls the level down, so it is flagged by ``background_requirement_met``
-    alone, and so is every band when no background was measured.
+    :math:`K_{1(\mathrm{RSS})}` per band, and ``background_margin_db`` and
+    ``background_margin_ref_db`` the two margins over the background they
+    were read from (``NaN`` where no background was measured).
+    ``background_requirement_met`` and ``upper_bound`` are read from those
+    margins and the 6 dB of 4.5, so they are not fields: the first is
+    ``True`` only where both margins reached it, and the second marks the
+    bands that 8.1.3 calls upper bounds, where the margin of the source under
+    test was measured and fell below 6 dB while the reference source's margin
+    met it, so the capped :math:`K_1` leaves the level too high. A band where
+    the reference source's margin falls short is not one: the capped
+    :math:`K_{1(\mathrm{RSS})}` pulls the level down, so it is flagged by
+    ``background_requirement_met`` alone, and so is every band when no
+    background was measured.
 
     ``sigma_r0`` is the Table 3 value per band (``NaN`` at 63 Hz, which the
     table does not reach) and ``sigma_r0_a`` its A-weighted row; with
@@ -340,8 +353,8 @@ class HardWalledSoundPowerResult(OwnsArrays):
     reference_power_level: np.ndarray
     background_correction: np.ndarray
     background_correction_ref: np.ndarray
-    background_requirement_met: np.ndarray
-    upper_bound: np.ndarray
+    background_margin_db: np.ndarray
+    background_margin_ref_db: np.ndarray
     c2: float
     sigma_r0: np.ndarray
     sigma_r0_a: float
@@ -358,9 +371,9 @@ class HardWalledSoundPowerResult(OwnsArrays):
         are not the ones the standard has.
 
         The plot draws one bar per ``frequencies`` entry from the level of the
-        same index and hatches it by ``background_requirement_met``; an array
-        one entry short raises a bare ``IndexError`` there and one entry long
-        is silently dropped, so the lengths are pinned here.
+        same index and hatches it by :attr:`background_requirement_met`; an
+        array one entry short raises a bare ``IndexError`` there and one entry
+        long is silently dropped, so the lengths are pinned here.
 
         :raises ValueError: if ``quantity`` is neither ``'power'`` nor
             ``'energy'``, ``coverage_factor`` is not positive, a count is below
@@ -384,12 +397,40 @@ class HardWalledSoundPowerResult(OwnsArrays):
             "reference_power_level",
             "background_correction",
             "background_correction_ref",
-            "background_requirement_met",
-            "upper_bound",
+            "background_margin_db",
+            "background_margin_ref_db",
             "sigma_r0",
         )
         require_ranks(self, **dict.fromkeys(bands, 1))
         require_same_length(self, *bands)
+
+    @property
+    def background_requirement_met(self) -> np.ndarray:
+        """Per band, whether both margins over the background reached the 6 dB of 4.5.
+
+        ``False`` where no background was measured. Each margin is judged
+        settled, as :math:`K_1` is read from it.
+        """
+        return np.asarray(
+            _margin_met(self.background_margin_db)
+            & _margin_met(self.background_margin_ref_db),
+            dtype=bool,
+        )
+
+    @property
+    def upper_bound(self) -> np.ndarray:
+        """Per band, whether 8.1.3 calls the level an upper bound.
+
+        The margin of the source under test was measured and fell below
+        6 dB while the reference source's margin met it.
+        """
+        measured = np.isfinite(self.background_margin_db)
+        return np.asarray(
+            measured
+            & ~_margin_met(self.background_margin_db)
+            & _margin_met(self.background_margin_ref_db),
+            dtype=bool,
+        )
 
     @property
     def sigma_tot(self) -> np.ndarray:
@@ -681,12 +722,14 @@ def _determine(
     mean_bg = nan_band.copy()
     k1 = np.zeros(n_bands, dtype=np.float64)
     met = np.zeros(n_bands, dtype=bool)
+    margin = nan_band.copy()
     if source_background is not None:
         mean_bg = _position_mean(
             source_background, "background_levels", n_positions, n_bands
         )  # Eq. (12)
         compared = mean_bg if background_for_source is None else background_for_source
-        k1, met = _k1_eq13(mean_source - compared)  # Eq. (13) / (19)
+        margin = np.asarray(mean_source - compared, dtype=np.float64)
+        k1, met = _k1_eq13(margin)  # Eq. (13) / (19)
     # One background reading serves both sources unless the reference
     # measurement brought its own (7.5).
     ref_background = (
@@ -696,15 +739,13 @@ def _determine(
     )
     k1_ref = np.zeros(n_bands, dtype=np.float64)
     met_ref = np.zeros(n_bands, dtype=bool)
+    margin_ref = nan_band.copy()
     if ref_background is not None:
         mean_bg_ref = _position_mean(
             ref_background, "background_levels_ref", n_positions, n_bands
         )
-        k1_ref, met_ref = _k1_eq13(mean_ref - mean_bg_ref)
-    requirement = met & met_ref
-    # 8.1.3 reads the upper bound off the margin of the source under test; a
-    # band where the reference source's margin is short as well is not one.
-    upper = measured & ~met & met_ref
+        margin_ref = np.asarray(mean_ref - mean_bg_ref, dtype=np.float64)
+        k1_ref, met_ref = _k1_eq13(margin_ref)
     _background_advisory(met, met_ref, measured=measured, stacklevel=4)
 
     level = np.asarray(power - mean_ref + mean_source + k1_ref - k1, dtype=np.float64)
@@ -720,8 +761,8 @@ def _determine(
         reference_power_level=np.asarray(power, dtype=np.float64),
         background_correction=k1,
         background_correction_ref=k1_ref,
-        background_requirement_met=np.asarray(requirement, dtype=bool),
-        upper_bound=np.asarray(upper, dtype=bool),
+        background_margin_db=margin,
+        background_margin_ref_db=margin_ref,
         c2=_c2_correction(reference.temperature_c, reference.static_pressure_kpa),
         sigma_r0=_table3_sigma(freqs),
         sigma_r0_a=_SIGMA_R0_A_DB,
@@ -1307,6 +1348,10 @@ def check_hard_walled_room(
     )
 
 
+#: The Part of ISO 3743 whose 9.5 reads the spectrum from :math:`s_\mathrm{M}`.
+_PART2_STANDARD = "ISO 3743-2:2018"
+
+
 @dataclass(frozen=True)
 class SourceLocationPlan(OwnsArrays):
     r"""How many source locations a determination needs, from a preliminary
@@ -1327,7 +1372,9 @@ class SourceLocationPlan(OwnsArrays):
     band, ``'broadband'``, ``'narrow-band'`` or ``'discrete tone'``, and
     ``None`` for Part 1, which draws no such conclusion. The ``a_weighted_...``
     fields are the same for the A-weighted row of Part 2 when A-weighted
-    levels were surveyed, ``NaN``, 0 and ``None`` otherwise.
+    levels were surveyed, ``NaN``, 0 and ``None`` otherwise. The two spectral
+    characters are read from the deviations and the 2,3 dB and 4 dB of 9.5,
+    so they are read-only properties and not fields.
     """
 
     standard: str
@@ -1336,10 +1383,8 @@ class SourceLocationPlan(OwnsArrays):
     source_locations: np.ndarray
     additional_room_locations: np.ndarray
     microphone_positions: int
-    spectral_character: tuple[str, ...] | None = None
     a_weighted_standard_deviation_db: float = math.nan
     a_weighted_source_locations: int = 0
-    a_weighted_spectral_character: str | None = None
 
     def __post_init__(self) -> None:
         """Reject a plan whose per-band quantities disagree.
@@ -1359,13 +1404,30 @@ class SourceLocationPlan(OwnsArrays):
         )
         require_ranks(self, **dict.fromkeys(bands, 1))
         require_same_length(self, *bands)
-        if self.spectral_character is not None and len(self.spectral_character) != len(
-            self.frequencies
+
+    @property
+    def spectral_character(self) -> tuple[str, ...] | None:
+        r"""Part 2's 9.5 reading of :math:`s_\mathrm{M}` per band, or ``None`` for Part 1.
+
+        ``'broadband'`` below 2,3 dB, ``'narrow-band'`` up to 4 dB and
+        ``'discrete tone'`` above.
+        """
+        if self.standard != _PART2_STANDARD:
+            return None
+        from .sound_power_special_room import _sm_class
+
+        return tuple(_sm_class(float(s)) for s in self.standard_deviation_db)
+
+    @property
+    def a_weighted_spectral_character(self) -> str | None:
+        """The 9.5 reading of the A-weighted deviation, or ``None`` without one."""
+        if self.standard != _PART2_STANDARD or math.isnan(
+            self.a_weighted_standard_deviation_db
         ):
-            msg = (
-                "SourceLocationPlan: 'spectral_character' must name one class per band."
-            )
-            raise ValueError(msg)
+            return None
+        from .sound_power_special_room import _sm_class
+
+        return _sm_class(float(self.a_weighted_standard_deviation_db))
 
     @property
     def required_source_locations(self) -> int:

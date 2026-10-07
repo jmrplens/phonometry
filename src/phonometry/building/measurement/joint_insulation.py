@@ -687,22 +687,43 @@ def lab_joint_insulation(
 class JointTestElementCheck:
     """Whether a joint is long and narrow enough to be tested (J.2.1, J.2.2).
 
+    The bounds are the clause's, so the verdicts are read from the length and
+    the width and are not fields: a check cannot be built to pass a joint the
+    clause fails.
+
     :ivar joint_length_m: Length of the joint, in m.
     :ivar joint_width_mm: Width of the joint, in mm.
     :ivar window_or_door_gap: Whether the joint is a gap between the parts of
         a window or door, which J.2.2 asks to be at least 5,0 m long.
-    :ivar length_ok: Whether the length is greater than 1 m and, for a window
-        or door gap, at least 5,0 m.
-    :ivar width_ok: Whether the width is no greater than 50 mm.
-    :ivar passes: Whether both hold.
     """
 
     joint_length_m: float
     joint_width_mm: float
     window_or_door_gap: bool
-    length_ok: bool
-    width_ok: bool
-    passes: bool
+
+    @property
+    def length_ok(self) -> bool:
+        """Whether the length is greater than 1 m and, for a window or door gap, at least 5,0 m.
+
+        The 1 m bound is exclusive and the 5,0 m bound inclusive, read with a
+        relative slack so that a length on it is not failed by rounding.
+        """
+        length = self.joint_length_m
+        if math.isnan(length) or length <= _MIN_JOINT_LENGTH_M:
+            return False
+        return not self.window_or_door_gap or length >= _MIN_GAP_LENGTH_M * (
+            1.0 - _BOUND_SLACK
+        )
+
+    @property
+    def width_ok(self) -> bool:
+        """Whether the width is no greater than 50 mm."""
+        return self.joint_width_mm <= _MAX_JOINT_WIDTH_MM * (1.0 + _BOUND_SLACK)
+
+    @property
+    def passes(self) -> bool:
+        """Whether both the length and the width hold."""
+        return self.length_ok and self.width_ok
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -755,17 +776,10 @@ def check_joint_test_element(
     """
     length = require_positive(joint_length_m, "joint_length_m")
     width = require_non_negative(joint_width_mm, "joint_width_mm")
-    length_ok = length > _MIN_JOINT_LENGTH_M
-    if window_or_door_gap:
-        length_ok = length_ok and length >= _MIN_GAP_LENGTH_M * (1.0 - _BOUND_SLACK)
-    width_ok = width <= _MAX_JOINT_WIDTH_MM * (1.0 + _BOUND_SLACK)
     return JointTestElementCheck(
         joint_length_m=length,
         joint_width_mm=width,
         window_or_door_gap=bool(window_or_door_gap),
-        length_ok=length_ok,
-        width_ok=width_ok,
-        passes=length_ok and width_ok,
     )
 
 
@@ -773,21 +787,49 @@ def check_joint_test_element(
 class GapWidthCheck:
     """The gap width read along the joint, and whether the readings agree (J.2.2).
 
+    Everything else is read from the readings, so a check cannot be built to
+    pass readings the clause fails.
+
     :ivar readings_mm: The gap widths read along the joint, in mm.
-    :ivar gap_width_mm: Their average, the gap width ``b``, in mm.
-    :ivar spread_mm: The largest difference between two readings, in mm.
-    :ivar enough_positions: Whether there are at least four readings.
-    :ivar uniform: Whether no two readings differ by more than 0,3 mm.
-    :ivar passes: Whether both hold; otherwise J.2.2 says to readjust the
-        mounting.
     """
 
     readings_mm: tuple[float, ...]
-    gap_width_mm: float
-    spread_mm: float
-    enough_positions: bool
-    uniform: bool
-    passes: bool
+
+    def __post_init__(self) -> None:
+        """Hold the readings as a tuple of floats.
+
+        :raises ValueError: If there is no reading.
+        """
+        readings = tuple(float(w) for w in self.readings_mm)
+        if not readings:
+            msg = "GapWidthCheck: 'readings_mm' must hold at least one reading."
+            raise ValueError(msg)
+        object.__setattr__(self, "readings_mm", readings)
+
+    @property
+    def gap_width_mm(self) -> float:
+        """The average of the readings, the gap width ``b``, in mm."""
+        return float(np.mean(self.readings_mm))
+
+    @property
+    def spread_mm(self) -> float:
+        """The largest difference between two readings, in mm."""
+        return max(self.readings_mm) - min(self.readings_mm)
+
+    @property
+    def enough_positions(self) -> bool:
+        """Whether there are at least four readings."""
+        return len(self.readings_mm) >= _MIN_GAP_READINGS
+
+    @property
+    def uniform(self) -> bool:
+        """Whether no two readings differ by more than 0,3 mm."""
+        return self.spread_mm <= _MAX_GAP_SPREAD_MM + _SLACK_DB
+
+    @property
+    def passes(self) -> bool:
+        """Whether both hold; otherwise J.2.2 says to readjust the mounting."""
+        return self.enough_positions and self.uniform
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -833,17 +875,7 @@ def check_gap_width(readings_mm: ArrayLike) -> GapWidthCheck:
     if np.any(widths < 0.0):
         msg = "'readings_mm' must be non-negative."
         raise ValueError(msg)
-    spread = float(np.max(widths) - np.min(widths))
-    enough = widths.size >= _MIN_GAP_READINGS
-    uniform = spread <= _MAX_GAP_SPREAD_MM + _SLACK_DB
-    return GapWidthCheck(
-        readings_mm=tuple(float(w) for w in widths),
-        gap_width_mm=float(np.mean(widths)),
-        spread_mm=spread,
-        enough_positions=enough,
-        uniform=uniform,
-        passes=enough and uniform,
-    )
+    return GapWidthCheck(readings_mm=tuple(float(w) for w in widths))
 
 
 # --- J.4 and J.5: a variable slit at several gap widths ------------------------
@@ -1067,27 +1099,49 @@ def joint_gap_series(
 class JointGapSeriesCheck:
     r"""Whether a variable slit was measured at the three gap widths of J.4.
 
+    The three widths J.4 asks for are read from the nominal and the minimal
+    gap width, so the verdicts are not fields: a check cannot be built to pass
+    a series that misses one.
+
     :ivar gap_widths_mm: The gap widths measured, ascending, in mm.
     :ivar nominal_gap_mm: The nominal gap width :math:`b_\mathrm{n}`, in mm.
     :ivar minimum_gap_mm: The minimal gap width :math:`b_\mathrm{min}`, in mm,
         or ``None`` when the series does not name it.
-    :ivar nominal_measured: Whether a measured width is :math:`b_\mathrm{n}`
-        (J.4 a)).
-    :ivar minimum_measured: Whether a measured width is
-        :math:`b_\mathrm{min}` (J.4 b)); ``False`` when the series names no
-        :math:`b_\mathrm{min}`, since nothing then shows it was measured.
-    :ivar working_range_measured: Whether a measured width is
-        :math:`b_\mathrm{n} + 3` mm (J.4 c)).
-    :ivar passes: Whether all three were measured.
     """
 
     gap_widths_mm: tuple[float, ...]
     nominal_gap_mm: float
     minimum_gap_mm: float | None
-    nominal_measured: bool
-    minimum_measured: bool
-    working_range_measured: bool
-    passes: bool
+
+    @property
+    def nominal_measured(self) -> bool:
+        r"""Whether a measured width is :math:`b_\mathrm{n}` (J.4 a))."""
+        return _measured_at(self.gap_widths_mm, self.nominal_gap_mm)
+
+    @property
+    def minimum_measured(self) -> bool:
+        r"""Whether a measured width is :math:`b_\mathrm{min}` (J.4 b)).
+
+        ``False`` when the series names no :math:`b_\mathrm{min}`, since
+        nothing then shows it was measured.
+        """
+        return self.minimum_gap_mm is not None and _measured_at(
+            self.gap_widths_mm, self.minimum_gap_mm
+        )
+
+    @property
+    def working_range_measured(self) -> bool:
+        r"""Whether a measured width is :math:`b_\mathrm{n} + 3` mm (J.4 c))."""
+        return _measured_at(self.gap_widths_mm, self.nominal_gap_mm + _WORKING_RANGE_MM)
+
+    @property
+    def passes(self) -> bool:
+        """Whether all three were measured."""
+        return (
+            self.nominal_measured
+            and self.minimum_measured
+            and self.working_range_measured
+        )
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -1117,9 +1171,9 @@ class JointGapSeriesCheck:
         return plot_joint_gap_series_check(self, ax=ax, language=language, **kwargs)
 
 
-def _measured_at(widths: np.ndarray, target: float) -> bool:
+def _measured_at(widths: tuple[float, ...], target: float) -> bool:
     """Whether one of *widths* lies within the 0,3 mm of J.2.2 of *target*."""
-    return bool(np.any(np.abs(widths - target) <= _GAP_MATCH_MM + _SLACK_DB))
+    return any(abs(width - target) <= _GAP_MATCH_MM + _SLACK_DB for width in widths)
 
 
 def check_joint_gap_series(series: JointGapSeries) -> JointGapSeriesCheck:
@@ -1142,17 +1196,8 @@ def check_joint_gap_series(series: JointGapSeries) -> JointGapSeriesCheck:
     :return: A :class:`JointGapSeriesCheck`.
     """
     widths = np.asarray(series.gap_widths_mm, dtype=np.float64)
-    nominal = _measured_at(widths, series.nominal_gap_mm)
-    working = _measured_at(widths, series.nominal_gap_mm + _WORKING_RANGE_MM)
-    minimum = series.minimum_gap_mm is not None and _measured_at(
-        widths, series.minimum_gap_mm
-    )
     return JointGapSeriesCheck(
         gap_widths_mm=tuple(float(w) for w in widths),
         nominal_gap_mm=float(series.nominal_gap_mm),
         minimum_gap_mm=series.minimum_gap_mm,
-        nominal_measured=nominal,
-        minimum_measured=minimum,
-        working_range_measured=working,
-        passes=nominal and minimum and working,
     )

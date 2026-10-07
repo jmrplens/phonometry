@@ -18,6 +18,8 @@
 # written (whitespace collapsed), and the reason. A line excuses one
 # comparison: a function that writes the same comparison twice lists it
 # twice, so a third copy added later is refused.
+_internal/rays.py	_advance_one_step_sloping	h > 0.0	numerical algorithm internal (the range left to a ray in the integrator step, set to exactly 0 once spent), no verdict
+_internal/rays.py	_advance_one_step_sloping	h > 0.0	numerical algorithm internal (the range left to a ray in the integrator step, set to exactly 0 once spent), no verdict
 aircraft/airport_noise.py	_attenuation_geometry	q < 0.0	ECAC Doc 29: behind or ahead of a segment the end-point geometry is used, which agrees with the segment's at its ends
 aircraft/airport_noise.py	_event_level_core	length <= 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 aircraft/airport_noise.py	_event_level_core	q < 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
@@ -38,6 +40,7 @@ aircraft/certification.py	_tone_factor	excess < _TONE_EXCESS_KNEE_DB	ICAO Annex 
 aircraft/certification.py	_tone_factor	excess < _TONE_EXCESS_SATURATION_DB	ICAO Annex 16 App. 2 Table A2-2: the pieces meet at 1,5, 3 and 20 dB, so no factor jumps there (recorded with the fix)
 aircraft/certification.py	_tone_factor	excess < _TONE_EXCESS_SATURATION_DB	ICAO Annex 16 App. 2 Table A2-2: the pieces meet at 1,5, 3 and 20 dB, so no factor jumps there (recorded with the fix)
 aircraft/flight_performance.py	Aerodrome.pressure_ratio	bracket <= 0.0	the domain of the ISA pressure-altitude law, whose bracket reaches zero far above any aerodrome; not a printed limit
+aircraft/flight_performance.py	_approach_distance_ft	drop_ft <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit: a descending step that does not start above the step below it
 aircraft/flight_performance.py	_climb_point	0.0 < sin_gamma < 1.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 aircraft/rotorcraft_propagation.py	_upper_hull	(v[0] - u[0]) * (pt[1] - u[1]) - (v[1] - u[1]) * (pt[0] - u[0]) >= 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 aircraft/rotorcraft_propagation.py	diffraction_attenuation	arg >= 1.0	continuous (log10 of 1 is 0) (recorded with the fix)
@@ -67,7 +70,7 @@ emission/intensity_compliance.py	_match_band	abs(nearest / frequency - 1.0) > _B
 emission/sound_power.py	_static_pressure_at_altitude	1.0 - _ALTITUDE_A_PER_M * altitude <= 0.0	the domain of the printed barometric power law, which reaches zero near 44 km, no test-site altitude; not a printed limit
 emission/sound_power_high_frequency.py	room_constant_from_air_absorption	mean_absorption >= 1.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 emission/sound_power_in_situ.py	static_pressure_from_altitude	base <= 0.0	the domain of the printed barometric power law, which reaches zero near 44 km, no test-site altitude; not a printed limit
-emission/sound_power_intensity.py	precision_qualification	(f_pi_signed - indicators.f_pi_unsigned) <= _F_PI_DIFF_LIMIT	difference of two indicators of the same data (recorded with the fix)
+emission/sound_power_intensity.py	PrecisionCriteria.criterion_3	difference <= _F_PI_DIFF_LIMIT	difference of two indicators of the same data (recorded with the fix)
 emission/sound_power_intensity_points.py	_confidence_interval	1.0 - spread > 0.0	quantity through logs, powers, fits or signal analysis; not decimal-reachable (recorded with the fix)
 emission/sound_power_intensity_points.py	_nominal_band	abs(nearest / frequency - 1.0) > _BAND_MATCH_TOLERANCE	the library's own tolerance for matching a given centre frequency to a nominal band, not a printed limit; a frequency on its edge is no centre of the series either way
 emission/sound_power_plant.py	_ray_hits	t <= 1.0	operands are inputs, table rows or continuous branches (recorded with the fix)
@@ -78,8 +81,8 @@ environment/assessment/impulsive_sound.py	_merge_runs	0.0 <= gap <= MERGE_GAP	th
 environment/assessment/impulsive_sound.py	_merge_runs	end_slope > ONSET_GRADIENT_LIMIT	onset slopes of measured level histories (recorded with the fix)
 environment/assessment/impulsive_sound.py	_merge_runs	start_slope > ONSET_GRADIENT_LIMIT	operands are inputs, table rows or continuous branches (recorded with the fix)
 environment/assessment/impulsive_sound.py	_raw_runs	gradient > ONSET_GRADIENT_LIMIT	onset rates of a measured level history; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
-environment/assessment/impulsive_sound.py	detect_onsets	orate > 0.0	operands are inputs, table rows or continuous branches (recorded with the fix)
-environment/assessment/impulsive_sound.py	detect_onsets	orate > ONSET_GRADIENT_LIMIT	operands are inputs, table rows or continuous branches (recorded with the fix)
+environment/assessment/impulsive_sound.py	ImpulseOnset.prominence	self.onset_rate > 0.0	operands are inputs, table rows or continuous branches (recorded with the fix)
+environment/assessment/impulsive_sound.py	ImpulseOnset.qualifies	self.onset_rate > ONSET_GRADIENT_LIMIT	operands are inputs, table rows or continuous branches (recorded with the fix)
 environment/assessment/soundscape.py	SoundscapeCorrelation.__post_init__	-1.0 <= self.coefficient <= 1.0	range checks of a correlation coefficient and a probability of the data, invariants of the result, not printed limits
 environment/assessment/soundscape.py	SoundscapeCorrelation.__post_init__	0.0 <= self.p_value <= 1.0	range checks of a correlation coefficient and a probability of the data, invariants of the result, not printed limits
 environment/assessment/soundscape.py	_significance	residual <= 0.0	a Pearson coefficient of rating data, a ratio of sums through a square root; the branch picks the infinite statistic of a perfect correlation
@@ -113,6 +116,7 @@ materials/diffusers/scattering_diffusion.py	directional_diffusion_coefficient	we
 materials/diffusers/scattering_diffusion.py	random_incidence_diffusion	total <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 metrology/conformance.py	ConformanceVerification.share_of_acceptance_limit	share > 1.0	operands are inputs, table rows or continuous branches (recorded with the fix)
 metrology/data_qualification.py	PeakStatisticsResult.__post_init__	np.diff(values) < 0.0	monotonicity of peak values the module takes from a record; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
+metrology/data_qualification.py	_acceptance_region	np.abs(seq - median) > 0.0	the median of an even count is the mean of the two middle values, and a value can equal it only when those two are equal, where the mean is exact
 metrology/data_qualification.py	_null_trend_mean	np.abs(seq - median) > 0.0	the median of an even count is the mean of the two middle values, and a value can equal it only when those two are equal, where the mean is exact
 metrology/data_qualification.py	_trend_test_runs	np.abs(values - median) > 0.0	the median of an even count is the mean of the two middle values, and a value can equal it only when those two are equal, where the mean is exact
 metrology/random_incidence.py	DirectivityFactor.__post_init__	self.gamma > 0.0	a positivity guard on a directivity factor of energy sums; carries a transcendental factor (a power, an exponential, a root or pi), so it cannot sit on a printed decimal
@@ -121,8 +125,8 @@ metrology/reciprocity_coupler.py	CouplerCheck.broadband_valid	self.broadband_mar
 metrology/reciprocity_coupler.py	_table_c3	abs(frequency / printed[nearest] - 1.0) <= _NOMINAL_TOLERANCE	the library's own 2 % tolerance for taking a printed row of IEC 61094-2 Table C.3, not a printed limit
 metrology/reciprocity_coupler.py	_table_c3	frequency < printed[0]	masked: a frequency within 2 % of the first or the last row of Table C.3 takes that row before this is read
 metrology/reciprocity_coupler.py	_table_c3	frequency > printed[-1]	masked: a frequency within 2 % of the first or the last row of Table C.3 takes that row before this is read
-metrology/reciprocity_coupler.py	check_coupler	_APPROXIMATION_RATIO[0] < ratio < _APPROXIMATION_RATIO[1]	the bounds 0,125 and 8 are powers of two, and a decimal length that is 8 or 1/8 times a decimal diameter is exactly that multiple in binary
-metrology/reciprocity_coupler.py	check_coupler	lowest_x > _APPROXIMATION_X	X carries the thermal diffusivity and heat-capacity ratio of the gas of Annex F; carries a transcendental factor (a power, an exponential, a root or pi), so it cannot sit on a printed decimal
+metrology/reciprocity_coupler.py	CouplerCheck.approximation_valid	_APPROXIMATION_RATIO[0] < ratio < _APPROXIMATION_RATIO[1]	the bounds 0,125 and 8 are powers of two, and a decimal length that is 8 or 1/8 times a decimal diameter is exactly that multiple in binary
+metrology/reciprocity_coupler.py	CouplerCheck.approximation_valid	self.lowest_x > _APPROXIMATION_X	X carries the thermal diffusivity and heat-capacity ratio of the gas of Annex F; carries a transcendental factor (a power, an exponential, a root or pi), so it cannot sit on a printed decimal
 metrology/reciprocity_free_field.py	ReciprocityAirAttenuation.within_stated_accuracy	_ACCURACY_WATER_FRACTION[0] <= self.water_vapour_mole_fraction <= _ACCURACY_WATER_FRACTION[1]	the water vapour mole fraction of IEC 61094-2 Annex F comes through the saturation pressure; carries a transcendental factor (a power, an exponential, a root or pi), so it cannot sit on a printed decimal
 metrology/uncertainty.py	_effective_dof	denom > 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 noise_control/_criterion.py	meets_target_of	excess <= 0.0	a single difference of a raw level and a printed curve against 0, exact sign (recorded with the fix)
@@ -158,9 +162,9 @@ room/acoustics.py	_fit_decay_time	float(level.min()) > lower	operands are inputs
 room/acoustics.py	_fit_decay_time	level <= upper	operands are inputs, table rows or continuous branches (recorded with the fix)
 room/acoustics.py	_fit_decay_time	level >= lower	operands are inputs, table rows or continuous branches (recorded with the fix)
 room/acoustics.py	_fit_decay_time	slope >= 0.0	the fit window must span the whole decay range first, so no near-zero slope reaches it; constant, alternating and palindromic curves were searched (recorded with the fix)
-room/acoustics.py	room_parameters	dyn >= _EDT_RANGE[1] + _NOISE_MARGIN_DB	dynamic range of a measured impulse response (recorded with the fix)
-room/acoustics.py	room_parameters	dyn >= _T20_RANGE[1] - _T20_RANGE[0] + _NOISE_MARGIN_DB + _T20_TAIL_HEADROOM_DB	operands are inputs, table rows or continuous branches (recorded with the fix)
-room/acoustics.py	room_parameters	dyn >= _T30_RANGE[1] - _T30_RANGE[0] + _NOISE_MARGIN_DB + _T30_TAIL_HEADROOM_DB	operands are inputs, table rows or continuous branches (recorded with the fix)
+room/acoustics.py	RoomAcousticsResult.edt_valid	self.dynamic_range >= _EDT_RANGE[1] + _NOISE_MARGIN_DB	dynamic range of a measured impulse response (recorded with the fix)
+room/acoustics.py	RoomAcousticsResult.t20_valid	self.dynamic_range >= needed	operands are inputs, table rows or continuous branches (recorded with the fix)
+room/acoustics.py	RoomAcousticsResult.t30_valid	self.dynamic_range >= needed	operands are inputs, table rows or continuous branches (recorded with the fix)
 room/auditorium.py	_decay_range_is_thin	float(np.max(p2)) / floor < 10.0 ** (_MINIMUM_DECAY_RANGE_DB / 10.0)	quantity through logs, powers, fits or signal analysis; not decimal-reachable (recorded with the fix)
 room/enclosed_space_absorption.py	equivalent_absorption_area	total < 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 room/enclosed_space_absorption.py	object_fraction	psi >= 1.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
@@ -178,6 +182,8 @@ signals/correlation.py	_parabolic_offset	denom >= 0.0	numerical algorithm intern
 signals/correlation.py	_refine_peak	grid[j] < 0.0	the sign of a correlation peak; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
 signals/correlation.py	time_delay	float(np.std(xa)) <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 signals/correlation.py	time_delay	float(np.std(ya)) <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
+signals/correlation.py	time_delay	peak_mag > 0.0	a guard that leaves an all-zero correlation curve unnormalised; the curve is drawn either way, no verdict
+signals/correlation.py	time_delay	peak_mag > 0.0	a guard that leaves an all-zero correlation curve unnormalised; the curve is drawn either way, no verdict
 signals/multitaper.py	_adaptive_multitaper_weights	dsum > 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 signals/multitaper.py	_adaptive_multitaper_weights	np.sum(d, axis=0) > 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 signals/multitaper.py	_adaptive_multitaper_weights	s_new > 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)

@@ -80,6 +80,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -340,12 +341,23 @@ class VibrationReductionResult(OwnsArrays):
         factor is below 0,25 so the band is bracketed and excluded from the
         single-number rating (ISO 10848-4:2010 Clause 9), or ``None`` when no
         modal overlap was supplied.
+    :ivar modal_overlap: The modal overlap factor ``M`` per band the bands are
+        bracketed by, or ``None`` when none was supplied. An octave band
+        carries the smallest of its three one-third-octave bands, since it is
+        bracketed when any of them is.
+    :ivar band_type: ``"third-octave"`` or ``"octave"``, the Annex A range the
+        single number is averaged over; ``None`` reads it from the spacing of
+        the frequencies.
+
+    ``single_number`` and ``bracketed`` are read from the fields, the
+    0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
+    fields.
     """
 
     frequencies: np.ndarray | None
     k_ij: np.ndarray
-    single_number: float | None
-    bracketed: np.ndarray | None = None
+    modal_overlap: np.ndarray | None = None
+    band_type: str | None = None
 
     def __post_init__(self) -> None:
         """Reject a junction whose per-band columns do not share a band set.
@@ -366,8 +378,34 @@ class VibrationReductionResult(OwnsArrays):
         :raises ValueError: if the frequencies, ``Kij`` and the bracketing mask
             do not agree on how many bands there are.
         """
-        require_ranks(self, frequencies=1, k_ij=1, bracketed=1)
-        require_same_length(self, "frequencies", "k_ij", "bracketed")
+        require_ranks(self, frequencies=1, k_ij=1, modal_overlap=1)
+        require_same_length(self, "frequencies", "k_ij", "modal_overlap")
+        if self.band_type is not None:
+            require_choice(self.band_type, "band_type", ("third-octave", "octave"))
+
+    @property
+    def bracketed(self) -> np.ndarray | None:
+        """Per band, whether the modal overlap is below 0,25 (ISO 10848-4 Clause 9).
+
+        ``None`` when no modal overlap was supplied.
+        """
+        if self.modal_overlap is None:
+            return None
+        return np.asarray(
+            np.asarray(self.modal_overlap) < _MODAL_OVERLAP_EXCLUSION, dtype=np.bool_
+        )
+
+    @property
+    def single_number(self) -> float | None:
+        """The Annex A mean ``K̄ij`` over the bands not bracketed, in dB, or ``None``."""
+        band_type = (
+            _detect_band_type(self.frequencies)
+            if self.band_type is None
+            else self.band_type
+        )
+        return _single_number_kij(
+            self.frequencies, self.k_ij, bracketed=self.bracketed, band_type=band_type
+        )
 
     def octave_bands(self) -> VibrationReductionResult:
         r"""Combine one-third-octave ``Kij`` into octave bands.
@@ -396,16 +434,14 @@ class VibrationReductionResult(OwnsArrays):
             freq_groups = self.frequencies.reshape(-1, 3)
             _validate_octave_triples(freq_groups)
             oct_f = freq_groups[:, 1]
-        oct_bracketed: np.ndarray | None = None
-        if self.bracketed is not None:
-            oct_bracketed = np.any(self.bracketed.reshape(-1, 3), axis=1)
+        oct_overlap: np.ndarray | None = None
+        if self.modal_overlap is not None:
+            oct_overlap = np.min(np.asarray(self.modal_overlap).reshape(-1, 3), axis=1)
         return VibrationReductionResult(
             frequencies=oct_f,
             k_ij=oct_k,
-            single_number=_single_number_kij(
-                oct_f, oct_k, bracketed=oct_bracketed, band_type="octave"
-            ),
-            bracketed=oct_bracketed,
+            modal_overlap=oct_overlap,
+            band_type="octave",
         )
 
     def plot(
@@ -619,20 +655,19 @@ def vibration_reduction_index(
         a_i = np.full(dv.size, s_i / _REFERENCE_LENGTH, dtype=np.float64)
         a_j = np.full(dv.size, s_j / _REFERENCE_LENGTH, dtype=np.float64)
 
-    bracketed: np.ndarray | None = None
+    m: np.ndarray | None = None
     if modal_overlap is not None:
         m = _positive_array(modal_overlap, "modal_overlap")
         m = _broadcast(m, dv.size, "modal_overlap")
-        bracketed = np.asarray(m < _MODAL_OVERLAP_EXCLUSION, dtype=np.bool_)
 
     k_ij = dv + 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
+    # The bands bracketed below the 0,25 of ISO 10848-4 Clause 9 and the
+    # Annex A mean are read by the result from the modal overlap it keeps.
     return VibrationReductionResult(
         frequencies=freq,
         k_ij=k_ij,
-        single_number=_single_number_kij(
-            freq, k_ij, bracketed=bracketed, band_type=_detect_band_type(freq)
-        ),
-        bracketed=bracketed,
+        modal_overlap=m,
+        band_type=_detect_band_type(freq),
     )
 
 

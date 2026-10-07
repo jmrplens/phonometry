@@ -734,25 +734,56 @@ def small_volume_measurement_points(layout: str) -> np.ndarray:
 class BackgroundNoiseAssessment(OwnsArrays):
     """The magnetic background noise of a site against 7.2 of IEC 60118-4:2014.
 
+    The ratio, the category and the reporting duty are read from the noise
+    levels and the 47 dB, 32 dB and 22 dB that 7.2 prints, so they are not
+    fields: an assessment cannot be built to place a site in a class its
+    noise does not reach.
+
     :ivar noise_levels_db: The A-weighted noise level at each point with the
         loop switched off, in dB re 400 mA/m.
-    :ivar reference_signal_to_noise_ratio_db: The reference level less the
-        noisiest point, in dB: the "reference signal-to-noise ratio" of 7.2.
-    :ivar category: ``"ideal"`` (above 47 dB), ``"acceptable"`` (32 dB to
-        47 dB), ``"tolerable_for_short_periods"`` (22 dB to 32 dB, only for
-        noise without an undesirable tonal quality or mostly at low
-        frequencies) or ``"below_tolerable"``.
-    :ivar report_required: Whether the ratio is below 32 dB, which "shall be
-        reported and agreed with the system operator".
     :ivar noise_is_tonal: Whether the noise was declared tonal and not mostly
         at low frequencies, which withholds the 22 dB relaxation.
     """
 
     noise_levels_db: np.ndarray
-    reference_signal_to_noise_ratio_db: float
-    category: str
-    report_required: bool
     noise_is_tonal: bool
+
+    @property
+    def reference_signal_to_noise_ratio_db(self) -> float:
+        """The reference level less the noisiest point, in dB.
+
+        The "reference signal-to-noise ratio" of 7.2: the levels are in dB re
+        400 mA/m, the reference level, so the ratio is the loudest level with
+        its sign changed.
+        """
+        return -float(np.max(self.noise_levels_db))
+
+    @property
+    def category(self) -> str:
+        """The class 7.2 puts the site in.
+
+        ``"ideal"`` (above 47 dB), ``"acceptable"`` (32 dB to 47 dB),
+        ``"tolerable_for_short_periods"`` (22 dB to 32 dB, only for noise
+        without an undesirable tonal quality or mostly at low frequencies) or
+        ``"below_tolerable"``.
+        """
+        snr = self.reference_signal_to_noise_ratio_db
+        if snr > _SNR_IDEAL_DB:
+            return _NOISE_CATEGORIES[0]
+        if snr >= _SNR_MINIMUM_DB:
+            return _NOISE_CATEGORIES[1]
+        if snr >= _SNR_SHORT_PERIODS_DB and not self.noise_is_tonal:
+            return _NOISE_CATEGORIES[2]
+        return _NOISE_CATEGORIES[3]
+
+    @property
+    def report_required(self) -> bool:
+        """Whether the ratio is below 32 dB.
+
+        7.2: such a ratio "shall be reported and agreed with the system
+        operator".
+        """
+        return self.reference_signal_to_noise_ratio_db < _SNR_MINIMUM_DB
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -800,21 +831,8 @@ def assess_background_noise(
     :return: A :class:`BackgroundNoiseAssessment`.
     """
     levels = require_finite_array(noise_levels_db, "noise_levels_db")
-    snr = -float(np.max(levels))
-    if snr > _SNR_IDEAL_DB:
-        category = _NOISE_CATEGORIES[0]
-    elif snr >= _SNR_MINIMUM_DB:
-        category = _NOISE_CATEGORIES[1]
-    elif snr >= _SNR_SHORT_PERIODS_DB and not noise_is_tonal:
-        category = _NOISE_CATEGORIES[2]
-    else:
-        category = _NOISE_CATEGORIES[3]
     return BackgroundNoiseAssessment(
-        noise_levels_db=levels,
-        reference_signal_to_noise_ratio_db=snr,
-        category=category,
-        report_required=snr < _SNR_MINIMUM_DB,
-        noise_is_tonal=bool(noise_is_tonal),
+        noise_levels_db=levels, noise_is_tonal=bool(noise_is_tonal)
     )
 
 

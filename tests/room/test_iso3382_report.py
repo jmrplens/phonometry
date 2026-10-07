@@ -200,8 +200,6 @@ def _synthetic_result(
     t30 = np.asarray(t30, dtype=np.float64)
     edt = np.asarray(edt, dtype=np.float64)
     n = t30.size
-    finite_t30 = np.isfinite(t30)
-    finite_edt = np.isfinite(edt)
     return room.RoomAcousticsResult(
         frequencies=frequency,
         edt=edt,
@@ -212,9 +210,6 @@ def _synthetic_result(
         d50=np.full(n, 0.5),
         ts=np.full(n, 0.1),
         dynamic_range=np.full(n, 60.0),
-        edt_valid=finite_edt,
-        t20_valid=finite_t30,
-        t30_valid=finite_t30,
         curvature=np.zeros(n),
     )
 

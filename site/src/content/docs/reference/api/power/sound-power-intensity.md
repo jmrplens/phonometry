@@ -189,18 +189,25 @@ Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 
 ```python
 PrecisionCriteria(
-    criterion_1: np.ndarray | None,
-    criterion_2: np.ndarray | None,
-    criterion_3: np.ndarray,
-    criterion_4: np.ndarray,
-    criterion_5: np.ndarray | None,
-    qualified: np.ndarray | None,
+    indicators: PrecisionFieldIndicators,
+    scan_intensity_level_1: np.ndarray | None = None,
+    scan_intensity_level_2: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
+    repeatability_limit_db: np.ndarray | None = None,
+    pressure_residual_index_db: np.ndarray | None = None,
+    field_nonuniformity_1: np.ndarray | None = None,
+    field_nonuniformity_2: np.ndarray | None = None,
 )
 ```
 
 ISO 9614-3:2002 Annex C acceptance criteria (per band, pass/fail).
 
-Each attribute is a boolean array (True = satisfied) or `None` when its
+The check holds the readings the five criteria compare, and each
+criterion is read from them and the limit Annex C prints, so none of them
+is a field: a criteria set cannot be built to qualify a band its readings
+do not qualify.
+
+Each criterion is a boolean array (True = satisfied) or `None` when its
 inputs are absent. `criterion_1` scan repeatability
 $\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2$ (Eq. C.1);
 `criterion_2` dynamic-capability
@@ -215,6 +222,79 @@ through criterion 4
 or, where evaluated, criterion 5 (C.1.6.2: a band satisfying criterion 5
 is qualified as a final result even if $F_\mathrm{S}(2) \ge 2$); `None`
 unless both criterion 1 and criterion 2 are evaluable.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `indicators` | The [`PrecisionFieldIndicators`](/phonometry/reference/api/power/sound-power-intensity/#precisionfieldindicators), which give criteria 3 and 4. |
+| `scan_intensity_level_1` | `LIn(1)` per band, in dB, or `None`. |
+| `scan_intensity_level_2` | `LIn(2)` per band, in dB, or `None`. |
+| `frequencies` | Nominal mid-band frequencies per band, in Hz, from which Table 1 gives the criterion-1 limit `s`, or `None`. |
+| `repeatability_limit_db` | The caller's own `s` per band, in dB, in place of Table 1, or `None` to read Table 1. |
+| `pressure_residual_index_db` | `delta_pI0` per band, in dB, or `None`. |
+| `field_nonuniformity_1` | `FS(1)` per band, or `None`. |
+| `field_nonuniformity_2` | `FS(2)` per band, or `None`. |
+
+### PrecisionCriteria.criterion_1
+
+*property*
+
+Scan repeatability $\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2$ (Eq. C.1).
+
+Judged settled, so a difference on the limit in decimal is on it.
+
+### PrecisionCriteria.criterion_1_limit_db
+
+*property*
+
+The criterion-1 limit `s` per band, in dB.
+
+The caller's `repeatability_limit_db`, or ISO 9614-3 Table 1 read
+from `frequencies`; `None` with neither.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if Table 1 is read and does not print a band. |
+
+### PrecisionCriteria.criterion_2
+
+*property*
+
+Dynamic capability $L_\mathrm{d} = \delta_{pI0} - K \ge F_{pI_\mathrm{n}}^{\mathrm{signed}}$ (Eq. C.2).
+
+### PrecisionCriteria.criterion_3
+
+*property*
+
+$F_{pI_\mathrm{n}}^{\mathrm{signed}} - F_{pI_\mathrm{n}}^{\mathrm{unsigned}} \le 3$ dB (Eq. C.3).
+
+### PrecisionCriteria.criterion_4
+
+*property*
+
+Field non-uniformity $F_\mathrm{S} \le 2$ (Eq. C.4).
+
+### PrecisionCriteria.criterion_5
+
+*property*
+
+Scan-density convergence $0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2$ (Eq. C.5).
+
+Judged settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
+in binary, and the criterion includes 1,2.
+
+### PrecisionCriteria.qualified
+
+*property*
+
+Whether each band qualifies as a final result (C.1.6.2).
+
+Criteria 1 to 3 with the field non-uniformity accepted through
+criterion 4 or, where evaluated, criterion 5; `None` unless both
+criterion 1 and criterion 2 are evaluable.
 
 ## PrecisionFieldIndicators
 
@@ -243,12 +323,10 @@ $F_{pI_\mathrm{n}}^{\mathrm{signed}} \ge F_{pI_\mathrm{n}}^{\mathrm{unsigned}}$.
 PrecisionIntensityResult(
     frequencies: np.ndarray | None,
     partial_power: np.ndarray,
-    sound_power: np.ndarray,
-    sound_power_level: np.ndarray,
-    sound_power_level_normalized: np.ndarray,
-    not_applicable_band: np.ndarray,
     surface_area: float,
-    sound_power_level_a: float,
+    *,
+    temperature_c: float = 23.0,
+    barometric_pressure_pa: float = 101325.0,
 )
 ```
 
@@ -260,8 +338,20 @@ $P = \sum P_i$ (Eq. 8) and `sound_power_level` its level
 $L_W = 10 \log_{10}(P/P_0)$ (Eq. 9), `NaN`
 where $P \le 0$ (`not_applicable_band` True, clause 9.2).
 `sound_power_level_normalized` is `LW0` normalized to 23 deg C /
-101 325 Pa (Eq. 10). `sound_power_level_a` is the A-weighted total over
-applicable bands (`NaN` without `frequencies` and more than one band).
+101 325 Pa (Eq. 10) from the air temperature `temperature_c` and the
+barometric pressure `barometric_pressure_pa` of the measurement.
+`sound_power_level_a` is the A-weighted total over applicable bands
+(`NaN` without `frequencies` and more than one band). Everything read
+from the partial powers is a read-only property, so the totals, the levels
+and the clause 9.2 flag are not fields.
+
+### PrecisionIntensityResult.not_applicable_band
+
+*property*
+
+Per band, whether the net sound power is not positive (clause 9.2).
+
+Judged on the settled share of the gross power, as in ISO 9614-2.
 
 ### PrecisionIntensityResult.plot()
 
@@ -350,6 +440,30 @@ fields; the fiche prints them verbatim in its footer.
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or a supplied `indicators`, `criteria` or `residual_index` does not span the result's bands. |
 | ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
+### PrecisionIntensityResult.sound_power
+
+*property*
+
+The signed band total $P = \sum P_i$ (Eq. 8), in watts.
+
+### PrecisionIntensityResult.sound_power_level
+
+*property*
+
+The band level $L_W = 10 \log_{10}(P/P_0)$ (Eq. 9), `NaN` where $P \le 0$.
+
+### PrecisionIntensityResult.sound_power_level_a
+
+*property*
+
+The A-weighted total over the applicable bands, in dB.
+
+### PrecisionIntensityResult.sound_power_level_normalized
+
+*property*
+
+`LW0`, the band level normalized to 23 deg C and 101 325 Pa (Eq. 10).
 
 ## sound_power_intensity
 
@@ -454,19 +568,13 @@ $$
 SoundPowerIntensityResult(
     frequencies: np.ndarray | None,
     partial_power: np.ndarray,
-    partial_power_level: np.ndarray,
-    sound_power: np.ndarray,
-    sound_power_level: np.ndarray,
-    negative_band: np.ndarray,
     surface_pressure_intensity_index: np.ndarray | None,
-    negative_partial_power_index: np.ndarray | None,
     repeatability: np.ndarray | None,
-    dynamic_capability_index: np.ndarray | None,
-    achieved_grade: np.ndarray | None,
+    pressure_residual_index_db: np.ndarray | None,
     surface_area: float,
-    sound_power_level_a: float,
-    a_weighting_omitted_bands: np.ndarray | None,
+    band_type: str,
     grade: str,
+    repeatability_limit_db: np.ndarray | None = None,
 )
 ```
 
@@ -487,8 +595,14 @@ is $|L_{Wi}(1) - L_{Wi}(2)|$ per segment and band (criterion 3),
 a second scan; it is $+\infty$ where the two sweeps reverse the flow
 direction on a segment (opposite-sign partial powers), a gross
 non-repeatability that criterion 3 must reject even when the magnitudes
-happen to match. `dynamic_capability_index` is `Ld` for the requested
-grade. `achieved_grade` is the per-band class `'engineering'`/
+happen to match. `pressure_residual_index_db` is the
+$\delta_{pI0}$ of the instrument per band, `None` when it was not
+given, and `dynamic_capability_index` the `Ld` it gives for the
+requested grade. `repeatability_limit_db` is the criterion-3 limit `s`
+the caller chose per band, `None` to read Table 2 by `frequencies` and
+`band_type`.
+
+`achieved_grade` is the per-band class `'engineering'`/
 `'survey'`/`'none'` (clause 8.4), `None` when the qualifying inputs
 (`delta_pI0` and a second scan) are absent. `sound_power_level_a` is the
 A-weighted total over determinable bands (`NaN` without `frequencies`
@@ -497,7 +611,54 @@ and more than one band), which omits the bands failing criteria 1 and/or 2
 `a_weighting_omitted_bands` flags the bands so omitted (per band,
 `True` = omitted); it is `None` when the criteria inputs
 (`pressure_levels` and `pressure_residual_index`) are absent, in which
-case every determinable band is summed and a warning is emitted.
+case every determinable band is summed and a warning is emitted. The
+verdicts, the totals and the indicators read from the partial powers are
+read-only properties, worked out from the fields and the limits Annex B
+prints, so they are not fields.
+
+### SoundPowerIntensityResult.a_weighting_omitted_bands
+
+*property*
+
+The bands clause 10.6 b keeps out of the A-weighted total, or `None`.
+
+### SoundPowerIntensityResult.achieved_grade
+
+*property*
+
+The per-band class Annex B grants (clause 8.4), or `None`.
+
+One of `'engineering'`, `'survey'` and `'none'` per band, read
+from the indicators, the repeatability and $\delta_{pI0}$
+against criteria 1 to 3.
+
+### SoundPowerIntensityResult.dynamic_capability_index
+
+*property*
+
+$L_\mathrm{d} = \delta_{pI0} - K$ per band at the requested grade, or `None`.
+
+### SoundPowerIntensityResult.negative_band
+
+*property*
+
+Per band, whether the net sound power is not positive (clause 9.2).
+
+The sign is judged on the settled share of the gross power, so partial
+powers that cancel in decimal are no net power whichever way the last
+bits of their sum fall.
+
+### SoundPowerIntensityResult.negative_partial_power_index
+
+*property*
+
+The negative-partial-power indicator $F_{+/-}$ (Eq. A.2), per band.
+
+### SoundPowerIntensityResult.partial_power_level
+
+*property*
+
+The magnitude level $10 \log_{10}(|P_i|/P_0)$ (Eq. 8), per segment and band.
 
 ### SoundPowerIntensityResult.plot()
 
@@ -561,3 +722,21 @@ indicators (`FpI`, `F+/-`) and the Annex B qualification criteria.
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
 | ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
+### SoundPowerIntensityResult.sound_power
+
+*property*
+
+The signed band total $P = \sum P_i$ (Eq. 6), in watts.
+
+### SoundPowerIntensityResult.sound_power_level
+
+*property*
+
+The band level $10 \log_{10}(P/P_0)$ (Eq. 13), `NaN` where $P \le 0$.
+
+### SoundPowerIntensityResult.sound_power_level_a
+
+*property*
+
+The A-weighted total over the determinable, qualified bands, in dB.

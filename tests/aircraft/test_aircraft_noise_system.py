@@ -84,11 +84,59 @@ def test_empty_call_not_passed() -> None:
     assert aircraft.verify_aircraft_noise_system().passes is False
 
 
-def test_a_verdict_the_checks_do_not_support_is_rejected() -> None:
-    """``passed`` is the conjunction of the checks, and False over none."""
+def test_the_verdict_is_read_from_the_checks() -> None:
+    """``passes`` is the conjunction of the checks, and False over none."""
     result = aircraft.verify_aircraft_noise_system(resolution=0.1)
     assert result.passes is True
-    with pytest.raises(ValueError, match=r"must be the conjunction of the checks"):
+    assert dataclasses.replace(result, resolution=None).passes is False
+    with pytest.raises(TypeError, match="passes"):
         dataclasses.replace(result, passes=False)
-    with pytest.raises(ValueError, match=r"must be the conjunction of the checks"):
-        dataclasses.replace(result, checks=())
+
+
+@pytest.mark.parametrize("field", ["checks", "passes"])
+def test_the_checks_and_the_verdict_are_not_fields(field: str) -> None:
+    """A row cannot state a limit or an ``ok`` its measurement does not reach."""
+    result = aircraft.verify_aircraft_noise_system(resolution=0.5)
+    with pytest.raises(TypeError, match=field):
+        dataclasses.replace(result, **{field: ()})
+
+
+def test_a_hand_built_result_reads_its_limit_from_the_standard() -> None:
+    """The 0.1 dB of 4.7 is read, not taken: 0.5 dB fails however it is built."""
+    result = aircraft.AircraftSystemComplianceResult(resolution=0.5)
+    (check,) = result.checks
+    assert (check["limit"], check["value"], check["ok"]) == (0.1, 0.5, False)
+    assert result.passes is False
+
+
+def test_a_check_row_cannot_be_written_into() -> None:
+    """The rows are read-only, so a write cannot move the verdict after it was read."""
+    result = aircraft.verify_aircraft_noise_system(resolution=0.5)
+    row = result.checks[0]
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        row["ok"] = True  # type: ignore[index]
+    assert result.passes is False
+
+
+def test_the_measurements_are_copies_of_the_callers() -> None:
+    """Changing the caller's mapping afterwards does not reach the result."""
+    measured = {1000.0: 1.2}
+    result = aircraft.verify_aircraft_noise_system(frequency_response=measured)
+    measured[1000.0] = 9.0
+    assert result.passes is True
+
+
+def test_the_result_survives_a_round_trip_through_pickle() -> None:
+    import pickle
+
+    result = aircraft.verify_aircraft_noise_system(
+        directional={4000.0: {90: 1.9}}, linearity={"reference": 0.3}
+    )
+    again = pickle.loads(pickle.dumps(result))  # noqa: S301 - our own bytes
+    assert again.checks == result.checks
+    assert again.passes is True
+
+
+def test_a_hand_built_result_refuses_a_frequency_no_table_covers() -> None:
+    with pytest.raises(ValueError, match="'frequency' is not an IEC 61265 tabulated"):
+        aircraft.AircraftSystemComplianceResult(directional={20.0: {90.0: 0.5}})

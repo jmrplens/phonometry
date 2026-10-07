@@ -371,7 +371,6 @@ class ModulationBlock(OwnsArrays):
         from the positive frequencies (the half magnitude the TS allows).
     :ivar modulation_frequency_range_hz: The user's range of fundamental
         modulation frequencies, in Hz.
-    :ivar status: :class:`ModulationBlockStatus` of the block.
     :ivar fundamental_frequency_hz: The fundamental modulation frequency, the
         highest local maximum in the range, in Hz; ``None`` for ``NO_PEAK``.
     :ivar prominence: The prominence ratio :math:`p_\mathrm{AM}` of Equation
@@ -383,6 +382,11 @@ class ModulationBlock(OwnsArrays):
         for a prominence-failed block.
     :ivar modulation_depth_db: ``L5 - L95`` of the reconstructed series, in
         dB; ``None`` unless the block is valid.
+    :ivar excluded: Whether the practitioner excluded the block by hand
+        (13.6.2.2, third bullet).
+
+    :attr:`status` is read from the prominence, the threshold of 4 of
+    13.6.2.3 e) and the exclusion, so it is not a field.
     """
 
     levels_db: NDArray[np.float64]
@@ -391,12 +395,58 @@ class ModulationBlock(OwnsArrays):
     power_spectrum: NDArray[np.float64]
     modulation_frequency_range_hz: tuple[float, float]
     _: KW_ONLY
-    status: ModulationBlockStatus
     fundamental_frequency_hz: float | None
     prominence: float | None
     harmonic_frequencies_hz: tuple[float, ...]
     reconstructed_db: NDArray[np.float64]
     modulation_depth_db: float | None
+    excluded: bool = False
+
+    def __post_init__(self) -> None:
+        """Refuse a block whose analysis does not match the status it reads as.
+
+        The status follows from the prominence, so what else the block holds
+        has to agree with it: a peak and its prominence come together, and a
+        modulation depth exists exactly when the block is valid.
+
+        :raises ValueError: if the fundamental and the prominence are not
+            given together, the prominence is negative or NaN, or the
+            modulation depth is present on a block that is not valid or
+            missing on one that is.
+        """
+        if (self.fundamental_frequency_hz is None) != (self.prominence is None):
+            msg = (
+                "ModulationBlock: a fundamental and its prominence come together "
+                "(13.6.2.3 d) and e)); give both or neither."
+            )
+            raise ValueError(msg)
+        if self.prominence is not None and (
+            math.isnan(self.prominence) or self.prominence < 0.0
+        ):
+            msg = "ModulationBlock: 'prominence' must be a non-negative ratio."
+            raise ValueError(msg)
+        if (self.modulation_depth_db is None) == self.valid:
+            msg = (
+                "ModulationBlock: a modulation depth is read from a valid block "
+                f"and from no other; this block reads as {self.status.value!r}."
+            )
+            raise ValueError(msg)
+
+    @property
+    def status(self) -> ModulationBlockStatus:
+        """:class:`ModulationBlockStatus` of the block (13.6.2.2 and 13.6.2.3).
+
+        ``EXCLUDED`` when the practitioner excluded it, ``NO_PEAK`` without a
+        local maximum in the range, ``LOW_PROMINENCE`` for a prominence under
+        :data:`AM_PROMINENCE_THRESHOLD`, ``VALID`` otherwise.
+        """
+        if self.excluded:
+            return ModulationBlockStatus.EXCLUDED
+        if self.prominence is None:
+            return ModulationBlockStatus.NO_PEAK
+        if self.prominence < AM_PROMINENCE_THRESHOLD:
+            return ModulationBlockStatus.LOW_PROMINENCE
+        return ModulationBlockStatus.VALID
 
     @property
     def valid(self) -> bool:
@@ -549,7 +599,6 @@ def amplitude_modulation_block(
     if not in_range:
         return ModulationBlock(
             **common,
-            status=ModulationBlockStatus.NO_PEAK,
             fundamental_frequency_hz=None,
             prominence=None,
             harmonic_frequencies_hz=(),
@@ -561,7 +610,6 @@ def amplitude_modulation_block(
     if prominence < AM_PROMINENCE_THRESHOLD:
         return ModulationBlock(
             **common,
-            status=ModulationBlockStatus.LOW_PROMINENCE,
             fundamental_frequency_hz=fundamental / _BLOCK_DURATION_S,
             prominence=prominence,
             harmonic_frequencies_hz=(),
@@ -586,7 +634,6 @@ def amplitude_modulation_block(
     )
     return ModulationBlock(
         **common,
-        status=ModulationBlockStatus.VALID,
         fundamental_frequency_hz=fundamental / _BLOCK_DURATION_S,
         prominence=prominence,
         harmonic_frequencies_hz=tuple(harmonics),
@@ -599,31 +646,85 @@ def amplitude_modulation_block(
 class ModulationPeriod(OwnsArrays):
     """The AM rating of one 10 min period (IEC TS 61400-11-2:2024, 13.6.3).
 
+    Everything but the blocks is read from them, against the 30 valid blocks
+    of 13.6.2.2 and the 90th percentile of 13.6.3, so a period cannot be
+    built to rate blocks the TS does not count.
+
     :ivar blocks: The sixty :class:`ModulationBlock` analyses, in time order.
-    :ivar modulation_depths_db: The depth of each block, in dB; NaN where the
-        block is not valid.
-    :ivar fundamental_frequencies_hz: The fundamental of each valid block, in
-        Hz; NaN elsewhere.
-    :ivar valid_blocks: Number of valid blocks, the ``n`` number of 13.6.2.2.
-    :ivar rated: Whether at least 30 blocks are valid (13.6.2.2).
-    :ivar rating_db: The AM rating of the period, in dB: the 90th percentile
-        of the valid depths when ``rated``, else 0 dB (13.6.3).
-    :ivar mean_modulation_frequency_hz: Mean fundamental of the valid blocks,
-        in Hz; ``None`` when not ``rated``.
-    :ivar mode_modulation_frequency_hz: Most frequent fundamental of the
-        valid blocks, in Hz, the lowest of equally frequent ones; ``None``
-        when not ``rated``.
     """
 
     blocks: tuple[ModulationBlock, ...]
-    modulation_depths_db: NDArray[np.float64]
-    fundamental_frequencies_hz: NDArray[np.float64]
-    _: KW_ONLY
-    valid_blocks: int
-    rated: bool
-    rating_db: float
-    mean_modulation_frequency_hz: float | None
-    mode_modulation_frequency_hz: float | None
+
+    @property
+    def modulation_depths_db(self) -> NDArray[np.float64]:
+        """The depth of each block, in dB; NaN where the block is not valid."""
+        return np.array(
+            [
+                b.modulation_depth_db
+                if b.valid and b.modulation_depth_db is not None
+                else np.nan
+                for b in self.blocks
+            ],
+            dtype=np.float64,
+        )
+
+    @property
+    def fundamental_frequencies_hz(self) -> NDArray[np.float64]:
+        """The fundamental of each valid block, in Hz; NaN elsewhere."""
+        return np.array(
+            [
+                b.fundamental_frequency_hz
+                if b.valid and b.fundamental_frequency_hz is not None
+                else np.nan
+                for b in self.blocks
+            ],
+            dtype=np.float64,
+        )
+
+    @property
+    def valid_blocks(self) -> int:
+        """Number of valid blocks, the ``n`` number of 13.6.2.2."""
+        return int(np.count_nonzero(np.isfinite(self.modulation_depths_db)))
+
+    @property
+    def rated(self) -> bool:
+        """Whether at least 30 blocks are valid (13.6.2.2)."""
+        return self.valid_blocks >= AM_MINIMUM_VALID_BLOCKS
+
+    @property
+    def rating_db(self) -> float:
+        """The AM rating of the period, in dB.
+
+        The 90th percentile of the valid depths when :attr:`rated`, else
+        0 dB (13.6.3).
+        """
+        if not self.rated:
+            return 0.0
+        depths = self.modulation_depths_db
+        return float(np.percentile(depths[np.isfinite(depths)], _RATING_PERCENTILE))
+
+    @property
+    def mean_modulation_frequency_hz(self) -> float | None:
+        """Mean fundamental of the valid blocks, in Hz; ``None`` when not :attr:`rated`."""
+        if not self.rated:
+            return None
+        fundamentals = self._valid_fundamentals()
+        lines = np.rint(fundamentals * _BLOCK_DURATION_S)
+        return float(np.mean(lines)) / _BLOCK_DURATION_S
+
+    @property
+    def mode_modulation_frequency_hz(self) -> float | None:
+        """Most frequent fundamental of the valid blocks, in Hz.
+
+        The lowest of equally frequent ones; ``None`` when not :attr:`rated`.
+        """
+        if not self.rated:
+            return None
+        return _mode_frequency(self._valid_fundamentals())
+
+    def _valid_fundamentals(self) -> NDArray[np.float64]:
+        valid = np.isfinite(self.modulation_depths_db)
+        return self.fundamental_frequencies_hz[valid]
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -699,38 +800,7 @@ def amplitude_modulation_period(
         if excluded[index]:
             block = _excluded(block)
         blocks.append(block)
-    depths = np.array(
-        [b.modulation_depth_db if b.valid else np.nan for b in blocks], dtype=np.float64
-    )
-    fundamentals = np.array(
-        [
-            b.fundamental_frequency_hz
-            if b.valid and b.fundamental_frequency_hz is not None
-            else np.nan
-            for b in blocks
-        ],
-        dtype=np.float64,
-    )
-    valid = np.isfinite(depths)
-    count = int(np.count_nonzero(valid))
-    rated = count >= AM_MINIMUM_VALID_BLOCKS
-    if rated:
-        rating = float(np.percentile(depths[valid], _RATING_PERCENTILE))
-        lines = np.rint(fundamentals[valid] * _BLOCK_DURATION_S)
-        mean_frequency: float | None = float(np.mean(lines)) / _BLOCK_DURATION_S
-        mode_frequency: float | None = _mode_frequency(fundamentals[valid])
-    else:
-        rating, mean_frequency, mode_frequency = 0.0, None, None
-    return ModulationPeriod(
-        blocks=tuple(blocks),
-        modulation_depths_db=read_only(depths),
-        fundamental_frequencies_hz=read_only(fundamentals),
-        valid_blocks=count,
-        rated=rated,
-        rating_db=rating,
-        mean_modulation_frequency_hz=mean_frequency,
-        mode_modulation_frequency_hz=mode_frequency,
-    )
+    return ModulationPeriod(blocks=tuple(blocks))
 
 
 def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
@@ -761,12 +831,12 @@ def _excluded(block: ModulationBlock) -> ModulationBlock:
         frequencies_hz=block.frequencies_hz,
         power_spectrum=block.power_spectrum,
         modulation_frequency_range_hz=block.modulation_frequency_range_hz,
-        status=ModulationBlockStatus.EXCLUDED,
         fundamental_frequency_hz=block.fundamental_frequency_hz,
         prominence=block.prominence,
         harmonic_frequencies_hz=(),
         reconstructed_db=read_only(np.zeros(0)),
         modulation_depth_db=None,
+        excluded=True,
     )
 
 

@@ -330,24 +330,46 @@ def lab_lining_improvement(
 class LiningCuringCheck:
     """Whether the basic element was stable across the two measurements (G.4).
 
+    The verdicts are read from the three times and the third G.4 prints, so
+    they are not fields: a check cannot be built to pass times the clause
+    fails.
+
     :ivar curing_time_days: Time from the end of construction of the basic
         element to the first sound reduction measurement, in days.
     :ivar time_lag_days: Time between the measurement without and the
         measurement with the lining, in days.
     :ivar required_curing_days: The curing period that settles the element,
         14 days unless the product specification sets another.
-    :ivar cured: Whether the curing time reaches ``required_curing_days``.
-    :ivar lag_within_third: Whether the time lag is at most a third of the
-        curing time, the alternative G.4 allows.
-    :ivar passes: Whether either condition holds.
     """
 
     curing_time_days: float
     time_lag_days: float
     required_curing_days: float
-    cured: bool
-    lag_within_third: bool
-    passes: bool
+
+    @property
+    def cured(self) -> bool:
+        """Whether the curing time reaches ``required_curing_days``.
+
+        Inclusive, and compared with a relative slack so that a time on the
+        bound is not failed by the binary rounding of the product.
+        """
+        return self.curing_time_days >= self.required_curing_days * (1.0 - _BOUND_SLACK)
+
+    @property
+    def lag_within_third(self) -> bool:
+        """Whether the time lag is at most a third of the curing time, the alternative G.4 allows.
+
+        Inclusive, with the same slack: the printed 1 d and 3 d, or 2,1 d and
+        6,3 d, are on the bound.
+        """
+        return self.time_lag_days * _LAG_FACTOR <= self.curing_time_days * (
+            1.0 + _BOUND_SLACK
+        )
+
+    @property
+    def passes(self) -> bool:
+        """Whether either condition holds."""
+        return self.cured or self.lag_within_third
 
     @property
     def earliest_start_days(self) -> float:
@@ -418,18 +440,10 @@ def check_lining_curing(
     curing = require_non_negative(curing_time_days, "curing_time_days")
     lag = require_non_negative(time_lag_days, "time_lag_days")
     required = require_positive(required_curing_days, "required_curing_days")
-    # Both bounds are inclusive and are compared with a relative slack, so that
-    # an input on the bound (the printed 1 d and 3 d, or 2,1 d and 6,3 d) is
-    # not failed by the binary rounding of the product.
-    cured = curing >= required * (1.0 - _BOUND_SLACK)
-    lag_ok = lag * _LAG_FACTOR <= curing * (1.0 + _BOUND_SLACK)
     return LiningCuringCheck(
         curing_time_days=curing,
         time_lag_days=lag,
         required_curing_days=required,
-        cured=cured,
-        lag_within_third=lag_ok,
-        passes=cured or lag_ok,
     )
 
 

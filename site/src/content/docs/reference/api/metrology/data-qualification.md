@@ -387,10 +387,8 @@ StationarityTestResult(
     count: int,
     mean: float,
     std: float,
-    bounds: tuple[int, int],
     p_value: float,
     *,
-    stationary: bool,
     alpha: float,
     n_segments: int,
     segment_duration: float,
@@ -417,13 +415,21 @@ procedure). The hypothesis of stationarity is accepted when
 | `count` | Observed test statistic (reverse arrangements or runs). |
 | `mean` | Null mean of the count. |
 | `std` | Null standard deviation of the count. |
-| `bounds` | Acceptance region `(lower, upper)` at `alpha`. |
 | `p_value` | Two-sided p-value of the observed count. |
-| `stationary` | `True` when the count falls inside the region. |
 | `alpha` | Significance level (default 0.05). |
 | `n_segments` | Number of segments the record was divided into. |
 | `segment_duration` | Duration of each segment, in seconds. |
 | `fs` | Sample rate of the record, in Hz. |
+
+### StationarityTestResult.bounds
+
+*property*
+
+Acceptance region `(lower, upper)` at `alpha`, read from the segment values.
+
+The same region [`trend_test`](/phonometry/reference/api/metrology/data-qualification/#trend_test) reads on `segment_values`:
+B&P Table A.6's convention for reverse arrangements, the exact
+percentage points about the segment values' own median for runs.
 
 ### StationarityTestResult.plot()
 
@@ -443,6 +449,12 @@ Plot the segment-statistic sequence with the test verdict.
 | Name | Description |
 | :--- | :--- |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+
+### StationarityTestResult.stationary
+
+*property*
+
+Whether the count falls inside the acceptance region, `lower < count <= upper`.
 
 ## trend_test
 
@@ -503,10 +515,8 @@ TrendTestResult(
     n: int,
     mean: float,
     std: float,
-    bounds: tuple[int, int],
     p_value: float,
     *,
-    trend_free: bool,
     alpha: float,
     median: float | None = None,
 )
@@ -530,11 +540,25 @@ two-sided tail probability of the observed count.
 | `n` | Number of observations used. |
 | `mean` | Null mean of the statistic (B&P Eq. (4.54) for `A`). |
 | `std` | Null standard deviation (B&P Eq. (4.55) for `A`). |
-| `bounds` | Acceptance region `(lower, upper)`: percentage points such that the no-trend hypothesis is accepted when `lower < statistic <= upper`. For reverse arrangements these follow B&P Table A.6's own convention (normal approximation with continuity correction, which reproduces the book's tabulated $\alpha = 0.05$ entries exactly; the table is not derivable from the exact Mahonian distribution), so at an acceptance boundary the verdict and the exact `p_value` can disagree by one count. |
 | `p_value` | Two-sided p-value from the exact null distribution (normal approximation above $n = 100$ for reverse arrangements). |
-| `trend_free` | `True` when the statistic falls inside the acceptance region. |
 | `alpha` | Significance level of the region (default 0.05). |
 | `median` | For `"runs"`, the median of the *original* sequence against which each value was classified (before values equal to it were discarded); `None` for `"reverse_arrangements"`. |
+
+### TrendTestResult.bounds
+
+*property*
+
+Acceptance region `(lower, upper)` at `alpha`, read from the sequence.
+
+Percentage points such that the no-trend hypothesis is accepted when
+`lower < statistic <= upper`. For reverse arrangements these follow
+B&P Table A.6's own convention (normal approximation with continuity
+correction, which reproduces the book's tabulated
+$\alpha = 0.05$ entries exactly; the table is not derivable
+from the exact Mahonian distribution), so at an acceptance boundary
+the verdict and the exact `p_value` can disagree by one count.
+For runs they are the exact percentage points of the counts above and
+below `median`.
 
 ### TrendTestResult.plot()
 
@@ -564,3 +588,12 @@ classification median is drawn as a reference line.
 | `kwargs` | Extra keyword arguments forwarded to the sequence `plot` call (e.g. `color`, `lw`, `marker`). |
 
 **Returns:** The `Axes` the sequence was drawn on, so the figure can be composed further.
+
+### TrendTestResult.trend_free
+
+*property*
+
+Whether the statistic falls inside the acceptance region.
+
+`lower < statistic <= upper`: the no-trend hypothesis is accepted at
+`alpha`.

@@ -623,9 +623,11 @@ class InDuctSoundPowerResult(OwnsArrays):
     95 % figure clause 9.2 says to record. ``information_only_band`` marks the
     bands the standard gives for information rather than as part of itself:
     those above 10 kHz, and every band when the sampling tube is used between
-    40 m/s and 60 m/s (5.3.3.4 NOTE, clause 4). Table 2 is stated for the
-    sampling tube; clause 4 NOTE 5 expects the figures to grow for the other
-    shields and gives no others, so the same values are reported for them.
+    40 m/s and 60 m/s (5.3.3.4 NOTE, clause 4); it is read from
+    ``frequencies`` and ``flow_velocity``, so it is not a field. Table 2 is
+    stated for the sampling tube; clause 4 NOTE 5 expects the figures to grow
+    for the other shields and gives no others, so the same values are reported
+    for them.
 
     ``duct_diameter_m`` and ``duct_area`` are :math:`d` and :math:`S`,
     ``characteristic_impedance`` is the :math:`\rho c` of the duct air and
@@ -643,7 +645,6 @@ class InDuctSoundPowerResult(OwnsArrays):
     combined_correction: np.ndarray
     reproducibility_standard_deviation: np.ndarray
     expanded_uncertainty: np.ndarray
-    information_only_band: np.ndarray
     duct_diameter_m: float
     duct_area: float
     characteristic_impedance: float
@@ -685,7 +686,6 @@ class InDuctSoundPowerResult(OwnsArrays):
             "combined_correction",
             "reproducibility_standard_deviation",
             "expanded_uncertainty",
-            "information_only_band",
         )
         require_ranks(self, **dict.fromkeys(per_band, 1))
         require_same_length(self, *per_band)
@@ -707,6 +707,21 @@ class InDuctSoundPowerResult(OwnsArrays):
             "speed_of_sound",
             "flow_velocity",
             "sound_power_level_a",
+        )
+
+    @property
+    def information_only_band(self) -> np.ndarray:
+        """Per band, whether the standard gives it for information only.
+
+        ``True`` above 10 kHz (3.8, clause 4), and in every band when the
+        flow at the microphone exceeds the 40 m/s of the sampling tube
+        (5.3.3.4 NOTE).
+        """
+        freqs = np.asarray(self.frequencies, dtype=np.float64)
+        return np.asarray(
+            (freqs > _NORMATIVE_MAX_HZ)
+            | (abs(self.flow_velocity) > _MAX_VELOCITY["sampling-tube"]),
+            dtype=bool,
         )
 
     def plot(
@@ -1188,9 +1203,6 @@ def sound_power_in_duct(
             SoundPowerWarning,
             stacklevel=2,
         )
-    information_only = (freqs > _NORMATIVE_MAX_HZ) | np.full(
-        freqs.shape, abs(u) > _MAX_VELOCITY["sampling-tube"]
-    )
     # Annex C, Eq. (C.1): the energy sum with the C_j of Table C.1.
     cj = np.asarray([_TABLE_C1[band] for band in _band_keys(freqs)], dtype=np.float64)
     return InDuctSoundPowerResult(
@@ -1204,7 +1216,6 @@ def sound_power_in_duct(
         combined_correction=np.asarray(combined, dtype=np.float64),
         reproducibility_standard_deviation=sigma_r,
         expanded_uncertainty=_COVERAGE_FACTOR * sigma_r,
-        information_only_band=information_only,
         duct_diameter_m=d,
         duct_area=area,
         characteristic_impedance=rho_c,

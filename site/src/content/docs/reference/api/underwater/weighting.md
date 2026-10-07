@@ -288,8 +288,6 @@ WeightedExposureResult(
     peak_margin: float | None,
     tts_peak_margin: float | None,
     *,
-    exceeds_injury: bool,
-    exceeds_tts: bool,
     guidance: str,
     group: str,
     impulsive: bool,
@@ -315,8 +313,6 @@ Weighted exposure of a spectrum against a hearing group's criteria.
 | `tts_margin` | `cumulative_sel - tts_sel`, in dB (or `None`). |
 | `peak_margin` | `peak_spl - injury_peak_spl`, in dB (or `None`). |
 | `tts_peak_margin` | `peak_spl - tts_peak_spl`, in dB (or `None`) -- the peak-SPL half of the dual metric on the TTS side, which can trip `exceeds_tts` on its own. |
-| `exceeds_injury` | Whether any injury-onset criterion is reached. The test is `margin >= 0`, so an exposure landing exactly **on** the criterion counts as exceeding it; the criteria are onset thresholds and the precautionary reading is the one an assessment wants. |
-| `exceeds_tts` | Whether any TTS-onset criterion is reached, on the same `margin >= 0` convention as `exceeds_injury`. |
 | `guidance` | The guidance version. |
 | `group` | Hearing-group code. |
 | `impulsive` | Whether the impulsive criteria were compared against. |
@@ -332,6 +328,22 @@ criteria.
 The [`ExposureCriteria`](/phonometry/reference/api/underwater/weighting/#exposurecriteria) compared against.
 
 **Returns:** [`exposure_criteria`](/phonometry/reference/api/underwater/weighting/#exposure_criteria) of `group` under `guidance`, impulsive or not.
+
+### WeightedExposureResult.exceeds_injury
+
+*property*
+
+Whether any injury-onset criterion is reached.
+
+The test is `margin >= 0`, so an exposure landing exactly **on** the
+criterion counts as exceeding it; the criteria are onset thresholds
+and the precautionary reading is the one an assessment wants.
+
+### WeightedExposureResult.exceeds_tts
+
+*property*
+
+Whether any TTS-onset criterion is reached, on the same `margin >= 0` convention.
 
 ### WeightedExposureResult.plot()
 

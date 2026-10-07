@@ -190,30 +190,56 @@ Time constants of the quasi-peak chain, in seconds.
 ## QuasiPeakDynamicsResult
 
 ```python
-QuasiPeakDynamicsResult(
-    fs: float,
-    passes: bool,
-    worst_margin_db: float,
-    worst_deviation_db: float,
-    stimuli: tuple[dict[str, Any], ...],
-)
+QuasiPeakDynamicsResult(fs: float, readings_percent: tuple[float, ...])
 ```
 
 The eleven acceptance windows of clause 2, read on one chain.
 
-What [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) returns: the verdict together with
-the eleven rows it is the conjunction of, and the sample rate they were
-run at.
+What [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) returns: the eleven readings, in
+percent of the steady reading, and the sample rate they were run at. The
+rows put each reading beside the window Table 2 or Table 3 prints for it,
+and the verdict and the two summary numbers are the conjunction, the
+minimum and the maximum of their columns, so all of them are read from
+the readings and the tables and none is a field.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate the stimuli were run at, in Hz. |
-| `passes` | Whether every reading fell inside its window. |
-| `worst_margin_db` | The smallest of the eleven margins, negative when one reading is outside its window. |
-| `worst_deviation_db` | The largest departure from a printed reference reading. It is a regression bound, not conformance: the reference is printed to two significant figures on nine of the eleven cells. |
-| `stimuli` | The eleven rows, `{"stimulus", "table", "reading_percent", "lower_percent", "reference_percent", "upper_percent", "deviation_db", "margin_db"}` each. |
+| `readings_percent` | The eleven readings, in percent of the steady reading: the eight single bursts of Table 2 from 1 ms to 200 ms, then the 2, 10 and 100 bursts per second of Table 3. |
+
+### QuasiPeakDynamicsResult.passes
+
+*property*
+
+Whether every reading fell inside its window.
+
+### QuasiPeakDynamicsResult.stimuli
+
+*property*
+
+The eleven rows, `{"stimulus", "table", "reading_percent",
+"lower_percent", "reference_percent", "upper_percent",
+"deviation_db", "margin_db"}` each, read-only.
+
+The window is the one Table 2 or Table 3 prints for the stimulus, and
+`margin_db` is positive when the reading is inside it.
+
+### QuasiPeakDynamicsResult.worst_deviation_db
+
+*property*
+
+The largest departure from a printed reference reading.
+
+It is a regression bound, not conformance: the reference is printed
+to two significant figures on nine of the eleven cells.
+
+### QuasiPeakDynamicsResult.worst_margin_db
+
+*property*
+
+The smallest of the margins, negative when one reading is outside its window.
 
 ## QuasiPeakResult
 

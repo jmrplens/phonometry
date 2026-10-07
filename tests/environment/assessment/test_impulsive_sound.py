@@ -296,18 +296,8 @@ def _result() -> iso.ImpulsiveSoundResult:
     levels = _ramp(40.0, 30.0, 0.30)
     times = np.arange(levels.size) * DT
     onsets = iso.detect_onsets(levels, DT)
-    p = max(o.prominence for o in onsets)
-    ki = float(iso.impulse_adjustment(p))
     return iso.ImpulsiveSoundResult(
-        times=times,
-        levels=levels,
-        dt=DT,
-        onsets=onsets,
-        prominence=p,
-        adjustment=ki,
-        category=iso._categorise(ki),
-        laeq=70.0,
-        adjusted_laeq=70.0 + ki,
+        times=times, levels=levels, dt=DT, onsets=onsets, laeq=70.0
     )
 
 

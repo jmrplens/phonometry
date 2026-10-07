@@ -2733,6 +2733,13 @@ _VALIDATION_AGAINST: dict[str, str] = {
 _VALIDATION_BAND_LABEL = (
     r"$\pm U_\Delta = \pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$"
 )
+_VALIDATION_SHARED_BAND_LABEL = (
+    r"$\pm U_\Delta = \pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2"
+    r" - 2(k\,u_\mathrm{sh})^2}$"
+)
+_VALIDATION_INDEPENDENT_LABEL = (
+    r"$\pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$, if independent"
+)
 _VALIDATION_DIFFERENCE_LABEL = r"$\Delta = L_\mathrm{cal} - L_\mathrm{val}$"
 _VALIDATION_FAILING_LABEL = r"$|\Delta| > U_\Delta$"
 _VALIDATION_UNCOVERED_LABEL = "Not covered by the validation"
@@ -2751,6 +2758,10 @@ _STRINGS.update(
         ]: "Frente a una calibración en otro soporte, acoplador o campo",
         _VALIDATION_AGAINST["reciprocity"]: "Frente a una calibración por reciprocidad",
         _VALIDATION_BAND_LABEL: _VALIDATION_BAND_LABEL,
+        _VALIDATION_SHARED_BAND_LABEL: _VALIDATION_SHARED_BAND_LABEL,
+        _VALIDATION_INDEPENDENT_LABEL: (
+            r"$\pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$, si fueran independientes"
+        ),
         _VALIDATION_DIFFERENCE_LABEL: _VALIDATION_DIFFERENCE_LABEL,
         _VALIDATION_FAILING_LABEL: _VALIDATION_FAILING_LABEL,
         _VALIDATION_UNCOVERED_LABEL: "Sin cubrir por la validación",
@@ -2837,7 +2848,9 @@ def plot_jig_coupler_verification(
     it is validated against, inside the expanded uncertainty of the
     difference, with the frequencies where they disagree marked and those of
     the calibration the validation does not cover drawn as dashed vertical
-    lines (IEC 61094-5 6.7).
+    lines (IEC 61094-5 6.7). When the two share part of their uncertainty,
+    the root-sum-square they would have as independent calibrations is
+    drawn dotted around the narrower band.
 
     :param result: A
         :class:`~phonometry.metrology.comparison_calibration.JigCouplerVerification`.
@@ -2852,14 +2865,34 @@ def plot_jig_coupler_verification(
     frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
     difference = np.asarray(result.difference_db, dtype=np.float64)
     uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
+    shares = bool(np.any(np.asarray(result.shared_standard_uncertainty_db) > 0.0))
     ax.fill_between(
         frequencies,
         -uncertainty,
         uncertainty,
         color=theme_fill(_C_PRIMARY, ax),
         lw=0.0,
-        label=_t(_VALIDATION_BAND_LABEL, language),
+        label=_t(
+            _VALIDATION_SHARED_BAND_LABEL if shares else _VALIDATION_BAND_LABEL,
+            language,
+        ),
     )
+    if shares:
+        independent = np.hypot(
+            np.asarray(result.calibration_uncertainty_db, dtype=np.float64),
+            np.asarray(result.validation_uncertainty_db, dtype=np.float64),
+        )
+        for sign in (1.0, -1.0):
+            ax.plot(
+                frequencies,
+                sign * independent,
+                color=_C_PRIMARY,
+                lw=1.4,
+                ls=":",
+                label=_t(_VALIDATION_INDEPENDENT_LABEL, language)
+                if sign > 0.0
+                else "_nolegend_",
+            )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)

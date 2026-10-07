@@ -13,8 +13,12 @@ CIRA(EXT) 010 (1996), whose Appendix B (folios 25 to 27, PDF pages 28 to 30)
 prints a circuit, its parameters and the graph of the error it causes: the
 series impedance is checked against the ratio Appendix B prints, evaluated
 here independently, and against the extremes of the printed graph. 6.7 prints
-no criterion, so the validation is checked against its definition. The
-printed values are read from ``tests/reference_data``.
+no criterion, so the validation is checked against its definition, and its
+shared part against the GUM: the covariance of two estimates through a
+common quantity (JCGM 100:2008 F.1.2.3, Formula (F.2)), worked by hand on
+the budget of Table D.1, and the correlation coefficients F.1.2.3 Example 2
+prints for two items calibrated against the same standard. The printed
+values are read from ``tests/reference_data``.
 """
 
 from __future__ import annotations
@@ -691,6 +695,334 @@ def test_verification_refuses_two_zero_uncertainties() -> None:
         )
 
 
+#: Table D.1 at 2 kHz, by hand: the eight rows sum to 0,001 907 dB^2, so each
+#: calibration of the budget has U = 2 sqrt(0,001 907) = 0,087 338 dB. Two
+#: against the same reference share its row, 0,025 dB; the other seven sum
+#: to 0,001 907 - 0,000 625 = 0,001 282 dB^2, and the difference of the two
+#: carries U = 2 sqrt(2 x 0,001 282) = 0,101 272 dB rather than the
+#: 2 sqrt(2 x 0,001 907) = 0,123 515 dB of two independent calibrations.
+_D1_EXPANDED_DB = 0.0873384222435922
+_D1_DIFFERENCE_SHARED_DB = 0.1012719112093773
+_D1_DIFFERENCE_INDEPENDENT_DB = 0.1235151812531561
+#: r = 0,000 625/0,001 907 (JCGM 100:2008 Formula (14)).
+_D1_CORRELATION = 0.3277399056109072
+
+
+def test_shared_reference_cancels_in_the_difference() -> None:
+    """Two calibrations with the budget of Table D.1 against the same LS2P:
+    its row, 0,025 dB, cancels in the difference, 0,101 272 dB where the
+    root-sum-square gives 0,123 515 dB, worked by hand above.
+    """
+    jig = _comparison(np.full(4, -26.3), _D1_EXPANDED_DB)
+    coupler = _comparison(np.full(4, -26.31), _D1_EXPANDED_DB)
+    independent = metrology.verify_jig_or_coupler(jig, coupler)
+    shared = metrology.verify_jig_or_coupler(
+        jig, coupler, shared_standard_uncertainty_db=0.025
+    )
+    np.testing.assert_allclose(
+        independent.expanded_uncertainty_db, _D1_DIFFERENCE_INDEPENDENT_DB, rtol=1e-12
+    )
+    np.testing.assert_allclose(
+        shared.expanded_uncertainty_db, _D1_DIFFERENCE_SHARED_DB, rtol=1e-12
+    )
+    np.testing.assert_allclose(
+        shared.correlation_coefficient, _D1_CORRELATION, rtol=1e-12
+    )
+    np.testing.assert_allclose(independent.correlation_coefficient, 0.0, atol=0.0)
+    np.testing.assert_allclose(shared.shared_standard_uncertainty_db, 0.025)
+    np.testing.assert_allclose(shared.difference_db, independent.difference_db)
+
+
+def test_shared_part_is_the_gum_law_for_correlated_inputs() -> None:
+    """u_Delta^2 = u_cal^2 + u_val^2 - 2 u_sh^2 at each frequency (JCGM 100:2008
+    5.2.2 with the covariance u_sh^2 of F.1.2.3), every column its own, on
+    the k = 2 of 7.9; the shared part follows the calibration's frequencies
+    and the one the validation does not cover drops out with it.
+    """
+    u_cal = np.array([0.08, 0.09, 0.10, 0.12])
+    u_val = np.array([0.06, 0.05, 0.07])
+    u_sh = np.array([0.01, 0.02, 0.025, 0.04])
+    jig = _comparison(np.full(4, -26.3), u_cal)
+    reciprocity = _reciprocity(np.array([1000.0, 2000.0, 4000.0]), -26.32, u_val)
+    result = metrology.verify_jig_or_coupler(
+        jig, reciprocity, microphone=1, shared_standard_uncertainty_db=u_sh
+    )
+    standard = np.sqrt((u_cal[:3] / 2) ** 2 + (u_val / 2) ** 2 - 2 * u_sh[:3] ** 2)
+    np.testing.assert_allclose(result.expanded_uncertainty_db, 2 * standard, rtol=1e-12)
+    np.testing.assert_allclose(result.shared_standard_uncertainty_db, u_sh[:3])
+    np.testing.assert_allclose(
+        result.correlation_coefficient,
+        u_sh[:3] ** 2 / ((u_cal[:3] / 2) * (u_val / 2)),
+        rtol=1e-12,
+    )
+    assert result.unvalidated_frequencies_hz.tolist() == [8000.0]
+
+
+@pytest.mark.parametrize(
+    ("validated", "kept"),
+    [
+        (np.array([2000.0, 4000.0, 8000.0]), [1, 2, 3]),
+        (np.array([1000.0, 4000.0, 8000.0]), [0, 2, 3]),
+    ],
+    ids=["first-uncovered", "middle-uncovered"],
+)
+def test_shared_part_follows_the_frequencies_the_validation_covers(
+    validated: np.ndarray, kept: list[int]
+) -> None:
+    """A shared part given per frequency of the calibration stays with its
+    own frequency when the one the validation leaves out is the first or
+    one in the middle, not the last: u_Delta^2 = u_cal^2 + u_val^2 -
+    2 u_sh^2 with the u_sh of each frequency validated.
+    """
+    u_cal = np.array([0.08, 0.09, 0.10, 0.12])
+    u_val = np.array([0.06, 0.07, 0.09])
+    u_sh = np.array([0.01, 0.02, 0.03, 0.04])
+    jig = _comparison(np.full(4, -26.3), u_cal)
+    other = _comparison(np.full(3, -26.32), u_val, validated)
+    result = metrology.verify_jig_or_coupler(
+        jig, other, shared_standard_uncertainty_db=u_sh
+    )
+    np.testing.assert_allclose(result.shared_standard_uncertainty_db, u_sh[kept])
+    standard = np.sqrt((u_cal[kept] / 2) ** 2 + (u_val / 2) ** 2 - 2 * u_sh[kept] ** 2)
+    np.testing.assert_allclose(result.expanded_uncertainty_db, 2 * standard, rtol=1e-12)
+    uncovered = np.delete(_F_VAL, kept)
+    assert result.unvalidated_frequencies_hz.tolist() == uncovered.tolist()
+
+
+def test_correlation_is_zero_where_a_calibration_carries_no_uncertainty() -> None:
+    """At a frequency where one calibration carries 0 dB nothing can be
+    shared, and the correlation coefficient is 0 there, not a division by
+    zero; elsewhere it is (k u_sh)^2/(U_cal U_val) = 0,04^2/(0,08 x 0,06).
+    """
+    result = cc.JigCouplerVerification(
+        frequencies_hz=np.array([1000.0, 2000.0]),
+        calibration_level_db=np.array([-26.3, -26.3]),
+        calibration_uncertainty_db=np.array([0.0, 0.08]),
+        validation_level_db=np.array([-26.3, -26.3]),
+        validation_uncertainty_db=np.array([0.06, 0.06]),
+        validation="comparison",
+        unvalidated_frequencies_hz=np.array([]),
+        shared_standard_uncertainty_db=np.array([0.0, 0.02]),
+    )
+    coefficient = result.correlation_coefficient
+    assert not np.any(np.isnan(coefficient))
+    np.testing.assert_allclose(coefficient, [0.0, 0.04**2 / (0.08 * 0.06)], rtol=1e-12)
+
+
+def test_shared_part_tightens_the_verdict() -> None:
+    """0,11 dB apart agrees within the 0,124 dB of two independent Table D.1
+    calibrations, and not within the 0,101 dB left once the reference they
+    share is taken out.
+    """
+    jig = _comparison(np.full(4, -26.3), _D1_EXPANDED_DB)
+    coupler = _comparison(np.array([-26.41, -26.3, -26.3, -26.3]), _D1_EXPANDED_DB)
+    independent = metrology.verify_jig_or_coupler(jig, coupler)
+    shared = metrology.verify_jig_or_coupler(
+        jig, coupler, shared_standard_uncertainty_db=0.025
+    )
+    assert independent.passes
+    assert shared.agrees.tolist() == [False, True, True, True]
+    assert not shared.passes
+    np.testing.assert_allclose(
+        shared.normalised_difference[0], 0.11 / _D1_DIFFERENCE_SHARED_DB, rtol=1e-9
+    )
+
+
+def test_no_shared_part_is_the_root_sum_square_to_the_last_bit() -> None:
+    """The default, and 0 dB given explicitly, leave every existing verdict
+    as it was: the root-sum-square of the two, bit for bit.
+    """
+    jig = _comparison(
+        np.array([-26.3, -26.31, -26.29, -26.3]), np.array([0.07, 0.08, 0.09, 0.1])
+    )
+    other = _comparison(np.full(4, -26.33), np.array([0.06, 0.05, 0.04, 0.03]))
+    default = metrology.verify_jig_or_coupler(jig, other)
+    explicit = metrology.verify_jig_or_coupler(
+        jig, other, shared_standard_uncertainty_db=0.0
+    )
+    rss = np.hypot(
+        default.calibration_uncertainty_db, default.validation_uncertainty_db
+    )
+    assert np.array_equal(default.expanded_uncertainty_db, rss)
+    assert np.array_equal(explicit.expanded_uncertainty_db, rss)
+    assert default.shared_standard_uncertainty_db.tolist() == [0.0] * 4
+
+
+def test_shared_part_as_large_as_one_uncertainty_is_allowed() -> None:
+    """u_sh = 0,03 dB is all of the 0,06 dB calibration (k = 2): the
+    difference keeps the rest of the other, sqrt(0,08^2 - 0,06^2) =
+    0,052 915 dB, and r = 0,000 9/(0,04 x 0,03) = 0,75.
+    """
+    jig = _comparison(np.full(4, -26.3), 0.06)
+    other = _comparison(np.full(4, -26.33), 0.08)
+    result = metrology.verify_jig_or_coupler(
+        jig, other, shared_standard_uncertainty_db=0.03
+    )
+    np.testing.assert_allclose(
+        result.expanded_uncertainty_db, 0.0529150262212918, rtol=1e-12
+    )
+    np.testing.assert_allclose(result.correlation_coefficient, 0.75, rtol=1e-12)
+
+
+def test_shared_part_within_a_nanodecibel_of_the_whole_is_the_whole() -> None:
+    """A shared part computed a few units in the last place above U/2 is the
+    whole of it, not a refusal, and leaves nothing of it in the difference.
+    """
+    jig = _comparison(np.full(4, -26.3), 0.06)
+    other = _comparison(np.full(4, -26.33), 0.08)
+    result = metrology.verify_jig_or_coupler(
+        jig, other, shared_standard_uncertainty_db=0.03 * (1.0 + 1e-15)
+    )
+    np.testing.assert_allclose(
+        result.expanded_uncertainty_db, 0.0529150262212918, rtol=1e-9
+    )
+
+
+def test_gum_example_2_correlation_of_two_items_against_one_standard() -> None:
+    """JCGM 100:2008 F.1.2.3 Example 2: against a standard of relative
+    standard uncertainty 10^-4, comparisons of 100, 10 and 1 x 10^-6 give
+    r ~ 0,5, 0,990 and 1,000, to the decimals printed. In levels each
+    calibration carries sqrt(u(alpha)^2 + (u(R_S)/R_S)^2) and they share
+    u(R_S)/R_S, all scaled by the same 20/ln 10 dB per neper.
+    """
+    scale = 20.0 / math.log(10.0)
+    standard = ref.GUM_F123_EXAMPLE_2_STANDARD_RELATIVE
+    for comparison, (printed, decimals) in ref.GUM_F123_EXAMPLE_2_CORRELATION.items():
+        expanded = 2.0 * scale * math.hypot(comparison, standard)
+        result = cc.JigCouplerVerification(
+            frequencies_hz=np.array([1000.0]),
+            calibration_level_db=np.array([-26.3]),
+            calibration_uncertainty_db=np.array([expanded]),
+            validation_level_db=np.array([-26.3]),
+            validation_uncertainty_db=np.array([expanded]),
+            validation="comparison",
+            unvalidated_frequencies_hz=np.array([]),
+            shared_standard_uncertainty_db=scale * standard,
+        )
+        assert round(float(result.correlation_coefficient[0]), decimals) == printed
+        np.testing.assert_allclose(
+            result.expanded_uncertainty_db,
+            2.0 * scale * math.sqrt(2.0) * comparison,
+            rtol=1e-9,
+        )
+
+
+def test_verification_publishes_the_shared_part_read_only() -> None:
+    result = cc.JigCouplerVerification(
+        frequencies_hz=np.array([1000.0, 2000.0]),
+        calibration_level_db=np.array([-26.3, -26.3]),
+        calibration_uncertainty_db=np.array([0.08, 0.08]),
+        validation_level_db=np.array([-26.3, -26.3]),
+        validation_uncertainty_db=np.array([0.06, 0.06]),
+        validation="comparison",
+        unvalidated_frequencies_hz=np.array([]),
+        shared_standard_uncertainty_db=0.02,
+    )
+    assert result.shared_standard_uncertainty_db.tolist() == [0.02, 0.02]
+    assert not result.shared_standard_uncertainty_db.flags.writeable
+
+
+@pytest.mark.parametrize(
+    ("shared", "match"),
+    [
+        (0.031, "'shared_standard_uncertainty_db' cannot exceed"),
+        (np.array([0.01, 0.01, 0.01, 0.041]), r"cannot exceed .* \[8000\.0\] Hz"),
+        (-0.01, "'shared_standard_uncertainty_db' must be non-negative"),
+        (
+            np.array([0.01, 0.01]),
+            "'shared_standard_uncertainty_db' must hold one value",
+        ),
+    ],
+)
+def test_validation_refuses_a_shared_part_it_cannot_hold(
+    shared: float | np.ndarray, match: str
+) -> None:
+    """Larger than the 0,06 dB calibration's standard uncertainty (0,03 dB)
+    or, at 8 kHz, the 0,08 dB one's (0,04 dB); negative; or neither one
+    value nor one per frequency of the calibration.
+    """
+    jig = _comparison(np.full(4, -26.3), np.array([0.06, 0.06, 0.06, 0.1]))
+    other = _comparison(np.full(4, -26.33), 0.08)
+    with pytest.raises(ValueError, match=match):
+        metrology.verify_jig_or_coupler(
+            jig, other, shared_standard_uncertainty_db=shared
+        )
+
+
+def test_verification_refuses_two_uncertainties_all_shared() -> None:
+    """Two calibrations of 0,08 dB that share all of it leave their
+    difference no uncertainty to be judged against.
+    """
+    with pytest.raises(ValueError, match="above 0 dB"):
+        cc.JigCouplerVerification(
+            frequencies_hz=np.array([1000.0]),
+            calibration_level_db=np.array([-26.3]),
+            calibration_uncertainty_db=np.array([0.08]),
+            validation_level_db=np.array([-26.3]),
+            validation_uncertainty_db=np.array([0.08]),
+            validation="comparison",
+            unvalidated_frequencies_hz=np.array([]),
+            shared_standard_uncertainty_db=0.04,
+        )
+
+
+def test_verification_refuses_a_negative_shared_part() -> None:
+    with pytest.raises(
+        ValueError, match="'shared_standard_uncertainty_db' must be non-negative"
+    ):
+        cc.JigCouplerVerification(
+            frequencies_hz=np.array([1000.0]),
+            calibration_level_db=np.array([-26.3]),
+            calibration_uncertainty_db=np.array([0.08]),
+            validation_level_db=np.array([-26.3]),
+            validation_uncertainty_db=np.array([0.06]),
+            validation="comparison",
+            unvalidated_frequencies_hz=np.array([]),
+            shared_standard_uncertainty_db=-0.01,
+        )
+
+
+def test_verification_plot_draws_the_independent_band_dotted() -> None:
+    """With a shared part the band is the narrower one and its label says
+    so; the root-sum-square the two would have as independent calibrations
+    is drawn dotted around it, once in the legend.
+    """
+    jig = _comparison(np.full(4, -26.3), _D1_EXPANDED_DB)
+    coupler = _comparison(np.array([-26.41, -26.3, -26.3, -26.3]), _D1_EXPANDED_DB)
+    result = metrology.verify_jig_or_coupler(
+        jig, coupler, shared_standard_uncertainty_db=0.025
+    )
+    ax = result.plot()
+    (band,) = ax.collections
+    assert "u_\\mathrm{sh}" in band.get_label()
+    vertices = band.get_paths()[0].vertices
+    edges = np.unique(vertices[np.isclose(vertices[:, 0], 1000.0), 1].round(12))
+    np.testing.assert_allclose(
+        edges, [-_D1_DIFFERENCE_SHARED_DB, _D1_DIFFERENCE_SHARED_DB]
+    )
+    dotted = [line for line in ax.get_lines() if line.get_linestyle() == ":"]
+    assert len(dotted) == 2
+    np.testing.assert_allclose(
+        sorted(float(line.get_ydata()[0]) for line in dotted),
+        [-_D1_DIFFERENCE_INDEPENDENT_DB, _D1_DIFFERENCE_INDEPENDENT_DB],
+    )
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert sum("if independent" in label for label in labels) == 1
+    plt.close(ax.figure)
+
+
+def test_verification_plot_in_spanish_names_the_independent_band() -> None:
+    jig = _comparison(np.full(4, -26.3), _D1_EXPANDED_DB)
+    coupler = _comparison(np.full(4, -26.31), _D1_EXPANDED_DB)
+    result = metrology.verify_jig_or_coupler(
+        jig, coupler, shared_standard_uncertainty_db=0.025
+    )
+    ax = result.plot(language="es")
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert any("si fueran independientes" in label for label in labels)
+    plt.close(ax.figure)
+
+
 def test_verification_plot_marks_the_disagreements() -> None:
     jig = _comparison(np.array([-26.3, -26.3, -26.3, -26.3]), 0.06)
     other = _comparison(np.array([-26.4, -26.41, -26.3, -26.3]), 0.08)
@@ -711,7 +1043,8 @@ def test_verification_plot_marks_the_disagreements() -> None:
     ):
         edges = np.unique(vertices[np.isclose(vertices[:, 0], frequency), 1].round(12))
         np.testing.assert_allclose(edges, [-uncertainty, uncertainty])
-    assert not any(line.get_linestyle() == "--" for line in ax.get_lines())
+    assert not any(line.get_linestyle() in ("--", ":") for line in ax.get_lines())
+    assert "u_\\mathrm{sh}" not in band.get_label()
     plt.close(ax.figure)
 
 

@@ -201,6 +201,11 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     r"$\pm U_\Delta = \pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$": "the expanded "
     "uncertainty of that difference, the two calibrations' combined; cal and val abbreviate "
     "calibración and validación as well (JigCouplerVerification.plot)",
+    r"$\pm U_\Delta = \pm\sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}$": "the "
+    "expanded uncertainty of that difference with the part the two calibrations share taken "
+    "out by the GUM law for correlated inputs; cal and val abbreviate calibración and "
+    "validación as well, and sh is the symbol of the shared part, after the "
+    "shared_standard_uncertainty_db the reader passes (JigCouplerVerification.plot)",
     r"$Z_\mathrm{a,C}$ [GPa·s/m³]": "the symbol of IEC 61094-2 Formula (B.1) and its unit, "
     "which read the same in Spanish (CapillaryTubeImpedance.plot)",
     r"$\alpha$, total": "the attenuation symbol of IEC 61094-3 B.2 and the word total, "

@@ -439,6 +439,12 @@ from .comparison_calibration import (
     BARHAM_2014_TABLE_2_CALCULATED_DB as BARHAM_2014_TABLE_2_CALCULATED_DB,
 )
 from .comparison_calibration import (
+    GUM_F123_EXAMPLE_2_CORRELATION as GUM_F123_EXAMPLE_2_CORRELATION,
+)
+from .comparison_calibration import (
+    GUM_F123_EXAMPLE_2_STANDARD_RELATIVE as GUM_F123_EXAMPLE_2_STANDARD_RELATIVE,
+)
+from .comparison_calibration import (
     IEC61094_1_KAPPA_REFERENCE as IEC61094_1_KAPPA_REFERENCE,
 )
 from .comparison_calibration import (

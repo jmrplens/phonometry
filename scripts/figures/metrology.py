@@ -1960,8 +1960,10 @@ def generate_comparison_air_gap(output_dir: str) -> None:
 
 
 def _jig_validation() -> "JigCouplerVerification":
-    """The guide's ``check``: a jig from 1 kHz to 20 kHz with a standing wave
-    near 6.3 kHz, validated against the coupler up to 10 kHz.
+    """The guide's ``shared``: a jig from 1 kHz to 20 kHz with a standing wave
+    near 6.3 kHz, validated against the coupler up to 10 kHz, the LS2P they
+    both take as reference (its row of IEC 61094-5 Table D.1, 0.025 dB)
+    taken out of the difference.
     """
     from phonometry import metrology
 
@@ -1994,11 +1996,15 @@ def _jig_validation() -> "JigCouplerVerification":
         r["l_c21"][:, :17],
         expanded_uncertainty_db=r["u"][:17],
     )
-    return metrology.verify_jig_or_coupler(jig, coupler)
+    return metrology.verify_jig_or_coupler(
+        jig, coupler, shared_standard_uncertainty_db=0.025
+    )
 
 
 def generate_comparison_jig_validation(output_dir: str) -> None:
-    """IEC 61094-5 6.7: a jig validated against a coupler."""
+    """IEC 61094-5 6.7: a jig validated against a coupler with the same
+    reference, the band of two independent calibrations dotted around it.
+    """
     print("Generating comparison_jig_validation...")
     fig, ax = plt.subplots(figsize=(10, 6))
     _jig_validation().plot(ax, language=_LANG)

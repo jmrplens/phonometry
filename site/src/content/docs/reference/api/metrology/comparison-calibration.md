@@ -143,7 +143,19 @@ and couplers and alternative sound sources", or, for a laboratory standard
 microphone, with its reciprocity calibration.
 [`verify_jig_or_coupler`](/phonometry/reference/api/metrology/comparison-calibration/#verify_jig_or_coupler) sets the two calibrations side by side; the
 clause prints no criterion, and the library reads it as their agreeing
-within the expanded uncertainty of their difference.
+within the expanded uncertainty of their difference. Two calibrations that
+share a component entering both levels alike, the same reference microphone
+or the same measuring chain, are correlated, and the part they share cancels
+in the difference: with $u_\mathrm{sh}$ its standard uncertainty, the
+GUM law of propagation for correlated inputs (JCGM 100:2008 5.2.2, with the
+covariance $u_\mathrm{sh}^2$ of F.1.2.3 for two sensitivities of 1)
+gives
+
+$$
+u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2
+$$
+
+which `shared_standard_uncertainty_db` passes to it.
 
 **Time-selective processing** (IEC 61094-8 Annex B). A free field can be
 simulated by keeping only the direct sound of an impulse response:
@@ -1294,6 +1306,8 @@ JigCouplerVerification(
     validation_uncertainty_db: NDArray[np.float64],
     validation: str,
     unvalidated_frequencies_hz: NDArray[np.float64],
+    *,
+    shared_standard_uncertainty_db: NDArray[np.float64] = ...,
 )
 ```
 
@@ -1302,11 +1316,32 @@ calibration of the same microphone (IEC 61094-5:2016 6.7).
 
 The difference of the two sensitivity levels at each frequency both
 calibrated, $\Delta = L_\mathrm{cal} - L_\mathrm{val}$, is judged
-against the expanded uncertainty of that difference,
-$U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$, the two
-calibrations taken as independent: the jig or coupler agrees at a
-frequency where $\lvert\Delta\rvert \le U_\Delta$. 6.7 asks for the
-validation and prints no criterion; this is the library's reading of it.
+against the expanded uncertainty of that difference: the jig or coupler
+agrees at a frequency where $\lvert\Delta\rvert \le U_\Delta$. 6.7
+asks for the validation and prints no criterion; this is the library's
+reading of it.
+
+Two independent calibrations give
+$U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$. Two that
+share a component, the same reference microphone or the same measuring
+chain, are correlated: each depends on the shared quantity with a
+sensitivity of 1, so the covariance of the two levels is its variance
+$u_\mathrm{sh}^2$ (JCGM 100:2008 F.1.2.3, Formula (F.2)), and the
+law of propagation for the difference (5.2.2, Formula (13)) is
+
+$$
+u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2
+$$
+
+the shared part cancelling in the difference. With the coverage factor
+$k = 2$ both expanded uncertainties are reported with (IEC 61094-5
+7.9 for a comparison, IEC 61094-2:2009 7.5 for a reciprocity
+calibration), $U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}$, the root-sum-square of the
+parts of the two expanded uncertainties that are each calibration's own.
+Only a component that enters both levels with the same sign and size
+can be shared this way; one that enters them with opposite signs makes
+the covariance negative and widens the band beyond the root-sum-square,
+which this verification does not represent.
 
 **Attributes**
 
@@ -1319,6 +1354,7 @@ validation and prints no criterion; this is the library's reading of it.
 | `validation_uncertainty_db` | $U_\mathrm{val}$, its expanded uncertainty ($k = 2$), in dB. |
 | `validation` | `"comparison"`, a calibration in another jig or coupler or with another source, or `"reciprocity"`. |
 | `unvalidated_frequencies_hz` | The frequencies of the calibration the validation does not cover, in Hz: 6.7 allows "more than one jig and/or coupler to cover a full frequency range", each validated where it is used. |
+| `shared_standard_uncertainty_db` | $u_\mathrm{sh}$, the standard uncertainty of what the two calibrations share, in dB at each frequency: the calibration of a common reference microphone (the first row of IEC 61094-5 Table D.1), its drift, a common measuring chain, each entering both levels with the same sign and size. One value is spread over every frequency (Default: 0 dB, two independent calibrations). |
 
 ### JigCouplerVerification.agrees
 
@@ -1326,6 +1362,17 @@ validation and prints no criterion; this is the library's reading of it.
 
 Whether $\lvert\Delta\rvert \le U_\Delta$ at each frequency,
 both sides settled to a nanodecibel before they meet.
+
+### JigCouplerVerification.correlation_coefficient
+
+*property*
+
+$r = u_\mathrm{sh}^2/(u_\mathrm{cal}\,u_\mathrm{val})$, the
+correlation coefficient of the two levels (JCGM 100:2008 5.2.2,
+Formula (14)), at each frequency: 0 for two independent calibrations,
+and towards 1 as the shared part outweighs what each calibration adds
+to it (F.1.2.3, Example 2). 0 where a calibration carries no
+uncertainty, and so shares none.
 
 ### JigCouplerVerification.difference_db
 
@@ -1337,8 +1384,9 @@ $\Delta = L_\mathrm{cal} - L_\mathrm{val}$, in dB.
 
 *property*
 
-$U_\Delta$, the root-sum-square of the two expanded
-uncertainties, in dB.
+$U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}$, the expanded uncertainty ($k = 2$) of
+the difference, in dB: the root-sum-square of the two expanded
+uncertainties when the calibrations share nothing.
 
 ### JigCouplerVerification.failing_frequencies_hz
 
@@ -2418,6 +2466,7 @@ verify_jig_or_coupler(
     validation: ComparisonCalibration | ReciprocityCalibration,
     *,
     microphone: int | None = None,
+    shared_standard_uncertainty_db: ArrayLike = 0.0,
 ) -> JigCouplerVerification
 ```
 
@@ -2439,11 +2488,31 @@ compared at the frequencies they share.
 
 The clause prints no criterion. The library reads "validated" as the two
 agreeing within the expanded uncertainty of their difference, each
-calibration's expanded uncertainty ($k = 2$, 7.9) combined as
-independent: $\lvert L_\mathrm{cal} - L_\mathrm{val}\rvert \le \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$. Two calibrations that share
-a reference, or a reciprocity calibration that is the reference's own,
-are correlated, and the root-sum-square then overstates the uncertainty
-of the difference.
+calibration's expanded uncertainty reported with $k = 2$ (7.9 for
+a comparison, IEC 61094-2:2009 7.5 for a reciprocity calibration):
+$\lvert L_\mathrm{cal} - L_\mathrm{val}\rvert \le U_\Delta$. Two
+independent calibrations give the root-sum-square,
+$U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}$. Two that
+share a component entering both levels with the same sign and size, the
+same reference microphone (the first row of Table D.1) or the same
+measuring chain, are correlated, and the root-sum-square counts twice
+what cancels in their difference: give that component's standard
+uncertainty $u_\mathrm{sh}$ as `shared_standard_uncertainty_db`,
+and the GUM law of propagation for correlated inputs (JCGM 100:2008 5.2.2
+with the covariance of F.1.2.3, Formula (F.2)) gives
+$u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2$, that is
+$U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}$. A shared part cannot be larger than either
+calibration's standard uncertainty, $U/k$.
+
+A reciprocity calibration made in the same set of three microphones as
+the reference's is not such a case. In IEC 61094-2:2009 Formula (7) the
+electrical transfer impedances of the two pairs that go through the third
+microphone are in the numerator of one microphone's sensitivity and in
+the denominator of the other's, so those pair measurements enter the two
+levels with opposite signs: their covariance is negative, and the
+uncertainty of the difference exceeds the root-sum-square, which
+`shared_standard_uncertainty_db` cannot express. Only the factors
+common to both levels, with the same sign, may be given here.
 
 **Parameters**
 
@@ -2452,6 +2521,7 @@ of the difference.
 | `calibration` | The pressure calibration by comparison made in the jig or coupler, with its expanded uncertainty. |
 | `validation` | The calibration it is validated against: a [`ComparisonCalibration`](/phonometry/reference/api/metrology/comparison-calibration/#comparisoncalibration) or a [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), in a pressure field, with its expanded uncertainty. |
 | `microphone` | For a reciprocity calibration, the index of the microphone that was compared (Default: None). |
+| `shared_standard_uncertainty_db` | $u_\mathrm{sh}$, the standard uncertainty of what the two calibrations share, in dB: one value, or one per frequency of `calibration` (Default: 0 dB, two independent calibrations). |
 
 **Returns:** The [`JigCouplerVerification`](/phonometry/reference/api/metrology/comparison-calibration/#jigcouplerverification).
 
@@ -2459,5 +2529,5 @@ of the difference.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a calibration or validation that is not a pressure calibration or carries no expanded uncertainty, a reciprocity calibration without `microphone` (or a comparison with one), a microphone it does not hold, or no frequency in common. |
+| ValueError | for a calibration or validation that is not a pressure calibration or carries no expanded uncertainty, a reciprocity calibration without `microphone` (or a comparison with one), a microphone it does not hold, no frequency in common, or a shared standard uncertainty that is negative, not one value per frequency of `calibration`, larger than the standard uncertainty of either calibration, or all of both. |
 | TypeError | for a validation that is neither calibration. |

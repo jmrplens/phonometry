@@ -34,6 +34,14 @@ references:
     number: "NPL Report CIRA(EXT) 010"
     url: "https://eprintspublications.npl.co.uk/439/"
     note: "Referencia [2] de la IEC 61094-5:2016: el circuito del apéndice B para el aire entre dos micrófonos en un acoplador simétrico, cuya impedancia en serie da air_gap_series_impedance_pa_s_m3, y su ejemplo de un LS2P frente a un WS2P de alta sensibilidad. El escaneo publicado ha perdido la unidad imaginaria del término de masa del primer micrófono (una errata)."
+  - type: report
+    authors: ["Jarvis, D. R.", "Watkins, S."]
+    year: 1997
+    title: "Methods for determining the pressure sensitivity of IEC type WS3 measurement microphones"
+    institution: "National Physical Laboratory"
+    number: "NPL Report CIRA(EXT) 022"
+    implemented: false
+    note: "Calibraciones en soporte de micrófonos patrón de trabajo comparadas con calibraciones por reciprocidad de los mismos micrófonos (figuras 6 y 7) y juzgadas de palabra frente a la repetibilidad típica de las medidas, una desviación típica dibujada como banda en la figura 7; no imprime ningún criterio numérico para la validación del 6.7, ni números frente a los que comprobar uno, ni nada sobre lo que comparten las dos calibraciones."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2009
@@ -62,7 +70,7 @@ references:
     publisher: "BIPM"
     url: "https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf"
     doi: "10.59161/JCGM100-2008E"
-    note: "La ley de propagación de la incertidumbre con que se combinan los dos balances, y el factor de cobertura k = 2 con que informan las dos partes. Publicada también como ISO/IEC Guide 98-3:2008."
+    note: "La ley de propagación de la incertidumbre con que se combinan los dos balances, y el factor de cobertura k = 2 con que informan las dos partes; su forma para magnitudes de entrada correlacionadas (5.2.2), con la covarianza de dos estimaciones de una magnitud común (F.1.2.3), quita de la incertidumbre de la diferencia de dos calibraciones lo que comparten, y se reproducen los coeficientes de correlación del Ejemplo 2 del F.1.2.3. Publicada también como ISO/IEC Guide 98-3:2008."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -952,15 +960,16 @@ reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/) con
 el índice de ese micrófono, y las compara en las frecuencias que comparten.
 El apartado no imprime ningún criterio. La biblioteca lee «validated» como
 que las dos coincidan dentro de la incertidumbre expandida de su diferencia,
+que para dos calibraciones independientes es la raíz de la suma de los
+cuadrados de las dos,
 
 $$
-\lvert L_\mathrm{cal} - L_\mathrm{val} \rvert \le
+\lvert L_\mathrm{cal} - L_\mathrm{val} \rvert \le U_\Delta =
 \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}
 $$
 
-tomadas como independientes; dos calibraciones que comparten una referencia
-están correlacionadas, y entonces la raíz de la suma de cuadrados sobrestima
-la incertidumbre de su diferencia.
+Dos calibraciones que comparten una componente están correlacionadas, y la
+parte que comparten sale de $U_\Delta$ (más abajo).
 
 Aquí el soporte del A.2 se valida frente al acoplador del A.1 para el WS2P
 del primer ejemplo, usando el acoplador hasta los 10 kHz para los que está
@@ -992,21 +1001,94 @@ disposición tiene que validarlo ahí, como permite el 6.7.
 `check.normalised_difference` es la diferencia en unidades de su
 incertidumbre expandida, -1,93 a 6,3 kHz.
 
-Las dos calibraciones toman aquí el mismo LS2P como referencia, así que su
-fila de la Tabla D.1, 0,05 dB con $k = 2$, se cancela en la diferencia
-mientras que la raíz de la suma de cuadrados la cuenta dos veces: sin ella,
-la banda a 6,3 kHz es de 0,106 dB y no de 0,128 dB. El veredicto no cambia
-aquí; para un par tan correlacionado, unos balances sin las componentes
-compartidas dan la incertidumbre de la diferencia. El apartado no imprime
-ni un criterio ni un ejemplo, así que el informe de conformidad comprueba
-el veredicto frente a su propia definición.
+### Calibraciones que comparten una referencia
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="La diferencia entre el WS2P calibrado en el soporte y en el acoplador en las once frecuencias que comparten, de 1 kHz a 10 kHz, dentro de una banda sombreada de más o menos la incertidumbre expandida de la diferencia, 0,124 dB que se ensancha a 0,143 dB a 10 kHz: a menos de 0,008 dB de cero en todas salvo 6,3 kHz, donde baja a -0,247 dB, fuera de la banda y marcada con una cruz; tres líneas verticales a trazos en 12,6 kHz, 15,8 kHz y 20 kHz marcan las frecuencias del soporte que el acoplador no cubre" width="88%" />
+Las dos calibraciones toman aquí el mismo LS2P como referencia, así que la
+primera fila de la Tabla D.1, la calibración de esa referencia (0,025 dB,
+los «±0,05 dB with a coverage factor of k = 2» de su certificado), está en
+los dos balances. El error que lleve esa calibración mueve juntos los dos
+niveles de sensibilidad y se cancela en su diferencia, mientras que la raíz
+de la suma de cuadrados lo cuenta dos veces. En los términos de la GUM, dos
+niveles que dependen cada uno de una magnitud común con una sensibilidad de
+1 tienen su varianza como covarianza (JCGM 100:2008 F.1.2.3, Fórmula (F.2),
+cuyos coeficientes de sensibilidad valen entonces 1 los dos), y la ley de propagación
+para magnitudes de entrada correlacionadas (5.2.2, Fórmula (13)) da para la
+diferencia
+
+$$
+u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2
+$$
+
+con $u_\mathrm{sh}$ la incertidumbre típica de lo que comparten las dos.
+`shared_standard_uncertainty_db` la recibe, un valor o uno por frecuencia de
+la calibración, y la banda pasa a ser, con el $k = 2$ del 7.9,
+
+$$
+U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}
+$$
+
+```python
+shared = metrology.verify_jig_or_coupler(jig, coupler, shared_standard_uncertainty_db=0.025)
+print(shared.passes, shared.failing_frequencies_hz.round())                                # False [6310.]
+print(shared.expanded_uncertainty_db[8].round(3), shared.normalised_difference[8].round(2))   # 0.106 -2.32
+print(shared.correlation_coefficient[8].round(2))                                           # 0.31
+```
+
+La banda se estrecha de 0,124 dB a 0,101 dB en las frecuencias bajas y de
+0,128 dB a 0,106 dB a 6,3 kHz, donde las dos calibraciones están
+correlacionadas con un coeficiente de 0,31, la varianza de la referencia
+entre el producto de sus incertidumbres típicas (Fórmula (14)). El
+veredicto no cambia aquí: el soporte sigue fallando sólo a 6,3 kHz, ahora
+por 2,32 veces la incertidumbre de la diferencia. Un par que coincide dentro
+de la raíz de la suma de cuadrados puede fallar una vez quitada la parte
+compartida. Qué componentes comparten las dos lo dice el laboratorio: la
+calibración de una referencia que usan las dos, su deriva desde entonces (la
+fila «Drift in reference microphone sensitivity since last calibration»,
+0,017 dB) para dos calibraciones hechas cerca en el tiempo, una cadena de
+medida por la que pasan las dos. Sólo cabe aquí un componente que entra en
+los dos niveles con el mismo signo y el mismo tamaño. Una calibración por
+reciprocidad hecha en el mismo juego de tres micrófonos que la de la
+referencia no es ese caso: en la Fórmula (7) de IEC 61094-2:2009 (folio 12)
+las impedancias de transferencia eléctrica de los dos pares que pasan por
+el tercer micrófono están en el numerador de la sensibilidad de un
+micrófono y en el denominador de la del otro, así que esas medidas entran
+en los dos niveles con signos opuestos. Su covarianza es negativa y
+ensancha la incertidumbre de la diferencia por encima de la raíz de la suma
+de cuadrados, algo que `shared_standard_uncertainty_db` no puede expresar;
+ahí sólo se pueden dar los factores comunes a los dos niveles con el mismo
+signo. Una parte compartida mayor que la incertidumbre típica de cualquiera
+de las dos calibraciones se rechaza, porque no se puede compartir más que el
+total.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="La diferencia entre el WS2P calibrado en el soporte y en el acoplador en las once frecuencias que comparten, de 1 kHz a 10 kHz, dentro de una banda sombreada de más o menos la incertidumbre expandida de la diferencia sin la referencia que comparten, 0,101 dB que se ensancha a 0,124 dB a 10 kHz, y a puntos alrededor la banda de dos calibraciones independientes, 0,124 dB que se ensancha a 0,143 dB: a menos de 0,008 dB de cero en todas salvo 6,3 kHz, donde baja a -0,247 dB, fuera de las dos bandas y marcada con una cruz; tres líneas verticales a trazos en 12,6 kHz, 15,8 kHz y 20 kHz marcan las frecuencias del soporte que el acoplador no cubre" width="88%" />
 
 *El soporte frente al acoplador: la diferencia de las dos calibraciones
-dentro de la incertidumbre expandida de la diferencia, la única frecuencia
-en la que el soporte falla y, en trazos, las tres por encima de 10 kHz a las
-que el acoplador no llega.*
+dentro de la incertidumbre expandida de la diferencia una vez quitada la
+referencia que comparten, a puntos alrededor la raíz de la suma de
+cuadrados de dos calibraciones independientes, la única frecuencia en la
+que el soporte falla y, en trazos, las tres por encima de 10 kHz a las que
+el acoplador no llega.*
+
+El apartado no imprime ni un criterio ni un ejemplo, así que el informe de
+conformidad comprueba el veredicto frente a su propia definición. Jarvis y
+Watkins (1997), NPL Report CIRA(EXT) 022, que compararon calibraciones en
+soporte de micrófonos patrón de trabajo en el NPL con calibraciones por
+reciprocidad de los mismos micrófonos, tampoco imprimen un criterio
+numérico: sus figuras 6 y 7 (folio 4) dibujan las diferencias, y el texto
+las juzga frente a «the typical repeatability» de las medidas (folio 2), una
+desviación típica dibujada como banda en la figura 7 y nunca impresa como
+número, sin ningún número frente al que comprobar un criterio. Las
+diferencias residuales «of less than 0.1 dB» del folio 5 dan un resultado,
+no fijan una prueba, y el informe no dice nada sobre lo que comparten las
+dos calibraciones. La parte compartida sí tiene números
+impresos, en la GUM: dos objetos calibrados frente al mismo patrón, de
+incertidumbre típica relativa $10^{-4}$, están correlacionados con
+coeficientes de aproximadamente 0,5, 0,990 y 1,000 para comparaciones de
+$100 \times 10^{-6}$, $10 \times 10^{-6}$ y $1 \times 10^{-6}$ (F.1.2.3,
+Ejemplo 2). El informe de conformidad comprueba `correlation_coefficient`
+frente a ellos, y la diferencia de dos calibraciones con el balance de la
+Tabla D.1 frente a las siete filas que quedan una vez cancelada la de la
+referencia.
 
 <details>
 <summary>Mostrar el código de estas figuras</summary>
@@ -1068,7 +1150,7 @@ gap.plot(ax_phase, quantity="phase", marker="none", language="es")
 fig.tight_layout()
 
 fig, ax = plt.subplots(figsize=(10, 6))
-check.plot(ax, language="es")
+shared.plot(ax, language="es")
 fig.tight_layout()
 plt.show()
 ```
@@ -1112,7 +1194,11 @@ nombra el A.2; reproduce todas las filas de la Tabla A.1 a partir de los
 datos de la tabla 1 del artículo. **El apartado 6.7 de la IEC 61094-5:** la
 comparación de una calibración hecha en un soporte o un acoplador con otra
 del mismo micrófono, por comparación en otro sitio o por reciprocidad, en las
-frecuencias que comparten. La comparación del apartado 5 de la IEC 61183 se
+frecuencias que comparten, con la parte de su incertidumbre que comparten
+las dos quitada de la incertidumbre de la diferencia por la ley de
+propagación de la GUM para magnitudes de entrada correlacionadas
+(JCGM 100:2008 5.2.2 y F.1.2.3), de la que se reproducen los coeficientes
+de correlación del Ejemplo 2 del F.1.2.3. La comparación del apartado 5 de la IEC 61183 se
 calcula con el mismo modelo. La Tabla D.1 y la Tabla A.1 se reproducen.
 </ScopeClaim>
 
@@ -1148,10 +1234,16 @@ desde el radio exterior, que sí la dan, a una velocidad del sonido que el
 artículo no imprime. Su incertidumbre la estima quien lo usa: el modelo da
 el cambio al doblar la separación que el A.2 nombra como aproximadamente el
 10 % de la Tabla A.1. **La validación del apartado 6.7.** El apartado no
-imprime ningún criterio; la coincidencia dentro de la raíz de la suma de
-cuadrados de las dos incertidumbres expandidas, con las dos calibraciones
-independientes, es la lectura de esta biblioteca, y el informe de
-conformidad la comprueba frente a su propia definición. **La Fórmula (B.10)** se
+imprime ningún criterio, y Jarvis y Watkins (1997), que compararon
+calibraciones en soporte con calibraciones por reciprocidad, tampoco
+imprimen uno numérico: juzgan las diferencias de palabra frente a una
+desviación típica de repetibilidad dibujada en su figura 7; la coincidencia
+dentro de la incertidumbre expandida de la diferencia, la raíz de la suma de
+cuadrados de las dos menos la parte que comparten, es la lectura de esta
+biblioteca, y el informe de conformidad la comprueba frente a su propia
+definición. Qué componentes comparten dos calibraciones lo da quien llama, y
+sólo se puede dar uno que entre en los dos niveles con el mismo signo y el
+mismo tamaño. **La Fórmula (B.10)** se
 lee como el espectro de un pulso que dura $2b$, como dicen la fórmula y su
 primer cero y no el texto.
 </ScopeClaim>
@@ -1172,7 +1264,11 @@ reciprocidad de la referencia (IEC 61094-2, -3) es el objeto de
 de la Tabla D.1, un micrófono calibrado como sistema con su preamplificador
 (0,002 dB, y para la tensión de polarización y la capacidad, dependiente de
 la frecuencia y menos de 0,02 dB por encima de 200 Hz), no se guarda como
-dato; un balance que lo necesite lo toma por `additional_components`.
+dato; un balance que lo necesite lo toma por `additional_components`. Una
+covarianza que ensancha la incertidumbre de la diferencia, como la de dos
+micrófonos del mismo juego de reciprocidad a través de los pares con el
+tercero (Fórmula (7) de IEC 61094-2:2009), no la toma
+`verify_jig_or_coupler`.
 </ScopeClaim>
 </Scope>
 

@@ -43,7 +43,12 @@ printed ratio, the volume, and the extremes and the ends of the graphs. 6.7
 prints no criterion for the validation of a jig or a coupler; its row checks
 the library's reading, agreement within the root-sum-square of the two
 expanded uncertainties, on its own definition, with the validation on a grid
-of its own.
+of its own. Two calibrations that share a component are correlated through
+it, and the GUM prints what that does: the covariance of two estimates of a
+common quantity (F.1.2.3, Formula (F.2)) and, for items calibrated against
+the same standard, the correlation coefficients of its Example 2, which the
+rows reproduce; with the budget of Table D.1 the reference's row cancels in
+the difference of two calibrations against the same LS2P.
 
 Oracle: IEC 61094-5:2016 (Edition 2.0, English-French): Table A.1 on printed
 folio 15 (PDF page 17), Annex C on folio 18 (PDF page 20), D.2 on folio 19
@@ -57,7 +62,9 @@ B.2 on folios 24 and 25 (PDF pages 26 and 27) and B.6 on folio 28 (PDF page
 of IEC 61094-5 on folios 9 and 10 (PDF pages 11 and 12), 6.7 on folio 10
 (PDF page 12), A.2 on folio 14 (PDF page 16). Barham et al. (2014): Formulas (1) to (5) and Tables 1 and 2 on page
 135 (PDF page 8 of the IOPscience download). Jarvis (1996): Appendix B on
-folios 25 to 27 (PDF pages 28 to 30 of the NPL scan).
+folios 25 to 27 (PDF pages 28 to 30 of the NPL scan). ISO/IEC Guide 98-3:2008
+(JCGM 100:2008): 5.2.2 on page 21 (PDF page 33), F.1.2.3 and Formula (F.2)
+on page 62 (PDF page 74) and its Example 2 on page 63 (PDF page 75).
 
 Six printed defects sit in this oracle and are recorded in
 ``docs/ERRATA.md``. D.3 of IEC 61094-5 states a combined standard uncertainty
@@ -1027,6 +1034,90 @@ def _chk_validation() -> Outcome:
     )
     matching += int(not result.passes)
     return count(matching, len(expected) + 1, subject="verdicts")
+
+
+@register(
+    _IEC61094,
+    "IEC 61094-5:2016 6.7; ISO/IEC Guide 98-3 F.1.2.3, Example 2",
+    "Correlation of two calibrations against the same standard of 10^-4, for comparisons of 100, 10 and 1 x 10^-6, as printed",
+)
+def _chk_validation_correlation() -> Outcome:
+    """Example 2 of F.1.2.3: resistors calibrated against the same standard
+    share its uncertainty, u(R_i, R_j) = u^2(R_S), and with u(R_S)/R_S =
+    10^-4 the correlation coefficient is about 0,5, 0,990 and 1,000 for
+    comparisons of 100, 10 and 1 x 10^-6. In levels each calibration
+    carries sqrt(u(alpha)^2 + (u(R_S)/R_S)^2) and the two share u(R_S)/R_S,
+    all scaled by the same 20/ln 10 dB per neper; the verification's
+    correlation coefficient has to give the printed values to the decimals
+    printed.
+    """
+    scale = 20.0 / math.log(10.0)
+    standard = ref.GUM_F123_EXAMPLE_2_STANDARD_RELATIVE
+    matching = 0
+    for comparison, (printed, decimals) in ref.GUM_F123_EXAMPLE_2_CORRELATION.items():
+        expanded = 2.0 * scale * math.hypot(comparison, standard)
+        result = cc.JigCouplerVerification(
+            frequencies_hz=np.array([1000.0]),
+            calibration_level_db=np.array([-26.3]),
+            calibration_uncertainty_db=np.array([expanded]),
+            validation_level_db=np.array([-26.3]),
+            validation_uncertainty_db=np.array([expanded]),
+            validation="comparison",
+            unvalidated_frequencies_hz=np.array([]),
+            shared_standard_uncertainty_db=scale * standard,
+        )
+        coefficient = round(float(result.correlation_coefficient[0]), decimals)
+        matching += int(math.isclose(coefficient, printed, abs_tol=1e-12))
+    return count(
+        matching, len(ref.GUM_F123_EXAMPLE_2_CORRELATION), subject="coefficients"
+    )
+
+
+@register(
+    _IEC61094,
+    "IEC 61094-5:2016 6.7, Table D.1; ISO/IEC Guide 98-3 5.2.2",
+    "Expanded uncertainty of the difference of two calibrations against the same LS2P, each with the budget of Table D.1",
+)
+def _chk_validation_shared_reference() -> Outcome:
+    """Two calibrations against the same reference, each with the eight rows
+    of Table D.1, share its first row, 0,025 dB; it cancels in their
+    difference, which carries 2 sqrt(2 x 0,001 282) = 0,1013 dB from the
+    other seven, where the root-sum-square of the two expanded uncertainties
+    gives 0,1235 dB. The expected value is built from the seven rows alone,
+    the common quantity taken out as an input of its own (F.1.2.4); the
+    library gets the two expanded uncertainties of the budget and the shared
+    row, at every frequency of the grid.
+    """
+    components = ref.IEC61094_5_TABLE_D1_STANDARD_DB
+    own = math.sqrt(
+        sum(value**2 for key, value in components.items() if key != "reference")
+    )
+    expected = 2.0 * math.sqrt(2.0) * own
+    half = _L_REF - _L_TEST
+    jig = metrology.simultaneous_comparison(
+        _F,
+        _L_REF,
+        half,
+        -half,
+        expanded_uncertainty_db=_budget_d1().expanded_uncertainty_db,
+    )
+    result = metrology.verify_jig_or_coupler(
+        jig, jig, shared_standard_uncertainty_db=components["reference"]
+    )
+    computed = result.expanded_uncertainty_db
+    worst = float(computed[np.argmax(np.abs(computed - expected))])
+    return numeric(
+        expected,
+        worst,
+        1e-9,
+        unit="dB",
+        places=9,
+        expected_label=(
+            f"{expected:.9f} dB, the reference row cancelling "
+            "(0.123515181 dB as independent)"
+        ),
+        computed_label=f"{worst:.9f} dB at the worst of {computed.size} frequencies",
+    )
 
 
 # ---------------------------------------------------------------------------

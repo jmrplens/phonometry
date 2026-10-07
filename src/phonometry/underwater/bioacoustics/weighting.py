@@ -730,7 +730,6 @@ class WeightedExposureResult:
     :ivar peak_spl: The unweighted peak sound pressure level supplied, in dB
         (``None`` when not given).
     :ivar n_events: Number of accumulated events (e.g. hammer strikes).
-    :ivar criteria: The :class:`ExposureCriteria` compared against.
     :ivar sel_margin: ``cumulative_sel - injury_sel``, in dB (``None`` when the
         criterion is not published); positive means the criterion is exceeded.
     :ivar tts_margin: ``cumulative_sel - tts_sel``, in dB (or ``None``).
@@ -746,6 +745,11 @@ class WeightedExposureResult:
         ``margin >= 0`` convention as ``exceeds_injury``.
     :ivar guidance: The guidance version.
     :ivar group: Hearing-group code.
+    :ivar impulsive: Whether the impulsive criteria were compared against.
+
+    The published criteria (:attr:`criteria`) are read from the guidance, the
+    group and ``impulsive``, so an assessment cannot be built against other
+    criteria.
     """
 
     frequencies: NDArray[np.float64]
@@ -757,7 +761,6 @@ class WeightedExposureResult:
     cumulative_sel: float
     peak_spl: float | None
     n_events: int
-    criteria: ExposureCriteria
     sel_margin: float | None
     tts_margin: float | None
     peak_margin: float | None
@@ -767,6 +770,7 @@ class WeightedExposureResult:
     exceeds_tts: bool
     guidance: str
     group: str
+    impulsive: bool
 
     def __post_init__(self) -> None:
         """Reject an assessment whose band rows do not all run over the bands.
@@ -826,6 +830,17 @@ class WeightedExposureResult:
         _require_totals_restate(self)
         _require_margins_restate(self)
         _require_verdicts_restate(self)
+
+    @property
+    def criteria(self) -> ExposureCriteria:
+        """The :class:`ExposureCriteria` compared against.
+
+        :return: :func:`exposure_criteria` of :attr:`group` under
+            :attr:`guidance`, impulsive or not.
+        """
+        return exposure_criteria(
+            self.group, guidance=self.guidance, impulsive=self.impulsive
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1129,7 +1144,6 @@ def weighted_exposure(
         cumulative_sel=float(cumulative),
         peak_spl=peak,
         n_events=n,
-        criteria=criteria,
         sel_margin=sel_margin,
         tts_margin=tts_margin,
         peak_margin=peak_margin,
@@ -1138,6 +1152,7 @@ def weighted_exposure(
         exceeds_tts=_any_positive(tts_margin, peak_tts_margin),
         guidance=weights.guidance,
         group=weights.group,
+        impulsive=bool(impulsive),
     )
 
 

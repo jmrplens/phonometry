@@ -69,7 +69,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_up
-from .sound_field_audiometry import DiffuseSoundFieldCheck, _diffuse_field_check
+from .sound_field_audiometry import (
+    _RANDOM_INCIDENCE_CLAUSE,
+    DiffuseSoundFieldCheck,
+    _diffuse_field_check,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -711,8 +715,7 @@ def check_random_incidence_field(
         front_to_random_index_db=front_to_random_index_db,
         frequencies=frequencies,
         default_frequencies=EARMUFF_TEST_BANDS_HZ,
-        limits=RANDOM_INCIDENCE_VARIATION_LIMITS,
-        standard="ISO 4869-3 5.2.2",
+        standard=_RANDOM_INCIDENCE_CLAUSE,
         owner="check_random_incidence_field",
     )
 
@@ -925,18 +928,35 @@ def _isolation_requirement(frequencies: np.ndarray) -> np.ndarray:
 class FixtureIsolationCheck:
     """Whether the test fixture isolates its microphone well enough (5.1.4).
 
+    The requirement is the clause's, read from the bands as
+    :attr:`required_db`, so a check cannot be built against another one.
+
     :ivar frequencies: The centre frequencies, in hertz.
     :ivar isolation_db: The acoustic isolation (3.7), the level with the
         isolation cup absent less the level with it sealed on, per band, in
         dB.
-    :ivar required_db: The least isolation 5.1.4 asks per band, in dB: 50 dB
-        from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; NaN
-        below 63 Hz, where it asks nothing.
     """
 
     frequencies: np.ndarray
     isolation_db: np.ndarray
-    required_db: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a check whose isolation does not follow its bands.
+
+        :raises ValueError: if the isolation does not hold one value per band.
+        """
+        if np.asarray(self.isolation_db).shape != np.asarray(self.frequencies).shape:
+            msg = "FixtureIsolationCheck: 'isolation_db' must hold one value per band."
+            raise ValueError(msg)
+
+    @property
+    def required_db(self) -> np.ndarray:
+        """The least isolation 5.1.4 asks per band, in dB.
+
+        :return: 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and
+            55 dB above; NaN below 63 Hz, where it asks nothing.
+        """
+        return _isolation_requirement(np.asarray(self.frequencies, dtype=np.float64))
 
     @property
     def sufficient(self) -> np.ndarray:
@@ -1024,5 +1044,4 @@ def verify_fixture_isolation(
     return FixtureIsolationCheck(
         frequencies=freqs,
         isolation_db=open_levels[0] - cup[0],
-        required_db=_isolation_requirement(freqs),
     )

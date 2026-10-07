@@ -221,7 +221,6 @@ ASSESSMENT_WEIGHTING_TOLERANCE = 0.05
 ```python
 AssessmentVelocity(
     assessment_velocity_mm_s: float,
-    guide_value_mm_s: float,
     building_class: str,
     velocity_mm_s: NDArray[np.float64],
     fs_hz: float,
@@ -235,10 +234,18 @@ One record judged by Annex E, without a dominant frequency.
 | Name | Description |
 | :--- | :--- |
 | `assessment_velocity_mm_s` | $\vert v_{Bn}\vert _\mathrm{max}$, the peak of the weighted velocity, in millimetres per second. |
-| `guide_value_mm_s` | The Table E.2 value it is compared with. |
 | `building_class` | The row of DIN 4150-3 Table 1 that was used. |
 | `velocity_mm_s` | The weighted velocity itself, one value per sample. |
 | `fs_hz` | The sampling frequency the record was read at. |
+
+The Table E.2 value (`guide_value_mm_s`) is read from the building
+class, so a record cannot be judged against another value.
+
+### AssessmentVelocity.guide_value_mm_s
+
+*property*
+
+The Table E.2 value the peak is compared with, in mm/s.
 
 ### AssessmentVelocity.plot()
 
@@ -812,9 +819,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 VibrationMeterVerification(
     frequencies_hz: NDArray[np.float64],
     deviation_percent: NDArray[np.float64],
-    lower_percent: NDArray[np.float64],
-    upper_percent: NDArray[np.float64],
-    within_tolerance: NDArray[np.bool_],
+    measured_response: NDArray[np.float64],
     weighting: str,
     working_range: str,
     reference_frequency_hz: float,
@@ -829,12 +834,21 @@ One measured amplitude response against Tables 2 and 3.
 | :--- | :--- |
 | `frequencies_hz` | The frequencies the response was measured at. |
 | `deviation_percent` | `F(f)` of Formula (7) at each of them: the measured response over the design response, both normalised at the reference frequency, as a percentage departure from unity. |
-| `lower_percent` | The Table 2 limit at each frequency. |
-| `upper_percent` | The Table 3 limit at each frequency. |
-| `within_tolerance` | Whether each frequency keeps to both limits. |
+| `measured_response` | The measured amplitude response at each of them, as supplied, which footnote a of Table 3 reads. |
 | `weighting` | `"kb"` or `"unweighted"`, which design response the deviation is against. |
 | `working_range` | The working range the limits were read for. |
 | `reference_frequency_hz` | The frequency both responses were normalised at. |
+
+The Table 2 and Table 3 limits (`lower_percent`,
+`upper_percent`) and the verdict are read from the frequencies, the
+working range and the measured response, so a verification cannot be
+built against other limits.
+
+### VibrationMeterVerification.lower_percent
+
+*property*
+
+The Table 2 limit at each frequency, in per cent.
 
 ### VibrationMeterVerification.passes
 
@@ -865,6 +879,21 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_vibration_meter_verification`. |
+
+### VibrationMeterVerification.upper_percent
+
+*property*
+
+The Table 3 limit at each frequency, in per cent.
+
+Infinite where the measured response is at or below 0,01, which
+footnote a of Table 3 leaves unconstrained from above.
+
+### VibrationMeterVerification.within_tolerance
+
+*property*
+
+Whether each frequency keeps to both limits.
 
 ### VibrationMeterVerification.worst_frequency_hz
 

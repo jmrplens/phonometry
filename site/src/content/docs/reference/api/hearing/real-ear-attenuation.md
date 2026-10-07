@@ -523,7 +523,7 @@ ReatSoundFieldCheck(
     position_deviation_db: np.ndarray,
     left_right_difference_db: np.ndarray,
     rotation_variation_db: np.ndarray,
-    allowable_variation_db: float | None,
+    free_field_rejection_db: float | None,
     positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
 ```
@@ -538,7 +538,7 @@ Whether the test site's sound field qualifies for ISO 4869-1 (4.2.2).
 | `position_deviation_db` | The level at each of the six positions 15 cm from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
 | `left_right_difference_db` | The difference between the right and left positions per band, as an absolute value, in dB. |
 | `rotation_variation_db` | The spread of the levels a rotated directional microphone saw per band, in dB, or `nan` where 4.2.2 b) does not apply (below 500 Hz) or no rotation was given. |
-| `allowable_variation_db` | What Table 1 allows that spread, in dB, or `None` when no rotation was given. |
+| `free_field_rejection_db` | The free-field rejection of the rotated directional microphone, in dB, or `None` when no rotation was given. What Table 1 allows the spread (`allowable_variation_db`) is read from it, not stored, so a check cannot be built against another allowance. |
 | `positions` | The position names, in row order. |
 
 4.2.2 b) is a requirement of the clause, not an option: a check made
@@ -546,6 +546,14 @@ without the rotation leaves it unjudged whenever a band reaches 500 Hz,
 `directionality_judged` says so, and `passes` is `False`
 until it is judged. `uniform` and `balanced` still give the
 verdict of a) on its own.
+
+### ReatSoundFieldCheck.allowable_variation_db
+
+*property*
+
+What Table 1 allows the rotation spread, in dB.
+
+**Returns:** The allowance for `free_field_rejection_db`, or `None` when no rotation was given.
 
 ### ReatSoundFieldCheck.balanced
 

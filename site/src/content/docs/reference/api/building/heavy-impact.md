@@ -358,33 +358,46 @@ HEAVY_IMPACT_SOURCES = {'rubber_ball': ((39.0, 1.0), (31.0, 1.5), (23.0, 1.5), (
 ## HeavyImpactSourceCheck
 
 ```python
-HeavyImpactSourceCheck(
-    source: str,
-    frequencies: np.ndarray,
-    measured: np.ndarray,
-    nominal: np.ndarray,
-    tolerance: np.ndarray,
-    deviation: np.ndarray,
-    within_tolerance: np.ndarray,
-    *,
-    passes: bool,
-)
+HeavyImpactSourceCheck(source: str, measured: np.ndarray)
 ```
 
 Conformance of a measured heavy impact source to its printed spectrum.
+
+Only the source and the measurement are fields. The printed spectrum, its
+tolerance and the verdict are read from the source's specification
+([`heavy_impact_source_specification`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_source_specification)), so a check cannot be built
+against another tolerance band.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `source` | `"rubber_ball"` or `"bang_machine"`. |
-| `frequencies` | Octave-band centre frequencies, in Hz. |
-| `measured` | Measured impact force exposure level `LFE`, in dB re 1 N. |
-| `nominal` | Printed nominal `LFE` per band, in dB re 1 N. |
-| `tolerance` | Printed tolerance per band, in dB. |
-| `deviation` | `measured - nominal` per band, in dB. |
-| `within_tolerance` | Per-band boolean mask of conforming bands. |
-| `passes` | `True` when every band conforms. |
+| `measured` | Measured impact force exposure level `LFE` in the five octave bands 31,5 Hz to 500 Hz, in dB re 1 N. |
+
+### HeavyImpactSourceCheck.deviation
+
+*property*
+
+`measured - nominal` per band, in dB.
+
+### HeavyImpactSourceCheck.frequencies
+
+*property*
+
+Octave-band centre frequencies, in Hz.
+
+### HeavyImpactSourceCheck.nominal
+
+*property*
+
+Printed nominal `LFE` per band, in dB re 1 N.
+
+### HeavyImpactSourceCheck.passes
+
+*property*
+
+`True` when every band conforms.
 
 ### HeavyImpactSourceCheck.plot()
 
@@ -401,6 +414,18 @@ Plot the measured `LFE` against the printed tolerance band.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### HeavyImpactSourceCheck.tolerance
+
+*property*
+
+Printed tolerance per band, in dB.
+
+### HeavyImpactSourceCheck.within_tolerance
+
+*property*
+
+Per-band boolean mask of conforming bands.
 
 ## HeavyImpactSourceSpec
 

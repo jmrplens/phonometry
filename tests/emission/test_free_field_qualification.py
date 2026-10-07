@@ -20,6 +20,7 @@ reflection deviates by the known amount.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import warnings
 
@@ -259,6 +260,47 @@ def test_a_known_reflection_deviates_by_the_known_amount() -> None:
     assert np.ptp(fit.deviations_db[0][inside, 0]) == pytest.approx(
         np.ptp(excess[inside]), abs=1e-12
     )
+
+
+@pytest.mark.parametrize(
+    ("room", "printed"),
+    [
+        # ISO 26101:2017 Table A.1, PDF page 15, folio 9: up to 630 Hz,
+        # 800 Hz to 5 000 Hz and from 6 300 Hz.
+        ("anechoic", (1.5, 1.5, 1.0, 1.0, 1.5, 1.5)),
+        ("hemi-anechoic", (2.5, 2.5, 2.0, 2.0, 3.0, 3.0)),
+    ],
+)
+def test_the_fit_reads_its_tolerance_from_table_a1(
+    room: str, printed: tuple[float, ...]
+) -> None:
+    freqs = (100.0, 630.0, 800.0, 5000.0, 6300.0, 10000.0)
+    d = np.linspace(0.5, 2.0, 7)
+    fit = emission.inverse_square_law_deviations(
+        _free_field_traverses(d, freqs, background=None),
+        frequencies_hz=freqs,
+        room=room,  # type: ignore[arg-type]
+    )
+    np.testing.assert_array_equal(fit.tolerance_db, printed)
+
+
+def test_a_radius_the_levels_do_not_qualify_is_refused() -> None:
+    # The reflecting wall ends the run inside the traverse; a result that
+    # claimed the whole traverse would judge it against a wider tolerance
+    # than Table A.1's 1,0 dB at 1 kHz.
+    d = np.arange(0.50, 2.4001, 0.05)
+    levels, _ = _incoherent_reflection(1.0, 2.5, d)
+    traverse = emission.MicrophoneTraverse.along((1, 0, 0), d, levels)
+    fit = emission.inverse_square_law_deviations(
+        [traverse], frequencies_hz=[1000.0], room="anechoic"
+    )
+    assert fit.maximum_qualified_radius_m < d[-1]
+    forged = {
+        "band_radius_m": np.array([d[-1]]),
+        "traverse_radius_m": np.array([[d[-1]]]),
+    }
+    with pytest.raises(ValueError, match="InverseSquareLawResult"):
+        dataclasses.replace(fit, **forged)  # type: ignore[arg-type]
 
 
 def test_a_coherent_reflection_ripples_by_the_known_amount() -> None:

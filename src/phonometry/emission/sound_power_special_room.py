@@ -378,8 +378,9 @@ class SpecialRoomReverberationCheck:
     ``reverberation_parameter`` the :math:`R` of Formula (1) (or its NOTE);
     ``nominal_reverberation_time_s`` is :math:`T_\mathrm{nom}`, supplied or,
     with ``centred`` ``True``, found by centring the measured values within
-    the limiting curves. ``lower_limit`` and ``upper_limit`` are the bounds on
-    :math:`T/(R\,T_\mathrm{nom})`, 0,9 and 1,1, or 0,8 and 1,2 above 6,3 kHz.
+    the limiting curves. :attr:`lower_limit` and :attr:`upper_limit` are the
+    bounds on :math:`T/(R\,T_\mathrm{nom})`, 0,9 and 1,1, or 0,8 and 1,2 above
+    6,3 kHz, read from the bands: the standard's, not fields.
     ``volume_m3`` is the room and ``method`` the determination it is being
     qualified for, which decides whether the 300 m³ ceiling applies.
     ``climate_product_change`` is the relative change of
@@ -397,8 +398,6 @@ class SpecialRoomReverberationCheck:
     reverberation_parameter: np.ndarray
     nominal_reverberation_time_s: float
     centred: bool
-    lower_limit: np.ndarray
-    upper_limit: np.ndarray
     volume_m3: float
     method: str
     climate_product_change: float = math.nan
@@ -422,11 +421,25 @@ class SpecialRoomReverberationCheck:
             "frequencies",
             "reverberation_time_s",
             "reverberation_parameter",
-            "lower_limit",
-            "upper_limit",
         )
         require_ranks(self, **dict.fromkeys(bands, 1))
         require_same_length(self, *bands)
+
+    @property
+    def lower_limit(self) -> np.ndarray:
+        r"""The lower bound on :math:`T/(R\,T_\mathrm{nom})` per band (6.3).
+
+        :return: 0,9, or 0,8 above the 6,3 kHz band.
+        """
+        return np.asarray(1.0 - _tolerance(self.frequencies), dtype=np.float64)
+
+    @property
+    def upper_limit(self) -> np.ndarray:
+        r"""The upper bound on :math:`T/(R\,T_\mathrm{nom})` per band (6.3).
+
+        :return: 1,1, or 1,2 above the 6,3 kHz band.
+        """
+        return np.asarray(1.0 + _tolerance(self.frequencies), dtype=np.float64)
 
     @property
     def normalized_ratio(self) -> np.ndarray:
@@ -711,8 +724,6 @@ def check_special_room_reverberation(
         reverberation_parameter=np.asarray(r, dtype=np.float64),
         nominal_reverberation_time_s=float(nominal),
         centred=centred,
-        lower_limit=np.asarray(1.0 - half_width, dtype=np.float64),
-        upper_limit=np.asarray(1.0 + half_width, dtype=np.float64),
         volume_m3=float(volume_m3),
         method=chosen,
         climate_product_change=change,
@@ -933,33 +944,44 @@ class SpecialRoomSuitabilityCheck:
     a calibrated broad-band reference source determined in the room by this
     standard (step 2), ``calibrated_power_level_db`` its calibration as the
     evaluation read it, under the meteorological conditions of the test
-    (step 1), and ``limit_db`` the Table 1 bound on the magnitude of their
-    difference (step 4).
+    (step 1), and :attr:`limit_db` the Table 1 bound on the magnitude of their
+    difference (step 4), read from the bands: the standard's, not a field.
     """
 
     frequencies: np.ndarray
     measured_power_level_db: np.ndarray
     calibrated_power_level_db: np.ndarray
-    limit_db: np.ndarray
 
     def __post_init__(self) -> None:
-        """Reject a check whose per-band arrays disagree.
+        """Reject a check whose per-band arrays disagree or leave Table 1.
 
-        :raises ValueError: if the arrays differ in length or rank.
+        :raises ValueError: if the arrays differ in length or rank, or a band
+            is not an octave of Table 1.
         """
         require_ranks(
             self,
             frequencies=1,
             measured_power_level_db=1,
             calibrated_power_level_db=1,
-            limit_db=1,
         )
         require_same_length(
             self,
             "frequencies",
             "measured_power_level_db",
             "calibrated_power_level_db",
-            "limit_db",
+        )
+        if any(round(float(f)) not in _TABLE1_DB for f in self.frequencies):
+            msg = (
+                "SpecialRoomSuitabilityCheck: 'frequencies' must be octave bands "
+                f"of Table 1 ({sorted(_TABLE1_DB)} Hz)."
+            )
+            raise ValueError(msg)
+
+    @property
+    def limit_db(self) -> np.ndarray:
+        """The Table 1 bound on the difference per band (step 4), in dB."""
+        return np.array(
+            [_TABLE1_DB[round(float(f))] for f in self.frequencies], dtype=np.float64
         )
 
     @property
@@ -1096,7 +1118,6 @@ def check_special_room_suitability(
         frequencies=freqs,
         measured_power_level_db=measured.copy(),
         calibrated_power_level_db=np.asarray(calibrated, dtype=np.float64).copy(),
-        limit_db=np.array([_TABLE1_DB[round(float(f))] for f in freqs]),
     )
 
 

@@ -15,6 +15,7 @@ tested here are read from that figure and not from any other source.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import warnings
 
@@ -124,6 +125,25 @@ def test_massive_structures_take_twice_row_1() -> None:
     doubled = bd.guideline_velocity("commercial", 50.0, massive_structure=True)
     assert doubled == pytest.approx(2.0 * plain)
     assert doubled == pytest.approx(80.0)
+
+
+def test_the_assessment_judges_a_massive_structure_against_twice_row_1() -> None:
+    """The assessment reads its guideline with the allowance it was given."""
+    plain = bd.assess_building_vibration(
+        60.0, building_class="commercial", frequency_hz=50.0
+    )
+    massive = bd.assess_building_vibration(
+        60.0, building_class="commercial", frequency_hz=50.0, massive_structure=True
+    )
+    assert plain.guideline_mm_s == pytest.approx(40.0)
+    assert massive.guideline_mm_s == pytest.approx(80.0)
+    assert (plain.within_guideline, massive.within_guideline) == (False, True)
+
+
+def test_the_massive_structure_allowance_is_written_by_name() -> None:
+    """A positional True cannot raise the guideline unseen."""
+    field = {f.name: f for f in dataclasses.fields(bd.DamageAssessment)}
+    assert field["massive_structure"].kw_only
 
 
 def test_the_doubling_is_written_for_row_1_alone() -> None:

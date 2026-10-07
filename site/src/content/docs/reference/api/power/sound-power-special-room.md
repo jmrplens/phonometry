@@ -514,8 +514,6 @@ SpecialRoomReverberationCheck(
     reverberation_parameter: np.ndarray,
     nominal_reverberation_time_s: float,
     centred: bool,
-    lower_limit: np.ndarray,
-    upper_limit: np.ndarray,
     volume_m3: float,
     method: str,
     climate_product_change: float = nan,
@@ -530,8 +528,9 @@ reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
 `reverberation_parameter` the $R$ of Formula (1) (or its NOTE);
 `nominal_reverberation_time_s` is $T_\mathrm{nom}$, supplied or,
 with `centred` `True`, found by centring the measured values within
-the limiting curves. `lower_limit` and `upper_limit` are the bounds on
-$T/(R\,T_\mathrm{nom})$, 0,9 and 1,1, or 0,8 and 1,2 above 6,3 kHz.
+the limiting curves. `lower_limit` and `upper_limit` are the
+bounds on $T/(R\,T_\mathrm{nom})$, 0,9 and 1,1, or 0,8 and 1,2 above
+6,3 kHz, read from the bands: the standard's, not fields.
 `volume_m3` is the room and `method` the determination it is being
 qualified for, which decides whether the 300 m³ ceiling applies.
 `climate_product_change` is the relative change of
@@ -555,6 +554,14 @@ Per band, whether `T` lies within the limiting curves.
 
 Whether $H(\theta + 5)$ stayed within ±10 % (6.6); `None`
 when the climates were not given.
+
+### SpecialRoomReverberationCheck.lower_limit
+
+*property*
+
+The lower bound on $T/(R\,T_\mathrm{nom})$ per band (6.3).
+
+**Returns:** 0,9, or 0,8 above the 6,3 kHz band.
 
 ### SpecialRoomReverberationCheck.nominal_in_range
 
@@ -616,6 +623,14 @@ $T/T_\mathrm{nom}$ per band, the quantity Figure B.3 draws.
 
 Whether the source is at most 1 % of the room, as clause 5
 recommends; `None` when no source volume was given.
+
+### SpecialRoomReverberationCheck.upper_limit
+
+*property*
+
+The upper bound on $T/(R\,T_\mathrm{nom})$ per band (6.3).
+
+**Returns:** 1,1, or 1,2 above the 6,3 kHz band.
 
 ### SpecialRoomReverberationCheck.volume_large_enough
 
@@ -812,7 +827,6 @@ SpecialRoomSuitabilityCheck(
     frequencies: np.ndarray,
     measured_power_level_db: np.ndarray,
     calibrated_power_level_db: np.ndarray,
-    limit_db: np.ndarray,
 )
 ```
 
@@ -823,7 +837,7 @@ a calibrated broad-band reference source determined in the room by this
 standard (step 2), `calibrated_power_level_db` its calibration as the
 evaluation read it, under the meteorological conditions of the test
 (step 1), and `limit_db` the Table 1 bound on the magnitude of their
-difference (step 4).
+difference (step 4), read from the bands: the standard's, not a field.
 
 ### SpecialRoomSuitabilityCheck.band_within
 
@@ -836,6 +850,12 @@ Per band, whether the difference stays within Table 1.
 *property*
 
 Per band, the level determined in the room less the calibration (step 3).
+
+### SpecialRoomSuitabilityCheck.limit_db
+
+*property*
+
+The Table 1 bound on the difference per band (step 4), in dB.
 
 ### SpecialRoomSuitabilityCheck.passes
 

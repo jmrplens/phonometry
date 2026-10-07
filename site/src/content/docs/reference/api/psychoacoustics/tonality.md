@@ -90,25 +90,36 @@ the same critical band are combined per clause 11.6 (Formulae 14-16).
 ## ToneAssessment
 
 ```python
-ToneAssessment(
-    frequency: float,
-    ratio_db: float,
-    criterion_db: float,
-    *,
-    prominent: bool,
-)
+ToneAssessment(frequency: float, ratio_db: float, method: str)
 ```
 
 Result of a discrete-tone prominence assessment.
 
-`ratio_db` is the tone-to-noise ratio or the prominence ratio in
-decibels depending on the producing function; `criterion_db` is the
-prominence limit at `frequency` and `prominent` the verdict.
-
+`ratio_db` is the tone-to-noise ratio (clause 11) or the prominence
+ratio (clause 12), as `method` says. The prominence criterion at
+`frequency` (`criterion_db`) is the standard's formula for that
+ratio and the verdict (`prominent`) is read from it, so an
+assessment cannot be built against another criterion.
 `prominent` applies the numeric criterion only; the standard's
 audibility requirements (aural examination per clauses 11.8/12.8 and
 the clause 8/9 lower-threshold-of-hearing screen, which needs
 calibrated absolute levels) are the caller's responsibility.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequency` | The tone frequency, in hertz. |
+| `ratio_db` | The ratio, in decibels. |
+| `method` | `"tone_to_noise_ratio"` or `"prominence_ratio"`. |
+
+### ToneAssessment.criterion_db
+
+*property*
+
+The prominence limit at `frequency`, in dB.
+
+**Returns:** Formulae (12)-(13) for the tone-to-noise ratio, (25)-(26) for the prominence ratio.
 
 ### ToneAssessment.plot()
 
@@ -141,3 +152,9 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `kwargs` | Forwarded to the assessed-tone marker `plot` call. |
 
 **Returns:** The axes.
+
+### ToneAssessment.prominent
+
+*property*
+
+Whether the ratio reaches the criterion inside the range of interest.

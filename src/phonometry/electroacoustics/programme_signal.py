@@ -466,21 +466,69 @@ class ProgrammeSignalCheck:
         ascending.
     :ivar band_levels_db: The band levels as given, in dB, in the order of
         :attr:`frequencies_hz`.
-    :ivar offset_db: The level added to the band levels to refer them to
-        Table II, in dB: the middle of the window of levels that keeps every
-        band inside its tolerance, or, when no level does, the level that
-        shares the worst excursion equally between the two sides.
-    :ivar relative_levels_db: Table II's relative levels at the bands, in dB.
-    :ivar tolerance_plus_db: The upper tolerances, in dB.
-    :ivar tolerance_minus_db: The lower tolerances, in dB.
+
+    Table II's relative levels and tolerances at the bands, and the offset
+    that refers the levels to them, are read from the table, so a check
+    cannot be built against other tolerances.
     """
 
     frequencies_hz: NDArray[np.float64]
     band_levels_db: NDArray[np.float64]
-    offset_db: float
-    relative_levels_db: NDArray[np.float64]
-    tolerance_plus_db: NDArray[np.float64]
-    tolerance_minus_db: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Reject a band Table II does not print, or levels of another length.
+
+        :raises ValueError: if a frequency is not a nominal band of Table II,
+            or the levels do not hold one finite value per band.
+        """
+        for value in np.atleast_1d(self.frequencies_hz):
+            if float(value) not in SIMULATED_PROGRAMME_SPECTRUM:
+                msg = (
+                    f"ProgrammeSignalCheck: {float(value):g} Hz is not a nominal "
+                    "band of IEC 60268-1 Table II."
+                )
+                raise ValueError(msg)
+        levels = np.asarray(self.band_levels_db, dtype=np.float64)
+        if levels.shape != np.shape(self.frequencies_hz) or not np.all(
+            np.isfinite(levels)
+        ):
+            msg = "ProgrammeSignalCheck: one finite band level per band."
+            raise ValueError(msg)
+
+    def _rows(self) -> list[ProgrammeSpectrumBand]:
+        return [
+            SIMULATED_PROGRAMME_SPECTRUM[float(value)]
+            for value in np.atleast_1d(self.frequencies_hz)
+        ]
+
+    @property
+    def relative_levels_db(self) -> NDArray[np.float64]:
+        """Table II's relative levels at the bands, in dB."""
+        return np.array([row.relative_level_db for row in self._rows()])
+
+    @property
+    def tolerance_plus_db(self) -> NDArray[np.float64]:
+        """The upper tolerances of Table II at the bands, in dB."""
+        return np.array([row.tolerance_plus_db for row in self._rows()])
+
+    @property
+    def tolerance_minus_db(self) -> NDArray[np.float64]:
+        """The lower tolerances of Table II at the bands, in dB."""
+        return np.array([row.tolerance_minus_db for row in self._rows()])
+
+    @property
+    def offset_db(self) -> float:
+        """The level added to the band levels to refer them to Table II, in dB.
+
+        The middle of the window of levels that keeps every band inside its
+        tolerance, or, when no level does, the level that shares the worst
+        excursion equally between the two sides.
+        """
+        table = self.relative_levels_db
+        levels = np.asarray(self.band_levels_db, dtype=np.float64)
+        lowest = float(np.max(table - self.tolerance_minus_db - levels))
+        highest = float(np.min(table + self.tolerance_plus_db - levels))
+        return 0.5 * (lowest + highest)
 
     @property
     def deviations_db(self) -> NDArray[np.float64]:
@@ -598,19 +646,7 @@ def check_programme_signal(
         msg = "'frequencies_hz' names a band of Table II more than once."
         raise ValueError(msg)
     order = np.argsort(nominal)
-    nominal = nominal[order]
-    levels = levels[order]
-    rows = [SIMULATED_PROGRAMME_SPECTRUM[float(value)] for value in nominal]
-    table = np.array([row.relative_level_db for row in rows])
-    plus = np.array([row.tolerance_plus_db for row in rows])
-    minus = np.array([row.tolerance_minus_db for row in rows])
-    lowest = float(np.max(table - minus - levels))
-    highest = float(np.min(table + plus - levels))
     return ProgrammeSignalCheck(
-        frequencies_hz=read_only(nominal),
-        band_levels_db=read_only(levels.copy()),
-        offset_db=0.5 * (lowest + highest),
-        relative_levels_db=read_only(table),
-        tolerance_plus_db=read_only(plus),
-        tolerance_minus_db=read_only(minus),
+        frequencies_hz=read_only(nominal[order]),
+        band_levels_db=read_only(levels[order].copy()),
     )

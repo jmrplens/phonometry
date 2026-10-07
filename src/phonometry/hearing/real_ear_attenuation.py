@@ -752,8 +752,11 @@ class ReatSoundFieldCheck:
     :ivar rotation_variation_db: The spread of the levels a rotated directional
         microphone saw per band, in dB, or ``nan`` where 4.2.2 b) does not
         apply (below 500 Hz) or no rotation was given.
-    :ivar allowable_variation_db: What Table 1 allows that spread, in dB, or
-        ``None`` when no rotation was given.
+    :ivar free_field_rejection_db: The free-field rejection of the rotated
+        directional microphone, in dB, or ``None`` when no rotation was given.
+        What Table 1 allows the spread (:attr:`allowable_variation_db`) is
+        read from it, not stored, so a check cannot be built against another
+        allowance.
     :ivar positions: The position names, in row order.
 
     4.2.2 b) is a requirement of the clause, not an option: a check made
@@ -767,8 +770,28 @@ class ReatSoundFieldCheck:
     position_deviation_db: np.ndarray
     left_right_difference_db: np.ndarray
     rotation_variation_db: np.ndarray
-    allowable_variation_db: float | None
+    free_field_rejection_db: float | None
     positions: tuple[str, ...] = _POSITIONS
+
+    def __post_init__(self) -> None:
+        """Reject a microphone Table 1 calls unsuitable.
+
+        :raises ValueError: for a rejection below 10 dB, or one that is not
+            finite.
+        """
+        if self.free_field_rejection_db is not None:
+            allowable_field_variation(self.free_field_rejection_db)
+
+    @property
+    def allowable_variation_db(self) -> float | None:
+        """What Table 1 allows the rotation spread, in dB.
+
+        :return: The allowance for :attr:`free_field_rejection_db`, or
+            ``None`` when no rotation was given.
+        """
+        if self.free_field_rejection_db is None:
+            return None
+        return allowable_field_variation(self.free_field_rejection_db)
 
     @property
     def uniform(self) -> np.ndarray:
@@ -799,12 +822,11 @@ class ReatSoundFieldCheck:
 
         :return: One boolean per band.
         """
-        if self.allowable_variation_db is None:
+        allowed = self.allowable_variation_db
+        if allowed is None:
             return np.ones(self.frequencies.size, dtype=bool)
         judged = np.isfinite(self.rotation_variation_db)
-        within = (
-            settled(self.rotation_variation_db - self.allowable_variation_db) <= 0.0
-        )
+        within = settled(self.rotation_variation_db - allowed) <= 0.0
         return np.asarray(~judged | within, dtype=bool)
 
     @property
@@ -919,7 +941,7 @@ def check_reat_sound_field(
     left = levels[_POSITIONS.index("left")]
     right = levels[_POSITIONS.index("right")]
     variation = np.full(count, np.nan)
-    allowed: float | None = None
+    rejection: float | None = None
     if (rotation_levels_db is None) != (free_field_rejection_db is None):
         msg = (
             "give 'rotation_levels_db' and 'free_field_rejection_db' "
@@ -927,7 +949,8 @@ def check_reat_sound_field(
         )
         raise ValueError(msg)
     if rotation_levels_db is not None and free_field_rejection_db is not None:
-        allowed = allowable_field_variation(free_field_rejection_db)
+        allowable_field_variation(free_field_rejection_db)
+        rejection = float(free_field_rejection_db)
         rotation = np.asarray(rotation_levels_db, dtype=np.float64)
         if rotation.ndim != _GRID_RANK or rotation.shape[1] != count:
             msg = (
@@ -949,5 +972,5 @@ def check_reat_sound_field(
         position_deviation_db=deviation,
         left_right_difference_db=np.abs(right - left),
         rotation_variation_db=variation,
-        allowable_variation_db=allowed,
+        free_field_rejection_db=rejection,
     )

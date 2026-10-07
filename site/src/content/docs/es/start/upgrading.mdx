@@ -651,6 +651,100 @@ print(octave.overall_class, octave.requirement_class("relative_attenuation"))
 # 1 1
 ```
 
+## Un veredicto lee de la norma el límite que esta imprime
+
+Un veredicto llevaba antes como campo del constructor el límite con el que se
+le juzgaba. En 3.3.0 lo hacían tres: `ToneAssessment.criterion_db`,
+`ExposureAssessment.action_value` y `limit_value`, y
+`RigidMassCalibrationResult.tolerance`. Otros seis, posteriores a 3.3.0, lo
+hacían en 4.0.0rc1, y el resto de la tabla llegó después de 4.0.0rc1.
+Cualquier código que construyera uno a mano, o que lo reescribiera con
+`dataclasses.replace`, podía juzgar una medición contra cualquier número y
+seguir poniendo el nombre de la norma encima del resultado. En 4.0 todo límite
+que imprime una norma es una propiedad de solo lectura, leída de los campos
+que la seleccionan: las bandas, la condición, la fuente, la clase, la sala. Un
+veredicto que se guardaba junto a su límite se lee también de los campos
+medidos, o se contrasta con ellos al construir el resultado, de modo que no
+puede contradecir el límite. Las funciones que devuelven estos veredictos
+reciben los mismos argumentos y dan las mismas respuestas, y cada nombre de la
+tabla sigue leyendo el mismo valor; solo cambia el código que construye un
+veredicto directamente o que sustituye uno de estos campos. La última columna
+indica en qué versión apareció cada veredicto.
+
+| Veredicto | Ya no son campos del constructor | Campos que conserva o gana | Desde |
+| --- | --- | --- | --- |
+| `building.PositionSpreadCheck` | `limit_db`, `stage`, `spread_db`, `action`, `next_positions`, `corner_standard_deviation_db` | `levels_db`, del que se leen todos | después de 4.0.0rc1 |
+| `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
+| `noise_control.BandFlatnessCheck` | `limit_db`, `satisfied` | `octave_centres_hz`, `spread_db` | después de 4.0.0rc1 |
+| `noise_control.SourcePositionCheck` | `required_positions`, `satisfied`, `exceeds_maximum` | `positions_used`, `max_octave_spread_db` | después de 4.0.0rc1 |
+| `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | después de 4.0.0rc1 |
+| `environment.ReflectionGridCheck` | `nominal_m`, `deviations_m`, `within` | `check`, `path_differences_m` | después de 4.0.0rc1 |
+| `emission.HardWalledRoomCheck` | `limit_db`, `minimum_volume_m3`, `box_dimension_limit_m`, `minimum_microphone_distance_m` | las bandas, la sala y la caja de referencia | después de 4.0.0rc1 |
+| `emission.ReferenceSoundSourceVerdict` | todos los `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | las bandas, los niveles y las cifras medidas | después de 4.0.0rc1 |
+| `emission.ReferenceSourceDriftResult`, `emission.SpecialRoomSuitabilityCheck` | `limit_db` | las bandas | después de 4.0.0rc1 |
+| `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | las bandas | después de 4.0.0rc1 |
+| `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing`; cada fila de banda debe repetir los mínimos de la tabla 2, su índice, sus márgenes y su clase | 4.0.0rc1 |
+| `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | lo selecciona `room`; los radios cualificados deben ser los que alcanzan los niveles | después de 4.0.0rc1 |
+| `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gana `earphone_attenuation_db` y `allowed_threshold_shift_db` | después de 4.0.0rc1 |
+| `hearing.FixtureIsolationCheck` | `required_db` | las bandas | después de 4.0.0rc1 |
+| `hearing.ReatSoundFieldCheck` | `allowable_variation_db` | gana `free_field_rejection_db` | después de 4.0.0rc1 |
+| `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gana `front_to_random_index_db` | después de 4.0.0rc1 |
+| `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference_db` | los seleccionan `field` y `loudspeaker_distance_m` | después de 4.0.0rc1 |
+| `electroacoustics.ProgrammeSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies_hz`, `band_levels_db` | después de 4.0.0rc1 |
+| `electroacoustics.NeckLoopVerification` | `limits` | lo selecciona `neck_loop_type` | después de 4.0.0rc1 |
+| `psychoacoustics.ToneAssessment` | `criterion_db`, `prominent` | gana `method`, `"tone_to_noise_ratio"` o `"prominence_ratio"` | 3.3.0 |
+| `underwater.WeightedExposureResult` | `criteria` | gana `impulsive` | 4.0.0rc1 |
+| `vibration.ExposureAssessment` | `action_value`, `limit_value`, `exceeds_action`, `exceeds_limit`, `zone` | `value`, `kind`, `metric` | 3.3.0 |
+| `vibration.PhaseVerification`, `vibration.WeightingVerification` | `tolerance_deg` (fase), `within_tolerance` | la ponderación y las frecuencias | 4.0.0rc1 |
+| `vibration.RunningRmsDecayVerification` | `printed_time_s`, `tolerance_s` | `method`, `integration_time_s`, `measured_time_s` | después de 4.0.0rc1 |
+| `vibration.SignalBurstVerification` | `printed`, `deviation_percent`, `tolerance_percent`, `within_tolerance` | la fila de la tabla, las columnas y `measured` | 4.0.0rc1 |
+| `vibration.VibrationMeterVerification` | `lower_percent`, `upper_percent`, `within_tolerance` | gana `measured_response` | después de 4.0.0rc1 |
+| `vibration.AssessmentVelocity` | `guide_value_mm_s` | lo selecciona `building_class` | después de 4.0.0rc1 |
+| `vibration.MountingCheck` | `acceptable`, `frequency_limit_hz`, `peak_acceleration_limit_m_s2`, `device` | gana `peak_acceleration_m_s2` y `upper_frequency_hz` | después de 4.0.0rc1 |
+| `vibration.DamageAssessment` | `guideline_mm_s` | gana `massive_structure`, solo por nombre | 4.0.0rc1 |
+| `vibration.RigidMassCalibrationResult` | `expected`, `deviation`, `within_tolerance`, `passes`, `tolerance` | `frequencies`, `measured`, `mass`, `quantity` | 3.3.0 |
+| `vibration.LevelDifferenceCheck` | `limit_db` | lo selecciona `condition` | después de 4.0.0rc1 |
+| `vibration.OutputMassCheck` | `mass_limit_kg` | gana `output_apparent_mass_kg`, la fuerza de salida medida entre la aceleración de salida | después de 4.0.0rc1 |
+
+También cambian dos llamadas. `rigid_mass_calibration_check` ya no recibe
+`tolerance`: el apartado 7.5.2 de ISO 7626-2:2015 dice que el bloque «shall
+agree within ±5 %», así que una aceptación interna más estricta se lee de
+`.deviation`. Y `HeavyImpactSourceCheck` y `RigidMassCalibrationResult`, cuyo
+`passes` era un campo almacenado, se niegan a leerse como valor de verdad
+igual que los demás veredictos: `if check:` lanza `TypeError` y el veredicto
+es `.passes`.
+
+```python
+import dataclasses
+
+from phonometry import vibration
+
+check = vibration.check_blocked_output([100.0, 200.0], [90.0, 95.0], [60.0, 70.0])
+print(check.limit_db, check.passes)
+# 20.0 True
+try:
+    dataclasses.replace(check, limit_db=10.0)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+calibration = vibration.rigid_mass_calibration_check([0.104, 0.093], [50.0, 500.0], 10.0)
+print(calibration.tolerance, calibration.within_tolerance.tolist())
+# 0.05 [True, False]
+```
+
+Los límites que una norma deja en manos del usuario siguen siendo campos: los
+límites de rugosidad y de tasa de decaimiento «por defecto» de ISO 3095, la
+tolerancia que ISO/DIS 16032 7.6 no imprime para «aproximadamente 30 s», el
+periodo de curado que fija la especificación del producto según ISO 10140-1
+G.4, el desplazamiento de umbral que ISO 8253-1 deja aceptar al examinador, y
+los límites de especificación, de caso de ensayo y de fila de límites que se
+pasan a las comprobaciones de conformidad, de ISO 17534-1 y del
+RD 1367/2007. Los registros de requisitos de ISO 8297 y de IEC 60118-4,
+`PlantRequirement` y `LoopRequirement`, también conservan como campo el límite
+de cada fila: un mismo tipo de registro reúne requisitos cuyos límites mezclan
+cifras impresas con la geometría de la planta, la intensidad de campo
+especificada o el ruido medido con el bucle apagado.
+
 ## Los diez nombres que ya no están
 
 Todo lo demás se movió. Estos diez no existen en ningún módulo público:

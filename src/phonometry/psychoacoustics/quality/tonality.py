@@ -15,8 +15,9 @@ caller's responsibility.
 
 from __future__ import annotations
 
+import math
 import warnings
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -132,25 +133,63 @@ def _warn_degenerate(ft: float, band_power: float, df: float) -> None:
         )
 
 
+#: The two ratios a tone is judged by, each with its own criterion.
+_TONE_METHODS: tuple[str, ...] = ("tone_to_noise_ratio", "prominence_ratio")
+
+
 @dataclass(frozen=True)
 class ToneAssessment:
     """Result of a discrete-tone prominence assessment.
 
-    ``ratio_db`` is the tone-to-noise ratio or the prominence ratio in
-    decibels depending on the producing function; ``criterion_db`` is the
-    prominence limit at ``frequency`` and ``prominent`` the verdict.
-
+    ``ratio_db`` is the tone-to-noise ratio (clause 11) or the prominence
+    ratio (clause 12), as ``method`` says. The prominence criterion at
+    ``frequency`` (:attr:`criterion_db`) is the standard's formula for that
+    ratio and the verdict (:attr:`prominent`) is read from it, so an
+    assessment cannot be built against another criterion.
     ``prominent`` applies the numeric criterion only; the standard's
     audibility requirements (aural examination per clauses 11.8/12.8 and
     the clause 8/9 lower-threshold-of-hearing screen, which needs
     calibrated absolute levels) are the caller's responsibility.
+
+    :ivar frequency: The tone frequency, in hertz.
+    :ivar ratio_db: The ratio, in decibels.
+    :ivar method: ``"tone_to_noise_ratio"`` or ``"prominence_ratio"``.
     """
 
     frequency: float
     ratio_db: float
-    criterion_db: float
-    _: KW_ONLY
-    prominent: bool
+    method: str
+
+    def __post_init__(self) -> None:
+        """Reject a ratio the standard does not define.
+
+        :raises ValueError: for a method other than the two of ECMA-418-1, or
+            a frequency that is not positive.
+        """
+        if self.method not in _TONE_METHODS:
+            msg = f"'method' must be one of {_TONE_METHODS}; got {self.method!r}."
+            raise ValueError(msg)
+        if math.isnan(self.frequency) or self.frequency <= 0.0:
+            msg = "'frequency' must be positive."
+            raise ValueError(msg)
+
+    @property
+    def criterion_db(self) -> float:
+        """The prominence limit at :attr:`frequency`, in dB.
+
+        :return: Formulae (12)-(13) for the tone-to-noise ratio, (25)-(26)
+            for the prominence ratio.
+        """
+        if self.method == "tone_to_noise_ratio":
+            return _tnr_criterion(self.frequency)
+        return _pr_criterion(self.frequency)
+
+    @property
+    def prominent(self) -> bool:
+        """Whether the ratio reaches the criterion inside the range of interest."""
+        return bool(
+            self.ratio_db >= self.criterion_db and _F_MIN <= self.frequency < _F_MAX
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -393,9 +432,7 @@ def tone_to_noise_ratio(
     p_noise = max(p_tot - p_tone - p_secondary, np.finfo(float).tiny) * (dfc / df_tot)
 
     tnr = float(10 * np.log10(p_tone / p_noise))
-    criterion = float(_tnr_criterion(ft))
-    prominent = tnr >= criterion and _F_MIN <= ft < _F_MAX
-    return ToneAssessment(ft, tnr, criterion, prominent=prominent)
+    return ToneAssessment(ft, tnr, "tone_to_noise_ratio")
 
 
 # ECMA-418-1:2024 Table 2 (p. 17): f_1,L = C0 + C1*ft + C2*ft^2 (Formula 21).
@@ -505,6 +542,4 @@ def prominence_ratio(
         # Formula (23).
         pr = 10 * np.log10(p_m) - 10 * np.log10((p_l + p_u) * 0.5)
 
-    criterion = float(_pr_criterion(ft))
-    prominent = float(pr) >= criterion and _F_MIN <= ft < _F_MAX
-    return ToneAssessment(ft, float(pr), criterion, prominent=prominent)
+    return ToneAssessment(ft, float(pr), "prominence_ratio")

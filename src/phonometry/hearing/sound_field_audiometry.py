@@ -74,6 +74,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import read_only
+from .._internal.validation import require_choice
 from .threshold import AUDIOMETRIC_FREQUENCIES as _AUDIOMETRIC_FREQUENCIES
 
 if TYPE_CHECKING:
@@ -170,6 +171,11 @@ DIFFUSE_FIELD_VARIATION_LIMITS: tuple[tuple[float, float], ...] = (
     (4.5, 4.5),
     (4.0, 4.0),
 )
+
+#: The two clauses that judge a diffuse field the same way, each with its own
+#: Table 1.
+_SOUND_FIELD_CLAUSE = "ISO 8253-2 5.3"
+_RANDOM_INCIDENCE_CLAUSE = "ISO 4869-3 5.2.2"
 
 #: The test frequencies of Table B.1, in hertz, 125 Hz to 12,5 kHz. The
 #: paragraph above the table announces them from 200 Hz; the table prints
@@ -387,6 +393,27 @@ def _allowable_variation(
     return allowed
 
 
+def _variation_limits(standard: str) -> tuple[tuple[float, float], ...]:
+    """The Table 1 a diffuse-field clause reads the microphone's index against.
+
+    :param standard: ``"ISO 8253-2 5.3"`` or ``"ISO 4869-3 5.2.2"``.
+    :return: ``(lowest index, allowable variation)`` rows, most directional
+        first.
+    :raises ValueError: for another clause.
+    """
+    if standard == _SOUND_FIELD_CLAUSE:
+        return DIFFUSE_FIELD_VARIATION_LIMITS
+    if standard == _RANDOM_INCIDENCE_CLAUSE:
+        from .earmuff_insertion_loss import RANDOM_INCIDENCE_VARIATION_LIMITS
+
+        return RANDOM_INCIDENCE_VARIATION_LIMITS
+    msg = (
+        f"'standard' must be {_SOUND_FIELD_CLAUSE!r} or "
+        f"{_RANDOM_INCIDENCE_CLAUSE!r}; got {standard!r}."
+    )
+    raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class DiffuseSoundFieldCheck:
     r"""Whether a sound field is diffuse enough, band by band.
@@ -405,13 +432,17 @@ class DiffuseSoundFieldCheck:
     :ivar directional_variation_db: The largest less the smallest level the
         directional microphone read at the reference point per band, in dB,
         or NaN where no reading was given or the band is below 500 Hz.
-    :ivar allowable_variation_db: What the Table 1 allows that variation per
-        band, in dB, or NaN where it is not judged: below 500 Hz, without a
-        directional reading, or where the microphone's index is below the
-        table's last row.
-    :ivar standard: The clause this check applies, for the figure and the
-        messages.
+    :ivar front_to_random_index_db: The directional microphone's
+        front-to-random sensitivity index per band, in dB, or ``None`` when
+        no directional reading was given.
+    :ivar standard: The clause this check applies, ``"ISO 8253-2 5.3"`` or
+        ``"ISO 4869-3 5.2.2"``, which picks the Table 1 the index is read
+        against.
     :ivar positions: The position names, in row order.
+
+    What Table 1 allows the variation (:attr:`allowable_variation_db`) is read
+    from the microphone's index and the standard's table, not stored, so a
+    check cannot be built against another table.
 
     The directional test is a requirement, not an option: a band from 500 Hz
     up without a suitable microphone's reading is not judged,
@@ -424,9 +455,40 @@ class DiffuseSoundFieldCheck:
     position_deviation_db: np.ndarray
     left_right_difference_db: np.ndarray
     directional_variation_db: np.ndarray
-    allowable_variation_db: np.ndarray
+    front_to_random_index_db: np.ndarray | None
     standard: str
     positions: tuple[str, ...] = _DIFFUSE_POSITIONS
+
+    def __post_init__(self) -> None:
+        """Reject a clause with no Table 1, or an index on other bands.
+
+        :raises ValueError: for a standard other than the two that share this
+            check, or an index that is not one value per band.
+        """
+        _variation_limits(self.standard)
+        index = self.front_to_random_index_db
+        if index is not None and np.shape(index) != np.shape(self.frequencies):
+            msg = (
+                "DiffuseSoundFieldCheck: 'front_to_random_index_db' must hold "
+                "one index per band."
+            )
+            raise ValueError(msg)
+
+    @property
+    def allowable_variation_db(self) -> np.ndarray:
+        """What the Table 1 allows the directional variation per band, in dB.
+
+        :return: The allowance, or NaN where it is not judged: below 500 Hz,
+            without a directional reading, or where the microphone's index is
+            below the table's last row.
+        """
+        index = self.front_to_random_index_db
+        if index is None:
+            return np.full(np.shape(self.frequencies), np.nan)
+        allowed = _allowable_variation(
+            np.asarray(index, dtype=np.float64), _variation_limits(self.standard)
+        )
+        return np.where(self.directional_required, allowed, np.nan)
 
     @property
     def uniform(self) -> np.ndarray:
@@ -534,7 +596,6 @@ def _diffuse_field_check(
     front_to_random_index_db: ArrayLike | None,
     frequencies: ArrayLike | None,
     default_frequencies: np.ndarray | tuple[float, ...],
-    limits: tuple[tuple[float, float], ...],
     standard: str,
     owner: str,
 ) -> DiffuseSoundFieldCheck:
@@ -548,8 +609,7 @@ def _diffuse_field_check(
         sensitivity index, one number or one per band, in dB.
     :param frequencies: The centre frequencies, or ``None`` for the default.
     :param default_frequencies: The frequencies assumed when none are given.
-    :param limits: The Table 1 that applies.
-    :param standard: The clause, for the result and the messages.
+    :param standard: The clause, which picks the Table 1 that applies.
     :param owner: The public function name, for the messages.
     :return: :class:`DiffuseSoundFieldCheck`.
     :raises ValueError: for positions that are missing or unknown, bands that
@@ -566,11 +626,11 @@ def _diffuse_field_check(
     deviation = levels - reference[None, :]
     left = levels[_DIFFUSE_POSITIONS.index("left")]
     right = levels[_DIFFUSE_POSITIONS.index("right")]
-    variation, allowed = _directional_variation(
+    variation, index = _directional_variation(
         directional_levels_db,
         front_to_random_index_db,
         freqs,
-        limits=limits,
+        limits=_variation_limits(standard),
         standard=standard,
     )
     return DiffuseSoundFieldCheck(
@@ -578,7 +638,7 @@ def _diffuse_field_check(
         position_deviation_db=deviation,
         left_right_difference_db=np.abs(right - left),
         directional_variation_db=variation,
-        allowable_variation_db=allowed,
+        front_to_random_index_db=index,
         standard=standard,
     )
 
@@ -590,13 +650,14 @@ def _directional_variation(
     *,
     limits: tuple[tuple[float, float], ...],
     standard: str,
-) -> tuple[np.ndarray, np.ndarray]:
-    """The directional test: the spread of the readings and the variation allowed.
+) -> tuple[np.ndarray, np.ndarray | None]:
+    """The directional test: the spread of the readings and the index per band.
 
     Per band, from 500 Hz up: the largest less the smallest level a
-    directional microphone read at the reference point, and the allowable
-    variation Table 1 gives for its front-to-random sensitivity index; NaN
-    below 500 Hz and in every band when no directional reading is given.
+    directional microphone read at the reference point, NaN below 500 Hz and
+    in every band when no directional reading is given; and the
+    microphone's front-to-random sensitivity index per band, ``None`` when
+    no directional reading is given.
 
     :raises ValueError: for a directional reading without its index or the
         other way round, an index that is not one number or one per band, a
@@ -605,7 +666,6 @@ def _directional_variation(
     """
     count = freqs.size
     variation = np.full(count, np.nan)
-    allowed = np.full(count, np.nan)
     if (directional_levels_db is None) != (front_to_random_index_db is None):
         msg = (
             "give 'directional_levels_db' and 'front_to_random_index_db' "
@@ -613,7 +673,7 @@ def _directional_variation(
         )
         raise ValueError(msg)
     if directional_levels_db is None or front_to_random_index_db is None:
-        return variation, allowed
+        return variation, None
     index = _front_to_random_index(front_to_random_index_db, count, limits, standard)
     readings = np.asarray(directional_levels_db, dtype=np.float64)
     if readings.ndim != _GRID_RANK or readings.shape[1] != count:
@@ -631,8 +691,7 @@ def _directional_variation(
         )
         raise ValueError(msg)
     variation[required] = judged.max(axis=0) - judged.min(axis=0)
-    allowed = np.where(required, _allowable_variation(index, limits), np.nan)
-    return variation, allowed
+    return variation, index
 
 
 def _front_to_random_index(
@@ -723,8 +782,7 @@ def check_diffuse_sound_field(
         front_to_random_index_db=front_to_random_index_db,
         frequencies=frequencies,
         default_frequencies=_AUDIOMETRIC_FREQUENCIES,
-        limits=DIFFUSE_FIELD_VARIATION_LIMITS,
-        standard="ISO 8253-2 5.3",
+        standard=_SOUND_FIELD_CLAUSE,
         owner="check_diffuse_sound_field",
     )
 
@@ -743,24 +801,61 @@ class FreeSoundFieldCheck:
     :ivar axis_difference_db: The level at the axial point in front of the
         reference point, towards the loudspeaker, less the level at the one
         behind it, per band, in dB.
-    :ivar inverse_distance_difference_db: What the inverse distance law gives
-        for that difference, :math:`20 \lg((r + d)/(r - d))`, in dB.
     :ivar loudspeaker_distance_m: :math:`r`, the distance from the loudspeaker
         to the reference point, in metres.
-    :ivar axis_offset_m: :math:`d`, how far the axial points sit from the
-        reference point: 0,15 m for a free field, 0,10 m for a quasi-free
-        one.
     :ivar positions: The lateral position names, in row order.
+
+    Where the axial points sit (:attr:`axis_offset_m`) is the clause's, and
+    so is the difference the inverse distance law gives there
+    (:attr:`inverse_distance_difference_db`): both are read from the field and
+    the loudspeaker distance and are not fields, so a check cannot be built
+    against another offset or another law.
     """
 
     field: str
     frequencies: np.ndarray
     lateral_deviation_db: np.ndarray
     axis_difference_db: np.ndarray
-    inverse_distance_difference_db: float
     loudspeaker_distance_m: float
-    axis_offset_m: float
     positions: tuple[str, ...] = _LATERAL_POSITIONS
+
+    def __post_init__(self) -> None:
+        """Refuse a field the clause does not name or a loudspeaker inside it.
+
+        :raises ValueError: If the field is not ``"free"`` or
+            ``"quasi-free"``, or the loudspeaker is not farther from the
+            reference point than the axial points.
+        """
+        require_choice(self.field, "field", ("free", "quasi-free"))
+        distance = float(self.loudspeaker_distance_m)
+        if not math.isfinite(distance) or distance <= self.axis_offset_m:
+            msg = (
+                "FreeSoundFieldCheck: 'loudspeaker_distance_m' must be a finite "
+                f"distance larger than the {self.axis_offset_m:g} m of the axial "
+                f"points; got {distance:g} m."
+            )
+            raise ValueError(msg)
+
+    @property
+    def axis_offset_m(self) -> float:
+        """:math:`d`, how far the axial points sit from the reference point.
+
+        :return: 0,15 m for a free field (5.2 c)), 0,10 m for a quasi-free one
+            (5.4 c)), in metres.
+        """
+        return (
+            _FREE_AXIS_OFFSET_M if self.field == "free" else _QUASI_FREE_AXIS_OFFSET_M
+        )
+
+    @property
+    def inverse_distance_difference_db(self) -> float:
+        r"""What the inverse distance law gives for the axial difference, in dB.
+
+        :return: :math:`20 \lg((r + d)/(r - d))` with :math:`r` the loudspeaker
+            distance and :math:`d` the axial offset.
+        """
+        r, d = float(self.loudspeaker_distance_m), self.axis_offset_m
+        return 20.0 * math.log10((r + d) / (r - d))
 
     @property
     def lateral_tolerance_db(self) -> np.ndarray:
@@ -945,10 +1040,7 @@ def _free_field_check(
         frequencies=freqs,
         lateral_deviation_db=lateral - reference[None, :],
         axis_difference_db=front - back,
-        inverse_distance_difference_db=20.0
-        * math.log10((distance + offset) / (distance - offset)),
         loudspeaker_distance_m=distance,
-        axis_offset_m=offset,
     )
 
 

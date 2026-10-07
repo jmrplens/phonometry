@@ -76,11 +76,14 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -970,8 +973,15 @@ def _band_average(
 # unidirectional, and the mass in front of the output force transducers.
 # ---------------------------------------------------------------------------
 
-#: The two level-difference conditions the parts share, by name.
-_CONDITIONS: tuple[str, ...] = ("blocked_output", "unwanted_input")
+#: The two level-difference conditions the parts share, by name, with the
+#: least difference each accepts, in dB.
+_CONDITION_LIMITS_DB: Mapping[str, float] = MappingProxyType(
+    {
+        "blocked_output": _BLOCKED_OUTPUT_LIMIT_DB,
+        "unwanted_input": _UNWANTED_INPUT_LIMIT_DB,
+    }
+)
+_CONDITIONS: tuple[str, ...] = tuple(_CONDITION_LIMITS_DB)
 
 
 @dataclass(frozen=True)
@@ -989,31 +999,30 @@ class LevelDifferenceCheck:
     (``"unwanted_input"``; ISO 10846-2:2008 Inequality (3), -3:2002
     Inequality (5), -4:2003 Inequality (7), -5:2008 Inequality (2)). The
     measurements are valid only at the frequencies where the condition holds.
+    The least difference is the series', read from the condition
+    (:attr:`limit_db`), so a check cannot be built against another one.
 
     :ivar frequencies: Frequencies judged, in hertz.
     :ivar difference_db: The level difference at each frequency, in dB
         (``+inf`` where the second level is that of a zero signal).
-    :ivar limit_db: The least difference the condition accepts, in dB.
     :ivar condition: ``"blocked_output"`` or ``"unwanted_input"``.
     """
 
     frequencies: np.ndarray
     difference_db: np.ndarray
-    limit_db: float
     condition: Literal["blocked_output", "unwanted_input"]
 
     def __post_init__(self) -> None:
         """Reject a check whose fields disagree or that names no condition.
 
         :raises ValueError: if the arrays differ in length or rank, a
-            frequency is not finite, a difference is NaN or ``-inf``, the
-            limit is not finite, or the condition is unknown.
+            frequency is not finite, a difference is NaN or ``-inf``, or the
+            condition is unknown.
         """
         owner = type(self).__name__
         require_ranks(self, frequencies=1, difference_db=1)
         require_same_length(self, "frequencies", "difference_db", axis="frequency")
         require_finite_fields(self, "frequencies")
-        require_finite(self.limit_db, "limit_db")
         difference = np.asarray(self.difference_db, dtype=np.float64)
         if np.any(np.isnan(difference)) or np.any(np.isneginf(difference)):
             msg = f"{owner}: 'difference_db' must not hold NaN or -inf."
@@ -1024,6 +1033,15 @@ class LevelDifferenceCheck:
                 f"got {self.condition!r}."
             )
             raise ValueError(msg)
+
+    @property
+    def limit_db(self) -> float:
+        """The least difference the condition accepts, fixed by the series.
+
+        :return: 20 dB for ``"blocked_output"``, 15 dB for
+            ``"unwanted_input"``.
+        """
+        return _CONDITION_LIMITS_DB[self.condition]
 
     @property
     def holds(self) -> np.ndarray:
@@ -1158,7 +1176,6 @@ def check_blocked_output(
     check = LevelDifferenceCheck(
         frequencies=read_only_copy(freq),
         difference_db=first - second,
-        limit_db=_BLOCKED_OUTPUT_LIMIT_DB,
         condition="blocked_output",
     )
     _warn_level_difference(
@@ -1220,7 +1237,6 @@ def check_unwanted_input(
     check = LevelDifferenceCheck(
         frequencies=read_only_copy(freq),
         difference_db=excitation - loudest,
-        limit_db=_UNWANTED_INPUT_LIMIT_DB,
         condition="unwanted_input",
     )
     _warn_level_difference(
@@ -1254,32 +1270,51 @@ class OutputMassCheck:
     the bound (:math:`r = 0{,}06`) is 0,54 dB against the 0,51 dB of an
     inertia force in phase with the measured one: the "0,5 dB" of NOTE 1.
 
+    The measured side of the inequality is a field, the apparent mass
+    :math:`|F_2|/|a_2|` the two output levels give; the 0,06 is the series',
+    so :attr:`mass_limit_kg` is read from it and a check cannot be built
+    against another factor.
+
     :ivar frequencies: Frequencies judged, in hertz.
     :ivar output_mass_kg: The mass ``m0``, in kg.
-    :ivar mass_limit_kg: The right-hand side of the inequality at each
-        frequency, in kg.
+    :ivar output_apparent_mass_kg: :math:`|F_2|/|a_2| =
+        10^{(L_{F2} - L_{a2})/20}` times 1 µN over 1 µm/s², the output force
+        over the output acceleration at each frequency, in kg.
     """
 
     frequencies: np.ndarray
     output_mass_kg: float
-    mass_limit_kg: np.ndarray
+    output_apparent_mass_kg: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject a check whose fields disagree or hold impossible values.
 
         :raises ValueError: if the arrays differ in length or rank, a value
-            is not finite, the mass is negative or a limit is not positive.
+            is not finite, the mass is negative or an apparent mass is not
+            positive.
         """
-        require_ranks(self, frequencies=1, mass_limit_kg=1)
-        require_same_length(self, "frequencies", "mass_limit_kg", axis="frequency")
-        require_finite_fields(self, "frequencies", "mass_limit_kg")
+        require_ranks(self, frequencies=1, output_apparent_mass_kg=1)
+        require_same_length(
+            self, "frequencies", "output_apparent_mass_kg", axis="frequency"
+        )
+        require_finite_fields(self, "frequencies", "output_apparent_mass_kg")
         require_finite(
             require_non_negative(self.output_mass_kg, "output_mass_kg"),
             "output_mass_kg",
         )
-        if np.any(np.asarray(self.mass_limit_kg, dtype=np.float64) <= 0.0):
-            msg = "OutputMassCheck: 'mass_limit_kg' must be positive."
+        if np.any(np.asarray(self.output_apparent_mass_kg, dtype=np.float64) <= 0.0):
+            msg = "OutputMassCheck: 'output_apparent_mass_kg' must be positive."
             raise ValueError(msg)
+
+    @property
+    def mass_limit_kg(self) -> np.ndarray:
+        r"""The right-hand side of the inequality at each frequency, in kg.
+
+        :return: :math:`0{,}06\,|F_2|/|a_2|`, one per frequency.
+        """
+        return _OUTPUT_MASS_FACTOR * np.asarray(
+            self.output_apparent_mass_kg, dtype=np.float64
+        )
 
     @property
     def holds(self) -> np.ndarray:
@@ -1295,8 +1330,8 @@ class OutputMassCheck:
 
         :return: One ratio per frequency; 0,06 where ``m0`` sits on its limit.
         """
-        limit = np.asarray(self.mass_limit_kg, dtype=np.float64)
-        return np.asarray(_OUTPUT_MASS_FACTOR * self.output_mass_kg / limit)
+        apparent = np.asarray(self.output_apparent_mass_kg, dtype=np.float64)
+        return np.asarray(self.output_mass_kg / apparent)
 
     @property
     def bias_bound_db(self) -> np.ndarray:
@@ -1404,16 +1439,15 @@ def check_output_mass(
             raise ValueError(msg)
         levels.append(level)
     force_db, acceleration_db = levels
-    limit = (
-        _OUTPUT_MASS_FACTOR
-        * (_FORCE_REFERENCE_N / _ACCELERATION_REFERENCE_M_S2)
-        * 10.0 ** ((force_db - acceleration_db) / 20.0)
+    apparent = (_FORCE_REFERENCE_N / _ACCELERATION_REFERENCE_M_S2) * 10.0 ** (
+        (force_db - acceleration_db) / 20.0
     )
     check = OutputMassCheck(
         frequencies=read_only_copy(freq),
         output_mass_kg=output_mass_kg,
-        mass_limit_kg=limit,
+        output_apparent_mass_kg=apparent,
     )
+    limit = check.mass_limit_kg
     if not check.passes:
         worst = int(np.argmin(limit))
         warnings.warn(

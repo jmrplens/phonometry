@@ -68,7 +68,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -345,20 +345,49 @@ class DamageAssessment:
     :ivar velocity_mm_s: The measured peak velocity, in millimetres per
         second: the largest of the three components at the foundation, or the
         larger of the two horizontal components in the topmost floor plane.
-    :ivar guideline_mm_s: The guideline value it is compared with.
     :ivar building_class: The row of Table 1 or Table 3 that was used.
     :ivar location: Where the velocity was measured.
     :ivar duration: Which clause the guideline came from.
     :ivar frequency_hz: The frequency the guideline was read at, or ``None``
         where the guideline does not depend on frequency.
+    :ivar massive_structure: Whether the row 1 values were raised by
+        :data:`MASSIVE_STRUCTURE_FACTOR`, the allowance 5.1 leaves to the
+        assessor for a massive engineering structure.
+
+    The guideline value (:attr:`guideline_mm_s`) is read from Table 1 or
+    Table 3 with those, so an assessment cannot be built against another
+    value.
     """
 
     velocity_mm_s: float
-    guideline_mm_s: float
     building_class: str
     location: str
     duration: str
     frequency_hz: float | None
+    _: KW_ONLY
+    massive_structure: bool = False
+
+    def __post_init__(self) -> None:
+        """Reject a row, a place or a frequency the tables give no value for.
+
+        :raises ValueError: For a negative or non-finite velocity, or for any
+            reason :func:`guideline_velocity` raises.
+        """
+        require_non_negative(self.velocity_mm_s, "velocity_mm_s")
+        _ = self.guideline_mm_s
+
+    @property
+    def guideline_mm_s(self) -> float:
+        """The guideline value the velocity is compared with, in mm/s."""
+        return float(
+            guideline_velocity(
+                self.building_class,
+                self.frequency_hz,
+                location=self.location,
+                duration=self.duration,
+                massive_structure=self.massive_structure,
+            )
+        )
 
     @property
     def ratio(self) -> float:
@@ -431,20 +460,13 @@ def assess_building_vibration(
     # measurement like any other, and it keeps to every guideline value there
     # is. Refusing it would refuse the easiest case the standard covers.
     v = require_non_negative(velocity_mm_s, "velocity_mm_s")
-    guideline = guideline_velocity(
-        building_class,
-        frequency_hz,
-        location=location,
-        duration=duration,
-        massive_structure=massive_structure,
-    )
     return DamageAssessment(
         velocity_mm_s=v,
-        guideline_mm_s=float(guideline),
         building_class=str(building_class),
         location=str(location),
         duration=str(duration),
         frequency_hz=None if frequency_hz is None else float(frequency_hz),
+        massive_structure=bool(massive_structure),
     )
 
 

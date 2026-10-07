@@ -208,6 +208,23 @@ def test_verification_normalises_at_the_reference_and_needs_it() -> None:
         im.verify_vibration_meter([1.0, 31.5], [1.0, 1.0])
 
 
+def test_a_response_at_or_below_0_01_has_no_upper_limit() -> None:
+    """Table 3 footnote a: the upper limit holds only where H_Ist(f) > 0,01.
+
+    DIN 45669-1:2010-09, PDF page 19, printed folio 19. The same shape 50 %
+    high at 200 Hz fails against the 20 % of Table 3 when the response there
+    is 0,36, and is not bound from above when it is 0,000 36.
+    """
+    f = np.array([16.0, 200.0])
+    shape = np.abs(im.kb_weighting_response(f)) * np.array([1.0, 1.5])
+    loud = im.verify_vibration_meter(f, shape)
+    quiet = im.verify_vibration_meter(f, shape * 1e-3)
+    assert loud.upper_percent[0] == pytest.approx(20.0)
+    assert not loud.passes
+    assert math.isinf(quiet.upper_percent[0])
+    assert quiet.passes
+
+
 def test_verification_refuses_mismatched_inputs() -> None:
     """Two arrays that do not line up cannot be compared point by point."""
     with pytest.raises(ValueError, match="same shape"):

@@ -1591,23 +1591,79 @@ def reflection_low_frequency_limit(
 class ReflectionGridCheck:
     r"""The position check of 5.6.2.5 or 5.6.2.6, against Table 3.
 
+    The nominal path differences and the tolerance are Table 3's, so they are
+    read from the check and are not fields: a check cannot be built, or
+    rewritten with :func:`dataclasses.replace`, against other nominal values
+    or another tolerance.
+
     :ivar check: ``"relative"`` (5.6.2.5, the loudspeaker against the grid,
         :math:`\Delta d_{k5}`) or ``"grid"`` (5.6.2.6, the grid against the
         reference plane, :math:`\Delta d_k`).
     :ivar path_differences_m: :math:`c\,\Delta t`, Formula (10) or (11), per
-        microphone; microphone 5 does not take part in the relative check.
-    :ivar nominal_m: The nominal values of Table 3.
-    :ivar deviations_m: Measured minus nominal.
-    :ivar within: Per microphone, whether the deviation is within
-        :math:`\pm\varepsilon_k` = 25 mm; ``True`` for microphone 5 in the
-        relative check.
+        microphone, microphone 1 first, in metres; microphone 5 does not take
+        part in the relative check.
     """
 
     check: str
     path_differences_m: NDArray[np.float64]
-    nominal_m: NDArray[np.float64]
-    deviations_m: NDArray[np.float64]
-    within: NDArray[np.bool_]
+
+    def __post_init__(self) -> None:
+        """Hold the path differences read-only and refuse an unknown check.
+
+        :raises ValueError: If the check is not ``"relative"`` or ``"grid"``,
+            or there are not nine finite path differences.
+        """
+        require_choice(self.check, "check", ("relative", "grid"))
+        measured = np.array(self.path_differences_m, dtype=np.float64)
+        if measured.shape != (_MICROPHONES,) or not np.all(np.isfinite(measured)):
+            msg = (
+                "ReflectionGridCheck: 'path_differences_m' must hold nine "
+                "finite path differences, microphone 1 first."
+            )
+            raise ValueError(msg)
+        object.__setattr__(self, "path_differences_m", read_only(measured))
+
+    @property
+    def nominal_m(self) -> NDArray[np.float64]:
+        r"""The nominal values of Table 3 for this check, in metres.
+
+        :return: :math:`\Delta d_{k5}` for the relative check, :math:`\Delta
+            d_k` for the grid check, microphone 1 first.
+        """
+        column = 0 if self.check == "relative" else 1
+        return read_only(
+            np.array(
+                [
+                    REFLECTION_PATH_DIFFERENCES_M[k][column]
+                    for k in range(1, _MICROPHONES + 1)
+                ],
+                dtype=np.float64,
+            )
+        )
+
+    @property
+    def deviations_m(self) -> NDArray[np.float64]:
+        """Measured minus nominal, in metres.
+
+        :return: One deviation per microphone; zero for microphone 5 in the
+            relative check, which does not take part in it.
+        """
+        deviations = self.path_differences_m - self.nominal_m
+        if self.check == "relative":
+            deviations[4] = 0.0
+        return read_only(deviations)
+
+    @property
+    def within(self) -> NDArray[np.bool_]:
+        r"""Per microphone, whether the deviation is within :math:`\pm\varepsilon_k`.
+
+        :return: ``True`` where the deviation is within the 25 mm of Table 3
+            (:data:`REFLECTION_PATH_TOLERANCE_M`).
+        """
+        return read_only(
+            np.abs(self.deviations_m)
+            <= REFLECTION_PATH_TOLERANCE_M + _TOLERANCE_SLACK_M
+        )
 
     @property
     def passes(self) -> bool:
@@ -1678,19 +1734,7 @@ def check_reflection_grid_position(
     if delays.shape != (_MICROPHONES,) or not np.all(np.isfinite(delays)):
         msg = "'time_delays_s' must hold nine finite delays, microphone 1 first."
         raise ValueError(msg)
-    column = 0 if kind == "relative" else 1
-    nominal = np.array(
-        [REFLECTION_PATH_DIFFERENCES_M[k][column] for k in range(1, _MICROPHONES + 1)]
-    )
     measured = speed * delays
     if kind == "relative":
-        measured[4] = nominal[4]
-    deviations = measured - nominal
-    within = np.abs(deviations) <= REFLECTION_PATH_TOLERANCE_M + _TOLERANCE_SLACK_M
-    return ReflectionGridCheck(
-        check=kind,
-        path_differences_m=read_only(measured),
-        nominal_m=read_only(nominal),
-        deviations_m=read_only(deviations),
-        within=read_only(within),
-    )
+        measured[4] = REFLECTION_PATH_DIFFERENCES_M[5][0]
+    return ReflectionGridCheck(check=kind, path_differences_m=measured)

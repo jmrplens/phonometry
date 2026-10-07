@@ -446,12 +446,13 @@ class WeightingVerification:
         frequencies.
     :ivar deviation_percent: ``(measured / design - 1) * 100`` elementwise,
         which is the quantity the standard's acceptance test is written in.
-    :ivar within_tolerance: Whether each frequency is inside its band, with
-        the deviation extended by ``expanded_uncertainty_percent`` as 13.1
-        and 14.1 require.
     :ivar expanded_uncertainty_percent: The testing laboratory's own expanded
         uncertainty, in per cent, that the verdict was reached with. ``0,0``
         when the caller supplied none, which compares the bare deviation.
+
+    The Table 5 band (:func:`weighting_tolerance_percent`) and the verdict it
+    gives (:attr:`within_tolerance`) are read from the weighting and the
+    frequencies, so a verification cannot be built against another band.
     """
 
     weighting: str
@@ -459,8 +460,38 @@ class WeightingVerification:
     measured: NDArray[np.float64]
     design: NDArray[np.float64]
     deviation_percent: NDArray[np.float64]
-    within_tolerance: NDArray[np.bool_]
     expanded_uncertainty_percent: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Reject a weighting or an uncertainty the comparison cannot read.
+
+        :raises ValueError: if the weighting is not one of the nine, a
+            frequency is not positive and finite, or the uncertainty is
+            negative or not finite.
+        """
+        weighting_tolerance_percent(self.weighting, self.frequencies_hz)
+        _checked_uncertainty(
+            self.expanded_uncertainty_percent, "expanded_uncertainty_percent"
+        )
+
+    @property
+    def within_tolerance(self) -> NDArray[np.bool_]:
+        """Whether each frequency is inside its band.
+
+        The deviation is extended by ``expanded_uncertainty_percent`` as 13.1
+        and 14.1 require. The -100 % of the two tails is the absence of a
+        lower limit rather than a wide one, so it is the one place the
+        laboratory's uncertainty is not subtracted: a response of exactly zero
+        deviates by -100 % and still conforms.
+        """
+        upper, lower = weighting_tolerance_percent(self.weighting, self.frequencies_hz)
+        deviation = np.asarray(self.deviation_percent, dtype=np.float64)
+        uncertainty = self.expanded_uncertainty_percent
+        unconstrained = lower <= UNCONSTRAINED_BELOW
+        within = (deviation + uncertainty <= upper) & (
+            unconstrained | (deviation - uncertainty >= lower)
+        )
+        return np.asarray(within, dtype=np.bool_)
 
     @property
     def passes(self) -> bool:
@@ -569,22 +600,12 @@ def verify_weighting(
 
     design = np.atleast_1d(np.asarray(weighting_factors(weighting, f), np.float64))
     deviation = (measured / design - 1.0) * 100.0
-    upper, lower = weighting_tolerance_percent(weighting, f)
-    # The -100 % of the two tails is the absence of a lower limit rather than
-    # a wide one, so it is the one place the laboratory's uncertainty must not
-    # be subtracted: a response of exactly zero deviates by -100 % and still
-    # conforms, and -100 - U would reject it for being measured carefully.
-    unconstrained = lower <= UNCONSTRAINED_BELOW
-    within = (deviation + uncertainty <= upper) & (
-        unconstrained | (deviation - uncertainty >= lower)
-    )
     return WeightingVerification(
         weighting=weighting,
         frequencies_hz=read_only_copy(f),
         measured=read_only_copy(measured),
         design=design,
         deviation_percent=deviation,
-        within_tolerance=np.asarray(within, dtype=np.bool_),
         expanded_uncertainty_percent=uncertainty,
     )
 
@@ -889,10 +910,10 @@ class PhaseVerification:
         (H.2.1, Formula (H.3)).
     :ivar characteristic_deviation_deg: The characteristic phase deviation of
         Formula (6) at each of those, in degrees.
-    :ivar tolerance_deg: The Table 5 limit at each of those, in degrees,
-        infinite in the two tails.
-    :ivar within_tolerance: Whether each characteristic phase deviation is
-        inside its limit.
+
+    The Table 5 limit (:attr:`tolerance_deg`) and the verdict it gives are
+    read from the weighting and the frequencies, so a verification cannot be
+    built against another band.
     """
 
     weighting: str
@@ -902,8 +923,33 @@ class PhaseVerification:
     deviation_deg: NDArray[np.float64]
     characteristic_frequencies_hz: NDArray[np.float64]
     characteristic_deviation_deg: NDArray[np.float64]
-    tolerance_deg: NDArray[np.float64]
-    within_tolerance: NDArray[np.bool_]
+
+    def __post_init__(self) -> None:
+        """Reject a weighting the standard does not define.
+
+        :raises ValueError: if the weighting is not one of the nine, or a
+            characteristic frequency is not positive and finite.
+        """
+        phase_tolerance_degrees(self.weighting, self.characteristic_frequencies_hz)
+
+    @property
+    def tolerance_deg(self) -> NDArray[np.float64]:
+        """The Table 5 limit at each characteristic frequency, in degrees.
+
+        :return: :func:`phase_tolerance_degrees` of the weighting, infinite
+            in the two tails.
+        """
+        return phase_tolerance_degrees(
+            self.weighting, self.characteristic_frequencies_hz
+        )
+
+    @property
+    def within_tolerance(self) -> NDArray[np.bool_]:
+        """Whether each characteristic phase deviation is inside its limit."""
+        return np.asarray(
+            np.asarray(self.characteristic_deviation_deg) <= self.tolerance_deg,
+            dtype=np.bool_,
+        )
 
     @property
     def passes(self) -> bool:
@@ -1024,7 +1070,6 @@ def verify_phase_response(
     deviation = np.asarray(measured - design, dtype=np.float64)
     _warn_if_inverted(deviation)
     characteristic = characteristic_phase_deviation(f, deviation)
-    tolerance = phase_tolerance_degrees(weighting, f[:-1])
     return PhaseVerification(
         weighting=weighting,
         frequencies_hz=read_only_copy(f),
@@ -1033,8 +1078,6 @@ def verify_phase_response(
         deviation_deg=deviation,
         characteristic_frequencies_hz=read_only_copy(f[:-1], dtype=np.float64),
         characteristic_deviation_deg=characteristic,
-        tolerance_deg=tolerance,
-        within_tolerance=np.asarray(characteristic <= tolerance, dtype=np.bool_),
     )
 
 
@@ -1193,24 +1236,57 @@ class RunningRmsDecayVerification:
 
     The row is the whole criterion: a printed time to 10 % of the initial
     indicated value and the tolerance printed beside it, for one averaging
-    and one time constant. The verdict is derived from those fields rather
-    than stored beside them, so a result cannot say it passed over numbers
-    that do not.
+    and one time constant. The row is read from the method and the time
+    constant (:attr:`printed_time_s`, :attr:`tolerance_s`) and the verdict
+    from the row, so a result can neither say it passed over numbers that do
+    not nor be built against another row.
 
     :ivar method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).
     :ivar integration_time_s: The printed time constant the row is for, in
         seconds.
     :ivar measured_time_s: The measured time to 10 % of the initial
         indicated value, as supplied, in seconds.
-    :ivar printed_time_s: The decay time the row prints, in seconds.
-    :ivar tolerance_s: The tolerance printed beside it, in seconds.
     """
 
     method: str
     integration_time_s: float
     measured_time_s: float
-    printed_time_s: float
-    tolerance_s: float
+
+    def __post_init__(self) -> None:
+        """Reject a method or a time constant the tables do not print.
+
+        :raises ValueError: if ``method`` is neither average, or the
+            integration time is not one of the three printed time constants.
+        """
+        self._row()
+
+    def _row(self) -> tuple[float, float]:
+        """The printed decay time and its tolerance, in seconds."""
+        averaging = require_choice(
+            str(self.method), "method", ("linear", "exponential")
+        )
+        tau = float(self.integration_time_s)
+        for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
+            if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
+                return printed_time, tolerance
+        printed = ", ".join(
+            f"{row[0]:g}" for row in RUNNING_RMS_DECAY_TIME_S[averaging]
+        )
+        msg = (
+            f"'integration_time_s' must be one of the time constants Tables 10 "
+            f"and 11 print ({printed} s); {tau:g} s has no printed decay band."
+        )
+        raise ValueError(msg)
+
+    @property
+    def printed_time_s(self) -> float:
+        """The decay time the row prints, in seconds."""
+        return self._row()[0]
+
+    @property
+    def tolerance_s(self) -> float:
+        """The tolerance printed beside it, in seconds."""
+        return self._row()[1]
 
     @property
     def lower_time_s(self) -> float:
@@ -1311,18 +1387,9 @@ def verify_running_rms_decay(
         msg = "'measured_time_s' must be positive and finite."
         raise ValueError(msg)
     tau = float(integration_time_s)
-    for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
+    for printed_tau, _time, _tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
         if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
-            return RunningRmsDecayVerification(
-                method=averaging,
-                integration_time_s=printed_tau,
-                measured_time_s=measured,
-                printed_time_s=printed_time,
-                tolerance_s=tolerance,
-            )
-    printed = ", ".join(f"{row[0]:g}" for row in RUNNING_RMS_DECAY_TIME_S[averaging])
-    msg = (
-        f"'integration_time_s' must be one of the time constants Tables 10 "
-        f"and 11 print ({printed} s); {tau:g} s has no printed decay band."
+            tau = printed_tau
+    return RunningRmsDecayVerification(
+        method=averaging, integration_time_s=tau, measured_time_s=measured
     )
-    raise ValueError(msg)

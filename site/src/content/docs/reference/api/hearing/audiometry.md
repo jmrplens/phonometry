@@ -166,30 +166,36 @@ AmbientNoiseCheck(
     presentation: str,
     frequencies: np.ndarray,
     levels_db: np.ndarray,
-    limits_db: np.ndarray,
-    table_bands_hz: tuple[float, ...],
     lowest_test_frequency_hz: float,
     lowest_hearing_level_db: float,
     noise_floor_db: np.ndarray | None = None,
     earphone: str | None = None,
+    earphone_attenuation_db: np.ndarray | None = None,
+    allowed_threshold_shift_db: float = 2.0,
 )
 ```
 
 Whether a test room is quiet enough for the audiometry, band by band.
+
+The fields hold what was measured and what the standard lets the tester
+choose: the presentation, the lowest test frequency, the lowest hearing
+level to be measured, the earphone and the threshold shift accepted. The
+limits themselves (`limits_db`) are read from the tables with those
+choices, so a check cannot be built against another table.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `presentation` | `"air"`, `"bone"` or `"sound field"`. |
-| `frequencies` | The one-third-octave mid-frequencies judged, in hertz. |
+| `frequencies` | The one-third-octave mid-frequencies judged, in hertz, each one of `table_bands_hz`. |
 | `levels_db` | The measured ambient sound pressure level per band, in dB. |
-| `limits_db` | The maximum permissible level per band, in dB, with every adjustment of [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) applied. |
-| `table_bands_hz` | Every band the table sets a limit for, in hertz. |
 | `lowest_test_frequency_hz` | The lowest test tone frequency, in hertz. |
 | `lowest_hearing_level_db` | The lowest hearing threshold level to be measured the limits were raised for, in dB. |
 | `noise_floor_db` | The measuring chain's noise floor per band, in dB, or `None` when not given. |
 | `earphone` | For air conduction, the earphone the limits were written for: a column of Table 3, or `"own attenuation"` for an attenuation given band by band; `None` for bone conduction and sound field. |
+| `earphone_attenuation_db` | The earphone's own attenuation per band of [`AMBIENT_NOISE_BANDS_HZ`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_bands_hz), in dB, when `earphone` is `"own attenuation"`; `None` otherwise. |
+| `allowed_threshold_shift_db` | The threshold shift accepted from the ambient noise, 2 (default) or 5, in dB. |
 
 A band the measurement leaves out is a band the room is not shown to meet,
 so `passes` needs every band of the table.
@@ -221,6 +227,14 @@ the level it measures. A band that misses it reads high, so a band
 within its limit still is; one over its limit may be the floor's.
 
 **Returns:** One boolean per band, all `False` without a floor.
+
+### AmbientNoiseCheck.limits_db
+
+*property*
+
+The maximum permissible level per band, in dB.
+
+**Returns:** [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) of the presentation and the tester's choices, at `frequencies`.
 
 ### AmbientNoiseCheck.lowest_measurable_hearing_level_db
 
@@ -268,6 +282,12 @@ Draw the measured spectrum against the limits, exceedances marked.
 | `kwargs` | Forwarded to the measured spectrum. |
 
 **Returns:** The axes.
+
+### AmbientNoiseCheck.table_bands_hz
+
+*property*
+
+Every band the table sets a limit for, in hertz.
 
 ### AmbientNoiseCheck.within
 

@@ -757,10 +757,8 @@ def plot_tone_assessment(
     marked; a tone on or above the curve is prominent.
 
     The producing method (tone-to-noise ratio, clause 11, or prominence
-    ratio, clause 12) is recovered from ``criterion_db``: the two criteria
-    differ everywhere in the range of interest (8 dB against 9 dB from 1 kHz
-    up, and different low-frequency slopes below), so the closer of the two
-    identifies the curve to draw and the quantity to label.
+    ratio, clause 12) is the result's ``method``, which picks the curve to
+    draw and the quantity to label.
 
     :param result: A :class:`~phonometry.psychoacoustics.quality.tonality.ToneAssessment`.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -789,10 +787,7 @@ def plot_tone_assessment(
             9.0,
         )
 
-    ft_arr = np.array([max(ft, _TONE_RANGE_HZ[0])])
-    is_tnr = abs(criterion - float(_tnr(ft_arr)[0])) <= abs(
-        criterion - float(_pr(ft_arr)[0])
-    )
+    is_tnr = result.method == "tone_to_noise_ratio"
     name = "TNR" if is_tnr else "PR"
     ylabel = "Tone-to-noise ratio TNR [dB]" if is_tnr else "Prominence ratio PR [dB]"
 

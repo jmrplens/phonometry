@@ -138,22 +138,59 @@ _DEVICES = {
 class MountingCheck:
     """Whether a transducer may be set down without fastening (5.3.2, 5.3.3).
 
-    :ivar acceptable: ``True`` when both the peak acceleration and the highest
-        frequency of interest are within what a loose mounting carries.
-    :ivar frequency_limit_hz: The frequency the direction allows a loose
-        mounting up to, in hertz.
-    :ivar peak_acceleration_limit_m_s2: The 3 m/s² of 5.3.2.1.
+    Only what is asked about is a field: the peak acceleration, the highest
+    frequency, the direction and the surface. The limits of 5.3.2.1, what
+    the transducer stands on and the verdict are read from them, so a check
+    cannot be built against other limits.
+
+    :ivar peak_acceleration_m_s2: The largest peak acceleration expected in
+        any direction, in metres per second squared.
+    :ivar upper_frequency_hz: The highest frequency the measurement has to
+        carry, in hertz.
     :ivar direction: ``"vertical"`` or ``"horizontal"``.
     :ivar surface: ``"hard"`` or ``"soft"``.
-    :ivar device: What the transducer has to stand on for the verdict to hold.
     """
 
-    acceptable: bool
-    frequency_limit_hz: float
-    peak_acceleration_limit_m_s2: float
+    peak_acceleration_m_s2: float
+    upper_frequency_hz: float
     direction: str
     surface: str
-    device: str
+
+    def __post_init__(self) -> None:
+        """Reject a direction, a surface or a reading the clause cannot judge.
+
+        :raises ValueError: For a negative acceleration, a non-positive
+            frequency, or an unknown direction or surface.
+        """
+        require_non_negative(self.peak_acceleration_m_s2, "peak_acceleration_m_s2")
+        require_positive(self.upper_frequency_hz, "upper_frequency_hz")
+        require_choice(str(self.direction), "direction", _DIRECTIONS)
+        require_choice(str(self.surface), "surface", _SURFACES)
+
+    @property
+    def frequency_limit_hz(self) -> float:
+        """The frequency the direction allows a loose mounting up to, in hertz."""
+        return LOOSE_MOUNTING_LIMITS_HZ[self.direction]
+
+    @property
+    def peak_acceleration_limit_m_s2(self) -> float:
+        """The 3 m/s² of 5.3.2.1."""
+        return LOOSE_MOUNTING_PEAK_ACCELERATION_M_S2
+
+    @property
+    def device(self) -> str:
+        """What the transducer has to stand on for the verdict to hold."""
+        return _DEVICES[self.surface]
+
+    @property
+    def acceptable(self) -> bool:
+        """``True`` when both the peak acceleration and the highest frequency
+        of interest are within what a loose mounting carries.
+        """
+        return (
+            self.peak_acceleration_m_s2 <= self.peak_acceleration_limit_m_s2
+            and self.upper_frequency_hz <= self.frequency_limit_hz
+        )
 
 
 def check_loose_mounting(
@@ -188,14 +225,11 @@ def check_loose_mounting(
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
     which = require_choice(str(direction), "direction", _DIRECTIONS)
     where = require_choice(str(surface), "surface", _SURFACES)
-    limit = LOOSE_MOUNTING_LIMITS_HZ[which]
     return MountingCheck(
-        acceptable=peak <= LOOSE_MOUNTING_PEAK_ACCELERATION_M_S2 and upper <= limit,
-        frequency_limit_hz=limit,
-        peak_acceleration_limit_m_s2=LOOSE_MOUNTING_PEAK_ACCELERATION_M_S2,
+        peak_acceleration_m_s2=peak,
+        upper_frequency_hz=upper,
         direction=which,
         surface=where,
-        device=_DEVICES[where],
     )
 
 

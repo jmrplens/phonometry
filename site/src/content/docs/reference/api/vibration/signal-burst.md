@@ -262,10 +262,6 @@ SignalBurstVerification(
     cycle_counts: tuple[int | None, ...],
     quantities: tuple[str, ...],
     measured: NDArray[np.float64],
-    printed: NDArray[np.float64],
-    deviation_percent: NDArray[np.float64],
-    tolerance_percent: NDArray[np.float64],
-    within_tolerance: NDArray[np.bool_],
 )
 ```
 
@@ -281,10 +277,17 @@ A meter's signal-burst indications against ISO 8041-1 Tables 7 to 9.
 | `cycle_counts` | The burst lengths that were graded, in printed order, with `None` for the continuous row. |
 | `quantities` | The columns that were graded, in printed order. |
 | `measured` | The indications as supplied, one row per burst length and one column per quantity. |
-| `printed` | The Table 7, 8 or 9 cells they are judged against, scaled by `amplitude_m_s2`. |
-| `deviation_percent` | `(measured / printed - 1) * 100`, elementwise. |
-| `tolerance_percent` | The printed tolerance of each column, from [`BURST_TOLERANCE_PERCENT`](/phonometry/reference/api/vibration/signal-burst/#burst_tolerance_percent). |
-| `within_tolerance` | Whether each cell is inside its tolerance. |
+
+The printed cells (`printed`), their tolerances
+(`tolerance_percent`) and the verdict are read from the tables with
+the application, the row, the burst lengths and the columns, so a
+verification cannot be built against other cells.
+
+### SignalBurstVerification.deviation_percent
+
+*property*
+
+`(measured / printed - 1) * 100`, elementwise.
 
 ### SignalBurstVerification.passes
 
@@ -321,6 +324,24 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `kwargs` | Forwarded to the marker series. |
 
 **Returns:** The axes.
+
+### SignalBurstVerification.printed
+
+*property*
+
+The Table 7, 8 or 9 cells, scaled by `amplitude_m_s2`.
+
+### SignalBurstVerification.tolerance_percent
+
+*property*
+
+The printed tolerance of each column, from [`BURST_TOLERANCE_PERCENT`](/phonometry/reference/api/vibration/signal-burst/#burst_tolerance_percent).
+
+### SignalBurstVerification.within_tolerance
+
+*property*
+
+Whether each cell is inside its tolerance.
 
 ### SignalBurstVerification.worst_deviation_percent
 

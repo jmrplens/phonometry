@@ -330,7 +330,11 @@ diferencias de nivel).
 | `tone_freq` | float, opcional | Hz | 89,1–11 200; por defecto `None` | `None` evalúa el pico más alto del rango de interés |
 | `resolution_hz` | float | Hz | > 0; por defecto `1.0` | La banda del tono debe quedar dentro del 15 % de la banda crítica (apartado 11.2) |
 
-Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
+Ambos devuelven un `ToneAssessment(frequency, ratio_db, method)`, donde `method`
+dice qué relación se ha calculado (`"tone_to_noise_ratio"` o
+`"prominence_ratio"`); `criterion_db` y `prominent` se leen de la fórmula de la
+norma para esa relación, de modo que una evaluación no puede llevar otro
+criterio.
 
 ## 3. Qué métrica de tonalidad usar y cuándo
 

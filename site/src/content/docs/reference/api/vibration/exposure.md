@@ -477,20 +477,14 @@ Assess a daily exposure against Directive 2002/44/EC (Article 3).
 ## ExposureAssessment
 
 ```python
-ExposureAssessment(
-    value: float,
-    kind: str,
-    metric: str,
-    action_value: float,
-    limit_value: float,
-    *,
-    exceeds_action: bool,
-    exceeds_limit: bool,
-    zone: str,
-)
+ExposureAssessment(value: float, kind: str, metric: str)
 ```
 
 A daily exposure assessed against the Directive 2002/44/EC values.
+
+The two values of Article 3 are the Directive's, read from `kind` and
+`metric` as properties together with the verdicts they give, so an
+assessment cannot be built against other values.
 
 **Attributes**
 
@@ -499,11 +493,36 @@ A daily exposure assessed against the Directive 2002/44/EC values.
 | `value` | The assessed daily exposure `A(8)` (or VDV), in its unit. |
 | `kind` | `"hav"` or `"wbv"`. |
 | `metric` | `"a8"` (m/s2) or `"vdv"` (m/s^1,75). |
-| `action_value` | The exposure action value (EAV). |
-| `limit_value` | The exposure limit value (ELV). |
-| `exceeds_action` | Whether `value` reaches or exceeds the EAV. |
-| `exceeds_limit` | Whether `value` reaches or exceeds the ELV. |
-| `zone` | `"below action"`, `"action"` (EAV\<=value\<ELV) or `"limit"` (value>=ELV). |
+
+### ExposureAssessment.action_value
+
+*property*
+
+The exposure action value (EAV) of Article 3 for the kind and metric.
+
+### ExposureAssessment.exceeds_action
+
+*property*
+
+Whether `value` reaches or exceeds the EAV.
+
+### ExposureAssessment.exceeds_limit
+
+*property*
+
+Whether `value` reaches or exceeds the ELV.
+
+### ExposureAssessment.limit_value
+
+*property*
+
+The exposure limit value (ELV) of Article 3 for the kind and metric.
+
+### ExposureAssessment.zone
+
+*property*
+
+`"below action"`, `"action"` (EAV\<=value\<ELV) or `"limit"` (value>=ELV).
 
 ## frequency_weighting
 

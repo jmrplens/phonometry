@@ -187,15 +187,11 @@ dimensions that still complies with 4.4.
 HardWalledRoomCheck(
     frequencies: np.ndarray,
     level_range_db: np.ndarray,
-    limit_db: np.ndarray,
     orientations: int,
     volume_m3: float,
     reference_box_volume_m3: float,
     largest_box_dimension_m: float,
-    minimum_volume_m3: float,
-    box_dimension_limit_m: float,
     max_absorption_coefficient: float,
-    minimum_microphone_distance_m: float,
 )
 ```
 
@@ -206,12 +202,14 @@ the mean levels of any two of the directional source's orientations
 (4.4), and `limit_db` the Table 3 value it may not exceed.
 `volume_m3` is the room, `reference_box_volume_m3` and
 `largest_box_dimension_m` the reference box of 4.1, and
-`minimum_volume_m3` / `box_dimension_limit_m` what 4.2 asks of them.
-`max_absorption_coefficient` is the largest sound absorption coefficient
-of any portion of the boundary surfaces, `NaN` when none was supplied,
-against the 0,20 of 4.3. `minimum_microphone_distance_m` is the
-$d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3 that keeps the microphones
-in the reverberant field, stated for the setup rather than judged.
+`minimum_volume_m3` / `box_dimension_limit_m` what 4.2 asks
+of them. `max_absorption_coefficient` is the largest sound absorption
+coefficient of any portion of the boundary surfaces, `NaN` when none was
+supplied, against the 0,20 of 4.3. `minimum_microphone_distance_m`
+is the $d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3 that keeps the
+microphones in the reverberant field, stated for the setup rather than
+judged. The limits are the standard's and are read from the bands, the
+room and the box, so a check cannot be built against other ones.
 
 ### HardWalledRoomCheck.acoustically_adequate
 
@@ -225,11 +223,43 @@ The 4.4 criterion: every band within Table 3.
 
 Per band, whether the spread stays within Table 3 (4.4).
 
+### HardWalledRoomCheck.box_dimension_limit_m
+
+*property*
+
+The largest reference-box dimension 4.2 allows in this room.
+
+**Returns:** 1,0 m in a room of up to 100 m³, 2,0 m in a larger one, in metres.
+
 ### HardWalledRoomCheck.box_fits
 
 *property*
 
 The size criterion of 4.2 on the largest reference-box dimension.
+
+### HardWalledRoomCheck.limit_db
+
+*property*
+
+The Table 3 standard deviation of reproducibility of each band, in dB.
+
+**Returns:** The spread 4.4 allows each band.
+
+### HardWalledRoomCheck.minimum_microphone_distance_m
+
+*property*
+
+The $d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3, in metres.
+
+**Returns:** The least distance from the source that keeps a microphone in the reverberant field.
+
+### HardWalledRoomCheck.minimum_volume_m3
+
+*property*
+
+The volume 4.2 asks of the room: 40 m³ and forty reference boxes.
+
+**Returns:** The larger of the two, in cubic metres.
 
 ### HardWalledRoomCheck.passes
 

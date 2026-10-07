@@ -690,28 +690,60 @@ TEST_ENVIRONMENT_REQUIREMENTS = {'ISO 3743-1': (None, 6.0), 'ISO 3744': (2.0, 6.
 ```python
 TestEnvironmentApplicability(
     base_standard: str,
-    environmental_correction_limit_db: float | None,
-    background_margin_limit_db: float | None,
-    required_area_ratio: float | None,
     actual_area_ratio: float,
-    applicable: bool,
     mean_absorption_coefficient: float,
 )
 ```
 
 Whether a room is good enough for a base standard, Annex C of part 2.
 
+Table C.1 is the annex's, so its two columns, the area ratio they call for
+and the verdict are read from the standard asked about and the room, not
+stored beside them: an answer cannot be built against another limit.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `base_standard` | The standard asked about. |
-| `environmental_correction_limit_db` | The largest $K_2$ Table C.1 allows it, in decibels, or `None` where the standard states none. |
-| `background_margin_limit_db` | The smallest margin over the background Table C.1 asks of it, in decibels, or `None` where the table states none. |
-| `required_area_ratio` | The smallest $S_V/S$ that meets the $K_2$ limit at this absorption coefficient. |
+| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). |
 | `actual_area_ratio` | The $S_V/S$ of the room and the measurement surface given. |
-| `applicable` | Whether the room meets the limit. |
 | `mean_absorption_coefficient` | The $\alpha$ the answer was read at. |
+
+### TestEnvironmentApplicability.applicable
+
+*property*
+
+Whether the room meets the $K_2$ limit of the standard.
+
+`True` for a standard with no $K_2$ limit, whose answer turns
+on the background margin alone, which this check does not see.
+
+### TestEnvironmentApplicability.background_margin_limit_db
+
+*property*
+
+The smallest margin over the background Table C.1 asks, in decibels.
+
+**Returns:** The margin, or `None` where the table states none.
+
+### TestEnvironmentApplicability.environmental_correction_limit_db
+
+*property*
+
+The largest $K_2$ Table C.1 allows the standard, in decibels.
+
+**Returns:** The limit, or `None` where the standard states none.
+
+### TestEnvironmentApplicability.required_area_ratio
+
+*property*
+
+The smallest $S_V/S$ that meets the $K_2$ limit.
+
+$4 / ((10^{K_2/10} - 1)\,\alpha)$ at
+`mean_absorption_coefficient`.
+
+**Returns:** The ratio, or `None` where the standard states no $K_2$ limit.
 
 ## UNRESTRICTED_ENCLOSURE_VOLUME_M3
 

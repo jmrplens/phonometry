@@ -347,6 +347,22 @@ def test_a_spread_the_six_positions_can_carry_is_not_flagged() -> None:
     assert verdict.exceeds_maximum is False
 
 
+def test_a_spread_between_whole_decibels_rounds_the_count_up() -> None:
+    """7.2.1: the count is "equal to or greater than" the spread in decibels.
+
+    BS EN ISO 11957:2009 (ISO 11957:1996), PDF page 14, printed folio 5. A
+    4,2 dB spread is more than four, so four positions are too few and five
+    are enough.
+    """
+    base = np.full(OCTAVES.size, 30.0)
+    spread = [base, base + 4.2, base + 1.0, base + 2.0, base + 3.0]
+    four = noise_control.check_source_positions(np.vstack(spread[:4]))
+    five = noise_control.check_source_positions(np.vstack(spread))
+    assert four.max_octave_spread_db == pytest.approx(4.2)
+    assert (four.required_positions, four.satisfied) == (5, False)
+    assert (five.required_positions, five.satisfied) == (5, True)
+
+
 def test_fewer_than_three_positions_is_refused() -> None:
     two_positions = np.vstack(
         [np.full(OCTAVES.size, 30.0), np.full(OCTAVES.size, 31.0)]

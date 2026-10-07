@@ -431,28 +431,6 @@ def test_a_rigid_mass_exactly_5_percent_off_is_within_tolerance(
     assert bool(result.within_tolerance[0])
 
 
-def _rigid_mass_within(deviation: float, tolerance: float) -> bool:
-    """The rigid-mass verdict on a block ``deviation`` off its 1/m line."""
-    mass = 2.0
-    result = vibration.rigid_mass_calibration_check(
-        [(1.0 + deviation) / mass], [100.0], mass, tolerance=tolerance
-    )
-    return bool(result.within_tolerance[0])
-
-
-@pytest.mark.parametrize(("deviation", "tolerance"), [(1e-10, 1e-12), (4e-10, 1e-10)])
-def test_a_rigid_mass_check_judges_a_tight_tolerance_on_its_own_scale(
-    deviation: float, tolerance: float
-) -> None:
-    # A deviation of 1e-10 is a hundred times a tolerance of 1e-12: it fails,
-    # although nine decimals of the deviation alone would read it as 0.
-    assert not _rigid_mass_within(deviation, tolerance)
-
-
-def test_a_rigid_mass_check_passes_a_deviation_inside_a_tight_tolerance() -> None:
-    assert _rigid_mass_within(1e-13, 1e-12)
-
-
 @pytest.mark.parametrize(("before", "after"), [(2.64, 3.3), (3.24, 4.05)])
 def test_a_growth_of_exactly_25_percent_is_not_tolerable(
     before: float, after: float

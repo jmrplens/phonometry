@@ -284,69 +284,98 @@ def resonance_frequency(mass: float, stiffness: float) -> float:
 # ---------------------------------------------------------------------------
 
 
+#: ISO 7626-2:2015 7.5.2: the measured frequency response of the calibration
+#: block "shall agree within +/-5 % of its known correct value".
+_RIGID_MASS_TOLERANCE = 0.05
+
+_RIGID_MASS_QUANTITIES: tuple[str, ...] = ("accelerance", "mobility")
+
+
 @dataclass(frozen=True)
 class RigidMassCalibrationResult:
     r"""Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
 
+    Only what was measured and the block are fields. The block's known
+    response, the deviation from it, the +/- 5 % of 7.5.2 and the verdict are
+    read from them, so a check cannot be built against another tolerance.
+
     :ivar frequencies: Frequencies of the calibration FRF, in hertz.
     :ivar measured: Measured FRF magnitude per frequency (``1/kg`` for
         accelerance, ``m/(N.s)`` for mobility).
-    :ivar expected: Known correct magnitude of the rigid calibration block per
-        frequency: :math:`1/m` (accelerance) or :math:`1/(2 \pi f m)`
-        (mobility).
-    :ivar deviation: Relative deviation ``measured/expected - 1`` per frequency.
-    :ivar within_tolerance: Per-frequency pass flag ``|deviation| <= tolerance``.
-    :ivar passes: ``True`` if every frequency is within the tolerance.
     :ivar mass: Mass ``m`` of the calibration block, in kg.
     :ivar quantity: FRF kind checked (``"accelerance"`` or ``"mobility"``).
-    :ivar tolerance: Relative tolerance applied (the standard's is 0.05).
     """
 
     frequencies: np.ndarray
     measured: np.ndarray
-    expected: np.ndarray
-    deviation: np.ndarray
-    within_tolerance: np.ndarray
     _: KW_ONLY
-    passes: bool
     mass: float
     quantity: str
-    tolerance: float
 
     def __post_init__(self) -> None:
         """Reject a calibration whose per-frequency quantities disagree.
 
-        The check of 7.5.2 is a verdict on a frequency range, and
-        :attr:`within_tolerance` is what carries it frequency by frequency.
-        :meth:`plot` selects the passing points with ``frequencies[within]``
-        and colours the rest as failures, so a mask of another length is
-        numpy's complaint about a boolean index that does not match the array
-        it indexes, raised from inside the plotter and naming neither field.
-        :attr:`passes` protests less: nothing re-derives it, so a mask
-        covering part of the measured range leaves an overall pass standing
-        over the frequencies it happened to reach, and the drift the
-        calibration exists to catch sits in the ones it did not.
-
-        :raises ValueError: if the per-frequency quantities do not share one
-            frequency axis.
+        :raises ValueError: for an unknown quantity, a mass or a frequency
+            that is not positive, or a measurement that does not carry one
+            value per frequency.
         """
-        require_ranks(
-            self,
-            frequencies=1,
-            measured=1,
-            expected=1,
-            deviation=1,
-            within_tolerance=1,
+        if self.quantity not in _RIGID_MASS_QUANTITIES:
+            msg = "'quantity' must be 'accelerance' or 'mobility'."
+            raise ValueError(msg)
+        require_positive(self.mass, "mass")
+        require_ranks(self, frequencies=1, measured=1)
+        require_same_length(self, "frequencies", "measured", axis="frequency")
+        _omega(self.frequencies)
+
+    @property
+    def expected(self) -> np.ndarray:
+        r"""Known correct magnitude of the block per frequency.
+
+        :return: :math:`1/m` (accelerance) or :math:`1/(2 \pi f m)` (mobility).
+        """
+        freq = np.asarray(self.frequencies, dtype=np.float64)
+        if self.quantity == "accelerance":
+            return np.full_like(freq, 1.0 / self.mass)
+        return np.asarray(1.0 / (_omega(freq) * self.mass), dtype=np.float64)
+
+    @property
+    def deviation(self) -> np.ndarray:
+        """Relative deviation ``measured/expected - 1`` per frequency."""
+        measured = np.asarray(self.measured, dtype=np.float64)
+        return np.asarray(measured / self.expected - 1.0, dtype=np.float64)
+
+    @property
+    def tolerance(self) -> float:
+        """The +/- 5 % of 7.5.2, as a relative tolerance (0.05)."""
+        return _RIGID_MASS_TOLERANCE
+
+    @property
+    def within_tolerance(self) -> np.ndarray:
+        """Per-frequency pass flag ``|deviation| <= tolerance``.
+
+        Judged as a settled share of the tolerance, so that a block exactly
+        5 % off in decimal is within the +/- 5 % whichever side of it the last
+        bits of the ratio fall.
+        """
+        return np.asarray(
+            settled_ratio(np.abs(self.deviation), self.tolerance) <= 1.0, dtype=bool
         )
-        require_same_length(
-            self,
-            "frequencies",
-            "measured",
-            "expected",
-            "deviation",
-            "within_tolerance",
-            axis="frequency",
+
+    @property
+    def passes(self) -> bool:
+        """``True`` if every frequency is within the tolerance."""
+        return bool(np.all(self.within_tolerance))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = (
+            "a RigidMassCalibrationResult has no truth value; read its "
+            "'.passes' for the verdict"
         )
+        raise TypeError(msg)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -374,7 +403,6 @@ def rigid_mass_calibration_check(
     mass: float,
     *,
     quantity: str = "accelerance",
-    tolerance: float = 0.05,
 ) -> RigidMassCalibrationResult:
     r"""Check an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
 
@@ -385,7 +413,8 @@ def rigid_mass_calibration_check(
     :math:`\lvert Y \rvert = 1/(2 \pi f m)`. All components of the
     measurement chain (including
     the attachment hardware) are connected as in the test series, so a failure
-    flags transducer, chain or attachment-compliance errors.
+    flags transducer, chain or attachment-compliance errors. The 5 % is the
+    clause's and is not a parameter.
 
     :param frf: Measured calibration FRF (complex or magnitude, scalar or
         array), in 1/kg (accelerance) or m/(N.s) (mobility).
@@ -394,16 +423,14 @@ def rigid_mass_calibration_check(
     :param quantity: ``"accelerance"`` (:math:`\lvert A \rvert = 1/m`) or
         ``"mobility"`` (:math:`\lvert Y \rvert = 1/(\omega m)`).
         (Default: ``"accelerance"``.)
-    :param tolerance: Relative tolerance (Default: 0.05, the +/- 5 % of 7.5.2).
     :return: A :class:`RigidMassCalibrationResult` with per-band pass flags.
-    :raises ValueError: for an unknown quantity, non-positive mass, tolerance
-        or frequency, or mismatched shapes.
+    :raises ValueError: for an unknown quantity, non-positive mass or
+        frequency, or mismatched shapes.
     """
-    if quantity not in ("accelerance", "mobility"):
+    if quantity not in _RIGID_MASS_QUANTITIES:
         msg = "'quantity' must be 'accelerance' or 'mobility'."
         raise ValueError(msg)
     mass = require_positive(mass, "mass")
-    tolerance = require_positive(tolerance, "tolerance")
     freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     measured = np.abs(np.atleast_1d(np.asarray(frf, dtype=np.complex128)))
     require_equal_shapes(
@@ -411,27 +438,12 @@ def rigid_mass_calibration_check(
         {"frf": measured.shape, "frequencies": freq.shape},
         "frequency",
     )
-    omega = _omega(freq)
-    if quantity == "accelerance":
-        expected = np.full_like(freq, 1.0 / mass)
-    else:
-        expected = 1.0 / (omega * mass)
-    deviation = measured / expected - 1.0
-    # Judged as a settled share of the tolerance, so that a block exactly 5 %
-    # off in decimal is within the +/- 5 % whichever side of it the last bits
-    # of the ratio fall, and a tighter tolerance of the caller's is judged on
-    # its own scale rather than on nine decimals of a ratio.
-    within = settled_ratio(np.abs(deviation), tolerance) <= 1.0
+    _omega(freq)
     return RigidMassCalibrationResult(
         frequencies=read_only_copy(freq),
         measured=np.asarray(measured, dtype=np.float64),
-        expected=np.asarray(expected, dtype=np.float64),
-        deviation=np.asarray(deviation, dtype=np.float64),
-        within_tolerance=within,
-        passes=bool(np.all(within)),
         mass=mass,
         quantity=quantity,
-        tolerance=tolerance,
     )
 
 

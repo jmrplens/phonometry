@@ -107,6 +107,6 @@ def test_the_tone_assessment_hands_its_language_to_the_formatter(
         real(*args, **kwargs)
 
     monkeypatch.setattr(psychoacoustics_plot, "format_frequency_axis", recording)
-    assessment = psychoacoustics.ToneAssessment(1000.0, 10.0, 8.0, prominent=True)
+    assessment = psychoacoustics.ToneAssessment(1000.0, 10.0, "tone_to_noise_ratio")
     assessment.plot(language=language)
     assert seen == [language]

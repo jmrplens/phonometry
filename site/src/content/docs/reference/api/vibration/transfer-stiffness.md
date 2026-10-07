@@ -976,7 +976,6 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 LevelDifferenceCheck(
     frequencies: np.ndarray,
     difference_db: np.ndarray,
-    limit_db: float,
     condition: Literal['blocked_output', 'unwanted_input'],
 )
 ```
@@ -994,6 +993,8 @@ $L_{a(\mathrm{excitation})} - L_{a(\mathrm{unwanted})} \ge 15$ dB
 (`"unwanted_input"`; ISO 10846-2:2008 Inequality (3), -3:2002
 Inequality (5), -4:2003 Inequality (7), -5:2008 Inequality (2)). The
 measurements are valid only at the frequencies where the condition holds.
+The least difference is the series', read from the condition
+(`limit_db`), so a check cannot be built against another one.
 
 **Attributes**
 
@@ -1001,7 +1002,6 @@ measurements are valid only at the frequencies where the condition holds.
 | :--- | :--- |
 | `frequencies` | Frequencies judged, in hertz. |
 | `difference_db` | The level difference at each frequency, in dB (`+inf` where the second level is that of a zero signal). |
-| `limit_db` | The least difference the condition accepts, in dB. |
 | `condition` | `"blocked_output"` or `"unwanted_input"`. |
 
 ### LevelDifferenceCheck.holds
@@ -1011,6 +1011,14 @@ measurements are valid only at the frequencies where the condition holds.
 Per frequency, whether the difference reaches the limit.
 
 **Returns:** One boolean per frequency.
+
+### LevelDifferenceCheck.limit_db
+
+*property*
+
+The least difference the condition accepts, fixed by the series.
+
+**Returns:** 20 dB for `"blocked_output"`, 15 dB for `"unwanted_input"`.
 
 ### LevelDifferenceCheck.passes
 
@@ -1086,7 +1094,7 @@ MIN_FREQUENCIES_PER_BAND = 5
 OutputMassCheck(
     frequencies: np.ndarray,
     output_mass_kg: float,
-    mass_limit_kg: np.ndarray,
+    output_apparent_mass_kg: np.ndarray,
 )
 ```
 
@@ -1111,13 +1119,18 @@ $-20 \lg(1 - r)$ dB with $r = m_0 |a_2| / |F_2|$, which at
 the bound ($r = 0{,}06$) is 0,54 dB against the 0,51 dB of an
 inertia force in phase with the measured one: the "0,5 dB" of NOTE 1.
 
+The measured side of the inequality is a field, the apparent mass
+$|F_2|/|a_2|$ the two output levels give; the 0,06 is the series',
+so `mass_limit_kg` is read from it and a check cannot be built
+against another factor.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies judged, in hertz. |
 | `output_mass_kg` | The mass `m0`, in kg. |
-| `mass_limit_kg` | The right-hand side of the inequality at each frequency, in kg. |
+| `output_apparent_mass_kg` | $\vert F_2\vert /\vert a_2\vert  = 10^{(L_{F2} - L_{a2})/20}$ times 1 µN over 1 µm/s², the output force over the output acceleration at each frequency, in kg. |
 
 ### OutputMassCheck.bias_bound_db
 
@@ -1146,6 +1159,14 @@ Per frequency, whether `m0` is within its limit.
 The inertia force over the measured force, $r = m_0 |a_2| / |F_2|$.
 
 **Returns:** One ratio per frequency; 0,06 where `m0` sits on its limit.
+
+### OutputMassCheck.mass_limit_kg
+
+*property*
+
+The right-hand side of the inequality at each frequency, in kg.
+
+**Returns:** $0{,}06\,|F_2|/|a_2|$, one per frequency.
 
 ### OutputMassCheck.passes
 

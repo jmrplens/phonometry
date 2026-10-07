@@ -2576,6 +2576,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   English and Spanish, so a reader knows the joining is theirs to do and to
   report.
 
+- **A verdict reads the limit its standard prints instead of taking it at
+  construction.** Thirty-four verdict classes carried a printed limit as a
+  constructor field, among them the ISO 11957 band flatness limit, the
+  ISO 10846 level differences and output mass limit, the ISO 3743-1 Table 3
+  spread and room size, the ISO 6926 clause 5 limits, the ISO 8253 ambient
+  noise limits and axial offsets, the ISO/DIS 16032 position spread, the
+  EN 1793-5 Table 3 path differences, the ISO 8041-1 tolerances, the
+  Directive 2002/44/EC action and limit values and the DIN 4150-3 guideline
+  values, so a verdict built by hand or rewritten with `dataclasses.replace`
+  could judge a measurement against any number. Each of those limits is now a
+  read-only property read from the fields that select it. A verdict that was
+  stored beside its limit, and the ISO 8041-1 weighting verdict that was
+  stored beside its printed band, is now read from the measured fields too,
+  or checked against them when the result is built: `PositionSpreadCheck`
+  keeps only its readings and reads its stage, spread and action from them,
+  every band row of an IEC 61043 verdict has to restate the Table 2 minima,
+  its index, its margins and its class, and an ISO 26101 fit refuses qualified
+  radii its levels do not reach within Table A.1.
+  The functions that return the verdicts take the same arguments and return
+  the same answers, and every limit still reads under the same name; code
+  that constructs one of these classes directly keeps only the measured
+  fields and the choices the standard leaves to the user, a few of which are
+  new fields (`AmbientNoiseCheck.earphone_attenuation_db` and
+  `allowed_threshold_shift_db`, `ReatSoundFieldCheck.free_field_rejection_db`,
+  `DiffuseSoundFieldCheck.front_to_random_index_db`,
+  `OutputMassCheck.output_apparent_mass_kg`, `ToneAssessment.method`,
+  `WeightedExposureResult.impulsive`, `MountingCheck.peak_acceleration_m_s2`
+  and `upper_frequency_hz`, `VibrationMeterVerification.measured_response`,
+  and `DamageAssessment.massive_structure`, which is taken by name only).
+  `rigid_mass_calibration_check` no longer takes a `tolerance`, since
+  ISO 7626-2 7.5.2 fixes the 5 %, and `HeavyImpactSourceCheck` and
+  `RigidMassCalibrationResult` refuse a truth value like every other verdict.
+  The limits a standard leaves to the user, such as the default roughness and
+  decay-rate limits of ISO 3095 and the background tolerance ISO/DIS 16032
+  does not print, stay fields, and so do the per-row limits of the ISO 8297
+  and IEC 60118-4 requirement records. A test now fails on any new field named
+  like a limit on a verdict, a verdict stored as a field included, that is not
+  derived from the standard or listed with the reason it stays. The upgrading
+  guide lists every class, what it keeps and the release it first shipped in.
 - **A guide's standards chips and its search field name only what the guide
   implements.** A normative document a guide only requires, cites or compares
   with, such as the calibrator a periodic test presupposes, the vocabulary a

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1891 numerical conformance checks against 523 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1893 numerical conformance checks against 523 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1891 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1893 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -53960,8 +53960,8 @@ documents, one page per module.
 | `JigDiameterCorrection` | `dataclass` | **The Table A.1 corrections at the frequencies asked for.**<br>• `frequencies_hz` [Hz], `correction_db` [dB], read-only<br>• `.expanded_uncertainty_db` [dB], a tenth of the correction (NOTE); `.standard_uncertainty_db` [dB], its half, read with the k = 2 of 7.9 and D.2 since the 10 % comes without one, the special-case component of Table D.1<br>• `.plot()`: the corrections and their band | `j.expanded_uncertainty_db` |
 | `diameter_sound_field_correction` | `function` | **The correction of a test microphone smaller than its reference, facing it across a narrow gap, by the model IEC 61094-5 6.5 refers to (Barham et al. 2014, the origin of Table A.1).**<br>• `frequencies_hz` [Hz], each below both resonance frequencies<br>• keyword-only: `reference_radius_m`, `test_diaphragm_radius_m`, `test_outer_radius_m`, `separation_m` [m]; `reference_resonance_frequency_hz`, `test_resonance_frequency_hz` [Hz]; `temperature_c` [°C] (Default: 23.0), `static_pressure_kpa` [kPa] (Default: 101.325), `relative_humidity_percent` [%] (Default: 50), the Annex F air its speed of sound comes from; `gas` (Default: None)<br>• read with Formula (4) less 1 and the annulus of Formula (2) from the outer radius, the readings that give Table A.1 (an erratum) | `metrology.diameter_sound_field_correction([20000.0], reference_radius_m=4.65e-3, test_diaphragm_radius_m=2.065e-3, test_outer_radius_m=2.975e-3, separation_m=0.5e-3, reference_resonance_frequency_hz=22e3, test_resonance_frequency_hz=100e3).correction_db  # [-1.434]`<br><br>• `DiameterSoundFieldCorrection` |
 | `DiameterSoundFieldCorrection` | `dataclass` | **The model's correction for microphones of different diameters.**<br>• `frequencies_hz` [Hz], `ratio` and `doubled_separation_ratio` R_P (complex), read-only; the geometry and `speed_of_sound` [m/s]<br>• `.correction_db` [dB], -20 lg\|R_P\|, added to the test microphone's level; `.doubled_separation_correction_db` [dB]; `.separation_change_db` [dB], the change A.2 names as approximately the uncertainty of Table A.1; `.phase_difference_deg` [°]<br>• `.plot()`: the correction and the correction at twice the separation | `model.separation_change_db` |
-| `verify_jig_or_coupler` | `function` | **Validate a jig or a coupler: a pressure calibration made in it against another calibration of the same microphone, by comparison elsewhere or by reciprocity (IEC 61094-5 6.7).**<br>• `calibration`: the `ComparisonCalibration` from the jig or coupler; `validation`: a `ComparisonCalibration` or a `ReciprocityCalibration`, both in a pressure field and with an expanded uncertainty<br>• keyword-only: `microphone`, the index of the microphone in a reciprocity calibration (Default: None)<br>• compared at the frequencies the two share; agreement within the root-sum-square of the two expanded uncertainties, the library's reading (the clause prints no criterion) | `v = metrology.verify_jig_or_coupler(jig, coupler)`<br><br>• `JigCouplerVerification` |
-| `JigCouplerVerification` | `dataclass` | **The verdict on a jig or a coupler.**<br>• `frequencies_hz` [Hz]; `calibration_level_db`, `validation_level_db` [dB re 1 V/Pa]; `calibration_uncertainty_db`, `validation_uncertainty_db` [dB]; `validation` ('comparison' / 'reciprocity'); `unvalidated_frequencies_hz` [Hz], read-only<br>• `.difference_db`, `.expanded_uncertainty_db` [dB], `.normalised_difference`, `.agrees`, `.failing_frequencies_hz` [Hz]<br>• `.passes`: every shared frequency agrees; `bool()` raises<br>• `.plot()`: the difference inside the band of its expanded uncertainty | `v.passes`, `v.failing_frequencies_hz` |
+| `verify_jig_or_coupler` | `function` | **Validate a jig or a coupler: a pressure calibration made in it against another calibration of the same microphone, by comparison elsewhere or by reciprocity (IEC 61094-5 6.7).**<br>• `calibration`: the `ComparisonCalibration` from the jig or coupler; `validation`: a `ComparisonCalibration` or a `ReciprocityCalibration`, both in a pressure field and with an expanded uncertainty<br>• keyword-only: `microphone`, the index of the microphone in a reciprocity calibration (Default: None); `shared_standard_uncertainty_db`, the standard uncertainty [dB] the two calibrations share, a common reference microphone or chain, one value or one per frequency of `calibration` (Default: 0, independent)<br>• compared at the frequencies the two share; agreement within the expanded uncertainty of the difference, the library's reading (the clause prints no criterion): the root-sum-square of the two less the shared part, `U_Delta = sqrt(U_cal^2 + U_val^2 - 2 (k u_sh)^2)`, that is `k = 2` times the root of `u_cal^2 + u_val^2 - 2 u_sh^2` (GUM 5.2.2 with the covariance of F.1.2.3)<br>• only a part that enters both levels with the same sign and size: the pairs through the third microphone of a joint reciprocity calibration enter with opposite signs and are not taken<br>• raises ValueError for a shared part above either calibration's standard uncertainty | `v = metrology.verify_jig_or_coupler(jig, coupler, shared_standard_uncertainty_db=0.025)`<br><br>• `JigCouplerVerification` |
+| `JigCouplerVerification` | `dataclass` | **The verdict on a jig or a coupler.**<br>• `frequencies_hz` [Hz]; `calibration_level_db`, `validation_level_db` [dB re 1 V/Pa]; `calibration_uncertainty_db`, `validation_uncertainty_db` [dB]; `validation` ('comparison' / 'reciprocity'); `unvalidated_frequencies_hz` [Hz]; keyword-only `shared_standard_uncertainty_db` [dB] (Default: 0), read-only<br>• `.difference_db`, `.expanded_uncertainty_db` [dB], `.normalised_difference`, `.correlation_coefficient`, `.agrees`, `.failing_frequencies_hz` [Hz]<br>• `.passes`: every shared frequency agrees; `bool()` raises<br>• `.plot()`: the difference inside the band of its expanded uncertainty, the independent band dotted when a part is shared | `v.passes`, `v.failing_frequencies_hz` |
 | `comparison_uncertainty_budget` | `function` | **The uncertainty budget of a comparison calibration at one frequency (IEC 61094-5 Annex D; IEC 61094-8 8.8, Table 2).**<br>• `standard_uncertainties_db`: each component a standard uncertainty [dB] or a `Quantity`, keyed as `IEC61094_5_TABLE_D1` (pressure) or `IEC61094_8_TABLE_2` (free field); a subset is allowed<br>• keyword-only: `frequency_hz` [Hz]; `field` (Default: 'pressure'); `additional_components`: named `Quantity` objects (Default: none); `coverage_factor` (Default: 2)<br>• on `combine_uncertainty`, sensitivities 1, U = k u_c | `b = metrology.comparison_uncertainty_budget(d1, frequency_hz=2000.0)`<br><br>• `b.expanded_uncertainty_db  # 0.087 (D.3 prints 0,08, an erratum)` |
 | `ComparisonUncertaintyBudget` | `dataclass` | **One comparison budget at one frequency.**<br>• `frequency_hz` [Hz], `field`, `names`, `components`, `standard_uncertainties_db` [dB], `uncertainty` (the `UncertaintyResult`, refused unless it is their root-sum-square), `coverage_factor`<br>• `.combined_uncertainty_db`, `.expanded_uncertainty_db`, `.linear_combined_uncertainty_db` [dB], `.standard`<br>• `.plot()`: one bar per component, with u_c, k and U | `b.combined_uncertainty_db  # 0.0437` |
 | `IEC61094_5_TABLE_D1` | `mapping` | **IEC 61094-5:2016 Table D.1, the example budget at 2 kHz, keyed 'reference', 'capacitance', 'non_linearity', 'impedance', 'polarizing_voltage', 'repeatability', 'drift', 'rounding'.**<br>• each value a `ComparisonUncertaintyRow` with the printed standard uncertainty and, for the seven rows that state one, the stated value and its divisor (√3 or 2); the repeatability states none | `metrology.IEC61094_5_TABLE_D1["drift"].standard_uncertainty_db  # 0.017` |
@@ -64088,10 +64088,10 @@ elsewhere or, for a laboratory standard microphone, the
 calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/) with the index of that microphone,
 and compares them at the frequencies they share. The clause prints no
 criterion. The library reads "validated" as the two agreeing within the
-expanded uncertainty of their difference,
-`|L_cal - L_val| <= sqrt(U_cal^2 + U_val^2)`, the two taken as independent;
-two calibrations that share a reference are correlated, and the
-root-sum-square then overstates the uncertainty of their difference.
+expanded uncertainty of their difference, `|L_cal - L_val| <= U_Δ`, which
+for two independent calibrations is the root-sum-square
+`U_Δ = sqrt(U_cal^2 + U_val^2)`; two calibrations that share a component
+are correlated, and the part they share comes out of it (below).
 
 Here the jig of A.2 is validated against the coupler of A.1 for the WS2P of
 the first example, the coupler used up to the 10 kHz it is for. Near
@@ -64121,15 +64121,77 @@ validated at all, the coupler not reaching there: a second set-up has to
 validate it there, as 6.7 allows. `check.normalised_difference` is the
 difference in units of its expanded uncertainty, -1,93 at 6,3 kHz.
 
-Both calibrations here take the same LS2P as their reference, so its row of
-Table D.1, 0,05 dB at $k = 2$, cancels in the difference while the
-root-sum-square counts it twice: without it the band at 6,3 kHz is 0,106 dB
-rather than 0,128 dB. The verdict does not change here; for a pair this
-correlated, budgets without the shared components give the uncertainty of
-the difference. The clause prints neither a criterion nor an example, so the
-conformance report checks the verdict against its own definition.
+### Calibrations that share a reference
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="The difference between the WS2P calibrated in the jig and in the coupler at the eleven frequencies they share, 1 kHz to 10 kHz, inside a shaded band of plus or minus the expanded uncertainty of the difference, 0.124 dB widening to 0.143 dB at 10 kHz: within 0.008 dB of zero everywhere but 6.3 kHz, where it falls to -0.247 dB, outside the band and marked with a cross; three dashed vertical lines at 12.6 kHz, 15.8 kHz and 20 kHz mark the frequencies of the jig the coupler does not cover" width="88%"></picture>
+Both calibrations here take the same LS2P as their reference, so the first
+row of Table D.1, the calibration of that reference (0,025 dB, the
+"±0,05 dB with a coverage factor of k = 2" of its certificate), is in both
+budgets. Whatever error that calibration carries moves the two sensitivity
+levels together and cancels in their difference, while the root-sum-square
+counts it twice. In the terms of the GUM, two levels that each depend on a
+common quantity with a sensitivity of 1 have its variance as their
+covariance (JCGM 100:2008 F.1.2.3, Formula (F.2), whose sensitivity
+coefficients are then both 1), and the law of propagation for correlated inputs
+(5.2.2, Formula (13)) gives for the difference
+
+`u_Δ^2 = u_cal^2 + u_val^2 - 2 u_sh^2`
+
+with `u_sh` the standard uncertainty of what the two share.
+`shared_standard_uncertainty_db` takes it, one value or one per frequency of
+the calibration, and the band becomes
+`U_Δ = sqrt(U_cal^2 + U_val^2 - 2 (k u_sh)^2)` with the `k = 2` of 7.9:
+
+```python
+shared = metrology.verify_jig_or_coupler(jig, coupler, shared_standard_uncertainty_db=0.025)
+print(shared.passes, shared.failing_frequencies_hz.round())                                # False [6310.]
+print(shared.expanded_uncertainty_db[8].round(3), shared.normalised_difference[8].round(2))   # 0.106 -2.32
+print(shared.correlation_coefficient[8].round(2))                                           # 0.31
+```
+
+The band narrows from 0,124 dB to 0,101 dB at the low frequencies and from
+0,128 dB to 0,106 dB at 6,3 kHz, where the two calibrations are correlated
+with a coefficient of 0,31, the reference's variance over the product of
+their standard uncertainties (Formula (14)). The verdict does not change
+here: the jig still fails at 6,3 kHz alone, now by 2,32 times the
+uncertainty of the difference. A pair that agrees within the root-sum-square
+can fail once the shared part is out of it. Which components the two share
+is the laboratory's to say: the calibration of a reference both use, its
+drift since then (the row "Drift in reference microphone sensitivity since
+last calibration", 0,017 dB) for two calibrations made close together, a
+measuring chain they both go through. Only a component that enters both
+levels with the same sign and size belongs here. A reciprocity calibration
+made in the same set of three microphones as the reference's is not such a
+case: in IEC 61094-2:2009 Formula (7) (folio 12) the electrical transfer
+impedances of the two pairs that go through the third microphone are in the
+numerator of one microphone's sensitivity and in the denominator of the
+other's, so those measurements enter the two levels with opposite signs.
+Their covariance is negative and widens the uncertainty of the difference
+beyond the root-sum-square, which `shared_standard_uncertainty_db` cannot
+express; only the factors common to both levels with the same sign may be
+given there. A shared part larger than either calibration's standard
+uncertainty is refused, since nothing can be shared beyond the whole of it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="The difference between the WS2P calibrated in the jig and in the coupler at the eleven frequencies they share, 1 kHz to 10 kHz, inside a shaded band of plus or minus the expanded uncertainty of the difference with the reference they share taken out, 0.101 dB widening to 0.124 dB at 10 kHz, and dotted around it the band of two independent calibrations, 0.124 dB widening to 0.143 dB: within 0.008 dB of zero everywhere but 6.3 kHz, where it falls to -0.247 dB, outside both bands and marked with a cross; three dashed vertical lines at 12.6 kHz, 15.8 kHz and 20 kHz mark the frequencies of the jig the coupler does not cover" width="88%"></picture>
+
+The clause prints neither a criterion nor an example, so the conformance
+report checks the verdict against its own definition. Jarvis and Watkins
+(1997), NPL Report CIRA(EXT) 022, who compared jig calibrations of working
+standard microphones at NPL with reciprocity calibrations of the same
+microphones, print no numeric criterion either: their Figures 6 and 7
+(folio 4) plot the differences, and the text judges them against "the
+typical repeatability" of the measurements (folio 2), one standard
+deviation drawn as a band in Figure 7 and never printed as a number, with
+no number a criterion could be checked against. The residual differences
+"of less than 0.1 dB" of folio 5 report a result rather than set a test, and
+the report says nothing about what the two calibrations share. The shared
+part has printed numbers, in the GUM: two items
+calibrated against the same standard, of relative standard uncertainty
+$10^{-4}$, are correlated with coefficients of about 0,5, 0,990 and 1,000
+for comparisons of $100 \times 10^{-6}$, $10 \times 10^{-6}$ and
+$1 \times 10^{-6}$ (F.1.2.3, Example 2). The conformance
+report checks `correlation_coefficient` against them, and the difference of
+two calibrations with the budget of Table D.1 against the seven rows left
+once the reference's cancels.
 
 ## What this guide covers
 
@@ -64160,9 +64222,12 @@ and the annulus of its Formula (2) from the overall radius, the readings
 that give its Table 2, which is Table A.1, with the change on doubling the
 separation that A.2 names, its uncertainty left to the caller; the
 validation of a jig or a coupler against another calibration of the same
-microphone (6.7), whose criterion, agreement within the root-sum-square of
-the two expanded uncertainties, is this library's reading, the clause
-printing none; the budgets of Table D.1 and IEC 61094-8 Table 2 with `k = 2`;
+microphone (6.7), whose criterion, agreement within the expanded uncertainty
+of the difference, the root-sum-square of the two less what they share by
+the GUM law of propagation for correlated inputs (JCGM 100:2008 5.2.2 and
+F.1.2.3), is this library's reading, the clause printing none and Jarvis
+and Watkins (1997) no numeric one, only a component that enters both levels
+with the same sign and size counting as shared; the budgets of Table D.1 and IEC 61094-8 Table 2 with `k = 2`;
 Tables A.1, D.1, 1 and 2 as published data; the effective free-field region
 of Formula (B.1) and the longest window it allows for a reflection; the time
 window of B.1.3 with the tapered edges of B.1.2, Formula (B.2) through it, the stepped sine of B.2 by Formula
@@ -64178,7 +64243,10 @@ IEC/TS 61094-7, which are inputs, and the reciprocity calibration of the
 reference, which is in
 [Microphone calibration by reciprocity](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/); the second special case of Table D.1, a microphone calibrated as a
 system with its preamplifier (0,002 dB, and under 0,02 dB above 200 Hz),
-which a budget takes through `additional_components`.
+which a budget takes through `additional_components`; a covariance that
+widens the uncertainty of the difference, as between two microphones of the
+same reciprocity set through the pairs with the third (IEC 61094-2:2009
+Formula (7)), which `verify_jig_or_coupler` does not take.
 
 ## See also
 
@@ -72009,7 +72077,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1891 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1893 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -73157,7 +73225,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1891 numerical conformance checks across 111 domains and 523 standards, covering
+1893 numerical conformance checks across 111 domains and 523 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

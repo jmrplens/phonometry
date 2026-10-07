@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1891/1891 conformance checks pass** across 111 domains and 523 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1893/1893 conformance checks pass** across 111 domains and 523 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2254,7 +2254,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (32/32)</summary>
+<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (34/34)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -2283,6 +2283,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, folio 26 | Volume of the coupler of the example, v = pi r^2 L | 2.534e-7 m³ as printed (+/-0.0005e-7 m³, its last digit) | 2.53353e-07 m³ | -0.00000000005 m³ | 100 % | ![Pass][cv-pass] Pass |
 | Jarvis (1996) NPL CIRA(EXT) 010 Appendix B, graph on folio 27 | Dip and value at 20 kHz of the error in level, and peak and value at 20 kHz of the error in phase, read off the printed graphs | 6/6 readings of the graphs | 6/6 readings of the graphs | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-5:2016 6.7 | A jig validated against a reciprocity calibration on a grid of its own: agreement within the root-sum-square of the two expanded uncertainties, 5 frequencies | 6/6 verdicts | 6/6 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 6.7; ISO/IEC Guide 98-3 F.1.2.3, Example 2 | Correlation of two calibrations against the same standard of 10^-4, for comparisons of 100, 10 and 1 x 10^-6, as printed | 3/3 coefficients | 3/3 coefficients | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 6.7, Table D.1; ISO/IEC Guide 98-3 5.2.2 | Expanded uncertainty of the difference of two calibrations against the same LS2P, each with the budget of Table D.1 | 0.101271911 dB, the reference row cancelling (0.123515181 dB as independent) | 0.101271911 dB at the worst of 5 frequencies | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 B.6.1, Formula (B.10) | Spectrum of a rectangular pulse of a = 10 V and b = 2,5 µs at 6 frequencies, as printed | Formula (B.10) at all 6 frequencies | max deviation 0.000000000000 of 2ab | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 B.6.1 | First zero of the pulse spectrum, f = 1/(2b), for b = 2,5 µs | 200000 Hz (+/-0 Hz) | 200000 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61094-8:2012 B.6.1 | Half-duration b for a first zero an order of magnitude above 20 kHz, 'just a few microseconds' | 2.5 µs ('just a few microseconds') | 2.5 µs | 0 µs | 0 % | ![Pass][cv-pass] Pass |

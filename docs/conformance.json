@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1891,
-    "passing": 1891,
+    "checks": 1893,
+    "passing": 1893,
     "failing": 0,
     "domains": 111,
     "standards": 523,
-    "citations": 1337,
+    "citations": 1339,
     "designations": 227,
     "sources": 125
   },
@@ -667,8 +667,8 @@
     {
       "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
       "title": "Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)",
-      "checks": 32,
-      "passing": 32
+      "checks": 34,
+      "passing": 34
     },
     {
       "id": "microphone-calibration-by-reciprocity-iec-61094-2-iec-61094-3",
@@ -50607,6 +50607,89 @@
         "value": 0.0
       },
       "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-6-7-iso-iec-guide-98-3-f-1-2-3-example-2/correlation-of-two-calibrations-against-the-same-standard-of-10-4-for-comparisons-of-100-10-and-1-x-10-6-as-printed",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 6.7; ISO/IEC Guide 98-3 F.1.2.3, Example 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "6.7"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO/IEC Guide 98-3",
+            "clause": "F.1.2.3, Example 2",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Correlation of two calibrations against the same standard of 10^-4, for comparisons of 100, 10 and 1 x 10^-6, as printed",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 coefficients"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 coefficients"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-6-7-table-d-1-iso-iec-guide-98-3-5-2-2/expanded-uncertainty-of-the-difference-of-two-calibrations-against-the-same-ls2p-each-with-the-budget-of-table-d-1",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 6.7, Table D.1; ISO/IEC Guide 98-3 5.2.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "6.7, Table D.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO/IEC Guide 98-3",
+            "clause": "5.2.2",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty of the difference of two calibrations against the same LS2P, each with the budget of Table D.1",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.10127191120937733,
+        "label": "0.101271911 dB, the reference row cancelling (0.123515181 dB as independent)"
+      },
+      "computed": {
+        "value": 0.101271911,
+        "label": "0.101271911 dB at the worst of 5 frequencies"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
       "verdict": "pass"
     },
     {

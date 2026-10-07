@@ -72,6 +72,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   frequencies beside the verdict. The clause prints no criterion; agreement
   within that uncertainty is the library's reading.
 
+- **Take what two calibrations share out of the validation of a jig or a
+  coupler.** Two calibrations made against the same reference microphone, or
+  through the same chain, are correlated: the error of what they share moves
+  both levels together and cancels in their difference, which the
+  root-sum-square counts twice. `metrology.verify_jig_or_coupler` now takes
+  the standard uncertainty of that shared part as
+  `shared_standard_uncertainty_db`, one value or one per frequency, and
+  judges the difference against
+  `U_Delta = sqrt(U_cal^2 + U_val^2 - 2 (k u_sh)^2)`, that is `k = 2` times
+  the root of `u_cal^2 + u_val^2 - 2 u_sh^2`: the GUM law of propagation for
+  correlated inputs with the covariance of two levels that each depend on a
+  common quantity with a sensitivity of 1 (JCGM 100:2008 5.2.2 and F.1.2.3).
+  Two calibrations with the budget of IEC 61094-5 Table D.1 against the same
+  LS2P are then judged within 0.101 dB rather than 0.124 dB. It defaults to
+  0 dB, which leaves every verdict as it was, and a shared part larger than
+  either calibration's standard uncertainty is refused. Only a component that
+  enters both levels with the same sign and size can be given: two
+  microphones of the same reciprocity set share the pair measurements through
+  the third with opposite signs (IEC 61094-2:2009 Formula (7)), a covariance
+  that widens the band and that this argument does not take.
+  `JigCouplerVerification` carries it, gives the `correlation_coefficient` of
+  the two calibrations, which reproduces the coefficients of F.1.2.3
+  Example 2 in the conformance report, and draws the band two independent
+  calibrations would have dotted around the narrower one.
+
 - **Analyse rail roughness by EN 15610 Method B, through digital one-third
   octave filters.** `environment.filtered_roughness_spectrum` runs a roughness
   record through one-third octave band filters along the rail, discards 2 m of

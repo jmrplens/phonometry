@@ -34,6 +34,14 @@ references:
     number: "NPL Report CIRA(EXT) 010"
     url: "https://eprintspublications.npl.co.uk/439/"
     note: "Reference [2] of IEC 61094-5:2016: the circuit of Appendix B for the air between two microphones in a symmetric coupler, whose series impedance air_gap_series_impedance_pa_s_m3 gives, and its example of an LS2P against a high sensitivity WS2P. The published scan has lost the imaginary unit of the first microphone's mass term (an erratum)."
+  - type: report
+    authors: ["Jarvis, D. R.", "Watkins, S."]
+    year: 1997
+    title: "Methods for determining the pressure sensitivity of IEC type WS3 measurement microphones"
+    institution: "National Physical Laboratory"
+    number: "NPL Report CIRA(EXT) 022"
+    implemented: false
+    note: "Jig calibrations of working standard microphones compared with reciprocity calibrations of the same microphones (Figures 6 and 7) and judged in words against the typical repeatability of the measurements, one standard deviation drawn as a band in Figure 7; it prints no numeric criterion for the validation of 6.7, no numbers one could be checked against, and nothing on what the two calibrations share."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2009
@@ -62,7 +70,7 @@ references:
     publisher: "BIPM"
     url: "https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf"
     doi: "10.59161/JCGM100-2008E"
-    note: "The law of propagation of uncertainty both budgets are combined by, and the coverage factor k = 2 both parts report with. Also published as ISO/IEC Guide 98-3:2008."
+    note: "The law of propagation of uncertainty both budgets are combined by, and the coverage factor k = 2 both parts report with; its form for correlated inputs (5.2.2) with the covariance of two estimates of a common quantity (F.1.2.3) takes what two calibrations share out of the uncertainty of their difference, and the correlation coefficients of F.1.2.3 Example 2 are reproduced. Also published as ISO/IEC Guide 98-3:2008."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -923,16 +931,16 @@ elsewhere or, for a laboratory standard microphone, the
 calibration](/phonometry/signals/metrology/reciprocity-calibration/) with the
 index of that microphone, and compares them at the frequencies they share.
 The clause prints no criterion. The library reads "validated" as the two
-agreeing within the expanded uncertainty of their difference,
+agreeing within the expanded uncertainty of their difference, which for two
+independent calibrations is the root-sum-square of the two,
 
 $$
-\lvert L_\mathrm{cal} - L_\mathrm{val} \rvert \le
+\lvert L_\mathrm{cal} - L_\mathrm{val} \rvert \le U_\Delta =
 \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}
 $$
 
-the two taken as independent; two calibrations that share a reference are
-correlated, and the root-sum-square then overstates the uncertainty of their
-difference.
+Two calibrations that share a component are correlated, and the part they
+share comes out of $U_\Delta$ (below).
 
 Here the jig of A.2 is validated against the coupler of A.1 for the WS2P of
 the first example, the coupler used up to the 10 kHz it is for. Near
@@ -962,19 +970,88 @@ validated at all, the coupler not reaching there: a second set-up has to
 validate it there, as 6.7 allows. `check.normalised_difference` is the
 difference in units of its expanded uncertainty, -1,93 at 6,3 kHz.
 
-Both calibrations here take the same LS2P as their reference, so its row of
-Table D.1, 0,05 dB at $k = 2$, cancels in the difference while the
-root-sum-square counts it twice: without it the band at 6,3 kHz is 0,106 dB
-rather than 0,128 dB. The verdict does not change here; for a pair this
-correlated, budgets without the shared components give the uncertainty of
-the difference. The clause prints neither a criterion nor an example, so the
-conformance report checks the verdict against its own definition.
+### Calibrations that share a reference
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="The difference between the WS2P calibrated in the jig and in the coupler at the eleven frequencies they share, 1 kHz to 10 kHz, inside a shaded band of plus or minus the expanded uncertainty of the difference, 0.124 dB widening to 0.143 dB at 10 kHz: within 0.008 dB of zero everywhere but 6.3 kHz, where it falls to -0.247 dB, outside the band and marked with a cross; three dashed vertical lines at 12.6 kHz, 15.8 kHz and 20 kHz mark the frequencies of the jig the coupler does not cover" width="88%" />
+Both calibrations here take the same LS2P as their reference, so the first
+row of Table D.1, the calibration of that reference (0,025 dB, the
+"±0,05 dB with a coverage factor of k = 2" of its certificate), is in both
+budgets. Whatever error that calibration carries moves the two sensitivity
+levels together and cancels in their difference, while the root-sum-square
+counts it twice. In the terms of the GUM, two levels that each depend on a
+common quantity with a sensitivity of 1 have its variance as their
+covariance (JCGM 100:2008 F.1.2.3, Formula (F.2), whose sensitivity
+coefficients are then both 1), and the law of propagation for correlated inputs
+(5.2.2, Formula (13)) gives for the difference
+
+$$
+u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2
+$$
+
+with $u_\mathrm{sh}$ the standard uncertainty of what the two share.
+`shared_standard_uncertainty_db` takes it, one value or one per frequency of
+the calibration, and the band becomes, with the $k = 2$ of 7.9,
+
+$$
+U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}
+$$
+
+```python
+shared = metrology.verify_jig_or_coupler(jig, coupler, shared_standard_uncertainty_db=0.025)
+print(shared.passes, shared.failing_frequencies_hz.round())                                # False [6310.]
+print(shared.expanded_uncertainty_db[8].round(3), shared.normalised_difference[8].round(2))   # 0.106 -2.32
+print(shared.correlation_coefficient[8].round(2))                                           # 0.31
+```
+
+The band narrows from 0,124 dB to 0,101 dB at the low frequencies and from
+0,128 dB to 0,106 dB at 6,3 kHz, where the two calibrations are correlated
+with a coefficient of 0,31, the reference's variance over the product of
+their standard uncertainties (Formula (14)). The verdict does not change
+here: the jig still fails at 6,3 kHz alone, now by 2,32 times the
+uncertainty of the difference. A pair that agrees within the root-sum-square
+can fail once the shared part is out of it. Which components the two share
+is the laboratory's to say: the calibration of a reference both use, its
+drift since then (the row "Drift in reference microphone sensitivity since
+last calibration", 0,017 dB) for two calibrations made close together, a
+measuring chain they both go through. Only a component that enters both
+levels with the same sign and size belongs here. A reciprocity calibration
+made in the same set of three microphones as the reference's is not such a
+case: in IEC 61094-2:2009 Formula (7) (folio 12) the electrical transfer
+impedances of the two pairs that go through the third microphone are in the
+numerator of one microphone's sensitivity and in the denominator of the
+other's, so those measurements enter the two levels with opposite signs.
+Their covariance is negative and widens the uncertainty of the difference
+beyond the root-sum-square, which `shared_standard_uncertainty_db` cannot
+express; only the factors common to both levels with the same sign may be
+given there. A shared part larger than either calibration's standard
+uncertainty is refused, since nothing can be shared beyond the whole of it.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_jig_validation.svg" alt="The difference between the WS2P calibrated in the jig and in the coupler at the eleven frequencies they share, 1 kHz to 10 kHz, inside a shaded band of plus or minus the expanded uncertainty of the difference with the reference they share taken out, 0.101 dB widening to 0.124 dB at 10 kHz, and dotted around it the band of two independent calibrations, 0.124 dB widening to 0.143 dB: within 0.008 dB of zero everywhere but 6.3 kHz, where it falls to -0.247 dB, outside both bands and marked with a cross; three dashed vertical lines at 12.6 kHz, 15.8 kHz and 20 kHz mark the frequencies of the jig the coupler does not cover" width="88%" />
 
 *The jig against the coupler: the difference of the two calibrations inside
-the expanded uncertainty of the difference, the one frequency where the jig
-fails, and dashed, the three above 10 kHz the coupler does not reach.*
+the expanded uncertainty of the difference once the reference they share is
+taken out, the root-sum-square of two independent calibrations dotted around
+it, the one frequency where the jig fails, and dashed, the three above
+10 kHz the coupler does not reach.*
+
+The clause prints neither a criterion nor an example, so the conformance
+report checks the verdict against its own definition. Jarvis and Watkins
+(1997), NPL Report CIRA(EXT) 022, who compared jig calibrations of working
+standard microphones at NPL with reciprocity calibrations of the same
+microphones, print no numeric criterion either: their Figures 6 and 7
+(folio 4) plot the differences, and the text judges them against "the
+typical repeatability" of the measurements (folio 2), one standard
+deviation drawn as a band in Figure 7 and never printed as a number, with
+no number a criterion could be checked against. The residual differences
+"of less than 0.1 dB" of folio 5 report a result rather than set a test, and
+the report says nothing about what the two calibrations share. The shared
+part has printed numbers, in the GUM: two items
+calibrated against the same standard, of relative standard uncertainty
+$10^{-4}$, are correlated with coefficients of about 0,5, 0,990 and 1,000
+for comparisons of $100 \times 10^{-6}$, $10 \times 10^{-6}$ and
+$1 \times 10^{-6}$ (F.1.2.3, Example 2). The conformance report checks
+`correlation_coefficient` against them, and the difference of two
+calibrations with the budget of Table D.1 against the seven rows left once
+the reference's cancels.
 
 <details>
 <summary>Show the code for these figures</summary>
@@ -1036,7 +1113,7 @@ gap.plot(ax_phase, quantity="phase", marker="none")
 fig.tight_layout()
 
 fig, ax = plt.subplots(figsize=(10, 6))
-check.plot(ax)
+shared.plot(ax)
 fig.tight_layout()
 plt.show()
 ```
@@ -1077,7 +1154,10 @@ its change on doubling the separation that A.2 names; it reproduces every
 row of Table A.1 from the inputs of the paper's Table 1. **IEC 61094-5 6.7:**
 the comparison of a calibration made in a jig or a coupler with another of
 the same microphone, by comparison elsewhere or by reciprocity, at the
-frequencies they share. The IEC 61183 clause 5 comparison computes through
+frequencies they share, with the part of their uncertainty the two share
+taken out of the uncertainty of the difference by the GUM law of
+propagation for correlated inputs (JCGM 100:2008 5.2.2 and F.1.2.3), whose
+correlation coefficients of F.1.2.3 Example 2 are reproduced. The IEC 61183 clause 5 comparison computes through
 the same model. Table D.1 and Table A.1 are reproduced.
 </ScopeClaim>
 
@@ -1110,9 +1190,14 @@ Formula (2) from the overall radius, which give it, at a speed of sound the
 paper does not print. Its uncertainty is the caller's to estimate: the model
 gives the change on doubling the separation that A.2 names as approximately
 the 10 % of Table A.1. **The validation of 6.7.** The clause prints no
-criterion; agreement within the root-sum-square of the two expanded
-uncertainties, the two calibrations independent, is this library's reading,
-and the conformance report checks it against its own definition. **Formula (B.10)** is read as the spectrum of a
+criterion, and Jarvis and Watkins (1997), which compared jig calibrations
+with reciprocity ones, print no numeric one either, judging the differences
+in words against one standard deviation of repeatability drawn in their
+Figure 7; agreement within the expanded uncertainty of the difference, the
+root-sum-square of the two less the part they share, is this library's
+reading, and the conformance report checks it against its own definition.
+Which components two calibrations share is the caller's to give, and only
+one that enters both levels with the same sign and size can be given. **Formula (B.10)** is read as the spectrum of a
 pulse lasting $2b$, as the formula and its first zero say and the text does
 not.
 </ScopeClaim>
@@ -1131,7 +1216,10 @@ of the reference (IEC 61094-2, -3) is the subject of
 D.1, a microphone calibrated as a system with its preamplifier (0,002 dB,
 and for the polarising voltage and the capacitance "frequency dependent" and
 under 0,02 dB above 200 Hz), is not held as data; a budget that needs it
-takes it through `additional_components`.
+takes it through `additional_components`. A covariance that widens the
+uncertainty of the difference, as between two microphones of the same
+reciprocity set through the pairs with the third (IEC 61094-2:2009
+Formula (7)), is not taken by `verify_jig_or_coupler`.
 </ScopeClaim>
 </Scope>
 

@@ -138,7 +138,19 @@ and couplers and alternative sound sources", or, for a laboratory standard
 microphone, with its reciprocity calibration.
 :func:`verify_jig_or_coupler` sets the two calibrations side by side; the
 clause prints no criterion, and the library reads it as their agreeing
-within the expanded uncertainty of their difference.
+within the expanded uncertainty of their difference. Two calibrations that
+share a component entering both levels alike, the same reference microphone
+or the same measuring chain, are correlated, and the part they share cancels
+in the difference: with :math:`u_\mathrm{sh}` its standard uncertainty, the
+GUM law of propagation for correlated inputs (JCGM 100:2008 5.2.2, with the
+covariance :math:`u_\mathrm{sh}^2` of F.1.2.3 for two sensitivities of 1)
+gives
+
+.. math::
+
+   u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2
+
+which ``shared_standard_uncertainty_db`` passes to it.
 
 **Time-selective processing** (IEC 61094-8 Annex B). A free field can be
 simulated by keeping only the direct sound of an impulse response:
@@ -195,6 +207,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
+from dataclasses import field as dataclass_field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -2651,6 +2664,25 @@ def comparison_uncertainty_budget(
 _VALIDATIONS = ("comparison", "reciprocity")
 
 
+def _no_shared_part() -> NDArray[np.float64]:
+    """The default shared standard uncertainty: none, 0 dB at every frequency."""
+    return np.zeros(1)
+
+
+def _own_part_db(
+    expanded_db: NDArray[np.float64], shared_expanded_db: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    r""":math:`\sqrt{U^2 - (k\,u_\mathrm{sh})^2}`, the expanded uncertainty a
+    calibration does not share with the other, in dB.
+
+    A shared part within a nanodecibel of the whole, which the verification
+    lets through as equal to it, leaves nothing rather than the root of a
+    negative rounding residue. With no shared part it is :math:`U` to the last
+    bit, the square root of a square being exact in binary.
+    """
+    return np.sqrt(np.maximum(expanded_db**2 - shared_expanded_db**2, 0.0))
+
+
 @dataclass(frozen=True)
 class JigCouplerVerification:
     r"""A calibration made in a jig or a coupler set against another
@@ -2658,11 +2690,33 @@ class JigCouplerVerification:
 
     The difference of the two sensitivity levels at each frequency both
     calibrated, :math:`\Delta = L_\mathrm{cal} - L_\mathrm{val}`, is judged
-    against the expanded uncertainty of that difference,
-    :math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}`, the two
-    calibrations taken as independent: the jig or coupler agrees at a
-    frequency where :math:`\lvert\Delta\rvert \le U_\Delta`. 6.7 asks for the
-    validation and prints no criterion; this is the library's reading of it.
+    against the expanded uncertainty of that difference: the jig or coupler
+    agrees at a frequency where :math:`\lvert\Delta\rvert \le U_\Delta`. 6.7
+    asks for the validation and prints no criterion; this is the library's
+    reading of it.
+
+    Two independent calibrations give
+    :math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}`. Two that
+    share a component, the same reference microphone or the same measuring
+    chain, are correlated: each depends on the shared quantity with a
+    sensitivity of 1, so the covariance of the two levels is its variance
+    :math:`u_\mathrm{sh}^2` (JCGM 100:2008 F.1.2.3, Formula (F.2)), and the
+    law of propagation for the difference (5.2.2, Formula (13)) is
+
+    .. math::
+
+       u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 - 2u_\mathrm{sh}^2
+
+    the shared part cancelling in the difference. With the coverage factor
+    :math:`k = 2` both expanded uncertainties are reported with (IEC 61094-5
+    7.9 for a comparison, IEC 61094-2:2009 7.5 for a reciprocity
+    calibration), :math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 +
+    U_\mathrm{val}^2 - 2(k\,u_\mathrm{sh})^2}`, the root-sum-square of the
+    parts of the two expanded uncertainties that are each calibration's own.
+    Only a component that enters both levels with the same sign and size
+    can be shared this way; one that enters them with opposite signs makes
+    the covariance negative and widens the band beyond the root-sum-square,
+    which this verification does not represent.
 
     :ivar frequencies_hz: The frequencies the two calibrations share, in Hz.
     :ivar calibration_level_db: :math:`L_\mathrm{cal}`, the sensitivity level
@@ -2679,6 +2733,13 @@ class JigCouplerVerification:
         validation does not cover, in Hz: 6.7 allows "more than one jig
         and/or coupler to cover a full frequency range", each validated
         where it is used.
+    :ivar shared_standard_uncertainty_db: :math:`u_\mathrm{sh}`, the standard
+        uncertainty of what the two calibrations share, in dB at each
+        frequency: the calibration of a common reference microphone (the
+        first row of IEC 61094-5 Table D.1), its drift, a common measuring
+        chain, each entering both levels with the same sign and size. One
+        value is spread over every frequency (Default: 0 dB, two independent
+        calibrations).
     """
 
     frequencies_hz: NDArray[np.float64]
@@ -2688,14 +2749,21 @@ class JigCouplerVerification:
     validation_uncertainty_db: NDArray[np.float64]
     validation: str
     unvalidated_frequencies_hz: NDArray[np.float64]
+    _: KW_ONLY
+    shared_standard_uncertainty_db: NDArray[np.float64] = dataclass_field(
+        default_factory=_no_shared_part
+    )
 
     def __post_init__(self) -> None:
         """Refuse columns that disagree and publish them read-only.
 
         :raises ValueError: for frequencies that are not positive and
             increasing, a column that is not one finite value per frequency,
-            a negative uncertainty, two uncertainties of 0 dB at the same
-            frequency, or an unknown validation.
+            a negative uncertainty, a shared standard uncertainty above the
+            standard uncertainty of either calibration, a difference left
+            with an expanded uncertainty of 0 dB at some frequency (two
+            uncertainties of 0 dB, or two that are all shared), or an unknown
+            validation.
         """
         require_choice(self.validation, "validation", _VALIDATIONS)
         frequencies = _frequency_axis(self.frequencies_hz)
@@ -2706,19 +2774,30 @@ class JigCouplerVerification:
             "calibration_uncertainty_db",
             "validation_level_db",
             "validation_uncertainty_db",
+            "shared_standard_uncertainty_db",
         ):
             column = _band_column(getattr(self, name), name, count)
             if name.endswith("uncertainty_db") and np.any(column < 0.0):
                 msg = f"JigCouplerVerification: '{name}' must be non-negative."
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(column.copy()))
-        if not np.all(
-            np.hypot(self.calibration_uncertainty_db, self.validation_uncertainty_db)
-            > 0.0
-        ):
+        shared = settled(self._shared_expanded_db)
+        larger = (shared > settled(self.calibration_uncertainty_db)) | (
+            shared > settled(self.validation_uncertainty_db)
+        )
+        if np.any(larger):
             msg = (
-                "JigCouplerVerification: at every frequency at least one of the two "
-                "calibrations must carry an expanded uncertainty above 0 dB."
+                "JigCouplerVerification: 'shared_standard_uncertainty_db' cannot "
+                "exceed the standard uncertainty of either calibration, its "
+                f"expanded uncertainty over k = {_COVERAGE_FACTOR:g}; it does at "
+                f"{self.frequencies_hz[larger].tolist()} Hz."
+            )
+            raise ValueError(msg)
+        if not np.all(settled(self.expanded_uncertainty_db) > 0.0):
+            msg = (
+                "JigCouplerVerification: at every frequency the difference of the two "
+                "calibrations must carry an expanded uncertainty above 0 dB: at "
+                "least one of them needs an uncertainty beyond the part they share."
             )
             raise ValueError(msg)
         uncovered = np.asarray(self.unvalidated_frequencies_hz, dtype=np.float64)
@@ -2732,11 +2811,41 @@ class JigCouplerVerification:
         return self.calibration_level_db - self.validation_level_db
 
     @property
-    def expanded_uncertainty_db(self) -> NDArray[np.float64]:
-        r""":math:`U_\Delta`, the root-sum-square of the two expanded
-        uncertainties, in dB.
+    def _shared_expanded_db(self) -> NDArray[np.float64]:
+        r""":math:`k\,u_\mathrm{sh}`, the shared part on the scale of the two
+        expanded uncertainties, in dB.
         """
-        return np.hypot(self.calibration_uncertainty_db, self.validation_uncertainty_db)
+        return _COVERAGE_FACTOR * self.shared_standard_uncertainty_db
+
+    @property
+    def expanded_uncertainty_db(self) -> NDArray[np.float64]:
+        r""":math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 -
+        2(k\,u_\mathrm{sh})^2}`, the expanded uncertainty (:math:`k = 2`) of
+        the difference, in dB: the root-sum-square of the two expanded
+        uncertainties when the calibrations share nothing.
+        """
+        shared = self._shared_expanded_db
+        return np.hypot(
+            _own_part_db(self.calibration_uncertainty_db, shared),
+            _own_part_db(self.validation_uncertainty_db, shared),
+        )
+
+    @property
+    def correlation_coefficient(self) -> NDArray[np.float64]:
+        r""":math:`r = u_\mathrm{sh}^2/(u_\mathrm{cal}\,u_\mathrm{val})`, the
+        correlation coefficient of the two levels (JCGM 100:2008 5.2.2,
+        Formula (14)), at each frequency: 0 for two independent calibrations,
+        and towards 1 as the shared part outweighs what each calibration adds
+        to it (F.1.2.3, Example 2). 0 where a calibration carries no
+        uncertainty, and so shares none.
+        """
+        product = self.calibration_uncertainty_db * self.validation_uncertainty_db
+        return np.divide(
+            self._shared_expanded_db**2,
+            product,
+            out=np.zeros_like(product),
+            where=product > 0.0,
+        )
 
     @property
     def normalised_difference(self) -> NDArray[np.float64]:
@@ -2864,6 +2973,7 @@ def verify_jig_or_coupler(
     validation: ComparisonCalibration | ReciprocityCalibration,
     *,
     microphone: int | None = None,
+    shared_standard_uncertainty_db: ArrayLike = 0.0,
 ) -> JigCouplerVerification:
     r"""Does a jig or coupler give the same calibration as another way of
     calibrating the same microphone (IEC 61094-5:2016 6.7)?
@@ -2883,12 +2993,33 @@ def verify_jig_or_coupler(
 
     The clause prints no criterion. The library reads "validated" as the two
     agreeing within the expanded uncertainty of their difference, each
-    calibration's expanded uncertainty (:math:`k = 2`, 7.9) combined as
-    independent: :math:`\lvert L_\mathrm{cal} - L_\mathrm{val}\rvert \le
-    \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}`. Two calibrations that share
-    a reference, or a reciprocity calibration that is the reference's own,
-    are correlated, and the root-sum-square then overstates the uncertainty
-    of the difference.
+    calibration's expanded uncertainty reported with :math:`k = 2` (7.9 for
+    a comparison, IEC 61094-2:2009 7.5 for a reciprocity calibration):
+    :math:`\lvert L_\mathrm{cal} - L_\mathrm{val}\rvert \le U_\Delta`. Two
+    independent calibrations give the root-sum-square,
+    :math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2}`. Two that
+    share a component entering both levels with the same sign and size, the
+    same reference microphone (the first row of Table D.1) or the same
+    measuring chain, are correlated, and the root-sum-square counts twice
+    what cancels in their difference: give that component's standard
+    uncertainty :math:`u_\mathrm{sh}` as ``shared_standard_uncertainty_db``,
+    and the GUM law of propagation for correlated inputs (JCGM 100:2008 5.2.2
+    with the covariance of F.1.2.3, Formula (F.2)) gives
+    :math:`u_\Delta^2 = u_\mathrm{cal}^2 + u_\mathrm{val}^2 -
+    2u_\mathrm{sh}^2`, that is
+    :math:`U_\Delta = \sqrt{U_\mathrm{cal}^2 + U_\mathrm{val}^2 -
+    2(k\,u_\mathrm{sh})^2}`. A shared part cannot be larger than either
+    calibration's standard uncertainty, :math:`U/k`.
+
+    A reciprocity calibration made in the same set of three microphones as
+    the reference's is not such a case. In IEC 61094-2:2009 Formula (7) the
+    electrical transfer impedances of the two pairs that go through the third
+    microphone are in the numerator of one microphone's sensitivity and in
+    the denominator of the other's, so those pair measurements enter the two
+    levels with opposite signs: their covariance is negative, and the
+    uncertainty of the difference exceeds the root-sum-square, which
+    ``shared_standard_uncertainty_db`` cannot express. Only the factors
+    common to both levels, with the same sign, may be given here.
 
     :param calibration: The pressure calibration by comparison made in the
         jig or coupler, with its expanded uncertainty.
@@ -2898,11 +3029,18 @@ def verify_jig_or_coupler(
         field, with its expanded uncertainty.
     :param microphone: For a reciprocity calibration, the index of the
         microphone that was compared (Default: None).
+    :param shared_standard_uncertainty_db: :math:`u_\mathrm{sh}`, the
+        standard uncertainty of what the two calibrations share, in dB: one
+        value, or one per frequency of ``calibration`` (Default: 0 dB, two
+        independent calibrations).
     :return: The :class:`JigCouplerVerification`.
     :raises ValueError: for a calibration or validation that is not a
         pressure calibration or carries no expanded uncertainty, a
         reciprocity calibration without ``microphone`` (or a comparison with
-        one), a microphone it does not hold, or no frequency in common.
+        one), a microphone it does not hold, no frequency in common, or a
+        shared standard uncertainty that is negative, not one value per
+        frequency of ``calibration``, larger than the standard uncertainty
+        of either calibration, or all of both.
     :raises TypeError: for a validation that is neither calibration.
     """
     if not isinstance(calibration, ComparisonCalibration):
@@ -2920,7 +3058,7 @@ def verify_jig_or_coupler(
     kind, level, uncertainty = _validation_columns(validation, microphone)
     own = np.asarray(calibration.frequencies_hz, dtype=np.float64)
     other = np.asarray(validation.frequencies_hz, dtype=np.float64)
-    shared = np.array(
+    match = np.array(
         [
             int(np.argmin(np.abs(other / frequency - 1.0)))
             if np.min(np.abs(other / frequency - 1.0)) <= _SAME_FREQUENCY_REL_TOL
@@ -2929,9 +3067,15 @@ def verify_jig_or_coupler(
         ],
         dtype=np.int64,
     )
-    covered = shared >= 0
+    covered = match >= 0
     if not np.any(covered):
         msg = "The calibration and the validation share no frequency."
+        raise ValueError(msg)
+    common = _band_column(
+        shared_standard_uncertainty_db, "shared_standard_uncertainty_db", own.size
+    )
+    if np.any(common < 0.0):
+        msg = "'shared_standard_uncertainty_db' must be non-negative."
         raise ValueError(msg)
     return JigCouplerVerification(
         frequencies_hz=own[covered],
@@ -2939,10 +3083,11 @@ def verify_jig_or_coupler(
         calibration_uncertainty_db=np.asarray(calibration.expanded_uncertainty_db)[
             covered
         ],
-        validation_level_db=level[shared[covered]],
-        validation_uncertainty_db=uncertainty[shared[covered]],
+        validation_level_db=level[match[covered]],
+        validation_uncertainty_db=uncertainty[match[covered]],
         validation=kind,
         unvalidated_frequencies_hz=own[~covered],
+        shared_standard_uncertainty_db=common[covered],
     )
 
 

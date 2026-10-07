@@ -272,3 +272,17 @@ JARVIS_1996_GRAPH_DIP: tuple[float, float] = (-0.0065, 7000.0)
 JARVIS_1996_GRAPH_AT_20KHZ_DB = 0.025
 JARVIS_1996_GRAPH_PHASE_PEAK: tuple[float, float] = (0.16, 12500.0)
 JARVIS_1996_GRAPH_PHASE_AT_20KHZ_DEG = 0.09
+
+#: ISO/IEC Guide 98-3:2008 (JCGM 100:2008) F.1.2.3, Example 2, folio 63 (PDF
+#: page 75): resistors calibrated against the same standard, whose relative
+#: standard uncertainty is u(R_S)/R_S = 10^-4, are correlated through it with
+#: u(R_i, R_j) = u^2(R_S); for a comparison of standard uncertainty u(alpha) the
+#: printed correlation coefficients, keyed by u(alpha), with the decimals
+#: printed: "if u(alpha) = 100 x 10^-6, r_ij ~ 0,5; if u(alpha) = 10 x 10^-6,
+#: r_ij ~ 0,990; and if u(alpha) = 1 x 10^-6, r_ij ~ 1,000".
+GUM_F123_EXAMPLE_2_STANDARD_RELATIVE = 1e-4
+GUM_F123_EXAMPLE_2_CORRELATION: dict[float, tuple[float, int]] = {
+    100e-6: (0.5, 1),
+    10e-6: (0.990, 3),
+    1e-6: (1.000, 3),
+}

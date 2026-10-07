@@ -207,7 +207,11 @@ condicionado. El precio es una contabilidad que el banco paga internamente:
 antes de cada etapa de diezmado debe ejecutarse un paso bajo antialiasing,
 porque una componente por encima del nuevo Nyquist que se pliegue hacia abajo
 cae *dentro* de las bandas bajas que se están midiendo, y ningún filtro
-posterior puede eliminarla.
+posterior puede eliminarla. El del banco es un filtro de fase lineal con
+ventana de Kaiser dimensionado para una banda atenuada de 120 dB, que deja
+cada imagen que el diezmado pliega sobre una banda a más de 125 dB por debajo
+de ella, y `verify_filter_class` califica esas imágenes frente a la Tabla 1 de
+IEC 61260.
 
 ### Trampas de aliasing
 

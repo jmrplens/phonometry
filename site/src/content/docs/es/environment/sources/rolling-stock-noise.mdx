@@ -325,13 +325,11 @@ de base diez que da el método A (`roughness_filter_bank`). Evaluado con
 estricta, y su respuesta integrada (4.5.3) y la suma de sus salidas (4.9)
 también quedan dentro de la clase 0. Cada banda funciona a la frecuencia de
 muestreo del propio registro, sin el diezmado banda a banda que los bancos de
-la biblioteca usan por defecto. Una banda diezmada deja pasar los números de
-onda que se pliegan sobre ella alrededor de la frecuencia diezmada con solo
-unos 73 dB a 75 dB de atenuación, por debajo de los 75 dB que la clase 0 pide
-en $G^{\pm 4}$ y más allá, y el apartado 4.8 pide a los filtros antialias de
-un sistema muestreado que esos alias no saquen al filtro de la tabla 1; sin
-diezmar, una banda no tiene alias y la evaluación llega hasta el número de
-onda de Nyquist del registro.
+la biblioteca usan por defecto. El apartado 4.8 pide a los filtros antialias
+de un sistema muestreado que los números de onda que se pliegan sobre una
+banda no saquen al filtro de la tabla 1; sin diezmar, una banda no tiene
+ningún alias, y la evaluación llega hasta el número de onda de Nyquist del
+registro y cubre exactamente lo que atraviesa un registro.
 
 El banco es de orden 4, el más bajo que es de clase 0, por una razón que la
 norma no dice: el filtro tarda en asentarse más cuanto más larga es la

@@ -479,23 +479,23 @@ L 622 4416
 L 622 4863 
 L 1947 4863 
 z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-29"/><use xlink:href="#DejaVuSans-55" transform="translate(50.23 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(89.14 0)"/><use xlink:href="#DejaVuSans-54" transform="translate(150.67 0)"/><use xlink:href="#DejaVuSans-58" transform="translate(214.16 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(277.53 0)"/><use xlink:href="#DejaVuSans-51" transform="translate(339.06 0)"/><use xlink:href="#DejaVuSans-46" transform="translate(402.44 0)"/><use xlink:href="#DejaVuSans-5c" transform="translate(457.42 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(516.61 0)"/><use xlink:href="#DejaVuSans-3e" transform="translate(548.39 0)"/><use xlink:href="#DejaVuSans-2b" transform="translate(587.41 0)"/><use xlink:href="#DejaVuSans-5d" transform="translate(662.61 0)"/><use xlink:href="#DejaVuSans-40" transform="translate(715.09 0)"/></g></g></g><g id="matplotlib.axis_2"><g id="ytick_1"><g id="line2d_55"><path d="M 40.93 313.97 
-L 432.04 313.97 
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-29"/><use xlink:href="#DejaVuSans-55" transform="translate(50.23 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(89.14 0)"/><use xlink:href="#DejaVuSans-54" transform="translate(150.67 0)"/><use xlink:href="#DejaVuSans-58" transform="translate(214.16 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(277.53 0)"/><use xlink:href="#DejaVuSans-51" transform="translate(339.06 0)"/><use xlink:href="#DejaVuSans-46" transform="translate(402.44 0)"/><use xlink:href="#DejaVuSans-5c" transform="translate(457.42 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(516.61 0)"/><use xlink:href="#DejaVuSans-3e" transform="translate(548.39 0)"/><use xlink:href="#DejaVuSans-2b" transform="translate(587.41 0)"/><use xlink:href="#DejaVuSans-5d" transform="translate(662.61 0)"/><use xlink:href="#DejaVuSans-40" transform="translate(715.09 0)"/></g></g></g><g id="matplotlib.axis_2"><g id="ytick_1"><g id="line2d_55"><path d="M 40.93 313.96 
+L 432.04 313.96 
 " clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_56"><defs><path id="m5e07181663" d="M 0 0 
 L -3.5 0 
-" style="stroke: #ffffff; stroke-width: 0.8"/></defs><g><use xlink:href="#m5e07181663" x="40.93" y="313.97" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_11"><!-- 35 --><g style="fill: #ffffff" transform="translate(21.2 317.76) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-16"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="ytick_2"><g id="line2d_57"><path d="M 40.93 267.06 
-L 432.04 267.06 
-" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_58"><g><use xlink:href="#m5e07181663" x="40.93" y="267.06" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_12"><!-- 40 --><g style="fill: #ffffff" transform="translate(21.2 270.86) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-17"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_3"><g id="line2d_59"><path d="M 40.93 220.15 
-L 432.04 220.15 
-" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_60"><g><use xlink:href="#m5e07181663" x="40.93" y="220.15" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_13"><!-- 45 --><g style="fill: #ffffff" transform="translate(21.2 223.95) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-17"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="ytick_4"><g id="line2d_61"><path d="M 40.93 173.24 
-L 432.04 173.24 
-" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_62"><g><use xlink:href="#m5e07181663" x="40.93" y="173.24" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_14"><!-- 50 --><g style="fill: #ffffff" transform="translate(21.2 177.04) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-18"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_5"><g id="line2d_63"><path d="M 40.93 126.34 
-L 432.04 126.34 
-" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_64"><g><use xlink:href="#m5e07181663" x="40.93" y="126.34" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_15"><!-- 55 --><g style="fill: #ffffff" transform="translate(21.2 130.14) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-18"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="ytick_6"><g id="line2d_65"><path d="M 40.93 79.43 
-L 432.04 79.43 
-" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_66"><g><use xlink:href="#m5e07181663" x="40.93" y="79.43" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_16"><!-- 60 --><g style="fill: #ffffff" transform="translate(21.2 83.23) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-19"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_7"><g id="line2d_67"><path d="M 40.93 32.52 
-L 432.04 32.52 
-" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_68"><g><use xlink:href="#m5e07181663" x="40.93" y="32.52" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_17"><!-- 65 --><g style="fill: #ffffff" transform="translate(21.2 36.32) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-19"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="text_18"><!-- Third-octave band level [dB] --><g style="fill: #ffffff" transform="translate(14.8 256.04) rotate(-90) scale(0.1 -0.1)"><defs><path id="DejaVuSans-37" d="M -19 4666 
+" style="stroke: #ffffff; stroke-width: 0.8"/></defs><g><use xlink:href="#m5e07181663" x="40.93" y="313.96" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_11"><!-- 35 --><g style="fill: #ffffff" transform="translate(21.2 317.76) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-16"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="ytick_2"><g id="line2d_57"><path d="M 40.93 267.05 
+L 432.04 267.05 
+" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_58"><g><use xlink:href="#m5e07181663" x="40.93" y="267.05" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_12"><!-- 40 --><g style="fill: #ffffff" transform="translate(21.2 270.84) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-17"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_3"><g id="line2d_59"><path d="M 40.93 220.13 
+L 432.04 220.13 
+" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_60"><g><use xlink:href="#m5e07181663" x="40.93" y="220.13" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_13"><!-- 45 --><g style="fill: #ffffff" transform="translate(21.2 223.93) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-17"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="ytick_4"><g id="line2d_61"><path d="M 40.93 173.21 
+L 432.04 173.21 
+" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_62"><g><use xlink:href="#m5e07181663" x="40.93" y="173.21" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_14"><!-- 50 --><g style="fill: #ffffff" transform="translate(21.2 177.01) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-18"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_5"><g id="line2d_63"><path d="M 40.93 126.29 
+L 432.04 126.29 
+" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_64"><g><use xlink:href="#m5e07181663" x="40.93" y="126.29" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_15"><!-- 55 --><g style="fill: #ffffff" transform="translate(21.2 130.09) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-18"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="ytick_6"><g id="line2d_65"><path d="M 40.93 79.38 
+L 432.04 79.38 
+" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_66"><g><use xlink:href="#m5e07181663" x="40.93" y="79.38" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_16"><!-- 60 --><g style="fill: #ffffff" transform="translate(21.2 83.18) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-19"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_7"><g id="line2d_67"><path d="M 40.93 32.46 
+L 432.04 32.46 
+" clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8; stroke-linecap: square"/></g><g id="line2d_68"><g><use xlink:href="#m5e07181663" x="40.93" y="32.46" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_17"><!-- 65 --><g style="fill: #ffffff" transform="translate(21.2 36.26) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-19"/><use xlink:href="#DejaVuSans-18" transform="translate(63.62 0)"/></g></g></g><g id="text_18"><!-- Third-octave band level [dB] --><g style="fill: #ffffff" transform="translate(14.8 256.04) rotate(-90) scale(0.1 -0.1)"><defs><path id="DejaVuSans-37" d="M -19 4666 
 L 3928 4666 
 L 3928 4134 
 L 2272 4134 
@@ -709,34 +709,34 @@ Q 3088 0 2303 0
 L 628 0 
 L 628 4666 
 z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-37"/><use xlink:href="#DejaVuSans-4b" transform="translate(61.08 0)"/><use xlink:href="#DejaVuSans-4c" transform="translate(124.45 0)"/><use xlink:href="#DejaVuSans-55" transform="translate(152.23 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(191.59 0)"/><use xlink:href="#DejaVuSans-10" transform="translate(255.08 0)"/><use xlink:href="#DejaVuSans-52" transform="translate(293.02 0)"/><use xlink:href="#DejaVuSans-46" transform="translate(354.2 0)"/><use xlink:href="#DejaVuSans-57" transform="translate(409.19 0)"/><use xlink:href="#DejaVuSans-44" transform="translate(448.39 0)"/><use xlink:href="#DejaVuSans-59" transform="translate(509.67 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(568.86 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(630.39 0)"/><use xlink:href="#DejaVuSans-45" transform="translate(662.17 0)"/><use xlink:href="#DejaVuSans-44" transform="translate(725.66 0)"/><use xlink:href="#DejaVuSans-51" transform="translate(786.94 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(850.31 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(913.8 0)"/><use xlink:href="#DejaVuSans-4f" transform="translate(945.58 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(973.36 0)"/><use xlink:href="#DejaVuSans-59" transform="translate(1034.89 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(1094.08 0)"/><use xlink:href="#DejaVuSans-4f" transform="translate(1155.61 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(1183.39 0)"/><use xlink:href="#DejaVuSans-3e" transform="translate(1215.17 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(1254.19 0)"/><use xlink:href="#DejaVuSans-25" transform="translate(1317.67 0)"/><use xlink:href="#DejaVuSans-40" transform="translate(1386.28 0)"/></g></g></g><g id="line2d_69"><path d="M 58.7 178.5 
-L 71.4 176.48 
-L 84.1 147.72 
-L 96.8 132.9 
-L 109.5 138.52 
-L 122.2 147.31 
-L 134.9 143.37 
-L 147.59 124.47 
-L 160.29 114.86 
-L 172.99 76.19 
-L 185.69 42.38 
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-37"/><use xlink:href="#DejaVuSans-4b" transform="translate(61.08 0)"/><use xlink:href="#DejaVuSans-4c" transform="translate(124.45 0)"/><use xlink:href="#DejaVuSans-55" transform="translate(152.23 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(191.59 0)"/><use xlink:href="#DejaVuSans-10" transform="translate(255.08 0)"/><use xlink:href="#DejaVuSans-52" transform="translate(293.02 0)"/><use xlink:href="#DejaVuSans-46" transform="translate(354.2 0)"/><use xlink:href="#DejaVuSans-57" transform="translate(409.19 0)"/><use xlink:href="#DejaVuSans-44" transform="translate(448.39 0)"/><use xlink:href="#DejaVuSans-59" transform="translate(509.67 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(568.86 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(630.39 0)"/><use xlink:href="#DejaVuSans-45" transform="translate(662.17 0)"/><use xlink:href="#DejaVuSans-44" transform="translate(725.66 0)"/><use xlink:href="#DejaVuSans-51" transform="translate(786.94 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(850.31 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(913.8 0)"/><use xlink:href="#DejaVuSans-4f" transform="translate(945.58 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(973.36 0)"/><use xlink:href="#DejaVuSans-59" transform="translate(1034.89 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(1094.08 0)"/><use xlink:href="#DejaVuSans-4f" transform="translate(1155.61 0)"/><use xlink:href="#DejaVuSans-3" transform="translate(1183.39 0)"/><use xlink:href="#DejaVuSans-3e" transform="translate(1215.17 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(1254.19 0)"/><use xlink:href="#DejaVuSans-25" transform="translate(1317.67 0)"/><use xlink:href="#DejaVuSans-40" transform="translate(1386.28 0)"/></g></g></g><g id="line2d_69"><path d="M 58.7 178.53 
+L 71.4 176.52 
+L 84.1 147.75 
+L 96.8 132.93 
+L 109.5 138.55 
+L 122.2 147.34 
+L 134.9 143.39 
+L 147.59 124.49 
+L 160.29 114.88 
+L 172.99 76.2 
+L 185.69 42.37 
 L 198.39 40.72 
 L 211.09 45.91 
 L 223.79 78.34 
-L 236.48 112.13 
-L 249.18 135.4 
-L 261.88 142.99 
-L 274.58 147.71 
-L 287.28 146.89 
-L 299.98 146.56 
-L 312.68 145.94 
-L 325.37 148.28 
-L 338.07 159.33 
-L 350.77 174.22 
-L 363.47 192.27 
-L 376.17 224.02 
-L 388.87 256.5 
-L 401.57 292.95 
+L 236.48 112.12 
+L 249.18 135.41 
+L 261.88 142.95 
+L 274.58 147.67 
+L 287.28 146.85 
+L 299.98 146.52 
+L 312.68 145.9 
+L 325.37 148.24 
+L 338.07 159.29 
+L 350.77 174.18 
+L 363.47 192.24 
+L 376.17 223.99 
+L 388.87 256.48 
+L 401.57 292.94 
 L 414.27 328.83 
 " clip-path="url(#p894bf4c6f2)" style="fill: none; stroke: #1f77b4; stroke-width: 1.8; stroke-linecap: square"/><defs><path id="m44d939040c" d="M 0 1.75 
 C 0.46 1.75 0.91 1.57 1.24 1.24 
@@ -748,34 +748,34 @@ C -1.57 -0.91 -1.75 -0.46 -1.75 0
 C -1.75 0.46 -1.57 0.91 -1.24 1.24 
 C -0.91 1.57 -0.46 1.75 0 1.75 
 z
-" style="stroke: #1f77b4"/></defs><g clip-path="url(#p894bf4c6f2)"><use xlink:href="#m44d939040c" x="58.7" y="178.5" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="71.4" y="176.48" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="84.1" y="147.72" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="96.8" y="132.9" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="109.5" y="138.52" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="122.2" y="147.31" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="134.9" y="143.37" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="147.59" y="124.47" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="160.29" y="114.86" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="172.99" y="76.19" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="185.69" y="42.38" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="198.39" y="40.72" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="211.09" y="45.91" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="223.79" y="78.34" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="236.48" y="112.13" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="249.18" y="135.4" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="261.88" y="142.99" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="274.58" y="147.71" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="287.28" y="146.89" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="299.98" y="146.56" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="312.68" y="145.94" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="325.37" y="148.28" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="338.07" y="159.33" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="350.77" y="174.22" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="363.47" y="192.27" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="376.17" y="224.02" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="388.87" y="256.5" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="401.57" y="292.95" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="414.27" y="328.83" style="fill: #1f77b4; stroke: #1f77b4"/></g></g><g id="line2d_70"><path d="M 58.7 178.5 
-L 71.4 176.48 
-L 84.1 147.72 
-L 96.8 132.9 
-L 109.5 138.52 
-L 122.2 147.31 
-L 134.9 143.37 
-L 147.59 124.47 
-L 160.29 114.86 
-L 172.99 76.19 
-L 185.69 42.38 
+" style="stroke: #1f77b4"/></defs><g clip-path="url(#p894bf4c6f2)"><use xlink:href="#m44d939040c" x="58.7" y="178.53" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="71.4" y="176.52" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="84.1" y="147.75" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="96.8" y="132.93" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="109.5" y="138.55" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="122.2" y="147.34" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="134.9" y="143.39" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="147.59" y="124.49" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="160.29" y="114.88" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="172.99" y="76.2" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="185.69" y="42.37" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="198.39" y="40.72" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="211.09" y="45.91" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="223.79" y="78.34" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="236.48" y="112.12" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="249.18" y="135.41" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="261.88" y="142.95" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="274.58" y="147.67" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="287.28" y="146.85" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="299.98" y="146.52" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="312.68" y="145.9" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="325.37" y="148.24" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="338.07" y="159.29" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="350.77" y="174.18" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="363.47" y="192.24" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="376.17" y="223.99" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="388.87" y="256.48" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="401.57" y="292.94" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#m44d939040c" x="414.27" y="328.83" style="fill: #1f77b4; stroke: #1f77b4"/></g></g><g id="line2d_70"><path d="M 58.7 178.53 
+L 71.4 176.52 
+L 84.1 147.75 
+L 96.8 132.93 
+L 109.5 138.55 
+L 122.2 147.34 
+L 134.9 143.39 
+L 147.59 124.49 
+L 160.29 114.88 
+L 172.99 76.2 
+L 185.69 42.37 
 L 198.39 40.72 
 L 211.09 45.91 
 L 223.79 78.34 
-L 236.48 112.13 
-L 249.18 135.4 
-L 261.88 142.99 
-L 274.58 147.71 
-L 287.28 146.89 
-L 299.98 146.56 
-L 312.68 145.94 
-L 325.37 148.28 
-L 338.07 159.33 
-L 350.77 174.22 
-L 363.47 192.27 
-L 376.17 224.02 
-L 388.87 256.5 
-L 401.57 292.95 
+L 236.48 112.12 
+L 249.18 135.41 
+L 261.88 142.95 
+L 274.58 147.67 
+L 287.28 146.85 
+L 299.98 146.52 
+L 312.68 145.9 
+L 325.37 148.24 
+L 338.07 159.29 
+L 350.77 174.18 
+L 363.47 192.24 
+L 376.17 223.99 
+L 388.87 256.48 
+L 401.57 292.94 
 L 414.27 328.83 
 " clip-path="url(#p894bf4c6f2)" style="fill: none; stroke-dasharray: 6.66,2.88; stroke-dashoffset: 0; stroke: #d62728; stroke-width: 1.8"/></g><g id="patch_3"><path d="M 40.93 343.23 
 L 40.93 26.32 

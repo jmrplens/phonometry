@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Grade a filter bank on the integrated response and the summation of
+  IEC 61260:1995 as well as its Table 1.** `filters.verify_filter_class(...,
+  edition="1995")` graded Table 1 alone; it now also grades the filter
+  integrated response of 4.5.3 (equations (9), (13), (14) and (16): the
+  effective bandwidth integrated over f/fm with no 1/Ω weight, by the
+  trapezoidal rule over at least 5S test frequencies on each side, against
+  G^(1/2b) − G^(−1/2b)), within ±0.15 dB, ±0.3 dB and ±0.5 dB for classes 0,
+  1 and 2, and the summation of output signals of 4.9 (equation (19)), within
+  ±1.0 dB for class 0, +1.0/−2.0 dB for class 1 and +2.0/−4.0 dB for class 2,
+  run from the lowest to the highest mid-band frequency as 5.8.4 asks, so the
+  end bands carry it on the half facing the set. Both run at the S of 5.3.3:
+  `points_per_bandwidth` is where S starts, and it is raised in steps of 12
+  until every band's integrated response reads the same to the nearest tenth
+  of a decibel at S and at S + 12; the result's `points_per_bandwidth` says
+  where it stopped, 36 for the default octave bank. A band's class and the
+  bank's are the strictest met on all three; `requirements`,
+  `requirement_class` and `plot(requirement=...)` read each one, and the plots
+  and the fiche name the 1995 clauses. The default Butterworth banks are
+  class 0 on all three. The errata register records that 3.15 prints the
+  normalizing constant with a stray factor of ten, and that the words of 4.9
+  and 5.8.3 take the summation difference the other way round from equation
+  (19), which the check follows as 5.8.5 instructs.
+
 - **Analyse rail roughness by EN 15610 Method B, through digital one-third
   octave filters.** `environment.filtered_roughness_spectrum` runs a roughness
   record through one-third octave band filters along the rail, discards 2 m of
@@ -21,10 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   requires, on Table 1, on the filter integrated response and on the summation
   of outputs, and the lowest order that is, so that it settles soonest inside
   the 2 m. Every band runs at the record's own rate, without the band-by-band
-  decimation of the library's default banks, whose anti-alias filter would let
-  the wavenumbers folding onto a band through only about 73 dB to 75 dB down,
-  short of the 75 dB class 0 asks beyond G^±4; Table 1 is graded up to the
-  Nyquist wavenumber of the record. A band is reported once its filter has
+  decimation of the library's default banks, so a band has no alias at all
+  and Table 1 is graded up to the Nyquist wavenumber of the record. A band is reported once its filter has
   settled to within 0.15 dB over the length analysed, from the 0.25 m band on
   a 5 m record and from the 0.5 m band on a 20 m one. Every `AcousticRoughnessSpectrum` now says which
   method made it, `average_roughness_spectra` keeps a method its spectra
@@ -1832,6 +1853,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a diagram shows is the one its clause prints.
 
 ### Fixed
+
+- **The filter banks keep every alias image more than 125 dB down, and the
+  class check grades the images a decimated band reads.**
+  `filters.verify_filter_class` graded a decimated band only up to the
+  Nyquist frequency of its decimated rate and counted every frequency above
+  it as infinite attenuation, so the images the decimation folds onto the band
+  went unseen. It now reads each band at the bank's input rate, its
+  anti-aliasing filter, the decimation and its sections together, over every
+  frequency below half the input rate, which is what Table 1 covers:
+  IEC 61260-1:2014 5.15 holds the images to the Table 1 limits, and
+  IEC 61260:1995 4.8 to the greatest of its minimum limits, which is the
+  floor the mask already sets where every image of a decimated band falls,
+  past its last breakpoint. Graded that way, the default banks did not hold
+  the class they declare: the anti-aliasing filter `scipy.signal.resample_poly`
+  designs by default left the images of the octave bank at 8, 16 and 32 kHz
+  68.9 dB down, under the 70 dB of class 1, and those of every other default
+  bank 70.9 dB to 73.1 dB down, under the 75 dB of class 0 of
+  IEC 61260:1995. The 68.9 dB images lie above 1.5 times the highest mid-band
+  frequency of the bank, beyond the range over which IEC 61260-2:2016 7.2.2.2
+  measures the relative attenuation, so that class 1 failure is one of
+  IEC 61260-1:2014 5.15 and Table 1 themselves. The bank was fixed, not the
+  check or what the bank declares: `OctaveFilterBank` and `octave_filter` now
+  decimate, and interpolate `sigbands` back, through a filter of the same
+  length whose Kaiser window is sized for a 120 dB stopband, which leaves the
+  images at least 125.4 dB down from 8 kHz to 192 kHz and its ripple inside a
+  band under 1e-5 dB, so the default banks are class 1 of IEC 61260-1:2014 and
+  class 0 of IEC 61260:1995 again, images included. A band level moves by
+  under 0.01 dB. `checked_to_omega` now reaches half the input rate on every
+  band and `range_limited` marks a Table 1 mask running on past it; the
+  time-invariance sweep, the plots, the fiche and the conformance report read
+  the same response, and the conformance suite runs the tones of
+  IEC 61260:1995 5.7 through the bank.
 
 - **The Spanish edition calls a sine wave a sinusoide, and an expanded
   uncertainty an incertidumbre expandida.** Thirty-nine places of the Spanish

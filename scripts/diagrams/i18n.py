@@ -4603,7 +4603,7 @@ _ES: dict[str, str] = {
     "this band: $m_1$ = +0.40 dB, $m_2$ = +0.60 dB, so class 1": "esta banda: $m_1$ = +0,40 dB, $m_2$ = +0,60 dB, luego clase 1",
     "$m$ is the least distance to a limit over $2^{15}$ grid points and every breakpoint": "$m$ es la menor distancia a un límite sobre $2^{15}$ puntos de rejilla y cada punto de quiebre",
     "a bank takes the class of its worst band, and none if any band has none": "un banco toma la clase de su peor banda, y ninguna si alguna banda no tiene",
-    "past a band's own Nyquist nothing is walked, and range_limited says so": "más allá del Nyquist propio de la banda no se recorre nada, y range_limited lo avisa",
+    "past half the input rate nothing is walked, and range_limited says so": "más allá de la mitad de la frecuencia de muestreo no se recorre nada, y range_limited lo avisa",
     "Also computed on the design": "También calculado en el diseño",
     "the IEC 61260-2 tests with no specimen": "los ensayos de IEC 61260-2 sin espécimen",
     "at $Ω_i = G^{i/(bS)}$ (Formula 1)": "en $Ω_i = G^{i/(bS)}$ (Fórmula 1)",

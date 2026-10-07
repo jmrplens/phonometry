@@ -354,7 +354,11 @@ las bandas del banco lejos de ese régimen:
    de los +0,8 dB de la clase 1 en el 5.16 de IEC 61260-1:2014, y a 16 la
    deformación mueve esa suma como mucho 0,005 dB. El nivel de banda se calcula
    sobre la señal diezmada; solo con `sigbands=True` la señal de banda vuelve a
-   la frecuencia de entrada, con `resample_poly(M, 1)`. Una banda Chebyshev II
+   la frecuencia de entrada, con `resample_poly(M, 1)`. Las dos direcciones
+   pasan por el mismo filtro de fase lineal con ventana de Kaiser, dimensionado
+   para una banda atenuada de 120 dB, de modo que las imágenes que el diezmado
+   pliega sobre una banda quedan a más de 125 dB por debajo de ella. Una banda
+   Chebyshev II
    de orden bajo y banda atenuada profunda, cuyo borde de banda atenuada
    quedaría por encima de dieciséis veces su borde superior, reserva más margen
    para que ese borde quede por debajo del Nyquist diezmado.

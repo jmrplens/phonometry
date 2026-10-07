@@ -224,18 +224,34 @@ def test_1995_class0_is_strictest() -> None:
 
 
 def test_butter_meets_class0_1995() -> None:
-    """The default order-6 Butterworth bank clears the strict 1995 class 0."""
+    """The default order-6 Butterworth bank clears the strict 1995 class 0.
+
+    On Table 1, alias images included, on the filter integrated response of
+    4.5.3 and on the summation of 4.9, each band carrying its margins to the
+    three classes on all three.
+    """
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
     result = filters.verify_filter_class(bank, edition="1995")
     assert result.overall_class == 0, result
+    assert result.requirements == (
+        "relative_attenuation",
+        "effective_bandwidth",
+        "summation",
+    )
     band = result.bands[0]
+    margins = {
+        f"{kind}margin_class{c}_db"
+        for kind in ("", "bandwidth_", "summation_")
+        for c in (0, 1, 2)
+    }
     assert set(band) == {
         "freq",
         "class",
         "checked_to_omega",
-        "margin_class0_db",
-        "margin_class1_db",
-        "margin_class2_db",
+        "bandwidth_deviation_db",
+        "summation_min_db",
+        "summation_max_db",
+        *margins,
     }
     # A class-0 band must clear class 1 and class 2 by at least as much.
     for b in result.bands:
@@ -267,25 +283,36 @@ def test_2014_default_unaffected_by_edition_support() -> None:
 
 
 def test_range_limited_flag_reports_unverifiable_stopband() -> None:
-    """The verdict flags that the mask beyond the processing Nyquist is unchecked.
+    """The verdict flags a mask that runs on past half the input rate.
 
-    The octave-band stop-band mask runs to G^4 = 15.85 f_m. A decimated band
-    keeps its processing Nyquist frequency at least sixteen times its upper
-    edge, about 23 f_m, so its whole mask is demonstrated; the 2 kHz and
-    4 kHz bands run at the full 48 kHz, whose Nyquist frequency is 12 f_m and
-    6 f_m for them, so their G^2..G^4 rows cannot be, and the verdict must
-    say so instead of claiming full Table 1 conformance.
+    The octave-band stop-band mask runs to G^4 = 15.85 f_m. Every band, a
+    decimated one with its alias images included, is graded up to half the
+    48 kHz input rate: that is 190.6 f_m for the 125 Hz band but 12 f_m and
+    6 f_m for the 2 kHz and 4 kHz bands, so their G^2..G^4 rows cannot be
+    demonstrated, and the verdict must say so instead of claiming full
+    Table 1 conformance.
     """
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     result = filters.verify_filter_class(bank)
     assert result.range_limited is True
-    mask_end = 10 ** (0.3 * 4)
-    for band, factor in zip(result.bands, bank.factor, strict=True):
-        if factor > 1:
-            assert band["checked_to_omega"] > mask_end
+    assert max(bank.factor) > 1
+    for band in result.bands:
+        assert band["checked_to_omega"] * band["freq"] == pytest.approx(24000.0)
     top = result.bands[-1]["checked_to_omega"]
     # The checked range covers the band edge but not the G^4 mask end.
-    assert 10**0.15 < top < mask_end
+    assert 10**0.15 < top < 10 ** (0.3 * 4)
+
+
+def test_a_bank_whose_mask_ends_below_half_the_rate_is_not_range_limited() -> None:
+    """Every band's G^4 breakpoint below fs / 2: the whole mask is demonstrated.
+
+    The 1 kHz band of a 48 kHz bank is graded to 24 f_m, past the 15.85 f_m
+    where its octave mask ends, and the lower bands further still.
+    """
+    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 1000])
+    result = filters.verify_filter_class(bank)
+    assert result.range_limited is False
+    assert min(b["checked_to_omega"] for b in result.bands) > 10 ** (0.3 * 4)
 
 
 def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:

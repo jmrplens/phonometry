@@ -92,19 +92,21 @@ print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
 print(band["freq"], band["class"], band["checked_to_omega"])
-# 12.589254117941678 1 17.984790220172403
+# 12.589254117941678 1 1906.3877633382747
 print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
-# 0.39999999999978114 0.3512657809681092
+# 0.39999977486865645 0.35126579320766144
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Cadena de cálculo para calificar un filtro de banda frente a la Tabla 1 de IEC 61260-1. Arriba, cuatro cajas encadenadas: la banda diseñada, un tercio de octava a 1000 Hz de orden 6; su atenuación relativa, la atenuación en cada frecuencia normalizada menos la del centro de banda; la máscara de la Tabla 1, con sus puntos de quiebre de octava llevados a tercio de octava y los límites rectos en lg Ω entre ellos; y el margen y la clase. Debajo, dos paneles comparten un eje de frecuencia estirado punto de quiebre a punto de quiebre. El panel de la banda de paso va de Ω = 1 al borde de banda en 1,122 y contiene el corredor de clase 1, un suelo en −0,4 dB bajo un techo que sube de +0,4 dB a +5,3 dB, con el corredor más ancho de clase 2 en discontinua a su alrededor; la banda se queda plana en 0 dB y sube a 3 dB en el borde. El panel de la banda atenuada va del borde a 5,392, donde solo rige un mínimo, que sube de 1,2 dB pasando por 16,6, 40,5 y 60 dB hasta 70 dB para la clase 1, y la banda sube muy por encima. Bajo las columnas, cada punto de quiebre de octava, desde G elevado a un octavo hasta G elevado a la cuarta, va emparejado con su valor en tercio de octava, y una fila da el margen de clase 1 en cada uno: +0,40 dB en los tres primeros, recuadrados como margen de la banda, luego +0,49, +2,29 y +1,81 dB, y de 26 a 92 dB en la banda atenuada. Una nota añade la clase 0 de la edición de 1995, ±0,15 dB en el centro de banda y 75 dB desde G elevado a la cuarta. Una caja verde da el veredicto, clase 1 con márgenes de +0,40 dB y +0,60 dB, un banco que toma la clase de su peor banda, y range_limited avisando de una banda recorrida solo hasta su propio Nyquist. A la derecha, una caja continua que sale de la caja de atenuación relativa recoge lo que el verificador también calcula sobre el diseño, los ensayos de IEC 61260-2 que no necesitan espécimen: al menos 24 sinusoides por ancho de banda en Ω = G elevado a i entre bS (Fórmula 1), la desviación del ancho de banda efectivo del 5.12 por la Fórmula (2) dentro de ±0,4 dB o ±0,6 dB, la suma de salidas del 5.16 por la Fórmula (3) entre +0,8 dB y −1,8 dB en clase 1, y el barrido del 5.14 por el propio banco. Debajo, una columna discontinua, fuera de la comprobación, recoge lo que un laboratorio le hace a un instrumento: IEC 61260-2 sobre un espécimen, al menos tres presentados y al menos uno ensayado por completo, 1 dB bajo el techo del rango lineal, de 20 °C a 26 °C y humedad relativa del 35 % al 65 %; y los ensayos periódicos de IEC 61260-3, cada filtro en su centro de banda o un barrido, tres filtros, bajo, medio y alto, en hasta 15 frecuencias, cuyos resultados califica verify_filter_periodic, con la incertidumbre dentro del Anexo B, de 0,20 a 0,50 dB. Las Fórmulas 9 y 11 van recuadradas al pie" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Cadena de cálculo para calificar un filtro de banda frente a la Tabla 1 de IEC 61260-1. Arriba, cuatro cajas encadenadas: la banda diseñada, un tercio de octava a 1000 Hz de orden 6; su atenuación relativa, la atenuación en cada frecuencia normalizada menos la del centro de banda; la máscara de la Tabla 1, con sus puntos de quiebre de octava llevados a tercio de octava y los límites rectos en lg Ω entre ellos; y el margen y la clase. Debajo, dos paneles comparten un eje de frecuencia estirado punto de quiebre a punto de quiebre. El panel de la banda de paso va de Ω = 1 al borde de banda en 1,122 y contiene el corredor de clase 1, un suelo en −0,4 dB bajo un techo que sube de +0,4 dB a +5,3 dB, con el corredor más ancho de clase 2 en discontinua a su alrededor; la banda se queda plana en 0 dB y sube a 3 dB en el borde. El panel de la banda atenuada va del borde a 5,392, donde solo rige un mínimo, que sube de 1,2 dB pasando por 16,6, 40,5 y 60 dB hasta 70 dB para la clase 1, y la banda sube muy por encima. Bajo las columnas, cada punto de quiebre de octava, desde G elevado a un octavo hasta G elevado a la cuarta, va emparejado con su valor en tercio de octava, y una fila da el margen de clase 1 en cada uno: +0,40 dB en los tres primeros, recuadrados como margen de la banda, luego +0,49, +2,29 y +1,81 dB, y de 26 a 92 dB en la banda atenuada. Una nota añade la clase 0 de la edición de 1995, ±0,15 dB en el centro de banda y 75 dB desde G elevado a la cuarta. Una caja verde da el veredicto, clase 1 con márgenes de +0,40 dB y +0,60 dB, un banco que toma la clase de su peor banda, y range_limited avisando de una banda cuya máscara sigue más allá de la mitad de la frecuencia de muestreo de entrada. A la derecha, una caja continua que sale de la caja de atenuación relativa recoge lo que el verificador también calcula sobre el diseño, los ensayos de IEC 61260-2 que no necesitan espécimen: al menos 24 sinusoides por ancho de banda en Ω = G elevado a i entre bS (Fórmula 1), la desviación del ancho de banda efectivo del 5.12 por la Fórmula (2) dentro de ±0,4 dB o ±0,6 dB, la suma de salidas del 5.16 por la Fórmula (3) entre +0,8 dB y −1,8 dB en clase 1, y el barrido del 5.14 por el propio banco. Debajo, una columna discontinua, fuera de la comprobación, recoge lo que un laboratorio le hace a un instrumento: IEC 61260-2 sobre un espécimen, al menos tres presentados y al menos uno ensayado por completo, 1 dB bajo el techo del rango lineal, de 20 °C a 26 °C y humedad relativa del 35 % al 65 %; y los ensayos periódicos de IEC 61260-3, cada filtro en su centro de banda o un barrido, tres filtros, bajo, medio y alto, en hasta 15 frecuencias, cuyos resultados califica verify_filter_periodic, con la incertidumbre dentro del Anexo B, de 0,20 a 0,50 dB. Las Fórmulas 9 y 11 van recuadradas al pie" width="100%" />
 
 *La banda de 1 kHz de un banco como el de arriba, a lo largo de la comprobación:
 su atenuación relativa en cada punto de quiebre de la Tabla 1, llevado a tercio
 de octava, frente a los límites de clase 1 y clase 2, y el menor margen decide
-la clase. El banco por defecto la recorre hasta el final de la máscara: a
-48 kHz su frecuencia de Nyquist es 24 veces su frecuencia central, y una banda
-diezmada conserva la suya en al menos dieciséis veces su borde superior. La caja de la derecha es lo que el apartado 1b calcula además
+la clase. La comprobación recorre cada banda hasta la mitad de la frecuencia de
+muestreo de entrada, 24 veces la frecuencia central de esta banda a 48 kHz,
+sobre la respuesta que la banda tiene a esa frecuencia, así que una banda
+diezmada se califica también sobre las imágenes que su diezmado pliega sobre
+ella. La caja de la derecha es lo que el apartado 1b calcula además
 sobre el diseño, los ensayos de IEC 61260-2 que no necesitan espécimen; la
 columna discontinua de debajo es lo que un laboratorio le hace a un
 instrumento, y el apartado 3b califica los resultados de ensayo periódico que
@@ -112,36 +114,77 @@ devuelve.*
 
 **Hasta dónde de la máscara llega realmente el veredicto.**
 `checked_to_omega` es la frecuencia normalizada $\Omega = f/f_\mathrm{m}$ más alta a la
-que se evaluó esa banda: la frecuencia de Nyquist de procesado de la propia
-banda, que en un banco multitasa es la de Nyquist de su frecuencia diezmada.
-El banco diezma una banda solo hasta donde esa frecuencia de Nyquist sigue
-siendo al menos dieciséis veces su borde superior de banda (el apartado 1b
-explica por qué), así que cada banda diezmada del banco de arriba se evalúa
-hasta $\Omega \approx 18$ o más, por encima del final de la máscara de la
-Tabla 1 (al menos 70 dB para la clase 1 desde $\Omega \approx 5{,}39$, la fila
-de octava $G^4$ llevada a tercio de octava). Las bandas que se quedan cortas
-son las que se filtran a la frecuencia completa en lo alto del banco: desde
-5 kHz, la frecuencia de Nyquist de 24 kHz queda por debajo de
-$5{,}39\,f_\mathrm{m}$, y la banda de 20 kHz solo se evalúa hasta
-$\Omega = 1{,}20$. Ahí el requisito de
-banda atenuada lejana no queda demostrado *sobre el filtro de banda* en
-absoluto. Se da por satisfecho porque una señal muestreada no lleva energía por
-encima de su frecuencia de Nyquist: el filtro antialiasing de la cadena de
-captura la eliminó antes de que la banda llegara a verla. `range_limited` es el
-indicador de que se ha usado ese argumento, y aquí vale `True`.
+que se evaluó esa banda: la mitad de la frecuencia de muestreo de entrada, la
+frecuencia más alta que contiene una entrada muestreada, dividida por la
+frecuencia central de la banda. Una banda que el banco diezma también se evalúa
+hasta ahí, no solo hasta la frecuencia de Nyquist de su frecuencia diezmada
+(véase más abajo). Todas las bandas del banco de arriba se evalúan por encima
+del final de la máscara de la Tabla 1 (al menos 70 dB para la clase 1 desde
+$\Omega \approx 5{,}39$, la fila de octava $G^4$ llevada a tercio de octava)
+salvo las de lo alto: desde 5 kHz, la frecuencia de Nyquist de 24 kHz queda
+por debajo de $5{,}39\,f_\mathrm{m}$, y la banda de 20 kHz solo se evalúa
+hasta $\Omega = 1{,}20$. Ahí el requisito de banda atenuada lejana no queda
+demostrado *sobre el filtro de banda* en absoluto. Se da por satisfecho porque
+una señal muestreada no lleva energía por encima de su frecuencia de Nyquist:
+el filtro antialiasing de la cadena de captura la eliminó antes de que la banda
+llegara a verla. `range_limited` es el indicador de que se ha usado ese
+argumento, y aquí vale `True`.
 
 Conviene decirlo tal cual en un informe: el veredicto acredita la máscara hasta
 `checked_to_omega`, y el resto es un argumento sobre la cadena de captura. El
-indicador solo se desactiva cuando la frecuencia de Nyquist de cada banda queda
-más allá del final de la máscara. El banco de tercios de octava del
-apartado 1b, de 125 Hz a 4 kHz a 48 kHz, no está limitado en rango; el banco de
-octavas del mismo rango sí, porque sus bandas de 2 kHz y 4 kHz, filtradas a la
-frecuencia completa, solo se evalúan hasta $\Omega \approx 12$ y 6, por debajo
-del $G^4 = 15{,}85$ donde termina la máscara de octava. Cuando un documento
-exija la máscara completa sobre cada filtro de banda, baja el techo del banco o
-sube `fs`: diseñar el banco con `design=filters.FilterDesign(resample=False)`
-no cambia nada aquí, porque las bandas que se quedan cortas ya corren a la
-frecuencia completa.
+indicador solo se desactiva cuando la mitad de la frecuencia de muestreo de
+entrada queda más allá del final de la máscara para cada banda. El banco de
+tercios de octava del apartado 1b, de 125 Hz a 4 kHz a 48 kHz, no está
+limitado en rango; el banco de octavas del mismo rango sí, porque sus bandas de
+2 kHz y 4 kHz, filtradas a la frecuencia completa, solo se evalúan hasta
+$\Omega \approx 12$ y 6, por debajo del $G^4 = 15{,}85$ donde termina la
+máscara de octava. Cuando un documento exija la máscara completa sobre cada
+filtro de banda, baja el techo del banco o sube `fs`: diseñar el banco con
+`design=filters.FilterDesign(resample=False)` no cambia nada aquí, porque las
+bandas que se quedan cortas ya corren a la frecuencia completa.
+
+**Una banda diezmada se califica sobre sus imágenes.** Una banda que el banco
+diezma por $M$ pasa su entrada por un paso bajo antialiasing, se queda con una
+muestra de cada $M$ y filtra a $f_\mathrm{s}/M$, de modo que un tono en
+$k\,f_\mathrm{s}/M \pm f$ sale de la banda en $f$: la banda lee imágenes de sí
+misma a lo largo de toda la banda de entrada. La IEC 61260-1:2014 5.15 pide a
+los filtros antialiasing que esas imágenes queden dentro de los límites de la
+Tabla 1, y la Tabla 1 cubre todas las frecuencias. La IEC 61260:1995 4.8 les
+pide que la atenuación relativa no supere el mayor de los límites mínimos de la
+Tabla 1, y el 5.7 lo ensaya con un tono en la frecuencia de muestreo diezmada
+menos la frecuencia central; toda imagen de una banda diezmada cae más allá del
+último punto de quiebre de la máscara, donde su mínimo es ese mayor. Así que la
+comprobación lee cada banda a la frecuencia de entrada en las dos ediciones: el
+filtro antialiasing en la frecuencia de entrada por las secciones de la banda
+en la frecuencia sobre la que se pliega. Calificado así, el diezmador que
+`scipy.signal.resample_poly` diseña por defecto, una ventana de Kaiser con
+$\beta = 5$, dejaba la primera imagen del banco de octavas por defecto 68,9 dB
+por debajo a 8, 16 y 32 kHz, sin llegar a los 70 dB de la clase 1, y las
+imágenes de todos los demás bancos por defecto entre 70,9 dB y 73,1 dB por
+debajo, sin llegar a los 75 dB de la clase 0 de la edición de 1995. Esas
+imágenes de 68,9 dB quedan por encima de 1,5 veces la frecuencia central más
+alta del banco, fuera del intervalo en el que la IEC 61260-2:2016 7.2.2.2 mide
+la atenuación relativa, así que ese veredicto de clase 1 descansa en el 5.15 y
+la Tabla 1 de la IEC 61260-1:2014 por sí mismos. Una comprobación que se
+detenía en la frecuencia de Nyquist diezmada no veía nada de eso. El banco
+diezma e interpola ahora con un filtro de la misma longitud cuya ventana de
+Kaiser está dimensionada para una banda atenuada de 120 dB: sus imágenes quedan
+al menos 125,4 dB por debajo de 8 kHz a 192 kHz, y su rizado dentro de
+cualquier banda baja de $8{,}4\times10^{-3}$ dB a menos de $10^{-5}$ dB. Los
+tonos que pasan por el banco leen las imágenes calificadas con una diferencia
+de 0,01 dB, a más de 120 dB por debajo.
+
+```python
+from phonometry import filters
+
+bank = filters.OctaveFilterBank(fs=16000, fraction=1, limits=[12, 5000])
+print([int(m) for m in bank.factor[:4]])   # [22, 11, 5, 2]: bandas diezmadas
+result = filters.verify_filter_class(bank)
+print(result.requirement_class("relative_attenuation"))   # 1
+band = result.bands[0]
+print(band["checked_to_omega"] * band["freq"])
+# 8000.0: la mitad de la frecuencia de entrada, no los 364 Hz de la diezmada
+```
 
 **Qué mide el margen.** Es el mínimo, sobre todas las frecuencias normalizadas
 en las que se evaluó la banda, de la distancia al límite más próximo de esa
@@ -434,6 +477,42 @@ result = filters.verify_filter_class(bank, edition="1995")   # clases 0, 1, 2
 print(result.overall_class)          # 0  (el Butterworth por defecto la supera)
 print(result.bands[0]["margin_class0_db"])
 ```
+
+La edición de 1995 se califica en todos sus apartados sobre la función de
+transferencia, no solo en la Tabla 1. Su **respuesta integrada del filtro**
+(4.5) es el cociente que la edición de 2014 llama desviación del ancho de banda
+efectivo, $\Delta B = 10\lg(B_\mathrm{e}/B_\mathrm{r})$, construido a su
+manera: la ecuación (14) integra $10^{-0{,}1\,\Delta A}$ sobre $f/f_\mathrm{m}$
+sin el peso $1/\Omega$, por la regla del trapecio de la ecuación (16) sobre al
+menos $5S$ frecuencias de ensayo a cada lado (5.4.2), con $S$ subida desde los
+24 pedidos en pasos de 12 hasta que la respuesta de todas las bandas se lee
+igual a la décima de decibelio más cercana con $S$ y con $S + 12$ (5.3.3; el
+`points_per_bandwidth` del resultado dice dónde se detuvo, y la suma se recorre
+también con ella), frente a la referencia
+$B_\mathrm{r} = G^{1/(2b)} - G^{-1/(2b)}$ de la ecuación (9), y el 4.5.3 la
+limita a ±0,15 dB, ±0,3 dB y ±0,5 dB para las clases 0, 1 y 2. Su **suma de las
+señales de salida** (4.9) es la ecuación (19), una banda y sus dos vecinas
+sumadas en energía, limitada a ±1,0 dB para la clase 0, +1,0 dB y −2,0 dB para
+la clase 1 y +2,0 dB y −4,0 dB para la clase 2, y recorrida, como pide el
+5.8.4, desde la frecuencia central más baja hasta la más alta: las bandas de
+los extremos se leen en la mitad que mira al juego, donde la vecina que le
+falta al juego no aporta nada. El banco Butterworth por defecto cumple la
+clase 0 en los tres:
+
+```python
+bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[125, 4000])
+result = filters.verify_filter_class(bank, edition="1995")
+print({r: result.requirement_class(r) for r in result.requirements})
+# {'relative_attenuation': 0, 'effective_bandwidth': 0, 'summation': 0}
+print(max(b["bandwidth_deviation_db"] for b in result.bands))   # unos +0,05 dB
+print(result.points_per_bandwidth)   # 36: el 5.3.3 subió S desde 24
+```
+
+Dos defectos de la edición impresa están en el
+[registro de erratas](/phonometry/es/reference/errata/): la constante de
+normalización del 3.15 lleva un factor diez de más, y el texto del 4.9 y del
+5.8.3 toma la diferencia de la suma en el sentido contrario a la ecuación (19),
+que la biblioteca sigue como indica el 5.8.5.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask.svg" alt="Corredores de aceptación anidados en la banda de paso para las clases 0, 1 y 2 de IEC 61260:1995 con la respuesta Butterworth de orden 6 dentro del corredor de clase 0 más estrecho" width="80%" />
 
@@ -771,7 +850,9 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 
 Pasar `edition="1995"` verifica contra la máscara más antigua de IEC 61260:1995 /
 ANSI S1.11-2004, que conserva la **clase 0** más estricta que la edición de 2014
-eliminó, de modo que un banco de orden 6 puede certificarse a clase 0:
+eliminó, junto con la respuesta integrada del filtro del 4.5.3 y la suma del
+4.9, de modo que un banco de orden 6 puede certificarse a clase 0 en los tres,
+y la ficha recoge cada uno bajo su apartado de 1995:
 
 ```python
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
@@ -785,7 +866,7 @@ result.report("iec61260_1995.pdf",
 <ReportPreview
 	name="iec61260_filter_1995_example"
 	title="Informe de ejemplo de conformidad de clase 0 IEC 61260:1995 (PDF)"
-	description="Ficha de conformidad de clase de filtro de una página bajo la edición de 1995: una tabla de clasificación por bandas con cada banda de octava alcanzando la clase 0, la atenuación relativa medida superpuesta sobre el corredor de aceptación verde de clase 0, el resultado encuadrado Class 0 - COMPLIES (margin +0.15 dB) y un veredicto CUMPLE frente a la clase 0 exigida."
+	description="Ficha de conformidad de clase de filtro de una página bajo la edición de 1995: una tabla de clasificación por bandas con cada banda de octava alcanzando la clase 0, la atenuación relativa medida superpuesta sobre el corredor de aceptación verde de clase 0 con los tres requisitos de la edición de 1995 calificados debajo, el resultado encuadrado Class 0 - COMPLIES (margin +0.10 dB) y un veredicto CUMPLE frente a la clase 0 exigida."
 	caption="La clase 0 la conserva la edición IEC 61260:1995 / ANSI S1.11-2004 (edition='1995'); la edición de 2014 solo mantiene las clases 1 y 2."
 />
 
@@ -803,7 +884,10 @@ IEC 61260-2:2016 (Fórmulas (1) a (3)); el ensayo de barrido del funcionamiento
 invariante en el tiempo (5.14, 7.4 de IEC 61260-2) ejecutado sobre el banco por
 `verify_time_invariance`, con la Fórmula (17) y su incertidumbre del Anexo A; la
 máscara de clase 0 de la edición retirada IEC 61260:1995 / ANSI S1.11-2004,
-accesible con `edition="1995"`; la calificación apartado por apartado de los
+accesible con `edition="1995"`, con la respuesta integrada del filtro (4.5.3) y
+la suma de las señales de salida (4.9) de esa edición; cada banda calificada a
+la frecuencia de entrada del banco hasta su mitad, con las imágenes que lee
+una banda diezmada (IEC 61260-1:2014 5.15, IEC 61260:1995 4.8); la calificación apartado por apartado de los
 resultados de ensayo periódico IEC 61260-3:2016 de un laboratorio con
 `verify_filter_periodic`, con sus frecuencias de ensayo, su Tabla 1 y la
 declaración del Capítulo 14; y la ficha acreditada de una página de
@@ -817,13 +901,14 @@ clima, inmunidad, sobrecarga y linealidad de IEC 61260-2 y las mediciones de
 IEC 61260-3 los hace un laboratorio, y `verify_filter_periodic` califica los
 números que devuelve sin producirlos. De ellos, el ruido propio del
 Capítulo 12 de IEC 61260-3 y las indicaciones de sobrecarga de 11.5 y 11.8 no se
-califican. Un veredicto con `edition="1995"` es solo su máscara de la Tabla 1:
-el ancho de banda efectivo y los demás requisitos de esa edición no se
-califican. Cerca de Nyquist la transformada
-bilineal deforma el eje de frecuencia y el banco no lo corrige, así que la
-máscara de banda atenuada más allá del Nyquist de procesado se informa como
-`range_limited` en lugar de verificarse: mantén el borde de banda superior
-holgadamente por debajo de Nyquist o sube `fs`.
+califican, ni, en la edición de 1995, los requisitos que responde un
+instrumento físico (linealidad, funcionamiento en tiempo real, entorno). Cerca
+de Nyquist la transformada bilineal deforma el eje de frecuencia y el banco no
+lo corrige, y por encima de la mitad de la frecuencia de entrada un banco
+digital no tiene frecuencia a la que responder, así que la máscara de banda
+atenuada más allá se informa como `range_limited` en lugar de verificarse:
+mantén el borde de banda superior holgadamente por debajo de Nyquist o sube
+`fs`.
 </ScopeClaim>
 </Scope>
 
@@ -883,8 +968,10 @@ La clase 0 es la clase de prestaciones más estricta, definida por IEC
 61260-1:2014. Su corredor de banda de paso admite solo ±0,15 dB en el
 centro de banda, frente a ±0,3 dB para la clase 1 en las máscaras de 1995.
 Sigue accesible con `edition="1995"`, y el banco Butterworth de orden 6 por
-defecto cumple la clase 0 en la configuración que verifica el informe de
-conformidad, el banco de bandas de octava a 48 kHz. Bajo IEC 61260-1:2014 ese
+defecto cumple la clase 0 en las configuraciones que verifica el informe de
+conformidad, los bancos de octava y de tercio de octava a 48 kHz, en la
+Tabla 1, en la respuesta integrada del filtro del 4.5.3 y en la suma del 4.9,
+con sus imágenes calificadas también. Bajo IEC 61260-1:2014 ese
 mismo banco es clase 1, en la máscara de la Tabla 1 y en el ancho de banda
 efectivo y la suma del 5.12 y el 5.16: la edición de 2014 no define ninguna
 clase 0, así que una afirmación de clase 0 tiene que citar la máscara de

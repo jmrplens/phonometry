@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 import numpy as np
 from scipy import signal
 
+from .._internal.frozen import read_only
 from .._internal.utils import (
     _ZI_NDIM_MULTICHANNEL,
     _downsamplingfactor,
@@ -53,6 +54,50 @@ _VALID_FILTERS = ["butter", "cheby1", "cheby2", "ellip", "bessel"]
 #: ratio: at 16 it moves the summation of an octave band by at most 0.005 dB
 #: and of a one-third-octave band by 0.002 dB, under a hundredth of a decibel.
 _DECIMATION_HEADROOM = 16.0
+
+#: The stopband attenuation, in decibels, that the Kaiser window of the
+#: multirate anti-aliasing filter is sized for (``scipy.signal.kaiser_beta``).
+#: A decimated band reads, besides the band it is designed for, every image
+#: the decimation folds onto it: an input at ``k fs/M +/- f`` lands on ``f``.
+#: The images of a band's pass band sit about twice the decimated Nyquist
+#: frequency above it and more, deep in this filter's stopband, so this filter
+#: alone attenuates them. The Kaiser window ``scipy.signal.resample_poly``
+#: uses by default (beta 5) left them 68.9 dB down in the default octave bank
+#: at 8, 16 and 32 kHz and 70.9 dB to 73.1 dB down at the other common rates:
+#: under the 70 dB that Table 1 of IEC 61260-1:2014 asks of class 1 at and
+#: beyond :math:`G^{\pm 4}` in the first case and under the 75 dB that
+#: IEC 61260:1995 asks of class 0 in all of them. Sized for 120 dB, with the
+#: same length, the images of the default octave and one-third-octave banks
+#: fall at least 125.4 dB down from 8 kHz to 192 kHz, and the filter's
+#: pass-band ripple inside any band drops from 8.4e-3 dB to under 1e-5 dB.
+_MULTIRATE_STOPBAND_DB = 120.0
+
+#: The half-length of the anti-aliasing filter in input samples per unit of
+#: decimation factor, the length ``scipy.signal.resample_poly`` uses.
+_MULTIRATE_HALF_LENGTH = 10
+
+
+@lru_cache(maxsize=64)
+def _multirate_lowpass(factor: int) -> np.ndarray:
+    """The anti-aliasing (and anti-imaging) filter of a band decimated by *factor*.
+
+    A linear-phase Kaiser-windowed sinc of ``2 * 10 * factor + 1`` taps with
+    its cutoff at the decimated Nyquist frequency, ``fs / (2 * factor)``, the
+    filter :func:`scipy.signal.resample_poly` designs for a down-sampling by
+    *factor*, with the window sized for :data:`_MULTIRATE_STOPBAND_DB`. The
+    bank decimates through it and interpolates its band signals back through
+    it, and :func:`~phonometry.filters.verify_filter_class` grades the
+    response a band has with it, so the three read the same filter.
+
+    :param factor: The band's decimation factor, at least 2.
+    :return: The filter taps, unit gain at DC, read-only.
+    """
+    taps = signal.firwin(
+        2 * _MULTIRATE_HALF_LENGTH * factor + 1,
+        1.0 / factor,
+        window=("kaiser", signal.kaiser_beta(_MULTIRATE_STOPBAND_DB)),
+    )
+    return read_only(np.asarray(taps, dtype=np.float64))
 
 
 @dataclass(frozen=True)
@@ -170,7 +215,11 @@ class FilterDesign:
         times its upper band edge (default True). The order 6 ``butter``
         octave and one-third-octave banks are class 1 on every requirement
         either way, decimated or at the full rate (``False``); the decimation
-        moves the summation of adjacent outputs by at most 0.005 dB.
+        moves the summation of adjacent outputs by at most 0.005 dB. A
+        decimated band runs its input through a linear-phase anti-aliasing
+        filter sized for a 120 dB stopband, which keeps every alias image
+        the decimation folds onto the band more than 125 dB below it, and
+        :func:`~phonometry.filters.verify_filter_class` grades those images.
     """
 
     filter_type: str = "butter"
@@ -709,8 +758,12 @@ class OctaveFilterBank:
             if sigbands and xb is not None:
                 # Restore original length
                 # filtered_signal is [channels, downsampled_samples]
+                factor = int(self.factor[idx])
                 y_resampled = _resample_to_length(
-                    filtered_signal, int(self.factor[idx]), x_proc.shape[1]
+                    filtered_signal,
+                    factor,
+                    x_proc.shape[1],
+                    taps=_multirate_lowpass(factor) if factor > 1 else None,
                 )
                 xb[idx] = y_resampled
 
@@ -722,11 +775,7 @@ class OctaveFilterBank:
         """Resample and filter for a specific band (vectorized)."""
         if not zero_phase and not self.stateful:
             return _decimate_and_filter(x, self.sos[idx], int(self.factor[idx]))
-        if self.factor[idx] > 1:
-            # axis=-1 is default for resample_poly, but being explicit is good
-            sd = signal.resample_poly(x, 1, self.factor[idx], axis=-1)
-        else:
-            sd = x
+        sd = _decimate(x, int(self.factor[idx]))
 
         if zero_phase:
             # sosfiltfilt requires padlen < n - 1; heavily decimated bands can
@@ -790,8 +839,8 @@ def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndar
     The forward, stateless path of :meth:`OctaveFilterBank.filter`, kept at
     module level so that the time-invariance test of
     :func:`phonometry.filters.verify_time_invariance` runs its sweep through
-    the very same two calls the bank makes, the polyphase anti-aliasing of
-    :func:`scipy.signal.resample_poly` included, without touching the
+    the very same two calls the bank makes, the polyphase anti-aliasing
+    filter of :func:`_multirate_lowpass` included, without touching the
     carried state of a stateful bank.
 
     :param x: The input, samples on the last axis.
@@ -799,8 +848,22 @@ def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndar
     :param factor: The band's decimation factor (1 filters at full rate).
     :return: The band output at the decimated rate.
     """
-    sd = signal.resample_poly(x, 1, factor, axis=-1) if factor > 1 else x
-    return cast(np.ndarray, signal.sosfilt(sos, sd, axis=-1))
+    return cast(np.ndarray, signal.sosfilt(sos, _decimate(x, factor), axis=-1))
+
+
+def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
+    """Decimate *x* by *factor* through :func:`_multirate_lowpass`.
+
+    :param x: The input, samples on the last axis.
+    :param factor: The decimation factor; 1 returns *x* untouched.
+    :return: The decimated signal.
+    """
+    if factor == 1:
+        return x
+    return cast(
+        np.ndarray,
+        signal.resample_poly(x, 1, factor, axis=-1, window=_multirate_lowpass(factor)),
+    )
 
 
 @lru_cache(maxsize=32)

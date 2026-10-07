@@ -26,10 +26,36 @@ ANSI-2004 octave-band table was transcribed digit-for-digit and cross-checked
 between the two standards (they agree exactly).
 
 One subject: the class of a band-filter design, graded against what IEC
-61260-1:2014 requires of the transfer function of a set of filters and run the
-way IEC 61260-2:2016 (pattern evaluation) says the requirement is tested.
+61260-1:2014 requires of the transfer function of a set of filters, with the
+effective bandwidth and the summation run the way IEC 61260-2:2016 (pattern
+evaluation) tests them, or against what IEC 61260:1995 requires and run the
+way its clause 5 tests it. The relative attenuation is graded further than
+IEC 61260-2:2016 7.2.2.2 measures it, which is from 0.5 times the lowest to
+1.5 times the highest mid-band frequency of the set: every band is read up to
+:math:`f_\mathrm{s}/2`, on the requirement of IEC 61260-1:2014 5.15 and
+Table 1 themselves.
+
+The transfer function graded is the one the bank has at its input rate. A
+band the bank decimates by :math:`M` runs its input through a linear-phase
+anti-aliasing filter, keeps one sample in :math:`M` and filters at
+:math:`f_\mathrm{s}/M`; a tone of frequency :math:`f` therefore comes out at
+:math:`f` folded about the multiples of :math:`f_\mathrm{s}/M`, scaled by the
+anti-aliasing filter at :math:`f` and the band's sections at the folded
+frequency. Every frequency below :math:`f_\mathrm{s}/2` is graded that way,
+the images the decimation folds onto the band included. IEC 61260-1:2014
+5.15 asks the anti-aliasing filters to keep the aliased components inside the
+Table 1 limits, and Table 1 covers every frequency. IEC 61260:1995 4.8 asks
+them to keep the relative attenuation from exceeding the greatest of the
+applicable minimum limits of Table 1, and 5.7 tests it with a tone at the
+decimated sampling frequency minus the mid-band frequency. The images are
+graded against the Table 1 corridor at their input frequency in both
+editions, which for the 1995 edition is the same floor: a decimated band
+keeps :math:`f_\mathrm{s}/(2M)` at least sixteen times its upper band-edge
+frequency, so every image lies past the last breakpoint of the mask, where
+the minimum limit is the greatest one.
+
 Besides the Table 1 mask there are two more requirements, both computed from
-the same designed sections:
+the same response:
 
 * **Effective bandwidth deviation** (61260-1 5.11 and 5.12). The normalized
   effective bandwidth :math:`B_\mathrm{e}` is the integral of Formula (13),
@@ -41,6 +67,16 @@ the same designed sections:
   :math:`B_\mathrm{r} = (1/b)\ln G` (Formula (15)) is
   :math:`\Delta B = 10\lg(B_\mathrm{e}/B_\mathrm{r})` (Formula (16)), within
   :math:`\pm 0.4` dB for class 1 and :math:`\pm 0.6` dB for class 2 (5.12.2).
+  The 1995 edition calls the same quotient the **filter integrated
+  response** (4.5) and builds it differently: its equation (14) integrates
+  :math:`10^{-0.1\,\Delta A}` over :math:`f/f_\mathrm{m}` with no
+  :math:`1/\Omega` weight, by the trapezoidal rule of equation (16) with
+  :math:`N \ge 5S` (5.4.2), against
+  :math:`B_\mathrm{r} = G^{1/(2b)} - G^{-1/(2b)}` (equation (9)), within
+  :math:`\pm 0.15`, :math:`\pm 0.3` and :math:`\pm 0.5` dB for classes 0, 1
+  and 2 (4.5.3). Its :math:`S` is raised in steps of 12 until the integrated
+  response of every band is independent of it to the nearest tenth of a
+  decibel (5.3.3), and the summation runs at the same :math:`S`.
 * **Summation of output signals** (61260-1 5.16). At the test frequencies
   :math:`\Omega_i`, :math:`|i| \le \lfloor S/2 \rfloor`, inside a band, the
   outputs of that band and of its two neighbours are summed on an energy
@@ -53,10 +89,13 @@ the same designed sections:
   as 7.2.4.5 instructs; the words of 7.2.4.3 and of 5.16 name the difference
   the other way round, "input minus reference attenuation, and the summed
   output", which with limits this asymmetric is not the same test (see the
-  errata registry).
-
-Both are graded for ``edition="2014"`` only, whose Part 2 prescribes them; a
-1995-edition verdict remains the Table 1 mask.
+  errata registry). The 1995 edition prints the same sum as equation (19)
+  (5.8.3), with the same conflict between its words and the formula, and
+  runs it "from the lowest midband frequency to the highest midband
+  frequency of the filter set" (5.8.4): its end bands are read on the half
+  facing the set, where the neighbour the set lacks adds nothing. Its limits
+  are :math:`\pm 1.0` dB for class 0, :math:`+1.0` dB and :math:`-2.0` dB for
+  class 1 and :math:`+2.0` dB and :math:`-4.0` dB for class 2 (4.9).
 
 The time-invariant operation of 5.14, tested with an exponential sweep
 (IEC 61260-2 7.4), is :func:`phonometry.filters.verify_time_invariance`: it
@@ -72,11 +111,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
+from functools import cached_property
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from scipy import signal
 
+from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
     is_class_designation,
@@ -86,8 +128,11 @@ from .._internal.validation import (
     require_same_length,
     require_summary_class,
 )
+from .core import _multirate_lowpass
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
+
     from matplotlib.axes import Axes
 
     from .._report.metadata import ReportMetadata
@@ -108,22 +153,56 @@ _MIN_GRID_POINTS = 16
 #: bandwidth "shall be not less than 24".
 _MIN_POINTS_PER_BANDWIDTH = 24
 
-#: IEC 61260-1:2014 5.12.2: acceptance limits on the effective bandwidth
-#: deviation, +/- dB, per class.
-_BANDWIDTH_LIMITS_DB: dict[int, float] = {1: 0.4, 2: 0.6}
+#: IEC 61260:1995 5.3.3: S is raised "in steps of 12 until the calculated
+#: filter integrated response is independent of S to the nearest tenth of a
+#: decibel".
+_POINTS_PER_BANDWIDTH_STEP_1995 = 12
 
-#: IEC 61260-1:2014 5.16: acceptance limits (lower, upper) on the summation of
-#: output signals, dB, per class.
-_SUMMATION_LIMITS_DB: dict[int, tuple[float, float]] = {1: (-1.8, 0.8), 2: (-3.8, 1.8)}
+#: The largest S the raise of IEC 61260:1995 5.3.3 is carried to. A response
+#: whose limit sits on a rounding boundary of a tenth of a decibel need never
+#: read the same tenth twice running; it is taken at this S, sixteen times
+#: the least, where the trapezoidal sum of equation (16) of an octave,
+#: one-third-octave or one-twenty-fourth-octave band of any of the library's
+#: designs, of order 2 to 12, is within 0.0001 dB of its value at four times
+#: that S.
+_MAX_POINTS_PER_BANDWIDTH_1995 = 16 * _MIN_POINTS_PER_BANDWIDTH
+
+#: The acceptance limits, +/- dB per class, on the deviation of a band's
+#: effective bandwidth from its reference bandwidth: IEC 61260-1:2014 5.12.2
+#: (the effective bandwidth deviation) and IEC 61260:1995 4.5.3 (the filter
+#: integrated response), by edition.
+_BANDWIDTH_LIMITS_DB: Mapping[str, Mapping[int, float]] = MappingProxyType(
+    {
+        "2014": MappingProxyType({1: 0.4, 2: 0.6}),
+        "1995": MappingProxyType({0: 0.15, 1: 0.3, 2: 0.5}),
+    }
+)
+
+#: The acceptance limits (lower, upper), dB per class, on the summation of the
+#: output signals: IEC 61260-1:2014 5.16 and IEC 61260:1995 4.9, by edition.
+_SUMMATION_LIMITS_DB: Mapping[str, Mapping[int, tuple[float, float]]] = (
+    MappingProxyType(
+        {
+            "2014": MappingProxyType({1: (-1.8, 0.8), 2: (-3.8, 1.8)}),
+            "1995": MappingProxyType({0: (-1.0, 1.0), 1: (-2.0, 1.0), 2: (-4.0, 2.0)}),
+        }
+    )
+)
+
+#: The least half-width of the trapezoidal integration of the effective
+#: bandwidth, in filter bandwidths: :math:`N \ge 2S` test frequencies on each
+#: side in IEC 61260-2:2016 7.2.3.2, :math:`N \ge 5S` in IEC 61260:1995 5.4.2.
+_INTEGRATION_BANDWIDTHS: Mapping[str, int] = MappingProxyType({"2014": 2, "1995": 5})
 
 #: The names of the requirements a design verdict can carry, with the key
-#: template their per-band margins are stored under and the clause of IEC
-#: 61260-1:2014 that states them.
-_REQUIREMENTS: dict[str, tuple[str, str]] = {
-    "relative_attenuation": ("margin_class{c}_db", "5.10"),
-    "effective_bandwidth": ("bandwidth_margin_class{c}_db", "5.12"),
-    "summation": ("summation_margin_class{c}_db", "5.16"),
-}
+#: template their per-band margins are stored under.
+_REQUIREMENTS: Mapping[str, str] = MappingProxyType(
+    {
+        "relative_attenuation": "margin_class{c}_db",
+        "effective_bandwidth": "bandwidth_margin_class{c}_db",
+        "summation": "summation_margin_class{c}_db",
+    }
+)
 
 # BS EN 61260-1:2014 Table 1, high side (Omega >= 1), as exponents x of the
 # octave-band normalized frequency G**x with (min, max) limits per class.
@@ -300,33 +379,297 @@ def _test_frequencies(
     return np.asarray(_G ** (i / (fraction * points_per_bandwidth)))
 
 
+#: The machine epsilon, the spacing of doubles at 1: added to a gain, it keeps
+#: the logarithm of a zero gain finite.
+_EPS = float(np.finfo(float).eps)
+
+#: How many alias images of a decimated band are read in one batch: each is a
+#: zoom transform of the band's anti-aliasing filter, and a batch holds that
+#: many of them in memory at once.
+_IMAGE_BATCH = 16
+
+
+def _anti_alias_gain(
+    factor: int, fs_hz: float, frequencies_hz: np.ndarray
+) -> np.ndarray:
+    r"""The magnitude of a band's anti-aliasing filter at the bank's input rate.
+
+    :param factor: The band's decimation factor; 1 has no such filter.
+    :param fs_hz: The bank's input sampling rate.
+    :param frequencies_hz: Where to evaluate it.
+    :return: :math:`|H_\mathrm{aa}(f)|`, one per frequency.
+    """
+    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    if factor == 1:
+        return np.ones(freqs.shape)
+    _, h = signal.freqz(_multirate_lowpass(factor), worN=freqs, fs=fs_hz)
+    return np.asarray(np.abs(h))
+
+
+def _band_gain(
+    sos: np.ndarray, factor: int, fs_hz: float, frequencies_hz: np.ndarray
+) -> np.ndarray:
+    r"""The magnitude response of one band, decimation included, at the input rate.
+
+    A tone of frequency :math:`f` at the input of the bank goes through the
+    band's anti-aliasing filter at the input rate and is then sampled at
+    :math:`f_\mathrm{s}/M`, where the band's sections see it folded about
+    multiples of that rate. :func:`scipy.signal.sosfreqz` at that rate is
+    periodic in it, so the sections evaluated at :math:`f` itself read the
+    folded frequency, and the band's output is the product of the two.
+
+    :param sos: The band's second-order sections, designed at ``fs / factor``.
+    :param factor: The band's decimation factor :math:`M`.
+    :param fs_hz: The bank's input sampling rate.
+    :param frequencies_hz: Input frequencies.
+    :return: :math:`|H_\mathrm{aa}(f)\,H_\mathrm{b}(f)|`.
+    """
+    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    _, h = signal.sosfreqz(sos, worN=freqs, fs=fs_hz / factor)
+    return np.asarray(_anti_alias_gain(factor, fs_hz, freqs) * np.abs(h))
+
+
+def _reference_attenuation_db(
+    sos: np.ndarray, factor: int, fs_hz: float, mid_hz: float
+) -> float:
+    """The attenuation of one band at its exact mid-band frequency, dB.
+
+    The reference attenuation of Formula (8) of IEC 61260-1:2014 and of
+    equation (8) of IEC 61260:1995, as :func:`verify_filter_class` takes it.
+    """
+    gain = float(_band_gain(sos, factor, fs_hz, np.array([mid_hz]))[0])
+    return -20.0 * math.log10(gain + _EPS)
+
+
 def _band_relative_attenuation(
-    sos: np.ndarray, mid_hz: float, rate_hz: float, frequencies_hz: np.ndarray
+    sos: np.ndarray,
+    factor: int,
+    fs_hz: float,
+    mid_hz: float,
+    frequencies_hz: np.ndarray,
 ) -> np.ndarray:
     """Relative attenuation of one designed band at arbitrary frequencies, dB.
 
-    Formula (8) of IEC 61260-1:2014 with the attenuation at the exact mid-band
-    frequency as reference, as :func:`verify_filter_class` reads the mask.
-    A frequency at or beyond the band's processing Nyquist frequency carries
-    no signal at the band's decimated rate (the multirate anti-aliasing
-    removes it), so it reads as infinite attenuation: its output is nothing.
+    Formula (8) of IEC 61260-1:2014 with the attenuation at the exact
+    mid-band frequency as reference, read off the response the band has at
+    the bank's input rate (:func:`_band_gain`), the alias images its
+    decimation folds onto it included. A frequency at or above half the
+    input rate is one no input of the bank can hold, and reads as infinite
+    attenuation.
 
     :param sos: The band's second-order sections.
+    :param factor: The band's decimation factor.
+    :param fs_hz: The bank's input sampling rate.
     :param mid_hz: Its exact mid-band frequency.
-    :param rate_hz: The rate its sections run at, ``fs / factor``.
     :param frequencies_hz: Where to evaluate it.
-    :return: The relative attenuation, ``+inf`` where no signal reaches.
+    :return: The relative attenuation, ``+inf`` where no input reaches.
     """
-    eps = np.finfo(float).eps
     freqs = np.asarray(frequencies_hz, dtype=np.float64)
     out = np.full(freqs.shape, np.inf)
-    reachable = (freqs > 0.0) & (freqs < rate_hz / 2.0)
-    _, h_ref = signal.sosfreqz(sos, worN=np.array([mid_hz]), fs=rate_hz)
-    a_ref = -20.0 * np.log10(np.abs(h_ref[0]) + eps)
+    reachable = (freqs > 0.0) & (freqs < fs_hz / 2.0)
     if np.any(reachable):
-        _, h = signal.sosfreqz(sos, worN=freqs[reachable], fs=rate_hz)
-        out[reachable] = -20.0 * np.log10(np.abs(h) + eps) - a_ref
+        # The mid-band frequency rides along, so the reference costs no
+        # second pass over the taps of the anti-aliasing filter.
+        gain = _band_gain(sos, factor, fs_hz, np.append(freqs[reachable], mid_hz))
+        a_ref = -20.0 * np.log10(gain[-1] + _EPS)
+        out[reachable] = -20.0 * np.log10(gain[:-1] + _EPS) - a_ref
     return out
+
+
+@dataclass(frozen=True)
+class _BandGrid:
+    r"""One band read on the frequency grid of :func:`verify_filter_class`.
+
+    ``num_points`` frequencies cover the band's decimated half-band,
+    :math:`[0, f_\mathrm{s}/(2M))`, at the spacing
+    :math:`f_\mathrm{s}/(2M\,\mathrm{num\_points})`; the alias images
+    above it are read at the same spacing, on the frequencies that fold onto
+    the same points.
+
+    :ivar sos: The band's second-order sections.
+    :ivar factor: Its decimation factor :math:`M`.
+    :ivar fs_hz: The bank's input sampling rate.
+    :ivar mid_hz: Its exact mid-band frequency.
+    :ivar num_points: Points per decimated half-band.
+    """
+
+    sos: np.ndarray
+    factor: int
+    fs_hz: float
+    mid_hz: float
+    num_points: int
+
+    @property
+    def rate_hz(self) -> float:
+        """The band's decimated sampling rate."""
+        return self.fs_hz / self.factor
+
+    @property
+    def spacing_hz(self) -> float:
+        """The grid spacing, the same in the half-band and in every image."""
+        return self.rate_hz / (2.0 * self.num_points)
+
+    @cached_property
+    def reference_db(self) -> float:
+        """The attenuation at the exact mid-band frequency."""
+        return _reference_attenuation_db(self.sos, self.factor, self.fs_hz, self.mid_hz)
+
+    @cached_property
+    def folded_gain(self) -> np.ndarray:
+        """The sections' magnitude at the folded points ``0 .. num_points``.
+
+        Point ``j`` is the frequency ``j * spacing`` of the decimated
+        half-band, its Nyquist frequency included; every image frequency
+        folds onto one of them. The anti-aliasing filter is not in it.
+        """
+        g = np.arange(self.num_points + 1) * self.spacing_hz
+        _, h = signal.sosfreqz(self.sos, worN=g, fs=self.rate_hz)
+        return read_only(np.abs(h))
+
+    def baseband(self) -> tuple[np.ndarray, np.ndarray]:
+        """The band below its decimated Nyquist frequency, anti-aliasing included.
+
+        :return: ``(frequencies_hz, relative_attenuation_db)`` on the grid
+            points of ``(0, fs / (2 M))``.
+        """
+        g = np.arange(1, self.num_points) * self.spacing_hz
+        gain = self.folded_gain[1 : self.num_points]
+        if self.factor > 1:
+            taps = _multirate_lowpass(self.factor)
+            zoom = signal.ZoomFFT(
+                taps.size,
+                [self.spacing_hz, self.num_points * self.spacing_hz],
+                m=self.num_points - 1,
+                fs=self.fs_hz,
+            )
+            gain = gain * np.abs(zoom(taps))
+        return g, -20.0 * np.log10(gain + _EPS) - self.reference_db
+
+    def images(self, first: int, last: int) -> Iterator[tuple[np.ndarray, np.ndarray]]:
+        r"""The alias images, on the frequencies that fold onto points ``first .. last``.
+
+        Image ``k`` is the input band around :math:`k f_\mathrm{s}/M`: an
+        input at :math:`k f_\mathrm{s}/M \pm g` is sampled onto :math:`g`.
+        Read are the frequencies on either side of every
+        :math:`k f_\mathrm{s}/M` below half the input rate whose :math:`g`
+        is ``first .. last`` grid steps. The anti-aliasing filter is read
+        there exactly, with one zoom transform of its taps shifted by
+        :math:`k f_\mathrm{s}/M` per image and side.
+
+        :param first: The first folded point (>= 0).
+        :param last: The last folded point (<= ``num_points``).
+        :return: One ``(frequencies_hz, relative_attenuation_db)`` per image
+            and side.
+        """
+        if self.factor == 1 or last < first:
+            return
+        taps = _multirate_lowpass(self.factor)
+        spacing = self.spacing_hz
+        steps = np.arange(first, last + 1, dtype=np.float64)
+        folded = self.folded_gain[first : last + 1]
+        a_ref = self.reference_db
+        size = steps.size
+        sides = (
+            (
+                signal.ZoomFFT(
+                    taps.size,
+                    [first * spacing, (last + 1) * spacing],
+                    m=size,
+                    fs=self.fs_hz,
+                ),
+                1.0,
+            ),
+            (
+                signal.ZoomFFT(
+                    taps.size,
+                    [-last * spacing, (1 - first) * spacing],
+                    m=size,
+                    fs=self.fs_hz,
+                ),
+                -1.0,
+            ),
+        )
+        t = np.arange(taps.size)
+        nyquist = self.fs_hz / 2.0
+        shifts = np.arange(1, self.factor // 2 + 1)
+        for start in range(0, shifts.size, _IMAGE_BATCH):
+            batch = shifts[start : start + _IMAGE_BATCH]
+            shifted = taps * np.exp(-2j * np.pi * np.outer(batch, t) / self.factor)
+            for zoom, sign in sides:
+                gain = np.abs(zoom(shifted, axis=-1))
+                if sign < 0:
+                    # The zoom runs from -last to -first steps: reverse it
+                    # to line it up with the folded points first .. last.
+                    gain = gain[:, ::-1]
+                for row, k in zip(gain, batch, strict=True):
+                    freqs = k * self.rate_hz + sign * steps * spacing
+                    keep = freqs < nyquist
+                    attenuation = -20.0 * np.log10(row * folded + _EPS) - a_ref
+                    yield freqs[keep], attenuation[keep]
+
+
+def _mask_margin(
+    fraction: float,
+    filter_class: int,
+    omega: np.ndarray,
+    delta_a: np.ndarray,
+    edition: str,
+) -> float:
+    """The smallest distance, dB, of a relative attenuation to the Table 1 corridor.
+
+    Negative where the attenuation leaves it, on either side.
+    """
+    if omega.size == 0:
+        return math.inf
+    minimum, maximum = class_limits(fraction, filter_class, omega, edition=edition)
+    low = float(np.min(delta_a - minimum))
+    finite = np.isfinite(maximum)
+    high = (
+        float(np.min(maximum[finite] - delta_a[finite])) if np.any(finite) else math.inf
+    )
+    return min(low, high)
+
+
+def _image_window(
+    grid: _BandGrid,
+    margins: dict[int, float],
+    spec: Mapping[str, Any],
+    fraction: float,
+) -> tuple[int, int]:
+    r"""The folded points whose images can still bind a band's verdict.
+
+    An image point folds onto a point :math:`g` of the half-band, where the
+    band's sections alone attenuate by :math:`A_\mathrm{b}(g)` relative to
+    the mid-band; the anti-aliasing filter can add gain to that by no more
+    than the sum of the magnitudes of its taps, and the limit an image point
+    is held to is no more than the class's largest minimum of Table 1 (the
+    one at and beyond :math:`G^{\pm 4}`). An image point whose
+    :math:`A_\mathrm{b}(g)` clears that limit by more than the margin the
+    band already has, after that gain, therefore cannot lower the margin,
+    and is not read. The rest are, every one, so the margin is the exact
+    minimum over the whole grid. A band whose pass band reaches its
+    decimated Nyquist frequency has image points the bound does not cover,
+    and all of them are read.
+
+    :return: ``(first, last)`` folded points to read; ``last < first`` when
+        none can bind.
+    """
+    if grid.factor == 1:
+        return 0, -1
+    edge = _map_breakpoint(spec["passband_max"][-1][0], fraction)
+    if grid.rate_hz / 2.0 <= edge * grid.mid_hz:
+        return 0, grid.num_points
+    taps = _multirate_lowpass(grid.factor)
+    gain_db = 20.0 * math.log10(float(np.sum(np.abs(taps))))
+    threshold = gain_db + max(
+        spec["stopband_min"][-1][spec["col"][cls]] + margin
+        for cls, margin in margins.items()
+    )
+    folded = -20.0 * np.log10(grid.folded_gain + _EPS) - grid.reference_db
+    alive = np.nonzero(folded < threshold)[0]
+    if alive.size == 0:
+        return 0, -1
+    return int(alive[0]), int(alive[-1])
 
 
 def _effective_bandwidth(
@@ -355,20 +698,64 @@ def _effective_bandwidth(
     return float(np.sum(2.0 / (lo + hi) * 0.5 * (power[:-1] + power[1:]) * (hi - lo)))
 
 
+def _effective_bandwidth_1995(
+    omega: np.ndarray, relative_attenuation_db: np.ndarray
+) -> float:
+    r"""IEC 61260:1995 equation (16): the trapezoidal :math:`B_\mathrm{e}`.
+
+    .. math::
+
+       B_\mathrm{e} = \sum_{i=-N}^{N} \frac{1}{2}
+       \left\{10^{-0.1\,\Delta A(f_i/f_\mathrm{m})} +
+       10^{-0.1\,\Delta A(f_{i+1}/f_\mathrm{m})}\right\}
+       \left[(f_{i+1}/f_\mathrm{m}) - (f_i/f_\mathrm{m})\right]
+
+    the integral of equation (14),
+    :math:`\int_0^\infty 10^{-0.1\,\Delta A(f/f_\mathrm{m})}\,
+    \mathrm{d}(f/f_\mathrm{m})`, which, unlike Formula (14) of the 2014
+    edition, carries no :math:`1/\Omega` weight. An infinite attenuation
+    contributes nothing.
+
+    :param omega: The ascending normalized test frequencies :math:`f_i/f_\mathrm{m}`.
+    :param relative_attenuation_db: :math:`\Delta A` at each of them.
+    :return: The normalized effective bandwidth.
+    """
+    power = 10.0 ** (-0.1 * np.asarray(relative_attenuation_db, dtype=np.float64))
+    return float(np.sum(0.5 * (power[:-1] + power[1:]) * np.diff(omega)))
+
+
 def _reference_bandwidth(fraction: float) -> float:
     r"""IEC 61260-1:2014 Formula (15): :math:`B_\mathrm{r} = (1/b)\ln G`."""
     return math.log(_G) / fraction
 
 
+def _reference_bandwidth_1995(fraction: float) -> float:
+    r"""IEC 61260:1995 equation (9): :math:`B_\mathrm{r} = G^{1/(2b)} - G^{-1/(2b)}`.
+
+    The bandwidth between the band-edge frequencies over the exact mid-band
+    frequency, :math:`(f_2 - f_1)/f_\mathrm{m}`.
+    """
+    return float(_G ** (1.0 / (2.0 * fraction)) - _G ** (-1.0 / (2.0 * fraction)))
+
+
+#: Per edition: the trapezoidal integration of the effective bandwidth and the
+#: reference bandwidth its deviation is taken against.
+_BANDWIDTH_INTEGRALS: Mapping[str, tuple[Any, Any]] = MappingProxyType(
+    {
+        "2014": (_effective_bandwidth, _reference_bandwidth),
+        "1995": (_effective_bandwidth_1995, _reference_bandwidth_1995),
+    }
+)
+
+
 def _summation_deviation(relative_attenuations_db: np.ndarray) -> np.ndarray:
-    r"""IEC 61260-2:2016 Formula (3), point by point.
+    r"""IEC 61260-2:2016 Formula (3) and IEC 61260:1995 equation (19), point by point.
 
     :math:`\Delta P_j = 10\lg\left[\sum 10^{-0.1\,\Delta A}\right]` over the
-    three filters :math:`j-1`, :math:`j`, :math:`j+1` at one frequency.
+    filters :math:`j-1`, :math:`j`, :math:`j+1` at one frequency.
 
-    :param relative_attenuations_db: Shape ``(3, n)``: the relative
-        attenuation of the lower neighbour, the band and the upper neighbour
-        at the same ``n`` frequencies.
+    :param relative_attenuations_db: Shape ``(n_filters, n)``: the relative
+        attenuation of each filter summed at the same ``n`` frequencies.
     :return: :math:`\Delta P_j` at each frequency, dB.
     """
     power = 10.0 ** (-0.1 * np.asarray(relative_attenuations_db, dtype=np.float64))
@@ -377,60 +764,150 @@ def _summation_deviation(relative_attenuations_db: np.ndarray) -> np.ndarray:
 
 def _bank_bandwidth_deviation(
     sos: np.ndarray,
+    factor: int,
+    fs_hz: float,
     mid_hz: float,
-    rate_hz: float,
     fraction: float,
     points_per_bandwidth: int,
+    edition: str = "2014",
 ) -> float:
-    r"""The effective bandwidth deviation :math:`\Delta B` of one designed band.
+    r"""The deviation :math:`\Delta B` of one designed band's effective bandwidth.
 
-    The Formula (1) grid runs from :math:`-N` to :math:`N + 1` with :math:`N`
-    at least :math:`2S` (7.2.3.2) and wide enough to reach the outermost
-    breakpoint of Table 1 (:math:`G^{\pm 4}` carried to the bandwidth), past
-    which the class 1 relative attenuation is at least 70 dB and leaves less
-    than one part in :math:`10^7` of the integral.
+    The effective bandwidth deviation of IEC 61260-1:2014 5.12 or the filter
+    integrated response of IEC 61260:1995 4.5, both
+    :math:`10\lg(B_\mathrm{e}/B_\mathrm{r})` but with the effective and the
+    reference bandwidths of their own edition. The test frequencies
+    :math:`\Omega_i = G^{i/(bS)}` run from :math:`-N` to :math:`N + 1`,
+    :math:`N` at least :math:`2S` (IEC 61260-2:2016 7.2.3.2) or :math:`5S`
+    (IEC 61260:1995 5.4.2) and wide enough to reach the outermost breakpoint
+    of Table 1 (:math:`G^{\pm 4}` carried to the bandwidth), past which a
+    band that meets any class attenuates by 60 dB or more and the integrand
+    is at most :math:`10^{-6}` of its pass-band value.
     """
     outermost = _map_breakpoint(_STOPBAND_MIN[-1][0], fraction)
     reach = math.ceil(fraction * points_per_bandwidth * math.log(outermost, _G))
-    n = max(2 * points_per_bandwidth, reach)
+    n = max(_INTEGRATION_BANDWIDTHS[edition] * points_per_bandwidth, reach)
     omega = _test_frequencies(fraction, points_per_bandwidth, -n, n + 1)
-    delta_a = _band_relative_attenuation(sos, mid_hz, rate_hz, omega * mid_hz)
-    return 10.0 * math.log10(
-        _effective_bandwidth(omega, delta_a) / _reference_bandwidth(fraction)
-    )
+    delta_a = _band_relative_attenuation(sos, factor, fs_hz, mid_hz, omega * mid_hz)
+    effective, reference = _BANDWIDTH_INTEGRALS[edition]
+    return 10.0 * math.log10(effective(omega, delta_a) / reference(fraction))
+
+
+def _settled_points_per_bandwidth(
+    bank: OctaveFilterBank, points_per_bandwidth: int
+) -> int:
+    r"""IEC 61260:1995 5.3.3: the S at which every band's integrated response has settled.
+
+    S starts at *points_per_bandwidth* and is raised in steps of 12 while the
+    filter integrated response of any band, :math:`\Delta B` of 4.5.1, read
+    to the nearest tenth of a decibel, changes from S to S + 12. The S
+    returned is the first at which none does, and the summation runs at it
+    too: 5.8.2 takes its S "from the relative attenuation tests", which
+    5.3.3 has raised. It stops at :data:`_MAX_POINTS_PER_BANDWIDTH_1995`.
+
+    :param bank: The filter bank graded.
+    :param points_per_bandwidth: The S to start from, at least 24.
+    :return: The S the 1995 tests run at.
+    """
+    factors = tuple(int(f) for f in bank.factor)
+    fs = float(bank.fs)
+    mids = np.asarray(bank.freq, dtype=np.float64)
+
+    def tenths(s: int) -> list[int]:
+        return [
+            round(
+                10.0
+                * _bank_bandwidth_deviation(
+                    bank.sos[idx],
+                    factors[idx],
+                    fs,
+                    float(mids[idx]),
+                    bank.fraction,
+                    s,
+                    "1995",
+                )
+            )
+            for idx in range(bank.num_bands)
+        ]
+
+    s = points_per_bandwidth
+    current = tenths(s)
+    while s < _MAX_POINTS_PER_BANDWIDTH_1995:
+        following = tenths(s + _POINTS_PER_BANDWIDTH_STEP_1995)
+        if following == current:
+            break
+        s += _POINTS_PER_BANDWIDTH_STEP_1995
+        current = following
+    return s
+
+
+def _summation_span(
+    band: int, num_bands: int, points_per_bandwidth: int, edition: str
+) -> tuple[int, int]:
+    r"""The indices :math:`i` of the summation test frequencies of one band.
+
+    :math:`i` runs from :math:`-M` to :math:`M`, :math:`M = \lfloor S/2
+    \rfloor` (IEC 61260-2:2016 7.2.4.2, IEC 61260:1995 5.8.2), the
+    frequencies between the band edges. IEC 61260:1995 5.8.4 runs the test
+    "from the lowest midband frequency to the highest midband frequency of
+    the filter set", so the lowest band is read from its mid-band frequency
+    up and the highest from its mid-band frequency down; IEC 61260-2:2016
+    7.2.4.4 leaves both out.
+    """
+    half = points_per_bandwidth // 2
+    first = 0 if edition == "1995" and band == 0 else -half
+    last = 0 if edition == "1995" and band == num_bands - 1 else half
+    return first, last
 
 
 def _bank_summation(
     sos: tuple[np.ndarray, ...] | list[np.ndarray],
+    factors: tuple[int, ...] | list[int] | np.ndarray,
+    fs_hz: float,
     mids_hz: np.ndarray,
-    rates_hz: np.ndarray,
     fraction: float,
     points_per_bandwidth: int,
     band: int,
+    edition: str = "2014",
 ) -> tuple[np.ndarray, np.ndarray]:
-    r"""The Formula (3) curve of one band: :math:`\Omega_i` and :math:`\Delta P_j`.
+    r"""The summation curve of one band: :math:`\Omega_i` and :math:`\Delta P_j`.
 
-    :math:`i` runs from :math:`-M` to :math:`M`, :math:`M = \lfloor S/2
-    \rfloor` (7.2.4.2), the frequencies between the band edges of the band.
-    Each of the three filters is evaluated at the same frequency in hertz,
-    which is the normalized frequency :math:`G^{i/(bS) \pm 1/b}` of 7.2.4.3
-    for the neighbours of a set whose mid-band frequencies step by
-    :math:`G^{1/b}`.
+    Formula (3) of IEC 61260-2:2016, equation (19) of IEC 61260:1995, over
+    the test frequencies of :func:`_summation_span`. Each filter is
+    evaluated at the same frequency in hertz, which is the normalized
+    frequency :math:`G^{i/(bS) \pm 1/b}` the two standards give for the
+    neighbours of a set whose mid-band frequencies step by :math:`G^{1/b}`.
+    A neighbour the set does not have (below the lowest band or above the
+    highest) adds nothing.
 
     :return: ``(omega, delta_p_db)`` for the band.
     """
-    half = points_per_bandwidth // 2
-    omega = _test_frequencies(fraction, points_per_bandwidth, -half, half)
+    count = len(mids_hz)
+    first, last = _summation_span(band, count, points_per_bandwidth, edition)
+    omega = _test_frequencies(fraction, points_per_bandwidth, first, last)
     freqs = omega * float(mids_hz[band])
     rows = np.vstack(
         [
             _band_relative_attenuation(
-                sos[k], float(mids_hz[k]), float(rates_hz[k]), freqs
+                sos[k], int(factors[k]), fs_hz, float(mids_hz[k]), freqs
             )
             for k in (band - 1, band, band + 1)
+            if 0 <= k < count
         ]
     )
     return omega, _summation_deviation(rows)
+
+
+def _summation_graded(band: int, num_bands: int, edition: str) -> bool:
+    """Whether one band carries the summation requirement in its edition.
+
+    IEC 61260-2:2016 7.2.4.4 grades the bands with a neighbour on each side;
+    IEC 61260:1995 5.8.4 every band of a set of two or more, between the
+    lowest and the highest mid-band frequency.
+    """
+    if edition == "1995":
+        return num_bands > 1
+    return 0 < band < num_bands - 1
 
 
 def _verify_band(
@@ -440,49 +917,47 @@ def _verify_band(
     breakpoint_omegas: np.ndarray,
     edition: str,
     num_points: int,
-) -> tuple[dict[str, Any], float]:
-    """Evaluate one band against every class; return its entry and Nyquist."""
+) -> dict[str, Any]:
+    """Grade one band on Table 1 at the full input rate; return its entry.
+
+    The relative attenuation is read on the band's decimated half-band, on
+    the Table 1 breakpoints exactly and on the alias images of the half-band
+    up to half the input rate (:class:`_BandGrid`, :func:`_image_window`).
+    """
     fm = float(bank.freq[idx])
-    fsd = bank.fs / float(bank.factor[idx])
-    w, h = signal.sosfreqz(bank.sos[idx], worN=num_points, fs=fsd)
-
-    # Attenuation relative to the mid-band attenuation (Formulas 7-8),
-    # with the reference evaluated exactly at the mid-band frequency.
-    attenuation = -20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
-    _, h_ref = signal.sosfreqz(bank.sos[idx], worN=np.array([fm]), fs=fsd)
-    a_ref = float(-20.0 * np.log10(np.abs(h_ref[0]) + np.finfo(float).eps))
-    delta_all = attenuation - a_ref
-
-    omega = w / fm
-    valid = omega > 0
-    omega, delta_a = omega[valid], delta_all[valid]
-
-    # Guarantee the Table 1 breakpoints (pass-band included) are evaluated,
-    # exactly (sosfreqz at the breakpoint frequencies, not interpolated
-    # off the grid, so a coarse grid cannot smooth a dip across them).
-    # Cut at the processing Nyquist, not omega.max(): the sosfreqz grid
-    # stops short of Nyquist and must not exclude checkable breakpoints.
-    omega_nyq = fsd / 2.0 / fm
-    extra = breakpoint_omegas[
-        (breakpoint_omegas > 0) & (breakpoint_omegas <= omega_nyq)
-    ]
+    fs = float(bank.fs)
+    grid = _BandGrid(
+        np.asarray(bank.sos[idx], dtype=np.float64),
+        int(bank.factor[idx]),
+        fs,
+        fm,
+        num_points,
+    )
+    nyquist = fs / 2.0
+    freqs, delta_a = grid.baseband()
+    # The Table 1 breakpoints (pass-band included) are read exactly, not off
+    # the grid, so a coarse grid cannot smooth a dip across them.
+    extra = breakpoint_omegas * fm
+    extra = extra[(extra > 0.0) & (extra < nyquist)]
     if extra.size:
-        _, h_extra = signal.sosfreqz(bank.sos[idx], worN=extra * fm, fs=fsd)
-        att_extra = -20.0 * np.log10(np.abs(h_extra) + np.finfo(float).eps)
-        omega = np.concatenate([omega, extra])
-        delta_a = np.concatenate([delta_a, att_extra - a_ref])
-
-    margins: dict[int, float] = {}
-    for cls in classes_ordered:
-        minimum, maximum = class_limits(bank.fraction, cls, omega, edition=edition)
-        low_margin = float(np.min(delta_a - minimum))
-        finite = np.isfinite(maximum)
-        high_margin = (
-            float(np.min(maximum[finite] - delta_a[finite]))
-            if np.any(finite)
-            else np.inf
+        freqs = np.concatenate([freqs, extra])
+        delta_a = np.concatenate(
+            [delta_a, _band_relative_attenuation(grid.sos, grid.factor, fs, fm, extra)]
         )
-        margins[cls] = min(low_margin, high_margin)
+    margins = {
+        cls: _mask_margin(bank.fraction, cls, freqs / fm, delta_a, edition)
+        for cls in classes_ordered
+    }
+    spec = _FILTER_EDITIONS[edition]
+    first, last = _image_window(grid, margins, spec, bank.fraction)
+    for image_freqs, image_delta in grid.images(first, last):
+        for cls in classes_ordered:
+            margins[cls] = min(
+                margins[cls],
+                _mask_margin(
+                    bank.fraction, cls, image_freqs / fm, image_delta, edition
+                ),
+            )
 
     band_class: int | None = next(
         (cls for cls in classes_ordered if margins[cls] >= 0), None
@@ -490,11 +965,11 @@ def _verify_band(
     band_entry: dict[str, Any] = {
         "freq": fm,
         "class": band_class,
-        "checked_to_omega": float(omega_nyq),
+        "checked_to_omega": nyquist / fm,
     }
     for cls in classes_ordered:
         band_entry[f"margin_class{cls}_db"] = margins[cls]
-    return band_entry, omega_nyq
+    return band_entry
 
 
 def _grade_pattern_requirements(
@@ -502,40 +977,52 @@ def _grade_pattern_requirements(
     bands: list[dict[str, Any]],
     classes_ordered: tuple[int, ...],
     points_per_bandwidth: int,
+    edition: str,
 ) -> None:
-    """Add the 5.12 and 5.16 requirements to every band entry, in place.
+    """Add the effective bandwidth and the summation to every band entry, in place.
 
-    Each band gets its effective bandwidth deviation and its margin to each
-    class's limits; each band with a neighbour on both sides gets the range
-    of its Formula (3) curve and its margins too (7.2.4.4 leaves the two end
-    bands out, and they carry ``None``). The band's class is then the
-    strictest class it meets on every requirement graded.
+    Each band gets the deviation of its effective bandwidth and its margin
+    to each class's limits; each band the summation applies to
+    (:func:`_summation_graded`) gets the range of its summation curve and
+    its margins too, and the others carry ``None``. The band's class is
+    then the strictest class it meets on every requirement graded.
     """
-    rates = np.asarray([bank.fs / float(f) for f in bank.factor], dtype=np.float64)
+    factors = tuple(int(f) for f in bank.factor)
+    fs = float(bank.fs)
     mids = np.asarray(bank.freq, dtype=np.float64)
-    last = len(bands) - 1
+    bandwidth_limits = _BANDWIDTH_LIMITS_DB[edition]
+    summation_limits = _SUMMATION_LIMITS_DB[edition]
     for idx, band in enumerate(bands):
         deviation = _bank_bandwidth_deviation(
             bank.sos[idx],
+            factors[idx],
+            fs,
             float(mids[idx]),
-            float(rates[idx]),
             bank.fraction,
             points_per_bandwidth,
+            edition,
         )
         band["bandwidth_deviation_db"] = deviation
         for cls in classes_ordered:
-            band[f"bandwidth_margin_class{cls}_db"] = _BANDWIDTH_LIMITS_DB[cls] - abs(
+            band[f"bandwidth_margin_class{cls}_db"] = bandwidth_limits[cls] - abs(
                 deviation
             )
-        if 0 < idx < last:
+        if _summation_graded(idx, len(bands), edition):
             _, curve = _bank_summation(
-                bank.sos, mids, rates, bank.fraction, points_per_bandwidth, idx
+                bank.sos,
+                factors,
+                fs,
+                mids,
+                bank.fraction,
+                points_per_bandwidth,
+                idx,
+                edition,
             )
             low, high = float(np.min(curve)), float(np.max(curve))
             band["summation_min_db"] = low
             band["summation_max_db"] = high
             for cls in classes_ordered:
-                lower, upper = _SUMMATION_LIMITS_DB[cls]
+                lower, upper = summation_limits[cls]
                 band[f"summation_margin_class{cls}_db"] = min(low - lower, upper - high)
         else:
             band["summation_min_db"] = None
@@ -549,7 +1036,7 @@ def _band_class(band: dict[str, Any], classes_ordered: tuple[int, ...]) -> int |
     """The strictest class one band meets on every requirement it carries."""
     for cls in classes_ordered:
         margins = [
-            band.get(template.format(c=cls)) for template, _ in _REQUIREMENTS.values()
+            band.get(template.format(c=cls)) for template in _REQUIREMENTS.values()
         ]
         if all(m is None or m >= 0.0 for m in margins):
             return cls
@@ -563,38 +1050,54 @@ def verify_filter_class(
     edition: str = "2014",
     points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH,
 ) -> FilterComplianceResult:
-    """Verify a filter bank against the IEC 61260 class limits.
+    r"""Verify a filter bank against the IEC 61260 class limits.
 
     Each band's relative attenuation (referenced to the attenuation at its
-    exact mid-band frequency) is checked against every acceptance-limit class of
-    the selected edition's Table 1, evaluated on a dense frequency grid up to
-    the band's processing Nyquist. The Table 1 breakpoint frequencies inside
-    that range are always included in the evaluation, so the pass-band
-    constraints are checked even if the grid were coarse. Frequencies beyond
-    the processing Nyquist cannot carry signal energy at the band's decimated
-    rate (the multirate anti-aliasing filter removes them), so they are
-    treated as compliant; because the Table 1 limits there are nevertheless
-    not demonstrated, the returned ``range_limited`` flag is set whenever a
-    band's stop-band mask extends beyond its processing Nyquist, and the
-    per-band ``checked_to_omega`` records how far the check reached.
+    exact mid-band frequency) is checked against every acceptance-limit
+    class of the selected edition's Table 1, on the response the band has
+    at the bank's input rate: its anti-aliasing filter, the decimation and
+    its sections, so that every alias image the decimation folds onto the
+    band is graded where the input carries it. Table 1 covers every
+    frequency (its last rows read :math:`\le G^{-4}` and :math:`\ge G^{+4}`),
+    and a sampled input holds every frequency below half its sampling rate,
+    so that is the range graded: ``num_points`` frequencies cover the
+    band's decimated half-band and the images above it are read at the same
+    spacing, up to half the input rate. The Table 1 breakpoint frequencies
+    in that range are always evaluated exactly, so the pass-band
+    constraints are checked even on a coarse grid. Above half the input
+    rate no input of the bank has a frequency, and the Table 1 limits there
+    are not demonstrated: the returned ``range_limited`` flag is set
+    whenever a band's outermost breakpoint (:math:`G^{4}`, carried to the
+    bandwidth) lies beyond half the input rate, and the per-band
+    ``checked_to_omega`` records how far the check reached.
 
-    For ``edition="2014"`` two more requirements of IEC 61260-1:2014 are
-    graded on the same sections, the way IEC 61260-2:2016 tests them (see
-    the module docstring): the effective bandwidth deviation of every band
-    (5.12, Formulas (1) and (2) of Part 2) and the summation of the output
-    signals of every band that has a neighbour on each side (5.16, Formula
-    (3) of Part 2). A band's class, and so the bank's, is the strictest class
-    met on every requirement graded; :meth:`FilterComplianceResult.requirement_class`
-    gives the class of each requirement on its own.
+    Two more requirements are graded on the same sections, the effective
+    bandwidth and the summation of the output signals, each in its edition's
+    own form (see the module docstring): for ``edition="2014"`` the
+    effective bandwidth deviation of IEC 61260-1:2014 5.12 of every band and
+    the summation of 5.16 of every band with a neighbour on each side, the
+    way IEC 61260-2:2016 tests them; for ``edition="1995"`` the filter
+    integrated response of IEC 61260:1995 4.5.3 of every band and the
+    summation of 4.9 from the lowest to the highest mid-band frequency, the
+    way its clauses 5.4 and 5.8 test them. A band's class, and so the
+    bank's, is the strictest class met on every requirement graded;
+    :meth:`FilterComplianceResult.requirement_class` gives the class of each
+    requirement on its own.
 
     :param bank: The filter bank to verify (its designed SOS are analyzed;
         works for stateful and stateless banks alike).
-    :param num_points: Number of frequency grid points per band (>= 16).
+    :param num_points: Number of frequency grid points per band on its
+        decimated half-band (>= 16); the alias images are read at the same
+        spacing.
     :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
-        (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0; the
-        verdict is its Table 1 mask alone).
+        (IEC 61260:1995, adds the stricter class 0).
     :param points_per_bandwidth: ``S``, the test frequencies per filter
-        bandwidth of IEC 61260-2:2016 Formula (1), at least 24 (7.2.1.4).
+        bandwidth of IEC 61260-2:2016 Formula (1) and IEC 61260:1995
+        equation (15), at least 24 (7.2.1.4 and 5.3.3). For
+        ``edition="1995"`` it is where S starts: 5.3.3 raises it in steps of
+        12 until the filter integrated response of every band reads the same
+        to the nearest tenth of a decibel at S and at S + 12, and the
+        result's ``points_per_bandwidth`` says where it stopped.
     :return: A :class:`FilterComplianceResult`, which carries the verdict
         together with the sections, mid-band frequencies, decimation factors
         and sampling rate it was measured through, so it can redraw the
@@ -623,22 +1126,24 @@ def verify_filter_class(
     breakpoint_omegas = np.concatenate([1.0 / breakpoint_omegas, breakpoint_omegas])
 
     # The outermost stop-band breakpoint (G**4 mapped to the bandwidth
-    # designator): a band whose processing Nyquist lies below it cannot have
-    # its full high-side stop-band mask demonstrated, so the verdict is then
-    # range-limited (the multirate anti-aliasing justifies treating the
-    # unreachable region as compliant, but it is not verified).
+    # designator): a band whose input Nyquist frequency lies below it cannot
+    # have its full high-side stop-band mask demonstrated, so the verdict is
+    # then range-limited.
     mask_top_omega = _map_breakpoint(spec["stopband_min"][-1][0], bank.fraction)
     range_limited = False
 
     for idx in range(bank.num_bands):
-        band_entry, omega_nyq = _verify_band(
+        band_entry = _verify_band(
             bank, idx, classes_ordered, breakpoint_omegas, edition, num_points
         )
-        if omega_nyq < mask_top_omega:
+        if band_entry["checked_to_omega"] < mask_top_omega:
             range_limited = True
         bands.append(band_entry)
-    if edition == "2014":
-        _grade_pattern_requirements(bank, bands, classes_ordered, points_per_bandwidth)
+    if edition == "1995":
+        points_per_bandwidth = _settled_points_per_bandwidth(bank, points_per_bandwidth)
+    _grade_pattern_requirements(
+        bank, bands, classes_ordered, points_per_bandwidth, edition
+    )
 
     if not bands:
         # No bands to verify: never report compliance vacuously.
@@ -718,7 +1223,7 @@ def _require_requirement_keys(
     """
     if not bands or not classes:
         return
-    for name, (template, _) in _REQUIREMENTS.items():
+    for name, template in _REQUIREMENTS.items():
         key = template.format(c=classes[0])
         carried = [key in band for band in bands]
         if any(carried) and not all(carried):
@@ -749,38 +1254,44 @@ class FilterComplianceResult:
     :ivar edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
         (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
     :ivar sos: Per-band second-order sections of the analysed bank (one array
-        per band), kept so the relative attenuation can be recomputed with
-        :func:`scipy.signal.sosfreqz` exactly as the verifier does.
+        per band), kept so the relative attenuation can be recomputed
+        exactly as the verifier does.
     :ivar band_frequencies: The exact mid-band frequencies ``f_m`` in Hz.
     :ivar factors: Per-band decimation factor; the band's processing sample
-        rate is ``fs / factor`` (the multirate rate the SOS were designed at).
-        Stored because the response must be evaluated at that decimated rate,
-        which the verifier's public return does not expose.
+        rate is ``fs / factor`` (the multirate rate the SOS were designed at)
+        and the factor fixes its anti-aliasing filter. Stored because the
+        response is evaluated through both, which the verifier's public
+        return does not otherwise expose.
     :ivar fs: The bank's full sampling rate in Hz.
     :ivar num_points: Frequency grid points per band used by the verification,
         retained so the redrawn curve matches the analysed grid.
-    :ivar range_limited: ``True`` when at least one band's stop-band mask
-        extends beyond its processing Nyquist frequency, so the verification
-        could not exercise the full Table 1 mask there (the multirate
-        anti-aliasing removes signal energy beyond it, but the limits are not
-        demonstrated); the stated class then attests the verified frequency
-        range and the ``.report()`` fiche prints a qualifying note.
+    :ivar range_limited: ``True`` when at least one band's outermost Table 1
+        breakpoint (:math:`G^{4}`, carried to the bandwidth) lies beyond half
+        the input sampling rate, so the verification could not exercise the
+        full Table 1 mask there (no input of a digital bank has a frequency
+        beyond it, but the limits are not demonstrated); the stated class
+        then attests the verified frequency range and the ``.report()``
+        fiche prints a qualifying note.
     :ivar points_per_bandwidth: ``S``, the test frequencies per bandwidth of
-        IEC 61260-2:2016 Formula (1) the effective bandwidth and the summation
-        were evaluated on.
+        IEC 61260-2:2016 Formula (1) (IEC 61260:1995 equation (15)) the
+        effective bandwidth and the summation were evaluated on; in the 1995
+        edition, the S that 5.3.3 raised the one asked for to.
 
-    For ``edition="2014"`` every band entry carries, besides its Table 1
-    margins ``margin_class<c>_db``, the two requirements IEC 61260-2 tests on
-    the same measurements:
+    Every band entry carries, besides its Table 1 margins
+    ``margin_class<c>_db``, the two requirements its edition tests on the
+    same measurements:
 
     * ``bandwidth_deviation_db``, the effective bandwidth deviation
-      :math:`\Delta B` of 5.12, and ``bandwidth_margin_class<c>_db``, its
-      distance to each class's limit;
+      :math:`\Delta B` of 5.12 (the filter integrated response of 4.5 in the
+      1995 edition), and ``bandwidth_margin_class<c>_db``, its distance to
+      each class's limit;
     * ``summation_min_db`` and ``summation_max_db``, the range of the
-      summation :math:`\Delta P_j` of 5.16 across the band, and
-      ``summation_margin_class<c>_db``, the nearer of its distances to each
-      class's two limits; all three are ``None`` on the first and the last
-      band, which have a neighbour on one side only (IEC 61260-2 7.2.4.4).
+      summation :math:`\Delta P_j` of 5.16 (4.9 in the 1995 edition) across
+      the band, and ``summation_margin_class<c>_db``, the nearer of its
+      distances to each class's two limits; all three are ``None`` on a band
+      the summation does not apply to: in the 2014 edition the first and the
+      last band, which have a neighbour on one side only (IEC 61260-2
+      7.2.4.4), in the 1995 edition the one band of a single-band bank.
 
     A band's ``class`` is then the strictest class it meets on all of them.
     """
@@ -895,20 +1406,22 @@ class FilterComplianceResult:
 
     @property
     def requirements(self) -> tuple[str, ...]:
-        """The requirements of IEC 61260-1:2014 this verdict graded.
+        """The requirements of its edition this verdict graded.
 
-        ``"relative_attenuation"`` (5.10, Table 1) always; for the 2014
-        edition also ``"effective_bandwidth"`` (5.12) and, when the bank has
-        a band with a neighbour on each side, ``"summation"`` (5.16), which
-        IEC 61260-2:2016 7.2.4.4 grades on those bands only. Empty for a bank
-        with no bands.
+        ``"relative_attenuation"`` (Table 1: 5.10 of IEC 61260-1:2014, 4.4 of
+        IEC 61260:1995) and ``"effective_bandwidth"`` (5.12; the filter
+        integrated response of 4.5 in 1995) always, and ``"summation"``
+        (5.16; 4.9 in 1995) when the bank has a band it applies to: a band
+        with a neighbour on each side in the 2014 edition, which
+        IEC 61260-2:2016 7.2.4.4 grades on those bands only, and two bands or
+        more in the 1995 edition. Empty for a bank with no bands.
         """
         if not self.bands:
             return ()
         classes = self.available_classes()
         return tuple(
             name
-            for name, (template, _) in _REQUIREMENTS.items()
+            for name, template in _REQUIREMENTS.items()
             if any(
                 band.get(template.format(c=classes[0])) is not None
                 for band in self.bands
@@ -955,7 +1468,7 @@ class FilterComplianceResult:
         if requirement not in self.requirements:
             msg = f"{requirement!r} was not graded; graded: {list(self.requirements)}"
             raise KeyError(msg)
-        return _REQUIREMENTS[requirement][0]
+        return _REQUIREMENTS[requirement]
 
     def reference_class(self) -> int:
         """The class whose corridor the fiche/plot overlays.

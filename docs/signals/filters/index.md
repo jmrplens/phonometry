@@ -77,9 +77,11 @@ laboratory and are not run here; `verify_filter_periodic` grades the results a
 laboratory brings back from the periodic tests, and says what they cannot
 show. Near Nyquist the bilinear
 transform warps the frequency axis and the bank carries no correction for it,
-unlike the fitted `high_accuracy` design of the weighting filters: the stopband
-beyond the processing Nyquist is reported as `range_limited` rather than
-verified, so keep the top band edge comfortably below Nyquist or raise `fs`.
+unlike the fitted `high_accuracy` design of the weighting filters:
+`verify_filter_class` grades every band up to half the input rate, the alias
+images a decimated band reads included, and reports the stopband beyond it as
+`range_limited` rather than verified, so keep the top band edge comfortably
+below Nyquist or raise `fs`.
 Two operations do not stream: zero-phase forward-backward filtering needs the
 whole signal, and rank statistics such as L90 have to be computed once on the
 pooled envelope. And the per-channel path never mixes channels: delay

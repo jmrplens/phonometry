@@ -175,41 +175,71 @@ def test_fiche_labels_bands_with_nominal_frequencies(tmp_path: Path) -> None:
 def test_range_limited_verdict_prints_qualifying_note(tmp_path: Path) -> None:
     """A range-limited COMPLIES is qualified on the fiche.
 
-    The multirate verification cannot exercise the stop-band mask beyond each
-    band's processing Nyquist, so the result carries ``range_limited`` and
-    the fiche prints the qualification next to the stated class.
+    Every band is graded, alias images included, up to half the input rate;
+    the G**4 breakpoint of the upper bands lies beyond it, so the result
+    carries ``range_limited`` and the fiche prints the qualification next to
+    the stated class.
     """
     result = filters.verify_filter_class(
         filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     )
     assert result.range_limited is True
     for band in result.bands:
-        assert band["checked_to_omega"] > 0.0
+        assert band["checked_to_omega"] * band["freq"] == pytest.approx(24000.0)
     out = tmp_path / "qualified.pdf"
     result.report(str(out))
     text = _extract_text(str(out)).replace("\n", " ")
     assert "COMPLIES" in text
-    assert "processing Nyquist frequency" in text
+    assert "half the sampling frequency" in text
     assert "not demonstrated" in text
 
 
-def test_a_full_rate_bank_is_not_credited_with_anti_aliasing(tmp_path: Path) -> None:
-    """A bank with no decimation has no multirate stage to leave energy out."""
+def test_a_full_mask_verdict_prints_no_range_note(tmp_path: Path) -> None:
+    """A bank whose every mask ends below fs / 2 carries no qualifying note.
+
+    The 1 kHz top band of a 48 kHz octave bank is graded past its G**4
+    breakpoint, so the result is not ``range_limited`` and the fiche states
+    the class without the half-sampling-frequency qualification.
+    """
+    result = filters.verify_filter_class(
+        filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 1000])
+    )
+    assert result.range_limited is False
+    out = tmp_path / "full_mask.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "COMPLIES" in text
+    assert "half the sampling frequency" not in text
+    assert "not demonstrated" not in text
+
+
+@pytest.mark.parametrize(
+    "design", [filters.FilterDesign(), filters.FilterDesign(resample=False)]
+)
+def test_the_range_note_does_not_credit_the_decimation(
+    tmp_path: Path, design: filters.FilterDesign
+) -> None:
+    """Decimated or not, the note names the one limit the check has: fs / 2.
+
+    A decimated band is graded on its alias images, not excused from them by
+    its anti-aliasing filter, so the fiche says the same of both banks.
+    """
     result = filters.verify_filter_class(
         filters.OctaveFilterBank(
             fs=48000,
             fraction=1,
             order=6,
             limits=[125, 4000],
-            design=filters.FilterDesign(resample=False),
+            design=design,
         )
     )
     assert result.range_limited is True
-    out = tmp_path / "full_rate.pdf"
+    out = tmp_path / "range.pdf"
     result.report(str(out))
     text = _extract_text(str(out)).replace("\n", " ")
     assert "half the sampling frequency" in text
     assert "multirate" not in text
+    assert "processing Nyquist" not in text
 
 
 def test_non_compliant_bank_renders(tmp_path: Path) -> None:
@@ -324,15 +354,24 @@ def test_fiche_of_a_bank_with_no_inner_band_cites_what_it_graded(
     assert "Summation of output signals" not in text
 
 
-def test_1995_fiche_carries_no_requirement_table(tmp_path: Path) -> None:
-    """The 1995 edition is graded on its Table 1 mask alone."""
+def test_1995_fiche_carries_its_requirement_table(tmp_path: Path) -> None:
+    """The 1995 edition is graded on Table 1, 4.5.3 and 4.9, by its clause numbers."""
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
     result = filters.verify_filter_class(bank, edition="1995")
-    assert result.requirements == ("relative_attenuation",)
+    assert result.requirements == (
+        "relative_attenuation",
+        "effective_bandwidth",
+        "summation",
+    )
     out = tmp_path / "1995.pdf"
     result.report(str(out))
-    text = _extract_text(str(out)).replace("\n", " ")
-    assert "Summation of output signals" not in text
+    text = " ".join(_extract_text(str(out)).split())
+    assert "IEC 61260:1995 / ANSI S1.11-2004, Table 1, 4.5.3 and 4.9" in text
+    assert "Filter integrated response (4.5.3)" in text
+    assert "Summation of output signals (4.9)" in text
+    assert "(5.16)" not in text
+    # A sum a hair under the input prints as +0.00, not as a signed zero.
+    assert "+0.00 to +0.16 dB" in text
 
 
 def test_unknown_language_rejected(tmp_path: Path) -> None:

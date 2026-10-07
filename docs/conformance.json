@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1877,
-    "passing": 1877,
+    "checks": 1884,
+    "passing": 1884,
     "failing": 0,
     "domains": 111,
     "standards": 521,
-    "citations": 1325,
+    "citations": 1330,
     "designations": 227,
     "sources": 123
   },
@@ -97,8 +97,8 @@
     {
       "id": "filters-weightings",
       "title": "Filters & weightings",
-      "checks": 12,
-      "passing": 12
+      "checks": 19,
+      "passing": 19
     },
     {
       "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
@@ -772,7 +772,7 @@
           "verdict": "pass",
           "class": 1,
           "binding": {
-            "frequency_hz": 501.0,
+            "frequency_hz": 631.0,
             "measured": 0.0,
             "limit": -0.4,
             "side": "floor"
@@ -798,7 +798,7 @@
           "verdict": "pass",
           "class": 1,
           "binding": {
-            "frequency_hz": 794.0,
+            "frequency_hz": 631.0,
             "measured": 0.0,
             "limit": -0.4,
             "side": "floor"
@@ -997,6 +997,218 @@
       "deviation": {
         "value": 0.15,
         "label": "+0.150 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1995-4-5-3-and-5-4/octave-butterworth-bank-fs-48-khz-125-hz-to-4-khz-largest-delta-b-of-equations-13-14-and-16-within-the-class-0-0-15-db",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260:1995 4.5.3 and 5.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260",
+            "edition": "1995",
+            "clause": "4.5.3 and 5.4"
+          }
+        ]
+      },
+      "quantity": "Octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): largest |Delta B| of equations (13), (14) and (16) within the class 0 +/-0.15 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 0 (|Delta B| <= 0.15 dB)"
+      },
+      "computed": {
+        "label": "class 0 (|Delta B| <= 0.050 dB)"
+      },
+      "deviation": {
+        "value": 0.1,
+        "label": "+0.100 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1995-4-5-3-and-5-4/one-third-octave-butterworth-bank-fs-48-khz-125-hz-to-4-khz-largest-delta-b-of-equations-13-14-and-16-within-the-class-0-0-15-db",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260:1995 4.5.3 and 5.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260",
+            "edition": "1995",
+            "clause": "4.5.3 and 5.4"
+          }
+        ]
+      },
+      "quantity": "One-third-octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): largest |Delta B| of equations (13), (14) and (16) within the class 0 +/-0.15 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 0 (|Delta B| <= 0.15 dB)"
+      },
+      "computed": {
+        "label": "class 0 (|Delta B| <= 0.050 dB)"
+      },
+      "deviation": {
+        "value": 0.1,
+        "label": "+0.100 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1995-4-9-and-5-8/octave-butterworth-bank-fs-48-khz-125-hz-to-4-khz-summed-outputs-of-equation-19-lowest-to-highest-mid-band-frequency-within-the-class-0-1-0-db",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260:1995 4.9 and 5.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260",
+            "edition": "1995",
+            "clause": "4.9 and 5.8"
+          }
+        ]
+      },
+      "quantity": "Octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): summed outputs of equation (19), lowest to highest mid-band frequency, within the class 0 +/-1.0 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 0 (-1.0 dB <= Delta P <= +1.0 dB)"
+      },
+      "computed": {
+        "label": "class 0 (+0.000 dB to +0.164 dB)"
+      },
+      "deviation": {
+        "value": 0.836,
+        "label": "+0.836 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1995-4-9-and-5-8/one-third-octave-butterworth-bank-fs-48-khz-125-hz-to-4-khz-summed-outputs-of-equation-19-lowest-to-highest-mid-band-frequency-within-the-class-0-1-0-db",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260:1995 4.9 and 5.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260",
+            "edition": "1995",
+            "clause": "4.9 and 5.8"
+          }
+        ]
+      },
+      "quantity": "One-third-octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): summed outputs of equation (19), lowest to highest mid-band frequency, within the class 0 +/-1.0 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 0 (-1.0 dB <= Delta P <= +1.0 dB)"
+      },
+      "computed": {
+        "label": "class 0 (+0.000 dB to +0.163 dB)"
+      },
+      "deviation": {
+        "value": 0.837,
+        "label": "+0.837 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1995-equations-9-and-16/ideal-octave-band-s-24-n-5s-filter-integrated-response-of-the-trapezoidal-sum-equals-its-hand-sum-interval-by-interval-closed-form",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260:1995 equations (9) and (16)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260",
+            "edition": "1995",
+            "clause": "equations (9) and (16)"
+          }
+        ]
+      },
+      "quantity": "Ideal octave band, S = 24, N = 5S: filter integrated response of the trapezoidal sum equals its hand sum interval by interval (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0008994162569429473
+      },
+      "computed": {
+        "value": 0.000899
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1995-4-8-and-5-7/tones-at-the-decimated-sampling-frequency-minus-the-nominal-mid-band-frequency-of-the-20-hz-and-200-hz-bands-of-the-default-one-third-octave-bank-fs-48-khz-run-through-the-bank-band-output-at-least-the-75-db-of-class-0-below-the-input",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260:1995 4.8 and 5.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260",
+            "edition": "1995",
+            "clause": "4.8 and 5.7"
+          }
+        ]
+      },
+      "quantity": "Tones at the decimated sampling frequency minus the nominal mid-band frequency of the 20 Hz and 200 Hz bands of the default one-third-octave bank (fs=48 kHz), run through the bank: band output at least the +75 dB of class 0 below the input",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 band outputs"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 band outputs"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "filters-weightings/iec-61260-1-2014-5-15-and-table-1/default-octave-bank-at-fs-16-khz-graded-at-its-input-rate-alias-images-of-the-decimated-bands-included-class-1-on-table-1",
+      "domain": "filters-weightings",
+      "reference": {
+        "cite": "IEC 61260-1:2014 5.15 and Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "5.15 and Table 1"
+          }
+        ]
+      },
+      "quantity": "Default octave bank at fs=16 kHz graded at its input rate, alias images of the decimated bands included: class 1 on Table 1",
+      "kind": "mask",
+      "expected": {
+        "label": "class 1"
+      },
+      "computed": {
+        "label": "class 1 (margin +0.400 dB)"
+      },
+      "deviation": {
+        "value": 0.4,
+        "label": "+0.400 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2559,11 +2771,11 @@
         "label": "class 1 (|L_out - L_c| <= 0.4 dB)"
       },
       "computed": {
-        "label": "class 1 (|L_out - L_c| <= 0.056 dB)"
+        "label": "class 1 (|L_out - L_c| <= 0.049 dB)"
       },
       "deviation": {
-        "value": 0.344,
-        "label": "+0.344 dB"
+        "value": 0.351,
+        "label": "+0.351 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2588,8 +2800,8 @@
         "value": 0.0
       },
       "computed": {
-        "value": 0.007,
-        "label": "max |(L_out - L_c) - Delta B| 0.0070 dB"
+        "value": 0.0001,
+        "label": "max |(L_out - L_c) - Delta B| 0.0001 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -2597,7 +2809,7 @@
         "value": 0.01
       },
       "deviation": {
-        "value": 0.007
+        "value": 0.0001
       },
       "precision": 4,
       "verdict": "pass"
@@ -8277,7 +8489,7 @@
         "value": 0.005
       },
       "deviation": {
-        "value": -9.92e-06
+        "value": -9.67e-06
       },
       "precision": 4,
       "verdict": "pass"
@@ -8302,7 +8514,7 @@
         "label": "m >= 0.5 (C.4.2 pass criterion)"
       },
       "computed": {
-        "label": "0.8831"
+        "label": "0.883"
       },
       "tolerance": {
         "mode": "mask",

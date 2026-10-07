@@ -152,8 +152,8 @@ _GRADED_BANK = filters.OctaveFilterBank(
 
 def test_the_pattern_limits_are_the_printed_ones() -> None:
     """IEC 61260-1:2014 5.12.2 and 5.16, as the design verifier holds them."""
-    assert compliance._BANDWIDTH_LIMITS_DB == ref.IEC61260_1_BANDWIDTH_LIMITS_DB
-    assert compliance._SUMMATION_LIMITS_DB == ref.IEC61260_1_SUMMATION_LIMITS_DB
+    assert compliance._BANDWIDTH_LIMITS_DB["2014"] == ref.IEC61260_1_BANDWIDTH_LIMITS_DB
+    assert compliance._SUMMATION_LIMITS_DB["2014"] == ref.IEC61260_1_SUMMATION_LIMITS_DB
 
 
 @pytest.mark.parametrize(
@@ -286,9 +286,8 @@ def test_the_summation_is_what_tones_through_the_bank_read(i: int) -> None:
     measured = 10.0 * math.log10(
         sum(10.0 ** (levels[k] / 10.0) for k in (j - 1, j, j + 1))
     ) - float(reference)
-    rates = np.asarray([fs / float(f) for f in bank.factor])
     omega, curve = _bank_summation(
-        bank.sos, np.asarray(bank.freq, dtype=float), rates, 1, 24, j
+        bank.sos, bank.factor, fs, np.asarray(bank.freq, dtype=float), 1, 24, j
     )
     computed = float(curve[np.argmin(np.abs(omega - _G ** (i / 24)))])
     assert computed > 0.45
@@ -362,15 +361,6 @@ def test_stateful_bank_grades_like_its_stateless_twin() -> None:
     for x, y in zip(a.bands, b.bands, strict=True):
         assert x["bandwidth_deviation_db"] == y["bandwidth_deviation_db"]
         assert x["summation_max_db"] == y["summation_max_db"]
-
-
-def test_the_1995_edition_grades_table_1_alone() -> None:
-    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
-    result = filters.verify_filter_class(bank, edition="1995")
-    assert result.requirements == ("relative_attenuation",)
-    assert "bandwidth_deviation_db" not in result.bands[0]
-    with pytest.raises(KeyError, match="'summation' was not graded"):
-        result.requirement_class("summation")
 
 
 def test_binding_margin_reads_the_requirement_and_refuses_a_foreign_class() -> None:
@@ -449,7 +439,7 @@ def test_the_class_mask_of_a_full_rate_band_stops_at_g_squared() -> None:
 
 
 def test_plotting_a_requirement_the_verdict_did_not_grade_is_refused() -> None:
-    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
+    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[800, 1200])
     result = filters.verify_filter_class(bank, edition="1995")
     with pytest.raises(ValueError, match="'requirement' must be one of"):
         result.plot(requirement="summation")

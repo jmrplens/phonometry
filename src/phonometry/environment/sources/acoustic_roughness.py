@@ -68,13 +68,9 @@ reported only when, over the length analysed, its filter has built up to
 within 0,15 dB of its steady output, the class 0 tolerance of EN 61260:1995
 4.5.3 on the integrated response. That is the reason for order 4, the lowest
 whose bank is class 0: it settles soonest. The bank is not decimated band by
-band, as the library's banks are by default: the anti-alias filter of the
-decimation lets the wavenumbers that fold onto a band around each decimated
-rate through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks
-at and beyond :math:`G^{\pm 4}` in Table 1, and 4.8 asks the anti-alias
-filters of a sampled-data system to keep aliased components from breaking
-those limits. Run at the record's own rate, a band has no alias, and its
-response is graded up to the Nyquist wavenumber. The filters of the Annex B
+band, as the library's banks are by default: run at the record's own rate, a
+band has no alias at all for 4.8 to bound, and what its response is graded on
+up to the Nyquist wavenumber is exactly what a record goes through. The filters of the Annex B
 listing do not comply with EN 61260 (see the errata register).
 
 Read from BS EN 15610:2009, which is identical to EN 15610:2009 (its national
@@ -716,14 +712,9 @@ def roughness_filter_bank(
     discards for the filter transients.
 
     The bank is designed without the band-by-band decimation the library's
-    banks use by default (``FilterDesign(resample=False)``). Decimated, it
-    would let the wavenumbers that fold onto a band around each decimated
-    rate through only about 73 dB to 75 dB down, the stopband of the
-    decimator's anti-alias filter: class 1 still, but short of the 75 dB
-    class 0 asks at and beyond :math:`G^{\pm 4}` in Table 1, and 4.8 asks
-    the anti-alias filters of a sampled-data system to keep aliased
-    components from breaking those limits. At the record's own rate a band
-    has no alias, and what the grade reads is what a record goes through.
+    banks use by default (``FilterDesign(resample=False)``). At the record's
+    own rate a band has no alias at all for 4.8 to bound, and what the grade
+    reads is exactly what a record goes through.
 
     :param sample_spacing_m: The sampling interval of the records, in metres;
         5.5 asks for 1 mm or less, and the bank needs a whole number of

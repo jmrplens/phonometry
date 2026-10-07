@@ -10368,10 +10368,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:**
   [`verify_filter_class`](../src/phonometry/filters/compliance.py) aplica los
   límites del 5.16 a la Fórmula (3) tal como está impresa, como indica el
-  7.2.4.5. Los veredictos que da a los bancos de la propia biblioteca no
+  7.2.4.5. Los veredictos que da a los bancos Butterworth por defecto no
   dependen de la lectura: a 48 kHz el banco de octavas suma de −0,06 dB a
   +0,69 dB y el de tercios de octava de −0,25 dB a +0,76 dB, los dos clase 1
-  de las dos maneras.
+  de las dos maneras. Los que da a un banco Chebyshev I o elíptico sí
+  dependen: sus salidas vecinas se solapan y suman hasta +3,01 dB por encima
+  de la entrada, que no es ninguna clase por la Fórmula (3) y es clase 2 por
+  las palabras. Su atenuación relativa ya no alcanza ninguna clase, así que
+  la clase global de un banco así es ninguna de las dos maneras.
   `test_the_summation_is_what_tones_through_the_bank_read` en
   [`tests/filters/test_pattern_evaluation.py`](../tests/filters/test_pattern_evaluation.py)
   mantiene la Fórmula (3) en lo que lee el banco en marcha.
@@ -10401,6 +10405,105 @@ dos ediciones con las mismas entradas y en el mismo orden.
   con `edition="1995"` usan la razón de base diez $G = 10^{3/10}$ de la
   ecuación (1), la que prefiere la NOTA 4, y nada en la biblioteca lee la
   ecuación (2) por su rótulo.
+- **Estado:** no reportada.
+
+## EN 61260:1995, 3.15 (la constante de normalización impresa con un factor diez de más)
+
+- **Ubicación:** apartado 3.15, "normalized effective bandwidth", página
+  impresa 6; ecuación (14) del 4.5.2, página impresa 11.
+- **Lo impreso:** el 3.15 define el ancho de banda efectivo normalizado como
+  una integral de la razón entre las señales cuadráticas medias de salida y
+  de entrada y dice "the ratio of time-mean-square signal is normalized by
+  multiplying by a constant equal to 10 $10^{0,1A_\mathrm{ref}}$ where
+  $A_\mathrm{ref}$ is the reference attenuation, in decibels; symbol
+  $B_\mathrm{e}$".
+- **El problema:** un filtro de atenuación $A$ (3.12) deja pasar la razón
+  $10^{-0,1A}$ de las señales cuadráticas medias; multiplicada por
+  $10^{0,1A_\mathrm{ref}}$ se convierte en $10^{-0,1\,\Delta A}$, el integrando
+  de la ecuación (14),
+  $B_\mathrm{e} = \int_0^\infty 10^{-0,1\,\Delta A(f/f_\mathrm{m})}\,\mathrm{d}(f/f_\mathrm{m})$.
+  La constante tal como está impresa lleva un segundo "10" delante de la
+  potencia, diez veces $10^{0,1A_\mathrm{ref}}$, lo que haría el ancho de
+  banda efectivo de la definición diez veces el de la ecuación (14) y la
+  respuesta integrada del filtro del 4.5.1 10 dB mayor, fuera de todas las
+  clases del 4.5.3. La constante debería decir $10^{0,1A_\mathrm{ref}}$.
+- **Evidencia:** leído en la página 10 del PDF (p. 6 impresa) de la
+  BS EN 61260:1996, que es la EN 61260:1995 (IEC 61260:1995) con la
+  modificación A1 incorporada, la copia fechada "© BSI 23 August 2002", frente
+  a la ecuación (14) en la página 15 del PDF (p. 11 impresa) de la misma
+  copia, que integra $10^{-0,1\,\Delta A}$ sin ese factor. La
+  ANSI S1.11-2004, que recoge la misma definición en su 3.15, imprime la
+  constante como $10^{0.1A_\mathrm{ref}}$, sin el segundo diez, leído en la
+  página 13 del PDF (p. 3 impresa) de la copia incorporada por referencia en
+  el 49 CFR 227.
+- **Comportamiento de la biblioteca:** no requiere cambios.
+  [`verify_filter_class`](../src/phonometry/filters/compliance.py) con
+  `edition="1995"` integra la ecuación (14) por la regla del trapecio de la
+  ecuación (16), sobre la propia atenuación relativa;
+  `test_equation_16_integrates_a_flat_response_to_its_span` y
+  `test_equation_16_on_an_ideal_band` en
+  [`tests/filters/test_filter_class_1995.py`](../tests/filters/test_filter_class_1995.py)
+  la fijan.
+- **Estado:** no reportada.
+
+## EN 61260:1995, 4.9 y 5.8.3, ecuación (19) (la diferencia de la suma tomada en los dos sentidos)
+
+- **Ubicación:** 4.9, página impresa 12; 5.8.3 y ecuación (19), página
+  impresa 16; 5.8.5, página impresa 17.
+- **Lo impreso:** el 4.9 dice "the difference between (a) the level of the
+  input signal minus the reference attenuation and (b) the level of the sum
+  of the time-mean-square output signals from various filters of specified
+  filter bandwidth shall not exceed ±1,0 dB; +1,0 dB, –2,0 dB and +2,0 dB,
+  –4,0 dB for classes 0, 1, and 2 instruments, respectively". El 5.8.3 define
+  "the difference $\Delta P(f_i)$ between the level of the input signal minus
+  the reference attenuation and the level of the summed output signals"
+  mediante
+  $$\Delta P(f_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB},$$
+  la ecuación (19), y el 5.8.5 exige que "the difference $\Delta P(f_i)$
+  calculated according to equation (19)" quede dentro de las tolerancias del
+  4.9.
+- **El problema:** con $\Delta A = A - A_\mathrm{ref}$ (ecuación (8)) y la
+  atenuación del filtro $A$ igual al nivel de entrada menos el de salida
+  (3.12), la ecuación (19) es el nivel de las salidas sumadas menos el nivel
+  de entrada descontada la atenuación de referencia, (b) menos (a). El texto
+  del 4.9 y del 5.8.3 nombra (a) menos (b), el mismo número con el otro
+  signo. La tolerancia de la clase 0 es simétrica y se lee igual de las dos
+  maneras; las de las clases 1 y 2 no lo son, así que en ellas son dos
+  ensayos distintos: un juego cuyas salidas suman 1,5 dB por encima de la
+  entrada no cumple la clase 1 según la ecuación (19) y la cumple según el
+  texto, y uno cuyas salidas suman 1,5 dB por debajo la cumple según la
+  ecuación (19) y no según el texto. La IEC 61260-1:2014 y la
+  IEC 61260-2:2016 arrastran el mismo conflicto (véase la entrada de la
+  IEC 61260-2:2016, 7.2.4.3 y Fórmula (3)), y también la ANSI S1.11-2004: su
+  4.9 enuncia la diferencia del mismo modo, y su anexo D, informativo, la
+  define con las mismas palabras en el D.8.3, la calcula con la ecuación (D4),
+  la misma suma de la ecuación (19), y la somete a las tolerancias del 4.9 en
+  el D.8.5.
+- **Evidencia:** una comparación de las frases con la ecuación que
+  introducen. Verificado en la página 16 del PDF (p. 12 impresa), en la
+  página 20 del PDF (p. 16 impresa) y en la página 21 del PDF (p. 17
+  impresa) de la BS EN 61260:1996, que es la EN 61260:1995 (IEC 61260:1995)
+  con la modificación A1 incorporada, la copia fechada "© BSI 23 August
+  2002", con el 3.12 en la página 9 del PDF (p. 5 impresa) y la ecuación (8)
+  en la página 10 del PDF (p. 6 impresa). La ANSI S1.11-2004, leída en la
+  página 16 del PDF (p. 6 impresa) para el 4.9 y en la página 30 del PDF
+  (p. 20 impresa) para el D.8.3 a D.8.5, en la copia incorporada por
+  referencia en el 49 CFR 227.
+- **Comportamiento de la biblioteca:**
+  [`verify_filter_class`](../src/phonometry/filters/compliance.py) con
+  `edition="1995"` aplica las tolerancias del 4.9 a la ecuación (19) tal como
+  está impresa, como indica el 5.8.5. Los veredictos que da a los bancos
+  Butterworth por defecto no dependen de la lectura: a 48 kHz el banco de
+  octavas suma de −0,62 dB a +0,69 dB y el de tercios de octava de −0,66 dB
+  a +0,76 dB, los dos dentro de la clase 0. Los que da a un banco
+  Chebyshev I o elíptico sí dependen: sus salidas vecinas se solapan y suman
+  hasta +3,01 dB por encima de la entrada, que no es ninguna clase por la
+  ecuación (19) y es clase 2 por las palabras. Su atenuación relativa ya no
+  alcanza ninguna clase, así que la clase global de un banco así es ninguna
+  de las dos maneras.
+  `test_the_4_9_limits_bound_equation_19_as_printed` en
+  [`tests/filters/test_filter_class_1995.py`](../tests/filters/test_filter_class_1995.py)
+  fija la lectura.
 - **Estado:** no reportada.
 
 ## IEC 61672-1:2013, tabla 3 (el límite inferior de clase 1 a 6 300 Hz impreso con punto decimal)

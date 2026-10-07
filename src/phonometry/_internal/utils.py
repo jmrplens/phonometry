@@ -71,20 +71,32 @@ def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
     return samples
 
 
-def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.ndarray:
+def _resample_to_length(
+    y: np.ndarray,
+    factor: int,
+    target_length: int,
+    *,
+    taps: np.ndarray | None = None,
+) -> np.ndarray:
     """Resample signal and ensure the output matches target_length exactly.
     Handles both 1D and 2D (channels, samples) arrays.
 
     :param y: Input signal.
     :param factor: Resampling factor.
     :param target_length: Target length.
+    :param taps: The interpolation filter, unit gain at DC, or ``None`` for
+        the one :func:`scipy.signal.resample_poly` designs.
     :return: Resampled signal.
     """
     if factor == 1:
         # Nothing to resample: fall through to the slice/pad logic only.
         y_resampled = y
-    else:
+    elif taps is None:
         y_resampled = cast(np.ndarray, signal.resample_poly(y, factor, 1, axis=-1))
+    else:
+        y_resampled = cast(
+            np.ndarray, signal.resample_poly(y, factor, 1, axis=-1, window=taps)
+        )
     current_length = y_resampled.shape[-1]
 
     if current_length > target_length:

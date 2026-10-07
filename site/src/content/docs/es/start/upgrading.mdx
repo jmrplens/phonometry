@@ -583,14 +583,22 @@ print(carpet.approximate)
 de 2014 califica ahora también la desviación del ancho de banda efectivo del
 5.12 y la suma de las señales de salida del 5.16, calculadas como las calcula
 IEC 61260-2:2016, y la `class` de una banda y la `overall_class` del banco son
-la clase más estricta que se cumple en los tres. Un veredicto con
-`edition="1995"` no cambia.
+la clase más estricta que se cumple en los tres. Para la edición de 1995
+califica la respuesta integrada del filtro del 4.5.3 y la suma de las señales
+de salida del 4.9 junto a la Tabla 1, como las ensaya el capítulo 5 de esa
+edición. En las dos ediciones cada banda se califica a la frecuencia de
+entrada del banco hasta su mitad, así que una banda diezmada se califica
+sobre las imágenes que su diezmado pliega sobre ella, y el diezmador del banco
+las deja a más de 125 dB por debajo.
 
 | Antes | 4.0 |
 | --- | --- |
 | cada banda de un banco diezmado se diezmaba hasta que su frecuencia de Nyquist de proceso era 1,25 veces su borde superior de banda | se diezma sólo hasta dejarla en dieciséis veces ese borde, así que la transformación bilineal ya no deforma la banda: el nivel de una banda se mueve hasta 0,07 dB con ruido blanco, sobre todo en las bandas más bajas, y el banco de octavas, que sumaría sus salidas hasta +0,94 dB y leería clase 2 en el 5.16, es clase 1 en todos los requisitos |
 | la `class` de una banda leída de `margin_class{c}_db` | `class` sobre todos los requisitos; `margin_class{c}_db` sigue siendo el margen de la Tabla 1, junto a `bandwidth_margin_class{c}_db` y `summation_margin_class{c}_db`, que vale `None` en las dos bandas de los extremos |
 | un solo requisito por el que preguntar | `requirements`, `requirement_class(name)` y `binding_margin_db(name, cls)` leen cada uno por separado, y `plot(requirement="summation")` lo dibuja |
+| un veredicto con `edition="1995"` solo sobre la Tabla 1 | la Tabla 1, `"effective_bandwidth"` (la respuesta integrada del filtro del 4.5.3) y `"summation"` (4.9, recorrida de la frecuencia central más baja a la más alta, así que las bandas de los extremos también la llevan), las dos con la S que el 5.3.3 sube en pasos de 12 hasta que la respuesta integrada se estabiliza, que el `points_per_bandwidth` del resultado indica (36 para el banco de octavas por defecto) |
+| una banda diezmada calificada hasta la frecuencia de Nyquist de su frecuencia diezmada, con `checked_to_omega` parado ahí | calificada a la frecuencia de entrada hasta su mitad, imágenes incluidas; `checked_to_omega` es la mitad de la frecuencia de entrada entre la frecuencia central, y `range_limited` marca una máscara de la Tabla 1 que sigue más allá |
+| el filtro antialiasing que `scipy.signal.resample_poly` diseña por defecto, que dejaba las imágenes del banco de octavas a 8, 16 y 32 kHz 68,9 dB por debajo, sin llegar a los 70 dB de la clase 1 | un filtro de la misma longitud dimensionado para una banda atenuada de 120 dB, con sus imágenes al menos 125,4 dB por debajo; el nivel de una banda se mueve menos de 0,01 dB |
 
 Los bancos de octavas y de tercios de octava siguen siendo clase 1.
 
@@ -600,7 +608,7 @@ from phonometry import filters
 octave = filters.verify_filter_class(
     filters.OctaveFilterBank(48000, fraction=1, limits=[125, 4000]))
 print(octave.overall_class, octave.requirement_class("relative_attenuation"))
-# 2 1
+# 1 1
 ```
 
 ## Los diez nombres que ya no están
@@ -627,15 +635,18 @@ actualizar, eso es un defecto y merece la pena
 [avisar](https://github.com/jmrplens/phonometry/issues).
 
 Un veredicto es la excepción, y la sección sobre las clases de filtro de más
-arriba explica cómo: para la edición de 2014, `verify_filter_class` califica el
-ancho de banda efectivo del 5.12 y la suma de salidas del 5.16 además de la
-máscara de la Tabla 1, así que la clase de un banco es la más estricta que
-cumple en los tres. Sus márgenes de la Tabla 1 y un veredicto con
-`edition="1995"` son los números que eran.
+arriba explica cómo: `verify_filter_class` califica el ancho de banda efectivo
+del 5.12 y la suma de salidas del 5.16 además de la máscara de la Tabla 1 para
+la edición de 2014, y la respuesta integrada del filtro del 4.5.3 y la suma del
+4.9 con `edition="1995"`, así que la clase de un banco es la más estricta que
+cumple en los tres. Cada banda se califica a la frecuencia de entrada del banco
+hasta la mitad de ella, así que los márgenes de la Tabla 1 de una banda
+diezmada recogen las imágenes que su diezmado pliega sobre ella.
 
 Los bancos de filtros diezmados son la otra: cada banda conserva ahora su
-frecuencia de Nyquist de proceso en dieciséis veces su borde superior, así que
-el nivel de una banda se mueve hasta 0,07 dB con ruido blanco, como dice la
+frecuencia de Nyquist de proceso en dieciséis veces su borde superior y diezma
+con un filtro antialiasing dimensionado para una banda atenuada de 120 dB, así
+que el nivel de una banda se mueve hasta 0,07 dB con ruido blanco, como dice la
 misma sección.
 
 Lo que dibuja cada `.plot()` está intacto, y también lo que imprime cada

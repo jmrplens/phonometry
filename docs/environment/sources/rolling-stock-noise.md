@@ -112,10 +112,9 @@ run at the record's samples per metre, order 4 Butterworth sections on the
 base-ten bands Method A reports, class 0 of EN 61260:1995 on Table 1, on the
 integrated response of 4.5.3 and on the summation of 4.9. Every band runs at
 the record's own rate, without the band-by-band decimation the library's banks
-use by default: decimated, the wavenumbers that fold onto a band would come
-through only about 73 dB to 75 dB down, short of the 75 dB class 0 asks beyond
-$G^{\pm 4}$, so the grade here reaches the Nyquist wavenumber of the record and
-covers all a record goes through. A band is reported
+use by default: a band then has no alias at all, so the grade here reaches the
+Nyquist wavenumber of the record and covers exactly what a record goes
+through. A band is reported
 when its filter has settled to within 0,15 dB (the class 0 tolerance of 4.5.3)
 over the length analysed: a 5 m record reports from 0,25 m, a 20 m one from
 0,5 m.

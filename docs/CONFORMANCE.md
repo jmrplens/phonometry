@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1877/1877 conformance checks pass** across 111 domains and 521 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1884/1884 conformance checks pass** across 111 domains and 521 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -51,9 +51,9 @@
 
 | Architecture | Class verdict | Binding band | Measured rel. atten. | Class-1 limit | Margin cl.1 | Margin cl.2 |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| butter | ![Pass][cv-pass] Class 1 (default) | 501 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
+| butter | ![Pass][cv-pass] Class 1 (default) | 631 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
 | cheby1 | ![By design][cv-by-design] By design (passband ripple) | 10000 Hz | +0.16 dB | &ge; +1.41 dB | -1.245 dB | -0.837 dB |
-| cheby2 | ![Pass][cv-pass] Class 1 | 794 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
+| cheby2 | ![Pass][cv-pass] Class 1 | 631 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
 | ellip | ![By design][cv-by-design] By design (passband ripple) | 10000 Hz | +0.10 dB | &ge; +1.32 dB | -1.218 dB | -0.813 dB |
 | bessel | ![By design][cv-by-design] By design (soft rolloff) | 10000 Hz | +9.82 dB | &ge; +10.62 dB | -0.799 dB | -0.045 dB |
 
@@ -71,13 +71,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Filters &amp; weightings</b>: 100% (12/12)</summary>
+<summary><b>Filters &amp; weightings</b>: 100% (19/19)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
 | IEC 61260-1:2014 Table 1 | Octave-band filter class (butterworth, fs=48 kHz) | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | - | ![Pass][cv-pass] Pass |
 | IEC 61260-1:2014 Table 1 | One-third-octave filter class (butterworth, fs=48 kHz) | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | - | ![Pass][cv-pass] Pass |
 | IEC 61260:1995 / ANSI S1.11-2004 Table 1 | Class 0 (strictest) octave-band filter (butterworth, fs=48 kHz) | class 0 | class 0 (margin +0.150 dB) | +0.150 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260:1995 4.5.3 and 5.4 | Octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): largest \|Delta B\| of equations (13), (14) and (16) within the class 0 +/-0.15 dB | class 0 (\|Delta B\| <= 0.15 dB) | class 0 (\|Delta B\| <= 0.050 dB) | +0.100 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260:1995 4.5.3 and 5.4 | One-third-octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): largest \|Delta B\| of equations (13), (14) and (16) within the class 0 +/-0.15 dB | class 0 (\|Delta B\| <= 0.15 dB) | class 0 (\|Delta B\| <= 0.050 dB) | +0.100 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260:1995 4.9 and 5.8 | Octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): summed outputs of equation (19), lowest to highest mid-band frequency, within the class 0 +/-1.0 dB | class 0 (-1.0 dB <= Delta P <= +1.0 dB) | class 0 (+0.000 dB to +0.164 dB) | +0.836 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260:1995 4.9 and 5.8 | One-third-octave Butterworth bank (fs=48 kHz, 125 Hz to 4 kHz): summed outputs of equation (19), lowest to highest mid-band frequency, within the class 0 +/-1.0 dB | class 0 (-1.0 dB <= Delta P <= +1.0 dB) | class 0 (+0.000 dB to +0.163 dB) | +0.837 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260:1995 equations (9) and (16) | Ideal octave band, S = 24, N = 5S: filter integrated response of the trapezoidal sum equals its hand sum interval by interval (closed form) | 0.000899 dB (+/-0 dB) | 0.000899 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260:1995 4.8 and 5.7 | Tones at the decimated sampling frequency minus the nominal mid-band frequency of the 20 Hz and 200 Hz bands of the default one-third-octave bank (fs=48 kHz), run through the bank: band output at least the +75 dB of class 0 below the input | 2/2 band outputs | 2/2 band outputs | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.15 and Table 1 | Default octave bank at fs=16 kHz graded at its input rate, alias images of the decimated bands included: class 1 on Table 1 | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | - | ![Pass][cv-pass] Pass |
 | IEC 651:1979 Table V (via BS 5969:1981) | Type 0 (strictest) A-weighting tolerance mask (fs=48 kHz) | Type 0 | Type 0 (margin +0.650 dB) | +0.650 dB | - | ![Pass][cv-pass] Pass |
 | IEC 651:1979 Table V (via BS 5969:1981) | Type 0 (strictest) C-weighting tolerance mask (fs=48 kHz) | Type 0 | Type 0 (margin +0.667 dB) | +0.667 dB | - | ![Pass][cv-pass] Pass |
 | IEC 61260-1:2014 Table F.1 | Formula (9) breakpoint mapping, b=3, Omega at G**(1/2) | 1.12202 (+/-0.00001) | 1.12202 | 0 | 31 % | ![Pass][cv-pass] Pass |
@@ -129,8 +136,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61260-2:2016 Formula (3) | Ideal bank: summed outputs restore the input inside a band and on its edges (closed form) | 0 dB (+/-0 dB) | max \|Delta P\| below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61260-1:2014 5.12.2 / IEC 61260-2:2016 7.2.3 | One-third-octave Butterworth bank (fs=48 kHz): largest \|Delta B\| within the class 1 +/-0.4 dB | class 1 (\|Delta B\| <= 0.4 dB) | class 1 (\|Delta B\| <= 0.049 dB) | +0.351 dB | - | ![Pass][cv-pass] Pass |
 | IEC 61260-1:2014 5.16 / IEC 61260-2:2016 7.2.4 | One-third-octave Butterworth bank (fs=48 kHz): summed outputs within the class 1 +0.8/-1.8 dB | class 1 (-1.8 dB <= Delta P <= +0.8 dB) | class 1 (+0.000 dB to +0.248 dB) | +0.552 dB | - | ![Pass][cv-pass] Pass |
-| IEC 61260-1:2014 5.14.3 / IEC 61260-2:2016 7.4 | One-third-octave multirate bank swept at 2 and 5 s per decade: \|L_out - L_c\| within class 1 +/-0.4 dB | class 1 (\|L_out - L_c\| <= 0.4 dB) | class 1 (\|L_out - L_c\| <= 0.056 dB) | +0.344 dB | - | ![Pass][cv-pass] Pass |
-| IEC 61260-1:2014 Annex G, G.2.8 | Swept deviation of a time-invariant band equals its effective bandwidth deviation | 0 dB (+/-0.01 dB) | max \|(L_out - L_c) - Delta B\| 0.0070 dB | 0.007 dB | 70 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.14.3 / IEC 61260-2:2016 7.4 | One-third-octave multirate bank swept at 2 and 5 s per decade: \|L_out - L_c\| within class 1 +/-0.4 dB | class 1 (\|L_out - L_c\| <= 0.4 dB) | class 1 (\|L_out - L_c\| <= 0.049 dB) | +0.351 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Annex G, G.2.8 | Swept deviation of a time-invariant band equals its effective bandwidth deviation | 0 dB (+/-0.01 dB) | max \|(L_out - L_c) - Delta B\| 0.0001 dB | 0.0001 dB | 1 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -507,7 +514,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.5 | 0.5 (+/-0.01) | 0.4998 | -0.0002 | 2 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.8 | 0.7 (+/-0.01) | 0.7002 | 0.0002 | 2 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.3 | Indirect method: exponential decay RT60=1 s vs Schroeder MTF | 0.5885 (+/-0.005) | 0.5885 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16:2020 C.4.2 | Filter-bank slope: +41 dB unmodulated tone one octave below 125 Hz | m >= 0.5 (C.4.2 pass criterion) | 0.8831 | headroom 0.383 | - | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2020 C.4.2 | Filter-bank slope: +41 dB unmodulated tone one octave below 125 Hz | m >= 0.5 (C.4.2 pass criterion) | 0.883 | headroom 0.383 | - | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 A.2.2 (audio path) | Weighting factors: modulated 500 Hz + 1 kHz pair through stipa() | 0.398 (+/-0.005) | 0.398 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 A.3.1.2 (audio path) | Filter-bank phase: half-octave edge carriers at TI=0.9 | 0.9 (+/-0.01) | 0.8981 | -0.0019 | 19 % | ![Pass][cv-pass] Pass |
 

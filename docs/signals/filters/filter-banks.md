@@ -71,7 +71,10 @@ the unit circle, and the SOS coefficients return to a well-conditioned range.
 The price is bookkeeping the bank pays internally: an anti-alias low-pass must
 run before every decimation stage, because a component above the new Nyquist
 that folds down lands *inside* the low bands being measured, and no later
-filter can remove it.
+filter can remove it. The bank's is a linear-phase Kaiser-windowed filter
+sized for a 120 dB stopband, which keeps every image the decimation folds onto
+a band more than 125 dB below it, and `verify_filter_class` grades those
+images against Table 1 of IEC 61260.
 
 ### Aliasing pitfalls
 

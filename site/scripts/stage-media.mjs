@@ -49,7 +49,7 @@ import {
   rmSync,
   statSync,
 } from 'node:fs';
-import { dirname, extname, join, resolve } from 'node:path';
+import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -57,13 +57,36 @@ const repoRoot = join(here, '..', '..');
 const target = join(here, '..', 'public', 'media');
 
 /**
+ * The repository .env, from a linked worktree as well, as scripts/repo_env.py
+ * finds it.
+ *
+ * .env is untracked, so it exists only beside the main checkout. In a linked
+ * worktree, .git is a file pointing at the common git dir (absolute, or
+ * relative to the worktree), and the directory holding that git dir is the
+ * main checkout, whose .env is the one meant.
+ */
+function dotEnvFile() {
+  const local = join(repoRoot, '.env');
+  if (existsSync(local)) return local;
+  const pointerFile = join(repoRoot, '.git');
+  if (!existsSync(pointerFile) || !statSync(pointerFile).isFile()) return local;
+  const pointer = readFileSync(pointerFile, 'utf8').trim();
+  if (!pointer.startsWith('gitdir:')) return local;
+  const common = resolve(repoRoot, pointer.slice('gitdir:'.length).trim());
+  for (let dir = dirname(common); dir !== dirname(dir); dir = dirname(dir)) {
+    if (basename(dir) === '.git') return join(dirname(dir), '.env');
+  }
+  return local;
+}
+
+/**
  * The value of KEY in the repository .env, dotenv-style, or undefined.
  *
- * The same file and the same precedence as scripts/fdtd_gpu_remote.py: a real
+ * The same file and the same precedence as scripts/repo_env.py: a real
  * environment variable wins, the file fills in what is unset, quotes come off.
  */
 function fromDotEnv(key) {
-  const file = join(repoRoot, '.env');
+  const file = dotEnvFile();
   if (!existsSync(file)) return undefined;
   for (const raw of readFileSync(file, 'utf8').split('\n')) {
     const line = raw.trim();

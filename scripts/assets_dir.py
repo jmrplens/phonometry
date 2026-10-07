@@ -23,6 +23,12 @@ Resolution, in order:
 Nothing falls back to ``.github/images``. A clip written there would be
 reported by ``check_figures.py`` as a figure nobody committed, and the whole
 point of the split is that no clip enters this repository again.
+
+Only the standard library is imported here: ``.env`` is read by
+:mod:`repo_env`, not by the GPU runner, which needs NumPy. Asking where the
+clips are has to work where nothing is installed, because
+``check_animation_freshness.py`` promises to ride in any job and ``make
+assets`` is the first thing a fresh clone runs.
 """
 
 from __future__ import annotations
@@ -30,7 +36,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import fdtd_gpu_remote
+import repo_env
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -59,7 +65,7 @@ def clips_dir() -> Path:
     Reads ``.env`` first, dotenv-style, so a value set there beside the GPU
     host is honoured without exporting anything.
     """
-    fdtd_gpu_remote.load_env()
+    repo_env.load_env()
     configured = os.environ.get(VARIABLE, "").strip()
     return Path(configured).expanduser() if configured else default_dir()
 

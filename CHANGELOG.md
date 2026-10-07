@@ -2368,6 +2368,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   resilient layers, which is the thinnest class the library holds and
   therefore the one a reader is most likely to go looking for, and the
   published air conditions.
+- **The check of the published clips runs where NumPy is not installed.**
+  `scripts/check_animation_freshness.py` says it rides in any job, but asking
+  where the clips are checked out read `.env` through the GPU runner, which
+  imports NumPy before anything else, so the check stopped on
+  `ModuleNotFoundError` wherever only the standard library was there, and so
+  did `make assets` on a fresh clone. The `.env` reader is now
+  `scripts/repo_env.py`, which imports the standard library alone.
+  `tests/test_scripts_without_numpy.py` reads the workflows for every script a
+  job without NumPy runs, follows `make` targets into the Makefile, and imports
+  each one, together with the two scripts that promise the same outside CI,
+  in an interpreter without site-packages, or with NumPy refused where the job
+  installs tools of its own. From a linked worktree, which has no `.env` of
+  its own, the site build now reads the main checkout's `.env` for
+  `PHONOMETRY_ASSETS_DIR` as the Python scripts already did, where before it
+  looked only beside itself.
+- **The check of the published clips gives the same answer on every Python.**
+  A clip's fingerprint hashes the printed syntax tree of the code that draws
+  it, and Python 3.11 and 3.12 print the empty lists of a tree that 3.13 and
+  3.14 leave out, so on the older two the check called every clip stale.
+  `scripts/animation_fingerprint.py` now drops the empty lists before
+  printing; the stamps already committed hold on all four versions, and
+  `tests/test_animation_fingerprint.py` pins the print of a fragment that
+  carries each kind of empty list, printed the way the older versions print.
 
 ### Changed
 

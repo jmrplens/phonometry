@@ -18,10 +18,10 @@ remote is configured or reachable. The flow is file-based and stateless:
    stepping time, so callers can report throughput honestly.
 
 Configuration comes from environment variables, optionally loaded from the
-repository ``.env`` (never committed; see ``.env.example``): PHONO_GPU_HOST,
-PHONO_GPU_USER, PHONO_GPU_NAME, PHONO_GPU_DOCKER_IMAGE, PHONO_GPU_WORKDIR.
-Real environment variables take precedence over the file, dotenv-style; the
-parser is self-contained so python-dotenv is not a dependency.
+repository ``.env`` (never committed; see ``.env.example``) by
+:func:`repo_env.load_env`: PHONO_GPU_HOST, PHONO_GPU_USER, PHONO_GPU_NAME,
+PHONO_GPU_DOCKER_IMAGE, PHONO_GPU_WORKDIR. Real environment variables take
+precedence over the file, dotenv-style.
 
 If the remote host does not answer (or the transfer/run fails), the runner
 prints a clear notice and finishes the job locally instead of raising, so
@@ -58,66 +58,21 @@ if str(_SCRIPTS) not in sys.path:
 
 import fdtd_gpu
 import job_runner
+import repo_env
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from numpy.typing import NDArray
 
-_REPO_ROOT = _SCRIPTS.parent
-
-
-def _env_file() -> Path:
-    """The ``.env`` holding the GPU settings, from a worktree as well.
-
-    ``.env`` is untracked, so it exists only next to the main checkout. Run
-    from a linked worktree, the copy beside this file is absent and every
-    setting would read as unset, which downgrades an AV1 render to VP9 without
-    saying so. Fall back to the directory holding the common git dir, which is
-    the main checkout for every worktree of the repository.
-    """
-    local = _REPO_ROOT / ".env"
-    if local.is_file():
-        return local
-    git_dir = _REPO_ROOT / ".git"
-    if git_dir.is_file():  # a worktree: the file points at the common git dir
-        pointer = git_dir.read_text(encoding="utf-8").strip()
-        if pointer.startswith("gitdir:"):
-            common = Path(pointer.split(":", 1)[1].strip())
-            for parent in common.parents:
-                if parent.name == ".git":
-                    return parent.parent / ".env"
-    return local
-
-
-_ENV_FILE = _env_file()
-
 _CONNECT_TIMEOUT_S = 8
 _DEFAULT_JOB_TIMEOUT_S = 900.0
 
-
-def load_env(path: Path = _ENV_FILE) -> dict[str, str]:
-    """Read ``KEY=VALUE`` lines from *path* into the process environment.
-
-    Comments (``#``) and blank lines are skipped, surrounding quotes are
-    stripped, and variables already present in ``os.environ`` are left
-    untouched (real environment wins, as python-dotenv does). Returns the
-    mapping that was read (before precedence), for inspection.
-    """
-    values: dict[str, str] = {}
-    if not path.is_file():
-        return values
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, _, value = line.partition("=")
-        key = key.strip()
-        value = value.strip().strip("'\"")
-        if key:
-            values[key] = value
-            os.environ.setdefault(key, value)
-    return values
+#: The ``.env`` reader, owned by :mod:`repo_env` so that resolving the clips
+#: directory never imports NumPy. Named here as well because the field
+#: builders that reach the GPU through this module call it as
+#: ``fdtd_gpu_remote.load_env()``.
+load_env = repo_env.load_env
 
 
 @dataclass(frozen=True)

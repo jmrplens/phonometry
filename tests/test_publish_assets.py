@@ -133,7 +133,7 @@ def test_the_message_names_what_was_rendered(names: list[str], expected: str) ->
 def test_the_resolver_honours_the_variable_and_falls_back_to_the_sibling(
     monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
 ) -> None:
-    monkeypatch.setattr(assets_dir.fdtd_gpu_remote, "load_env", dict)
+    monkeypatch.setattr(assets_dir.repo_env, "load_env", dict)
     monkeypatch.setenv(assets_dir.VARIABLE, str(tmp_path / "elsewhere"))
     assert assets_dir.clips_dir() == tmp_path / "elsewhere"
     monkeypatch.delenv(assets_dir.VARIABLE)

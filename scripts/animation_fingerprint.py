@@ -42,7 +42,9 @@ re-render, so an alarm nobody believes would be worse than no alarm.
 
 * **The hash is over the AST, not the source text.** Reformatting, a
   reflowed comment or a rewritten docstring cannot move it; only a change to
-  what the code *does* can.
+  what the code *does* can. Nor can the interpreter that reads it: the tree
+  is printed without its empty lists, which is the one place Python 3.11 to
+  3.14 print the same tree differently (:func:`_drop_empty_lists`).
 * **The two big translation tables are excluded wholesale** and re-entered
   entry by entry. ``_ES_EXACT`` has thousands of lines and changes with every
   figure that gains a Spanish string; hashing it whole would mark all
@@ -67,8 +69,10 @@ Known gaps, deliberately
 from __future__ import annotations
 
 import ast
+import contextlib
 import hashlib
 import pathlib
+import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -413,9 +417,50 @@ def _strip_docstrings(node: ast.AST) -> ast.AST:
     return clone
 
 
+def _drop_empty_lists(tree: ast.AST) -> ast.AST:
+    """*tree* without its empty lists, so every interpreter prints it alike.
+
+    ``ast.dump`` does not print one tree the same way on every Python. 3.11
+    and 3.12 print every empty list a node carries (``decorator_list=[]``,
+    ``bases=[]``, ``posonlyargs=[]``, ``kw_defaults=[]``, ``type_ignores=[]``
+    and the like, and on 3.12 the ``type_params=[]`` it gave each function
+    and class), and 3.13 stopped printing them. Hashed as printed, the same
+    sources fingerprinted one way on 3.11 and 3.12 and another on 3.13 and
+    3.14, and the freshness check called every clip stale wherever it ran on
+    the older two. With the empty lists removed each of them prints what 3.13
+    prints by default, so the stamps already committed hold on all four. An
+    optional field holding ``None`` needs nothing: every one of these versions
+    leaves it out of the print already, and a ``None`` that is a literal in
+    the source (``Constant``, ``MatchSingleton``) is printed by all of them.
+
+    Mutates *tree*, which :func:`_strip_docstrings` has already copied.
+    """
+    for node in ast.walk(tree):
+        for name in node._fields:
+            value = getattr(node, name, None)
+            if isinstance(value, list) and not value:
+                with contextlib.suppress(AttributeError):
+                    delattr(node, name)
+    return tree
+
+
+#: Printed the way 3.11 and 3.12 print, empty lists and all, where the
+#: interpreter can choose. Once :func:`_drop_empty_lists` has run there is
+#: no empty list left, so the print is what 3.13 gives by default; asking for
+#: the older behaviour only means that without the drop the print would
+#: change on every interpreter, not just the older ones, and a test run on
+#: any of them would say so.
+_SHOW_EMPTY: dict[str, bool] = (
+    {"show_empty": True} if sys.version_info >= (3, 13) else {}
+)
+
+
 def _dump(node: ast.AST) -> str:
     return ast.dump(
-        _strip_docstrings(node), annotate_fields=True, include_attributes=False
+        _drop_empty_lists(_strip_docstrings(node)),
+        annotate_fields=True,
+        include_attributes=False,
+        **_SHOW_EMPTY,
     )
 
 

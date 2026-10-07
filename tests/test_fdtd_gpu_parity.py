@@ -19,7 +19,6 @@ engine only through that path.
 from __future__ import annotations
 
 import json
-import os
 import pathlib
 import sys
 from typing import TYPE_CHECKING, Any
@@ -499,25 +498,6 @@ def test_submit_falls_back_to_local_numpy_run(
     err = capsys.readouterr().err
     assert "docker run failed" in err
     assert "falling back to a local NumPy run" in err
-
-
-def test_load_env_real_environment_wins(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
-) -> None:
-    """An exported variable beats the .env file; missing ones are loaded."""
-    env_file = tmp_path / ".env"
-    env_file.write_text(
-        '# comment line\nPHONO_GPU_HOST=file-host\nPHONO_GPU_NAME="lab GPU"\n',
-        encoding="utf-8",
-    )
-    monkeypatch.setenv("PHONO_GPU_HOST", "env-host")
-    # Guarantee the variable is absent and restored either way.
-    monkeypatch.setenv("PHONO_GPU_NAME", "sentinel")
-    monkeypatch.delenv("PHONO_GPU_NAME")
-    values = fdtd_gpu_remote.load_env(env_file)
-    assert values == {"PHONO_GPU_HOST": "file-host", "PHONO_GPU_NAME": "lab GPU"}
-    assert os.environ["PHONO_GPU_HOST"] == "env-host"  # real env wins
-    assert os.environ["PHONO_GPU_NAME"] == "lab GPU"  # quotes stripped
 
 
 def _remote_frames(

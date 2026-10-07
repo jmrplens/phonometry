@@ -19,6 +19,7 @@ ask what the fingerprint did about it.
 
 from __future__ import annotations
 
+import ast
 import pathlib
 import sys
 from typing import Self
@@ -273,6 +274,70 @@ def test_a_change_that_cannot_reach_a_clip_leaves_it_alone(
     before = fp.fingerprints(tree)
     edit(tree, module, old, new)
     assert fp.fingerprints(tree) == before
+
+
+#: A class, functions with and without a keyword default and a bare lambda:
+#: every kind of empty list a node carries (``bases``, ``keywords``,
+#: ``decorator_list``, ``posonlyargs``, ``kwonlyargs``, ``kw_defaults``,
+#: ``defaults``, ``args``, ``type_ignores`` and, on 3.12, ``type_params``).
+#: And the two kinds of ``None``: an optional field left unset (a step-only
+#: slice, a ``**`` argument), which no interpreter prints, and a literal
+#: (``return None``, ``case None``), which every one prints and must keep.
+_EVERY_EMPTY_FIELD = """
+class Panel:
+    def draw(self, ax, *, label=None):
+        ax.plot(x[::2], **style)
+        return None
+
+def pick(kind):
+    match kind:
+        case None:
+            return lambda: 0
+"""
+
+#: What every interpreter from 3.11 to 3.14 prints for it. Measured on all
+#: four; before the empty lists were dropped, 3.11 and 3.12 printed
+#: ``decorator_list=[]``, ``bases=[]``, ``type_ignores=[]`` and the other
+#: empty lists, and 3.12 ``type_params=[]`` as well, where 3.13 prints
+#: nothing, and called every published clip stale.
+_PRINTED = (
+    "Module(body=[ClassDef(name='Panel', body=[FunctionDef(name='draw', "
+    "args=arguments(args=[arg(arg='self'), arg(arg='ax'), arg(arg='label')], "
+    "defaults=[Name(id='<no default>', ctx=Load()), Name(id='<no default>', "
+    "ctx=Load()), Constant(value=None)]), body=[Expr(value=Call(func=Attribute("
+    "value=Name(id='ax', ctx=Load()), attr='plot', ctx=Load()), "
+    "args=[Subscript(value=Name(id='x', ctx=Load()), slice=Slice(step="
+    "Constant(value=2)), ctx=Load())], keywords=[keyword(value=Name("
+    "id='style', ctx=Load()))])), Return(value=Constant(value=None))])]), "
+    "FunctionDef(name='pick', args=arguments(args=[arg(arg='kind')], "
+    "defaults=[Name(id='<no default>', ctx=Load())]), body=[Match(subject="
+    "Name(id='kind', ctx=Load()), cases=[match_case(pattern=MatchSingleton("
+    "value=None), body=[Return(value=Lambda(args=arguments(), body=Constant("
+    "value=0)))])])])])"
+)
+
+
+def test_the_tree_prints_the_same_on_every_interpreter() -> None:
+    """The hash is over the printed tree, so the print may not vary.
+
+    The freshness check runs wherever the sources are, a site build with an
+    older system Python included, and stamps written on 3.13 have to hold
+    there.
+    """
+    assert fp._dump(ast.parse(_EVERY_EMPTY_FIELD)) == _PRINTED
+
+
+def test_no_empty_list_survives_to_be_printed() -> None:
+    """What the line above cannot see from one interpreter: the rule itself.
+
+    A field still holding ``[]`` would be printed by 3.11 and 3.12 and
+    skipped by 3.13, so none may remain on the node.
+    """
+    tree = fp._drop_empty_lists(ast.parse(_EVERY_EMPTY_FIELD))
+    for node in ast.walk(tree):
+        held = vars(node)
+        for name in node._fields:
+            assert held.get(name) != [], f"{type(node).__name__}.{name} is empty"
 
 
 def test_a_new_clip_is_reported_rather_than_ignored(tree: pathlib.Path) -> None:

@@ -10,13 +10,15 @@ keeps honest. The glossary the gate also holds is fixed the same way, against
 the sentences that shipped «seno» for the waveform, «incertidumbre
 extendida» for the GUM's expanded uncertainty, «media cuadrática» and
 «cuadrado medio» for the mean square, and «presupuesto» for a budget of
-quantities that add up, which the glossary calls a «balance».
+quantities that add up, which the glossary calls a «balance»; and against
+the analysis of variance, the one place «cuadrado medio» is right.
 """
 
 from __future__ import annotations
 
 import pathlib
 import sys
+import time
 import unicodedata
 
 import pytest
@@ -554,9 +556,312 @@ def test_a_quadratic_mean_context_holds_only_its_own_sentence(text: str) -> None
 def test_a_mean_square_called_cuadrado_medio_is_found(
     text: str, found: list[tuple[str, str]]
 ) -> None:
-    """The statistician's term for the mean square, which the glossary rules out."""
+    """The statistician's term for the mean square of a signal, ruled out there."""
     assert _departures(text) == found
     assert _departures(text, page=True) == found
+
+
+_SIGNAL_MEAN_SQUARE = [("cuadrado medio", "valor cuadrático medio")]
+
+
+@pytest.mark.parametrize(
+    ("text", "found"),
+    [
+        # The time weighting guide as it shipped, beside its degree of freedom.
+        (
+            "Es una estimación insesgada pero extremadamente ruidosa del cuadrado\n"
+            "  medio (un grado de libertad) y, para un tono, depende por completo",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # The degrees of freedom of a multitaper estimate.
+        (
+            "el cuadrado medio promediado acarrea unos $2K$ grados de libertad "
+            "chi-cuadrado de un único registro",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # What a level accumulates block by block.
+        (
+            "el cuadrado medio de una grabación no tiene constante de tiempo ni "
+            "detector, solo una suma de cuadrados y un recuento de muestras",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # The noise a synchronous average leaves.
+        (
+            "el cuadrado medio del ruido residual cae con el número de promedios",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # The mean square error of a filter, which an analysis of variance
+        # also writes «cuadrado medio del error».
+        ("el cuadrado medio del error del filtro adaptativo", _SIGNAL_MEAN_SQUARE),
+        # The definition of an analysis of variance, Montgomery's words
+        # (Diseño y análisis de experimentos, 2.ª ed., Limusa Wiley, 2004,
+        # PDF page 145, folio 130), which names neither the analysis nor its
+        # groups and so is no more than a signal could say.
+        (
+            "Cada suma de cuadrados dividida por sus grados de libertad es un "
+            "cuadrado medio.",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # A residual mean square with no degrees of freedom beside it, the
+        # error an adaptive canceller leaves.
+        (
+            "el cuadrado medio residual del cancelador adaptativo",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # A round robin and an acoustic treatment compare too.
+        (
+            "los cuadrados medios de la presión medidos entre laboratorios",
+            [("cuadrados medios", "valores cuadráticos medios")],
+        ),
+        (
+            "el cuadrado medio de la presión cambia entre tratamientos del techo",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        # The ECMA-418-2 loudness guide recalculates its bands «entre grupos»
+        # (the advanced loudness guide, at its 0,9845 sone_HMS anchor), and a
+        # guide splits machines or bands into groups: groups that do not
+        # qualify the term are a signal's.
+        (
+            "Sin ningún promediado de bandas la cadena da 0,955; y con el "
+            "cuadrado medio de bloque recalculado entre grupos que exige la "
+            "norma, 0,9845.",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        (
+            "con el recálculo completo entre grupos que exige la norma, el "
+            "cuadrado medio de cada banda se promedia",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        (
+            "el cuadrado medio de la vibración dentro de los grupos de máquinas "
+            "más cercanos domina la suma",
+            _SIGNAL_MEAN_SQUARE,
+        ),
+        ("el cuadrado medio entre grupos de bandas", _SIGNAL_MEAN_SQUARE),
+    ],
+)
+def test_a_signal_mean_square_fails_beside_the_words_an_anova_shares(
+    text: str, found: list[tuple[str, str]]
+) -> None:
+    """Words an analysis of variance shares with a signal do not make one.
+
+    Each sentence holds a word of the analysis that the mean square of a
+    signal takes as well (degrees of freedom, a sum of squares, a residual,
+    groups), and so the term in it is the signal's and fails.
+    """
+    assert _departures(text) == found
+    assert _departures(text, page=True) == found
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # A full stop, also closed in emphasis.
+        "El análisis de la varianza viene en el apartado 7. El cuadrado "
+        "medio de la señal se integra con la constante de tiempo.",
+        "como en un **ANOVA.** El cuadrado medio de la señal se integra",
+        # A colon, a semicolon, a question mark and an exclamation mark.
+        "Véase el ANOVA: el cuadrado medio de la señal se integra",
+        "Véase el ANOVA; el cuadrado medio de la señal se integra",
+        "¿Es un ANOVA? El cuadrado medio de la señal se integra",
+        "¡No es un ANOVA! El cuadrado medio de la señal se integra",
+        # An item of a list and a heading, which carry no stop.
+        "- ANOVA en el anexo\n- el cuadrado medio de la presión con ponderación A",
+        "- Cuadro del análisis de la varianza\n* el cuadrado medio de la señal",
+        "1. ANOVA en el anexo\n2) el cuadrado medio de la presión",
+        "### Análisis de la varianza\nEl cuadrado medio de la señal es su potencia.",
+    ],
+)
+def test_an_analysis_named_in_another_sentence_exempts_nothing(text: str) -> None:
+    """The analysis exempts the term only in the sentence that names it."""
+    assert _departures(text) == _SIGNAL_MEAN_SQUARE
+    assert _departures(text, page=True) == _SIGNAL_MEAN_SQUARE
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # Montgomery's one-factor table (PDF page 86, folio 71), with groups
+        # for the treatments he compares.
+        "Observe que el cuadrado medio entre grupos (118,94) es varias veces "
+        "mayor que el cuadrado medio dentro de los grupos o cuadrado medio del "
+        "error (8,06).",
+        # The analysis named, without the article and with it.
+        "En la tabla se resume el análisis de varianza, y el cuadrado medio de "
+        "cada fuente es su suma de cuadrados dividida por sus grados de libertad",
+        "Cada suma de cuadrados dividida por sus grados de libertad es un "
+        "cuadrado medio del análisis de la varianza.",
+        # The acronym and the plural.
+        "Los cuadrados medios del ANOVA de la Tabla 2",
+        # The mean square named by its row, without the article and with it,
+        # and the residual one beside its degrees of freedom.
+        "el cuadrado medio entre grupos vale 3,2",
+        "los cuadrados medios entre los grupos y residual",
+        "El cuadrado medio residual vale 8,06 con 20 grados de libertad.",
+        # A page wraps the term and its row, and so does an item of a list.
+        "el cuadrado\nmedio dentro de los grupos estima la varianza de repetibilidad",
+        "- el cuadrado medio dentro de los\n  grupos estima la repetibilidad",
+        # The analysis named before the colon of a designation or the point
+        # of a number, and the term after it.
+        "En el ANOVA el valor 118.94 es el cuadrado medio de la tabla",
+        "El ANOVA de ISO 5725-2:1994 da el cuadrado medio de la tabla",
+    ],
+)
+def test_a_mean_square_of_an_analysis_of_variance_is_left_alone(text: str) -> None:
+    """The statistician's term, in a sentence that names the analysis or its row."""
+    assert _departures(text) == []
+    assert _departures(text, page=True) == []
+
+
+#: Montgomery's Table 3-4 (Diseño y análisis de experimentos, 2.ª ed., Limusa
+#: Wiley, 2004, PDF page 86, folio 71) as printed, whose rows name neither the
+#: analysis nor its groups: only the header says what the table is.
+_MONTGOMERY_TABLE = (
+    "| Fuente de variación | Suma de cuadrados | Grados de libertad "
+    "| Cuadrado medio | $F_0$ | Valor $P$ |\n"
+    "|---|---|---|---|---|---|\n"
+    "| Peso porcentual del algodón | 475.76 | 4 | 118.94 | $F_0$=14.76 | <0.01 |\n"
+    "| Error | 161.20 | 20 | 8.06 | | |\n"
+    "| Total | 636.96 | 24 | | | |"
+)
+
+
+@pytest.mark.parametrize(
+    ("table", "found"),
+    [
+        (_MONTGOMERY_TABLE, []),
+        # The same header over a comparison of laboratories.
+        (
+            "| Fuente | Suma de cuadrados | Grados de libertad | Cuadrado medio |\n"
+            "|---|---|---|---|\n"
+            "| Entre laboratorios | 475,76 | 4 | 118,94 |\n"
+            "| Residual | 161,20 | 20 | 8,06 |",
+            [],
+        ),
+        # A table of a signal, with the degrees of freedom of each band but no
+        # sum of squares.
+        (
+            "| Banda | Cuadrado medio | Grados de libertad |\n"
+            "|---|---|---|\n"
+            "| 1 kHz | 0,2 | 2 |",
+            [("Cuadrado medio", "Valor cuadrático medio")],
+        ),
+    ],
+)
+def test_a_table_is_one_of_an_analysis_of_variance_by_its_header(
+    table: str, found: list[tuple[str, str]]
+) -> None:
+    """A sum of squares, its degrees of freedom and their mean square, side by side."""
+    assert _departures(table, page=True) == found
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        _MONTGOMERY_TABLE + "\nEl cuadrado medio de la señal se mide en Pa².",
+        "El cuadrado medio de la señal se mide en Pa²\n" + _MONTGOMERY_TABLE,
+    ],
+)
+def test_a_table_of_an_analysis_of_variance_exempts_no_prose_beside_it(
+    text: str,
+) -> None:
+    """Prose written against a table, with no blank line, is a sentence apart."""
+    assert _departures(text, page=True) == [
+        ("cuadrado medio", "valor cuadrático medio")
+    ]
+
+
+def test_a_long_run_without_a_stop_is_read_in_linear_time() -> None:
+    """The sentence of a term is cut once, not tried from every character.
+
+    A 20 kB table with one «cuadrado medio» and no stop took about forty
+    seconds while each context was a pattern spanning its sentence, since the
+    pattern was tried again from every character before it.
+    """
+    table = "| Cuadrado medio |" + " 0,5 |" * 4_000
+    start = time.perf_counter()
+    found = _departures(table, page=True)
+    assert time.perf_counter() - start < 2.0
+    assert found == [("Cuadrado medio", "Valor cuadrático medio")]
+
+
+def test_an_analysis_of_variance_exempts_only_its_own_term() -> None:
+    """A sentence of the analysis lets no waveform, quadratic mean or budget through."""
+    text = (
+        "En el análisis de la varianza, un seno de 1 kHz, la media cuadrática "
+        "por segmento, un presupuesto de ruido y el cuadrado medio entre grupos"
+    )
+    assert _departures(text) == [
+        ("seno", "sinusoide"),
+        ("media cuadrática", "valor cuadrático medio"),
+        ("presupuesto", "balance"),
+    ]
+
+
+def test_the_vocabulary_of_an_analysis_of_variance_never_goes_stale(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """No sentence of the tree is an analysis of variance, and none has to be.
+
+    The contexts of the analysis are its vocabulary, not the words of one
+    sentence each, so they are left out of the contexts that must keep
+    matching, and a run that meets a signal's «cuadrado medio» sends the
+    author to the analysis, not to a stale table.
+    """
+    assert set(csa.ANALYSIS_OF_VARIANCE).isdisjoint(csa.CONTEXTS)
+    value = csa.Value("page.md", 1, "el cuadrado medio de la señal", page=True)
+    assert set(csa.ANALYSIS_OF_VARIANCE).isdisjoint(csa.unused_contexts([value]))
+    monkeypatch.setattr(csa, "read_sources", lambda: ([value], []))
+    assert csa.main([]) == 1
+    out = capsys.readouterr().out
+    assert "'cuadrado medio' is written 'valor cuadrático medio'" in out
+    assert "a sentence of an analysis of variance (ANALYSIS_OF_VARIANCE)" in out
+    assert "any other label of the analysis goes in ALLOWED" in out
+    assert "ANALYSIS_OF_VARIANCE lists" not in out
+
+
+_ANOVA_PAGE = """---
+title: "Precisión de un método de medida"
+---
+
+En el análisis de la varianza de la Tabla 2, el cuadrado medio entre grupos
+es varias veces mayor que el cuadrado medio dentro de los grupos.
+
+| Fuente de variación | Suma de cuadrados | Grados de libertad | Cuadrado medio |
+|---|---|---|---|
+| Entre grupos | 475,76 | 4 | 118,94 |
+| Dentro de los grupos | 161,20 | 20 | 8,06 |
+
+El nivel del registro sale del cuadrado medio de la presión, que la
+ponderación temporal integra con su constante de tiempo.
+"""
+
+
+def test_a_page_keeps_its_analysis_of_variance_and_loses_its_signal(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The prose and the table of the analysis pass; the signal's term fails."""
+    (tmp_path / "es").mkdir()
+    (tmp_path / "es" / "precision.md").write_text(_ANOVA_PAGE, encoding="utf-8")
+    values, empty = csa.read_sources(
+        (), root=tmp_path, builders=(), pages=("es/*.md",), figures=()
+    )
+    assert empty == []
+    offences, _stale = csa.check(values, allowed={})
+    assert [(o.line, o.word, o.spelling) for o in offences] == [
+        (13, "cuadrado medio", "valor cuadrático medio")
+    ]
+
+
+def test_a_label_of_an_analysis_of_variance_goes_in_allowed() -> None:
+    """A label that names neither the analysis nor its row passes by ALLOWED."""
+    value = csa.Value("scripts/figures/i18n.py", 12, "Cuadrado medio")
+    offences, _stale = csa.check([value], allowed={})
+    assert [(o.word, o.spelling) for o in offences] == [
+        ("Cuadrado medio", "Valor cuadrático medio")
+    ]
+    allowed = {("Cuadrado medio", "Cuadrado medio"): "a column of an ANOVA table"}
+    assert csa.check([value], allowed=allowed) == ([], [])
 
 
 def test_a_context_exempts_only_its_own_quadratic_mean() -> None:

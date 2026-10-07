@@ -697,9 +697,30 @@ where the English says root mean square or quadratic mean, and the phrase is
 right, its context goes in the `QUADRATIC_MEAN` table with the reason, under
 the same rule as `TRIGONOMETRIC`. Write the context on the words of the one
 sentence it exempts, never on a shape such as "de los extremos" or "beside an
-arithmetic mean", which a mean square can take as well. The statistician's
-"cuadrado medio" is a plain ruling in `GLOSSARY_PHRASES`: it fails wherever it
-stands, as "incertidumbre extendida" does.
+arithmetic mean", which a mean square can take as well.
+
+The statistician's "cuadrado medio" is right only in an analysis of variance,
+so it fails wherever it stands except in a sentence of the analysis, by the
+vocabulary listed in its `ANALYSIS_OF_VARIANCE` table: a sentence that names
+the analysis ("análisis de la varianza", "ANOVA"), names the mean square by
+its row of the table ("cuadrado medio entre grupos", "cuadrado medio dentro
+de los grupos", or "cuadrado medio residual" beside its "grados de
+libertad"), or is the header of a Markdown table that sets a sum of squares,
+its degrees of freedom and their mean square side by side. A word the mean
+square of a signal says as well is not enough on its own: the time weighting
+guide shipped "del cuadrado medio (un grado de libertad)", a level is a sum
+of squares, a noise is residual, and the ECMA-418-2 guide recalculates its
+bands "entre grupos". A sentence ends at a stop (a full stop, a semicolon, a
+colon, a question or an exclamation mark), and also before an item of a list
+or a heading and after a heading, which carry none; a wrapped line runs on,
+and the rows of a table are one sentence with its header. No analysis of
+variance is written yet, so that table is a vocabulary rather than the words
+of one sentence each, and it does not fail the run for matching nothing. A
+sentence of an analysis of variance exempts every "cuadrado medio" it holds
+and nothing else: a "seno", a "media cuadrática" or a "presupuesto" beside it
+is read against its own table. A label of the analysis that is none of these
+(the axis label of a figure, an entry of a translation table) goes in
+`ALLOWED`, keyed by its value and the term, with the reason.
 
 A budget is read the same way. Every budget of quantities that add up (an
 uncertainty, a noise, an absorption, an error or a link budget) is a "balance"

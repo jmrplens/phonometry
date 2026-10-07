@@ -2053,11 +2053,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   guides and the DIN 45672-2 erratum wrote the statistician's "cuadrado
   medio" beside a "valor cuadrático medio" on the same page, and the levels
   guide and its diagram "la media del cuadrado"; they say "valor cuadrático
-  medio" too. `make spanish-accents` now fails on every "cuadrado medio" and
-  on every "media cuadrática" that is not in one of the quadratic-mean
-  contexts it lists, each written on the words of the one sentence it
-  exempts, with its reason. The Spanish data qualification diagram is titled
-  "Cualificación de datos", as its guide is.
+  medio" too. `make spanish-accents` now fails on every "cuadrado medio"
+  outside a sentence of an analysis of variance, the one place the
+  statistician's term is right: a sentence that names the analysis, names
+  the mean square by its row of the table (between or within the groups, or
+  the residual one beside its degrees of freedom), or is the header of the
+  table itself. It also fails on every "media cuadrática" that is not in one
+  of the quadratic-mean contexts it lists, each written on the words of the
+  one sentence it exempts, with its reason. The Spanish data qualification
+  diagram is titled "Cualificación de datos", as its guide is.
 
 - **The Spanish edition calls every budget of quantities that add up a
   balance.** Twenty-six places in sixteen Spanish pages said "presupuesto",

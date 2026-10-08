@@ -318,14 +318,16 @@ boundary-comparisons:
 # type, so a result that keeps it shares memory with the caller, and the
 # caller's next in-place edit changes a result already computed. A public
 # record that can hold an array inherits phonometry._internal.frozen.OwnsArrays,
-# which copies every array it is built with, so this fails on such a record
-# that does not, and on a copy written around an array handed to one (the
-# record makes it; a second one is waste). Then it follows every parameter
-# through the package to the places an array is kept that make no copy of
-# their own (object.__setattr__, a plain class's attributes, read_only calls)
-# and fails on one that is not a copy (read_only_copy, for anything that is
-# not such a record). On the tree it was written against it found 349 places
-# in 121 files, and then 428 records without the base. Stdlib only.
+# which copies every array it is built with (an array a factory allocates and
+# passes through handed_over is sealed instead of copied), so this fails on
+# such a record that does not, and on a copy written around an array handed to
+# one (the record makes it; a second one is waste). Then it follows every
+# parameter through the package to the places an array is kept that make no
+# copy of their own (object.__setattr__, a plain class's attributes, read_only
+# calls) and fails on one that is not a copy (read_only_copy, for anything
+# that is not such a record), and on any handed_over call it cannot prove is
+# the only holder of a new array. On the tree it was written against it found
+# 349 places in 121 files, and then 428 records without the base. Stdlib only.
 array-aliasing:
 	$(PYTHON) scripts/check_array_aliasing.py
 

@@ -594,6 +594,32 @@ def test_two_runs_are_bit_identical() -> None:
     assert np.array_equal(a.snapshots, b.snapshots)
 
 
+def test_each_snapshot_is_the_field_of_its_own_step() -> None:
+    """Frame ``k`` is the field ``k * snapshot_every`` steps in.
+
+    A probe samples the field after every step, so at a probe's cell each
+    frame holds, bit for bit, what the probe recorded at that step. The run
+    is not a whole number of cadences long, so the last frame falls short
+    of the end and an index one cadence off shows up as a frame that differs
+    or one left at zero.
+    """
+    every = 10
+    res = fdtd_simulation(
+        C0,
+        0.05,
+        1.6e-2,
+        shape=(40, 60),
+        sources=[GaussianPulse(ix=20, iy=20, half_width_s=5e-4)],
+        probes=[(30, 20), (50, 35)],
+        snapshot_every=every,
+    )
+    assert (res.times.size - 1) % every != 0
+    assert res.snapshots is not None
+    assert float(np.abs(res.snapshots[-1]).max()) > 0.0
+    for k, (ix, iy) in enumerate(res.probes):
+        assert np.array_equal(res.snapshots[:, iy, ix], res.pressures[k, ::every])
+
+
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [

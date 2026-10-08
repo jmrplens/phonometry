@@ -16,7 +16,7 @@ a copy of its own. Every public record that can hold an array inherits
 record is built, whoever builds it: a function of the package or a caller
 writing the record by hand. Anything else that keeps an array (a plain
 class, a private record) copies it through
-``phonometry._internal.frozen.read_only_copy``. The check has three parts.
+``phonometry._internal.frozen.read_only_copy``. The check has four parts.
 
 The first reads the classes: a public record (a dataclass or a named tuple
 that a public module defines or lists in ``__all__``) with a field annotated
@@ -82,6 +82,28 @@ new array, ``math``, a few builtins), so a copy it cannot vouch for is left
 alone and the rule never asks for a copy that keeps the caller's array whole
 to be dropped.
 
+The fourth vouches for the one array a record keeps without a copy: one a
+factory passes through ``phonometry._internal.frozen.handed_over``, so that
+the frames of a simulation or the field of a march are not held twice while
+the record is built. That is right only when nothing else can reach the
+array, and each call is proved so from the syntax or fails: it is an
+argument of a record that inherits ``OwnsArrays``, built in the ``return``
+statement; its argument is a name bound once, in the function's own scope
+and to it alone, to a new array (``np.zeros``, ``np.empty``, ``np.ones``,
+or ``None`` in one branch of a conditional); the function is no generator
+and does not hand out its frame (``locals()``, ``vars()``, ``eval``,
+``exec``); and every other read of the name writes into the array
+(``name[...] = value``, ``+=`` included), tests it against ``None``, or
+passes it to a function of the package, with no decorator, whose parameter
+is used the same way, down to three calls deep. A view, a second name, a
+container, a closure or a lambda rules it out. The function is found
+however it is spelt: imported under another name, read as an attribute of
+a module bound by any import (``_internal.frozen.handed_over``), or named
+in a string (``getattr``). A call anywhere else (at module level, in a
+lambda, the function named but not called) fails too, and this part has no
+exemption: an array that cannot be proved alone is copied, as every other
+one is.
+
 A private helper is held to the rule whatever its callers pass today: the
 next caller may hand it the caller's array. The analysis reads names, not
 types, so a scalar that travels the same path as an array is read as one
@@ -99,7 +121,10 @@ not required to inherit ``OwnsArrays``, so an array a caller puts in its
 that returns it (``return values.copy()``) and handed to a record is not
 read as made twice, since the helper's other callers may need it; and a
 value whose path runs through code outside the package (a callback, a
-library call it does not know) is read as a new value.
+library call it does not know) is read as a new value. The fourth part reads
+names, so a frame reached by introspection (``sys._getframe``,
+``inspect.currentframe``) from code a factory calls could still reach an
+array handed over; no module of the package does that.
 """
 
 from __future__ import annotations
@@ -123,6 +148,11 @@ SOURCE = ROOT / "src" / "phonometry"
 #: (``phonometry._internal.frozen.OwnsArrays``).
 MECHANISM = "OwnsArrays"
 
+#: The function through which a factory hands the record it returns an array
+#: it built, for the record to keep without a copy
+#: (``phonometry._internal.frozen.handed_over``).
+HANDOVER = "handed_over"
+
 #: Public records that can hold an array and do not inherit :data:`MECHANISM`,
 #: keyed by file and class, each with the reason.
 RECORD_EXEMPT: dict[tuple[str, str], str] = {
@@ -137,6 +167,12 @@ RECORD_EXEMPT: dict[tuple[str, str], str] = {
 #: Functions that may keep a parameter's array, keyed by file and qualified
 #: function, each with the reason.
 EXEMPT: dict[tuple[str, str], str] = {
+    ("src/phonometry/_internal/frozen.py", "_adopted"): (
+        f"the {MECHANISM} mechanism keeping an array handed over: it seals "
+        f"the array {HANDOVER} marked, which the check's fourth part proves "
+        "nothing but the record can reach, and any other array it returns "
+        "None for, so the record copies it"
+    ),
     ("src/phonometry/_internal/frozen.py", "_take_ownership"): (
         f"the {MECHANISM} mechanism itself: what it stores on the record is "
         "the read-only copy _owned makes of each array, or the value as it "
@@ -230,6 +266,10 @@ _NUMPY_INDEX = frozenset(
 _NUMPY_BUILDERS = frozenset(
     {"array", "asarray", "asanyarray", "ascontiguousarray", "atleast_1d", "fromiter"}
 )
+
+#: The numpy functions that allocate a new array from a shape alone, the only
+#: arrays a factory may hand over (:data:`HANDOVER`).
+_NUMPY_FRESH = frozenset({"zeros", "empty", "ones"})
 
 #: Array methods that may return the array itself or a view of it.
 _METHOD_ALIASING = frozenset(
@@ -2027,6 +2067,141 @@ class Reader:
         reader = Reader(self.tree, function, self.summaries, None)
         return reader.uses_harmless(parameter, depth + 1)
 
+    # -- an array handed over without a copy --------------------------------
+    def handover_refused(self, call: ast.Call) -> str | None:
+        """Why the reading cannot vouch for an array handed over, or ``None``.
+
+        ``handed_over(name)`` lets the record keep the array without a copy,
+        which is right only when nothing else can reach it, now or later.
+        That is proved here from the syntax alone: the call is an argument of
+        a record that inherits :data:`MECHANISM`, built in the ``return``
+        statement, so nothing of the function runs after the record holds the
+        array; the name is bound once, in the function's own scope, to an
+        array a numpy allocation makes (:data:`_NUMPY_FRESH`, or ``None`` in
+        one branch of a conditional); and every other read of it only writes
+        into the array (:meth:`writes_into`). No view, no second name and no
+        container ever holds it, so when the function returns, the record's
+        is the only reference left.
+        """
+        parents, uses = self.syntax()
+        holder = parents.get(call)
+        record = parents.get(holder) if isinstance(holder, ast.keyword) else holder
+        if not isinstance(record, ast.Call) or not (
+            (isinstance(holder, ast.keyword) and holder.arg is not None)
+            or any(argument is call for argument in record.args)
+        ):
+            return "it is not an argument of a record"
+        info = self.built_record(record)
+        if info is None or not self.tree.copies_arrays(info):
+            return f"it is not an argument of a record that inherits {MECHANISM}"
+        if not isinstance(parents.get(record), ast.Return):
+            return "the record is not built in the return statement"
+        if (
+            len(call.args) != 1
+            or call.keywords
+            or not isinstance(call.args[0], ast.Name)
+        ):
+            return "its argument is not a name"
+        name = call.args[0].id
+        function = self.function.node
+        if name in _parameter_names(function):
+            return f"{name} is a parameter"
+        if _frame_escapes(function):
+            return "the function can reach its own frame (a generator, locals())"
+        bindings = _bindings(function, name)
+        stores = [
+            use for use in uses.get(name, ()) if not isinstance(use.ctx, ast.Load)
+        ]
+        store = stores[0] if len(stores) == 1 else None
+        if (
+            len(bindings) != 1
+            or bindings[0] is None
+            or not self.allocates(bindings[0])
+            or store is None
+            or not _single_target(parents.get(store), store)
+            or not _own_scope(store, parents, function)
+        ):
+            return (
+                f"{name} is not bound once, in the function and to it alone, to a "
+                f"new array (np.{', np.'.join(sorted(_NUMPY_FRESH))})"
+            )
+        for use in uses.get(name, ()):
+            if use is call.args[0] or use is store:
+                continue
+            if not self.writes_into(use, parents, depth=0):
+                return f"{name} is read where it may be kept (line {use.lineno})"
+        return None
+
+    def allocates(self, node: ast.expr) -> bool:
+        """Whether *node* is a new array a numpy allocation makes, or one of
+        two such branches with ``None`` in the other.
+        """
+        if isinstance(node, ast.IfExp):
+            branches = (node.body, node.orelse)
+            return any(not _is_none(b) for b in branches) and all(
+                _is_none(b) or self.allocates(b) for b in branches
+            )
+        return (
+            isinstance(node, ast.Call)
+            and self.numpy_function(node.func) in _NUMPY_FRESH
+            and not any(k.arg in {None, "like"} for k in node.keywords)
+        )
+
+    def writes_into(
+        self, node: ast.Name, parents: Mapping[ast.AST, ast.AST], depth: int
+    ) -> bool:
+        """Whether a read of a handed-over name only writes into the array.
+
+        The array is written into (``name[...] = value``, or ``+=``), tested
+        against ``None``, or passed to a function of the package whose
+        parameter is used the same way, read in its own body down to three
+        calls deep. Nothing else: not a view, not a container, not a closure
+        of a nested function or a lambda, and not a function behind a
+        decorator, whose wrapper is code the body does not show and may keep
+        what it is passed.
+        """
+        if not _own_scope(node, parents, self.function.node):
+            return False
+        parent = parents.get(node)
+        if isinstance(parent, ast.Subscript):
+            return parent.value is node and isinstance(parent.ctx, ast.Store)
+        if isinstance(parent, ast.Compare):
+            operands = (parent.left, *parent.comparators)
+            return all(isinstance(op, ast.Is | ast.IsNot) for op in parent.ops) and all(
+                operand is node or _is_none(operand) for operand in operands
+            )
+        if isinstance(parent, ast.keyword):
+            call, keyword = parents.get(parent), parent.arg
+            if keyword is None:
+                return False
+        else:
+            call, keyword = parent, None
+            if not isinstance(call, ast.Call) or all(a is not node for a in call.args):
+                return False
+        if not isinstance(call, ast.Call) or depth >= 3:
+            return False
+        target = self.callee(call.func)
+        if target is None or target not in self.tree.functions:
+            return False
+        function = self.tree.functions[target]
+        parameter = _bound_parameter(function, call, node, keyword)
+        if (
+            parameter is None
+            or function.node.decorator_list
+            or _frame_escapes(function.node)
+        ):
+            return False
+        reader = Reader(self.tree, function, self.summaries, None)
+        return reader.only_written(parameter, depth + 1)
+
+    def only_written(self, name: str, depth: int) -> bool:
+        """Whether a parameter is never bound again and only written into."""
+        parents, uses = self.syntax()
+        return all(
+            isinstance(use.ctx, ast.Load) and self.writes_into(use, parents, depth)
+            for use in uses.get(name, ())
+        )
+
     def replace_sink(
         self, node: ast.Call, arguments: list[Value], keywords: dict[str | None, Value]
     ) -> Value:
@@ -2345,6 +2520,58 @@ def _names_in(target: ast.AST, name: str) -> bool:
     return any(isinstance(n, ast.Name) and n.id == name for n in ast.walk(target))
 
 
+def _own_scope(
+    node: ast.AST,
+    parents: Mapping[ast.AST, ast.AST],
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> bool:
+    """Whether *node* is in the function's own scope, not in a nested
+    function, a lambda, a class body or a comprehension.
+    """
+    current = parents.get(node)
+    while current is not None and current is not function:
+        if isinstance(
+            current,
+            ast.FunctionDef
+            | ast.AsyncFunctionDef
+            | ast.Lambda
+            | ast.ClassDef
+            | ast.ListComp
+            | ast.SetComp
+            | ast.DictComp
+            | ast.GeneratorExp,
+        ):
+            return False
+        current = parents.get(current)
+    return current is function
+
+
+def _single_target(statement: ast.AST | None, target: ast.Name | None) -> bool:
+    """Whether *statement* binds *target* alone (``a = b = ...`` binds two)."""
+    if isinstance(statement, ast.Assign):
+        return len(statement.targets) == 1 and statement.targets[0] is target
+    return isinstance(statement, ast.AnnAssign) and statement.target is target
+
+
+#: Builtins through which a function hands out its own local names.
+_FRAME_BUILTINS = frozenset({"locals", "vars", "eval", "exec"})
+
+
+def _frame_escapes(function: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    """Whether a function's locals may be reached from outside it: a
+    coroutine or a generator, whose frame outlives the call, or a body that
+    calls ``locals()``, ``vars()``, ``eval`` or ``exec``.
+    """
+    if isinstance(function, ast.AsyncFunctionDef):
+        return True
+    for node in ast.walk(function):
+        if isinstance(node, ast.Yield | ast.YieldFrom | ast.Await):
+            return True
+        if isinstance(node, ast.Name) and node.id in _FRAME_BUILTINS:
+            return True
+    return False
+
+
 def _bindings(
     function: ast.FunctionDef | ast.AsyncFunctionDef, name: str
 ) -> list[ast.expr | None]:
@@ -2630,6 +2857,93 @@ def records_without_mechanism(
     return found
 
 
+def handovers_in(
+    files: Sequence[pathlib.Path],
+    root: pathlib.Path = SOURCE,
+    *,
+    tree: Tree | None = None,
+) -> list[Finding]:
+    """Every array handed over to a record that the reading cannot vouch for.
+
+    Each call to :data:`HANDOVER`, however it is spelt
+    (:func:`_names_target`), is read where it stands
+    (:meth:`Reader.handover_refused`); a call outside a function the tree
+    reads (at module level, in a class body, in a lambda), and the function
+    named anywhere but as the callee of a call, are refused outright, since
+    nothing can then be proved of the array. No exemption covers this part:
+    an array that cannot be proved alone is copied, as every other one is.
+    *tree* is the package already read from *files*, when the caller has it.
+    """
+    if tree is None:
+        tree = Tree(files, root)
+    target = (f"{tree.package}._internal.frozen", HANDOVER)
+    by_node = {function.node: function for function in tree.functions.values()}
+    found: list[Finding] = []
+    for module, syntax in tree.modules.items():
+        named = [
+            node
+            for node in ast.walk(syntax)
+            if _names_target(node, tree, module, target)
+        ]
+        if not named:
+            continue
+        parents = {
+            child: parent
+            for parent in ast.walk(syntax)
+            for child in ast.iter_child_nodes(parent)
+        }
+        for node in named:
+            call = parents.get(node)
+            scope = parents.get(node)
+            while scope is not None and not isinstance(
+                scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda
+            ):
+                scope = parents.get(scope)
+            function = (
+                by_node.get(scope)
+                if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef)
+                else None
+            )
+            reason: str | None
+            if not isinstance(call, ast.Call) or call.func is not node:
+                reason = "the function is named where it is not called"
+            elif function is None:
+                reason = "it is not called in a function"
+            else:
+                reason = Reader(tree, function, {}, None).handover_refused(call)
+            if reason is not None:
+                found.append(
+                    Finding(
+                        tree.paths[module],
+                        function.qualname if function is not None else "<module>",
+                        getattr(node, "lineno", 0),
+                        f"{HANDOVER}(...): {reason}",
+                        (),
+                    )
+                )
+    return sorted(set(found), key=lambda f: (f.path, f.line, f.sink))
+
+
+def _names_target(
+    node: ast.AST, tree: Tree, module: str, target: tuple[str, str]
+) -> bool:
+    """Whether *node* may name the function *target* in *module*.
+
+    A bare name imported from its module under any name counts, and so,
+    spelt as the function's own name, does any other bare name, any
+    attribute whatever it is read from (``frozen.handed_over``,
+    ``_internal.frozen.handed_over``, a module bound by any import) and the
+    string itself (``getattr(frozen, "handed_over")``). The reading errs on
+    the side of the proof: a spelling it cannot follow to the module is held
+    to it all the same, since nothing else in the package bears that name.
+    """
+    if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+        return node.id == target[1] or tree.resolve(module, node.id) == target
+    if isinstance(node, ast.Attribute):
+        return node.attr == target[1]
+    return isinstance(node, ast.Constant) and node.value == target[1]
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Report every array kept without a copy of its own."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -2650,8 +2964,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         records_without_mechanism(files, root, tree=tree), RECORD_EXEMPT
     )
     found, stale = exempted(findings_in(files, root, tree=tree), EXEMPT)
-    if not (found or stale or unequipped or stale_records):
-        print("Every array a result keeps is a copy of its own.")
+    unproved = handovers_in(files, root, tree=tree)
+    if not (found or stale or unequipped or stale_records or unproved):
+        print(
+            "Every array a result keeps is a copy of its own, or an array "
+            "nothing else can reach."
+        )
         return 0
     if unequipped:
         print(
@@ -2683,6 +3001,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             "phonometry._internal.frozen (a copy of its own, read only); a "
             "function that has to keep the caller's array goes in EXEMPT at the "
             "top of scripts/check_array_aliasing.py with its reason."
+        )
+    if unproved:
+        print(
+            f"::error::an array is handed to a record through {HANDOVER} and "
+            "nothing proves that the record is the only one to hold it"
+        )
+        for finding in unproved:
+            print(
+                f"  {finding.path}:{finding.line}: {finding.function}: {finding.sink}"
+            )
+        print(
+            "  -> hand the record the array as it is, and the record copies it; "
+            f"{HANDOVER} is only for an array the function allocates itself "
+            "(np.zeros, np.empty, np.ones), only writes into, there or in the "
+            "helpers it passes it to, and hands to the record it returns."
         )
     for key in stale:
         print(f"::error::EXEMPT lists {key}, which keeps no array any more")

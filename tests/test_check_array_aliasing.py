@@ -44,6 +44,9 @@ def read_only_copy(array, dtype=None):
 class OwnsArrays:
     def __post_init__(self):
         pass
+
+def handed_over(array):
+    return array
 """
 
 #: A validation helper of the kind ``_internal/validation.py`` holds: its
@@ -1083,6 +1086,476 @@ def test_a_parameter_copied_into_itself_is_not_read_as_a_second_copy(
         """,
     )
     assert found == set()
+
+
+# ---------------------------------------------------------------------------
+# An array handed over to the record without a copy
+# ---------------------------------------------------------------------------
+
+#: A record that copies, a record that does not, and helpers that write into
+#: their array, keep it or hand it on.
+_RUN = """
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+@dataclass(frozen=True)
+class Run(OwnsArrays):
+    frames: NDArray[np.float64] | None
+    times: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Plain:
+    frames: NDArray[np.float64] | None
+    times: NDArray[np.float64]
+
+def write(frames, n):
+    if frames is not None:
+        frames[0] = 1.0
+    for i in range(n):
+        frames[i, 0] += 2.0
+
+def write_on(n, *, frames):
+    write(frames, n)
+
+def keep(store, frames):
+    store.append(frames)
+
+def fill_and_return(frames):
+    frames[0] = 1.0
+    return frames
+
+def rebind(frames):
+    frames = frames[::2]
+    frames[0] = 1.0
+
+def write_later(frames):
+    frames[0] = 1.0
+    yield
+
+def write_deep_1(frames):
+    write_deep_2(frames)
+
+def write_deep_2(frames):
+    write_deep_3(frames)
+
+def write_deep_3(frames):
+    write_deep_4(frames)
+
+def write_deep_4(frames):
+    frames[0] = 1.0
+
+_SEEN = []
+
+def remember(function):
+    def wrapper(*args):
+        _SEEN.append(args)
+        return function(*args)
+    return wrapper
+
+@remember
+def write_remembered(frames):
+    frames[0] = 1.0
+"""
+
+
+def _handovers(tmp_path: pathlib.Path, body: str) -> set[tuple[str, str]]:
+    """``(function, sink)`` of every handover the check refuses in *body*,
+    a module ``sim`` that imports the helpers above.
+    """
+    source = (
+        "import numpy as np\n\n"
+        "from ._internal.frozen import handed_over\n"
+        "from .run import (\n"
+        "    Run, _Plain, fill_and_return, keep, rebind, write, write_deep_1,\n"
+        "    write_deep_2, write_later, write_on, write_remembered,\n"
+        ")\n" + textwrap.dedent(body)
+    )
+    root = _package(tmp_path, {"run": _RUN, "sim": source})
+    found = caa.handovers_in(sorted(root.rglob("*.py")), root)
+    return {(f.function, f.sink) for f in found}
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        # Allocated, written in place, handed to the record returned.
+        """
+        def run(n):
+            frames = np.zeros((n, 3))
+            for i in range(n):
+                frames[i] = i
+                frames[i, 0] += 1.0
+            return Run(frames=handed_over(frames), times=np.arange(n))
+        """,
+        # An optional array, tested against None, written by a helper of the
+        # package (by position and by keyword), handed over by position.
+        """
+        def run(n, every=None):
+            frames: np.ndarray | None = (
+                None if every is None else np.empty((n, 3), dtype=np.float64)
+            )
+            if frames is not None:
+                frames[0] = 0.0
+            write(frames, n)
+            write_on(n, frames=frames)
+            return Run(handed_over(frames), np.arange(n))
+        """,
+        # Down three helpers, each only passing it on or writing into it.
+        """
+        def run(n):
+            frames = np.ones((n, 3))
+            write_deep_2(frames)
+            return Run(frames=handed_over(frames), times=np.arange(n))
+        """,
+    ],
+    ids=["written-in-place", "optional-written-by-helpers", "three-helpers-deep"],
+)
+def test_an_array_nothing_else_can_reach_may_be_handed_over(
+    tmp_path: pathlib.Path, body: str
+) -> None:
+    """The shape of the simulation factories: one allocation, writes into
+    it there or in a helper, and the record that keeps it as the return.
+    """
+    assert _handovers(tmp_path, body) == set()
+
+
+@pytest.mark.parametrize(
+    ("body", "reason"),
+    [
+        (
+            """
+            def run(frames):
+                return Run(frames=handed_over(frames), times=np.arange(3))
+            """,
+            "frames is a parameter",
+        ),
+        (
+            """
+            from . import _internal
+
+            def run(frames):
+                return Run(
+                    frames=_internal.frozen.handed_over(frames), times=np.arange(3)
+                )
+            """,
+            "frames is a parameter",
+        ),
+        (
+            """
+            import pkg._internal.frozen
+
+            def run(frames):
+                return Run(
+                    frames=pkg._internal.frozen.handed_over(frames),
+                    times=np.arange(3),
+                )
+            """,
+            "frames is a parameter",
+        ),
+        (
+            """
+            def run(x):
+                frames = np.asarray(x)
+                return Run(frames=handed_over(frames), times=np.arange(3))
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(x):
+                frames = np.zeros(3)
+                frames = np.zeros(4)
+                return Run(frames=handed_over(frames), times=np.arange(3))
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(x):
+                kept = frames = np.zeros(3)
+                return Run(frames=handed_over(frames), times=kept)
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(x):
+                for frames in (np.zeros(3),):
+                    pass
+                return Run(frames=handed_over(frames), times=np.arange(3))
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(x):
+                def build():
+                    frames = np.zeros(3)
+                    return frames
+                return Run(frames=handed_over(frames), times=build())
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                first = frames[0]
+                return Run(frames=handed_over(frames), times=first)
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return Run(frames=handed_over(frames), times=frames.T)
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                frames[0][1] = 2.0
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n, store):
+                frames = np.zeros((n, 3))
+                keep(store, frames)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                times = fill_and_return(frames)
+                return Run(frames=handed_over(frames), times=times)
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                rebind(frames)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                list(write_later(frames))
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                write_deep_1(frames)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                write_remembered(frames)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return Run(frames=handed_over(frames), times=handed_over(frames))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n, hooks):
+                frames = np.zeros((n, 3))
+                def peek():
+                    frames[0] = 1.0
+                hooks.append(peek)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n, hooks):
+                frames = np.zeros((n, 3))
+                hooks.append(lambda: frames)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                rows = [frames[i] for i in range(n)]
+                return Run(frames=handed_over(frames), times=np.asarray(rows))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n, cache):
+                frames = np.zeros((n, 3))
+                cache.update(locals())
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "the function can reach its own frame",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                yield n
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "the function can reach its own frame",
+        ),
+        (
+            """
+            def run(n, seen):
+                frames = np.zeros((n, 3))
+                if frames in seen:
+                    raise ValueError(n)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                result = Run(frames=handed_over(frames), times=np.arange(n))
+                return result
+            """,
+            "the record is not built in the return statement",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return _Plain(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "it is not an argument of a record that inherits OwnsArrays",
+        ),
+        (
+            """
+            def run(n):
+                frames = handed_over(np.zeros((n, 3)))
+                return Run(frames=frames, times=np.arange(n))
+            """,
+            "it is not an argument of a record",
+        ),
+        (
+            """
+            def run(n):
+                return Run(frames=handed_over(np.zeros((n, 3))), times=np.arange(n))
+            """,
+            "its argument is not a name",
+        ),
+    ],
+    ids=[
+        "parameter",
+        "dotted-path",
+        "absolute-dotted-path",
+        "not-allocated",
+        "bound-twice",
+        "second-name",
+        "loop-target",
+        "bound-in-nested-scope",
+        "view-kept",
+        "transpose-kept",
+        "view-written",
+        "helper-keeps",
+        "helper-returns",
+        "helper-rebinds",
+        "helper-generator",
+        "four-helpers-deep",
+        "decorated-helper",
+        "handed-twice",
+        "closure",
+        "lambda",
+        "comprehension",
+        "locals",
+        "generator",
+        "membership-test",
+        "record-not-returned",
+        "record-without-mechanism",
+        "outside-record",
+        "not-a-name",
+    ],
+)
+def test_an_array_something_else_may_reach_is_refused(
+    tmp_path: pathlib.Path, body: str, reason: str
+) -> None:
+    """A parameter, a view, a second name, a helper that keeps or returns it
+    or binds it again, a helper behind a decorator, a closure, a frame the
+    function hands out, and a record that is not what the function returns:
+    in each the record would not be the only one to hold the array it keeps
+    without a copy. The function is found however it is spelt, a dotted path
+    to its module included.
+    """
+    found = _handovers(tmp_path, body)
+    assert len(found) == 1, found
+    ((function, sink),) = found
+    assert function == "run"
+    assert sink.startswith("handed_over(...): " + reason), sink
+
+
+@pytest.mark.parametrize(
+    ("body", "reason"),
+    [
+        ("KEPT = handed_over(np.zeros(3))\n", "it is not called in a function"),
+        ("hand = handed_over\n", "the function is named where it is not called"),
+        (
+            "def run(n):\n"
+            "    make = lambda frames: Run(frames=handed_over(frames), times=frames)\n"
+            "    return make(np.zeros(n))\n",
+            "it is not called in a function",
+        ),
+        (
+            "from ._internal import frozen\n\n"
+            "def run(frames):\n"
+            "    hand = getattr(frozen, 'handed_over')\n"
+            "    return Run(frames=hand(frames), times=np.arange(3))\n",
+            "the function is named where it is not called",
+        ),
+    ],
+    ids=["module-level", "named-not-called", "in-a-lambda", "named-in-a-string"],
+)
+def test_the_handover_named_outside_a_function_is_refused(
+    tmp_path: pathlib.Path, body: str, reason: str
+) -> None:
+    """At module level, in a lambda, or the function passed around under
+    another name or fetched by its name as a string, nothing can be proved
+    of what it is handed.
+    """
+    found = _handovers(tmp_path, body)
+    assert {sink for _, sink in found} == {"handed_over(...): " + reason}
 
 
 def test_a_record_exemption_silences_its_class_and_goes_stale_without_it(

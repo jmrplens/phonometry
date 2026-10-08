@@ -987,12 +987,14 @@ jobs:
   # perhaps printed, and nothing raises. Clearing the writeable flag on such an
   # array is worse, because it freezes the caller's own. A public record that
   # can hold an array inherits OwnsArrays, which copies every array it is
-  # built with, so this fails on such a record that does not, and on a copy
-  # written around an array handed to one, which would be made twice. Then it
-  # follows every parameter through assignments, views, containers and the
-  # package's own helpers to the other places an array is kept, and fails on
-  # one that is not a read-only copy of its own. An AST data-flow walk, static
-  # and dependency-free, so it runs on its own.
+  # built with (an array a factory allocates and passes through handed_over
+  # is sealed instead of copied), so this fails on such a record that does
+  # not, and on a copy written around an array handed to one, which would be
+  # made twice. Then it follows every parameter through assignments, views,
+  # containers and the package's own helpers to the other places an array is
+  # kept, and fails on one that is not a read-only copy of its own, and on any
+  # handed_over call it cannot prove is the only holder of a new array. An AST
+  # data-flow walk, static and dependency-free, so it runs on its own.
   array-aliasing:
     name: Every result keeps its own copy of the arrays it was given
     runs-on: ubuntu-latest

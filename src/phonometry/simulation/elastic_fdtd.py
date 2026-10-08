@@ -75,7 +75,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 from .._internal.catalogue import CatalogueRow
-from .._internal.frozen import OwnsArrays, read_only_copy
+from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import require_ranks, require_same_length
 from .fdtd import (
     _SIDES,
@@ -1334,16 +1334,19 @@ def _record_elastic_run(
     probe_fields: tuple[str, ...],
     snapshot_every: int | None,
     snapshot_field: str,
-) -> tuple[NDArray[np.float64], list[Field2D], list[int]]:
-    """Step the engine, recording probe histories and field snapshots."""
-    signals = np.zeros(
-        (probe_ix.shape[0], len(probe_fields), steps + 1), dtype=np.float64
-    )
-    frames: list[Field2D] = []
-    frame_steps: list[int] = []
-    if snapshot_every is not None:
-        frames.append(sim.collocated(snapshot_field))
-        frame_steps.append(0)
+    signals: NDArray[np.float64],
+    snapshots: NDArray[np.float64] | None,
+) -> None:
+    """Step the engine, writing probe histories and field snapshots in place.
+
+    ``signals`` takes one column per step after the first, one layer per
+    entry of ``probe_fields``; ``snapshots`` takes the initial field and then
+    one frame every ``snapshot_every`` steps, ``steps // snapshot_every + 1``
+    of them. Both are allocated by the caller before the march, so that the
+    run is never held twice, as a list of frames and their stack.
+    """
+    if snapshots is not None:
+        snapshots[0] = sim.collocated(snapshot_field)
     rows = probe_ix[:, 1]
     cols = probe_ix[:, 0]
     for i in range(steps):
@@ -1351,10 +1354,12 @@ def _record_elastic_run(
         if probe_ix.shape[0]:
             for k, field in enumerate(probe_fields):
                 signals[:, k, i + 1] = _sample_probes(sim, field, rows, cols)
-        if snapshot_every is not None and (i + 1) % snapshot_every == 0:
-            frames.append(sim.collocated(snapshot_field))
-            frame_steps.append(i + 1)
-    return signals, frames, frame_steps
+        if (
+            snapshots is not None
+            and snapshot_every is not None
+            and (i + 1) % snapshot_every == 0
+        ):
+            snapshots[(i + 1) // snapshot_every] = sim.collocated(snapshot_field)
 
 
 def _validated_snapshot_options(
@@ -1482,14 +1487,29 @@ def elastic_fdtd_simulation(
         msg = f"duration must cover at least one time step (dt = {sim.dt:.3e} s)"
         raise ValueError(msg)
     times = np.arange(steps + 1, dtype=np.float64) * sim.dt
-    signals, frames, frame_steps = _record_elastic_run(
-        sim, steps, probe_ix, fields, snapshot_every, snapshot_field
+    # The record keeps these two as they are (handed_over): the snapshots are
+    # most of the result, and a copy would hold them twice while it is built.
+    signals = np.zeros((probe_ix.shape[0], len(fields), steps + 1), dtype=np.float64)
+    snapshots = (
+        None
+        if snapshot_every is None
+        else np.zeros((steps // snapshot_every + 1, ny, nx), dtype=np.float64)
+    )
+    _record_elastic_run(
+        sim,
+        steps,
+        probe_ix,
+        fields,
+        snapshot_every,
+        snapshot_field,
+        signals,
+        snapshots,
     )
 
     positions = (probe_ix.astype(np.float64) + 0.5) * sim.dx
     return ElasticFDTDResult(
         times=times,
-        signals=signals,
+        signals=handed_over(signals),
         probe_fields=fields,
         probes=probe_ix,
         probe_positions=positions,
@@ -1497,9 +1517,11 @@ def elastic_fdtd_simulation(
         dt=sim.dt,
         shape=(ny, nx),
         sources=tuple(sources),
-        snapshots=np.stack(frames) if frames else None,
+        snapshots=handed_over(snapshots),
         snapshot_times=(
-            np.asarray(frame_steps, dtype=np.float64) * sim.dt if frame_steps else None
+            None
+            if snapshot_every is None
+            else np.arange(0, steps + 1, snapshot_every, dtype=np.float64) * sim.dt
         ),
         snapshot_field=snapshot_field,
         obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),

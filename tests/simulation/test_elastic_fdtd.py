@@ -772,6 +772,32 @@ def test_two_runs_are_bit_identical() -> None:
     np.testing.assert_array_equal(a.snapshots, b.snapshots)
 
 
+@pytest.mark.parametrize("field", ["p", "vx", "vy"])
+def test_each_snapshot_is_the_field_of_its_own_step(field: str) -> None:
+    """Frame ``k`` is the field ``k * snapshot_every`` steps in.
+
+    A probe samples the field after every step, so at a probe's cell each
+    frame of the same field holds, bit for bit, what the probe recorded at
+    that step. The run is not a whole number of cadences long, so the last
+    frame falls short of the end and an index one cadence off shows up as a
+    frame that differs or one left at zero.
+    """
+    every = 9
+    res = _small_run(
+        recording=ElasticRecording(
+            probes=[(30, 15), (20, 25)],
+            probe_fields=(field,),
+            snapshot_every=every,
+            snapshot_field=field,
+        )
+    )
+    assert (res.times.size - 1) % every != 0
+    assert res.snapshots is not None
+    assert float(np.abs(res.snapshots[-1]).max()) > 0.0
+    for k, (ix, iy) in enumerate(res.probes):
+        assert np.array_equal(res.snapshots[:, iy, ix], res.signals[k, 0, ::every])
+
+
 def test_positive_waveform_injects_positive_pressure() -> None:
     # The explosion convention is pressure-like: a positive waveform
     # raises the synthetic pressure at the source cell.

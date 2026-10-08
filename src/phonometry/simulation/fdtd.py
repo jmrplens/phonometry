@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .._internal.frozen import OwnsArrays, read_only_copy
+from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import (
     require_equal_counts,
     require_positive,
@@ -380,7 +380,12 @@ def _run_recording(
     record_every: int | None,
     decimate: int,
 ) -> NDArray[np.float64]:
-    """Validate the ``run()`` arguments and march, stacking pressure frames."""
+    """Validate the ``run()`` arguments and march, recording pressure frames.
+
+    The frames are written into one array allocated before the march (one
+    for the initial state, then one every ``record_every`` steps), so the
+    recording is never held twice, as a list of frames and their stack.
+    """
     steps = _integer("steps", steps)
     if steps < 0:
         msg = "steps must be non-negative"
@@ -394,16 +399,18 @@ def _run_recording(
     if decimate < 1:
         msg = "decimate must be >= 1"
         raise ValueError(msg)
-    frames: list[Field2D] = []
-    if record_every is not None:
-        frames.append(engine.p[::decimate, ::decimate].copy())
+    if record_every is None:
+        for _ in range(steps):
+            engine.step()
+        return np.zeros((0, 0, 0), dtype=np.float64)
+    first = engine.p[::decimate, ::decimate]
+    frames = np.zeros((steps // record_every + 1, *first.shape), dtype=first.dtype)
+    frames[0] = first
     for i in range(steps):
         engine.step()
-        if record_every is not None and (i + 1) % record_every == 0:
-            frames.append(engine.p[::decimate, ::decimate].copy())
-    if not frames:
-        return np.zeros((0, 0, 0), dtype=np.float64)
-    return np.stack(frames)
+        if (i + 1) % record_every == 0:
+            frames[(i + 1) // record_every] = engine.p[::decimate, ::decimate]
+    return frames
 
 
 def _validated_obstacle(
@@ -1429,24 +1436,31 @@ def _record_run(
     steps: int,
     probe_ix: NDArray[np.int_],
     snapshot_every: int | None,
-) -> tuple[NDArray[np.float64], list[Field2D], list[int]]:
-    """Step the engine, recording probe histories and field snapshots."""
-    pressures = np.zeros((probe_ix.shape[0], steps + 1), dtype=np.float64)
-    frames: list[Field2D] = []
-    frame_steps: list[int] = []
-    if snapshot_every is not None:
-        frames.append(sim.p.copy())
-        frame_steps.append(0)
+    pressures: NDArray[np.float64],
+    snapshots: NDArray[np.float64] | None,
+) -> None:
+    """Step the engine, writing probe histories and field snapshots in place.
+
+    ``pressures`` takes one column per step after the first; ``snapshots``
+    takes the initial field and then one frame every ``snapshot_every``
+    steps, so it has ``steps // snapshot_every + 1`` of them. Both are
+    allocated by the caller before the march, so that the run is never held
+    twice, as a list of frames and their stack.
+    """
+    if snapshots is not None:
+        snapshots[0] = sim.p
     rows = probe_ix[:, 1]
     cols = probe_ix[:, 0]
     for i in range(steps):
         sim.step()
         if probe_ix.shape[0]:
             pressures[:, i + 1] = sim.p[rows, cols]
-        if snapshot_every is not None and (i + 1) % snapshot_every == 0:
-            frames.append(sim.p.copy())
-            frame_steps.append(i + 1)
-    return pressures, frames, frame_steps
+        if (
+            snapshots is not None
+            and snapshot_every is not None
+            and (i + 1) % snapshot_every == 0
+        ):
+            snapshots[(i + 1) // snapshot_every] = sim.p
 
 
 def fdtd_simulation(
@@ -1554,21 +1568,31 @@ def fdtd_simulation(
         msg = f"duration must cover at least one time step (dt = {sim.dt:.3e} s)"
         raise ValueError(msg)
     times = np.arange(steps + 1, dtype=np.float64) * sim.dt
-    pressures, frames, frame_steps = _record_run(sim, steps, probe_ix, snapshot_every)
+    # The record keeps these two as they are (handed_over): the snapshots are
+    # most of the result, and a copy would hold them twice while it is built.
+    pressures = np.zeros((probe_ix.shape[0], steps + 1), dtype=np.float64)
+    snapshots = (
+        None
+        if snapshot_every is None
+        else np.zeros((steps // snapshot_every + 1, ny, nx), dtype=np.float64)
+    )
+    _record_run(sim, steps, probe_ix, snapshot_every, pressures, snapshots)
 
     positions = (probe_ix.astype(np.float64) + 0.5) * sim.dx
     return FDTDResult(
         times=times,
-        pressures=pressures,
+        pressures=handed_over(pressures),
         probes=probe_ix,
         probe_positions=positions,
         dx=sim.dx,
         dt=sim.dt,
         shape=(ny, nx),
         sources=tuple(sources),
-        snapshots=np.stack(frames) if frames else None,
+        snapshots=handed_over(snapshots),
         snapshot_times=(
-            np.asarray(frame_steps, dtype=np.float64) * sim.dt if frame_steps else None
+            None
+            if snapshot_every is None
+            else np.arange(0, steps + 1, snapshot_every, dtype=np.float64) * sim.dt
         ),
         obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
     )

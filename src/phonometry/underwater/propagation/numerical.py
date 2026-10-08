@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -3735,6 +3735,7 @@ def parabolic_equation(
         frequency=f,
         ranges=ranges,
         depths=z,
-        propagation_loss=np.asarray(pl, dtype=np.float64),
+        # The field is most of the result; the record keeps it as it is.
+        propagation_loss=handed_over(pl),
         source_depth=zs,
     )

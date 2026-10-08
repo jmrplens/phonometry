@@ -682,13 +682,14 @@ LabJointInsulationResult(
     r_s_measured_db: np.ndarray,
     r_s_max_db: np.ndarray,
     r_s_db: np.ndarray,
-    regime: tuple[str, ...],
     joint_length_m: float | None,
     rating: WeightedRatingResult | None,
     c_100_5000_db: int | None,
     ctr_100_5000_db: int | None,
     max_rating: WeightedRatingResult | None,
     open_band_rating: JointOpenBandRating | None,
+    *,
+    limit_at_maximum: bool = True,
 )
 ```
 
@@ -702,13 +703,16 @@ Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 | `r_s_measured_db` | $R_\mathrm{s}'$, the index measured with the test element in the test opening, per band, in dB. |
 | `r_s_max_db` | $R_\mathrm{s,max}$, the maximum of the test arrangement with the joint sealed on both sides, in dB. |
 | `r_s_db` | $R_\mathrm{s}$, corrected for the flanking through the arrangement, in dB. In the `"limit"` and `"maximum"` bands it is a minimum value. |
-| `regime` | How each band was corrected: `"uncorrected"` ($R_\mathrm{s,max}$ at least 10 dB above), `"corrected"` (Formula (J.2), 6 dB to 10 dB), `"limit"` (the fixed 1,3 dB below 6 dB) or `"maximum"` (above $R_\mathrm{s,max} - 3$ dB, set to $R_\mathrm{s,max}$). |
 | `joint_length_m` | Length $l$ of the joint, in m, or `None` when not given; the form of Figure J.7 prints it as the test length. |
 | `rating` | $R_\mathrm{s,w}$ ($C$; $C_\mathrm{tr}$) of ISO 717-1:2020, or `None` without the 16 bands 100 Hz to 3 150 Hz. |
 | `c_100_5000_db` | $C_{100\text{-}5000}$, in dB, or `None` without the bands 100 Hz to 5 000 Hz. |
 | `ctr_100_5000_db` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
 | `max_rating` | The ISO 717-1 rating of $R_\mathrm{s,max}$, the maximum sound insulation of the arrangement J.5.2 a) asks the report to state, or `None`. |
 | `open_band_rating` | The single numbers with the indicative bands taken as infinitely high, or `None` when no band is indicative or there is no rating. |
+| `limit_at_maximum` | Whether the bands within 3 dB of the maximum were set to $R_\mathrm{s,max}$, as J.1 allows, rather than given the 1,3 dB correction (Default: `True`). |
+
+How each band was corrected (`regime`) is read from the measured
+and the maximum indices and `limit_at_maximum`, so it is not a field.
 
 ### LabJointInsulationResult.bracketed
 
@@ -781,6 +785,18 @@ $R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$, in dB, or `None`.
 *property*
 
 $R_\mathrm{s,w}$, in dB, or `None` without a rating.
+
+### LabJointInsulationResult.regime
+
+*property*
+
+How each band is corrected for the flanking of the arrangement (J.1).
+
+With $d = R_\mathrm{s,max} - R_\mathrm{s}'$: `"uncorrected"`
+when $R_\mathrm{s,max}$ is at least 10 dB above, `"corrected"`
+by Formula (J.2) from 6 dB to 10 dB, `"limit"` (the fixed 1,3 dB)
+below 6 dB, and `"maximum"` (set to $R_\mathrm{s,max}$) above
+$R_\mathrm{s,max} - 3$ dB when `limit_at_maximum`.
 
 ### LabJointInsulationResult.report()
 

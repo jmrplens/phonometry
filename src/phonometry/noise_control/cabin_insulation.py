@@ -339,8 +339,6 @@ class CabinInsulationResult(OwnsArrays):
     :ivar cabin_levels: :math:`(L_p)_{\text{cabin}}`, in decibels, after any
         background correction.
     :ivar insulation: :math:`D_p` or :math:`D'_p` per band, in decibels.
-    :ivar apparent: Whether the answer carries the prime of 3.6, which it does
-        for both in-situ methods.
     :ivar a_weighted_insulation: :math:`D'_{p\mathrm{A}}` of Equation (3), in decibels,
         or ``None``. Defined only for the actual-noise method.
     :ivar internal_noise_level: :math:`L_{pA}` of 6.7, in decibels, or ``None``
@@ -348,17 +346,48 @@ class CabinInsulationResult(OwnsArrays):
     :ivar method: ``"laboratory"``, ``"in-situ-loudspeaker"`` or
         ``"in-situ-actual-noise"``.
     :ivar band_fraction: 3 for one-third octaves, 1 for octaves.
+
+    Whether the answer carries the prime (:attr:`apparent`) is read from the
+    method, so it is not a field.
     """
 
     frequencies: NDArray[np.float64] | None
     room_levels: NDArray[np.float64]
     cabin_levels: NDArray[np.float64]
     insulation: NDArray[np.float64]
-    apparent: bool
     a_weighted_insulation: float | None
     internal_noise_level: float | None
     method: str
     band_fraction: int
+
+    def __post_init__(self) -> None:
+        """Reject a method the standard does not describe, or a number it does not give.
+
+        The prime is read from the method, and so is whether the A-weighted
+        insulation :math:`D'_{pA}` exists: definition 3.7 and Equation (3)
+        give it for the actual-noise method alone.
+
+        :raises ValueError: if ``method`` is not one of the three, or an
+            A-weighted insulation is carried under another method.
+        """
+        how = require_choice(self.method, "method", _METHODS)
+        if self.a_weighted_insulation is not None and how != _ACTUAL_NOISE:
+            msg = (
+                "CabinInsulationResult: 'a_weighted_insulation' is D'_pA, which "
+                "ISO 11957 defines only for the actual environmental noise "
+                f"(definition 3.7 and Equation (3)); method is {how!r}."
+            )
+            raise ValueError(msg)
+
+    @property
+    def apparent(self) -> bool:
+        """Whether the answer carries the prime of 3.6.
+
+        The word "apparent" says the measurement was carried out in situ
+        (3.6, NOTE 2), so it is read from the method: both in-situ methods
+        give :math:`D'_p`, the laboratory method :math:`D_p`.
+        """
+        return self.method in _IN_SITU_METHODS
 
     @property
     def symbol(self) -> str:
@@ -723,7 +752,6 @@ def cabin_insulation(
         room_levels=room,
         cabin_levels=cabin,
         insulation=np.asarray(room - cabin, dtype=np.float64),
-        apparent=how in _IN_SITU_METHODS,
         a_weighted_insulation=weighted,
         internal_noise_level=(
             None

@@ -327,7 +327,6 @@ WestonPropagationResult(
     range_m: NDArray[np.float64],
     propagation_loss: NDArray[np.float64],
     propagation_factor: NDArray[np.float64],
-    regime: NDArray[np.str_],
     spherical: NDArray[np.float64],
     cylindrical: NDArray[np.float64],
     mode_stripping: NDArray[np.float64],
@@ -351,7 +350,6 @@ Weston regime propagation loss versus range.
 | `range_m` | Ranges from the source, in metres. |
 | `propagation_loss` | Composite propagation loss $\mathrm{PL} = -10 \log_{10} F$ per range, in dB re 1 m². |
 | `propagation_factor` | The composite propagation factor `F`, in m⁻². |
-| `regime` | The active regime label at each range (one of [`WESTON_REGIMES`](/phonometry/reference/api/underwater/weston-regimes/#weston_regimes)). |
 | `spherical` | Spherical-spreading loss $20 \log_{10} r$ at every range, in dB. |
 | `cylindrical` | Cylindrical-spreading loss (Eq. 9.42) at every range, dB. |
 | `mode_stripping` | Mode-stripping loss (Eq. 9.49) at every range, dB (`nan` when the bottom is lossless: without reflection loss there is nothing to strip). |
@@ -363,6 +361,9 @@ Weston regime propagation loss versus range.
 | `source_depth` | Source depth `z0`, in metres. |
 | `receiver_depth` | Receiver depth `z`, in metres. |
 | `seabed` | Name of the seabed used. |
+
+The regime in force at each range (`regime`) is read from the
+ranges and the boundaries, so it is not a field.
 
 ### WestonPropagationResult.plot()
 
@@ -376,6 +377,17 @@ WestonPropagationResult.plot(
 ```
 
 Plot the composite loss with each regime's law and the boundaries.
+
+### WestonPropagationResult.regime
+
+*property*
+
+The regime in force at each range, one of [`WESTON_REGIMES`](/phonometry/reference/api/underwater/weston-regimes/#weston_regimes).
+
+Read from `range_m` and `boundaries`: each regime holds
+from its own boundary onwards, the boundary itself included.
+
+**Returns:** One label per range.
 
 ## WestonRegimeBoundaries
 

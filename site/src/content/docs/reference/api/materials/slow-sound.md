@@ -138,7 +138,12 @@ Outcome of a critical-coupling (perfect-absorption) design.
 reflection zero on the real-frequency axis at `target_frequency` and
 `angle_rad`; `absorption` is the modelled coefficient there (`~1`) and
 `normalized_impedance` the achieved `Z cos(theta) / Z0` (`~1`).
-`converged` flags whether the root find met its tolerance.
+`converged` flags a design that reached perfect absorption: the root
+find met its tolerance, its solution lies inside the search bounds it was
+given, and `absorption` exceeds 0,999. The first two are facts of the
+solve that the result does not keep, so the flag is a field; the third is
+read from `absorption`, so a design that claims convergence with less
+absorption is refused.
 
 ## helmholtz_resonator_impedance
 

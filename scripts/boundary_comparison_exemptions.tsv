@@ -43,6 +43,7 @@ aircraft/flight_performance.py	Aerodrome.pressure_ratio	bracket <= 0.0	the domai
 aircraft/flight_performance.py	_approach_distance_ft	drop_ft <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit: a descending step that does not start above the step below it
 aircraft/flight_performance.py	_climb_point	0.0 < sin_gamma < 1.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 aircraft/rotorcraft_propagation.py	_upper_hull	(v[0] - u[0]) * (pt[1] - u[1]) - (v[1] - u[1]) * (pt[0] - u[0]) >= 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
+aircraft/rotorcraft_propagation.py	_validated_section	np.diff(d) <= 0.0	the section distances must increase: one rounding of two consecutive distances keeps the sign of their difference, so it is zero or negative exactly when they are not increasing; a domain guard, not a printed limit
 aircraft/rotorcraft_propagation.py	diffraction_attenuation	arg >= 1.0	continuous (log10 of 1 is 0) (recorded with the fix)
 building/measurement/flanking_transmission.py	_detect_band_type	ratio > _OCTAVE_STEP_THRESHOLD	operands are inputs, table rows or continuous branches (recorded with the fix)
 building/measurement/flanking_transmission.py	_validate_octave_triples	abs(mid - nearest) <= 0.06 * nearest	operands are inputs, table rows or continuous branches (recorded with the fix)
@@ -100,6 +101,8 @@ environment/sources/acoustic_roughness.py	_spike_edges	abs(first[centre + right]
 environment/sources/acoustic_roughness.py	_spike_edges	abs(first[centre - left]) >= _SPIKE_EDGE_SLOPE_UM_PER_M	slopes of a measured roughness record found by the spike-removal search; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
 environment/sources/wind_turbine.py	_critical_band_edges	_LOW_FREQ_MIN <= f <= _LOW_FREQ_MAX	operands are inputs, table rows or continuous branches (recorded with the fix)
 environment/sources/wind_turbine.py	_positive	scalar <= 0.0	a positivity check of the speeds, distances and levels the module passes it; a domain guard, not a printed limit
+environment/sources/wind_turbine.py	WindTurbineTonalityResult.__post_init__	candidate >= _LOW_FREQ_MIN	guard that refuses a candidate line below the analysis range, the refusal wind_turbine_tonality makes; the candidate is a line frequency of the spectrum as given, not a computed decimal
+environment/sources/wind_turbine.py	_validate_narrowband	diffs <= 0.0	the line frequencies must increase: one rounding of two consecutive frequencies keeps the sign of their difference, so it is zero or negative exactly when they are not increasing; a domain guard, not a printed limit
 environment/sources/wind_turbine.py	wind_turbine_tonality	fc < _LOW_FREQ_MIN	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 filters/_weighting_design.py	fit_prototype	best[0] > _FIT_FAILED_DB	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 filters/frequencies.py	_infer_band_fraction	float(freq[1] / freq[0]) > _OCTAVE_SPACING_MIN_RATIO	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
@@ -111,7 +114,7 @@ materials/absorbers/airflow_resistance.py	_warn_alternating_validity	ratio_term 
 materials/absorbers/biot.py	_stack_surface_impedance	scale > 0.0	numerical algorithm internal (row equilibration of a linear system), no verdict
 materials/absorbers/porous.py	_warn_fit_range	x < lo	an extrapolation warning of an empirical fit; X carries the density of air of Annex F, and f/sigma of band frequencies and flow resistivities, whole or half numbers, is one correctly rounded division
 materials/absorbers/porous.py	_warn_fit_range	x > hi	an extrapolation warning of an empirical fit; X carries the density of air of Annex F, and f/sigma of band frequencies and flow resistivities, whole or half numbers, is one correctly rounded division
-materials/absorbers/slow_sound.py	critical_coupling_design	alpha > _PERFECT_ABSORPTION_THRESHOLD	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
+materials/absorbers/slow_sound.py	_reaches_perfect_absorption	alpha > _PERFECT_ABSORPTION_THRESHOLD	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 materials/diffusers/scattering_diffusion.py	directional_diffusion_coefficient	weighted_energy_sq <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 materials/diffusers/scattering_diffusion.py	random_incidence_diffusion	total <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 metrology/conformance.py	ConformanceVerification.share_of_acceptance_limit	share > 1.0	operands are inputs, table rows or continuous branches (recorded with the fix)
@@ -140,7 +143,7 @@ noise_control/valves.py	multistage_trim_conditions	p1 / p2 >= _STAGNATION_BRANCH
 noise_control/valves_hydrodynamic.py	corrected_incipient_ratio	corrected >= _FLASHING_RATIO	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 noise_control/valves_hydrodynamic.py	stage_conditions	abs(shares - 1.0) > _SERIES_LAW_TOLERANCE	the library's own 5 % tolerance on the series law of stage capacities, not a printed limit
 noise_control/valves_hydrodynamic.py	valve_hydrodynamic_noise	fraction > 0.0	operands are inputs, table rows or continuous branches (recorded with the fix)
-noise_control/valves_hydrodynamic.py	valve_hydrodynamic_noise	ratio >= _FLASHING_RATIO	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
+noise_control/valves_hydrodynamic.py	_require_below_flashing	ratio >= _FLASHING_RATIO	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 psychoacoustics/loudness/moore_glasberg.py	_excitation_pattern	freqs > fc	the ERB-rate grid of the filters is transcendental
 psychoacoustics/loudness/moore_glasberg.py	_excitation_pattern	g > _ROEX_G_MAX	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 psychoacoustics/loudness/moore_glasberg.py	_specific_loudness	e > _E_HIGH_LEVEL	an excitation pattern of a spectrum through roex filters; carries a transcendental factor (a power, an exponential, a root or pi), so it cannot sit on a printed decimal

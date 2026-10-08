@@ -57,7 +57,7 @@ flanking rules it calls in, to ISO 10140-2:2021 A.3.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -169,11 +169,12 @@ _WORKING_RANGE_MM = 3.0
 #: spread of the target is the target as far as the readings can tell.
 _GAP_MATCH_MM = _MAX_GAP_SPREAD_MM
 
+#: How far, in dB, a corrected index of a result built by hand may be from
+#: the correction of J.1: rounding, not a tolerance of the method.
+_FIELD_SLACK_DB = 1e-9
+
 #: The three single numbers J.5.2 i) asks for as a function of gap width.
 _SINGLE_NUMBERS = ("r_s_w", "r_s_w_c", "r_s_w_ctr")
-
-#: Names of the four per-band regimes of the flanking correction.
-_REGIMES = ("uncorrected", "corrected", "limit", "maximum")
 
 
 def joint_sound_reduction_index(
@@ -338,11 +339,6 @@ class LabJointInsulationResult(OwnsArrays):
     :ivar r_s_db: :math:`R_\mathrm{s}`, corrected for the flanking through the
         arrangement, in dB. In the ``"limit"`` and ``"maximum"`` bands it is a
         minimum value.
-    :ivar regime: How each band was corrected: ``"uncorrected"``
-        (:math:`R_\mathrm{s,max}` at least 10 dB above), ``"corrected"``
-        (Formula (J.2), 6 dB to 10 dB), ``"limit"`` (the fixed 1,3 dB below
-        6 dB) or ``"maximum"`` (above :math:`R_\mathrm{s,max} - 3` dB, set to
-        :math:`R_\mathrm{s,max}`).
     :ivar joint_length_m: Length :math:`l` of the joint, in m, or ``None``
         when not given; the form of Figure J.7 prints it as the test length.
     :ivar rating: :math:`R_\mathrm{s,w}` (:math:`C`; :math:`C_\mathrm{tr}`) of
@@ -357,29 +353,38 @@ class LabJointInsulationResult(OwnsArrays):
     :ivar open_band_rating: The single numbers with the indicative bands
         taken as infinitely high, or ``None`` when no band is indicative or
         there is no rating.
+    :ivar limit_at_maximum: Whether the bands within 3 dB of the maximum were
+        set to :math:`R_\mathrm{s,max}`, as J.1 allows, rather than given the
+        1,3 dB correction (Default: ``True``).
+
+    How each band was corrected (:attr:`regime`) is read from the measured
+    and the maximum indices and ``limit_at_maximum``, so it is not a field.
     """
 
     frequencies_hz: np.ndarray
     r_s_measured_db: np.ndarray
     r_s_max_db: np.ndarray
     r_s_db: np.ndarray
-    regime: tuple[str, ...]
     joint_length_m: float | None
     rating: WeightedRatingResult | None
     c_100_5000_db: int | None
     ctr_100_5000_db: int | None
     max_rating: WeightedRatingResult | None
     open_band_rating: JointOpenBandRating | None
+    _: KW_ONLY
+    limit_at_maximum: bool = True
 
     def __post_init__(self) -> None:
-        """Reject columns of different lengths and an unknown regime.
+        """Reject columns of different lengths, or a correction of another rule.
 
         The figure, the table of the form and the octave conversion read the
         four columns against ``frequencies_hz`` band by band, and the regime
-        decides which bands the form prints as minimum values.
+        read from them decides which bands the form prints as minimum values.
+        The corrected index is what that regime's rule of J.1 makes of the
+        measured and the maximum indices, so it is held to it band by band.
 
-        :raises ValueError: if the per-band columns disagree, or a regime is
-            not one of the four.
+        :raises ValueError: if the per-band columns disagree, or ``r_s_db`` is
+            not the correction the regime of each band gives.
         """
         require_ranks(
             self,
@@ -391,14 +396,37 @@ class LabJointInsulationResult(OwnsArrays):
         require_same_length(
             self, "frequencies_hz", "r_s_measured_db", "r_s_max_db", "r_s_db"
         )
-        if len(self.regime) != np.size(self.frequencies_hz):
+        expected = _correct(
+            np.asarray(self.r_s_measured_db, dtype=np.float64),
+            np.asarray(self.r_s_max_db, dtype=np.float64),
+            limit_at_maximum=self.limit_at_maximum,
+        )
+        if not np.allclose(
+            self.r_s_db, expected, rtol=0.0, atol=_FIELD_SLACK_DB, equal_nan=True
+        ):
             msg = (
-                "LabJointInsulationResult: 'regime' must carry one entry per "
-                f"band; got {len(self.regime)} for {np.size(self.frequencies_hz)}."
+                "LabJointInsulationResult: 'r_s_db' must be the correction of "
+                "J.1 each band's regime gives from 'r_s_measured_db' and "
+                f"'r_s_max_db', {expected.tolist()!r}; got "
+                f"{np.asarray(self.r_s_db).tolist()!r}."
             )
             raise ValueError(msg)
-        for entry in self.regime:
-            require_choice(entry, "regime", _REGIMES)
+
+    @property
+    def regime(self) -> tuple[str, ...]:
+        r"""How each band is corrected for the flanking of the arrangement (J.1).
+
+        With :math:`d = R_\mathrm{s,max} - R_\mathrm{s}'`: ``"uncorrected"``
+        when :math:`R_\mathrm{s,max}` is at least 10 dB above, ``"corrected"``
+        by Formula (J.2) from 6 dB to 10 dB, ``"limit"`` (the fixed 1,3 dB)
+        below 6 dB, and ``"maximum"`` (set to :math:`R_\mathrm{s,max}`) above
+        :math:`R_\mathrm{s,max} - 3` dB when :attr:`limit_at_maximum`.
+        """
+        return _regimes(
+            np.asarray(self.r_s_measured_db),
+            np.asarray(self.r_s_max_db),
+            limit_at_maximum=self.limit_at_maximum,
+        )
 
     @property
     def minimum_value(self) -> np.ndarray:
@@ -551,30 +579,42 @@ def _indicative_bands(measured: np.ndarray, maximum: np.ndarray) -> np.ndarray:
     return np.asarray(margin < _MAXIMUM_MARGIN_DB - _SLACK_DB, dtype=bool)
 
 
-def _correct(
+def _regimes(
     measured: np.ndarray, maximum: np.ndarray, *, limit_at_maximum: bool
-) -> tuple[np.ndarray, tuple[str, ...]]:
-    """The flanking correction of J.1 and ISO 10140-2:2021 A.3, band by band."""
-    margin = maximum - measured
-    corrected = np.empty_like(measured)
+) -> tuple[str, ...]:
+    """Which rule of J.1 and ISO 10140-2:2021 A.3 corrects each band."""
     regime: list[str] = []
-    for k, d in enumerate(margin):
+    for d in maximum - measured:
         if d >= _NO_CORRECTION_DB - _SLACK_DB:
-            corrected[k] = measured[k]
             regime.append("uncorrected")
         elif d >= _FORMULA_MARGIN_DB - _SLACK_DB:
+            regime.append("corrected")
+        elif limit_at_maximum and d < _MAXIMUM_MARGIN_DB - _SLACK_DB:
+            regime.append("maximum")
+        else:
+            regime.append("limit")
+    return tuple(regime)
+
+
+def _correct(
+    measured: np.ndarray, maximum: np.ndarray, *, limit_at_maximum: bool
+) -> np.ndarray:
+    """The flanking correction of J.1 and ISO 10140-2:2021 A.3, band by band."""
+    corrected = np.empty_like(measured)
+    regimes = _regimes(measured, maximum, limit_at_maximum=limit_at_maximum)
+    for k, regime in enumerate(regimes):
+        if regime == "uncorrected":
+            corrected[k] = measured[k]
+        elif regime == "corrected":
             # Formula (J.2); the argument is positive because d >= 6 dB here.
             corrected[k] = -10.0 * math.log10(
                 10.0 ** (-measured[k] / 10.0) - 10.0 ** (-maximum[k] / 10.0)
             )
-            regime.append("corrected")
-        elif limit_at_maximum and d < _MAXIMUM_MARGIN_DB - _SLACK_DB:
+        elif regime == "maximum":
             corrected[k] = maximum[k]
-            regime.append("maximum")
         else:
             corrected[k] = measured[k] + _LIMIT_CORRECTION_DB
-            regime.append("limit")
-    return corrected, tuple(regime)
+    return corrected
 
 
 def lab_joint_insulation(
@@ -648,7 +688,7 @@ def lab_joint_insulation(
         if joint_length_m is None
         else require_positive(joint_length_m, "joint_length_m")
     )
-    r_s, regime = _correct(measured, maximum, limit_at_maximum=limit_at_maximum)
+    r_s = _correct(measured, maximum, limit_at_maximum=limit_at_maximum)
 
     core = _match_bands(freqs, _FREQ_THIRD_OCTAVE)
     rating: WeightedRatingResult | None = None
@@ -670,13 +710,13 @@ def lab_joint_insulation(
         r_s_measured_db=measured,
         r_s_max_db=maximum,
         r_s_db=np.asarray(r_s, dtype=np.float64),
-        regime=regime,
         joint_length_m=length,
         rating=rating,
         c_100_5000_db=c_wide,
         ctr_100_5000_db=ctr_wide,
         max_rating=max_rating,
         open_band_rating=opened,
+        limit_at_maximum=bool(limit_at_maximum),
     )
 
 

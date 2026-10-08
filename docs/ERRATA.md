@@ -6980,6 +6980,54 @@ in the same order.
   out cavitating.
 - **Status:** unreported.
 
+## IEC 60534-8-4:2005, Equations (19a) and (19b) (a turbulent condition written against the wrong ratio, and two conditions that both claim the threshold and x_F = 1)
+
+- **Location:** Clause 5.4.1, the conditions above Equations (19a) and (19b)
+  on printed folio 12 (PDF page 14) of BS EN 60534-8-4:2005.
+- **The print:** "For turbulent conditions $x_\mathrm{Fz} \le x_\mathrm{Fzp1}$
+  or $x_\mathrm{F} \ge 1$):" above (19a), and "For cavitating conditions
+  ($x_\mathrm{Fzp1} \le x_\mathrm{F} \le 1$:" above (19b).
+- **The problem:** the first alternative of the (19a) condition compares the
+  two thresholds with each other and names no operating point. Read as
+  printed, that alternative holds exactly when $p_1 \le 6 \times 10^5$ Pa,
+  because Equation (3c) raises $x_\mathrm{Fzp1}$ above $x_\mathrm{Fz}$ only
+  below that pressure. Below $x_\mathrm{F} = 1$, where the second alternative
+  does not apply, the turbulent spectrum of (19a) would then cover every point
+  at or below 6 bar, cavitating ones included, and no point above it, where a
+  turbulent point, $x_\mathrm{F} < x_\mathrm{Fzp1}$, would fall under neither
+  condition; the intended condition is $x_\mathrm{F} \le x_\mathrm{Fzp1}$.
+  The two conditions then share both of their ends: the threshold
+  $x_\mathrm{F} = x_\mathrm{Fzp1}$, which (19b) includes with ≤ while the
+  corrected (19a) would include it too, and
+  $x_\mathrm{F} = 1$, which (19a) claims with ≥ and (19b) with ≤. Each
+  condition also leaves a parenthesis unpaired, a closing one after (19a)'s
+  and an opening one before (19b)'s. The rest of the document does not settle
+  the threshold either: the test of 5.1 calls a point turbulent when
+  $\Delta p$ "is lower than" $x_\mathrm{Fzp1}(p_1 - p_\mathrm{v})$ and
+  cavitating when it "exceeds" it, the region of Equation (9) is printed
+  $x_\mathrm{Fz,p1} \le x_\mathrm{F} \le 1$, and 6.3 applies the turbulent
+  equations when $x_\mathrm{F,i} \le x_\mathrm{Fzp1,i}$.
+- **Consequence:** none on the threshold, where Equation (9) returns exactly
+  zero and (19b) reduces to (19a). At $x_\mathrm{F} = 1$ neither applies,
+  because Equations (9) and (13) divide by $1 - x_\mathrm{F}$ there. Read
+  literally, the (19a) condition would split the band spectrum below
+  $x_\mathrm{F} = 1$ by inlet pressure instead of by regime.
+- **Evidence:** the two conditions as printed. Verified on PDF page 14
+  (printed p. 12) of BS EN 60534-8-4:2005: the turbulent condition reads
+  "$x_{Fz} \le x_{Fzp1}$ or $x_F \ge 1$)" and the cavitating one
+  "($x_{Fzp1} \le x_F \le 1$:", with Equation (3c) on PDF page 10 (printed
+  p. 8), the 5.1 test on PDF page 12 (printed p. 10) and the 6.3 condition on
+  PDF page 16 (printed p. 14).
+- **Library behaviour:**
+  [`valve_hydrodynamic_noise`](../src/phonometry/noise_control/valves_hydrodynamic.py)
+  picks (19a) or (19b) by the one regime of 5.1, cavitating when $\Delta p$
+  exceeds $x_\mathrm{Fzp1}(p_1 - p_\mathrm{v})$, so the threshold itself is
+  turbulent, and it stops below $x_\mathrm{F} = 1$. A
+  `HydrodynamicValveNoise` built by hand reads its regime the same way and
+  refuses a point at or past $x_\mathrm{F} = 1$;
+  `test_a_differential_on_the_threshold_is_turbulent` pins the threshold.
+- **Status:** unreported.
+
 ## IEC 60534-8-4:2005, Table A.1 (three printed intermediates its own equations do not reproduce)
 
 - **Location:** Annex A (informative), Table A.1: the Equation (17) row on

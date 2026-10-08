@@ -1545,6 +1545,10 @@ def pressure_reciprocity_pair(
 #: nominal value, and adjacent rows are 25 % apart.
 _NOMINAL_TOLERANCE = 0.02
 
+#: How far, in dB, a correction of a result built by hand may be from the one
+#: Table C.3 gives: rounding, not a tolerance of the method.
+_FIELD_SLACK_DB = 1e-9
+
 
 @dataclass(frozen=True)
 class WaveMotionCorrection(OwnsArrays):
@@ -1556,31 +1560,63 @@ class WaveMotionCorrection(OwnsArrays):
         level, in dB.
     :ivar speed_of_sound_ratio: The ratio of the speed of sound in the gas of
         the coupler to that in air, 1 for air.
-    :ivar interpolated: Whether each value was interpolated between rows of the
-        table rather than read from one.
+
+    Whether each value was interpolated between rows of the table
+    (:attr:`interpolated`) is read from the frequencies and the ratio, so it
+    is not a field.
     """
 
     frequencies_hz: NDArray[np.float64]
     correction_db: NDArray[np.float64]
     speed_of_sound_ratio: float
-    interpolated: NDArray[np.bool_]
 
     def __post_init__(self) -> None:
-        """Publish the columns read-only.
+        """Publish the columns read-only, each correction the one Table C.3 gives.
+
+        Whether each value was read from a row or interpolated is read from
+        the frequencies and the ratio, so the values have to be the ones the
+        table gives there.
 
         :raises ValueError: for frequencies that are not positive and
-            increasing, or columns of another length.
+            increasing, a correction column of another length, a ratio that
+            is not positive, a frequency whose air equivalent is above the
+            last row of Table C.3, 2 500 Hz, or a correction that is not the
+            one Table C.3 gives at its frequency.
         """
         frequencies = _frequency_axis(self.frequencies_hz)
         object.__setattr__(self, "frequencies_hz", read_only(frequencies))
-        for name, dtype in (("correction_db", np.float64), ("interpolated", np.bool_)):
-            column = np.asarray(getattr(self, name), dtype=dtype).reshape(-1)
-            if column.size != frequencies.size:
-                msg = (
-                    f"WaveMotionCorrection: '{name}' must hold one value per frequency."
-                )
-                raise ValueError(msg)
-            object.__setattr__(self, name, read_only(column))
+        column = np.asarray(self.correction_db, dtype=np.float64).reshape(-1)
+        if column.size != frequencies.size:
+            msg = "WaveMotionCorrection: 'correction_db' must hold one value per frequency."
+            raise ValueError(msg)
+        object.__setattr__(self, "correction_db", read_only(column))
+        ratio = require_positive(self.speed_of_sound_ratio, "speed_of_sound_ratio")
+        expected = np.array([_table_c3(float(f) / ratio)[0] for f in frequencies])
+        if not np.allclose(column, expected, rtol=0.0, atol=_FIELD_SLACK_DB):
+            msg = (
+                "WaveMotionCorrection: 'correction_db' must be what Table C.3 "
+                "gives at each frequency for 'speed_of_sound_ratio', "
+                f"{expected.tolist()!r}; got {column.tolist()!r}."
+            )
+            raise ValueError(msg)
+
+    @property
+    def interpolated(self) -> NDArray[np.bool_]:
+        """Whether each value was interpolated between rows of Table C.3.
+
+        A frequency whose air equivalent lies within 2 % of a printed row
+        takes that row, and one below the first row takes its nil
+        correction; any other is interpolated between two rows.
+
+        :return: One boolean per frequency.
+        """
+        return np.array(
+            [
+                _table_c3(float(f) / self.speed_of_sound_ratio)[1]
+                for f in self.frequencies_hz
+            ],
+            dtype=np.bool_,
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1652,12 +1688,10 @@ def large_volume_wave_motion_correction(
     """
     frequencies = _frequency_axis(frequencies_hz)
     ratio = require_positive(speed_of_sound_ratio, "speed_of_sound_ratio")
-    read = [_table_c3(float(f) / ratio) for f in frequencies]
     return WaveMotionCorrection(
         frequencies_hz=frequencies,
-        correction_db=np.array([value for value, _ in read]),
+        correction_db=np.array([_table_c3(float(f) / ratio)[0] for f in frequencies]),
         speed_of_sound_ratio=ratio,
-        interpolated=np.array([flag for _, flag in read]),
     )
 
 

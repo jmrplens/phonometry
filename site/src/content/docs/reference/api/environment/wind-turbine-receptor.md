@@ -101,8 +101,9 @@ BackgroundCorrectionRegime(*values)
 Which rule of 11.7 a bin's background correction followed.
 
 `LOGARITHMIC`: the total is at least 3 dB above the background, and the
-background is subtracted (Equation (6)). `THREE_DB`: the total is 0 dB
-to 3 dB above it, and the suggested 3 dB correction is applied.
+background is subtracted (Equation (6)). `THREE_DB`: the total is at
+least 0 dB but less than 3 dB above it, and the suggested 3 dB correction
+is applied.
 `UNDETERMINED`: the background is above the total, and the turbine
 level cannot be determined (11.6.4).
 
@@ -858,12 +859,13 @@ Subtract the background from the total, bin by bin (10.3.2, 11.7).
 Where the bin-averaged total is at least 3 dB above the background, the
 turbine level is the logarithmic subtraction of Equation (6),
 $L_{c,k} = 10 \lg(10^{L_{T,k}/10} - 10^{L_{B,k}/10})$, with the
-uncertainty of Equation (7). Where it is 0 dB to 3 dB above, 11.7 suggests
-a 3 dB correction instead, and a regulatory excess cannot then be found
-(11.7 NOTE 1). Where the background is louder than the total, no turbine
-level can be determined (11.6.4) and the bin is NaN. A difference within
-a nanodecibel of 3 dB or of 0 dB is on that limit, so the rounding of two
-energy means cannot move a bin from one rule to the other.
+uncertainty of Equation (7). Where it is at least 0 dB but less than 3 dB
+above, 11.7 suggests a 3 dB correction instead, and a regulatory excess
+cannot then be found (11.7 NOTE 1). Where the background is louder than
+the total, no turbine level can be determined (11.6.4) and the bin is NaN.
+A difference within a nanodecibel of 3 dB or of 0 dB is on that limit, so
+the rounding of two energy means cannot move a bin from one rule to the
+other.
 
 **Parameters**
 
@@ -894,7 +896,6 @@ TurbineSoundLevels(
     turbine_levels_db: NDArray[np.float64],
     turbine_uncertainty_db: NDArray[np.float64],
     *,
-    regimes: tuple[BackgroundCorrectionRegime, ...],
     wind_speeds_m_s: NDArray[np.float64] | None,
     wind_directions_deg: NDArray[np.float64] | None,
 )
@@ -909,11 +910,13 @@ Background-corrected wind turbine levels per bin (10.3.2, 11.7).
 | `total_levels_db` | The total (turbines on) bin levels, in dB. |
 | `background_levels_db` | The background (turbines off) bin levels. |
 | `level_differences_db` | Total minus background, in dB. |
-| `turbine_levels_db` | The turbine level $L_{c,k}$, in dB: Equation (6) where the difference is at least 3 dB, the total minus 3 dB where it is 0 dB to 3 dB, NaN where it is negative. |
+| `turbine_levels_db` | The turbine level $L_{c,k}$, in dB: Equation (6) where the difference is at least 3 dB, the total minus 3 dB where it is at least 0 dB but less than 3 dB, NaN where it is negative. |
 | `turbine_uncertainty_db` | Its standard uncertainty, in dB: Equation (7) for the logarithmic subtraction, the total's own uncertainty for the fixed 3 dB correction (a constant offset), NaN where undetermined. |
-| `regimes` | The [`BackgroundCorrectionRegime`](/phonometry/reference/api/environment/wind-turbine-receptor/#backgroundcorrectionregime) of each bin. |
 | `wind_speeds_m_s` | The bins' wind speeds, in m/s, when known. |
 | `wind_directions_deg` | Centre of each bin's direction sector, in degrees, when binned by direction; `None` otherwise. Two bins of one wind speed class in different sectors are told apart by it. |
+
+Which rule of 11.7 each bin followed (`regimes`) is read from the
+total and the background levels, so it is not a field.
 
 ### TurbineSoundLevels.plot()
 
@@ -942,6 +945,18 @@ past the twelfth take them again, in the same order.
 | `kwargs` | Forwarded to the turbine level line (one per sector). |
 
 **Returns:** The axes.
+
+### TurbineSoundLevels.regimes
+
+*property*
+
+The [`BackgroundCorrectionRegime`](/phonometry/reference/api/environment/wind-turbine-receptor/#backgroundcorrectionregime) of each bin (11.7).
+
+Read from `total_levels_db` and `background_levels_db`:
+the logarithmic subtraction where the total is at least 3 dB above the
+background, the 3 dB correction where it is at least 0 dB but less
+than 3 dB above, and undetermined where the background is louder. A
+difference within a nanodecibel of 3 dB or of 0 dB is on that limit.
 
 ## TYPE_B_UNCERTAINTY_EXAMPLES_DB
 

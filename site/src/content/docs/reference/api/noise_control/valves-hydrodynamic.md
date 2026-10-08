@@ -484,9 +484,10 @@ far towards flashing this operating point is, and 1 is the whole way.
 
 ```python
 HydrodynamicValveNoise(
-    regime: str,
     pressure_ratio: float,
     differential: float,
+    inlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     cavitation_differential: float,
     incipient_ratio: float,
     corrected_ratio: float,
@@ -519,9 +520,10 @@ What IEC 60534-8-4 says about one operating point on a liquid line.
 
 | Name | Description |
 | :--- | :--- |
-| `regime` | `"turbulent"` or `"cavitating"`, from the test of 5.1: the valve cavitates when $p_1 - p_2$ exceeds $x_{Fzp1}(p_1 - p_v)$. |
 | `pressure_ratio` | $x_F$ of Equation (1). |
 | `differential` | $p_1 - p_2$, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
+| `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 | `cavitation_differential` | $\Delta p_c$ of Equation (2), in Pa. It stops following the differential once the flow chokes. |
 | `incipient_ratio` | $x_{Fz}$, the threshold as given, at 6 × 10⁵ Pa. |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c), the threshold at the working inlet pressure. This is the number the regime test is made against. |
@@ -545,6 +547,26 @@ What IEC 60534-8-4 says about one operating point on a liquid line.
 | `band_internal_level` | $L_{pi}(f_i)$ of Equation (19a) or (19b), in dB. |
 | `band_transmission_loss` | $TL(f_i)$ of Equation (22a), in dB. |
 | `band_external_level` | $L_{pe,1m}(f_i)$ of Equation (21), in dB, unweighted. |
+
+The regime (`regime`) is read from `differential`,
+`corrected_ratio` and the two pressures, so it is not a field, and
+the three cavitation fields are given exactly when it is cavitating.
+
+### HydrodynamicValveNoise.regime
+
+*property*
+
+`"turbulent"` or `"cavitating"`, the test of 5.1.
+
+The valve cavitates when $\Delta p = p_1 - p_2$ exceeds
+$x_{Fzp1}(p_1 - p_v)$ and $x_F$ is not greater than 1, and
+is turbulent when $\Delta p$ is lower. The result holds
+$x_F$ below 1, so the second condition always holds here. 5.1
+leaves the threshold itself to neither side, and the rest of the
+standard puts it on both (the region of Equation (9) and Equation
+(19b) with the cavitating points, 4.1, Equation (18b) and 6.3 with the
+turbulent ones). It is read as turbulent because Equation (9) returns
+zero there, so the two branches meet without a step.
 
 ## incipient_cavitation_ratio
 

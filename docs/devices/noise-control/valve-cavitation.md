@@ -308,7 +308,7 @@ by a thousand before handing it to Equation (12).
   downstream of a line this loud.
 - [Duct-Borne Noise](duct-path.md): the same question for a ventilation
   system, where the source is a fan rather than a jet.
-- [Errata in published sources](../../ERRATA.md): the six entries this page
+- [Errata in published sources](../../ERRATA.md): the seven entries this page
   rests on, from a sign to an equation printed two ways.
 - API reference: [`noise_control.valves_hydrodynamic`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
 
@@ -326,7 +326,7 @@ NOTE, the external level of (18a) and (18b), and the band route of 5.4. And
 Clause 6 for a multistage trim: the stage pressures and ratios of (23a) to
 (26), the energy sum of (27), and the last stage of 6.3.2. Validated against
 all three worked examples of Annex A in the
-[conformance report](../../CONFORMANCE.md); the six defects that annex and
+[conformance report](../../CONFORMANCE.md); the seven defects that annex and
 its clauses carry are in the [errata register](../../ERRATA.md). The
 laboratory measurement of x_Fz (IEC 60534-8-2) and the flashing regime past
 x_F = 1 are not implemented.

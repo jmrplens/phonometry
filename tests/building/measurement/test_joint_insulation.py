@@ -194,7 +194,6 @@ def test_result_refuses_mismatched_columns() -> None:
             r_s_measured_db=good.r_s_measured_db,
             r_s_max_db=good.r_s_max_db,
             r_s_db=good.r_s_db,
-            regime=good.regime,
             joint_length_m=None,
             rating=None,
             c_100_5000_db=None,
@@ -204,22 +203,52 @@ def test_result_refuses_mismatched_columns() -> None:
         )
 
 
-def test_result_refuses_an_unknown_regime() -> None:
-    good = _one_band(45.0, 60.0)
-    with pytest.raises(ValueError, match="regime"):
-        LabJointInsulationResult(
-            frequencies_hz=good.frequencies_hz,
-            r_s_measured_db=good.r_s_measured_db,
-            r_s_max_db=good.r_s_max_db,
-            r_s_db=good.r_s_db,
-            regime=("guessed",),
-            joint_length_m=None,
-            rating=None,
-            c_100_5000_db=None,
-            ctr_100_5000_db=None,
-            max_rating=None,
-            open_band_rating=None,
-        )
+def _columns(good: LabJointInsulationResult) -> dict[str, object]:
+    return {
+        "frequencies_hz": good.frequencies_hz,
+        "r_s_measured_db": good.r_s_measured_db,
+        "r_s_max_db": good.r_s_max_db,
+        "r_s_db": good.r_s_db,
+        "joint_length_m": None,
+        "rating": None,
+        "c_100_5000_db": None,
+        "ctr_100_5000_db": None,
+        "max_rating": None,
+        "open_band_rating": None,
+    }
+
+
+def test_result_takes_no_regime() -> None:
+    """The regime is read from the columns, so none can be handed in beside them."""
+    columns = _columns(_one_band(45.0, 60.0))
+    with pytest.raises(TypeError, match="regime"):
+        LabJointInsulationResult(**columns, regime=("maximum",))  # type: ignore[call-arg]
+
+
+@pytest.mark.parametrize(
+    ("maximum", "limit_at_maximum", "regime"),
+    [
+        (60.0, True, "uncorrected"),
+        (52.0, True, "corrected"),
+        (49.0, True, "limit"),
+        (46.0, True, "maximum"),
+        (46.0, False, "limit"),
+    ],
+)
+def test_a_hand_built_result_reads_its_regime_from_its_columns(
+    maximum: float, *, limit_at_maximum: bool, regime: str
+) -> None:
+    """The regime follows the measured and maximum indices and the J.1 rule."""
+    columns = _columns(_one_band(45.0, maximum, limit_at_maximum=limit_at_maximum))
+    res = LabJointInsulationResult(**columns, limit_at_maximum=limit_at_maximum)  # type: ignore[arg-type]
+    assert res.regime == (regime,)
+
+
+def test_a_hand_built_result_refuses_the_correction_of_another_rule() -> None:
+    """Within 3 dB of the maximum, J.1 gives 1,3 dB or the maximum, not both."""
+    columns = _columns(_one_band(45.0, 46.0, limit_at_maximum=True))
+    with pytest.raises(ValueError, match="r_s_db"):
+        LabJointInsulationResult(**columns, limit_at_maximum=False)  # type: ignore[arg-type]
 
 
 def test_lab_joint_insulation_refuses_a_length_mismatch() -> None:

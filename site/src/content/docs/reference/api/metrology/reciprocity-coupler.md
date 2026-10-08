@@ -1298,7 +1298,6 @@ WaveMotionCorrection(
     frequencies_hz: NDArray[np.float64],
     correction_db: NDArray[np.float64],
     speed_of_sound_ratio: float,
-    interpolated: NDArray[np.bool_],
 )
 ```
 
@@ -1312,7 +1311,22 @@ microphones (IEC 61094-2:2009 C.3, Table C.3).
 | `frequencies_hz` | The frequencies, in Hz. |
 | `correction_db` | The correction added to the pressure sensitivity level, in dB. |
 | `speed_of_sound_ratio` | The ratio of the speed of sound in the gas of the coupler to that in air, 1 for air. |
-| `interpolated` | Whether each value was interpolated between rows of the table rather than read from one. |
+
+Whether each value was interpolated between rows of the table
+(`interpolated`) is read from the frequencies and the ratio, so it
+is not a field.
+
+### WaveMotionCorrection.interpolated
+
+*property*
+
+Whether each value was interpolated between rows of Table C.3.
+
+A frequency whose air equivalent lies within 2 % of a printed row
+takes that row, and one below the first row takes its nil
+correction; any other is interpolated between two rows.
+
+**Returns:** One boolean per frequency.
 
 ### WaveMotionCorrection.plot()
 

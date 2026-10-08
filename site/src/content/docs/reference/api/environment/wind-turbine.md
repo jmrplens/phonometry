@@ -165,9 +165,9 @@ WindTurbineTonalityResult(
     audibility_criterion: float,
     tonal_audibility: float,
     *,
-    has_identified_tone: bool,
     frequencies: NDArray[np.float64],
     levels: NDArray[np.float64],
+    candidate_frequency_hz: float,
 )
 ```
 
@@ -184,9 +184,28 @@ Tonal audibility of a narrowband spectrum (IEC 61400-11).
 | `tonality` | Tonality $\Delta L_\mathrm{tn} = L_{p\mathrm{t}} - L_{p\mathrm{n}}$, in dB. |
 | `audibility_criterion` | The criterion `L_a` (Formula 34), in dB. |
 | `tonal_audibility` | Tonal audibility $\Delta L_\mathrm{a} = \Delta L_\mathrm{tn} - L_\mathrm{a}$, in dB. |
-| `has_identified_tone` | Whether the candidate passed the 9.5.2 possible-tone screening *and* at least one spectral line was classified as "tone" (subclause 9.5.4). When `False` the numeric fields are non-standard fallbacks (the standard defines no tonality for such a spectrum) and the spectrum must be **excluded** from the 9.5.1 energy averaging of `ΔL_a,j,k` over the spectra of a bin. |
 | `frequencies` | The narrowband line frequencies, in Hz. |
 | `levels` | The narrowband line levels, in dB. |
+| `candidate_frequency_hz` | The frequency of the candidate line the critical band was centred on, in Hz: the spectrum maximum, or the line nearest the `tone_frequency` asked for. |
+
+Whether a tone was identified (`has_identified_tone`) is read from
+the spectrum and the candidate, so it is not a field.
+
+### WindTurbineTonalityResult.has_identified_tone
+
+*property*
+
+Whether a tone was identified (subclause 9.5.4).
+
+An identified tone is a possible tone of 9.5.2, a local maximum more
+than 6 dB above the energy average of its critical band (not counting
+the line of the maximum and the two lines beside it), with one or
+more spectral lines classified as "tone" by 9.5.3. Read from
+`levels`, `frequencies` and `candidate_frequency_hz`.
+When `False` the numeric fields are non-standard fallbacks (the
+standard defines no tonality for such a spectrum) and the spectrum
+must be **excluded** from the 9.5.1 energy averaging of `ΔL_a,j,k`
+over the spectra of a bin.
 
 ### WindTurbineTonalityResult.is_audible
 

@@ -443,7 +443,6 @@ TerrainScreeningResult(
     frequencies: NDArray[np.float64],
     adjustment: NDArray[np.float64],
     *,
-    screened: bool,
     path_difference: float,
     diffraction_points: NDArray[np.float64],
     source: tuple[float, float],
@@ -461,13 +460,15 @@ Ground and screening over a terrain section (guidance §A.4.4-A.4.5).
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz, shape `(F,)`. |
 | `adjustment` | The combined ground-and-screening adjustment per band, in dB, added to the received level in the Doc 32 Eq. 23 chain (it replaces the flat-ground `ΔLg`): the mean-ground-plane ground effect when the line of sight is clear, $-(\Delta L_\mathrm{d} + \Delta L_\mathrm{g})$ of Eq. 45 when terrain blocks it. |
-| `screened` | Whether terrain blocks the line of sight (any profile point strictly above it). |
 | `path_difference` | The rubber-band path difference `δ`, in metres (`NaN` when unscreened). |
 | `diffraction_points` | The diffracting edges `(d, z)` on the convex propagation path, shape `(n, 2)` (empty when unscreened). |
 | `source` | The source `(d, z)`, in metres. |
 | `receiver` | The receiver `(d, z)`, in metres. |
 | `distances` | The section distances, in metres, shape `(M,)`. |
 | `heights` | The section terrain heights, in metres, shape `(M,)`. |
+
+Whether the terrain blocks the line of sight (`screened`) is read
+from the section, the source and the receiver, so it is not a field.
 
 ### TerrainScreeningResult.plot()
 
@@ -481,3 +482,13 @@ TerrainScreeningResult.plot(
 ```
 
 Plot the section geometry: terrain, line of sight and sound path.
+
+### TerrainScreeningResult.screened
+
+*property*
+
+Whether terrain blocks the line of sight (guidance Appendix D).
+
+Only the terrain points above the line of sight are obstacles, so the
+section is screened when one lies strictly above it and the convex
+path over them has a diffracting edge.

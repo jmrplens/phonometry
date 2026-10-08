@@ -71,6 +71,7 @@ pieces have an oracle and which do not.
 
 from __future__ import annotations
 
+import math
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -193,6 +194,10 @@ _DELTA_LW_SCREED = (13.0, -14.2, 20.8)
 #: ISO 12354-2:2017 Formula (C.5), asphalt / dry floors:
 #: ``(−0,21 m' − 5,45) lg(s') + 0,46 m' + 23,8``.
 _DELTA_LW_ASPHALT = (-0.21, -5.45, 0.46, 23.8)
+
+#: How closely a quantity of a result built by hand has to be what its
+#: equation gives from the fields beside it: rounding, not a tolerance.
+_FIELD_REL_TOL: float = 1e-9
 
 #: The axis the tapping machine's force spectrum runs over, one third-octave
 #: band holding several of its lines.
@@ -492,8 +497,6 @@ class TappingForceResult(OwnsArrays):
     :ivar cut_off_frequency: Cut-off frequency ``fco``, in Hz
         (Eqs. 3.101/3.102).
     :ivar limiting_frequency: Limiting frequency ``flimit``, in Hz (Eq. 3.106).
-    :ivar over_critical: ``True`` when :math:`K m \ge 4 Z_\mathrm{dp}^{2}`, i.e. the
-        hammer does not rebound.
     :ivar contact_stiffness: Contact stiffness ``K`` used, in N/m.
     :ivar impedance: Driving-point impedance ``Zdp`` used, in N.s/m.
     :ivar lower_limit: Low-frequency asymptote
@@ -502,6 +505,10 @@ class TappingForceResult(OwnsArrays):
         :math:`\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}`, in N
         (Eq. 3.100); 6 dB above ``lower_limit`` in mean square.
     :ivar band: Band width used for ``mean_square_force``.
+    :ivar mass_kg: Hammer mass ``m`` used, in kg (Default: 0,5).
+
+    Whether the oscillation is over-critical is read from ``K``, ``Zdp`` and
+    ``m`` (:attr:`over_critical`), so it is not a field.
     """
 
     frequencies: np.ndarray
@@ -511,12 +518,12 @@ class TappingForceResult(OwnsArrays):
     cut_off_frequency: float
     limiting_frequency: float
     _: KW_ONLY
-    over_critical: bool
     contact_stiffness: float
     impedance: float
     lower_limit: float
     upper_limit: float
     band: str = "third"
+    mass_kg: float = TAPPING_HAMMER_MASS
 
     def __post_init__(self) -> None:
         """Reject a force spectrum whose per-band quantities disagree.
@@ -532,7 +539,21 @@ class TappingForceResult(OwnsArrays):
         power input collapsed to a single value comes back as a one-value
         level spectrum, whatever the frequency axis beside it holds.
 
-        :raises ValueError: if the per-band quantities disagree.
+        The contact stiffness, the impedance and the hammer mass are what
+        :attr:`over_critical` is read from, so each has to be a positive
+        number for the regime to mean anything, and the numbers that follow
+        from them have to be the ones the regime selects: the cut-off
+        frequency of Eq. (3.101) or (3.102), the limiting frequency of
+        Eq. (3.106), the force spectrum of the whole pulse or of its first
+        lobe, with its low-frequency limits of Eqs. (3.99) and (3.100) a factor
+        of 2 apart, the band mean-square force of Eq. (3.91) at one impact
+        rate in every band, and the power input of Eq. (3.103). The impact
+        velocity and rate enter the spectrum only as their product, which
+        :attr:`lower_limit` keeps, divided by ``m``.
+
+        :raises ValueError: if the per-band quantities disagree, ``K``,
+            ``Zdp`` or ``m`` is not positive and finite, or a quantity read
+            from them is not what its equation gives.
         """
         require_ranks(
             self,
@@ -544,6 +565,63 @@ class TappingForceResult(OwnsArrays):
         require_same_length(
             self, "frequencies", "peak_force", "mean_square_force", "power_input"
         )
+        k = require_positive(self.contact_stiffness, "contact_stiffness")
+        z = require_positive(self.impedance, "impedance")
+        m = require_positive(self.mass_kg, "mass_kg")
+        lower = require_positive(self.lower_limit, "lower_limit")
+        factor = _band_factor(self.band)  # type: ignore[arg-type]
+        expected = (
+            (
+                "cut_off_frequency",
+                tapping_cut_off_frequency(k, z, mass=m),
+                "K, Zdp and m give",
+            ),
+            (
+                "limiting_frequency",
+                hammer_limiting_frequency(z, mass=m),
+                "Zdp and m give",
+            ),
+            ("upper_limit", 2.0 * lower, "twice 'lower_limit' is"),
+        )
+        for name, value, source in expected:
+            if not math.isclose(getattr(self, name), value, rel_tol=_FIELD_REL_TOL):
+                msg = (
+                    f"TappingForceResult: '{name}' must be {value!r}, what "
+                    f"{source}; got {getattr(self, name)!r}."
+                )
+                raise ValueError(msg)
+        f = np.asarray(self.frequencies, dtype=np.float64)
+        if f.size == 0:
+            return
+        # v0 and fi are not kept, but |Fn| scales with their product only.
+        peak = _peak_force(f, k, z, m, impact_velocity=lower / m, impact_rate=1.0)
+        mean_square = np.asarray(self.mean_square_force, dtype=np.float64)
+        rate = factor * f * np.asarray(self.peak_force) ** 2 / (2.0 * mean_square)
+        checks = (
+            ("peak_force", np.asarray(self.peak_force), peak),
+            ("mean_square_force", rate, np.full(f.size, rate[0])),
+            ("power_input", np.asarray(self.power_input), mean_square / z),
+        )
+        for name, held, column in checks:
+            if not np.allclose(held, column, rtol=_FIELD_REL_TOL, atol=0.0):
+                msg = (
+                    f"TappingForceResult: '{name}' is not what the "
+                    + ("over-critical" if self.over_critical else "under-critical")
+                    + " pulse of K, Zdp and m gives (Eqs. 3.91, 3.95 to 3.100 "
+                    "and 3.103)."
+                )
+                raise ValueError(msg)
+
+    @property
+    def over_critical(self) -> bool:
+        r"""Whether the hammer-floor oscillation is over-critical (Eq. 3.95).
+
+        Hopkins draws the line at :math:`K m \ge 4 Z_\mathrm{dp}^{2}`: the pulse
+        then decays to zero without changing sign, so the hammer does not
+        rebound; below it the oscillation is under-critical (Eq. 3.96). Read
+        from :attr:`contact_stiffness`, :attr:`impedance` and :attr:`mass_kg`.
+        """
+        return _is_over_critical(self.contact_stiffness, self.impedance, self.mass_kg)
 
     @property
     def power_input_level(self) -> np.ndarray:
@@ -621,18 +699,7 @@ def tapping_force_spectrum(
         else require_positive(impact_velocity, "impact_velocity")
     )
 
-    omega = 2.0 * np.pi * f
-    decay = k / (2.0 * z)
-    omega0_sq = k / m
-    spectrum = v0 * k / (omega0_sq - omega**2 + 2.0j * decay * omega)
-    over_critical = _is_over_critical(k, z, m)
-    if not over_critical:
-        beta = np.sqrt(omega0_sq - decay**2)
-        duration = np.pi / beta
-        spectrum = spectrum * (
-            1.0 + np.exp(-decay * duration) * np.exp(-1.0j * omega * duration)
-        )
-    peak = np.abs(spectrum) * fi
+    peak = _peak_force(f, k, z, m, impact_velocity=v0, impact_rate=fi)
     mean_square = peak**2 * (factor * f) / (2.0 * fi)
     return TappingForceResult(
         frequencies=f,
@@ -641,13 +708,41 @@ def tapping_force_spectrum(
         power_input=np.asarray(mean_square / z, dtype=np.float64),
         cut_off_frequency=tapping_cut_off_frequency(k, z, mass=m),
         limiting_frequency=hammer_limiting_frequency(z, mass=m),
-        over_critical=over_critical,
         contact_stiffness=k,
         impedance=z,
         lower_limit=float(m * v0 * fi),
         upper_limit=float(2.0 * m * v0 * fi),
         band=band,
+        mass_kg=m,
     )
+
+
+def _peak_force(
+    f: np.ndarray,
+    k: float,
+    z: float,
+    m: float,
+    *,
+    impact_velocity: float,
+    impact_rate: float,
+) -> np.ndarray:
+    r"""The magnitude :math:`|F_n|` of the tapping machine's force lines.
+
+    The Fourier transform of the whole pulse when the oscillation is
+    over-critical, of its first lobe when it is not, scaled by the impact
+    rate; see :func:`tapping_force_spectrum`.
+    """
+    omega = 2.0 * np.pi * f
+    decay = k / (2.0 * z)
+    omega0_sq = k / m
+    spectrum = impact_velocity * k / (omega0_sq - omega**2 + 2.0j * decay * omega)
+    if not _is_over_critical(k, z, m):
+        beta = np.sqrt(omega0_sq - decay**2)
+        duration = np.pi / beta
+        spectrum = spectrum * (
+            1.0 + np.exp(-decay * duration) * np.exp(-1.0j * omega * duration)
+        )
+    return np.asarray(np.abs(spectrum) * impact_rate, dtype=np.float64)
 
 
 # --------------------------------------------------------------------------- #

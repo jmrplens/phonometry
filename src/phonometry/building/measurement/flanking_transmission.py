@@ -345,9 +345,11 @@ class VibrationReductionResult(OwnsArrays):
         bracketed by, or ``None`` when none was supplied. An octave band
         carries the smallest of its three one-third-octave bands, since it is
         bracketed when any of them is.
-    :ivar band_type: ``"third-octave"`` or ``"octave"``, the Annex A range the
-        single number is averaged over; ``None`` reads it from the spacing of
-        the frequencies.
+    :ivar band_type: ``"third-octave"`` or ``"octave"``, the band set the
+        caller states for the Annex A range the single number is averaged
+        over, as :meth:`octave_bands` states it; ``None`` (the default, and
+        what :func:`vibration_reduction_index` leaves) reads it from the
+        spacing of the frequencies each time.
 
     ``single_number`` and ``bracketed`` are read from the fields, the
     0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
@@ -661,13 +663,13 @@ def vibration_reduction_index(
         m = _broadcast(m, dv.size, "modal_overlap")
 
     k_ij = dv + 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
-    # The bands bracketed below the 0,25 of ISO 10848-4 Clause 9 and the
-    # Annex A mean are read by the result from the modal overlap it keeps.
+    # The bands bracketed below the 0,25 of ISO 10848-4 Clause 9, the band
+    # set of the Annex A range and the Annex A mean are read by the result
+    # from the frequencies and the modal overlap it keeps.
     return VibrationReductionResult(
         frequencies=freq,
         k_ij=k_ij,
         modal_overlap=m,
-        band_type=_detect_band_type(freq),
     )
 
 

@@ -72,6 +72,8 @@ from ..._internal.validation import (
     require_finite_array,
     require_finite_matrix,
     require_positive,
+    require_ranks,
+    require_same_length,
 )
 
 if TYPE_CHECKING:
@@ -422,6 +424,11 @@ _RELEVANCE_DROP_DB = 1.0
 #: a whole decibel just as often. A nanodecibel is far below any digit the TS
 #: prints or a meter reads.
 _BOUNDARY_SLACK_DB = 1e-9
+
+#: How far, in dB, a column of a result built by hand may be from what its
+#: levels give: rounding, not a tolerance of the method.
+_FIELD_SLACK_DB = 1e-9
+
 #: The distance correction term of Equation (C.1), 10 lg(4 pi) as printed.
 _DISTANCE_TERM_DB = 11.0
 #: Attenuation over the source-receiver distance that sets the upper tone
@@ -1015,8 +1022,9 @@ class BackgroundCorrectionRegime(StrEnum):
     """Which rule of 11.7 a bin's background correction followed.
 
     ``LOGARITHMIC``: the total is at least 3 dB above the background, and the
-    background is subtracted (Equation (6)). ``THREE_DB``: the total is 0 dB
-    to 3 dB above it, and the suggested 3 dB correction is applied.
+    background is subtracted (Equation (6)). ``THREE_DB``: the total is at
+    least 0 dB but less than 3 dB above it, and the suggested 3 dB correction
+    is applied.
     ``UNDETERMINED``: the background is above the total, and the turbine
     level cannot be determined (11.6.4).
     """
@@ -1035,15 +1043,18 @@ class TurbineSoundLevels(OwnsArrays):
     :ivar level_differences_db: Total minus background, in dB.
     :ivar turbine_levels_db: The turbine level :math:`L_{c,k}`, in dB:
         Equation (6) where the difference is at least 3 dB, the total minus
-        3 dB where it is 0 dB to 3 dB, NaN where it is negative.
+        3 dB where it is at least 0 dB but less than 3 dB, NaN where it is
+        negative.
     :ivar turbine_uncertainty_db: Its standard uncertainty, in dB: Equation
         (7) for the logarithmic subtraction, the total's own uncertainty for
         the fixed 3 dB correction (a constant offset), NaN where undetermined.
-    :ivar regimes: The :class:`BackgroundCorrectionRegime` of each bin.
     :ivar wind_speeds_m_s: The bins' wind speeds, in m/s, when known.
     :ivar wind_directions_deg: Centre of each bin's direction sector, in
         degrees, when binned by direction; ``None`` otherwise. Two bins of one
         wind speed class in different sectors are told apart by it.
+
+    Which rule of 11.7 each bin followed (:attr:`regimes`) is read from the
+    total and the background levels, so it is not a field.
     """
 
     total_levels_db: NDArray[np.float64]
@@ -1052,9 +1063,87 @@ class TurbineSoundLevels(OwnsArrays):
     turbine_levels_db: NDArray[np.float64]
     turbine_uncertainty_db: NDArray[np.float64]
     _: KW_ONLY
-    regimes: tuple[BackgroundCorrectionRegime, ...]
     wind_speeds_m_s: NDArray[np.float64] | None
     wind_directions_deg: NDArray[np.float64] | None
+
+    def __post_init__(self) -> None:
+        """Reject a bin whose difference or turbine level is of another rule.
+
+        The rule of 11.7 each bin follows is read from its total and its
+        background level, so the difference beside them has to be theirs, and
+        the turbine level the one that rule gives: Equation (6), the total
+        less 3 dB, or NaN where the background is louder. Its uncertainty is
+        NaN wherever the level is; elsewhere it comes from the uncertainties
+        of the total and the background, which the result does not keep.
+
+        :raises ValueError: if the columns disagree in rank or length, the
+            difference is not the total less the background, the turbine
+            level is not the one the rule of its bin gives, or an undetermined
+            bin carries an uncertainty.
+        """
+        require_ranks(
+            self,
+            total_levels_db=1,
+            background_levels_db=1,
+            level_differences_db=1,
+            turbine_levels_db=1,
+            turbine_uncertainty_db=1,
+        )
+        require_same_length(
+            self,
+            "total_levels_db",
+            "background_levels_db",
+            "level_differences_db",
+            "turbine_levels_db",
+            "turbine_uncertainty_db",
+            axis="bin",
+        )
+        total = np.asarray(self.total_levels_db, dtype=np.float64)
+        background = np.asarray(self.background_levels_db, dtype=np.float64)
+        levels = _turbine_levels(total, background)
+        for name, expected, rule in (
+            (
+                "level_differences_db",
+                total - background,
+                "the total less the background",
+            ),
+            (
+                "turbine_levels_db",
+                levels,
+                "the level the rule of 11.7 of each bin gives",
+            ),
+        ):
+            if not np.allclose(
+                getattr(self, name),
+                expected,
+                rtol=0.0,
+                atol=_FIELD_SLACK_DB,
+                equal_nan=True,
+            ):
+                msg = f"TurbineSoundLevels: '{name}' must be {rule}."
+                raise ValueError(msg)
+        uncertainty = np.asarray(self.turbine_uncertainty_db, dtype=np.float64)
+        if not np.all(np.isnan(uncertainty[np.isnan(levels)])):
+            msg = (
+                "TurbineSoundLevels: 'turbine_uncertainty_db' must be NaN in a "
+                "bin whose turbine level cannot be determined (11.6.4)."
+            )
+            raise ValueError(msg)
+
+    @property
+    def regimes(self) -> tuple[BackgroundCorrectionRegime, ...]:
+        """The :class:`BackgroundCorrectionRegime` of each bin (11.7).
+
+        Read from :attr:`total_levels_db` and :attr:`background_levels_db`:
+        the logarithmic subtraction where the total is at least 3 dB above the
+        background, the 3 dB correction where it is at least 0 dB but less
+        than 3 dB above, and undetermined where the background is louder. A
+        difference within a nanodecibel of 3 dB or of 0 dB is on that limit.
+        """
+        difference = np.asarray(self.total_levels_db) - np.asarray(
+            self.background_levels_db
+        )
+        return tuple(_correction_regime(float(delta)) for delta in difference)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1079,6 +1168,45 @@ class TurbineSoundLevels(OwnsArrays):
         )
 
 
+def _correction_regime(delta: float) -> BackgroundCorrectionRegime:
+    """The rule of 11.7 a bin whose total is ``delta`` dB above its background follows.
+
+    11.7 prints both rules to 3 dB inclusive: the logarithmic subtraction for
+    a total "at least 3 dB" above the background and the 3 dB correction for
+    one "between 0 dB to 3 dB" above it. Its own "less than 3 dB", in the
+    sentence before the two rules and in NOTE 1, leaves 3 dB itself to the
+    subtraction, so the correction runs from 0 dB, included, to 3 dB,
+    excluded. A difference of two energy means reaches a limit only to within
+    rounding, so a difference within a nanodecibel of a limit is on it.
+    """
+    if delta >= _BACKGROUND_MARGIN_DB - _BOUNDARY_SLACK_DB:
+        return BackgroundCorrectionRegime.LOGARITHMIC
+    if delta >= -_BOUNDARY_SLACK_DB:
+        return BackgroundCorrectionRegime.THREE_DB
+    return BackgroundCorrectionRegime.UNDETERMINED
+
+
+def _turbine_levels(
+    total: NDArray[np.float64], background: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """The turbine level of each bin by the rule of 11.7 its difference selects.
+
+    Equation (6) where the total is at least 3 dB above the background, the
+    total less 3 dB where it is at least 0 dB but less than 3 dB above, NaN
+    where it is below.
+    """
+    e_t = 10.0 ** (total / 10.0)
+    e_b = 10.0 ** (background / 10.0)
+    corrected = np.full(total.shape, np.nan)
+    for i, delta in enumerate(total - background):
+        regime = _correction_regime(float(delta))
+        if regime is BackgroundCorrectionRegime.LOGARITHMIC:
+            corrected[i] = 10.0 * math.log10(e_t[i] - e_b[i])
+        elif regime is BackgroundCorrectionRegime.THREE_DB:
+            corrected[i] = total[i] - _BACKGROUND_MARGIN_DB
+    return corrected
+
+
 def turbine_sound_levels(
     total_levels_db: ArrayLike,
     background_levels_db: ArrayLike,
@@ -1093,12 +1221,13 @@ def turbine_sound_levels(
     Where the bin-averaged total is at least 3 dB above the background, the
     turbine level is the logarithmic subtraction of Equation (6),
     :math:`L_{c,k} = 10 \lg(10^{L_{T,k}/10} - 10^{L_{B,k}/10})`, with the
-    uncertainty of Equation (7). Where it is 0 dB to 3 dB above, 11.7 suggests
-    a 3 dB correction instead, and a regulatory excess cannot then be found
-    (11.7 NOTE 1). Where the background is louder than the total, no turbine
-    level can be determined (11.6.4) and the bin is NaN. A difference within
-    a nanodecibel of 3 dB or of 0 dB is on that limit, so the rounding of two
-    energy means cannot move a bin from one rule to the other.
+    uncertainty of Equation (7). Where it is at least 0 dB but less than 3 dB
+    above, 11.7 suggests a 3 dB correction instead, and a regulatory excess
+    cannot then be found (11.7 NOTE 1). Where the background is louder than
+    the total, no turbine level can be determined (11.6.4) and the bin is NaN.
+    A difference within a nanodecibel of 3 dB or of 0 dB is on that limit, so
+    the rounding of two energy means cannot move a bin from one rule to the
+    other.
 
     :param total_levels_db: Bin levels with the turbines operating, in dB.
     :param background_levels_db: Bin levels with the turbines off, in dB.
@@ -1140,32 +1269,22 @@ def turbine_sound_levels(
     difference = total - background
     e_t = 10.0 ** (total / 10.0)
     e_b = 10.0 ** (background / 10.0)
-    corrected = np.full(total.shape, np.nan)
+    corrected = _turbine_levels(total, background)
     uncertainty = np.full(total.shape, np.nan)
-    regimes: list[BackgroundCorrectionRegime] = []
     for i, delta in enumerate(difference):
-        # Both limits of 11.7 are inclusive ("at least 3 dB", "between 0 dB
-        # to 3 dB"), and a difference of two energy means reaches them only
-        # to within rounding.
-        if delta >= _BACKGROUND_MARGIN_DB - _BOUNDARY_SLACK_DB:
-            corrected[i] = 10.0 * math.log10(e_t[i] - e_b[i])
+        regime = _correction_regime(float(delta))
+        if regime is BackgroundCorrectionRegime.LOGARITHMIC:
             uncertainty[i] = math.hypot(u_t[i] * e_t[i], u_b[i] * e_b[i]) / (
                 e_t[i] - e_b[i]
             )
-            regimes.append(BackgroundCorrectionRegime.LOGARITHMIC)
-        elif delta >= -_BOUNDARY_SLACK_DB:
-            corrected[i] = total[i] - _BACKGROUND_MARGIN_DB
+        elif regime is BackgroundCorrectionRegime.THREE_DB:
             uncertainty[i] = u_t[i]
-            regimes.append(BackgroundCorrectionRegime.THREE_DB)
-        else:
-            regimes.append(BackgroundCorrectionRegime.UNDETERMINED)
     return TurbineSoundLevels(
         total_levels_db=total,
         background_levels_db=background,
         level_differences_db=read_only(difference),
         turbine_levels_db=read_only(corrected),
         turbine_uncertainty_db=read_only(uncertainty),
-        regimes=tuple(regimes),
         wind_speeds_m_s=_optional_per_bin(
             wind_speeds_m_s, total.size, "wind_speeds_m_s"
         ),

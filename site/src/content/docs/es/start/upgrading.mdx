@@ -813,7 +813,7 @@ marca un campo que solo se pasa por nombre.
 | `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | después de 4.0.0rc1 |
 | `environment.SoundRelevantTurbines` | `relevant`, `total_level_db`, `relevant_level_db` | `predicted_levels_db` | después de 4.0.0rc1 |
 | `environment.WindShearProfile` | `typical` | `shear_exponent` | después de 4.0.0rc1 |
-| `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone` | 3.3.0 |
+| `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone`, que también es de solo lectura (sección siguiente) | 3.3.0 |
 | `filters.FilterComplianceResult` | `bands`, `overall_class`, `range_limited` | gana `band_margins`, las filas sin su clase | 3.3.0 |
 | `filters.WeightingComplianceResult` | `bands`, `overall_class`, `range_limited` | gana `band_margins`, las filas sin su clase | 4.0.0rc1 |
 | `hearing.AscendingThresholdResult` | `threshold_db`, `determined`, `series_exhausted` | `ascent_levels_db`, `shortened` | después de 4.0.0rc1 |
@@ -890,12 +890,18 @@ print(result.overall_class, result.bands[0]["class"], "class" in result.band_mar
 # 1 1 False
 ```
 
-Una bandera sigue siendo un campo cuando no es un veredicto contra un límite:
-una opción que fija quien llama, como `small_room` o `noise_is_tonal`; un
-hecho del cálculo, como la rama que tomó un resolvedor; el resultado de un
-análisis que solo repetirlo daría, como
-`WindTurbineTonalityResult.has_identified_tone`; y una columna de una fila de
-una tabla publicada. `PlantRequirement` y `LoopRequirement` no cambian: sus
+Una bandera sigue siendo un campo cuando no es un veredicto contra un límite y
+nada de lo que guarda el resultado la decide: una opción que fija quien llama,
+como `small_room` o `noise_is_tonal`; una rama que eligió quien llama con lo
+que pasó, como `InverseSquareLawResult.origin_fitted`; un hecho de una entrada
+que el resultado no guarda, como `TimeWeightedEnvelope.calibrated`; una
+propiedad del fichero leído; si un resolvedor iterativo convergió; y una
+columna de una fila de una tabla publicada. `CriticalCouplingResult.converged`
+conserva el desenlace de su resolución, que el resultado no puede repetir,
+pero ya no puede declarar la convergencia junto a una absorción que no supera
+0,999, la tercera condición de la bandera. Un régimen que el resultado podría
+leer de sus propios valores es un veredicto, y la sección siguiente enumera los
+que se han movido. `PlantRequirement` y `LoopRequirement` no cambian: sus
 filas conservan cada límite como campo por la razón que da la sección
 anterior, y `PlantRequirement.holds` sigue junto a él. `TrackCondition`
 conserva su `holds` como fila del informe, pero `ReferenceTrackCheck`
@@ -903,6 +909,117 @@ construye sus condiciones a partir de la vía que guarda, así que ningún
 veredicto lee una construida en otro sitio. También se quedan los `checks` de
 sí o no de `SoundLevelMeterPeriodicRequirement`: son lo que vio quien ensaya,
 una sobrecarga indicada o un indicador enclavado, no un límite juzgado.
+
+## Un resultado lee su régimen de los valores que guarda
+
+Algunos resultados guardaban un régimen o una clasificación junto a los
+valores de los que se leía: el régimen de una válvula, si un martillo rebota,
+si el terreno apantalla un trayecto, si se encontró un tono, si un promediado
+síncrono tuvo que interpolar. La función comparaba valores que el resultado
+guarda, o podría guardar, con una constante o con un umbral que imprime su
+fuente, y guardaba la respuesta, así que un resultado construido a mano podía
+guardar la rigidez de un martillo en régimen subcrítico y decir que es
+sobrecrítico. En 4.0 cada una es una propiedad de solo lectura, leída de los
+valores que conserva el resultado, y un resultado que no conservaba lo que lee
+la prueba ahora lo conserva, con la unidad en el nombre. «Solo por nombre»
+marca un campo que solo se pasa por nombre.
+
+Un valor justo en un límite cae donde lo pone la fuente. Hopkins imprime el
+caso sobrecrítico como K m ≥ 4 Zdp², así que el amortiguamiento crítico es
+sobrecrítico, e IEC TS 61400-11-2 pide un total «al menos 3 dB» por encima del
+fondo para la resta logarítmica, así que una diferencia de 3 dB la recibe.
+IEC 60534-8-4 no zanja su umbral de cavitación en un solo sentido: la prueba de
+5.1 no deja el umbral mismo de ningún lado, la región de la Ecuación (9) y la
+Ecuación (19b) lo ponen con los puntos con cavitación, y 4.1, la Ecuación (18b)
+y 6.3 con los turbulentos. La biblioteca lo lee como turbulento, donde la
+Ecuación (9) devuelve cero y las dos ramas se encuentran sin escalón.
+
+Las funciones reciben los mismos argumentos y devuelven los mismos números.
+Tiene que cambiar el código que construye uno de estos resultados directamente
+o que sustituye uno de los campos de los que se lee su régimen, y también el que
+lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
+
+| Resultado | Ya no es campo del constructor | Se lee de | Desde |
+| --- | --- | --- | --- |
+| `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins, ecuación 3.95) | `contact_stiffness`, `impedance`; gana `mass_kg`, solo por nombre | 4.0.0rc1 |
+| `noise_control.HydrodynamicValveNoise` | `regime`, con cavitación cuando Δp supera x_Fzp1 (p1 - pv) (IEC 60534-8-4, 5.1) | `differential`, `corrected_ratio`; gana `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
+| `noise_control.AerodynamicValveNoise` | `regime`, los cinco intervalos de IEC 60534-8-3, 5.2 | `pressure_ratio`, `boundaries`; gana `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, solo por nombre | 4.0.0rc1 |
+| `aircraft.TerrainScreeningResult` | `screened`, terreno estrictamente por encima de la línea de visión | `source`, `receiver`, `distances`, `heights` | 3.3.0 |
+| `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1, 6.3.5 a)) | `reversal_levels_db` | después de 4.0.0rc1 |
+| `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels_db` | después de 4.0.0rc1 |
+| `metrology.WaveMotionCorrection` | `interpolated` | `frequencies_hz`, `speed_of_sound_ratio` | después de 4.0.0rc1 |
+| `noise_control.CabinInsulationResult` | `apparent` (ISO 11957, 3.6) | `method` | después de 4.0.0rc1 |
+| `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11, 9.5.2 a 9.5.4) | `levels`, `frequencies`; gana `candidate_frequency_hz`, solo por nombre | 3.3.0 |
+| `building.LabJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_measured_db`, `r_s_max_db`; gana `limit_at_maximum`, solo por nombre | después de 4.0.0rc1 |
+| `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels_db`, `background_levels_db` | después de 4.0.0rc1 |
+| `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
+| `signals.SynchronousAverageResult` | `interpolated`, f_s T no es un número entero de muestras | `fs`, `period_s` | 4.0.0rc1 |
+
+`building.VibrationReductionResult.band_type` sigue siendo un campo, como el
+conjunto de bandas que declara quien llama: `octave_bands()` declara
+`"octave"`, porque una sola banda de octava no se distingue de una de tercio
+de octava por su espaciado. `vibration_reduction_index` ya no lo rellena con
+el conjunto de bandas que leía de las frecuencias; lo deja en `None`, y el
+resultado lee el espaciado cada vez que calcula la media del anexo A, que da la
+misma media que antes.
+
+Los números que elige un régimen quedan atados a él, así que un resultado
+construido a mano ya no puede llevar un régimen junto a los valores de otro.
+Al construirse, cada uno de estos resultados rechaza:
+
+- `TappingForceResult`: una frecuencia de corte, una frecuencia límite, un
+  espectro de fuerza o una potencia inyectada que no sean los que dan K, Zdp y
+  m en su régimen, y unos límites de las ecuaciones (3.99) y (3.100) que no
+  estén a un factor 2 el uno del otro.
+- `HydrodynamicValveNoise`: una presión de vapor igual o superior a la presión
+  de entrada; un x_F o un x_Fzp1 que no sean los que dan la Ecuación (1) o la
+  (3c) a partir de los campos de al lado; un punto en la evaporación o más
+  allá, x_F = 1; campos de cavitación en un punto turbulento, o ninguno en uno
+  con cavitación.
+- `AerodynamicValveNoise`: unos límites que no sean los de su gas y su
+  guarnición, y un número de Mach o una eficiencia acústica de otro régimen.
+- `TerrainScreeningResult`: una fuente o un receptor que no sean un punto
+  finito, una fuente en el receptor o más allá, una sección que no vaya de uno
+  al otro, y una diferencia de camino o unas aristas de difracción que no sean
+  las de la goma elástica sobre esa sección.
+- `AutomaticThresholdResult` y `SweepThresholdResult`: inversiones que no se
+  alternan, un trazado que no conserva ningún pico o ningún valle, y una media,
+  un umbral o un umbral continuo que no sean los que dan las inversiones.
+- `WaveMotionCorrection`: una frecuencia más allá de la última fila de la
+  tabla C.3, y una corrección que la tabla no da en su frecuencia.
+- `CabinInsulationResult`: un aislamiento ponderado A con cualquier método que
+  no sea el del ruido real.
+- `WindTurbineTonalityResult`: una candidata que no sea una línea del espectro
+  a 20 Hz o más, y una cadena de las fórmulas 30 a 34 que no sea la que da el
+  espectro en torno a ella.
+- `LabJointInsulationResult`: un índice corregido por otra regla de J.1.
+- `TurbineSoundLevels`: una diferencia de niveles que no sea el total menos el
+  fondo, un nivel del aerogenerador por otra regla de 11.7, y una
+  incertidumbre en un intervalo cuyo nivel no se puede determinar.
+- `WestonPropagationResult`: una pérdida compuesta que no sea la ley del
+  régimen vigente.
+- `SynchronousAverageResult`: una rejilla de periodo de más o menos muestras
+  que `round(fs * period_s)`.
+
+```python
+import dataclasses
+
+import numpy as np
+
+from phonometry import building
+
+bands = np.array([100.0, 200.0, 400.0, 800.0])
+force = building.tapping_force_spectrum(bands, 1.0e6, 3.0e4)
+print(force.over_critical)
+# False
+print(building.tapping_force_spectrum(bands, 1.0e6, 100.0).over_critical)
+# True
+try:
+    dataclasses.replace(force, impedance=100.0)
+except ValueError as error:
+    print("cut_off_frequency" in str(error))
+# True
+```
 
 ## Los diez nombres que ya no están
 

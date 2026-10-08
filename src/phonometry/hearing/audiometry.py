@@ -247,6 +247,10 @@ _RELAXED_ALLOWANCE_DB = 8.0
 _NOISE_FLOOR_MARGIN_DB = 6.0
 #: A limit reached through floating-point arithmetic is on the limit.
 _BOUNDARY_SLACK_DB = 1e-9
+
+#: How far, in dB, a mean or a threshold of a result built by hand may be from
+#: what its reversals give: rounding, not a tolerance of the method.
+_FIELD_SLACK_DB = 1e-9
 #: Relative tolerance for matching a frequency to a tabulated one.
 _FREQUENCY_RTOL = 1e-3
 #: Tolerance for comparing two levels a tester set on the attenuator.
@@ -1380,25 +1384,117 @@ def _reversal_kinds(levels: np.ndarray, name: str) -> np.ndarray:
     return kinds
 
 
+def _retained_reversals(levels: np.ndarray) -> np.ndarray:
+    """Which reversals 6.3.5 a) keeps.
+
+    The first reversal after the change of frequency is ignored, and so are
+    both reversals that bound an excursion of 3 dB or less.
+
+    :param levels: The levels at successive reversals, in dB.
+    :return: ``True`` for a reversal kept.
+    """
+    retained = np.ones(levels.size, dtype=bool)
+    retained[0] = False
+    small = np.abs(np.diff(levels)) <= _SMALL_EXCURSION_DB + _BOUNDARY_SLACK_DB
+    retained[:-1] &= ~small
+    retained[1:] &= ~small
+    return retained
+
+
+def _tracing_mean(levels: np.ndarray) -> float:
+    """The mean of the average kept peak and the average kept valley (6.3.5 b).
+
+    :param levels: The levels at successive reversals, in dB.
+    :return: The mean, in dB, before the rounding of 6.3.5 c).
+    :raises ValueError: when the reversals do not alternate, or no peak or no
+        valley is left after 6.3.5 a).
+    """
+    kinds = _reversal_kinds(levels, "reversal_levels_db")
+    retained = _retained_reversals(levels)
+    peaks = levels[retained & kinds]
+    valleys = levels[retained & ~kinds]
+    if peaks.size == 0 or valleys.size == 0:
+        msg = (
+            "no peak or no valley of the tracing is left after 6.3.5 a) "
+            "ignores the first reversal and the excursions of 3 dB or less."
+        )
+        raise ValueError(msg)
+    return 0.5 * (float(np.mean(peaks)) + float(np.mean(valleys)))
+
+
 @dataclass(frozen=True)
 class AutomaticThresholdResult(OwnsArrays):
     """The hearing threshold level from an automatic recording (6.3.5).
 
     :ivar reversal_levels_db: The levels at the reversals of the tracing at
         one frequency, in order, in dB.
-    :ivar is_peak: Whether each reversal is a peak (a local maximum of the
-        level), the others being valleys.
-    :ivar retained: Whether each reversal is kept after 6.3.5 a): the first
-        is ignored, and so are both ends of every excursion of 3 dB or less.
     :ivar mean_db: The mean of the average peak and the average valley, in dB.
     :ivar threshold_db: That mean rounded up to the next whole decibel, in dB.
+
+    Which reversals are peaks (:attr:`is_peak`) and which 6.3.5 a) keeps
+    (:attr:`retained`) are read from the levels, so they are not fields.
     """
 
     reversal_levels_db: np.ndarray
-    is_peak: np.ndarray
-    retained: np.ndarray
     mean_db: float
     threshold_db: float
+
+    def __post_init__(self) -> None:
+        """Reject a tracing whose reversals or whose threshold disagree.
+
+        The peaks and the valleys are read from the order of the levels, so
+        the levels have to turn the trace at every reversal, and the
+        reversals 6.3.5 a) keeps have to leave a peak and a valley to average.
+        The mean and the threshold are what 6.3.5 b) and c) make of them.
+
+        :raises ValueError: for fewer than three reversals, a level that is
+            not finite, reversals that do not alternate between peaks and
+            valleys, a tracing that keeps no peak or no valley after a), or a
+            mean or a threshold that is not the one the kept reversals give.
+        """
+        levels = _levels(self.reversal_levels_db, "reversal_levels_db", minimum=3)
+        mean = _tracing_mean(levels)
+        expected = (
+            ("mean_db", mean),
+            ("threshold_db", float(math.ceil(float(settled(mean))))),
+        )
+        for name, value in expected:
+            if not math.isclose(
+                getattr(self, name), value, rel_tol=0.0, abs_tol=_FIELD_SLACK_DB
+            ):
+                msg = (
+                    f"AutomaticThresholdResult: '{name}' must be {value!r}, what "
+                    "6.3.5 b) and c) make of the reversals kept; got "
+                    f"{getattr(self, name)!r}."
+                )
+                raise ValueError(msg)
+
+    @property
+    def is_peak(self) -> np.ndarray:
+        """Whether each reversal is a peak, a local maximum of the level.
+
+        The others are valleys. Read from the direction the trace turns at
+        each reversal.
+
+        :return: One boolean per reversal.
+        """
+        return _reversal_kinds(
+            np.asarray(self.reversal_levels_db, dtype=np.float64),
+            "reversal_levels_db",
+        )
+
+    @property
+    def retained(self) -> np.ndarray:
+        """Whether each reversal is kept after 6.3.5 a).
+
+        The first is ignored, and so are both ends of every excursion of
+        3 dB or less.
+
+        :return: One boolean per reversal.
+        """
+        return _retained_reversals(
+            np.asarray(self.reversal_levels_db, dtype=np.float64)
+        )
 
     @property
     def peaks_db(self) -> np.ndarray:
@@ -1478,25 +1574,9 @@ def automatic_audiometry_threshold(
         or no valley after a).
     """
     levels = _levels(reversal_levels_db, "reversal_levels_db", minimum=3)
-    kinds = _reversal_kinds(levels, "reversal_levels_db")
-    retained = np.ones(levels.size, dtype=bool)
-    retained[0] = False
-    small = np.abs(np.diff(levels)) <= _SMALL_EXCURSION_DB + _BOUNDARY_SLACK_DB
-    retained[:-1] &= ~small
-    retained[1:] &= ~small
-    peaks = levels[retained & kinds]
-    valleys = levels[retained & ~kinds]
-    if peaks.size == 0 or valleys.size == 0:
-        msg = (
-            "no peak or no valley of the tracing is left after 6.3.5 a) "
-            "ignores the first reversal and the excursions of 3 dB or less."
-        )
-        raise ValueError(msg)
-    mean = 0.5 * (float(np.mean(peaks)) + float(np.mean(valleys)))
+    mean = _tracing_mean(levels)
     return AutomaticThresholdResult(
         reversal_levels_db=levels,
-        is_peak=kinds,
-        retained=retained,
         mean_db=mean,
         # Settled first, so a mean such as 12,000 000 000 000 002 dB is not
         # taken up to 13 dB by a last-bit excess.
@@ -1509,13 +1589,87 @@ def automatic_audiometry_threshold(
 # ---------------------------------------------------------------------------
 
 
+def _sweep_frequencies(
+    reversal_frequencies: ArrayLike, levels: np.ndarray
+) -> np.ndarray:
+    """The reversal frequencies of a sweep, one per level, running one way.
+
+    :raises ValueError: when they do not match the levels, are not positive,
+        or do not run one way.
+    """
+    freqs = _levels(reversal_frequencies, "reversal_frequencies", minimum=6)
+    if freqs.size != levels.size or np.any(freqs <= 0.0):
+        msg = (
+            "'reversal_frequencies' must hold one positive frequency per "
+            "reversal level."
+        )
+        raise ValueError(msg)
+    steps = np.diff(freqs)
+    if not (np.all(steps > 0.0) or np.all(steps < 0.0)):
+        msg = "'reversal_frequencies' must run one way, as a sweep does."
+        raise ValueError(msg)
+    return freqs
+
+
+def _sweep_reversals(levels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """The positions of the peaks and of the valleys of a sweep tracing.
+
+    :raises ValueError: when the reversals do not alternate, or fewer than
+        three peaks or three valleys are traced.
+    """
+    kinds = _reversal_kinds(levels, "reversal_levels_db")
+    peaks, valleys = np.flatnonzero(kinds), np.flatnonzero(~kinds)
+    if min(peaks.size, valleys.size) < _SWEEP_REVERSALS_PER_SIDE:
+        msg = "a sweep-frequency tracing needs at least three peaks and three valleys."
+        raise ValueError(msg)
+    return peaks, valleys
+
+
+def _sweep_means(
+    freqs: np.ndarray, levels: np.ndarray, targets: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """At each target, the 7.5 mean of the three nearest peaks and valleys.
+
+    :return: The means, in dB, and the larger spread of the three peaks and
+        of the three valleys each averaged, in dB.
+    """
+    peaks, valleys = _sweep_reversals(levels)
+    log_f = np.log(freqs)
+    means = np.empty(targets.size)
+    spreads = np.empty(targets.size)
+    for k, target in enumerate(targets):
+        distance = np.abs(log_f - math.log(target))
+        near_peaks = levels[peaks[np.argsort(distance[peaks], kind="stable")[:3]]]
+        near_valleys = levels[valleys[np.argsort(distance[valleys], kind="stable")[:3]]]
+        means[k] = 0.5 * (float(np.mean(near_peaks)) + float(np.mean(near_valleys)))
+        spreads[k] = max(float(np.ptp(near_peaks)), float(np.ptp(near_valleys)))
+    return means, spreads
+
+
+def _running_threshold(
+    freqs: np.ndarray, levels: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """The semicontinuous threshold of 7.5, run over six reversals at a time.
+
+    :return: The geometric mean frequency of each run, in hertz, and the
+        arithmetic mean level of each run, in dB.
+    """
+    log_f = np.log(freqs)
+    window = 2 * _SWEEP_REVERSALS_PER_SIDE
+    runs = levels.size - window + 1
+    running_f = np.array(
+        [math.exp(float(np.mean(log_f[i : i + window]))) for i in range(runs)]
+    )
+    running_l = np.array([float(np.mean(levels[i : i + window])) for i in range(runs)])
+    return running_f, running_l
+
+
 @dataclass(frozen=True)
 class SweepThresholdResult(OwnsArrays):
     """Hearing threshold levels from a sweep-frequency tracing (7.5).
 
     :ivar reversal_frequencies: The frequency of each reversal, in hertz.
     :ivar reversal_levels_db: The hearing level of each reversal, in dB.
-    :ivar is_peak: Whether each reversal is a peak, the others being valleys.
     :ivar frequencies: The frequencies the threshold was determined at, in
         hertz.
     :ivar mean_db: At each, the mean of the average of the three nearest peaks
@@ -1527,17 +1681,70 @@ class SweepThresholdResult(OwnsArrays):
         consecutive reversals, in hertz.
     :ivar running_threshold_db: The arithmetic mean level of each run, in dB,
         the semicontinuous threshold of 7.5.
+
+    Which reversals are peaks (:attr:`is_peak`) is read from the levels, so
+    it is not a field.
     """
 
     reversal_frequencies: np.ndarray
     reversal_levels_db: np.ndarray
-    is_peak: np.ndarray
     frequencies: np.ndarray
     mean_db: np.ndarray
     threshold_db: np.ndarray
     spread_db: np.ndarray
     running_frequencies: np.ndarray
     running_threshold_db: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a tracing whose reversals or whose thresholds disagree.
+
+        The peaks and the valleys are read from the order of the levels, so
+        the levels have to turn the trace at every reversal, and every column
+        beside them is what 7.5 makes of the peaks and the valleys: the means,
+        the rounded thresholds and the spreads at :attr:`frequencies`, and the
+        running threshold.
+
+        :raises ValueError: for fewer than six reversals, a level or a
+            frequency that is not finite and positive, reversals that do not
+            alternate between peaks and valleys or keep fewer than three of
+            either, a sweep that does not run one way, or a column that is not
+            the one the reversals give.
+        """
+        levels = _levels(self.reversal_levels_db, "reversal_levels_db", minimum=6)
+        freqs = _sweep_frequencies(self.reversal_frequencies, levels)
+        targets = _levels(self.frequencies, "frequencies")
+        means, spreads = _sweep_means(freqs, levels, targets)
+        running_f, running_l = _running_threshold(freqs, levels)
+        expected = (
+            ("mean_db", means),
+            ("threshold_db", np.array([_round_half_up(m, 1.0) for m in means])),
+            ("spread_db", spreads),
+            ("running_frequencies", running_f),
+            ("running_threshold_db", running_l),
+        )
+        for name, value in expected:
+            held = np.asarray(getattr(self, name), dtype=np.float64)
+            if held.shape != value.shape or not np.allclose(
+                held, value, rtol=1e-9, atol=_FIELD_SLACK_DB
+            ):
+                msg = (
+                    f"SweepThresholdResult: '{name}' is not what 7.5 makes of "
+                    "the reversals it holds."
+                )
+                raise ValueError(msg)
+
+    @property
+    def is_peak(self) -> np.ndarray:
+        """Whether each reversal is a peak, the others being valleys.
+
+        Read from the direction the trace turns at each reversal.
+
+        :return: One boolean per reversal.
+        """
+        return _reversal_kinds(
+            np.asarray(self.reversal_levels_db, dtype=np.float64),
+            "reversal_levels_db",
+        )
 
     @property
     def less_reliable(self) -> np.ndarray:
@@ -1604,22 +1811,8 @@ def sweep_audiometry_threshold(
         not run one way, or no frequency to determine.
     """
     levels = _levels(reversal_levels_db, "reversal_levels_db", minimum=6)
-    freqs = _levels(reversal_frequencies, "reversal_frequencies", minimum=6)
-    if freqs.size != levels.size or np.any(freqs <= 0.0):
-        msg = (
-            "'reversal_frequencies' must hold one positive frequency per "
-            "reversal level."
-        )
-        raise ValueError(msg)
-    steps = np.diff(freqs)
-    if not (np.all(steps > 0.0) or np.all(steps < 0.0)):
-        msg = "'reversal_frequencies' must run one way, as a sweep does."
-        raise ValueError(msg)
-    kinds = _reversal_kinds(levels, "reversal_levels_db")
-    peaks, valleys = np.flatnonzero(kinds), np.flatnonzero(~kinds)
-    if min(peaks.size, valleys.size) < _SWEEP_REVERSALS_PER_SIDE:
-        msg = "a sweep-frequency tracing needs at least three peaks and three valleys."
-        raise ValueError(msg)
+    freqs = _sweep_frequencies(reversal_frequencies, levels)
+    _sweep_reversals(levels)
     if frequencies is None:
         low, high = float(np.min(freqs)), float(np.max(freqs))
         audiometric = np.asarray(_AUDIOMETRIC_FREQUENCIES, dtype=np.float64)
@@ -1635,25 +1828,11 @@ def sweep_audiometry_threshold(
         if np.any(targets <= 0.0):
             msg = "'frequencies' must be positive, in hertz."
             raise ValueError(msg)
-    log_f = np.log(freqs)
-    means = np.empty(targets.size)
-    spreads = np.empty(targets.size)
-    for k, target in enumerate(targets):
-        distance = np.abs(log_f - math.log(target))
-        near_peaks = levels[peaks[np.argsort(distance[peaks], kind="stable")[:3]]]
-        near_valleys = levels[valleys[np.argsort(distance[valleys], kind="stable")[:3]]]
-        means[k] = 0.5 * (float(np.mean(near_peaks)) + float(np.mean(near_valleys)))
-        spreads[k] = max(float(np.ptp(near_peaks)), float(np.ptp(near_valleys)))
-    window = 2 * _SWEEP_REVERSALS_PER_SIDE
-    runs = levels.size - window + 1
-    running_f = np.array(
-        [math.exp(float(np.mean(log_f[i : i + window]))) for i in range(runs)]
-    )
-    running_l = np.array([float(np.mean(levels[i : i + window])) for i in range(runs)])
+    means, spreads = _sweep_means(freqs, levels, targets)
+    running_f, running_l = _running_threshold(freqs, levels)
     return SweepThresholdResult(
         reversal_frequencies=freqs,
         reversal_levels_db=levels,
-        is_peak=kinds,
         frequencies=np.asarray(targets, dtype=np.float64),
         mean_db=means,
         threshold_db=np.array([_round_half_up(m, 1.0) for m in means]),

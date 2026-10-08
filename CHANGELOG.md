@@ -3049,10 +3049,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   verdict, found either by the field's type or name or by tracing the value
   a function of the package gives it back to a comparison or a label one
   chose, unless it is listed with the reason it stays, such as an option the
-  caller sets, a fact of the computation, a column of a published table, the
-  yes or no a tester observed under IEC 61672-3, or the ISO 8297 requirement
-  record. The upgrading guide lists every class, the fields it no longer
-  takes, what each verdict is read from and the release it first shipped in.
+  caller sets, a column of a published table, the yes or no a tester observed
+  under IEC 61672-3, or the ISO 8297 requirement record. The upgrading guide
+  lists every class, the fields it no longer takes, what each verdict is read
+  from and the release it first shipped in.
+
+- **A result reads its regime from the values it holds, as a verdict does.**
+  Thirteen result classes stored a classification their function reached by
+  comparing values they hold with a constant or a printed threshold: whether
+  the hammer of the tapping machine is over-critical (Hopkins Eq. 3.95),
+  whether an IEC 60534-8-4 valve is turbulent or cavitating and which of the
+  five IEC 60534-8-3 regimes a gas valve is in, whether terrain screens a
+  rotorcraft propagation path, which ISO 8253-1 reversals are peaks and which
+  ones 6.3.5 a) keeps, which IEC 61094-2 Table C.3 corrections were
+  interpolated, whether an ISO 11957 insulation carries the prime, whether
+  IEC 61400-11 identified a tone, how ISO 10140-1 J.1 corrected each band of
+  a joint, which IEC TS 61400-11-2 background rule each bin followed, which
+  of Weston's regimes holds at each range and whether a synchronous average
+  had to interpolate its periods. Each is now a read-only property read from
+  the values the result keeps, and the results that did not keep what the
+  test reads now do: `TappingForceResult` gains `mass_kg`,
+  `HydrodynamicValveNoise` gains `inlet_pressure_pa` and `vapour_pressure_pa`,
+  `AerodynamicValveNoise` gains `specific_heat_ratio`, `pressure_recovery`
+  and `efficiency_correction`, `WindTurbineTonalityResult` gains
+  `candidate_frequency_hz` and `LabJointInsulationResult` gains
+  `limit_at_maximum`. The numbers a regime selects are held to it when the
+  result is built, so a result built by hand can no longer carry one regime
+  beside the values of another: a tapping result refuses a cut-off frequency
+  or a force spectrum of the other regime, a liquid valve a pressure ratio
+  that is not Equation (1) of its pressures or a point at or past flashing, a
+  gas valve a Mach number or an efficiency of another regime, a terrain
+  section one that does not run from the source to the receiver or edges that
+  are not those of the rubber band over it, a tonality result numbers that
+  are not its spectrum's, and the others likewise. A value on a boundary falls
+  where the source puts it: critical damping is over-critical, as Hopkins prints
+  K m ≥ 4 Zdp², and a total exactly 3 dB above its background takes the
+  logarithmic subtraction IEC TS 61400-11-2 asks "at least 3 dB" for. IEC
+  60534-8-4 puts its cavitation threshold on both sides in different clauses
+  and on neither in the test of 5.1; the library reads a differential equal to
+  x_Fzp1 (p1 - pv) as turbulent, where Equation (9) returns zero.
+  `CriticalCouplingResult` keeps `converged`, the outcome of its solve, but
+  refuses it beside an absorption that does not exceed 0.999.
+  `vibration_reduction_index` no longer stores in `band_type` the band set it
+  read from the frequencies; the field now holds only a band set the caller
+  states. The functions take the same arguments and return the same numbers,
+  and every conformance row reads as before. The test that keeps verdicts out
+  of result fields now also traces a label appended under a comparison, a
+  label written into an array through a mask and a numbered case a helper
+  returns, and what stays a field is listed with a precise reason: a branch
+  the caller chose, a fact of an input the result does not keep, a property of
+  the file read or the convergence of a solver. The upgrading guide lists each
+  class, what it is read from, what it refuses and the release it first
+  shipped in.
 
 - **A guide's standards chips and its search field name only what the guide
   implements.** A normative document a guide only requires, cites or compares

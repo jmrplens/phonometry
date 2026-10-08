@@ -795,8 +795,6 @@ is a property of the method, and nothing here corrects for it.
 ```python
 AutomaticThresholdResult(
     reversal_levels_db: np.ndarray,
-    is_peak: np.ndarray,
-    retained: np.ndarray,
     mean_db: float,
     threshold_db: float,
 )
@@ -809,10 +807,11 @@ The hearing threshold level from an automatic recording (6.3.5).
 | Name | Description |
 | :--- | :--- |
 | `reversal_levels_db` | The levels at the reversals of the tracing at one frequency, in order, in dB. |
-| `is_peak` | Whether each reversal is a peak (a local maximum of the level), the others being valleys. |
-| `retained` | Whether each reversal is kept after 6.3.5 a): the first is ignored, and so are both ends of every excursion of 3 dB or less. |
 | `mean_db` | The mean of the average peak and the average valley, in dB. |
 | `threshold_db` | That mean rounded up to the next whole decibel, in dB. |
+
+Which reversals are peaks (`is_peak`) and which 6.3.5 a) keeps
+(`retained`) are read from the levels, so they are not fields.
 
 ### AutomaticThresholdResult.doubtful
 
@@ -821,6 +820,17 @@ The hearing threshold level from an automatic recording (6.3.5).
 Whether the recording should be repeated (6.3.5).
 
 **Returns:** `True` when the peaks or the valleys deviate by more than 10 dB from each other, or fewer than six reversals remain.
+
+### AutomaticThresholdResult.is_peak
+
+*property*
+
+Whether each reversal is a peak, a local maximum of the level.
+
+The others are valleys. Read from the direction the trace turns at
+each reversal.
+
+**Returns:** One boolean per reversal.
 
 ### AutomaticThresholdResult.peaks_db
 
@@ -852,6 +862,17 @@ Draw the tracing through its reversals, the ignored ones faded.
 | `kwargs` | Forwarded to the tracing. |
 
 **Returns:** The axes.
+
+### AutomaticThresholdResult.retained
+
+*property*
+
+Whether each reversal is kept after 6.3.5 a).
+
+The first is ignored, and so are both ends of every excursion of
+3 dB or less.
+
+**Returns:** One boolean per reversal.
 
 ### AutomaticThresholdResult.valleys_db
 
@@ -1216,7 +1237,6 @@ and the run advances one reversal at a time.
 SweepThresholdResult(
     reversal_frequencies: np.ndarray,
     reversal_levels_db: np.ndarray,
-    is_peak: np.ndarray,
     frequencies: np.ndarray,
     mean_db: np.ndarray,
     threshold_db: np.ndarray,
@@ -1234,13 +1254,25 @@ Hearing threshold levels from a sweep-frequency tracing (7.5).
 | :--- | :--- |
 | `reversal_frequencies` | The frequency of each reversal, in hertz. |
 | `reversal_levels_db` | The hearing level of each reversal, in dB. |
-| `is_peak` | Whether each reversal is a peak, the others being valleys. |
 | `frequencies` | The frequencies the threshold was determined at, in hertz. |
 | `mean_db` | At each, the mean of the average of the three nearest peaks and the average of the three nearest valleys, in dB. |
 | `threshold_db` | That mean rounded to the nearest whole decibel, in dB. |
 | `spread_db` | At each, the larger spread of the three peaks and of the three valleys it averaged, in dB. |
 | `running_frequencies` | The geometric mean frequency of each run of six consecutive reversals, in hertz. |
 | `running_threshold_db` | The arithmetic mean level of each run, in dB, the semicontinuous threshold of 7.5. |
+
+Which reversals are peaks (`is_peak`) is read from the levels, so
+it is not a field.
+
+### SweepThresholdResult.is_peak
+
+*property*
+
+Whether each reversal is a peak, the others being valleys.
+
+Read from the direction the trace turns at each reversal.
+
+**Returns:** One boolean per reversal.
 
 ### SweepThresholdResult.less_reliable
 

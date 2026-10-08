@@ -187,8 +187,6 @@ class SynchronousAverageResult(OwnsArrays):
         alignment.
     :ivar period_s: Repetition period ``T``, in seconds.
     :ivar fs: Sample rate, in Hz.
-    :ivar interpolated: Whether band-limited fractional-delay alignment was
-        applied (``True`` when :math:`f_\mathrm{s} T` is not an integer).
     :ivar noise_reduction_db: Power reduction of asynchronous noise,
         :math:`10 \log_{10} N` dB (amplitude SNR gain :math:`\sqrt{N}`).
     :ivar residual_rms: Root-mean-square of :attr:`residual`.
@@ -196,6 +194,10 @@ class SynchronousAverageResult(OwnsArrays):
         Hz (from DC over a whole number of harmonics of ``1/T``).
     :ivar comb_response: Magnitude of the comb filter (McFadden Eq. 8) on
         :attr:`comb_frequencies`.
+
+    Whether the periods were aligned by a fractional delay
+    (:attr:`interpolated`) is read from :attr:`fs` and :attr:`period_s`, so
+    it is not a field.
     """
 
     period_waveform: Signal | NDArray[np.float64]
@@ -206,7 +208,6 @@ class SynchronousAverageResult(OwnsArrays):
     period_s: float
     fs: float
     _: KW_ONLY
-    interpolated: bool
     noise_reduction_db: float
     residual_rms: float
     comb_frequencies: NDArray[np.float64]
@@ -247,10 +248,15 @@ class SynchronousAverageResult(OwnsArrays):
         reads it at all, which makes its rank the one mistake here that
         nothing downstream would ever report.
 
+        Whether the periods were interpolated is read from :attr:`fs` and
+        :attr:`period_s`, so the period grid beside them has to be the one
+        they give: :attr:`samples_per_period` samples, ``round(fs * T)``.
+
         :raises ValueError: if the waveform disagrees with its time axis, the
             comb response with its frequency axis, any of the five carries
-            an axis it should not, or the waveform is a Signal at a rate other
-            than :attr:`fs`.
+            an axis it should not, the waveform is a Signal at a rate other
+            than :attr:`fs`, or the period grid is not ``round(fs * T)``
+            samples long.
         """
         require_ranks(
             self,
@@ -265,6 +271,27 @@ class SynchronousAverageResult(OwnsArrays):
         require_same_length(
             self, "comb_frequencies", "comb_response", axis="comb-filter frequency"
         )
+        expected = round(self.fs * self.period_s)
+        if self.samples_per_period != expected or np.size(self.times) != expected:
+            msg = (
+                "SynchronousAverageResult: 'samples_per_period' and the period "
+                f"of 'times' must be round(fs * period_s) = {expected}, the "
+                "grid the periods were aligned to; got "
+                f"{self.samples_per_period!r} and {np.size(self.times)}."
+            )
+            raise ValueError(msg)
+
+    @property
+    def interpolated(self) -> bool:
+        r"""Whether band-limited fractional-delay alignment was applied.
+
+        ``True`` when :math:`f_\mathrm{s} T` is not an integer, to within
+        :math:`10^{-9}` of a sample, so the period starts between samples and
+        each block is shifted onto the grid before it is averaged. Read from
+        :attr:`fs` and :attr:`period_s`.
+        """
+        samples = self.fs * self.period_s
+        return bool(abs(samples - round(samples)) >= _ALIGN_TOL)
 
     @property
     def amplitude_snr_gain(self) -> float:
@@ -403,7 +430,6 @@ def time_synchronous_average(
     samples, m_int = _samples_per_period(fs_v, period_v)
     n_avg = _resolve_n_averages(n_averages, xa.size, samples, m_int)
 
-    interpolated = abs(samples - round(samples)) >= _ALIGN_TOL
     blocks = np.empty((n_avg, m_int), dtype=np.float64)
     for n in range(n_avg):
         blocks[n] = _extract_period(xa, n * samples, m_int)
@@ -426,7 +452,6 @@ def time_synchronous_average(
         samples_per_period=m_int,
         period_s=period_v,
         fs=fs_v,
-        interpolated=bool(interpolated),
         noise_reduction_db=noise_reduction_db,
         residual_rms=residual_rms,
         comb_frequencies=comb_freqs,

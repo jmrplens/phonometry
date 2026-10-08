@@ -770,7 +770,12 @@ class CriticalCouplingResult:
     reflection zero on the real-frequency axis at ``target_frequency`` and
     ``angle_rad``; ``absorption`` is the modelled coefficient there (``~1``) and
     ``normalized_impedance`` the achieved ``Z cos(theta) / Z0`` (``~1``).
-    ``converged`` flags whether the root find met its tolerance.
+    ``converged`` flags a design that reached perfect absorption: the root
+    find met its tolerance, its solution lies inside the search bounds it was
+    given, and ``absorption`` exceeds 0,999. The first two are facts of the
+    solve that the result does not keep, so the flag is a field; the third is
+    read from ``absorption``, so a design that claims convergence with less
+    absorption is refused.
     """
 
     target_frequency: float
@@ -781,6 +786,25 @@ class CriticalCouplingResult:
     normalized_impedance: complex
     _: KW_ONLY
     converged: bool
+
+    def __post_init__(self) -> None:
+        """Reject a converged design that did not reach perfect absorption.
+
+        :raises ValueError: if ``converged`` is true and ``absorption`` does
+            not exceed 0,999.
+        """
+        if self.converged and not _reaches_perfect_absorption(self.absorption):
+            msg = (
+                "CriticalCouplingResult: a design with 'converged' true reached "
+                "perfect absorption, an 'absorption' above 0.999; got "
+                f"{self.absorption!r}."
+            )
+            raise ValueError(msg)
+
+
+def _reaches_perfect_absorption(alpha: float) -> bool:
+    """Whether a modelled absorption coefficient counts as perfect absorption."""
+    return alpha > _PERFECT_ABSORPTION_THRESHOLD
 
 
 def _acoustic_surface_impedance(
@@ -913,7 +937,7 @@ def critical_coupling_design(
         sol.success
         and lc_lo <= lc_opt <= lc_hi
         and h_lo <= h_opt <= h_hi
-        and alpha > _PERFECT_ABSORPTION_THRESHOLD
+        and _reaches_perfect_absorption(alpha)
     )
     if not converged:
         warnings.warn(

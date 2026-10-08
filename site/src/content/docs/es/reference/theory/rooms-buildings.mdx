@@ -294,7 +294,7 @@ Un tiempo por octava constante hace que el espectro del ESS sea rosa (−3 dB/oc
 reglas que deciden si una respuesta al impulso deconvolucionada sirve están en el
 apartado 6.2, y difieren según el tipo de excitación. Una señal *repetitiva* como
 una MLS tiene que tener un periodo de repetición no menor que el tiempo de
-reverberación de la sala, $T_{REP} \ge T$ (Fórmula 10), o los modos no se excitan
+reverberación de la sala, $T_\mathrm{REP} \ge T$ (Fórmula 10), o los modos no se excitan
 hasta el régimen estacionario y la respuesta se envuelve sobre sí misma. Un
 barrido *no repetitivo* puede tener la longitud que convenga, pero tiene que ir
 **seguido de silencio**, y la caída hay que registrarla durante al menos la mitad
@@ -326,7 +326,7 @@ $$
 E(t) = \int_t^{\infty} p^2(\tau)\ d\tau = \int_0^{\infty} p^2\ d\tau - \int_0^t p^2\ d\tau , \qquad L(t) = 10 \log_{10} \frac{E(t)}{E(0)}\ \text{dB},
 $$
 
-es decir, una suma acumulada invertida en tiempo discreto. La integración inversa cancela la fluctuación aleatoria de una única respuesta al impulso al cuadrado: para un decaimiento de energía puramente exponencial $p^2(t) = e^{-a t}$ da $E(t) = e^{-a t}/a$, una recta exactamente $L(t) = -(10 a / \ln 10)\ t$. El ruido de fondo aplana $E(t)$, así que la integración se trunca en el cruce $t_1$ de la recta de decaimiento ajustada con el nivel de ruido y la cola que falta se compensa con una exponencial de la pendiente ajustada; sin ese término la integral finita **subestima** sistemáticamente $T$.
+es decir, una suma acumulada invertida en tiempo discreto. La integración inversa cancela la fluctuación aleatoria de una única respuesta al impulso al cuadrado: para un decaimiento de energía puramente exponencial $p^2(t) = \mathrm{e}^{-a t}$ da $E(t) = \mathrm{e}^{-a t}/a$, una recta exactamente $L(t) = -(10 a / \ln 10)\ t$. El ruido de fondo aplana $E(t)$, así que la integración se trunca en el cruce $t_1$ de la recta de decaimiento ajustada con el nivel de ruido y la cola que falta se compensa con una exponencial de la pendiente ajustada; sin ese término la integral finita **subestima** sistemáticamente $T$.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Respuesta al impulso al cuadrado con su curva de decaimiento por integración inversa de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" width="80%" />
 
@@ -361,10 +361,10 @@ grado ninguno.
 Repartir la energía en una frontera temprano/tardío $t_\mathrm{e}$ da el índice temprano-tardío y el cociente de definición:
 
 $$
-C_{te} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0{,}05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
+C_{t_\mathrm{e}} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_\mathrm{e}}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0{,}05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-con $t_\mathrm{e} = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ y $T_\mathrm{S} = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms, los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
+con $t_\mathrm{e} = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{t_\mathrm{e}} = 10 \log_{10}(\mathrm{e}^{a t_\mathrm{e}} - 1)$ y $T_\mathrm{S} = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms, los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands.svg" alt="Parámetros por banda de ISO 3382 de una respuesta al impulso de sala sintética: barras agrupadas de EDT, T20 y T30 por banda de octava que caen desde unos 1,4 s a 125 Hz hasta 0,7 s a 4 kHz, sobre un segundo panel donde C50 y C80 crecen con la frecuencia" width="92%" />
 
@@ -406,18 +406,18 @@ sale plano o creciente, las dos distancias no existen, no es que sean grandes.*
 
 ### Aislamiento en campo e índice ponderado (ISO 16283-1, ISO 717-1)
 
-Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promediada en energía sobre las posiciones de micrófono, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) se normaliza de dos formas: la diferencia de niveles estandarizada $D_\mathrm{nT} = D + 10 \log_{10}(T/T_0)$ con $T_0 = 0{,}5$ s (de modo que $D_\mathrm{nT} = D$ cuando $T = T_0$), y el índice de reducción acústica aparente $R' = D + 10 \log_{10}(S/A)$ con el área de absorción de Sabine $A = 0{,}16\ V / T$, por tanto $R' = D + 10 \log_{10}[S T / (0{,}16\ V)]$.
+Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promediada en energía sobre las posiciones de micrófono, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) se normaliza de dos formas: la diferencia de niveles estandarizada $D_{\mathrm{n}T} = D + 10 \log_{10}(T/T_0)$ con $T_0 = 0{,}5$ s (de modo que $D_{\mathrm{n}T} = D$ cuando $T = T_0$), y el índice de reducción acústica aparente $R' = D + 10 \log_{10}(S/A)$ con el área de absorción de Sabine $A = 0{,}16\ V / T$, por tanto $R' = D + 10 \log_{10}[S T / (0{,}16\ V)]$.
 
 En un recinto de menos de 25 m³, ese promedio por defecto **no** es el nivel que
 pide ISO 16283-1 en las tres bandas más bajas. El apartado 8 añade una medición
 en esquinas: los niveles tomados en las esquinas del recinto se promedian en
 energía (Fórmula 12) y se combinan con el promedio por defecto como
-$L_\mathrm{LF} = 10 \log_{10}\left[(10^{0{,}1 L_{esquina}} + 2 \cdot 10^{0{,}1 L})/3\right]$
+$L_\mathrm{LF} = 10 \log_{10}\left[(10^{0{,}1 L_\mathrm{esquina}} + 2 \cdot 10^{0{,}1 L})/3\right]$
 (Fórmula 13), y ese $L_\mathrm{LF}$ sustituye al nivel por defecto **solo en las bandas
 de 50, 63 y 80 Hz**, porque ahí las posiciones por defecto no muestrean el campo
 modal. La biblioteca consume niveles y no realiza esta combinación, así que hay
 que aplicarla antes de llamarla. Importa porque los términos de adaptación
-espectral extendidos $C_{50-3150}$ y $C_{tr,50-3150}$ están dominados justo por
+espectral extendidos $C_{50-3150}$ y $C_{\mathrm{tr},50-3150}$ están dominados justo por
 esas tres bandas: un índice de un recinto pequeño calculado sin el procedimiento
 de esquinas no es comparable con otro que sí lo usó.
 
@@ -452,9 +452,9 @@ magnitudes comparables.
 
 El aislamiento a impactos cambia la fuente aérea por una **máquina de impactos
 normalizada** y valora el nivel del recinto receptor, así que las convenciones
-de signo se invierten. Los niveles de impactos estandarizado y normalizado son $L'_{nT} = L_i - 10 \log_{10}(T/T_0)$
-(el término de reverberación se *resta*, al contrario que $D_\mathrm{nT}$) y
-$L'_n = L_i + 10 \log_{10}(A/A_0)$ con $A_0 = 10$ m² y $A = 0{,}16\ V/T$. El índice
+de signo se invierten. Los niveles de impactos estandarizado y normalizado son $L'_{\mathrm{n}T} = L_i - 10 \log_{10}(T/T_0)$
+(el término de reverberación se *resta*, al contrario que $D_{\mathrm{n}T}$) y
+$L'_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ con $A_0 = 10$ m² y $A = 0{,}16\ V/T$. El índice
 de ISO 717-2 desplaza la curva de referencia de la Tabla 3 hasta que $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
 es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas); la desviación
 *desfavorable* cuenta ahora donde la **medición supera** la referencia (el ruido
@@ -551,7 +551,7 @@ consecuencia práctica es un diagnóstico: cuando un $R'$ de campo se niega a su
 después de mejorar el elemento, la medición ha topado con una trayectoria de
 flancos, no con el elemento. El par a
 impactos es el nivel normalizado de
-laboratorio $L_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) frente al $L'_n$ de
+laboratorio $L_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) frente al $L'_\mathrm{n}$ de
 campo (ISO 16283-2), ambos referidos a $A_0 = 10$ m². Antes de formar cualquiera
 de ellos, el nivel del recinto receptor se corrige por ruido de fondo mediante la
 resta energética $L = 10 \log_{10}(10^{L_\mathrm{sb}/10} - 10^{L_\mathrm{b}/10})$ para un margen
@@ -562,7 +562,7 @@ extensión a fachadas (ISO 16283-3) sustituye el nivel del recinto emisor por el
 nivel 2 m frente a la fachada, $D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2$, y añade una corrección
 fija por ángulo de incidencia al índice de reducción acústica del elemento, $-1{,}5$
 dB para el método del altavoz a 45° ($R'_{45°}$) y $-3$ dB para el método de
-tráfico rodado con todos los ángulos ($R'_{tr,s}$); los tres llevan el número
+tráfico rodado con todos los ángulos ($R'_\mathrm{tr,s}$); los tres llevan el número
 único a ruido aéreo de ISO 717-1.
 
 ## Aislamiento acústico y absorción, predichos (EN 12354-1/-2/-6, Bies, Cremer, Hopkins)
@@ -608,15 +608,15 @@ acoplamiento de referencia. $K_{ij}$ es el **índice de reducción vibratoria** 
 la unión (Anexo E), una función empírica de la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$: para una unión rígida en cruz
 $K_{13} = 8{,}7 + 17{,}1 M + 5{,}7 M^2$ (a través) y $K_{12} = 8{,}7 + 5{,}7 M^2$
-(en esquina), leídos a 500 Hz, y acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
+(en esquina), leídos a 500 Hz, y acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_\mathrm{f}\ l_0
 (1/S_i + 1/S_j)]$ (Fórmula 29). Dos trasdosados se combinan como
 $\max(a,b) + \min(a,b)/2$ (Fórmulas 30/31). La contrapartida a impactos
 (EN 12354-2, Fórmula 21) es la resta directa
-$L'_{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, con el nivel equivalente del suelo
+$L'_\mathrm{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, con el nivel equivalente del suelo
 desnudo $L_\mathrm{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Anexo B), la mejora del
 revestimiento $\Delta L_\mathrm{w}$ (ISO 717-2) y la corrección por flancos $K$ de la
 Tabla 1. Los ejemplos resueltos del Anexo H.3 de EN 12354-1 ($R'_\mathrm{w} = 52$ dB) y del
-Anexo E.3 de EN 12354-2 ($L'_{n,w} = 45$ dB) se reproducen exactamente.
+Anexo E.3 de EN 12354-2 ($L'_\mathrm{n,w} = 45$ dB) se reproducen exactamente.
 
 **Dónde se aplica el modelo simplificado.** Supone elementos homogéneos cuya
 transmisión gobierna su masa por unidad de superficie, unidos rígidamente, de
@@ -745,8 +745,8 @@ típica $u$: la situación **A** (caracterización en laboratorio) usa la desvia
 típica de reproducibilidad $\sigma_\mathrm{R}$; la situación **B** (misma ubicación,
 equipos de trabajo distintos) la $\sigma_\mathrm{situ}$ in situ; la situación **C** (misma
 ubicación, operador y equipo, repetida) la repetibilidad $\sigma_\mathrm{r}$. Los valores
-por banda y de un solo número están tabulados para $R$/$R'$/$D_\mathrm{n}$/$D_\mathrm{nT}$ a
-ruido aéreo (Tablas 2/3), $L_\mathrm{n}$/$L'_n$ a impactos (Tabla 4 por banda, solo
+por banda y de un solo número están tabulados para $R$/$R'$/$D_\mathrm{n}$/$D_{\mathrm{n}T}$ a
+ruido aéreo (Tablas 2/3), $L_\mathrm{n}$/$L'_\mathrm{n}$ a impactos (Tabla 4 por banda, solo
 situaciones B/C; la Tabla 5 de un solo número añade una estimación en situación
 A) y la reducción del revestimiento $\Delta L$ (Tablas 6/7, solo situación A).
 La incertidumbre expandida es $U = k\ u$ (Fórmula 2) con el factor de cobertura

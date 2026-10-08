@@ -992,8 +992,8 @@ def impulsive_sound_adjustment(
 _PLOT_LABELS: dict[str, dict[str, str]] = {
     "en": {
         "xlabel": "Time [s]",
-        "ylabel": "$L_{pAF}$ [dB]",
-        "level": "$L_{pAF}$",
+        "ylabel": r"$L_{p\mathrm{AF}}$ [dB]",
+        "level": r"$L_{p\mathrm{AF}}$",
         "onset": "onset",
         "start": "start",
         "end": "end",
@@ -1002,13 +1002,13 @@ _PLOT_LABELS: dict[str, dict[str, str]] = {
         _CATEGORY_NOT_IMPULSIVE: _CATEGORY_NOT_IMPULSIVE,
         _CATEGORY_REGULAR_IMPULSIVE: _CATEGORY_REGULAR_IMPULSIVE,
         _CATEGORY_HIGHLY_IMPULSIVE: _CATEGORY_HIGHLY_IMPULSIVE,
-        "summary": "P = {p}, K_I = {k} dB ({cat})",
-        "nosummary": "no qualifying onset: K_I = 0 dB (not impulsive)",
+        "summary": r"$P$ = {p}, $K_\mathrm{{I}}$ = {k} dB ({cat})",
+        "nosummary": r"no qualifying onset: $K_\mathrm{I}$ = 0 dB (not impulsive)",
     },
     "es": {
         "xlabel": "Tiempo [s]",
-        "ylabel": "$L_{pAF}$ [dB]",
-        "level": "$L_{pAF}$",
+        "ylabel": r"$L_{p\mathrm{AF}}$ [dB]",
+        "level": r"$L_{p\mathrm{AF}}$",
         "onset": "inicio",
         "start": "principio",
         "end": "final",
@@ -1017,8 +1017,8 @@ _PLOT_LABELS: dict[str, dict[str, str]] = {
         _CATEGORY_NOT_IMPULSIVE: "no impulsivo",
         _CATEGORY_REGULAR_IMPULSIVE: "impulsivo regular",
         _CATEGORY_HIGHLY_IMPULSIVE: "altamente impulsivo",
-        "summary": "P = {p}, K_I = {k} dB ({cat})",
-        "nosummary": "sin inicio válido: K_I = 0 dB (no impulsivo)",
+        "summary": r"$P$ = {p}, $K_\mathrm{{I}}$ = {k} dB ({cat})",
+        "nosummary": r"sin inicio válido: $K_\mathrm{I}$ = 0 dB (no impulsivo)",
     },
 }
 
@@ -1063,7 +1063,7 @@ def _plot_impulsive_sound(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    from ..._i18n import check_language
+    from ..._i18n import check_language, format_number
 
     lang = check_language(language)
     labels = _PLOT_LABELS[lang]
@@ -1110,13 +1110,15 @@ def _plot_impulsive_sound(
         ax.text(
             governing.time_start,
             (governing.level_start + governing.level_end) / 2.0,
-            f" {labels['ld']} = {governing.level_difference:.1f} dB",
+            f" {labels['ld']} = {format_number(governing.level_difference, lang)} dB",
             color="tab:blue",
             va="center",
         )
+        # P and K_I are set as mathematics, so the numbers carry the
+        # language's decimal separator from here, as the level difference does.
         summary = labels["summary"].format(
-            p=f"{result.prominence:.2f}",
-            k=f"{result.adjustment:.2f}",
+            p=format_number(result.prominence, lang, decimals=2),
+            k=format_number(result.adjustment, lang, decimals=2),
             cat=labels[result.category],
         )
     else:

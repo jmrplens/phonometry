@@ -95,7 +95,7 @@ print(res.rounded())                    # [ 8 12 18 23 26 26] dB
 print(round(res.a_weighted_insulation, 1))   # 19.3 dB
 ```
 
-El número ponderado A es $D_{WA}$ de la ecuación (2), y es la cifra única que
+El número ponderado A es $D_{W\mathrm{A}}$ de la ecuación (2), y es la cifra única que
 lleva una declaración. El apartado 9.4 informa cada valor de banda redondeado
 al decibelio más próximo, que es lo que hace `.rounded()`.
 
@@ -135,7 +135,7 @@ medirse igualmente con su fuente real mientras se cumpla el límite de volumen
 de la propia norma base. Las dos sustitutas son:
 
 - el método de **reciprocidad** de la parte 1, 7.2, que pone el encapsulado en
-  un campo difuso y mide dentro, y da $D_{pr}$. Existe solo en la parte 1, y
+  un campo difuso y mide dentro, y da $D_{p\mathrm{r}}$. Existe solo en la parte 1, y
   pedirlo in situ se rechaza en vez de aproximarse;
 - una fuente **artificial**, la máquina de impactos del anexo A dejada caer
   sobre una chapa de acero sin amortiguar, usada en varias posiciones. Las
@@ -230,9 +230,9 @@ print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
 
 Hay un tercer método, y es el que un puesto de trabajo suele querer: excitar la
 sala con el ruido que hay de verdad. Es el único método para el que la norma
-define una diferencia ponderada A, $D'_{pA}$ de la ecuación (3), y
+define una diferencia ponderada A, $D'_{p\mathrm{A}}$ de la ecuación (3), y
 `cabin_insulation` rechaza calcular una con cualquier otro, porque una cifra
-rotulada $D'_{pA}$ que salió de un altavoz es una afirmación que el documento
+rotulada $D'_{p\mathrm{A}}$ que salió de un altavoz es una afirmación que el documento
 no hace.
 
 ## 5. El recuento que se lee en la respuesta
@@ -300,16 +300,16 @@ rating = noise_control.weighted_cabin_insulation(
 print(rating.rating, rating.c, rating.ctr)   # 28 -1 -5
 ```
 
-El apartado 4 de la ISO 11957 llama a $D_{p,w}$ el número único preferente y
+El apartado 4 de la ISO 11957 llama a $D_{p,\mathrm{w}}$ el número único preferente y
 acto seguido, en el mismo párrafo, avisa de no leer demasiado en él: lo que
 vale una cabina depende del espectro en el que esté. Los anexos responden a esa
 objeción directamente. Dado un espectro, el aislamiento estimado es
 
 $$
-D_{pA,e} = L_A - 10 \lg \sum_i 10^{0,1\left(L_i - A_i - D_{pi}\right)}
+D_{p\mathrm{A},\mathrm{e}} = L_\mathrm{A} - 10 \lg \sum_i 10^{0,1\left(L_i - A_i - D_{pi}\right)}
 $$
 
-con $L_A$ el total ponderado A de ese mismo espectro. El signo de $A_i$ es la
+con $L_\mathrm{A}$ el total ponderado A de ese mismo espectro. El signo de $A_i$ es la
 trampa: el anexo imprime una atenuación, positiva donde la ponderación quita
 nivel, mientras que las correcciones por banda de una biblioteca son la
 corrección misma. Los dos términos se construyen aquí de la misma tabla, así

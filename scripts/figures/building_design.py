@@ -690,13 +690,13 @@ def generate_structure_borne_power(output_dir: str) -> None:
     ax.set_xticks(x)
     ax.set_xticklabels([f"{b:g}" for b in bands])
     ax.set_xlabel(LABEL_FREQ_HZ)
-    ax.set_ylabel(r"Structure-borne power level $L_{W\mathrm{s}}$ [dB re 1 pW]")
+    ax.set_ylabel(r"Structure-borne power level $L_\mathrm{Ws}$ [dB re 1 pW]")
     ax.set_title("EN 15657 Reception-Plate Structure-Borne Sound Power", pad=12)
     ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="upper right", fontsize=9)
 
     info = [
-        r"$L_{W\mathrm{s}} = 10\,\log_{10}(2\pi f\,\eta\,m\,S) + L_v - 60$ dB",
+        r"$L_\mathrm{Ws} = 10\,\log_{10}(2\pi f\,\eta\,m\,S) + L_\mathrm{v} - 60$ dB",
         r"$\eta = 2.2/(f\,T_\mathrm{s})$,  $v_0$ = 1 nm/s",
         "reception-plate method (clause 7)",
     ]
@@ -767,7 +767,7 @@ def generate_installed_structure_borne(output_dir: str) -> None:
         color=COLOR_SECONDARY,
         marker="o",
         lw=2.0,
-        label=r"characteristic $L_{W\mathrm{s,c}}$ (EN 15657)",
+        label=r"characteristic $L_\mathrm{Ws,c}$ (EN 15657)",
     )
     ax.plot(
         x,
@@ -775,7 +775,7 @@ def generate_installed_structure_borne(output_dir: str) -> None:
         color=COLOR_TERTIARY,
         marker="s",
         lw=2.0,
-        label=r"installed $L_{W\mathrm{s,inst}} = L_{W\mathrm{s,c}}"
+        label=r"installed $L_\mathrm{Ws,inst} = L_\mathrm{Ws,c}"
         r" - D_\mathrm{C}$",
     )
     for k, p in enumerate(res.path_levels):
@@ -811,7 +811,7 @@ def generate_installed_structure_borne(output_dir: str) -> None:
             r" / (|Y_\mathrm{s}|\,\mathrm{Re}\,Y_i))$"
         ),
         (
-            r"$L_{\mathrm{n,s},ij} = L_{W\mathrm{s,inst}} - D_\mathrm{sa} - R_{ij}"
+            r"$L_{\mathrm{n,s},ij} = L_\mathrm{Ws,inst} - D_\mathrm{sa} - R_{ij}"
             r" - 10\,\log_{10}(S_i/S_0) - 10\,\log_{10}(A_0/4)$"
         ),
         (
@@ -2153,7 +2153,7 @@ def generate_structure_borne_conversion(output_dir: str) -> None:
         markersize=5,
         zorder=4,
         label=(
-            r"$L_{W\mathrm{s}}$ measured on the test plate"
+            r"$L_\mathrm{Ws}$ measured on the test plate"
             r" ($Y = 5.34\times10^{-6}$)"
         ),
     )
@@ -2166,7 +2166,7 @@ def generate_structure_borne_conversion(output_dir: str) -> None:
         markersize=6,
         zorder=5,
         label=(
-            r"$L_{W\mathrm{sn}}$ on the standard plate "
+            r"$L_\mathrm{Wsn}$ on the standard plate "
             r"($Y = 5\times10^{-6}$): "
             "what is declared"
         ),
@@ -2180,7 +2180,7 @@ def generate_structure_borne_conversion(output_dir: str) -> None:
         markersize=6,
         zorder=5,
         label=(
-            r"$L_{W\mathrm{s,inst}}$ on the receiving wall "
+            r"$L_\mathrm{Ws,inst}$ on the receiving wall "
             r"($Y = 24.1\times10^{-6}$)"
         ),
     )
@@ -2193,7 +2193,7 @@ def generate_structure_borne_conversion(output_dir: str) -> None:
         markersize=6,
         zorder=5,
         label=(
-            r"$L_{W\mathrm{s,c}}$ with the source mobility "
+            r"$L_\mathrm{Ws,c}$ with the source mobility "
             r"($Y = 10^{-3}$): "
             "the input to EN 12354-5"
         ),
@@ -2207,9 +2207,9 @@ def generate_structure_borne_conversion(output_dir: str) -> None:
         markeredgewidth=2.0,
         zorder=6,
         label=(
-            rf"$L_{{W\mathrm{{s,c}}}} - D_\mathrm{{C}}$, "
+            rf"$L_\mathrm{{Ws,c}} - D_\mathrm{{C}}$, "
             rf"$D_\mathrm{{C}}$ = {d_c:g} dB: "
-            rf"back to $L_{{W\mathrm{{s,inst}}}}$"
+            rf"back to $L_\mathrm{{Ws,inst}}$"
         ),
     )
 
@@ -2228,13 +2228,16 @@ def generate_structure_borne_conversion(output_dir: str) -> None:
     # contact markers reproducing the printed Table I.8 columns stops being
     # something the reader can check. Four decibels above the top of the
     # arrow clears the marker there and leaves the box under the
-    # characteristic curve well past the band the arrow is drawn in.
+    # characteristic curve well past the band the arrow is drawn in. The
+    # sentence is set on two short lines so that the box stays narrow in
+    # both languages: on one line the Spanish reached the falling stretch of
+    # the characteristic curve between 125 Hz and 250 Hz and hid it.
     ax.text(
         0.12,
         installed[0] + 4.0,
         f"+{installed[0] - l_wsn[0]:.1f} dB = "
         "$10\\,\\mathrm{lg}(24.1/5.0)$:\n"
-        "a lighter receiver accepts more power",
+        "a lighter receiver\naccepts more power",
         fontsize=9,
         color=COLOR_FG,
         va="center",

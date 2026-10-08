@@ -585,7 +585,7 @@ def tapping_force_spectrum(
     Eqs. (3.95)/(3.96) is the same rational function in both critical cases,
     :math:`\hat{F}(\omega) = v_0 K/(\omega_0^{2} - \omega^{2} + 2 i a \omega)`,
     multiplied for the under-critical case by
-    :math:`1 + e^{-a \pi/\beta} e^{-i \omega \pi/\beta}` because only the
+    :math:`1 + \mathrm{e}^{-a \pi/\beta} \mathrm{e}^{-i \omega \pi/\beta}` because only the
     first positive lobe (of duration :math:`\pi/\beta`) is transformed. That
     truncation is what produces the deep troughs at :math:`n f_\mathrm{co}`,
     :math:`n = 3, 5, 7` that Hopkins notes below Fig. 4.64; they vanish once

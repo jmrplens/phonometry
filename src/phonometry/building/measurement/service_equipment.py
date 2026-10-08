@@ -68,7 +68,7 @@ absorption area :math:`A_0 = 10` m², Formulae (5) and (6):
 
 .. math::
 
-    L_\mathrm{nT} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
+    L_{\mathrm{n}T} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
     L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0,16\,V}\ \mathrm{dB}
 
 Only the one-third-octave bands 50 Hz to 5 000 Hz (octave bands 63 Hz to
@@ -81,7 +81,7 @@ energy sums of the corrected bands plus the Annex A corrections, rounded to
 whole decibels. The A-weighted value uses either the restricted range 50 Hz to
 5 000 Hz or the extended range 25 Hz to 10 000 Hz; the C-weighted value uses
 the extended range. The single numbers are named as Table 1 names them, for
-example :math:`L_\mathrm{A,Smax,nT}` or :math:`L_\mathrm{C,eq}`. 4.2 also
+example :math:`L_{\mathrm{A,Smax,n}T}` or :math:`L_\mathrm{C,eq}`. 4.2 also
 admits "a specific frequency range" for the bands, and the form of Annex C has
 a box for it, but 7.8 forms the weighted values over the two ranges above
 only, and so does the library: a band set that does not cover the chosen
@@ -1142,7 +1142,7 @@ class ServiceEquipmentResult(OwnsArrays):
     :ivar standardizable: Per band, whether 7.7 lets it be standardized or
         normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from
         ``frequencies_hz`` and ``band``, so it is not a field.
-    :ivar standardized_db: :math:`L_\mathrm{nT}` per band (Formula (5)), in dB,
+    :ivar standardized_db: :math:`L_{\mathrm{n}T}` per band (Formula (5)), in dB,
         or ``None`` without a reverberation time. Bands outside the range are
         the corrected level, unstandardized.
     :ivar normalized_db: :math:`L_\mathrm{n}` per band (Formula (6)), in dB, or

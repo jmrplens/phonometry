@@ -721,7 +721,7 @@ def sti_from_impulse_response(
 
     .. math::
 
-       m_k(f_m) = \left| \int h_k^2(t)\, e^{-j 2\pi f_m t}\, dt \right|
+       m_k(f_m) = \left| \int h_k^2(t)\, \mathrm{e}^{-j 2\pi f_m t}\, dt \right|
        \Big/ \int h_k^2(t)\, dt
 
     at the 14 modulation frequencies 0,63-12,5 Hz

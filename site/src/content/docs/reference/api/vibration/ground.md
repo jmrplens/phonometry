@@ -17,10 +17,10 @@ strain a vibration puts into the soil.
 
 **Why two speeds are enough.** An unbounded elastic continuum carries two
 kinds of wave, and their speeds are fixed by two elastic constants and the
-density: $v_s = \sqrt{G/\rho}$ for the shear wave (Formula (2)) and
-$v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$ for the compression wave. So
+density: $\mathrm{v}_\mathrm{s} = \sqrt{G/\rho}$ for the shear wave (Formula (2)) and
+$\mathrm{v}_\mathrm{p} = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$ for the compression wave. So
 measuring both speeds fixes $G$ and $\nu$, and with them every
-other constant. $v_p > v_s$ always; the ratio decides Poisson's ratio
+other constant. $\mathrm{v}_\mathrm{p} > \mathrm{v}_\mathrm{s}$ always; the ratio decides Poisson's ratio
 (Formula (3)).
 
 **Why a small strain.** The shear modulus of a soil falls as the strain grows:
@@ -34,7 +34,7 @@ The strain itself is the velocity amplitude over the shear-wave speed
 **Two formulas that are printed wrong.** Formula (1) writes the compression
 speed as $\sqrt{E/\rho}$, which is the speed in a thin rod, and as
 $\sqrt{G(1-\nu)/(\rho(1-2\nu))}$, which is short of a factor 2; Formula
-(5) builds on the first and writes $E = v_p^2 \rho$. Both contradict
+(5) builds on the first and writes $E = \mathrm{v}_\mathrm{p}^2 \rho$. Both contradict
 Formula (3) of the same clause, which is right, and the two expressions of
 Formula (1) only agree with each other at $\nu = (\sqrt{17}-1)/8 \approx 0{,}39$. This module uses the relations of the continuum, which is
 what Formula (3) is derived from, and the defect is registered in
@@ -55,7 +55,7 @@ compression_wave_speed(
 
 The compression-wave speed of a continuum, Formula (1) corrected, in m/s.
 
-$v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$, the speed of a P-wave in an
+$\mathrm{v}_\mathrm{p} = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$, the speed of a P-wave in an
 unbounded medium, whose inverse is Formula (3). Formula (1) prints the
 radicand without the factor 2, which gives a speed $\sqrt{2}$ too
 slow at every Poisson's ratio.
@@ -68,7 +68,7 @@ slow at every Poisson's ratio.
 | `poisson_ratio` | $\nu$, above -1 and below 0,5. |
 | `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
 
-**Returns:** $v_p$, in metres per second.
+**Returns:** $\mathrm{v}_\mathrm{p}$, in metres per second.
 
 **Raises**
 
@@ -95,7 +95,7 @@ poisson_ratio_from_wave_speeds(
 
 Poisson's ratio from the two wave speeds, Formula (3).
 
-$\nu = (v_p^2 - 2 v_s^2) / (2 (v_p^2 - v_s^2))$, the inversion of
+$\nu = (\mathrm{v}_\mathrm{p}^2 - 2 \mathrm{v}_\mathrm{s}^2) / (2 (\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2))$, the inversion of
 the continuum relations and the formula of Clause 4.5.1 that is printed
 right.
 
@@ -103,10 +103,10 @@ right.
 
 | Name | Description |
 | :--- | :--- |
-| `compression_wave_speed_m_s` | $v_p$, in metres per second. |
-| `shear_wave_speed_m_s` | $v_s$, in metres per second. |
+| `compression_wave_speed_m_s` | $\mathrm{v}_\mathrm{p}$, in metres per second. |
+| `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
 
-**Returns:** $\nu$, between -1 and 0,5. It is positive when $v_p$ exceeds $\sqrt{2}\,v_s$, as it does in every soil; a pair between $2/\sqrt{3}$ and $\sqrt{2}$ gives the negative ratio a continuum allows and a soil does not show.
+**Returns:** $\nu$, between -1 and 0,5. It is positive when $\mathrm{v}_\mathrm{p}$ exceeds $\sqrt{2}\,\mathrm{v}_\mathrm{s}$, as it does in every soil; a pair between $2/\sqrt{3}$ and $\sqrt{2}$ gives the negative ratio a continuum allows and a soil does not show.
 
 **Raises**
 
@@ -124,13 +124,13 @@ shear_modulus_from_wave_speed(
 ) -> float
 ```
 
-The shear modulus $G = v_s^2 \rho$, Formula (5), in pascals.
+The shear modulus $G = \mathrm{v}_\mathrm{s}^2 \rho$, Formula (5), in pascals.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `shear_wave_speed_m_s` | $v_s$, in metres per second. |
+| `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
 | `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $G$, in pascals.
@@ -151,7 +151,7 @@ shear_strain_amplitude(
 ) -> float
 ```
 
-The shear strain amplitude $\hat\gamma = \hat v / v_s$, Formula (4).
+The shear strain amplitude $\hat\gamma = \hat{\mathrm{v}} / \mathrm{v}_\mathrm{s}$, Formula (4).
 
 Compare it with [`SHEAR_STRAIN_LINEAR_LIMIT`](/phonometry/reference/api/vibration/ground/#shear_strain_linear_limit) to know whether the
 small-strain modulus still applies.
@@ -160,8 +160,8 @@ small-strain modulus still applies.
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_amplitude_m_s` | $\hat v$, the velocity amplitude, in metres per second (not millimetres: the strain is a ratio of the two speeds). |
-| `shear_wave_speed_m_s` | $v_s$, in metres per second. |
+| `velocity_amplitude_m_s` | $\hat{\mathrm{v}}$, the velocity amplitude, in metres per second (not millimetres: the strain is a ratio of the two speeds). |
+| `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
 
 **Returns:** $\hat\gamma$, in radians.
 
@@ -192,8 +192,8 @@ youngs_modulus_from_wave_speeds(
 
 The elastic modulus from the two wave speeds, in pascals.
 
-$E = 2G(1+\nu) = \rho v_s^2 (3 v_p^2 - 4 v_s^2)/(v_p^2 - v_s^2)$,
-which is what Formula (5) means. As printed it reads $E = v_p^2 \rho$, the thin-rod relation, and that overstates the modulus of a soil
+$E = 2G(1+\nu) = \rho \mathrm{v}_\mathrm{s}^2 (3 \mathrm{v}_\mathrm{p}^2 - 4 \mathrm{v}_\mathrm{s}^2)/(\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2)$,
+which is what Formula (5) means. As printed it reads $E = \mathrm{v}_\mathrm{p}^2 \rho$, the thin-rod relation, and that overstates the modulus of a soil
 with $\nu = 0{,}3$ by 35 % and of one with $\nu = 0{,}45$ by a
 factor of 3,8.
 
@@ -201,8 +201,8 @@ factor of 3,8.
 
 | Name | Description |
 | :--- | :--- |
-| `compression_wave_speed_m_s` | $v_p$, in metres per second. |
-| `shear_wave_speed_m_s` | $v_s$, in metres per second. |
+| `compression_wave_speed_m_s` | $\mathrm{v}_\mathrm{p}$, in metres per second. |
+| `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
 | `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $E$, in pascals.

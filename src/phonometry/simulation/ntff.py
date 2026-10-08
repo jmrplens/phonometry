@@ -4,7 +4,7 @@ r"""2D near-to-far-field (NTFF) transformation over a closed contour.
 Given the steady-state pressure and outward normal velocity phasors on a
 closed contour that encloses a scatterer (or any source region), the
 exterior field is fully determined by the Kirchhoff-Helmholtz boundary
-integral. In two dimensions, with the :math:`e^{+j \omega t}` time
+integral. In two dimensions, with the :math:`\mathrm{e}^{+j \omega t}` time
 convention
 used throughout the library, the free-space Green function is
 
@@ -37,10 +37,10 @@ and Groby, *Metadiffusers: Deep-subwavelength sound diffusers*, Sci. Rep.
 by :meth:`~phonometry.simulation.FDTD2D.add_contour_probe` (or assembled by
 hand into a :class:`ContourPhasors`), either in the true far-field limit,
 where
-:math:`H_0^{(2)}(kR) \to \sqrt{2 / (\pi k R)}\, e^{-j (k R - \pi / 4)}`
+:math:`H_0^{(2)}(kR) \to \sqrt{2 / (\pi k R)}\, \mathrm{e}^{-j (k R - \pi / 4)}`
 turns the
 integral into an angular pattern :math:`F(\theta)` with
-:math:`p(r, \theta) \to F(\theta)\, e^{-j k r} / \sqrt{r}`, or at a finite
+:math:`p(r, \theta) \to F(\theta)\, \mathrm{e}^{-j k r} / \sqrt{r}`, or at a finite
 observation radius with the exact Hankel kernels.
 
 Because the integral representation is source-free inside ``S`` for any
@@ -86,8 +86,8 @@ __all__ = [
 class ContourPhasors(OwnsArrays):
     r"""Steady-state ``p`` and ``v_n`` phasors sampled on a closed contour.
 
-    The phasors follow the library's :math:`e^{+j \omega t}` convention:
-    :math:`p(t) = \operatorname{Re}\{p \, e^{+j \omega t}\}`.
+    The phasors follow the library's :math:`\mathrm{e}^{+j \omega t}` convention:
+    :math:`p(t) = \operatorname{Re}\{p \, \mathrm{e}^{+j \omega t}\}`.
     ``normals`` point outward
     (away from the enclosed region) and ``normal_velocity`` is the particle
     velocity component along them. Instances are produced by
@@ -258,12 +258,12 @@ def far_field_from_contour(
 
     with the outgoing 2D free-space Green function
     :math:`G = -(j/4) H_0^{(2)}(k R)` and its normal derivative through
-    :math:`dG/dR = (j k / 4) H_1^{(2)}(k R)` (:math:`e^{+j \omega t}`
+    :math:`dG/dR = (j k / 4) H_1^{(2)}(k R)` (:math:`\mathrm{e}^{+j \omega t}`
     convention,
     :func:`scipy.special.hankel2`).
 
     With ``distance=None`` (the default) the far-field limit
-    :math:`H_0^{(2)}(kR) \to \sqrt{2 / (\pi k R)}\, e^{-j (k R - \pi/4)}`
+    :math:`H_0^{(2)}(kR) \to \sqrt{2 / (\pi k R)}\, \mathrm{e}^{-j (k R - \pi/4)}`
     is taken
     analytically and the returned complex pattern :math:`F(a)` is the
     relative
@@ -271,7 +271,7 @@ def far_field_from_contour(
 
     .. math::
 
-       p(r, a) \to F(a)\, e^{-j k r} / \sqrt{r}
+       p(r, a) \to F(a)\, \mathrm{e}^{-j k r} / \sqrt{r}
        \quad \text{as } r \to \infty,
 
     with ``r`` measured from ``origin`` (the phase reference; magnitudes at

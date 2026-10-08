@@ -30,7 +30,7 @@ level** it delivers into a rigid floor (ISO 16283-2:2020 Formula (A.1) =
 JIS A 1418-2:2019 Formula (1)):
 
 $$
-L_{F\mathrm{E}} = 10\log_{10}\!\left[\frac{1}{T_\mathrm{ref}}
+L_\mathrm{FE} = 10\log_{10}\!\left[\frac{1}{T_\mathrm{ref}}
 \int_{t_1}^{t_2}\frac{F^2(t)}{F_0^2}\,\mathrm{d}t\right]\ \text{dB re 1 N},
 $$
 
@@ -41,7 +41,7 @@ identically in ISO 16283-2:2020 Table A.1, ISO 10140-5:2021 Table F.1 and
 JIS A 1418-2:2019 Table A.2 for the ball; the bang machine appears only in
 JIS A 1418-2:2019 Table A.1.
 
-| Octave (Hz) | Rubber ball $L_{F\mathrm{E}}$ (dB re 1 N) | Bang machine $L_{F\mathrm{E}}$ (dB re 1 N) |
+| Octave (Hz) | Rubber ball $L_\mathrm{FE}$ (dB re 1 N) | Bang machine $L_\mathrm{FE}$ (dB re 1 N) |
 |---|---|---|
 | 31.5 | 39.0 ± 1.0 | 47.0 ± 1.0 |
 | 63 | 31.0 ± 1.5 | 40.0 ± 1.5 |

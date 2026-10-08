@@ -929,7 +929,7 @@ L 442.68 22.32
 z
 "/></g><g id="matplotlib.axis_3"><g id="xtick_18"><g id="line2d_56"><path d="M 494.88 341.31 
 L 494.88 22.32 
-" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_57"><g><use xlink:href="#m8d14ee1197" x="494.88" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_17"><!-- measured --><g style="fill: #ffffff" transform="translate(469.9 356.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-50"/><use xlink:href="#DejaVuSans-48" transform="translate(97.41 0)"/><use xlink:href="#DejaVuSans-44" transform="translate(158.94 0)"/><use xlink:href="#DejaVuSans-56" transform="translate(220.22 0)"/><use xlink:href="#DejaVuSans-58" transform="translate(272.31 0)"/><use xlink:href="#DejaVuSans-55" transform="translate(335.69 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(374.59 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(436.12 0)"/></g><!-- $L'_{pA}$ --><g style="fill: #ffffff" transform="translate(485.83 369.42) scale(0.1 -0.1)"><defs><path id="DejaVuSans-Oblique-2f" d="M 1075 4666 
+" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_57"><g><use xlink:href="#m8d14ee1197" x="494.88" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_17"><!-- measured --><g style="fill: #ffffff" transform="translate(469.9 356.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-50"/><use xlink:href="#DejaVuSans-48" transform="translate(97.41 0)"/><use xlink:href="#DejaVuSans-44" transform="translate(158.94 0)"/><use xlink:href="#DejaVuSans-56" transform="translate(220.22 0)"/><use xlink:href="#DejaVuSans-58" transform="translate(272.31 0)"/><use xlink:href="#DejaVuSans-55" transform="translate(335.69 0)"/><use xlink:href="#DejaVuSans-48" transform="translate(374.59 0)"/><use xlink:href="#DejaVuSans-47" transform="translate(436.12 0)"/></g><!-- $L'_{p\mathrm{A}}$ --><g style="fill: #ffffff" transform="translate(485.83 369.42) scale(0.1 -0.1)"><defs><path id="DejaVuSans-Oblique-2f" d="M 1075 4666 
 L 1709 4666 
 L 909 525 
 L 3181 525 
@@ -981,26 +981,26 @@ L 922 3500
 L 1497 3500 
 L 1394 2969 
 z
-" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-24" d="M 2356 4666 
-L 3072 4666 
-L 3938 0 
-L 3278 0 
-L 3084 1197 
-L 984 1197 
-L 325 0 
-L -341 0 
-L 2356 4666 
+" transform="scale(0.015625)"/><path id="DejaVuSans-24" d="M 2188 4044 
+L 1331 1722 
+L 3047 1722 
+L 2188 4044 
 z
-M 2584 4044 
-L 1275 1722 
-L 2988 1722 
-L 2584 4044 
+M 1831 4666 
+L 2547 4666 
+L 4325 0 
+L 3669 0 
+L 3244 1197 
+L 1141 1197 
+L 716 0 
+L 50 0 
+L 1831 4666 
 z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-2f" transform="translate(0 0.57)"/><use xlink:href="#Cmsy10-49" transform="translate(62.73 41.87) scale(0.7)"/><use xlink:href="#DejaVuSans-Oblique-53" transform="translate(85.66 -14.43) scale(0.7)"/><use xlink:href="#DejaVuSans-Oblique-24" transform="translate(130.1 -14.43) scale(0.7)"/></g></g></g><g id="xtick_19"><g id="line2d_58"><path d="M 624.56 341.31 
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-2f" transform="translate(0 0.57)"/><use xlink:href="#Cmsy10-49" transform="translate(62.73 41.87) scale(0.7)"/><use xlink:href="#DejaVuSans-Oblique-53" transform="translate(85.66 -14.43) scale(0.7)"/><use xlink:href="#DejaVuSans-24" transform="translate(130.1 -14.43) scale(0.7)"/></g></g></g><g id="xtick_19"><g id="line2d_58"><path d="M 624.56 341.31 
 L 624.56 22.32 
-" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_59"><g><use xlink:href="#m8d14ee1197" x="624.56" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_18"><!-- room --><g style="fill: #ffffff" transform="translate(611.63 356.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-55"/><use xlink:href="#DejaVuSans-52" transform="translate(38.91 0)"/><use xlink:href="#DejaVuSans-52" transform="translate(100.09 0)"/><use xlink:href="#DejaVuSans-50" transform="translate(161.28 0)"/></g><!-- $K_{3A}$ --><g style="fill: #ffffff" transform="translate(616.51 368.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-Oblique-2e" transform="translate(0 0.09)"/><use xlink:href="#DejaVuSans-16" transform="translate(65.58 -14.91) scale(0.7)"/><use xlink:href="#DejaVuSans-Oblique-24" transform="translate(110.11 -14.91) scale(0.7)"/></g></g></g><g id="xtick_20"><g id="line2d_60"><path d="M 754.25 341.31 
+" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_59"><g><use xlink:href="#m8d14ee1197" x="624.56" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_18"><!-- room --><g style="fill: #ffffff" transform="translate(611.63 356.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-55"/><use xlink:href="#DejaVuSans-52" transform="translate(38.91 0)"/><use xlink:href="#DejaVuSans-52" transform="translate(100.09 0)"/><use xlink:href="#DejaVuSans-50" transform="translate(161.28 0)"/></g><!-- $K_{3\mathrm{A}}$ --><g style="fill: #ffffff" transform="translate(616.51 368.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-Oblique-2e" transform="translate(0 0.09)"/><use xlink:href="#DejaVuSans-16" transform="translate(65.58 -14.91) scale(0.7)"/><use xlink:href="#DejaVuSans-24" transform="translate(110.11 -14.91) scale(0.7)"/></g></g></g><g id="xtick_20"><g id="line2d_60"><path d="M 754.25 341.31 
 L 754.25 22.32 
-" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_61"><g><use xlink:href="#m8d14ee1197" x="754.25" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_19"><!-- emission --><g style="fill: #ffffff" transform="translate(732.08 356.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-48"/><use xlink:href="#DejaVuSans-50" transform="translate(61.53 0)"/><use xlink:href="#DejaVuSans-4c" transform="translate(158.94 0)"/><use xlink:href="#DejaVuSans-56" transform="translate(186.72 0)"/><use xlink:href="#DejaVuSans-56" transform="translate(238.81 0)"/><use xlink:href="#DejaVuSans-4c" transform="translate(290.91 0)"/><use xlink:href="#DejaVuSans-52" transform="translate(318.69 0)"/><use xlink:href="#DejaVuSans-51" transform="translate(379.88 0)"/></g><!-- $L_{pA}$ --><g style="fill: #ffffff" transform="translate(746.7 368.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-Oblique-2f" transform="translate(0 0.09)"/><use xlink:href="#DejaVuSans-Oblique-53" transform="translate(55.71 -14.91) scale(0.7)"/><use xlink:href="#DejaVuSans-Oblique-24" transform="translate(100.15 -14.91) scale(0.7)"/></g></g></g></g><g id="matplotlib.axis_4"><g id="ytick_10"><g id="line2d_62"><path d="M 442.68 341.31 
+" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_61"><g><use xlink:href="#m8d14ee1197" x="754.25" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_19"><!-- emission --><g style="fill: #ffffff" transform="translate(732.08 356.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-48"/><use xlink:href="#DejaVuSans-50" transform="translate(61.53 0)"/><use xlink:href="#DejaVuSans-4c" transform="translate(158.94 0)"/><use xlink:href="#DejaVuSans-56" transform="translate(186.72 0)"/><use xlink:href="#DejaVuSans-56" transform="translate(238.81 0)"/><use xlink:href="#DejaVuSans-4c" transform="translate(290.91 0)"/><use xlink:href="#DejaVuSans-52" transform="translate(318.69 0)"/><use xlink:href="#DejaVuSans-51" transform="translate(379.88 0)"/></g><!-- $L_{p\mathrm{A}}$ --><g style="fill: #ffffff" transform="translate(746.7 368.91) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-Oblique-2f" transform="translate(0 0.09)"/><use xlink:href="#DejaVuSans-Oblique-53" transform="translate(55.71 -14.91) scale(0.7)"/><use xlink:href="#DejaVuSans-24" transform="translate(100.15 -14.91) scale(0.7)"/></g></g></g></g><g id="matplotlib.axis_4"><g id="ytick_10"><g id="line2d_62"><path d="M 442.68 341.31 
 L 806.44 341.31 
 " clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_63"><g><use xlink:href="#m5e07181663" x="442.68" y="341.31" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_20"><!-- 0 --><g style="fill: #ffffff" transform="translate(429.32 345.11) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-13"/></g></g></g><g id="ytick_11"><g id="line2d_64"><path d="M 442.68 305.06 
 L 806.44 305.06 
@@ -1018,22 +1018,7 @@ L 806.44 123.82
 L 806.44 87.57 
 " clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_77"><g><use xlink:href="#m5e07181663" x="442.68" y="87.57" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_27"><!-- 70 --><g style="fill: #ffffff" transform="translate(422.96 91.37) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-1a"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="ytick_18"><g id="line2d_78"><path d="M 442.68 51.32 
 L 806.44 51.32 
-" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_79"><g><use xlink:href="#m5e07181663" x="442.68" y="51.32" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_28"><!-- 80 --><g style="fill: #ffffff" transform="translate(422.96 55.12) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-1b"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="text_29"><!-- A-weighted sound pressure level (dB) --><g style="fill: #ffffff" transform="translate(416.56 275.56) rotate(-90) scale(0.1 -0.1)"><defs><path id="DejaVuSans-24" d="M 2188 4044 
-L 1331 1722 
-L 3047 1722 
-L 2188 4044 
-z
-M 1831 4666 
-L 2547 4666 
-L 4325 0 
-L 3669 0 
-L 3244 1197 
-L 1141 1197 
-L 716 0 
-L 50 0 
-L 1831 4666 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-10" d="M 313 2009 
+" clip-path="url(#p74facdfe23)" style="fill: none; stroke-dasharray: 2.96,1.28; stroke-dashoffset: 0; stroke: #555555; stroke-opacity: 0.5; stroke-width: 0.8"/></g><g id="line2d_79"><g><use xlink:href="#m5e07181663" x="442.68" y="51.32" style="fill: #ffffff; stroke: #ffffff; stroke-width: 0.8"/></g></g><g id="text_28"><!-- 80 --><g style="fill: #ffffff" transform="translate(422.96 55.12) scale(0.1 -0.1)"><use xlink:href="#DejaVuSans-1b"/><use xlink:href="#DejaVuSans-13" transform="translate(63.62 0)"/></g></g></g><g id="text_29"><!-- A-weighted sound pressure level (dB) --><g style="fill: #ffffff" transform="translate(416.56 275.56) rotate(-90) scale(0.1 -0.1)"><defs><path id="DejaVuSans-10" d="M 313 2009 
 L 1997 2009 
 L 1997 1497 
 L 313 1497 

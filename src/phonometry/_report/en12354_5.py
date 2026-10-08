@@ -168,14 +168,15 @@ def _statement(
 def _relation_strip(language: str = "en") -> str:
     """The Formula 18a/17 relation line for the basis strip."""
     return t(
-        "L<sub>n,s,ij</sub> = L<sub>Ws,inst,i</sub> - D<sub>sa,i</sub> - "
-        "R<sub>ij,ref</sub> - 10 lg(S<sub>i</sub>/S<sub>0</sub>) - "
+        "L<sub>n,s,<i>ij</i></sub> = L<sub>Ws,inst,<i>i</i></sub> - "
+        "D<sub>sa,<i>i</i></sub> - R<sub><i>ij</i>,ref</sub> - "
+        "10 lg(S<sub><i>i</i></sub>/S<sub>0</sub>) - "
         "10 lg(A<sub>0</sub>/4), S<sub>0</sub> = A<sub>0</sub> = 10 m"
         "<super>2</super> (EN 12354-5:2009 Formula 18a), with the installed "
-        "power L<sub>Ws,inst,i</sub> = L<sub>Ws,c</sub> - D<sub>C,i</sub> "
-        "(Formula 18b) and the energetic path sum L<sub>n,s</sub> = 10 lg("
-        "&#931;<sub>j</sub> 10<super>L<sub>n,s,ij</sub>/10</super>) "
-        "(Formula 17).",
+        "power L<sub>Ws,inst,<i>i</i></sub> = L<sub>Ws,c</sub> - "
+        "D<sub>C,<i>i</i></sub> (Formula 18b) and the energetic path sum "
+        "L<sub>n,s</sub> = 10 lg(&#931;<sub><i>j</i></sub> "
+        "10<super>L<sub>n,s,<i>ij</i></sub>/10</super>) (Formula 17).",
         language,
     )
 

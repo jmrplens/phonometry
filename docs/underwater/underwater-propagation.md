@@ -86,7 +86,7 @@ ranges at which they hand over, from the seabed reflectivity alone:
 
 $\psi_\mathrm{c} = \arccos(c_\mathrm{w}/c_\mathrm{sed})$ is the critical grazing angle, $\eta$ the
 **reflection loss gradient** in nepers per radian ($|R(\theta)| \approx
-e^{-\eta\theta}$) and $H_\mathrm{e}$ the Weston effective depth, the level a short
+\mathrm{e}^{-\eta\theta}$) and $H_\mathrm{e}$ the Weston effective depth, the level a short
 distance below the true seabed at which a pressure-release boundary appears to
 lie. `weston_propagation_loss` assembles the composite loss
 $PL = -10 \log_{10} F$ and returns each regime's own law alongside it; the

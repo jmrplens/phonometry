@@ -86,13 +86,13 @@ _SPECS: dict[str, dict[str, str]] = {
     "dnt": {
         "title": "Field airborne sound insulation between rooms",
         "basis": (
-            "Standardized level difference D<sub>nT</sub> measured in "
+            "Standardized level difference D<sub>n<i>T</i></sub> measured in "
             "accordance with ISO 16283-1:2014 (field measurement). "
             "Rating per ISO 717-1:2020."
         ),
-        "symbol": "D<sub>nT</sub>",
-        "rating_symbol": "D<sub>nT,w</sub>",
-        "ylabel": "$D_{nT}$ [dB]",
+        "symbol": "D<sub>n<i>T</i></sub>",
+        "rating_symbol": "D<sub>n<i>T</i>,w</sub>",
+        "ylabel": r"$D_{\mathrm{n}T}$ [dB]",
         "statement": _FIELD_STATEMENT,
     },
     "r_prime": {
@@ -110,13 +110,13 @@ _SPECS: dict[str, dict[str, str]] = {
     "l_n_t": {
         "title": "Field impact sound insulation of floors",
         "basis": (
-            "Standardized impact sound pressure level L&#8242;<sub>nT</sub> "
+            "Standardized impact sound pressure level L&#8242;<sub>n<i>T</i></sub> "
             "measured in accordance with ISO 16283-2:2020 using the tapping "
             "machine. Rating per ISO 717-2:2020."
         ),
-        "symbol": "L&#8242;<sub>nT</sub>",
-        "rating_symbol": "L&#8242;<sub>nT,w</sub>",
-        "ylabel": "$L'_{nT}$ [dB]",
+        "symbol": "L&#8242;<sub>n<i>T</i></sub>",
+        "rating_symbol": "L&#8242;<sub>n<i>T</i>,w</sub>",
+        "ylabel": r"$L'_{\mathrm{n}T}$ [dB]",
         "statement": (
             "Evaluation based on field measurement results obtained by an "
             "engineering method."
@@ -131,7 +131,7 @@ _SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "L&#8242;<sub>n</sub>",
         "rating_symbol": "L&#8242;<sub>n,w</sub>",
-        "ylabel": "$L'_{n}$ [dB]",
+        "ylabel": r"$L'_\mathrm{n}$ [dB]",
         "statement": (
             "Evaluation based on field measurement results obtained by an "
             "engineering method."
@@ -251,13 +251,13 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
     "d_2m_nt": {
         "title": _FACADE_TITLE,
         "basis": (
-            "Standardized facade level difference D<sub>2m,nT</sub> measured "
+            "Standardized facade level difference D<sub>2m,n<i>T</i></sub> measured "
             "in accordance with ISO 16283-3:2016 (field measurement). Rating "
             "per ISO 717-1:2020."
         ),
-        "symbol": "D<sub>2m,nT</sub>",
-        "rating_symbol": "D<sub>2m,nT,w</sub>",
-        "ylabel": "$D_{2m,nT}$ [dB]",
+        "symbol": "D<sub>2m,n<i>T</i></sub>",
+        "rating_symbol": "D<sub>2m,n<i>T</i>,w</sub>",
+        "ylabel": r"$D_{\mathrm{2m,n}T}$ [dB]",
         "statement": _FIELD_STATEMENT,
     },
     "d_2m_n": {
@@ -269,7 +269,7 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "D<sub>2m,n</sub>",
         "rating_symbol": "D<sub>2m,n,w</sub>",
-        "ylabel": "$D_{2m,n}$ [dB]",
+        "ylabel": r"$D_\mathrm{2m,n}$ [dB]",
         "statement": _FIELD_STATEMENT,
     },
     "r_prime": {

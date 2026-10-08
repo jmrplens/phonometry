@@ -121,7 +121,7 @@ The confidence limit of the meter's own error on one quantity (Table 3).
 
 | Name | Description |
 | :--- | :--- |
-| `quantity` | `"rms"` for a value based on an r.m.s., such as `KB_F` or `KB_FTm`, or `"peak"` for a peak value. |
+| `quantity` | `"rms"` for a value based on an r.m.s., such as $KB_\mathrm{F}$ or $KB_\mathrm{FTm}$, or `"peak"` for a peak value. |
 | `accuracy_class` | 1 (default) or 2, the classes of the 1995 edition of DIN 45669-1. The 2010 edition grades every meter by one set of tolerances, so class 1 is the column that applies to a meter of today. |
 
 **Returns:** The limit, in per cent of the displayed value.

@@ -30,7 +30,7 @@ first milliseconds. The free-field record *is* the direct sound, so it is
 aligned onto the other record to a fiftieth of a sample, scaled to its peak and
 subtracted (5.5.4, [`subtract_direct_sound`](/phonometry/reference/api/environment/barrier-reflection/#subtract_direct_sound)). What is left is the
 reflection, and what cannot be removed is measured by the reduction factor
-$R_{sub}$ of Formula (6).
+$R_\mathrm{sub}$ of Formula (6).
 
 The two components are then cut out with the **Adrienne temporal window**
 (5.5.5, [`adrienne_reflection_window`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_reflection_window)): a 0,5 ms left half of a
@@ -46,15 +46,15 @@ incident energy in each band, with three corrections; the gain factor divides
 here, as the library computes it (see below):
 
 $$
-RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j} \frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df} {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df} \, C_{geo,k}\, C_{dir,k}(\Delta f_j)\, /\, C_{gain,k}(\Delta f_g)
+RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j} \frac{\int_{\Delta f_j} |F[h_{\mathrm{r},k}(t)\, w_{\mathrm{r},k}(t)]|^2\, df} {\int_{\Delta f_j} |F[h_{\mathrm{i},k}(t)\, w_{\mathrm{i},k}(t)]|^2\, df} \, C_{\mathrm{geo},k}\, C_{\mathrm{dir},k}(\Delta f_j)\, /\, C_{\mathrm{gain},k}(\Delta f_g)
 $$
 
-* $C_{geo,k} = (d_{r,k}/d_{i,k})^2$ puts back the spherical spreading of
+* $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$ puts back the spherical spreading of
   the longer reflected path (Formula (2), Table 2).
-* $C_{dir,k}$ puts back the loudspeaker directivity: the reflection left
+* $C_{\mathrm{dir},k}$ puts back the loudspeaker directivity: the reflection left
   the loudspeaker at another angle than the direct sound (Formula (3),
   [`source_directivity_corrections`](/phonometry/reference/api/environment/barrier-reflection/#source_directivity_corrections)).
-* $C_{gain,k}$ takes out a change of amplifier or microphone gain
+* $C_{\mathrm{gain},k}$ takes out a change of amplifier or microphone gain
   between the free-field and the in-front configurations (Formula (4)).
 
 The last correction is a **division** here. Formula (1) prints it as a
@@ -128,7 +128,7 @@ millihertz.
 
 | Name | Description |
 | :--- | :--- |
-| `window_length_s` | Total length $T_{W,ADR}$, in seconds. |
+| `window_length_s` | Total length $T_\mathrm{W,ADR}$, in seconds. |
 
 **Returns:** The frequency of the first minimum of the magnitude spectrum, in hertz: 162,5 Hz for 7,9 ms and 216,5 Hz for 6,0 ms.
 
@@ -170,7 +170,7 @@ the formula EN 1793-5 prints.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate, in hertz. |
-| `window_length_s` | Total length $T_{W,ADR}$, in seconds. |
+| `window_length_s` | Total length $T_\mathrm{W,ADR}$, in seconds. |
 
 **Returns:** The window, one sample per `1 / fs`; its marker point, where the flat part begins, is sample `round(0.5e-3 * fs)`.
 
@@ -270,7 +270,7 @@ The direct sound taken out of an impulse response, 5.5.4.
 | `peak_index` | The sample of the first and main peak of the in-front record, the direct sound. |
 | `shift_samples` | The shift applied to the free-field record, in samples, positive for a delay: a whole number of the 1/50 sample moving steps, within the +/- 2 samples 5.5.4 allows. |
 | `amplitude_factor` | The factor that made the two main peaks equal. |
-| `reduction_db` | $R_{sub}$, Formula (6): the energy of the free-field record within 0,5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
+| `reduction_db` | $R_\mathrm{sub}$, Formula (6): the energy of the free-field record within 0,5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
 
 The three records come back in the type they arrived as: a
 [`Signal`](/phonometry/reference/api/io/io/#signal) when the record was one (in pascals and
@@ -313,7 +313,7 @@ geometric_divergence_corrections(
 ) -> NDArray[np.float64]
 ```
 
-$C_{geo,k} = (d_{r,k}/d_{i,k})^2$, Formula (2).
+$C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, Formula (2).
 
 The reflection travels further than the direct sound and spreads over a
 larger sphere; this puts that energy back. At microphone 5 it is
@@ -357,8 +357,8 @@ reflection_grid_paths_m(
 
 The direct and the specular path to each microphone (Table 2).
 
-$d_{i,k}$ runs from the centre of the loudspeaker front panel to
-microphone $k$; $d_{r,k}$ runs from the same point to the
+$d_{\mathrm{i},k}$ runs from the centre of the loudspeaker front panel to
+microphone $k$; $d_{\mathrm{r},k}$ runs from the same point to the
 reference plane and back to the microphone by specular reflection, which
 is the distance from the image of the loudspeaker in the plane. With the
 geometry of the standard these are the values Table 2 prints to two
@@ -372,7 +372,7 @@ decimals (1,25 m and 1,75 m at microphone 5).
 | `microphone_distance_m` | $d_M$, grid to reference plane, m. |
 | `grid_spacing_m` | $s$, microphone spacing, m. |
 
-**Returns:** A read-only `(9, 2)` array: column 0 is $d_{i,k}$ and column 1 is $d_{r,k}$, rows in microphone order 1 to 9.
+**Returns:** A read-only `(9, 2)` array: column 0 is $d_{\mathrm{i},k}$ and column 1 is $d_{\mathrm{r},k}$, rows in microphone order 1 to 9.
 
 **Raises**
 
@@ -412,9 +412,9 @@ subtracted ([`subtract_direct_sound`](/phonometry/reference/api/environment/barr
 windowed on its own peak and the residual on the specular arrival of the
 reflection, both with the marker point 0,2 ms before the peak (5.5.6);
 the band energies of the two are divided and corrected by
-$C_{geo,k}$, $C_{dir,k}$ and $C_{gain,k}$. The
+$C_{\mathrm{geo},k}$, $C_{\mathrm{dir},k}$ and $C_{\mathrm{gain},k}$. The
 reflection's peak is placed by geometry, the direct peak plus
-$(d_{r,k} - d_{i,k})/c$, which is what 5.5.6 prefers and what makes
+$(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c$, which is what 5.5.6 prefers and what makes
 the reference plane the conventional reflection plane of a non-flat
 device.
 
@@ -432,10 +432,10 @@ within 5 % of 1; the value computed is always used here.
 | `free_field_irs` | The free-field impulse responses of the same microphones, in the same form and shape. |
 | `fs` | Sample rate, in hertz. Required when every record is a bare array; a Signal supplies it, and a Signal that disagrees with it or with another Signal is refused rather than arbitrated. |
 | `speed_of_sound` | Speed of sound at the air temperature of the test (5.5.6, 5.7.3), in metres per second; it places the reflected window, and the standard asks for its temperature-dependent value. |
-| `window_length_s` | $T_{W,ADR}$ from the 200 Hz band upward, one length or nine (one per microphone); 6,0 ms by 5.5.5. |
-| `low_band_window_length_s` | $T_{W,ADR}$ of the 100 Hz to 160 Hz bands; 7,9 ms by 5.5.5. |
+| `window_length_s` | $T_\mathrm{W,ADR}$ from the 200 Hz band upward, one length or nine (one per microphone); 6,0 ms by 5.5.5. |
+| `low_band_window_length_s` | $T_\mathrm{W,ADR}$ of the 100 Hz to 160 Hz bands; 7,9 ms by 5.5.5. |
 | `low_band_microphones` | The microphones averaged below 200 Hz; 1 to 6 by 5.5.5. |
-| `directivity_corrections` | $C_{dir,k}(\Delta f_j)$ as a `(9, 18)` array ([`source_directivity_corrections`](/phonometry/reference/api/environment/barrier-reflection/#source_directivity_corrections)), or `None` for none, which is what a report states as "none". |
+| `directivity_corrections` | $C_{\mathrm{dir},k}(\Delta f_j)$ as a `(9, 18)` array ([`source_directivity_corrections`](/phonometry/reference/api/environment/barrier-reflection/#source_directivity_corrections)), or `None` for none, which is what a report states as "none". |
 | `lowest_band_hz` | The lowest reliable band, where $DL_{RI}$ starts; 200 Hz for the qualification sample of 5.3. |
 
 **Returns:** The [`ReflectionIndexResult`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult), with `.plot()`.
@@ -450,7 +450,7 @@ within 5 % of 1; the value computed is always used here.
 
 | Warning | When |
 | :--- | :--- |
-| BarrierReflectionWarning | For an $R_{sub}$ below 10 dB, a gain factor more than 20 % from 1, or a sample rate below 44 kHz. |
+| BarrierReflectionWarning | For an $R_\mathrm{sub}$ below 10 dB, a gain factor more than 20 % from 1, or a sample rate below 44 kHz. |
 
 ## reflection_index_from_positions
 
@@ -601,7 +601,7 @@ NOTE 1 of 5.6.1 gives 1,96 m for the 7,9 ms window at 340 m/s.
 
 | Name | Description |
 | :--- | :--- |
-| `window_length_s` | $T_{W,ADR}$ of the reflected component, s. |
+| `window_length_s` | $T_\mathrm{W,ADR}$ of the reflected component, s. |
 | `speed_of_sound` | Speed of sound at the air temperature of the test (5.7.3), in metres per second. |
 
 **Returns:** The radius, in metres.
@@ -775,8 +775,8 @@ The sound reflection index of a device, per one-third octave band.
 | `lowest_band_hz` | The lowest reliable band, where the single number starts (the $m$ of Formula (12)). |
 | `rating` | $DL_{RI}$ over the bands from `lowest_band_hz`, a [`RoadDeviceRating`](/phonometry/reference/api/environment/noise-reducing-devices/#roaddevicerating). |
 | `microphone_values` | `(positions, 9, 18)`: the index of each microphone, `nan` where 5.5.5 leaves it out (microphones 7 to 9 below 200 Hz by default); `None` for a result built from position values. |
-| `gain_corrections` | `(positions, 9)`: $C_{gain,k}$ of Formula (4), or `None`. |
-| `subtraction_reductions_db` | `(positions, 9)`: $R_{sub}$ of each subtraction, in decibels, or `None`. |
+| `gain_corrections` | `(positions, 9)`: $C_{\mathrm{gain},k}$ of Formula (4), or `None`. |
+| `subtraction_reductions_db` | `(positions, 9)`: $R_\mathrm{sub}$ of each subtraction, in decibels, or `None`. |
 
 ### ReflectionIndexResult.expanded_uncertainty()
 
@@ -790,7 +790,7 @@ ReflectionIndexResult.expanded_uncertainty(
 
 Expanded uncertainty from the reproducibility of Table A.1 (A.2).
 
-$U_j = k_p\, s_{R,j}$, with $s_R$ taken as the combined
+$U_j = k_p\, s_{\mathrm{R},j}$, with $s_\mathrm{R}$ taken as the combined
 standard uncertainty. Annex B.5 takes the high column and
 $k_p$ = 1,96 for 95 % coverage, which is the default.
 
@@ -847,13 +847,13 @@ source_directivity_corrections(
 ) -> NDArray[np.float64]
 ```
 
-$C_{dir,k}(\Delta f_j)$, Formula (3).
+$C_{\mathrm{dir},k}(\Delta f_j)$, Formula (3).
 
 The direct sound reaches microphone $k$ at the angle
 $\alpha_k$ from the loudspeaker axis, and the reflection leaves the
 loudspeaker at another angle $\beta_k$, towards its specular point.
 Both are measured once per loudspeaker in free field, at the same distance
-$d_{i,k}$: one at the microphone position, one on the specular path.
+$d_{\mathrm{i},k}$: one at the microphone position, one on the specular path.
 The correction is the ratio of their windowed band energies, each window
 placed on its own record's peak (5.5.6).
 
@@ -893,7 +893,7 @@ samples either way, by a phase ramp over its own transform (steps a and
 b); the shift that minimises the squared difference over 50 samples
 around the main peak of the in-front record is kept; the shifted record
 is scaled so the two main peaks are equal; and it is subtracted. The
-reduction factor $R_{sub}$ of Formula (6) measures what is left of
+reduction factor $R_\mathrm{sub}$ of Formula (6) measures what is left of
 the direct sound.
 
 **Parameters**
@@ -916,4 +916,4 @@ the direct sound.
 
 | Warning | When |
 | :--- | :--- |
-| BarrierReflectionWarning | If $R_{sub}$ is below 10 dB or the sample rate below 44 kHz. |
+| BarrierReflectionWarning | If $R_\mathrm{sub}$ is below 10 dB or the sample rate below 44 kHz. |

@@ -11,10 +11,10 @@ strain a vibration puts into the soil.
 
 **Why two speeds are enough.** An unbounded elastic continuum carries two
 kinds of wave, and their speeds are fixed by two elastic constants and the
-density: :math:`v_s = \sqrt{G/\rho}` for the shear wave (Formula (2)) and
-:math:`v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}` for the compression wave. So
+density: :math:`\mathrm{v}_\mathrm{s} = \sqrt{G/\rho}` for the shear wave (Formula (2)) and
+:math:`\mathrm{v}_\mathrm{p} = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}` for the compression wave. So
 measuring both speeds fixes :math:`G` and :math:`\nu`, and with them every
-other constant. :math:`v_p > v_s` always; the ratio decides Poisson's ratio
+other constant. :math:`\mathrm{v}_\mathrm{p} > \mathrm{v}_\mathrm{s}` always; the ratio decides Poisson's ratio
 (Formula (3)).
 
 **Why a small strain.** The shear modulus of a soil falls as the strain grows:
@@ -28,7 +28,7 @@ The strain itself is the velocity amplitude over the shear-wave speed
 **Two formulas that are printed wrong.** Formula (1) writes the compression
 speed as :math:`\sqrt{E/\rho}`, which is the speed in a thin rod, and as
 :math:`\sqrt{G(1-\nu)/(\rho(1-2\nu))}`, which is short of a factor 2; Formula
-(5) builds on the first and writes :math:`E = v_p^2 \rho`. Both contradict
+(5) builds on the first and writes :math:`E = \mathrm{v}_\mathrm{p}^2 \rho`. Both contradict
 Formula (3) of the same clause, which is right, and the two expressions of
 Formula (1) only agree with each other at :math:`\nu = (\sqrt{17}-1)/8
 \approx 0{,}39`. This module uses the relations of the continuum, which is
@@ -85,7 +85,7 @@ def _speeds(
 
     Clause 4.5.1 says only that the compression wave is the faster, and that
     is not enough: below :math:`2/\sqrt{3}` times the shear speed the bulk
-    modulus :math:`\rho(v_p^2 - 4 v_s^2/3)` is negative, and Poisson's ratio
+    modulus :math:`\rho(\mathrm{v}_\mathrm{p}^2 - 4 \mathrm{v}_\mathrm{s}^2/3)` is negative, and Poisson's ratio
     below -1.
     """
     v_p = require_positive(compression_wave_speed_m_s, "compression_wave_speed_m_s")
@@ -103,9 +103,9 @@ def _speeds(
 def shear_modulus_from_wave_speed(
     shear_wave_speed_m_s: float, *, density_kg_m3: float
 ) -> float:
-    r"""The shear modulus :math:`G = v_s^2 \rho`, Formula (5), in pascals.
+    r"""The shear modulus :math:`G = \mathrm{v}_\mathrm{s}^2 \rho`, Formula (5), in pascals.
 
-    :param shear_wave_speed_m_s: :math:`v_s`, in metres per second.
+    :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
     :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`G`, in pascals.
     :raises ValueError: For a non-positive speed or density.
@@ -120,14 +120,14 @@ def poisson_ratio_from_wave_speeds(
 ) -> float:
     r"""Poisson's ratio from the two wave speeds, Formula (3).
 
-    :math:`\nu = (v_p^2 - 2 v_s^2) / (2 (v_p^2 - v_s^2))`, the inversion of
+    :math:`\nu = (\mathrm{v}_\mathrm{p}^2 - 2 \mathrm{v}_\mathrm{s}^2) / (2 (\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2))`, the inversion of
     the continuum relations and the formula of Clause 4.5.1 that is printed
     right.
 
-    :param compression_wave_speed_m_s: :math:`v_p`, in metres per second.
-    :param shear_wave_speed_m_s: :math:`v_s`, in metres per second.
-    :return: :math:`\nu`, between -1 and 0,5. It is positive when :math:`v_p`
-        exceeds :math:`\sqrt{2}\,v_s`, as it does in every soil; a pair
+    :param compression_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
+    :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
+    :return: :math:`\nu`, between -1 and 0,5. It is positive when :math:`\mathrm{v}_\mathrm{p}`
+        exceeds :math:`\sqrt{2}\,\mathrm{v}_\mathrm{s}`, as it does in every soil; a pair
         between :math:`2/\sqrt{3}` and :math:`\sqrt{2}` gives the negative
         ratio a continuum allows and a soil does not show.
     :raises ValueError: For a non-positive speed, or a compression wave no
@@ -146,14 +146,14 @@ def youngs_modulus_from_wave_speeds(
 ) -> float:
     r"""The elastic modulus from the two wave speeds, in pascals.
 
-    :math:`E = 2G(1+\nu) = \rho v_s^2 (3 v_p^2 - 4 v_s^2)/(v_p^2 - v_s^2)`,
-    which is what Formula (5) means. As printed it reads :math:`E = v_p^2
+    :math:`E = 2G(1+\nu) = \rho \mathrm{v}_\mathrm{s}^2 (3 \mathrm{v}_\mathrm{p}^2 - 4 \mathrm{v}_\mathrm{s}^2)/(\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2)`,
+    which is what Formula (5) means. As printed it reads :math:`E = \mathrm{v}_\mathrm{p}^2
     \rho`, the thin-rod relation, and that overstates the modulus of a soil
     with :math:`\nu = 0{,}3` by 35 % and of one with :math:`\nu = 0{,}45` by a
     factor of 3,8.
 
-    :param compression_wave_speed_m_s: :math:`v_p`, in metres per second.
-    :param shear_wave_speed_m_s: :math:`v_s`, in metres per second.
+    :param compression_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
+    :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
     :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`E`, in pascals.
     :raises ValueError: As :func:`poisson_ratio_from_wave_speeds`, or for a
@@ -171,7 +171,7 @@ def compression_wave_speed(
 ) -> float:
     r"""The compression-wave speed of a continuum, Formula (1) corrected, in m/s.
 
-    :math:`v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}`, the speed of a P-wave in an
+    :math:`\mathrm{v}_\mathrm{p} = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}`, the speed of a P-wave in an
     unbounded medium, whose inverse is Formula (3). Formula (1) prints the
     radicand without the factor 2, which gives a speed :math:`\sqrt{2}` too
     slow at every Poisson's ratio.
@@ -179,7 +179,7 @@ def compression_wave_speed(
     :param shear_modulus_pa: :math:`G`, in pascals.
     :param poisson_ratio: :math:`\nu`, above -1 and below 0,5.
     :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
-    :return: :math:`v_p`, in metres per second.
+    :return: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :raises ValueError: For a non-positive modulus or density, or a ratio
         outside ``(-1, 0.5)``, where the continuum would not be stable.
     """
@@ -195,15 +195,15 @@ def compression_wave_speed(
 def shear_strain_amplitude(
     velocity_amplitude_m_s: float, *, shear_wave_speed_m_s: float
 ) -> float:
-    r"""The shear strain amplitude :math:`\hat\gamma = \hat v / v_s`, Formula (4).
+    r"""The shear strain amplitude :math:`\hat\gamma = \hat{\mathrm{v}} / \mathrm{v}_\mathrm{s}`, Formula (4).
 
     Compare it with :data:`SHEAR_STRAIN_LINEAR_LIMIT` to know whether the
     small-strain modulus still applies.
 
-    :param velocity_amplitude_m_s: :math:`\hat v`, the velocity amplitude, in
+    :param velocity_amplitude_m_s: :math:`\hat{\mathrm{v}}`, the velocity amplitude, in
         metres per second (not millimetres: the strain is a ratio of the two
         speeds).
-    :param shear_wave_speed_m_s: :math:`v_s`, in metres per second.
+    :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
     :return: :math:`\hat\gamma`, in radians.
     :raises ValueError: For a negative amplitude or a non-positive speed.
     """

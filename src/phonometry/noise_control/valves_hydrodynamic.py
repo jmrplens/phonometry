@@ -36,7 +36,7 @@ recorded in ``docs/ERRATA.md``:
 * Equation (12) is printed **twice, differently**: Clause 5.1 gives the
   Strouhal number a leading 0,02 and no valve style modifier, Annex A's
   Table A.1 gives it 0,036 and a factor :math:`F_d^{0,75}`. Only the annex
-  form reproduces the annex's own printed :math:`N_{Str}`, which is why
+  form reproduces the annex's own printed :math:`N_\mathrm{Str}`, which is why
   :data:`STROUHAL_CONSTANTS` carries both and the default is ``"annex"``.
 * Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51,76 dB``,
   positive, where its own two inputs sum to :math:`-51{,}763` dB.
@@ -199,7 +199,7 @@ _CAVITATION_TRANSMISSION_FACTOR = 250.0
 _INTERNAL_LEVEL_COEFFICIENT = 3.2e9
 
 #: Equation (8): the acoustical efficiency of the turbulent jet at
-#: :math:`U_{vc} = c_L`.
+#: :math:`U_\mathrm{vc} = c_L`.
 _TURBULENT_EFFICIENCY = 1.0e-4
 
 #: Equation (9)'s leading constant.
@@ -487,7 +487,7 @@ def vena_contracta_velocity(
 
     .. math::
 
-       U_{vc} = \frac{1}{F_L}\sqrt{\frac{2 \Delta p_c}{\rho_L}}
+       U_\mathrm{vc} = \frac{1}{F_L}\sqrt{\frac{2 \Delta p_c}{\rho_L}}
 
     Bernoulli's velocity for the differential of Equation (2), divided by the
     recovery factor because :math:`F_L` is defined as the fraction of the
@@ -497,7 +497,7 @@ def vena_contracta_velocity(
         :func:`cavitation_differential`, in Pa.
     :param density: :math:`\rho_L` of the liquid, in kg/m³.
     :param pressure_recovery: :math:`F_L`, dimensionless.
-    :return: :math:`U_{vc}`, in m/s.
+    :return: :math:`U_\mathrm{vc}`, in m/s.
     :raises ValueError: If a value is not positive and finite, or the
         recovery factor is outside its range.
     """
@@ -514,15 +514,15 @@ def mechanical_stream_power(
 
     .. math::
 
-       W_m = \frac{\dot m\, U_{vc}^2\, F_L^2}{2}
+       W_m = \frac{\dot m\, U_\mathrm{vc}^2\, F_L^2}{2}
 
-    The kinetic power of the jet, :math:`\dot m U_{vc}^2/2`, scaled back by
+    The kinetic power of the jet, :math:`\dot m U_\mathrm{vc}^2/2`, scaled back by
     :math:`F_L^2` to the part of it that is actually thrown away rather than
     recovered as pressure downstream. Equation (7a) then takes a part in
     :math:`10^{-6}` of this and calls it sound.
 
     :param mass_flow: :math:`\dot m`, in kg/s.
-    :param velocity: :math:`U_{vc}` from :func:`vena_contracta_velocity`, in
+    :param velocity: :math:`U_\mathrm{vc}` from :func:`vena_contracta_velocity`, in
         m/s.
     :param pressure_recovery: :math:`F_L`, dimensionless.
     :return: :math:`W_m`, in W.
@@ -545,7 +545,7 @@ def turbulent_efficiency(velocity: float, speed_of_sound: float) -> float:
 
     .. math::
 
-       \eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)
+       \eta_\mathrm{turb} = 10^{-4}\left(\frac{U_\mathrm{vc}}{c_L}\right)
 
     5.1 argues the case: at these velocities the jet is slow enough to be a
     monopole, and a monopole's efficiency rises with the first power of the
@@ -554,9 +554,9 @@ def turbulent_efficiency(velocity: float, speed_of_sound: float) -> float:
     valve jet runs at tens of metres per second, so the efficiency comes out
     in the :math:`10^{-6}` range: one part in a million of the stream power.
 
-    :param velocity: :math:`U_{vc}`, in m/s.
+    :param velocity: :math:`U_\mathrm{vc}`, in m/s.
     :param speed_of_sound: :math:`c_L` in the liquid, in m/s.
-    :return: :math:`\eta_{turb}`, dimensionless.
+    :return: :math:`\eta_\mathrm{turb}`, dimensionless.
     :raises ValueError: If a value is not positive and finite.
     """
     speed = require_positive(velocity, "velocity")
@@ -584,9 +584,9 @@ def cavitation_efficiency(
 
     .. math::
 
-       \eta_{cav} = 0{,}32\, \eta_{turb}
+       \eta_\mathrm{cav} = 0{,}32\, \eta_\mathrm{turb}
          \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\;
-         e^{5 x_{Fzp1}}
+         \mathrm{e}^{5 x_{Fzp1}}
          \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5}
          \left(\frac{x_F}{x_{Fzp1}}\right)^{5}
          \left(x_F - x_{Fzp1}\right)^{1,5}
@@ -599,13 +599,13 @@ def cavitation_efficiency(
     infinity as the valve approaches flashing, which is where the method
     stops.
 
-    :param turbulent: :math:`\eta_{turb}` from :func:`turbulent_efficiency`.
+    :param turbulent: :math:`\eta_\mathrm{turb}` from :func:`turbulent_efficiency`.
     :param differential: :math:`p_1 - p_2`, in Pa.
     :param choked_differential: :math:`\Delta p_c` from
         :func:`cavitation_differential`, in Pa.
     :param pressure_ratio: :math:`x_F` of Equation (1).
     :param corrected_ratio: :math:`x_{Fzp1}` of Equation (3c).
-    :return: :math:`\eta_{cav}`, dimensionless, and exactly zero on the
+    :return: :math:`\eta_\mathrm{cav}`, dimensionless, and exactly zero on the
         threshold.
     :raises ValueError: If a value is not positive and finite, if the
         operating point is below the threshold, or if it is at or past
@@ -700,14 +700,14 @@ def jet_strouhal_number(  # noqa: PLR0913
 
     .. math::
 
-       N_{STR} = \frac{0{,}036\, F_L^2\, C\, F_d^{0,75}}
+       N_\mathrm{STR} = \frac{0{,}036\, F_L^2\, C\, F_d^{0,75}}
                       {N_{34}\, x_{Fzp1}^{1,5}\, d\, d_o}
                  \left(\frac{1}{p_1 - p_v}\right)^{0,57}
 
     This is the one place where the two printings of the standard disagree
     with each other. The form above is Table A.1's; Clause 5.1 prints the
     same equation with a leading 0,02 and **no** :math:`F_d^{0,75}`. Only the
-    annex form reproduces the annex's own :math:`N_{Str} = 0{,}399`, so it is
+    annex form reproduces the annex's own :math:`N_\mathrm{Str} = 0{,}399`, so it is
     the default here; pass ``form="clause"`` for the normative text's version
     and see ``docs/ERRATA.md``.
 
@@ -727,7 +727,7 @@ def jet_strouhal_number(  # noqa: PLR0913
     :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{34}`.
     :param form: Which printing of Equation (12) to use, ``"annex"`` or
         ``"clause"``.
-    :return: :math:`N_{STR}`, dimensionless.
+    :return: :math:`N_\mathrm{STR}`, dimensionless.
     :raises ValueError: If a value is not positive and finite, if the inlet
         is at or below the vapour pressure, or if a choice is not one the
         standard prints.
@@ -761,17 +761,17 @@ def turbulent_peak_frequency(
 
     .. math::
 
-       f_{p,turb} = N_{STR}\, \frac{U_{vc}}{D_j}
+       f_\mathrm{p,turb} = N_\mathrm{STR}\, \frac{U_\mathrm{vc}}{D_j}
 
     A jet radiates around the frequency at which its own eddies pass a fixed
     point, which is the velocity divided by the size of the eddies. The jet
     diameter of Equation (4) stands for that size.
 
-    :param strouhal_number: :math:`N_{STR}` from
+    :param strouhal_number: :math:`N_\mathrm{STR}` from
         :func:`jet_strouhal_number`.
-    :param velocity: :math:`U_{vc}`, in m/s.
+    :param velocity: :math:`U_\mathrm{vc}`, in m/s.
     :param jet: :math:`D_j` of Equation (4), in m.
-    :return: :math:`f_{p,turb}`, in Hz.
+    :return: :math:`f_\mathrm{p,turb}`, in Hz.
     :raises ValueError: If a value is not positive and finite.
     """
     strouhal = require_positive(strouhal_number, "strouhal_number")
@@ -787,7 +787,7 @@ def cavitation_peak_frequency(
 
     .. math::
 
-       f_{p,cav} = 6 f_{p,turb}
+       f_\mathrm{p,cav} = 6 f_\mathrm{p,turb}
          \left(\frac{1 - x_F}{1 - x_{Fzp1}}\right)^{2}
          \left(\frac{x_{Fzp1}}{x_F}\right)^{2,5}
 
@@ -799,11 +799,11 @@ def cavitation_peak_frequency(
     noise is hissy, six times the turbulent peak; deep into cavitation it
     drops back down into a rumble.
 
-    :param turbulent_peak: :math:`f_{p,turb}` from :func:`turbulent_peak_frequency`,
+    :param turbulent_peak: :math:`f_\mathrm{p,turb}` from :func:`turbulent_peak_frequency`,
         in Hz.
     :param pressure_ratio: :math:`x_F` of Equation (1).
     :param corrected_ratio: :math:`x_{Fzp1}` of Equation (3c).
-    :return: :math:`f_{p,cav}`, in Hz.
+    :return: :math:`f_\mathrm{p,cav}`, in Hz.
     :raises ValueError: If a value is not positive and finite, or the
         operating point is at or past flashing.
     """
@@ -945,8 +945,8 @@ def cavitation_transmission_loss(
     .. math::
 
        TL_{cav} = TL_{turb} + 10 \lg\left(
-         250\, \frac{f_{p,cav}^{1,5}}{f_{p,turb}^{2}}\,
-         \frac{\eta_{cav}}{\eta_{turb} + \eta_{cav}}\right)
+         250\, \frac{f_\mathrm{p,cav}^{1,5}}{f_\mathrm{p,turb}^{2}}\,
+         \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb} + \eta_\mathrm{cav}}\right)
 
     Cavitation noise peaks higher in frequency than turbulent noise, and the
     pipe wall passes high frequencies better, so the correction is normally
@@ -954,7 +954,7 @@ def cavitation_transmission_loss(
     which is one reason cavitating valves are heard from far away.
 
     The NOTE to the equation floors the efficiency ratio at
-    :math:`f_{p,turb}^2/(250 f_{p,cav}^{1,5})` while :math:`x_F` is within
+    :math:`f_\mathrm{p,turb}^2/(250 f_\mathrm{p,cav}^{1,5})` while :math:`x_F` is within
     0,1 of the threshold, which is exactly the value that makes the bracket
     equal 1. Just above incipient cavitation, where the cavitating efficiency
     is still a small fraction of the total, the floor therefore keeps the
@@ -963,9 +963,9 @@ def cavitation_transmission_loss(
     printed.
 
     :param turbulent_loss: :math:`TL_{turb}` of Equation (16a), in dB.
-    :param turbulent_peak: :math:`f_{p,turb}`, in Hz.
-    :param cavitation_peak: :math:`f_{p,cav}`, in Hz.
-    :param efficiency_ratio: :math:`\eta_{cav}/(\eta_{turb}+\eta_{cav})`.
+    :param turbulent_peak: :math:`f_\mathrm{p,turb}`, in Hz.
+    :param cavitation_peak: :math:`f_\mathrm{p,cav}`, in Hz.
+    :param efficiency_ratio: :math:`\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})`.
     :param pressure_ratio: :math:`x_F`, for the NOTE's floor.
     :param corrected_ratio: :math:`x_{Fzp1}`, for the NOTE's floor.
     :return: :math:`TL_{cav}`, in dB, negative.
@@ -1013,8 +1013,8 @@ def turbulent_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.floa
     .. math::
 
        F_{turb}(f_i) = -10 \lg\left[
-         \frac{1}{4}\left(\frac{f_i}{f_{p,turb}}\right)^{3}
-         + \left(\frac{f_i}{f_{p,turb}}\right)^{-1}\right] - 3{,}1
+         \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{3}
+         + \left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{-1}\right] - 3{,}1
 
     A band correction, in dB, that adds to the overall internal level. The
     two terms in the bracket are the two sides of the peak: below it the
@@ -1024,15 +1024,15 @@ def turbulent_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.floa
     normalisation: over the band set of 5.4.1 these corrections do not sum
     back to :math:`L_{pi}`, they sum about 5 dB above it, so the band route
     and the overall route of Equation (18a) are two answers and not one
-    answer twice. The maximum is not exactly at :math:`f_{p,turb}` either:
+    answer twice. The maximum is not exactly at :math:`f_\mathrm{p,turb}` either:
     the quarter in front of the rising branch puts it at
-    :math:`(4/3)^{1/4} f_{p,turb}`, a few per cent above.
+    :math:`(4/3)^{1/4} f_\mathrm{p,turb}`, a few per cent above.
 
     The negative exponent is easy to lose. Text extracted from the printed
     page renders it as a bare 1, which flattens the low-frequency side.
 
     :param frequency: :math:`f_i`, the band centres, in Hz.
-    :param peak: :math:`f_{p,turb}` from :func:`turbulent_peak_frequency`, in Hz.
+    :param peak: :math:`f_\mathrm{p,turb}` from :func:`turbulent_peak_frequency`, in Hz.
     :return: :math:`F_{turb}(f_i)`, in dB.
     :raises ValueError: If a value is not positive and finite.
     """
@@ -1045,20 +1045,20 @@ def cavitation_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.flo
     .. math::
 
        F_{cav}(f_i) = -10 \lg\left[
-         \frac{1}{4}\left(\frac{f_i}{f_{p,cav}}\right)^{1,5}
-         + \left(\frac{f_i}{f_{p,cav}}\right)^{-1,5}\right] - 3{,}5
+         \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{1,5}
+         + \left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{-1,5}\right] - 3{,}5
 
     The same shape as Equation (20a) with every numeral changed. Both
     exponents are :math:`\pm 1,5` instead of 3 and −1, so both flanks fall at
     the same 4,5 dB per octave and the hump is symmetric, but about
-    :math:`\sqrt[3]{4}\, f_{p,cav}`, two thirds of an octave above the
+    :math:`\sqrt[3]{4}\, f_\mathrm{p,cav}`, two thirds of an octave above the
     frequency Equation (13) names, because the quarter in front of the
     rising branch shifts the maximum up. Against Equation (20a)'s 3 dB up and 9 dB down
     that is a far broader spectrum: cavitation is heard as a wide band of
     gravel where turbulence is heard as a hiss around one frequency.
 
     :param frequency: :math:`f_i`, the band centres, in Hz.
-    :param peak: :math:`f_{p,cav}` from :func:`cavitation_peak_frequency`,
+    :param peak: :math:`f_\mathrm{p,cav}` from :func:`cavitation_peak_frequency`,
         in Hz.
     :return: :math:`F_{cav}(f_i)`, in dB.
     :raises ValueError: If a value is not positive and finite.
@@ -1083,23 +1083,23 @@ def band_internal_levels(
     .. math::
 
        L_{pi}(f_i) = L_{pi} + 10 \lg\left(
-         \frac{\eta_{turb}}{\eta_{turb}+\eta_{cav}} 10^{0,1 F_{turb}(f_i)}
-         + \frac{\eta_{cav}}{\eta_{turb}+\eta_{cav}} 10^{0,1 F_{cav}(f_i)}
+         \frac{\eta_\mathrm{turb}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0,1 F_{turb}(f_i)}
+         + \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0,1 F_{cav}(f_i)}
          \right)
 
     The cavitating form is the turbulent and the cavitating spectra added in
     energy, each weighted by the share of the sound power its own efficiency
     accounts for. Since the two peak frequencies differ by a factor of a few,
     the sum is a two-humped spectrum, and which hump is taller is decided by
-    :math:`\eta_{cav}/(\eta_{turb}+\eta_{cav})` alone.
+    :math:`\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})` alone.
 
     :param frequency: :math:`f_i`, the band centres, in Hz.
     :param internal_level: :math:`L_{pi}` of Equation (10), in dB.
-    :param turbulent_peak: :math:`f_{p,turb}`, in Hz.
-    :param cavitation_peak: :math:`f_{p,cav}`, in Hz, or ``None`` for the
+    :param turbulent_peak: :math:`f_\mathrm{p,turb}`, in Hz.
+    :param cavitation_peak: :math:`f_\mathrm{p,cav}`, in Hz, or ``None`` for the
         turbulent branch.
     :param cavitation_fraction:
-        :math:`\eta_{cav}/(\eta_{turb}+\eta_{cav})`, between 0 and 1. Zero
+        :math:`\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})`, between 0 and 1. Zero
         gives Equation (19a) whatever else is passed.
     :return: :math:`L_{pi}(f_i)`, in dB, one value per band.
     :raises ValueError: If a value is out of range, or the cavitating branch
@@ -1162,16 +1162,16 @@ class HydrodynamicValveNoise(OwnsArrays):
         at the working inlet pressure. This is the number the regime test is
         made against.
     :ivar jet_diameter_m: :math:`D_j` of Equation (4), in m.
-    :ivar velocity: :math:`U_{vc}` of Equation (5), in m/s.
+    :ivar velocity: :math:`U_\mathrm{vc}` of Equation (5), in m/s.
     :ivar stream_power: :math:`W_m` of Equation (6), in W.
-    :ivar turbulent_efficiency: :math:`\eta_{turb}` of Equation (8).
-    :ivar cavitation_efficiency: :math:`\eta_{cav}` of Equation (9), or
+    :ivar turbulent_efficiency: :math:`\eta_\mathrm{turb}` of Equation (8).
+    :ivar cavitation_efficiency: :math:`\eta_\mathrm{cav}` of Equation (9), or
         ``None`` in the turbulent regime.
     :ivar sound_power: :math:`W_a` of Equation (7a) or (7b), in W.
     :ivar internal_level: :math:`L_{pi}` of Equation (10), in dB.
-    :ivar strouhal_number: :math:`N_{STR}` of Equation (12).
-    :ivar turbulent_peak: :math:`f_{p,turb}` of Equation (11), in Hz.
-    :ivar cavitation_peak: :math:`f_{p,cav}` of Equation (13), in Hz, or
+    :ivar strouhal_number: :math:`N_\mathrm{STR}` of Equation (12).
+    :ivar turbulent_peak: :math:`f_\mathrm{p,turb}` of Equation (11), in Hz.
+    :ivar cavitation_peak: :math:`f_\mathrm{p,cav}` of Equation (13), in Hz, or
         ``None`` in the turbulent regime.
     :ivar pipe_ring_frequency: :math:`f_r` of Equation (14), in Hz.
     :ivar reference_transmission_loss: :math:`TL_{fr}` of Equation (15), in

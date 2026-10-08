@@ -40,15 +40,15 @@ Image $i$ at distance $r_i$ from the receiver arrives at $t_i = r_i / c$
 
 $$
 A_i = \left[ \prod_\text{walls} R_\text{wall}^{\,\text{(reflections there)}}
-\right] \cdot e^{-m r_i / 2} / (4 \pi r_i)
+\right] \cdot \mathrm{e}^{-m r_i / 2} / (4 \pi r_i)
 $$
 
 combining the $1 / (4 \pi r_i)$ spherical spreading, the product of the wall
 **pressure reflection factors** $R = \sqrt{1 - \alpha}$ (Vorländer Equation
 (11.39); $|R|^2 = 1 - \alpha$ in energy, Kuttruff 4.1) each raised to the
 number of reflections that image made off that wall, and the air pressure
-attenuation $e^{-m r_i / 2}$ over the path (Kuttruff 4.1; $m$ the *intensity*
-attenuation constant, so intensity falls as $e^{-m r}$).
+attenuation $\mathrm{e}^{-m r_i / 2}$ over the path (Kuttruff 4.1; $m$ the *intensity*
+attenuation constant, so intensity falls as $\mathrm{e}^{-m r}$).
 
 Along one axis the reflection count off the two walls of an image at lattice
 index $n$ and mirror parity $p$ is $|n - p|$ (wall at 0) and $|n|$ (wall at

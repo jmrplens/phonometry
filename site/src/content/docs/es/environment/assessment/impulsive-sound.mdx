@@ -180,7 +180,7 @@ pondera la señal en A, aplica la ponderación temporal F
 ($\tau = 125\ \text{ms}$),
 muestrea el historial de nivel $L_{p\mathrm{AF}}$ cada 10-25 ms, detecta cada arranque (el
 tramo contiguo cuyo gradiente supera 10 dB/s, fusionando eventos separados menos
-de 50 ms), mide su diferencia de nivel $L_\mathrm{D} = L_\mathrm{e} - L_\mathrm{s}$ y su tasa de crecimiento
+de 50 ms), mide su diferencia de nivel $\mathrm{LD} = L_\mathrm{e} - L_\mathrm{s}$ y su tasa de crecimiento
 $\mathrm{OR}$ por mínimos cuadrados, y devuelve el ajuste determinante $K_\mathrm{I}$ con la
 categoría de fuente del apartado 7: *no impulsiva* ($K_\mathrm{I} = 0$), *impulsiva
 regular* ($0 < K_\mathrm{I} \le 5$) o *altamente impulsiva* ($K_\mathrm{I} > 5$).
@@ -302,7 +302,7 @@ mínimos cuadrados sobre el crecimiento detectado, así que un ajuste tendido
 sobre un flanco visiblemente abrupto indica que el historial de nivel se
 registró con demasiada poca resolución. Y la diferencia de nivel se mide desde
 el nivel *justo antes* del arranque, no desde el fondo a largo plazo, por lo que
-un segundo golpe que llega sobre la cola del anterior puntúa un $L_\mathrm{D}$ menor del
+un segundo golpe que llega sobre la cola del anterior puntúa un $\mathrm{LD}$ menor del
 que aparenta merecer.
 
 Como la tasa de crecimiento y la diferencia de nivel son *diferencias* de

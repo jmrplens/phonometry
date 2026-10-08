@@ -806,6 +806,26 @@ jobs:
     - name: Check that no file sets one subscript both ways
       run: python scripts/check_subscript_slope.py
 
+  # ISO 80000-2 prints the mathematical constants upright, and an italic e is a
+  # variable. KaTeX and mathtext set a bare letter italic, so the exponential is
+  # upright only where the source asks for it, and the corpus had both. Static
+  # and dependency-free, like the subscript gate beside it.
+  euler-number:
+    name: Euler's number is upright
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no formula sets the exponential's e in italic
+      run: python scripts/check_euler_number.py
+
   # generate_api_docs copies the mathematics of a docstring to the site
   # verbatim, and KaTeX reads what the docstring actually holds. A doubled
   # backslash is a line break with a command after it, which KaTeX refuses,

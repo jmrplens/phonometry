@@ -25,7 +25,7 @@ and the primary output, the standardized level difference at 2 m
 
 .. math::
 
-   D_{2\mathrm{m,nT}} = R' + \Delta L_\mathrm{fs}
+   D_{2\mathrm{m,n}T} = R' + \Delta L_\mathrm{fs}
    + 10 \log_{10}\!\left( \frac{V}{6 T_0 S} \right)
    \qquad T_0 = 0.5~\text{s}
 

@@ -41,10 +41,10 @@ model. The PE is anchored against the exact spherical-wave ground effect
 (gradient zero), which it reproduces to a few tenths of a dB on the default
 grid (finer `height_step` converges it further).
 
-The ground impedance is taken in the $e^{-i \omega t}$ convention of
+The ground impedance is taken in the $\mathrm{e}^{-i \omega t}$ convention of
 Salomons (a passive ground has $\operatorname{Im}(Z) > 0$), shared with
 [`phonometry.environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/). The porous models of
-`phonometry.materials` work in the opposite $e^{+j \omega t}$
+`phonometry.materials` work in the opposite $\mathrm{e}^{+j \omega t}$
 convention ($\operatorname{Im}(Z) < 0$), so an impedance derived from
 them (`flow_resistivity=` or a
 `PorousMediumResult`) is conjugated internally before entering the PE ground
@@ -99,9 +99,9 @@ normalized complex value/array, or a
 [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult)) or derived from an
 effective `flow_resistivity` (Pa s/m2) via the `model` porous model.
 Exactly one of the two must be given. A plain `impedance` value is taken
-in the $e^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$
+in the $\mathrm{e}^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$
 for a passive ground); a `PorousMediumResult` or `flow_resistivity` is
-conjugated internally from the materials' $e^{+j \omega t}$
+conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$
 convention.
 
 **Parameters**

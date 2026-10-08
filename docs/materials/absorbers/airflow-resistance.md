@@ -71,7 +71,7 @@ ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop_pa, "D",
         label="Evaluation at 0.5 mm/s")
 ax.set_xlabel("Linear airflow velocity u [mm/s]")
 ax.set_ylabel("Pressure drop dp [Pa]")
-ax.set_title(f"R_s = {r.specific_resistance:.0f} Pa·s/m")
+ax.set_title(rf"$R_\mathrm{{s}}$ = {r.specific_resistance:.0f} Pa·s/m")
 ax.legend()
 plt.show()
 ```

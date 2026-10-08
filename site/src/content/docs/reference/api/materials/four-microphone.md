@@ -19,8 +19,8 @@ Transmission loss (Eq. (26)), hard-backed reflection/absorption
 standard one subject: everything here exists to fill the matrix or to
 interpret it.
 
-Time convention $e^{+j\omega t}$ with the forward wave carried by
-$e^{-jkx}$ (Eq. (21)); air properties from Clause 8.2/8.3, Eqs. (4)/(5),
+Time convention $\mathrm{e}^{+j\omega t}$ with the forward wave carried by
+$\mathrm{e}^{-jkx}$ (Eq. (21)); air properties from Clause 8.2/8.3, Eqs. (4)/(5),
 use temperature in **degrees Celsius**. Both differ from the ISO 10534-2
 ansatz of [`impedance_tube`](/phonometry/reference/api/materials/impedance-tube/), whose
 wavenumber is $k_0 = k_0' - jk_0''$ and whose air properties take
@@ -109,11 +109,11 @@ face_quantities(
 Face pressures and particle velocities (ASTM E2611-19, Eq. (21)).
 
 $$
-p_0 = A + B, \qquad p_d = C e^{-jkd} + D e^{+jkd}
+p_0 = A + B, \qquad p_d = C \mathrm{e}^{-jkd} + D \mathrm{e}^{+jkd}
 $$
 
 $$
-u_0 = \frac{A - B}{\rho c}, \qquad u_d = \frac{C e^{-jkd} - D e^{+jkd}}{\rho c}
+u_0 = \frac{A - B}{\rho c}, \qquad u_d = \frac{C \mathrm{e}^{-jkd} - D \mathrm{e}^{+jkd}}{\rho c}
 $$
 
 **Parameters**
@@ -483,14 +483,14 @@ Normal-incidence transmission loss in dB (ASTM E2611-19, Eq. (26)).
 With
 
 $$
-t = \frac{2 e^{jkd}} {T_{11} + T_{12}/(\rho c) + \rho c \, T_{21} + T_{22}} \tag{Eq. 25}
+t = \frac{2 \mathrm{e}^{jkd}} {T_{11} + T_{12}/(\rho c) + \rho c \, T_{21} + T_{22}} \tag{Eq. 25}
 $$
 
 $$
 TL = 20 \log_{10} \left| \frac{1}{t} \right| = 20 \log_{10} \frac{\lvert T_{11} + T_{12}/(\rho c) + \rho c \, T_{21} + T_{22} \rvert}{2} \tag{Eq. 26}
 $$
 
-(the $e^{jkd}$ factor has unit magnitude for
+(the $\mathrm{e}^{jkd}$ factor has unit magnitude for
 a real wavenumber).
 
 **Parameters**
@@ -525,25 +525,25 @@ Decompose the wave field into `(A, B, C, D)` (ASTM E2611-19, Eqs. (17)-(20)).
 The exponents are implemented exactly as printed:
 
 $$
-A = \frac{j \left( H_1 e^{-jkl_1} - H_2 e^{-jk(l_1+s_1)} \right)} {2 \sin(k s_1)}
+A = \frac{j \left( H_1 \mathrm{e}^{-jkl_1} - H_2 \mathrm{e}^{-jk(l_1+s_1)} \right)} {2 \sin(k s_1)}
 $$
 
 $$
-B = \frac{j \left( H_2 e^{+jk(l_1+s_1)} - H_1 e^{+jkl_1} \right)} {2 \sin(k s_1)}
+B = \frac{j \left( H_2 \mathrm{e}^{+jk(l_1+s_1)} - H_1 \mathrm{e}^{+jkl_1} \right)} {2 \sin(k s_1)}
 $$
 
 $$
-C = \frac{j \left( H_3 e^{+jk(l_2+s_2)} - H_4 e^{+jkl_2} \right)} {2 \sin(k s_2)}
+C = \frac{j \left( H_3 \mathrm{e}^{+jk(l_2+s_2)} - H_4 \mathrm{e}^{+jkl_2} \right)} {2 \sin(k s_2)}
 $$
 
 $$
-D = \frac{j \left( H_4 e^{-jkl_2} - H_3 e^{-jk(l_2+s_2)} \right)} {2 \sin(k s_2)}
+D = \frac{j \left( H_4 \mathrm{e}^{-jkl_2} - H_3 \mathrm{e}^{-jk(l_2+s_2)} \right)} {2 \sin(k s_2)}
 $$
 
 `A`/`B` are the forward/backward complex amplitudes on the upstream
 (source) side and `C`/`D` those on the downstream side, all referenced
-to the front face $x = 0$. With the $e^{+j\omega t}$ /
-forward-$e^{-jkx}$
+to the front face $x = 0$. With the $\mathrm{e}^{+j\omega t}$ /
+forward-$\mathrm{e}^{-jkx}$
 convention these exponents correspond to the microphone whose transfer
 function is `H2` sitting nearest the front face at distance `l1` (and
 `H1` at $l_1 + s_1$), and to `H3` nearest the downstream side at

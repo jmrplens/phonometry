@@ -250,8 +250,8 @@ puro $\alpha$ en decibelios por metro:
 
 $$
 \alpha = 8{,}686\ f^2 \Big[ 1{,}84\times10^{-11} \big(p_\mathrm{a}/p_\mathrm{r}\big)^{-1} \big(T/T_0\big)^{1/2}
-       + \big(T/T_0\big)^{-5/2} \big( 0{,}01275\ \tfrac{e^{-2239{,}1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
-       + 0{,}1068\ \tfrac{e^{-3352{,}0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
+       + \big(T/T_0\big)^{-5/2} \big( 0{,}01275\ \tfrac{\mathrm{e}^{-2239{,}1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
+       + 0{,}1068\ \tfrac{\mathrm{e}^{-3352{,}0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
 $$
 
 con las frecuencias de relajación del oxígeno y el nitrógeno $f_\mathrm{rO}$, $f_\mathrm{rN}$
@@ -431,14 +431,14 @@ típica combinada es $u^2 = \sum c_i^2 u_i^2$ (C.1) y la incertidumbre expandida
 $U = k\ u$ con $k = 1{,}65$ para un intervalo **unilateral** al 95 %
 (apartado 14), de modo que el límite superior declarado es $L_\mathrm{EX,8h} + U$. Los
 métodos por tareas y por función difieren de forma instructiva: la incertidumbre
-de muestreo del ruido de la tarea $u_{1a}$ divide la suma de desviaciones al
+de muestreo del ruido de la tarea $u_{1\mathrm{a}}$ divide la suma de desviaciones al
 cuadrado entre $I(I-1)$ (el error típico de la media, Ec. C.6), mientras que la
 incertidumbre de muestreo por función/jornada completa $u_1$ es la desviación
 típica muestral simple con denominador $N-1$ (Ec. C.12), así que la misma
 dispersión contribuye más en el método por función (menos muestras, más gruesas).
 El balance de la tarea (Ec. C.3) añade los coeficientes de sensibilidad
-$c_{1a}$ (Ec. C.4) y $c_{1b}$ (Ec. C.5) y una incertidumbre opcional de la
-duración de la tarea $u_{1b}$ (Ec. C.7); el balance por función/jornada
+$c_{1\mathrm{a}}$ (Ec. C.4) y $c_{1\mathrm{b}}$ (Ec. C.5) y una incertidumbre opcional de la
+duración de la tarea $u_{1\mathrm{b}}$ (Ec. C.7); el balance por función/jornada
 completa (Ec. C.9) lee $c_1 u_1$ de la Tabla C.4 en función de $(N, u_1)$ y suma
 en cuadratura la incertidumbre del instrumento $u_2$ (Tabla C.5) y la
 incertidumbre de posición del micrófono $u_3 = 1{,}0$ dB. Los niveles de pico
@@ -495,9 +495,9 @@ $L_W = \bar{L}_p + 10 \log_{10}(S/S_0)$: la presión cuadrática media promediad
 sobre una superficie envolvente de área $S$, multiplicada por $S$, es la
 potencia radiada. Dos correcciones restablecen esa idealización. El **ruido de
 fondo** no correlacionado suma su valor cuadrático medio al de la fuente, así
-que con el margen $\Delta L_p = L_{ST} - L_{bg}$ el nivel solo de la fuente se
+que con el margen $\Delta L_p = L_\mathrm{ST} - L_\mathrm{bg}$ el nivel solo de la fuente se
 recupera restando $K_1 = -10 \log_{10}(1 - 10^{-\Delta L_p/10})$ (de
-$p_{src}^2 = p_{ST}^2 (1 - 10^{-\Delta L_p/10})$). El **campo reverberante** de
+$p_\mathrm{src}^2 = p_\mathrm{ST}^2 (1 - 10^{-\Delta L_p/10})$). El **campo reverberante** de
 una sala no anecoica añade una densidad de energía casi uniforme $4P/(A c)$ al
 directo $P/(S c)$, de modo que el nivel superficial supera el valor de campo
 libre en su cociente, $K_2 = 10 \log_{10}(1 + 4 S/A)$, con $A$ el área de
@@ -538,7 +538,7 @@ que el grado de ingeniería usa 10 posiciones clave sobre un plano reflectante
 reducido. `measurement_positions()` las devuelve escaladas al radio elegido, y
 `plot_microphone_positions()` dibuja el conjunto antes de medir nada.
 ISO 3746 (inspección) comparte las matemáticas con criterios más
-laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$.
+laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$.
 
 ### Grado de precisión en cámaras anecoicas (ISO 3745)
 
@@ -566,7 +566,7 @@ añade cuando la dispersión del SPL por banda supera $N_\mathrm{M}/2$, apartado
 y las mismas posiciones dan el índice de directividad
 $DI_i = L_{pi} - \bar{L}_p$ (Ec. 21). El ejemplo de incertidumbre del
 apartado 10.5, $U = 2\sqrt{0{,}5^2 + 2{,}0^2} = 4{,}12$ dB, se reproduce, junto
-con los valores de $\sigma_{\mathrm{R}0}$ por banda de las Tablas 2/3.
+con los valores de $\sigma_{R0}$ por banda de las Tablas 2/3.
 
 ### Cámara reverberante (ISO 3741)
 
@@ -656,7 +656,7 @@ la Tabla 2.
 Esos mismos dos indicadores llevan tres juegos de nombres a lo largo de la
 familia ISO 9614: la ISO 9614-1 los llama $F_2$ (presión-intensidad), $F_3$
 (potencia parcial negativa) y $F_4$ (no uniformidad del campo); la Parte 2
-escribe $F_{pI}$ y $F_{+/-}$; la Parte 3 escribe $F_{pIn}$ y $F_\mathrm{S}$. Cada
+escribe $F_{pI}$ y $F_{+/-}$; la Parte 3 escribe $F_{pI_\mathrm{n}}$ y $F_\mathrm{S}$. Cada
 subsección de aquí usa los símbolos de su propia parte. La nomenclatura de $F_2$
 a $F_4$ es la que se emplea en [Intensidad
 acústica](/phonometry/es/reference/theory/signal-analysis/#intensidad-acústica-iec-61043).
@@ -679,13 +679,13 @@ ISO 9614-3:2002 eleva el método de barrido al grado de precisión con una
 maquinaria de indicadores más estricta. Las potencias parciales
 $P_i = I_{\mathrm{n},i} S_i$ (Ec. 5) se suman como antes, pero la validez descansa
 ahora en los indicadores presión-intensidad con y sin signo
-$F_{pIn} = \bar{L}_p - L_{I\mathrm{n}}$ (Ecs. B.3/B.6, los F2/F3 de ISO 9614-1) y en
+$F_{pI_\mathrm{n}} = \bar{L}_p - L_{I\mathrm{n}}$ (Ecs. B.3/B.6, los F2/F3 de ISO 9614-1) y en
 la no uniformidad normalizada de la intensidad $F_\mathrm{S}$ (Ec. B.8), a través de
 cinco criterios de aceptación (Anexo C): repetibilidad del barrido
 $|L_{I\mathrm{n}}(1) - L_{I\mathrm{n}}(2)| \le s/2$ (C.1), capacidad dinámica
-$L_\mathrm{d} = \delta_{pI0} - K \ge F_{pIn}(\text{con signo})$ con el factor de error
+$L_\mathrm{d} = \delta_{pI0} - K \ge F_{pI_\mathrm{n}}(\text{con signo})$ con el factor de error
 de sesgo de precisión $K = 10$ dB (C.2),
-$F_{pIn}(\text{con signo}) - F_{pIn}(\text{sin signo}) \le 3$ dB (C.3),
+$F_{pI_\mathrm{n}}(\text{con signo}) - F_{pI_\mathrm{n}}(\text{sin signo}) \le 3$ dB (C.3),
 $F_\mathrm{S} \le 2$ (C.4) y la convergencia de densidad de barrido
 $0{,}83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1{,}2$ (C.5). La Ec. 10 normaliza el resultado a
 las condiciones meteorológicas de referencia,

@@ -212,6 +212,12 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "which Spanish spells the same (ReciprocityAirAttenuation.plot)",
     r"$\alpha_\mathrm{cl} + \alpha_\mathrm{rot}$": "the classical and rotational terms of "
     "IEC 61094-3 B.2 Step 4; a subscript follows its source (ReciprocityAirAttenuation.plot)",
+    r"$f_\mathrm{p,turb}$": "the turbulent peak frequency of IEC 60534-8-4, whose list of "
+    "subscripts prints turb upright as an abbreviation; a subscript follows its source "
+    "(valve_cavitation_noise)",
+    r"$f_\mathrm{p,cav}$": "the cavitation peak frequency of IEC 60534-8-4, whose list of "
+    "subscripts prints cav upright as an abbreviation; a subscript follows its source "
+    "(valve_cavitation_noise)",
 }
 
 # A run of at least three letters, in any alphabet: shorter runs are unit and

@@ -7,7 +7,7 @@ source with a **noise hemisphere**: one-third-octave-band sound pressure levels
 on a spherical grid of azimuth $\varphi$ and polar angle $\theta$, measured at
 a fixed **60 m** reference distance under ICAO reference atmospheric
 conditions. Placing that source at a receiver adds the propagation adjustment
-$\Delta L_p = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$ ($+\ \Delta L_\mathrm{d}$).
+$\Delta L_\mathrm{p} = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$ ($+\ \Delta L_\mathrm{d}$).
 
 This page covers the source and propagation primitives, the flight-condition
 interpolation across a hemisphere database, the hover/idle source derivation

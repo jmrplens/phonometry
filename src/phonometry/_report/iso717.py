@@ -90,7 +90,7 @@ _SYMBOL_RE = re.compile(r"^([A-Z]'?)([A-Za-z0-9,]+)$")
 
 
 def _symbol_markup(symbol: str) -> str:
-    """Reportlab markup of a plain-text quantity symbol (``DnT,w`` -> ``D<sub>nT,w</sub>``).
+    """Reportlab markup of a plain-text quantity symbol (``DnT,w`` -> ``D<sub>n<i>T</i>,w</sub>``).
 
     :raises ValueError: If ``symbol`` is not a leading (optionally primed)
         capital followed by its subscript, the shape of every ISO 717-1
@@ -113,7 +113,7 @@ def _band_symbol_markup(symbol: str) -> str:
 
     Strips the trailing weighted-``w`` marker (and its comma) so the value
     table is headed by the band quantity the curve actually holds
-    (``DnT,w`` -> ``D<sub>nT</sub>``, ``Rw`` -> ``R``).
+    (``DnT,w`` -> ``D<sub>n<i>T</i></sub>``, ``Rw`` -> ``R``).
     """
     band = symbol
     if band.endswith(",w"):

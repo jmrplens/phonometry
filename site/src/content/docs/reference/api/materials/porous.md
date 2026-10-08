@@ -7,8 +7,8 @@ sidebar:
 
 Porous-material models and resonant sheet impedances.
 
-Two complementary building blocks, all in the $e^{+j \omega t}$
-time convention with the forward wave carried by $e^{-j k x}$ (so a
+Two complementary building blocks, all in the $\mathrm{e}^{+j \omega t}$
+time convention with the forward wave carried by $\mathrm{e}^{-j k x}$ (so a
 passive medium has $\operatorname{Im}(k) < 0$):
 
 * **Equivalent-fluid models** for the characteristic impedance `Zc` and the
@@ -807,7 +807,7 @@ Equivalent-fluid characterisation of a porous material.
 All arrays share the shape of `frequencies`. `characteristic_impedance`
 is the complex characteristic impedance `Zc` in Pa s/m as seen from the
 material surface, `wavenumber` the complex wavenumber `k` in rad/m
-($\operatorname{Im}(k) < 0$ for the $e^{+j \omega t}$
+($\operatorname{Im}(k) < 0$ for the $\mathrm{e}^{+j \omega t}$
 convention), `effective_density` $= Z_\mathrm{c} k / \omega$ and
 `bulk_modulus` $= Z_\mathrm{c} \omega / k$ the surface-normalised
 equivalent-fluid density and bulk modulus, so that

@@ -220,7 +220,17 @@ def _d_rotorcraft_certification(s: SVG, th: Theme) -> None:
     s.ground(gy, 40.0, 560.0)
     s.line(70.0, hy, 530.0, hy, th.muted, 1.3, dash="8,6")
     s.arrow(530.0, hy, 556.0, hy, th.fg, 2.0)
-    s.text(72.0, 112.0, "level flight at 0.9 $V_H$", 14, th.fg, anchor="start")
+    # Annex 16 prints its speeds in roman type, V_H and V_NE (Chapter 8,
+    # 8.3.1, PDF page 64; Part I, 1.1, PDF pages 23 and 24).
+    s.text(
+        72.0,
+        112.0,
+        "level flight at 0.9 $V_H$",
+        14,
+        th.fg,
+        anchor="start",
+        upright=("V", "V_H"),
+    )
 
     # Helicopter silhouette (flying to the right).
     s.line(240.0, 126.0, 360.0, 126.0, th.fg, 3.0)  # main rotor
@@ -274,6 +284,7 @@ def _d_rotorcraft_certification(s: SVG, th: Theme) -> None:
         14,
         th.fg,
         anchor="start",
+        upright=("V", "V_H", "V_NE"),
     )
     s.text(
         80.0,
@@ -649,6 +660,7 @@ def _d_anp_records(s: SVG, th: Theme) -> None:
         11,
         th.muted,
         anchor="end",
+        upright=("Δ_I",),
     )
 
     # Keys down into the tables.
@@ -908,7 +920,7 @@ def _d_anp_records(s: SVG, th: Theme) -> None:
     by, bh = 674.0, 96.0
     s.rect(36, by, 220, bh, th.panel, th.primary, rx=6, sw=1.8)
     s.text(146, by + 20, "NPD lookup", 12, th.primary, bold=True)
-    s.text(146, by + 42, "$L_{E∞}$(20 159 lb, 612 m)", 12, th.fg)
+    s.text(146, by + 42, "$L_{E∞}$(20 159 lb, 612 m)", 12, th.fg, sloped=("L_E",))
     s.text(146, by + 62, "= 89.3 dB", 13, th.fg, bold=True)
     s.text(146, by + 84, "+0.07 dB impedance (Eq. 4-6)", 11, th.muted)
     s.arrow(258, by + bh / 2, 276, by + bh / 2, th.muted, 1.6)
@@ -927,14 +939,31 @@ def _d_anp_records(s: SVG, th: Theme) -> None:
         "$Δ_V$ −0.30, $Δ_{I}(φ)$ +0.20, $Λ(β, ℓ)$ 0.32, $Δ_F$ −0.97 dB",
         12,
         th.fg,
+        upright=("Δ_I",),
     )
     s.text(443, by + 62, "$β = φ$ = 35.2°, $ℓ$ = 500 m, Wing mounting", 11, th.muted)
-    s.text(443, by + 86, "$L_{E,seg}$ = 88.0 dB", 13, th.accent, bold=True)
+    s.text(
+        443,
+        by + 86,
+        "$L_{E,seg}$ = 88.0 dB",
+        13,
+        th.accent,
+        bold=True,
+        sloped=("L_E",),
+    )
     s.arrow(610, by + bh / 2, 628, by + bh / 2, th.muted, 1.6)
     s.rect(630, by, 238, bh, th.panel, th.secondary, rx=6, sw=1.8)
     s.text(749, by + 20, "All ten profile segments", 12, th.secondary, bold=True)
     s.text(749, by + 42, "58.4, 79.5, 88.0, 78.2, 65.6, …", 11, th.fg)
-    s.text(749, by + 64, "$L_E$ = 89.0 dB at O", 14, th.secondary, bold=True)
+    s.text(
+        749,
+        by + 64,
+        "$L_E$ = 89.0 dB at O",
+        14,
+        th.secondary,
+        bold=True,
+        sloped=("L_E",),
+    )
     s.text(749, by + 86, "over an x, y grid: the contour", 11, th.muted)
 
     fy = 786.0
@@ -945,6 +974,8 @@ def _d_anp_records(s: SVG, th: Theme) -> None:
         "$L_{E,seg} = L_{E∞}(P, d) + Δ_V + Δ_{I}(φ) − Λ(β, ℓ) + Δ_F$   (Eq. 4-8b)",
         14,
         th.fg,
+        upright=("Δ_I",),
+        sloped=("L_E",),
     )
     s.text(
         452,
@@ -953,6 +984,7 @@ def _d_anp_records(s: SVG, th: Theme) -> None:
         "$Δ_{impedance} = 10 lg(ρ·c/409.81)$ (Eq. 4-6)",
         13,
         th.fg,
+        sloped=("L_E",),
     )
 
 

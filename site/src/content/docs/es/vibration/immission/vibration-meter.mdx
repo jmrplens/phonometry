@@ -59,8 +59,8 @@ etapas, cada una impresa como una función de transferencia exacta o como un
 promediado exacto.
 
 La **limitación de banda** (5.2.3.2, fórmula (3)) son dos parejas de
-Butterworth: un paso alto de dos polos en `0,8 f_u` y un paso bajo de dos polos
-en `f_o / 0,8`. El rango de trabajo es de 1 Hz a 80 Hz para edificios, así que
+Butterworth: un paso alto de dos polos en $0{,}8\,f_\mathrm{u}$ y un paso bajo de dos polos
+en $f_\mathrm{o}/0{,}8$. El rango de trabajo es de 1 Hz a 80 Hz para edificios, así que
 esas esquinas caen en 0,8 Hz y 100 Hz. Junto a una vía férrea el rango es de
 4 Hz a 315 Hz, que es donde trabaja la
 [DIN 45672](/phonometry/es/vibration/immission/railway-vibration/), y también
@@ -120,15 +120,18 @@ print(f"las dos esquinas de la limitación de banda: {corners.round(4)}")  # [0.
 
 La señal KB se promedia, y el promediado es el que un sonómetro llama Fast: un
 valor eficaz móvil con `τ = 0,125 s` (fórmula (1)). Su valor en cada instante es
-la **intensidad de vibración ponderada** `KB_F(t)`, y el 3.10.1.2 dice por qué
+la **intensidad de vibración ponderada** $KB_\mathrm{F}(t)$, y el 3.10.1.2 dice por qué
 esa constante de tiempo: la DIN 4150-2 juzga con ella el efecto sobre las
 personas, y la indicación fluctuante que da por debajo de 5 Hz se tuvo en cuenta
-al escribir esos criterios de valoración.
+al escribir esos criterios de valoración. La lista de símbolos de la
+DIN 45669-1 (capítulo 4) imprime KB en redonda; las fórmulas, las figuras y los
+diagramas de esta documentación lo escriben en cursiva, como lo imprime la
+DIN 4150-2.
 
 De esa señal salen los tres números con los que se informa una medida. El máximo
-`KB_Fmax` sobre la duración de promediado. El máximo dentro de cada **intervalo
+$KB_\mathrm{Fmax}$ sobre la duración de promediado. El máximo dentro de cada **intervalo
 de 30 s** (*Takt*), que fija la DIN 4150-2. Y el eficaz de esos máximos por
-intervalo, `KB_FTm`, de la fórmula (2), que lleva dentro dos reglas fáciles de
+intervalo, $KB_\mathrm{FTm}$, de la fórmula (2), que lleva dentro dos reglas fáciles de
 pasar por alto:
 
 - un máximo por intervalo igual o menor que **0,1** entra en la suma como cero,
@@ -223,7 +226,7 @@ print(vibration.KB_REFERENCE_INDICATIONS)
 # {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 0.68, 'kbf_takt_rms': 0.68}
 ```
 
-Que `KB_Fmax` esté por encima de `KB_F` en todas las filas no es una ganancia:
+Que $KB_\mathrm{Fmax}$ esté por encima de $KB_\mathrm{F}$ en todas las filas no es una ganancia:
 es la **ondulación** del valor eficaz móvil de una sinusoide, de la que trata el anexo
 B, y es lo que hace que estos valores merezcan la pena como oráculo. En ningún
 sitio hay una forma cerrada para la pareja, así que una comprobación que los
@@ -236,7 +239,7 @@ La tolerancia no es sobre la respuesta sino sobre su **forma**. La fórmula (7)
 divide la respuesta medida por la de diseño, cada una normalizada en la
 frecuencia de referencia de 16 Hz, así que un error de ganancia plano es asunto
 de calibración y no de conformidad. Lo que queda se juzga banda a banda: 10 %
-desde `1,25 f_u` hasta `0,8 f_o`, 20 % hasta `0,5 f_u` y `2 f_o`, y por debajo
+desde $1{,}25\,f_\mathrm{u}$ hasta $0{,}8\,f_\mathrm{o}$, 20 % hasta $0{,}5\,f_\mathrm{u}$ y $2\,f_\mathrm{o}$, y por debajo
 de eso la tabla 2 deja de acotar la respuesta por abajo.
 
 ```python
@@ -286,7 +289,7 @@ Cada clase de edificio de la tabla 1 de la DIN 4150-3 recibe un **filtro de
 ponderación** cuyo módulo objetivo es la curva de valores de referencia de esa
 clase invertida y normalizada al valor que mantiene de 1 Hz a 10 Hz. Se filtra
 la velocidad con él y el pico de lo que sale, la **velocidad de valoración**
-`v_Bn`, se compara con un único número que ya no depende de la frecuencia: 20, 5
+$v_{\mathrm{B}n}$, se compara con un único número que ya no depende de la frecuencia: 20, 5
 o 3 mm/s (tabla E.2).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/assessment_weighting.svg" alt="Dos paneles uno al lado del otro sobre ejes de frecuencia logarítmicos de 1 a 315 hercios. El panel izquierdo es lo que pide la tabla 1 de la DIN 4150-3: tres curvas de valores de referencia en milímetros por segundo, planas hasta 10 hercios en 20, 5 y 3, subiendo por dos tramos rectos hasta 50 y 100 hercios y planas por encima en 50, 20 y 10. El panel derecho es la ponderación que quita la frecuencia: esas mismas tres curvas invertidas y normalizadas a su valor de baja frecuencia, planas de 1 a 10 hercios y cayendo hasta 0,4, 0,25 y 0,3, con una banda verde pálida de más menos cinco por ciento dibujada alrededor de la curva de viviendas, que es la tolerancia que la tabla E.1 permite a un filtro realizado" width="96%" />
@@ -464,7 +467,7 @@ módulos de las fórmulas (5) y (6) como sus valores absolutos.
 </ScopeClaim>
 
 <ScopeClaim status="covered">
-La **intensidad de vibración ponderada** `KB_F(t)` de la fórmula (1), su máximo,
+La **intensidad de vibración ponderada** $KB_\mathrm{F}(t)$ de la fórmula (1), su máximo,
 los **máximos por intervalo** de los tramos de 30 s del 5.1.6.4 y el **eficaz de
 los máximos por intervalo** de la fórmula (2), con sus dos reglas de recuento
 incluidas, y los límites de detección del 5.2.2.

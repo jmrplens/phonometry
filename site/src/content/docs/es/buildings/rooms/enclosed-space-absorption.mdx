@@ -55,10 +55,10 @@ hace este cálculo. El área de absorción equivalente $A$ no es solo un fin en 
 misma: es la magnitud que convierte una predicción de aislamiento en una
 predicción valorada. Una predicción produce una diferencia de niveles $D$, y las
 valoraciones solo quedan definidas una vez que se conoce la absorción del recinto
-receptor: $D_\mathrm{nT} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$. Mientras que la
+receptor: $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$. Mientras que la
 EN 12354-5 necesita esa misma $A$ para convertir la potencia acústica de una
 instalación de servicio en un nivel de sala. La dirección del error importa:
-sobrestimar la absorción del recinto receptor *favorece* el $D_\mathrm{nT}$ previsto, de
+sobrestimar la absorción del recinto receptor *favorece* el $D_{\mathrm{n}T}$ previsto, de
 modo que los mismos datos optimistas de $\alpha_\mathrm{s}$ que acortan el tiempo de
 reverberación previsto inflan también la valoración de aislamiento prevista. Por
 eso la norma insiste en que se declare en el informe la procedencia de cada
@@ -431,7 +431,7 @@ for name in profiles:
         [(1000.0, soft)], 2000.0, air_condition=name)
     left.loglog(bands, humid.absorption_area - still.absorption_area,
                 marker="o", label=name)
-left.set_ylabel(r"$A_{air}$ [m$^2$]")
+left.set_ylabel(r"$A_\mathrm{air}$ [m$^2$]")
 left.legend(fontsize=8)
 
 for volume, area in ((60.0, 94.0), (2000.0, 1000.0)):
@@ -621,7 +621,7 @@ EN 12354-6 da una estimación de campo difuso, y un objetivo pasado por
   (ISO 11654), la valoración que el §3 prohíbe como entrada.
 - [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
   el miembro de la familia que consume la $A$ que aquí se calcula, a través de
-  $D_\mathrm{nT} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$.
+  $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$.
 - [Informe de conformidad](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
   los tres casos del Anexo E frente a los que se comprueban estas
   implementaciones.

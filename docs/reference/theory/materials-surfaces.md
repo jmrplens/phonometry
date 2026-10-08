@@ -159,7 +159,7 @@ at the 0.5 mm/s reference velocity, which is why the reference velocity has to
 be stated with any resistivity that is quoted.*
 
 $$
-R = \kappa'\ \frac{p_\mathrm{s}}{2 \pi f V}\ \frac{h_\mathrm{t}}{h_\mathrm{s}}\ 10^{(L_{ps} - L_{p\mathrm{t}})/20}
+R = \kappa'\ \frac{p_\mathrm{s}}{2 \pi f V}\ \frac{h_\mathrm{t}}{h_\mathrm{s}}\ 10^{(L_{p\mathrm{s}} - L_{p\mathrm{t}})/20}
 $$
 
 Only a level *difference* enters, so the sound-level device needs no
@@ -181,11 +181,11 @@ $f > c_0/(20 s)$; clauses 4.2–4.5) carries only plane waves, so the surface
 reflection factor of a sample is fully observable. ISO 10534-2
 (transfer-function method) compares the measured two-microphone transfer
 function $H_{12}$ with the analytic incident and reflected ones
-$H_\mathrm{I} = e^{-j k_0 s}$, $H_\mathrm{R} = e^{+j k_0 s}$ (Annex D) to give (clause 7,
+$H_\mathrm{I} = \mathrm{e}^{-j k_0 s}$, $H_\mathrm{R} = \mathrm{e}^{+j k_0 s}$ (Annex D) to give (clause 7,
 Eq. 17):
 
 $$
-r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\ e^{2 j k_0 x_1}, \qquad
+r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\ \mathrm{e}^{2 j k_0 x_1}, \qquad
 \alpha = 1 - |r|^2, \qquad \frac{Z}{\rho c_0} = \frac{1 + r}{1 - r},
 $$
 

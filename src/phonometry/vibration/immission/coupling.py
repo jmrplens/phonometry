@@ -236,10 +236,10 @@ def check_loose_mounting(
 def instrument_confidence_limit_percent(
     quantity: str, accuracy_class: int = 1
 ) -> float:
-    """The confidence limit of the meter's own error on one quantity (Table 3).
+    r"""The confidence limit of the meter's own error on one quantity (Table 3).
 
     :param quantity: ``"rms"`` for a value based on an r.m.s., such as
-        ``KB_F`` or ``KB_FTm``, or ``"peak"`` for a peak value.
+        :math:`KB_\mathrm{F}` or :math:`KB_\mathrm{FTm}`, or ``"peak"`` for a peak value.
     :param accuracy_class: 1 (default) or 2, the classes of the 1995 edition
         of DIN 45669-1. The 2010 edition grades every meter by one set of
         tolerances, so class 1 is the column that applies to a meter of today.

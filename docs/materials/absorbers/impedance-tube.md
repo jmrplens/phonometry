@@ -139,11 +139,11 @@ level_diff = np.linspace(0.5, 40.0, 300)    # L_max - L_min [dB]
 swr = materials.standing_wave_ratio_from_level(level_diff)
 fig, ax = plt.subplots()
 ax.plot(level_diff, materials.standing_wave_absorption(swr),
-        label="Absorption coefficient alpha")
+        label=r"Absorption coefficient $\alpha$")
 ax.plot(level_diff, materials.standing_wave_reflection_magnitude(swr), "--",
         label="Reflection factor magnitude |r|")
-ax.set_xlabel("Standing-wave level difference L_max - L_min [dB]")
-ax.set_ylabel("alpha, |r|")
+ax.set_xlabel(r"Standing-wave level difference $L_\mathrm{max} - L_\mathrm{min}$ [dB]")
+ax.set_ylabel(r"$\alpha$, $|r|$")
 ax.legend()
 plt.show()
 ```
@@ -173,10 +173,10 @@ transfer-function tubes disagree.
 The closed forms above use only the level *difference*; the *positions* of
 the minima carry the rest of the information. With $x$ measured from the
 sample face towards the source, the interior field of a wave with reflection
-factor $r = |r|\,e^{j\Phi}$ is
+factor $r = |r|\,\mathrm{e}^{j\Phi}$ is
 
 $$
-p(x) = A\left(e^{jkx} + |r|\,e^{j\Phi}e^{-jkx}\right), \qquad
+p(x) = A\left(\mathrm{e}^{jkx} + |r|\,\mathrm{e}^{j\Phi}\mathrm{e}^{-jkx}\right), \qquad
 |p|^2 = A^2\left(1 + |r|^2 + 2|r|\cos(2kx - \Phi)\right),
 $$
 
@@ -228,11 +228,11 @@ complex transfer function $H_{12}$; from it the reflection factor at the sample
 face, the absorption and the normalised surface impedance follow (Eqs. (17)–(19)):
 
 $$
-r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\,e^{\,2 j k_0 x_1}, \qquad
+r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\,\mathrm{e}^{\,2 j k_0 x_1}, \qquad
 \alpha = 1 - |r|^2, \qquad \frac{Z}{\rho c_0} = \frac{1+r}{1-r},
 $$
 
-with $H_\mathrm{I} = e^{-j k_0 s}$, $H_\mathrm{R} = e^{+j k_0 s}$, microphone spacing $s$ and $x_1$
+with $H_\mathrm{I} = \mathrm{e}^{-j k_0 s}$, $H_\mathrm{R} = \mathrm{e}^{+j k_0 s}$, microphone spacing $s$ and $x_1$
 the distance from the sample to the farther microphone.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_standing_wave_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_standing_wave_tube.gif" alt="Animation: incident and reflected waves sum into a standing wave inside the impedance tube; a rigid termination gives deep envelope nodes, a porous sample gives shallow ones, sampled by the two wall microphones" width="640" height="360" loading="lazy"></picture>
@@ -508,12 +508,12 @@ plt.show()
 
 # By hand, from the matrix methods:
 fig, ax = plt.subplots()
-ax.plot(f, tm.transmission_loss(407.0), label="Transmission loss TL_n")
+ax.plot(f, tm.transmission_loss(407.0), label=r"Transmission loss $\mathrm{TL}_\mathrm{n}$")
 twin = ax.twinx()
 twin.plot(f, tm.absorption_hard_backed(407.0), "--", color="gray",
           label="Hard-backed absorption alpha")
 ax.set_xlabel("Frequency [Hz]")
-ax.set_ylabel("Transmission loss TL_n [dB]")
+ax.set_ylabel(r"Transmission loss $\mathrm{TL}_\mathrm{n}$ [dB]")
 twin.set_ylabel("Hard-backed absorption alpha")
 plt.show()
 ```

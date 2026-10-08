@@ -50,15 +50,15 @@ Lo primero que hace la parte 2 es cortar el registro en tres tramos, y toda
 magnitud que viene después lleva el índice del tramo sobre el que se leyó
 (apartado 5).
 
-- **`T₁`**, unos cuatro segundos con la vibración más grande en el centro. Es
+- **$T_1$**, unos cuatro segundos con la vibración más grande en el centro. Es
   donde se leen los valores característicos del paso. Un tren corto o rápido
-  pide a menudo menos, y entonces `T₁` puede ser tan largo como `T₂` y no más.
-- **`T₂`**, el paso en sí: el tiempo que tarda un tren en cruzar una sección de
+  pide a menudo menos, y entonces $T_1$ puede ser tan largo como $T_2$ y no más.
+- **$T_2$**, el paso en sí: el tiempo que tarda un tren en cruzar una sección de
   medida imaginaria. La experiencia, dice la norma, pone su comienzo donde la
   amplitud llega a más o menos un cuarto de los máximos más frecuentes del paso,
   y su final donde vuelve a ese mismo valor. Eso es un juicio sobre el registro,
   así que la biblioteca lo pide en lugar de adivinarlo.
-- **`T₃`**, el suceso entero, con la llegada y la salida en silencio incluidas.
+- **$T_3$**, el suceso entero, con la llegada y la salida en silencio incluidas.
   Es el tramo sobre el que se forma la energía del paso.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_passage.svg" alt="Un eje de tiempo de treinta segundos con la velocidad de un paso de tren en milímetros por segundo. Una traza gris tenue es la propia velocidad, en silencio durante seis segundos, subiendo en tres segundos hasta una envolvente pulsante de unos 0,3 a 0,45 milímetros por segundo de pico que se mantiene hasta los 21 segundos y se apaga hacia los 24. Una curva azul encima es el valor eficaz móvil de la fórmula (1), que sube con la envolvente hasta unos 0,2 y late con los bogies. Una línea discontinua roja marca su máximo en 0,218 milímetros por segundo. Por encima del registro, tres flechas de doble punta marcan los tramos: T1 sobre cuatro segundos alrededor de los 15,5 segundos, T2 de 6,75 a 23,25 segundos, y T3 sobre los treinta enteros" width="96%" />
@@ -90,7 +90,7 @@ passage.plot(language="es")
 
 El registro de arriba es sintético y tiene la forma de uno real: la envolvente de
 un tren que llega y se va, un pulso por bogie, un tono de paso de traviesas a
-40 Hz, una resonancia de forjado a 63 Hz y algo de ruido de banda ancha. Su `T₂`
+40 Hz, una resonancia de forjado a 63 Hz y algo de ruido de banda ancha. Su $T_2$
 empieza donde la envolvente llega a un cuarto, 6,75 s, y acaba donde vuelve a
 él, 23,25 s:
 
@@ -125,7 +125,7 @@ print(f"KB_Fmax {passage.kbf_max:.3f}")                      # 0.216
 
 Antes de leer nada, el registro pasa por la limitación de banda del rango
 ferroviario de la DIN 45669-1, como pasa dentro del vibrómetro. Por eso un
-registro tiene que ser la velocidad que da el captador, y por eso `KB_Fmax`, el
+registro tiene que ser la velocidad que da el captador, y por eso $KB_\mathrm{Fmax}$, el
 número con el que la DIN 4150-2 juzga a las personas, sale de la misma llamada
 que lo demás.
 
@@ -186,15 +186,15 @@ print(f"seis en una hora: {six:.5f} mm/s")  # 0.02961 mm/s, raíz de 6 veces uno
 ```
 
 Ese es el número que comparar entre dos horas de tráfico, y es la razón de que
-`T₃` incluya los extremos en silencio: no llevan energía, y a la hora le da igual
+$T_3$ incluya los extremos en silencio: no llevan energía, y a la hora le da igual
 cuánto duró el registro.
 
 ## 4. Tercios de octava: los espectros de la figura 6
 
 El apartado 7.2 analiza el paso en tercios de octava desde 4 Hz hasta 315 Hz como
 mínimo, e imprime dos espectros como resultado: el **nivel de intervalo** sobre
-`T₂` (fórmula (6)), el valor eficaz móvil de cada banda promediado sobre el paso,
-y el **nivel máximo** sobre `T₃` (fórmula (7)), el mayor valor que alcanza el
+$T_2$ (fórmula (6)), el valor eficaz móvil de cada banda promediado sobre el paso,
+y el **nivel máximo** sobre $T_3$ (fórmula (7)), el mayor valor que alcanza el
 eficaz móvil de cada banda. La distancia entre los dos es la cresta de la banda:
 ancha donde la vibración llega a golpes, estrecha donde es constante.
 
@@ -281,7 +281,7 @@ líneas lleva cada banda: 1 a 4 Hz, 6 a 31,5 Hz, 58 a 315 Hz. La norma da los
 recuentos «por comparabilidad» y no los deduce. Son lo que cabe en un sexto de
 octava a cada lado del centro nominal, en todas partes salvo a 10 Hz y 12,5 Hz,
 donde esos bordes darían una línea y tres y la tabla da dos y dos. La tabla dice
-cuántas líneas y no cuáles, así que la biblioteca declara su elección: las `Kₙ`
+cuántas líneas y no cuáles, así que la biblioteca declara su elección: las $K_n$
 líneas más cercanas al centro nominal en un eje logarítmico, que son justo las
 que caen dentro de los bordes nominales allí donde el recuento es el que dan los
 bordes, y 10 y 11,25 Hz, luego 12,5 y 13,75 Hz, donde no lo es. Es una regla de
@@ -370,8 +370,8 @@ Dos de las fórmulas del apartado están mal impresas, y la [página de
 erratas](/phonometry/es/reference/errata/) tiene la lectura. La fórmula (1)
 escribe la velocidad de compresión primero como `√(E/ρ)`, la velocidad de una
 onda en una barra delgada, y luego como `√(G(1−ν)/(ρ(1−2ν)))`, a la que le falta
-un factor 2. La fórmula (5) se apoya en la primera y escribe `E = v_p² ρ`, que a
-partir de un `v_p` medido devuelve el módulo de onda P en lugar de `E`. La
+un factor 2. La fórmula (5) se apoya en la primera y escribe $E = \mathrm{v}_\mathrm{p}^2\,\rho$, que a
+partir de un $\mathrm{v}_\mathrm{p}$ medido devuelve el módulo de onda P en lugar de $E$. La
 fórmula (3), impresa entre las dos, es correcta, y la biblioteca usa las
 relaciones de las que se deduce:
 
@@ -413,7 +413,7 @@ ax.plot(nu, continuum, label="continuo, la inversa de la fórmula (3)")
 ax.plot(nu, np.sqrt((1 - nu) / (1 - 2 * nu)), "--", label="fórmula (1), segundo radical")
 ax.plot(nu, np.sqrt(2 * (1 + nu)), ":", label="fórmula (1), sqrt(E / rho)")
 ax.set_xlabel("Coeficiente de Poisson")
-ax.set_ylabel("v_p / v_s")
+ax.set_ylabel(r"$\mathrm{v}_\mathrm{p} / \mathrm{v}_\mathrm{s}$")
 ax.legend()
 ```
 
@@ -525,7 +525,7 @@ DIN 4150-2 y la DIN 4150-3.
 ## Véase también
 
 - [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
-  el vibrómetro con el que se lee cada magnitud de aquí, y la `KB_F` que produce.
+  el vibrómetro con el que se lee cada magnitud de aquí, y la $KB_\mathrm{F}$ que produce.
 - [Daños por vibración en estructuras (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
   los valores de referencia con los que se compara una velocidad de pico que
   viene de una vía.

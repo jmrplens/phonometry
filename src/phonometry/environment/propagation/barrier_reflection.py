@@ -24,7 +24,7 @@ first milliseconds. The free-field record *is* the direct sound, so it is
 aligned onto the other record to a fiftieth of a sample, scaled to its peak and
 subtracted (5.5.4, :func:`subtract_direct_sound`). What is left is the
 reflection, and what cannot be removed is measured by the reduction factor
-:math:`R_{sub}` of Formula (6).
+:math:`R_\mathrm{sub}` of Formula (6).
 
 The two components are then cut out with the **Adrienne temporal window**
 (5.5.5, :func:`adrienne_reflection_window`): a 0,5 ms left half of a
@@ -42,16 +42,16 @@ here, as the library computes it (see below):
 .. math::
 
    RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j}
-   \frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df}
-        {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df}
-   \, C_{geo,k}\, C_{dir,k}(\Delta f_j)\, /\, C_{gain,k}(\Delta f_g)
+   \frac{\int_{\Delta f_j} |F[h_{\mathrm{r},k}(t)\, w_{\mathrm{r},k}(t)]|^2\, df}
+        {\int_{\Delta f_j} |F[h_{\mathrm{i},k}(t)\, w_{\mathrm{i},k}(t)]|^2\, df}
+   \, C_{\mathrm{geo},k}\, C_{\mathrm{dir},k}(\Delta f_j)\, /\, C_{\mathrm{gain},k}(\Delta f_g)
 
-* :math:`C_{geo,k} = (d_{r,k}/d_{i,k})^2` puts back the spherical spreading of
+* :math:`C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2` puts back the spherical spreading of
   the longer reflected path (Formula (2), Table 2).
-* :math:`C_{dir,k}` puts back the loudspeaker directivity: the reflection left
+* :math:`C_{\mathrm{dir},k}` puts back the loudspeaker directivity: the reflection left
   the loudspeaker at another angle than the direct sound (Formula (3),
   :func:`source_directivity_corrections`).
-* :math:`C_{gain,k}` takes out a change of amplifier or microphone gain
+* :math:`C_{\mathrm{gain},k}` takes out a change of amplifier or microphone gain
   between the free-field and the in-front configurations (Formula (4)).
 
 The last correction is a **division** here. Formula (1) prints it as a
@@ -185,10 +185,10 @@ REFLECTION_MICROPHONE_DISTANCE_M = 0.25
 REFLECTION_GRID_SPACING_M = 0.40
 
 #: Table 2 as printed, per microphone :math:`k` numbered as Figure 3.b (1 to 3
-#: on the top row, seen from the loudspeaker): the distance :math:`d_{i,k}`
+#: on the top row, seen from the loudspeaker): the distance :math:`d_{\mathrm{i},k}`
 #: from the loudspeaker front panel to the microphone in metres, the specular
-#: path :math:`d_{r,k}` via the reference plane in metres, and the correction
-#: :math:`C_{geo,k} = (d_{r,k}/d_{i,k})^2` of Formula (2), all to two decimals.
+#: path :math:`d_{\mathrm{r},k}` via the reference plane in metres, and the correction
+#: :math:`C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2` of Formula (2), all to two decimals.
 #: :func:`reflection_grid_paths_m` and :func:`geometric_divergence_corrections`
 #: give the unrounded values the table is printed from.
 REFLECTION_GRID_DISTANCES: Mapping[int, tuple[float, float, float]] = MappingProxyType(
@@ -228,7 +228,7 @@ REFLECTION_PATH_DIFFERENCES_M: Mapping[int, tuple[float, float]] = MappingProxyT
 #: same for every microphone, in metres (plus or minus).
 REFLECTION_PATH_TOLERANCE_M = 0.025
 
-#: 5.5.5: the standard total length :math:`T_{W,ADR}` of the Adrienne window,
+#: 5.5.5: the standard total length :math:`T_\mathrm{W,ADR}` of the Adrienne window,
 #: in seconds: 0,5 ms leading edge, 5,18 ms flat, 2,22 ms trailing edge. It
 #: processes microphones 1 to 6 in the bands of 100 Hz to 160 Hz.
 ADRIENNE_STANDARD_LENGTH_S = 7.9e-3
@@ -259,8 +259,8 @@ def _precision_row(
 
 #: Table A.1 (informative), after the QUIESST inter-laboratory test: the
 #: standard deviations of repeatability :math:`s_r` and of reproducibility
-#: :math:`s_R` of the sound reflection index, per one-third octave band in
-#: hertz, each as ``(median, low, high)``. A.2 takes :math:`s_R` as the
+#: :math:`s_\mathrm{R}` of the sound reflection index, per one-third octave band in
+#: hertz, each as ``(median, low, high)``. A.2 takes :math:`s_\mathrm{R}` as the
 #: combined standard uncertainty; Annex B.5 takes the high column for a
 #: conservative estimate.
 REFLECTION_INDEX_PRECISION: Mapping[float, Mapping[str, tuple[float, float, float]]] = (
@@ -402,8 +402,8 @@ def reflection_grid_paths_m(
 ) -> NDArray[np.float64]:
     r"""The direct and the specular path to each microphone (Table 2).
 
-    :math:`d_{i,k}` runs from the centre of the loudspeaker front panel to
-    microphone :math:`k`; :math:`d_{r,k}` runs from the same point to the
+    :math:`d_{\mathrm{i},k}` runs from the centre of the loudspeaker front panel to
+    microphone :math:`k`; :math:`d_{\mathrm{r},k}` runs from the same point to the
     reference plane and back to the microphone by specular reflection, which
     is the distance from the image of the loudspeaker in the plane. With the
     geometry of the standard these are the values Table 2 prints to two
@@ -412,8 +412,8 @@ def reflection_grid_paths_m(
     :param source_distance_m: :math:`d_S`, loudspeaker to reference plane, m.
     :param microphone_distance_m: :math:`d_M`, grid to reference plane, m.
     :param grid_spacing_m: :math:`s`, microphone spacing, m.
-    :return: A read-only ``(9, 2)`` array: column 0 is :math:`d_{i,k}` and
-        column 1 is :math:`d_{r,k}`, rows in microphone order 1 to 9.
+    :return: A read-only ``(9, 2)`` array: column 0 is :math:`d_{\mathrm{i},k}` and
+        column 1 is :math:`d_{\mathrm{r},k}`, rows in microphone order 1 to 9.
     :raises ValueError: If a distance is not positive or the grid does not
         stand between the loudspeaker and the plane.
     """
@@ -432,7 +432,7 @@ def geometric_divergence_corrections(
     microphone_distance_m: float = REFLECTION_MICROPHONE_DISTANCE_M,
     grid_spacing_m: float = REFLECTION_GRID_SPACING_M,
 ) -> NDArray[np.float64]:
-    r""":math:`C_{geo,k} = (d_{r,k}/d_{i,k})^2`, Formula (2).
+    r""":math:`C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2`, Formula (2).
 
     The reflection travels further than the direct sound and spreads over a
     larger sphere; this puts that energy back. At microphone 5 it is
@@ -467,7 +467,7 @@ def reflection_sampled_area_radius_m(
     :func:`~phonometry.materials.surfaces.road_absorption.max_sampled_area_radius`.
     NOTE 1 of 5.6.1 gives 1,96 m for the 7,9 ms window at 340 m/s.
 
-    :param window_length_s: :math:`T_{W,ADR}` of the reflected component, s.
+    :param window_length_s: :math:`T_\mathrm{W,ADR}` of the reflected component, s.
     :param speed_of_sound: Speed of sound at the air temperature of the
         test (5.7.3), in metres per second.
     :return: The radius, in metres.
@@ -529,7 +529,7 @@ def adrienne_reflection_window(
     the formula EN 1793-5 prints.
 
     :param fs: Sample rate, in hertz.
-    :param window_length_s: Total length :math:`T_{W,ADR}`, in seconds.
+    :param window_length_s: Total length :math:`T_\mathrm{W,ADR}`, in seconds.
     :return: The window, one sample per ``1 / fs``; its marker point, where
         the flat part begins, is sample ``round(0.5e-3 * fs)``.
     :raises ValueError: If ``fs`` is not positive, the length does not exceed
@@ -593,7 +593,7 @@ def adrienne_low_frequency_limit_hz(window_length_s: float) -> float:
     window is evaluated in closed form and the notch is located to a
     millihertz.
 
-    :param window_length_s: Total length :math:`T_{W,ADR}`, in seconds.
+    :param window_length_s: Total length :math:`T_\mathrm{W,ADR}`, in seconds.
     :return: The frequency of the first minimum of the magnitude spectrum, in
         hertz: 162,5 Hz for 7,9 ms and 216,5 Hz for 6,0 ms.
     :raises ValueError: If the length does not exceed the 0,5 ms leading edge.
@@ -642,7 +642,7 @@ class DirectSoundSubtraction(OwnsArrays):
         samples, positive for a delay: a whole number of the 1/50 sample
         moving steps, within the +/- 2 samples 5.5.4 allows.
     :ivar amplitude_factor: The factor that made the two main peaks equal.
-    :ivar reduction_db: :math:`R_{sub}`, Formula (6): the energy of the
+    :ivar reduction_db: :math:`R_\mathrm{sub}`, Formula (6): the energy of the
         free-field record within 0,5 ms of the peak over that of the residual
         in the same interval, in decibels. Below 10 dB the subtraction is not
         perfect; ``inf`` when nothing is left at all.
@@ -789,7 +789,7 @@ def subtract_direct_sound(
     b); the shift that minimises the squared difference over 50 samples
     around the main peak of the in-front record is kept; the shifted record
     is scaled so the two main peaks are equal; and it is subtracted. The
-    reduction factor :math:`R_{sub}` of Formula (6) measures what is left of
+    reduction factor :math:`R_\mathrm{sub}` of Formula (6) measures what is left of
     the direct sound.
 
     :param in_front_ir: The impulse response in front of the device. Accepts
@@ -803,7 +803,7 @@ def subtract_direct_sound(
     :return: The :class:`DirectSoundSubtraction`, with ``.plot()``.
     :raises ValueError: If the records are not one-dimensional, finite and of
         equal length, or the rate is missing or not positive.
-    :warns BarrierReflectionWarning: If :math:`R_{sub}` is below 10 dB or the
+    :warns BarrierReflectionWarning: If :math:`R_\mathrm{sub}` is below 10 dB or the
         sample rate below 44 kHz.
     """
     rate = _require_fs(
@@ -928,13 +928,13 @@ def source_directivity_corrections(
     window_length_s: float | ArrayLike = ADRIENNE_SHORT_LENGTH_S,
     low_band_window_length_s: float | ArrayLike = ADRIENNE_STANDARD_LENGTH_S,
 ) -> NDArray[np.float64]:
-    r""":math:`C_{dir,k}(\Delta f_j)`, Formula (3).
+    r""":math:`C_{\mathrm{dir},k}(\Delta f_j)`, Formula (3).
 
     The direct sound reaches microphone :math:`k` at the angle
     :math:`\alpha_k` from the loudspeaker axis, and the reflection leaves the
     loudspeaker at another angle :math:`\beta_k`, towards its specular point.
     Both are measured once per loudspeaker in free field, at the same distance
-    :math:`d_{i,k}`: one at the microphone position, one on the specular path.
+    :math:`d_{\mathrm{i},k}`: one at the microphone position, one on the specular path.
     The correction is the ratio of their windowed band energies, each window
     placed on its own record's peak (5.5.6).
 
@@ -1113,9 +1113,9 @@ class ReflectionIndexResult(OwnsArrays):
     :ivar microphone_values: ``(positions, 9, 18)``: the index of each
         microphone, ``nan`` where 5.5.5 leaves it out (microphones 7 to 9 below
         200 Hz by default); ``None`` for a result built from position values.
-    :ivar gain_corrections: ``(positions, 9)``: :math:`C_{gain,k}` of
+    :ivar gain_corrections: ``(positions, 9)``: :math:`C_{\mathrm{gain},k}` of
         Formula (4), or ``None``.
-    :ivar subtraction_reductions_db: ``(positions, 9)``: :math:`R_{sub}` of
+    :ivar subtraction_reductions_db: ``(positions, 9)``: :math:`R_\mathrm{sub}` of
         each subtraction, in decibels, or ``None``.
     """
 
@@ -1136,7 +1136,7 @@ class ReflectionIndexResult(OwnsArrays):
     ) -> tuple[NDArray[np.float64], float]:
         r"""Expanded uncertainty from the reproducibility of Table A.1 (A.2).
 
-        :math:`U_j = k_p\, s_{R,j}`, with :math:`s_R` taken as the combined
+        :math:`U_j = k_p\, s_{\mathrm{R},j}`, with :math:`s_\mathrm{R}` taken as the combined
         standard uncertainty. Annex B.5 takes the high column and
         :math:`k_p` = 1,96 for 95 % coverage, which is the default.
 
@@ -1255,9 +1255,9 @@ def reflection_index(
     windowed on its own peak and the residual on the specular arrival of the
     reflection, both with the marker point 0,2 ms before the peak (5.5.6);
     the band energies of the two are divided and corrected by
-    :math:`C_{geo,k}`, :math:`C_{dir,k}` and :math:`C_{gain,k}`. The
+    :math:`C_{\mathrm{geo},k}`, :math:`C_{\mathrm{dir},k}` and :math:`C_{\mathrm{gain},k}`. The
     reflection's peak is placed by geometry, the direct peak plus
-    :math:`(d_{r,k} - d_{i,k})/c`, which is what 5.5.6 prefers and what makes
+    :math:`(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c`, which is what 5.5.6 prefers and what makes
     the reference plane the conventional reflection plane of a non-flat
     device.
 
@@ -1280,13 +1280,13 @@ def reflection_index(
     :param speed_of_sound: Speed of sound at the air temperature of the test
         (5.5.6, 5.7.3), in metres per second; it places the reflected window,
         and the standard asks for its temperature-dependent value.
-    :param window_length_s: :math:`T_{W,ADR}` from the 200 Hz band upward,
+    :param window_length_s: :math:`T_\mathrm{W,ADR}` from the 200 Hz band upward,
         one length or nine (one per microphone); 6,0 ms by 5.5.5.
-    :param low_band_window_length_s: :math:`T_{W,ADR}` of the 100 Hz to
+    :param low_band_window_length_s: :math:`T_\mathrm{W,ADR}` of the 100 Hz to
         160 Hz bands; 7,9 ms by 5.5.5.
     :param low_band_microphones: The microphones averaged below 200 Hz;
         1 to 6 by 5.5.5.
-    :param directivity_corrections: :math:`C_{dir,k}(\Delta f_j)` as a
+    :param directivity_corrections: :math:`C_{\mathrm{dir},k}(\Delta f_j)` as a
         ``(9, 18)`` array (:func:`source_directivity_corrections`), or ``None``
         for none, which is what a report states as "none".
     :param lowest_band_hz: The lowest reliable band, where :math:`DL_{RI}`
@@ -1295,7 +1295,7 @@ def reflection_index(
     :raises ValueError: If the records are not shaped as above, the rate is
         missing or disagrees, a window does not fit its record, or a
         parameter is out of range.
-    :warns BarrierReflectionWarning: For an :math:`R_{sub}` below 10 dB, a
+    :warns BarrierReflectionWarning: For an :math:`R_\mathrm{sub}` below 10 dB, a
         gain factor more than 20 % from 1, or a sample rate below 44 kHz.
     """
     fronts = _grid_positions(in_front_irs, "in_front_irs")

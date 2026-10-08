@@ -66,7 +66,7 @@ abajo.
 Cada micrófono oye el sonido directo y, algo más de un milisegundo después, la
 reflexión. La reflexión ha recorrido más camino, 1,75 m frente a 1,25 m en el
 micrófono 5, y se ha repartido sobre una esfera mayor; la fórmula (2) lo
-devuelve con $C_{geo,k} = (d_{r,k}/d_{i,k})^2$, que la tabla 2 imprime para cada
+devuelve con $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, que la tabla 2 imprime para cada
 micrófono:
 
 ```python
@@ -113,7 +113,7 @@ muestra, hasta dos muestras a cada lado, con una rampa de fase sobre su propia
 transformada; se queda el desplazamiento que mejor ajusta las 50 muestras que
 rodean el pico principal; el registro se escala para que los dos picos sean
 iguales y se resta. Lo que queda es la reflexión, y el **factor de reducción**
-$R_{sub}$ de la fórmula (6) mide cuánto del sonido directo se fue con ella: la
+$R_\mathrm{sub}$ de la fórmula (6) mide cuánto del sonido directo se fue con ella: la
 energía a menos de 0,5 ms del pico antes, dividida por la energía que queda
 ahí después. Por debajo de 10 dB la norma da la sustracción por imperfecta, y
 `subtract_direct_sound` también, con un `BarrierReflectionWarning`.
@@ -181,7 +181,7 @@ la comprobación de ganancia del apartado 5.5.1 usa 1,3 ms (0,5 + 0,56 +
 0,24 ms), lo bastante corta para terminar antes de que la reflexión alcance los
 micrófonos de las esquinas. El **punto marcador** donde empieza la parte plana
 queda 0,2 ms antes del pico de la componente (apartado 5.5.6); para la reflexión
-el pico se coloca por geometría, el pico directo más $(d_{r,k} - d_{i,k})/c$, que
+el pico se coloca por geometría, el pico directo más $(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c$, que
 es lo que hace del plano de referencia el plano de reflexión convencional de un
 dispositivo que no es plano.
 
@@ -193,7 +193,7 @@ print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 H
 
 Los flancos son la fórmula (7) muestreada tal como está impresa, cada uno la
 mitad de una ventana de Blackman-Harris completa del doble de su longitud. La
-tabla 1 llama a $T_{W,BH}$ longitud del flanco de bajada, que metida en la
+tabla 1 llama a $T_\mathrm{W,BH}$ longitud del flanco de bajada, que metida en la
 fórmula (7) dibujaría una campana entera donde el flanco tendría que caer; el
 [registro de erratas](/phonometry/es/reference/errata/) lo recoge. La segunda
 línea es el límite de baja frecuencia de la ventana, el asunto de la sección 5.
@@ -206,20 +206,20 @@ ganancia divide aquí, como lo calcula la biblioteca (véase más abajo):
 
 $$
 RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j}
-\frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df}
-     {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df}
-\; \frac{C_{geo,k}\, C_{dir,k}(\Delta f_j)}{C_{gain,k}(\Delta f_g)}
+\frac{\int_{\Delta f_j} |F[h_{\mathrm{r},k}(t)\, w_{\mathrm{r},k}(t)]|^2\, df}
+     {\int_{\Delta f_j} |F[h_{\mathrm{i},k}(t)\, w_{\mathrm{i},k}(t)]|^2\, df}
+\; \frac{C_{\mathrm{geo},k}\, C_{\mathrm{dir},k}(\Delta f_j)}{C_{\mathrm{gain},k}(\Delta f_g)}
 $$
 
-- $C_{geo,k}$ es la divergencia de la sección 1.
-- $C_{dir,k}$ devuelve la **directividad del altavoz**: la reflexión salió de él
+- $C_{\mathrm{geo},k}$ es la divergencia de la sección 1.
+- $C_{\mathrm{dir},k}$ devuelve la **directividad del altavoz**: la reflexión salió de él
   hacia el punto especular, con otro ángulo que el sonido directo. Se mide una
   vez por altavoz (fórmula (3)), en campo libre, en la posición del micrófono y
   sobre el camino especular a la misma distancia, y
   `source_directivity_corrections` convierte los dos juegos de registros en la
   matriz `(9, 18)` que recibe `reflection_index`. Un informe sin ella declara
   «ninguna», y no pasarla equivale a eso.
-- $C_{gain,k}$ quita un **cambio de ganancia** entre la configuración en campo
+- $C_{\mathrm{gain},k}$ quita un **cambio de ganancia** entre la configuración en campo
   libre y la de delante del dispositivo. La fórmula (4) lo mide como la energía
   incidente delante del dispositivo dividida por la del campo libre, con la
   ventana de 1,3 ms sobre las bandas de 500 Hz a 2 kHz. La biblioteca **divide**
@@ -420,7 +420,7 @@ decimales, la resolución con la que el apartado 5.11 informa del índice. Los
 dos redondean a los 8 dB impresos. La incertidumbre expandida es la
 reproducibilidad del ensayo interlaboratorio de la tabla A.1 por el factor de
 cobertura, 1,59 dB para el índice global; en siete bandas la tabla B.2 imprime
-una centésima menos que 1,96 veces la $s_R$ de la tabla A.1, como darían
+una centésima menos que 1,96 veces la $s_\mathrm{R}$ de la tabla A.1, como darían
 desviaciones típicas sin redondear. La impresión no dice qué valores multiplicó
 el ejemplo, y la biblioteca multiplica los impresos.
 

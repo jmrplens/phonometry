@@ -18,11 +18,11 @@ building. The chain closes the structural-vibroacoustics series:
    [`phonometry.building.measurement.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/)) and then referred to the
    actual receiver with the Annex I mobility correction
    ([`installed_power_from_reception_plate`](/phonometry/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate)),
-   $L_{W\mathrm{s,inst},i} = L_{W\mathrm{s,n}} + 10 \log_{10}( Y_{\infty,i} / Y_{\infty,\mathrm{rec}} )$
+   $L_{\mathrm{Ws,inst},i} = L_\mathrm{Ws,n} + 10 \log_{10}( Y_{\infty,i} / Y_{\infty,\mathrm{rec}} )$
    with the reference plate mobility
    $Y_{\infty,\mathrm{rec}} = 5 \cdot 10^{-6}$ m/(N.s), or equivalently to the
    characteristic level
-   $L_{W\mathrm{s,c}} = L_{W\mathrm{s,n}} + 10 \log_{10}( Y_\mathrm{s} / Y_{\infty,\mathrm{rec}} )$ with the
+   $L_\mathrm{Ws,c} = L_\mathrm{Ws,n} + 10 \log_{10}( Y_\mathrm{s} / Y_{\infty,\mathrm{rec}} )$ with the
    source mobility (Annex I.3, Table I.8), from which `D_C` is subtracted.
 2. Only part of that power is actually injected into the supporting element; the
    loss is the **coupling term** `D_C` (clause 4.4.3), positive in the usual
@@ -37,13 +37,13 @@ building. The chain closes the structural-vibroacoustics series:
    source mobility, Formula 19d). An elastic support adds its transfer
    mobility `Y_k` inside the modulus (Formula 19e).
 3. The **installed** power level is then
-   $L_{W\mathrm{s,inst},i} = L_{W\mathrm{s,c}} - D_{\mathrm{C},i}$
+   $L_{\mathrm{Ws,inst},i} = L_\mathrm{Ws,c} - D_{\mathrm{C},i}$
    (Formula 18b).
 4. The normalised sound pressure level in the receiving room for one path (i->j)
    follows from the installed power, the structure-to-airborne adjustment term
    `D_sa` (clause 4.4.4), the flanking sound reduction index `R_ij,ref` and
    the element area (Formula 18a):
-   $L_{\mathrm{n,s},ij} = L_{W\mathrm{s,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}} - 10 \log_{10}(S_i/S_0) - 10 \log_{10}(A_0/4)$
+   $L_{\mathrm{n,s},ij} = L_{\mathrm{Ws,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}} - 10 \log_{10}(S_i/S_0) - 10 \log_{10}(A_0/4)$
    with $S_0 = A_0 = 10$ m²; the paths combine energetically
    (Formula 17).
 
@@ -182,7 +182,7 @@ installed_power_from_reception_plate(
 
 Mobility correction of the reception-plate power (EN 12354-5, Annex I).
 
-$L_{W\mathrm{s,inst},i} = L_{W\mathrm{s,n},i} + 10 \log_{10}( Y_{\infty,i} / Y_{\infty,\mathrm{rec}} )$, which refers the
+$L_{\mathrm{Ws,inst},i} = L_{\mathrm{Ws,n},i} + 10 \log_{10}( Y_{\infty,i} / Y_{\infty,\mathrm{rec}} )$, which refers the
 characteristic reception-plate power level `L_Ws,n` (EN 15657
 Formula (17), re the 10 cm concrete plate
 $Y_{\infty,\mathrm{rec}} = 5 \cdot 10^{-6}$ m/(N.s))
@@ -260,7 +260,7 @@ installed_structure_borne_power_level(
 Installed structure-borne power level (EN 12354-5, Formula 18b).
 
 $$
-L_{W\mathrm{s,inst},i} = L_{W\mathrm{s,c}} - D_{\mathrm{C},i}
+L_{\mathrm{Ws,inst},i} = L_\mathrm{Ws,c} - D_{\mathrm{C},i}
 $$
 
 **Parameters**
@@ -424,7 +424,7 @@ structure_borne_pressure_level_path(
 Normalised structure-borne SPL for one path i->j (Formula 18a).
 
 $$
-L_{\mathrm{n,s},ij} = L_{W\mathrm{s,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}} - 10 \log_{10}\frac{S_i}{S_0} - 10 \log_{10}\frac{A_0}{4}
+L_{\mathrm{n,s},ij} = L_{\mathrm{Ws,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}} - 10 \log_{10}\frac{S_i}{S_0} - 10 \log_{10}\frac{A_0}{4}
 $$
 
 **Parameters**
@@ -527,7 +527,7 @@ tapping_machine_characteristic_power_level(
 Characteristic power level of the tapping machine (Formula D.9a).
 
 $$
-L_{W\mathrm{s,c}} = L_F - 5 - 10 \log_{10} f
+L_\mathrm{Ws,c} = L_\mathrm{F} - 5 - 10 \log_{10} f
 $$
 
 The standard notes the result is about 115 dB re 1 pW per one-third octave
@@ -625,7 +625,7 @@ tapping_machine_force_level_estimate(
 Closed form printed under Table F.1 for the tapping machine force level.
 
 $$
-L_F = 10 \log_{10} \frac{2{,}5 f}{10^{-12}} \quad\text{(octave)}, \qquad L_F = 10 \log_{10} \frac{0{,}8 f}{10^{-12}} \quad\text{(1/3 octave)}
+L_\mathrm{F} = 10 \log_{10} \frac{2{,}5 f}{10^{-12}} \quad\text{(octave)}, \qquad L_\mathrm{F} = 10 \log_{10} \frac{0{,}8 f}{10^{-12}} \quad\text{(1/3 octave)}
 $$
 
 The standard qualifies this with "up till about 1000 Hz": it reproduces the

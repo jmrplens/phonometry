@@ -31,7 +31,7 @@ unchanged, of course, so the standard puts a second microphone at a
 what it heard:
 
 $$
-D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right) - \left(L_{r,A} - L_{r,B}\right)
+D_\mathrm{IL} = \left(L_{\mathrm{ref},\mathrm{A}} - L_{\mathrm{ref},\mathrm{B}}\right) - \left(L_{\mathrm{r},\mathrm{A}} - L_{\mathrm{r},\mathrm{B}}\right)
 $$
 
 That is the **direct method**, 8.2.1, and it needs a barrier that has not been
@@ -322,7 +322,7 @@ measured_insertion_loss_direct(
 The insertion loss by the direct method, 8.2.1.
 
 $$
-D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right) - \left(L_{r,A} - L_{r,B}\right)
+D_\mathrm{IL} = \left(L_{\mathrm{ref},\mathrm{A}} - L_{\mathrm{ref},\mathrm{B}}\right) - \left(L_{\mathrm{r},\mathrm{A}} - L_{\mathrm{r},\mathrm{B}}\right)
 $$
 
 The reference term is the source normalisation: whatever the source did
@@ -339,10 +339,10 @@ anything: **the same reference and receiver positions in both campaigns**.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_before_db` | $L_{\text{ref},B}$ per band, in decibels. |
-| `reference_after_db` | $L_{\text{ref},A}$ per band, in decibels. |
-| `receiver_before_db` | $L_{r,B}$ per band, in decibels. |
-| `receiver_after_db` | $L_{r,A}$ per band, in decibels. |
+| `reference_before_db` | $L_{\mathrm{ref},\mathrm{B}}$ per band, in decibels. |
+| `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band, in decibels. |
+| `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band, in decibels. |
+| `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 
 **Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/phonometry/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
@@ -371,20 +371,20 @@ measured_insertion_loss_indirect(
 The insertion loss by the indirect method, 8.2.2.
 
 $$
-\Delta L_B = L_{\text{ref},B} - \left(L_{r,B} - C_r\right), \qquad \Delta L_A = L_{\text{ref},A} - \left(L_{r,A} - C'_r\right), \qquad D'_{IL} = \Delta L_A - \Delta L_B
+\Delta L_\mathrm{B} = L_{\mathrm{ref},\mathrm{B}} - \left(L_{\mathrm{r},\mathrm{B}} - C_\mathrm{r}\right), \qquad \Delta L_\mathrm{A} = L_{\mathrm{ref},\mathrm{A}} - \left(L_{\mathrm{r},\mathrm{A}} - C'_\mathrm{r}\right), \qquad D'_\mathrm{IL} = \Delta L_\mathrm{A} - \Delta L_\mathrm{B}
 $$
 
 The "before" pair comes from a substitute site judged equivalent in
 terrain, ground and source, which is what makes this an estimate rather
 than a determination: 8.2.2 says so itself.
 
-$C_r$ and $C'_r$ correct for the kind of receiver position:
+$C_\mathrm{r}$ and $C'_\mathrm{r}$ correct for the kind of receiver position:
 0 dB in a hemi free field, 6 dB for a microphone against a facade, where
 the pressure doubles. The clause attaches the unprimed symbol to the
 "before" equation and the primed one to the "after", and then defines the
 two by receiver type rather than by campaign, which taken literally would
 force one type on each campaign. The NOTE settles it, by preferring
-receiver positions "where corrections $C_r$ and $C'_r$ are
+receiver positions "where corrections $C_\mathrm{r}$ and $C'_\mathrm{r}$ are
 essentially the same", so the type is asked for once per campaign here
 (see the errata).
 
@@ -397,10 +397,10 @@ exists.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_before_db` | $L_{\text{ref},B}$ per band, at the substitute site, in decibels. |
-| `reference_after_db` | $L_{\text{ref},A}$ per band, in decibels. |
-| `receiver_before_db` | $L_{r,B}$ per band, at the substitute site, in decibels. |
-| `receiver_after_db` | $L_{r,A}$ per band, in decibels. |
+| `reference_before_db` | $L_{\mathrm{ref},\mathrm{B}}$ per band, at the substitute site, in decibels. |
+| `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band, in decibels. |
+| `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band, at the substitute site, in decibels. |
+| `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `receiver_type_before` | `"hemi_free_field"` (default) or `"reflecting_surface"`, for the substitute site. |
 | `receiver_type_after` | The same for the barrier site. |
@@ -436,14 +436,14 @@ The insertion loss of a barrier as measured, ISO 10847 clause 8.2.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in hertz, or `None` where the measurement is an A-weighted level. |
-| `reference_before_db` | $L_{\text{ref},B}$ per band. |
-| `reference_after_db` | $L_{\text{ref},A}$ per band. |
-| `receiver_before_db` | $L_{r,B}$ per band. |
-| `receiver_after_db` | $L_{r,A}$ per band. |
-| `insertion_loss_db` | $D_{IL}$ or $D'_{IL}$ per band, in decibels. |
+| `reference_before_db` | $L_{\mathrm{ref},\mathrm{B}}$ per band. |
+| `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band. |
+| `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band. |
+| `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band. |
+| `insertion_loss_db` | $D_\mathrm{IL}$ or $D'_\mathrm{IL}$ per band, in decibels. |
 | `method` | `"direct"` or `"indirect"`. |
-| `receiver_correction_before_db` | $C_r$, in decibels, zero for the direct method. |
-| `receiver_correction_after_db` | $C'_r$, in decibels, zero for the direct method. |
+| `receiver_correction_before_db` | $C_\mathrm{r}$, in decibels, zero for the direct method. |
+| `receiver_correction_after_db` | $C'_\mathrm{r}$, in decibels, zero for the direct method. |
 
 ### MeasuredBarrierInsertionLoss.plot()
 

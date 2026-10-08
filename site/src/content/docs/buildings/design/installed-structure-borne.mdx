@@ -36,17 +36,17 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 by building service equipment (pumps, fans, lifts, water installations) that
 injects **structure-borne sound** into the building. It closes the
 structural-vibroacoustics chain: the source is described by its characteristic
-structure-borne sound power level $L_{W\mathrm{s,c}}$, derived from the EN 15657
+structure-borne sound power level $L_\mathrm{Ws,c}$, derived from the EN 15657
 reception-plate measurement through the Formula (15)/(17) conversion and a
 mobility correction (**not** the raw plate-injected level;
 see [EN 15657](/phonometry/buildings/design/structure-borne-power/)); the source and
 receiver point mobilities set how much power is actually coupled into the
 structure, and the building transmission carries it to the receiving room. The
 Annex I mobility correction `installed_power_from_reception_plate` refers the
-characteristic reception-plate level $L_{W\mathrm{s,n}}$ to the actual receiver,
-$L_{W\mathrm{s,inst}} = L_{W\mathrm{s,n}} + 10\log_{10}(Y_{\infty,i} / Y_{\infty,\mathrm{rec}})$
+characteristic reception-plate level $L_\mathrm{Ws,n}$ to the actual receiver,
+$L_\mathrm{Ws,inst} = L_\mathrm{Ws,n} + 10\log_{10}(Y_{\infty,i} / Y_{\infty,\mathrm{rec}})$
 with $Y_{\infty,\mathrm{rec}} = 5\cdot 10^{-6}\ \text{m/(N·s)}$;
-with the source mobility instead it yields $L_{W\mathrm{s,c}}$ (Annex I.3, Table I.8).
+with the source mobility instead it yields $L_\mathrm{Ws,c}$ (Annex I.3, Table I.8).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne.svg" alt="The EN 12354-5 cascade per octave band: characteristic power, installed power after the coupling term, per-path sound pressure levels and their energetic total" width="82%" loading="eager" />
 
@@ -104,7 +104,7 @@ which reduces to $10\log_{10}(|Y_\mathrm{s}|/\mathrm{Re}\{Y_i\})$ for a **force 
 mobility, Formula 19c) and to $-10\log_{10}(|Y_\mathrm{s}|\,\mathrm{Re}\{Z_i\})$ for a **velocity source**
 (low source mobility, Formula 19d); an elastic support adds its transfer
 mobility $Y_k$ inside the modulus (Formula 19e). The **installed** power level is
-then (Formula 18b) $L_{W\mathrm{s,inst}} = L_{W\mathrm{s,c}} - D_\mathrm{C}$.
+then (Formula 18b) $L_\mathrm{Ws,inst} = L_\mathrm{Ws,c} - D_\mathrm{C}$.
 
 The two limits are usable once the mobilities differ by about an order of
 magnitude: at $|Y_\mathrm{s}|/|Y_i| = 10$ the force-source form is 0.8 dB below the exact
@@ -123,13 +123,13 @@ when the two mobilities are comparable and in antiphase. The exact curve bottoms
 out at matched mobilities, which is best power transfer and therefore worst
 isolation.
 
-This is the same $L_{W\mathrm{s,inst}}$ as the Annex I mobility correction of
+This is the same $L_\mathrm{Ws,inst}$ as the Annex I mobility correction of
 the introduction, reached by a different route: use Formula (18b) when $D_\mathrm{C}$ is
 known from the two mobilities, and the direct correction
-$L_{W\mathrm{s,n}} + 10\log_{10}(Y_{\infty,i}/Y_{\infty,\mathrm{rec}})$ when it is not.
+$L_\mathrm{Ws,n} + 10\log_{10}(Y_{\infty,i}/Y_{\infty,\mathrm{rec}})$ when it is not.
 On the Annex I.3 cistern both give 68.2 dB at 63 Hz, from
-$L_{W\mathrm{s,c}} = 84.4$ dB and $D_\mathrm{C} = 16.2$ dB. Note which quantity you are handed:
-$L_{W\mathrm{s,c}}$ is the input this page takes, and it is *not* the 68.2 dB the
+$L_\mathrm{Ws,c} = 84.4$ dB and $D_\mathrm{C} = 16.2$ dB. Note which quantity you are handed:
+$L_\mathrm{Ws,c}$ is the input this page takes, and it is *not* the 68.2 dB the
 [EN 15657 page](/phonometry/buildings/design/structure-borne-power/) prints as
 its installed level because feeding that in subtracts $D_\mathrm{C}$ twice.
 
@@ -328,10 +328,10 @@ Table F.1 is its octave-band force level:
 
 | Octave band [Hz] | 31,5 | 63 | 125 | 250 | 500 | 1000 | 2000 | 4000 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| $L_F$ [dB] | 139 | 142 | 145 | 148 | 151 | 154 | 156 | 156 |
+| $L_\mathrm{F}$ [dB] | 139 | 142 | 145 | 148 | 151 | 154 | 156 | 156 |
 
 Two conditions travel with the table. The closed form the standard prints
-beside it, $L_F = 10\log_{10}(2{,}5f/10^{-12})$ in octave bands and
+beside it, $L_\mathrm{F} = 10\log_{10}(2{,}5f/10^{-12})$ in octave bands and
 $10\log_{10}(0{,}8f/10^{-12})$ in one-third-octave bands, holds only "up till
 about 1000 Hz": it gives 157 dB and 160 dB at 2 kHz and 4 kHz where the table
 flattens at 156 dB, so read the table where the table exists and the closed
@@ -341,7 +341,7 @@ are re $10^{-6}$ N despite the "re 1 pN" the caption prints; see the
 
 Clause D.1.3 then treats the machine as a force source with the mass-like
 mobility of its 0,5 kg hammers, which turns the table into the two inputs this
-page takes: $L_{W\mathrm{s,c}} = L_F - 5 - 10\log_{10}f$ (Formula D.9a) and
+page takes: $L_\mathrm{Ws,c} = L_\mathrm{F} - 5 - 10\log_{10}f$ (Formula D.9a) and
 $D_{\mathrm{C},i} = -10\log_{10}(\omega M Y_i) + 10\log_{10}[1 + (\omega M Y_i)^2]$
 (Formula D.9b, which is Formula 19b with $Y_\mathrm{s} = 1/\mathrm{j}\omega M$).
 
@@ -403,12 +403,12 @@ sound reduction index $R_{ij,\mathrm{ref}}$ (EN 12354-1) and the element area
 (Formula 18a):
 
 $$
-L_{\mathrm{n,s},ij} = L_{W\mathrm{s,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}}
+L_{\mathrm{n,s},ij} = L_{\mathrm{Ws,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}}
              - 10\log_{10}\frac{S_i}{S_0} - 10\log_{10}\frac{A_0}{4},
 $$
 
 with $S_0 = A_0 = 10\ \text{m}^2$. Read the five terms in order, because each one
-undoes a different normalisation. $L_{W\mathrm{s,inst},i}$ is the power that
+undoes a different normalisation. $L_{\mathrm{Ws,inst},i}$ is the power that
 actually entered element $i$. $D_{\mathrm{sa},i}$ converts that structural excitation into
 the equivalent *airborne* excitation, so that the next term may be an airborne
 quantity at all. $R_{ij,\mathrm{ref}}$ is that airborne flanking index, defined
@@ -551,7 +551,7 @@ prediction, not a measurement**: a prediction-basis line naming
 EN 12354-5:2009, an optional metadata header (client, source equipment,
 receiving room, instrumentation, climate, date), a per-band table (nominal
 octave/one-third-octave frequency, the installed structure-borne power level
-$L_{W\mathrm{s,inst}}$, each transmission path's normalised SPL $L_{\mathrm{n,s},ij}$ and the
+$L_\mathrm{Ws,inst}$, each transmission path's normalised SPL $L_{\mathrm{n,s},ij}$ and the
 combined total $L_\mathrm{n,s}$), the per-path and total $L_\mathrm{n,s}(f)$ spectra, and a
 boxed band-summed total $L_\mathrm{n,s}$ (dB) with the installed power total and the
 path count.
@@ -620,7 +620,7 @@ repository; click the preview to open the PDF.
 <ScopeClaim status="covered" label="Covered">
 EN 12354-5:2009: the coupling term $D_\mathrm{C}$ (clause 4.4.3, Formulae 19b-e, with
 its force-source and velocity-source limits) via `coupling_term`, the
-installed power level $L_{W\mathrm{s,inst}} = L_{W\mathrm{s,c}} - D_\mathrm{C}$ (Formula 18b)
+installed power level $L_\mathrm{Ws,inst} = L_\mathrm{Ws,c} - D_\mathrm{C}$ (Formula 18b)
 via `installed_structure_borne_power_level`, and the per-path normalised sound
 pressure level and its energetic total (Formulae 18a, 17) via
 `installed_source_prediction`. Validated against the standard's own Annex I
@@ -650,7 +650,7 @@ revision.
 ## See also
 
 - [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
-  the reception-plate characterisation that supplies $L_{W\mathrm{s,c}}$ and the source
+  the reception-plate characterisation that supplies $L_\mathrm{Ws,c}$ and the source
   mobility this prediction consumes.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
   the measured $Y_\mathrm{s}$ and $Y_i$ behind the coupling term.

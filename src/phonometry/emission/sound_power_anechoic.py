@@ -32,7 +32,7 @@ of a hemi-anechoic room (Eq. 15), and each tabulated position carries an equal
 share of it; unequal partial areas :math:`S_i` are averaged by Eq. 13 instead.
 The A-weighted total is combined with the ISO 3744 Annex E band corrections
 (Annex C, Eq. C.1) and the expanded uncertainty
-:math:`U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}` (Eq. 24/25) takes its
+:math:`U = k\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` (Eq. 24/25) takes its
 reproducibility standard deviation from Table 3 (anechoic) or Table 2
 (hemi-anechoic).
 """
@@ -269,7 +269,7 @@ class PrecisionSoundPowerResult(OwnsArrays):
     per position and band (Eq. 21); ``non_uniformity_index`` the
     per-band ``VIr`` sample standard deviation about the arithmetic mean
     (Eq. 22). ``uncertainty`` is the A-weighted expanded uncertainty
-    :math:`U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}`
+    :math:`U = k\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}`
     (Eq. 24/25) and ``uncertainty_bands`` the
     per-band value (``NaN`` without ``frequencies``).
     ``sound_power_level_a`` is the A-weighted total ``LWA`` (Eq. C.1).
@@ -632,7 +632,7 @@ def precision_uncertainty(
     r"""Expanded uncertainty :math:`U = k \sigma_\mathrm{tot}` (ISO 3745:2012).
 
     ISO 3745:2012 Eq. 24/25:
-    :math:`\sigma_\mathrm{tot} = \sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}` and
+    :math:`\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` and
     :math:`U = k \sigma_\mathrm{tot}`, with :math:`k = 2` (95 %, two-sided) or
     :math:`k = 1.6` (95 %, one-sided, when comparing to a limit).
 

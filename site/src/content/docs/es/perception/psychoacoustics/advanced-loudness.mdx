@@ -519,8 +519,8 @@ plt.show()
 fig, ax = plt.subplots()
 ax.fill_between(res.bark, res.specific_loudness, alpha=0.3)
 ax.plot(res.bark, res.specific_loudness)
-ax.set_xlabel("Razón de banda crítica z [Bark_HMS]")
-ax.set_ylabel("Sonoridad específica N' [sone_HMS/Bark_HMS]")
+ax.set_xlabel(r"Razón de banda crítica $z$ [$\mathrm{Bark}_\mathrm{HMS}$]")
+ax.set_ylabel(r"Sonoridad específica $N'$ [$\mathrm{sone}_\mathrm{HMS}/\mathrm{Bark}_\mathrm{HMS}$]")
 plt.show()
 ```
 

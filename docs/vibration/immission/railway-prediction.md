@@ -180,7 +180,7 @@ and the sum level gives the clock maximum r.m.s. of the kind of train
 (Formula (9)), `KB_FTm,Zug = c_T1 · v₀ · 10^(L/20)` with `c_T1` = 1 for Max
 Hold spectra and `v₀` = 5·10⁻⁵ mm/s, the reference of the level. The value
 is the KB quantity itself, because KB is the velocity in millimetres per
-second. Then 1,5 times it is `KB_Fmax,Zug` (Formula (10)) and 3 times that
+second. Then 1,5 times it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)) and 3 times that
 the peak velocity a [DIN 4150-3](../structural/structural-damage.md)
 comparison wants (Formula (12)).
 
@@ -251,10 +251,10 @@ print(vibration.velocity_spectrum_um_s([60.0, 75.6]).round(1))  # [ 50.  301.3]
 
 Annex B is for the case where the ground's decay was measured with a point
 excitation, a drop weight or a shaker, and a train is wanted. Nearer than
-`R₀ ≈ L² / λ` (Formula (B.1)) a train of length `L` is a line of point sources
+$R_0 \approx L^2/\lambda$ (Formula (B.1)) a train of length $L$ is a line of point sources
 and its surface waves spread less than a point's; further away it is a
 point. So the exponent measured with the point is made shallower by 0,3 up
-to `R₀`, or by 0,5 if the point fit lumped spreading and damping into one
+to $R_0$, or by 0,5 if the point fit lumped spreading and damping into one
 power law, and kept as it is beyond (Formula (B.2) and Figure B.1). Within
 the distances of Table 1, 25 m from a surface tram to 200 m from freight on
 soft ground, the line behaviour is the rule.
@@ -278,7 +278,7 @@ the unweighted one. Its assessment severities, 0,11 by day and 0,05 by
 night, are what the printed inputs give with the factor 0,7 under the root
 once instead of squared, where Formula (11) gives 0,090 and 0,040, and the
 daytime verdict turns on the difference: the
-example finds `A_r` = 0,1 exceeded, the formula finds it met. And its floor
+example finds $A_\mathrm{r}$ = 0,1 exceeded, the formula finds it met. And its floor
 transfer column comes from no table of Annex A, and cites Figure 3 for it
 where the concrete floor is Figure 4. The conformance rows hold the chain
 from the printed 78,1 dB and the formula for the printed inputs, and the

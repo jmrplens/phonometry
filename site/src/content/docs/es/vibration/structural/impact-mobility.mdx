@@ -200,7 +200,7 @@ right.semilogy(f[band], whole[band], color="0.6", label="registro entero")
 right.semilogy(f[band], kept[band], label="ventana de fuerza")
 right.semilogy(f[band], clean[band], "--", label="el impulso solo")
 right.set_ylim(1e-7, 1.0)
-right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("G_FF [N²·s/Hz]")
+right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("$G_{FF}$ [N²·s/Hz]")
 right.legend(); plt.show()
 ```
 
@@ -309,7 +309,7 @@ el mismo registro leería un 8,5 %.
 
 Un registro más largo exigiría un tamaño de bloque o una banda de zoom que el
 analizador puede no tener (8.3). La alternativa que recomienda la parte es una
-**ventana exponencial**, $w(t) = e^{-at}$, que empieza en la unidad y añade al
+**ventana exponencial**, $w(t) = \mathrm{e}^{-at}$, que empieza en la unidad y añade al
 dato un decaimiento conocido para que el registro acabe donde debe. Como pauta
 general, el decaimiento natural debería llegar aun así al **25 %** o menos dentro
 del registro, o la corrección del anexo A se vuelve demasiado sensible a los
@@ -339,10 +339,10 @@ eso es lo que hace el anexo A.
 
 Si se multiplican los dos miembros de la convolución
 $x(t) = \int_0^t h(\tau) f(t - \tau)\,\mathrm{d}\tau$ (fórmula (A.1)) por
-$e^{-at}$, y como $e^{-at} = e^{-a\tau} e^{-a(t-\tau)}$, la respuesta con
+$\mathrm{e}^{-at}$, y como $\mathrm{e}^{-at} = \mathrm{e}^{-a\tau} \mathrm{e}^{-a(t-\tau)}$, la respuesta con
 ventana es la fuerza con ventana convolucionada con una respuesta al impulso
-con ventana (fórmula (A.2)). Cada modo $A_r e^{s_r t}$ de la respuesta al
-impulso pasa a ser $A_r e^{(s_r - a)t}$: la ventana desplaza cada polo en $a$
+con ventana (fórmula (A.2)). Cada modo $A_r \mathrm{e}^{s_r t}$ de la respuesta al
+impulso pasa a ser $A_r \mathrm{e}^{(s_r - a)t}$: la ventana desplaza cada polo en $a$
 y deja su residuo como estaba. Una relación de amortiguamiento $\hat\zeta_r$
 estimada de datos con ventana lleva por tanto la parte de la ventana, y la
 fórmula (A.3) la retira:
@@ -513,7 +513,7 @@ for true in (0.002, 0.005, 0.01, 0.02):
     plt.plot(100 * ratios, 100 * (np.array(a3) - true) / true, "o-",
              label=f"fórmula (A.3), amortiguamiento real {100 * true:g} %")
     plt.plot(100 * ratios, 100 * (np.array(exact) - true) / true, "k:")
-plt.xlabel("Amortiguamiento que añade la ventana, a/omega_r [%]")
+plt.xlabel(r"Amortiguamiento que añade la ventana, $a/\omega_r$ [%]")
 plt.ylabel("Error en el amortiguamiento real [%]")
 plt.legend(); plt.show()
 ```
@@ -536,7 +536,7 @@ se confunda con un número.
 
 **Dobles golpes (6.4).** Dos impactos en un registro son dos impulsos cuyas
 transformadas interfieren: un segundo impulso $r$ veces el primero y $\tau$
-después multiplica el espectro por $1 + r e^{-j\omega\tau}$, que ondula entre
+después multiplica el espectro por $1 + r \mathrm{e}^{-j\omega\tau}$, que ondula entre
 $(1 + r)^2$ y $(1 - r)^2$ cada $1/\tau$ hercios. Los valles sólo son profundos
 cuando el segundo impacto es casi tan fuerte como el primero, y por eso la
 parte dice que un segundo impacto pequeño se ve como un ligero rizado y que
@@ -601,7 +601,7 @@ _, both = vibration.energy_spectral_density(double, fs)
 band = (f > 0.0) & (f <= 400.0)
 right.semilogy(f[band], one[band], "--", color="0.6", label="un impacto")
 right.semilogy(f[band], both[band], label="los dos: valles cada 16,7 Hz")
-right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("G_FF [N²·s/Hz]")
+right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("$G_{FF}$ [N²·s/Hz]")
 right.legend(); plt.show()
 ```
 

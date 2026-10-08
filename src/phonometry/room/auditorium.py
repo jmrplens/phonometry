@@ -764,7 +764,7 @@ def early_lateral_energy_fraction(
 
     .. math::
 
-       J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_L^2(t)\ \mathrm{d}t}
+       J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                             {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
 
     and Equation (A.15), the cosine-weighted variant that A.2.4 calls
@@ -773,7 +773,7 @@ def early_lateral_energy_fraction(
     .. math::
 
        J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080}
-                              \left| p_L(t) \cdot p(t) \right|\ \mathrm{d}t}
+                              \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t}
                              {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
 
     The modulus in (A.15) is printed and it matters: the figure-of-eight
@@ -904,7 +904,7 @@ def late_lateral_sound_level(
 
     .. math::
 
-       L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_L^2(t)\ \mathrm{d}t}
+       L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                          {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t}
              \ \mathrm{dB}
 
@@ -1099,9 +1099,9 @@ def interaural_cross_correlation(
     .. math::
 
        \mathrm{IACF}_{t_1,t_2}(\tau) =
-           \frac{\int_{t_1}^{t_2} p_l(t)\, p_r(t + \tau)\ \mathrm{d}t}
-                {\sqrt{\int_{t_1}^{t_2} p_l^2(t)\ \mathrm{d}t
-                       \int_{t_1}^{t_2} p_r^2(t)\ \mathrm{d}t}}
+           \frac{\int_{t_1}^{t_2} p_\mathrm{l}(t)\, p_\mathrm{r}(t + \tau)\ \mathrm{d}t}
+                {\sqrt{\int_{t_1}^{t_2} p_\mathrm{l}^2(t)\ \mathrm{d}t
+                       \int_{t_1}^{t_2} p_\mathrm{r}^2(t)\ \mathrm{d}t}}
 
     and Equation (B.2) takes the coefficient from it:
 
@@ -1297,8 +1297,8 @@ class StageSupportResult(OwnsArrays):
 
     ``frequencies`` holds the exact band centre frequencies in Hz, or is
     ``None`` for a broadband measurement. ``early`` is
-    :math:`ST_\mathrm{Early}` in dB (Equation (C.1)) and ``late``
-    :math:`ST_\mathrm{Late}` in dB (Equation (C.2)), both referred to the
+    :math:`\mathrm{ST}_\mathrm{Early}` in dB (Equation (C.1)) and ``late``
+    :math:`\mathrm{ST}_\mathrm{Late}` in dB (Equation (C.2)), both referred to the
     same direct sound. Table C.1 gives their typical ranges as -24 dB to
     -8 dB and -24 dB to -10 dB and prints "Not known" for both
     just-noticeable differences, so this module has none.
@@ -1338,11 +1338,11 @@ def stage_support(
 
     .. math::
 
-       ST_\mathrm{Early} = 10 \lg
+       \mathrm{ST}_\mathrm{Early} = 10 \lg
            \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t}
                 {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB},
        \qquad
-       ST_\mathrm{Late} = 10 \lg
+       \mathrm{ST}_\mathrm{Late} = 10 \lg
            \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t}
                 {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
 
@@ -1650,7 +1650,7 @@ def single_number_average(
     strength, early decay time, clarity, definition and centre time average
     the 500 Hz and 1 kHz octaves; the lateral quantities average 125 Hz to
     1 kHz, four bands. A.5 prints both cases as examples for exactly that
-    reason, :math:`G_m` over two bands and :math:`J_{\mathrm{LF}m}` over
+    reason, :math:`G_\mathrm{m}` over two bands and :math:`J_\mathrm{LFm}` over
     four, and an accessor that hard-codes the mid pair is wrong for half the
     table.
 

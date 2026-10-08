@@ -43,12 +43,12 @@ spectra are known and the dominant path per band matters.
    $a_\mathrm{situ} = 2.2\,\pi^2 S \sqrt{f_\mathrm{ref}/f}/(c_\mathrm{o} T_\mathrm{s,situ})$
    (Formula 11).
 3. Junctions (Formula 10).
-   $D_{v,ij,\mathrm{situ}} = K_{ij} - 10 \log_{10}(l_{ij}/\sqrt{a_{i,\mathrm{situ}} a_{j,\mathrm{situ}}})$,
+   $D_{\mathrm{v},ij,\mathrm{situ}} = K_{ij} - 10 \log_{10}(l_{ij}/\sqrt{a_{i,\mathrm{situ}} a_{j,\mathrm{situ}}})$,
    floored at 0 dB ([`in_situ_velocity_level_difference`](/phonometry/reference/api/building/detailed-model/#in_situ_velocity_level_difference)).
 4. Paths. The direct path is
    $R_\mathrm{Dd} = R_\mathrm{s,situ} + \Delta R_\mathrm{D,situ} + \Delta R_\mathrm{d,situ}$
    (Formula 14) and each flanking path (Formula 15) is
-   $R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{v,ij,\mathrm{situ}} + T$
+   $R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{\mathrm{v},ij,\mathrm{situ}} + T$
    with the geometry term $T = 10 \log_{10}(S_\mathrm{s}/\sqrt{S_i S_j})$
    ([`flanking_reduction_index`](/phonometry/reference/api/building/detailed-model/#flanking_reduction_index)).
 5. Assembly. $R' = -10 \log_{10}(\sum 10^{-R/10})$ over the direct path and
@@ -61,7 +61,7 @@ $L_\mathrm{n} = 155 - 30 \log_{10}(m') + 10 \log_{10}(T_\mathrm{s}) + 10 \log_{1
 ([`bare_floor_impact_level`](/phonometry/reference/api/building/detailed-model/#bare_floor_impact_level)); the direct path is
 $L_\mathrm{n,d} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} - \Delta L_\mathrm{d,situ}$
 (Formula 11) and each flanking path (Formula 12) is
-$L_{\mathrm{n},ij} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} + (R_{i,\mathrm{situ}} - R_{j,\mathrm{situ}})/2 - \Delta R_{j,\mathrm{situ}} - D_{v,ij,\mathrm{situ}} - 10 \log_{10}(S_i/\sqrt{S_i S_j})$
+$L_{\mathrm{n},ij} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} + (R_{i,\mathrm{situ}} - R_{j,\mathrm{situ}})/2 - \Delta R_{j,\mathrm{situ}} - D_{\mathrm{v},ij,\mathrm{situ}} - 10 \log_{10}(S_i/\sqrt{S_i S_j})$
 ([`flanking_impact_level`](/phonometry/reference/api/building/detailed-model/#flanking_impact_level)), combined
 energetically into `L'n` and rated `L'n,w (CI)` per ISO 717-2
 ([`detailed_impact_prediction`](/phonometry/reference/api/building/detailed-model/#detailed_impact_prediction)).
@@ -664,7 +664,7 @@ flanking_impact_level(
 
 Flanking normalized impact level `Ln,ij` per band (Part 2, F. 12).
 
-$L_{\mathrm{n},ij} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} + (R_{i,\mathrm{situ}} - R_{j,\mathrm{situ}})/2 - \Delta R_{j,\mathrm{situ}} - D_{v,ij,\mathrm{situ}} - T$
+$L_{\mathrm{n},ij} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} + (R_{i,\mathrm{situ}} - R_{j,\mathrm{situ}})/2 - \Delta R_{j,\mathrm{situ}} - D_{\mathrm{v},ij,\mathrm{situ}} - T$
 with the geometry term $T = 10 \log_{10}(S_i/\sqrt{S_i S_j})$, `i` the
 excited floor
 and `j` the flanking element radiating in the receiving room.
@@ -749,7 +749,7 @@ flanking_impact_level_from_normalized_difference(
 
 Flanking impact level of a Type B junction (Part 2, Formula 14).
 
-$L_{\mathrm{n},ij} = L_{\mathrm{n},ii} - \Delta L_i + (R_i - R_j)/2 - \Delta R_j - D_{v,ij,\mathrm{n}} - 10 \log_{10}(S_i/(l_o l_{ij}))$
+$L_{\mathrm{n},ij} = L_{\mathrm{n},ii} - \Delta L_i + (R_i - R_j)/2 - \Delta R_j - D_{\mathrm{v},ij,\mathrm{n}} - 10 \log_{10}(S_i/(l_o l_{ij}))$
 with the reference length $l_o = 1$ m: Formula (12) with the
 junction described by the
 normalized direction-averaged velocity level difference instead of
@@ -794,7 +794,7 @@ flanking_reduction_index(
 
 Flanking sound reduction index `Rij` per band (Formula 15).
 
-$R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{v,ij,\mathrm{situ}} + T$
+$R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{\mathrm{v},ij,\mathrm{situ}} + T$
 for `ij = Ff, Fd, Df`, with the geometry term
 $T = 10 \log_{10}(S_\mathrm{s}/\sqrt{S_i S_j})$. For diagonal transmission the
 standard fixes $S_\mathrm{s} = 10$ m².
@@ -883,7 +883,7 @@ flanking_reduction_index_from_normalized_difference(
 
 Flanking index of a Type B junction `Rij` (Formula 17).
 
-$R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{v,ij,\mathrm{n}} + T$ with
+$R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{\mathrm{v},ij,\mathrm{n}} + T$ with
 the geometry term $T = 10 \log_{10}(S_\mathrm{s}/(l_o l_{ij}))$ and the reference
 length $l_o = 1$ m. It is
 Formula (15) with Formula (12) substituted, so the junction is described by
@@ -1349,7 +1349,7 @@ in_situ_velocity_level_difference(
 
 In-situ velocity level difference `Dv,ij,situ` (Formula 10).
 
-$D_{v,ij,\mathrm{situ}} = K_{ij} - 10 \log_{10}(l_{ij}/\sqrt{a_{i,\mathrm{situ}} a_{j,\mathrm{situ}}})$, floored at 0 dB as
+$D_{\mathrm{v},ij,\mathrm{situ}} = K_{ij} - 10 \log_{10}(l_{ij}/\sqrt{a_{i,\mathrm{situ}} a_{j,\mathrm{situ}}})$, floored at 0 dB as
 the formula prescribes. It converts the situation-invariant junction
 descriptor `Kij` (ISO 12354-1 Annex E, or measured per ISO 10848) into
 the level drop the junction actually produces between the two elements as

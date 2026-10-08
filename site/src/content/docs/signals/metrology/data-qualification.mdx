@@ -447,7 +447,7 @@ $m_k = \int f^k\,G(f)\,\mathrm{d}f$:
 $$
 N_0 = \frac{1}{\pi}\frac{\sigma_v}{\sigma_x} = 2\sqrt{\frac{m_2}{m_0}},
 \qquad
-N_a = N_0\, e^{-a^2/2\sigma_x^2},
+N_a = N_0\, \mathrm{e}^{-a^2/2\sigma_x^2},
 $$
 
 where $N_a$ is the crossing rate of level $a$ (Eq. (5.196)). $N_0/2$ is the
@@ -479,7 +479,7 @@ res.plot()
 rate. The measured zero-crossing rate of this 800-1200 Hz record is
 2012.7 crossings per second against Example 5.13's closed form
 $2\sqrt{f_\mathrm{c}^2 + B^2/12} = 2013.3$, an apparent frequency of 1007 Hz; from there
-the Rice exponential $N_a = N_0 e^{-a^2/2\sigma_x^2}$ tracks the counts to
+the Rice exponential $N_a = N_0 \mathrm{e}^{-a^2/2\sigma_x^2}$ tracks the counts to
 within 2 % out to $2\sigma$, where the rate has already fallen to 268/s. Past
 $3\sigma$ the count is a handful of events per second and the scatter is the
 statistics of the record, not a failure of the model.*
@@ -564,7 +564,7 @@ $$
 the single number that fixes the distribution of peak heights
 (B&P Sec. 5.5.4). At $r = 1$ - narrow bandwidth data, one maximum per
 zero-crossing cycle - peaks are **Rayleigh** distributed:
-$\mathrm{Prob}[\text{peak} > a] = e^{-a^2/2\sigma_x^2}$ (Eq. (5.206)), which
+$\mathrm{Prob}[\text{peak} > a] = \mathrm{e}^{-a^2/2\sigma_x^2}$ (Eq. (5.206)), which
 is the one-in-3000 chance of a peak beyond $4\sigma$ of B&P Example 5.14.
 As $r \to 0$ ever more ripples ride on each cycle, negative maxima appear,
 and the peak heights approach the plain **Gaussian** amplitude distribution.
@@ -591,7 +591,7 @@ res.plot()   # empirical exceedance against the Rice mixture (figure below)
 closed-form $r = \sqrt5/3 = 0.745$, and the record measures 0.746, which is
 also why 12.6 % of its 39 534 maxima are **negative**, an impossibility underRayleigh. The empirical staircase sits on the Rice mixture for that $r$ and
 between the two limits everywhere: the chance of a peak beyond $4\sigma$ is
-$2.5\times10^{-4}$, a quarter below the Rayleigh $e^{-8} = 3.4\times10^{-4}$.
+$2.5\times10^{-4}$, a quarter below the Rayleigh $\mathrm{e}^{-8} = 3.4\times10^{-4}$.
 Assuming the Rayleigh limit on a record that is not narrowband over-predicts the
 extremes.*
 

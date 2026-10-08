@@ -97,15 +97,15 @@ reaching $10^{-4}$ only when the jet reaches the speed of sound in the liquid,
 which for water is 1 400 m/s and never happens in a control valve:
 
 $$
-\eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)
+\eta_\mathrm{turb} = 10^{-4}\left(\frac{U_\mathrm{vc}}{c_L}\right)
 $$
 
 Equation (9) is the other one, and it is worth reading factor by factor:
 
 $$
-\eta_{cav} = 0{,}32\, \eta_{turb}
+\eta_\mathrm{cav} = 0{,}32\, \eta_\mathrm{turb}
   \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\;
-  e^{5 x_{Fzp1}}
+  \mathrm{e}^{5 x_{Fzp1}}
   \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5}
   \left(\frac{x_F}{x_{Fzp1}}\right)^{5}
   \left(x_F - x_{Fzp1}\right)^{1,5}
@@ -244,7 +244,7 @@ print(round(noise_control.jet_strouhal_number(**form, form="annex"), 3))   # 0.3
 print(round(noise_control.jet_strouhal_number(**form, form="clause"), 3))  # 0.425
 ```
 
-Only the annex form reproduces the annex's own printed $N_{Str} = 0{,}399$,
+Only the annex form reproduces the annex's own printed $N_\mathrm{Str} = 0{,}399$,
 so it is the default here and the clause form is one keyword away. For this
 valve the two differ by 6 %; for a single-port valve with $F_d = 1$ the annex
 form is 80 % above the clause one, which is five sixths of an octave in the

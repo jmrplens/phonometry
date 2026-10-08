@@ -29,8 +29,8 @@ Four properties make the search a design routine rather than an optimiser's
 output:
 
 * **Every parameter is a frequency.** Each factor is
-  :math:`s^2 + b_1 s + b_0` with :math:`b_1 = e^{\theta_1}` and
-  :math:`b_0 = e^{\theta_0}`, which is the Routh-Hurwitz condition for a stable
+  :math:`s^2 + b_1 s + b_0` with :math:`b_1 = \mathrm{e}^{\theta_1}` and
+  :math:`b_0 = \mathrm{e}^{\theta_0}`, which is the Routh-Hurwitz condition for a stable
   quadratic: any real :math:`\theta` puts both roots strictly in the left half
   plane, so no step of the search can produce an unstable filter or a
   non-minimum-phase numerator, and no projection back into a feasible set is
@@ -376,7 +376,7 @@ def _quadratic_group(
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""``|s^2 + b1 s + b0|^2`` per factor at ``s = j omega``, and the gradient.
 
-    With :math:`b_1 = e^{\theta_1}` and :math:`b_0 = e^{\theta_0}` the squared
+    With :math:`b_1 = \mathrm{e}^{\theta_1}` and :math:`b_0 = \mathrm{e}^{\theta_0}` the squared
     magnitude is :math:`(b_0 - \Omega^2)^2 + (b_1 \Omega)^2`, and the
     derivatives of its ``log`` with respect to the *logs* of the coefficients
     are :math:`2 b_1^2 \Omega^2 / D` and :math:`2 b_0 (b_0 - \Omega^2) / D`.

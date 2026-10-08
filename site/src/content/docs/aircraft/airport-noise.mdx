@@ -178,7 +178,7 @@ segment's power and distance, and is corrected term by term:
 | `duration_correction` | $\Delta_V$ | §4.5.1 | the segment speed against the NPD reference speed (exposure levels only) |
 | `engine_installation_correction` | $\Delta_\mathrm{I}(\varphi)$ | §4.5.3 | where the engines are mounted, through the depression angle |
 | `lateral_attenuation` | $\Lambda(\beta, \ell)$ | §4.5.4 | ground effect and refraction for a receiver off to the side |
-| `noise_fraction` | $\Delta_F$ | §4.5.6 | the share of the infinite-path energy a finite segment contributes (exposure levels only) |
+| `noise_fraction` | $\Delta_\mathrm{F}$ | §4.5.6 | the share of the infinite-path energy a finite segment contributes (exposure levels only) |
 | `start_of_roll_directivity` | $\Delta_{\text{SOR}}(\psi)$ | §4.5.7 | the rearward jet lobe behind a take-off ground-roll segment |
 
 $\beta$ is the elevation angle of the propagation path above the ground line at
@@ -199,14 +199,14 @@ They assemble into a segment exposure level as
 $$
 L_{E,\text{seg}} = \bigl[L_{E\infty}(P, d) + \Delta_{\text{imp}}\bigr]
  + \Delta_V + \Delta_\mathrm{I}(\varphi) - \Lambda(\beta, \ell)
- + \Delta_F + \Delta_{\text{SOR}}
+ + \Delta_\mathrm{F} + \Delta_{\text{SOR}}
 $$
 
 where the bracket is the impedance-adjusted NPD baseline of §4.2.1 and the rest
 is Eq. 4-8b (Eq. 4-9b behind a ground roll), and the event level is the energy
 sum over the segments, $L_E = 10\lg\sum 10^{L_{E,\text{seg}}/10}$ (Eq. 4-11). A
 maximum level takes the largest segment value instead (Eq. 4-10) and drops the
-two terms that exist only for exposure, $\Delta_V$ and $\Delta_F$.
+two terms that exist only for exposure, $\Delta_V$ and $\Delta_\mathrm{F}$.
 
 Their magnitudes are worth carrying, because they decide which term matters for
 a given receiver.
@@ -430,7 +430,7 @@ off abeam ($\psi = 90°$) and directly behind ($\psi = 180°$).
 at +0.99 dB at $\psi$ = 123° and the turboprop at +1.96 dB at 121°, both within
 0.2 dB of abeam at 90°; by 180°, straight behind the aircraft, they are down to
 −13.5 and −10.1 dB. A receiver placed a few degrees off the lobe therefore sees
-a completely different start-of-roll contribution, which is why $\Delta_{SOR}$
+a completely different start-of-roll contribution, which is why $\Delta_\mathrm{SOR}$
 is applied per segment and per receiver rather than as a single correction to
 the event.*
 

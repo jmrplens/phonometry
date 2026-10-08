@@ -47,15 +47,15 @@ normalmente se lee en una tabla a partir de la construcción y el volumen del
 recinto. Cada magnitud del control es entonces una suma o una resta de $k$:
 
 $$
-D_\mathrm{nT} = D + k, \qquad
+D_{\mathrm{n}T} = D + k, \qquad
 D_\mathrm{n} = D + k + 10\log_{10}\frac{A_0 T_0}{0{,}16\,V}, \qquad
 R' = D + k + 10\log_{10}\frac{S T_0}{0{,}16\,V},
 $$
 
 $$
-L'_\mathrm{nT} = L_\mathrm{i} - k, \qquad
+L'_{\mathrm{n}T} = L_\mathrm{i} - k, \qquad
 L'_\mathrm{n} = L_\mathrm{i} - k - 10\log_{10}\frac{A_0 T_0}{0{,}16\,V}, \qquad
-D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + k,
+D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + k,
 $$
 
 con $A_0 = 10\ \text{m}^2$ y $V$ el volumen del recinto receptor. Las dos
@@ -145,7 +145,7 @@ res.plot()   # DnT vs curva de referencia ISO 717-1 desplazada (necesita matplot
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation.svg" alt="Aislamiento a ruido aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" width="80%" />
 
 *El índice de reverberación $k = 10\log_{10}(T/T_0)$ desplaza la diferencia de
-niveles bruta $D$ hacia la estandarizada $D_\mathrm{nT}$: hacia arriba donde la sala
+niveles bruta $D$ hacia la estandarizada $D_{\mathrm{n}T}$: hacia arriba donde la sala
 es viva ($T > T_0$), hacia abajo donde es apagada. El índice automático solo
 se forma con
 exactamente 5 valores de octava (o 16 de tercio de octava).*
@@ -335,8 +335,8 @@ uno un `.report(path)` que escribe el informe de campo del método de control
 (survey) ISO 10052 de una página: la línea de base normativa que nombra la
 ISO 10052 (bandas de octava), una cabecera de metadatos opcional, la tabla en
 bandas de octava junto a la curva medida frente a la referencia desplazada, el
-índice de campo en su recuadro ($D_\mathrm{nT,w}$/$R'_\mathrm{w}$, $L'_\mathrm{nT,w}$ o
-$D_{2\mathrm{m,nT,w}}$), la
+índice de campo en su recuadro ($D_{\mathrm{n}T,\mathrm{w}}$/$R'_\mathrm{w}$, $L'_{\mathrm{n}T,\mathrm{w}}$ o
+$D_{2\mathrm{m,n}T,\mathrm{w}}$), la
 declaración del método de control, un veredicto opcional (las diferencias de
 niveles cumplen si igualan o superan el requisito, y el nivel de impactos si lo
 iguala o queda por debajo) y un pie. El resultado a ruido aéreo informa
@@ -366,7 +366,7 @@ facade.report("D2mnTw_survey.pdf")                       # D2m,nT,w (C; Ctr)
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_impact_insulation.svg" alt="Aislamiento a impactos por el método de control: el nivel de impactos medido Li en bandas de octava y el L'nT estandarizado con la corrección por índice de reverberación sombreada entre ambos, el índice L'nT,w anotado y una nota de que una sala viva reduce el nivel de impactos estandarizado" width="80%" />
 
 *El control de impactos aplica el índice de reverberación con el signo
-contrario, $L'_\mathrm{nT} = L_\mathrm{i} - k$: un recinto receptor vivo ($T > T_0$)
+contrario, $L'_{\mathrm{n}T} = L_\mathrm{i} - k$: un recinto receptor vivo ($T > T_0$)
 **reduce** el
 nivel de impactos estandarizado. Como en el caso aéreo, el índice automático
 aparece para exactamente 5 valores de octava (o 16 de tercio de octava).*
@@ -434,8 +434,8 @@ El método de control de ISO 10052:2021: el índice de reverberación
 $k = 10\log_{10}(T/T_0)$ medido con `building.reverberation_index` o estimado
 desde las clases de recinto de la Tabla 3 con
 `building.estimate_reverberation_index`; las magnitudes de control aéreas, de
-impacto y de fachada ($D_\mathrm{nT}$, $D_\mathrm{n}$, $R'$ con la regla $V/7,5$, $L'_\mathrm{nT}$,
-$L'_\mathrm{n}$, $D_{2\mathrm{m,nT}}$) mediante `building.survey_airborne_insulation`,
+impacto y de fachada ($D_{\mathrm{n}T}$, $D_\mathrm{n}$, $R'$ con la regla $V/7,5$, $L'_{\mathrm{n}T}$,
+$L'_\mathrm{n}$, $D_{2\mathrm{m,n}T}$) mediante `building.survey_airborne_insulation`,
 `building.survey_impact_insulation` y `building.survey_facade_insulation`; el
 ruido de equipamiento $L_{XY}$ desde exactamente tres posiciones mediante
 `building.survey_service_equipment_level`; los índices ISO 717 automáticos

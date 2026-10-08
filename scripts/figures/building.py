@@ -446,7 +446,7 @@ def generate_facade_prediction(output_dir: str) -> None:
         marker="s",
         markersize=6,
         zorder=5,
-        label=r"$D_\mathrm{2m,nT}$",
+        label=r"$D_{\mathrm{2m,n}T}$",
     )
 
     ax.set_xticks(x)
@@ -463,7 +463,7 @@ def generate_facade_prediction(output_dir: str) -> None:
             rf"$R^{{\prime}}_\mathrm{{tr,s,w}}$ = {result.r_tr_s_w} dB"
             rf"   ($C_\mathrm{{tr}}$ = {_fmt_minus(result.c_tr)})"  # type: ignore[arg-type]  # octave layout: Ctr always computed
         ),
-        rf"$D_\mathrm{{2m,nT,w}}$ = {result.d_2m_nt_w} dB",
+        rf"$D_{{\mathrm{{2m,n}}T,\mathrm{{w}}}}$ = {result.d_2m_nt_w} dB",
         "air inlet limits the low bands",
     ]
     ax.text(
@@ -826,7 +826,7 @@ def generate_survey_insulation(output_dir: str) -> None:
         marker="s",
         markersize=6,
         zorder=5,
-        label=r"$D_\mathrm{nT}$ (standardized)",
+        label=r"$D_{\mathrm{n}T}$ (standardized)",
     )
 
     ax.set_xticks(x)
@@ -840,7 +840,7 @@ def generate_survey_insulation(output_dir: str) -> None:
 
     info = [
         (
-            rf"$D_\mathrm{{nT,w}}$ = {res.rating.rating} dB  "
+            rf"$D_{{\mathrm{{n}}T,\mathrm{{w}}}}$ = {res.rating.rating} dB  "
             f"($C$ = {_fmt_minus(res.rating.c)})"
         ),
         "octave bands, $T_0$ = 0.5 s",
@@ -902,7 +902,7 @@ def generate_heavy_impact_sources(output_dir: str) -> None:
     ax_src.set_xticks(x)
     ax_src.set_xticklabels(["31.5", "63", "125", "250", "500"])
     ax_src.set_xlabel(LABEL_FREQ_HZ)
-    ax_src.set_ylabel(r"Impact force exposure level $L_{F\mathrm{E}}$ [dB re 1 N]")
+    ax_src.set_ylabel(r"Impact force exposure level $L_\mathrm{FE}$ [dB re 1 N]")
     ax_src.set_title(
         "Standard heavy impact sources\n(ISO 16283-2 Table A.1, "
         "JIS A 1418-2 Tables A.1/A.2)",
@@ -1629,7 +1629,7 @@ def generate_field_airborne_insulation(output_dir: str) -> None:
         linewidth=2.4,
         markersize=5,
         zorder=5,
-        label=r"$D_\mathrm{nT}$ (standardized)",
+        label=r"$D_{\mathrm{n}T}$ (standardized)",
     )
 
     ax.set_ylabel("Level difference [dB]")
@@ -1640,7 +1640,7 @@ def generate_field_airborne_insulation(output_dir: str) -> None:
 
     info = [
         (
-            rf"$D_\mathrm{{nT,w}}$($C$;$C_\mathrm{{tr}}$) = {w.rating}"
+            rf"$D_{{\mathrm{{n}}T,\mathrm{{w}}}}$($C$;$C_\mathrm{{tr}}$) = {w.rating}"
             f"({_fmt_minus(w.c)};{_fmt_minus(w.ctr)}) dB"
         ),
         (
@@ -1759,7 +1759,7 @@ def generate_facade_field_insulation(output_dir: str) -> None:
         linewidth=2.4,
         markersize=5,
         zorder=6,
-        label=r"$D_\mathrm{2m,nT}$ (standardized)",
+        label=r"$D_{\mathrm{2m,n}T}$ (standardized)",
     )
     ax.plot(
         x,
@@ -1801,7 +1801,7 @@ def generate_facade_field_insulation(output_dir: str) -> None:
 
     info = [
         (
-            rf"$D_\mathrm{{ls,2m,nT,w}}$($C$;$C_\mathrm{{tr}}$) = {w.rating}"
+            rf"$D_{{\mathrm{{ls,2m,n}}T,\mathrm{{w}}}}$($C$;$C_\mathrm{{tr}}$) = {w.rating}"
             f"({_fmt_minus(w.c)};{_fmt_minus(w.ctr)}) dB"
         ),
         r"45° loudspeaker method (−1.5 dB on $R^{\prime}$)",
@@ -1868,7 +1868,7 @@ def generate_survey_impact_insulation(output_dir: str) -> None:
         linewidth=2.4,
         markersize=6,
         zorder=5,
-        label=r"$L^{\prime}_\mathrm{nT}$ (standardized)",
+        label=r"$L^{\prime}_{\mathrm{n}T}$ (standardized)",
     )
 
     ax.set_ylabel("Impact sound pressure level [dB]")
@@ -1879,10 +1879,10 @@ def generate_survey_impact_insulation(output_dir: str) -> None:
 
     info = [
         (
-            rf"$L^{{\prime}}_\mathrm{{nT,w}}$($C_\mathrm{{I}}$) = {res.rating.rating}"
+            rf"$L^{{\prime}}_{{\mathrm{{n}}T,\mathrm{{w}}}}$($C_\mathrm{{I}}$) = {res.rating.rating}"
             f"({_fmt_minus(res.rating.ci)}) dB"
         ),
-        r"note the minus sign: a live room lowers $L^{\prime}_\mathrm{nT}$",
+        r"note the minus sign: a live room lowers $L^{\prime}_{\mathrm{n}T}$",
     ]
     ax.text(
         0.985,
@@ -3250,7 +3250,7 @@ def generate_low_frequency_procedure(output_dir: str) -> None:
         linewidth=2.0,
         markersize=4,
         zorder=4,
-        label=r"$D_\mathrm{nT}$, default procedure alone",
+        label=r"$D_{\mathrm{n}T}$, default procedure alone",
     )
     ax_dnt.plot(
         xf,
@@ -3260,7 +3260,7 @@ def generate_low_frequency_procedure(output_dir: str) -> None:
         linewidth=2.4,
         markersize=4,
         zorder=5,
-        label=r"$D_\mathrm{nT}$, with the low-frequency procedure",
+        label=r"$D_{\mathrm{n}T}$, with the low-frequency procedure",
     )
     # Stopped below the reading, so the divider is not a line disappearing
     # behind an opaque chip.
@@ -3291,7 +3291,7 @@ def generate_low_frequency_procedure(output_dir: str) -> None:
         "\n".join(
             [
                 (
-                    r"$D_\mathrm{nT,w}$ = "
+                    r"$D_{\mathrm{n}T,\mathrm{w}}$ = "
                     f"{w_required.rating} dB either way (100 Hz to 3150 Hz)"
                 ),
                 (

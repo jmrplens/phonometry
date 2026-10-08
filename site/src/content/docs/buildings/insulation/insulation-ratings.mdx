@@ -34,8 +34,8 @@ import Video from '../../../../components/Video.astro';
 
 Every sound-insulation quantity in this documentation ends its journey the
 same way: a band spectrum walks in, a single number walks out. Whether the
-spectrum is a laboratory $R$, a field $R'$ or $D_\mathrm{nT}$, a façade
-$D_{2\mathrm{m,nT}}$, an impact $L_\mathrm{n}$ or $L'_\mathrm{nT}$, or a flanking $D_\mathrm{n,f}$, what
+spectrum is a laboratory $R$, a field $R'$ or $D_{\mathrm{n}T}$, a façade
+$D_{2\mathrm{m,n}T}$, an impact $L_\mathrm{n}$ or $L'_{\mathrm{n}T}$, or a flanking $D_\mathrm{n,f}$, what
 regulations quote is the weighted single number of ISO 717, and two
 reference-curve engines produce all of them: **ISO 717-1** for airborne
 quantities, where an unfavourable deviation is a band falling *below* the
@@ -59,7 +59,7 @@ Pass the 16 one-third-octave values from 100 Hz to 3150 Hz to
 returns the rating read at 500 Hz, plus the spectrum adaptation terms $C$ and
 $C_\mathrm{tr}$. For the measured spectrum used below, `w.rating, w.c, w.ctr` prints
 `30 -2 -3`: $R_\mathrm{w}\ (C\ ;\ C_\mathrm{tr}) = 30\ (-2\ ;\ -3)$. The same call rates $R'$, $D_\mathrm{n}$ and
-$D_\mathrm{nT}$.
+$D_{\mathrm{n}T}$.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain.svg" alt="Calculation chain of the ISO 717 single-number ratings. Across the top, a strip of one-third-octave bands from 50 Hz to 5000 Hz: the 16 bands from 100 Hz to 3150 Hz drawn solid with 500 Hz picked out, the five octave bands from 125 Hz to 2000 Hz bracketed under them, and the bands at 50, 63, 80, 4000 and 5000 Hz dashed as an enlarged range that only the adaptation terms read, the 4000 and 5000 Hz bands in ISO 717-1 alone. A box states the rule both parts share: shift the Table 3 curve towards the measurement in 1 dB steps until the sum of unfavourable deviations is as large as possible but not more than 32.0 dB over 16 bands or 10.0 dB over 5, in 0.1 dB steps for the expression of uncertainty, and read the shifted curve at 500 Hz. Below it, two small charts side by side. On the left, ISO 717-1 for airborne sound: the reference curve moved 22 dB down onto a measured sound reduction index, with bars where the measurement falls below it that add up to 31.8 dB, giving Rw = 52 − 22 = 30 dB; C = 28 − 30 = −2 dB from spectrum No. 1, pink noise, and Ctr = 27 − 30 = −3 dB from spectrum No. 2, urban traffic, both over all 16 bands, stated as Rw(C;Ctr) = 30 (−2; −3) dB. On the right, ISO 717-2 for impact sound: the reference curve moved 19 dB up onto a measured normalized impact level, with bars where the measurement rises above it that add up to 28.0 dB, giving Ln,w = 60 + 19 = 79 dB, with 5 dB taken off when the bands are octaves, and CI from the unweighted energy sum of the first 15 bands, without 3150 Hz. Each side lists its enlarged-range terms, and a box at the foot carries Cj = XAj − Xw and CI = Ln,sum − 15 − Ln,w" width="100%" />
 
@@ -83,7 +83,7 @@ but not more than 32.0 dB (16 one-third-octave bands) or 10.0 dB (5 octave
 bands). The two caps are one rule, not two constants: $32.0 = 2.0 \times 16$
 and $10.0 = 2.0 \times 5$, so what the method actually permits is **an average
 unfavourable deviation of 2 dB per band**. The rating ($R_\mathrm{w}$, $R'_\mathrm{w}$,
-$D_\mathrm{nT,w}$ …) is the shifted reference read at 500 Hz.
+$D_{\mathrm{n}T,\mathrm{w}}$ …) is the shifted reference read at 500 Hz.
 
 The reference curve itself (ISO 717-1:2020, Table 3) is not arbitrary either.
 It rises 3 dB per one-third octave (9 dB per octave) from 100 Hz to 400 Hz,
@@ -127,7 +127,7 @@ which spectrum is substituted: No. 1, A-weighted pink noise, representative of
 living activities (speech, music, radio, television), gives $C$; No. 2,
 A-weighted urban road traffic, whose energy sits at low frequency, gives
 $C_\mathrm{tr}$. So the rating plus the term ($R_\mathrm{w} + C$ for a laboratory index,
-$R'_\mathrm{w} + C$ or $D_\mathrm{nT,w} + C$ for the quantities of the
+$R'_\mathrm{w} + C$ or $D_{\mathrm{n}T,\mathrm{w}} + C$ for the quantities of the
 [field guide](/phonometry/buildings/insulation/insulation-field/), and likewise
 with $C_\mathrm{tr}$) is the A-weighted level difference the construction achieves
 against that source, which is what makes the sum, and not the rating alone,
@@ -142,7 +142,7 @@ the thing worth specifying. Reading them:
   two constructions with equal ratings can differ audibly against traffic.
 * Design with the descriptor that matches the noise, carried by the field
   quantity the requirement rates: $R'_\mathrm{w} + C_\mathrm{tr}$ for a façade on a busy
-  road, $D_\mathrm{nT,w} + C$ (or the plain rating, where the regulation says so)
+  road, $D_{\mathrm{n}T,\mathrm{w}} + C$ (or the plain rating, where the regulation says so)
   between dwellings, the two example requirements of ISO 717-1, 5.3.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_adaptation_terms.svg" alt="Left: the sound reduction index of a 150 mm dense concrete wall and of a 12 kg per square metre metal-stud double leaf with a 90 mm cavity, both against the same shifted ISO 717-1 reference curve at Rw = 49 dB. Right: a grouped bar chart of Rw, Rw + C and Rw + Ctr for the two constructions, identical at Rw and 6 dB apart at Rw + Ctr" width="92%" />
@@ -279,7 +279,7 @@ plt.show()
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $R$, $R'$, $D_\mathrm{nT}$ … per band |
+| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $R$, $R'$, $D_{\mathrm{n}T}$ … per band |
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_rating()` returns a `WeightedRatingResult` (`rating`, `c`, `ctr`,
@@ -292,7 +292,7 @@ figures on this page are drawn from: `band_centers`, `measured` and
 The single-number rating (ISO 717-2) shifts the same style of reference curve,
 but an **unfavourable deviation now occurs where the measurement *exceeds* the
 reference** (impact noise is worse when higher), the sign opposite to
-ISO 717-1. The rating ($L_\mathrm{n,w}$, $L'_\mathrm{n,w}$, $L'_\mathrm{nT,w}$) is the shifted
+ISO 717-1. The rating ($L_\mathrm{n,w}$, $L'_\mathrm{n,w}$, $L'_{\mathrm{n}T,\mathrm{w}}$) is the shifted
 reference read at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}$ (ISO 717-2:2020
 Formulae (A.1) to (A.3)) uses the energetic sum over 100–2500 Hz (the first 15
@@ -379,7 +379,7 @@ ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measure
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(rf"$L_\mathrm{{n,w}}$ = {res_imp.rating} dB  ($C_\mathrm{{I}}$ = {res_imp.ci:+d} dB)")
 ax.legend()
 plt.show()
 ```
@@ -397,7 +397,7 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $L_\mathrm{n}$, $L'_\mathrm{n}$ or $L'_\mathrm{nT}$ per band |
+| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $L_\mathrm{n}$, $L'_\mathrm{n}$ or $L'_{\mathrm{n}T}$ per band |
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
@@ -424,7 +424,7 @@ ISO 16283 does not let the 50 Hz, 63 Hz and 80 Hz bands be measured with the
 default procedure alone: the corner procedure is mandatory there, and it can move
 those three bands by several decibels, which can move
 $C_{50\text{–}3150}$ by a whole one. So a requirement written as
-$D_\mathrm{nT,w} + C_{50\text{–}3150}$ is judged on the corner procedure
+$D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ is judged on the corner procedure
 whether the report mentions it or not. See
 [Small Rooms: the ISO 16283 Low-Frequency Procedure](/phonometry/buildings/insulation/low-frequency-procedure/).
 

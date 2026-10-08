@@ -5,7 +5,7 @@
 The *Documento Básico HR* "Protección frente al ruido" of the Spanish building
 code states its requirements in A-weighted global quantities that are close
 relatives of, but not identical to, the ISO 717-1 weighted ratings: $R_\mathrm{A}$,
-$R_\mathrm{A,tr}$, $D_\mathrm{nT,A}$ and $D_{2\mathrm{m,nT,Atr}}$. This page implements the direct
+$R_\mathrm{A,tr}$, $D_{\mathrm{n}T,\mathrm{A}}$ and $D_{2\mathrm{m,n}T,\mathrm{Atr}}$. This page implements the direct
 Annex A route, which is the normative one for DB-HR, the requirement tables of
 clause 2, and the two design calculations most often used with them: the
 window-size correction and the insulation of a composite facade.
@@ -25,7 +25,7 @@ I_x = -10 \log_{10} \sum_i 10^{(L_{x,i} - X_i)/10} \quad \text{[dBA]}
 $$
 
 where $X_i$ is the band insulation (the sound reduction index $R$ or $R'$, the
-standardized level difference $D_\mathrm{nT}$, $D_{2\mathrm{m,nT}}$ and so on) and $L_{x,i}$
+standardized level difference $D_{\mathrm{n}T}$, $D_{2\mathrm{m,n}T}$ and so on) and $L_{x,i}$
 the normalised source spectrum. The sum runs over **eighteen** one-third-octave
 bands, 100 Hz to 5 kHz, two more than the sixteen of ISO 717-1 (100 Hz to
 3150 Hz): the 4 kHz and 5 kHz bands, which are the first reason the two routes
@@ -33,15 +33,15 @@ do not always agree. The band centres are in `DB_HR_FREQUENCIES`.
 
 | Normalised spectrum | Annex A table | Quantity it defines | Formula |
 | :--- | :--- | :--- | :--- |
-| A-weighted pink noise, $L_{\mathrm{Ar},i}$ | Table A.5 | $R_\mathrm{A}$, $D_\mathrm{nT,A}$, $D_{2\mathrm{m,nT,A}}$ | (A.5), (A.7) |
-| Road traffic, $L_{\mathrm{Atr},i}$ | Table A.3 | $R_\mathrm{A,tr}$, $D_{2\mathrm{m,nT,Atr}}$ | (A.6) |
-| Railway noise, $L_{\mathrm{Aef},i}$ | Table A.4 (numerically identical to A.3) | $D_{2\mathrm{m,nT,A}}$ | (A.5) |
-| Aircraft noise, $L_{\mathrm{Aav},i}$ | Table A.2 | $D_{2\mathrm{m,nT,Atr}}$ | (A.6) |
+| A-weighted pink noise, $L_{\mathrm{Ar},i}$ | Table A.5 | $R_\mathrm{A}$, $D_{\mathrm{n}T,\mathrm{A}}$, $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.5), (A.7) |
+| Road traffic, $L_{\mathrm{Atr},i}$ | Table A.3 | $R_\mathrm{A,tr}$, $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
+| Railway noise, $L_{\mathrm{Aef},i}$ | Table A.4 (numerically identical to A.3) | $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.5) |
+| Aircraft noise, $L_{\mathrm{Aav},i}$ | Table A.2 | $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
 
 The railway row is the one worth reading twice. Clause 3.1.3.4 point 1 says
 that where railway noise dominates the facade is assessed in
-$D_{2\mathrm{m,nT,A}}$ through formula (A.5), and only road traffic and aircraft give
-$D_{2\mathrm{m,nT,Atr}}$ through (A.6); Table H.1 prints the same split. Because
+$D_{2\mathrm{m,n}T,\mathrm{A}}$ through formula (A.5), and only road traffic and aircraft give
+$D_{2\mathrm{m,n}T,\mathrm{Atr}}$ through (A.6); Table H.1 prints the same split. Because
 Table A.4 is digit for digit Table A.3, a rail-dominant facade comes out at
 the same *number* as a road one, but the quantity the requirement and the
 report are stated in is not the same. That is why `d2m_nt_a()` and
@@ -101,9 +101,9 @@ the document itself accepts three approximations as long as the two routes
 differ by less than 1 dB:
 
 $$
-D_\mathrm{nT,A} \approx D_\mathrm{nT,w} + C \quad (H.1), \qquad
-D_{2\mathrm{m,nT,A}} \approx D_{2\mathrm{m,nT,w}} + C \quad (H.2), \qquad
-D_{2\mathrm{m,nT,Atr}} \approx D_{2\mathrm{m,nT,w}} + C_\mathrm{tr} \quad (H.3)
+D_{\mathrm{n}T,\mathrm{A}} \approx D_{\mathrm{n}T,\mathrm{w}} + C \quad (H.1), \qquad
+D_{2\mathrm{m,n}T,\mathrm{A}} \approx D_{2\mathrm{m,n}T,\mathrm{w}} + C \quad (H.2), \qquad
+D_{2\mathrm{m,n}T,\mathrm{Atr}} \approx D_{2\mathrm{m,n}T,\mathrm{w}} + C_\mathrm{tr} \quad (H.3)
 $$
 
 with (H.2) covering the rail-dominant case of the previous section. On the two
@@ -112,7 +112,7 @@ published spectra this page reproduces, the agreement is exact to the integer:
 | Case | Direct route (Annex A) | ISO 717-1 route | Published? |
 | :--- | :--- | :--- | :--- |
 | Separating wall of Ejemplo 7.2 | $R'_\mathrm{A} = 51.4$ dBA, rounded to 51 | $R'_\mathrm{w} = 52$ with $C_{100-5000} = -1$, i.e. 51 | yes, Ejemplo 7.1 prints $R'_\mathrm{w} = 52$, $C = -1$ and the 51 dBA |
-| Facade of Ejercicio 7.1 | $D_{2\mathrm{m,nT,Atr}} = 32.8$ dBA, rounded to 33 | $D_{2\mathrm{m,nT,w}} = 38$ with $C_{\mathrm{tr},100-5000} = -5$, i.e. 33 | no, the book prints neither 38 nor $-5$ |
+| Facade of Ejercicio 7.1 | $D_{2\mathrm{m,n}T,\mathrm{Atr}} = 32.8$ dBA, rounded to 33 | $D_{2\mathrm{m,n}T,\mathrm{w}} = 38$ with $C_{\mathrm{tr},100-5000} = -5$, i.e. 33 | no, the book prints neither 38 nor $-5$ |
 
 The two rows are not equally strong evidence. The wall row is a genuine
 external check, because the *Manual* prints the ISO 717-1 numbers as well as
@@ -129,8 +129,8 @@ $C_{100-5000}$ and $C_{\mathrm{tr},100-5000}$; that reading is not in Annex H it
 but in the *Manual*, in the note to expressions [7.15] and [7.16]. It matters:
 on the facade of Ejercicio 7.1 the core-range $C$ is $-2$ while $C_{100-5000}$
 is $-1$, so taking the wrong one gives 36 dBA instead of 37 for the
-$D_{2\mathrm{m,nT,A}}$ of that facade. On the same specimen $C_\mathrm{tr}$ and
-$C_{\mathrm{tr},100-5000}$ are both $-5$, so the $D_{2\mathrm{m,nT,Atr}}$ that DB-HR actually
+$D_{2\mathrm{m,n}T,\mathrm{A}}$ of that facade. On the same specimen $C_\mathrm{tr}$ and
+$C_{\mathrm{tr},100-5000}$ are both $-5$, so the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ that DB-HR actually
 requires happens not to discriminate between the two readings at all.
 
 ```python
@@ -156,7 +156,7 @@ and the **habitable room** (*recinto habitable*) in general.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements.svg" alt="Section through a three-storey residential building with each DB-HR requirement on its element: the Table 2.1 D2m,nT,Atr of the facade with the microphone 2 m out, the RA of the partition, DnT,A between dwellings and over a shop, the L′nT,w of the floors, the RA pair of a shared door and the two routes of the party wall, above the Annex A chain from eighteen bands to the rounded number each airborne limit is read against" width="88%"></picture>
 
-**Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,nT,Atr}}$ is read by bands of
+**Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ is read by bands of
 the site's day noise index $L_\mathrm{d}$ ($L_\mathrm{d} \le 60$, $60 < L_\mathrm{d} \le 65$,
 $65 < L_\mathrm{d} \le 70$, $70 < L_\mathrm{d} \le 75$ and $L_\mathrm{d} > 75$ dBA):
 
@@ -173,7 +173,7 @@ for residential acoustic areas.
 
 **Airborne insulation between rooms (clause 2.1.1).** Partition walls
 (*tabiquería*) within one use unit must have $R_\mathrm{A} \ge 33$ dBA. Against a room
-of another use unit, a protected room requires $D_\mathrm{nT,A} \ge 50$ dBA and a
+of another use unit, a protected room requires $D_{\mathrm{n}T,\mathrm{A}} \ge 50$ dBA and a
 habitable room $\ge 45$ dBA; against a services or activity room, a protected
 room requires $\ge 55$ dBA and a habitable room $\ge 45$ dBA. When the two
 rooms share a door or a window, the requirement moves to the opening (sound
@@ -182,12 +182,12 @@ one) and to the enclosure around it (50 dBA).
 
 **Party walls (clause 2.1.1 c).** Against a *medianería* DB-HR offers two
 **alternative** routes, not cumulative ones: either each of the two leaves
-reaches $D_{2\mathrm{m,nT,Atr}} \ge 40$ dBA, or the two leaves taken together reach
-$D_\mathrm{nT,A} \ge 50$ dBA. `db_hr_party_wall_requirement()` returns whichever route
+reaches $D_{2\mathrm{m,n}T,\mathrm{Atr}} \ge 40$ dBA, or the two leaves taken together reach
+$D_{\mathrm{n}T,\mathrm{A}} \ge 50$ dBA. `db_hr_party_wall_requirement()` returns whichever route
 is asked for.
 
 **Impact sound (clause 2.1.2).** The standardized impact sound pressure level
-$L'_\mathrm{nT,w}$ must not exceed 65 dB in a protected room against a room of another
+$L'_{\mathrm{n}T,\mathrm{w}}$ must not exceed 65 dB in a protected room against a room of another
 use unit, nor 60 dB against a services or activity room; that same 60 dB limit
 applies to the habitable room.
 
@@ -297,12 +297,12 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
 - [Spanish Noise Regulation (RD 1367/2007)](../../environment/assessment/spanish-noise-regulation.md): where
   the site's day noise index $L_\mathrm{d}$ that Table 2.1 is entered with comes from.
 - [Façade Sound Insulation](facade-insulation.md): the ISO 16283-3 measurement
-  of $D_{2\mathrm{m,nT}}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,nT,Atr}}$ index of
+  of $D_{2\mathrm{m,n}T}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ index of
   this page.
 - [Predicting Panel Sound Insulation](../design/panel-sound-insulation.md): the
   composite-facade calculation and transmission through openings and slits.
 - [Field Insulation Measurement (ISO 16283)](insulation-field.md): the band
-  spectra of $R'$, $D_\mathrm{nT}$ and $L'_\mathrm{nT}$ that these global quantities summarise.
+  spectra of $R'$, $D_{\mathrm{n}T}$ and $L'_{\mathrm{n}T}$ that these global quantities summarise.
 - API reference: [`building.regulation.spain`](https://jmrplens.github.io/phonometry/reference/api/building/spain/).
 
 ## References

@@ -28,7 +28,7 @@ machine is put in a room rather than measured in the open? The answer is the
 environmental correction of ISO 3744,
 
 $$
-\Delta L_A = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad S = S_0 \, 10^{(L_{WA} - L_{pA})/10}
+\Delta L_\mathrm{A} = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad S = S_0 \, 10^{(L_{W\mathrm{A}} - L_{p\mathrm{A}})/10}
 $$
 
 because the difference between the two printed emission quantities is the
@@ -366,18 +366,18 @@ workstation_level(
 
 The level at the machine's own workstation in the room, Annex C.
 
-$L'_{pA} = L_{pA} + \Delta L_A$, the emission value the machine was
+$L'_{p\mathrm{A}} = L_{p\mathrm{A}} + \Delta L_\mathrm{A}$, the emission value the machine was
 declared with plus what the room adds to it.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `sound_power_level_db` | $L_{WA}$ of the machine, in decibels. |
-| `emission_level_db` | $L_{pA}$ at its workstation, in decibels. |
+| `sound_power_level_db` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
+| `emission_level_db` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
 | `absorption_area_m2` | $A$ of the room, in square metres. |
 
-**Returns:** $L'_{pA}$, in decibels.
+**Returns:** $L'_{p\mathrm{A}}$, in decibels.
 
 **Raises**
 
@@ -399,7 +399,7 @@ workstation_level_increase(
 How much the room adds at the machine's own workstation, Annex C.
 
 $$
-\Delta L_A = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad \frac{S}{S_0} = 10^{(L_{WA} - L_{pA})/10}
+\Delta L_\mathrm{A} = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad \frac{S}{S_0} = 10^{(L_{W\mathrm{A}} - L_{p\mathrm{A}})/10}
 $$
 
 The two emission quantities a machine is declared with differ by the
@@ -407,17 +407,17 @@ measurement surface: the sound power level is the emission sound pressure
 level plus $10 \lg(S/S_0)$. Put the machine in a room and the
 reverberant field adds the environmental correction of ISO 3744 on top,
 which is what Figure C.1 draws against the equivalent absorption area with
-$L_{WA} - L_{pA}$ as the parameter.
+$L_{W\mathrm{A}} - L_{p\mathrm{A}}$ as the parameter.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `sound_power_level_db` | $L_{WA}$ of the machine, in decibels. |
-| `emission_level_db` | $L_{pA}$ at its workstation, in decibels. |
+| `sound_power_level_db` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
+| `emission_level_db` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
 | `absorption_area_m2` | $A$ of the room, in square metres. |
 
-**Returns:** $\Delta L_A$, in decibels.
+**Returns:** $\Delta L_\mathrm{A}$, in decibels.
 
 **Raises**
 

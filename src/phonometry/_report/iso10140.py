@@ -76,7 +76,7 @@ _SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "L<sub>n</sub>",
         "rating_symbol": "L<sub>n,w</sub>",
-        "ylabel": "$L_{n}$ [dB]",
+        "ylabel": r"$L_\mathrm{n}$ [dB]",
         "statement": (
             "Evaluation based on laboratory measurement results obtained by a "
             "precision method with the standard tapping machine."

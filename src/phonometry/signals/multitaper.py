@@ -259,7 +259,7 @@ def _dpss_eigenspectra(
     .. math::
 
        \hat{S}_k(f) = \Delta t \left\lvert \sum_t h_{tk} x_t
-       e^{-i 2 \pi f t \Delta t} \right\rvert^2
+       \mathrm{e}^{-i 2 \pi f t \Delta t} \right\rvert^2
 
     Returns ``(eigenspectra, eigenvalues, taper_dc_gains_squared)`` where
     the last term is :math:`\left( \sum_t h_{tk} \right)^2`, needed for

@@ -164,12 +164,12 @@ def _phase_table(
     headers = [
         t("Period", language),
         t("Noise phase", language),
-        "T<sub>i</sub> [h]",
-        "L<sub>Aeq,Ti</sub> [dB]",
+        "T<sub><i>i</i></sub> [h]",
+        "L<sub>Aeq,<i>Ti</i></sub> [dB]",
         "K<sub>t</sub>",
         "K<sub>f</sub>",
         "K<sub>i</sub>",
-        "L<sub>Keq,Ti</sub> [dB]",
+        "L<sub>Keq,<i>Ti</i></sub> [dB]",
     ]
     widths = [22.0, 40.0, 16.0, 26.0, 14.0, 14.0, 14.0, 28.0]
     if verbose:
@@ -291,9 +291,9 @@ def _results_table(result: ActivityAssessment, language: str = "en") -> Table:
     headers = [
         t("Period", language),
         t("Limit [dB]", language),
-        "L<sub>Keq,Ti</sub> / +5",
-        "L<sub>Keq,x</sub> / +3",
-        t("L<sub>K,x</sub> / limit", language),
+        "L<sub>Keq,<i>Ti</i></sub> / +5",
+        "L<sub>Keq,<i>x</i></sub> / +3",
+        t("L<sub>K,<i>x</i></sub> / limit", language),
         t("Result", language),
     ]
     widths = [24.0, 24.0, 32.0, 32.0, 32.0, 30.0]
@@ -340,14 +340,14 @@ def _statement(
         t("Governing period: {period}", language).format(
             period=t(_PERIOD_LABELS[governing.period], language)
         ),
-        t("L<sub>Keq,x</sub> = {value} dB, limit {limit} dB", language).format(
+        t("L<sub>Keq,<i>x</i></sub> = {value} dB, limit {limit} dB", language).format(
             value=_fmt(float(governing.reported_level), language, decimals=0),
             limit=_fmt(governing.limit, language, decimals=0),
         ),
     ]
     if governing.reported_long_term is not None:
         extended.append(
-            t("L<sub>K,x</sub> = {value} dB", language).format(
+            t("L<sub>K,<i>x</i></sub> = {value} dB", language).format(
                 value=_fmt(float(governing.reported_long_term), language, decimals=0)
             )
         )
@@ -410,8 +410,8 @@ def render_activity_report(
 
     article = "Article 25.1 b" if result.new_activity else "Article 25.2"
     basis = t(
-        "Corrected equivalent continuous level L<sub>Keq,T</sub> = "
-        "L<sub>Aeq,T</sub> + K<sub>t</sub> + K<sub>f</sub> + K<sub>i</sub> "
+        "Corrected equivalent continuous level L<sub>Keq,<i>T</i></sub> = "
+        "L<sub>Aeq,<i>T</i></sub> + K<sub>t</sub> + K<sub>f</sub> + K<sub>i</sub> "
         "(Annex I A.2 c), determined by the reference procedures of Annex IV; "
         "compliance assessed per {article} of Real Decreto 1367/2007.",
         language,
@@ -479,9 +479,9 @@ def render_activity_report(
                 "K<sub>t</sub> follows from the one-third-octave difference "
                 "L<sub>t</sub> = L<sub>f</sub> &#8722; L<sub>s</sub> against "
                 "the mean of the adjacent bands, K<sub>f</sub> from "
-                "L<sub>Ceq,Ti</sub> &#8722; L<sub>Aeq,Ti</sub> and "
-                "K<sub>i</sub> from L<sub>AIeq,Ti</sub> &#8722; "
-                "L<sub>Aeq,Ti</sub>; each is 0, 3 or 6 dB and their sum never "
+                "L<sub>Ceq,<i>Ti</i></sub> &#8722; L<sub>Aeq,<i>Ti</i></sub> and "
+                "K<sub>i</sub> from L<sub>AIeq,<i>Ti</i></sub> &#8722; "
+                "L<sub>Aeq,<i>Ti</i></sub>; each is 0, 3 or 6 dB and their sum never "
                 "exceeds 9 dB (Annex IV A.3.3).",
                 language,
             ),
@@ -494,9 +494,9 @@ def render_activity_report(
                 "The period level is the duration-weighted energy mean of the "
                 "phase levels, rounded by adding 0,5 dB and taking the integer "
                 "part (Annex IV A.3.4.2). The limit values are respected when "
-                "no annual L<sub>K,x</sub> exceeds the table value, no daily "
-                "L<sub>Keq,x</sub> exceeds it by more than 3 dB and no measured "
-                "L<sub>Keq,Ti</sub> exceeds it by more than 5 dB.",
+                "no annual L<sub>K,<i>x</i></sub> exceeds the table value, no daily "
+                "L<sub>Keq,<i>x</i></sub> exceeds it by more than 3 dB and no measured "
+                "L<sub>Keq,<i>Ti</i></sub> exceeds it by more than 5 dB.",
                 language,
             ),
             basis_strip_style,

@@ -325,7 +325,7 @@ under the line. On the left the corners run 6 dB to 8 dB above the central-zone
 average, and Formula (13) carries about half of that gap into the reported
 level: +3.4, +4.0 and +3.8 dB. On the right that lift, together with the 63 Hz
 octave reverberation time replacing the three measured ones, takes about 4 dB
-off $D_\mathrm{nT}$ in each of the three bands. The weighted rating does not
+off $D_{\mathrm{n}T}$ in each of the three bands. The weighted rating does not
 move, because ISO 717-1 reads it over 100 Hz to 3150 Hz and never sees these
 bands; the enlarged-range term that does see them, $C_{50\text{–}3150}$, moves by a
 whole decibel.*
@@ -388,8 +388,8 @@ The numbers the figure reads off are the ones the chain carries: the default
 procedure gives 54.7, 57.9 and 53.2 dB in the receiving room, Formula (12)
 gives 61.3, 65.4 and 60.4 dB in the corners, and Formula (13) reports 58.1,
 61.9 and 57.0 dB. With the 63 Hz octave time of 0.66 s substituted for the
-three measured ones, $D_\mathrm{nT}$ falls from 35.6, 33.9 and 36.9 dB to
-31.7, 29.7 and 33.3 dB. $D_\mathrm{nT,w}$ stays at 56 dB either way, and
+three measured ones, $D_{\mathrm{n}T}$ falls from 35.6, 33.9 and 36.9 dB to
+31.7, 29.7 and 33.3 dB. $D_{\mathrm{n}T,\mathrm{w}}$ stays at 56 dB either way, and
 $C_{50\text{–}3150}$ moves from −1 dB to −2 dB.
 
 ### `LowFrequencyProcedure` parameters
@@ -519,12 +519,12 @@ fall back on.
 ### Does the corner procedure change the weighted rating?
 
 Usually not the core one. ISO 717-1 and ISO 717-2 read $R'_\mathrm{w}$,
-$D_\mathrm{nT,w}$ and $L'_\mathrm{nT,w}$ over 100 Hz to 3150 Hz, and the
+$D_{\mathrm{n}T,\mathrm{w}}$ and $L'_{\mathrm{n}T,\mathrm{w}}$ over 100 Hz to 3150 Hz, and the
 procedure reaches no band in that range. What it does change is the
 enlarged-range spectrum adaptation terms of ISO 717-1 Annex B and ISO 717-2
 Annex A, $C_{50\text{–}3150}$, $C_{50\text{–}5000}$ and $C_{\mathrm{I},50\text{–}2500}$: those sum
 over the 50 Hz band upwards, so a requirement written as
-$D_\mathrm{nT,w} + C_{50\text{–}3150}$ is judged on the corner procedure whether the
+$D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ is judged on the corner procedure whether the
 report mentions it or not.
 
 ## References

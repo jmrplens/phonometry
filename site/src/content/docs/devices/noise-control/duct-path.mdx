@@ -588,7 +588,7 @@ for velocity in (5.0, 10.0, 20.0, 40.0):
     res = noise_control.silencer_self_noise(bands, airway_velocity=velocity, passages=5,
                                             height=24 * IN)
     ax.semilogx(res.frequencies, res.values, "o-", label=f"{velocity:.0f} m/s")
-ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated L_W [dB re 1 pW]")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
 ax.legend()
 plt.show()
 ```
@@ -1007,7 +1007,7 @@ walls, and drives it twice with one off-axis source that excites the plane
 mode and the first transverse mode together: once at 180 Hz, below the
 263.8 Hz the snippet just printed, and once at 400 Hz above it. Nothing else
 differs. Below cut-on the transverse mode is *evanescent*: it decays as
-$e^{-\alpha x}$ with $1/\alpha = 0.28$ m, which puts it 20 dB down 0.65 m from
+$\mathrm{e}^{-\alpha x}$ with $1/\alpha = 0.28$ m, which puts it 20 dB down 0.65 m from
 the source (one duct width), so the lumpy near field dies there and every
 wavefront after it crosses the section flat. Above cut-on it propagates, the two modes run at different
 axial wavenumbers ($k_x = 5.51$ against $k = 7.33$ rad/m at 400 Hz) and beat

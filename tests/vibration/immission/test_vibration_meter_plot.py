@@ -127,6 +127,6 @@ def test_spanish_labels_of_the_other_two_figures() -> None:
         _record(), FS_HZ, building_class="sensitive"
     )
     ax_es = assessment.plot(language="es")
-    assert ax_es.get_ylabel() == "Velocidad de valoración $v_B$ [mm/s]"
+    assert ax_es.get_ylabel() == r"Velocidad de valoración $v_\mathrm{B}$ [mm/s]"
     assert "especialmente sensible" in ax_es.get_title()
     assert "CUMPLE" in ax_es.get_title()

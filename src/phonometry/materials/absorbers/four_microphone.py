@@ -13,8 +13,8 @@ Transmission loss (Eq. (26)), hard-backed reflection/absorption
 standard one subject: everything here exists to fill the matrix or to
 interpret it.
 
-Time convention :math:`e^{+j\omega t}` with the forward wave carried by
-:math:`e^{-jkx}` (Eq. (21)); air properties from Clause 8.2/8.3, Eqs. (4)/(5),
+Time convention :math:`\mathrm{e}^{+j\omega t}` with the forward wave carried by
+:math:`\mathrm{e}^{-jkx}` (Eq. (21)); air properties from Clause 8.2/8.3, Eqs. (4)/(5),
 use temperature in **degrees Celsius**. Both differ from the ISO 10534-2
 ansatz of :mod:`~phonometry.materials.absorbers.impedance_tube`, whose
 wavenumber is :math:`k_0 = k_0' - jk_0''` and whose air properties take
@@ -243,22 +243,22 @@ def wave_decomposition(
 
     .. math::
 
-       A = \frac{j \left( H_1 e^{-jkl_1} - H_2 e^{-jk(l_1+s_1)} \right)}
+       A = \frac{j \left( H_1 \mathrm{e}^{-jkl_1} - H_2 \mathrm{e}^{-jk(l_1+s_1)} \right)}
        {2 \sin(k s_1)}
 
-       B = \frac{j \left( H_2 e^{+jk(l_1+s_1)} - H_1 e^{+jkl_1} \right)}
+       B = \frac{j \left( H_2 \mathrm{e}^{+jk(l_1+s_1)} - H_1 \mathrm{e}^{+jkl_1} \right)}
        {2 \sin(k s_1)}
 
-       C = \frac{j \left( H_3 e^{+jk(l_2+s_2)} - H_4 e^{+jkl_2} \right)}
+       C = \frac{j \left( H_3 \mathrm{e}^{+jk(l_2+s_2)} - H_4 \mathrm{e}^{+jkl_2} \right)}
        {2 \sin(k s_2)}
 
-       D = \frac{j \left( H_4 e^{-jkl_2} - H_3 e^{-jk(l_2+s_2)} \right)}
+       D = \frac{j \left( H_4 \mathrm{e}^{-jkl_2} - H_3 \mathrm{e}^{-jk(l_2+s_2)} \right)}
        {2 \sin(k s_2)}
 
     ``A``/``B`` are the forward/backward complex amplitudes on the upstream
     (source) side and ``C``/``D`` those on the downstream side, all referenced
-    to the front face :math:`x = 0`. With the :math:`e^{+j\omega t}` /
-    forward-:math:`e^{-jkx}`
+    to the front face :math:`x = 0`. With the :math:`\mathrm{e}^{+j\omega t}` /
+    forward-:math:`\mathrm{e}^{-jkx}`
     convention these exponents correspond to the microphone whose transfer
     function is ``H2`` sitting nearest the front face at distance ``l1`` (and
     ``H1`` at :math:`l_1 + s_1`), and to ``H3`` nearest the downstream side at
@@ -329,10 +329,10 @@ def face_quantities(
     .. math::
 
        p_0 = A + B, \qquad
-       p_d = C e^{-jkd} + D e^{+jkd}
+       p_d = C \mathrm{e}^{-jkd} + D \mathrm{e}^{+jkd}
 
        u_0 = \frac{A - B}{\rho c}, \qquad
-       u_d = \frac{C e^{-jkd} - D e^{+jkd}}{\rho c}
+       u_d = \frac{C \mathrm{e}^{-jkd} - D \mathrm{e}^{+jkd}}{\rho c}
 
     :param a: Upstream forward amplitude ``A``.
     :param b: Upstream backward amplitude ``B``.
@@ -410,7 +410,7 @@ class TransferMatrix(OwnsArrays):
 
         .. math::
 
-           t = \frac{2 e^{jkd}}
+           t = \frac{2 \mathrm{e}^{jkd}}
            {T_{11} + T_{12}/(\rho c) + \rho c \, T_{21} + T_{22}}
            \tag{Eq. 25}
 
@@ -419,7 +419,7 @@ class TransferMatrix(OwnsArrays):
            + \rho c \, T_{21} + T_{22} \rvert}{2}
            \tag{Eq. 26}
 
-        (the :math:`e^{jkd}` factor has unit magnitude for
+        (the :math:`\mathrm{e}^{jkd}` factor has unit magnitude for
         a real wavenumber).
 
         :param characteristic_impedance: Characteristic impedance ``rho c``.

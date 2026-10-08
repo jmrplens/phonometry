@@ -79,12 +79,12 @@ epnl_from_pnlt(
 EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
 
 $$
-\mathrm{EPNL} = 10 \cdot \log_{10}\left( \sum_{k_\mathrm{F}..k_\mathrm{L}} 10^{\mathrm{PNLT}(k)/10} \cdot \Delta t(k) \right) - 10 \cdot \log_{10}(T_0)
+\mathrm{EPNL} = 10 \cdot \log_{10}\left( \sum_{k_\mathrm{F}..k_\mathrm{L}} 10^{\mathrm{PNLT}(k)/10} \cdot \Delta t(k) \right) - 10 \cdot \log_{10}(\mathrm{t}_0)
 $$
 
 with the
 10 dB-down integration limits about the maximum `PNLTM`. The exact
-$-10 \cdot \log_{10}(T_0)$ form is used rather than the Annex's rounded
+$-10 \cdot \log_{10}(\mathrm{t}_0)$ form is used rather than the Annex's rounded
 constant 13 for
 uniform 0.5 s records (difference 0.0103 dB); the ETM Table 4-4 integrated
 reference reproduces the exact form to five decimals.

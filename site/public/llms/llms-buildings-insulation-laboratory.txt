@@ -54,15 +54,15 @@ test mounted in a test opening of about 10 m² between them.
 | | Field (ISO 16283) | Laboratory (ISO 10140) |
 | :--- | :--- | :--- |
 | Airborne element index | $R'$ apparent (with flanking) | $R$ direct (flanking suppressed) |
-| Airborne room pair | $D_\mathrm{nT}$, $D_\mathrm{n}$ (no prime: room quantities) | — |
-| Impact | $L'_\mathrm{n}$, $L'_\mathrm{nT}$ apparent | $L_\mathrm{n}$ direct |
-| Single number | $R'_\mathrm{w}$, $D_\mathrm{nT,w}$, $L'_\mathrm{n,w}$, $L'_\mathrm{nT,w}$ | $R_\mathrm{w}$, $L_\mathrm{n,w}$ |
+| Airborne room pair | $D_{\mathrm{n}T}$, $D_\mathrm{n}$ (no prime: room quantities) | — |
+| Impact | $L'_\mathrm{n}$, $L'_{\mathrm{n}T}$ apparent | $L_\mathrm{n}$ direct |
+| Single number | $R'_\mathrm{w}$, $D_{\mathrm{n}T,\mathrm{w}}$, $L'_\mathrm{n,w}$, $L'_{\mathrm{n}T,\mathrm{w}}$ | $R_\mathrm{w}$, $L_\mathrm{n,w}$ |
 | Absorption area | measured in the room | property of the facility |
 
 The apostrophe is the flanking marker of building acoustics, and it travels
 with the quantity into its single number: $R_\mathrm{w}$ rates a laboratory spectrum,
 $R'_\mathrm{w}$ a field one. The standardized and normalized level differences
-$D_\mathrm{nT}$ and $D_\mathrm{n}$ carry no prime because they describe the room pair rather
+$D_{\mathrm{n}T}$ and $D_\mathrm{n}$ carry no prime because they describe the room pair rather
 than an element, so there is no flanking-free counterpart to mark. In a
 well-built construction $R'_\mathrm{w}$ lands a few dB below the laboratory $R_\mathrm{w}$ of
 the same partition; a much larger gap says flanking dominates, and the
@@ -150,7 +150,7 @@ ax1.set_title(f"Rw = {lab.rating.rating} dB")
 ax2.semilogx(imp.rating.band_centers, imp.l_n, "o-", label="normalized Ln")
 ax2.semilogx(imp.rating.band_centers, imp.rating.shifted_reference, "s--",
              label="shifted reference")
-ax2.set_title(f"Ln,w = {imp.rating.rating} dB")
+ax2.set_title(rf"$L_\mathrm{{n,w}}$ = {imp.rating.rating} dB")
 for ax in (ax1, ax2):
     ax.set_xlabel("Frequency [Hz]")
     ax.legend()
@@ -1833,9 +1833,9 @@ as an input, together with the overall flanking descriptors $D_\mathrm{n,f}$
 empirical `junction_vibration_reduction()` of that prediction.
 
 **Vibration reduction index (Formula (13)).**
-$K_{ij} = \overline{D}_{v,ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
+$K_{ij} = \overline{D}_{\mathrm{v},ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
 the direction-averaged velocity level difference
-$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Formula (11), which
+$\overline{D}_{\mathrm{v},ij} = \tfrac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})$ (Formula (11), which
 makes $K_{ij}$ symmetric), the common-edge junction length $l_{ij}$ and the
 **equivalent absorption lengths** $a_j = 2.2\pi^2 S_j /(T_{\mathrm{s},j} c_0)\sqrt{f_\mathrm{ref}/f}$
 (Formula (12), $f_\mathrm{ref} = 1000$ Hz). For lightweight well-damped elements

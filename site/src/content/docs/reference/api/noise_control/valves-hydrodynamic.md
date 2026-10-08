@@ -42,7 +42,7 @@ recorded in `docs/ERRATA.md`:
 * Equation (12) is printed **twice, differently**: Clause 5.1 gives the
   Strouhal number a leading 0,02 and no valve style modifier, Annex A's
   Table A.1 gives it 0,036 and a factor $F_d^{0,75}$. Only the annex
-  form reproduces the annex's own printed $N_{Str}$, which is why
+  form reproduces the annex's own printed $N_\mathrm{Str}$, which is why
   [`STROUHAL_CONSTANTS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants) carries both and the default is `"annex"`.
 * Table A.1 prints the band transmission loss as `TL(8 000 Hz) = 51,76 dB`,
   positive, where its own two inputs sum to $-51{,}763$ dB.
@@ -103,14 +103,14 @@ L_{pi}(f_i) = L_{pi} + F_{turb}(f_i)
 $$
 
 $$
-L_{pi}(f_i) = L_{pi} + 10 \lg\left( \frac{\eta_{turb}}{\eta_{turb}+\eta_{cav}} 10^{0,1 F_{turb}(f_i)} + \frac{\eta_{cav}}{\eta_{turb}+\eta_{cav}} 10^{0,1 F_{cav}(f_i)} \right)
+L_{pi}(f_i) = L_{pi} + 10 \lg\left( \frac{\eta_\mathrm{turb}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0,1 F_{turb}(f_i)} + \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0,1 F_{cav}(f_i)} \right)
 $$
 
 The cavitating form is the turbulent and the cavitating spectra added in
 energy, each weighted by the share of the sound power its own efficiency
 accounts for. Since the two peak frequencies differ by a factor of a few,
 the sum is a two-humped spectrum, and which hump is taller is decided by
-$\eta_{cav}/(\eta_{turb}+\eta_{cav})$ alone.
+$\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$ alone.
 
 **Parameters**
 
@@ -118,9 +118,9 @@ $\eta_{cav}/(\eta_{turb}+\eta_{cav})$ alone.
 | :--- | :--- |
 | `frequency` | $f_i$, the band centres, in Hz. |
 | `internal_level` | $L_{pi}$ of Equation (10), in dB. |
-| `turbulent_peak` | $f_{p,turb}$, in Hz. |
-| `cavitation_peak` | $f_{p,cav}$, in Hz, or `None` for the turbulent branch. |
-| `cavitation_fraction` | $\eta_{cav}/(\eta_{turb}+\eta_{cav})$, between 0 and 1. Zero gives Equation (19a) whatever else is passed. |
+| `turbulent_peak` | $f_\mathrm{p,turb}$, in Hz. |
+| `cavitation_peak` | $f_\mathrm{p,cav}$, in Hz, or `None` for the turbulent branch. |
+| `cavitation_fraction` | $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$, between 0 and 1. Zero gives Equation (19a) whatever else is passed. |
 
 **Returns:** $L_{pi}(f_i)$, in dB, one value per band.
 
@@ -193,13 +193,13 @@ cavitation_distribution(
 Equation (20b): how cavitation noise spreads over the bands.
 
 $$
-F_{cav}(f_i) = -10 \lg\left[ \frac{1}{4}\left(\frac{f_i}{f_{p,cav}}\right)^{1,5} + \left(\frac{f_i}{f_{p,cav}}\right)^{-1,5}\right] - 3{,}5
+F_{cav}(f_i) = -10 \lg\left[ \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{1,5} + \left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{-1,5}\right] - 3{,}5
 $$
 
 The same shape as Equation (20a) with every numeral changed. Both
 exponents are $\pm 1,5$ instead of 3 and −1, so both flanks fall at
 the same 4,5 dB per octave and the hump is symmetric, but about
-$\sqrt[3]{4}\, f_{p,cav}$, two thirds of an octave above the
+$\sqrt[3]{4}\, f_\mathrm{p,cav}$, two thirds of an octave above the
 frequency Equation (13) names, because the quarter in front of the
 rising branch shifts the maximum up. Against Equation (20a)'s 3 dB up and 9 dB down
 that is a far broader spectrum: cavitation is heard as a wide band of
@@ -210,7 +210,7 @@ gravel where turbulence is heard as a hiss around one frequency.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | $f_i$, the band centres, in Hz. |
-| `peak` | $f_{p,cav}$ from [`cavitation_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_peak_frequency), in Hz. |
+| `peak` | $f_\mathrm{p,cav}$ from [`cavitation_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_peak_frequency), in Hz. |
 
 **Returns:** $F_{cav}(f_i)$, in dB.
 
@@ -236,7 +236,7 @@ cavitation_efficiency(
 Equation (9): what the collapsing bubbles add.
 
 $$
-\eta_{cav} = 0{,}32\, \eta_{turb} \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\; e^{5 x_{Fzp1}} \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5} \left(\frac{x_F}{x_{Fzp1}}\right)^{5} \left(x_F - x_{Fzp1}\right)^{1,5}
+\eta_\mathrm{cav} = 0{,}32\, \eta_\mathrm{turb} \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\; \mathrm{e}^{5 x_{Fzp1}} \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5} \left(\frac{x_F}{x_{Fzp1}}\right)^{5} \left(x_F - x_{Fzp1}\right)^{1,5}
 $$
 
 Three of those factors are what makes cavitation noise behave the way it
@@ -251,13 +251,13 @@ stops.
 
 | Name | Description |
 | :--- | :--- |
-| `turbulent` | $\eta_{turb}$ from [`turbulent_efficiency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_efficiency). |
+| `turbulent` | $\eta_\mathrm{turb}$ from [`turbulent_efficiency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_efficiency). |
 | `differential` | $p_1 - p_2$, in Pa. |
 | `choked_differential` | $\Delta p_c$ from [`cavitation_differential`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_differential), in Pa. |
 | `pressure_ratio` | $x_F$ of Equation (1). |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c). |
 
-**Returns:** $\eta_{cav}$, dimensionless, and exactly zero on the threshold.
+**Returns:** $\eta_\mathrm{cav}$, dimensionless, and exactly zero on the threshold.
 
 **Raises**
 
@@ -286,7 +286,7 @@ cavitation_peak_frequency(
 Equation (13): the peak frequency of the cavitation noise.
 
 $$
-f_{p,cav} = 6 f_{p,turb} \left(\frac{1 - x_F}{1 - x_{Fzp1}}\right)^{2} \left(\frac{x_{Fzp1}}{x_F}\right)^{2,5}
+f_\mathrm{p,cav} = 6 f_\mathrm{p,turb} \left(\frac{1 - x_F}{1 - x_{Fzp1}}\right)^{2} \left(\frac{x_{Fzp1}}{x_F}\right)^{2,5}
 $$
 
 Both brackets are the reciprocals of the ones in Equation (9), and that
@@ -301,11 +301,11 @@ drops back down into a rumble.
 
 | Name | Description |
 | :--- | :--- |
-| `turbulent_peak` | $f_{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
+| `turbulent_peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
 | `pressure_ratio` | $x_F$ of Equation (1). |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c). |
 
-**Returns:** $f_{p,cav}$, in Hz.
+**Returns:** $f_\mathrm{p,cav}$, in Hz.
 
 **Raises**
 
@@ -330,7 +330,7 @@ cavitation_transmission_loss(
 Equation (17): the transmission loss once the valve cavitates.
 
 $$
-TL_{cav} = TL_{turb} + 10 \lg\left( 250\, \frac{f_{p,cav}^{1,5}}{f_{p,turb}^{2}}\, \frac{\eta_{cav}}{\eta_{turb} + \eta_{cav}}\right)
+TL_{cav} = TL_{turb} + 10 \lg\left( 250\, \frac{f_\mathrm{p,cav}^{1,5}}{f_\mathrm{p,turb}^{2}}\, \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb} + \eta_\mathrm{cav}}\right)
 $$
 
 Cavitation noise peaks higher in frequency than turbulent noise, and the
@@ -339,7 +339,7 @@ positive: the wall becomes *less* effective when the valve cavitates,
 which is one reason cavitating valves are heard from far away.
 
 The NOTE to the equation floors the efficiency ratio at
-$f_{p,turb}^2/(250 f_{p,cav}^{1,5})$ while $x_F$ is within
+$f_\mathrm{p,turb}^2/(250 f_\mathrm{p,cav}^{1,5})$ while $x_F$ is within
 0,1 of the threshold, which is exactly the value that makes the bracket
 equal 1. Just above incipient cavitation, where the cavitating efficiency
 is still a small fraction of the total, the floor therefore keeps the
@@ -352,9 +352,9 @@ printed.
 | Name | Description |
 | :--- | :--- |
 | `turbulent_loss` | $TL_{turb}$ of Equation (16a), in dB. |
-| `turbulent_peak` | $f_{p,turb}$, in Hz. |
-| `cavitation_peak` | $f_{p,cav}$, in Hz. |
-| `efficiency_ratio` | $\eta_{cav}/(\eta_{turb}+\eta_{cav})$. |
+| `turbulent_peak` | $f_\mathrm{p,turb}$, in Hz. |
+| `cavitation_peak` | $f_\mathrm{p,cav}$, in Hz. |
+| `efficiency_ratio` | $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$. |
 | `pressure_ratio` | $x_F$, for the NOTE's floor. |
 | `corrected_ratio` | $x_{Fzp1}$, for the NOTE's floor. |
 
@@ -526,15 +526,15 @@ What IEC 60534-8-4 says about one operating point on a liquid line.
 | `incipient_ratio` | $x_{Fz}$, the threshold as given, at 6 × 10⁵ Pa. |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c), the threshold at the working inlet pressure. This is the number the regime test is made against. |
 | `jet_diameter_m` | $D_j$ of Equation (4), in m. |
-| `velocity` | $U_{vc}$ of Equation (5), in m/s. |
+| `velocity` | $U_\mathrm{vc}$ of Equation (5), in m/s. |
 | `stream_power` | $W_m$ of Equation (6), in W. |
-| `turbulent_efficiency` | $\eta_{turb}$ of Equation (8). |
-| `cavitation_efficiency` | $\eta_{cav}$ of Equation (9), or `None` in the turbulent regime. |
+| `turbulent_efficiency` | $\eta_\mathrm{turb}$ of Equation (8). |
+| `cavitation_efficiency` | $\eta_\mathrm{cav}$ of Equation (9), or `None` in the turbulent regime. |
 | `sound_power` | $W_a$ of Equation (7a) or (7b), in W. |
 | `internal_level` | $L_{pi}$ of Equation (10), in dB. |
-| `strouhal_number` | $N_{STR}$ of Equation (12). |
-| `turbulent_peak` | $f_{p,turb}$ of Equation (11), in Hz. |
-| `cavitation_peak` | $f_{p,cav}$ of Equation (13), in Hz, or `None` in the turbulent regime. |
+| `strouhal_number` | $N_\mathrm{STR}$ of Equation (12). |
+| `turbulent_peak` | $f_\mathrm{p,turb}$ of Equation (11), in Hz. |
+| `cavitation_peak` | $f_\mathrm{p,cav}$ of Equation (13), in Hz, or `None` in the turbulent regime. |
 | `pipe_ring_frequency` | $f_r$ of Equation (14), in Hz. |
 | `reference_transmission_loss` | $TL_{fr}$ of Equation (15), in dB, negative. |
 | `turbulent_transmission_loss` | $TL_{turb}$ of Equation (16a), in dB. |
@@ -659,13 +659,13 @@ jet_strouhal_number(
 Equation (12): the Strouhal number of the jet.
 
 $$
-N_{STR} = \frac{0{,}036\, F_L^2\, C\, F_d^{0,75}} {N_{34}\, x_{Fzp1}^{1,5}\, d\, d_o} \left(\frac{1}{p_1 - p_v}\right)^{0,57}
+N_\mathrm{STR} = \frac{0{,}036\, F_L^2\, C\, F_d^{0,75}} {N_{34}\, x_{Fzp1}^{1,5}\, d\, d_o} \left(\frac{1}{p_1 - p_v}\right)^{0,57}
 $$
 
 This is the one place where the two printings of the standard disagree
 with each other. The form above is Table A.1's; Clause 5.1 prints the
 same equation with a leading 0,02 and **no** $F_d^{0,75}$. Only the
-annex form reproduces the annex's own $N_{Str} = 0{,}399$, so it is
+annex form reproduces the annex's own $N_\mathrm{Str} = 0{,}399$, so it is
 the default here; pass `form="clause"` for the normative text's version
 and see `docs/ERRATA.md`.
 
@@ -688,7 +688,7 @@ and comes out anywhere between about 0,2 and 0,5.
 | `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{34}$. |
 | `form` | Which printing of Equation (12) to use, `"annex"` or `"clause"`. |
 
-**Returns:** $N_{STR}$, dimensionless.
+**Returns:** $N_\mathrm{STR}$, dimensionless.
 
 **Raises**
 
@@ -871,10 +871,10 @@ mechanical_stream_power(
 Equation (6): the stream power the valve dissipates.
 
 $$
-W_m = \frac{\dot m\, U_{vc}^2\, F_L^2}{2}
+W_m = \frac{\dot m\, U_\mathrm{vc}^2\, F_L^2}{2}
 $$
 
-The kinetic power of the jet, $\dot m U_{vc}^2/2$, scaled back by
+The kinetic power of the jet, $\dot m U_\mathrm{vc}^2/2$, scaled back by
 $F_L^2$ to the part of it that is actually thrown away rather than
 recovered as pressure downstream. Equation (7a) then takes a part in
 $10^{-6}$ of this and calls it sound.
@@ -884,7 +884,7 @@ $10^{-6}$ of this and calls it sound.
 | Name | Description |
 | :--- | :--- |
 | `mass_flow` | $\dot m$, in kg/s. |
-| `velocity` | $U_{vc}$ from [`vena_contracta_velocity`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#vena_contracta_velocity), in m/s. |
+| `velocity` | $U_\mathrm{vc}$ from [`vena_contracta_velocity`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#vena_contracta_velocity), in m/s. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 
 **Returns:** $W_m$, in W.
@@ -1155,7 +1155,7 @@ turbulent_distribution(
 Equation (20a): how turbulent noise spreads over the bands.
 
 $$
-F_{turb}(f_i) = -10 \lg\left[ \frac{1}{4}\left(\frac{f_i}{f_{p,turb}}\right)^{3} + \left(\frac{f_i}{f_{p,turb}}\right)^{-1}\right] - 3{,}1
+F_{turb}(f_i) = -10 \lg\left[ \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{3} + \left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{-1}\right] - 3{,}1
 $$
 
 A band correction, in dB, that adds to the overall internal level. The
@@ -1166,9 +1166,9 @@ per octave. The trailing 3,1 dB is a printed offset and not a
 normalisation: over the band set of 5.4.1 these corrections do not sum
 back to $L_{pi}$, they sum about 5 dB above it, so the band route
 and the overall route of Equation (18a) are two answers and not one
-answer twice. The maximum is not exactly at $f_{p,turb}$ either:
+answer twice. The maximum is not exactly at $f_\mathrm{p,turb}$ either:
 the quarter in front of the rising branch puts it at
-$(4/3)^{1/4} f_{p,turb}$, a few per cent above.
+$(4/3)^{1/4} f_\mathrm{p,turb}$, a few per cent above.
 
 The negative exponent is easy to lose. Text extracted from the printed
 page renders it as a bare 1, which flattens the low-frequency side.
@@ -1178,7 +1178,7 @@ page renders it as a bare 1, which flattens the low-frequency side.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | $f_i$, the band centres, in Hz. |
-| `peak` | $f_{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
+| `peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
 
 **Returns:** $F_{turb}(f_i)$, in dB.
 
@@ -1197,7 +1197,7 @@ turbulent_efficiency(velocity: float, speed_of_sound: float) -> float
 Equation (8): the acoustical efficiency of the turbulent jet.
 
 $$
-\eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)
+\eta_\mathrm{turb} = 10^{-4}\left(\frac{U_\mathrm{vc}}{c_L}\right)
 $$
 
 5.1 argues the case: at these velocities the jet is slow enough to be a
@@ -1211,10 +1211,10 @@ in the $10^{-6}$ range: one part in a million of the stream power.
 
 | Name | Description |
 | :--- | :--- |
-| `velocity` | $U_{vc}$, in m/s. |
+| `velocity` | $U_\mathrm{vc}$, in m/s. |
 | `speed_of_sound` | $c_L$ in the liquid, in m/s. |
 
-**Returns:** $\eta_{turb}$, dimensionless.
+**Returns:** $\eta_\mathrm{turb}$, dimensionless.
 
 **Raises**
 
@@ -1235,7 +1235,7 @@ turbulent_peak_frequency(
 Equation (11): the peak frequency of the turbulent noise.
 
 $$
-f_{p,turb} = N_{STR}\, \frac{U_{vc}}{D_j}
+f_\mathrm{p,turb} = N_\mathrm{STR}\, \frac{U_\mathrm{vc}}{D_j}
 $$
 
 A jet radiates around the frequency at which its own eddies pass a fixed
@@ -1246,11 +1246,11 @@ diameter of Equation (4) stands for that size.
 
 | Name | Description |
 | :--- | :--- |
-| `strouhal_number` | $N_{STR}$ from [`jet_strouhal_number`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#jet_strouhal_number). |
-| `velocity` | $U_{vc}$, in m/s. |
+| `strouhal_number` | $N_\mathrm{STR}$ from [`jet_strouhal_number`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#jet_strouhal_number). |
+| `velocity` | $U_\mathrm{vc}$, in m/s. |
 | `jet` | $D_j$ of Equation (4), in m. |
 
-**Returns:** $f_{p,turb}$, in Hz.
+**Returns:** $f_\mathrm{p,turb}$, in Hz.
 
 **Raises**
 
@@ -1349,7 +1349,7 @@ vena_contracta_velocity(
 Equation (5): the jet velocity.
 
 $$
-U_{vc} = \frac{1}{F_L}\sqrt{\frac{2 \Delta p_c}{\rho_L}}
+U_\mathrm{vc} = \frac{1}{F_L}\sqrt{\frac{2 \Delta p_c}{\rho_L}}
 $$
 
 Bernoulli's velocity for the differential of Equation (2), divided by the
@@ -1364,7 +1364,7 @@ ideal velocity head the valve actually reaches at the vena contracta.
 | `density` | $\rho_L$ of the liquid, in kg/m³. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 
-**Returns:** $U_{vc}$, in m/s.
+**Returns:** $U_\mathrm{vc}$, in m/s.
 
 **Raises**
 

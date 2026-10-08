@@ -168,7 +168,7 @@ def _relation_strip(language: str = "en") -> str:
         "m<sub>0</sub> = 1 kg, S<sub>0</sub> = 1 m<super>2</super>, the plate "
         "loss factor &#951; = 2,2/(f T<sub>s</sub>) (Formula 13) and the "
         "spatial mean velocity level L<sub>v</sub> = 10 lg((1/N) &#931; "
-        "10<super>L<sub>v,i</sub>/10</super>) re v<sub>0</sub> = "
+        "10<super>L<sub>v,<i>i</i></sub>/10</super>) re v<sub>0</sub> = "
         "10<super>&#8722;9</super> m/s (Formula 12).",
         language,
     )
@@ -180,7 +180,7 @@ def _conversion_strip(language: str = "en") -> str:
         "Formula 14 gives the power injected into this particular reception "
         "plate, not a plate-independent source descriptor: convert it to the "
         "equivalent blocked force level (Formula 15) and the characteristic "
-        "reception-plate power level L<sub>Ws,n</sub> (Formula 17), then apply "
+        "reception-plate power level L<sub>Wsn</sub> (Formula 17), then apply "
         "the EN 12354-5:2009 Annex I mobility correction, before predicting an "
         "installed level.",
         language,

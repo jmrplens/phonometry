@@ -210,10 +210,10 @@ A lo largo del sobrevuelo, $\mathrm{PNLT} = \mathrm{PNL} + C$ y su máximo es
 $\mathrm{PNLTM}$. La métrica convierte el nivel corregido por tonos de vuelta a
 energía, la suma sobre los registros comprendidos entre los dos puntos de 10 dB
 por debajo y la divide por una duración de referencia fija
-$t_0 = 10\ \text{s}$ (Ap. 2 §4.6),
+$\mathrm{t}_0 = 10\ \text{s}$ (Ap. 2 §4.6),
 
 $$
-\mathrm{EPNL} = 10\lg\!\left[\frac{1}{t_0}\sum_k 10^{\mathrm{PNLT}(k)/10}\,
+\mathrm{EPNL} = 10\lg\!\left[\frac{1}{\mathrm{t}_0}\sum_k 10^{\mathrm{PNLT}(k)/10}\,
 \Delta t_k\right],
 $$
 
@@ -374,9 +374,9 @@ lleva al día de referencia con
 
 $$
 \mathrm{SPL}_\mathrm{R}(i) = \mathrm{SPL}(i)
- + 0{,}01\,[\alpha(i) - \alpha_\mathrm{R}(i)]\,QK
- + 0{,}01\,\alpha_\mathrm{R}(i)\,(QK - Q_\mathrm{r}K_\mathrm{r})
- + 20\lg\frac{QK}{Q_\mathrm{r}K_\mathrm{r}},
+ + 0{,}01\,[\alpha(i) - \alpha_\mathrm{R}(i)]\,\mathrm{QK}
+ + 0{,}01\,\alpha_\mathrm{R}(i)\,(\mathrm{QK} - \mathrm{Q}_r\mathrm{K}_r)
+ + 20\lg\frac{\mathrm{QK}}{\mathrm{Q}_r\mathrm{K}_r},
 $$
 
 que cambia el coeficiente de absorción del día de ensayo por el de referencia
@@ -394,7 +394,7 @@ $$
 
 (§8.3.6). $\Delta_{\text{peak}}$ se ocupa de una cresta secundaria que quede a
 menos de 2 dB del $\mathrm{PNLTM}$ y que exceda el máximo ajustado (§8.3.3);
-$\Delta_2 = -7{,}5\lg(QK/Q_\mathrm{r}K_\mathrm{r}) + 10\lg(V_\mathrm{G}/V_\mathrm{GR})$ es el cambio de duración por
+$\Delta_2 = -7{,}5\lg(\mathrm{QK}/\mathrm{Q}_r\mathrm{K}_r) + 10\lg(\mathrm{V}_\mathrm{G}/\mathrm{V}_\mathrm{GR})$ es el cambio de duración por
 la longitud de trayecto y la velocidad respecto al suelo (§8.3.4); y $\Delta_3$
 corrige la diferencia entre los parámetros operacionales de propulsión del vuelo
 de ensayo y los especificados para la condición de referencia, a partir de las
@@ -407,12 +407,12 @@ del Capítulo 3.
 La biblioteca aporta los ingredientes y no la contabilidad. `air_attenuation` y
 `sae_band_attenuation`, más abajo, dan los $\alpha(i)$ y $\alpha_\mathrm{R}(i)$
 de los dos primeros términos, aunque no en su unidad: el §8.3.2.1 toma los
-coeficientes en dB/100 m con $QK$ en metros, y eso es lo que convierte el 0,01,
+coeficientes en dB/100 m con $\mathrm{QK}$ en metros, y eso es lo que convierte el 0,01,
 mientras que `air_attenuation` devuelve dB/m (el $0{,}01\,\alpha(i)$ de esos
 términos) y `sae_band_attenuation` una atenuación en banda a lo largo de un
-camino dado, en dB (el $0{,}01\,\alpha(i)\,QK$ entero para el camino $QK$). La
+camino dado, en dB (el $0{,}01\,\alpha(i)\,\mathrm{QK}$ entero para el camino $\mathrm{QK}$). La
 maquinaria del EPNL vuelve a pasar un espectro ajustado con la misma facilidad
-que uno medido; la geometría de la trayectoria $QK/Q_\mathrm{r}K_\mathrm{r}$ y
+que uno medido; la geometría de la trayectoria $\mathrm{QK}/\mathrm{Q}_r\mathrm{K}_r$ y
 los cuatro términos $\Delta$ en sí no están implementados. Primero se ajusta y luego se informa: el EPNL que devuelve esta
 página es un valor del día de ensayo, y un veredicto de `requirement` solo es un
 veredicto de certificación una vez aplicado el §8.

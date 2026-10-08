@@ -63,7 +63,7 @@ This guide continues from the [Room Acoustics guide](/phonometry/buildings/rooms
 the same impulse response, measured either side of a partition, yields its
 sound insulation. This page covers the engineering-grade measurement of
 ISO 16283 in the finished building: the airborne level differences $D$,
-$D_\mathrm{nT}$ and $R'$, the impact levels $L'_\mathrm{nT}$ and $L'_\mathrm{n}$, the field test
+$D_{\mathrm{n}T}$ and $R'$, the impact levels $L'_{\mathrm{n}T}$ and $L'_\mathrm{n}$, the field test
 report, and the ISO 12999-1 uncertainty that qualifies every field value.
 Three close relatives have guides of their own: the reference-curve engine
 behind every single number in
@@ -100,12 +100,12 @@ room ($L_1$) and the **receiving** room ($L_2$) per one-third-octave band
 and form the level difference $D = L_1 - L_2$. Two normalisations make it
 comparable between rooms. The **standardized level difference** references
 the receiving-room reverberation time $T$ to $T_0 = 0.5$ s (so with
-$T = 0.5$ s, $D_\mathrm{nT} = D$ exactly), and the **apparent sound reduction
+$T = 0.5$ s, $D_{\mathrm{n}T} = D$ exactly), and the **apparent sound reduction
 index** normalises by the partition area $S$ and the Sabine absorption area
 $A$:
 
 $$
-D_\mathrm{nT} = D + 10 \log_{10} \frac{T}{T_0}, \qquad
+D_{\mathrm{n}T} = D + 10 \log_{10} \frac{T}{T_0}, \qquad
 R' = D + 10 \log_{10} \frac{S}{A}, \qquad A = \frac{0.16\ V}{T}.
 $$
 
@@ -115,7 +115,7 @@ $L = 10 \log_{10}\left( \frac{1}{n} \sum_j 10^{L_j/10} \right)$.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup.svg" alt="Field airborne insulation setup: a loudspeaker in the source room, microphones energy-averaged in source and receiving rooms across the common partition" width="92%" loading="eager" />
 
 The prime on $R'$ is a convention, not decoration: primed quantities ($R'$,
-$L'_\mathrm{n}$, $L'_\mathrm{nT}$) are measured **in the building** and include every
+$L'_\mathrm{n}$, $L'_{\mathrm{n}T}$) are measured **in the building** and include every
 flanking path, while the unprimed $R$ and $L_\mathrm{n}$ are laboratory properties of
 the element alone, measured with flanking suppressed. The full lab-to-field
 map lives in
@@ -124,16 +124,16 @@ prediction that bridges the two is
 [EN 12354](/phonometry/buildings/design/insulation-prediction/).
 
 One measurement yields all three quantities, so **which one goes on the report
-is a regulatory question, not a measurement one.** $D_\mathrm{nT}$ describes the room
+is a regulatory question, not a measurement one.** $D_{\mathrm{n}T}$ describes the room
 pair as the occupants experience it, and that is what most national codes for
 dwellings state their requirements in. $R'$ describes the partition, normalised
 by its area, and is what a comparison against a laboratory $R_\mathrm{w}$ or an EN 12354
 prediction needs. Measure once, then report the quantity the requirement is
 written in and say which it is: an $R'_\mathrm{A}$ cannot be checked against a
-$D_\mathrm{nT,A}$ limit without converting through the room's $T$ and the partition
+$D_{\mathrm{n}T,\mathrm{A}}$ limit without converting through the room's $T$ and the partition
 area first; see
 [Spanish Building Code (CTE DB-HR)](/phonometry/buildings/insulation/spanish-building-code/),
-which states its between-rooms requirement in $D_\mathrm{nT,A}$ and its
+which states its between-rooms requirement in $D_{\mathrm{n}T,\mathrm{A}}$ and its
 partition-wall requirement in $R_\mathrm{A}$.
 
 ```python
@@ -164,7 +164,7 @@ spectrum to `weighted_rating`, so every band aligns index-by-index with the
 ISO 717-1 reference curve.
 
 The scale is worth carrying: for a separating wall or floor between dwellings,
-national requirements typically sit around $D_\mathrm{nT,w} = 50$ dB and rarely below
+national requirements typically sit around $D_{\mathrm{n}T,\mathrm{w}} = 50$ dB and rarely below
 45 dB, so the 40 dB of this deliberately flat example would fail every one of
 them. Higher is better for an airborne quantity, and 5 dB is roughly the step
 between a construction that works and one that generates complaints.
@@ -182,7 +182,7 @@ between a construction that works and one that generates complaints.
 
 `airborne_insulation()` returns an `AirborneInsulationResult` (`d`, `dnt`,
 `r_prime` or `None`). The reference-curve engine that turns any of those
-spectra into $R_\mathrm{w}$, $R'_\mathrm{w}$ or $D_\mathrm{nT,w}$, its spectrum adaptation terms and its
+spectra into $R_\mathrm{w}$, $R'_\mathrm{w}$ or $D_{\mathrm{n}T,\mathrm{w}}$, its spectrum adaptation terms and its
 enlarged-range variants are in
 [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/).
 
@@ -252,13 +252,13 @@ Use the three-regime expression above for field levels.
 
 With **multiple loudspeakers operating simultaneously** (Clause 7.3.3) there
 is one measurement: energy-average the positions in each room, correct for
-background noise, and form $D_\mathrm{nT}$ or $R'$ once. With a **single loudspeaker
+background noise, and form $D_{\mathrm{n}T}$ or $R'$ once. With a **single loudspeaker
 moved between positions** (Clause 7.3.4) the standard does *not* average the
 levels across loudspeaker positions. It forms the result for each position and
 averages the *results* as transmission factors,
 
 $$
-D_\mathrm{nT} = -10\log_{10}\left[\frac{1}{m}\sum_{j=1}^{m} 10^{-D_{\mathrm{nT},j}/10}\right],
+D_{\mathrm{n}T} = -10\log_{10}\left[\frac{1}{m}\sum_{j=1}^{m} 10^{-D_{\mathrm{n}T,j}/10}\right],
 $$
 
 which weights the worst position most. The two routes are not the same number:
@@ -313,7 +313,7 @@ $$
 L_\mathrm{LF} = 10\log_{10}\left[\frac{10^{0.1 L_\text{Corner}} + 2 \cdot 10^{0.1 L}}{3}\right].
 $$
 
-$L_\mathrm{LF}$ replaces $L$ in those three bands, and $D_\mathrm{nT}$ or $R'$ is then
+$L_\mathrm{LF}$ replaces $L$ in those three bands, and $D_{\mathrm{n}T}$ or $R'$ is then
 formed exactly as before. Under the receiving room's own trigger, Clause 10.4
 also stops the
 50 Hz, 63 Hz and 80 Hz one-third-octave reverberation times being measured and
@@ -373,16 +373,16 @@ receiving room is normalised like the airborne case, but with a sign flip on
 the reverberation term:
 
 $$
-L'_\mathrm{nT} = L_\mathrm{i} - 10 \log_{10} \frac{T}{T_0}, \qquad
+L'_{\mathrm{n}T} = L_\mathrm{i} - 10 \log_{10} \frac{T}{T_0}, \qquad
 L'_\mathrm{n} = L_\mathrm{i} + 10 \log_{10} \frac{A}{A_0}, \quad
 A_0 = 10\ \text{m}^2,\ A = \frac{0.16\ V}{T}.
 $$
 
-The **standardized** impact level $L'_\mathrm{nT}$ ($T_0 = 0.5$ s for dwellings)
+The **standardized** impact level $L'_{\mathrm{n}T}$ ($T_0 = 0.5$ s for dwellings)
 needs only the receiving-room $T$, so with $T = 0.5$ s it equals $L_\mathrm{i}$; the
 **normalized** level $L'_\mathrm{n}$ (referenced to a 10 m² absorption area) also needs
 the receiving-room volume. Note the **minus** sign: more reverberation
-*lowers* $L'_\mathrm{nT}$, opposite to the airborne $D_\mathrm{nT}$.
+*lowers* $L'_{\mathrm{n}T}$, opposite to the airborne $D_{\mathrm{n}T}$.
 
 The tapping machine is not the only source ISO 16283-2 specifies. Its hammers
 deliver a hard, quasi-stationary excitation whose energy sits above 100 Hz,
@@ -420,11 +420,11 @@ print(building.weighted_impact_rating(octave).rating)  # 54
 
 Feed `impact_insulation`'s `l_n_t` (or `l_n`) straight into
 `weighted_impact_rating`; the rating and $C_\mathrm{I}$ reproduce the ISO 717-2 Annex C
-values (thirds $L'_\mathrm{nT,w} = 79$, $C_\mathrm{I} = -11$; octave 54, $C_\mathrm{I} = 0$).
+values (thirds $L'_{\mathrm{n}T,\mathrm{w}} = 79$, $C_\mathrm{I} = -11$; octave 54, $C_\mathrm{I} = 0$).
 
 The sign of the scale reverses here: **lower is better** for an impact
 quantity. National limits for dwellings sit in the 50 to 60 dB range, so
-$L'_\mathrm{nT,w} = 79$ dB is a bare structural floor with no covering and no floating
+$L'_{\mathrm{n}T,\mathrm{w}} = 79$ dB is a bare structural floor with no covering and no floating
 layer, failing by roughly 20 dB. The Annex C example is a worst case, not a
 typical one. What it takes to close a gap of that size is a floating floor on a
 resilient layer or a decoupled ceiling, not a carpet; see
@@ -451,9 +451,9 @@ The per-band field results write the test report of ISO 16283-1:2014 /
 ISO 16283-2:2020 Clause 14 directly, laid out like the recommended results
 forms (Annex B / Annex C) and the accredited field reports built on them.
 `AirborneInsulationResult.report()` renders the standardized level difference
-$D_\mathrm{nT}$ fiche (Figure B.1) or, with `quantity="r_prime"`, the apparent sound
+$D_{\mathrm{n}T}$ fiche (Figure B.1) or, with `quantity="r_prime"`, the apparent sound
 reduction index $R'$ fiche (Figure B.2); `ImpactInsulationResult.report()`
-renders the standardized $L'_\mathrm{nT}$ fiche (Figure C.1) or, with
+renders the standardized $L'_{\mathrm{n}T}$ fiche (Figure C.1) or, with
 `quantity="l_n"`, the normalized $L'_\mathrm{n}$ fiche (Figure C.2). Each fiche names
 the field standard in its basis line, evaluates the ISO 717-1 / ISO 717-2
 single-number rating over the 16 core one-third-octave bands (100–3150 Hz),
@@ -512,9 +512,9 @@ imp.report("LnTw_field.pdf",
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/field_airborne_insulation.svg" alt="Field airborne measurement chain: the raw level difference D and the standardized DnT across the sixteen one-third-octave bands, with the reverberation correction shaded between them and the resulting DnT,w and R'w ratings annotated" width="80%" />
 
 *The receiving-room reverberation time turns the raw level difference $D$
-into the standardized $D_\mathrm{nT}$ band by band; with $T$ above $T_0 = 0.5$ s
+into the standardized $D_{\mathrm{n}T}$ band by band; with $T$ above $T_0 = 0.5$ s
 across the range, the correction lifts the curve slightly. The rating box
-carries both single numbers of this measurement, $D_\mathrm{nT,w}$ and $R'_\mathrm{w}$.*
+carries both single numbers of this measurement, $D_{\mathrm{n}T,\mathrm{w}}$ and $R'_\mathrm{w}$.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -708,7 +708,7 @@ power off the radiating face instead of the receiving-room level, is
 <Scope>
 <ScopeClaim status="covered" label="Covered">
 ISO 16283-1:2014 (airborne field insulation: the level difference,
-standardized $D_\mathrm{nT}$ and apparent $R'$ of Clause 3.12-3.15 and the Clause 7.8
+standardized $D_{\mathrm{n}T}$ and apparent $R'$ of Clause 3.12-3.15 and the Clause 7.8
 position averaging) and ISO 16283-2:2020 (impact field insulation, the same
 normalisations with the sign flip) through `building.energy_average_level`,
 `building.airborne_insulation` and `building.impact_insulation`, each writing
@@ -785,8 +785,8 @@ Intensity](/phonometry/buildings/insulation/insulation-intensity/)).
 
 ### What does DnT,w mean?
 
-$D_\mathrm{nT,w}$ is the weighted standardized level difference. Per
-one-third-octave band, $D_\mathrm{nT} = D + 10 \log_{10}(T/T_0)$ references the
+$D_{\mathrm{n}T,\mathrm{w}}$ is the weighted standardized level difference. Per
+one-third-octave band, $D_{\mathrm{n}T} = D + 10 \log_{10}(T/T_0)$ references the
 receiving-room reverberation time $T$ to $T_0 = 0.5$ s, with
 $D = L_1 - L_2$ the source-to-receiving level difference (ISO 16283-1).
 The ISO 717-1 reference-curve method then collapses the 16 bands from
@@ -795,7 +795,7 @@ The ISO 717-1 reference-curve method then collapses the 16 bands from
 ### What is the difference between R and R' in sound insulation?
 
 The prime marks where the measurement was made: primed quantities ($R'$,
-$L'_\mathrm{n}$, $L'_\mathrm{nT}$) are measured in the building and include every flanking
+$L'_\mathrm{n}$, $L'_{\mathrm{n}T}$) are measured in the building and include every flanking
 path, while the unprimed $R$ and $L_\mathrm{n}$ are laboratory properties of the
 element alone, measured with flanking suppressed. In the field
 (ISO 16283-1), $R' = D + 10 \log_{10}(S/A)$ with partition area $S$ and

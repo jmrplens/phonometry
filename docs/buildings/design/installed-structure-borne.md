@@ -6,17 +6,17 @@
 by building service equipment (pumps, fans, lifts, water installations) that
 injects **structure-borne sound** into the building. It closes the
 structural-vibroacoustics chain: the source is described by its characteristic
-structure-borne sound power level $L_{W\mathrm{s,c}}$, derived from the EN 15657
+structure-borne sound power level $L_\mathrm{Ws,c}$, derived from the EN 15657
 reception-plate measurement through the Formula (15)/(17) conversion and a
 mobility correction (**not** the raw plate-injected level;
 see [EN 15657](structure-borne-power.md)); the source and receiver point
 mobilities set how much power is actually coupled into the structure, and the
 building transmission carries it to the receiving room. The Annex I mobility
 correction `installed_power_from_reception_plate` refers the characteristic
-reception-plate level $L_{W\mathrm{s,n}}$ to the actual receiver,
-$L_{W\mathrm{s,inst}} = L_{W\mathrm{s,n}} + 10\log_{10}(Y_{\infty,i} / Y_{\infty,\mathrm{rec}})$
+reception-plate level $L_\mathrm{Ws,n}$ to the actual receiver,
+$L_\mathrm{Ws,inst} = L_\mathrm{Ws,n} + 10\log_{10}(Y_{\infty,i} / Y_{\infty,\mathrm{rec}})$
 with $Y_{\infty,\mathrm{rec}} = 5\cdot 10^{-6}\ \text{m/(N·s)}$;
-with the source mobility instead it yields $L_{W\mathrm{s,c}}$ (Annex I.3, Table I.8).
+with the source mobility instead it yields $L_\mathrm{Ws,c}$ (Annex I.3, Table I.8).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne.svg" alt="The EN 12354-5 cascade per octave band: the characteristic structure-borne power level, the installed power level after subtracting the coupling term, the per-path normalised sound pressure levels, and their energetic total" width="82%"></picture>
 
@@ -64,7 +64,7 @@ which reduces to $10\log_{10}(|Y_\mathrm{s}|/\mathrm{Re}\{Y_i\})$ for a **force 
 mobility, Formula 19c) and to $-10\log_{10}(|Y_\mathrm{s}|\,\mathrm{Re}\{Z_i\})$ for a **velocity source**
 (low source mobility, Formula 19d); an elastic support adds its transfer
 mobility $Y_k$ inside the modulus (Formula 19e). The **installed** power level is
-then (Formula 18b) $L_{W\mathrm{s,inst}} = L_{W\mathrm{s,c}} - D_\mathrm{C}$.
+then (Formula 18b) $L_\mathrm{Ws,inst} = L_\mathrm{Ws,c} - D_\mathrm{C}$.
 
 The physics behind $D_\mathrm{C}$ is the classical power input of a point-excited
 plate: only the real part of the receiver's driving-point mobility absorbs
@@ -127,7 +127,7 @@ sound reduction index $R_{ij,\mathrm{ref}}$ (EN 12354-1) and the element area
 (Formula 18a):
 
 $$
-L_{\mathrm{n,s},ij} = L_{W\mathrm{s,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}}
+L_{\mathrm{n,s},ij} = L_{\mathrm{Ws,inst},i} - D_{\mathrm{sa},i} - R_{ij,\mathrm{ref}}
              - 10\log_{10}\frac{S_i}{S_0} - 10\log_{10}\frac{A_0}{4},
 $$
 
@@ -179,7 +179,7 @@ machine, in octave bands from 31,5 Hz to 4 kHz: 139, 142, 145, 148, 151, 154,
 `tapping_machine_force_level_estimate` the closed form printed beside the table
 (valid only up to about 1000 Hz, and the only route to one-third-octave values),
 and `tapping_machine_characteristic_power_level` /
-`tapping_machine_coupling_term` turn them into the $L_{W\mathrm{s,c}}$ and $D_\mathrm{C}$ of
+`tapping_machine_coupling_term` turn them into the $L_\mathrm{Ws,c}$ and $D_\mathrm{C}$ of
 Formulae (D.9a) and (D.9b). The table's levels are re $10^{-6}$ N despite the
 "re 1 pN" its caption prints; see [the errata register](../../ERRATA.md).
 
@@ -202,7 +202,7 @@ one-page PDF fiche, clearly labelled a prediction and not a measurement: a
 prediction-basis line naming EN 12354-5:2009, an optional metadata header
 (client, source equipment, receiving room, instrumentation, climate, date), a
 per-band table (nominal octave/one-third-octave frequency, the installed
-structure-borne power level $L_{W\mathrm{s,inst}}$, each transmission path's
+structure-borne power level $L_\mathrm{Ws,inst}$, each transmission path's
 normalised SPL
 $L_{\mathrm{n,s},ij}$ and the combined total $L_\mathrm{n,s}$), the per-path and total
 $L_\mathrm{n,s}(f)$
@@ -259,7 +259,7 @@ room.*
 ## See also
 
 - [Structure-borne sound power of equipment (EN 15657)](structure-borne-power.md):
-  the reception-plate characterisation that supplies $L_{W\mathrm{s,c}}$ and the source
+  the reception-plate characterisation that supplies $L_\mathrm{Ws,c}$ and the source
   mobility this prediction consumes.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](../../vibration/structural/mechanical-mobility.md):
   the measured $Y_\mathrm{s}$ and $Y_i$ behind the coupling term.

@@ -568,7 +568,7 @@ without `frequencies` it is `NaN` (A-weighting needs the band centres).
 `directivity_index` is the apparent directivity index per microphone
 position and band, shape `(NM, NB)`, formed from the single event levels
 exactly as clause 3.24 allows. `uncertainty` is the expanded uncertainty
-$U = 2\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$ (95 %),
+$U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ (95 %),
 which clause 9.1 Eq. (24) makes the same for `LJ` as for `LW`.
 `events` is the number of single sound emission events $N_\mathrm{e}$
 the levels were reduced from, or `None` when the caller supplied the
@@ -624,7 +624,7 @@ without `frequencies` it is `NaN` (A-weighting needs the band centres).
 microphone position and frequency band, shape `(NM, NB)` (Eq. 7,
 evaluated per band per clause 8.4). `uncertainty` is the expanded
 uncertainty
-$U = 2\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$ (95 %, ISO 3744
+$U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ (95 %, ISO 3744
 clause 9.5).
 
 ### SoundPowerResult.declare()

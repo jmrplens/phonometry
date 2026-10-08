@@ -94,7 +94,7 @@ print(res.rounded())                    # [ 8 12 18 23 26 26] dB
 print(round(res.a_weighted_insulation, 1))   # 19.3 dB
 ```
 
-The A-weighted number is $D_{WA}$ of Equation (2), and it is the single figure
+The A-weighted number is $D_{W\mathrm{A}}$ of Equation (2), and it is the single figure
 a declaration carries. Clause 9.4 reports every band value rounded to the
 nearest decibel, which is what `.rounded()` does.
 
@@ -133,7 +133,7 @@ measured with its actual source while the base standard's own limit on volume
 is met. The two substitutes are:
 
 - the **reciprocity** method of part 1, 7.2, which puts the enclosure in a
-  diffuse field and measures inside it, giving $D_{pr}$. It exists in part 1
+  diffuse field and measures inside it, giving $D_{p\mathrm{r}}$. It exists in part 1
   only, and asking for it in situ is refused rather than approximated;
 - an **artificial** source, the tapping machine of Annex A dropped on an
   undamped steel plate, used at several positions. The positions are averaged
@@ -226,9 +226,9 @@ print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
 
 There is a third method, and it is the one a workplace usually wants: drive the
 room with the noise that is actually there. That is the only method for which
-the standard defines an A-weighted difference, $D'_{pA}$ of Equation (3), and
+the standard defines an A-weighted difference, $D'_{p\mathrm{A}}$ of Equation (3), and
 `cabin_insulation` refuses to compute one under any other, because a figure
-labelled $D'_{pA}$ that came from a loudspeaker is a claim the document does
+labelled $D'_{p\mathrm{A}}$ that came from a loudspeaker is a claim the document does
 not make.
 
 ## 5. The count that is read off the answer
@@ -294,16 +294,16 @@ rating = noise_control.weighted_cabin_insulation(
 print(rating.rating, rating.c, rating.ctr)   # 28 -1 -5
 ```
 
-Clause 4 of ISO 11957 calls $D_{p,w}$ the preferred single number and then
+Clause 4 of ISO 11957 calls $D_{p,\mathrm{w}}$ the preferred single number and then
 warns, in the same paragraph, against reading too much into it: what a cabin is
 worth depends on the spectrum it stands in. The annexes answer that objection
 directly. Given a spectrum, the estimated insulation is
 
 $$
-D_{pA,e} = L_A - 10 \lg \sum_i 10^{0,1\left(L_i - A_i - D_{pi}\right)}
+D_{p\mathrm{A},\mathrm{e}} = L_\mathrm{A} - 10 \lg \sum_i 10^{0,1\left(L_i - A_i - D_{pi}\right)}
 $$
 
-with $L_A$ the A-weighted total of the same spectrum. The sign of $A_i$ is the
+with $L_\mathrm{A}$ the A-weighted total of the same spectrum. The sign of $A_i$ is the
 trap: the annex prints an attenuation, positive where the weighting takes level
 away, while a library's band corrections are the correction itself. Both terms
 are built here from the same table, so the answer cannot disagree with its own

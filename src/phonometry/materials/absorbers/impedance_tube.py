@@ -6,8 +6,8 @@ surface is obtained from the measured transfer function ``H12`` between two
 microphones flush-mounted in the wall of a tube terminated by the specimen,
 and from it the surface impedance and the normal-incidence absorption
 coefficient (Clause 7, Eqs. (17)-(20)). Time convention
-:math:`e^{+j\omega t}`; the incident wave carries :math:`e^{+jk_0x}` and the
-reflected wave :math:`e^{-jk_0x}` (Annex D, Eqs. (D.1)-(D.8)). The complex
+:math:`\mathrm{e}^{+j\omega t}`; the incident wave carries :math:`\mathrm{e}^{+jk_0x}` and the
+reflected wave :math:`\mathrm{e}^{-jk_0x}` (Annex D, Eqs. (D.1)-(D.8)). The complex
 wavenumber is :math:`k_0 = k_0' - jk_0''` with the attenuation constant
 :math:`k_0''` (Clause 2.6, Annex A). Air properties from Clause 7.2,
 Eqs. (5)/(7), use temperature in **kelvin**.
@@ -305,10 +305,10 @@ def reflection_factor(
 
     .. math::
 
-       r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}} \, e^{+2jk_0x_1}
+       r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}} \, \mathrm{e}^{+2jk_0x_1}
 
     with the incident- and reflected-wave transfer functions
-    :math:`H_\mathrm{I} = e^{-jk_0s}` (Eq. (D.5)) and :math:`H_\mathrm{R} = e^{+jk_0s}`
+    :math:`H_\mathrm{I} = \mathrm{e}^{-jk_0s}` (Eq. (D.5)) and :math:`H_\mathrm{R} = \mathrm{e}^{+jk_0s}`
     (Eq. (D.6)), ``s`` the microphone spacing and ``x1`` the distance from
     the sample to the **farther** microphone (Clause 7.7).
 

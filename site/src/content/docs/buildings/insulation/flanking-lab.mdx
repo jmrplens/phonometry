@@ -98,9 +98,9 @@ as an input, together with the overall flanking descriptors $D_\mathrm{n,f}$
 empirical `junction_vibration_reduction()` of that prediction.
 
 **Vibration reduction index (Formula (13)).**
-$K_{ij} = \overline{D}_{v,ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
+$K_{ij} = \overline{D}_{\mathrm{v},ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
 the direction-averaged velocity level difference
-$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Formula (11), which
+$\overline{D}_{\mathrm{v},ij} = \tfrac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})$ (Formula (11), which
 makes $K_{ij}$ symmetric), the common-edge junction length $l_{ij}$ and the
 **equivalent absorption lengths** $a_j = 2.2\pi^2 S_j /(T_{\mathrm{s},j} c_0)\sqrt{f_\mathrm{ref}/f}$
 (Formula (12), $f_\mathrm{ref} = 1000$ Hz). For lightweight well-damped elements
@@ -112,7 +112,7 @@ Formula (14), which needs no $T_\mathrm{s}$ at all.
 Every symbol in Formula (13) is a length or an area in that drawing. The
 highlighted corner line is $l_{ij}$, the common edge of the two elements; $S_i$
 and $S_j$ are the areas of the two plates, which enter through their equivalent
-absorption lengths $a_i$ and $a_j$; and $\overline{D}_{v,ij}$ is what the pair
+absorption lengths $a_i$ and $a_j$; and $\overline{D}_{\mathrm{v},ij}$ is what the pair
 of accelerometers reads, once with element $i$ driven and once with element $j$
 driven. The $10\log_{10}(l_{ij}/\sqrt{a_i a_j})$ term is what makes the index a
 property of the *junction* rather than of the two particular plates that were
@@ -306,8 +306,8 @@ elements of the junction are identical, a $\Delta R$ of 10 dB in every band
 suffices. In general, excite element 1 and then element 2 with the same kind of
 excitation, read the average velocity level of the receiving element $j$ in
 each case, and require
-$\Delta R_\text{min} = 10 - L_{v,1j} + L_{v,2j}$ when
-$L_{v,1j} - L_{v,2j} \le 10$ dB, and nothing at all when the difference already
+$\Delta R_\text{min} = 10 - L_{\mathrm{v},1j} + L_{\mathrm{v},2j}$ when
+$L_{\mathrm{v},1j} - L_{\mathrm{v},2j} \le 10$ dB, and nothing at all when the difference already
 exceeds 10 dB (Formulae (23) and (24)). Heavy shielding on a light element can
 change the very transmission being measured and is to be avoided. **A $K_{ij}$
 or $D_\mathrm{n,f}$ quoted without a statement of how the other elements were
@@ -330,7 +330,7 @@ the lowest.
 **Excitation (Clause 7.2.4).** Steady-state, from an electrodynamic shaker
 driven with noise or from a tapping machine (adapted for walls, with the
 impacts mechanically controlled to repeat), or transient, from single or
-manually repeated hammer blows, in which case $D_{v,ij}$ must be measured on
+manually repeated hammer blows, in which case $D_{\mathrm{v},ij}$ must be measured on
 both elements **simultaneously**. Manual multiple hits are spread over 1 m² to
 2 m² at 1 Hz to 2 Hz over 20 s to 30 s. In every band the receiving element's
 velocity level must exceed the background by at least 10 dB; below that, the

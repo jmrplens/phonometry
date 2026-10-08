@@ -6141,9 +6141,9 @@ def generate_assessment_weighting(output_dir: str) -> None:
         "sensitive": COLOR_SECONDARY,
     }
     labels = {
-        "commercial": "$v_{B1}$, commercial and industrial",
-        "residential": "$v_{B2}$, dwellings",
-        "sensitive": "$v_{B3}$, especially sensitive",
+        "commercial": r"$v_{\mathrm{B}1}$, commercial and industrial",
+        "residential": r"$v_{\mathrm{B}2}$, dwellings",
+        "sensitive": r"$v_{\mathrm{B}3}$, especially sensitive",
     }
 
     _fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.4))
@@ -6171,7 +6171,7 @@ def generate_assessment_weighting(output_dir: str) -> None:
     axes[1].set_xscale("log")
     axes[1].set_title("The weighting that removes the frequency", pad=10)
     axes[1].set_xlabel(LABEL_FREQ_HZ)
-    axes[1].set_ylabel("Weighting factor $H_{vB}$")
+    axes[1].set_ylabel(r"Weighting factor $H_\mathrm{vB}$")
     axes[1].set_ylim(0.0, 1.15)
     for ax in axes:
         ax.set_xlim(1.0, 315.0)
@@ -6411,7 +6411,7 @@ def generate_ground_wave_speeds(output_dir: str) -> None:
     )
     ax.set_title("Compression-wave speed over shear-wave speed (DIN 45672-1)", pad=12)
     ax.set_xlabel("Poisson's ratio $\\nu$")
-    ax.set_ylabel("$v_p / v_s$")
+    ax.set_ylabel(r"$\mathrm{v}_\mathrm{p} / \mathrm{v}_\mathrm{s}$")
     ax.set_xlim(0.0, 0.49)
     ax.set_ylim(0.8, 8.0)
     ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
@@ -6472,7 +6472,7 @@ def generate_people_guide_values(output_dir: str) -> None:
         )
         ax.grid(axis="y", which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
         ax.set_axisbelow(True)
-    axes[0].set_ylabel("Guide value, dimensionless KB")
+    axes[0].set_ylabel("Guide value, dimensionless $KB$")
     axes[1].legend(loc="upper right", fontsize=9)
     _fig.suptitle("The guide values of DIN 4150-2 Table 1 by kind of area", y=0.98)
     plt.tight_layout()

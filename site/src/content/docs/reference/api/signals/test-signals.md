@@ -76,7 +76,7 @@ fractional_delay(
 Delay a record by an arbitrary (sub-sample) number of samples.
 
 Band-limited delay via a frequency-domain phase ramp
-$e^{-j 2 \pi k \cdot \text{delay} / N}$: every spectral
+$\mathrm{e}^{-j 2 \pi k \cdot \text{delay} / N}$: every spectral
 component is delayed by exactly
 `delay` samples, i.e. its phase changes by
 $-2 \pi f \cdot \text{delay} / f_\mathrm{s}$

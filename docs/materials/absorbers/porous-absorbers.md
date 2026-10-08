@@ -23,7 +23,7 @@ own guide, [Metamaterial Absorbers](metamaterial-absorbers.md).
 
 A rigid-frame porous material behaves like an *equivalent fluid* with a
 complex characteristic impedance $Z_\mathrm{c}$ and wavenumber $k$ (time convention
-$e^{+j\omega t}$, so a passive medium has $\mathrm{Im}(k) < 0$).
+$\mathrm{e}^{+j\omega t}$, so a passive medium has $\mathrm{Im}(k) < 0$).
 
 **Delany–Bazley** (Mechel 2e Sect. G.11; Bies 5e Appendix D, Table D.1;
 Hopkins Eqs. 1.171–1.174) is the one-parameter power law in the absorber
@@ -272,7 +272,7 @@ fig, ax = plt.subplots()
 for medium, style in ((rigid, "--"), (limp, "-")):
     ax.plot(f, medium.effective_density.real / rho0, style)
     ax.plot(f, medium.effective_density.imag / rho0, style)
-ax.set(xlabel="Frequency [Hz]", ylabel="rho_e / rho_0", ylim=(-30, 30))
+ax.set(xlabel="Frequency [Hz]", ylabel=r"$\rho_\mathrm{e} / \rho_0$", ylim=(-30, 30))
 plt.show()
 ```
 
@@ -548,7 +548,7 @@ res.plot()   # alpha(f) with |R| overlaid
 ```
 
 The solver evaluates the physical quantities through a numerically robust
-admittance recursion (immune to the $e^{|\mathrm{Im}(k_x)| d}$ overflow of
+admittance recursion (immune to the $\mathrm{e}^{|\mathrm{Im}(k_x)| d}$ overflow of
 raw matrix entries for extremely attenuating layers) and still exposes the
 full chain matrix (reciprocal by construction, $\det T = 1$) in
 `transfer_matrix`, ready for the

@@ -68,7 +68,7 @@ mínima desde $|H|$, retardo de grupo y exceso de fase.
 ## 1. Un barrido, todos los armónicos
 
 En un barrido exponencial la frecuencia instantánea crece como
-$f(t) = f_1 e^{t/L}$, así que en el momento en que la excitación pasa por
+$f(t) = f_1 \mathrm{e}^{t/L}$, así que en el momento en que la excitación pasa por
 $f$, el producto de distorsión del armónico n aparece en $n f$: exactamente
 donde estará el propio barrido $L\ln(n)$ segundos después. Deconvolucionar
 la grabación contra el barrido comprime por tanto cada orden en su propia
@@ -288,7 +288,7 @@ el barrido $L\ln(n)$ equivale exactamente a generar su armónico n. Eso solo
 se cumple para
 
 $$
-x(t) = \sin\!\big[2\pi f_1 L\, e^{t/L}\big],
+x(t) = \sin\!\big[2\pi f_1 L\, \mathrm{e}^{t/L}\big],
 \qquad
 L = \frac{1}{f_1}\,\mathrm{round}\!\Big(\frac{f_1\,\tilde T}{\ln(f_2/f_1)}\Big),
 $$
@@ -303,7 +303,7 @@ filtro inverso,
 
 $$
 \tilde X(f) = 2\sqrt{f/L}\;
-e^{-j 2\pi f L\,(1 - \ln(f/f_1)) + j\pi/4},
+\mathrm{e}^{-j 2\pi f L\,(1 - \ln(f/f_1)) + j\pi/4},
 $$
 
 en lugar de con una FFT de la señal. Además de exacta, la deconvolución

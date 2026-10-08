@@ -2078,6 +2078,193 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the room-acoustics fiche, apart from the structural reverberation time
   $T_\mathrm{s}$.
 
+- **The weighted vibration severity KB is italic in every diagram, figure and
+  register entry, and `make subscripts` fails on an upright one.**
+  DIN 4150-2:1999, E DIN 4150-2, DIN 45672-2 and E DIN 45672-3 print KB
+  italic, one quantity symbol of two letters, while the list of symbols of
+  DIN 45669-1:2010 sets it upright. The diagrams drew it upright, as an
+  acronym; they now draw it italic like the figures, the docstrings and the
+  guides, and the vibration-meter guide says in one sentence that the
+  documentation follows DIN 4150-2 where DIN 45669-1 differs. The axis of the
+  guide-values figure is labelled with the symbol, and the DIN 45669-1 entry of
+  the errata register sets its quoted $KB_\mathrm{F}$ row as the symbol. The
+  subscript check now holds a short table of letter runs that are one quantity
+  symbol, with the slope the documentation sets them in, and reads every page,
+  the errata register and the drawing modules included, and every image,
+  embedded on a page or not, against it.
+
+- **Euler's number is upright in every formula, and `make euler-number` keeps
+  it that way.** KaTeX and matplotlib set a bare letter italic, so the
+  exponential was upright only where a page asked for it: the site wrote
+  about seventy italic and forty upright e, at times a few lines apart on one
+  page. ISO 80000-2:2019, Clause 4, prints the mathematical constants upright
+  and keeps the italic letter for a variable. Every exponential in the
+  docstrings, the guides in both languages, the docs mirror, the theory pages
+  and the errata register is now written $\mathrm{e}$; the strain
+  $e^s_{ij}$ of a Biot frame, which is a variable, keeps its italic letter.
+  `scripts/check_euler_number.py`, run by `make euler-number` and by a CI job
+  of its own, reads every formula of those files and the label source of
+  every figure and diagram, and fails on an exponent hung on an italic e.
+  It reads a docstring's math block to its end: `make subscripts` read such a
+  block only up to its first blank line, so the second equation of a block
+  went unread, which is how the face velocities of the four-microphone
+  transfer matrix kept their italic e; both checks now read the whole block.
+
+- **The EN 15657 symbols keep their upright descriptive subscripts and take
+  an italic index, and the glossary shows the structure-borne power level
+  again.** UNE-EN 15657:2018 prints every subscript of its symbol set
+  upright, the index of the position levels included, and a print in one
+  slope cannot tell an index from an abbreviation. There ISO 80000-2 decides,
+  as it does for IEC 60534-8-3, CNOSSOS-EU, RD 1367/2007, NT ACOU 112 and
+  EN 12354-5:2009: a running index is italic and a descriptive abbreviation
+  upright. The descriptive parts stay upright as printed, $L_\mathrm{v}$,
+  $L_\mathrm{Ws}$, $L_\mathrm{Wsn}$, $L_\mathrm{Fb,eq}$ and
+  $L_\mathrm{vf,eq}$, the receiver and source mobilities
+  $Y_\mathrm{R,low,eq}$ and $Y_\mathrm{S,eq}$, the free velocity
+  $v_\mathrm{f}$ and the blocked force $F_\mathrm{b}$, and the position
+  levels of Formula (12) are $L_{\mathrm{v},i}$, with an italic i. The
+  module, the structure-borne power guide in both languages and its docs
+  mirror, the reception-plate diagrams, the figures and the example fiche now
+  set them that way, and the EN 12354-5 page, module and fiche, which take the
+  same power levels, write $L_\mathrm{Ws,c}$, $L_\mathrm{Ws,n}$,
+  $L_{\mathrm{Ws,inst},i}$, $D_{\mathrm{C},i}$ and the force level
+  $L_\mathrm{F}$. The RD 1367/2007 example fiche sets the phase level
+  $L_{\mathrm{Keq},Ti}$, the daily level $L_{\mathrm{Keq},x}$ and the
+  measurement time of $L_{\mathrm{Aeq},T}$ italic, as its guide and its own
+  figure already did. The errata entries of both standards transcribe the
+  print, and the example fiche names the characteristic power
+  $L_\mathrm{Wsn}$, as Formula (17) does. `make subscripts` now fails on a
+  running index set upright: the letter a sum runs over, or an i, j or k
+  that follows another part of a subscript, in the docstrings, the guides,
+  the drawing modules and every figure and diagram; the errata register,
+  which quotes the print, is not held to it. The glossary card of the
+  structure-borne power level printed "Wmathrm" as text, because its symbol
+  lost a backslash on the way through JavaScript; it reads $L_\mathrm{Ws}$
+  again, on the site and in the docs mirror.
+
+- **The subscripts of the aircraft, rotorcraft, railway, sound power, room
+  acoustics and exposure guides follow their printed pages, and every page
+  agrees with its figures and diagrams.** Every subscripted symbol of the
+  guides, their diagrams and their figures was listed and the symbols that
+  were set two ways were checked against the print. ICAO Annex 16 prints the
+  certification speeds $\mathrm{V}_\mathrm{H}$, $\mathrm{V}_\mathrm{NE}$ and
+  $\mathrm{V}_\mathrm{Y}$, the ground speeds $\mathrm{V}_\mathrm{G}$ and
+  $\mathrm{V}_\mathrm{GR}$ and the $\mathrm{QK}$ and
+  $\mathrm{Q}_r\mathrm{K}_r$ of the helicopter and propeller corrections in
+  roman type, and DIN 45672-1:2009 the wave speeds $\mathrm{v}_\mathrm{p}$,
+  $\mathrm{v}_\mathrm{s}$, $\mathrm{v}_\mathrm{R}$, $\mathrm{v}_\mathrm{Z}$;
+  the guides, the docstrings of the ground-wave functions, the wave-speed
+  figure, the errata transcription, the rotorcraft certification diagram and
+  the railway cross-section diagram now set them that way, the V_Y of the
+  rotorcraft guide with the capital Y Annex 16 prints. The diagram canvas
+  takes a key of one letter for a symbol a standard prints in roman type on
+  the baseline. ECAC Doc 29 sets every subscript italic, so the meaning
+  decides: the start of roll SOR of $\Delta_\mathrm{SOR}$ and
+  $d_\mathrm{SOR}$, the segment of $L_{E,\mathrm{seg}}$, the finite-segment
+  correction $\Delta_\mathrm{F}$, the installation correction
+  $\Delta_\mathrm{I}$ and the impedance correction are upright on the airport
+  guide, the docstrings, the start-of-roll figure and the ANP and segment
+  diagrams, and the exposure E of $L_E$ stays italic on the diagrams as on the
+  pages; the propagation p of the rotorcraft $\Delta L_\mathrm{p}$ of
+  ECAC Doc 32 is upright likewise. ISO 3744 and ISO 3746 print $\sigma_{R0}$
+  with an italic R, which the sound power guides, docstrings and the theory
+  page now follow everywhere; ISO 3382-1 prints $G_\mathrm{m}$,
+  $J_\mathrm{LFm}$, $p_\mathrm{L}$, $p_\mathrm{l}$ and $p_\mathrm{r}$
+  upright, which the room-acoustics guides and `room.auditorium` now follow;
+  ISO 9612 prints $c_{1\mathrm{a}}$, $u_{1\mathrm{a}}$, $c_{1\mathrm{b}}$ and
+  $u_{1\mathrm{b}}$ with upright a and b, and ISO 2631-1:1997, Equation
+  (10), and ISO 5349-1:2001, Equation (1), print the weighting of the axis
+  values upright and the axis italic, $a_{\mathrm{w}x}$ and
+  $a_{\mathrm{hw}x}$ as $k_x$ beside them, and the exposure guides, the
+  theory pages, the docstrings and the two exposure diagrams now set them
+  so. The
+  figures that lagged their pages were redrawn: $L_{p\mathrm{A}}$ of the
+  workstation emission figure, $L_{p\mathrm{AF}}$ of the impulsive sound
+  onsets and of `ImpulsiveSoundResult.plot()` and `LevelHistory.plot()`,
+  $\mathrm{ST}_\mathrm{Early}$ and $\mathrm{ST}_\mathrm{Late}$ of the stage support figure,
+  $K_{2\mathrm{A}}$ of the sound power methods diagram, the
+  $f_\mathrm{min}$ of the barrier reflection limit figure and of its plot,
+  and the EN 12354-5 power levels of the structure-borne conversion figure.
+  Three labels that drew a subscript as an underscore are set as symbols:
+  the title of `ImpulsiveSoundResult.plot()`, which printed "K_I" and now
+  sets $P$ and $K_\mathrm{I}$ as ISO/PAS 1996-3 prints them, with the
+  decimal comma in Spanish; the end correction of the duct-end diagram,
+  $D_\mathrm{td}$ of ISO 7235 and $\Delta L_\mathrm{r}$ of ISO 5135; and
+  the areas $S_\mathrm{w}$ and $S_\mathrm{out}$ and the distance $r$ of
+  the plenum drawing. ISO/PAS 1996-3 and NT ACOU 112 print the level
+  difference as the abbreviation LD, beside the onset rate OR, so the
+  impulsive sound guide writes $\mathrm{LD}$ where it wrote
+  $L_\mathrm{D}$. The theory pages now write
+  $L'_\mathrm{n}$, $L'_{\mathrm{n}T}$, $L_\mathrm{TQ}$ and
+  $F_{pI_\mathrm{n}}$ as the guides do, and $R_\mathrm{w}$,
+  $\alpha_\mathrm{w}$, $A_\mathrm{air}$, $z_{0\mathrm{ref}}$,
+  $L_\mathrm{A}$ and $L_\mathrm{AF}$ are written one way on each page that
+  set them two ways. ISO 11690-3 prints its Table C.2 upright throughout, so
+  the workroom functions and their errata entry now write
+  $L_{W\mathrm{A}}$, $L_{p\mathrm{A}}$, $L'_{p\mathrm{A}}$ and
+  $\Delta L_\mathrm{A}$ with the weighting upright, as the guides do, and
+  the railway guide's figure code labels the wave-speed ratio as the figure
+  draws it.
+
+- **The standardized levels carry an italic T, and the building, device,
+  noise control and environment guides follow their printed symbols.** ISO
+  16283-1:2014, ISO 16283-2:2020, ISO 16283-3:2016, ISO 717-1:2020, ISO
+  717-2:2020 and ISO 10052:2021 print $D_{\mathrm{n}T}$, $L'_{\mathrm{n}T}$
+  and $D_{2\mathrm{m},\mathrm{n}T}$ with an upright n and the italic T of the
+  reverberation time the level is standardized to; every guide, docstring,
+  figure, diagram, fiche and glossary card set the T upright and now sets it
+  italic. ISO 10848-1:2017 prints the vibration reduction index
+  $D_{\mathrm{v},ij}$ with an upright v, ISO 16283-2 and ISO 10140-5 the
+  $L_\mathrm{FE}$ upright, ISO 14257 the heights
+  $h_\mathrm{S}$ and $h_\mathrm{P}$ upright, IEC 60268-3 the intermodulation
+  $d_{m,n}$ and $d_{d,n}$ with italic orders, ISO 5136 the mean level
+  $L_{p\mathrm{m}}$ and the reflection $r_\mathrm{a}$ with an upright m and
+  a, ICAO Annex 16 the time $\mathrm{t}_0$ upright, DIN 45672-1 the peak
+  velocity $\hat{\mathrm{v}}$ upright, ISO 3382-1 the stage support
+  $\mathrm{ST}$ upright and DIN 45669-1 $H_\mathrm{vB}$, $v_\mathrm{B}$ and
+  $v_{\mathrm{B}n}$ with an upright B; the guides, docstrings, errata entries,
+  figures and diagrams now follow them. The KB family is set as a formula, not
+  as code, in the five immission guides. The control valve cavitation guide
+  sets the abbreviations of IEC 60534-8-4 upright, and the EN 1793-5 guide
+  and module set the abbreviations the page expands upright and keep the
+  letters it does not expand italic.
+
+  ISO 7235:2003 prints the two test series $L_{p\mathrm{I}}$ and
+  $L_{p\mathrm{II}}$ with an upright I and II, and its insertion loss is
+  $D_\mathrm{i} = L_{p\mathrm{II}} - L_{p\mathrm{I}}$; the ISO 7235 diagram
+  wrote the difference the other way round, which would make every insertion
+  loss negative, and now writes it as the standard does. ISO 11820:1996 prints
+  $D_\mathrm{ts}$ and $D_\mathrm{is}$ upright and the level differences
+  $D_{\mathrm{t}p\mathrm{s}}$ and $D_{\mathrm{i}p\mathrm{s}}$ with the
+  italic p of the pressure, and its areas, field corrections and pressures
+  $S_\mathrm{II}$, $K_\mathrm{II}$ and $p_\mathrm{Tu}$ with upright
+  subscripts; ISO 11546-1 and ISO 11957 print $D_{W\mathrm{A}}$,
+  $D_{p\mathrm{A}}$, $D_{p\mathrm{r}}$ and $D_{p\mathrm{A},\mathrm{e}}$ with
+  the italic quantity letter and an upright A, r and e; ISO 10847 prints
+  $D_\mathrm{IL}$, $L_{\mathrm{ref},\mathrm{A}}$ and
+  $L_{\mathrm{r},\mathrm{B}}$ upright throughout, the A and B the after and
+  before campaigns; and ISO 11821 prints $D_{p\mathrm{A}}$ the same way. The
+  silencer, in-situ noise control, enclosure and cabin modules, their plots,
+  guides and errata entries now set them so. The VDI 2081 limit frequency
+  $f_\mathrm{G}$, the reference roughness length $z_{0\mathrm{ref}}$ of IEC
+  61400-11 and the ground correction $\Delta L_{\mathrm{g},\mathrm{LF}}$ of
+  IEC TS 61400-11-2 are written as printed, and the theory pages set
+  $L_\mathrm{ST}$, $L_\mathrm{bg}$, $L_\mathrm{corner}$, $T_\mathrm{REP}$,
+  $C_{\mathrm{tr},50-3150}$, $\omega_\mathrm{stop}$ and the middle, lower and
+  upper bands of the prominence ratio upright, as abbreviations.
+
+  The diagram canvas can split a subscript letter by letter under one symbol
+  only, so $L_{p\mathrm{I}}$ sets an upright I while the pressure-intensity
+  indicator $F_{pI}$ of ISO 9614 keeps both letters italic. The figure code
+  in the guides labels its axes with the symbols, where a few labels wrote a
+  subscript as a plain underscore. `make euler-number` and `make subscripts`
+  now read the formulas they skipped before: a row break `\\` in an aligned
+  block, a formula opened by `(\delta` or `(\dfrac`, inline math that wraps
+  onto the next line of a page, and the doubled backslashes of a plain Python
+  string. They found twelve more italic e and two subscripts that lagged
+  their page. `make euler-number` also fails on an italic base of the natural
+  logarithm, $\log_e$, which ISO 80000-2 prints $\log_\mathrm{e}$.
+
 - **A result keeps its own copy of the arrays it was given.** `np.asarray`
   hands back the caller's own array when it is already `float64`, and so does
   every validation helper built on it, so a result built from one kept the

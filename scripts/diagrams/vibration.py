@@ -1839,7 +1839,7 @@ def _d_junction_rig(s: SVG, th: Theme) -> None:
     # Transmission path across the corner.
     s.path("M 300 402 Q 214 400 208 330", stroke=th.accent, sw=2.0)
     s.arrow(209.0, 344.0, 208.0, 322.0, th.accent, 2.0)
-    s.text(194, 356, "$D_{v,ij}$", 14, th.accent, anchor="end")
+    s.text(194, 356, "$D_{v,ij}$", 14, th.accent, anchor="end", upright=("D_v",))
 
     # ===== Right: T-junction (wall standing mid-way on the floor) =========
     s.text(690, 86, "T-junction", 18, th.fg, bold=True)
@@ -3041,14 +3041,24 @@ def _d_railway_cross_section(s: SVG, th: Theme) -> None:
     # --- The two boxed equations
     box_y = 824.0
     s.rect(52, box_y, 386, 80, th.panel, th.primary, rx=6, sw=1.8)
-    s.text(245, box_y + 26, "$l_{MG} = l_Z + r · v_Z / v_R$", 15, th.primary, bold=True)
+    # DIN 45672-1:2009-12 prints the speeds v_Z and v_R in roman type beside
+    # the italic l and r (note to 7.3.1, PDF page 19, folio 19).
+    s.text(
+        245,
+        box_y + 26,
+        "$l_{MG} = l_Z + r · v_Z / v_R$",
+        15,
+        th.primary,
+        bold=True,
+        upright=("v",),
+    )
     track = (
         "minimum test-track length for a point $r$ from the track axis;",
         "$l_Z$ train length, $v_Z$ its speed, $v_R$ Rayleigh wave speed",
     )
-    size = s.fit_size(track, (12, 11), 370)
+    size = s.fit_size(track, (12, 11), 370, upright=("v",))
     s.text(245, box_y + 48, track[0], size, th.fg)
-    s.text(245, box_y + 68, track[1], size, th.fg)
+    s.text(245, box_y + 68, track[1], size, th.fg, upright=("v",))
     s.rect(462, box_y, 386, 80, th.panel, th.secondary, rx=6, sw=1.8)
     s.text(
         655, box_y + 26, "$v_E = ṽ_3 · √(T_3$ / 3600 s)", 15, th.secondary, bold=True

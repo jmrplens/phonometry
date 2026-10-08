@@ -46,7 +46,7 @@ $$
   $2\sqrt{m_2 / m_0}$ with the plain frequency moments
   $m_k = \int f^k G \, df$; twice the record's *apparent frequency*;
 * the expected number of crossings of level `a`,
-  $N_a = N_0 e^{-a^2 / (2\sigma_x^2)}$ (Eq. (5.196));
+  $N_a = N_0 \mathrm{e}^{-a^2 / (2\sigma_x^2)}$ (Eq. (5.196));
 * the expected number of maxima per unit time,
   $M = (1/2\pi)(\sigma_a / \sigma_v) = \sqrt{m_4 / m_2}$
   (Eq. (5.211));
@@ -60,7 +60,7 @@ $$
   $\epsilon = \sqrt{1 - r^2}$):
 
   $$
-  P[\text{peak} > z] = Q(z / \epsilon) + r\, e^{-z^2 / 2} \left[ 1 - Q(rz / \epsilon) \right]
+  P[\text{peak} > z] = Q(z / \epsilon) + r\, \mathrm{e}^{-z^2 / 2} \left[ 1 - Q(rz / \epsilon) \right]
   $$
 
   where `Q` is the standardized normal exceedance (Eq. (5.250)).
@@ -91,7 +91,7 @@ and compares them with the closed forms for Gaussian data: the
 zero-crossing rate
 $N_0 = (1/\pi)(\sigma_v/\sigma_x) = 2\sqrt{m_2/m_0}$
 (Eq. (5.195)) and the level dependence
-$N_a = N_0 e^{-a^2/(2\sigma_x^2)}$ (Eq. (5.196)), with the
+$N_a = N_0 \mathrm{e}^{-a^2/(2\sigma_x^2)}$ (Eq. (5.196)), with the
 spectral moments taken from the record's own Welch autospectrum. For
 low-pass white noise of bandwidth `B` the expectation is
 $N_0 = 2B/\sqrt{3}$ -- an apparent frequency of `0.58 B` (B&P
@@ -142,7 +142,7 @@ Measured level-crossing rates against the Rice expectation.
 All rates count crossings with *both* slopes per unit time, following
 B&P Sec. 5.5.1; the rate of zero crossings is twice the record's
 apparent frequency. The Rice curve
-$N_a = N_0 e^{-a^2 / (2\sigma^2)}$ (Eq. (5.196)) holds for
+$N_a = N_0 \mathrm{e}^{-a^2 / (2\sigma^2)}$ (Eq. (5.196)) holds for
 Gaussian records; systematic departures of the measured rates from
 it are themselves a useful non-Gaussianity screen (B&P Sec. 5.5.1.1).
 
@@ -152,7 +152,7 @@ it are themselves a useful non-Gaussianity screen (B&P Sec. 5.5.1.1).
 | :--- | :--- |
 | `levels` | Crossing levels `a`, in signal units (about the removed record mean). |
 | `rates` | Measured crossing rates per level, in 1/s. |
-| `rice_rates` | Rice expectation $N_0 e^{-a^2/(2\sigma^2)}$, 1/s. |
+| `rice_rates` | Rice expectation $N_0 \mathrm{e}^{-a^2/(2\sigma^2)}$, 1/s. |
 | `zero_crossing_rate` | Measured zero-crossing rate `N0`, in 1/s. |
 | `zero_crossing_rate_rice` | Expected $N_0 = 2\sqrt{m_2/m_0}$ from the record's Welch autospectrum moments (Eq. (5.195)), in 1/s. |
 | `apparent_frequency` | `N0 / 2` from the spectral moments, in Hz (a 60 Hz sine crosses zero 120 times per second). |
@@ -293,8 +293,8 @@ $P[\text{peak} > z]$ at the record's irregularity
 factor.
 
 B&P Eq. (5.223): the probability that a maximum chosen at random
-exceeds `z` record RMS units. $e^{-z^2/2}$ for narrow
-bandwidth data -- $e^{-8} = 0.00033$ at $z = 4$, B&P
+exceeds `z` record RMS units. $\mathrm{e}^{-z^2/2}$ for narrow
+bandwidth data -- $\mathrm{e}^{-8} = 0.00033$ at $z = 4$, B&P
 Example 5.14 -- and the Gaussian exceedance in the wide
 bandwidth limit.
 

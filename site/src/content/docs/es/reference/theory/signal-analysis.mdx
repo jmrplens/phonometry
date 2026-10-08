@@ -251,7 +251,7 @@ $$
 banda de paso plana.
 
 $$
-|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_{stop}/\omega)}}}
+|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_\mathrm{stop}/\omega)}}}
 $$
 
 **4. Elíptico:** rizado uniforme en ambas bandas, máxima selectividad.
@@ -437,13 +437,13 @@ y[n] = \alpha \cdot x^2[n] + (1 - \alpha) \cdot y[n-1]
 $$
 
 $$
-\alpha = 1 - e^{-1 / (f_\mathrm{s} \cdot \tau)}
+\alpha = 1 - \mathrm{e}^{-1 / (f_\mathrm{s} \cdot \tau)}
 $$
 
 Esta es la imagen digital del detector RC analógico del sonómetro clásico: la
 presión al cuadrado carga un condensador a través de una resistencia, así que el
 valor cuadrático medio que se muestra es un paso bajo de un polo sobre $p^2$ con
-constante de tiempo $\tau$, y $\alpha = 1 - e^{-1/(f_\mathrm{s} \tau)}$ es su
+constante de tiempo $\tau$, y $\alpha = 1 - \mathrm{e}^{-1/(f_\mathrm{s} \tau)}$ es su
 discretización invariante al impulso, exacta a cualquier $f_\mathrm{s}$, al contrario que
 la aproximación $1/(f_\mathrm{s} \tau)$ que suele verse. Las dos constantes normalizadas
 son $\tau = 125$ ms (**Fast**) y $\tau = 1$ s (**Slow**). Una entrada en escalón

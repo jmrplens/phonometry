@@ -318,8 +318,8 @@ plt.show()
 fig, ax = plt.subplots()
 ax.fill_between(res.bark, res.specific_tonality, alpha=0.3, color="#d62728")
 ax.plot(res.bark, res.specific_tonality, color="#d62728")
-ax.set_xlabel("Razón de banda crítica z [Bark_HMS]")
-ax.set_ylabel("Tonalidad específica T' [tu_HMS]")
+ax.set_xlabel(r"Razón de banda crítica $z$ [$\mathrm{Bark}_\mathrm{HMS}$]")
+ax.set_ylabel(r"Tonalidad específica $T'$ [$\mathrm{tu}_\mathrm{HMS}$]")
 plt.show()
 ```
 
@@ -431,13 +431,13 @@ for fm in fmods:
 
 fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(10, 8.5))
 ax0.plot(tin.times, tin.tonality_vs_time,
-         label=f"Tono en ruido (T = {tin.tonality:.2f} tu_HMS)")   # 1,19
+         label=rf"Tono en ruido ($T$ = {tin.tonality:.2f} $\mathrm{{tu}}_\mathrm{{HMS}}$)")   # 1,19
 ax0.plot(pn.times, pn.tonality_vs_time,
-         label=f"Ruido puro (T = {pn.tonality:.2f} tu_HMS)")       # 0,02
-ax0.set(xlabel="Tiempo [s]", ylabel="Tonalidad T [tu_HMS]")
+         label=rf"Ruido puro ($T$ = {pn.tonality:.2f} $\mathrm{{tu}}_\mathrm{{HMS}}$)")       # 0,02
+ax0.set(xlabel="Tiempo [s]", ylabel=r"Tonalidad $T$ [$\mathrm{tu}_\mathrm{HMS}$]")
 ax0.legend()
 ax1.plot(fmods, r, "o-", label="Portadora de 1 kHz, AM del 100 %")  # máximo 1,0 asper
-ax1.set(xlabel="Frecuencia de modulación f_mod [Hz]", ylabel="Aspereza R [asper]")
+ax1.set(xlabel=r"Frecuencia de modulación $f_\mathrm{mod}$ [Hz]", ylabel="Aspereza $R$ [asper]")
 ax1.legend()
 plt.show()
 ```
@@ -473,8 +473,8 @@ import matplotlib.pyplot as plt
 # `res` es el resultado de aspereza del fragmento de arriba.
 fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 4.8))
 ax0.plot(res.bark, res.specific_roughness)
-ax0.set(xlabel="Razón de banda crítica z [Bark_HMS]",
-        ylabel="Aspereza específica R'(z) [asper/Bark_HMS]")
+ax0.set(xlabel=r"Razón de banda crítica $z$ [$\mathrm{Bark}_\mathrm{HMS}$]",
+        ylabel=r"Aspereza específica $R'(z)$ [$\mathrm{asper}/\mathrm{Bark}_\mathrm{HMS}$]")
 ax1.plot(res.times, res.roughness_vs_time)
 ax1.axhline(res.roughness, linestyle="--")     # el percentil 90
 ax1.set(xlabel="Tiempo [s]", ylabel="Aspereza R [asper]")
@@ -580,9 +580,9 @@ f_vals = [psychoacoustics.fluctuation_strength_ecma(am_tone(fm), fs).fluctuation
 r_vals = [psychoacoustics.roughness_ecma(am_tone(fm), fs).roughness for fm in fm_fast]
 
 fig, ax = plt.subplots()
-ax.semilogx(fm_slow, f_vals, "o-", label="Intensidad de fluctuación F [vacil_HMS]")
+ax.semilogx(fm_slow, f_vals, "o-", label=r"Intensidad de fluctuación $F$ [$\mathrm{vacil}_\mathrm{HMS}$]")
 ax.semilogx(fm_fast, r_vals, "s-", label="Aspereza R [asper]")
-ax.set(xlabel="Frecuencia de modulación [Hz]", ylabel="F [vacil_HMS] / R [asper]")
+ax.set(xlabel="Frecuencia de modulación [Hz]", ylabel=r"$F$ [$\mathrm{vacil}_\mathrm{HMS}$] / $R$ [asper]")
 ax.legend()
 plt.show()
 ```

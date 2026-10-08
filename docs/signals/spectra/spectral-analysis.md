@@ -426,7 +426,7 @@ the $K$ resulting *eigenspectra* are averaged:
 $$
 \hat{S}^{(mt)}(f) = \frac{1}{K}\sum_{k=0}^{K-1} \hat{S}_k(f), \qquad
 \hat{S}_k(f) = \Delta t\,\Bigl|\sum_{t=1}^{N} h_{t,k}\,x_t\,
-e^{-i 2\pi f t \Delta t}\Bigr|^2 .
+\mathrm{e}^{-i 2\pi f t \Delta t}\Bigr|^2 .
 $$
 
 Because the tapers are orthogonal the eigenspectra are nearly uncorrelated,

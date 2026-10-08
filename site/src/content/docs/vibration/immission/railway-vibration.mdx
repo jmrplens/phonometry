@@ -49,15 +49,15 @@ assessment is DIN 4150-2 for people and DIN 4150-3 for buildings.
 The first thing Part 2 does is cut the record into three stretches, and every
 quantity after that carries the index of the one it was read over (Clause 5).
 
-- **`T₁`**, about four seconds with the largest vibration in its middle. It is
+- **$T_1$**, about four seconds with the largest vibration in its middle. It is
   where the characteristic values of the passage are read. A short or fast
-  train often needs less, and then `T₁` may be as long as `T₂` and no longer.
-- **`T₂`**, the passage itself: the time a train takes to cross an imaginary
+  train often needs less, and then $T_1$ may be as long as $T_2$ and no longer.
+- **$T_2$**, the passage itself: the time a train takes to cross an imaginary
   measuring section. Experience, the standard says, puts its start where the
   amplitude reaches about a quarter of the most frequent maxima of the passage
   and its end where it falls back to the same value. That is a judgement about
   the record, so the library asks for it rather than guessing it.
-- **`T₃`**, the whole event, quiet approach and departure included. It is the
+- **$T_3$**, the whole event, quiet approach and departure included. It is the
   one the energy of the passage is formed over.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_passage.svg" alt="A thirty-second time axis carrying the velocity of one train passage in millimetres per second. A faint grey trace is the velocity itself, quiet for six seconds, rising over three seconds to a pulsing envelope of about 0.3 to 0.45 millimetres per second peak that holds until 21 seconds and falls away by 24. A blue curve over it is the running r.m.s. of Formula (1), rising with the envelope to about 0.2 and pulsing with the bogies. A red dashed line marks its maximum at 0.218 millimetres per second. Above the record, three double-headed arrows mark the stretches: T1 over four seconds around 15.5 seconds, T2 from 6.75 to 23.25 seconds, and T3 over the whole thirty" width="96%" />
@@ -89,7 +89,7 @@ passage.plot()
 
 The record above is synthetic and shaped like a real one: the envelope of a
 train arriving and leaving, a pulse per bogie, a sleeper-passing tone at 40 Hz,
-a floor resonance at 63 Hz and some broadband noise. Its `T₂` starts where the
+a floor resonance at 63 Hz and some broadband noise. Its $T_2$ starts where the
 envelope reaches a quarter, 6,75 s, and ends where it falls back, 23,25 s:
 
 ```python
@@ -123,7 +123,7 @@ print(f"KB_Fmax {passage.kbf_max:.3f}")                      # 0.216
 
 Before anything is read, the record goes through the band limitation of the
 DIN 45669-1 railway range, as it does inside the meter. That is why a record
-has to be the velocity the transducer gives, and why `KB_Fmax`, the number
+has to be the velocity the transducer gives, and why $KB_\mathrm{Fmax}$, the number
 DIN 4150-2 judges people by, comes out of the same call as the rest.
 
 ## 2. The running r.m.s., and the fourteen per cent that is seven
@@ -183,15 +183,15 @@ print(f"six in an hour: {six:.5f} mm/s")  # 0.02961 mm/s, sqrt(6) times one
 ```
 
 That is the number to compare between two hours of traffic, and it is why
-`T₃` includes the quiet ends: they carry no energy, and the hour does not care
+$T_3$ includes the quiet ends: they carry no energy, and the hour does not care
 how long the record ran.
 
 ## 4. Third octaves: the spectra of Figure 6
 
 Clause 7.2 analyses the passage in third octaves from 4 Hz to at least 315 Hz,
-and prints two spectra as the result: the **interval level** over `T₂`
+and prints two spectra as the result: the **interval level** over $T_2$
 (Formula (6)), the running r.m.s. of each band averaged over the passage, and
-the **maximum level** over `T₃` (Formula (7)), the largest value the running
+the **maximum level** over $T_3$ (Formula (7)), the largest value the running
 r.m.s. of each band reaches. The gap between them is the crest of the band:
 wide where the vibration comes in bursts, narrow where it is steady.
 
@@ -279,7 +279,7 @@ takes: 1 at 4 Hz, 6 at 31,5 Hz, 58 at 315 Hz. The standard gives the counts
 octave either side of the nominal centre holds, everywhere but at 10 Hz and
 12,5 Hz, where those edges would give one line and three and the table gives
 two and two. The table says how many lines and not which, so the library
-states its choice: the `Kₙ` lines nearest the nominal centre on a logarithmic
+states its choice: the $K_n$ lines nearest the nominal centre on a logarithmic
 axis, which are exactly the lines inside the nominal edges wherever the count
 is what the edges hold, and 10 and 11,25 Hz, then 12,5 and 13,75 Hz, where it
 is not. It is a rule of nominal bands and behaves like one: nominal edges do
@@ -366,8 +366,8 @@ Two of the clause's formulas are printed wrong, and the
 [errata page](/phonometry/reference/errata/) has the reading. Formula (1)
 writes the compression speed first as `√(E/ρ)`, the speed of a wave in a thin
 rod, and then as `√(G(1−ν)/(ρ(1−2ν)))`, which is short of a factor 2. Formula
-(5) builds on the first and writes `E = v_p² ρ`, which from a measured `v_p`
-returns the P-wave modulus instead of `E`. Formula (3), printed between them,
+(5) builds on the first and writes $E = \mathrm{v}_\mathrm{p}^2\,\rho$, which from a measured $\mathrm{v}_\mathrm{p}$
+returns the P-wave modulus instead of $E$. Formula (3), printed between them,
 is right, and the library uses the relations it is derived from:
 
 ```python
@@ -408,7 +408,7 @@ ax.plot(nu, continuum, label="continuum, the inverse of Formula (3)")
 ax.plot(nu, np.sqrt((1 - nu) / (1 - 2 * nu)), "--", label="Formula (1), second radical")
 ax.plot(nu, np.sqrt(2 * (1 + nu)), ":", label="Formula (1), sqrt(E / rho)")
 ax.set_xlabel("Poisson's ratio")
-ax.set_ylabel("v_p / v_s")
+ax.set_ylabel(r"$\mathrm{v}_\mathrm{p} / \mathrm{v}_\mathrm{s}$")
 ax.legend()
 ```
 
@@ -518,7 +518,7 @@ people and buildings is DIN 4150-2 and DIN 4150-3.
 ## See also
 
 - [Measuring vibration immission (DIN 45669-1)](/phonometry/vibration/immission/vibration-meter/):
-  the meter every quantity here is read with, and the `KB_F` it produces.
+  the meter every quantity here is read with, and the $KB_\mathrm{F}$ it produces.
 - [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
   the guideline values a peak velocity from a railway is compared with.
 - [Spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the

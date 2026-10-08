@@ -138,7 +138,7 @@ The impulse response is filtered into the seven octave bands 125 Hz -
 obtained from the Schroeder integral (IEC 60268-16, indirect method):
 
 $$
-m_k(f_m) = \left| \int h_k^2(t)\, e^{-j 2\pi f_m t}\, dt \right| \Big/ \int h_k^2(t)\, dt
+m_k(f_m) = \left| \int h_k^2(t)\, \mathrm{e}^{-j 2\pi f_m t}\, dt \right| \Big/ \int h_k^2(t)\, dt
 $$
 
 at the 14 modulation frequencies 0,63-12,5 Hz

@@ -714,7 +714,7 @@ def _fractional_advance(x: NDArray[np.float64], shift: float) -> NDArray[np.floa
     r"""Advance ``x`` by ``shift`` samples (band-limited, non-circular).
 
     Frequency-domain phase ramp
-    :math:`e^{+j 2 \pi k \cdot \text{shift} / \text{nfft}}` over a record
+    :math:`\mathrm{e}^{+j 2 \pi k \cdot \text{shift} / \text{nfft}}` over a record
     zero-padded past the shift, so the advanced samples leaving one end
     land in the padding instead of wrapping around. This is the alignment
     kernel of :func:`~phonometry.signals.correlation.align_impulse_responses`.
@@ -754,7 +754,7 @@ def fractional_delay(
     r"""Delay a record by an arbitrary (sub-sample) number of samples.
 
     Band-limited delay via a frequency-domain phase ramp
-    :math:`e^{-j 2 \pi k \cdot \text{delay} / N}`: every spectral
+    :math:`\mathrm{e}^{-j 2 \pi k \cdot \text{delay} / N}`: every spectral
     component is delayed by exactly
     ``delay`` samples, i.e. its phase changes by
     :math:`-2 \pi f \cdot \text{delay} / f_\mathrm{s}`

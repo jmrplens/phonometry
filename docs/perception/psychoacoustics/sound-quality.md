@@ -129,8 +129,8 @@ plt.show()
 fig, ax = plt.subplots()
 ax.fill_between(res.bark, res.specific_tonality, alpha=0.3, color="#d62728")
 ax.plot(res.bark, res.specific_tonality, color="#d62728")
-ax.set_xlabel("Critical-band rate z [Bark_HMS]")
-ax.set_ylabel("Specific tonality T' [tu_HMS]")
+ax.set_xlabel(r"Critical-band rate $z$ [$\mathrm{Bark}_\mathrm{HMS}$]")
+ax.set_ylabel(r"Specific tonality $T'$ [$\mathrm{tu}_\mathrm{HMS}$]")
 plt.show()
 ```
 
@@ -215,7 +215,7 @@ tonal = [scores[k][0] for k in labels]
 rough_v = [scores[k][1] for k in labels]
 xpos = np.arange(len(labels))
 fig, ax = plt.subplots()
-ax.bar(xpos - 0.2, tonal, 0.4, label="Tonality [tu_HMS]")
+ax.bar(xpos - 0.2, tonal, 0.4, label=r"Tonality [$\mathrm{tu}_\mathrm{HMS}$]")
 ax.bar(xpos + 0.2, rough_v, 0.4, label="Roughness [asper]")
 ax.set_xticks(xpos)
 ax.set_xticklabels(labels)
@@ -305,9 +305,9 @@ f_vals = [psychoacoustics.fluctuation_strength_ecma(am_tone(fm), fs).fluctuation
 r_vals = [psychoacoustics.roughness_ecma(am_tone(fm), fs).roughness for fm in fm_fast]
 
 fig, ax = plt.subplots()
-ax.semilogx(fm_slow, f_vals, "o-", label="Fluctuation strength F [vacil_HMS]")
+ax.semilogx(fm_slow, f_vals, "o-", label=r"Fluctuation strength $F$ [$\mathrm{vacil}_\mathrm{HMS}$]")
 ax.semilogx(fm_fast, r_vals, "s-", label="Roughness R [asper]")
-ax.set(xlabel="Modulation frequency [Hz]", ylabel="F [vacil_HMS] / R [asper]")
+ax.set(xlabel="Modulation frequency [Hz]", ylabel=r"$F$ [$\mathrm{vacil}_\mathrm{HMS}$] / $R$ [asper]")
 ax.legend()
 plt.show()
 ```

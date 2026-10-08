@@ -95,8 +95,9 @@ DARK = Theme(
 #: and the source under test of the ISO 3740 series (RSS, ST, printed
 #: upright in ISO 3747:2010, Equation (11)), the indicated value and the
 #: input of ISO 8041-1, Formulae (9) and (12) (ind, in, both printed
-#: upright there beside an italic f and w), the hand-arm/whole-body
-#: vibration axes of ISO 5349 and ISO 2631 (hv, hwx, hwy, hwz, wx, wy, wz),
+#: upright there beside an italic f and w), the hand-arm vibration total
+#: value of ISO 5349-1 (hv; the axis values of ISO 5349-1 and ISO 2631-1 are
+#: in :data:`_MIXED_SCRIPTS`),
 #: the seat and platform weighted accelerations of ISO 10326-1 (wS, wP),
 #: the parts of a room and of a building element the building plates name
 #: (obj and air of EN 12354-6 Formulae 2 to 4, the wall/win mnemonics of
@@ -148,7 +149,7 @@ DARK = Theme(
 #: ``\text``), the nominal reverberation time of the small-room method
 #: (nom, ``T_\mathrm{nom}`` on its guide), the daily dose of ISO 2631-5
 #: (zd, ``D_\mathrm{zd}``), the standardized impact level of ISO 16283-2
-#: (nT, ``L'_\mathrm{nT}``) and the A-weighted Slow level beside the AF of
+#: (nT, ``L'_{\mathrm{n}T}``) and the A-weighted Slow level beside the AF of
 #: IEC 61672-1 (AS).
 #:
 #: The last words came in with the labels that the plates used to draw as
@@ -251,12 +252,6 @@ _ROMAN_SCRIPTS = frozenset(
         "RSS",
         "ST",
         "hv",
-        "hwx",
-        "hwy",
-        "hwz",
-        "wx",
-        "wy",
-        "wz",
         # wS/wP: the seat and platform weighted accelerations of
         # ISO 10326-1, printed upright.
         "wS",
@@ -274,6 +269,11 @@ _ROMAN_SCRIPTS = frozenset(
         "AF",
         "AFmax",
         "ASmax",
+        # FE: the impact force exposure level of ISO 16283-2:2020, Formula
+        # (A.1) (PDF page 29, folio 23), and ISO 10140-5:2021, Formula (F.2)
+        # (PDF page 34, folio 28), L_FE, printed with an upright FE beside
+        # the italic F(t) and F_0 of the same formula.
+        "FE",
         "Cpeak",
         "sa",
         "situ",
@@ -289,8 +289,6 @@ _ROMAN_SCRIPTS = frozenset(
         "nom",
         # zd: the daily dose of ISO 2631-5, D_zd.
         "zd",
-        # nT: the standardized impact level of ISO 16283-2, L'_nT.
-        "nT",
         # AS: A-weighted, time weighting S, beside the AF of IEC 61672-1.
         "AS",
         # sr/met/bar: the second edge to the receiver, the meteorological
@@ -326,6 +324,26 @@ _ROMAN_SCRIPTS = frozenset(
         # method and upright in the BOE, so the guides decide by meaning.
         "Ar",
         "Keq",
+        # SOR/seg/impedance: the start of roll, the segment and the
+        # impedance correction of ECAC Doc 29. Its Volume 2 (4th edition,
+        # Symbols and Subscripts, PDF pages 12 and 13) sets every subscript
+        # italic, max and ref included, so the print cannot tell an
+        # abbreviation from an index, and the meaning decides as it does for
+        # max and ref.
+        "SOR",
+        "seg",
+        "impedance",
+        # Ws/Wsn/Fb: the structure-borne power, the characteristic power and
+        # the blocked force of UNE-EN 15657:2018: L_Ws and L_Fb,eq in
+        # Formulae (11), (14) and (15) (PDF pages 14 and 15) and L_Wsn in
+        # Formula (17) (PDF page 17), with L_Ws,c and L_Ws,inst of
+        # EN 12354-5:2009, which consumes them (4.4.1, Formula (18b), PDF
+        # page 23). Both print every subscript upright, the index i of
+        # L_Ws,inst,i included, so ISO 80000-2 decides: these runs name what
+        # the level is of and are upright, while the index stays italic.
+        "Ws",
+        "Wsn",
+        "Fb",
         "Fmax",
         "FTm",
         "FTr",
@@ -360,12 +378,7 @@ _ROMAN_SCRIPTS = frozenset(
 #: Subscripts that are part quantity symbol and part word, letter by letter:
 #: ``"v"`` for the italic of a quantity, ``"u"`` for the upright of an
 #: abbreviation. :data:`_ROMAN_SCRIPTS` cannot express these, because it sets a
-#: whole run one way. The two members so far are the force exposure level of
-#: JIS A 1418-2, ``L_FE = 10 lg[(1/T_ref) int F(t)^2/F_0^2 dt]``, whose F is the
-#: force the formula integrates, so it is italic like every other quantity in
-#: the corpus, while its E abbreviates "exposure" and is upright -- set roman
-#: whole, as it was, the plate drew the same F upright that the figures and the
-#: library both draw italic -- and the clock maxima of DIN 45669-1:2010-09,
+#: whole run one way. The first member is the clock maxima of DIN 45669-1:2010-09,
 #: Formula (2), ``KB_FTi``, whose F and T describe the Fast time constant and
 #: the clock duration, as Fmax and FTm do above, while its i is the index that
 #: counts the clock intervals and stays italic, the one letter the note on
@@ -399,8 +412,7 @@ _ROMAN_SCRIPTS = frozenset(
 #: guides write that way: the G-weighted level ``L_{p\mathrm{G}}`` of
 #: ISO 7196, the A-weighted Fast level ``L_{p\mathrm{AF}}`` of the Nordtest
 #: method, the pressure-intensity indicator ``F_{pI_\mathrm{n}}`` of ISO 9614
-#: (p and I the two quantities it compares, n the normal), the structure-borne power and blocked force of EN 15657
-#: (``L_{W\mathrm{s}}``, ``L_{W\mathrm{sn}}``, ``L_{F\mathrm{b,eq}}``), the
+#: (p and I the two quantities it compares, n the normal), the
 #: levels of the equipment and the reference source of the small-room
 #: comparison method (``L_{W\mathrm{e}}``, ``L_{W\mathrm{r}}``,
 #: ``L_{p\mathrm{e}}``, ``L_{p\mathrm{r}}``), and two that split the other
@@ -409,6 +421,25 @@ _ROMAN_SCRIPTS = frozenset(
 #: italic there beside an upright A, and the effective A-weighted level of
 #: ISO 4869-2:2018, Formula (23), ``L'_{p,Ax}``, whose x counts the
 #: protection levels and is printed italic beside the same upright A.
+#:
+#: The mean sound pressure level of the in-duct method, ``L_pm`` of BS EN ISO
+#: 5136:2009, 9.2 (PDF page 33, folio 23), has the italic p of the pressure
+#: and the upright m of "mean", the same split as ``L_pe`` and ``L_pr``.
+#:
+#: The standardized levels of the field standards split the same way: ISO
+#: 16283-1:2014, 3.13 and Formula (2) (PDF page 9, folio 3), ISO 16283-2:2020,
+#: 3.13 (PDF page 9, folio 3), ISO 16283-3:2016, 3.15 (PDF page 11, folio 5),
+#: ISO 717-1:2020 and ISO 717-2:2020 print ``D_nT``, ``L'_nT`` and
+#: ``D_2m,nT`` with an upright n, the normalisation, and an italic T, the
+#: reverberation time the level is standardized to.
+#:
+#: The weighted axis values of the vibration standards split the same way:
+#: ISO 2631-1:1997, 6.5, Equation (10) (PDF page 18, folio 12), prints
+#: ``a_wx``, ``a_wy`` and ``a_wz`` with an upright w, the weighting, and an
+#: italic x, y and z, the same italic axis letters as the subscripts of
+#: ``k_x``, ``k_y`` and ``k_z`` beside them, and ISO 5349-1:2001, 4.5,
+#: Equation (1) (PDF page 11, folio 5), prints ``a_hwx``, ``a_hwy`` and
+#: ``a_hwz`` with an upright hw and the same italic axis.
 #:
 #: So does the end correction of a slit mouth, ``Δl`` (Jiménez et al. 2017,
 #: Sci. Rep. 7:5389, Eq. (5)), in ``M_Δl`` and ``Z_Δl``: the Δ is an operator and
@@ -422,26 +453,62 @@ _MIXED_SCRIPTS: dict[str, str] = {
     "AE": "uv",
     "Aj": "uv",
     "Ax": "uv",
-    "FE": "vu",
     "FTi": "uuv",
-    "Fb": "vu",
     "In": "vu",
     "WA": "vu",
     "WAd": "vuu",
     "We": "vu",
     "Wr": "vu",
-    "Ws": "vu",
-    "Wsn": "vuu",
     "pA": "vu",
     "pAF": "vuu",
     "pG": "vu",
     "pIn": "vvu",
     "pS": "vu",
     "pe": "vu",
+    "pm": "vu",
     "pr": "vu",
     "vA": "vu",
+    "nT": "uv",
+    "hwx": "uuv",
+    "hwy": "uuv",
+    "hwz": "uuv",
+    "wx": "uv",
+    "wy": "uv",
+    "wz": "uv",
     "Δl": "uv",
 }
+
+#: Runs that split letter by letter only under one symbol, because the same
+#: letters are a different quantity under another: ``{base: {run: kinds}}``,
+#: the kinds spelled as in :data:`_MIXED_SCRIPTS`. The two test series of the
+#: duct and in-situ silencer methods are the members. BS EN ISO 7235:2009, 6.3
+#: (PDF page 32, folio 22), and ISO 11820:1996, 3.2 and 3.4 (UNE-EN ISO
+#: 11820:1997, PDF pages 8 and 10, folios 8 and 10), print ``L_pI`` and
+#: ``L_pII`` with the italic p of the pressure and an upright I and II, the
+#: label of the series, while the pressure-intensity indicator ``F_pI`` of
+#: ISO 9614 and ISO 15186 keeps both letters italic, two quantities. ISO 11820
+#: prints its level differences ``D_tps`` and ``D_ips`` (3.1, 3.2, PDF page 8,
+#: folio 8) with an upright t, i and s (transmission, insertion, silencer)
+#: around the italic p of the pressure.
+_MIXED_SCRIPTS_OF: dict[str, dict[str, str]] = {
+    "D": {"ips": "uvu", "tps": "uvu"},
+    "L": {"pI": "vu", "pII": "vuu"},
+}
+
+#: No base-qualified runs: what a script that hangs from no listed symbol gets.
+_NO_MIXED: dict[str, str] = {}
+
+#: Runs of two or more Latin letters that are one quantity symbol and are
+#: italic on the baseline, where any other such run is an operator name or an
+#: acronym and stands upright. The weighted vibration severity is the one: DIN
+#: 4150-2:1999-06 prints ``KB(t)``, ``KB_F(t)``, ``KB_Fmax`` and ``KB_FTm`` with
+#: an italic KB (3.4 to 3.6, PDF page 3), as E DIN 4150-2:2023-08, DIN
+#: 45672-2:1995-07 and E DIN 45672-3:2023-02 do, while the list of symbols of
+#: DIN 45669-1:2010-09 (Clause 4, PDF page 10) sets it upright. The corpus
+#: follows DIN 4150-2 everywhere, and ``scripts/check_subscript_slope.py``
+#: fails on an upright KB. A run here is italic on the baseline only: in a
+#: subscript the curated sets above decide, as they do for every other run.
+_ITALIC_BASE_RUNS = frozenset({"KB"})
 
 #: Whole subscripts that run through a digit and are printed upright from end
 #: to end. The letter scan of :func:`_math_tokens` stops at a digit, so in
@@ -605,6 +672,8 @@ def _math_tokens(
     upright: frozenset[str] = frozenset(),
     sloped: frozenset[str] = frozenset(),
     matched: set[str] | None = None,
+    baseline_upright: frozenset[str] = frozenset(),
+    mixed_here: dict[str, str] = _NO_MIXED,
 ) -> list[tuple[str, str, str]]:
     r"""Split one math run into ``(kind, text)`` chunks.
 
@@ -634,7 +703,11 @@ def _math_tokens(
     and *sloped* the set it asks for italic although :data:`_ROMAN_SCRIPTS`
     holds them; each run either sets is added to *matched*. A run of
     :data:`_MIXED_SCRIPTS` keeps its letter-by-letter styles and is never
-    matched.
+    matched. *baseline_upright* is the set of single letters this call sets
+    upright on the baseline, where a letter is otherwise an italic variable:
+    the print of the standard decides, as ICAO Annex 16 prints the speeds
+    V_H and V_NE and DIN 45672-1 the wave speeds v_p and v_R in roman type;
+    each letter it sets is added to *matched* too.
 
     Malformed markup raises :class:`ValueError` naming the whole string *s*
     and the offending piece, so a typo breaks the generation instead of
@@ -718,7 +791,11 @@ def _math_tokens(
                 or (latin and run[j].isascii() and run[j].isalpha())
             ):
                 j += 1
-            mixed = _MIXED_SCRIPTS.get(run[i:j]) if words else None
+            mixed = (
+                mixed_here.get(run[i:j], _MIXED_SCRIPTS.get(run[i:j]))
+                if words
+                else None
+            )
             if mixed is None and words and not latin and ch.isupper():
                 # A script that opens with a capital Greek letter and runs
                 # on in Latin is one name, though the scan above stops at
@@ -752,7 +829,12 @@ def _math_tokens(
                 kind = "up" if roman and name not in sloped else "var"
             else:
                 letters = sum(1 for c in run[i:j] if c not in _COMBINING)
-                kind = "var" if letters == 1 else "up"
+                italic = letters == 1 or run[i:j] in _ITALIC_BASE_RUNS
+                if italic and run[i:j] in baseline_upright:
+                    italic = False
+                    if matched is not None:
+                        matched.add(run[i:j])
+                kind = "var" if italic else "up"
             out.append((kind, run[i:j], ""))
             i = j
         else:
@@ -815,7 +897,16 @@ def _math_runs(
     if len(segments) % 2 == 0:
         msg = f"unbalanced $ markup in {s!r}"
         raise ValueError(msg)
-    table = _script_table(upright, "upright")
+    upright = tuple(upright)
+    bases = frozenset(key for key in upright if "_" not in key)
+    for key in bases:
+        if not (len(key) == 1 and key.isalpha()):
+            msg = (
+                f"upright key {key!r} is neither '<base>_<letters>' nor one "
+                "letter: name a subscript as 'S_p' or a baseline symbol as 'V'"
+            )
+            raise ValueError(msg)
+    table = _script_table((k for k in upright if "_" in k), "upright")
     table_sloped = _script_table(sloped, "sloped")
     chunks: list[tuple[str, bool, float, float]] = []
 
@@ -840,6 +931,9 @@ def _math_runs(
         empty: frozenset[str] = frozenset()
         wanted = table.get(base, empty) if kind == "sub" else empty
         unwanted = table_sloped.get(base, empty) if kind == "sub" else empty
+        mixed_here = (
+            _MIXED_SCRIPTS_OF.get(base, _NO_MIXED) if kind == "sub" else _NO_MIXED
+        )
         matched: set[str] = set()
         for kind2, payload2, base2 in _math_tokens(
             payload,
@@ -849,6 +943,7 @@ def _math_runs(
             upright=wanted,
             sloped=unwanted,
             matched=matched,
+            mixed_here=mixed_here,
         ):
             if kind2 in ("sub", "sup"):
                 script(kind2, payload2, base2, shift, scale, depth + 1)
@@ -867,11 +962,16 @@ def _math_runs(
                 "commands here, write the glyph itself (θ, √, ·, …)"
             )
             raise ValueError(msg)
-        for kind, payload, base in _math_tokens(segment, s):
+        used: set[str] = set()
+        for kind, payload, base in _math_tokens(
+            segment, s, baseline_upright=bases, matched=used
+        ):
             if kind in ("var", "up"):
                 add(payload, italic=kind == "var")
             else:
                 script(kind, payload, base, 0.0, 1.0, 1)
+        if hits is not None:
+            hits.update(used)
     return chunks
 
 
@@ -1155,7 +1255,10 @@ class SVG:
         a key no label of the plate uses is a typo, and :meth:`render`
         refuses it. ``sloped`` is the other direction, for the rarer source
         that prints a letter of the curated set italic (the f of $ΔL_f$ in
-        ISO 3747, where RD 1367 sets the f of $K_f$ upright).
+        ISO 3747, where RD 1367 sets the f of $K_f$ upright). A key of one
+        letter with no subscript sets that letter upright on the baseline,
+        for the source that prints a symbol in roman type: ``("V",)`` for the
+        speeds $V_H$ and $V_{NE}$ of ICAO Annex 16.
         """
         if anchor not in ("start", "middle", "end"):
             msg = f"'anchor' must be one of ('start', 'middle', 'end'); got {anchor!r}."

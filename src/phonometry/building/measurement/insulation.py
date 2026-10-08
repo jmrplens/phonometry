@@ -5,7 +5,7 @@ r"""Field measurement of sound insulation: airborne (ISO 16283-1:2014), impact
 **Field quantities (ISO 16283-1:2014).** From the energy-average sound
 pressure levels in the source and receiving rooms this module forms the
 level difference :math:`D = L_1 - L_2` (Clause 3.12, Formula (1)), the
-standardized level difference :math:`D_\mathrm{nT} = D + 10 \log_{10}(T/T_0)` with the
+standardized level difference :math:`D_{\mathrm{n}T} = D + 10 \log_{10}(T/T_0)` with the
 reference reverberation time :math:`T_0 = 0.5` s (Clause 3.13,
 Formula (2)), and the apparent sound reduction index
 :math:`R' = D + 10 \log_{10}(S/A)` with the Sabine equivalent absorption area
@@ -19,7 +19,7 @@ caller having already applied any background-noise correction (Clause 9.2).
 **Field impact quantities (ISO 16283-2:2020).** With the tapping machine as
 the impact source this module forms, from the energy-average impact sound
 pressure level ``Li`` in the receiving room, the standardized impact sound
-pressure level :math:`L'_\mathrm{nT} = L_\mathrm{i} - 10 \log_{10}(T/T_0)` with
+pressure level :math:`L'_{\mathrm{n}T} = L_\mathrm{i} - 10 \log_{10}(T/T_0)` with
 :math:`T_0 = 0.5` s (Clause
 3.13, Formula (1)) and the normalized impact sound pressure level
 :math:`L'_\mathrm{n} = L_\mathrm{i} + 10 \log_{10}(A/A_0)` (Clause 3.15,
@@ -35,7 +35,7 @@ energy-averaged (Clause 7.8.1, Formula (11)).
 source this module forms, from the level 2 m in front of the façade
 ``L1,2m`` and the receiving-room level ``L2``, the level difference
 :math:`D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2` (Clause 3.14), its standardized form
-:math:`D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}(T/T_0)` with :math:`T_0 = 0.5` s
+:math:`D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}(T/T_0)` with :math:`T_0 = 0.5` s
 (Clause 3.15) and
 normalized form :math:`D_{2\mathrm{m,n}} = D_{2\mathrm{m}} - 10 \log_{10}(A/A_0)` with the Sabine
 absorption
@@ -341,7 +341,7 @@ class ImpactInsulationResult(OwnsArrays):
     r"""Per-band field impact sound insulation (ISO 16283-2).
 
     :ivar l_n_t: Standardized impact sound pressure level
-        :math:`L'_\mathrm{nT} = L_\mathrm{i} - 10 \log_{10}(T/T_0)` per band, in dB (Clause 3.13,
+        :math:`L'_{\mathrm{n}T} = L_\mathrm{i} - 10 \log_{10}(T/T_0)` per band, in dB (Clause 3.13,
         Formula (1)).
     :ivar l_n: Normalized impact sound pressure level
         :math:`L'_\mathrm{n} = L_\mathrm{i} + 10 \log_{10}(A/A_0)` per band, in dB (Clause 3.15,
@@ -483,7 +483,7 @@ class FacadeInsulationResult(OwnsArrays):
     :ivar d_2m: Level difference :math:`D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2` per band,
         in dB (Clause 3.14; ``Dls,2m`` loudspeaker, ``Dtr,2m`` traffic).
     :ivar d_2m_nt: Standardized level difference
-        :math:`D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}(T/T_0)` per band, in dB
+        :math:`D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}(T/T_0)` per band, in dB
         (Clause 3.15).
     :ivar d_2m_n: Normalized level difference
         :math:`D_{2\mathrm{m,n}} = D_{2\mathrm{m}} - 10 \log_{10}(A/A_0)` per band, in dB
@@ -1001,7 +1001,7 @@ def airborne_insulation(
     Computes, per frequency band, the level difference
     :math:`D = L_1 - L_2`
     (Formula (1)), the standardized level difference
-    :math:`D_\mathrm{nT} = D + 10 \log_{10}(T/T_0)` (Formula (2)) and, when the partition
+    :math:`D_{\mathrm{n}T} = D + 10 \log_{10}(T/T_0)` (Formula (2)) and, when the partition
     area
     and receiving-room volume are given, the apparent sound reduction
     index :math:`R' = D + 10 \log_{10}(S/A)` with :math:`A = 0.16\,V/T`
@@ -1157,7 +1157,7 @@ def impact_insulation(
     r"""Field impact sound insulation per ISO 16283-2:2020 (tapping machine).
 
     Computes, per frequency band, the standardized impact sound pressure
-    level :math:`L'_\mathrm{nT} = L_\mathrm{i} - 10 \log_{10}(T/T_0)` (Formula (1)) and, when the
+    level :math:`L'_{\mathrm{n}T} = L_\mathrm{i} - 10 \log_{10}(T/T_0)` (Formula (1)) and, when the
     receiving-room volume is given, the normalized impact sound pressure
     level :math:`L'_\mathrm{n} = L_\mathrm{i} + 10 \log_{10}(A/A_0)` (Formula (3)) with the
     Sabine equivalent absorption
@@ -1324,7 +1324,7 @@ def facade_insulation(
 
     Computes, per frequency band, the global-method level difference
     :math:`D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2` (Clause 3.14), its standardized form
-    :math:`D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}(T/T_0)` (Clause 3.15) and, when the
+    :math:`D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}(T/T_0)` (Clause 3.15) and, when the
     receiving-room volume is given, its normalized form
     :math:`D_{2\mathrm{m,n}} = D_{2\mathrm{m}} - 10 \log_{10}(A/A_0)` with the Sabine equivalent
     absorption

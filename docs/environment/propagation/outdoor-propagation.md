@@ -24,8 +24,8 @@ pure-tone attenuation coefficient $\alpha$, in decibels per metre:
 
 $$
 \alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_\mathrm{a}/p_\mathrm{r}\big)^{-1} \big(T/T_0\big)^{1/2}
-       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
-       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
+       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{\mathrm{e}^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
+       + 0.1068\ \tfrac{\mathrm{e}^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
 $$
 
 with the oxygen and nitrogen relaxation frequencies $f_\mathrm{rO}$, $f_\mathrm{rN}$

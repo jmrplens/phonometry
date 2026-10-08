@@ -35,10 +35,10 @@ model. The PE is anchored against the exact spherical-wave ground effect
 (gradient zero), which it reproduces to a few tenths of a dB on the default
 grid (finer ``height_step`` converges it further).
 
-The ground impedance is taken in the :math:`e^{-i \omega t}` convention of
+The ground impedance is taken in the :math:`\mathrm{e}^{-i \omega t}` convention of
 Salomons (a passive ground has :math:`\operatorname{Im}(Z) > 0`), shared with
 :mod:`phonometry.environment.propagation.ground_barriers`. The porous models of
-:mod:`phonometry.materials` work in the opposite :math:`e^{+j \omega t}`
+:mod:`phonometry.materials` work in the opposite :math:`\mathrm{e}^{+j \omega t}`
 convention (:math:`\operatorname{Im}(Z) < 0`), so an impedance derived from
 them (``flow_resistivity=`` or a
 ``PorousMediumResult``) is conjugated internally before entering the PE ground
@@ -686,9 +686,9 @@ def atmospheric_parabolic_equation(
     :class:`~phonometry.materials.PorousMediumResult`) or derived from an
     effective ``flow_resistivity`` (Pa s/m2) via the ``model`` porous model.
     Exactly one of the two must be given. A plain ``impedance`` value is taken
-    in the :math:`e^{-i \omega t}` convention (:math:`\operatorname{Im}(Z) > 0`
+    in the :math:`\mathrm{e}^{-i \omega t}` convention (:math:`\operatorname{Im}(Z) > 0`
     for a passive ground); a ``PorousMediumResult`` or ``flow_resistivity`` is
-    conjugated internally from the materials' :math:`e^{+j \omega t}`
+    conjugated internally from the materials' :math:`\mathrm{e}^{+j \omega t}`
     convention.
 
     :param frequency_hz: Source frequency, in Hz.

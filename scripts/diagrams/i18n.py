@@ -3053,9 +3053,9 @@ _ES: dict[str, str] = {
     "A full circle in section is 4\u03c0: the opening radiates into the whole room. "
     "Half of one is 2\u03c0, a quarter is \u03c0.": "Un círculo completo en sección es 4\u03c0: la abertura radia a toda la sala. "
     "La mitad es 2\u03c0, un cuarto es \u03c0.",
-    "D_td = 10 lg[1 + \u03a9 / (4\u03c0f\u221aS / c)\u00b2] dB, "
-    "which ISO 5135 prints as \u0394L_r = 10 lg[1 + (c / 4\u03c0f)\u00b2 (\u03a9 / S)]": "D_td = 10 lg[1 + \u03a9 / (4\u03c0f\u221aS / c)\u00b2] dB, "
-    "que la ISO 5135 imprime como \u0394L_r = 10 lg[1 + (c / 4\u03c0f)\u00b2 (\u03a9 / S)]",
+    "$D_{td} = 10 lg[1 + \u03a9 / (4\u03c0f\u221aS / c)\u00b2]$ dB, "
+    "which ISO 5135 prints as $\u0394L_r = 10 lg[1 + (c / 4\u03c0f)\u00b2 (\u03a9 / S)]$": "$D_{td} = 10 lg[1 + \u03a9 / (4\u03c0f\u221aS / c)\u00b2]$ dB, "
+    "que la ISO 5135 imprime como $\u0394L_r = 10 lg[1 + (c / 4\u03c0f)\u00b2 (\u03a9 / S)]$",
     "One formula, two names, and the same five values in ISO 7235 Table B.1 "
     "and ISO 5135 Table 1": "Una fórmula, dos nombres, y los mismos cinco valores en la Tabla B.1 de la "
     "ISO 7235 y la Tabla 1 de la ISO 5135",
@@ -3071,7 +3071,7 @@ _ES: dict[str, str] = {
     "test duct, anechoic termination": "conducto de ensayo, terminación anecoica",
     "three positions on a line inclined to the axis, at mid-length": "tres posiciones en línea inclinada respecto al eje, a media longitud",
     "$r ≤ 0.3$ planes": "planos $r ≤ 0,3$",
-    "$D_i = L_{pI} − L_{pII}$, one third octave at a time": "$D_i = L_{pI} − L_{pII}$, tercio de octava a tercio de octava",
+    "$D_i = L_{pII} − L_{pI}$, one third octave at a time": "$D_i = L_{pII} − L_{pI}$, tercio de octava a tercio de octava",
     "modal filter: ≥ 3 dB on the fundamental at the low-frequency end,": "filtro modal: ≥ 3 dB sobre el modo fundamental en el extremo grave,",
     "≥ 5 dB above the cut-on of higher-order modes (5.2.2.3)": "≥ 5 dB por encima del corte de los modos superiores (5.2.2.3)",
     "substitution duct: the empty housing where possible, otherwise": "conducto de sustitución: la carcasa vacía si es posible; si no,",

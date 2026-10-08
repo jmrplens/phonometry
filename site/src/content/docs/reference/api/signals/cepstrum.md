@@ -39,12 +39,12 @@ at the quefrency of its period. Three variants are standard:
   homomorphic deconvolution.
 
 **Echoes.** A single reflection $x(t) = s(t) + a s(t - t_0)$
-multiplies the spectrum by $1 + a e^{-j 2 \pi f t_0}$, whose complex
+multiplies the spectrum by $1 + a \mathrm{e}^{-j 2 \pi f t_0}$, whose complex
 logarithm expands (for $\lvert a \rvert < 1$) into the exactly
 summable series
 
 $$
-\ln(1 + a e^{-j \theta}) = \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n} e^{-j n \theta}
+\ln(1 + a \mathrm{e}^{-j \theta}) = \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n} \mathrm{e}^{-j n \theta}
 $$
 
 so the cepstrum carries a spike train at the *rahmonics* $n t_0$ with
@@ -265,7 +265,7 @@ An echo delay and reflection coefficient read off the power cepstrum.
 | `cepstrum` | Power cepstrum searched. |
 | `delay` | The echo delay, in seconds: the quefrency of the largest `\|cepstrum\|` peak in the searched band, refined by quadratic (parabolic) interpolation of `\|cepstrum\|` through the peak sample and its two neighbours, so an off-sample delay is estimated to a fraction of a sample. |
 | `delay_samples` | The peak position in whole samples (no interpolation): the index at which `reflection_coefficient` is read, so `delay` differs from `delay_samples/fs` by the interpolated sub-sample offset (at most half a sample). |
-| `reflection_coefficient` | Signed cepstrum value at the peak sample. For a single in-record echo $x(t) = s(t) + a s(t - t_0)$ the power cepstrum's first rahmonic height is exactly `a` -- of either sign -- (the $n = 1$ term of the $\ln(1 + a e^{-j \theta})$ series), so the value estimates the reflection coefficient directly, including its polarity. When the true delay falls between samples the rahmonic is split across neighbouring quefrency bins and the reported coefficient underestimates $\lvert a \rvert$ (down to roughly 65 % of it for a delay midway between samples); the interpolated `delay` is unaffected. |
+| `reflection_coefficient` | Signed cepstrum value at the peak sample. For a single in-record echo $x(t) = s(t) + a s(t - t_0)$ the power cepstrum's first rahmonic height is exactly `a` -- of either sign -- (the $n = 1$ term of the $\ln(1 + a \mathrm{e}^{-j \theta})$ series), so the value estimates the reflection coefficient directly, including its polarity. When the true delay falls between samples the rahmonic is split across neighbouring quefrency bins and the reported coefficient underestimates $\lvert a \rvert$ (down to roughly 65 % of it for a delay midway between samples); the interpolated `delay` is unaffected. |
 | `search_range` | The `(min, max)` quefrency band searched, s. |
 | `fs` | Sample rate of the analysed record, in Hz. |
 | `nfft` | FFT length used. |

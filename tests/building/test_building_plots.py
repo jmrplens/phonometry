@@ -76,7 +76,7 @@ def test_source_check_plot_draws_the_measured_spectrum(language: str) -> None:
     measured = [39.0, 31.0, 23.0, 17.0, 12.5]
     res = ph.building.check_heavy_impact_source(measured)
     ax = res.plot(language=language)
-    line = _line_by_label(ax, "L_{FE}")
+    line = _line_by_label(ax, r"L_\mathrm{FE}")
     np.testing.assert_allclose(line.get_ydata(), measured)
     # Five octave bands on evenly spaced categorical positions.
     assert [t.get_text() for t in ax.get_xticklabels()][:2] != []

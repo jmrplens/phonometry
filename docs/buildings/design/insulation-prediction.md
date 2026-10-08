@@ -217,10 +217,10 @@ plt.show()
 </details>
 
 The airborne counterpart of that closure is Formula (5b),
-$D_\mathrm{nT} = R' + 10\log_{10}(0.32\,V/S_\mathrm{s})$, exposed as `standardized_level_difference`;
+$D_{\mathrm{n}T} = R' + 10\log_{10}(0.32\,V/S_\mathrm{s})$, exposed as `standardized_level_difference`;
 it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
 11.5)` gives 53.6 dB, the printed $V/(3S)$ chain 53.8 dB, both rounding to
-$D_\mathrm{nT,w} = 54$ dB).
+$D_{\mathrm{n}T,\mathrm{w}} = 54$ dB).
 
 The three insulation guides close a loop: the
 [laboratory](../insulation/insulation-lab.md) measures $R$ and $K_{ij}$ element by element

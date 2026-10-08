@@ -19,14 +19,14 @@ and Diffusers* (3rd ed., CRC Press, 2017):
 
 * Each well of depth `d_n` behaves, at normal incidence and with a rigid
   bottom, as a locally reacting patch of pressure reflection coefficient
-  $R_n = e^{-2jkd_n}$ (Chapter 10; the phase change of a wave travelling
+  $R_n = \mathrm{e}^{-2jkd_n}$ (Chapter 10; the phase change of a wave travelling
   down and back up the well). An arbitrary complex reflection coefficient per
   well is accepted as well, so admittance or resonator-loaded surfaces computed
   elsewhere can be fed in directly.
 * The scattered pressure at reflection angle $\theta$ for a source at
   incidence $\psi$ is the sum over the wells of the periodic surface
   (Chapter 5, Equation (5.8), and Chapter 9, Equation (9.32)):
-  $p(\theta) = F(\theta) \sum_n R_n e^{jkx_n(\sin\psi + \sin\theta)}$,
+  $p(\theta) = F(\theta) \sum_n R_n \mathrm{e}^{jkx_n(\sin\psi + \sin\theta)}$,
   with `x_n` the centre of the `n`-th well and $k = 2\pi f/c$. The
   optional prefactor $F(\theta)$ collects the single-well aperture
   directivity $\operatorname{sinc}(kw(\sin\psi + \sin\theta)/2)$ (the
@@ -214,7 +214,7 @@ Predict the far-field polar response of a diffuser (Cox and D'Antonio, Eq. (5.8)
 Evaluates the single-plane Fraunhofer scattered pressure of a periodic
 phase-grating surface and reduces it to the ISO 17497-2 directional
 diffusion coefficient. Supply the surface either as rigid-bottom well
-`depths` ($R_n = e^{-2jkd_n}$) or as an explicit per-well complex
+`depths` ($R_n = \mathrm{e}^{-2jkd_n}$) or as an explicit per-well complex
 `reflection` sequence (for admittance or resonator-loaded surfaces); give
 exactly one.
 

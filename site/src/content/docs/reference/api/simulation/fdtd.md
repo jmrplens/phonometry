@@ -67,12 +67,12 @@ the pressure averaged from the two adjacent cell centres, and folds
 them into complex accumulators at each requested frequency, so a
 continuous-wave run never stores full time histories.
 
-After every step the accumulators gain $p\, e^{-j \omega t}$ with
+After every step the accumulators gain $p\, \mathrm{e}^{-j \omega t}$ with
 the fields' own leapfrog time stamps ($t = n\,\Delta t$ for
 pressure, $t = (n - 1/2)\,\Delta t$ for velocity, so the half-step
 stagger is handled
 exactly). `phasors` scales the sums by `2 / n_samples` into the
-steady-state complex amplitudes of the library's $e^{+j \omega t}$
+steady-state complex amplitudes of the library's $\mathrm{e}^{+j \omega t}$
 convention. Accumulate only over the steady state: run the transient
 out, call `reset`, then integrate a window as close as possible
 to a whole number of periods (the residual leakage falls as one over
@@ -529,7 +529,7 @@ GaussianPulse(
 
 A soft Gaussian pressure pulse injected at one cell.
 
-$s(t) = \text{amplitude} \cdot e^{-((t - t_0)/w)^2}$, with $w$
+$s(t) = \text{amplitude} \cdot \mathrm{e}^{-((t - t_0)/w)^2}$, with $w$
 the half-width `half_width_s` and `t0` defaulting to
 `4 * half_width_s` so the pulse starts from (numerically) zero.
 

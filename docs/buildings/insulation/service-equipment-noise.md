@@ -38,9 +38,9 @@ read off the meter, and Table 1 names them:
 
 | | A-weighted | C-weighted |
 | :--- | :--- | :--- |
-| Maximum, time weighting S | $L_\mathrm{A,Smax}$, $L_\mathrm{A,Smax,nT}$, $L_\mathrm{A,Smax,n}$ | $L_\mathrm{C,Smax}$, $L_\mathrm{C,Smax,nT}$, $L_\mathrm{C,Smax,n}$ |
-| Maximum, time weighting F | $L_\mathrm{A,Fmax}$, $L_\mathrm{A,Fmax,nT}$, $L_\mathrm{A,Fmax,n}$ | $L_\mathrm{C,Fmax}$, $L_\mathrm{C,Fmax,nT}$, $L_\mathrm{C,Fmax,n}$ |
-| Equivalent continuous | $L_\mathrm{A,eq}$, $L_\mathrm{A,eq,nT}$, $L_\mathrm{A,eq,n}$ | $L_\mathrm{C,eq}$, $L_\mathrm{C,eq,nT}$, $L_\mathrm{C,eq,n}$ |
+| Maximum, time weighting S | $L_\mathrm{A,Smax}$, $L_{\mathrm{A,Smax,n}T}$, $L_\mathrm{A,Smax,n}$ | $L_\mathrm{C,Smax}$, $L_{\mathrm{C,Smax,n}T}$, $L_\mathrm{C,Smax,n}$ |
+| Maximum, time weighting F | $L_\mathrm{A,Fmax}$, $L_{\mathrm{A,Fmax,n}T}$, $L_\mathrm{A,Fmax,n}$ | $L_\mathrm{C,Fmax}$, $L_{\mathrm{C,Fmax,n}T}$, $L_\mathrm{C,Fmax,n}$ |
+| Equivalent continuous | $L_\mathrm{A,eq}$, $L_{\mathrm{A,eq,n}T}$, $L_\mathrm{A,eq,n}$ | $L_\mathrm{C,eq}$, $L_{\mathrm{C,eq,n}T}$, $L_\mathrm{C,eq,n}$ |
 
 The draft is explicit that these are not interchangeable: only results
 obtained with the same method are compared, and a result compared with a
@@ -219,7 +219,7 @@ another value is specified, or to a reference absorption area
 $A_0 = 10$ m² (Formulae (5) and (6)):
 
 $$
-L_\mathrm{nT} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
+L_{\mathrm{n}T} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
 L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0.16\,V}\ \mathrm{dB}
 $$
 

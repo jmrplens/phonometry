@@ -536,7 +536,7 @@ last `tau` seconds of the record, so a time `t` after the cut its
 window still holds `(tau - t) / tau` of the original mean square and the
 indicated value falls as $\sqrt{(\tau - t)/\tau}$, reaching 10 % at
 `t = 0,99 tau`. The exponential average of Eq. (3) decays in power as
-$e^{-t/\tau}$, so the indication falls as $e^{-t/2\tau}$ and
+$\mathrm{e}^{-t/\tau}$, so the indication falls as $\mathrm{e}^{-t/2\tau}$ and
 reaches 10 % at $t = 2\tau\ln 10 = 4,605\,2\,\tau$.
 
 Both land inside the printed bands of [`RUNNING_RMS_DECAY_TIME_S`](/phonometry/reference/api/vibration/instrumentation/#running_rms_decay_time_s)

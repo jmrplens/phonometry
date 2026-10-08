@@ -1456,7 +1456,7 @@ Q 518.02 185.7 518.02 187.95
 L 518.02 196.96 
 Q 518.02 199.21 520.27 199.21 
 z
-" style="fill: #f0f2f5; stroke: #e0e0e0; stroke-linejoin: miter"/></g><!-- $f_G$ = 214 Hz --><g transform="translate(520.27 194.79) scale(0.09 -0.09)"><defs><path id="DejaVuSans-Oblique-49" d="M 3059 4863 
+" style="fill: #f0f2f5; stroke: #e0e0e0; stroke-linejoin: miter"/></g><!-- $f_\mathrm{G}$ = 214 Hz --><g transform="translate(520.27 194.79) scale(0.09 -0.09)"><defs><path id="DejaVuSans-Oblique-49" d="M 3059 4863 
 L 2969 4384 
 L 2419 4384 
 Q 2106 4384 1964 4261 
@@ -1476,35 +1476,31 @@ Q 1278 4363 1576 4613
 Q 1875 4863 2516 4863 
 L 3059 4863 
 z
-" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-2a" d="M 3494 697 
-L 3738 1919 
-L 2700 1919 
-L 2797 2438 
-L 4453 2438 
-L 4050 384 
-Q 3634 156 3143 32 
-Q 2653 -91 2156 -91 
-Q 1278 -91 783 396 
-Q 288 884 288 1753 
-Q 288 2475 589 3126 
-Q 891 3778 1422 4213 
-Q 1756 4484 2153 4617 
-Q 2550 4750 3034 4750 
-Q 3472 4750 3873 4639 
-Q 4275 4528 4641 4306 
-L 4513 3634 
-Q 4231 3928 3853 4083 
-Q 3475 4238 3047 4238 
-Q 2550 4238 2172 4048 
-Q 1794 3859 1497 3463 
-Q 1244 3125 1098 2667 
-Q 953 2209 953 1734 
-Q 953 1081 1287 751 
-Q 1622 422 2284 422 
-Q 2616 422 2925 492 
-Q 3234 563 3494 697 
+" transform="scale(0.015625)"/><path id="DejaVuSans-2a" d="M 3809 666 
+L 3809 1919 
+L 2778 1919 
+L 2778 2438 
+L 4434 2438 
+L 4434 434 
+Q 4069 175 3628 42 
+Q 3188 -91 2688 -91 
+Q 1594 -91 976 548 
+Q 359 1188 359 2328 
+Q 359 3472 976 4111 
+Q 1594 4750 2688 4750 
+Q 3144 4750 3555 4637 
+Q 3966 4525 4313 4306 
+L 4313 3634 
+Q 3963 3931 3569 4081 
+Q 3175 4231 2741 4231 
+Q 1884 4231 1454 3753 
+Q 1025 3275 1025 2328 
+Q 1025 1384 1454 906 
+Q 1884 428 2741 428 
+Q 3075 428 3337 486 
+Q 3600 544 3809 666 
 z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-49" transform="translate(0 0.02)"/><use xlink:href="#DejaVuSans-Oblique-2a" transform="translate(35.21 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-3" transform="translate(92.18 0.02)"/><use xlink:href="#DejaVuSans-20" transform="translate(123.97 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(207.76 0.02)"/><use xlink:href="#DejaVuSans-15" transform="translate(239.55 0.02)"/><use xlink:href="#DejaVuSans-14" transform="translate(303.17 0.02)"/><use xlink:href="#DejaVuSans-17" transform="translate(366.79 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(430.42 0.02)"/><use xlink:href="#DejaVuSans-2b" transform="translate(462.2 0.02)"/><use xlink:href="#DejaVuSans-5d" transform="translate(537.4 0.02)"/></g></g><g id="text_40"><g id="patch_16"><path d="M 453.39 349.24 
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-49" transform="translate(0 0.02)"/><use xlink:href="#DejaVuSans-2a" transform="translate(35.21 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-3" transform="translate(92.18 0.02)"/><use xlink:href="#DejaVuSans-20" transform="translate(123.97 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(207.76 0.02)"/><use xlink:href="#DejaVuSans-15" transform="translate(239.55 0.02)"/><use xlink:href="#DejaVuSans-14" transform="translate(303.17 0.02)"/><use xlink:href="#DejaVuSans-17" transform="translate(366.79 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(430.42 0.02)"/><use xlink:href="#DejaVuSans-2b" transform="translate(462.2 0.02)"/><use xlink:href="#DejaVuSans-5d" transform="translate(537.4 0.02)"/></g></g><g id="text_40"><g id="patch_16"><path d="M 453.39 349.24 
 L 715.81 349.24 
 Q 718.53 349.24 718.53 346.52 
 L 718.53 338.02 

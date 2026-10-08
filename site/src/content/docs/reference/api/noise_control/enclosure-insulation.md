@@ -43,7 +43,7 @@ the substitution is what the choice in [`applicable_methods`](/phonometry/refere
 
 * an **actual** source, the machine itself, which is the normal case;
 * the **reciprocity** method of part 1, 7.2, which puts the enclosure in a
-  diffuse field and measures inside it, giving $D_{pr}$;
+  diffuse field and measures inside it, giving $D_{p\mathrm{r}}$;
 * an **artificial** source, the tapping machine of Annex A on its undamped
   steel plate, used at several positions inside the enclosure.
 
@@ -230,9 +230,9 @@ The insertion loss of an enclosure, band by band.
 | `frequencies` | Nominal band centre frequencies, in hertz, or `None` when the levels were given without them. |
 | `level_without` | The level measured without the enclosure, in decibels. |
 | `level_with` | The level measured with it, in decibels. |
-| `insulation` | $D_W$, $D_p$ or $D_{pr}$ per band, in decibels. |
+| `insulation` | $D_W$, $D_p$ or $D_{p\mathrm{r}}$ per band, in decibels. |
 | `quantity` | What was subtracted: `"sound_power"`, `"sound_pressure"` or `"reciprocity"`. |
-| `a_weighted_insulation` | $D_{WA}$ or $D_{pA}$ of Equation (2) or (4), in decibels, or `None` when no band centres were given and no A-weighted pair was supplied. For the two standards of Table 1 that determine an A-weighted value alone, a single pair of levels is that value, and it is carried here. |
+| `a_weighted_insulation` | $D_{W\mathrm{A}}$ or $D_{p\mathrm{A}}$ of Equation (2) or (4), in decibels, or `None` when no band centres were given and no A-weighted pair was supplied. For the two standards of Table 1 that determine an A-weighted value alone, a single pair of levels is that value, and it is carried here. |
 | `condition` | `"laboratory"` (part 1) or `"in-situ"` (part 2). |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `base_standard` | The standard the levels were determined by. |
@@ -291,7 +291,7 @@ The A-weighted insulation an enclosure would give a stated spectrum.
 Annex C of part 1 and Annex D of part 2, the same formula:
 
 $$
-D_{WA,e} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_i)}
+D_{W\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_i)}
 $$
 
 where $L_i$ is the assumed source spectrum, $A_i$ the
@@ -302,8 +302,8 @@ corrections are the correction itself, so $A_i = -C_k$. Both terms
 are formed here from the same table, so the total and the sum cannot
 disagree, and with $D_i = 0$ the answer is exactly zero.
 
-The same formula serves $D_W$ (giving $D_{WA,e}$),
-$D_p$ and $D_{pr}$; which one it is, is the caller's.
+The same formula serves $D_W$ (giving $D_{W\mathrm{A},\mathrm{e}}$),
+$D_p$ and $D_{p\mathrm{r}}$; which one it is, is the caller's.
 
 **Parameters**
 
@@ -313,7 +313,7 @@ $D_p$ and $D_{pr}$; which one it is, is the caller's.
 | `insulation` | The measured insulation $D_i$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 
-**Returns:** $D_{WA,e}$, in decibels.
+**Returns:** $D_{W\mathrm{A},\mathrm{e}}$, in decibels.
 
 **Raises**
 
@@ -436,7 +436,7 @@ reciprocity_insulation(
 
 Insertion loss measured from the outside in, Equation (5) of part 1.
 
-$D_{pr} = \overline{L_{p,\text{ext}}} - \overline{L_{p,\text{int}}}$:
+$D_{p\mathrm{r}} = \overline{L_{p,\text{ext}}} - \overline{L_{p,\text{int}}}$:
 the enclosure is put in a diffuse field, the field is measured around it
 and again inside it, and the difference is the insulation the enclosure
 would give a source within it. The method belongs to the laboratory, and it
@@ -514,7 +514,7 @@ sound_power_insulation(
 Insertion loss from two sound power determinations, Equations (1) and (2).
 
 $D_W = L_{W,\text{without}} - L_{W,\text{with}}$ band by band, and
-$D_{WA}$ the same difference of the A-weighted totals. Where the
+$D_{W\mathrm{A}}$ the same difference of the A-weighted totals. Where the
 A-weighted pair is not supplied it is computed from the band spectra with
 the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 
@@ -561,7 +561,7 @@ Insertion loss from two sound pressure levels, Equations (3) and (4).
 
 $D_p = L_{p,\text{without}} - L_{p,\text{with}}$ at one stated
 position, with the same microphone positions in both runs, and
-$D_{pA}$ the difference of the A-weighted values. The position is
+$D_{p\mathrm{A}}$ the difference of the A-weighted values. The position is
 part of the answer: the standard requires it in the report, because an
 insertion loss at the operator's ear and one a metre from the panel are
 different numbers about the same enclosure.
@@ -767,7 +767,7 @@ weighted_insulation(
 The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.
 
 Both parts say the same thing: rate the spectrum by ISO 717-1, putting
-$D_W$ or $D_{pr}$ where that standard writes $R$. The
+$D_W$ or $D_{p\mathrm{r}}$ where that standard writes $R$. The
 reference curve, the shift and the adaptation terms come from
 [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), which has its own conformance
 rows; what is done here is the trim to the rating bands.
@@ -807,7 +807,7 @@ The single-number rating of an insertion loss spectrum, ISO 717-1.
 
 | Name | Description |
 | :--- | :--- |
-| `rating` | $D_{W,w}$ or $D_{pr,w}$, in decibels. |
+| `rating` | $D_{W,\mathrm{w}}$ or $D_{p\mathrm{r},\mathrm{w}}$, in decibels. |
 | `c` | The spectrum adaptation term $C$, in decibels. |
 | `ctr` | The spectrum adaptation term $C_{tr}$, in decibels. |
 | `unfavourable_sum` | The sum of unfavourable deviations the shift left, in decibels. |

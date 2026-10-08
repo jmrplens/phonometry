@@ -46,11 +46,11 @@ instead (ISO 3747 clause 8.5, ISO 3743-1 clause 8.2).
 
 | Method | Standard | Measured quantity | Environment | Accuracy grade | Use when |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Enveloping surface | **ISO 3744** (engineering) / **ISO 3746** (survey) | Sound pressure on a hemisphere or box | Essentially free field over one or more reflecting planes | Grade 2 ($\sigma_{\mathrm{R}0} \approx 1.5\ \text{dB}$) / grade 3 ($\approx 3.0\ \text{dB}$) | In situ or a large room; no special test facility available |
+| Enveloping surface | **ISO 3744** (engineering) / **ISO 3746** (survey) | Sound pressure on a hemisphere or box | Essentially free field over one or more reflecting planes | Grade 2 ($\sigma_{R0} \approx 1.5\ \text{dB}$) / grade 3 ($\approx 3.0\ \text{dB}$) | In situ or a large room; no special test facility available |
 | Reverberation room | **ISO 3741** | Sound pressure in the diffuse field | Qualified hard-walled reverberation room | Grade 1 (precision) | Highest accuracy for steady, broadband sources in a lab |
-| Hard-walled test room | **ISO 3743-1** | Sound pressure of the source and of a calibrated reference sound source at the same positions | An ordinary hard-walled room of at least 40 m³, no surface absorbing more than 0.20 | Grade 2 ($\sigma_{\mathrm{R}0} \approx 1.5\ \text{dB}$ A-weighted) | A small movable source, with no qualified laboratory room at hand |
-| Special reverberation room | **ISO 3743-2** | Sound pressure in a room whose reverberation time follows a prescribed curve | A special reverberation room of at least 70 m³, at most 300 m³ for the direct method with the 4 kHz and 8 kHz octaves | Grade 2 ($\sigma_{\mathrm{R}0} \approx 2.0\ \text{dB}$ A-weighted) | Small sources tested one after another, read off the room alone or against a reference source |
-| In situ comparison | **ISO 3747** | Sound pressure of the source and of a calibrated reference sound source at the same positions | The reverberant part of the room the machine works in ($\Delta L_f \ge 7$ dB) | Grade 2 ($\sigma_{\mathrm{R}0} \approx 1.5\ \text{dB}$) / grade 3 ($\approx 4.0\ \text{dB}$) | A machine that cannot leave its installation, in a room too reverberant for an enveloping surface |
+| Hard-walled test room | **ISO 3743-1** | Sound pressure of the source and of a calibrated reference sound source at the same positions | An ordinary hard-walled room of at least 40 m³, no surface absorbing more than 0.20 | Grade 2 ($\sigma_{R0} \approx 1.5\ \text{dB}$ A-weighted) | A small movable source, with no qualified laboratory room at hand |
+| Special reverberation room | **ISO 3743-2** | Sound pressure in a room whose reverberation time follows a prescribed curve | A special reverberation room of at least 70 m³, at most 300 m³ for the direct method with the 4 kHz and 8 kHz octaves | Grade 2 ($\sigma_{R0} \approx 2.0\ \text{dB}$ A-weighted) | Small sources tested one after another, read off the room alone or against a reference source |
+| In situ comparison | **ISO 3747** | Sound pressure of the source and of a calibrated reference sound source at the same positions | The reverberant part of the room the machine works in ($\Delta L_f \ge 7$ dB) | Grade 2 ($\sigma_{R0} \approx 1.5\ \text{dB}$) / grade 3 ($\approx 4.0\ \text{dB}$) | A machine that cannot leave its installation, in a room too reverberant for an enveloping surface |
 | Intensity at discrete points | **ISO 9614-1** | Normal sound intensity held at each of $N$ points, one per segment | Almost any, tolerant of steady extraneous noise | Grade 1 or 2 per band from the Annex B criteria; grade 3 on the A-weighted total | On-site where the probe stands still at each point rather than sweeping the surface |
 | Intensity scanning | **ISO 9614-2** | Normal sound intensity scanned over a surface | Almost any, tolerant of steady extraneous noise | Grade 2 / 3 (from per-band field indicators) | On-site with background noise, or one machine among many |
 | Anechoic room | **ISO 3745** | Sound pressure on a fixed microphone array | Qualified anechoic or hemi-anechoic room | Grade 1 (precision) | Reference-grade emission in a free-field laboratory |
@@ -158,16 +158,16 @@ order; the first match names the standard.
 
 ### What the accuracy grades mean
 
-The grade is a claim about **reproducibility**: $\sigma_{\mathrm{R}0}$ is the standard
+The grade is a claim about **reproducibility**: $\sigma_{R0}$ is the standard
 deviation you would see if different laboratories measured the same source,
 each following the standard correctly. Typical A-weighted values are
-$\sigma_{\mathrm{R}0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3743-1, ISO 3747,
+$\sigma_{R0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3743-1, ISO 3747,
 ISO 9614-2; 2.0 dB for ISO 3743-2) and 3 dB or more for grade 3 (larger still when $K_2$ is
 large or the spectrum is tonal). Per-band values are larger at the
 spectrum edges. The `uncertainty` field of the pressure-method results
 (enveloping surface and anechoic) is the expanded uncertainty
 $U = 2\sigma_\text{tot}$ (95 % coverage), where
-$\sigma_\text{tot} = \sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\text{omc}^2}$ also folds
+$\sigma_\text{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ also folds
 in the operating/mounting instability
 $\sigma_\text{omc}$ that you estimate and pass in; the grade only bounds the method's
 share of the budget.
@@ -302,10 +302,10 @@ it.
 
 ### What do the accuracy grades in sound power measurement mean?
 
-The grade is a claim about reproducibility: $\sigma_{\mathrm{R}0}$ is the standard deviation
+The grade is a claim about reproducibility: $\sigma_{R0}$ is the standard deviation
 you would see if different laboratories measured the same source, each
 following the standard correctly. Typical A-weighted values are
-$\sigma_{\mathrm{R}0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3743-1, ISO 3747,
+$\sigma_{R0} \approx 0.5\ \text{dB}$ for grade 1 (ISO 3741), 1.5 dB for grade 2 (ISO 3744, ISO 3743-1, ISO 3747,
 ISO 9614-2; 2.0 dB for ISO 3743-2) and 3 dB or more for grade 3. A grade-2 $L_{W\mathrm{A}}$ carries
 $U \approx 3\ \text{dB}$, so two grade-2 results 2 dB apart are statistically
 indistinguishable.

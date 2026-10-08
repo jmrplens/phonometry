@@ -180,8 +180,10 @@ _STRINGS: dict[str, str] = {
     "Barrier insertion loss": "Pérdida por inserción de barrera",
     "Receiver level before the barrier": "Nivel en el receptor antes de la barrera",
     "Receiver level after the barrier": "Nivel en el receptor después de la barrera",
-    "Measured insertion loss $D_{IL}$": "Pérdida por inserción medida $D_{IL}$",
-    "Measured insertion loss $D'_{IL}$": "Pérdida por inserción medida $D'_{IL}$",
+    r"Measured insertion loss $D_\mathrm{IL}$": (
+        r"Pérdida por inserción medida $D_\mathrm{IL}$"
+    ),
+    r"Measured insertion loss $D'_\mathrm{IL}$": r"Pérdida por inserción medida $D'_\mathrm{IL}$",
     "A barrier measured where it stands": "Una barrera medida donde está",
     "Effective sound speed [m/s]": "Velocidad efectiva del sonido [m/s]",
     _HEIGHT_LABEL: "Altura [m]",
@@ -260,10 +262,10 @@ _STRINGS: dict[str, str] = {
     "In front of the device": "Delante del dispositivo",
     "Free field, aligned and scaled": "Campo libre, alineado y escalado",
     "What is left: the reflection": "Lo que queda: la reflexión",
-    "Interval of $R_{sub}$": "Intervalo de $R_{sub}$",
+    r"Interval of $R_\mathrm{sub}$": r"Intervalo de $R_\mathrm{sub}$",
     "Signal subtraction": "Sustracción de la señal",
     "Microphone": "Micrófono",
-    "Low frequency limit $f_{min}$ [Hz]": "Límite de baja frecuencia $f_{min}$ [Hz]",
+    r"Low frequency limit $f_\mathrm{min}$ [Hz]": r"Límite de baja frecuencia $f_\mathrm{min}$ [Hz]",
     "limited by the ground reflection": "limitado por la reflexión en el suelo",
     "limited by the top edge": "limitado por el borde superior",
     "limited by a side edge": "limitado por un borde lateral",
@@ -1374,7 +1376,7 @@ def plot_direct_sound_subtraction(
         facecolor=theme_fill(_C_TERTIARY, ax),
         linewidth=0.0,
         zorder=0,
-        label=_t("Interval of $R_{sub}$", language),
+        label=_t(r"Interval of $R_\mathrm{sub}$", language),
     )
     # Drawn wide and underneath: where the subtraction worked, the aligned
     # free-field record lies on top of it and only its edges show.
@@ -1466,7 +1468,7 @@ def plot_reflection_frequency_limit(
     ax.set_xticks(positions)
     ax.set_xticklabels([str(k + 1) for k in range(limits.size)])
     ax.set_xlabel(_t("Microphone", language))
-    ax.set_ylabel(_t("Low frequency limit $f_{min}$ [Hz]", language))
+    ax.set_ylabel(_t(r"Low frequency limit $f_\mathrm{min}$ [Hz]", language))
     ax.set_ylim(0.0, float(np.max(limits)) * 1.2)
     from matplotlib.patches import Patch
 
@@ -1582,9 +1584,9 @@ def plot_barrier_in_situ(
     :return: The axes.
     """
     symbol = (
-        "Measured insertion loss $D_{IL}$"
+        r"Measured insertion loss $D_\mathrm{IL}$"
         if result.method == "direct"
-        else "Measured insertion loss $D'_{IL}$"
+        else r"Measured insertion loss $D'_\mathrm{IL}$"
     )
     return _plot_two_runs(
         ax,

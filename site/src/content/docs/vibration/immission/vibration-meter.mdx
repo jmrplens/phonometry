@@ -56,7 +56,7 @@ A velocity signal enters and four numbers come out. Between them are three
 stages, each printed as an exact transfer function or an exact average.
 
 **Band limitation** (5.2.3.2, Formula (3)) is two Butterworth pairs: a
-two-pole high pass at `0,8 f_u` and a two-pole low pass at `f_o / 0,8`. The
+two-pole high pass at $0{,}8\,f_\mathrm{u}$ and a two-pole low pass at $f_\mathrm{o}/0{,}8$. The
 working range is 1 Hz to 80 Hz for buildings, so those corners are 0,8 Hz and
 100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
 [DIN 45672](/phonometry/vibration/immission/railway-vibration/) works, and
@@ -115,15 +115,17 @@ print(f"the two band-limit corners: {corners.round(4)}")  # [0.7071 0.7071]
 
 The KB signal is averaged, and the averaging is the one a sound level meter
 calls Fast: a running r.m.s. with `τ = 0,125 s` (Formula (1)). Its value at any
-instant is the **weighted vibration severity** `KB_F(t)`, and 3.10.1.2 says
+instant is the **weighted vibration severity** $KB_\mathrm{F}(t)$, and 3.10.1.2 says
 why that time constant: DIN 4150-2 judges the effect on people with it, and
 the fluctuating indication it gives below 5 Hz was taken into account when
-those judging criteria were written.
+those judging criteria were written. The list of symbols of DIN 45669-1
+(Clause 4) prints KB upright; the formulas, figures and diagrams of this
+documentation set it italic, as DIN 4150-2 prints it.
 
 From that signal come the three numbers a measurement is reported as. The
-maximum `KB_Fmax` over the averaging time. The maximum inside each **clock
+maximum $KB_\mathrm{Fmax}$ over the averaging time. The maximum inside each **clock
 interval** (*Takt*) of 30 s, which DIN 4150-2 fixes. And the r.m.s. of those
-clock maxima, `KB_FTm`, from Formula (2), which carries two rules that are
+clock maxima, $KB_\mathrm{FTm}$, from Formula (2), which carries two rules that are
 easy to read past:
 
 - a clock maximum at or below **0,1** enters the sum as zero, and the interval
@@ -217,7 +219,7 @@ print(vibration.KB_REFERENCE_INDICATIONS)
 # {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 0.68, 'kbf_takt_rms': 0.68}
 ```
 
-`KB_Fmax` above `KB_F` in every row is not a gain: it is the **ripple** of a
+$KB_\mathrm{Fmax}$ above $KB_\mathrm{F}$ in every row is not a gain: it is the **ripple** of a
 running r.m.s. of a sine, which Annex B is about, and it is why these values
 are worth having as an oracle. No closed form for the pair is printed
 anywhere, so a check that reproduces them checks the whole chain, filter,
@@ -228,8 +230,8 @@ squaring, averaging and maximum together.
 The tolerance is not on the response but on its **shape**. Formula (7) divides
 the measured response by the design response, each normalised at the reference
 frequency of 16 Hz, so a flat gain error is a calibration matter and not a
-conformity one. What is left is graded band by band: 10 % from `1,25 f_u` to
-`0,8 f_o`, 20 % out to `0,5 f_u` and `2 f_o`, and below that Table 2 stops
+conformity one. What is left is graded band by band: 10 % from $1{,}25\,f_\mathrm{u}$ to
+$0{,}8\,f_\mathrm{o}$, 20 % out to $0{,}5\,f_\mathrm{u}$ and $2\,f_\mathrm{o}$, and below that Table 2 stops
 constraining the response from below altogether.
 
 ```python
@@ -278,7 +280,7 @@ it can change the verdict. Annex E removes the question instead of refining
 it. Each building class of DIN 4150-3 Table 1 gets a **weighting filter**
 whose target magnitude is that class's guideline curve inverted and normalised
 to the value it holds from 1 Hz to 10 Hz. Filter the velocity with it and the
-peak of what comes out, the **assessment velocity** `v_Bn`, is compared with a
+peak of what comes out, the **assessment velocity** $v_{\mathrm{B}n}$, is compared with a
 single number that no longer depends on frequency: 20, 5 or 3 mm/s (Table E.2).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/assessment_weighting.svg" alt="Two panels side by side on logarithmic frequency axes from 1 to 315 hertz. The left panel is what DIN 4150-3 Table 1 asks for: three guideline curves in millimetres per second, flat to 10 hertz at 20, 5 and 3, rising along two straight segments to 50 and 100 hertz and flat above at 50, 20 and 10. The right panel is the weighting that removes the frequency: the same three curves inverted and normalised to their low-frequency value, flat at 1 to 10 hertz and falling to 0.4, 0.25 and 0.3, with a pale green band of plus or minus five per cent drawn around the dwellings curve, which is the tolerance Table E.1 allows a realised filter" width="96%" />
@@ -453,7 +455,7 @@ Formulae (5) and (6) as their absolute values.
 </ScopeClaim>
 
 <ScopeClaim status="covered">
-The **weighted vibration severity** `KB_F(t)` of Formula (1), its maximum, the
+The **weighted vibration severity** $KB_\mathrm{F}(t)$ of Formula (1), its maximum, the
 **clock maxima** of the 30 s intervals of 5.1.6.4 and the **clock maximum
 r.m.s.** of Formula (2), including its two counting rules, and the detection
 limits of 5.2.2.

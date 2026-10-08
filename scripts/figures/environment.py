@@ -2564,7 +2564,7 @@ def generate_wind_turbine_apparent_power(output_dir: str) -> None:
         "top", functions=(lambda v: v * factor, lambda v: v / factor)
     )
     secondary.set_xlabel(
-        r"Formula (29) wind speed at 10 m, $z_{0,\mathrm{ref}}$ = 0,05 m [m/s]"
+        r"Formula (29) wind speed at 10 m, $z_{0\mathrm{ref}}$ = 0,05 m [m/s]"
     )
     plt.tight_layout()
     save_figure(output_dir, "wind_turbine_apparent_power.svg")

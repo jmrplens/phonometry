@@ -55,7 +55,7 @@ EN 12354-3 predice esa misma diferencia de niveles estandarizada a partir de
 los índices de reducción acústica del muro, del acristalamiento y de la
 entrada de aire antes de instalar ninguno de ellos, y la EN 12354-4 le da la
 vuelta al cerramiento para radiar al exterior una fuente interior. Una sección
-final pone lado a lado la $D_{2\mathrm{m,nT}}$ medida y la prevista y muestra qué las
+final pone lado a lado la $D_{2\mathrm{m,n}T}$ medida y la prevista y muestra qué las
 separa y qué no. Las curvas de referencia tras cada número único están en
 [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/);
 los cerramientos interiores del mismo edificio, en
@@ -95,7 +95,7 @@ como en el caso a ruido aéreo, sus formas estandarizada y normalizada:
 
 $$
 D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2, \quad
-D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}, \quad
+D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}, \quad
 D_{2\mathrm{m,n}} = D_{2\mathrm{m}} - 10 \log_{10}\frac{A}{A_0},
 $$
 
@@ -125,8 +125,8 @@ sonoro del recinto receptor se aproxima a un campo difuso» (3.12, Nota 3),
 mientras que los $-3$ dB de $R'_\mathrm{tr,s}$ suponen que el sonido llega «desde
 todos los ángulos» (3.13, Nota 2). Así que el 1,5 dB entre los dos métodos es
 una afirmación sobre la *fuente*, no sobre la pared, y es la razón por la que
-un resultado de altavoz se etiqueta $D_{\mathrm{ls},2\mathrm{m,nT}}$ y uno de tráfico
-$D_{\mathrm{tr},2\mathrm{m,nT}}$ en lugar de llamarse los dos igual.
+un resultado de altavoz se etiqueta $D_{\mathrm{ls},2\mathrm{m,n}T}$ y uno de tráfico
+$D_{\mathrm{tr},2\mathrm{m,n}T}$ en lugar de llamarse los dos igual.
 
 Los 2 m del método global son un compromiso del mismo tipo. Más cerca, el
 micrófono lee una presión dominada por la propia reflexión de la fachada y por
@@ -137,9 +137,9 @@ estable en casi todo el rango, y lo bastante cerca para seguir dentro del campo
 de la fachada; pero la norma es franca sobre el precio, y anota en el
 apartado 9.6.1 que «se producirán errores sistemáticos a bajas frecuencias
 debido a efectos de interferencia». La consecuencia práctica es la que hay que
-llevarse: el nivel de referencia de un $D_{2\mathrm{m,nT}}$ se mide delante de una
+llevarse: el nivel de referencia de un $D_{2\mathrm{m,n}T}$ se mide delante de una
 superficie reflectante y es por tanto más alto que el campo libre que la misma
-fuente produciría con el edificio quitado, así que un $D_{2\mathrm{m,nT}}$ y un $D_\mathrm{nT}$
+fuente produciría con el edificio quitado, así que un $D_{2\mathrm{m,n}T}$ y un $D_{\mathrm{n}T}$
 interior no son la misma clase de número aunque tengan el mismo tamaño.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_facade_setup.svg" alt="Sección por una fachada de vivienda: un altavoz sobre el terreno con la línea de incidencia de 45 grados más menos 5 grados hasta el centro de un elemento de ensayo de 11,5 metros cuadrados, la distancia oblicua r acotada en 5 m para el método del elemento y 7 m para el método global y la perpendicular D debajo, un micrófono sujeto enrasado sobre el elemento de ensayo con sus tolerancias de 10 mm en paralelo y 3 mm en normal, y el micrófono global a 2,0 más menos 0,2 m del plano de la fachada a 1,5 m sobre el suelo del recinto receptor" width="92%" loading="eager" />
@@ -150,7 +150,7 @@ interior no son la misma clase de número aunque tengan el mismo tamaño.
 
 **Global o de elemento.** Responden a preguntas distintas, y la Tabla 1 de
 ISO 16283-3 dice cuál se prefiere para cada una. Los métodos **globales** dan
-$D_{2\mathrm{m,nT}}$ (o $D_{2\mathrm{m,n}}$) y «cuantifican el aislamiento a ruido aéreo de una
+$D_{2\mathrm{m,n}T}$ (o $D_{2\mathrm{m,n}}$) y «cuantifican el aislamiento a ruido aéreo de una
 fachada completa o de un edificio completo en una situación especificada»; ese
 resultado «no puede compararse con un índice de reducción acústica obtenido en
 laboratorio», porque es una propiedad del edificio tal como está construido.
@@ -246,7 +246,7 @@ fac.plot()   # D2m,nT por banda con D2m, D2m,n y R' superpuestos (requiere matpl
 *Las cuatro magnitudes de fachada de una misma medición: la $D_{2\mathrm{m}}$ bruta,
 sus formas estandarizada y normalizada, y la $R'_{45°}$ de elemento con la
 corrección por ángulo de incidencia de −1,5 dB. El recuadro recoge el valor
-único $D_{\mathrm{ls},2\mathrm{m,nT,w}}$ obtenido al pasar $D_{2\mathrm{m,nT}}$ al motor de ISO 717-1.*
+único $D_{\mathrm{ls},2\mathrm{m,n}T,\mathrm{w}}$ obtenido al pasar $D_{2\mathrm{m,n}T}$ al motor de ISO 717-1.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -319,7 +319,7 @@ fachada de 16 bandas a `weighted_rating` para su número único de ISO 717-1.
 `FacadeInsulationResult.report(path)` escribe el informe de ensayo de fachada en
 campo ISO 16283-3 de una página: la línea de base normativa, una cabecera de
 metadatos opcional, la tabla en tercios de octava junto a la curva medida frente
-a la referencia desplazada, el índice de campo $D_{2\mathrm{m,nT,w}}\ (C;\ C_\mathrm{tr})$ en
+a la referencia desplazada, el índice de campo $D_{2\mathrm{m,n}T,\mathrm{w}}\ (C;\ C_\mathrm{tr})$ en
 su recuadro, la declaración de método de ingeniería, un veredicto opcional
 (una diferencia de
 niveles cumple si iguala o supera el requisito) y un pie. `quantity="d_2m_nt"`
@@ -358,7 +358,7 @@ $$
 salida principal, la diferencia de nivel estandarizada a 2 m (Fórmula 13)
 
 $$
-D_{2\mathrm{m,nT}} = R' + \Delta L_\mathrm{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0{,}5\ \text{s},
+D_{2\mathrm{m,n}T} = R' + \Delta L_\mathrm{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0{,}5\ \text{s},
 $$
 
 con el término de forma de la fachada $\Delta L_\mathrm{fs}$ (Anexo C; 0 dB para una
@@ -473,7 +473,7 @@ página mediante un método `report(path)`, con la misma maquetación que las
 fichas de predicción a ruido aéreo y de impactos. `FacadePredictionResult.report()`
 representa la tabla de elementos de la fachada (el índice parcial ponderado
 $R_\mathrm{p,w}$ de cada elemento) junto a la gráfica por elemento / $R'$ /
-$D_{2\mathrm{m,nT}}$, el número único previsto $D_{2\mathrm{m,nT,w}}$ en un recuadro (con
+$D_{2\mathrm{m,n}T}$, el número único previsto $D_{2\mathrm{m,n}T,\mathrm{w}}$ en un recuadro (con
 $R'_\mathrm{tr,s,w}$ y $C_\mathrm{tr}$), la
 declaración de predicción y, cuando se aporta un `requirement`, un veredicto
 CUMPLE/NO CUMPLE (la diferencia de niveles cumple si es igual o mayor). `verbose=True`
@@ -487,7 +487,7 @@ volumen del recinto receptor `receiving_volume`, la situación exterior/de tráf
 en `test_room`, además de los campos de identidad del calculista / laboratorio
 (`client`, `manufacturer`, `measurement_standard`, `laboratory`, `operator`,
 `report_id`, `test_date`), un resumen libre de la forma de la fachada y del
-modelo en `notes` y el objetivo $D_{2\mathrm{m,nT,w}}$ en `requirement`. Los metadatos,
+modelo en `notes` y el objetivo $D_{2\mathrm{m,n}T,\mathrm{w}}$ en `requirement`. Los metadatos,
 `language="es"` y el extra `phonometry[report]` se comportan como en las fichas
 de medición.
 
@@ -640,7 +640,7 @@ definición medida, se sustituye $D_{2\mathrm{m}}$ por el índice aparente que i
 se introduce el área de absorción de Sabine $A = 0{,}16\ V/T$:
 
 $$
-D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}
+D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}
           = R' + 10 \log_{10}\frac{A}{S} + 10 \log_{10}\frac{T}{T_0}
           = R' + 10 \log_{10}\frac{0{,}16\ V}{S\ T_0}.
 $$
@@ -688,7 +688,7 @@ print(building.weighted_rating(meas.d_2m_nt).rating, fac.d_2m_nt_w)   # 33 33
 ```
 
 Las dos curvas van paralelas hasta el segundo decimal y ambas se valoran en
-$D_{2\mathrm{m,nT,w}} = 33$ dB. Todo lo que separa una predicción real de una medición
+$D_{2\mathrm{m,n}T,\mathrm{w}} = 33$ dB. Todo lo que separa una predicción real de una medición
 real está, por tanto, en los datos de entrada y no en las fórmulas:
 
 * **Los índices de los elementos.** La predicción consume valores de $R$ de
@@ -701,7 +701,7 @@ real está, por tanto, en los datos de entrada y no en las fórmulas:
   en la posición de 2 m, y la medición se lleva ese cambio tal cual mientras
   que la predicción tiene que buscarlo en el Anexo C.
 * **La fuente.** La ISO 16283-3 etiqueta el resultado con altavoz como
-  $D_{\mathrm{ls},2\mathrm{m,nT}}$ precisamente porque un altavoz a 45° no es tráfico rodado; su
+  $D_{\mathrm{ls},2\mathrm{m,n}T}$ precisamente porque un altavoz a 45° no es tráfico rodado; su
   índice de elemento lleva una corrección de ángulo de −1,5 dB donde el método
   de tráfico para todos los ángulos lleva −3 dB. La EN 12354-3 predice
   directamente el $R_\mathrm{tr,s} = R'$ referido al tráfico y ofrece
@@ -725,12 +725,12 @@ entrada de aire, no el muro.
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-La ISO 16283-3:2016 (las magnitudes de fachada en campo $D_{2\mathrm{m}}$, $D_{2\mathrm{m,nT}}$,
+La ISO 16283-3:2016 (las magnitudes de fachada en campo $D_{2\mathrm{m}}$, $D_{2\mathrm{m,n}T}$,
 $D_{2\mathrm{m,n}}$, $R'_{45°}$ y $R'_\mathrm{tr,s}$ de los métodos de elemento con altavoz y
 con tráfico rodado, con el promediado de posiciones del apartado 9.5.1 y el
 informe de ensayo del apartado 14) mediante `building.facade_insulation`; la
 EN 12354-3:2000 (la suma de factores de transmisión de la Fórmula 10, los
-índices $R_{45}$ y $R_\mathrm{tr,s}$, la $D_{2\mathrm{m,nT}}$ de la Fórmula 13 y el término de
+índices $R_{45}$ y $R_\mathrm{tr,s}$, la $D_{2\mathrm{m,n}T}$ de la Fórmula 13 y el término de
 forma de fachada del Anexo C) mediante `building.facade_sound_reduction` y
 `building.facade_shape_level_difference`; y la EN 12354-4:2000 (la potencia
 acústica radiada de la Fórmula 2 con el término de difusividad del Anexo B y
@@ -774,7 +774,7 @@ no las filas impresas.
   los modelos de flancos aéreos y de impacto de EN 12354-1/2, que comparten la
   suma de factores de transmisión usada aquí.
 - [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
-  el motor de curva de referencia tras los números únicos $D_{2\mathrm{m,nT,w}}$,
+  el motor de curva de referencia tras los números únicos $D_{2\mathrm{m,n}T,\mathrm{w}}$,
   $R'_{45,\mathrm{w}}$ y $R'_\mathrm{tr,s,w}$.
 - [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
   la magnitud de fachada en bandas de octava del método rápido de control.

@@ -131,7 +131,7 @@ def _dnf_spec(standard: str, language: str) -> dict[str, str]:
         ).format(standard=standard),
         "symbol": "D<sub>n,f</sub>",
         "rating_symbol": "D<sub>n,f,w</sub>",
-        "ylabel": "$D_{n,f}$ [dB]",
+        "ylabel": r"$D_\mathrm{n,f}$ [dB]",
         "statement": t(
             "Evaluation based on laboratory measurement of the normalized "
             "flanking level difference ({standard}, airborne excitation).",
@@ -152,7 +152,7 @@ def _lnf_spec(standard: str, language: str) -> dict[str, str]:
         ).format(standard=standard),
         "symbol": "L<sub>n,f</sub>",
         "rating_symbol": "L<sub>n,f,w</sub>",
-        "ylabel": "$L_{n,f}$ [dB]",
+        "ylabel": r"$L_\mathrm{n,f}$ [dB]",
         "statement": t(
             "Evaluation based on laboratory measurement of the normalized "
             "flanking impact level ({standard}, tapping machine on the "

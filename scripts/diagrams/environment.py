@@ -965,8 +965,16 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
 
     # The weather is part of the measurement, so it goes on the plate.
     s.rect(70, 620, 760, 92, th.panel, th.fg, rx=6, sw=1.6)
+    # ISO 10847:1997, 8.2.1 (PDF page 15, folio 11), prints every subscript of
+    # the insertion loss upright: IL, ref, r (receiver), A and B (after and
+    # before).
     s.text(
-        450, 648, "$D_{IL} = (L_{ref,A} - L_{ref,B}) - (L_{r,A} - L_{r,B})$", 18, th.fg
+        450,
+        648,
+        "$D_{IL} = (L_{ref,A} − L_{ref,B}) − (L_{r,A} − L_{r,B})$",
+        18,
+        th.fg,
+        upright=("D_IL", "L_A", "L_B", "L_r"),
     )
     s.text(
         450,

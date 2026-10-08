@@ -455,8 +455,8 @@ the **sponge thickness**, and, for a steady-state measurement, the
 has a rule, and each of them fails quietly when it is wrong.
 
 **Source bandwidth.** A `GaussianPulse` of half-width `width` is
-$s(t) = A\,e^{-((t-t_0)/\text{width})^2}$, whose magnitude spectrum is
-$e^{-(\pi f\,\text{width})^2}$: it is 20 dB down at $f = 0.483/\text{width}$
+$s(t) = A\,\mathrm{e}^{-((t-t_0)/\text{width})^2}$, whose magnitude spectrum is
+$\mathrm{e}^{-(\pi f\,\text{width})^2}$: it is 20 dB down at $f = 0.483/\text{width}$
 and 40 dB down at $0.683/\text{width}$. Work in the reader's direction:
 choose $f_\text{max}$, take $\Delta x$ from it, then take
 $\text{width} \ge 0.5/f_\text{max}$ and the pulse is at least 20 dB down
@@ -1056,7 +1056,7 @@ error; a pulse travels at the group speed and is three times slower still:
 
 ### How wide should the source pulse and the sponge be?
 
-The `GaussianPulse` spectrum is $e^{-(\pi f\,\text{width})^2}$, 20 dB down at
+The `GaussianPulse` spectrum is $\mathrm{e}^{-(\pi f\,\text{width})^2}$, 20 dB down at
 $f = 0.483/\text{width}$, so `width` $\ge 0.5/f_\text{max}$ keeps the injected
 energy inside the band the grid resolves. The sponge is a rule in **cells**,
 not in wavelengths: because its absorption rate acts on pressure and velocity

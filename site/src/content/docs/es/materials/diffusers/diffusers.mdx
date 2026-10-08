@@ -335,8 +335,8 @@ plt.show()
 # la ec. (5) relleno, y el s(f) que dibuja ScatteringResult.plot().
 fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
 top.fill_between(freqs, alpha_s, alpha_spec, color="#2ca02c", alpha=0.25)
-top.semilogx(freqs, alpha_spec, "s-", color="#d62728", label="alpha_spec")
-top.semilogx(freqs, alpha_s, "o-", color="#1f77b4", label="alpha_s")
+top.semilogx(freqs, alpha_spec, "s-", color="#d62728", label=r"$\alpha_\mathrm{spec}$")
+top.semilogx(freqs, alpha_s, "o-", color="#1f77b4", label=r"$\alpha_\mathrm{s}$")
 top.set_ylabel("Coeficiente de absorción")
 top.set_ylim(0.0, 1.0)
 top.legend()
@@ -926,7 +926,7 @@ pozo devuelva la onda incidente con una fase diferente. Un pozo de fondo
 rígido y profundidad $d_n$ refleja con el coeficiente de presión
 
 $$
-R_n = e^{-2 j k d_n},
+R_n = \mathrm{e}^{-2 j k d_n},
 $$
 
 el viaje de ida y vuelta por el pozo, así que la secuencia de profundidades es
@@ -1071,12 +1071,12 @@ de rejilla de fase de Schroeder, de modo que una secuencia de profundidades de
 pozo pueda evaluarse antes de fabricar una muestra.
 `predict_diffuser_polar_response` evalúa el modelo de Fraunhofer (campo lejano)
 de plano único de Cox y D'Antonio: cada pozo de fondo rígido y profundidad $d_n$
-aporta un coeficiente de reflexión de presión $R_n = e^{-2 j k d_n}$, y la
+aporta un coeficiente de reflexión de presión $R_n = \mathrm{e}^{-2 j k d_n}$, y la
 presión dispersada al ángulo de reflexión $\theta$ para una fuente con incidencia
 $\psi$ es la suma sobre los pozos de la superficie periódica (Ec. (5.8)),
 
 $$
-p(\theta) = F(\theta) \sum_n R_n \, e^{\,j k x_n (\sin\psi + \sin\theta)},
+p(\theta) = F(\theta) \sum_n R_n \, \mathrm{e}^{\,j k x_n (\sin\psi + \sin\theta)},
 $$
 
 con $x_n$ el centro del pozo y $k = 2\pi f / c$. Los niveles polares predichos

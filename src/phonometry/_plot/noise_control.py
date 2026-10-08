@@ -92,10 +92,14 @@ _STRINGS: dict[str, str] = {
     "Cabin insulation": "Aislamiento de la cabina",
     "Insulation [dB]": "Aislamiento [dB]",
     "Sound pressure level [dB]": "Nivel de presión acústica [dB]",
-    "Level difference $D_{tps}$": "Diferencia de niveles $D_{tps}$",
-    "Level difference $D_{ips}$": "Diferencia de niveles $D_{ips}$",
-    "Transmission loss $D_{ts}$": "Pérdida por transmisión $D_{ts}$",
-    "Insertion loss $D_{is}$": "Pérdida por inserción $D_{is}$",
+    r"Level difference $D_{\mathrm{t}p\mathrm{s}}$": (
+        r"Diferencia de niveles $D_{\mathrm{t}p\mathrm{s}}$"
+    ),
+    r"Level difference $D_{\mathrm{i}p\mathrm{s}}$": (
+        r"Diferencia de niveles $D_{\mathrm{i}p\mathrm{s}}$"
+    ),
+    r"Transmission loss $D_\mathrm{ts}$": r"Pérdida por transmisión $D_\mathrm{ts}$",
+    r"Insertion loss $D_\mathrm{is}$": r"Pérdida por inserción $D_\mathrm{is}$",
     "A silencer measured where it stands": "Un silenciador medido donde está",
     "Level and loss [dB]": "Nivel y pérdida [dB]",
     "Unscreened level $L_{p1}$": "Nivel sin apantallar $L_{p1}$",
@@ -625,7 +629,7 @@ _POWER_LEVEL_LABEL = "Sound power level [dB]"
 _ENCLOSURE_SYMBOLS = {
     "sound_power": "$D_W$",
     "sound_pressure": "$D_p$",
-    "reciprocity": "$D_{pr}$",
+    "reciprocity": r"$D_{p\mathrm{r}}$",
 }
 
 
@@ -735,11 +739,15 @@ def plot_silencer_in_situ(
     )
     transmission = result.quantity == "transmission"
     difference_label = _t(
-        "Level difference $D_{tps}$" if transmission else "Level difference $D_{ips}$",
+        r"Level difference $D_{\mathrm{t}p\mathrm{s}}$"
+        if transmission
+        else r"Level difference $D_{\mathrm{i}p\mathrm{s}}$",
         language,
     )
     loss_label = _t(
-        "Transmission loss $D_{ts}$" if transmission else "Insertion loss $D_{is}$",
+        r"Transmission loss $D_\mathrm{ts}$"
+        if transmission
+        else r"Insertion loss $D_\mathrm{is}$",
         language,
     )
     ax.fill_between(

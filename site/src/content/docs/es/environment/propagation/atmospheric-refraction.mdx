@@ -419,13 +419,13 @@ plt.show()
 </details>
 
 La impedancia del suelo se proporciona directamente (`impedance=`, un valor
-complejo normalizado en el convenio $e^{-i\omega t}$ de Salomons, con
+complejo normalizado en el convenio $\mathrm{e}^{-i\omega t}$ de Salomons, con
 $\operatorname{Im}(Z) > 0$ para un suelo pasivo), como un
 `PorousMediumResult`, o a partir de una
 `flow_resistivity` efectiva mediante los
 [modelos porosos](/phonometry/es/materials/absorbers/porous-absorbers/) del dominio de
 materiales; los modelos porosos trabajan en el convenio opuesto
-$e^{+j\omega t}$, así que su impedancia se conjuga internamente.
+$\mathrm{e}^{+j\omega t}$, así que su impedancia se conjuga internamente.
 
 El clip de abajo ejecuta la física ondulatoria completa con los dos signos
 del perfil logarítmico: una fuente estacionaria de 50 Hz a 2 m sobre suelo

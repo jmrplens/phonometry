@@ -37,7 +37,7 @@ the substitution is what the choice in :func:`applicable_methods` is about:
 
 * an **actual** source, the machine itself, which is the normal case;
 * the **reciprocity** method of part 1, 7.2, which puts the enclosure in a
-  diffuse field and measures inside it, giving :math:`D_{pr}`;
+  diffuse field and measures inside it, giving :math:`D_{p\mathrm{r}}`;
 * an **artificial** source, the tapping machine of Annex A on its undamped
   steel plate, used at several positions inside the enclosure.
 
@@ -274,11 +274,11 @@ class EnclosureInsulationResult(OwnsArrays):
         when the levels were given without them.
     :ivar level_without: The level measured without the enclosure, in decibels.
     :ivar level_with: The level measured with it, in decibels.
-    :ivar insulation: :math:`D_W`, :math:`D_p` or :math:`D_{pr}` per band, in
+    :ivar insulation: :math:`D_W`, :math:`D_p` or :math:`D_{p\mathrm{r}}` per band, in
         decibels.
     :ivar quantity: What was subtracted: ``"sound_power"``,
         ``"sound_pressure"`` or ``"reciprocity"``.
-    :ivar a_weighted_insulation: :math:`D_{WA}` or :math:`D_{pA}` of Equation
+    :ivar a_weighted_insulation: :math:`D_{W\mathrm{A}}` or :math:`D_{p\mathrm{A}}` of Equation
         (2) or (4), in decibels, or ``None`` when no band centres were given
         and no A-weighted pair was supplied. For the two standards of Table 1
         that determine an A-weighted value alone, a single pair of levels is
@@ -328,7 +328,7 @@ class EnclosureInsulationResult(OwnsArrays):
 class WeightedEnclosureInsulation(OwnsArrays):
     r"""The single-number rating of an insertion loss spectrum, ISO 717-1.
 
-    :ivar rating: :math:`D_{W,w}` or :math:`D_{pr,w}`, in decibels.
+    :ivar rating: :math:`D_{W,\mathrm{w}}` or :math:`D_{p\mathrm{r},\mathrm{w}}`, in decibels.
     :ivar c: The spectrum adaptation term :math:`C`, in decibels.
     :ivar ctr: The spectrum adaptation term :math:`C_{tr}`, in decibels.
     :ivar unfavourable_sum: The sum of unfavourable deviations the shift left,
@@ -527,7 +527,7 @@ def sound_power_insulation(
     r"""Insertion loss from two sound power determinations, Equations (1) and (2).
 
     :math:`D_W = L_{W,\text{without}} - L_{W,\text{with}}` band by band, and
-    :math:`D_{WA}` the same difference of the A-weighted totals. Where the
+    :math:`D_{W\mathrm{A}}` the same difference of the A-weighted totals. Where the
     A-weighted pair is not supplied it is computed from the band spectra with
     the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 
@@ -579,7 +579,7 @@ def sound_pressure_insulation(
 
     :math:`D_p = L_{p,\text{without}} - L_{p,\text{with}}` at one stated
     position, with the same microphone positions in both runs, and
-    :math:`D_{pA}` the difference of the A-weighted values. The position is
+    :math:`D_{p\mathrm{A}}` the difference of the A-weighted values. The position is
     part of the answer: the standard requires it in the report, because an
     insertion loss at the operator's ear and one a metre from the panel are
     different numbers about the same enclosure.
@@ -624,7 +624,7 @@ def reciprocity_insulation(
 ) -> EnclosureInsulationResult:
     r"""Insertion loss measured from the outside in, Equation (5) of part 1.
 
-    :math:`D_{pr} = \overline{L_{p,\text{ext}}} - \overline{L_{p,\text{int}}}`:
+    :math:`D_{p\mathrm{r}} = \overline{L_{p,\text{ext}}} - \overline{L_{p,\text{int}}}`:
     the enclosure is put in a diffuse field, the field is measured around it
     and again inside it, and the difference is the insulation the enclosure
     would give a source within it. The method belongs to the laboratory, and it
@@ -735,7 +735,7 @@ def weighted_insulation(
     r"""The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.
 
     Both parts say the same thing: rate the spectrum by ISO 717-1, putting
-    :math:`D_W` or :math:`D_{pr}` where that standard writes :math:`R`. The
+    :math:`D_W` or :math:`D_{p\mathrm{r}}` where that standard writes :math:`R`. The
     reference curve, the shift and the adaptation terms come from
     :func:`phonometry.building.weighted_rating`, which has its own conformance
     rows; what is done here is the trim to the rating bands.
@@ -779,7 +779,7 @@ def estimated_a_weighted_insulation(
 
     .. math::
 
-       D_{WA,e} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_i)}
+       D_{W\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_i)}
 
     where :math:`L_i` is the assumed source spectrum, :math:`A_i` the
     A-weighting of the band and :math:`D_i` the measured insulation. The sign
@@ -789,15 +789,15 @@ def estimated_a_weighted_insulation(
     are formed here from the same table, so the total and the sum cannot
     disagree, and with :math:`D_i = 0` the answer is exactly zero.
 
-    The same formula serves :math:`D_W` (giving :math:`D_{WA,e}`),
-    :math:`D_p` and :math:`D_{pr}`; which one it is, is the caller's.
+    The same formula serves :math:`D_W` (giving :math:`D_{W\mathrm{A},\mathrm{e}}`),
+    :math:`D_p` and :math:`D_{p\mathrm{r}}`; which one it is, is the caller's.
 
     :param spectrum_levels: The assumed source spectrum :math:`L_i` per band,
         in decibels.
     :param insulation: The measured insulation :math:`D_i` per band, in
         decibels.
     :param frequencies: Nominal band centres, in hertz.
-    :return: :math:`D_{WA,e}`, in decibels.
+    :return: :math:`D_{W\mathrm{A},\mathrm{e}}`, in decibels.
     :raises ValueError: For inputs that do not match band for band.
     """
     levels = require_finite_array(spectrum_levels, "spectrum_levels")

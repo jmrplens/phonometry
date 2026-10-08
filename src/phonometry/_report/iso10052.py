@@ -71,13 +71,13 @@ _SURVEY_STATEMENT = (
 _DNT_SPEC: dict[str, str] = {
     "title": "Field airborne sound insulation between rooms",
     "basis": (
-        "Standardized level difference D<sub>nT</sub> measured in accordance "
+        "Standardized level difference D<sub>n<i>T</i></sub> measured in accordance "
         "with ISO 10052:2021 (survey method, {bands}). Rating per "
         "ISO 717-1:2020."
     ),
-    "symbol": "D<sub>nT</sub>",
-    "rating_symbol": "D<sub>nT,w</sub>",
-    "ylabel": "$D_{nT}$ [dB]",
+    "symbol": "D<sub>n<i>T</i></sub>",
+    "rating_symbol": "D<sub>n<i>T</i>,w</sub>",
+    "ylabel": r"$D_{\mathrm{n}T}$ [dB]",
     "statement": _SURVEY_STATEMENT,
 }
 _R_PRIME_SPEC: dict[str, str] = {
@@ -95,25 +95,25 @@ _R_PRIME_SPEC: dict[str, str] = {
 _L_NT_SPEC: dict[str, str] = {
     "title": "Field impact sound insulation of floors",
     "basis": (
-        "Standardized impact sound pressure level L&#8242;<sub>nT</sub> "
+        "Standardized impact sound pressure level L&#8242;<sub>n<i>T</i></sub> "
         "measured in accordance with ISO 10052:2021 (survey method, {bands}) "
         "using the tapping machine. Rating per ISO 717-2:2020."
     ),
-    "symbol": "L&#8242;<sub>nT</sub>",
-    "rating_symbol": "L&#8242;<sub>nT,w</sub>",
-    "ylabel": "$L'_{nT}$ [dB]",
+    "symbol": "L&#8242;<sub>n<i>T</i></sub>",
+    "rating_symbol": "L&#8242;<sub>n<i>T</i>,w</sub>",
+    "ylabel": r"$L'_{\mathrm{n}T}$ [dB]",
     "statement": _SURVEY_STATEMENT,
 }
 _D_2M_NT_SPEC: dict[str, str] = {
     "title": "Field facade sound insulation",
     "basis": (
-        "Standardized facade level difference D<sub>2m,nT</sub> measured in "
+        "Standardized facade level difference D<sub>2m,n<i>T</i></sub> measured in "
         "accordance with ISO 10052:2021 (survey method, {bands}). Rating "
         "per ISO 717-1:2020."
     ),
-    "symbol": "D<sub>2m,nT</sub>",
-    "rating_symbol": "D<sub>2m,nT,w</sub>",
-    "ylabel": "$D_{2m,nT}$ [dB]",
+    "symbol": "D<sub>2m,n<i>T</i></sub>",
+    "rating_symbol": "D<sub>2m,n<i>T</i>,w</sub>",
+    "ylabel": r"$D_{\mathrm{2m,n}T}$ [dB]",
     "statement": _SURVEY_STATEMENT,
 }
 

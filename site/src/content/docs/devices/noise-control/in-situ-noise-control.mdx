@@ -73,7 +73,7 @@ turns them into a quantity: the ratio of the two measurement areas, and the
 difference of the two field corrections.
 
 $$
-D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+D_\mathrm{ts} = D_{\mathrm{t}p\mathrm{s}} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
 $$
 
 That is Equation (19) of ISO 11820, and it is the whole idea of measuring in
@@ -279,8 +279,8 @@ the reference term normalises the source: whatever ran differently on the second
 day, the reference microphone heard it too.
 
 $$
-D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right)
-       - \left(L_{r,A} - L_{r,B}\right)
+D_\mathrm{IL} = \left(L_{\mathrm{ref},\mathrm{A}} - L_{\mathrm{ref},\mathrm{B}}\right)
+       - \left(L_{\mathrm{r},\mathrm{A}} - L_{\mathrm{r},\mathrm{B}}\right)
 $$
 
 ```python

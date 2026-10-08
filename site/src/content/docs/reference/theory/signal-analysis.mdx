@@ -239,7 +239,7 @@ $$
 **3. Chebyshev II:** Inverse Chebyshev, equiripple in stopband, flat passband.
 
 $$
-|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_{stop}/\omega)}}}
+|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_\mathrm{stop}/\omega)}}}
 $$
 
 **4. Elliptic:** Equiripple in both, maximum selectivity.
@@ -408,13 +408,13 @@ y[n] = \alpha \cdot x^2[n] + (1 - \alpha) \cdot y[n-1]
 $$
 
 $$
-\alpha = 1 - e^{-1 / (f_\mathrm{s} \cdot \tau)}
+\alpha = 1 - \mathrm{e}^{-1 / (f_\mathrm{s} \cdot \tau)}
 $$
 
 This is the digital image of the analogue RC detector of the classical sound
 level meter: the squared pressure charges a capacitor through a resistor, so the
 displayed mean square is a one-pole low pass on $p^2$ with time constant $\tau$,
-and $\alpha = 1 - e^{-1/(f_\mathrm{s} \tau)}$ is its impulse-invariant discretisation,
+and $\alpha = 1 - \mathrm{e}^{-1/(f_\mathrm{s} \tau)}$ is its impulse-invariant discretisation,
 exact at any $f_\mathrm{s}$, unlike the $1/(f_\mathrm{s} \tau)$ approximation often seen. The two
 standard constants are $\tau = 125$ ms (**Fast**) and $\tau = 1$ s (**Slow**).
 A step input reaches within 1 dB of its final value after about $1.6\tau$ and is

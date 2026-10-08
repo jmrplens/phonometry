@@ -26,8 +26,8 @@ what it heard:
 
 .. math::
 
-   D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right)
-          - \left(L_{r,A} - L_{r,B}\right)
+   D_\mathrm{IL} = \left(L_{\mathrm{ref},\mathrm{A}} - L_{\mathrm{ref},\mathrm{B}}\right)
+          - \left(L_{\mathrm{r},\mathrm{A}} - L_{\mathrm{r},\mathrm{B}}\right)
 
 That is the **direct method**, 8.2.1, and it needs a barrier that has not been
 built yet or can be taken down. Where it cannot, the **indirect method** of
@@ -497,16 +497,16 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
 
     :ivar frequencies: Nominal band centres, in hertz, or ``None`` where the
         measurement is an A-weighted level.
-    :ivar reference_before_db: :math:`L_{\text{ref},B}` per band.
-    :ivar reference_after_db: :math:`L_{\text{ref},A}` per band.
-    :ivar receiver_before_db: :math:`L_{r,B}` per band.
-    :ivar receiver_after_db: :math:`L_{r,A}` per band.
-    :ivar insertion_loss_db: :math:`D_{IL}` or :math:`D'_{IL}` per band, in
+    :ivar reference_before_db: :math:`L_{\mathrm{ref},\mathrm{B}}` per band.
+    :ivar reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band.
+    :ivar receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band.
+    :ivar receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band.
+    :ivar insertion_loss_db: :math:`D_\mathrm{IL}` or :math:`D'_\mathrm{IL}` per band, in
         decibels.
     :ivar method: ``"direct"`` or ``"indirect"``.
-    :ivar receiver_correction_before_db: :math:`C_r`, in decibels, zero for
+    :ivar receiver_correction_before_db: :math:`C_\mathrm{r}`, in decibels, zero for
         the direct method.
-    :ivar receiver_correction_after_db: :math:`C'_r`, in decibels, zero for
+    :ivar receiver_correction_after_db: :math:`C'_\mathrm{r}`, in decibels, zero for
         the direct method.
     """
 
@@ -606,8 +606,8 @@ def measured_insertion_loss_direct(
 
     .. math::
 
-       D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right)
-              - \left(L_{r,A} - L_{r,B}\right)
+       D_\mathrm{IL} = \left(L_{\mathrm{ref},\mathrm{A}} - L_{\mathrm{ref},\mathrm{B}}\right)
+              - \left(L_{\mathrm{r},\mathrm{A}} - L_{\mathrm{r},\mathrm{B}}\right)
 
     The reference term is the source normalisation: whatever the source did
     differently between the two campaigns, the reference microphone heard it
@@ -619,10 +619,10 @@ def measured_insertion_loss_direct(
     taken down, and 4.1 adds the condition that makes the subtraction mean
     anything: **the same reference and receiver positions in both campaigns**.
 
-    :param reference_before_db: :math:`L_{\text{ref},B}` per band, in decibels.
-    :param reference_after_db: :math:`L_{\text{ref},A}` per band, in decibels.
-    :param receiver_before_db: :math:`L_{r,B}` per band, in decibels.
-    :param receiver_after_db: :math:`L_{r,A}` per band, in decibels.
+    :param reference_before_db: :math:`L_{\mathrm{ref},\mathrm{B}}` per band, in decibels.
+    :param reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band, in decibels.
+    :param receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band, in decibels.
+    :param receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :return: The insertion loss, as a :class:`MeasuredBarrierInsertionLoss`.
     :raises ValueError: For levels that do not match band for band, or a band
@@ -663,21 +663,21 @@ def measured_insertion_loss_indirect(
 
     .. math::
 
-       \Delta L_B = L_{\text{ref},B} - \left(L_{r,B} - C_r\right), \qquad
-       \Delta L_A = L_{\text{ref},A} - \left(L_{r,A} - C'_r\right), \qquad
-       D'_{IL} = \Delta L_A - \Delta L_B
+       \Delta L_\mathrm{B} = L_{\mathrm{ref},\mathrm{B}} - \left(L_{\mathrm{r},\mathrm{B}} - C_\mathrm{r}\right), \qquad
+       \Delta L_\mathrm{A} = L_{\mathrm{ref},\mathrm{A}} - \left(L_{\mathrm{r},\mathrm{A}} - C'_\mathrm{r}\right), \qquad
+       D'_\mathrm{IL} = \Delta L_\mathrm{A} - \Delta L_\mathrm{B}
 
     The "before" pair comes from a substitute site judged equivalent in
     terrain, ground and source, which is what makes this an estimate rather
     than a determination: 8.2.2 says so itself.
 
-    :math:`C_r` and :math:`C'_r` correct for the kind of receiver position:
+    :math:`C_\mathrm{r}` and :math:`C'_\mathrm{r}` correct for the kind of receiver position:
     0 dB in a hemi free field, 6 dB for a microphone against a facade, where
     the pressure doubles. The clause attaches the unprimed symbol to the
     "before" equation and the primed one to the "after", and then defines the
     two by receiver type rather than by campaign, which taken literally would
     force one type on each campaign. The NOTE settles it, by preferring
-    receiver positions "where corrections :math:`C_r` and :math:`C'_r` are
+    receiver positions "where corrections :math:`C_\mathrm{r}` and :math:`C'_\mathrm{r}` are
     essentially the same", so the type is asked for once per campaign here
     (see the errata).
 
@@ -686,12 +686,12 @@ def measured_insertion_loss_indirect(
     levels. Where they differ, the answer moves by 6 dB, which is why the NOTE
     exists.
 
-    :param reference_before_db: :math:`L_{\text{ref},B}` per band, at the
+    :param reference_before_db: :math:`L_{\mathrm{ref},\mathrm{B}}` per band, at the
         substitute site, in decibels.
-    :param reference_after_db: :math:`L_{\text{ref},A}` per band, in decibels.
-    :param receiver_before_db: :math:`L_{r,B}` per band, at the substitute
+    :param reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band, in decibels.
+    :param receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band, at the substitute
         site, in decibels.
-    :param receiver_after_db: :math:`L_{r,A}` per band, in decibels.
+    :param receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :param receiver_type_before: ``"hemi_free_field"`` (default) or
         ``"reflecting_surface"``, for the substitute site.

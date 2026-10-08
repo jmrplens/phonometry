@@ -143,7 +143,7 @@ $$
 **3. Chebyshev II:** Inverse Chebyshev, equiripple in stopband, flat passband.
 
 $$
-|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_{stop}/\omega)}}}
+|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_\mathrm{stop}/\omega)}}}
 $$
 
 **4. Elliptic:** Equiripple in both, maximum selectivity.
@@ -248,7 +248,7 @@ y[n] = \alpha \cdot x^2[n] + (1 - \alpha) \cdot y[n-1]
 $$
 
 $$
-\alpha = 1 - e^{-1 / (f_\mathrm{s} \cdot \tau)}
+\alpha = 1 - \mathrm{e}^{-1 / (f_\mathrm{s} \cdot \tau)}
 $$
 
 Where $\tau$ is the time constant (e.g., 125 ms for Fast).

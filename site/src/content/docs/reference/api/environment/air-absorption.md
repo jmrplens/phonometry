@@ -16,7 +16,7 @@ oxygen and nitrogen molecules plus classical and rotational losses
 The attenuation coefficient, in decibels per metre (ISO 9613-1:1993):
 
 $$
-\alpha = 8.686 f^2 \left\{ 1.84 \times 10^{-11} \left( \frac{p_\mathrm{a}}{p_\mathrm{r}} \right)^{-1} \left( \frac{T}{T_0} \right)^{1/2} + \left( \frac{T}{T_0} \right)^{-5/2} \left[ 0.01275 \, e^{-2239.1/T} \left( f_\mathrm{rO} + \frac{f^2}{f_\mathrm{rO}} \right)^{-1} + 0.1068 \, e^{-3352.0/T} \left( f_\mathrm{rN} + \frac{f^2}{f_\mathrm{rN}} \right)^{-1} \right] \right\} \tag{Eq. 5}
+\alpha = 8.686 f^2 \left\{ 1.84 \times 10^{-11} \left( \frac{p_\mathrm{a}}{p_\mathrm{r}} \right)^{-1} \left( \frac{T}{T_0} \right)^{1/2} + \left( \frac{T}{T_0} \right)^{-5/2} \left[ 0.01275 \, \mathrm{e}^{-2239.1/T} \left( f_\mathrm{rO} + \frac{f^2}{f_\mathrm{rO}} \right)^{-1} + 0.1068 \, \mathrm{e}^{-3352.0/T} \left( f_\mathrm{rN} + \frac{f^2}{f_\mathrm{rN}} \right)^{-1} \right] \right\} \tag{Eq. 5}
 $$
 
 with the oxygen and nitrogen relaxation frequencies (ISO 9613-1:1993):

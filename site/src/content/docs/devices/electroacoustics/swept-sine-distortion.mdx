@@ -68,7 +68,7 @@ group delay and excess phase.
 ## 1. One sweep, every harmonic
 
 For an exponential sweep the instantaneous frequency rises as
-$f(t) = f_1 e^{t/L}$, so the moment the excitation passes $f$, the n-th
+$f(t) = f_1 \mathrm{e}^{t/L}$, so the moment the excitation passes $f$, the n-th
 harmonic distortion product appears at $n f$: exactly where the sweep
 itself will be $L\ln(n)$ seconds later. Deconvolving the recording against
 the sweep therefore time-compresses each order into its own impulse
@@ -280,7 +280,7 @@ $L\ln(n)$ is exactly equivalent to generating its n-th harmonic. That holds
 only for
 
 $$
-x(t) = \sin\!\big[2\pi f_1 L\, e^{t/L}\big],
+x(t) = \sin\!\big[2\pi f_1 L\, \mathrm{e}^{t/L}\big],
 \qquad
 L = \frac{1}{f_1}\,\mathrm{round}\!\Big(\frac{f_1\,\tilde T}{\ln(f_2/f_1)}\Big),
 $$
@@ -294,7 +294,7 @@ deconvolves with the closed-form spectrum of the inverse filter,
 
 $$
 \tilde X(f) = 2\sqrt{f/L}\;
-e^{-j 2\pi f L\,(1 - \ln(f/f_1)) + j\pi/4},
+\mathrm{e}^{-j 2\pi f L\,(1 - \ln(f/f_1)) + j\pi/4},
 $$
 
 rather than an FFT of the signal. Besides being exact, the analytic

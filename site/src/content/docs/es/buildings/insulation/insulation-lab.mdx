@@ -111,15 +111,15 @@ $K_\mathrm{c}$: para volver a hacerla comparable.
 | | Campo (ISO 16283) | Laboratorio (ISO 10140) |
 | :--- | :--- | :--- |
 | Índice aéreo de elemento | $R'$ aparente (con flancos) | $R$ directo (flancos suprimidos) |
-| Aéreo de pareja de salas | $D_\mathrm{nT}$, $D_\mathrm{n}$ (sin prima: magnitudes de sala) | — |
-| Impactos | $L'_\mathrm{n}$, $L'_\mathrm{nT}$ aparentes | $L_\mathrm{n}$ directo |
-| Índice global | $R'_\mathrm{w}$, $D_\mathrm{nT,w}$, $L'_\mathrm{n,w}$, $L'_\mathrm{nT,w}$ | $R_\mathrm{w}$, $L_\mathrm{n,w}$ |
+| Aéreo de pareja de salas | $D_{\mathrm{n}T}$, $D_\mathrm{n}$ (sin prima: magnitudes de sala) | — |
+| Impactos | $L'_\mathrm{n}$, $L'_{\mathrm{n}T}$ aparentes | $L_\mathrm{n}$ directo |
+| Índice global | $R'_\mathrm{w}$, $D_{\mathrm{n}T,\mathrm{w}}$, $L'_\mathrm{n,w}$, $L'_{\mathrm{n}T,\mathrm{w}}$ | $R_\mathrm{w}$, $L_\mathrm{n,w}$ |
 | Área de absorción | medida en la sala | propiedad de la instalación |
 
 La prima es el marcador de flancos de la acústica de edificios, y viaja
 con la magnitud hasta su índice global: $R_\mathrm{w}$ valora un espectro de
 laboratorio, $R'_\mathrm{w}$ uno de campo. Las diferencias de nivel estandarizada y
-normalizada $D_\mathrm{nT}$ y $D_\mathrm{n}$ no llevan prima porque describen la pareja de
+normalizada $D_{\mathrm{n}T}$ y $D_\mathrm{n}$ no llevan prima porque describen la pareja de
 salas y no un elemento, así que no hay contraparte sin flancos que marcar. En
 una construcción bien ejecutada $R'_\mathrm{w}$ queda unos pocos dB por debajo del
 $R_\mathrm{w}$ de laboratorio de la misma partición; una diferencia mucho mayor dice
@@ -279,7 +279,7 @@ ax1.set_title(f"Rw = {lab.rating.rating} dB")
 ax2.semilogx(imp.rating.band_centers, imp.l_n, "o-", label="Ln normalizado")
 ax2.semilogx(imp.rating.band_centers, imp.rating.shifted_reference, "s--",
              label="referencia desplazada")
-ax2.set_title(f"Ln,w = {imp.rating.rating} dB")
+ax2.set_title(rf"$L_\mathrm{{n,w}}$ = {imp.rating.rating} dB")
 for ax in (ax1, ax2):
     ax.set_xlabel("Frecuencia [Hz]")
     ax.legend()
@@ -299,7 +299,7 @@ controla, y las doce trayectorias por flancos del modelo EN 12354-1, tres por
 cada elemento de flanco, son donde hay que buscarlo. Las dos curvas de campo
 son predicciones, no desplazamientos: entre ellas solo cambia la calidad de la
 unión, a través de la diferencia de nivel de velocidad promediada
-direccionalmente $\overline{D}_{v,ij}$ que suministra una
+direccionalmente $\overline{D}_{\mathrm{v},ij}$ que suministra una
 [medición ISO 10848](/phonometry/es/buildings/insulation/flanking-lab/).*
 
 <details>

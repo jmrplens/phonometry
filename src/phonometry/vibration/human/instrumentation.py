@@ -1207,7 +1207,7 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
     window still holds ``(tau - t) / tau`` of the original mean square and the
     indicated value falls as :math:`\sqrt{(\tau - t)/\tau}`, reaching 10 % at
     ``t = 0,99 tau``. The exponential average of Eq. (3) decays in power as
-    :math:`e^{-t/\tau}`, so the indication falls as :math:`e^{-t/2\tau}` and
+    :math:`\mathrm{e}^{-t/\tau}`, so the indication falls as :math:`\mathrm{e}^{-t/2\tau}` and
     reaches 10 % at :math:`t = 2\tau\ln 10 = 4,605\,2\,\tau`.
 
     Both land inside the printed bands of :data:`RUNNING_RMS_DECAY_TIME_S`

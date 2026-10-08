@@ -77,17 +77,17 @@ impulse per image,
 
 $$
 g(t) = \sum_n A_n\ \delta(t - t_n), \qquad
-A_n = \frac{1}{4\pi r_n}\ e^{-m r_n / 2} \prod_{\text{walls}} R_w^{\,k_{w,n}},
+A_n = \frac{1}{4\pi r_n}\ \mathrm{e}^{-m r_n / 2} \prod_{\text{walls}} R_\mathrm{w}^{\,k_{w,n}},
 \qquad t_n = \frac{r_n}{c}.
 $$
 
 Each image at distance $r_n$ from the receiver arrives at $t_n = r_n/c$ with an
 amplitude built from the $1/(4\pi r_n)$ spherical spreading, the product of the
-wall **pressure reflection factors** $R_w = \sqrt{1 - \alpha_w}$ each raised to
+wall **pressure reflection factors** $R_\mathrm{w} = \sqrt{1 - \alpha_\mathrm{w}}$ each raised to
 the number of reflections $k_{w,n}$ that image made off wall $w$, and the air
-pressure loss $e^{-m r_n/2}$ over the path ($m$ the power (intensity)
-attenuation coefficient in neper per metre, so intensity falls as $e^{-m r}$ and
-pressure as $e^{-m r/2}$: the same $m$ the
+pressure loss $\mathrm{e}^{-m r_n/2}$ over the path ($m$ the power (intensity)
+attenuation coefficient in neper per metre, so intensity falls as $\mathrm{e}^{-m r}$ and
+pressure as $\mathrm{e}^{-m r/2}$: the same $m$ the
 [reverberation-time](/phonometry/buildings/rooms/reverberation-prediction/) and
 [EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) guides feed
 to their $4mV$ terms). A shoebox has exactly

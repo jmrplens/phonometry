@@ -619,7 +619,7 @@ the $K$ resulting *eigenspectra* are averaged:
 $$
 \hat{S}^{(mt)}(f) = \frac{1}{K}\sum_{k=0}^{K-1} \hat{S}_k(f), \qquad
 \hat{S}_k(f) = \Delta t\,\Bigl|\sum_{t=1}^{N} h_{t,k}\,x_t\,
-e^{-i 2\pi f t \Delta t}\Bigr|^2 .
+\mathrm{e}^{-i 2\pi f t \Delta t}\Bigr|^2 .
 $$
 
 Because the tapers are orthogonal the eigenspectra are nearly uncorrelated,
@@ -1388,12 +1388,12 @@ the `oversample` padding of
 ## 2. Echo detection: the rahmonic spike train
 
 A single reflection $x(t) = s(t) + a\,s(t-t_0)$ multiplies the spectrum by
-$1 + a e^{-j 2\pi f t_0}$ - a ripple of period $1/t_0$ across the whole band.
+$1 + a \mathrm{e}^{-j 2\pi f t_0}$ - a ripple of period $1/t_0$ across the whole band.
 Its logarithm expands, for $|a| < 1$, into the exactly summable series
 
 $$
-\ln\!\left(1 + a e^{-j\theta}\right)
-= \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n}\, e^{-jn\theta},
+\ln\!\left(1 + a \mathrm{e}^{-j\theta}\right)
+= \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n}\, \mathrm{e}^{-jn\theta},
 $$
 
 so the cepstrum carries a spike train at the **rahmonics** $n t_0$ with
@@ -2670,7 +2670,7 @@ documented counterpart for preparing records outside those chains.
 
 `fractional_delay` shifts a record by any number of samples, including
 sub-sample amounts, by multiplying the spectrum with the phase ramp
-$e^{-j 2\pi f D/f_\mathrm{s}}$: every component is delayed by exactly `D` samples. Two
+$\mathrm{e}^{-j 2\pi f D/f_\mathrm{s}}$: every component is delayed by exactly `D` samples. Two
 boundary conventions cover the two use cases:
 
 - `mode="linear"` (default) zero-pads the record past the shift, so samples

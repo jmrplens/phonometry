@@ -754,9 +754,9 @@ the book left the cell empty, or whether it printed three numbers.
 Every row of every published catalogue is one of these, a frozen and
 keyword-only dataclass. A subclass written to hold a quantity no
 catalogue of the library publishes is the same, and it leaves out
-`slots=True`: on the Python 3.13 releases that predate the fix, a
-slotted dataclass that calls `super()` without arguments, as a
-`__post_init__` does, raises `TypeError` when it is built.
+`slots=True`: on Python 3.12, and on the 3.13 releases that predate
+the fix, a slotted dataclass that calls `super()` without arguments, as
+a `__post_init__` does, raises `TypeError` when it is built.
 
 **A row checks itself when it is built**, whoever builds it, and refuses
 with [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) rather than holding a cell nothing

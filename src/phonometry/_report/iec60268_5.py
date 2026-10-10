@@ -43,6 +43,7 @@ from ._layout import (
     _SVGLIB_HINT,
     build_document,
     document_styles,
+    fiche_savefig_context,
     fmt_num,
     footer_flow,
     grid_table,
@@ -208,7 +209,7 @@ def _drawing_from_figure(
     proportions set on each axes survive.
     """
     try:
-        import matplotlib as mpl
+        savefig_settings = fiche_savefig_context()
     except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
         raise ImportError(_MATPLOTLIB_HINT) from exc
     try:
@@ -223,7 +224,7 @@ def _drawing_from_figure(
     os.close(svg_fd)
     svg_path = Path(svg_name)
     try:
-        with mpl.rc_context({"svg.fonttype": "path"}):
+        with savefig_settings:
             fig.savefig(svg_path, format="svg", bbox_inches="tight")
         drawing = svg2rlg(svg_path)
     finally:

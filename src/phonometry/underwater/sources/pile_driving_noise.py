@@ -34,7 +34,9 @@ from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     require_finite_fields,
     require_ranks,
+    require_real,
     require_same_length,
+    require_scalar,
 )
 from ...io._resolve import (
     SignalInput,
@@ -117,6 +119,7 @@ def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
     :raises ValueError: If ``n_strikes`` is not a whole number
         :math:`\ge 1`.
     """
+    require_scalar(n_strikes, "n_strikes")
     n_float = float(n_strikes)
     if not n_float.is_integer():
         msg = "'n_strikes' must be a whole number of strikes."
@@ -499,10 +502,10 @@ def strike_sel_spectrum(
     # Unpacking rejects the short, the over-long and the non-iterable in one
     # move, where indexing would escape as an IndexError or TypeError that
     # names nothing and a third element would be silently ignored.
+    msg = "'limits' must be a (lower, upper) pair of frequencies in Hz."
     try:
-        lo, hi = (float(v) for v in limits)
+        lo, hi = (require_real(v, msg) for v in limits)
     except (TypeError, ValueError):
-        msg = "'limits' must be a (lower, upper) pair of frequencies in Hz."
         raise ValueError(msg) from None
     if not (np.isfinite(lo) and np.isfinite(hi)) or not (0.0 < lo < hi):
         msg = "'limits' must be a finite, increasing, positive pair."

@@ -69,7 +69,7 @@ import numpy as np
 from scipy.special import hankel2
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import require_equal_shapes, require_scalar
 from ..fluids import Fluid
 
 if TYPE_CHECKING:
@@ -334,6 +334,7 @@ def far_field_from_contour(
             prefactor * contour.segment * np.sum(kernel * integrand, axis=1),
             dtype=np.complex128,
         )
+    require_scalar(distance, "distance")
     d = float(distance)
     if not np.isfinite(d) or d <= 0.0:
         msg = "distance must be positive and finite"

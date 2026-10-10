@@ -24,6 +24,10 @@ from reference_data import (
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
 import generate_graphs
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 FS = 48000
 #: Sample rate of the special-curves figure (B, D, AU). It runs at 96 kHz, not
 #: the 48 kHz of the IEC 61672-1 figure, because the IEC 61012 U low-pass that

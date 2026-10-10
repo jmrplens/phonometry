@@ -178,6 +178,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -610,6 +611,7 @@ def point_connection_coupling_loss_factor(
     if np.any(freq <= 0.0):
         msg = "'frequency' must be positive."
         raise ValueError(msg)
+    require_scalar(n_connections, "n_connections")
     n = int(n_connections)
     if n < 1:
         msg = "'n_connections' must be a positive integer."

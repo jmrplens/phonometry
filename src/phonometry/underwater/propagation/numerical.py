@@ -63,6 +63,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .closed_form import _ABSORPTION_MODELS, _M_PER_KM, seawater_absorption
 from .seabed_reflection import reflection_coefficient
@@ -537,7 +538,9 @@ def normal_modes(
     rho = require_positive(density, "density")
     z_prof, c_prof = _clean_profile(depths, sound_speeds, "normal_modes")
     water_depth = float(z_prof[-1])
+    require_scalar(source_depth, "source_depth")
     zs = float(source_depth)
+    require_scalar(receiver_depth, "receiver_depth")
     zr = float(receiver_depth)
     if not (0.0 < zs < water_depth) or not (0.0 < zr < water_depth):
         msg = "'source_depth'/'receiver_depth' must lie within the water column."
@@ -551,6 +554,7 @@ def normal_modes(
             20_000,
             max(400, int(np.ceil(60.0 * water_depth * f / float(np.min(c_prof))))),
         )
+    require_scalar(n_depth_points, "n_depth_points")
     if int(n_depth_points) < _MIN_MODE_GRID_POINTS:
         msg = "'n_depth_points' must be at least 8."
         raise ValueError(msg)
@@ -900,10 +904,12 @@ def ray_trace(
     bathy = _clean_bathymetry(bathymetry, z_prof, "ray_trace")
     water_depth = float(z_prof[-1])
     depth_at_source = water_depth if bathy is None else float(bathy[1][0])
+    require_scalar(source_depth, "source_depth")
     zs = float(source_depth)
     if not (0.0 <= zs <= depth_at_source):
         raise ValueError(_SOURCE_OUTSIDE)
     rmax = require_positive(max_range, "max_range")
+    require_scalar(n_steps, "n_steps")
     if int(n_steps) < _MIN_RAY_STEPS:
         msg = "'n_steps' must be at least 2."
         raise ValueError(msg)
@@ -1492,6 +1498,7 @@ def eigenrays(
     if r_rec > float(r_grid[-1]):
         msg = "'receiver_range' must not run past the traced fan."
         raise ValueError(msg)
+    require_scalar(receiver_depth, "receiver_depth")
     z_rec = float(receiver_depth)
     if not (0.0 < z_rec < water_depth):
         msg = (
@@ -1500,6 +1507,7 @@ def eigenrays(
             " one is touched tangentially and never crossed."
         )
         raise ValueError(msg)
+    require_scalar(max_arrivals, "max_arrivals")
     if int(max_arrivals) < 1:
         msg = "'max_arrivals' must be at least 1."
         raise ValueError(msg)
@@ -1509,6 +1517,7 @@ def eigenrays(
     if n_steps is None:
         ns = max(2, int(np.ceil(r_rec / float(r_grid[1] - r_grid[0]))) + 1)
     else:
+        require_scalar(n_steps, "n_steps")
         ns = int(n_steps)
         if ns < _MIN_RAY_STEPS:
             msg = "'n_steps' must be at least 2."
@@ -2832,6 +2841,7 @@ def _beam_receiver_grid(
     receiver about the two boundaries, which only means anything between them.
     """
     if receiver_depths_m is None:
+        require_scalar(n_depth_points, "n_depth_points")
         n_z = int(n_depth_points)
         if n_z < _MIN_RECEIVER_DEPTHS:
             msg = "'n_depth_points' must be at least 2."
@@ -3312,6 +3322,7 @@ def gaussian_beams(
     bathy = _clean_bathymetry(bathymetry, z_prof, "gaussian_beams")
     water_depth = float(z_prof[-1])
     depth_at_source = water_depth if bathy is None else float(bathy[1][0])
+    require_scalar(source_depth, "source_depth")
     zs = float(source_depth)
     if not (0.0 < zs < depth_at_source):
         raise ValueError(_SOURCE_OUTSIDE)
@@ -3675,6 +3686,7 @@ def parabolic_equation(
     f = require_positive(frequency_hz, "frequency_hz")
     z_prof, c_prof = _clean_profile(depths, sound_speeds, "parabolic_equation")
     water_depth = float(z_prof[-1])
+    require_scalar(source_depth, "source_depth")
     zs = float(source_depth)
     if not (0.0 < zs < water_depth):
         raise ValueError(_SOURCE_OUTSIDE)
@@ -3683,6 +3695,7 @@ def parabolic_equation(
     if dr > rmax:
         msg = "'range_step' must not exceed 'max_range'."
         raise ValueError(msg)
+    require_scalar(n_depth_points, "n_depth_points")
     n = int(n_depth_points)
     if n < _MIN_PE_DEPTH_POINTS:
         msg = "'n_depth_points' must be at least 16."

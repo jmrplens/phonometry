@@ -82,7 +82,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_positive
+from ..._internal.validation import require_positive, require_scalar
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -138,6 +138,7 @@ def _require_shear_modulus(value: complex, name: str) -> complex:
 
 def _require_poisson_ratio(value: float) -> float:
     """Validate a Poisson coefficient of an isotropic frame."""
+    require_scalar(value, "poisson_ratio")
     nu = float(value)
     if not -1.0 < nu < _POISSON_INCOMPRESSIBLE_LIMIT:
         msg = "'poisson_ratio' must satisfy -1 < nu < 0.5."

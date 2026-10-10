@@ -10,6 +10,13 @@
 pip install phonometry
 ```
 
+phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
+or later. Each of those floors, and each floor of the extras, is the oldest
+release the library's tests pass with, and a CI job installs exactly those
+releases on Python 3.12 to keep it so: matplotlib 3.10.7 for `[plot]`,
+reportlab 4.0.4 and svglib 0.9.0 for `[report]`, numba 0.60.0 for `[perf]` and
+python-soundfile 0.12.0 for `[audio]`.
+
 Optional extras:
 
 ```bash

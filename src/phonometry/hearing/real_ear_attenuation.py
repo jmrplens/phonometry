@@ -78,6 +78,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
+from .._internal.validation import require_scalar
 from .hearing_protectors import _octave_axis
 
 if TYPE_CHECKING:
@@ -745,6 +746,7 @@ def allowable_field_variation(free_field_rejection_db: float) -> float:
     :raises ValueError: for a rejection below 10 dB, for which Table 1 says the
         microphone is not suitable, or one that is not finite.
     """
+    require_scalar(free_field_rejection_db, "free_field_rejection_db")
     rejection = float(free_field_rejection_db)
     if not math.isfinite(rejection):
         msg = "'free_field_rejection_db' must be finite, in dB."

@@ -42,7 +42,7 @@ import math
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.validation import require_positive
+from ..._internal.validation import require_positive, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -185,6 +185,7 @@ def compression_wave_speed(
     """
     g = require_positive(shear_modulus_pa, "shear_modulus_pa")
     rho = require_positive(density_kg_m3, "density_kg_m3")
+    require_scalar(poisson_ratio, "poisson_ratio")
     nu = float(poisson_ratio)
     if not _POISSON_LIMITS[0] < nu < _POISSON_LIMITS[1]:
         msg = f"'poisson_ratio' must lie in (-1, 0.5); got {poisson_ratio!r}."
@@ -207,6 +208,7 @@ def shear_strain_amplitude(
     :return: :math:`\hat\gamma`, in radians.
     :raises ValueError: For a negative amplitude or a non-positive speed.
     """
+    require_scalar(velocity_amplitude_m_s, "velocity_amplitude_m_s")
     v = float(velocity_amplitude_m_s)
     if not math.isfinite(v) or v < 0.0:
         msg = (

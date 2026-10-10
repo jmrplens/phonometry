@@ -60,9 +60,12 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
-    from typing import TypeIs
-
     from reportlab.platypus import Table
+
+    # TypeIs reached typing in Python 3.13; the type checker reads it from
+    # typing_extensions for the 3.12 the package supports, and nothing imports
+    # it at run time.
+    from typing_extensions import TypeIs
 
     from ..emission.sound_power import SoundPowerResult
     from ..emission.sound_power_anechoic import PrecisionSoundPowerResult

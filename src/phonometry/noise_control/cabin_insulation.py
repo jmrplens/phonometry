@@ -82,6 +82,7 @@ from .._internal.validation import (
     require_finite_array,
     require_finite_matrix,
     require_positive,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from ..emission._shared import _a_weighting_corrections
@@ -463,6 +464,7 @@ class SourcePositionCheck:
             :data:`MIN_SOURCE_POSITIONS_IN_SITU` positions or a spread that is
             negative or not finite.
         """
+        require_scalar(self.positions_used, "positions_used")
         if int(self.positions_used) < MIN_SOURCE_POSITIONS_IN_SITU:
             msg = (
                 "SourcePositionCheck: 'positions_used' must be at least "

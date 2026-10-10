@@ -31,6 +31,7 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    is_scalar,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -388,12 +389,15 @@ def tone_correction(
     """
     # An integral float (0.0, 2.0) carries the same band index and is taken;
     # anything the index cannot be (2.9, "aeroplane", None) is refused by name
-    # rather than left to fail inside int().
-    try:
-        start = int(start_band)
-        integral = start == start_band
-    except (TypeError, ValueError, OverflowError):
-        start, integral = -1, False
+    # rather than left to fail inside int(), and so is an array, by its rank:
+    # numpy before 2.4 converts a one-element array instead of refusing it.
+    start, integral = -1, False
+    if is_scalar(start_band):
+        try:
+            start = int(start_band)
+            integral = start == start_band
+        except (TypeError, ValueError, OverflowError):
+            start, integral = -1, False
     if not integral or not 0 <= start <= _MAX_TONE_START_BAND:
         msg = "'start_band' must be an integer between 0 (50 Hz) and 3 (100 Hz)."
         raise ValueError(msg)

@@ -1919,6 +1919,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A one-element array is refused where one number is asked for, on every
+  NumPy the library supports.** NumPy 2.0 to 2.3 convert a one-element array
+  to a float with no more than a deprecation warning, and only 2.4 refuses it,
+  so a guard that read its parameter through `float()`, `int()` or `math` took
+  `measure_sound_absorption(..., relative_humidity_percent=np.array([54.0]))`
+  as 54 % on the oldest supported NumPy and refused it on the newest with an
+  anonymous `TypeError`. Every guard that reads a parameter that way, public or
+  private, and every dataclass field checked the same way when a result is
+  built, now asks for the rank first and refuses an array of any shape with a
+  `ValueError` that names the parameter, on every NumPy. That covers the
+  shared positive, finite, non-negative, temperature and fraction checks, the
+  humidity of ISO 354 and of ISO 9613-1 (and so of `atmospheric_absorption`
+  and `sae_band_attenuation`), and the guards the modules keep for their own
+  parameters, from `absorption_class`, `reference_atmosphere_correction` and
+  `minimum_reliable_reverberation_time` to `is_significant_change`,
+  `blade_passing_frequency` and `low_frequency_procedure_applies`. The shared
+  checks still take whatever `float()` takes, a numeric string such as
+  `"1000"` included, and refuse anything else by the parameter's name instead
+  of with `math`'s anonymous `TypeError`.
+
+- **A fiche's figure keeps its size whatever the caller's matplotlib
+  configuration says.** The figure a `.report()` fiche embeds was saved with
+  the bounding box `rcParams["savefig.bbox"]` named, so a matplotlibrc that
+  saves `"tight"` re-cropped it to its ink; on matplotlib 3.10 the taller
+  drawing pushed the ISO 15186 intensity fiche and the Spanish ISO 16251
+  fiche onto a second page, where `report()` refuses them. The figure is now
+  saved with the fiche's own box and padding, the ones every committed fiche
+  was drawn with.
+
 - **The filter banks keep every alias image more than 125 dB down, and the
   class check grades the images a decimated band reads.**
   `filters.verify_filter_class` graded a decimated band only up to the
@@ -2983,6 +3012,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carries each kind of empty list, printed the way the older versions print.
 
 ### Changed
+
+- **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
+  extras it really works with.** `requires-python` drops from 3.13 to 3.12,
+  and every floor in the package metadata is now the oldest release the
+  library's tests pass with on Python 3.12, measured beside every other
+  floor: NumPy 2.0.2, SciPy 1.14.0, matplotlib 3.10.7 for `[plot]`, numba
+  0.60.0 for `[perf]`, reportlab 4.0.4 and svglib 0.9.0 for `[report]` and
+  python-soundfile 0.12.0 for `[audio]`. They used to repeat the newest
+  releases, which turned away environments a release or two behind for no
+  reason anyone had found. A CI job installs exactly those floors on Python
+  3.12 and runs the library's tests, so a floor cannot stop being true without
+  a pull request failing, and Python 3.12 joins the test matrix. A floor rises
+  only with a failure measured at it; CONTRIBUTING.md states the rule.
 
 - **The railway rolling stock guide says what EN 15610 7.5 asks of longer
   wavelengths, and why the library computes none of it.** The guide listed the

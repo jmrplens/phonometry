@@ -781,7 +781,10 @@ def test_a_long_run_without_a_stop_is_read_in_linear_time() -> None:
     table = "| Cuadrado medio |" + " 0,5 |" * 4_000
     start = time.perf_counter()
     found = _departures(table, page=True)
-    assert time.perf_counter() - start < 2.0
+    # Ten seconds against the forty the quadratic reading took: wide enough
+    # that a loaded runner or an older interpreter does not fail a linear
+    # pass, and still far below what the old pattern needed.
+    assert time.perf_counter() - start < 10.0
     assert found == [("Cuadrado medio", "Valor cuadrático medio")]
 
 

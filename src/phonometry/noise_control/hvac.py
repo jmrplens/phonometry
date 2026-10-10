@@ -89,6 +89,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from ..room.steady_field import room_constant
@@ -1007,6 +1008,7 @@ def plenum_attenuation(
     s_w = require_positive(wall_area, "wall_area")
     # Past pi/2 the direct term of Eq. (8.275) turns negative, which the
     # method does not model; a NaN fails the same comparison and is refused.
+    require_scalar(angle_rad, "angle_rad")
     if not (math.isfinite(angle_rad) and 0.0 <= angle_rad <= math.pi / 2.0):
         msg = "'angle_rad' must lie in [0, pi/2] radians."
         raise ValueError(msg)
@@ -1241,6 +1243,7 @@ def blade_passing_frequency(rotational_speed: float, blades: int) -> float:
     :raises ValueError: If ``blades`` is not a positive integer.
     """
     rpm = require_positive(rotational_speed, "rotational_speed")
+    require_scalar(blades, "blades")
     if blades <= 0 or not float(blades).is_integer():
         msg = "'blades' must be a positive integer."
         raise ValueError(msg)
@@ -1601,6 +1604,7 @@ def octave_band_limits(
     :return: An :class:`HvacSpectrumResult` of the per-band limit, dB.
     """
     f, idx = _octave_slots(frequencies)
+    require_scalar(a_weighted_limit_db, "a_weighted_limit_db")
     limit = float(a_weighted_limit_db)
     if not math.isfinite(limit):
         msg = "'a_weighted_limit_db' must be finite."
@@ -2551,6 +2555,7 @@ def silencer_self_noise(
         )
     f, idx = _octave_slots(frequencies)
     v = require_positive(airway_velocity, "airway_velocity")
+    require_scalar(passages, "passages")
     if passages <= 0 or not float(passages).is_integer():
         msg = "'passages' must be a positive integer."
         raise ValueError(msg)
@@ -2643,6 +2648,7 @@ def diffuser_sound_power(
     flow_cfm = require_positive(volume_flow, "volume_flow") / _M3S_PER_CFM
     drop_in_wg = require_positive(pressure_drop_pa, "pressure_drop_pa") / _PA_PER_IN_WG
     profile = require_choice(shape, "shape", ("rectangular", "round"))
+    require_scalar(count, "count")
     if count <= 0 or not float(count).is_integer():
         msg = "'count' must be a positive integer."
         raise ValueError(msg)
@@ -2697,6 +2703,7 @@ def air_terminal_velocity_limit(
     table = _TERMINAL_VELOCITY_LIMIT[side]
     # The finiteness test keeps a NaN or infinite criterion out of round(),
     # whose own refusal names neither the parameter nor the tabulated values.
+    require_scalar(design_criterion, "design_criterion")
     if not math.isfinite(design_criterion) or round(design_criterion) not in table:
         msg = (
             f"'design_criterion' must be one of {sorted(table)}; "

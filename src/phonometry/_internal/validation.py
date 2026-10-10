@@ -55,18 +55,101 @@ def is_at_most(value: float, limit: float) -> bool:
     return value <= limit
 
 
+def is_scalar(value: object) -> bool:
+    """True when *value* has no axes: one number, not an array holding one.
+
+    :func:`float` is not this test, although guards through the tree used it
+    as one. Whether it refuses a one-element array depends on numpy: 2.4 raises
+    ``TypeError``, while 2.0 to 2.3 convert ``np.array([54.0])`` to ``54.0``
+    with no more than a ``DeprecationWarning``. A guard that left the refusal to
+    :func:`float` therefore accepted a per-band array on one install and
+    refused it on the next. The rank answers the same on every numpy.
+
+    A ragged nested sequence, to which numpy can give no rank, has axes as far
+    as this is concerned.
+
+    :param value: The value to test, of any type.
+    :return: ``True`` when ``value`` has rank 0, ``False`` otherwise.
+    """
+    try:
+        return int(np.ndim(cast("ArrayLike", value))) == 0
+    except ValueError:
+        return False
+
+
+def require_real(value: object, msg: str) -> float:
+    """*value* as a ``float``, or ``ValueError(msg)`` when it is not one number.
+
+    The coercion a guard means when it hands a caller's value to
+    :func:`float` and renames the failure: the rank is asked first, through
+    :func:`is_scalar`, so that a one-element array is refused on every numpy
+    rather than only on those where :func:`float` happens to refuse it.
+
+    :param value: The caller's value, of any type.
+    :param msg: The refusal, worded by the guard that owns the parameter.
+    :return: ``float(value)``.
+    :raises ValueError: with *msg*, for an array of any shape, or for anything
+        :func:`float` cannot take.
+    """
+    if not is_scalar(value):
+        raise ValueError(msg)
+    try:
+        return float(cast("float", value))
+    except (TypeError, ValueError, OverflowError):
+        raise ValueError(msg) from None
+
+
+def require_scalar(value: object, name: str) -> None:
+    """Refuse an array before a scalar guard reads it as one number.
+
+    Every scalar guard opens with this. The guards test their value through
+    :func:`float` or :mod:`math`, which converts it the same way, and so
+    inherit the numpy dependence :func:`is_scalar` describes: a one-element
+    array would be read as its element on numpy 2.0 to 2.3 and refused with an
+    anonymous ``TypeError`` from 2.4 on.
+
+    :param value: The caller's value, of any type.
+    :param name: Parameter name used in the error message.
+    :raises ValueError: for an array of any shape, a ragged sequence included.
+    """
+    if not is_scalar(value):
+        msg = f"'{name}' must be one number, not an array."
+        raise ValueError(msg)
+
+
+def _one_number(value: object, name: str) -> float:
+    """*value* as a ``float``, refused by name when it is not one number.
+
+    What every shared scalar guard reads first. The rank is asked before the
+    conversion (an array is refused on every numpy), and the conversion is
+    :func:`float`'s, so whatever it took before these guards asked the rank,
+    a numeric string such as ``"1000"`` included, it still takes; what it
+    cannot take is refused with the parameter's name instead of the anonymous
+    ``TypeError`` :mod:`math` would raise on it.
+
+    :param value: The caller's value, of any type.
+    :param name: Parameter name used in the error message.
+    :return: ``float(value)``.
+    :raises ValueError: for an array, or for anything :func:`float` refuses.
+    """
+    require_scalar(value, name)
+    return require_real(value, f"'{name}' must be a number, got {value!r}.")
+
+
 def require_positive(value: float, name: str) -> float:
     """Require a positive finite number (rejects NaN and infinities).
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for a non-finite or non-positive value.
+    :raises ValueError: for an array, something that is not a number, or a
+        non-finite or non-positive value.
     """
-    if not math.isfinite(value) or value <= 0.0:
+    number = _one_number(value, name)
+    if not math.isfinite(number) or number <= 0.0:
         msg = f"'{name}' must be positive."
         raise ValueError(msg)
-    return float(value)
+    return number
 
 
 #: Absolute zero, in degrees Celsius. The bound on a temperature that has to be
@@ -91,13 +174,14 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     :param value: The temperature to validate, in degrees Celsius.
     :param name: Parameter name used in the error message.
     :return: The validated temperature as a ``float``.
-    :raises ValueError: for a non-finite temperature, or one at or below
-        -273,15 degC.
+    :raises ValueError: for an array, something that is not a number, a
+        non-finite temperature, or one at or below -273,15 degC.
     """
-    if not math.isfinite(value) or value <= ABSOLUTE_ZERO_C:
+    number = _one_number(value, name)
+    if not math.isfinite(number) or number <= ABSOLUTE_ZERO_C:
         msg = f"'{name}' must be finite and above -273.15 degC."
         raise ValueError(msg)
-    return float(value)
+    return number
 
 
 def require_above_absolute_zero_array(x: ArrayLike, name: str) -> np.ndarray:
@@ -129,12 +213,14 @@ def require_non_negative(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for a non-finite or negative value.
+    :raises ValueError: for an array, something that is not a number, or a
+        non-finite or negative value.
     """
-    if not math.isfinite(value) or value < 0.0:
+    number = _one_number(value, name)
+    if not math.isfinite(number) or number < 0.0:
         msg = f"'{name}' must be non-negative."
         raise ValueError(msg)
-    return float(value)
+    return number
 
 
 def require_finite(value: float, name: str) -> float:
@@ -148,12 +234,14 @@ def require_finite(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for a non-finite value.
+    :raises ValueError: for an array, something that is not a number, or a
+        non-finite value.
     """
-    if not math.isfinite(value):
+    number = _one_number(value, name)
+    if not math.isfinite(number):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)
-    return float(value)
+    return number
 
 
 def require_fraction(value: float, name: str) -> float:
@@ -162,12 +250,14 @@ def require_fraction(value: float, name: str) -> float:
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for a non-finite value or one outside ``[0, 1)``.
+    :raises ValueError: for an array, something that is not a number, a
+        non-finite value, or one outside ``[0, 1)``.
     """
-    if not math.isfinite(value) or value < 0.0 or value >= 1.0:
+    number = _one_number(value, name)
+    if not math.isfinite(number) or number < 0.0 or number >= 1.0:
         msg = f"'{name}' must be in the range [0, 1)."
         raise ValueError(msg)
-    return float(value)
+    return number
 
 
 def require_count(value: object, name: str, *, minimum: int = 1) -> int:

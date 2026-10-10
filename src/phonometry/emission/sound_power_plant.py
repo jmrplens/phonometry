@@ -146,6 +146,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._shared import (
     _CK_OCTAVE,
@@ -1862,6 +1863,7 @@ class PlantRequirement:
                 f"'comparison' must be one of {_COMPARISONS}; got {self.comparison!r}."
             )
             raise ValueError(msg)
+        require_scalar(self.tolerance, "tolerance")
         if math.isnan(self.tolerance) or self.tolerance < 0.0:
             msg = f"'tolerance' must be >= 0; got {self.tolerance!r}."
             raise ValueError(msg)

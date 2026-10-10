@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_finite_fields
+from .._internal.validation import require_finite_fields, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -536,6 +536,7 @@ class PropellerEngineCoefficients:
         # Spelled out rather than as ``not v > 0``: the two differ only on NaN,
         # which the negated comparison happens to catch, and a guard should say
         # what it refuses instead of relying on that.
+        require_scalar(true_airspeed_kt, "true_airspeed_kt")
         if not math.isfinite(true_airspeed_kt) or true_airspeed_kt <= 0.0:
             msg = (
                 "PropellerEngineCoefficients: 'true_airspeed_kt' must be "
@@ -1937,6 +1938,7 @@ def departure_profile(
             f"step is {first!r}."
         )
         raise ValueError(msg)
+    require_scalar(weight_lb, "weight_lb")
     if weight_lb <= 0.0 or not math.isfinite(weight_lb):
         msg = f"'weight_lb' must be positive; got {weight_lb!r}."
         raise ValueError(msg)

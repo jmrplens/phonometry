@@ -42,7 +42,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from .._internal.boundary import round_half_up
-from .._internal.validation import check_engine
+from .._internal.validation import check_engine, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -144,6 +144,7 @@ class OperatingModeDeclaration:
                 "missing."
             )
             raise ValueError(msg)
+        require_scalar(self.emission_pressure_level, "emission_pressure_level")
         if self.emission_pressure_level is not None and not math.isfinite(
             float(self.emission_pressure_level)
         ):

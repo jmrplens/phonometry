@@ -30,6 +30,10 @@ from diagrams.canvas import LIGHT, SVG, _label_runs, _math_runs
 from diagrams.i18n import _ES
 from diagrams.outline import measure
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 #: The glyph-id stem each face writes, one per DejaVu file the plates set.
 _REG = "DejaVuSans"
 _BOLD = "DejaVuSans-Bold"

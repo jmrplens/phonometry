@@ -68,6 +68,7 @@ from ..._internal.validation import (
     require_finite_fields,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -1084,6 +1085,7 @@ def weighted_exposure(
     if np.any(np.isnan(sel)) or np.any(sel == np.inf):
         msg = "'band_sel' must be finite, or -inf for a band with no energy."
         raise ValueError(msg)
+    require_scalar(n_events, "n_events")
     n_float = float(n_events)
     if not n_float.is_integer() or int(n_float) < 1:
         msg = "'n_events' must be a whole number of events, at least 1."
@@ -1098,6 +1100,7 @@ def weighted_exposure(
 
     peak: float | None = None
     if peak_spl is not None:
+        require_scalar(peak_spl, "peak_spl")
         peak = float(peak_spl)
         if not np.isfinite(peak):
             msg = "'peak_spl' must be finite."

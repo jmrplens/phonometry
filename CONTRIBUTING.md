@@ -99,6 +99,65 @@ holds the block to one statement, and
 SonarCloud uses for python:S5778 and S9088; conversions such as
 `float("nan")`, containers and NumPy calls do not count.
 
+### 3a. Pinned versions and dependency floors
+
+phonometry supports Python 3.12 and newer, and the test matrix runs 3.12,
+3.13 and 3.14. Two sets of versions describe its dependencies, and they answer
+different questions:
+
+- **The pins** in `requirements*.txt` are what this repository develops, tests
+  and draws its figures with. They are exact and stay at the latest releases:
+  Dependabot proposes each upgrade and the suite decides. It does so with the
+  `increase-if-necessary` strategy, which moves an exact pin and leaves a
+  floor that already admits the new release where it is; the `increase`
+  strategy would raise every floor to the newest release in the same pull
+  request, and `tests/test_minimum_requirements.py` refuses it.
+- **The floors** in `pyproject.toml`, under `[project.dependencies]` and
+  `[project.optional-dependencies]`, are what a user may install. Each one is
+  the oldest release the library's tests pass with on Python 3.12, measured
+  with every other floor installed beside it, and the comment above them says
+  what each one rests on. The `minimum-versions` CI job installs exactly those
+  floors and runs the library's tests on them, so a floor that stops being
+  true fails the pull request that made it so.
+
+The rule: keep the pins at the latest releases, keep the floors measured, and
+**never raise a floor without a failure measured at it**. When new code needs
+a newer release, the `minimum-versions` job is what says so; raise that floor
+to the oldest release that passes, and write the failure beside it. A floor
+raised on a guess turns away every user whose environment would have worked.
+
+The job reads the floors with
+[`scripts/minimum_requirements.py`](scripts/minimum_requirements.py), which
+also refuses a requirement that is not a single `>=` floor and, with
+`--check`, an environment where pip settled on anything else. To run it as the
+job does, in a fresh Python 3.12 environment:
+
+```bash
+python scripts/minimum_requirements.py > minimum-requirements.txt
+pip install -r minimum-requirements.txt pytest pytest-xdist pypdf pypdfium2 pystoi pyyaml jsonschema
+pip install --no-deps -e .
+python scripts/minimum_requirements.py --check
+NUMBA_DISABLE_JIT=0 pytest -n auto --without-pinned-stack
+```
+
+The figure, diagram and badge tooling is tied to the pinned stack its
+committed artefacts are drawn with, so its test modules carry the
+`pinned_stack` mark, and `--without-pinned-stack` leaves every module that
+carries it out of the run before importing it: some of them import names the
+floor matplotlib does not have, and a module that fails on import is an error
+whatever mark it carries. `tests/test_minimum_requirements.py` keeps every test
+module that imports that tooling marked, and every marked module one that
+imports it.
+
+The NumPy floor is also why a guard asks a value its rank before it reads it
+as one number: `float()`, `int()` and `math` take a one-element array as its
+element on NumPy 2.0 to 2.3 and refuse it from 2.4 on, so a guard that leaves
+the refusal to them behaves differently at the floor and at the pin. Validate
+a scalar through the shared checks in `phonometry._internal.validation`
+(`require_positive`, `require_finite` and their siblings), or open the guard
+with `require_scalar(value, "name")`; `tests/test_scalar_guards.py` reads the
+tree and refuses a guard that converts its parameter without it.
+
 ### 3b. Oracle data (committed vs local)
 
 Some suites are validated against reference material that is too large or not

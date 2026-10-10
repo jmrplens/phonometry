@@ -37,10 +37,11 @@ variable empties the directory first, which is what ``make graphs`` does.
 
 from __future__ import annotations
 
-import atexit
 import json
 import os
 import pathlib
+
+from process_exit import run_at_exit
 
 #: Names the directory the fragments are written to. Unset means "do not
 #: record", which is the default everywhere except the generation runs the
@@ -96,7 +97,7 @@ def untranslated(text: str) -> None:
 
 def _register() -> None:
     global _REGISTERED
-    atexit.register(_dump)
+    run_at_exit(_dump)
     _REGISTERED = True
 
 
@@ -107,12 +108,13 @@ def _forget_after_fork() -> None:
     fragment, and without this that holds only while the parent has not
     recorded anything before it forks. ``os.fork`` copies :data:`_PASSES` and
     ``_REGISTERED`` into the child but not the handler that reads them:
-    ``multiprocessing.popen_fork`` empties the ``atexit`` registry in the
-    child before the target runs, so a child that inherited
-    ``_REGISTERED = True`` would never re-register and would drop everything
-    it recorded. Clearing both puts the child where a spawned worker starts,
-    and its first :func:`visit` registers a handler of its own -- after the
-    child cleared the registry, which is why that one survives.
+    ``multiprocessing.popen_fork`` never runs the parent's exit handlers in
+    the child, so a child that inherited ``_REGISTERED = True`` would never
+    re-register and would drop everything it recorded. Clearing both puts the
+    child where a spawned worker starts, and its first :func:`visit`
+    registers a handler of its own, through
+    :func:`process_exit.run_at_exit`, which a forked child reaches on 3.12
+    as well as on 3.13.
     """
     global _REGISTERED, _CURRENT, _PASS
     for pass_ in _PASSES.values():

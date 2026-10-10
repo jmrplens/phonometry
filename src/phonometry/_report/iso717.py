@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import is_scalar, require_equal_shapes
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -383,7 +383,7 @@ def _extended_terms(
     specs = impact_specs if result.quantity == "impact" else airborne_specs
     for attr, label in specs:
         value = getattr(result, attr, None)
-        if value is None:
+        if value is None or not is_scalar(value):
             continue
         try:
             number = float(value)

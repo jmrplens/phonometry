@@ -36,6 +36,10 @@ if _SCRIPTS not in sys.path:
 
 from figures.fields._core import _fit_text_below, _fit_text_x, _layout_box
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 

@@ -49,7 +49,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from .cepstrum import _fold_causal
 
 if TYPE_CHECKING:
@@ -96,6 +96,7 @@ def _validate_response(
 
 
 def _validate_oversample(oversample: int) -> int:
+    require_scalar(oversample, "oversample")
     factor = int(oversample)
     if factor < 1:
         msg = "'oversample' must be a positive integer."
@@ -198,6 +199,7 @@ def group_delay(
     :raises ValueError: If the inputs are invalid.
     """
     resp = _validate_response(response)
+    require_scalar(fs, "fs")
     fs_v = float(fs)
     if not np.isfinite(fs_v) or fs_v <= 0.0:
         msg = "'fs' must be a positive, finite number."
@@ -375,6 +377,7 @@ def phase_decomposition(
     :raises ValueError: If the inputs are invalid.
     """
     resp = _validate_response(response)
+    require_scalar(fs, "fs")
     fs_v = float(fs)
     if not np.isfinite(fs_v) or fs_v <= 0.0:
         msg = "'fs' must be a positive, finite number."

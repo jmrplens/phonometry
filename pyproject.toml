@@ -20,7 +20,7 @@ description = "Acoustic measurement, analysis and prediction for Python: levels 
 # scripts/generate_pypi_readme.py; `make pypi-readme` refreshes it and the
 # packaging tests fail on drift.
 readme = "README_PYPI.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 # PEP 639, which setuptools 84 wants: the expression and the file, not the
 # classifier. The classifier is deprecated and raised four
 # SetuptoolsDeprecationWarning on every build.
@@ -82,6 +82,7 @@ keywords = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
@@ -90,22 +91,41 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Typing :: Typed",
 ]
+# The floors are measured, not guessed: each is the oldest release the
+# library's suite passes with on Python 3.12, with every other floor
+# installed beside it, and a CI job (minimum-versions in python-app.yml)
+# installs exactly these and runs the suite, so a floor cannot rot into a
+# promise nobody checks. A floor rises only with a failure measured at it;
+# the pins the repository develops on live in requirements*.txt and stay at
+# the latest releases. What each one rests on:
+#   numpy 2.0.2   2.0.0 and 2.0.1 return a multiple coherence that differs in
+#                 the last bit between a Signal block and the same records
+#                 passed one by one, in about half the runs
+#   scipy 1.14.0  1.13 cannot read an RF64 WAV
+#   numba 0.60.0  the first release that installs beside numpy 2
+#   matplotlib 3.10.7  3.10.0 and 3.10.1 drop `lw` in hist(), and 3.10.3 to
+#                 3.10.6 warn through pyparsing 3.3 when they parse mathtext
+#   reportlab 4.0.4    4.0.0 requires pycairo, a C build; 4.0.1 to 4.0.3 were
+#                 never published
+#   svglib 0.9.0  0.8 is Python 2 code
+#   soundfile 0.12.0   the first wheel that carries its own libsndfile; 0.11
+#                 needs one installed on the system
 dependencies = [
-    "numpy>=2.5.3",
-    "scipy>=1.18.1",
+    "numpy>=2.0.2",
+    "scipy>=1.14.0",
 ]
 
 [project.optional-dependencies]
-perf = ["numba>=0.67.0"]
-plot = ["matplotlib>=3.11.2"]
-report = ["reportlab>=5.0.0", "svglib>=2.1.0"]
+perf = ["numba>=0.60.0"]
+plot = ["matplotlib>=3.10.7"]
+report = ["reportlab>=4.0.4", "svglib>=0.9.0"]
 # The base install already reads the whole linear WAV family (PCM, float,
 # EXTENSIBLE, BWF, RF64) through scipy; the extra adds the remaining
 # containers and codecs (FLAC, AIFF, Ogg/Opus, MP3, compressed WAV) via
 # python-soundfile, whose wheel bundles libsndfile (LGPL-2.1, dynamically
 # linked).
-audio = ["soundfile>=0.14.0"]
-full = ["numba>=0.67.0", "matplotlib>=3.11.2", "reportlab>=5.0.0", "svglib>=2.1.0", "soundfile>=0.14.0"]
+audio = ["soundfile>=0.12.0"]
+full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.0", "soundfile>=0.12.0"]
 
 [project.urls]
 "Homepage" = "https://jmrp.io/docs/phonometry"
@@ -143,7 +163,7 @@ version = {file = "VERSION"}
 # drifted from any single style.
 [tool.ruff]
 line-length = 88
-target-version = "py313"
+target-version = "py312"
 # Markdown is excluded on purpose. Ruff formats fenced Python inside `.md` but
 # does not recognise `.mdx` at all, and every snippet in `docs/` is mirrored by
 # hand into `site/src/content/docs/` in English and Spanish. Formatting one
@@ -302,7 +322,7 @@ allow-star-arg-any = true
 known-first-party = ["phonometry"]
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 
@@ -321,6 +341,14 @@ pythonpath = ["tests"]
 # that happens to pick one of its consumers. Unmarked tests are distributed
 # exactly as with the default `load` mode, and the flag is inert without `-n`.
 addopts = ["--dist=loadgroup"]
+markers = [
+    # The minimum-versions CI job runs the library's tests at the dependency
+    # floors with --without-pinned-stack, which leaves the modules carrying
+    # this mark out before importing them: the figure, diagram and badge
+    # tooling is tied to the pinned stack its committed artefacts are drawn
+    # with (tests/pinned_stack.py).
+    "pinned_stack: tests the figure, diagram or badge tooling, which runs on the pinned figure stack only",
+]
 filterwarnings = [
     "ignore:Low sampling rate:UserWarning",
     # 4.0 carries no deprecated names: the aliases the 3.x layout left behind

@@ -105,6 +105,7 @@ from .._internal.validation import (
     require_finite_array,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from .conformance import _at_most
 from .uncertainty import (
@@ -1586,6 +1587,7 @@ def _repeatability_dof(value: float) -> float:
     Positive, and infinite for a standard deviation known rather than
     estimated; NaN is refused.
     """
+    require_scalar(value, "repeatability_dof")
     dof = float(value)
     if math.isnan(dof) or dof <= 0.0:
         msg = f"'repeatability_dof' must be positive; got {value!r}."

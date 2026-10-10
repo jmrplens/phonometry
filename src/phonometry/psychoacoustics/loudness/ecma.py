@@ -64,6 +64,7 @@ from ..._internal.validation import (
     require_1d_signal,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
@@ -748,6 +749,7 @@ def loudness_ecma(
     if x.size == 0:
         msg = "signal must not be empty"
         raise ValueError(msg)
+    require_scalar(fs, "fs")
     fs = float(fs)
     if fs <= 0.0:
         msg = "fs must be positive"

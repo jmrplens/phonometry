@@ -76,6 +76,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_same_shape,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 from ...materials.absorbers.sound_absorption import attenuation_from_alpha
@@ -168,7 +169,12 @@ def _validate(
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive."
         raise ValueError(msg)
-    require_above_absolute_zero(float(temperature_c), "temperature_c")
+    require_above_absolute_zero(temperature_c, "temperature_c")
+    # The comparisons below would let a one-element array through, and the
+    # psychrometric conversion would then read it as its element on numpy 2.0
+    # to 2.3 and refuse it anonymously from 2.4 on.
+    require_scalar(relative_humidity_percent, "relative_humidity_percent")
+    require_scalar(atmospheric_pressure_kpa, "atmospheric_pressure_kpa")
     if not 0.0 <= relative_humidity_percent <= _MAX_RELATIVE_HUMIDITY_PERCENT:
         msg = "'relative_humidity_percent' must be within [0, 100] %."
         raise ValueError(msg)

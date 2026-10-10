@@ -222,6 +222,7 @@ from .._internal.validation import (
     require_finite_array,
     require_non_negative,
     require_positive,
+    require_scalar,
 )
 from .free_field_corrections import (
     _band_column,
@@ -759,6 +760,7 @@ def _relative_humidity(value: float, name: str) -> float:
     :raises ValueError: for a humidity outside the closed range from dry to
         saturated air.
     """
+    require_scalar(value, name)
     if not math.isfinite(value) or not 0.0 <= value <= _SATURATED_PERCENT:
         msg = f"'{name}' must be between 0 and 100."
         raise ValueError(msg)
@@ -2541,6 +2543,7 @@ def _component(value: float | Quantity, name: str) -> Quantity:
     """
     if isinstance(value, Quantity):
         return Quantity(0.0, value.uncertainty, value.distribution, name=name)
+    require_scalar(value, name)
     number = float(value)
     if not (math.isfinite(number) and number >= 0.0):
         msg = (

@@ -14,6 +14,7 @@ and not only on synthetic draws.
 from __future__ import annotations
 
 import math
+import sys
 
 import numpy as np
 import pytest
@@ -134,6 +135,9 @@ def test_shape_and_empty_are_preserved() -> None:
     )
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 13), reason="math.fma, the reference, is new in Python 3.13"
+)
 def test_fused_multiply_add_matches_math_fma() -> None:
     """The emulation behind the near-one window's four fused sites."""
     rng = np.random.default_rng(3)

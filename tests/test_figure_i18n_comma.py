@@ -19,6 +19,10 @@ if _SCRIPTS not in sys.path:
 
 from figures.i18n import _ES_PATTERNS, _decimal_comma, lookup
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 
 @pytest.mark.parametrize(
     "text",
@@ -122,7 +126,7 @@ def test_every_replacement_template_of_the_pattern_table_compiles() -> None:
     for pattern, replacement in _ES_PATTERNS:
         try:
             re.sub(pattern, replacement, "")
-        except re.PatternError as exc:  # pragma: no cover - the failure text
+        except re.error as exc:  # pragma: no cover - the failure text
             broken.append(f"{pattern!r}: {exc}")
     assert not broken, "\n".join(broken)
 

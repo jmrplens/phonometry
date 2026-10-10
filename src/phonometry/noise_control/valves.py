@@ -68,6 +68,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_positive,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
@@ -399,6 +400,7 @@ def flow_regime(pressure_ratio: float, boundaries: RegimeBoundaries) -> int:
     :raises ValueError: If the pressure ratio is not a finite number in
         (0, 1).
     """
+    require_scalar(pressure_ratio, "pressure_ratio")
     x = float(pressure_ratio)
     if not math.isfinite(x) or not 0.0 < x < 1.0:
         msg = (
@@ -442,6 +444,7 @@ def valve_style_modifier(
     """
     area = require_positive(passage_area, "passage_area")
     perimeter = require_positive(wetted_perimeter, "wetted_perimeter")
+    require_scalar(passages, "passages")
     count = int(passages)
     if count != passages or count < 1:
         msg = (
@@ -1027,6 +1030,7 @@ def stage_level_correction(
     :raises ValueError: If the stage count is below two, or a pressure is not
         positive and finite, or the stagnation pressure exceeds the inlet.
     """
+    require_scalar(stages, "stages")
     count = int(stages)
     if count != stages or count < _MINIMUM_SOURCES:
         msg = (

@@ -70,6 +70,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
@@ -351,6 +352,7 @@ def impulse_prominence(
         onset rate or level difference, or an assessment period that is not
         positive and finite.
     """
+    require_scalar(assessment_period_min, "assessment_period_min")
     if not math.isfinite(assessment_period_min) or assessment_period_min <= 0.0:
         msg = (
             f"assessment_period_min must be positive and finite; got "
@@ -425,6 +427,7 @@ def rating_level(
     ):
         msg = "laeq, adjustment and durations must be finite."
         raise ValueError(msg)
+    require_scalar(reference_time, "reference_time")
     if not math.isfinite(reference_time) or reference_time <= 0.0 or np.any(dt <= 0.0):
         msg = "reference_time and durations must be positive."
         raise ValueError(msg)
@@ -714,10 +717,12 @@ def sound_pressure_level_history(
 
     fs = resolve_fs(signal, fs, name="signal")
     x = np.asarray(resolve_samples(signal, name="signal"), dtype=np.float64).ravel()
+    require_scalar(fs, "fs")
     if not math.isfinite(fs) or fs <= 0.0:
         msg = "fs must be positive."
         raise ValueError(msg)
     lo, hi = SAMPLE_INTERVAL_RANGE
+    require_scalar(dt, "dt")
     if not lo <= dt <= hi:
         msg = f"dt must be within {lo * 1e3:g}-{hi * 1e3:g} ms (Clause 4); got {dt * 1e3:g} ms."
         raise ValueError(msg)
@@ -872,6 +877,7 @@ def detect_onsets(
     :raises ValueError: for a non-positive ``dt`` or fewer than two samples.
     """
     lev = np.asarray(levels, dtype=np.float64).ravel()
+    require_scalar(dt, "dt")
     if not math.isfinite(dt) or dt <= 0.0:
         msg = "dt must be positive."
         raise ValueError(msg)

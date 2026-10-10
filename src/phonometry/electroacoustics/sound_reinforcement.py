@@ -85,6 +85,7 @@ from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 from .._internal.boundary import settled
+from .._internal.validation import require_scalar
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -108,6 +109,7 @@ def open_microphone_correction(open_microphones: int) -> float:
         once (>= 1).
     :return: The correction :math:`\Delta L_\text{nom}`, dB.
     """
+    require_scalar(open_microphones, "open_microphones")
     n = int(open_microphones)
     if n != open_microphones or n < 1:
         msg = "'open_microphones' must be an integer of at least 1."
@@ -263,10 +265,12 @@ def feedback_stability(
         :data:`DEFAULT_STABILITY_MARGIN`, Long's equalised-system value).
     :return: A :class:`FeedbackStabilityResult`.
     """
+    require_scalar(open_loop_gain, "open_loop_gain")
     z_s = float(open_loop_gain)
     if not math.isfinite(z_s):
         msg = "'open_loop_gain' must be finite."
         raise ValueError(msg)
+    require_scalar(stability_margin, "stability_margin")
     margin_required = float(stability_margin)
     if not math.isfinite(margin_required) or margin_required < 0.0:
         msg = "'stability_margin' must be finite and non-negative."

@@ -195,7 +195,7 @@ const dateModified = (() => {
   }
 })();
 
-const softwareRequirements = 'Python >= 3.13 with NumPy and SciPy (matplotlib and numba optional).';
+const softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
 
 // --- Canonical identity --------------------------------------------------
 // The `#person` entity is no longer restated here; it is fetched from its

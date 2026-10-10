@@ -60,7 +60,7 @@ from dataclasses import dataclass
 from math import isfinite, log10
 from typing import TYPE_CHECKING, Any, Literal
 
-from ..._internal.validation import check_engine
+from ..._internal.validation import check_engine, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -398,6 +398,7 @@ class ImpactPredictionResult:
 
 def _check_finite(value: float, name: str) -> float:
     """Return ``value`` as a float, raising if it is not finite."""
+    require_scalar(value, name)
     v = float(value)
     if not isfinite(v):
         msg = f"'{name}' must be a finite number."

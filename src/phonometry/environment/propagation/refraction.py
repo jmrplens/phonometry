@@ -61,6 +61,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...materials.absorbers.porous import PUBLISHED_AIR
 
@@ -214,6 +215,7 @@ def log_linear_sound_speed_profile(
     if not np.isfinite(b):
         msg = "'b' must be finite."
         raise ValueError(msg)
+    require_scalar(n_points, "n_points")
     if int(n_points) < _MIN_POLYLINE_NODES:
         msg = "'n_points' must be at least 2."
         raise ValueError(msg)
@@ -472,11 +474,13 @@ def atmospheric_ray_paths(
     """
     z_prof, c_prof = _clean_profile(profile)
     top = float(z_prof[-1])
+    require_scalar(source_height, "source_height")
     zs = float(source_height)
     if zs < 0.0:
         msg = "'source_height' must be non-negative."
         raise ValueError(msg)
     rmax = require_positive(max_range, "max_range")
+    require_scalar(n_steps, "n_steps")
     if int(n_steps) < _MIN_RAY_STEPS:
         msg = "'n_steps' must be at least 2."
         raise ValueError(msg)
@@ -714,6 +718,7 @@ def atmospheric_parabolic_equation(
     """
     f = require_positive(frequency_hz, "frequency_hz")
     z_prof, c_prof = _clean_profile(profile)
+    require_scalar(source_height, "source_height")
     zs = float(source_height)
     if zs <= 0.0:
         msg = "'source_height' must be positive."

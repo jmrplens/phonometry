@@ -26,8 +26,8 @@ The `PyOctaveBand` package on PyPI is a stub that only redirects to
 
 Supported interpreters and platforms are whatever the test matrix in
 [`.github/workflows/python-app.yml`](.github/workflows/python-app.yml)
-exercises, at the time of writing Python 3.13 and 3.14 on Ubuntu, macOS and
-Windows. That workflow is the authority, not this paragraph. A report that
+exercises, at the time of writing Python 3.12, 3.13 and 3.14 on Ubuntu, macOS
+and Windows. That workflow is the authority, not this paragraph. A report that
 reproduces only outside the matrix is handled as an ordinary bug.
 
 ## Reporting a vulnerability

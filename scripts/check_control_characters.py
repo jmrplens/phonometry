@@ -162,10 +162,11 @@ def offences(
         else FORBIDDEN
     )
     try:
-        # newline="" turns off universal-newline translation, without which a
-        # CRLF arrives as a bare "\n" and the carriage return this looks for
-        # is the one character it can never see.
-        text = path.read_text(encoding="utf-8", newline="")
+        # Decoded from the bytes, so no universal-newline translation runs:
+        # with it a CRLF arrives as a bare "\n" and the carriage return this
+        # looks for is the one character it can never see. (read_text takes
+        # newline="" only from Python 3.13 on.)
+        text = path.read_bytes().decode("utf-8")
     except (OSError, UnicodeDecodeError):  # pragma: no cover - not in this tree
         return []
     found: list[tuple[int, int, str]] = []
@@ -212,8 +213,7 @@ def check(paths: list[pathlib.Path]) -> tuple[list[str], list[str]]:
         for line, column, character in offences(path, allow_carriage_return=exempt):
             reports.append(f"{name}:{line}:{column}: {character}")
         if exempt and any(
-            character == "\r"
-            for character in path.read_text(encoding="utf-8", newline="")
+            character == "\r" for character in path.read_bytes().decode("utf-8")
         ):
             still_delivered.add(name)
     return reports, sorted(set(AS_DELIVERED) - still_delivered)

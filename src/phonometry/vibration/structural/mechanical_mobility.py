@@ -94,6 +94,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 # ---------------------------------------------------------------------------
@@ -466,6 +467,7 @@ def random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray:
     :return: The normalized random error, in percent (same shape as input).
     :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
     """
+    require_scalar(n_averages, "n_averages")
     n = int(n_averages)
     if n < 1:
         msg = "'n_averages' must be at least 1."

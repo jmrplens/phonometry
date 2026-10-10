@@ -44,6 +44,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import require_scalar
 from ._backends import _import_soundfile, _sniff, _warn_lossy, info, soundfile_stamp
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
@@ -232,7 +233,9 @@ def read_blocks(
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
     """
+    require_scalar(block_size, "block_size")
     block_size = int(block_size)
+    require_scalar(overlap, "overlap")
     overlap = int(overlap)
     if block_size < 1:
         msg = f"block_size must be at least 1; got {block_size}"
@@ -246,6 +249,7 @@ def read_blocks(
     # Refused here rather than at the first block, as io.read refuses it at
     # the call: a generator would otherwise hand back an iterator that fails
     # only when the loop starts.
+    require_scalar(calibration_factor, "calibration_factor")
     if calibration_factor is not None and (
         not math.isfinite(calibration_factor) or calibration_factor <= 0
     ):

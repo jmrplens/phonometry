@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -320,6 +320,7 @@ def age_threshold(
     :raises ValueError: for an age below 18, an unknown sex, a fractile outside
         (0, 1), or an unknown frequency.
     """
+    require_scalar(age, "age")
     if age < _REFERENCE_AGE:
         msg = (
             f"age must be at least {_REFERENCE_AGE:.0f} years (the ISO 7029 "
@@ -329,6 +330,7 @@ def age_threshold(
     if sex not in _MEDIAN:
         msg = f"sex must be one of {SEXES}; got {sex!r}."
         raise ValueError(msg)
+    require_scalar(fractile, "fractile")
     if not 0.0 < fractile < 1.0:
         msg = f"fractile must be in (0, 1); got {fractile}."
         raise ValueError(msg)

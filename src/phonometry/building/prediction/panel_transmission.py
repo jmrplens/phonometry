@@ -101,6 +101,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...materials.absorbers.porous import PUBLISHED_AIR
 from ...solids import PUBLISHED_PLATEAU_DATA, PlateauMaterial
@@ -259,6 +260,7 @@ def _resolve_field_correction(band: str, override: float | None) -> float:
     """The field-incidence correction to subtract, in dB."""
     if override is None:
         return field_incidence_correction(band)
+    require_scalar(override, "field_correction")
     value = float(override)
     if not np.isfinite(value) or value < 0.0:
         msg = "'field_correction' must be finite and non-negative."
@@ -879,6 +881,7 @@ def corrugated_plate_stiffness(
     amplitude = require_positive(corrugation_amplitude, "corrugation_amplitude")
     wavelength = require_positive(corrugation_wavelength, "corrugation_wavelength")
     e = require_positive(youngs_modulus, "youngs_modulus")
+    require_scalar(poisson_ratio, "poisson_ratio")
     if not -1.0 < poisson_ratio < 1.0:
         msg = "'poisson_ratio' must lie in (-1, 1)."
         raise ValueError(msg)
@@ -941,7 +944,9 @@ def orthotropic_plate_resonance(
     :return: The eigenfrequency, in hertz.
     :raises ValueError: for a non-positive input or a mode order below 1.
     """
+    require_scalar(mode_x, "mode_x")
     i = int(mode_x)
+    require_scalar(mode_z, "mode_z")
     n = int(mode_z)
     if i < 1 or n < 1:
         msg = "'mode_x' and 'mode_z' must be integers >= 1."

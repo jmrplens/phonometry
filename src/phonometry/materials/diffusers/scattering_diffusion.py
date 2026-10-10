@@ -40,6 +40,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .reverberation_room_scattering import _positive_scalar
 
@@ -137,6 +138,7 @@ class DiffusionResult(OwnsArrays):
                 "receiver with no scattered energy."
             )
             raise ValueError(msg)
+        require_scalar(self.coefficient, "coefficient")
         if not math.isfinite(float(self.coefficient)):
             msg = (
                 "DiffusionResult: 'coefficient' must be finite; got "

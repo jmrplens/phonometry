@@ -84,7 +84,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive
 from .test_signals import _validate_1d_finite, fractional_delay
@@ -133,6 +133,7 @@ def comb_filter_response(
     :raises ValueError: If the parameters are invalid.
     """
     period_v = _positive(period_s, "period_s")
+    require_scalar(n_averages, "n_averages")
     n = int(n_averages)
     if n < 1:
         msg = "'n_averages' must be a positive integer."
@@ -337,6 +338,7 @@ def _resolve_n_averages(
         raise ValueError(msg)
     if n_averages is None:
         return available
+    require_scalar(n_averages, "n_averages")
     requested = int(n_averages)
     if requested < 1:
         msg = "'n_averages' must be a positive integer."
@@ -422,6 +424,7 @@ def time_synchronous_average(
     xa = _validate_1d_finite(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
     period_v = _positive(period_s, "period_s")
+    require_scalar(n_harmonics, "n_harmonics")
     n_harmonics_v = int(n_harmonics)
     if n_harmonics_v < 1:
         msg = "'n_harmonics' must be a positive integer."

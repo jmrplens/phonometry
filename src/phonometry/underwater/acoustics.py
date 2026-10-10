@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import require_real
 from ..io._resolve import SignalInput, apply_calibration, resolve_fs
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
@@ -53,22 +54,20 @@ _NO_ENERGY_MSG = "'pressure' has no energy."
 
 
 def _positive(value: float, name: str) -> float:
-    scalar = float(value)
+    msg = f"'{name}' must be a positive, finite number."
+    scalar = require_real(value, msg)
     if not np.isfinite(scalar) or scalar <= 0.0:
-        msg = f"'{name}' must be a positive, finite number."
         raise ValueError(msg)
     return scalar
 
 
 def _finite(value: float, name: str) -> float:
+    # A per-band array (or anything else float() cannot take) would otherwise
+    # escape as numpy's or the built-in's TypeError, which names neither the
+    # parameter nor this function, or, on numpy before 2.4, be read as its
+    # one element; require_real refuses it by its rank.
     msg = f"'{name}' must be a finite number."
-    try:
-        scalar = float(value)
-    except (TypeError, ValueError):
-        # A per-band array (or anything else float() cannot take) would
-        # otherwise escape as numpy's or the built-in's TypeError, which
-        # names neither the parameter nor this function.
-        raise ValueError(msg) from None
+    scalar = require_real(value, msg)
     if not np.isfinite(scalar):
         raise ValueError(msg)
     return scalar

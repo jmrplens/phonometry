@@ -112,7 +112,7 @@ import numpy as np
 from scipy import stats
 
 from ..._internal.frozen import OwnsArrays, read_only
-from ..._internal.validation import require_choice
+from ..._internal.validation import require_choice, require_real, require_scalar
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -1330,6 +1330,7 @@ def method_b_summary(
     :raises ValueError: for a value outside 1 to 5, a confidence level not
         strictly between 0 and 1, or sites that do not match the responses.
     """
+    require_scalar(confidence_level, "confidence_level")
     if not 0.0 < confidence_level < 1.0:
         msg = "'confidence_level' must lie strictly between 0 and 1."
         raise ValueError(msg)
@@ -1637,12 +1638,9 @@ class SoundscapeAcousticEnvironment:
             raise ValueError(msg)
         results: dict[str, float] = {}
         for key, value in self.measurement_results.items():
-            try:
-                number = float(value)
-            except (TypeError, ValueError):
-                number = math.nan
+            msg = f"{owner}: ISO/TS 12913-2 A.3 f) result {key!r} must be finite."
+            number = require_real(value, msg)
             if not math.isfinite(number):
-                msg = f"{owner}: ISO/TS 12913-2 A.3 f) result {key!r} must be finite."
                 raise ValueError(msg)
             results[str(key)] = number
         object.__setattr__(self, "measurement_results", MappingProxyType(results))

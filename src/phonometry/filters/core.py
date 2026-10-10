@@ -17,7 +17,12 @@ from .._internal.utils import (
     _downsamplingfactor,
     _resample_to_length,
 )
-from .._internal.validation import require_choice, require_positive
+from .._internal.validation import (
+    is_scalar,
+    require_choice,
+    require_positive,
+    require_real,
+)
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import (
     like_input,
@@ -310,7 +315,10 @@ def _validate_bank_design(
         raise ValueError(msg)
     if limits is None:
         limits = [12, 20000]
-    if len(limits) != 2:  # noqa: PLR2004
+    # Two frequencies, each one number: a one-element array would pass the
+    # comparisons below on every numpy and reach float() in the band
+    # generator, which numpy 2.0 to 2.3 answer with its element.
+    if len(limits) != 2 or not all(is_scalar(f) for f in limits):  # noqa: PLR2004
         msg = "Limits must be a list of two frequencies [f_min, f_max]."
         raise ValueError(msg)
     if limits[0] <= 0 or limits[1] <= 0:
@@ -388,10 +396,10 @@ def _resolve_limits(limits: list[float] | None) -> list[float] | None:
     """
     if limits is None:
         return None
+    msg = f"'limits' must be a pair of frequencies [f_min, f_max]; got {limits!r}."
     try:
-        return [float(f) for f in limits]
-    except (TypeError, ValueError):
-        msg = f"'limits' must be a pair of frequencies [f_min, f_max]; got {limits!r}."
+        return [require_real(f, msg) for f in limits]
+    except TypeError:
         raise ValueError(msg) from None
 
 

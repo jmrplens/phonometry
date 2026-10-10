@@ -121,7 +121,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_finite, require_positive
+from .._internal.validation import require_finite, require_positive, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
@@ -252,6 +252,7 @@ _COORDINATES = 3
 
 def _band_index(frequency_hz: float) -> int:
     """The one-third octave band of a frequency, 0 at 1 kHz (base-ten bands)."""
+    require_scalar(frequency_hz, "frequencies_hz")
     if not math.isfinite(frequency_hz) or frequency_hz <= 0.0:
         msg = f"'frequencies_hz' must be positive and finite; got {frequency_hz!r}."
         raise ValueError(msg)
@@ -1962,6 +1963,7 @@ def _checked_plane(
 ) -> tuple[float | None, float | None]:
     """The A.2.5 inputs, refused when they cannot describe a plane."""
     if absorption is not None:
+        require_scalar(absorption, "reflecting_plane_absorption_coefficient")
         value = float(absorption)
         if not 0.0 <= value <= 1.0:
             msg = (

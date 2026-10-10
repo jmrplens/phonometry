@@ -126,6 +126,7 @@ from .._internal.validation import (
     require_finite_array,
     require_finite_fields,
     require_positive,
+    require_scalar,
 )
 from ._shared import _S0, SoundPowerWarning
 
@@ -1242,6 +1243,7 @@ def check_turbine_test_environment(
         raise ValueError(msg)
     wind: float | None = None
     if wind_speed_m_s is not None:
+        require_scalar(wind_speed_m_s, "wind_speed_m_s")
         wind = float(wind_speed_m_s)
         if not math.isfinite(wind) or wind < 0.0:
             msg = (

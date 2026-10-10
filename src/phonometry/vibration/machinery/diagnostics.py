@@ -100,6 +100,7 @@ from ..._internal.validation import (
     require_choice,
     require_non_negative,
     require_positive,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -118,6 +119,7 @@ _MIN_POLES = 2
 
 def _require_count(value: int, name: str, minimum: int = 1) -> int:
     """An integer parameter that must be at least *minimum*."""
+    require_scalar(value, name)
     n = int(value)
     if n < minimum:
         raise ValueError(
@@ -621,6 +623,7 @@ def induction_motor_frequencies(
     :raises ValueError: for a non-positive, non-integer or inconsistent input.
     """
     fs = shaft_rate(speed_rpm)
+    require_scalar(poles, "poles")
     p = int(poles)
     if p < _MIN_POLES or p % 2:
         msg = "'poles' must be an even integer of at least 2."

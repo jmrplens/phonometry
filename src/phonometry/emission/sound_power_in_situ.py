@@ -106,6 +106,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._shared import (
     _CK_OCTAVE,
@@ -710,6 +711,7 @@ def _checked_sigma_omc(sigma_omc: float | None, coverage_factor: float) -> float
     require_positive(coverage_factor, "coverage_factor")
     if sigma_omc is None:
         return float("nan")
+    require_scalar(sigma_omc, "sigma_omc")
     if not np.isfinite(sigma_omc) or sigma_omc < 0.0:
         msg = "'sigma_omc' must be finite and non-negative."
         raise ValueError(msg)

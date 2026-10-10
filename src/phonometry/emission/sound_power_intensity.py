@@ -112,6 +112,7 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections, _check_grade
@@ -1214,7 +1215,7 @@ class PrecisionIntensityResult(OwnsArrays):
         require_ranks(self, frequencies=1, partial_power=2)
         require_same_length(self, "frequencies", ("partial_power", 1))
         require_finite_fields(self, "surface_area")
-        require_above_absolute_zero(float(self.temperature_c), "temperature_c")
+        require_above_absolute_zero(self.temperature_c, "temperature_c")
         pressure = self.barometric_pressure_pa
         if math.isnan(pressure) or pressure <= 0.0:
             msg = "'barometric_pressure_pa' must be positive (Pa)."
@@ -1687,7 +1688,8 @@ def sound_power_intensity_precision(
     if np.any(seg <= 0.0):
         msg = "All 'areas' must be positive."
         raise ValueError(msg)
-    require_above_absolute_zero(float(temperature_c), "temperature_c")
+    require_above_absolute_zero(temperature_c, "temperature_c")
+    require_scalar(barometric_pressure_pa, "barometric_pressure_pa")
     if barometric_pressure_pa <= 0.0:
         msg = "'barometric_pressure_pa' must be positive (Pa)."
         raise ValueError(msg)

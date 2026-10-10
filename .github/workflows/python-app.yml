@@ -1085,7 +1085,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.13", "3.14"]
+        # From the oldest Python requires-python admits to the newest the
+        # classifiers name, every one in between included;
+        # tests/test_minimum_requirements.py holds the list to pyproject.toml.
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
     - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
@@ -1137,8 +1140,9 @@ jobs:
         fail_ci_if_error: false
 
   # The main matrix runs against the latest numpy with the pure-Python
-  # impulse kernel; this job is the only one exercising the numba-jitted
-  # path (numba pins numpy, so it lives in its own environment).
+  # impulse kernel; this job exercises the numba-jitted path on the newest
+  # numba (numba pins numpy, so it lives in its own environment), and
+  # minimum-versions below builds the same kernels at the numba floor.
   tests-perf:
     name: tests (numba-jitted kernel)
     runs-on: ubuntu-latest
@@ -1167,9 +1171,10 @@ jobs:
     # The newest Python the package supports. This job used to sit on 3.13
     # because numba trails a new interpreter by a release or two, and while it
     # did, the jitted kernel was never built against the newest Python we ship
-    # for. numba 0.67.0 publishes cp314 wheels and carries the 3.14 classifier,
-    # and it is the floor in pyproject.toml (numba>=0.67.0), so nothing older
-    # can resolve here.
+    # for. numba publishes cp314 wheels from 0.63.0 on, and the floor in
+    # pyproject.toml (numba>=0.60.0) predates them, so on 3.14 pip resolves a
+    # release that has them; the floor itself is built on 3.12 by the
+    # minimum-versions job.
     # Tracking the newest version is the strictest single choice for this job:
     # a compiled extension meeting a new interpreter is the thing most likely
     # to break, and the pure-Python kernel is covered on both versions by the
@@ -1196,6 +1201,57 @@ jobs:
       # reach it read the cache in a fraction of a second, against a suite
       # that takes about twenty minutes to run one test at a time.
       run: pytest -q -n auto
+
+  # The floors in pyproject.toml are measured: each is the oldest release the
+  # library's suite passes with on the oldest Python the package supports.
+  # Every other job installs the pinned, newest stack, so without this one a
+  # floor would be a promise nobody checks, and the day the code started to
+  # need something newer it would go on claiming the old release. Here the
+  # floors are installed exactly, read from pyproject.toml by
+  # scripts/minimum_requirements.py so that raising one is an edit in one
+  # place, and --check fails the job if pip settled on anything else.
+  #
+  # It runs the library's tests, not the figure and documentation tooling:
+  # the generators and their checkers compare against artefacts drawn on the
+  # pinned figure stack, so they are tied to it, and their test modules carry
+  # the `pinned_stack` mark. --without-pinned-stack (tests/conftest.py) leaves
+  # those modules out before importing them, since some import names the floor
+  # matplotlib does not have. The jitted kernels are on, so the numba floor is
+  # compiled and exercised too.
+  minimum-versions:
+    name: Library tests at the dependency floors
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NUMBA_DISABLE_JIT: "0"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      VECLIB_MAXIMUM_THREADS: "1"
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.12"
+    - name: Install the floors pyproject.toml declares, exactly
+      run: |
+        python -m pip install --upgrade pip
+        python scripts/minimum_requirements.py > minimum-requirements.txt
+        cat minimum-requirements.txt
+        # The test tools at the versions the main matrix pins.
+        grep -E '^(pytest|pytest-xdist|pypdf|pypdfium2|pystoi|pyyaml|jsonschema)==' requirements-dev.txt | cut -d' ' -f1 > test-tools.txt
+        pip install -r minimum-requirements.txt -r test-tools.txt
+        pip install --no-deps -e .
+        python scripts/minimum_requirements.py --check
+    - name: Check the jitted kernels compile at the numba floor
+      run: python scripts/check_jit_kernel.py
+    - name: Run the library tests at the floors
+      run: pytest -q -n auto --without-pinned-stack
 
   sonar:
     needs: tests

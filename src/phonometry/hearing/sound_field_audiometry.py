@@ -74,7 +74,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_choice
+from .._internal.validation import require_choice, require_scalar
 from .threshold import AUDIOMETRIC_FREQUENCIES as _AUDIOMETRIC_FREQUENCIES
 
 if TYPE_CHECKING:
@@ -827,6 +827,7 @@ class FreeSoundFieldCheck(OwnsArrays):
             reference point than the axial points.
         """
         require_choice(self.field, "field", ("free", "quasi-free"))
+        require_scalar(self.loudspeaker_distance_m, "loudspeaker_distance_m")
         distance = float(self.loudspeaker_distance_m)
         if not math.isfinite(distance) or distance <= self.axis_offset_m:
             msg = (
@@ -1020,6 +1021,7 @@ def _free_field_check(
     """
     clause = "ISO 8253-2 5.2" if field == "free" else "ISO 8253-2 5.4"
     offset = _FREE_AXIS_OFFSET_M if field == "free" else _QUASI_FREE_AXIS_OFFSET_M
+    require_scalar(loudspeaker_distance_m, "loudspeaker_distance_m")
     distance = float(loudspeaker_distance_m)
     if not math.isfinite(distance) or distance <= offset:
         msg = (

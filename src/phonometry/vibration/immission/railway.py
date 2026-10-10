@@ -59,6 +59,7 @@ from ..._internal.validation import (
     _as_float64,
     require_finite_array,
     require_positive,
+    require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .vibration_meter import (
@@ -327,6 +328,7 @@ def event_velocity(interval_rms_mm_s: float, duration_s: float) -> float:
     :return: :math:`v_\mathrm{E}`, in millimetres per second.
     :raises ValueError: For a negative velocity or a non-positive duration.
     """
+    require_scalar(interval_rms_mm_s, "interval_rms_mm_s")
     v = float(interval_rms_mm_s)
     if not math.isfinite(v) or v < 0.0:
         msg = f"'interval_rms_mm_s' must be finite and non-negative; got {v!r}."
@@ -455,6 +457,7 @@ def amplitude_distribution(
     :raises ValueError: For a bad record or fewer than two bins.
     """
     x = _record(velocity_mm_s)
+    require_scalar(bins, "bins")
     count = int(bins)
     if count < _MIN_BINS:
         msg = f"'bins' must be at least 2; got {bins!r}."
@@ -920,6 +923,7 @@ def evaluate_train_passage(
     """
     raw = _record(velocity_mm_s)
     fs = _sample_rate(fs_hz, "railway")
+    require_scalar(upper_band_hz, "upper_band_hz")
     upper = float(upper_band_hz)
     allowed = [
         nominal

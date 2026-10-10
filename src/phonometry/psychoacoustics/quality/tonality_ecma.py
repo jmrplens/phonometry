@@ -48,6 +48,7 @@ from ..._internal.validation import (
     require_1d_signal,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..loudness.ecma import (
     _CBF,
@@ -191,9 +192,11 @@ def _band_range(f_low: float | None, f_high: float | None) -> tuple[int, int]:
     Enforces the Formulae 56/57 preconditions: 16 Hz < f_L, f_H < 20 kHz and
     f_L < f_H.
     """
+    require_scalar(f_low, "f_low")
     if f_low is not None and (not math.isfinite(f_low) or f_low <= _F_LOW_MIN_HZ):
         msg = "'f_low' must exceed 16 Hz (Formula 56)."
         raise ValueError(msg)
+    require_scalar(f_high, "f_high")
     if f_high is not None and (not math.isfinite(f_high) or f_high >= _F_HIGH_MAX_HZ):
         msg = "'f_high' must be below 20 kHz (Formula 57)."
         raise ValueError(msg)
@@ -306,6 +309,7 @@ def tonality_ecma(
     if x.size == 0:
         msg = "signal must not be empty"
         raise ValueError(msg)
+    require_scalar(fs, "fs")
     fs = float(fs)
     if fs <= 0.0:
         msg = "fs must be positive"

@@ -960,7 +960,7 @@ def verify_sound_calibrator(
     """
     designation = _designation(calibrator_class)
     base = designation.split("/", 1)[0]
-    f = require_positive(float(nominal_frequency_hz), "nominal_frequency_hz")
+    f = require_positive(nominal_frequency_hz, "nominal_frequency_hz")
     test = require_choice(
         str(environmental_test), "environmental_test", _ENVIRONMENTAL_TESTS
     )

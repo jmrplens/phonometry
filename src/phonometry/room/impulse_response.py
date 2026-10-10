@@ -76,6 +76,7 @@ from .._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import (
@@ -1090,13 +1091,16 @@ def shaped_sweep_signal(
         the synthesis metadata (grid, imposed magnitude, group delay,
         crest factor).
     """
+    require_scalar(fs, "fs")
     fs_v = float(fs)
     if fs_v <= 0.0:
         msg = "fs must be positive"
         raise ValueError(msg)
+    require_scalar(f1, "f1")
     if f1 <= 0.0:
         msg = "f1 must be positive"
         raise ValueError(msg)
+    require_scalar(f2, "f2")
     if f2 <= f1:
         msg = "f2 must be greater than f1"
         raise ValueError(msg)

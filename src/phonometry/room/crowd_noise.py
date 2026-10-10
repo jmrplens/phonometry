@@ -88,6 +88,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -228,6 +229,7 @@ def absorption_per_table(
     """
     r = _require_distance(distance, "distance")
     q = require_positive(directivity, "directivity")
+    require_scalar(speech_to_noise, "speech_to_noise")
     snr = float(speech_to_noise)
     if not np.isfinite(snr):
         msg = "'speech_to_noise' must be finite."

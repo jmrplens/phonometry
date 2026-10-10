@@ -105,7 +105,9 @@ from ..._internal.validation import (
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
+    require_real,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -140,6 +142,7 @@ NO_TONE_AUDIBILITY = -10.0
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -148,6 +151,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _finite(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar):
         msg = f"'{name}' must be finite."
@@ -1178,11 +1182,9 @@ def _require_line_spacing(spacing: float) -> None:
     :raises ValueError: if the field is not numeric, or is not a positive,
         finite resolution.
     """
-    try:
-        value = float(spacing)
-    except (TypeError, ValueError, OverflowError) as exc:
-        msg = "ToneAudibilityResult: 'line_spacing' must be numeric."
-        raise ValueError(msg) from exc
+    value = require_real(
+        spacing, "ToneAudibilityResult: 'line_spacing' must be numeric."
+    )
     if math.isfinite(value) and value > 0.0:
         return
     msg = (

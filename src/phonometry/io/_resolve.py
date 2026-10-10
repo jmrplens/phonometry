@@ -63,6 +63,7 @@ from typing import overload
 import numpy as np
 
 from .._internal.utils import _typesignal
+from .._internal.validation import require_scalar
 from ._signal import Signal
 
 #: What a function that consumes a recording accepts for its signal
@@ -342,6 +343,7 @@ def require_signal_rate(
     :raises ValueError: If the field is a Signal at another rate.
     """
     value = getattr(owner, field)
+    require_scalar(rate, "rate")
     if isinstance(value, Signal) and not math.isclose(
         float(value.fs), float(rate), rel_tol=1e-12, abs_tol=0.0
     ):

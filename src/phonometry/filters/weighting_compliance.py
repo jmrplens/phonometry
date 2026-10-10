@@ -49,7 +49,7 @@ from .._internal.frozen import (
     frozen_rows,
     reduce_with_plain_rows,
 )
-from .._internal.validation import require_choice
+from .._internal.validation import require_choice, require_scalar
 from .weighting import WeightingFilter, _runtime_frequency_response
 
 if TYPE_CHECKING:
@@ -956,6 +956,7 @@ def verify_weighting_class(
             f"for edition '{edition}'."
         )
         raise ValueError(msg)
+    require_scalar(sweep_points, "sweep_points")
     if sweep_points < _MIN_SWEEP_POINTS:
         msg = "'sweep_points' must be at least 64."
         raise ValueError(msg)

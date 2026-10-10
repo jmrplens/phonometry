@@ -61,6 +61,7 @@ from .._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..io._resolve import (
     like_input,
@@ -376,6 +377,7 @@ def correlation_random_error(
     """
     b = _positive(signal_bandwidth, "signal_bandwidth")
     t = _positive(duration, "duration")
+    require_scalar(coefficient, "coefficient")
     rho = float(coefficient)
     if not np.isfinite(rho) or abs(rho) > 1.0:
         msg = "'coefficient' must be in [-1, 1]."
@@ -477,6 +479,7 @@ def _validate_refinement(interpolation: str, upsample: int) -> int:
     if interpolation not in ("parabolic", "none"):
         msg = "'interpolation' must be 'parabolic' or 'none'."
         raise ValueError(msg)
+    require_scalar(upsample, "upsample")
     factor = int(upsample)
     if factor < 1:
         msg = "'upsample' must be a positive integer."

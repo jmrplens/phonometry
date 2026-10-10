@@ -51,6 +51,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_non_negative,
     require_positive_array,
+    require_scalar,
 )
 from .porous import (
     PUBLISHED_AIR,
@@ -730,6 +731,7 @@ def layered_absorber(
     if not layers:
         msg = "'layers' must contain at least one layer."
         raise ValueError(msg)
+    require_scalar(angle_rad, "angle_rad")
     theta = float(angle_rad)
     # The last ~3e-8 rad below pi/2 round sin(theta)**2 to 1.0, driving the
     # in-depth wavenumber of an air layer to exactly zero (inf * 0 = nan in
@@ -838,10 +840,12 @@ def diffuse_field_absorption(
     :return: A :class:`DiffuseFieldAbsorptionResult`.
     """
     f = require_positive_array(frequency, "frequency")
+    require_scalar(angle_limit_rad, "angle_limit_rad")
     lim = float(angle_limit_rad)
     if not 0.0 < lim <= np.pi / 2.0:
         msg = "'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2."
         raise ValueError(msg)
+    require_scalar(quadrature_points, "quadrature_points")
     n = int(quadrature_points)
     if n < _MIN_QUADRATURE_POINTS:
         msg = "'quadrature_points' must be at least 2."
@@ -902,6 +906,7 @@ def statistical_absorption(
     if np.any(z.real <= 0.0):
         msg = "'normalized_impedance' must have a positive real part."
         raise ValueError(msg)
+    require_scalar(angle_limit_rad, "angle_limit_rad")
     lim = float(angle_limit_rad)
     if not 0.0 < lim <= np.pi / 2.0:
         msg = "'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2."

@@ -73,6 +73,7 @@ from ..._internal.validation import (
     require_finite_fields,
     require_non_negative,
     require_positive,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -157,7 +158,7 @@ class ZoneBoundaries:
         """
         require_finite_fields(self, "a_b", "b_c", "c_d")
         for name in ("a_b", "b_c", "c_d"):
-            require_positive(float(getattr(self, name)), name)
+            require_positive(getattr(self, name), name)
         if not self.a_b < self.b_c < self.c_d:
             msg = (
                 "ZoneBoundaries: the three boundaries must increase through "
@@ -518,6 +519,7 @@ def is_significant_change(change: float, zone_b_upper: float) -> bool:
     :raises ValueError: If the change is not finite or the limit is not
         positive.
     """
+    require_scalar(change, "change")
     if not math.isfinite(change):
         msg = "'change' must be finite."
         raise ValueError(msg)

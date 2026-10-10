@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Literal, overload
 import numpy as np
 from scipy.io import wavfile
 
+from .._internal.validation import require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._bext import (
     coding_history_line,
@@ -146,6 +147,7 @@ def _resolve_input(
     everything else becomes float64.
     """
     if isinstance(x, Signal):
+        require_scalar(fs, "fs")
         if fs is not None and int(fs) != x.fs:
             msg = (
                 f"fs={fs} conflicts with the Signal's own fs={x.fs}; "

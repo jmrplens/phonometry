@@ -15,16 +15,17 @@ from __future__ import annotations
 
 import pathlib
 import sys
-from typing import TYPE_CHECKING
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_subscript_slope as css
+import pytest
 
-if TYPE_CHECKING:
-    import pytest
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
 
 
 def _write(tmp_path: pathlib.Path, name: str, text: str) -> pathlib.Path:

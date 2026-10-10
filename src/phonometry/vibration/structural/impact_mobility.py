@@ -101,7 +101,9 @@ from ..._internal.validation import (
     require_non_negative,
     require_positive,
     require_ranks,
+    require_real,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_samples
@@ -783,6 +785,7 @@ class ImpactMobilityResult(OwnsArrays):
         if np.any(~(coherence >= 0.0)) or np.any(coherence > 1.0):
             msg = f"{owner}: 'coherence' must lie in [0, 1]."
             raise ValueError(msg)
+        require_scalar(self.impacts, "impacts")
         if isinstance(self.impacts, bool) or int(self.impacts) < 1:
             msg = f"{owner}: 'impacts' must be at least 1."
             raise ValueError(msg)
@@ -1558,7 +1561,7 @@ def _pair(value: object, name: str) -> tuple[float, float]:
     if isinstance(value, (str, bytes)) or not isinstance(value, Iterable):
         raise ValueError(msg)
     try:
-        low, high = (float(edge) for edge in value)
+        low, high = (require_real(edge, msg) for edge in value)
     except (TypeError, ValueError):
         raise ValueError(msg) from None
     return low, high

@@ -31,6 +31,7 @@ from ._i18n import format_number, t
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from contextlib import AbstractContextManager
 
     from numpy.typing import ArrayLike
     from reportlab.graphics.shapes import Drawing
@@ -189,6 +190,26 @@ def display_round(value: float, decimals: int = 1) -> float:
     return -magnitude if value < 0.0 else magnitude
 
 
+def fiche_savefig_context() -> AbstractContextManager[object]:
+    """The settings an embedded fiche figure is saved under.
+
+    Whatever the caller's matplotlib configuration says: text goes out as
+    vector paths, and the page geometry is held too. ``savefig()`` reads its
+    bounding box and padding from ``rcParams`` when the call does not name
+    them, so a matplotlibrc (or a script run earlier in the same process) that
+    set ``savefig.bbox`` to ``"tight"`` re-cropped the figure to its ink, the
+    legend above the axes included, and on matplotlib 3.10 the taller drawing
+    pushed the ISO 15186 and ISO 16251 fiches onto a second page.
+
+    Called only after the renderer has imported matplotlib.
+    """
+    import matplotlib as mpl
+
+    return mpl.rc_context(
+        {"svg.fonttype": "path", "savefig.bbox": "standard", "savefig.pad_inches": 0.1}
+    )
+
+
 def render_figure_drawing(
     plot_fn: Callable[..., Any],
     target_width: float,
@@ -229,7 +250,6 @@ def render_figure_drawing(
         decimal separator.
     """
     try:
-        import matplotlib as mpl
         from matplotlib.backends.backend_agg import FigureCanvasAgg
         from matplotlib.figure import Figure
     except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
@@ -302,7 +322,7 @@ def render_figure_drawing(
 
         localize_axes(ax, language)
         fig.tight_layout()
-        with mpl.rc_context({"svg.fonttype": "path"}):
+        with fiche_savefig_context():
             fig.savefig(svg_path, format="svg")
         drawing = svg2rlg(svg_path)
     finally:

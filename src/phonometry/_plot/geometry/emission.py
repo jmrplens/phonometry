@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.validation import require_scalar
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -183,6 +184,7 @@ def plot_microphone_positions(
     if pts.ndim != 2 or pts.shape[1] != 3 or pts.shape[0] == 0:  # noqa: PLR2004
         msg = "'positions' must have shape (N, 3) with N >= 1."
         raise ValueError(msg)
+    require_scalar(radius, "radius")
     if radius is not None and radius <= 0.0:
         msg = "'radius' must be positive when given."
         raise ValueError(msg)
@@ -294,6 +296,7 @@ def plot_pp_probe_geometry(
     from matplotlib.patches import Circle, Rectangle
 
     _check_language(language)
+    require_scalar(spacing, "spacing")
     if spacing <= 0.0:
         msg = "'spacing' must be positive."
         raise ValueError(msg)

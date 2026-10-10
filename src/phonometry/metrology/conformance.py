@@ -70,7 +70,7 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from .._internal.validation import require_finite
+from .._internal.validation import require_finite, require_scalar
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -186,6 +186,8 @@ class ConformanceVerification:
             "upper_limit",
             _open_limit(self.upper_limit, "upper_limit", upper=True),
         )
+        require_scalar(self.lower_limit, "lower_limit")
+        require_scalar(self.upper_limit, "upper_limit")
         if math.isinf(self.lower_limit) and math.isinf(self.upper_limit):
             msg = (
                 "'lower_limit' and 'upper_limit' are both open: an acceptance "
@@ -342,7 +344,7 @@ def _limits(acceptance_limits: float | tuple[float, float]) -> tuple[float, floa
             _open_limit(lower, "acceptance_limits", upper=False),
             _open_limit(upper, "acceptance_limits", upper=True),
         )
-    limit = require_finite(float(acceptance_limits), "acceptance_limits")
+    limit = require_finite(acceptance_limits, "acceptance_limits")
     if limit < 0.0:
         msg = (
             "'acceptance_limits' must be non-negative when it is one number: it "

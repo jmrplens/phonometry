@@ -100,6 +100,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean
+from ..._internal.validation import require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -199,6 +200,7 @@ def low_frequency_procedure_applies(volume: float) -> bool:
     :return: ``True`` when the low-frequency procedure is required.
     :raises ValueError: If ``volume`` is not a positive, finite number.
     """
+    require_scalar(volume, "volume")
     value = float(volume)
     # Ordered, not merged: `math.isfinite` is what catches NaN and both
     # infinities, and it has to run first because `value <= 0.0` is False for
@@ -226,6 +228,7 @@ def _require_volume_triggers(volume: float, name: str) -> None:
     :raises ValueError: If the volume is not positive and finite, or if it does
         not trigger the procedure.
     """
+    require_scalar(volume, name)
     if not low_frequency_procedure_applies(volume):
         rounded = math.floor(float(volume) + 0.5)
         msg = (

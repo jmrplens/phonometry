@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import require_scalar
 from ._i18n import format_number, t
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 from ._layout import (
@@ -104,6 +105,7 @@ _OCTAVE_STEP_THRESHOLD = 1.6
 
 def _part_designation(part: int) -> str:
     """The designation of ISO 10848 part ``part``, or raise."""
+    require_scalar(part, "part")
     try:
         return _PART_DESIGNATIONS[int(part)]
     except (KeyError, ValueError) as exc:

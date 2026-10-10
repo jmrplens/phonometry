@@ -54,7 +54,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import (
+    require_ranks,
+    require_real,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive, _validate_signal
 
@@ -222,6 +227,7 @@ def envelope(
 
     xa = _validate_signal(x, "x", context="envelope analysis")
     fs_v = _positive(resolve_fs(x, fs), "fs")
+    require_scalar(decimation_factor, "decimation_factor")
     factor = int(decimation_factor)
     if factor < 1:
         msg = "'decimation_factor' must be a positive integer."
@@ -395,10 +401,10 @@ def _bandpass_pre_filter(
     """
     from scipy import signal as sp_signal
 
+    msg = f"'band' must be a pair of numeric (low, high) edges in Hz, got {band!r}."
     try:
-        low, high = (float(edge) for edge in band)
+        low, high = (require_real(edge, msg) for edge in band)
     except (TypeError, ValueError) as exc:
-        msg = f"'band' must be a pair of numeric (low, high) edges in Hz, got {band!r}."
         raise ValueError(msg) from exc
     if not 0.0 < low < high < fs / 2.0:
         msg = (

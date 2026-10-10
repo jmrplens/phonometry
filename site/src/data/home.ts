@@ -130,7 +130,7 @@ export const en: HomeContent = {
 		body: [
 			'phonometry is a Python library for acoustic measurement, analysis and prediction. You give it a signal, a measured spectrum or a set of geometrical and material inputs; it gives you the quantity the standard defines, with the intermediate terms still visible.',
 			'Every result is a typed, frozen dataclass. It carries the inputs it was computed from, it draws its own figure with a one-line <code>.plot()</code> in English or Spanish, and where a standard defines a reporting format it renders a one-page PDF fiche with <code>.report()</code>.',
-			`It is written and maintained by one person, published under the MIT licence on <a href="https://pypi.org/project/phonometry/">PyPI</a>, archived with a <a href="https://doi.org/${DOI}">DOI on Zenodo</a>, and currently at version ${version}. It needs Python 3.13 or newer with NumPy and SciPy. Optional extras add the rest: <code>[plot]</code> for the figures, <code>[perf]</code> for the faster impulse ballistics, <code>[report]</code> for the PDF fiches, and <code>[full]</code> for all three.`,
+			`It is written and maintained by one person, published under the MIT licence on <a href="https://pypi.org/project/phonometry/">PyPI</a>, archived with a <a href="https://doi.org/${DOI}">DOI on Zenodo</a>, and currently at version ${version}. It needs Python 3.12 or newer with NumPy and SciPy. Optional extras add the rest: <code>[plot]</code> for the figures, <code>[perf]</code> for the faster impulse ballistics, <code>[report]</code> for the PDF fiches, and <code>[full]</code> for all three.`,
 		],
 	},
 	who: {
@@ -256,7 +256,7 @@ export const en: HomeContent = {
 		steps: [
 			{
 				title: 'Install it',
-				body: 'Python 3.13 or newer. The base install pulls in NumPy and SciPy; the [full] extra adds the other three, [plot] for the figures, [perf] for the faster impulse ballistics and [report] for the PDF fiches.',
+				body: 'Python 3.12 or newer. The base install pulls in NumPy and SciPy; the [full] extra adds the other three, [plot] for the figures, [perf] for the faster impulse ballistics and [report] for the PDF fiches.',
 				code: 'pip install phonometry[full]',
 				href: '/phonometry/start/getting-started/',
 				linkText: 'Installation options',
@@ -292,7 +292,7 @@ export const es: HomeContent = {
 		body: [
 			'phonometry es una biblioteca de Python para medición, análisis y predicción acústica. Le das una señal, un espectro medido o un conjunto de datos geométricos y de materiales, y te devuelve la magnitud que define la norma, con los términos intermedios a la vista.',
 			'Cada resultado es un dataclass tipado y congelado (<code>frozen</code>). Conserva los datos de entrada con los que se calculó, dibuja su propia figura con un <code>.plot()</code> de una línea en inglés o en español y, cuando una norma define un formato de informe, genera una ficha PDF de una página con <code>.report()</code>.',
-			`La escribe y la mantiene una sola persona, se publica con licencia MIT en <a href="https://pypi.org/project/phonometry/">PyPI</a>, se archiva con <a href="https://doi.org/${DOI}">DOI en Zenodo</a> y va por la versión ${version}. Necesita Python 3.13 o posterior con NumPy y SciPy; matplotlib, numba y reportlab son extras opcionales.`,
+			`La escribe y la mantiene una sola persona, se publica con licencia MIT en <a href="https://pypi.org/project/phonometry/">PyPI</a>, se archiva con <a href="https://doi.org/${DOI}">DOI en Zenodo</a> y va por la versión ${version}. Necesita Python 3.12 o posterior con NumPy y SciPy; matplotlib, numba y reportlab son extras opcionales.`,
 		],
 	},
 	who: {
@@ -411,7 +411,7 @@ export const es: HomeContent = {
 		steps: [
 			{
 				title: 'Instálala',
-				body: 'Python 3.13 o posterior. La instalación básica trae NumPy y SciPy; el extra completo añade las figuras, la ponderación temporal de impulso acelerada y la generación de fichas PDF.',
+				body: 'Python 3.12 o posterior. La instalación básica trae NumPy y SciPy; el extra completo añade las figuras, la ponderación temporal de impulso acelerada y la generación de fichas PDF.',
 				code: 'pip install phonometry[full]',
 				href: '/phonometry/es/start/getting-started/',
 				linkText: 'Opciones de instalación',

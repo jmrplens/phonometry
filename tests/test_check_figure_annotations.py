@@ -55,6 +55,10 @@ if _SCRIPTS not in sys.path:
 import check_figure_annotations as check
 import figure_annotation_audit as audit
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 

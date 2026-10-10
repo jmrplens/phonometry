@@ -95,7 +95,7 @@ part written most bluntly.
 - Evidence that a number is defensible: the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/), which prints each standard's own expected value beside the computed one.
 - A printed expected value that disagrees with the library: the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/), which says which of the two is wrong and why.
 
-The assumed starting point is Python 3.13 or newer with working NumPy and
+The assumed starting point is Python 3.12 or newer with working NumPy and
 SciPy, and enough acoustics to know what a one-third-octave band and a sound
 pressure level are.
 
@@ -124,6 +124,13 @@ Source: https://jmrplens.github.io/phonometry/start/getting-started/
 ```bash
 pip install phonometry
 ```
+
+phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
+or later. Each of those floors, and each floor of the extras, is the oldest
+release the library's tests pass with, and a CI job installs exactly those
+releases on Python 3.12 to keep it so: matplotlib 3.10.7 for `[plot]`,
+reportlab 4.0.4 and svglib 0.9.0 for `[report]`, numba 0.60.0 for `[perf]` and
+python-soundfile 0.12.0 for `[audio]`.
 
 Optional extras:
 

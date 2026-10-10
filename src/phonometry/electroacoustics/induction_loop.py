@@ -585,8 +585,8 @@ def loop_test_noise(
     :return: The signal.
     """
     rate = require_count(fs, "fs")
-    duration = require_positive(float(seconds), "seconds")
-    level = require_positive(float(rms), "rms")
+    duration = require_positive(seconds, "seconds")
+    level = require_positive(rms, "rms")
     if rate <= 2 * _BAND_LIMIT_HZ[1]:
         msg = f"'fs' must exceed {2 * _BAND_LIMIT_HZ[1]:g} Hz for the 6.5 kHz low-pass."
         raise ValueError(msg)
@@ -644,8 +644,8 @@ def combi_signal(
     if rate <= 2 * _BAND_LIMIT_HZ[1]:
         msg = f"'fs' must exceed {2 * _BAND_LIMIT_HZ[1]:g} Hz for the 6.5 kHz low-pass."
         raise ValueError(msg)
-    sine_s = require_finite(float(sine_seconds), "sine_seconds")
-    noise_s = require_finite(float(noise_seconds), "noise_seconds")
+    sine_s = require_finite(sine_seconds, "sine_seconds")
+    noise_s = require_finite(noise_seconds, "noise_seconds")
     n_cycles = require_count(cycles, "cycles")
     if sine_s < _COMBI_MIN_SINE_S or noise_s < _COMBI_MIN_NOISE_S:
         msg = (
@@ -1122,7 +1122,7 @@ def verify_induction_loop_system(
     :return: An :class:`InductionLoopVerification`.
     """
     levels = _levels(field_strength_levels_db, "field_strength_levels_db")
-    specified = require_finite(float(specified_level_db), "specified_level_db")
+    specified = require_finite(specified_level_db, "specified_level_db")
     requirements = [
         _band_requirement(
             "field_strength",
@@ -1526,8 +1526,8 @@ def verify_amplifier_overload(
         delivers (E.3).
     :return: An :class:`AmplifierOverloadVerification`.
     """
-    required = require_positive(float(required_current_a), "required_current_a")
-    compliance = require_positive(float(compliance_voltage_v), "compliance_voltage_v")
+    required = require_positive(required_current_a, "required_current_a")
+    compliance = require_positive(compliance_voltage_v, "compliance_voltage_v")
     row = OVERLOAD_TEST_FREQUENCIES[
         require_choice(programme, "programme", tuple(OVERLOAD_TEST_FREQUENCIES))
     ]

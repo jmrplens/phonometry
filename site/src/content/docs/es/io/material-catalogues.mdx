@@ -1100,8 +1100,9 @@ print(row.surface_density_kg_m2, row.converted)
 # 8.6 {'surface_density_kg_m2': ('8600', 'g/m2')}
 ```
 
-No pongas `slots=True` en una clase así: en Python 3.13 falla un método suyo
-que llame a `super()` sin argumentos, que es como un `__post_init__` tuyo
+No pongas `slots=True` en una clase así: en Python 3.12, y en las versiones de
+3.13 anteriores a la corrección, falla un método suyo que llame a `super()` sin
+argumentos, que es como un `__post_init__` tuyo
 llega al contrato de fila. Una anotación `float` o `int` a secas se rechaza
 con `TypeError` la primera vez que se construye la clase, porque cualquier
 celda de una fila puede faltar. Una clase construida sobre `BandedRow` no está

@@ -87,7 +87,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_choice, require_positive
+from ..._internal.validation import require_choice, require_positive, require_scalar
 from .exposure import (
     _params,
     frequency_weighting,
@@ -447,6 +447,7 @@ def _require_sampling_rate(test: SawtoothBurstTest, fs: float | None) -> float:
     """
     if fs is None:
         return test.recommended_sampling_rate_hz
+    require_scalar(fs, "fs")
     rate = float(fs)
     if not math.isfinite(rate) or rate <= 0.0:
         msg = "'fs' must be a positive, finite sampling frequency."
@@ -510,6 +511,7 @@ def sawtooth_burst(
     test = _require_application(application)
     burst_cycles = _require_cycles(test, cycles)
     rate = _require_sampling_rate(test, fs)
+    require_scalar(amplitude_m_s2, "amplitude_m_s2")
     amplitude = float(amplitude_m_s2)
     if not math.isfinite(amplitude) or amplitude <= 0.0:
         msg = "'amplitude_m_s2' must be positive and finite."
@@ -839,6 +841,7 @@ def verify_signal_burst_response(
     """
     test = _require_application(application)
     row = _require_row(test, name)
+    require_scalar(amplitude_m_s2, "amplitude_m_s2")
     amplitude = float(amplitude_m_s2)
     if not math.isfinite(amplitude) or amplitude <= 0.0:
         msg = "'amplitude_m_s2' must be positive and finite."

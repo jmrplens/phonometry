@@ -40,6 +40,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 
@@ -155,6 +156,7 @@ class ScatteringDiffusionWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 def _positive_scalar(value: float, name: str) -> float:
     """Return ``value`` as a positive float or raise ``ValueError``."""
+    require_scalar(value, name)
     v = float(value)
     if not math.isfinite(v) or v <= 0.0:
         msg = f"'{name}' must be a positive, finite number."

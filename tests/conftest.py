@@ -2,7 +2,9 @@
 import os
 import sys
 from collections.abc import Iterator
+from pathlib import Path
 
+import pinned_stack
 import pytest
 
 # Select a non-interactive matplotlib backend for the headless test suite.
@@ -21,6 +23,35 @@ def pytest_configure(config: pytest.Config) -> None:
     # setdefault: the CI tests-perf job sets NUMBA_DISABLE_JIT=0 explicitly
     # to exercise the jitted kernel; an externally-set value must win.
     os.environ.setdefault("NUMBA_DISABLE_JIT", "1")
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        pinned_stack.OPTION,
+        action="store_true",
+        default=False,
+        dest="without_pinned_stack",
+        help=(
+            "leave out the tests of the figure, diagram and badge tooling, "
+            "which runs on the pinned figure stack only"
+        ),
+    )
+
+
+def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool | None:
+    """Leave a pinned-stack test module out before it is imported, when asked.
+
+    At the dependency floors such a module can fail on import, and a module
+    that fails on import is an error whatever mark it carries; see
+    ``tests/pinned_stack.py``.
+    """
+    if not config.getoption("without_pinned_stack"):
+        return None
+    if collection_path.suffix != ".py" or not collection_path.name.startswith("test_"):
+        return None
+    if pinned_stack.declares(collection_path.read_text(encoding="utf-8")):
+        return True
+    return None
 
 
 @pytest.fixture(autouse=True)
@@ -86,6 +117,13 @@ def pytest_collection_modifyitems(
                     rank[path] = i
                     break
     items.sort(key=lambda item: rank[item.nodeid.split("::", 1)[0]])
+    if config.getoption("without_pinned_stack"):
+        # A test marked one by one, rather than through its module's
+        # pytestmark, is collected and left out here.
+        dropped = [i for i in items if i.get_closest_marker(pinned_stack.MARK)]
+        if dropped:
+            config.hook.pytest_deselected(items=dropped)
+            items[:] = [i for i in items if not i.get_closest_marker(pinned_stack.MARK)]
 
 
 def pytest_report_header(config: pytest.Config) -> list[str]:

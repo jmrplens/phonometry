@@ -74,6 +74,7 @@ from .._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -179,6 +180,7 @@ def _spacing_offset(spacing: float) -> float:
     r"""Table 2 Note 1 separation term :math:`10 \log_{10}(x/25)` in dB, ``x`` in
     mm.
     """
+    require_scalar(spacing, "spacing")
     if not np.isfinite(spacing) or spacing <= 0.0:
         msg = "'spacing' must be a positive, finite distance in metres."
         raise ValueError(msg)
@@ -420,6 +422,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"'{name}' must be finite."
                 raise ValueError(msg)
+        require_scalar(self.spacing, "spacing")
         if not math.isfinite(self.spacing):
             msg = "'spacing' must be finite."
             raise ValueError(msg)
@@ -630,6 +633,7 @@ def _plane_wave_phase_deg(
     r"""Plane-wave phase difference :math:`k d` across the spacer, in
     degrees.
     """
+    require_scalar(spacing, "spacing")
     if not np.isfinite(spacing) or spacing <= 0.0:
         msg = "'spacing' must be a positive, finite distance in metres."
         raise ValueError(msg)

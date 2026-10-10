@@ -60,6 +60,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_positive,
     require_ranks,
+    require_real,
     require_same_length,
 )
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
@@ -340,17 +341,17 @@ def _require_frequency_pair(owner: object, name: str) -> None:
     if value is None:
         return
     owner_name = type(owner).__name__
-    if np.shape(value) != (2,):
-        msg = (
-            f"{owner_name}: '{name}' must be a (lo, hi) pair; "
-            f"got shape {np.shape(value)}."
-        )
-        raise ValueError(msg)
     try:
-        lo, hi = float(value[0]), float(value[1])
-    except (TypeError, ValueError) as exc:
-        msg = f"{owner_name}: '{name}' must be numeric."
-        raise ValueError(msg) from exc
+        shape: tuple[int, ...] | None = np.shape(value)
+    except ValueError:
+        # A ragged pair, one member an array: numpy has no shape to give.
+        shape = None
+    if shape != (2,):
+        described = "a ragged sequence" if shape is None else f"shape {shape}"
+        msg = f"{owner_name}: '{name}' must be a (lo, hi) pair; got {described}."
+        raise ValueError(msg)
+    numeric = f"{owner_name}: '{name}' must be numeric."
+    lo, hi = require_real(value[0], numeric), require_real(value[1], numeric)
     if not (math.isfinite(lo) and math.isfinite(hi) and 0.0 < lo <= hi):
         msg = (
             f"{owner_name}: '{name}' must be a finite (lo, hi) frequency pair "

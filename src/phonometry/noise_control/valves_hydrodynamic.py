@@ -77,6 +77,7 @@ from .._internal.validation import (
     require_non_negative,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from .valves import (
     AIR_SOUND_SPEED_M_S,
@@ -978,6 +979,7 @@ def cavitation_transmission_loss(
     :raises ValueError: If a value is not positive and finite, or only one of
         the two ratios the floor needs was given.
     """
+    require_scalar(turbulent_loss, "turbulent_loss")
     if not math.isfinite(turbulent_loss):
         msg = "'turbulent_loss' must be a finite level in dB."
         raise ValueError(msg)
@@ -1111,12 +1113,14 @@ def band_internal_levels(
     :raises ValueError: If a value is out of range, or the cavitating branch
         was asked for without its peak frequency.
     """
+    require_scalar(cavitation_fraction, "cavitation_fraction")
     if not 0.0 <= cavitation_fraction <= 1.0 or not math.isfinite(cavitation_fraction):
         msg = (
             "'cavitation_fraction' is a share of the sound power, so it must "
             f"be between 0 and 1; got {cavitation_fraction!r}."
         )
         raise ValueError(msg)
+    require_scalar(internal_level, "internal_level")
     if not math.isfinite(internal_level):
         msg = "'internal_level' must be a finite level in dB."
         raise ValueError(msg)
@@ -1944,6 +1948,7 @@ def _require_share(value: float, name: str) -> float:
 
 def _require_count(value: int, name: str) -> int:
     """A count of passages or openings: a whole number of one or more."""
+    require_scalar(value, name)
     count = int(value)
     if count != value or count < 1:
         msg = (

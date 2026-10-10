@@ -961,7 +961,7 @@ def fluctuation_strength_ecma(
     if x.size == 0:
         msg = "signal must not be empty"
         raise ValueError(msg)
-    fs = require_positive(float(fs), "fs")
+    fs = require_positive(fs, "fs")
     if fs != _FS:
         x = signal.resample(x, max(1, round(x.size * _FS / fs)))
 

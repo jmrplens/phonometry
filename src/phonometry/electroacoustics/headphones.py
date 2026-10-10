@@ -175,7 +175,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_count, require_positive
+from .._internal.validation import require_count, require_positive, require_scalar
 from .programme_signal import ProgrammeSignalCheck, check_programme_signal
 
 if TYPE_CHECKING:
@@ -300,7 +300,7 @@ def impedance_code(impedance_ohm: float) -> str:
         ohms or does not fit the form: ``4.7`` ohm is not whole, and ``123``
         ohm needs a mantissa of three digits.
     """
-    value = require_positive(float(impedance_ohm), "impedance_ohm")
+    value = require_positive(impedance_ohm, "impedance_ohm")
     whole = round(value)
     if whole < 1 or not math.isclose(value, whole, rel_tol=_WHOLE_OHM_RTOL):
         msg = f"'impedance_ohm' must be a whole number of ohms; got {value:g}."
@@ -685,7 +685,7 @@ def verify_rated_impedance(
     if not (np.all(np.isfinite(z)) and np.all(z > 0.0)):
         msg = "'impedance_ohm' must be positive and finite."
         raise ValueError(msg)
-    rated = require_positive(float(rated_impedance_ohm), "rated_impedance_ohm")
+    rated = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
     lower, upper = (float(value) for value in rated_frequency_range_hz)
     if not (0.0 < lower < upper and math.isfinite(upper)):
         msg = (
@@ -728,7 +728,8 @@ def characteristic_voltage(
     :return: The characteristic voltage, in volts (RMS).
     :raises ValueError: If the e.m.f. is not positive or the level not finite.
     """
-    emf = require_positive(float(source_emf_v), "source_emf_v")
+    emf = require_positive(source_emf_v, "source_emf_v")
+    require_scalar(sound_pressure_level_db, "sound_pressure_level_db")
     level = float(sound_pressure_level_db)
     if not math.isfinite(level):
         msg = "'sound_pressure_level_db' must be finite."
@@ -740,7 +741,8 @@ def _impedances(
     rated_impedance_ohm: float, rated_source_impedance_ohm: float
 ) -> tuple[float, float]:
     """The rated impedance (positive) and the rated source impedance (not negative)."""
-    rated = require_positive(float(rated_impedance_ohm), "rated_impedance_ohm")
+    rated = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
+    require_scalar(rated_source_impedance_ohm, "rated_source_impedance_ohm")
     source = float(rated_source_impedance_ohm)
     if not (math.isfinite(source) and source >= 0.0):
         msg = "'rated_source_impedance_ohm' must be finite and not negative."
@@ -774,7 +776,7 @@ def headphone_input_power(
     :return: The input power, in watts.
     :raises ValueError: If an input is out of range.
     """
-    emf = require_positive(float(source_emf_v), "source_emf_v")
+    emf = require_positive(source_emf_v, "source_emf_v")
     rated, source = _impedances(rated_impedance_ohm, rated_source_impedance_ohm)
     return emf * emf * rated / (rated + source) ** 2
 
@@ -797,7 +799,7 @@ def headphone_source_emf(
     :return: The source e.m.f., in volts (RMS).
     :raises ValueError: If an input is out of range.
     """
-    power = require_positive(float(input_power_w), "input_power_w")
+    power = require_positive(input_power_w, "input_power_w")
     rated, source = _impedances(rated_impedance_ohm, rated_source_impedance_ohm)
     return math.sqrt(power * rated) * (rated + source) / rated
 
@@ -843,7 +845,8 @@ def working_sound_pressure_level(
     :return: The working sound pressure level, in dB re 20 µPa.
     :raises ValueError: If an input is out of range.
     """
-    emf = require_positive(float(source_emf_v), "source_emf_v")
+    emf = require_positive(source_emf_v, "source_emf_v")
+    require_scalar(sound_pressure_level_db, "sound_pressure_level_db")
     level = float(sound_pressure_level_db)
     if not math.isfinite(level):
         msg = "'sound_pressure_level_db' must be finite."
@@ -1971,10 +1974,10 @@ def verify_ear_canal_microphone(
     :raises ValueError: If a value is out of range or the level arrays
         disagree in length.
     """
-    entrance = require_positive(float(entrance_area_mm2), "entrance_area_mm2")
-    section = require_positive(float(canal_section_area_mm2), "canal_section_area_mm2")
-    canal = require_positive(float(ear_canal_area_mm2), "ear_canal_area_mm2")
-    volume = require_positive(float(volume_mm3), "volume_mm3")
+    entrance = require_positive(entrance_area_mm2, "entrance_area_mm2")
+    section = require_positive(canal_section_area_mm2, "canal_section_area_mm2")
+    canal = require_positive(ear_canal_area_mm2, "ear_canal_area_mm2")
+    volume = require_positive(volume_mm3, "volume_mm3")
     bands = np.atleast_1d(
         _levels(pink_noise_band_levels_db, "pink_noise_band_levels_db")
     )
@@ -2004,7 +2007,7 @@ def verify_ear_canal_microphone(
 def _time_axis(fs: int, seconds: float) -> NDArray[np.float64]:
     """Sample instants of a record of ``seconds`` at ``fs``."""
     rate = require_count(fs, "fs")
-    duration = require_positive(float(seconds), "seconds")
+    duration = require_positive(seconds, "seconds")
     n = round(rate * duration)
     if n < 1:
         msg = f"'seconds' of {duration:g} s is shorter than one sample at {rate} Hz."
@@ -2036,9 +2039,7 @@ def headphone_modulation_signal(
     :raises ValueError: If an input is out of range.
     """
     t = _time_axis(fs, seconds)
-    peak = math.sqrt(2.0) * require_positive(
-        float(rated_source_emf_v), "rated_source_emf_v"
-    )
+    peak = math.sqrt(2.0) * require_positive(rated_source_emf_v, "rated_source_emf_v")
     low, high = _MODULATION_FREQUENCIES_HZ
     share = _MODULATION_RATIO / (_MODULATION_RATIO + 1.0)
     return np.asarray(
@@ -2068,7 +2069,8 @@ def headphone_difference_frequency_signal(
     :raises ValueError: If an input is out of range.
     """
     t = _time_axis(fs, seconds)
-    upper = require_positive(float(upper_frequency_hz), "upper_frequency_hz")
+    upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
+    require_scalar(fs, "fs")
     if not _DIFFERENCE_FREQUENCY_HZ < upper < 0.5 * float(fs):
         msg = (
             f"'upper_frequency_hz' must lie between {_DIFFERENCE_FREQUENCY_HZ:g} Hz "
@@ -2077,7 +2079,7 @@ def headphone_difference_frequency_signal(
         raise ValueError(msg)
     amplitude = (
         math.sqrt(2.0)
-        * require_positive(float(rated_source_emf_v), "rated_source_emf_v")
+        * require_positive(rated_source_emf_v, "rated_source_emf_v")
         / 2.0
     )
     lower = upper - _DIFFERENCE_FREQUENCY_HZ

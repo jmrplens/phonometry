@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
 
-from .._internal.validation import require_choice
+from .._internal.validation import require_choice, require_scalar
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
@@ -43,6 +43,7 @@ def validate_target(criterion: str, target: float | None) -> tuple[str, float | 
     family = require_choice(criterion, "criterion", CRITERION_FAMILIES)
     if target is None:
         return family, None
+    require_scalar(target, "target")
     value = float(target)
     if not np.isfinite(value):
         msg = "'target' must be a finite criterion value."

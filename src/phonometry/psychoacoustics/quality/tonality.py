@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.utils import _typesignal
+from ..._internal.validation import require_scalar
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import apply_calibration, resolve_fs
 from ...signals.spectra import _welch_autospectrum
@@ -169,6 +170,7 @@ class ToneAssessment:
         if self.method not in _TONE_METHODS:
             msg = f"'method' must be one of {_TONE_METHODS}; got {self.method!r}."
             raise ValueError(msg)
+        require_scalar(self.frequency, "frequency")
         if math.isnan(self.frequency) or self.frequency <= 0.0:
             msg = "'frequency' must be positive."
             raise ValueError(msg)

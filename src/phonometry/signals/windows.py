@@ -30,6 +30,7 @@ from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
     require_ranks,
+    require_scalar,
 )
 from .spectra import _positive
 
@@ -222,6 +223,7 @@ def window_metrics(
     """
     from scipy import signal as sp_signal
 
+    require_scalar(n, "n")
     n_v = int(n)
     if n_v < _MIN_WINDOW_LENGTH:
         msg = f"'n' must be at least {_MIN_WINDOW_LENGTH} samples."

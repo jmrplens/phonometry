@@ -496,9 +496,9 @@ def rectangular_loop_field(
     :raises ValueError: for a non-positive dimension, a non-finite coordinate
         or a point on the conductor, where a filament's field is infinite.
     """
-    current = require_finite(float(current_a), "current_a")
-    length = require_positive(float(length_m), "length_m")
-    width = require_positive(float(width_m), "width_m")
+    current = require_finite(current_a, "current_a")
+    length = require_positive(length_m, "length_m")
+    width = require_positive(width_m, "width_m")
     n = require_count(turns, "turns")
     coordinates = (
         _as_float64(x_m, "x_m"),
@@ -570,10 +570,10 @@ def loop_centre_field(
     :param turns: Number of turns.
     :return: The field strength at the centre, in A/m.
     """
-    current = require_finite(float(current_a), "current_a")
-    side = require_positive(float(length_m), "length_m")
+    current = require_finite(current_a, "current_a")
+    side = require_positive(length_m, "length_m")
     if width_m is not None:
-        side = math.sqrt(side * require_positive(float(width_m), "width_m"))
+        side = math.sqrt(side * require_positive(width_m, "width_m"))
     n = require_count(turns, "turns")
     return 2.0 * math.sqrt(2.0) * n * current / (math.pi * side)
 
@@ -603,10 +603,10 @@ def loop_current(
     :param turns: Number of turns.
     :return: The RMS current in each turn, in amperes.
     """
-    length = require_positive(float(length_m), "length_m")
-    width = require_positive(float(width_m), "width_m")
-    height = require_finite(float(height_m), "height_m")
-    target = require_positive(float(field_strength_a_per_m), "field_strength_a_per_m")
+    length = require_positive(length_m, "length_m")
+    width = require_positive(width_m, "width_m")
+    height = require_finite(height_m, "height_m")
+    target = require_positive(field_strength_a_per_m, "field_strength_a_per_m")
     n = require_count(turns, "turns")
     return target / (n * _axis_field_per_ampere(length, width, height))
 
@@ -642,13 +642,13 @@ def loop_dimensions(
     :raises ValueError: when the current cannot reach the field strength at
         that height with a loop of any size.
     """
-    current = require_positive(float(current_a), "current_a")
-    ratio = require_finite(float(aspect_ratio), "aspect_ratio")
+    current = require_positive(current_a, "current_a")
+    ratio = require_finite(aspect_ratio, "aspect_ratio")
     if ratio < 1.0:
         msg = f"'aspect_ratio' is long side over short side and must be at least 1; got {ratio}."
         raise ValueError(msg)
-    height = require_positive(float(height_m), "height_m")
-    target = require_positive(float(field_strength_a_per_m), "field_strength_a_per_m")
+    height = require_positive(height_m, "height_m")
+    target = require_positive(field_strength_a_per_m, "field_strength_a_per_m")
     n = require_count(turns, "turns")
 
     def field(short: float) -> float:
@@ -711,12 +711,10 @@ def loop_resistance(
         Celsius.
     :return: The DC resistance of the loop, in ohms.
     """
-    perimeter = require_positive(float(perimeter_m), "perimeter_m")
-    area = require_positive(float(conductor_area_mm2), "conductor_area_mm2")
+    perimeter = require_positive(perimeter_m, "perimeter_m")
+    area = require_positive(conductor_area_mm2, "conductor_area_mm2")
     n = require_count(turns, "turns")
-    temperature = require_finite(
-        float(conductor_temperature_c), "conductor_temperature_c"
-    )
+    temperature = require_finite(conductor_temperature_c, "conductor_temperature_c")
     resistivity = _COPPER_RESISTIVITY_OHM_M * (
         1.0
         + _COPPER_TEMPERATURE_COEFFICIENT
@@ -770,9 +768,9 @@ def rectangular_loop_inductance(
     :raises ValueError: when the wire is not thin against the sides, where the
         formula does not hold.
     """
-    a = require_positive(float(length_m), "length_m")
-    b = require_positive(float(width_m), "width_m")
-    area = require_positive(float(conductor_area_mm2), "conductor_area_mm2")
+    a = require_positive(length_m, "length_m")
+    b = require_positive(width_m, "width_m")
+    area = require_positive(conductor_area_mm2, "conductor_area_mm2")
     n = require_count(turns, "turns")
     radius = math.sqrt(area * 1.0e-6 / math.pi)
     if radius * 10.0 > min(a, b):
@@ -849,7 +847,7 @@ class LoopImpedance(OwnsArrays):
         :param frequency_hz: Frequencies, in hertz, positive and finite.
         :return: :math:`U = I|Z|`, in volts.
         """
-        current = require_finite(float(current_a), "current_a")
+        current = require_finite(current_a, "current_a")
         return current * self.at(frequency_hz)
 
     def plot(
@@ -890,8 +888,8 @@ def loop_impedance(
         by default the one-third-octave centres from 50 Hz to 10 kHz.
     :return: A :class:`LoopImpedance`.
     """
-    resistance = require_positive(float(resistance_ohm), "resistance_ohm")
-    inductance = require_positive(float(inductance_h), "inductance_h")
+    resistance = require_positive(resistance_ohm, "resistance_ohm")
+    inductance = require_positive(inductance_h, "inductance_h")
     f = (
         np.array(_THIRD_OCTAVE_CENTRES_HZ, dtype=np.float64)
         if frequencies_hz is None
@@ -1007,8 +1005,8 @@ def maximum_output_current(
         msg = "'resistor_voltage_v' and 'thd_percent' need the same length, at least 2."
         raise ValueError(msg)
     _ascending(voltage, "resistor_voltage_v")
-    resistance = require_positive(float(load_resistance_ohm), "load_resistance_ohm")
-    rated = require_positive(float(rated_thd_percent), "rated_thd_percent")
+    resistance = require_positive(load_resistance_ohm, "load_resistance_ohm")
+    rated = require_positive(rated_thd_percent, "rated_thd_percent")
     current = voltage / resistance
     if thd[0] > rated:
         msg = (
@@ -1087,9 +1085,9 @@ def equivalent_input_noise_voltage(
         amperes.
     :return: The equivalent input noise voltage, in volts.
     """
-    u = require_positive(float(source_emf_v), "source_emf_v")
-    i = require_positive(float(output_current_a), "output_current_a")
-    i_n = require_positive(float(noise_current_a), "noise_current_a")
+    u = require_positive(source_emf_v, "source_emf_v")
+    i = require_positive(output_current_a, "output_current_a")
+    i_n = require_positive(noise_current_a, "noise_current_a")
     return u * i_n / i
 
 
@@ -1111,8 +1109,8 @@ def amplifier_signal_to_noise_ratio(
         amperes.
     :return: The signal-to-noise ratio, in dB.
     """
-    i_r = require_positive(float(rated_current_a), "rated_current_a")
-    i_n = require_positive(float(noise_current_a), "noise_current_a")
+    i_r = require_positive(rated_current_a, "rated_current_a")
+    i_n = require_positive(noise_current_a, "noise_current_a")
     return 10.0 * math.log10(i_r * i_r / (i_n * i_n))
 
 
@@ -1636,7 +1634,7 @@ def neck_loop_characteristics(
         )
         raise ValueError(msg)
     _ascending(f, "frequencies_hz")
-    voltage = require_positive(float(input_voltage_v), "input_voltage_v")
+    voltage = require_positive(input_voltage_v, "input_voltage_v")
     ref = _reference_index(f, "frequencies_hz")
     inside = (f >= _SPEECH_BAND_HZ[0]) & (f <= _SPEECH_BAND_HZ[1])
     minimum = float(np.min(z[inside]))
@@ -1801,8 +1799,8 @@ def verify_neck_loop(
     :param neck_loop_type: 1 or 2.
     :return: A :class:`NeckLoopVerification`.
     """
-    resistance = require_positive(float(dc_resistance_ohm), "dc_resistance_ohm")
-    voltage = require_positive(float(input_voltage_v), "input_voltage_v")
+    resistance = require_positive(dc_resistance_ohm, "dc_resistance_ohm")
+    voltage = require_positive(input_voltage_v, "input_voltage_v")
     msg = f"'neck_loop_type' must be one of {tuple(NECK_LOOP_TYPES)}; got {neck_loop_type!r}."
     try:
         kind = require_count(neck_loop_type, "neck_loop_type")

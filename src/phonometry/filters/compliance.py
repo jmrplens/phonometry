@@ -130,6 +130,7 @@ from .._internal.validation import (
     require_count,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .core import _multirate_lowpass
 
@@ -1102,6 +1103,7 @@ def verify_filter_class(
         relative attenuation and render an accredited ``.report()`` fiche
         without keeping a reference to the (possibly stateful) bank.
     """
+    require_scalar(num_points, "num_points")
     if num_points < _MIN_GRID_POINTS:
         msg = "'num_points' must be at least 16."
         raise ValueError(msg)

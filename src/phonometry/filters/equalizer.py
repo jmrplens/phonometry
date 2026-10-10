@@ -66,7 +66,7 @@ from scipy import signal
 
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from ..io._resolve import (
     like_input,
     refuse_foreign_rate,
@@ -548,6 +548,7 @@ class ParametricEQ:
             across calls (block processing).
         :param steady_ic: If True, initialize the state at steady state.
         """
+        require_scalar(fs, "fs")
         if fs <= 0:
             msg = "Sample rate 'fs' must be positive."
             raise ValueError(msg)

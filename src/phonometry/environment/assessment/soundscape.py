@@ -111,6 +111,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from scipy import stats
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import require_choice, require_real, require_scalar
 
@@ -152,7 +153,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class QuestionnaireScale:
+class QuestionnaireScale(RichDisplay):
     """One scale of the soundscape questionnaire, as ISO/TS 12913-2 prints it.
 
     The text is transcribed from the figure, misprints included: the questions
@@ -1538,7 +1539,7 @@ def _optional_text(owner: str, item: str, value: object) -> None:
 
 
 @dataclass(frozen=True)
-class SoundscapeParticipants:
+class SoundscapeParticipants(RichDisplay):
     """The participants of a soundscape study (ISO/TS 12913-2 A.2 a) to e)).
 
     Every field is required: "the participants shall be identified and the
@@ -1575,7 +1576,7 @@ class SoundscapeParticipants:
 
 
 @dataclass(frozen=True)
-class SoundscapeAcousticEnvironment:
+class SoundscapeAcousticEnvironment(RichDisplay):
     """The studied acoustic environment (ISO/TS 12913-2 A.3 a) to h)).
 
     :ivar environment_type: A.3 a), ``"real"``, ``"recorded"`` or
@@ -1655,7 +1656,7 @@ class SoundscapeAcousticEnvironment:
 
 
 @dataclass(frozen=True)
-class SoundscapeDataCollection:
+class SoundscapeDataCollection(RichDisplay):
     """How the perception data were collected (ISO/TS 12913-2 A.4 a) to e)).
 
     :ivar methods: A.4 a), the methods used.
@@ -1695,7 +1696,7 @@ class SoundscapeDataCollection:
 
 
 @dataclass(frozen=True)
-class SoundscapeReport:
+class SoundscapeReport(RichDisplay):
     """The minimum reporting requirements of a soundscape study
     (ISO/TS 12913-2 Annex A, normative, and clause 6).
 

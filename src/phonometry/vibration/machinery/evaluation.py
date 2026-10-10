@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
@@ -125,7 +126,7 @@ ZONE_LIMIT_FACTORS: Mapping[str, float] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class ZoneBoundaries:
+class ZoneBoundaries(RichDisplay):
     """The three magnitudes that separate the four evaluation zones.
 
     The unit is whichever the machine-specific part states: micrometres of
@@ -281,7 +282,7 @@ def allowable_velocity(
 
 
 @dataclass(frozen=True)
-class VectorChangeResult:
+class VectorChangeResult(RichDisplay):
     """A change in vibration between two states, as a vector (Annex D).
 
     :ivar magnitude: The magnitude of the change, in the unit of the two
@@ -382,7 +383,7 @@ def vibration_vector_change(
 # Industrial machines: the boundaries the series prints for them
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class MachineZoneLimits:
+class MachineZoneLimits(RichDisplay):
     """The two boundary sets one machine class is judged on at once.
 
     ISO 10816-3:2009 states each class twice, once in displacement and once
@@ -626,7 +627,7 @@ GEAR_VELOCITY_SLOPE_DB_PER_DECADE = 14.0
 
 
 @dataclass(frozen=True)
-class GearUnitRatings:
+class GearUnitRatings(RichDisplay):
     """The three rating numbers Table 5 gives one class of gear unit.
 
     :ivar displacement: The displacement rating ``DR``, which indexes Table 2.

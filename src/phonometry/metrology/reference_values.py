@@ -53,6 +53,8 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+from .._internal.display import RichDisplay
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
@@ -66,7 +68,7 @@ _TABLE_3 = "Table 3"
 
 
 @dataclass(frozen=True)
-class ReferenceValue:
+class ReferenceValue(RichDisplay):
     """One reference value of ISO 1683:2015, with what it is a reference of.
 
     :ivar quantity: The quantity the value is the reference of, in English

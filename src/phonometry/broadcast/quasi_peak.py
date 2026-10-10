@@ -108,6 +108,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_1d_signal,
@@ -184,7 +185,7 @@ _WEIGHTING_TAIL_SECONDS = 0.005
 
 
 @dataclass(frozen=True)
-class QuasiPeakBallistics:
+class QuasiPeakBallistics(RichDisplay):
     """Time constants of the quasi-peak chain, in seconds.
 
     :ivar charge: Rise time constant of the peak rectifier.

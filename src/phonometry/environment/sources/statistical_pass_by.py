@@ -111,6 +111,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import round_half_up
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -653,7 +654,7 @@ def pass_by_regression(
 
 
 @dataclass(frozen=True)
-class StatisticalPassByResult:
+class StatisticalPassByResult(RichDisplay):
     r"""The vehicle sound levels and the index of one road surface (ISO 11819-1).
 
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"``.

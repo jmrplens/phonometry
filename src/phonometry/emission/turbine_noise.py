@@ -118,6 +118,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_up
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
@@ -271,7 +272,7 @@ def _within_k_limit(k: float) -> bool:
 
 
 @dataclass(frozen=True)
-class TurbineReferenceBox:
+class TurbineReferenceBox(RichDisplay):
     """One reference box of a turbine set (clause 7.1).
 
     The smallest rectangular box that just encloses one part of the set, its
@@ -1117,7 +1118,7 @@ def turbine_reference_source_correction(
 
 
 @dataclass(frozen=True)
-class TurbineTestEnvironmentCheck:
+class TurbineTestEnvironmentCheck(RichDisplay):
     r"""Whether the test environment qualifies for IEC 61063 (A.3.3, 4.3).
 
     Built by :func:`check_turbine_test_environment`. The verdicts are read

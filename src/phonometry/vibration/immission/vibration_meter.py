@@ -72,6 +72,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from scipy import signal as sig
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -1089,7 +1090,7 @@ def assess_short_term_vibration(
 
 
 @dataclass(frozen=True)
-class DominantFrequency:
+class DominantFrequency(RichDisplay):
     """The dominant frequency of one event, and how it was found (Annex D).
 
     :ivar frequency_hz: The dominant frequency, in hertz.

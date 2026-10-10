@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import require_choice, require_positive, require_scalar
 
 if TYPE_CHECKING:
@@ -318,7 +319,7 @@ def weighted_lining_improvement(
 
 
 @dataclass(frozen=True)
-class LiningImprovementResult:
+class LiningImprovementResult(RichDisplay):
     """Single-number ratings of an additional layer (ISO 12354-1 Annex D).
 
     :ivar resonance_frequency: Resonance frequency ``fo`` of the system, in Hz.

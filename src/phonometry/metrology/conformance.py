@@ -70,6 +70,7 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from .._internal.display import RichDisplay
 from .._internal.validation import require_finite, require_scalar
 
 if TYPE_CHECKING:
@@ -136,7 +137,7 @@ def _open_limit(value: float, name: str, *, upper: bool) -> float:
 
 
 @dataclass(frozen=True)
-class ConformanceVerification:
+class ConformanceVerification(RichDisplay):
     """One measured deviation judged by the conformance rule of IEC TC 29.
 
     The verdict is derived from the fields rather than stored beside them, so

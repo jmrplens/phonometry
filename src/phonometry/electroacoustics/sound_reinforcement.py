@@ -85,6 +85,7 @@ from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.validation import require_scalar
 
 if TYPE_CHECKING:
@@ -158,7 +159,7 @@ def feedback_loop_gain(
 
 
 @dataclass(frozen=True)
-class FeedbackStabilityResult:
+class FeedbackStabilityResult(RichDisplay):
     r"""Gain structure and stability verdict of a reinforcement loop.
 
     :ivar open_loop_gain: Open-loop system gain :math:`Z_\mathrm{S}`, dB

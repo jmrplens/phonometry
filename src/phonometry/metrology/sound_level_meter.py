@@ -160,6 +160,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.validation import is_class_designation, require_real
 from .conformance import ConformanceVerification, verify_conformance
 
@@ -212,7 +213,7 @@ def _limits_for(
 
 
 @dataclass(frozen=True)
-class ToneburstReference:
+class ToneburstReference(RichDisplay):
     r"""One row of IEC 61672-1:2013 Table 4, the reference 4 kHz toneburst response.
 
     :ivar duration_ms: The toneburst duration :math:`T_\mathrm{b}`, in
@@ -242,7 +243,7 @@ class ToneburstReference:
 
 
 @dataclass(frozen=True)
-class PeakReference:
+class PeakReference(RichDisplay):
     r"""One row of IEC 61672-1:2013 Table 5, the C-weighted peak reference difference.
 
     :ivar signal: The test signal: ``"one cycle"``, ``"positive half cycle"``
@@ -274,7 +275,7 @@ class PeakReference:
 
 
 @dataclass(frozen=True)
-class MaxUncertaintyRow:
+class MaxUncertaintyRow(RichDisplay):
     """One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 
     :ivar requirement: The requirement, as the "Requirement" column prints it.
@@ -998,7 +999,7 @@ def _other_ranges_held(rows: Mapping[str, Sequence[float]]) -> int:
 
 
 @dataclass(frozen=True, kw_only=True)
-class SoundLevelMeterPeriodicMeasurements:
+class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61672-3:2013.
 
     Every graded result comes with the actual expanded uncertainty the
@@ -1603,7 +1604,7 @@ _EXPOSURE_FROM_TIME_AVERAGE = (
 
 
 @dataclass(frozen=True, kw_only=True)
-class SoundLevelMeterFeatures:
+class SoundLevelMeterFeatures(RichDisplay):
     r"""Which optional design features of IEC 61672-1:2013 a sound level meter has.
 
     IEC 61672-3:2013 8.1: the periodic tests "apply only for those design
@@ -1729,7 +1730,7 @@ class SoundLevelMeterFeatures:
 
 
 @dataclass(frozen=True)
-class SoundLevelMeterPeriodicRequirement:
+class SoundLevelMeterPeriodicRequirement(RichDisplay):
     """The verdict on one requirement of IEC 61672-3:2013.
 
     :ivar name: The requirement, one of :data:`SLM_PERIODIC_REQUIREMENTS`.
@@ -1918,7 +1919,7 @@ def _clause_label(clause: str) -> str:
 
 
 @dataclass(frozen=True)
-class SoundLevelMeterPeriodicVerification:
+class SoundLevelMeterPeriodicVerification(RichDisplay):
     """The IEC 61672-3:2013 verdict on the periodic tests of a sound level meter.
 
     :ivar meter_class: The class the meter was tested as, 1 or 2.

@@ -86,6 +86,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_choice, require_positive, require_scalar
 from .exposure import (
@@ -132,7 +133,7 @@ def _max_fall_time_s(name: str) -> float:
 
 
 @dataclass(frozen=True)
-class SawtoothBurstTest:
+class SawtoothBurstTest(RichDisplay):
     """One application's row of ISO 8041-1 Table 6 (folio 17).
 
     :ivar application: The application key, as :data:`SAWTOOTH_BURST_TESTS`

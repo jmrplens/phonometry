@@ -98,6 +98,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_1d_signal,
@@ -849,7 +850,7 @@ def stationary_test(levels_db: ArrayLike, lengths_m: ArrayLike) -> StationaryTes
 
 
 @dataclass(frozen=True)
-class RollingStockTestResult:
+class RollingStockTestResult(RichDisplay):
     r"""A test decided by the highest rounded mean of three runs per position.
 
     :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
@@ -1142,7 +1143,7 @@ def background_level_increase(
 
 
 @dataclass(frozen=True)
-class AdjacentVehicleNeutrality:
+class AdjacentVehicleNeutrality(RichDisplay):
     r"""Whether a vehicle next to the unit under test is acoustically neutral, 6.3.4.
 
     :param with_adjacent_level_db: :math:`L_{p\mathrm{Aeq},T_{p1}}`, over the
@@ -1677,7 +1678,7 @@ _FILTERED_LENGTH_CLAUSE = "EN 15610 7.4.3"
 
 
 @dataclass(frozen=True)
-class TrackCondition:
+class TrackCondition(RichDisplay):
     """One requirement of the reference track and whether it holds.
 
     :attr:`ReferenceTrackCheck.conditions` builds these rows from the track
@@ -1697,7 +1698,7 @@ class TrackCondition:
 
 
 @dataclass(frozen=True)
-class ReferenceTrackCheck:
+class ReferenceTrackCheck(RichDisplay):
     """The verdict on a test track against the reference conditions of ISO 3095 6.2.
 
     :param speed_kmh: The test speed the track was judged for, in km/h.
@@ -2316,7 +2317,7 @@ def _track_conditions(check: ReferenceTrackCheck) -> tuple[TrackCondition, ...]:
 
 
 @dataclass(frozen=True)
-class PassByUncertainty:
+class PassByUncertainty(RichDisplay):
     r"""An uncertainty budget of a rolling stock noise result, Annex G.
 
     The measurand is the reading plus uncorrelated corrections,

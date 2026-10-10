@@ -215,6 +215,7 @@ import numpy as np
 from scipy import special
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_above_absolute_zero,
@@ -527,7 +528,7 @@ def _require_phase_pair(
 
 
 @dataclass(frozen=True)
-class ComparisonUncertaintyRow:
+class ComparisonUncertaintyRow(RichDisplay):
     r"""One row of the uncertainty table of IEC 61094-5 (Table D.1) or
     IEC 61094-8 (Table 2).
 
@@ -664,7 +665,7 @@ _BUDGET_TABLES: Mapping[str, Mapping[str, ComparisonUncertaintyRow]] = MappingPr
 
 
 @dataclass(frozen=True)
-class ReferenceCalibrationRow:
+class ReferenceCalibrationRow(RichDisplay):
     """One row of IEC 61094-8:2012 Table 1: a way the reference microphone's
     free-field sensitivity can be known, and the expanded uncertainty
     (:math:`k = 2`) it typically carries.
@@ -3090,7 +3091,7 @@ def verify_jig_or_coupler(
 
 
 @dataclass(frozen=True)
-class FreeFieldRegion:
+class FreeFieldRegion(RichDisplay):
     r"""The effective free-field region of a time-selective calibration
     (IEC 61094-8:2012 B.1, Formula (B.1) and Figure B.1).
 
@@ -3669,7 +3670,7 @@ def air_gap_series_impedance_pa_s_m3(
 
 
 @dataclass(frozen=True)
-class RectangularPulse:
+class RectangularPulse(RichDisplay):
     r"""The rectangular pulse of the direct impulse method (IEC 61094-8:2012
     B.6.1, Formula (B.10)).
 

@@ -49,6 +49,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_choice,
@@ -424,7 +425,7 @@ def npd_atmosphere_increment(
 
 
 @dataclass(frozen=True)
-class RevisedNpdCurves:
+class RevisedNpdCurves(RichDisplay):
     """NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
 
     :ivar original: The curves as the ANP database gives them, in the AIR-1845

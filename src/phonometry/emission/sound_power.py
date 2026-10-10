@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
@@ -1084,7 +1085,7 @@ def sound_power_pressure(
 
 
 @dataclass(frozen=True)
-class ReferenceAtmosphereCorrection:
+class ReferenceAtmosphereCorrection(RichDisplay):
     r"""The two Annex G corrections to reference meteorological conditions.
 
     ``c1`` is the reference-quantity correction and ``c2`` the

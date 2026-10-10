@@ -181,3 +181,18 @@ def test_a_skip_entry_stays_while_one_edition_still_fails(
     failures = check_doc_snippets.check_execution([site, mirror])
     assert len(failures) == 1
     assert "runs now" in failures[0]
+
+
+def test_a_fixture_writes_the_file_a_page_reads(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A page that reads a file the reader brings runs on one the harness
+    writes first, in the directory the page runs in; without it, it fails.
+    """
+    page = _page(tmp_path, "print(open('take.txt').read())", name="reads.md")
+    (failure,) = check_doc_snippets.check_execution([page])
+    assert "take.txt" in failure
+    monkeypatch.setitem(
+        check_doc_snippets._FIXTURES, "reads", "open('take.txt', 'w').write('x')\n"
+    )
+    assert check_doc_snippets.check_execution([page]) == []

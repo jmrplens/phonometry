@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
@@ -101,7 +102,7 @@ _MIN_PROFILE_POINTS = 2
 
 
 @dataclass(frozen=True)
-class Barrier:
+class Barrier(RichDisplay):
     r"""Screening obstacle for the ISO 9613-2 barrier term (clause 7.4).
 
     The barrier is described by the diffraction geometry that feeds the
@@ -162,7 +163,7 @@ class Barrier:
 
 
 @dataclass(frozen=True)
-class PropagationGeometry:
+class PropagationGeometry(RichDisplay):
     r"""Source-to-receiver geometry of the propagation path (ISO 9613-2:1996).
 
     The three lengths every term of the method needs: the straight-line
@@ -184,7 +185,7 @@ class PropagationGeometry:
 
 
 @dataclass(frozen=True)
-class GroundFactors:
+class GroundFactors(RichDisplay):
     """Ground factors ``G`` of the three regions (ISO 9613-2:1996, clause 7.3.1).
 
     The general ground method splits the path into a source region, a middle
@@ -203,7 +204,7 @@ class GroundFactors:
 
 
 @dataclass(frozen=True, kw_only=True)
-class AtmosphericConditions:
+class AtmosphericConditions(RichDisplay):
     """State of the air behind the atmospheric absorption term ``Aatm``.
 
     The three quantities the ISO 9613-1 attenuation coefficient ``alpha`` is a
@@ -221,7 +222,7 @@ class AtmosphericConditions:
 
 
 @dataclass(frozen=True)
-class DirectivityCorrection:
+class DirectivityCorrection(RichDisplay):
     r"""Directivity correction :math:`D_\mathrm{c} = D_i + D_\Omega` (Eq. (3)).
 
     The two terms the standard adds to the sound power level of a point source:

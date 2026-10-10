@@ -74,6 +74,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even, settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -441,7 +442,7 @@ class WeightedCabinInsulation(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class SourcePositionCheck:
+class SourcePositionCheck(RichDisplay):
     r"""Whether enough loudspeaker positions were used, 7.2.1.
 
     The rule is the clause's, so only what was measured is a field: the
@@ -598,7 +599,7 @@ class BandFlatnessCheck(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class CabinUncertainty:
+class CabinUncertainty(RichDisplay):
     r"""What clause 10 will and will not say about a measurement.
 
     Everything but the method and the volume ratio is what clause 10 prints

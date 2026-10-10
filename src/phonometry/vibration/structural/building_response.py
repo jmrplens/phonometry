@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import require_choice, require_positive
 from .building_damage import storey_fundamental_frequency
@@ -266,7 +267,7 @@ def empirical_frequency_bounds(frequency_hz: float) -> tuple[float, float]:
 
 
 @dataclass(frozen=True)
-class BuildingFrequencyEstimate:
+class BuildingFrequencyEstimate(RichDisplay):
     """One predicted fundamental frequency, with the error it carries.
 
     :ivar frequency_hz: The predicted fundamental frequency.

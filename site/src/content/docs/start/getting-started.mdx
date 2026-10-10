@@ -449,6 +449,83 @@ too: a band filter needs several cycles of its own centre frequency to settle,
 so a one-second record says very little about the 12.5 or 16 Hz bands however
 many digits come back.
 
+## In a notebook
+
+Jupyter, JupyterLab, VS Code and Colab display the value of the last line of a
+cell, and a result displays as a table of its fields: each with its unit when
+its name carries one (`_db`, `_hz`, `_m`...), each array as one line with its
+shape and the range of its values, never the values themselves, so the frames
+of a simulation take a single row. A verdict shows its outcome, PASS or FAIL,
+in the title. Showing the table reads the fields and, on a verdict, `passes`,
+which may read other properties of the verdict; it draws nothing and runs
+nothing else. `print()` and `repr()` are unchanged: the dataclass repr, with
+numpy's own summary of an array longer than a thousand values.
+
+This cell filters a 1 kHz tone over noise into one-third-octave bands and ends
+in the result:
+
+```python
+import numpy as np
+from phonometry import building, filters
+
+fs = 48000
+t = np.arange(fs) / fs
+rng = np.random.default_rng(7)
+noise = np.cumsum(rng.standard_normal(fs))
+noise /= np.std(noise)
+x = 0.4 * np.sin(2 * np.pi * 1000.0 * t) + 0.05 * noise
+
+bank = filters.octave_filter(x, fs, fraction=3, limits=[20.0, 20000.0])
+bank        # the last line of the cell: the notebook shows its table
+```
+
+Jupyter shows it under the cell as this table:
+
+<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top"></td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">list of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top"></td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
+
+A verdict, in a cell of its own, shows its outcome in the title. This one
+applies Annex G.4 of ISO 10140-1 to a [lining test](/phonometry/buildings/insulation/lab-application-rules/) on a masonry wall:
+the measurements without and with the lining may be a day apart only once the
+wall has cured for two weeks, or for at least three times that lag, and
+2.9 days is neither:
+
+```python
+check = building.check_lining_curing(curing_time_days=2.9, time_lag_days=1.0)
+check       # a verdict: its outcome in the title
+```
+
+<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>LiningCuringCheck</strong><span style="background:#cf222e;color:#ffffff;border-radius:3px;padding:0 6px;margin-left:6px;font-weight:bold">FAIL</span></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>curing_time_days</code></td><td style="text-align:left;vertical-align:top">2.9</td><td style="text-align:left;vertical-align:top">d</td></tr><tr><td style="text-align:left;vertical-align:top"><code>time_lag_days</code></td><td style="text-align:left;vertical-align:top">1</td><td style="text-align:left;vertical-align:top">d</td></tr><tr><td style="text-align:left;vertical-align:top"><code>required_curing_days</code></td><td style="text-align:left;vertical-align:top">14</td><td style="text-align:left;vertical-align:top">d</td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
+
+The IPython terminal prints the same tables as text:
+
+```text
+OctaveFilterResult
+  levels       array 31 float64, 17.125 to 82.986
+  frequencies  list of 31 numbers, 19.953 to 19953
+  bands        None
+plot()
+
+LiningCuringCheck: FAIL
+  curing_time_days      2.9  d
+  time_lag_days         1    d
+  required_curing_days  14   d
+plot()
+```
+
+The last line names what the result can draw. `.plot()` returns the
+matplotlib axes, and a notebook draws the figure under the cell with its
+inline backend, with no `plt.show()`; in a script, call `plt.show()` or save
+the figure:
+
+```python
+ax = bank.plot()    # drawn under the cell; in a script, plt.show()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/octave_band_levels.svg" alt="One-third-octave spectrum drawn by the result object itself: band level in decibels against band centre frequency on a log axis from 16 hertz to 20 kilohertz, with one marked point per band. A 1 kilohertz tone stands at 83 decibels, about forty decibels clear of a noise floor that runs near 43 decibels at the bottom of the range and falls steadily to 17 decibels at the top" width="88%" />
+
+*The figure `bank.plot()` draws under the cell: the one-third-octave spectrum
+of the 1 kHz tone over noise.*
+
 ## Where to go next
 
 The octave analysis above uses `phonometry.filters`, one of twenty import

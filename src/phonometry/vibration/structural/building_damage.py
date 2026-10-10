@@ -75,6 +75,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
@@ -339,7 +340,7 @@ def pipeline_guideline_velocity(
 
 
 @dataclass(frozen=True)
-class DamageAssessment:
+class DamageAssessment(RichDisplay):
     """One measured velocity against the guideline value it is judged by.
 
     :ivar velocity_mm_s: The measured peak velocity, in millimetres per

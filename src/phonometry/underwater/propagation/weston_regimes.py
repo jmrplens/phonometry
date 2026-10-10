@@ -57,6 +57,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.special import erf
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_positive,
@@ -84,7 +85,7 @@ _NORMAL_INCIDENCE_DEG = 90.0
 
 
 @dataclass(frozen=True)
-class WestonSeabed:
+class WestonSeabed(RichDisplay):
     r"""Characteristic seabed properties (Ainslie Table 9.1, printed p. 454).
 
     :ivar name: Sediment name.
@@ -304,7 +305,7 @@ def waveguide_cutoff_frequency(
 
 
 @dataclass(frozen=True)
-class WestonRegimeBoundaries:
+class WestonRegimeBoundaries(RichDisplay):
     r"""Range boundaries between Weston's four propagation regimes.
 
     :ivar spherical_to_cylindrical: Range at which :math:`1/r^2` and

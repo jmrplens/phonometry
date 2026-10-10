@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import (
     require_equal_counts,
@@ -108,7 +109,7 @@ def _positive_map(name: str, field: Field2D) -> None:
 
 
 @dataclass(frozen=True)
-class GaussianPulse:
+class GaussianPulse(RichDisplay):
     r"""A soft Gaussian pressure pulse injected at one cell.
 
     :math:`s(t) = \text{amplitude} \cdot \mathrm{e}^{-((t - t_0)/w)^2}`, with :math:`w`
@@ -145,7 +146,7 @@ class GaussianPulse:
 
 
 @dataclass(frozen=True)
-class CWSource:
+class CWSource(RichDisplay):
     """A continuous sine drive with a smooth cosine-ramped onset.
 
     The first ``ramp_cycles`` periods fade the amplitude in with a raised
@@ -241,7 +242,7 @@ class SignalSource(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class PlaneWaveSource:
+class PlaneWaveSource(RichDisplay):
     """A sustained one-way plane wave injected on a line near one edge.
 
     A total-field/scattered-field style injection: each step the incident

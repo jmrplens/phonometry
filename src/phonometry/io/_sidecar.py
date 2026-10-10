@@ -72,6 +72,7 @@ from typing import cast
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.json_input import (
     LONE_SURROGATE,
     MAX_NESTING,
@@ -104,7 +105,7 @@ _REAL_KINDS = frozenset("iuf")
 
 
 @dataclass(frozen=True)
-class CalibrationSidecar:
+class CalibrationSidecar(RichDisplay):
     """The calibration record of one audio file (schema v1, module docstring).
 
     ``calibration_factor`` is the digital-to-pascal multiplier and the

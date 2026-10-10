@@ -106,6 +106,7 @@ import numpy as np
 from scipy.special import jn_zeros, jv
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_choice,
@@ -542,7 +543,7 @@ def _end_admittance(
 
 
 @dataclass(frozen=True)
-class CapillaryTube:
+class CapillaryTube(RichDisplay):
     r"""Identical open capillary tubes that equalise the static pressure of a
     coupler (IEC 61094-2:2009 5.6 and Annex B).
 
@@ -709,7 +710,7 @@ def capillary_tube_impedance(
 
 
 @dataclass(frozen=True)
-class ReciprocityMicrophone:
+class ReciprocityMicrophone(RichDisplay):
     r"""The parameters of a laboratory standard microphone that enter the
     acoustic transfer impedance (IEC 61094-2:2009 7.3.3 and Annex E).
 
@@ -867,7 +868,7 @@ def microphone_acoustic_impedance(
 
 
 @dataclass(frozen=True)
-class PlaneWaveCoupler:
+class PlaneWaveCoupler(RichDisplay):
     r"""A plane-wave coupler: a cylinder of the diameter of the front cavities
     (IEC 61094-2:2009 C.2, Table C.1 and Figure C.1).
 
@@ -893,7 +894,7 @@ class PlaneWaveCoupler:
 
 
 @dataclass(frozen=True)
-class LargeVolumeCoupler:
+class LargeVolumeCoupler(RichDisplay):
     r"""A large-volume coupler: a cylinder much larger than the front cavities
     and the equivalent volumes (IEC 61094-2:2009 C.3, Table C.2 and Figure C.2).
 
@@ -1010,7 +1011,7 @@ def _closed_cavity(
 
 
 @dataclass(frozen=True)
-class CouplerDimensions:
+class CouplerDimensions(RichDisplay):
     """One column of IEC 61094-2:2009 Table C.1 or Table C.2, the nominal
     dimensions of a coupler for one type of laboratory standard microphone,
     in millimetres as printed.
@@ -1716,7 +1717,7 @@ _ANNEX_F_HUMIDITY_PERCENT = (10.0, 90.0)
 
 
 @dataclass(frozen=True)
-class CouplerCheck:
+class CouplerCheck(RichDisplay):
     r"""Whether the formulas of IEC 61094-2:2009 apply to a coupler at the
     frequencies and conditions of a calibration.
 
@@ -2087,7 +2088,7 @@ def _level_change(
 
 
 @dataclass(frozen=True)
-class CouplerInputUncertainties:
+class CouplerInputUncertainties(RichDisplay):
     """The standard uncertainty of each input quantity of the acoustic transfer
     impedance in a coupler: those Table 1 of IEC 61094-2:2009 lists under
     "Coupler properties" (7.3.2) and "Microphone parameters" (7.3.3) that

@@ -59,6 +59,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import require_positive
 
 if TYPE_CHECKING:
@@ -220,7 +221,7 @@ def resonance_transmissibility(
 
 
 @dataclass(frozen=True)
-class SeatTransmissionResult:
+class SeatTransmissionResult(RichDisplay):
     r"""One simulated input vibration test, as the standard records it.
 
     :ivar seat_acceleration: The mean of the seat runs,

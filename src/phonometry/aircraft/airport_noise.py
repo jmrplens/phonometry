@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_above_absolute_zero,
@@ -219,7 +220,7 @@ def impedance_adjustment(
 
 
 @dataclass(frozen=True, kw_only=True)
-class AerodromeAtmosphere:
+class AerodromeAtmosphere(RichDisplay):
     """The aerodrome air the NPD levels are corrected to (Eq. 4-6/4-7).
 
     The two quantities :func:`impedance_adjustment` needs, at the standard

@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_positive, require_positive_array
 from ..absorbers.porous import PUBLISHED_AIR, Complex
@@ -69,7 +70,7 @@ _MIN_WELLS = 2
 
 
 @dataclass(frozen=True)
-class MetadiffuserWell:
+class MetadiffuserWell(RichDisplay):
     r"""One slit of a metadiffuser panel.
 
     ``slit_height`` is the slit opening ``h_n`` along the panel face and

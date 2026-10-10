@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.io import wavfile
 
+from .._internal.display import RichDisplay
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
     WAVE_FORMAT_PCM,
@@ -72,7 +73,7 @@ _THREE_BYTE_PCM_BITS = 24
 
 
 @dataclass(frozen=True)
-class AudioFileInfo:
+class AudioFileInfo(RichDisplay):
     """What :func:`phonometry.io.info` learned without reading the samples.
 
     ``bit_depth`` is the *valid* bits per sample where the notion applies

@@ -66,6 +66,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy import signal as sig
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
@@ -1209,7 +1210,7 @@ _DIRECTIVE_VALUES: Mapping[tuple[str, str], tuple[float, float]] = MappingProxyT
 
 
 @dataclass(frozen=True)
-class ExposureAssessment:
+class ExposureAssessment(RichDisplay):
     """A daily exposure assessed against the Directive 2002/44/EC values.
 
     The two values of Article 3 are the Directive's, read from ``kind`` and

@@ -1058,6 +1058,49 @@ gate too, and `RECORD_EXEMPT` does the same for a record class. The
 docstring of the script lists what it does not read: records a result holds
 whole, and arrays returned bare.
 
+### 7g. Showing a record in a notebook
+
+Jupyter, JupyterLab, VS Code, Colab and the IPython terminal display the last
+line of a cell whole, and a dataclass with nothing else to show is its `repr`:
+every field, and every array as numpy prints it, in full up to a thousand
+values, so a record of a few such arrays fills pages. Every public record
+therefore inherits `phonometry._internal.display.RichDisplay`, which gives
+IPython `_repr_html_` (a table Jupyter renders) and `_repr_pretty_` (the same
+table as text). A record that can hold an array already has it, because
+`OwnsArrays` extends it; any other public record lists `RichDisplay` among its
+bases. A named tuple cannot take a base, so it defines the two methods in its
+body as calls to `record_html` and `record_pretty` from the same module.
+
+The table reads the fields and, on a verdict, `passes`. That one is a
+property, and it may read others of the record, so keep it cheap; the display
+itself calls no other property, draws no plot and runs no other computation of
+the record's own, so do not give a record a display method of its own, and
+keep anything expensive out of its fields. A field's unit is read from the end
+of its name, the way the API already spells it (`_db`, `_hz`, `_m`, `_m_s`,
+`_kg_m3`...); a name that ends in the letters of a unit and is a symbol
+(`alpha_s`, `r_tr_s`) is read as one, and the rare name that defeats the
+reading goes in `_SYMBOLS` in that module. A unit suffix the module does not
+spell yet goes in its `_UNITS`: `tests/test_record_display.py` fails on a
+public field whose name ends in a unit and shows none. An array is one line,
+its shape, its type and its range, never its values, and a verdict shows
+`passes` as PASS or FAIL in the title, or "no verdict" when it is not a bool.
+`repr()` and `print()` keep the dataclass's.
+
+```bash
+python scripts/check_record_display.py   # or: make record-display
+```
+
+The gate reads the same public records `scripts/check_array_aliasing.py`
+does, and fails on one that does not inherit `RichDisplay`, itself or
+through a class of the package (`OwnsArrays` counts because it extends
+`RichDisplay`, and only while it does), on one that defines `_repr_html_`
+or `_repr_pretty_` of its own, and on a named tuple whose two methods are not
+the calls to the mechanism. `EXEMPT` at the top of the script takes a record
+that has to display itself otherwise, with the reason. A notebook kernel
+runs it for real in CI: `scripts/check_notebook.py` executes
+`tests/notebooks/smoke.ipynb` with nbclient on an ipykernel
+(`requirements-notebook.txt`) and reads what each cell put out.
+
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

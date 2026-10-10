@@ -79,6 +79,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
@@ -251,7 +252,7 @@ class SilencerInSituWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class InstallationCase:
+class InstallationCase(RichDisplay):
     r"""One of the twenty installations of Figure 1, with its area rules.
 
     :ivar number: The case number Figure 1 prints, 1 to 20.

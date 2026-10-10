@@ -331,6 +331,18 @@ boundary-comparisons:
 array-aliasing:
 	$(PYTHON) scripts/check_array_aliasing.py
 
+# A notebook displays the last expression of a cell whole, and a dataclass
+# record with nothing else to show is its repr: every field, and every array
+# as numpy prints it, in full up to a thousand values. A public record
+# inherits phonometry._internal.display.RichDisplay (through OwnsArrays when
+# it can hold an array, which counts only while OwnsArrays extends it), which
+# gives Jupyter a table of its fields and IPython the same table as text, so
+# this fails on a public record that does not, or that sets the table aside
+# with a _repr_html_ or _repr_pretty_ of its own. On the tree it was written
+# against, before the display, it found all 673 public records. Stdlib only.
+record-display:
+	$(PYTHON) scripts/check_record_display.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -707,6 +719,6 @@ check: lint security test
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
-	boundary-comparisons array-aliasing \
+	boundary-comparisons array-aliasing record-display \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

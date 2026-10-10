@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only_copy
 from .._internal.validation import (
     require_axis_count,
@@ -465,7 +466,7 @@ class SpectralClass(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class AnpAircraft:
+class AnpAircraft(RichDisplay):
     """One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 
     :ivar aircraft_id: ANP aircraft identifier (e.g. ``"747100"``).

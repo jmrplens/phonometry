@@ -73,6 +73,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.optimize import root
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -115,7 +116,7 @@ class SlowSoundAbsorberWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class HelmholtzResonator:
+class HelmholtzResonator(RichDisplay):
     """A square-cross-section Helmholtz resonator loading a slit.
 
     ``neck_length`` ``l_n`` and ``neck_side`` ``w_n`` describe the neck,
@@ -766,7 +767,7 @@ def slit_helmholtz_absorber(
 # Critical-coupling (perfect-absorption) design helper
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
-class CriticalCouplingResult:
+class CriticalCouplingResult(RichDisplay):
     """Outcome of a critical-coupling (perfect-absorption) design.
 
     ``resonator`` and ``slit_height`` are the solved geometry that places the

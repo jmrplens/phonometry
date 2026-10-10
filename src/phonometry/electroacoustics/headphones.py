@@ -174,6 +174,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_count, require_positive, require_scalar
 from .programme_signal import ProgrammeSignalCheck, check_programme_signal
@@ -328,7 +329,7 @@ def _require_letter(value: str, name: str, table: Mapping[str, str]) -> str:
 
 
 @dataclass(frozen=True)
-class HeadphoneClassification:
+class HeadphoneClassification(RichDisplay):
     """The classification of a headphone by IEC 60268-7:2010 Clause 4.
 
     :ivar principle: The principle of the transducer, a key of
@@ -1081,7 +1082,7 @@ def programme_characteristic_voltage(
 
 
 @dataclass(frozen=True)
-class LimitingTestSignalCheck:
+class LimitingTestSignalCheck(RichDisplay):
     """The test signal of the limiting voltages judged by IEC 60268-7 8.3.2.2 b).
 
     :ivar peak_to_rms: The ratio of the record's peak value to its RMS value.
@@ -1850,7 +1851,7 @@ def ear_canal_frequency_response(
 
 
 @dataclass(frozen=True)
-class EarCanalMicrophoneVerification:
+class EarCanalMicrophoneVerification(RichDisplay):
     """A probe microphone judged by IEC 60268-7:2010 Annex B a) to e).
 
     :ivar entrance_area_mm2: The microphone's cross-sectional area within the

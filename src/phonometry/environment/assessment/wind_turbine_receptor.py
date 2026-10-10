@@ -65,6 +65,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.validation import (
@@ -278,7 +279,7 @@ SWEDISH_LOW_FREQUENCY_LIMITS_DB: Mapping[float, float] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class GroundImpedanceClass:
+class GroundImpedanceClass(RichDisplay):
     """One impedance class of Table C.1.
 
     :ivar flow_resistivity_kpa_s_m2: Representative flow resistivity, in
@@ -586,7 +587,7 @@ def logarithmic_wind_speed(
 
 
 @dataclass(frozen=True)
-class WindShearProfile:
+class WindShearProfile(RichDisplay):
     r"""A wind profile through two measured heights (Annex K).
 
     :ivar heights_m: The two measurement heights, lower first, in m.
@@ -1834,7 +1835,7 @@ def amplitude_modulation_adjustment(
 
 
 @dataclass(frozen=True)
-class WindTurbineRatingLevel:
+class WindTurbineRatingLevel(RichDisplay):
     r"""The rating level of wind turbine sound (Annex A, A.1).
 
     :ivar equivalent_level_db: The equivalent continuous level

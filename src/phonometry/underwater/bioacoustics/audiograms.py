@@ -44,6 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import require_ranks, require_same_length
 
@@ -55,7 +56,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class AudiogramParameters:
+class AudiogramParameters(RichDisplay):
     r"""Group-audiogram fit parameters (Southall et al. 2019, Tables 2 and 3).
 
     :ivar group: Hearing-group code.

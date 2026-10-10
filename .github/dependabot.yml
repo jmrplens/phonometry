@@ -65,3 +65,18 @@ updates:
       site:
         patterns:
           - "*"
+
+  # The Pyodide the CI job installs the wheel into, standing in for
+  # JupyterLite: a new Pyodide ships new numpy and scipy builds, which is
+  # what decides whether the package installs there.
+  - package-ecosystem: "npm"
+    directory: "/tests/pyodide"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:30"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "javascript"
+    open-pull-requests-limit: 2

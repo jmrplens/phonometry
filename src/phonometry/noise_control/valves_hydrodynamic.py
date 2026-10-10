@@ -70,6 +70,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
@@ -1361,7 +1362,7 @@ def _default_bands() -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class LiquidStream:
+class LiquidStream(RichDisplay):
     r"""The liquid and the operating point, which Clause 4.1 reads first.
 
     :ivar mass_flow: :math:`\dot m`, in kg/s.
@@ -1382,7 +1383,7 @@ class LiquidStream:
 
 
 @dataclass(frozen=True)
-class LiquidTrim:
+class LiquidTrim(RichDisplay):
     r"""The valve, at the travel being examined.
 
     :ivar flow_coefficient: :math:`C`.
@@ -1412,7 +1413,7 @@ class LiquidTrim:
 
 
 @dataclass(frozen=True)
-class LiquidPipe:
+class LiquidPipe(RichDisplay):
     r"""The pipe the noise comes out of, and the air around it.
 
     :ivar internal_diameter_m: :math:`D_i`, in m.
@@ -1640,7 +1641,7 @@ def valve_hydrodynamic_noise(
 
 
 @dataclass(frozen=True)
-class StageConditions:
+class StageConditions(RichDisplay):
     r"""What one throttling stage of a multistage trim sees.
 
     :ivar inlet_pressure_pa: :math:`p_{1,i}` of Equations (23a) and (23b), in

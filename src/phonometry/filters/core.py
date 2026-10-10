@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 import numpy as np
 from scipy import signal
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.utils import (
     _ZI_NDIM_MULTICHANNEL,
@@ -194,7 +195,7 @@ class OctaveFilterResult(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class FilterDesign:
+class FilterDesign(RichDisplay):
     """How the band-pass filters of a bank are designed.
 
     The defaults are the design used everywhere in the library: Butterworth
@@ -235,7 +236,7 @@ class FilterDesign:
 
 
 @dataclass(frozen=True)
-class LevelCalibration:
+class LevelCalibration(RichDisplay):
     """How the energy in a band becomes a level reading.
 
     :ivar factor: Calibration factor for SPL calculation: multiplies the
@@ -251,7 +252,7 @@ class LevelCalibration:
 
 
 @dataclass(frozen=True)
-class BlockProcessing:
+class BlockProcessing(RichDisplay):
     """How the bank carries its filter state from one block to the next.
 
     :ivar stateful: If True, carry filter state between calls. Useful for
@@ -266,7 +267,7 @@ class BlockProcessing:
 
 
 @dataclass(frozen=True)
-class ResponsePlot:
+class ResponsePlot(RichDisplay):
     """The filter-response plot drawn while the bank is being designed.
 
     :ivar show: If True, show the filter response plot (default False).

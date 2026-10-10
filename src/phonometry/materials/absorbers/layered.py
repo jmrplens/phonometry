@@ -47,6 +47,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_non_negative,
@@ -101,7 +102,7 @@ __all__ = [
 ]
 
 
-class _DrawableLayer:
+class _DrawableLayer(RichDisplay):
     """Shared geometry drawing for the layer dataclasses.
 
     ``plot()`` draws the layer as a one-layer stack cross-section, to scale,

@@ -104,6 +104,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_count, require_positive
 
@@ -124,7 +125,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class ProgrammeSpectrumBand:
+class ProgrammeSpectrumBand(RichDisplay):
     """One row of IEC 60268-1:1985 Table II.
 
     :ivar relative_level_db: The relative level of the one-third-octave band,

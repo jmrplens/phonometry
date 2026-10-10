@@ -75,6 +75,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 from .._internal.catalogue import CatalogueRow
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import require_ranks, require_same_length
 from .fdtd import (
@@ -113,7 +114,7 @@ _MIN_GRID_CELLS = 2
 
 
 @dataclass(frozen=True)
-class ExplosionSource:
+class ExplosionSource(RichDisplay):
     r"""An isotropic (explosive) stress injection at one cell centre.
 
     Virieux (1986) drives an explosion with equal increments on both normal
@@ -150,7 +151,7 @@ class ExplosionSource:
 
 
 @dataclass(frozen=True)
-class ForceSource:
+class ForceSource(RichDisplay):
     """A directional body-force injection at one velocity node.
 
     The standard body-force term of the equation of motion (the ``f`` of the
@@ -192,7 +193,7 @@ ElasticSource = ExplosionSource | ForceSource
 
 
 @dataclass(frozen=True)
-class Material:
+class Material(RichDisplay):
     r"""An isotropic elastic medium as measurable wave speeds and density.
 
     The three numbers the solver's material maps are built from: the
@@ -1222,7 +1223,7 @@ class ElasticFDTDResult(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class ElasticRecording:
+class ElasticRecording(RichDisplay):
     """What an elastic run writes down: probe traces and field snapshots.
 
     The two ways out of a running simulation. Probes record a time history at
@@ -1247,7 +1248,7 @@ class ElasticRecording:
 
 
 @dataclass(frozen=True)
-class ElasticBoundaries:
+class ElasticBoundaries(RichDisplay):
     """How the four edges of the elastic domain are terminated.
 
     The sponge thickness only means anything where a side is absorbing, which

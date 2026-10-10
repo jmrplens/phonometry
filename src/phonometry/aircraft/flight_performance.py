@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.validation import require_finite_fields, require_scalar
 
 if TYPE_CHECKING:
@@ -254,7 +255,7 @@ def _transition_offset(length_ft: float) -> float:
 # Aerodrome and atmosphere (B3)
 # --------------------------------------------------------------------------
 @dataclass(frozen=True)
-class Aerodrome:
+class Aerodrome(RichDisplay):
     """The aerodrome, its weather and the runway a procedure is flown from.
 
     Every atmosphere ratio of B3 is a function of altitude above mean sea level
@@ -432,7 +433,7 @@ _ISA_SEA_LEVEL = Aerodrome(elevation_ft=0.0, temperature_c=15.0)
 # Coefficient tables
 # --------------------------------------------------------------------------
 @dataclass(frozen=True)
-class JetEngineCoefficients:
+class JetEngineCoefficients(RichDisplay):
     """One ANP ``Jet_Engine_Coefficients`` row: the Eq. B-9 thrust polynomial.
 
     ``CNT = E + F Vc + Ga h + Gb h^2 + H T`` gives the corrected net thrust per
@@ -490,7 +491,7 @@ class JetEngineCoefficients:
 
 
 @dataclass(frozen=True)
-class PropellerEngineCoefficients:
+class PropellerEngineCoefficients(RichDisplay):
     """One ANP ``Propeller_Engine_Coefficients`` row: the Eq. B-12 thrust.
 
     ``CNT = (326 eta Pp / Vt) / delta`` for a piston or turboprop aeroplane.
@@ -550,7 +551,7 @@ class PropellerEngineCoefficients:
 
 
 @dataclass(frozen=True)
-class AerodynamicCoefficients:
+class AerodynamicCoefficients(RichDisplay):
     """One ANP ``Aerodynamic_Coefficients`` row: a flap configuration.
 
     :ivar drag_ratio: ``R``, the drag-over-lift ratio of the configuration,
@@ -590,7 +591,7 @@ class AerodynamicCoefficients:
 
 
 @dataclass(frozen=True)
-class PerformanceAircraft:
+class PerformanceAircraft(RichDisplay):
     """One aeroplane's Appendix B coefficient set.
 
     :ivar aircraft_id: ANP aircraft identifier.
@@ -695,7 +696,7 @@ class PerformanceAircraft:
 # Procedural steps
 # --------------------------------------------------------------------------
 @dataclass(frozen=True)
-class DepartureStep:
+class DepartureStep(RichDisplay):
     """One row of an ANP departure procedural-step table (B6.1).
 
     :ivar step_type: ``"Takeoff"``, ``"Climb"``, ``"Accelerate"``, ``"Level"``
@@ -826,7 +827,7 @@ class DepartureStep:
 
 
 @dataclass(frozen=True)
-class ApproachStep:
+class ApproachStep(RichDisplay):
     """One row of an ANP approach procedural-step table (B7.1).
 
     :ivar step_type: ``"Descend"``, ``"Descend-Decel"``, ``"Descend-Idle"``,
@@ -1021,7 +1022,7 @@ class ApproachStep:
 # Results
 # --------------------------------------------------------------------------
 @dataclass(frozen=True)
-class ProfilePoint:
+class ProfilePoint(RichDisplay):
     """One point of a Doc 29 flight profile.
 
     :ivar distance_ft: Distance along the ground track, ft. Measured from brake
@@ -1077,7 +1078,7 @@ class ProfilePoint:
 
 
 @dataclass(frozen=True)
-class FlightProfile:
+class FlightProfile(RichDisplay):
     """A flight profile: the fixed-point trajectory a procedure flies (B1).
 
     :ivar aircraft_id: ANP aircraft identifier.

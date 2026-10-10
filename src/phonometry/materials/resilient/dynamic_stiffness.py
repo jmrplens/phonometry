@@ -84,6 +84,7 @@ if TYPE_CHECKING:
 
 from ..._internal.boundary import settled
 from ..._internal.catalogue import CatalogueError, CatalogueRow, read_table, take
+from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import check_engine, require_non_negative, require_positive
 from ..._internal.warnings import PhonometryWarning
@@ -632,7 +633,7 @@ def resilient_layer(layer: str | ResilientLayer) -> ResilientLayer:
 
 
 @dataclass(frozen=True)
-class DynamicStiffnessResult:
+class DynamicStiffnessResult(RichDisplay):
     """Dynamic stiffness of a resilient layer and the floating-floor resonance.
 
     :ivar apparent_stiffness: Apparent dynamic stiffness ``s't``, in N/m3.

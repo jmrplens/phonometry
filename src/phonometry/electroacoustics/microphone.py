@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
@@ -354,7 +355,7 @@ _DEFAULT_OVERLOAD = MicrophoneOverload()
 
 
 @dataclass(frozen=True)
-class MicrophoneElectrical:
+class MicrophoneElectrical(RichDisplay):
     """Electrical impedance and rated power supply (IEC 60268-4 Clauses 10/9).
 
     The electrical side of the rated characteristics: the rated (internal)

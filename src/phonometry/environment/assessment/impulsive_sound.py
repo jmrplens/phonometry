@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
@@ -482,7 +483,7 @@ _OnsetRateMethod = Literal["least_squares", "upper_half"]
 
 
 @dataclass(frozen=True)
-class ImpulseOnset:
+class ImpulseOnset(RichDisplay):
     r"""A single detected onset of ``LpAF`` (ISO/PAS 1996-3, Clause 3).
 
     :ivar index_start: Sample index of the starting point ``s``.

@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.validation import require_equal_counts, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
@@ -200,7 +201,7 @@ def tonal_adjustment(audibility: float) -> float:
 
 
 @dataclass(frozen=True)
-class TonalAssessmentResult:
+class TonalAssessmentResult(RichDisplay):
     """Tonal-audibility assessment of a tone in noise (ISO 1996-2 Annex C).
 
     :ivar tone_level: Energy-summed tone level ``Lpt``, in dB.
@@ -348,7 +349,7 @@ def _survey_threshold(frequency: float) -> float:
 # Residual-noise correction (Clause 10.4, Annex I)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class ResidualCorrectionResult:
+class ResidualCorrectionResult(RichDisplay):
     """Residual-noise-corrected level (ISO 1996-2:2017 Clause 10.4).
 
     :ivar corrected_level: The corrected level ``L`` (Formula (16)), in dB.
@@ -594,7 +595,7 @@ _LEVEL_SPREAD_WARNING_DB = 3.0
 
 
 @dataclass(frozen=True)
-class RepeatedMeasurementResult:
+class RepeatedMeasurementResult(RichDisplay):
     r"""Energy-mean level and its uncertainty from repeats (Formulae (17)–(20)).
 
     :ivar mean_level: Energy-mean level

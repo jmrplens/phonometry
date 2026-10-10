@@ -118,6 +118,7 @@ from .._internal.catalogue import (
     spellings,
     unit_stem,
 )
+from .._internal.display import RichDisplay
 from .._internal.json_input import (
     LONE_SURROGATE,
     UNSAFE,
@@ -345,7 +346,7 @@ class _Joined[R: CatalogueRow](Mapping[str, R]):
 
 
 @dataclass(frozen=True, kw_only=True, eq=False, repr=False)
-class Catalogue[R: CatalogueRow](Mapping[str, R]):
+class Catalogue[R: CatalogueRow](Mapping[str, R], RichDisplay):
     """A caller's catalogue: rows of one class, keyed as the packaged ones are.
 
     What :func:`read_catalogue` and :func:`parse_catalogue` return. It is a

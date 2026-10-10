@@ -1,0 +1,17 @@
+# The notebook kernel the "phonometry runs in a notebook kernel" CI job
+# executes tests/notebooks/smoke.ipynb on (scripts/check_notebook.py), pinned
+# exactly, on top of requirements.txt and requirements-reports.txt, which pin
+# the plotting and the fiche-rendering halves of what the notebook calls.
+#
+# nbclient runs the cells and nbformat reads the notebook; ipykernel is the
+# IPython kernel that Jupyter, JupyterLab, VS Code and Colab all run, and it
+# brings the inline matplotlib backend and IPython's display machinery, which
+# is what the job is there to exercise. IPython and jupyter_client are pinned
+# with it because they decide how a displayed object is formatted and how its
+# outputs come back. Dependabot proposes the upgrades weekly, as for the other
+# requirement files.
+nbclient==0.11.0
+nbformat==5.11.1
+ipykernel==7.4.0
+ipython==9.17.1
+jupyter-client==8.10.0

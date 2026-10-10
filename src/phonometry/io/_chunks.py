@@ -66,6 +66,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+from .._internal.display import RichDisplay
+
 if TYPE_CHECKING:
     from typing import BinaryIO
 
@@ -299,7 +301,7 @@ class FormatChunk:
 
 
 @dataclass(frozen=True)
-class BroadcastMetadata:
+class BroadcastMetadata(RichDisplay):
     r"""The ``bext`` broadcast extension chunk of EBU Tech 3285 (v2, 2011).
 
     Field-by-field transcription of the Tech 3285 ``BROADCAST_EXT``
@@ -366,7 +368,7 @@ class BroadcastMetadata:
 
 
 @dataclass(frozen=True)
-class CuePoint:
+class CuePoint(RichDisplay):
     """One record of the ``cue`` chunk (1991 RIFF specification).
 
     For the plain ``data``-chunk case (no playlist, no wave list), which is

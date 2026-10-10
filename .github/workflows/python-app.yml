@@ -50,6 +50,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install -r requirements-notebook.txt
         pip install -e .
     # The clips are the one committed asset CI never regenerates: an FDTD run
     # plus four video encodes each is far too slow for a pull request, and the
@@ -1011,6 +1012,32 @@ jobs:
     - name: Check that no result keeps an array it was handed
       run: python scripts/check_array_aliasing.py
 
+  # Jupyter, VS Code, Colab and the IPython terminal display the last
+  # expression of a cell whole, and a dataclass record with nothing else to
+  # show is its repr: every field, and every array as numpy prints it, in
+  # full up to a thousand values, pages of numbers for a record of a few such
+  # arrays. A public record inherits RichDisplay (through OwnsArrays when it
+  # can hold an array), which shows a table of its fields instead, so this
+  # fails on a public record that does not, or that sets the table aside with
+  # a display method of its own. It
+  # shares the AST reading of the array-aliasing gate: static and
+  # dependency-free, so it runs on its own.
+  record-display:
+    name: Every public record shows itself as a table in a notebook
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that every public record displays itself
+      run: python scripts/check_record_display.py
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass
@@ -1252,6 +1279,77 @@ jobs:
       run: python scripts/check_jit_kernel.py
     - name: Run the library tests at the floors
       run: pytest -q -n auto --without-pinned-stack
+
+  # The suite calls _repr_html_ and _repr_pretty_ itself; a notebook goes
+  # through IPython, which picks the method, runs matplotlib on its inline
+  # backend and sends a warning to the cell's stderr. This executes
+  # tests/notebooks/smoke.ipynb with nbclient on a real ipykernel, with the
+  # package installed as a user installs it, and reads what each cell put
+  # out: a filter bank result as its table, .plot() as an inline PNG, a
+  # verdict as FAIL, a .report() PDF in a temporary directory and a
+  # PhonometryWarning.
+  notebook:
+    name: phonometry runs in a notebook kernel
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install the package, its plot and report extras, and a kernel
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-reports.txt -r requirements-notebook.txt
+        pip install ".[plot,report]"
+    - name: Execute the smoke notebook and read its outputs
+      run: python scripts/check_notebook.py tests/notebooks/smoke.ipynb
+
+  # JupyterLite runs Python in the browser on Pyodide, where micropip
+  # installs a package against the numpy, scipy and matplotlib Pyodide builds
+  # for WebAssembly, whatever PyPI holds. This builds the wheel and loads the
+  # Pyodide that tests/pyodide pins under Node. The first step installs the
+  # wheel as a JupyterLite user would, requirements included, then the
+  # requirements of the plot and report extras (keep_going, so every one
+  # Pyodide cannot meet is named at once), and fails saying which floor in
+  # pyproject.toml the builds Pyodide ships fall short of. The second
+  # runs whatever the first said: it installs the wheel without its
+  # requirements, on Pyodide's own numpy and scipy, and runs an import and an
+  # octave filter bank, so the job also says whether the code itself runs
+  # there.
+  pyodide:
+    name: phonometry installs and runs in Pyodide (JupyterLite)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Build the wheel
+      run: python -m pip wheel --no-deps --wheel-dir dist .
+    - uses: actions/setup-node@v7
+      with:
+        node-version: 24
+    - name: Install the Pyodide tests/pyodide pins, with the pnpm it pins
+      run: |
+        corepack enable
+        pnpm install --frozen-lockfile
+      working-directory: tests/pyodide
+    - name: Install the wheel and its plot and report extras with micropip
+      run: node tests/pyodide/smoke.mjs install dist/phonometry-*.whl
+    - name: Run an octave filter bank on the numpy and scipy Pyodide ships
+      if: ${{ !cancelled() }}
+      run: node tests/pyodide/smoke.mjs run dist/phonometry-*.whl
 
   sonar:
     needs: tests

@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
@@ -415,7 +416,7 @@ _TABLE_F4: dict[
 
 
 @dataclass(frozen=True)
-class RoadEmissionCoefficients:
+class RoadEmissionCoefficients(RichDisplay):
     """Appendix F coefficient database for the road source.
 
     Holds Tables F-1, F-2 and F-3 together with the temperature coefficients
@@ -489,7 +490,7 @@ ROAD_COEFFICIENTS = RoadEmissionCoefficients(
 
 
 @dataclass(frozen=True)
-class RoadSurfaceCoefficients:
+class RoadSurfaceCoefficients(RichDisplay):
     """One row of Table F-4: the acoustic signature of a road surface.
 
     :ivar name: The surface description as printed in Table F-4.
@@ -532,7 +533,7 @@ def road_surface_coefficients(surface: RoadSurface | str) -> RoadSurfaceCoeffici
 
 
 @dataclass(frozen=True)
-class RoadTraffic:
+class RoadTraffic(RichDisplay):
     """The traffic of one vehicle category on a source line.
 
     :ivar category: The :class:`RoadVehicleCategory` of the flow.

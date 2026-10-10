@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -80,7 +81,7 @@ WEIGHTING_GUIDANCE = ("nmfs-2024", "nmfs-2018", "southall-2019")
 
 
 @dataclass(frozen=True)
-class WeightingParameters:
+class WeightingParameters(RichDisplay):
     """Auditory weighting and exposure function parameters for one group.
 
     :ivar group: Hearing-group code as used by its own guidance version.
@@ -384,7 +385,7 @@ _PARAMETERS: dict[str, dict[str, WeightingParameters]] = {
 
 
 @dataclass(frozen=True)
-class ExposureCriteria:
+class ExposureCriteria(RichDisplay):
     """Published TTS and injury (PTS / AUD INJ) onset criteria for one group.
 
     Sound exposure levels are weighted; peak sound pressure levels are

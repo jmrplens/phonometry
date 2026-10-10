@@ -60,6 +60,7 @@ from dataclasses import dataclass
 from math import isfinite, log10
 from typing import TYPE_CHECKING, Any, Literal
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import check_engine, require_scalar
 
 if TYPE_CHECKING:
@@ -144,7 +145,7 @@ _TABLE1_K = (
 
 
 @dataclass(frozen=True)
-class FlankingPath:
+class FlankingPath(RichDisplay):
     """One flanking transmission path (Ff, Df or Fd) of the simplified model.
 
     :ivar label: Human-readable path name, e.g. ``"floor-Ff"``.
@@ -159,7 +160,7 @@ class FlankingPath:
 
 
 @dataclass(frozen=True)
-class PathContribution:
+class PathContribution(RichDisplay):
     """A transmission path with its share of the total transmitted energy.
 
     :ivar label: Path name (``"Dd"`` for the direct path).
@@ -190,7 +191,7 @@ class PathContribution:
 
 
 @dataclass(frozen=True)
-class AirbornePredictionResult:
+class AirbornePredictionResult(RichDisplay):
     """Predicted apparent airborne insulation (EN 12354-1:2000, Formula 26).
 
     :ivar r_prime_w: Apparent weighted sound reduction index ``R'w``, in dB.
@@ -292,7 +293,7 @@ class AirbornePredictionResult:
 
 
 @dataclass(frozen=True)
-class ImpactPredictionResult:
+class ImpactPredictionResult(RichDisplay):
     """Predicted apparent impact insulation (EN 12354-2:2000, Formula 21).
 
     :ivar l_prime_n_w: Apparent weighted normalized impact sound pressure level

@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_scalar
 from .hearing_protectors import _octave_axis
@@ -114,7 +115,7 @@ _MINIMUM_SUBJECTS = 2
 
 
 @dataclass(frozen=True)
-class ProtectorUncertaintyBudget:
+class ProtectorUncertaintyBudget(RichDisplay):
     r"""The three standard uncertainties of a hearing protector measurement.
 
     The budget of Table A.1: each component is normally distributed with a

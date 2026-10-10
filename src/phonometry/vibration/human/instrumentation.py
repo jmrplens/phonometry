@@ -79,6 +79,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -1234,7 +1235,7 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunningRmsDecayVerification:
+class RunningRmsDecayVerification(RichDisplay):
     """One measured decay time against its row of ISO 8041-1 Table 10 or 11.
 
     The row is the whole criterion: a printed time to 10 % of the initial

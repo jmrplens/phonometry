@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
@@ -77,7 +78,7 @@ DISTRIBUTIONS: tuple[str, ...] = ("gaussian", "rectangular", "triangular", "u-sh
 
 
 @dataclass(frozen=True)
-class Quantity:
+class Quantity(RichDisplay):
     r"""An input quantity of a measurement model (GUM clause 4).
 
     :ivar value: Best estimate :math:`x_i` of the input quantity.

@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
@@ -1237,7 +1238,7 @@ def _reference_distance(hemispheres: Sequence[RotorcraftHemisphere]) -> float:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RotorcraftAtmosphere:
+class RotorcraftAtmosphere(RichDisplay):
     """The air a rotorcraft event propagates through (Eq. 26/27).
 
     The ICAO reference conditions of the hemisphere database are the defaults,

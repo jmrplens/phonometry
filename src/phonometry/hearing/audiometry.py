@@ -94,6 +94,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_up, settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_scalar
 from .sound_field_audiometry import (
@@ -1850,7 +1851,7 @@ def sweep_audiometry_threshold(
 
 
 @dataclass(frozen=True)
-class RetestAgreementCheck:
+class RetestAgreementCheck(RichDisplay):
     """Whether a repeat measurement confirms the first one (6.2.3.2 Step 3).
 
     :ivar first_db: The hearing threshold level measured first, in dB.
@@ -2123,7 +2124,7 @@ def audiogram_cautions(
 
 
 @dataclass(frozen=True)
-class AudiometricUncertaintyBudget:
+class AudiometricUncertaintyBudget(RichDisplay):
     r"""The uncertainty budget of a hearing threshold level (Annex A).
 
     The eight standard uncertainties of Table A.1, each with a sensitivity

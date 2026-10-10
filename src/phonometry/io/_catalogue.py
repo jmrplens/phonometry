@@ -85,7 +85,7 @@ issue that pass finds is placed back at its line and its column.
 from __future__ import annotations
 
 import dataclasses
-import datetime
+import datetime as dt
 import difflib
 import hashlib
 import json
@@ -2129,7 +2129,7 @@ class _Writer:
             kind="publication",
             document=sources[0],
             version=None,
-            consulted=datetime.datetime.now(tz=datetime.UTC).date().isoformat(),
+            consulted=dt.datetime.now(tz=dt.UTC).date().isoformat(),
         )
         return provenance, _packaged_table(next(iter(self.rows.values())))
 

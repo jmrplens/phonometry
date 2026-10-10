@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import copy
 import dataclasses
-import datetime
+import datetime as dt
 import errno
 import importlib
 import json
@@ -133,8 +133,8 @@ def test_a_table_is_exported_as_a_publication_consulted_today(
     assert provenance["kind"] == "publication"
     assert provenance["version"] is None
     assert provenance["document"] == next(iter(rows.values())).source
-    today = datetime.datetime.now(tz=datetime.UTC).date()
-    consulted = datetime.date.fromisoformat(provenance["consulted"])
+    today = dt.datetime.now(tz=dt.UTC).date()
+    consulted = dt.date.fromisoformat(provenance["consulted"])
     assert abs((consulted - today).days) <= 1
     assert all("derived" not in row for row in document["rows"])
     assert document["phonometry_version"] == phonometry.__version__

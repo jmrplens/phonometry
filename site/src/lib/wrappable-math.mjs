@@ -29,9 +29,10 @@ export function rehypeWrappableMath() {
       : [];
   const hasClass = (node, name) => classesOf(node).includes(name);
   // KaTeX renamed its layout classes in 0.18 (`base` -> `katex-base`,
-  // `strut` -> `katex-strut`) to stop colliding with page styles. rehype-katex
-  // still renders with the 0.16 line, so both spellings are accepted rather
-  // than tying this pass to whichever one is installed.
+  // `strut` -> `katex-strut`) to stop colliding with page styles. The site
+  // renders with the new spelling now that pnpm-workspace.yaml resolves
+  // rehype-katex's own katex to the site's version; the old one is still
+  // accepted so this pass does not hang on which line is installed.
   const isChunk = (node) => hasClass(node, 'katex-base') || hasClass(node, 'base');
   const isStrut = (node) => hasClass(node, 'katex-strut') || hasClass(node, 'strut');
   // KaTeX writes horizontal space as a right margin on an empty span.

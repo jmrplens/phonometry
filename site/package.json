@@ -2,7 +2,7 @@
   "name": "phonometry-docs",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@12.5.1+sha512.e3f305bc784a2bc89f5ad3b6138889470fae8d2af5f36b61216ec91c2c3d64089775f9de38aac331044ea40f245cb0d5666392dfdf65824e1907ef6a2c62de5f",
+  "packageManager": "pnpm@12.10.1+sha512.ba40a37eb1a370d60fea8c4cf1d364c13bcccef518e98ad2bcee954f539d38da37458e58261a3fa55e06523450ea0ffff9f497b135be41f2c15c1642bacace6c",
   "private": true,
   "scripts": {
     "build": "astro build",
@@ -14,6 +14,7 @@
     "check:redirects": "node scripts/check-redirects.mjs",
     "check:search": "node scripts/check-search-designation.mjs",
     "check:sidebar": "node scripts/with-preview.mjs -- node scripts/check-sidebar.mjs",
+    "check:social-cards": "node scripts/check-social-cards.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "check:types": "astro check",
     "check:visual": "node scripts/with-preview.mjs -- sh -c 'node scripts/check-contrast.mjs && node scripts/check-home-headings.mjs && node scripts/check-lang-suggest.mjs && node scripts/check-page-chips.mjs'",
@@ -28,24 +29,24 @@
     "redirects": "node scripts/generate-redirects.mjs"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.3.1",
-    "@astrojs/starlight": "^0.42.2",
-    "astro": "^7.3.3",
-    "katex": "^0.16.47",
+    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/starlight": "^0.42.6",
+    "astro": "^7.3.8",
+    "katex": "catalog:",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "satori": "^0.33.4",
-    "sharp": "^0.35.4",
-    "starlight-image-zoom": "^0.16.0",
-    "starlight-links-validator": "^0.26.0",
+    "satori": "^0.47.1",
+    "sharp": "^0.35.5",
+    "starlight-image-zoom": "^0.16.1",
+    "starlight-links-validator": "^0.27.0",
     "starlight-sidebar-topics": "^0.9.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "html-validate": "^11.16.0",
+    "html-validate": "^11.16.2",
     "lighthouse": "^13.5.0",
-    "pa11y-ci": "^4.1.1",
-    "puppeteer": "25.11.0",
+    "pa11y-ci": "^5.0.0",
+    "puppeteer": "25.13.0",
     "typescript": "^6.0.3"
   }
 }

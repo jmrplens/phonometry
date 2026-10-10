@@ -39,7 +39,7 @@ string stops at :data:`MAX_TEXT` characters and a whole value at
 from __future__ import annotations
 
 import dataclasses
-import datetime
+import datetime as dt
 import enum
 import html
 import itertools
@@ -396,7 +396,7 @@ def _scalar(value: object) -> str | None:
         return repr(_cut(value))
     if isinstance(value, bytes):
         return f"{len(value)} bytes"
-    if isinstance(value, datetime.date | datetime.time | datetime.timedelta):
+    if isinstance(value, dt.date | dt.time | dt.timedelta):
         return str(value)
     if isinstance(value, os.PathLike):
         return _cut(os.fsdecode(value))

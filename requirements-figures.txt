@@ -20,7 +20,7 @@
 # figures with exactly this stack, then commit both). Generated from the
 # maintainer's venv that produced the committed figures.
 matplotlib==3.11.2
-fonttools==4.65.0
+fonttools==4.66.1
 numpy==2.5.3
 scipy==1.18.1
 pillow==12.3.0

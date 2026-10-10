@@ -108,9 +108,9 @@ function delimiterProblems(sourceDirs) {
  *
  * Two different copies of KaTeX decide how a formula looks. `rehype-katex`
  * writes the markup using the katex it depends on, while the site imports
- * `katex/dist/katex.min.css` from its own katex dependency, and nothing ties
- * the two versions together. They drifted: the site served 0.18 CSS over 0.16
- * markup, and the class names for the base box and the strut were renamed
+ * `katex/dist/katex.min.css` from its own katex dependency. Nothing used to tie
+ * the two versions together, and they drifted: the site served 0.18 CSS over
+ * 0.16 markup, and the class names for the base box and the strut were renamed
  * between those lines. Every formula on the site therefore rendered with no
  * `white-space: nowrap` on its base box and no struts setting its line height,
  * free to wrap in the middle of an expression.
@@ -120,6 +120,12 @@ function delimiterProblems(sourceDirs) {
  * relationship between them, so that is what this checks. For each class KaTeX
  * renamed, take the spelling the built markup actually uses and require the
  * built CSS to carry a rule for that exact spelling.
+ *
+ * They are tied now: `site/package.json` and the `katex: 'catalog:'` override
+ * in `site/pnpm-workspace.yaml` both read katex from one catalog entry there,
+ * so every katex in the tree resolves to the same version. This check is what
+ * notices if that link is ever cut, for instance by a literal version written
+ * in place of `catalog:` on either side.
  */
 function stylesheetMismatch(distDir) {
   // Renamed in KaTeX 0.18: `.katex .base` -> `.katex-base`, likewise the strut.
@@ -202,8 +208,11 @@ if (mismatches.length > 0) {
   console.error(
     '\nThe KaTeX stylesheet does not match the markup the renderer emits.\n' +
       'Every formula on the site is missing the rules for the classes below.\n' +
-      "Align `katex` in site/package.json with the version `rehype-katex`\n" +
-      'resolves (`node -e \'require.resolve("katex", {paths: [require.resolve("rehype-katex")]})\'`):\n',
+      'site/package.json and the override in site/pnpm-workspace.yaml must both\n' +
+      "read `katex` from its catalog entry (`katex: 'catalog:'`); check that\n" +
+      'neither was replaced by a literal version. To see which katex the renderer\n' +
+      'resolves: `node -e \'console.log(require.resolve("katex", {paths: [require.resolve("rehype-katex")]}))\'`\n' +
+      'The classes that do not match:\n',
   );
   for (const mismatch of mismatches) {
     console.error(

@@ -95,6 +95,7 @@ import numpy as np
 
 from .._internal.boundary import round_half_up, settled
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.validation import require_scalar
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_BANDS_HZ as _SOUND_FIELD_BANDS_HZ,
 )
@@ -506,6 +507,7 @@ def ambient_noise_limits(
             f"shifts the tables are written for; got {shift:g}."
         )
         raise ValueError(msg)
+    require_scalar(lowest_hearing_level_db, "lowest_hearing_level_db")
     hearing_level = float(lowest_hearing_level_db)
     if not math.isfinite(hearing_level):
         msg = "'lowest_hearing_level_db' must be finite, in dB."
@@ -1942,6 +1944,7 @@ def check_retest_agreement(
     if not (math.isfinite(first) and math.isfinite(repeat)):
         msg = "'first_db' and 'repeat_db' must be finite hearing levels, in dB."
         raise ValueError(msg)
+    require_scalar(frequency_hz, "frequency_hz")
     f = float(frequency_hz)
     if not math.isfinite(f) or f <= 0.0:
         msg = f"'frequency_hz' must be a positive frequency in hertz; got {f:g}."
@@ -2287,10 +2290,12 @@ def audiometric_uncertainty(
     if conduction not in _CONDUCTIONS:
         msg = f"'conduction' must be one of {_CONDUCTIONS}; got {conduction!r}."
         raise ValueError(msg)
+    require_scalar(frequency, "frequency")
     f = float(frequency)
     if not math.isfinite(f) or f <= 0.0:
         msg = f"'frequency' must be a positive frequency in hertz; got {f:g}."
         raise ValueError(msg)
+    require_scalar(level_step_db, "level_step_db")
     step = float(level_step_db)
     if not math.isfinite(step) or step < 0.0:
         msg = f"'level_step_db' must be finite and not negative; got {step:g}."

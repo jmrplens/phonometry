@@ -32,6 +32,10 @@ if _SCRIPTS not in sys.path:
 
 import animation_fingerprint as fp
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 REGISTRY = """
 from .schematics import animate_one, animate_two
 

@@ -85,6 +85,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...filters.frequencies import _OCTAVE_SPACING_MIN_RATIO
 from .insulation import (
@@ -181,6 +182,7 @@ def _as_1d(values: float | Sequence[float] | np.ndarray, name: str) -> np.ndarra
 
 def _positive(value: float, name: str) -> float:
     """Validate a positive, finite scalar."""
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."

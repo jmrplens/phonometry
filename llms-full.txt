@@ -2,7 +2,7 @@
 
 > Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1893 numerical conformance checks against 523 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1893 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.12). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1893 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -40699,8 +40699,9 @@ print(row.surface_density_kg_m2, row.converted)
 # 8.6 {'surface_density_kg_m2': ('8600', 'g/m2')}
 ```
 
-Leave `slots=True` out of such a class: on Python 3.13 a method of it that
-calls `super()` without arguments fails, which is how a `__post_init__` of
+Leave `slots=True` out of such a class: on Python 3.12, and on the 3.13
+releases that predate the fix, a method of it that calls `super()` without
+arguments fails, which is how a `__post_init__` of
 your own reaches the row contract. A bare `float` or `int`
 annotation is refused with `TypeError` the first time the class is built,
 because every cell of a row may be missing. A class built on `BandedRow` is
@@ -71894,6 +71895,13 @@ Source: https://jmrplens.github.io/phonometry/start/getting-started/
 pip install phonometry
 ```
 
+phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
+or later. Each of those floors, and each floor of the extras, is the oldest
+release the library's tests pass with, and a CI job installs exactly those
+releases on Python 3.12 to keep it so: matplotlib 3.10.7 for `[plot]`,
+reportlab 4.0.4 and svglib 0.9.0 for `[report]`, numba 0.60.0 for `[perf]` and
+python-soundfile 0.12.0 for `[audio]`.
+
 Optional extras:
 
 ```bash
@@ -72176,7 +72184,7 @@ part written most bluntly.
 - Evidence that a number is defensible: the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/), which prints each standard's own expected value beside the computed one.
 - A printed expected value that disagrees with the library: the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/), which says which of the two is wrong and why.
 
-The assumed starting point is Python 3.13 or newer with working NumPy and
+The assumed starting point is Python 3.12 or newer with working NumPy and
 SciPy, and enough acoustics to know what a one-third-octave band and a sound
 pressure level are.
 

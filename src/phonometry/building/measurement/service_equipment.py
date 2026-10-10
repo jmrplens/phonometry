@@ -891,7 +891,7 @@ def _positive_number(value: ArrayLike, name: str) -> float:
     # is refused like a bare one.
     if arr.ndim != 0 or isinstance(arr.item(), _NOT_A_NUMBER_TYPES):
         raise ValueError(msg)
-    return require_positive(float(_as_float64(value, name)), name)
+    return require_positive(_as_float64(value, name).item(), name)
 
 
 def _numbers(value: ArrayLike, name: str) -> np.ndarray:

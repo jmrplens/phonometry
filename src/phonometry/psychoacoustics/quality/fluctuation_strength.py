@@ -52,7 +52,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_ranks, require_same_length
+from ..._internal.validation import require_ranks, require_same_length, require_scalar
 from ...io._resolve import apply_calibration, resolve_fs
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
@@ -105,8 +105,11 @@ def fluctuation_strength_am_noise(
     :raises ValueError: If ``modulation_factor`` is outside [0, 1] or
         ``mod_frequency`` is not positive/finite, or the level is not finite.
     """
+    require_scalar(modulation_factor, "modulation_factor")
     m = float(modulation_factor)
+    require_scalar(mod_frequency, "mod_frequency")
     fmod = float(mod_frequency)
+    require_scalar(level_db, "level_db")
     lvl = float(level_db)
     if not np.isfinite(m) or not 0.0 <= m <= 1.0:
         msg = "'modulation_factor' must be in [0, 1]."
@@ -569,6 +572,7 @@ def fluctuation_strength(
 
     fs = resolve_fs(signal_in, fs, name="signal_in")
     sig = apply_calibration(signal_in, _validate_signal(signal_in))
+    require_scalar(fs, "fs")
     fs_v = float(fs)
     if not np.isfinite(fs_v) or fs_v <= 0.0:
         msg = "'fs' must be positive and finite."

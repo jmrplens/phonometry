@@ -42,6 +42,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._zwicker_data import (
     A0_TRANSMISSION,
@@ -945,6 +946,7 @@ def loudness_zwicker(
         raise ValueError(msg)
     pressure = pressure * factor
 
+    require_scalar(fs, "fs")
     if int(fs) != fs:
         msg = f"'fs' must be an integer sampling rate, got {fs!r}."
         raise ValueError(msg)
@@ -961,6 +963,7 @@ def loudness_zwicker(
             raise ValueError(msg)
         pressure = np.asarray(signal.resample_poly(pressure, up, down))
 
+    require_scalar(time_skip, "time_skip")
     time_skip = float(time_skip)
     if not math.isfinite(time_skip) or time_skip < 0.0:
         msg = "'time_skip' must be a non-negative, finite time."

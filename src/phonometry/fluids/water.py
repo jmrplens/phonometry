@@ -41,6 +41,7 @@ from .._internal.validation import (
     require_above_absolute_zero,
     require_above_absolute_zero_array,
     require_finite_array,
+    require_scalar,
 )
 from ._state import Fluid
 
@@ -55,6 +56,7 @@ _MODELS = ("unesco", "del_grosso", "mackenzie", "medwin")
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -63,6 +65,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _finite(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar):
         msg = f"'{name}' must be a finite number."

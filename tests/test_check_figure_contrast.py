@@ -32,6 +32,10 @@ import check_figure_contrast as cfc
 
 from phonometry._plot.common import theme_fill
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 

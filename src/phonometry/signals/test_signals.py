@@ -58,7 +58,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import (
     apply_calibration,
@@ -142,10 +142,12 @@ def noise_signal(
     :return: The noise record, ``round(fs * seconds)`` samples.
     :raises ValueError: If the inputs or parameters are invalid.
     """
+    require_scalar(fs, "fs")
     fs_v = float(fs)
     if not np.isfinite(fs_v) or fs_v <= 0.0:
         msg = "'fs' must be a positive, finite number."
         raise ValueError(msg)
+    require_scalar(seconds, "seconds")
     seconds_v = float(seconds)
     if not np.isfinite(seconds_v) or seconds_v <= 0.0:
         msg = "'seconds' must be a positive, finite number."
@@ -157,6 +159,7 @@ def noise_signal(
     if color not in _COLOR_EXPONENTS:
         msg = "'color' must be one of 'white', 'pink', 'red', 'blue', 'violet'."
         raise ValueError(msg)
+    require_scalar(rms, "rms")
     rms_v = float(rms)
     if not np.isfinite(rms_v) or rms_v <= 0.0:
         msg = "'rms' must be a positive, finite number."
@@ -311,11 +314,13 @@ def _tone_burst_scalars(
     if f_v >= fs_v / 2.0:
         msg = "'frequency' must be below the Nyquist rate fs/2."
         raise ValueError(msg)
+    require_scalar(cycles, "cycles")
     cycles_v = int(cycles)
     if cycles_v != cycles or cycles_v < 1:
         msg = "'cycles' must be a positive integer."
         raise ValueError(msg)
     amplitude_v = _positive(amplitude, "amplitude")
+    require_scalar(repetitions, "repetitions")
     repetitions_v = int(repetitions)
     if repetitions_v != repetitions or repetitions_v < 1:
         msg = "'repetitions' must be a positive integer."
@@ -625,14 +630,17 @@ def resample_signal(
     xa = _validate_1d_finite(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
     fs_new_v = _positive(fs_new, "fs_new")
+    require_scalar(stopband_attenuation_db, "stopband_attenuation_db")
     atten = float(stopband_attenuation_db)
     if not np.isfinite(atten) or atten < _MIN_STOPBAND_ATTENUATION_DB:
         msg = "'stopband_attenuation_db' must be at least 30 dB."
         raise ValueError(msg)
+    require_scalar(transition_width, "transition_width")
     tw = float(transition_width)
     if not np.isfinite(tw) or not 0.0 < tw <= _MAX_TRANSITION_WIDTH:
         msg = "'transition_width' must be in (0, 0.5]."
         raise ValueError(msg)
+    require_scalar(max_denominator, "max_denominator")
     max_den = int(max_denominator)
     if max_den < 1:
         msg = "'max_denominator' must be a positive integer."
@@ -788,6 +796,7 @@ def fractional_delay(
     :raises ValueError: If the inputs or parameters are invalid.
     """
     xa = _validate_1d_finite(x, "x")
+    require_scalar(delay, "delay")
     delay_v = float(delay)
     if not np.isfinite(delay_v):
         msg = "'delay' must be a finite number."

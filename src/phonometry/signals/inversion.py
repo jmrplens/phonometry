@@ -48,7 +48,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from ..io._resolve import SignalInput, apply_calibration
 from ..io._resolve import resolve_fs as _resolve_signal_fs
 from ..io._signal import Signal
@@ -405,6 +405,7 @@ def _resolve_fs(
             "that carries a sample rate)"
         )
         raise ValueError(msg)
+    require_scalar(fs, "fs")
     fs_v = float(fs)
     if fs_v <= 0.0:
         msg = "fs must be positive"

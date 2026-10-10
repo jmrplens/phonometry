@@ -58,7 +58,12 @@ import numpy as np
 from scipy.special import erf
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_positive, require_ranks, require_same_length
+from ..._internal.validation import (
+    require_positive,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -172,6 +177,7 @@ def loss_parameter(attenuation_db_per_wavelength: float) -> float:
     :return: The dimensionless loss parameter :math:`\varepsilon`.
     :raises ValueError: If the attenuation is negative or non-finite.
     """
+    require_scalar(attenuation_db_per_wavelength, "attenuation_db_per_wavelength")
     beta = float(attenuation_db_per_wavelength)
     if not np.isfinite(beta) or beta < 0.0:
         msg = "'attenuation_db_per_wavelength' must be non-negative and finite."
@@ -418,6 +424,7 @@ def _angle_and_gradient(
             )
             raise ValueError(msg)
     else:
+        require_scalar(critical_angle_deg, "critical_angle_deg")
         deg = float(critical_angle_deg)
         if not np.isfinite(deg) or not (0.0 < deg <= _NORMAL_INCIDENCE_DEG):
             msg = "'critical_angle_deg' must lie in (0, 90] degrees."
@@ -426,6 +433,7 @@ def _angle_and_gradient(
     if gradient is None:
         eta = reflection_loss_gradient(bed, frequency_hz=frequency_hz)
     else:
+        require_scalar(gradient, "reflection_loss_gradient_value_np_per_rad")
         eta = float(gradient)
         if not np.isfinite(eta) or eta < 0.0:
             msg = "'reflection_loss_gradient_value_np_per_rad' must be non-negative and finite."

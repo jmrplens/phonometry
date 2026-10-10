@@ -27,6 +27,10 @@ if _SCRIPTS not in sys.path:
 
 from figures.i18n import _decimal_comma, _fmt_minus
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 MINUS = "−"
 
 

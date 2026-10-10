@@ -52,6 +52,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -523,6 +524,7 @@ def single_number_rating_uncertainty(
     :raises ValueError: Negative ``dl_alpha``, unknown ``condition`` or an
         untabulated ``confidence``.
     """
+    require_scalar(dl_alpha, "dl_alpha")
     value = float(dl_alpha)
     if not np.isfinite(value) or value < 0.0:
         msg = "'dl_alpha' must be a non-negative, finite value."

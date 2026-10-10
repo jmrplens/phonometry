@@ -88,6 +88,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -1725,6 +1726,7 @@ _SOURCE_HEIGHT_AXIS = "source height"
 
 
 def _finite(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar):
         msg = f"'{name}' must be a finite number."

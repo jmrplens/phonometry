@@ -78,7 +78,6 @@ colours.
 
 from __future__ import annotations
 
-import atexit
 import contextlib
 import itertools
 import json
@@ -89,6 +88,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 from matplotlib.axes import Axes
 from matplotlib.text import Text
+from process_exit import run_at_exit
 
 if TYPE_CHECKING:
     from matplotlib.axis import Axis, Tick
@@ -340,17 +340,17 @@ def _page_size(label: _Label) -> tuple[float, float]:
 
 def _register() -> None:
     global _REGISTERED
-    atexit.register(_dump)
+    run_at_exit(_dump)
     _REGISTERED = True
 
 
 def _forget_after_fork() -> None:
     """Drop the parent's recording so a forked child records only its own.
 
-    ``multiprocessing`` empties the ``atexit`` registry of a forked child, so
-    a child that inherited ``_REGISTERED = True`` would never register a
-    handler of its own and its measurements would be lost. The annotation
-    audit carries the full account of why; the fix is the same.
+    ``multiprocessing`` never runs the parent's exit handlers in a forked
+    child, so a child that inherited ``_REGISTERED = True`` would never
+    register a handler of its own and its measurements would be lost. The
+    annotation audit carries the full account of why; the fix is the same.
     """
     global _REGISTERED
     _FOUND.clear()

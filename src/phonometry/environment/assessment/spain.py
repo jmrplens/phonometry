@@ -92,6 +92,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -308,6 +309,7 @@ _HOURS_SUM_TOL = 1e-9
 
 def _finite(value: float, name: str) -> float:
     """Return ``value`` as a float, rejecting non-finite input."""
+    require_scalar(value, name)
     scalar = float(value)
     if not math.isfinite(scalar):
         msg = f"'{name}' must be finite."
@@ -317,6 +319,7 @@ def _finite(value: float, name: str) -> float:
 
 def _positive(value: float, name: str) -> float:
     """Return ``value`` as a float, rejecting non-positive or non-finite input."""
+    require_scalar(value, name)
     scalar = float(value)
     if not math.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -1298,11 +1301,13 @@ def _validate_annual_inputs(
     :param closed_level: Level representing a day with no operation, dB.
     :raises ValueError: For a fractional or out-of-range count of days.
     """
+    require_scalar(year_days, "year_days")
     if int(year_days) != year_days or int(year_days) <= 0:
         msg = f"'year_days' must be a positive whole number; got {year_days!r}."
         raise ValueError(msg)
     if operating_days is None:
         return
+    require_scalar(operating_days, "operating_days")
     if int(operating_days) != operating_days:
         msg = (
             f"'operating_days' must be a whole number of days; got {operating_days!r}."

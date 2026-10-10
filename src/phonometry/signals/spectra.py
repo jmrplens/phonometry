@@ -73,6 +73,7 @@ from .._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
 
@@ -110,6 +111,7 @@ _MIN_SMOOTHING_POINTS = 2
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -150,6 +152,7 @@ def _validate_signal(
 def _validate_welch_params(
     n: int, fs: float, nperseg: int | None, overlap: float
 ) -> tuple[int, float]:
+    require_scalar(overlap, "overlap")
     if not 0.0 <= float(overlap) < 1.0:
         msg = "'overlap' must be in [0, 1)."
         raise ValueError(msg)
@@ -353,6 +356,7 @@ def _coherence_from_spectra(
 
 
 def _validate_confidence(confidence: float) -> float:
+    require_scalar(confidence, "confidence")
     conf = float(confidence)
     if not 0.0 < conf < 1.0:
         msg = "'confidence' must be in (0, 1)."

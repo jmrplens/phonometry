@@ -89,7 +89,7 @@ part written most bluntly.
 - Evidence that a number is defensible: the [conformance report](/phonometry/reference/conformance/), which prints each standard's own expected value beside the computed one.
 - A printed expected value that disagrees with the library: the [errata registry](/phonometry/reference/errata/), which says which of the two is wrong and why.
 
-The assumed starting point is Python 3.13 or newer with working NumPy and
+The assumed starting point is Python 3.12 or newer with working NumPy and
 SciPy, and enough acoustics to know what a one-third-octave band and a sound
 pressure level are.
 

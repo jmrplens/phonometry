@@ -26,7 +26,12 @@ updates:
       - "dependencies"
       - "python"
     open-pull-requests-limit: 5
-    versioning-strategy: "increase"
+    # The exact pins in requirements*.txt move to each new release, because
+    # an `==` pin never admits it; the `>=` floors in pyproject.toml already
+    # admit every newer release and stay where they were measured. "increase"
+    # would raise them to the release being bumped to, with no failure behind
+    # it (CONTRIBUTING.md, section 3a).
+    versioning-strategy: "increase-if-necessary"
     groups:
       python:
         patterns:

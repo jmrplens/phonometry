@@ -94,7 +94,7 @@ más franca.
 - Pruebas de que un número es defendible: el [informe de conformidad](/phonometry/es/reference/conformance/), que imprime el valor esperado de cada norma junto al calculado.
 - Un valor esperado impreso que no concuerda con la biblioteca: el [registro de erratas](/phonometry/es/reference/errata/), que dice cuál de los dos está mal y por qué.
 
-El punto de partida que se supone es Python 3.13 o posterior con NumPy y SciPy
+El punto de partida que se supone es Python 3.12 o posterior con NumPy y SciPy
 funcionando, y la acústica suficiente para saber qué son una banda de tercio de
 octava y un nivel de presión acústica.
 

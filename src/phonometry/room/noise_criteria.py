@@ -47,6 +47,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -221,6 +222,7 @@ class NCResult(OwnsArrays):
         _require_table1_bands(type(self).__name__, self.frequencies)
         if self.out_of_range is not None:
             require_choice(self.out_of_range, "out_of_range", ("above", "below"))
+            require_scalar(self.rating, "rating")
             if not math.isnan(float(self.rating)):
                 msg = (
                     "NCResult: 'rating' must be NaN when 'out_of_range' is "

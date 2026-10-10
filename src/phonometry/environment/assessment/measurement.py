@@ -53,7 +53,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.validation import require_equal_counts
+from ..._internal.validation import require_equal_counts, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -116,6 +116,7 @@ class EnvironmentalMeasurementWarning(PhonometryWarning):
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -124,6 +125,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _finite(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar):
         msg = f"'{name}' must be finite."

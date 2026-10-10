@@ -78,6 +78,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .insulation import (
     ImpactRatingResult,
@@ -226,6 +227,7 @@ def _finite_bands(
 
 def _positive(value: float, name: str) -> float:
     """Return ``value`` as a positive, finite float, or raise."""
+    require_scalar(value, name)
     v = float(value)
     if not np.isfinite(v) or v <= 0.0:
         msg = f"'{name}' must be positive."

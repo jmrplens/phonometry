@@ -189,7 +189,6 @@ sitting within three pixels of a threshold, and nothing further from one.
 
 from __future__ import annotations
 
-import atexit
 import contextlib
 import json
 import os
@@ -201,6 +200,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch
 from matplotlib.text import Annotation, Text
 from matplotlib.transforms import Bbox
+from process_exit import run_at_exit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -1199,7 +1199,7 @@ def _covered_by(
 
 def _register() -> None:
     global _REGISTERED
-    atexit.register(_dump)
+    run_at_exit(_dump)
     _REGISTERED = True
 
 
@@ -1207,18 +1207,19 @@ def _forget_after_fork() -> None:
     """Drop the parent's recording so a forked child records only its own.
 
     ``os.fork`` copies ``_FOUND`` and ``_REGISTERED`` into the child but not
-    the handler that reads them: ``multiprocessing.popen_fork`` empties the
-    whole ``atexit`` registry in the child before the target runs, and puts
-    its own ``_exit_function`` in place of it. A child that inherited
+    the handler that reads them: ``multiprocessing.popen_fork`` never runs
+    the parent's exit handlers in the child (Python 3.13 empties the
+    ``atexit`` registry before the target runs, 3.12 leaves through
+    ``os._exit`` without reading it). A child that inherited
     ``_REGISTERED = True`` would therefore never re-register, and everything
     it went on to measure would be dropped at exit -- a partial recording,
     which the checker's coverage rule turns into "not a full run" rather than
     into a pass, but only after a whole generation run has been paid for.
 
     Clearing both leaves the child where a spawned worker starts, and its
-    first :func:`audit` registers a handler of its own. That registration
-    happens after the child has cleared the registry, which is why it
-    survives where the inherited one does not.
+    first :func:`audit` registers a handler of its own, through
+    :func:`process_exit.run_at_exit`, which a forked child reaches on 3.12
+    as well as on 3.13.
 
     No fork in the corpus reaches this today, and the reason is the second
     clause rather than the first: the one fork, the four language/theme

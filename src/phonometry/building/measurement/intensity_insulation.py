@@ -84,12 +84,14 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    is_scalar,
     require_equal_counts,
     require_equal_shapes,
     require_finite_fields,
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .insulation import (
     WeightedRatingResult,
@@ -468,6 +470,7 @@ class IntensityElementNormalizedResult(OwnsArrays):
 
 def _positive_area(value: float, name: str) -> float:
     """Return ``value`` as a positive, finite area, or raise."""
+    require_scalar(value, name)
     v = float(value)
     if not np.isfinite(v) or v <= 0.0:
         msg = f"'{name}' must be positive."
@@ -790,6 +793,7 @@ def intensity_element_normalized_difference(
         "band",
     )
     sm = _positive_area(measurement_area, "measurement_area")
+    require_scalar(n, "n")
     if int(n) != n or n < 1:
         msg = "'n' must be a positive integer."
         raise ValueError(msg)
@@ -942,6 +946,7 @@ def limp_panel_reduction_index(
             f"panel that large (ISO 15186-3:2002, A.1); got {s:g} m2."
         )
         raise ValueError(msg)
+    require_scalar(temperature_c, "temperature_c")
     theta = float(temperature_c)
     b = require_positive(static_pressure_pa, "static_pressure_pa")
     if not np.isfinite(theta) or theta <= -_ANNEX_A_KELVIN:
@@ -987,7 +992,9 @@ def _validated_element_count(elements: object) -> int:
         taken from.
     """
     msg = "'elements' must be a positive integer."
-    if isinstance(elements, (bool, np.bool_)):
+    # An array is refused by its rank: numpy before 2.4 converts a
+    # one-element array through int() instead of refusing it.
+    if isinstance(elements, (bool, np.bool_)) or not is_scalar(elements):
         raise ValueError(msg)
     try:
         count = int(elements)  # type: ignore[call-overload]

@@ -61,7 +61,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from ..io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
@@ -96,6 +96,7 @@ _MIN_HARMONIC_ORDER = 2
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -539,6 +540,7 @@ def _harmonic_window(
     """
     min_spacing = int(np.floor(delays_samples[-1] - delays_samples[-2]))
     if ir_length is not None:
+        require_scalar(ir_length, "ir_length")
         window = int(ir_length)
         if window < _MIN_IR_LENGTH:
             msg = f"'ir_length' must be at least {_MIN_IR_LENGTH} samples."
@@ -692,6 +694,7 @@ def swept_sine_distortion(
     if method not in ("synchronized", "farina"):
         msg = "'method' must be 'synchronized' or 'farina'."
         raise ValueError(msg)
+    require_scalar(n_harmonics, "n_harmonics")
     n_orders = int(n_harmonics)
     if n_orders < _MIN_HARMONIC_ORDER:
         msg = "'n_harmonics' must be at least 2."

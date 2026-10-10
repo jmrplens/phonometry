@@ -110,6 +110,7 @@ from ..._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...fluids import Fluid
 from ...solids.catalogue import SolidMaterial
@@ -663,6 +664,7 @@ def in_situ_total_loss_factor(
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
     sigma = _band_array(radiation_factor, f.size, "radiation_factor", positive=True)
+    require_scalar(perimeter_absorption, "perimeter_absorption")
     perimeter_sum = float(perimeter_absorption)
     if not np.isfinite(perimeter_sum) or perimeter_sum < 0.0:
         msg = "'perimeter_absorption' must be finite and non-negative."

@@ -63,6 +63,7 @@ from ..._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -364,6 +365,7 @@ class AbsorptionRatingResult(OwnsArrays):
             ``unfavourable_sum`` does not restate the deviations between the
             two octave curves.
         """
+        require_scalar(self.alpha_w, "alpha_w")
         if not math.isfinite(self.alpha_w) or not 0.0 <= self.alpha_w <= 1.0:
             msg = (
                 f"{type(self).__name__}: 'alpha_w' must be a finite value in "
@@ -670,6 +672,7 @@ def absorption_class(alpha_w: float) -> str:
         ``"Not classified"``.
     :raises ValueError: if ``alpha_w`` is not a finite value in ``[0, 1]``.
     """
+    require_scalar(alpha_w, "alpha_w")
     if not math.isfinite(alpha_w) or not 0.0 <= alpha_w <= 1.0:
         msg = "'alpha_w' must be a finite value in the range [0, 1]."
         raise ValueError(msg)

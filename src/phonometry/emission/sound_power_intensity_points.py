@@ -137,6 +137,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections
@@ -409,6 +410,7 @@ def _nominal_band(frequency: float, band_type: BandType) -> float:
         tabulated centre of ``band_type`` lies within
         :data:`_BAND_MATCH_TOLERANCE` of it.
     """
+    require_scalar(frequency, "frequencies")
     if not math.isfinite(frequency) or frequency <= 0.0:
         msg = "Band centre frequencies must be finite and positive."
         raise ValueError(msg)

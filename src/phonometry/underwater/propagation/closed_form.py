@@ -43,6 +43,7 @@ from ..._internal.validation import (
     require_above_absolute_zero,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -60,6 +61,7 @@ _FG_A3_SWITCH_T_C = 20.0
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -204,8 +206,11 @@ def seawater_absorption(
     :raises ValueError: If ``model`` is unknown or an input is invalid.
     """
     f_khz = _positive_array(frequency_hz, "frequency_hz") / 1000.0
+    require_scalar(temperature_c, "temperature_c")
     t = float(temperature_c)
+    require_scalar(salinity, "salinity")
     s = float(salinity)
+    require_scalar(depth, "depth")
     z = float(depth)
     if not (np.isfinite(t) and np.isfinite(s) and np.isfinite(z) and np.isfinite(ph)):
         msg = "'temperature_c', 'salinity', 'depth' and 'ph' must be finite."

@@ -40,6 +40,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 from figures import i18n, registry, theme  # noqa: E402
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 #: The four variants every clip is rendered in.
 EXPECTED = (("en", False), ("en", True), ("es", False), ("es", True))
 

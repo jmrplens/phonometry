@@ -94,6 +94,7 @@ from ..._internal.validation import (
     require_non_negative,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from .railway import VELOCITY_LEVEL_REFERENCE_MM_S, band_sum_level
 from .train_categories import TRAIN_KB_FMAX_FACTOR
@@ -941,6 +942,7 @@ def line_source_correction_db(
     distance = require_positive(distance_m, "distance_m")
     reference = require_positive(reference_distance_m, "reference_distance_m")
     low, high = sorted(LINE_SOURCE_EXPONENT_CORRECTION.values())
+    require_scalar(exponent_correction, "exponent_correction")
     correction = float(exponent_correction)
     if not low <= correction <= high:
         msg = f"'exponent_correction' is {low:g} to {high:g} in Annex B, got {correction!r}."
@@ -1009,6 +1011,7 @@ def train_velocity_ratio(
         raise ValueError(msg)
     exponent = require_non_negative(point_exponent, "point_exponent")
     low, high = sorted(LINE_SOURCE_EXPONENT_CORRECTION.values())
+    require_scalar(exponent_correction, "exponent_correction")
     correction = float(exponent_correction)
     if not low <= correction <= high:
         msg = f"'exponent_correction' is {low:g} to {high:g} in Annex B, got {correction!r}."

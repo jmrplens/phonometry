@@ -55,7 +55,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from ..io._resolve import resolve_fs
 from .spectra import (
     _DEFAULT_OVERLAP,
@@ -428,7 +428,9 @@ def zoom_fft(
 
     xa = _validate_signal(x, "x", context="a zoom FFT")
     fs_v = _positive(resolve_fs(x, fs), "fs")
+    require_scalar(f_min, "f_min")
     lo = float(f_min)
+    require_scalar(f_max, "f_max")
     hi = float(f_max)
     if not 0.0 <= lo < hi <= fs_v / 2.0:
         msg = "The zoom band must satisfy 0 <= f_min < f_max <= fs/2."
@@ -436,6 +438,7 @@ def zoom_fft(
     if n_points is None:
         m = int(np.ceil((hi - lo) * xa.size / fs_v)) + 1
     else:
+        require_scalar(n_points, "n_points")
         m = int(n_points)
     if m < _MIN_ZOOM_GRID_POINTS:
         msg = "'n_points' must be at least 2."

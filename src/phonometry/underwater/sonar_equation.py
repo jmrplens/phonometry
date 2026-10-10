@@ -59,6 +59,7 @@ from .._internal.validation import (
     require_equal_shapes,
     require_positive,
     require_same_shape,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -81,6 +82,7 @@ _MIN_CURVE_POINTS = 2
 
 
 def _finite(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar):
         msg = f"'{name}' must be a finite number."
@@ -395,6 +397,7 @@ def detection_range(
     if rmax <= 1.0:
         msg = "'max_range' must exceed 1 m."
         raise ValueError(msg)
+    require_scalar(n_points, "n_points")
     if int(n_points) < _MIN_CURVE_POINTS:
         msg = "'n_points' must be at least 2."
         raise ValueError(msg)

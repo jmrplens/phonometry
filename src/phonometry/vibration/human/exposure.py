@@ -75,6 +75,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
@@ -807,6 +808,7 @@ def _weighted_signal(signal: SignalInput) -> Real:
 
 def _positive_fs(fs: float) -> float:
     """Return ``fs`` as a positive, finite float or raise ``ValueError``."""
+    require_scalar(fs, "fs")
     fs = float(fs)
     if not math.isfinite(fs) or fs <= 0.0:
         msg = "'fs' must be a positive, finite sampling frequency."
@@ -841,6 +843,7 @@ def running_rms(
     fs = resolve_fs(signal, fs, name="signal")
     x = _weighted_signal(signal)
     fs = _positive_fs(fs)
+    require_scalar(integration_time, "integration_time")
     tau = float(integration_time)
     if not math.isfinite(tau) or tau <= 0.0:
         msg = "'integration_time' must be positive and finite."
@@ -1065,7 +1068,9 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
     :return: The daily exposure ``A(8)``, in m/s2.
     :raises ValueError: for a non-finite or negative magnitude or duration.
     """
+    require_scalar(total_value, "total_value")
     a = float(total_value)
+    require_scalar(duration_s, "duration_s")
     t = float(duration_s)
     # `< 0.0` alone would wave a NaN through (every NaN comparison is False)
     # into an A(8) of NaN that the Directive assessment then reads as "below
@@ -1172,6 +1177,7 @@ def hav_vwf_lifetime_years(a8: float) -> float:
     :return: The lifetime exposure duration :math:`D_\mathrm{y}`, in years.
     :raises ValueError: if ``a8`` is not positive.
     """
+    require_scalar(a8, "a8")
     a = float(a8)
     if not math.isfinite(a) or a <= 0.0:
         msg = "'a8' must be a positive daily exposure."
@@ -1247,6 +1253,7 @@ class ExposureAssessment:
             raise ValueError(_KIND_METRIC_MSG)
         # A NaN exposure fails both `>= EAV` comparisons and would be assessed
         # "below action"; refuse it instead of letting the verdict claim safety.
+        require_scalar(self.value, "value")
         if not math.isfinite(self.value) or self.value < 0.0:
             msg = "'value' must be finite and non-negative."
             raise ValueError(msg)

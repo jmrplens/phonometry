@@ -417,7 +417,7 @@ def _axial_geometry(
     if len(dimensions) != _N_ROOM_AXES:
         msg = "'dimensions' must be the three room lengths (Lx, Ly, Lz)."
         raise ValueError(msg)
-    lx, ly, lz = (require_positive(float(d), "dimension") for d in dimensions)
+    lx, ly, lz = (require_positive(d, "dimension") for d in dimensions)
     volume = lx * ly * lz
     pair_areas = np.array(
         [2.0 * ly * lz, 2.0 * lx * lz, 2.0 * lx * ly], dtype=np.float64

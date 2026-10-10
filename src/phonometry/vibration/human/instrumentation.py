@@ -85,6 +85,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_finite_array,
     require_positive_array,
+    require_scalar,
 )
 from .exposure import (
     WEIGHTING_NAMES,
@@ -428,6 +429,7 @@ def _checked_uncertainty(value: float | None, name: str) -> float:
     """
     if value is None:
         return 0.0
+    require_scalar(value, name)
     uncertainty = float(value)
     if not math.isfinite(uncertainty) or uncertainty < 0.0:
         msg = f"'{name}' must be non-negative and finite; got {value!r}."
@@ -1221,6 +1223,7 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
         time is not positive and finite.
     """
     averaging = require_choice(str(method), "method", ("linear", "exponential"))
+    require_scalar(integration_time_s, "integration_time_s")
     tau = float(integration_time_s)
     if not math.isfinite(tau) or tau <= 0.0:
         msg = "'integration_time_s' must be positive and finite."
@@ -1382,6 +1385,7 @@ def verify_running_rms_decay(
         the three printed time constants.
     """
     averaging = require_choice(str(method), "method", ("linear", "exponential"))
+    require_scalar(measured_time_s, "measured_time_s")
     measured = float(measured_time_s)
     if not math.isfinite(measured) or measured <= 0.0:
         msg = "'measured_time_s' must be positive and finite."

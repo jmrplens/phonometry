@@ -82,6 +82,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -625,10 +626,11 @@ def image_source_rir(
     if d.shape != (3,):
         msg = "'dimensions' must be a 3-vector (Lx, Ly, Lz)."
         raise ValueError(msg)
-    lx = require_positive(float(d[0]), "Lx")
-    ly = require_positive(float(d[1]), "Ly")
-    lz = require_positive(float(d[2]), "Lz")
+    lx = require_positive(d[0], "Lx")
+    ly = require_positive(d[1], "Ly")
+    lz = require_positive(d[2], "Lz")
     dims = (lx, ly, lz)
+    require_scalar(fs, "fs")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)

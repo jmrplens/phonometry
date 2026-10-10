@@ -91,6 +91,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -319,6 +320,7 @@ _QUIET_FACADE_REDUCTION = 10.0
 
 def _finite(value: float, name: str) -> float:
     """Return ``value`` as a float, rejecting non-finite input."""
+    require_scalar(value, name)
     scalar = float(value)
     if not math.isfinite(scalar):
         msg = f"'{name}' must be finite."
@@ -328,6 +330,7 @@ def _finite(value: float, name: str) -> float:
 
 def _positive(value: float, name: str) -> float:
     """Return ``value`` as a float, rejecting non-positive or non-finite input."""
+    require_scalar(value, name)
     scalar = float(value)
     if not math.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -765,6 +768,7 @@ class DbHrCheck:
 
         :raises ValueError: if ``value`` is not finite.
         """
+        require_scalar(self.value, "value")
         if not math.isfinite(self.value):
             msg = f"DbHrCheck: 'value' must be finite; got {self.value!r}."
             raise ValueError(msg)

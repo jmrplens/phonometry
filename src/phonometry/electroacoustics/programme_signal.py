@@ -388,8 +388,8 @@ def simulated_programme_signal(
         msg = f"'spectrum' must be 'table' or 'figure_2'; got {spectrum!r}."
         raise ValueError(msg)
     rate = require_count(fs, "fs")
-    duration = require_positive(float(seconds), "seconds")
-    level = require_positive(float(rms), "rms")
+    duration = require_positive(seconds, "seconds")
+    level = require_positive(rms, "rms")
     n = round(rate * duration)
     if n < _MIN_SAMPLES:
         msg = f"'fs'*'seconds' must give at least {_MIN_SAMPLES} samples, got {n}."
@@ -410,7 +410,7 @@ def simulated_programme_signal(
     x -= float(np.mean(x))
     x /= float(np.sqrt(np.mean(x * x)))
     if peak_to_rms is not None:
-        x = _clip_to_ratio(x, require_positive(float(peak_to_rms), "peak_to_rms"))
+        x = _clip_to_ratio(x, require_positive(peak_to_rms, "peak_to_rms"))
     return np.asarray(x * level, dtype=np.float64)
 
 

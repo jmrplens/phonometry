@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import require_ranks, require_same_length, require_scalar
 from ..filters.weighting import _itu_r_468_prototype
 from ..io._resolve import apply_calibration, resolve_fs
 
@@ -85,6 +85,7 @@ _HARMONIC_SEARCH_FACTOR = 0.1
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -94,6 +95,7 @@ def _positive(value: float, name: str) -> float:
 
 def _validate_notch_q(notch_q: float) -> float:
     """Validate the effective notch quality factor (AES17 5.2.8: 1.2 <= Q <= 3)."""
+    require_scalar(notch_q, "notch_q")
     q = float(notch_q)
     if not _AES17_NOTCH_Q_MIN <= q <= _AES17_NOTCH_Q_MAX:
         msg = "'notch_q' must be within the AES17 range [1.2, 3]."

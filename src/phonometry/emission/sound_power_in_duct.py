@@ -103,6 +103,7 @@ from .._internal.validation import (
     require_positive,
     require_positive_array,
     require_ranks,
+    require_real,
     require_same_length,
 )
 from ._shared import _S0, SoundPowerWarning
@@ -791,13 +792,11 @@ def _as_scalar(value: object, name: str) -> float:
     or a string is an ordinary caller mistake, and left to :func:`float` it
     raises a bare ``TypeError`` from numpy or the interpreter that names
     neither the parameter nor the function; every refusal of this module is a
-    ``ValueError`` that names its parameter, so the coercion is made here.
+    ``ValueError`` that names its parameter, so the coercion is made here. A
+    one-element array is refused by its rank, since numpy before 2.4 converts
+    it to a float instead of refusing it.
     """
-    try:
-        return float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError) as exc:
-        msg = f"'{name}' must be a real number."
-        raise ValueError(msg) from exc
+    return require_real(value, f"'{name}' must be a real number.")
 
 
 def _check_duct_diameter(duct_diameter_m: float) -> float:

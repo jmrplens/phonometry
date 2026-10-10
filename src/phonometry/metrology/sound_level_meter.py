@@ -160,7 +160,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import is_class_designation
+from .._internal.validation import is_class_designation, require_real
 from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
@@ -798,11 +798,7 @@ def _scalar(value: float, name: str) -> float:
 
     :raises ValueError: for anything that is not one finite number.
     """
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        msg = f"'{name}' must be one number."
-        raise ValueError(msg) from None
+    number = require_real(value, f"'{name}' must be one number.")
     if not math.isfinite(number):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)

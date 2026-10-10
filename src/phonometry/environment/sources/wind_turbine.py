@@ -38,6 +38,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 
@@ -68,6 +69,7 @@ _MIN_SPECTRUM_LINES = 3
 
 
 def _positive(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -308,6 +310,7 @@ class WindTurbineTonalityResult(OwnsArrays):
         """
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels", axis="spectral line")
+        require_scalar(self.candidate_frequency_hz, "candidate_frequency_hz")
         candidate = float(self.candidate_frequency_hz)
         if not (math.isfinite(candidate) and candidate >= _LOW_FREQ_MIN):
             msg = (
@@ -451,6 +454,7 @@ def _candidate_peak(
     """
     if tone_frequency is None:
         return int(np.argmax(lv))
+    require_scalar(tone_frequency, "tone_frequency")
     tf = float(tone_frequency)
     if not np.isfinite(tf) or tf < float(fr[0]) or tf > float(fr[-1]):
         msg = (

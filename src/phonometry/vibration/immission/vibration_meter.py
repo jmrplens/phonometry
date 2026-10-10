@@ -79,6 +79,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -938,6 +939,7 @@ def assessment_weighting_taps(
         taps = int(round(fs / 2.0))
         taps += 1 - taps % 2
     else:
+        require_scalar(numtaps, "numtaps")
         taps = int(numtaps)
         if taps <= 0 or taps % 2 == 0:
             msg = f"'numtaps' must be a positive odd number; got {numtaps!r}."

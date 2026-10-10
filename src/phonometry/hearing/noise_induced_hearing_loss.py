@@ -35,6 +35,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from .threshold import age_threshold
@@ -549,9 +550,11 @@ def nipts(
     runs but a :class:`NoiseInducedHearingLossWarning` marks the result as an
     extrapolation, and the ``.report()`` fiche prints the matching caveat.
     """
+    require_scalar(years, "years")
     if years <= 0.0:
         msg = f"years must be positive; got {years}."
         raise ValueError(msg)
+    require_scalar(fractile, "fractile")
     if not 0.0 < fractile < 1.0:
         msg = f"fractile must be in (0, 1); got {fractile}."
         raise ValueError(msg)

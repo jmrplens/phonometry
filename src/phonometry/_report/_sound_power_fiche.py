@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
+from .._internal.validation import require_scalar
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -233,6 +234,7 @@ def headline_level(result: SoundPowerLike, level_a: float | None = None) -> floa
         finite, which is a determination with no qualifying band left.
     """
     if level_a is not None:
+        require_scalar(level_a, "level_a")
         if not math.isfinite(float(level_a)):
             msg = (
                 "the screened A-weighted level is not defined: no band "

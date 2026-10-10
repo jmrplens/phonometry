@@ -41,6 +41,7 @@ import json
 import pathlib
 import re
 import subprocess
+import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
@@ -154,6 +155,17 @@ def _check_areas_cover_the_tree() -> None:
 
 def _version() -> str:
     return (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+
+
+def _python_floor() -> str:
+    """The oldest Python ``requires-python`` admits, as ``pyproject.toml`` says it."""
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        spec = tomllib.load(handle)["project"]["requires-python"]
+    match = re.fullmatch(r">=\s*(\d+\.\d+)", spec.strip())
+    if match is None:
+        msg = f"generate_llms.py: requires-python {spec!r} is not a single floor"
+        raise SystemExit(msg)
+    return match.group(1)
 
 
 def _conformance_counts() -> tuple[int, int, int]:
@@ -603,10 +615,11 @@ def _summary(version: str) -> list[str]:
         "",
         (
             f"phonometry v{version} is a pure-Python library built on NumPy/SciPy "
-            "(Python >= 3.13). Each result is a typed, frozen dataclass that carries "
-            "the inputs it was computed from, draws its own figure with a one-line "
-            "`.plot()` in English or Spanish, and, where a standard defines a "
-            "reporting format, renders that format as a PDF with `.report()`. The "
+            f"(Python >= {_python_floor()}). Each result is a typed, frozen dataclass "
+            "that carries the inputs it was computed from, draws its own figure with "
+            "a one-line `.plot()` in English or Spanish, and, where a standard "
+            "defines a reporting format, renders that format as a PDF with "
+            "`.report()`. The "
             f"conformance report pins each of the {checks} checks to a standard, a "
             "clause or table, the normative expected value and the value the library "
             f"computes, across {domains} domains."

@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_ranks, require_same_length
+from ..._internal.validation import require_ranks, require_same_length, require_scalar
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .moore_glasberg import (
     _ERB_C1,
@@ -451,6 +451,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
             "long_term_loudness_level",
             axis="frame",
         )
+        require_scalar(self.n_max, "n_max")
         if not math.isfinite(self.n_max) or self.n_max < 0.0:
             msg = (
                 "MooreGlasbergTimeVaryingLoudness: 'n_max' must be a finite, "
@@ -790,6 +791,7 @@ def loudness_moore_glasberg_time(
     """
     _validate_conditions(field, presentation)
     fs = resolve_fs(signal, fs, name="signal")
+    require_scalar(fs, "fs")
     if fs <= 0.0:
         msg = f"'fs' must be a positive sampling rate, got {fs!r}."
         raise ValueError(msg)

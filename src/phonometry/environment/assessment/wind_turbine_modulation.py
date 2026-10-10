@@ -92,6 +92,7 @@ from ..._internal.validation import (
     is_class_designation,
     require_finite_array,
     require_finite_matrix,
+    require_scalar,
 )
 from .wind_turbine_receptor import _A_WEIGHTING_DB, _bin_keys, _type_a_arithmetic
 
@@ -420,6 +421,7 @@ class ModulationBlock(OwnsArrays):
                 "(13.6.2.3 d) and e)); give both or neither."
             )
             raise ValueError(msg)
+        require_scalar(self.prominence, "prominence")
         if self.prominence is not None and (
             math.isnan(self.prominence) or self.prominence < 0.0
         ):

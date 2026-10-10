@@ -78,6 +78,7 @@ from ..._internal.validation import (
     require_choice,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 from .porous import PUBLISHED_AIR, Complex
@@ -256,6 +257,7 @@ def rectangular_duct_properties(
     pr = fluid.prandtl_number
     gamma = fluid.heat_capacity_ratio
     p0 = fluid.static_pressure_pa
+    require_scalar(sum_terms, "sum_terms")
     n = int(sum_terms)
     if n < 1:
         msg = "'sum_terms' must be at least 1."
@@ -709,6 +711,7 @@ def slit_helmholtz_absorber(
         raise ValueError(msg)
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
+    require_scalar(angle_rad, "angle_rad")
     theta = float(angle_rad)
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
         msg = "'angle_rad' must satisfy 0 <= angle < pi/2 - 1e-6."
@@ -884,6 +887,7 @@ def critical_coupling_design(
     d = require_positive(period_m, "period_m")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
+    require_scalar(angle_rad, "angle_rad")
     theta = float(angle_rad)
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
         msg = "'angle_rad' must satisfy 0 <= angle < pi/2 - 1e-6."

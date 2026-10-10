@@ -1966,7 +1966,12 @@ def _default_jobs() -> int:
     figure's data arrays plus a matplotlib canvas (~a few hundred MB for the
     heaviest compute figures).
     """
-    cpus = os.process_cpu_count() or 2
+    # The cores this process may run on, where the interpreter can say
+    # (os.process_cpu_count is new in Python 3.13); the machine's count before.
+    if sys.version_info >= (3, 13):
+        cpus = os.process_cpu_count() or 2
+    else:
+        cpus = os.cpu_count() or 2
     return max(1, min(cpus - 2, 8))
 
 

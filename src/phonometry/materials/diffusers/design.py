@@ -66,6 +66,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.validation import require_scalar
 from .scattering_diffusion import (
     DiffusionSpectrum,
     diffusion_spectrum,
@@ -113,6 +114,7 @@ _MIN_RECEIVERS = 2
 # ---------------------------------------------------------------------------
 def _positive_scalar(value: float, name: str) -> float:
     """Return ``value`` as a positive, finite float or raise ``ValueError``."""
+    require_scalar(value, name)
     v = float(value)
     if not math.isfinite(v) or v <= 0.0:
         msg = f"'{name}' must be a positive, finite number."
@@ -122,6 +124,7 @@ def _positive_scalar(value: float, name: str) -> float:
 
 def _prime_generator(prime: int) -> int:
     """Return ``prime`` as an odd prime >= 3 or raise ``ValueError``."""
+    require_scalar(prime, "prime")
     n = int(prime)
     if n != prime:
         msg = "'prime' must be an integer."
@@ -371,10 +374,12 @@ def _prepare_geometry(
     if not np.all(np.isfinite(ang)):
         msg = "'angles_deg' values must be finite."
         raise ValueError(msg)
+    require_scalar(source_angle_deg, "source_angle_deg")
     psi = float(source_angle_deg)
     if not math.isfinite(psi):
         msg = "'source_angle_deg' must be finite."
         raise ValueError(msg)
+    require_scalar(repetitions, "repetitions")
     n_periods = int(repetitions)
     if n_periods != repetitions or n_periods < 1:
         msg = "'repetitions' must be an integer of at least 1."

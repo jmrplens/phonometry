@@ -137,6 +137,7 @@ from .._internal.validation import (
     require_finite_array,
     require_finite_matrix,
     require_positive_array,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from .comparison_calibration import _compared_level_db, _output_level_difference_db
@@ -558,6 +559,7 @@ class DirectivityFactor(OwnsArrays):
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(array))
         require_finite(self.reference_level_db, "reference_level_db")
+        require_scalar(self.gamma, "gamma")
         if not (math.isfinite(self.gamma) and self.gamma > 0.0):
             msg = f"DirectivityFactor: 'gamma' must be positive and finite; got {self.gamma!r}."
             raise ValueError(msg)

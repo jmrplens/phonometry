@@ -101,6 +101,7 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._shared import (
     SoundPowerWarning,
@@ -587,6 +588,8 @@ def _room_inputs(
     through: ``nan <= 0`` is ``False``, so the room would pass here and the
     determination would return ``NaN`` bands with nothing said about why.
     """
+    require_scalar(volume, "volume")
+    require_scalar(surface_area, "surface_area")
     if (
         not math.isfinite(volume)
         or not math.isfinite(surface_area)

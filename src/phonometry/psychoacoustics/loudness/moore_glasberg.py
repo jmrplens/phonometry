@@ -57,6 +57,7 @@ from ..._internal.validation import (
     require_1d_signal,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ..erb_scale import CAM_C, ERB_C1, ERB_C2, erb_bandwidth, frequency_from_cam
@@ -600,6 +601,7 @@ class MooreGlasbergLoudness(OwnsArrays):
             "centre_frequencies",
             axis="auditory filter",
         )
+        require_scalar(self.loudness, "loudness")
         if not math.isfinite(self.loudness) or self.loudness < 0.0:
             msg = (
                 "MooreGlasbergLoudness: 'loudness' must be a finite, "
@@ -1044,6 +1046,7 @@ def loudness_moore_glasberg(
     if pressure.size == 0:
         msg = "Input signal 'x' cannot be empty."
         raise ValueError(msg)
+    require_scalar(fs, "fs")
     if fs <= 0.0:
         msg = f"'fs' must be a positive sampling rate, got {fs!r}."
         raise ValueError(msg)

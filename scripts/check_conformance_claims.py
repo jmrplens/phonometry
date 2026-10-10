@@ -298,8 +298,13 @@ def rewrite_text(
 
 
 def _read(path: pathlib.Path) -> str:
-    """Read a file with its line endings left exactly as they are on disk."""
-    return path.read_text(encoding="utf8", newline="")
+    """Read a file with its line endings left exactly as they are on disk.
+
+    Decoded from its bytes rather than through ``read_text(newline="")``,
+    which only Python 3.13 accepts: the bytes carry no newline translation
+    either, and the script runs on every interpreter the package supports.
+    """
+    return path.read_bytes().decode("utf8")
 
 
 def _label(path: pathlib.Path, root: pathlib.Path) -> str:

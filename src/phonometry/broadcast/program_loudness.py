@@ -65,6 +65,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 _EMPTY_SIGNAL = "Input signal 'x' cannot be empty."
@@ -211,7 +212,7 @@ def k_weighting_coefficients(
     :return: ``(stage1, stage2)``, each a ``(b, a)`` coefficient pair: the
         spherical-head shelving filter and the RLB high-pass filter.
     """
-    fs = require_positive(float(fs), "fs")
+    fs = require_positive(fs, "fs")
     if fs < _MIN_REDESIGN_RATE:
         msg = (
             "the K-weighting redesign requires fs >= 16000 Hz; below that "
@@ -378,10 +379,11 @@ def k_weighting_response(
     :raises ValueError: If ``fs`` is below 16 kHz, ``n`` is not positive, or a
         supplied frequency is outside ``(0, fs/2]``.
     """
-    fs = require_positive(float(fs), "fs")
+    fs = require_positive(fs, "fs")
     (b1, a1), (b2, a2) = k_weighting_coefficients(fs)
     nyquist = fs / 2.0
     if frequencies is None:
+        require_scalar(n, "n")
         if n < 1:
             msg = f"n must be a positive integer; got {n}."
             raise ValueError(msg)
@@ -616,7 +618,7 @@ def true_peak_level(
     :return: The true-peak level in dBTP: a float for 1D input, an array of
         shape ``(channels,)`` for 2D input.
     """
-    fs = require_positive(float(resolve_fs(x, fs)), "fs")
+    fs = require_positive(resolve_fs(x, fs), "fs")
     if oversample is None:
         oversample = max(1, ceil(_TRUE_PEAK_RATE / fs))
     if (
@@ -976,9 +978,9 @@ def program_loudness(
     """
     fs = resolve_fs(x, fs)
     x_proc, w = _prepare_signal(x, weights)
-    fs = require_positive(float(fs), "fs")
-    momentary_step = require_positive(float(momentary_step), "momentary_step")
-    short_term_step = require_positive(float(short_term_step), "short_term_step")
+    fs = require_positive(fs, "fs")
+    momentary_step = require_positive(momentary_step, "momentary_step")
+    short_term_step = require_positive(short_term_step, "short_term_step")
     if momentary_step > MAX_METER_STEP or short_term_step > MAX_METER_STEP:
         msg = (
             "momentary_step and short_term_step must be <= 0.1 s: EBU Tech "

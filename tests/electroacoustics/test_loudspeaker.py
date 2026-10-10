@@ -313,6 +313,27 @@ def test_report_renders_one_page_with_rated_table(tmp_path: Path) -> None:
     assert "PASS" in text
 
 
+def test_the_response_graph_keeps_its_size_whatever_savefig_padding_says() -> None:
+    """The caller's ``savefig.pad_inches`` does not resize the fiche's graph.
+
+    This fiche saves its own figure with an explicit tight box, so
+    ``savefig.bbox`` is already named; the padding around that box still
+    comes from ``rcParams`` unless the fiche sets it, and a matplotlibrc with
+    a wide pad made the graph taller on the page.
+    """
+    pytest.importorskip("reportlab")
+    pytest.importorskip("svglib")
+    import matplotlib as mpl
+
+    from phonometry._report.iec60268_5 import _response_drawing
+
+    result = _example_result()
+    own = _response_drawing(result, 200.0)
+    with mpl.rc_context({"savefig.pad_inches": 1.0, "savefig.bbox": "standard"}):
+        padded = _response_drawing(result, 200.0)
+    assert (padded.width, padded.height) == pytest.approx((own.width, own.height))
+
+
 def test_report_without_optional_panels(tmp_path: Path) -> None:
     """A response-only result (no impedance/THD/polar) still renders."""
     pytest.importorskip("reportlab")

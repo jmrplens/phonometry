@@ -52,6 +52,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .ntff import ContourPhasors
 
@@ -72,6 +73,7 @@ _BOUNDARY_NAMES = ("rigid", "absorbing")
 
 def _positive_finite(name: str, value: float) -> float:
     """Validate that *value* is a strictly positive finite scalar."""
+    require_scalar(value, name)
     out = float(value)
     if not np.isfinite(out) or out <= 0.0:
         msg = f"{name} must be positive and finite"
@@ -81,6 +83,7 @@ def _positive_finite(name: str, value: float) -> float:
 
 def _finite(name: str, value: float) -> float:
     """Validate that *value* is a finite scalar."""
+    require_scalar(value, name)
     out = float(value)
     if not np.isfinite(out):
         msg = f"{name} must be finite"

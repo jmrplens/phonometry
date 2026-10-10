@@ -79,6 +79,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -484,6 +485,7 @@ def facade_sound_reduction(
     :return: A :class:`FacadePredictionResult`.
     """
     delta = float(delta_l_fs)
+    require_scalar(volume, "volume")
     v = float(volume)
     if v <= 0:
         msg = "'volume' must be positive."
@@ -673,7 +675,9 @@ def facade_shape_level_difference(
         valid = ", ".join(sorted(_DELTA_LFS))
         msg = f"Unknown facade shape {shape!r}. Valid: {valid}."
         raise ValueError(msg) from None
+    require_scalar(line_of_sight, "line_of_sight")
     h = float(line_of_sight)
+    require_scalar(absorption, "absorption")
     aw = float(absorption)
     if not (np.isfinite(h) and h >= 0.0):
         msg = "'line_of_sight' must be a non-negative height in m."

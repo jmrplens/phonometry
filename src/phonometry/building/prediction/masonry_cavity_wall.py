@@ -164,7 +164,7 @@ def wall_tie_stiffness_per_area(ties_per_area: float, tie: str | float) -> float
     k = (
         wall_tie_stiffness(tie)[1]
         if isinstance(tie, str)
-        else require_positive(float(tie), "tie")
+        else require_positive(tie, "tie")
     )
     return float(n * k)
 
@@ -297,7 +297,7 @@ def wall_tie_coupling_loss_factor(
         k = (
             wall_tie_stiffness(tie)[1]
             if isinstance(tie, str)
-            else require_positive(float(tie), "tie")
+            else require_positive(tie, "tie")
         )
     yc = np.zeros_like(f) if k is None else omega / k
     # Yi and Yj are real for a thin plate, Yc purely imaginary.

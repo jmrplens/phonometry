@@ -84,6 +84,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..io._resolve import resolve_fs
 from ..signals.spectra import _positive, _validate_signal, power_spectral_density
@@ -890,6 +891,7 @@ def stationarity_test(
     if statistic not in _STATISTICS:
         msg = f"'statistic' must be one of {_STATISTICS}, got {statistic!r}."
         raise ValueError(msg)
+    require_scalar(n_segments, "n_segments")
     segments = int(n_segments)
     if not _MIN_OBSERVATIONS <= segments <= xa.size:
         msg = (
@@ -1183,6 +1185,7 @@ def _check_measured_peak_rate(
     :raises ValueError: if the duration is not a positive finite record
         length, or the rate is not the peak count over it.
     """
+    require_scalar(duration, "duration")
     if not math.isfinite(duration) or duration <= 0.0:
         msg = (
             f"{owner}: 'duration' must be a positive, finite record length "

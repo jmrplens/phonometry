@@ -126,6 +126,7 @@ if TYPE_CHECKING:
 # in the tree reads it from there, the names this module used to define stay
 # importable from this path, unchanged; the ``__all__`` below re-exports them.
 from ..._internal.frozen import OwnsArrays
+from ..._internal.validation import require_scalar
 from .ratings import (
     _INDEX_500_THIRD,
     _REF_IMPACT_THIRD_OCTAVE,
@@ -916,6 +917,7 @@ def _check_low_frequency_volume(
     """
     if volume is None:
         return
+    require_scalar(volume, "volume")
     if not math.isclose(float(volume), float(procedure.volume), rel_tol=1e-12):
         msg = (
             f"{owner}: 'volume' is {float(volume):g} m³ and the receiving-room "
@@ -949,6 +951,8 @@ def _apparent_reduction_index(
     if not is_positive(area) or not is_positive(volume):
         msg = "'area' and 'volume' must be positive."
         raise ValueError(msg)
+    require_scalar(area, "area")
+    require_scalar(volume, "volume")
     if math.isinf(area) or math.isinf(volume):
         msg = "'area' and 'volume' must be finite."
         raise ValueError(msg)
@@ -1246,6 +1250,7 @@ def impact_insulation(
         if not is_positive(volume):
             msg = "'volume' must be positive."
             raise ValueError(msg)
+        require_scalar(volume, "volume")
         if math.isinf(volume):
             msg = "'volume' must be finite."
             raise ValueError(msg)
@@ -1281,6 +1286,8 @@ def _validate_facade_geometry(
     sound reduction index needs the surface level, the element area and the
     receiving-room volume together.
     """
+    require_scalar(volume, "volume")
+    require_scalar(area, "area")
     if volume is not None and not is_positive(volume):
         msg = "'volume' must be positive."
         raise ValueError(msg)

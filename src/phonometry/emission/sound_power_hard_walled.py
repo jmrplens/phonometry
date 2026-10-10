@@ -126,6 +126,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._shared import (
     _CK_OCTAVE,
@@ -293,6 +294,7 @@ def _check_uncertainty_inputs(
     require_positive(coverage_factor, "coverage_factor")
     if sigma_omc_db is None:
         return math.nan
+    require_scalar(sigma_omc_db, "sigma_omc_db")
     if not math.isfinite(sigma_omc_db) or sigma_omc_db < 0.0:
         msg = "'sigma_omc_db' must be finite and non-negative."
         raise ValueError(msg)

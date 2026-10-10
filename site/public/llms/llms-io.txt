@@ -1681,8 +1681,9 @@ print(row.surface_density_kg_m2, row.converted)
 # 8.6 {'surface_density_kg_m2': ('8600', 'g/m2')}
 ```
 
-Leave `slots=True` out of such a class: on Python 3.13 a method of it that
-calls `super()` without arguments fails, which is how a `__post_init__` of
+Leave `slots=True` out of such a class: on Python 3.12, and on the 3.13
+releases that predate the fix, a method of it that calls `super()` without
+arguments fails, which is how a `__post_init__` of
 your own reaches the row contract. A bare `float` or `int`
 annotation is refused with `TypeError` the first time the class is built,
 because every cell of a row may be missing. A class built on `BandedRow` is

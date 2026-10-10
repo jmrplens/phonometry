@@ -35,6 +35,10 @@ from diagrams.outline import (
     shape,
 )
 
+# The figure, diagram and badge tooling is tied to the pinned figure stack its
+# artefacts are drawn with, so the minimum-versions job deselects this module.
+pytestmark = pytest.mark.pinned_stack
+
 _SANS = (False, False, False)
 _SANS_FACE = _FACES[_SANS][0]
 

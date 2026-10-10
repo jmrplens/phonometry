@@ -119,9 +119,7 @@ def thermal_noise_spectrum(
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequency_hz, "frequency_hz")
-    t_kelvin = (
-        require_above_absolute_zero(float(temperature_c), "temperature_c") + 273.15
-    )
+    t_kelvin = require_above_absolute_zero(temperature_c, "temperature_c") + 273.15
     rho = require_positive(density, "density")
     c = require_positive(speed_of_sound, "speed_of_sound")
     p2 = 4.0 * np.pi * _BOLTZMANN * t_kelvin * rho * f**2 / c

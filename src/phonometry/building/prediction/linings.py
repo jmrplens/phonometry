@@ -37,7 +37,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
-from ..._internal.validation import require_choice, require_positive
+from ..._internal.validation import require_choice, require_positive, require_scalar
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -285,6 +285,7 @@ def weighted_lining_improvement(
         not finite.
     """
     f0 = require_positive(resonance_frequency, "resonance_frequency")
+    require_scalar(base_rating, "base_rating")
     rw = float(base_rating)
     if not np.isfinite(rw):
         msg = "'base_rating' must be finite."
@@ -491,7 +492,9 @@ def lining_improvement_in_situ(
     :return: The field rating ``ΔRsitu``, in dB.
     :raises ValueError: If an input is not finite, or ``fo`` is not positive.
     """
+    require_scalar(laboratory_improvement, "laboratory_improvement")
     delta_lab = float(laboratory_improvement)
+    require_scalar(base_rating_in_situ, "base_rating_in_situ")
     rw = float(base_rating_in_situ)
     if not np.isfinite(delta_lab) or not np.isfinite(rw):
         msg = "'laboratory_improvement' and 'base_rating_in_situ' must be finite."

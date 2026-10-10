@@ -651,7 +651,7 @@ def pass_by_measurement(
     """
     rate = resolve_fs(signal, fs, name="signal")
     samples = require_1d_signal(resolve_samples(signal, name="signal"), "'signal'")
-    rate = require_positive(float(rate), "fs")
+    rate = require_positive(rate, "fs")
     if samples.size == 0:
         msg = "'signal' holds no sample."
         raise ValueError(msg)

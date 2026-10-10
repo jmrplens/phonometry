@@ -50,6 +50,7 @@ from .._internal.validation import (
     check_engine,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..filters.core import OctaveFilterBank
 from ..io._resolve import resolve_fs
@@ -738,6 +739,7 @@ def reverberation_time_standard_deviation(
         reverberation time or bandwidth is not positive and finite. An
         infinite ``decays`` is taken: it is the limit 7.2 declines to use.
     """
+    require_scalar(evaluation_range, "evaluation_range")
     key = float(evaluation_range)
     if key not in DECAY_UNCERTAINTY_COEFFICIENTS:
         msg = (
@@ -807,6 +809,7 @@ def minimum_reliable_reverberation_time(
     if not np.all(np.isfinite(width)) or np.any(width <= 0.0):
         msg = "'bandwidth' must be a positive, finite bandwidth in Hz."
         raise ValueError(msg)
+    require_scalar(detector_time, "detector_time")
     if not math.isfinite(detector_time) or detector_time < 0.0:
         msg = "'detector_time' must be a finite time of zero seconds or more."
         raise ValueError(msg)

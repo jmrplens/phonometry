@@ -49,6 +49,7 @@ from .._internal.validation import (
     require_equal_shapes,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..io._resolve import apply_calibration, resolve_pair_fs
 
@@ -353,6 +354,7 @@ def stoi(
     """
     fs = resolve_pair_fs(clean, degraded, fs, names=("clean", "degraded"))
     x, y = _validate_pair(clean, degraded)
+    require_scalar(fs, "fs")
     if int(fs) <= 0:
         msg = "'fs' must be a positive sample rate."
         raise ValueError(msg)

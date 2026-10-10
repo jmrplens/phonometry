@@ -292,7 +292,7 @@ def _per_category(values: Mapping[str, float], name: str) -> dict[str, float]:
         msg = f"'{name}' must hold one value for each of '1', '2a' and '2b'."
         raise ValueError(msg)
     return {
-        _vehicle_category(key): require_finite(float(value), f"{name}[{key!r}]")
+        _vehicle_category(key): require_finite(value, f"{name}[{key!r}]")
         for key, value in values.items()
     }
 
@@ -930,7 +930,7 @@ def statistical_pass_by(
                 weighting_factors=weights,
             )
         else:
-            reference_index = require_finite(float(reference_db), "reference_db")
+            reference_index = require_finite(reference_db, "reference_db")
     return StatisticalPassByResult(
         road_speed_category=road,
         regressions=MappingProxyType(regressions),

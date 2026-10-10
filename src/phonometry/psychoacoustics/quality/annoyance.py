@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.validation import require_positive
+from ..._internal.validation import require_positive, require_scalar
 from ...io._resolve import SignalInput, resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
@@ -70,6 +70,7 @@ _WFR_ROUGHNESS_WEIGHT = 0.6
 
 
 def _nonnegative(value: float, name: str) -> float:
+    require_scalar(value, name)
     scalar = float(value)
     if not np.isfinite(scalar) or scalar < 0.0:
         msg = f"'{name}' must be a non-negative, finite number."

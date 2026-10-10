@@ -154,6 +154,37 @@ def test_a_drawing_is_scaled_by_what_it_covers_not_by_what_it_declares() -> None
     assert drawing.getBounds()[2] <= target + 0.5
 
 
+# --------------------------------------------------------------------------
+# The caller's matplotlib configuration
+# --------------------------------------------------------------------------
+def test_a_tight_savefig_setting_does_not_reshape_an_embedded_figure() -> None:
+    """The fiche figure keeps its own box whatever ``savefig.bbox`` says.
+
+    ``savefig()`` reads the bounding box and its padding from ``rcParams``
+    when the call names neither. A matplotlibrc, or a script run earlier in
+    the same process, that saved ``"tight"`` re-cropped the figure to its ink,
+    the legend above the axes included, and on matplotlib 3.10 the taller
+    drawing pushed two fiches onto a second page.
+    """
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    import matplotlib as mpl
+
+    from phonometry._report._layout import render_figure_drawing
+
+    def legend_above(
+        ax: Axes | None = None, language: str = "en", **kwargs: object
+    ) -> Axes:
+        """One curve, whose legend the fiche moves above the axes."""
+        ax.plot([1.0, 2.0], [1.0, 2.0], label="a curve")
+        return ax
+
+    own = render_figure_drawing(legend_above, 100.0, y_top=None)
+    with mpl.rc_context({"savefig.bbox": "tight", "savefig.pad_inches": 1.0}):
+        tight = render_figure_drawing(legend_above, 100.0, y_top=None)
+    assert (tight.width, tight.height) == pytest.approx((own.width, own.height))
+
+
 @pytest.mark.parametrize(
     "centres",
     [[100, 125], [100, 125, 160, 200, 250, 315]],

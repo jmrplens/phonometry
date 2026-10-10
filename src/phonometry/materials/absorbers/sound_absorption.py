@@ -65,7 +65,9 @@ from ..._internal.validation import (
     require_above_absolute_zero,
     require_equal_shapes,
     require_ranks,
+    require_real,
     require_same_length,
+    require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
 
@@ -155,13 +157,14 @@ def _resolve_speed(temperature_c: float, speed_of_sound: float | None) -> float:
     if speed_of_sound is not None:
         # NaN passes a bare <= comparison and propagates into every derived
         # quantity; infinity is positive but zeroes the speed-dependent terms.
+        require_scalar(speed_of_sound, "speed_of_sound")
         if not math.isfinite(speed_of_sound) or speed_of_sound <= 0.0:
             msg = "'speed_of_sound' must be finite and positive."
             raise ValueError(msg)
         return float(speed_of_sound)
     # NaN is named alongside the bound: a NaN temperature would otherwise
     # propagate through Eq. (6) into every derived quantity.
-    require_above_absolute_zero(float(temperature_c), "temperature_c")
+    require_above_absolute_zero(temperature_c, "temperature_c")
     lo, hi = _EQ6_TEMPERATURE_RANGE
     if not lo <= temperature_c <= hi:
         warnings.warn(
@@ -651,15 +654,13 @@ def measure_sound_absorption(
     if relative_humidity_percent is None:
         humidity_pct: float | None = None
     else:
-        # A non-numeric humidity becomes NaN here so that it fails the range
-        # test below and is refused by name, instead of dying inside float():
-        # ValueError for a string, TypeError for a list or a 1-d array.
-        try:
-            humidity_pct = float(relative_humidity_percent)
-        except (TypeError, ValueError):
-            humidity_pct = math.nan
+        # One refusal, by name, for anything that is not one humidity: a
+        # string or a list would otherwise die inside float(), and an array is
+        # refused by its rank because numpy before 2.4 converts a one-element
+        # array to a float instead of refusing it.
+        msg = "'relative_humidity_percent' must be within [0, 100] %."
+        humidity_pct = require_real(relative_humidity_percent, msg)
         if not 0.0 <= humidity_pct <= _MAX_RELATIVE_HUMIDITY_PERCENT:
-            msg = "'relative_humidity_percent' must be within [0, 100] %."
             raise ValueError(msg)
     # Resolve the speed once (Eq. (6)); this emits the single temperature
     # advisory. Passing the resolved speed to the reused helpers below keeps

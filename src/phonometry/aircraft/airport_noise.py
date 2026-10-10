@@ -44,6 +44,7 @@ from .._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -76,7 +77,9 @@ def lateral_attenuation(elevation_deg: float, lateral_m: float) -> float:
     :return: The lateral attenuation ``Λ``, in dB (subtracted from the level).
     :raises ValueError: If ``lateral_m`` is negative or non-finite.
     """
+    require_scalar(lateral_m, "lateral_m")
     ell = float(lateral_m)
+    require_scalar(elevation_deg, "elevation_deg")
     beta = float(elevation_deg)
     if not np.isfinite(ell) or ell < 0.0 or not np.isfinite(beta):
         msg = "'lateral_m' must be non-negative and inputs finite."
@@ -101,6 +104,7 @@ def engine_installation_correction(
     :return: The correction ``ΔI``, in dB (added to the level).
     :raises ValueError: If ``mounting`` is unknown or the angle is non-finite.
     """
+    require_scalar(depression_deg, "depression_deg")
     phi = float(depression_deg)
     if not np.isfinite(phi):
         msg = "'depression_deg' must be finite."
@@ -128,7 +132,9 @@ def duration_correction(reference_speed: float, segment_speed: float) -> float:
     :return: The duration correction ``ΔV``, in dB.
     :raises ValueError: If a speed is not strictly positive.
     """
+    require_scalar(reference_speed, "reference_speed")
     vref = float(reference_speed)
+    require_scalar(segment_speed, "segment_speed")
     vseg = float(segment_speed)
     if not (np.isfinite(vref) and vref > 0.0 and np.isfinite(vseg) and vseg > 0.0):
         msg = "'reference_speed' and 'segment_speed' must be positive."
@@ -149,7 +155,9 @@ def noise_fraction(q: float, segment_length: float, scaled_distance: float) -> f
     :raises ValueError: If ``segment_length`` or ``scaled_distance`` is not
         positive.
     """
+    require_scalar(segment_length, "segment_length")
     lam = float(segment_length)
+    require_scalar(scaled_distance, "scaled_distance")
     dl = float(scaled_distance)
     if not (np.isfinite(lam) and lam > 0.0 and np.isfinite(dl) and dl > 0.0):
         msg = "'segment_length' and 'scaled_distance' must be positive."
@@ -196,7 +204,9 @@ def impedance_adjustment(
     :raises ValueError: If the pressure is not positive, the temperature is at
         or below -273,15 degC, or either input is non-finite.
     """
+    require_scalar(temperature_c, "temperature_c")
     t = float(temperature_c)
+    require_scalar(atmospheric_pressure_kpa, "atmospheric_pressure_kpa")
     p = float(atmospheric_pressure_kpa)
     if not (np.isfinite(t) and np.isfinite(p) and p > 0.0):
         msg = "'atmospheric_pressure_kpa' must be positive and inputs finite."
@@ -264,7 +274,9 @@ def start_of_roll_directivity(
     :return: The directivity correction ``ΔSOR``, in dB (added to the level).
     :raises ValueError: If ``engine`` is unknown or the inputs are invalid.
     """
+    require_scalar(azimuth_deg, "azimuth_deg")
     psi = float(azimuth_deg)
+    require_scalar(distance_m, "distance_m")
     dsor = float(distance_m)
     if not (np.isfinite(psi) and np.isfinite(dsor) and dsor > 0.0):
         msg = "'distance_m' must be positive and inputs finite."
@@ -419,6 +431,7 @@ def npd_level(
     if dq.size == 0 or not np.all(np.isfinite(dq)) or np.any(dq <= 0.0):
         msg = "'distance' must be finite and strictly positive."
         raise ValueError(msg)
+    require_scalar(power, "power")
     pq = float(power)
     if not np.isfinite(pq):
         msg = "'power' must be finite."

@@ -93,6 +93,7 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._shared import (
     _S0,
@@ -353,6 +354,7 @@ class SoundPowerResult(OwnsArrays):
             a non-finite band.
         """
         require_choice(self.grade, "grade", ("engineering", "survey"))
+        require_scalar(self.surface_area, "surface_area")
         if not math.isfinite(self.surface_area):
             msg = (
                 "SoundPowerResult: 'surface_area' must be finite; "
@@ -1166,6 +1168,7 @@ class SoundEnergyResult(OwnsArrays):
             is not positive.
         """
         require_choice(self.grade, "grade", ("engineering", "survey"))
+        require_scalar(self.surface_area, "surface_area")
         if not math.isfinite(self.surface_area):
             msg = (
                 "SoundEnergyResult: 'surface_area' must be finite; "
@@ -1266,6 +1269,7 @@ def _static_pressure_at_altitude(altitude: float) -> float:
     :raises ValueError: for a non-finite altitude, or one at which the
         printed power law has no positive base.
     """
+    require_scalar(altitude, "altitude")
     if not math.isfinite(altitude) or 1.0 - _ALTITUDE_A_PER_M * altitude <= 0.0:
         msg = (
             "'altitude' must be finite and below "
@@ -1319,6 +1323,7 @@ def reference_atmosphere_correction(
         ``altitude`` are given, or either is out of range, or ``temperature_c``
         is not above absolute zero.
     """
+    require_scalar(temperature_c, "temperature_c")
     if not math.isfinite(temperature_c) or temperature_c <= -_KELVIN_OFFSET:
         msg = f"'temperature_c' must be finite and above {-_KELVIN_OFFSET} degrees C."
         raise ValueError(msg)

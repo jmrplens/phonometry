@@ -103,6 +103,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -219,7 +220,7 @@ _G_SINGULARITY = 1e-6
 
 
 @dataclass(frozen=True)
-class HeavyImpactSourceSpec:
+class HeavyImpactSourceSpec(RichDisplay):
     """Printed specification of a standard heavy and soft impact source.
 
     Annex A is normative in both standards, and the drop height belongs to its

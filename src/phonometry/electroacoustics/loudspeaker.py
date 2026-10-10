@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
@@ -286,7 +287,7 @@ _DEFAULT_DIRECTIVITY = LoudspeakerDirectivity()
 
 
 @dataclass(frozen=True)
-class LoudspeakerRatings:
+class LoudspeakerRatings(RichDisplay):
     """Manufacturer-stated ratings (IEC 60268-5 Clauses 18 and 19).
 
     The rated characteristics the report prints rather than computes: the

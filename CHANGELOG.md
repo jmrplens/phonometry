@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Results read well in a notebook.** Jupyter, JupyterLab, VS Code and Colab
+  display the last line of a cell, and every public result, verdict and record
+  now displays as a table of its fields instead of the dataclass repr: a
+  scalar with its unit, read from the end of the field's name (`levels_db` in
+  dB, `wind_speed_m_s` in m/s), an array as one line with its shape, its type
+  and the range of its values but never the values, a record held in a field
+  as a folded table of its own, and the outcome of a verdict, PASS or FAIL, in
+  the title. The frames of a simulation take one row, and the largest result
+  displays in a few kilobytes. The IPython terminal prints the same table as
+  text. Showing it reads the fields and, on a verdict, `passes`, which may
+  read other properties of the verdict, and draws nothing; `print()` and
+  `repr()` are unchanged. A new section of the getting-started guide, In a
+  notebook, shows the table, its text and the figure `.plot()` draws under the
+  cell. CI now runs the package in a notebook kernel, displaying a result, a
+  verdict, an inline `.plot()`, a `.report()` and a warning, and installs the
+  wheel in Pyodide, the Python of JupyterLite, with its `plot` and `report`
+  extras. On Pyodide 314.0.7 it installs on the numpy 2.4.6, scipy 1.18.0 and
+  matplotlib 3.10.8 Pyodide ships, and a one-third-octave filter bank runs
+  there. The job fails, naming the floor, the day a floor in `pyproject.toml`
+  rises above what Pyodide ships.
+
 - **Grade a filter bank on the integrated response and the summation of
   IEC 61260:1995 as well as its Table 1.** `filters.verify_filter_class(...,
   edition="1995")` graded Table 1 alone; it now also grades the filter

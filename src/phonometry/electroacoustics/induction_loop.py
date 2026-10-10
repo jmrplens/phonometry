@@ -112,6 +112,7 @@ import numpy as np
 from scipy import optimize, signal
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
@@ -842,7 +843,7 @@ def assess_background_noise(
 
 
 @dataclass(frozen=True)
-class LoopRequirement:
+class LoopRequirement(RichDisplay):
     """One requirement of IEC 60118-4:2014, judged on every value it covers.
 
     Each judged value has its own lower and upper limit (minus or plus
@@ -926,7 +927,7 @@ class LoopRequirement:
 
 
 @dataclass(frozen=True)
-class InductionLoopVerification:
+class InductionLoopVerification(RichDisplay):
     """The IEC 60118-4:2014 verdict on an installed induction-loop system.
 
     :ivar clause: ``"8"`` for a system judged on its useful magnetic field
@@ -1345,7 +1346,7 @@ def verify_small_volume_system(
 
 
 @dataclass(frozen=True)
-class OverloadTestFrequency:
+class OverloadTestFrequency(RichDisplay):
     """One row of Table 4 of IEC 60118-4:2014/A1:2017.
 
     :ivar programme: The typical programme material of the system.

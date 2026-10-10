@@ -69,6 +69,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import round_half_up
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .sound_field_audiometry import (
     _RANDOM_INCIDENCE_CLAUSE,
@@ -272,7 +273,7 @@ def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndar
 
 
 @dataclass(frozen=True)
-class InsertionLossUncertaintyBudget:
+class InsertionLossUncertaintyBudget(RichDisplay):
     r"""The uncertainty budget of an insertion loss (Annex B, Table B.1).
 
     Five normal inputs with a sensitivity coefficient of 1 (B.3), so the

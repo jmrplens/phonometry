@@ -25,9 +25,10 @@ wrong thing. Three checks, cheapest first:
 3. **Execution.** Every English page's blocks, plus those of the README and
    of ``llms.txt``, are concatenated in reading
    order (a guide is a narrative: later blocks use the variables the earlier
-   ones bound) and run in a subprocess. Pages that cannot run standalone are
-   listed in :data:`_SKIP` with a reason, and the list is checked for
-   staleness: a page that starts passing must leave it. A block that passes
+   ones bound) and run in a subprocess. A page that reads a file the reader
+   brings runs on one :data:`_FIXTURES` writes first. Pages that cannot run
+   standalone are listed in :data:`_SKIP` with a reason, and the list is
+   checked for staleness: a page that starts passing must leave it. A block that passes
    ``...`` to a call is a sketch of a call rather than a computation, so it is
    read but not run.
 
@@ -61,7 +62,6 @@ _SITE_ES = _SITE / "es"
 #: "needs a file the repository does not ship" is a fact, "example" is not.
 _SKIP: dict[str, str] = {
     # The page reads something the repository does not ship.
-    "getting-started": "reads measurement.wav, a recording the reader supplies",
     "block-processing": "streams through soundfile, an optional dependency",
     # The page shows excerpts of a workflow rather than a script: a block
     # starts from a variable the prose introduced, or a later block rebinds
@@ -77,6 +77,29 @@ _SKIP: dict[str, str] = {
     "synchronous-averaging": "excerpt: a later block shortens the record an "
     "earlier one averages",
     "time-weighting": "excerpt: starts from the block stream of the prose",
+}
+
+#: Files a page reads that the reader brings, written by code run in the
+#: page's directory before its first block, so the page runs on a file of the
+#: kind its prose describes instead of being skipped. The code is the
+#: harness's, not the page's: no reader sees it, and its names start with an
+#: underscore and are deleted, so no block can lean on them.
+_FIXTURES: dict[str, str] = {
+    # The two WAVs of one measurement chain, float as a meter writes them: 3 s
+    # of the calibrator's 1 kHz tone, then a second of a 100 Hz and a 1 kHz
+    # tone, both well below full scale.
+    "getting-started": (
+        "import numpy as _np\n"
+        "from scipy.io import wavfile as _wavfile\n"
+        "_fs = 48000\n"
+        "_t = _np.arange(3 * _fs) / _fs\n"
+        "_tone = 0.25 * _np.sin(2 * _np.pi * 1000 * _t)\n"
+        "_wavfile.write('calibrator.wav', _fs, _tone.astype(_np.float32))\n"
+        "_t = _np.arange(_fs) / _fs\n"
+        "_tones = _np.sin(2 * _np.pi * 100 * _t) + _np.sin(2 * _np.pi * 1000 * _t)\n"
+        "_wavfile.write('measurement.wav', _fs, (0.1 * _tones).astype(_np.float32))\n"
+        "del _np, _wavfile, _fs, _t, _tone, _tones\n"
+    ),
 }
 
 #: Timeout per page, generous enough for the FDTD and ECMA pages.
@@ -230,9 +253,13 @@ def _is_sketch(code: str) -> bool:
     return any(isinstance(n, ast.Call) and placeholder(n) for n in ast.walk(tree))
 
 
-def _run_page(page: pathlib.Path) -> tuple[pathlib.Path, str]:
-    """Run a page's blocks as one script; return its stderr tail on failure."""
-    runnable = [b for b in _blocks(page) if not _is_sketch(b)]
+def _run_page(page: pathlib.Path, fixture: str = "") -> tuple[pathlib.Path, str]:
+    """Run a page's blocks as one script; return its stderr tail on failure.
+
+    *fixture* runs first, in the same directory: the files of
+    :data:`_FIXTURES` the page reads.
+    """
+    runnable = [fixture, *(b for b in _blocks(page) if not _is_sketch(b))]
     # A deprecated phonometry name in a snippet is an error, exactly as it is
     # in the test suite (pyproject filterwarnings): the guides teach the
     # canonical API, and a page that teaches an alias teaches a path that the
@@ -270,7 +297,8 @@ def check_execution(pages: list[pathlib.Path]) -> list[str]:
     failures: list[str] = []
     still_skipped: dict[str, list[pathlib.Path]] = {}
     with concurrent.futures.ProcessPoolExecutor() as pool:
-        for page, error in pool.map(_run_page, runnable):
+        fixtures = [_FIXTURES.get(page.stem, "") for page in runnable]
+        for page, error in pool.map(_run_page, runnable, fixtures):
             if error:
                 failures.append(f"{_rel(page)}: {error}")
         # A page that starts running must leave the skip list, or the list
@@ -279,7 +307,8 @@ def check_execution(pages: list[pathlib.Path]) -> list[str]:
         # hand-written mirror under docs/; the entry is stale only once both
         # editions run, since dropping it while one of them still fails would
         # turn a stale-skip report into a failing page.
-        for page, error in pool.map(_run_page, skipped):
+        fixtures = [_FIXTURES.get(page.stem, "") for page in skipped]
+        for page, error in pool.map(_run_page, skipped, fixtures):
             if error:
                 still_skipped.setdefault(page.stem, []).append(page)
     for page in skipped:

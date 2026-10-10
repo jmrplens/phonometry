@@ -43,6 +43,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
@@ -135,7 +136,7 @@ _DEVICES = {
 
 
 @dataclass(frozen=True)
-class MountingCheck:
+class MountingCheck(RichDisplay):
     """Whether a transducer may be set down without fastening (5.3.2, 5.3.3).
 
     Only what is asked about is a field: the peak acceleration, the highest

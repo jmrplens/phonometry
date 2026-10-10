@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
@@ -223,7 +224,7 @@ def joint_sound_reduction_index(
 
 
 @dataclass(frozen=True)
-class JointOpenBandRating:
+class JointOpenBandRating(RichDisplay):
     r"""The single numbers with the indicative bands taken as infinitely high (J.1).
 
     Where :math:`R_\mathrm{s}'` is above :math:`R_\mathrm{s,max} - 3` dB the
@@ -724,7 +725,7 @@ def lab_joint_insulation(
 
 
 @dataclass(frozen=True)
-class JointTestElementCheck:
+class JointTestElementCheck(RichDisplay):
     """Whether a joint is long and narrow enough to be tested (J.2.1, J.2.2).
 
     The bounds are the clause's, so the verdicts are read from the length and
@@ -824,7 +825,7 @@ def check_joint_test_element(
 
 
 @dataclass(frozen=True)
-class GapWidthCheck:
+class GapWidthCheck(RichDisplay):
     """The gap width read along the joint, and whether the readings agree (J.2.2).
 
     Everything else is read from the readings, so a check cannot be built to
@@ -1136,7 +1137,7 @@ def joint_gap_series(
 
 
 @dataclass(frozen=True)
-class JointGapSeriesCheck:
+class JointGapSeriesCheck(RichDisplay):
     r"""Whether a variable slit was measured at the three gap widths of J.4.
 
     The three widths J.4 asks for are read from the nominal and the minimal

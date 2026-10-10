@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 from scipy import signal
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import require_ranks, require_same_length, require_scalar
@@ -115,7 +116,7 @@ _MIN_RESPONSE_POINTS = 2
 
 
 @dataclass(frozen=True)
-class EQSection:
+class EQSection(RichDisplay):
     r"""One biquad of the RBJ Audio EQ Cookbook.
 
     :ivar filter_type: ``'peaking'``, ``'lowshelf'``, ``'highshelf'``,

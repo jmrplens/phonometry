@@ -130,6 +130,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_count,
@@ -228,7 +229,7 @@ _FORMULAS = ("A.3", "A.4", "A.5")
 
 
 @dataclass(frozen=True)
-class ReferenceMicrophoneRow:
+class ReferenceMicrophoneRow(RichDisplay):
     r"""One row of IEC 61183:1994 Table B.1.
 
     The characteristics of a type LS2aP/LS2F laboratory standard microphone

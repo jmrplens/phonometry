@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -186,7 +187,7 @@ MOUNTING_TYPES: Mapping[str, str] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class CeilingSpecimenCheck:
+class CeilingSpecimenCheck(RichDisplay):
     """Whether a test arrangement meets the printed limits of clause 4.
 
     The verdict covers the limits clause 4 puts a number on and a measured

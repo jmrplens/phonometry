@@ -66,6 +66,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
@@ -105,7 +106,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class RainfallType:
+class RainfallType(RichDisplay):
     """One class of natural rain (ISO 10140-1:2021 Table K.1).
 
     Each quantity is a ``(lower, upper)`` pair; ``None`` is an open end: the
@@ -138,7 +139,7 @@ RAINFALL_CLASSIFICATION: Mapping[str, RainfallType] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class ArtificialRain:
+class ArtificialRain(RichDisplay):
     """One type of artificial rain and the tank that makes it (ISO 10140-5 Annex H).
 
     :ivar rainfall_rate_mm_h: Rainfall rate, in mm/h: the depth of water the

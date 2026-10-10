@@ -129,6 +129,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 from .._internal.boundary import settled, settled_net_share, settled_ratio
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     is_at_most,
@@ -661,7 +662,7 @@ def normal_intensity_from_levels(
 
 
 @dataclass(frozen=True)
-class PartialPowerConcentration:
+class PartialPowerConcentration(RichDisplay):
     r"""Outcome of the optional procedure of ISO 9614-1:1993 clause 8.3.2/B.1.3.
 
     The segments carrying most of the sound power, and how many new positions

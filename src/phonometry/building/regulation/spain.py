@@ -85,6 +85,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import round_half_up
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -704,7 +705,7 @@ def window_size_correction(area: float) -> int:
 # Requirements (Clause 2)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class DbHrRequirement:
+class DbHrRequirement(RichDisplay):
     """A single DB-HR performance requirement.
 
     :ivar quantity: The quantity the requirement is stated in, e.g.
@@ -745,7 +746,7 @@ class DbHrRequirement:
 
 
 @dataclass(frozen=True)
-class DbHrCheck:
+class DbHrCheck(RichDisplay):
     """A DB-HR requirement checked against an achieved value.
 
     The rounding, the margin and the verdict are read from the achieved value
@@ -801,7 +802,7 @@ class DbHrCheck:
 
 
 @dataclass(frozen=True)
-class DbHrAssessment:
+class DbHrAssessment(RichDisplay):
     """A set of DB-HR requirement checks.
 
     :ivar checks: The individual :class:`DbHrCheck` results.

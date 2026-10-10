@@ -152,6 +152,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy import optimize
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
@@ -1655,7 +1656,7 @@ def neck_loop_characteristics(
 
 
 @dataclass(frozen=True)
-class NeckLoopType:
+class NeckLoopType(RichDisplay):
     """One neck-loop type of the draft Annex D (prEN 62489-1:2010/prA2:2017).
 
     :ivar description: What the type is, as the draft describes it.
@@ -1700,7 +1701,7 @@ NECK_LOOP_TYPES: Mapping[int, NeckLoopType] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class NeckLoopVerification:
+class NeckLoopVerification(RichDisplay):
     """A neck loop judged against one type of the draft Annex D (prA2:2017).
 
     :ivar neck_loop_type: The type it was judged as, 1 or 2.

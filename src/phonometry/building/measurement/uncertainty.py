@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.validation import require_choice, require_equal_shapes
 
 if TYPE_CHECKING:
@@ -403,7 +404,7 @@ _CONFIDENCE_MATCH_TOL = 1e-9
 # Result containers.
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class BandUncertainty:
+class BandUncertainty(RichDisplay):
     """One-third-octave-band standard uncertainties (ISO 12999-1 Tables 2/4/6/D.1).
 
     :ivar measurand: ``"airborne"``, ``"impact"`` or ``"impact_reduction"``.
@@ -443,7 +444,7 @@ class BandUncertainty:
 
 
 @dataclass(frozen=True)
-class UncertainValue:
+class UncertainValue(RichDisplay):
     r"""A best estimate with its ISO 12999-1 expanded uncertainty (Clause 8).
 
     :ivar value: Best estimate ``y`` (e.g. a weighted rating), in dB.

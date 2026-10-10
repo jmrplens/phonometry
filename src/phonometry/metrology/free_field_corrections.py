@@ -97,6 +97,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
@@ -206,7 +207,7 @@ _COMBINATION_ABS_TOL_DB = 1e-15
 
 
 @dataclass(frozen=True)
-class UncertaintyComponentRow:
+class UncertaintyComponentRow(RichDisplay):
     r"""One row of IEC 62585:2012 Table I.1, the likely components of the
     uncertainty of a correction measured with a comparison coupler (Annex E).
 

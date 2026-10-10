@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
     require_finite,
@@ -141,7 +142,7 @@ TYPICAL_EXCESS_RANGE_DB: Mapping[str, _Range] = MappingProxyType(
 
 
 @dataclass(frozen=True)
-class PredictionMethod:
+class PredictionMethod(RichDisplay):
     """One row of Table 4, with what Table E.1 asks it to be fed.
 
     :param category: ``"1"``, ``"2a"``, ``"2b"`` or ``"2c"``.
@@ -221,7 +222,7 @@ RECOMMENDED_DETAIL: Mapping[
 
 
 @dataclass(frozen=True)
-class DetailVerdict:
+class DetailVerdict(RichDisplay):
     """Whether the data in hand is what a category of method asks for.
 
     The verdicts are read from the three levels and the row of Table E.1 the

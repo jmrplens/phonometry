@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.validation import require_equal_counts
 
 if TYPE_CHECKING:
@@ -42,7 +43,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class SignalOrigin:
+class SignalOrigin(RichDisplay):
     """Where a :class:`Signal` came from, as read from the file itself.
 
     The name is deliberately not ``SignalSource``, which
@@ -70,7 +71,7 @@ class SignalOrigin:
 
 
 @dataclass(frozen=True)
-class Signal:
+class Signal(RichDisplay):
     """A sampled acoustic signal with its rate, calibration and provenance.
 
     Written ``io.Signal`` after ``from phonometry import io``, or

@@ -17,6 +17,7 @@ import math
 import types
 from typing import TYPE_CHECKING
 
+from .._internal.display import RichDisplay
 from .._internal.validation import require_positive
 from .._internal.warnings import PhonometryWarning
 
@@ -78,7 +79,7 @@ def characteristic_impedance(density: float, speed_of_sound: float) -> float:
 
 
 @dataclasses.dataclass(frozen=True)
-class Fluid:
+class Fluid(RichDisplay):
     """One fluid at one state, and the properties its model fixed there.
 
     :param temperature_c: Temperature, in degrees Celsius.

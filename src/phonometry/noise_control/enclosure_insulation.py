@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import round_half_even
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
@@ -346,7 +347,7 @@ class WeightedEnclosureInsulation(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class TestEnvironmentApplicability:
+class TestEnvironmentApplicability(RichDisplay):
     r"""Whether a room is good enough for a base standard, Annex C of part 2.
 
     Table C.1 is the annex's, so its two columns, the area ratio they call for
@@ -428,7 +429,7 @@ class TestEnvironmentApplicability:
 
 
 @dataclass(frozen=True)
-class MethodEntry:
+class MethodEntry(RichDisplay):
     """One row of Table 1: a way of measuring and what it yields.
 
     :ivar base_standard: The standard the levels come from.

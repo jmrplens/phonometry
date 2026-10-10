@@ -37,6 +37,8 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from .display import RichDisplay
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
@@ -313,7 +315,7 @@ def _composed(hook: Callable[..., None]) -> Callable[..., None]:
     return __post_init__
 
 
-class OwnsArrays:
+class OwnsArrays(RichDisplay):
     """A frozen dataclass that keeps a read-only copy of its own of every array.
 
     Inherited by every public record of the library that can hold an array.
@@ -331,7 +333,9 @@ class OwnsArrays:
     ``__post_init__``, or inherits one, keeps it: the copy is composed
     around it when the class is created, never in its place. The class goes
     last among the bases, so that a ``__post_init__`` of another base is the
-    one composed.
+    one composed. It extends :class:`~phonometry._internal.display.RichDisplay`,
+    so a record that copies its arrays also shows itself as a table in a
+    notebook.
     """
 
     __slots__ = ()

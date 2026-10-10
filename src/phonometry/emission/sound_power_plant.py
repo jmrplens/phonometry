@@ -136,6 +136,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -1817,7 +1818,7 @@ _COMPARISONS = (">", ">=", "<=", "=")
 
 
 @dataclass(frozen=True)
-class PlantRequirement:
+class PlantRequirement(RichDisplay):
     """One requirement of ISO 8297 held against the measurement.
 
     :ivar key: A stable identifier, such as ``"mean_distance_min"``.
@@ -1923,7 +1924,7 @@ def _row(
 
 
 @dataclass(frozen=True)
-class PlantMeasurementCheck:
+class PlantMeasurementCheck(RichDisplay):
     """The arrangement and the readings of an ISO 8297 measurement against the
     requirements of the standard.
 

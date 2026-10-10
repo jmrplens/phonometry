@@ -47,6 +47,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import require_positive, require_scalar
 from ...io._resolve import SignalInput, resolve_calibration, resolve_fs
 
@@ -79,7 +80,7 @@ def _nonnegative(value: float, name: str) -> float:
 
 
 @dataclass(frozen=True)
-class PsychoacousticAnnoyanceResult:
+class PsychoacousticAnnoyanceResult(RichDisplay):
     """Psychoacoustic annoyance and its contributing terms (Fastl & Zwicker).
 
     :ivar annoyance: Psychoacoustic annoyance ``PA`` (Equation 16.2),

@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.utils import _typesignal
 from ..._internal.validation import require_scalar
 from ..._internal.warnings import PhonometryWarning
@@ -139,7 +140,7 @@ _TONE_METHODS: tuple[str, ...] = ("tone_to_noise_ratio", "prominence_ratio")
 
 
 @dataclass(frozen=True)
-class ToneAssessment:
+class ToneAssessment(RichDisplay):
     """Result of a discrete-tone prominence assessment.
 
     ``ratio_db`` is the tone-to-noise ratio (clause 11) or the prominence

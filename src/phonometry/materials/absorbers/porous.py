@@ -76,6 +76,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy import special
 
 from ..._internal.boundary import settled
+from ..._internal.display import record_html, record_pretty
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -91,6 +92,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._internal.display import Printer
     from ..._internal.types import Real
 
 Complex = NDArray[np.complex128]
@@ -728,6 +730,14 @@ class FibreResistivityFit(NamedTuple):
     direction: str
     source: str
 
+    def _repr_html_(self) -> str:
+        """The table Jupyter, JupyterLab, VS Code and Colab render."""
+        return record_html(self)
+
+    def _repr_pretty_(self, printer: Printer, cycle: object) -> None:
+        """The table in plain text, for the IPython terminal."""
+        record_pretty(self, printer, cycle)
+
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at
 #: an average fibre diameter of 4,75 um, in the plane of the sheet. Hopkins
@@ -877,6 +887,14 @@ class FibreCharacteristicLengths(NamedTuple):
 
     viscous_length_m: float
     thermal_length_m: float
+
+    def _repr_html_(self) -> str:
+        """The table Jupyter, JupyterLab, VS Code and Colab render."""
+        return record_html(self)
+
+    def _repr_pretty_(self, printer: Printer, cycle: object) -> None:
+        """The table in plain text, for the IPython terminal."""
+        record_pretty(self, printer, cycle)
 
 
 def fibre_characteristic_lengths(

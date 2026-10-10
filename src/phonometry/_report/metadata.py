@@ -16,12 +16,14 @@ import math
 from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING
 
+from .._internal.display import RichDisplay
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 
 @dataclass(frozen=True, kw_only=True)
-class ReportMetadata:
+class ReportMetadata(RichDisplay):
     """Descriptive metadata for the accredited ISO 717 report fiche.
 
     All fields are optional (default ``None``); the report renders only the

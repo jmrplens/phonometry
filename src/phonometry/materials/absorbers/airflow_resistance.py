@@ -75,6 +75,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.validation import check_engine, require_equal_shapes
 from ..._internal.warnings import PhonometryWarning
 from ...fluids import Fluid
@@ -179,7 +180,7 @@ class AirflowResistanceWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class StaticAirflowResult:
+class StaticAirflowResult(RichDisplay):
     r"""Result of an ISO 9053-1:2018 stepwise (static-method) determination.
 
     ``resistance`` (``R``, Pa*s/m3), ``specific_resistance`` (``R_s``, Pa*s/m) and

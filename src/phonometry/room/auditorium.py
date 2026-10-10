@@ -58,6 +58,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import require_choice, require_finite_array
 from .._internal.warnings import PhonometryWarning
@@ -1478,7 +1479,7 @@ TEST_REPORT_ITEMS = (
 
 
 @dataclass(frozen=True)
-class AuditoriumQuantity:
+class AuditoriumQuantity(RichDisplay):
     """One row of ISO 3382-1:2009, Table A.1.
 
     ``symbol`` is the quantity as the table prints it, ``aspect`` the

@@ -42,6 +42,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from .._internal.boundary import round_half_up
+from .._internal.display import RichDisplay
 from .._internal.validation import check_engine, require_scalar
 
 if TYPE_CHECKING:
@@ -65,7 +66,7 @@ def _round_db(value: float) -> int:
 
 
 @dataclass(frozen=True)
-class OperatingModeDeclaration:
+class OperatingModeDeclaration(RichDisplay):
     r"""Declared dual-number noise-emission values for one operating mode.
 
     Holds the measured A-weighted sound power level ``L_WA`` and its uncertainty
@@ -229,7 +230,7 @@ class OperatingModeDeclaration:
 
 
 @dataclass(frozen=True)
-class NoiseEmissionDeclaration:
+class NoiseEmissionDeclaration(RichDisplay):
     r"""An ISO 4871:1996 declaration of noise emission values (clauses 4 to 6).
 
     A declaration is one or more :class:`OperatingModeDeclaration` values (one

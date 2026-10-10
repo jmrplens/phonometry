@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
@@ -238,7 +239,7 @@ def _clean_bathymetry(
 
 
 @dataclass(frozen=True)
-class FluidSeabed:
+class FluidSeabed(RichDisplay):
     r"""A lossy fluid seabed, passed as the ``bottom`` of a solver.
 
     The fluid half-space of
@@ -2880,7 +2881,7 @@ class _Fan(NamedTuple):
 
 
 @dataclass(frozen=True)
-class BeamFan:
+class BeamFan(RichDisplay):
     r"""The launch fan :func:`gaussian_beams` hangs its beams on.
 
     Aperture, density and initial width travel together because they are one
@@ -2913,7 +2914,7 @@ class BeamFan:
 
 
 @dataclass(frozen=True)
-class VolumeAbsorption:
+class VolumeAbsorption(RichDisplay):
     r"""Seawater volume absorption: a model and the water it is evaluated in.
 
     The same models, spelled the same way, as

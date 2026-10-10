@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     check_engine,
@@ -278,7 +279,7 @@ def _task_sampling_uncertainty(levels: Sequence[float]) -> float:
 # Result dataclasses.
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class Task:
+class Task(RichDisplay):
     """One task of a task-based measurement (ISO 9612:2009 Clause 9).
 
     :param samples: Measured ``Lp,A,eqT,mi`` levels for the task, dB. At least
@@ -318,7 +319,7 @@ class Task:
 
 
 @dataclass(frozen=True)
-class TaskContribution:
+class TaskContribution(RichDisplay):
     """Per-task results and uncertainty terms of a task-based determination.
 
     The Clause 9.3 spread advisory is read from the number of samples and
@@ -391,7 +392,7 @@ class TaskContribution:
 
 
 @dataclass(frozen=True)
-class ExposureResult:
+class ExposureResult(RichDisplay):
     r"""Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 
     :ivar lex_8h: A-weighted daily noise exposure level ``LEX,8h``, dB.

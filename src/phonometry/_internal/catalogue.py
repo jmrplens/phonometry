@@ -80,6 +80,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, NamedTuple, NoReturn, 
 
 import numpy as np
 
+from .._internal.display import RichDisplay
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
@@ -143,7 +145,7 @@ _PAGE = "the page"
 
 
 @dataclass(frozen=True, kw_only=True)
-class CatalogueIssue:
+class CatalogueIssue(RichDisplay):
     r"""One thing wrong with a catalogue, or worth a second look, and where.
 
     A reader of a catalogue file collects every one of these before it
@@ -257,7 +259,7 @@ def _date_is_valid(text: str) -> bool:
 
 
 @dataclass(frozen=True, kw_only=True)
-class Provenance:
+class Provenance(RichDisplay):
     """Which document a catalogue's cells were read from, and how.
 
     A book's table is cited by its page, and the citation of every packaged
@@ -2065,7 +2067,7 @@ def _spell(entry: float | tuple[float, float], digits: str = "g") -> str:
 
 
 @dataclass(frozen=True, kw_only=True)
-class CatalogueRow:
+class CatalogueRow(RichDisplay):
     """One row of a published table, with what each cell said.
 
     The quantities are the subclass's business; this holds what surrounds

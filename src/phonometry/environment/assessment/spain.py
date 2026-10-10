@@ -86,6 +86,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -676,7 +677,7 @@ def corrected_level(
 # Noise phases and period integration (Annex IV A.3.4.2 b)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class NoisePhase:
+class NoisePhase(RichDisplay):
     """A noise phase ``Ti`` of steady emission within an evaluation period.
 
     RD 1367/2007 (Annex IV A.3.4.2 b) splits an evaluation period whose
@@ -808,7 +809,7 @@ def long_term_corrected_level(
 # Limit-table lookups
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class RegulationLimits:
+class RegulationLimits(RichDisplay):
     """A day/evening/night limit triple read from RD 1367/2007.
 
     :ivar day: Limit of the day period, in dB.
@@ -1052,7 +1053,7 @@ def adjacent_premises_limits(building_use: str, room_type: str) -> RegulationLim
 # Compliance assessment (Article 25)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class PeriodAssessment:
+class PeriodAssessment(RichDisplay):
     """The assessment of one evaluation period against its limit.
 
     The rounded levels and the three verdicts of Article 25.1 b are read from
@@ -1167,7 +1168,7 @@ class PeriodAssessment:
 
 
 @dataclass(frozen=True)
-class ActivityAssessment:
+class ActivityAssessment(RichDisplay):
     """Compliance of an activity or port infrastructure (Article 25).
 
     :ivar periods: The per-period assessments, in day/evening/night order;

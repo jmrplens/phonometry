@@ -88,6 +88,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.validation import require_choice, require_positive
 from .conformance import ConformanceVerification, verify_conformance
 
@@ -126,7 +127,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class CalibratorTableRow:
+class CalibratorTableRow(RichDisplay):
     """One row of an IEC 60942:2017 table keyed by a range of nominal frequencies.
 
     The printed ranges close and open their ends differently ("31,5 to 63",
@@ -493,7 +494,7 @@ def _values(value: float | Sequence[float], name: str) -> tuple[float, ...]:
 
 
 @dataclass(frozen=True)
-class SoundCalibratorMeasurements:
+class SoundCalibratorMeasurements(RichDisplay):
     """What a laboratory measured on a sound calibrator, for IEC 60942:2017.
 
     Each requirement is a pair of fields, the measured deviation and the
@@ -673,7 +674,7 @@ def _broadcast(
 
 
 @dataclass(frozen=True)
-class SoundCalibratorRequirement:
+class SoundCalibratorRequirement(RichDisplay):
     """One requirement of IEC 60942:2017, judged on every measurement of it.
 
     :ivar name: The requirement, one of :data:`CALIBRATOR_REQUIREMENTS`.
@@ -742,7 +743,7 @@ class SoundCalibratorRequirement:
 
 
 @dataclass(frozen=True)
-class SoundCalibratorVerification:
+class SoundCalibratorVerification(RichDisplay):
     """The IEC 60942:2017 verdict on one setting of a sound calibrator.
 
     :ivar calibrator_class: The designation it was judged as, one of

@@ -145,6 +145,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from ..._internal.boundary import round_half_up
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
 from ..._internal.validation import (
@@ -382,7 +383,7 @@ SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY: Mapping[str, float] = MappingProxyTy
 
 
 @dataclass(frozen=True)
-class OperatingCondition:
+class OperatingCondition(RichDisplay):
     """How one kind of equipment is run while it is measured (Annex B).
 
     Annex B is normative, but B.1.1 lets national requirements and regulations
@@ -2716,7 +2717,7 @@ def check_measurement_disturbance(
 
 
 @dataclass(frozen=True)
-class InstrumentAgreementCheck:
+class InstrumentAgreementCheck(RichDisplay):
     r"""Whether the calculated single numbers agree with the instrument (7.8).
 
     :ivar calculated_db: The single numbers of the result compared, as 7.8

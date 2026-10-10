@@ -99,6 +99,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
@@ -1286,7 +1287,7 @@ def floating_floor_improvement(
 # Element description and its in-situ evaluation
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
-class HomogeneousElement:
+class HomogeneousElement(RichDisplay):
     r"""A Type A homogeneous element of the detailed model.
 
     :ivar label: Human-readable element name, e.g. ``"separating floor"``.

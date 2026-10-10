@@ -61,6 +61,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -318,7 +319,7 @@ def railway_guide_values(
 
 
 @dataclass(frozen=True)
-class RailwayChange:
+class RailwayChange(RichDisplay):
     r"""The verdict of 6.5.3.6 on an altered or extended line.
 
     The increases and the verdicts are read from the two cases, the guide

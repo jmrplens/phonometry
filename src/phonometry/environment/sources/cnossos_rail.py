@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
@@ -408,7 +409,7 @@ class TrackCurvature(Enum):
 
 
 @dataclass(frozen=True)
-class VehicleDescriptor:
+class VehicleDescriptor(RichDisplay):
     """The four-digit vehicle descriptor of Table [2.3.a].
 
     :ivar vehicle_type: Digit 1, the :class:`VehicleType`.
@@ -461,7 +462,7 @@ class VehicleDescriptor:
 
 
 @dataclass(frozen=True)
-class TrackDescriptor:
+class TrackDescriptor(RichDisplay):
     """The six-digit track descriptor of Table [2.3.b].
 
     :ivar base: Digit 1, the :class:`TrackBase`.
@@ -2324,7 +2325,7 @@ class RollingStock(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class RailwayVehicle:
+class RailwayVehicle(RichDisplay):
     """One vehicle of the traffic on a track section.
 
     :ivar stock: The :class:`RollingStock` data of the vehicle type.

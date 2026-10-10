@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
@@ -327,7 +328,7 @@ def lab_lining_improvement(
 
 
 @dataclass(frozen=True)
-class LiningCuringCheck:
+class LiningCuringCheck(RichDisplay):
     """Whether the basic element was stable across the two measurements (G.4).
 
     The verdicts are read from the three times and the third G.4 prints, so

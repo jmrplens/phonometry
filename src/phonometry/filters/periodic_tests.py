@@ -102,6 +102,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import read_only
 from .._internal.validation import is_class_designation, require_positive
 from ..metrology.conformance import ConformanceVerification, verify_conformance
@@ -312,7 +313,7 @@ def _rows(
 
 
 @dataclass(frozen=True)
-class FilterPeriodicMeasurements:
+class FilterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61260-3:2016.
 
     Every result comes with the actual expanded uncertainty the laboratory
@@ -503,7 +504,7 @@ class FilterPeriodicMeasurements:
 
 
 @dataclass(frozen=True)
-class PeriodicTestClause:
+class PeriodicTestClause(RichDisplay):
     r"""The verdict on one clause of IEC 61260-3:2016.
 
     :ivar clause: The clause, ``"10.2"``, ``"10.3"``, ``"11.7"``, ``"11.9"``
@@ -605,7 +606,7 @@ class PeriodicTestClause:
 
 
 @dataclass(frozen=True)
-class FilterPeriodicVerification:
+class FilterPeriodicVerification(RichDisplay):
     """The IEC 61260-3:2016 verdict on the periodic tests of a band filter.
 
     :ivar filter_class: The class the filter was tested as, 1 or 2.

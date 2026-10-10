@@ -71,6 +71,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import require_choice
 from ..._internal.warnings import PhonometryWarning
 from ...filters.weighting import weighting_filter
@@ -112,7 +113,7 @@ class SoundscapeWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class BinauralParameter:
+class BinauralParameter(RichDisplay):
     """One row of ISO/TS 12913-3 Table D.1, "Metrics and representative
     single values".
 
@@ -276,7 +277,7 @@ _REPORTED_RESULTS = (_LAEQ, _LCEQ, _LAF5, _LAF95, "N5", "N95", "Nrmc")
 
 
 @dataclass(frozen=True)
-class BinauralMetric:
+class BinauralMetric(RichDisplay):
     """One metric of Table D.1 at both ears (ISO/TS 12913-3 D.2).
 
     :ivar symbol: The metric, as Table D.1 prints it (``"LAeq,T"``,
@@ -318,7 +319,7 @@ class BinauralMetric:
 
 
 @dataclass(frozen=True)
-class BinauralIndicators:
+class BinauralIndicators(RichDisplay):
     """The binaural analysis of a soundscape recording (ISO/TS 12913-3
     Annex D, Table D.1).
 

@@ -104,6 +104,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
@@ -188,7 +189,7 @@ class SourceRoom(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class DesignCriterion:
+class DesignCriterion(RichDisplay):
     """The design criterion the receiving room is held to.
 
     The verdict half of the chain: which room-criterion family the received

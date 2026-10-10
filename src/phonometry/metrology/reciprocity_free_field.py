@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.boundary import settled
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_non_negative, require_positive
 from .free_field_corrections import _band_column, _frequency_axis
@@ -852,7 +853,7 @@ _ANNEX_A_RANGE_M = (0.150, 0.500)
 
 
 @dataclass(frozen=True)
-class FreeFieldArrangementCheck:
+class FreeFieldArrangementCheck(RichDisplay):
     """Whether a free-field reciprocity arrangement is the one IEC 61094-3:2016
     recommends.
 

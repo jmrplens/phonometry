@@ -96,6 +96,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
@@ -153,7 +154,7 @@ def shaft_rate(speed_rpm: float) -> float:
 
 
 @dataclass(frozen=True)
-class FaultLine:
+class FaultLine(RichDisplay):
     """One predicted discrete line of a machine's kinematic signature.
 
     :ivar name: Short label, unique within a result (``"BPFO"``, ``"2xGMF"``,
@@ -187,7 +188,7 @@ def _line(
 
 
 @dataclass(frozen=True)
-class FaultFrequencyResult:
+class FaultFrequencyResult(RichDisplay):
     """A family of predicted fault lines for one machine element.
 
     :ivar lines: The predicted :class:`FaultLine` entries, in the order the

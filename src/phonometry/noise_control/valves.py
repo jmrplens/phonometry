@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
@@ -304,7 +305,7 @@ class ValveNoiseWarning(PhonometryWarning):
 
 
 @dataclass(frozen=True)
-class RegimeBoundaries:
+class RegimeBoundaries(RichDisplay):
     r"""The four pressure ratios that cut Clause 5.2 into five regimes.
 
     :ivar vena_contracta: :math:`x_{vcc}`, where the flow in the vena
@@ -646,7 +647,7 @@ def internal_spectrum(
 
 
 @dataclass(frozen=True)
-class PipeFrequencies:
+class PipeFrequencies(RichDisplay):
     """The three frequencies Clause 5.5 shapes the transmission loss with.
 
     :ivar ring: :math:`f_r` of Equation (21), where the pipe rings as a
@@ -851,7 +852,7 @@ def last_stage_flow_coefficient(total_area: float, *, coefficient: str = "Cv") -
 
 
 @dataclass(frozen=True)
-class MultistageConditions:
+class MultistageConditions(RichDisplay):
     r"""What a multistage trim hands Clause 5 in place of the valve inlet.
 
     :ivar flow_coefficient: :math:`C_n` of the last stage, Equation (27).
@@ -1053,7 +1054,7 @@ def stage_level_correction(
 
 
 @dataclass(frozen=True)
-class Expander:
+class Expander(RichDisplay):
     r"""The transition piece downstream of the valve (Clause 7).
 
     A valve whose outlet is narrower than the pipe it discharges into makes a
@@ -1397,7 +1398,7 @@ def _third_octave_bands() -> NDArray[np.float64]:
 
 
 @dataclass(frozen=True)
-class GasStream:
+class GasStream(RichDisplay):
     r"""The gas and the operating point, which Clause 5.1 reads first.
 
     :ivar mass_flow: :math:`\dot m`, in kg/s.
@@ -1419,7 +1420,7 @@ class GasStream:
 
 
 @dataclass(frozen=True)
-class ValveTrim:
+class ValveTrim(RichDisplay):
     r"""The valve, at the travel being examined.
 
     Every field is a manufacturer's datum except the last two, which Table 4
@@ -1447,7 +1448,7 @@ class ValveTrim:
 
 
 @dataclass(frozen=True)
-class DownstreamPipe:
+class DownstreamPipe(RichDisplay):
     r"""The pipe the noise actually comes out of, and what surrounds it.
 
     The last four fields are the values the standard prints for a steel pipe

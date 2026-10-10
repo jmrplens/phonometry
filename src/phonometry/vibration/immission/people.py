@@ -83,6 +83,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -219,7 +220,7 @@ INDUCED_SEISMIC_PEAK_FACTOR: float = 0.44
 
 
 @dataclass(frozen=True)
-class GuideValues:
+class GuideValues(RichDisplay):
     r"""One row of Table 1 or Table 2 for one period: the three guide values.
 
     :ivar a_u: :math:`A_\mathrm{u}`, the lower value, which :math:`KB_\mathrm{Fmax}`
@@ -873,7 +874,7 @@ def kb_fmax_from_peak_velocity(
 
 
 @dataclass(frozen=True)
-class PeopleAssessment:
+class PeopleAssessment(RichDisplay):
     r"""The verdict of Clause 6.2 on one immission, and how it was reached.
 
     The verdict, the comparison that decided it and whether it rests on the

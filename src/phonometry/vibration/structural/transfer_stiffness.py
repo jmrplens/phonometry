@@ -91,6 +91,7 @@ if TYPE_CHECKING:
 
 
 from ..._internal.boundary import settled
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
@@ -2082,7 +2083,7 @@ _ANNEX_B_NAMES = (
 
 
 @dataclass(frozen=True)
-class DrivingPointUncertainty:
+class DrivingPointUncertainty(RichDisplay):
     r"""Uncertainty budget of a band level measured by the driving-point method (ISO 10846-5 Annex B).
 
     The band level is modelled as the measured one plus five corrections of

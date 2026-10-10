@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.boundary import round_half_away_from_zero, round_half_up
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
@@ -1863,7 +1864,7 @@ _IMPACT_REFERENCE_FLOOR_CI = weighted_impact_rating(
 
 
 @dataclass(frozen=True)
-class ReductionImprovementRating:
+class ReductionImprovementRating(RichDisplay):
     r"""Single-number improvement of the sound reduction index by a lining.
 
     The rating of ISO 717-1:2020 Annex D: the measured ``ΔR`` is added to the

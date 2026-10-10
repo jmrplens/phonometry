@@ -5,16 +5,20 @@
 built, so it holds whoever builds the record: a function of the library, or a
 caller who writes ``SomeResult(levels_db=levels, ...)`` by hand. The first
 half of this file fixes what the mechanism does, on records written for the
-purpose; the second builds public records of the library by hand with an
+purpose, the arrays a factory hands over without a copy included, and that
+the largest simulation results are not held twice while they are built; the
+second builds public records of the library by hand with an
 array the caller can still write into, writes into it, and checks that the
 record did not move.
 """
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import importlib
 import pkgutil
+import tracemalloc
 from collections import ChainMap, OrderedDict, defaultdict
 from collections.abc import Iterator, Mapping
 from types import MappingProxyType
@@ -371,6 +375,220 @@ def test_none_and_numbers_go_through_untouched() -> None:
     record = Optional()
     assert record.levels_db is None
     assert record.level_db == 0.0
+
+
+# ---------------------------------------------------------------------------
+# An array handed over: kept as it is, sealed, never copied
+# ---------------------------------------------------------------------------
+
+
+def test_an_array_handed_over_is_kept_as_it_is_and_sealed() -> None:
+    frames = np.zeros((4, 3))
+    frames[1] = 2.0
+    record = _Plain(levels_db=frozen.handed_over(frames))
+    assert record.levels_db is frames
+    assert not frames.flags.writeable
+    with pytest.raises(ValueError, match="read-only"):
+        frames[0, 0] = 1.0
+
+
+def test_only_the_first_record_keeps_an_array_handed_over() -> None:
+    frames = frozen.handed_over(np.ones(5))
+    first = _Plain(levels_db=frames)
+    second = _Plain(levels_db=frames)
+    assert first.levels_db is frames
+    assert second.levels_db is not frames
+    assert not np.shares_memory(first.levels_db, second.levels_db)
+
+
+@pytest.mark.parametrize(
+    "make",
+    [
+        lambda: np.zeros((6, 4))[:, 1],
+        lambda: np.zeros((6, 4))[::2],
+        lambda: np.zeros((6, 4))[1:3],
+        lambda: np.asfortranarray(np.zeros((6, 4))),
+    ],
+    ids=["view-of-a-column", "strided-view", "contiguous-view", "fortran-ordered"],
+)
+def test_an_array_handed_over_that_is_a_view_or_not_c_ordered_is_copied(
+    make: Callable[[], np.ndarray],
+) -> None:
+    """Only memory the array owns, C-ordered, is kept: a view would leave
+    its base writeable behind the record, and every record holds the same
+    layout however it was built. A view is turned down before it is sealed,
+    C-ordered or not, so the caller's view keeps its ``writeable`` flag.
+    """
+    array = make()
+    record = _Plain(levels_db=frozen.handed_over(array))
+    assert not np.shares_memory(record.levels_db, array)
+    assert record.levels_db.flags.c_contiguous
+    assert array.flags.writeable
+
+
+def test_handing_over_none_hands_over_nothing() -> None:
+    assert frozen.handed_over(None) is None
+
+
+def test_an_array_never_kept_leaves_no_mark() -> None:
+    before = len(frozen._HANDED_OVER)
+    frozen.handed_over(np.zeros(3))
+    assert len(frozen._HANDED_OVER) == before
+
+
+def test_an_array_not_handed_over_is_still_copied() -> None:
+    frames = np.zeros(5)
+    record = _Plain(levels_db=frames)
+    assert record.levels_db is not frames
+    assert frames.flags.writeable
+
+
+def _fdtd() -> object:
+    from phonometry import simulation
+
+    sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
+    return simulation.fdtd_simulation(
+        343.0,
+        0.02,
+        100 * sim.dt,
+        sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
+        shape=(100, 100),
+        probes=[(10, 10)],
+        snapshot_every=1,
+    )
+
+
+def _elastic_fdtd() -> object:
+    from phonometry import simulation
+
+    dx = 0.05
+    c_p = 5900.0
+    dt = 0.6 * dx / (c_p * np.sqrt(2.0))
+    pulse = simulation.GaussianPulse(0, 0, 2e-4)
+    return simulation.elastic_fdtd_simulation(
+        c_p,
+        3200.0,
+        dx,
+        160 * dt,
+        sources=[simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value)],
+        rho=7850.0,
+        shape=(60, 100),
+        recording=simulation.ElasticRecording(probes=[(5, 5)], snapshot_every=1),
+    )
+
+
+def _underwater_pe() -> object:
+    from phonometry import underwater
+
+    return underwater.parabolic_equation(
+        200.0,
+        [0.0, 100.0],
+        [1500.0, 1500.0],
+        source_depth=40.0,
+        max_range=10_000.0,
+        range_step=2.0,
+        n_depth_points=256,
+    )
+
+
+def _atmospheric_pe() -> object:
+    from phonometry import environment
+
+    return environment.atmospheric_parabolic_equation(
+        500.0,
+        environment.linear_sound_speed_profile(0.1),
+        source_height=2.0,
+        flow_resistivity=50e3,
+        max_range=1000.0,
+        max_height=50.0,
+    )
+
+
+@contextlib.contextmanager
+def _traced_peak() -> Iterator[list[int]]:
+    """The peak memory traced inside the block, above what was traced at its start.
+
+    A trace already running (``PYTHONTRACEMALLOC``) is kept: its peak is reset
+    and its starting allocation taken off, and it is stopped only if the block
+    started it. The peak is appended to the list the block receives.
+    """
+    started = not tracemalloc.is_tracing()
+    if started:
+        tracemalloc.start()
+    tracemalloc.reset_peak()
+    base = tracemalloc.get_traced_memory()[0]
+    peak: list[int] = []
+    try:
+        yield peak
+    finally:
+        peak.append(tracemalloc.get_traced_memory()[1] - base)
+        if started:
+            tracemalloc.stop()
+
+
+@pytest.mark.parametrize(
+    "run",
+    [_fdtd, _elastic_fdtd, _underwater_pe, _atmospheric_pe],
+    ids=["fdtd", "elastic-fdtd", "underwater-pe", "atmospheric-pe"],
+)
+def test_a_simulation_result_is_not_held_twice_while_it_is_built(
+    run: Callable[[], object],
+) -> None:
+    """The frames of a run and the field of a march are written into one
+    array and handed to the record, which keeps that array: at no moment
+    does the run hold a second copy of the result (a list of frames and
+    their stack, or the record's copy of either), so the memory the run
+    needs above the result it returns is the solver's alone.
+    """
+    run()  # load the lazily imported domain packages outside the measurement
+    with _traced_peak() as traced:
+        result = run()
+    peak = traced[0]
+    arrays = [
+        value
+        for field in dataclasses.fields(result)  # type: ignore[arg-type]
+        if isinstance(value := getattr(result, field.name), np.ndarray)
+    ]
+    held = sum(array.nbytes for array in arrays)
+    assert peak - held < held / 2, (peak, held)
+    assert all(not array.flags.writeable for array in arrays)
+
+
+def _fdtd_engine() -> object:
+    from phonometry import simulation
+
+    sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
+    sim.add_source(simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4))
+    return sim
+
+
+def _elastic_fdtd_engine() -> object:
+    from phonometry import simulation
+
+    sim = simulation.ElasticFDTD2D(5900.0, 3200.0, 0.05, rho=7850.0, shape=(60, 100))
+    pulse = simulation.GaussianPulse(0, 0, 2e-4)
+    sim.add_source(simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value))
+    return sim
+
+
+@pytest.mark.parametrize(
+    "engine",
+    [_fdtd_engine, _elastic_fdtd_engine],
+    ids=["fdtd", "elastic-fdtd"],
+)
+def test_a_run_writes_its_frames_into_one_array(
+    engine: Callable[[], object],
+) -> None:
+    """``run()`` hands back the frames it records, and at no moment holds a
+    second copy of them (a list of frames and their stack): the memory the
+    march needs above the frames it returns is the solver's alone.
+    """
+    sim = engine()
+    with _traced_peak() as traced:
+        frames = sim.run(100, record_every=1)  # type: ignore[attr-defined]
+    peak = traced[0]
+    assert frames.shape[0] == 101
+    assert peak - frames.nbytes < frames.nbytes / 2, (peak, frames.nbytes)
 
 
 # ---------------------------------------------------------------------------

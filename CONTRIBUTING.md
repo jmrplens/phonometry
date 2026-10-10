@@ -943,6 +943,17 @@ array twice, and a type that has to change is written
 held in a field is left alone and answers for its own arrays, an
 `io.Signal` included, whose samples stay writeable.
 
+The one array a record keeps without a copy is one the factory allocates
+itself and fills, the frames of a simulation or the field of a march, so
+that a result of hundreds of megabytes is not held twice while the record
+is built. Allocate it before the loop (`np.zeros`, `np.empty` or
+`np.ones`), write into it there or in helpers it is passed to, and hand it
+over as `snapshots=handed_over(snapshots)`, from
+`phonometry._internal.frozen`, in the record the function returns. The
+record seals that array and keeps it, and only the first record it reaches
+does; one that does not own its memory or is not C-ordered is copied all
+the same.
+
 Anything else that keeps an array it was handed (a plain class, a private
 record) stores a copy of its own through
 `phonometry._internal.frozen.read_only_copy`, which copies and clears the
@@ -959,7 +970,16 @@ something that can hold an array and no `OwnsArrays` among its bases fails,
 and so does a copy written around an array handed to one that has it, or
 made first into a name (`f = levels.copy()`) that is only read before it is
 handed over (`frequencies_hz=read_only(f)`); a copy the function writes
-into, binds again or keeps a view of is left alone. Then
+into, binds again or keeps a view of is left alone. Every `handed_over`
+call has to be proved from the code, with no exemption: it is an argument
+of the record built in the `return` statement, its name is bound once to
+one of those allocations (or `None` in one branch of a conditional), and
+every other use of the name writes into the array (`name[...] = value`),
+tests it against `None`, or passes it to a helper of the package, with no
+decorator, that does only that, three calls deep at most; a view, a second
+name, a closure, a generator or `locals()` fails it. The call is held to
+this however the function is spelt, a dotted path to its module or
+`getattr` with its name included. Then
 it follows every parameter of every function through assignments, views,
 containers and the package's own helpers to the places an array is kept: a
 field of a public record that does not copy it, `object.__setattr__` on a

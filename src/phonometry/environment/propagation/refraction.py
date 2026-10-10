@@ -54,7 +54,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
     require_equal_shapes,
@@ -850,7 +850,8 @@ def atmospheric_parabolic_equation(
         frequency=f,
         ranges=np.asarray(ranges, dtype=np.float64),
         heights=np.asarray(out_heights, dtype=np.float64),
-        relative_level=field,
+        # The field is most of the result; the record keeps it as it is.
+        relative_level=handed_over(field),
         source_height=zs,
         normalized_impedance=z_imp,
     )

@@ -18,6 +18,12 @@ of the library or a caller writing the record by hand. An object that is not
 such a record (a plain class, a private record) keeps an array it was handed
 through :func:`read_only_copy`. ``scripts/check_array_aliasing.py`` holds the
 package to both.
+
+The one array a record keeps without copying is one a function of the
+library built for it and passes through :func:`handed_over`: the frames of
+a simulation, the field of a march, which nobody else can reach, so that a
+result of several hundred megabytes is not held twice while it is built.
+The check holds every such call to that.
 """
 
 from __future__ import annotations
@@ -90,6 +96,63 @@ def read_only_copy(
     return read_only(np.array(array, dtype=dtype))
 
 
+#: The arrays a function of the library has handed to the record it is
+#: building, by identity, until a record keeps one. Weak, so an array that
+#: never reaches a record leaves no trace here.
+_HANDED_OVER: weakref.WeakValueDictionary[int, np.ndarray] = (
+    weakref.WeakValueDictionary()
+)
+
+
+@overload
+def handed_over(array: None) -> None: ...
+
+
+@overload
+def handed_over[A: np.ndarray](array: A) -> A: ...
+
+
+def handed_over(array: np.ndarray | None) -> np.ndarray | None:
+    """Let the record *array* is passed to keep it as it is, without a copy.
+
+    A record that inherits :class:`OwnsArrays` copies every array it is
+    built with, so a factory that builds a large array itself (the frames a
+    simulation records, the field a march fills) would hold the result
+    twice while the record is built. Passed through this function, the array
+    becomes the record's own: it is sealed with :func:`read_only` instead of
+    copied. That is only right for an array nobody else can reach, and
+    ``scripts/check_array_aliasing.py`` holds every call to that: the call is
+    an argument of the record the function returns, and its argument is a
+    name bound once, to a new array (``np.zeros``, ``np.empty`` or
+    ``np.ones``), that the function, or an undecorated helper of the package
+    it is passed to, only ever writes into.
+
+    The first record the array reaches keeps it; a second one copies it, as
+    it does an array that does not own its memory or is not C-ordered.
+
+    :param array: The new array, or ``None`` for an optional field left out.
+    :return: The same array, or ``None``.
+    """
+    if array is not None:
+        _HANDED_OVER[id(array)] = array
+    return array
+
+
+def _adopted(array: np.ndarray) -> np.ndarray | None:
+    """*array* sealed as it is, if it was handed over, else ``None``.
+
+    The mark is taken off as it is read, so only the first record the array
+    reaches keeps it. An array that is a view of another's memory, or not
+    C-ordered, is not kept (the record copies it all the same), so a record
+    holds the same layout however it was built.
+    """
+    if _HANDED_OVER.pop(id(array), None) is not array:
+        return None
+    if not (array.flags.owndata and array.flags.c_contiguous):
+        return None
+    return read_only(array)
+
+
 def _sealed(array: np.ndarray) -> bool:
     """Whether nobody can write into *array* through any name it has.
 
@@ -135,7 +198,8 @@ def _owned(value: object, *, always: bool) -> object:
     ``OrderedDict``, a ``defaultdict``, a mapping of the caller's own) as a
     plain ``dict``, which never shares the caller's container. Anything else,
     a record included, is left as it is: a record held whole is composition,
-    and the record answers for its own arrays.
+    and the record answers for its own arrays. An array passed through
+    :func:`handed_over` is the one exception: it is sealed, not copied.
     """
     if isinstance(value, np.ndarray):
         return _owned_array(value, always=always)
@@ -147,7 +211,13 @@ def _owned(value: object, *, always: bool) -> object:
 
 
 def _owned_array(value: np.ndarray, *, always: bool) -> np.ndarray:
-    """*value*, or a read-only C-ordered copy of it when one is due."""
+    """*value*, or a read-only C-ordered copy of it when one is due.
+
+    An array passed through :func:`handed_over` is sealed as it is instead.
+    """
+    adopted = _adopted(value)
+    if adopted is not None:
+        return adopted
     if always or not _sealed(value):
         return read_only(np.array(value, order="C"))
     return value
@@ -204,9 +274,10 @@ def _take_ownership(
     """Copy the record's arrays, run its own ``__post_init__``, then seal.
 
     Before the class's own ``__post_init__`` runs, every array an init field
-    holds is replaced by a read-only copy, so the class validates and
-    normalises the record's own arrays: ``np.asarray(self.levels_db)`` is
-    that copy, and ``read_only`` on it touches nobody else's array. After,
+    holds is replaced by a read-only copy (or, handed over, sealed as it
+    is), so the class validates and normalises the record's own arrays:
+    ``np.asarray(self.levels_db)`` is that copy, and ``read_only`` on it
+    touches nobody else's array. After,
     every field is looked at once more, and an array somebody can still
     write into, one the class built and stored without sealing it or one it
     took from elsewhere, is copied too.
@@ -249,7 +320,9 @@ class OwnsArrays:
     Whoever builds the record, a function of the library or a caller writing
     ``SomeResult(levels_db=levels, ...)`` by hand, each array it is given
     (also inside a tuple, a list or a mapping) is replaced by a copy that
-    refuses in-place writes, before the class's own ``__post_init__`` runs.
+    refuses in-place writes, before the class's own ``__post_init__`` runs;
+    only an array a function of the library builds for it and passes
+    through :func:`handed_over` is sealed and kept instead.
     The caller's array is never flagged, and nothing the caller does to it
     afterwards reaches the record. A record held in a field is left as it
     is, an :class:`~phonometry.io.Signal` included: that is composition, the

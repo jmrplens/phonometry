@@ -293,6 +293,10 @@ _SHOCK_PEAK_COEFFICIENT = 1.4
 #: the root of two in regimes IV and V.
 _EFFICIENCY_MACH_EXPONENT = 6.6
 
+#: How closely a number of a result built by hand has to be what its equation
+#: gives from the fields beside it: rounding, not a tolerance of the method.
+_FIELD_REL_TOL = 1e-9
+
 
 class ValveNoiseWarning(PhonometryWarning):
     """A valve read outside the conditions IEC 60534-8-3 prints for it."""
@@ -509,11 +513,15 @@ def _regime_state(
     from: :math:`M_{vc} c_{vc}` in regime I and :math:`c_{vcc}` above it,
     which is the same quantity once the vena contracta is choked.
     """
-    subsonic = 1.0 - pressure_ratio / recovery**2
+    mach = _regime_mach(
+        regime,
+        pressure_ratio=pressure_ratio,
+        boundaries=boundaries,
+        gamma=gamma,
+        recovery=recovery,
+    )
     if regime == REGIME_SUBSONIC:
-        mach = math.sqrt(
-            (2.0 / (gamma - 1.0)) * (subsonic ** ((1.0 - gamma) / gamma) - 1.0)
-        )
+        subsonic = 1.0 - pressure_ratio / recovery**2
         temperature_k = inlet_temperature_k * subsonic ** ((gamma - 1.0) / gamma)
         sonic = math.sqrt(
             gamma
@@ -525,21 +533,40 @@ def _regime_state(
     sonic = math.sqrt(
         (2.0 * gamma / (gamma + 1.0)) * (inlet_pressure_pa / inlet_density)
     )
+    return mach, temperature_k, sonic, sonic
+
+
+def _regime_mach(
+    regime: int,
+    *,
+    pressure_ratio: float,
+    boundaries: RegimeBoundaries,
+    gamma: float,
+    recovery: float,
+) -> float:
+    """Table 3's Mach number, regime by regime.
+
+    The vena contracta's own Mach number in regime I, the free expansion
+    Mach number of the jet in regimes II to IV, and the constant of regime V.
+    """
+    if regime == REGIME_SUBSONIC:
+        subsonic = 1.0 - pressure_ratio / recovery**2
+        return math.sqrt(
+            (2.0 / (gamma - 1.0)) * (subsonic ** ((1.0 - gamma) / gamma) - 1.0)
+        )
     if regime == REGIME_CONSTANT_EFFICIENCY:
-        mach = math.sqrt(
+        return math.sqrt(
             (2.0 / (gamma - 1.0))
             * (_CONSTANT_EFFICIENCY_FACTOR ** ((gamma - 1.0) / gamma) - 1.0)
         )
-    else:
-        mach = math.sqrt(
-            (2.0 / (gamma - 1.0))
-            * (
-                (1.0 / (boundaries.recovery * (1.0 - pressure_ratio)))
-                ** ((gamma - 1.0) / gamma)
-                - 1.0
-            )
+    return math.sqrt(
+        (2.0 / (gamma - 1.0))
+        * (
+            (1.0 / (boundaries.recovery * (1.0 - pressure_ratio)))
+            ** ((gamma - 1.0) / gamma)
+            - 1.0
         )
-    return mach, temperature_k, sonic, sonic
+    )
 
 
 def _acoustical_efficiency(
@@ -1221,8 +1248,7 @@ def combine_internal_levels(
 class AerodynamicValveNoise(OwnsArrays):
     r"""What IEC 60534-8-3 Clause 5 says about one operating point.
 
-    :ivar regime: Which of the five regimes of Clause 5.2 the valve is in.
-    :ivar boundaries: The four pressure ratios that placed it there.
+    :ivar boundaries: The four pressure ratios that place it in a regime.
     :ivar pressure_ratio: :math:`x` of Equation (1).
     :ivar vena_contracta_pressure_pa: :math:`p_{vc}` of Equation (2), in Pa. It
         goes negative past the choking point, where the equation is being
@@ -1253,9 +1279,18 @@ class AerodynamicValveNoise(OwnsArrays):
         ``band_external_level`` and ``external_level``, combined with the
         trim by Equation (43); this field carries the outlet flow on its own,
         which is the only place it can be read apart.
+    :ivar specific_heat_ratio: :math:`\gamma` of the gas the boundaries and
+        the Mach number were taken for.
+    :ivar pressure_recovery: :math:`F_L` (or :math:`F_{LP}/F_p`) the
+        boundaries and the Mach number were taken for.
+    :ivar efficiency_correction: :math:`A_\eta` from Table 4, the
+        correction the acoustical efficiency of Table 3 was scaled by.
+
+    The regime (:attr:`regime`) is read from :attr:`pressure_ratio` and
+    :attr:`boundaries`, so it is not a field, and the Mach number and the
+    acoustical efficiency beside it are the ones Table 3 gives in that regime.
     """
 
-    regime: int
     boundaries: RegimeBoundaries
     pressure_ratio: float
     vena_contracta_pressure_pa: float
@@ -1277,6 +1312,77 @@ class AerodynamicValveNoise(OwnsArrays):
     external_level: float
     pipe_frequencies: PipeFrequencies
     expander: ExpanderNoise | None
+    _: KW_ONLY
+    specific_heat_ratio: float
+    pressure_recovery: float
+    efficiency_correction: float
+
+    def __post_init__(self) -> None:
+        """Reject an operating point whose regime its own numbers contradict.
+
+        The regime is read from the pressure ratio and the boundaries, so the
+        boundaries have to be the ones Equations (3) to (7) give for the gas
+        and the trim, and the Mach number and the acoustical efficiency the
+        ones Table 3 gives in that regime. The peak frequency of Table 3 also
+        needs the Strouhal number and the inlet state, which the result does
+        not keep, so it is not held to the regime here.
+
+        :raises ValueError: if :attr:`pressure_ratio` is not a finite number
+            strictly between 0 and 1, or the boundaries, the Mach number or
+            the acoustical efficiency is not the one the regime gives.
+        """
+        regime = flow_regime(self.pressure_ratio, self.boundaries)
+        expected_bounds = pressure_ratio_boundaries(
+            self.specific_heat_ratio, self.pressure_recovery
+        )
+        for name in (
+            "vena_contracta",
+            "critical",
+            "break_point",
+            "constant_efficiency",
+        ):
+            if not math.isclose(
+                getattr(self.boundaries, name),
+                getattr(expected_bounds, name),
+                rel_tol=_FIELD_REL_TOL,
+            ):
+                msg = (
+                    f"AerodynamicValveNoise: 'boundaries.{name}' is not what "
+                    "Equations (3) to (7) give for 'specific_heat_ratio' and "
+                    "'pressure_recovery'."
+                )
+                raise ValueError(msg)
+        mach = _regime_mach(
+            regime,
+            pressure_ratio=self.pressure_ratio,
+            boundaries=self.boundaries,
+            gamma=self.specific_heat_ratio,
+            recovery=self.pressure_recovery,
+        )
+        efficiency = _acoustical_efficiency(
+            regime,
+            correction=self.efficiency_correction,
+            recovery=self.pressure_recovery,
+            mach=mach,
+            pressure_ratio=self.pressure_ratio,
+            vena_contracta_ratio=self.boundaries.vena_contracta,
+        )
+        for name, value in (("mach", mach), ("acoustical_efficiency", efficiency)):
+            if not math.isclose(getattr(self, name), value, rel_tol=_FIELD_REL_TOL):
+                msg = (
+                    f"AerodynamicValveNoise: '{name}' must be {value!r}, what "
+                    f"Table 3 gives in regime {regime}; got {getattr(self, name)!r}."
+                )
+                raise ValueError(msg)
+
+    @property
+    def regime(self) -> int:
+        r"""Which of the five regimes of Clause 5.2 the valve is in, 1 to 5.
+
+        Read from :attr:`pressure_ratio` and :attr:`boundaries` by
+        :func:`flow_regime`, the intervals of Clause 5.2 closed at the top.
+        """
+        return flow_regime(self.pressure_ratio, self.boundaries)
 
 
 def _third_octave_bands() -> NDArray[np.float64]:
@@ -1536,7 +1642,6 @@ def valve_aerodynamic_noise(
         air_sound_speed=air_sound_speed,
     )
     return AerodynamicValveNoise(
-        regime=regime,
         boundaries=boundaries,
         pressure_ratio=float(x),
         vena_contracta_pressure_pa=float(vena_contracta_pressure_pa),
@@ -1560,4 +1665,7 @@ def valve_aerodynamic_noise(
         external_level=float(external_level),
         pipe_frequencies=frequencies,
         expander=outlet_noise,
+        specific_heat_ratio=gamma,
+        pressure_recovery=recovery,
+        efficiency_correction=float(efficiency_correction),
     )

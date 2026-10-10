@@ -74,6 +74,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
     require_finite_array,
+    require_non_negative,
     require_positive,
     require_positive_array,
 )
@@ -248,6 +249,11 @@ _BAND_RANGE_HZ = (50.0, 20000.0)
 #: closed at this value, but Equation (9) divides by :math:`1 - x_F` and so
 #: has no value on the boundary itself, which is where this module stops.
 _FLASHING_RATIO = 1.0
+
+#: How closely a ratio of a result built by hand has to be what its equation
+#: gives from the fields beside it: the rounding of one division, not a
+#: tolerance of the method.
+_FIELD_REL_TOL = 1e-9
 
 #: The smallest number of stages Clause 6 is about.
 _MINIMUM_STAGES = 2
@@ -1149,11 +1155,11 @@ def _spreading(internal_diameter_m: float, wall_thickness: float) -> float:
 class HydrodynamicValveNoise(OwnsArrays):
     r"""What IEC 60534-8-4 says about one operating point on a liquid line.
 
-    :ivar regime: ``"turbulent"`` or ``"cavitating"``, from the test of 5.1:
-        the valve cavitates when :math:`p_1 - p_2` exceeds
-        :math:`x_{Fzp1}(p_1 - p_v)`.
     :ivar pressure_ratio: :math:`x_F` of Equation (1).
     :ivar differential: :math:`p_1 - p_2`, in Pa.
+    :ivar inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
+    :ivar vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
+        temperature, absolute, in Pa.
     :ivar cavitation_differential: :math:`\Delta p_c` of Equation (2), in Pa.
         It stops following the differential once the flow chokes.
     :ivar incipient_ratio: :math:`x_{Fz}`, the threshold as given, at
@@ -1192,11 +1198,16 @@ class HydrodynamicValveNoise(OwnsArrays):
     :ivar band_transmission_loss: :math:`TL(f_i)` of Equation (22a), in dB.
     :ivar band_external_level: :math:`L_{pe,1m}(f_i)` of Equation (21), in
         dB, unweighted.
+
+    The regime (:attr:`regime`) is read from :attr:`differential`,
+    :attr:`corrected_ratio` and the two pressures, so it is not a field, and
+    the three cavitation fields are given exactly when it is cavitating.
     """
 
-    regime: str
     pressure_ratio: float
     differential: float
+    inlet_pressure_pa: float
+    vapour_pressure_pa: float
     cavitation_differential: float
     incipient_ratio: float
     corrected_ratio: float
@@ -1220,6 +1231,120 @@ class HydrodynamicValveNoise(OwnsArrays):
     band_internal_level: NDArray[np.float64]
     band_transmission_loss: NDArray[np.float64]
     band_external_level: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Reject an operating point whose regime its own fields contradict.
+
+        The regime is read from the pressures, so the two ratios beside them
+        have to be the ones Equations (1) and (3c) make of them: :math:`x_F`
+        is the differential over :math:`p_1 - p_v`, and :math:`x_{Fzp1}` is
+        :math:`x_{Fz}` moved to :math:`p_1`. The operating point stays below
+        :math:`x_F = 1`, where the liquid flashes and Equation (9) has no
+        value, as :func:`valve_hydrodynamic_noise` does. The regime then
+        decides which of Equations (7a) and (7b), (16a) and (17), (18a) and
+        (18b) the numbers beside it come from: a turbulent point has no
+        cavitation efficiency, no cavitation peak and no cavitation
+        transmission loss, and a cavitating one has the first two.
+
+        :raises ValueError: if the inlet pressure is not above the vapour
+            pressure, the differential is negative or reaches flashing,
+            ``pressure_ratio`` or ``corrected_ratio`` is not what Equation
+            (1) or (3c) gives from the fields beside it, or the cavitation
+            fields disagree with the regime.
+        """
+        p1 = require_positive(self.inlet_pressure_pa, "inlet_pressure_pa")
+        pv = require_positive(self.vapour_pressure_pa, "vapour_pressure_pa")
+        if pv >= p1:
+            msg = (
+                "HydrodynamicValveNoise: 'vapour_pressure_pa' must be below "
+                "'inlet_pressure_pa', or the liquid is not a liquid at the inlet."
+            )
+            raise ValueError(msg)
+        differential = require_non_negative(self.differential, "differential")
+        ratio = _require_below_flashing(differential / (p1 - pv))
+        expected = {
+            "pressure_ratio": ratio,
+            "corrected_ratio": corrected_incipient_ratio(self.incipient_ratio, p1),
+        }
+        for name, value in expected.items():
+            if not math.isclose(getattr(self, name), value, rel_tol=_FIELD_REL_TOL):
+                msg = (
+                    f"HydrodynamicValveNoise: '{name}' must be what Equation "
+                    + ("(1)" if name == "pressure_ratio" else "(3c)")
+                    + f" gives from the fields beside it, {value!r}; got "
+                    f"{getattr(self, name)!r}."
+                )
+                raise ValueError(msg)
+        cavitating = self.regime == _CAVITATING
+        given = {
+            "cavitation_efficiency": self.cavitation_efficiency,
+            "cavitation_peak": self.cavitation_peak,
+        }
+        if not cavitating:
+            given["cavitation_transmission_loss"] = self.cavitation_transmission_loss
+        for name, field_value in given.items():
+            if (field_value is not None) != cavitating:
+                msg = (
+                    f"HydrodynamicValveNoise: '{name}' "
+                    + ("is needed" if cavitating else "has no meaning")
+                    + f" in the {self.regime} regime of 5.1."
+                )
+                raise ValueError(msg)
+
+    @property
+    def regime(self) -> str:
+        r"""``"turbulent"`` or ``"cavitating"``, the test of 5.1.
+
+        The valve cavitates when :math:`\Delta p = p_1 - p_2` exceeds
+        :math:`x_{Fzp1}(p_1 - p_v)` and :math:`x_F` is not greater than 1, and
+        is turbulent when :math:`\Delta p` is lower. The result holds
+        :math:`x_F` below 1, so the second condition always holds here. 5.1
+        leaves the threshold itself to neither side, and the rest of the
+        standard puts it on both (the region of Equation (9) and Equation
+        (19b) with the cavitating points, 4.1, Equation (18b) and 6.3 with the
+        turbulent ones). It is read as turbulent because Equation (9) returns
+        zero there, so the two branches meet without a step.
+        """
+        return _flow_regime(
+            self.differential,
+            self.corrected_ratio,
+            self.inlet_pressure_pa,
+            self.vapour_pressure_pa,
+        )
+
+
+#: The two regimes of 5.1.
+_TURBULENT = "turbulent"
+_CAVITATING = "cavitating"
+
+
+def _flow_regime(
+    differential: float,
+    corrected_ratio: float,
+    inlet_pressure_pa: float,
+    vapour_pressure_pa: float,
+) -> str:
+    r"""The regime of 5.1: cavitating when :math:`p_1 - p_2` exceeds
+    :math:`x_{Fzp1}(p_1 - p_v)`, turbulent otherwise.
+    """
+    threshold = corrected_ratio * (inlet_pressure_pa - vapour_pressure_pa)
+    return _CAVITATING if differential > threshold else _TURBULENT
+
+
+def _require_below_flashing(ratio: float) -> float:
+    """Return :math:`x_F`, or raise at or past the flashing point.
+
+    :raises ValueError: if :math:`x_F` is 1 or more, where the outlet is at
+        the vapour pressure and Equation (9) divides by zero.
+    """
+    if ratio >= _FLASHING_RATIO:
+        msg = (
+            "At x_F = 1 the outlet is at the vapour pressure and the liquid "
+            "flashes; Equation (9) divides by 1 - x_F, so the method stops "
+            f"below it. Got x_F = {ratio:.3f}."
+        )
+        raise ValueError(msg)
+    return ratio
 
 
 def _default_bands() -> NDArray[np.float64]:
@@ -1373,13 +1498,7 @@ def valve_hydrodynamic_noise(
     ratio = differential_pressure_ratio(
         inlet_pressure_pa=p1, outlet_pressure_pa=p2, vapour_pressure_pa=pv
     )
-    if ratio >= _FLASHING_RATIO:
-        msg = (
-            "At x_F = 1 the outlet is at the vapour pressure and the liquid "
-            "flashes; Equation (9) divides by 1 - x_F, so the method stops "
-            f"below it. Got x_F = {ratio:.3f}."
-        )
-        raise ValueError(msg)
+    _require_below_flashing(ratio)
     differential = p1 - p2
     choked = cavitation_differential(
         inlet_pressure_pa=p1,
@@ -1388,7 +1507,7 @@ def valve_hydrodynamic_noise(
         pressure_recovery=recovery,
     )
     threshold = corrected_incipient_ratio(incipient_ratio, p1)
-    cavitating = differential > threshold * (p1 - pv)
+    cavitating = _flow_regime(differential, threshold, p1, pv) == _CAVITATING
 
     jet = jet_diameter_m(
         flow_coefficient, style_modifier, recovery, coefficient=coefficient
@@ -1477,9 +1596,10 @@ def valve_hydrodynamic_noise(
     )
     band_loss = reference + transmission_loss_correction(bands, ring)
     return HydrodynamicValveNoise(
-        regime="cavitating" if cavitating else "turbulent",
         pressure_ratio=float(ratio),
         differential=float(differential),
+        inlet_pressure_pa=p1,
+        vapour_pressure_pa=pv,
         cavitation_differential=float(choked),
         incipient_ratio=float(incipient_ratio),
         corrected_ratio=float(threshold),

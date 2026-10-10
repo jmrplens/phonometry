@@ -1780,7 +1780,7 @@ def _terrain_adjustments(
             )[0]
             continue
         sigma_seg = np.full(n - 1, sigma)
-        adj, _, _, _ = _screening_core(
+        adj, _, _ = _screening_core(
             freqs, (0.0, sz), (span, float(receivers[i, 2])), d, pz, sigma_seg
         )
         out[i] = adj

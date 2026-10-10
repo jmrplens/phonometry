@@ -13,10 +13,14 @@ produced it. A field is reported when the value it is given is
   ``np.asarray``, ``bool`` and the like), reached through local names, tuple
   unpacking, comprehensions and the module-level helpers of the package that
   return one; or
-* a label (a string, a bool, an enum member, a string constant of the module)
-  chosen by such a comparison: ``"a" if x < LIMIT else "b"``, ``np.where`` over
-  a comparison between two labels, or a helper whose ``return`` of a label sits
-  under an ``if`` on one.
+* a label (a string, a bool, an enum member, a string constant of the module,
+  one item of a module tuple of strings, or a number a module constant in
+  capitals names a case by) chosen by such a comparison: ``"a" if x < LIMIT
+  else "b"``, ``np.where`` over a comparison between two labels, a helper whose
+  ``return`` of a label sits under an ``if`` on one, a label appended to a list
+  under such an ``if``, or a label written into an array through a mask,
+  ``labels[r >= EDGE] = REGIMES[1]``; an array narrowed in place by a mask,
+  ``kept[1:] &= ~small``, is traced like the mask.
 
 What it cannot see is a verdict that reaches the constructor through
 ``**kwargs``, through :func:`dataclasses.replace`, through ``cls(...)`` or
@@ -134,10 +138,14 @@ def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
             for index, item in enumerate(target.elts):
                 bind(item, _Unpacked(value, index))
 
-    for node in ast.walk(func):
+    def visit(node: ast.AST, test: ast.expr | None) -> None:
+        # ``test`` is the condition of the innermost ``if`` around ``node``.
         if isinstance(node, ast.Assign):
             for target in node.targets:
-                bind(target, node.value)
+                bind(_base(target), node.value)
+                if isinstance(target, ast.Subscript):
+                    # ``labels[mask] = LABEL``: the label is where the mask holds.
+                    bind(_base(target), _chosen(target.slice, node.value))
         elif (
             isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None
         ):
@@ -145,7 +153,10 @@ def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
         elif isinstance(node, ast.AugAssign) and isinstance(
             node.op, (ast.BitAnd, ast.BitOr, ast.BitXor)
         ):
-            bind(node.target, ast.BinOp(left=node.target, op=node.op, right=node.value))
+            bind(
+                _base(node.target),
+                ast.BinOp(left=node.target, op=node.op, right=node.value),
+            )
         elif isinstance(node, (ast.For, ast.comprehension)):
             _bind_loop(node, bind)
         elif (
@@ -155,8 +166,30 @@ def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
             and isinstance(node.func.value, ast.Name)
         ):
             for arg in node.args:
-                bind(node.func.value, ast.List(elts=[arg]))
+                item = arg if test is None else _chosen(test, arg)
+                bind(node.func.value, ast.List(elts=[item]))
+        if isinstance(node, ast.If):
+            visit(node.test, test)
+            for child in (*node.body, *node.orelse):
+                visit(child, node.test)
+            return
+        for child in ast.iter_child_nodes(node):
+            visit(child, test)
+
+    visit(func, None)
     return {name: tuple(values) for name, values in out.items()}
+
+
+def _base(target: ast.AST) -> ast.AST:
+    """The name a subscripted write goes into: ``x`` for ``x[i][j]``."""
+    while isinstance(target, ast.Subscript):
+        target = target.value
+    return target
+
+
+def _chosen(test: ast.expr, value: ast.expr) -> ast.IfExp:
+    """``value`` as a label ``test`` chose, the shape ``_choice`` reads."""
+    return ast.IfExp(test=test, body=value, orelse=value)
 
 
 def _is_dtype(expr: ast.AST) -> bool:
@@ -173,11 +206,23 @@ class _Tracer:
         self.namespace = vars(module)
 
     def label(self, expr: object) -> bool:
-        """Whether *expr* is a label: a string or bool, a module string, an enum member."""
+        """Whether *expr* is a label: a string or bool, a module string, an enum member.
+
+        One item of a module tuple of strings is one too, and so is a number
+        a module constant in capitals names a case by (``REGIME_CHOKED = 2``).
+        """
         if isinstance(expr, ast.Constant):
             return isinstance(expr.value, (str, bool))
         if isinstance(expr, ast.Name):
-            return isinstance(self.namespace.get(expr.id), str)
+            value = self.namespace.get(expr.id)
+            return isinstance(value, str) or (
+                isinstance(value, int)
+                and not isinstance(value, bool)
+                and expr.id.lstrip("_").isupper()
+            )
+        if isinstance(expr, ast.Subscript) and isinstance(expr.value, ast.Name):
+            labels = self.namespace.get(expr.value.id)
+            return isinstance(labels, tuple) and all(isinstance(v, str) for v in labels)
         if isinstance(expr, ast.Attribute) and isinstance(expr.value, ast.Name):
             owner = self.namespace.get(expr.value.id)
             return isinstance(owner, type) and issubclass(owner, enum.Enum)

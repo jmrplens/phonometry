@@ -127,7 +127,6 @@ SynchronousAverageResult(
     period_s: float,
     fs: float,
     *,
-    interpolated: bool,
     noise_reduction_db: float,
     residual_rms: float,
     comb_frequencies: NDArray[np.float64],
@@ -148,17 +147,31 @@ Time synchronous average of a periodic waveform in noise.
 | `samples_per_period` | Integer samples per period `M` after any alignment. |
 | `period_s` | Repetition period `T`, in seconds. |
 | `fs` | Sample rate, in Hz. |
-| `interpolated` | Whether band-limited fractional-delay alignment was applied (`True` when $f_\mathrm{s} T$ is not an integer). |
 | `noise_reduction_db` | Power reduction of asynchronous noise, $10 \log_{10} N$ dB (amplitude SNR gain $\sqrt{N}$). |
 | `residual_rms` | Root-mean-square of `residual`. |
 | `comb_frequencies` | Frequency axis of the comb-filter response, in Hz (from DC over a whole number of harmonics of `1/T`). |
 | `comb_response` | Magnitude of the comb filter (McFadden Eq. 8) on `comb_frequencies`. |
+
+Whether the periods were aligned by a fractional delay
+(`interpolated`) is read from `fs` and `period_s`, so
+it is not a field.
 
 ### SynchronousAverageResult.amplitude_snr_gain
 
 *property*
 
 Amplitude signal-to-noise improvement $\sqrt{N}$.
+
+### SynchronousAverageResult.interpolated
+
+*property*
+
+Whether band-limited fractional-delay alignment was applied.
+
+`True` when $f_\mathrm{s} T$ is not an integer, to within
+$10^{-9}$ of a sample, so the period starts between samples and
+each block is shifted onto the grid before it is averaged. Read from
+`fs` and `period_s`.
 
 ### SynchronousAverageResult.plot()
 

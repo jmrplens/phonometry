@@ -191,7 +191,6 @@ CabinInsulationResult(
     room_levels: NDArray[np.float64],
     cabin_levels: NDArray[np.float64],
     insulation: NDArray[np.float64],
-    apparent: bool,
     a_weighted_insulation: float | None,
     internal_noise_level: float | None,
     method: str,
@@ -209,11 +208,23 @@ The sound pressure insulation of a cabin, band by band.
 | `room_levels` | $(L_p)_{\text{room}}$, in decibels, after any background correction. |
 | `cabin_levels` | $(L_p)_{\text{cabin}}$, in decibels, after any background correction. |
 | `insulation` | $D_p$ or $D'_p$ per band, in decibels. |
-| `apparent` | Whether the answer carries the prime of 3.6, which it does for both in-situ methods. |
 | `a_weighted_insulation` | $D'_{p\mathrm{A}}$ of Equation (3), in decibels, or `None`. Defined only for the actual-noise method. |
 | `internal_noise_level` | $L_{pA}$ of 6.7, in decibels, or `None` when the cabin has no integral source. |
 | `method` | `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
 | `band_fraction` | 3 for one-third octaves, 1 for octaves. |
+
+Whether the answer carries the prime (`apparent`) is read from the
+method, so it is not a field.
+
+### CabinInsulationResult.apparent
+
+*property*
+
+Whether the answer carries the prime of 3.6.
+
+The word "apparent" says the measurement was carried out in situ
+(3.6, NOTE 2), so it is read from the method: both in-situ methods
+give $D'_p$, the laboratory method $D_p$.
 
 ### CabinInsulationResult.plot()
 

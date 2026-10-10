@@ -73,7 +73,6 @@ AERODYNAMIC_A_WEIGHTING_DB = (-63.4, -56.7, -50.5, -44.7, -39.4, -34.6, -30.2, -
 
 ```python
 AerodynamicValveNoise(
-    regime: int,
     boundaries: RegimeBoundaries,
     pressure_ratio: float,
     vena_contracta_pressure_pa: float,
@@ -95,6 +94,10 @@ AerodynamicValveNoise(
     external_level: float,
     pipe_frequencies: PipeFrequencies,
     expander: ExpanderNoise | None,
+    *,
+    specific_heat_ratio: float,
+    pressure_recovery: float,
+    efficiency_correction: float,
 )
 ```
 
@@ -104,8 +107,7 @@ What IEC 60534-8-3 Clause 5 says about one operating point.
 
 | Name | Description |
 | :--- | :--- |
-| `regime` | Which of the five regimes of Clause 5.2 the valve is in. |
-| `boundaries` | The four pressure ratios that placed it there. |
+| `boundaries` | The four pressure ratios that place it in a regime. |
 | `pressure_ratio` | $x$ of Equation (1). |
 | `vena_contracta_pressure_pa` | $p_{vc}$ of Equation (2), in Pa. It goes negative past the choking point, where the equation is being read outside the range it means anything in. |
 | `jet_diameter_m` | $D_j$ of Equation (9), in m. |
@@ -126,6 +128,22 @@ What IEC 60534-8-3 Clause 5 says about one operating point.
 | `external_level` | $L_{pAe,1m}$ of Equation (25), in dB. |
 | `pipe_frequencies` | The ring and coincidence frequencies the transmission loss is shaped by. |
 | `expander` | What Clause 7 says the flow leaving the valve outlet makes, or `None` when no expander was given. When it is present its spectrum is already in `band_internal_level`, and so in `band_external_level` and `external_level`, combined with the trim by Equation (43); this field carries the outlet flow on its own, which is the only place it can be read apart. |
+| `specific_heat_ratio` | $\gamma$ of the gas the boundaries and the Mach number were taken for. |
+| `pressure_recovery` | $F_L$ (or $F_{LP}/F_p$) the boundaries and the Mach number were taken for. |
+| `efficiency_correction` | $A_\eta$ from Table 4, the correction the acoustical efficiency of Table 3 was scaled by. |
+
+The regime (`regime`) is read from `pressure_ratio` and
+`boundaries`, so it is not a field, and the Mach number and the
+acoustical efficiency beside it are the ones Table 3 gives in that regime.
+
+### AerodynamicValveNoise.regime
+
+*property*
+
+Which of the five regimes of Clause 5.2 the valve is in, 1 to 5.
+
+Read from `pressure_ratio` and `boundaries` by
+[`flow_regime`](/phonometry/reference/api/noise_control/valves/#flow_regime), the intervals of Clause 5.2 closed at the top.
 
 ## AIR_SOUND_SPEED_M_S
 

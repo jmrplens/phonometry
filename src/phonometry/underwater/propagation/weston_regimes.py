@@ -69,6 +69,10 @@ if TYPE_CHECKING:
 #: Regime labels, in order of increasing range.
 WESTON_REGIMES = ("spherical", "cylindrical", "mode-stripping", "single-mode")
 
+#: How far, in dB, the composite loss of a result built by hand may be from
+#: the law of the regime in force: rounding, not a tolerance of the method.
+_FIELD_SLACK_DB = 1e-9
+
 # Normal incidence, the largest grazing angle a ray can have: the upper edge
 # of the (0, 90] degree validity range for a 'critical_angle_deg' override.
 _NORMAL_INCIDENCE_DEG = 90.0
@@ -437,8 +441,6 @@ class WestonPropagationResult(OwnsArrays):
     :ivar propagation_loss: Composite propagation loss
         :math:`\mathrm{PL} = -10 \log_{10} F` per range, in dB re 1 m².
     :ivar propagation_factor: The composite propagation factor ``F``, in m⁻².
-    :ivar regime: The active regime label at each range (one of
-        :data:`WESTON_REGIMES`).
     :ivar spherical: Spherical-spreading loss :math:`20 \log_{10} r` at every
         range, in dB.
     :ivar cylindrical: Cylindrical-spreading loss (Eq. 9.42) at every range, dB.
@@ -454,12 +456,14 @@ class WestonPropagationResult(OwnsArrays):
     :ivar source_depth: Source depth ``z0``, in metres.
     :ivar receiver_depth: Receiver depth ``z``, in metres.
     :ivar seabed: Name of the seabed used.
+
+    The regime in force at each range (:attr:`regime`) is read from the
+    ranges and the boundaries, so it is not a field.
     """
 
     range_m: NDArray[np.float64]
     propagation_loss: NDArray[np.float64]
     propagation_factor: NDArray[np.float64]
-    regime: NDArray[np.str_]
     spherical: NDArray[np.float64]
     cylindrical: NDArray[np.float64]
     mode_stripping: NDArray[np.float64]
@@ -475,26 +479,24 @@ class WestonPropagationResult(OwnsArrays):
     def __post_init__(self) -> None:
         r"""Reject a column that does not run over the result's own ranges.
 
-        The nine arrays are one table indexed by ``range_m``: the composite
-        loss, the factor it was taken from, the label of the regime in force,
-        and the four regime laws evaluated at every range whether or not they
-        are in force there. A column of another length answers for ranges the
-        row beside it did not come from.
+        The eight arrays are one table indexed by ``range_m``: the composite
+        loss, the factor it was taken from, and the four regime laws evaluated
+        at every range whether or not they are in force there. A column of
+        another length answers for ranges the row beside it did not come
+        from. The label of the regime in force is read from ``range_m`` and
+        the boundaries, so it always runs over the result's own ranges.
 
-        Six of the nine reach :meth:`plot`, and there the mistake stops the
+        Six of the eight reach :meth:`plot`, and there the mistake stops the
         figure without saying whose it is -- matplotlib refuses with ``x and y
         must have same first dimension, but have shapes (40,) and (39,)``,
         which carries two shapes and neither the field nor the result they
         belong to, so the six are indistinguishable from it.
 
-        The other three the figure never draws, so nothing complains at all.
-        A ``regime`` column computed on a 41-point grid and handed to a
-        40-point range axis builds, plots its full seven lines, and then puts
-        the onset of mode stripping at 1075 m where the aligned result puts it
-        at 885 m. A one-element ``propagation_factor`` broadcasts rather than
-        raising: :math:`-10 \log_{10} F` checked against ``propagation_loss``
-        comes back 49 dB adrift instead of nought, and the figure is drawn in
-        full either way.
+        The figure never draws the factor, so nothing complains about it: a
+        one-element ``propagation_factor`` broadcasts rather than raising,
+        :math:`-10 \log_{10} F` checked against ``propagation_loss`` comes
+        back 49 dB adrift instead of nought, and the figure is drawn in full
+        either way.
 
         The ranks are pinned with the lengths because a range grid handed in
         two-dimensional stays two-dimensional through every column and agrees
@@ -502,15 +504,18 @@ class WestonPropagationResult(OwnsArrays):
         :meth:`plot` on numpy's ambiguous truth value, raised while testing
         whether a regime boundary falls inside the axis.
 
+        The composite loss is the law of the regime in force at each range,
+        so it is held to that column, and to the factor it was taken from.
+
         :raises ValueError: if a column has the wrong number of axes, or a
-            length other than ``range_m``'s.
+            length other than ``range_m``'s, or the composite loss is not the
+            law of the regime in force or not :math:`-10 \log_{10} F`.
         """
         require_ranks(
             self,
             range_m=1,
             propagation_loss=1,
             propagation_factor=1,
-            regime=1,
             spherical=1,
             cylindrical=1,
             mode_stripping=1,
@@ -522,7 +527,6 @@ class WestonPropagationResult(OwnsArrays):
             "range_m",
             "propagation_loss",
             "propagation_factor",
-            "regime",
             "spherical",
             "cylindrical",
             "mode_stripping",
@@ -530,6 +534,43 @@ class WestonPropagationResult(OwnsArrays):
             "multipath",
             axis="range",
         )
+        laws = dict(
+            zip(
+                WESTON_REGIMES,
+                (
+                    self.spherical,
+                    self.cylindrical,
+                    self.mode_stripping,
+                    self.single_mode,
+                ),
+                strict=True,
+            )
+        )
+        in_force = _composite(self.regime, laws)
+        loss = np.asarray(self.propagation_loss, dtype=np.float64)
+        for name, expected in (
+            ("the law of the regime in force", in_force),
+            ("-10 lg F of 'propagation_factor'", _to_db(self.propagation_factor)),
+        ):
+            if not np.allclose(
+                loss, expected, rtol=0.0, atol=_FIELD_SLACK_DB, equal_nan=True
+            ):
+                msg = (
+                    "WestonPropagationResult: 'propagation_loss' must be "
+                    f"{name} at each range."
+                )
+                raise ValueError(msg)
+
+    @property
+    def regime(self) -> NDArray[np.str_]:
+        """The regime in force at each range, one of :data:`WESTON_REGIMES`.
+
+        Read from :attr:`range_m` and :attr:`boundaries`: each regime holds
+        from its own boundary onwards, the boundary itself included.
+
+        :return: One label per range.
+        """
+        return _regime_labels(self.range_m, self.boundaries)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -541,6 +582,28 @@ class WestonPropagationResult(OwnsArrays):
         return plot_weston_regimes(
             self, ax=ax, language=check_language(language), **kwargs
         )
+
+
+def _regime_labels(
+    r: NDArray[np.float64], bounds: WestonRegimeBoundaries
+) -> NDArray[np.str_]:
+    """The label of the regime in force at each range ``r``."""
+    labels = np.full(np.shape(r), WESTON_REGIMES[0], dtype="<U14")
+    labels[r >= bounds.spherical_to_cylindrical] = WESTON_REGIMES[1]
+    labels[r >= bounds.cylindrical_to_mode_stripping] = WESTON_REGIMES[2]
+    labels[r >= bounds.mode_stripping_to_single_mode] = WESTON_REGIMES[3]
+    return labels
+
+
+def _composite(
+    labels: NDArray[np.str_], laws: dict[str, NDArray[np.float64]]
+) -> NDArray[np.float64]:
+    """At each range, the value of the law of the regime its label names."""
+    out = np.array(laws[WESTON_REGIMES[0]], dtype=np.float64, copy=True)
+    for name in WESTON_REGIMES[1:]:
+        in_force = labels == name
+        out[in_force] = np.asarray(laws[name], dtype=np.float64)[in_force]
+    return out
 
 
 def _to_db(factor: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -640,23 +703,15 @@ def weston_propagation_loss(
         * np.exp(-eta * lam**2 * r / (4.0 * h_eff**3))
     )
 
-    labels = np.full(r.shape, WESTON_REGIMES[0], dtype="<U14")
-    factor = f_ss.copy()
-    in_cs = r >= bounds.spherical_to_cylindrical
-    labels[in_cs] = WESTON_REGIMES[1]
-    factor[in_cs] = f_cs[in_cs]
-    in_ms = r >= bounds.cylindrical_to_mode_stripping
-    labels[in_ms] = WESTON_REGIMES[2]
-    factor[in_ms] = f_ms[in_ms]
-    in_sm = r >= bounds.mode_stripping_to_single_mode
-    labels[in_sm] = WESTON_REGIMES[3]
-    factor[in_sm] = f_sm[in_sm]
+    factor = _composite(
+        _regime_labels(r, bounds),
+        dict(zip(WESTON_REGIMES, (f_ss, f_cs, f_ms, f_sm), strict=True)),
+    )
 
     return WestonPropagationResult(
         range_m=r,
         propagation_loss=_to_db(factor),
         propagation_factor=factor,
-        regime=labels,
         spherical=_to_db(f_ss),
         cylindrical=_to_db(f_cs),
         mode_stripping=_to_db(f_ms),

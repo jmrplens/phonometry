@@ -41,11 +41,16 @@ with an ordering comparison, a combination of them, or a label one chose (a
 per-band mask annotated ``np.ndarray``, a category held as a string, an enum
 member), traced by :mod:`stored_verdicts`. A field either way fails unless
 :data:`_STATED_FLAGS` lists it with the reason it stays: an option the caller
-states, a fact of the computation, a column of a published table row, a row a
-verdict's own property builds, the yes/no observations a tester records, the
-ISO 8297 requirement record, or the outcome of an analysis only running it
-again could give. The verdicts turned into read-only properties are pinned
-class by class in :data:`_DERIVED_FLAGS`.
+states, a branch the caller chose by what they gave, a fact of an input the
+result does not hold, a property of the file read, the convergence of an
+iterative solver, a column of a published table row, a row a verdict's own
+property builds, the yes/no observations a tester records, or the ISO 8297
+requirement record. A regime or a classification the function reached by
+comparing values the result holds, or could hold, with a constant or a
+printed threshold (the over-critical hammer, the cavitating valve, the
+screened section, the identified tone) is a verdict like any other and stays
+out of that list. The verdicts and regimes turned into read-only properties
+are pinned class by class in :data:`_DERIVED_FLAGS`.
 
 What this half cannot see is a verdict stored as a number (a margin, a
 rating) that names itself like none of those, a verdict handed to the
@@ -548,9 +553,21 @@ def _flag_fields() -> set[str]:
 
 
 _CALLER = "an option or a statement the caller gives, not a verdict the result reaches"
-_FACT = (
-    "a fact of the computation or of its geometry (a method, a branch, a regime, "
-    "a convergence, the kind of a sample), judged against no limit"
+_BRANCH = (
+    "the branch the caller chose by what they gave (a source box to search, a "
+    "ground to reflect from), compared against no limit"
+)
+_INPUT = (
+    "a fact the caller's input carried (a Signal's calibration), read as given; "
+    "the result does not hold the input it was read from"
+)
+_FILE = "a property of the file read (its codec, its chunks), judged against no limit"
+_CONVERGENCE = (
+    "whether the root find met its tolerance with a solution inside the search "
+    "bounds it was given, facts of the solve the result does not keep; the "
+    "third condition of the flag, an absorption above 0,999, is read from the "
+    "absorption the result holds, and a result that claims convergence "
+    "without it is refused"
 )
 _ROW = "a column of a published table row, as the table prints it"
 _RECORD = "one row of a generic requirement record, beside the limit it is judged by"
@@ -563,10 +580,6 @@ _OBSERVED = (
     "indicator latched, an indication inside the manual's range), judged "
     "against no printed limit"
 )
-_ANALYSIS = (
-    "the outcome of the 9.5 line classification over the spectrum the result keeps; "
-    "reading it again is running the analysis again"
-)
 
 #: Boolean or flag-named fields that are no stored verdict, each with why.
 _STATED_FLAGS = {
@@ -574,7 +587,6 @@ _STATED_FLAGS = {
     "phonometry.aircraft.airport_noise.FlightSegmentState.landing_roll": _CALLER,
     "phonometry.aircraft.anp_fleet.AnpProfile.ground_roll": _ROW,
     "phonometry.aircraft.anp_fleet.AnpProfile.landing_roll": _ROW,
-    "phonometry.aircraft.rotorcraft_propagation.TerrainScreeningResult.screened": _FACT,
     "phonometry.broadcast.quasi_peak.QuasiPeakResult.weighted": _CALLER,
     "phonometry.building.impact_catalogue.ImpactInsulation.has_section_drawing": _ROW,
     "phonometry.building.measurement.intensity_insulation.LowFrequencyElementResult."
@@ -583,6 +595,8 @@ _STATED_FLAGS = {
     "absorbing_specimen_surface": _CALLER,
     "phonometry.building.measurement.joint_insulation.JointTestElementCheck."
     "window_or_door_gap": _CALLER,
+    "phonometry.building.measurement.joint_insulation.LabJointInsulationResult."
+    "limit_at_maximum": _CALLER,
     "phonometry.building.measurement.service_equipment.OperatingCondition."
     "equivalent_level": _ROW,
     "phonometry.building.measurement.service_equipment.OperatingCondition."
@@ -591,11 +605,7 @@ _STATED_FLAGS = {
     "ServiceEquipmentPositionCheck.small_room": _CALLER,
     "phonometry.building.measurement.uncertainty.BandUncertainty.upper_limit": _CALLER,
     "phonometry.building.measurement.uncertainty.UncertainValue.one_sided": _CALLER,
-    "phonometry.building.measurement.flanking_transmission.VibrationReductionResult."
-    "band_type": _FACT,
     "phonometry.building.prediction.linings.LiningImprovementResult.anchors": _CALLER,
-    "phonometry.building.prediction.resilient_layers.TappingForceResult."
-    "over_critical": _FACT,
     "phonometry.electroacoustics.headphones.ProgrammeCharacteristicVoltage."
     "a_weighted": _CALLER,
     "phonometry.electroacoustics.headphones.ProgrammeCharacteristicVoltage."
@@ -605,7 +615,7 @@ _STATED_FLAGS = {
     "phonometry.emission.free_field_qualification.FreeFieldCheck."
     "paths_in_working_area": _CALLER,
     "phonometry.emission.free_field_qualification.InverseSquareLawResult."
-    "origin_fitted": _FACT,
+    "origin_fitted": _BRANCH,
     "phonometry.emission.reference_sound_source.ReferenceSoundSourceVerdict."
     "reverberation_rooms_only": _CALLER,
     "phonometry.emission.sound_power_high_frequency.HighFrequencySoundPowerResult."
@@ -625,7 +635,7 @@ _STATED_FLAGS = {
     "phonometry.environment.assessment.wind_turbine_receptor.LowFrequencyLevel."
     "a_weighted": _CALLER,
     "phonometry.environment.propagation.ground_barriers.BarrierInsertionLoss."
-    "ground": _FACT,
+    "ground": _BRANCH,
     "phonometry.environment.propagation.outdoor_propagation.Barrier."
     "ground_reflections_by_image": _CALLER,
     "phonometry.environment.propagation.outdoor_propagation.Barrier.lateral": _CALLER,
@@ -638,8 +648,6 @@ _STATED_FLAGS = {
     "phonometry.environment.sources.rolling_stock_noise.TrackCondition.holds": (
         _DERIVED_ROW
     ),
-    "phonometry.environment.sources.wind_turbine.WindTurbineTonalityResult."
-    "has_identified_tone": _ANALYSIS,
     "phonometry.filters.core.BlockProcessing.stateful": _CALLER,
     "phonometry.filters.core.BlockProcessing.steady_ic": _CALLER,
     "phonometry.filters.core.FilterDesign.resample": _CALLER,
@@ -647,17 +655,16 @@ _STATED_FLAGS = {
     "phonometry.filters.core.ResponsePlot.show": _CALLER,
     "phonometry.filters.periodic_tests.FilterPeriodicVerification."
     "pattern_approval_public": _CALLER,
-    "phonometry.filters.weighting.TimeWeightedEnvelope.calibrated": _FACT,
+    "phonometry.filters.weighting.TimeWeightedEnvelope.calibrated": _INPUT,
     "phonometry.hearing.audiometry.AscendingThresholdResult.shortened": _CALLER,
-    "phonometry.hearing.audiometry.AutomaticThresholdResult.is_peak": _FACT,
-    "phonometry.hearing.audiometry.SweepThresholdResult.is_peak": _FACT,
-    "phonometry.io._chunks.WavChunks.has_ixml": _FACT,
-    "phonometry.io._signal.SignalOrigin.lossy": _FACT,
-    "phonometry.io._wav.AudioFileInfo.has_ixml": _FACT,
-    "phonometry.io._wav.AudioFileInfo.lossy": _FACT,
-    "phonometry.materials.absorbers.slow_sound.CriticalCouplingResult.converged": _FACT,
+    "phonometry.io._chunks.WavChunks.has_ixml": _FILE,
+    "phonometry.io._signal.SignalOrigin.lossy": _FILE,
+    "phonometry.io._wav.AudioFileInfo.has_ixml": _FILE,
+    "phonometry.io._wav.AudioFileInfo.lossy": _FILE,
+    "phonometry.materials.absorbers.slow_sound.CriticalCouplingResult.converged": (
+        _CONVERGENCE
+    ),
     "phonometry.metrology.reciprocity_coupler.CouplerCheck.in_air": _CALLER,
-    "phonometry.metrology.reciprocity_coupler.WaveMotionCorrection.interpolated": _FACT,
     "phonometry.metrology.sound_calibrator.CalibratorTableRow.includes_lower": _ROW,
     "phonometry.metrology.sound_calibrator.CalibratorTableRow.includes_upper": _ROW,
     "phonometry.metrology.sound_level_meter.MaxUncertaintyRow.includes_lower": _ROW,
@@ -685,20 +692,18 @@ _STATED_FLAGS = {
     "corrections_in_manual": _CALLER,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicVerification."
     "pattern_approval_public": _CALLER,
-    "phonometry.noise_control.cabin_insulation.CabinInsulationResult.apparent": _FACT,
-    "phonometry.noise_control.cabin_insulation.WeightedCabinInsulation.apparent": _FACT,
+    "phonometry.noise_control.cabin_insulation.WeightedCabinInsulation.apparent": (
+        _CALLER
+    ),
     "phonometry.noise_control.enclosure_insulation.MethodEntry.band_values": _ROW,
     "phonometry.noise_control.enclosure_insulation.MethodEntry."
     "survey_grade_excluded": _ROW,
     "phonometry.noise_control.silencer_in_situ.InstallationCase.source_area_rule": _ROW,
-    "phonometry.noise_control.valves_hydrodynamic.HydrodynamicValveNoise.regime": _FACT,
     "phonometry.room.auditorium.AuditoriumQuantity.energy_averaged": _ROW,
     "phonometry.room.auditorium.AuditoriumQuantity.relative_jnd": _ROW,
     "phonometry.signals.envelope.EnvelopeResult.antialias": _CALLER,
     "phonometry.signals.envelope.EnvelopeSpectrumResult.remove_dc": _CALLER,
     "phonometry.signals.multitaper.MultitaperSpectralDensityResult.adaptive": _CALLER,
-    "phonometry.signals.synchronous_average.SynchronousAverageResult."
-    "interpolated": _CALLER,
     "phonometry.simulation.elastic_fdtd.ElasticFDTDResult.obstacle_mask": _CALLER,
     "phonometry.simulation.fdtd.FDTDResult.obstacle_mask": _CALLER,
     "phonometry.speech.objective_intelligibility.STOIResult.extended": _CALLER,
@@ -727,10 +732,15 @@ _STATED_FLAGS = {
 def test_no_result_stores_a_verdict_flag() -> None:
     unexpected = sorted(_flag_fields() - set(_STATED_FLAGS))
     assert not unexpected, (
-        "These result fields hold a flag: read a verdict from the values it judges "
-        "and the limit the standard prints, as a read-only property, or list a "
-        "flag the caller states, a fact of the computation, a table column or a "
-        "requirement row in _STATED_FLAGS, with why: " + ", ".join(unexpected)
+        "These result fields hold a flag: read a verdict, a regime or a "
+        "classification from the values it is reached from and the limit the "
+        "standard prints, as a read-only property. List a field in _STATED_FLAGS, "
+        "with why, only when it is none of those: an option or a statement the "
+        "caller gives, a branch the caller chose, a fact of an input the result "
+        "does not hold, a property of the file read, the convergence of an "
+        "iterative solver, a column of a published table row, a row a verdict's "
+        "property builds, a tester's observations or a requirement record: "
+        + ", ".join(unexpected)
     )
 
 
@@ -828,6 +838,77 @@ def test_the_guard_traces_a_verdict_to_where_it_is_reached(
     }
 
 
+#: A module whose result is filled with four regimes chosen the ways the
+#: regime results used to choose them: labels appended under an ``if``, a
+#: label of a module tuple written through a mask, a mask narrowed in place,
+#: and a numbered case a helper returns under an ``if``. The two values
+#: written through a mask are readings, and the count is no named case.
+_REGIME_PROBE = """
+from dataclasses import dataclass
+
+import numpy as np
+
+EDGE = 3.0
+REGIMES = ("near", "far")
+REGIME_LOW = 1
+REGIME_HIGH = 2
+
+
+@dataclass(frozen=True)
+class RegimeProbe:
+    appended: tuple
+    labelled: np.ndarray
+    kept: np.ndarray
+    case: int
+    corrected: np.ndarray
+    count: int
+
+
+def _case(x):
+    if x <= EDGE:
+        return REGIME_LOW
+    return REGIME_HIGH
+
+
+def probe(margins, x):
+    margins = np.asarray(margins)
+    appended = []
+    corrected = margins.copy()
+    for m in margins:
+        if m >= EDGE:
+            appended.append("plain")
+        else:
+            appended.append("limited")
+    labelled = np.full(margins.shape, REGIMES[0])
+    labelled[margins >= EDGE] = REGIMES[1]
+    corrected[margins < EDGE] = 0.0
+    kept = np.ones(margins.size, dtype=bool)
+    kept[1:] &= ~(np.diff(margins) <= EDGE)
+    return RegimeProbe(
+        appended=tuple(appended),
+        labelled=labelled,
+        kept=kept,
+        case=_case(x),
+        corrected=corrected,
+        count=int(margins.size),
+    )
+"""
+
+
+def test_the_guard_traces_a_regime_to_where_it_is_chosen(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "phonometry_regime_probe.py").write_text(
+        _REGIME_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_regime_probe")
+    assert set(found) == {
+        f"phonometry_regime_probe.RegimeProbe.{name}"
+        for name in ("appended", "labelled", "kept", "case")
+    }
+
+
 #: The verdicts the sweep turned into read-only properties, by class, with the
 #: values read beside them that were stored too.
 _DERIVED_FLAGS = {
@@ -865,6 +946,9 @@ _DERIVED_FLAGS = {
         "minimum_measured",
         "working_range_measured",
         "passes",
+    ),
+    "phonometry.building.measurement.joint_insulation.LabJointInsulationResult": (
+        "regime",
     ),
     "phonometry.building.measurement.joint_insulation.JointTestElementCheck": (
         "length_ok",
@@ -908,11 +992,15 @@ _DERIVED_FLAGS = {
         "corner_height_ok",
         "corner_obstacle_ok",
     ),
+    "phonometry.building.prediction.resilient_layers.TappingForceResult": (
+        "over_critical",
+    ),
     "phonometry.building.regulation.spain.DbHrCheck": (
         "reported",
         "margin",
         "complies",
     ),
+    "phonometry.aircraft.rotorcraft_propagation.TerrainScreeningResult": ("screened",),
     "phonometry.electroacoustics.induction_loop.BackgroundNoiseAssessment": (
         "reference_signal_to_noise_ratio_db",
         "category",
@@ -1072,6 +1160,9 @@ _DERIVED_FLAGS = {
         "total_level_db",
         "relevant_level_db",
     ),
+    "phonometry.environment.assessment.wind_turbine_receptor.TurbineSoundLevels": (
+        "regimes",
+    ),
     "phonometry.environment.assessment.wind_turbine_receptor.WindShearProfile": (
         "typical",
     ),
@@ -1082,6 +1173,7 @@ _DERIVED_FLAGS = {
     ),
     "phonometry.environment.sources.wind_turbine.WindTurbineTonalityResult": (
         "is_audible",
+        "has_identified_tone",
     ),
     "phonometry.filters.compliance.FilterComplianceResult": (
         "bands",
@@ -1098,6 +1190,11 @@ _DERIVED_FLAGS = {
         "determined",
         "series_exhausted",
     ),
+    "phonometry.hearing.audiometry.AutomaticThresholdResult": (
+        "is_peak",
+        "retained",
+    ),
+    "phonometry.hearing.audiometry.SweepThresholdResult": ("is_peak",),
     "phonometry.hearing.occupational_exposure.ExposureResult": ("sampling_advisory",),
     "phonometry.hearing.occupational_exposure.TaskContribution": ("spread_advisory",),
     "phonometry.hearing.real_ear_attenuation.AttenuationDifferenceResult": (
@@ -1129,12 +1226,14 @@ _DERIVED_FLAGS = {
         "full_solution_advised",
         "conditions_valid",
     ),
+    "phonometry.metrology.reciprocity_coupler.WaveMotionCorrection": ("interpolated",),
     "phonometry.metrology.reciprocity_free_field.FreeFieldArrangementCheck": (
         "distances_ok",
         "support_ok",
         "annex_a_range",
         "attenuation_accuracy",
     ),
+    "phonometry.noise_control.cabin_insulation.CabinInsulationResult": ("apparent",),
     "phonometry.noise_control.cabin_insulation.CabinUncertainty": (
         "ratio_satisfied",
         "stateable",
@@ -1142,6 +1241,8 @@ _DERIVED_FLAGS = {
         "increased_uncertainty_band_range_hz",
         "excess_standard_deviation_db",
     ),
+    "phonometry.noise_control.valves.AerodynamicValveNoise": ("regime",),
+    "phonometry.noise_control.valves_hydrodynamic.HydrodynamicValveNoise": ("regime",),
     "phonometry.room.acoustics.RoomAcousticsResult": (
         "edt_valid",
         "t20_valid",
@@ -1158,9 +1259,15 @@ _DERIVED_FLAGS = {
         "fittings_ok",
         "sources_ok",
     ),
+    "phonometry.signals.synchronous_average.SynchronousAverageResult": (
+        "interpolated",
+    ),
     "phonometry.underwater.bioacoustics.weighting.WeightedExposureResult": (
         "exceeds_injury",
         "exceeds_tts",
+    ),
+    "phonometry.underwater.propagation.weston_regimes.WestonPropagationResult": (
+        "regime",
     ),
     "phonometry.vibration.immission.people.PeopleAssessment": (
         "complies",

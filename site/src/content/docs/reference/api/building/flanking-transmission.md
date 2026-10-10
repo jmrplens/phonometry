@@ -724,7 +724,7 @@ Per-band vibration reduction index `Kij` (ISO 10848-1:2006).
 | `single_number` | Arithmetic-mean single-number `K̄ij` over 200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave) per Annex A, in dB, or `None` when the frequencies do not cover the corresponding band set. Bands bracketed for poor modal overlap (ISO 10848-4:2010 Clause 9) are excluded from the mean. |
 | `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0,25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
 | `modal_overlap` | The modal overlap factor `M` per band the bands are bracketed by, or `None` when none was supplied. An octave band carries the smallest of its three one-third-octave bands, since it is bracketed when any of them is. |
-| `band_type` | `"third-octave"` or `"octave"`, the Annex A range the single number is averaged over; `None` reads it from the spacing of the frequencies. |
+| `band_type` | `"third-octave"` or `"octave"`, the band set the caller states for the Annex A range the single number is averaged over, as `octave_bands` states it; `None` (the default, and what [`vibration_reduction_index`](/phonometry/reference/api/building/flanking-transmission/#vibration_reduction_index) leaves) reads it from the spacing of the frequencies each time. |
 
 `single_number` and `bracketed` are read from the fields, the
 0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not

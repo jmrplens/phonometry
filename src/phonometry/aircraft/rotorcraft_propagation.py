@@ -89,6 +89,10 @@ _FLOW_RESISTIVITY = {
 #: Minimum vertex count of a terrain section: two vertices form the single
 #: straight segment the continuous least-squares mean-plane fit (Eq. 36-40) needs.
 _MIN_SECTION_VERTICES = 2
+#: How far, in metres, the section may stop short of the source or the
+#: receiver and still count as running from one to the other: the rounding of
+#: a distance, not a tolerance of the method.
+_COVER_SLACK_M = 1e-9
 #: Edge span ``e`` at or below which the multiple-diffraction factor C'' is 1,
 #: in metres (guidance Eq. 44).
 _SINGLE_DIFFRACTION_MAX_SPAN = 0.3
@@ -584,8 +588,6 @@ class TerrainScreeningResult(OwnsArrays):
         effect when the line of sight is clear,
         :math:`-(\Delta L_\mathrm{d} + \Delta L_\mathrm{g})` of Eq. 45
         when terrain blocks it.
-    :ivar screened: Whether terrain blocks the line of sight (any profile
-        point strictly above it).
     :ivar path_difference: The rubber-band path difference ``δ``, in metres
         (``NaN`` when unscreened).
     :ivar diffraction_points: The diffracting edges ``(d, z)`` on the convex
@@ -594,12 +596,14 @@ class TerrainScreeningResult(OwnsArrays):
     :ivar receiver: The receiver ``(d, z)``, in metres.
     :ivar distances: The section distances, in metres, shape ``(M,)``.
     :ivar heights: The section terrain heights, in metres, shape ``(M,)``.
+
+    Whether the terrain blocks the line of sight (:attr:`screened`) is read
+    from the section, the source and the receiver, so it is not a field.
     """
 
     frequencies: NDArray[np.float64]
     adjustment: NDArray[np.float64]
     _: KW_ONLY
-    screened: bool
     path_difference: float
     diffraction_points: NDArray[np.float64]
     source: tuple[float, float]
@@ -619,7 +623,18 @@ class TerrainScreeningResult(OwnsArrays):
         plot pairs vertex by vertex to draw the terrain the line of sight was
         tested against.
 
-        :raises ValueError: if the spectrum or the section vertices disagree.
+        The regime is read from the section, so the section has to be the one
+        :func:`terrain_screening_adjustment` keeps, cropped to run from the
+        source to the receiver (the rubber band runs between them and nowhere
+        else), and the path it diffracts over has to agree with it: the
+        rubber band's own path difference and diffracting edges exactly when
+        the terrain blocks the line of sight, neither when it does not.
+
+        :raises ValueError: if the spectrum or the section vertices disagree,
+            the source or the receiver is not a finite point, the source does
+            not lie before the receiver, the section does not run from one to
+            the other, or the path difference and the diffracting edges are
+            not those of the rubber band over the section.
         """
         require_ranks(
             self,
@@ -631,6 +646,57 @@ class TerrainScreeningResult(OwnsArrays):
         )
         require_same_length(self, "frequencies", "adjustment")
         require_same_length(self, "distances", "heights", axis="section vertex")
+        src, rcv = _section_ends(self.source, self.receiver)
+        d, z = _validated_section(self.distances, self.heights)
+        if not (
+            math.isclose(float(d[0]), src[0], rel_tol=0.0, abs_tol=_COVER_SLACK_M)
+            and math.isclose(float(d[-1]), rcv[0], rel_tol=0.0, abs_tol=_COVER_SLACK_M)
+        ):
+            msg = (
+                "TerrainScreeningResult: 'distances' must run from the source "
+                "to the receiver, the section the line of sight is tested over; "
+                f"got {float(d[0])!r} m to {float(d[-1])!r} m for a source at "
+                f"{src[0]!r} m and a receiver at {rcv[0]!r} m."
+            )
+            raise ValueError(msg)
+        hull = _convex_path(src, rcv, d, z)
+        edges = np.asarray(self.diffraction_points, dtype=np.float64)
+        if hull is None:
+            agrees = edges.shape[0] == 0 and math.isnan(self.path_difference)
+        else:
+            band = hull[1:-1]
+            agrees = (
+                edges.shape == band.shape
+                and bool(np.allclose(edges, band, rtol=0.0, atol=_COVER_SLACK_M))
+                and math.isclose(
+                    self.path_difference,
+                    _rubber_band_difference(hull, src, rcv),
+                    rel_tol=1e-9,
+                    abs_tol=_COVER_SLACK_M,
+                )
+            )
+        if not agrees:
+            msg = (
+                "TerrainScreeningResult: 'path_difference' and "
+                "'diffraction_points' must be those of the rubber band over this "
+                "section, which "
+                + ("blocks" if hull is not None else "does not block")
+                + " the line of sight (NaN and no edge when it does not)."
+            )
+            raise ValueError(msg)
+
+    @property
+    def screened(self) -> bool:
+        """Whether terrain blocks the line of sight (guidance Appendix D).
+
+        Only the terrain points above the line of sight are obstacles, so the
+        section is screened when one lies strictly above it and the convex
+        path over them has a diffracting edge.
+        """
+        return (
+            _convex_path(self.source, self.receiver, self.distances, self.heights)
+            is not None
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -698,6 +764,33 @@ def terrain_screening_adjustment(
     """
     f = require_positive_array(frequencies, "frequencies")
     d, z = _validated_section(distances, heights)
+    src, rcv = _section_ends(source, receiver)
+    if d[0] > src[0] + _COVER_SLACK_M or d[-1] < rcv[0] - _COVER_SLACK_M:
+        msg = "The terrain section must cover [source d, receiver d]."
+        raise ValueError(msg)
+    sigma_seg = _segment_resistivities(flow_resistivity, d.size - 1)
+    d, z, sigma_seg = _cropped_section(d, z, sigma_seg, src[0], rcv[0])
+    adjustment, delta, points = _screening_core(f, src, rcv, d, z, sigma_seg)
+    return TerrainScreeningResult(
+        frequencies=f,
+        adjustment=adjustment,
+        path_difference=delta,
+        diffraction_points=points,
+        source=src,
+        receiver=rcv,
+        distances=d,
+        heights=z,
+    )
+
+
+def _section_ends(
+    source: tuple[float, float], receiver: tuple[float, float]
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    """The source and the receiver as finite ``(d, z)`` points, in that order.
+
+    :raises ValueError: if either is not a finite point, or the source does
+        not lie at a smaller section distance than the receiver.
+    """
     src = (float(source[0]), float(source[1]))
     rcv = (float(receiver[0]), float(receiver[1]))
     if not (
@@ -711,23 +804,7 @@ def terrain_screening_adjustment(
     if src[0] >= rcv[0]:
         msg = "'source' must lie at a smaller section distance than 'receiver'."
         raise ValueError(msg)
-    if d[0] > src[0] + 1e-9 or d[-1] < rcv[0] - 1e-9:
-        msg = "The terrain section must cover [source d, receiver d]."
-        raise ValueError(msg)
-    sigma_seg = _segment_resistivities(flow_resistivity, d.size - 1)
-    d, z, sigma_seg = _cropped_section(d, z, sigma_seg, src[0], rcv[0])
-    adjustment, screened, delta, points = _screening_core(f, src, rcv, d, z, sigma_seg)
-    return TerrainScreeningResult(
-        frequencies=f,
-        adjustment=adjustment,
-        screened=screened,
-        path_difference=delta,
-        diffraction_points=points,
-        source=src,
-        receiver=rcv,
-        distances=d,
-        heights=z,
-    )
+    return src, rcv
 
 
 def _segment_resistivities(
@@ -816,6 +893,46 @@ def _side_ground(
     return np.asarray(dlg, dtype=np.float64), h_lo, h_hi, a
 
 
+def _convex_path(
+    src: tuple[float, float],
+    rcv: tuple[float, float],
+    d: NDArray[np.float64],
+    z: NDArray[np.float64],
+) -> NDArray[np.float64] | None:
+    """The convex path over the terrain that blocks the line of sight, or ``None``.
+
+    Only the terrain points strictly above the line of sight are treated as
+    obstacles (guidance Appendix D), and the sound follows the shortest
+    convex path over them, the rubber band, from the source to the receiver.
+    ``None`` when no point is above the line of sight, or when the band
+    grazes it so closely that it keeps no diffracting edge.
+    """
+    interior = slice(1, -1) if d.size > _MIN_SECTION_VERTICES else slice(0, 0)
+    los = src[1] + (rcv[1] - src[1]) * (d - src[0]) / (rcv[0] - src[0])
+    above = np.zeros(d.size, dtype=bool)
+    above[interior] = z[interior] > los[interior]
+    if not np.any(above):
+        return None
+    pts = np.vstack(
+        [[src[0], src[1]], np.column_stack([d[above], z[above]]), [rcv[0], rcv[1]]]
+    )
+    hull = _upper_hull(pts)
+    if hull[1:-1].shape[0] == 0:  # numerically grazing: treat as clear
+        return None
+    return hull
+
+
+def _rubber_band_difference(
+    hull: NDArray[np.float64],
+    src: tuple[float, float],
+    rcv: tuple[float, float],
+) -> float:
+    """The path difference ``δ`` of the rubber band ``hull`` over the direct path."""
+    seg_len = np.hypot(np.diff(hull[:, 0]), np.diff(hull[:, 1]))
+    direct = math.hypot(rcv[0] - src[0], rcv[1] - src[1])
+    return float(np.sum(seg_len) - direct)
+
+
 def _screening_core(
     f: NDArray[np.float64],
     src: tuple[float, float],
@@ -823,13 +940,8 @@ def _screening_core(
     d: NDArray[np.float64],
     z: NDArray[np.float64],
     sigma_seg: NDArray[np.float64],
-) -> tuple[NDArray[np.float64], bool, float, NDArray[np.float64]]:
+) -> tuple[NDArray[np.float64], float, NDArray[np.float64]]:
     """The combined ground-and-screening adjustment of a section (Eq. 45-47)."""
-    interior = slice(1, -1) if d.size > _MIN_SECTION_VERTICES else slice(0, 0)
-    los = src[1] + (rcv[1] - src[1]) * (d - src[0]) / (rcv[0] - src[0])
-    above = np.zeros(d.size, dtype=bool)
-    above[interior] = z[interior] > los[interior]
-
     # Clear line of sight: mean-ground-plane ground effect over the full path.
     clear, _, _, _ = _side_ground(
         f=f,
@@ -841,20 +953,13 @@ def _screening_core(
         clamp_lo=True,
         clamp_hi=True,
     )
-    if not np.any(above):
-        return clear, False, float("nan"), np.empty((0, 2))
+    hull = _convex_path(src, rcv, d, z)
+    if hull is None:
+        return clear, float("nan"), np.empty((0, 2))
 
     # Blocked: rubber band over the terrain (the shortest convex path).
-    pts = np.vstack(
-        [[src[0], src[1]], np.column_stack([d[above], z[above]]), [rcv[0], rcv[1]]]
-    )
-    hull = _upper_hull(pts)
     edges = hull[1:-1]
-    if edges.shape[0] == 0:  # numerically grazing: treat as clear
-        return clear, False, float("nan"), np.empty((0, 2))
-    seg_len = np.hypot(np.diff(hull[:, 0]), np.diff(hull[:, 1]))
-    direct = math.hypot(rcv[0] - src[0], rcv[1] - src[1])
-    delta = float(np.sum(seg_len) - direct)
+    delta = _rubber_band_difference(hull, src, rcv)
     # e: the distance between the first and last diffraction edges, measured
     # along the intermediate edges (equal to the chord for one or two edges).
     span = float(np.sum(np.hypot(np.diff(edges[:, 0]), np.diff(edges[:, 1]))))
@@ -911,7 +1016,7 @@ def _screening_core(
     # Per-band trigger (§A.4.5): bands with δ < −λ/20 keep the clear path.
     screened_band = delta >= -(_C / f) / 20.0
     adjustment = np.where(screened_band, -total, clear)
-    return np.asarray(adjustment, dtype=np.float64), True, delta, edges
+    return np.asarray(adjustment, dtype=np.float64), delta, edges
 
 
 def _mirrored_point(

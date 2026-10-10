@@ -170,11 +170,15 @@ def test_decision_matches_displayed_audibility_at_boundary(tmp_path: Path) -> No
 
     A raw tonal audibility of 0.03 dB is audible (> 0), but it rounds to the
     displayed 0.0 dB; the fiche must state the tone is *not* audible so the
-    decision text cannot contradict the number printed in the box.
+    decision text cannot contradict the number printed in the box. The tone is
+    a single line, so ΔL_a moves decibel for decibel with its level, and the
+    synthetic tone lowered by the difference lands on 0.03 dB.
     """
-    import dataclasses
-
-    result = dataclasses.replace(_result(), tonal_audibility=0.03)
+    levels, freqs = _synthetic_tone()
+    peak = int(np.argmax(levels))
+    levels[peak] -= _result().tonal_audibility - 0.03
+    result = wind_turbine_tonality(levels, freqs)
+    assert result.tonal_audibility == pytest.approx(0.03, abs=1e-9)
     assert result.is_audible is True  # the raw value is audible
     out = tmp_path / "boundary.pdf"
     result.report(str(out))

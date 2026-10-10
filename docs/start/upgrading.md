@@ -785,7 +785,7 @@ that is keyword-only.
 | `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | after 4.0.0rc1 |
 | `environment.SoundRelevantTurbines` | `relevant`, `total_level_db`, `relevant_level_db` | `predicted_levels_db` | after 4.0.0rc1 |
 | `environment.WindShearProfile` | `typical` | `shear_exponent` | after 4.0.0rc1 |
-| `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone` | 3.3.0 |
+| `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone`, itself read-only (next section) | 3.3.0 |
 | `filters.FilterComplianceResult` | `bands`, `overall_class`, `range_limited` | gains `band_margins`, the rows without their class | 3.3.0 |
 | `filters.WeightingComplianceResult` | `bands`, `overall_class`, `range_limited` | gains `band_margins`, the rows without their class | 4.0.0rc1 |
 | `hearing.AscendingThresholdResult` | `threshold_db`, `determined`, `series_exhausted` | `ascent_levels_db`, `shortened` | after 4.0.0rc1 |
@@ -861,12 +861,17 @@ print(result.overall_class, result.bands[0]["class"], "class" in result.band_mar
 # 1 1 False
 ```
 
-A flag stays a field where it is no verdict against a limit: an option the
-caller sets, such as `small_room` or `noise_is_tonal`; a fact of the
-computation, such as the branch a solver took; the outcome of an analysis
-that only running it again could give, such as
-`WindTurbineTonalityResult.has_identified_tone`; and a column of a published
-table row. `PlantRequirement` and `LoopRequirement` do not change: their rows
+A flag stays a field where it is no verdict against a limit and nothing the
+result holds decides it: an option the caller sets, such as `small_room` or
+`noise_is_tonal`; a branch the caller chose by what they gave, such as
+`InverseSquareLawResult.origin_fitted`; a fact of an input the result does not
+keep, such as `TimeWeightedEnvelope.calibrated`; a property of the file read;
+whether an iterative solver converged; and a column of a published table row.
+`CriticalCouplingResult.converged` keeps the outcome of its solve, which the
+result cannot run again, but it can no longer claim convergence beside an
+absorption that does not exceed 0.999, the third condition of the flag.
+A regime the result could read from its own values is a verdict, and the next
+section lists the ones that moved. `PlantRequirement` and `LoopRequirement` do not change: their rows
 keep each limit as a field for the reason the section above gives, and
 `PlantRequirement.holds` stays beside it. `TrackCondition` keeps its `holds`
 as a row of the report, but `ReferenceTrackCheck` builds its conditions from
@@ -874,6 +879,114 @@ the track it holds, so no verdict reads one built elsewhere. The yes/no
 `checks` of `SoundLevelMeterPeriodicRequirement` stay as well: they are what
 the tester saw, an overload indicated or an indicator latched, not a limit
 judged.
+
+## A result reads its regime from the values it holds
+
+Some results stored a regime or a classification beside the values it was
+read from: the regime of a valve, whether a hammer rebounds, whether terrain
+screens a path, whether a tone was found, whether a synchronous average had to
+interpolate. The function compared values the result holds, or could hold,
+with a constant or a threshold its source prints, and stored the answer, so a
+result built by hand could hold the stiffness of an under-critical hammer and
+say it is over-critical. In 4.0 each of them is a read-only property, read
+from the values the result keeps, and a result that did not keep what the test
+reads now keeps it, with the unit in the name. "By name only" marks a field
+that is keyword-only.
+
+A value exactly on a boundary falls where the source puts it. Hopkins prints
+the over-critical case as K m ≥ 4 Zdp², so critical damping is over-critical,
+and IEC TS 61400-11-2 asks for a total "at least 3 dB" above the background
+before the logarithmic subtraction, so a difference of 3 dB takes it.
+IEC 60534-8-4 does not settle its cavitation threshold one way: the test of
+5.1 leaves the threshold itself to neither side, the region of Equation (9)
+and Equation (19b) put it with the cavitating points, and 4.1, Equation (18b)
+and 6.3 with the turbulent ones. The library reads it as turbulent, where
+Equation (9) returns zero and the two branches meet without a step.
+
+The functions take the same arguments and return the same numbers. Code that
+builds one of these results directly, or replaces one of the fields its regime
+is read from, has to change, and so does code that reads `band_type` from
+`vibration_reduction_index` (see below the table).
+
+| Result | No longer a constructor field | Read from | Since |
+| --- | --- | --- | --- |
+| `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins Eq. 3.95) | `contact_stiffness`, `impedance`; gains `mass_kg`, by name only | 4.0.0rc1 |
+| `noise_control.HydrodynamicValveNoise` | `regime`, cavitating when Δp exceeds x_Fzp1 (p1 - pv) (IEC 60534-8-4 5.1) | `differential`, `corrected_ratio`; gains `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
+| `noise_control.AerodynamicValveNoise` | `regime`, the five intervals of IEC 60534-8-3 5.2 | `pressure_ratio`, `boundaries`; gains `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, by name only | 4.0.0rc1 |
+| `aircraft.TerrainScreeningResult` | `screened`, terrain strictly above the line of sight | `source`, `receiver`, `distances`, `heights` | 3.3.0 |
+| `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1 6.3.5 a)) | `reversal_levels_db` | after 4.0.0rc1 |
+| `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels_db` | after 4.0.0rc1 |
+| `metrology.WaveMotionCorrection` | `interpolated` | `frequencies_hz`, `speed_of_sound_ratio` | after 4.0.0rc1 |
+| `noise_control.CabinInsulationResult` | `apparent` (ISO 11957 3.6) | `method` | after 4.0.0rc1 |
+| `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11 9.5.2 to 9.5.4) | `levels`, `frequencies`; gains `candidate_frequency_hz`, by name only | 3.3.0 |
+| `building.LabJointInsulationResult` | `regime` (ISO 10140-1 J.1) | `r_s_measured_db`, `r_s_max_db`; gains `limit_at_maximum`, by name only | after 4.0.0rc1 |
+| `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2 11.7) | `total_levels_db`, `background_levels_db` | after 4.0.0rc1 |
+| `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
+| `signals.SynchronousAverageResult` | `interpolated`, f_s T not a whole number of samples | `fs`, `period_s` | 4.0.0rc1 |
+
+`building.VibrationReductionResult.band_type` stays a field, as the band set
+the caller states: `octave_bands()` states `"octave"`, since a single octave
+band cannot be told from a one-third-octave band by its spacing.
+`vibration_reduction_index` no longer fills it with the band set it read from
+the frequencies; it leaves `None`, and the result reads the spacing each time
+it takes the Annex A mean, which gives the same mean as before.
+
+The numbers a regime selects are held to it, so a result built by hand can no
+longer carry one regime beside the values of another. When it is built, each
+of these results refuses:
+
+- `TappingForceResult`: a cut-off frequency, a limiting frequency, a force
+  spectrum or a power input that is not what K, Zdp and m give in their
+  regime, and limits of Eqs. (3.99) and (3.100) that are not a factor of 2
+  apart.
+- `HydrodynamicValveNoise`: a vapour pressure at or above the inlet pressure;
+  an x_F or an x_Fzp1 that is not what Equation (1) or (3c) gives from the
+  fields beside it; a point at or past flashing, x_F = 1; cavitation fields on
+  a turbulent point, or none on a cavitating one.
+- `AerodynamicValveNoise`: boundaries that are not those of its gas and its
+  trim, and a Mach number or an acoustical efficiency of another regime.
+- `TerrainScreeningResult`: a source or a receiver that is not a finite point,
+  a source at or past the receiver, a section that does not run from one to
+  the other, and a path difference or diffracting edges that are not those
+  of the rubber band over that section.
+- `AutomaticThresholdResult` and `SweepThresholdResult`: reversals that do not
+  alternate, a tracing that keeps no peak or no valley, and a mean, a
+  threshold or a running threshold that is not what the reversals give.
+- `WaveMotionCorrection`: a frequency beyond the last row of Table C.3, and a
+  correction the table does not give at its frequency.
+- `CabinInsulationResult`: an A-weighted insulation under any method but the
+  actual noise.
+- `WindTurbineTonalityResult`: a candidate that is not a line of the spectrum
+  at or above 20 Hz, and a Formula 30 to 34 chain that is not the one the
+  spectrum gives about it.
+- `LabJointInsulationResult`: a corrected index of another rule of J.1.
+- `TurbineSoundLevels`: a level difference other than the total less the
+  background, a turbine level of another rule of 11.7, and an uncertainty on
+  a bin whose level cannot be determined.
+- `WestonPropagationResult`: a composite loss that is not the law of the
+  regime in force.
+- `SynchronousAverageResult`: a period grid other than `round(fs * period_s)`
+  samples.
+
+```python
+import dataclasses
+
+import numpy as np
+
+from phonometry import building
+
+bands = np.array([100.0, 200.0, 400.0, 800.0])
+force = building.tapping_force_spectrum(bands, 1.0e6, 3.0e4)
+print(force.over_critical)
+# False
+print(building.tapping_force_spectrum(bands, 1.0e6, 100.0).over_critical)
+# True
+try:
+    dataclasses.replace(force, impedance=100.0)
+except ValueError as error:
+    print("cut_off_frequency" in str(error))
+# True
+```
 
 ## The ten names that are gone
 

@@ -850,12 +850,12 @@ TappingForceResult(
     cut_off_frequency: float,
     limiting_frequency: float,
     *,
-    over_critical: bool,
     contact_stiffness: float,
     impedance: float,
     lower_limit: float,
     upper_limit: float,
     band: str = 'third',
+    mass_kg: float = 0.5,
 )
 ```
 
@@ -871,12 +871,26 @@ Force spectrum of the ISO tapping machine on one walking surface.
 | `power_input` | Power injected into the floor $W_\mathrm{in} = F_\mathrm{rms}^{2}/Z_\mathrm{dp}$, in W (Eq. 3.103). |
 | `cut_off_frequency` | Cut-off frequency `fco`, in Hz (Eqs. 3.101/3.102). |
 | `limiting_frequency` | Limiting frequency `flimit`, in Hz (Eq. 3.106). |
-| `over_critical` | `True` when $K m \ge 4 Z_\mathrm{dp}^{2}$, i.e. the hammer does not rebound. |
 | `contact_stiffness` | Contact stiffness `K` used, in N/m. |
 | `impedance` | Driving-point impedance `Zdp` used, in N.s/m. |
 | `lower_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{lower}} = m v_0/T_\mathrm{i}$, in N (Eq. 3.99). |
 | `upper_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, in N (Eq. 3.100); 6 dB above `lower_limit` in mean square. |
 | `band` | Band width used for `mean_square_force`. |
+| `mass_kg` | Hammer mass `m` used, in kg (Default: 0,5). |
+
+Whether the oscillation is over-critical is read from `K`, `Zdp` and
+`m` (`over_critical`), so it is not a field.
+
+### TappingForceResult.over_critical
+
+*property*
+
+Whether the hammer-floor oscillation is over-critical (Eq. 3.95).
+
+Hopkins draws the line at $K m \ge 4 Z_\mathrm{dp}^{2}$: the pulse
+then decays to zero without changing sign, so the hammer does not
+rebound; below it the oscillation is under-critical (Eq. 3.96). Read
+from `contact_stiffness`, `impedance` and `mass_kg`.
 
 ### TappingForceResult.plot()
 

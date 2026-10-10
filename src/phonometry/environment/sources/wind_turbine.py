@@ -186,6 +186,26 @@ _TONE_GROUP_DROP = 10.0
 #: Audibility criterion constants of Formula 34.
 _LA_OFFSET, _LA_PIVOT, _LA_EXP = -2.0, 502.0, 2.5
 
+#: The fields of the Formula 30 to 34 chain a tonality result carries, in the
+#: order :func:`_tonality_chain` returns them.
+_TONALITY_METRICS = (
+    "tone_frequency",
+    "critical_bandwidth",
+    "tone_level",
+    "masking_level",
+    "tonality",
+    "audibility_criterion",
+    "tonal_audibility",
+)
+
+#: How far, in dB, a metric of a result built by hand may be from what its
+#: spectrum gives: rounding, not a tolerance of the method.
+_FIELD_SLACK_DB = 1e-9
+
+#: How far, in hertz, a candidate may be from a line of the spectrum and still
+#: be that line: rounding, not a tolerance of the method.
+_LINE_SLACK_HZ = 1e-9
+
 
 @dataclass(frozen=True)
 class WindTurbineTonalityResult(OwnsArrays):
@@ -203,14 +223,14 @@ class WindTurbineTonalityResult(OwnsArrays):
     :ivar audibility_criterion: The criterion ``L_a`` (Formula 34), in dB.
     :ivar tonal_audibility: Tonal audibility
         :math:`\Delta L_\mathrm{a} = \Delta L_\mathrm{tn} - L_\mathrm{a}`, in dB.
-    :ivar has_identified_tone: Whether the candidate passed the 9.5.2
-        possible-tone screening *and* at least one spectral line was
-        classified as "tone" (subclause 9.5.4). When ``False`` the numeric
-        fields are non-standard fallbacks (the standard defines no tonality
-        for such a spectrum) and the spectrum must be **excluded** from the
-        9.5.1 energy averaging of ``ΔL_a,j,k`` over the spectra of a bin.
     :ivar frequencies: The narrowband line frequencies, in Hz.
     :ivar levels: The narrowband line levels, in dB.
+    :ivar candidate_frequency_hz: The frequency of the candidate line the
+        critical band was centred on, in Hz: the spectrum maximum, or the line
+        nearest the ``tone_frequency`` asked for.
+
+    Whether a tone was identified (:attr:`has_identified_tone`) is read from
+    the spectrum and the candidate, so it is not a field.
     """
 
     tone_frequency: float
@@ -221,9 +241,27 @@ class WindTurbineTonalityResult(OwnsArrays):
     audibility_criterion: float
     tonal_audibility: float
     _: KW_ONLY
-    has_identified_tone: bool
     frequencies: NDArray[np.float64]
     levels: NDArray[np.float64]
+    candidate_frequency_hz: float
+
+    @property
+    def has_identified_tone(self) -> bool:
+        """Whether a tone was identified (subclause 9.5.4).
+
+        An identified tone is a possible tone of 9.5.2, a local maximum more
+        than 6 dB above the energy average of its critical band (not counting
+        the line of the maximum and the two lines beside it), with one or
+        more spectral lines classified as "tone" by 9.5.3. Read from
+        :attr:`levels`, :attr:`frequencies` and :attr:`candidate_frequency_hz`.
+        When ``False`` the numeric fields are non-standard fallbacks (the
+        standard defines no tonality for such a spectrum) and the spectrum
+        must be **excluded** from the 9.5.1 energy averaging of ``ΔL_a,j,k``
+        over the spectra of a bin.
+        """
+        peak = int(np.argmin(np.abs(self.frequencies - self.candidate_frequency_hz)))
+        possible_tone, is_tone, _ = _tone_lines(self.levels, self.frequencies, peak)
+        return possible_tone and bool(np.any(is_tone))
 
     @property
     def is_audible(self) -> bool:
@@ -255,23 +293,53 @@ class WindTurbineTonalityResult(OwnsArrays):
         in the fiche's rounding of the metrics table with ``cannot convert
         float NaN to integer``, naming no field, no result and no fiche.
 
+        The candidate line is what :attr:`has_identified_tone` centres the
+        critical band on, so it has to be a line of the spectrum and inside
+        the standard's analysis range, from 20 Hz. Whether a tone is
+        identified decides which lines the tone level sums and which line
+        the tone frequency is, so the whole chain is held to what the
+        spectrum gives about that candidate.
+
         :raises ValueError: if ``frequencies`` and ``levels`` differ in
-            length, either is not a 1-D spectrum, or a metric of the
-            Formula 30 to 34 chain is not finite.
+            length, either is not a 1-D, finite and uniformly spaced
+            narrowband spectrum, a metric of the Formula 30 to 34 chain is not
+            finite or not the one the spectrum gives, or the candidate is not a
+            line of the spectrum at or above 20 Hz.
         """
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels", axis="spectral line")
-        for name in (
-            "tone_frequency",
-            "critical_bandwidth",
-            "tone_level",
-            "masking_level",
-            "tonality",
-            "audibility_criterion",
-            "tonal_audibility",
-        ):
+        candidate = float(self.candidate_frequency_hz)
+        if not (math.isfinite(candidate) and candidate >= _LOW_FREQ_MIN):
+            msg = (
+                "WindTurbineTonalityResult: 'candidate_frequency_hz' must be a "
+                "line of the spectrum, at or above 20 Hz."
+            )
+            raise ValueError(msg)
+        for name in _TONALITY_METRICS:
             if not math.isfinite(getattr(self, name)):
                 msg = f"'{name}' must be finite."
+                raise ValueError(msg)
+        lv, fr, df = _validate_narrowband(self.levels, self.frequencies)
+        peak = int(np.argmin(np.abs(fr - candidate)))
+        if not math.isclose(
+            float(fr[peak]), candidate, rel_tol=0.0, abs_tol=_LINE_SLACK_HZ
+        ):
+            msg = (
+                "WindTurbineTonalityResult: 'candidate_frequency_hz' must be a "
+                f"line of the spectrum, at or above 20 Hz; {candidate!r} Hz is "
+                "not one."
+            )
+            raise ValueError(msg)
+        chain = _tonality_chain(lv, fr, df, peak)
+        for name, value in zip(_TONALITY_METRICS, chain, strict=True):
+            if not math.isclose(
+                getattr(self, name), value, rel_tol=1e-9, abs_tol=_FIELD_SLACK_DB
+            ):
+                msg = (
+                    f"WindTurbineTonalityResult: '{name}' must be {value!r}, "
+                    "what Formulas 30 to 34 give from the spectrum about the "
+                    f"candidate line; got {getattr(self, name)!r}."
+                )
                 raise ValueError(msg)
 
     def plot(
@@ -415,6 +483,46 @@ def _screen_possible_tone(
     )
 
 
+def _tone_lines(
+    lv: NDArray[np.float64],
+    fr: NDArray[np.float64],
+    peak: int,
+) -> tuple[bool, NDArray[np.bool_], float]:
+    """9.5.2 and 9.5.3 about the candidate line ``peak``.
+
+    :return: Whether the candidate is a possible tone, which lines of its
+        critical band are classified as "tone", and the energy average
+        ``L_pn,avg`` of the lines classified as masking, in dB.
+    """
+    lo, hi = _critical_band_edges(float(fr[peak]))
+    in_band = (fr >= lo) & (fr <= hi)
+    band = lv[in_band]
+
+    # L_70%: energy mean of the 70 % lowest-level lines in the critical band.
+    n_low = max(1, round(0.7 * band.size))
+    l70 = _energy_mean(np.sort(band)[:n_low])
+    # The line levels are judged against energy means settled, since the mean
+    # of equal lines is that level only to its last bits.
+    masking = band[settled(band - l70 - _MASKING_MARGIN) < 0.0]
+    l_pn_avg = _energy_mean(masking) if masking.size else l70
+    tone_threshold = l_pn_avg + _TONE_MARGIN
+
+    possible_tone = _screen_possible_tone(lv, in_band, peak)
+
+    # Tone lines (9.5.3, "adjacent" struck out by A1:2018): every line in the
+    # critical band above the tone threshold and within 10 dB of the highest
+    # such line ("the line having the greatest level is identified; lines are
+    # then only classified as tone if within 10 dB of the highest level"),
+    # whether or not contiguous with it.
+    above = in_band & (settled(lv - tone_threshold) > 0.0)
+    if np.any(above):
+        highest_level = float(np.max(lv[above]))
+        is_tone = above & (settled(highest_level - lv) <= _TONE_GROUP_DROP)
+    else:
+        is_tone = above
+    return possible_tone, is_tone, l_pn_avg
+
+
 def wind_turbine_tonality(
     levels: NDArray[np.float64] | list[float],
     frequencies: NDArray[np.float64] | list[float],
@@ -465,7 +573,6 @@ def wind_turbine_tonality(
             "analysis range (the critical band would extend below 0 Hz)."
         )
         raise ValueError(msg)
-    cbw = critical_bandwidth(fc)
     lo, hi = _critical_band_edges(fc)
     if fr[0] > lo + 1e-9 or fr[-1] < hi - 1e-9:
         warnings.warn(
@@ -476,36 +583,30 @@ def wind_turbine_tonality(
             WindTurbineNoiseWarning,
             stacklevel=2,
         )
-    in_band = (fr >= lo) & (fr <= hi)
-    band = lv[in_band]
+    chain = _tonality_chain(lv, fr, df, peak)
+    return WindTurbineTonalityResult(
+        **dict(zip(_TONALITY_METRICS, chain, strict=True)),
+        frequencies=fr,
+        levels=lv,
+        candidate_frequency_hz=fc,
+    )
 
-    # L_70%: energy mean of the 70 % lowest-level lines in the critical band.
-    n_low = max(1, round(0.7 * band.size))
-    l70 = _energy_mean(np.sort(band)[:n_low])
-    # The line levels are judged against energy means settled, since the mean
-    # of equal lines is that level only to its last bits.
-    masking = band[settled(band - l70 - _MASKING_MARGIN) < 0.0]
-    l_pn_avg = _energy_mean(masking) if masking.size else l70
-    tone_threshold = l_pn_avg + _TONE_MARGIN
 
-    possible_tone = _screen_possible_tone(lv, in_band, peak)
-
-    # Tone lines (9.5.3, "adjacent" struck out by A1:2018): every line in the
-    # critical band above the tone threshold and within 10 dB of the highest
-    # such line ("the line having the greatest level is identified; lines are
-    # then only classified as tone if within 10 dB of the highest level"),
-    # whether or not contiguous with it.
-    above = in_band & (settled(lv - tone_threshold) > 0.0)
-    if np.any(above):
-        highest_level = float(np.max(lv[above]))
-        is_tone = above & (settled(highest_level - lv) <= _TONE_GROUP_DROP)
-    else:
-        is_tone = above
+def _tonality_chain(
+    lv: NDArray[np.float64],
+    fr: NDArray[np.float64],
+    df: float,
+    peak: int,
+) -> tuple[float, float, float, float, float, float, float]:
+    """Formulas 30 to 34 about the candidate line ``peak``, in the order of
+    :data:`_TONALITY_METRICS`.
+    """
+    cbw = critical_bandwidth(float(fr[peak]))
+    possible_tone, is_tone, l_pn_avg = _tone_lines(lv, fr, peak)
     tone_positions = np.nonzero(is_tone)[0]
-    has_identified_tone = possible_tone and tone_positions.size > 0
-    if not has_identified_tone:
-        # Non-standard fallback so the numeric fields stay defined; flagged
-        # by has_identified_tone = False.
+    if not (possible_tone and tone_positions.size > 0):
+        # Non-standard fallback so the numeric fields stay defined; the
+        # result reads has_identified_tone = False from the same spectrum.
         tone_positions = np.array([peak])
     # The frequency of the tone is the classified line with the highest level
     # (9.5.4); it anchors the reported frequency and Formula 34.
@@ -525,17 +626,12 @@ def wind_turbine_tonality(
     l_pn = l_pn_avg + 10.0 * np.log10(cbw / enbw)
     tonality = l_pt - l_pn
     l_a = _LA_OFFSET - np.log10(1.0 + (f_tone / _LA_PIVOT) ** _LA_EXP)
-    delta_la = float(tonality - l_a)
-
-    return WindTurbineTonalityResult(
-        tone_frequency=f_tone,
-        critical_bandwidth=cbw,
-        tone_level=float(l_pt),
-        masking_level=float(l_pn),
-        tonality=float(tonality),
-        audibility_criterion=float(l_a),
-        tonal_audibility=delta_la,
-        has_identified_tone=has_identified_tone,
-        frequencies=fr,
-        levels=lv,
+    return (
+        f_tone,
+        cbw,
+        float(l_pt),
+        float(l_pn),
+        float(tonality),
+        float(l_a),
+        float(tonality - l_a),
     )

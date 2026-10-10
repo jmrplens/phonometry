@@ -7471,6 +7471,57 @@ dos ediciones con las mismas entradas y en el mismo orden.
   del intervalo en disputa sale cavitante.
 - **Estado:** sin comunicar.
 
+## IEC 60534-8-4:2005, Ecuaciones (19a) y (19b) (una condición turbulenta escrita contra el cociente equivocado, y dos condiciones que se reclaman el umbral y x_F = 1)
+
+- **Ubicación:** apartado 5.4.1, las condiciones encima de las Ecuaciones
+  (19a) y (19b) del folio impreso 12 (página 14 del PDF) de
+  BS EN 60534-8-4:2005.
+- **Lo impreso:** «For turbulent conditions $x_\mathrm{Fz} \le x_\mathrm{Fzp1}$
+  or $x_\mathrm{F} \ge 1$):» encima de la (19a), y «For cavitating conditions
+  ($x_\mathrm{Fzp1} \le x_\mathrm{F} \le 1$:» encima de la (19b).
+- **El problema:** la primera alternativa de la condición de la (19a) compara
+  los dos umbrales entre sí y no nombra ningún punto de funcionamiento. Leída
+  tal como se imprime, esa alternativa se cumple justo cuando
+  $p_1 \le 6 \times 10^5$ Pa, porque la Ecuación (3c) solo sube
+  $x_\mathrm{Fzp1}$ por encima de $x_\mathrm{Fz}$ por debajo de esa presión.
+  Por debajo de $x_\mathrm{F} = 1$, donde la segunda alternativa no se aplica,
+  el espectro turbulento de la (19a) cubriría entonces todo punto a 6 bar o
+  menos, también los cavitantes, y ningún punto por encima, donde un punto
+  turbulento, $x_\mathrm{F} < x_\mathrm{Fzp1}$, no caería en ninguna de las
+  dos condiciones; la condición que se quería escribir es
+  $x_\mathrm{F} \le x_\mathrm{Fzp1}$. Las dos condiciones comparten además sus
+  dos extremos: el umbral $x_\mathrm{F} = x_\mathrm{Fzp1}$, que la (19b) incluye con ≤ y que la (19a)
+  corregida incluiría también, y $x_\mathrm{F} = 1$, que la (19a) reclama con
+  ≥ y la (19b) con ≤. Cada condición deja además un paréntesis sin pareja, uno
+  de cierre tras la de la (19a) y uno de apertura delante de la de la (19b).
+  El resto del documento tampoco zanja el umbral: la prueba del 5.1 llama
+  turbulento a un punto cuando $\Delta p$ «is lower than»
+  $x_\mathrm{Fzp1}(p_1 - p_\mathrm{v})$ y cavitante cuando lo «exceeds», la
+  región de la Ecuación (9) se imprime
+  $x_\mathrm{Fz,p1} \le x_\mathrm{F} \le 1$, y el 6.3 aplica las ecuaciones
+  turbulentas cuando $x_\mathrm{F,i} \le x_\mathrm{Fzp1,i}$.
+- **Consecuencia:** ninguna en el umbral, donde la Ecuación (9) devuelve
+  exactamente cero y la (19b) se reduce a la (19a). En $x_\mathrm{F} = 1$ no
+  se aplica ninguna, porque las Ecuaciones (9) y (13) dividen allí por
+  $1 - x_\mathrm{F}$. Leída al pie de la letra, la condición de la (19a)
+  repartiría el espectro por bandas por debajo de $x_\mathrm{F} = 1$ según la
+  presión de entrada en vez de según el régimen.
+- **Evidencia:** las dos condiciones tal como se imprimen. Verificado en la
+  página 14 del PDF (p. impresa 12) de BS EN 60534-8-4:2005: la condición
+  turbulenta pone «$x_{Fz} \le x_{Fzp1}$ or $x_F \ge 1$)» y la cavitante
+  «($x_{Fzp1} \le x_F \le 1$:», con la Ecuación (3c) en la página 10 del PDF
+  (p. impresa 8), la prueba del 5.1 en la página 12 del PDF (p. impresa 10) y
+  la condición del 6.3 en la página 16 del PDF (p. impresa 14).
+- **Comportamiento de la biblioteca:**
+  [`valve_hydrodynamic_noise`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/valves_hydrodynamic.py)
+  elige la (19a) o la (19b) por el único régimen del 5.1, cavitante cuando
+  $\Delta p$ supera $x_\mathrm{Fzp1}(p_1 - p_\mathrm{v})$, así que el umbral
+  mismo es turbulento, y se detiene antes de $x_\mathrm{F} = 1$. Un
+  `HydrodynamicValveNoise` construido a mano lee su régimen de la misma manera
+  y rechaza un punto en $x_\mathrm{F} = 1$ o más allá;
+  `test_a_differential_on_the_threshold_is_turbulent` fija el umbral.
+- **Estado:** sin comunicar.
+
 ## IEC 60534-8-4:2005, Tabla A.1 (tres intermedios impresos que sus propias ecuaciones no reproducen)
 
 - **Ubicación:** anexo A (informativo), Tabla A.1: la fila de la Ecuación (17)

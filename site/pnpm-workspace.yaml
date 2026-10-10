@@ -10,28 +10,37 @@ allowBuilds:
 minimumReleaseAge: 0
 
 # Security advisories against transitive dependencies, none of which we depend
-# on directly: ip-address through socks/proxy-agent, undici through
-# cheerio/pa11y-ci, nanoid through postcss/vite, js-yaml through astro's
-# internal helpers. Each parent's own range already admits the patched
-# release, so these only force the resolution forward and are removed once the
-# parents float past them on their own.
+# on directly: nanoid through postcss/vite, js-yaml through astro's internal
+# helpers, brace-expansion through globby/minimatch. Each parent's own range
+# already admits the patched release, so these only force the resolution
+# forward and are removed once the parents float past them on their own.
+# ip-address and undici went that way with pa11y-ci 5: puppeteer 25 no longer
+# brings socks or proxy-agent, and cheerio 1.2 asks for undici ^7.19, so an
+# unscoped undici pin would now drag it, and astro's font loader, back to 6.
 overrides:
-  ip-address: ^10.3.1
   js-yaml@^4: ^4.3.1
   nanoid@^3: ^3.3.17
-  undici: ^6.28.0
   brace-expansion@^1: ^1.1.18
-  # pa11y and pa11y-ci both still require puppeteer ^24, which pins
-  # @puppeteer/browsers to 2.13.2. That release extracts downloaded browser
-  # archives with extract-zip, whose symlink handling lets a crafted archive
-  # write outside the target directory. @puppeteer/browsers 3.x replaced
-  # extract-zip with OS tar/unzip and puppeteer-core 24.43.1 works fine
-  # against it (verified by running the pa11y audit); the pin only matters at
-  # install time, so this can go once pa11y ships on puppeteer 25.
-  "@puppeteer/browsers@<3": ^3.1.0
+  # Two copies of KaTeX decide how a formula looks: rehype-katex writes the
+  # markup with the katex it depends on, and the site loads the stylesheet
+  # from its own. rehype-katex 7, the current release, still asks for
+  # ^0.16, and KaTeX 0.18 renamed its layout classes (`base` became
+  # `katex-base`, `strut` became `katex-strut`), so left to themselves the two
+  # would disagree and every formula would lose its line-height rules.
+  # Resolving every katex in the tree to the one catalog entry below, which
+  # package.json names too, keeps the renderer and the stylesheet one
+  # version, so a katex bump moves both at once. `pnpm check:math` fails the
+  # build if they ever part again.
+  katex: 'catalog:'
   # satori pins fflate at exactly 0.7.3, whose unzipSync can be walked into
   # an infinite loop by a malformed ZIP64 archive. The site never unzips
   # anything, so this is reachable by nothing here, but the patch release is
   # a drop-in and the tree already carries 0.7.5 for another parent. Goes
   # once satori floats past the pin.
   "fflate@0.7.3": ^0.7.5
+
+# The katex both copies above resolve to. A catalog rather than a version in
+# package.json, because it is the one place the dependency and the override
+# can both read the same specifier from.
+catalog:
+  katex: ^0.19.0

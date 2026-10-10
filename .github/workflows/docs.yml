@@ -293,6 +293,15 @@ jobs:
         # accessibility audit both pass on such a page.
         run: pnpm run check:math
         working-directory: site
+      - name: Check every social card kept its mark and its title
+        # The card a link preview shows is an image the build lays out with
+        # satori and rasterises with sharp, and neither fails when something
+        # on it goes missing. satori 0.42 began painting the positioned
+        # artwork over the type, as CSS does, and every card came out as the
+        # bare artwork while the build and every check above stayed green.
+        # This reads each card back and measures the mark and the title.
+        run: pnpm run check:social-cards
+        working-directory: site
       - name: Accessibility audit (pa11y, WCAG2AA)
         run: pnpm run pa11y
         working-directory: site

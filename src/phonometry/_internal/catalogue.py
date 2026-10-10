@@ -60,7 +60,7 @@ would close a cycle.
 from __future__ import annotations
 
 import dataclasses
-import datetime
+import datetime as dt
 import json
 import math
 import numbers
@@ -252,7 +252,7 @@ def _date_is_valid(text: str) -> bool:
         return False
     padded = text + "-01" * (2 - text.count("-"))
     try:
-        datetime.date.fromisoformat(padded)
+        dt.date.fromisoformat(padded)
     except ValueError:
         return False
     return True

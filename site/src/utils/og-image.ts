@@ -184,6 +184,12 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
         style: { position: 'absolute', top: 0, left: 0, objectFit: 'cover' },
       },
     } as Node,
+    // Positioned as well, so it paints over the artwork. CSS paints positioned
+    // boxes after the boxes in normal flow, whatever their order in the tree,
+    // and the artwork above is positioned. Satori 0.41 and older painted in
+    // tree order, so the card came out right by accident; 0.42 paints as CSS
+    // does, and without this the artwork covered the mark and every line of
+    // type. scripts/check-social-cards.mjs fails the build on such a card.
     el(
       'div',
       {
@@ -191,6 +197,7 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
         flexDirection: 'column',
         justifyContent: 'space-between',
         flex: '1',
+        position: 'relative',
         padding: `${PAD_Y}px ${PAD_X}px`,
       },
       // Top: the mark, at the size it keeps its grid legible.

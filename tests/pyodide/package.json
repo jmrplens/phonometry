@@ -3,7 +3,7 @@
   "private": true,
   "description": "Pyodide, the Python JupyterLite runs, for the CI job that installs the phonometry wheel with micropip and runs it (tests/pyodide/smoke.mjs).",
   "type": "module",
-  "packageManager": "pnpm@12.5.1+sha512.e3f305bc784a2bc89f5ad3b6138889470fae8d2af5f36b61216ec91c2c3d64089775f9de38aac331044ea40f245cb0d5666392dfdf65824e1907ef6a2c62de5f",
+  "packageManager": "pnpm@12.10.1+sha512.ba40a37eb1a370d60fea8c4cf1d364c13bcccef518e98ad2bcee954f539d38da37458e58261a3fa55e06523450ea0ffff9f497b135be41f2c15c1642bacace6c",
   "dependencies": {
     "pyodide": "314.0.7"
   }

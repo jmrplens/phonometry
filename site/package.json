@@ -47,6 +47,6 @@
     "lighthouse": "^13.5.0",
     "pa11y-ci": "^5.0.0",
     "puppeteer": "25.13.0",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }

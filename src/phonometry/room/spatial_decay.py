@@ -514,17 +514,17 @@ def floor_reference_value(
     .. math::
 
        D_\mathrm{floor,ref}(r) = D_\mathrm{ref}(r)
-       + 10 \lg\left(1 + \frac{r^2}{r^2 + 4 h_S h_P}\right) \ \text{dB}
+       + 10 \lg\left(1 + \frac{r^2}{r^2 + 4 h_\mathrm{S} h_\mathrm{P}}\right) \ \text{dB}
 
     With the microphone path at the source height the product becomes
-    :math:`4 h_S^2`, which is Equation (B.3); with the source on the floor the
+    :math:`4 h_\mathrm{S}^2`, which is Equation (B.3); with the source on the floor the
     whole bracket becomes 2 and the correction is the 3 dB of Equation (B.4),
     the free field folded into a half space.
 
     :param distances_m: :math:`r` at each position, in metres.
-    :param source_height_m: :math:`h_S`, in metres; zero for a source on the
+    :param source_height_m: :math:`h_\mathrm{S}`, in metres; zero for a source on the
         floor.
-    :param path_height_m: :math:`h_P`, in metres; omit it for a path at the
+    :param path_height_m: :math:`h_\mathrm{P}`, in metres; omit it for a path at the
         source height.
     :return: :math:`D_\mathrm{floor,ref}(r)`, in decibels.
     :raises ValueError: For a distance that is not strictly positive or a
@@ -575,8 +575,8 @@ def corrected_distribution_value(
     :param measured_reference_db: :math:`D_{\mathrm{meas,ref}\,j}(r)` measured
         for this source over a reflecting plane, in decibels.
     :param distances_m: :math:`r` at each position, in metres.
-    :param source_height_m: :math:`h_S`, in metres.
-    :param path_height_m: :math:`h_P`, in metres.
+    :param source_height_m: :math:`h_\mathrm{S}`, in metres.
+    :param path_height_m: :math:`h_\mathrm{P}`, in metres.
     :return: :math:`D_{\mathrm{corr}\,j}(r)`, in decibels.
     :raises ValueError: For inputs that do not match position for position, or
         a correction that leaves no energy at all.

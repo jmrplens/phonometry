@@ -21,7 +21,7 @@ division per stage and cannot drift from the trajectory actually returned. The
 arc length is what volume absorption multiplies on. Jensen, Kuperman, Porter &
 Schmidt, *Computational Ocean Acoustics* (2nd ed., Springer 2011), Sect. 3.6.2
 carries a loss :math:`\alpha` in nepers/m into the eikonal by perturbation and
-lands on the factor :math:`e^{-\int_0^s \alpha(s')\,ds'}` of Eq. (3.116), an
+lands on the factor :math:`\mathrm{e}^{-\int_0^s \alpha(s')\,ds'}` of Eq. (3.116), an
 integral along the *ray path*, not along the range axis: the two agree only for
 a horizontal ray, and a steep or many-times-reflected path is longer than the
 range it spans by exactly the factor the marcher integrates here. A reflection
@@ -402,7 +402,7 @@ class RayMarch(NamedTuple):
         range spanned and exceeds it by exactly the obliquity of the path; a
         reflection adds no path, so it stays continuous across one, like the
         time. This is the measure a volume absorption
-        :math:`e^{-\int \alpha\,ds}` multiplies on (Jensen Sect. 3.6.2,
+        :math:`\mathrm{e}^{-\int \alpha\,ds}` multiplies on (Jensen Sect. 3.6.2,
         Eq. 3.116).
     :ivar verticals: Vertical slowness :math:`\zeta` at each range sample.
     :ivar reflections: Boundary reflections resolved inside each range step

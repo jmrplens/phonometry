@@ -37,7 +37,7 @@ arrives at :math:`t_i = r_i / c` (Vorlander Equation (11.38)) with amplitude
 .. math::
 
    A_i = \left[ \prod_{\text{walls}} R_{\text{wall}}^{n_{\text{wall}}}
-   \right] \frac{e^{-m r_i / 2}}{4 \pi r_i}
+   \right] \frac{\mathrm{e}^{-m r_i / 2}}{4 \pi r_i}
 
 with :math:`n_{\text{wall}}` the reflections that image made off each wall:
 the :math:`1 / (4 \pi r_i)` spherical spreading, the product of the wall
@@ -46,8 +46,8 @@ Equation
 (11.39); :math:`|R|^2 = 1 - \alpha` in energy, Kuttruff 4.1) each raised to
 the
 number of reflections that image made off that wall, and the air pressure
-attenuation :math:`e^{-m r_i / 2}` over the path (Kuttruff 4.1; ``m`` the
-*intensity* attenuation constant, so intensity falls as :math:`e^{-m r}`).
+attenuation :math:`\mathrm{e}^{-m r_i / 2}` over the path (Kuttruff 4.1; ``m`` the
+*intensity* attenuation constant, so intensity falls as :math:`\mathrm{e}^{-m r}`).
 The RIR
 is the sum of unit impulses at :math:`t_i` weighted by :math:`A_i` (Kuttruff
 Equation
@@ -574,11 +574,11 @@ def image_source_rir(
     image (Kuttruff Equations (4.4)-(4.5)). Each image at distance ``r``
     arrives at :math:`r / c` (Vorlander Equation (11.38)) with amplitude
     :math:`\left[ \prod R_{\text{wall}}^{n_{\text{wall}}} \right]
-    e^{-m r / 2} / (4 \pi r)`: the :math:`1 / (4 \pi r)`
+    \mathrm{e}^{-m r / 2} / (4 \pi r)`: the :math:`1 / (4 \pi r)`
     spherical spreading, the product of the wall pressure reflection factors
     :math:`R = \sqrt{1 - \alpha}` (Vorlander Equation (11.39)) over the
     reflections
-    the image made, and the air pressure attenuation :math:`e^{-m r / 2}`.
+    the image made, and the air pressure attenuation :math:`\mathrm{e}^{-m r / 2}`.
 
     With scalar or per-wall ``absorption`` (and no ``frequencies``) the result
     is a broadband RIR; a per-band ``absorption`` (or a given ``frequencies``)
@@ -605,7 +605,7 @@ def image_source_rir(
         :data:`DEFAULT_SPEED_OF_SOUND`).
     :param air_attenuation: Air *intensity* attenuation constant ``m``, in
         neper per metre (scalar or per-band); the pressure amplitude of each
-        path is scaled by :math:`e^{-m r / 2}` (Kuttruff 4.1). Default 0 (air
+        path is scaled by :math:`\mathrm{e}^{-m r / 2}` (Kuttruff 4.1). Default 0 (air
         absorption neglected). Obtain a physical ``m`` from
         :func:`~phonometry.environment.propagation.air_absorption.air_attenuation_m`.
     :param duration: RIR length, s; default the latest image arrival rounded up

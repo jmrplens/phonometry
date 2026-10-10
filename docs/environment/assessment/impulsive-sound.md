@@ -128,7 +128,7 @@ applies time weighting F ($\tau = 125\ \text{ms}$), samples the level history
 $L_{p\mathrm{AF}}$
 every 10-25 ms, detects each onset (the contiguous stretch whose gradient
 exceeds 10 dB/s, merging events less than 50 ms apart), measures its level
-difference $L_\mathrm{D} = L_\mathrm{e} - L_\mathrm{s}$ and its least-squares onset rate $\mathrm{OR}$,
+difference $\mathrm{LD} = L_\mathrm{e} - L_\mathrm{s}$ and its least-squares onset rate $\mathrm{OR}$,
 and returns
 the governing adjustment $K_\mathrm{I}$ with the source category of clause 7:
 *not impulsive* ($K_\mathrm{I} = 0$), *regular impulsive* ($0 < K_\mathrm{I} \le 5$) or
@@ -207,7 +207,7 @@ least-squares fits over the detected rise, so a shallow fit on a visibly steep
 edge means the level history was logged too coarsely to resolve it. And the
 level difference is measured from the level *just before* the onset, not from
 the long-term background, which is why a second strike arriving on the decay
-tail of the first one scores a smaller $L_\mathrm{D}$ than it appears to deserve.
+tail of the first one scores a smaller $\mathrm{LD}$ than it appears to deserve.
 
 Because the onset rate and level difference are level *differences*, the
 adjustment is insensitive to the absolute calibration of the meter (clause 8);

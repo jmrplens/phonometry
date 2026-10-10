@@ -70,7 +70,7 @@ un *valor cuadrático medio* móvil con memoria exponencial. Formalmente
 $$
 \tau\ \frac{dy}{dt} + y = x^2(t)
 \quad\Longleftrightarrow\quad
-y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ \mathrm{e}^{-(t-\xi)/\tau}\ d\xi
 $$
 
 un paso bajo de primer orden sobre la señal al cuadrado. La constante de tiempo
@@ -155,7 +155,7 @@ lenta, conmutando por muestra según el signo del cambio:
 
 $$
 y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
-\alpha = \begin{cases}1 - e^{-1/(f_\mathrm{s} \cdot 0{,}035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_\mathrm{s} \cdot 1{,}5)} & \text{en otro caso}\end{cases}
+\alpha = \begin{cases}1 - \mathrm{e}^{-1/(f_\mathrm{s} \cdot 0{,}035)} & x^2[n] > y[n-1]\\[2pt] 1 - \mathrm{e}^{-1/(f_\mathrm{s} \cdot 1{,}5)} & \text{en otro caso}\end{cases}
 $$
 
 Una constante de tiempo y una velocidad de caída son la misma afirmación. Un
@@ -271,7 +271,7 @@ exacta del detector del apartado 1 a una ráfaga tonal aislada de 4 kHz de
 duración $T_\mathrm{b}$:
 
 $$
-\Delta_{\mathrm{ref}} = 10\log_{10}\left(1 - e^{-T_\mathrm{b}/\tau}\right)\ \text{dB}
+\Delta_{\mathrm{ref}} = 10\log_{10}\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)\ \text{dB}
 $$
 
 Léela en voz alta y sale la tabla entera. En Fast ($\tau = 125$ ms) una ráfaga

@@ -19,7 +19,7 @@ a direct wave and a reflected wave weighted by the **spherical-wave reflection
 coefficient** $Q$ (Attenborough Eq. 2.40a; Salomons Eq. 3.2):
 
 $$
-p = \frac{e^{ikR_1}}{4\pi R_1} + Q\,\frac{e^{ikR_2}}{4\pi R_2},
+p = \frac{\mathrm{e}^{ikR_1}}{4\pi R_1} + Q\,\frac{\mathrm{e}^{ikR_2}}{4\pi R_2},
 $$
 
 with $R_1$ the source-receiver distance and $R_2$ the image-source distance.
@@ -32,7 +32,7 @@ R_\mathrm{p} = \frac{Z\cos\theta - 1}{Z\cos\theta + 1},
 $$
 
 $$
-F(w) = 1 + i\sqrt{\pi}\,w\,e^{-w^2}\operatorname{erfc}(-iw), \qquad
+F(w) = 1 + i\sqrt{\pi}\,w\,\mathrm{e}^{-w^2}\operatorname{erfc}(-iw), \qquad
 w = \sqrt{\tfrac{i k R_2}{2}}\left(\cos\theta + \tfrac{1}{Z}\right).
 $$
 
@@ -40,7 +40,7 @@ Here $Z$ is the ground surface impedance normalized by $\rho c$, $\theta$ is
 the angle of incidence from the ground normal
 ($\cos\theta = (h_\mathrm{s} + h_\mathrm{r})/R_2$), and the boundary-loss factor $F(w)$ is
 written through the scaled complementary error function
-$e^{-w^2}\operatorname{erfc}(-iw)$, i.e. the Faddeeva function
+$\mathrm{e}^{-w^2}\operatorname{erfc}(-iw)$, i.e. the Faddeeva function
 `scipy.special.wofz`. The second term of $Q$ is the *ground wave* that keeps
 the field finite at grazing incidence, where $R_\mathrm{p} \to -1$ and a plane-wave
 model would predict silence
@@ -50,7 +50,7 @@ The relative sound level (the *excess attenuation*, dB re free field) is
 (Salomons Eq. 3.4):
 
 $$
-\Delta L = 20\log_{10}\!\left|\,1 + Q\,\frac{R_1}{R_2}\,e^{i k (R_2 - R_1)}\,\right|.
+\Delta L = 20\log_{10}\!\left|\,1 + Q\,\frac{R_1}{R_2}\,\mathrm{e}^{i k (R_2 - R_1)}\,\right|.
 $$
 
 ```python
@@ -73,9 +73,9 @@ The ground impedance is either derived from an effective `flow_resistivity`
 [`phonometry.materials`](../../materials/absorbers/porous-absorbers.md), which model a semi-infinite porous
 ground) or supplied directly as a normalized complex `impedance` (a scalar,
 per-band array, or a `PorousMediumResult`). A plain `impedance` value is taken
-in the $e^{-i\omega t}$ convention of Salomons, in which a passive ground has
+in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, in which a passive ground has
 $\operatorname{Im}(Z) > 0$; the porous models of `phonometry.materials` work
-in the opposite $e^{+j\omega t}$ convention ($\operatorname{Im}(Z) < 0$), so
+in the opposite $\mathrm{e}^{+j\omega t}$ convention ($\operatorname{Im}(Z) < 0$), so
 anything obtained from them (a
 `flow_resistivity` or a `PorousMediumResult`) is conjugated internally before
 it enters the Weyl-Van der Pol formulas.

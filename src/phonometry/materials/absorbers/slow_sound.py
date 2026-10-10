@@ -34,7 +34,7 @@ phonometry (a passive medium has :math:`\operatorname{Im}(k) < 0`):
   :math:`\alpha_k = (2k+1) \pi / a` and :math:`\beta_m = (2m+1) \pi / b`.
   The duct series is printed in the opposite time convention of the source;
   it is returned conjugated here so the neck and cavity share the
-  :math:`e^{+j\omega t}` passivity of the slit. Both models are pinned in the
+  :math:`\mathrm{e}^{+j\omega t}` passivity of the slit. Both models are pinned in the
   tests to their exact limits: the effective density tends to ``rho0`` and the
   bulk modulus to ``kappa0`` as the boundary layers vanish, and
   :math:`j\omega\rho` tends to the Poiseuille flow resistivity of the channel
@@ -234,7 +234,7 @@ def rectangular_duct_properties(
     :math:`G_\kappa^2 = j \omega \mathrm{Pr} \rho_0 / \eta`. Here the duct
     is square (:math:`a = b`, both equal to ``side``). The series is
     transcribed in the source's time convention and returned conjugated so
-    the result is passive in the :math:`e^{+j\omega t}` convention
+    the result is passive in the :math:`\mathrm{e}^{+j\omega t}` convention
     (:math:`\operatorname{Im}(k) < 0`). The normalising constant 64 is fixed
     by the exact limits :math:`\rho \to \rho_0`, :math:`\kappa \to \kappa_0`
     as the boundary layers vanish and by the Poiseuille resistivity

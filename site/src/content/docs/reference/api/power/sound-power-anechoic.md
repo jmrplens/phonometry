@@ -39,7 +39,7 @@ of a hemi-anechoic room (Eq. 15), and each tabulated position carries an equal
 share of it; unequal partial areas $S_i$ are averaged by Eq. 13 instead.
 The A-weighted total is combined with the ISO 3744 Annex E band corrections
 (Annex C, Eq. C.1) and the expanded uncertainty
-$U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$ (Eq. 24/25) takes its
+$U = k\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ (Eq. 24/25) takes its
 reproducibility standard deviation from Table 3 (anechoic) or Table 2
 (hemi-anechoic).
 
@@ -187,7 +187,7 @@ precision_uncertainty(
 Expanded uncertainty $U = k \sigma_\mathrm{tot}$ (ISO 3745:2012).
 
 ISO 3745:2012 Eq. 24/25:
-$\sigma_\mathrm{tot} = \sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$ and
+$\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ and
 $U = k \sigma_\mathrm{tot}$, with $k = 2$ (95 %, two-sided) or
 $k = 1.6$ (95 %, one-sided, when comparing to a limit).
 
@@ -239,7 +239,7 @@ $DI_i = L_{pi} - \overline{L_p}$
 per position and band (Eq. 21); `non_uniformity_index` the
 per-band `VIr` sample standard deviation about the arithmetic mean
 (Eq. 22). `uncertainty` is the A-weighted expanded uncertainty
-$U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$
+$U = k\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$
 (Eq. 24/25) and `uncertainty_bands` the
 per-band value (`NaN` without `frequencies`).
 `sound_power_level_a` is the A-weighted total `LWA` (Eq. C.1).

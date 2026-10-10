@@ -219,11 +219,11 @@ potencia acústica, banda a banda de 10 Hz a 200 Hz:
 
 $$
 L_{p,\mathrm{LF}} = L_{W,\mathrm{LF}} - 10\lg\left(l^2 + h^2\right) - 11~\mathrm{dB}
-+ \Delta L_{g,\mathrm{LF}} - \Delta L_\mathrm{a} - \Delta L_\sigma
++ \Delta L_{\mathrm{g},\mathrm{LF}} - \Delta L_\mathrm{a} - \Delta L_\sigma
 $$
 
 con $l$ la distancia horizontal y $h$ la altura de buje, 11 dB por
-$10\lg(4\pi)$, la corrección de terreno $\Delta L_{g,\mathrm{LF}}$ de la Tabla C.2
+$10\lg(4\pi)$, la corrección de terreno $\Delta L_{\mathrm{g},\mathrm{LF}}$ de la Tabla C.2
 para la clase de impedancia D, la absorción del aire $\Delta L_\mathrm{a} = \alpha
 \sqrt{l^2 + h^2}$ y un aislamiento de fachada $\Delta L_\sigma$ como las dos filas
 danesas de la Tabla C.3. Los aerogeneradores se suman por banda, y el nivel es la
@@ -567,7 +567,7 @@ depths = np.linspace(0.0, 12.0, 481)
 fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
 left.plot(depths, environment.amplitude_modulation_adjustment(depths))
 left.plot([period.rating_db], [k_am], "o")
-left.set(xlabel="Profundidad de modulación [dB]", ylabel="Ajuste K_am [dB]")
+left.set(xlabel="Profundidad de modulación [dB]", ylabel=r"Ajuste $K_\mathrm{am}$ [dB]")
 rating.plot(right, language="es")
 plt.show()
 ```

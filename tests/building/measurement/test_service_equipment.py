@@ -1169,7 +1169,7 @@ def test_level_figure_marks_limited_and_unstandardized_bands() -> None:
         if line.get_label() == "upper limit (background)"
     )
     assert np.asarray(marks.get_xdata()).size == 2
-    assert "$L_\\mathrm{A,eq,nT}$" in ax.get_title()
+    assert "$L_{\\mathrm{A,eq,n}T}$" in ax.get_title()
     assert len(ax.patches) == 6
     plt.close(fig)
 

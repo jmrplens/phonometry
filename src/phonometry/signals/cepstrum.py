@@ -33,14 +33,14 @@ at the quefrency of its period. Three variants are standard:
   homomorphic deconvolution.
 
 **Echoes.** A single reflection :math:`x(t) = s(t) + a s(t - t_0)`
-multiplies the spectrum by :math:`1 + a e^{-j 2 \pi f t_0}`, whose complex
+multiplies the spectrum by :math:`1 + a \mathrm{e}^{-j 2 \pi f t_0}`, whose complex
 logarithm expands (for :math:`\lvert a \rvert < 1`) into the exactly
 summable series
 
 .. math::
 
-   \ln(1 + a e^{-j \theta})
-   = \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n} e^{-j n \theta}
+   \ln(1 + a \mathrm{e}^{-j \theta})
+   = \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n} \mathrm{e}^{-j n \theta}
 
 so the cepstrum carries a spike train at the *rahmonics* :math:`n t_0` with
 amplitudes :math:`a, -a^2/2, a^3/3, \ldots` (their sum is
@@ -519,7 +519,7 @@ class EchoDetectionResult(OwnsArrays):
         For a single in-record echo
         :math:`x(t) = s(t) + a s(t - t_0)` the power cepstrum's first
         rahmonic height is exactly ``a`` -- of either sign -- (the
-        :math:`n = 1` term of the :math:`\ln(1 + a e^{-j \theta})`
+        :math:`n = 1` term of the :math:`\ln(1 + a \mathrm{e}^{-j \theta})`
         series), so the value estimates the reflection coefficient
         directly, including its polarity. When the true delay falls
         between samples the rahmonic is split across neighbouring

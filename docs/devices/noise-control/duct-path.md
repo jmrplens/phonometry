@@ -632,7 +632,7 @@ clip below simulates the 0.65 m dimension of that same duct as a 2D slice
 with rigid walls, and drives it twice with one off-axis source that excites
 the plane mode and the first transverse mode together: at 180 Hz, below the
 263.8 Hz just printed, and at 400 Hz above it. Below cut-on the transverse
-mode is evanescent, decaying as $e^{-\alpha x}$ with $1/\alpha = 0.28$ m,
+mode is evanescent, decaying as $\mathrm{e}^{-\alpha x}$ with $1/\alpha = 0.28$ m,
 which puts it 20 dB down one duct width from the source, so the lumpy near
 field dies there and every later
 wavefront crosses the section flat. Above cut-on it propagates, the two modes

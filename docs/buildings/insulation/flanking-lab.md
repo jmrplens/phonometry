@@ -25,9 +25,9 @@ as an input, together with the overall flanking descriptors $D_\mathrm{n,f}$
 empirical `junction_vibration_reduction()` of that prediction.
 
 **Vibration reduction index (Formula (13)).**
-$K_{ij} = \overline{D}_{v,ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
+$K_{ij} = \overline{D}_{\mathrm{v},ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
 the direction-averaged velocity level difference
-$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Formula (11), which
+$\overline{D}_{\mathrm{v},ij} = \tfrac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})$ (Formula (11), which
 makes $K_{ij}$ symmetric), the common-edge junction length $l_{ij}$ and the
 **equivalent absorption lengths** $a_j = 2.2\pi^2 S_j /(T_{\mathrm{s},j} c_0)\sqrt{f_\mathrm{ref}/f}$
 (Formula (12), $f_\mathrm{ref} = 1000$ Hz). For lightweight well-damped elements

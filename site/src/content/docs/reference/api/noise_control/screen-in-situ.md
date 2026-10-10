@@ -56,7 +56,7 @@ not with a table, and it draws two hard lines: under 6 dB "the environmental
 conditions are not acceptable", and over 10 dB there is nothing to correct.
 [`background_corrected_level_db`](/phonometry/reference/api/noise_control/screen-in-situ/#background_corrected_level_db) refuses the first and skips the second.
 
-Clause 5.9 is the other: the A-weighted attenuation $D_{pA}$ **shall not
+Clause 5.9 is the other: the A-weighted attenuation $D_{p\mathrm{A}}$ **shall not
 be determined when an artificial sound source is used**, because an A-weighted
 number belongs to the spectrum that produced it and a loudspeaker's spectrum is
 not the machine's. [`screen_attenuation`](/phonometry/reference/api/noise_control/screen-in-situ/#screen_attenuation) refuses it rather than compute a
@@ -359,7 +359,7 @@ or both are arithmetic means of several $L_{S\text{max}}$ values.
 The two kinds are not mixed, and [`impulse_mean_level_db`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_mean_level_db) is the
 second of them.
 
-$D_{pA} = L_{pA1} - L_{pA2}$ is clause 5.9, and it carries the
+$D_{p\mathrm{A}} = L_{p\mathrm{A}1} - L_{p\mathrm{A}2}$ is clause 5.9, and it carries the
 standard's one flat prohibition: it **shall not be determined when an
 artificial sound source is used**. An A-weighted number belongs to the
 spectrum that produced it, and a loudspeaker's spectrum is not the
@@ -374,8 +374,8 @@ machine's, so the pair is refused rather than computed under
 | `screened_levels_db` | $L_{p2}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `source_kind` | `"actual"` (default) or `"artificial"`. |
-| `a_weighted_unscreened_level_db` | $L_{pA1}$, in decibels. |
-| `a_weighted_screened_level_db` | $L_{pA2}$, in decibels. |
+| `a_weighted_unscreened_level_db` | $L_{p\mathrm{A}1}$, in decibels. |
+| `a_weighted_screened_level_db` | $L_{p\mathrm{A}2}$, in decibels. |
 | `distance_m` | How far this position stands from the screen, in metres, carried into the result because 5.5.2 reports the spread over the line rather than one number. |
 
 **Returns:** The attenuation, as a [`ScreenInSituResult`](/phonometry/reference/api/noise_control/screen-in-situ/#screeninsituresult).
@@ -418,7 +418,7 @@ The in-situ attenuation of a removable screen, ISO 11821 clause 5.8.
 | `unscreened_levels_db` | $L_{p1}$, the level with the screen removed, per band. |
 | `screened_levels_db` | $L_{p2}$, the level with it in place, per band. |
 | `attenuation_db` | $D_p$ per band, in decibels. |
-| `a_weighted_attenuation_db` | $D_{pA}$, in decibels, or `None`. Clause 5.9 allows it only with the actual source. |
+| `a_weighted_attenuation_db` | $D_{p\mathrm{A}}$, in decibels, or `None`. Clause 5.9 allows it only with the actual source. |
 | `source_kind` | `"actual"` or `"artificial"`. |
 | `distance_m` | How far the position stands from the screen, in metres, or `None`. |
 
@@ -465,7 +465,7 @@ in-situ standards of this library.
 ScreenInSituResult.rounded_a_weighted() -> int | None
 ```
 
-$D_{pA}$ as 7.4 c) reports it, to the nearest integer.
+$D_{p\mathrm{A}}$ as 7.4 c) reports it, to the nearest integer.
 
 The clause gives the A-weighted attenuation the same rounding as the
 band values. `None` where no A-weighted pair was given.

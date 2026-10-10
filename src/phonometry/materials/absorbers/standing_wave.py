@@ -111,7 +111,7 @@ def standing_wave_reflection(
 ) -> Complex:
     r"""Complex reflection factor from the standing wave (ISO 10534-1, Eqs. (17)-(23)).
 
-    :math:`r = |r| e^{j\phi}` with :math:`|r| = (s - 1)/(s + 1)` (Eq. (14))
+    :math:`r = |r| \mathrm{e}^{j\phi}` with :math:`|r| = (s - 1)/(s + 1)` (Eq. (14))
     and the phase at the first pressure minimum
     :math:`\phi = \pi (4 x_{\text{min},1} / \lambda_0 - 1)` (Eq. (20)).
 

@@ -13,9 +13,9 @@ take the difference band by band.
 That is Equation (1) in the laboratory. Equation (2) is the same arithmetic
 **in situ**, where the room need not be diffuse, and the answer carries a prime
 to say so: :math:`D'_p`. Equation (3) is the A-weighted difference
-:math:`D'_{pA}`, and the standard defines it only for the third of its three
+:math:`D'_{p\mathrm{A}}`, and the standard defines it only for the third of its three
 methods, the one that drives the room with the noise that is actually there.
-There is no unprimed :math:`D_{pA}` in this document, and
+There is no unprimed :math:`D_{p\mathrm{A}}` in this document, and
 :func:`cabin_insulation` refuses to compute one.
 
 The three methods
@@ -28,7 +28,7 @@ The three methods
   answer itself (:func:`check_source_positions`);
 * **in situ with the actual noise**, 7.2.2, where the machinery of the
   workplace is the source, which is the only method that yields
-  :math:`D'_{pA}`.
+  :math:`D'_{p\mathrm{A}}`.
 
 Only results from the same method may be compared, which is why the method is
 a field of :class:`CabinInsulationResult` and not a remark in a docstring.
@@ -341,7 +341,7 @@ class CabinInsulationResult(OwnsArrays):
     :ivar insulation: :math:`D_p` or :math:`D'_p` per band, in decibels.
     :ivar apparent: Whether the answer carries the prime of 3.6, which it does
         for both in-situ methods.
-    :ivar a_weighted_insulation: :math:`D'_{pA}` of Equation (3), in decibels,
+    :ivar a_weighted_insulation: :math:`D'_{p\mathrm{A}}` of Equation (3), in decibels,
         or ``None``. Defined only for the actual-noise method.
     :ivar internal_noise_level: :math:`L_{pA}` of 6.7, in decibels, or ``None``
         when the cabin has no integral source.
@@ -393,7 +393,7 @@ class CabinInsulationResult(OwnsArrays):
 class WeightedCabinInsulation(OwnsArrays):
     r"""The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 
-    :ivar rating: :math:`D_{p,w}` or :math:`D'_{p,w}`, in decibels.
+    :ivar rating: :math:`D_{p,\mathrm{w}}` or :math:`D'_{p,\mathrm{w}}`, in decibels.
     :ivar c: The spectrum adaptation term :math:`C`, in decibels.
     :ivar ctr: The spectrum adaptation term :math:`C_{tr}`, in decibels.
     :ivar unfavourable_sum: The sum of unfavourable deviations at the shift
@@ -649,7 +649,7 @@ def cabin_insulation(
        D_p = (L_p)_{\text{room}} - (L_p)_{\text{cabin}}
 
     in the laboratory, the same in situ under the name :math:`D'_p`, and the
-    A-weighted difference :math:`D'_{pA} = (L_{pA})_{\text{room}} -
+    A-weighted difference :math:`D'_{p\mathrm{A}} = (L_{pA})_{\text{room}} -
     (L_{pA})_{\text{cabin}}` when the source is the noise of the workplace.
     Definition 3.7 ties that last one to the actual-noise method alone, so an
     A-weighted pair given under another method is refused rather than quietly
@@ -756,7 +756,7 @@ def weighted_cabin_insulation(
     :param insulation: :math:`D_p` or :math:`D'_p` over the 16 one-third-octave
         rating bands or the 5 octave ones, in decibels.
     :param apparent: Whether the spectrum is the in-situ one, which decides
-        whether the rating is :math:`D_{p,w}` or :math:`D'_{p,w}`.
+        whether the rating is :math:`D_{p,\mathrm{w}}` or :math:`D'_{p,\mathrm{w}}`.
     :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
     :return: The rating, as a :class:`WeightedCabinInsulation`.
     :raises ValueError: For a spectrum that is not the rating bands.
@@ -791,7 +791,7 @@ def estimated_cabin_noise_insulation(
 
     .. math::
 
-       D_{pA,e} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_{pi})}
+       D_{p\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_{pi})}
 
     with :math:`L_A = 10 \lg \sum_i 10^{0,1 (L_i - A_i)}` the A-weighted total
     of the assumed spectrum. The sign of :math:`A_i` is the trap: the annex
@@ -808,7 +808,7 @@ def estimated_cabin_noise_insulation(
         in decibels.
     :param insulation: :math:`D_{pi}` or :math:`D'_{pi}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
-    :return: :math:`D_{pA,e}` or :math:`D'_{pA,e}`, in decibels.
+    :return: :math:`D_{p\mathrm{A},\mathrm{e}}` or :math:`D'_{p\mathrm{A},\mathrm{e}}`, in decibels.
     :raises ValueError: For inputs that do not match band for band.
     """
     levels = require_finite_array(spectrum_levels, "spectrum_levels")

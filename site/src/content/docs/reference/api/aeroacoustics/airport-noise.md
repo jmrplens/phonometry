@@ -518,7 +518,7 @@ Behind a takeoff ground-roll segment, jet-exhaust noise radiates a lobed
 rearward pattern. `ΔSOR` adjusts the segment level relative to the level to
 the side of the start of roll, as a function of the azimuth `ψ` between the
 aircraft forward axis and the observer (Eq. 4-24a for turbofan jets, 4-24b for
-turboprops), scaled beyond 762 m by $d_{SOR,0}/d_{SOR}$ (Eq. 4-25).
+turboprops), scaled beyond 762 m by $d_{\mathrm{SOR},0}/d_\mathrm{SOR}$ (Eq. 4-25).
 It is only
 applied behind takeoff ground-roll segments
 ($90^\circ \le \psi \le 180^\circ$); ahead of the
@@ -528,7 +528,7 @@ aircraft ($\psi < 90^\circ$) it is zero.
 
 | Name | Description |
 | :--- | :--- |
-| `azimuth_deg` | Azimuth `ψ` from the forward axis to the observer, in degrees ($\psi = \arccos(q/d_{SOR})$, in `[90, 180]` behind the aircraft). Values below 90° return 0; values above 180° are clamped to 180°. |
+| `azimuth_deg` | Azimuth `ψ` from the forward axis to the observer, in degrees ($\psi = \arccos(q/d_\mathrm{SOR})$, in `[90, 180]` behind the aircraft). Values below 90° return 0; values above 180° are clamped to 180°. |
 | `distance_m` | Distance `dSOR` from the observer to the segment start, in metres. |
 | `engine` | `"jet"` (turbofan, Eq. 4-24a) or `"turboprop"` (Eq. 4-24b). |
 

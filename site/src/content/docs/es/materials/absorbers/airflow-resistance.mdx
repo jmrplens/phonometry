@@ -143,7 +143,7 @@ ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop_pa, "D",
         label="Evaluación a 0.5 mm/s")
 ax.set_xlabel("Velocidad lineal del flujo u [mm/s]")
 ax.set_ylabel("Caída de presión dp [Pa]")
-ax.set_title(f"R_s = {r.specific_resistance:.0f} Pa·s/m")
+ax.set_title(rf"$R_\mathrm{{s}}$ = {r.specific_resistance:.0f} Pa·s/m")
 ax.legend()
 plt.show()
 ```

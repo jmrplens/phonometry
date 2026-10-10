@@ -21,11 +21,11 @@ Annex C makes that a ratio, measured with the source and the microphone
 1,0 m apart at the same height, with nothing reflecting within 2 m:
 
 $$
-ST_\mathrm{Early} = 10 \lg \left[
+\mathrm{ST}_\mathrm{Early} = 10 \lg \left[
     \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t}
          {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right] \text{dB},
 \qquad
-ST_\mathrm{Late} = 10 \lg \left[
+\mathrm{ST}_\mathrm{Late} = 10 \lg \left[
     \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t}
          {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right] \text{dB}.
 $$

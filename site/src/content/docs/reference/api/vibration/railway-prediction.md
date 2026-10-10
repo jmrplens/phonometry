@@ -39,7 +39,7 @@ spectrum with it.
 
 **Transmission** (Clause 5.3). The ratio of the velocities at the distance
 $r$ and at the reference distance $r_0$ is geometric spreading
-times material damping (Formula (5)), $(r/r_0)^{-n} e^{-\alpha_R (r - r_0)}$ with $\alpha_R = 2\pi f D / c_s$, or a power law with an exponent
+times material damping (Formula (5)), $(r/r_0)^{-n} \mathrm{e}^{-\alpha_R (r - r_0)}$ with $\alpha_R = 2\pi f D / c_s$, or a power law with an exponent
 measured per band (Formula (6)); the level difference is 20 lg of it
 (Formula (4)). On the surface the exponent is usually 0,2 to 0,4.
 
@@ -284,7 +284,7 @@ ground_transmission_db(
 The transmission through the ground, Formulae (4) to (6).
 
 Formula (5) gives the ratio of the velocity at $r$ to that at
-$r_0$ as $(r/r_0)^{-n} e^{-\alpha_R(f)(r - r_0)}$, geometric
+$r_0$ as $(r/r_0)^{-n} \mathrm{e}^{-\alpha_R(f)(r - r_0)}$, geometric
 spreading with the exponent $n$ and material damping with
 $\alpha_R$ of [`ground_attenuation_coefficient_per_m`](/phonometry/reference/api/vibration/railway-prediction/#ground_attenuation_coefficient_per_m), and
 Formula (4) takes 20 lg of it. With the damping left out and an

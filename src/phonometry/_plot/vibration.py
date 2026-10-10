@@ -405,7 +405,7 @@ _STRINGS: dict[str, str] = {
     "Vibration immission over {duration} s ({range} range)": "Inmisión de vibración en {duration} s (rango {range})",
     "building": "edificios",
     "railway": "ferrocarril",
-    "Assessment velocity $v_B$ [mm/s]": "Velocidad de valoración $v_B$ [mm/s]",
+    r"Assessment velocity $v_\mathrm{B}$ [mm/s]": r"Velocidad de valoración $v_\mathrm{B}$ [mm/s]",
     "guideline {value} mm/s": "valor de referencia {value} mm/s",
     "peak {value} mm/s": "pico {value} mm/s",
     "Short-term vibration by DIN 45669-1 Annex E ({cls}): {verdict}": "Vibración de corta duración según DIN 45669-1, anexo E ({cls}): {verdict}",
@@ -2030,7 +2030,7 @@ def plot_multiple_shock(
         grid,
         100.0 * prob,
         color=_C_PRIMARY,
-        label=r"$\Pi(R) = 1 - e^{-(R/\alpha)^{\beta}}$",
+        label=r"$\Pi(R) = 1 - \mathrm{e}^{-(R/\alpha)^{\beta}}$",
     )
     for level, r_val in zip((10, 50, 90), (r10, r50, r90), strict=True):
         ax.axhline(level, color=_C_MUTED, ls=":", lw=0.8)
@@ -2857,9 +2857,9 @@ def plot_vibration_meter_reading(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The weighted vibration severity of one record, with what it reduces to.
+    r"""The weighted vibration severity of one record, with what it reduces to.
 
-    ``KB_F(t)`` against time, the maximum it reaches, and the clock maxima
+    :math:`KB_\mathrm{F}(t)` against time, the maximum it reaches, and the clock maxima
     that Formula (2) averages, each drawn at the middle of the 30 s interval
     it belongs to. The two horizontal lines are the numbers a meter displays,
     and the distance between them is what a long quiet stretch does to a
@@ -2869,7 +2869,7 @@ def plot_vibration_meter_reading(
         :class:`~phonometry.vibration.immission.vibration_meter.VibrationMeterReading`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Forwarded to the ``KB_F(t)`` ``plot`` call.
+    :param kwargs: Forwarded to the :math:`KB_\mathrm{F}(t)` ``plot`` call.
     :return: The axes.
     """
     from .._i18n import format_number, localize_axes
@@ -2936,9 +2936,9 @@ def plot_assessment_velocity(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The Annex E assessment velocity against the one value it is judged by.
+    r"""The Annex E assessment velocity against the one value it is judged by.
 
-    ``v_B(t)`` against time with the guideline value of Table E.2 as a pair of
+    :math:`v_\mathrm{B}(t)` against time with the guideline value of Table E.2 as a pair of
     lines, above and below zero because the quantity judged is the largest
     absolute value. There is no frequency axis and no guideline curve: that is
     the whole point of Annex E.
@@ -2947,7 +2947,7 @@ def plot_assessment_velocity(
         :class:`~phonometry.vibration.immission.vibration_meter.AssessmentVelocity`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Forwarded to the ``v_B(t)`` ``plot`` call.
+    :param kwargs: Forwarded to the :math:`v_\mathrm{B}(t)` ``plot`` call.
     :return: The axes.
     """
     from .._i18n import format_number, localize_axes
@@ -2977,7 +2977,7 @@ def plot_assessment_velocity(
     )
     ax.axhline(-guide, color=_C_REFERENCE, ls="--", lw=1.5)
     ax.set_xlabel(_t(_TIME_LABEL, language))
-    ax.set_ylabel(_t("Assessment velocity $v_B$ [mm/s]", language))
+    ax.set_ylabel(_t(r"Assessment velocity $v_\mathrm{B}$ [mm/s]", language))
     ax.set_title(
         _t(
             "Short-term vibration by DIN 45669-1 Annex E ({cls}): {verdict}",
@@ -3141,12 +3141,12 @@ def plot_people_assessment(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The two assessment quantities of DIN 4150-2 against the three guide values.
+    r"""The two assessment quantities of DIN 4150-2 against the three guide values.
 
-    ``KB_Fmax`` beside ``A_u`` and ``A_o``, and ``KB_FTr`` beside ``A_r``, as
+    :math:`KB_\mathrm{Fmax}` beside :math:`A_\mathrm{u}` and :math:`A_\mathrm{o}`, and :math:`KB_\mathrm{FTr}` beside :math:`A_\mathrm{r}`, as
     bars on a logarithmic axis, because the three guide values of one row
     span more than a decade and the order they are read in is what Clause
-    6.2 is about. A ``KB_FTr`` the verdict did not need is drawn as an empty
+    6.2 is about. A :math:`KB_\mathrm{FTr}` the verdict did not need is drawn as an empty
     slot rather than as zero.
 
     :param result: A

@@ -68,9 +68,9 @@ las bandas, nunca se leen en el sonómetro, y la tabla 1 los nombra:
 
 | | Ponderado A | Ponderado C |
 | :--- | :--- | :--- |
-| Máximo, ponderación temporal S | $L_\mathrm{A,Smax}$, $L_\mathrm{A,Smax,nT}$, $L_\mathrm{A,Smax,n}$ | $L_\mathrm{C,Smax}$, $L_\mathrm{C,Smax,nT}$, $L_\mathrm{C,Smax,n}$ |
-| Máximo, ponderación temporal F | $L_\mathrm{A,Fmax}$, $L_\mathrm{A,Fmax,nT}$, $L_\mathrm{A,Fmax,n}$ | $L_\mathrm{C,Fmax}$, $L_\mathrm{C,Fmax,nT}$, $L_\mathrm{C,Fmax,n}$ |
-| Continuo equivalente | $L_\mathrm{A,eq}$, $L_\mathrm{A,eq,nT}$, $L_\mathrm{A,eq,n}$ | $L_\mathrm{C,eq}$, $L_\mathrm{C,eq,nT}$, $L_\mathrm{C,eq,n}$ |
+| Máximo, ponderación temporal S | $L_\mathrm{A,Smax}$, $L_{\mathrm{A,Smax,n}T}$, $L_\mathrm{A,Smax,n}$ | $L_\mathrm{C,Smax}$, $L_{\mathrm{C,Smax,n}T}$, $L_\mathrm{C,Smax,n}$ |
+| Máximo, ponderación temporal F | $L_\mathrm{A,Fmax}$, $L_{\mathrm{A,Fmax,n}T}$, $L_\mathrm{A,Fmax,n}$ | $L_\mathrm{C,Fmax}$, $L_{\mathrm{C,Fmax,n}T}$, $L_\mathrm{C,Fmax,n}$ |
+| Continuo equivalente | $L_\mathrm{A,eq}$, $L_{\mathrm{A,eq,n}T}$, $L_\mathrm{A,eq,n}$ | $L_\mathrm{C,eq}$, $L_{\mathrm{C,eq,n}T}$, $L_\mathrm{C,eq,n}$ |
 
 El borrador es explícito en que no son intercambiables: solo se comparan
 resultados obtenidos con el mismo método, y un resultado que se compara con
@@ -255,7 +255,7 @@ $T_0$, 0,5 s salvo que se indique otro valor, o a un área de absorción de
 referencia $A_0 = 10$ m² (fórmulas (5) y (6)):
 
 $$
-L_\mathrm{nT} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
+L_{\mathrm{n}T} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
 L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0{,}16\,V}\ \mathrm{dB}
 $$
 

@@ -13,7 +13,7 @@ and Diffusers* (3rd ed., CRC Press, 2017):
 
 * Each well of depth ``d_n`` behaves, at normal incidence and with a rigid
   bottom, as a locally reacting patch of pressure reflection coefficient
-  :math:`R_n = e^{-2jkd_n}` (Chapter 10; the phase change of a wave travelling
+  :math:`R_n = \mathrm{e}^{-2jkd_n}` (Chapter 10; the phase change of a wave travelling
   down and back up the well). An arbitrary complex reflection coefficient per
   well is accepted as well, so admittance or resonator-loaded surfaces computed
   elsewhere can be fed in directly.
@@ -21,7 +21,7 @@ and Diffusers* (3rd ed., CRC Press, 2017):
   incidence :math:`\psi` is the sum over the wells of the periodic surface
   (Chapter 5, Equation (5.8), and Chapter 9, Equation (9.32)):
   :math:`p(\theta) = F(\theta) \sum_n R_n
-  e^{jkx_n(\sin\psi + \sin\theta)}`,
+  \mathrm{e}^{jkx_n(\sin\psi + \sin\theta)}`,
   with ``x_n`` the centre of the ``n``-th well and :math:`k = 2\pi f/c`. The
   optional prefactor :math:`F(\theta)` collects the single-well aperture
   directivity :math:`\operatorname{sinc}(kw(\sin\psi + \sin\theta)/2)` (the
@@ -205,7 +205,7 @@ def _scattered_pressure(
     r"""Complex far-field scattered pressure of a periodic surface (arbitrary units).
 
     Implements
-    :math:`p(\theta) = F(\theta) \sum_n R_n e^{jkx_n(\sin\psi + \sin\theta)}`
+    :math:`p(\theta) = F(\theta) \sum_n R_n \mathrm{e}^{jkx_n(\sin\psi + \sin\theta)}`
     (Cox and D'Antonio, Eqs. (5.8)/(9.32)) for ``repetitions`` repetitions of the
     single-period reflection sequence ``reflection``. The result is defined only
     up to the overall constant ``A``; only relative levels matter for the
@@ -326,7 +326,7 @@ def _resolve_reflection(
     r"""Return the per-well reflection coefficient sequence at ``frequency``.
 
     Exactly one of ``depths`` (rigid-bottom wells,
-    :math:`R_n = e^{-2jkd_n}`) or ``reflection`` (an explicit complex
+    :math:`R_n = \mathrm{e}^{-2jkd_n}`) or ``reflection`` (an explicit complex
     sequence) must be given.
     """
     if (depths is None) == (reflection is None):
@@ -430,7 +430,7 @@ def predict_diffuser_polar_response(
     Evaluates the single-plane Fraunhofer scattered pressure of a periodic
     phase-grating surface and reduces it to the ISO 17497-2 directional
     diffusion coefficient. Supply the surface either as rigid-bottom well
-    ``depths`` (:math:`R_n = e^{-2jkd_n}`) or as an explicit per-well complex
+    ``depths`` (:math:`R_n = \mathrm{e}^{-2jkd_n}`) or as an explicit per-well complex
     ``reflection`` sequence (for admittance or resonator-loaded surfaces); give
     exactly one.
 

@@ -102,9 +102,9 @@ toma como entrada, junto con los descriptores globales de flanco $D_\mathrm{n,f}
 empírica `junction_vibration_reduction()` de esa predicción.
 
 **Índice de reducción vibratoria (Fórmula (13)).**
-$K_{ij} = \overline{D}_{v,ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, a
+$K_{ij} = \overline{D}_{\mathrm{v},ij} + 10\log_{10}\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, a
 partir de la diferencia de nivel de velocidad promediada direccionalmente
-$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Fórmula (11), que hace
+$\overline{D}_{\mathrm{v},ij} = \tfrac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})$ (Fórmula (11), que hace
 $K_{ij}$ simétrico), la longitud de unión de arista común $l_{ij}$ y las
 **longitudes de absorción equivalentes**
 $a_j = 2{,}2\pi^2 S_j /(T_{\mathrm{s},j} c_0)\sqrt{f_\mathrm{ref}/f}$ (Fórmula (12),
@@ -117,7 +117,7 @@ simplificada, que no necesita ningún $T_\mathrm{s}$.
 Cada símbolo de la Fórmula (13) es una longitud o un área de ese dibujo. La
 línea de esquina resaltada es $l_{ij}$, la arista común de los dos elementos;
 $S_i$ y $S_j$ son las áreas de las dos placas, que entran a través de sus
-longitudes de absorción equivalentes $a_i$ y $a_j$; y $\overline{D}_{v,ij}$ es
+longitudes de absorción equivalentes $a_i$ y $a_j$; y $\overline{D}_{\mathrm{v},ij}$ es
 lo que lee la pareja de acelerómetros, una vez con el elemento $i$ excitado y
 otra con el elemento $j$ excitado. El término
 $10\log_{10}(l_{ij}/\sqrt{a_i a_j})$ es lo que convierte el índice en una
@@ -319,8 +319,8 @@ montarlo. Cuando los tres o cuatro elementos de la unión son idénticos, basta
 con un $\Delta R$ de 10 dB en todas las bandas. En general, excita el elemento 1
 y después el elemento 2 con el mismo tipo de excitación, lee el nivel de
 velocidad medio del elemento receptor $j$ en cada caso y exige
-$\Delta R_\text{min} = 10 - L_{v,1j} + L_{v,2j}$ cuando
-$L_{v,1j} - L_{v,2j} \le 10$ dB, y nada en absoluto cuando la diferencia ya
+$\Delta R_\text{min} = 10 - L_{\mathrm{v},1j} + L_{\mathrm{v},2j}$ cuando
+$L_{\mathrm{v},1j} - L_{\mathrm{v},2j} \le 10$ dB, y nada en absoluto cuando la diferencia ya
 supera los 10 dB (Fórmulas (23) y (24)). Un apantallamiento pesado sobre un
 elemento ligero puede cambiar la mismísima transmisión que se está midiendo, y
 hay que evitarlo. **Un $K_{ij}$ o un $D_\mathrm{n,f}$ declarado sin decir cómo se
@@ -345,7 +345,7 @@ compruébala en la banda más alta, no en la más baja.
 **Excitación (apartado 7.2.4).** Estacionaria, con un excitador electrodinámico
 alimentado con ruido o con una máquina de impactos (adaptada para paredes, con
 los impactos controlados mecánicamente para que se repitan), o transitoria, con
-golpes de martillo únicos o repetidos a mano, en cuyo caso $D_{v,ij}$ debe
+golpes de martillo únicos o repetidos a mano, en cuyo caso $D_{\mathrm{v},ij}$ debe
 medirse en los dos elementos **simultáneamente**. Los golpes múltiples a mano
 se reparten sobre 1 m² a 2 m², a 1 Hz o 2 Hz, durante 20 s a 30 s. En cada
 banda el nivel de velocidad del elemento receptor debe superar el ruido de

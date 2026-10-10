@@ -197,10 +197,10 @@ The station that produces those spectra is fixed clause by clause.
 Over the flyover, $\mathrm{PNLT} = \mathrm{PNL} + C$ and its maximum is
 $\mathrm{PNLTM}$. The metric converts the tone-corrected level back to energy,
 sums it over the records between the two 10 dB-down points and divides by a
-fixed reference duration $t_0 = 10\ \text{s}$ (App. 2 §4.6),
+fixed reference duration $\mathrm{t}_0 = 10\ \text{s}$ (App. 2 §4.6),
 
 $$
-\mathrm{EPNL} = 10\lg\!\left[\frac{1}{t_0}\sum_k 10^{\mathrm{PNLT}(k)/10}\,
+\mathrm{EPNL} = 10\lg\!\left[\frac{1}{\mathrm{t}_0}\sum_k 10^{\mathrm{PNLT}(k)/10}\,
 \Delta t_k\right],
 $$
 
@@ -352,9 +352,9 @@ moved to the reference day by
 
 $$
 \mathrm{SPL}_\mathrm{R}(i) = \mathrm{SPL}(i)
- + 0.01\,[\alpha(i) - \alpha_\mathrm{R}(i)]\,QK
- + 0.01\,\alpha_\mathrm{R}(i)\,(QK - Q_\mathrm{r}K_\mathrm{r})
- + 20\lg\frac{QK}{Q_\mathrm{r}K_\mathrm{r}},
+ + 0.01\,[\alpha(i) - \alpha_\mathrm{R}(i)]\,\mathrm{QK}
+ + 0.01\,\alpha_\mathrm{R}(i)\,(\mathrm{QK} - \mathrm{Q}_r\mathrm{K}_r)
+ + 20\lg\frac{\mathrm{QK}}{\mathrm{Q}_r\mathrm{K}_r},
 $$
 
 which swaps the test-day absorption coefficient for the reference one over the
@@ -372,7 +372,7 @@ $$
 
 (§8.3.6). $\Delta_{\text{peak}}$ handles a secondary peak within 2 dB of
 $\mathrm{PNLTM}$ that overtakes the adjusted maximum (§8.3.3);
-$\Delta_2 = -7.5\lg(QK/Q_\mathrm{r}K_\mathrm{r}) + 10\lg(V_\mathrm{G}/V_\mathrm{GR})$ is the change in duration
+$\Delta_2 = -7.5\lg(\mathrm{QK}/\mathrm{Q}_r\mathrm{K}_r) + 10\lg(\mathrm{V}_\mathrm{G}/\mathrm{V}_\mathrm{GR})$ is the change in duration
 from the path length and the ground speed (§8.3.4); and $\Delta_3$ corrects for
 the difference between the propulsion operating parameters flown and those
 specified for the reference condition, from manufacturer sensitivity curves
@@ -384,12 +384,12 @@ limit.
 The library supplies the ingredients and not the bookkeeping. `air_attenuation`
 and `sae_band_attenuation` below give the $\alpha(i)$ and $\alpha_\mathrm{R}(i)$
 of the first two terms, though not in their unit: §8.3.2.1 takes the
-coefficients in dB/100 m with $QK$ in metres, which is what the 0.01 converts,
+coefficients in dB/100 m with $\mathrm{QK}$ in metres, which is what the 0.01 converts,
 while `air_attenuation` returns dB/m (the $0.01\,\alpha(i)$ of those terms) and
 `sae_band_attenuation` a band attenuation over a given path, in dB (the whole
-$0.01\,\alpha(i)\,QK$ for the path $QK$). The EPNL machinery re-runs an
+$0.01\,\alpha(i)\,\mathrm{QK}$ for the path $\mathrm{QK}$). The EPNL machinery re-runs an
 adjusted spectrum as readily as a measured one; the flight-path geometry
-$QK/Q_\mathrm{r}K_\mathrm{r}$ and the four $\Delta$ terms themselves are not
+$\mathrm{QK}/\mathrm{Q}_r\mathrm{K}_r$ and the four $\Delta$ terms themselves are not
 implemented. Adjust first, then report: the
 EPNL this page returns is a test-day value, and a `requirement` verdict is only
 a certification verdict once §8 has been applied.

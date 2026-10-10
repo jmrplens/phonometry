@@ -161,7 +161,7 @@ ax.set_xticks(np.arange(freqs.size))
 ax.set_xticklabels([f"{f:g}" if f < 1000 else f"{f/1000:g}k" for f in freqs],
                    rotation=45)
 ax.set_xlabel("Frequency [Hz]")
-ax.set_ylabel("Sound absorption coefficient alpha_s")
+ax.set_ylabel(r"Sound absorption coefficient $\alpha_\mathrm{s}$")
 plt.show()
 ```
 

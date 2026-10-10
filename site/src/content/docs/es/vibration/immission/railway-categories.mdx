@@ -40,10 +40,10 @@ intervalo de una **categoría** de tren, un tipo de vehículo sobre una vía en 
 sentido, es el eficaz de un máximo por intervalo por paso sobre los pasos
 medidos (fórmula (5)), y, a diferencia de la (A.1) de la edición de 1999 y de
 la propia fórmula (1) del vibrómetro, nada por debajo de 0,1 se pone a cero
-por el camino, porque el número siguiente se construye sobre él: la `KB_Fmax`
+por el camino, porque el número siguiente se construye sobre él: la $KB_\mathrm{Fmax}$
 de la categoría no es el mayor máximo por intervalo que nadie observó sino
 **1,5 veces** su eficaz (fórmula (7)), ya que un solo paso con un plano en una
-rueda no dice nada de la línea. La `KB_Fmax` del ferrocarril es la mayor sobre
+rueda no dice nada de la línea. La $KB_\mathrm{Fmax}$ del ferrocarril es la mayor sobre
 las categorías (fórmula (8)).
 
 El ejemplo 8 del anexo B mide 2,5 h en un edificio residencial nuevo junto a
@@ -94,9 +94,9 @@ En un seguimiento de semanas o meses, un punto sustitutivo, en la cimentación
 por ejemplo, puede ocupar el lugar del recinto si cumple la DIN 45669-2 y su
 transferencia al recinto, un factor lineal o una función dependiente de la
 frecuencia, se determina, a ser posible midiendo, con su incertidumbre solo
-como cota superior; desde ahí solo se demuestra `KB_Fmax < A_o` y
-`KB_FTr < A_r`, nunca con seguridad una superación. Cuenta con hasta un 15 %
-de incertidumbre en toda magnitud `KB_F`, calcula `KB_Fmax` y `KB_FTr` con al
+como cota superior; desde ahí solo se demuestra $KB_\mathrm{Fmax} < A_\mathrm{o}$ y
+$KB_\mathrm{FTr} < A_\mathrm{r}$, nunca con seguridad una superación. Cuenta con hasta un 15 %
+de incertidumbre en toda magnitud $KB_\mathrm{F}$, calcula $KB_\mathrm{Fmax}$ y $KB_\mathrm{FTr}$ con al
 menos tres decimales y redondéalos a dos según la DIN 1333, e informa del
 plano de situación con puntos y direcciones, el acoplamiento, el vibrómetro y
 sus ajustes, y las condiciones de funcionamiento.
@@ -134,10 +134,10 @@ verdict = vibration.assess_people_in_buildings(
 print(verdict.complies, verdict.criterion)  # False A_r
 ```
 
-Con el borrador un ferrocarril se compara con `A_o` como cualquier otra
+Con el borrador un ferrocarril se compara con $A_\mathrm{o}$ como cualquier otra
 fuente, cosa que la edición de 1999 no hacía; los tranvías del ejemplo 8
-superan el `A_o` nocturno de 0,2 de un edificio residencial nuevo y el
-requisito no se cumple de noche antes siquiera de formar `KB_FTr`.
+superan el $A_\mathrm{o}$ nocturno de 0,2 de un edificio residencial nuevo y el
+requisito no se cumple de noche antes siquiera de formar $KB_\mathrm{FTr}$.
 
 ```python
 from phonometry import vibration
@@ -167,12 +167,12 @@ Una línea existente que se modifica o se amplía se juzga por el **cambio** que
 trae (6.5.3.6). El caso sin el proyecto, con el horario presente o el
 previsto, se pone frente al caso proyectado; el caso proyectado se sujeta
 primero a los valores de referencia como cualquier inmisión, con una
-`KB_Fmax` igual o inferior a `A_u` que lo zanja por sí sola, y donde `KB_Fmax`
-supera `A_o` o `KB_FTr` supera `A_r` el requisito sigue contando como cumplido
+$KB_\mathrm{Fmax}$ igual o inferior a $A_\mathrm{u}$ que lo zanja por sí sola, y donde $KB_\mathrm{Fmax}$
+supera $A_\mathrm{o}$ o $KB_\mathrm{FTr}$ supera $A_\mathrm{r}$ el requisito sigue contando como cumplido
 si la magnitud crece menos de un 25 %, el menor aumento que un estudio de
 laboratorio encontró que la gente nota. El apartado dice que los requisitos se
-cumplen si se da una de sus condiciones; su propio ejemplo 9, cuya `KB_Fmax`
-no cambia en absoluto, va a medidas correctoras porque `KB_FTr` crece más, así
+cumplen si se da una de sus condiciones; su propio ejemplo 9, cuya $KB_\mathrm{Fmax}$
+no cambia en absoluto, va a medidas correctoras porque $KB_\mathrm{FTr}$ crece más, así
 que tienen que darse todas las condiciones que se aplican, y la biblioteca lo
 lee así. El ejemplo 9 añade una segunda vía a
 una línea de vía única que pasa junto a una casa en una zona mixta: 28 trenes
@@ -254,7 +254,7 @@ obras dibujada al revés, diez máximos por intervalo impresos en la figura B.2
 que no dan el 0,39 que usa el texto, un ejemplo que cita el apartado de una
 línea nueva mientras aplica el de una ampliación, dos referencias cruzadas que
 nombran la fórmula y el apartado equivocados, y un suceso raro cumplido por
-debajo de `A_o` en una frase y en él en el apartado siguiente y en el
+debajo de $A_\mathrm{o}$ en una frase y en él en el apartado siguiente y en el
 diagrama.
 
 ## 4. Qué más cambia el borrador
@@ -266,30 +266,30 @@ lo de abajo es lo que `edition="2023"` lee de forma distinta a la
 [edición de 1999](/phonometry/es/vibration/immission/people-in-buildings/);
 los números que no se nombran aquí son los mismos en las dos.
 
-- **La tabla 1** cambia una celda: el `A_u` nocturno de una zona mixta, ahora
+- **La tabla 1** cambia una celda: el $A_\mathrm{u}$ nocturno de una zona mixta, ahora
   con las zonas urbanas en la fila, pasa de 0,15 a 0,1.
-- **El 15 %** de incertidumbre de una medida de `KB_F` ya no excusa una
-  `KB_Fmax` por encima de `A_u`. El ejemplo 3 de 1999 leía 0,17 frente a 0,15
+- **El 15 %** de incertidumbre de una medida de $KB_\mathrm{F}$ ya no excusa una
+  $KB_\mathrm{Fmax}$ por encima de $A_\mathrm{u}$. El ejemplo 3 de 1999 leía 0,17 frente a 0,15
   como cumplido por ese motivo; el ejemplo 3 del borrador lee 0,114 frente a
-  0,10, sigue hasta `KB_FTr`, encuentra 0,075 frente a un `A_r` de 0,07, y lo
+  0,10, sigue hasta $KB_\mathrm{FTr}$, encuentra 0,075 frente a un $A_\mathrm{r}$ de 0,07, y lo
   da por incumplido.
-- **Una carretera de noche** no se juzga por `A_o`: el 6.5.2 dice que una
+- **Una carretera de noche** no se juzga por $A_\mathrm{o}$: el 6.5.2 dice que una
   superación rara del valor superior nocturno no incumple el requisito, y
   pone un máximo por intervalo aislado por encima de 0,6, en cualquier zona,
   como motivo para buscar la causa y corregirla, que es lo que la edición de
   1999 decía de un ferrocarril. **Una carretera existente** junto a un
-  edificio existente: los vecinos tienen que soportar `A_u` y `A_r` superados
+  edificio existente: los vecinos tienen que soportar $A_\mathrm{u}$ y $A_\mathrm{r}$ superados
   hasta en un 50 %, de día y de noche (6.5.2), que `source="road_existing"`
   da como valores de referencia multiplicados por 1,5.
 - **Un suceso sísmico inducido**, unos segundos con su energía por debajo de
-  15 Hz, años después de la intervención que lo causa (6.5.1.3): `KB_Fmax` es
+  15 Hz, años después de la intervención que lo causa (6.5.1.3): $KB_\mathrm{Fmax}$ es
   más o menos 0,44 veces la velocidad de pico, y se sujeta de día y de noche
-  al `A_o` del día, sin `KB_FTr`.
+  al $A_\mathrm{o}$ del día, sin $KB_\mathrm{FTr}$.
 - **Una obra**: la tabla 3 del borrador imprime los días dos a seis que la
   figura 3 de 1999 obligaba a leer de una curva, celda por celda lo que da la
-  interpolación, y dice que `D` cuenta solo los días en que se supera la
+  interpolación, y dice que $D$ cuenta solo los días en que se supera la
   tabla 1.
-- El **ferrocarril urbano** de 1999, con su factor 1,5 sobre `A_u` y `A_r`,
+- El **ferrocarril urbano** de 1999, con su factor 1,5 sobre $A_\mathrm{u}$ y $A_\mathrm{r}$,
   desaparece; en su lugar está el factor 0,7 de la tabla 2 sobre el eficaz.
 
 ```python
@@ -325,14 +325,14 @@ una modificada (6.5.3.6).
 <ScopeClaim status="covered">
 **El resto del borrador** detrás de `edition="2023"`: la única celda de la
 tabla 1, el procedimiento sin el atajo del 15 %, un ferrocarril comparado con
-`A_o`, la carretera existente del 6.5.2 y el suceso sísmico inducido del
+$A_\mathrm{o}$, la carretera existente del 6.5.2 y el suceso sísmico inducido del
 6.5.1.3, y la tabla 3 tal como está impresa.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
 **Ninguna decisión que el borrador deja abierta.** Una línea existente que no
 se modifica (6.5.3.4) no tiene regla numérica y no se inventa ninguna; la
-concesión del 6.5.3.7 a un edificio nuevo, un `A_o` de 0,6 para una categoría
+concesión del 6.5.3.7 a un edificio nuevo, un $A_\mathrm{o}$ de 0,6 para una categoría
 con pasos raros, es un juicio y sigue siéndolo.
 </ScopeClaim>
 

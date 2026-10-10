@@ -65,7 +65,7 @@ loudspeaker sees them: 1 to 3 along the top row, 7 to 9 along the bottom.
 Each microphone hears the direct sound and, a little over a millisecond later,
 the reflection. The reflection has travelled further, 1,75 m against 1,25 m at
 microphone 5, and has spread over a larger sphere; Formula (2) puts that back
-with $C_{geo,k} = (d_{r,k}/d_{i,k})^2$, which Table 2 prints for every
+with $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, which Table 2 prints for every
 microphone:
 
 ```python
@@ -110,7 +110,7 @@ free-field record is shifted in steps of a fiftieth of a sample, within two
 samples either way, by a phase ramp over its own transform; the shift that
 best fits the 50 samples around the main peak is kept; the record is scaled so
 the two peaks are equal and subtracted. What is left is the reflection, and the
-**reduction factor** $R_{sub}$ of Formula (6) measures how much of the direct
+**reduction factor** $R_\mathrm{sub}$ of Formula (6) measures how much of the direct
 sound went with it: the energy within 0,5 ms of the peak before, over the
 energy there after. Below 10 dB the standard reads the subtraction as
 imperfect, and so does `subtract_direct_sound`, with a
@@ -177,7 +177,7 @@ half whose length is 3/7 of the flat part. The standard window is 7,9 ms long
 1,3 ms (0,5 + 0,56 + 0,24 ms), short enough to end before the reflection
 reaches the corner microphones. The **marker point** where the flat part
 begins sits 0,2 ms before the peak of the component (5.5.6); for the reflection
-the peak is placed by geometry, the direct peak plus $(d_{r,k} - d_{i,k})/c$,
+the peak is placed by geometry, the direct peak plus $(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c$,
 which is what makes the reference plane the conventional reflection plane of a
 device that is not flat.
 
@@ -188,7 +188,7 @@ print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 H
 ```
 
 The edges are Formula (7) sampled as printed, each a half of a full
-Blackman-Harris window twice its own length. Table 1 calls $T_{W,BH}$ the length
+Blackman-Harris window twice its own length. Table 1 calls $T_\mathrm{W,BH}$ the length
 of the trailing edge, which read into Formula (7) would draw a whole bell
 where the edge should fall; the [errata
 registry](/phonometry/reference/errata/) records it. The second line is the
@@ -202,20 +202,20 @@ here, as the library computes it (see below):
 
 $$
 RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j}
-\frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df}
-     {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df}
-\; \frac{C_{geo,k}\, C_{dir,k}(\Delta f_j)}{C_{gain,k}(\Delta f_g)}
+\frac{\int_{\Delta f_j} |F[h_{\mathrm{r},k}(t)\, w_{\mathrm{r},k}(t)]|^2\, df}
+     {\int_{\Delta f_j} |F[h_{\mathrm{i},k}(t)\, w_{\mathrm{i},k}(t)]|^2\, df}
+\; \frac{C_{\mathrm{geo},k}\, C_{\mathrm{dir},k}(\Delta f_j)}{C_{\mathrm{gain},k}(\Delta f_g)}
 $$
 
-- $C_{geo,k}$ is the divergence of section 1.
-- $C_{dir,k}$ puts back the **directivity of the loudspeaker**: the reflection
+- $C_{\mathrm{geo},k}$ is the divergence of section 1.
+- $C_{\mathrm{dir},k}$ puts back the **directivity of the loudspeaker**: the reflection
   left it towards the specular point, at another angle than the direct sound.
   It is measured once per loudspeaker (Formula (3)), in free field, at the
   microphone position and on the specular path at the same distance, and
   `source_directivity_corrections` turns the two sets of records into the
   `(9, 18)` array `reflection_index` takes. A report without it states "none",
   and so does leaving it out.
-- $C_{gain,k}$ takes out a **change of gain** between the free-field and the
+- $C_{\mathrm{gain},k}$ takes out a **change of gain** between the free-field and the
   in-front configurations. Formula (4) measures it as the in-front incident
   energy over the free-field one, with the 1,3 ms window over the bands of
   500 Hz to 2 kHz. The library **divides** by it. Formula (1) prints it as a
@@ -410,7 +410,7 @@ decimals, the resolution 5.11 reports the index to. Both round to the 8 dB
 printed. The expanded uncertainty is the reproducibility of the
 inter-laboratory test in Table A.1 times the coverage factor, 1,59 dB for the
 single number; in seven bands Table B.2 prints a hundredth less than 1,96
-times the $s_R$ of Table A.1, as unrounded standard deviations would give. The
+times the $s_\mathrm{R}$ of Table A.1, as unrounded standard deviations would give. The
 print does not say which values the example multiplied, and the library
 multiplies the printed ones.
 

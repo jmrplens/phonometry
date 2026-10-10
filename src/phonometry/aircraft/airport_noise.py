@@ -248,14 +248,14 @@ def start_of_roll_directivity(
     rearward pattern. ``ΔSOR`` adjusts the segment level relative to the level to
     the side of the start of roll, as a function of the azimuth ``ψ`` between the
     aircraft forward axis and the observer (Eq. 4-24a for turbofan jets, 4-24b for
-    turboprops), scaled beyond 762 m by :math:`d_{SOR,0}/d_{SOR}` (Eq. 4-25).
+    turboprops), scaled beyond 762 m by :math:`d_{\mathrm{SOR},0}/d_\mathrm{SOR}` (Eq. 4-25).
     It is only
     applied behind takeoff ground-roll segments
     (:math:`90^\circ \le \psi \le 180^\circ`); ahead of the
     aircraft (:math:`\psi < 90^\circ`) it is zero.
 
     :param azimuth_deg: Azimuth ``ψ`` from the forward axis to the observer, in
-        degrees (:math:`\psi = \arccos(q/d_{SOR})`, in ``[90, 180]`` behind
+        degrees (:math:`\psi = \arccos(q/d_\mathrm{SOR})`, in ``[90, 180]`` behind
         the aircraft).
         Values below 90° return 0; values above 180° are clamped to 180°.
     :param distance_m: Distance ``dSOR`` from the observer to the segment start,

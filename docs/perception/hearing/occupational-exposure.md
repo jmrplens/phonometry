@@ -117,7 +117,7 @@ $k = 1.65$ for a **one-sided** 95 % interval (Clause 14), because a hygienist
 cares only about the *upper* bound: `res.upper_limit` = $L_\mathrm{EX,8h} + U$ is the
 value 95 % of measurements fall below, the number compared against an action
 limit. Second, the task and job methods weight the *same* spread of samples
-differently. The task sampling uncertainty $u_{1a}$ (Eq. C.6) divides the summed
+differently. The task sampling uncertainty $u_{1\mathrm{a}}$ (Eq. C.6) divides the summed
 squared deviations by $I(I-1)$ (the standard error of the mean, smaller by a
 factor $\sqrt{I}$), whereas the job/full-day sampling uncertainty $u_1$ (Eq. C.12)
 is the plain sample standard deviation with denominator $N-1$, whose contribution
@@ -129,8 +129,8 @@ level to $88.4$ before the duration normalisation; the library keeps it
 unrounded.)
 
 **What dominates the budget.** Annex C combines four sources in quadrature
-(Table C.1): the **sampling** uncertainty ($u_{1a}$/$u_1$), the **duration**
-uncertainty ($u_{1b}$, task-based only), the **instrument** ($u_2$, Table C.5)
+(Table C.1): the **sampling** uncertainty ($u_{1\mathrm{a}}$/$u_1$), the **duration**
+uncertainty ($u_{1\mathrm{b}}$, task-based only), the **instrument** ($u_2$, Table C.5)
 and the **microphone position** ($u_3$, Clause C.6). The last two are small
 and roughly fixed ($u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
 a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default), so
@@ -164,7 +164,7 @@ derived on the [Theory](../../reference/theory/environment-transport.md) page.
 | `effective_duration_hours` | job / full-day | float | h | $> 0$ | Effective working-day duration $T_\mathrm{e}$ |
 | `instrument` | all | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (default) | Selects $u_2$ (Table C.5) |
 | `u3` | all | float | dB | default `1.0` | Microphone-position uncertainty (Clause C.6) |
-| `include_duration_uncertainty` | task | bool | — | default `True` | `False` omits the $(c_{1b}u_{1b})^2$ term (Annex D case a) |
+| `include_duration_uncertainty` | task | bool | — | default `True` | `False` omits the $(c_{1\mathrm{b}}u_{1\mathrm{b}})^2$ term (Annex D case a) |
 | `n_workers` / `sample_duration_hours` | job | int / float | — / h | default `None` | Table 1 cumulative-duration check |
 | `warn` | all | bool | — | default `True` | Emit `OccupationalExposureWarning` for the sampling advisories |
 
@@ -194,7 +194,7 @@ verdict against the limit value, and a footer identity block. A printed note
 records that the limit value applies to the effective exposure with the worn
 hearing protectors' attenuation taken into account, which the measured
 $L_\mathrm{EX,8h}$ does not include. `verbose=True` adds the per-task Annex C
-uncertainty columns ($u_{1a}$, $u_{1b}$, $u_2$); `language="es"` renders the
+uncertainty columns ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$); `language="es"` renders the
 Spanish fiche (nivel de exposición diario equivalente, comma decimals).
 Rendering needs the optional `phonometry[report]` extra (reportlab), plus
 matplotlib for the task-based chart.

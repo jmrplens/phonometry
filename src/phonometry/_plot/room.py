@@ -230,15 +230,15 @@ _STRINGS: dict[str, str] = {
     r"Single number, $J_\mathrm{LFCm}$ (125 Hz to 1 kHz)": (
         r"Número único, $J_\mathrm{LFCm}$ (125 Hz a 1 kHz)"
     ),
-    r"Early support, $ST_\mathrm{Early}$": r"Soporte temprano, $ST_\mathrm{Early}$",
-    r"Late support, $ST_\mathrm{Late}$": r"Soporte tardío, $ST_\mathrm{Late}$",
+    r"Early support, $\mathrm{ST}_\mathrm{Early}$": r"Soporte temprano, $\mathrm{ST}_\mathrm{Early}$",
+    r"Late support, $\mathrm{ST}_\mathrm{Late}$": r"Soporte tardío, $\mathrm{ST}_\mathrm{Late}$",
     "Stage support [dB]": "Soporte de escenario [dB]",
     "ISO 3382-1 stage support": "Soporte de escenario ISO 3382-1",
-    r"Typical range of $ST_\mathrm{Early}$ (Table C.1)": (
-        r"Rango habitual de $ST_\mathrm{Early}$ (Tabla C.1)"
+    r"Typical range of $\mathrm{ST}_\mathrm{Early}$ (Table C.1)": (
+        r"Rango habitual de $\mathrm{ST}_\mathrm{Early}$ (Tabla C.1)"
     ),
-    r"Typical range of $ST_\mathrm{Late}$ (Table C.1)": (
-        r"Rango habitual de $ST_\mathrm{Late}$ (Tabla C.1)"
+    r"Typical range of $\mathrm{ST}_\mathrm{Late}$ (Table C.1)": (
+        r"Rango habitual de $\mathrm{ST}_\mathrm{Late}$ (Tabla C.1)"
     ),
     "Interaural cross correlation": "Correlación cruzada interaural",
     "ISO 3382-1 interaural cross correlation": (
@@ -667,10 +667,15 @@ def plot_stage_support(
             high,
             color=colour,
             alpha=0.25,
-            label=_t(rf"Typical range of $ST_\mathrm{{{key}}}$ (Table C.1)", language),
+            label=_t(
+                rf"Typical range of $\mathrm{{ST}}_\mathrm{{{key}}}$ (Table C.1)",
+                language,
+            ),
         )
     style_default(kwargs, "color", _C_PRIMARY)
-    kwargs.setdefault("label", _t(r"Early support, $ST_\mathrm{Early}$", language))
+    kwargs.setdefault(
+        "label", _t(r"Early support, $\mathrm{ST}_\mathrm{Early}$", language)
+    )
     ax.plot(positions, early, "o-", zorder=3, **kwargs)
     ax.plot(
         positions,
@@ -678,7 +683,7 @@ def plot_stage_support(
         "s--",
         color=_C_SECONDARY,
         zorder=3,
-        label=_t(r"Late support, $ST_\mathrm{Late}$", language),
+        label=_t(r"Late support, $\mathrm{ST}_\mathrm{Late}$", language),
     )
     ax.set_ylabel(_t("Stage support [dB]", language))
     ax.set_title(_t("ISO 3382-1 stage support", language))

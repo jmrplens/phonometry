@@ -187,7 +187,7 @@ la distancia de ese segmento, y se corrige término a término:
 | `duration_correction` | $\Delta_V$ | §4.5.1 | la velocidad del segmento frente a la velocidad de referencia NPD (solo niveles de exposición) |
 | `engine_installation_correction` | $\Delta_\mathrm{I}(\varphi)$ | §4.5.3 | dónde van montados los motores, a través del ángulo de depresión |
 | `lateral_attenuation` | $\Lambda(\beta, \ell)$ | §4.5.4 | el efecto suelo y la refracción para un receptor apartado a un lado |
-| `noise_fraction` | $\Delta_F$ | §4.5.6 | la parte de la energía de la trayectoria infinita que aporta un segmento finito (solo niveles de exposición) |
+| `noise_fraction` | $\Delta_\mathrm{F}$ | §4.5.6 | la parte de la energía de la trayectoria infinita que aporta un segmento finito (solo niveles de exposición) |
 | `start_of_roll_directivity` | $\Delta_{\text{SOR}}(\psi)$ | §4.5.7 | el lóbulo trasero de chorro detrás de un segmento del recorrido de despegue |
 
 $\beta$ es el ángulo de elevación de la trayectoria de propagación sobre la
@@ -208,7 +208,7 @@ Se ensamblan en un nivel de exposición de segmento como
 $$
 L_{E,\text{seg}} = \bigl[L_{E\infty}(P, d) + \Delta_{\text{imp}}\bigr]
  + \Delta_V + \Delta_\mathrm{I}(\varphi) - \Lambda(\beta, \ell)
- + \Delta_F + \Delta_{\text{SOR}}
+ + \Delta_\mathrm{F} + \Delta_{\text{SOR}}
 $$
 
 donde el corchete es la línea base NPD ajustada en impedancia del §4.2.1 y el
@@ -216,7 +216,7 @@ resto es la Ec. 4-8b (la Ec. 4-9b detrás de un recorrido de despegue), y el
 nivel de evento es la suma energética sobre los segmentos,
 $L_E = 10\lg\sum 10^{L_{E,\text{seg}}/10}$ (Ec. 4-11). Un nivel máximo toma en su
 lugar el mayor valor de segmento (Ec. 4-10) y prescinde de los dos términos que
-solo existen para la exposición, $\Delta_V$ y $\Delta_F$.
+solo existen para la exposición, $\Delta_V$ y $\Delta_\mathrm{F}$.
 
 Conviene llevar encima sus magnitudes, porque son las que deciden qué término
 importa para un receptor dado.
@@ -445,7 +445,7 @@ en 121°, los dos a menos de 0,2 dB del valor al través en 90°; en 180°, just
 detrás de la aeronave, han bajado a −13,5 y −10,1 dB. Un receptor situado unos
 pocos grados fuera del lóbulo ve por tanto una contribución de inicio del
 recorrido de despegue completamente distinta, que es la razón de que
-$\Delta_{SOR}$ se aplique por segmento y por receptor y no como una corrección
+$\Delta_\mathrm{SOR}$ se aplique por segmento y por receptor y no como una corrección
 única al evento.*
 
 <details>

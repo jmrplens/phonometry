@@ -783,7 +783,7 @@ $a = K/(2 Z_\mathrm{dp})$ and $\omega_0^{2} = K/m$, the transform of
 Eqs. (3.95)/(3.96) is the same rational function in both critical cases,
 $\hat{F}(\omega) = v_0 K/(\omega_0^{2} - \omega^{2} + 2 i a \omega)$,
 multiplied for the under-critical case by
-$1 + e^{-a \pi/\beta} e^{-i \omega \pi/\beta}$ because only the
+$1 + \mathrm{e}^{-a \pi/\beta} \mathrm{e}^{-i \omega \pi/\beta}$ because only the
 first positive lobe (of duration $\pi/\beta$) is transformed. That
 truncation is what produces the deep troughs at $n f_\mathrm{co}$,
 $n = 3, 5, 7$ that Hopkins notes below Fig. 4.64; they vanish once

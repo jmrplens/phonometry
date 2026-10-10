@@ -9,9 +9,9 @@ Declarative layer stacks and the transfer-matrix absorber solver.
 
 An absorber is declared as a list of layers ordered from the sound-incidence
 side towards the termination and solved at one angle, in the same
-$e^{+j \omega t}$ time convention as the element models of
+$\mathrm{e}^{+j \omega t}$ time convention as the element models of
 [`porous`](/phonometry/reference/api/materials/porous/), with the forward wave carried
-by $e^{-j k x}$ (so a passive medium has
+by $\mathrm{e}^{-j k x}$ (so a passive medium has
 $\operatorname{Im}(k) < 0$):
 
 * **Transfer-matrix multilayer prediction**: each fluid layer contributes
@@ -163,7 +163,7 @@ Eq. (2)).
 
 `Zs`, `R` and `alpha` are evaluated with the numerically robust
 admittance recursion (algebraically identical to the chain product but
-immune to the $e^{\lvert \operatorname{Im}(k_x) \rvert d}$
+immune to the $\mathrm{e}^{\lvert \operatorname{Im}(k_x) \rvert d}$
 overflow of the raw matrix entries for
 extremely attenuating layers); the raw chain matrix is still returned in
 `transfer_matrix` and may overflow in such extreme cases.

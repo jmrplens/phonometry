@@ -11,8 +11,8 @@ Source: https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ra
 
 Every sound-insulation quantity in this documentation ends its journey the
 same way: a band spectrum walks in, a single number walks out. Whether the
-spectrum is a laboratory $R$, a field $R'$ or $D_\mathrm{nT}$, a façade
-$D_{2\mathrm{m,nT}}$, an impact $L_\mathrm{n}$ or $L'_\mathrm{nT}$, or a flanking $D_\mathrm{n,f}$, what
+spectrum is a laboratory $R$, a field $R'$ or $D_{\mathrm{n}T}$, a façade
+$D_{2\mathrm{m,n}T}$, an impact $L_\mathrm{n}$ or $L'_{\mathrm{n}T}$, or a flanking $D_\mathrm{n,f}$, what
 regulations quote is the weighted single number of ISO 717, and two
 reference-curve engines produce all of them: **ISO 717-1** for airborne
 quantities, where an unfavourable deviation is a band falling *below* the
@@ -45,7 +45,7 @@ method** of ISO 717-1: a fixed reference curve is shifted in 1 dB steps
 toward the measured curve until the sum of *unfavourable* deviations
 (where the measurement falls below the reference) is as large as possible
 but not more than 32.0 dB (16 one-third-octave bands) or 10.0 dB (5 octave
-bands). The rating ($R_\mathrm{w}$, $R'_\mathrm{w}$, $D_\mathrm{nT,w}$ …) is the shifted reference
+bands). The rating ($R_\mathrm{w}$, $R'_\mathrm{w}$, $D_{\mathrm{n}T,\mathrm{w}}$ …) is the shifted reference
 read at 500 Hz. The **spectrum adaptation terms** $C$ (pink noise) and $C_\mathrm{tr}$
 (urban traffic) add the low-frequency penalty of a real source.
 
@@ -54,7 +54,7 @@ of ISO 717-1 Annex A: $C$ against A-weighted pink noise, representative of
 living activities (speech, music, radio, television), and $C_\mathrm{tr}$ against
 A-weighted urban road traffic, whose energy sits at low frequency. They are
 defined so that the rating plus the term ($R_\mathrm{w} + C$ for a laboratory index,
-$R'_\mathrm{w} + C$ or $D_\mathrm{nT,w} + C$ for the quantities of the
+$R'_\mathrm{w} + C$ or $D_{\mathrm{n}T,\mathrm{w}} + C$ for the quantities of the
   [field guide](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/), and
 likewise with $C_\mathrm{tr}$) is the A-weighted level difference achieved against
 that source. Reading them:
@@ -68,7 +68,7 @@ that source. Reading them:
   two constructions with equal ratings can differ audibly against traffic.
 * Design with the descriptor that matches the noise, carried by the field
   quantity the requirement rates: $R'_\mathrm{w} + C_\mathrm{tr}$ for a façade on a busy
-  road, $D_\mathrm{nT,w} + C$ (or the plain rating, where the regulation says so)
+  road, $D_{\mathrm{n}T,\mathrm{w}} + C$ (or the plain rating, where the regulation says so)
   between dwellings, the two example requirements of ISO 717-1, 5.3.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
@@ -121,7 +121,7 @@ plt.show()
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $R$, $R'$, $D_\mathrm{nT}$ … per band |
+| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $R$, $R'$, $D_{\mathrm{n}T}$ … per band |
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_rating()` returns a `WeightedRatingResult`
@@ -132,7 +132,7 @@ plt.show()
 The single-number rating (ISO 717-2) shifts the same style of reference curve,
 but an **unfavourable deviation now occurs where the measurement *exceeds* the
 reference** (impact noise is worse when higher), the sign opposite to
-ISO 717-1. The rating ($L_\mathrm{n,w}$, $L'_\mathrm{n,w}$, $L'_\mathrm{nT,w}$) is the shifted
+ISO 717-1. The rating ($L_\mathrm{n,w}$, $L'_\mathrm{n,w}$, $L'_{\mathrm{n}T,\mathrm{w}}$) is the shifted
 reference read at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}$ uses the energetic sum
 over 100–2500 Hz (the first 15 thirds, excluding 3150 Hz) or 125–2000 Hz
@@ -198,7 +198,7 @@ ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measure
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(rf"$L_\mathrm{{n,w}}$ = {res_imp.rating} dB  ($C_\mathrm{{I}}$ = {res_imp.ci:+d} dB)")
 ax.legend()
 plt.show()
 ```
@@ -216,7 +216,7 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $L_\mathrm{n}$, $L'_\mathrm{n}$ or $L'_\mathrm{nT}$ per band |
+| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $L_\mathrm{n}$, $L'_\mathrm{n}$ or $L'_{\mathrm{n}T}$ per band |
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
@@ -242,7 +242,7 @@ ISO 16283 does not let the 50 Hz, 63 Hz and 80 Hz bands be measured with the
 default procedure alone: the corner procedure is mandatory there, and it can move
 those three bands by several decibels, which can move
 $C_{50\text{–}3150}$ by a whole one. So a requirement written as
-$D_\mathrm{nT,w} + C_{50\text{–}3150}$ is judged on the corner procedure
+$D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ is judged on the corner procedure
 whether the report mentions it or not. See
 [Small Rooms: the ISO 16283 Low-Frequency
 Procedure](https://jmrplens.github.io/phonometry/buildings/insulation/low-frequency-procedure/).
@@ -501,7 +501,7 @@ EN 12354-3 predicts the same standardized level difference from the sound
 reduction indices of the wall, the glazing and the air inlet before any of them
 is installed, and EN 12354-4 turns the envelope round to radiate an indoor
 source outwards. A closing section puts the measured and the predicted
-$D_{2\mathrm{m,nT}}$ side by side and shows what does, and does not, separate them. The
+$D_{2\mathrm{m,n}T}$ side by side and shows what does, and does not, separate them. The
 reference curves behind every single number live in
 [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/); the internal partitions
 of the same building in
@@ -519,7 +519,7 @@ case, its standardized and normalized forms:
 
 $$
 D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2, \quad
-D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}, \quad
+D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}, \quad
 D_{2\mathrm{m,n}} = D_{2\mathrm{m}} - 10 \log_{10}\frac{A}{A_0},
 $$
 
@@ -570,7 +570,7 @@ fac.plot()   # per-band D2m,nT with D2m, D2m,n and R' overlaid (needs matplotlib
 *The four façade quantities of one measurement: the raw $D_{2\mathrm{m}}$, its
 standardized and normalized forms, and the element $R'_{45°}$ carrying the
 −1.5 dB angle-of-incidence correction. The rating box reads the single
-number $D_{\mathrm{ls},2\mathrm{m,nT,w}}$ obtained by feeding $D_{2\mathrm{m,nT}}$ to the ISO 717-1
+number $D_{\mathrm{ls},2\mathrm{m,n}T,\mathrm{w}}$ obtained by feeding $D_{2\mathrm{m,n}T}$ to the ISO 717-1
 engine.*
 
 <details>
@@ -644,7 +644,7 @@ quantity to `weighted_rating` for its ISO 717-1 single number.
 `FacadeInsulationResult.report(path)` writes the one-page ISO 16283-3 field
 façade test report: the standard-basis line, an optional metadata header, the
 one-third-octave table beside the measured-versus-shifted-reference curve, the
-boxed field rating $D_{2\mathrm{m,nT,w}}\ (C;\ C_\mathrm{tr})$, the engineering-method
+boxed field rating $D_{2\mathrm{m,n}T,\mathrm{w}}\ (C;\ C_\mathrm{tr})$, the engineering-method
 statement, an optional requirement verdict (a level difference passes at or above it) and a
 footer. `quantity="d_2m_nt"` (default) reports the standardized level
 difference; `"d_2m_n"` the normalized one; `"r_prime"` the apparent sound
@@ -658,7 +658,7 @@ fac.report("Rp45_facade.pdf", quantity="r_prime")      # R'45,w (C; Ctr)
 
 [![Field facade ISO 16283-3 example report: metadata header, one-third-octave D2m,nT table beside the measured-versus-shifted-reference curve, boxed D2m,nT,w (C; Ctr), the engineering-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_facade_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_facade_example.pdf)
 
-*Field façade fiche (`FacadeInsulationResult.report`), $D_{2\mathrm{m,nT,w}}\ (C;\ C_\mathrm{tr})$.*
+*Field façade fiche (`FacadeInsulationResult.report`), $D_{2\mathrm{m,n}T,\mathrm{w}}\ (C;\ C_\mathrm{tr})$.*
 
 ## Prediction from the elements (EN 12354-3)
 
@@ -678,7 +678,7 @@ traffic-referenced indices $R_{45} = R'+1$ and $R_\mathrm{tr,s} = R'$, and the p
 output, the standardized level difference at 2 m (Formula 13)
 
 $$
-D_{2\mathrm{m,nT}} = R' + \Delta L_\mathrm{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0.5\ \text{s},
+D_{2\mathrm{m,n}T} = R' + \Delta L_\mathrm{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0.5\ \text{s},
 $$
 
 with the façade-shape term $\Delta L_\mathrm{fs}$ (Annex C; 0 dB for a flat reflecting
@@ -783,7 +783,7 @@ The façade prediction also writes a one-page **prediction** report through a
 `report(path)` method, the same layout as the airborne and impact prediction
 fiches. `FacadePredictionResult.report()` renders the façade-element table (each
 element's weighted partial index $R_\mathrm{p,w}$) beside the per-element / $R'$ /
-$D_{2\mathrm{m,nT}}$ plot, the boxed predicted $D_{2\mathrm{m,nT,w}}$ (with $R'_\mathrm{tr,s,w}$ and
+$D_{2\mathrm{m,n}T}$ plot, the boxed predicted $D_{2\mathrm{m,n}T,\mathrm{w}}$ (with $R'_\mathrm{tr,s,w}$ and
 $C_\mathrm{tr}$), the prediction statement and, when a `requirement` is supplied, a
 PASS/FAIL verdict
 (the level difference passes at or above it). `verbose=True` annexes each
@@ -796,7 +796,7 @@ receiving-room `receiving_volume`, the outdoor/traffic situation in `test_room`,
 plus the calculator / laboratory identity fields (`client`, `manufacturer`,
 `measurement_standard`, `laboratory`, `operator`, `report_id`, `test_date`), a
 free-text façade-shape and model summary in `notes` and the target
-$D_{2\mathrm{m,nT,w}}$ in `requirement`. Metadata, `language="es"` and the `phonometry[report]` extra
+$D_{2\mathrm{m,n}T,\mathrm{w}}$ in `requirement`. Metadata, `language="es"` and the `phonometry[report]` extra
 behave as in the measurement fiches.
 
 ```python
@@ -935,7 +935,7 @@ the apparent index it implies and substitute the Sabine absorption area
 $A = 0.16\ V/T$:
 
 $$
-D_{2\mathrm{m,nT}} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}
+D_{2\mathrm{m,n}T} = D_{2\mathrm{m}} + 10 \log_{10}\frac{T}{T_0}
           = R' + 10 \log_{10}\frac{A}{S} + 10 \log_{10}\frac{T}{T_0}
           = R' + 10 \log_{10}\frac{0.16\ V}{S\ T_0}.
 $$
@@ -981,7 +981,7 @@ print(building.weighted_rating(meas.d_2m_nt).rating, fac.d_2m_nt_w)   # 33 33
 ```
 
 The two curves run parallel to the second decimal and both rate at
-$D_{2\mathrm{m,nT,w}} = 33$ dB. Everything that separates a real prediction from a real
+$D_{2\mathrm{m,n}T,\mathrm{w}} = 33$ dB. Everything that separates a real prediction from a real
 measurement therefore sits in the inputs, not in the formulas:
 
 * **The element indices.** The prediction consumes laboratory $R$ values
@@ -993,7 +993,7 @@ measurement therefore sits in the inputs, not in the formulas:
   façade. A balcony, a gallery or a terrace changes the field at the 2 m
   position, and a measurement takes that change as it is while a prediction
   has to look it up in Annex C.
-* **The source.** ISO 16283-3 labels the loudspeaker result $D_{\mathrm{ls},2\mathrm{m,nT}}$
+* **The source.** ISO 16283-3 labels the loudspeaker result $D_{\mathrm{ls},2\mathrm{m,n}T}$
   precisely because a loudspeaker at 45° is not road traffic; its element
   index carries a −1.5 dB angle correction where the all-angle traffic method
   carries −3 dB. EN 12354-3 predicts the traffic-referenced $R_\mathrm{tr,s} = R'$
@@ -1042,9 +1042,9 @@ decides the result.
 ## Standards
 
 ISO 16283-3:2016, which defines the field façade quantities $D_{2\mathrm{m}}$,
-$D_{2\mathrm{m,nT}}$, $D_{2\mathrm{m,n}}$, $R'_{45°}$ and $R'_\mathrm{tr,s}$ of the loudspeaker and
+$D_{2\mathrm{m,n}T}$, $D_{2\mathrm{m,n}}$, $R'_{45°}$ and $R'_\mathrm{tr,s}$ of the loudspeaker and
 road-traffic methods and their test report; EN 12354-3:2000, which predicts
-the same $D_{2\mathrm{m,nT}}$ from the element indices with the Annex C façade-shape
+the same $D_{2\mathrm{m,n}T}$ from the element indices with the Annex C façade-shape
 term (Annex F worked example); and EN 12354-4:2000, which predicts the sound
 power radiated outwards by a building side and its exterior level (Annex G
 worked example). The single-number ratings come from ISO 717-1 (Annex F of
@@ -1073,7 +1073,7 @@ implementation follows the formulae rather than the printed rows.
   airborne and impact flanking models of EN 12354-1/2 that share the
   transmission-factor summation used here.
 - [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
-  engine behind the $D_{2\mathrm{m,nT,w}}$, $R'_{45,\mathrm{w}}$ and $R'_\mathrm{tr,s,w}$ single
+  engine behind the $D_{2\mathrm{m,n}T,\mathrm{w}}$, $R'_{45,\mathrm{w}}$ and $R'_\mathrm{tr,s,w}$ single
   numbers.
 - [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/): the
   octave-band façade quantity of the quick survey method.
@@ -1098,7 +1098,7 @@ Source: https://jmrplens.github.io/phonometry/buildings/insulation/spanish-build
 The *Documento Básico HR* "Protección frente al ruido" of the Spanish building
 code states its requirements in A-weighted global quantities that are close
 relatives of, but not identical to, the ISO 717-1 weighted ratings: $R_\mathrm{A}$,
-$R_\mathrm{A,tr}$, $D_\mathrm{nT,A}$ and $D_{2\mathrm{m,nT,Atr}}$. This page implements the direct
+$R_\mathrm{A,tr}$, $D_{\mathrm{n}T,\mathrm{A}}$ and $D_{2\mathrm{m,n}T,\mathrm{Atr}}$. This page implements the direct
 Annex A route, which is the normative one for DB-HR, the requirement tables of
 clause 2, and the two design calculations most often used with them: the
 window-size correction and the insulation of a composite facade.
@@ -1118,7 +1118,7 @@ I_x = -10 \log_{10} \sum_i 10^{(L_{x,i} - X_i)/10} \quad \text{[dBA]}
 $$
 
 where $X_i$ is the band insulation (the sound reduction index $R$ or $R'$, the
-standardized level difference $D_\mathrm{nT}$, $D_{2\mathrm{m,nT}}$ and so on) and $L_{x,i}$
+standardized level difference $D_{\mathrm{n}T}$, $D_{2\mathrm{m,n}T}$ and so on) and $L_{x,i}$
 the normalised source spectrum. The sum runs over **eighteen** one-third-octave
 bands, 100 Hz to 5 kHz, two more than the sixteen of ISO 717-1 (100 Hz to
 3150 Hz): the 4 kHz and 5 kHz bands, which are the first reason the two routes
@@ -1126,15 +1126,15 @@ do not always agree. The band centres are in `DB_HR_FREQUENCIES`.
 
 | Normalised spectrum | Annex A table | Quantity it defines | Formula |
 | :--- | :--- | :--- | :--- |
-| A-weighted pink noise, $L_{\mathrm{Ar},i}$ | Table A.5 | $R_\mathrm{A}$, $D_\mathrm{nT,A}$, $D_{2\mathrm{m,nT,A}}$ | (A.5), (A.7) |
-| Road traffic, $L_{\mathrm{Atr},i}$ | Table A.3 | $R_\mathrm{A,tr}$, $D_{2\mathrm{m,nT,Atr}}$ | (A.6) |
-| Railway noise, $L_{\mathrm{Aef},i}$ | Table A.4 (numerically identical to A.3) | $D_{2\mathrm{m,nT,A}}$ | (A.5) |
-| Aircraft noise, $L_{\mathrm{Aav},i}$ | Table A.2 | $D_{2\mathrm{m,nT,Atr}}$ | (A.6) |
+| A-weighted pink noise, $L_{\mathrm{Ar},i}$ | Table A.5 | $R_\mathrm{A}$, $D_{\mathrm{n}T,\mathrm{A}}$, $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.5), (A.7) |
+| Road traffic, $L_{\mathrm{Atr},i}$ | Table A.3 | $R_\mathrm{A,tr}$, $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
+| Railway noise, $L_{\mathrm{Aef},i}$ | Table A.4 (numerically identical to A.3) | $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.5) |
+| Aircraft noise, $L_{\mathrm{Aav},i}$ | Table A.2 | $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
 
 The railway row is the one worth reading twice. Clause 3.1.3.4 point 1 says
 that where railway noise dominates the facade is assessed in
-$D_{2\mathrm{m,nT,A}}$ through formula (A.5), and only road traffic and aircraft give
-$D_{2\mathrm{m,nT,Atr}}$ through (A.6); Table H.1 prints the same split. Because
+$D_{2\mathrm{m,n}T,\mathrm{A}}$ through formula (A.5), and only road traffic and aircraft give
+$D_{2\mathrm{m,n}T,\mathrm{Atr}}$ through (A.6); Table H.1 prints the same split. Because
 Table A.4 is digit for digit Table A.3, a rail-dominant facade comes out at
 the same *number* as a road one, but the quantity the requirement and the
 report are stated in is not the same. That is why `d2m_nt_a()` and
@@ -1194,9 +1194,9 @@ the document itself accepts three approximations as long as the two routes
 differ by less than 1 dB:
 
 $$
-D_\mathrm{nT,A} \approx D_\mathrm{nT,w} + C \quad (H.1), \qquad
-D_{2\mathrm{m,nT,A}} \approx D_{2\mathrm{m,nT,w}} + C \quad (H.2), \qquad
-D_{2\mathrm{m,nT,Atr}} \approx D_{2\mathrm{m,nT,w}} + C_\mathrm{tr} \quad (H.3)
+D_{\mathrm{n}T,\mathrm{A}} \approx D_{\mathrm{n}T,\mathrm{w}} + C \quad (H.1), \qquad
+D_{2\mathrm{m,n}T,\mathrm{A}} \approx D_{2\mathrm{m,n}T,\mathrm{w}} + C \quad (H.2), \qquad
+D_{2\mathrm{m,n}T,\mathrm{Atr}} \approx D_{2\mathrm{m,n}T,\mathrm{w}} + C_\mathrm{tr} \quad (H.3)
 $$
 
 with (H.2) covering the rail-dominant case of the previous section. On the two
@@ -1205,7 +1205,7 @@ published spectra this page reproduces, the agreement is exact to the integer:
 | Case | Direct route (Annex A) | ISO 717-1 route | Published? |
 | :--- | :--- | :--- | :--- |
 | Separating wall of Ejemplo 7.2 | $R'_\mathrm{A} = 51.4$ dBA, rounded to 51 | $R'_\mathrm{w} = 52$ with $C_{100-5000} = -1$, i.e. 51 | yes, Ejemplo 7.1 prints $R'_\mathrm{w} = 52$, $C = -1$ and the 51 dBA |
-| Facade of Ejercicio 7.1 | $D_{2\mathrm{m,nT,Atr}} = 32.8$ dBA, rounded to 33 | $D_{2\mathrm{m,nT,w}} = 38$ with $C_{\mathrm{tr},100-5000} = -5$, i.e. 33 | no, the book prints neither 38 nor $-5$ |
+| Facade of Ejercicio 7.1 | $D_{2\mathrm{m,n}T,\mathrm{Atr}} = 32.8$ dBA, rounded to 33 | $D_{2\mathrm{m,n}T,\mathrm{w}} = 38$ with $C_{\mathrm{tr},100-5000} = -5$, i.e. 33 | no, the book prints neither 38 nor $-5$ |
 
 The two rows are not equally strong evidence. The wall row is a genuine
 external check, because the *Manual* prints the ISO 717-1 numbers as well as
@@ -1222,8 +1222,8 @@ $C_{100-5000}$ and $C_{\mathrm{tr},100-5000}$; that reading is not in Annex H it
 but in the *Manual*, in the note to expressions [7.15] and [7.16]. It matters:
 on the facade of Ejercicio 7.1 the core-range $C$ is $-2$ while $C_{100-5000}$
 is $-1$, so taking the wrong one gives 36 dBA instead of 37 for the
-$D_{2\mathrm{m,nT,A}}$ of that facade. On the same specimen $C_\mathrm{tr}$ and
-$C_{\mathrm{tr},100-5000}$ are both $-5$, so the $D_{2\mathrm{m,nT,Atr}}$ that DB-HR actually
+$D_{2\mathrm{m,n}T,\mathrm{A}}$ of that facade. On the same specimen $C_\mathrm{tr}$ and
+$C_{\mathrm{tr},100-5000}$ are both $-5$, so the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ that DB-HR actually
 requires happens not to discriminate between the two readings at all.
 
 ```python
@@ -1249,7 +1249,7 @@ and the **habitable room** (*recinto habitable*) in general.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements.svg" alt="Section through a three-storey residential building with each DB-HR requirement on its element: the Table 2.1 D2m,nT,Atr of the facade with the microphone 2 m out, the RA of the partition, DnT,A between dwellings and over a shop, the L′nT,w of the floors, the RA pair of a shared door and the two routes of the party wall, above the Annex A chain from eighteen bands to the rounded number each airborne limit is read against" width="88%"></picture>
 
-**Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,nT,Atr}}$ is read by bands of
+**Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ is read by bands of
 the site's day noise index $L_\mathrm{d}$ ($L_\mathrm{d} \le 60$, $60 < L_\mathrm{d} \le 65$,
 $65 < L_\mathrm{d} \le 70$, $70 < L_\mathrm{d} \le 75$ and $L_\mathrm{d} > 75$ dBA):
 
@@ -1266,7 +1266,7 @@ for residential acoustic areas.
 
 **Airborne insulation between rooms (clause 2.1.1).** Partition walls
 (*tabiquería*) within one use unit must have $R_\mathrm{A} \ge 33$ dBA. Against a room
-of another use unit, a protected room requires $D_\mathrm{nT,A} \ge 50$ dBA and a
+of another use unit, a protected room requires $D_{\mathrm{n}T,\mathrm{A}} \ge 50$ dBA and a
 habitable room $\ge 45$ dBA; against a services or activity room, a protected
 room requires $\ge 55$ dBA and a habitable room $\ge 45$ dBA. When the two
 rooms share a door or a window, the requirement moves to the opening (sound
@@ -1275,12 +1275,12 @@ one) and to the enclosure around it (50 dBA).
 
 **Party walls (clause 2.1.1 c).** Against a *medianería* DB-HR offers two
 **alternative** routes, not cumulative ones: either each of the two leaves
-reaches $D_{2\mathrm{m,nT,Atr}} \ge 40$ dBA, or the two leaves taken together reach
-$D_\mathrm{nT,A} \ge 50$ dBA. `db_hr_party_wall_requirement()` returns whichever route
+reaches $D_{2\mathrm{m,n}T,\mathrm{Atr}} \ge 40$ dBA, or the two leaves taken together reach
+$D_{\mathrm{n}T,\mathrm{A}} \ge 50$ dBA. `db_hr_party_wall_requirement()` returns whichever route
 is asked for.
 
 **Impact sound (clause 2.1.2).** The standardized impact sound pressure level
-$L'_\mathrm{nT,w}$ must not exceed 65 dB in a protected room against a room of another
+$L'_{\mathrm{n}T,\mathrm{w}}$ must not exceed 65 dB in a protected room against a room of another
 use unit, nor 60 dB against a services or activity room; that same 60 dB limit
 applies to the habitable room.
 
@@ -1390,12 +1390,12 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/): where
   the site's day noise index $L_\mathrm{d}$ that Table 2.1 is entered with comes from.
 - [Façade Sound Insulation](https://jmrplens.github.io/phonometry/buildings/insulation/facade-insulation/): the ISO 16283-3 measurement
-  of $D_{2\mathrm{m,nT}}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,nT,Atr}}$ index of
+  of $D_{2\mathrm{m,n}T}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ index of
   this page.
 - [Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/): the
   composite-facade calculation and transmission through openings and slits.
 - [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/): the band
-  spectra of $R'$, $D_\mathrm{nT}$ and $L'_\mathrm{nT}$ that these global quantities summarise.
+  spectra of $R'$, $D_{\mathrm{n}T}$ and $L'_{\mathrm{n}T}$ that these global quantities summarise.
 - API reference: [`building.regulation.spain`](https://jmrplens.github.io/phonometry/reference/api/building/spain/).
 
 ## References

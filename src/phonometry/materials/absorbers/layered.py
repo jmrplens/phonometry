@@ -3,9 +3,9 @@ r"""Declarative layer stacks and the transfer-matrix absorber solver.
 
 An absorber is declared as a list of layers ordered from the sound-incidence
 side towards the termination and solved at one angle, in the same
-:math:`e^{+j \omega t}` time convention as the element models of
+:math:`\mathrm{e}^{+j \omega t}` time convention as the element models of
 :mod:`~phonometry.materials.absorbers.porous`, with the forward wave carried
-by :math:`e^{-j k x}` (so a passive medium has
+by :math:`\mathrm{e}^{-j k x}` (so a passive medium has
 :math:`\operatorname{Im}(k) < 0`):
 
 * **Transfer-matrix multilayer prediction**: each fluid layer contributes
@@ -546,9 +546,9 @@ def _split_fluid_run(
     r"""Group a fluid run into chain blocks of at most *budget* nepers.
 
     A fluid run that attenuates by ``b`` nepers has chain-matrix entries of
-    order :math:`e^b` while the same block's back face is the identity, so
+    order :math:`\mathrm{e}^b` while the same block's back face is the identity, so
     the assembled system of Allard & Atalla Sect. 11.6 holds rows differing
-    by :math:`e^b` and the elimination of the block loses about
+    by :math:`\mathrm{e}^b` and the elimination of the block loses about
     :math:`b / \ln(10)` digits; past :math:`b \sim 710` the entries overflow
     float64 outright. The split is algebraically exact, because a
     homogeneous fluid layer of phase :math:`k_x d` is the product of ``m``
@@ -708,7 +708,7 @@ def layered_absorber(
 
     ``Zs``, ``R`` and ``alpha`` are evaluated with the numerically robust
     admittance recursion (algebraically identical to the chain product but
-    immune to the :math:`e^{\lvert \operatorname{Im}(k_x) \rvert d}`
+    immune to the :math:`\mathrm{e}^{\lvert \operatorname{Im}(k_x) \rvert d}`
     overflow of the raw matrix entries for
     extremely attenuating layers); the raw chain matrix is still returned in
     ``transfer_matrix`` and may overflow in such extreme cases.

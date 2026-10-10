@@ -1,8 +1,8 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Porous-material models and resonant sheet impedances.
 
-Two complementary building blocks, all in the :math:`e^{+j \omega t}`
-time convention with the forward wave carried by :math:`e^{-j k x}` (so a
+Two complementary building blocks, all in the :math:`\mathrm{e}^{+j \omega t}`
+time convention with the forward wave carried by :math:`\mathrm{e}^{-j k x}` (so a
 passive medium has :math:`\operatorname{Im}(k) < 0`):
 
 * **Equivalent-fluid models** for the characteristic impedance ``Zc`` and the
@@ -235,7 +235,7 @@ class PorousMediumResult(OwnsArrays):
     All arrays share the shape of ``frequencies``. ``characteristic_impedance``
     is the complex characteristic impedance ``Zc`` in Pa s/m as seen from the
     material surface, ``wavenumber`` the complex wavenumber ``k`` in rad/m
-    (:math:`\operatorname{Im}(k) < 0` for the :math:`e^{+j \omega t}`
+    (:math:`\operatorname{Im}(k) < 0` for the :math:`\mathrm{e}^{+j \omega t}`
     convention), ``effective_density`` :math:`= Z_\mathrm{c} k / \omega` and
     ``bulk_modulus`` :math:`= Z_\mathrm{c} \omega / k` the surface-normalised
     equivalent-fluid density and bulk modulus, so that

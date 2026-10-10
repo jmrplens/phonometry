@@ -674,7 +674,7 @@ de grado 2 de la sección 1: el coste del grado es sobre todo tiempo.
 | `static_pressure_kpa` | float | kPa | por defecto `101.325` | Fija $C_1$, $C_2$ |
 | `air_absorption_coefficient` | float o array 1D | dB/m | por defecto `None` | El término $C_3$ de absorción del aire; se aporta, no se calcula |
 | `sigma_omc` | float | dB | por defecto `0.0` | Desviación típica de funcionamiento y montaje, apartado 10.5 |
-| `coverage_factor` | float | — | por defecto `2.0` | La $k$ de $U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\text{omc}^2}$ |
+| `coverage_factor` | float | — | por defecto `2.0` | La $k$ de $U = k\sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ |
 
 Los dos últimos son toda la historia de la incertidumbre, y el valor por defecto
 la esconde: si se deja como está, `sigma_omc = 0` afirma que la instalación es

@@ -1662,9 +1662,9 @@ from the correction itself or from a bare `environmental_correction_db`
 (0 outdoors).
 
 A.3.2 offers a second route: a reference sound source calibrated in a free
-field over a reflecting plane, whose sound power level $L_{Wr}$ is set against
+field over a reflecting plane, whose sound power level $L_{W\mathrm{r}}$ is set against
 the level $L_W$ it shows in the hall by the method of ISO 3746 with $K$ taken
-as zero, so $K = L_W - L_{Wr}$. By its NOTE, $L_W$ is the mean of two
+as zero, so $K = L_W - L_{W\mathrm{r}}$. By its NOTE, $L_W$ is the mean of two
 determinations, the source in the middle of each long side of the set, and a
 machine longer than 10 m takes two more, at the ends. Outdoors, and in very
 large halls or halls that are not closed, $K$ is zero (A.4), and the wind has

@@ -1400,7 +1400,7 @@ export const glossary = [
       },
       {
         id: "d-nt",
-        symbol: "$D_\\mathrm{nT}$",
+        symbol: "$D_{\\mathrm{n}T}$",
         unit: "dB",
         standard: "ISO 16283-1:2014",
         clause: {
@@ -1543,7 +1543,7 @@ export const glossary = [
       },
       {
         id: "r-w-r-w-d-nt-w",
-        symbol: "$R_\\mathrm{w}$, $R'_\\mathrm{w}$, $D_\\mathrm{nT,w}$",
+        symbol: "$R_\\mathrm{w}$, $R'_\\mathrm{w}$, $D_{\\mathrm{n}T,\\mathrm{w}}$",
         unit: "dB",
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/insulation-ratings",
@@ -1591,18 +1591,18 @@ export const glossary = [
       },
       {
         id: "l-nt",
-        symbol: "$L'_\\mathrm{nT}$",
+        symbol: "$L'_{\\mathrm{n}T}$",
         unit: "dB re 20 µPa",
         standard: "ISO 16283-2:2015",
         guide: "buildings/insulation/insulation-field",
         definition: {
-          en: "Standardized impact sound pressure level, referred to a reference reverberation time. Note the sign: more reverberation lowers it, the opposite of $D_\\mathrm{nT}$.",
-          es: "Nivel de presión acústica de impactos estandarizado, referido a un tiempo de reverberación de referencia. Atención al signo: más reverberación lo baja, al revés que el $D_\\mathrm{nT}$.",
+          en: "Standardized impact sound pressure level, referred to a reference reverberation time. Note the sign: more reverberation lowers it, the opposite of $D_{\\mathrm{n}T}$.",
+          es: "Nivel de presión acústica de impactos estandarizado, referido a un tiempo de reverberación de referencia. Atención al signo: más reverberación lo baja, al revés que el $D_{\\mathrm{n}T}$.",
         },
       },
       {
         id: "l-n-w-l-nt-w",
-        symbol: "$L_\\mathrm{n,w}$, $L'_\\mathrm{nT,w}$",
+        symbol: "$L_\\mathrm{n,w}$, $L'_{\\mathrm{n}T,\\mathrm{w}}$",
         unit: "dB",
         standard: "ISO 717-2:2020",
         guide: "buildings/insulation/insulation-ratings",
@@ -1707,25 +1707,25 @@ export const glossary = [
       },
       {
         id: "d-2m-nt",
-        symbol: "$D_{2\\mathrm{m,nT}}$",
+        symbol: "$D_{2\\mathrm{m,n}T}$",
         unit: "dB",
         standard: "ISO 16283-3:2016",
         clause: "3.15",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0,5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source ($D_{\\mathrm{tr},2\\mathrm{m,nT}}$ for road traffic, $D_{\\mathrm{ls},2\\mathrm{m,nT}}$ for a loudspeaker).",
-          es: "Diferencia de niveles estandarizada en fachada: el nivel a 2 m por delante de la fachada menos el nivel interior, estandarizado a un tiempo de reverberación de referencia de 0,5 s en viviendas. La posición a 2 m está en el campo que la propia fachada refleja, así que no es un nivel de campo libre, y la notación indica la fuente: $D_{\\mathrm{tr},2\\mathrm{m,nT}}$ para tráfico rodado y $D_{\\mathrm{ls},2\\mathrm{m,nT}}$ para altavoz.",
+          en: "Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0,5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source ($D_{\\mathrm{tr},2\\mathrm{m,n}T}$ for road traffic, $D_{\\mathrm{ls},2\\mathrm{m,n}T}$ for a loudspeaker).",
+          es: "Diferencia de niveles estandarizada en fachada: el nivel a 2 m por delante de la fachada menos el nivel interior, estandarizado a un tiempo de reverberación de referencia de 0,5 s en viviendas. La posición a 2 m está en el campo que la propia fachada refleja, así que no es un nivel de campo libre, y la notación indica la fuente: $D_{\\mathrm{tr},2\\mathrm{m,n}T}$ para tráfico rodado y $D_{\\mathrm{ls},2\\mathrm{m,n}T}$ para altavoz.",
         },
       },
       {
         id: "d-ls-2m-nt-w",
-        symbol: "$D_{\\mathrm{ls},2\\mathrm{m,nT,w}}$",
+        symbol: "$D_{\\mathrm{ls},2\\mathrm{m,n}T,\\mathrm{w}}$",
         unit: "dB",
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "The weighted facade rating: $D_{2\\mathrm{m,nT}}$ measured with a loudspeaker put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
-          es: "El índice global de fachada: el $D_{2\\mathrm{m,nT}}$ medido con altavoz pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice `ls` no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
+          en: "The weighted facade rating: $D_{2\\mathrm{m,n}T}$ measured with a loudspeaker put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
+          es: "El índice global de fachada: el $D_{2\\mathrm{m,n}T}$ medido con altavoz pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice `ls` no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
         },
       },
       {
@@ -1760,7 +1760,7 @@ export const glossary = [
       },
       {
         id: "d-nt-a",
-        symbol: "$D_\\mathrm{nT,A}$, $D_{2\\mathrm{m,nT,Atr}}$",
+        symbol: "$D_{\\mathrm{n}T,\\mathrm{A}}$, $D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$",
         unit: "dBA",
         standard: {
           en: "CTE DB-HR",
@@ -1772,8 +1772,8 @@ export const glossary = [
         },
         guide: "buildings/insulation/spanish-building-code",
         definition: {
-          en: "The same global index applied to a standardized level difference: between two rooms ($D_\\mathrm{nT,A}$, pink noise) and between the outside and a protected room ($D_{2\\mathrm{m,nT,Atr}}$, road traffic or aircraft). These are the quantities the DB-HR requirement tables are written against, so a project is checked in them and not in the ISO 717-1 ratings.",
-          es: "El mismo índice global aplicado a una diferencia de niveles estandarizada: entre dos recintos ($D_\\mathrm{nT,A}$, ruido rosa) y entre el exterior y un recinto protegido ($D_{2\\mathrm{m,nT,Atr}}$, tráfico rodado o aeronaves). Son las magnitudes en las que están escritas las tablas de exigencias del DB-HR, de modo que un proyecto se comprueba en ellas y no en los índices de la ISO 717-1.",
+          en: "The same global index applied to a standardized level difference: between two rooms ($D_{\\mathrm{n}T,\\mathrm{A}}$, pink noise) and between the outside and a protected room ($D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$, road traffic or aircraft). These are the quantities the DB-HR requirement tables are written against, so a project is checked in them and not in the ISO 717-1 ratings.",
+          es: "El mismo índice global aplicado a una diferencia de niveles estandarizada: entre dos recintos ($D_{\\mathrm{n}T,\\mathrm{A}}$, ruido rosa) y entre el exterior y un recinto protegido ($D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$, tráfico rodado o aeronaves). Son las magnitudes en las que están escritas las tablas de exigencias del DB-HR, de modo que un proyecto se comprueba en ellas y no en los índices de la ISO 717-1.",
         },
       },
       {
@@ -2386,7 +2386,7 @@ export const glossary = [
       },
       {
         id: "l-ws",
-        symbol: "$L_{W\mathrm{s}}$",
+        symbol: "$L_\\mathrm{Ws}$",
         unit: "dB re 1 pW",
         standard: "EN 15657:2018",
         clause: {
@@ -2795,7 +2795,7 @@ export const glossary = [
       },
       {
         id: "imd",
-        symbol: "IMD, $d_{\\mathrm{m},n}$",
+        symbol: "IMD, $d_{m,n}$",
         qualifier: {
           en: "modulation",
           es: "por modulación",
@@ -2811,7 +2811,7 @@ export const glossary = [
       },
       {
         id: "imd-2",
-        symbol: "$d_{\\mathrm{d},n}$",
+        symbol: "$d_{d,n}$",
         qualifier: {
           en: "difference frequency",
           es: "por frecuencia diferencia",

@@ -80,7 +80,7 @@ move one lever.
 | :--- | :--- |
 | `max_angle_deg` | Half-angle of the fan, in degrees from the horizontal. Beams are spread symmetrically over `[-max_angle_deg, +max_angle_deg]`. |
 | `n_beams` | Number of beams in the fan. Default (`None`): from the overlap condition. Adjacent beams are $s\,\delta\theta_0$ apart at arc length $s$ while each has spread to $W \to s\lambda/(\pi W_0)$, so the condition that they still overlap, $\delta\theta_0 \lesssim \lambda/(\pi W_0)$, is range-independent; the default takes four times that margin. Too coarse a fan shows as a periodic ripple in range at the beam spacing, which is easy to mistake for physical interference. |
-| `beam_width` | The $W_0$ of Eq. (3.91), in metres: the beam's initial half-width, at the $e^{-2}$ folding distance in intensity, applied to every beam of the fan when passed. Default (`None`): one width per launch angle, the free-space optimum of each beam's own flight; see `_default_beam_widths`. |
+| `beam_width` | The $W_0$ of Eq. (3.91), in metres: the beam's initial half-width, at the $\mathrm{e}^{-2}$ folding distance in intensity, applied to every beam of the fan when passed. Default (`None`): one width per launch angle, the free-space optimum of each beam's own flight; see `_default_beam_widths`. |
 
 ## EigenrayResult
 
@@ -105,12 +105,12 @@ The eigenrays connecting one source to one receiver, earliest first.
 Every per-arrival array has one entry per eigenray, sorted by travel time.
 The frequency-independent pieces of each arrival are recorded separately
 (delay, complex amplitude, angles, boundary counts) so that one search
-serves every frequency: in the module's $e^{-i\omega t}$ convention
+serves every frequency: in the module's $\mathrm{e}^{-i\omega t}$ convention
 the pressure a tone of angular frequency $\omega$ produces at the
 receiver is
 
 $$
-p(\omega) = \sum_j a_j\, e^{i \omega \tau_j},
+p(\omega) = \sum_j a_j\, \mathrm{e}^{i \omega \tau_j},
 $$
 
 with $a_j$ the `amplitudes` and $\tau_j$ the
@@ -187,19 +187,19 @@ $$
 a_j = \left| \frac{c(z_\mathrm{R})\,\cos\theta_0} {c(z_\mathrm{S})\, r_\mathrm{R}\, q_j} \right|^{1/2} (-i)^{m_j}\, (-1)^{n_{\mathrm{s},j}}\, \mathcal{R}^{n_{b,j}},
 $$
 
-in the module's $e^{-i\omega t}$ convention, normalised to unit
+in the module's $\mathrm{e}^{-i\omega t}$ convention, normalised to unit
 pressure at 1 m. Why each factor:
 
 * The magnitude is Eq. (3.65) with the $1/(4\pi)$ cancelled against
   the free-field reference of Eqs. (3.67)-(3.68), which is how the book
   itself defines transmission loss from these amplitudes and how every
   solver of this module already normalises: the coherent sum
-  $\sum_j a_j e^{i\omega\tau_j}$ over a complete arrival set is
+  $\sum_j a_j \mathrm{e}^{i\omega\tau_j}$ over a complete arrival set is
   directly comparable to [`GaussianBeamResult.pressure`](/phonometry/reference/api/underwater/numerical/#gaussianbeamresult), and
   $-20\lg|{\sum}|$ to every propagation loss here.
 * $(-i)^m$ is Eq. (3.79) exactly as printed. Sect. 3.3 writes the
-  ray field as $A\,e^{i\omega\tau}$ (Eq. 3.57), which *is* the
-  $e^{-i\omega t}$ convention, so the printed factor transfers
+  ray field as $A\,\mathrm{e}^{i\omega\tau}$ (Eq. 3.57), which *is* the
+  $\mathrm{e}^{-i\omega t}$ convention, so the printed factor transfers
   unchanged; it is the same $-\pi/2$ per caustic the beam solver's
   tracked square-root branch spends continuously, taken here in the
   discrete form the classical amplitude needs, since with real initial
@@ -211,7 +211,7 @@ pressure at 1 m. Why each factor:
   $\mathcal{R}$ is the Rayleigh coefficient of
   [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient)
   at that angle, **not conjugated**: that function returns the
-  coefficient in the $e^{-i\omega t}$ convention these amplitudes
+  coefficient in the $\mathrm{e}^{-i\omega t}$ convention these amplitudes
   are declared in, so it enters as printed. ([`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams)
   conjugates the very same coefficient because its internal sum is
   assembled in the conjugate convention and conjugated once at the end;
@@ -410,10 +410,10 @@ The limits are worth knowing before the numbers are believed.
 **Seawater absorption is off by default** and the field is then optimistic
 beyond a few kilometres at sonar frequencies, exactly as ray theory without
 a volume loss must be. Passing `absorption` multiplies each beam by
-$e^{-\alpha s}$ with $s$ the **arc length along its central
+$\mathrm{e}^{-\alpha s}$ with $s$ the **arc length along its central
 ray**, which is Sect. 3.6.2 done as printed: perturbing the eikonal with
 the complex sound speed a volume loss implies leaves the real rays standing
-and attaches $e^{-\int_0^s \alpha(s')\,ds'}$ to each (Eq. 3.116),
+and attaches $\mathrm{e}^{-\int_0^s \alpha(s')\,ds'}$ to each (Eq. 3.116),
 an integral along the path flown, not along the range axis. The distinction
 is not pedantry. The same section notes that adding $\alpha r$ to the
 loss "is used in many ray models", and that shortcut under-charges every
@@ -595,11 +595,11 @@ can be subtracted.
 | `ranges` | Range grid of the field, in metres. |
 | `depths` | Depth grid of the field, in metres. |
 | `propagation_loss` | Propagation-loss field `PL(z, r)`, in dB, shape `(n_depths, n_ranges)`. Infinite where the field is exactly zero, which happens in the wedge no beam of the fan reaches: each beam is summed out to four half-widths, 140 dB below its own axis, so a point that far from every one of them is outside the traced aperture rather than merely in shadow. The graded penumbra just past a limiting ray, which is the part of a shadow zone worth having, is finite and carries the beams' tails. Many ordinary cases have no infinity at all: an isovelocity 1000 m guide at 300 Hz over 10 km, everything default, has none in 80200 cells. The source column is **not** one of the infinities, and is not to be read. [`parabolic_equation`](/phonometry/reference/api/underwater/numerical/#parabolic_equation) divides by $\sqrt{r}$ and so genuinely diverges at `r = 0`; the beam sum does not, and hands back a finite number there instead, 13.6 dB in the case above. It means nothing, and neither does anything else within about three initial beam widths of the source: see [`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams) on why this method has no near field. The plausible size of these numbers is the point worth knowing about them. |
-| `pressure` | The complex field the loss was taken from, same shape, in the module's own $e^{-i\omega t}$ convention (the conjugate of the one Jensen Eq. (3.88) is printed in) and normalised to unit pressure at 1 m, so `propagation_loss = -20 lg\|pressure\|`. |
+| `pressure` | The complex field the loss was taken from, same shape, in the module's own $\mathrm{e}^{-i\omega t}$ convention (the conjugate of the one Jensen Eq. (3.88) is printed in) and normalised to unit pressure at 1 m, so `propagation_loss = -20 lg\|pressure\|`. |
 | `launch_angles_deg` | Launch angle of each beam's central ray, from the horizontal, in degrees. |
 | `ray_ranges` | Range of each central ray at each marching step, in metres, shape `(n_beams, n_steps)`. This is the marching grid, which is finer than (and independent of) `ranges`. |
 | `ray_depths` | Depth of each central ray on that grid, in metres. |
-| `beam_widths` | Beam half-width $W(s)$ on that grid, in metres: Jensen Eq. (3.89), the distance at which the beam's own pressure has fallen by $e^{-1}$ and its intensity by $e^{-2}$. |
+| `beam_widths` | Beam half-width $W(s)$ on that grid, in metres: Jensen Eq. (3.89), the distance at which the beam's own pressure has fallen by $\mathrm{e}^{-1}$ and its intensity by $\mathrm{e}^{-2}$. |
 | `wavefront_curvatures` | Beam wavefront curvature $K(s)$ on that grid, in 1/m: Jensen Eq. (3.90) with the sign that belongs to the conjugated field this result exposes, so that a beam spreading in free space reproduces Eq. (3.85), $K = x/(x^2 + a^2)$, as a positive number. |
 | `initial_beam_widths` | The $W_0$ of Eq. (3.91) actually used by each beam of the fan, in metres, shape `(n_beams,)`. An explicit `fan.beam_width` fills it with one value; the default is per launch angle (see `_default_beam_widths`), widest on the axis of the fan whenever a shallow channel's modal-resolution term is in play and flat across it otherwise. |
 | `absorption_model` | The seawater absorption model applied along the beams, or `None` when the run propagated without volume absorption (the default). |
@@ -742,7 +742,7 @@ equation.
 Marches the split-step Fourier solution (Jensen Ch. 6) in range with a
 discrete sine transform in depth, enforcing a pressure-release surface at
 `z = 0` and bottom at `z = water_depth`. The envelope is related to
-pressure by $p = \psi \, e^{i(k_0 r - \pi/4)} / \sqrt{r}$ and
+pressure by $p = \psi \, \mathrm{e}^{i(k_0 r - \pi/4)} / \sqrt{r}$ and
 $\mathrm{PL} = -20 \log_{10}(\lvert \psi \rvert / \sqrt{r})$
 (Eqs. 6.70-6.71), using a Gaussian starter.
 
@@ -930,7 +930,7 @@ Ray-tracing solution through a sound-speed profile.
 | `ranges` | Per-ray horizontal ranges, in metres, shape `(n_rays, n_steps)`. |
 | `depths` | Per-ray depths, in metres, shape `(n_rays, n_steps)`. |
 | `travel_times` | Per-ray cumulative travel times, in seconds, shape `(n_rays, n_steps)` (zero at the source, increasing along the ray). |
-| `arc_lengths` | Per-ray cumulative arc length along the ray, in metres, same shape (zero at the source). It is never less than the range column it stands in, exceeds it by the obliquity of the path, and a reflection leaves it continuous. This, and not the range, is the measure seawater absorption acts along: Jensen Sect. 3.6.2 carries a volume loss $\alpha$ into the ray solution by perturbing the eikonal and lands on $e^{-\int_0^s \alpha(s')\,ds'}$ (Eq. 3.116), an integral over the path actually flown, so a caller hanging amplitudes on these rays multiplies by $e^{-\alpha s}$ with the $s$ read off here. |
+| `arc_lengths` | Per-ray cumulative arc length along the ray, in metres, same shape (zero at the source). It is never less than the range column it stands in, exceeds it by the obliquity of the path, and a reflection leaves it continuous. This, and not the range, is the measure seawater absorption acts along: Jensen Sect. 3.6.2 carries a volume loss $\alpha$ into the ray solution by perturbing the eikonal and lands on $\mathrm{e}^{-\int_0^s \alpha(s')\,ds'}$ (Eq. 3.116), an integral over the path actually flown, so a caller hanging amplitudes on these rays multiplies by $\mathrm{e}^{-\alpha s}$ with the $s$ read off here. |
 | `surface_reflections` | Per-ray cumulative count of sea-surface reflections by each range sample, same shape (zero at the source). |
 | `bottom_reflections` | The same count for the seabed. The two counts, and not the reflection coefficients themselves, are the whole of the per-bounce record an amplitude carrier needs from the geometry. Jensen Sect. 3.6.3 treats a boundary interaction as multiplying the ray amplitude by $\vert \mathcal{R}(\theta)\vert $ and adding $\arg \mathcal{R}(\theta)$ to its phase (Eqs. 3.125-3.126), with $\theta$ the local angle of incidence; and in a range-independent medium that angle is the *same* at every touch of the same flat boundary, because the direction a ray crosses a depth with is fixed by Snell's invariant, $\cos\theta = \xi\,c$, not by how many times it has bounced. Any boundary coefficient therefore enters a path's amplitude only as $\mathcal{R}^n$ with the $n$ read off here, which is how [`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams) charges its lossy seabed and how [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays) charges each arrival; `ray_trace` itself carries no amplitude, so the counts are what it can meaningfully expose. |
 | `source_depth` | Source depth, in metres. |

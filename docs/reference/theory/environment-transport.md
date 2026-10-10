@@ -78,8 +78,8 @@ $\alpha$ in decibels per metre:
 
 $$
 \alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_\mathrm{a}/p_\mathrm{r}\big)^{-1} \big(T/T_0\big)^{1/2}
-       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
-       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
+       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{\mathrm{e}^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
+       + 0.1068\ \tfrac{\mathrm{e}^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
 $$
 
 with the oxygen and nitrogen relaxation frequencies $f_\mathrm{rO}$, $f_\mathrm{rN}$ of
@@ -187,13 +187,13 @@ The **Annex C** uncertainty budget is normative. The combined standard
 uncertainty is $u^2 = \sum c_i^2 u_i^2$ (C.1) and the expanded uncertainty is
 $U = k\ u$ with $k = 1.65$ for a **one-sided** 95 % interval (Clause 14), so the
 reported upper limit is $L_\mathrm{EX,8h} + U$. The task and job methods differ in an
-instructive way: the task noise-sampling uncertainty $u_{1a}$ divides the summed
+instructive way: the task noise-sampling uncertainty $u_{1\mathrm{a}}$ divides the summed
 squared deviations by $I(I-1)$ (the standard error of the mean, Eq. C.6)
 whereas the job/full-day sampling uncertainty $u_1$ is the plain sample standard
 deviation with denominator $N-1$ (Eq. C.12), so the same spread contributes more
 in the job method (fewer, coarser samples). The task budget (Eq. C.3) adds the
-sensitivity coefficients $c_{1a}$ (Eq. C.4) and $c_{1b}$ (Eq. C.5) and an optional
-task-duration uncertainty $u_{1b}$ (Eq. C.7); the job/full-day budget (Eq. C.9)
+sensitivity coefficients $c_{1\mathrm{a}}$ (Eq. C.4) and $c_{1\mathrm{b}}$ (Eq. C.5) and an optional
+task-duration uncertainty $u_{1\mathrm{b}}$ (Eq. C.7); the job/full-day budget (Eq. C.9)
 reads $c_1 u_1$ from Table C.4 as a function of $(N, u_1)$ and adds the instrument
 uncertainty $u_2$ (Table C.5) and microphone-position uncertainty $u_3 = 1.0$ dB
 in quadrature. Peak levels $L_{p,\mathrm{Cpeak}}$ are reported without an uncertainty:
@@ -240,8 +240,8 @@ $L_W = \bar{L}_p + 10 \log_{10}(S/S_0)$: the mean-square pressure averaged over
 an enveloping surface of area $S$, multiplied by $S$, is the radiated power.
 Two corrections restore that idealisation. Uncorrelated **background noise**
 adds its mean square to the source's, so with the margin
-$\Delta L_p = L_{ST} - L_{bg}$ the source-only level is recovered by subtracting
-$K_1 = -10 \log_{10}(1 - 10^{-\Delta L_p/10})$ (from $p_{src}^2 = p_{ST}^2 (1 - 10^{-\Delta L_p/10})$).
+$\Delta L_p = L_\mathrm{ST} - L_\mathrm{bg}$ the source-only level is recovered by subtracting
+$K_1 = -10 \log_{10}(1 - 10^{-\Delta L_p/10})$ (from $p_\mathrm{src}^2 = p_\mathrm{ST}^2 (1 - 10^{-\Delta L_p/10})$).
 The **reverberant field** of a non-anechoic room adds a near-uniform energy
 density $4P/(A c)$ to the direct $P/(S c)$, so the surface level exceeds the
 free-field value by their ratio, $K_2 = 10 \log_{10}(1 + 4 S/A)$, with $A$ the
@@ -250,7 +250,7 @@ geometry: a hemisphere $S = 2 \pi r^2$ over one reflecting plane (halved and
 quartered for two and three planes), a one-plane box $S = 4(ab + bc + ca)$ with
 $a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$, $c = l_3 + d$. ISO 3746 (survey) shares
 the maths with looser criteria. The expanded uncertainty is
-$U = 2 \sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\mathrm{omc}^2}$.
+$U = 2 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$.
 
 ### Precision grade in anechoic rooms (ISO 3745)
 
@@ -275,7 +275,7 @@ positions; the mirror set 21–40 is added when the band-SPL spread exceeds
 $N_\mathrm{M}/2$, clause 9.3.2), and the same positions yield the directivity index
 $DI_i = L_{pi} - \bar{L}_p$ (Eq. 21). The clause 10.5 uncertainty example,
 $U = 2\sqrt{0.5^2 + 2.0^2} = 4.12$ dB, is reproduced, along with the Table 2/3
-per-band $\sigma_{\mathrm{R}0}$ values.
+per-band $\sigma_{R0}$ values.
 
 ### Reverberation room (ISO 3741)
 
@@ -354,13 +354,13 @@ positions the surface needs.*
 ISO 9614-3:2002 upgrades the scanning method to precision grade with a tighter
 indicator machinery. The partial powers $P_i = I_{\mathrm{n},i} S_i$ (Eq. 5) sum as
 before, but validity now rests on the signed and unsigned pressure-intensity
-indicators $F_{pIn} = \bar{L}_p - L_{I\mathrm{n}}$ (Eqs. B.3/B.6, the F2/F3 of
+indicators $F_{pI_\mathrm{n}} = \bar{L}_p - L_{I\mathrm{n}}$ (Eqs. B.3/B.6, the F2/F3 of
 ISO 9614-1) and the normalized intensity non-uniformity $F_\mathrm{S}$ (Eq. B.8),
 through five acceptance criteria (Annex C): scan repeatability
 $|L_{I\mathrm{n}}(1) - L_{I\mathrm{n}}(2)| \le s/2$ (C.1), dynamic capability
-$L_\mathrm{d} = \delta_{pI0} - K \ge F_{pIn}(\text{signed})$ with the precision
+$L_\mathrm{d} = \delta_{pI0} - K \ge F_{pI_\mathrm{n}}(\text{signed})$ with the precision
 bias-error factor $K = 10$ dB (C.2),
-$F_{pIn}(\text{signed}) - F_{pIn}(\text{unsigned}) \le 3$ dB (C.3),
+$F_{pI_\mathrm{n}}(\text{signed}) - F_{pI_\mathrm{n}}(\text{unsigned}) \le 3$ dB (C.3),
 $F_\mathrm{S} \le 2$ (C.4) and the scan-density convergence
 $0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2$ (C.5). Eq. 10 normalizes the result to the
 reference meteorological conditions,

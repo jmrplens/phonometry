@@ -465,3 +465,222 @@ def test_the_tree_it_ships_with_passes() -> None:
     paths = css.collect([str(root / r) for r in css.DEFAULT_ROOTS])
     _, failures = css.check(paths, root / css.PLATES)
     assert failures == []
+
+
+def test_an_upright_vibration_severity_fails_on_a_page(tmp_path: pathlib.Path) -> None:
+    r"""KB is italic everywhere, as DIN 4150-2 prints it, whatever the file."""
+    path = _write(
+        tmp_path,
+        "meter.md",
+        "The maximum $\\mathrm{KB}_\\mathrm{Fmax}$ and the r.m.s. $KB_\\mathrm{FTm}$.\n",
+    )
+    _, failures = css.check([path])
+    assert len(failures) == 1
+    assert "KB upright on line 1" in failures[0]
+    assert "DIN 4150-2" in failures[0]
+
+
+def test_an_italic_vibration_severity_passes_and_a_subscript_is_not_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""The KB of :math:`L_{v,KB}` names a weighting, and is not a base."""
+    path = _write(
+        tmp_path,
+        "prediction.md",
+        "$KB_\\mathrm{F}(t)$, $L_{v,KB}$ and $H_{\\mathrm{KB}}(f)$.\n",
+    )
+    found = css.base_sightings(path.read_text(encoding="utf-8"), ".md")
+    assert dict(found[("KB", "")]) == {"italic": [1]}
+    _, failures = css.check([path])
+    assert failures == []
+
+
+def test_a_file_outside_the_file_scope_is_still_held_to_the_bases(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The errata register keeps its own subscripts but not an upright KB."""
+    (tmp_path / "reference").mkdir()
+    errata = _write(tmp_path, "reference/errata.md", "$\\text{KB}_\\mathrm{F}$\n")
+    assert css.collect([str(tmp_path)]) == []
+    assert css.collect([str(tmp_path)], everything=True) == [errata]
+    _, failures = css.check([], bases_only=[errata])
+    assert len(failures) == 1
+    assert "KB upright on line 1" in failures[0]
+
+
+def test_a_plate_drawing_an_upright_vibration_severity_fails(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A plate is read from its glyphs: KB from the regular face is upright."""
+    from diagrams import canvas
+
+    images = tmp_path / "images"
+    images.mkdir()
+    page = _write(tmp_path, "people.md", _EMBED.format("diagram_people"))
+    _plate(images, "diagram_people", "$KB_{Fmax}$ ≤ $A_u$ ?", upright=("A_u",))
+    _, failures = css.check([page], images)
+    assert failures == []
+    monkeypatch.setattr(canvas, "_ITALIC_BASE_RUNS", frozenset())
+    css._IMAGE_CACHE.clear()
+    _plate(images, "diagram_people", "$KB_{Fmax}$ ≤ $A_u$ ?", upright=("A_u",))
+    _, failures = css.check([page], images)
+    assert len(failures) == 1
+    assert 'KB upright in "$KB_{Fmax}$ ≤ $A_u$ ?"' in failures[0]
+
+
+def test_every_image_is_read_for_the_bases_embedded_or_not(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An image no page embeds still ships, so its KB is read too."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _figure(images, "people_guide_values", "Guide value, $\\mathrm{KB}$")
+    _, failures = css.check([], images)
+    assert failures == []
+    _, failures = css.check([], images, every_image=True)
+    assert len(failures) == 1
+    assert "people_guide_values.svg" in failures[0]
+
+
+def test_an_upright_vibration_severity_in_a_cases_block_fails(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""A row break ``\\`` is TeX, so the block around it is read."""
+    path = _write(
+        tmp_path,
+        "categories.md",
+        "$$\nA = \\begin{cases} \\mathrm{KB}_\\mathrm{Fmax} & a \\\\\n"
+        "  KB_\\mathrm{FTr} & b \\end{cases}\n$$\n",
+    )
+    found = css.base_sightings(path.read_text(encoding="utf-8"), ".md")
+    assert dict(found[("KB", "")]) == {"upright": [1], "italic": [1]}
+    _, failures = css.check([path])
+    assert len(failures) == 1
+    assert "KB upright" in failures[0]
+
+
+def test_an_upright_vibration_severity_after_a_wrapped_formula_fails(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A formula that wraps a line does not hide the one after it."""
+    path = _write(
+        tmp_path,
+        "meter.md",
+        "The clock $T = 30\\,\n\\mathrm{s}$ gives $\\mathrm{KB}_\\mathrm{FTm}$.\n",
+    )
+    found = css.base_sightings(path.read_text(encoding="utf-8"), ".md")
+    assert dict(found[("KB", "")]) == {"upright": [2]}
+
+
+def test_a_subscript_in_a_cases_block_is_read(tmp_path: pathlib.Path) -> None:
+    """The file scope covers every row of a block, as it covers a line."""
+    path = _write(
+        tmp_path,
+        "weighting.md",
+        "$L_\\mathrm{s}$ and\n\n$$\n\\begin{cases} L_s & a \\\\ 0 & b \\end{cases}\n$$\n",
+    )
+    _, failures = css.check([path])
+    assert len(failures) == 1
+
+
+def test_an_upright_running_index_fails_on_a_page(tmp_path: pathlib.Path) -> None:
+    r"""UNE-EN 15657 prints the i of :math:`L_{v,i}` upright; the corpus does not."""
+    path = _write(
+        tmp_path,
+        "structure-borne-power.md",
+        "$L_\\mathrm{v} = 10 \\lg(\\sum 10^{L_\\mathrm{v,i}/10})$\n",
+    )
+    _, failures = css.check([path])
+    assert len(failures) == 1
+    assert "L_\\mathrm{v,i}: the index i is upright on line 1" in failures[0]
+    assert "ISO 80000-2" in failures[0]
+
+
+def test_italic_running_indices_beside_upright_abbreviations_pass(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The settled shapes: an upright abbreviation, then an italic index."""
+    path = _write(
+        tmp_path,
+        "installed.md",
+        "$L_{\\mathrm{v},i}$, $D_{\\mathrm{C},i}$, $L_{\\mathrm{n,s},ij}$, "
+        "$L_{\\mathrm{Ws,inst},i}$ and $\\sum_{i=1}^{N} 10^{L_i/10}$.\n",
+    )
+    assert css.index_slips(path.read_text(encoding="utf-8"), ".md") == []
+    _, failures = css.check([path])
+    assert failures == []
+
+
+def test_an_upright_sum_index_fails_and_a_named_sum_passes(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""The letter a sum runs over is an index; ``\sum_\mathrm{Zug}`` is a word."""
+    path = _write(
+        tmp_path,
+        "sums.md",
+        "$\\sum_\\mathrm{j} a_j$, $\\sum_{\\mathrm{i}=1}^{N} b_i$ and "
+        "$\\sum_\\mathrm{Zug} n_\\mathrm{Zug}$.\n",
+    )
+    slips = css.index_slips(path.read_text(encoding="utf-8"), ".md")
+    assert sorted(index for _, index, _ in slips) == ["i", "j"]
+
+
+def test_an_upright_letter_opening_a_subscript_is_not_read_as_an_index(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The impact level of ISO 16283-2 opens its subscript with an upright i."""
+    path = _write(
+        tmp_path,
+        "heavy-impact.md",
+        "$L_\\mathrm{i}$, $L_\\mathrm{i,Fmax}$ and $L_\\mathrm{i,Fmax,0}$.\n",
+    )
+    _, failures = css.check([path])
+    assert failures == []
+
+
+def test_the_errata_register_may_quote_an_upright_index(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A transcription keeps the print; a drawing module is held to the rule."""
+    (tmp_path / "reference").mkdir()
+    (tmp_path / "_plot").mkdir()
+    errata = _write(tmp_path, "reference/errata.md", "$D_\\mathrm{C,i}$\n")
+    plot = _write(tmp_path, "_plot/building.py", 'LABEL = r"$L_\\mathrm{v,i}$"\n')
+    _, failures = css.check([], bases_only=[errata, plot])
+    assert len(failures) == 1
+    assert "building.py" in failures[0]
+    assert "the index i is upright on line 1" in failures[0]
+
+
+def test_a_plate_drawing_an_upright_running_index_fails(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The reception plate keyed the index of Formula (12) upright, twice."""
+    images = tmp_path / "images"
+    images.mkdir()
+    label = "$L_v = 10 lg[(1/N)·Σ_i 10^{L_{v,i}/10}]$"
+    _plate(images, "diagram_plate", label, upright=("L_v", "L_i", "Σ_i"))
+    _, failures = css.check([], images, every_image=True)
+    assert len(failures) == 2
+    assert any("L_{v,i}: the index i is upright" in f for f in failures)
+    assert any("\\Sigma_{i}: the index i is upright" in f for f in failures)
+    css._IMAGE_CACHE.clear()
+    _plate(images, "diagram_plate", label, upright=("L_v",))
+    _, failures = css.check([], images, every_image=True)
+    assert failures == []
+
+
+def test_a_figure_setting_an_upright_running_index_fails(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A figure label is read from the source matplotlib keeps."""
+    images = tmp_path / "images"
+    images.mkdir()
+    _figure(images, "plate_levels", "Position level $L_\\mathrm{v,i}$ [dB]")
+    _, failures = css.check([], images, every_image=True)
+    assert len(failures) == 1
+    assert "plate_levels.svg" in failures[0]
+    css._IMAGE_CACHE.clear()
+    _figure(images, "plate_levels", "Position level $L_{\\mathrm{v},i}$ [dB]")
+    _, failures = css.check([], images, every_image=True)
+    assert failures == []

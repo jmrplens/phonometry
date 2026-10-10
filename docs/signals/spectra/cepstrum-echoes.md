@@ -106,12 +106,12 @@ the `oversample` padding of
 ## 2. Echo detection: the rahmonic spike train
 
 A single reflection $x(t) = s(t) + a\,s(t-t_0)$ multiplies the spectrum by
-$1 + a e^{-j 2\pi f t_0}$ - a ripple of period $1/t_0$ across the whole band.
+$1 + a \mathrm{e}^{-j 2\pi f t_0}$ - a ripple of period $1/t_0$ across the whole band.
 Its logarithm expands, for $|a| < 1$, into the exactly summable series
 
 $$
-\ln\!\left(1 + a e^{-j\theta}\right)
-= \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n}\, e^{-jn\theta},
+\ln\!\left(1 + a \mathrm{e}^{-j\theta}\right)
+= \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n}\, \mathrm{e}^{-jn\theta},
 $$
 
 so the cepstrum carries a spike train at the **rahmonics** $n t_0$ with

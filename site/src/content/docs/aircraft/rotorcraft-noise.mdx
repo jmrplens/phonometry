@@ -60,7 +60,7 @@ levels on a spherical grid of azimuth $\varphi$ and polar angle $\theta$,
 defined at a fixed **60 m** reference distance under ICAO reference
 atmospheric conditions. Placing that source at a receiver adds the
 propagation adjustment
-$\Delta L_p = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$.
+$\Delta L_\mathrm{p} = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$.
 
 The EPNL this page computes is the same quantity fixed-wing certification asks
 for; only the source description differs. ICAO Annex 16 Chapter 8 flies the
@@ -102,9 +102,9 @@ filled bin's, and the energetic average of them where several are equally near.
 The condition matrix a database should span is fixed by Doc 32 §4.1: hemispheres
 at descent angles at intervals of at least 3° and four different airspeeds, to
 cover the descent region where blade-vortex interaction lives; climb angles at
-the best rate-of-climb speed $V_y$ or a typical take-off speed, including the
-maximum climb angle stated in the flight manual; and level flight at 0.9 $V_H$
-with $+10$ kt (or $V_H$, whichever is smaller), $-15$ kt and $-30$ kt
+the best rate-of-climb speed $\mathrm{V}_\mathrm{Y}$ or a typical take-off speed, including the
+maximum climb angle stated in the flight manual; and level flight at 0.9 $\mathrm{V}_\mathrm{H}$
+with $+10$ kt (or $\mathrm{V}_\mathrm{H}$, whichever is smaller), $-15$ kt and $-30$ kt
 increments. Outside the hull those conditions span, the interpolation degrades
 to nearest-neighbour, silently.
 

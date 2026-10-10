@@ -77,7 +77,7 @@ is only an indication of the upper limit (NOTE of 4.2).
    K = 10 \lg\left[1 + \frac{4}{A/S}\right] \tag{Figure A.3}
 
 with the equivalent absorption area :math:`A = 0{,}16\,V/T` of the room from
-its reverberation time (A.3.1); A.3.2 obtains :math:`K = L_W - L_{Wr}` from a
+its reverberation time (A.3.1); A.3.2 obtains :math:`K = L_W - L_{W\mathrm{r}}` from a
 calibrated reference sound source instead. :math:`K` shall not exceed 7 dB
 (8.3 and A.3.3), which A.3.3 restates as :math:`A/S \ge 1`.
 
@@ -913,7 +913,7 @@ def turbine_background_correction(level_difference_db: ArrayLike) -> float | np.
 
 @dataclass(frozen=True)
 class TurbineEnvironmentalCorrection(OwnsArrays):
-    """The environmental correction ``K`` of a test room (clause 8.2, Annex A).
+    r"""The environmental correction ``K`` of a test room (clause 8.2, Annex A).
 
     Built by :func:`turbine_environmental_correction` (A.3.1, Figure A.3) or
     by :func:`turbine_reference_source_correction` (A.3.2).
@@ -924,7 +924,7 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
     :ivar absorption_area_m2: :math:`A` (A.3.1), in square metres, or ``None``.
     :ivar reference_levels_db: The determinations of the reference source's
         sound power level :math:`L_W` (A.3.2), in dB, or ``None``.
-    :ivar calibrated_level_db: :math:`L_{Wr}` (A.3.2), in dB, or ``None``.
+    :ivar calibrated_level_db: :math:`L_{W\mathrm{r}}` (A.3.2), in dB, or ``None``.
     """
 
     environmental_correction_db: float
@@ -1069,9 +1069,9 @@ def turbine_reference_source_correction(
     calibrated_level_db: float,
     machine_length_m: float,
 ) -> TurbineEnvironmentalCorrection:
-    """Environmental correction :math:`K = L_W - L_{Wr}` from a reference source (A.3.2).
+    r"""Environmental correction :math:`K = L_W - L_{W\mathrm{r}}` from a reference source (A.3.2).
 
-    :math:`L_{Wr}` is the calibrated sound power level of the reference sound
+    :math:`L_{W\mathrm{r}}` is the calibrated sound power level of the reference sound
     source, determined in a free field over a reflecting plane
     (:math:`K = 0`), and :math:`L_W` the sound power level the same source
     shows in the test room by the survey method of ISO 3746 with :math:`K`
@@ -1084,7 +1084,7 @@ def turbine_reference_source_correction(
 
     :param sound_power_levels_db: The determinations of :math:`L_W`, in dB:
         two for a machine up to 10 m long, four above.
-    :param calibrated_level_db: :math:`L_{Wr}`, in dB re 1 pW.
+    :param calibrated_level_db: :math:`L_{W\mathrm{r}}`, in dB re 1 pW.
     :param machine_length_m: Length of the machine under test, in metres,
         which sets how many determinations are needed.
     :return: The correction and the determinations it came from.

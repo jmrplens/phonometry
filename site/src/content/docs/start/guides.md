@@ -475,7 +475,7 @@ ASTM E413.
   building envelope measured per ISO 16283-3, predicted per EN 12354-3 and
   radiating outwards per EN 12354-4.
 - [Spanish Building Code (CTE DB-HR)](/phonometry/buildings/insulation/spanish-building-code/):
-  the DB-HR global indices $R_\mathrm{A}$, $R_\mathrm{A,tr}$, $D_\mathrm{nT,A}$ and $D_{2\mathrm{m,nT,Atr}}$,
+  the DB-HR global indices $R_\mathrm{A}$, $R_\mathrm{A,tr}$, $D_{\mathrm{n}T,\mathrm{A}}$ and $D_{2\mathrm{m,n}T,\mathrm{Atr}}$,
   the clause 2 requirement tables and the window-size correction.
 
 **[Insulation design](/phonometry/buildings/design/)**

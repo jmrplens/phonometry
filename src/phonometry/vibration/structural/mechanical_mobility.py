@@ -18,7 +18,7 @@ velocity         mobility ``Y``         m/(N.s)        impedance          (N.s/m
 acceleration     accelerance ``A``      1/kg           apparent mass      (kg)
 ===============  =====================  ===========  =========================
 
-For a harmonic motion :math:`x e^{j \omega t}` the velocity is
+For a harmonic motion :math:`x \mathrm{e}^{j \omega t}` the velocity is
 :math:`j \omega x` and the acceleration :math:`-\omega^2 x`, so every FRF
 follows from the receptance ``H``:
 

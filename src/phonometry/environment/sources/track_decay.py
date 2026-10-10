@@ -20,8 +20,8 @@ one-third octave band magnitude :math:`A(x_n)`; the one at the accelerometer
 itself is the direct response :math:`A(x_0)`.
 
 **Clause 7 and Annex A, the rate.** If the response decayed as
-:math:`A(x) = A(0)\,e^{-\beta x}`, the decay rate would be
-:math:`\mathrm{DR} = 20 \lg e^{\beta} = 8{,}686\,\beta` dB/m, and the integral of the
+:math:`A(x) = A(0)\,\mathrm{e}^{-\beta x}`, the decay rate would be
+:math:`\mathrm{DR} = 20 \lg \mathrm{e}^{\beta} = 8{,}686\,\beta` dB/m, and the integral of the
 squared response along the rail would be :math:`|A(0)|^2 / 2\beta` (A.1). The
 standard estimates it from that integral rather than from a fitted slope,
 

@@ -564,7 +564,7 @@ The exponential average the formula integrates, started from rest. Clause
 4 says what that costs at the start of a record and so why the averaging
 has to be running before the train arrives. It puts the cost at 14 % after
 $2\tau$ and 2 % after $4\tau$, which are the shortfalls of the
-mean square, $e^{-2}$ and $e^{-4}$; the running r.m.s. itself,
+mean square, $\mathrm{e}^{-2}$ and $\mathrm{e}^{-4}$; the running r.m.s. itself,
 which is what Figure 3 draws, is 7 % and 0,9 % short.
 
 **Parameters**

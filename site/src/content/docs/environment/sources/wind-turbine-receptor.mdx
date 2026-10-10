@@ -214,11 +214,11 @@ clean, so Annex C predicts it from the sound power levels, band by band from
 
 $$
 L_{p,\mathrm{LF}} = L_{W,\mathrm{LF}} - 10\lg\left(l^2 + h^2\right) - 11~\mathrm{dB}
-+ \Delta L_{g,\mathrm{LF}} - \Delta L_\mathrm{a} - \Delta L_\sigma
++ \Delta L_{\mathrm{g},\mathrm{LF}} - \Delta L_\mathrm{a} - \Delta L_\sigma
 $$
 
 with $l$ the horizontal distance and $h$ the hub height, 11 dB for
-$10\lg(4\pi)$, the ground correction $\Delta L_{g,\mathrm{LF}}$ of Table C.2
+$10\lg(4\pi)$, the ground correction $\Delta L_{\mathrm{g},\mathrm{LF}}$ of Table C.2
 for impedance class D, the air absorption $\Delta L_\mathrm{a} = \alpha
 \sqrt{l^2 + h^2}$ and a facade insulation $\Delta L_\sigma$ such as the two
 Danish rows of Table C.3. The turbines are summed per band, and the level is the
@@ -548,7 +548,7 @@ depths = np.linspace(0.0, 12.0, 481)
 fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
 left.plot(depths, environment.amplitude_modulation_adjustment(depths))
 left.plot([period.rating_db], [k_am], "o")
-left.set(xlabel="Modulation depth [dB]", ylabel="Adjustment K_am [dB]")
+left.set(xlabel="Modulation depth [dB]", ylabel=r"Adjustment $K_\mathrm{am}$ [dB]")
 rating.plot(right)
 plt.show()
 ```

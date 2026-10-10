@@ -1024,7 +1024,7 @@ def standardized_impact_level(l_prime_n_w: float, volume: float) -> float:
 
     .. math::
 
-       L'_\mathrm{nT,w} = L'_\mathrm{n,w} - 10 \log_{10}\frac{0.16\,V}{A_0 T_0}
+       L'_{\mathrm{n}T,\mathrm{w}} = L'_\mathrm{n,w} - 10 \log_{10}\frac{0.16\,V}{A_0 T_0}
        = L'_\mathrm{n,w} - 10 \log_{10}(0.032\,V)
 
     with :math:`A_0 = 10` m² and :math:`T_0 = 0.5` s, the exact Formula (3)
@@ -1052,7 +1052,7 @@ def standardized_level_difference(
 
     .. math::
 
-       D_\mathrm{nT} = R' + 10 \log_{10}\frac{0.16\,V}{T_0 S_\mathrm{s}}
+       D_{\mathrm{n}T} = R' + 10 \log_{10}\frac{0.16\,V}{T_0 S_\mathrm{s}}
        = R' + 10 \log_{10}\frac{0.32\,V}{S_\mathrm{s}}
 
     with :math:`T_0 = 0.5` s, the exact Formula (5b) form, applied to the
@@ -1060,7 +1060,7 @@ def standardized_level_difference(
     H.3 worked example rounds the factor to :math:`10 \log_{10}(V/(3 S_\mathrm{s}))`
     (:math:`1/0.32 = 3.125 \approx 3`), printing :math:`52.2 + 1.6 = 53.8` dB
     where the exact form gives 53.6 dB;
-    both round to the same :math:`D_\mathrm{nT,w} = 54` dB.
+    both round to the same :math:`D_{\mathrm{n}T,\mathrm{w}} = 54` dB.
 
     :param r_prime_w: Apparent weighted sound reduction index ``R'w``, in dB
         (see :func:`predicted_airborne_insulation`).

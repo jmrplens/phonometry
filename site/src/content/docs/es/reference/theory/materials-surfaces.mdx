@@ -365,7 +365,7 @@ caudalímetro por un pistón a ~2 Hz y un micrófono en una cavidad cerrada
 (apartado 8.7, Fórmula 2):
 
 $$
-R = \kappa'\ \frac{p_\mathrm{s}}{2 \pi f V}\ \frac{h_\mathrm{t}}{h_\mathrm{s}}\ 10^{(L_{ps} - L_{p\mathrm{t}})/20}
+R = \kappa'\ \frac{p_\mathrm{s}}{2 \pi f V}\ \frac{h_\mathrm{t}}{h_\mathrm{s}}\ 10^{(L_{p\mathrm{s}} - L_{p\mathrm{t}})/20}
 $$
 
 Solo entra una *diferencia* de niveles, así que el equipo de medición sonora
@@ -395,11 +395,11 @@ plenamente observable. ISO 10534-2:1998 (método de función de transferencia; l
 numeración de apartados y de ecuaciones que se cita aquí es la de esa edición, e
 ISO 10534-2:2023 la renumera)
 compara la función de transferencia medida entre dos micrófonos $H_{12}$ con
-las analíticas incidente y reflejada $H_\mathrm{I} = e^{-j k_0 s}$,
-$H_\mathrm{R} = e^{+j k_0 s}$ (Anexo D) para dar (apartado 7, Ec. 17):
+las analíticas incidente y reflejada $H_\mathrm{I} = \mathrm{e}^{-j k_0 s}$,
+$H_\mathrm{R} = \mathrm{e}^{+j k_0 s}$ (Anexo D) para dar (apartado 7, Ec. 17):
 
 $$
-r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\ e^{2 j k_0 x_1}, \qquad
+r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\ \mathrm{e}^{2 j k_0 x_1}, \qquad
 \alpha = 1 - |r|^2, \qquad \frac{Z}{\rho c_0} = \frac{1 + r}{1 - r},
 $$
 

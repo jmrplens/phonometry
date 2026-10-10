@@ -211,7 +211,7 @@ def test_facade_plot_accepts_label_kwarg() -> None:
     labels = [ln.get_label() for ln in ax.lines]
     assert "my measurement" in labels
     # The companion curves keep their own labels.
-    assert any(label.startswith("$D_{2m}$") for label in labels)
+    assert any(label.startswith(r"$D_\mathrm{2m}$") for label in labels)
     plt.close("all")
 
 

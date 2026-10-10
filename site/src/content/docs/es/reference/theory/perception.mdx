@@ -211,10 +211,10 @@ El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentr
 1. **Niveles de tercio de octava**: 28 bandas, de 25 Hz a 12,5 kHz (el banco de filtros del Anexo A a 48 kHz, Tablas A.1/A.2). Para sonidos variables en el tiempo, las salidas de banda al cuadrado se suavizan con tres paso bajos en cascada con $\tau = 2/(3 f_\mathrm{c})$ ($f_\mathrm{c}$ limitada a 1 kHz) y se muestrean cada 2 ms.
 2. **Agrupación en baja frecuencia**: las 11 bandas hasta 250 Hz reciben las correcciones isofónicas de la Tabla A.3 y se suman en las tres primeras bandas críticas (25–80, 100–160, 200–250 Hz).
 3. **Transmisión a0**: la corrección de transferencia del oído externo/medio de la Tabla A.4 (más la diferencia de campo difuso de la Tabla A.5 con `field='diffuse'`) produce los niveles de banda crítica $L_E$.
-4. **Sonoridad núcleo**: cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
+4. **Sonoridad núcleo**: cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_\mathrm{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
 
    $$
-   N_c = \max\left(0,\ 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right]\right) \ \text{sonios/Bark}, \qquad s = 0{,}25
+   N_c = \max\left(0,\ 0{,}0635 \cdot 10^{0{,}025 L_\mathrm{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_\mathrm{TQ})/10} \right)^{0{,}25} - 1 \right]\right) \ \text{sonios/Bark}, \qquad s = 0{,}25
    $$
 
    (la forma que da el programa de referencia a la transformación de sonoridad de Zwicker; las bandas por debajo del umbral aportan cero).
@@ -272,7 +272,7 @@ la verdad.
 En lugar de las bandas críticas fijas de Zwicker, el modelo de Moore-Glasberg forma un **patrón de excitación** continuo sobre la escala del número ERB («Cam») usando filtros auditivos **exponenciales redondeados (roex)** dependientes del nivel. En función de la desviación de frecuencia normalizada $g = |f - f_\mathrm{c}| / f_\mathrm{c}$ respecto a un filtro centrado en $f_\mathrm{c}$, la ponderación del filtro es
 
 $$
-W(g) = (1 + p\ g)\ e^{-p\ g}
+W(g) = (1 + p\ g)\ \mathrm{e}^{-p\ g}
 $$
 
 donde la pendiente $p$ crece con el nivel de la fuente, ensanchando el flanco
@@ -296,7 +296,7 @@ y una etapa de inhibición binaural (Fórmulas 10–13) combina los oídos de mo
 que un sonido diótico es más sonoro que el mismo sonido en un solo oído. El
 ancla de 1 kHz / 40 dB SPL da exactamente 1 sonio.
 
-**ISO 532-3** lo hace variable en el tiempo. Un espectro deslizante de seis FFT paralelas con ventana de Hann (longitudes de segmento de 2 a 64 ms, cada una aportando su propio rango de frecuencias, actualizado cada $T_0 = 1$ ms) alimenta la misma cadena de excitación y sonoridad específica, integrada por dos suavizadores de primer orden en cascada con $\alpha = 1 - e^{-T_0 / \tau}$,
+**ISO 532-3** lo hace variable en el tiempo. Un espectro deslizante de seis FFT paralelas con ventana de Hann (longitudes de segmento de 2 a 64 ms, cada una aportando su propio rango de frecuencias, actualizado cada $T_0 = 1$ ms) alimenta la misma cadena de excitación y sonoridad específica, integrada por dos suavizadores de primer orden en cascada con $\alpha = 1 - \mathrm{e}^{-T_0 / \tau}$,
 
 $$
 S(t) = \alpha\ x(t) + (1 - \alpha)\ S(t - 1)
@@ -369,10 +369,10 @@ La agudeza (*sharpness*) condensa en un solo número el énfasis en alta frecuen
 
 $$
 S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum}, \qquad
-g(z) = \begin{cases} 1 & z \le 15{,}8\ \text{Bark} \\ 0{,}15\ e^{0{,}42 (z - 15{,}8)} + 0{,}85 & z > 15{,}8\ \text{Bark} \end{cases}
+g(z) = \begin{cases} 1 & z \le 15{,}8\ \text{Bark} \\ 0{,}15\ \mathrm{e}^{0{,}42 (z - 15{,}8)} + 0{,}85 & z > 15{,}8\ \text{Bark} \end{cases}
 $$
 
-evaluado sobre la misma malla de 240 puntos a 0,1 Bark. La constante $k$ no está codificada a mano, sino que se deriva del requisito de calibración (apartado 6): un ruido de banda estrecha de una banda crítica de ancho, 920–1080 Hz a 60 dB SPL, puntúa exactamente 1 acum, y la $k = 0{,}108$ derivada cae dentro de la ventana normativa $0{,}105 \le k < 0{,}115$ (apartado 5.2). Las ponderaciones informativas del Anexo B se ofrecen bajo el mismo anclaje de 1 acum: von Bismarck (codo en 15 Bark, $0{,}2\ e^{0{,}308(z-15)} + 0{,}8$) y Aures (dependiente de la sonoridad, $g(z) = 0{,}078\ (e^{0{,}171 z}/z)\ N/\ln(0{,}05 N + 1)$). Los objetivos de banda estrecha de la Tabla A.2 se reproducen dentro de la tolerancia del apartado 6 (5 % o 0,05 acum): 0,38 acum a 250 Hz, 1,00 a 1 kHz, 1,78 a 2,5 kHz, 2,82 a 4 kHz.
+evaluado sobre la misma malla de 240 puntos a 0,1 Bark. La constante $k$ no está codificada a mano, sino que se deriva del requisito de calibración (apartado 6): un ruido de banda estrecha de una banda crítica de ancho, 920–1080 Hz a 60 dB SPL, puntúa exactamente 1 acum, y la $k = 0{,}108$ derivada cae dentro de la ventana normativa $0{,}105 \le k < 0{,}115$ (apartado 5.2). Las ponderaciones informativas del Anexo B se ofrecen bajo el mismo anclaje de 1 acum: von Bismarck (codo en 15 Bark, $0{,}2\ \mathrm{e}^{0{,}308(z-15)} + 0{,}8$) y Aures (dependiente de la sonoridad, $g(z) = 0{,}078\ (\mathrm{e}^{0{,}171 z}/z)\ N/\ln(0{,}05 N + 1)$). Los objetivos de banda estrecha de la Tabla A.2 se reproducen dentro de la tolerancia del apartado 6 (5 % o 0,05 acum): 0,38 acum a 250 Hz, 1,00 a 1 kHz, 1,78 a 2,5 kHz, 2,82 a 4 kHz.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="Ponderación de agudeza g(z) de DIN 45692 frente a la tasa de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" width="80%" />
 
@@ -422,7 +422,7 @@ $$
 \mathrm{TNR}_{\text{crit}} = \begin{cases} 8{,}0 + 8{,}33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8{,}0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
 $$
 
-**PR** (apartado 12) compara el nivel de la banda crítica centrada en el tono, $L_M$, con la potencia media de las dos bandas críticas **contiguas** $L_L$, $L_\mathrm{U}$ (bordes según las Fórmulas ajustadas 21–22 con las Tablas 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Fórmula 23). Para $f_\mathrm{t} \le 171{,}4$ Hz la banda inferior se trunca en 20 Hz y su potencia se reescala a un **ancho de banda de 100 Hz** (Fórmula 24). El criterio (Fórmulas 25–26) es 9,0 dB para $f_\mathrm{t} \ge 1$ kHz, y crece como $9{,}0 + 10{,}0\log_{10}(1000/f_\mathrm{t})$ por debajo. Los tonos se evalúan dentro del rango de interés de 89,1 Hz – 11,2 kHz (apartados 11.5 / 12.6).
+**PR** (apartado 12) compara el nivel de la banda crítica centrada en el tono, $L_\mathrm{M}$, con la potencia media de las dos bandas críticas **contiguas** $L_\mathrm{L}$, $L_\mathrm{U}$ (bordes según las Fórmulas ajustadas 21–22 con las Tablas 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Fórmula 23). Para $f_\mathrm{t} \le 171{,}4$ Hz la banda inferior se trunca en 20 Hz y su potencia se reescala a un **ancho de banda de 100 Hz** (Fórmula 24). El criterio (Fórmulas 25–26) es 9,0 dB para $f_\mathrm{t} \ge 1$ kHz, y crece como $9{,}0 + 10{,}0\log_{10}(1000/f_\mathrm{t})$ por debajo. Los tonos se evalúan dentro del rango de interés de 89,1 Hz – 11,2 kHz (apartados 11.5 / 12.6).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Relación tono-ruido de un tono de ventilador de 250 Hz representada frente al criterio de prominencia de ECMA-418-1: el criterio cae desde unos 17 dB a 89 Hz hasta 8 dB constantes por encima de 1 kHz, y el tono evaluado se sitúa en 15,1 dB, 2,1 dB por encima del criterio de 13,0 dB a 250 Hz, así que es prominente" width="88%" />
 
@@ -441,7 +441,7 @@ Consulta la [guía de tonos discretos prominentes](/phonometry/es/perception/psy
 La inteligibilidad del habla viaja en las modulaciones lentas de intensidad de la envolvente del habla. Los números de apartado que siguen son los de IEC 60268-16 Ed. 5 (2020). La **función de transferencia de modulación (MTF)** $m(F)$ de un canal de transmisión es la razón entre la profundidad de modulación recibida y la emitida de la envolvente de intensidad por banda de octava a la frecuencia de modulación $F$; el STI completo la evalúa en las 14 frecuencias de modulación en tercios de octava de 0,63 a 12,5 Hz en las siete bandas de octava de 125 Hz a 8 kHz (A.2.2). Desde una respuesta al impulso medida, la **forma cerrada de Schroeder** la da directamente (método indirecto):
 
 $$
-m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ e^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
+m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ \mathrm{e}^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
 $$
 
 El ruido de fondo estacionario multiplica el $m$ de cada banda por la razón de intensidades (el término de ruido):

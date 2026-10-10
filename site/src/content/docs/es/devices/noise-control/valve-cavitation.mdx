@@ -132,15 +132,15 @@ sonido en el líquido, que para el agua son 1 400 m/s y en una válvula de
 control no pasa nunca:
 
 $$
-\eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)
+\eta_\mathrm{turb} = 10^{-4}\left(\frac{U_\mathrm{vc}}{c_L}\right)
 $$
 
 La Ecuación (9) es la otra, y merece leerse factor a factor:
 
 $$
-\eta_{cav} = 0{,}32\, \eta_{turb}
+\eta_\mathrm{cav} = 0{,}32\, \eta_\mathrm{turb}
   \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\;
-  e^{5 x_{Fzp1}}
+  \mathrm{e}^{5 x_{Fzp1}}
   \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5}
   \left(\frac{x_F}{x_{Fzp1}}\right)^{5}
   \left(x_F - x_{Fzp1}\right)^{1,5}
@@ -282,7 +282,7 @@ print(round(noise_control.jet_strouhal_number(**form, form="annex"), 3))   # 0.3
 print(round(noise_control.jet_strouhal_number(**form, form="clause"), 3))  # 0.425
 ```
 
-Solo la forma del anexo reproduce el $N_{Str} = 0{,}399$ que el propio anexo
+Solo la forma del anexo reproduce el $N_\mathrm{Str} = 0{,}399$ que el propio anexo
 imprime, así que es la que va por defecto aquí y la de la cláusula queda a una
 palabra clave de distancia. Para esta válvula las dos difieren un 6 %; para
 una válvula de un solo orificio con $F_d = 1$ la del anexo está un 80 % por

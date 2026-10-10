@@ -50,7 +50,7 @@ not with a table, and it draws two hard lines: under 6 dB "the environmental
 conditions are not acceptable", and over 10 dB there is nothing to correct.
 :func:`background_corrected_level_db` refuses the first and skips the second.
 
-Clause 5.9 is the other: the A-weighted attenuation :math:`D_{pA}` **shall not
+Clause 5.9 is the other: the A-weighted attenuation :math:`D_{p\mathrm{A}}` **shall not
 be determined when an artificial sound source is used**, because an A-weighted
 number belongs to the spectrum that produced it and a loudspeaker's spectrum is
 not the machine's. :func:`screen_attenuation` refuses it rather than compute a
@@ -341,7 +341,7 @@ class ScreenInSituResult(OwnsArrays):
     :ivar screened_levels_db: :math:`L_{p2}`, the level with it in place, per
         band.
     :ivar attenuation_db: :math:`D_p` per band, in decibels.
-    :ivar a_weighted_attenuation_db: :math:`D_{pA}`, in decibels, or ``None``.
+    :ivar a_weighted_attenuation_db: :math:`D_{p\mathrm{A}}`, in decibels, or ``None``.
         Clause 5.9 allows it only with the actual source.
     :ivar source_kind: ``"actual"`` or ``"artificial"``.
     :ivar distance_m: How far the position stands from the screen, in metres,
@@ -366,7 +366,7 @@ class ScreenInSituResult(OwnsArrays):
         return np.asarray(round_half_even(self.attenuation_db), dtype=np.int_)
 
     def rounded_a_weighted(self) -> int | None:
-        """:math:`D_{pA}` as 7.4 c) reports it, to the nearest integer.
+        r""":math:`D_{p\mathrm{A}}` as 7.4 c) reports it, to the nearest integer.
 
         The clause gives the A-weighted attenuation the same rounding as the
         band values. ``None`` where no A-weighted pair was given.
@@ -414,7 +414,7 @@ def screen_attenuation(
     The two kinds are not mixed, and :func:`impulse_mean_level_db` is the
     second of them.
 
-    :math:`D_{pA} = L_{pA1} - L_{pA2}` is clause 5.9, and it carries the
+    :math:`D_{p\mathrm{A}} = L_{p\mathrm{A}1} - L_{p\mathrm{A}2}` is clause 5.9, and it carries the
     standard's one flat prohibition: it **shall not be determined when an
     artificial sound source is used**. An A-weighted number belongs to the
     spectrum that produced it, and a loudspeaker's spectrum is not the
@@ -425,8 +425,8 @@ def screen_attenuation(
     :param screened_levels_db: :math:`L_{p2}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :param source_kind: ``"actual"`` (default) or ``"artificial"``.
-    :param a_weighted_unscreened_level_db: :math:`L_{pA1}`, in decibels.
-    :param a_weighted_screened_level_db: :math:`L_{pA2}`, in decibels.
+    :param a_weighted_unscreened_level_db: :math:`L_{p\mathrm{A}1}`, in decibels.
+    :param a_weighted_screened_level_db: :math:`L_{p\mathrm{A}2}`, in decibels.
     :param distance_m: How far this position stands from the screen, in
         metres, carried into the result because 5.5.2 reports the spread over
         the line rather than one number.

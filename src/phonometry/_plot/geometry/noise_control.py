@@ -950,7 +950,7 @@ def plot_plenum_geometry(
     ax.text(
         0.5 * box_w,
         0.5 * (y_in + y_out) + 0.03 * r,
-        "r = " + _metres(r, language),
+        "$r$ = " + _metres(r, language),
         fontsize=8,
         ha="center",
         va="bottom",
@@ -963,9 +963,9 @@ def plot_plenum_geometry(
     ax.text(
         0.5 * box_w,
         -0.08 * r,
-        "S_w = "
+        r"$S_\mathrm{w}$ = "
         + format_number(wall_area, language, decimals=1, trim=True)
-        + " m$^2$, S_out = "
+        + r" m$^2$, $S_\mathrm{out}$ = "
         + format_number(exit_area, language, decimals=2, trim=True)
         + " m$^2$",
         fontsize=8,

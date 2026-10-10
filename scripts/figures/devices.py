@@ -6453,7 +6453,7 @@ def generate_vdi2081_section_change(output_dir: str) -> None:
     limit = 343.0 / (2.0 * 0.8)
     ax2.axvline(limit, color=COLOR_FG, linestyle="--", linewidth=1.0, alpha=0.55)
     ax2.annotate(
-        f"$f_G$ = {limit:.0f} Hz",
+        rf"$f_\mathrm{{G}}$ = {limit:.0f} Hz",
         xy=(limit, 0.5),
         xycoords=("data", "axes fraction"),
         ha="center",
@@ -6723,9 +6723,9 @@ def generate_workstation_emission(output_dir: str) -> None:
     ax2.set_xticks([0, 1, 2])
     ax2.set_xticklabels(
         [
-            "measured\n$L'_{pA}$",
-            "room\n$K_{3A}$",
-            "emission\n$L_{pA}$",
+            "measured\n$L'_{p\\mathrm{A}}$",
+            "room\n$K_{3\\mathrm{A}}$",
+            "emission\n$L_{p\\mathrm{A}}$",
         ]
     )
     ax2.set_ylim(0.0, 88.0)
@@ -6915,8 +6915,8 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         label="One metre outside, $L_{pe,1m}(f_i)$",
     )
     for frequency, name, side in (
-        (cavitating.turbulent_peak, "$f_{p,turb}$", "right"),
-        (cavitation_peak, "$f_{p,cav}$", "left"),
+        (cavitating.turbulent_peak, r"$f_\mathrm{p,turb}$", "right"),
+        (cavitation_peak, r"$f_\mathrm{p,cav}$", "left"),
     ):
         ax2.axvline(frequency, color=COLOR_MUTED, ls=":", lw=1.4)
         # Above the humps: at 118 dB the arrow of the note below ran
@@ -6967,7 +6967,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         turbulent,
         color=COLOR_PRIMARY,
         lw=2.4,
-        label="Turbulent, $\\eta_{turb}$",
+        label="Turbulent, $\\eta_\\mathrm{turb}$",
     )
     ax3.plot(
         ratios,
@@ -6975,7 +6975,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         color=COLOR_SECONDARY,
         lw=2.4,
         ls="--",
-        label="Cavitating, $\\eta_{cav}$",
+        label="Cavitating, $\\eta_\\mathrm{cav}$",
     )
     ax3.axvline(corrected, color=COLOR_MUTED, ls=":", lw=1.4)
     ax3.set_yscale("log")
@@ -7489,7 +7489,8 @@ def generate_enclosure_cabin_insulation(output_dir: str) -> None:
     twin.grid(visible=False)
     weighted = res.a_weighted_insulation or 0.0
     twin.annotate(
-        f"A-weighted insertion loss $D_{{WA}}$ = {weighted:.1f} dB,\n"
+        rf"A-weighted insertion loss $D_{{W\mathrm{{A}}}}$ = {weighted:.1f} dB,"
+        "\n"
         "which is the single number a declaration carries",
         xy=(2000.0, float(res.insulation[4])),
         xytext=(330.0, 44.0),

@@ -36,7 +36,7 @@ spectrum with it.
 
 **Transmission** (Clause 5.3). The ratio of the velocities at the distance
 :math:`r` and at the reference distance :math:`r_0` is geometric spreading
-times material damping (Formula (5)), :math:`(r/r_0)^{-n} e^{-\alpha_R (r -
+times material damping (Formula (5)), :math:`(r/r_0)^{-n} \mathrm{e}^{-\alpha_R (r -
 r_0)}` with :math:`\alpha_R = 2\pi f D / c_s`, or a power law with an exponent
 measured per band (Formula (6)); the level difference is 20 lg of it
 (Formula (4)). On the surface the exponent is usually 0,2 to 0,4.
@@ -568,7 +568,7 @@ def ground_transmission_db(
     r"""The transmission through the ground, Formulae (4) to (6).
 
     Formula (5) gives the ratio of the velocity at :math:`r` to that at
-    :math:`r_0` as :math:`(r/r_0)^{-n} e^{-\alpha_R(f)(r - r_0)}`, geometric
+    :math:`r_0` as :math:`(r/r_0)^{-n} \mathrm{e}^{-\alpha_R(f)(r - r_0)}`, geometric
     spreading with the exponent :math:`n` and material damping with
     :math:`\alpha_R` of :func:`ground_attenuation_coefficient_per_m`, and
     Formula (4) takes 20 lg of it. With the damping left out and an

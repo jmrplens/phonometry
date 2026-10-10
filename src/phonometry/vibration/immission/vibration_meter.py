@@ -21,6 +21,9 @@ into the dimensionless **KB signal**. Its running r.m.s. with
 vibration severity*, and the quantities a meter displays are its maximum
 :math:`KB_\mathrm{Fmax}`, the maximum within each 30 s clock interval
 (*Takt*) and the r.m.s. of those clock maxima :math:`KB_\mathrm{FTm}` (Formula (2)).
+The list of symbols of the standard (Clause 4) prints KB upright; the
+formulas, figures and diagrams of this documentation set it italic, as
+DIN 4150-2 prints it.
 
 **Two rules of Formula (2) that are easy to miss.** A clock maximum at or
 below 0,1 enters the sum as zero but still counts in :math:`N`, so a quiet
@@ -211,7 +214,7 @@ RESPONSE_TOLERANCE_UPPER_PERCENT: tuple[tuple[float, float, float], ...] = (
 _UPPER_TOLERANCE_FLOOR: float = 0.01
 
 #: Table 8 as Corrigendum 1:2012-12 rewrites it: bursts of an 80 Hz sine
-#: repeated once a second, and the ``KB_Fmax`` each must show as a percentage
+#: repeated once a second, and the :math:`KB_\mathrm{Fmax}` each must show as a percentage
 #: of the display for the continuous signal of the same amplitude. The rows
 #: are ``(burst duration in milliseconds, whole sine cycles per second,
 #: percentage)``; ``math.inf`` is the continuous signal, whose 100,4 % is the
@@ -228,7 +231,7 @@ KB_PULSE_RESPONSE_PERCENT: tuple[tuple[float, int, float], ...] = (
 )
 
 #: The rows of Table 9 that follow the formulas of 5.2.3: for a 1 mm/s sine at
-#: each test frequency, the ``KB_F(t)``, ``KB_Fmax`` and ``KB_FTm`` a meter of
+#: each test frequency, the :math:`KB_\mathrm{F}(t)`, :math:`KB_\mathrm{Fmax}` and :math:`KB_\mathrm{FTm}` a meter of
 #: the building working range must display. The ``|v|max`` row of the same
 #: table is not here; see the module docstring and ``docs/ERRATA.md``.
 KB_TEST_INDICATIONS: Mapping[float, tuple[float, float, float]] = MappingProxyType(
@@ -608,7 +611,7 @@ def verify_vibration_meter(
 def kb_signal(
     velocity_mm_s: ArrayLike, fs_hz: float, *, working_range: str = "building"
 ) -> NDArray[np.float64]:
-    """The KB signal ``KB(t)`` of 3.10.1.1, which is dimensionless.
+    """The KB signal :math:`KB(t)` of 3.10.1.1, which is dimensionless.
 
     The velocity is band-limited and frequency-weighted by Formula (4) and
     normalised by 1 mm/s, which is the normalisation that makes the KB signal
@@ -619,7 +622,7 @@ def kb_signal(
         (1-D).
     :param fs_hz: Sampling frequency, in hertz.
     :param working_range: See :func:`band_limitation_response`.
-    :return: ``KB(t)``, one value per sample.
+    :return: :math:`KB(t)`, one value per sample.
     :raises ValueError: For a bad record, a rate that cannot carry the working
         range, or an unknown range.
     """
@@ -636,7 +639,7 @@ def kbf_signal(
     working_range: str = "building",
     time_constant_s: float = KB_TIME_CONSTANT_S,
 ) -> NDArray[np.float64]:
-    """The weighted vibration severity ``KB_F(t)``, Formula (1).
+    r"""The weighted vibration severity :math:`KB_\mathrm{F}(t)`, Formula (1).
 
     The running r.m.s. is the exponential average the formula integrates, as
     the single-pole recursion Annex A draws: ``y[i] = (1 - a) y[i-1] + a x[i]``
@@ -653,7 +656,7 @@ def kbf_signal(
         standard fixes it at 0,125 s and the parameter exists so a comparison
         with another time weighting can be written down, not so a meter can
         use one.
-    :return: ``KB_F(t)``, one value per sample.
+    :return: :math:`KB_\mathrm{F}(t)`, one value per sample.
     :raises ValueError: For a bad record, a non-positive time constant, or a
         rate that cannot carry the working range.
     """
@@ -702,13 +705,13 @@ def _exponential_running_rms(
 def takt_maxima(
     kbf: ArrayLike, fs_hz: float, *, takt_duration_s: float = TAKT_DURATION_S
 ) -> NDArray[np.float64]:
-    """The clock maxima ``KB_FTi`` of 3.10.1.4, one per whole clock interval.
+    r"""The clock maxima :math:`KB_{\mathrm{FT}i}` of 3.10.1.4, one per whole clock interval.
 
     A clock interval the record did not fill is not a clock interval: 5.1.6.4
     says the averaging time always spans a whole number of them, so a trailing
     part-interval is dropped rather than scaled up.
 
-    :param kbf: The ``KB_F(t)`` signal (1-D).
+    :param kbf: The :math:`KB_\mathrm{F}(t)` signal (1-D).
     :param fs_hz: Sampling frequency, in hertz.
     :param takt_duration_s: The clock interval, in seconds (default 30 s).
     :return: One maximum per whole clock interval, in order. Empty when the
@@ -730,7 +733,7 @@ def takt_maxima(
 
 
 def takt_maximum_rms(maxima: ArrayLike) -> float:
-    """The clock maximum r.m.s. ``KB_FTm``, Formula (2).
+    r"""The clock maximum r.m.s. :math:`KB_\mathrm{FTm}`, Formula (2).
 
     Both rules of the formula are here: a clock maximum at or below
     :data:`TAKT_SUPPRESSION_THRESHOLD` enters the sum as zero, and the
@@ -738,7 +741,7 @@ def takt_maximum_rms(maxima: ArrayLike) -> float:
     pulls the result down instead of leaving it unchanged.
 
     :param maxima: The clock maxima of :func:`takt_maxima`.
-    :return: ``KB_FTm``, dimensionless. Zero for an empty input, which is the
+    :return: :math:`KB_\mathrm{FTm}`, dimensionless. Zero for an empty input, which is the
         answer for a record with no whole clock interval in it.
     :raises ValueError: If a maximum is negative or not finite.
     """
@@ -763,7 +766,7 @@ class VibrationMeterReading(OwnsArrays):
 
     :ivar peak_velocity_mm_s: :math:`|v|_\mathrm{max}`, the largest absolute
         value of the band-limited velocity over the measuring time.
-    :ivar kbf: The ``KB_F(t)`` signal, one value per sample.
+    :ivar kbf: The :math:`KB_\mathrm{F}(t)` signal, one value per sample.
     :ivar kbf_max: :math:`KB_\mathrm{Fmax}`, its maximum.
     :ivar takt_maxima: The clock maxima, one per whole clock interval.
     :ivar kbf_takt_rms: :math:`KB_\mathrm{FTm}` of Formula (2).
@@ -798,7 +801,7 @@ class VibrationMeterReading(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
     ) -> Axes:
-        """Draw ``KB_F(t)`` with its maximum and the clock maxima on it.
+        r"""Draw :math:`KB_\mathrm{F}(t)` with its maximum and the clock maxima on it.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.

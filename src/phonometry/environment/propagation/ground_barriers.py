@@ -17,7 +17,7 @@ Eq. (3.2)):
 
 .. math::
 
-   p = \frac{e^{ikR_1}}{4 \pi R_1} + Q \, \frac{e^{ikR_2}}{4 \pi R_2}
+   p = \frac{\mathrm{e}^{ikR_1}}{4 \pi R_1} + Q \, \frac{\mathrm{e}^{ikR_2}}{4 \pi R_2}
 
 with :math:`R_1` the source-receiver distance, :math:`R_2` the image-source
 distance and (Attenborough Eq. (2.40c) / Salomons Eq. (D.58)):
@@ -46,7 +46,7 @@ the Faddeeva function :func:`scipy.special.wofz`. The relative sound level (the
 .. math::
 
    \Delta L = 20 \log_{10} \left| 1 + Q \, \frac{R_1}{R_2} \,
-   e^{i k (R_2 - R_1)} \right| \tag{Salomons Eq. 3.4}
+   \mathrm{e}^{i k (R_2 - R_1)} \right| \tag{Salomons Eq. 3.4}
 
 Limits reproduced by the implementation: an acoustically hard ground
 (:math:`|Z| \to \infty`) gives :math:`R_\mathrm{p} \to 1`, so
@@ -57,13 +57,13 @@ regardless of the boundary loss (the ground wave vanishes), and
 (:math:`h_\mathrm{s}, h_\mathrm{r} \to 0`, :math:`\cos\theta \to 0`) :math:`R_\mathrm{p} \to -1`; and as
 the range grows (:math:`R_2 \to \infty`) :math:`|w| \to \infty` and
 :math:`F \to 0`. The ground impedance is taken in
-the :math:`e^{-i \omega t}` time convention of Salomons, in which a passive
+the :math:`\mathrm{e}^{-i \omega t}` time convention of Salomons, in which a passive
 ground has :math:`\operatorname{Im}(Z) > 0`; it may be supplied directly or
 derived from the porous models of :mod:`phonometry.materials`
 (:func:`~phonometry.materials.delany_bazley` / :func:`~phonometry.materials.miki`),
 which model a semi-infinite porous ground whose surface impedance equals the
 characteristic impedance of the medium. The materials domain works in the
-opposite :math:`e^{+j \omega t}` convention (:math:`\operatorname{Im}(Z) < 0`
+opposite :math:`\mathrm{e}^{+j \omega t}` convention (:math:`\operatorname{Im}(Z) < 0`
 for a passive medium), so
 any impedance obtained from a porous model is conjugated internally before it
 enters the formulas above.
@@ -168,13 +168,13 @@ def _normalized_ground_impedance(
     impedance of :func:`~phonometry.materials.delany_bazley` /
     :func:`~phonometry.materials.miki`.
 
-    The returned impedance is in the :math:`e^{-i \omega t}` time convention
+    The returned impedance is in the :math:`\mathrm{e}^{-i \omega t}` time convention
     of Salomons (a passive ground has :math:`\operatorname{Im}(Z) > 0`). The
-    materials domain works in the opposite :math:`e^{+j \omega t}` convention
+    materials domain works in the opposite :math:`\mathrm{e}^{+j \omega t}` convention
     (:math:`\operatorname{Im}(Z) < 0`), so anything
     obtained from a porous model (the ``flow_resistivity`` path or a
     ``PorousMediumResult``) is conjugated here; a plain ``impedance``
-    scalar/array is taken as already :math:`e^{-i \omega t}` and passed
+    scalar/array is taken as already :math:`\mathrm{e}^{-i \omega t}` and passed
     through.
     """
     from ...materials.absorbers.porous import PorousMediumResult
@@ -202,7 +202,7 @@ def _normalized_ground_impedance(
 def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Complex:
     r"""Broadcast a scalar/array normalized impedance to the frequency shape.
 
-    The impedance is in the :math:`e^{-i \omega t}` convention (a passive
+    The impedance is in the :math:`\mathrm{e}^{-i \omega t}` convention (a passive
     ground has :math:`\operatorname{Im}(Z) > 0`); a zero or non-finite
     impedance is rejected because :math:`1/Z`
     enters the numerical distance (an infinite ``Z`` would give ``inf/inf`` NaN
@@ -295,7 +295,7 @@ def spherical_reflection_coefficient(
     :param frequencies: Frequencies, in hertz.
     :param normalized_impedance: Ground surface impedance normalized by
         ``rho c`` (complex, per frequency or scalar), in the
-        :math:`e^{-i \omega t}` time convention (a passive ground has
+        :math:`\mathrm{e}^{-i \omega t}` time convention (a passive ground has
         :math:`\operatorname{Im}(Z) > 0`).
     :param source_height: Source height ``hs`` above the ground, in metres.
     :param receiver_height: Receiver height ``hr`` above the ground, in metres.
@@ -363,11 +363,11 @@ def ground_effect(
     r"""Spherical-wave ground effect above a finite-impedance ground.
 
     Assembles the two-ray field
-    :math:`p = e^{ikR_1}/(4 \pi R_1) + Q \, e^{ikR_2}/(4 \pi R_2)`
+    :math:`p = \mathrm{e}^{ikR_1}/(4 \pi R_1) + Q \, \mathrm{e}^{ikR_2}/(4 \pi R_2)`
     with the spherical-wave reflection coefficient ``Q`` of
     :func:`spherical_reflection_coefficient` and reports the relative sound
     level
-    :math:`\Delta L = 20 \log_{10}\left| 1 + Q (R_1/R_2) e^{i k (R_2 - R_1)}
+    :math:`\Delta L = 20 \log_{10}\left| 1 + Q (R_1/R_2) \mathrm{e}^{i k (R_2 - R_1)}
     \right|` (Salomons Eq. (3.4)),
     i.e. the level re the free field.
 
@@ -381,10 +381,10 @@ def ground_effect(
     :param source_height: Source height ``hs``, in metres.
     :param receiver_height: Receiver height ``hr``, in metres.
     :param distance: Horizontal source-receiver distance, in metres.
-    :param impedance: Normalized ground impedance (:math:`e^{-i \omega t}`
+    :param impedance: Normalized ground impedance (:math:`\mathrm{e}^{-i \omega t}`
         convention, :math:`\operatorname{Im}(Z) > 0` for a passive ground), or
         a ``PorousMediumResult`` (which is conjugated internally from the
-        materials' :math:`e^{+j \omega t}` convention).
+        materials' :math:`\mathrm{e}^{+j \omega t}` convention).
     :param flow_resistivity: Effective flow resistivity ``sigma`` (Pa s/m2);
         grassland is about ``2e5`` (Salomons Sec. 3.1). The porous model raises
         a :class:`~phonometry.materials.PorousAbsorberWarning` when the lowest
@@ -563,7 +563,7 @@ def _screen_field(
 
     .. math::
 
-       p_\mathrm{d} = \frac{e^{ikR'}}{4 \pi R'} \, \frac{1+i}{2}
+       p_\mathrm{d} = \frac{\mathrm{e}^{ikR'}}{4 \pi R'} \, \frac{1+i}{2}
        \left[ A_\mathrm{D}(X_-) + A_\mathrm{D}(X_+) \right]
 
     with :math:`R' = A + e + B` the shortest diffracted path over the barrier
@@ -895,10 +895,10 @@ def barrier_insertion_loss(
     :param thickness: Top width ``e`` of a thick barrier (double diffraction),
         in metres; ``None`` for a thin screen.
     :param ground_impedance: Normalized ground impedance for the coherent ground
-        model (``"exact"`` only), in the :math:`e^{-i \omega t}` convention
+        model (``"exact"`` only), in the :math:`\mathrm{e}^{-i \omega t}` convention
         (:math:`\operatorname{Im}(Z) > 0` for a passive ground); a
         ``PorousMediumResult`` is conjugated internally from the materials'
-        :math:`e^{+j \omega t}` convention.
+        :math:`\mathrm{e}^{+j \omega t}` convention.
     :param ground_flow_resistivity: Effective flow resistivity ``sigma``
         (Pa s/m2) for the ground model, as an alternative to ``ground_impedance``.
     :param ground_model: Porous model for ``ground_flow_resistivity``.

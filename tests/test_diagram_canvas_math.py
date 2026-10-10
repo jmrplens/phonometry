@@ -142,6 +142,25 @@ def test_operator_names_and_acronyms_stay_upright() -> None:
     ]
 
 
+def test_the_vibration_severity_is_one_italic_symbol() -> None:
+    """KB is a quantity, italic as DIN 4150-2 prints it, not an acronym.
+
+    Every other run of two Latin letters on the baseline stays upright, and
+    inside a subscript the curated sets still decide.
+    """
+    assert _math_runs("$KB_{Fmax}$") == [
+        ("KB", True, 0.0, 1.0),
+        ("Fmax", False, 0.22, 0.7),
+    ]
+    assert _math_runs("$TL$") == [("TL", False, 0.0, 1.0)]
+    assert _math_runs("$L_{KB}$") == [
+        ("L", True, 0.0, 1.0),
+        ("KB", True, 0.22, 0.7),
+    ]
+    element = _element("$KB_{FTm}$")
+    assert _uses(element, _ITAL) > 0
+
+
 def test_greek_letters_are_italic_variables() -> None:
     # Adjacent single-letter variables merge into one italic run; the
     # prime is an upright glyph after its greek base.
@@ -366,11 +385,12 @@ def test_capital_greek_is_upright_and_lowercase_stays_italic() -> None:
         ("L", True, 0.0, 1.0),
         ("i", True, 0.22, 0.70),
     ]
-    # Doc 29 prints the SOR subscript in italic (eq. 4-23): it is not on
-    # the curated roman list, so it takes the italic index default.
+    # Doc 29 prints every subscript italic, max and ref included, so its
+    # italic SOR says nothing; the start of roll is an abbreviation and is
+    # on the curated roman list.
     assert _math_runs("$Δ_{SOR}$") == [
         ("Δ", False, 0.0, 1.0),
-        ("SOR", True, 0.22, 0.70),
+        ("SOR", False, 0.22, 0.70),
     ]
     assert all(not italic for _, italic, _, _ in _math_runs("banked by $Φ$ in turns"))
     # Lowercase Greek keeps the italic-variable rule, base and script.
@@ -425,7 +445,7 @@ def test_a_greek_and_latin_script_splits_by_letter() -> None:
     # A capital Greek base with a Latin script is not such a run.
     assert _math_runs("$Δ_{SOR}$") == [
         ("Δ", False, 0.0, 1.0),
-        ("SOR", True, 0.22, 0.70),
+        ("SOR", False, 0.22, 0.70),
     ]
     # A Greek-plus-Latin script that is not curated keeps the old split.
     assert _math_runs("$M_{Δlx}$") == [
@@ -663,8 +683,45 @@ def test_a_key_never_reaches_a_mixed_run() -> None:
     assert hits == set()
 
 
+def test_a_run_splits_letter_by_letter_under_its_own_symbol_only() -> None:
+    # ISO 7235 prints the series levels L_pI and L_pII with the italic p of
+    # the pressure and an upright I and II, while the pressure-intensity
+    # indicator F_pI of ISO 9614 keeps both letters italic: the split hangs
+    # on the symbol, not on the letters.
+    assert _math_runs("$L_{pI}$") == [
+        ("L", True, 0.0, 1.0),
+        ("p", True, 0.22, 0.70),
+        ("I", False, 0.22, 0.70),
+    ]
+    assert _math_runs("$L_{pII}$")[-1] == ("II", False, 0.22, 0.70)
+    assert _math_runs("$F_{pI}$") == [
+        ("F", True, 0.0, 1.0),
+        ("pI", True, 0.22, 0.70),
+    ]
+    # ISO 11820 sets the t, i and s of D_tps and D_ips upright around the
+    # italic p of the pressure.
+    assert _math_runs("$D_{tps}$")[1:] == [
+        ("t", False, 0.22, 0.70),
+        ("p", True, 0.22, 0.70),
+        ("s", False, 0.22, 0.70),
+    ]
+
+
+def test_a_one_letter_key_sets_the_baseline_symbol_upright() -> None:
+    """ICAO Annex 16 prints its speeds in roman: V_H with an upright V."""
+    assert _math_runs("$0.9 V_H$", upright=("V", "V_H")) == [
+        ("0.9 V", False, 0.0, 1.0),
+        ("H", False, 0.22, 0.7),
+    ]
+    hits: set[str] = set()
+    _math_runs("$r · v_Z / v_R$", upright=("v",), hits=hits)
+    assert hits == {"v"}
+    with pytest.raises(ValueError, match="upright key 'VH' is neither"):
+        _math_runs("$V_H$", upright=("VH",))
+
+
 def test_a_malformed_key_is_refused() -> None:
-    with pytest.raises(ValueError, match="upright key 'Sp' is not"):
+    with pytest.raises(ValueError, match="upright key 'Sp' is neither"):
         _math_runs("$S_p$", ("Sp",))
 
 

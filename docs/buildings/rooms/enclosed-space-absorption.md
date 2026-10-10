@@ -236,7 +236,7 @@ repository. Click the preview to open the PDF:
   (ISO 11654), the rating §3 forbids as an input.
 - [Predicting Sound Insulation (EN 12354)](../design/insulation-prediction.md):
   the family member that consumes the $A$ computed here, through
-  $D_\mathrm{nT} = D + 10\lg(T/T_0)$ and $R' = D + 10\lg(S/A)$.
+  $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ and $R' = D + 10\lg(S/A)$.
 - [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
   the three Annex E cases these implementations are checked against.
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): the full ISO 9613-1

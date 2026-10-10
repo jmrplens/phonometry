@@ -19,9 +19,9 @@ $$
 That is Equation (1) in the laboratory. Equation (2) is the same arithmetic
 **in situ**, where the room need not be diffuse, and the answer carries a prime
 to say so: $D'_p$. Equation (3) is the A-weighted difference
-$D'_{pA}$, and the standard defines it only for the third of its three
+$D'_{p\mathrm{A}}$, and the standard defines it only for the third of its three
 methods, the one that drives the room with the noise that is actually there.
-There is no unprimed $D_{pA}$ in this document, and
+There is no unprimed $D_{p\mathrm{A}}$ in this document, and
 [`cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) refuses to compute one.
 
 The three methods
@@ -34,7 +34,7 @@ The three methods
   answer itself ([`check_source_positions`](/phonometry/reference/api/noise_control/cabin-insulation/#check_source_positions));
 * **in situ with the actual noise**, 7.2.2, where the machinery of the
   workplace is the source, which is the only method that yields
-  $D'_{pA}$.
+  $D'_{p\mathrm{A}}$.
 
 Only results from the same method may be compared, which is why the method is
 a field of [`CabinInsulationResult`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresult) and not a remark in a docstring.
@@ -151,7 +151,7 @@ D_p = (L_p)_{\text{room}} - (L_p)_{\text{cabin}}
 $$
 
 in the laboratory, the same in situ under the name $D'_p$, and the
-A-weighted difference $D'_{pA} = (L_{pA})_{\text{room}} - (L_{pA})_{\text{cabin}}$ when the source is the noise of the workplace.
+A-weighted difference $D'_{p\mathrm{A}} = (L_{pA})_{\text{room}} - (L_{pA})_{\text{cabin}}$ when the source is the noise of the workplace.
 Definition 3.7 ties that last one to the actual-noise method alone, so an
 A-weighted pair given under another method is refused rather than quietly
 renamed.
@@ -210,7 +210,7 @@ The sound pressure insulation of a cabin, band by band.
 | `cabin_levels` | $(L_p)_{\text{cabin}}$, in decibels, after any background correction. |
 | `insulation` | $D_p$ or $D'_p$ per band, in decibels. |
 | `apparent` | Whether the answer carries the prime of 3.6, which it does for both in-situ methods. |
-| `a_weighted_insulation` | $D'_{pA}$ of Equation (3), in decibels, or `None`. Defined only for the actual-noise method. |
+| `a_weighted_insulation` | $D'_{p\mathrm{A}}$ of Equation (3), in decibels, or `None`. Defined only for the actual-noise method. |
 | `internal_noise_level` | $L_{pA}$ of 6.7, in decibels, or `None` when the cabin has no integral source. |
 | `method` | `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
 | `band_fraction` | 3 for one-third octaves, 1 for octaves. |
@@ -405,7 +405,7 @@ Both formulas of the annex, which differ only in whether $D_p$ or
 $D'_p$ is substituted:
 
 $$
-D_{pA,e} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_{pi})}
+D_{p\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_{pi})}
 $$
 
 with $L_A = 10 \lg \sum_i 10^{0,1 (L_i - A_i)}$ the A-weighted total
@@ -427,7 +427,7 @@ be, and nothing here is corrected for flanking through the floor.
 | `insulation` | $D_{pi}$ or $D'_{pi}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 
-**Returns:** $D_{pA,e}$ or $D'_{pA,e}$, in decibels.
+**Returns:** $D_{p\mathrm{A},\mathrm{e}}$ or $D'_{p\mathrm{A},\mathrm{e}}$, in decibels.
 
 **Raises**
 
@@ -819,7 +819,7 @@ answer to that objection.
 | Name | Description |
 | :--- | :--- |
 | `insulation` | $D_p$ or $D'_p$ over the 16 one-third-octave rating bands or the 5 octave ones, in decibels. |
-| `apparent` | Whether the spectrum is the in-situ one, which decides whether the rating is $D_{p,w}$ or $D'_{p,w}$. |
+| `apparent` | Whether the spectrum is the in-situ one, which decides whether the rating is $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$. |
 | `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
 
 **Returns:** The rating, as a [`WeightedCabinInsulation`](/phonometry/reference/api/noise_control/cabin-insulation/#weightedcabininsulation).
@@ -849,7 +849,7 @@ The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 
 | Name | Description |
 | :--- | :--- |
-| `rating` | $D_{p,w}$ or $D'_{p,w}$, in decibels. |
+| `rating` | $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$, in decibels. |
 | `c` | The spectrum adaptation term $C$, in decibels. |
 | `ctr` | The spectrum adaptation term $C_{tr}$, in decibels. |
 | `unfavourable_sum` | The sum of unfavourable deviations at the shift the rating was read at, in decibels. |

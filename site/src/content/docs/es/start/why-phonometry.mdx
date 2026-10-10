@@ -39,7 +39,7 @@ facilidad y responden a preguntas distintas:
 | Qué mide | El nivel Fast/Slow/Impulse de la norma | $L_{\mathrm{eq},\tau}$, energía por intervalo |
 
 Un polo en el eje real negativo corresponde a una respuesta al impulso
-exponencial decreciente ($h(t) \propto e^{-t/\tau}$), exactamente lo que
+exponencial decreciente ($h(t) \propto \mathrm{e}^{-t/\tau}$), exactamente lo que
 significa «ponderación temporal exponencial»: los eventos pasados se olvidan
 exponencialmente. Una implementación que en cambio
 acumule energía y se reinicie cada $\tau$ segundos ha construido el
@@ -51,12 +51,12 @@ el reinicio cambia la naturaleza de la medición.
 De esa ecuación salen además los valores de referencia del apartado siguiente, y
 vale la pena deducirlos una vez en lugar de dar por buena la Tabla 4. Intégrala
 partiendo del reposo sobre una ráfaga de duración $T_\mathrm{b}$ y la envolvente alcanza
-$(1-e^{-T_\mathrm{b}/\tau})$ del valor estacionario que acabaría produciendo ese mismo
+$(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ del valor estacionario que acabaría produciendo ese mismo
 tono, así que el nivel máximo con ponderación temporal respecto del régimen
 estacionario es
 
 $$
-\delta_{\text{ref}} = 10\lg\!\left(1 - e^{-T_\mathrm{b}/\tau}\right)
+\delta_{\text{ref}} = 10\lg\!\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)
 $$
 
 que es la Ecuación (7) de IEC 61672-1:2013. Con $\tau_\mathrm{F} = 0,125$ s da
@@ -150,7 +150,7 @@ estacionario, 1,0 dB por encima del objetivo.
   description="Una ráfaga tonal de 4 kHz se desliza a través de la frontera entre dos bloques de integración de 125 ms. La envolvente exponencial Fast alcanza el mismo máximo en todas las alineaciones porque la duración de la ráfaga entra en su ecuación diferencial, mientras que la escalera del Leq por bloques sube y baja según dónde vaya cayendo la ráfaga, y el panel de lectura frente a alineación va construyendo las dos trazas sobre el corredor de clase 1 sombreado. El segundo acto lo repite con una ráfaga de 200 ms, donde el corredor tiene la mitad de anchura."
 />
 
-*La traza exponencial es plana porque $10\lg(1-e^{-T_\mathrm{b}/\tau})$ contiene $T_\mathrm{b}$
+*La traza exponencial es plana porque $10\lg(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ contiene $T_\mathrm{b}$
 y nada del reloj; la traza por bloques, a esta duración
 fija, es un retrato de la alineación y de nada más. Las dos lecturas se calculan aquí con
 `time_weighting(x, fs, mode="fast")` y con `leq` sobre segmentos consecutivos

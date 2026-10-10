@@ -202,7 +202,7 @@ suman; y el nivel suma da el eficaz de los máximos por intervalo del tipo de
 tren (fórmula (9)), `KB_FTm,Zug = c_T1 · v₀ · 10^(L/20)` con `c_T1` = 1 para
 espectros Max Hold y `v₀` = 5·10⁻⁵ mm/s, la referencia del nivel. El valor es
 la propia magnitud KB, porque KB es la velocidad en milímetros por segundo.
-Luego 1,5 veces eso es `KB_Fmax,Zug` (fórmula (10)) y 3 veces eso la velocidad
+Luego 1,5 veces eso es $KB_\mathrm{Fmax,Zug}$ (fórmula (10)) y 3 veces eso la velocidad
 de pico que quiere una comparación con la
 [DIN 4150-3](/phonometry/es/vibration/structural/structural-damage/)
 (fórmula (12)).
@@ -274,10 +274,10 @@ print(vibration.velocity_spectrum_um_s([60.0, 75.6]).round(1))  # [ 50.  301.3]
 
 El anexo B es para el caso en que el decaimiento del terreno se midió con una
 excitación puntual, una masa de caída o un excitador, y lo que se quiere es un
-tren. Más cerca de `R₀ ≈ L² / λ` (fórmula (B.1)) un tren de longitud `L` es
+tren. Más cerca de $R_0 \approx L^2/\lambda$ (fórmula (B.1)) un tren de longitud $L$ es
 una fila de fuentes puntuales y sus ondas superficiales divergen menos que las
 de un punto; más lejos es un punto. Así que el exponente medido con el punto se
-suaviza en 0,3 hasta `R₀`, o en 0,5 si el ajuste del punto metió divergencia y
+suaviza en 0,3 hasta $R_0$, o en 0,5 si el ajuste del punto metió divergencia y
 amortiguamiento en una sola ley de potencia, y se deja como está más allá
 (fórmula (B.2) y figura B.1). Dentro de las distancias de la tabla 1, de 25 m
 para un tranvía en superficie a 200 m para mercancías sobre terreno blando, el
@@ -302,7 +302,7 @@ ponderar. Sus intensidades de valoración, 0,11 de día y 0,05 de noche, son lo
 que dan los datos impresos con el factor 0,7 bajo la raíz una vez en lugar de
 al cuadrado, donde la fórmula (11) da 0,090 y 0,040, y el veredicto de día se
 decide en esa diferencia: el ejemplo encuentra
-superado el `A_r` de 0,1, la fórmula lo encuentra cumplido. Y su columna de
+superado el $A_\mathrm{r}$ de 0,1, la fórmula lo encuentra cumplido. Y su columna de
 transferencia del forjado no sale de ninguna tabla del anexo A, y cita para
 ella la figura 3 cuando el forjado de hormigón es la figura 4. Las filas de
 conformidad sujetan la cadena desde los 78,1 dB impresos y la fórmula para los

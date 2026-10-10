@@ -568,19 +568,19 @@ in the same order.
 - **Location:** Annex F, clause F.4.2: the symbol list of Formula (F.9), the
   sentence introducing the closed form, and the caption of Table F.1 (printed
   p. 59).
-- **The print:** "$L_F$ is the force level in the source room, in dB re 1 pN";
-  "$L_F = 10\lg 2{,}5f/10^{-12}$ dB re 1 pN or $L_F = 10\lg 0{,}8f/10^{-12}$ dB
-  re 1 pN for one-third octave bands"; and "Table F.1 – Force level $L_F$ re
+- **The print:** "$L_\mathrm{F}$ is the force level in the source room, in dB re 1 pN";
+  "$L_\mathrm{F} = 10\lg 2{,}5f/10^{-12}$ dB re 1 pN or $L_\mathrm{F} = 10\lg 0{,}8f/10^{-12}$ dB
+  re 1 pN for one-third octave bands"; and "Table F.1 – Force level $L_\mathrm{F}$ re
   1 pN for the ISO tapping machine in octave bands", whose eight cells read
   139, 142, 145, 148, 151, 154, 156 and 156 dB.
 - **The problem:** the reference force of those levels is $10^{-6}$ N, not
   1 pN. Three independent readings agree, and none of them is compatible with
   the printed reference. **(a) The annex's own algebra.** A power level re
   1 pW built from a force level and a mobility is
-  $L_W = L_F + 10\lg(F_0^2 Y / W_0)$. Formula (D.5a) prints
-  $L_{Ws,c} = L_{F,eq} + 10\lg Y_s$ and Formula (D.9a) prints
-  $L_{Ws,c} = L_F - 5 - 10\lg f$, which is the same expression evaluated at
-  the mass-like source mobility $Y_s = (2\pi f M)^{-1}$ of a 0,5 kg tapping
+  $L_\mathrm{W} = L_\mathrm{F} + 10\lg(F_0^2 Y / W_0)$. Formula (D.5a) prints
+  $L_\mathrm{Ws,c} = L_\mathrm{F,eq} + 10\lg Y_\mathrm{s}$ and Formula (D.9a) prints
+  $L_\mathrm{Ws,c} = L_\mathrm{F} - 5 - 10\lg f$, which is the same expression evaluated at
+  the mass-like source mobility $Y_\mathrm{s} = (2\pi f M)^{-1}$ of a 0,5 kg tapping
   hammer. Neither carries a term for $F_0^2/W_0$, so both balance only when
   $F_0^2 / W_0 = 1\ \text{s}^{-1}$, that is $F_0 = 10^{-6}$ N; read re 1 pN
   each would fall 120 dB short of the level it defines. The velocity
@@ -621,18 +621,18 @@ in the same order.
 
 - **Location:** Annex D, the Key of Figure D.3 (printed p. 47).
 - **The print:** three key rows, each labelled with the same symbol:
-  $L_{Ws,c,A} = 124\ \text{dB}$, $L_{Ws,c,A} = 119\ \text{dB}$ and
-  $L_{Ws,c,A} = 102\ \text{dB}$.
+  $L_\mathrm{Ws,c,A} = 124\ \text{dB}$, $L_\mathrm{Ws,c,A} = 119\ \text{dB}$ and
+  $L_\mathrm{Ws,c,A} = 102\ \text{dB}$.
 - **The problem:** the figure's own caption reads "Structure-borne sound power
   for the ISO-tapping machine: characteristic source power, installed power on
   a wooden floor and installed power on a concrete floor; the A-weighted power
   level is also indicated". Only the first curve is a characteristic power; the
   other two are installed powers and their A-weighted totals are
-  $L_{Ws,\text{inst},A}$. The plotted curves settle the assignment: the first
+  $L_\mathrm{Ws,inst,A}$. The plotted curves settle the assignment: the first
   is flat at about 114,5 dB re 1 pW, which is the frequency-independent
   Formula (D.9a) result for the tapping machine, while the other two rise with
   frequency and lie below it, the concrete floor lowest, as
-  $L_{Ws,c} - D_{C,i}$ requires.
+  $L_\mathrm{Ws,c} - D_{\mathrm{C},i}$ requires.
 - **Evidence:** verified on PDF page 49 (printed p. 47) of BS EN 12354-5:2009,
   the page carrying Figure D.3 with its Key and its caption.
 - **Library behaviour:** none required; no value is read from Figure D.3.
@@ -696,7 +696,7 @@ in the same order.
 - **Location:** Annex L, Table L.4 (printed p. 82), the right-hand block
   headed "Transmission path 2d".
 - **The print:** the block gives $\alpha_{i,\text{situ}}$ = 6,3 to 14,1,
-  $D_{v,ij,\text{situ}}$ = 11,0 to 13,6 and $R_{ij}$ = 43,9 to 84,6 dB.
+  $D_{\mathrm{v},ij,\text{situ}}$ = 11,0 to 13,6 and $R_{ij}$ = 43,9 to 84,6 dB.
 - **The problem:** those are the numbers of path **4d** (internal wall 2 to
   the separating floor), not of path 2d (external wall 2). Table L.1 of the
   same annex prints the whole $R_{4d}$ column, 43,9 to 84,6 dB, and the
@@ -705,17 +705,17 @@ in the same order.
   has $\alpha_{i,\text{situ}} = 10{,}3\ \text{m}$ at 50 Hz
   ($S = 13{,}75\ \text{m}^2$, $\eta_\text{tot} = 0{,}114\,9$) while internal
   wall 2 has 6,3 m ($\eta_\text{tot} = 0{,}070\,3$), the printed value; and
-  $D_{v,ij,\text{situ}}$ follows the floor-to-internal-wall $K_{ij}$ of 8,8
+  $D_{\mathrm{v},ij,\text{situ}}$ follows the floor-to-internal-wall $K_{ij}$ of 8,8
   dB, which gives 11,0 to 13,6 dB, not the floor-to-external-wall 6,4 dB,
   which gives 9,6 to 11,9 dB.
 - **Evidence:** independent recomputation of Formulae (10), (11) and (15) for
   both candidate paths at every band. Path 4d reproduces all three columns of
-  the block, $\alpha_{i,\text{situ}}$ to 0,05 m and $D_{v,ij,\text{situ}}$ and
+  the block, $\alpha_{i,\text{situ}}$ to 0,05 m and $D_{\mathrm{v},ij,\text{situ}}$ and
   $R_{ij}$ to 0,05 dB, which is the printed resolution. Path 2d departs from
   the block's $R_{ij}$ column by 0,1 dB to 7,0 dB depending on the band, and
   comes closest between 100 Hz and 160 Hz (0,5 / 0,5 / 0,1 dB), so $R_{ij}$
   alone does not identify the path over those bands; $\alpha_{i,\text{situ}}$
-  (10,3 against 6,3 m at 50 Hz) and $D_{v,ij,\text{situ}}$ (1,4 dB to 1,7 dB
+  (10,3 against 6,3 m at 50 Hz) and $D_{\mathrm{v},ij,\text{situ}}$ (1,4 dB to 1,7 dB
   apart in every band) do.
 - **Library behaviour:** the test that asserts the block builds it as path 4d
   and names the mislabelling.
@@ -763,7 +763,7 @@ in the same order.
   tables cannot both be right, and from 100 Hz upwards they agree exactly.
 - **Evidence:** Formula (12) evaluated from the annex's own Table G.3 columns
   ($L_{n,\text{situ}}$, $R_\text{situ}$) and the Table G.4
-  $D_{v,ij,\text{situ}}$ and $\Delta L_\text{situ}$ columns gives 47,80 /
+  $D_{\mathrm{v},ij,\text{situ}}$ and $\Delta L_\text{situ}$ columns gives 47,80 /
   45,85 / 46,95 dB, reproducing the printed 47,8 / 45,9 / 47,0 of Table G.4 to
   0,05 dB and Table G.1 only from 100 Hz upwards. Carrying the same
   recomputation through the whole chain puts external wall 2 low by 0,5 dB to
@@ -1059,10 +1059,10 @@ in the same order.
   p. 14) and Formula (14) itself (printed p. 15), the structural power level
   injected into the reception plate.
 - **The print:** the sentence reads "a partir del nivel de velocidad promediado
-  espacialmente de la placa $L_v$, de la **masa por unidad de superficie** $m$,
+  espacialmente de la placa $L_\mathrm{v}$, de la **masa por unidad de superficie** $m$,
   del área de la placa $S$ y del factor de pérdida $\eta$, utilizando
   $f_0 = 1$ Hz, $m_0 = 1$ kg y $S_0 = 1$ m² como referencias", above
-  $L_{Ws} = \left(10\lg\left(\dfrac{2\pi f m \eta S}{f_0 \cdot m_0 \cdot S_0}\right)\right)\text{dB} + L_v - 60\ \text{dB}$.
+  $L_\mathrm{Ws} = \left(10\lg\left(\dfrac{2\pi f m \eta S}{f_0 \cdot m_0 \cdot S_0}\right)\right)\text{dB} + L_\mathrm{v} - 60\ \text{dB}$.
 - **The problem:** the same sentence defines $m$ as a mass per unit area, in
   kg/m², and its reference $m_0$ as 1 kg. With $m$ in kg/m² and $S$ in m², the
   group $2\pi f\,\eta\,m\,S / (f_0 m_0 S_0)$ is dimensionless only if $m_0$ is
@@ -4113,8 +4113,8 @@ in the same order.
   $Z_{\Delta l_\text{slit}} = -i\omega \cdot \Delta l_\text{slit} \cdot \rho_0/(\phi t \cdot S_0)$.
 - **The problem:** the term models the added radiation mass of the slit mouth,
   but the printed $-i\omega$ prefactor is an opposite-time-convention
-  ($e^{-i\omega t}$) expression inconsistent with the papers' otherwise
-  $e^{+i\omega t}$ transfer-matrix chain (the $+i$ off-diagonal slit matrices
+  ($\mathrm{e}^{-i\omega t}$) expression inconsistent with the papers' otherwise
+  $\mathrm{e}^{+i\omega t}$ transfer-matrix chain (the $+i$ off-diagonal slit matrices
   of Appl. Sci. Eq. (2) and the $-i$ cotangent-type resonator impedance).
   Transcribed literally into that chain, the correction raises the slit-panel
   resonance where an added mass must lower it: for a 1 mm slit with a 30 mm
@@ -4126,7 +4126,7 @@ in the same order.
   the uncorrected panel; the direction of the neck end corrections of the same
   papers as the consistent control.
 - **Library behaviour:** uses the added-mass sign ($+j\omega$ in the
-  $e^{+j\omega t}$ convention of the library), conjugating the printed term
+  $\mathrm{e}^{+j\omega t}$ convention of the library), conjugating the printed term
   exactly as it conjugates the papers' Stinson duct series; direction and peak
   are pinned by ``test_slit_radiation_correction_lowers_resonance`` in
   [`tests/materials/absorbers/test_slow_sound.py`](../tests/materials/absorbers/test_slow_sound.py).
@@ -6596,7 +6596,7 @@ in the same order.
   sound", and prints
 
   $$
-  ST_\mathrm{Early} = 10 \lg \left[
+  \mathrm{ST}_\mathrm{Early} = 10 \lg \left[
       \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t}
            {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right]\ \mathrm{dB}.
   $$
@@ -6606,7 +6606,7 @@ in the same order.
   and prints
 
   $$
-  ST_\mathrm{Late} = 10 \lg \left[
+  \mathrm{ST}_\mathrm{Late} = 10 \lg \left[
       \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t}
            {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right]\ \mathrm{dB}.
   $$
@@ -6621,7 +6621,7 @@ in the same order.
   exponential decay of $T = 2$ s, a reader who takes "within the first 0,1 s"
   to start where the direct-sound window ends collects the 10 ms to 20 ms
   interval as well, which is 17 % more energy and **0,68 dB** on
-  $ST_\mathrm{Early}$, against the 1 dB standard deviation C.2.4 estimates
+  $\mathrm{ST}_\mathrm{Early}$, against the 1 dB standard deviation C.2.4 estimates
   for a single reading. The missing ceiling of (C.2) costs 0,01 dB in the
   same hall, because a 2 s decay is already 30 dB down at one second, and
   reaches 0,2 dB at $T = 4$ s and 1,0 dB at $T = 8$ s: it is the cathedral,
@@ -7444,11 +7444,11 @@ in the same order.
   on a physical meter and is not implemented.
 - **Status:** unreported (typographic, no numerical consequence).
 
-## DIN 45669-1:2010-09, Table 9 (a peak-velocity row that contradicts Formula (5), and the KB_F row beside it)
+## DIN 45669-1:2010-09, Table 9 (a peak-velocity row that contradicts Formula (5), and the $KB_\mathrm{F}$ row beside it)
 
 - **Location:** Table 9, printed folio 35 (PDF page 35 of the copy read here,
   which prints its folio numbers without an offset), rows "|v|max in mm/s bei
-  f_u = 1 Hz und f_o = 80 Hz" and "KB_F(t) ± 2 % Schwankung".
+  f_u = 1 Hz und f_o = 80 Hz" and "$KB_\mathrm{F}(t)$ ± 2 % Schwankung".
 - **The print:** for a sinusoidal input at the test frequencies, the peak row
   reads 0,852 at 1 Hz, 1,000 at 5,6 Hz, 1,000 at 31,5 Hz, 0,843 at 80 Hz and
   0,249 at 315 Hz; the $KB_\mathrm{F}$ row of the same five columns reads 0,103, 0,500,
@@ -7492,20 +7492,20 @@ in the same order.
   Formula (5) on printed page 8 (PDF pages 7 and 8 of the copy read here, which
   prints its folios without an offset).
 - **The print:** Formula (1) gives the compression-wave speed as
-  $v_p = \sqrt{E/\rho} = \sqrt{G(1-\nu)/(\rho(1-2\nu))}$, Formula (3) gives
-  Poisson's ratio as $\nu = (v_p^2 - 2 v_s^2)/(2(v_p^2 - v_s^2))$, and
-  Formula (5) gives the two moduli as $G = v_s^2 \rho$ and $E = v_p^2 \rho$.
+  $\mathrm{v}_\mathrm{p} = \sqrt{E/\rho} = \sqrt{G(1-\nu)/(\rho(1-2\nu))}$, Formula (3) gives
+  Poisson's ratio as $\nu = (\mathrm{v}_\mathrm{p}^2 - 2 \mathrm{v}_\mathrm{s}^2)/(2(\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2))$, and
+  Formula (5) gives the two moduli as $G = \mathrm{v}_\mathrm{s}^2 \rho$ and $E = \mathrm{v}_\mathrm{p}^2 \rho$.
 - **The problem:** the three cannot all hold. In the unbounded continuum the
   clause says it is describing, the compression wave travels at
-  $v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$, and Formula (3) is exactly the
-  inversion of that together with $v_s = \sqrt{G/\rho}$ of Formula (2). The
+  $\mathrm{v}_\mathrm{p} = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$, and Formula (3) is exactly the
+  inversion of that together with $\mathrm{v}_\mathrm{s} = \sqrt{G/\rho}$ of Formula (2). The
   second radical of Formula (1) is short of the factor 2, which makes it
   $\sqrt{2}$ too slow at every Poisson's ratio. The first, $\sqrt{E/\rho}$, is
   the speed of a longitudinal wave in a thin rod: with $E = 2G(1+\nu)$ it gives
-  $v_p^2/v_s^2 = 2(1+\nu)$, against $2(1-\nu)/(1-2\nu)$ in the continuum. The
+  $\mathrm{v}_\mathrm{p}^2/\mathrm{v}_\mathrm{s}^2 = 2(1+\nu)$, against $2(1-\nu)/(1-2\nu)$ in the continuum. The
   two expressions Formula (1) sets equal agree with each other only at
   $\nu = (\sqrt{17}-1)/8 \approx 0{,}39$. Formula (5) is the rod speed solved
-  for $E$, so from a measured $v_p$ it returns the P-wave modulus
+  for $E$, so from a measured $\mathrm{v}_\mathrm{p}$ it returns the P-wave modulus
   $M = 2G(1-\nu)/(1-2\nu)$ rather than $E$, which overstates $E$ by 35 % at
   $\nu = 0{,}3$ and by a factor of 3,8 at $\nu = 0{,}45$, the range of a
   saturated soil.
@@ -7538,12 +7538,12 @@ in the same order.
   available after $2\tau$ to within 14 % and after $4\tau$ to within 2 %, taking
   the mean of the running r.m.s. of a harmonic signal.
 - **The problem:** 14 % and 2 % are the shortfalls of the running mean square,
-  $e^{-2} = 13{,}5$ % and $e^{-4} = 1{,}8$ %, and not of the running r.m.s. the
+  $\mathrm{e}^{-2} = 13{,}5$ % and $\mathrm{e}^{-4} = 1{,}8$ %, and not of the running r.m.s. the
   sentence names. Formula (1) started from rest gives a mean square that grows
-  as $(1 - e^{-t/\tau})$ of its final value once the ripple is averaged out, so
+  as $(1 - \mathrm{e}^{-t/\tau})$ of its final value once the ripple is averaged out, so
   the r.m.s. grows as the square root of that, and it is short by
-  $1 - \sqrt{1 - e^{-2}} = 7{,}0$ % after $2\tau$ and by
-  $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % after $4\tau$: about half the printed
+  $1 - \sqrt{1 - \mathrm{e}^{-2}} = 7{,}0$ % after $2\tau$ and by
+  $1 - \sqrt{1 - \mathrm{e}^{-4}} = 0{,}9$ % after $4\tau$: about half the printed
   figures.
 - **Evidence:** Formula (1) on the same page and Figure 3 on the next, which
   draws $\tilde v_\mathrm{F}/\hat v$ of an 8 Hz and a 20 Hz sine against
@@ -8140,12 +8140,12 @@ in the same order.
 - **Location:** item 9.4 c) 2) on printed page 9 (PDF page 16 of the BS EN ISO
   11546-1:2009 copy read here, whose folios run seven behind the PDF pages),
   against clause 8 on printed page 8.
-- **The print:** "2) A-weighted sound power insulation, $D_{WA}$ (see clause
+- **The print:** "2) A-weighted sound power insulation, $D_{W\mathrm{A}}$ (see clause
   8);", listed under "9.4 Acoustical data" among the quantities a measurement
   with the actual sound source has to record.
 - **The problem:** clause 8 of this part is "Uncertainty", and it says nothing
-  about $D_{WA}$: it states the standard deviations expected of each method and
-  sends a declared value to ISO 4871. $D_{WA}$ is defined in definition 3.9 and
+  about $D_{W\mathrm{A}}$: it states the standard deviations expected of each method and
+  sends a declared value to ISO 4871. $D_{W\mathrm{A}}$ is defined in definition 3.9 and
   computed by Equation (2) of 6.2. A reader following the cross-reference
   arrives at a clause that does not define the quantity it was sent to find.
 - **Evidence:** item 9.4 c) 2) on printed page 9 and the heading and body of
@@ -8156,7 +8156,7 @@ in the same order.
   correctly where it belongs.
 - **Library behaviour:**
   [`sound_power_insulation`](../src/phonometry/noise_control/enclosure_insulation.py)
-  returns $D_{WA}$ from Equation (2) and cites 6.2 for it.
+  returns $D_{W\mathrm{A}}$ from Equation (2) and cites 6.2 for it.
 - **Status:** not reported.
 
 ## ISO 11546-1:1995, clause 8 (a misspelt word in the uncertainty statement)
@@ -8208,7 +8208,7 @@ in the same order.
 - **Location:** definition 3.11 on printed page 3 (PDF page 9), against
   Annex C and Annex D on printed pages 12 and 15.
 - **The print:** "**3.11 estimated noise insulation due to the enclosure,**
-  $D_{WA,e}$ or $D_{pA,e}$: Calculated reduction in A-weighted sound power or
+  $D_{W\mathrm{A},\mathrm{e}}$ or $D_{p\mathrm{A},\mathrm{e}}$: Calculated reduction in A-weighted sound power or
   sound pressure level obtained from $D_W$ or $D_p$, measured in accordance
   with this part of ISO 11546, and a specific noise spectrum. (See annex C.)"
 - **The problem:** Annex C of this part is "Guidelines for evaluating the
@@ -8459,10 +8459,10 @@ in the same order.
 
 - **Location:** the two level-difference equations of 8.2.2 and the list of
   symbols under them, on printed page 11 (PDF page 15).
-- **The print:** $\Delta L_B = L_{\mathrm{ref},B} - (L_{r,B} - C_r)$ and
-  $\Delta L_A = L_{\mathrm{ref},A} - (L_{r,A} - C'_r)$, and then "$C_r$ and
-  $C'_r$ are correction factors for the type of receiver position; for "hemi
-  free-field": $C_r$ = 0 dB; for "on reflecting surfaces": $C'_r$ = 6 dB".
+- **The print:** $\Delta L_\mathrm{B} = L_{\mathrm{ref},\mathrm{B}} - (L_{\mathrm{r},\mathrm{B}} - C_\mathrm{r})$ and
+  $\Delta L_\mathrm{A} = L_{\mathrm{ref},\mathrm{A}} - (L_{\mathrm{r},\mathrm{A}} - C'_\mathrm{r})$, and then "$C_\mathrm{r}$ and
+  $C'_\mathrm{r}$ are correction factors for the type of receiver position; for "hemi
+  free-field": $C_\mathrm{r}$ = 0 dB; for "on reflecting surfaces": $C'_\mathrm{r}$ = 6 dB".
 - **The problem:** the prime carries two meanings in the same clause. In the
   equations it separates the "before" campaign from the "after" one, since
   every other symbol in them is subscripted B or A. In the definitions it
@@ -8472,7 +8472,7 @@ in the same order.
   against a reflecting surface.
 - **Evidence:** the two equations and the symbol list on printed page 11,
   settled by the NOTE that closes the same clause, "It is preferable to choose
-  receiver positions where corrections $C_r$ and $C'_r$ are essentially the
+  receiver positions where corrections $C_\mathrm{r}$ and $C'_\mathrm{r}$ are essentially the
   same", which is advice only if each campaign's correction follows its own
   receiver position rather than being fixed by the campaign. Verified on PDF
   page 15 (printed p. 11) of ISO 10847:1997.
@@ -8671,18 +8671,18 @@ in the same order.
 
 - **Location:** Table C.2 on printed page 20 (PDF page 30), against Figure C.1
   on printed page 19 (PDF page 29).
-- **The print:** the row for machine M8 gives $L_{WA} - L_{pA}$ = 29 dB,
-  $\Delta L_A$ = 10 dB and $L'_{pA}$ = 88 dB, in a room whose equivalent
+- **The print:** the row for machine M8 gives $L_{W\mathrm{A}} - L_{p\mathrm{A}}$ = 29 dB,
+  $\Delta L_\mathrm{A}$ = 10 dB and $L'_{p\mathrm{A}}$ = 88 dB, in a room whose equivalent
   absorption area C.2.2 puts at 195 m2.
-- **The problem:** Figure C.1, the diagram the annex says to read $\Delta L_A$
+- **The problem:** Figure C.1, the diagram the annex says to read $\Delta L_\mathrm{A}$
   off, has a vertical axis that ends at 10 dB, and the curve for a 29 dB
   difference leaves the top of it well before 195 m2. The 10 dB in the table is
   the edge of the diagram rather than a reading of it, and the level it carries
   into the last column is 2,4 dB low.
 - **Evidence:** the axis of Figure C.1 runs 0 dB to 10 dB, and the closed form
   the diagram draws, the environmental correction
-  $\Delta L_A = 10 \lg(1 + 4S/A)$ of ISO 3744 with
-  $S/S_0 = 10^{(L_{WA}-L_{pA})/10}$, gives 12,4 dB for that row. The same
+  $\Delta L_\mathrm{A} = 10 \lg(1 + 4S/A)$ of ISO 3744 with
+  $S/S_0 = 10^{(L_{W\mathrm{A}}-L_{p\mathrm{A}})/10}$, gives 12,4 dB for that row. The same
   expression reproduces the other seven rows of the table within 0,4 dB, which
   is the half decibel the diagram is drawn to. Verified on PDF pages 29 and 30
   (printed pp. 19 and 20) of EN ISO 11690-3:1998 as published in
@@ -10301,7 +10301,7 @@ in the same order.
   A-weighting row and the "− 11 dB" row.
 - **The problem:** Equation (C.1) subtracts the term,
   $L_{p,\mathrm{LF}} = L_{W,\mathrm{LF}} - 10\lg(l^2 + h^2) - 11\ \mathrm{dB} +
-  \Delta L_{g,\mathrm{LF}} - \Delta L_a - \Delta L_\sigma$, and every other
+  \Delta L_{\mathrm{g},\mathrm{LF}} - \Delta L_\mathrm{a} - \Delta L_\sigma$, and every other
   row of the table carries the sign with which it enters the equation. Filled
   in as labelled, the table adds twice the distance term to the level. The row
   reads **"− 10log ($l^2$ + $h^2$)"**.

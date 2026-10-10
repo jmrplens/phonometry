@@ -60,7 +60,7 @@ Describe cada actividad como una `hearing.Task` con sus muestras y su duración
 y llama a `hearing.task_based_exposure(tasks)`. Para la jornada del soldador
 del anexo D que se usa abajo devuelve `lex_8h` = 84,3 dB con una
 `expanded_uncertainty` $U = 3{,}2$ dB, así que el `upper_limit` unilateral al
-95 % es 87,5 dB, porque por defecto se incluye el término de duración $u_{1b}$
+95 % es 87,5 dB, porque por defecto se incluye el término de duración $u_{1\mathrm{b}}$
 del anexo C construido a partir del `duration_range` de cada tarea. El
 fragmento del apartado 1 pasa `include_duration_uncertainty=False` para
 reproducir el caso a del anexo D, donde las duraciones se tratan como exactas,
@@ -128,7 +128,7 @@ lo que es un juicio que el informe tiene que dejar por escrito.
 
 **Cuántas, y tomadas cuándo (apartado 9.3).** Al menos tres mediciones por
 tarea, y la norma recomienda tomarlas en momentos distintos de la tarea o sobre
-distintos trabajadores del grupo, para que la dispersión que alimenta $u_{1a}$
+distintos trabajadores del grupo, para que la dispersión que alimenta $u_{1\mathrm{a}}$
 sea variabilidad real y no un minuto afortunado. La jornada del anexo D del
 fragmento de abajo es exactamente esa regla en acción: la soldadura se queda con
 sus tres muestras, mientras que el corte/amolado tiene seis, porque las tres
@@ -242,7 +242,7 @@ alto que cuatro de las seis muestras individuales. Eso no es un error:
 normalizar un turno largo a una jornada nominal de ocho horas *debe*
 penalizarlo. Equivócate en $T_\mathrm{e}$ por un factor y todo el resultado se mueve en
 su $10\log_{10}$, y por eso la estrategia por tareas lleva un término aparte de
-incertidumbre de duración $u_{1b}$ para exactamente esa magnitud.
+incertidumbre de duración $u_{1\mathrm{b}}$ para exactamente esa magnitud.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg"
@@ -327,7 +327,7 @@ le importa la cota *superior*: `res.upper_limit` = $L_\mathrm{EX,8h} + U$ es el 
 debajo del cual queda el 95 % de las mediciones, el número que se compara con un
 valor de acción. Segundo, los métodos por tareas y por función ponderan de forma
 distinta la *misma* dispersión de muestras. La incertidumbre de muestreo de la
-tarea $u_{1a}$ (Ec. C.6) divide la suma de desviaciones al cuadrado entre
+tarea $u_{1\mathrm{a}}$ (Ec. C.6) divide la suma de desviaciones al cuadrado entre
 $I(I-1)$ (el error típico de la media, menor en un factor $\sqrt{I}$), mientras
 que la incertidumbre de muestreo por función/jornada completa $u_1$ (Ec. C.12) es
 la desviación típica muestral simple con denominador $N-1$, cuya contribución
@@ -339,8 +339,8 @@ declara $88{,}1$: la norma redondea el nivel de jornada efectiva a $88{,}4$ ante
 de la normalización de la duración; la biblioteca lo mantiene sin redondear.)
 
 **Qué domina el balance.** El anexo C combina cuatro fuentes en cuadratura
-(Tabla C.1): la incertidumbre de **muestreo** ($u_{1a}$/$u_1$), la de
-**duración** ($u_{1b}$, solo por tareas), la del **instrumento** ($u_2$,
+(Tabla C.1): la incertidumbre de **muestreo** ($u_{1\mathrm{a}}$/$u_1$), la de
+**duración** ($u_{1\mathrm{b}}$, solo por tareas), la del **instrumento** ($u_2$,
 Tabla C.5) y la de la **posición del micrófono** ($u_3$, apartado C.6). Las dos
 últimas son pequeñas y aproximadamente fijas ($u_2 = 0{,}7$ dB para un
 sonómetro de clase 1, 1,5 dB para uno de clase 2 o un exposímetro personal, y
@@ -358,7 +358,7 @@ quien mide.
 />
 
 *Dos cosas que dice la figura y que no dicen las fórmulas.* Primera: cada
-término va ponderado por $c_{1a}$, la parte de la energía diaria que le
+término va ponderado por $c_{1\mathrm{a}}$, la parte de la energía diaria que le
 corresponde a la tarea, así que el balance sigue la dosis y no el reloj: el
 corte y amolado son 1,5 h de las ocho y se lleva el **91 %** de la varianza, las
 cinco horas de soldadura se llevan el 9 % y la tarea tranquila de planificación
@@ -367,10 +367,10 @@ aproximada, no una identidad. Con el exposímetro personal por defecto, el
 término de muestreo de la tarea solo adelanta al del instrumento cuando la
 desviación típica muestral supera $1{,}5\sqrt{I}$, unos 3,7 dB con seis
 muestras, y en esta jornada del anexo D no lo hace: el corte y amolado dispersa
-3,0 dB sobre seis muestras, así que $u_{1a} = 1{,}2$ dB frente a
+3,0 dB sobre seis muestras, así que $u_{1\mathrm{a}} = 1{,}2$ dB frente a
 $u_2 = 1{,}5$ dB. El mayor segmento suelto de aquí es en realidad la
 **duración** de esa tarea corta y ruidosa, porque
-$c_{1b} = 4{,}34\,c_{1a}/\bar{T}_m$ crece a medida que la tarea se acorta, así
+$c_{1\mathrm{b}} = 4{,}34\,c_{1\mathrm{a}}/\bar{T}_m$ crece a medida que la tarea se acorta, así
 que una incertidumbre de $\pm 0{,}5$ h sobre una tarea de 1,5 h cuesta más que
 el término de muestreo o el del instrumento.
 
@@ -438,7 +438,7 @@ en la página de [Teoría](/phonometry/es/reference/theory/environment-transport
 | `effective_duration_hours` | función / jornada | float | h | $> 0$ | Duración efectiva de la jornada $T_\mathrm{e}$ |
 | `instrument` | todas | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (def.) | Selecciona $u_2$ (Tabla C.5) |
 | `u3` | todas | float | dB | def. `1.0` | Incertidumbre de posición del micrófono (apartado C.6) |
-| `include_duration_uncertainty` | tarea | bool | — | def. `True` | `False` omite el término $(c_{1b}u_{1b})^2$ (anexo D caso a) |
+| `include_duration_uncertainty` | tarea | bool | — | def. `True` | `False` omite el término $(c_{1\mathrm{b}}u_{1\mathrm{b}})^2$ (anexo D caso a) |
 | `n_workers` / `sample_duration_hours` | función | int / float | — / h | def. `None` | Comprobación de duración acumulada de la Tabla 1 |
 | `warn` | todas | bool | — | def. `True` | Emitir `OccupationalExposureWarning` para los avisos de muestreo |
 
@@ -476,7 +476,7 @@ veredicto CUMPLE/NO CUMPLE frente al valor límite. Una nota impresa recuerda
 que el valor límite se aplica a la exposición *efectiva*, teniendo en cuenta
 la atenuación de los protectores auditivos utilizados, que el $L_\mathrm{EX,8h}$
 medido no incluye. `verbose=True` añade las columnas de incertidumbre por
-tarea del anexo C ($u_{1a}$, $u_{1b}$, $u_2$), y `language="es"` produce la
+tarea del anexo C ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$), y `language="es"` produce la
 ficha en español (*nivel de exposición diario equivalente*, *valor límite de
 exposición*, con coma decimal).
 

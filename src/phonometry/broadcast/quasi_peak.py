@@ -327,7 +327,7 @@ else:  # pragma: no cover - exercised only without numba installed
 def _alpha(time_constant: float, fs: float) -> float:
     r"""One-pole coefficient of a time constant at a sample rate.
 
-    :math:`\alpha = 1 - e^{-T/\tau}` with :math:`T = 1/f_\mathrm{s}`, spelled
+    :math:`\alpha = 1 - \mathrm{e}^{-T/\tau}` with :math:`T = 1/f_\mathrm{s}`, spelled
     through ``expm1`` so that the very small exponents of a long constant at
     a high rate keep their significant figures.
 

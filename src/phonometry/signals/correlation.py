@@ -639,7 +639,7 @@ def _phase_slope_delay(
 
     with :math:`\hat{\theta}_{xy} = -\arg \hat{G}_{xy}` unwrapped (a
     delayed second record has
-    :math:`\hat{G}_{xy} \propto e^{-j 2 \pi f \tau_0}`, Eq. 5.95b). The
+    :math:`\hat{G}_{xy} \propto \mathrm{e}^{-j 2 \pi f \tau_0}`, Eq. 5.95b). The
     small-angle linearization behind it assumes the residual
     :math:`2 \pi f \tau_0 - \hat{\theta}_{xy}` stays small, i.e. a
     clean, moderate delay.

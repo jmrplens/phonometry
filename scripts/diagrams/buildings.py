@@ -1699,7 +1699,18 @@ def _d_reception_plate(s: SVG, th: Theme) -> None:
     s.text(430, 324, "Reception plate  ($m$, $S$, $η$)", 14, th.fg, bold=True)
     for ax_ in (140.0, 190.0, 400.0, 500.0):
         _accel(s, ax_, 302)
-    s.text(560, 272, "velocity positions → $L_v$", 14, th.secondary, anchor="end")
+    # UNE-EN 15657:2018 prints every subscript upright (Formula (12), PDF
+    # page 14), so ISO 80000-2 decides: the v that names the velocity level is
+    # upright, and the index i of the positions stays italic.
+    s.text(
+        560,
+        272,
+        "velocity positions → $L_v$",
+        14,
+        th.secondary,
+        anchor="end",
+        upright=("L_v",),
+    )
     for sx in (150.0, 510.0):
         _spring_v(s, sx, 334, 430, th.accent, coils=3)
     s.ground(430, 80, 580)
@@ -1712,7 +1723,7 @@ def _d_reception_plate(s: SVG, th: Theme) -> None:
     s.text(735, 238, "$η = 2.2 / (f·T_s)$   (Formula 13)", 13, th.fg)
     # Longest line of the panel: a smaller face keeps it inside the dashed box.
     s.text(735, 270, "$L_{Ws} = 10 log_{10}(2πf·η·m·S / f_0 m_0 S_0)$", 11, th.fg)
-    s.text(735, 296, "$+ L_v − 60$   (Formula 14)", 12, th.fg)
+    s.text(735, 296, "$+ L_v − 60$   (Formula 14)", 12, th.fg, upright=("L_v",))
     s.text(735, 366, "→ source quantities (Formulae 15–19):", 13, th.fg, bold=True)
     s.text(735, 394, "equivalent blocked force $L_{Fb,eq}$ ,", 13, th.muted)
     s.text(735, 418, "$L_{Wsn}$ consumed by EN 12354-5", 13, th.muted)
@@ -1725,6 +1736,7 @@ def _d_reception_plate(s: SVG, th: Theme) -> None:
         "spatial average:  $L_v = 10 lg[(1/N)·Σ_i 10^{L_{v,i}/10}]$   (Formula 12)",
         15,
         th.fg,
+        upright=("L_v",),
     )
 
 
@@ -3570,8 +3582,8 @@ def _d_facade_setup(s: SVG, th: Theme) -> None:
                 "comparable with a laboratory $R$."
             ),
         ),
-        # The 2 m of D_2m,nT is set upright with the nT beside it, as the
-        # guide writes it.
+        # The 2 m of D_2m,nT is set upright with the n beside it and the T
+        # italic, as ISO 16283-3:2016, 3.15, prints it and the guide writes it.
         (
             626,
             (

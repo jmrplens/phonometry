@@ -41,7 +41,7 @@ $dN/dt = 4 \pi c^3 t^2 / V$
 arrives at $t_i = r_i / c$ (Vorlander Equation (11.38)) with amplitude
 
 $$
-A_i = \left[ \prod_{\text{walls}} R_{\text{wall}}^{n_{\text{wall}}} \right] \frac{e^{-m r_i / 2}}{4 \pi r_i}
+A_i = \left[ \prod_{\text{walls}} R_{\text{wall}}^{n_{\text{wall}}} \right] \frac{\mathrm{e}^{-m r_i / 2}}{4 \pi r_i}
 $$
 
 with $n_{\text{wall}}$ the reflections that image made off each wall:
@@ -51,8 +51,8 @@ Equation
 (11.39); $|R|^2 = 1 - \alpha$ in energy, Kuttruff 4.1) each raised to
 the
 number of reflections that image made off that wall, and the air pressure
-attenuation $e^{-m r_i / 2}$ over the path (Kuttruff 4.1; `m` the
-*intensity* attenuation constant, so intensity falls as $e^{-m r}$).
+attenuation $\mathrm{e}^{-m r_i / 2}$ over the path (Kuttruff 4.1; `m` the
+*intensity* attenuation constant, so intensity falls as $\mathrm{e}^{-m r}$).
 The RIR
 is the sum of unit impulses at $t_i$ weighted by $A_i$ (Kuttruff
 Equation
@@ -120,11 +120,11 @@ Builds every image of the source up to reflection order `max_order`
 as the sum of the direct sound and one attenuated, delayed unit impulse per
 image (Kuttruff Equations (4.4)-(4.5)). Each image at distance `r`
 arrives at $r / c$ (Vorlander Equation (11.38)) with amplitude
-$\left[ \prod R_{\text{wall}}^{n_{\text{wall}}} \right] e^{-m r / 2} / (4 \pi r)$: the $1 / (4 \pi r)$
+$\left[ \prod R_{\text{wall}}^{n_{\text{wall}}} \right] \mathrm{e}^{-m r / 2} / (4 \pi r)$: the $1 / (4 \pi r)$
 spherical spreading, the product of the wall pressure reflection factors
 $R = \sqrt{1 - \alpha}$ (Vorlander Equation (11.39)) over the
 reflections
-the image made, and the air pressure attenuation $e^{-m r / 2}$.
+the image made, and the air pressure attenuation $\mathrm{e}^{-m r / 2}$.
 
 With scalar or per-wall `absorption` (and no `frequencies`) the result
 is a broadband RIR; a per-band `absorption` (or a given `frequencies`)
@@ -144,7 +144,7 @@ reproduces the Eyring reverberation time of the room (Kuttruff Equation
 | `fs` | Sample rate, Hz. |
 | `max_order` | Reflection-order cut-off (total wall reflections). The shoebox has $(2/3)(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order `i0` (Kuttruff Equation (9.23)). Default 20. |
 | `speed_of_sound` | Speed of sound `c`, m/s (default [`DEFAULT_SPEED_OF_SOUND`](/phonometry/reference/api/materials/road-absorption/#default_speed_of_sound)). |
-| `air_attenuation` | Air *intensity* attenuation constant `m`, in neper per metre (scalar or per-band); the pressure amplitude of each path is scaled by $e^{-m r / 2}$ (Kuttruff 4.1). Default 0 (air absorption neglected). Obtain a physical `m` from [`air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). |
+| `air_attenuation` | Air *intensity* attenuation constant `m`, in neper per metre (scalar or per-band); the pressure amplitude of each path is scaled by $\mathrm{e}^{-m r / 2}$ (Kuttruff 4.1). Default 0 (air absorption neglected). Obtain a physical `m` from [`air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). |
 | `duration` | RIR length, s; default the latest image arrival rounded up to the next sample. |
 | `frequencies` | Optional band centre frequencies, Hz, labelling a per-band result. When given, its length must match the band count of `absorption` (or broadcast against it). |
 

@@ -318,13 +318,13 @@ def generate_airport_sor(output_dir: str) -> None:
     ax.set_xlim(-21.0, 21.0)
     ax.set_ylim(-20.2, 1.5)
     ax.set_title(
-        r"Start-of-Roll Directivity $\Delta_{SOR}$ (ECAC Doc 29 §4.5.7)", pad=6
+        r"Start-of-Roll Directivity $\Delta_\mathrm{SOR}$ (ECAC Doc 29 §4.5.7)", pad=6
     )
     ax.text(
         0.0,
         1.0,
-        r"radial axis: $\Delta_{SOR}$ [dB] relative to abeam"
-        r"  ·  $d_{SOR}$ = 300 m",
+        r"radial axis: $\Delta_\mathrm{SOR}$ [dB] relative to abeam"
+        r"  ·  $d_\mathrm{SOR}$ = 300 m",
         fontsize=9,
         color=COLOR_FG,
         ha="center",

@@ -732,7 +732,7 @@ def task_based_exposure(
     include_duration_uncertainty: bool = True,
     warn: bool = True,
 ) -> ExposureResult:
-    """Daily noise exposure level from task-based measurements (ISO 9612:2009 Clause 9).
+    r"""Daily noise exposure level from task-based measurements (ISO 9612:2009 Clause 9).
 
     Each task level is the energy average of its samples (Eq 7); the daily level
     is the energy sum of the task contributions (Eq 9/10). The uncertainty budget
@@ -743,7 +743,7 @@ def task_based_exposure(
     :param instrument: Default instrument class selecting ``u2`` (Table C.5);
         may be overridden per :class:`Task`.
     :param u3: Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0).
-    :param include_duration_uncertainty: Include the :math:`(c_{1b} u_{1b})^2`
+    :param include_duration_uncertainty: Include the :math:`(c_{1\mathrm{b}} u_{1\mathrm{b}})^2`
         duration term (Eq C.3). When False the budget omits it (ISO 9612
         Annex D case a).
     :param warn: Emit :class:`OccupationalExposureWarning` when a task triggers the 3 dB

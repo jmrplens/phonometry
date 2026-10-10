@@ -413,7 +413,7 @@ class NormalModeResult(OwnsArrays):
         r"""Reject a modal solution whose three axes do not line up.
 
         A mode is a wavenumber and a shape together. Eq. 5.17 sums
-        :math:`\Psi_m(z_\mathrm{s})\,\Psi_m(z_\mathrm{r})\,e^{i k_{rm} r}/\sqrt{k_{rm}}`
+        :math:`\Psi_m(z_\mathrm{s})\,\Psi_m(z_\mathrm{r})\,\mathrm{e}^{i k_{rm} r}/\sqrt{k_{rm}}`
         over ``m``, pairing each row of ``mode_functions`` with the
         ``wavenumbers`` entry of the same index and each column of that row
         with a ``mode_depths`` entry, and a caller re-synthesising the field
@@ -671,10 +671,10 @@ class RayTraceResult(OwnsArrays):
         reflection leaves it continuous. This, and not the range, is the
         measure seawater absorption acts along: Jensen Sect. 3.6.2 carries a
         volume loss :math:`\alpha` into the ray solution by perturbing the
-        eikonal and lands on :math:`e^{-\int_0^s \alpha(s')\,ds'}`
+        eikonal and lands on :math:`\mathrm{e}^{-\int_0^s \alpha(s')\,ds'}`
         (Eq. 3.116), an integral over the path actually flown, so a caller
         hanging amplitudes on these rays multiplies by
-        :math:`e^{-\alpha s}` with the :math:`s` read off here.
+        :math:`\mathrm{e}^{-\alpha s}` with the :math:`s` read off here.
     :ivar surface_reflections: Per-ray cumulative count of sea-surface
         reflections by each range sample, same shape (zero at the source).
     :ivar bottom_reflections: The same count for the seabed. The two counts,
@@ -1017,13 +1017,13 @@ class EigenrayResult(OwnsArrays):
     Every per-arrival array has one entry per eigenray, sorted by travel time.
     The frequency-independent pieces of each arrival are recorded separately
     (delay, complex amplitude, angles, boundary counts) so that one search
-    serves every frequency: in the module's :math:`e^{-i\omega t}` convention
+    serves every frequency: in the module's :math:`\mathrm{e}^{-i\omega t}` convention
     the pressure a tone of angular frequency :math:`\omega` produces at the
     receiver is
 
     .. math::
 
-        p(\omega) = \sum_j a_j\, e^{i \omega \tau_j},
+        p(\omega) = \sum_j a_j\, \mathrm{e}^{i \omega \tau_j},
 
     with :math:`a_j` the ``amplitudes`` and :math:`\tau_j` the
     ``travel_times``; the band-limited channel impulse response is the inverse
@@ -1084,7 +1084,7 @@ class EigenrayResult(OwnsArrays):
 
         Every array here is read by position against the others, as the class
         states above: the pressure the list stands for is
-        :math:`\sum_j a_j e^{i\omega\tau_j}`, which pairs ``amplitudes``
+        :math:`\sum_j a_j \mathrm{e}^{i\omega\tau_j}`, which pairs ``amplitudes``
         with ``travel_times`` entry by entry, and the figure hangs each stem
         at a time taken from one array, at a height taken from a second and
         in a colour taken from the sum of two more. Where the odd array
@@ -1391,19 +1391,19 @@ def eigenrays(
         {c(z_\mathrm{S})\, r_\mathrm{R}\, q_j} \right|^{1/2}
         (-i)^{m_j}\, (-1)^{n_{\mathrm{s},j}}\, \mathcal{R}^{n_{b,j}},
 
-    in the module's :math:`e^{-i\omega t}` convention, normalised to unit
+    in the module's :math:`\mathrm{e}^{-i\omega t}` convention, normalised to unit
     pressure at 1 m. Why each factor:
 
     * The magnitude is Eq. (3.65) with the :math:`1/(4\pi)` cancelled against
       the free-field reference of Eqs. (3.67)-(3.68), which is how the book
       itself defines transmission loss from these amplitudes and how every
       solver of this module already normalises: the coherent sum
-      :math:`\sum_j a_j e^{i\omega\tau_j}` over a complete arrival set is
+      :math:`\sum_j a_j \mathrm{e}^{i\omega\tau_j}` over a complete arrival set is
       directly comparable to :attr:`GaussianBeamResult.pressure`, and
       :math:`-20\lg|{\sum}|` to every propagation loss here.
     * :math:`(-i)^m` is Eq. (3.79) exactly as printed. Sect. 3.3 writes the
-      ray field as :math:`A\,e^{i\omega\tau}` (Eq. 3.57), which *is* the
-      :math:`e^{-i\omega t}` convention, so the printed factor transfers
+      ray field as :math:`A\,\mathrm{e}^{i\omega\tau}` (Eq. 3.57), which *is* the
+      :math:`\mathrm{e}^{-i\omega t}` convention, so the printed factor transfers
       unchanged; it is the same :math:`-\pi/2` per caustic the beam solver's
       tracked square-root branch spends continuously, taken here in the
       discrete form the classical amplitude needs, since with real initial
@@ -1415,7 +1415,7 @@ def eigenrays(
       :math:`\mathcal{R}` is the Rayleigh coefficient of
       :func:`~phonometry.underwater.propagation.seabed_reflection.reflection_coefficient`
       at that angle, **not conjugated**: that function returns the
-      coefficient in the :math:`e^{-i\omega t}` convention these amplitudes
+      coefficient in the :math:`\mathrm{e}^{-i\omega t}` convention these amplitudes
       are declared in, so it enters as printed. (:func:`gaussian_beams`
       conjugates the very same coefficient because its internal sum is
       assembled in the conjugate convention and conjugated once at the end;
@@ -1701,7 +1701,7 @@ class GaussianBeamResult(OwnsArrays):
         no near field. The plausible size of these numbers is the point worth
         knowing about them.
     :ivar pressure: The complex field the loss was taken from, same shape, in
-        the module's own :math:`e^{-i\omega t}` convention (the conjugate of
+        the module's own :math:`\mathrm{e}^{-i\omega t}` convention (the conjugate of
         the one Jensen Eq. (3.88) is printed in) and normalised to unit
         pressure at 1 m, so ``propagation_loss = -20 lg|pressure|``.
     :ivar launch_angles_deg: Launch angle of each beam's central ray, from the
@@ -1712,7 +1712,7 @@ class GaussianBeamResult(OwnsArrays):
     :ivar ray_depths: Depth of each central ray on that grid, in metres.
     :ivar beam_widths: Beam half-width :math:`W(s)` on that grid, in metres:
         Jensen Eq. (3.89), the distance at which the beam's own pressure has
-        fallen by :math:`e^{-1}` and its intensity by :math:`e^{-2}`.
+        fallen by :math:`\mathrm{e}^{-1}` and its intensity by :math:`\mathrm{e}^{-2}`.
     :ivar wavefront_curvatures: Beam wavefront curvature :math:`K(s)` on that
         grid, in 1/m: Jensen Eq. (3.90) with the sign that belongs to the
         conjugated field this result exposes, so that a beam spreading in free
@@ -2634,7 +2634,7 @@ def _beam_influence(
     VOLUME ABSORPTION rides in the same exponent when ``attenuation`` is
     nonzero. Sect. 3.6.2 derives it by perturbing the eikonal with a complex
     sound speed: the real rays stand, and each acquires the factor
-    :math:`e^{-\int_0^s \alpha(s')\,ds'}` of Eq. (3.116), an integral along the
+    :math:`\mathrm{e}^{-\int_0^s \alpha(s')\,ds'}` of Eq. (3.116), an integral along the
     ray's own arc length, "a loss proportional to the path length times the
     loss per meter" for constant :math:`\alpha`. The path length here is the
     marcher's cumulative arc length at the bracketing column continued to the
@@ -2668,7 +2668,7 @@ def _beam_influence(
     unfolding. The straight continuation the influence sum evaluates *is* the
     unfolded beam, so evaluating it at those rotated image points keeps on a
     slope the very property that makes the flat ladder exact: each stationary
-    image contributes :math:`e^{ikR}/R` of its own unfolded distance. What
+    image contributes :math:`\mathrm{e}^{ikR}/R` of its own unfolded distance. What
     breaks it is a fold plane that is wrong by the facet's tilt: an earlier
     version of this branch folded at the local *depth* but not the local
     *slope*, and the tilt displaces a first-fold image by
@@ -2891,7 +2891,7 @@ class BeamFan:
         coarse a fan shows as a periodic ripple in range at the beam spacing,
         which is easy to mistake for physical interference.
     :ivar beam_width: The :math:`W_0` of Eq. (3.91), in metres: the beam's
-        initial half-width, at the :math:`e^{-2}` folding distance in
+        initial half-width, at the :math:`\mathrm{e}^{-2}` folding distance in
         intensity, applied to every beam of the fan when passed. Default
         (``None``): one width per launch angle, the free-space optimum of
         each beam's own flight; see :func:`_default_beam_widths`.
@@ -3144,10 +3144,10 @@ def gaussian_beams(
     **Seawater absorption is off by default** and the field is then optimistic
     beyond a few kilometres at sonar frequencies, exactly as ray theory without
     a volume loss must be. Passing ``absorption`` multiplies each beam by
-    :math:`e^{-\alpha s}` with :math:`s` the **arc length along its central
+    :math:`\mathrm{e}^{-\alpha s}` with :math:`s` the **arc length along its central
     ray**, which is Sect. 3.6.2 done as printed: perturbing the eikonal with
     the complex sound speed a volume loss implies leaves the real rays standing
-    and attaches :math:`e^{-\int_0^s \alpha(s')\,ds'}` to each (Eq. 3.116),
+    and attaches :math:`\mathrm{e}^{-\int_0^s \alpha(s')\,ds'}` to each (Eq. 3.116),
     an integral along the path flown, not along the range axis. The distinction
     is not pedantry. The same section notes that adding :math:`\alpha r` to the
     loss "is used in many ray models", and that shortcut under-charges every
@@ -3649,7 +3649,7 @@ def parabolic_equation(
     Marches the split-step Fourier solution (Jensen Ch. 6) in range with a
     discrete sine transform in depth, enforcing a pressure-release surface at
     ``z = 0`` and bottom at ``z = water_depth``. The envelope is related to
-    pressure by :math:`p = \psi \, e^{i(k_0 r - \pi/4)} / \sqrt{r}` and
+    pressure by :math:`p = \psi \, \mathrm{e}^{i(k_0 r - \pi/4)} / \sqrt{r}` and
     :math:`\mathrm{PL} = -20 \log_{10}(\lvert \psi \rvert / \sqrt{r})`
     (Eqs. 6.70-6.71), using a Gaussian starter.
 

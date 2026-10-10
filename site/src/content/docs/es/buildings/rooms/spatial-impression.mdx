@@ -75,7 +75,7 @@ que llega cada reflexión. Elevar la presión al cuadrado, como hace la
 Ecuación (A.14), pondera esa reflexión por $\cos^2 \theta$:
 
 $$
-J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_L^2(t)\ \mathrm{d}t}
+J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                      {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}.
 $$
 
@@ -85,7 +85,7 @@ subjetivamente más preciso:
 
 $$
 J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080}
-                       \left| p_L(t) \cdot p(t) \right|\ \mathrm{d}t}
+                       \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t}
                       {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}.
 $$
 
@@ -129,7 +129,7 @@ aquí su tiempo cero de la respuesta que se pasa primero.
 
 ## 2. El módulo que borra una capa de texto
 
-La Ecuación (A.15) imprime un módulo alrededor de $p_L(t) \cdot p(t)$. Es
+La Ecuación (A.15) imprime un módulo alrededor de $p_\mathrm{L}(t) \cdot p(t)$. Es
 fácil perderlo, porque `pdftotext` devuelve ese mismo numerador sin él, y
 perderlo invierte el significado de la magnitud: un micrófono en ocho
 responde con signo opuesto a los dos lados, así que dos reflexiones
@@ -168,7 +168,7 @@ energía lateral posterior a la ventana temprana frente a la referencia de
 campo libre a 10 m, la misma referencia que usa la fuerza sonora.
 
 $$
-L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_L^2(t)\ \mathrm{d}t}
+L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                   {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t}\ \text{dB}.
 $$
 
@@ -208,9 +208,9 @@ es la correlación cruzada normalizada de las dos respuestas auriculares,
 
 $$
 \mathrm{IACF}_{t_1,t_2}(\tau) =
-    \frac{\int_{t_1}^{t_2} p_l(t)\, p_r(t + \tau)\ \mathrm{d}t}
-         {\sqrt{\int_{t_1}^{t_2} p_l^2(t)\ \mathrm{d}t
-                \int_{t_1}^{t_2} p_r^2(t)\ \mathrm{d}t}},
+    \frac{\int_{t_1}^{t_2} p_\mathrm{l}(t)\, p_\mathrm{r}(t + \tau)\ \mathrm{d}t}
+         {\sqrt{\int_{t_1}^{t_2} p_\mathrm{l}^2(t)\ \mathrm{d}t
+                \int_{t_1}^{t_2} p_\mathrm{r}^2(t)\ \mathrm{d}t}},
 $$
 
 y la Ecuación (B.2) toma su mayor magnitud dentro de un milisegundo en torno

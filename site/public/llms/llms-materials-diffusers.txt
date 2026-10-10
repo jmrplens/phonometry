@@ -503,7 +503,7 @@ with a different phase. A rigid-bottomed well of depth $d_n$ reflects with the
 pressure coefficient
 
 $$
-R_n = e^{-2 j k d_n},
+R_n = \mathrm{e}^{-2 j k d_n},
 $$
 
 the round trip down and back up the well, so the depth sequence is a phase
@@ -562,12 +562,12 @@ phase-grating diffuser, so a well-depth sequence can be graded before a sample
 is built. `predict_diffuser_polar_response` evaluates the single-plane
 Fraunhofer (far-field) model of Cox and D'Antonio: each rigid-bottom well of
 depth $d_n$ contributes a pressure reflection coefficient
-$R_n = e^{-2 j k d_n}$, and the scattered pressure at reflection angle $\theta$
+$R_n = \mathrm{e}^{-2 j k d_n}$, and the scattered pressure at reflection angle $\theta$
 for a source at incidence $\psi$ is the sum over the wells of the periodic
 surface (Eq. (5.8)),
 
 $$
-p(\theta) = F(\theta) \sum_n R_n \, e^{\,j k x_n (\sin\psi + \sin\theta)},
+p(\theta) = F(\theta) \sum_n R_n \, \mathrm{e}^{\,j k x_n (\sin\psi + \sin\theta)},
 $$
 
 with $x_n$ the well centre and $k = 2\pi f / c$. The predicted polar levels

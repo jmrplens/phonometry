@@ -82,7 +82,7 @@ K = 10 \lg\left[1 + \frac{4}{A/S}\right] \tag{Figure A.3}
 $$
 
 with the equivalent absorption area $A = 0{,}16\,V/T$ of the room from
-its reverberation time (A.3.1); A.3.2 obtains $K = L_W - L_{Wr}$ from a
+its reverberation time (A.3.1); A.3.2 obtains $K = L_W - L_{W\mathrm{r}}$ from a
 calibrated reference sound source instead. $K$ shall not exceed 7 dB
 (8.3 and A.3.3), which A.3.3 restates as $A/S \ge 1$.
 
@@ -401,9 +401,9 @@ turbine_reference_source_correction(
 ) -> TurbineEnvironmentalCorrection
 ```
 
-Environmental correction $K = L_W - L_{Wr}$ from a reference source (A.3.2).
+Environmental correction $K = L_W - L_{W\mathrm{r}}$ from a reference source (A.3.2).
 
-$L_{Wr}$ is the calibrated sound power level of the reference sound
+$L_{W\mathrm{r}}$ is the calibrated sound power level of the reference sound
 source, determined in a free field over a reflecting plane
 ($K = 0$), and $L_W$ the sound power level the same source
 shows in the test room by the survey method of ISO 3746 with $K$
@@ -419,7 +419,7 @@ of the determinations.
 | Name | Description |
 | :--- | :--- |
 | `sound_power_levels_db` | The determinations of $L_W$, in dB: two for a machine up to 10 m long, four above. |
-| `calibrated_level_db` | $L_{Wr}$, in dB re 1 pW. |
+| `calibrated_level_db` | $L_{W\mathrm{r}}$, in dB re 1 pW. |
 | `machine_length_m` | Length of the machine under test, in metres, which sets how many determinations are needed. |
 
 **Returns:** The correction and the determinations it came from.
@@ -506,7 +506,7 @@ by [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbi
 | `surface_area_m2` | $S$ (A.3.1), in square metres, or `None`. |
 | `absorption_area_m2` | $A$ (A.3.1), in square metres, or `None`. |
 | `reference_levels_db` | The determinations of the reference source's sound power level $L_W$ (A.3.2), in dB, or `None`. |
-| `calibrated_level_db` | $L_{Wr}$ (A.3.2), in dB, or `None`. |
+| `calibrated_level_db` | $L_{W\mathrm{r}}$ (A.3.2), in dB, or `None`. |
 
 ### TurbineEnvironmentalCorrection.plot()
 

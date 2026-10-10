@@ -261,7 +261,7 @@ def programme_signal_filter(frequencies_hz: ArrayLike) -> NDArray[np.complex128]
 #: The decibel-to-exponent factor, :math:`\ln 10 / 10`.
 _DB_TO_EXPONENT = math.log(10.0) / 10.0
 
-#: Below this exponent the series value of :math:`(e^z - 1)/z` is used.
+#: Below this exponent the series value of :math:`(\mathrm{e}^z - 1)/z` is used.
 _SMALL_EXPONENT = 1e-12
 
 #: The tolerance of the band-level fit of the ``"table"`` realisation, in dB,
@@ -271,7 +271,7 @@ _FIT_ITERATIONS = 100
 
 
 def _relative_expm1(z: NDArray[np.float64]) -> NDArray[np.float64]:
-    """:math:`(e^z - 1)/z`, which tends to 1 as :math:`z` tends to 0."""
+    r""":math:`(\mathrm{e}^z - 1)/z`, which tends to 1 as :math:`z` tends to 0."""
     small = np.abs(z) < _SMALL_EXPONENT
     safe = np.where(small, 1.0, z)
     return np.asarray(np.where(small, 1.0, np.expm1(safe) / safe), dtype=np.float64)

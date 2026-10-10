@@ -218,7 +218,7 @@ import matplotlib.pyplot as plt
 t = np.arange(recording.size) / fs
 fig, ax = plt.subplots(figsize=(9, 4))
 ax.axvspan(4.0, 5.0, color="C1", alpha=0.15)
-ax.plot(t, laf_t, linewidth=0.8, label="$L_{AF}(t)$")
+ax.plot(t, laf_t, linewidth=0.8, label=r"$L_\mathrm{AF}(t)$")
 for value, name, style in [(la_eq, "LAeq", "--"), (ln[10], "L10", ":"),
                            (ln[50], "L50", "-."), (ln[90], "L90", (0, (5, 1)))]:
     ax.axhline(value, linestyle=style, linewidth=1.0,

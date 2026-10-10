@@ -152,12 +152,12 @@ exactamente igual que el relleno `oversample` de
 ## 2. Detección de ecos: el tren de picos rahmónicos
 
 Una reflexión única $x(t) = s(t) + a\,s(t-t_0)$ multiplica el espectro por
-$1 + a e^{-j 2\pi f t_0}$ - un rizado de periodo $1/t_0$ en toda la banda.
+$1 + a \mathrm{e}^{-j 2\pi f t_0}$ - un rizado de periodo $1/t_0$ en toda la banda.
 Su logaritmo se expande, para $|a| < 1$, en la serie exactamente sumable
 
 $$
-\ln\!\left(1 + a e^{-j\theta}\right)
-= \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n}\, e^{-jn\theta},
+\ln\!\left(1 + a \mathrm{e}^{-j\theta}\right)
+= \sum_{n \ge 1} (-1)^{n+1} \frac{a^n}{n}\, \mathrm{e}^{-jn\theta},
 $$
 
 así que el cepstrum lleva un tren de picos en los **rahmónicos** $n t_0$ con

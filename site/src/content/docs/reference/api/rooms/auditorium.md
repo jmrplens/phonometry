@@ -205,14 +205,14 @@ ISO 3382-1:2009, Equation (A.14), the share of the first 80 ms that
 arrives from the side:
 
 $$
-J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_L^2(t)\ \mathrm{d}t} {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
+J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t} {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
 $$
 
 and Equation (A.15), the cosine-weighted variant that A.2.4 calls
 subjectively more accurate:
 
 $$
-J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080} \left| p_L(t) \cdot p(t) \right|\ \mathrm{d}t} {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
+J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080} \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t} {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
 $$
 
 The modulus in (A.15) is printed and it matters: the figure-of-eight
@@ -397,7 +397,7 @@ Interaural cross correlation of a binaural response, per band.
 ISO 3382-1:2009, Equation (B.1) defines the normalised function
 
 $$
-\mathrm{IACF}_{t_1,t_2}(\tau) = \frac{\int_{t_1}^{t_2} p_l(t)\, p_r(t + \tau)\ \mathrm{d}t} {\sqrt{\int_{t_1}^{t_2} p_l^2(t)\ \mathrm{d}t \int_{t_1}^{t_2} p_r^2(t)\ \mathrm{d}t}}
+\mathrm{IACF}_{t_1,t_2}(\tau) = \frac{\int_{t_1}^{t_2} p_\mathrm{l}(t)\, p_\mathrm{r}(t + \tau)\ \mathrm{d}t} {\sqrt{\int_{t_1}^{t_2} p_\mathrm{l}^2(t)\ \mathrm{d}t \int_{t_1}^{t_2} p_\mathrm{r}^2(t)\ \mathrm{d}t}}
 $$
 
 and Equation (B.2) takes the coefficient from it:
@@ -546,7 +546,7 @@ arrives after the early window, against the same free-field reference
 the sound strength uses:
 
 $$
-L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_L^2(t)\ \mathrm{d}t} {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t} \ \mathrm{dB}
+L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t} {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t} \ \mathrm{dB}
 $$
 
 Where $J_\mathrm{LF}$ is a fraction and cancels its own
@@ -923,7 +923,7 @@ The band set is per quantity and is not always the mid pair. The sound
 strength, early decay time, clarity, definition and centre time average
 the 500 Hz and 1 kHz octaves; the lateral quantities average 125 Hz to
 1 kHz, four bands. A.5 prints both cases as examples for exactly that
-reason, $G_m$ over two bands and $J_{\mathrm{LF}m}$ over
+reason, $G_\mathrm{m}$ over two bands and $J_\mathrm{LFm}$ over
 four, and an accessor that hard-codes the mid pair is wrong for half the
 table.
 
@@ -1184,7 +1184,7 @@ musician hears from the platform against the direct sound of their own
 instrument:
 
 $$
-ST_\mathrm{Early} = 10 \lg \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t} {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}, \qquad ST_\mathrm{Late} = 10 \lg \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t} {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
+\mathrm{ST}_\mathrm{Early} = 10 \lg \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t} {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}, \qquad \mathrm{ST}_\mathrm{Late} = 10 \lg \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t} {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
 $$
 
 Both are measured with the source and the microphone 1,0 m apart on the
@@ -1280,8 +1280,8 @@ Per-band stage support (ISO 3382-1:2009, Annex C).
 
 `frequencies` holds the exact band centre frequencies in Hz, or is
 `None` for a broadband measurement. `early` is
-$ST_\mathrm{Early}$ in dB (Equation (C.1)) and `late`
-$ST_\mathrm{Late}$ in dB (Equation (C.2)), both referred to the
+$\mathrm{ST}_\mathrm{Early}$ in dB (Equation (C.1)) and `late`
+$\mathrm{ST}_\mathrm{Late}$ in dB (Equation (C.2)), both referred to the
 same direct sound. Table C.1 gives their typical ranges as -24 dB to
 -8 dB and -24 dB to -10 dB and prints "Not known" for both
 just-noticeable differences, so this module has none.

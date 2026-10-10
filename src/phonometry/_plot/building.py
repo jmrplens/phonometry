@@ -253,7 +253,7 @@ _STRINGS: dict[str, str] = {
     "Radiated sound power (EN 12354-4)": "Potencia acústica radiada (EN 12354-4)",
     "Vibration reduction index $K_{ij}$ [dB]": "Índice de reducción de vibraciones $K_{ij}$ [dB]",
     "Vibration reduction index (ISO 10848)": "Índice de reducción de vibraciones (ISO 10848)",
-    "Structure-borne power level $L_{W\\mathrm{s}}$ [dB re 1 pW]": "Nivel de potencia estructural $L_{W\\mathrm{s}}$ [dB re 1 pW]",
+    "Structure-borne power level $L_\\mathrm{Ws}$ [dB re 1 pW]": "Nivel de potencia estructural $L_\\mathrm{Ws}$ [dB re 1 pW]",
     "EN 15657 characteristic structure-borne sound power": "Potencia acústica estructural característica EN 15657",
     "paths": "trayectos",
     "total $L_\\mathrm{n,s}$": "total $L_\\mathrm{n,s}$",
@@ -295,10 +295,10 @@ _STRINGS: dict[str, str] = {
     "In-situ element performance (ISO 12354)": "Comportamiento del elemento in situ (ISO 12354)",
     "Reduction index / impact level [dB]": "Índice de reducción / nivel de impactos [dB]",
     "tolerance band": "banda de tolerancia",
-    "nominal $L_{FE}$": "$L_{FE}$ nominal",
-    "measured $L_{FE}$": "$L_{FE}$ medido",
+    r"nominal $L_\mathrm{FE}$": r"$L_\mathrm{FE}$ nominal",
+    r"measured $L_\mathrm{FE}$": r"$L_\mathrm{FE}$ medido",
     "outside tolerance": "fuera de tolerancia",
-    "Impact force exposure level $L_{FE}$ [dB re 1 N]": "Nivel de exposición a la fuerza de impacto $L_{FE}$ [dB re 1 N]",
+    r"Impact force exposure level $L_\mathrm{FE}$ [dB re 1 N]": r"Nivel de exposición a la fuerza de impacto $L_\mathrm{FE}$ [dB re 1 N]",
     _CONFORMS: "cumple",
     _DOES_NOT_CONFORM: "no cumple",
     "Heavy impact source conformance": "Conformidad de la fuente de impacto pesada",
@@ -347,7 +347,7 @@ _STRINGS: dict[str, str] = {
     _BACKGROUND_L2_LABEL: "ruido de fondo $L_2$",
     "measured $L_1$": "medido $L_1$",
     _CORRECTED_LABEL: "corregido por ruido de fondo",
-    "standardized $L_\\mathrm{nT}$": "estandarizado $L_\\mathrm{nT}$",
+    "standardized $L_{\\mathrm{n}T}$": "estandarizado $L_{\\mathrm{n}T}$",
     "upper limit (background)": "límite superior (ruido de fondo)",
     "not standardized (7.7)": "sin estandarizar (apartado 7.7)",
     "Reading": "Lectura",
@@ -885,10 +885,12 @@ def plot_facade_insulation(
     x = _facade_x_axis(ax, getattr(result, "frequencies", None), n, language=language)
 
     # D2m,nT first so it is lines[0]; other quantities follow when present.
-    curves = [("$D_{2m,nT}$", dnt)]
-    curves.append(("$D_{2m}$", np.asarray(result.d_2m, dtype=np.float64)))
+    curves = [(r"$D_{\mathrm{2m,n}T}$", dnt)]
+    curves.append((r"$D_\mathrm{2m}$", np.asarray(result.d_2m, dtype=np.float64)))
     if result.d_2m_n is not None:
-        curves.append(("$D_{2m,n}$", np.asarray(result.d_2m_n, dtype=np.float64)))
+        curves.append(
+            (r"$D_\mathrm{2m,n}$", np.asarray(result.d_2m_n, dtype=np.float64))
+        )
     if result.r_prime is not None:
         curves.append((_R_PRIME, np.asarray(result.r_prime, dtype=np.float64)))
     # Forward user kwargs to the primary D2m,nT curve only, so styling kwargs
@@ -949,7 +951,7 @@ def plot_facade_prediction(
         "s-",
         color="tab:blue",
         lw=2.0,
-        label="$D_{2m,nT}$",
+        label=r"$D_{\mathrm{2m,n}T}$",
     )
 
     ax.set_ylabel(_t("Reduction index / level difference [dB]", language))
@@ -1084,7 +1086,7 @@ def plot_structure_borne_power(
         result.frequencies,
         result.total_level,
         ylabel=_t(
-            r"Structure-borne power level $L_{W\mathrm{s}}$ [dB re 1 pW]", language
+            r"Structure-borne power level $L_\mathrm{Ws}$ [dB re 1 pW]", language
         ),
         title=_t("EN 15657 characteristic structure-borne sound power", language),
         language=language,
@@ -1483,7 +1485,7 @@ def plot_airborne_insulation(
     from .._i18n import localize_axes
 
     curves = [
-        ("$D_\\mathrm{nT}$", np.asarray(result.dnt, dtype=np.float64)),
+        ("$D_{\\mathrm{n}T}$", np.asarray(result.dnt, dtype=np.float64)),
         ("$D$", np.asarray(result.d, dtype=np.float64)),
     ]
     if result.r_prime is not None:
@@ -1519,7 +1521,9 @@ def plot_impact_insulation(
     """
     from .._i18n import localize_axes
 
-    curves = [(r"$L^{\prime}_\mathrm{nT}$", np.asarray(result.l_n_t, dtype=np.float64))]
+    curves = [
+        (r"$L^{\prime}_{\mathrm{n}T}$", np.asarray(result.l_n_t, dtype=np.float64))
+    ]
     if result.l_n is not None:
         curves.append(
             (r"$L^{\prime}_\mathrm{n}$", np.asarray(result.l_n, dtype=np.float64))
@@ -1970,11 +1974,11 @@ def plot_heavy_impact_source(
         "s--",
         color=_C_REFERENCE,
         lw=1.2,
-        label=_t("nominal $L_{FE}$", language),
+        label=_t(r"nominal $L_\mathrm{FE}$", language),
     )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("label", _t("measured $L_{FE}$", language))
+    kwargs.setdefault("label", _t(r"measured $L_\mathrm{FE}$", language))
     ax.plot(positions, result.measured, "-", **kwargs)
     failing = ~result.within_tolerance
     if bool(np.any(failing)):
@@ -1988,7 +1992,9 @@ def plot_heavy_impact_source(
             zorder=6,
             label=_t("outside tolerance", language),
         )
-    ax.set_ylabel(_t("Impact force exposure level $L_{FE}$ [dB re 1 N]", language))
+    ax.set_ylabel(
+        _t(r"Impact force exposure level $L_\mathrm{FE}$ [dB re 1 N]", language)
+    )
     verdict = _verdict_word(passes=result.passes, language=language)
     source = _t(_HEAVY_IMPACT_SOURCE_LABELS[result.source], language)
     ax.set_title(
@@ -2647,8 +2653,17 @@ def plot_low_frequency_element(
 
 
 def _rating_symbol(key: str) -> str:
-    """Table 1 notation as mathtext: ``"LA,eq,nT"`` to an upright subscript."""
-    return rf"$L_\mathrm{{{key[1:]}}}$"
+    r"""Table 1 notation as mathtext: ``"LA,eq,nT"`` to an upright subscript.
+
+    The T of a standardized level is the reverberation time it is
+    standardized to and stays italic, as ISO 16283-1:2014 prints
+    :math:`D_{\mathrm{n}T}`: ``"LA,eq,nT"`` becomes
+    :math:`L_{\mathrm{A,eq,n}T}`.
+    """
+    body = key[1:]
+    if body.endswith("nT"):
+        return rf"$L_{{\mathrm{{{body[:-1]}}}T}}$"
+    return rf"$L_\mathrm{{{body}}}$"
 
 
 def _headline_rating(result: ServiceEquipmentResult) -> str | None:
@@ -2736,7 +2751,7 @@ def plot_service_equipment_level(
             label=final_label,
         )
         final = result.standardized_db
-        final_label = _t("standardized $L_\\mathrm{nT}$", language)
+        final_label = _t("standardized $L_{\\mathrm{n}T}$", language)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "s")
     kwargs.setdefault("label", final_label)

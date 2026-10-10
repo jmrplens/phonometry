@@ -14,7 +14,7 @@ record (8.6). This module holds those pieces and reuses the FRF machinery of
 
 **Spectra.** The records are sampled at ``fs`` and transformed with the
 discrete Fourier transform scaled by the sampling interval,
-:math:`X(f_k) = \Delta t \sum_n x_n e^{-j 2\pi k n / N}`, which for a transient
+:math:`X(f_k) = \Delta t \sum_n x_n \mathrm{e}^{-j 2\pi k n / N}`, which for a transient
 wholly inside the record samples its continuous Fourier transform (8.3). The
 force energy spectral density is :math:`G_{FF} = 2 \lvert F(f) \rvert^2`, in
 N²·s/Hz: the power spectral density of 3.3, :math:`2 \lvert F \rvert^2 / T`,
@@ -37,7 +37,7 @@ compliance) and is converted to mobility with :func:`.convert_frf`.
 **Windows (8.5).** The *force window* has unity gain over the part of the
 record that holds the force pulse and its filter response and sets the rest to
 exactly zero (8.5.1). The *exponential window*
-:math:`w(t) = e^{-a t}` starts at unity and adds a known decay to the data
+:math:`w(t) = \mathrm{e}^{-a t}` starts at unity and adds a known decay to the data
 (8.3 a), 8.5.2). Applied to force and response alike, it replaces every pole
 :math:`s_r` of the impulse response by :math:`s_r - a` (Annex A, Formula
 (A.2)), so a mode appears more damped than it is, and Formula (A.3) takes the
@@ -381,7 +381,7 @@ def force_window(
 def exponential_window(
     n_samples: int, fs: float, *, decay_rate_per_s: float
 ) -> np.ndarray:
-    r"""The exponential window of 8.5.2: :math:`w(t) = e^{-a t}`.
+    r"""The exponential window of 8.5.2: :math:`w(t) = \mathrm{e}^{-a t}`.
 
     The window has an initial value of unity at the start of the record and
     decreases exponentially towards its end, adding a known amount of
@@ -395,7 +395,7 @@ def exponential_window(
     :param decay_rate_per_s: Decay rate ``a``, in 1/s (>= 0; 0 is no window).
         :func:`exponential_decay_rate` finds the rate that ends the record at a
         stated value.
-    :return: The window, one value per sample, :math:`e^{-a n / f_s}`.
+    :return: The window, one value per sample, :math:`\mathrm{e}^{-a n / f_s}`.
     :raises ValueError: for fewer than 16 samples, a non-positive sample rate
         or a negative decay rate.
     """
@@ -499,7 +499,7 @@ class DoubleHitCheck(OwnsArrays):
     sharp notches into the force spectrum (Figure 5), where the low
     signal-to-noise ratio spoils the mobility. For two pulses of the same
     shape, the second :math:`r` times the first and :math:`\tau` later, the
-    spectrum is the single pulse's times :math:`1 + r e^{-j\omega\tau}`: it
+    spectrum is the single pulse's times :math:`1 + r \mathrm{e}^{-j\omega\tau}`: it
     ripples with a period of :math:`1/\tau` in frequency between
     :math:`1 + r` and :math:`1 - r`, so the notches are deep only when the
     second impact is about as strong as the first. That is why 6.4 says a small
@@ -1355,7 +1355,7 @@ class SingleModeFitResult(OwnsArrays):
 
         The pole is moved back by the decay rate, :math:`p + a`, and the
         residue and direct term are kept: the window multiplies the impulse
-        response :math:`R e^{p t}` by :math:`e^{-a t}`, which changes the pole
+        response :math:`R \mathrm{e}^{p t}` by :math:`\mathrm{e}^{-a t}`, which changes the pole
         and nothing else (Formula (A.2)).
 
         :param frequencies: Frequencies, in hertz.

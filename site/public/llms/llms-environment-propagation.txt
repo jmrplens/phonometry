@@ -168,8 +168,8 @@ pure-tone attenuation coefficient $\alpha$, in decibels per metre:
 
 $$
 \alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_\mathrm{a}/p_\mathrm{r}\big)^{-1} \big(T/T_0\big)^{1/2}
-       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
-       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
+       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{\mathrm{e}^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
+       + 0.1068\ \tfrac{\mathrm{e}^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \big) \Big],
 $$
 
 with the oxygen and nitrogen relaxation frequencies $f_\mathrm{rO}$, $f_\mathrm{rN}$
@@ -950,7 +950,7 @@ a direct wave and a reflected wave weighted by the **spherical-wave reflection
 coefficient** $Q$ (Attenborough Eq. 2.40a; Salomons Eq. 3.2):
 
 $$
-p = \frac{e^{ikR_1}}{4\pi R_1} + Q\,\frac{e^{ikR_2}}{4\pi R_2},
+p = \frac{\mathrm{e}^{ikR_1}}{4\pi R_1} + Q\,\frac{\mathrm{e}^{ikR_2}}{4\pi R_2},
 $$
 
 with $R_1$ the source-receiver distance and $R_2$ the image-source distance.
@@ -963,7 +963,7 @@ R_\mathrm{p} = \frac{Z\cos\theta - 1}{Z\cos\theta + 1},
 $$
 
 $$
-F(w) = 1 + i\sqrt{\pi}\,w\,e^{-w^2}\operatorname{erfc}(-iw), \qquad
+F(w) = 1 + i\sqrt{\pi}\,w\,\mathrm{e}^{-w^2}\operatorname{erfc}(-iw), \qquad
 w = \sqrt{\tfrac{i k R_2}{2}}\left(\cos\theta + \tfrac{1}{Z}\right).
 $$
 
@@ -971,7 +971,7 @@ Here $Z$ is the ground surface impedance normalized by $\rho c$, $\theta$ is
 the angle of incidence from the ground normal
 ($\cos\theta = (h_\mathrm{s} + h_\mathrm{r})/R_2$), and the boundary-loss factor $F(w)$ is
 written through the scaled complementary error function
-$e^{-w^2}\operatorname{erfc}(-iw)$, i.e. the Faddeeva function
+$\mathrm{e}^{-w^2}\operatorname{erfc}(-iw)$, i.e. the Faddeeva function
 `scipy.special.wofz`. The second term of $Q$ is the *ground wave* that keeps
 the field finite at grazing incidence, where $R_\mathrm{p} \to -1$ and a plane-wave
 model would predict silence
@@ -981,7 +981,7 @@ The relative sound level (the *excess attenuation*, dB re free field) is
 (Salomons Eq. 3.4):
 
 $$
-\Delta L = 20\log_{10}\!\left|\,1 + Q\,\frac{R_1}{R_2}\,e^{i k (R_2 - R_1)}\,\right|.
+\Delta L = 20\log_{10}\!\left|\,1 + Q\,\frac{R_1}{R_2}\,\mathrm{e}^{i k (R_2 - R_1)}\,\right|.
 $$
 
 ```python
@@ -1004,9 +1004,9 @@ The ground impedance is either derived from an effective `flow_resistivity`
 [`phonometry.materials`](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/), which model a semi-infinite porous
 ground) or supplied directly as a normalized complex `impedance` (a scalar,
 per-band array, or a `PorousMediumResult`). A plain `impedance` value is taken
-in the $e^{-i\omega t}$ convention of Salomons, in which a passive ground has
+in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, in which a passive ground has
 $\operatorname{Im}(Z) > 0$; the porous models of `phonometry.materials` work
-in the opposite $e^{+j\omega t}$ convention ($\operatorname{Im}(Z) < 0$), so
+in the opposite $\mathrm{e}^{+j\omega t}$ convention ($\operatorname{Im}(Z) < 0$), so
 anything obtained from them (a
 `flow_resistivity` or a `PorousMediumResult`) is conjugated internally before
 it enters the Weyl-Van der Pol formulas.
@@ -1707,11 +1707,11 @@ plt.show()
 </details>
 
 The ground impedance is supplied directly (`impedance=`, a normalized complex
-value in the $e^{-i\omega t}$ convention of Salomons, with
+value in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, with
 $\operatorname{Im}(Z) > 0$ for a passive ground), as a `PorousMediumResult`,
 or from an effective `flow_resistivity` via
 the [porous models](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/) of the materials domain; the porous
-models work in the opposite $e^{+j\omega t}$ convention, so their impedance is
+models work in the opposite $\mathrm{e}^{+j\omega t}$ convention, so their impedance is
 conjugated internally.
 
 The clip below runs the full wave physics through both signs of the
@@ -1814,7 +1814,7 @@ loudspeaker sees them: 1 to 3 along the top row, 7 to 9 along the bottom.
 Each microphone hears the direct sound and, a little over a millisecond later,
 the reflection. The reflection has travelled further, 1,75 m against 1,25 m at
 microphone 5, and has spread over a larger sphere; Formula (2) puts that back
-with $C_{geo,k} = (d_{r,k}/d_{i,k})^2$, which Table 2 prints for every
+with $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, which Table 2 prints for every
 microphone:
 
 ```python
@@ -1859,7 +1859,7 @@ free-field record is shifted in steps of a fiftieth of a sample, within two
 samples either way, by a phase ramp over its own transform; the shift that
 best fits the 50 samples around the main peak is kept; the record is scaled so
 the two peaks are equal and subtracted. What is left is the reflection, and the
-**reduction factor** $R_{sub}$ of Formula (6) measures how much of the direct
+**reduction factor** $R_\mathrm{sub}$ of Formula (6) measures how much of the direct
 sound went with it: the energy within 0,5 ms of the peak before, over the
 energy there after. Below 10 dB the standard reads the subtraction as
 imperfect, and so does `subtract_direct_sound`, with a
@@ -1922,7 +1922,7 @@ half whose length is 3/7 of the flat part. The standard window is 7,9 ms long
 1,3 ms (0,5 + 0,56 + 0,24 ms), short enough to end before the reflection
 reaches the corner microphones. The **marker point** where the flat part
 begins sits 0,2 ms before the peak of the component (5.5.6); for the reflection
-the peak is placed by geometry, the direct peak plus $(d_{r,k} - d_{i,k})/c$,
+the peak is placed by geometry, the direct peak plus $(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c$,
 which is what makes the reference plane the conventional reflection plane of a
 device that is not flat.
 
@@ -1933,7 +1933,7 @@ print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 H
 ```
 
 The edges are Formula (7) sampled as printed, each a half of a full
-Blackman-Harris window twice its own length. Table 1 calls $T_{W,BH}$ the length
+Blackman-Harris window twice its own length. Table 1 calls $T_\mathrm{W,BH}$ the length
 of the trailing edge, which read into Formula (7) would draw a whole bell
 where the edge should fall; the [errata
 registry](https://jmrplens.github.io/phonometry/reference/errata/) records it. The second line is the
@@ -1947,20 +1947,20 @@ here, as the library computes it (see below):
 
 $$
 RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j}
-\frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df}
-     {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df}
-\; \frac{C_{geo,k}\, C_{dir,k}(\Delta f_j)}{C_{gain,k}(\Delta f_g)}
+\frac{\int_{\Delta f_j} |F[h_{\mathrm{r},k}(t)\, w_{\mathrm{r},k}(t)]|^2\, df}
+     {\int_{\Delta f_j} |F[h_{\mathrm{i},k}(t)\, w_{\mathrm{i},k}(t)]|^2\, df}
+\; \frac{C_{\mathrm{geo},k}\, C_{\mathrm{dir},k}(\Delta f_j)}{C_{\mathrm{gain},k}(\Delta f_g)}
 $$
 
-- $C_{geo,k}$ is the divergence of section 1.
-- $C_{dir,k}$ puts back the **directivity of the loudspeaker**: the reflection
+- $C_{\mathrm{geo},k}$ is the divergence of section 1.
+- $C_{\mathrm{dir},k}$ puts back the **directivity of the loudspeaker**: the reflection
   left it towards the specular point, at another angle than the direct sound.
   It is measured once per loudspeaker (Formula (3)), in free field, at the
   microphone position and on the specular path at the same distance, and
   `source_directivity_corrections` turns the two sets of records into the
   `(9, 18)` array `reflection_index` takes. A report without it states "none",
   and so does leaving it out.
-- $C_{gain,k}$ takes out a **change of gain** between the free-field and the
+- $C_{\mathrm{gain},k}$ takes out a **change of gain** between the free-field and the
   in-front configurations. Formula (4) measures it as the in-front incident
   energy over the free-field one, with the 1,3 ms window over the bands of
   500 Hz to 2 kHz. The library **divides** by it. Formula (1) prints it as a
@@ -2147,7 +2147,7 @@ decimals, the resolution 5.11 reports the index to. Both round to the 8 dB
 printed. The expanded uncertainty is the reproducibility of the
 inter-laboratory test in Table A.1 times the coverage factor, 1,59 dB for the
 single number; in seven bands Table B.2 prints a hundredth less than 1,96
-times the $s_R$ of Table A.1, as unrounded standard deviations would give. The
+times the $s_\mathrm{R}$ of Table A.1, as unrounded standard deviations would give. The
 print does not say which values the example multiplied, and the library
 multiplies the printed ones.
 
@@ -2298,7 +2298,7 @@ and a result that lands on a limit through floating-point arithmetic is on it.
 The figure runs the form on this library's own implementation of ISO 9613-2,
 with test case T03 of ISO/TR 17534-3 (porous ground, Table 6). The rows are
 the form's: the A-weighted level in each octave band and their total, against
-the row $L_A$ of Table 6, the one its footnote certifies to ±0,05 dB. On the
+the row $L_\mathrm{A}$ of Table 6, the one its footnote certifies to ±0,05 dB. On the
 left, the library as it is: every row inside its interval, the largest
 deviation 0,008 dB. On the right, one detail changed: the air
 absorption read at the nominal band centres instead of at the exact base-10

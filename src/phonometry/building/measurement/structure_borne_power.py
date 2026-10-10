@@ -15,7 +15,7 @@ The power a resonant plate dissipates equals
 
 .. math::
 
-   L_{W\mathrm{s}} = 10 \log_{10}\frac{2 \pi f \eta\, m S}{f_0 m_0 S_0} + L_v - 60
+   L_\mathrm{Ws} = 10 \log_{10}\frac{2 \pi f \eta\, m S}{f_0 m_0 S_0} + L_\mathrm{v} - 60
    \qquad \text{dB re 1 pW}
 
 with the references :math:`f_0 = 1` Hz, :math:`m_0 = 1` kg (printed as 1 kg;
@@ -28,7 +28,7 @@ level is the energetic average over the ``N`` plate positions (Formula 12):
 
 .. math::
 
-   L_v = 10 \log_{10}\!\left( \frac{1}{N} \sum 10^{L_{v,i}/10} \right)
+   L_\mathrm{v} = 10 \log_{10}\!\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)
 
 and the plate loss factor follows from its structural reverberation time ``Ts``
 (Formula 13, identical to the ISO 10848 total loss factor):
@@ -47,15 +47,15 @@ source):
 
 - the **equivalent blocked force level** (Formula 15, dB re
   :math:`F_0 = 10^{-6}` N):
-  :math:`L_{F\mathrm{b,eq}} = L_{Ws,low}
-  - 10 \log_{10}( \operatorname{Re}\{Y_{R,low,eq}\} / Y_0 )`
+  :math:`L_\mathrm{Fb,eq} = L_\mathrm{Ws,low}
+  - 10 \log_{10}( \operatorname{Re}\{Y_\mathrm{R,low,eq}\} / Y_0 )`
   with the measured low-mobility-plate mobility and :math:`Y_0 = 1`
   m/(N.s);
 - the **characteristic reception-plate power level** used by EN 12354-5
   (Formula 17), referred to the standard 10 cm concrete plate of
-  characteristic mobility :math:`Y_{R,\infty,low} = 5 \cdot 10^{-6}`
+  characteristic mobility :math:`Y_{\mathrm{R},\infty,\mathrm{low}} = 5 \cdot 10^{-6}`
   m/(N.s) (clause 7.2.4):
-  :math:`L_{Wsn} = L_{F\mathrm{b,eq}} + 10 \log_{10}( Y_{R,\infty,low} / Y_0 )`;
+  :math:`L_\mathrm{Wsn} = L_\mathrm{Fb,eq} + 10 \log_{10}( Y_{\mathrm{R},\infty,\mathrm{low}} / Y_0 )`;
 - the **equivalent free velocity level** (Formula 18, dB re ``1e-9 m/s``)
   from the high-mobility plate, and the **source mobility** from both
   (Formula 19). ``L_Wsn`` plus the mobility corrections of EN 12354-5
@@ -121,7 +121,7 @@ _MOBILITY_LEVEL_CONSTANT = (REFERENCE_VELOCITY / REFERENCE_FORCE) ** 2
 def spatial_mean_velocity_level(levels: ArrayLike) -> float:
     r"""Spatial-average velocity level over the plate (EN 15657, Formula 12).
 
-    :math:`L_v = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{v,i}/10} \right)` --
+    :math:`L_\mathrm{v} = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)` --
     the energetic average of the
     per-position velocity levels.
 
@@ -166,7 +166,7 @@ def structure_borne_power_level(
 
     .. math::
 
-       L_{W\mathrm{s}} = 10 \log_{10}\frac{2 \pi f \eta\, m S}{f_0 m_0 S_0} + L_v
+       L_\mathrm{Ws} = 10 \log_{10}\frac{2 \pi f \eta\, m S}{f_0 m_0 S_0} + L_\mathrm{v}
        + 10 \log_{10}\frac{v_0^2}{P_0}
 
     With the EN 15657 reference :math:`v_0 = 10^{-9}` m/s the last term is
@@ -288,7 +288,7 @@ class StructureBornePowerResult(OwnsArrays):
 
     @property
     def total_level(self) -> float:
-        r"""Band-summed power level :math:`10 \log_{10}(\sum 10^{0.1 L_{W\mathrm{s}}})`,
+        r"""Band-summed power level :math:`10 \log_{10}(\sum 10^{0.1 L_\mathrm{Ws}})`,
         in dB.
         """
         lw = np.asarray(self.power_level, dtype=np.float64)
@@ -420,8 +420,8 @@ def equivalent_blocked_force_level(
 ) -> np.ndarray:
     r"""Equivalent blocked force level, squared (EN 15657:2018, Formula 15).
 
-    :math:`L_{F\mathrm{b,eq}} = L_{Ws,low}
-    - 10 \log_{10}(\operatorname{Re}\{Y_{R,low,eq}\}/Y_0)`
+    :math:`L_\mathrm{Fb,eq} = L_\mathrm{Ws,low}
+    - 10 \log_{10}(\operatorname{Re}\{Y_\mathrm{R,low,eq}\}/Y_0)`
     in dB re :math:`F_0 = 10^{-6}` N,
     from the power injected into the *low-mobility* reception plate
     (Formula 14) and the equivalent point mobility of that plate (the
@@ -467,9 +467,9 @@ def characteristic_reception_plate_power(
 ) -> np.ndarray:
     r"""Characteristic reception-plate power level (EN 15657:2018, Formula 17).
 
-    :math:`L_{Wsn} = L_{F\mathrm{b,eq}} + 10 \log_{10}(|Y_{R,\infty,low}|/Y_0)`
+    :math:`L_\mathrm{Wsn} = L_\mathrm{Fb,eq} + 10 \log_{10}(|Y_{\mathrm{R},\infty,\mathrm{low}}|/Y_0)`
     with the characteristic mobility of the standard 10 cm concrete reception
-    plate :math:`Y_{R,\infty,low} = 5 \cdot 10^{-6}` m/(N.s) (clause 7.2.4) and
+    plate :math:`Y_{\mathrm{R},\infty,\mathrm{low}} = 5 \cdot 10^{-6}` m/(N.s) (clause 7.2.4) and
     :math:`Y_0 = 1` m/(N.s). This is the plate-independent source power level
     ``L_Ws,n`` that EN 12354-5 consumes (its Annex I mobility correction
     :func:`phonometry.building.installed_power_from_reception_plate` then
@@ -499,14 +499,14 @@ def equivalent_free_velocity_level(
 ) -> np.ndarray:
     r"""Equivalent free velocity level of the source (EN 15657:2018, Formula 18).
 
-    :math:`L_{vf,eq} = L_{Ws,high} + 10 \log_{10}\left( |Y_{R,high,eq}|^2 /
-    (\operatorname{Re}\{Y_{R,high,eq}\}\, Y_0) \right) + 60~\text{dB}`
+    :math:`L_\mathrm{vf,eq} = L_\mathrm{Ws,high} + 10 \log_{10}\left( |Y_\mathrm{R,high,eq}|^2 /
+    (\operatorname{Re}\{Y_\mathrm{R,high,eq}\}\, Y_0) \right) + 60~\text{dB}`
     in dB re 1e-9 m/s, from the power injected into the
     *high-mobility* reception plate and its equivalent (complex) point
     mobility. The plus sign follows the printed formula and the physics
-    (:math:`v_f^2 = P |Y|^2 / \operatorname{Re}\{Y\}`); it is what makes
+    (:math:`v_\mathrm{f}^2 = P |Y|^2 / \operatorname{Re}\{Y\}`); it is what makes
     Formulae (15) and (18)
-    combine through Formula (19) into :math:`|Y_{S,eq}| = v_f / F_b`.
+    combine through Formula (19) into :math:`|Y_\mathrm{S,eq}| = v_\mathrm{f} / F_\mathrm{b}`.
 
     :param power_level: Injected power level ``L_Ws,high`` (per band), in dB
         re 1 pW.
@@ -548,7 +548,7 @@ def source_mobility_from_levels(
 ) -> np.ndarray:
     r"""Equivalent source mobility magnitude (EN 15657:2018, Formula 19).
 
-    :math:`|Y_{S,eq}|^2 / Y_0^2 = 10^{(L_{vf,eq} - L_{F\mathrm{b,eq}})/10} \cdot
+    :math:`|Y_\mathrm{S,eq}|^2 / Y_0^2 = 10^{(L_\mathrm{vf,eq} - L_\mathrm{Fb,eq})/10} \cdot
     10^{-6}`, the ratio
     of the free-velocity (re 1e-9 m/s) and blocked-force (re 1e-6 N)
     references makes the constant

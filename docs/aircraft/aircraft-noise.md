@@ -62,7 +62,7 @@ to $\mathrm{PNLTM} - 10$ on each side) and normalises to 10 s:
 
 $$
 \mathrm{EPNL} = 10\log_{10}\!\Big(\sum_{k=k_\mathrm{F}}^{k_\mathrm{L}} 10^{\mathrm{PNLT}(k)/10}\,\Delta t(k)\Big)
-- 10\log_{10} T_0, \qquad T_0 = 10\ \mathrm{s},
+- 10\log_{10} \mathrm{t}_0, \qquad \mathrm{t}_0 = 10\ \mathrm{s},
 $$
 
 so $\mathrm{EPNL} = \mathrm{PNLTM} + D$ with the duration correction $D$.

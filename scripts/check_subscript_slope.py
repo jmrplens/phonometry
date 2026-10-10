@@ -34,6 +34,31 @@ them leans: a page setting :math:`KB_\mathrm{FTr}` against an italic
 inside one formula. The members of each family in :data:`LINKED` therefore take
 one slope in a file, whichever of them it writes.
 
+A third rule holds the corpus rather than the file, for a base whose sources
+disagree with each other. DIN 4150-2, its 2023 draft, DIN 45672-2 and
+E DIN 45672-3 print the weighted vibration severity with an italic KB, and the
+list of symbols of DIN 45669-1 sets it upright; the corpus follows DIN 4150-2.
+That is a choice between sources, not a meaning a file can state, so every
+file, the errata register and the drawing modules included, and every image
+in the directory, embedded or not, sets each base of :data:`BASES` the one way.
+
+A fourth rule holds every running index italic, in every file and every
+image. Some standards print every subscript in one slope, and such a print
+cannot tell an index from an abbreviation: UNE-EN 15657:2018 sets the index
+of the position levels :math:`L_{\mathrm{v},i}` (Formula (12)) as upright as
+the v beside it, and EN 12354-5:2009, IEC 60534-8-3, CNOSSOS-EU, RD 1367/2007
+and NT ACOU 112 print their subscripts the same way. There ISO 80000-2
+decides, as the corpus has: a running index is a variable and italic, a
+descriptive abbreviation upright. So the letter a sum runs over
+(:math:`\sum_i`, the Σ of a plate) and an i, j or k that follows another
+component of the same subscript (:math:`L_{\mathrm{v},i}`,
+:math:`D_{\mathrm{C},i}`, :math:`L_{\mathrm{n,s},ij}`) are italic wherever
+they are written, the drawing modules included (:func:`index_slips`). An
+upright i that opens a subscript is not read: that is the impact level
+:math:`L_\mathrm{i}` of ISO 16283-2, which the first rule already holds
+against an index on the same page. The errata register is not read for this
+either, since it quotes prints that set the index upright.
+
 What a failure means, in order of how often it is the answer
 ------------------------------------------------------------
 
@@ -91,11 +116,17 @@ from __future__ import annotations
 
 import argparse
 import collections
+import dataclasses
 import html
+import itertools
 import pathlib
 import re
 import sys
 import unicodedata
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator, Mapping, Sequence
 
 #: Where the prose lives: the module docstrings that become the API reference,
 #: and the three editions of the guides.
@@ -213,41 +244,221 @@ _LINKED_RUNS = frozenset(
     member for members in LINKED.values() for member in members if len(member[1]) > 1
 )
 
+#: Letter runs that are one quantity symbol, with the slope the corpus sets
+#: each in wherever it is the base of a symbol, and why. Unlike the file rule,
+#: this one holds across the whole corpus: the sources of a base like this
+#: disagree with each other, so the corpus has chosen one of them, and a file
+#: that sets the other has left the choice rather than stated a meaning. A run
+#: inside a subscript is not read here: the KB weighting names the filter of
+#: :math:`H_\mathrm{KB}` in DIN 4150-2, Formula (1), and is a word there.
+BASES: dict[str, tuple[str, str]] = {
+    "KB": (
+        "italic",
+        "the weighted vibration severity, printed with an italic KB by "
+        "DIN 4150-2:1999-06 (3.4 to 3.6, PDF page 3), E DIN 4150-2:2023-08, "
+        "DIN 45672-2:1995-07 and E DIN 45672-3:2023-02; the list of symbols "
+        "of DIN 45669-1:2010-09 (Clause 4, PDF page 10) sets it upright, and "
+        "the corpus follows DIN 4150-2",
+    ),
+}
+
+#: The commands that set their argument upright, as a page or a figure label
+#: writes them. ``\rm`` is a switch rather than a command with an argument and
+#: is read as one when it opens a group (``{\rm KB}``).
+_UPRIGHT_WRAPPERS = frozenset(
+    {"mathrm", "text", "textrm", "textup", "operatorname", "mathsf", "mathup", "rm"}
+)
+
+#: What a running index is written with in this corpus: i, j and k, alone or
+#: paired, as the path ij of a flanking sum is.
+_INDEX_RUN = re.compile(r"[ijk]{1,2}")
+
+#: The operators whose subscript is the index they run over: the sum and the
+#: product as a page writes them, and the Σ a plate draws, which
+#: :func:`_base_symbol` names as a page would.
+_RUNNING_OPERATORS = frozenset({"\\sum", "\\prod", "\\Sigma"})
+
+#: The errata register, both editions and its site page, which quotes what a
+#: print sets, upright indices included, and so is not held to
+#: :func:`index_slips`. Matched on the file name alone.
+_TRANSCRIPTIONS = re.compile(r"(?:^|/)errata(?:\.es)?\.mdx?$", re.IGNORECASE)
+
+#: A cheap test for an image that may carry a running index: a sum, or a
+#: subscript with a comma in it, braced or wrapped. An image without one is not
+#: parsed for them.
+_MAY_INDEX = re.compile(r"Σ_|\\(?:sum|prod)_|_(?:\\(?:mathrm|text))?\{\{?[^{}]*,")
+
+
+def _base_slopes(region: str) -> list[tuple[str, str]]:
+    r"""``(base, slope)`` for each run of :data:`BASES` on the baseline of *region*.
+
+    A small reading of TeX, enough to tell where a run stands: a group opened
+    by ``_`` or ``^`` is a script, and so is everything inside it; a group
+    opened by an upright command (:data:`_UPRIGHT_WRAPPERS`) is upright, and
+    so is everything inside it. ``\mathrm{KB}_\mathrm{F}`` is an upright base,
+    ``KB_\mathrm{F}`` an italic one, and the KB of ``H_\mathrm{KB}`` or
+    ``L_{v,KB}`` is a subscript and is passed over.
+    """
+    found: list[tuple[str, str]] = []
+    # Each open group: (is a script, is upright).
+    stack: list[tuple[bool, bool]] = [(False, False)]
+    pending_script = False
+    pending_upright = False
+    i = 0
+    while i < len(region):
+        ch = region[i]
+        script, upright = stack[-1]
+        if ch == "\\":
+            j = i + 1
+            while j < len(region) and region[j].isalpha():
+                j += 1
+            name = region[i + 1 : j] or region[i + 1 : i + 2]
+            j = max(j, i + 2)
+            if name in _UPRIGHT_WRAPPERS:
+                if name == "rm":
+                    stack[-1] = (script, True)
+                else:
+                    pending_upright = True
+            elif pending_script:
+                # A command standing alone as the whole script (``_\max``).
+                k = j
+                while k < len(region) and region[k] == " ":
+                    k += 1
+                if k >= len(region) or region[k] != "{":
+                    pending_script = False
+            i = j
+            continue
+        if ch == "{":
+            stack.append((script or pending_script, upright or pending_upright))
+            pending_script = pending_upright = False
+        elif ch == "}":
+            if len(stack) > 1:
+                stack.pop()
+        elif ch in "_^":
+            pending_script = True
+        elif ch.isascii() and ch.isalpha():
+            j = i
+            while j < len(region) and region[j].isascii() and region[j].isalpha():
+                j += 1
+            if pending_script:
+                # A bare script takes one character, the rest of the run is
+                # back on the level the script hangs from.
+                pending_script = False
+                i += 1
+                continue
+            run = region[i:j]
+            if not script and run in BASES:
+                found.append((run, "upright" if upright else "italic"))
+            i = j
+            continue
+        elif not ch.isspace():
+            pending_script = False
+        i += 1
+    return found
+
+
+def base_sightings(text: str, suffix: str) -> Sightings:
+    """Every run of :data:`BASES` *text* sets as a base, by slope and line.
+
+    Keyed ``(base, "")`` so that it reads like :func:`sightings`.
+    """
+    found: Sightings = collections.defaultdict(lambda: collections.defaultdict(list))
+    for offset, region in tex_regions(text, suffix):
+        line = text.count("\n", 0, offset) + 1
+        for base, slope in _base_slopes(region):
+            found[(base, "")][slope].append(line)
+    return found
+
 
 def math_regions(text: str, suffix: str) -> list[tuple[int, str]]:
     r"""``(offset, snippet)`` for every mathematics region of *text*.
 
     ``$$...$$`` and ``$...$`` in every file kind, plus the reStructuredText
-    ``:math:`...``` roles and ``.. math::`` blocks the docstrings use.
+    ``:math:`...``` roles and ``.. math::`` blocks the docstrings use. On a
+    page an inline formula may wrap onto the next line of its paragraph, so
+    its dollars are paired across one line break, never across a blank line:
+    paired line by line, the closing dollar of a wrapped formula was taken for
+    an opening one, and the formula after it was read as text. In a module a
+    dollar belongs to one string on one line, and is paired there.
     """
     out: list[tuple[int, str]] = [
         (m.start(1), m.group(1)) for m in re.finditer(r"\$\$(.+?)\$\$", text, re.DOTALL)
     ]
-    out.extend(
-        (m.start(1), m.group(1))
-        for m in re.finditer(r"(?<![$\\])\$(?!\$)([^$\n]+?)\$(?!\$)", text)
-    )
+    inline = _INLINE_LINE if suffix == ".py" else _INLINE_PARAGRAPH
+    out.extend((m.start(1), m.group(1)) for m in inline.finditer(text))
     if suffix == ".py":
         out.extend(
             (m.start(1), m.group(1))
             for m in re.finditer(r":math:`(.+?)`", text, re.DOTALL)
         )
-        out.extend(
-            (m.start(2), m.group(2))
-            for m in re.finditer(
-                r"^([ \t]*)\.\. math::[ \t]*\n(.*?)(?=\n\s*\n|\Z)",
-                text,
-                re.DOTALL | re.MULTILINE,
-            )
-        )
+        out.extend(_math_blocks(text))
     return out
 
 
-#: A run that is a regex or its replacement rather than a label, by the same
-#: shapes ``check_mathtext.py`` recognises: a doubled backslash means "a
-#: literal backslash" in a pattern, and a capture group or a backreference is
-#: not mathematics. The Spanish translation tables are made of these.
-_PATTERN_SHAPE = re.compile(r"\\\\|\(\.\+\)|\(\\d|\(\.\*\)|\\\d")
+#: The line that opens a reStructuredText math block, and its indentation.
+_MATH_DIRECTIVE = re.compile(r"^([ \t]*)\.\. math::[ \t]*$", re.MULTILINE)
+
+
+def _math_blocks(text: str) -> list[tuple[int, str]]:
+    """``(offset, body)`` of every ``.. math::`` block of *text*.
+
+    A block runs on for as long as its lines are indented past the
+    directive, blank lines included: a block of two equations sets them in
+    two paragraphs, and the second is as much mathematics as the first.
+    Ending the block at its first blank line read the first equation alone.
+    """
+    out: list[tuple[int, str]] = []
+    for match in _MATH_DIRECTIVE.finditer(text):
+        indent = len(match.group(1).expandtabs())
+        start = match.end() + 1
+        end = start
+        for line in text[start:].splitlines(keepends=True):
+            stripped = line.strip()
+            if stripped and len(line) - len(line.lstrip()) <= indent:
+                break
+            end += len(line)
+        out.append((start, text[start:end].rstrip()))
+    return out
+
+
+#: An inline formula: on one line in a module, and within one paragraph on a
+#: page, where a single line break may fall inside it.
+_INLINE_LINE = re.compile(r"(?<![$\\])\$(?!\$)([^$\n]+?)\$(?!\$)")
+_INLINE_PARAGRAPH = re.compile(
+    r"(?<![$\\])\$(?!\$)((?:[^$\n]|\n(?![ \t]*\n))+?)\$(?!\$)"
+)
+
+#: A run that is a regex or its replacement rather than a label: a capture
+#: group, a digit class opening a group, or a backreference is not
+#: mathematics, and the Spanish translation tables are made of these. ``(\d``
+#: counts only where no letter follows, since ``(\delta`` and ``(\dfrac`` are
+#: TeX. A doubled backslash is not on the list: in a formula it is the row
+#: break of a ``cases`` or ``aligned`` block, and taking it for a pattern hid
+#: every such block from both gates.
+_PATTERN_SHAPE = re.compile(r"\(\.\+\)|\(\.\*\)|\(\\d(?![A-Za-z])|\\\d")
+
+#: A command whose backslash is doubled: the label of a plain (not raw) Python
+#: string, ``"$\\mathrm{e}^{x}$"``, or such a string quoted in a page's
+#: snippet. It is the same TeX with every backslash written twice.
+_ESCAPED = re.compile(r"\\\\[A-Za-z]")
+
+
+def tex_regions(text: str, suffix: str) -> list[tuple[int, str]]:
+    r"""The mathematics of *text* as TeX: :func:`math_regions` without the
+    regex sources, with the doubled backslashes of a plain string undone.
+
+    Undoing them keeps every line break, so a line counted inside the region
+    is the line of the file.
+    """
+    out: list[tuple[int, str]] = []
+    for offset, region in math_regions(text, suffix):
+        if _PATTERN_SHAPE.search(region):
+            continue
+        if _ESCAPED.search(region):
+            region = region.replace("\\\\", "\\")
+        out.append((offset, region))
+    return out
+
 
 #: ``base_subscript``: a Greek command or a run of letters, an optional prime,
 #: then the subscript, braced or bare. The prime stays with the base, so the
@@ -311,6 +522,36 @@ def _components(body: str) -> list[str]:
     return parts
 
 
+def _flat_components(sub: str) -> list[tuple[str, bool]]:
+    r"""The components of the subscript *sub* in order, each with its slope.
+
+    ``(component, upright)``, read as :func:`sightings` reads them: where the
+    upright command wraps the whole run (``\mathrm{v,i}``) every component is
+    upright, and a run the command wraps inside braces
+    (``{\mathrm{v},i}``) is upright while what stands beside it bare is not.
+    """
+    whole = _UPRIGHT.match(sub.strip())
+    if whole:
+        return [(part.strip(), True) for part in whole.group(1).split(",")]
+    out: list[tuple[str, bool]] = []
+    for part in _components(sub):
+        wrapped = _UPRIGHT.match(part)
+        if wrapped:
+            out.extend((inner.strip(), True) for inner in wrapped.group(1).split(","))
+        else:
+            out.append((part, False))
+    return out
+
+
+def _subscripts(region: str) -> Iterator[tuple[str, str, str]]:
+    """``(symbol, subscript, as written)`` for each subscripted symbol of *region*."""
+    for match in _SUBSCRIPTED.finditer(region):
+        base, prime, raw = match.group(1), match.group(2), match.group(3)
+        base = _GREEK_SHAPES.get(base, base)
+        sub = raw[1:-1] if raw.startswith("{") else raw
+        yield base + prime, sub, match.group(0)
+
+
 def sightings(text: str, suffix: str) -> Sightings:
     r"""Every one-letter subscript of *text*, by symbol and by slope.
 
@@ -325,30 +566,54 @@ def sightings(text: str, suffix: str) -> Sightings:
     weighting prefix and a word are not what this is about.
     """
     found: Sightings = collections.defaultdict(lambda: collections.defaultdict(list))
-    for offset, region in math_regions(text, suffix):
-        if _PATTERN_SHAPE.search(region):
-            continue
+    for offset, region in tex_regions(text, suffix):
         line = text.count("\n", 0, offset) + 1
-        for match in _SUBSCRIPTED.finditer(region):
-            base, prime, raw = match.group(1), match.group(2), match.group(3)
-            base = _GREEK_SHAPES.get(base, base)
-            sub = raw[1:-1] if raw.startswith("{") else raw
-            whole = _UPRIGHT.match(sub.strip())
-            body = whole.group(1) if whole else sub
-            parts = [p.strip() for p in body.split(",")] if whole else _components(body)
-            for part in parts:
-                upright = _UPRIGHT.match(part)
-                if upright:
-                    for inner in (p.strip() for p in upright.group(1).split(",")):
-                        if (
-                            _ITALIC.match(inner)
-                            or (base + prime, inner) in _LINKED_RUNS
-                        ):
-                            found[(base + prime, inner)]["upright"].append(line)
-                elif _ITALIC.match(part) or (base + prime, part) in _LINKED_RUNS:
-                    slope = "upright" if whole else "italic"
-                    found[(base + prime, part)][slope].append(line)
+        for symbol, sub, _ in _subscripts(region):
+            for part, upright in _flat_components(sub):
+                if _ITALIC.match(part) or (symbol, part) in _LINKED_RUNS:
+                    slope = "upright" if upright else "italic"
+                    found[(symbol, part)][slope].append(line)
     return found
+
+
+def _upright_indices(symbol: str, sub: str) -> list[str]:
+    r"""The running indices the subscript *sub* of *symbol* sets upright.
+
+    The subscript of a sum is its index, up to an ``=`` (``\sum_{i=1}``),
+    where it is one letter: ``\sum_\mathrm{Zug}`` runs over the named train
+    categories of DIN 4150-2 and is a word. Elsewhere an index is an i, j or
+    k that follows another component (``L_{\mathrm{v},i}``); one that opens
+    the subscript is the impact level ``L_\mathrm{i}`` as often as an index,
+    and is left to the file rule.
+    """
+    if symbol in _RUNNING_OPERATORS:
+        index = sub.split("=", 1)[0].strip()
+        wrapped = _UPRIGHT.match(index)
+        if wrapped and _ITALIC.match(wrapped.group(1).strip()):
+            return [wrapped.group(1).strip()]
+        return []
+    return [
+        part
+        for k, (part, upright) in enumerate(_flat_components(sub))
+        if k and upright and _INDEX_RUN.fullmatch(part)
+    ]
+
+
+#: A running index set upright: ``(symbol as written, index, where)``, the
+#: place a line of a file or the label of an image.
+Slip = tuple[str, str, int | str]
+
+
+def index_slips(text: str, suffix: str) -> list[Slip]:
+    """Every running index *text* sets upright, with the symbol and line."""
+    out: list[Slip] = []
+    for offset, region in tex_regions(text, suffix):
+        line = text.count("\n", 0, offset) + 1
+        for symbol, sub, written in _subscripts(region):
+            out.extend(
+                (written, index, line) for index in _upright_indices(symbol, sub)
+            )
+    return out
 
 
 #: Where the generators write the plates and the figures, and where every page
@@ -535,10 +800,11 @@ def _read_label(source: str, body: str) -> list[tuple[str, Level, bool | None]] 
     """``(character, level, italic)`` along one label, or ``None`` if unreadable.
 
     Blank characters draw nothing, so the drawn glyphs line up with the
-    label's other characters. A script is short and is held glyph for glyph;
-    a baseline run is not (a ligature draws two letters as one glyph), and a
-    baseline style is never what is read, so it is matched as a run and its
-    characters keep ``None``.
+    label's other characters. A script is short and is held glyph for glyph.
+    A baseline run is held glyph for glyph too where it can be, which is what
+    the base of a symbol is read from (:data:`BASES`); where a ligature has
+    drawn two of its letters as one glyph it cannot, and its characters keep
+    ``None``.
     """
     chars = _label_levels(source)
     inked = [i for i, (ch, _) in enumerate(chars) if not ch.isspace()]
@@ -559,7 +825,12 @@ def _read_label(source: str, body: str) -> list[tuple[str, Level, bool | None]] 
     out: list[tuple[str, Level, bool | None]] = [(ch, lv, None) for ch, lv in chars]
     start = 0
     for (level, count), (_, faces) in zip(written, drawn, strict=True):
-        if level:
+        if not level and count == len(faces):
+            # A baseline run with no ligature in it lines up glyph for glyph,
+            # which is what the base of a symbol is read from.
+            for i, italic in zip(inked[start : start + count], faces, strict=True):
+                out[i] = (chars[i][0], level, italic)
+        elif level:
             if count != len(faces):
                 # A ligature (the ff of "eff" and "diff") draws two letters
                 # as one glyph, and it only forms inside one run, so a script
@@ -591,6 +862,33 @@ def plate_sightings(svg: str) -> tuple[PlateSightings, list[str]]:
         lambda: collections.defaultdict(list)
     )
     unreadable: list[str] = []
+    for source, base, components in _plate_scripts(svg, unreadable):
+        for letters in components:
+            run = "".join(c[0] for c in letters)
+            if len(letters) == 1 and _ITALIC.match(letters[0][0]):
+                slope = "italic" if letters[0][2] else "upright"
+                found[(base, letters[0][0])][slope].append(source)
+            elif (base, run) in _LINKED_RUNS and len({c[2] for c in letters}) == 1:
+                slope = "italic" if letters[-1][2] else "upright"
+                found[(base, run)][slope].append(source)
+    return found, unreadable
+
+
+#: One component of a script a plate draws: its inked characters, each with
+#: its level and whether it is drawn from the oblique face.
+PlateComponent = list[tuple[str, Level, bool | None]]
+
+
+def _plate_scripts(
+    svg: str, unreadable: list[str]
+) -> Iterator[tuple[str, str, list[PlateComponent]]]:
+    """``(label, base, components)`` for each subscript a plate draws.
+
+    A subscript is split at its commas into components, blanks dropped, and
+    hangs from the symbol :func:`_base_symbol` names; a subscript that hangs
+    from nothing a page could write is passed over. A label whose glyphs do
+    not line up with its source is appended to *unreadable* instead.
+    """
     for match in _PLATE_LABEL.finditer(svg):
         source = html.unescape(match.group(1))
         if "$" not in source or "_" not in source:
@@ -609,24 +907,101 @@ def plate_sightings(svg: str) -> tuple[PlateSightings, list[str]]:
             while j < len(chars) and chars[j][1] == level:
                 j += 1
             base = _base_symbol([(c, lv) for c, lv, _ in chars], i)
-            component: list[tuple[str, Level, bool | None]] = []
-            for item in [*chars[i:j], (",", level, None)]:
-                if item[0] != ",":
-                    component.append(item)
-                    continue
-                letters = [c for c in component if not c[0].isspace()]
-                run = "".join(c[0] for c in letters)
-                if base and len(letters) == 1 and _ITALIC.match(letters[0][0]):
-                    slope = "italic" if letters[0][2] else "upright"
-                    found[(base, letters[0][0])][slope].append(source)
-                elif (
-                    base
-                    and (base, run) in _LINKED_RUNS
-                    and len({c[2] for c in letters}) == 1
-                ):
-                    slope = "italic" if letters[-1][2] else "upright"
-                    found[(base, run)][slope].append(source)
-                component = []
+            components: list[PlateComponent] = [[]]
+            for item in chars[i:j]:
+                if item[0] == ",":
+                    components.append([])
+                elif not item[0].isspace():
+                    components[-1].append(item)
+            if base:
+                yield source, base, components
+            i = j
+
+
+def plate_index_slips(svg: str) -> list[Slip]:
+    """Every running index a plate draws upright, by label.
+
+    Read as :func:`index_slips` reads a page: the one letter a Σ runs over,
+    up to an ``=``, and an i, j or k drawn after another component of a
+    subscript. A label the plate reading cannot line up is reported by
+    :func:`plate_sightings`, not here.
+    """
+    out: list[Slip] = []
+    for source, base, components in _plate_scripts(svg, []):
+        spelled = ["".join(c[0] for c in letters) for letters in components]
+        written = f"{base}_{{{','.join(spelled)}}}"
+        if base in _RUNNING_OPERATORS:
+            index = list(itertools.takewhile(lambda c: c[0] != "=", components[0]))
+            found = [index] if len(index) == 1 and _ITALIC.match(index[0][0]) else []
+        else:
+            found = [
+                letters
+                for k, letters in enumerate(components)
+                if k and _INDEX_RUN.fullmatch(spelled[k])
+            ]
+        out.extend(
+            (written, "".join(c[0] for c in letters), source)
+            for letters in found
+            if all(c[2] is False for c in letters)
+        )
+    return out
+
+
+def _in_math(source: str) -> list[bool]:
+    """Whether each character :func:`_label_levels` reads is inside ``$...$``."""
+    flags: list[bool] = []
+    for k, segment in enumerate(source.split("$")):
+        if k % 2 == 0:
+            flags.extend(False for _ in segment)
+        else:
+            inner: list[tuple[str, Level]] = []
+            _math_levels(segment, "", inner)
+            flags.extend(True for _ in inner)
+    return flags
+
+
+def plate_bases(svg: str) -> tuple[PlateSightings, list[str]]:
+    """Every run of :data:`BASES` a plate draws as a base, and what it cannot read.
+
+    A run counts where it stands on the baseline of a ``$...$`` span, as a
+    whole run of letters. A label whose baseline cannot be lined up glyph for
+    glyph (a ligature) and that carries one is returned by name, so an
+    unreadable plate fails rather than passing unread.
+    """
+    found: PlateSightings = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    unreadable: list[str] = []
+    for match in _PLATE_LABEL.finditer(svg):
+        source = html.unescape(match.group(1))
+        if "$" not in source or not any(base in source for base in BASES):
+            continue
+        chars = _read_label(source, match.group(2))
+        math = _in_math(source)
+        if chars is None or len(math) != len(chars):
+            unreadable.append(source)
+            continue
+        i = 0
+        while i < len(chars):
+            if not (math[i] and chars[i][1] == "" and _is_ascii_letter(chars[i][0])):
+                i += 1
+                continue
+            j = i
+            while (
+                j < len(chars)
+                and math[j]
+                and chars[j][1] == ""
+                and _is_ascii_letter(chars[j][0])
+            ):
+                j += 1
+            run = "".join(c for c, _, _ in chars[i:j])
+            if run in BASES:
+                faces = {italic for _, _, italic in chars[i:j]}
+                if None in faces:
+                    unreadable.append(source)
+                else:
+                    slope = "italic" if faces == {True} else "upright"
+                    found[(run, "")][slope].append(source)
             i = j
     return found, unreadable
 
@@ -656,17 +1031,65 @@ def figure_sightings(svg: str) -> PlateSightings:
     return found
 
 
+def figure_bases(svg: str) -> PlateSightings:
+    """Every run of :data:`BASES` a matplotlib figure sets as a base.
+
+    Read from the comments as :func:`base_sightings` reads a page.
+    """
+    found: PlateSightings = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    for match in _FIGURE_TEXT.finditer(svg):
+        source = html.unescape(match.group(1))
+        if "$" not in source or not any(base in source for base in BASES):
+            continue
+        for symbol, slopes in base_sightings(source, ".md").items():
+            for slope in slopes:
+                found[symbol][slope].append(source)
+    return found
+
+
+def figure_index_slips(svg: str) -> list[Slip]:
+    """Every running index a matplotlib figure sets upright, by text.
+
+    Read from the comments as :func:`index_slips` reads a page.
+    """
+    out: list[Slip] = []
+    for match in _FIGURE_TEXT.finditer(svg):
+        source = html.unescape(match.group(1))
+        if "$" not in source or "_" not in source:
+            continue
+        out.extend(
+            (written, index, source) for written, index, _ in index_slips(source, ".md")
+        )
+    return out
+
+
+@dataclasses.dataclass(frozen=True)
+class Image:
+    """What one image sets: its subscripts, its bases, the running indices it
+    sets upright, and what it cannot read.
+    """
+
+    symbols: PlateSightings
+    bases: PlateSightings
+    slips: list[Slip]
+    unreadable: list[str]
+
+
 #: What each image file holds, as :func:`_image` reads it, or ``None`` for a
 #: file that is not there.
-_IMAGE_CACHE: dict[pathlib.Path, tuple[PlateSightings, list[str]] | None] = {}
+_IMAGE_CACHE: dict[pathlib.Path, Image | None] = {}
 
 
-def _image(path: pathlib.Path) -> tuple[PlateSightings, list[str]] | None:
+def _image(path: pathlib.Path) -> Image | None:
     """What the image at *path* sets, and the labels that keep it from being read.
 
-    A plate is read from its glyphs (:func:`plate_sightings`) and a figure
-    from its comments (:func:`figure_sightings`), which are always readable.
-    ``None`` if there is no such file.
+    A plate is read from its glyphs (:func:`plate_sightings`,
+    :func:`plate_bases`, :func:`plate_index_slips`) and a figure from its
+    comments (:func:`figure_sightings`, :func:`figure_bases`,
+    :func:`figure_index_slips`), which are always readable. ``None`` if
+    there is no such file.
     """
     if path not in _IMAGE_CACHE:
         try:
@@ -674,27 +1097,35 @@ def _image(path: pathlib.Path) -> tuple[PlateSightings, list[str]] | None:
         except OSError:
             _IMAGE_CACHE[path] = None
         else:
-            _IMAGE_CACHE[path] = (
-                plate_sightings(text)
-                if text.startswith(_PLATE_HEAD)
-                else (figure_sightings(text), [])
-            )
+            if text.startswith(_PLATE_HEAD):
+                symbols, unreadable = plate_sightings(text)
+                bases, unread_bases = plate_bases(text)
+                _IMAGE_CACHE[path] = Image(
+                    symbols,
+                    bases,
+                    plate_index_slips(text),
+                    list(dict.fromkeys(unreadable + unread_bases)),
+                )
+            else:
+                _IMAGE_CACHE[path] = Image(
+                    figure_sightings(text),
+                    figure_bases(text),
+                    figure_index_slips(text),
+                    [],
+                )
     return _IMAGE_CACHE[path]
 
 
-def embedded(
+def _embedded_images(
     text: str, path: pathlib.Path, plates: pathlib.Path
-) -> tuple[dict[tuple[str, str], dict[str, list[str]]], list[str]]:
-    """What the images *text* embeds set, and what keeps one from being read.
+) -> list[tuple[str, Image]]:
+    """``(file name, reading)`` for each image *text* embeds that *plates* holds.
 
-    Each sighting is a location, ``diagram_x.svg: "label"``; a Spanish page
-    (one under an ``es`` directory) is held against the Spanish image.
+    A Spanish page (one under an ``es`` directory) is held against the Spanish
+    image, and falls back to the English one where there is no Spanish file.
     """
     spanish = "es" in path.parts
-    found: dict[tuple[str, str], dict[str, list[str]]] = collections.defaultdict(
-        lambda: collections.defaultdict(list)
-    )
-    problems: list[str] = []
+    out: list[tuple[str, Image]] = []
     for name in sorted(set(_IMAGE_REF.findall(text))):
         plate = f"{name}_es.svg" if spanish else f"{name}.svg"
         read = _image(plates / plate)
@@ -706,12 +1137,28 @@ def embedded(
             # An image this directory does not hold: a broken embed is the
             # link checker's to report, not this gate's.
             continue
-        symbols, unreadable = read
+        out.append((plate, read))
+    return out
+
+
+def embedded(
+    text: str, path: pathlib.Path, plates: pathlib.Path
+) -> tuple[dict[tuple[str, str], dict[str, list[str]]], list[str]]:
+    """What the images *text* embeds set, and what keeps one from being read.
+
+    Each sighting is a location, ``diagram_x.svg: "label"``; a Spanish page
+    (one under an ``es`` directory) is held against the Spanish image.
+    """
+    found: dict[tuple[str, str], dict[str, list[str]]] = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    problems: list[str] = []
+    for plate, read in _embedded_images(text, path, plates):
         problems.extend(
             f"cannot line up the glyphs of {plate} label {label!r}"
-            for label in unreadable
+            for label in read.unreadable
         )
-        for symbol, slopes in symbols.items():
+        for symbol, slopes in read.symbols.items():
             for slope, labels in slopes.items():
                 found[symbol][slope].extend(
                     f'{plate}: "{label}"' for label in dict.fromkeys(labels)
@@ -719,8 +1166,12 @@ def embedded(
     return found, problems
 
 
-def collect(roots: list[str]) -> list[pathlib.Path]:
-    """The files to read, in a stable order."""
+def collect(roots: list[str], *, everything: bool = False) -> list[pathlib.Path]:
+    """The files to read, in a stable order.
+
+    *everything* keeps the files the file scope does not apply to
+    (:data:`_EXCLUDED`), which :data:`BASES` is still read in.
+    """
     paths: list[pathlib.Path] = []
     for root in roots:
         target = pathlib.Path(root)
@@ -737,6 +1188,8 @@ def collect(roots: list[str]) -> list[pathlib.Path]:
     # backslashes, so every exclusion silently stopped matching there and the
     # drawing modules were read after all. The same normalisation is why
     # ``declared`` below reads ``as_posix``.
+    if everything:
+        return paths
     return [p for p in paths if not _EXCLUDED.search(p.as_posix())]
 
 
@@ -758,20 +1211,78 @@ def _where(lines: list[int], plates: list[str]) -> str:
     return "; ".join(parts)
 
 
+def _base_reports(
+    where: str, found: Mapping[tuple[str, str], Mapping[str, Sequence[int | str]]]
+) -> list[str]:
+    """One report per run of :data:`BASES` *where* sets against the corpus."""
+    out: list[str] = []
+    for (base, _), slopes in sorted(found.items()):
+        wanted, reason = BASES[base]
+        for slope, places in sorted(slopes.items()):
+            if slope == wanted:
+                continue
+            lines = [p for p in places if isinstance(p, int)]
+            labels = [f'"{p}"' for p in places if isinstance(p, str)]
+            out.append(
+                f"  {where}\n"
+                f"      {base} {slope} {_where(lines, labels)}\n"
+                f"      {' ' * len(base)} is {wanted} everywhere: {reason}"
+            )
+    return out
+
+
+def _index_reports(where: str, slips: Sequence[Slip]) -> list[str]:
+    """One report per running index *where* sets upright."""
+    out: list[str] = []
+    for (written, index), places in itertools.groupby(
+        sorted(slips, key=lambda slip: (slip[0], slip[1], str(slip[2]))),
+        key=lambda slip: (slip[0], slip[1]),
+    ):
+        spots = [place for _, _, place in places]
+        lines = [p for p in spots if isinstance(p, int)]
+        labels = [f'"{p}"' for p in spots if isinstance(p, str)]
+        out.append(
+            f"  {where}\n"
+            f"      {written}: the index {index} is upright "
+            f"{_where(lines, labels)}\n"
+            "      a running index is italic everywhere: ISO 80000-2 sets it "
+            "as a variable, and where a standard prints every subscript in "
+            "one slope the corpus follows ISO 80000-2"
+        )
+    return out
+
+
+def _read_text(path: pathlib.Path) -> str | None:
+    """The text of *path*, or ``None`` for a file that cannot be read as text."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
 def check(
-    paths: list[pathlib.Path], plates: pathlib.Path | None = None
+    paths: list[pathlib.Path],
+    plates: pathlib.Path | None = None,
+    *,
+    bases_only: Iterable[pathlib.Path] = (),
+    every_image: bool = False,
 ) -> tuple[int, list[str]]:
     """``(files read, one report per undeclared collision)``.
 
     *plates* is the directory the embedded plates and figures are read from,
-    the repository's :data:`PLATES` by default.
+    the repository's :data:`PLATES` by default. Every file in *paths* and
+    every image they embed is also held to :data:`BASES` and to
+    :func:`index_slips`, and so is every file in *bases_only*, which the file
+    scope does not apply to, the errata register excepted from the index rule
+    (:data:`_TRANSCRIPTIONS`), and with *every_image* every image in *plates*,
+    embedded or not.
     """
     plate_dir = pathlib.Path(PLATES) if plates is None else plates
     failures: list[str] = []
+    images: dict[str, Image] = {}
     for path in paths:
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+        text = _read_text(path)
+        if text is None:
             continue
         registered = declared(path)
         prose = sightings(text, path.suffix)
@@ -794,6 +1305,36 @@ def check(
         failures.extend(
             f"  {path}\n      {problem}" for problem in _family_splits(prose, drawn)
         )
+        failures.extend(_base_reports(str(path), base_sightings(text, path.suffix)))
+        failures.extend(_index_reports(str(path), index_slips(text, path.suffix)))
+        images.update(_embedded_images(text, path, plate_dir))
+    for path in bases_only:
+        text = _read_text(path)
+        if text is not None:
+            failures.extend(_base_reports(str(path), base_sightings(text, path.suffix)))
+            if not _TRANSCRIPTIONS.search(path.as_posix()):
+                failures.extend(
+                    _index_reports(str(path), index_slips(text, path.suffix))
+                )
+    if every_image:
+        for svg in sorted(plate_dir.glob("*.svg")):
+            if svg.name in images:
+                continue
+            text = _read_text(svg)
+            if text is None or not (
+                any(base in text for base in BASES) or _MAY_INDEX.search(text)
+            ):
+                continue
+            read = _image(svg)
+            if read is not None:
+                images[svg.name] = read
+                failures.extend(
+                    f"  {svg.name}\n      cannot line up the glyphs of label {label!r}"
+                    for label in read.unreadable
+                )
+    for name, read in sorted(images.items()):
+        failures.extend(_base_reports(name, read.bases))
+        failures.extend(_index_reports(name, read.slips))
     return len(paths), failures
 
 
@@ -845,26 +1386,33 @@ def main(argv: list[str] | None = None) -> int:
         print(f"No images in {plates}: run from the repository root.", file=sys.stderr)
         return 1
     paths = collect(args.roots)
-    read, failures = check(paths, plates)
+    kept = set(paths)
+    others = [p for p in collect(args.roots, everything=True) if p not in kept]
+    read, failures = check(paths, plates, bases_only=others, every_image=True)
     if not failures:
         print(
             f"Every subscript is single-valued in each of {read} files "
-            "and the images they embed."
+            "and the images they embed, every "
+            + ", ".join(sorted(BASES))
+            + " takes the slope the corpus sets it in, and every running "
+            "index is italic."
         )
         return 0
 
     print(
         f"{len(failures)} subscripts carry both slopes inside one file "
-        "or the images it embeds:\n",
+        "or the images it embeds, a base is set against the corpus, or a "
+        "running index is upright:\n",
         file=sys.stderr,
     )
     for failure in failures:
         print(failure, file=sys.stderr)
     print(
         "\nRe-letter the index, set the lagging one the way its neighbours "
-        "are set, or\ndeclare the page in DECLARED naming both meanings. A "
-        "plate's slope is set\nin scripts/diagrams and a figure's in "
-        "scripts/figures; regenerate the image\nafter changing it.",
+        "are set, or\ndeclare the page in DECLARED naming both meanings; set "
+        "a base the way BASES\nsays and a running index italic. A plate's "
+        "slope is set in\nscripts/diagrams and a figure's in scripts/figures; "
+        "regenerate the image\nafter changing it.",
         file=sys.stderr,
     )
     return 1

@@ -459,7 +459,7 @@ frecuenciales $m_k = \int f^k\,G(f)\,\mathrm{d}f$:
 $$
 N_0 = \frac{1}{\pi}\frac{\sigma_v}{\sigma_x} = 2\sqrt{\frac{m_2}{m_0}},
 \qquad
-N_a = N_0\, e^{-a^2/2\sigma_x^2},
+N_a = N_0\, \mathrm{e}^{-a^2/2\sigma_x^2},
 $$
 
 donde $N_a$ es la tasa de cruces del nivel $a$ (Ec. (5.196)). $N_0/2$ es la
@@ -491,7 +491,7 @@ res.plot(language="es")
 tasa. La tasa de cruces por cero medida en este registro de 800-1200 Hz es de
 2012,7 cruces por segundo frente a la forma cerrada del Ejemplo 5.13,
 $2\sqrt{f_\mathrm{c}^2 + B^2/12} = 2013{,}3$, una frecuencia aparente de 1007 Hz; a
-partir de ahí la exponencial de Rice $N_a = N_0 e^{-a^2/2\sigma_x^2}$ sigue los
+partir de ahí la exponencial de Rice $N_a = N_0 \mathrm{e}^{-a^2/2\sigma_x^2}$ sigue los
 recuentos con menos de un 2 % de diferencia hasta $2\sigma$, donde la tasa ya ha
 caído a 268/s. Pasado $3\sigma$ el recuento es de un puñado de sucesos por
 segundo y la dispersión es la estadística del registro, no un fallo del modelo.*
@@ -579,7 +579,7 @@ $$
 el número único que fija la distribución de las alturas de pico
 (B&P Sec. 5.5.4). Con $r = 1$ - datos de banda estrecha, un máximo por
 ciclo de cruce por cero - los picos siguen una distribución de
-**Rayleigh**: $\mathrm{Prob}[\text{pico} > a] = e^{-a^2/2\sigma_x^2}$
+**Rayleigh**: $\mathrm{Prob}[\text{pico} > a] = \mathrm{e}^{-a^2/2\sigma_x^2}$
 (Ec. (5.206)), la probabilidad de uno entre 3000 de un pico más allá de
 $4\sigma$ del Ejemplo 5.14 de B&P. Cuando $r \to 0$ cada ciclo lleva cada
 vez más rizos encima, aparecen máximos negativos y las alturas de pico se
@@ -609,7 +609,7 @@ es también por lo que el 12,6 % de sus 39 534 máximos son **negativos**, alg
 imposible bajo Rayleigh. La escalera empírica se apoya en la mezcla de Rice para
 ese $r$ y queda en todas partes entre los dos límites: la probabilidad de un
 pico más allá de $4\sigma$ es $2{,}5\times10^{-4}$, una cuarta parte por debajo
-del $e^{-8} = 3{,}4\times10^{-4}$ de Rayleigh. Suponer el límite de Rayleigh en
+del $\mathrm{e}^{-8} = 3{,}4\times10^{-4}$ de Rayleigh. Suponer el límite de Rayleigh en
 un registro que no es de banda estrecha sobrestima los extremos.*
 
 <details>

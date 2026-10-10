@@ -198,7 +198,7 @@ def running_velocity_rms(
     4 says what that costs at the start of a record and so why the averaging
     has to be running before the train arrives. It puts the cost at 14 % after
     :math:`2\tau` and 2 % after :math:`4\tau`, which are the shortfalls of the
-    mean square, :math:`e^{-2}` and :math:`e^{-4}`; the running r.m.s. itself,
+    mean square, :math:`\mathrm{e}^{-2}` and :math:`\mathrm{e}^{-4}`; the running r.m.s. itself,
     which is what Figure 3 draws, is 7 % and 0,9 % short.
 
     :param velocity_mm_s: The velocity, in millimetres per second (1-D), as

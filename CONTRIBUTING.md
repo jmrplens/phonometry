@@ -461,6 +461,55 @@ established rather than guessing, and why a new upright subscript is expected
 to arrive with the sentence in this corpus, or the clause in its standard,
 that expands the letter.
 
+**Where the standard prints both slopes, the print wins.** The rule above is
+the default, not a correction of the sources. A standard that sets some
+letters of its subscripts italic and others upright has drawn the line
+itself, and the documentation follows it letter by letter: ISO 7235 prints
+the italic p and the upright series I of $L_{p\mathrm{I}}$, and ISO 16283-1
+the upright n and the italic T of $D_{\mathrm{n}T}$. Read the symbol on its
+printed page before setting it.
+
+**Where the standard prints one slope, ISO 80000-2 decides.** Some standards
+set every subscript of their symbol set the same way: IEC 60534-8-3,
+CNOSSOS-EU, RD 1367/2007, NT ACOU 112, EN 12354-5:2009 and UNE-EN 15657:2018
+print all of them upright, and ECAC Doc 29 prints all of them italic. Such a
+print cannot tell an index from an abbreviation, so the rule above decides
+there: a running index (i, j, n...) is italic, and a descriptive abbreviation
+is upright. UNE-EN 15657:2018 prints the position levels of Formula (12) as
+$L_\mathrm{v,i}$, the index as upright as the v; the documentation writes
+$L_{\mathrm{v},i}$, and keeps upright the descriptive parts of the symbol set
+(v, vf, Fb, Ws, eq, inst, RMS), which name what each level is of:
+$L_\mathrm{v}$, $L_\mathrm{Ws}$, $L_\mathrm{Wsn}$, $L_\mathrm{Fb,eq}$ and
+$L_\mathrm{vf,eq}$. The EN 12354-5 page that consumes them writes
+$L_\mathrm{Ws,c}$, $L_{\mathrm{Ws,inst},i}$ and $D_{\mathrm{C},i}$ the same
+way, and the RD 1367 phase level is $L_{\mathrm{Keq},Ti}$.
+
+**A base can carry a slope too.** A run of letters is one symbol, and the
+weighted vibration severity is the one whose sources disagree: DIN 4150-2, its
+2023 draft, DIN 45672-2 and E DIN 45672-3 print it with an italic KB, while
+the list of symbols of DIN 45669-1:2010-09 (Clause 4) sets it upright. The
+corpus follows DIN 4150-2 everywhere, the errata register and the vibration
+meter of DIN 45669-1 included, and says so where that standard is the subject.
+On a plate the composer sets a run of two or more letters upright as an
+operator name or an acronym, except the runs of `_ITALIC_BASE_RUNS` in
+`scripts/diagrams/canvas.py`, of which KB is the one. The checker below holds
+every base listed in its `BASES` table to its slope in every file and every
+image.
+
+**Euler's number is upright.** ISO 80000-2:2019, Clause 4, prints the
+mathematical constants upright, $\mathrm{e} = 2{,}718\,281\,828\ldots$ beside
+$\pi$, and keeps the italic letter for a variable. KaTeX and mathtext set a
+bare letter italic, so write the exponential as `\mathrm{e}^{-t/\tau}`; a
+plate, which has no commands, writes `exp(...)`. The italic e stays where it is
+a variable, as the strain $e^s_{ij}$ of a Biot frame is; a subscript e is
+another letter and takes the slope of what it names ($T_\mathrm{e}$). The base
+of the natural logarithm is the constant again, and ISO 80000-2 (Table 9, item
+2-13.5) prints it upright: $\ln x = \log_\mathrm{e} x$. `make euler-number`
+(`scripts/check_euler_number.py`) fails on an italic exponential or an italic
+$\log_e$ in any formula of the docstrings, the guides, the errata register and
+the label of any figure or plate, the rows of a `cases` or `aligned` block and
+a formula that wraps onto the next line included.
+
 The drawn labels reach the same result by another route. The plate composer
 keys the slope on the letter run (`_ROMAN_SCRIPTS` in
 `scripts/diagrams/canvas.py`), so a run in that set is upright in every plate,
@@ -569,14 +618,28 @@ names the symbol in its `upright` key (`upright=("A_r",)`).
 
 It cannot check that the slope a file chose is the right one for its
 standard: that is a reading of a source document, and no script does it. It
-does not read `docs/ERRATA.md`, where a symbol reproduces what a published
-page prints and restyling it would make the citation say something its source
-does not. And it does not read the drawing modules (`src/phonometry/_plot`,
-`src/phonometry/_report`, `scripts/`), which are filed by domain rather than
-by standard: one plotting module holds the figures of a dozen of them, so the
-file is not the scope in which a letter has one meaning. The guide that embeds
-the figure is, and its snippets are read here, as are its plates and its
-figures.
+does not hold `docs/ERRATA.md` to one slope per symbol, because a symbol
+there reproduces what a published page prints and restyling it would make the
+citation say something its source does not. And it does not hold the drawing
+modules (`src/phonometry/_plot`, `src/phonometry/_report`, `scripts/`) to it
+either, since they are filed by domain rather than by standard: one plotting
+module holds the figures of a dozen of them, so the file is not the scope in
+which a letter has one meaning. The guide that embeds the figure is, and its
+snippets are read here, as are its plates and its figures. The bases of
+`BASES` are the exception: they are a choice the corpus made between its
+sources, so the errata register, the drawing modules and every image are held
+to them too.
+
+The running index is the other choice held everywhere. Every file the checker
+reads, the drawing modules included, and every image are held to an italic
+index: the letter a sum runs over ($\sum_i$, the Σ of a plate) and an i, j or
+k that follows another component of the same subscript
+($L_{\mathrm{v},i}$, $D_{\mathrm{C},i}$, $L_{\mathrm{n,s},ij}$). An upright i
+that opens a subscript is not read, because that is the impact level
+$L_\mathrm{i}$ of ISO 16283-2 as often as an index, and the one-meaning rule
+already holds it against an index on the same page. The errata register is
+not read for this either: it quotes prints that set the index upright, and
+the quotation keeps the print.
 
 The other half of the same subject is the backslash, and it has its own gate:
 

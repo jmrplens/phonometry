@@ -3477,10 +3477,20 @@ def generate_stage_support_windows(output_dir: str) -> None:
     ax2.axhspan(-24.0, -8.0, color=theme_fill(COLOR_PRIMARY, ax2), zorder=0)
     ax2.axhspan(-24.0, -10.0, color=theme_fill(COLOR_SECONDARY, ax2), zorder=0)
     ax2.plot(
-        bands, result.early, "o-", color=COLOR_PRIMARY, lw=2.0, label="$ST_{Early}$"
+        bands,
+        result.early,
+        "o-",
+        color=COLOR_PRIMARY,
+        lw=2.0,
+        label=r"$\mathrm{ST}_\mathrm{Early}$",
     )
     ax2.plot(
-        bands, result.late, "s--", color=COLOR_SECONDARY, lw=1.6, label="$ST_{Late}$"
+        bands,
+        result.late,
+        "s--",
+        color=COLOR_SECONDARY,
+        lw=1.6,
+        label=r"$\mathrm{ST}_\mathrm{Late}$",
     )
     ax2.set_xticks(bands)
     ax2.set_xticklabels(["250", "500", "1k", "2k"][: bands.size])

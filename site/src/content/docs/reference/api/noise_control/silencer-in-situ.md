@@ -26,9 +26,9 @@ that they cannot be added by accident.
 Two quantities, twenty installations
 ------------------------------------
 
-**Transmission loss** $D_{ts}$ compares the sound power reaching the
+**Transmission loss** $D_\mathrm{ts}$ compares the sound power reaching the
 silencer with the sound power leaving it, Equation (4). **Insertion loss**
-$D_{is}$ compares the plant without the silencer with the plant with it,
+$D_\mathrm{is}$ compares the plant without the silencer with the plant with it,
 Equation (8), and it is the only choice for a blowdown silencer, which does
 not exist as a duct element to measure through.
 
@@ -38,7 +38,7 @@ of the two measurement surfaces and the difference of the two field
 corrections:
 
 $$
-D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+D_\mathrm{ts} = D_{\mathrm{t}p\mathrm{s}} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
 $$
 
 Which areas those are is not a matter of taste. Figure 1 enumerates twenty
@@ -153,13 +153,13 @@ flow_velocity_m_s(
 
 The flow velocity a velocity pressure stands for, Equation (28).
 
-$w = \sqrt{2 p_v / \rho}$.
+$w = \sqrt{2 p_\mathrm{v} / \rho}$.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_pressure_pa` | $p_v$, in pascals. |
+| `velocity_pressure_pa` | $p_\mathrm{v}$, in pascals. |
 | `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $w$, in metres per second.
@@ -231,7 +231,7 @@ in_situ_insertion_loss(
 The insertion loss of a silencer in place, Equation (21).
 
 $$
-D_{is} = \overline{L_{pII}} - \overline{L_{pI}} + 10 \lg \frac{S_{II}}{S_I} + K_{II} - K_I
+D_\mathrm{is} = \overline{L_{p\mathrm{II}}} - \overline{L_{p\mathrm{I}}} + 10 \lg \frac{S_\mathrm{II}}{S_\mathrm{I}} + K_\mathrm{II} - K_\mathrm{I}
 $$
 
 The same shape as Equation (19) with the two runs in place of the two
@@ -256,12 +256,12 @@ value per band.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_without_db` | $\overline{L_{pII}}$ per band, in decibels. |
-| `levels_with_db` | $\overline{L_{pI}}$ per band, in decibels. |
-| `area_without_m2` | $S_{II}$, one value or one per band, in square metres. |
-| `area_with_m2` | $S_I$, one value or one per band, in square metres. |
+| `levels_without_db` | $\overline{L_{p\mathrm{II}}}$ per band, in decibels. |
+| `levels_with_db` | $\overline{L_{p\mathrm{I}}}$ per band, in decibels. |
+| `area_without_m2` | $S_\mathrm{II}$, one value or one per band, in square metres. |
+| `area_with_m2` | $S_\mathrm{I}$, one value or one per band, in square metres. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `field_correction_difference_db` | $K_{II} - K_I$, one value or one per band, in decibels. |
+| `field_correction_difference_db` | $K_\mathrm{II} - K_\mathrm{I}$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 17 to 20, carried into the result. |
 
 **Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
@@ -290,7 +290,7 @@ in_situ_transmission_loss(
 The transmission loss of a silencer in place, Equation (19).
 
 $$
-D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+D_\mathrm{ts} = D_{\mathrm{t}p\mathrm{s}} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
 $$
 
 The level difference of Equation (1), the ratio of the two measurement
@@ -338,7 +338,7 @@ insertion_level_difference_db(
 
 The level difference the silencer made, Equation (3).
 
-$D_{ips} = L_{pII} - L_{pI}$, the level before the silencer was
+$D_{\mathrm{i}p\mathrm{s}} = L_{p\mathrm{II}} - L_{p\mathrm{I}}$, the level before the silencer was
 installed less the level after. Here II is *without* and I is *with*,
 which is again the opposite of the reading order, so the arguments say
 which run they are.
@@ -347,10 +347,10 @@ which run they are.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_without_db` | $L_{pII}$ per band, in decibels. |
-| `levels_with_db` | $L_{pI}$ per band, in decibels. |
+| `levels_without_db` | $L_{p\mathrm{II}}$ per band, in decibels. |
+| `levels_with_db` | $L_{p\mathrm{I}}$ per band, in decibels. |
 
-**Returns:** $D_{ips}$ per band, in decibels.
+**Returns:** $D_{\mathrm{i}p\mathrm{s}}$ per band, in decibels.
 
 **Raises**
 
@@ -413,8 +413,8 @@ One of the twenty installations of Figure 1, with its area rules.
 | `source_side` | What stands on the source side: `"duct"`, `"diffuse_room"`, `"non_diffuse_room"`, `"open_space"`, or `"any"` for the four insertion cases, whose source side is not part of the case. |
 | `receiver_side` | The same for the receiver side. |
 | `quantity` | `"transmission"` for cases 1 to 16, `"insertion"` for 17 to 20. |
-| `source_area_rule` | How 9.1.3 or 9.1.4 says to read $S_2$, the source side of a transmission case, or $S_{II}$, the run without the silencer of an insertion one, in the clause's own words. |
-| `receiver_area_rule` | The same for $S_1$ or $S_I$. |
+| `source_area_rule` | How 9.1.3 or 9.1.4 says to read $S_2$, the source side of a transmission case, or $S_\mathrm{II}$, the run without the silencer of an insertion one, in the clause's own words. |
+| `receiver_area_rule` | The same for $S_1$ or $S_\mathrm{I}$. |
 
 ## ISO11820_AIR_GAS_CONSTANT
 
@@ -783,10 +783,10 @@ A silencer measured where it stands, ISO 11820 Equation (19) or (21).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in hertz, or `None`. |
-| `level_difference_db` | $D_{tps}$ or $D_{ips}$, the sound pressure level difference the loss is built on, per band. |
-| `area_term_db` | $10 \lg(S_2/S_1)$ or $10 \lg(S_{II}/S_I)$ per band, in decibels. Always one value per band, even where both areas were given as single values, because the area of a diffuse room moves with the reverberation time from band to band. |
-| `field_correction_difference_db` | $K_2 - K_1$ or $K_{II} - K_I$ per band, in decibels, on the same shape. |
-| `loss_db` | $D_{ts}$ or $D_{is}$ per band, in decibels. |
+| `level_difference_db` | $D_{\mathrm{t}p\mathrm{s}}$ or $D_{\mathrm{i}p\mathrm{s}}$, the sound pressure level difference the loss is built on, per band. |
+| `area_term_db` | $10 \lg(S_2/S_1)$ or $10 \lg(S_\mathrm{II}/S_\mathrm{I})$ per band, in decibels. Always one value per band, even where both areas were given as single values, because the area of a diffuse room moves with the reverberation time from band to band. |
+| `field_correction_difference_db` | $K_2 - K_1$ or $K_\mathrm{II} - K_\mathrm{I}$ per band, in decibels, on the same shape. |
+| `loss_db` | $D_\mathrm{ts}$ or $D_\mathrm{is}$ per band, in decibels. |
 | `quantity` | `"transmission"` or `"insertion"`. |
 | `case` | The installation of Figure 1 the measurement was made in, or `None` where the caller did not name one. |
 
@@ -881,7 +881,7 @@ static_pressure_difference_pa(
 The static pressure difference behind a change of area, Equation (14).
 
 $$
-\Delta p_S = \Delta p_T - \frac{\rho \, q_V^2}{2} \left(\frac{1}{S_\mathrm{u}^2} - \frac{1}{S_\mathrm{d}^2}\right)
+\Delta p_\mathrm{S} = \Delta p_\mathrm{T} - \frac{\rho \, q_V^2}{2} \left(\frac{1}{S_\mathrm{u}^2} - \frac{1}{S_\mathrm{d}^2}\right)
 $$
 
 For a silencer whose inlet and outlet areas differ, where the gas
@@ -893,13 +893,13 @@ says in words.
 
 | Name | Description |
 | :--- | :--- |
-| `total_pressure_loss_pa` | $\Delta p_T$, in pascals. |
+| `total_pressure_loss_pa` | $\Delta p_\mathrm{T}$, in pascals. |
 | `volume_flow_m3_s` | $q_V$, in cubic metres per second. |
 | `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
 | `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
 | `downstream_area_m2` | $S_\mathrm{d}$, in square metres. |
 
-**Returns:** $\Delta p_S$, in pascals.
+**Returns:** $\Delta p_\mathrm{S}$, in pascals.
 
 **Raises**
 
@@ -937,9 +937,9 @@ registered in `docs/ERRATA.md` under "ISO 11820:1996, Equations (20) and
 (22)".
 
 The same expression is Equation (22) with the two runs of an insertion
-measurement in place of the two sides: there $\theta_I$ is the
-temperature with the silencer and $\theta_{II}$ without, and the
-correction it returns is $K_{II} - K_I$. Pass the with-silencer
+measurement in place of the two sides: there $\theta_\mathrm{I}$ is the
+temperature with the silencer and $\theta_\mathrm{II}$ without, and the
+correction it returns is $K_\mathrm{II} - K_\mathrm{I}$. Pass the with-silencer
 temperature as the receiver one and the without-silencer temperature as
 the source one, which is the ordering the two equations share.
 
@@ -949,10 +949,10 @@ The standard writes 273 rather than 273,15, and that is what is used.
 
 | Name | Description |
 | :--- | :--- |
-| `receiver_temperature_c` | $\theta_1$ on the receiver side, or $\theta_I$ with the silencer, in degrees Celsius. |
-| `source_temperature_c` | $\theta_2$ on the source side, or $\theta_{II}$ without the silencer, in degrees Celsius. |
+| `receiver_temperature_c` | $\theta_1$ on the receiver side, or $\theta_\mathrm{I}$ with the silencer, in degrees Celsius. |
+| `source_temperature_c` | $\theta_2$ on the source side, or $\theta_\mathrm{II}$ without the silencer, in degrees Celsius. |
 
-**Returns:** $K_2 - K_1$ or $K_{II} - K_I$, in decibels.
+**Returns:** $K_2 - K_1$ or $K_\mathrm{II} - K_\mathrm{I}$, in decibels.
 
 **Raises**
 
@@ -971,7 +971,7 @@ total_pressure_loss_pa(
 
 The total pressure loss of the silencer, Equation (13).
 
-$\Delta p_T = \overline{p_{Tu}} - \overline{p_{Td}}$, the mean total
+$\Delta p_\mathrm{T} = \overline{p_\mathrm{Tu}} - \overline{p_\mathrm{Td}}$, the mean total
 pressure upstream less the mean total pressure downstream, each of them
 the arithmetic mean of Equations (23) and (25). Where the inlet and outlet
 areas are equal and neither temperature nor density changes much, this is
@@ -981,10 +981,10 @@ also the static pressure difference.
 
 | Name | Description |
 | :--- | :--- |
-| `upstream_total_pressure_pa` | $\overline{p_{Tu}}$, in pascals, as a difference from the ambient pressure. |
-| `downstream_total_pressure_pa` | $\overline{p_{Td}}$, in pascals, on the same basis. |
+| `upstream_total_pressure_pa` | $\overline{p_\mathrm{Tu}}$, in pascals, as a difference from the ambient pressure. |
+| `downstream_total_pressure_pa` | $\overline{p_\mathrm{Td}}$, in pascals, on the same basis. |
 
-**Returns:** $\Delta p_T$, in pascals.
+**Returns:** $\Delta p_\mathrm{T}$, in pascals.
 
 ## transmission_level_difference_db
 
@@ -997,7 +997,7 @@ transmission_level_difference_db(
 
 The level difference across the silencer, Equation (1).
 
-$D_{tps} = \overline{L_{p2}} - \overline{L_{p1}}$, the mean level on
+$D_{\mathrm{t}p\mathrm{s}} = \overline{L_{p2}} - \overline{L_{p1}}$, the mean level on
 the source side less the mean level on the receiver side. The arguments
 are named for the side rather than for the subscript, because 1 is the
 receiver and 2 the source, which is the opposite of the order most readers
@@ -1013,7 +1013,7 @@ turns into a transmission loss.
 | `source_levels_db` | $\overline{L_{p2}}$ per band, in decibels. |
 | `receiver_levels_db` | $\overline{L_{p1}}$ per band, in decibels. |
 
-**Returns:** $D_{tps}$ per band, in decibels.
+**Returns:** $D_{\mathrm{t}p\mathrm{s}}$ per band, in decibels.
 
 **Raises**
 
@@ -1048,7 +1048,7 @@ velocity_pressure_pa(
 
 The velocity pressure, Equation (27).
 
-$p_v = p_T - p_S$, the total pressure less the static pressure, both
+$p_\mathrm{v} = p_\mathrm{T} - p_\mathrm{S}$, the total pressure less the static pressure, both
 reported as differences from the ambient atmospheric pressure as 8.3.2
 asks.
 
@@ -1056,10 +1056,10 @@ asks.
 
 | Name | Description |
 | :--- | :--- |
-| `total_pressure_pa` | $p_T$, in pascals. |
-| `static_pressure_pa` | $p_S$, in pascals. |
+| `total_pressure_pa` | $p_\mathrm{T}$, in pascals. |
+| `static_pressure_pa` | $p_\mathrm{S}$, in pascals. |
 
-**Returns:** $p_v$, in pascals.
+**Returns:** $p_\mathrm{v}$, in pascals.
 
 **Raises**
 

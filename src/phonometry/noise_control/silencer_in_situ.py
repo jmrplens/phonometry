@@ -20,9 +20,9 @@ that they cannot be added by accident.
 Two quantities, twenty installations
 ------------------------------------
 
-**Transmission loss** :math:`D_{ts}` compares the sound power reaching the
+**Transmission loss** :math:`D_\mathrm{ts}` compares the sound power reaching the
 silencer with the sound power leaving it, Equation (4). **Insertion loss**
-:math:`D_{is}` compares the plant without the silencer with the plant with it,
+:math:`D_\mathrm{is}` compares the plant without the silencer with the plant with it,
 Equation (8), and it is the only choice for a blowdown silencer, which does
 not exist as a duct element to measure through.
 
@@ -33,7 +33,7 @@ corrections:
 
 .. math::
 
-   D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+   D_\mathrm{ts} = D_{\mathrm{t}p\mathrm{s}} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
 
 Which areas those are is not a matter of taste. Figure 1 enumerates twenty
 installations, sixteen for transmission and four for insertion, by what stands
@@ -252,7 +252,7 @@ class SilencerInSituWarning(PhonometryWarning):
 
 @dataclass(frozen=True)
 class InstallationCase:
-    """One of the twenty installations of Figure 1, with its area rules.
+    r"""One of the twenty installations of Figure 1, with its area rules.
 
     :ivar number: The case number Figure 1 prints, 1 to 20.
     :ivar source_side: What stands on the source side: ``"duct"``,
@@ -263,9 +263,9 @@ class InstallationCase:
     :ivar quantity: ``"transmission"`` for cases 1 to 16, ``"insertion"`` for
         17 to 20.
     :ivar source_area_rule: How 9.1.3 or 9.1.4 says to read :math:`S_2`, the
-        source side of a transmission case, or :math:`S_{II}`, the run without
+        source side of a transmission case, or :math:`S_\mathrm{II}`, the run without
         the silencer of an insertion one, in the clause's own words.
-    :ivar receiver_area_rule: The same for :math:`S_1` or :math:`S_I`.
+    :ivar receiver_area_rule: The same for :math:`S_1` or :math:`S_\mathrm{I}`.
     """
 
     number: int
@@ -526,7 +526,7 @@ def transmission_level_difference_db(
 ) -> NDArray[np.float64]:
     r"""The level difference across the silencer, Equation (1).
 
-    :math:`D_{tps} = \overline{L_{p2}} - \overline{L_{p1}}`, the mean level on
+    :math:`D_{\mathrm{t}p\mathrm{s}} = \overline{L_{p2}} - \overline{L_{p1}}`, the mean level on
     the source side less the mean level on the receiver side. The arguments
     are named for the side rather than for the subscript, because 1 is the
     receiver and 2 the source, which is the opposite of the order most readers
@@ -537,7 +537,7 @@ def transmission_level_difference_db(
 
     :param source_levels_db: :math:`\overline{L_{p2}}` per band, in decibels.
     :param receiver_levels_db: :math:`\overline{L_{p1}}` per band, in decibels.
-    :return: :math:`D_{tps}` per band, in decibels.
+    :return: :math:`D_{\mathrm{t}p\mathrm{s}}` per band, in decibels.
     :raises ValueError: For spectra that do not match band for band.
     """
     source = require_finite_array(source_levels_db, "source_levels_db")
@@ -553,14 +553,14 @@ def insertion_level_difference_db(
 ) -> NDArray[np.float64]:
     r"""The level difference the silencer made, Equation (3).
 
-    :math:`D_{ips} = L_{pII} - L_{pI}`, the level before the silencer was
+    :math:`D_{\mathrm{i}p\mathrm{s}} = L_{p\mathrm{II}} - L_{p\mathrm{I}}`, the level before the silencer was
     installed less the level after. Here II is *without* and I is *with*,
     which is again the opposite of the reading order, so the arguments say
     which run they are.
 
-    :param levels_without_db: :math:`L_{pII}` per band, in decibels.
-    :param levels_with_db: :math:`L_{pI}` per band, in decibels.
-    :return: :math:`D_{ips}` per band, in decibels.
+    :param levels_without_db: :math:`L_{p\mathrm{II}}` per band, in decibels.
+    :param levels_with_db: :math:`L_{p\mathrm{I}}` per band, in decibels.
+    :return: :math:`D_{\mathrm{i}p\mathrm{s}}` per band, in decibels.
     :raises ValueError: For spectra that do not match band for band.
     """
     without = require_finite_array(levels_without_db, "levels_without_db")
@@ -673,19 +673,19 @@ def temperature_field_correction_db(
     (22)".
 
     The same expression is Equation (22) with the two runs of an insertion
-    measurement in place of the two sides: there :math:`\theta_I` is the
-    temperature with the silencer and :math:`\theta_{II}` without, and the
-    correction it returns is :math:`K_{II} - K_I`. Pass the with-silencer
+    measurement in place of the two sides: there :math:`\theta_\mathrm{I}` is the
+    temperature with the silencer and :math:`\theta_\mathrm{II}` without, and the
+    correction it returns is :math:`K_\mathrm{II} - K_\mathrm{I}`. Pass the with-silencer
     temperature as the receiver one and the without-silencer temperature as
     the source one, which is the ordering the two equations share.
 
     The standard writes 273 rather than 273,15, and that is what is used.
 
     :param receiver_temperature_c: :math:`\theta_1` on the receiver side, or
-        :math:`\theta_I` with the silencer, in degrees Celsius.
+        :math:`\theta_\mathrm{I}` with the silencer, in degrees Celsius.
     :param source_temperature_c: :math:`\theta_2` on the source side, or
-        :math:`\theta_{II}` without the silencer, in degrees Celsius.
-    :return: :math:`K_2 - K_1` or :math:`K_{II} - K_I`, in decibels.
+        :math:`\theta_\mathrm{II}` without the silencer, in degrees Celsius.
+    :return: :math:`K_2 - K_1` or :math:`K_\mathrm{II} - K_\mathrm{I}`, in decibels.
     :raises ValueError: For a temperature that is not finite or at or below
         the absolute zero the equation uses.
     """
@@ -706,15 +706,15 @@ class SilencerInSituResult(OwnsArrays):
     r"""A silencer measured where it stands, ISO 11820 Equation (19) or (21).
 
     :ivar frequencies: Nominal band centres, in hertz, or ``None``.
-    :ivar level_difference_db: :math:`D_{tps}` or :math:`D_{ips}`, the sound
+    :ivar level_difference_db: :math:`D_{\mathrm{t}p\mathrm{s}}` or :math:`D_{\mathrm{i}p\mathrm{s}}`, the sound
         pressure level difference the loss is built on, per band.
-    :ivar area_term_db: :math:`10 \lg(S_2/S_1)` or :math:`10 \lg(S_{II}/S_I)`
+    :ivar area_term_db: :math:`10 \lg(S_2/S_1)` or :math:`10 \lg(S_\mathrm{II}/S_\mathrm{I})`
         per band, in decibels. Always one value per band, even where both areas
         were given as single values, because the area of a diffuse room moves
         with the reverberation time from band to band.
     :ivar field_correction_difference_db: :math:`K_2 - K_1` or
-        :math:`K_{II} - K_I` per band, in decibels, on the same shape.
-    :ivar loss_db: :math:`D_{ts}` or :math:`D_{is}` per band, in decibels.
+        :math:`K_\mathrm{II} - K_\mathrm{I}` per band, in decibels, on the same shape.
+    :ivar loss_db: :math:`D_\mathrm{ts}` or :math:`D_\mathrm{is}` per band, in decibels.
     :ivar quantity: ``"transmission"`` or ``"insertion"``.
     :ivar case: The installation of Figure 1 the measurement was made in, or
         ``None`` where the caller did not name one.
@@ -826,7 +826,7 @@ def in_situ_transmission_loss(
 
     .. math::
 
-       D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+       D_\mathrm{ts} = D_{\mathrm{t}p\mathrm{s}} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
 
     The level difference of Equation (1), the ratio of the two measurement
     areas, and the difference of the two field corrections.
@@ -895,8 +895,8 @@ def in_situ_insertion_loss(
 
     .. math::
 
-       D_{is} = \overline{L_{pII}} - \overline{L_{pI}}
-       + 10 \lg \frac{S_{II}}{S_I} + K_{II} - K_I
+       D_\mathrm{is} = \overline{L_{p\mathrm{II}}} - \overline{L_{p\mathrm{I}}}
+       + 10 \lg \frac{S_\mathrm{II}}{S_\mathrm{I}} + K_\mathrm{II} - K_\mathrm{I}
 
     The same shape as Equation (19) with the two runs in place of the two
     sides. NOTE 5 of 3.4 says that in most cases the two areas are equal and
@@ -916,14 +916,14 @@ def in_situ_insertion_loss(
     and the field correction may be one value, applied to every band, or one
     value per band.
 
-    :param levels_without_db: :math:`\overline{L_{pII}}` per band, in decibels.
-    :param levels_with_db: :math:`\overline{L_{pI}}` per band, in decibels.
-    :param area_without_m2: :math:`S_{II}`, one value or one per band, in
+    :param levels_without_db: :math:`\overline{L_{p\mathrm{II}}}` per band, in decibels.
+    :param levels_with_db: :math:`\overline{L_{p\mathrm{I}}}` per band, in decibels.
+    :param area_without_m2: :math:`S_\mathrm{II}`, one value or one per band, in
         square metres.
-    :param area_with_m2: :math:`S_I`, one value or one per band, in square
+    :param area_with_m2: :math:`S_\mathrm{I}`, one value or one per band, in square
         metres.
     :param frequencies: Nominal band centres, in hertz.
-    :param field_correction_difference_db: :math:`K_{II} - K_I`, one value or
+    :param field_correction_difference_db: :math:`K_\mathrm{II} - K_\mathrm{I}`, one value or
         one per band, in decibels.
     :param case: The installation of Figure 1, 17 to 20, carried into the
         result.
@@ -995,17 +995,17 @@ def total_pressure_loss_pa(
 ) -> float:
     r"""The total pressure loss of the silencer, Equation (13).
 
-    :math:`\Delta p_T = \overline{p_{Tu}} - \overline{p_{Td}}`, the mean total
+    :math:`\Delta p_\mathrm{T} = \overline{p_\mathrm{Tu}} - \overline{p_\mathrm{Td}}`, the mean total
     pressure upstream less the mean total pressure downstream, each of them
     the arithmetic mean of Equations (23) and (25). Where the inlet and outlet
     areas are equal and neither temperature nor density changes much, this is
     also the static pressure difference.
 
-    :param upstream_total_pressure_pa: :math:`\overline{p_{Tu}}`, in pascals,
+    :param upstream_total_pressure_pa: :math:`\overline{p_\mathrm{Tu}}`, in pascals,
         as a difference from the ambient pressure.
-    :param downstream_total_pressure_pa: :math:`\overline{p_{Td}}`, in
+    :param downstream_total_pressure_pa: :math:`\overline{p_\mathrm{Td}}`, in
         pascals, on the same basis.
-    :return: :math:`\Delta p_T`, in pascals.
+    :return: :math:`\Delta p_\mathrm{T}`, in pascals.
     """
     return require_finite(
         upstream_total_pressure_pa, "upstream_total_pressure_pa"
@@ -1024,7 +1024,7 @@ def static_pressure_difference_pa(
 
     .. math::
 
-       \Delta p_S = \Delta p_T - \frac{\rho \, q_V^2}{2}
+       \Delta p_\mathrm{S} = \Delta p_\mathrm{T} - \frac{\rho \, q_V^2}{2}
        \left(\frac{1}{S_\mathrm{u}^2} - \frac{1}{S_\mathrm{d}^2}\right)
 
     For a silencer whose inlet and outlet areas differ, where the gas
@@ -1032,12 +1032,12 @@ def static_pressure_difference_pa(
     and the two pressure differences are the same number, which is what 3.5
     says in words.
 
-    :param total_pressure_loss_pa: :math:`\Delta p_T`, in pascals.
+    :param total_pressure_loss_pa: :math:`\Delta p_\mathrm{T}`, in pascals.
     :param volume_flow_m3_s: :math:`q_V`, in cubic metres per second.
     :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
     :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
     :param downstream_area_m2: :math:`S_\mathrm{d}`, in square metres.
-    :return: :math:`\Delta p_S`, in pascals.
+    :return: :math:`\Delta p_\mathrm{S}`, in pascals.
     :raises ValueError: For a value that is not finite, or a non-positive
         density or area.
     """
@@ -1102,13 +1102,13 @@ def velocity_pressure_pa(
 ) -> NDArray[np.float64]:
     r"""The velocity pressure, Equation (27).
 
-    :math:`p_v = p_T - p_S`, the total pressure less the static pressure, both
+    :math:`p_\mathrm{v} = p_\mathrm{T} - p_\mathrm{S}`, the total pressure less the static pressure, both
     reported as differences from the ambient atmospheric pressure as 8.3.2
     asks.
 
-    :param total_pressure_pa: :math:`p_T`, in pascals.
-    :param static_pressure_pa: :math:`p_S`, in pascals.
-    :return: :math:`p_v`, in pascals.
+    :param total_pressure_pa: :math:`p_\mathrm{T}`, in pascals.
+    :param static_pressure_pa: :math:`p_\mathrm{S}`, in pascals.
+    :return: :math:`p_\mathrm{v}`, in pascals.
     :raises ValueError: For inputs that do not match.
     """
     total = require_finite_array(total_pressure_pa, "total_pressure_pa")
@@ -1124,9 +1124,9 @@ def flow_velocity_m_s(
 ) -> NDArray[np.float64]:
     r"""The flow velocity a velocity pressure stands for, Equation (28).
 
-    :math:`w = \sqrt{2 p_v / \rho}`.
+    :math:`w = \sqrt{2 p_\mathrm{v} / \rho}`.
 
-    :param velocity_pressure_pa: :math:`p_v`, in pascals.
+    :param velocity_pressure_pa: :math:`p_\mathrm{v}`, in pascals.
     :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`w`, in metres per second.
     :raises ValueError: For a non-positive density or a negative velocity

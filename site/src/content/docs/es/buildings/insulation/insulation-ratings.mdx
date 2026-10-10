@@ -34,8 +34,8 @@ import Video from '../../../../../components/Video.astro';
 
 Toda magnitud de aislamiento acústico de esta documentación termina su viaje
 igual: entra un espectro por bandas y sale un número único. Sea el espectro
-un $R$ de laboratorio, un $R'$ o $D_\mathrm{nT}$ de campo, un $D_{2\mathrm{m,nT}}$ de
-fachada, un $L_\mathrm{n}$ o $L'_\mathrm{nT}$ de impactos o un $D_\mathrm{n,f}$ de flancos, lo que
+un $R$ de laboratorio, un $R'$ o $D_{\mathrm{n}T}$ de campo, un $D_{2\mathrm{m,n}T}$ de
+fachada, un $L_\mathrm{n}$ o $L'_{\mathrm{n}T}$ de impactos o un $D_\mathrm{n,f}$ de flancos, lo que
 citan las normativas es el número único ponderado de ISO 717, y dos motores
 de curva de referencia los producen todos: **ISO 717-1** para las
 magnitudes aéreas, donde una desviación desfavorable es una banda que cae
@@ -59,7 +59,7 @@ Pasa los 16 valores en tercios de octava de 100 Hz a 3150 Hz a
 devuelve el índice leído a 500 Hz, junto con los términos de adaptación
 espectral $C$ y $C_\mathrm{tr}$. Para el espectro medido que se usa abajo,
 `w.rating, w.c, w.ctr` imprime `30 -2 -3`: $R_\mathrm{w}\ (C\ ;\ C_\mathrm{tr}) = 30\ (-2\ ;\ -3)$. La
-misma llamada valora $R'$, $D_\mathrm{n}$ y $D_\mathrm{nT}$.
+misma llamada valora $R'$, $D_\mathrm{n}$ y $D_{\mathrm{n}T}$.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain.svg" alt="Cadena de cálculo de los índices globales de ISO 717. Arriba, una tira de bandas de tercio de octava de 50 Hz a 5000 Hz: las 16 bandas de 100 Hz a 3150 Hz en trazo continuo con la de 500 Hz destacada, las cinco bandas de octava de 125 Hz a 2000 Hz marcadas con corchetes debajo, y las bandas de 50, 63, 80, 4000 y 5000 Hz a trazos, como rango ampliado que solo leen los términos de adaptación, las de 4000 y 5000 Hz solo en ISO 717-1. Un recuadro enuncia la regla que comparten las dos partes: desplazar la curva de la Tabla 3 hacia la curva medida en pasos de 1 dB hasta que la suma de desviaciones desfavorables sea lo mayor posible pero no más de 32,0 dB en 16 bandas o 10,0 dB en 5, en pasos de 0,1 dB para expresar la incertidumbre, y leer la curva desplazada a 500 Hz. Debajo, dos gráficas pequeñas lado a lado. A la izquierda, ISO 717-1 para ruido aéreo: la curva de referencia bajada 22 dB sobre un índice de reducción acústica medido, con barras donde la medida queda por debajo que suman 31,8 dB, y de ahí Rw = 52 − 22 = 30 dB; C = 28 − 30 = −2 dB con el espectro n.º 1, ruido rosa, y Ctr = 27 − 30 = −3 dB con el espectro n.º 2, tráfico urbano, ambos sobre las 16 bandas, expresado como Rw(C;Ctr) = 30 (−2; −3) dB. A la derecha, ISO 717-2 para ruido de impactos: la curva de referencia subida 19 dB sobre un nivel de impactos normalizado medido, con barras donde la medida queda por encima que suman 28,0 dB, y de ahí Ln,w = 60 + 19 = 79 dB, con 5 dB menos cuando las bandas son de octava, y CI a partir de la suma energética sin ponderar de las 15 primeras bandas, sin la de 3150 Hz. Cada lado lista sus términos de rango ampliado, y un recuadro al pie lleva Cj = XAj − Xw y CI = Ln,sum − 15 − Ln,w" width="100%" />
 
@@ -83,7 +83,7 @@ mayor posible pero no mayor que 32,0 dB (16 bandas de tercio de octava) o
 10,0 dB (5 bandas de octava). Los dos topes son una sola regla, no dos
 constantes: $32{,}0 = 2{,}0 \times 16$ y $10{,}0 = 2{,}0 \times 5$, así que lo
 que el método permite en realidad es **una desviación desfavorable media de
-2 dB por banda**. El índice ($R_\mathrm{w}$, $R'_\mathrm{w}$, $D_\mathrm{nT,w}$ …) es la
+2 dB por banda**. El índice ($R_\mathrm{w}$, $R'_\mathrm{w}$, $D_{\mathrm{n}T,\mathrm{w}}$ …) es la
 referencia desplazada leída a 500 Hz.
 
 La curva de referencia en sí (ISO 717-1:2020, Tabla 3) tampoco es arbitraria.
@@ -131,7 +131,7 @@ ponderado A, representativo de las actividades domésticas (habla, música,
 radio, televisión), da $C$; el n.º 2, tráfico rodado urbano ponderado A, cuya
 energía se concentra en baja frecuencia, da $C_\mathrm{tr}$. De modo que el
 índice más el término ($R_\mathrm{w} + C$ para un índice de laboratorio, $R'_\mathrm{w} + C$ o
-$D_\mathrm{nT,w} + C$ para las magnitudes de la
+$D_{\mathrm{n}T,\mathrm{w}} + C$ para las magnitudes de la
 [guía de campo](/phonometry/es/buildings/insulation/insulation-field/), e igual
 con $C_\mathrm{tr}$) es la diferencia de nivel ponderada A que la construcción
 consigue frente a esa fuente, que es lo que hace que lo que merece la pena
@@ -147,7 +147,7 @@ especificar sea la suma y no el índice a secas. Para leerlos:
   valoración pueden diferir de forma audible frente al tráfico.
 * Diseña con el descriptor que corresponda al ruido, sobre la magnitud de
   campo que el requisito valora: $R'_\mathrm{w} + C_\mathrm{tr}$ para una fachada a una
-  calle con tráfico, $D_\mathrm{nT,w} + C$ (o el índice a secas, donde la
+  calle con tráfico, $D_{\mathrm{n}T,\mathrm{w}} + C$ (o el índice a secas, donde la
   reglamentación lo diga) entre viviendas, los dos requisitos de ejemplo de
   ISO 717-1, 5.3.
 
@@ -287,7 +287,7 @@ plt.show()
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | $R$, $R'$, $D_\mathrm{nT}$ … medidos por banda |
+| `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | $R$, $R'$, $D_{\mathrm{n}T}$ … medidos por banda |
 | `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
 
 `weighted_rating()` devuelve un `WeightedRatingResult` (`rating`, `c`, `ctr`,
@@ -301,7 +301,7 @@ El índice de un solo número (ISO 717-2) desplaza el mismo estilo de curva de
 referencia, pero una **desviación desfavorable se produce ahora donde la
 medición *supera* la referencia** (el ruido de impactos es peor cuanto más
 alto), el signo opuesto a ISO 717-1. El índice ($L_\mathrm{n,w}$, $L'_\mathrm{n,w}$,
-$L'_\mathrm{nT,w}$) es la referencia desplazada leída a 500 Hz; para bandas de octava se reduce además
+$L'_{\mathrm{n}T,\mathrm{w}}$) es la referencia desplazada leída a 500 Hz; para bandas de octava se reduce además
 en 5 dB. El término de adaptación espectral $C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}$
 (Fórmulas (A.1) a (A.3) de ISO 717-2:2020)
 usa la suma energética sobre 100–2500 Hz (los primeros 15 tercios, excluyendo
@@ -391,7 +391,7 @@ ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measure
                 alpha=0.3, label="Desviaciones desfavorables")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Nivel de presión acústica de impactos [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(rf"$L_\mathrm{{n,w}}$ = {res_imp.rating} dB  ($C_\mathrm{{I}}$ = {res_imp.ci:+d} dB)")
 ax.legend()
 plt.show()
 ```
@@ -409,7 +409,7 @@ celda las dieciséis bandas y da $-10$; la entrada del registro está en
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | $L_\mathrm{n}$, $L'_\mathrm{n}$ o $L'_\mathrm{nT}$ medidos por banda |
+| `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | $L_\mathrm{n}$, $L'_\mathrm{n}$ o $L'_{\mathrm{n}T}$ medidos por banda |
 | `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
 
 `weighted_impact_rating()` devuelve un `ImpactRatingResult` (`rating`,
@@ -438,7 +438,7 @@ con el procedimiento por defecto: allí el procedimiento en esquinas es
 obligatorio, y puede mover esas tres bandas varios decibelios, lo bastante
 para poder mover
 $C_{50\text{–}3150}$ un decibelio entero. Así que una exigencia escrita como
-$D_\mathrm{nT,w} + C_{50\text{–}3150}$ se juzga con el procedimiento en
+$D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ se juzga con el procedimiento en
 esquinas lo mencione o no el informe. Véase
 [Recintos pequeños: procedimiento de baja frecuencia](/phonometry/es/buildings/insulation/low-frequency-procedure/).
 

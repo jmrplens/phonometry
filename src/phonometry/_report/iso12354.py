@@ -622,16 +622,16 @@ def render_iso12354_facade_report(
         title_key="Predicted facade sound insulation",
         basis_key=(
             "Predicted standardized level difference of a facade "
-            "D<sub>2m,nT</sub> (the envelope elements' apparent sound reduction "
+            "D<sub>2m,n<i>T</i></sub> (the envelope elements' apparent sound reduction "
             "index R&#8242; combined energetically with the room geometry) "
             "estimated in accordance with EN 12354-3:2000 (simplified "
             "model, Formula 13). This is a prediction from element data, not a "
-            "measurement. D<sub>2m,nT,w</sub> (with apparent index "
+            "measurement. D<sub>2m,n<i>T</i>,w</sub> (with apparent index "
             "R&#8242;<sub>tr,s,w</sub> = {rtrs} dB and C<sub>tr</sub> = {ctr} "
             "dB) per ISO 717-1."
         ),
         rating_value=float(result.d_2m_nt_w),
-        rating_symbol="D<sub>2m,nT,w</sub>",
+        rating_symbol="D<sub>2m,n<i>T</i>,w</sub>",
         left_caption_key=caption_key,
         metric_rows=metric_rows,
         is_impact=False,

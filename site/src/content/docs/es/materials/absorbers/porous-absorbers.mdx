@@ -123,7 +123,7 @@ perfecta en el acoplamiento crítico, tienen su propia guía,
 
 Un material poroso de esqueleto rígido se comporta como un *fluido
 equivalente* con una impedancia característica compleja $Z_\mathrm{c}$ y un número de
-onda $k$ (convención temporal $e^{+j\omega t}$, de modo que un medio pasivo
+onda $k$ (convención temporal $\mathrm{e}^{+j\omega t}$, de modo que un medio pasivo
 tiene $\mathrm{Im}(k) < 0$).
 
 **Delany–Bazley** (Mechel 2e secc. G.11; Bies 5e apéndice D, tabla D.1;
@@ -556,7 +556,7 @@ fig, ax = plt.subplots()
 for medium, style in ((rigid, "--"), (limp, "-")):
     ax.plot(f, medium.effective_density.real / rho0, style)
     ax.plot(f, medium.effective_density.imag / rho0, style)
-ax.set(xlabel="Frecuencia [Hz]", ylabel="rho_e / rho_0", ylim=(-30, 30))
+ax.set(xlabel="Frecuencia [Hz]", ylabel=r"$\rho_\mathrm{e} / \rho_0$", ylim=(-30, 30))
 plt.show()
 ```
 
@@ -917,7 +917,7 @@ de ISO 354, cuyo sufijo es exactamente esta $d$.
 
 El modelo multicapa evalúa las magnitudes físicas mediante una recursión de
 admitancias numéricamente robusta (inmune al desbordamiento
-$e^{|\mathrm{Im}(k_x)| d}$ de las entradas matriciales en bruto en capas
+$\mathrm{e}^{|\mathrm{Im}(k_x)| d}$ de las entradas matriciales en bruto en capas
 extremadamente atenuantes) y aun así expone la matriz de cadena completa
 (recíproca por construcción, $\det T = 1$) en `transfer_matrix`, lista para
 la [maquinaria ASTM E2611](/phonometry/es/materials/absorbers/impedance-tube/)

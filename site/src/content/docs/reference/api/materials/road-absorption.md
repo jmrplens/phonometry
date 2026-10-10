@@ -26,7 +26,7 @@ opposite ends of the absorption scale and are **not** interchangeable:
   mandatory geometry $d_\mathrm{s} = 1.25$ m (source-to-plane) and
   $d_\mathrm{m} = 0.25$ m (mic-to-plane), giving $K_\mathrm{r} = 2/3$ (Clause 4.2 /
   Annex C). The complex pressure reflection factor
-  $Q_p = (1/K_\mathrm{r})(H_\mathrm{r}/H_\mathrm{i})\, e^{+j 2 \pi f \Delta\tau}$ with
+  $Q_p = (1/K_\mathrm{r})(H_\mathrm{r}/H_\mathrm{i})\, \mathrm{e}^{+j 2 \pi f \Delta\tau}$ with
   $\Delta\tau = 2 d_\mathrm{m} / c$ (Annex C) is available for theory comparison.
   A highly reflective reference surface removes the electro-acoustic chain
   error and the geometry factor by a ratio (Annex B), and non-normal incidence
@@ -45,11 +45,11 @@ opposite ends of the absorption scale and are **not** interchangeable:
   $\alpha \approx \alpha_{\text{measured}} - \alpha_{\text{system}}$.
 
 Sign / normalisation convention (ISO 13472-1): the forward transform is
-NumPy's `rfft` with kernel $e^{-j 2 \pi f t}$ (unnormalised); every
+NumPy's `rfft` with kernel $\mathrm{e}^{-j 2 \pi f t}$ (unnormalised); every
 quantity here is a ratio of two transforms from the same processing chain, so
 the transform normalisation cancels (Clause 6.1). A pure time delay `tau` of
-the reflected path scales its spectrum by $e^{-j 2 \pi f \tau}$; the
-optional phase restoration multiplies by $e^{+j 2 \pi f \tau}$ to
+the reflected path scales its spectrum by $\mathrm{e}^{-j 2 \pi f \tau}$; the
+optional phase restoration multiplies by $\mathrm{e}^{+j 2 \pi f \tau}$ to
 recover `Qp` (Annex C /
 Annex G, resolving the Clause 4.1 NOTE shorthand to the frequency-dependent
 form).

@@ -481,8 +481,8 @@ se conserva. Cada uno tiene su regla, y cada uno falla en silencio cuando
 está mal.
 
 **Ancho de banda de la fuente.** Un `GaussianPulse` de semianchura `width`
-es $s(t) = A\,e^{-((t-t_0)/\text{width})^2}$, cuyo espectro de magnitud es
-$e^{-(\pi f\,\text{width})^2}$: queda 20 dB por debajo en
+es $s(t) = A\,\mathrm{e}^{-((t-t_0)/\text{width})^2}$, cuyo espectro de magnitud es
+$\mathrm{e}^{-(\pi f\,\text{width})^2}$: queda 20 dB por debajo en
 $f = 0{,}483/\text{width}$ y 40 dB por debajo en $0{,}683/\text{width}$.
 Trabaja en la dirección del lector: elige $f_\text{max}$, saca de ahí
 $\Delta x$, y toma después $\text{width} \ge 0{,}5/f_\text{max}$; así el
@@ -1123,7 +1123,7 @@ que [la sección 6 mide en tres mallas](#dispersion-numerica-y-precision).
 
 ### ¿Qué anchura deben tener el pulso de fuente y la esponja?
 
-El espectro del `GaussianPulse` es $e^{-(\pi f\,\text{width})^2}$, 20 dB por
+El espectro del `GaussianPulse` es $\mathrm{e}^{-(\pi f\,\text{width})^2}$, 20 dB por
 debajo en $f = 0{,}483/\text{width}$, así que con
 `width` $\ge 0{,}5/f_\text{max}$ la energía inyectada se mantiene dentro de
 la banda que la malla resuelve. La esponja es una regla en **celdas**, no en

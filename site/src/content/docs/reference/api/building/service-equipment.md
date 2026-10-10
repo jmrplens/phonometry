@@ -71,7 +71,7 @@ $T_0$ (0,5 s unless another value is specified) or to a reference
 absorption area $A_0 = 10$ m², Formulae (5) and (6):
 
 $$
-L_\mathrm{nT} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0,16\,V}\ \mathrm{dB}
+L_{\mathrm{n}T} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0,16\,V}\ \mathrm{dB}
 $$
 
 Only the one-third-octave bands 50 Hz to 5 000 Hz (octave bands 63 Hz to
@@ -84,7 +84,7 @@ energy sums of the corrected bands plus the Annex A corrections, rounded to
 whole decibels. The A-weighted value uses either the restricted range 50 Hz to
 5 000 Hz or the extended range 25 Hz to 10 000 Hz; the C-weighted value uses
 the extended range. The single numbers are named as Table 1 names them, for
-example $L_\mathrm{A,Smax,nT}$ or $L_\mathrm{C,eq}$. 4.2 also
+example $L_{\mathrm{A,Smax,n}T}$ or $L_\mathrm{C,eq}$. 4.2 also
 admits "a specific frequency range" for the bands, and the form of Annex C has
 a box for it, but 7.8 forms the weighted values over the two ranges above
 only, and so does the library: a band set that does not cover the chosen
@@ -1382,7 +1382,7 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | `background` | The Clause 9 correction, or `None` when no background was given. |
 | `corrected_db` | The average corrected for the background, in dB (the average itself when there is no background). |
 | `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies_hz` and `band`, so it is not a field. |
-| `standardized_db` | $L_\mathrm{nT}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
+| `standardized_db` | $L_{\mathrm{n}T}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
 | `normalized_db` | $L_\mathrm{n}$ per band (Formula (6)), in dB, or `None` without a reverberation time and a volume. |
 | `ratings` | The weighted single numbers of Table 1, rounded to whole decibels (7.8), keyed by their notation: `"LA,eq"`, `"LA,Smax,nT"`, `"LC,Fmax,n"` and so on. The C-weighted ones are present only when the bands cover the extended range. |
 | `unrounded_ratings` | The same single numbers before rounding, in dB. |

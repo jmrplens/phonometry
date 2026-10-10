@@ -557,7 +557,7 @@ _ES_EXACT = {
     "$A_\\mathrm{u}$, the lower value": "$A_\\mathrm{u}$, el valor inferior",
     r"$A_\mathrm{r}$, for the assessment severity": r"$A_\mathrm{r}$, para la intensidad de valoración",
     "$A_\\mathrm{o}$, the upper value": "$A_\\mathrm{o}$, el valor superior",
-    "Guide value, dimensionless KB": "Valor de referencia, KB adimensional",
+    "Guide value, dimensionless $KB$": "Valor de referencia, $KB$ adimensional",
     "industrial": "industrial",
     "commercial": "comercial",
     "mixed": "mixta",
@@ -619,10 +619,10 @@ _ES_EXACT = {
     "What DIN 4150-3 Table 1 asks for": "Lo que pide la tabla 1 de la DIN 4150-3",
     "The weighting that removes the frequency": "La ponderación que quita la frecuencia",
     "Guideline peak velocity [mm/s]": "Velocidad de pico de referencia [mm/s]",
-    "Weighting factor $H_{vB}$": "Factor de ponderación $H_{vB}$",
-    "$v_{B1}$, commercial and industrial": "$v_{B1}$, comercial e industrial",
-    "$v_{B2}$, dwellings": "$v_{B2}$, viviendas",
-    "$v_{B3}$, especially sensitive": "$v_{B3}$, especialmente sensible",
+    r"Weighting factor $H_\mathrm{vB}$": r"Factor de ponderación $H_\mathrm{vB}$",
+    r"$v_{\mathrm{B}1}$, commercial and industrial": r"$v_{\mathrm{B}1}$, comercial e industrial",
+    r"$v_{\mathrm{B}2}$, dwellings": r"$v_{\mathrm{B}2}$, viviendas",
+    r"$v_{\mathrm{B}3}$, especially sensitive": r"$v_{\mathrm{B}3}$, especialmente sensible",
     "$\\pm$5 % of Table E.1": "$\\pm$5 % de la tabla E.1",
     # meter_phase_verification (ISO 8041-1 Formula (6) and Table 5): the two
     # invariances of the characteristic phase deviation, and the verdict on
@@ -800,9 +800,9 @@ _ES_EXACT = {
     "grade 2 boundary: 4 dB": "frontera del grado 2: 4 dB",
     "capped at 7 dB, which is\n$-10\\,\\lg 0.2$ to a tenth of a decibel": "topada en 7 dB, que es\n$-10\\,\\lg 0{,}2$ con una décima de decibelio",
     "A work station 1.6 m from the source": "Un puesto de trabajo a 1,6 m de la fuente",
-    "measured\n$L'_{pA}$": "medido\n$L'_{pA}$",
-    "room\n$K_{3A}$": "sala\n$K_{3A}$",
-    "emission\n$L_{pA}$": "emisión\n$L_{pA}$",
+    "measured\n$L'_{p\\mathrm{A}}$": "medido\n$L'_{p\\mathrm{A}}$",
+    "room\n$K_{3\\mathrm{A}}$": "sala\n$K_{3\\mathrm{A}}$",
+    "emission\n$L_{p\\mathrm{A}}$": "emisión\n$L_{p\\mathrm{A}}$",
     "A-weighted sound pressure level (dB)": "Nivel de presión sonora ponderado A (dB)",
     "the room is 11 m $\\times$ 8 m $\\times$ 4 m\nwith a 1.2 s reverberation time": "la sala mide 11 m $\\times$ 8 m $\\times$ 4 m\ny tiene 1,2 s de reverberación",
     "zone B: unrestricted operation": "zona B: operación sin restricción",
@@ -1029,13 +1029,13 @@ _ES_EXACT = {
     "Noise-Power-Distance Curves (ECAC Doc 29)": "Curvas nivel-potencia-distancia (ECAC Doc 29)",
     "Aircraft Departure SEL Contour (ECAC Doc 29)": "Contorno SEL de despegue (ECAC Doc 29)",
     "Aircraft noise contour (ECAC Doc 29)": "Contorno de ruido de aeronave (ECAC Doc 29)",
-    r"Start-of-Roll Directivity $\Delta_{SOR}$ (ECAC Doc 29 §4.5.7)": r"Directividad de inicio de rodaje $\Delta_{SOR}$ (ECAC Doc 29 §4.5.7)",
+    r"Start-of-Roll Directivity $\Delta_\mathrm{SOR}$ (ECAC Doc 29 §4.5.7)": r"Directividad de inicio de rodaje $\Delta_\mathrm{SOR}$ (ECAC Doc 29 §4.5.7)",
     "Turbofan jet (Eq. 4-24a)": "Reactor turbofán (Ec. 4-24a)",
     "Turboprop (Eq. 4-24b)": "Turbohélice (Ec. 4-24b)",
     "90°\nabeam": "90°\ntravés",
     "180° behind": "180° detrás",
-    r"radial axis: $\Delta_{SOR}$ [dB] relative to abeam  ·  $d_{SOR}$ = 300 m": r"eje radial: $\Delta_{SOR}$ [dB] relativo al través"
-    r"  ·  $d_{SOR}$ = 300 m",
+    r"radial axis: $\Delta_\mathrm{SOR}$ [dB] relative to abeam  ·  $d_\mathrm{SOR}$ = 300 m": r"eje radial: $\Delta_\mathrm{SOR}$ [dB] relativo al través"
+    r"  ·  $d_\mathrm{SOR}$ = 300 m",
     "Rotorcraft Ground Effect (ECAC Doc 32, Chien-Soroka)": "Efecto de suelo de rotorcraft (ECAC Doc 32, Chien-Soroka)",
     "Rotorcraft Flyover Time History (ECAC Doc 32)": "Historia temporal de sobrevuelo de rotorcraft (ECAC Doc 32)",
     "Recorded time [s]": "Tiempo registrado [s]",
@@ -1261,9 +1261,9 @@ _ES_EXACT = {
     "ISO 10052 Survey Method: Reverberation-Index Correction": "Método de control ISO 10052: corrección por índice de reverberación",
     "Level difference [dB]": "Diferencia de nivel [dB]",
     "$D$ (level difference)": "$D$ (diferencia de nivel)",
-    r"$D_\mathrm{nT}$ (standardized)": r"$D_\mathrm{nT}$ (estandarizada)",
+    r"$D_{\mathrm{n}T}$ (standardized)": r"$D_{\mathrm{n}T}$ (estandarizada)",
     "octave bands, $T_0$ = 0.5 s": "bandas de octava, $T_0$ = 0,5 s",
-    "$D_\\mathrm{nT,w}$ = 49 dB  ($C$ = −1)\noctave bands, $T_0$ = 0.5 s": "$D_\\mathrm{nT,w}$ = 49 dB  ($C$ = −1)\n"
+    "$D_{\\mathrm{n}T,\\mathrm{w}}$ = 49 dB  ($C$ = −1)\noctave bands, $T_0$ = 0.5 s": "$D_{\\mathrm{n}T,\\mathrm{w}}$ = 49 dB  ($C$ = −1)\n"
     "bandas de octava, $T_0$ = 0,5 s",
     # absorption_uncertainty figure (ISO 12999-2)
     "ISO 12999-2 Sound Absorption Coefficient Uncertainty": "Incertidumbre del coeficiente de absorción acústica (ISO 12999-2)",
@@ -1284,10 +1284,7 @@ _ES_EXACT = {
     # heavy_impact_sources figure (ISO 16283-2 / JIS A 1418-2 / ISO 717-2)
     "Standard heavy impact sources\n(ISO 16283-2 Table A.1, JIS A 1418-2 Tables A.1/A.2)": "Fuentes de impacto pesadas normalizadas\n(ISO 16283-2 Tabla A.1, "
     "JIS A 1418-2 Tablas A.1/A.2)",
-    # Two spellings of one label: the italic subscript is the library
-    # renderer's (phonometry._plot.building), the upright one this figure's.
-    "Impact force exposure level $L_{FE}$ [dB re 1 N]": "Nivel de exposición a la fuerza de impacto $L_{FE}$ [dB re 1 N]",
-    r"Impact force exposure level $L_{F\mathrm{E}}$ [dB re 1 N]": r"Nivel de exposición a la fuerza de impacto $L_{F\mathrm{E}}$ [dB re 1 N]",
+    r"Impact force exposure level $L_\mathrm{FE}$ [dB re 1 N]": r"Nivel de exposición a la fuerza de impacto $L_\mathrm{FE}$ [dB re 1 N]",
     "rubber ball tolerance": "tolerancia de la pelota de caucho",
     "rubber ball nominal": "pelota de caucho nominal",
     "bang machine tolerance": "tolerancia de la máquina de neumático",
@@ -1521,30 +1518,30 @@ _ES_EXACT = {
     "Part 2 engineering ($\\varepsilon$ measured)": "Parte 2 ingeniería ($\\varepsilon$ medido)",
     # structure_borne_power figure (EN 15657)
     "EN 15657 Reception-Plate Structure-Borne Sound Power": "Potencia acústica estructural en placa receptora EN 15657",
-    r"Structure-borne power level $L_{W\mathrm{s}}$ [dB re 1 pW]": r"Nivel de potencia estructural $L_{W\mathrm{s}}$ [dB re 1 pW]",
+    r"Structure-borne power level $L_\mathrm{Ws}$ [dB re 1 pW]": r"Nivel de potencia estructural $L_\mathrm{Ws}$ [dB re 1 pW]",
     "low-mobility plate": "placa de baja movilidad",
     "high-mobility plate": "placa de alta movilidad",
-    "$L_{W\\mathrm{s}} = 10\\,\\log_{10}(2\\pi f\\,\\eta\\,m\\,S) + L_v - 60$ dB\n"
+    "$L_\\mathrm{Ws} = 10\\,\\log_{10}(2\\pi f\\,\\eta\\,m\\,S) + L_\\mathrm{v} - 60$ dB\n"
     "$\\eta = 2.2/(f\\,T_\\mathrm{s})$,  $v_0$ = 1 nm/s\n"
-    "reception-plate method (clause 7)": "$L_{W\\mathrm{s}} = 10\\,\\log_{10}(2\\pi f\\,\\eta\\,m\\,S) + L_v - 60$ dB\n"
+    "reception-plate method (clause 7)": "$L_\\mathrm{Ws} = 10\\,\\log_{10}(2\\pi f\\,\\eta\\,m\\,S) + L_\\mathrm{v} - 60$ dB\n"
     "$\\eta = 2{,}2/(f\\,T_\\mathrm{s})$,  $v_0$ = 1 nm/s\n"
     "método de la placa receptora (apartado 7)",
     # installed_structure_borne figure (EN 12354-5)
     "EN 12354-5 Installed Structure-Borne Sound": "Ruido estructural instalado EN 12354-5",
-    r"characteristic $L_{W\mathrm{s,c}}$ (EN 15657)": r"característica $L_{W\mathrm{s,c}}$ (EN 15657)",
-    r"installed $L_{W\mathrm{s,inst}} = L_{W\mathrm{s,c}} - D_\mathrm{C}$": r"instalada $L_{W\mathrm{s,inst}} = L_{W\mathrm{s,c}} - D_\mathrm{C}$",
+    r"characteristic $L_\mathrm{Ws,c}$ (EN 15657)": r"característica $L_\mathrm{Ws,c}$ (EN 15657)",
+    r"installed $L_\mathrm{Ws,inst} = L_\mathrm{Ws,c} - D_\mathrm{C}$": r"instalada $L_\mathrm{Ws,inst} = L_\mathrm{Ws,c} - D_\mathrm{C}$",
     r"paths $L_{\mathrm{n,s},ij}$": r"caminos $L_{\mathrm{n,s},ij}$",
     r"total $L_\mathrm{n,s}$": r"total $L_\mathrm{n,s}$",
     # Formula box, symbols only: reads the same in Spanish.
     "$D_\\mathrm{C} = 10\\,\\log_{10}(|Y_\\mathrm{s}+Y_i|^2"
     " / (|Y_\\mathrm{s}|\\,\\mathrm{Re}\\,Y_i))$\n"
-    "$L_{\\mathrm{n,s},ij} = L_{W\\mathrm{s,inst}} - D_\\mathrm{sa} - R_{ij}"
+    "$L_{\\mathrm{n,s},ij} = L_\\mathrm{Ws,inst} - D_\\mathrm{sa} - R_{ij}"
     " - 10\\,\\log_{10}(S_i/S_0) - 10\\,\\log_{10}(A_0/4)$\n"
     "$L_\\mathrm{n,s} = 10\\,\\log_{10}"
     "(\\Sigma\\,10^{L_{\\mathrm{n,s},ij}/10})$,  "
     "$S_0 = A_0$ = 10 m²": "$D_\\mathrm{C} = 10\\,\\log_{10}(|Y_\\mathrm{s}+Y_i|^2"
     " / (|Y_\\mathrm{s}|\\,\\mathrm{Re}\\,Y_i))$\n"
-    "$L_{\\mathrm{n,s},ij} = L_{W\\mathrm{s,inst}} - D_\\mathrm{sa} - R_{ij}"
+    "$L_{\\mathrm{n,s},ij} = L_\\mathrm{Ws,inst} - D_\\mathrm{sa} - R_{ij}"
     " - 10\\,\\log_{10}(S_i/S_0) - 10\\,\\log_{10}(A_0/4)$\n"
     "$L_\\mathrm{n,s} = 10\\,\\log_{10}"
     "(\\Sigma\\,10^{L_{\\mathrm{n,s},ij}/10})$,  "
@@ -1578,8 +1575,8 @@ _ES_EXACT = {
     r"$R^{\prime}$ (façade)": r"$R^{\prime}$ (fachada)",
     "air inlet limits the low bands": "la entrada de aire limita las bandas bajas",
     "$R^{\\prime}_\\mathrm{tr,s,w}$ = 31 dB   ($C_\\mathrm{tr}$ = −3)\n"
-    "$D_\\mathrm{2m,nT,w}$ = 33 dB\nair inlet limits the low bands": "$R^{\\prime}_\\mathrm{tr,s,w}$ = 31 dB   ($C_\\mathrm{tr}$ = −3)\n"
-    "$D_\\mathrm{2m,nT,w}$ = 33 dB\n"
+    "$D_{\\mathrm{2m,n}T,\\mathrm{w}}$ = 33 dB\nair inlet limits the low bands": "$R^{\\prime}_\\mathrm{tr,s,w}$ = 31 dB   ($C_\\mathrm{tr}$ = −3)\n"
+    "$D_{\\mathrm{2m,n}T,\\mathrm{w}}$ = 33 dB\n"
     "la entrada de aire limita las bandas bajas",
     # facade_elevation_geometry element names, drawn by plot_facade_elements;
     # worded as the facade-insulation page's own alt text.
@@ -3166,8 +3163,8 @@ _ES_EXACT = {
     # Wind-turbine apparent sound power and audibility (IEC 61400-11) (FL3).
     "Apparent Sound Power against Wind Speed (IEC 61400-11)": "Potencia acústica aparente frente al viento (IEC 61400-11)",
     "Hub-height wind speed [m/s]  (0,5 m/s bins)": "Velocidad del viento a altura de buje [m/s]  (intervalos de 0,5 m/s)",
-    r"Formula (29) wind speed at 10 m, $z_{0,\mathrm{ref}}$ = 0,05 m [m/s]": r"Velocidad del viento a 10 m de la Fórmula (29), "
-    r"$z_{0,\mathrm{ref}}$ = 0,05 m [m/s]",
+    r"Formula (29) wind speed at 10 m, $z_{0\mathrm{ref}}$ = 0,05 m [m/s]": r"Velocidad del viento a 10 m de la Fórmula (29), "
+    r"$z_{0\mathrm{ref}}$ = 0,05 m [m/s]",
     "Valid bin (margin $>$ 6 dB)": "Intervalo válido (margen $>$ 6 dB)",
     "3-6 dB margin: reported with an asterisk": "Margen de 3-6 dB: se declara con asterisco",
     r"Margin $\leq$ 3 dB: bin voided": r"Margen $\leq$ 3 dB: intervalo anulado",
@@ -3593,21 +3590,21 @@ _ES_EXACT = {
     "default": "la banda sombreada es lo que añade la Fórmula (13):\n"
     "+3,4 / +4,0 / +3,8 dB, un tercio de esquina contra dos tercios "
     "por defecto",
-    r"$D_\mathrm{nT}$, default procedure alone": r"$D_\mathrm{nT}$, solo el procedimiento por defecto",
-    r"$D_\mathrm{nT}$, with the low-frequency procedure": r"$D_\mathrm{nT}$, con el procedimiento de baja frecuencia",
+    r"$D_{\mathrm{n}T}$, default procedure alone": r"$D_{\mathrm{n}T}$, solo el procedimiento por defecto",
+    r"$D_{\mathrm{n}T}$, with the low-frequency procedure": r"$D_{\mathrm{n}T}$, con el procedimiento de baja frecuencia",
     "Clause 8 and Clause 10.4\nreach only these three bands": "Los apartados 8 y 10.4\nsolo alcanzan estas tres bandas",
-    r"$D_\mathrm{nT,w}$ = 56 dB either way (100 Hz to 3150 Hz)"
+    r"$D_{\mathrm{n}T,\mathrm{w}}$ = 56 dB either way (100 Hz to 3150 Hz)"
     "\n"
-    r"$C_{50‐3150}$ = −1 dB $\rightarrow$ −2 dB": r"$D_\mathrm{nT,w}$ = 56 dB en ambos casos (100 Hz a 3150 Hz)"
+    r"$C_{50‐3150}$ = −1 dB $\rightarrow$ −2 dB": r"$D_{\mathrm{n}T,\mathrm{w}}$ = 56 dB en ambos casos (100 Hz a 3150 Hz)"
     "\n"
     r"$C_{50‐3150}$ = −1 dB $\rightarrow$ −2 dB",
-    r"$D_\mathrm{2m,nT}$ (standardized)": r"$D_\mathrm{2m,nT}$ (estandarizada)",
+    r"$D_{\mathrm{2m,n}T}$ (standardized)": r"$D_{\mathrm{2m,n}T}$ (estandarizada)",
     r"$D_\mathrm{2m,n}$ (normalized)": r"$D_\mathrm{2m,n}$ (normalizada)",
     r"$R^{\prime}_{45°}$ (element)": r"$R^{\prime}_{45°}$ (elemento)",
     "Level difference / reduction index [dB]": "Diferencia de nivel / índice de reducción [dB]",
     "ISO 10052 Survey Method: Impact Sound": "Método de control ISO 10052: ruido de impactos",
     r"$L_\mathrm{i}$ (impact level)": r"$L_\mathrm{i}$ (nivel de impactos)",
-    r"$L^{\prime}_\mathrm{nT}$ (standardized)": r"$L^{\prime}_\mathrm{nT}$ (estandarizado)",
+    r"$L^{\prime}_{\mathrm{n}T}$ (standardized)": r"$L^{\prime}_{\mathrm{n}T}$ (estandarizado)",
     "Impact sound pressure level [dB]": "Nivel de presión acústica de impactos [dB]",
     "ISO 10140 Laboratory Insulation (flanking suppressed)": "Aislamiento en laboratorio ISO 10140 (flancos suprimidos)",
     r"normalized $L_\mathrm{n}$": r"$L_\mathrm{n}$ normalizado",
@@ -3695,9 +3692,9 @@ _ES_EXACT = {
     "The insertion loss is the gap, band by band": (
         "La pérdida por inserción es el hueco, banda a banda"
     ),
-    "A-weighted insertion loss $D_{WA}$ = 19.3 dB,\n"
+    "A-weighted insertion loss $D_{W\\mathrm{A}}$ = 19.3 dB,\n"
     "which is the single number a declaration carries": (
-        "Pérdida por inserción ponderada A $D_{WA}$ = 19,3 dB,\n"
+        "Pérdida por inserción ponderada A $D_{W\\mathrm{A}}$ = 19,3 dB,\n"
         "que es el número único que lleva una declaración"
     ),
     "Precision and engineering methods, $K_2 \\leq 2$ dB": (
@@ -3871,8 +3868,8 @@ _ES_EXACT = {
     "turbulent one: the wall passes it better": "aquí la parte cavitante es el 38 % de la potencia\ny está una octava por encima de la turbulenta:\n"
     "la pared la deja pasar mejor",
     "What the bubbles add": "Lo que añaden las burbujas",
-    "Turbulent, $\\eta_{turb}$": "Turbulenta, $\\eta_{turb}$",
-    "Cavitating, $\\eta_{cav}$": "Cavitante, $\\eta_{cav}$",
+    "Turbulent, $\\eta_\\mathrm{turb}$": "Turbulenta, $\\eta_\\mathrm{turb}$",
+    "Cavitating, $\\eta_\\mathrm{cav}$": "Cavitante, $\\eta_\\mathrm{cav}$",
     "zero at the threshold, then a fifth power:\nthe cavitation term passes the turbulent\n"
     "one within a tenth of $x_F$ of starting": "cero en el umbral y luego una quinta potencia:\nel término de cavitación pasa al turbulento\n"
     "en menos de una décima de $x_F$",
@@ -4262,17 +4259,17 @@ _ES_EXACT = {
     # structure_borne_conversion (buildings/design/structure-borne-power)
     "One Source, Four Levels: the EN 15657 Conversion Chain": "Una fuente, cuatro niveles: la cadena de conversión de la EN 15657",
     "Structure-borne power level [dB re 1 pW]": "Nivel de potencia estructural [dB re 1 pW]",
-    r"$L_{W\mathrm{s}}$ measured on the test plate ($Y = 5.34\times10^{-6}$)": r"$L_{W\mathrm{s}}$ medido sobre la placa de ensayo "
+    r"$L_\mathrm{Ws}$ measured on the test plate ($Y = 5.34\times10^{-6}$)": r"$L_\mathrm{Ws}$ medido sobre la placa de ensayo "
     r"($Y = 5{,}34\times10^{-6}$)",
-    r"$L_{W\mathrm{sn}}$ on the standard plate ($Y = 5\times10^{-6}$): "
-    "what is declared": r"$L_{W\mathrm{sn}}$ sobre la placa normalizada "
+    r"$L_\mathrm{Wsn}$ on the standard plate ($Y = 5\times10^{-6}$): "
+    "what is declared": r"$L_\mathrm{Wsn}$ sobre la placa normalizada "
     r"($Y = 5\times10^{-6}$): "
     "lo que se declara",
-    r"$L_{W\mathrm{s,inst}}$ on the receiving wall "
-    r"($Y = 24.1\times10^{-6}$)": r"$L_{W\mathrm{s,inst}}$ sobre el muro receptor "
+    r"$L_\mathrm{Ws,inst}$ on the receiving wall "
+    r"($Y = 24.1\times10^{-6}$)": r"$L_\mathrm{Ws,inst}$ sobre el muro receptor "
     r"($Y = 24{,}1\times10^{-6}$)",
-    r"$L_{W\mathrm{s,c}}$ with the source mobility ($Y = 10^{-3}$): "
-    "the input to EN 12354-5": r"$L_{W\mathrm{s,c}}$ con la movilidad de la fuente ($Y = 10^{-3}$): "
+    r"$L_\mathrm{Ws,c}$ with the source mobility ($Y = 10^{-3}$): "
+    "the input to EN 12354-5": r"$L_\mathrm{Ws,c}$ con la movilidad de la fuente ($Y = 10^{-3}$): "
     "la entrada de la EN 12354-5",
     "EN 12354-5 Annex I.3 flushing cistern, wall contact\n"
     "markers reproduce the printed Table I.8 columns": "Cisterna del anexo I.3 de la EN 12354-5, contacto en el muro\n"
@@ -4637,8 +4634,8 @@ _ES_EXACT = {
     ),
     "A platform with 1.9 s of decay": "Un escenario con 1,9 s de decaimiento",
     "Stage support (dB)": "Soporte de escenario (dB)",
-    "$ST_{Early}$": "$ST_{Early}$",
-    "$ST_{Late}$": "$ST_{Late}$",
+    r"$\mathrm{ST}_\mathrm{Early}$": r"$\mathrm{ST}_\mathrm{Early}$",
+    r"$\mathrm{ST}_\mathrm{Late}$": r"$\mathrm{ST}_\mathrm{Late}$",
     "the two shaded bands are the typical ranges\n"
     "of Table C.1, which prints no JND for either": (
         "las dos bandas sombreadas son los rangos habituales\n"
@@ -5093,22 +5090,22 @@ _ES_PATTERNS = [
     (
         (
             r"^\+(\d+)\.(\d+) dB = \$10\\,\\mathrm\{lg\}\(24\.1/5\.0\)\$:\n"
-            r"a lighter receiver accepts more power$"
+            r"a lighter receiver\naccepts more power$"
         ),
         (
             r"+\1,\2 dB = $10\\,\\mathrm{lg}(24{,}1/5{,}0)$:"
-            "\nun receptor más ligero acepta más potencia"
+            "\nun receptor más ligero\nacepta más potencia"
         ),
     ),
     (
         (
-            r"^\$L_\{W\\mathrm\{s,c\}\} - D_\\mathrm\{C\}\$, "
+            r"^\$L_\\mathrm\{Ws,c\} - D_\\mathrm\{C\}\$, "
             r"\$D_\\mathrm\{C\}\$ = (\d+)\.(\d+) dB: "
-            r"back to \$L_\{W\\mathrm\{s,inst\}\}\$$"
+            r"back to \$L_\\mathrm\{Ws,inst\}\$$"
         ),
         (
-            r"$L_{W\\mathrm{s,c}} - D_\\mathrm{C}$, $D_\\mathrm{C}$ = \1,\2 dB: "
-            r"de vuelta a $L_{W\\mathrm{s,inst}}$"
+            r"$L_\\mathrm{Ws,c} - D_\\mathrm{C}$, $D_\\mathrm{C}$ = \1,\2 dB: "
+            r"de vuelta a $L_\\mathrm{Ws,inst}$"
         ),
     ),
     # radiation_efficiency_panels legend and annotations.
@@ -6268,34 +6265,34 @@ _ES_PATTERNS = [
     ),
     (
         (
-            r"^\$D_\\mathrm\{ls,2m,nT,w\}\$\(\$C\$;\$C_\\mathrm\{tr\}\$\) = (.+) dB\n"
+            r"^\$D_\{\\mathrm\{ls,2m,n\}T,\\mathrm\{w\}\}\$\(\$C\$;\$C_\\mathrm\{tr\}\$\) = (.+) dB\n"
             r"45° loudspeaker method \(−1\.5 dB on \$R\^\{\\prime\}\$\)$"
         ),
         (
-            "$D_\\\\mathrm{ls,2m,nT,w}$($C$;$C_\\\\mathrm{tr}$) = \\1 dB\n"
+            "$D_{\\\\mathrm{ls,2m,n}T,\\\\mathrm{w}}$($C$;$C_\\\\mathrm{tr}$) = \\1 dB\n"
             "método del altavoz a 45° (−1,5 dB en $R^{\\\\prime}$)"
         ),
     ),
     (
         (
-            r"^\$L\^\{\\prime\}_\\mathrm\{nT,w\}\$\(\$C_\\mathrm\{I\}\$\) = (.+) dB\n"
+            r"^\$L\^\{\\prime\}_\{\\mathrm\{n\}T,\\mathrm\{w\}\}\$\(\$C_\\mathrm\{I\}\$\) = (.+) dB\n"
             r"note the minus sign: a live room lowers "
-            r"\$L\^\{\\prime\}_\\mathrm\{nT\}\$$"
+            r"\$L\^\{\\prime\}_\{\\mathrm\{n\}T\}\$$"
         ),
         (
-            "$L^{\\\\prime}_\\\\mathrm{nT,w}$($C_\\\\mathrm{I}$) = \\1 dB\n"
+            "$L^{\\\\prime}_{\\\\mathrm{n}T,\\\\mathrm{w}}$($C_\\\\mathrm{I}$) = \\1 dB\n"
             "atención al signo menos: un recinto vivo reduce "
-            "$L^{\\\\prime}_\\\\mathrm{nT}$"
+            "$L^{\\\\prime}_{\\\\mathrm{n}T}$"
         ),
     ),
     (
         (
-            r"^\$D_\\mathrm\{nT,w\}\$\(\$C\$;\$C_\\mathrm\{tr\}\$\) = (.+) dB\n"
+            r"^\$D_\{\\mathrm\{n\}T,\\mathrm\{w\}\}\$\(\$C\$;\$C_\\mathrm\{tr\}\$\) = (.+) dB\n"
             r"\$R\^\{\\prime\}_\\mathrm\{w\}\$ = (\d+) dB   "
             r"\(\$S\$ = 12\.5 m², \$V\$ = 30\.4 m³\)$"
         ),
         (
-            "$D_\\\\mathrm{nT,w}$($C$;$C_\\\\mathrm{tr}$) = \\1 dB\n"
+            "$D_{\\\\mathrm{n}T,\\\\mathrm{w}}$($C$;$C_\\\\mathrm{tr}$) = \\1 dB\n"
             "$R^{\\\\prime}_\\\\mathrm{w}$ = \\2 dB   "
             "($S$ = 12,5 m², $V$ = 30,4 m³)"
         ),

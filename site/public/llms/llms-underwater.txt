@@ -813,7 +813,7 @@ ranges at which they hand over, from the seabed reflectivity alone:
 
 $\psi_\mathrm{c} = \arccos(c_\mathrm{w}/c_\mathrm{sed})$ is the critical grazing angle, $\eta$ the
 **reflection loss gradient** in nepers per radian ($|R(\theta)| \approx
-e^{-\eta\theta}$) and $H_\mathrm{e}$ the Weston effective depth, the level a short
+\mathrm{e}^{-\eta\theta}$) and $H_\mathrm{e}$ the Weston effective depth, the level a short
 distance below the true seabed at which a pressure-release boundary appears to
 lie. `weston_propagation_loss` assembles the composite loss
 $PL = -10 \log_{10} F$ and returns each regime's own law alongside it; the
@@ -1601,15 +1601,15 @@ $$
 with a pressure-release surface at $z = 0$ and, at the bottom $z = D$,
 $\Psi(D) = 0$ for a pressure-release bed or $\mathrm{d}\Psi/\mathrm{d}z|_{D} = 0$ for a
 rigid one. Each eigenfunction $\Psi_m(z)$ is a standing wave in depth that
-travels in range as $e^{\,i k_{rm} r}$ with its own horizontal wavenumber
+travels in range as $\mathrm{e}^{\,i k_{rm} r}$ with its own horizontal wavenumber
 $k_{rm}$; only the modes with real $k_{rm}$ **propagate**, the rest are
 evanescent and die within a few water depths. The field is the modal sum
 (Eq. 5.14),
 
 $$
-p(r, z) \simeq \frac{i\,e^{-i\pi/4}}{\rho(z_\mathrm{s})\sqrt{8\pi r}}
+p(r, z) \simeq \frac{i\,\mathrm{e}^{-i\pi/4}}{\rho(z_\mathrm{s})\sqrt{8\pi r}}
   \sum_m \Psi_m(z_\mathrm{s})\,\Psi_m(z)\,
-  \frac{e^{\,i k_{rm} r}}{\sqrt{k_{rm}}},
+  \frac{\mathrm{e}^{\,i k_{rm} r}}{\sqrt{k_{rm}}},
 $$
 
 each mode weighted by its excitation at the source depth $\Psi_m(z_\mathrm{s})$ and
@@ -1811,9 +1811,9 @@ sonar equation consumes, and the skeleton a channel impulse response is built
 on.*
 
 One list serves every frequency. The amplitudes are normalised to unit
-pressure at 1 m, in the same $e^{-i\omega t}$ convention as the rest of the
+pressure at 1 m, in the same $\mathrm{e}^{-i\omega t}$ convention as the rest of the
 module, and the search never asks for a frequency at all: the tone a receiver
-hears is $p(\omega) = \sum_j a_j e^{i\omega\tau_j}$, its loss
+hears is $p(\omega) = \sum_j a_j \mathrm{e}^{i\omega\tau_j}$, its loss
 $-20\lg|p(\omega)|$ on the same scale as the other three solvers, and a
 band's impulse response is that sum transformed. Each amplitude carries
 $(-1)$ per surface touch and the bottom's coefficient per bottom touch (the
@@ -2013,10 +2013,10 @@ level beyond a few kilometres at sonar frequencies is optimistic. Passing
 `VolumeAbsorption` naming its own water; the same names, arguments and
 defaults as
 [`seawater_absorption`](https://jmrplens.github.io/phonometry/underwater/underwater-propagation/)) multiplies each beam by
-$e^{-\alpha s}$ with $s$ the **arc length along its central ray**, which is
+$\mathrm{e}^{-\alpha s}$ with $s$ the **arc length along its central ray**, which is
 Jensen §3.6.2 as printed: perturbing the eikonal with the complex sound speed
 a volume loss implies leaves the real rays standing and attaches
-$e^{-\int_0^s \alpha\,ds'}$ to each (Eq. 3.116). It is not $\alpha r$ over the
+$\mathrm{e}^{-\int_0^s \alpha\,ds'}$ to each (Eq. 3.116). It is not $\alpha r$ over the
 horizontal range, the shortcut the same section notes "is used in many ray
 models": a path at 60° is twice as long as the range it covers, and the steep
 multiple bounces of a waveguide are exactly the arrivals absorption is
@@ -2143,7 +2143,7 @@ physics makes the beam large compared to the channel.
 
 The parabolic equation trades the boundary-value Helmholtz problem for an
 initial-value problem in range. Factor out the fast outgoing oscillation,
-$p(r, z) \simeq \psi(r, z)\,e^{\,i k_0 r}/\sqrt{k_0 r}$ with a reference
+$p(r, z) \simeq \psi(r, z)\,\mathrm{e}^{\,i k_0 r}/\sqrt{k_0 r}$ with a reference
 wavenumber $k_0 = \omega/c_0$, and for energy travelling within a small
 angle of the horizontal the envelope obeys the **standard (Tappert) PE**
 (Jensen §6.2):
@@ -2158,8 +2158,8 @@ $$
 The **split-step Fourier** algorithm marches it by operator splitting,
 alternating two individually exact
 half-physics steps: diffraction is a multiplication by
-$e^{-i k_z^2 \Delta r / 2 k_0}$ in the vertical-wavenumber domain, and
-refraction a phase screen $e^{\,i k_0 (n^2 - 1) \Delta r / 2}$ back in
+$\mathrm{e}^{-i k_z^2 \Delta r / 2 k_0}$ in the vertical-wavenumber domain, and
+refraction a phase screen $\mathrm{e}^{\,i k_0 (n^2 - 1) \Delta r / 2}$ back in
 depth, with one transform pair per range step. `parabolic_equation` starts
 from a Gaussian field matched to the point source and uses a discrete sine
 transform in depth, which enforces the pressure-release surface and bottom

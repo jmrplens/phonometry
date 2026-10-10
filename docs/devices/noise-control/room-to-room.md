@@ -438,7 +438,7 @@ to a surface other than the partition than roughly half a wavelength.
   and [Flanking transmission](../../buildings/insulation/flanking-lab.md):
   the EN 12354 models for the flanking paths this page only debits.
 - [Field sound insulation](../../buildings/insulation/insulation-field.md):
-  how the same room pair is measured, and the $D_\mathrm{nT}$ and $R'$ a test report
+  how the same room pair is measured, and the $D_{\mathrm{n}T}$ and $R'$ a test report
   hands back.
 - [Room-noise criteria](../../buildings/rooms/room-noise.md): the NC and
   RC Mark II families the verdict is written in.

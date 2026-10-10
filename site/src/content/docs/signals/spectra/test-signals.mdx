@@ -253,7 +253,7 @@ nothing and costs the band edge.
 
 `fractional_delay` shifts a record by any number of samples, including
 sub-sample amounts, by multiplying the spectrum with the phase ramp
-$e^{-j 2\pi f D/f_\mathrm{s}}$: every component is delayed by exactly `D` samples. Two
+$\mathrm{e}^{-j 2\pi f D/f_\mathrm{s}}$: every component is delayed by exactly `D` samples. Two
 boundary conventions cover the two use cases:
 
 - `mode="linear"` (default) zero-pads the record past the shift, so samples

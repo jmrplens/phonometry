@@ -48,7 +48,7 @@ $$
 \mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8.0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
 $$
 
-**PR** (clause 12) compares the level of the critical band centred on the tone, $L_M$, with the mean power of the two **contiguous** critical bands $L_L$, $L_\mathrm{U}$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Formula 23). For $f_\mathrm{t} \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_\mathrm{t} \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_\mathrm{t})$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
+**PR** (clause 12) compares the level of the critical band centred on the tone, $L_\mathrm{M}$, with the mean power of the two **contiguous** critical bands $L_\mathrm{L}$, $L_\mathrm{U}$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Formula 23). For $f_\mathrm{t} \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_\mathrm{t} \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_\mathrm{t})$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Tone-to-noise ratio of a 250 Hz fan tone plotted against the ECMA-418-1 prominence criterion: the criterion falls from about 17 dB at 89 Hz to a flat 8 dB above 1 kHz, and the assessed tone sits at 15.1 dB, 2.1 dB above the 13.0 dB criterion at 250 Hz, so it is prominent" width="88%"></picture>
 
@@ -68,10 +68,10 @@ The ear analyzes sound in **critical bands**: frequency regions within which ene
 1. **One-third-octave levels**: 28 bands, 25 Hz to 12.5 kHz (the Annex A filterbank at 48 kHz, Tables A.1/A.2). For time-varying sounds the squared band outputs are smoothed by three cascaded low-passes with $\tau = 2/(3 f_\mathrm{c})$ ($f_\mathrm{c}$ capped at 1 kHz) and sampled every 2 ms.
 2. **Low-frequency grouping**: the 11 bands up to 250 Hz receive the equal-loudness corrections of Table A.3 and are summed into the first three critical bands (25–80, 100–160, 200–250 Hz).
 3. **a0 transmission**: the outer/middle-ear transfer correction of Table A.4 (plus the diffuse-field difference of Table A.5 when `field='diffuse'`) yields the critical-band levels $L_E$.
-4. **Core loudness**: each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
+4. **Core loudness**: each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_\mathrm{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
 
    $$
-   N_c = \max\left(0,\ 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right]\right) \ \text{sone/Bark}, \qquad s = 0.25
+   N_c = \max\left(0,\ 0.0635 \cdot 10^{0.025 L_\mathrm{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_\mathrm{TQ})/10} \right)^{0.25} - 1 \right]\right) \ \text{sone/Bark}, \qquad s = 0.25
    $$
 
    (the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).
@@ -107,7 +107,7 @@ ISO 532-1 is one of three loudness models; two newer families refine the auditor
 Instead of Zwicker's fixed critical bands, the Moore-Glasberg model forms a continuous **excitation pattern** on the ERB-number ("Cam") scale using level-dependent **rounded-exponential (roex)** auditory filters. As a function of the normalized frequency deviation $g = |f - f_\mathrm{c}| / f_\mathrm{c}$ from a filter centred at $f_\mathrm{c}$, the filter weighting is
 
 $$
-W(g) = (1 + p\ g)\ e^{-p\ g}
+W(g) = (1 + p\ g)\ \mathrm{e}^{-p\ g}
 $$
 
 where the slope $p$ grows with the source level, broadening the lower skirt as level rises (ISO 532-2, Formulae 2–5); this reproduces the upward spread of masking. Passing the stimulus intensity through every filter gives the excitation $E(i)$, and a compressive law maps it to the **specific loudness** $N'(i)$ in sone/Cam (Formulae 7–9), of the mid-level form
@@ -124,7 +124,7 @@ $$
 
 and a binaural-inhibition stage (Formulae 10–13) combines the ears so a diotic sound is louder than the same sound at one ear. The 1 kHz / 40 dB SPL anchor gives exactly 1 sone.
 
-**ISO 532-3** makes this time-varying. A running spectrum from six parallel Hann-windowed FFTs (segment lengths 2–64 ms, each contributing its own frequency range, updated every $T_0 = 1$ ms) drives the same excitation and specific-loudness chain, integrated by two cascaded first-order smoothers with $\alpha = 1 - e^{-T_0 / \tau}$,
+**ISO 532-3** makes this time-varying. A running spectrum from six parallel Hann-windowed FFTs (segment lengths 2–64 ms, each contributing its own frequency range, updated every $T_0 = 1$ ms) drives the same excitation and specific-loudness chain, integrated by two cascaded first-order smoothers with $\alpha = 1 - \mathrm{e}^{-T_0 / \tau}$,
 
 $$
 S(t) = \alpha\ x(t) + (1 - \alpha)\ S(t - 1)
@@ -187,10 +187,10 @@ Sharpness condenses the high-frequency emphasis of a sound into one number: the 
 
 $$
 S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum}, \qquad
-g(z) = \begin{cases} 1 & z \le 15.8\ \text{Bark} \\ 0.15\ e^{0.42 (z - 15.8)} + 0.85 & z > 15.8\ \text{Bark} \end{cases}
+g(z) = \begin{cases} 1 & z \le 15.8\ \text{Bark} \\ 0.15\ \mathrm{e}^{0.42 (z - 15.8)} + 0.85 & z > 15.8\ \text{Bark} \end{cases}
 $$
 
-evaluated on the same 240-bin, 0.1-Bark grid. The constant $k$ is not hard-coded but derived from the calibration requirement (clause 6): a critical-band-wide narrowband noise 920–1080 Hz at 60 dB SPL scores exactly 1 acum, and the derived $k = 0.108$ lands inside the normative window $0.105 \le k < 0.115$ (clause 5.2). The informative Annex B weightings are provided under the same 1-acum anchor: von Bismarck (knee at 15 Bark, $0.2\ e^{0.308(z-15)} + 0.8$) and Aures (loudness-dependent, $g(z) = 0.078\ (e^{0.171 z}/z)\ N/\ln(0.05 N + 1)$). The Table A.2 narrow-band targets are reproduced within the clause 6 tolerance (5 % or 0.05 acum): 0.38 acum at 250 Hz, 1.00 at 1 kHz, 1.78 at 2.5 kHz, 2.82 at 4 kHz.
+evaluated on the same 240-bin, 0.1-Bark grid. The constant $k$ is not hard-coded but derived from the calibration requirement (clause 6): a critical-band-wide narrowband noise 920–1080 Hz at 60 dB SPL scores exactly 1 acum, and the derived $k = 0.108$ lands inside the normative window $0.105 \le k < 0.115$ (clause 5.2). The informative Annex B weightings are provided under the same 1-acum anchor: von Bismarck (knee at 15 Bark, $0.2\ \mathrm{e}^{0.308(z-15)} + 0.8$) and Aures (loudness-dependent, $g(z) = 0.078\ (\mathrm{e}^{0.171 z}/z)\ N/\ln(0.05 N + 1)$). The Table A.2 narrow-band targets are reproduced within the clause 6 tolerance (5 % or 0.05 acum): 0.38 acum at 250 Hz, 1.00 at 1 kHz, 1.78 at 2.5 kHz, 2.82 at 4 kHz.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
 
@@ -207,7 +207,7 @@ See the [Sound Quality Metrics guide](../../perception/psychoacoustics/sound-qua
 Speech intelligibility rides on the slow intensity modulations of the speech envelope. The **modulation transfer function** $m(F)$ of a transmission channel is the ratio of received to emitted modulation depth of the octave-band intensity envelope at modulation frequency $F$; the full STI evaluates it at the 14 one-third-octave modulation frequencies 0.63–12.5 Hz in the seven octave bands 125 Hz – 8 kHz (A.2.2). From a measured impulse response the **Schroeder closed form** gives it directly (indirect method):
 
 $$
-m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ e^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
+m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ \mathrm{e}^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
 $$
 
 Steady background noise multiplies each band's $m$ by the intensity ratio (the noise term):

@@ -178,7 +178,7 @@ for velocity in (5.0, 10.0, 20.0):
 ax.semilogx(bands, hvac.flow_noise_bend(bands, flow_velocity=10.0, area=0.04,
                                         height=0.2).values, "s--",
             label="Mitred bend, 10 m/s")
-ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated L_W [dB re 1 pW]")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
 ax.legend()
 plt.show()
 ```

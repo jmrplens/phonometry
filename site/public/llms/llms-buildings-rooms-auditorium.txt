@@ -227,7 +227,7 @@ doubling; past the critical distance the reverberant field takes over and
 the curve flattens, at a level set by the room's absorption alone. Table A.1
 gives −2 dB to +10 dB as the typical range in unoccupied halls up to
 25 000 m³ (for the **single number**, the arithmetic mean of the 500 Hz and
-1 kHz octave bands), which is what the "m" of $G_m$ marks and what
+1 kHz octave bands), which is what the "m" of $G_\mathrm{m}$ marks and what
 `res.plot()` draws across the shaded band.
 
 ```python
@@ -391,7 +391,7 @@ angle each reflection arrives at. Squaring the pressure, as Equation (A.14)
 does, weights that reflection by $\cos^2 \theta$:
 
 $$
-J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_L^2(t)\ \mathrm{d}t}
+J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                      {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}.
 $$
 
@@ -401,7 +401,7 @@ accurate:
 
 $$
 J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080}
-                       \left| p_L(t) \cdot p(t) \right|\ \mathrm{d}t}
+                       \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t}
                       {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}.
 $$
 
@@ -445,7 +445,7 @@ from the response you pass first.
 
 ## 2. The modulus that a text layer deletes
 
-Equation (A.15) prints a modulus around $p_L(t) \cdot p(t)$. It is easy to
+Equation (A.15) prints a modulus around $p_\mathrm{L}(t) \cdot p(t)$. It is easy to
 lose, because `pdftotext` renders the same numerator without it, and losing
 it inverts the meaning of the quantity: a figure-of-eight microphone
 responds with opposite sign to the two sides, so two mirror-image
@@ -484,7 +484,7 @@ lateral energy after the early window against the free-field reference at
 10 m, the same reference the sound strength uses.
 
 $$
-L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_L^2(t)\ \mathrm{d}t}
+L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                   {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t}\ \text{dB}.
 $$
 
@@ -524,9 +524,9 @@ normalised cross correlation of the two ear responses,
 
 $$
 \mathrm{IACF}_{t_1,t_2}(\tau) =
-    \frac{\int_{t_1}^{t_2} p_l(t)\, p_r(t + \tau)\ \mathrm{d}t}
-         {\sqrt{\int_{t_1}^{t_2} p_l^2(t)\ \mathrm{d}t
-                \int_{t_1}^{t_2} p_r^2(t)\ \mathrm{d}t}},
+    \frac{\int_{t_1}^{t_2} p_\mathrm{l}(t)\, p_\mathrm{r}(t + \tau)\ \mathrm{d}t}
+         {\sqrt{\int_{t_1}^{t_2} p_\mathrm{l}^2(t)\ \mathrm{d}t
+                \int_{t_1}^{t_2} p_\mathrm{r}^2(t)\ \mathrm{d}t}},
 $$
 
 and Equation (B.2) takes its largest magnitude within a millisecond of
@@ -638,11 +638,11 @@ Annex C makes that a ratio, measured with the source and the microphone
 1,0 m apart at the same height, with nothing reflecting within 2 m:
 
 $$
-ST_\mathrm{Early} = 10 \lg \left[
+\mathrm{ST}_\mathrm{Early} = 10 \lg \left[
     \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t}
          {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right] \text{dB},
 \qquad
-ST_\mathrm{Late} = 10 \lg \left[
+\mathrm{ST}_\mathrm{Late} = 10 \lg \left[
     \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t}
          {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right] \text{dB}.
 $$
@@ -956,8 +956,8 @@ of 9.2.
 Every quantity in Annex A gets quoted as one number, and A.5 asks for the
 index "m" on the symbol when it is. What the "m" averages is **not** the
 same for every quantity: Table A.1 gives each row its own band set, and A.5
-prints two examples for exactly that reason, $G_m$ over the 500 Hz and 1 kHz
-octaves and $J_{\mathrm{LF}m}$ over four bands from 125 Hz.
+prints two examples for exactly that reason, $G_\mathrm{m}$ over the 500 Hz and 1 kHz
+octaves and $J_\mathrm{LFm}$ over four bands from 125 Hz.
 
 ```python
 import numpy as np

@@ -192,7 +192,7 @@ right.semilogy(f[band], whole[band], color="0.6", label="whole record")
 right.semilogy(f[band], kept[band], label="force window")
 right.semilogy(f[band], clean[band], "--", label="the pulse alone")
 right.set_ylim(1e-7, 1.0)
-right.set_xlabel("Frequency [Hz]"); right.set_ylabel("G_FF [N²·s/Hz]")
+right.set_xlabel("Frequency [Hz]"); right.set_ylabel("$G_{FF}$ [N²·s/Hz]")
 right.legend(); plt.show()
 ```
 
@@ -296,7 +296,7 @@ read 8.5 %.
 
 A longer record would need a block size or a zoom band the analyser may not
 have (8.3). The alternative the part recommends is an **exponential window**,
-$w(t) = e^{-at}$, which starts at unity and adds a known decay to the data so
+$w(t) = \mathrm{e}^{-at}$, which starts at unity and adds a known decay to the data so
 the record ends where it should. As a general guideline, the natural decay
 should still reach **25 %** or less within the record, or the correction of
 Annex A becomes too sensitive to errors in the damping estimate (8.5.2), and
@@ -323,10 +323,10 @@ to be avoided but a known quantity to be taken out, which is what Annex A does.
 ## 4. Taking the window out again (Annex A)
 
 Multiply both sides of the convolution $x(t) = \int_0^t h(\tau) f(t - \tau)\,
-\mathrm{d}\tau$ (Formula (A.1)) by $e^{-at}$, and because
-$e^{-at} = e^{-a\tau} e^{-a(t-\tau)}$ the windowed response is the windowed
+\mathrm{d}\tau$ (Formula (A.1)) by $\mathrm{e}^{-at}$, and because
+$\mathrm{e}^{-at} = \mathrm{e}^{-a\tau} \mathrm{e}^{-a(t-\tau)}$ the windowed response is the windowed
 force convolved with a windowed impulse response (Formula (A.2)). Every mode
-$A_r e^{s_r t}$ of the impulse response becomes $A_r e^{(s_r - a)t}$: the
+$A_r \mathrm{e}^{s_r t}$ of the impulse response becomes $A_r \mathrm{e}^{(s_r - a)t}$: the
 window moves each pole back by $a$ and leaves its residue alone. A damping
 ratio $\hat\zeta_r$ estimated from windowed data therefore carries the
 window's share, and Formula (A.3) removes it:
@@ -492,7 +492,7 @@ for true in (0.002, 0.005, 0.01, 0.02):
     plt.plot(100 * ratios, 100 * (np.array(a3) - true) / true, "o-",
              label=f"Formula (A.3), true damping {100 * true:g} %")
     plt.plot(100 * ratios, 100 * (np.array(exact) - true) / true, "k:")
-plt.xlabel("Damping the window adds, a/omega_r [%]")
+plt.xlabel(r"Damping the window adds, $a/\omega_r$ [%]")
 plt.ylabel("Error in the true damping [%]")
 plt.legend(); plt.show()
 ```
@@ -513,7 +513,7 @@ as a truth value raises, so a verdict is never mistaken for a number.
 
 **Double hits (6.4).** Two impacts in one record are two pulses whose
 transforms interfere: a second pulse $r$ times the first and $\tau$ later
-multiplies the spectrum by $1 + r e^{-j\omega\tau}$, which ripples between
+multiplies the spectrum by $1 + r \mathrm{e}^{-j\omega\tau}$, which ripples between
 $(1 + r)^2$ and $(1 - r)^2$ every $1/\tau$ hertz. The notches are deep only
 when the second impact is about as strong as the first, which is why the part
 says a small second impact shows as a slight ripple and moderate dips may be
@@ -575,7 +575,7 @@ _, both = vibration.energy_spectral_density(double, fs)
 band = (f > 0.0) & (f <= 400.0)
 right.semilogy(f[band], one[band], "--", color="0.6", label="one impact")
 right.semilogy(f[band], both[band], label="both: dips every 16.7 Hz")
-right.set_xlabel("Frequency [Hz]"); right.set_ylabel("G_FF [N²·s/Hz]")
+right.set_xlabel("Frequency [Hz]"); right.set_ylabel("$G_{FF}$ [N²·s/Hz]")
 right.legend(); plt.show()
 ```
 

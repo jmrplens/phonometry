@@ -246,7 +246,7 @@ $m_k = \int f^k\,G(f)\,\mathrm{d}f$:
 $$
 N_0 = \frac{1}{\pi}\frac{\sigma_v}{\sigma_x} = 2\sqrt{\frac{m_2}{m_0}},
 \qquad
-N_a = N_0\, e^{-a^2/2\sigma_x^2},
+N_a = N_0\, \mathrm{e}^{-a^2/2\sigma_x^2},
 $$
 
 where $N_a$ is the crossing rate of level $a$ (Eq. (5.196)). $N_0/2$ is the
@@ -324,7 +324,7 @@ $$
 the single number that fixes the distribution of peak heights
 (B&P Sec. 5.5.4). At $r = 1$ - narrow bandwidth data, one maximum per
 zero-crossing cycle - peaks are **Rayleigh** distributed:
-$\mathrm{Prob}[\text{peak} > a] = e^{-a^2/2\sigma_x^2}$ (Eq. (5.206)), which
+$\mathrm{Prob}[\text{peak} > a] = \mathrm{e}^{-a^2/2\sigma_x^2}$ (Eq. (5.206)), which
 is the one-in-3000 chance of a peak beyond $4\sigma$ of B&P Example 5.14.
 As $r \to 0$ ever more ripples ride on each cycle, negative maxima appear,
 and the peak heights approach the plain **Gaussian** amplitude distribution.

@@ -978,8 +978,8 @@ Both averages have a closed form, and neither is a fitted constant. The linear
 average keeps the last $\tau$ seconds of the record, so $t$ seconds after the
 cut its window still holds $(\tau - t)/\tau$ of the original mean square and the
 indication falls as $\sqrt{(\tau - t)/\tau}$, reaching a tenth at
-$t = 0.99\,\tau$. The exponential average decays in power as $e^{-t/\tau}$, so
-the indication falls as $e^{-t/2\tau}$ and reaches a tenth at
+$t = 0.99\,\tau$. The exponential average decays in power as $\mathrm{e}^{-t/\tau}$, so
+the indication falls as $\mathrm{e}^{-t/2\tau}$ and reaches a tenth at
 $t = 2\tau\ln 10 = 4.6052\,\tau$. `running_rms_decay_time` is those two
 expressions, and they land on the printed numbers:
 

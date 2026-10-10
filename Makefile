@@ -179,6 +179,16 @@ digit-grouping:
 subscripts:
 	$(PYTHON) scripts/check_subscript_slope.py
 
+# ISO 80000-2 prints the mathematical constants upright, e = 2,718 281 828 ...
+# beside pi, and an italic e is a variable. KaTeX and mathtext set a bare letter
+# italic, so the exponential is upright only where the source writes
+# \mathrm{e}, and the corpus had both, a few lines apart on one page. This
+# reads every formula of the docstrings, the three editions of the guides and
+# the errata register, and the label source of every figure and plate, and
+# fails on an exponent hung on an italic e. Static and dependency-free.
+euler-number:
+	$(PYTHON) scripts/check_euler_number.py
+
 # The blind spot of the Spanish pass, and the reason it needs a check of its
 # own. That pass ends with the decimal comma, guarded by `"$" not in s` because
 # a bare comma inside `$...$` sets with maths spacing -- but the guard tests the
@@ -692,7 +702,7 @@ check: lint security test
 	figure-annotations figure-ticks figures reports \
 	assets animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
-	snippets snippets-static claims subscripts docstring-math language-forwarding \
+	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
 	boundary-comparisons array-aliasing \

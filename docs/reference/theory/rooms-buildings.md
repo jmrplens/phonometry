@@ -34,7 +34,7 @@ $$
 E(t) = \int_t^{\infty} p^2(\tau)\ d\tau = \int_0^{\infty} p^2\ d\tau - \int_0^t p^2\ d\tau , \qquad L(t) = 10 \log_{10} \frac{E(t)}{E(0)}\ \text{dB},
 $$
 
-i.e. a reversed cumulative sum in discrete time. Backward integration cancels the random fluctuation of a single squared IR: for a purely exponential energy decay $p^2(t) = e^{-a t}$ it gives $E(t) = e^{-a t}/a$, an exactly straight line $L(t) = -(10 a / \ln 10)\ t$. Background noise flattens $E(t)$, so integration is truncated at the crossing $t_1$ of the fitted decay line with the noise level and the missing tail is compensated by an exponential with the fitted rate; without that term the finite integral systematically **underestimates** $T$.
+i.e. a reversed cumulative sum in discrete time. Backward integration cancels the random fluctuation of a single squared IR: for a purely exponential energy decay $p^2(t) = \mathrm{e}^{-a t}$ it gives $E(t) = \mathrm{e}^{-a t}/a$, an exactly straight line $L(t) = -(10 a / \ln 10)\ t$. Background noise flattens $E(t)$, so integration is truncated at the crossing $t_1$ of the fitted decay line with the noise level and the missing tail is compensated by an exponential with the fitted rate; without that term the finite integral systematically **underestimates** $T$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
@@ -49,10 +49,10 @@ Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapola
 Splitting the energy at an early/late boundary $t_\mathrm{e}$ gives the early-to-late index and the definition ratio:
 
 $$
-C_{te} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
+C_{t_\mathrm{e}} = 10 \log_{10} \frac{\int_0^{t_\mathrm{e}} p^2\ dt}{\int_{t_\mathrm{e}}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_\mathrm{e}} - 1)$ and $T_\mathrm{S} = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
+with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_\mathrm{S} = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{t_\mathrm{e}} = 10 \log_{10}(\mathrm{e}^{a t_\mathrm{e}} - 1)$ and $T_\mathrm{S} = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_bands.svg" alt="ISO 3382 per-band parameters of a synthetic room impulse response: grouped EDT, T20 and T30 bars per octave band falling from about 1.4 s at 125 Hz to 0.7 s at 4 kHz, over a second panel where C50 and C80 rise with frequency" width="92%"></picture>
 
@@ -89,11 +89,11 @@ A rectangular room reflects a point source in its walls; each reflection equals 
 
 $$
 g(t) = \sum_n A_n\ \delta(t - t_n), \qquad
-A_n = \frac{1}{4\pi r_n}\ e^{-m r_n / 2} \prod_{\text{walls}} R_q^{\,k_{q,n}}, \qquad
+A_n = \frac{1}{4\pi r_n}\ \mathrm{e}^{-m r_n / 2} \prod_{\text{walls}} R_q^{\,k_{q,n}}, \qquad
 t_n = \frac{r_n}{c},
 $$
 
-with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $e^{-m r_n/2}$ ($m$ the *intensity* attenuation constant). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
+with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $\mathrm{e}^{-m r_n/2}$ ($m$ the *intensity* attenuation constant). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
 
 The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is exact only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
 
@@ -109,7 +109,7 @@ the optional last term (about $+0.14$ dB at 20 °C) correcting a characteristic 
 
 ### Field insulation and weighted rating (ISO 16283-1, ISO 717-1)
 
-Per one-third-octave band the level difference $D = L_1 - L_2$ (energy-averaged over microphone positions, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) is normalised two ways: the standardized level difference $D_\mathrm{nT} = D + 10 \log_{10}(T/T_0)$ with $T_0 = 0.5$ s (so $D_\mathrm{nT} = D$ when $T = T_0$), and the apparent sound reduction index $R' = D + 10 \log_{10}(S/A)$ with the Sabine absorption area $A = 0.16\ V / T$, hence $R' = D + 10 \log_{10}[S T / (0.16\ V)]$.
+Per one-third-octave band the level difference $D = L_1 - L_2$ (energy-averaged over microphone positions, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) is normalised two ways: the standardized level difference $D_{\mathrm{n}T} = D + 10 \log_{10}(T/T_0)$ with $T_0 = 0.5$ s (so $D_{\mathrm{n}T} = D$ when $T = T_0$), and the apparent sound reduction index $R' = D + 10 \log_{10}(S/A)$ with the Sabine absorption area $A = 0.16\ V / T$, hence $R' = D + 10 \log_{10}[S T / (0.16\ V)]$.
 
 The single-number rating (ISO 717-1, Clause 4.4) shifts the Table 3 **reference curve** in 1 dB steps toward the measured curve until the sum of *unfavourable* deviations $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves); the rating $R_\mathrm{w}$ is the shifted reference at 500 Hz. The **spectrum adaptation terms** are $C = X_{\mathrm{A}1} - X_\mathrm{w}$ and $C_\mathrm{tr} = X_{\mathrm{A}2} - X_\mathrm{w}$ with $X_{\mathrm{A}j} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (Table 4 spectra No. 1 pink noise, No. 2 urban traffic), each rounded to an integer. The ISO 717-1 Annex C worked example ($R_\mathrm{w} = 30$, $C = -2$, $C_\mathrm{tr} = -3$, unfavourable sum 31.8 dB) is reproduced exactly.
 
@@ -121,9 +121,9 @@ The single-number rating (ISO 717-1, Clause 4.4) shifts the Table 3 **reference 
 
 Impact insulation swaps the airborne source for a standardized **tapping
 machine** and rates the receiving-room level, so the sign conventions flip. The
-standardized and normalized impact levels are $L'_{nT} = L_i - 10 \log_{10}(T/T_0)$
-(the reverberation term is *subtracted*, opposite to $D_\mathrm{nT}$) and
-$L'_n = L_i + 10 \log_{10}(A/A_0)$ with $A_0 = 10$ m² and $A = 0.16\ V/T$. The
+standardized and normalized impact levels are $L'_{\mathrm{n}T} = L_i - 10 \log_{10}(T/T_0)$
+(the reverberation term is *subtracted*, opposite to $D_{\mathrm{n}T}$) and
+$L'_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ with $A_0 = 10$ m² and $A = 0.16\ V/T$. The
 ISO 717-2 rating shifts the Table 3 reference curve until $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
 is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves); the
 *unfavourable* deviation now counts where the **measurement exceeds** the
@@ -165,7 +165,7 @@ reduction index $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) versus the
 apparent field index $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1), the
 same closed form evaluated with the facility's known $A$ or the room's measured
 $A = 0.16\ V/T$. The impact pair is the normalized laboratory level
-$L_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) versus the field $L'_n$
+$L_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) versus the field $L'_\mathrm{n}$
 (ISO 16283-2), both referenced to $A_0 = 10$ m². Before either is formed the
 receiving-room level is corrected for background noise by the energy
 subtraction $L = 10 \log_{10}(10^{L_\mathrm{sb}/10} - 10^{L_\mathrm{b}/10})$ for a 6–15 dB
@@ -176,7 +176,7 @@ façade extension (ISO 16283-3) replaces the source-room level by the level 2 m
 in front of the façade, $D_{2\mathrm{m}} = L_{1,2\mathrm{m}} - L_2$, and adds a fixed
 angle-of-incidence correction to the element sound reduction index, $-1.5$ dB
 for the 45° loudspeaker method ($R'_{45°}$) and $-3$ dB for the all-angle
-road-traffic method ($R'_{tr,s}$); all three carry the ISO 717-1 airborne
+road-traffic method ($R'_\mathrm{tr,s}$); all three carry the ISO 717-1 airborne
 single number.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_lab_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_lab.svg" alt="Plan view of an ISO 10140 laboratory transmission suite: structurally decoupled source and receiving reverberation rooms of about 59 and 51 cubic metres, the test element mounted in the 10 square metre test opening between them, a corner loudspeaker in the source room and a continuously moving microphone with a sweep radius of at least 1 m in each room" width="92%"></picture>
@@ -220,14 +220,14 @@ junction coupling length and $l_0 = 1$ m the reference coupling length. $K_{ij}$
 is the junction **vibration reduction index** (Annex E), an empirical function of
 the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$: for a rigid cross-junction
 $K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
-(corner), read at 500 Hz, and floored at $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
+(corner), read at 500 Hz, and floored at $K_{ij,\min} = 10 \log_{10}[l_\mathrm{f}\ l_0
 (1/S_i + 1/S_j)]$ (Formula 29). Two linings combine as $\max(a,b) + \min(a,b)/2$
 (Formulas 30/31). The impact counterpart (EN 12354-2, Formula 21) is the direct
-subtraction $L'_{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, with the bare-floor
+subtraction $L'_\mathrm{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, with the bare-floor
 equivalent level $L_\mathrm{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the
 covering improvement $\Delta L_\mathrm{w}$ (ISO 717-2) and the flanking correction $K$
 from Table 1. The EN 12354-1 Annex H.3 ($R'_\mathrm{w} = 52$ dB) and EN 12354-2 Annex E.3
-($L'_{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
+($L'_\mathrm{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
 model is stated to have about a 2 dB standard deviation (Clause 5).
 
 ### Absorption in enclosed spaces (EN 12354-6)
@@ -279,8 +279,8 @@ uncertainty $u$: situation **A** (laboratory characterisation) uses the
 reproducibility standard deviation $\sigma_\mathrm{R}$; situation **B** (same location,
 different teams) the in-situ $\sigma_\mathrm{situ}$; situation **C** (same location,
 operator and equipment, repeated) the repeatability $\sigma_\mathrm{r}$. The per-band and
-single-number values are tabulated for airborne $R$/$R'$/$D_\mathrm{n}$/$D_\mathrm{nT}$
-(Tables 2/3), impact $L_\mathrm{n}$/$L'_n$ (Table 4 bands, situations B/C only; Table 5
+single-number values are tabulated for airborne $R$/$R'$/$D_\mathrm{n}$/$D_{\mathrm{n}T}$
+(Tables 2/3), impact $L_\mathrm{n}$/$L'_\mathrm{n}$ (Table 4 bands, situations B/C only; Table 5
 ratings adding a situation-A estimate) and the
 covering reduction $\Delta L$ (Tables 6/7, situation A only). The expanded
 uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$ of Table 8

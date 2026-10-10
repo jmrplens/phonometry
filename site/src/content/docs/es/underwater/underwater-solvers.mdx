@@ -183,15 +183,15 @@ $$
 con superficie de presión nula en $z = 0$ y, en el fondo $z = D$,
 $\Psi(D) = 0$ para un lecho de presión nula o $\mathrm{d}\Psi/\mathrm{d}z|_{D} = 0$
 para uno rígido. Cada autofunción $\Psi_m(z)$ es una onda estacionaria en
-profundidad que viaja en distancia como $e^{\,i k_{rm} r}$ con su propio
+profundidad que viaja en distancia como $\mathrm{e}^{\,i k_{rm} r}$ con su propio
 número de onda horizontal $k_{rm}$; solo **propagan** los modos con
 $k_{rm}$ real, el resto son evanescentes y se extinguen al cabo de unas
 pocas profundidades de agua. El campo es la suma modal (Ec. 5.14),
 
 $$
-p(r, z) \simeq \frac{i\,e^{-i\pi/4}}{\rho(z_\mathrm{s})\sqrt{8\pi r}}
+p(r, z) \simeq \frac{i\,\mathrm{e}^{-i\pi/4}}{\rho(z_\mathrm{s})\sqrt{8\pi r}}
   \sum_m \Psi_m(z_\mathrm{s})\,\Psi_m(z)\,
-  \frac{e^{\,i k_{rm} r}}{\sqrt{k_{rm}}},
+  \frac{\mathrm{e}^{\,i k_{rm} r}}{\sqrt{k_{rm}}},
 $$
 
 cada modo ponderado por su excitación en la profundidad de la fuente
@@ -251,7 +251,7 @@ for m in range(4):
     axes[0].plot(res.mode_functions[m], res.mode_depths, label=f"m = {m + 1}")
 axes[0].axhline(50.0, linestyle="--")
 axes[0].invert_yaxis()
-axes[0].set(xlabel="Función modal Psi_m(z)", ylabel="Profundidad [m]")
+axes[0].set(xlabel=r"Función modal $\Psi_m(z)$", ylabel="Profundidad [m]")
 axes[0].legend()
 
 freqs = np.arange(10.0, 201.0, 1.0)
@@ -511,9 +511,9 @@ consume la ecuación del sonar y el esqueleto sobre el que se construye una
 respuesta al impulso del canal.*
 
 Una sola lista sirve para todas las frecuencias. Las amplitudes están
-normalizadas a presión unidad a 1 m, en el mismo convenio $e^{-i\omega t}$
+normalizadas a presión unidad a 1 m, en el mismo convenio $\mathrm{e}^{-i\omega t}$
 que el resto del módulo, y la búsqueda no pregunta nunca por una frecuencia:
-el tono que oye un receptor es $p(\omega) = \sum_j a_j e^{i\omega\tau_j}$, su
+el tono que oye un receptor es $p(\omega) = \sum_j a_j \mathrm{e}^{i\omega\tau_j}$, su
 pérdida $-20\lg|p(\omega)|$ en la misma escala que los otros tres métodos, y
 la respuesta al impulso de una banda es esa suma transformada. Cada amplitud
 lleva un $(-1)$ por toque en la superficie y el coeficiente del fondo por
@@ -722,11 +722,11 @@ frecuencias de sonar resulta optimista. Pasar `absorption`
 `VolumeAbsorption` que nombra su propia agua; los mismos nombres,
 argumentos y valores por defecto que
 [`seawater_absorption`](/phonometry/es/underwater/underwater-propagation/#perdida-de-propagacion))
-multiplica cada haz por $e^{-\alpha s}$ con $s$ la **longitud de arco a lo
+multiplica cada haz por $\mathrm{e}^{-\alpha s}$ con $s$ la **longitud de arco a lo
 largo de su rayo central**, que es la §3.6.2 de Jensen tal como está impresa:
 perturbar la eikonal con la velocidad del sonido compleja que implica una
 pérdida de volumen deja en pie los rayos reales y cuelga de cada uno el factor
-$e^{-\int_0^s \alpha\,ds'}$ (Ec. 3.116). No es $\alpha r$ sobre la distancia
+$\mathrm{e}^{-\int_0^s \alpha\,ds'}$ (Ec. 3.116). No es $\alpha r$ sobre la distancia
 horizontal, el atajo que la misma sección señala que «se usa en muchos modelos
 de rayos»: un trayecto a 60° es el doble de largo que la distancia que cubre,
 y los rebotes múltiples más inclinados de una guía de ondas son exactamente
@@ -863,7 +863,7 @@ frecuencia, donde la física hace que el haz sea grande comparado con el canal.
 
 La ecuación parabólica cambia el problema de contorno de Helmholtz por un
 problema de valores iniciales en distancia. Factoriza la oscilación
-saliente rápida, $p(r, z) \simeq \psi(r, z)\,e^{\,i k_0 r}/\sqrt{k_0 r}$
+saliente rápida, $p(r, z) \simeq \psi(r, z)\,\mathrm{e}^{\,i k_0 r}/\sqrt{k_0 r}$
 con un número de onda de referencia $k_0 = \omega/c_0$, y para la energía
 que viaja dentro de un ángulo pequeño respecto a la horizontal la
 envolvente obedece la **PE estándar (Tappert)** (Jensen §6.2):
@@ -877,9 +877,9 @@ $$
 
 El algoritmo **split-step de Fourier** la hace avanzar por descomposición de
 operadores, alternando dos semipasos físicos, exacto cada uno por separado: la
-difracción es una multiplicación por $e^{-i k_z^2 \Delta r / 2 k_0}$ en el
+difracción es una multiplicación por $\mathrm{e}^{-i k_z^2 \Delta r / 2 k_0}$ en el
 dominio del número de onda vertical, y la refracción una pantalla de fase
-$e^{\,i k_0 (n^2 - 1) \Delta r / 2}$ de vuelta en profundidad, con un par de
+$\mathrm{e}^{\,i k_0 (n^2 - 1) \Delta r / 2}$ de vuelta en profundidad, con un par de
 transformadas por paso de distancia. `parabolic_equation` arranca de un campo
 gaussiano adaptado a la fuente puntual y usa una transformada discreta de
 senos en profundidad, que impone por construcción la superficie y el fondo de
@@ -963,7 +963,7 @@ grazing = np.degrees(np.arccos(np.clip(modes.wavenumbers / k0, -1.0, 1.0)))
 ax_ang.bar(np.arange(1, grazing.size + 1), grazing)
 ax_ang.axhline(20.0, linestyle="--")
 ax_ang.set(xlabel="Índice de modo m",
-           ylabel="Ángulo rasante arccos(k_rm/k) [grados]")
+           ylabel=r"Ángulo rasante $\arccos(k_{rm}/k)$ [grados]")
 plt.show()
 ```
 
@@ -984,7 +984,7 @@ etiquetado como el ajuste grueso y rápido y no como el correcto. Refina y
 vuelve a calcular antes de fiarte de un número.
 
 **El paso en distancia del split-step.** El semipaso de refracción es una
-pantalla de fase $e^{\,i k_0 (n^2 - 1)\Delta r/2}$, así que debe girar la fase
+pantalla de fase $\mathrm{e}^{\,i k_0 (n^2 - 1)\Delta r/2}$, así que debe girar la fase
 bastante menos de un radián por paso, y hay que apretarlo allí donde el perfil
 tenga gradientes fuertes. La prueba honesta es la misma: divide $\Delta r$ entre
 dos y mira si el campo se mueve.

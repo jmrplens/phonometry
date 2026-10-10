@@ -88,7 +88,7 @@ suma de una onda directa y una onda reflejada ponderada por el **coeficiente de
 reflexión de onda esférica** $Q$ (Attenborough Ec. 2.40a; Salomons Ec. 3.2):
 
 $$
-p = \frac{e^{ikR_1}}{4\pi R_1} + Q\,\frac{e^{ikR_2}}{4\pi R_2},
+p = \frac{\mathrm{e}^{ikR_1}}{4\pi R_1} + Q\,\frac{\mathrm{e}^{ikR_2}}{4\pi R_2},
 $$
 
 con $R_1$ la distancia fuente-receptor y $R_2$ la distancia de la fuente
@@ -101,7 +101,7 @@ R_\mathrm{p} = \frac{Z\cos\theta - 1}{Z\cos\theta + 1},
 $$
 
 $$
-F(w) = 1 + i\sqrt{\pi}\,w\,e^{-w^2}\operatorname{erfc}(-iw), \qquad
+F(w) = 1 + i\sqrt{\pi}\,w\,\mathrm{e}^{-w^2}\operatorname{erfc}(-iw), \qquad
 w = \sqrt{\tfrac{i k R_2}{2}}\left(\cos\theta + \tfrac{1}{Z}\right).
 $$
 
@@ -109,7 +109,7 @@ Aquí $Z$ es la impedancia superficial del suelo normalizada por $\rho c$,
 $\theta$ es el ángulo de incidencia desde la normal al suelo
 ($\cos\theta = (h_\mathrm{s} + h_\mathrm{r})/R_2$) y el factor de pérdida por frontera $F(w)$
 se escribe mediante la función de error complementaria escalada
-$e^{-w^2}\operatorname{erfc}(-iw)$, es decir, la función de Faddeeva
+$\mathrm{e}^{-w^2}\operatorname{erfc}(-iw)$, es decir, la función de Faddeeva
 `scipy.special.wofz`. El segundo término de $Q$ es la *onda de suelo* que
 mantiene finito el campo en incidencia rasante, donde $R_\mathrm{p} \to -1$ y un
 modelo de onda plana predeciría silencio (Salomons Ecs. D.57, D.59, D.60).
@@ -118,7 +118,7 @@ El nivel sonoro relativo (la *atenuación en exceso*, dB respecto al campo libre
 es (Salomons Ec. 3.4):
 
 $$
-\Delta L = 20\log_{10}\!\left|\,1 + Q\,\frac{R_1}{R_2}\,e^{i k (R_2 - R_1)}\,\right|.
+\Delta L = 20\log_{10}\!\left|\,1 + Q\,\frac{R_1}{R_2}\,\mathrm{e}^{i k (R_2 - R_1)}\,\right|.
 $$
 
 ```python
@@ -142,10 +142,10 @@ modelo `delany_bazley` o `miki` de
 [`phonometry.materials`](/phonometry/es/materials/absorbers/porous-absorbers/), que modelan
 un suelo poroso semiinfinito) o se suministra directamente como una `impedance`
 compleja normalizada (un escalar, un vector por banda o un `PorousMediumResult`).
-Un valor de `impedance` directo se toma en el convenio $e^{-i\omega t}$ de
+Un valor de `impedance` directo se toma en el convenio $\mathrm{e}^{-i\omega t}$ de
 Salomons, en el que un suelo pasivo tiene $\operatorname{Im}(Z) > 0$; los
 modelos porosos de `phonometry.materials` trabajan en el convenio opuesto
-$e^{+j\omega t}$ ($\operatorname{Im}(Z) < 0$), así que todo lo obtenido de
+$\mathrm{e}^{+j\omega t}$ ($\operatorname{Im}(Z) < 0$), así que todo lo obtenido de
 ellos (una `flow_resistivity` o un
 `PorousMediumResult`) se conjuga internamente antes de entrar en las fórmulas
 de Weyl-Van der Pol.
@@ -540,7 +540,7 @@ dos llamadas posicionales de esta página no son paralelas.
 | `source_height` | float | m | ≥ 0 | $h_\mathrm{s}$ |
 | `receiver_height` | float | m | ≥ 0 | $h_\mathrm{r}$ (**antes** de la distancia) |
 | `distance` | float | m | > 0 | Distancia horizontal fuente-receptor |
-| `impedance` | array, `PorousMediumResult` o None | — | `None` | $Z$ normalizada en el convenio $e^{-i\omega t}$ |
+| `impedance` | array, `PorousMediumResult` o None | — | `None` | $Z$ normalizada en el convenio $\mathrm{e}^{-i\omega t}$ |
 | `flow_resistivity` | float o None | Pa·s/m² | `None` | $\sigma$ efectiva; alimenta el modelo poroso |
 | `model` | `"delany_bazley"` \| `"miki"` | — | `"delany_bazley"` | Prefiere `"miki"` por debajo del rango de ajuste |
 | `speed_of_sound` / `air_density` | float | m/s, kg/m³ | 343.0 / 1.205 | |

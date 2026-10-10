@@ -27,6 +27,9 @@ $\tau = 0{,}125$ s (Formula (1)) is $KB_\mathrm{F}(t)$, the *weighted
 vibration severity*, and the quantities a meter displays are its maximum
 $KB_\mathrm{Fmax}$, the maximum within each 30 s clock interval
 (*Takt*) and the r.m.s. of those clock maxima $KB_\mathrm{FTm}$ (Formula (2)).
+The list of symbols of the standard (Clause 4) prints KB upright; the
+formulas, figures and diagrams of this documentation set it italic, as
+DIN 4150-2 prints it.
 
 **Two rules of Formula (2) that are easy to miss.** A clock maximum at or
 below 0,1 enters the sum as zero but still counts in $N$, so a quiet
@@ -437,7 +440,7 @@ kb_signal(
 ) -> NDArray[np.float64]
 ```
 
-The KB signal `KB(t)` of 3.10.1.1, which is dimensionless.
+The KB signal $KB(t)$ of 3.10.1.1, which is dimensionless.
 
 The velocity is band-limited and frequency-weighted by Formula (4) and
 normalised by 1 mm/s, which is the normalisation that makes the KB signal
@@ -452,7 +455,7 @@ per second for the result to mean what the standard says.
 | `fs_hz` | Sampling frequency, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 
-**Returns:** `KB(t)`, one value per sample.
+**Returns:** $KB(t)$, one value per sample.
 
 **Raises**
 
@@ -515,7 +518,7 @@ kbf_signal(
 ) -> NDArray[np.float64]
 ```
 
-The weighted vibration severity `KB_F(t)`, Formula (1).
+The weighted vibration severity $KB_\mathrm{F}(t)$, Formula (1).
 
 The running r.m.s. is the exponential average the formula integrates, as
 the single-pole recursion Annex A draws: `y[i] = (1 - a) y[i-1] + a x[i]`
@@ -533,7 +536,7 @@ why a measurement is started before the event it is about.
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 | `time_constant_s` | The averaging time constant, in seconds. The standard fixes it at 0,125 s and the parameter exists so a comparison with another time weighting can be written down, not so a meter can use one. |
 
-**Returns:** `KB_F(t)`, one value per sample.
+**Returns:** $KB_\mathrm{F}(t)$, one value per sample.
 
 **Raises**
 
@@ -643,7 +646,7 @@ takt_maxima(
 ) -> NDArray[np.float64]
 ```
 
-The clock maxima `KB_FTi` of 3.10.1.4, one per whole clock interval.
+The clock maxima $KB_{\mathrm{FT}i}$ of 3.10.1.4, one per whole clock interval.
 
 A clock interval the record did not fill is not a clock interval: 5.1.6.4
 says the averaging time always spans a whole number of them, so a trailing
@@ -653,7 +656,7 @@ part-interval is dropped rather than scaled up.
 
 | Name | Description |
 | :--- | :--- |
-| `kbf` | The `KB_F(t)` signal (1-D). |
+| `kbf` | The $KB_\mathrm{F}(t)$ signal (1-D). |
 | `fs_hz` | Sampling frequency, in hertz. |
 | `takt_duration_s` | The clock interval, in seconds (default 30 s). |
 
@@ -671,7 +674,7 @@ part-interval is dropped rather than scaled up.
 takt_maximum_rms(maxima: ArrayLike) -> float
 ```
 
-The clock maximum r.m.s. `KB_FTm`, Formula (2).
+The clock maximum r.m.s. $KB_\mathrm{FTm}$, Formula (2).
 
 Both rules of the formula are here: a clock maximum at or below
 [`TAKT_SUPPRESSION_THRESHOLD`](/phonometry/reference/api/vibration/vibration-meter/#takt_suppression_threshold) enters the sum as zero, and the
@@ -684,7 +687,7 @@ pulls the result down instead of leaving it unchanged.
 | :--- | :--- |
 | `maxima` | The clock maxima of [`takt_maxima`](/phonometry/reference/api/vibration/vibration-meter/#takt_maxima). |
 
-**Returns:** `KB_FTm`, dimensionless. Zero for an empty input, which is the answer for a record with no whole clock interval in it.
+**Returns:** $KB_\mathrm{FTm}$, dimensionless. Zero for an empty input, which is the answer for a record with no whole clock interval in it.
 
 **Raises**
 
@@ -771,7 +774,7 @@ What a meter displays for one record (5.1.6.1).
 | Name | Description |
 | :--- | :--- |
 | `peak_velocity_mm_s` | $\vert v\vert _\mathrm{max}$, the largest absolute value of the band-limited velocity over the measuring time. |
-| `kbf` | The `KB_F(t)` signal, one value per sample. |
+| `kbf` | The $KB_\mathrm{F}(t)$ signal, one value per sample. |
 | `kbf_max` | $KB_\mathrm{Fmax}$, its maximum. |
 | `takt_maxima` | The clock maxima, one per whole clock interval. |
 | `kbf_takt_rms` | $KB_\mathrm{FTm}$ of Formula (2). |
@@ -800,7 +803,7 @@ VibrationMeterReading.plot(
 ) -> Axes
 ```
 
-Draw `KB_F(t)` with its maximum and the clock maxima on it.
+Draw $KB_\mathrm{F}(t)$ with its maximum and the clock maxima on it.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.

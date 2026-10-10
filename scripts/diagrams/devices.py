@@ -335,7 +335,7 @@ def _methods_relation(s: SVG, th: Theme, cx: float, top: float, m: _Method) -> N
     s.rect(cx - 137, top, 274, 36, "none", m.color, rx=8, dash="5,4")
     s.text(cx, top + 23, m.relation, 10, th.fg, bold=True)
     # The d of the dynamic capability index of ISO 9614, upright on the guide.
-    s.text(cx, top + 54, m.limit, 11, th.muted, upright=("L_d",))
+    s.text(cx, top + 54, m.limit, 11, th.muted, upright=("L_d", "K_A"))
 
 
 def _methods_attributes(s: SVG, th: Theme, cx: float, top: float, m: _Method) -> None:
@@ -2844,7 +2844,7 @@ def _d_silencer_iso7235(s: SVG, th: Theme) -> None:
     s.text(
         60,
         532,
-        "$D_i = L_{pI} − L_{pII}$, one third octave at a time",
+        "$D_i = L_{pII} − L_{pI}$, one third octave at a time",
         15,
         th.fg,
         anchor="start",
@@ -4041,7 +4041,14 @@ def _d_silencer_in_situ(s: SVG, th: Theme) -> None:
 
     # What the two surfaces are worth once they are read.
     s.rect(70, 420, 760, 66, th.panel, th.fg, rx=6, sw=1.6)
-    s.text(450, 448, "$D_{ts} = D_{tps} + 10 lg(S_2/S_1) + K_2 − K_1$", 18, th.fg)
+    s.text(
+        450,
+        448,
+        "$D_{ts} = D_{tps} + 10 lg(S_2/S_1) + K_2 − K_1$",
+        18,
+        th.fg,
+        upright=("D_ts",),
+    )
     s.text(
         450,
         472,
@@ -4236,13 +4243,17 @@ def _d_open_end_solid_angles(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+    # ISO 7235 prints D_td with an upright td (Annex B, Formula (B.3)) and
+    # ISO 5135 the ΔL_r with an upright r (Clause 7, Formula (1)), as the
+    # silencer-measurement guide sets them.
     s.text(
         450,
         372,
-        "D_td = 10 lg[1 + Ω / (4πf√S / c)²] dB, "
-        "which ISO 5135 prints as ΔL_r = 10 lg[1 + (c / 4πf)² (Ω / S)]",
+        "$D_{td} = 10 lg[1 + Ω / (4πf√S / c)²]$ dB, "
+        "which ISO 5135 prints as $ΔL_r = 10 lg[1 + (c / 4πf)² (Ω / S)]$",
         16,
         th.fg,
+        upright=("D_td", "ΔL_r"),
     )
     s.text(
         450,
@@ -4768,6 +4779,10 @@ def _d_in_duct_rig(s: SVG, th: Theme) -> None:
         "termination $r_a$ ≤ 0.4 at 50 Hz, ≤ 0.15 from 125 Hz",
         12,
         th.muted,
+        # BS EN ISO 5136:2009, 7.4 (PDF page 25, folio 15), prints the
+        # reflection coefficient of the anechoic termination r_a with an
+        # upright a.
+        upright=("r_a",),
     )
     s.text(
         450,

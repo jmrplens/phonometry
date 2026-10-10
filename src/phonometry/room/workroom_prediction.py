@@ -23,8 +23,8 @@ environmental correction of ISO 3744,
 
 .. math::
 
-   \Delta L_A = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad
-   S = S_0 \, 10^{(L_{WA} - L_{pA})/10}
+   \Delta L_\mathrm{A} = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad
+   S = S_0 \, 10^{(L_{W\mathrm{A}} - L_{p\mathrm{A}})/10}
 
 because the difference between the two printed emission quantities is the
 measurement surface itself, and the level in the room is the emission level
@@ -350,20 +350,20 @@ def workstation_level_increase(
 
     .. math::
 
-       \Delta L_A = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad
-       \frac{S}{S_0} = 10^{(L_{WA} - L_{pA})/10}
+       \Delta L_\mathrm{A} = 10 \lg\left(1 + \frac{4S}{A}\right) \ \text{dB}, \qquad
+       \frac{S}{S_0} = 10^{(L_{W\mathrm{A}} - L_{p\mathrm{A}})/10}
 
     The two emission quantities a machine is declared with differ by the
     measurement surface: the sound power level is the emission sound pressure
     level plus :math:`10 \lg(S/S_0)`. Put the machine in a room and the
     reverberant field adds the environmental correction of ISO 3744 on top,
     which is what Figure C.1 draws against the equivalent absorption area with
-    :math:`L_{WA} - L_{pA}` as the parameter.
+    :math:`L_{W\mathrm{A}} - L_{p\mathrm{A}}` as the parameter.
 
-    :param sound_power_level_db: :math:`L_{WA}` of the machine, in decibels.
-    :param emission_level_db: :math:`L_{pA}` at its workstation, in decibels.
+    :param sound_power_level_db: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
+    :param emission_level_db: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
     :param absorption_area_m2: :math:`A` of the room, in square metres.
-    :return: :math:`\Delta L_A`, in decibels.
+    :return: :math:`\Delta L_\mathrm{A}`, in decibels.
     :raises ValueError: For a non-finite level, a non-positive absorption
         area, or an emission level above the sound power level, which would
         put the workstation inside a measurement surface smaller than a square
@@ -392,13 +392,13 @@ def workstation_level(
 ) -> float:
     r"""The level at the machine's own workstation in the room, Annex C.
 
-    :math:`L'_{pA} = L_{pA} + \Delta L_A`, the emission value the machine was
+    :math:`L'_{p\mathrm{A}} = L_{p\mathrm{A}} + \Delta L_\mathrm{A}`, the emission value the machine was
     declared with plus what the room adds to it.
 
-    :param sound_power_level_db: :math:`L_{WA}` of the machine, in decibels.
-    :param emission_level_db: :math:`L_{pA}` at its workstation, in decibels.
+    :param sound_power_level_db: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
+    :param emission_level_db: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
     :param absorption_area_m2: :math:`A` of the room, in square metres.
-    :return: :math:`L'_{pA}`, in decibels.
+    :return: :math:`L'_{p\mathrm{A}}`, in decibels.
     :raises ValueError: As :func:`workstation_level_increase`.
     """
     return emission_level_db + workstation_level_increase(

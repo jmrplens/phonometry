@@ -22,7 +22,7 @@ coefficient `Q` (Attenborough & Van Renterghem, *Predicting Outdoor Sound*
 Eq. (3.2)):
 
 $$
-p = \frac{e^{ikR_1}}{4 \pi R_1} + Q \, \frac{e^{ikR_2}}{4 \pi R_2}
+p = \frac{\mathrm{e}^{ikR_1}}{4 \pi R_1} + Q \, \frac{\mathrm{e}^{ikR_2}}{4 \pi R_2}
 $$
 
 with $R_1$ the source-receiver distance, $R_2$ the image-source
@@ -53,7 +53,7 @@ the Faddeeva function `scipy.special.wofz`. The relative sound level (the
 "excess attenuation", dB re free field) is:
 
 $$
-\Delta L = 20 \log_{10} \left| 1 + Q \, \frac{R_1}{R_2} \, e^{i k (R_2 - R_1)} \right| \tag{Salomons Eq. 3.4}
+\Delta L = 20 \log_{10} \left| 1 + Q \, \frac{R_1}{R_2} \, \mathrm{e}^{i k (R_2 - R_1)} \right| \tag{Salomons Eq. 3.4}
 $$
 
 Limits reproduced by the implementation: an acoustically hard ground
@@ -65,13 +65,13 @@ $\Delta L$ reaches
 ($h_\mathrm{s}, h_\mathrm{r} \to 0$, $\cos\theta \to 0$) $R_\mathrm{p} \to -1$; and as
 the range grows ($R_2 \to \infty$) $|w| \to \infty$ and
 $F \to 0$. The ground impedance is taken in
-the $e^{-i \omega t}$ time convention of Salomons, in which a passive
+the $\mathrm{e}^{-i \omega t}$ time convention of Salomons, in which a passive
 ground has $\operatorname{Im}(Z) > 0$; it may be supplied directly or
 derived from the porous models of `phonometry.materials`
 ([`delany_bazley`](/phonometry/reference/api/materials/porous/#delany_bazley) / [`miki`](/phonometry/reference/api/materials/porous/#miki)),
 which model a semi-infinite porous ground whose surface impedance equals the
 characteristic impedance of the medium. The materials domain works in the
-opposite $e^{+j \omega t}$ convention ($\operatorname{Im}(Z) < 0$
+opposite $\mathrm{e}^{+j \omega t}$ convention ($\operatorname{Im}(Z) < 0$
 for a passive medium), so
 any impedance obtained from a porous model is conjugated internally before it
 enters the formulas above.
@@ -162,7 +162,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | `receiver_height` | Receiver height, in metres. |
 | `method` | `"kurze_anderson"` or `"exact"`. |
 | `thickness` | Top width `e` of a thick barrier (double diffraction), in metres; `None` for a thin screen. |
-| `ground_impedance` | Normalized ground impedance for the coherent ground model (`"exact"` only), in the $e^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$ for a passive ground); a `PorousMediumResult` is conjugated internally from the materials' $e^{+j \omega t}$ convention. |
+| `ground_impedance` | Normalized ground impedance for the coherent ground model (`"exact"` only), in the $\mathrm{e}^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$ for a passive ground); a `PorousMediumResult` is conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$ convention. |
 | `ground_flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2) for the ground model, as an alternative to `ground_impedance`. |
 | `ground_model` | Porous model for `ground_flow_resistivity`. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
@@ -363,11 +363,11 @@ ground_effect(
 Spherical-wave ground effect above a finite-impedance ground.
 
 Assembles the two-ray field
-$p = e^{ikR_1}/(4 \pi R_1) + Q \, e^{ikR_2}/(4 \pi R_2)$
+$p = \mathrm{e}^{ikR_1}/(4 \pi R_1) + Q \, \mathrm{e}^{ikR_2}/(4 \pi R_2)$
 with the spherical-wave reflection coefficient `Q` of
 [`spherical_reflection_coefficient`](/phonometry/reference/api/environment/ground-barriers/#spherical_reflection_coefficient) and reports the relative sound
 level
-$\Delta L = 20 \log_{10}\left| 1 + Q (R_1/R_2) e^{i k (R_2 - R_1)} \right|$ (Salomons Eq. (3.4)),
+$\Delta L = 20 \log_{10}\left| 1 + Q (R_1/R_2) \mathrm{e}^{i k (R_2 - R_1)} \right|$ (Salomons Eq. (3.4)),
 i.e. the level re the free field.
 
 The ground surface impedance is either supplied through `impedance` (a
@@ -384,7 +384,7 @@ of the materials domain. Exactly one of the two must be given.
 | `source_height` | Source height `hs`, in metres. |
 | `receiver_height` | Receiver height `hr`, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |
-| `impedance` | Normalized ground impedance ($e^{-i \omega t}$ convention, $\operatorname{Im}(Z) > 0$ for a passive ground), or a `PorousMediumResult` (which is conjugated internally from the materials' $e^{+j \omega t}$ convention). |
+| `impedance` | Normalized ground impedance ($\mathrm{e}^{-i \omega t}$ convention, $\operatorname{Im}(Z) > 0$ for a passive ground), or a `PorousMediumResult` (which is conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$ convention). |
 | `flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2); grassland is about `2e5` (Salomons Sec. 3.1). The porous model raises a [`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) when the lowest bands fall below its published fit range $0.01 < \rho f / \sigma < 1$ (it still extrapolates a value there). |
 | `model` | Porous model for `flow_resistivity` (`"delany_bazley"` or `"miki"`). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
@@ -508,7 +508,7 @@ $w = \sqrt{i k R_2 / 2} \, (\cos\theta + 1/Z)$ (Eq. (D.57)).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `normalized_impedance` | Ground surface impedance normalized by `rho c` (complex, per frequency or scalar), in the $e^{-i \omega t}$ time convention (a passive ground has $\operatorname{Im}(Z) > 0$). |
+| `normalized_impedance` | Ground surface impedance normalized by `rho c` (complex, per frequency or scalar), in the $\mathrm{e}^{-i \omega t}$ time convention (a passive ground has $\operatorname{Im}(Z) > 0$). |
 | `source_height` | Source height `hs` above the ground, in metres. |
 | `receiver_height` | Receiver height `hr` above the ground, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |

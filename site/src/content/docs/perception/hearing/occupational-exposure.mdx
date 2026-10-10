@@ -57,7 +57,7 @@ Describe each activity as a `hearing.Task` with its samples and duration, then
 call `hearing.task_based_exposure(tasks)`. For the Annex D welder's day below
 it returns `lex_8h` = 84.3 dB with an `expanded_uncertainty` $U = 3.2$ dB, so
 the one-sided 95 % `upper_limit` is 87.5 dB, because the default includes the
-Annex C duration term $u_{1b}$ built from each task's `duration_range`. The §1
+Annex C duration term $u_{1\mathrm{b}}$ built from each task's `duration_range`. The §1
 snippet passes `include_duration_uncertainty=False` to reproduce Annex D case a,
 where the durations are treated as exact, and that is what drops $U$ to 2.7 dB
 and the upper limit to 87.0 dB. Unstructured days use
@@ -119,7 +119,7 @@ is a judgement the report has to record.
 **How many, and taken when (Clause 9.3).** At least three measurements per
 task, and the standard recommends taking them at different times during the
 task or on different workers in the group, so that the scatter feeding
-$u_{1a}$ is real variability rather than one lucky minute. The Annex D day in
+$u_{1\mathrm{a}}$ is real variability rather than one lucky minute. The Annex D day in
 the snippet below is exactly this rule in action: welding keeps its three
 samples, while cutting/grinding has six, because the first three spanned more
 than 3 dB. Note what that buys: Eq. C.6 divides the scatter by $I(I-1)$, so it
@@ -222,7 +222,7 @@ $10\log_{10}(9.25/8)$ = 0.6 dB and $L_\mathrm{EX,8h}$ = 90.1 dB, which is higher
 four of the six individual samples. That is not an error: normalising a long
 shift to a nominal eight-hour day is *supposed* to penalise it. Get $T_\mathrm{e}$ wrong
 by a factor and the whole result moves by $10\log_{10}$ of it, which is why the
-task-based strategy carries a separate duration-uncertainty term $u_{1b}$ for
+task-based strategy carries a separate duration-uncertainty term $u_{1\mathrm{b}}$ for
 exactly this quantity.
 
 <ThemeImage
@@ -304,7 +304,7 @@ $k = 1.65$ for a **one-sided** 95 % interval (Clause 14), because a hygienist
 cares only about the *upper* bound: `res.upper_limit` = $L_\mathrm{EX,8h} + U$ is the
 value 95 % of measurements fall below, the number compared against an action
 limit. Second, the task and job methods weight the *same* spread of samples
-differently. The task sampling uncertainty $u_{1a}$ (Eq. C.6) divides the summed
+differently. The task sampling uncertainty $u_{1\mathrm{a}}$ (Eq. C.6) divides the summed
 squared deviations by $I(I-1)$ (the standard error of the mean, smaller by a
 factor $\sqrt{I}$), whereas the job/full-day sampling uncertainty $u_1$ (Eq. C.12)
 is the plain sample standard deviation with denominator $N-1$, whose contribution
@@ -316,8 +316,8 @@ level to $88.4$ before the duration normalisation; the library keeps it
 unrounded.)
 
 **What dominates the budget.** Annex C combines four sources in quadrature
-(Table C.1): the **sampling** uncertainty ($u_{1a}$/$u_1$), the **duration**
-uncertainty ($u_{1b}$, task-based only), the **instrument** ($u_2$, Table C.5)
+(Table C.1): the **sampling** uncertainty ($u_{1\mathrm{a}}$/$u_1$), the **duration**
+uncertainty ($u_{1\mathrm{b}}$, task-based only), the **instrument** ($u_2$, Table C.5)
 and the **microphone position** ($u_3$, Clause C.6). The last two are small
 and roughly fixed ($u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
 a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default),
@@ -333,7 +333,7 @@ which are also the only two the surveyor controls.
 />
 
 *Two things the figure says that the formulae do not.* First, every term is
-weighted by $c_{1a}$, the task's share of the daily energy, so the budget
+weighted by $c_{1\mathrm{a}}$, the task's share of the daily energy, so the budget
 follows the dose rather than the clock: cutting and grinding is 1.5 h of the
 eight and carries **91 %** of the variance, welding's five hours carry 9 %, and
 the quiet planning task carries nothing measurable. Second, "the sampling term
@@ -341,9 +341,9 @@ dominates" is a rule of thumb, not an identity. With the default personal
 exposimeter the task sampling term overtakes the instrument term only once the
 sample standard deviation exceeds $1.5\sqrt{I}$ (about 3.7 dB at six samples),
 and in this Annex D day it does not: cutting and grinding scatters by 3.0 dB
-over six samples, so $u_{1a} = 1.2$ dB against $u_2 = 1.5$ dB. The largest
+over six samples, so $u_{1\mathrm{a}} = 1.2$ dB against $u_2 = 1.5$ dB. The largest
 single segment here is in fact the **duration** of that short, loud task,
-because $c_{1b} = 4.34\,c_{1a}/\bar{T}_m$ grows as the task shortens, so a
+because $c_{1\mathrm{b}} = 4.34\,c_{1\mathrm{a}}/\bar{T}_m$ grows as the task shortens, so a
 $\pm 0.5$ h uncertainty on a 1.5 h task costs more than either the sampling or
 the instrument term.
 
@@ -407,7 +407,7 @@ derived on the [Theory](/phonometry/reference/theory/environment-transport/) pag
 | `effective_duration_hours` | job / full-day | float | h | $> 0$ | Effective working-day duration $T_\mathrm{e}$ |
 | `instrument` | all | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (default) | Selects $u_2$ (Table C.5) |
 | `u3` | all | float | dB | default `1.0` | Microphone-position uncertainty (Clause C.6) |
-| `include_duration_uncertainty` | task | bool | — | default `True` | `False` omits the $(c_{1b}u_{1b})^2$ term (Annex D case a) |
+| `include_duration_uncertainty` | task | bool | — | default `True` | `False` omits the $(c_{1\mathrm{b}}u_{1\mathrm{b}})^2$ term (Annex D case a) |
 | `n_workers` / `sample_duration_hours` | job | int / float | — / h | default `None` | Table 1 cumulative-duration check |
 | `warn` | all | bool | — | default `True` | Emit `OccupationalExposureWarning` for the sampling advisories |
 
@@ -442,7 +442,7 @@ displayed, with a PASS/FAIL verdict against the limit value. A printed note
 records that the limit value applies to the *effective* exposure, with the
 attenuation of the worn hearing protectors taken into account, which the
 measured $L_\mathrm{EX,8h}$ does not include. `verbose=True` adds the per-task
-Annex C uncertainty columns ($u_{1a}$, $u_{1b}$, $u_2$), and `language="es"`
+Annex C uncertainty columns ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$), and `language="es"`
 renders the Spanish fiche (the vocabulary of the Spanish transposition,
 RD 286/2006: *nivel de exposición diario equivalente*, *valor límite de
 exposición*, with comma decimals).

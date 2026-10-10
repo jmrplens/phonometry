@@ -457,11 +457,11 @@ def epnl_from_pnlt(
 
        \mathrm{EPNL} = 10 \cdot \log_{10}\left( \sum_{k_\mathrm{F}..k_\mathrm{L}}
        10^{\mathrm{PNLT}(k)/10} \cdot \Delta t(k) \right)
-       - 10 \cdot \log_{10}(T_0)
+       - 10 \cdot \log_{10}(\mathrm{t}_0)
 
     with the
     10 dB-down integration limits about the maximum ``PNLTM``. The exact
-    :math:`-10 \cdot \log_{10}(T_0)` form is used rather than the Annex's rounded
+    :math:`-10 \cdot \log_{10}(\mathrm{t}_0)` form is used rather than the Annex's rounded
     constant 13 for
     uniform 0.5 s records (difference 0.0103 dB); the ETM Table 4-4 integrated
     reference reproduces the exact form to five decimals.

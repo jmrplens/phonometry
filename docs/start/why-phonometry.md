@@ -33,7 +33,7 @@ different questions:
 | What it measures | The standard's Fast/Slow/Impulse level | $L_{\mathrm{eq},\tau}$, energy per interval |
 
 A pole on the negative real axis corresponds to a decaying exponential impulse
-response ($h(t) \propto e^{-t/\tau}$), exactly what "exponential time
+response ($h(t) \propto \mathrm{e}^{-t/\tau}$), exactly what "exponential time
 weighting" means: past events are forgotten exponentially. An implementation
 that instead accumulates energy and resets every $\tau$ seconds has built
 the block integrator, whatever it is called, and one that puts the pole on
@@ -44,11 +44,11 @@ the measurement's nature.
 That equation is also where the reference numbers of the next section come
 from, which is worth doing once rather than taking Table 4 on faith. Integrate
 it from rest over a burst of duration $T_\mathrm{b}$ and the envelope reaches
-$(1-e^{-T_\mathrm{b}/\tau})$ of the steady value the same tone would eventually
+$(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ of the steady value the same tone would eventually
 produce, so the maximum time-weighted level relative to steady state is
 
 $$
-\delta_{\text{ref}} = 10\lg\!\left(1 - e^{-T_\mathrm{b}/\tau}\right)
+\delta_{\text{ref}} = 10\lg\!\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)
 $$
 
 which is IEC 61672-1:2013 Equation (7). With $\tau_\mathrm{F} = 0.125$ s that
@@ -135,7 +135,7 @@ level, 1.0 dB above the target.
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential.webm)
 
-*The exponential trace is flat because $10\lg(1-e^{-T_\mathrm{b}/\tau})$
+*The exponential trace is flat because $10\lg(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$
 contains $T_\mathrm{b}$ and nothing about the clock; the block trace, at this fixed
 duration, is a picture of the alignment and nothing else. Both readings are computed here
 with `time_weighting(x, fs, mode="fast")` and with `leq` over consecutive

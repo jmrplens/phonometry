@@ -206,7 +206,7 @@ to $\mathrm{PNLTM} - 10$ on each side) and normalises to 10 s:
 
 $$
 \mathrm{EPNL} = 10\log_{10}\!\Big(\sum_{k=k_\mathrm{F}}^{k_\mathrm{L}} 10^{\mathrm{PNLT}(k)/10}\,\Delta t(k)\Big)
-- 10\log_{10} T_0, \qquad T_0 = 10\ \mathrm{s},
+- 10\log_{10} \mathrm{t}_0, \qquad \mathrm{t}_0 = 10\ \mathrm{s},
 $$
 
 so $\mathrm{EPNL} = \mathrm{PNLTM} + D$ with the duration correction $D$.
@@ -1417,7 +1417,7 @@ source with a **noise hemisphere**: one-third-octave-band sound pressure levels
 on a spherical grid of azimuth $\varphi$ and polar angle $\theta$, measured at
 a fixed **60 m** reference distance under ICAO reference atmospheric
 conditions. Placing that source at a receiver adds the propagation adjustment
-$\Delta L_p = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$ ($+\ \Delta L_\mathrm{d}$).
+$\Delta L_\mathrm{p} = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$ ($+\ \Delta L_\mathrm{d}$).
 
 This page covers the source and propagation primitives, the flight-condition
 interpolation across a hemisphere database, the hover/idle source derivation

@@ -20,7 +20,7 @@ record (8.6). This module holds those pieces and reuses the FRF machinery of
 
 **Spectra.** The records are sampled at `fs` and transformed with the
 discrete Fourier transform scaled by the sampling interval,
-$X(f_k) = \Delta t \sum_n x_n e^{-j 2\pi k n / N}$, which for a transient
+$X(f_k) = \Delta t \sum_n x_n \mathrm{e}^{-j 2\pi k n / N}$, which for a transient
 wholly inside the record samples its continuous Fourier transform (8.3). The
 force energy spectral density is $G_{FF} = 2 \lvert F(f) \rvert^2$, in
 N²·s/Hz: the power spectral density of 3.3, $2 \lvert F \rvert^2 / T$,
@@ -41,7 +41,7 @@ compliance) and is converted to mobility with [`.convert_frf`](/phonometry/refer
 **Windows (8.5).** The *force window* has unity gain over the part of the
 record that holds the force pulse and its filter response and sets the rest to
 exactly zero (8.5.1). The *exponential window*
-$w(t) = e^{-a t}$ starts at unity and adds a known decay to the data
+$w(t) = \mathrm{e}^{-a t}$ starts at unity and adds a known decay to the data
 (8.3 a), 8.5.2). Applied to force and response alike, it replaces every pole
 $s_r$ of the impulse response by $s_r - a$ (Annex A, Formula
 (A.2)), so a mode appears more damped than it is, and Formula (A.3) takes the
@@ -510,7 +510,7 @@ transforms of the pulses tend to cancel at certain frequencies and cut
 sharp notches into the force spectrum (Figure 5), where the low
 signal-to-noise ratio spoils the mobility. For two pulses of the same
 shape, the second $r$ times the first and $\tau$ later, the
-spectrum is the single pulse's times $1 + r e^{-j\omega\tau}$: it
+spectrum is the single pulse's times $1 + r \mathrm{e}^{-j\omega\tau}$: it
 ripples with a period of $1/\tau$ in frequency between
 $1 + r$ and $1 - r$, so the notches are deep only when the
 second impact is about as strong as the first. That is why 6.4 says a small
@@ -699,7 +699,7 @@ exponential_window(
 ) -> np.ndarray
 ```
 
-The exponential window of 8.5.2: $w(t) = e^{-a t}$.
+The exponential window of 8.5.2: $w(t) = \mathrm{e}^{-a t}$.
 
 The window has an initial value of unity at the start of the record and
 decreases exponentially towards its end, adding a known amount of
@@ -716,7 +716,7 @@ damping away again.
 | `fs` | Sample rate, in Hz. |
 | `decay_rate_per_s` | Decay rate `a`, in 1/s (>= 0; 0 is no window). [`exponential_decay_rate`](/phonometry/reference/api/vibration/impact-mobility/#exponential_decay_rate) finds the rate that ends the record at a stated value. |
 
-**Returns:** The window, one value per sample, $e^{-a n / f_s}$.
+**Returns:** The window, one value per sample, $\mathrm{e}^{-a n / f_s}$.
 
 **Raises**
 
@@ -1551,7 +1551,7 @@ The mode with the window taken out, of kind `kind` (Annex A).
 
 The pole is moved back by the decay rate, $p + a$, and the
 residue and direct term are kept: the window multiplies the impulse
-response $R e^{p t}$ by $e^{-a t}$, which changes the pole
+response $R \mathrm{e}^{p t}$ by $\mathrm{e}^{-a t}$, which changes the pole
 and nothing else (Formula (A.2)).
 
 **Parameters**

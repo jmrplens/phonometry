@@ -379,7 +379,7 @@ for category in ("1", "2", "3"):
         ax.plot(slopes,
                 [a_weighted(environment.road_propulsion_noise(category, speed, road_slope_percent=s)) - flat
                  for s in slopes], style, label=f"Category {category}, {speed:g} km/h")
-ax.set_xlabel("Road road_slope_percent s [%]")
+ax.set_xlabel("Road slope s [%]")
 ax.set_ylabel("Propulsion-noise correction [dB(A)]")
 ax.legend(fontsize="small")
 plt.show()

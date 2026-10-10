@@ -152,8 +152,8 @@ ax_sex.legend()
 res = [hearing.age_threshold(a, "male", 0.5) for a in ages]
 su = np.array([r.spread_upper[i] for r in res])
 sl = np.array([r.spread_lower[i] for r in res])
-ax_spread.plot(ages, su, "-", label="s_u")
-ax_spread.plot(ages, sl, "--", label="s_l")
+ax_spread.plot(ages, su, "-", label=r"$s_\mathrm{u}$")
+ax_spread.plot(ages, sl, "--", label=r"$s_\mathrm{l}$")
 ax_spread.axvline(70.0, linestyle=":")      # solo informativo por encima de aquí
 ax_spread.legend()
 plt.show()

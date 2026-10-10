@@ -496,7 +496,7 @@ ASTM E413.
   el cerramiento del edificio medido según ISO 16283-3, previsto según
   EN 12354-3 y radiando al exterior según EN 12354-4.
 - [Código Técnico de la Edificación (CTE DB-HR)](/phonometry/es/buildings/insulation/spanish-building-code/):
-  las magnitudes globales $R_\mathrm{A}$, $R_\mathrm{A,tr}$, $D_\mathrm{nT,A}$ y $D_{2\mathrm{m,nT,Atr}}$ del
+  las magnitudes globales $R_\mathrm{A}$, $R_\mathrm{A,tr}$, $D_{\mathrm{n}T,\mathrm{A}}$ y $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ del
   DB HR, las tablas de exigencias del apartado 2 y la corrección por tamaño de
   ventana.
 

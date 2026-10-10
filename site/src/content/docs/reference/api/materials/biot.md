@@ -18,7 +18,7 @@ and it predicts **three** waves in an isotropic porous layer, two compressional
 and one shear (Allard & Atalla, *Propagation of Sound in Porous Media* 2e,
 chapter 6).
 
-This module implements that theory in the $e^{+j \omega t}$ convention
+This module implements that theory in the $\mathrm{e}^{+j \omega t}$ convention
 of the rest of the package, exactly as printed:
 
 * **Elastic coefficients** `P`, `Q` and `R` for the usual case of a
@@ -326,7 +326,7 @@ with the bulk modulus of the pore fluid.
 
 | Name | Description |
 | :--- | :--- |
-| `shear_modulus` | Complex shear modulus `N` of the frame, in Pa ($\operatorname{Im}(N) \ge 0$ for a lossy frame in the $e^{+j \omega t}$ convention). |
+| `shear_modulus` | Complex shear modulus `N` of the frame, in Pa ($\operatorname{Im}(N) \ge 0$ for a lossy frame in the $\mathrm{e}^{+j \omega t}$ convention). |
 | `poisson_ratio` | Poisson coefficient `nu` of the frame ($-1 < \nu < 0.5$). |
 
 **Returns:** The complex bulk modulus `Kb` of the frame in vacuum, in Pa.

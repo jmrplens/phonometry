@@ -650,7 +650,7 @@ the grade-2 one of section 1: the cost of the grade is mostly time.
 | `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
 | `air_absorption_coefficient` | float or 1D array | dB/m | default `None` | The $C_3$ air-absorption term; supplied, not computed |
 | `sigma_omc` | float | dB | default `0.0` | Operating and mounting standard deviation, clause 10.5 |
-| `coverage_factor` | float | — | default `2.0` | $k$ in $U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\text{omc}^2}$ |
+| `coverage_factor` | float | — | default `2.0` | $k$ in $U = k\sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ |
 
 The last two are the whole uncertainty story, and the default hides it: left
 alone, `sigma_omc = 0` claims a perfectly repeatable installation and the fiche

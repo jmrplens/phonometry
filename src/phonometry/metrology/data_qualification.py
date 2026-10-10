@@ -42,7 +42,7 @@ the geometric moments
   :math:`2\sqrt{m_2 / m_0}` with the plain frequency moments
   :math:`m_k = \int f^k G \, df`; twice the record's *apparent frequency*;
 * the expected number of crossings of level ``a``,
-  :math:`N_a = N_0 e^{-a^2 / (2\sigma_x^2)}` (Eq. (5.196));
+  :math:`N_a = N_0 \mathrm{e}^{-a^2 / (2\sigma_x^2)}` (Eq. (5.196));
 * the expected number of maxima per unit time,
   :math:`M = (1/2\pi)(\sigma_a / \sigma_v) = \sqrt{m_4 / m_2}`
   (Eq. (5.211));
@@ -58,7 +58,7 @@ the geometric moments
   .. math::
 
      P[\text{peak} > z] = Q(z / \epsilon)
-     + r\, e^{-z^2 / 2} \left[ 1 - Q(rz / \epsilon) \right]
+     + r\, \mathrm{e}^{-z^2 / 2} \left[ 1 - Q(rz / \epsilon) \right]
 
   where ``Q`` is the standardized normal exceedance (Eq. (5.250)).
 
@@ -964,14 +964,14 @@ class LevelCrossingResult(OwnsArrays):
     All rates count crossings with *both* slopes per unit time, following
     B&P Sec. 5.5.1; the rate of zero crossings is twice the record's
     apparent frequency. The Rice curve
-    :math:`N_a = N_0 e^{-a^2 / (2\sigma^2)}` (Eq. (5.196)) holds for
+    :math:`N_a = N_0 \mathrm{e}^{-a^2 / (2\sigma^2)}` (Eq. (5.196)) holds for
     Gaussian records; systematic departures of the measured rates from
     it are themselves a useful non-Gaussianity screen (B&P Sec. 5.5.1.1).
 
     :ivar levels: Crossing levels ``a``, in signal units (about the
         removed record mean).
     :ivar rates: Measured crossing rates per level, in 1/s.
-    :ivar rice_rates: Rice expectation :math:`N_0 e^{-a^2/(2\sigma^2)}`, 1/s.
+    :ivar rice_rates: Rice expectation :math:`N_0 \mathrm{e}^{-a^2/(2\sigma^2)}`, 1/s.
     :ivar zero_crossing_rate: Measured zero-crossing rate ``N0``, in 1/s.
     :ivar zero_crossing_rate_rice: Expected
         :math:`N_0 = 2\sqrt{m_2/m_0}` from the record's Welch
@@ -1044,7 +1044,7 @@ def level_crossing_rate(
     zero-crossing rate
     :math:`N_0 = (1/\pi)(\sigma_v/\sigma_x) = 2\sqrt{m_2/m_0}`
     (Eq. (5.195)) and the level dependence
-    :math:`N_a = N_0 e^{-a^2/(2\sigma_x^2)}` (Eq. (5.196)), with the
+    :math:`N_a = N_0 \mathrm{e}^{-a^2/(2\sigma_x^2)}` (Eq. (5.196)), with the
     spectral moments taken from the record's own Welch autospectrum. For
     low-pass white noise of bandwidth ``B`` the expectation is
     :math:`N_0 = 2B/\sqrt{3}` -- an apparent frequency of ``0.58 B`` (B&P
@@ -1118,9 +1118,9 @@ def _rice_peak_exceedance(
     r""":math:`P[\text{peak} > z]` for standardized peak height ``z``
     (B&P Eq. (5.223)).
 
-    :math:`Q(z/\epsilon) + r\, e^{-z^2/2} \left[ 1 - Q(rz/\epsilon) \right]`
+    :math:`Q(z/\epsilon) + r\, \mathrm{e}^{-z^2/2} \left[ 1 - Q(rz/\epsilon) \right]`
     with :math:`\epsilon = \sqrt{1 - r^2}`: the Rayleigh exceedance
-    :math:`e^{-z^2/2}` for narrow bandwidth data (:math:`r \to 1`, B&P
+    :math:`\mathrm{e}^{-z^2/2}` for narrow bandwidth data (:math:`r \to 1`, B&P
     Eq. (5.206)) and the Gaussian exceedance for :math:`r \to 0`
     (Eq. (5.221)).
     """
@@ -1140,8 +1140,8 @@ def _rice_peak_density(
 ) -> NDArray[np.float64]:
     r"""Peak probability density ``w(z)`` (B&P Eq. (5.217)).
 
-    :math:`\frac{\epsilon}{\sqrt{2\pi}} e^{-z^2/(2\epsilon^2)}
-    + r z\, e^{-z^2/2} \left[ 1 - Q(rz/\epsilon) \right]`: the mixture
+    :math:`\frac{\epsilon}{\sqrt{2\pi}} \mathrm{e}^{-z^2/(2\epsilon^2)}
+    + r z\, \mathrm{e}^{-z^2/2} \left[ 1 - Q(rz/\epsilon) \right]`: the mixture
     between the standardized Gaussian (:math:`r = 0`, Eq. (5.221)) and Rayleigh
     (:math:`r = 1`, Eq. (5.222)) densities; minus the derivative of
     :func:`_rice_peak_exceedance`.
@@ -1356,8 +1356,8 @@ class PeakStatisticsResult(OwnsArrays):
         factor.
 
         B&P Eq. (5.223): the probability that a maximum chosen at random
-        exceeds ``z`` record RMS units. :math:`e^{-z^2/2}` for narrow
-        bandwidth data -- :math:`e^{-8} = 0.00033` at :math:`z = 4`, B&P
+        exceeds ``z`` record RMS units. :math:`\mathrm{e}^{-z^2/2}` for narrow
+        bandwidth data -- :math:`\mathrm{e}^{-8} = 0.00033` at :math:`z = 4`, B&P
         Example 5.14 -- and the Gaussian exceedance in the wide
         bandwidth limit.
 

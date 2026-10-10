@@ -12,16 +12,16 @@ situation-invariant junction descriptor that feeds straight into the
 
 **Vibration reduction index (Part 1, Clause 3.9).** From the *direction
 averaged* velocity level difference
-:math:`\overline{D}_{v,ij} = \frac{1}{2}(D_{v,ij} + D_{v,ji})` (Formula (11))
+:math:`\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})` (Formula (11))
 this module forms, per one-third-octave band,
-:math:`K_{ij} = \overline{D}_{v,ij} + 10 \log_{10}(l_{ij} / \sqrt{a_i a_j})`
+:math:`K_{ij} = \overline{D}_{\mathrm{v},ij} + 10 \log_{10}(l_{ij} / \sqrt{a_i a_j})`
 (Formula (13)) with the common-edge
 junction length ``lij`` and the equivalent absorption lengths ``ai``, ``aj`` of
 the two elements. For lightweight, well-damped elements the equivalent
 absorption length collapses to the element area (:math:`a_j = S_j / l_0`,
 :math:`l_0 = 1` m,
 Clause 3.8 Note 3) and Formula (13) reduces to Formula (14),
-:math:`K_{ij} = \overline{D}_{v,ij} + 10 \log_{10}(l_{ij} / \sqrt{S_i S_j})`.
+:math:`K_{ij} = \overline{D}_{\mathrm{v},ij} + 10 \log_{10}(l_{ij} / \sqrt{S_i S_j})`.
 Because it uses the direction average,
 ``Kij`` is symmetric (:math:`K_{ij} = K_{ji}`).
 
@@ -206,7 +206,7 @@ def velocity_level_difference(
     source_level: Sequence[float] | np.ndarray,
     receive_level: Sequence[float] | np.ndarray,
 ) -> np.ndarray:
-    r"""Velocity level difference :math:`D_{v,ij} = L_{v,i} - L_{v,j}` (Formula (8)).
+    r"""Velocity level difference :math:`D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},j}` (Formula (8)).
 
     :param source_level: Average velocity level ``Lv,i`` of the excited
         element, in dB, per band.
@@ -232,7 +232,7 @@ def direction_averaged_level_difference(
 ) -> np.ndarray:
     r"""Direction-averaged velocity level difference (Formula (11)).
 
-    :math:`\overline{D}_{v,ij} = \frac{1}{2}(D_{v,ij} + D_{v,ji})` with
+    :math:`\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})` with
     ``Dv,ij`` measured exciting element
     ``i`` and ``Dv,ji`` exciting element ``j``. The average makes the derived
     ``Kij`` symmetric.
@@ -579,13 +579,13 @@ def vibration_reduction_index(
 ) -> VibrationReductionResult:
     r"""Vibration reduction index ``Kij`` (Formula (13), or simplified (14)).
 
-    :math:`K_{ij} = \overline{D}_{v,ij} + 10 \log_{10}(l_{ij} / \sqrt{a_i a_j})`.
+    :math:`K_{ij} = \overline{D}_{\mathrm{v},ij} + 10 \log_{10}(l_{ij} / \sqrt{a_i a_j})`.
     When the structural reverberation
     times and the frequencies are supplied, the equivalent absorption lengths
     ``ai``, ``aj`` come from Formula (12) and the full Formula (13) is used.
     Otherwise the lightweight, well-damped simplification
     :math:`a_j = S_j / l_0` (:math:`l_0 = 1` m) applies and Formula (14),
-    :math:`K_{ij} = \overline{D}_{v,ij} + 10 \log_{10}(l_{ij} / \sqrt{S_i S_j})`,
+    :math:`K_{ij} = \overline{D}_{\mathrm{v},ij} + 10 \log_{10}(l_{ij} / \sqrt{S_i S_j})`,
     is used.
 
     :param velocity_level_difference: Direction-averaged velocity level
@@ -1051,7 +1051,7 @@ def strong_coupling_satisfied(
     r"""Strong-coupling applicability check (Part 1, Formula (15)).
 
     ``Kij`` is relevant only where
-    :math:`\overline{D}_{v,ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}`.
+    :math:`\overline{D}_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}`.
 
     :param velocity_level_difference: Direction-averaged ``D̄v,ij`` per band,
         in dB.

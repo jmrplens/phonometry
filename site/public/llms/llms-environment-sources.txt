@@ -1,11 +1,11 @@
 # phonometry: Environmental sources
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/environment/sources/index.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/
+<!-- source: docs/environment/sources/index.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/
 
 # Environmental sources
 
@@ -17,10 +17,10 @@ rotor centre. The height, the band range and the directivity are part of the
 definition, not details of the measurement, which is why an emission method is
 a standard in its own right and not a preliminary step. What every emission
 page here produces is that descriptor, in the form
-[Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)
+[Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)
 consumes.
 
-[CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/)
+[CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/)
 implements section 2.2 of Annex II to Directive 2002/49/EC in its consolidated
 text: Directive (EU) 2015/996 as corrected by the OJ L 5 corrigendum of 2018,
 which restores the 63 Hz to 8 kHz octave range the original clause contradicted,
@@ -33,7 +33,7 @@ mopeds, motorcycles) a rolling and a propulsion term are energy-summed,
 corrected for pavement, air temperature, studded tyres and gradient, adjusted
 near junctions, and turned into a directional power per metre of source line.
 
-[CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/)
+[CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/)
 implements section 2.3 on the same pattern, but with **two** equivalent source
 lines, at 0,5 m and at 4,0 m above the rail head, because the physical sources
 radiate from different heights. It starts one step further back than the road
@@ -44,7 +44,7 @@ arithmetic. Impact noise at joints and switches, curve squeal, traction,
 aerodynamic noise above 200 km/h and a bridge term are each allocated to the
 height they radiate from.
 
-[Railway rolling-stock noise: the ISO 3095 type test](https://jmrplens.github.io/phonometry/environment/sources/rolling-stock-noise/)
+[Railway rolling-stock noise: the ISO 3095 type test](https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/)
 is where the railway source is **measured** rather than predicted: the noise of
 one vehicle, standing, passing at constant speed, starting and braking, with
 the microphone positions and the averaging ISO 3095:2013 fixes. Its
@@ -53,7 +53,7 @@ roughness EN 15610 measures and whose decay rates EN 15461 measures. Its
 roughness limit is, band for band from 0,4 m to 3,15 mm, the rail roughness of
 class E on the CNOSSOS page, the class Appendix G names after ISO 3095.
 
-[Road-surface noise: the statistical pass-by method](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/)
+[Road-surface noise: the statistical pass-by method](https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/)
 is the other page here that measures rather than predicts, and the only one
 that measures what a **road surface** contributes rather than what a source
 emits. ISO 11819-1 records the maximum level and the speed of
@@ -62,7 +62,7 @@ logarithm of speed, reads it at the reference speeds of its Table 1 and adds the
 three vehicle sound levels into the Statistical Pass-By Index, in many cases
 quoted as a difference from a reference surface.
 
-[Wind-turbine noise: sound power and tonal audibility](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/)
+[Wind-turbine noise: sound power and tonal audibility](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/)
 is IEC 61400-11, where the descriptor is **measured** rather than tabulated.
 With the microphone on a ground board at the horizontal distance R0 = H + D/2,
 the apparent sound power per band follows from the measured pressure level and
@@ -72,7 +72,7 @@ speed. The same page carries the tonal audibility that decides whether a
 blade-passing, gearbox or generator tone stands above its masking noise, and
 ends in a `.report()` assessment fiche.
 
-[Wind turbine sound at a dwelling](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/)
+[Wind turbine sound at a dwelling](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/)
 is IEC TS 61400-11-2, the other end of the same path: what arrives at a
 neighbour's house several hundred metres away. It sorts weeks of intervals by
 wind speed and direction, averages each bin with its uncertainty, takes off
@@ -89,25 +89,25 @@ propagation model: its index ranks surfaces.
 
 ## Pages in this section
 
-- [CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/):
+- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/):
   the rolling and propulsion sound power per vehicle category, its pavement,
   temperature, studded-tyre, gradient and junction corrections, and the
   directional power per metre of source line.
-- [Road-surface noise: the statistical pass-by method](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/):
+- [Road-surface noise: the statistical pass-by method](https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/):
   the ISO 11819-1 regression of each vehicle category on speed, the vehicle
   sound levels at the Table 1 reference speeds, the index and its difference
   from a reference surface.
-- [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/):
+- [CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/):
   roughness and transfer functions to the two equivalent source lines at 0,5 m
   and 4,0 m, with the impact, squeal, traction, aerodynamic and bridge terms.
-- [Railway rolling-stock noise: the ISO 3095 type test](https://jmrplens.github.io/phonometry/environment/sources/rolling-stock-noise/):
+- [Railway rolling-stock noise: the ISO 3095 type test](https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/):
   the four tests of a railway vehicle, the pass-by level and the transit
   exposure level, the reference track by EN 15610 and EN 15461, Annex C and the
   uncertainty budget of Annex G.
-- [Wind-turbine noise: sound power and tonal audibility](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/):
+- [Wind-turbine noise: sound power and tonal audibility](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/):
   the IEC 61400-11 apparent sound power referred to the rotor centre, its
   wind-speed binning and the tonal-audibility chain, with the assessment fiche.
-- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/):
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/):
   the wind speed between heights, the bin averages and background correction,
   the low frequency level indoors, the emergence, the amplitude modulation
   rating and the rating level at the receptor.
@@ -116,9 +116,9 @@ propagation model: its index ranks surfaces.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the path model every descriptor here is built to feed.
-- [Sound power and intensity](https://jmrplens.github.io/phonometry/devices/emission/): how a machine
+- [Sound power and intensity](https://docs.jmrp.io/phonometry/devices/emission/): how a machine
   that is not a vehicle is characterised.
 
 ## What this section does not cover
@@ -127,11 +127,11 @@ Two of the four CNOSSOS sources are missing, by omission rather than
 oversight: the **industrial source** of section 2.4 and Appendix H is not
 implemented, and neither is the **aircraft source** of sections 2.6 and 2.7:
 aircraft noise is covered by the ICAO and ECAC methods in [Aircraft
-noise](https://jmrplens.github.io/phonometry/aircraft/), which is a different family of models entirely.
+noise](https://docs.jmrp.io/phonometry/aircraft/), which is a different family of models entirely.
 Neither is the **CNOSSOS propagation method** of section 2.5: it differs from
 the ISO 9613-2 model this library implements, so pairing these source powers
 with [Outdoor Sound
-Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) does
+Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) does
 not give a CNOSSOS result. Inside the two methods that are here, three gaps
 come from the source documents themselves: the open vehicle category 5 has no
 coefficients in Appendix F and is not modelled, rail roughness classes N and B
@@ -143,8 +143,8 @@ are treated by the industrial method, so they are not here either.
 ---
 
 
-<!-- source: docs/environment/sources/cnossos-road-emission.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/
+<!-- source: docs/environment/sources/cnossos-road-emission.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/
 
 # CNOSSOS-EU road traffic source emission
 
@@ -458,9 +458,9 @@ split into point sources is declared out of scope by the method itself.
 
 ## See also
 
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the ISO 9613-2 chain that
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the ISO 9613-2 chain that
   carries a source power to a receiver.
-- [Environmental noise levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$ and
+- [Environmental noise levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$ and
   $L_\mathrm{night}$ indicators the resulting maps are drawn for.
 
 ## References
@@ -504,8 +504,8 @@ table):
 ---
 
 
-<!-- source: docs/environment/sources/cnossos-rail-emission.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/
+<!-- source: docs/environment/sources/cnossos-rail-emission.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/
 
 # CNOSSOS-EU railway source emission
 
@@ -931,9 +931,9 @@ such as depots, stations and loudspeakers, are treated by the industrial method.
 
 ## See also
 
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the
   ISO 9613-2 chain that carries a source power to a receiver.
-- [Environmental noise levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the
+- [Environmental noise levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the
   $L_\mathrm{den}$ and $L_\mathrm{night}$ indicators the resulting maps are drawn for.
 
 ## References
@@ -975,8 +975,8 @@ Appendix G, in the consolidated text. Three instruments read together:
 ---
 
 
-<!-- source: docs/environment/sources/rolling-stock-noise.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/rolling-stock-noise/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/rolling-stock-noise/
+<!-- source: docs/environment/sources/rolling-stock-noise.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/
 
 # Railway rolling-stock noise: the ISO 3095 type test
 
@@ -1152,7 +1152,7 @@ of the same listing, third-order Butterworth run forward and back, are 6,02 dB
 down at their band edges (just inside them, where Table 1 allows at most 5,5 dB
 for class 2) and read a flat band about 0,6 dB low, outside every class of
 EN 61260 that 7.4.3 requires; see the
-[errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+[errata registry](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## What this page does not cover
 
@@ -1174,19 +1174,19 @@ tester, who must describe it in the report.
 
 ## See also
 
-- [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/): the
+- [CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/): the
   prediction side, from roughness spectra to a sound power per metre.
-- [Road-surface noise: the statistical pass-by method](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/):
+- [Road-surface noise: the statistical pass-by method](https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/):
   the road's counterpart.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the ISO 3095 and EN 15610
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the ISO 3095 and EN 15610
   entries.
-- API reference: [`environment.sources.rolling_stock_noise`](https://jmrplens.github.io/phonometry/reference/api/environment/rolling-stock-noise/).
+- API reference: [`environment.sources.rolling_stock_noise`](https://docs.jmrp.io/phonometry/reference/api/environment/rolling-stock-noise/).
 
 ---
 
 
-<!-- source: docs/environment/sources/road-surface-pass-by.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/
+<!-- source: docs/environment/sources/road-surface-pass-by.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/
 
 # Road-surface noise: the statistical pass-by method (ISO 11819-1)
 
@@ -1329,7 +1329,7 @@ to 79,996 dB. The corrected index (80,1 dB) and the temperature-corrected
 The 77,3 dB reference is described as seven surfaces of the same composition as
 Annex D, whose levels index to 78,92 dB with the same weights; the standard does
 not say they are one database. The speed spreads of Annex E do not fit its own
-regression; see the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+regression; see the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## What this page does not cover
 
@@ -1340,18 +1340,18 @@ editions of ISO 11819-1 were not consulted.
 
 ## See also
 
-- [CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/): the
+- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/): the
   prediction side, where a surface is a correction per vehicle category.
-- [In-situ road-surface absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/):
+- [In-situ road-surface absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/):
   the ISO 13472 absorption of the surface itself.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the two ISO 11819-1 entries.
-- API reference: [`environment.sources.statistical_pass_by`](https://jmrplens.github.io/phonometry/reference/api/environment/statistical-pass-by/).
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the two ISO 11819-1 entries.
+- API reference: [`environment.sources.statistical_pass_by`](https://docs.jmrp.io/phonometry/reference/api/environment/statistical-pass-by/).
 
 ---
 
 
-<!-- source: docs/environment/sources/wind-turbine-noise.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/
+<!-- source: docs/environment/sources/wind-turbine-noise.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/
 
 # Wind-turbine noise: apparent sound power and tonal audibility (IEC 61400-11)
 
@@ -1409,7 +1409,7 @@ bias with it. The ground board, in turn, is why the formula subtracts 6 dB:
 a capsule lying on a hard plate receives a perfectly coherent reflection
 (pressure doubling, $+6$ dB) instead of the uncontrolled height-dependent
 interference pattern a tripod microphone would sample (see
-[the image source behind the ground effect](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)).
+[the image source behind the ground effect](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)).
 
 ### Wind-speed bins and standardized conditions
 
@@ -1435,7 +1435,7 @@ $L_{W\mathrm{A},10\mathrm{m}}$ at integer 10 m wind speeds regardless of the sit
 terrain. The library implements the closed-form quantities of this pipeline
 (slant distance, per-band apparent power, tonal audibility), and Formula (29)
 is `environment.logarithmic_wind_speed`, on the
-[receptor page](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/); the binning,
+[receptor page](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/); the binning,
 averaging and uncertainty machinery operates on whole measurement campaigns
 and stays out of scope. So does the IEC TS 61400-14 declaration route, which
 turns a batch of measured machines into the declared value a planning authority
@@ -1444,7 +1444,7 @@ outside IEC 61400-11 altogether: **amplitude modulation** (the swish, folded
 into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** (optional
 measurements under 7.2.1 with no rating method attached). Amplitude modulation
 at a dwelling is rated by clause 13 of IEC TS 61400-11-2, on the
-[receptor page](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/); infrasound falls to national
+[receptor page](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/); infrasound falls to national
 guidance.
 
 ## 2. Tonal audibility
@@ -1577,11 +1577,11 @@ the 0 dB audibility line and past a 6 dB acceptance requirement.*
 
 ## See also
 
-- [Environmental noise levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
-- [Tone audibility](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/): the same tonal-audibility idea outside the wind-turbine context.
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
-- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/): what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
-- API reference: [`environment.sources.wind_turbine`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/).
+- [Environmental noise levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
+- [Tone audibility](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/): the same tonal-audibility idea outside the wind-turbine context.
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/): what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
+- API reference: [`environment.sources.wind_turbine`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine/).
 
 ## References
 
@@ -1619,12 +1619,12 @@ here; these are the underlying closed forms.
 ---
 
 
-<!-- source: docs/environment/sources/wind-turbine-receptor.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/ -->
-Source: https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-receptor/
+<!-- source: docs/environment/sources/wind-turbine-receptor.md | canonical: https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/ -->
+Source: https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/
 
 # Wind turbine sound at a dwelling (IEC TS 61400-11-2)
 
-[IEC 61400-11](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/) measures what a turbine emits, close to
+[IEC 61400-11](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/) measures what a turbine emits, close to
 it and downwind. IEC TS 61400-11-2:2024 measures what arrives at a dwelling
 several hundred metres away, where the wind that drives the rotor also stirs
 the trees, raises the background and bends the sound on its way. The
@@ -1741,7 +1741,7 @@ Danish statutory order on wind turbine noise (BEK nr. 135 of 2019), set for
 80 % relative humidity and 10 °C with Nord2000 band rates and no absorption
 below 25 Hz. ISO 9613-1 at 80 % gives 0,07, 0,11, 0,17 and 0,25 dB/km there.
 The table joins two atmospheres at 100 Hz, which is in the
-[errata register](https://jmrplens.github.io/phonometry/reference/errata/). The library publishes the row as printed,
+[errata register](https://docs.jmrp.io/phonometry/reference/errata/). The library publishes the row as printed,
 `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`, and takes other coefficients through
 `air_attenuation_db_per_km=`.
 
@@ -1810,11 +1810,11 @@ excludes (`excluded=`): read literally they would be the periods 13.6.3 rates
 0 dB, and the "including 0 values" of the same sentence would mean nothing. A
 period of exactly 30 valid blocks is rated, as 13.6.2.2
 and the report say; the bullets of 13.6.3 leave it out, which is in the
-[errata register](https://jmrplens.github.io/phonometry/reference/errata/). The working group's code (v1.4) was used as
+[errata register](https://docs.jmrp.io/phonometry/reference/errata/). The working group's code (v1.4) was used as
 an oracle only: the library reproduces its printed sample result (prominence
 44.64, fundamental 0.70 Hz and a 10 s rating of 8.38 dB for the 100 Hz to
 400 Hz series in the 0.4 Hz to 0.9 Hz range) and its output on synthetic
-blocks, as the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/) shows. The code alone
+blocks, as the [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/) shows. The code alone
 drops the line at an upper range limit of 0,6 Hz, 0,7 Hz, 1,2 Hz or 1,4 Hz,
 because it compares floating-point frequencies and those multiples of 0,1 Hz
 come out a little above the limit (sixteen times 0,1 Hz is exactly 1,6 Hz, so
@@ -1849,7 +1849,7 @@ print(search.upper_frequency_hz)   # 4000.0, as Table 7 prints
 The row of Table 7 printed for 10 °C and 80 % holds the frequencies the rule
 gives at −10 °C and 80 % (10, 5, 2,5 and 2 kHz where 10 °C gives 10, 6,3, 5
 and 4 kHz); it is in
-the [errata register](https://jmrplens.github.io/phonometry/reference/errata/) with eight other printed defects.
+the [errata register](https://docs.jmrp.io/phonometry/reference/errata/) with eight other printed defects.
 
 ## What this guide covers
 
@@ -1869,16 +1869,16 @@ fundamental modulation frequency lies above the 1,6 Hz of 13.2.
 
 ## See also
 
-- [Wind-turbine noise (IEC 61400-11)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/): the emission
+- [Wind-turbine noise (IEC 61400-11)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/): the emission
   whose sound power levels feed Annex C and the prediction of 10.3.4.
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): ISO
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): ISO
   9613-1 air absorption and the ISO 9613-2 chain.
-- [Impulsive-sound prominence](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/): the ISO/PAS
+- [Impulsive-sound prominence](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/): the ISO/PAS
   1996-3 adjustment.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): Tables 7, C.2 and C.4, 13.6.3
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): Tables 7, C.2 and C.4, 13.6.3
   and five more.
-- API reference: [`environment.assessment.wind_turbine_receptor`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-receptor/)
-  and [`environment.assessment.wind_turbine_modulation`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-modulation/).
+- API reference: [`environment.assessment.wind_turbine_receptor`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine-receptor/)
+  and [`environment.assessment.wind_turbine_modulation`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine-modulation/).
 
 ## References
 

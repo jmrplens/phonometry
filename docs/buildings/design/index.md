@@ -76,7 +76,7 @@ junctions away.
 The prediction family was published by CEN as EN 12354-1 to -6 and later
 reissued by ISO as a second edition, ISO 12354-1:2017 and ISO 12354-2:2017,
 which is not word for word the earlier text: where a formula changed between the
-prints, the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/) records both. Parts
+prints, the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/) records both. Parts
 3 to 6 keep their EN designation in the editions used here. Every guide names
 the edition it was read from: EN 12354-1:2000 and EN 12354-2:2000 for the
 simplified models on

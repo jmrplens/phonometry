@@ -268,7 +268,7 @@ the ECAC Doc 29 method of [Airport noise](airport-noise.md).
 - [The ANP fleet database](anp-fleet.md): the measured
   noise-power-distance tables for real types, which is where the certification
   data ends up for modelling work.
-- API reference: [`aircraft.certification`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
+- API reference: [`aircraft.certification`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
 
 ## References
 

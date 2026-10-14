@@ -321,7 +321,7 @@ Pages elsewhere on the site that this section leans on:
 - [Aircraft noise: Effective Perceived Noise Level](aircraft-noise.md):
   the certification metric, which is measured rather than tabulated.
 - API reference:
-  [`aircraft.anp_fleet`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/anp-fleet/).
+  [`aircraft.anp_fleet`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/anp-fleet/).
 
 ## References
 

@@ -251,7 +251,7 @@ events of the reference workbook are reproduced end-to-end in the test suite.
   into one curve.
 - [Environmental levels](../environment/assessment/environmental-levels.md): the $L_\mathrm{den}$-style
   long-term indices that a full airport study accumulates from single events.
-- API reference: [`aircraft.airport_noise`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/airport-noise/).
+- API reference: [`aircraft.airport_noise`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/airport-noise/).
 
 ## References
 

@@ -504,7 +504,7 @@ print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
 - [Calibration](../metrology/calibration.md): the sensitivity factor that turns digital units into the pascals every level here assumes.
 - [Occupational exposure (ISO 9612)](../../perception/hearing/occupational-exposure.md): the workplace measurement strategies the dose measures feed.
 - [Multichannel and Performance](../filters/multichannel.md): per-channel levels and how to combine them energetically.
-- API reference: [`signals.levels`](https://jmrplens.github.io/phonometry/reference/api/signals/levels/), and [`metrology.reference_values`](https://jmrplens.github.io/phonometry/reference/api/metrology/reference-values/) for the ISO 1683 table.
+- API reference: [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/), and [`metrology.reference_values`](https://docs.jmrp.io/phonometry/reference/api/metrology/reference-values/) for the ISO 1683 table.
 - Theory: [Event and dose metrics](../../reference/theory/signal-analysis.md#event-and-dose-metrics): the energy definitions behind Leq, SEL and the exposure quantities, and how the percentile levels relate to them.
 
 ## References

@@ -564,7 +564,7 @@ receiving side is handed to, and ISO 11820, which measures a silencer in situ.
   with what a laboratory would measure.
 - [Errata in published sources](../../ERRATA.md): the gap Table 6 of ISO 7235
   leaves at 160 Hz, and the two printed gas-law constants.
-- API reference: [`noise_control.silencer_measurement`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/).
+- API reference: [`noise_control.silencer_measurement`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-measurement/).
 - [Industrial noise control](noise-control.md):
   the rival closed form for the end reflection, and the air-terminal
   corrections a diffuser is selected with.

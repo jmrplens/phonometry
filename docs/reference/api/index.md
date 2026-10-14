@@ -11,7 +11,7 @@ publishes those twenty-one and four names that belong to none of them:
 > one row per public name, kept complete by a CI gate
 > (`scripts/check_api_reference.py`). The full generated reference, with every
 > signature, parameter table and cross-link, lives on the site:
-> [phonometry API reference](https://jmrplens.github.io/phonometry/reference/api/).
+> [phonometry API reference](https://docs.jmrp.io/phonometry/reference/api/).
 
 ## Namespaces
 
@@ -55,7 +55,7 @@ every earlier layout were removed in 4.0 along with the shims that served
 them, so `phonometry.metrology.levels`, `phonometry.environmental` and the
 rest of the pre-4.0 spellings raise `ModuleNotFoundError`. The paths in force
 are the ones the
-[generated reference](https://jmrplens.github.io/phonometry/reference/api/)
+[generated reference](https://docs.jmrp.io/phonometry/reference/api/)
 documents, one page per module.
 
 > **Reading the input column.** Every function that consumes a recording

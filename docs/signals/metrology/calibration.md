@@ -375,7 +375,7 @@ Take the laboratory's results (each measured deviation with the expanded uncerta
 - [Multichannel and Performance](../filters/multichannel.md): one sensitivity per channel when the channels differ.
 - [GUM uncertainty](gum-uncertainty.md): propagating the calibrator tolerance and drift bound into a level's uncertainty.
 - [Compliance and verification](compliance-verification.md): the conformance rule of IEC TC 29 the calibrator verdict is reached by.
-- API reference: [`metrology.calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://jmrplens.github.io/phonometry/reference/api/metrology/conformance/) and [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/).
+- API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://docs.jmrp.io/phonometry/reference/api/metrology/conformance/) and [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/).
 
 ## References
 

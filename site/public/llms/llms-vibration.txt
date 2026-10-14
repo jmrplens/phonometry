@@ -1,11 +1,11 @@
 # phonometry: Vibration and structure-borne sound
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/vibration/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/
+<!-- source: docs/vibration/index.md | canonical: https://docs.jmrp.io/phonometry/vibration/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/
 
 # Vibration and structure-borne sound
 
@@ -31,7 +31,7 @@ surface radiates directly; EN 15657 measures the structure-borne power a
 machine injects into a reception plate; and EN 12354-5 assembles all of it into
 the sound pressure level predicted in a receiving room. That final prediction
 is also where this section hands over to the [sound
-insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) models of the buildings section.
+insulation](https://docs.jmrp.io/phonometry/buildings/insulation/) models of the buildings section.
 The same group holds the one question that is not about sound at all: whether
 the shaking damages the building, which DIN 4150-3 answers with guideline
 values for the peak particle velocity, read at the dominant frequency of the
@@ -51,91 +51,91 @@ the seat, measured by the laboratory method of ISO 10326-1, which answers with
 a single ratio whether the seat attenuates what it is given or amplifies it.
 
 Start with
-[Mechanical mobility and the FRF family](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/)
+[Mechanical mobility and the FRF family](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/)
 if you care about the noise a machine causes in a building, with
-[Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) if you care
+[Human Vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/) if you care
 about the dose a person receives, or with [Machine fault
-frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/) if you care
+frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/) if you care
 about the condition of the machine itself.
 
-## [Structure-borne sources](https://jmrplens.github.io/phonometry/vibration/structural/)
+## [Structure-borne sources](https://docs.jmrp.io/phonometry/vibration/structural/)
 
 From FRF vocabulary to the predicted level in a receiving room.
 
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/):
   receptance, mobility and accelerance with their reciprocals, and the SDOF
   reference resonator.
-- [Mobility by impact excitation (ISO 7626-5)](https://jmrplens.github.io/phonometry/vibration/structural/impact-mobility/):
+- [Mobility by impact excitation (ISO 7626-5)](https://docs.jmrp.io/phonometry/vibration/structural/impact-mobility/):
   the mobility measured with an impact hammer, its windows, the average over
   impacts, the Annex A damping correction and the checks on the record.
-- [Bending-wave transmission at plate junctions (Cremer/Craik/Hopkins)](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions (Cremer/Craik/Hopkins)](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/):
   the frequency-independent wave-approach coefficients for rigid X, T, L and
   in-line junctions, their angular average and the derived coupling loss factor
   and Kij, and the experimental route that measures the same coupling loss
   factors by power injection.
-- [Transfer stiffness of resilient elements (ISO 10846)](https://jmrplens.github.io/phonometry/vibration/structural/transfer-stiffness/):
+- [Transfer stiffness of resilient elements (ISO 10846)](https://docs.jmrp.io/phonometry/vibration/structural/transfer-stiffness/):
   the dynamic transfer stiffness of vibration isolators by the direct,
   indirect and driving-point methods, in one-third-octave bands.
-- [Sound power from surface vibration (ISO/TS 7849)](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/):
+- [Sound power from surface vibration (ISO/TS 7849)](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/):
   radiated airborne power from surface velocity and a radiation factor.
-- [Structure-borne sound power of equipment (EN 15657)](https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/):
   the reception-plate method and the plate-independent source quantities.
-- [Installed structure-borne sound (EN 12354-5)](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/):
   the receiving-room sound pressure level predicted from source and receiver
   mobilities.
 
-## [Human vibration](https://jmrplens.github.io/phonometry/vibration/human/)
+## [Human vibration](https://docs.jmrp.io/phonometry/vibration/human/)
 
 Vibration transmitted to the human body, from daily exposure to spinal injury
 risk.
 
-- [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): whole-body and
+- [Human Vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): whole-body and
   hand-arm weightings (ISO 8041-1), r.m.s. and dose measures (ISO 2631-1),
   daily exposure A(8) (ISO 5349) and the Directive 2002/44/EC values.
-- [Multiple-shock whole-body vibration (ISO 2631-5)](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/):
+- [Multiple-shock whole-body vibration (ISO 2631-5)](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/):
   the spinal-response model and the probability of lumbar injury for vibration
   containing multiple shocks.
-- [What a seat does to the vibration (ISO 10326-1)](https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/):
+- [What a seat does to the vibration (ISO 10326-1)](https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
-- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/):
   the tolerance band on each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications a
   conforming meter has to reproduce, and the personal vibration exposure
   meter of ISO 8041-2, graded with the same burst tables.
 
-## [Machinery](https://jmrplens.github.io/phonometry/vibration/machinery/)
+## [Machinery](https://docs.jmrp.io/phonometry/vibration/machinery/)
 
 Turning a vibration spectrum into a diagnosis of the machine that made it.
 
-- [Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/):
+- [Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/):
   the characteristic bearing, gear and shaft frequencies, and the envelope
   analysis that finds them under the broadband noise of a running machine.
 
-## [Vibration immission](https://jmrplens.github.io/phonometry/vibration/immission/)
+## [Vibration immission](https://docs.jmrp.io/phonometry/vibration/immission/)
 
 The instrument the German immission-control standards presuppose, the
 assessment it makes possible, and the railway measurements it is used for.
 
-- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/):
   the KB weighting and the weighted vibration severity a DIN 4150 measurement
   is reported in, the tolerance bands a meter is graded by, and the Annex E
   assessment velocity that judges a building without a dominant frequency.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/):
   one train passage reduced to the numbers that can be compared, from the event
   value of an hour of traffic to the third-octave spectra and the narrow-band
   density behind them, and the ground constants from two wave speeds.
-- [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/):
+- [Vibration and people in buildings (DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/):
   the guide values a reading is held to by area and time of day, the order the
   standard reads them in, the assessment vibration severity of a day of
   exposure, and the rules for blasting, roads, railways and construction sites.
-- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/):
+- [Railway vibration by category of train (E DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/):
   the draft that is to replace DIN 4150-2, a railway judged by category of
   train with a weighting factor per kind, and the rest of its changes.
-- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+- [Predicting railway vibration (E DIN 45672-3)](https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/):
   a railway's spectrum on a floor built term by term before there is anything
   to measure, and the KB values formed from it.
-- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/):
+- [Predicting vibration before measuring (DIN 4150-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/):
   the decay with distance, what a building does to it, and the shapes of a
   blast, a falling mass and a hall of machines.
 
@@ -143,7 +143,7 @@ assessment it makes possible, and the railway measurements it is used for.
 
 **An instrument is graded on the clauses that can be computed.** Every
 criterion of ISO 8041-1 that is arithmetic is implemented, on the [meter
-verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) page: the
+verification](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/) page: the
 tolerance band around each frequency weighting, the band-limiting stage on its
 own, the characteristic phase deviation, the running r.m.s. decay times and
 the 228 saw-tooth burst indications the standard prints. The rest of that standard, the indication,
@@ -163,7 +163,7 @@ ISO 2631-2 deleted its predecessor's guidance values on purpose, so for the
 human response to building vibration there are no acceptable magnitudes to
 compare against; what the library gives is the weighted magnitude, and the
 judgement stays with the assessor and the national code. The guideline values
-of [DIN 4150-3](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/) are a
+of [DIN 4150-3](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/) are a
 different question and are implemented: they are about damage to the structure,
 and keeping to one is not a certificate any more than exceeding one is a
 finding of damage.
@@ -172,7 +172,7 @@ Two structural predictions are idealisations rather than measurements. The
 junction transmission coefficients are a closed-form result for a rigid,
 simply supported junction (the *measured* vibration reduction index of ISO
 10848 is [Laboratory flanking
-transmission](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/)) and the FRF
+transmission](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/)) and the FRF
 page returns element-wise free reciprocals, correct for a driving-point or
 single-path use but not a full FRF matrix, with no blocked matrix quantities,
 and the impact page fits one mode at a time. On the isolator page, the
@@ -185,15 +185,15 @@ not tabulated.
 Every quantity here starts from a record of acceleration or of velocity, which
 the signature of each function names, and most of them from a spectral estimate
 as well, so the filtering, the weighting curves and the spectral estimators behind them
-are in [Signal analysis](https://jmrplens.github.io/phonometry/signals/), and [Spectral
-analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/) is the page the
+are in [Signal analysis](https://docs.jmrp.io/phonometry/signals/), and [Spectral
+analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/) is the page the
 machinery diagnostics build on. The derivations are in [Vibration
-theory](https://jmrplens.github.io/phonometry/reference/theory/vibration/): the human-vibration weightings, the ISO 2631-5
+theory](https://docs.jmrp.io/phonometry/reference/theory/vibration/): the human-vibration weightings, the ISO 2631-5
 shock model and the point mobilities and radiation efficiency.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
-and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+and [All guides](https://docs.jmrp.io/phonometry/) lists every page with a line on
 each.
 
 ---

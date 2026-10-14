@@ -7,7 +7,7 @@
 //   pnpm build                 # the audit runs against dist/
 //   pnpm run lighthouse        # mobile (default)
 //   pnpm run lighthouse -- --desktop
-//   BASE_URL=https://jmrplens.github.io node scripts/lighthouse-audit.mjs
+//   BASE_URL=https://docs.jmrp.io node scripts/lighthouse-audit.mjs
 //
 // Without BASE_URL the script starts `astro preview` itself on PORT (default
 // 4323) and stops it when done. Reports land in lighthouse-results/

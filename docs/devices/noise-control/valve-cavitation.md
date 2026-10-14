@@ -310,7 +310,7 @@ by a thousand before handing it to Equation (12).
   system, where the source is a fan rather than a jet.
 - [Errata in published sources](../../ERRATA.md): the seven entries this page
   rests on, from a sign to an equation printed two ways.
-- API reference: [`noise_control.valves_hydrodynamic`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
+- API reference: [`noise_control.valves_hydrodynamic`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
 
 ## Standards
 

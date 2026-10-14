@@ -9,7 +9,7 @@ head:
       {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "@id": "https://jmrplens.github.io/phonometry/start/guides/#areas",
+        "@id": "https://docs.jmrp.io/phonometry/start/guides/#areas",
         "name": "phonometry documentation areas",
         "description": "The thirteen documented areas of the phonometry guides, each with the standards it implements.",
         "inLanguage": "en",
@@ -21,91 +21,91 @@ head:
             "position": 1,
             "name": "Signal analysis",
             "description": "Filter banks, weighting, levels, spectra, calibration and uncertainty.",
-            "url": "https://jmrplens.github.io/phonometry/signals/"
+            "url": "https://docs.jmrp.io/phonometry/signals/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "The medium",
             "description": "The fluid a sound travels through, computed from the measured conditions: humid air from IEC 61094-2:2009 Annex F.",
-            "url": "https://jmrplens.github.io/phonometry/fluids/"
+            "url": "https://docs.jmrp.io/phonometry/fluids/"
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": "Elastic solids",
             "description": "The elastic constants of a solid and the three longitudinal wave speeds that follow from them, each named after the shape it belongs to.",
-            "url": "https://jmrplens.github.io/phonometry/solids/"
+            "url": "https://docs.jmrp.io/phonometry/solids/"
           },
           {
             "@type": "ListItem",
             "position": 4,
             "name": "Files",
             "description": "Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing and lossless conversion; catalogues of materials of your own.",
-            "url": "https://jmrplens.github.io/phonometry/io/"
+            "url": "https://docs.jmrp.io/phonometry/io/"
           },
           {
             "@type": "ListItem",
             "position": 5,
             "name": "Hearing and perception",
             "description": "Loudness, sound quality, speech intelligibility, hearing and exposure.",
-            "url": "https://jmrplens.github.io/phonometry/perception/"
+            "url": "https://docs.jmrp.io/phonometry/perception/"
           },
           {
             "@type": "ListItem",
             "position": 6,
             "name": "Rooms and buildings",
             "description": "Room parameters, background noise, field and laboratory insulation, prediction.",
-            "url": "https://jmrplens.github.io/phonometry/buildings/"
+            "url": "https://docs.jmrp.io/phonometry/buildings/"
           },
           {
             "@type": "ListItem",
             "position": 7,
             "name": "Materials and surfaces",
             "description": "Absorption, airflow resistance, impedance tube, porous and metamaterial models, diffusers, scattering.",
-            "url": "https://jmrplens.github.io/phonometry/materials/"
+            "url": "https://docs.jmrp.io/phonometry/materials/"
           },
           {
             "@type": "ListItem",
             "position": 8,
             "name": "Vibration and structure-borne sound",
             "description": "Mobility and FRFs, isolators, radiated power, junctions, human vibration.",
-            "url": "https://jmrplens.github.io/phonometry/vibration/"
+            "url": "https://docs.jmrp.io/phonometry/vibration/"
           },
           {
             "@type": "ListItem",
             "position": 9,
             "name": "Environment and transport",
             "description": "Outdoor propagation, barriers, refraction, road, rail and wind-turbine sources, and the assessment built on them.",
-            "url": "https://jmrplens.github.io/phonometry/environment/"
+            "url": "https://docs.jmrp.io/phonometry/environment/"
           },
           {
             "@type": "ListItem",
             "position": 10,
             "name": "Aircraft noise",
             "description": "Certification levels, airport contours and the rotorcraft hemisphere method.",
-            "url": "https://jmrplens.github.io/phonometry/aircraft/"
+            "url": "https://docs.jmrp.io/phonometry/aircraft/"
           },
           {
             "@type": "ListItem",
             "position": 11,
             "name": "Underwater acoustics",
             "description": "Levels re 1 microPa, ship radiated noise, pile driving, ambient noise, propagation loss.",
-            "url": "https://jmrplens.github.io/phonometry/underwater/"
+            "url": "https://docs.jmrp.io/phonometry/underwater/"
           },
           {
             "@type": "ListItem",
             "position": 12,
             "name": "Sources and devices",
             "description": "Sound power, intensity, emission declarations, electroacoustics, programme loudness.",
-            "url": "https://jmrplens.github.io/phonometry/devices/"
+            "url": "https://docs.jmrp.io/phonometry/devices/"
           },
           {
             "@type": "ListItem",
             "position": 13,
             "name": "Wave simulation",
             "description": "Deterministic 2D FDTD solvers, acoustic and elastic P-SV, validated against analytic oracles rather than a standard.",
-            "url": "https://jmrplens.github.io/phonometry/simulation/"
+            "url": "https://docs.jmrp.io/phonometry/simulation/"
           }
         ]
       }

@@ -34,8 +34,8 @@ This package will not follow it. Install phonometry under its own name and
 take the guide below: it maps every 3.x name to its new home, and it names the
 three places where the obvious fix is the wrong one.
 
-- Upgrading to 4.0: https://jmrplens.github.io/phonometry/start/upgrading/
-- Documentation: https://jmrplens.github.io/phonometry/
+- Upgrading to 4.0: https://docs.jmrp.io/phonometry/start/upgrading/
+- Documentation: https://docs.jmrp.io/phonometry/
 - Package: https://pypi.org/project/phonometry/
 - Repository: https://github.com/jmrplens/phonometry
 - Last release under the old name: [`pyoctaveband-v2` branch](https://github.com/jmrplens/phonometry/tree/pyoctaveband-v2)

@@ -432,7 +432,7 @@ there is no multi-sensor TDOA solver.
 - [Calibrated spectral analysis](spectral-analysis.md): the cross-spectrum the GCC weightings are built from, and the two-channel acquisition rules.
 - [Test signals](test-signals.md): the band-limited fractional-delay kernel behind the sub-sample alignment.
 - [Time synchronous averaging](synchronous-averaging.md): the same alignment applied per revolution.
-- API reference: [`signals.correlation`](https://jmrplens.github.io/phonometry/reference/api/signals/correlation/) and [`signals.envelope`](https://jmrplens.github.io/phonometry/reference/api/signals/envelope/).
+- API reference: [`signals.correlation`](https://docs.jmrp.io/phonometry/reference/api/signals/correlation/) and [`signals.envelope`](https://docs.jmrp.io/phonometry/reference/api/signals/envelope/).
 
 ## References
 

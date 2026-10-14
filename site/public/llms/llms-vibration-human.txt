@@ -1,11 +1,11 @@
 # phonometry: Human vibration
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/vibration/human/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/human/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/human/
+<!-- source: docs/vibration/human/index.md | canonical: https://docs.jmrp.io/phonometry/vibration/human/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/human/
 
 # Human vibration
 
@@ -18,7 +18,7 @@ cover it: the general chain, the special case that breaks it, what a seat does
 to the vibration it passes on, and whether the instrument doing the measuring
 is entitled to be believed.
 
-[Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) is the general chain.
+[Human Vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/) is the general chain.
 It covers the whole-body and hand-arm frequency weightings of **ISO 8041-1**,
 the weighted r.m.s. acceleration and the running and dose measures of
 **ISO 2631-1** (MTVV, VDV, MSDV, crest factor) that flag shocks a plain
@@ -28,7 +28,7 @@ vibration total value and daily exposure A(8) of **ISO 5349-1/-2**, and the
 exposure action and limit values of **Directive 2002/44/EC** that make A(8)
 legally meaningful.
 
-[Multiple-shock whole-body vibration (ISO 2631-5)](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/)
+[Multiple-shock whole-body vibration (ISO 2631-5)](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/)
 handles exposures the r.m.s. philosophy underestimates: repeated mechanical
 shocks from off-road vehicles, high-speed craft or earth-moving machinery,
 which load the lumbar spine far beyond what their energy average suggests.
@@ -45,20 +45,20 @@ clause 5 regime, the severe shocks with possible loss of contact with the seat
 that this library implements, rather than in its Annex A finite-element model
 for exposures in which the occupant stays seated. The measurement front-end
 (weighting filters, band analysis) is shared with the [core signal
-analysis](https://jmrplens.github.io/phonometry/signals/) section.
+analysis](https://docs.jmrp.io/phonometry/signals/) section.
 
 ## Pages in this section
 
-- [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): ISO 8041-1
+- [Human Vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): ISO 8041-1
   weightings, ISO 2631-1 r.m.s. and dose measures, ISO 5349 daily exposure
   A(8) and the Directive 2002/44/EC values.
-- [Multiple-shock whole-body vibration (ISO 2631-5)](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/):
+- [Multiple-shock whole-body vibration (ISO 2631-5)](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/):
   the spinal-response model, acceleration dose and probability of lumbar
   injury.
-- [What a seat does to the vibration (ISO 10326-1)](https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/):
+- [What a seat does to the vibration (ISO 10326-1)](https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
-- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/):
   the tolerance band around each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications a
   conforming meter has to reproduce, and the personal vibration exposure
@@ -72,7 +72,7 @@ that is arithmetic: the band-limiting stage on its own, the characteristic
 phase deviation, the running r.m.s. decay times and the 228 saw-tooth burst
 indications the standard prints, which
 is what [meter
-verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) is about. The
+verification](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/) is about. The
 design and type-testing clauses of that standard, from indication and
 linearity to the environmental tests, are laboratory measurements on hardware
 and stay outside: a pass on any of these is a necessary condition for
@@ -100,8 +100,8 @@ this section produces.
 ---
 
 
-<!-- source: docs/vibration/human/human-vibration.md | canonical: https://jmrplens.github.io/phonometry/vibration/human/human-vibration/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/human/human-vibration/
+<!-- source: docs/vibration/human/human-vibration.md | canonical: https://docs.jmrp.io/phonometry/vibration/human/human-vibration/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/human/human-vibration/
 
 # Human Vibration: Whole-Body and Hand-Arm Exposure
 
@@ -120,7 +120,7 @@ of analog filters; **ISO 2631-1** applies them to whole-body vibration,
 and **ISO 5349-1/-2** to hand-transmitted vibration. This page covers the whole
 chain. Only the weighting definitions are taken from ISO 8041-1 here; what
 that standard says about the instrument measuring them is
-[meter verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/).
+[meter verification](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%"></picture>
 
@@ -502,11 +502,11 @@ ISO 5349-2 Annex E.3 hand-arm day with the Directive 2002/44/EC assessment.*
 
 ## See also
 
-- [Multiple Shock Vibration](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/): where a record goes once its crest factor and its clause 6.3.3 ratios say the r.m.s. cannot describe it: the ISO 2631-5 spinal-response model, and the seat-pad acquisition this page's whole-body half points at.
-- [Sound power from surface vibration](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/): the other thing a surface acceleration is used for, when the question is what the machine radiates rather than what the operator receives.
-- [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the before-and-after check of clause 6.3.1 and the traceability the fiche's `calibration` field records.
-- API reference: [`vibration.human.exposure`](https://jmrplens.github.io/phonometry/reference/api/vibration/exposure/).
-- Theory: [Human vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec): the frequency weightings of ISO 2631-1 and ISO 5349-1, and the running r.m.s., VDV and MTVV definitions.
+- [Multiple Shock Vibration](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/): where a record goes once its crest factor and its clause 6.3.3 ratios say the r.m.s. cannot describe it: the ISO 2631-5 spinal-response model, and the seat-pad acquisition this page's whole-body half points at.
+- [Sound power from surface vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/): the other thing a surface acceleration is used for, when the question is what the machine radiates rather than what the operator receives.
+- [Calibration](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): the before-and-after check of clause 6.3.1 and the traceability the fiche's `calibration` field records.
+- API reference: [`vibration.human.exposure`](https://docs.jmrp.io/phonometry/reference/api/vibration/exposure/).
+- Theory: [Human vibration](https://docs.jmrp.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec): the frequency weightings of ISO 2631-1 and ISO 5349-1, and the running r.m.s., VDV and MTVV definitions.
 
 ## References
 
@@ -533,8 +533,8 @@ values).
 ---
 
 
-<!-- source: docs/vibration/human/multiple-shock-vibration.md | canonical: https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/
+<!-- source: docs/vibration/human/multiple-shock-vibration.md | canonical: https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/
 
 # Multiple-shock whole-body vibration (ISO 2631-5)
 
@@ -696,7 +696,7 @@ the 10/50/90 % risk thresholds of Table C.2. The model is vertical-axis only:
 clause 4 neglects the horizontal contributions to spinal compression by design,
 and the horizontal spinal model of the withdrawn 2004 edition is not reinstated,
 so horizontal whole-body exposure is assessed instead with the r.m.s.,
-running-r.m.s./MTVV and VDV metrics of [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/)
+running-r.m.s./MTVV and VDV metrics of [Human Vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/)
 (ISO 2631-1).
 
 ## 4. The health-risk report (`.report()`)
@@ -771,9 +771,9 @@ ISO 2631-5:2018 Annex C worked example with the Table C.2 risk classification.*
 
 ## See also
 
-- [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the ISO 2631-1 chain this page hands back to for the horizontal axes, and the crest factor and clause 6.3.3 ratios that decide whether a record belongs here at all.
-- API reference: [`vibration.human.multiple_shock`](https://jmrplens.github.io/phonometry/reference/api/vibration/multiple-shock/).
-- Theory: [Multiple shocks (ISO 2631-5)](https://jmrplens.github.io/phonometry/reference/theory/vibration/#multiple-shocks-iso-2631-5): the ISO 2631-5 response model, the acceleration dose and the Weibull risk law.
+- [Human Vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): the ISO 2631-1 chain this page hands back to for the horizontal axes, and the crest factor and clause 6.3.3 ratios that decide whether a record belongs here at all.
+- API reference: [`vibration.human.multiple_shock`](https://docs.jmrp.io/phonometry/reference/api/vibration/multiple-shock/).
+- Theory: [Multiple shocks (ISO 2631-5)](https://docs.jmrp.io/phonometry/reference/theory/vibration/#multiple-shocks-iso-2631-5): the ISO 2631-5 response model, the acceleration dose and the Weibull risk law.
 
 ## References
 
@@ -795,8 +795,8 @@ C.1, C.3-C.5, Tables C.1/C.2).
 ---
 
 
-<!-- source: docs/vibration/human/seat-vibration.md | canonical: https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/
+<!-- source: docs/vibration/human/seat-vibration.md | canonical: https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/
 
 # What a seat does to the vibration (ISO 10326-1)
 
@@ -805,7 +805,7 @@ whether it helps is not obvious: a suspension seat is a spring and a damper,
 and a spring has a resonance. Feed it the wrong spectrum and it amplifies
 exactly what it was bought to attenuate.
 
-[Human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/)
+[Human vibration exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/)
 measures what reaches the person. This page is the laboratory method that
 measures what the seat did to it, and it answers with one number.
 
@@ -913,7 +913,7 @@ Formula (4), the one shown above, is correct. Formula (3) beside it carries an
 asterisk on all four of its symbols and so reduces to
 $a^{*}_\mathrm{wS} = a^{*}_\mathrm{wS}$, which corrects nothing; the reading
 the library implements is the one the clause's own prose asks for. It is
-recorded in the [errata](https://jmrplens.github.io/phonometry/reference/errata/).
+recorded in the [errata](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## 3. The damping test
 
@@ -969,7 +969,7 @@ earth-moving machinery classes of ISO 7096, are not implemented either.
 **Nothing weights a signal here.** The accelerations this page divides are
 already frequency-weighted; the weightings themselves, and the r.m.s.
 integration behind them, are in [human vibration
-exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/).
+exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/).
 
 **No laboratory.** The simulator tolerances of Clause 9, the transducer
 mounting of 5.2, the semi-rigid disc, the test persons and posture of 8.2, the
@@ -979,11 +979,11 @@ follows a test, not the test.
 
 ## See also
 
-- [Human vibration exposure (ISO 2631, ISO 5349)](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/):
+- [Human vibration exposure (ISO 2631, ISO 5349)](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/):
   the weightings and the daily exposure the seat is measured in service of.
-- [Vibration with repeated shocks (ISO 2631-5)](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/):
+- [Vibration with repeated shocks (ISO 2631-5)](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/):
   what a seat that bottoms out delivers to the spine.
-- [Transfer stiffness of resilient elements (ISO 10846)](https://jmrplens.github.io/phonometry/vibration/structural/transfer-stiffness/):
+- [Transfer stiffness of resilient elements (ISO 10846)](https://docs.jmrp.io/phonometry/vibration/structural/transfer-stiffness/):
   the same idea of a measured transmission ratio, applied to the isolator
   rather than to the seat.
 
@@ -1011,8 +1011,8 @@ are not implemented.
 ---
 
 
-<!-- source: docs/vibration/human/meter-verification.md | canonical: https://jmrplens.github.io/phonometry/vibration/human/meter-verification/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/human/meter-verification/
+<!-- source: docs/vibration/human/meter-verification.md | canonical: https://docs.jmrp.io/phonometry/vibration/human/meter-verification/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/human/meter-verification/
 
 # Verifying a human-vibration meter (ISO 8041-1)
 
@@ -1023,7 +1023,7 @@ the spine, what a seat passes on. This one computes something about the
 specification a general-purpose human-vibration meter is designed and tested
 against, and the rest of the section has been quoting one clause of it all
 along, because the nine frequency weightings that [human vibration
-exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) applies are defined here and nowhere else.
+exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/) applies are defined here and nowhere else.
 
 The **human** in that name is load-bearing. The standard specifies instruments
 "designed to measure vibration values, for the purpose of assessing human
@@ -1114,7 +1114,7 @@ The design goal is not a table of numbers, it is a transfer function. Clause
 high-pass and low-pass pair that band-limits, an acceleration-velocity
 transition carrying the overall gain and an upward step, multiplied together
 as $H(s) = H_\mathrm{h}(s)\,H_\mathrm{l}(s)\,H_\mathrm{t}(s)\,H_\mathrm{s}(s)$
-(Formula (5)). [Human vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) covers that cascade and
+(Formula (5)). [Human vibration](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/) covers that cascade and
 the Table 3 parameter set that specialises it into the nine weightings `Wb`,
 `Wc`, `Wd`, `We`, `Wf`, `Wh`, `Wj`, `Wk` and `Wm`. `weighting_factors`
 evaluates it at any frequency, and that value, not a tabulated one, is what a
@@ -2392,7 +2392,7 @@ still prints 0,388 8 for `Wf`, so the caveat of section 6 applies to a PVEM
 word for word: `band_limited_weighting_factor` is the factor that makes the row
 satisfiable. And the paragraph after it still grades "each time weighting"
 against "the tolerance limits of Table 2", whose time-weighting row Part 2 no
-longer prints. Both are in the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+longer prints. Both are in the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/).
 
 **Its own uncertainties.** Part 2 prints the maximum expanded uncertainty each
 of its test clauses allows a laboratory, and in clause 12, pattern evaluation,
@@ -2442,7 +2442,7 @@ hardware.
 A sound level meter gets exactly this treatment, from a different committee
 and in a different unit. IEC 61672-1 prints design goals for the A, C and Z
 weightings and acceptance limits around them, and
-[`verify_weighting_class`](https://jmrplens.github.io/phonometry/signals/levels/weighting/) turns a response
+[`verify_weighting_class`](https://docs.jmrp.io/phonometry/signals/levels/weighting/) turns a response
 into a verdict against them. The two verifiers are the same idea applied on
 either side of the acoustics-vibration fence:
 
@@ -2481,7 +2481,7 @@ mask, so any measurement made in software inherits the verdict.
 that *measurement of that instrument*, on the day it was made. Neither is a
 pattern evaluation, a periodic verification or an in situ check, and neither
 has a microphone, a transducer or a serial number.
-[Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/)
+[Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/)
 is the map of every verifier in the library and of where each one's claim
 ends.
 
@@ -2528,19 +2528,19 @@ clauses are not implemented.
 
 ## See also
 
-- [Human vibration exposure (ISO 2631, ISO 5349)](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the
+- [Human vibration exposure (ISO 2631, ISO 5349)](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): the
   weightings this page grades an instrument against, and the exposure chain
   that consumes them.
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/):
   the other verifiers, and what only a laboratory can attest.
-- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the
+- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/): the
   sound level meter's weightings and the IEC 61672-1 acceptance limits of
   section 12.
-- [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the
+- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): the
   before-and-after check that an in situ verification is built on, and the
   traceability a type test is reported with.
 - API reference:
-  [`vibration.human.instrumentation`](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/).
+  [`vibration.human.instrumentation`](https://docs.jmrp.io/phonometry/reference/api/vibration/instrumentation/).
 
 ## References
 
@@ -2599,7 +2599,7 @@ record as `sawtooth_burst`, the printed responses of Tables 7 to 9 as
 `SIGNAL_BURST_RESPONSE`, the reproduction as `signal_burst_indications` and
 the verdict as `verify_signal_burst_response`. The frequency weightings
 themselves (Table 3 and clause 5.6) are covered in
-[human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/).
+[human vibration exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/).
 
 ISO 8041-2:2021, *Human response to vibration — Measuring instrumentation —
 Part 2: Personal vibration exposure meters*: the saw-tooth signal burst of 5.9

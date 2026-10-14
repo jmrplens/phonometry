@@ -13,5 +13,5 @@ contact_links:
     url: https://github.com/jmrplens/phonometry/discussions/categories/documentation-learning
     about: Feedback on the guides, figures and animations, in English or Spanish.
   - name: Documentation site
-    url: https://jmrplens.github.io/phonometry/
+    url: https://docs.jmrp.io/phonometry/
     about: Guides, API reference and worked examples.

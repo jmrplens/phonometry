@@ -303,7 +303,7 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
   composite-facade calculation and transmission through openings and slits.
 - [Field Insulation Measurement (ISO 16283)](insulation-field.md): the band
   spectra of $R'$, $D_{\mathrm{n}T}$ and $L'_{\mathrm{n}T}$ that these global quantities summarise.
-- API reference: [`building.regulation.spain`](https://jmrplens.github.io/phonometry/reference/api/building/spain/).
+- API reference: [`building.regulation.spain`](https://docs.jmrp.io/phonometry/reference/api/building/spain/).
 
 ## References
 

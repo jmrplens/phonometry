@@ -239,7 +239,7 @@ designs rather than replacing an ISO 17497-2 measurement.
   equivalent-fluid and resonant layers the metamaterial cells are built from.
 - [2D FDTD wave simulation](../../simulation/fdtd-simulation.md): the wave solver behind the
   animation above, meshing the real slit and resonator geometry.
-- API reference: [`materials.diffusers.metadiffuser`](https://jmrplens.github.io/phonometry/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](https://jmrplens.github.io/phonometry/reference/api/materials/design/).
+- API reference: [`materials.diffusers.metadiffuser`](https://docs.jmrp.io/phonometry/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](https://docs.jmrp.io/phonometry/reference/api/materials/design/).
 
 ## References
 

@@ -149,7 +149,7 @@ BibTeX:
   year    = {2026},
   version = {4.0.0rc1},
   doi     = {10.5281/zenodo.21215280},
-  url     = {https://jmrplens.github.io/phonometry/},
+  url     = {https://docs.jmrp.io/phonometry/},
   license = {MIT}
 }
 ```

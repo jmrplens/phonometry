@@ -338,7 +338,7 @@ ISO 3382-1 asks for, is in
   Equation (A.9) subtracts, measured to ISO 3741.
 - [Absorption and Reverberation Time](enclosed-space-absorption.md): the
   absorption area Equation (A.5) converts a diffuse-field reading through.
-- API reference: [`room.auditorium`](https://jmrplens.github.io/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
 
 ## Standards
 

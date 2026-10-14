@@ -228,7 +228,7 @@ the 0 dB audibility line and past a 6 dB acceptance requirement.*
 - [Tone audibility](../../perception/psychoacoustics/tone-audibility.md): the same tonal-audibility idea outside the wind-turbine context.
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
 - [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](wind-turbine-receptor.md): what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
-- API reference: [`environment.sources.wind_turbine`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/).
+- API reference: [`environment.sources.wind_turbine`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine/).
 
 ## References
 

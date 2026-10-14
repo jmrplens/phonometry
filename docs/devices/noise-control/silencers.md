@@ -485,7 +485,7 @@ are lossless unless a `resistance` is supplied.
   equivalent-fluid material theory behind dissipative linings.
 - [Loudspeaker Characterisation (IEC 60268-5)](../electroacoustics/loudspeakers.md): the
   radiating piston, the companion radiator model of a duct's open end.
-- API reference: [`noise_control.silencers`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencers/).
+- API reference: [`noise_control.silencers`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencers/).
 
 ## References
 

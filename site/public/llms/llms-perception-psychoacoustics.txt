@@ -1,11 +1,11 @@
 # phonometry: Psychoacoustics
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/perception/psychoacoustics/index.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/
+<!-- source: docs/perception/psychoacoustics/index.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/
 
 # Psychoacoustics
 
@@ -24,7 +24,7 @@ a 1 kHz tone at 40 dB SPL, 1 acum a critical-band-wide noise at 1 kHz and 60 dB,
 1 asper a 1 kHz carrier fully modulated at 70 Hz at 60 dB, 1 vacil the same
 carrier modulated at 4 Hz, and 1 tu_HMS a 1 kHz tone at 40 dB. They are
 tabulated together, beside the speech and hearing scales, under "Reading the
-numbers" on the [section overview](https://jmrplens.github.io/phonometry/perception/).
+numbers" on the [section overview](https://docs.jmrp.io/phonometry/perception/).
 
 The two families of pages differ in purpose, and that difference decides what
 you can conclude. Loudness, sharpness, roughness and fluctuation strength are
@@ -37,29 +37,29 @@ strength (0.2 vacil_HMS), which is the closest thing to a pass mark in the
 magnitude family. All of them share one prerequisite: an absolutely calibrated
 signal in pascals, because every metric here is level-dependent.
 
-[Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) is the foundation page: the Zwicker
+[Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) is the foundation page: the Zwicker
 reference method of ISO 532-1 with its one-page fiche, together with the
 ISO 226:2023 equal-loudness contours that anchor the perceptual scale for pure
 tones. The newer model families,
 Moore-Glasberg per ISO 532-2/-3 and the Sottek Hearing Model of ECMA-418-2,
 continue in
-[Advanced Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/), which also
+[Advanced Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/), which also
 carries the model-choice table.
-[Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) adds
+[Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/) adds
 sharpness per DIN 45692 and the ECMA-418-2 tonality, roughness and
 fluctuation strength that share the Sottek front-end.
 
 Tones in noise get two dedicated pages because two different questions are
 asked of them.
-[Prominent Discrete Tones (ECMA-418-1)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/)
+[Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/)
 answers a product-noise question: is this tone *prominent* by the
 tone-to-noise and prominence-ratio criteria used in IT-equipment declarations?
-[Objective audibility of tones in noise (ISO/PAS 20065)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/)
+[Objective audibility of tones in noise (ISO/PAS 20065)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/)
 answers an environmental one: by how many decibels does the tone exceed its
 masking threshold, the audibility that feeds the tonal penalty of
 ISO 1996-2.
 
-[Psychoacoustic annoyance and fluctuation strength](https://jmrplens.github.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/)
+[Psychoacoustic annoyance and fluctuation strength](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/)
 closes the chain with the Fastl & Zwicker model, which combines loudness,
 sharpness, roughness and the slow-modulation sensation of fluctuation strength
 into a single annoyance value. Read it last: three of its four inputs come from
@@ -70,18 +70,18 @@ normative model of the same sensation, under a different unit name.
 
 ## Pages in this section
 
-- [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/): the ISO 532-1 Zwicker loudness in
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): the ISO 532-1 Zwicker loudness in
   sones, plus the ISO 226:2023 equal-loudness contours.
-- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/):
+- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/):
   the Moore-Glasberg and Sottek loudness models and the model-choice table.
-- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/): sharpness
+- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): sharpness
   (DIN 45692) and ECMA-418-2 tonality, roughness and fluctuation strength.
-- [Prominent Discrete Tones (ECMA-418-1)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/):
+- [Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/):
   tone-to-noise and prominence ratios with prominence verdicts.
-- [Objective audibility of tones in noise (ISO/PAS 20065)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/):
+- [Objective audibility of tones in noise (ISO/PAS 20065)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/):
   the audibility of a tone above the masking threshold, feeding the
   ISO 1996-2 tonal adjustment.
-- [Psychoacoustic annoyance and fluctuation strength](https://jmrplens.github.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/):
+- [Psychoacoustic annoyance and fluctuation strength](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/):
   the Fastl & Zwicker annoyance model and the fluctuation-strength models it
   consumes.
 
@@ -114,13 +114,13 @@ steady 1 kHz tone reads about 0.09 vacil rather than 0.
 Finally, none of these metrics is a community response: annoyance here is a
 laboratory sensation computed from a signal, while the annoyance a
 neighbourhood reports is a social-survey quantity handled through the
-indicators of [Environment and transport](https://jmrplens.github.io/phonometry/environment/).
+indicators of [Environment and transport](https://docs.jmrp.io/phonometry/environment/).
 
 ---
 
 
-<!-- source: docs/perception/psychoacoustics/loudness.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/
+<!-- source: docs/perception/psychoacoustics/loudness.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/
 
 # Loudness
 
@@ -129,11 +129,11 @@ how loud a listener actually *perceives* it. This page covers the reference
 method, loudness in sones by Zwicker (ISO 532-1), plus the equal-loudness
 contours of pure tones (ISO 226); the newer model families, Moore-Glasberg
 (ISO 532-2/-3) and the Sottek Hearing Model loudness (ECMA-418-2), are
-[Advanced loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/).
 Sharpness, tonality and roughness live in
-[Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/); speech metrics in
-[Speech Transmission Index](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/) and
-[Speech Intelligibility Index](https://jmrplens.github.io/phonometry/perception/speech/speech-intelligibility/).
+[Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/); speech metrics in
+[Speech Transmission Index](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/) and
+[Speech Intelligibility Index](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/).
 
 ## Loudness in sones (ISO 532-1, Zwicker)
 
@@ -252,7 +252,7 @@ beside the specific-loudness pattern $N'(z)$ (the result's own `.plot()`), the
 boxed $N = X\ \text{sone}$ ($L_\mathrm{N} = Y\ \text{phon}$) single number, an optional
 verdict row and a
 footer with the fixed disclaimer. It uses the same `ReportMetadata` container
-(documented under [Insulation ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata))
+(documented under [Insulation ratings](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata))
 and rendering engine as the ISO 717 insulation fiche; a supplied `requirement`
 is read as the maximum permitted loudness in sone (a lower loudness passes).
 Rendering needs reportlab and, for the figure the fiche embeds, matplotlib (`pip
@@ -344,13 +344,13 @@ interpolation between the 29 tabulated frequencies, so `loudness_level()`
 expects one of the Table 1 frequencies and rejects anything else. Note this
 is the loudness of *pure tones*; the loudness of arbitrary signals in sones
 is what the ISO 532 models compute, the Zwicker method above and the newer
-families of [Advanced loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/).
+families of [Advanced loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/).
 
 Zwicker is the reference model, not the only one. The **Moore-Glasberg**
 loudness of ISO 532-2, its time-varying ISO 532-3 extension and the
 **Sottek Hearing Model** loudness of ECMA-418-2, together with the
 model-choice table that says when to prefer each, are
-[Advanced loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/).
 
 ## Quick answers
 
@@ -391,30 +391,30 @@ hearing threshold.
 
 ## See also
 
-- [Advanced loudness (ISO 532-2/-3, ECMA-418-2)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/): the
+- [Advanced loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/): the
   Moore-Glasberg and Sottek loudness models and the model-choice table.
-- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/): sharpness,
+- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): sharpness,
   tonality and roughness, the other half of the sound-quality story.
-- [Psychoacoustic annoyance and fluctuation strength](https://jmrplens.github.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/):
+- [Psychoacoustic annoyance and fluctuation strength](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/):
   the Zwicker and Fastl model that consumes the percentile loudness $N_5$.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.zwicker`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/zwicker/) and [`psychoacoustics.loudness.contours`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/contours/).
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/perception/): the equations behind the loudness models.
+- API reference: [`psychoacoustics.loudness.zwicker`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/zwicker/) and [`psychoacoustics.loudness.contours`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/contours/).
 
 ---
 
 
-<!-- source: docs/perception/psychoacoustics/advanced-loudness.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/
+<!-- source: docs/perception/psychoacoustics/advanced-loudness.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/
 
 # Advanced Loudness (ISO 532-2/-3, ECMA-418-2)
 
 The Zwicker method of ISO 532-1 is the reference route to loudness in sones
-and lives in [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/), together with the ISO 226
+and lives in [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/), together with the ISO 226
 equal-loudness contours. This page covers the newer model families
 phonometry ships beside it: the **Moore-Glasberg** loudness of
 ISO 532-2/532-3 and the **Sottek Hearing Model** loudness of
 ECMA-418-2:2025, whose shared auditory front-end also powers the tonality
-and roughness metrics of [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/).
+and roughness metrics of [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/).
 
 The page opens with the choice: which model fits which measurement, and why
 the sone values of the four methods agree at the 1 kHz / 40 dB anchor yet
@@ -425,7 +425,7 @@ section with a worked example, its figure and its parameter table.
 
 | Model | Standard | Stationary / time-varying | Output | When to use |
 | :--- | :--- | :--- | :--- | :--- |
-| [Zwicker](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) | ISO 532-1:2017 | both | sone | Reference method; one-third-octave input; fast and widely cited |
+| [Zwicker](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) | ISO 532-1:2017 | both | sone | Reference method; one-third-octave input; fast and widely cited |
 | Moore-Glasberg | ISO 532-2:2017 | stationary | sone | roex excitation pattern; better for tones and explicit binaural summation |
 | Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | time-varying | sone (STL/LTL) | Time-varying loudness with short-/long-term traces and the peak $N_\text{max}$ |
 | Sottek (Hearing Model) | ECMA-418-2:2025 | time-varying | sone_HMS | Shares one auditory front-end with the ECMA tonality and roughness metrics |
@@ -768,12 +768,12 @@ The Zwicker method (ISO 532-1:2017) is the reference: stationary and time-varyin
 
 ## See also
 
-- [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/): the Zwicker reference method (ISO 532-1), its
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): the Zwicker reference method (ISO 532-1), its
   accredited fiche and the ISO 226 equal-loudness contours.
-- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/): the tonality, roughness and
+- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): the tonality, roughness and
   fluctuation strength built on the same ECMA-418-2 front-end.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.moore_glasberg`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/ecma/).
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/perception/): the equations behind the loudness models.
+- API reference: [`psychoacoustics.loudness.moore_glasberg`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/ecma/).
 
 ## References
 
@@ -813,8 +813,8 @@ based on the Sottek Hearing Model)*: the Sottek Hearing Model loudness
 ---
 
 
-<!-- source: docs/perception/psychoacoustics/sound-quality.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/
+<!-- source: docs/perception/psychoacoustics/sound-quality.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/
 
 # Sound Quality Metrics
 
@@ -822,9 +822,9 @@ Two sounds of equal loudness can still differ in how *sharp*, how *tonal*,
 how *rough* or how strongly *fluctuating* they are. This page covers the
 sound-quality metrics that complement loudness: sharpness (DIN 45692) and the
 ECMA-418-2 tonality, roughness and fluctuation strength of the Sottek Hearing
-Model. Loudness itself lives in [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/); the ECMA-418-2
+Model. Loudness itself lives in [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/); the ECMA-418-2
 loudness that shares the same auditory front-end lives in
-[Advanced loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/).
 
 The four metrics form one family: a single calibrated signal splits across
 two auditory front ends, and every branch is anchored to a reference sound
@@ -1146,17 +1146,17 @@ the 90th percentile of $F(l_{50})$), `specific_fluctuation_strength`
 
 The Fastl & Zwicker fluctuation-strength models (closed form for AM
 broadband noise and the Osses 2016 signal model) live in
-[Psychoacoustic Annoyance](https://jmrplens.github.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/); this Clause 9
+[Psychoacoustic Annoyance](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/); this Clause 9
 metric is the normative Sottek-model counterpart.
 
-See [Prominent Discrete Tones](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/) for the ECMA-418-1 TNR/PR
-prominence verdicts, [Speech Transmission Index](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/) for
-STI/STIPA, and [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/) for the underlying math.
+See [Prominent Discrete Tones](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/) for the ECMA-418-1 TNR/PR
+prominence verdicts, [Speech Transmission Index](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/) for
+STI/STIPA, and [Theory](https://docs.jmrp.io/phonometry/reference/theory/perception/) for the underlying math.
 
 ## See also
 
-- API reference: [`psychoacoustics.quality.sharpness`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.quality.tonality_ecma`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics.quality.roughness_ecma`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics.quality.fluctuation_strength_ecma`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
-- Theory: [Advanced loudness models and sound quality](https://jmrplens.github.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
+- API reference: [`psychoacoustics.quality.sharpness`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.quality.tonality_ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics.quality.roughness_ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics.quality.fluctuation_strength_ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- Theory: [Advanced loudness models and sound quality](https://docs.jmrp.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
 
 ## References
 
@@ -1180,8 +1180,8 @@ clause 9, the HSA-based envelope analysis).
 ---
 
 
-<!-- source: docs/perception/psychoacoustics/tone-prominence.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/
+<!-- source: docs/perception/psychoacoustics/tone-prominence.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/
 
 # Prominent Discrete Tones (ECMA-418-1)
 
@@ -1376,12 +1376,12 @@ Read the table as a decision: the *purpose of the report* picks the metric,
 not the convenience of the input. A device emission declaration is an
 ECMA-418-1 prominence verdict; a complaint about a tone from an installation
 is an ISO 1996-2 rating, so it needs the audibility $\Delta L$ that maps to `Kt`
-([tone audibility](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/)); a product comparison where nobody is
+([tone audibility](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/)); a product comparison where nobody is
 being fined is where the ECMA-418-2 tonality earns its place, because it is a
-magnitude rather than a threshold test ([sound quality](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/));
+magnitude rather than a threshold test ([sound quality](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/));
 and a turbine is its own regime, with a measurement procedure in
 IEC 61400-11 that fixes the geometry and the wind bins
-([wind-turbine noise](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/)).
+([wind-turbine noise](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/)).
 
 Two consequences worth keeping in mind. First, the numbers do not convert:
 a TNR of 12 dB is not an audibility of 12 dB, because the masking model, the
@@ -1395,19 +1395,19 @@ other only as supporting evidence.
 
 ## See also
 
-- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 rating levels and their Table A.1
+- [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 rating levels and their Table A.1
   tonal adjustments, whose Kt is justified by the ISO/PAS 20065 audibility
   route; these prominence verdicts are complementary emission screening.
-- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/): the ECMA-418-2 psychoacoustic
+- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): the ECMA-418-2 psychoacoustic
   tonality T in tu_HMS, the hearing-model counterpart of these FFT ratios.
-- [Objective audibility of tones in noise](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/): the ISO/PAS 20065
+- [Objective audibility of tones in noise](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/): the ISO/PAS 20065
   audibility ΔL that the ISO 1996-2 tonal adjustment Kt is read from.
-- [Wind-turbine noise](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/): the IEC 61400-11 tonal audibility,
+- [Wind-turbine noise](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/): the IEC 61400-11 tonal audibility,
   the same question asked per wind-speed bin.
-- [Impulsive-sound prominence](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/): the NT ACOU 112
+- [Impulsive-sound prominence](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/): the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/): the critical-band model and criteria derivation.
-- API reference: [`psychoacoustics.quality.tonality`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/tonality/).
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/perception/): the critical-band model and criteria derivation.
+- API reference: [`psychoacoustics.quality.tonality`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality/).
 
 ## References
 
@@ -1434,8 +1434,8 @@ frequency-dependent prominence criteria.
 ---
 
 
-<!-- source: docs/perception/psychoacoustics/tone-audibility.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/
+<!-- source: docs/perception/psychoacoustics/tone-audibility.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/
 
 # Objective audibility of tones in noise (ISO/PAS 20065)
 
@@ -1447,7 +1447,7 @@ derives, for every prominent tone, the **audibility** $\Delta L$: how many
 decibels the tone level exceeds the masking threshold of the surrounding noise.
 (Whether a tone is *annoying* is a separate, downstream rating judgement.) It
 is the detailed method that **ISO 1996-2:2017** defers to (the simpler Annex C
-route lives in [environmental measurement](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/)); the mean
+route lives in [environmental measurement](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/)); the mean
 audibility $\Delta L$ it produces feeds the ISO 1996-2 tonal adjustment $K_\mathrm{t}$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility.svg" alt="Per-tone audibility ΔL of the nine tones of the ISO/PAS 20065 Annex E combustion-engine spectrum, with the decisive tone at 137.3 Hz highlighted and the ΔL = 0 dB audibility threshold marked" width="82%"></picture>
@@ -1765,8 +1765,8 @@ adjustment $K$ (Table J.1), an optional PASS/FAIL verdict row and a
 prominence note, and a footer with the fixed disclaimer.
 
 It uses the same `ReportMetadata` container
-(documented under [Insulation ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata))
-and rendering engine as the [ISO 532-1 loudness fiche](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/#iso-532-1-report-report);
+(documented under [Insulation ratings](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata))
+and rendering engine as the [ISO 532-1 loudness fiche](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/#iso-532-1-report-report);
 a supplied `requirement` is read as the maximum acceptable decisive audibility
 $\Delta L_\mathrm{ta}$ in dB (a quieter tone passes). Rendering needs reportlab and, for the
 figure the fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`);
@@ -1799,19 +1799,19 @@ repository; click the preview to open the PDF.
 
 ## See also
 
-- [Environmental noise measurement](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/):
+- [Environmental noise measurement](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/):
   the ISO 1996-1 rating level this audibility feeds, and the simpler ISO 1996-2
   Annex C route for a single spectrum.
-- [Tone prominence: TNR and PR](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/):
+- [Tone prominence: TNR and PR](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/):
   the ECMA-418-1 prominence question asked of product noise, with the table
   that picks between the library's four tonality metrics.
-- [Wind turbine noise](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/):
+- [Wind turbine noise](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/):
   the IEC 61400-11 per-bin audibility, the same formula applied to a
   bin-by-bin wind-speed campaign.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/#tone-prominence-tnr-and-pr-ecma-418-1):
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/perception/#tone-prominence-tnr-and-pr-ecma-418-1):
   the neighbouring family of tone metrics, TNR and PR, derived from the same
   critical-band picture.
-- API reference: [`psychoacoustics.quality.tone_audibility`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/tone-audibility/).
+- API reference: [`psychoacoustics.quality.tone_audibility`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tone-audibility/).
 
 ## References
 
@@ -1860,13 +1860,13 @@ because the module is weighting agnostic. Where the two documents disagree, the
 distinctness edge-steepness test follows the **DIN 45681:2005-03** reading and
 its executable reference program rather than the asymmetric formulae printed in
 ISO/PAS 20065, which contradict it; the defect is registered in
-[Errata](https://jmrplens.github.io/phonometry/reference/errata/).
+[Errata](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ---
 
 
-<!-- source: docs/perception/psychoacoustics/psychoacoustic-annoyance.md | canonical: https://jmrplens.github.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/ -->
-Source: https://jmrplens.github.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/
+<!-- source: docs/perception/psychoacoustics/psychoacoustic-annoyance.md | canonical: https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/ -->
+Source: https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/
 
 # Psychoacoustic annoyance and fluctuation strength (Fastl & Zwicker)
 
@@ -1918,7 +1918,7 @@ model and unit in the library:
 
 - **Loudness**: the percentile loudness $N_5$ (the loudness exceeded 5 % of the
   time), in **sone**, from the ISO 532-1 Zwicker time-varying model
-  (`loudness_zwicker`, see [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/)).
+  (`loudness_zwicker`, see [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/)).
 - **Sharpness** $S$, in **acum**: the spectral balance towards high
   frequencies, DIN 45692 (`sharpness_din`).
 - **Roughness** $R$, in **asper**: the harshness of fast (~70 Hz) amplitude
@@ -2008,7 +2008,7 @@ $f_\mathrm{mod} \approx 4\ \text{Hz}$ rather than the ~70 Hz roughness peak. By
 definition, a 1 kHz tone at 60 dB,
 100 % amplitude-modulated at 4 Hz, produces 1 vacil. This page covers the
 Fastl & Zwicker models; the normative Sottek-model fluctuation strength of
-ECMA-418-2 Clause 9 lives in [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/).
+ECMA-418-2 Clause 9 lives in [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Left: the closed-form and signal-model fluctuation strength of the same amplitude-modulated broadband noise at 60 dB against modulation frequency, both band-pass around 4 Hz, the signal model peaking at 5.5 vacil against the closed form's 3.7, a factor 1.5 overshoot at 4 Hz. Right: the signal model on the amplitude-modulated 1 kHz tone at 70 dB of its Table 1 literature cross-check, peaking at 1.09 vacil at 4 Hz" width="82%"></picture>
 
@@ -2166,21 +2166,21 @@ accumulates more of it than the single closed form allows.
 
 ## See also
 
-- [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/): the ISO 532-1
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): the ISO 532-1
   percentile loudness $N_5$ this model takes as its first argument, and the
   acquisition rules the recording has to satisfy before any of it applies.
-- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/):
+- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/):
   the DIN 45692 sharpness $S$, the ECMA-418-2 roughness $R$ and the normative
   vacil_HMS fluctuation strength of the same sensation this page models in
   vacil.
-- [Advanced Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/advanced-loudness/):
+- [Advanced Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/):
   the alternative loudness models, and why mixing families makes the composite
   an engineering estimate.
-- [Environmental Levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/):
   community annoyance, the other thing the word means, and the rating levels it
   is assessed with.
-- Theory: [Advanced loudness models and sound quality](https://jmrplens.github.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the loudness and sound-quality metrics the annoyance model combines, derived one at a time.
-- API reference: [`psychoacoustics.quality.annoyance`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics.quality.fluctuation_strength`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/fluctuation-strength/).
+- Theory: [Advanced loudness models and sound quality](https://docs.jmrp.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the loudness and sound-quality metrics the annoyance model combines, derived one at a time.
+- API reference: [`psychoacoustics.quality.annoyance`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics.quality.fluctuation_strength`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength/).
 
 ## References
 
@@ -2215,7 +2215,7 @@ sensation of fluctuation strength* (ICA 2016), clean-room and with no numeric
 standard: calibrated to 1 vacil at the reference AM tone and cross-checked
 against the paper's Table 1 literature trends and the open SQAT reference oracle.
 The four sensations reuse the library's ISO 532-1 loudness, DIN 45692 sharpness
-and ECMA-418-2 roughness (see [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) and
-[Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/)).
+and ECMA-418-2 roughness (see [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) and
+[Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/)).
 
 ---

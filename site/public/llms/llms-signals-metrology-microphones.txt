@@ -1,11 +1,11 @@
 # phonometry: Microphone calibration (IEC 61094)
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/signals/metrology/comparison-calibration.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/
+<!-- source: docs/signals/metrology/comparison-calibration.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/
 
 # Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)
 
@@ -129,7 +129,7 @@ print(round(b.linear_combined_uncertainty_db, 4))                               
 ```
 
 D.3 prints 0,040 dB and 0,08 dB, which are not the root-sum-square of its own
-eight components (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)). The strict calculation in
+eight components (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)). The strict calculation in
 linear form D.3 mentions, and does not print, gives 0,043 614 dB; the Spanish
 UNE-EN 61094-5:2017 leaves six of the eight values of Table D.1 blank and prints
 0,004 dB in D.3. With one budget per frequency, the expanded uncertainty goes
@@ -209,7 +209,7 @@ its expanded uncertainty; the paper prints no speed of sound, and at
 the paper's formulas with its own inputs do not give its own table: the
 library reads the radial sensitivity of its Formula (4) less 1 and the
 annulus of its Formula (2) from the WS3's overall radius, the two readings
-that do (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)). A.2 sets the expanded uncertainty of
+that do (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)). A.2 sets the expanded uncertainty of
 Table A.1 at 10 % of each correction, "which is approximately the change
 observed by doubling the distance between the microphones";
 `separation_change_db` is that change by the model, of the order A.2 states
@@ -362,7 +362,7 @@ The impulse response lasts the inverse of the frequency step, 20 ms (B.2.2:
 120 Hz is enough in a small anechoic room "because the primary reflections
 all occur before 8 ms", about 30 Hz in a large one). B.2.1 says the
 increment "will determine the time domain resolution"; it is the length it
-sets, as B.2.2 says (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)). `ir_ws2f.plot()` draws
+sets, as B.2.2 says (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)). `ir_ws2f.plot()` draws
 the whole record:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response.svg" alt="The WS2F's impulse response from the stepped sine of 0 Hz to 100 kHz in 50 Hz steps, normalised to its peak, over the whole 20 ms record: the direct sound at 2.89 ms with a short ringing, the rig's reflection at 4.28 ms at about a tenth of the peak, and nothing after them up to 20 ms. The title gives the 50 Hz step and the 20.00 ms length" width="88%"></picture>
@@ -416,7 +416,7 @@ rectangular pulse, whose spectrum is Formula (B.10); its first zero, `1/(2b)`,
 "must be approximately an order of magnitude higher than the upper limit of
 the frequency range of interest". The formula is that of a pulse lasting
 `2b`, although the text calls `b` the duration (an
-[erratum](https://jmrplens.github.io/phonometry/reference/errata/)), and `metrology.rectangular_pulse` takes the
+[erratum](https://docs.jmrp.io/phonometry/reference/errata/)), and `metrology.rectangular_pulse` takes the
 whole duration:
 
 ```python
@@ -501,7 +501,7 @@ two "see slightly different pressures [...] (see 7.4 and [2])": each diaphragm t
 series impedance, and `V_x` is the equivalent volume of that impedance,
 which the circuit of [2] gives (below).
 `metrology.ReciprocityMicrophone`, the microphone of
-[the reciprocity calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/), holds the lumped
+[the reciprocity calibration](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/), holds the lumped
 parameters of IEC 61094-2 E.4, the low-frequency volume, the resonance
 frequency and the loss factor, and its `complex_equivalent_volume_m3` gives
 `V_e` from them. Its ratio to the low-frequency volume holds no `kappa_r`, so
@@ -597,7 +597,7 @@ curves for `P1/P2`, the LS2P re the WS2P, so the other way up, with its
 report reproduces them. In the published scan its impedance of the LS2P
 shows no imaginary unit on the mass term, where blank space stands; the
 second microphone's has it, and the graph needs it (an
-[erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+[erratum](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_air_gap_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_air_gap.svg" alt="The pressure ratio of the high sensitivity WS2P re the LS2P of Jarvis (1996) Appendix B in a coupler 2 mm long and 12.7 mm across, from 100 Hz to 20 kHz. Left, its level: nothing up to 1 kHz, rising to +0.0064 dB at 7 kHz, crossing 0 dB near 10 kHz and falling to -0.025 dB at 20 kHz, with its standard uncertainty dashed. Right, its phase: nothing up to 2 kHz, falling to -0.158 degrees at 12.5 kHz and back to -0.09 degrees at 20 kHz" width="100%"></picture>
 
@@ -629,7 +629,7 @@ cover a full frequency range with low uncertainty" (6.7).
 coupler beside another calibration of the same microphone, a comparison made
 elsewhere or, for a laboratory standard microphone, the
 `ReciprocityCalibration` of [the reciprocity
-calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/) with the index of that microphone,
+calibration](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/) with the index of that microphone,
 and compares them at the frequencies they share. The clause prints no
 criterion. The library reads "validated" as the two agreeing within the
 expanded uncertainty of their difference, `|L_cal - L_val| <= U_Δ`, which
@@ -782,10 +782,10 @@ which are `room.impulse_response`, `room.mls_impulse_response` and
 `electroacoustics.transfer_function` elsewhere in the library, and the
 synchronous averaging of B.6.2, which is `signals.time_synchronous_average`;
 the qualification of the free field by ISO 26101, on [its own
-page](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/); the values of
+page](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/); the values of
 IEC/TS 61094-7, which are inputs, and the reciprocity calibration of the
 reference, which is in
-[Microphone calibration by reciprocity](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/); the second special case of Table D.1, a microphone calibrated as a
+[Microphone calibration by reciprocity](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/); the second special case of Table D.1, a microphone calibrated as a
 system with its preamplifier (0,002 dB, and under 0,02 dB above 200 Hz),
 which a budget takes through `additional_components`; a covariance that
 widens the uncertainty of the difference, as between two microphones of the
@@ -794,26 +794,26 @@ Formula (7)), which `verify_jig_or_coupler` does not take.
 
 ## See also
 
-- [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/):
+- [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/):
   the primary calibration of the laboratory standard microphone a comparison
   takes as its reference.
-- [Free-field corrections of a sound level meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/):
+- [Free-field corrections of a sound level meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/):
   a meter compared with an LS2P reference in the same way.
-- [Random-incidence and diffuse-field response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+- [Random-incidence and diffuse-field response (IEC 61183)](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/):
   the diffuse-field comparison that computes through the same model.
-- [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
+- [Measurement uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
   the budgets are combined by.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): IEC 61094-5 D.3, UNE-EN
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): IEC 61094-5 D.3, UNE-EN
   61094-5:2017 Table D.1, IEC 61094-8 8.4, B.2.1 and Formula (B.10),
   Barham et al. (2014) Formulas (1), (2) and (4), and Jarvis (1996)
   Appendix B.
-- API reference: [`metrology.comparison_calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/comparison-calibration/).
+- API reference: [`metrology.comparison_calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/comparison-calibration/).
 
 ---
 
 
-<!-- source: docs/signals/metrology/reciprocity-calibration.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/
+<!-- source: docs/signals/metrology/reciprocity-calibration.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/
 
 # Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)
 
@@ -1098,16 +1098,16 @@ figure.
 
 ## See also
 
-- [Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/):
+- [Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)](https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/):
   carrying a reciprocity-calibrated reference over to a working standard
   microphone.
-- [Humid air](https://jmrplens.github.io/phonometry/fluids/humid-air/): the IEC 61094-2 Annex F air.
-- [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): the GUM the budgets are
+- [Humid air](https://docs.jmrp.io/phonometry/fluids/humid-air/): the IEC 61094-2 Annex F air.
+- [Measurement uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/): the GUM the budgets are
   combined by.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): IEC 61094-2 Tables B.1 and
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): IEC 61094-2 Tables B.1 and
   B.2, IEC 61094-3 Formulas (8) and (9), and B.2 Step 1.
-- API reference: [`metrology.reciprocity_calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-calibration/),
-  [`metrology.reciprocity_coupler`](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-coupler/),
-  [`metrology.reciprocity_free_field`](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-free-field/).
+- API reference: [`metrology.reciprocity_calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-calibration/),
+  [`metrology.reciprocity_coupler`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-coupler/),
+  [`metrology.reciprocity_free_field`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-free-field/).
 
 ---

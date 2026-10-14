@@ -1,15 +1,15 @@
 # phonometry: Insulation design
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/buildings/design/index.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/
+<!-- source: docs/buildings/design/index.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/
 
 # Insulation design
 
-The pages of the [Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/)
+The pages of the [Sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/)
 section answer the question *what does this building achieve?* The pages here
 answer the one that comes first: *what will it achieve, and what should I
 build?* Both halves speak the same language of $R$, $L_\mathrm{n}$ and their weighted
@@ -17,16 +17,16 @@ single numbers, but a prediction is assembled from element data instead of
 measured in a finished room, so its inputs, its assumptions and its error bars
 are its own subject.
 
-[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/)
+[Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/)
 is the normative model: the airborne and impact flanking transmission between
 two rooms, path by path, from the direct element and the junction vibration
 reduction indices $K_{ij}$. It consumes laboratory element data measured per
 ISO 10140 and junction data measured per ISO 10848, both of which live in
-[Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) beside the
+[Sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/) beside the
 field measurement the prediction is checked against, and beside the façade
 guide that carries the same family across the building envelope.
 
-[Detailed Per-Band Prediction (ISO 12354)](https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/)
+[Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/)
 runs the same standard band by band instead of on single numbers: the
 laboratory element and junction data are converted to their in-situ values,
 every path is formed per band, and the result shows which path dominates each
@@ -43,7 +43,7 @@ detailed airborne model carries no bias error and a standard deviation of 1,5 dB
 to 2,5 dB (Clause 5) against about 2 dB for the simplified one. What the
 detailed model buys is the spectrum behind the single number.
 
-[Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/)
+[Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/)
 goes one level deeper, to where the element $R$ itself comes from: the mass law
 and the coincidence dip of a single panel, the plateau shortcut that estimates
 the whole curve by hand, the coincidence *range* of a corrugated or ribbed sheet,
@@ -54,27 +54,27 @@ expresses in one number.
 
 Two pages here carry the floor half of any design, one measuring and one
 predicting.
-[Floor-Covering Impact Improvement (ISO 16251-1)](https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/)
+[Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/)
 gives the weighted improvement $\Delta L_\mathrm{w}$ of a covering that exists, on a
 small heavyweight mock-up, and that is the term EN 12354-2 subtracts from the
 bare-floor level.
-[Predicting Resilient-Layer Performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/)
+[Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/)
 predicts it for a covering that does not yet exist, from the tapping machine's
 own force spectrum, the cut-off frequency of a soft covering, the 30 lg and
 40 lg floating-floor laws and the ISO 12354-1 Annex D rating of a wall lining.
 Both start from the stiffness per unit area $s'$ of the resilient layer,
 measured per EN 29052-1 in
-[Dynamic stiffness of resilient materials](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/)
+[Dynamic stiffness of resilient materials](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/)
 over in the materials section, which sets the resonance the whole improvement
 hangs on.
 
 Building service equipment is a chain of its own, and the two pages only read
 correctly in order.
-[Structure-borne sound power of equipment (EN 15657)](https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/)
+[Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/)
 characterises a pump, fan or cistern by the power it injects into the
 structure, measured on a reception plate of known dissipation and then made
 plate-independent.
-[Installed structure-borne sound (EN 12354-5)](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/)
+[Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/)
 takes that source description, loses part of it to the coupling term the source
 and receiver mobilities set, and carries the rest to a room that may be several
 junctions away.
@@ -83,15 +83,15 @@ junctions away.
 The prediction family was published by CEN as EN 12354-1 to -6 and later
 reissued by ISO as a second edition, ISO 12354-1:2017 and ISO 12354-2:2017,
 which is not word for word the earlier text: where a formula changed between the
-prints, the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/) records both. Parts
+prints, the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/) records both. Parts
 3 to 6 keep their EN designation in the editions used here. Every guide names
 the edition it was read from: EN 12354-1:2000 and EN 12354-2:2000 for the
 simplified models on
-[Predicting Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/),
+[Predicting Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/),
 including the tabulated flanking correction $K$ that the 2017 impact part
 replaced with explicit per-path formulae; ISO 12354-1:2017 and ISO 12354-2:2017
 for the per-band models and the Annex L/G worked examples of
-[Detailed Per-Band Prediction](https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/);
+[Detailed Per-Band Prediction](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/);
 and EN 12354-3:2000 to EN 12354-6:2003 for façades, service equipment and
 enclosed spaces. Check which edition your regulation calls up before quoting a
 clause or a correction from either.
@@ -114,34 +114,34 @@ resilient layer's $s'$ comes from EN 29052-1. And for service equipment, the
 characteristic structure-borne power comes from the EN 15657 reception plate.
 Two of the pages in this section are themselves such measurements, feeding the
 others; the built result is finally checked against the ISO 16283 field
-measurement in [Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/).
+measurement in [Sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/).
 
 ## Pages in this section
 
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/):
   the airborne and impact flanking models between rooms (EN 12354-1/2) with
   their junction vibration reduction indices and prediction fiches.
-- [Detailed Per-Band Prediction (ISO 12354)](https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/):
+- [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/):
   the per-band detailed model of ISO 12354-1/-2 with in-situ element and
   junction conversion, the flanking indices per band and the per-path
   contributions behind the rating.
-- [Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/):
   the mass law, the plateau shortcut and the coincidence dip of a single panel
   (Sharp, Norton), the coincidence range of a corrugated or ribbed sheet
   (Vigran/Heckl), double walls and the wall-tie bridge of a masonry cavity wall
   (Bies, Hopkins), slits and apertures (Gomperts, Wilson-Soroka), radiation
   efficiency (Leppington/Maidanik) and point mobilities (Cremer).
-- [Floor-Covering Impact Improvement (ISO 16251-1)](https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/):
   the weighted improvement of a soft floor covering measured on a small
   heavyweight mock-up.
-- [Predicting Resilient-Layer Performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/):
+- [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/):
   the tapping-machine force model, the cut-off frequency of a soft covering,
   the floating-floor improvement laws and the ISO 12354-1 Annex D rating of a
   wall lining.
-- [Structure-borne sound power of equipment (EN 15657)](https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/):
   the characteristic power a machine injects into a building element, measured
   on a reception plate.
-- [Installed structure-borne sound (EN 12354-5)](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/):
   what that power becomes once the machine is mounted on a real element, and
   the level it produces in the receiving room.
 
@@ -149,7 +149,7 @@ measurement in [Sound insulation](https://jmrplens.github.io/phonometry/building
 
 Pages elsewhere on the site that this section leans on:
 
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the load-plate resonance measurement, the enclosed-gas term and the
   floating-floor natural frequency.
 
@@ -180,7 +180,7 @@ springs; there is no per-band prediction of a lining's improvement, because
 Annex D is a single-number method; and heavy impact sources such as the rubber
 ball are not covered by any of these models at all: their rating is [Heavy
 and Soft Impact
-Sources](https://jmrplens.github.io/phonometry/buildings/insulation/heavy-impact-sources/).
+Sources](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/).
 
 Two edition boundaries: only the 2009 edition of EN 12354-5 is implemented,
 not the 2023 revision, and the simplified and detailed pages follow different
@@ -189,8 +189,8 @@ editions of the 12354 family, as the note above says.
 ---
 
 
-<!-- source: docs/buildings/design/insulation-prediction.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/
+<!-- source: docs/buildings/design/insulation-prediction.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/
 
 # Predicting Sound Insulation (EN 12354)
 
@@ -201,11 +201,11 @@ the airborne model of EN 12354-1 with its junction vibration reduction
 indices, the impact model of EN 12354-2 and the prediction fiches of both. The
 third and fourth parts of the same family, which cross the building envelope
 instead of an internal partition, are in
-[Façade Sound Insulation](https://jmrplens.github.io/phonometry/buildings/insulation/facade-insulation/). The measured quantities the
+[Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/). The measured quantities the
 model is checked against live in
-[Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/); the
+[Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/); the
 laboratory inputs come from
-[Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/).
+[Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/).
 
 ## Predicting performance (EN 12354)
 
@@ -415,9 +415,9 @@ it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
 $D_{\mathrm{n}T,\mathrm{w}} = 54$ dB).
 
 The three insulation guides close a loop: the
-[laboratory](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/) measures $R$ and $K_{ij}$ element by element
+[laboratory](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/) measures $R$ and $K_{ij}$ element by element
 and junction by junction, this model assembles them into a predicted $R'_\mathrm{w}$,
-and the [field measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/) checks the built result.
+and the [field measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/) checks the built result.
 When the measured value lands well below the prediction, look for a
 construction defect on the dominant path the model reports: a rigid bridge
 across a resilient junction, a missing lining, a leak around the separating
@@ -517,7 +517,7 @@ insulation against outdoor sound, EN 12354-4 the sound power an indoor source
 radiates outwards. Both are built on the same area-weighted summation of
 element transmission factors used above, and both are covered, beside the
 ISO 16283-3 measurement they are compared against, in
-[Façade Sound Insulation](https://jmrplens.github.io/phonometry/buildings/insulation/facade-insulation/).
+[Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/).
 
 ## References
 
@@ -536,7 +536,7 @@ EN 12354-3:2000 and EN 12354-4:2000 have their own page, and the absorption
 member of the family is EN 12354-6.
 
 **Not covered.** The *detailed* per-band models of both parts are a separate
-page, [Detailed per-band prediction (ISO 12354)](https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/): the
+page, [Detailed per-band prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/): the
 same standard run band by band, with the laboratory element and junction data
 converted to their in-situ values before the paths are formed. Use the
 simplified model here when only the weighted element ratings are known and the
@@ -544,42 +544,42 @@ question is whether the room passes; use the detailed one when the element
 spectra exist and the question is which path sets which band. The element
 inputs themselves ($R_\mathrm{w}$, $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, mass per unit area)
 are taken as given, from laboratory data or from the mass-law estimates of
-[Predicting panel sound insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/). **EN 12354-5**
+[Predicting panel sound insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/). **EN 12354-5**
 (service equipment) is in
-[Installed structure-borne sound](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/).
+[Installed structure-borne sound](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/).
 
 ## See also
 
-- [Façade Sound Insulation](https://jmrplens.github.io/phonometry/buildings/insulation/facade-insulation/): the EN 12354-3 and
+- [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/): the EN 12354-3 and
   EN 12354-4 predictions across the building envelope, with the ISO 16283-3
   measurement they are compared against.
-- [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/):
   the measured in-situ quantities the prediction is checked against.
-- [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
+- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
   engine behind the predicted $R'_\mathrm{w}$ and $L'_\mathrm{n,w}$.
-- [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/): the
+- [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/): the
   ISO 10140 ratings the model consumes.
-- [Laboratory Flanking Transmission (ISO 10848)](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/): the
+- [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/): the
   measured junction vibration reduction index $K_{ij}$ the model consumes.
-- [Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/):
   the absorption member of the same EN 12354 family.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the $s'$ input to the EN 12354-2 floating-floor term.
-- API reference: [`building.prediction.simplified_model`](https://jmrplens.github.io/phonometry/reference/api/building/simplified-model/) and [`building.prediction.facade`](https://jmrplens.github.io/phonometry/reference/api/building/facade/).
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#transmission-loss): the
+- API reference: [`building.prediction.simplified_model`](https://docs.jmrp.io/phonometry/reference/api/building/simplified-model/) and [`building.prediction.facade`](https://docs.jmrp.io/phonometry/reference/api/building/facade/).
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#transmission-loss): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.
 
 ---
 
 
-<!-- source: docs/buildings/design/detailed-prediction.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/
+<!-- source: docs/buildings/design/detailed-prediction.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/
 
 # Detailed Per-Band Prediction (ISO 12354)
 
 The simplified model of
-[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/) returns one
+[Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) returns one
 number, $R'_\mathrm{w}$ or $L'_\mathrm{n,w}$, and hides everything that happens inside the
 spectrum. The **detailed model** (ISO 12354-1:2017 Clause 4.2 airborne,
 ISO 12354-2:2017 Clause 4.2 impact) carries every quantity through the
@@ -613,7 +613,7 @@ thick element stops improving, and Formula (B.10) floors the transmission
 factor at a plateau set by $\rho c_\mathrm{L}$. Only homogeneous elements are
 calculated this way: the spectrum of a lightweight, double or composite
 element enters the chain as an input, from
-[Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/) or from a test
+[Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) or from a test
 report.
 
 **2. In-situ conversion.** The element radiates and is damped differently in
@@ -673,7 +673,7 @@ mineral wool, two 365 mm autoclaved aerated concrete external walls and two
 junctions. Together they print about twenty per-band tables, one per
 intermediate quantity, which makes the example a complete oracle for the
 model. Eight defects of those printed tables are recorded in
-[Errata](https://jmrplens.github.io/phonometry/reference/errata/), and the fixture below takes the corrected readings.
+[Errata](https://docs.jmrp.io/phonometry/reference/errata/), and the fixture below takes the corrected readings.
 
 ```python
 import numpy as np
@@ -715,7 +715,7 @@ The element's $m'$ and $f_\mathrm{c}$ follow from its material and its
 thickness, $m' = \rho t$ and $f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$
 with the density and the quasi-longitudinal phase velocity of Table B.3, and
 `HomogeneousElement.from_solid` works both out from a solid's catalogue row,
-a published one or one of [your own catalogues](https://jmrplens.github.io/phonometry/io/material-catalogues/). The internal loss factor
+a published one or one of [your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/). The internal loss factor
 is never read from the row, which may hold four, so it is given here as the
 element specification gives it. The unrounded $f_\mathrm{c}$ is the one the
 standard's footnote says its calculation used:
@@ -1053,28 +1053,28 @@ factors, Annex C the structural reverberation time and Annex E the junction
 vibration reduction indices. The worked examples of ISO 12354-1 Annex L and
 ISO 12354-2 Annex G describe one shared building in about twenty per-band
 tables and are the numerical anchor of this module; the defects found in their
-printed tables are recorded in [Errata](https://jmrplens.github.io/phonometry/reference/errata/).
+printed tables are recorded in [Errata](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/): the
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): the
   simplified single-number model and the Annex E junction catalogue this page
   builds on.
-- [Laboratory Flanking Transmission (ISO 10848)](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/): where the
+- [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/): where the
   measured $K_{ij}$ and the equivalent absorption length come from.
-- [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
+- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
   engine that turns the predicted spectrum into $R'_\mathrm{w}$ / $L'_\mathrm{n,w}$.
-- [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/): the built
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): the built
   result the prediction is checked against.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the $s'$ behind the floating floor's resonance frequency.
-- API reference: [`building.prediction.detailed_model`](https://jmrplens.github.io/phonometry/reference/api/building/detailed-model/).
+- API reference: [`building.prediction.detailed_model`](https://docs.jmrp.io/phonometry/reference/api/building/detailed-model/).
 
 ---
 
 
-<!-- source: docs/buildings/design/panel-sound-insulation.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/
+<!-- source: docs/buildings/design/panel-sound-insulation.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/
 
 # Predicting Panel Sound Insulation (mass law, coincidence, double walls)
 
@@ -1086,8 +1086,8 @@ the double wall (its mass-spring-mass resonance), the transmission through slits
 and apertures that caps any real construction, the radiation efficiency of a
 bending plate, and the point mobilities that set the vibrational power a
 structure absorbs. The measured counterparts these predictions feed live in
-[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/) and
-[Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/).
+[Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) and
+[Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Four panels: the single-panel mass law with its coincidence dip, the double wall with the mass-spring-mass resonance and cavity gain, the plate radiation efficiency rising to unity above the critical frequency, and a composite wall whose 1 % open slit caps R at the open-area limit" width="92%"></picture>
 
@@ -1193,7 +1193,7 @@ plt.show()
 </details>
 
 The clip below watches coincidence happen in a 2D
-[elastic FDTD field](https://jmrplens.github.io/phonometry/simulation/elastic-waves/): a 10 mm
+[elastic FDTD field](https://docs.jmrp.io/phonometry/simulation/elastic-waves/): a 10 mm
 steel plate immersed in air, driven by a sustained plane wave at 45 degrees,
 with both frequencies picked from the library's `coincidence_frequency`. At
 $f_\mathrm{c}/2 = 603$ Hz the measured transmission lands on the oblique mass law; at
@@ -1305,7 +1305,7 @@ print(res.transmission_loss.round(1))
 The material does not have to be a name. `material=` also takes a
 `PlateauMaterial` row: one of `solids.PUBLISHED_PLATEAU_DATA`, which draws
 the same curve as its name, or a row of your own that `io.read_catalogue`
-read from a data sheet ([Your own catalogues](https://jmrplens.github.io/phonometry/io/material-catalogues/)).
+read from a data sheet ([Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/)).
 A row gives its three numbers only through
 `printed()`, so a sheet that declares its plateau height as a bound ("no
 more than 30 dB") is refused with what it prints rather than drawn at
@@ -1741,7 +1741,7 @@ compared level for level.
 
 How much airborne power a vibrating plate radiates per unit mean-square velocity
 is its **radiation efficiency** $\sigma$, the radiation factor $\varepsilon$
-that [Sound Power from Surface Vibration](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/) (ISO 7849)
+that [Sound Power from Surface Vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/) (ISO 7849)
 otherwise takes as a measured input. Below the critical frequency the plate
 radiates weakly; above it $\sigma \to 1$ (Leppington/Maidanik, Eqs 2.227-2.230):
 $\sigma = (1 - f_\mathrm{c}/f)^{-1/2}$ for $f > f_\mathrm{c}$.
@@ -1933,21 +1933,21 @@ need the whole room-plate-cavity-plate-room chain.
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/): assembles
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): assembles
   predicted or measured element $R$ into the in-situ $R'_\mathrm{w}$.
-- [Sound Power from Surface Vibration (ISO 7849)](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/):
+- [Sound Power from Surface Vibration (ISO 7849)](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/):
   consumes the predicted radiation efficiency as its radiation factor.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/):
   the measured counterpart of the theoretical point mobilities.
-- [Porous and multilayer absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/): the cavity-fill models
+- [Porous and multilayer absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/): the cavity-fill models
   a double wall consumes.
-- API reference: [`building.prediction.panel_transmission`](https://jmrplens.github.io/phonometry/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](https://jmrplens.github.io/phonometry/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](https://jmrplens.github.io/phonometry/reference/api/building/aperture-transmission/), [`vibration.structural.radiation_efficiency`](https://jmrplens.github.io/phonometry/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](https://jmrplens.github.io/phonometry/reference/api/vibration/point-mobility/).
+- API reference: [`building.prediction.panel_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](https://docs.jmrp.io/phonometry/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/aperture-transmission/), [`vibration.structural.radiation_efficiency`](https://docs.jmrp.io/phonometry/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/point-mobility/).
 
 ---
 
 
-<!-- source: docs/buildings/design/impact-improvement.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/
+<!-- source: docs/buildings/design/impact-improvement.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/
 
 # Floor-Covering Impact Improvement (ISO 16251-1)
 
@@ -1962,9 +1962,9 @@ $\Delta L_\mathrm{w}$ against the ISO 717-2 reference floor, the accredited fich
 and the ISO 12354-2 engineering estimate that predicts a floating floor's
 improvement from the dynamic stiffness of its resilient layer. The
 full-size laboratory chain lives in
-[Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/); the $s'$
+[Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/); the $s'$
 measurement behind the estimate is the subject of
-[Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/).
+[Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/).
 
 ## The small-mock-up method
 
@@ -2094,7 +2094,7 @@ screed poured on a resilient layer) is designed the other way round, from
 two numbers known at the drawing stage: the mass per unit area $m'$ of the
 slab and the dynamic stiffness per unit area $s'$ of the resilient layer,
 measured per EN 29052-1 as in the
-[dynamic-stiffness guide](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/). Together they set the mass-spring
+[dynamic-stiffness guide](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/). Together they set the mass-spring
 resonance of the system (ISO 12354-2:2017, Annex C, Formula (C.2)):
 
 $$
@@ -2142,7 +2142,7 @@ estimates are design aids kept deliberately on the safe side (the 30 lg
 slope undercuts the 40 lg infinite-plate theory where experimental data say
 real screeds fall short); once a specimen exists, the measured mock-up of
 this page, or the full ISO 10140-3 floor, is the reference, and the
-[EN 12354-2 prediction](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/) consumes whichever $\Delta L_\mathrm{w}$ you have.
+[EN 12354-2 prediction](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) consumes whichever $\Delta L_\mathrm{w}$ you have.
 
 ## References
 
@@ -2196,31 +2196,31 @@ ISO 12354-2:2017 Annex C floating-floor formulae are quoted here as design aids
 and evaluated inline; the helpers that wrap them, the tapping-machine force
 model behind a soft covering's improvement and the **ISO 12354-1** Annex D
 rating of a wall lining belong to
-[Predicting resilient-layer performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/). The superseded
+[Predicting resilient-layer performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/). The superseded
 full-size ISO 140-8 method survives only as the comparison axis of the
 Foret et al. (2011) worked example.
 
 ## See also
 
-- [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/): the ISO 10140
+- [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/): the ISO 10140
   suite this mock-up replaces for soft coverings, and the full-size
   ISO 10140-3 improvement measurement.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the $s'$ measurement that feeds the floating-floor estimate.
-- [Predicting Resilient-Layer Performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/): the
+- [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/): the
   prediction counterpart of this page, from the tapping-machine force model
   to floating floors and wall linings.
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/): the
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): the
   impact model whose Formula (21) consumes $\Delta L_\mathrm{w}$.
-- [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
+- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
   engine behind the weighted improvement.
-- API reference: [`building.measurement.floor_covering_improvement`](https://jmrplens.github.io/phonometry/reference/api/building/floor-covering-improvement/).
+- API reference: [`building.measurement.floor_covering_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/floor-covering-improvement/).
 
 ---
 
 
-<!-- source: docs/buildings/design/resilient-layers.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/
+<!-- source: docs/buildings/design/resilient-layers.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/
 
 # Predicting Resilient-Layer Performance
 
@@ -2233,9 +2233,9 @@ construction is *worse* than bare, and above it the improvement climbs at a
 rate the construction type decides. This guide is the prediction side of that
 story, from the material data to the improvement spectrum; the measurement
 side lives in
-[Floor-Covering Impact Improvement (ISO 16251-1)](https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/)
+[Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/)
 and
-[Dynamic stiffness of resilient materials](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/).
+[Dynamic stiffness of resilient materials](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/).
 
 ## The excitation: the tapping machine as a mass-spring-dashpot
 
@@ -2631,24 +2631,24 @@ set out in "What is anchored on a published number, and what is not" above.
 
 ## See also
 
-- [Floor-Covering Impact Improvement (ISO 16251-1)](https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/):
   the measurement these predictions are checked against.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   where $s'$ comes from.
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/):
   the simplified model that consumes $\Delta L_\mathrm{w}$ and $\Delta R_\mathrm{w}$.
-- [Detailed Per-Band Prediction (ISO 12354)](https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/):
+- [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/):
   the per-band model whose floating-floor term is `floating_floor_improvement`.
-- [Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/):
   the mass-spring-mass resonance of a double leaf, the airborne counterpart of
   the lining resonance.
-- API reference: [`building.prediction.resilient_layers`](https://jmrplens.github.io/phonometry/reference/api/building/resilient-layers/).
+- API reference: [`building.prediction.resilient_layers`](https://docs.jmrp.io/phonometry/reference/api/building/resilient-layers/).
 
 ---
 
 
-<!-- source: docs/buildings/design/structure-borne-power.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/
+<!-- source: docs/buildings/design/structure-borne-power.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/
 
 # Structure-borne sound power of building equipment (EN 15657)
 
@@ -2762,7 +2762,7 @@ Two reception plates bracket the installation conditions. On the *low-mobility*
 or loss factor; the *high-mobility* (light) plate is dynamically loaded by the
 source, so its reverberation time and mobility are measured with the source
 attached. The plate-injected power plus the plate's point mobility (see
-[mechanical mobility](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/)) yield the source description
+[mechanical mobility](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/)) yield the source description
 for the EN 12354-5 model through the conversion chain below.
 
 ## 3. From plate power to source quantities (Formulae 15–19)
@@ -2790,7 +2790,7 @@ and, from the high-mobility plate, the **equivalent free velocity level**
 $|Y_\mathrm{S,eq}|$
 (Formula 19). The EN 12354-5 Annex I mobility correction
 (`installed_power_from_reception_plate`, see
-[installed structure-borne sound](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/)) then refers
+[installed structure-borne sound](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/)) then refers
 $L_\mathrm{Wsn}$ to the actual receiving element.
 
 ```python
@@ -2882,8 +2882,8 @@ EN 15657 reception-plate characterization with the boxed total L_Ws.*
 
 ## See also
 
-- API reference: [`building.measurement.structure_borne_power`](https://jmrplens.github.io/phonometry/reference/api/building/structure-borne-power/).
-- Theory: [Point mobilities and radiation efficiency](https://jmrplens.github.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the point mobility, the source-receiver mismatch and the injected power they define.
+- API reference: [`building.measurement.structure_borne_power`](https://docs.jmrp.io/phonometry/reference/api/building/structure-borne-power/).
+- Theory: [Point mobilities and radiation efficiency](https://docs.jmrp.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the point mobility, the source-receiver mismatch and the injected power they define.
 
 ## References
 
@@ -2922,8 +2922,8 @@ Annex I.3 Table I.8 conversion of the flushing-cistern source.
 ---
 
 
-<!-- source: docs/buildings/design/installed-structure-borne.md | canonical: https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/
+<!-- source: docs/buildings/design/installed-structure-borne.md | canonical: https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/
 
 # Installed structure-borne sound from equipment (EN 12354-5)
 
@@ -2934,7 +2934,7 @@ structural-vibroacoustics chain: the source is described by its characteristic
 structure-borne sound power level $L_\mathrm{Ws,c}$, derived from the EN 15657
 reception-plate measurement through the Formula (15)/(17) conversion and a
 mobility correction (**not** the raw plate-injected level;
-see [EN 15657](https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/)); the source and receiver point
+see [EN 15657](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/)); the source and receiver point
 mobilities set how much power is actually coupled into the structure, and the
 building transmission carries it to the receiving room. The Annex I mobility
 correction `installed_power_from_reception_plate` refers the characteristic
@@ -2996,9 +2996,9 @@ plate: only the real part of the receiver's driving-point mobility absorbs
 power, and the mismatch between $Y_\mathrm{s}$ and $Y_i$ decides how much of the
 source's capability ever enters the structure (Hopkins 2007, Section 2.8).
 The mobilities themselves come from the
-[mechanical-mobility chain](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/): measured per ISO 7626,
+[mechanical-mobility chain](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/): measured per ISO 7626,
 or from the infinite-plate closed forms of
-[panel theory](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/) when no measurement exists. A pump
+[panel theory](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) when no measurement exists. A pump
 on a concrete slab is the textbook force source: its casing mobility is
 orders of magnitude above the slab's, so $D_\mathrm{C}$ collapses to Formula 19c and
 the injected power no longer depends on the receiver at all.
@@ -3106,7 +3106,7 @@ machine, in octave bands from 31,5 Hz to 4 kHz: 139, 142, 145, 148, 151, 154,
 and `tapping_machine_characteristic_power_level` /
 `tapping_machine_coupling_term` turn them into the $L_\mathrm{Ws,c}$ and $D_\mathrm{C}$ of
 Formulae (D.9a) and (D.9b). The table's levels are re $10^{-6}$ N despite the
-"re 1 pN" its caption prints; see [the errata register](https://jmrplens.github.io/phonometry/reference/errata/).
+"re 1 pN" its caption prints; see [the errata register](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ```python
 import numpy as np
@@ -3183,15 +3183,15 @@ room.*
 
 ## See also
 
-- [Structure-borne sound power of equipment (EN 15657)](https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/):
   the reception-plate characterisation that supplies $L_\mathrm{Ws,c}$ and the source
   mobility this prediction consumes.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/):
   the measured $Y_\mathrm{s}$ and $Y_i$ behind the coupling term.
-- [Bending-wave transmission at plate junctions](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/):
   the junction physics that carries the installed power to the flanking
   radiators.
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/): the
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): the
   airborne and impact members of the same prediction family.
 
 ## References

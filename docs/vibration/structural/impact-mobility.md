@@ -629,7 +629,7 @@ windowed.report(
   the `transfer_function` estimator for the channel-match test of 8.1.
 - [Transfer stiffness of resilient elements (ISO 10846)](transfer-stiffness.md):
   a force-per-motion FRF measured on a laboratory rig.
-- API reference: [`vibration.structural.impact_mobility`](https://jmrplens.github.io/phonometry/reference/api/vibration/impact-mobility/).
+- API reference: [`vibration.structural.impact_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/impact-mobility/).
 
 ## References
 

@@ -313,7 +313,7 @@ exceeds 9 dB.
 - [Impulsive-sound prominence](impulsive-sound.md): the ISO/PAS 1996-3
   impulsive adjustment, the relative of $K_\mathrm{i}$ that is not interchangeable with
   it.
-- API reference: [`environment.assessment.spain`](https://jmrplens.github.io/phonometry/reference/api/environment/spain/).
+- API reference: [`environment.assessment.spain`](https://docs.jmrp.io/phonometry/reference/api/environment/spain/).
 
 ## References
 

@@ -128,9 +128,9 @@ audio = ["soundfile>=0.12.0"]
 full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.0", "soundfile>=0.12.0"]
 
 [project.urls]
-"Homepage" = "https://jmrp.io/docs/phonometry"
+"Homepage" = "https://docs.jmrp.io/phonometry/"
 "Author" = "https://jmrp.io/"
-"Documentation" = "https://jmrplens.github.io/phonometry/"
+"Documentation" = "https://docs.jmrp.io/phonometry/"
 "Source" = "https://github.com/jmrplens/phonometry"
 "Changelog" = "https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/jmrplens/phonometry/issues"

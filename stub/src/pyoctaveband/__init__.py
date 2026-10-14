@@ -16,7 +16,7 @@ warnings.warn(
     "PyOctaveBand has been renamed to 'phonometry'. This package installs the "
     "3.x line, where 'import phonometry' replaces 'import pyoctaveband' and "
     "nothing else changes. From 4.0 on, names live in the module of their "
-    "domain: https://jmrplens.github.io/phonometry/start/upgrading/",
+    "domain: https://docs.jmrp.io/phonometry/start/upgrading/",
     FutureWarning,
     stacklevel=2,
 )

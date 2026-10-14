@@ -124,7 +124,7 @@ panel has once it is installed. Norton & Karczub **Appendix 4 A** adds
 twenty-one solids with the bar and the bulk speed in separate columns, their
 **Table 6.1** eleven structural loss factors, and Vigran **Table 3.1** nine
 building materials. Every row is also on the
-[published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#solids)
+[published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#solids)
 page, filterable, with the book and the page each one was read on.
 
 ```python

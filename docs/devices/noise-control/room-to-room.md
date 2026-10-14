@@ -448,7 +448,7 @@ to a surface other than the partition than roughly half a wavelength.
 - [Sound power](../emission/sound-power.md): the machine $L_W$
   the whole chain starts from.
 - API reference:
-  [`noise_control.room_to_room`](https://jmrplens.github.io/phonometry/reference/api/noise_control/room-to-room/).
+  [`noise_control.room_to_room`](https://docs.jmrp.io/phonometry/reference/api/noise_control/room-to-room/).
 
 ## References
 

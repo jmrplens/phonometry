@@ -162,5 +162,5 @@ the off-axis increases of Annex B.
   audiometric zero the hearing levels are measured from.
 - [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](hearing-protectors.md): the
   same diffuse-field test on the site where an earmuff is screened.
-- API reference: [`hearing.audiometry`](https://jmrplens.github.io/phonometry/reference/api/hearing/audiometry/)
-  and [`hearing.sound_field_audiometry`](https://jmrplens.github.io/phonometry/reference/api/hearing/sound-field-audiometry/).
+- API reference: [`hearing.audiometry`](https://docs.jmrp.io/phonometry/reference/api/hearing/audiometry/)
+  and [`hearing.sound_field_audiometry`](https://docs.jmrp.io/phonometry/reference/api/hearing/sound-field-audiometry/).

@@ -332,8 +332,8 @@ a machine into its enclosure or its slab is outside every model here.
   the closed forms and worked anchors these implementations are validated
   against.
 - API reference:
-  [`noise_control.hvac`](https://jmrplens.github.io/phonometry/reference/api/noise_control/hvac/) and
-  [`noise_control.enclosures`](https://jmrplens.github.io/phonometry/reference/api/noise_control/enclosures/).
+  [`noise_control.hvac`](https://docs.jmrp.io/phonometry/reference/api/noise_control/hvac/) and
+  [`noise_control.enclosures`](https://docs.jmrp.io/phonometry/reference/api/noise_control/enclosures/).
 
 ## References
 

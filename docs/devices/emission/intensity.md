@@ -811,7 +811,7 @@ for absolute scaling of the two channels.
 - [Sound power from surface vibration](vibration-sound-power.md): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
 - [Calibration](../../signals/metrology/calibration.md): the absolute scaling of the two channels the estimator assumes.
 - [Theory: signal analysis](../../reference/theory/signal-analysis.md): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
-- API reference: [`emission.intensity`](https://jmrplens.github.io/phonometry/reference/api/power/intensity/).
+- API reference: [`emission.intensity`](https://docs.jmrp.io/phonometry/reference/api/power/intensity/).
 - Theory: [Sound intensity (IEC 61043)](../../reference/theory/signal-analysis.md#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
 
 ## References

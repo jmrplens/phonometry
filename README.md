@@ -1,4 +1,4 @@
-<a href="https://jmrplens.github.io/phonometry/"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/brand/banner.webp" alt="phonometry, acoustic measurement toolkit for Python" width="100%"></a>
+<a href="https://docs.jmrp.io/phonometry/"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/brand/banner.webp" alt="phonometry, acoustic measurement toolkit for Python" width="100%"></a>
 
 <!-- Package -->
 [![PyPI version](https://img.shields.io/pypi/v/phonometry?logo=pypi&logoColor=white)](https://pypi.org/project/phonometry/)
@@ -102,7 +102,7 @@ print(f"SPL [dB]: {result.levels}")
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *1/3 octave band spectrum analysis of a complex signal. More examples in the
-[documentation](https://jmrplens.github.io/phonometry/).*
+[documentation](https://docs.jmrp.io/phonometry/).*
 
 ## ✨ What's inside
 
@@ -157,7 +157,7 @@ points on the ANSI band edges.*
 
 ## 📚 Documentation
 
-**Full documentation website: https://jmrplens.github.io/phonometry/**
+**Full documentation website: https://docs.jmrp.io/phonometry/**
 (English / Español)
 
 The same content is browsable as Markdown in
@@ -200,7 +200,7 @@ phonometry is one person's work, and its main cost is the primary sources:
 every metric is implemented from the governing standard's paid text. You can
 [sponsor the project on GitHub](https://github.com/sponsors/jmrplens), and the
 documentation keeps a live list of the
-[sources that resisted every legitimate acquisition route](https://jmrplens.github.io/phonometry/start/support/),
+[sources that resisted every legitimate acquisition route](https://docs.jmrp.io/phonometry/start/support/),
 with four ways to help get them: fund the purchase, send a copy privately
 (whatever its origin, it is never republished), verify against your own
 licensed copy, or point at a channel that was missed.

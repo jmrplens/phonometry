@@ -694,4 +694,4 @@ worked example, so no row reproduces one.
 - [Errata found in published sources](../../ERRATA.md): the six
   defects of the draft this method meets.
 - API reference:
-  [`building.measurement.service_equipment`](https://jmrplens.github.io/phonometry/reference/api/building/service-equipment/).
+  [`building.measurement.service_equipment`](https://docs.jmrp.io/phonometry/reference/api/building/service-equipment/).

@@ -222,11 +222,11 @@ and what it does not.
 
 ## See also
 
-- API reference: [`metrology.calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/),
-  [`filters.weighting`](https://jmrplens.github.io/phonometry/reference/api/filters/weighting/),
-  [`signals.levels`](https://jmrplens.github.io/phonometry/reference/api/signals/levels/),
-  [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/) and
-  [`filters.compliance`](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/).
+- API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/),
+  [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/),
+  [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/),
+  [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and
+  [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
 
 ## References
 

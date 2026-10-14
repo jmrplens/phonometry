@@ -403,7 +403,7 @@ lowest reliable band: that stays with the report.
 - [Spherical ground effect and advanced barriers](ground-barriers.md): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
 - [In-situ Road-Surface Absorption](../../materials/surfaces/road-absorption.md): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
 - [Errata found in published sources](../../ERRATA.md): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
-- API reference: [`environment.propagation.barrier_reflection`](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-reflection/).
+- API reference: [`environment.propagation.barrier_reflection`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-reflection/).
 
 ## References
 

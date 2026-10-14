@@ -425,7 +425,7 @@ this implementation.
 - [Electroacoustics (IEC 60268-3)](../electroacoustics/electroacoustics.md):
   the chain that carries the programme once it has been normalised.
 - [Broadcast](index.md): the section overview.
-- API reference: [`broadcast`](https://jmrplens.github.io/phonometry/reference/api/broadcast/program-loudness/).
+- API reference: [`broadcast`](https://docs.jmrp.io/phonometry/reference/api/broadcast/program-loudness/).
 
 ## References
 

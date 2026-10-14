@@ -981,7 +981,7 @@ doors, windows, glazing, small technical elements, floors, shutters).
 - [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md):
   the intensity method K.4.3 allows for rain.
 - API reference:
-  [`building.measurement.lab_improvement`](https://jmrplens.github.io/phonometry/reference/api/building/lab-improvement/),
-  [`building.measurement.joint_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/joint-insulation/),
-  [`building.measurement.rainfall_sound`](https://jmrplens.github.io/phonometry/reference/api/building/rainfall-sound/)
-  and [`building.measurement.ratings`](https://jmrplens.github.io/phonometry/reference/api/building/ratings/).
+  [`building.measurement.lab_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/lab-improvement/),
+  [`building.measurement.joint_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/joint-insulation/),
+  [`building.measurement.rainfall_sound`](https://docs.jmrp.io/phonometry/reference/api/building/rainfall-sound/)
+  and [`building.measurement.ratings`](https://docs.jmrp.io/phonometry/reference/api/building/ratings/).

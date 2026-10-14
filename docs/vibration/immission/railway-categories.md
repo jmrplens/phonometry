@@ -303,8 +303,8 @@ Clause 8, the report, are text.
   the two parts a railway measurement is carried out with particular regard
   to.
 - API reference:
-  [`vibration.immission.train_categories`](https://jmrplens.github.io/phonometry/reference/api/vibration/train-categories/)
-  and [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).
+  [`vibration.immission.train_categories`](https://docs.jmrp.io/phonometry/reference/api/vibration/train-categories/)
+  and [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
 ## References
 
 - Deutsches Institut für Normung. (2023). *Erschütterungen im Bauwesen —

@@ -306,7 +306,7 @@ factor and the boxed LWA.*
   result.
 - [Mechanical mobility (ISO 7626)](../../vibration/structural/mechanical-mobility.md):
   the transducer practice behind a measured surface velocity.
-- API reference: [`emission.vibration_sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/vibration-sound-power/).
+- API reference: [`emission.vibration_sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/vibration-sound-power/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the radiation efficiency that turns a surface velocity into a radiated power.
 
 ## References

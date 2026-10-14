@@ -433,7 +433,7 @@ Propagation](outdoor-propagation.md) guide).
 - [Integrated and statistical levels](../../signals/levels/levels.md): the
   percentile levels $L_{10}$ and $L_{90}$ whose sense the quantiles of Annex C
   reverse.
-- API reference: [`environment.propagation.software_quality`](https://jmrplens.github.io/phonometry/reference/api/environment/software-quality/).
+- API reference: [`environment.propagation.software_quality`](https://docs.jmrp.io/phonometry/reference/api/environment/software-quality/).
 
 ## References
 

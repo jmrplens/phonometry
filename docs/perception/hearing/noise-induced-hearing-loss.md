@@ -269,7 +269,7 @@ res.report(
 - [Speech Intelligibility Index](../speech/speech-intelligibility.md): what a
   shifted threshold costs in speech audibility, which is the consequence a
   worker actually notices.
-- API reference: [`hearing.noise_induced_hearing_loss`](https://jmrplens.github.io/phonometry/reference/api/hearing/noise-induced-hearing-loss/).
+- API reference: [`hearing.noise_induced_hearing_loss`](https://docs.jmrp.io/phonometry/reference/api/hearing/noise-induced-hearing-loss/).
 - Theory: [Noise-induced hearing loss (ISO 1999)](../../reference/theory/perception.md#noise-induced-hearing-loss-iso-1999): the ISO 1999 threshold-shift model, its median and its percentile spread.
 
 ## References

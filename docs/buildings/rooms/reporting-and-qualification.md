@@ -239,7 +239,7 @@ fills in.
 - [Sound strength G (ISO 3382-1)](sound-strength.md), [Spatial
   impression](spatial-impression.md) and [Stage support and
   uncertainty](stage-and-uncertainty.md): the quantities Table A.1 averages.
-- API reference: [`room.auditorium`](https://jmrplens.github.io/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
 
 ## Standards
 

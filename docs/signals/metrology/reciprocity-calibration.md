@@ -291,6 +291,6 @@ figure.
   combined by.
 - [Errata in published sources](../../ERRATA.md): IEC 61094-2 Tables B.1 and
   B.2, IEC 61094-3 Formulas (8) and (9), and B.2 Step 1.
-- API reference: [`metrology.reciprocity_calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-calibration/),
-  [`metrology.reciprocity_coupler`](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-coupler/),
-  [`metrology.reciprocity_free_field`](https://jmrplens.github.io/phonometry/reference/api/metrology/reciprocity-free-field/).
+- API reference: [`metrology.reciprocity_calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-calibration/),
+  [`metrology.reciprocity_coupler`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-coupler/),
+  [`metrology.reciprocity_free_field`](https://docs.jmrp.io/phonometry/reference/api/metrology/reciprocity-free-field/).

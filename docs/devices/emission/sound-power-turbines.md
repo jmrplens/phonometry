@@ -429,7 +429,7 @@ casings is checked as one.
   $K_1$ and $K_2$.
 - [Sound Power in Situ by Comparison (ISO 3747)](sound-power-in-situ.md):
   the other route for a machine that cannot leave its installation.
-- API reference: [`emission.turbine_noise`](https://jmrplens.github.io/phonometry/reference/api/power/turbine-noise/).
+- API reference: [`emission.turbine_noise`](https://docs.jmrp.io/phonometry/reference/api/power/turbine-noise/).
 
 ## References
 

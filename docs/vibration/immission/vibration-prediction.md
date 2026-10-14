@@ -262,7 +262,7 @@ distance.
 - [Vibration next to a railway (DIN 45672)](railway-vibration.md):
   the wave speeds of the ground that the wavelength here comes from.
 - API reference:
-  [`vibration.immission.prediction`](https://jmrplens.github.io/phonometry/reference/api/vibration/prediction/).
+  [`vibration.immission.prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/prediction/).
 ## References
 
 - Deutsches Institut für Normung. (2001). *Erschütterungen im Bauwesen —

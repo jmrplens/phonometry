@@ -678,8 +678,8 @@ exposure of IEC 62489-2 is outside this library.
 - [Frequency Weighting (A, C, Z)](../../signals/levels/weighting.md): the
   A-weighting of IEC 61672-1 that the noise measurements of clause 7 and 10.4
   use.
-- API reference: [`electroacoustics.induction_loop`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/induction-loop/)
-  and [`electroacoustics.induction_loop_components`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/induction-loop-components/).
+- API reference: [`electroacoustics.induction_loop`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/induction-loop/)
+  and [`electroacoustics.induction_loop_components`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/induction-loop-components/).
 
 ## References
 

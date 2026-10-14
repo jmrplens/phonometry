@@ -188,5 +188,5 @@ measurement protocol of ISO/TS 12913-2 D.7.
 - [Errata in published sources](../../ERRATA.md): part 3 for part 2, the stray
   factor of Formula (A.3), the where-lists of (A.4) and (B.2), the exponent of
   the Nrmc NOTE, three scales for four, and the questionnaire misspellings.
-- API reference: [`environment.assessment.soundscape`](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape/)
-  and [`environment.assessment.soundscape_binaural`](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape-binaural/).
+- API reference: [`environment.assessment.soundscape`](https://docs.jmrp.io/phonometry/reference/api/environment/soundscape/)
+  and [`environment.assessment.soundscape_binaural`](https://docs.jmrp.io/phonometry/reference/api/environment/soundscape-binaural/).

@@ -488,7 +488,7 @@ waves probe the sediment shear stiffness.
 - [Underwater sound propagation](../underwater/underwater-propagation.md): the
   fluid-bottom Rayleigh reflection model whose missing shear physics
   section 5 quantifies.
-- API reference: [`simulation.elastic-fdtd`](https://jmrplens.github.io/phonometry/reference/api/simulation/elastic-fdtd/).
+- API reference: [`simulation.elastic-fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
 
 ## References
 

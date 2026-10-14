@@ -1,11 +1,11 @@
 # phonometry: The medium
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/fluids/index.md | canonical: https://jmrplens.github.io/phonometry/fluids/ -->
-Source: https://jmrplens.github.io/phonometry/fluids/
+<!-- source: docs/fluids/index.md | canonical: https://docs.jmrp.io/phonometry/fluids/ -->
+Source: https://docs.jmrp.io/phonometry/fluids/
 
 # The medium
 
@@ -50,7 +50,7 @@ domain may import `fluids` without an architecture edge, and a catalogue here
 that reached into `materials`, `building` and `simulation` would make the
 medium depend on three of the domains that stand on it. The comparison is a
 documentation artefact instead, and the [published
-catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/) page lists all four side by
+catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/) page lists all four side by
 side.
 
 What `fluids.PUBLISHED_FLUIDS` does hold is the states this library read from
@@ -120,7 +120,7 @@ in `phonometry.environment`.
 
 ## What is here
 
-- [Humid air](https://jmrplens.github.io/phonometry/fluids/humid-air/): the CIPM-2007 formulation of
+- [Humid air](https://docs.jmrp.io/phonometry/fluids/humid-air/): the CIPM-2007 formulation of
   IEC 61094-2:2009 Annex F, what it fixes and what it does not, how much each
   condition is worth, and why the library asks for the temperature but assumes
   the pressure out loud.
@@ -128,12 +128,12 @@ in `phonometry.environment`.
 ---
 
 
-<!-- source: docs/fluids/humid-air.md | canonical: https://jmrplens.github.io/phonometry/fluids/humid-air/ -->
-Source: https://jmrplens.github.io/phonometry/fluids/humid-air/
+<!-- source: docs/fluids/humid-air.md | canonical: https://docs.jmrp.io/phonometry/fluids/humid-air/ -->
+Source: https://docs.jmrp.io/phonometry/fluids/humid-air/
 
 # Humid air
 
-A [reciprocity calibration](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/)
+A [reciprocity calibration](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/)
 needs the air it is done in to five or six figures, which is why the standard that defines that calibration also carries the most
 carefully stated model of humid air in the acoustic literature. Annex F is
 that model, and this page is what the library does with it.

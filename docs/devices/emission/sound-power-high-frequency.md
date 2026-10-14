@@ -432,7 +432,7 @@ deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 - [Errata](../../ERRATA.md): the 43 misprinted cells of
   Tables 1 and 2, and the oxygen relaxation frequency that Formula (A.5)
   sets with a digit zero.
-- API reference: [`emission.sound_power_high_frequency`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-high-frequency/).
+- API reference: [`emission.sound_power_high_frequency`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-high-frequency/).
 
 ## References
 

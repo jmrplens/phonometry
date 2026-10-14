@@ -367,4 +367,4 @@ IEC 60268-16 method, and is not the one checked here.
 - [Speech Intelligibility Index](../../perception/speech/speech-intelligibility.md): the ANSI S3.5
   view of the same intelligibility question.
 - [Levels](../../signals/levels/levels.md): the A-weighted levels behind the spatial decay.
-- API reference: [`room.open_plan`](https://jmrplens.github.io/phonometry/reference/api/rooms/open-plan/).
+- API reference: [`room.open_plan`](https://docs.jmrp.io/phonometry/reference/api/rooms/open-plan/).

@@ -1,11 +1,11 @@
 # phonometry: Broadcast
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/devices/broadcast/index.md | canonical: https://jmrplens.github.io/phonometry/devices/broadcast/ -->
-Source: https://jmrplens.github.io/phonometry/devices/broadcast/
+<!-- source: docs/devices/broadcast/index.md | canonical: https://docs.jmrp.io/phonometry/devices/broadcast/ -->
+Source: https://docs.jmrp.io/phonometry/devices/broadcast/
 
 # Broadcast
 
@@ -17,7 +17,7 @@ The word *loudness* carries two meanings on this site, and they are not versions
 of each other. Here it is an **energy measure**: a K-weighted mean square over
 the whole programme, gated, reported in LUFS, designed so that two programmes
 normalised to the same number feel equally loud on the same playback chain. In
-[Psychoacoustics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) it is a
+[Psychoacoustics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) it is a
 **perceptual magnitude in sones**, computed by an auditory model with masking
 and compression. A broadcast deliverable is specified in LUFS; a product-noise
 sensation is specified in sones. Reaching for the wrong one is the commonest
@@ -57,13 +57,13 @@ anywhere in it.
 
 ## Pages in this section
 
-- [Programme loudness (EBU R 128)](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/):
+- [Programme loudness (EBU R 128)](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/):
   the ITU-R BS.1770 K-weighting, gated 400 ms blocks and channel-weighted sum,
   the EBU R 128 target and ceiling, the Tech 3341 momentary, short-term and
   integrated meters, the Tech 3342 loudness range, the Annex 2 oversampled true
   peak and the Annex 3 channel weights for advanced sound systems, validated
   against the EBU test signals and ending in an EBU R 128 report fiche.
-- [Quasi-peak programme meter (ITU-R BS.468-4)](https://jmrplens.github.io/phonometry/devices/broadcast/quasi-peak/):
+- [Quasi-peak programme meter (ITU-R BS.468-4)](https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/):
   the psophometric noise meter, the clause 2 quasi-peak detector, its eleven
   Table 2 and Table 3 acceptance windows, the clause 2.6 calibration that makes
   a reading dBqps, and the three fitted time scales those windows identify only
@@ -73,10 +73,10 @@ anywhere in it.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) (ISO 532-1): the
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) (ISO 532-1): the
   other loudness, the perceptual magnitude in sones, for when the question is
   how loud something *sounds* rather than how a programme should be delivered.
-- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the
+- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/): the
   weighting family K-weighting sits beside, and does not belong to.
 
 ## What this section does not cover
@@ -93,8 +93,8 @@ is your encoder's job.
 ---
 
 
-<!-- source: docs/devices/broadcast/program-loudness.md | canonical: https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/ -->
-Source: https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/
+<!-- source: docs/devices/broadcast/program-loudness.md | canonical: https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/ -->
+Source: https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/
 
 # Programme loudness and true peak (ITU-R BS.1770 / EBU R 128)
 
@@ -409,7 +409,7 @@ The interpolator recovers the inter-sample excursion the sample grid missed
 inside the +0.2/−0.4 dB tolerance that EBU Mode meters must meet).
 EBU R 128 caps production at **−1 dBTP**; distribution codecs often need
 more headroom. This is the same oversampled-peak machinery behind the
-C-weighted `lc_peak` of [Integrated & Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/).
+C-weighted `lc_peak` of [Integrated & Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/).
 
 ## 6. Multichannel programmes and Annex 3
 
@@ -452,7 +452,7 @@ The stacked layout (compliance table on top, plot below) differs from the
 narrow two-panel body of the other fiches because the compliance table needs
 four columns and the loudness-vs-time trace is landscape. It uses the same
 `ReportMetadata` container and rendering engine as the
-[ISO 717 insulation fiche](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata);
+[ISO 717 insulation fiche](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata);
 a supplied `requirement` is read as the target programme loudness in LUFS
 (defaulting to the EBU R 128 −23.0 LUFS), and the fiche passes when the
 integrated loudness is within the selected R 128 tolerance of it and the true
@@ -511,17 +511,17 @@ this implementation.
 
 ## See also
 
-- [Loudness (ISO 532)](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/): the
+- [Loudness (ISO 532)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): the
   psychoacoustic models, in sones and specific loudness, that answer the
   perceived-magnitude question this page's gated LUFS deliberately does not.
-- [Integrated & Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/):
+- [Integrated & Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/):
   $L_\mathrm{eq}$, $L_\mathrm{Ceq}$ and the same oversampled-peak machinery behind `lc_peak`.
-- [Frequency weightings](https://jmrplens.github.io/phonometry/signals/levels/weighting/): A, C and Z
+- [Frequency weightings](https://docs.jmrp.io/phonometry/signals/levels/weighting/): A, C and Z
   against the K-weighting of this page.
-- [Electroacoustics (IEC 60268-3)](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/):
+- [Electroacoustics (IEC 60268-3)](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/):
   the chain that carries the programme once it has been normalised.
-- [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the section overview.
-- API reference: [`broadcast`](https://jmrplens.github.io/phonometry/reference/api/broadcast/program-loudness/).
+- [Broadcast](https://docs.jmrp.io/phonometry/devices/broadcast/): the section overview.
+- API reference: [`broadcast`](https://docs.jmrp.io/phonometry/reference/api/broadcast/program-loudness/).
 
 ## References
 
@@ -569,8 +569,8 @@ Table 1 signals at ±1 LU.
 ---
 
 
-<!-- source: docs/devices/broadcast/quasi-peak.md | canonical: https://jmrplens.github.io/phonometry/devices/broadcast/quasi-peak/ -->
-Source: https://jmrplens.github.io/phonometry/devices/broadcast/quasi-peak/
+<!-- source: docs/devices/broadcast/quasi-peak.md | canonical: https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/ -->
+Source: https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/
 
 # Quasi-peak programme meter (ITU-R BS.468-4)
 
@@ -584,7 +584,7 @@ meter", gives signal-to-noise figures "that are not directly comparable" with
 the ones the Recommendation describes.
 
 The curve is `weighting_filter(curve="468")`
-([Frequency weightings](https://jmrplens.github.io/phonometry/signals/levels/weighting/)). The detector is
+([Frequency weightings](https://docs.jmrp.io/phonometry/signals/levels/weighting/)). The detector is
 `broadcast.quasi_peak_meter`.
 
 ## 1. What clause 2 specifies, and what it does not
@@ -846,22 +846,22 @@ clause 3's one sentence naming the unit. A conformity sheet in an accredited
 format would attest this library's own filter, on a page carrying a
 standard-basis line, with eleven numbers produced by ballistics this project
 fitted. The conformity evidence is real and it is published, in
-[`docs/CONFORMANCE.md`](https://jmrplens.github.io/phonometry/reference/conformance/), through
+[`docs/CONFORMANCE.md`](https://docs.jmrp.io/phonometry/reference/conformance/), through
 `verify_quasi_peak_dynamics`.
 
 ## See also
 
-- [Programme loudness & true peak](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/): the other ITU-R BS
+- [Programme loudness & true peak](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/): the other ITU-R BS
   meter, and the opposite design: a gated mean square with published
   coefficients where this one is a peak follower with none.
-- [Frequency weightings](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the 468 curve
+- [Frequency weightings](https://docs.jmrp.io/phonometry/signals/levels/weighting/): the 468 curve
   itself, beside A, C and Z.
-- [Test signals](https://jmrplens.github.io/phonometry/signals/spectra/test-signals/): `tone_burst`, the
+- [Test signals](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
-- [Microphones (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/): where a
+- [Microphones (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/): where a
   stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
-- [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the section overview.
+- [Broadcast](https://docs.jmrp.io/phonometry/devices/broadcast/): the section overview.
 
 ## References
 

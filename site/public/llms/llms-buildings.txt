@@ -1,11 +1,11 @@
 # phonometry: Rooms and buildings
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/buildings/index.md | canonical: https://jmrplens.github.io/phonometry/buildings/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/
+<!-- source: docs/buildings/index.md | canonical: https://docs.jmrp.io/phonometry/buildings/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/
 
 # Rooms and buildings
 
@@ -21,105 +21,105 @@ in the field (ISO 16283) or the laboratory (ISO 10140) and predicted from
 element data (EN 12354).
 
 Both halves consume coefficients measured elsewhere: the
-[Materials and surfaces](https://jmrplens.github.io/phonometry/materials/)
+[Materials and surfaces](https://docs.jmrp.io/phonometry/materials/)
 section characterises the absorption, impedance and scattering data that the
 room and insulation predictions here rely on.
 
 Start with
-[Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/)
-and [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the impulse response
+[Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/)
+and [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the impulse response
 the first acquires and the parameters the second derives are the vocabulary
 the rest of the section speaks. If your interest is insulation, read
-[Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/)
+[Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/)
 next, and note that impact sources other than the tapping machine have their own
 page, since ISO 16283-2 is the clause a field engineer usually arrives with; if
 it is design-stage prediction, go to
-[Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/)
-and [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/).
+[Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/)
+and [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/).
 
-## [Room acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/)
+## [Room acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/)
 
 The sound field inside a single room: measured from an impulse response, rated
 against criterion curves, and predicted from volume and absorption.
 
-- [Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/):
   the ISO 18233 deterministic acquisition, sweep deconvolution and MLS.
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2 room
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2 room
   parameters derived from that impulse response.
-- [Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/):
+- [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/):
   the speech-privacy quantities of an open-plan floor.
-- [Image sources and the steady-state room field](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/):
+- [Image sources and the steady-state room field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/):
   the deterministic image-source impulse response and the statistical
   steady-state level.
-- [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/): the
+- [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/): the
   ANSI/ASA S12.2-2019 room-noise ratings with their spectral tags.
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/):
   Sabine, Eyring, Millington-Sette, Fitzroy and Arau-Puchades models with the
   air-absorption term.
-- [Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/):
   the normative prediction of a room's total equivalent absorption area and
   reverberation time.
 
-## [Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/)
+## [Sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/)
 
 Airborne and impact insulation: measured in the building, characterised in the
 laboratory, and predicted from element data.
 
-- [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/):
   ISO 16283-1/2 field measurement, the Clause 14 report and the ISO 12999-1
   uncertainty that qualifies it.
-- [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://jmrplens.github.io/phonometry/buildings/insulation/low-frequency-procedure/):
+- [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/):
   the corner measurement that becomes mandatory below 25 m³, and the 63 Hz
   octave reverberation time that comes with it.
-- [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/):
+- [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/):
   the ISO 10140 laboratory characterisation of an element.
-- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/):
   what a lining or a floor covering adds, rated on the ISO 717 reference
   curves, what a sealed joint lets through per metre, and the sound of rain on
   a roof.
-- [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/):
+- [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/):
   the direct-power route to the same indices when flanking is high.
-- [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/):
+- [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/):
   the octave-band control method and its reverberation index.
-- [Service-Equipment and Activity Noise (ISO 16032)](https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/):
+- [Service-Equipment and Activity Noise (ISO 16032)](https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/):
   the engineering method for equipment and activity noise in a room, from the
   ISO/DIS 16032:2023 draft.
-- [Heavy and Soft Impact Sources (ISO 16283-2)](https://jmrplens.github.io/phonometry/buildings/insulation/heavy-impact-sources/):
+- [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/):
   the rubber ball and the bang machine, the impact force exposure level that
   specifies them and the ISO 717-2 Annex D single number.
-- [Laboratory Flanking Transmission (ISO 10848)](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/):
+- [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/):
   the measured junction vibration reduction index, the flanking descriptors,
   and the suspended-ceiling plenum path with its ceiling attenuation class.
-- [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the
+- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): the
   reference-curve engines behind Rw, DnT,w, Ln,w and their adaptation terms.
-- [Façade Sound Insulation](https://jmrplens.github.io/phonometry/buildings/insulation/facade-insulation/): the
+- [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/): the
   building envelope measured (ISO 16283-3) and predicted (EN 12354-3/4).
-- [Spanish Building Code (CTE DB-HR)](https://jmrplens.github.io/phonometry/buildings/insulation/spanish-building-code/):
+- [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/):
   the DB-HR global indices, the clause 2 requirements and the window-size
   correction.
 
-## [Insulation design](https://jmrplens.github.io/phonometry/buildings/design/)
+## [Insulation design](https://docs.jmrp.io/phonometry/buildings/design/)
 
 The same quantities before the building exists: predicted from element data,
 and from the physics of the element itself.
 
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/):
   airborne and impact flanking transmission between rooms (EN 12354-1/2).
-- [Detailed Per-Band Prediction (ISO 12354)](https://jmrplens.github.io/phonometry/buildings/design/detailed-prediction/):
+- [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/):
   the same prediction band by band, with the per-path contributions behind
   R'w and L'n,w.
-- [Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/):
   the mass law, coincidence dip, double walls and apertures.
-- [Floor-Covering Impact Improvement (ISO 16251-1)](https://jmrplens.github.io/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/):
   the weighted improvement of a soft covering on a small heavyweight mock-up.
-- [Predicting Resilient-Layer Performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/):
+- [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/):
   the prediction side of coverings, floating floors and wall linings.
-- [Structure-borne sound power of equipment (EN 15657)](https://jmrplens.github.io/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/):
   the reception-plate method and the plate-independent source quantities.
-- [Installed structure-borne sound (EN 12354-5)](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/):
   the receiving-room sound pressure level predicted from source and receiver
   mobilities.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the load-plate resonance measurement behind every floating-floor prediction.
 
 ## What this section does not cover
@@ -151,7 +151,7 @@ importer, no material database, no ray tracer and no auralisation: the room
 pages take dimensions, absorption coefficients and impulse responses and give
 back parameters, and the image-source model is specular only. An actual
 low-frequency field in a real shape is [wave
-simulation](https://jmrplens.github.io/phonometry/simulation/).
+simulation](https://docs.jmrp.io/phonometry/simulation/).
 
 **And a prediction is not a verdict.** The single-number ratings and the
 national indices are computed here, but the limit values they are judged
@@ -163,15 +163,15 @@ comes from your regulation.
 
 Every quantity on these pages starts from band levels or from a filtered
 impulse response, so the calibration, weighting and fractional-octave
-filtering behind them are in [Signal analysis](https://jmrplens.github.io/phonometry/signals/), and
-[Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/) runs that
+filtering behind them are in [Signal analysis](https://docs.jmrp.io/phonometry/signals/), and
+[Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/) runs that
 chain end to end on one runnable page. The derivations sit in [Rooms and
-buildings theory](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/), from the Schroeder integration
+buildings theory](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/), from the Schroeder integration
 to the EN 12354 path sums.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
-and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+and [All guides](https://docs.jmrp.io/phonometry/) lists every page with a line on
 each.
 
 ---

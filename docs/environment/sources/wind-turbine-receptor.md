@@ -255,8 +255,8 @@ fundamental modulation frequency lies above the 1,6 Hz of 13.2.
   1996-3 adjustment.
 - [Errata in published sources](../../ERRATA.md): Tables 7, C.2 and C.4, 13.6.3
   and five more.
-- API reference: [`environment.assessment.wind_turbine_receptor`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-receptor/)
-  and [`environment.assessment.wind_turbine_modulation`](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine-modulation/).
+- API reference: [`environment.assessment.wind_turbine_receptor`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine-receptor/)
+  and [`environment.assessment.wind_turbine_modulation`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine-modulation/).
 
 ## References
 

@@ -1,11 +1,11 @@
 # phonometry: Assessment and regulation
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/environment/assessment/index.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/ -->
-Source: https://jmrplens.github.io/phonometry/environment/assessment/
+<!-- source: docs/environment/assessment/index.md | canonical: https://docs.jmrp.io/phonometry/environment/assessment/ -->
+Source: https://docs.jmrp.io/phonometry/environment/assessment/
 
 # Assessment and regulation
 
@@ -18,7 +18,7 @@ ISO 1996 supplies the first two links, and a national regulation supplies the
 third together with its own version of the second.
 
 [Environmental Levels (ISO
-1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/) is the
+1996-1/-2)](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/) is the
 indicator and adjustment layer, and the page most readers of this subsection
 want. Lden weights the evening by +5 dB and the night by +10 dB over default
 12/4/8 h periods, adjustable because Member States define them differently;
@@ -29,9 +29,9 @@ The ISO 1996-2 half of the page *determines* rather than defines: the Annex C
 tonal adjustment, the clause 10.4 correction for residual noise, and the
 Annex F uncertainty budget that says how much the rating level is worth. It
 starts from period levels you already have; producing those is [Integrated and
-Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/).
+Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/).
 
-[Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/)
+[Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/)
 is the adjustment for sound whose impulses make it more annoying than its LAeq
 suggests, in both the Nordtest closed form and the ISO/PAS 1996-3 measurement
 chain: from the onset rate and level difference of each impulse it predicts a
@@ -40,7 +40,7 @@ measured LAeq. It is the measurement that replaces an assessor's judgement in
 the character-adjustment slot of the chain above, and it ends in a `.report()`
 assessment fiche.
 
-[Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/)
+[Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/)
 is what the whole chain looks like once a state has legislated it: the
 corrected level LKeq with its tonal, low-frequency and impulsive corrections
 Kt, Kf and Ki, evaluation periods split into noise phases, and the limit tables
@@ -50,7 +50,7 @@ ISO 1996 a regulation typically restates, and which it replaces. Kf, the
 correction driven by the difference between the C-weighted and the A-weighted
 level, has no counterpart in ISO 1996 at all.
 
-[Impulsive Sound Exposure Statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/)
+[Impulsive Sound Exposure Statistics (ISO 13474)](https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/)
 is for the source whose level at the receiver is not one number: a blast or a
 shot kilometres away, heard ten decibels louder or quieter as the weather
 between them changes. From the level and probability of each replica
@@ -59,7 +59,7 @@ exposure level, spreads it for turbulence, and reads off the long-term level,
 the rating level with the impulsive adjustment K, and the level exceeded by
 any percentage of the events.
 
-[Soundscape Analysis (ISO/TS 12913)](https://jmrplens.github.io/phonometry/environment/assessment/soundscape/)
+[Soundscape Analysis (ISO/TS 12913)](https://docs.jmrp.io/phonometry/environment/assessment/soundscape/)
 turns the question round: not how much sound arrives, but how the people
 there hear it. Its input is a questionnaire rather than a signal: the scale
 values and site medians of the ISO/TS 12913-2 questionnaire, the pleasantness
@@ -75,21 +75,21 @@ soundscape page for a study that asks the people who live with the sound.
 
 ## Pages in this section
 
-- [Environmental Levels (ISO 1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels (ISO 1996-1/-2)](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/):
   Lden, Ldn and the composite rating level of clause 6.5, the Annex C tonal
   adjustment, the clause 10.4 residual-noise correction and the Annex F
   uncertainty budget.
-- [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/):
+- [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/):
   the predicted prominence of impulsive sounds, the graduated LAeq adjustment
   KI, the ISO/PAS 1996-3 measurement chain and the assessment fiche.
-- [Impulsive Sound Exposure Statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/):
+- [Impulsive Sound Exposure Statistics (ISO 13474)](https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/):
   the long-term and rating levels of a blast from its replica atmospheres, the
   ordered classes and their densities, the spread for turbulence and the
   exceedance levels.
-- [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/):
+- [Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/):
   the corrected level LKeq, the Kt/Kf/Ki corrections, the evaluation periods
   and noise phases, and the immission limit tables.
-- [Soundscape Analysis (ISO/TS 12913)](https://jmrplens.github.io/phonometry/environment/assessment/soundscape/):
+- [Soundscape Analysis (ISO/TS 12913)](https://docs.jmrp.io/phonometry/environment/assessment/soundscape/):
   the questionnaire and its scale values, the pleasantness and eventfulness
   of Figure A.1, the Spearman and Pearson correlations, the Method B
   statistics, the binaural metrics of Table D.1 and the reporting record.
@@ -98,13 +98,13 @@ soundscape page for a study that asks the people who live with the sound.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the
+- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the
   LAeq, percentile and event levels of each reference period, which every
   indicator here starts from.
-- [Objective audibility of tones in noise](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/):
+- [Objective audibility of tones in noise](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/):
   the ISO/PAS 20065 engineering method whose mean audibility the ISO 1996-2
   tonal adjustment maps into decibels.
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the path that delivered the sound to the receiver being assessed.
 
 ## What this section does not cover
@@ -128,8 +128,8 @@ whichever one applies.
 ---
 
 
-<!-- source: docs/environment/assessment/environmental-levels.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/ -->
-Source: https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/
+<!-- source: docs/environment/assessment/environmental-levels.md | canonical: https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/ -->
+Source: https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/
 
 # Environmental Levels (ISO 1996-1/-2)
 
@@ -146,7 +146,7 @@ uncertainty budget.
 The level-computation half of the topic, the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$ integrals,
 the percentile levels $L_N$, SEL and the noise dose that produce the period
 levels this page consumes, is
-[Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/); everything here assumes
+[Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/); everything here assumes
 those per-period values are already in hand.
 
 ## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
@@ -231,9 +231,9 @@ Where you put the microphone changes the number: ISO 1996-2 fixes the receiver p
 Combine with `laeq()` per time period to go from recordings to $L_\mathrm{den}$. The
 tonal adjustment itself is justified by the tonal audibility route of the next
 section (fed, for the ISO/PAS 20065 method, by
-[Objective audibility of tones in noise](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/));
+[Objective audibility of tones in noise](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/));
 the `tone_to_noise_ratio()` / `prominence_ratio()` verdicts of
-[Prominent Discrete Tones](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/) are
+[Prominent Discrete Tones](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/) are
 complementary emission screening, not the $K_\mathrm{t}$ basis.
 
 ## Determining levels: tonal adjustment, residual noise and uncertainty (ISO 1996-2)
@@ -320,18 +320,18 @@ $L_\mathrm{dn}$ (3.6.5) keeps only the +10 dB night penalty.
 
 ## See also
 
-- [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$,
+- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$,
   percentile and event levels the indicators of this page are assembled from.
-- [Objective audibility of tones in noise](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-audibility/): the tonal
+- [Objective audibility of tones in noise](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/): the tonal
   audibility whose mean value maps to the $K_\mathrm{t}$ adjustment (Table J.1).
-- [Prominent Discrete Tones](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/): the ECMA-418-1
+- [Prominent Discrete Tones](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/): the ECMA-418-1
   tone-to-noise and prominence-ratio verdicts, complementary emission
   screening for the tonal question.
-- [Occupational Noise Exposure](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/): the workplace
+- [Occupational Noise Exposure](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/): the workplace
   counterpart, from task samples to the daily exposure level with its
   uncertainty budget.
-- API reference: [`environment.assessment.measurement`](https://jmrplens.github.io/phonometry/reference/api/environment/measurement/)
-  and [`environment.assessment.rating`](https://jmrplens.github.io/phonometry/reference/api/environment/rating/).
+- API reference: [`environment.assessment.measurement`](https://docs.jmrp.io/phonometry/reference/api/environment/measurement/)
+  and [`environment.assessment.rating`](https://docs.jmrp.io/phonometry/reference/api/environment/rating/).
 
 ## References
 
@@ -356,8 +356,8 @@ Annex F measurement uncertainty budget.
 ---
 
 
-<!-- source: docs/environment/assessment/impulsive-sound.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/ -->
-Source: https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/
+<!-- source: docs/environment/assessment/impulsive-sound.md | canonical: https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/ -->
+Source: https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/
 
 # Impulsive-sound prominence (NT ACOU 112)
 
@@ -615,8 +615,8 @@ governing prominence $P$ together with the derived $L_\mathrm{Aeq}$ adjustment $
 and a footer with the fixed disclaimer.
 
 It uses the same `ReportMetadata` container
-(documented under [Insulation ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata))
-and rendering engine as the [ISO 532-1 loudness fiche](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/#iso-532-1-report-report);
+(documented under [Insulation ratings](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata))
+and rendering engine as the [ISO 532-1 loudness fiche](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/#iso-532-1-report-report);
 a supplied `requirement` is read as the maximum acceptable governing prominence
 $P$ (a less prominent impulse passes). Rendering needs reportlab and, for the
 figure the fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`);
@@ -650,8 +650,8 @@ prominence $P$ with the $L_\mathrm{Aeq}$ adjustment $K_\mathrm{I}$.*
 
 ## See also
 
-- API reference: [`environment.assessment.impulsive_sound`](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/).
-- Theory: [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112): the NT ACOU 112 prominence derivation and the onset criterion it rests on.
+- API reference: [`environment.assessment.impulsive_sound`](https://docs.jmrp.io/phonometry/reference/api/environment/impulsive-sound/).
+- Theory: [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112): the NT ACOU 112 prominence derivation and the onset criterion it rests on.
 
 ## References
 
@@ -691,8 +691,8 @@ as a function of their own.
 ---
 
 
-<!-- source: docs/environment/assessment/spanish-noise-regulation.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/ -->
-Source: https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/
+<!-- source: docs/environment/assessment/spanish-noise-regulation.md | canonical: https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/ -->
+Source: https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/
 
 # Spanish Noise Regulation (RD 1367/2007)
 
@@ -706,9 +706,9 @@ annual value, and that value is compared against three different criteria read
 off the same limit table. This page implements that chain end to end.
 
 The per-period levels that feed it come from
-[Integrated & Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/), and the European
+[Integrated & Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/), and the European
 $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators they coexist with, from
-[Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/).
+[Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/).
 
 ## The corrected level LKeq and its three corrections
 
@@ -996,18 +996,18 @@ exceeds 9 dB.
 
 ## See also
 
-- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$ and $L_\mathrm{dn}$
+- [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$ and $L_\mathrm{dn}$
   indicators and the ISO 1996-2 adjustments the corrections of the regulation
   coexist with.
-- [Integrated & Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the per-phase $L_\mathrm{Aeq}$,
+- [Integrated & Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the per-phase $L_\mathrm{Aeq}$,
   $L_\mathrm{Ceq}$ and $L_\mathrm{AIeq}$ levels that feed the three corrections.
-- [Spanish Building Code (CTE DB-HR)](https://jmrplens.github.io/phonometry/buildings/insulation/spanish-building-code/): the other half
+- [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/): the other half
   of the Spanish framework, which shares the site's day noise index $L_\mathrm{d}$ with
   this page.
-- [Impulsive-sound prominence](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/): the ISO/PAS 1996-3
+- [Impulsive-sound prominence](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/): the ISO/PAS 1996-3
   impulsive adjustment, the relative of $K_\mathrm{i}$ that is not interchangeable with
   it.
-- API reference: [`environment.assessment.spain`](https://jmrplens.github.io/phonometry/reference/api/environment/spain/).
+- API reference: [`environment.assessment.spain`](https://docs.jmrp.io/phonometry/reference/api/environment/spain/).
 
 ## References
 
@@ -1041,8 +1041,8 @@ the compliance criteria of Article 25.
 ---
 
 
-<!-- source: docs/environment/assessment/sel-distribution.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/ -->
-Source: https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/
+<!-- source: docs/environment/assessment/sel-distribution.md | canonical: https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/ -->
+Source: https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/
 
 # Impulsive sound exposure statistics (ISO 13474)
 
@@ -1143,7 +1143,7 @@ dist.plot(view="exceedance")
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event level exceeds x, with L95, L50, L10, L5 and L1 marked as Equation (25) gives them and the long-term level LT2 of 37,0 dB" width="88%"></picture>
 
 Two things in Annex A do not follow from its own equations, and both are in
-the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). The running text gives the shift of
+the [errata register](https://docs.jmrp.io/phonometry/reference/errata/). The running text gives the shift of
 Equation (22) as 1,04 dB with a standard deviation of 5 dB; the equation gives
 2,878 dB there, 1,04 dB is its value at 3 dB, and the printed LT2 of 37,0 dB and
 the curve of Figure A.2 were computed with 2,878 dB. And Figure A.3 prints
@@ -1170,21 +1170,21 @@ and the uncertainty budget of Annex B.
 
 ## See also
 
-- [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/): the other
+- [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/): the other
   assessment of impulsive sound, the prominence of an impulse at a receiver.
-- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 rating
+- [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 rating
   framework the long-term rating level is offered to.
-- [Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/): the
+- [Atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): the
   excess attenuation of one sound speed profile, where a replica level starts.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the shift printed as 1,04 dB
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the shift printed as 1,04 dB
   and the exceedance levels of Figure A.3.
-- API reference: [`environment.assessment.exposure_distribution`](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/).
+- API reference: [`environment.assessment.exposure_distribution`](https://docs.jmrp.io/phonometry/reference/api/environment/exposure-distribution/).
 
 ---
 
 
-<!-- source: docs/environment/assessment/soundscape.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/soundscape/ -->
-Source: https://jmrplens.github.io/phonometry/environment/assessment/soundscape/
+<!-- source: docs/environment/assessment/soundscape.md | canonical: https://docs.jmrp.io/phonometry/environment/assessment/soundscape/ -->
+Source: https://docs.jmrp.io/phonometry/environment/assessment/soundscape/
 
 # Soundscape analysis (ISO/TS 12913)
 
@@ -1232,7 +1232,7 @@ print(summary.ranges.tolist())    # [[1.0, 1.0], [3.0, 3.0]]
 Every Method A scale is ordinal, so A.2 reports the median per site and item
 and the range. The questions of Figures C.2 to C.4 print "to what extend" and
 "reponse alternative"; the tables keep them, and the
-[errata register](https://jmrplens.github.io/phonometry/reference/errata/) has the entry.
+[errata register](https://docs.jmrp.io/phonometry/reference/errata/) has the entry.
 
 ## Pleasantness and eventfulness
 
@@ -1270,7 +1270,7 @@ pe.plot()  # the model of Figure A.1
 
 A.3 says the formulas process "the results from part 3"; the attributes they
 read are part 2, which is what the library uses (see the
-[errata register](https://jmrplens.github.io/phonometry/reference/errata/)).
+[errata register](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 ## Linking the ratings to the acoustic data
 
@@ -1367,14 +1367,14 @@ measurement protocol of ISO/TS 12913-2 D.7.
 
 ## See also
 
-- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 framework
+- [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 framework
   the levels of Table D.1 are defined in.
-- [Integrated and statistical levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the
+- [Integrated and statistical levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the
   level and percentile functions the binaural analysis reads at each ear.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): part 3 for part 2, the stray
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): part 3 for part 2, the stray
   factor of Formula (A.3), the where-lists of (A.4) and (B.2), the exponent of
   the Nrmc NOTE, three scales for four, and the questionnaire misspellings.
-- API reference: [`environment.assessment.soundscape`](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape/)
-  and [`environment.assessment.soundscape_binaural`](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape-binaural/).
+- API reference: [`environment.assessment.soundscape`](https://docs.jmrp.io/phonometry/reference/api/environment/soundscape/)
+  and [`environment.assessment.soundscape_binaural`](https://docs.jmrp.io/phonometry/reference/api/environment/soundscape-binaural/).
 
 ---

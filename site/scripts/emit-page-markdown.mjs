@@ -18,6 +18,7 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { glob } from "node:fs/promises";
 import { hasMarkdownCopy, routeOf } from "../src/lib/page-markdown.mjs";
+import { basePath, siteUrl } from "../src/data/site.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
@@ -25,7 +26,7 @@ const repoRoot = join(siteRoot, "..");
 const contentDir = join(siteRoot, "src", "content", "docs");
 const docsDir = join(repoRoot, "docs");
 const outDir = process.env.ASTRO_OUT_DIR ?? join(siteRoot, "dist");
-const SITE_URL = "https://jmrplens.github.io/phonometry";
+const SITE_URL = `${siteUrl}${basePath}`;
 
 /** Strip YAML frontmatter and return the body. */
 function stripFrontmatter(text) {

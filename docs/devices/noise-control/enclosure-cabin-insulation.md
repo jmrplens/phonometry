@@ -280,5 +280,5 @@ procedure, of which only the rounding computes.
 - [Errata in published sources](../../ERRATA.md): a column headed with a
   standard that does not exist, a definition that points at the wrong annex,
   and a clearance rule that relaxes the one above it.
-- API reference: [`noise_control.enclosure_insulation`](https://jmrplens.github.io/phonometry/reference/api/noise_control/enclosure-insulation/)
-  and [`noise_control.cabin_insulation`](https://jmrplens.github.io/phonometry/reference/api/noise_control/cabin-insulation/).
+- API reference: [`noise_control.enclosure_insulation`](https://docs.jmrp.io/phonometry/reference/api/noise_control/enclosure-insulation/)
+  and [`noise_control.cabin_insulation`](https://docs.jmrp.io/phonometry/reference/api/noise_control/cabin-insulation/).

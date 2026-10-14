@@ -6,5 +6,5 @@
  * to another path or another host is one edit here rather than a hunt through
  * the checks.
  */
-export const siteUrl = 'https://jmrplens.github.io';
+export const siteUrl = 'https://docs.jmrp.io';
 export const basePath = '/phonometry';

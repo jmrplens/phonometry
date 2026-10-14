@@ -291,7 +291,7 @@ prominence $P$ with the $L_\mathrm{Aeq}$ adjustment $K_\mathrm{I}$.*
 
 ## See also
 
-- API reference: [`environment.assessment.impulsive_sound`](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/).
+- API reference: [`environment.assessment.impulsive_sound`](https://docs.jmrp.io/phonometry/reference/api/environment/impulsive-sound/).
 - Theory: [Impulsive-sound prominence (NT ACOU 112)](../../reference/theory/environment-transport.md#impulsive-sound-prominence-nt-acou-112): the NT ACOU 112 prominence derivation and the onset criterion it rests on.
 
 ## References

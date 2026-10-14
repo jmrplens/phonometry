@@ -603,4 +603,4 @@ ISO 16283-3 Annex E are outside the procedure by Clause 6.
   machinery the 63 Hz octave value comes out of.
 - [Errata found in published sources](../../ERRATA.md): the two defects of
   ISO 16283-2 that this procedure runs into.
-- API reference: [`building.measurement.low_frequency`](https://jmrplens.github.io/phonometry/reference/api/building/low-frequency/) and [`building.measurement.insulation`](https://jmrplens.github.io/phonometry/reference/api/building/insulation/).
+- API reference: [`building.measurement.low_frequency`](https://docs.jmrp.io/phonometry/reference/api/building/low-frequency/) and [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/).

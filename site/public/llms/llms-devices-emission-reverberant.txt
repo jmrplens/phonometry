@@ -1,11 +1,11 @@
 # phonometry: Sound power in a reverberant field
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/devices/emission/sound-power-reverberation.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/
+<!-- source: docs/devices/emission/sound-power-reverberation.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/
 
 # Sound Power in the Reverberation Room (ISO 3741)
 
@@ -21,7 +21,7 @@ comparison method against a reference sound source, the qualification
 warnings, the accredited-style test fiche and, in section 3, the sound energy
 level $L_J$ that the same two methods give a single event. Which route fits
 which job, and the pressure and intensity alternatives, are weighed in
-[Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+[Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 ## 1. Reverberation room, precision grade (ISO 3741)
 
@@ -178,7 +178,7 @@ source's levels and known power.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels_ref` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
-| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source; a [`ReferenceSourceCalibration`](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
+| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source; a [`ReferenceSourceCalibration`](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band $K_1$ on $L_p(\text{ST})$ |
 | `background_levels_ref` | 1D or 2D array | dB | matches `levels_ref` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
 
@@ -197,7 +197,7 @@ fields are `NaN` for the comparison method).
 The reverberation-room result (`ReverberationSoundPowerResult`, ISO 3741)
 writes a one-page PDF fiche laid out like a sound-power test sheet through
 its own `.report()`, sharing the layout and the `ReportMetadata` container of
-the [pressure-method fiche](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
+the [pressure-method fiche](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
 The standard-basis line
 names ISO 3741:2010 and the precision accuracy grade (grade 1) and states which
 method was used, the direct method using the room equivalent absorption area
@@ -286,7 +286,7 @@ for its own background by the frequency-dependent criterion of 9.1.2
 integration time $T$ as the events, compared as its exposure over that window,
 $L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$, so that the energies Eq. 25
 subtracts share one reference; `integration_time` is therefore required with
-`background_levels` (the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/) records the
+`background_levels` (the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/) records the
 reading). Annex F then forms the octave-band levels (Eq. F.4, the energy sum of
 the three thirds of Table F.1 per octave, `octave_band_levels`) and the
 A-weighted total (Eq. F.5, `sound_energy_level_a`).
@@ -350,19 +350,19 @@ source positions of Eq. 24 is left to the caller.
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the seven determination
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the seven determination
   routes, what the accuracy grades promise, and the ISO 4871 noise-emission
   declaration a measured $L_{W\mathrm{A}}$ feeds.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the in-situ enveloping surface and the precision anechoic array.
-- [Sound Power by Intensity Scanning (ISO 9614)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning (ISO 9614)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/):
   the routes that tolerate steady background noise.
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): measuring the reverberation time
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): measuring the reverberation time
   $T_{60}$ that sets the Sabine absorption area.
-- [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/): the Waterhouse and $C_1$/$C_2$
+- [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/): the Waterhouse and $C_1$/$C_2$
   derivations.
-- API reference: [`emission.sound_power_reverberation`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/).
+- API reference: [`emission.sound_power_reverberation`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/).
 
 ## References
 
@@ -391,8 +391,8 @@ criteria and the Annex F A-weighting.
 ---
 
 
-<!-- source: docs/devices/emission/sound-power-test-rooms.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/
+<!-- source: docs/devices/emission/sound-power-test-rooms.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/
 
 # Sound Power in Small Test Rooms (ISO 3743)
 
@@ -409,7 +409,7 @@ beside it. This guide covers the room qualification of both parts, the
 background corrections, the source-location surveys, the determinations, the
 reproducibility of Tables 3 and 5 and the reference meteorological
 conditions. Which route fits which job is weighed in
-[Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+[Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_small_test_rooms_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_small_test_rooms.svg" alt="Two room plans side by side. On the left, the ISO 3743-1 hard-walled room of 5.0 m by 4.0 m: the source's reference box turned off the axes of the walls and at least 1 m from the wall, labelled as the source under test and then the reference source in its place, four numbered microphone positions round it and a fifth on the box, marked as standing above it, one joined to the source by a dashed line marked at least 0.3 V to the one-third, two joined by a line marked at least half a wavelength, and one at least 0.5 m from the wall. On the right, the ISO 3743-2 special reverberation room of 5.4 m by 4.4 m with absorber patches of at most 1.5 square metres along the walls and a painted concrete floor absorbing less than 0.06: a first source location at least 1 m from the wall, a dashed second location 1.2 m beside it, and six numbered microphone positions, with at least 0.3 V to the one-third from the second location, half a wavelength between two positions and a quarter wavelength from the wall. A footer states the room criteria of both parts, the worked distances for 60 and 72 cubic metres, Eq. 14 on the means with both margins at least 6 dB, the reverberation-time limits with R, Formula 9, and Formula 10 with the reference source at least 1.5 m from the walls" width="96%"></picture>
 
@@ -463,7 +463,7 @@ print(round(room.minimum_microphone_distance_m, 2))  # 1.17 m from the source (7
 Table 3 prints its middle octave row as "400 to 5 000", a one-third-octave
 range it kept from the ISO 3744 table it was converted from; the library
 reads the row as the octaves it spans, 500 Hz to 4 kHz (see the
-[errata](https://jmrplens.github.io/phonometry/reference/errata/)). The last line is the
+[errata](https://docs.jmrp.io/phonometry/reference/errata/)). The last line is the
 $d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3 that keeps every microphone in the
 reverberant field, stated for the setup rather than judged.
 
@@ -599,7 +599,7 @@ plt.show()
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 1D, 2D or 3D array | dB | `(bands,)`, `(NM, bands)` or `(NS, NM, bands)` | Measured $L'_{pi(\mathrm{ST})}$: one traverse (NOTE to 8.1.2), one row per fixed position (at least three, 7.3), or one grid per source location (Eq. 9) |
 | `levels_ref` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | The reference source at the same positions, or on the same traverse |
-| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | `(bands,)` | Calibrated $L_{W(\mathrm{RSS})}$ at the conditions of the test; a [`ReferenceSourceCalibration`](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/) is summed from its one-third octave bands into the octaves at `frequencies` and read there, less its own $C_2$ |
+| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | `(bands,)` | Calibrated $L_{W(\mathrm{RSS})}$ at the conditions of the test; a [`ReferenceSourceCalibration`](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/) is summed from its one-third octave bands into the octaves at `frequencies` and read there, less its own $C_2$ |
 | `frequencies` | 1D array | Hz | 125 Hz to 8 kHz octaves | Ascending octave centres (3.11); 63 Hz is accepted where the room and the instrumentation are satisfactory there (Table B.1 footnote) |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(NM, bands)` | $L_{pi(\mathrm{B})}$, averaged by Eq. 12. `None` warns and leaves `background_requirement_met` `False` throughout |
 | `background_levels_ref` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` |
@@ -632,7 +632,7 @@ background from a *time-integrated* event level, as ISO 3744 does; the
 library compares the background as its exposure over the same interval $T$,
 $\overline{L_{p(\mathrm{B})}} + 10 \log_{10}(T/T_0)$, and so needs
 `integration_time_s` with a background (see the
-[errata](https://jmrplens.github.io/phonometry/reference/errata/)).
+[errata](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 ```python
 # An electric desk stapler in the same room: five strokes measured one at a
@@ -704,7 +704,7 @@ against 0,9 and 1,1 alone, and it puts the 250 Hz band of Figure B.4 at
 1.13 $R$, outside the limits the example says the curve is centred in, so the
 library keeps its rule; a $T_\mathrm{nom}$ given in
 `nominal_reverberation_time_s`, the printed 0,73 s among them, is checked as
-given (see the [errata](https://jmrplens.github.io/phonometry/reference/errata/)). 6.6 then asks the climate to hold:
+given (see the [errata](https://docs.jmrp.io/phonometry/reference/errata/)). 6.6 then asks the climate to hold:
 $H(\theta + 5\ ^\circ\mathrm{C})$ during the test within ±10 % of its value
 while the reverberation time was measured. Clause 5 adds a recommendation on
 the source: its volume should not exceed 1 % of the room's, 0,7 m³ in a room
@@ -740,7 +740,7 @@ print(np.round(emission.reverberation_parameter([100.0, 1000.0], 72.0), 3))  # [
 limiting curves of this 72 m³ room, with the centred $T_\mathrm{nom}$ in the
 title. The curves widen above the 6,3 kHz band, as the text of 6.3 says;
 Figure B.3 draws them wide at 6,3 kHz already (see the
-[errata](https://jmrplens.github.io/phonometry/reference/errata/)).*
+[errata](https://docs.jmrp.io/phonometry/reference/errata/)).*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1029,7 +1029,7 @@ takes it out, and should not be used with $\sigma'_\mathrm{omc}$ above
 $\sigma'_\mathrm{tot}/\sqrt{2}$. Part 2 prints the same relation as its
 Formula (14) with a plus sign, which its own next paragraph contradicts; the
 library takes the difference for both (see the
-[errata](https://jmrplens.github.io/phonometry/reference/errata/)).
+[errata](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 **Reference conditions (Annex A of Part 1, Annex E of Part 2).** Above
 500 m the levels are carried to 101,325 kPa and 23,0 °C by
@@ -1150,26 +1150,26 @@ calibrated: its characteristics and calibration tolerances, Annex A of Part 2
 (A.1 and Table A.1: ±1 dB from 100 Hz to 160 Hz, ±0,5 dB from 200 Hz to
 4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
 calibration certificate's and are not judged here. An ISO 6926 calibration
-made in [Free Field and Reference Sources](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/), which judges the
+made in [Free Field and Reference Sources](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/), which judges the
 requirements of ISO 6926, is taken by either comparison as `lw_ref`, and by
 the suitability evaluation of 6.7 as `calibrated_power_levels`, and read at
 the conditions of the test.
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the
   determination routes, the accuracy grades and the ISO 4871 noise-emission
   declaration.
-- [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/):
   the precision grade of ISO 3741, whose Waterhouse term the special room
   builds into its reverberation curve.
-- [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/):
   the same comparison with a reference source, taken to the room the machine
   works in.
-- [Sound Power by Pressure Methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the enveloping surface of ISO 3744, ISO 3745 and ISO 3746 for a source
   measured in its direct field.
-- [API reference](https://jmrplens.github.io/phonometry/reference/api/): the ISO 3743 functions and
+- [API reference](https://docs.jmrp.io/phonometry/reference/api/): the ISO 3743 functions and
   results under `phonometry.emission`.
 
 
@@ -1220,8 +1220,8 @@ the comparison methods, the Table 5 reproducibility and Annexes E and F.
 ---
 
 
-<!-- source: docs/devices/emission/sound-power-in-situ.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/
+<!-- source: docs/devices/emission/sound-power-in-situ.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/
 
 # Sound Power in Situ by Comparison (ISO 3747)
 
@@ -1237,7 +1237,7 @@ the difference of the two mean levels. The method reaches engineering grade 2
 where the field is reverberant enough and the source not too directional, and
 survey grade 3 otherwise; an impulsive source gets a sound energy level
 instead of a sound power level by the same route. Which route fits which job
-is weighed in [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+is weighed in [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 ## 1. The comparison in situ (ISO 3747)
 
@@ -1445,7 +1445,7 @@ with the grade and the expanded uncertainty.
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 2D array | dB | `(n, bands)` | Measured $L'_{pi(\mathrm{ST})}$, one row per microphone position, three or four positions (7.4.1) |
 | `levels_ref` | 2D or 3D array | dB | `(n, bands)` or `(m, n, bands)` | The reference source at the same positions, one grid per location, corrected per its manufacturer but not for background |
-| `lw_ref` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/) is summed from its one-third octave bands into the octaves at `frequencies` |
+| `lw_ref` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/) is summed from its one-third octave bands into the octaves at `frequencies` |
 | `frequencies` | 1D array | Hz | 63 Hz to 8 kHz octaves | Nominal octave mid-band frequencies of Table D.1; required. Clause 3.11 puts the general-purpose range at 125 Hz to 8 kHz; the 63 Hz row of Table D.1 carries footnote a, which allows it only where the test environment, the reference sound source and the instrumentation are satisfactory at that frequency |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(n, bands)` | $L_{pi(\mathrm{B})}$; one spectrum serves every position. `None` warns and leaves `background_requirement_met` `False` in every band, since 7.5 measures it at each position and 8.1 needs the margin |
 | `background_levels_ref` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` (7.5) |
@@ -1617,14 +1617,14 @@ manufacturer's, applied before the levels arrive.
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the determination routes,
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the determination routes,
   the accuracy grades and the ISO 4871 noise-emission declaration.
-- [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/): the
+- [Sound Power in the Reverberation Room](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/): the
   precision comparison of ISO 3741 in a qualified room, whose $C_2$ this
   guide shares.
-- [Sound Power by Pressure Methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/): the enveloping
+- [Sound Power by Pressure Methods](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/): the enveloping
   surface for a source that can be measured in its direct field.
-- [Sound Power by Intensity Scanning](https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/): the routes
+- [Sound Power by Intensity Scanning](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/): the routes
   that tolerate steady background noise without a reference source.
 
 ## References
@@ -1658,8 +1658,8 @@ clause 9 uncertainty and Annexes A, C and D.
 ---
 
 
-<!-- source: docs/devices/emission/sound-power-high-frequency.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/
+<!-- source: docs/devices/emission/sound-power-high-frequency.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/
 
 # Sound Power in the 16 kHz Octave (ISO 9295)
 
@@ -1677,7 +1677,7 @@ the comparison with a reference sound source for broadband noise and for
 tones, the free-field alternative, what Table 3 asks a report to determine
 for each type of noise, and the misprints of the tables the standard prints
 for the air absorption. Which route fits which job below
-10 kHz is weighed in [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+10 kHz is weighed in [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 ## 1. The 16 kHz octave band (ISO 9295)
 
@@ -1842,7 +1842,7 @@ zeros are printed 10 % high: "0,033 0" for 0,030 0, "0,04 4" for 0,040 0
 and "0,05 50" for 0,050 0. The last of them, at 21 500 Hz, 27 °C and 60 %,
 is the largest error in the tables, 0,005 0 Np/m, and read into Formula (7)
 any of the three raises the level by at least 0.41 dB. The whole list, cell by cell, is in the
-[errata registry](https://jmrplens.github.io/phonometry/reference/errata/). The 581 correct cells hold a
+[errata registry](https://docs.jmrp.io/phonometry/reference/errata/). The 581 correct cells hold a
 smaller surprise: they reproduce digit for digit only with the temperature
 converted as $\theta + 273.16$ K, the triple point of water, where the
 Celsius scale puts 273.15 K. The library converts with 273.15 K, which moves
@@ -2001,7 +2001,7 @@ plt.show()
 
 The fourth method is ISO 3744 in a hemi-anechoic room, with the three
 one-third-octave bands of the 16 kHz octave, and
-[`sound_power_pressure`](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/)
+[`sound_power_pressure`](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/)
 takes it as it stands (without `frequencies`, since the A-weighting table of
 ISO 3744 stops at 10 kHz). What ISO 9295 adds is Formula (10): beyond a
 measurement radius of 2 m the air absorbs enough over the path that the
@@ -2072,7 +2072,7 @@ the levels Table 3 asks to determine for each type of noise
 qualification of the room and the flatness of the chain are checks the
 laboratory makes, the reference source comes calibrated (for broadband noise
 as the ISO 6926 calibration of
-[Free Field and Reference Sources](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/) if the
+[Free Field and Reference Sources](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/) if the
 laboratory made it here), and the $\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
 monitored. The background correction is ISO 3741's, applied to the levels
 before they are passed (`reverberation_background_correction`). The
@@ -2082,18 +2082,18 @@ deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the
   determination routes below 10 kHz and the ISO 4871 declaration.
-- [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/):
   the room technique this standard extends, and the $C_1$ and $C_2$ it borrows.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the enveloping surface of the free-field method.
-- [Outdoor propagation (ISO 9613-1 / ISO 9613-2)](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor propagation (ISO 9613-1 / ISO 9613-2)](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the attenuation coefficient Annex A is written from.
-- [Errata](https://jmrplens.github.io/phonometry/reference/errata/): the 43 misprinted cells of
+- [Errata](https://docs.jmrp.io/phonometry/reference/errata/): the 43 misprinted cells of
   Tables 1 and 2, and the oxygen relaxation frequency that Formula (A.5)
   sets with a digit zero.
-- API reference: [`emission.sound_power_high_frequency`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-high-frequency/).
+- API reference: [`emission.sound_power_high_frequency`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-high-frequency/).
 
 ## References
 

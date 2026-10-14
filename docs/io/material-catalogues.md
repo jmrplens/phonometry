@@ -542,7 +542,7 @@ An outdoor ground is far more resistive than the fibrous materials the two
 models were fitted to, so every octave here lies below their published fit
 range, and the call raises a `PorousAbsorberWarning` saying the regression is
 an extrapolation there;
-[Choosing the ground impedance](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/#choosing-the-ground-impedance)
+[Choosing the ground impedance](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/#choosing-the-ground-impedance)
 explains what that costs and why Miki is the model to prefer below the range.
 
 ### A wall in the detailed building model
@@ -1036,7 +1036,7 @@ print(io.parse_catalogue(pointed, row_type=materials.PorousMaterial) == mine)   
 A document names its schema in a top-level `$schema`, which the reader takes
 and never reads: a file beside it, as above, or the schema of every row
 class the library publishes, which the documentation site serves at
-`https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json`.
+`https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json`.
 An editor can also be told which files are catalogues, and keep them free of
 the key; in Visual Studio Code that is one setting:
 
@@ -1045,7 +1045,7 @@ the key; in Visual Studio Code that is one setting:
   "json.schemas": [
     {
       "fileMatch": ["*.catalogue.json", "*.csv.phonometry.json"],
-      "url": "https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json"
+      "url": "https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json"
     }
   ]
 }
@@ -1104,7 +1104,7 @@ or a pull request is never merged.
 ## See also
 
 - [Files](index.md): what the file layer of the library reads and writes, and why.
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/): every table the library has read from a page, the same row classes with the book's cells.
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/): every table the library has read from a page, the same row classes with the book's cells.
 - [Reading a material datasheet](../materials/reading-a-datasheet.md): what each number on a data sheet is, and which row class holds it.
 - [Porous and Multilayer Absorbers](../materials/absorbers/porous-absorbers.md): the models a `PorousMaterial` row goes into.
 - [Dynamic stiffness of resilient materials](../materials/resilient/dynamic-stiffness.md): $s'$, $s'_\mathrm{t}$ and clause 8.2 in full.
@@ -1112,7 +1112,7 @@ or a pull request is never merged.
 - [Elastic waves and fluid-solid coupling](../simulation/elastic-waves.md): the solver a solid's row is a medium of.
 - [Spherical ground effect and advanced barriers](../environment/propagation/ground-barriers.md): the models a ground row's `medium()` goes into.
 - [Detailed Per-Band Prediction (ISO 12354)](../buildings/design/detailed-prediction.md): the ISO 12354 chain an element from `from_solid` enters.
-- API reference: [`phonometry.io`](https://jmrplens.github.io/phonometry/reference/api/io/io/).
+- API reference: [`phonometry.io`](https://docs.jmrp.io/phonometry/reference/api/io/io/).
 
 ## References
 

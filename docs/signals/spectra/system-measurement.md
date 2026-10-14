@@ -407,7 +407,7 @@ implements the single-channel, scalar case of their Eq. 17 and nothing else.
 - [Loudspeakers](../../devices/electroacoustics/loudspeakers.md): the reference axis, distance and free-field conditions the measured response needs.
 - [Calibrated spectral analysis](spectral-analysis.md): the Welch machinery that verifies the shaped sweep, and the smoothing the inversion wants first.
 - [Correlation and delay](correlation-delay.md): the loopback measurement that aligns the two Golay records.
-- API reference: [`signals.inversion`](https://jmrplens.github.io/phonometry/reference/api/signals/inversion/).
+- API reference: [`signals.inversion`](https://docs.jmrp.io/phonometry/reference/api/signals/inversion/).
 
 ## References
 

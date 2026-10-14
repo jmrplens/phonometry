@@ -697,8 +697,8 @@ ISO 9614-3.
   the comparison in the highest octave.
 - [Errata](../../ERRATA.md): the two spatial resolutions of the
   amended Annex A, and the $d_0$ of ISO 6926 Formula (A.1).
-- API reference: [`emission.free_field_qualification`](https://jmrplens.github.io/phonometry/reference/api/power/free-field-qualification/)
-  and [`emission.reference_sound_source`](https://jmrplens.github.io/phonometry/reference/api/power/reference-sound-source/).
+- API reference: [`emission.free_field_qualification`](https://docs.jmrp.io/phonometry/reference/api/power/free-field-qualification/)
+  and [`emission.reference_sound_source`](https://docs.jmrp.io/phonometry/reference/api/power/reference-sound-source/).
 
 ## References
 

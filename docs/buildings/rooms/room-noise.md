@@ -277,7 +277,7 @@ repository. Click a preview to open the PDF:
   measurement that produces the input spectrum.
 - [Field Insulation Measurement (ISO 16283)](../insulation/insulation-field.md):
   when the source is next door rather than overhead.
-- API reference: [`room.noise_criteria`](https://jmrplens.github.io/phonometry/reference/api/rooms/noise-criteria/).
+- API reference: [`room.noise_criteria`](https://docs.jmrp.io/phonometry/reference/api/rooms/noise-criteria/).
 - Theory: [Room noise criteria (ANSI S12.2)](../../reference/theory/rooms-buildings.md#room-noise-criteria-ansi-s122): how the NC, RC Mark II and NR families are constructed and what each was designed to penalise.
 
 ## References

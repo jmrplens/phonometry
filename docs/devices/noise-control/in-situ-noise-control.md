@@ -213,6 +213,6 @@ equivalence; and the report templates.
   ISO 10847 measures.
 - [Errata in published sources](../../ERRATA.md): an upwind wind class printed
   with a positive lower bound, and one prime asked to mean two different things.
-- API reference: [`noise_control.silencer_in_situ`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-in-situ/),
-  [`noise_control.screen_in_situ`](https://jmrplens.github.io/phonometry/reference/api/noise_control/screen-in-situ/)
-  and [`environment.propagation.barrier_in_situ`](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/).
+- API reference: [`noise_control.silencer_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-in-situ/),
+  [`noise_control.screen_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/screen-in-situ/)
+  and [`environment.propagation.barrier_in_situ`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-in-situ/).

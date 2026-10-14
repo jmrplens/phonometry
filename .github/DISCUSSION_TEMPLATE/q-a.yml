@@ -18,7 +18,7 @@ body:
           failures with no standard in play: a crash, a result that contradicts the
           library's own documentation, or a broken installation.
 
-        The [documentation](https://jmrplens.github.io/phonometry/) is available in
+        The [documentation](https://docs.jmrp.io/phonometry/) is available in
         English and Spanish, and you are welcome to write in either language.
 
   - type: textarea

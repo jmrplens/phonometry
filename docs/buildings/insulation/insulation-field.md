@@ -559,4 +559,4 @@ and the sound-intensity route (**ISO 15186-1**/-2).
   used for the insulation spectra.
 - [Theory](../../reference/theory/rooms-buildings.md): the reference-curve derivation behind the
   weighted single-number ratings.
-- API reference: [`building.measurement.insulation`](https://jmrplens.github.io/phonometry/reference/api/building/insulation/) and [`building.measurement.uncertainty`](https://jmrplens.github.io/phonometry/reference/api/building/uncertainty/).
+- API reference: [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/) and [`building.measurement.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/building/uncertainty/).

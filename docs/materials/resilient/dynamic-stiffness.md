@@ -322,7 +322,7 @@ heavy slab) is the design goal.
   `airflow_resistivity_kpa_s_m2` is in kPa·s/m².
 - [Resilient layers overview](index.md): where this
   measurement sits among the materials guides.
-- API reference: [`materials.resilient.dynamic_stiffness`](https://jmrplens.github.io/phonometry/reference/api/materials/dynamic-stiffness/).
+- API reference: [`materials.resilient.dynamic_stiffness`](https://docs.jmrp.io/phonometry/reference/api/materials/dynamic-stiffness/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring resonance the EN 29052-1 rig measures, seen as a mobility.
 
 ## References

@@ -567,7 +567,7 @@ from the ISO 3891 coefficient it cites.
   the SAE ARP 866A coefficient of ISO 3891 that the weather path evaluates.
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md):
   what the plant's $L_W$ is for, the level at a neighbour.
-- API reference: [`emission.plant_sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-plant/).
+- API reference: [`emission.plant_sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-plant/).
 
 ## References
 

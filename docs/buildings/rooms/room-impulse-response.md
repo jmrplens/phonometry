@@ -320,4 +320,4 @@ deconvolution identities in the [conformance report](../../CONFORMANCE.md).
   measurement either side of a partition.
 - [Image Sources & Steady-State Field](room-image-sources.md): simulated
   impulse responses to rehearse the processing chain on.
-- API reference: [`room.impulse_response`](https://jmrplens.github.io/phonometry/reference/api/rooms/impulse-response/).
+- API reference: [`room.impulse_response`](https://docs.jmrp.io/phonometry/reference/api/rooms/impulse-response/).

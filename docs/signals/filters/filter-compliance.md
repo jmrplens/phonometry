@@ -733,9 +733,9 @@ the summation of 4.9, its alias images graded too.
   spectrum stage this class applies to.
 - [Conformance report](../../CONFORMANCE.md): the verified configurations behind
   the class claims of this page.
-- API reference: [`filters.compliance`](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/),
-  [`filters.time_invariance`](https://jmrplens.github.io/phonometry/reference/api/filters/time-invariance/)
-  and [`filters.periodic_tests`](https://jmrplens.github.io/phonometry/reference/api/filters/periodic-tests/).
+- API reference: [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/),
+  [`filters.time_invariance`](https://docs.jmrp.io/phonometry/reference/api/filters/time-invariance/)
+  and [`filters.periodic_tests`](https://docs.jmrp.io/phonometry/reference/api/filters/periodic-tests/).
 
 ## References
 

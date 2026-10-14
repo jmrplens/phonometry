@@ -1,11 +1,11 @@
 # phonometry: Control valve noise (IEC 60534-8)
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/devices/noise-control/control-valve-noise.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/ -->
-Source: https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/
+<!-- source: docs/devices/noise-control/control-valve-noise.md | canonical: https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/ -->
+Source: https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/
 
 # Control valve noise (IEC 60534-8-3)
 
@@ -72,7 +72,7 @@ same row, while its regime IV row ends $x \le x_{CE}$. Read as the table
 prints it, the single point $x = x_{CE}$ belongs to two regimes at once. The
 clause is the normative text and its list is consistent, so `flow_regime`
 follows the clause, and
-[the errata register](https://jmrplens.github.io/phonometry/reference/errata/) records the
+[the errata register](https://docs.jmrp.io/phonometry/reference/errata/) records the
 disagreement.
 
 ## 2. The jet, which is not the valve
@@ -418,16 +418,16 @@ took out.
 
 ## See also
 
-- [Reactive Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): the four-pole chain that would be put
+- [Reactive Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/): the four-pole chain that would be put
   downstream of a valve this loud.
-- [Duct-Borne Noise](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/): the same question for a ventilation
+- [Duct-Borne Noise](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/): the same question for a ventilation
   system, where the source is a fan rather than a jet.
-- [HVAC Noise the German Way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/): another
+- [HVAC Noise the German Way (VDI 2081)](https://docs.jmrp.io/phonometry/devices/noise-control/vdi2081-air-systems/): another
   chain that ends in a level rather than in a sound power.
-- [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/): the ISO 5136
+- [Sound Power in a Duct](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-duct/): the ISO 5136
   measurement of what a source puts into a pipe, which is the measured
   counterpart of what this page predicts.
-- API reference: [`noise_control.valves`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves/).
+- API reference: [`noise_control.valves`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves/).
 
 ## Standards
 
@@ -439,22 +439,22 @@ the trims built to be quiet: the drilled cage of 6.2, the multistage
 substitution of 6.3 and the multipath multistage case of 6.4. And the
 outlet-flow half of Clause 7, for the flow leaving a valve outlet that has
 passed Mach 0,3. Validated against all seven worked examples of Annex A in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the three defects that annex
-carries are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). Clause 8 and Clause 9
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/); the three defects that annex
+carries are in the [errata register](https://docs.jmrp.io/phonometry/reference/errata/). Clause 8 and Clause 9
 are not implemented yet; the hydrodynamic case of IEC 60534-8-4 has
-[a page of its own](https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/).
+[a page of its own](https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/).
 
 ---
 
 
-<!-- source: docs/devices/noise-control/valve-cavitation.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/ -->
-Source: https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/
+<!-- source: docs/devices/noise-control/valve-cavitation.md | canonical: https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/ -->
+Source: https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/
 
 # Hydrodynamic valve noise (IEC 60534-8-4)
 
 Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
 choke the way a gas does, so a control valve on a water line cannot build
-the shock cells that [the aerodynamic part](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/) spends
+the shock cells that [the aerodynamic part](https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/) spends
 five regimes on. It makes noise two ways instead, and the whole of
 IEC 60534-8-4 is the sum of them: **turbulence** in the jet leaving the vena contracta, and
 **cavitation**, once the pressure there falls low enough for the liquid to
@@ -668,7 +668,7 @@ Those three are printed in Table A.1 as 141,9 dB, **51,76 dB** and 77,4 dB.
 The middle one is printed without its minus sign, and it cannot be: its own
 two inputs, $-44{,}71$ and $-7{,}053$ dB, sum to $-51{,}763$, and the row
 below only reproduces its printed 77,4 dB with the negative value.
-[The errata register](https://jmrplens.github.io/phonometry/reference/errata/) records it, along with three
+[The errata register](https://docs.jmrp.io/phonometry/reference/errata/) records it, along with three
 intermediates of the same table that its own equations do not reproduce.
 
 ## 5. One equation, printed two ways
@@ -751,16 +751,16 @@ by a thousand before handing it to Equation (12).
 
 ## See also
 
-- [Control Valve Noise (IEC 60534-8-3)](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/): the same
+- [Control Valve Noise (IEC 60534-8-3)](https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/): the same
   chain for a compressible fluid, where five flow regimes take the place of
   one threshold.
-- [Reactive Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): the four-pole chain that would be put
+- [Reactive Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/): the four-pole chain that would be put
   downstream of a line this loud.
-- [Duct-Borne Noise](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/): the same question for a ventilation
+- [Duct-Borne Noise](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/): the same question for a ventilation
   system, where the source is a fan rather than a jet.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the seven entries this page
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the seven entries this page
   rests on, from a sign to an equation printed two ways.
-- API reference: [`noise_control.valves_hydrodynamic`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
+- API reference: [`noise_control.valves_hydrodynamic`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
 
 ## Standards
 
@@ -776,8 +776,8 @@ NOTE, the external level of (18a) and (18b), and the band route of 5.4. And
 Clause 6 for a multistage trim: the stage pressures and ratios of (23a) to
 (26), the energy sum of (27), and the last stage of 6.3.2. Validated against
 all three worked examples of Annex A in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the seven defects that annex and
-its clauses carry are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). The
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/); the seven defects that annex and
+its clauses carry are in the [errata register](https://docs.jmrp.io/phonometry/reference/errata/). The
 laboratory measurement of x_Fz (IEC 60534-8-2) and the flashing regime past
 x_F = 1 are not implemented.
 

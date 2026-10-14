@@ -31,7 +31,7 @@ look a name up, the three places where the obvious fix is the wrong one, and
 the ten names that are gone.
 
 **I have a job, not a subject. Which page is it?**
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes the library by
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes the library by
 the task instead of the topic: measure a reverberation time, check a wall
 against a building code, rate a machine's sound power, decide whether a worker
 is over the exposure limit.
@@ -85,8 +85,8 @@ part written most bluntly.
 - A first measurement carried end to end: [Build a sound level meter](../signals/sound-level-meter.md).
 - The whole inventory, by topic: [All guides](../README.md).
 - A symbol you have but cannot name: the [glossary](../reference/glossary.md), with its unit, its defining clause and the guide that computes it.
-- Evidence that a number is defensible: the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/), which prints each standard's own expected value beside the computed one.
-- A printed expected value that disagrees with the library: the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/), which says which of the two is wrong and why.
+- Evidence that a number is defensible: the [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/), which prints each standard's own expected value beside the computed one.
+- A printed expected value that disagrees with the library: the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/), which says which of the two is wrong and why.
 
 The assumed starting point is Python 3.12 or newer with working NumPy and
 SciPy, and enough acoustics to know what a one-third-octave band and a sound
@@ -98,6 +98,6 @@ This is not a tutorial series, and it is not the API. Function signatures and
 argument types are in the generated API reference. The derivations, the
 numerical conformance report, the errata register for defects found in the
 published standards themselves, the glossary of symbols and the bibliography
-are all in [Reference](https://jmrplens.github.io/phonometry/reference/). And the acoustics itself is
+are all in [Reference](https://docs.jmrp.io/phonometry/reference/). And the acoustics itself is
 assumed rather than taught: the guides explain the method a standard
 prescribes and why it is written that way, not what a decibel is.

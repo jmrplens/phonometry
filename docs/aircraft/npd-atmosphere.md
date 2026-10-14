@@ -300,7 +300,7 @@ Pages elsewhere on the site that this section leans on:
 - [Aircraft noise: Effective Perceived Noise Level](aircraft-noise.md): SAE ARP
   5534 on its own, as certification uses it.
 - API reference:
-  [`aircraft.npd_atmosphere`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/npd-atmosphere/).
+  [`aircraft.npd_atmosphere`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/npd-atmosphere/).
 
 ## References
 

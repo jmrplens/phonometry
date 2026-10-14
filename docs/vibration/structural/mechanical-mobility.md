@@ -321,7 +321,7 @@ res.report(
   them.
 - [Frequency response and coherence](../../devices/electroacoustics/electroacoustics.md):
   the `transfer_function` and `coherence` estimators section 3 runs on.
-- API reference: [`vibration.structural.mechanical_mobility`](https://jmrplens.github.io/phonometry/reference/api/vibration/mechanical-mobility/).
+- API reference: [`vibration.structural.mechanical_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/mechanical-mobility/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the infinite-structure point mobilities and the radiation efficiency, and why they are averages a finite structure oscillates about.
 
 ## References

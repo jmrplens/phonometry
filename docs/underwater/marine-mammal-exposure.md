@@ -255,7 +255,7 @@ piling campaign's weighted exposure falls below a criterion.
 - [Underwater sound propagation](underwater-propagation.md):
   the propagation loss and figure-of-merit machinery that turns a criterion
   into a range.
-- API reference: [`underwater.bioacoustics.weighting`](https://jmrplens.github.io/phonometry/reference/api/underwater/weighting/) and [`underwater.bioacoustics.audiograms`](https://jmrplens.github.io/phonometry/reference/api/underwater/audiograms/).
+- API reference: [`underwater.bioacoustics.weighting`](https://docs.jmrp.io/phonometry/reference/api/underwater/weighting/) and [`underwater.bioacoustics.audiograms`](https://docs.jmrp.io/phonometry/reference/api/underwater/audiograms/).
 
 ## References
 

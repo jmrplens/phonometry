@@ -462,8 +462,8 @@ people and buildings is DIN 4150-2 and DIN 4150-3.
 - [Spectral analysis](../../signals/spectra/spectral-analysis.md): the
   Welch estimate behind the narrow-band density and the confidence it carries.
 - API reference:
-  [`vibration.immission.railway`](https://jmrplens.github.io/phonometry/reference/api/vibration/railway/)
-  and [`vibration.immission.ground`](https://jmrplens.github.io/phonometry/reference/api/vibration/ground/).
+  [`vibration.immission.railway`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway/)
+  and [`vibration.immission.ground`](https://docs.jmrp.io/phonometry/reference/api/vibration/ground/).
 
 ## References
 

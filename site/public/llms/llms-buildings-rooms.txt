@@ -1,11 +1,11 @@
 # phonometry: Room acoustics
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/buildings/rooms/index.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/
+<!-- source: docs/buildings/rooms/index.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/
 
 # Room acoustics
 
@@ -25,30 +25,30 @@ caveats at their lowest bands. A reader chasing a low-frequency problem should
 start from the modal treatment rather than from the decay parameters.
 
 The measurement chain starts in
-[Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/):
+[Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/):
 the deterministic excitation signals of ISO 18233, the sweep deconvolution
 that turns a recording into an impulse response, and the MLS alternative.
-[Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) then derives the ISO 3382
+[Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) then derives the ISO 3382
 parameters from it (reverberation time, EDT, clarity, definition and centre
 time), and
-[Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/)
+[Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/)
 answers the question a single closed room does not raise: how far speech stays
 intelligible across an open floor, through the spatial decay rate and the
 distraction and privacy distances.
-[Image sources and the steady-state room field](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/)
+[Image sources and the steady-state room field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/)
 approaches the same room deterministically, building its impulse response from
 mirrored sources, its steady-state level from the room constant, and, below the
 Schroeder frequency where both of those give out, the discrete normal modes of
 the shoebox itself.
 
-[Spatial Sound Decay in Workrooms](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/)
+[Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/)
 asks the question a factory hall raises instead: not how long a decay lasts, but
 how far the level falls as you walk away from a machine, and how far above open
 air the room sits while it does.
 
 Before the two prediction pages, one page answers a different question about the
 same room.
-[Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/)
+[Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/)
 asks whether its steady background noise (ventilation, distant traffic) is
 acceptable for its use, rated against the ANSI/ASA S12.2 criterion curves, with
 the RC Mark II rumble/hiss tag diagnosing *why* a spectrum fails.
@@ -56,11 +56,11 @@ the RC Mark II rumble/hiss tag diagnosing *why* a spectrum fails.
 Prediction gets two pages because two traditions coexist. Both are diffuse-field
 statistical models fed by the same laboratory absorption coefficients, so they
 are not rival physics; they differ in what they are admissible for.
-[Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/)
+[Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/)
 covers the classical statistical formulae (Sabine, Eyring, Millington-Sette,
 Fitzroy and Arau-Puchades), including the models that handle a non-uniform
 absorption distribution.
-[Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/)
+[Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/)
 covers the normative European version of the same physics: the total
 equivalent absorption area assembled from surfaces, objects and air, and the
 reverberation time that follows from it, as a standard a design report can
@@ -78,53 +78,53 @@ loss of diffusivity, and they fail in the same direction: the measured
 reverberation time comes out longer than predicted, by up to a factor of two in
 the low-diffusivity rooms the standard's own accuracy clause records. And
 neither replaces a measurement: the measured counterpart is
-[Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/).
+[Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/).
 
 Related pages elsewhere: the absorption coefficient the prediction chain
 consumes is measured in
-[Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/),
+[Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/),
 insulation *between* rooms continues in
-[Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/), and the
+[Sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/), and the
 speech intelligibility a room affords is quantified by the
-[Speech Transmission Index](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/).
+[Speech Transmission Index](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/).
 
 ## Pages in this section
 
-- [Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/):
   the ISO 18233 deterministic methods, exponential sweeps and their
   deconvolution, and MLS.
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2
   parameters (T20, T30, EDT, C50, C80, D50, Ts) with the Schroeder integration
   and the accredited fiche.
-- [Sound strength G (ISO 3382-1)](https://jmrplens.github.io/phonometry/buildings/rooms/sound-strength/):
+- [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/):
   how loud the hall is, against the same source at 10 m in a free field, and
   the three printed routes to that reference.
-- [Spatial impression (ISO 3382-1)](https://jmrplens.github.io/phonometry/buildings/rooms/spatial-impression/):
+- [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/):
   where the sound comes from, measured with a figure-of-eight microphone
   beside the omnidirectional one and with a head that has two.
-- [Stage support and uncertainty (ISO 3382-1)](https://jmrplens.github.io/phonometry/buildings/rooms/stage-and-uncertainty/):
+- [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/):
   the two measures taken on the platform with the source a metre away, and
   the uncertainty Clause 7 puts on a measured reverberation time.
-- [Reporting and source qualification (ISO 3382-1)](https://jmrplens.github.io/phonometry/buildings/rooms/reporting-and-qualification/):
+- [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/):
   Table 1 and the gliding directivity survey, the receiver counts of
   Table A.2, and which bands each single number of Table A.1 averages.
-- [Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/):
+- [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/):
   the spatial decay rate of speech and the distraction and privacy distances.
-- [Image sources and the steady-state room field](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/):
+- [Image sources and the steady-state room field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/):
   the deterministic image-source room impulse response (Kuttruff/Vorländer),
   the statistical steady-state level with the room constant, critical distance
   and Schroeder frequency (Bies), and the rectangular-room normal modes with
   their axial, tangential and oblique families, mode count and modal density
   (Long).
-- [Spatial Sound Decay in Workrooms](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/):
+- [Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/):
   the spatial sound distribution curve of a workroom with its two descriptors,
   the Annex B correction for the source's own curve, and the prediction
   categories and detail levels that match them at design time.
-- [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/):
+- [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/):
   the ANSI/ASA S12.2-2019 NC tangency and RC Mark II ratings.
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/):
   the five statistical models with the air-absorption term.
-- [Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/):
   the normative equivalent-absorption-area and reverberation-time prediction.
 
 ## What this section does not cover
@@ -135,14 +135,14 @@ boundary, and it stops when the reflection order runs out rather than when the
 sound does. Below the Schroeder frequency, where the statistical models give
 out, what this section offers is the mode *positions* of a rigid rectangular
 box, not the field of a real room at low frequency. For that, the [wave
-simulation](https://jmrplens.github.io/phonometry/simulation/) section runs an FDTD solver on the actual
+simulation](https://docs.jmrp.io/phonometry/simulation/) section runs an FDTD solver on the actual
 geometry.
 
 **No auralisation, no ray tracer, no room model.** There is no geometry
 importer, no material database and no renderer: the pages take dimensions,
 coefficients and impulse responses as inputs, and give back parameters. The
 absorption coefficients themselves come from [Materials and
-surfaces](https://jmrplens.github.io/phonometry/materials/absorbers/), and the model errs optimistically
+surfaces](https://docs.jmrp.io/phonometry/materials/absorbers/), and the model errs optimistically
 when the room is not diffuse (outside the EN 12354-6 clause 4.6 limits: no
 dimension more than five times another, opposite surfaces within a factor of
 three in absorption, object fraction below 0.2), the measured reverberation
@@ -151,13 +151,13 @@ time can reach twice the predicted one.
 Two coverage boundaries follow the standards. Only the normative clause 4
 model of EN 12354-6 is implemented, not its informative Annex D method for
 irregular spaces. And nothing in this section measures insulation *between*
-rooms: that is [Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/).
+rooms: that is [Sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/).
 
 ---
 
 
-<!-- source: docs/buildings/rooms/room-impulse-response.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/
+<!-- source: docs/buildings/rooms/room-impulse-response.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/
 
 # Measuring the Room Impulse Response
 
@@ -170,9 +170,9 @@ guide covers the acquisition itself, per ISO 18233: the exponential sine
 sweep and its deconvolution, the MLS correlation method, and where to place
 sources and microphones so the averaged result means something. Turning the
 measured IR into room parameters lives in
-[Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/); the same IR measured either side of a
+[Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/); the same IR measured either side of a
 partition becomes sound insulation in
-[Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/).
+[Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/).
 
 ## Two deterministic excitations (ISO 18233)
 
@@ -253,7 +253,7 @@ unchanged) that also carries the sample rate and method and adds an `.plot()`.
 Two more excitations from the transfer-function literature - complementary
 Golay pairs with exactly noise-free deconvolution, and sweeps shaped to an
 arbitrary target spectrum - live in the
-[system-measurement guide](https://jmrplens.github.io/phonometry/signals/spectra/system-measurement/) and return the same
+[system-measurement guide](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/) and return the same
 result types.
 
 **The two excitations.** The exponential sweep sweeps its energy up the
@@ -298,7 +298,7 @@ broadband IR: the direct sound, discrete early reflections and the decaying
 diffuse tail. Its `.plot()` shows the waveform above and the log-magnitude
 envelope with the Schroeder energy-decay curve below: the straight decay
 whose slope becomes the reverberation time in the
-[Room Acoustics guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/).
+[Room Acoustics guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_sweep_deconvolution_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_sweep_deconvolution.gif" alt="Animation: the exponential sweep crosses the room while its spectrogram builds with delayed copies from the reflections, then the inverse filter collapses the whole recording into the impulse response" width="640" height="360" loading="lazy"></picture>
 
@@ -403,7 +403,7 @@ mistakes bias the mean itself:
   the source, with $\hat T$ an estimate of the expected reverberation time
   (about 2.2 m for a 200 m³ classroom with an expected 0.5 s).
 - **Low-frequency luck.** Below the Schroeder frequency (see the
-[Room Acoustics guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)) each band
+[Room Acoustics guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)) each band
   holds only a handful of room modes, and a microphone on a node of one of
   them sees a different decay than a microphone on an antinode. The spread
   of the 63-125 Hz bands across positions is structurally larger; the cure
@@ -414,7 +414,7 @@ Three practical limits close the chain. Playback and recording themselves
 which starts at the recorded array. ISO 18233's time-variance and distortion
 diagnostics are not implemented either: the sweep separates distortion, but
 no helper here quantifies it (that reading lives in the
-[swept-sine distortion guide](https://jmrplens.github.io/phonometry/devices/electroacoustics/swept-sine-distortion/)).
+[swept-sine distortion guide](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/)).
 And the position rules above are guidance prose: nothing checks how many
 positions were measured or where.
 
@@ -422,14 +422,14 @@ positions were measured or where.
 
 The IR leaves this page in several directions. Band-filtered and
 backward-integrated it becomes the decay curve whose slope is the
-reverberation time: the [Room Acoustics guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) picks up
+reverberation time: the [Room Acoustics guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) picks up
 exactly there, and its open-plan sibling walks the
-[ISO 3382-3 line of workstations](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/). Measured either
+[ISO 3382-3 line of workstations](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/). Measured either
 side of a partition, the same sweeps feed the level differences of
-[field sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/). And the harmonic distortion
+[field sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/). And the harmonic distortion
 that the exponential sweep pushes to negative arrival times is not always
 discarded: read deliberately, it becomes the THD analysis of the
-[swept-sine distortion guide](https://jmrplens.github.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
+[swept-sine distortion guide](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
 
 ## Quick answers
 
@@ -463,29 +463,29 @@ ISO 18233:2006 (application of new measurement methods: the swept-sine and
 MLS acquisition of impulse responses); ISO 3382-1:2009 and ISO 3382-2:2008
 (the source and microphone position requirements and accuracy grades applied
 when planning where to measure). Validated against closed-form
-deconvolution identities in the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/).
+deconvolution identities in the [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
 
 ## See also
 
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the decay analysis and ISO 3382
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the decay analysis and ISO 3382
   parameters computed from the IR this page acquires.
-- [Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/): the
+- [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/): the
   speech-privacy line measured with the same acquisition.
-- [System Measurement](https://jmrplens.github.io/phonometry/signals/spectra/system-measurement/): complementary Golay pairs and
+- [System Measurement](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/): complementary Golay pairs and
   spectrally shaped sweeps, returning the same result types.
-- [Swept-Sine Distortion & Phase](https://jmrplens.github.io/phonometry/devices/electroacoustics/swept-sine-distortion/): the Farina
+- [Swept-Sine Distortion & Phase](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/): the Farina
   reading of the distortion the sweep separates.
-- [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/): the same
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): the same
   measurement either side of a partition.
-- [Image Sources & Steady-State Field](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/): simulated
+- [Image Sources & Steady-State Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/): simulated
   impulse responses to rehearse the processing chain on.
-- API reference: [`room.impulse_response`](https://jmrplens.github.io/phonometry/reference/api/rooms/impulse-response/).
+- API reference: [`room.impulse_response`](https://docs.jmrp.io/phonometry/reference/api/rooms/impulse-response/).
 
 ---
 
 
-<!-- source: docs/buildings/rooms/room-acoustics.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/
+<!-- source: docs/buildings/rooms/room-acoustics.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/
 
 # Room Acoustics
 
@@ -496,16 +496,16 @@ ISO 3382-1/2 asks about the sound field inside a single room. This page
 turns a measured IR into those parameters: the Schroeder decay curve, the
 evaluation windows, the validity flags and the accredited fiche. Acquiring
 the IR itself (sweeps, MLS, where to measure) lives in
-[Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/), and the
+[Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/), and the
 open-plan speech metrics of ISO 3382-3 in
-[Open-Plan Office Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/). Two separate decay
+[Open-Plan Office Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/). Two separate decay
 measurements in a reverberation room, one with the room empty and one with
 the specimen installed, yield a material's sound absorption; that method
 (ISO 354) lives in
-[Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/). For
+[Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/). For
 sound insulation *between* spaces (the same IR measured either side of a
 partition) see the companion
-[Field Insulation Measurement (ISO 16283) guide](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/).
+[Field Insulation Measurement (ISO 16283) guide](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/).
 
 ## Decay analysis and room parameters (ISO 3382-1/2)
 
@@ -678,7 +678,7 @@ disagreement carries information:
   stage house feeding energy back) and strongly uneven absorption that
   leaves one room axis reverberant. No single number describes such a
   decay: report both windows together with the curvature, and treat the
-  [statistical predictions](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/) with suspicion,
+  [statistical predictions](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/) with suspicion,
   because their diffuse-field assumption has visibly failed.
 - **EDT far from T20/T30**: EDT is fitted where the direct sound and the
   first reflections still dominate, so it varies from seat to seat while
@@ -765,7 +765,7 @@ and so do a band range that misses those two octaves and one that reaches them
 with a non-evaluable $T_{30}$ in either, which fall back to the first band
 whose $T_{30}$ could be evaluated. It uses the same `ReportMetadata` container
 as the [ISO 11654 absorption
-fiche](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/#iso-11654-report-report);
+fiche](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/#iso-11654-report-report);
 the room-specific fields `room_volume`, `source_positions` and
 `receiver_positions` populate the header (ISO 3382 requires the room volume and
 the number of source and microphone positions to be reported), alongside
@@ -809,32 +809,32 @@ repository. Click the preview to open the PDF:
 Two sections that used to live on this page have guides of their own: the
 acquisition of the impulse response, with the ISO 18233 sweeps and MLS and
 the placement rules, is
-[Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/); and the
+[Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/); and the
 ISO 3382-3 open-plan speech metrics, with their fiche, are
-[Open-Plan Office Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/).
+[Open-Plan Office Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/).
 
 ## See also
 
-- [Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/): the
+- [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/): the
   ISO 18233 acquisition of the IR this page analyses.
-- [Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/): the
+- [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/): the
   speech-privacy quantities of open-plan offices.
-- [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/): the
+- [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/): the
   ISO 354 reverberation-room absorption measurement (`absorption_area`,
   `absorption_coefficient`, `measure_sound_absorption`) that consumes the
   reverberation times `room_parameters` returns, and its ISO 11654 rating.
-- [Field](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/), [laboratory](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/) and
-  [predicted](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/) sound insulation: field,
+- [Field](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [laboratory](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/) and
+  [predicted](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) sound insulation: field,
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): the $L_W$ methods that consume the
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): the $L_W$ methods that consume the
   ISO 354 absorption area (the ISO 3744 $K_2$ and the ISO 3741 absorption term).
-- [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) and [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/): loudness,
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) and [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): loudness,
   sharpness and the other perception metrics of what the room delivers.
-- [Filter Banks](https://jmrplens.github.io/phonometry/signals/filters/filter-banks/): the IEC 61260 fractional-octave filters
+- [Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/): the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/): Schroeder integration, regression windows and the
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/): Schroeder integration, regression windows and the
   reference-curve derivation.
-- API reference: [`room.acoustics`](https://jmrplens.github.io/phonometry/reference/api/rooms/acoustics/).
+- API reference: [`room.acoustics`](https://docs.jmrp.io/phonometry/reference/api/rooms/acoustics/).
 
 ## Quick answers
 
@@ -876,23 +876,23 @@ The fit window plus a safety margin must fit inside the impulse-to-noise ratio, 
   [iso.org catalogue](https://www.iso.org/standard/36201.html).
   The accuracy grades and the dynamic-range criterion behind the decay
   analysis; its position rules are applied in the
-  [room-impulse-response guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/).
+  [room-impulse-response guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/).
 
 ## Standards
 
 ISO 3382-1:2009 and ISO 3382-2:2008 (reverberation time and room parameters
 from the Schroeder decay). The impulse-response acquisition (ISO 18233)
-lives in [Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/)
+lives in [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/)
 and the open-plan metrics (ISO 3382-3) in
-[Open-Plan Office Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/). Validated against
+[Open-Plan Office Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/). Validated against
 closed-form decays and the standards' own parameter definitions in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/).
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
 
 ---
 
 
-<!-- source: docs/buildings/rooms/open-plan-acoustics.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/
+<!-- source: docs/buildings/rooms/open-plan-acoustics.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/
 
 # Open-Plan Office Acoustics (ISO 3382-3)
 
@@ -903,10 +903,10 @@ measured along a line of workstations, walking away from a talker. This
 guide covers that measurement chain: the quantities, the to-scale
 measurement line and the accredited fiche. The impulse responses and levels
 behind it are acquired as in
-[Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/); the
+[Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/); the
 per-position STI comes from the
-[Speech Transmission Index guide](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/); the closed-room
-decay parameters live in [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/).
+[Speech Transmission Index guide](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/); the closed-room
+decay parameters live in [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/).
 
 ## Speech privacy along a line of workstations
 
@@ -1050,7 +1050,7 @@ fields and marks `rd` / `rp`.
 `d2s`/`lp_as_4m` are `nan` if fewer than two positions fall in 2–16 m;
 `rd`/`rp` are `nan` when STI does not decrease with distance. The per-position
 STI can itself be measured with the STIPA tools in the
-[Speech Transmission Index guide](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/).
+[Speech Transmission Index guide](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/).
 
 Two things stay outside the function. The fourth required single number, the
 average A-weighted background noise $L_{p,\mathrm{A,B}}$, is not computed here. It is
@@ -1079,7 +1079,7 @@ field (`ReportMetadata(requirement=...)`, read as the minimum acceptable
 $D_\mathrm{2,S}$ in dB, reflecting the informative quality ranges of Annex A
 where a larger spatial decay is better; the room passes at or above it). It
 uses the same `ReportMetadata` container as the [ISO 3382-1/-2 room-acoustics
-fiche](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/#iso-3382-report-report); the open-plan-specific fields
+fiche](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/#iso-3382-report-report); the open-plan-specific fields
 `area` (floor area), `source_positions` and `receiver_positions` (the number of
 measurement positions) populate the header, alongside `client`, `test_room`,
 `specimen`, `instrumentation`, `temperature_c`, `relative_humidity_percent`,
@@ -1185,7 +1185,7 @@ $$
 > prose ("6.3 or more square metres, 68 sq ft") converts to 6.317 m². The library
 > computes both bounds from the speech-to-noise ratio rather than hardcoding
 > either constant, so they stay mutually consistent; the misprint is recorded in
-> the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+> the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ```python
 from phonometry import room
@@ -1244,7 +1244,7 @@ absorption or where in the room a given table sits.
 ISO 3382-3:2012 (open-plan office speech metrics: the spatial decay rate
 $D_\mathrm{2,S}$, the A-weighted speech level at 4 m, and the distraction and
 privacy distances from STI). Validated against the standard's own quantity
-definitions in the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/). The
+definitions in the [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/). The
 implemented edition is frozen at ISO 3382-3:2012; the superseding
 ISO 3382-3:2022 revision removes the privacy distance $r_\mathrm{P}$, adds the
 comfort distance $r_\mathrm{C}$ and moves the per-position STI to the indirect
@@ -1252,27 +1252,27 @@ IEC 60268-16 method, and is not the one checked here.
 
 ## See also
 
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2 decay parameters of
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-1/2 decay parameters of
   the same room.
-- [Measuring the Room Impulse Response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/): the
+- [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/): the
   acquisition behind the per-position levels.
-- [Speech Transmission Index](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/): the STI/STIPA
+- [Speech Transmission Index](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/): the STI/STIPA
   measurement that feeds the per-position `sti_values`.
-- [Speech Intelligibility Index](https://jmrplens.github.io/phonometry/perception/speech/speech-intelligibility/): the ANSI S3.5
+- [Speech Intelligibility Index](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/): the ANSI S3.5
   view of the same intelligibility question.
-- [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the A-weighted levels behind the spatial decay.
-- API reference: [`room.open_plan`](https://jmrplens.github.io/phonometry/reference/api/rooms/open-plan/).
+- [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the A-weighted levels behind the spatial decay.
+- API reference: [`room.open_plan`](https://docs.jmrp.io/phonometry/reference/api/rooms/open-plan/).
 
 ---
 
 
-<!-- source: docs/buildings/rooms/room-image-sources.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/
+<!-- source: docs/buildings/rooms/room-image-sources.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/
 
 # Image sources and the steady-state room field (Kuttruff / Vorländer / Bies)
 
-Where [reverberation-time prediction](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/) gives a
-single statistical decay rate and [room-acoustics measurement](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)
+Where [reverberation-time prediction](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/) gives a
+single statistical decay rate and [room-acoustics measurement](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)
 analyses a *measured* impulse response, this page covers the classical
 *predictions* of the sound field in a rectangular room, all in
 `phonometry.room`:
@@ -1479,7 +1479,7 @@ $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$, so the specular field's initial decay
 rate is the one that defines that $T$. The match is exact only in the near-cubic
 limit; an elongated room sustains energy along its long axis, so its pure
 *specular* decay runs slower than Eyring's diffuse-field estimate (the regime
-the [Fitzroy and Arau-Puchades models](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/) correct).
+the [Fitzroy and Arau-Puchades models](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/) correct).
 The model captures specular reflections only, with no diffraction or diffuse
 scattering, and is exact only for real, angle-independent wall reflection
 factors (Kuttruff 4.1).
@@ -1716,12 +1716,12 @@ they merge into the continuum the statistical model of section 2 assumes. The
 mode calculator assumes rigid walls and a rectangular plan: it gives the
 eigen*frequencies*, not the pressure amplitude at a listening position, and
 says nothing about damping, mode shape or a non-shoebox geometry. For those,
-mesh the room and run the [2D FDTD solver](https://jmrplens.github.io/phonometry/simulation/fdtd-simulation/).
+mesh the room and run the [2D FDTD solver](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/).
 
 ## Validation
 
 The implementations are checked against the closed forms and the source texts'
-own numeric anchors (see [CONFORMANCE.md](https://jmrplens.github.io/phonometry/reference/conformance/)):
+own numeric anchors (see [CONFORMANCE.md](https://docs.jmrp.io/phonometry/reference/conformance/)):
 
 - the direct-sound amplitude $1/(4 \pi r)$ and delay $r / c$ (exact geometry),
   the audible image count (Kuttruff Equation (9.23)) and the reflection
@@ -1757,37 +1757,37 @@ modal density (Eqs. 8.45, 8.46) in `room_modes`, `room_mode_frequency`,
 scattering. An elongated room therefore decays more slowly than the Eyring
 estimate the model is checked against: the anisotropy the Fitzroy and
 Arau-Puchades models of
-[reverberation-time prediction](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/) exist to correct.
+[reverberation-time prediction](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/) exist to correct.
 Kuttruff's reverberation distance, which uses the Sabine absorption area rather
 than the room constant, is quoted for comparison and not implemented:
 `steady_state_field` and `critical_distance` are always the Bies room-constant
 form. The mode calculator assumes rigid walls and a rectangular plan and
 returns eigen*frequencies* only: no amplitude at a listening position, no
 damping, no mode shape, no other geometry; for those, mesh the room and run the
-[2D FDTD solver](https://jmrplens.github.io/phonometry/simulation/fdtd-simulation/). Bolt's preferred
+[2D FDTD solver](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/). Bolt's preferred
 dimension ratios are discussed, not tabulated.
 
 ## See also
 
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the *measured* impulse
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the *measured* impulse
   response (ISO 18233) and the ISO 3382 parameters the synthetic RIR feeds.
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/):
   the statistical decay rate the image-source model reproduces, and the
   anisotropy models beyond it.
-- [Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/):
   the equivalent absorption area behind the mean absorption `alpha_bar`.
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): the `Lw` that drives the
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): the `Lw` that drives the
   steady-state level.
-- [2D FDTD wave simulation](https://jmrplens.github.io/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/): the
   independent wave solver used to cross-check the rigid-wall echo and the decay.
-- [Theory: Rooms and buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/):
+- [Theory: Rooms and buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/):
   the image-lattice and steady-state derivations.
 - [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
   the closed forms and worked anchors these implementations are validated
   against.
-- API reference: [`room.image_source`](https://jmrplens.github.io/phonometry/reference/api/rooms/image-source/)
-  and [`room.steady_field`](https://jmrplens.github.io/phonometry/reference/api/rooms/steady-field/).
-- Theory: [Image-source room impulse response](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#image-source-room-impulse-response-kuttruff-41-vorländer-11): the geometrical model behind the image method and its relation to the statistical one.
+- API reference: [`room.image_source`](https://docs.jmrp.io/phonometry/reference/api/rooms/image-source/)
+  and [`room.steady_field`](https://docs.jmrp.io/phonometry/reference/api/rooms/steady-field/).
+- Theory: [Image-source room impulse response](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#image-source-room-impulse-response-kuttruff-41-vorländer-11): the geometrical model behind the image method and its relation to the statistical one.
 
 ## References
 
@@ -1821,8 +1821,8 @@ dimension ratios are discussed, not tabulated.
 ---
 
 
-<!-- source: docs/buildings/rooms/workroom-sound-decay.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/
+<!-- source: docs/buildings/rooms/workroom-sound-decay.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/
 
 # Spatial sound decay in workrooms (ISO 14257, ISO 11690-3)
 
@@ -1928,7 +1928,7 @@ Annex C prints 4,4 dB per doubling, which is the corrected figure, and 7,3 dB of
 excess, which is the uncorrected one. Applying the correction to one descriptor
 and not to the other cannot be right, and 28 of the 36 printed results leave
 their own rounding if the two are swapped; the entry is in
-[Errata](https://jmrplens.github.io/phonometry/reference/errata/).
+[Errata](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## One number, and the design half
 
@@ -1966,23 +1966,23 @@ turntable rather than a formula, nor the reporting checklist of clause 7.
 
 ## See also
 
-- [Open-plan office acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/): the same
+- [Open-plan office acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/): the same
   shape of measurement asked about speech rather than machinery.
-- [Room acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): what a room does to a decay in time.
-- [Image sources and the steady-state room field](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/): the
+- [Room acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): what a room does to a decay in time.
+- [Image sources and the steady-state room field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/): the
   room constant and the critical distance this measurement so often contradicts.
-- [Suspended ceilings (EN 16487)](https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/):
+- [Suspended ceilings (EN 16487)](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/):
   the product test code behind the absorption a workroom ceiling is sold on.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the Annex C correction defect
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the Annex C correction defect
   above, and the two constants of Equations (5) and (8) that differ by 0,3 %.
-- API reference: [`room.spatial_decay`](https://jmrplens.github.io/phonometry/reference/api/rooms/spatial-decay/)
-  and [`room.workroom_prediction`](https://jmrplens.github.io/phonometry/reference/api/rooms/workroom-prediction/).
+- API reference: [`room.spatial_decay`](https://docs.jmrp.io/phonometry/reference/api/rooms/spatial-decay/)
+  and [`room.workroom_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/workroom-prediction/).
 
 ---
 
 
-<!-- source: docs/buildings/rooms/room-noise.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/
+<!-- source: docs/buildings/rooms/room-noise.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/
 
 # Room-noise criteria (NC / RC Mark II)
 
@@ -2247,22 +2247,22 @@ repository. Click a preview to open the PDF:
 
 ## See also
 
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382
   decay parameters of the same room, measured from an impulse response.
-- [Reverberation-time prediction](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/)
+- [Reverberation-time prediction](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/)
   and
-  [Sound absorption in enclosed spaces](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/):
+  [Sound absorption in enclosed spaces](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/):
   the absorption that lowers a whole spectrum once the tag says the character
   is right.
-- [Speech Transmission Index](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/):
+- [Speech Transmission Index](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/):
   the intelligibility that both criterion families were built to protect.
-- [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/) and
-  [Filter Banks](https://jmrplens.github.io/phonometry/signals/filters/filter-banks/): the octave-band
+- [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/) and
+  [Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/): the octave-band
   measurement that produces the input spectrum.
-- [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/):
   when the source is next door rather than overhead.
-- API reference: [`room.noise_criteria`](https://jmrplens.github.io/phonometry/reference/api/rooms/noise-criteria/).
-- Theory: [Room noise criteria (ANSI S12.2)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122): how the NC, RC Mark II and NR families are constructed and what each was designed to penalise.
+- API reference: [`room.noise_criteria`](https://docs.jmrp.io/phonometry/reference/api/rooms/noise-criteria/).
+- Theory: [Room noise criteria (ANSI S12.2)](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122): how the NC, RC Mark II and NR families are constructed and what each was designed to penalise.
 
 ## References
 
@@ -2299,8 +2299,8 @@ Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating
 ---
 
 
-<!-- source: docs/buildings/rooms/reverberation-prediction.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/
+<!-- source: docs/buildings/rooms/reverberation-prediction.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/
 
 # Reverberation-time prediction (Sabine · Eyring · Fitzroy · Arau-Puchades)
 
@@ -2309,8 +2309,8 @@ The **reverberation time** $T$, the time for the sound-energy level to fall by
 **boundary areas** and the **sound-absorption coefficients** of its surfaces,
 through the classical statistical-acoustics formulae. This is the design-stage
 counterpart of the *measured* reverberation time of
-[Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) (ISO 3382) and complements the EN 12354-6
-model of [Sound absorption in enclosed spaces](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/),
+[Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) (ISO 3382) and complements the EN 12354-6
+model of [Sound absorption in enclosed spaces](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/),
 which specialises the same physics to that standard's Clause 4.
 
 phonometry offers five models, ordered by how much they account for a
@@ -2383,7 +2383,7 @@ fall below Sabine; Sabine's over-estimate at high absorption is the reason
 Eyring exists. As $\alpha \to 0$, $-S\ln(1-\bar\alpha) \to \sum_i S_i\alpha_i$
 and Eyring reduces to Sabine. Air absorption enters every model through the
 power-attenuation coefficient $m$ (in neper per metre, from the ISO 9613-1
-[atmospheric absorption](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)):
+[atmospheric absorption](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)):
 
 ```python
 from phonometry import environment, room
@@ -2530,7 +2530,7 @@ domain of validity:
   coefficients: a single surface with $\alpha_i = 1$ drives the whole
   prediction to zero. Reverberation-room coefficients at or above 1.0 (a
   documented ISO 354 outcome, see the absorption section of
-  [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)) lie outside the domain of the
+  [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)) lie outside the domain of the
   logarithmic term, so phonometry enforces each formula's own domain:
   Sabine accepts such coefficients as supplied (its linear
   $A = \sum_i S_i\alpha_i$ stays finite); Eyring accepts them as long as
@@ -2557,13 +2557,13 @@ point, that stays diffuse while it decays. The common breakages:
 - **Coupled volumes** (a hall with an open stage house, two rooms through a
   doorway) produce double-slope decays; no single $T$ exists, and the
   measured T20 and T30 disagree (the curvature diagnostic of
-  [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)).
+  [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)).
 - **Disproportionate rooms** (corridors, low flat halls) with the
   absorption on one surface pair keep a grazing sound field parallel to the
   hard surfaces that the absorber barely touches; the measured time can be
   up to twice any statistical prediction, the practical experience recorded
   in EN 12354-6 (see
-  [Sound absorption in enclosed spaces](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/)).
+  [Sound absorption in enclosed spaces](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/)).
 - **Focusing geometries** (domes, curved rear walls) concentrate late
   energy instead of mixing it, producing position-dependent decays no
   single-number formula can represent.
@@ -2606,7 +2606,7 @@ is emitted. A target reverberation time supplied through the metadata's
 reverberation time is a target range rather than a strictly
 higher/lower-is-better quantity. It uses the same `ReportMetadata` container
 (documented under
-[Insulation ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata)) and
+[Insulation ratings](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata)) and
 rendering engine as the other fiches; passing `metadata=None` produces a bare
 prediction fiche. Rendering needs reportlab and, for the figure the fiche
 embeds, matplotlib (`pip install "phonometry[report,plot]"`); only
@@ -2645,19 +2645,19 @@ repository. Click the preview to open the PDF:
 
 ## See also
 
-- [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/):
   the ISO 354 measurement every $\alpha_\mathrm{s}$ on this page comes from, its mounting
   dependence, and the ISO 11654 rating that must *not* be substituted for the
   per-band table (§0).
-- [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/#how-much-decay-range-do-i-need-for-a-valid-t20-or-t30):
+- [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/#how-much-decay-range-do-i-need-for-a-valid-t20-or-t30):
   the measured counterpart, and the curvature diagnostic that tells you a
   prediction's diffuse-field assumption has failed.
-- [Modes of a rectangular room](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room):
+- [Modes of a rectangular room](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room):
   what is below the Schroeder frequency, where none of these five formulae
   applies.
-- API reference: [`room.reverberation_prediction`](https://jmrplens.github.io/phonometry/reference/api/rooms/reverberation-prediction/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).
-- Theory: [Steady-state room field](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56): the diffuse-field assumption every Sabine-family formula makes, and where it stops holding.
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#absorption-coefficients): the
+- API reference: [`room.reverberation_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/reverberation-prediction/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
+- Theory: [Steady-state room field](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56): the diffuse-field assumption every Sabine-family formula makes, and where it stops holding.
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#absorption-coefficients): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 
@@ -2702,12 +2702,12 @@ repository. Click the preview to open the PDF:
 The classical reverberation formulae predate the normative
 world; they enter it through EN 12354-6:2003, whose Clause 4 model is a
 Sabine calculation with object and air terms (see
-[Sound absorption in enclosed spaces](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/)), and
+[Sound absorption in enclosed spaces](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/)), and
 through ISO 354:2003, which defines the measured absorption coefficient via
 Sabine's formula. Air absorption follows ISO 9613-1:1993, *Acoustics —
 Attenuation of sound during propagation outdoors — Part 1: Calculation of
 the absorption of sound by the atmosphere* (see
-[Outdoor propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)). The conformance suite is
+[Outdoor propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)). The conformance suite is
 anchored on a real worked example, Everest's Fig. 7-22 Example 1 (an
 untreated 23.3 × 16 × 10 ft room), whose six printed Sabine reverberation
 times the SI implementation reproduces to ≤ 0.02 s, reinforced by
@@ -2719,8 +2719,8 @@ whole family.
 ---
 
 
-<!-- source: docs/buildings/rooms/enclosed-space-absorption.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/ -->
-Source: https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/
+<!-- source: docs/buildings/rooms/enclosed-space-absorption.md | canonical: https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/ -->
+Source: https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/
 
 # Sound absorption in enclosed spaces (EN 12354-6)
 
@@ -2729,7 +2729,7 @@ room and its **reverberation time** from the absorption of its surfaces and
 objects, the design counterpart of the measured reverberation time. It is the
 absorption member of the EN 12354 building-acoustics family (the airborne and
 impact insulation members live in
-[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/)).
+[Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/)).
 phonometry implements the normative Clause 4 model. (The informative Annex D
 method for irregular spaces is out of scope.)
 
@@ -2837,16 +2837,16 @@ plt.show()
 The `ReverberationResult` carries the per-band absorption area and reverberation
 time, the volume and the object fraction, and its `.plot()` draws the
 reverberation-time spectrum. This is the prediction counterpart of the measured
-reverberation time in [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)
+reverberation time in [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)
 (ISO 3382) and of the reverberation-room absorption of
-[Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/)
+[Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/)
 (ISO 354).
 
 ## 3. Where the input data comes from
 
 **Surface coefficients.** The standard expects the $\alpha_{\mathrm{s},i}$ to come
 from laboratory measurements to EN ISO 354, the reverberation-room method of
-[Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/);
+[Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/);
 theoretical, empirical or field
 values are admitted as long as the data source is stated. ISO 354 delivers
 one-third-octave data, and an octave-band calculation takes the arithmetic
@@ -2887,7 +2887,7 @@ times up to twice the prediction in low-diffusivity rooms. The standard's own
 scope goes further: very large or irregularly shaped spaces (concert halls,
 theatres, factories) are excluded from the model itself, not just from this
 implementation. The classical alternatives for those cases live in
-[Reverberation-time prediction](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/).
+[Reverberation-time prediction](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
 
 ## 4. Enclosed-space report (`.report()`)
 
@@ -2903,7 +2903,7 @@ the metadata's `requirement` field is printed as a reference line only, since a
 room reverberation time is a target range rather than a strictly
 higher/lower-is-better quantity. It uses the same `ReportMetadata` container
 (documented under
-[Insulation ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata)) and
+[Insulation ratings](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata)) and
 rendering engine as the other fiches; passing `metadata=None` produces a bare
 characterisation fiche. Rendering needs reportlab and, for the figure the fiche
 embeds, matplotlib (`pip install "phonometry[report,plot]"`); only
@@ -2948,24 +2948,24 @@ repository. Click the preview to open the PDF:
 
 ## See also
 
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/):
   the classical family, and the models to reach for when the clause 4.6 limits
   fail.
-- [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/):
+- [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/):
   the measured counterpart of the reverberation time predicted here.
-- [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/):
   where the $\alpha_\mathrm{s}$ come from (ISO 354) and where $\alpha_\mathrm{w}$ is defined
   (ISO 11654), the rating §3 forbids as an input.
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/):
   the family member that consumes the $A$ computed here, through
   $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ and $R' = D + 10\lg(S/A)$.
 - [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
   the three Annex E cases these implementations are checked against.
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the full ISO 9613-1
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the full ISO 9613-1
   atmospheric-absorption model, for conditions or frequencies the six
   built-in climate profiles do not cover.
-- API reference: [`room.enclosed_space_absorption`](https://jmrplens.github.io/phonometry/reference/api/rooms/enclosed-space-absorption/).
-- Theory: [Absorption in enclosed spaces](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#absorption-in-enclosed-spaces-en-12354-6): the equivalent-absorption-area definition the EN 12354-6 procedure computes.
+- API reference: [`room.enclosed_space_absorption`](https://docs.jmrp.io/phonometry/reference/api/rooms/enclosed-space-absorption/).
+- Theory: [Absorption in enclosed spaces](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#absorption-in-enclosed-spaces-en-12354-6): the equivalent-absorption-area definition the EN 12354-6 procedure computes.
 
 ## References
 
@@ -2993,6 +2993,6 @@ Formula 5), validated against the three worked cases of Annex E. The Table 1
 climate-condition power attenuation coefficients (125 Hz-8 kHz octave bands)
 are derived from ISO 9613-1:1993; the full atmospheric-absorption model for
 arbitrary conditions and frequencies is covered in [Outdoor Sound
-Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/).
+Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/).
 
 ---

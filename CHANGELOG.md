@@ -3034,6 +3034,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The documentation is published at https://docs.jmrp.io/phonometry/.**
+  Every address the project gives for it now names that host instead of
+  https://jmrplens.github.io/phonometry/: the site's canonical links, sitemap,
+  hreflang alternates, Open Graph images and structured data, its
+  `robots.txt`, the llms files, the README, the markdown edition under
+  `docs/`, `CITATION.cff`, `.zenodo.json`, the JOSS paper and the package
+  metadata of phonometry and of the PyOctaveBand transition package, whose
+  `Homepage` pointed at a redirect on jmrp.io. The path is unchanged, and
+  GitHub Pages redirects every old address to the same path on the new host,
+  so existing links keep working.
+
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,
   and every floor in the package metadata is now the oldest release the

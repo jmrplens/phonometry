@@ -404,7 +404,7 @@ all assume the record is stationary, as does the very idea of *the* $L_\mathrm{e
 a measurement in [Levels](../levels/levels.md). When a record fails
 the test, split it at the change (the `segment_values` sequence shows
 where), analyse the pieces, or move to the short-time views - the
-[calibrated spectrogram](https://jmrplens.github.io/phonometry/signals/spectra/time-frequency/) - that do not
+[calibrated spectrogram](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/) - that do not
 assume stationarity. And when it passes, the
 [GUM machinery](gum-uncertainty.md) can propagate the
 *remaining* random error of every averaged estimate with a clean
@@ -433,7 +433,7 @@ out glitches stay manual steps, the way the book describes them.
 - [Time-frequency analysis](../spectra/time-frequency.md): the short-time view for records that fail the test, and for the glides its mean square cannot see.
 - [GUM uncertainty](gum-uncertainty.md): propagating the remaining random error of a qualified average.
 - [Levels](../levels/levels.md): the $L_\mathrm{eq}$ whose definition assumes one stationary measurement.
-- API reference: [`metrology.data_qualification`](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/).
+- API reference: [`metrology.data_qualification`](https://docs.jmrp.io/phonometry/reference/api/metrology/data-qualification/).
 - Theory: [Measurement uncertainty (GUM)](../../reference/theory/signal-analysis.md#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the uncertainty framework the qualification criteria of this page feed.
 
 ## References

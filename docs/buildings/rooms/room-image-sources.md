@@ -516,8 +516,8 @@ dimension ratios are discussed, not tabulated.
 - [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
   the closed forms and worked anchors these implementations are validated
   against.
-- API reference: [`room.image_source`](https://jmrplens.github.io/phonometry/reference/api/rooms/image-source/)
-  and [`room.steady_field`](https://jmrplens.github.io/phonometry/reference/api/rooms/steady-field/).
+- API reference: [`room.image_source`](https://docs.jmrp.io/phonometry/reference/api/rooms/image-source/)
+  and [`room.steady_field`](https://docs.jmrp.io/phonometry/reference/api/rooms/steady-field/).
 - Theory: [Image-source room impulse response](../../reference/theory/rooms-buildings.md#image-source-room-impulse-response-kuttruff-41-vorländer-11): the geometrical model behind the image method and its relation to the statistical one.
 
 ## References

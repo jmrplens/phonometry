@@ -235,7 +235,7 @@ that was lost was.
   ISO 18233 acquisition of the responses this page pairs up.
 - [Image sources and the steady-state room field](room-image-sources.md):
   where the early reflections this page weighs come from.
-- API reference: [`room.auditorium`](https://jmrplens.github.io/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
 
 ## Standards
 

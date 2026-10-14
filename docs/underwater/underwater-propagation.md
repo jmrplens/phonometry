@@ -626,7 +626,7 @@ and these closed forms, have their own guide:
   the normal-mode, ray-tracing, Gaussian-beam and parabolic-equation solvers
   for the cases where these closed forms are not enough, and the
   model-selection guidance.
-- API reference: [`underwater.propagation.closed_form`](https://jmrplens.github.io/phonometry/reference/api/underwater/closed-form/) and [`underwater.propagation.sound_speed`](https://jmrplens.github.io/phonometry/reference/api/underwater/sound-speed/).
+- API reference: [`underwater.propagation.closed_form`](https://docs.jmrp.io/phonometry/reference/api/underwater/closed-form/) and [`underwater.propagation.sound_speed`](https://docs.jmrp.io/phonometry/reference/api/underwater/sound-speed/).
 
 ## References
 

@@ -1,11 +1,11 @@
 # phonometry: Vibration immission
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/vibration/immission/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/
+<!-- source: docs/vibration/immission/index.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/
 
 # Vibration immission
 
@@ -21,7 +21,7 @@ mounting limits and the instrument's share of the error are numbers.
 This section is the instrument of that set and the assessment for people that
 reads it. The buildings already had a page: the guideline values of DIN 4150-3
 are in [Vibration damage to
-structures](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/), and they used
+structures](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/), and they used
 to say, at the end, that the instrument requirements of DIN 45669 were not
 implemented. They are now, which closes the loop: the quantity a guideline
 value is compared against is defined by the meter, and the meter is defined by
@@ -54,34 +54,34 @@ behind an edition switch.
 
 ## Pages in this section
 
-- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/):
   the band limitation and KB weighting of Formulae (3) and (4), the weighted
   vibration severity and the clock maximum r.m.s. of Formulae (1) and (2), the
   tolerance bands of Tables 2 and 3, the printed check values of Tables 8 and
   9, and the assessment velocity of Annex E (DIN 45669-1:2010-09 with
   Corrigendum 1:2012-12), with the loose-mounting limits, the mass loading
   and the instrument confidence limits of DIN 45669-2:2005-06.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/):
   the three stretches of a passage, the running r.m.s. and the event value
   referred to an hour, the third-octave spectra of Figure 6, the narrow-band
   density and Table 1 (DIN 45672-2:1995-07), and the ground constants from two
   wave speeds (DIN 45672-1:2009-12, Clause 4.5).
-- [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/):
+- [Vibration and people in buildings (DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/):
   the guide values of Table 1 by area, time of day and source, the procedure
   of 6.2 as a verdict, the assessment vibration severity of Formulae (4) and
   (5) with the rest-time weight, the rules of 6.5 for blasting, roads,
   railways and construction sites with Table 2, the railway classes of Annex A
   and the estimate of Clause 7 from a peak velocity (DIN 4150-2:1999-06).
-- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/):
+- [Railway vibration by category of train (E DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/):
   the draft's Formulae (5) to (8) and Table 2, the night-time upper value of
   a new line, the 25 % rule of an altered one, and its changes to Table 1,
   the procedure and the sources (E DIN 4150-2:2023-08).
-- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+- [Predicting railway vibration (E DIN 45672-3)](https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/):
   Formula (1) with the emission, ground, foundation, floor and mitigation
   terms, the ground transmission of Formulae (4) to (6), the six tables of
   Annex A, and the KB values of Clause 7 from the spectrum
   (E DIN 45672-3:2023-02).
-- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/):
+- [Predicting vibration before measuring (DIN 4150-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/):
   the far field of Formula (1), the decay of Formula (2) with the exponents
   of Figure 1, the building of Formulae (3) and (4), the blast, the falling
   mass and the machine hall of Formulae (5) to (7) with the nomogram of
@@ -89,12 +89,12 @@ behind an edition switch.
 
 ## See also
 
-- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/):
   the guideline values this chain produces the numbers for.
-- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/):
   the same idea for the meter that measures vibration on people, with its own
   weightings and its own tolerance tables.
-- [Building response and fundamental frequency (ISO 4866)](https://jmrplens.github.io/phonometry/vibration/structural/building-response/):
+- [Building response and fundamental frequency (ISO 4866)](https://docs.jmrp.io/phonometry/vibration/structural/building-response/):
   the frequency a building answers at, which is a different question from the
   frequency of the event.
 
@@ -128,15 +128,15 @@ an impact are the user's.
 ---
 
 
-<!-- source: docs/vibration/immission/vibration-meter.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/
+<!-- source: docs/vibration/immission/vibration-meter.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/
 
 # Measuring vibration immission (DIN 45669-1)
 
 German immission control judges vibration in buildings with two standards that
 print thresholds and say almost nothing about how the number reaching them was
 formed. DIN 4150-2 sets what people in buildings may be exposed to and
-[DIN 4150-3](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/) sets what
+[DIN 4150-3](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/) sets what
 the buildings themselves may take. Both are tables of values for a quantity
 that has to come from somewhere, and DIN 45669-1 is where it comes from: the
 specification of the **vibration meter**, which is also the definition of the
@@ -158,7 +158,7 @@ stages, each printed as an exact transfer function or an exact average.
 two-pole high pass at $0{,}8\,f_\mathrm{u}$ and a two-pole low pass at $f_\mathrm{o}/0{,}8$. The
 working range is 1 Hz to 80 Hz for buildings, so those corners are 0,8 Hz and
 100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
-[DIN 45672](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/) works, and
+[DIN 45672](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/) works, and
 blasting and structure-borne sound need it too.
 
 **Frequency weighting** (Formula (4)) divides that by
@@ -305,7 +305,7 @@ a second of quiet in front of the event removes it.
 Two tables make the chain checkable rather than merely specified. Table 9 (on
 printed folio 35) says what a 1 mm/s sine has to show at five frequencies, and
 Table 8, in the redraft [Corrigendum
-1](https://jmrplens.github.io/phonometry/reference/errata/) gives it, says the same for a burst train.
+1](https://docs.jmrp.io/phonometry/reference/errata/) gives it, says the same for a burst train.
 They are published here as data, and the conformance report runs them:
 
 ```python
@@ -560,18 +560,18 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
-- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/):
   the guideline values the Annex E weightings invert, and the assessment this
   chain feeds.
-- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/):
   the same kind of instrument standard, for the other kind of meter, with its
   own tolerance tables.
-- [Human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the
+- [Human vibration exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): the
   people side of the same measurement, weighted differently and judged by
   other documents.
 - API reference:
-  [`vibration.immission.vibration_meter`](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/)
-  and [`vibration.immission.coupling`](https://jmrplens.github.io/phonometry/reference/api/vibration/coupling/).
+  [`vibration.immission.vibration_meter`](https://docs.jmrp.io/phonometry/reference/api/vibration/vibration-meter/)
+  and [`vibration.immission.coupling`](https://docs.jmrp.io/phonometry/reference/api/vibration/coupling/).
 
 ## References
 
@@ -606,8 +606,8 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 ---
 
 
-<!-- source: docs/vibration/immission/railway-vibration.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/
+<!-- source: docs/vibration/immission/railway-vibration.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/
 
 # Vibration next to a railway (DIN 45672)
 
@@ -623,7 +623,7 @@ That is what DIN 45672 is for. Part 1 says how to measure next to a railway:
 where the transducers go, which directions, which trains, what the report has
 to contain. Part 2 says how to **reduce** the record once it exists, and it is
 the part this page implements, with the meter of
-[DIN 45669-1](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/) in its 4 Hz to
+[DIN 45669-1](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/) in its 4 Hz to
 315 Hz railway working range. Neither part says what the result may be: the
 assessment is DIN 4150-2 for people and DIN 4150-3 for buildings.
 
@@ -737,7 +737,7 @@ train arrives. It quotes the cost as 14 % after `2τ` and 2 % after `4τ`, and
 those are the shortfalls of the **mean square**, `e⁻²` and `e⁻⁴`. The running
 r.m.s. the sentence is about, and the one its own Figure 3 draws, is short by
 7 % and 0,9 %. The advice stands; the size of the error is overstated by a
-factor of two, and the [errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the
+factor of two, and the [errata page](https://docs.jmrp.io/phonometry/reference/errata/) has the
 detail.
 
 ## 3. The event value, and an hour of trains
@@ -946,7 +946,7 @@ the shear wave, Poisson's ratio from their ratio (Formula (3)), and the
 elastic modulus from the two together.
 
 Two of the clause's formulas are printed wrong, and the
-[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the reading. Formula (1)
+[errata page](https://docs.jmrp.io/phonometry/reference/errata/) has the reading. Formula (1)
 writes the compression speed first as `√(E/ρ)`, the speed of a wave in a thin
 rod, and then as `√(G(1−ν)/(ρ(1−2ν)))`, which is short of a factor 2. Formula
 (5) builds on the first and writes $E = \mathrm{v}_\mathrm{p}^2\,\rho$, which from a measured $\mathrm{v}_\mathrm{p}$
@@ -1064,15 +1064,15 @@ people and buildings is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
-- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/):
   the meter every quantity here is read with, and the $KB_\mathrm{F}$ it produces.
-- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/):
   the guideline values a peak velocity from a railway is compared with.
-- [Spectral analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/): the
+- [Spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/): the
   Welch estimate behind the narrow-band density and the confidence it carries.
 - API reference:
-  [`vibration.immission.railway`](https://jmrplens.github.io/phonometry/reference/api/vibration/railway/)
-  and [`vibration.immission.ground`](https://jmrplens.github.io/phonometry/reference/api/vibration/ground/).
+  [`vibration.immission.railway`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway/)
+  and [`vibration.immission.ground`](https://docs.jmrp.io/phonometry/reference/api/vibration/ground/).
 
 ## References
 
@@ -1104,12 +1104,12 @@ people and buildings is DIN 4150-2 and DIN 4150-3.
 ---
 
 
-<!-- source: docs/vibration/immission/people-in-buildings.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/
+<!-- source: docs/vibration/immission/people-in-buildings.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/
 
 # Vibration and people in buildings (DIN 4150-2)
 
-A [vibration meter](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/) turns a
+A [vibration meter](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/) turns a
 record into two numbers, the maximum weighted vibration severity $KB_\mathrm{Fmax}$
 and the clock maximum r.m.s. $KB_\mathrm{FTm}$, and stops. DIN 4150-2 is where those
 numbers are judged for the people who live or work where the vibration
@@ -1403,7 +1403,7 @@ Formula (A.1b) prints $KB_{\mathrm{FTm},j}$ equal to a mean of squares with no r
 it, while Formula (A.1a) beside it takes the root, Formula (A.2) beneath them
 uses $KB^2_{\mathrm{FTm},j}$ for the mean square, and Example 8 applies (A.1b) with the
 root. The library takes the root, the tests hold it to the example, and the
-[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the reading.
+[errata page](https://docs.jmrp.io/phonometry/reference/errata/) has the reading.
 
 ## 7. The draft of 2023
 
@@ -1417,7 +1417,7 @@ existing road whose neighbours must put up with 50 % more, and an induced
 seismic event held to the daytime $A_\mathrm{o}$. The guide values carry the edition
 they were read for and the verdict follows it. The railway and the rest of
 the changes have
-[their own page](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/).
+[their own page](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/).
 
 ```python
 from phonometry import vibration
@@ -1457,15 +1457,15 @@ from the meter of DIN 45669-1, which forms them from a record.
 
 ## See also
 
-- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/):
   where $KB_\mathrm{Fmax}$ and the clock maxima come from, and the numbers of
   DIN 45669-2 a measurement is planned by.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/):
   the same passages reduced for comparison rather than for assessment.
-- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/):
   the other half of DIN 4150, what the building itself may take.
 - API reference:
-  [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).
+  [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
 
 ## References
 
@@ -1495,12 +1495,12 @@ from the meter of DIN 45669-1, which forms them from a record.
 ---
 
 
-<!-- source: docs/vibration/immission/railway-categories.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/
+<!-- source: docs/vibration/immission/railway-categories.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/
 
 # Railway vibration by category of train (E DIN 4150-2)
 
-The [1999 edition of DIN 4150-2](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
+The [1999 edition of DIN 4150-2](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/)
 treats a railway as a set of classes of train, each occupying the clock
 intervals its trains ran through, and lifts the guide values by 1,5 for an
 urban line. The draft that is to replace it, published for comment in
@@ -1705,7 +1705,7 @@ ax.legend()
 The night of Example 9 is printed over 920 clock intervals, which gives the
 0,066 and 0,096 on the page; 6.5.3.2 fixes the night at 960, which gives
 0,065 and 0,094, and the conclusion is the same. The
-[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has it, with the one condition
+[errata page](https://docs.jmrp.io/phonometry/reference/errata/) has it, with the one condition
 of 6.5.3.6, a result of Example 8 that its own four-decimal inputs do not
 give, a decision in the construction flowchart drawn the wrong way round,
 ten clock maxima printed on Figure B.2 that do not give the 0,39 the text
@@ -1720,7 +1720,7 @@ The guide values carry the edition and the period they were read for, so
 the verdict knows which rules to apply without being told, and asking for
 the values of one edition under the rules of the other is refused.
 Everything below is what `edition="2023"` reads differently from the
-[1999 edition](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/); the
+[1999 edition](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/); the
 numbers not named here are the same in both.
 
 - **Table 1** changes one cell: the night $A_\mathrm{u}$ of a mixed area, now with
@@ -1790,19 +1790,19 @@ Clause 8, the report, are text.
 
 ## See also
 
-- [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/):
+- [Vibration and people in buildings (DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/):
   the 1999 edition, the procedure and the guide values both editions share.
-- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+- [Predicting railway vibration (E DIN 45672-3)](https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/):
   where the r.m.s. of a category comes from when there is nothing to
   measure yet.
-- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/):
   the clock maxima the categories are formed from.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/):
   the two parts a railway measurement is carried out with particular regard
   to.
 - API reference:
-  [`vibration.immission.train_categories`](https://jmrplens.github.io/phonometry/reference/api/vibration/train-categories/)
-  and [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).
+  [`vibration.immission.train_categories`](https://docs.jmrp.io/phonometry/reference/api/vibration/train-categories/)
+  and [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
 ## References
 
 - Deutsches Institut für Normung. (2023). *Erschütterungen im Bauwesen —
@@ -1821,19 +1821,19 @@ Clause 8, the report, are text.
 ---
 
 
-<!-- source: docs/vibration/immission/railway-prediction.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/
+<!-- source: docs/vibration/immission/railway-prediction.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/
 
 # Predicting railway vibration (E DIN 45672-3)
 
-[DIN 45672-1](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/) measures
+[DIN 45672-1](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/) measures
 next to a line and Part 2 reduces what was measured. Part 3, which has only
 ever existed as the draft of February 2023, answers the question that comes
 before both: a line is planned, or a building next to one, and someone has to
 say how much the floors will move before there is anything to measure. The
 answer is a third-octave velocity spectrum on a floor, built by adding what
 is known about the source, the ground and the building, and from it the two
-numbers [DIN 4150-2](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
+numbers [DIN 4150-2](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/)
 judges.
 
 ## 1. A spectrum is a sum of what is known
@@ -1997,7 +1997,7 @@ reduction and goes in with its sign changed.
 ## 3. From the spectrum to the numbers DIN 4150-2 judges
 
 Clause 7 turns the spectrum into the assessment quantities. The KB
-weighting of [DIN 45669-1](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/)
+weighting of [DIN 45669-1](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/)
 is printed as a table of third-octave corrections, Table 2, from 4 Hz to
 80 Hz, and added to each band (Formula (8)); the weighted bands are summed;
 and the sum level gives the clock maximum r.m.s. of the kind of train
@@ -2005,7 +2005,7 @@ and the sum level gives the clock maximum r.m.s. of the kind of train
 Hold spectra and `v₀` = 5·10⁻⁵ mm/s, the reference of the level. The value
 is the KB quantity itself, because KB is the velocity in millimetres per
 second. Then 1,5 times it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)) and 3 times that
-the peak velocity a [DIN 4150-3](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/)
+the peak velocity a [DIN 4150-3](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/)
 comparison wants (Formula (12)).
 
 ```python
@@ -2027,7 +2027,7 @@ print(f"v_max = {prediction.peak_velocity_mm_s:.2f} mm/s")  # 1.73 mm/s
 ```
 
 The assessment vibration severity over a day's timetable is Formula (11),
-the sum of Formula (6) of the [draft of DIN 4150-2](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/)
+the sum of Formula (6) of the [draft of DIN 4150-2](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/)
 with the same weighting factors, 0,7 for a tram on the surface, printed
 without that formula's sentence that a category at or below 0,1 counts as
 zero; the library applies the sentence, since the assessment is the one the
@@ -2106,7 +2106,7 @@ example finds $A_\mathrm{r}$ = 0,1 exceeded, the formula finds it met. And its f
 transfer column comes from no table of Annex A, and cites Figure 3 for it
 where the concrete floor is Figure 4. The conformance rows hold the chain
 from the printed 78,1 dB and the formula for the printed inputs, and the
-[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the readings, together with
+[errata page](https://docs.jmrp.io/phonometry/reference/errata/) has the readings, together with
 a timber floor table whose lower deviation is printed above its mean, three
 figure legends that name the wrong table or quantity, the sentence on a
 category at or below 0,1 that Formula (11) leaves out, and an Annex A called
@@ -2141,15 +2141,15 @@ library carries none. The spectrum is the user's.
 
 ## See also
 
-- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/):
+- [Railway vibration by category of train (E DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/):
   the assessment this prediction feeds, with the same Formula (11) and the
   same factors.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/):
   the measurement the emission spectra and the ground decay come from.
-- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/):
+- [Predicting vibration before measuring (DIN 4150-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/):
   the general decay law this method's Formula (5) is a case of.
 - API reference:
-  [`vibration.immission.railway_prediction`](https://jmrplens.github.io/phonometry/reference/api/vibration/railway-prediction/).
+  [`vibration.immission.railway_prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway-prediction/).
 ## References
 
 - Deutsches Institut für Normung. (2023). *Schwingungsmessung an
@@ -2169,8 +2169,8 @@ library carries none. The spectrum is the user's.
 ---
 
 
-<!-- source: docs/vibration/immission/vibration-prediction.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/
+<!-- source: docs/vibration/immission/vibration-prediction.md | canonical: https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/
 
 # Predicting vibration before measuring (DIN 4150-1)
 
@@ -2397,7 +2397,7 @@ the dash-dot line to the radial one, and the drawing has them the other way
 about. A.5.1 prints an eccentric moment in newtons. And the sixth measured
 point of Figure A.18, labelled all groups of a hall of 252 machines, sits at
 110, the count of the groups of the hall nearest the measuring point. The
-[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has all five with their pages.
+[errata page](https://docs.jmrp.io/phonometry/reference/errata/) has all five with their pages.
 
 ## What this guide covers
 
@@ -2425,16 +2425,16 @@ distance.
 
 ## See also
 
-- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+- [Predicting railway vibration (E DIN 45672-3)](https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/):
   the same decay law as a third-octave chain, with the building's transfer
   as tables.
-- [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
-  and [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+- [Vibration and people in buildings (DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/)
+  and [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/):
   what the predicted numbers are judged against.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/):
   the wave speeds of the ground that the wavelength here comes from.
 - API reference:
-  [`vibration.immission.prediction`](https://jmrplens.github.io/phonometry/reference/api/vibration/prediction/).
+  [`vibration.immission.prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/prediction/).
 ## References
 
 - Deutsches Institut für Normung. (2001). *Erschütterungen im Bauwesen —

@@ -134,4 +134,4 @@ and the uncertainty budget of Annex B.
   excess attenuation of one sound speed profile, where a replica level starts.
 - [Errata in published sources](../../ERRATA.md): the shift printed as 1,04 dB
   and the exceedance levels of Figure A.3.
-- API reference: [`environment.assessment.exposure_distribution`](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/).
+- API reference: [`environment.assessment.exposure_distribution`](https://docs.jmrp.io/phonometry/reference/api/environment/exposure-distribution/).

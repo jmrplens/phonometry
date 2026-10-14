@@ -151,5 +151,5 @@ turntable rather than a formula, nor the reporting checklist of clause 7.
   the product test code behind the absorption a workroom ceiling is sold on.
 - [Errata in published sources](../../ERRATA.md): the Annex C correction defect
   above, and the two constants of Equations (5) and (8) that differ by 0,3 %.
-- API reference: [`room.spatial_decay`](https://jmrplens.github.io/phonometry/reference/api/rooms/spatial-decay/)
-  and [`room.workroom_prediction`](https://jmrplens.github.io/phonometry/reference/api/rooms/workroom-prediction/).
+- API reference: [`room.spatial_decay`](https://docs.jmrp.io/phonometry/reference/api/rooms/spatial-decay/)
+  and [`room.workroom_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/workroom-prediction/).

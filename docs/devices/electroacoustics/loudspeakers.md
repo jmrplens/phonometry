@@ -467,7 +467,7 @@ design separately.
 - [Sound Power](../emission/sound-power.md): the radiated-power descriptor, for when the
   question is how much acoustic power the source emits rather than how it
   responds on axis.
-- API reference: [`electroacoustics.piston`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/piston/) and [`electroacoustics.loudspeaker`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/loudspeaker/).
+- API reference: [`electroacoustics.piston`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/piston/) and [`electroacoustics.loudspeaker`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/loudspeaker/).
 
 ## References
 

@@ -201,7 +201,7 @@ for x in audio_stream(block):            # your capture callback
 - [Multichannel and Performance](multichannel.md): one state per channel, and where the computation time actually goes.
 - [Time Weighting](../levels/time-weighting.md#6-block-processing): the functional detector API with the state passed by hand.
 - [Integrated and Statistical Levels](../levels/levels.md): which metrics accumulate across blocks and which must be recomputed on the pooled envelope.
-- API reference: [`filters.weighting`](https://jmrplens.github.io/phonometry/reference/api/filters/weighting/) and [`filters.core`](https://jmrplens.github.io/phonometry/reference/api/filters/core/).
+- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/).
 - Theory: [Filter Bank Design and Numerical Stability](../../reference/theory/signal-analysis.md#filter-bank-design--numerical-stability): why a bank is designed as second-order sections and decimated per band, which is what makes streaming state possible at all.
 
 ## References

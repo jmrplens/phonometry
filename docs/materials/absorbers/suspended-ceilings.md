@@ -124,4 +124,4 @@ EN 13964 beyond the definitions and the CE marking depth this code refers to.
   what an absorbing ceiling is bought for, measured in the finished hall.
 - [Room-noise criteria](../../buildings/rooms/room-noise.md): the target the
   absorption is chosen against.
-- API reference: [`materials.absorbers.suspended_ceilings`](https://jmrplens.github.io/phonometry/reference/api/materials/suspended-ceilings/).
+- API reference: [`materials.absorbers.suspended_ceilings`](https://docs.jmrp.io/phonometry/reference/api/materials/suspended-ceilings/).

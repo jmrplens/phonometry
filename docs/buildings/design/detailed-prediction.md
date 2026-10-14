@@ -492,4 +492,4 @@ printed tables are recorded in [Errata](../../ERRATA.md).
   result the prediction is checked against.
 - [Dynamic stiffness of resilient materials (EN 29052-1)](../../materials/resilient/dynamic-stiffness.md):
   the $s'$ behind the floating floor's resonance frequency.
-- API reference: [`building.prediction.detailed_model`](https://jmrplens.github.io/phonometry/reference/api/building/detailed-model/).
+- API reference: [`building.prediction.detailed_model`](https://docs.jmrp.io/phonometry/reference/api/building/detailed-model/).

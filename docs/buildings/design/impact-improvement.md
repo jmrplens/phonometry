@@ -265,4 +265,4 @@ Foret et al. (2011) worked example.
   impact model whose Formula (21) consumes $\Delta L_\mathrm{w}$.
 - [Insulation Ratings (ISO 717)](../insulation/insulation-ratings.md): the reference-curve
   engine behind the weighted improvement.
-- API reference: [`building.measurement.floor_covering_improvement`](https://jmrplens.github.io/phonometry/reference/api/building/floor-covering-improvement/).
+- API reference: [`building.measurement.floor_covering_improvement`](https://docs.jmrp.io/phonometry/reference/api/building/floor-covering-improvement/).

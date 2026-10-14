@@ -645,7 +645,7 @@ print(row.why_missing("scattering_coefficient_5000"))
 ```
 
 The whole of all three tables is on the
-[published catalogues page](https://jmrplens.github.io/phonometry/reference/catalogues/#scattering-coefficients),
+[published catalogues page](https://docs.jmrp.io/phonometry/reference/catalogues/#scattering-coefficients),
 filterable and with the source of every row.
 
 ## Scattering or diffusion? Two coefficients, two jobs
@@ -707,7 +707,7 @@ no longer small against the wavelength; a frequency-blind single number
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): the full ISO 9613-1
   atmospheric-absorption model whose pure-tone coefficient the ISO 17497-1
   air-attenuation relations consume.
-- API reference: [`materials.diffusers.scattering_diffusion`](https://jmrplens.github.io/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](https://jmrplens.github.io/phonometry/reference/api/materials/design/).
+- API reference: [`materials.diffusers.scattering_diffusion`](https://docs.jmrp.io/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](https://docs.jmrp.io/phonometry/reference/api/materials/design/).
 
 ## References
 

@@ -166,11 +166,11 @@ quantities, the in-situ subtraction and the scattering and diffusion
 coefficients.
 
 If you came here for a number rather than for a method, the
-[published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/) page holds every
+[published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/) page holds every
 value this library reads from a printed page, one table per catalogue, with
 the book and the page each row was read on.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

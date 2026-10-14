@@ -3,7 +3,7 @@
 #
 # NOTE: this is the subpath copy, served at /phonometry/robots.txt. Crawlers
 # only read the file at the domain root, so the authoritative one is
-# https://jmrplens.github.io/robots.txt; this copy exists so anything that does
+# https://docs.jmrp.io/robots.txt; this copy exists so anything that does
 # fetch it is told the same thing.
 #
 # The two files are not identical, and no check here can make them so: the root
@@ -15,8 +15,8 @@
 # both.
 #
 # Structured context for LLMs:
-#   https://jmrplens.github.io/phonometry/llms.txt
-#   https://jmrplens.github.io/phonometry/llms-full.txt
+#   https://docs.jmrp.io/phonometry/llms.txt
+#   https://docs.jmrp.io/phonometry/llms-full.txt
 
 User-agent: *
 Allow: /
@@ -70,4 +70,4 @@ Allow: /
 User-agent: Amazonbot
 Allow: /
 
-Sitemap: https://jmrplens.github.io/phonometry/sitemap-index.xml
+Sitemap: https://docs.jmrp.io/phonometry/sitemap-index.xml

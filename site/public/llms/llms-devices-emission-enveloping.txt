@@ -1,11 +1,11 @@
 # phonometry: Sound power on an enveloping surface
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/devices/emission/sound-power-pressure.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/
+<!-- source: docs/devices/emission/sound-power-pressure.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/
 
 # Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)
 
@@ -26,7 +26,7 @@ steadily at all, the noise burst whose descriptor is the sound energy level
 $L_J$ of clause 8.3. That route is theirs alone: ISO 3745 defines no sound
 energy level. Which
 route fits which job, and the reverberation-room and intensity alternatives,
-are weighed in [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+are weighed in [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 ## 1. Enveloping surface, sound pressure (ISO 3744 / ISO 3746)
 
@@ -524,7 +524,7 @@ the time-averaged level measured over the same window (clause 8.3.1), and it is
 compared as its exposure over that window, $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$,
 so that the energies Eq. 21 subtracts share one reference (the two levels are
 re $E_0 = p_0^2 \cdot 1$ s and re $p_0^2$ respectively; the
-[errata registry](https://jmrplens.github.io/phonometry/reference/errata/) records the reading); `integration_time` is
+[errata registry](https://docs.jmrp.io/phonometry/reference/errata/) records the reading); `integration_time` is
 therefore required with `background_levels`, and the criteria and clamp are
 section 1's.
 
@@ -588,21 +588,21 @@ surface, position and room arguments of `sound_power_pressure` plus `events`,
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the seven determination
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the seven determination
   routes, what the accuracy grades promise, and the ISO 4871 noise-emission
   declaration a measured $L_{W\mathrm{A}}$ feeds.
-- [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/):
   the precision-grade diffuse-field alternative when the source can travel
   to a qualified room.
-- [Sound Power by Intensity Scanning (ISO 9614)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning (ISO 9614)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/):
   the routes that tolerate the steady background noise a pressure method
   cannot subtract.
-- [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the reverberation time and equivalent
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): the reverberation time and equivalent
   absorption area that feed $K_2$.
-- [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/): the $K_1$/$K_2$ and $C_1$/$C_2$
+- [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/): the $K_1$/$K_2$ and $C_1$/$C_2$
   derivations.
-- API reference: [`emission.sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/).
+- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/).
 
 ## References
 
@@ -653,7 +653,7 @@ correction of `reference_atmosphere_correction` (Eq. G.1/G.3).
 **Not covered.** Neither determination performs the facility qualification it
 rests on: the free-field qualification of the anechoic or hemi-anechoic room
 is its own step, by ISO 26101 against the amended ISO 3745 Annex A, in
-[Free Field and Reference Sources](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/), whose verdict
+[Free Field and Reference Sources](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/), whose verdict
 `sound_power_anechoic` takes as `room_qualification` and warns on, and
 ISO 3744's $K_2$ validity only warns.
 ISO 3744 **Annex G**, the correction to reference meteorological conditions
@@ -670,8 +670,8 @@ compute it from **ISO 9613-1** itself.
 ---
 
 
-<!-- source: docs/devices/emission/free-field-qualification.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/
+<!-- source: docs/devices/emission/free-field-qualification.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/
 
 # Free Field and Reference Sources (ISO 26101 / ISO 6926)
 
@@ -688,8 +688,8 @@ the library fits the source strength $b$ and the mathematical origin, the
 verdict of the amended Annex A on a synthetic hemi-anechoic room, and a
 reference source calibrated on the 2 m hemisphere, judged against clause 5
 and handed to a comparison method. The determinations themselves are in
-[Sound Power by Pressure Methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/)
-and [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/).
+[Sound Power by Pressure Methods](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/)
+and [Sound Power in the Reverberation Room](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/).
 
 ## 1. The inverse square law along a traverse (ISO 26101)
 
@@ -1079,7 +1079,7 @@ print(check100.conforming_range_hz, round(check100.conforming_radius_m, 2))
 # (100.0, 250.0) 2.71
 ```
 
-The inconsistency is in the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+The inconsistency is in the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/).
 A laboratory that takes A.4.3 as the rule of the annex reads the two flags and
 decides.
 
@@ -1317,7 +1317,7 @@ Formula (A.1) has a defect of its own: Annex A defines its $d_0$ as half the
 characteristic source dimension of ISO 3745, which ISO 3745 3.14 already
 defines as the distance from the origin to the farthest corner of the
 reference box. `knee_frequency` takes the length that enters the formula, and
-the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/) has the details.
+the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/) has the details.
 
 ## What this guide covers
 
@@ -1358,20 +1358,20 @@ ISO 9614-3.
 
 ## See also
 
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the precision determination in the room this guide qualifies.
-- [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/):
   the comparison method a reference source serves.
-- [Sound Power in Small Test Rooms (ISO 3743)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/):
+- [Sound Power in Small Test Rooms (ISO 3743)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/):
   the comparison in a hard-walled room and in a special reverberation room.
-- [Sound Power in Situ by Comparison (ISO 3747)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison (ISO 3747)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/):
   the octave-band comparison with a reference source where the machine stands.
-- [Sound Power in the 16 kHz Octave (ISO 9295)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/):
+- [Sound Power in the 16 kHz Octave (ISO 9295)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/):
   the comparison in the highest octave.
-- [Errata](https://jmrplens.github.io/phonometry/reference/errata/): the two spatial resolutions of the
+- [Errata](https://docs.jmrp.io/phonometry/reference/errata/): the two spatial resolutions of the
   amended Annex A, and the $d_0$ of ISO 6926 Formula (A.1).
-- API reference: [`emission.free_field_qualification`](https://jmrplens.github.io/phonometry/reference/api/power/free-field-qualification/)
-  and [`emission.reference_sound_source`](https://jmrplens.github.io/phonometry/reference/api/power/reference-sound-source/).
+- API reference: [`emission.free_field_qualification`](https://docs.jmrp.io/phonometry/reference/api/power/free-field-qualification/)
+  and [`emission.reference_sound_source`](https://docs.jmrp.io/phonometry/reference/api/power/reference-sound-source/).
 
 ## References
 
@@ -1411,8 +1411,8 @@ Annex A and Annex B.
 ---
 
 
-<!-- source: docs/devices/emission/sound-power-turbines.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-turbines/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-turbines/
+<!-- source: docs/devices/emission/sound-power-turbines.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/
 
 # Sound Power of Steam Turbine Sets (IEC 61063)
 
@@ -1430,7 +1430,7 @@ of Table 2 and how it departs from the $K_{1\mathrm{A}}$ of ISO 3746, the
 environmental correction of Figure A.3 and the qualification of the hall, the
 surface sound pressure level and the sound power level, and the report. Which
 route fits other machines is weighed in
-[Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+[Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 ## 1. The test code (IEC 61063)
 
@@ -1836,14 +1836,14 @@ casings is checked as one.
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the
   determination routes and the ISO 4871 declaration.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the enveloping-surface survey method this test code is built on, and its
   $K_1$ and $K_2$.
-- [Sound Power in Situ by Comparison (ISO 3747)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison (ISO 3747)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/):
   the other route for a machine that cannot leave its installation.
-- API reference: [`emission.turbine_noise`](https://jmrplens.github.io/phonometry/reference/api/power/turbine-noise/).
+- API reference: [`emission.turbine_noise`](https://docs.jmrp.io/phonometry/reference/api/power/turbine-noise/).
 
 ## References
 

@@ -242,7 +242,7 @@ repository. Click the preview to open the PDF:
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): the full ISO 9613-1
   atmospheric-absorption model, for conditions or frequencies the six
   built-in climate profiles do not cover.
-- API reference: [`room.enclosed_space_absorption`](https://jmrplens.github.io/phonometry/reference/api/rooms/enclosed-space-absorption/).
+- API reference: [`room.enclosed_space_absorption`](https://docs.jmrp.io/phonometry/reference/api/rooms/enclosed-space-absorption/).
 - Theory: [Absorption in enclosed spaces](../../reference/theory/rooms-buildings.md#absorption-in-enclosed-spaces-en-12354-6): the equivalent-absorption-area definition the EN 12354-6 procedure computes.
 
 ## References

@@ -156,6 +156,6 @@ theory](../reference/theory/environment-transport.md): the ISO 1996-1 descriptor
 NT ACOU 112 prominence criterion and the ISO 9613 attenuation terms.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

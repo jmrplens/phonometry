@@ -51,7 +51,7 @@ SITE_ONLY_PREFIXES = ("reference/api",)
 #: in the same repository.
 ROUTE_ALIASES = {"start/guides": "README.md"}
 
-SITE_BASE = "https://jmrplens.github.io/phonometry"
+SITE_BASE = "https://docs.jmrp.io/phonometry"
 
 
 def _frontmatter(text: str, page: Path) -> tuple[dict[str, str], str]:

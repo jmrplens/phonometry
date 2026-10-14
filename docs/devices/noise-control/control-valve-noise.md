@@ -420,7 +420,7 @@ took out.
 - [Sound Power in a Duct](../emission/sound-power-in-duct.md): the ISO 5136
   measurement of what a source puts into a pipe, which is the measured
   counterpart of what this page predicts.
-- API reference: [`noise_control.valves`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves/).
+- API reference: [`noise_control.valves`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves/).
 
 ## Standards
 

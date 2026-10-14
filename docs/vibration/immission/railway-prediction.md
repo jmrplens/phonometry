@@ -325,7 +325,7 @@ library carries none. The spectrum is the user's.
 - [Predicting vibration before measuring (DIN 4150-1)](vibration-prediction.md):
   the general decay law this method's Formula (5) is a case of.
 - API reference:
-  [`vibration.immission.railway_prediction`](https://jmrplens.github.io/phonometry/reference/api/vibration/railway-prediction/).
+  [`vibration.immission.railway_prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway-prediction/).
 ## References
 
 - Deutsches Institut für Normung. (2023). *Schwingungsmessung an

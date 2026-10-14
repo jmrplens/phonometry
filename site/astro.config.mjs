@@ -721,10 +721,13 @@ export default defineConfig({
           tag: 'link',
           attrs: { rel: 'apple-touch-icon', href: `${basePath}/apple-touch-icon.png` },
         },
-        // Ownership proofs for Google Search Console and Bing Webmaster Tools,
-        // for the https://jmrplens.github.io/phonometry/ property. Both read
-        // them from the property's home page and re-check them later, so they
-        // stay. Public by design: neither is a credential.
+        // Ownership proofs for Google Search Console and Bing Webmaster Tools.
+        // They were issued for the https://jmrplens.github.io/phonometry/
+        // property, which now redirects to https://docs.jmrp.io/phonometry/;
+        // a property for the new address that is given a different proof
+        // takes it as one more tag here. Both services read them from the
+        // property's home page and re-check them later, so they stay. Public
+        // by design: neither is a credential.
         {
           tag: 'meta',
           attrs: { name: 'google-site-verification', content: '4Hx_PJ1seU_BgKfWpo_FA7_Hkh7GeYVNrvnvzqCjF0Q' },

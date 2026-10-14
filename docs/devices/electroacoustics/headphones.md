@@ -559,8 +559,8 @@ calibrated readings the response function is not given.
 - [Test signals and sample-rate tools](../../signals/spectra/test-signals.md):
   the tone bursts of IEC 60268-1 Annex A, the other part of that standard the
   library implements.
-- API reference: [`electroacoustics.programme_signal`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/programme-signal/)
-  and [`electroacoustics.headphones`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/headphones/).
+- API reference: [`electroacoustics.programme_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/programme-signal/)
+  and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).
 
 ## Standards
 

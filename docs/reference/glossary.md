@@ -71,7 +71,7 @@ first use; this table is the site-wide list.
 For the source of each definition rather than the definition itself, the
 [bibliography](bibliography.md) lists every cited work with
 a DOI or publisher link, and the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/) shows the numerical
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/) shows the numerical
 check that pins each quantity to its standard's own expected value.
 
 ## Sound pressure, power and intensity levels

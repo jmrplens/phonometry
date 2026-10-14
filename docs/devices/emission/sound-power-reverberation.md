@@ -355,7 +355,7 @@ source positions of Eq. 24 is left to the caller.
 - [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
 - [Theory](../../reference/theory/environment-transport.md): the Waterhouse and $C_1$/$C_2$
   derivations.
-- API reference: [`emission.sound_power_reverberation`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/).
+- API reference: [`emission.sound_power_reverberation`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/).
 
 ## References
 

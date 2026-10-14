@@ -73,7 +73,7 @@
     },
     {
       "relation": "isDocumentedBy",
-      "identifier": "https://jmrplens.github.io/phonometry/"
+      "identifier": "https://docs.jmrp.io/phonometry/"
     }
   ]
 }

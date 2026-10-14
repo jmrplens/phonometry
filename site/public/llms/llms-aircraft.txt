@@ -1,11 +1,11 @@
 # phonometry: Aircraft noise
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/aircraft/index.md | canonical: https://jmrplens.github.io/phonometry/aircraft/ -->
-Source: https://jmrplens.github.io/phonometry/aircraft/
+<!-- source: docs/aircraft/index.md | canonical: https://docs.jmrp.io/phonometry/aircraft/ -->
+Source: https://docs.jmrp.io/phonometry/aircraft/
 
 # Aircraft noise
 
@@ -18,19 +18,19 @@ common anatomy: a rigorously standardised **source descriptor** (a spectral
 time history, a noise-power-distance table or a noise hemisphere) plus
 standardised **propagation adjustments** that place the source at a receiver.
 
-[Aircraft noise: Effective Perceived Noise Level](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/)
+[Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/)
 covers fixed-wing certification. The **EPNL** of ICAO Annex 16 condenses a
 one-third-octave time history of a flyover into a single EPNdB value through
 perceived noisiness, a tone correction and a duration correction; the page
 adds the IEC 61265 measurement-system verifier and the SAE ARP 5534
 atmospheric absorption used in the certification chain.
-[Airport Noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/) picks the
+[Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) picks the
 aeroplane up from there: the noise-power-distance tables, the per-segment
 corrections of a flight path (impedance, lateral attenuation, engine
 installation, duration, noise fraction and start-of-roll directivity) and the
 single-event contour over a ground grid.
 
-[Rotorcraft noise: the hemisphere method](https://jmrplens.github.io/phonometry/aircraft/rotorcraft-noise/)
+[Rotorcraft noise: the hemisphere method](https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/)
 covers helicopters, whose strong directivity defeats a single-number source
 level. ECAC Doc 32 instead describes the source as a **noise hemisphere**
 (band levels on a grid of emission angles at a 60 m reference distance),
@@ -39,11 +39,11 @@ Chien-Soroka ground effect, interpolates between the measured flight
 conditions along the track, and integrates the received history into the
 single-event SEL, LASmax and EPNL and their ground-grid contours.
 
-[The ANP fleet database](https://jmrplens.github.io/phonometry/aircraft/anp-fleet/) closes the loop on
+[The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/) closes the loop on
 the two above: the noise-power-distance tables and default trajectories EASA and
 EUROCONTROL publish for real aircraft types, ready to feed the Doc 29 chain
 without writing a table by hand.
-[NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/)
+[NPD data for the air at the airport](https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/)
 adjusts those tables to the air of a study: the ANP curves are normalised to the
 average absorption of certification tests, and ECAC Doc 29 Vol. 2 Appendix D
 recalculates them from each aircraft's spectral class for another temperature,
@@ -52,13 +52,13 @@ humidity and pressure, with the SAE ARP 5534 absorption or the legacy SAE ARP
 
 The shared physics connects outward: atmospheric absorption comes from the
 same ISO 9613-1 model as
-[Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/), and the
+[Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/), and the
 same type-testing logic governs
-[Wind-turbine noise](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/),
+[Wind-turbine noise](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/),
 which is filed with the other environmental sources: its IEC 61400-11 apparent
 sound power level and tonal-audibility chain answer the same question for a
 source that is not an aircraft. That tonality test is in turn a cousin of the
-methods in [Psychoacoustics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/).
+methods in [Psychoacoustics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/).
 
 Start from the question. To check an aeroplane against a certification limit,
 or to understand where the published numbers for a type come from, start with
@@ -78,18 +78,18 @@ land-use study is finally judged on.
 
 ## Pages in this section
 
-- [Aircraft noise: Effective Perceived Noise Level](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/):
+- [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/):
   the ICAO Annex 16 EPNL chain, the IEC 61265 verifier and the SAE ARP 5534
   absorption.
-- [Airport Noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/): the NPD
+- [Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/): the NPD
   engine, the single-event segment chain and the ground-grid SEL contour.
-- [Rotorcraft noise: the hemisphere method](https://jmrplens.github.io/phonometry/aircraft/rotorcraft-noise/):
+- [Rotorcraft noise: the hemisphere method](https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/):
   the ECAC Doc 32 noise-hemisphere source model, its propagation adjustments
   and the single-event metrics and contours.
-- [The ANP fleet database](https://jmrplens.github.io/phonometry/aircraft/anp-fleet/): the EASA tables of
+- [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/): the EASA tables of
   noise-power-distance curves and default trajectories that run the Doc 29
   chain for a real aircraft type.
-- [NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/):
+- [NPD data for the air at the airport](https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/):
   the ANP curves recalculated for a non-reference atmosphere by Doc 29
   Appendix D.
 
@@ -120,29 +120,29 @@ edition. And sonic boom is not touched anywhere in the library.
 Finally, the CNOSSOS-EU aircraft source of sections 2.6 and 2.7 is **not**
 implemented: aircraft noise here is the ICAO and ECAC family, which is a
 different set of models from the road and rail sources of [Environmental
-sources](https://jmrplens.github.io/phonometry/environment/sources/), and the two must not be mixed
+sources](https://docs.jmrp.io/phonometry/environment/sources/), and the two must not be mixed
 inside one strategic map without saying so.
 
 ## Before and after these pages
 
 Every level on these pages is built from band levels, so the filtering,
 weighting and calibration that produce them are in [Signal
-analysis](https://jmrplens.github.io/phonometry/signals/), and [Build a sound level
-meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/) runs that chain end to end on
+analysis](https://docs.jmrp.io/phonometry/signals/), and [Build a sound level
+meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/) runs that chain end to end on
 one runnable page. The derivations for aircraft noise are not in the theory
 reference: they stay inside the guides above, beside the flight geometry that
 motivates them.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
-and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+and [All guides](https://docs.jmrp.io/phonometry/) lists every page with a line on
 each.
 
 ---
 
 
-<!-- source: docs/aircraft/aircraft-noise.md | canonical: https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/ -->
-Source: https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/
+<!-- source: docs/aircraft/aircraft-noise.md | canonical: https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/ -->
+Source: https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/
 
 # Aircraft noise: Effective Perceived Noise Level (ICAO Annex 16 / IEC 61265)
 
@@ -266,7 +266,7 @@ Level | Limit | Margin verdict row when a certification limit is supplied, a
 static reference-conditions strip (25 °C, 70 % RH, sea level, zero wind, ISA)
 and a footer with the fixed disclaimer. It uses the same `ReportMetadata`
 container (documented under [Insulation
-ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata)) and rendering
+ratings](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/#report-metadata-reportmetadata)) and rendering
 engine as the ISO 717 insulation fiche; a supplied `requirement` is read as the
 certification EPNL limit in EPNdB (the EPNL passes at or below it), and
 `metadata=None` produces a lightweight prediction fiche with no verdict row.
@@ -400,19 +400,19 @@ only then report it against a certification limit.
 The certification chain ends here. Turning these aeroplanes into noise
 around an airport, the noise-power-distance tables, the per-segment
 corrections of a flight path and the ground contour of a single event, is
-the ECAC Doc 29 method of [Airport noise](https://jmrplens.github.io/phonometry/aircraft/airport-noise/).
+the ECAC Doc 29 method of [Airport noise](https://docs.jmrp.io/phonometry/aircraft/airport-noise/).
 
 ## See also
 
-- [Airport noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/): the NPD
+- [Airport noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/): the NPD
   engine and the single-event contour chain around an airport.
-- [Rotorcraft noise: the hemisphere method](https://jmrplens.github.io/phonometry/aircraft/rotorcraft-noise/):
+- [Rotorcraft noise: the hemisphere method](https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/):
   the ECAC Doc 32 method, whose single-event EPNL is this same Appendix 2 chain
   driven by a noise hemisphere instead of a certification flyover.
-- [The ANP fleet database](https://jmrplens.github.io/phonometry/aircraft/anp-fleet/): the measured
+- [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/): the measured
   noise-power-distance tables for real types, which is where the certification
   data ends up for modelling work.
-- API reference: [`aircraft.certification`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
+- API reference: [`aircraft.certification`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
 
 ## References
 
@@ -457,13 +457,13 @@ performance tolerances. SAE ARP 5534:2021, *Application of Pure-Tone
 Atmospheric Absorption Losses to One-Third-Octave-Band Data*: the SAE-Method
 band attenuation (Eqs. 7–10), with the pure-tone coefficient of Eqs. 1-6.
 The ECAC Doc 29 airport-noise method is documented in
-[Airport noise](https://jmrplens.github.io/phonometry/aircraft/airport-noise/).
+[Airport noise](https://docs.jmrp.io/phonometry/aircraft/airport-noise/).
 
 ---
 
 
-<!-- source: docs/aircraft/airport-noise.md | canonical: https://jmrplens.github.io/phonometry/aircraft/airport-noise/ -->
-Source: https://jmrplens.github.io/phonometry/aircraft/airport-noise/
+<!-- source: docs/aircraft/airport-noise.md | canonical: https://docs.jmrp.io/phonometry/aircraft/airport-noise/ -->
+Source: https://docs.jmrp.io/phonometry/aircraft/airport-noise/
 
 # Airport noise (ECAC Doc 29)
 
@@ -481,9 +481,9 @@ mounted, and the rearward lobe of a jet still on the runway.
 This page covers that chain end to end, from the NPD interpolation to the
 ground-grid contour, and it is validated against the reference workbook of
 Doc 29 5th ed. Vol. 3. The certification metric these tables ultimately come
-from, the EPNL of ICAO Annex 16, is [Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/); the
+from, the EPNL of ICAO Annex 16, is [Aircraft noise](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/); the
 physical propagation ingredients (ground effect, atmospheric absorption,
-barriers) are [Outdoor sound propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/).
+barriers) are [Outdoor sound propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/).
 
 ## 1. The noise-power-distance engine
 
@@ -546,9 +546,9 @@ of temperature (°C) and relative humidity (%) above 500, and wind below 8 m/s.
 Outside it the *tables themselves* have to be converted by the Appendix D
 procedure before this chain reads them. The functions of this page take the NPD
 arrays as given, and `impedance_adjustment` takes only temperature and
-pressure; the conversion is [NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/),
+pressure; the conversion is [NPD data for the air at the airport](https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/),
 whose `revise_npd_curves` returns revised tables to pass here, and the ANP
-wiring of [The ANP fleet database](https://jmrplens.github.io/phonometry/aircraft/anp-fleet/) applies it by itself when it is
+wiring of [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/) applies it by itself when it is
 given `relative_humidity_percent=`. One restriction runs under all of it: the SAE AIR 5662 lateral
 attenuation, and with it the whole single-event chain that uses it, is derived
 for acoustically soft, grassy ground, so a contour drawn over water, an apron
@@ -709,14 +709,14 @@ events of the reference workbook are reproduced end-to-end in the test suite.
 
 ## See also
 
-- [Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/): the ICAO Annex 16 certification
+- [Aircraft noise](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/): the ICAO Annex 16 certification
   metric behind the aircraft data.
-- [Outdoor sound propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the ISO 9613-2
+- [Outdoor sound propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the ISO 9613-2
   attenuation terms and the ground effect the lateral attenuation condenses
   into one curve.
-- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$-style
+- [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$-style
   long-term indices that a full airport study accumulates from single events.
-- API reference: [`aircraft.airport_noise`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/airport-noise/).
+- API reference: [`aircraft.airport_noise`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/airport-noise/).
 
 ## References
 
@@ -753,12 +753,12 @@ Vol 3 Part 1 reference workbook.
 ---
 
 
-<!-- source: docs/aircraft/anp-fleet.md | canonical: https://jmrplens.github.io/phonometry/aircraft/anp-fleet/ -->
-Source: https://jmrplens.github.io/phonometry/aircraft/anp-fleet/
+<!-- source: docs/aircraft/anp-fleet.md | canonical: https://docs.jmrp.io/phonometry/aircraft/anp-fleet/ -->
+Source: https://docs.jmrp.io/phonometry/aircraft/anp-fleet/
 
 # The ANP fleet database
 
-[Airport noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/) computes an event level from a
+[Airport noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) computes an event level from a
 noise-power-distance table and a flight path. That page supplies both by hand,
 which is what you want while learning the method and what you never want
 afterwards: for a real study the numbers come from the **Aircraft Noise and
@@ -807,7 +807,7 @@ pounds for most jets, so a power you pass to `level` has to be in those units.
 The engine **mounting** is the one field of the record the Doc 29 chain itself
 reads; it is derived from the ANP lateral directivity identifier, is one of
 `"wing"`, `"fuselage"` or `"propeller"`, and selects the engine-installation
-correction that [Airport noise](https://jmrplens.github.io/phonometry/aircraft/airport-noise/) applies by hand. The choice is
+correction that [Airport noise](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) applies by hand. The choice is
 not cosmetic: at small depression angles the wing and fuselage corrections differ
 by more than a decibel, a propeller takes none of that correction at all, and the
 shipped fleet splits 70 / 55 / 30 across the three. An unrecognised identifier
@@ -1023,7 +1023,7 @@ adjustment, defaulting to the 15 °C and 101.325 kPa of the standard atmosphere
 (a bookkeeping term worth +0.07 dB there, not a weather correction). Passing
 `relative_humidity_percent` as well recalculates both NPD tables for the air at
 the field by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class
-([NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/)).
+([NPD data for the air at the airport](https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/)).
 
 ```python
 import numpy as np
@@ -1072,12 +1072,12 @@ it.
 ## See also
 Pages elsewhere on the site that this section leans on:
 
-- [Airport Noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/): the method
+- [Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/): the method
   itself, built from a hand-written NPD table and flight path.
-- [Aircraft noise: Effective Perceived Noise Level](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/):
+- [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/):
   the certification metric, which is measured rather than tabulated.
 - API reference:
-  [`aircraft.anp_fleet`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/anp-fleet/).
+  [`aircraft.anp_fleet`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/anp-fleet/).
 
 ## References
 
@@ -1090,8 +1090,8 @@ Pages elsewhere on the site that this section leans on:
 ---
 
 
-<!-- source: docs/aircraft/npd-atmosphere.md | canonical: https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/ -->
-Source: https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/
+<!-- source: docs/aircraft/npd-atmosphere.md | canonical: https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/ -->
+Source: https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/
 
 # NPD data for the air at the airport
 
@@ -1109,7 +1109,7 @@ runway than the database says; a hot, dry one can absorb more. ECAC Doc 29
 Vol. 2 Appendix D recalculates the NPD curves for the air of a study, and this
 page runs it: from the AIR-1845 rates, through the spectral class that each NPD
 carries, to revised curves that feed the event levels and contours of
-[Airport noise](https://jmrplens.github.io/phonometry/aircraft/airport-noise/) and [The ANP fleet database](https://jmrplens.github.io/phonometry/aircraft/anp-fleet/).
+[Airport noise](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) and [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/).
 
 ## The AIR-1845 atmosphere
 
@@ -1363,7 +1363,7 @@ Every intermediate table of the Appendix D example is a row of the conformance
 report, cell by cell at its printed precision, and all of them agree to the last
 digit but two: 32 cells of Table D-3b are printed about 6 parts per million
 below the ISO 3891 formula, and the last row of Table D-6c is printed as a copy
-of the last row of Table D-6b, which is in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/).
+of the last row of Table D-6b, which is in the [errata register](https://docs.jmrp.io/phonometry/reference/errata/).
 ISO 3891 Table 10 is a row too, all 264 cells. The formula misses 15 cells of
 its Table 9 by one printed unit: seven contradict Table 10 where the humidity
 drops out of the formula, and are in the same register; the other eight each
@@ -1386,14 +1386,14 @@ Annex 16 procedure.
 ## See also
 Pages elsewhere on the site that this section leans on:
 
-- [The ANP fleet database](https://jmrplens.github.io/phonometry/aircraft/anp-fleet/): the NPD curves, profiles and event
+- [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/): the NPD curves, profiles and event
   wiring this page revises.
-- [Airport Noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/): the single-event chain the
+- [Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/): the single-event chain the
   revised curves feed.
-- [Aircraft noise: Effective Perceived Noise Level](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/): SAE ARP
+- [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/): SAE ARP
   5534 on its own, as certification uses it.
 - API reference:
-  [`aircraft.npd_atmosphere`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/npd-atmosphere/).
+  [`aircraft.npd_atmosphere`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/npd-atmosphere/).
 
 ## References
 
@@ -1407,8 +1407,8 @@ Pages elsewhere on the site that this section leans on:
 ---
 
 
-<!-- source: docs/aircraft/rotorcraft-noise.md | canonical: https://jmrplens.github.io/phonometry/aircraft/rotorcraft-noise/ -->
-Source: https://jmrplens.github.io/phonometry/aircraft/rotorcraft-noise/
+<!-- source: docs/aircraft/rotorcraft-noise.md | canonical: https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/ -->
+Source: https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/
 
 # Rotorcraft noise: the hemisphere method (ECAC Doc 32 / NORAH2)
 
@@ -1608,7 +1608,7 @@ other setups, and the reference database actually ships +8/−10/−2 dB (the
 `offset_db` to reproduce the prototype. The Approach 3 prose derives
 full-rpm idle from HOGE where its own Table 3 derives it from HIGE, 12 dB
 apart; the table, backed by the database, is what is implemented (see the
-[errata registry](https://jmrplens.github.io/phonometry/reference/errata/)).
+[errata registry](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 ```python
 import numpy as np
@@ -1986,16 +1986,16 @@ itself rests on the closed-form anchors and its CNOSSOS-EU lineage.
 
 ## See also
 
-- [Aircraft noise: Effective Perceived Noise Level](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/):
+- [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/):
   the ICAO Annex 16 Appendix 2 chain this page's Doc 32 Eq. 28 term calls, and
   the measurement practice a hemisphere campaign follows.
-- [Airport Noise (ECAC Doc 29)](https://jmrplens.github.io/phonometry/aircraft/airport-noise/): the
+- [Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/): the
   fixed-wing contour method, where a noise-power-distance table plays the role
   the noise hemisphere plays here.
-- [Outdoor sound propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor sound propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the ISO 9613-2 ground effect and the CNOSSOS ground classes this two-ray
   adjustment shares.
-- API reference: [`aircraft.rotorcraft_noise`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/rotorcraft-noise/).
+- API reference: [`aircraft.rotorcraft_noise`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/rotorcraft-noise/).
 
 ## References
 

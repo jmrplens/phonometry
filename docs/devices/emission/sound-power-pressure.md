@@ -595,7 +595,7 @@ surface, position and room arguments of `sound_power_pressure` plus `events`,
 - [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
 - [Theory](../../reference/theory/environment-transport.md): the $K_1$/$K_2$ and $C_1$/$C_2$
   derivations.
-- API reference: [`emission.sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/).
+- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/).
 
 ## References
 

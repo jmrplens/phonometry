@@ -1,11 +1,11 @@
 # phonometry: Resilient layers
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/materials/resilient/index.md | canonical: https://jmrplens.github.io/phonometry/materials/resilient/ -->
-Source: https://jmrplens.github.io/phonometry/materials/resilient/
+<!-- source: docs/materials/resilient/index.md | canonical: https://docs.jmrp.io/phonometry/materials/resilient/ -->
+Source: https://docs.jmrp.io/phonometry/materials/resilient/
 
 # Resilient layers
 
@@ -21,7 +21,7 @@ resonance sits. This is why s' is the one number a resilient-layer datasheet
 must carry, and why it is a *dynamic* stiffness: a static compression test
 describes neither the audio frequency range nor the working preload.
 
-[Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/)
+[Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/)
 is the measurement that produces it. A 200 mm × 200 mm specimen carries an 8 kg
 load plate (200 kg/m² in total, which reproduces the roughly 2 kPa static
 preload of a real floating floor), and a vertical exciter with an accelerometer
@@ -36,16 +36,16 @@ chains all of it and renders the clause 9 test-report fiche.
 Two inputs come from outside this subsection. The resonant frequency has to be
 extrapolated to zero force amplitude by the clause 7 procedure, and the airflow
 resistivity is measured by ISO 9053 in
-[Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/) (note
+[Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/) (note
 that ISO 9053 reports it in Pa·s/m² while this page's argument is in kPa·s/m²).
 What the design side does with s' is
-[Predicting resilient-layer performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/),
+[Predicting resilient-layer performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/),
 which turns it into the floating-floor improvement and the ISO 12354-1 Annex D
 lining rating.
 
 ## Pages in this section
 
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the load-plate resonance method, the apparent stiffness it yields, the
   enclosed-gas term for air-permeable layers, the airflow-resistivity regimes
   of clause 8.2 and the clause 9 test-report fiche.
@@ -54,9 +54,9 @@ lining rating.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/): the
+- [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/): the
   ISO 9053 measurement of the lateral resistivity the regime rule needs.
-- [Predicting resilient-layer performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/):
+- [Predicting resilient-layer performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/):
   the consumer, where s' becomes a floating-floor improvement.
 
 ## What this section does not cover
@@ -75,8 +75,8 @@ the standard and outside the library.
 ---
 
 
-<!-- source: docs/materials/resilient/dynamic-stiffness.md | canonical: https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/ -->
-Source: https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/
+<!-- source: docs/materials/resilient/dynamic-stiffness.md | canonical: https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/ -->
+Source: https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/
 
 # Dynamic stiffness of resilient materials (EN 29052-1)
 
@@ -87,7 +87,7 @@ ISO 9052-1:1989) measures the **dynamic stiffness per unit area** $s'$ of the
 resilient layer from the resonance of a standard load plate on a
 200 mm × 200 mm specimen. $s'$ is the input to the floating-floor term of the
 EN 12354-2 impact model covered in
-[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/). (ISO 16251-1 does not apply here:
+[Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/). (ISO 16251-1 does not apply here:
 its scope is limited to soft, locally-reacting floor coverings and explicitly
 excludes floating floors.)
 
@@ -388,20 +388,20 @@ heavy slab) is the design goal.
 
 ## See also
 
-- [Predicting Resilient-Layer Performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/):
+- [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/):
   what the design side does with $s'$, from the mass-spring resonance to the
   improvement laws above it and their weighted single number.
-- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/):
   the floating-floor term this measurement feeds.
-- [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/): the
+- [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/): the
   ISO 9053 determination of the lateral resistivity $r$ that clause 8.2 needs,
   reported there as $\sigma$ in Pa·s/m², the unit
   `ResilientLayer.natural_frequency` takes, while
   `airflow_resistivity_kpa_s_m2` is in kPa·s/m².
-- [Resilient layers overview](https://jmrplens.github.io/phonometry/materials/resilient/): where this
+- [Resilient layers overview](https://docs.jmrp.io/phonometry/materials/resilient/): where this
   measurement sits among the materials guides.
-- API reference: [`materials.resilient.dynamic_stiffness`](https://jmrplens.github.io/phonometry/reference/api/materials/dynamic-stiffness/).
-- Theory: [Point mobilities and radiation efficiency](https://jmrplens.github.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring resonance the EN 29052-1 rig measures, seen as a mobility.
+- API reference: [`materials.resilient.dynamic_stiffness`](https://docs.jmrp.io/phonometry/reference/api/materials/dynamic-stiffness/).
+- Theory: [Point mobilities and radiation efficiency](https://docs.jmrp.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring resonance the EN 29052-1 rig measures, seen as a mobility.
 
 ## References
 

@@ -314,7 +314,7 @@ conventions.*
   sensitivity into calibrated sound pressure levels.
 - [Build a sound level meter](../../signals/sound-level-meter.md): the measurement chain a
   characterised microphone feeds.
-- API reference: [`electroacoustics.microphone`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/microphone/).
+- API reference: [`electroacoustics.microphone`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/microphone/).
 
 ## References
 

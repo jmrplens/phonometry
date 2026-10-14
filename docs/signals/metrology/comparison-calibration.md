@@ -800,4 +800,4 @@ Formula (7)), which `verify_jig_or_coupler` does not take.
   61094-5:2017 Table D.1, IEC 61094-8 8.4, B.2.1 and Formula (B.10),
   Barham et al. (2014) Formulas (1), (2) and (4), and Jarvis (1996)
   Appendix B.
-- API reference: [`metrology.comparison_calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/comparison-calibration/).
+- API reference: [`metrology.comparison_calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/comparison-calibration/).

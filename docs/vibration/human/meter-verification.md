@@ -1526,7 +1526,7 @@ clauses are not implemented.
   before-and-after check that an in situ verification is built on, and the
   traceability a type test is reported with.
 - API reference:
-  [`vibration.human.instrumentation`](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/).
+  [`vibration.human.instrumentation`](https://docs.jmrp.io/phonometry/reference/api/vibration/instrumentation/).
 
 ## References
 

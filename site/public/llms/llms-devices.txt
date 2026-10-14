@@ -1,11 +1,11 @@
 # phonometry: Sources and devices
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/devices/index.md | canonical: https://jmrplens.github.io/phonometry/devices/ -->
-Source: https://jmrplens.github.io/phonometry/devices/
+<!-- source: docs/devices/index.md | canonical: https://docs.jmrp.io/phonometry/devices/ -->
+Source: https://docs.jmrp.io/phonometry/devices/
 
 # Sources and devices
 
@@ -25,110 +25,110 @@ they carry, and the **noise control** pages hold the path measures that quiet
 a machine once its emission is known.
 
 If you are here to measure a machine, start with
-[Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/) and let its decision guidance
+[Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/) and let its decision guidance
 pick the route, which may end on an intensity probe or, when only vibration can
 be measured, on the radiating surface itself; read
-[Sound Intensity (p-p)](https://jmrplens.github.io/phonometry/devices/emission/intensity/)
+[Sound Intensity (p-p)](https://docs.jmrp.io/phonometry/devices/emission/intensity/)
 when that route involves an intensity probe. If you are here to bench-test
 audio gear, go straight to
-[Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/); if you are here to
+[Electroacoustics](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/); if you are here to
 level a programme, go to
-[Programme loudness](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/).
+[Programme loudness](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/).
 
-## [Sound power and intensity](https://jmrplens.github.io/phonometry/devices/emission/)
+## [Sound power and intensity](https://docs.jmrp.io/phonometry/devices/emission/)
 
 The total acoustic emission of a source, and the power flux it is built on.
 
-- [Sound Intensity (p-p)](https://jmrplens.github.io/phonometry/devices/emission/intensity/): two-microphone
+- [Sound Intensity (p-p)](https://docs.jmrp.io/phonometry/devices/emission/intensity/): two-microphone
   sound intensity per IEC 61043, with the ISO 9614-1 field indicators and its
   sound power determination at discrete points.
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing the determination
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing the determination
   method and declaring the noise emission per ISO 4871.
-- [Sound Power by Pressure Methods](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the enveloping surface of ISO 3744/3746 and the precision anechoic grade of
   ISO 3745.
-- [Free Field and Reference Sources](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/):
+- [Free Field and Reference Sources](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/):
   the ISO 26101 room qualification and the ISO 6926 reference sound source.
-- [Sound Power in the Reverberation Room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
-- [Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/):
+- [Sound Power in Small Test Rooms](https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/):
   the ISO 3743 methods for small movable sources in a hard-walled or a
   special reverberation test room.
-- [Sound Power in Situ by Comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/):
   the ISO 3747 comparison against a reference sound source where the machine
   works.
-- [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/):
+- [Sound Power in a Duct](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-duct/):
   the ISO 5136 in-duct method for fans.
-- [Sound Power of Multisource Industrial Plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/):
+- [Sound Power of Multisource Industrial Plants](https://docs.jmrp.io/phonometry/devices/emission/sound-power-plant/):
   the ISO 8297 contour round a whole industrial plant.
-- [Sound Power in the 16 kHz Octave](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/):
+- [Sound Power in the 16 kHz Octave](https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/):
   the ISO 9295 methods above 10 kHz.
-- [Sound Power of Steam Turbine Sets](https://jmrplens.github.io/phonometry/devices/emission/sound-power-turbines/):
+- [Sound Power of Steam Turbine Sets](https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/):
   the IEC 61063 test code for a turbine set in its hall.
-- [Sound Power by Intensity Scanning](https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/):
   the on-site scanning of ISO 9614-2 and the ISO 9614-3 precision grade.
-- [Sound power from surface vibration (ISO/TS 7849)](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/):
+- [Sound power from surface vibration (ISO/TS 7849)](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/):
   the radiated power from the surface-averaged velocity level and the radiation
   factor, for the case where the machine cannot be moved, the room is not
   qualified and only an accelerometer is available: the Part 1 upper limit and
   the Part 2 engineering value.
 
-## [Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/)
+## [Electroacoustics](https://docs.jmrp.io/phonometry/devices/electroacoustics/)
 
 Amplifiers, loudspeakers and microphones on the bench, and the programme
 signal they carry.
 
-- [Electroacoustics: distortion and frequency response](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/):
+- [Electroacoustics: distortion and frequency response](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/):
   the IEC 60268-3 distortion metrics and frequency-response estimation with
   coherence.
-- [Loudspeaker Characterisation (IEC 60268-5)](https://jmrplens.github.io/phonometry/devices/electroacoustics/loudspeakers/):
+- [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/):
   the sensitivity conventions, the radiating piston and the IEC 60268-5
   characteristics fiche.
-- [Microphone Characterisation (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/):
+- [Microphone Characterisation (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/):
   the sensitivity references, directional patterns and inherent noise of the
   IEC 60268-4 fiche.
-- [Swept-sine distortion and phase utilities](https://jmrplens.github.io/phonometry/devices/electroacoustics/swept-sine-distortion/):
+- [Swept-sine distortion and phase utilities](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/):
   harmonic separation and THD(f) from one exponential sweep (Farina /
   Novak synchronized swept-sine), and minimum phase, group delay and
   excess phase from a measured response.
-- [Audio-Frequency Induction Loops (IEC 60118-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/induction-loops/):
+- [Audio-Frequency Induction Loops (IEC 60118-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/induction-loops/):
   the installed hearing loop judged by IEC 60118-4 and its Amendment 1, over a
   room's useful volume or at the points of a refuge and a counter, and its
   amplifier, loop and neck loop measured by IEC 62489-1.
-- [Headphones and Earphones (IEC 60268-7)](https://jmrplens.github.io/phonometry/devices/electroacoustics/headphones/):
+- [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/):
   the headphone on its ear simulator, measured by IEC 60268-7 with the
   simulated programme signal of IEC 60268-1: impedance, voltages, levels,
   frequency responses and the probe microphone of Annex B.
-- [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the loudness problem solved
+- [Broadcast](https://docs.jmrp.io/phonometry/devices/broadcast/): the loudness problem solved
   with a measurement rather than a compressor, one gated number per programme
   and the range that says how much it moves.
-- [Programme loudness and true peak](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/):
+- [Programme loudness and true peak](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/):
   the ITU-R BS.1770-5 programme loudness and true-peak level with the
   EBU R 128 normalisation practice, EBU Mode metering and loudness range.
 
-## [Noise control](https://jmrplens.github.io/phonometry/devices/noise-control/)
+## [Noise control](https://docs.jmrp.io/phonometry/devices/noise-control/)
 
 Industrial noise control on the path, between the machine and whoever hears
 it.
 
-- [Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): reactive silencers by the
+- [Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/): reactive silencers by the
   four-pole method and the reactive-versus-dissipative choice.
-- [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/): the
+- [Duct-Borne Noise: Fan to Room](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.
-- [Room to Room: Partition, Receiving Room, Criterion](https://jmrplens.github.io/phonometry/devices/noise-control/room-to-room/):
+- [Room to Room: Partition, Receiving Room, Criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/):
   the composed source-room to receiving-room chain and the transmission loss a
   partition or an enclosure needs to meet a noise criterion.
-- [Industrial Noise Control: HVAC and Enclosures](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/):
+- [Industrial Noise Control: HVAC and Enclosures](https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/):
   duct attenuation, flow noise and machine-enclosure insertion loss.
 
 ## What this section does not cover
 
 **Not every facility is qualified here.** The free-field qualification of
 an anechoic or hemi-anechoic room is performed, by ISO 26101 against the
-amended ISO 3745 Annex A, in [Free Field and Reference Sources](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/),
+amended ISO 3745 Annex A, in [Free Field and Reference Sources](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/),
 and the two rooms of ISO 3743 are qualified in
-[Sound Power in Small Test Rooms](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/): the hard-walled room of
+[Sound Power in Small Test Rooms](https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/): the hard-walled room of
 Part 1 by its volume, surfaces and acoustic adequacy
 (`check_hard_walled_room`), the special reverberation room of Part 2 by its
 reverberation time, surfaces and suitability
@@ -153,7 +153,7 @@ attenuation Wells' closed form driven by a declared mean absorption. Neither is 
 And no page here predicts a panel's transmission loss:
 `enclosure_insertion_loss` combines a value you supply with the interior
 correction, and the prediction itself is [Insulation
-design](https://jmrplens.github.io/phonometry/buildings/design/).
+design](https://docs.jmrp.io/phonometry/buildings/design/).
 
 Editions are pinned rather than current in two places: the distortion metrics
 follow AES17-2015 and not the 2020 revision, and the microphone
@@ -166,17 +166,17 @@ rendered to a loudspeaker layout before it can be measured.
 
 Every emission quantity here is computed from band levels or from an intensity
 pair, so the calibration, weighting and filtering behind them are in [Signal
-analysis](https://jmrplens.github.io/phonometry/signals/), and [Build a sound level
-meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/) runs that chain end to end on
+analysis](https://docs.jmrp.io/phonometry/signals/), and [Build a sound level
+meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/) runs that chain end to end on
 one runnable page. The derivations are split by physics rather than by topic:
-[sound power determination](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123)
-is under Environment and transport, and [sound intensity](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043)
+[sound power determination](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123)
+is under Environment and transport, and [sound intensity](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043)
 under Signal analysis. The electroacoustics and noise-control pages carry their
 derivations inline.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
-and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+and [All guides](https://docs.jmrp.io/phonometry/) lists every page with a line on
 each.
 
 ---

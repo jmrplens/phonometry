@@ -456,8 +456,8 @@ reciprocal, but it is not a boundary-element solution.
 - [Atmospheric refraction: rays and the GFPE](atmospheric-refraction.md): the vertical sound-speed gradient both models here assume away.
 - [Porous absorbers](../../materials/absorbers/porous-absorbers.md): the Delany-Bazley and Miki models behind `flow_resistivity`, and their fit range.
 - Theory: [Outdoor propagation](../../reference/theory/environment-transport.md#outdoor-propagation-general-method-iso-9613-2): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
-- API reference: [`environment.propagation.ground_barriers`](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/).
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#ground-surfaces): the
+- API reference: [`environment.propagation.ground_barriers`](https://docs.jmrp.io/phonometry/reference/api/environment/ground-barriers/).
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

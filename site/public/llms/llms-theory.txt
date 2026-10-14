@@ -1,75 +1,75 @@
 # phonometry: Theory and reference
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/reference/theory/index.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/
+<!-- source: docs/reference/theory/index.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/
 
 # Theoretical Background
 
 The theory reference collects the derivations, clause references and design decisions for the areas whose mathematics is **shared across many guides**. A theory page maps an implemented method back to the clause, equation and table of the standard or textbook it comes from, states the physics behind each correction term and the assumptions that bound it, and gives the reference values the validation suite checks against. It does not show workflows: that is what the guides are for.
 
-Several areas keep their theory **inside their guides** instead, because the derivation and the single method it serves would otherwise be separated for nothing: the underwater modules ([Underwater Acoustics](https://jmrplens.github.io/phonometry/underwater/underwater-acoustics/), [Underwater Propagation](https://jmrplens.github.io/phonometry/underwater/underwater-propagation/), [Underwater Propagation Solvers](https://jmrplens.github.io/phonometry/underwater/underwater-solvers/) and [Marine-Mammal Noise Exposure](https://jmrplens.github.io/phonometry/underwater/marine-mammal-exposure/)), the aircraft certification and contour methods ([Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/)), the CNOSSOS-EU road and railway emission models ([Environment and transport](https://jmrplens.github.io/phonometry/environment/)), the IEC 60268 electroacoustic measurements, the BS.1770 broadcast chain and the noise-control models ([Sources and devices](https://jmrplens.github.io/phonometry/devices/)), and the FDTD and elastic solvers ([Wave simulation](https://jmrplens.github.io/phonometry/simulation/)). Everything below is listed with the sections each domain page hosts.
+Several areas keep their theory **inside their guides** instead, because the derivation and the single method it serves would otherwise be separated for nothing: the underwater modules ([Underwater Acoustics](https://docs.jmrp.io/phonometry/underwater/underwater-acoustics/), [Underwater Propagation](https://docs.jmrp.io/phonometry/underwater/underwater-propagation/), [Underwater Propagation Solvers](https://docs.jmrp.io/phonometry/underwater/underwater-solvers/) and [Marine-Mammal Noise Exposure](https://docs.jmrp.io/phonometry/underwater/marine-mammal-exposure/)), the aircraft certification and contour methods ([Aircraft noise](https://docs.jmrp.io/phonometry/aircraft/)), the CNOSSOS-EU road and railway emission models ([Environment and transport](https://docs.jmrp.io/phonometry/environment/)), the IEC 60268 electroacoustic measurements, the BS.1770 broadcast chain and the noise-control models ([Sources and devices](https://docs.jmrp.io/phonometry/devices/)), and the FDTD and elastic solvers ([Wave simulation](https://docs.jmrp.io/phonometry/simulation/)). Everything below is listed with the sections each domain page hosts.
 
-## [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/)
+## [Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/)
 
-- [Octave Band Frequencies (ANSI S1.11 / IEC 61260)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260)
-- [Frequency Resolution vs FFT Bin Spacing](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing)
-- [Magnitude Responses |H(jw)|](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#magnitude-responses-hjw)
-- [Filter Bank Design & Numerical Stability](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#filter-bank-design--numerical-stability)
-- [Weighting Curves (IEC 61672-1)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#weighting-curves-iec-61672-1)
-- [Time Integration](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#time-integration)
-- [G-weighting (ISO 7196)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#g-weighting-iso-7196)
-- [Event and dose metrics](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics)
-- [Sound intensity (IEC 61043)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043)
-- [Measurement uncertainty (ISO/IEC Guide 98-3: GUM and Supplement 1)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1)
+- [Octave Band Frequencies (ANSI S1.11 / IEC 61260)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260)
+- [Frequency Resolution vs FFT Bin Spacing](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing)
+- [Magnitude Responses |H(jw)|](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#magnitude-responses-hjw)
+- [Filter Bank Design & Numerical Stability](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#filter-bank-design--numerical-stability)
+- [Weighting Curves (IEC 61672-1)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#weighting-curves-iec-61672-1)
+- [Time Integration](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#time-integration)
+- [G-weighting (ISO 7196)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#g-weighting-iso-7196)
+- [Event and dose metrics](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics)
+- [Sound intensity (IEC 61043)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043)
+- [Measurement uncertainty (ISO/IEC Guide 98-3: GUM and Supplement 1)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1)
 
-## [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/)
+## [Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/)
 
-- [Equal-loudness contours (ISO 226:2023)](https://jmrplens.github.io/phonometry/reference/theory/perception/#equal-loudness-contours-iso-2262023)
-- [Tone prominence: TNR and PR (ECMA-418-1)](https://jmrplens.github.io/phonometry/reference/theory/perception/#tone-prominence-tnr-and-pr-ecma-418-1)
-- [Zwicker loudness (ISO 532-1)](https://jmrplens.github.io/phonometry/reference/theory/perception/#zwicker-loudness-iso-532-1)
-- [Advanced loudness models & sound quality](https://jmrplens.github.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality)
-- [Modulation transfer and STI (IEC 60268-16)](https://jmrplens.github.io/phonometry/reference/theory/perception/#modulation-transfer-and-sti-iec-60268-16)
-- [Speech Intelligibility Index (ANSI S3.5)](https://jmrplens.github.io/phonometry/reference/theory/perception/#speech-intelligibility-index-ansi-s35)
-- [Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)](https://jmrplens.github.io/phonometry/reference/theory/perception/#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029)
-- [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/reference/theory/perception/#noise-induced-hearing-loss-iso-1999)
+- [Equal-loudness contours (ISO 226:2023)](https://docs.jmrp.io/phonometry/reference/theory/perception/#equal-loudness-contours-iso-2262023)
+- [Tone prominence: TNR and PR (ECMA-418-1)](https://docs.jmrp.io/phonometry/reference/theory/perception/#tone-prominence-tnr-and-pr-ecma-418-1)
+- [Zwicker loudness (ISO 532-1)](https://docs.jmrp.io/phonometry/reference/theory/perception/#zwicker-loudness-iso-532-1)
+- [Advanced loudness models & sound quality](https://docs.jmrp.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality)
+- [Modulation transfer and STI (IEC 60268-16)](https://docs.jmrp.io/phonometry/reference/theory/perception/#modulation-transfer-and-sti-iec-60268-16)
+- [Speech Intelligibility Index (ANSI S3.5)](https://docs.jmrp.io/phonometry/reference/theory/perception/#speech-intelligibility-index-ansi-s35)
+- [Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)](https://docs.jmrp.io/phonometry/reference/theory/perception/#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029)
+- [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/reference/theory/perception/#noise-induced-hearing-loss-iso-1999)
 
-## [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/)
+## [Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/)
 
-- [Room noise criteria (ANSI S12.2)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122)
-- [Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354)
+- [Room noise criteria (ANSI S12.2)](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122)
+- [Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354)
 
-## [Materials and Surfaces](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/)
+## [Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/)
 
-- [Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2)
-- [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
-- [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
+- [Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2)
+- [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
+- [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
 
-## [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/)
+## [Environment and Transport](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/)
 
-- [Environmental descriptors (ISO 1996-1)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1)
-- [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112)
-- [Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-and-occupational-exposure-iso-9613-12-iso-9612)
-- [Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-1/2/3)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123)
+- [Environmental descriptors (ISO 1996-1)](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1)
+- [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112)
+- [Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-and-occupational-exposure-iso-9613-12-iso-9612)
+- [Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-1/2/3)](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123)
 
-## [Vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/)
+## [Vibration](https://docs.jmrp.io/phonometry/reference/theory/vibration/)
 
-- [Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)](https://jmrplens.github.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec)
-- [Multiple shocks (ISO 2631-5)](https://jmrplens.github.io/phonometry/reference/theory/vibration/#multiple-shocks-iso-2631-5)
-- [Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)](https://jmrplens.github.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29)
+- [Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)](https://docs.jmrp.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec)
+- [Multiple shocks (ISO 2631-5)](https://docs.jmrp.io/phonometry/reference/theory/vibration/#multiple-shocks-iso-2631-5)
+- [Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)](https://docs.jmrp.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29)
 
 ---
 
 
-<!-- source: docs/reference/theory/environment-transport.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/environment-transport/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/environment-transport/
+<!-- source: docs/reference/theory/environment-transport.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/environment-transport/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/environment-transport/
 
 # Theory: Environment and Transport
 
-This page collects the theory behind outdoor and environmental noise: the whole-day rating descriptors and the impulsive-sound adjustment, atmospheric absorption, the general outdoor propagation method, occupational noise exposure with its uncertainty budget, and the sound power determination methods. It is part of the [theory reference](https://jmrplens.github.io/phonometry/reference/theory/).
+This page collects the theory behind outdoor and environmental noise: the whole-day rating descriptors and the impulsive-sound adjustment, atmospheric absorption, the general outdoor propagation method, occupational noise exposure with its uncertainty budget, and the sound power determination methods. It is part of the [theory reference](https://docs.jmrp.io/phonometry/reference/theory/).
 
 ## Environmental descriptors (ISO 1996-1)
 
@@ -97,7 +97,7 @@ The adjustments $K_i$ cover time-of-day penalties (ISO 1996-1 Table A.1: evening
 
 *A 24-hour $L_\mathrm{Aeq}$ profile split into day, evening and night, the +5/+10 dB penalties and the resulting $L_\mathrm{den}$.*
 
-See the [Environmental levels guide](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/) for usage.
+See the [Environmental levels guide](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/) for usage.
 
 ## Impulsive-sound prominence (NT ACOU 112)
 
@@ -130,7 +130,7 @@ steepness on this axis; the level difference is the height of the same rise.
 Three strikes are detected here and only the steepest-and-tallest one governs
 the adjustment.*
 
-See the [Impulse Prominence guide](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/) for usage.
+See the [Impulse Prominence guide](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/) for usage.
 
 ## Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)
 
@@ -269,7 +269,7 @@ examples of Annexes D (task, $L_\mathrm{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job
 $88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
 the standard's printed precision: every intermediate of Annex E is digit-exact,
 and its final level differs only by the standard's own pre-rounding of the
-effective-day level (see the [Occupational Noise Exposure guide](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/)).
+effective-day level (see the [Occupational Noise Exposure guide](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/)).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" width="80%"></picture>
 
@@ -279,8 +279,8 @@ energy-summed $L_\mathrm{EX,8h}$ and the band up to $L_\mathrm{EX,8h} + U$ that 
 with $U = 2.7$ dB the upper limit sits 2.7 dB above the number, which is enough
 to cross an action value on its own.*
 
-See the [Outdoor Propagation guide](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) and the
-[Occupational Noise Exposure guide](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/) for usage.
+See the [Outdoor Propagation guide](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) and the
+[Occupational Noise Exposure guide](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/) for usage.
 
 ## Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-1/2/3)
 
@@ -293,7 +293,7 @@ intensity** held at discrete points (ISO 9614-1) or scanned over that same
 surface (ISO 9614-2 and ISO 9614-3), and the **surface velocity** of the
 radiating casing, which takes no acoustic measurement at all: ISO/TS 7849, whose
 radiation factor is the radiation efficiency derived in the
-[vibration reference](https://jmrplens.github.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29).
+[vibration reference](https://docs.jmrp.io/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The seven sound power routes, one row for each measured quantity, every cell carrying the same five attributes. The sound pressure row: the ISO 3744/3746 hemispherical enveloping surface over a reflecting plane, the ISO 3745 fixed microphone array in a wedge-lined anechoic room, and the ISO 3741 diffuse field of a reverberation room. The sound intensity row: the ISO 9614-1 measurement surface cut into ten segments with the probe held still at a point in each, the ISO 9614-2 serpentine scan swept over that same surface, and the tighter ISO 9614-3 precision scan. The surface velocity row carries one route across the full width, ISO/TS 7849 with an accelerometer on a radiating casing and no microphone at all" width="92%"></picture>
 
@@ -436,7 +436,7 @@ net power is negative are not determinable (clause 9.2) and are flagged. A
 uniform normal intensity recovers the power exactly (100 µW over 3.75 m² →
 80.0 dB re 1 pW), independent of how the surface is segmented.
 
-See the [Sound Power guide](https://jmrplens.github.io/phonometry/devices/emission/sound-power/) for usage.
+See the [Sound Power guide](https://docs.jmrp.io/phonometry/devices/emission/sound-power/) for usage.
 
 ## References
 
@@ -525,12 +525,12 @@ See the [Sound Power guide](https://jmrplens.github.io/phonometry/devices/emissi
 ---
 
 
-<!-- source: docs/reference/theory/materials-surfaces.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/
+<!-- source: docs/reference/theory/materials-surfaces.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/
 
 # Theory: Materials and Surfaces
 
-This page collects the theory behind materials and surfaces: surface scattering and diffusion, in-situ road-surface absorption, and acoustic material characterisation from the weighted absorption rating to airflow resistance and the impedance tube. It is part of the [theory reference](https://jmrplens.github.io/phonometry/reference/theory/). The ISO 354 reverberation-room measurement that feeds the ISO 11654 rating is covered in [Theory: Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/).
+This page collects the theory behind materials and surfaces: surface scattering and diffusion, in-situ road-surface absorption, and acoustic material characterisation from the weighted absorption rating to airflow resistance and the impedance tube. It is part of the [theory reference](https://docs.jmrp.io/phonometry/reference/theory/). The ISO 354 reverberation-room measurement that feeds the ISO 11654 rating is covered in [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
 
 ## Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)
 
@@ -607,7 +607,7 @@ is why $d_\theta$ is 0.11 where the flat reference of the same size scores
 0.005, and why it is still nowhere near 1: the numerator rewards an even
 response, and a comb of lobes is not even.*
 
-See the [Diffusers guide](https://jmrplens.github.io/phonometry/materials/diffusers/diffusers/) for usage.
+See the [Diffusers guide](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/) for usage.
 
 ## In-situ road surface absorption (ISO 13472-1, ISO 13472-2)
 
@@ -639,7 +639,7 @@ subtractive correction for internal system losses.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" width="92%"></picture>
 
-See the [In-situ Road-Surface Absorption guide](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/) for usage.
+See the [In-situ Road-Surface Absorption guide](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/) for usage.
 
 ## Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)
 
@@ -665,7 +665,7 @@ raising 500 Hz to 1.00 keeps $\alpha_\mathrm{w} = 0.60$ but adds the indicator, 
 
 *The ISO 11654 rating: practical absorption against the shifted reference, with the unfavourable deviation shaded and the weighted coefficient read at 500 Hz.*
 
-See the [Sound Absorption Measurement and Rating guide](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/) for usage.
+See the [Sound Absorption Measurement and Rating guide](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/) for usage.
 
 ### Airflow resistance (ISO 9053-1/2)
 
@@ -699,7 +699,7 @@ $\kappa' = 1.370 = 0.978\,\kappa$) is reproduced, and the validity guards of
 Formula 3 (transfer ratio < 0.3) and Formula 4 (10 dB background margin) are
 enforced.
 
-See the [Airflow Resistance guide](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/) for usage.
+See the [Airflow Resistance guide](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/) for usage.
 
 ### Impedance tube (ISO 10534-1, ISO 10534-2, ASTM E2611)
 
@@ -764,7 +764,7 @@ the free-standing layer lets through (the transmission loss above) and how much
 the same layer absorbs once it is backed rigidly. A material can be a good
 absorber and a poor barrier at once, which this pair makes plain.*
 
-See the [Impedance Tube guide](https://jmrplens.github.io/phonometry/materials/absorbers/impedance-tube/) for usage.
+See the [Impedance Tube guide](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/) for usage.
 
 ## References
 
@@ -817,12 +817,12 @@ See the [Impedance Tube guide](https://jmrplens.github.io/phonometry/materials/a
 ---
 
 
-<!-- source: docs/reference/theory/perception.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/perception/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/perception/
+<!-- source: docs/reference/theory/perception.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/perception/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/perception/
 
 # Theory: Perception and Hearing
 
-This page collects the theory behind hearing and psychoacoustics: the equal-loudness contours, the Zwicker, Moore-Glasberg and Sottek loudness models, the sound-quality metrics tonality, roughness and sharpness, tone prominence, the speech metrics STI and SII, and the statistics of hearing thresholds and hearing loss. It is part of the [theory reference](https://jmrplens.github.io/phonometry/reference/theory/).
+This page collects the theory behind hearing and psychoacoustics: the equal-loudness contours, the Zwicker, Moore-Glasberg and Sottek loudness models, the sound-quality metrics tonality, roughness and sharpness, tone prominence, the speech metrics STI and SII, and the statistics of hearing thresholds and hearing loss. It is part of the [theory reference](https://docs.jmrp.io/phonometry/reference/theory/).
 
 ## Equal-loudness contours (ISO 226:2023)
 
@@ -850,7 +850,7 @@ The standard specifies **no interpolation** between the tabulated frequencies. F
 
 *The ISO 226:2023 contours from Formula (1), 20 to 90 phon, with the hearing threshold.*
 
-See the [Loudness guide](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) for usage.
+See the [Loudness guide](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) for usage.
 
 ## Tone prominence: TNR and PR (ECMA-418-1)
 
@@ -879,7 +879,7 @@ tone-to-noise ratio is judged against a different threshold at every frequency:
 the example tone clears its 13.0 dB threshold at 250 Hz by 2.1 dB, while a
 10 dB tone would be prominent anywhere above 1 kHz and not prominent here.*
 
-See the [Prominent Discrete Tones guide](https://jmrplens.github.io/phonometry/perception/psychoacoustics/tone-prominence/) for usage.
+See the [Prominent Discrete Tones guide](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/) for usage.
 
 ## Zwicker loudness (ISO 532-1)
 
@@ -916,7 +916,7 @@ below 1 sone the reference program uses $L_\mathrm{N} = 40 (N + 0.0005)^{0.35}$,
 
 *Specific loudness N′(z) over the Bark axis: energy spread over many critical bands sums to more sones than the same band level in a single band.*
 
-See the [Loudness guide](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) for usage.
+See the [Loudness guide](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) for usage.
 
 ## Advanced loudness models & sound quality
 
@@ -1020,7 +1020,7 @@ Aures curve, which is why the choice of weighting changes a sharpness value
 only for sounds with energy above the knee (15 to 15.8 Bark, about 2.5 to
 3 kHz) and leaves everything below it untouched.*
 
-See the [Sound Quality Metrics guide](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) for usage.
+See the [Sound Quality Metrics guide](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/) for usage.
 
 ## Modulation transfer and STI (IEC 60268-16)
 
@@ -1071,7 +1071,7 @@ curve falls steeply through the range where a room is still usable and
 flattens once the modulation has already been destroyed, which is why halving
 a long reverberation time buys less intelligibility than halving a short one.*
 
-See the [Speech Transmission Index guide](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/) for usage.
+See the [Speech Transmission Index guide](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/) for usage.
 
 ## Speech Intelligibility Index (ANSI S3.5)
 
@@ -1102,7 +1102,7 @@ not lift the family uniformly: shouting adds 27.6 dB at 2.5 kHz, 26.3 dB at
 1 kHz and **−1.6 dB** at 160 Hz, so the spectrum tilts as well as rises, and the
 extra effort is spent where the importance function above is largest.*
 
-See the [Speech Intelligibility guide](https://jmrplens.github.io/phonometry/perception/speech/speech-intelligibility/) for usage.
+See the [Speech Intelligibility guide](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/) for usage.
 
 ## Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)
 
@@ -1118,7 +1118,7 @@ and any fractile follows a two-sided Gaussian model (clause 4.4), $\Delta H_Q = 
 
 *The ISO 7029 median age shift with its fractile band (left) and the ISO 389-7 free- and diffuse-field reference thresholds (right).*
 
-See the [Hearing Threshold guide](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/) for usage.
+See the [Hearing Threshold guide](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/) for usage.
 
 ## Noise-induced hearing loss (ISO 1999)
 
@@ -1146,7 +1146,7 @@ direction the paragraph above states: the edge of the shaded band showing the
 which ISO 1999 and its Annex D column headings label $Q = 10\ \%$. At 4 kHz
 this case runs 19.5 / 26.0 / 36.0 dB at `fractile` 0.10 / 0.50 / 0.90.*
 
-See the [Noise-Induced Hearing Loss guide](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/) for usage.
+See the [Noise-Induced Hearing Loss guide](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/) for usage.
 
 ## References
 
@@ -1207,12 +1207,12 @@ See the [Noise-Induced Hearing Loss guide](https://jmrplens.github.io/phonometry
 ---
 
 
-<!-- source: docs/reference/theory/rooms-buildings.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/
+<!-- source: docs/reference/theory/rooms-buildings.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/
 
 # Theory: Rooms and Buildings
 
-This page collects the theory behind rooms and buildings: impulse-response measurement and the room-acoustic parameters, background-noise criteria, airborne and impact insulation with their single-number ratings and uncertainty, and flanking and absorption prediction. It is part of the [theory reference](https://jmrplens.github.io/phonometry/reference/theory/); surface scattering and acoustic material characterisation live on [Materials and Surfaces](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/).
+This page collects the theory behind rooms and buildings: impulse-response measurement and the room-acoustic parameters, background-noise criteria, airborne and impact insulation with their single-number ratings and uncertainty, and flanking and absorption prediction. It is part of the [theory reference](https://docs.jmrp.io/phonometry/reference/theory/); surface scattering and acoustic material characterisation live on [Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
 
 ## Room noise criteria (ANSI S12.2)
 
@@ -1222,7 +1222,7 @@ ANSI/ASA S12.2-2019 rates steady background noise in rooms against families of o
 
 *The same spectrum rated both ways: NC tangency at the governing band (left) and the RC Mark II reference with the rumble excess (right).*
 
-See the [Room Noise guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/) for usage.
+See the [Room Noise guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/) for usage.
 
 ## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)
 
@@ -1315,7 +1315,7 @@ $$
 L_p = L_W + 10 \log_{10}\!\left( \frac{Q}{4\pi r^2} + \frac{4}{R} \right) \left[ + 10 \log_{10}\frac{\rho c}{400} \right] \quad \text{(Bies Eq. 6.43)},
 $$
 
-the optional last term (about $+0.14$ dB at 20 °C) correcting a characteristic impedance away from 400 Pa·s/m. The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check. See the [Image sources and steady-state field guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/).
+the optional last term (about $+0.14$ dB at 20 °C) correcting a characteristic impedance away from 400 Pa·s/m. The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check. See the [Image sources and steady-state field guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/).
 
 ### Field insulation and weighted rating (ISO 16283-1, ISO 717-1)
 
@@ -1478,7 +1478,7 @@ arithmetic on a smaller room: $A$ from 2.26 to 5.03 m² and $T$ from 2.1 to
 0.9 s at 1 kHz, and the figure shows why the two move in opposite directions
 and not proportionally.*
 
-See the [Enclosed-Space Absorption guide](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/) for usage.
+See the [Enclosed-Space Absorption guide](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/) for usage.
 
 ### Measurement uncertainty (ISO 12999-1)
 
@@ -1503,8 +1503,8 @@ Uncorrelated components combine in quadrature $u_\mathrm{c} = \sqrt{\sum u_i^2}$
 (Formula A.7), and the uncorrelated single-number uncertainty is the
 energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
-See the [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) and
-[Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/) guides for usage.
+See the [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) and
+[Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/) guides for usage.
 
 ### Predicted panel sound insulation (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
 
@@ -1529,7 +1529,7 @@ sum $R = -10\log_{10}[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Eq. 4.92), so a bare 
 of relative area $S_\mathrm{a}/S$ limits the composite to $10\log_{10}(S/S_\mathrm{a})$. The resonant
 transmission path and the double-wall radiation draw on the plate radiation
 efficiency and point mobilities of the
-[vibration theory](https://jmrplens.github.io/phonometry/reference/theory/vibration/). The prediction is clean-room from Bies,
+[vibration theory](https://docs.jmrp.io/phonometry/reference/theory/vibration/). The prediction is clean-room from Bies,
 Hansen & Howard (2017), Hopkins (2007) and Cremer, Heckl & Petersson (2005).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Four panels: the single-panel mass law with its coincidence dip, the double wall with the mass-spring-mass resonance and cavity gain, the plate radiation efficiency rising to unity above the critical frequency, and a composite wall whose 1 % open slit caps R at the open-area limit" width="92%"></picture>
@@ -1545,7 +1545,7 @@ showing a client.*
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="To-scale cross-section of a 2 mm slit through a 100 mm wall: the hatched wall drawn in section with the narrow horizontal air gap at mid-height, an incident-sound arrow pointing at the gap from the left, the 100 mm wall depth and 2 mm slit width dimensioned, and circular transmitted wavefronts sketched spreading from the slit exit on the right" width="80%"></picture>
 
-See the [Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/) guide for
+See the [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) guide for
 usage.
 
 ## References
@@ -1663,12 +1663,12 @@ usage.
 ---
 
 
-<!-- source: docs/reference/theory/signal-analysis.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/
+<!-- source: docs/reference/theory/signal-analysis.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/
 
 # Theory: Signal Analysis
 
-This page collects the theory behind the measurement chain itself: the standardized fractional-octave bands and the time-domain filter banks that implement them, the frequency weighting curves, time integration, level, event and exposure metrics, sound intensity, and the GUM uncertainty framework that underpins every measured quantity. It is part of the [theory reference](https://jmrplens.github.io/phonometry/reference/theory/).
+This page collects the theory behind the measurement chain itself: the standardized fractional-octave bands and the time-domain filter banks that implement them, the frequency weighting curves, time integration, level, event and exposure metrics, sound intensity, and the GUM uncertainty framework that underpins every measured quantity. It is part of the [theory reference](https://docs.jmrp.io/phonometry/reference/theory/).
 
 ## Octave Band Frequencies (ANSI S1.11 / IEC 61260)
 
@@ -1899,11 +1899,11 @@ transform. That transform compresses frequencies near Nyquist, so the default
 `high_accuracy` mode does not apply it to the printed prototype: it fits a
 prototype of the same structure whose response *at the warped frequencies* is
 the printed one's response at the true frequencies, and transforms that. See
-[Frequency Weighting](https://jmrplens.github.io/phonometry/signals/levels/weighting/).
+[Frequency Weighting](https://docs.jmrp.io/phonometry/signals/levels/weighting/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="A, C and Z frequency weighting curves of IEC 61672-1 with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
 
-*The three IEC 61672-1 weighting curves realized by the library, with the small positive region of the A curve magnified. The special B, D and AU curves are charted in [Special Weightings](https://jmrplens.github.io/phonometry/signals/levels/special-weightings/).*
+*The three IEC 61672-1 weighting curves realized by the library, with the small positive region of the A curve magnified. The special B, D and AU curves are charted in [Special Weightings](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/).*
 
 ## Time Integration
 
@@ -1921,7 +1921,7 @@ Where $\tau$ is the time constant (e.g., 125 ms for Fast).
 
 The default initial condition is $y[-1] = 0$. Use `initial_state='first'` to
 start from the first input energy, or pass a scalar/array with the previous
-mean-square output state. See [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/) for the
+mean-square output state. See [Why phonometry](https://docs.jmrp.io/phonometry/start/why-phonometry/) for the
 IEC 61672-1 tone-burst verification of this implementation.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
@@ -1954,7 +1954,7 @@ that fence the curve off below 1 Hz and above 20 Hz.*
 
 Since G acts on 0.25 Hz – 315 Hz, far below the Nyquist frequency at audio rates, the frequency warping of the plain bilinear transform (applied without prewarping) is negligible there: about 0.014 % at 315 Hz for $f_\mathrm{s} = 48$ kHz, under 0.01 dB on the response. The default design still fits the prototype at the sample rate as it does for A and C, which costs nothing here and matters at the low rates infrasound is often recorded at, where 315 Hz approaches Nyquist.
 
-See the [Special Weightings guide](https://jmrplens.github.io/phonometry/signals/levels/special-weightings/) for usage.
+See the [Special Weightings guide](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/) for usage.
 
 ## Event and dose metrics
 
@@ -1988,7 +1988,7 @@ It is identical to $L_\mathrm{EP,d}$ of Directive 86/188/EEC and $L_\mathrm{EX,8
 
 **$L_\mathrm{Cpeak}$** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_\mathrm{Cpeak} = 20\log_{10}(\max|p_\mathrm{C}(t)|/p_0)$, the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
 
-See the [Levels guide](https://jmrplens.github.io/phonometry/signals/levels/levels/) for usage and the [Calibration guide](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) for absolute-scale setup.
+See the [Levels guide](https://docs.jmrp.io/phonometry/signals/levels/levels/) for usage and the [Calibration guide](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) for absolute-scale setup.
 
 ## Sound intensity (IEC 61043)
 
@@ -2022,7 +2022,7 @@ IEC 61043 clause 7.3 specifies the probe intensity response with exactly this ar
 
 The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive the field is: in a free plane progressive wave it equals $10 \log_{10}(\rho_0 c / 400) = 0.14$ dB, while large values flag reactive or noisy fields in which the inter-channel phase error dominates. ISO 9614-1:1993 Annex A generalizes it over a measurement surface as the indicator F2 (with F3 for negative partial power and F4 for field non-uniformity), and the instrument's **dynamic capability** $L_\mathrm{d} = \delta_{pI0} - K$ (pressure-residual intensity index minus the bias error factor: 10 dB for grades 1/2, 7 dB for grade 3) must exceed F2 for the measurement to be valid (criterion 1).
 
-See the [Sound Intensity guide](https://jmrplens.github.io/phonometry/devices/emission/intensity/) for usage.
+See the [Sound Intensity guide](https://docs.jmrp.io/phonometry/devices/emission/intensity/) for usage.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
 
@@ -2075,7 +2075,7 @@ is what clause 8 calls validation; where the model is non-linear or the output
 visibly non-Gaussian the histogram departs from the curve and the interval is
 read off the fractiles instead.*
 
-See the [GUM Uncertainty guide](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/) for usage.
+See the [GUM Uncertainty guide](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/) for usage.
 
 ## References
 
@@ -2138,12 +2138,12 @@ See the [GUM Uncertainty guide](https://jmrplens.github.io/phonometry/signals/me
 ---
 
 
-<!-- source: docs/reference/theory/vibration.md | canonical: https://jmrplens.github.io/phonometry/reference/theory/vibration/ -->
-Source: https://jmrplens.github.io/phonometry/reference/theory/vibration/
+<!-- source: docs/reference/theory/vibration.md | canonical: https://docs.jmrp.io/phonometry/reference/theory/vibration/ -->
+Source: https://docs.jmrp.io/phonometry/reference/theory/vibration/
 
 # Theory: Vibration
 
-This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It is part of the [theory reference](https://jmrplens.github.io/phonometry/reference/theory/).
+This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It is part of the [theory reference](https://docs.jmrp.io/phonometry/reference/theory/).
 
 ## Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)
 
@@ -2228,8 +2228,8 @@ the Table C.1 Weibull law $\Pi(R)$ with the Annex C worked example marked at
 $R = 1.22$, $\Pi = 0.37$: the risk rises steeply over a narrow band of $R$, so
 a dose that doubles does not double the probability.*
 
-See the [Human Vibration guide](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) and the
-[Multiple-Shock Vibration guide](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/) for usage.
+See the [Human Vibration guide](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/) and the
+[Multiple-Shock Vibration guide](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/) for usage.
 
 ## Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)
 
@@ -2251,10 +2251,10 @@ weakly (edge and corner modes), and above it $\sigma \to (1 - f_\mathrm{c}/f)^{-
 radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
 from-vibration chain without a power measurement, and it drives the resonant
 transmission path of the
-[panel sound insulation theory](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/). Both are clean-room
+[panel sound insulation theory](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/). Both are clean-room
 from Cremer, Heckl & Petersson (2005) and Hopkins (2007).
 
-See the [Predicting Panel Sound Insulation guide](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/) for
+See the [Predicting Panel Sound Insulation guide](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) for
 usage.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities.svg" alt="Two stacked panels against frequency from 0.5 Hz to 2 kHz on a log axis. Top: mobility magnitude for a single-degree-of-freedom resonator, which resonates, against three infinite-structure closed forms: a 140 mm concrete plate, flat at about 2.6 times ten to the minus six metres per newton-second; a 100 by 200 mm steel beam falling as the inverse square root of frequency; and a steel strut in longitudinal motion, flat. Bottom: the phase of each, zero for the plate and the rod, minus 45 degrees for the beam" width="92%"></picture>

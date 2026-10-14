@@ -286,7 +286,7 @@ built on these envelopes, and [Why phonometry](../../start/why-phonometry.md) fo
 - [Impulsive-sound prominence](../../environment/assessment/impulsive-sound.md): the onset-based rating of impulses that the international standards moved to.
 - [Spanish Noise Regulation](../../environment/assessment/spanish-noise-regulation.md): a rating in force that still requires the I weighting, through the $L_\mathrm{AIeq} - L_\mathrm{Aeq}$ impulsive correction $K_\mathrm{i}$.
 - [Calibration and dBFS](../metrology/calibration.md): the IEC 61672-3 periodic tests, in which these ballistics are spot-checked against the class limits on a real instrument.
-- API reference: [`filters.weighting`](https://jmrplens.github.io/phonometry/reference/api/filters/weighting/).
+- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/).
 - Theory: [Time Integration](../../reference/theory/signal-analysis.md#time-integration): the first-order equation the exponential detectors solve, and what integrating it over a fixed block instead would change.
 
 ## References

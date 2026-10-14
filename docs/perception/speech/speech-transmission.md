@@ -501,7 +501,7 @@ one. Neither of those is visible in the index.
   sharpness, tonality and roughness of the received sound.
 - [Theory](../../reference/theory/perception.md): the modulation-transfer derivation and the $m$ ↔ STI
   mapping.
-- API reference: [`speech.sti`](https://jmrplens.github.io/phonometry/reference/api/speech/sti/).
+- API reference: [`speech.sti`](https://docs.jmrp.io/phonometry/reference/api/speech/sti/).
 
 ## References
 

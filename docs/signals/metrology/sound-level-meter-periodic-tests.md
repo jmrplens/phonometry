@@ -351,4 +351,4 @@ free-field correction data come without an uncertainty, is not written.
   and its verdict under IEC 60942.
 - [Sound level meter](../sound-level-meter.md): the frequency and time
   weightings, and the design verdict on the library's own chain.
-- API reference: [`metrology.sound_level_meter`](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-level-meter/).
+- API reference: [`metrology.sound_level_meter`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-level-meter/).

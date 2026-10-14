@@ -218,7 +218,7 @@ phonometry.
 - [Underwater sound propagation](underwater-propagation.md):
   the propagation loss that carries these source levels to a receiver, and the
   sonar equation they feed.
-- API reference: [`underwater.acoustics`](https://jmrplens.github.io/phonometry/reference/api/underwater/acoustics/), [`underwater.sources.pile_driving_noise`](https://jmrplens.github.io/phonometry/reference/api/underwater/pile-driving-noise/) and [`underwater.sources.ship_radiated_noise`](https://jmrplens.github.io/phonometry/reference/api/underwater/ship-radiated-noise/).
+- API reference: [`underwater.acoustics`](https://docs.jmrp.io/phonometry/reference/api/underwater/acoustics/), [`underwater.sources.pile_driving_noise`](https://docs.jmrp.io/phonometry/reference/api/underwater/pile-driving-noise/) and [`underwater.sources.ship_radiated_noise`](https://docs.jmrp.io/phonometry/reference/api/underwater/ship-radiated-noise/).
 - General underwater propagation modelling (ray, normal mode, parabolic equation) is covered in [Underwater propagation solvers](underwater-solvers.md).
 
 ## References

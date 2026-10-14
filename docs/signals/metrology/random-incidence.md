@@ -229,4 +229,4 @@ the microphone and the windscreen (clauses 9 to 11) are not implemented.
 - [Microphone characterisation](../../devices/electroacoustics/microphones.md):
   the IEC 60268-4 directivity index of a microphone on its own.
 - [Errata in published sources](../../ERRATA.md): the two equal-area angles.
-- API reference: [`metrology.random_incidence`](https://jmrplens.github.io/phonometry/reference/api/metrology/random-incidence/).
+- API reference: [`metrology.random_incidence`](https://docs.jmrp.io/phonometry/reference/api/metrology/random-incidence/).

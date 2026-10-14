@@ -320,8 +320,8 @@ operator's to keep and to report.
   rated-characteristics report.
 - [Room acoustics](../../buildings/rooms/room-acoustics.md): `impulse_response`,
   which is the linear half of the same recording.
-- API reference: [`electroacoustics.swept_sine`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/swept-sine/)
-  and [`signals.phase`](https://jmrplens.github.io/phonometry/reference/api/signals/phase/).
+- API reference: [`electroacoustics.swept_sine`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/swept-sine/)
+  and [`signals.phase`](https://docs.jmrp.io/phonometry/reference/api/signals/phase/).
 
 ## References
 

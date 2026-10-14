@@ -494,7 +494,7 @@ libsndfile under the LGPL, which the base install deliberately avoids.
 - [Block processing](../signals/filters/block-processing.md): the stateful machinery `read_blocks` feeds.
 - [Programme loudness](../devices/broadcast/program-loudness.md): the BS.1770 implementation behind `bext="loudness"`.
 - [Build a sound level meter](../signals/sound-level-meter.md): the whole chain this page's files enter and leave.
-- API reference: [`phonometry.io`](https://jmrplens.github.io/phonometry/reference/api/io/io/).
+- API reference: [`phonometry.io`](https://docs.jmrp.io/phonometry/reference/api/io/io/).
 
 ## References
 

@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { basePath, siteUrl } from "../src/data/site.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
@@ -26,8 +27,8 @@ const repoRoot = join(siteRoot, "..");
 const distDir = join(siteRoot, "dist");
 const docsDir = join(siteRoot, "src", "content", "docs");
 
-const SITE = "https://jmrplens.github.io";
-const BASE = "/phonometry";
+const SITE = siteUrl;
+const BASE = basePath;
 const buildDate = new Date().toISOString().slice(0, 10);
 
 // Map a sitemap URL to its source content file, or null if none is found or the

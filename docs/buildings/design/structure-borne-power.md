@@ -232,7 +232,7 @@ EN 15657 reception-plate characterization with the boxed total L_Ws.*
 
 ## See also
 
-- API reference: [`building.measurement.structure_borne_power`](https://jmrplens.github.io/phonometry/reference/api/building/structure-borne-power/).
+- API reference: [`building.measurement.structure_borne_power`](https://docs.jmrp.io/phonometry/reference/api/building/structure-borne-power/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the point mobility, the source-receiver mismatch and the injected power they define.
 
 ## References

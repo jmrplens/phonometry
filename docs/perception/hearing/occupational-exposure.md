@@ -232,7 +232,7 @@ Annex D task-based day with the Directive 2003/10/EC assessment.*
   combined and expanded uncertainties.
 - [Theory](../../reference/theory/environment-transport.md): the derivation of the strategy formulas and the
   Annex C budget.
-- API reference: [`hearing.occupational_exposure`](https://jmrplens.github.io/phonometry/reference/api/hearing/occupational-exposure/).
+- API reference: [`hearing.occupational_exposure`](https://docs.jmrp.io/phonometry/reference/api/hearing/occupational-exposure/).
 
 ## References
 

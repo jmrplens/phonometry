@@ -255,4 +255,4 @@ ISO 717-2.
 - [Room Acoustics](../rooms/room-acoustics.md): the measured reverberation times
   behind the reverberation index.
 - [Levels](../../signals/levels/levels.md): the energy averaging behind the octave-band levels.
-- API reference: [`building.measurement.survey_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/survey-insulation/).
+- API reference: [`building.measurement.survey_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/survey-insulation/).

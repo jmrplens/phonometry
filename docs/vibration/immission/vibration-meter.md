@@ -439,8 +439,8 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
   people side of the same measurement, weighted differently and judged by
   other documents.
 - API reference:
-  [`vibration.immission.vibration_meter`](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/)
-  and [`vibration.immission.coupling`](https://jmrplens.github.io/phonometry/reference/api/vibration/coupling/).
+  [`vibration.immission.vibration_meter`](https://docs.jmrp.io/phonometry/reference/api/vibration/vibration-meter/)
+  and [`vibration.immission.coupling`](https://docs.jmrp.io/phonometry/reference/api/vibration/coupling/).
 
 ## References
 

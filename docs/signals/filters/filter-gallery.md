@@ -382,7 +382,7 @@ when it is odd.
 - [Filter class verification (IEC 61260-1)](filter-compliance.md): the
   Table 1 acceptance mask, class 0 and the compliance fiche of these
   architectures.
-- API reference: [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/) and [`filters.core`](https://jmrplens.github.io/phonometry/reference/api/filters/core/).
+- API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/).
 
 ## References
 

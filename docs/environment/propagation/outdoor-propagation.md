@@ -379,7 +379,7 @@ quantity, so that two implementations can be compared where a single formula
 would not separate them; it also fixes the envelope a result has to stay
 inside, $\pm 0{,}05$ dB per band and on the total. The seven that ISO 9613-2
 answers on its own (T01 to T07) are checked band by band in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/).
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
 The other twelve build their ray paths by the additional recommendations of
 its Clause 5, over barriers and around buildings, and are not implemented.
 
@@ -709,9 +709,9 @@ against the exact half-plane and coherent-ground models.
 - [Quality of outdoor sound software (ISO 17534-1)](software-quality.md): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
 - [CNOSSOS-EU road emission](../sources/cnossos-road-emission.md) and [CNOSSOS-EU rail emission](../sources/cnossos-rail-emission.md): the source strengths the comparison in section 4 refers to.
 - [Environmental noise levels](../assessment/environmental-levels.md): what happens to the predicted level once it becomes an assessed one.
-- API reference: [`environment.propagation.outdoor_propagation`](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).
+- API reference: [`environment.propagation.outdoor_propagation`](https://docs.jmrp.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
 - Theory: [Outdoor propagation](../../reference/theory/environment-transport.md#outdoor-propagation-general-method-iso-9613-2): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

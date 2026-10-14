@@ -46,7 +46,7 @@ DATA = ROOT / "site" / "src" / "data" / "glossary.mjs"
 PAGE = SITE / "reference" / "glossary.mdx"
 MIRROR = DOCS / "reference" / "glossary.md"
 
-SITE_BASE = "https://jmrplens.github.io/phonometry"
+SITE_BASE = "https://docs.jmrp.io/phonometry"
 
 #: Routes that are generated or site-only: a relative link would dangle.
 SITE_ONLY_PREFIXES = ("reference/api",)

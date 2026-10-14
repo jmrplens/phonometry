@@ -1,11 +1,11 @@
 # phonometry: Outdoor sound
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/environment/propagation/index.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/ -->
-Source: https://jmrplens.github.io/phonometry/environment/propagation/
+<!-- source: docs/environment/propagation/index.md | canonical: https://docs.jmrp.io/phonometry/environment/propagation/ -->
+Source: https://docs.jmrp.io/phonometry/environment/propagation/
 
 # Outdoor sound
 
@@ -16,7 +16,7 @@ one thing both of them assume does not happen; the fourth measures the barrier
 itself, and the fifth asks whether the program that computes the method
 computes it correctly.
 
-[Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) is the
+[Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) is the
 engineering method. Starting from a source's **sound power**, ISO 9613-2
 subtracts, octave band by octave band, every mechanism that attenuates sound on
 its way: geometrical divergence, atmospheric absorption (supplied by the
@@ -26,7 +26,7 @@ keeps the per-term breakdown visible, so a prediction is never a black box: you
 can see exactly which mechanism buys how many decibels at which frequency.
 Start here. The other two pages exist to say when its terms can be trusted.
 
-[Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/)
+[Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/)
 goes underneath two of those terms to the wave acoustics they fit: the
 Weyl-Van der Pol spherical-wave reflection coefficient of a finite-impedance
 ground, and barrier diffraction by the Kurze-Anderson Fresnel number, the exact
@@ -38,7 +38,7 @@ ground impedance, and a tabulated correction cannot know where it falls. Open
 this page when the answer is dominated by the ground or by a screen, or when
 the octave-band result has to be defended against a measurement.
 
-[Atmospheric refraction: rays and the GFPE](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/)
+[Atmospheric refraction: rays and the GFPE](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/)
 removes the assumption both pages above are built on. Sound speed changes with
 height, so rays are curved rather than straight, and whether that matters is
 mostly a question of range: a representative surface-layer gradient bends rays
@@ -55,13 +55,13 @@ function parabolic equation as the reference field.
 
 Read them in that order. The fourth page turns round and measures the
 barrier itself: [Sound reflection of a noise barrier
-in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/) takes the
+in situ](https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/) takes the
 impulse responses of EN 1793-5, a loudspeaker and nine microphones in front of
 a road barrier where it stands, to the sound reflection index band by band and
 to its single number DL_RI, the in-place counterpart of the absorption rating
 the product is declared by.
 
-[Quality of Outdoor Sound Software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/)
+[Quality of Outdoor Sound Software (ISO 17534-1)](https://docs.jmrp.io/phonometry/environment/propagation/software-quality/)
 turns from the physics to the program. A noise map is computed by software,
 often in a faster "modified configuration" that neglects paths and
 interpolates between grid points, and two programs implementing the same
@@ -74,31 +74,31 @@ uncertainty.
 
 The rating that a predicted level ends in is not here:
 the period levels come from [Integrated and Statistical
-Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/), and Lden, Ldn and the rating level
+Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/), and Lden, Ldn and the rating level
 from [Environmental Levels (ISO
-1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/) in the
-[assessment](https://jmrplens.github.io/phonometry/environment/assessment/) subsection. The source
+1996-1/-2)](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/) in the
+[assessment](https://docs.jmrp.io/phonometry/environment/assessment/) subsection. The source
 strengths a prediction starts from are in
-[Environmental sources](https://jmrplens.github.io/phonometry/environment/sources/) for road, rail and
-wind turbines, in [Sound power and intensity](https://jmrplens.github.io/phonometry/devices/emission/)
-for a machine, and in [Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/) for aircraft.
+[Environmental sources](https://docs.jmrp.io/phonometry/environment/sources/) for road, rail and
+wind turbines, in [Sound power and intensity](https://docs.jmrp.io/phonometry/devices/emission/)
+for a machine, and in [Aircraft noise](https://docs.jmrp.io/phonometry/aircraft/) for aircraft.
 
 ## Pages in this section
 
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   ISO 9613-1 atmospheric absorption and the ISO 9613-2 general method with a
   per-term octave-band attenuation breakdown.
-- [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/):
+- [Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/):
   the Weyl-Van der Pol spherical-wave ground reflection and wave-theoretic
   barrier diffraction (Kurze-Anderson, exact rigid half-plane, thick barriers
   and the coherent four-path barrier on the ground).
-- [Atmospheric refraction: rays and the GFPE](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/):
+- [Atmospheric refraction: rays and the GFPE](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/):
   the refracting atmosphere itself: effective sound-speed profiles, curved rays
   with their shadow zones, and the Green's function parabolic equation.
-- [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/):
+- [Sound reflection of a noise barrier in situ](https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/):
   the sound reflection index of EN 1793-5 measured in front of a road barrier,
   with the signal subtraction, the Adrienne window and the single number DL_RI.
-- [Quality of Outdoor Sound Software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/):
+- [Quality of Outdoor Sound Software (ISO 17534-1)](https://docs.jmrp.io/phonometry/environment/propagation/software-quality/):
   a program's results against the limits of its certified test cases, the
   quantiles of the level differences a modified configuration introduces, and
   the precision of a method across programs.
@@ -107,13 +107,13 @@ for a machine, and in [Aircraft noise](https://jmrplens.github.io/phonometry/air
 
 Pages elsewhere on the site that this section leans on:
 
-- [CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/)
-  and [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/),
-  both in [Environmental sources](https://jmrplens.github.io/phonometry/environment/sources/): the
+- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/)
+  and [CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/),
+  both in [Environmental sources](https://docs.jmrp.io/phonometry/environment/sources/): the
   directional sound power per metre of source line that a prediction starts
   from.
-- [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/),
-  in [Assessment and regulation](https://jmrplens.github.io/phonometry/environment/assessment/): the
+- [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/),
+  in [Assessment and regulation](https://docs.jmrp.io/phonometry/environment/assessment/): the
   character adjustment applied to the level once it has arrived.
 
 ## What this section does not cover
@@ -134,15 +134,15 @@ scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
 and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
 outright. Nothing on these pages produces an environmental rating: no Lden, no
 limit value and no verdict on a site (those are [Assessment and
-regulation](https://jmrplens.github.io/phonometry/environment/assessment/)); the single number and the
+regulation](https://docs.jmrp.io/phonometry/environment/assessment/)); the single number and the
 position check of EN 1793-5 are about a product and its measurement, and the
 TRC form of ISO 17534-1 judges a program, not a site.
 
 ---
 
 
-<!-- source: docs/environment/propagation/outdoor-propagation.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/ -->
-Source: https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/
+<!-- source: docs/environment/propagation/outdoor-propagation.md | canonical: https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/ -->
+Source: https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/
 
 # Outdoor Sound Propagation
 
@@ -523,7 +523,7 @@ quantity, so that two implementations can be compared where a single formula
 would not separate them; it also fixes the envelope a result has to stay
 inside, $\pm 0{,}05$ dB per band and on the total. The seven that ISO 9613-2
 answers on its own (T01 to T07) are checked band by band in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/).
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
 The other twelve build their ray paths by the additional recommendations of
 its Clause 5, over barriers and around buildings, and are not implemented.
 
@@ -667,7 +667,7 @@ The comparison itself, each result against the limits of its certified result
 as the TRC form of ISO 17534-1 records it, is `verify_calculation_results`,
 and what a faster configuration of a mapping program costs is measured by the
 quantiles of Annex C of the same standard: both are in [Quality of outdoor
-sound software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/).
+sound software (ISO 17534-1)](https://docs.jmrp.io/phonometry/environment/propagation/software-quality/).
 
 ## 4. Scope, assumptions and pitfalls
 
@@ -765,9 +765,9 @@ under regulations that cite ISO 9613 use this module. (ISO published a
 revised ISO 9613-2 in 2024; this library implements the 1996 edition, the one
 most national regulations and the validation literature still reference.)
 
-See the [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/) page for the full derivation, the
-[Room Acoustics guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/) for how $\alpha$ feeds
-ISO 354, and the [Occupational Noise Exposure guide](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/) for the ISO 9612 occupational
+See the [Theory](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/) page for the full derivation, the
+[Room Acoustics guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) for how $\alpha$ feeds
+ISO 354, and the [Occupational Noise Exposure guide](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
 
 ## 5. Prediction reports (`.report()`)
@@ -843,19 +843,19 @@ result.report(
 insertion loss over the octave bands.*
 
 Here too `result.plot()` previews the insertion-loss spectrum of the fiche;
-the [ground and barriers guide](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/) draws the same result
+the [ground and barriers guide](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) draws the same result
 against the exact half-plane and coherent-ground models.
 
 ## See also
 
-- [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
-- [Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
-- [Quality of outdoor sound software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
-- [CNOSSOS-EU road emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/) and [CNOSSOS-EU rail emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/): the source strengths the comparison in section 4 refers to.
-- [Environmental noise levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): what happens to the predicted level once it becomes an assessed one.
-- API reference: [`environment.propagation.outdoor_propagation`](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).
-- Theory: [Outdoor propagation](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
+- [Atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
+- [Quality of outdoor sound software (ISO 17534-1)](https://docs.jmrp.io/phonometry/environment/propagation/software-quality/): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
+- [CNOSSOS-EU road emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/) and [CNOSSOS-EU rail emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/): the source strengths the comparison in section 4 refers to.
+- [Environmental noise levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): what happens to the predicted level once it becomes an assessed one.
+- API reference: [`environment.propagation.outdoor_propagation`](https://docs.jmrp.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
+- Theory: [Outdoor propagation](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
@@ -923,17 +923,17 @@ and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
 ISO 354:2003, *Acoustics — Measurement of sound
 absorption in a reverberation room*: only the clause 8.1.2.1 conversion
 $m = \alpha/(10 \log_{10} e)$ behind `air_attenuation_m`; the reverberation-room
-method itself is covered in the [Room Acoustics guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/).
+method itself is covered in the [Room Acoustics guide](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/).
 
 ---
 
 
-<!-- source: docs/environment/propagation/ground-barriers.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/ -->
-Source: https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/
+<!-- source: docs/environment/propagation/ground-barriers.md | canonical: https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/ -->
+Source: https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/
 
 # Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)
 
-The [ISO 9613-2 general method](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) folds the ground and
+The [ISO 9613-2 general method](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) folds the ground and
 barrier terms into tabulated, energy-based corrections. This page covers the
 underlying wave acoustics in `phonometry.environment.propagation.ground_barriers`: the
 **spherical-wave reflection coefficient** of a finite-impedance ground
@@ -1001,7 +1001,7 @@ res.plot()                        # excess attenuation vs frequency
 
 The ground impedance is either derived from an effective `flow_resistivity`
 (via the `delany_bazley` or `miki` model of
-[`phonometry.materials`](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/), which model a semi-infinite porous
+[`phonometry.materials`](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), which model a semi-infinite porous
 ground) or supplied directly as a normalized complex `impedance` (a scalar,
 per-band array, or a `PorousMediumResult`). A plain `impedance` value is taken
 in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, in which a passive ground has
@@ -1052,7 +1052,7 @@ effect is reciprocal under an exchange of source and receiver heights.
 
 ### A ground from a catalogue
 
-A row of `environment.PUBLISHED_GROUND`, or of [a catalogue of your own](https://jmrplens.github.io/phonometry/io/material-catalogues/),
+A row of `environment.PUBLISHED_GROUND`, or of [a catalogue of your own](https://docs.jmrp.io/phonometry/io/material-catalogues/),
 gives the impedance itself: `GroundSurface.medium` is the porous half-space
 of its effective flow resistivity, by the Delany and Bazley or the Miki
 model, which `ground_effect` takes as `impedance`, `barrier_insertion_loss`
@@ -1100,7 +1100,7 @@ which tends to 5 dB at the shadow boundary $N \to 0$ and approximates Maekawa's
 point-source curve within about 1.5 dB.
 
 The clip below is that formula as a field. It is the
-[2D FDTD solver](https://jmrplens.github.io/phonometry/simulation/fdtd-simulation/) run twice on one
+[2D FDTD solver](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/) run twice on one
 12 × 7 m half-space over rigid ground with a thin rigid screen 2.5 m tall,
 once at 100 Hz and once at 500 Hz, each with a barrier-free reference run over
 the same ground so the annotated insertion loss is a true one. The geometry
@@ -1345,7 +1345,7 @@ Both road numbers come from a laboratory, on a sample and in a diffuse field.
 EN 1793-5 measures the reflection of the barrier as built, in the direct field
 of a loudspeaker in front of it, and weights it by the same spectrum into a
 third number, $DL_{RI}$. It has its own page, [Sound reflection of a noise
-barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/), because most of the work is in getting from nine
+barrier in situ](https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/), because most of the work is in getting from nine
 impulse responses to the index; the rating itself is
 `environment.sound_reflection_rating`, beside the two above, and returns the
 same `RoadDeviceRating`.
@@ -1353,7 +1353,7 @@ same `RoadDeviceRating`.
 ## Relation to ISO 9613-2
 
 The tabulated $A_\mathrm{gr}$ and $D_z$ of the
-[ISO 9613-2 method](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)
+[ISO 9613-2 method](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)
 are octave-band, energy-based engineering fits; `ground_effect` and
 `barrier_insertion_loss` are their narrowband wave-acoustic counterparts. Over
 hard ground both agree on the +6 dB enhancement and the 5 dB grazing barrier
@@ -1375,7 +1375,7 @@ four-path barrier-on-ground model weighted by the `ground_effect` coefficient.
 
 **Not covered.** Both models assume a homogeneous, non-refracting,
 non-turbulent atmosphere; a vertical sound-speed gradient is the subject of
-[atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/) instead. The coherent
+[atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/) instead. The coherent
 barrier-on-ground model weights all four diffracted paths with a single
 reflection coefficient $Q$ computed over the overall source-receiver geometry,
 not with a separate coefficient per image path, so it is coherent and
@@ -1383,12 +1383,12 @@ reciprocal, but it is not a boundary-element solution.
 
 ## See also
 
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/): the octave-band ISO 9613-2 fits these models sit underneath, and the rule an obstacle has to satisfy to be a barrier at all.
-- [Atmospheric refraction: rays and the GFPE](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/): the vertical sound-speed gradient both models here assume away.
-- [Porous absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity`, and their fit range.
-- Theory: [Outdoor propagation](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
-- API reference: [`environment.propagation.ground_barriers`](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/).
-- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the octave-band ISO 9613-2 fits these models sit underneath, and the rule an obstacle has to satisfy to be a barrier at all.
+- [Atmospheric refraction: rays and the GFPE](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): the vertical sound-speed gradient both models here assume away.
+- [Porous absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity`, and their fit range.
+- Theory: [Outdoor propagation](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
+- API reference: [`environment.propagation.ground_barriers`](https://docs.jmrp.io/phonometry/reference/api/environment/ground-barriers/).
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
@@ -1421,19 +1421,19 @@ reciprocal, but it is not a boundary-element solution.
 ---
 
 
-<!-- source: docs/environment/propagation/atmospheric-refraction.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/ -->
-Source: https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/
+<!-- source: docs/environment/propagation/atmospheric-refraction.md | canonical: https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/ -->
+Source: https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/
 
 # Atmospheric refraction: ray tracing and the parabolic equation (Salomons / Attenborough)
 
-The [ISO 9613-2 method](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) and the
-[spherical-wave ground effect](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/) both assume a **homogeneous**
+The [ISO 9613-2 method](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) and the
+[spherical-wave ground effect](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) both assume a **homogeneous**
 atmosphere. In reality the sound speed changes with height, because temperature
 and wind change with height, and this **refracts** sound: rays curve, and over a
 few hundred metres the received level can swing by tens of decibels. This page
 covers `phonometry.environment.propagation.refraction`, the
 refracting-atmosphere counterpart of the ocean solvers in
-[`phonometry.underwater.propagation.numerical`](https://jmrplens.github.io/phonometry/underwater/underwater-solvers/): a
+[`phonometry.underwater.propagation.numerical`](https://docs.jmrp.io/phonometry/underwater/underwater-solvers/): a
 **ray model** and a **parabolic-equation (PE)** solver, both clean-room from
 Salomons, *Computational Atmospheric Acoustics* (2001) and Attenborough & Van
 Renterghem, *Predicting Outdoor Sound* 2e (2021, Ch. 11).
@@ -1634,7 +1634,7 @@ equation valid within a limiting elevation angle, and marches it in range on a
 range-height grid. `atmospheric_parabolic_equation` implements the **Green's
 Function PE** (GFPE, Salomons Appendix H), the atmospheric member of the same
 split-step Fourier family as the ocean
-[`parabolic_equation`](https://jmrplens.github.io/phonometry/underwater/underwater-solvers/). Each range step:
+[`parabolic_equation`](https://docs.jmrp.io/phonometry/underwater/underwater-solvers/). Each range step:
 
 1. transforms the field to the vertical-wavenumber domain (FFT);
 2. applies the free-space propagator
@@ -1710,7 +1710,7 @@ The ground impedance is supplied directly (`impedance=`, a normalized complex
 value in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, with
 $\operatorname{Im}(Z) > 0$ for a passive ground), as a `PorousMediumResult`,
 or from an effective `flow_resistivity` via
-the [porous models](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/) of the materials domain; the porous
+the [porous models](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/) of the materials domain; the porous
 models work in the opposite $\mathrm{e}^{+j\omega t}$ convention, so their impedance is
 conjugated internally.
 
@@ -1731,7 +1731,7 @@ The models are anchored by independent oracles:
 
 - **Homogeneous limit → spherical ground effect.** With a zero gradient the
   GFPE field must reproduce the exact Weyl-Van der Pol
-  [`ground_effect`](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/) at every range. It does so to a few
+  [`ground_effect`](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) at every range. It does so to a few
   tenths of a dB over grassland on the default grid (source and receiver near
   the ground, 50 m to 1 km), and to the coherent **+6 dB** two-ray enhancement
   over a rigid ground.
@@ -1743,7 +1743,7 @@ The models are anchored by independent oracles:
   inside the closed-form shadow distance.
 
 These checks are pinned numerically in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/) (section "Atmospheric refraction").
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/) (section "Atmospheric refraction").
 
 ## What this guide covers
 
@@ -1766,7 +1766,7 @@ assume flat ground at $z = 0$; neither accepts a terrain elevation profile.
 
 ## See also
 
-- Theory: [Outdoor propagation](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the meteorological assumptions ISO 9613-2 makes, which is what refraction takes apart.
+- Theory: [Outdoor propagation](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the meteorological assumptions ISO 9613-2 makes, which is what refraction takes apart.
 
 ## References
 
@@ -1778,16 +1778,16 @@ assume flat ground at $z = 0$; neither accepts a terrain elevation profile.
 
 ---
 
-← [Spherical ground and barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/) ·
-[Outdoor propagation (ISO 9613-2)](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) ·
-[Underwater propagation solvers](https://jmrplens.github.io/phonometry/underwater/underwater-solvers/) ·
-[Documentation index](https://jmrplens.github.io/phonometry/)
+← [Spherical ground and barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) ·
+[Outdoor propagation (ISO 9613-2)](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) ·
+[Underwater propagation solvers](https://docs.jmrp.io/phonometry/underwater/underwater-solvers/) ·
+[Documentation index](https://docs.jmrp.io/phonometry/)
 
 ---
 
 
-<!-- source: docs/environment/propagation/barrier-reflection.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/ -->
-Source: https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/
+<!-- source: docs/environment/propagation/barrier-reflection.md | canonical: https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/ -->
+Source: https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/
 
 # Sound reflection of a noise barrier in situ (EN 1793-5)
 
@@ -1936,7 +1936,7 @@ The edges are Formula (7) sampled as printed, each a half of a full
 Blackman-Harris window twice its own length. Table 1 calls $T_\mathrm{W,BH}$ the length
 of the trailing edge, which read into Formula (7) would draw a whole bell
 where the edge should fall; the [errata
-registry](https://jmrplens.github.io/phonometry/reference/errata/) records it. The second line is the
+registry](https://docs.jmrp.io/phonometry/reference/errata/) records it. The second line is the
 window's low frequency limit, the subject of section 5.
 
 ## 4. The index, band by band
@@ -1966,7 +1966,7 @@ $$
   500 Hz to 2 kHz. The library **divides** by it. Formula (1) prints it as a
   multiplier, and since Formula (4) makes it the gain change itself, a
   multiplier would square the change instead of removing it; the [errata
-  registry](https://jmrplens.github.io/phonometry/reference/errata/) records the case. Above 20 % the
+  registry](https://docs.jmrp.io/phonometry/reference/errata/) records the case. Above 20 % the
   standard reads the change as a sign the settings moved, and the function
   warns.
 
@@ -2154,7 +2154,7 @@ multiplies the printed ones.
 ## Relation to the other parts of EN 1793
 
 The declaration of a road device ([Spherical ground effect and advanced
-barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/#3-what-the-product-declaration-says-en-1793))
+barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/#3-what-the-product-declaration-says-en-1793))
 carries $DL_\alpha$ from EN 1793-1 and $DL_R$ from EN 1793-2, both from a
 laboratory. $DL_{RI}$ answers the question of $DL_\alpha$ again, in the direct
 field beside the road rather than the diffuse field of a reverberation room,
@@ -2179,7 +2179,7 @@ and 3, NOTE 1 of 5.6.1, the three windows and the example of Annex B (Tables
 B.1 and B.2) are conformance checks.
 
 **Not covered.** Obtaining the impulse responses, by MLS or sweep and deconvolution (5.4.3),
-which is the [room impulse response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/)
+which is the [room impulse response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/)
 machinery; the anti-aliasing filter of 5.5.2 and the signal-to-noise ratio of
 5.5.3, which a laboratory states rather than computes; the meteorological and
 surface conditions of 5.7; and the far-field indicators of Annex C, which the
@@ -2189,10 +2189,10 @@ lowest reliable band: that stays with the report.
 
 ## See also
 
-- [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
-- [In-situ Road-Surface Absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
-- [Errata found in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
-- API reference: [`environment.propagation.barrier_reflection`](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-reflection/).
+- [Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
+- [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
+- [Errata found in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
+- API reference: [`environment.propagation.barrier_reflection`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-reflection/).
 
 ## References
 
@@ -2223,8 +2223,8 @@ lowest reliable band: that stays with the report.
 ---
 
 
-<!-- source: docs/environment/propagation/software-quality.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/software-quality/ -->
-Source: https://jmrplens.github.io/phonometry/environment/propagation/software-quality/
+<!-- source: docs/environment/propagation/software-quality.md | canonical: https://docs.jmrp.io/phonometry/environment/propagation/software-quality/ -->
+Source: https://docs.jmrp.io/phonometry/environment/propagation/software-quality/
 
 # Quality of outdoor sound software (ISO 17534-1)
 
@@ -2632,7 +2632,7 @@ deviation of C.5; the uniform sample of C.2 with the 2 m exclusion and the
 1:100 recommendation, and the chainages of C.3; and the round-robin result of
 4.5.2 and A.3. Table C.1, read also in Tables 5 and 6 of VDI 3723 Blatt 1,
 the example of C.4 and Table B.2 are reproduced in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/).
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
 
 **Covered, by a reading of the text.** Three conventions the text leaves
 open: the ordinals of C.2 counted from zero, the chainages of C.3 in whole metres, and a level difference taken as
@@ -2647,19 +2647,19 @@ configuration; the levels to compare come from the program under test. The
 method-specific test cases are those of ISO/TR 17534-3 for ISO 9613-2, and T08
 to T19 of that report, which need barriers, buildings and reflections, are not
 implemented (see the [Outdoor Sound
-Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) guide).
+Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) guide).
 
 ## See also
 
-- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the ISO 9613-2 chain and the seven test cases of ISO/TR 17534-3 it answers
   on its own, which the TRC example above checks.
-- [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/):
   the GUM propagation that the standard deviation of C.5 is meant for.
-- [Integrated and statistical levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the
+- [Integrated and statistical levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the
   percentile levels $L_{10}$ and $L_{90}$ whose sense the quantiles of Annex C
   reverse.
-- API reference: [`environment.propagation.software_quality`](https://jmrplens.github.io/phonometry/reference/api/environment/software-quality/).
+- API reference: [`environment.propagation.software_quality`](https://docs.jmrp.io/phonometry/reference/api/environment/software-quality/).
 
 ## References
 
@@ -2690,9 +2690,9 @@ Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdo
 
 ---
 
-← [Outdoor propagation (ISO 9613-2)](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) ·
-[Spherical ground and barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/) ·
-[Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/) ·
-[Documentation index](https://jmrplens.github.io/phonometry/)
+← [Outdoor propagation (ISO 9613-2)](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) ·
+[Spherical ground and barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) ·
+[Atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/) ·
+[Documentation index](https://docs.jmrp.io/phonometry/)
 
 ---

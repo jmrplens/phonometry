@@ -8,7 +8,7 @@ authors:
     email: "mail@jmrp.io"
     orcid: "https://orcid.org/0000-0003-1250-6212"
 repository-code: "https://github.com/jmrplens/phonometry"
-url: "https://jmrplens.github.io/phonometry/"
+url: "https://docs.jmrp.io/phonometry/"
 doi: "10.5281/zenodo.21215280"
 version: 4.0.0rc1
 date-released: "2026-09-10"

@@ -431,7 +431,7 @@ normalized levels, the per-band uncertainty and the Annex C omission stated.*
 - [Sound Power in the Reverberation Room (ISO 3741)](sound-power-reverberation.md):
   the precision diffuse-field route in a qualified laboratory room.
 - [Theory](../../reference/theory/environment-transport.md): the field-indicator derivations.
-- API reference: [`emission.sound_power_intensity`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/).
+- API reference: [`emission.sound_power_intensity`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
 
 ## References
 

@@ -421,7 +421,7 @@ log spectrum only.
 - [Time synchronous averaging](synchronous-averaging.md): removing the synchronous part before running an envelope spectrum on the residual.
 - [Machine fault frequencies](../../vibration/machinery/machine-diagnostics.md): the bearing and gear families read off exactly this envelope spectrum.
 - [Swept-sine distortion](../../devices/electroacoustics/swept-sine-distortion.md): the minimum-phase folding that shares this page's core.
-- API reference: [`signals.cepstrum`](https://jmrplens.github.io/phonometry/reference/api/signals/cepstrum/).
+- API reference: [`signals.cepstrum`](https://docs.jmrp.io/phonometry/reference/api/signals/cepstrum/).
 
 ## References
 

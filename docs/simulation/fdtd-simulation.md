@@ -600,8 +600,8 @@ against a closed form or a 3D solver.
   Scholte waves, mode conversion and immersed plates.
 - [Conformance report](../CONFORMANCE.md): two of the closed-form
   validation anchors of section 6 run there.
-- API reference: [`simulation.fdtd`](https://jmrplens.github.io/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.ntff`](https://jmrplens.github.io/phonometry/reference/api/simulation/ntff/).
+- API reference: [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
+  [`simulation.ntff`](https://docs.jmrp.io/phonometry/reference/api/simulation/ntff/).
 
 ## References
 

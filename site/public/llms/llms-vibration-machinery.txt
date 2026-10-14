@@ -1,11 +1,11 @@
 # phonometry: Machinery
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/vibration/machinery/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/machinery/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/machinery/
+<!-- source: docs/vibration/machinery/index.md | canonical: https://docs.jmrp.io/phonometry/vibration/machinery/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/machinery/
 
 # Machinery
 
@@ -29,27 +29,27 @@ a running machine is **envelope analysis**, and it is three steps in three
 places. Band-pass the record around the high-frequency housing resonance that
 the impacts ring, take the envelope spectrum so the repetition rate of the
 impacts becomes a discrete line (that step is [Cepstrum, echoes and the
-envelope spectrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/), one section
+envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/), one section
 away) and overlay the kinematic families, coloured by origin, so a shaft
 harmonic can never be misread as bearing evidence. When two shafts have to be
 separated before their sidebands can be read, [Time synchronous
-averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/) does it first.
+averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/) does it first.
 
-[Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/)
+[Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/)
 computes the families and draws them on a measured envelope spectrum, and
-[Evaluating machine vibration](https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
+[Evaluating machine vibration](https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
 answers the question that comes before any of it: whether the machine is
 acceptable at all, graded from one broad-band measurement into the four zones
 of ISO 20816-1.
 
 ## Pages in this section
 
-- [Evaluating machine vibration (ISO 20816-1)](https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/):
+- [Evaluating machine vibration (ISO 20816-1)](https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/):
   the four evaluation zones, the frequency-shaped velocity criterion of
   Figure 9 with the zone factors of Annex C.2, the typical boundary ranges of
   Table C.1, and the vector reading of a change that a magnitude comparison
   misses (ISO 20816-1:2016).
-- [Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/):
+- [Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/):
   the rolling-contact bearing frequencies, the gear-mesh frequency and its
   sidebands, the induction-motor supply, slip, pole-pass and rotor-slot
   harmonics, and the blade-passing tones of fans, blowers and pumps, all from
@@ -59,15 +59,15 @@ of ISO 20816-1.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Cepstrum, echoes and the envelope spectrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/):
+- [Cepstrum, echoes and the envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/):
   the envelope spectrum this section's workflow depends on, and the cepstrum
   that reads periodic ripple in the spectrum itself.
-- [Time synchronous averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/):
+- [Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/):
   extracting one shaft's contribution before its sidebands are read.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/):
   the frequency-response vocabulary behind the housing resonance the envelope
   method rings.
-- [Bending-wave transmission at plate junctions](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/):
   where the machine's vibration goes once it has left the machine.
 
 ## What this section does not cover
@@ -79,7 +79,7 @@ loaded bearing slips a little, so expect the measured peak within a per cent
 or two of the prediction rather than exactly on it.
 
 The severity verdict is a page of its own now:
-[Evaluating machine vibration](https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
+[Evaluating machine vibration](https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
 carries the ISO 20816-1 zones and criteria. What is still absent is the
 trending that feeds them. The amplitude criteria that turn a present
 line into an assessment (crest-factor and kurtosis trending, and the velocity
@@ -94,8 +94,8 @@ frequency itself as the broken-bar sideband spacing.
 ---
 
 
-<!-- source: docs/vibration/machinery/machine-diagnostics.md | canonical: https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/
+<!-- source: docs/vibration/machinery/machine-diagnostics.md | canonical: https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/
 
 # Machine fault frequencies (Norton & Karczub)
 
@@ -107,8 +107,8 @@ diagnosis: a peak is only evidence when it sits on a named line. This page
 covers the kinematics of M. P. Norton and D. G. Karczub, *Fundamentals of Noise
 and Vibration Analysis for Engineers* (2nd ed., Cambridge University Press,
 2003), Section 8.4, and how they combine with the signal chain the library
-already provides - the [envelope spectrum and cepstrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/) and
-[time synchronous averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/).
+already provides - the [envelope spectrum and cepstrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/) and
+[time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/).
 
 The working view is the two put together: the envelope spectrum of a
 band-passed vibration record with the predicted lines drawn on top and named.
@@ -294,16 +294,16 @@ one function for each:
 2. **Detect and transform the envelope.** The repetition rate of the impacts
    is an amplitude modulation of that resonance, so it becomes a *line* in the
    envelope spectrum, at the fault frequency and its harmonics. See the
-   [cepstrum and envelope-spectrum guide](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/).
+   [cepstrum and envelope-spectrum guide](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/).
 3. **Name the lines.** Overlay the kinematic prediction. `.plot(spectrum=…)`
    accepts any `envelope_spectrum` result (or anything exposing `frequencies`
    and `amplitude`) and draws the predicted lines over it, coloured by family
    so shaft harmonics never read as bearing evidence.
 
 Two more tools help when the record is crowded.
-[Time synchronous averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/) removes everything not
+[Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/) removes everything not
 locked to one shaft, which separates a gearbox's two shafts before the
-sidebands are read; and the [cepstrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/) collapses a whole
+sidebands are read; and the [cepstrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/) collapses a whole
 harmonic or sideband family onto a single quefrency spike, which is the fastest
 way to tell *which* periodicity dominates when several are superimposed.
 
@@ -351,14 +351,14 @@ count.
 
 ## See also
 
-- [Cepstrum, echoes and the envelope spectrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/): the
+- [Cepstrum, echoes and the envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/): the
   envelope spectrum these lines are drawn on, and the cepstral collapse of a
   harmonic family.
-- [Time synchronous averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/): separating one
+- [Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/): separating one
   shaft's signature from everything asynchronous with it.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/):
   finding the structural resonances a defect impact excites.
-- [Bending-wave transmission at plate junctions](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/): what
+- [Bending-wave transmission at plate junctions](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/): what
   happens to the vibration once it leaves the machine.
 
 ## References
@@ -366,17 +366,17 @@ count.
 - Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration
   analysis for engineers* (2nd ed., Section 8.4). Cambridge University Press.
 
-See the [bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/) for full entries.
+See the [bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/) for full entries.
 
 ---
 
 
-<!-- source: docs/vibration/machinery/machine-vibration-evaluation.md | canonical: https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/ -->
-Source: https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/
+<!-- source: docs/vibration/machinery/machine-vibration-evaluation.md | canonical: https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/ -->
+Source: https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/
 
 # Evaluating machine vibration (ISO 20816-1)
 
-[Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/) answers *where a fault would
+[Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/) answers *where a fault would
 show*. This page answers the question a plant asks first: **is this machine
 acceptable at all**. The two are different trades. A kinematic line tells you
 what is wrong; a severity grade tells you whether to keep running, and it comes
@@ -782,12 +782,12 @@ predecessor supplies the industrial boundaries.
 
 ## See also
 
-- [Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/): where a fault would
+- [Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/): where a fault would
   show, once the severity says something is worth looking for.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/):
   the frequency-response vocabulary behind the housing response that a
   non-rotating measurement reads.
-- [Human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the same
+- [Human vibration exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): the same
   motion judged against a person rather than against a machine.
 
 ## References

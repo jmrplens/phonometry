@@ -585,7 +585,7 @@ itself rests on the closed-form anchors and its CNOSSOS-EU lineage.
 - [Outdoor sound propagation](../environment/propagation/outdoor-propagation.md):
   the ISO 9613-2 ground effect and the CNOSSOS ground classes this two-ray
   adjustment shares.
-- API reference: [`aircraft.rotorcraft_noise`](https://jmrplens.github.io/phonometry/reference/api/aeroacoustics/rotorcraft-noise/).
+- API reference: [`aircraft.rotorcraft_noise`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/rotorcraft-noise/).
 
 ## References
 

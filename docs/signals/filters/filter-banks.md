@@ -462,7 +462,7 @@ one-third-octave band spans $G^{1/3} \approx 1.2589$, ten bands per decade.
 - [Filter Class Verification (IEC 61260-1)](filter-compliance.md):
   the Table 1 acceptance mask, class 0 and the compliance fiche of the banks
   designed here.
-- API reference: [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/), [`filters.core`](https://jmrplens.github.io/phonometry/reference/api/filters/core/) and [`filters.weighting`](https://jmrplens.github.io/phonometry/reference/api/filters/weighting/).
+- API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/), [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/) and [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/).
 - Theory: [Octave Band Frequencies](../../reference/theory/signal-analysis.md#octave-band-frequencies-ansi-s111--iec-61260): where the base-10 midband grid and the band edges come from, and why the bank is designed on them rather than on nominal labels.
 
 ## References

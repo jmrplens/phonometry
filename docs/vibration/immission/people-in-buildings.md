@@ -358,7 +358,7 @@ from the meter of DIN 45669-1, which forms them from a record.
 - [Vibration damage to structures (DIN 4150-3)](../structural/structural-damage.md):
   the other half of DIN 4150, what the building itself may take.
 - API reference:
-  [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).
+  [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
 
 ## References
 

@@ -78,7 +78,7 @@ CONTENT = ROOT / "site" / "src" / "content" / "docs"
 #: verbatim at the site root, so these publish at /llms/llms-<area>.txt and
 #: the site root keeps exactly llms.txt and llms-full.txt.
 SHARDS_DIR = ROOT / "site" / "public" / "llms"
-SITE_URL = "https://jmrplens.github.io/phonometry"
+SITE_URL = "https://docs.jmrp.io/phonometry"
 REPO_URL = "https://github.com/jmrplens/phonometry"
 DOI = "10.5281/zenodo.21215280"
 

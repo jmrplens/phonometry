@@ -484,4 +484,4 @@ which Part 3's six bands cannot feed.
   reference-curve engine behind $R_{I,\mathrm{w}}$ and $D_{I,\mathrm{n,e,w}}$.
 - [Sound Intensity](../../devices/emission/intensity.md): the two-microphone probe, its field
   indicators and the residual-index qualification behind every scan.
-- API reference: [`building.measurement.intensity_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/intensity-insulation/).
+- API reference: [`building.measurement.intensity_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/intensity-insulation/).

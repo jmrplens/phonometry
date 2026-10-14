@@ -209,7 +209,7 @@ time-reversed, which is what
   comes from, measured with a second microphone.
 - [Measuring the Room Impulse Response](room-impulse-response.md): the
   ISO 18233 acquisition of the responses this page measures.
-- API reference: [`room.auditorium`](https://jmrplens.github.io/phonometry/reference/api/rooms/auditorium/) and [`room.acoustics`](https://jmrplens.github.io/phonometry/reference/api/rooms/acoustics/).
+- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/) and [`room.acoustics`](https://docs.jmrp.io/phonometry/reference/api/rooms/acoustics/).
 
 ## Standards
 

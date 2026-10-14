@@ -202,4 +202,4 @@ tester, who must describe it in the report.
   the road's counterpart.
 - [Errata in published sources](../../ERRATA.md): the ISO 3095 and EN 15610
   entries.
-- API reference: [`environment.sources.rolling_stock_noise`](https://jmrplens.github.io/phonometry/reference/api/environment/rolling-stock-noise/).
+- API reference: [`environment.sources.rolling_stock_noise`](https://docs.jmrp.io/phonometry/reference/api/environment/rolling-stock-noise/).

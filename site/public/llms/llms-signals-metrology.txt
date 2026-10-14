@@ -1,11 +1,11 @@
 # phonometry: Calibration and uncertainty
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/signals/metrology/index.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/
+<!-- source: docs/signals/metrology/index.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/
 
 # Calibration and uncertainty
 
@@ -18,7 +18,7 @@ fourth page maps the evidence that backs the numbers: what a performance
 **class** asserts, the verifiers that grade a chain, and the published
 conformance report.
 
-[Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) handles the
+[Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) handles the
 physical meaning. phonometry works in two reference frames: physical **dB
 SPL**, established from a recorded calibrator tone (the IEC 60942 field
 ritual), and digital **dBFS**, levels relative to full scale, appropriate when
@@ -27,7 +27,7 @@ The page explains how each mode is set up and, just as important, which
 quantities are meaningful in which frame, and it grades the calibrator itself
 against IEC 60942:2017 from what a laboratory measured on it.
 
-[Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/)
+[Measurement uncertainty (GUM and Monte Carlo)](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/)
 handles the second, implementing the *Guide to the Expression of Uncertainty
 in Measurement* (**ISO/IEC Guide 98-3:2008**) and its Monte Carlo
 **Supplement 1**. The GUM route propagates standard uncertainties analytically
@@ -38,7 +38,7 @@ intervals that stay honest when the model is non-linear or the inputs are far
 from Gaussian. The page shows both on the same models, including where they
 diverge and why.
 
-[Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/)
+[Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/)
 carries the evidence story: what a performance class actually claims in
 IEC 61672-1 and IEC 61260-1 (same design goals, different acceptance limits),
 which public verifier grades each stage of a measurement chain against its
@@ -52,7 +52,7 @@ for the periodic tests of a sound level meter, `filters.verify_filter_periodic`
 for those of a band filter) and compute on a design the tests that need no
 specimen.
 
-[Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/) guards the gate
+[Data qualification](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/) guards the gate
 in front of both: every average - a Leq, a Welch PSD, every averaged input
 to an uncertainty budget - assumes the record is stationary, and the Bendat & Piersol reverse
 arrangement and runs tests decide that objectively from segment mean squares,
@@ -61,41 +61,41 @@ statistics of level crossings and peaks - apparent frequency, peak rates,
 the irregularity factor - that characterise a qualified Gaussian record and
 screen for one that is not.
 
-[Random-incidence and diffuse-field response](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/)
+[Random-incidence and diffuse-field response](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/)
 takes the calibration of the meter itself beyond its reference direction: the
 IEC 61183 directivity factor from readings in an anechoic room, the
 random-incidence sensitivity level that follows from it, and the
 diffuse-field level by comparison with a reference meter in a reverberation
 room.
 
-[Free-field corrections](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/)
+[Free-field corrections](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/)
 bring a meter tested on a sound calibrator, a comparison coupler or an
 electrostatic actuator back to the free field it is specified for: the IEC
 62585 adjustment value at the calibration check frequency, the correction at
 each frequency, the uncertainty budget that goes with it, and the maximum each
 clause permits.
 
-[Periodic tests of a sound level meter](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
+[Periodic tests of a sound level meter](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
 grade what a laboratory measured on a working meter by IEC 61672-3: every
 clause from the frequency weightings to the high-level stability against the
 acceptance limits of IEC 61672-1 and the maxima of its Table B.1, what a
 complete test holds, and the statement Clause 22 prescribes for the outcome.
 
-[Calibration by comparison](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/)
+[Calibration by comparison](https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/)
 goes one step up the chain, to the microphone itself: a working standard
 microphone takes the sensitivity of a reference through the ratio of their
 output voltages, in a coupler by IEC 61094-5 or in a free field by IEC
 61094-8, with the environmental, jig and free-field corrections each part asks
 for and the uncertainty budget of Table D.1 or Table 2.
 
-[Calibration by reciprocity](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/)
+[Calibration by reciprocity](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/)
 is the top of that chain: the reference itself, a laboratory standard
 microphone, calibrated with no other microphone to compare it with, from
 three pair measurements and the acoustic transfer impedance of a coupler by
 IEC 61094-2 or of a free field by IEC 61094-3.
 
 The same discipline extends into the frequency domain: the
-[Signals and spectra](https://jmrplens.github.io/phonometry/signals/spectra/) pages
+[Signals and spectra](https://docs.jmrp.io/phonometry/signals/spectra/) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
 every PSD carries its effective number of averages, its normalized random
 error and a chi-square confidence interval.
@@ -107,39 +107,39 @@ budgets that are specialisations of the GUM machinery described here.
 
 ## Pages in this section
 
-- [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): physical SPL
+- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): physical SPL
   calibration from a calibrator tone, the stability check it applies to that
   recording, the IEC 60942:2017 verdict on the calibrator itself, and the
   digital full-scale mode.
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/):
   what a performance class asserts, the verifiers that grade weightings,
   filter banks and intensity spectra against their tolerance tables, the
   conformance rule of IEC TC 29, the conformance report, and the scope of
   IEC 61672-2/-3 and IEC 61260-2/-3.
-- [Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty (GUM and Monte Carlo)](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method, expanded
   uncertainty and coverage intervals.
-- [Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/): the reverse
+- [Data qualification](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/): the reverse
   arrangement and runs stationarity tests on segment statistics, and the
   Rice level-crossing and peak statistics with the irregularity factor.
-- [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/):
   the directivity factor of a sound level meter from readings in two planes,
   one plane or 38 equal-area elements, its random-incidence and diffuse-field
   sensitivity levels, and Table B.1 of the reference microphone.
-- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/):
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/):
   the adjustment value, the corrections for a calibrator, a coupler and an
   actuator, the budget of Annex I and the verdict of clauses 9 to 14.
-- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
+- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
   the verdict on a laboratory's results, clause by clause, with Tables 4, 5
   and B.1 of IEC 61672-1, and the statement of Clause 22.
-- [Microphone Calibration by Comparison (IEC 61094-5/-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/):
+- [Microphone Calibration by Comparison (IEC 61094-5/-8)](https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/):
   the simultaneous comparison with the interchange of Annex C, the sequential
   one against a monitor, in level and phase, the environmental, WS3 jig,
   different-diameter and acoustic impedance corrections with the air between
   two microphones, the validation of a jig or coupler, the budgets of Table
   D.1 and Table 2 with k = 2, and the time-selective processing of IEC
   61094-8 Annex B.
-- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/):
+- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/):
   three microphones calibrated in pairs, the transfer impedance of a
   plane-wave or large-volume coupler with the heat conduction of Annex A and
   the capillary tubes of Annex B, the free field with the attenuation of
@@ -155,7 +155,7 @@ when the manual asks for one; the IEC 61672-3 periodic tests are not run
 either, and `verify_sound_level_meter_periodic` grades the results a
 laboratory returns;
 [Compliance and
-verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/) draws
+verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/) draws
 that boundary precisely, part by part. The dBFS half of the calibration page
 sits outside any standard and makes no physical claim: it is a reference
 frame, not a measurement. Data qualification implements the quantitative core
@@ -165,14 +165,14 @@ steps, as the book describes them. And an uncertainty budget is a model of
 *your* measurement: the library propagates whatever you declare, and never
 invents the terms. Where a standard publishes its own budget the guides say
 so, as ISO 9612 does for [occupational
-exposure](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/) and ISO
-12999-1 for [sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/).
+exposure](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/) and ISO
+12999-1 for [sound insulation](https://docs.jmrp.io/phonometry/buildings/insulation/).
 
 ---
 
 
-<!-- source: docs/signals/metrology/calibration.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/calibration/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/calibration/
+<!-- source: docs/signals/metrology/calibration.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/calibration/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/calibration/
 
 # Calibration and dBFS
 
@@ -197,7 +197,7 @@ before and re-check it after each session, verify meter and calibrator
 periodically in the laboratory (IEC 61672-3 and IEC 60942; Bies, Hansen &
 Howard 2017, §3.4), and treat the pre/post difference as your drift bound.
 The field, laboratory and drift section below turns that into concrete
-rules, and the [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/)
+rules, and the [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/)
 walkthrough starts from exactly this step before any level is computed.
 
 ## Why calibrate? The theory
@@ -418,7 +418,7 @@ Each is judged by the conformance rule the IEC TC 29 instrument standards
 written since 2013 share (5.1.15): the deviation within its acceptance limit
 **and** the uncertainty within its maximum, both inclusive
 (`metrology.verify_conformance`, worked through the printed examples in
-[Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/)).
+[Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/)).
 
 ```python
 from phonometry import metrology
@@ -544,12 +544,12 @@ Take the laboratory's results (each measured deviation with the expanded uncerta
 
 ## See also
 
-- [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/): the walkthrough that starts from this calibration step and ends at a class-checked instrument.
-- [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): every metric that consumes the `calibration_factor` derived here.
-- [Multichannel and Performance](https://jmrplens.github.io/phonometry/signals/filters/multichannel/): one sensitivity per channel when the channels differ.
-- [GUM uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): propagating the calibrator tolerance and drift bound into a level's uncertainty.
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): the conformance rule of IEC TC 29 the calibrator verdict is reached by.
-- API reference: [`metrology.calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://jmrplens.github.io/phonometry/reference/api/metrology/conformance/) and [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/).
+- [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/): the walkthrough that starts from this calibration step and ends at a class-checked instrument.
+- [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): every metric that consumes the `calibration_factor` derived here.
+- [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/): one sensitivity per channel when the channels differ.
+- [GUM uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/): propagating the calibrator tolerance and drift bound into a level's uncertainty.
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/): the conformance rule of IEC TC 29 the calibrator verdict is reached by.
+- API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://docs.jmrp.io/phonometry/reference/api/metrology/conformance/) and [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/).
 
 ## References
 
@@ -585,8 +585,8 @@ A.1 to A.5, 5.9.4.2, A.6.4.7) by the conformance rule of 5.1.15.
 ---
 
 
-<!-- source: docs/signals/metrology/gum-uncertainty.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/
+<!-- source: docs/signals/metrology/gum-uncertainty.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/
 
 # Measurement uncertainty (GUM and Monte Carlo)
 
@@ -783,7 +783,7 @@ of ISO 12999-1, which combines reproducibility terms for a single-number
 rating, is a separate, domain-specific budget.
 
 A budget is only as honest as the record behind it: every averaged input
-assumes stationarity, and [Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/)
+assumes stationarity, and [Data qualification](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/)
 provides the Bendat & Piersol tests that check it before the propagation
 starts.
 
@@ -795,31 +795,31 @@ general form; use this page whenever your measurement model is not one of
 those standardized cases:
 
 - **Calibration.** The calibrator's class tolerance and the pre/post drift
-  bound of [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) are textbook Type B inputs:
+  bound of [Calibration](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) are textbook Type B inputs:
   propagate them (`Quantity(..., "rectangular")`) through the level model
   rather than quoting the tolerance alone.
 - **Environmental levels.** The ISO 1996-2 combined uncertainty of the
-  [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/) page is Formula (2) of
+  [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/) page is Formula (2) of
   that standard: the same quadrature sum with the standard's own
   sensitivity coefficients.
 - **Building acoustics.** The per-band and single-number uncertainties of
-  [field insulation measurements](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/) apply the tabulated
+  [field insulation measurements](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/) apply the tabulated
   reproducibility terms of ISO 12999-1, a standardized budget for one
   specific model.
 - **Absorption.** The
-  [absorption-measurement page](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/) carries the
+  [absorption-measurement page](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/) carries the
   ISO 12999-2 absorption uncertainty, the same construction for the
   reverberation-room method.
 - **Occupational exposure.** The ISO 9612 uncertainty of
-  [occupational measurements](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/) budgets sampling,
+  [occupational measurements](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/) budgets sampling,
   instrument and position contributions in exactly this way.
 
 ## See also
 
-- [Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/): the stationarity checks every averaged input silently assumes.
-- [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the tolerance and drift inputs of every calibrated chain.
-- API reference: [`metrology.uncertainty`](https://jmrplens.github.io/phonometry/reference/api/metrology/uncertainty/).
-- Theory: [Measurement uncertainty (GUM)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the law of propagation of uncertainty, the coverage factor and where the Monte Carlo supplement takes over.
+- [Data qualification](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/): the stationarity checks every averaged input silently assumes.
+- [Calibration](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): the tolerance and drift inputs of every calibrated chain.
+- API reference: [`metrology.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/metrology/uncertainty/).
+- Theory: [Measurement uncertainty (GUM)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the law of propagation of uncertainty, the coverage factor and where the Monte Carlo supplement takes over.
 
 ## References
 
@@ -861,15 +861,15 @@ coverage interval (clause 7).
 ---
 
 
-<!-- source: docs/signals/metrology/compliance-verification.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/
+<!-- source: docs/signals/metrology/compliance-verification.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/
 
 # Compliance and verification
 
 Three kinds of evidence back a number computed with this library. The
 **verifiers** are public functions that grade a filter or weighting you
 configured against the acceptance limits of its governing standard. The
-**conformance report** ([docs/CONFORMANCE.md](https://jmrplens.github.io/phonometry/reference/conformance/)) pins the
+**conformance report** ([docs/CONFORMANCE.md](https://docs.jmrp.io/phonometry/reference/conformance/)) pins the
 shipped implementation to the standards' own expected values and is
 regenerated on every change. And the **scope notes** on each guide say where
 the software's claim ends and a laboratory's begins. This page is the map of
@@ -887,12 +887,12 @@ IEC 61260-1:2014 subclause 1.2).
 
 A class is therefore not a quality grade but a **worst-case error bound
 under stated conditions**, and the bound chains: a class 1 measurement needs
-every stage at class 1, from the [calibrator](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) through the
+every stage at class 1, from the [calibrator](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) through the
 weighting to the band filter. One class 2 stage bounds the chain at class 2.
 
 Two vocabulary edges: **class 0** belongs to the withdrawn IEC 61260:1995 /
 ANSI S1.11-2004 masks, not to the 2014 edition (see
-[Filter class verification](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/)); and a class
+[Filter class verification](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/)); and a class
 belongs to a specification, so the honest claim is "class 1 per
 IEC 61672-1:2013 Table 3" or "class 1 per IEC 61260-1:2014 Table 1", never
 "class 1" alone.
@@ -943,8 +943,8 @@ one-third-octave bank is class 1 on Table 1 and misses class 1 on the
 summation of 5.16 by 0.002 dB, at its 16 kHz band. The
 details, including why a +0.400 dB margin is the ceiling for a passing
 Butterworth bank, are in
-[Filter class verification](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/); the weighting
-side is section 6 of [Frequency weighting](https://jmrplens.github.io/phonometry/signals/levels/weighting/).
+[Filter class verification](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/); the weighting
+side is section 6 of [Frequency weighting](https://docs.jmrp.io/phonometry/signals/levels/weighting/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask.svg" alt="A and C weighting deviations at 48 kHz threading within the IEC 61672-1 Table 3 class 1 acceptance corridor, with the wider class 2 limits dotted" width="80%"></picture>
 
@@ -997,8 +997,8 @@ laboratory's own expanded uncertainty before it is compared with the limit
 (clauses 13.1 and 14.1), so the same instrument passes on one bench and fails
 on another, and `verify_weighting` takes that uncertainty as an argument
 rather than assuming it away. The four are covered by [Verifying a
-human-vibration meter](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/), and the
-aircraft one by [Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/).
+human-vibration meter](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/), and the
+aircraft one by [Aircraft noise](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/).
 
 **The conformance rule of IEC TC 29.** The IEC instrument standards written
 since 2013 answer the same question another way, in the same sentence:
@@ -1016,12 +1016,12 @@ and its verdict names which of the four outcomes of IEC 60942 E.2.2 it is, in
 the words of the tables' "Reasons" column. One end of the acceptance interval
 may be open, `acceptance_limits=(70.0, math.inf)`, for a stop-band requirement
 that has a minimum and no maximum. `verify_sound_calibrator` applies the rule
-to every requirement of IEC 60942:2017 (see [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/)),
+to every requirement of IEC 60942:2017 (see [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/)),
 `verify_sound_level_meter_periodic` to every result of an IEC 61672-3:2013
 periodic test (see [Periodic tests of a sound level
-meter](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)), and `verify_filter_periodic` to
+meter](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)), and `verify_filter_periodic` to
 every result of an IEC 61260-3:2016 periodic test (see [Filter class
-verification](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/)).
+verification](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/)).
 
 ```python
 from phonometry import metrology
@@ -1038,14 +1038,14 @@ print(both_out.passes, both_out.outcome)              # False 4
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="The eight examples of IEC 60942:2017 Table E.1 between 0 dB and 0.25 dB, as Figure E.1 draws their absolute deviations, and the ten of IEC 61672-1:2013 Table C.1 between -1.2 dB and +1.0 dB, each marker the verdict verify_conformance returned, which is the verdict the table prints" width="100%"></picture>
 
-All eighteen examples are rows of the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/),
+All eighteen examples are rows of the [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/),
 verdict and printed reason each, and so are the same ten as IEC 61260-1:2014
 Table C.1 prints them.
 
 ## Reading the conformance report
 
 The verifiers grade *your* configuration; the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/) is the complementary evidence for
+[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/) is the complementary evidence for
 the implementation as shipped: each row pins one implemented quantity to the
 governing standard's own expected value (a worked example or a
 tolerance-table entry, not a regression baseline), with the computed value,
@@ -1057,7 +1057,7 @@ names the standard, edition and clause the implementation was held to); note
 that the class rows walk one pinned configuration, so section 2's verifiers
 are how the claim transfers to your own bank; and cite the report of the
 exact library version you pinned. Defects the re-derivation exposed in the
-published standards themselves are in the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+published standards themselves are in the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## What only a laboratory can attest
 
@@ -1113,8 +1113,8 @@ test per IEC 61672-3 and the calibrator's laboratory results per IEC 60942,
 which `verify_sound_level_meter_periodic` and `verify_sound_calibrator` grade
 but cannot produce (as `verify_filter_periodic` grades a filter set's
 IEC 61260-3 results), discussed in [Periodic tests of a sound level
-meter](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/) and
-[Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/). A defensible report
+meter](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/) and
+[Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/). A defensible report
 names both verdicts: the library's design verdict with the version and its
 conformance report, and the instrument's test record with its date.
 
@@ -1156,14 +1156,14 @@ them.
 ---
 
 
-<!-- source: docs/signals/metrology/data-qualification.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/
+<!-- source: docs/signals/metrology/data-qualification.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/
 
 # Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)
 
-Every average in this documentation - a [PSD](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/), a
-[Leq](https://jmrplens.github.io/phonometry/signals/levels/levels/), a
-[GUM budget](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/) - assumes the record is
+Every average in this documentation - a [PSD](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/), a
+[Leq](https://docs.jmrp.io/phonometry/signals/levels/levels/), a
+[GUM budget](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/) - assumes the record is
 **stationary**: that the process generating it did not drift while it was
 being measured. Bendat & Piersol devote Section 10.3 of *Random Data* to
 qualifying records before analysis, and `phonometry.metrology` implements its
@@ -1415,7 +1415,7 @@ apparent frequency of $0.58B$, Example 5.12) and a band centred on $f_\mathrm{c}
 gives $N_0 = 2\sqrt{f_\mathrm{c}^2 + B^2/12}$ (Example 5.13).
 `level_crossing_rate` counts the actual crossings of each level and puts
 the Rice curve next to them, taking the moments from the record's own
-[Welch autospectrum](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/):
+[Welch autospectrum](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/):
 
 ```python
 import numpy as np
@@ -1557,15 +1557,15 @@ record to the physically meaningful range first.
 
 Qualification comes *before* the statistics this section's other pages
 compute: the chi-square confidence interval of a
-[Welch PSD](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/) and the random-error
-formulas of the [correlation estimators](https://jmrplens.github.io/phonometry/signals/spectra/correlation-delay/)
+[Welch PSD](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/) and the random-error
+formulas of the [correlation estimators](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/)
 all assume the record is stationary, as does the very idea of *the* $L_\mathrm{eq}$ of
-a measurement in [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/). When a record fails
+a measurement in [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/). When a record fails
 the test, split it at the change (the `segment_values` sequence shows
 where), analyse the pieces, or move to the short-time views - the
-[calibrated spectrogram](https://jmrplens.github.io/phonometry/signals/spectra/time-frequency/) - that do not
+[calibrated spectrogram](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/) - that do not
 assume stationarity. And when it passes, the
-[GUM machinery](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/) can propagate the
+[GUM machinery](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/) can propagate the
 *remaining* random error of every averaged estimate with a clean
 conscience.
 
@@ -1588,12 +1588,12 @@ out glitches stay manual steps, the way the book describes them.
 
 ## See also
 
-- [Spectral analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/): the chi-square confidence interval that assumes the stationarity this page tests.
-- [Time-frequency analysis](https://jmrplens.github.io/phonometry/signals/spectra/time-frequency/): the short-time view for records that fail the test, and for the glides its mean square cannot see.
-- [GUM uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): propagating the remaining random error of a qualified average.
-- [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the $L_\mathrm{eq}$ whose definition assumes one stationary measurement.
-- API reference: [`metrology.data_qualification`](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/).
-- Theory: [Measurement uncertainty (GUM)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the uncertainty framework the qualification criteria of this page feed.
+- [Spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/): the chi-square confidence interval that assumes the stationarity this page tests.
+- [Time-frequency analysis](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/): the short-time view for records that fail the test, and for the glides its mean square cannot see.
+- [GUM uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/): propagating the remaining random error of a qualified average.
+- [Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): the $L_\mathrm{eq}$ whose definition assumes one stationary measurement.
+- API reference: [`metrology.data_qualification`](https://docs.jmrp.io/phonometry/reference/api/metrology/data-qualification/).
+- Theory: [Measurement uncertainty (GUM)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1): the uncertainty framework the qualification criteria of this page feed.
 
 ## References
 
@@ -1619,8 +1619,8 @@ out glitches stay manual steps, the way the book describes them.
 ---
 
 
-<!-- source: docs/signals/metrology/random-incidence.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/
+<!-- source: docs/signals/metrology/random-incidence.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/
 
 # Random-incidence and diffuse-field response (IEC 61183)
 
@@ -1741,7 +1741,7 @@ The X-Y plane alone has the 2,45 dB Table B.1 prints for the microphone at
 element's area in polar angle, which reproduces the list the note prints
 except 77,9° and 282,1°, where the construction gives 77,85° and 282,15°: all
 the other pairs of the printed list sum to 180,0° about the grazing direction,
-and 77,9° + 102,2° is 180,1°. The two are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/).
+and 77,9° + 102,2° is 180,1°. The two are in the [errata register](https://docs.jmrp.io/phonometry/reference/errata/).
 
 ## The random-incidence sensitivity level, band by band
 
@@ -1835,29 +1835,29 @@ the signal-to-noise ratio of A.2.3 and the integration times of B.1.4), the
 averaging of at least eight tones per band (4.11). The corrections of
 IEC 62585 that bring a measurement made with a sound calibrator, a comparison
 coupler or an electrostatic actuator to the meter's free-field response are
-on [their own page](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/); its corrections for the case,
+on [their own page](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/); its corrections for the case,
 the microphone and the windscreen (clauses 9 to 11) are not implemented.
 
 ## See also
 
-- [Free-field corrections](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/): IEC 62585, the
+- [Free-field corrections](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/): IEC 62585, the
   corrections that bring a meter on a calibrator, a coupler or an actuator to
   its free-field response, for a meter with a free-field microphone.
-- [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the calibrator tone that sets the
+- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): the calibrator tone that sets the
   pressure sensitivity every level of a meter starts from.
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): what the
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/): what the
   IEC 61672-1 class of a meter asserts, and which of its tests the library
   runs.
-- [Microphone characterisation](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/):
+- [Microphone characterisation](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/):
   the IEC 60268-4 directivity index of a microphone on its own.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the two equal-area angles.
-- API reference: [`metrology.random_incidence`](https://jmrplens.github.io/phonometry/reference/api/metrology/random-incidence/).
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): the two equal-area angles.
+- API reference: [`metrology.random_incidence`](https://docs.jmrp.io/phonometry/reference/api/metrology/random-incidence/).
 
 ---
 
 
-<!-- source: docs/signals/metrology/free-field-corrections.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/
+<!-- source: docs/signals/metrology/free-field-corrections.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/
 
 # Free-field corrections of a sound level meter (IEC 62585)
 
@@ -1955,7 +1955,7 @@ corrections and not over the calibrators as well.
 `metrology.comparison_coupler_correction` names its two readings in the
 coupler by what each is of, `slm_coupler_level_db` and
 `reference_coupler_level_db`, because Formulas (E.4) to (E.6) exchange the two
-labels Figure E.1 defines (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+labels Figure E.1 defines (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)).
 `metrology.electrostatic_actuator_correction` returns the correction of
 Formula (F.13), normalised to the calibration check frequency, where it is
 zero.
@@ -1981,7 +1981,7 @@ print(round(b1.coverage_factor, 2), round(b1.expanded_uncertainty_db, 2))  # 2.0
 
 Tables I.2 and I.3 both reproduce. Table I.2 prints `k = 2,11`, which is not
 the factor its own 29,98 degrees of freedom give: at 95 % that is 2,04, and
-2,11 is the one for about 17 (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+2,11 is the one for about 17 (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty.svg" alt="The standard uncertainty of each of the fifteen components of Table I.1 at 1 kHz (u_c = 0.0590 dB, k = 2.04, U = 0.121 dB) and at 8 kHz (u_c = 0.1400 dB, k = 2.00, U = 0.280 dB)" width="100%"></picture>
 
@@ -2023,7 +2023,7 @@ print(h.size, (h[[1, 31, 40]] / 1000).round(6))   # 41 [ 1.059254  5.956621 10. 
 ```
 
 All 41 values of Table H.1 reproduce; its exponent column prints `10^(31/80)`
-for index 31, where the value is `10^(31/40)` (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+for index 31, where the value is `10^(31/40)` (an [erratum](https://docs.jmrp.io/phonometry/reference/errata/)).
 
 ## What this guide covers
 
@@ -2045,23 +2045,23 @@ with the IEC 61672-1 acceptance limits that clause 15 p) asks for separately.
 
 ## See also
 
-- [Random-incidence and diffuse-field response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+- [Random-incidence and diffuse-field response (IEC 61183)](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/):
   the response of the meter to sound from every direction.
-- [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
+- [Measurement uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
   and the Welch-Satterthwaite degrees of freedom the budget is built on.
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): what the
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/): what the
   IEC 61672-1 class of a meter asserts.
-- [Periodic tests of a sound level meter (IEC 61672-3)](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
+- [Periodic tests of a sound level meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
   the verdict on the periodic test that uses these corrections.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): Table I.2, Table H.1 and
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): Table I.2, Table H.1 and
   Formulas (E.4) to (E.6).
-- API reference: [`metrology.free_field_corrections`](https://jmrplens.github.io/phonometry/reference/api/metrology/free-field-corrections/).
+- API reference: [`metrology.free_field_corrections`](https://docs.jmrp.io/phonometry/reference/api/metrology/free-field-corrections/).
 
 ---
 
 
-<!-- source: docs/signals/metrology/sound-level-meter-periodic-tests.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/ -->
-Source: https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/
+<!-- source: docs/signals/metrology/sound-level-meter-periodic-tests.md | canonical: https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/ -->
+Source: https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/
 
 # Periodic tests of a sound level meter (IEC 61672-3)
 
@@ -2406,14 +2406,14 @@ free-field correction data come without an uncertainty, is not written.
 
 ## See also
 
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): the conformance
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/): the conformance
   rule of IEC TC 29, and what pattern evaluation and periodic tests attest.
-- [Free-field corrections of a sound level meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/):
+- [Free-field corrections of a sound level meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/):
   the corrections the acoustical test of Clause 12 applies.
-- [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the sound calibrator of Clause 9
+- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): the sound calibrator of Clause 9
   and its verdict under IEC 60942.
-- [Sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/): the frequency and time
+- [Sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/): the frequency and time
   weightings, and the design verdict on the library's own chain.
-- API reference: [`metrology.sound_level_meter`](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-level-meter/).
+- API reference: [`metrology.sound_level_meter`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-level-meter/).
 
 ---

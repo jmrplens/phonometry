@@ -549,7 +549,7 @@ library, and a sheet pasted into an issue or a pull request is never merged.
 - [Your own catalogues](../io/material-catalogues.md): the file, its provenance, the CSV front end and every refusal.
 - [Sound Absorption Measurement and Rating](absorbers/absorption-measurement.md): ISO 354 and the rating of ISO 11654 in full.
 - [Dynamic stiffness of resilient materials](resilient/dynamic-stiffness.md): $s'$ and $s'_\mathrm{t}$, which a floating floor's sheet declares.
-- API reference: [`materials.absorbers.datasheets`](https://jmrplens.github.io/phonometry/reference/api/materials/datasheets/), [`building.datasheets`](https://jmrplens.github.io/phonometry/reference/api/building/datasheets/).
+- API reference: [`materials.absorbers.datasheets`](https://docs.jmrp.io/phonometry/reference/api/materials/datasheets/), [`building.datasheets`](https://docs.jmrp.io/phonometry/reference/api/building/datasheets/).
 
 ## References
 

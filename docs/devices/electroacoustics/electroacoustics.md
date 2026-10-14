@@ -322,7 +322,7 @@ in [Microphone Characterisation (IEC 60268-4)](microphones.md).
 - [Two-channel system measurement](../../signals/spectra/system-measurement.md):
   the physical arrangement behind the $H_1$ estimate of section 5, with the
   reference tap and the two synchronous channels drawn.
-- API reference: [`electroacoustics.distortion`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/noise-measurements/) and [`electroacoustics.frequency_response`](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/frequency-response/).
+- API reference: [`electroacoustics.distortion`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/noise-measurements/) and [`electroacoustics.frequency_response`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/frequency-response/).
 
 ## References
 

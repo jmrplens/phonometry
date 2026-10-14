@@ -1,11 +1,11 @@
 # phonometry: Sound intensity and sound power from it
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/devices/emission/sound-power-intensity.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/
+<!-- source: docs/devices/emission/sound-power-intensity.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/
 
 # Sound Power by Intensity Scanning (ISO 9614-2 / ISO 9614-3)
 
@@ -19,8 +19,8 @@ the two of them: the ISO 9614-2 engineering/survey determination with its
 field indicators and per-band achieved grade, the ISO 9614-3 precision
 (grade 1) scan with its tighter criteria, and the accredited-style test
 fiche. The probe itself, its finite-difference bias and the ISO 9614-1
-discrete-point method live in [Sound Intensity (p-p)](https://jmrplens.github.io/phonometry/devices/emission/intensity/);
-which route fits which job is weighed in [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+discrete-point method live in [Sound Intensity (p-p)](https://docs.jmrp.io/phonometry/devices/emission/intensity/);
+which route fits which job is weighed in [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/).
 
 ## 1. Intensity scanning (ISO 9614-2)
 
@@ -28,7 +28,7 @@ Sound **intensity** is the net energy flux, so it distinguishes energy
 *leaving* the source from steady energy merely passing through the surface,
 which is why the intensity method tolerates background noise that would
 defeat the pressure methods. A p-p probe (see the
-[Sound Intensity guide](https://jmrplens.github.io/phonometry/devices/emission/intensity/)) is swept continuously over each of
+[Sound Intensity guide](https://docs.jmrp.io/phonometry/devices/emission/intensity/)) is swept continuously over each of
 $N$ segments of a surface enclosing the source, reporting the segment-averaged
 signed normal intensity $\langle I_{\mathrm{n},i} \rangle$.
 
@@ -148,7 +148,7 @@ partial powers and evaluates criterion 3; `pressure_levels` enables $F_{pI}$;
 `pressure_residual_index` ($\delta_{pI0}$) plus a second sweep enables the
 per-band
 achieved grade. The probe's finite-difference intensity has a
-frequency-dependent bias handled in the [intensity guide](https://jmrplens.github.io/phonometry/devices/emission/intensity/).
+frequency-dependent bias handled in the [intensity guide](https://docs.jmrp.io/phonometry/devices/emission/intensity/).
 
 ### `sound_power_intensity()` parameters
 
@@ -282,7 +282,7 @@ plt.show()
 The intensity-scanning result (`SoundPowerIntensityResult`, ISO 9614-2)
 writes a one-page PDF fiche laid out like a sound-power test sheet through
 its own `.report()`, sharing the layout and the `ReportMetadata` container of
-the [pressure-method fiche](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
+the [pressure-method fiche](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
 The standard-basis line
 names ISO 9614-2:1996 and the measurement grade, the per-band table lists the
 intensity-derived band sound-power level $L_W$, and the boxed $L_{W\mathrm{A}}$ carries
@@ -427,18 +427,18 @@ normalized levels, the per-band uncertainty and the Annex C omission stated.*
 
 ## See also
 
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the seven determination
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing among the seven determination
   routes, what the accuracy grades promise, and the ISO 4871 noise-emission
   declaration a measured $L_{W\mathrm{A}}$ feeds.
-- [Sound Intensity (p-p)](https://jmrplens.github.io/phonometry/devices/emission/intensity/): the two-microphone probe, its
+- [Sound Intensity (p-p)](https://docs.jmrp.io/phonometry/devices/emission/intensity/): the two-microphone probe, its
   finite-difference bias, the ISO 9614-1 field indicators behind the scanning
   methods and the discrete-point determination those indicators qualify.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/):
   the enveloping-surface and anechoic routes for quiet sites.
-- [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/):
   the precision diffuse-field route in a qualified laboratory room.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/): the field-indicator derivations.
-- API reference: [`emission.sound_power_intensity`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/).
+- [Theory](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/): the field-indicator derivations.
+- API reference: [`emission.sound_power_intensity`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
 
 ## References
 
@@ -475,8 +475,8 @@ clause 9.2 not-applicable flagging of section 2.
 ---
 
 
-<!-- source: docs/devices/emission/intensity.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/intensity/ -->
-Source: https://jmrplens.github.io/phonometry/devices/emission/intensity/
+<!-- source: docs/devices/emission/intensity.md | canonical: https://docs.jmrp.io/phonometry/devices/emission/intensity/ -->
+Source: https://docs.jmrp.io/phonometry/devices/emission/intensity/
 
 # Sound Intensity (p-p method)
 
@@ -882,7 +882,7 @@ which is offered to class 2 as an alternative. A verdict computed over fewer
 bands is flagged `range_limited` so it cannot be read as a full-range claim.
 The Spanish translation UNE-EN 61043:1999 records only the octave alternative
 for class 2 and drops the one-third-octave one; the library follows the
-EN/IEC text (see the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/)). Clause 8 combines separately supplied components:
+EN/IEC text (see the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/)). Clause 8 combines separately supplied components:
 `instrument_class_from_components(probe_class, processor_class)` returns 1
 only when both are class 1, and 2 for every other pairing.
 
@@ -1279,18 +1279,18 @@ the microphones alone.
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
 | `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
 
-See [Theory](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/) for the derivations and [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/)
+See [Theory](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/) for the derivations and [Calibration](https://docs.jmrp.io/phonometry/signals/metrology/calibration/)
 for absolute scaling of the two channels.
 
 ## See also
 
-- [Sound Power by Intensity Scanning](https://jmrplens.github.io/phonometry/devices/emission/sound-power-intensity/): the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
-- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing between the intensity, pressure and reverberation-room routes.
-- [Sound power from surface vibration](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
-- [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the absolute scaling of the two channels the estimator assumes.
-- [Theory: signal analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
-- API reference: [`emission.intensity`](https://jmrplens.github.io/phonometry/reference/api/power/intensity/).
-- Theory: [Sound intensity (IEC 61043)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
+- [Sound Power by Intensity Scanning](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/): the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): choosing between the intensity, pressure and reverberation-room routes.
+- [Sound power from surface vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
+- [Calibration](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): the absolute scaling of the two channels the estimator assumes.
+- [Theory: signal analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
+- API reference: [`emission.intensity`](https://docs.jmrp.io/phonometry/reference/api/power/intensity/).
+- Theory: [Sound intensity (IEC 61043)](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
 
 ## References
 

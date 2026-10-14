@@ -1,11 +1,11 @@
 # phonometry: Signal analysis
 
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+Part of https://docs.jmrp.io/phonometry/llms.txt. Full text of the pages in this area.
 
 ---
 
-<!-- source: docs/signals/index.md | canonical: https://jmrplens.github.io/phonometry/signals/ -->
-Source: https://jmrplens.github.io/phonometry/signals/
+<!-- source: docs/signals/index.md | canonical: https://docs.jmrp.io/phonometry/signals/ -->
+Source: https://docs.jmrp.io/phonometry/signals/
 
 # Signal analysis
 
@@ -40,153 +40,153 @@ arbitrary, and why every level function also accepts a `calibration_factor` in
 pascals per digital unit or the `dbfs=True` escape hatch. Simple metrics come
 back as floats and arrays; the richer ones come back as frozen result objects
 that expose `.plot()`. [Calibration and
-dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) resolves the third convention
+dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) resolves the third convention
 in full, and [Multichannel and
-Performance](https://jmrplens.github.io/phonometry/signals/filters/multichannel/) the first.
+Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/) the first.
 
 Two ways in. To see the whole chain working at once, run [Build a sound level
-meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/): it calibrates against a
+meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/): it calibrates against a
 calibrator tone, applies the frequency and time weightings, integrates into
 Leq, SEL and percentile levels, splits the signal into octave bands and checks
 the class of every stage, on one runnable page. To learn the pieces in
 dependency order, start at [Filter
-Banks](https://jmrplens.github.io/phonometry/signals/filters/filter-banks/), which introduces the band
+Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/), which introduces the band
 decomposition every other page assumes, then [Integrated and Statistical
-Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/) for the metrics most measurements
-end in, and [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/)
+Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/) for the metrics most measurements
+end in, and [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/)
 to anchor them to pascals.
 
-## [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/)
+## [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/)
 
-- [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/): the whole
+- [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/): the whole
   chain assembled on one runnable page (calibration, frequency and time
   weighting, the integrated and statistical levels, the band decomposition and
   the class verdict of each stage) as the worked introduction to the four
   subsections below.
 
-## [Octave filtering](https://jmrplens.github.io/phonometry/signals/filters/)
+## [Octave filtering](https://docs.jmrp.io/phonometry/signals/filters/)
 
 Fractional octave band decomposition and the two ways to scale it: streaming
 blocks and multichannel arrays.
 
-- [Filter Banks](https://jmrplens.github.io/phonometry/signals/filters/filter-banks/): the fractional-octave
+- [Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/): the fractional-octave
   band mathematics, the bank parameters, the parametric EQ, band
   decomposition and zero-phase offline filtering.
-- [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): the five
+- [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/): the five
   filter architectures compared, the full response gallery and
   per-architecture usage, with the Linkwitz-Riley crossover.
-- [Filter Class Verification (IEC 61260-1)](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/):
+- [Filter Class Verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/):
   the Table 1 acceptance mask band by band, the effective bandwidth and the
   summation of outputs of IEC 61260-2, the swept time-invariance test, the
   grading of IEC 61260-3 periodic tests, the class 0 of the withdrawn 1995
   edition and the compliance fiche.
-- [Block Processing](https://jmrplens.github.io/phonometry/signals/filters/block-processing/): stateful streaming
+- [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/): stateful streaming
   analysis that carries filter state across buffers, for signals that never
   fit in memory.
-- [Multichannel and Performance](https://jmrplens.github.io/phonometry/signals/filters/multichannel/): vectorized
+- [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/): vectorized
   analysis of many channels at once, with performance notes.
 
-## [Levels and weighting](https://jmrplens.github.io/phonometry/signals/levels/)
+## [Levels and weighting](https://docs.jmrp.io/phonometry/signals/levels/)
 
 From weighted signal to reported level: the frequency weightings, the time
 ballistics and the integrated, statistical and rating levels.
 
-- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the
+- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/): the
   IEC 61672-1 ear-response curves, the high-frequency accuracy mode and the
   Table 3 class verification.
-- [Special Weightings (G, B, D, AU)](https://jmrplens.github.io/phonometry/signals/levels/special-weightings/):
+- [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/):
   the ISO 7196 infrasound G-weighting, the historical B and D curves and AU
   per IEC 61012.
-- [Time Weighting](https://jmrplens.github.io/phonometry/signals/levels/time-weighting/): Fast, Slow and Impulse
+- [Time Weighting](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/): Fast, Slow and Impulse
   exponential ballistics per IEC 61672-1.
-- [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): Leq and
+- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): Leq and
   LAeq, percentile levels L10/L50/L90, LCpeak and SEL, noise dose (IEC 61252),
   and octave spectrograms.
-- [Environmental Levels (ISO 1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels (ISO 1996-1/-2)](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/):
   Lden, Ldn and the composite rating levels, the tonal adjustment, the
   residual-noise correction and the uncertainty budget.
-- [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/):
+- [Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/):
   the corrected level LKeq, the Kt/Kf/Ki corrections, the evaluation periods
   and noise phases, and the limit tables.
 
-## [Signals and spectra](https://jmrplens.github.io/phonometry/signals/spectra/)
+## [Signals and spectra](https://docs.jmrp.io/phonometry/signals/spectra/)
 
 Fine-grained frequency- and time-domain analysis, every estimate calibrated
 and carrying its statistical quality.
 
-- [Calibrated spectral analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/): the
+- [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/): the
   Bendat & Piersol Welch estimators with their statistical quality: PSD and
   cross-spectral density with chi-square confidence intervals, the coherent
   output spectrum with the spectral SNR, 1/n-octave smoothing and
   exact-slope colored-noise generators.
-- [Multiple and partial coherence](https://jmrplens.github.io/phonometry/signals/spectra/miso-coherence/): the
+- [Multiple and partial coherence](https://docs.jmrp.io/phonometry/signals/spectra/miso-coherence/): the
   multiple-input/output coherence functions for multiple correlated
   sources and one output, with the conditioning that tells a genuine cause
   from a source that merely correlates with it, and the partial coherent
   output spectra that say which source dominates each band.
-- [Time-frequency analysis](https://jmrplens.github.io/phonometry/signals/spectra/time-frequency/): the
+- [Time-frequency analysis](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/): the
   calibrated STFT spectrogram in absolute units (dB SPL for pascals) and
   the zoom FFT that resolves tones closer than a practical FFT bin.
-- [Cepstrum, echoes and the envelope spectrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/):
+- [Cepstrum, echoes and the envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/):
   the power, real and complex cepstrum with quefrency analysis, echo
   detection with the reflection coefficient read off the cepstral peak,
   lowpass/highpass liftering of a log spectrum, and the envelope spectrum
   that turns amplitude modulations into discrete lines.
-- [Time synchronous averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/):
+- [Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/):
   extraction of a periodic waveform of known period by time domain averaging,
   the comb filter that describes it in the frequency domain, the square-root
   noise-reduction law, and the choice of the number of averages that places a
   comb node on an interfering order (McFadden 1987).
-- [Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/)
+- [Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/)
   (in the vibration section): the kinematic fault-frequency families of
   rotating machinery (Norton &
   Karczub Section 8.4) drawn on top of a measured envelope spectrum: bearing
   BPFO, BPFI, BSF and cage frequencies, gear-mesh sidebands, induction-motor
   slip, pole-pass and rotor-slot harmonics, and blade-passing tones.
-- [Correlation, time delay and envelope](https://jmrplens.github.io/phonometry/signals/spectra/correlation-delay/):
+- [Correlation, time delay and envelope](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/):
   correlation estimates with the Bendat & Piersol random errors, time-delay
   estimation by direct correlation, cross-spectrum phase slope and the
   Knapp & Carter GCC weightings, sub-sample impulse-response delay and
   alignment, and the Hilbert envelope.
-- [Test signals and sample-rate tools](https://jmrplens.github.io/phonometry/signals/spectra/test-signals/):
+- [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/):
   IEC 60268-1 tone bursts with exact gating, resampling with a stated
   anti-alias specification, and band-limited fractional delay.
-- [System measurement](https://jmrplens.github.io/phonometry/signals/spectra/system-measurement/):
+- [System measurement](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/):
   complementary Golay pairs, sweeps with an arbitrary target magnitude
   spectrum by group-delay shaping, and the Kirkeby-regularized inversion of
   a measured response.
 
-## [Calibration and uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/)
+## [Calibration and uncertainty](https://docs.jmrp.io/phonometry/signals/metrology/)
 
 What the numbers mean and how much to trust them.
 
-- [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): physical SPL
+- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): physical SPL
   calibration from a calibrator tone (IEC 60942), the stability check it applies
   to that recording, and the digital dBFS mode.
-- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/):
   what a performance class asserts, the verifiers that grade each stage
   against its tolerance tables, how to read the conformance report, and the
   scope of IEC 61672-2/-3 and IEC 61260-2/-3.
-- [Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty (GUM and Monte Carlo)](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method of
   ISO/IEC Guide 98-3, with expanded uncertainty and coverage intervals.
-- [Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/): the reverse
+- [Data qualification](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/): the reverse
   arrangement and runs stationarity tests on segment statistics, and the Rice
   level-crossing and peak statistics with the irregularity factor.
-- [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/):
   the directivity factor of a sound level meter and its random-incidence and
   diffuse-field sensitivity levels.
-- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/):
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/):
   the corrections that bring a meter on a calibrator, a coupler or an
   actuator to its free-field response, and their uncertainty.
-- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
+- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
   the verdict on a laboratory's periodic-test results for a working meter,
   clause by clause, and the statement of Clause 22.
-- [Microphone Calibration by Comparison (IEC 61094-5/-8)](https://jmrplens.github.io/phonometry/signals/metrology/comparison-calibration/):
+- [Microphone Calibration by Comparison (IEC 61094-5/-8)](https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/):
   a working standard microphone calibrated against a reference in a pressure
   field or a free field, with the corrections and the uncertainty budget each
   part asks for.
-- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](https://jmrplens.github.io/phonometry/signals/metrology/reciprocity-calibration/):
+- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/):
   laboratory standard microphones calibrated in pairs with no reference, in a
   coupler or a free field, with the corrections and the budgets of Table 1.
 
@@ -208,7 +208,7 @@ results by `filters.verify_filter_periodic`, none of which performs a
 physical test;
 the IEC 61260-2 tests that need no specimen are computed on the design), so a class
 verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
-verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/) draws
+verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/) draws
 that boundary part by part.
 
 **No file is opened.** Nothing in the library decodes WAV, FLAC or any other
@@ -221,28 +221,28 @@ multi-sensor TDOA solver, no beamformer and no source localisation.
 
 **No perceptual features.** The cepstrum here is the plain linear-frequency
 one, with no mel warping or MFCC variant, and loudness as a sensation belongs
-to [Psychoacoustics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/), not to the
+to [Psychoacoustics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/), not to the
 energy metrics of this section.
 
 ## Before and after these pages
 
 The derivations behind these pages are in [Signal analysis
-theory](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/): the band grid, the weighting curves,
+theory](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/): the band grid, the weighting curves,
 the time integration, the intensity approximation and the uncertainty
 framework. If you have not run anything yet, [Getting
-Started](https://jmrplens.github.io/phonometry/start/getting-started/) installs the library and
+Started](https://docs.jmrp.io/phonometry/start/getting-started/) installs the library and
 calibrates a first analysis.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
-and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
+[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+and [All guides](https://docs.jmrp.io/phonometry/) lists every page with a line on
 each.
 
 ---
 
 
-<!-- source: docs/signals/sound-level-meter.md | canonical: https://jmrplens.github.io/phonometry/signals/sound-level-meter/ -->
-Source: https://jmrplens.github.io/phonometry/signals/sound-level-meter/
+<!-- source: docs/signals/sound-level-meter.md | canonical: https://docs.jmrp.io/phonometry/signals/sound-level-meter/ -->
+Source: https://docs.jmrp.io/phonometry/signals/sound-level-meter/
 
 # Build a sound level meter
 
@@ -305,7 +305,7 @@ cal = metrology.sensitivity(calibrator, target_spl=94.0, fs=fs)
 # calibration_factor. For this synthetic tone it is ~1.0.
 ```
 
-Deep guide: [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/), which
+Deep guide: [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/), which
 also covers calibrating from a known microphone sensitivity and the digital
 dBFS mode used when no physical reference exists.
 
@@ -339,8 +339,8 @@ integrate the squared weighted signal directly, with no ballistics at all,
 which is why they show no needle movement to follow. The chain is shown here
 because it *is* the meter's display.
 
-Deep guides: [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/)
-and [Time Weighting](https://jmrplens.github.io/phonometry/signals/levels/time-weighting/), which takes this same clip
+Deep guides: [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/)
+and [Time Weighting](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/), which takes this same clip
 apart against the IEC 61672-1 tone-burst table.
 
 ## 4. Integrate: the numbers a meter reports
@@ -369,9 +369,9 @@ nine-times-longer background gets back in duration), $L_{\mathrm{A}E}$ is $L_\ma
 plus $10\log_{10}$ of the 10 s duration, and $L_{90}$ barely notices the event at
 all.
 
-Deep guide: [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/),
+Deep guide: [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/),
 which adds noise dose and octave spectrograms; the $L_\mathrm{den}$ and rating levels
-continue in [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/).
+continue in [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/).
 
 ## 5. Band-filter: the spectrum view (IEC 61260-1)
 
@@ -391,10 +391,10 @@ spl, bands = filtered.levels, filtered.frequencies
 print(dict(zip(bands, np.round(spl, 1))))
 ```
 
-Deep guides: [Filter Banks](https://jmrplens.github.io/phonometry/signals/filters/filter-banks/) for the filter
+Deep guides: [Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/) for the filter
 architectures and zero-phase mode,
-[Block Processing](https://jmrplens.github.io/phonometry/signals/filters/block-processing/) for streaming, and
-[Multichannel and Performance](https://jmrplens.github.io/phonometry/signals/filters/multichannel/) for arrays.
+[Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/) for streaming, and
+[Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/) for arrays.
 
 ## 6. Verify: is this meter class 1?
 
@@ -415,22 +415,22 @@ print(filters.verify_filter_class(bank).overall_class)    # 1
 
 The verdicts also come per band, so you can see exactly where a design would
 leave its class corridor. Deep guides:
-[Frequency Weighting](https://jmrplens.github.io/phonometry/signals/levels/weighting/) (section on class
-verification) and [Filter class verification](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/) (the
+[Frequency Weighting](https://docs.jmrp.io/phonometry/signals/levels/weighting/) (section on class
+verification) and [Filter class verification](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/) (the
 Table 1 mask, class 0 and the compliance fiche).
 
 ## Where to go next
 
 The meter built here is the trunk; the rest of the core grows from it.
 
-- [Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty (GUM and Monte Carlo)](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/):
   attach an uncertainty to the $L_\mathrm{Aeq}$ you just computed, calibration term
   included.
-- [Calibrated spectral analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/): when
+- [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/): when
   bands are too coarse, the Welch PSD with confidence intervals.
-- [Correlation, time delay and envelope](https://jmrplens.github.io/phonometry/signals/spectra/correlation-delay/):
+- [Correlation, time delay and envelope](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/):
   two microphones instead of one, and the delay between them.
-- [Block Processing](https://jmrplens.github.io/phonometry/signals/filters/block-processing/): turn this page's
+- [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/): turn this page's
   offline meter into a streaming one with carried filter state.
 
 ## What this guide covers
@@ -447,7 +447,7 @@ laboratory measured on it against every IEC 60942:2017 requirement that has an
 acceptance limit, by the conformance rule of IEC TC 29. So has a working
 meter's periodic test: `metrology.verify_sound_level_meter_periodic` grades
 what a laboratory measured in the tests of IEC 61672-3:2013, clause by clause
-([Periodic tests of a sound level meter](https://jmrplens.github.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)).
+([Periodic tests of a sound level meter](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)).
 
 **Not covered.** `verify_weighting_class` and `verify_filter_class` check the
 frequency-response *design* of the digital filters against the standards'
@@ -461,16 +461,16 @@ last section screen the *recording*, not the instrument. The same holds for
 the calibrator: nothing here performs an IEC 60942:2017 test on one.
 `verify_sound_calibrator` grades the numbers a laboratory measured, and
 `sensitivity()` screens the short-term stability of the take against Table 2;
-[Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) says exactly what each checks
+[Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) says exactly what each checks
 and what it does not.
 
 ## See also
 
-- API reference: [`metrology.calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/),
-  [`filters.weighting`](https://jmrplens.github.io/phonometry/reference/api/filters/weighting/),
-  [`signals.levels`](https://jmrplens.github.io/phonometry/reference/api/signals/levels/),
-  [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/) and
-  [`filters.compliance`](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/).
+- API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/),
+  [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/),
+  [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/),
+  [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and
+  [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
 
 ## References
 

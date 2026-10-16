@@ -626,7 +626,7 @@ def _sigma_r0_3745(nominal: int, room: PrecisionRoom) -> float:
 
 def precision_uncertainty(
     sigma_r0: float | np.ndarray,
-    sigma_omc: float = 0.0,
+    sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
 ) -> float | np.ndarray:
     r"""Expanded uncertainty :math:`U = k \sigma_\mathrm{tot}` (ISO 3745:2012).
@@ -637,17 +637,17 @@ def precision_uncertainty(
     :math:`k = 1.6` (95 %, one-sided, when comparing to a limit).
 
     :param sigma_r0: Reproducibility standard deviation (Tables 2/3), dB.
-    :param sigma_omc: Operating/mounting standard deviation ``sigma_omc``, dB.
+    :param sigma_omc_db: Operating/mounting standard deviation ``sigma_omc_db``, dB.
     :param coverage_factor: ``k`` (typically 2 or 1.6).
     :return: ``U`` in decibels, scalar or per band matching ``sigma_r0``.
     """
     if coverage_factor <= 0.0:
         msg = "'coverage_factor' must be positive."
         raise ValueError(msg)
-    if sigma_omc < 0.0:
-        msg = "'sigma_omc' must be non-negative."
+    if sigma_omc_db < 0.0:
+        msg = "'sigma_omc_db' must be non-negative."
         raise ValueError(msg)
-    sigma_tot = np.hypot(np.asarray(sigma_r0, dtype=np.float64), sigma_omc)
+    sigma_tot = np.hypot(np.asarray(sigma_r0, dtype=np.float64), sigma_omc_db)
     u = coverage_factor * sigma_tot
     return as_float_or_array(u)
 
@@ -723,7 +723,7 @@ def _precision_uncertainty_bands(
     freqs: np.ndarray | None,
     n_bands: int,
     room: PrecisionRoom,
-    sigma_omc: float,
+    sigma_omc_db: float,
     coverage_factor: float,
 ) -> np.ndarray:
     """Per-band expanded uncertainty (Eq. 24/25), NaN without band centres."""
@@ -734,7 +734,7 @@ def _precision_uncertainty_bands(
         dtype=np.float64,
     )
     return np.asarray(
-        precision_uncertainty(sigma_bands, sigma_omc, coverage_factor),
+        precision_uncertainty(sigma_bands, sigma_omc_db, coverage_factor),
         dtype=np.float64,
     )
 
@@ -755,7 +755,7 @@ def _room_qualification_warnings(
         raise ValueError(msg)
     if check.passes:
         qualified_radius = check.maximum_qualified_radius_m
-        low, high = float(check.frequencies_hz[0]), float(check.frequencies_hz[-1])
+        low, high = float(check.frequencies[0]), float(check.frequencies[-1])
     elif check.conforming_range_hz is not None and not check.not_judged:
         qualified_radius = check.conforming_radius_m
         low, high = check.conforming_range_hz
@@ -801,7 +801,7 @@ def sound_power_anechoic(
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
-    sigma_omc: float = ...,
+    sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult: ...
@@ -818,7 +818,7 @@ def sound_power_anechoic(
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
-    sigma_omc: float = ...,
+    sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult: ...
@@ -835,7 +835,7 @@ def sound_power_anechoic(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
     air_absorption_coefficient: float | np.ndarray | None = None,
-    sigma_omc: float = 0.0,
+    sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
     room_qualification: FreeFieldCheck | None = None,
 ) -> PrecisionSoundPowerResult:
@@ -874,7 +874,7 @@ def sound_power_anechoic(
     :param static_pressure_kpa: Static pressure ``ps`` (kPa), for C1/C2.
     :param air_absorption_coefficient: ``a(f)`` (dB/m) for C3, scalar or
         per band; ``None`` leaves :math:`C_3 = 0`.
-    :param sigma_omc: Operating/mounting standard deviation, dB.
+    :param sigma_omc_db: Operating/mounting standard deviation, dB.
     :param coverage_factor: ``k`` (2 two-sided, 1.6 one-sided).
     :param room_qualification: The :func:`~phonometry.emission.check_free_field`
         verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room
@@ -939,9 +939,9 @@ def sound_power_anechoic(
         vir = np.zeros(n_bands, dtype=np.float64)
 
     # --- uncertainty (Eq. 24/25) ------------------------------------------
-    u_a = float(precision_uncertainty(_SIGMA_R0_3745_A, sigma_omc, coverage_factor))
+    u_a = float(precision_uncertainty(_SIGMA_R0_3745_A, sigma_omc_db, coverage_factor))
     u_bands = _precision_uncertainty_bands(
-        freqs, n_bands, room, sigma_omc, coverage_factor
+        freqs, n_bands, room, sigma_omc_db, coverage_factor
     )
 
     return PrecisionSoundPowerResult(

@@ -54,7 +54,7 @@ def _calibration(
     )
     return emission.reference_source_calibration(
         grid,
-        frequencies_hz=_THIRDS,
+        frequencies=_THIRDS,
         arrangement="fixed",
         **kwargs,  # type: ignore[arg-type]
     )
@@ -74,7 +74,7 @@ def test_formula_1_uses_the_energy_average() -> None:
 
 
 def test_formula_1_needs_two_repetitions() -> None:
-    with pytest.raises(ValueError, match="'levels_db'"):
+    with pytest.raises(ValueError, match="'levels'"):
         emission.repeatability_standard_deviation([80.0])
 
 
@@ -149,7 +149,7 @@ def test_annex_a_c2_for_each_radiation_character() -> None:
         temperature_c=30.0,
         static_pressure_kpa=95.0,
         radiation="monopole",
-        frequencies_hz=[100.0, 1000.0],
+        frequencies=[100.0, 1000.0],
         knee_frequency_hz=500.0,
     )
     np.testing.assert_allclose(
@@ -159,7 +159,7 @@ def test_annex_a_c2_for_each_radiation_character() -> None:
         temperature_c=30.0,
         static_pressure_kpa=95.0,
         radiation="dipole",
-        frequencies_hz=[500.0, 1000.0],
+        frequencies=[500.0, 1000.0],
         knee_frequency_hz=500.0,
     )
     np.testing.assert_allclose(dipole, pressure + 25.0 * ratio, rtol=0, atol=1e-12)
@@ -168,7 +168,7 @@ def test_annex_a_c2_for_each_radiation_character() -> None:
 def test_a_dipole_below_its_knee_has_no_c2() -> None:
     with pytest.raises(ValueError, match="dipole"):
         emission.radiation_impedance_correction(
-            radiation="dipole", frequencies_hz=[100.0], knee_frequency_hz=500.0
+            radiation="dipole", frequencies=[100.0], knee_frequency_hz=500.0
         )
     with pytest.raises(ValueError, match="knee"):
         emission.radiation_impedance_correction(radiation="monopole")
@@ -356,14 +356,14 @@ def test_annex_b_replaces_the_lowest_bands_when_they_agree() -> None:
     freqs = np.concatenate([[50.0, 63.0, 80.0], _THIRDS])
     levels = np.full((20, freqs.size), 80.0)
     pressure = emission.reference_source_calibration(
-        levels, frequencies_hz=freqs, arrangement="fixed"
+        levels, frequencies=freqs, arrangement="fixed"
     ).sound_power_level_db
     intensity = np.full(freqs.size, np.nan)
     low = freqs <= 315.0
     intensity[low] = pressure[low] + np.where(freqs[low] <= 80.0, 3.5, 0.8)
     cal = emission.reference_source_calibration(
         levels,
-        frequencies_hz=freqs,
+        frequencies=freqs,
         arrangement="fixed",
         intensity_sound_power_level_db=intensity,
     )
@@ -374,7 +374,7 @@ def test_annex_b_replaces_the_lowest_bands_when_they_agree() -> None:
     intensity[freqs == 200.0] = pressure[freqs == 200.0][0] + 1.2
     refused = emission.reference_source_calibration(
         levels,
-        frequencies_hz=freqs,
+        frequencies=freqs,
         arrangement="fixed",
         intensity_sound_power_level_db=intensity,
     )
@@ -384,17 +384,17 @@ def test_annex_b_replaces_the_lowest_bands_when_they_agree() -> None:
 
 def test_the_calibration_bands_must_be_one_third_octaves_from_50_hz() -> None:
     levels = np.full((20, 2), 80.0)
-    with pytest.raises(ValueError, match="'frequencies_hz'"):
+    with pytest.raises(ValueError, match="'frequencies'"):
         emission.reference_source_calibration(
-            levels, frequencies_hz=[40.0, 50.0], arrangement="fixed"
+            levels, frequencies=[40.0, 50.0], arrangement="fixed"
         )
 
 
 def test_a_calibration_needs_bands() -> None:
     levels = np.full((20, 0), 80.0)
-    with pytest.raises(ValueError, match="'frequencies_hz' must be a non-empty"):
+    with pytest.raises(ValueError, match="'frequencies' must be a non-empty"):
         emission.reference_source_calibration(
-            levels, frequencies_hz=[], arrangement="fixed"
+            levels, frequencies=[], arrangement="fixed"
         )
 
 
@@ -406,7 +406,7 @@ def test_a_calibration_needs_finite_levels(bad: object) -> None:
     else:
         levels = np.full((20, _THIRDS.size), 80.0)
         levels[2, 0] = bad
-    with pytest.raises(ValueError, match="'levels_db' must hold the finite levels"):
+    with pytest.raises(ValueError, match="'levels' must hold the finite levels"):
         _calibration(levels)
 
 
@@ -483,13 +483,13 @@ def _hemi_check(radius_end: float) -> emission.FreeFieldCheck:
         for u, targets in directions
     ]
     fit = emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=grid, room="hemi-anechoic"
+        traverses, frequencies=grid, room="hemi-anechoic"
     )
     return emission.check_free_field(
         fit,
         bandwidth="broadband",
         source_directionality=emission.verify_source_directionality(
-            np.full((32, grid.size), 80.0), frequencies_hz=grid, room="hemi-anechoic"
+            np.full((32, grid.size), 80.0), frequencies=grid, room="hemi-anechoic"
         ),
         reflecting_plane_absorption_coefficient=0.02,
         reflecting_plane_margin_m=1.0,
@@ -514,13 +514,13 @@ def test_the_annex_b_bands_need_no_qualified_room() -> None:
     freqs = np.concatenate([[50.0, 63.0, 80.0], _THIRDS])
     levels = np.full((20, freqs.size), 80.0)
     pressure = emission.reference_source_calibration(
-        levels, frequencies_hz=freqs, arrangement="fixed"
+        levels, frequencies=freqs, arrangement="fixed"
     ).sound_power_level_db
     intensity = np.where(freqs <= 315.0, pressure + 0.5, np.nan)
     check = _hemi_check(3.0)  # qualified from 100 Hz to 10 kHz only
     cal = emission.reference_source_calibration(
         levels,
-        frequencies_hz=freqs,
+        frequencies=freqs,
         arrangement="fixed",
         intensity_sound_power_level_db=intensity,
         room_qualification=check,
@@ -528,7 +528,7 @@ def test_the_annex_b_bands_need_no_qualified_room() -> None:
     assert cal.room_qualified is True
     with pytest.warns(emission.SoundPowerWarning, match="8.1"):
         pressure_only = emission.reference_source_calibration(
-            levels, frequencies_hz=freqs, arrangement="fixed", room_qualification=check
+            levels, frequencies=freqs, arrangement="fixed", room_qualification=check
         )
     assert pressure_only.room_qualified is False
 
@@ -598,7 +598,7 @@ def test_the_repetitions_are_three_or_five() -> None:
 def test_a_spectrum_wider_than_12_db_fails_5_4() -> None:
     lw = np.linspace(80.0, 92.5, _THIRDS.size)  # 0,625 dB steps, 12,5 dB range
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS, directivity_index_db=np.zeros(_THIRDS.size),
+        lw, frequencies=_THIRDS, directivity_index_db=np.zeros(_THIRDS.size),
         repeated_levels_db=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.core_range_db == pytest.approx(12.5)
@@ -609,7 +609,7 @@ def test_a_step_of_more_than_3_db_fails_5_4() -> None:
     lw = np.full(_THIRDS.size, 90.0)
     lw[10] = 93.1
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS, directivity_index_db=np.zeros(_THIRDS.size),
+        lw, frequencies=_THIRDS, directivity_index_db=np.zeros(_THIRDS.size),
         repeated_levels_db=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.adjacent_step_db[10] == pytest.approx(3.1)
@@ -620,7 +620,7 @@ def test_an_extended_range_is_held_to_16_db_and_4_db() -> None:
     freqs = np.concatenate([[50.0, 63.0, 80.0], _THIRDS])
     lw = np.concatenate([[80.5, 84.0, 87.8], np.full(_THIRDS.size, 91.5)])
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=freqs, directivity_index_db=np.zeros(freqs.size),
+        lw, frequencies=freqs, directivity_index_db=np.zeros(freqs.size),
         repeated_levels_db=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.extended_range_db == pytest.approx(11.0)
@@ -628,7 +628,7 @@ def test_an_extended_range_is_held_to_16_db_and_4_db() -> None:
     assert verdict.spectrum_met
     lw[0] = 75.0  # 16,5 dB range, 9 dB step
     assert not emission.verify_reference_sound_source(
-        lw, frequencies_hz=freqs, directivity_index_db=np.zeros(freqs.size),
+        lw, frequencies=freqs, directivity_index_db=np.zeros(freqs.size),
         repeated_levels_db=np.vstack([lw, lw, lw]),
     ).spectrum_met  # fmt: skip
 
@@ -645,7 +645,7 @@ def test_the_16_db_range_is_judged_on_its_own(*, lowest: float, met: bool) -> No
     lw = np.concatenate(
         [lowest + np.array([0.0, 4.0, 8.0]), np.linspace(83.0, 88.5, _THIRDS.size)]
     )
-    verdict = emission.verify_reference_sound_source(lw, frequencies_hz=freqs)
+    verdict = emission.verify_reference_sound_source(lw, frequencies=freqs)
     assert np.all(verdict.adjacent_step_db <= verdict.adjacent_limit_db + 1e-12)
     assert verdict.core_range_db <= 12.0
     assert verdict.extended_range_db == pytest.approx(88.5 - lowest, abs=1e-12)
@@ -655,7 +655,7 @@ def test_the_16_db_range_is_judged_on_its_own(*, lowest: float, met: bool) -> No
 def test_a_missing_core_band_fails_5_4() -> None:
     lw = np.full(_THIRDS.size - 1, 90.0)
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS[:-1], directivity_index_db=np.zeros(lw.size),
+        lw, frequencies=_THIRDS[:-1], directivity_index_db=np.zeros(lw.size),
         repeated_levels_db=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert not verdict.frequency_range_met
@@ -667,12 +667,12 @@ def test_a_directivity_index_above_6_db_fails_5_5() -> None:
     directivity = np.zeros(_THIRDS.size)
     directivity[5] = 6.2
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS, directivity_index_db=directivity,
+        lw, frequencies=_THIRDS, directivity_index_db=directivity,
         repeated_levels_db=np.vstack([lw, lw, lw]),
     )  # fmt: skip
     assert verdict.directivity_met is False
     labelled = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
         supply_variation_db=0.1, reverberation_rooms_only=True,
     )  # fmt: skip
     assert labelled.directivity_met is True
@@ -691,10 +691,10 @@ def test_unjudged_requirements_hold_the_verdict() -> None:
 
 def test_a_calibration_brings_its_own_bands() -> None:
     calibration = _calibration()
-    with pytest.raises(ValueError, match="'frequencies_hz'"):
-        emission.verify_reference_sound_source(calibration, frequencies_hz=_THIRDS)
+    with pytest.raises(ValueError, match="'frequencies'"):
+        emission.verify_reference_sound_source(calibration, frequencies=_THIRDS)
     levels = np.full(3, 90.0)
-    with pytest.raises(ValueError, match="'frequencies_hz'"):
+    with pytest.raises(ValueError, match="'frequencies'"):
         emission.verify_reference_sound_source(levels)
 
 
@@ -705,13 +705,13 @@ def test_a_change_beyond_2_83_times_table_1_calls_for_recalibration() -> None:
     freqs = [80.0, 125.0, 1000.0]
     reference = np.array([85.0, 88.0, 90.0])
     within = emission.verify_reference_source_drift(
-        reference, reference + [2.26, -1.13, 0.56], frequencies_hz=freqs
+        reference, reference + [2.26, -1.13, 0.56], frequencies=freqs
     )
     np.testing.assert_allclose(within.limit_db, [2.264, 1.132, 0.566])
     assert within.passes
     assert not within.recalibration_required
     beyond = emission.verify_reference_source_drift(
-        reference, reference + [0.0, 0.0, 0.57], frequencies_hz=freqs
+        reference, reference + [0.0, 0.0, 0.57], frequencies=freqs
     )
     assert beyond.recalibration_required
     with pytest.raises(TypeError, match="passes"):
@@ -901,14 +901,14 @@ def test_iso_3743_1_energy_reads_the_calibration() -> None:
     background = np.full(3, 40.0)
     from_object = emission.sound_energy_hard_walled(
         events, rss, cal, freqs, events=5, background_levels=background,
-        integration_time_s=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
+        integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     at_test = cal.sound_power_level_at(
         freqs, bandwidth="octave", temperature_c=20.0, static_pressure_kpa=90.0
     )
     from_levels = emission.sound_energy_hard_walled(
         events, rss, at_test, freqs, events=5, background_levels=background,
-        integration_time_s=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
+        integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     np.testing.assert_allclose(
         from_object.sound_energy_level,
@@ -1062,7 +1062,7 @@ def test_iso_3743_2_suitability_refuses_a_calibration_it_cannot_read() -> None:
     no value at the test but the manufacturer's.
     """
     above_200 = emission.reference_source_calibration(
-        np.full((20, 16), 80.0), frequencies_hz=_THIRDS[3:19], arrangement="fixed"
+        np.full((20, 16), 80.0), frequencies=_THIRDS[3:19], arrangement="fixed"
     )
     manufacturers = _calibration(c2_db=0.3)
     measured = np.full(_SUITABILITY_FREQS.size, 92.0)
@@ -1096,15 +1096,15 @@ def test_iso_3743_refuses_a_calibration_it_cannot_read() -> None:
 def test_iso_9295_reads_the_bands_of_the_16_khz_octave() -> None:
     freqs = np.array([12500.0, 16000.0, 20000.0])
     cal = emission.reference_source_calibration(
-        np.full((20, 3), 70.0), frequencies_hz=freqs, arrangement="paths"
+        np.full((20, 3), 70.0), frequencies=freqs, arrangement="paths"
     )
     st = np.array([60.0, 58.0, 55.0])
     far = np.array([62.0, 61.0, 57.0])
     from_object = emission.high_frequency_sound_power_comparison(
         st,
-        frequencies_hz=freqs,
-        reference_pressure_levels_db=far,
-        reference_sound_power_levels_db=cal,
+        frequencies=freqs,
+        reference_pressure_levels=far,
+        reference_sound_power_levels=cal,
         temperature_c=20.0,
         static_pressure_kpa=90.0,
     )
@@ -1120,9 +1120,9 @@ def test_iso_9295_reads_the_bands_of_the_16_khz_octave() -> None:
     with pytest.raises(ValueError, match="per hertz"):
         emission.high_frequency_sound_power_comparison(
             st,
-            frequencies_hz=freqs,
-            reference_pressure_levels_db=far,
-            reference_sound_power_levels_db=cal,
+            frequencies=freqs,
+            reference_pressure_levels=far,
+            reference_sound_power_levels=cal,
             noise_bandwidth_hz=10.0,
         )
 
@@ -1155,7 +1155,7 @@ def test_the_verdict_plot_draws_the_range_requirement() -> None:
     """A source that fails on the 12 dB range alone shows it above the limit."""
     lw = 80.0 + 1.2 * np.arange(_THIRDS.size)  # 24 dB over 100 Hz to 10 kHz
     verdict = emission.verify_reference_sound_source(
-        lw, frequencies_hz=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
+        lw, frequencies=_THIRDS, repeated_levels_db=np.vstack([lw, lw, lw]),
         directivity_index_db=np.full(_THIRDS.size, 2.0), supply_variation_db=0.1,
     )  # fmt: skip
     ax = verdict.plot()
@@ -1168,7 +1168,7 @@ def test_the_verdict_plot_draws_the_range_requirement() -> None:
 def test_a_judged_failure_titles_the_verdict_before_missing_data() -> None:
     """The spectrum fails; the steadiness is not judged: "does not comply"."""
     lw = 80.0 + 1.2 * np.arange(_THIRDS.size)
-    verdict = emission.verify_reference_sound_source(lw, frequencies_hz=_THIRDS)
+    verdict = emission.verify_reference_sound_source(lw, frequencies=_THIRDS)
     assert verdict.not_judged
     ax = verdict.plot()
     assert ax.get_title().endswith("does not comply")
@@ -1184,7 +1184,7 @@ def test_a_judged_failure_titles_the_verdict_before_missing_data() -> None:
 
 def test_the_drift_plot_draws_the_change() -> None:
     result = emission.verify_reference_source_drift(
-        [85.0, 88.0], [85.1, 88.9], frequencies_hz=[500.0, 1000.0]
+        [85.0, 88.0], [85.1, 88.9], frequencies=[500.0, 1000.0]
     )
     ax = result.plot(language="es")
     assert "requiere recalibración" in ax.get_title()
@@ -1197,7 +1197,7 @@ def test_the_drift_title_fits_the_default_figure(language: str, change: float) -
     result = emission.verify_reference_source_drift(
         np.full(_THIRDS.size, 85.0),
         np.full(_THIRDS.size, 85.0 + change),
-        frequencies_hz=_THIRDS,
+        frequencies=_THIRDS,
     )
     ax = result.plot(language=language)
     figure = ax.figure

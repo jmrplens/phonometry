@@ -190,7 +190,7 @@ def test_result_refuses_mismatched_columns() -> None:
     two_bands = np.array([500.0, 1000.0])
     with pytest.raises(ValueError, match="band"):
         LabJointInsulationResult(
-            frequencies_hz=two_bands,
+            frequencies=two_bands,
             r_s_measured_db=good.r_s_measured_db,
             r_s_max_db=good.r_s_max_db,
             r_s_db=good.r_s_db,
@@ -205,7 +205,7 @@ def test_result_refuses_mismatched_columns() -> None:
 
 def _columns(good: LabJointInsulationResult) -> dict[str, object]:
     return {
-        "frequencies_hz": good.frequencies_hz,
+        "frequencies": good.frequencies,
         "r_s_measured_db": good.r_s_measured_db,
         "r_s_max_db": good.r_s_max_db,
         "r_s_db": good.r_s_db,
@@ -810,7 +810,7 @@ def test_gap_series_octave_figure_draws_the_sealed_element_and_each_width() -> N
     ax = series.plot_octave_bands()
     assert len(ax.lines) == len(series.gap_widths_mm) + 1
     sealed = series.results[0]
-    _, maximum = improvement_octave_bands(sealed.r_s_max_db, sealed.frequencies_hz)
+    _, maximum = improvement_octave_bands(sealed.r_s_max_db, sealed.frequencies)
     assert ax.lines[0].get_ydata() == pytest.approx(maximum)
     assert "R_\\mathrm{s,max}" in ax.lines[0].get_label()
     for line, result in zip(ax.lines[1:], series.results, strict=True):

@@ -815,12 +815,14 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     return float(_round_half_up_array(value, decimals))
 
 
-def _nominal_bands(frequencies_hz: ArrayLike, band: str) -> np.ndarray:
+def _nominal_bands(frequencies: ArrayLike, band: str) -> np.ndarray:
     """Match each given centre to the nominal band of 4.2 it stands for."""
     table = np.asarray(_THIRD_OCTAVE_BANDS if band == "third" else _OCTAVE_BANDS)
-    freqs = np.atleast_1d(_as_float64(frequencies_hz, "frequencies_hz"))
+    freqs = np.atleast_1d(_as_float64(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0 or not np.all(np.isfinite(freqs)):
-        msg = "'frequencies_hz' must be a non-empty one-dimensional list of finite centres."
+        msg = (
+            "'frequencies' must be a non-empty one-dimensional list of finite centres."
+        )
         raise ValueError(msg)
     nominal = np.empty_like(freqs)
     for i, f in enumerate(freqs):
@@ -834,7 +836,7 @@ def _nominal_bands(frequencies_hz: ArrayLike, band: str) -> np.ndarray:
             raise ValueError(msg)
         nominal[i] = table[j]
     if np.any(np.diff(nominal) <= 0.0):
-        msg = "'frequencies_hz' must name each band once, in increasing order."
+        msg = "'frequencies' must name each band once, in increasing order."
         raise ValueError(msg)
     return nominal
 
@@ -950,7 +952,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
     :ivar regime: Per band, ``"none"`` (no correction), ``"corrected"``
         (Formula (8)) or ``"limited"`` (held at 2,2 dB: the band is an upper
         limit of the equipment level).
-    :ivar frequencies_hz: The band centres, in Hz, or ``None`` when not given.
+    :ivar frequencies: The band centres, in Hz, or ``None`` when not given.
 
     The difference, the regime, the correction and the corrected level are
     read from the two measured levels and the 10 dB and 4 dB of Clause 9, so
@@ -959,7 +961,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
 
     measured_db: np.ndarray
     background_db: np.ndarray
-    frequencies_hz: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject a correction whose band arrays disagree in length.
@@ -971,11 +973,8 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         if len(n) != 1 or np.asarray(self.background_db).shape != n:
             msg = "ServiceEquipmentBackgroundResult: every band quantity needs one value per band."
             raise ValueError(msg)
-        if (
-            self.frequencies_hz is not None
-            and np.asarray(self.frequencies_hz).shape != n
-        ):
-            msg = "ServiceEquipmentBackgroundResult: 'frequencies_hz' needs one centre per band."
+        if self.frequencies is not None and np.asarray(self.frequencies).shape != n:
+            msg = "ServiceEquipmentBackgroundResult: 'frequencies' needs one centre per band."
             raise ValueError(msg)
 
     @property
@@ -1042,10 +1041,10 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
 
 
 def service_equipment_background_correction(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     background_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> ServiceEquipmentBackgroundResult:
     r"""Correct band levels for the background (ISO/DIS 16032:2023 Clause 9).
 
@@ -1064,31 +1063,33 @@ def service_equipment_background_correction(
     the equipment, the result stands without correction
     (:func:`check_varying_background`).
 
-    :param levels_db: Measured band levels :math:`L_1`, background included,
+    :param levels: Measured band levels :math:`L_1`, background included,
         in dB.
     :param background_db: Background band levels :math:`L_2`, in dB, the same
         shape.
-    :param frequencies_hz: Band centres in Hz, kept for the plot only.
+    :param frequencies: Band centres in Hz, kept for the plot only.
     :return: :class:`ServiceEquipmentBackgroundResult`.
     :raises ValueError: If a level is not finite or the shapes differ.
     """
-    measured = np.atleast_1d(_as_levels(levels_db, "levels_db"))
+    measured = np.atleast_1d(_as_levels(levels, "levels"))
     background = np.atleast_1d(_as_levels(background_db, "background_db"))
     if measured.ndim != 1 or background.shape != measured.shape:
-        msg = "'levels_db' and 'background_db' must be one level per band, the same length."
+        msg = (
+            "'levels' and 'background_db' must be one level per band, the same length."
+        )
         raise ValueError(msg)
     freqs = None
-    if frequencies_hz is not None:
-        freqs = _as_float64(frequencies_hz, "frequencies_hz")
+    if frequencies is not None:
+        freqs = _as_float64(frequencies, "frequencies")
         if freqs.shape != measured.shape or not np.all(np.isfinite(freqs)):
-            msg = "'frequencies_hz' must give one finite centre per band."
+            msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
     # The difference, the regime and the correction are read by the result
     # from the two levels it keeps.
     return ServiceEquipmentBackgroundResult(
         measured_db=measured,
         background_db=background,
-        frequencies_hz=freqs,
+        frequencies=freqs,
     )
 
 
@@ -1124,9 +1125,9 @@ class ServiceEquipmentResult(OwnsArrays):
     r"""Service-equipment sound pressure level, engineering method.
 
     Produced by :func:`service_equipment_level`. Every band array runs over
-    :attr:`frequencies_hz`.
+    :attr:`frequencies`.
 
-    :ivar frequencies_hz: Nominal band centres, in Hz.
+    :ivar frequencies: Nominal band centres, in Hz.
     :ivar band: ``"third"`` or ``"octave"``.
     :ivar quantity: The Table 1 quantity: ``"Smax"``, ``"Fmax"`` or ``"eq"``.
     :ivar a_weighting_range: ``"restricted"`` (50 Hz to 5 000 Hz; octave
@@ -1142,7 +1143,7 @@ class ServiceEquipmentResult(OwnsArrays):
         average itself when there is no background).
     :ivar standardizable: Per band, whether 7.7 lets it be standardized or
         normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from
-        ``frequencies_hz`` and ``band``, so it is not a field.
+        ``frequencies`` and ``band``, so it is not a field.
     :ivar standardized_db: :math:`L_{\mathrm{n}T}` per band (Formula (5)), in dB,
         or ``None`` without a reverberation time. Bands outside the range are
         the corrected level, unstandardized.
@@ -1157,7 +1158,7 @@ class ServiceEquipmentResult(OwnsArrays):
         dB.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     band: str
     quantity: str
     a_weighting_range: str
@@ -1175,9 +1176,9 @@ class ServiceEquipmentResult(OwnsArrays):
         """Reject a result whose band arrays do not share one band set.
 
         :raises ValueError: if a band array differs in length from
-            :attr:`frequencies_hz` or the readings are not two-dimensional.
+            :attr:`frequencies` or the readings are not two-dimensional.
         """
-        shape = np.asarray(self.frequencies_hz).shape
+        shape = np.asarray(self.frequencies).shape
         bands = [
             self.average_db,
             self.corrected_db,
@@ -1204,9 +1205,7 @@ class ServiceEquipmentResult(OwnsArrays):
             :attr:`band`.
         """
         return np.asarray(
-            _in_range(
-                np.asarray(self.frequencies_hz), _STANDARDIZATION_RANGE[self.band]
-            ),
+            _in_range(np.asarray(self.frequencies), _STANDARDIZATION_RANGE[self.band]),
             dtype=bool,
         )
 
@@ -1222,7 +1221,7 @@ class ServiceEquipmentResult(OwnsArrays):
         """The bands a weighted value of this result was summed over."""
         key = self.a_weighting_range if weighting == "A" else "extended"
         return _in_range(
-            np.asarray(self.frequencies_hz), _WEIGHTING_RANGES[self.band][key]
+            np.asarray(self.frequencies), _WEIGHTING_RANGES[self.band][key]
         )
 
     def upper_limit(self, weighting: str) -> bool:
@@ -1257,7 +1256,7 @@ class ServiceEquipmentResult(OwnsArrays):
         used = self._range_mask("A")
         if any(k.startswith("LC") for k in self.ratings):
             used = used | self._range_mask("C")
-        freqs = np.asarray(self.frequencies_hz)
+        freqs = np.asarray(self.frequencies)
         return tuple(float(f) for f in freqs[used & ~np.asarray(self.standardizable)])
 
     @property
@@ -1304,8 +1303,8 @@ class ServiceEquipmentResult(OwnsArrays):
 
 
 def service_equipment_level(
-    levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     *,
     quantity: _Quantity,
     band: _Band = "third",
@@ -1330,9 +1329,9 @@ def service_equipment_level(
     instant the A- or C-weighted level peaks for a maximum level (Clause 6), or
     over the integration time of Annex B for an equivalent level.
 
-    :param levels_db: Band levels of each reading, shape ``(readings, bands)``
+    :param levels: Band levels of each reading, shape ``(readings, bands)``
         (one-dimensional for a single reading), in dB.
-    :param frequencies_hz: Nominal band centres, in Hz, increasing: the
+    :param frequencies: Nominal band centres, in Hz, increasing: the
         one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of
         31,5 Hz to 8 000 Hz, as ``band`` says.
     :param quantity: The Table 1 quantity measured: ``"Smax"``, ``"Fmax"`` or
@@ -1367,12 +1366,12 @@ def service_equipment_level(
     t0 = _positive_number(
         reference_reverberation_time_s, "reference_reverberation_time_s"
     )
-    nominal = _nominal_bands(frequencies_hz, band)
-    readings = _as_levels(levels_db, "levels_db")
+    nominal = _nominal_bands(frequencies, band)
+    readings = _as_levels(levels, "levels")
     if readings.ndim == 1:
         readings = readings[np.newaxis, :]
     if readings.ndim != _PER_POSITION_RANK or readings.shape[1] != nominal.size:
-        msg = "'levels_db' must be (readings, bands) with one column per band of 'frequencies_hz'."
+        msg = "'levels' must be (readings, bands) with one column per band of 'frequencies'."
         raise ValueError(msg)
 
     a_mask = _in_range(nominal, _WEIGHTING_RANGES[band][a_weighting_range])
@@ -1395,7 +1394,7 @@ def service_equipment_level(
         if bg.ndim == _PER_POSITION_RANK:
             bg = energy_mean(bg, axis=0)
         background = service_equipment_background_correction(
-            average, bg, frequencies_hz=nominal
+            average, bg, frequencies=nominal
         )
         corrected = background.corrected_db
 
@@ -1413,19 +1412,19 @@ def service_equipment_level(
     c_corr = np.asarray([weights["C"][float(f)] for f in nominal])
     unrounded: dict[str, float] = {}
     variants = (("", corrected), (",nT", standardized), (",n", normalized))
-    for suffix, levels in variants:
-        if levels is None:
+    for suffix, variant in variants:
+        if variant is None:
             continue
-        unrounded[f"LA,{quantity}{suffix}"] = _weighted_sum(levels, a_corr, a_mask)
+        unrounded[f"LA,{quantity}{suffix}"] = _weighted_sum(variant, a_corr, a_mask)
         if c_mask is not None:
-            unrounded[f"LC,{quantity}{suffix}"] = _weighted_sum(levels, c_corr, c_mask)
+            unrounded[f"LC,{quantity}{suffix}"] = _weighted_sum(variant, c_corr, c_mask)
     ratings = {k: int(_round_half_up(v)) for k, v in unrounded.items()}
 
     reproducibility = np.asarray(
         [SERVICE_EQUIPMENT_REPRODUCIBILITY[band][float(f)] for f in nominal]
     )
     return ServiceEquipmentResult(
-        frequencies_hz=nominal,
+        frequencies=nominal,
         band=band,
         quantity=quantity,
         a_weighting_range=a_weighting_range,
@@ -1496,12 +1495,12 @@ class PositionSpreadCheck(OwnsArrays):
     check cannot be built, or rewritten with :func:`dataclasses.replace`, with
     an action the readings do not lead to.
 
-    :ivar levels_db: The A-weighted levels read directly from the instrument,
+    :ivar levels: The A-weighted levels read directly from the instrument,
         uncorrected, in the order of 7.4.1: corner, position 2, position 3,
         then (corner, 4, 5) and (corner, 6, 7) for each further stage, in dB.
     """
 
-    levels_db: np.ndarray
+    levels: np.ndarray
 
     def __post_init__(self) -> None:
         """Hold the readings read-only and reject a partial stage.
@@ -1509,21 +1508,21 @@ class PositionSpreadCheck(OwnsArrays):
         :raises ValueError: if the levels are not 3, 6 or 9 finite readings
             in one row.
         """
-        levels = np.atleast_1d(_as_levels(self.levels_db, "levels_db"))
+        levels = np.atleast_1d(_as_levels(self.levels, "levels"))
         if levels.ndim != 1 or levels.size not in (3, 6, 9):
-            msg = "PositionSpreadCheck: 'levels_db' must hold 3, 6 or 9 readings, three per stage."
+            msg = "PositionSpreadCheck: 'levels' must hold 3, 6 or 9 readings, three per stage."
             raise ValueError(msg)
-        object.__setattr__(self, "levels_db", read_only(levels))
+        object.__setattr__(self, "levels", read_only(levels))
 
     @property
     def stage(self) -> int:
         """How many sets of three readings there are: 1, 2 or 3."""
-        return int(self.levels_db.size // _READINGS_PER_STAGE)
+        return int(self.levels.size // _READINGS_PER_STAGE)
 
     @property
     def spread_db(self) -> float:
         """The difference between the highest and lowest reading, in dB."""
-        return float(np.max(self.levels_db) - np.min(self.levels_db))
+        return float(np.max(self.levels) - np.min(self.levels))
 
     @property
     def limit_db(self) -> float:
@@ -1574,7 +1573,7 @@ class PositionSpreadCheck(OwnsArrays):
 
         :return: The deviation, or ``None`` with a single corner reading.
         """
-        corners = self.levels_db[::_READINGS_PER_STAGE]
+        corners = self.levels[::_READINGS_PER_STAGE]
         return float(np.std(corners, ddof=1)) if corners.size > 1 else None
 
     @property
@@ -1612,7 +1611,7 @@ class PositionSpreadCheck(OwnsArrays):
         )
 
 
-def check_position_spread(levels_db: ArrayLike) -> PositionSpreadCheck:
+def check_position_spread(levels: ArrayLike) -> PositionSpreadCheck:
     r"""Are the positions measured so far enough (ISO/DIS 16032:2023 7.4.1)?
 
     The A-weighted levels read directly from the instrument, without any
@@ -1642,17 +1641,17 @@ def check_position_spread(levels_db: ArrayLike) -> PositionSpreadCheck:
     while a later one can still pass, and a spread at a limit does not pass it
     (``docs/ERRATA.md``).
 
-    :param levels_db: The 3, 6 or 9 A-weighted levels in the order of 7.4.1:
+    :param levels: The 3, 6 or 9 A-weighted levels in the order of 7.4.1:
         ``[corner, 2, 3]``, then ``[corner, 4, 5]`` and ``[corner, 6, 7]``
         appended, in dB.
     :return: :class:`PositionSpreadCheck`.
     :raises ValueError: If there are not 3, 6 or 9 finite levels.
     """
-    levels = np.atleast_1d(_as_levels(levels_db, "levels_db"))
+    levels = np.atleast_1d(_as_levels(levels, "levels"))
     if levels.ndim != 1 or levels.size not in (3, 6, 9):
-        msg = "'levels_db' must hold 3, 6 or 9 readings: [corner, 2, 3] and each later stage."
+        msg = "'levels' must hold 3, 6 or 9 readings: [corner, 2, 3] and each later stage."
         raise ValueError(msg)
-    return PositionSpreadCheck(levels_db=levels)
+    return PositionSpreadCheck(levels=levels)
 
 
 # ---------------------------------------------------------------------------
@@ -2146,18 +2145,18 @@ def _readings(value: ArrayLike, name: str) -> np.ndarray:
 class CalibrationDeviationResult(OwnsArrays):
     r"""Whether the instrumentation may be used, by its calibrations (Clause 5).
 
-    :ivar levels_db: The calibrator readings of this measurement in the order
+    :ivar levels: The calibrator readings of this measurement in the order
         they were taken, at the beginning and at the end, in dB.
     :ivar previous_levels_db: The readings of earlier calibrations of the same
         instrumentation with the same calibrator, in dB; empty when none were
         given.
-    :ivar deviations_db: Per reading of :attr:`levels_db`, the largest absolute
+    :ivar deviations_db: Per reading of :attr:`levels`, the largest absolute
         difference from every calibration taken before it, the earlier ones
         and the readings of this measurement already taken, in dB; ``nan`` for
         a first reading with nothing before it.
     """
 
-    levels_db: np.ndarray
+    levels: np.ndarray
     previous_levels_db: np.ndarray
     deviations_db: np.ndarray
 
@@ -2174,9 +2173,9 @@ class CalibrationDeviationResult(OwnsArrays):
         """Reject a verdict whose deviations do not follow its readings.
 
         :raises ValueError: if :attr:`deviations_db` does not hold one value
-            per reading of :attr:`levels_db`.
+            per reading of :attr:`levels`.
         """
-        if np.asarray(self.deviations_db).shape != np.asarray(self.levels_db).shape:
+        if np.asarray(self.deviations_db).shape != np.asarray(self.levels).shape:
             msg = "CalibrationDeviationResult: 'deviations_db' needs one value per reading."
             raise ValueError(msg)
 
@@ -2281,7 +2280,7 @@ def verify_calibration_deviation(
         if earlier.size:
             deviations[i] = float(np.max(np.abs(level - earlier)))
     return CalibrationDeviationResult(
-        levels_db=levels,
+        levels=levels,
         previous_levels_db=previous,
         deviations_db=deviations,
     )
@@ -2430,13 +2429,13 @@ class VaryingBackgroundCheck(OwnsArrays):
         the same bands, in dB.
     :ivar observation_time_s: How long the background maximum was watched for,
         in s.
-    :ivar frequencies_hz: The band centres, in Hz, or ``None`` when not given.
+    :ivar frequencies: The band centres, in Hz, or ``None`` when not given.
     """
 
     background_maximum_db: np.ndarray
     equipment_levels_db: np.ndarray
     observation_time_s: float
-    frequencies_hz: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
 
     @property
     def limit_db(self) -> float:
@@ -2455,8 +2454,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         """
         shape = np.asarray(self.background_maximum_db).shape
         if np.asarray(self.equipment_levels_db).shape != shape or (
-            self.frequencies_hz is not None
-            and np.asarray(self.frequencies_hz).shape != shape
+            self.frequencies is not None and np.asarray(self.frequencies).shape != shape
         ):
             msg = (
                 "VaryingBackgroundCheck: every band quantity needs one value per band."
@@ -2533,7 +2531,7 @@ def check_varying_background(
     equipment_levels_db: ArrayLike,
     *,
     observation_time_s: float,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> VaryingBackgroundCheck:
     r"""Can the result stand without correction (NOTE to ISO/DIS 16032:2023 Clause 9)?
 
@@ -2559,7 +2557,7 @@ def check_varying_background(
         the same bands, in dB.
     :param observation_time_s: How long the background maximum was watched
         for, in s.
-    :param frequencies_hz: Band centres in Hz, kept for the plot only.
+    :param frequencies: Band centres in Hz, kept for the plot only.
     :return: :class:`VaryingBackgroundCheck`.
     :raises ValueError: If a level is not finite, the shapes differ, or the
         observation time is not one positive number.
@@ -2571,16 +2569,16 @@ def check_varying_background(
         raise ValueError(msg)
     observation = _positive_number(observation_time_s, "observation_time_s")
     freqs = None
-    if frequencies_hz is not None:
-        freqs = np.atleast_1d(_as_float64(frequencies_hz, "frequencies_hz"))
+    if frequencies is not None:
+        freqs = np.atleast_1d(_as_float64(frequencies, "frequencies"))
         if freqs.shape != background.shape or not np.all(np.isfinite(freqs)):
-            msg = "'frequencies_hz' must give one finite centre per band."
+            msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
     return VaryingBackgroundCheck(
         background_maximum_db=background,
         equipment_levels_db=equipment,
         observation_time_s=observation,
-        frequencies_hz=None if freqs is None else freqs,
+        frequencies=None if freqs is None else freqs,
     )
 
 

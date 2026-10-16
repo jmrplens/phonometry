@@ -221,9 +221,17 @@ def test_rigid_mass_calibration_validation() -> None:
         vibration.rigid_mass_calibration_check([0.1, 0.1], [100.0], 10.0)
     with pytest.raises(
         ValueError,
-        match=r"'frequency' must be positive \(mobility conversions divide by omega\)",
+        match=r"'frequencies' must be positive \(mobility conversions divide by omega\)",
     ):
         vibration.rigid_mass_calibration_check([0.1], [0.0], 10.0)
+
+
+def test_a_rigid_mass_record_names_its_frequency_axis() -> None:
+    frequencies, measured = np.array([-1.0]), np.array([0.1])
+    with pytest.raises(ValueError, match=r"'frequencies' must be positive"):
+        vibration.RigidMassCalibrationResult(
+            frequencies, measured, mass=10.0, quantity="accelerance"
+        )
 
 
 def test_a_measurement_short_of_its_frequencies_is_refused() -> None:

@@ -164,7 +164,7 @@ def _probability_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
 
 
 def _levels_and_probabilities(
-    levels_db: ArrayLike, probabilities: ArrayLike
+    levels: ArrayLike, probabilities: ArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The replica levels and their probabilities, flattened in the same order.
 
@@ -175,11 +175,11 @@ def _levels_and_probabilities(
         the probabilities do not sum to one within
         :data:`_PROBABILITY_SUM_TOLERANCE`.
     """
-    levels = _real_array(levels_db, "levels_db")
+    levels = _real_array(levels, "levels")
     probs = _probability_array(probabilities, "probabilities")
     if levels.shape != probs.shape:
         msg = (
-            "'levels_db' and 'probabilities' must have the same shape, one "
+            "'levels' and 'probabilities' must have the same shape, one "
             f"probability per replica atmosphere; got {levels.shape} and "
             f"{probs.shape}."
         )
@@ -264,7 +264,7 @@ def replica_probabilities(
         per excess-attenuation class.
     :return: An array of shape ``(N_atm, N_exc)``, row ``k`` and column ``l``,
         the shape :func:`sel_distribution` and :func:`long_term_sel` read
-        ``levels_db`` in.
+        ``levels`` in.
     :raises ValueError: for an empty, multi-dimensional, non-finite or
         negative input.
     """
@@ -283,7 +283,7 @@ def replica_probabilities(
 
 
 def long_term_sel(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     probabilities: ArrayLike,
     *,
     rating_adjustment_db: float = 0.0,
@@ -309,10 +309,10 @@ def long_term_sel(
     Annex A calls this value ``LT1`` and computes it with a single
     atmospheric-absorption class of probability 1.
 
-    :param levels_db: :math:`L_{E,\mathrm{w},k,l}` of each replica atmosphere,
+    :param levels: :math:`L_{E,\mathrm{w},k,l}` of each replica atmosphere,
         in dB, any shape (``(N_atm, N_exc)`` or already flattened).
     :param probabilities: The probability of each replica, the same shape as
-        ``levels_db`` (see :func:`replica_probabilities`).
+        ``levels`` (see :func:`replica_probabilities`).
     :param rating_adjustment_db: ``K``, in dB; 0 dB (the default) gives
         Equation (7).
     :return: The long-term average level, in dB.
@@ -320,7 +320,7 @@ def long_term_sel(
         probabilities do not sum to one, every probability is zero, or a value
         is not finite.
     """
-    levels, probs = _levels_and_probabilities(levels_db, probabilities)
+    levels, probs = _levels_and_probabilities(levels, probabilities)
     k_db = require_finite(rating_adjustment_db, "rating_adjustment_db")
     return _energy_mean_db(levels, probs) + k_db
 
@@ -411,7 +411,7 @@ class SelDistribution(OwnsArrays):
     normal distribution of standard deviation ``sigma_db`` centred
     ``level_shift_db`` below the subclass centre (Equations (21) to (23)).
 
-    :ivar levels_db: :math:`L_{E,\mathrm{w},m}` of the ``M`` classes, in
+    :ivar levels: :math:`L_{E,\mathrm{w},m}` of the ``M`` classes, in
         increasing order, in dB.
     :ivar probabilities: :math:`\wp_m` of each class (Equation (14)).
     :ivar lower_bounds_db: :math:`g_{\mathrm{L},m}`, in dB (Equations (11),
@@ -436,7 +436,7 @@ class SelDistribution(OwnsArrays):
         class holds more than one only where equal levels were combined.
     """
 
-    levels_db: NDArray[np.float64]
+    levels: NDArray[np.float64]
     probabilities: NDArray[np.float64]
     lower_bounds_db: NDArray[np.float64]
     upper_bounds_db: NDArray[np.float64]
@@ -461,14 +461,14 @@ class SelDistribution(OwnsArrays):
             value is not finite.
         """
         per_class = (
-            "levels_db",
+            "levels",
             "probabilities",
             "lower_bounds_db",
             "upper_bounds_db",
             "class_densities_per_db",
         )
         sizes = {name: np.shape(getattr(self, name)) for name in per_class}
-        count = np.size(self.levels_db)
+        count = np.size(self.levels)
         if count < _MIN_CLASSES or any(shape != (count,) for shape in sizes.values()):
             msg = (
                 "SelDistribution: the per-class columns must be 1-D arrays of "
@@ -647,7 +647,7 @@ class SelDistribution(OwnsArrays):
 
 
 def sel_distribution(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     probabilities: ArrayLike,
     *,
     sigma_db: float = _TYPICAL_SIGMA_DB,
@@ -671,10 +671,10 @@ def sel_distribution(
     Equal levels keep their own classes unless that leaves a class of no
     width, in which case the run is combined (see the module documentation).
 
-    :param levels_db: :math:`L_{E,\mathrm{w},k,l}` of each replica atmosphere,
+    :param levels: :math:`L_{E,\mathrm{w},k,l}` of each replica atmosphere,
         in dB, any shape; a ``(N_atm, N_exc)`` array is read row by row.
     :param probabilities: The probability of occurrence of each replica, the
-        same shape as ``levels_db``, summing to one (see
+        same shape as ``levels``, summing to one (see
         :func:`replica_probabilities`).
     :param sigma_db: Standard deviation of the spread due to turbulence, in dB;
         5 dB by default, the value clause 5 says is typically used.
@@ -687,7 +687,7 @@ def sel_distribution(
         levels are combined, ``sigma_db`` is not positive, or ``subclasses``
         is not a whole number of at least one.
     """
-    levels, probs = _levels_and_probabilities(levels_db, probabilities)
+    levels, probs = _levels_and_probabilities(levels, probabilities)
     sigma = require_positive(sigma_db, "sigma_db")
     n_sub = require_count(subclasses, "subclasses")
     lt1 = _energy_mean_db(levels, probs)
@@ -699,7 +699,7 @@ def sel_distribution(
     count = sorted_levels.size
     if count < _MIN_CLASSES:
         msg = (
-            "'levels_db' must hold at least two distinct levels: with one, the "
+            "'levels' must hold at least two distinct levels: with one, the "
             "outer boundaries of Equations (12) and (13) are not defined."
         )
         raise ValueError(msg)
@@ -720,7 +720,7 @@ def sel_distribution(
     lt2 = _energy_mean_db(centres.ravel(), weights)
 
     return SelDistribution(
-        levels_db=read_only(sorted_levels),
+        levels=read_only(sorted_levels),
         probabilities=read_only(sorted_probs),
         lower_bounds_db=read_only(lower),
         upper_bounds_db=read_only(upper),

@@ -3900,7 +3900,7 @@ def _intercept_at_zero(
 
 def _draw_phase_series(
     ax: Axes,
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     values_deg: np.ndarray,
     colour: str,
     *,
@@ -3920,7 +3920,7 @@ def _draw_phase_series(
     reading the panel exists for is that both are on the axis.
     """
     ax.plot(
-        frequencies_hz,
+        frequencies,
         values_deg,
         color=colour,
         linestyle="--" if dashed else "-",
@@ -4129,7 +4129,7 @@ def generate_meter_phase_verification(output_dir: str) -> None:
     fail_limit = float(pole_check.tolerance_deg[fail_index])
     # The other end of that very same pair, which is the whole of the
     # attribution rule: Formula (H.3) hands the value to the lower of the two.
-    pair_hz = float(pole_check.frequencies_hz[fail_index + 1])
+    pair_hz = float(pole_check.frequencies[fail_index + 1])
     upper_limit = float(vibration.phase_tolerance_degrees(name, [pair_hz])[0])
     ax_cpd.plot(
         [fail_hz, pair_hz],
@@ -5164,7 +5164,7 @@ def generate_meter_running_rms_decay(output_dir: str) -> None:
 
     name = "Wk"
     tau_s = 1.0
-    fs_hz = 2000.0
+    fs = 2000.0
     cut_s = 10.0
     # The width of the top panel, in seconds after the cut: past the printed
     # band of the slower average, with room on the right for the reading of
@@ -5182,13 +5182,13 @@ def generate_meter_running_rms_decay(output_dir: str) -> None:
     # 45 parts per million of the mean square, two orders of magnitude under
     # the ripple that actually sets where the initial value falls.
     excitation_hz = vibration.REFERENCE_FREQUENCY_HZ[name]
-    sample_times = np.arange(round(2.0 * cut_s * fs_hz)) / fs_hz
+    sample_times = np.arange(round(2.0 * cut_s * fs)) / fs
     excitation = math.sqrt(2.0) * np.sin(2.0 * math.pi * excitation_hz * sample_times)
     excitation[sample_times >= cut_s] = 0.0
-    cut_index = round(cut_s * fs_hz)
+    cut_index = round(cut_s * fs)
     # Time since the cut, counted in samples rather than by subtracting the
     # cut from the clock, so the axis starts at exactly zero.
-    since_cut = np.arange(sample_times.size - cut_index) / fs_hz
+    since_cut = np.arange(sample_times.size - cut_index) / fs
 
     closed_form_s = {
         method: vibration.running_rms_decay_time(tau_s, method=method)
@@ -5205,7 +5205,7 @@ def generate_meter_running_rms_decay(output_dir: str) -> None:
     for method in ("linear", "exponential"):
         trace = np.asarray(
             vibration.running_rms(
-                excitation, fs_hz, integration_time=tau_s, method=method
+                excitation, fs, integration_time=tau_s, method=method
             ),
             dtype=np.float64,
         )
@@ -5268,8 +5268,8 @@ def generate_meter_running_rms_decay(output_dir: str) -> None:
     # straight line on this axis for six seconds, so it is drawn every tenth
     # sample: 5 ms of drawn resolution, four points across the fastest ripple
     # the average can pass, and a tenth of the vertices.
-    stride = {"linear": 1, "exponential": round(0.005 * fs_hz)}
-    view_stop = round(view_s * fs_hz) + 1
+    stride = {"linear": 1, "exponential": round(0.005 * fs)}
+    view_stop = round(view_s * fs) + 1
     for method, colour, label in averages:
         defined = np.flatnonzero(np.isfinite(measured_db[method]))
         shown = slice(0, min(int(defined[-1]) + 1, view_stop), stride[method])
@@ -6051,9 +6051,9 @@ def generate_kb_weighting(output_dir: str) -> None:
     plt.close()
 
 
-def _immission_record(fs_hz: float) -> np.ndarray:
+def _immission_record(fs: float) -> np.ndarray:
     """Ninety seconds of ground vibration with two events in it, in mm/s."""
-    t = np.arange(int(90.0 * fs_hz)) / fs_hz
+    t = np.arange(int(90.0 * fs)) / fs
     record = 0.02 * np.sin(2.0 * np.pi * 11.0 * t)  # a machine running nearby
     for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
         window = (t >= start) & (t < start + 3.0)
@@ -6069,10 +6069,10 @@ def generate_kb_time_response(output_dir: str) -> None:
     print("Generating kb_time_response...")
     from phonometry import vibration
 
-    fs_hz = 2048.0
-    record = _immission_record(fs_hz)
-    reading = vibration.measure_vibration_immission(record, fs_hz)
-    times = np.arange(record.size) / fs_hz
+    fs = 2048.0
+    record = _immission_record(fs)
+    reading = vibration.measure_vibration_immission(record, fs)
+    times = np.arange(record.size) / fs
 
     _fig, axes = plt.subplots(2, 1, figsize=(10, 7.0), sharex=True)
     axes[0].plot(times, record, color=COLOR_MUTED, linewidth=0.6)
@@ -6184,9 +6184,9 @@ def generate_assessment_weighting(output_dir: str) -> None:
     plt.close()
 
 
-def _railway_record(fs_hz: int) -> np.ndarray:
+def _railway_record(fs: int) -> np.ndarray:
     """Thirty seconds of one train passage, in mm/s, as the railway guide builds it."""
-    t = np.arange(30 * fs_hz) / fs_hz
+    t = np.arange(30 * fs) / fs
     rng = np.random.default_rng(7)
     envelope = np.clip((t - 6.0) / 3.0, 0.0, 1.0) * np.clip((24.0 - t) / 3.0, 0.0, 1.0)
     bogies = 1.0 + 0.5 * np.sin(2.0 * np.pi * 1.6 * t) ** 2
@@ -6211,11 +6211,11 @@ def generate_railway_passage(output_dir: str) -> None:
     print("Generating railway_passage...")
     from phonometry import vibration
 
-    fs_hz = 2048
+    fs = 2048
     passage = vibration.evaluate_train_passage(
-        _railway_record(fs_hz), fs_hz, t2_s=_RAILWAY_T2_S
+        _railway_record(fs), fs, t2_s=_RAILWAY_T2_S
     )
-    times = np.arange(passage.velocity_mm_s.size) / fs_hz
+    times = np.arange(passage.velocity_mm_s.size) / fs
 
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(
@@ -6281,12 +6281,12 @@ def generate_railway_spectra(output_dir: str) -> None:
     print("Generating railway_spectra...")
     from phonometry import vibration
 
-    fs_hz = 2048
+    fs = 2048
     passage = vibration.evaluate_train_passage(
-        _railway_record(fs_hz), fs_hz, t2_s=_RAILWAY_T2_S
+        _railway_record(fs), fs, t2_s=_RAILWAY_T2_S
     )
-    t2 = slice(round(_RAILWAY_T2_S[0] * fs_hz), round(_RAILWAY_T2_S[1] * fs_hz))
-    spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+    t2 = slice(round(_RAILWAY_T2_S[0] * fs), round(_RAILWAY_T2_S[1] * fs))
+    spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
     centres, rms = vibration.third_octaves_from_narrowband(
         spectrum.frequencies, spectrum.psd
     )
@@ -6297,7 +6297,7 @@ def generate_railway_spectra(output_dir: str) -> None:
             strict=True,
         )
     )
-    bands = passage.band_centres_hz
+    bands = passage.frequencies
     positions = np.arange(bands.size)
 
     _fig, ax = plt.subplots(figsize=(10, 6.2))
@@ -6569,7 +6569,7 @@ def generate_railway_prediction_chain(output_dir: str) -> None:
     prediction = vibration.predict_train_category(
         emission, ground_db=ground, floor_db=floor
     )
-    bands = prediction.frequencies_hz
+    bands = prediction.frequencies
     positions = np.arange(bands.size)
     weighted = np.isin(bands, prediction.weighted_frequencies_hz)
 

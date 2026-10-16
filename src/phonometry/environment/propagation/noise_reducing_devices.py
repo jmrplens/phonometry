@@ -230,7 +230,7 @@ class RoadDeviceRating(OwnsArrays):
         print no ladder.
     :ivar quantity: ``"absorption"``, ``"insulation"`` or ``"reflection"``.
     :ivar spectrum: ``"road"`` (EN 1793-3) or ``"railway"`` (EN 16272-3-1).
-    :ivar bands_hz: The eighteen band centre frequencies, in Hz.
+    :ivar frequencies: The eighteen band centre frequencies, in Hz.
     :ivar values: The per-band input the rating was weighted from: the sound
         absorption coefficients, the sound reduction indices in dB, or the
         sound reflection indices (``nan`` allowed below ``lowest_band_hz``).
@@ -245,7 +245,7 @@ class RoadDeviceRating(OwnsArrays):
     category: str | None
     quantity: str
     spectrum: str
-    bands_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     values: NDArray[np.float64]
     weights: NDArray[np.float64]
     lowest_band_hz: float = TRAFFIC_NOISE_BANDS_HZ[0]
@@ -349,7 +349,7 @@ def sound_absorption_rating(
         ),
         quantity="absorption",
         spectrum=spectrum,
-        bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
+        frequencies=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
         values=alpha,
         weights=weights,
     )
@@ -387,7 +387,7 @@ def airborne_insulation_rating(
         ),
         quantity="insulation",
         spectrum=spectrum,
-        bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
+        frequencies=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
         values=reduction,
         weights=weights,
     )
@@ -466,7 +466,7 @@ def sound_reflection_rating(
         category=None,
         quantity="reflection",
         spectrum="road",
-        bands_hz=bands,
+        frequencies=bands,
         values=values,
         weights=weights,
         lowest_band_hz=float(bands[first]),

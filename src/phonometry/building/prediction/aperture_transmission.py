@@ -239,7 +239,7 @@ def slit_transmission_coefficient(
 ) -> ApertureTransmissionResult:
     r"""Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param width: Slit width ``w``, in m (> 0).
     :param depth: Slit depth ``d`` (wall thickness across the slit), in m (> 0).
     :param field: ``"diffuse"`` (:math:`m = 8`) or ``"normal"``
@@ -360,7 +360,7 @@ def circular_aperture_transmission_coefficient(
 ) -> ApertureTransmissionResult:
     """Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param radius: Aperture radius ``a``, in m (> 0).
     :param depth: Aperture depth ``d`` (wall thickness), in m (> 0).
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).

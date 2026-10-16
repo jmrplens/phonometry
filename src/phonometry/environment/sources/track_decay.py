@@ -187,7 +187,7 @@ def _response_magnitudes(responses: ArrayLike, band_count: int) -> NDArray[np.fl
     return matrix
 
 
-def _excitation_grid(distances_m: ArrayLike) -> NDArray[np.float64]:
+def _excitation_grid(distances: ArrayLike) -> NDArray[np.float64]:
     """The excitation positions as the grid Formula 1 sums over.
 
     6.7 and Figure 2 put the direct response at the accelerometer, position
@@ -198,24 +198,24 @@ def _excitation_grid(distances_m: ArrayLike) -> NDArray[np.float64]:
 
     :raises ValueError: For a grid that is not that.
     """
-    distances = np.atleast_1d(np.asarray(distances_m, dtype=np.float64))
+    distances = np.atleast_1d(np.asarray(distances, dtype=np.float64))
     if distances.ndim != 1:
-        msg = "'distances_m' must be one-dimensional, one distance per position."
+        msg = "'distances' must be one-dimensional, one distance per position."
         raise ValueError(msg)
     if distances.size < _MINIMUM_POSITIONS:
-        msg = "'distances_m' needs at least the direct position and one more."
+        msg = "'distances' needs at least the direct position and one more."
         raise ValueError(msg)
     if not np.all(np.isfinite(distances)):
-        msg = "'distances_m' must be finite."
+        msg = "'distances' must be finite."
         raise ValueError(msg)
     if abs(distances[0]) > 0.0 or np.any(np.diff(distances) <= 0.0):
-        msg = "'distances_m' must start at the accelerometer, 0 m, and increase."
+        msg = "'distances' must start at the accelerometer, 0 m, and increase."
         raise ValueError(msg)
     return distances
 
 
 def _measurement(
-    distances_m: ArrayLike, responses: ArrayLike, band_count: int
+    distances: ArrayLike, responses: ArrayLike, band_count: int
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The grid and the responses of a set of measurements, checked together.
 
@@ -224,7 +224,7 @@ def _measurement(
         number of positions.
     """
     matrix = _response_magnitudes(responses, band_count)
-    distances = _excitation_grid(distances_m)
+    distances = _excitation_grid(distances)
     if distances.size != matrix.shape[0]:
         msg = f"'responses' has {matrix.shape[0]} rows for {distances.size} positions."
         raise ValueError(msg)
@@ -240,9 +240,9 @@ class TrackDecayRate(OwnsArrays):
     needs.
 
     :param direction: ``"vertical"`` or ``"lateral"``.
-    :param frequencies_hz: The nominal band frequencies, in hertz.
+    :param frequencies: The nominal band frequencies, in hertz.
     :param decay_rates_db_per_m: The decay rate of each band, in dB/m.
-    :param distances_m: The excitation positions, in metres from the
+    :param distances: The excitation positions, in metres from the
         accelerometer: the direct one at 0 m first, then strictly increasing,
         at least two in all; ``None`` for rates taken from a report.
     :param responses: The magnitude :math:`|A(x_n)|` of each response, one row
@@ -252,9 +252,9 @@ class TrackDecayRate(OwnsArrays):
     """
 
     direction: str
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     decay_rates_db_per_m: NDArray[np.float64]
-    distances_m: NDArray[np.float64] | None = None
+    distances: NDArray[np.float64] | None = None
     responses: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
@@ -269,11 +269,11 @@ class TrackDecayRate(OwnsArrays):
             strictly increase, or responses that are not positive and finite.
         """
         require_choice(self.direction, "direction", TRACK_DECAY_DIRECTIONS)
-        frequencies = require_positive_array(self.frequencies_hz, "frequencies_hz")
+        frequencies = require_positive_array(self.frequencies, "frequencies")
         bands = np.round(10.0 * np.log10(frequencies)).astype(np.int64)
         if np.any(np.diff(bands) <= 0):
             msg = (
-                "'frequencies_hz' must name distinct one-third octave bands in "
+                "'frequencies' must name distinct one-third octave bands in "
                 "increasing order."
             )
             raise ValueError(msg)
@@ -281,26 +281,28 @@ class TrackDecayRate(OwnsArrays):
             self.decay_rates_db_per_m, "decay_rates_db_per_m"
         )
         if frequencies.size != rates.size:
-            msg = "'frequencies_hz' and 'decay_rates_db_per_m' need one value per band each."
-            raise ValueError(msg)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
-        object.__setattr__(self, "decay_rates_db_per_m", read_only(rates))
-        if (self.distances_m is None) != (self.responses is None):
-            msg = "'distances_m' and 'responses' come together or not at all."
-            raise ValueError(msg)
-        if self.distances_m is not None and self.responses is not None:
-            distances, responses = _measurement(
-                self.distances_m, self.responses, frequencies.size
+            msg = (
+                "'frequencies' and 'decay_rates_db_per_m' need one value per band each."
             )
-            object.__setattr__(self, "distances_m", read_only(distances))
+            raise ValueError(msg)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
+        object.__setattr__(self, "decay_rates_db_per_m", read_only(rates))
+        if (self.distances is None) != (self.responses is None):
+            msg = "'distances' and 'responses' come together or not at all."
+            raise ValueError(msg)
+        if self.distances is not None and self.responses is not None:
+            distances, responses = _measurement(
+                self.distances, self.responses, frequencies.size
+            )
+            object.__setattr__(self, "distances", read_only(distances))
             object.__setattr__(self, "responses", read_only(responses))
 
     @property
     def minimum_measurable_db_per_m(self) -> float | None:
         r"""The floor :math:`4{,}343 / x_\mathrm{max}` of Formula 2, in dB/m; ``None`` without the grid."""
-        if self.distances_m is None:
+        if self.distances is None:
             return None
-        return float(_DECAY_CONSTANT_DB / self.distances_m[-1])
+        return float(_DECAY_CONSTANT_DB / self.distances[-1])
 
     @property
     def suitable(self) -> NDArray[np.bool_]:
@@ -311,7 +313,7 @@ class TrackDecayRate(OwnsArrays):
         """
         floor = self.minimum_measurable_db_per_m
         if floor is None:
-            return np.ones(self.frequencies_hz.size, dtype=bool)
+            return np.ones(self.frequencies.size, dtype=bool)
         return np.asarray(
             floor <= _SUITABLE_FRACTION * self.decay_rates_db_per_m + _TOLERANCE
         )
@@ -339,7 +341,7 @@ class TrackDecayRate(OwnsArrays):
         :raises KeyError: If the spectrum has no such band.
         """
         band = round(10.0 * np.log10(require_positive(frequency_hz, "frequency_hz")))
-        bands = np.round(10.0 * np.log10(self.frequencies_hz)).astype(int)
+        bands = np.round(10.0 * np.log10(self.frequencies)).astype(int)
         matches = np.flatnonzero(bands == band)
         if matches.size == 0:
             msg = f"the rates have no band at {frequency_hz:g} Hz."
@@ -380,8 +382,8 @@ class TrackDecayRate(OwnsArrays):
 def track_decay_rate(
     responses: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
-    distances_m: ArrayLike | None = None,
+    frequencies: ArrayLike,
+    distances: ArrayLike | None = None,
     sleeper_spacing_m: float = _DEFAULT_SLEEPER_SPACING_M,
     direction: str = "vertical",
 ) -> TrackDecayRate:
@@ -400,13 +402,13 @@ def track_decay_rate(
         one row per excitation position, nearest first, the direct response in
         the first row, and one column per band. Magnitudes, not levels: a
         level in decibels is ``10 ** (level / 20)``.
-    :param frequencies_hz: The nominal frequency of each band, in hertz; 6.6
+    :param frequencies: The nominal frequency of each band, in hertz; 6.6
         asks for at least 100 Hz to 5 000 Hz.
-    :param distances_m: The excitation positions, in metres from the
+    :param distances: The excitation positions, in metres from the
         accelerometer, starting at 0 and increasing. When omitted, the 29
         positions of Figure 2 at ``sleeper_spacing_m``.
     :param sleeper_spacing_m: The sleeper spacing the Figure 2 grid is laid
-        out in, in metres, when ``distances_m`` is omitted.
+        out in, in metres, when ``distances`` is omitted.
     :param direction: ``"vertical"`` or ``"lateral"``.
     :return: The rates, with the grid and the responses they came from.
     :raises ValueError: For responses that are not positive and finite, a
@@ -414,11 +416,11 @@ def track_decay_rate(
         at 0 or does not strictly increase, frequencies that do not name
         distinct bands in increasing order, or shapes that do not agree.
     """
-    frequencies = require_positive_array(frequencies_hz, "frequencies_hz")
+    frequencies = require_positive_array(frequencies, "frequencies")
     grid: ArrayLike = (
         track_decay_excitation_positions(sleeper_spacing_m=sleeper_spacing_m)
-        if distances_m is None
-        else distances_m
+        if distances is None
+        else distances
     )
     distances, matrix = _measurement(grid, responses, frequencies.size)
     ratios = (matrix / matrix[0]) ** 2
@@ -426,8 +428,8 @@ def track_decay_rate(
     rates = _DECAY_CONSTANT_DB / accumulated
     return TrackDecayRate(
         direction=direction,
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         decay_rates_db_per_m=rates,
-        distances_m=distances,
+        distances=distances,
         responses=matrix,
     )

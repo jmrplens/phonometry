@@ -423,7 +423,7 @@ class WeightedCabinInsulation(OwnsArrays):
     :ivar ctr: The spectrum adaptation term :math:`C_{tr}`, in decibels.
     :ivar unfavourable_sum: The sum of unfavourable deviations at the shift
         the rating was read at, in decibels.
-    :ivar band_centres_hz: The bands the rating was read over, in hertz.
+    :ivar frequencies: The bands the rating was read over, in hertz.
     :ivar apparent: Whether the rating carries the prime of 3.9.
     """
 
@@ -431,7 +431,7 @@ class WeightedCabinInsulation(OwnsArrays):
     c: int
     ctr: int
     unfavourable_sum: float
-    band_centres_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     apparent: bool
 
 
@@ -525,13 +525,13 @@ class BandFlatnessCheck(OwnsArrays):
     The limits are the clause's, so they are read from the octave and are not
     fields: a check cannot be built against another limit.
 
-    :ivar octave_centres_hz: The nominal octave centre frequencies read, in
+    :ivar octave_frequencies: The nominal octave centre frequencies read, in
         hertz.
     :ivar spread_db: The difference between the loudest and the quietest of the
         three one-third-octave bands in each, in decibels.
     """
 
-    octave_centres_hz: NDArray[np.float64]
+    octave_frequencies: NDArray[np.float64]
     spread_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -541,7 +541,7 @@ class BandFlatnessCheck(OwnsArrays):
             negative or not finite, or a centre that is not a nominal octave
             centre frequency.
         """
-        centres = read_only(np.asarray(self.octave_centres_hz, dtype=np.float64))
+        centres = read_only(np.asarray(self.octave_frequencies, dtype=np.float64))
         spread = read_only(np.asarray(self.spread_db, dtype=np.float64))
         if centres.ndim != 1 or spread.shape != centres.shape:
             msg = "BandFlatnessCheck: one spread per octave centre."
@@ -559,7 +559,7 @@ class BandFlatnessCheck(OwnsArrays):
                     "centre frequency."
                 )
                 raise ValueError(msg)
-        object.__setattr__(self, "octave_centres_hz", centres)
+        object.__setattr__(self, "octave_frequencies", centres)
         object.__setattr__(self, "spread_db", spread)
 
     @property
@@ -570,7 +570,7 @@ class BandFlatnessCheck(OwnsArrays):
             the octaves below 125 Hz, for which the clause prints no limit.
         """
         return np.array(
-            [_flatness_limit_db(c) for c in self.octave_centres_hz.tolist()],
+            [_flatness_limit_db(c) for c in self.octave_frequencies.tolist()],
             dtype=np.float64,
         )
 
@@ -798,7 +798,7 @@ def weighted_cabin_insulation(
         c=int(result.c),
         ctr=int(result.ctr),
         unfavourable_sum=float(result.unfavourable_sum),
-        band_centres_hz=bands,
+        frequencies=bands,
         apparent=bool(apparent),
     )
 
@@ -1012,7 +1012,7 @@ def check_band_flatness(
         centres.append(centre)
         spreads.append(max(members) - min(members))
     return BandFlatnessCheck(
-        octave_centres_hz=np.asarray(centres, dtype=np.float64),
+        octave_frequencies=np.asarray(centres, dtype=np.float64),
         spread_db=np.asarray(spreads, dtype=np.float64),
     )
 

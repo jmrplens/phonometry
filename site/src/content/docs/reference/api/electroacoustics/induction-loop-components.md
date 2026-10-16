@@ -247,7 +247,7 @@ The range 5.4.13.4 recommends, 32 dB, for comparison with `agc_range_db`.
 
 ```python
 amplifier_frequency_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     output_current_a: ArrayLike,
 ) -> AmplifierFrequencyResponse
 ```
@@ -265,7 +265,7 @@ range of at least 50 Hz to 8 kHz" and the load current measured at each
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in hertz, ascending and including 1000 Hz. |
+| `frequencies` | The measurement frequencies, in hertz, ascending and including 1000 Hz. |
 | `output_current_a` | The RMS load current at each, in amperes. |
 
 **Returns:** An [`AmplifierFrequencyResponse`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifierfrequencyresponse).
@@ -301,7 +301,7 @@ source e.m.f. reduced to zero.
 
 ```python
 AmplifierFrequencyResponse(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     output_current_a: np.ndarray,
     response_db: np.ndarray,
 )
@@ -313,7 +313,7 @@ The frequency response of an amplifier into its load (IEC 62489-1:2010 5.4.12).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in hertz, ascending. |
+| `frequencies` | The measurement frequencies, in hertz, ascending. |
 | `output_current_a` | The load current measured at each, in amperes. |
 | `response_db` | The current level relative to the one at 1 kHz, in dB, so 0 dB at 1 kHz (5.4.12.3). |
 
@@ -332,7 +332,7 @@ response measured at one-third-octave centres is read between them.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency_hz` | Frequencies, in hertz. |
+| `frequency_hz` | Frequency or frequencies, in hertz. |
 
 **Returns:** The response there, dB re 1 kHz.
 
@@ -547,7 +547,7 @@ loop_impedance(
     resistance_ohm: float,
     inductance_h: float,
     *,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> LoopImpedance
 ```
 
@@ -559,7 +559,7 @@ The impedance of a loop from its resistance and inductance.
 | :--- | :--- |
 | `resistance_ohm` | Series resistance, in ohms ([`loop_resistance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_resistance), plus that of the feed cable). |
 | `inductance_h` | Series inductance, in henries ([`rectangular_loop_inductance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_inductance), plus that of the feed cable). |
-| `frequencies_hz` | Frequencies to tabulate the magnitude at, in hertz; by default the one-third-octave centres from 50 Hz to 10 kHz. |
+| `frequencies` | Frequencies to tabulate the magnitude at, in hertz; by default the one-third-octave centres from 50 Hz to 10 kHz. |
 
 **Returns:** A [`LoopImpedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopimpedance).
 
@@ -697,7 +697,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 LoopImpedance(
     resistance_ohm: float,
     inductance_h: float,
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     impedance_ohm: np.ndarray,
 )
 ```
@@ -718,7 +718,7 @@ $U = I|Z|$, the $U_\mathrm{h}$ of E.3.
 | :--- | :--- |
 | `resistance_ohm` | The series resistance, in ohms. |
 | `inductance_h` | The series inductance, in henries. |
-| `frequencies_hz` | The frequencies the magnitude is tabulated at, in hertz. |
+| `frequencies` | The frequencies the magnitude is tabulated at, in hertz. |
 | `impedance_ohm` | The magnitude of the impedance there, in ohms. |
 
 ### LoopImpedance.at()
@@ -733,7 +733,7 @@ The magnitude of the impedance at any frequency, in ohms.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency_hz` | Frequencies, in hertz, positive and finite. |
+| `frequency_hz` | Frequency or frequencies, in hertz, positive and finite. |
 
 **Returns:** $|Z|$ there, in ohms.
 
@@ -759,7 +759,7 @@ The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 | Name | Description |
 | :--- | :--- |
 | `current_a` | RMS loop current, in amperes. |
-| `frequency_hz` | Frequencies, in hertz, positive and finite. |
+| `frequency_hz` | Frequency or frequencies, in hertz, positive and finite. |
 
 **Returns:** $U = I|Z|$, in volts.
 
@@ -890,7 +890,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 neck_loop_characteristics(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     field_strength_level_db: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
@@ -915,7 +915,7 @@ that gives 0 dB, where the scaling does nothing.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in hertz, ascending and including 1000 Hz. |
+| `frequencies` | The measurement frequencies, in hertz, ascending and including 1000 Hz. |
 | `field_strength_level_db` | The field strength level on the jig at each, in dB re 400 mA/m. |
 | `impedance_ohm` | The input impedance at each, in ohms; complex values are reduced to their magnitude, and real ones must be positive. |
 | `input_voltage_v` | The input voltage the field was measured with, in volts. |
@@ -934,7 +934,7 @@ NECK_LOOP_TYPES = {1: NeckLoopType(description='for audio sources powered by two
 
 ```python
 NeckLoopCharacteristics(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     field_strength_level_db: np.ndarray,
     impedance_ohm: np.ndarray,
     input_voltage_v: float,
@@ -951,7 +951,7 @@ What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in hertz. |
+| `frequencies` | The measurement frequencies, in hertz. |
 | `field_strength_level_db` | The field strength level on the test jig at each, in dB re 400 mA/m, with `input_voltage_v` applied. |
 | `impedance_ohm` | The magnitude of the input impedance at each, in ohms. |
 | `input_voltage_v` | The input voltage the field was measured with, in volts. |
@@ -1082,7 +1082,7 @@ Whether 400 mA/m is reached within the type's input voltage.
 
 ```python
 quadrature_phase_error(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     phase_difference_deg: ArrayLike,
 ) -> QuadraturePhaseError
 ```
@@ -1099,7 +1099,7 @@ degrees are as much in quadrature as 90.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in hertz, ascending, at least one of them inside 100 Hz to 5 kHz. |
+| `frequencies` | The measurement frequencies, in hertz, ascending, at least one of them inside 100 Hz to 5 kHz. |
 | `phase_difference_deg` | The phase angle between the loop currents at each, in degrees. |
 
 **Returns:** A [`QuadraturePhaseError`](/phonometry/reference/api/electroacoustics/induction-loop-components/#quadraturephaseerror).
@@ -1108,7 +1108,7 @@ degrees are as much in quadrature as 90.
 
 ```python
 QuadraturePhaseError(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     phase_difference_deg: np.ndarray,
     deviation_deg: np.ndarray,
     max_deviation_deg: float,
@@ -1130,7 +1130,7 @@ the in-phase part is $\cos 85^\circ = 0{,}087$).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in hertz. |
+| `frequencies` | The measurement frequencies, in hertz. |
 | `phase_difference_deg` | The phase angle between the loop currents at each, in degrees. |
 | `deviation_deg` | Its absolute deviation from 90 degrees, in degrees. |
 | `max_deviation_deg` | The largest deviation over 100 Hz to 5 kHz, the characteristic of 5.4.14.2, in degrees. |

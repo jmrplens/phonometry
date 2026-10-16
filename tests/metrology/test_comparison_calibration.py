@@ -516,10 +516,10 @@ def test_nominal_and_exact_thirds_are_as_far_apart_as_stated() -> None:
 
 
 def _environment_at(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
 ) -> cc.EnvironmentalSensitivityCorrection:
     return metrology.environmental_sensitivity_correction(
-        frequencies_hz,
+        frequencies,
         static_pressure_kpa=99.0,
         temperature_c=21.0,
         relative_humidity_percent=45.0,
@@ -705,7 +705,7 @@ def test_jig_correction_reads_table_a1_at_exact_frequencies() -> None:
 
 def test_jig_correction_defaults_to_the_fourteen_rows() -> None:
     jig = metrology.jig_diameter_correction()
-    assert jig.frequencies_hz.size == 14
+    assert jig.frequencies.size == 14
     assert jig.correction_db[-1] == pytest.approx(-1.443, abs=1e-12)
 
 
@@ -771,7 +771,7 @@ def test_results_publish_read_only_columns() -> None:
         _F, _L_REF, first, second, expanded_uncertainty_db=0.09
     )
     for column in (
-        result.frequencies_hz,
+        result.frequencies,
         result.reference_sensitivity_level_db,
         result.output_level_differences_db,
         result.expanded_uncertainty_db,

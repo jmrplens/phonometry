@@ -60,7 +60,7 @@ def _ambient_noise(language: str) -> Axes:
 
 
 def _ship_traffic(language: str) -> Axes:
-    return ship_source_spectrum(12.0, 100.0, frequency_hz=_FREQUENCIES).plot(
+    return ship_source_spectrum(12.0, 100.0, frequencies=_FREQUENCIES).plot(
         language=language
     )
 

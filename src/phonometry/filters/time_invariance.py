@@ -113,7 +113,7 @@ class TimeInvarianceResult(OwnsArrays):
     the level of the input sweep, whose effective value is 1 (IEC 61260-2
     Formula (A.4)), so :math:`L_\mathrm{in} = 0` dB.
 
-    :ivar band_frequencies: The exact mid-band frequencies, Hz.
+    :ivar frequencies: The exact mid-band frequencies, Hz.
     :ivar fraction: The bandwidth designator denominator ``b``.
     :ivar fs: The bank's sampling rate, Hz.
     :ivar seconds_per_decade: The sweep rates, one decade in so many seconds.
@@ -128,7 +128,7 @@ class TimeInvarianceResult(OwnsArrays):
     :ivar expected_levels_db: :math:`L_\mathrm{c}` of Formula (17), same shape.
     """
 
-    band_frequencies: np.ndarray
+    frequencies: np.ndarray
     fraction: float
     fs: float
     seconds_per_decade: tuple[float, ...]
@@ -145,7 +145,7 @@ class TimeInvarianceResult(OwnsArrays):
         :raises ValueError: if the level arrays are not one row per sweep rate
             and one column per band, or hold a non-finite value.
         """
-        freqs = np.asarray(self.band_frequencies, dtype=np.float64)
+        freqs = np.asarray(self.frequencies, dtype=np.float64)
         out = np.asarray(self.output_levels_db, dtype=np.float64)
         expected = np.asarray(self.expected_levels_db, dtype=np.float64)
         shape = (len(self.seconds_per_decade), freqs.size)
@@ -166,7 +166,7 @@ class TimeInvarianceResult(OwnsArrays):
             if len(value) != len(self.seconds_per_decade):
                 msg = f"'{name}' must carry one value per sweep rate."
                 raise ValueError(msg)
-        object.__setattr__(self, "band_frequencies", read_only(freqs))
+        object.__setattr__(self, "frequencies", read_only(freqs))
         object.__setattr__(self, "output_levels_db", read_only(out))
         object.__setattr__(self, "expected_levels_db", read_only(expected))
 
@@ -553,7 +553,7 @@ def verify_time_invariance(
                 reference_attenuation_db=a_ref,
             )
     return TimeInvarianceResult(
-        band_frequencies=np.asarray(mids),
+        frequencies=np.asarray(mids),
         fraction=float(bank.fraction),
         fs=fs,
         seconds_per_decade=rates_spd,

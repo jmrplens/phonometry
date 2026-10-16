@@ -267,7 +267,7 @@ def wall_tie_coupling_loss_factor(
     Eq. 4.88). Since :math:`m_i = \rho_{\mathrm{s}1} S` and :math:`N = n S`, the plate
     area cancels and only the tie density ``n`` enters.
 
-    :param frequency: Frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param mass1: Surface density ``rho_s1`` of the excited leaf, in kg/m^2 (> 0).
     :param mass2: Surface density ``rho_s2`` of the receiving leaf, in kg/m^2 (> 0).
     :param bending_stiffness1: Bending stiffness per unit width ``B'`` of leaf 1,

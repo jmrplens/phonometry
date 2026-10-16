@@ -287,7 +287,7 @@ def plot_ambient_noise(
     check_language(language)
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    levels = np.asarray(result.levels_db, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
     ax.plot(
         freqs,
         np.asarray(result.limits_db, dtype=np.float64),

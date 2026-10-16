@@ -189,7 +189,7 @@ _UPPER_BAND_RANGE_HZ: tuple[float, float] = (80.0, 315.0)
 
 def running_velocity_rms(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
 ) -> NDArray[np.float64]:
@@ -204,14 +204,14 @@ def running_velocity_rms(
 
     :param velocity_mm_s: The velocity, in millimetres per second (1-D), as
         measured or in one third-octave band of it.
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param time_constant_s: The time constant, in seconds (default 0,125 s,
         "Fast").
     :return: :math:`\tilde v_\mathrm{F}(t)`, one value per sample, in mm/s.
     :raises ValueError: For a bad record or a non-positive rate or constant.
     """
     return _exponential_running_rms(
-        velocity_mm_s, fs_hz, time_constant_s=time_constant_s, name="velocity_mm_s"
+        velocity_mm_s, fs, time_constant_s=time_constant_s, name="velocity_mm_s"
     )
 
 
@@ -223,14 +223,14 @@ def _level(values: NDArray[np.float64], reference: float) -> NDArray[np.float64]
 
 def running_velocity_level(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
 ) -> NDArray[np.float64]:
     r"""The running velocity level :math:`L_{v\mathrm{F}}(t)` of Formula (2), in dB.
 
     :param velocity_mm_s: The velocity, in millimetres per second (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param time_constant_s: See :func:`running_velocity_rms`.
     :return: :math:`20 \lg(\tilde v_\mathrm{F} / v_0)` with :math:`v_0` =
         :data:`VELOCITY_LEVEL_REFERENCE_MM_S`, one value per sample. A sample
@@ -238,13 +238,13 @@ def running_velocity_level(
         sample, is ``-inf``.
     :raises ValueError: For a bad record or a non-positive rate or constant.
     """
-    rms = running_velocity_rms(velocity_mm_s, fs_hz, time_constant_s=time_constant_s)
+    rms = running_velocity_rms(velocity_mm_s, fs, time_constant_s=time_constant_s)
     return _level(rms, VELOCITY_LEVEL_REFERENCE_MM_S)
 
 
 def running_acceleration_level(
     acceleration_m_s2: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
 ) -> NDArray[np.float64]:
@@ -252,7 +252,7 @@ def running_acceleration_level(
 
     :param acceleration_m_s2: The acceleration, in metres per second squared
         (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param time_constant_s: See :func:`running_velocity_rms`.
     :return: :math:`20 \lg(\tilde a_F / a_0)` with :math:`a_0 = 10^{-6}`
         m/s², the reference DIN EN 21683 gives and the one the rest of this
@@ -261,14 +261,14 @@ def running_acceleration_level(
     """
     rms = _exponential_running_rms(
         acceleration_m_s2,
-        fs_hz,
+        fs,
         time_constant_s=time_constant_s,
         name="acceleration_m_s2",
     )
     return _level(rms, _ACCELERATION_REFERENCE_M_S2)
 
 
-def _slice(size: int, fs_hz: float, interval_s: tuple[float, float]) -> slice:
+def _slice(size: int, fs: float, interval_s: tuple[float, float]) -> slice:
     """The samples of a ``(start, end)`` stretch of a record, in seconds."""
     start_s, end_s = (float(bound) for bound in interval_s)
     if not (math.isfinite(start_s) and math.isfinite(end_s)) or end_s <= start_s:
@@ -277,12 +277,12 @@ def _slice(size: int, fs_hz: float, interval_s: tuple[float, float]) -> slice:
             f"got {interval_s!r}."
         )
         raise ValueError(msg)
-    first = round(start_s * fs_hz)
-    last = round(end_s * fs_hz)
+    first = round(start_s * fs)
+    last = round(end_s * fs)
     if first < 0 or last > size:
         msg = (
             f"the interval {interval_s!r} runs outside the record, which is "
-            f"{size / fs_hz:g} s long."
+            f"{size / fs:g} s long."
         )
         raise ValueError(msg)
     if last <= first:
@@ -292,7 +292,7 @@ def _slice(size: int, fs_hz: float, interval_s: tuple[float, float]) -> slice:
 
 
 def interval_rms(
-    values: ArrayLike, fs_hz: float, *, interval_s: tuple[float, float]
+    values: ArrayLike, fs: float, *, interval_s: tuple[float, float]
 ) -> float:
     r"""The interval r.m.s. of Formula (4), or of Formula (5).
 
@@ -302,7 +302,7 @@ def interval_rms(
     Formula (4) and which is what a meter reading its display produces.
 
     :param values: The velocity or its running r.m.s., in any unit (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param interval_s: The stretch ``(start, end)``, in seconds from the start
         of the record.
     :return: :math:`\tilde v_j`, in the unit of *values*.
@@ -310,7 +310,7 @@ def interval_rms(
         that is empty or runs outside the record.
     """
     x = _record(values, "values")
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     stretch = x[_slice(x.size, fs, interval_s)]
     return float(np.sqrt(np.mean(stretch**2)))
 
@@ -400,14 +400,14 @@ def passage_average_velocity(interval_rms_mm_s: ArrayLike) -> float:
 
 
 def passage_average_level(
-    levels_db: ArrayLike, *, axis: int | None = None
+    levels: ArrayLike, *, axis: int | None = None
 ) -> float | NDArray[np.float64]:
     r"""The energy average of levels over repeated passages (Clause 9), in dB.
 
     :math:`10 \lg \langle 10^{L/10} \rangle`, the level of
     :func:`passage_average_velocity`.
 
-    :param levels_db: The levels of the passages, in decibels. A 2-D array of
+    :param levels: The levels of the passages, in decibels. A 2-D array of
         third-octave spectra, one row per passage, averages band by band with
         ``axis=0``.
     :param axis: The axis the passages run along; ``None`` (default) averages
@@ -415,9 +415,9 @@ def passage_average_level(
     :return: The average level: a float, or one level per band.
     :raises ValueError: For an empty or non-finite input.
     """
-    levels = _as_float64(levels_db, "levels_db")
+    levels = _as_float64(levels, "levels")
     if levels.size == 0 or not np.all(np.isfinite(levels)):
-        msg = "'levels_db' must be non-empty and finite."
+        msg = "'levels' must be non-empty and finite."
         raise ValueError(msg)
     if axis is None:
         return float(energy_mean(levels))
@@ -476,7 +476,7 @@ def amplitude_distribution(
 
 def narrowband_psd(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     resolution_hz: float = NARROWBAND_RESOLUTION_HZ,
 ) -> SpectralDensityResult:
@@ -490,7 +490,7 @@ def narrowband_psd(
 
     :param velocity_mm_s: The velocity of the stretch, in millimetres per
         second (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param resolution_hz: The line spacing :math:`\Delta f`, in hertz (default
         1,25 Hz). The block holds ``round(fs / resolution)`` samples, so the
         spacing actually used is ``fs`` over that count.
@@ -502,7 +502,7 @@ def narrowband_psd(
     from ...signals import power_spectral_density
 
     x = _record(velocity_mm_s)
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     resolution = require_positive(resolution_hz, "resolution_hz")
     block = round(fs / resolution)
     if block > x.size:
@@ -592,7 +592,7 @@ def _check_resolution(frequencies: NDArray[np.float64]) -> float:
     """The line spacing of a narrow-band axis, held to the one Table 1 is for."""
     steps = np.diff(frequencies)
     if steps.size == 0 or not np.allclose(steps, steps[0], rtol=1e-6, atol=0.0):
-        msg = "'frequencies_hz' must be evenly spaced, as a narrow-band spectrum is."
+        msg = "'frequencies' must be evenly spaced, as a narrow-band spectrum is."
         raise ValueError(msg)
     spacing = float(steps[0])
     if abs(spacing / NARROWBAND_RESOLUTION_HZ - 1.0) > _RESOLUTION_TOLERANCE:
@@ -606,7 +606,7 @@ def _check_resolution(frequencies: NDArray[np.float64]) -> float:
 
 
 def third_octaves_from_narrowband(
-    frequencies_hz: ArrayLike, psd: ArrayLike
+    frequencies: ArrayLike, psd: ArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Add a narrow-band spectrum back into third octaves, Formula (23).
 
@@ -630,7 +630,7 @@ def third_octaves_from_narrowband(
     that starts above the lowest bands or stops inside a band leaves those
     bands out rather than filling them with the lines of a neighbour.
 
-    :param frequencies_hz: The line frequencies of the spectrum, in hertz,
+    :param frequencies: The line frequencies of the spectrum, in hertz,
         evenly spaced at 1,25 Hz.
     :param psd: The one-sided power spectral density at those lines, in
         (mm/s)²/Hz.
@@ -640,10 +640,10 @@ def third_octaves_from_narrowband(
     :raises ValueError: For mismatched or non-finite inputs, a negative
         density, uneven spacing, or a spacing Table 1 is not written for.
     """
-    f = require_finite_array(frequencies_hz, "frequencies_hz")
+    f = require_finite_array(frequencies, "frequencies")
     g = require_finite_array(psd, "psd")
     if f.ndim != 1 or f.shape != g.shape:
-        msg = "'frequencies_hz' and 'psd' must be 1-D with one value per line."
+        msg = "'frequencies' and 'psd' must be 1-D with one value per line."
         raise ValueError(msg)
     if np.any(g < 0.0):
         msg = "'psd' must not be negative; a power spectral density never is."
@@ -696,24 +696,24 @@ def elastic_insertion_loss(
     return np.asarray(before - after, dtype=np.float64)
 
 
-def band_sum_level(levels_db: ArrayLike) -> float:
+def band_sum_level(levels: ArrayLike) -> float:
     r"""The sum level :math:`\Sigma L` of a spectrum, Annex B, Formula (B.3).
 
     :math:`10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}`, the energy sum of the bands.
 
-    :param levels_db: The band levels, in decibels.
+    :param levels: The band levels, in decibels.
     :return: :math:`\Sigma L`, in decibels.
     :raises ValueError: For an empty or non-finite input.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     if levels.size == 0:
-        msg = "'levels_db' must not be empty."
+        msg = "'levels' must not be empty."
         raise ValueError(msg)
     return float(energy_sum(levels))
 
 
 def centred_interval(
-    velocity_mm_s: ArrayLike, fs_hz: float, *, duration_s: float = T1_DURATION_S
+    velocity_mm_s: ArrayLike, fs: float, *, duration_s: float = T1_DURATION_S
 ) -> tuple[float, float]:
     """The stretch :math:`T_1` of Clause 5 a), centred on the largest amplitude.
 
@@ -723,14 +723,14 @@ def centred_interval(
     rather than cut, so it keeps its length.
 
     :param velocity_mm_s: The velocity, in millimetres per second (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param duration_s: The length of the stretch, in seconds (default 4 s).
     :return: ``(start, end)``, in seconds from the start of the record. A
         record shorter than *duration_s* is returned whole.
     :raises ValueError: For a bad record or a non-positive rate or duration.
     """
     x = _record(velocity_mm_s)
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     record_s = x.size / fs
     duration = min(require_positive(duration_s, "duration_s"), record_s)
     peak_s = float(np.argmax(np.abs(x))) / fs
@@ -756,12 +756,12 @@ class TrainPassage(OwnsArrays):
     :ivar intervals_s: The three stretches ``(start, end)``, in seconds.
     :ivar event_velocity_mm_s: :math:`v_\mathrm{E}` of Formula (8), from :math:`T_3`.
     :ivar event_level_db: :math:`L_{v\mathrm{E}}` of Formula (9).
-    :ivar band_centres_hz: The nominal third-octave centres analysed.
+    :ivar frequencies: The nominal third-octave centres analysed.
     :ivar band_interval_levels_db: :math:`L_{v\mathrm{F}j}(f_{\mathrm{T}n})` of Formula (6), one
         row per stretch, :math:`T_1` to :math:`T_3`.
     :ivar band_max_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
         (7), over :math:`T_3`.
-    :ivar fs_hz: The sampling frequency of the record.
+    :ivar fs: The sampling frequency of the record.
     """
 
     velocity_mm_s: NDArray[np.float64]
@@ -773,10 +773,10 @@ class TrainPassage(OwnsArrays):
     intervals_s: tuple[tuple[float, float], ...]
     event_velocity_mm_s: float
     event_level_db: float
-    band_centres_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     band_interval_levels_db: NDArray[np.float64]
     band_max_levels_db: NDArray[np.float64]
-    fs_hz: float
+    fs: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -886,7 +886,7 @@ def _stretch_bounds(
 
 def evaluate_train_passage(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     t2_s: tuple[float, float],
     t1_s: tuple[float, float] | None = None,
@@ -903,7 +903,7 @@ def evaluate_train_passage(
 
     :param velocity_mm_s: The velocity of the passage as the transducer gives
         it, in millimetres per second (1-D).
-    :param fs_hz: Sampling frequency, in hertz: an integer, for the
+    :param fs: Sampling frequency, in hertz: an integer, for the
         third-octave bank, and high enough to carry the 315 Hz range.
     :param t2_s: :math:`T_2`, the passage itself, ``(start, end)`` in seconds.
         Clause 5 b) reads it off the record, from about a quarter of the most
@@ -922,7 +922,7 @@ def evaluate_train_passage(
         a nominal centre from 80 Hz to 315 Hz.
     """
     raw = _record(velocity_mm_s)
-    fs = _sample_rate(fs_hz, "railway")
+    fs = _sample_rate(fs, "railway")
     require_scalar(upper_band_hz, "upper_band_hz")
     upper = float(upper_band_hz)
     allowed = [
@@ -968,10 +968,10 @@ def evaluate_train_passage(
         event_level_db=(
             event_velocity_level(rms[2], duration_3) if rms[2] > 0.0 else -math.inf
         ),
-        band_centres_hz=centres,
+        frequencies=centres,
         band_interval_levels_db=interval_levels,
         band_max_levels_db=_level(
             np.max(band_rms[:, t3], axis=1), VELOCITY_LEVEL_REFERENCE_MM_S
         ),
-        fs_hz=fs,
+        fs=fs,
     )

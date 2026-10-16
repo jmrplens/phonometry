@@ -153,7 +153,7 @@ CENTRAL_TOLERANCE_PERCENT = (12.0, -11.0, 6.0)
 
 ```python
 characteristic_phase_deviation(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     phase_deviation_deg: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -191,7 +191,7 @@ the characteristic phase deviation values".
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies the phase errors belong to, in hertz, strictly ascending. H.2.1 asks for them "preferably in steps of one-third octaves", which is the grid Annex B tabulates. |
+| `frequencies` | The frequencies the phase errors belong to, in hertz, strictly ascending. H.2.1 asks for them "preferably in steps of one-third octaves", which is the grid Annex B tabulates. |
 | `phase_deviation_deg` | The phase error at each frequency, in degrees, measured minus design goal. |
 
 **Returns:** One value per adjacent pair, in degrees, attributed to the lower frequency of the pair, so of length one less than the input.
@@ -353,7 +353,7 @@ r.m.s.-only meter is not graded on phase at all.
 ```python
 PhaseVerification(
     weighting: str,
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     measured_phase_deg: NDArray[np.float64],
     design_phase_deg: NDArray[np.float64],
     deviation_deg: NDArray[np.float64],
@@ -369,7 +369,7 @@ One measured phase response against the ISO 8041-1 Table 5 phase band.
 | Name | Description |
 | :--- | :--- |
 | `weighting` | The weighting the response was measured for. |
-| `frequencies_hz` | The frequencies it was measured at. |
+| `frequencies` | The frequencies it was measured at. |
 | `measured_phase_deg` | The measured phase, as supplied. |
 | `design_phase_deg` | The design-goal phase of Formula (H.1) at the same frequencies, on the branch Tables B.1 to B.9 print. |
 | `deviation_deg` | The phase error, measured minus design, in degrees. |
@@ -694,7 +694,7 @@ UNCONSTRAINED_BELOW = -100.0
 ```python
 verify_phase_response(
     name: str,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     measured_phase_deg: ArrayLike,
 ) -> PhaseVerification
 ```
@@ -743,7 +743,7 @@ this function does not perform.
 | Name | Description |
 | :--- | :--- |
 | `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
-| `frequencies_hz` | The frequencies the phase was measured at, in hertz, strictly ascending and at least two of them. |
+| `frequencies` | The frequencies the phase was measured at, in hertz, strictly ascending and at least two of them. |
 | `measured_phase_deg` | The measured phase at each frequency, in degrees, on the continuous branch Tables B.1 to B.9 print. |
 
 **Returns:** The verdict, as a [`PhaseVerification`](/phonometry/reference/api/vibration/instrumentation/#phaseverification).
@@ -883,7 +883,7 @@ The Table 5 band around a weighting, region by region.
 ```python
 WeightingVerification(
     weighting: str,
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     measured: NDArray[np.float64],
     design: NDArray[np.float64],
     deviation_percent: NDArray[np.float64],
@@ -898,7 +898,7 @@ One measured weighting response against its ISO 8041-1 tolerances.
 | Name | Description |
 | :--- | :--- |
 | `weighting` | The weighting the response was measured for. |
-| `frequencies_hz` | The frequencies it was measured at. |
+| `frequencies` | The frequencies it was measured at. |
 | `measured` | The measured weighting factors, as supplied. |
 | `design` | The design-goal factors of ISO 8041-1 Table 3 at the same frequencies. |
 | `deviation_percent` | `(measured / design - 1) * 100` elementwise, which is the quantity the standard's acceptance test is written in. |

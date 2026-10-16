@@ -415,8 +415,8 @@ def responses(rates_db_per_m):
     return np.exp(-np.outer(x_hammer, beta))
 
 decay = [
-    environment.track_decay_rate(responses(vertical), frequencies_hz=bands, direction="vertical"),
-    environment.track_decay_rate(responses(lateral), frequencies_hz=bands, direction="lateral"),
+    environment.track_decay_rate(responses(vertical), frequencies=bands, direction="vertical"),
+    environment.track_decay_rate(responses(lateral), frequencies=bands, direction="lateral"),
 ]
 print(x_hammer[-1], round(decay[0].minimum_measurable_db_per_m, 3), decay[1].far_field_sufficient)
 # 39.6 0.11 True
@@ -484,7 +484,7 @@ noise = [68.0, 69.5, 71.0, 72.5, 74.0, 76.0, 78.0, 80.5, 83.0,
          85.5, 87.0, 87.5, 86.5, 84.5, 82.0, 79.0, 75.5, 72.0]   # L_pAeq,Tp(f) a 160 km/h, dB
 average = environment.average_roughness_spectra(spectra)
 small = environment.check_small_roughness_deviations(
-    average, noise, frequencies_hz=bands, speed_kmh=160.0
+    average, noise, frequencies=bands, speed_kmh=160.0
 )
 print(round(small.impact_db, 2), small.passes)
 # 0.57 True

@@ -2584,7 +2584,7 @@ in the same order.
   apply. Verified on PDF page 27 (printed p. 25) of BS EN 61094-8:2012, the
   English text of EN 61094-8:2012, which is IEC 61094-8:2012 unchanged.
 - **Library behaviour:** `metrology.SteppedSineImpulseResponse` follows
-  B.2.2: its `duration_s` is $1/\Delta f$ and its `sample_rate_hz` is
+  B.2.2: its `duration_s` is $1/\Delta f$ and its `fs` is
   $N\,\Delta f$; no change was required.
 - **Status:** unreported (wording defect, no numerical consequence).
 
@@ -3010,7 +3010,7 @@ in the same order.
   $L_J = L_W + 10 \lg(T/T_0)$ field by field on both families; the
   conformance report carries the identity as "ISO 3744:2010 Eq. 23 / clause
   3.4 NOTE 1". `sound_energy_hard_walled` reads ISO 3743-1:2010 Equation (19)
-  the same way and requires `integration_time_s` with the background;
+  the same way and requires `integration_time` with the background;
   `test_steady_source_energy_is_power_plus_10_lg_t` in
   `tests/emission/test_sound_power_hard_walled.py` and the conformance check
   "ISO 3743-1:2010 Eq. 20 / clause 3.4 NOTE 1" pin the identity there.

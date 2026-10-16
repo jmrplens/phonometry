@@ -141,7 +141,7 @@ _DISTANCE_MATCH_RTOL = 1e-9
 
 def _spectrum_levels(spectrum: SpectralClass | ArrayLike) -> NDArray[np.float64]:
     """The 24 band levels of a spectral class, or of a bare array of them."""
-    raw = spectrum.levels_db if isinstance(spectrum, SpectralClass) else spectrum
+    raw = spectrum.levels if isinstance(spectrum, SpectralClass) else spectrum
     levels = require_finite_array(raw, "spectrum")
     if levels.size != NOY_BANDS.size:
         msg = (
@@ -164,11 +164,11 @@ def _a_weighted_sum(levels: NDArray[np.float64]) -> NDArray[np.float64]:
 class NpdAtmosphereIncrement(OwnsArrays):
     r"""The NPD increment for a specified atmosphere (ECAC Doc 29 Vol. 2 Appendix D).
 
-    Every per-band array runs over the 24 bands of :attr:`frequencies_hz`, and
+    Every per-band array runs over the 24 bands of :attr:`frequencies`, and
     every per-distance array over :attr:`distances_m`; the two attenuation
     tables are ``(bands, distances)``.
 
-    :ivar frequencies_hz: Nominal one-third-octave-band centre frequencies, in
+    :ivar frequencies: Nominal one-third-octave-band centre frequencies, in
         Hz (50 Hz to 10 kHz).
     :ivar distances_m: The NPD slant distances :math:`d_i`, in metres.
     :ivar spectrum_db: The spectral class as given, :math:`L_{n,\mathrm{ref}}(d_\mathrm{ref})`
@@ -193,7 +193,7 @@ class NpdAtmosphereIncrement(OwnsArrays):
         not use it.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     distances_m: NDArray[np.float64]
     spectrum_db: NDArray[np.float64]
     source_spectrum_db: NDArray[np.float64]
@@ -220,7 +220,7 @@ class NpdAtmosphereIncrement(OwnsArrays):
         """
         require_ranks(
             self,
-            frequencies_hz=1,
+            frequencies=1,
             distances_m=1,
             spectrum_db=1,
             source_spectrum_db=1,
@@ -232,7 +232,7 @@ class NpdAtmosphereIncrement(OwnsArrays):
         )
         require_same_length(
             self,
-            "frequencies_hz",
+            "frequencies",
             "spectrum_db",
             "source_spectrum_db",
             "reference_attenuation_db",
@@ -408,7 +408,7 @@ def npd_atmosphere_increment(
     reference_levels = _a_weighted_sum(spread - reference_attenuation)
     specified_levels = _a_weighted_sum(spread - specified_attenuation)
     return NpdAtmosphereIncrement(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         distances_m=d,
         spectrum_db=levels,
         source_spectrum_db=source,

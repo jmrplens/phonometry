@@ -360,7 +360,7 @@ def test_a_specific_table_that_lost_its_band_axis_is_refused(
 
 
 @pytest.mark.parametrize(
-    "field", ["bark", "centre_frequencies", "specific_fluctuation_strength"]
+    "field", ["bark", "frequencies", "specific_fluctuation_strength"]
 )
 @pytest.mark.xdist_group("ecma-fluctuation-ref")
 def test_a_band_axis_off_the_filter_bank_is_refused(

@@ -272,10 +272,10 @@ plt.show()
 # By hand, from the rating the result carries:
 w = res.rating
 fig, ax = plt.subplots()
-ax.semilogx(w.band_centers, res.d_i_n_e, "o-", label="DI,n,e (element)")
-ax.semilogx(w.band_centers, w.shifted_reference, "s--",
+ax.semilogx(w.frequencies, res.d_i_n_e, "o-", label="DI,n,e (element)")
+ax.semilogx(w.frequencies, w.shifted_reference, "s--",
             label="shifted reference")
-ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
                 alpha=0.3, label="unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")

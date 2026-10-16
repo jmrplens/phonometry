@@ -534,7 +534,7 @@ class MooreGlasbergLoudness(OwnsArrays):
     level relationship of Table 5).  ``specific`` holds the specific loudness
     N'(i) in sone/Cam sampled at the ERB-number grid ``erb_number`` (Cam),
     i.e. i from 1.8 Cam to 38.9 Cam in 0.1 Cam steps (372 values), and
-    ``centre_frequencies`` the corresponding auditory-filter centre
+    ``frequencies`` the corresponding auditory-filter centre
     frequencies in Hz.  For a binaural (diotic) result the specific-loudness
     pattern is that of a single ear before binaural inhibition; the total
     ``loudness`` already includes the binaural summation.  ``field`` and
@@ -545,7 +545,7 @@ class MooreGlasbergLoudness(OwnsArrays):
     loudness_level: float
     specific: np.ndarray
     erb_number: np.ndarray
-    centre_frequencies: np.ndarray
+    frequencies: np.ndarray
     field: str
     presentation: str
 
@@ -559,7 +559,7 @@ class MooreGlasbergLoudness(OwnsArrays):
         scale with the pattern and takes the ends of the scale for its x
         limits, so a disagreement between those two surfaces late and
         obscurely, as a matplotlib complaint about a first dimension.
-        ``centre_frequencies`` is not drawn at all: a mismatch there reaches
+        ``frequencies`` is not drawn at all: a mismatch there reaches
         the reader intact, naming the wrong filter for every value of the
         pattern, and the total loudness printed in the title was integrated
         over a grid the answer no longer describes.
@@ -593,12 +593,12 @@ class MooreGlasbergLoudness(OwnsArrays):
             not a finite non-negative sone value, or if ``loudness_level``
             does not restate ``loudness`` through Table 5.
         """
-        require_ranks(self, specific=1, erb_number=1, centre_frequencies=1)
+        require_ranks(self, specific=1, erb_number=1, frequencies=1)
         require_same_length(
             self,
             "erb_number",
             "specific",
-            "centre_frequencies",
+            "frequencies",
             axis="auditory filter",
         )
         require_scalar(self.loudness, "loudness")
@@ -826,7 +826,7 @@ def _result_from_components(
         loudness_level=_loudness_level(loudness),
         specific=n_spec,
         erb_number=_I_GRID,
-        centre_frequencies=_FC_GRID,
+        frequencies=_FC_GRID,
         field=field,
         presentation=presentation,
     )

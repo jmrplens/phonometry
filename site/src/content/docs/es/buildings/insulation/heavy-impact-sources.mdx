@@ -322,7 +322,7 @@ freqs = [63.0, 125.0, 250.0, 500.0]
 li_fmax = [65.3, 64.5, 58.0, 55.8]           # promediado en energía sobre posiciones
 t = [1.43, 3.70, 3.10, 2.38]                 # tiempo de reverberación del receptor
 
-res = building.standardized_maximum_impact_level(li_fmax, 41.4, t, frequency=freqs)
+res = building.standardized_maximum_impact_level(li_fmax, 41.4, t, frequencies=freqs)
 print(res.volume_term)                        # 10 lg(41.4/50) = -0.8 dB
 print(building.fast_reverberation_correction([0.5]))   # exactamente 0 dB con T = T0
 res.plot()   # espectros medido y estandarizado (requiere matplotlib)

@@ -105,7 +105,7 @@ class STOIResult(OwnsArrays):
         over bands for STOI, the spectral correlation ``d_m`` for ESTOI).
     :ivar band_scores: Per-band mean intermediate correlation over the
         segments (STOI only; ``None`` for ESTOI, whose index mixes the bands).
-    :ivar band_frequencies: The 15 one-third-octave band centre frequencies,
+    :ivar frequencies: The 15 one-third-octave band centre frequencies,
         in hertz.
     :ivar fs: The internal sample rate the measure runs at (10 kHz).
     """
@@ -115,13 +115,13 @@ class STOIResult(OwnsArrays):
     extended: bool
     segment_scores: NDArray[np.float64]
     band_scores: NDArray[np.float64] | None
-    band_frequencies: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     fs: int
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band quantities disagree.
 
-        :attr:`band_scores` and :attr:`band_frequencies` are the two halves of
+        :attr:`band_scores` and :attr:`frequencies` are the two halves of
         one bar chart, the bar heights and the band each bar is labelled with,
         and every reader pairs them by position. Matplotlib does notice the
         mismatch, but only when the chart is drawn and only as a complaint
@@ -136,8 +136,8 @@ class STOIResult(OwnsArrays):
 
         :raises ValueError: if the band axes disagree.
         """
-        require_ranks(self, segment_scores=1, band_scores=1, band_frequencies=1)
-        require_same_length(self, "band_scores", "band_frequencies")
+        require_ranks(self, segment_scores=1, band_scores=1, frequencies=1)
+        require_same_length(self, "band_scores", "frequencies")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -416,6 +416,6 @@ def stoi(
         extended=extended,
         segment_scores=np.asarray(segment_scores, dtype=np.float64),
         band_scores=band_scores,
-        band_frequencies=centers,
+        frequencies=centers,
         fs=SAMPLE_RATE,
     )

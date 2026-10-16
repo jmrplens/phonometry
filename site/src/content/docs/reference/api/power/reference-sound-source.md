@@ -146,7 +146,7 @@ radiation_impedance_correction(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     knee_frequency_hz: float | None = None,
 ) -> np.ndarray
 ```
@@ -167,7 +167,7 @@ calibration used should be the one the user applies.
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals. |
 | `radiation` | `"unknown"` (default), `"monopole"` or `"dipole"`. |
-| `frequencies_hz` | The band frequencies, in hertz; required for a monopole or a dipole, whose correction depends on the knee frequency. |
+| `frequencies` | The band frequencies, in hertz; required for a monopole or a dipole, whose correction depends on the knee frequency. |
 | `knee_frequency_hz` | $f_\mathrm{k}$ (see [`knee_frequency`](/phonometry/reference/api/power/reference-sound-source/#knee_frequency)), required for a monopole or a dipole. |
 
 **Returns:** $C_2$ per band, in dB (one value without frequencies).
@@ -182,9 +182,9 @@ calibration used should be the one the user applies.
 
 ```python
 reference_source_calibration(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     arrangement: Literal['paths', 'fixed'],
     background_levels_db: ArrayLike | None = None,
     maximum_levels_db: ArrayLike | None = None,
@@ -219,11 +219,11 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | `(positions, bands)` time-averaged levels at the fixed positions or along the traverses of 8.2, in dB. |
-| `frequencies_hz` | Nominal one-third octave mid-band frequencies, in hertz, ascending, from 50 Hz to 20 kHz. |
+| `levels` | `(positions, bands)` time-averaged levels at the fixed positions or along the traverses of 8.2, in dB. |
+| `frequencies` | Nominal one-third octave mid-band frequencies, in hertz, ascending, from 50 Hz to 20 kHz. |
 | `arrangement` | `"paths"` (meridional or spiral paths) or `"fixed"` (the 20 fixed positions or coaxial circular paths), which selects the column of Table 2. |
 | `background_levels_db` | Background levels, per position or one spectrum, for the ISO 3745 correction; `None` applies none. |
-| `maximum_levels_db` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels_db`. |
+| `maximum_levels_db` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels`. |
 | `conditions` | The [`CalibrationConditions`](/phonometry/reference/api/power/reference-sound-source/#calibrationconditions) of the air during the calibration, whose temperature and static pressure enter $C_1$ and the Annex A $C_2$ and whose $a(f)$ enters $C_3$; `None` (default) takes the reference meteorological conditions of clause 4 with no air absorption. |
 | `radiation` | Radiation character for the Annex A $C_2$. |
 | `knee_frequency_hz` | Knee frequency for a monopole or a dipole. |
@@ -244,7 +244,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 
 ```python
 reference_source_reproducibility_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],
     arrangement: Literal['paths', 'fixed'] | None = None,
@@ -262,7 +262,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal mid-band frequencies, in hertz. |
+| `frequencies` | Nominal mid-band frequencies, in hertz. |
 | `environment` | `"hemi-anechoic"` or `"reverberation-room"`. |
 | `arrangement` | In a hemi-anechoic room, `"paths"` (meridional or spiral) or `"fixed"` (20 discrete positions or coaxial circular paths); ignored in a reverberation room. |
 | `bandwidth` | `"one-third-octave"` (default) or `"octave"`. |
@@ -279,7 +279,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 
 ```python
 ReferenceSoundSourceVerdict(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     sound_power_level_db: np.ndarray,
     repeatability_db: np.ndarray | None,
     supply_variation_db: np.ndarray | None,
@@ -300,7 +300,7 @@ built against another limit.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third octave bands, contiguous and ascending, in hertz. |
+| `frequencies` | The one-third octave bands, contiguous and ascending, in hertz. |
 | `sound_power_level_db` | The calibrated $L_W$ per band. |
 | `repeatability_db` | $\sigma_r$ of Formula (1) per band, or `None` when no repetitions were given. |
 | `supply_variation_db` | The largest change of $L_W$ per band over the declared range of the electrical or mechanical supply (5.2), or `None` when not given. |
@@ -444,7 +444,7 @@ The 0,3 dB either way of 5.2, in dB.
 
 ```python
 ReferenceSourceCalibration(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     surface_pressure_level_db: np.ndarray,
     directivity_index_db: np.ndarray,
     c1_db: float,
@@ -472,7 +472,7 @@ measurement Table B.1 refuses.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal one-third octave mid-band frequencies, in hertz, ascending. |
+| `frequencies` | Nominal one-third octave mid-band frequencies, in hertz, ascending. |
 | `surface_pressure_level_db` | $\overline{L_p}$ over the 2 m hemisphere after the background correction, per band. |
 | `directivity_index_db` | $D_{\mathrm{I}i}$ per position or traverse and band (3.9), `(positions, bands)`. |
 | `c1_db` | $C_1$, in dB. |
@@ -567,7 +567,7 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 
 ```python
 ReferenceSourceCalibration.sound_power_level_at(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     bandwidth: Literal['one-third-octave', 'octave'] = 'one-third-octave',
     temperature_c: float | None = None,
@@ -591,7 +591,7 @@ calibrated.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal mid-band frequencies, in hertz. |
+| `frequencies` | Nominal mid-band frequencies, in hertz. |
 | `bandwidth` | `"one-third-octave"` (default) or `"octave"`. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius; `None` (default), with `static_pressure_kpa`, reads the reference conditions. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, given together with `temperature_c`. |
@@ -617,10 +617,7 @@ them.
 ## ReferenceSourceDriftResult
 
 ```python
-ReferenceSourceDriftResult(
-    frequencies_hz: np.ndarray,
-    change_db: np.ndarray,
-)
+ReferenceSourceDriftResult(frequencies: np.ndarray, change_db: np.ndarray)
 ```
 
 Whether a reference sound source has drifted enough to be recalibrated.
@@ -632,7 +629,7 @@ The limit is the clause's, 2,83 times Table 1, read from the bands as
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third octave bands, in hertz. |
+| `frequencies` | The one-third octave bands, in hertz. |
 | `change_db` | The latest level less the reference one, per band. |
 
 ### ReferenceSourceDriftResult.limit_db
@@ -683,7 +680,7 @@ Draw the change of each band against its limit.
 ## repeatability_standard_deviation
 
 ```python
-repeatability_standard_deviation(levels_db: ArrayLike) -> np.ndarray
+repeatability_standard_deviation(levels: ArrayLike) -> np.ndarray
 ```
 
 Standard deviation under repeatability conditions (ISO 6926 Formula (1)).
@@ -696,7 +693,7 @@ $\overline{L_X}$ the energy average of the repetitions, as clause
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | `(N, bands)` repeated levels (sound power or sound pressure), or `(N,)` for one band, in dB. |
+| `levels` | `(N, bands)` repeated levels (sound power or sound pressure), or `(N,)` for one band, in dB. |
 
 **Returns:** $\sigma_r$ per band, in dB.
 
@@ -712,7 +709,7 @@ $\overline{L_X}$ the energy average of the repetitions, as clause
 verify_reference_sound_source(
     calibration: ReferenceSourceCalibration | ArrayLike,
     *,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     repeated_levels_db: ArrayLike | None = None,
     supply_variation_db: ArrayLike | None = None,
     directivity_index_db: ArrayLike | None = None,
@@ -734,7 +731,7 @@ frequencies.
 | Name | Description |
 | :--- | :--- |
 | `calibration` | A [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), or the calibrated $L_W$ per band, in dB re 1 pW. |
-| `frequencies_hz` | The bands of a plain level array, ascending one-third octave mid-bands, in hertz; omitted with a calibration. |
+| `frequencies` | The bands of a plain level array, ascending one-third octave mid-bands, in hertz; omitted with a calibration. |
 | `repeated_levels_db` | `(3, bands)` sound power levels or `(5, bands)` sound pressure levels measured in succession (8.3.3, 9.3.2); `None` leaves the steadiness of 5.2 unjudged. |
 | `supply_variation_db` | The largest change of the sound power level in each band over the declared range of the electrical or mechanical supply, the line voltage for instance (5.2), per band or one value for every band, in dB; `None` leaves that requirement unjudged. |
 | `directivity_index_db` | The directivity index per position and band, or the highest per band, for a plain level array (a calibration brings its own). |
@@ -755,7 +752,7 @@ verify_reference_source_drift(
     reference_levels_db: ArrayLike,
     latest_levels_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> ReferenceSourceDriftResult
 ```
 
@@ -772,7 +769,7 @@ times Table 1 in any band calls for recalibration.
 | :--- | :--- |
 | `reference_levels_db` | The levels of the earlier check, per band, in dB. |
 | `latest_levels_db` | The levels of the latest check, same bands. |
-| `frequencies_hz` | Nominal one-third octave mid-bands, 50 Hz to 20 kHz, in hertz. |
+| `frequencies` | Nominal one-third octave mid-bands, 50 Hz to 20 kHz, in hertz. |
 
 **Returns:** [`ReferenceSourceDriftResult`](/phonometry/reference/api/power/reference-sound-source/#referencesourcedriftresult).
 

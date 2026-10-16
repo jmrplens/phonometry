@@ -44,7 +44,7 @@ ship_source_spectrum(
     *,
     vessel_class: str = 'containership',
     model: str = 'jomopans-echo',
-    frequency_hz: NDArray[np.float64] | list[float] | None = None,
+    frequencies: NDArray[np.float64] | list[float] | None = None,
 ) -> ShipTrafficSpectrum
 ```
 
@@ -58,7 +58,7 @@ Predicted underwater source-level spectrum of a ship.
 | `length_m` | Vessel length, in metres (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
 | `vessel_class` | JOMOPANS-ECHO vessel class (see [`VESSEL_CLASSES`](/phonometry/reference/api/underwater/ship-traffic-noise/#vessel_classes)); used only by `"jomopans-echo"`. |
 | `model` | `"jomopans-echo"` (default), `"randi"` or `"wales-heitmeyer"`. |
-| `frequency_hz` | Frequencies, in Hz; defaults to the decidecade bands 10 Hz-31.5 kHz of the JOMOPANS-ECHO validation range. |
+| `frequencies` | Frequencies, in Hz; defaults to the decidecade bands 10 Hz-31.5 kHz of the JOMOPANS-ECHO validation range. |
 
 **Returns:** A [`ShipTrafficSpectrum`](/phonometry/reference/api/underwater/ship-traffic-noise/#shiptrafficspectrum).
 

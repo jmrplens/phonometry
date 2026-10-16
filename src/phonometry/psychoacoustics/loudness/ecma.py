@@ -259,7 +259,7 @@ class EcmaLoudness(OwnsArrays):
     (Formula 117).  ``specific_loudness`` is the average specific loudness
     N'(z) in sone_HMS/Bark_HMS over the 53 auditory bands (Formula 115),
     with ``bark`` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
-    ``centre_frequencies`` the band centre frequencies F(z).  ``times`` and
+    ``frequencies`` the band centre frequencies F(z).  ``times`` and
     ``loudness_vs_time`` hold the time-dependent loudness N(l) at 187,5 Hz
     (Formula 116).  ``field`` records the assumed sound field.
     """
@@ -267,7 +267,7 @@ class EcmaLoudness(OwnsArrays):
     loudness: float
     specific_loudness: np.ndarray
     bark: np.ndarray
-    centre_frequencies: np.ndarray
+    frequencies: np.ndarray
     times: np.ndarray
     loudness_vs_time: np.ndarray
     field: str
@@ -280,7 +280,7 @@ class EcmaLoudness(OwnsArrays):
         critical-band-rate scale of the 53 auditory bands, and the
         time-dependent loudness against its block times. Where the chart draws
         such a pair a mismatch does stop it, but from inside matplotlib, about
-        a first dimension, whenever someone next plots; ``centre_frequencies``
+        a first dimension, whenever someone next plots; ``frequencies``
         it never draws, so a band axis that disagrees there is caught by
         nobody and F(z) is reported for a band other than the one whose
         loudness stands beside it.
@@ -297,7 +297,7 @@ class EcmaLoudness(OwnsArrays):
             self,
             specific_loudness=1,
             bark=1,
-            centre_frequencies=1,
+            frequencies=1,
             times=1,
             loudness_vs_time=1,
         )
@@ -305,7 +305,7 @@ class EcmaLoudness(OwnsArrays):
             self,
             "specific_loudness",
             "bark",
-            "centre_frequencies",
+            "frequencies",
             axis="auditory band",
         )
         require_same_length(self, "times", "loudness_vs_time", axis="time block")
@@ -763,7 +763,7 @@ def loudness_ecma(
         loudness=n_single,
         specific_loudness=n_spec,
         bark=_Z,
-        centre_frequencies=_F_CENTRE,
+        frequencies=_F_CENTRE,
         times=time,
         loudness_vs_time=n_time,
         field=field,

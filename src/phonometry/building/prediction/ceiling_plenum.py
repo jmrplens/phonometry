@@ -413,7 +413,7 @@ class CeilingAttenuationResult(OwnsArrays):
 
 
 def ceiling_attenuation_class(
-    attenuation: ArrayLike, frequency: ArrayLike | None = None
+    attenuation: ArrayLike, frequencies: ArrayLike | None = None
 ) -> CeilingAttenuationResult:
     """Ceiling attenuation class CAC (ASTM E413-22 clause 5, via ASTM E1414).
 
@@ -425,7 +425,7 @@ def ceiling_attenuation_class(
 
     :param attenuation: Normalized ceiling attenuation ``Dn,c`` in the 16
         one-third-octave bands 125 Hz to 4000 Hz, in dB.
-    :param frequency: Optional band centre frequencies, in Hz; when given they
+    :param frequencies: Optional band centre frequencies, in Hz; when given they
         must be exactly the 16 contour bands.
     :return: A :class:`CeilingAttenuationResult`.
     :raises ValueError: for a wrong number of bands or mismatched frequencies.
@@ -441,12 +441,10 @@ def ceiling_attenuation_class(
             f"(125 Hz to 4000 Hz)."
         )
         raise ValueError(msg)
-    if frequency is not None:
-        given = require_finite_array(frequency, "frequency")
+    if frequencies is not None:
+        given = require_finite_array(frequencies, "frequencies")
         if given.shape != bands.shape or not np.allclose(given, bands):
-            msg = (
-                "'frequency' must be the 16 ASTM E413 contour bands 125 Hz to 4000 Hz."
-            )
+            msg = "'frequencies' must be the 16 ASTM E413 contour bands 125 Hz to 4000 Hz."
             raise ValueError(msg)
     # Clause 5.2: the contour is fitted to integer-rounded data.
     rounded = np.asarray(np.floor(values + 0.5), dtype=np.float64)
@@ -567,7 +565,7 @@ def plenum_flanking_reduction_index(
     ceiling_length: float,
     plenum_height: float,
     sidewalls: str = ...,
-    frequency: ArrayLike | None = ...,
+    frequencies: ArrayLike | None = ...,
     attenuation_source: ArrayLike,
     attenuation_receiving: ArrayLike,
     source_length: float | None = ...,
@@ -584,7 +582,7 @@ def plenum_flanking_reduction_index(
     ceiling_length: float,
     plenum_height: float,
     sidewalls: str = ...,
-    frequency: ArrayLike | None = ...,
+    frequencies: ArrayLike | None = ...,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
@@ -598,7 +596,7 @@ def plenum_flanking_reduction_index(
     ceiling_length: float,
     plenum_height: float,
     sidewalls: str = "reflecting",
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     attenuation_source: ArrayLike | None = None,
     attenuation_receiving: ArrayLike | None = None,
     source_length: float | None = None,
@@ -632,7 +630,7 @@ def plenum_flanking_reduction_index(
     :param sidewalls: ``"reflecting"`` (:math:`\epsilon = 2`, Default) or
         ``"absorbing"`` (:math:`\epsilon = 1`); :math:`\epsilon` scales both
         the geometry penalty of Eq. (9.20) and the exponents of Eq. (9.18).
-    :param frequency: Optional band centre frequencies, in Hz.
+    :param frequencies: Optional band centre frequencies, in Hz.
     :param attenuation_source: Optional plenum power attenuation coefficient
         ``mS`` per band, in 1/m (> 0); switches to Eq. (9.18).
     :param attenuation_receiving: Optional ``mR`` per band, in 1/m (> 0);
@@ -669,11 +667,11 @@ def plenum_flanking_reduction_index(
     ss = _require_split(split_source, "split_source")
     sr = _require_split(split_receiving, "split_receiving")
     freqs: np.ndarray | None = None
-    if frequency is not None:
-        freqs = require_finite_array(frequency, "frequency")
+    if frequencies is not None:
+        freqs = require_finite_array(frequencies, "frequencies")
         require_equal_shapes(
             "plenum_flanking_reduction_index",
-            {"reduction_index_source": rs.shape, "frequency": freqs.shape},
+            {"reduction_index_source": rs.shape, "frequencies": freqs.shape},
             "band",
         )
 

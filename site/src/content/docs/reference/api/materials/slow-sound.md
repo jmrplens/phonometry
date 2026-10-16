@@ -189,7 +189,7 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `resonator` | The [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) geometry. |
 | `slit_height` | Slit height `h` for the neck-to-slit correction; if `None` that correction is omitted (`"square"` only). |
 | `lattice_step` | Lattice step `a` for the neck-to-slit correction. |
@@ -344,7 +344,7 @@ $28.454\,\eta/\text{side}^2$ as $\omega \to 0$.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `side` | Square-duct side length, in metres. |
 | `fluid` | State of the air in the duct ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 | `sum_terms` | Transverse modes kept per axis (default 40). |
@@ -381,7 +381,7 @@ $\kappa_0 = \gamma P_0$.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `slit_height` | Slit height `h`, in metres. |
 | `fluid` | State of the air in the slit ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 
@@ -424,7 +424,7 @@ only the front air impedance carries `cos(theta)`.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `resonators` | One [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) or a sequence of them, ordered from the panel face towards the rigid backing. |
 | `slit_height` | Slit height `h`, in metres. |
 | `lattice_step` | Resonator lattice step `a` along the slit, in metres; the slit depth is $L = N a$. |

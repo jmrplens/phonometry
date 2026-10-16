@@ -79,7 +79,7 @@ check_special_room_reverberation(
     reverberation_time_s: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     nominal_reverberation_time_s: float | None = None,
     surface_area_m2: float | None = None,
     speed_of_sound: float | None = None,
@@ -137,7 +137,7 @@ but keeps it out of the verdict, the clause saying "should".
 | :--- | :--- |
 | `reverberation_time_s` | Measured reverberation time per band, in seconds, in one-third-octave bands as Figure B.3 has them. |
 | `frequencies` | Band centre frequencies, in hertz. |
-| `volume_m3` | Volume of the test room, in cubic metres. |
+| `volume` | Volume of the test room, in cubic metres. |
 | `nominal_reverberation_time_s` | $T_\mathrm{nom}$ to check, in seconds; `None` centres it. |
 | `surface_area_m2` | Room surface area for the NOTE form of $R$, in square metres, with `speed_of_sound`. |
 | `speed_of_sound` | Speed of sound for the NOTE form, in metres per second. |
@@ -252,7 +252,7 @@ and without them it is the plain mean of the surfaces.
 ```python
 reverberation_parameter(
     frequencies: ArrayLike,
-    volume_m3: float,
+    volume: float,
     *,
     surface_area_m2: float | None = None,
     speed_of_sound: float | None = None,
@@ -287,7 +287,7 @@ that volume too and nothing is read off the figure.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in hertz. |
-| `volume_m3` | Volume of the test room, in cubic metres. |
+| `volume` | Volume of the test room, in cubic metres. |
 | `surface_area_m2` | Total surface area of the room, in square metres; with `speed_of_sound` it selects the NOTE form. |
 | `speed_of_sound` | Speed of sound, in metres per second, required with `surface_area_m2` and refused without it. |
 
@@ -306,7 +306,7 @@ sound_power_special_room(
     levels: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     nominal_reverberation_time_s: float,
     background_levels: ArrayLike | None = None,
     a_weighted_levels: ArrayLike | None = None,
@@ -340,7 +340,7 @@ Annex F total of the octave bands.
 | :--- | :--- |
 | `levels` | Measured octave-band levels, in decibels: `(bands,)` for a microphone traverse, `(NM, bands)` for fixed positions, or `(NS, NM, bands)` for several source locations (9.4). |
 | `frequencies` | Nominal octave centres from 63 Hz to 8 kHz, ascending (Table F.1; 63 Hz under its footnote). |
-| `volume_m3` | Volume of the test room, in cubic metres. |
+| `volume` | Volume of the test room, in cubic metres. |
 | `nominal_reverberation_time_s` | $T_\mathrm{nom}$ of the room (6.3), in seconds, as [`check_special_room_reverberation`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_reverberation) finds it. |
 | `background_levels` | Background levels, `(NM, bands)` or one `(bands,)` spectrum for every position, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False`. |
 | `a_weighted_levels` | The A-weighted levels measured with the source, one per position (`(NM,)` or `(NS, NM)`) or one traverse level, in decibels; `None` leaves the direct A-weighted level `NaN`. |
@@ -514,7 +514,7 @@ SpecialRoomReverberationCheck(
     reverberation_parameter: np.ndarray,
     nominal_reverberation_time_s: float,
     centred: bool,
-    volume_m3: float,
+    volume: float,
     method: str,
     climate_product_change: float = nan,
     source_volume_m3: float = nan,
@@ -531,7 +531,7 @@ with `centred` `True`, found by centring the measured values within
 the limiting curves. `lower_limit` and `upper_limit` are the
 bounds on $T/(R\,T_\mathrm{nom})$, 0,9 and 1,1, or 0,8 and 1,2 above
 6,3 kHz, read from the bands: the standard's, not fields.
-`volume_m3` is the room and `method` the determination it is being
+`volume` is the room and `method` the determination it is being
 qualified for, which decides whether the 300 m³ ceiling applies.
 `climate_product_change` is the relative change of
 $H(\theta + 5\ ^\circ\mathrm{C})$ between the reverberation
@@ -660,12 +660,12 @@ SpecialRoomSoundPowerResult(
     background_margin_ref_db: np.ndarray,
     mean_reference_level: np.ndarray,
     reference_power_level: np.ndarray,
-    volume_m3: float,
+    volume: float,
     nominal_reverberation_time_s: float,
     c2: float,
     sigma_r0: np.ndarray,
     sigma_r0_a: float,
-    sigma_omc: float,
+    sigma_omc_db: float,
     coverage_factor: float,
     sound_power_level_a: float,
     sound_power_level_a_direct: float,
@@ -699,7 +699,7 @@ and every margin, of the source and, for the comparison method, of the
 reference source, reached it. For the comparison method
 `mean_reference_level` is $L_{p\mathrm{r}}$ and
 `reference_power_level` $L_{W\mathrm{r}}$; for the direct method
-both are `NaN` and `volume_m3` and `nominal_reverberation_time_s`
+both are `NaN` and `volume` and `nominal_reverberation_time_s`
 carry the room instead (`NaN` for the comparison method).
 
 `sound_power_level_a` is the Annex F total of the octave bands;
@@ -742,7 +742,7 @@ Whether every A-weighted margin reached the 4 dB of 6.5.
 *property*
 
 `U` of the A-weighted level (Formula 13), in decibels: 5,7 dB for
-`sigma_omc` = 2,0 dB and `k` = 2, the 11.5 EXAMPLE.
+`sigma_omc_db` = 2,0 dB and `k` = 2, the 11.5 EXAMPLE.
 
 ### SpecialRoomSoundPowerResult.plot()
 
@@ -759,7 +759,7 @@ Plot the octave-band spectrum with the A-weighted total annotated.
 
 A band whose background margin fell below 4 dB is hatched as not
 meeting 9.8, and the expanded uncertainty is drawn as an error bar
-where `sigma_omc` was given. Requires matplotlib
+where `sigma_omc_db` was given. Requires matplotlib
 (`pip install phonometry[plot]`).
 
 **Parameters**
@@ -824,7 +824,7 @@ as 9.8 asks.
 
 *property*
 
-Formula (12) per band, in decibels; `NaN` without `sigma_omc`.
+Formula (12) per band, in decibels; `NaN` without `sigma_omc_db`.
 
 ### SpecialRoomSoundPowerResult.sigma_tot_a
 

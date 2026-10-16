@@ -168,7 +168,7 @@ raise a [`RoadAbsorptionWarning`](/phonometry/reference/api/materials/road-absor
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies to check, in hertz. |
+| `frequency` | Frequency or frequencies to check, in hertz. |
 
 **Raises**
 
@@ -561,7 +561,7 @@ source-to-microphone distance projected on the reference plane.
 
 ```python
 one_third_octave_absorption(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     absorption: ArrayLike,
     *,
     f_min: float = 250.0,
@@ -584,8 +584,8 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Narrow-band frequencies, in hertz. |
-| `absorption` | Narrow-band absorption values aligned with `frequency`. |
+| `frequencies` | Narrow-band frequencies, in hertz. |
+| `absorption` | Narrow-band absorption values aligned with `frequencies`. |
 | `f_min` | Lowest band centre to report, in hertz (default 250 Hz). |
 | `f_max` | Highest band centre to report, in hertz (4000 Hz for Part 1; pass 1600 Hz for the Part-2 range). |
 | `clip_negative` | Set negative band results to zero (default `True`). |
@@ -596,7 +596,7 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `frequency` and `absorption` differ in shape or are empty. |
+| ValueError | If `frequencies` and `absorption` differ in shape or are empty. |
 
 ## PART1_FREQUENCY_RANGE
 

@@ -181,7 +181,7 @@ def ln_levels(
     # _validate_reference_stability already uses in calibration.py.
     tau = {"fast": 0.125, "slow": 1.0, "impulse": 0.035}[mode.lower()]
     skip = min(int(5 * tau * fs), envelope.shape[-1] // 2)
-    levels_db = _level_db(
+    levels = _level_db(
         mean_square=envelope[..., skip:],
         calibration_factor=calibration_factor,
         dbfs=dbfs,
@@ -189,7 +189,7 @@ def ln_levels(
 
     result: dict[int, float | np.ndarray] = {}
     for value in n:
-        p = np.percentile(levels_db, 100 - value, axis=-1)
+        p = np.percentile(levels, 100 - value, axis=-1)
         result[value] = float(p) if np.ndim(p) == 0 else np.asarray(p)
     return result
 

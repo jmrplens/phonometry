@@ -439,7 +439,7 @@ def low_frequency_level(level: ArrayLike, corner: ArrayLike) -> np.ndarray:
     ``L``, however quiet the corners are.
 
     :param level: Energy-average level ``L`` from the default procedure, in dB,
-        one value per band.
+        a scalar or one value per band.
     :param corner: Corner level :math:`L_\mathrm{Corner}` from
         :func:`corner_level`, in dB, same bands.
     :return: :math:`L_\mathrm{LF}`, in dB, one value per band.
@@ -699,7 +699,7 @@ def _substituted_reverberation(
 
 
 def apply_low_frequency_procedure(
-    level: ArrayLike,
+    levels: ArrayLike,
     frequencies: ArrayLike,
     procedure: LowFrequencyProcedure,
     *,
@@ -724,7 +724,7 @@ def apply_low_frequency_procedure(
     neither: it takes no reverberation times and refuses a procedure that
     brings a 63 Hz octave value.
 
-    :param level: Energy-average levels of the whole measurement, in dB, one
+    :param levels: Energy-average levels of the whole measurement, in dB, one
         value per band.
     :param frequencies: Band centre frequencies, in Hz, same length.
     :param procedure: The room's corner measurements and volume.
@@ -744,11 +744,11 @@ def apply_low_frequency_procedure(
         expected = " or ".join(repr(name) for name in _ROOMS)
         msg = f"'room' must be {expected}, got {room!r}."
         raise ValueError(msg)
-    levels = np.asarray(level, dtype=np.float64)
+    levels = np.asarray(levels, dtype=np.float64)
     freqs = np.asarray(frequencies, dtype=np.float64)
     if levels.ndim != 1 or freqs.ndim != 1:
         msg = (
-            "'level' and 'frequencies' must each be one-dimensional (one "
+            "'levels' and 'frequencies' must each be one-dimensional (one "
             f"value per band); got {levels.ndim} and {freqs.ndim} dimension(s)."
         )
         raise ValueError(msg)

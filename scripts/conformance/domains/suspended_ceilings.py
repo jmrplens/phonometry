@@ -106,7 +106,7 @@ def _library_correction(
     specimen_area_m2: float,
     empty: tuple[float, float],
     with_specimen: tuple[float, float],
-    bands_hz: tuple[float, ...],
+    frequencies: tuple[float, ...],
 ) -> tuple[np.ndarray, bool]:
     """``4V(m2 - m1)/S`` through the library, and whether 4.2.1 was warned of.
 
@@ -115,13 +115,13 @@ def _library_correction(
     :param empty: The empty-room climate, as the (temperature, humidity) key of
         a printed ISO 9613-1 sub-table and column.
     :param with_specimen: The same for the measurement with the specimen.
-    :param bands_hz: The bands to evaluate, all of which both columns print.
+    :param frequencies: The bands to evaluate, all of which both columns print.
     :return: The correction per band and whether the clause's cap was reported
         as exceeded, which is the verdict the rows check.
     """
     table = oracle.ISO9613_1_TABLE_1_DB_PER_KM
-    alpha_1 = tuple(table[empty][band] for band in bands_hz)
-    alpha_2 = tuple(table[with_specimen][band] for band in bands_hz)
+    alpha_1 = tuple(table[empty][band] for band in frequencies)
+    alpha_2 = tuple(table[with_specimen][band] for band in frequencies)
     # dB/km to dB/m, then the library's own EN ISO 354 8.1.2.1 conversion.
     m_1 = ph.materials.attenuation_from_alpha(np.asarray(alpha_1) / 1000.0)
     m_2 = ph.materials.attenuation_from_alpha(np.asarray(alpha_2) / 1000.0)
@@ -365,7 +365,7 @@ def _chk_air_correction_over_the_cap() -> Outcome:
         specimen_area_m2=oracle.SRL_13441_AREA_M2,
         empty=(20.0, 50.0),
         with_specimen=(20.0, 60.0),
-        bands_hz=bands,
+        frequencies=bands,
     )
     return _cap_verdict(computed, bands, warned=warned, over=True)
 
@@ -398,7 +398,7 @@ def _chk_air_correction_inside_the_cap() -> Outcome:
         specimen_area_m2=oracle.SP_P302808_AREA_M2,
         empty=(20.0, 90.0),
         with_specimen=(25.0, 90.0),
-        bands_hz=bands,
+        frequencies=bands,
     )
     return _cap_verdict(computed, bands, warned=warned, over=False)
 

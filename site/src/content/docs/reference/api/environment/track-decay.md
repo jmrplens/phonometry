@@ -99,8 +99,8 @@ The hammer positions of Figure 2, in metres from the accelerometer.
 track_decay_rate(
     responses: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
-    distances_m: ArrayLike | None = None,
+    frequencies: ArrayLike,
+    distances: ArrayLike | None = None,
     sleeper_spacing_m: float = 0.6,
     direction: str = 'vertical',
 ) -> TrackDecayRate
@@ -121,9 +121,9 @@ the ratio to the direct response enters.
 | Name | Description |
 | :--- | :--- |
 | `responses` | The one-third octave band magnitudes $\vert A(x_n)\vert $, one row per excitation position, nearest first, the direct response in the first row, and one column per band. Magnitudes, not levels: a level in decibels is `10 ** (level / 20)`. |
-| `frequencies_hz` | The nominal frequency of each band, in hertz; 6.6 asks for at least 100 Hz to 5 000 Hz. |
-| `distances_m` | The excitation positions, in metres from the accelerometer, starting at 0 and increasing. When omitted, the 29 positions of Figure 2 at `sleeper_spacing_m`. |
-| `sleeper_spacing_m` | The sleeper spacing the Figure 2 grid is laid out in, in metres, when `distances_m` is omitted. |
+| `frequencies` | The nominal frequency of each band, in hertz; 6.6 asks for at least 100 Hz to 5 000 Hz. |
+| `distances` | The excitation positions, in metres from the accelerometer, starting at 0 and increasing. When omitted, the 29 positions of Figure 2 at `sleeper_spacing_m`. |
+| `sleeper_spacing_m` | The sleeper spacing the Figure 2 grid is laid out in, in metres, when `distances` is omitted. |
 | `direction` | `"vertical"` or `"lateral"`. |
 
 **Returns:** The rates, with the grid and the responses they came from.
@@ -139,9 +139,9 @@ the ratio to the direct response enters.
 ```python
 TrackDecayRate(
     direction: str,
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     decay_rates_db_per_m: NDArray[np.float64],
-    distances_m: NDArray[np.float64] | None = None,
+    distances: NDArray[np.float64] | None = None,
     responses: NDArray[np.float64] | None = None,
 )
 ```
@@ -157,9 +157,9 @@ needs.
 | Name | Description |
 | :--- | :--- |
 | `direction` | `"vertical"` or `"lateral"`. |
-| `frequencies_hz` | The nominal band frequencies, in hertz. |
+| `frequencies` | The nominal band frequencies, in hertz. |
 | `decay_rates_db_per_m` | The decay rate of each band, in dB/m. |
-| `distances_m` | The excitation positions, in metres from the accelerometer: the direct one at 0 m first, then strictly increasing, at least two in all; `None` for rates taken from a report. |
+| `distances` | The excitation positions, in metres from the accelerometer: the direct one at 0 m first, then strictly increasing, at least two in all; `None` for rates taken from a report. |
 | `responses` | The magnitude $\vert A(x_n)\vert $ of each response, one row per position and one column per band, positive and finite, in whatever unit the mobility or accelerance was measured in; `None` for rates taken from a report. |
 
 ### TrackDecayRate.far_field_drops_db

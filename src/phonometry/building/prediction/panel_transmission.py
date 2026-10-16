@@ -442,7 +442,7 @@ def single_panel_transmission_loss(
     let it be computed from *bending_stiffness* and *mass_per_area* through
     :func:`~phonometry.vibration.structural.radiation_efficiency.coincidence_frequency`.
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
     :param critical_frequency: Coincidence frequency ``fc``, in hertz (> 0).
     :param bending_stiffness: Bending stiffness per unit width ``B'``, in N.m,
@@ -728,7 +728,7 @@ def plateau_transmission_loss(
     *plateau_height* or *frequency_ratio* always overrides the material's,
     and the material's own is then not read at all.
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param material: A key into :data:`PLATEAU_MATERIALS`, or a
         :class:`~phonometry.solids.PlateauMaterial` row (Default: ``None``).
     :param thickness_mm: Panel thickness, in **millimetres** (> 0), used with
@@ -1198,7 +1198,7 @@ def orthotropic_transmission_loss(
     4 kHz caused by resonances of the panel sections between the ribs, which
     no smooth model predicts.
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
     :param critical_frequency_lower: Lower coincidence frequency ``fc1``, in
         hertz (> 0), from the stiffest direction.
@@ -1377,7 +1377,7 @@ def double_wall_transmission_loss(
     unit area as *tie_stiffness_per_area* (see
     :func:`phonometry.building.wall_tie_stiffness_per_area`).
 
-    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param mass1: Surface density of leaf 1 ``m1``, in kg/m^2 (> 0).
     :param mass2: Surface density of leaf 2 ``m2``, in kg/m^2 (> 0).
     :param gap: Cavity depth ``d``, in m (> 0).

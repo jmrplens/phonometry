@@ -239,7 +239,7 @@ plant (item m) of clause 12); they are not summed in here.
 ```python
 PartialPlantContributions(
     names: tuple[str, ...],
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     part_levels_db: NDArray[np.float64],
 )
 ```
@@ -252,7 +252,7 @@ own contours, and each part's share of it (0.2 b, c).
 | Name | Description |
 | :--- | :--- |
 | `names` | A name per part. |
-| `frequencies_hz` | Nominal octave-band centres, in Hz. |
+| `frequencies` | Nominal octave-band centres, in Hz. |
 | `part_levels_db` | $L_W$ of each part, `(parts, bands)`, in dB re 1 pW. |
 
 ### PartialPlantContributions.a_weighted_contribution_db
@@ -320,7 +320,7 @@ PLANT_AIR_ABSORPTION_DB_PER_M = {31.5: 0.0, 63.0: 0.0, 125.0: 0.0, 250.0: 0.001,
 
 ```python
 plant_air_absorption_db_per_m(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -353,7 +353,7 @@ standard sets no number for "markedly".
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal octave-band centres, 31,5 Hz to 8 kHz. |
+| `frequencies` | Nominal octave-band centres, 31,5 Hz to 8 kHz. |
 | `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3. |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent (0 to 100), or `None` for Table 3. |
 
@@ -587,15 +587,15 @@ reported; [`check_plant_measurement`](/phonometry/reference/api/power/sound-powe
 
 ```python
 plant_sound_power(
-    levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     *,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,
     mean_distance_m: float,
     plant_area_m2: float,
-    background_levels_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     directional_microphone_angle_deg: float | ArrayLike | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -622,14 +622,14 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{pi}$, one row per position and one column per octave band, in dB re 20 µPa. |
-| `frequencies_hz` | Nominal octave-band centres of the columns, 31,5 Hz to 8 kHz. |
+| `levels` | $L_{pi}$, one row per position and one column per octave band, in dB re 20 µPa. |
+| `frequencies` | Nominal octave-band centres of the columns, 31,5 Hz to 8 kHz. |
 | `measurement_area_m2` | $S_\mathrm{m}$, in square metres. |
 | `contour_length_m` | $l$, in metres. |
 | `microphone_height_m` | $h$, the height the microphones stood at, in metres. |
 | `mean_distance_m` | $\bar{d}$, in metres. |
 | `plant_area_m2` | $S_\mathrm{p}$, in square metres. |
-| `background_levels_db` | The background alone at each position and band, in decibels, or `None` where the plant could not be stopped. |
+| `background_levels` | The background alone at each position and band, in decibels, or `None` where the plant could not be stopped. |
 | `directional_microphone_angle_deg` | $\theta$, the angle at which a directional microphone has lost 3 dB, in degrees, one value or one per band; `None` (default) for an omnidirectional microphone. |
 | `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3 at 15 °C. Pass it, with the humidity, only when the weather differs markedly from 15 °C and 70 %: the formula does not return Table 3 at those conditions, and passing them gives $0{,}0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than omitting them (see [`plant_air_absorption_db_per_m`](/phonometry/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1)). |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent, or `None` for Table 3 at 70 %. |
@@ -905,11 +905,11 @@ $h$ of 9.3 for this contour and plant, in metres.
 
 ```python
 PlantMeasurementContour.sound_power(
-    levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     *,
     microphone_height_m: float | None = None,
-    background_levels_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     directional_microphone_angle_deg: float | ArrayLike | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -924,10 +924,10 @@ Run clause 10 on the levels read at the measured positions of this contour.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | One row per measured position, in the order of `positions_m`, one column per octave band, in decibels. |
-| `frequencies_hz` | The octave-band centres of the columns, in Hz. |
+| `levels` | One row per measured position, in the order of `positions_m`, one column per octave band, in decibels. |
+| `frequencies` | The octave-band centres of the columns, in Hz. |
 | `microphone_height_m` | The height the microphones stood at, in metres; `None` for the height 9.3 prescribes. |
-| `background_levels_db` | The background alone, same shape, or `None`. |
+| `background_levels` | The background alone, same shape, or `None`. |
 | `directional_microphone_angle_deg` | The 3 dB angle of a directional microphone, one or one per band, or `None`. |
 | `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3. |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent, or `None` for Table 3. |
@@ -986,9 +986,9 @@ For `"="` it is the room left inside the tolerance.
 
 ```python
 PlantSoundPowerResult(
-    frequencies_hz: NDArray[np.float64],
-    measured_levels_db: NDArray[np.float64],
-    background_levels_db: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64],
+    measured_levels: NDArray[np.float64],
+    background_levels: NDArray[np.float64] | None,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,
@@ -1012,9 +1012,9 @@ result cannot carry a level that disagrees with its own inputs.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Nominal octave-band centres, in Hz. |
-| `measured_levels_db` | The levels read at the $N$ positions with the plant operating, `(N, bands)`, in dB re 20 µPa. |
-| `background_levels_db` | The background alone at the same positions, or `None` when it could not be measured (9.5.4). |
+| `frequencies` | Nominal octave-band centres, in Hz. |
+| `measured_levels` | The levels read at the $N$ positions with the plant operating, `(N, bands)`, in dB re 20 µPa. |
+| `background_levels` | The background alone at the same positions, or `None` when it could not be measured (9.5.4). |
 | `measurement_area_m2` | $S_\mathrm{m}$, in square metres. |
 | `contour_length_m` | $l$, in metres. |
 | `microphone_height_m` | $h$, the height the microphones stood at, in metres. |
@@ -1099,7 +1099,7 @@ $\overline{L_p}$ in a band with nothing capped.
 
 $\bar{d}/\sqrt{S_\mathrm{p}}$, the argument of Table 1.
 
-### PlantSoundPowerResult.levels_db
+### PlantSoundPowerResult.levels
 
 *property*
 

@@ -220,7 +220,7 @@ def plot_modulation_block(
 def _draw_block_spectrum(
     result: ModulationBlock, ax: Axes, language: str, kwargs: dict[str, Any]
 ) -> None:
-    freqs = np.asarray(result.frequencies_hz)
+    freqs = np.asarray(result.frequencies)
     spectrum = np.asarray(result.power_spectrum)
     included = set(
         np.round(np.asarray(result.included_frequencies_hz) * 10).astype(int)
@@ -839,7 +839,7 @@ def plot_low_frequency_level(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, np.asarray(result.frequencies_hz), language=language)
+    positions = _band_axis(ax, np.asarray(result.frequencies), language=language)
     ax.plot(
         positions,
         result.outdoor_levels_db,
@@ -952,7 +952,7 @@ def plot_tone_search_limit(
 
     ax = ax if ax is not None else _new_axes()
     ax.plot(
-        result.frequencies_hz,
+        result.frequencies,
         result.attenuation_db,
         **styled(
             kwargs,

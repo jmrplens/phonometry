@@ -231,7 +231,7 @@ def test_missing_rating_rejected(tmp_path: Path) -> None:
 
 def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
     """A manually built rating lacking the per-band arrays is rejected."""
-    # A backward-compatibly constructed rating (band_centers / measured /
+    # A backward-compatibly constructed rating (frequencies / measured /
     # shifted_reference default to None) would otherwise crash the table.
     bare_rating = building.WeightedRatingResult(
         rating=30, c=-2, ctr=-3, unfavourable_sum=0.0
@@ -267,12 +267,12 @@ def test_report_rejects_band_count_mismatch(tmp_path: Path) -> None:
 
     res = _airborne_result()
     assert res.rating is not None
-    centers = res.rating.band_centers[:-1]
+    centers = res.rating.frequencies[:-1]
     measured = res.rating.measured[:-1]
     shifted = res.rating.shifted_reference[:-1]
     short = dataclasses.replace(
         res.rating,
-        band_centers=centers,
+        frequencies=centers,
         measured=measured,
         shifted_reference=shifted,
         # Dropping the top band drops its unfavourable deviation with it, and
@@ -283,7 +283,7 @@ def test_report_rejects_band_count_mismatch(tmp_path: Path) -> None:
     out = str(tmp_path / "x.pdf")
     with pytest.raises(
         ValueError,
-        match=r"LabAirborneInsulationResult\.report: .*'rating\.band_centers' "
+        match=r"LabAirborneInsulationResult\.report: .*'rating\.frequencies' "
         r".* must all have the same shape, one value per band",
     ):
         bad.report(out)

@@ -152,7 +152,7 @@ AM_SAMPLE_INTERVAL_S = 0.1
 ```python
 amplitude_modulation_band_levels(
     band_levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     band: int,
     weighting: Literal['A', 'Z'],
@@ -172,7 +172,7 @@ value at each nominal centre frequency.
 | Name | Description |
 | :--- | :--- |
 | `band_levels_db` | The logged band levels, in dB: one row per 100 ms sample and one column per one-third-octave band (a single sample may be given as one row). |
-| `frequencies_hz` | Nominal centre frequency of each column, in Hz; it must include the seven centres of `band`. |
+| `frequencies` | Nominal centre frequency of each column, in Hz; it must include the seven centres of `band`. |
 | `band` | The AM band number, 1 to 3 (13.6.2.1.1) or 4 to 6 (Annex G.3), as an integer; see [`AM_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_frequency_bands_hz). |
 | `weighting` | `"A"` when the band levels are already A-weighted, `"Z"` when the A-weighting is still to be applied. Required: a wrong guess is a 20 dB to 30 dB error at the lowest bands. |
 
@@ -188,7 +188,7 @@ value at each nominal centre frequency.
 
 ```python
 amplitude_modulation_block(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
 ) -> ModulationBlock
@@ -217,7 +217,7 @@ Equation (12) gives it.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The 100 band-limited A-weighted `Leq,100ms` values of the block, in dB (see [`amplitude_modulation_band_levels`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_band_levels)). |
+| `levels` | The 100 band-limited A-weighted `Leq,100ms` values of the block, in dB (see [`amplitude_modulation_band_levels`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_band_levels)). |
 | `modulation_frequency_range_hz` | `(low, high)` range, in Hz, where the fundamental modulation frequency is expected: the blade passage frequencies of the turbines with some tolerance (13.6.2.1.2), within 0.3 Hz to 1.6 Hz (13.2). |
 
 **Returns:** A [`ModulationBlock`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblock).
@@ -232,7 +232,7 @@ Equation (12) gives it.
 
 ```python
 amplitude_modulation_period(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
     excluded_blocks: ArrayLike | None = None,
@@ -253,7 +253,7 @@ its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wi
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The 6 000 band-limited `LAeq,100ms` values of the period, in dB, synchronised to the hour (13.6.3). |
+| `levels` | The 6 000 band-limited `LAeq,100ms` values of the period, in dB, synchronised to the hour (13.6.3). |
 | `modulation_frequency_range_hz` | `(low, high)` range of the fundamental, in Hz, as for [`amplitude_modulation_block`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). |
 | `excluded_blocks` | Optional sixty flags, `True` for a block the practitioner excludes by hand (13.6.2.2); those blocks are not analysed and do not count as valid. The TS notes that standard practice excludes whole 10 min periods, so excluding single blocks is an adaptation to be justified. |
 
@@ -379,9 +379,9 @@ narrower sectors past the twelfth take them again, in the same order.
 
 ```python
 ModulationBlock(
-    levels_db: NDArray[np.float64],
+    levels: NDArray[np.float64],
     detrended_db: NDArray[np.float64],
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     power_spectrum: NDArray[np.float64],
     modulation_frequency_range_hz: tuple[float, float],
     *,
@@ -400,9 +400,9 @@ The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The 100 band-limited `LAeq,100ms` values analysed, in dB. |
-| `detrended_db` | `levels_db` minus its cubic least-squares fit, in dB. |
-| `frequencies_hz` | The spectrum lines, 0.1 Hz to 4.9 Hz. |
+| `levels` | The 100 band-limited `LAeq,100ms` values analysed, in dB. |
+| `detrended_db` | `levels` minus its cubic least-squares fit, in dB. |
+| `frequencies` | The spectrum lines, 0.1 Hz to 4.9 Hz. |
 | `power_spectrum` | $S_{xx}$ of Equation (12) at those lines, from the positive frequencies (the half magnitude the TS allows). |
 | `modulation_frequency_range_hz` | The user's range of fundamental modulation frequencies, in Hz. |
 | `fundamental_frequency_hz` | The fundamental modulation frequency, the highest local maximum in the range, in Hz; `None` for `NO_PEAK`. |

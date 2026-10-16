@@ -310,7 +310,7 @@ check_small_roughness_deviations(
     roughness: AcousticRoughnessSpectrum,
     noise_levels_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     speed_kmh: float,
     limit_db: Mapping[float, float] = mappingproxy({0.4: 17.1, 0.315: 15.0, 0.25: 13.0, 0.2: 11.0, 0.16: 9.0, 0.125: 7.0, 0.1: 4.9, 0.08: 2.9, 0.063: 0.9, 0.05: -1.1, 0.04: -3.2, 0.0315: -5.0, 0.025: -5.6, 0.02: -6.2, 0.016: -6.8, 0.0125: -7.4, 0.01: -8.0, 0.008: -8.6, 0.0063: -9.2, 0.005: -9.8, 0.004: -10.4, 0.00315: -11.0}),
 ) -> SmallRoughnessDeviation
@@ -341,7 +341,7 @@ speed.
 | :--- | :--- |
 | `roughness` | The measured roughness of the test section, the spectra of its rails quadratically averaged ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra)). |
 | `noise_levels_db` | The A-weighted one-third octave spectrum of the pass-by, $L_{p\mathrm{Aeq},T_p}(f)$, in dB. |
-| `frequencies_hz` | Its nominal band frequencies, in hertz. |
+| `frequencies` | Its nominal band frequencies, in hertz. |
 | `speed_kmh` | The train speed, in km/h. |
 | `limit_db` | The upper limit, nominal wavelength in metres to level; Figure 2 by default. The verdict records it, and [`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track) takes the verdict only when it judges the track against the same limit (6.2.5 and C.2.1). |
 
@@ -357,8 +357,8 @@ speed.
 
 ```python
 impulsiveness_rise_speed(
-    times_s: ArrayLike,
-    levels_db: ArrayLike,
+    times: ArrayLike,
+    levels: ArrayLike,
 ) -> RiseSpeedResult
 ```
 
@@ -382,8 +382,8 @@ derivative to mean something; [`pass_by_measurement`](/phonometry/reference/api/
 
 | Name | Description |
 | :--- | :--- |
-| `times_s` | The sample times, in seconds, increasing. |
-| `levels_db` | $L_{p\mathrm{AF}}(t)$, in dB. |
+| `times` | The sample times, in seconds, increasing. |
+| `levels` | $L_{p\mathrm{AF}}(t)$, in dB. |
 
 **Returns:** The slopes and their rise speeds.
 
@@ -551,8 +551,8 @@ G.2): build it with [`phonometry.metrology.rectangular`](/phonometry/reference/a
 
 ```python
 PassByMeasurement(
-    times_s: NDArray[np.float64],
-    levels_db: NDArray[np.float64],
+    times: NDArray[np.float64],
+    levels: NDArray[np.float64],
     start_s: float,
     end_s: float,
     equivalent_level_db: float,
@@ -571,8 +571,8 @@ The levels of one pass-by record, 6.5 and 6.6.3.
 
 | Name | Description |
 | :--- | :--- |
-| `times_s` | The times of the stored level history, in seconds from the start of the record. |
-| `levels_db` | $L_{p\mathrm{AF}}(t)$, the A-weighted level with time weighting F, at `times_s`, in dB. |
+| `times` | The times of the stored level history, in seconds from the start of the record. |
+| `levels` | $L_{p\mathrm{AF}}(t)$, the A-weighted level with time weighting F, at `times`, in dB. |
 | `start_s` | $T_1$, the start of the measurement time interval. |
 | `end_s` | $T_2$, its end, in seconds. |
 | `equivalent_level_db` | $L_{p\mathrm{Aeq},T}$ over $T_1$ to $T_2$, in dB; the pass-by level $L_{p\mathrm{Aeq},T_p}$ when the interval is the pass-by time. |
@@ -833,8 +833,8 @@ Draw the roughness spectra against Figure 2, or the decay rates against Figure 3
 
 ```python
 RiseSpeedResult(
-    times_s: NDArray[np.float64],
-    levels_db: NDArray[np.float64],
+    times: NDArray[np.float64],
+    levels: NDArray[np.float64],
     slopes: tuple[tuple[int, int], ...],
     rise_speeds_db_per_s: tuple[float, ...],
 )
@@ -846,8 +846,8 @@ The impulsive character of a level history, Annex A.
 
 | Name | Description |
 | :--- | :--- |
-| `times_s` | The times of the history, in seconds. |
-| `levels_db` | $L_{p\mathrm{AF}}(t)$, in dB. |
+| `times` | The times of the history, in seconds. |
+| `levels` | $L_{p\mathrm{AF}}(t)$, in dB. |
 | `slopes` | The first and last sample of every slope that rises without a break by at least 10 dB. |
 | `rise_speeds_db_per_s` | The steepest rise $s_j$ of each slope, in dB/s (Formula A.1). |
 
@@ -1017,7 +1017,7 @@ roughness_comparability(
     noise_levels_1_db: ArrayLike,
     noise_levels_2_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     speed_kmh: float,
 ) -> RoughnessComparability
 ```
@@ -1044,7 +1044,7 @@ for roughness alone, not a prediction (E.1).
 | `roughness_2` | That of test situation 2. |
 | `noise_levels_1_db` | The A-weighted pass-by spectrum measured in situation 1, in dB. |
 | `noise_levels_2_db` | That of situation 2, in dB. |
-| `frequencies_hz` | The nominal bands of both noise spectra, in hertz. |
+| `frequencies` | The nominal bands of both noise spectra, in hertz. |
 | `speed_kmh` | The train speed of both pass-bys, in km/h. |
 
 **Returns:** The four differences and the bound.
@@ -1062,7 +1062,7 @@ RoughnessComparability(
     speed_kmh: float,
     roughness_1: AcousticRoughnessSpectrum,
     roughness_2: AcousticRoughnessSpectrum,
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     noise_levels_1_db: NDArray[np.float64],
     noise_levels_2_db: NDArray[np.float64],
     level_differences_db: tuple[float, float, float, float],
@@ -1078,7 +1078,7 @@ How much two tracks' roughness could change a pass-by level, Annex E.
 | `speed_kmh` | The train speed, in km/h. |
 | `roughness_1` | The measured roughness of test situation 1. |
 | `roughness_2` | That of test situation 2. |
-| `frequencies_hz` | The nominal bands of the two noise spectra, in hertz. |
+| `frequencies` | The nominal bands of the two noise spectra, in hertz. |
 | `noise_levels_1_db` | The A-weighted pass-by spectrum of situation 1, in dB. |
 | `noise_levels_2_db` | That of situation 2, in dB. |
 | `level_differences_db` | $\Delta L^{\mathrm{min},1}$, $\Delta L^{\mathrm{max},1}$, $\Delta L^{\mathrm{min},2}$ and $\Delta L^{\mathrm{max},2}$ of Formula E.4, in dB, in that order. |
@@ -1135,7 +1135,7 @@ SmallRoughnessDeviation(
     roughness: AcousticRoughnessSpectrum,
     limit_db: Mapping[float, float],
     corrected_roughness_levels_db: NDArray[np.float64],
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     roughness_correction_db: NDArray[np.float64],
     noise_levels_db: NDArray[np.float64],
 )
@@ -1151,7 +1151,7 @@ The acceptance of small roughness exceedances by their effect on the noise, Anne
 | `roughness` | The quadratically averaged measured roughness. |
 | `limit_db` | The upper limit the roughness was held down to, nominal wavelength in metres to level, held as a read-only copy. |
 | `corrected_roughness_levels_db` | The just-compliant spectrum of Formula C.1, band by band with `roughness`, in dB re 1 µm. |
-| `frequencies_hz` | The nominal one-third octave bands of the noise spectrum, in hertz. |
+| `frequencies` | The nominal one-third octave bands of the noise spectrum, in hertz. |
 | `roughness_correction_db` | $\Delta L_{r,\mathrm{rail}}(f)$ of Formula C.2, in dB. |
 | `noise_levels_db` | The measured A-weighted spectrum $L^\mathrm{measured}_{p\mathrm{Aeq},T_p}(f)$, in dB. |
 
@@ -1217,7 +1217,7 @@ STATIONARY_END_POSITION_LENGTH_M = 11.780972450961723
 
 ```python
 stationary_test(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     lengths_m: ArrayLike,
 ) -> StationaryTestResult
 ```
@@ -1233,7 +1233,7 @@ position are valid when they are no more than 3 dB apart (9.3).
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | One row per set, one column per position of the whole mesh of 5.5.1.1 at 1,2 m, in dB; at least three sets. |
+| `levels` | One row per set, one column per position of the whole mesh of 5.5.1.1 at 1,2 m, in dB; at least three sets. |
 | `lengths_m` | The length each position stands for, in metres. |
 
 **Returns:** The test.
@@ -1247,7 +1247,7 @@ position are valid when they are no more than 3 dB apart (9.3).
 ## stationary_unit_level
 
 ```python
-stationary_unit_level(levels_db: ArrayLike, lengths_m: ArrayLike) -> float
+stationary_unit_level(levels: ArrayLike, lengths_m: ArrayLike) -> float
 ```
 
 The length-weighted energy average of a stationary mesh, Formulae 1 to 3.
@@ -1265,7 +1265,7 @@ end position stands for [`STATIONARY_END_POSITION_LENGTH_M`](/phonometry/referen
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L^i_{p\mathrm{Aeq},T}$ of each position, in dB. |
+| `levels` | $L^i_{p\mathrm{Aeq},T}$ of each position, in dB. |
 | `lengths_m` | The length $l_i$ each position stands for, in metres. |
 
 **Returns:** The average, in dB, unrounded.
@@ -1280,7 +1280,7 @@ end position stands for [`STATIONARY_END_POSITION_LENGTH_M`](/phonometry/referen
 
 ```python
 StationaryTestResult(
-    levels_db: NDArray[np.float64],
+    levels: NDArray[np.float64],
     lengths_m: NDArray[np.float64],
 )
 ```
@@ -1291,7 +1291,7 @@ The stationary test of a unit, 5.8.1.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L^i_{p\mathrm{Aeq},T}$, one row per set of measurements (one sample at every position) and one column per position, in dB. |
+| `levels` | $L^i_{p\mathrm{Aeq},T}$, one row per set of measurements (one sample at every position) and one column per position, in dB. |
 | `lengths_m` | The length each position stands for, in metres. |
 
 ### StationaryTestResult.mean_level_db

@@ -641,13 +641,14 @@ class AuditoryWeightingResult(OwnsArrays):
 
 def _positive_frequencies(
     frequency_hz: NDArray[np.float64] | list[float] | float,
+    name: str = "frequency_hz",
 ) -> NDArray[np.float64]:
     f = np.array(frequency_hz, dtype=np.float64, copy=True, ndmin=1)
     if f.size == 0 or not np.all(np.isfinite(f)):
-        msg = "'frequency_hz' must be finite and non-empty."
+        msg = f"'{name}' must be finite and non-empty."
         raise ValueError(msg)
     if np.any(f <= 0.0):
-        msg = "'frequency_hz' must be strictly positive."
+        msg = f"'{name}' must be strictly positive."
         raise ValueError(msg)
     return f
 
@@ -1036,7 +1037,7 @@ def _require_margins_restate(result: WeightedExposureResult) -> None:
 
 
 def weighted_exposure(
-    frequency_hz: NDArray[np.float64] | list[float],
+    frequencies_hz: NDArray[np.float64] | list[float],
     band_sel: NDArray[np.float64] | list[float],
     group: str,
     *,
@@ -1056,7 +1057,7 @@ def weighted_exposure(
     peak sound pressure level, if supplied, is compared **unweighted**, as the
     dual-metric rule requires.
 
-    :param frequency_hz: Band centre frequencies, in Hz (1-D, positive).
+    :param frequencies_hz: Band centre frequencies, in Hz (1-D, positive).
     :param band_sel: Per-band single-event SEL, in dB re 1 µPa²·s (or
         dB re (20 µPa)²·s for an in-air group); same shape. ``-inf`` is
         accepted for a band that carries no energy, which is what
@@ -1076,10 +1077,10 @@ def weighted_exposure(
     :return: A :class:`WeightedExposureResult`.
     :raises ValueError: If an input is invalid.
     """
-    f = _positive_frequencies(frequency_hz)
+    f = _positive_frequencies(frequencies_hz, "frequencies_hz")
     sel = np.array(band_sel, dtype=np.float64, copy=True, ndmin=1)
     require_equal_shapes(
-        "weighted_exposure", {"frequency_hz": f.shape, "band_sel": sel.shape}, "band"
+        "weighted_exposure", {"frequencies_hz": f.shape, "band_sel": sel.shape}, "band"
     )
     # -inf is admitted as the level of a band that carries no energy (see
     # StrikeSelSpectrum.band_sel); it is the neutral element of the energy sum.

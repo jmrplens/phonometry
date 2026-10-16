@@ -223,7 +223,7 @@ ISO 10848 total loss factor.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in hertz (per band). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or per band). |
 | `reverberation_time` | Structural reverberation time `Ts`, in s. |
 
 **Returns:** The loss factor `eta` (dimensionless) per band.
@@ -256,7 +256,7 @@ quantities.
 | Name | Description |
 | :--- | :--- |
 | `velocity_level` | Spatial mean plate velocity level `L_v` (per band), in dB re 1e-9 m/s (see [`spatial_mean_velocity_level`](/phonometry/reference/api/building/structure-borne-power/#spatial_mean_velocity_level)). |
-| `frequency` | Band centre frequencies `f`, in hertz. |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or per band). |
 | `mass_per_area` | Plate mass per unit area `m`, in kg/m^2 (> 0). |
 | `area` | Plate area `S`, in m^2 (> 0). |
 | `loss_factor` | Plate loss factor `eta` (per band), or `None` to derive it from `reverberation_time`. |
@@ -368,7 +368,7 @@ the EN 12354-5 Annex I mobility correction
 | Name | Description |
 | :--- | :--- |
 | `velocity_level` | Spatial mean plate velocity level `L_v` (scalar or per band), in dB re `v0`. |
-| `frequency` | Band centre frequency `f`, in hertz. |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array). |
 | `mass_per_area` | Plate mass per unit area `m`, in kg/m^2 (> 0). |
 | `area` | Plate area `S`, in m^2 (> 0). |
 | `loss_factor` | Plate loss factor `eta` (scalar or per band, > 0). |

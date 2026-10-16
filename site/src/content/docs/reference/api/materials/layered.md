@@ -86,7 +86,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `layers` | Layer stack, as in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 | `quadrature_points` | Gauss-Legendre order (default 64). |
@@ -172,7 +172,7 @@ extremely attenuating layers); the raw chain matrix is still returned in
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `layers` | Layer stack from the incidence side to the termination. |
 | `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$; grazing incidence is excluded). |
 | `termination` | `"rigid"` (default), `"free"`, or a non-zero complex impedance (scalar or per-frequency array), in Pa s/m. |

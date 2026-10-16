@@ -202,7 +202,7 @@ def plot_roughness_spectrum(
     wavelengths = [float(w) for w in spectrum.wavelengths_m]
     ax.plot(
         [100.0 * w for w in wavelengths],
-        spectrum.levels_db,
+        spectrum.levels,
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -223,9 +223,9 @@ def plot_roughness_spectrum(
     return ax
 
 
-def _band_positions(frequencies_hz: list[float]) -> dict[int, float]:
+def _band_positions(frequencies: list[float]) -> dict[int, float]:
     """Equidistant positions of one-third octave bands, keyed by band index."""
-    bands = sorted({round(10.0 * math.log10(f)) for f in frequencies_hz})
+    bands = sorted({round(10.0 * math.log10(f)) for f in frequencies})
     return {band: float(i) for i, band in enumerate(bands)}
 
 
@@ -261,7 +261,7 @@ def _draw_decay(
     label: str,
     color: str,
 ) -> None:
-    x = [positions[round(10.0 * math.log10(f))] for f in rates.frequencies_hz]
+    x = [positions[round(10.0 * math.log10(f))] for f in rates.frequencies]
     ax.plot(
         x,
         rates.decay_rates_db_per_m,
@@ -325,7 +325,7 @@ def plot_track_decay_rate(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = [float(f) for f in rates.frequencies_hz]
+    frequencies = [float(f) for f in rates.frequencies]
     if limit_db_per_m is not None:
         frequencies += [float(f) for f in limit_db_per_m]
     positions = _band_positions(frequencies)
@@ -375,8 +375,8 @@ def plot_pass_by_measurement(
         label=_t("Measurement interval $T$", language),
     )
     ax.plot(
-        result.times_s,
-        result.levels_db,
+        result.times,
+        result.levels,
         **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=r"$L_{p\mathrm{AF}}(t)$"),
     )
     ax.hlines(
@@ -390,11 +390,11 @@ def plot_pass_by_measurement(
             f"{format_number(result.equivalent_level_db, language)} dB"
         ),
     )
-    inside = (result.times_s >= result.start_s) & (result.times_s <= result.end_s)
+    inside = (result.times >= result.start_s) & (result.times <= result.end_s)
     if np.any(inside):
-        peak = int(np.flatnonzero(inside)[np.argmax(result.levels_db[inside])])
+        peak = int(np.flatnonzero(inside)[np.argmax(result.levels[inside])])
         ax.plot(
-            [result.times_s[peak]],
+            [result.times[peak]],
             [result.max_level_db],
             linestyle="none",
             marker="v",
@@ -432,8 +432,8 @@ def plot_stationary_test(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = np.arange(result.levels_db.shape[1]) + 1
-    means = 10.0 * np.log10(np.mean(10.0 ** (result.levels_db / 10.0), axis=0))
+    positions = np.arange(result.levels.shape[1]) + 1
+    means = 10.0 * np.log10(np.mean(10.0 ** (result.levels / 10.0), axis=0))
     ax.bar(
         positions,
         means,
@@ -449,8 +449,8 @@ def plot_stationary_test(
             f"{format_number(result.reported_level_db, language, decimals=0)} dB"
         ),
     )
-    low = float(np.min(result.levels_db)) - 5.0
-    high = float(np.max(result.levels_db)) + 4.0
+    low = float(np.min(result.levels)) - 5.0
+    high = float(np.max(result.levels)) + 4.0
     ax.set_ylim(low, high)
     ax.set_xticks(positions)
     ax.set_xlabel(_t(_POSITION_LABEL, language))
@@ -561,14 +561,14 @@ def plot_rise_speed(
 
     ax = ax if ax is not None else _new_axes()
     ax.plot(
-        result.times_s,
-        result.levels_db,
+        result.times,
+        result.levels,
         **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=r"$L_{p\mathrm{AF}}(t)$"),
     )
     for i, (start, stop) in enumerate(result.slopes):
         ax.plot(
-            result.times_s[start : stop + 1],
-            result.levels_db[start : stop + 1],
+            result.times[start : stop + 1],
+            result.levels[start : stop + 1],
             color=_C_SECONDARY,
             lw=2.6,
             label=_t("Slopes rising 10 dB", language) if i == 0 else None,
@@ -664,8 +664,8 @@ def plot_small_roughness_deviation(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_positions([float(f) for f in result.frequencies_hz])
-    x = [positions[round(10.0 * math.log10(f))] for f in result.frequencies_hz]
+    positions = _band_positions([float(f) for f in result.frequencies])
+    x = [positions[round(10.0 * math.log10(f))] for f in result.frequencies]
     ax.plot(
         x,
         result.noise_levels_db,
@@ -727,20 +727,20 @@ def plot_roughness_comparability(
     centimetres = 100.0 * np.asarray(upper.wavelengths_m)
     ax.fill_between(
         centimetres,
-        lower.levels_db,
-        upper.levels_db,
+        lower.levels,
+        upper.levels,
         color=theme_fill(_C_QUATERNARY, ax),
     )
     ax.plot(
         centimetres,
-        upper.levels_db,
+        upper.levels,
         **styled(
             kwargs, color=_C_QUATERNARY, lw=2.2, label=_t("Maximum envelope", language)
         ),
     )
     ax.plot(
         centimetres,
-        lower.levels_db,
+        lower.levels,
         color=_C_TERTIARY,
         lw=2.2,
         label=_t("Minimum envelope", language),
@@ -751,7 +751,7 @@ def plot_roughness_comparability(
     ):
         ax.plot(
             100.0 * np.asarray(spectrum.wavelengths_m),
-            spectrum.levels_db,
+            spectrum.levels,
             color=color,
             lw=1.0,
             marker="o",
@@ -790,7 +790,7 @@ def _draw_reference_roughness(
         label = _t("Measured", language) + (f" {i + 1}" if numbered else "")
         ax.plot(
             100.0 * np.asarray(spectrum.wavelengths_m),
-            spectrum.levels_db,
+            spectrum.levels,
             **styled(
                 kwargs,
                 color=colors[i % len(colors)],
@@ -836,9 +836,7 @@ def _draw_reference_decay(
     frequencies = [
         float(f) for limit in result.decay_limits_db_per_m.values() for f in limit
     ]
-    frequencies += [
-        float(f) for rates in result.decay_rates for f in rates.frequencies_hz
-    ]
+    frequencies += [float(f) for rates in result.decay_rates for f in rates.frequencies]
     positions = _band_positions(frequencies)
     labels = _decay_set_labels(result, language)
     for i, (rates, label) in enumerate(zip(result.decay_rates, labels, strict=True)):

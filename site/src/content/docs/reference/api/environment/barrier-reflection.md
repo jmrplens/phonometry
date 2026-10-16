@@ -752,7 +752,7 @@ Per microphone, whether the deviation is within $\pm\varepsilon_k$.
 
 ```python
 ReflectionIndexResult(
-    bands_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     reflection_index: NDArray[np.float64],
     position_values: NDArray[np.float64],
     lowest_band_hz: float,
@@ -769,7 +769,7 @@ The sound reflection index of a device, per one-third octave band.
 
 | Name | Description |
 | :--- | :--- |
-| `bands_hz` | The eighteen band centres, 100 Hz to 5 kHz. |
+| `frequencies` | The eighteen band centres, 100 Hz to 5 kHz. |
 | `reflection_index` | $RI_j$, the average over every microphone of every grid position (5.6.2.3); `nan` in a band nothing measured. |
 | `position_values` | `(positions, 18)`: the average of each grid position, the "particular values" of Table B.1. |
 | `lowest_band_hz` | The lowest reliable band, where the single number starts (the $m$ of Formula (12)). |

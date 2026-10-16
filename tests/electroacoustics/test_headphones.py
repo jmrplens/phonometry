@@ -388,7 +388,7 @@ def test_the_unclipped_programme_signal_fails_on_its_peaks() -> None:
 def test_at_44_1_khz_the_20_khz_band_is_left_out() -> None:
     x = ea.simulated_programme_signal(44100, 30.0, peak_to_rms=2.0, seed=8)
     check = ea.check_limiting_test_signal(x, 44100)
-    assert check.spectrum.frequencies_hz[-1] == 16000.0
+    assert check.spectrum.frequencies[-1] == 16000.0
     assert check.passes
 
 
@@ -728,7 +728,7 @@ def test_impedance_plot_draws_the_modulus_the_limit_and_the_minimum(
     )
     ax = verdict.plot(language=language)
     curve, rated, limit, lowest = ax.lines
-    np.testing.assert_array_equal(curve.get_xdata(), verdict.frequencies_hz)
+    np.testing.assert_array_equal(curve.get_xdata(), verdict.frequencies)
     np.testing.assert_array_equal(curve.get_ydata(), verdict.impedance_ohm)
     assert tuple(rated.get_ydata()) == (32.0, 32.0)
     assert tuple(limit.get_ydata()) == (verdict.limit_ohm, verdict.limit_ohm)

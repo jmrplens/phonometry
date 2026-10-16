@@ -174,7 +174,7 @@ def test_third_octave_arrays_must_hold_three_bands_per_octave(bands: int) -> Non
     result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
     with pytest.raises(
         ValueError,
-        match=r"'3 x band_centers'.*must each carry one value per one-third-octave band",
+        match=r"'3 x frequencies'.*must each carry one value per one-third-octave band",
     ):
         dataclasses.replace(
             result,

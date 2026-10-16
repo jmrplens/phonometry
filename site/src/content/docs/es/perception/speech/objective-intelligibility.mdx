@@ -265,7 +265,7 @@ pos = np.arange(res.band_scores.size)
 fig, ax = plt.subplots()
 ax.bar(pos, res.band_scores)
 ax.set_xticks(pos)
-ax.set_xticklabels([f"{f:.0f}" for f in res.band_frequencies], rotation=45, ha="right")
+ax.set_xticklabels([f"{f:.0f}" for f in res.frequencies], rotation=45, ha="right")
 ax.set_xlabel("Banda de tercio de octava [Hz]")
 ax.set_ylabel("Correlación intermedia media")
 ax.set_title(f"STOI = {res.value:.3f}")
@@ -394,7 +394,7 @@ plt.show()
 | `extended` | bool | — | def. `False` | `True` selecciona ESTOI |
 
 Devuelve un `STOIResult`: `value`, `band_scores` (15), `segment_scores`,
-`band_frequencies` y `extended`. Da error con longitudes distintas, con entradas
+`frequencies` y `extended`. Da error con longitudes distintas, con entradas
 no finitas y cuando sobreviven menos de 30 tramas de corto plazo a la eliminación
 de tramas silenciosas.
 

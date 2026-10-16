@@ -146,7 +146,7 @@ air impedance.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
 | `depth` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres. |

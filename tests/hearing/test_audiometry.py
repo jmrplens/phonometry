@@ -231,7 +231,7 @@ def test_the_room_check_has_no_truth_value() -> None:
 @pytest.mark.parametrize(
     ("levels", "kwargs", "match"),
     [
-        (np.zeros(5), {}, "levels_db"),
+        (np.zeros(5), {}, "levels"),
         (np.zeros(2), {"frequencies": [125.0, 333.0]}, "333"),
         (np.zeros(2), {"frequencies": [250.0, 125.0]}, "increasing"),
         (np.zeros(25), {"noise_floor_db": np.zeros(3)}, "noise_floor_db"),

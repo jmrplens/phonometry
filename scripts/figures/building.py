@@ -992,7 +992,7 @@ def generate_ceiling_plenum_flanking(output_dir: str) -> None:
             ceiling,
             ceiling_length=4.75,
             plenum_height=depth,
-            frequency=freqs,
+            frequencies=freqs,
         )
         ax_path.plot(
             x,
@@ -3452,7 +3452,7 @@ def generate_service_equipment_varying_background(output_dir: str) -> None:
         [36.5, 35.0, 31.0, 27.5, 24.0, 21.0, 17.5],
         [44.0, 46.5, 43.0, 39.5, 36.0, 32.5, 28.0],
         observation_time_s=720.0,
-        frequencies_hz=[63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
+        frequencies=[63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
     )
     _fig, ax = plt.subplots(figsize=(9, 5.6))
     check.plot(ax=ax, language=_LANG)

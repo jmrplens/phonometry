@@ -216,7 +216,7 @@ def _nominal_index(frequencies: NDArray[np.float64], centre: float) -> int:
     match = np.nonzero(np.abs(frequencies - centre) <= _NOMINAL_MATCH * centre)[0]
     if match.size != 1:
         msg = (
-            f"'frequencies_hz' must hold the one-third-octave band centred at "
+            f"'frequencies' must hold the one-third-octave band centred at "
             f"{centre:g} Hz exactly once."
         )
         raise ValueError(msg)
@@ -225,7 +225,7 @@ def _nominal_index(frequencies: NDArray[np.float64], centre: float) -> int:
 
 def amplitude_modulation_band_levels(
     band_levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     band: int,
     weighting: Literal["A", "Z"],
@@ -241,7 +241,7 @@ def amplitude_modulation_band_levels(
     :param band_levels_db: The logged band levels, in dB: one row per 100 ms
         sample and one column per one-third-octave band (a single sample may
         be given as one row).
-    :param frequencies_hz: Nominal centre frequency of each column, in Hz; it
+    :param frequencies: Nominal centre frequency of each column, in Hz; it
         must include the seven centres of ``band``.
     :param band: The AM band number, 1 to 3 (13.6.2.1.1) or 4 to 6 (Annex
         G.3), as an integer; see :data:`AM_FREQUENCY_BANDS_HZ`.
@@ -264,10 +264,10 @@ def amplitude_modulation_band_levels(
         msg = f"'weighting' must be 'A' or 'Z'; got {weighting!r}."
         raise ValueError(msg)
     levels = require_finite_matrix(band_levels_db, "band_levels_db")
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
+    freqs = require_finite_array(frequencies, "frequencies")
     if freqs.size != levels.shape[1]:
         msg = (
-            f"'frequencies_hz' has {freqs.size} centres but 'band_levels_db' "
+            f"'frequencies' has {freqs.size} centres but 'band_levels_db' "
             f"has {levels.shape[1]} columns."
         )
         raise ValueError(msg)
@@ -365,9 +365,9 @@ def _swing(series: NDArray[np.float64]) -> float:
 class ModulationBlock(OwnsArrays):
     r"""The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
 
-    :ivar levels_db: The 100 band-limited ``LAeq,100ms`` values analysed, in dB.
-    :ivar detrended_db: ``levels_db`` minus its cubic least-squares fit, in dB.
-    :ivar frequencies_hz: The spectrum lines, 0.1 Hz to 4.9 Hz.
+    :ivar levels: The 100 band-limited ``LAeq,100ms`` values analysed, in dB.
+    :ivar detrended_db: ``levels`` minus its cubic least-squares fit, in dB.
+    :ivar frequencies: The spectrum lines, 0.1 Hz to 4.9 Hz.
     :ivar power_spectrum: :math:`S_{xx}` of Equation (12) at those lines,
         from the positive frequencies (the half magnitude the TS allows).
     :ivar modulation_frequency_range_hz: The user's range of fundamental
@@ -390,9 +390,9 @@ class ModulationBlock(OwnsArrays):
     13.6.2.3 e) and the exclusion, so it is not a field.
     """
 
-    levels_db: NDArray[np.float64]
+    levels: NDArray[np.float64]
     detrended_db: NDArray[np.float64]
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     power_spectrum: NDArray[np.float64]
     modulation_frequency_range_hz: tuple[float, float]
     _: KW_ONLY
@@ -460,7 +460,7 @@ class ModulationBlock(OwnsArrays):
         """The spectrum lines transformed back, three about each component."""
         if not self.valid or self.fundamental_frequency_hz is None:
             return ()
-        last = self.frequencies_hz.size
+        last = self.frequencies.size
         lines: set[int] = set()
         for centre in (self.fundamental_frequency_hz, *self.harmonic_frequencies_hz):
             lines.update(_window(round(centre * _BLOCK_DURATION_S), last))
@@ -538,7 +538,7 @@ def _harmonic_line(
 
 
 def amplitude_modulation_block(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
 ) -> ModulationBlock:
@@ -561,7 +561,7 @@ def amplitude_modulation_block(
     prominence. :attr:`ModulationBlock.power_spectrum` keeps every line as
     Equation (12) gives it.
 
-    :param levels_db: The 100 band-limited A-weighted ``Leq,100ms`` values of
+    :param levels: The 100 band-limited A-weighted ``Leq,100ms`` values of
         the block, in dB (see :func:`amplitude_modulation_band_levels`).
     :param modulation_frequency_range_hz: ``(low, high)`` range, in Hz, where
         the fundamental modulation frequency is expected: the blade passage
@@ -572,10 +572,10 @@ def amplitude_modulation_block(
         range is outside 0.3 Hz to 1.6 Hz or holds no spectrum line.
     """
     first, last_in_range = _validated_range(modulation_frequency_range_hz)
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     if levels.size != AM_BLOCK_SAMPLES:
         msg = (
-            f"'levels_db' must hold the {AM_BLOCK_SAMPLES} values of one 10 s "
+            f"'levels' must hold the {AM_BLOCK_SAMPLES} values of one 10 s "
             f"block of 100 ms levels; got {levels.size}."
         )
         raise ValueError(msg)
@@ -589,9 +589,9 @@ def amplitude_modulation_block(
     frequencies = lines / _BLOCK_DURATION_S
     low, high = (float(v) for v in modulation_frequency_range_hz)
     common: dict[str, Any] = {
-        "levels_db": levels,
+        "levels": levels,
         "detrended_db": read_only(detrended),
-        "frequencies_hz": read_only(frequencies),
+        "frequencies": read_only(frequencies),
         "power_spectrum": read_only(spectrum),
         "modulation_frequency_range_hz": (low, high),
     }
@@ -747,7 +747,7 @@ class ModulationPeriod(OwnsArrays):
 
 
 def amplitude_modulation_period(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
     excluded_blocks: ArrayLike | None = None,
@@ -762,7 +762,7 @@ def amplitude_modulation_period(
     its bin by :func:`bin_amplitude_modulation`, as the TS says (13.6.3,
     13.6.4); the AMWG Final Report discards it instead.
 
-    :param levels_db: The 6 000 band-limited ``LAeq,100ms`` values of the
+    :param levels: The 6 000 band-limited ``LAeq,100ms`` values of the
         period, in dB, synchronised to the hour (13.6.3).
     :param modulation_frequency_range_hz: ``(low, high)`` range of the
         fundamental, in Hz, as for :func:`amplitude_modulation_block`.
@@ -775,11 +775,11 @@ def amplitude_modulation_period(
     :raises ValueError: If the period does not hold 6 000 finite values or the
         exclusion flags are not sixty booleans (or 0 and 1).
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     samples = AM_BLOCK_SAMPLES * AM_PERIOD_BLOCKS
     if levels.size != samples:
         msg = (
-            f"'levels_db' must hold the {samples} values of one 10 min period "
+            f"'levels' must hold the {samples} values of one 10 min period "
             f"of 100 ms levels; got {levels.size}."
         )
         raise ValueError(msg)
@@ -828,9 +828,9 @@ def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
 def _excluded(block: ModulationBlock) -> ModulationBlock:
     """The same block, marked as excluded by the practitioner."""
     return ModulationBlock(
-        levels_db=block.levels_db,
+        levels=block.levels,
         detrended_db=block.detrended_db,
-        frequencies_hz=block.frequencies_hz,
+        frequencies=block.frequencies,
         power_spectrum=block.power_spectrum,
         modulation_frequency_range_hz=block.modulation_frequency_range_hz,
         fundamental_frequency_hz=block.fundamental_frequency_hz,

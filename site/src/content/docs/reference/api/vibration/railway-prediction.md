@@ -109,7 +109,7 @@ FOUNDATION_TO_FLOOR_RATIOS = (0.05, 0.063, 0.08, 0.1, 0.125, 0.16, 0.2, 0.25, 0.
 
 ```python
 foundation_to_floor_transfer_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     floor: str,
     floor_natural_frequency_hz: float,
@@ -130,7 +130,7 @@ table has no value for gives `nan`.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centres, in hertz. |
+| `frequencies` | The band centres, in hertz. |
 | `floor` | `"concrete"` or `"timber"`. |
 | `floor_natural_frequency_hz` | $f_\mathrm{e}$, positive. |
 | `statistic` | `"mean"` (default), `"lower"` or `"upper"`. |
@@ -155,7 +155,7 @@ GEOMETRIC_DECAY_EXPONENT_RANGE = (0.2, 0.4)
 
 ```python
 ground_attenuation_coefficient_per_m(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     damping_ratio: float,
     shear_wave_speed_m_s: float,
@@ -173,7 +173,7 @@ how it is computed here.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centres, in hertz. |
+| `frequencies` | The band centres, in hertz. |
 | `damping_ratio` | $D$, the damping ratio of the ground. |
 | `shear_wave_speed_m_s` | $c_s$, in metres per second. |
 
@@ -271,7 +271,7 @@ same 14 bands, or padded with zeros above them by the caller.
 
 ```python
 ground_transmission_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     distance_m: float,
     reference_distance_m: float,
@@ -298,7 +298,7 @@ measured with a point excitation.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centres, in hertz. |
+| `frequencies` | The band centres, in hertz. |
 | `distance_m` | $r$, from the source to the ground in front of the building or to its foundation. |
 | `reference_distance_m` | $r_0$, where the emission spectrum was taken. |
 | `exponent` | $n$, one value or one per band. |
@@ -325,8 +325,8 @@ KB_ASSESSMENT_BANDS_HZ = (4.0, 80.0)
 
 ```python
 kb_weighted_levels_db(
-    levels_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    levels: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -341,8 +341,8 @@ refused.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_v$, one level per band, in decibels. |
-| `frequencies_hz` | The band centres, nominal, 4 Hz to 80 Hz. |
+| `levels` | $L_v$, one level per band, in decibels. |
+| `frequencies` | The band centres, nominal, 4 Hz to 80 Hz. |
 
 **Returns:** $L_{v,KB}$, one per band.
 
@@ -518,7 +518,7 @@ foundation term zero (Annex C does exactly that).
 predict_train_category(
     emission_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0),
+    frequencies: ArrayLike = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0),
     ground_db: ArrayLike = 0.0,
     foundation_db: ArrayLike = 0.0,
     floor_db: ArrayLike = 0.0,
@@ -542,7 +542,7 @@ category at or below 0,1 counting as zero.
 | Name | Description |
 | :--- | :--- |
 | `emission_db` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
-| `frequencies_hz` | The band centres, nominal; the 19 bands from 4 Hz to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz. |
+| `frequencies` | The band centres, nominal; the 19 bands from 4 Hz to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz. |
 | `ground_db` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
 | `foundation_db` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
 | `floor_db` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
@@ -576,7 +576,7 @@ RECOMMENDED_DISTANCES_M = {'freight_soft_soil': {'tunnel': None, 'surface': 200.
 
 ```python
 rescale_emission_for_speed(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     speed_from_km_h: float,
     speed_to_km_h: float,
@@ -596,7 +596,7 @@ refused.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{v,\mathrm{E1}}$, the spectrum measured at the first speed, in decibels. |
+| `levels` | $L_{v,\mathrm{E1}}$, the spectrum measured at the first speed, in decibels. |
 | `speed_from_km_h` | $v_1$, the speed it was measured at. |
 | `speed_to_km_h` | $v_2$, the speed wanted, in the same unit. |
 
@@ -729,7 +729,7 @@ form; this is its reading.
 
 ```python
 TrainCategoryPrediction(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     emission_db: NDArray[np.float64],
     floor_db: NDArray[np.float64],
     weighted_frequencies_hz: NDArray[np.float64],
@@ -747,7 +747,7 @@ The prediction for one category of train, Clauses 5 and 7.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centres. |
+| `frequencies` | The band centres. |
 | `emission_db` | $L_{v,\mathrm{E}}$ the prediction started from. |
 | `floor_db` | $L_v$ of Formula (1), the spectrum on the floor. |
 | `weighted_frequencies_hz` | The band centres from 4 Hz to 80 Hz the KB assessment sums. |
@@ -785,7 +785,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ## velocity_spectrum_um_s
 
 ```python
-velocity_spectrum_um_s(levels_db: ArrayLike) -> NDArray[np.float64]
+velocity_spectrum_um_s(levels: ArrayLike) -> NDArray[np.float64]
 ```
 
 A level spectrum as a velocity spectrum, Formula (13).
@@ -797,7 +797,7 @@ curves of VDI 2038 Blatt 2 are drawn in.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_v$, one level per band, in decibels. |
+| `levels` | $L_v$, one level per band, in decibels. |
 
 **Returns:** $v_\mathrm{RMS}$, one per band, in micrometres per second.
 

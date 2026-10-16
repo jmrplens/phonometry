@@ -490,10 +490,10 @@ def _c32_signal(m: float, fs: int, seconds: float) -> np.ndarray:
     centers = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
     f1 = [1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50]
     f2 = [8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50]
-    levels_db = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
+    levels = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
     t = np.arange(round(seconds * fs)) / fs
     x = np.zeros(t.size)
-    for fc, fa, fb, level in zip(centers, f1, f2, levels_db, strict=True):
+    for fc, fa, fb, level in zip(centers, f1, f2, levels, strict=True):
         envelope = 0.5 * (
             1.0 + 0.55 * m * (np.sin(2 * np.pi * fa * t) - np.sin(2 * np.pi * fb * t))
         )

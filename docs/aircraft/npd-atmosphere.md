@@ -47,7 +47,7 @@ db = aircraft.load_anp_database()
 ac = db.aircraft("747100")
 print(ac.departure_spectral_class_id, ac.approach_spectral_class_id)   # 107 209
 spectrum = ac.spectral_class("D")
-print(spectrum.description, spectrum.levels_db[13])   # 4-Engine.Tfan 70.0 dB at 1 kHz
+print(spectrum.description, spectrum.levels[13])   # 4-Engine.Tfan 70.0 dB at 1 kHz
 ```
 
 <picture>

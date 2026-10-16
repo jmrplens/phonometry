@@ -553,7 +553,7 @@ def test_the_phase_verdict_carries_what_it_was_reached_from() -> None:
     frequencies, _ = _annex_b_grid("Wd")
     design = _design_phase("Wd", frequencies)
     verdict = vibration.verify_phase_response("Wd", frequencies, design + 3.0)
-    assert verdict.frequencies_hz == pytest.approx(frequencies)
+    assert verdict.frequencies == pytest.approx(frequencies)
     assert verdict.measured_phase_deg == pytest.approx(design + 3.0)
     assert verdict.design_phase_deg == pytest.approx(design)
     assert verdict.deviation_deg == pytest.approx(np.full(frequencies.size, 3.0))
@@ -592,11 +592,11 @@ def test_formula_6_needs_a_pair_of_ascending_frequencies(call) -> None:  # noqa:
     quantity that is then read as a modulus. Both are refused; the ascending
     pair either side of each refusal is the case that works.
     """
-    with pytest.raises(ValueError, match=r"'frequencies_hz' must hold at least two"):
+    with pytest.raises(ValueError, match=r"'frequencies' must hold at least two"):
         call([16.0], [1.0])
-    with pytest.raises(ValueError, match=r"'frequencies_hz' must increase strictly"):
+    with pytest.raises(ValueError, match=r"'frequencies' must increase strictly"):
         call([16.0, 16.0], [1.0, 1.0])
-    with pytest.raises(ValueError, match=r"'frequencies_hz' must increase strictly"):
+    with pytest.raises(ValueError, match=r"'frequencies' must increase strictly"):
         call([20.0, 16.0], [1.0, 1.0])
     assert call([16.0, 20.0], [1.0, 1.0]) is not None
 
@@ -611,7 +611,7 @@ def test_formula_6_needs_a_pair_of_ascending_frequencies(call) -> None:  # noqa:
 def test_the_phase_measurement_is_checked_before_it_is_judged(call) -> None:  # noqa: ANN001
     with pytest.raises(ValueError, match=r"same shape"):
         call([1.0, 2.0, 4.0], [0.0, 0.0])
-    with pytest.raises(ValueError, match=r"'frequencies_hz' must be strictly positive"):
+    with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):
         call([0.0, 2.0], [0.0, 0.0])
     with pytest.raises(ValueError, match=r"must contain only finite"):
         call([1.0, 2.0], [0.0, math.nan])

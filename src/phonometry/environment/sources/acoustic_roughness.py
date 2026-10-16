@@ -460,7 +460,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
     :param wavelengths_m: The nominal band wavelengths, in metres, from the
         longest to the shortest as clause 9 draws them; each names the
         base-ten one-third octave band of wavenumber it is nominal for.
-    :param levels_db: The acoustic roughness level :math:`L_r` of each band,
+    :param levels: The acoustic roughness level :math:`L_r` of each band,
         dB re 1 µm.
     :param record_length_m: The length of roughness the spectrum was taken
         from, in metres: for Method B, what is left once the 2 m at either
@@ -474,7 +474,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
     """
 
     wavelengths_m: NDArray[np.float64]
-    levels_db: NDArray[np.float64]
+    levels: NDArray[np.float64]
     record_length_m: float | None = None
     segment_count: int | None = None
     method: str | None = None
@@ -492,16 +492,16 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         if self.method is not None:
             require_choice(self.method, "method", _METHODS)
         wavelengths = require_positive_array(self.wavelengths_m, "wavelengths_m")
-        levels = require_finite_array(self.levels_db, "levels_db")
+        levels = require_finite_array(self.levels, "levels")
         if wavelengths.size != levels.size:
-            msg = "'wavelengths_m' and 'levels_db' need one value per band each."
+            msg = "'wavelengths_m' and 'levels' need one value per band each."
             raise ValueError(msg)
         bands = np.array([_band_of_wavelength(w) for w in wavelengths])
         if np.any(np.diff(bands) <= 0):
             msg = "'wavelengths_m' must name distinct bands from the longest wavelength down."
             raise ValueError(msg)
         object.__setattr__(self, "wavelengths_m", read_only(wavelengths))
-        object.__setattr__(self, "levels_db", read_only(levels))
+        object.__setattr__(self, "levels", read_only(levels))
 
     @property
     def bands(self) -> tuple[int, ...]:
@@ -521,7 +521,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         except ValueError:
             msg = f"the spectrum has no band at {wavelength_m:g} m."
             raise KeyError(msg) from None
-        return float(self.levels_db[index])
+        return float(self.levels[index])
 
     def plot(
         self,
@@ -668,7 +668,7 @@ def acoustic_roughness_spectrum(
     levels = 10.0 * np.log10(np.maximum(energies, floor) / _REFERENCE_ROUGHNESS_UM**2)
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(int(b)) for b in bands]),
-        levels_db=levels,
+        levels=levels,
         record_length_m=float(record.size * spacing),
         segment_count=int(segments.shape[0]),
         method="A",
@@ -883,7 +883,7 @@ def filtered_roughness_spectrum(
     bands = [round(10.0 * math.log10(float(f))) for f in bank.freq]
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
-        levels_db=np.asarray(levels),
+        levels=np.asarray(levels),
         record_length_m=float(analysed_m),
         segment_count=None,
         method="B",
@@ -924,7 +924,7 @@ def average_roughness_spectra(
     for spectrum in spectra:
         index = {band: i for i, band in enumerate(spectrum.bands)}
         energies += np.array(
-            [10.0 ** (spectrum.levels_db[index[b]] / 10.0) for b in bands]
+            [10.0 ** (spectrum.levels[index[b]] / 10.0) for b in bands]
         )
     levels = 10.0 * np.log10(energies / len(spectra))
     lengths = [s.record_length_m for s in spectra]
@@ -932,7 +932,7 @@ def average_roughness_spectra(
     methods = {s.method for s in spectra}
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
-        levels_db=levels,
+        levels=levels,
         record_length_m=None
         if None in lengths
         else float(sum(x for x in lengths if x is not None)),

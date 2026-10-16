@@ -151,6 +151,12 @@ class TestSingleNumberAverage:
         with pytest.raises(ValueError, match="Table A.1 prints"):
             room.single_number_average("C50", np.zeros(6), OCTAVES)
 
+    def test_it_names_both_axes_when_their_lengths_differ(self) -> None:
+        with pytest.raises(
+            ValueError, match=r"'values' has 5 entries and 'frequencies' has 6"
+        ):
+            room.single_number_average("G", np.zeros(5), OCTAVES)
+
 
 class TestOctavePairAverages:
     """The low, mid and high presentation of A.5."""
@@ -172,6 +178,12 @@ class TestOctavePairAverages:
     def test_it_refuses_a_band_axis_that_does_not_span_all_six(self) -> None:
         with pytest.raises(ValueError, match="does not carry the 4000 Hz band"):
             room.octave_pair_averages(np.zeros(5), OCTAVES[:5])
+
+    def test_it_names_both_axes_when_their_lengths_differ(self) -> None:
+        with pytest.raises(
+            ValueError, match=r"'values' has 5 entries and 'frequencies' has 6"
+        ):
+            room.octave_pair_averages(np.zeros(5), OCTAVES)
 
 
 class TestPerceptiblyDifferent:

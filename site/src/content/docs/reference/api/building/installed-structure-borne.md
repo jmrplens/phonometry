@@ -478,7 +478,7 @@ sign included.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in hertz (> 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `critical_frequency` | Critical frequency `fc,i` of the element, in hertz (> 0). |
 | `mass_per_area` | Mass per unit area `mi` of the element, in kg/m^2 (> 0). |
 | `radiation_factor` | Radiation factor `sigma_i` of the element (Default: 1.0, its value above `fc`; EN 12354-1:2000 Annex B estimates it below). |
@@ -544,7 +544,7 @@ of Table F.1 against its own printed "re 1 pN" caption.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in hertz (> 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `force_level` | Force level `L_F`, in dB re 1e-6 N (Table F.1 or [`tapping_machine_force_level_estimate`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_force_level_estimate)). |
 
 **Returns:** The characteristic power level `L_Ws,c`, in dB re 1 pW.
@@ -581,7 +581,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in hertz (> 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `receiver_mobility` | Real mobility `Y_i` of the supporting element, in m/(N.s) (> 0). |
 | `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass), the 0,5 kg of clause D.1.3 and ISO 10140-5). |
 
@@ -640,7 +640,7 @@ bands the standard does not tabulate.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in hertz (> 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `bandwidth` | `"octave"` (coefficient 2,5) or `"third"` (coefficient 0,8). |
 
 **Returns:** The force level `L_F`, in dB re 1e-6 N (the standard prints "re 1 pN"; see `docs/ERRATA.md`).
@@ -742,7 +742,7 @@ which [`coupling_term`](/phonometry/reference/api/building/installed-structure-b
 | Name | Description |
 | :--- | :--- |
 | `structure` | Table D.1 row name. |
-| `frequency` | Frequency `f`, in hertz, for the frequency-dependent rows only. |
+| `frequency` | Frequency `f`, in hertz (scalar or array), for the frequency-dependent rows only. |
 | `mass` | Mass `M`, in kilograms (rows `"mass"`, `"mass_spring"`). |
 | `density` | Density `rho`, in kg/m^3. |
 | `longitudinal_velocity` | Quasi-longitudinal wave speed `cL`, in m/s. |

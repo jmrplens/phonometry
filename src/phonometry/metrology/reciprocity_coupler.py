@@ -379,7 +379,7 @@ class HeatConductionCorrection(OwnsArrays):
     r"""The heat-conduction correction of a closed cavity at low frequencies
     (IEC 61094-2:2009 5.5 and A.2, Formula (A.1)).
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar length_to_diameter_ratio: :math:`R`.
     :ivar volume_to_surface_m: :math:`l`, the volume to surface ratio, in m.
     :ivar x: :math:`X = f l^2/(\kappa\alpha_t)` at each frequency.
@@ -388,7 +388,7 @@ class HeatConductionCorrection(OwnsArrays):
     :ivar method: ``"exact"`` or ``"approximation"``.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     length_to_diameter_ratio: float
     volume_to_surface_m: float
     x: NDArray[np.float64]
@@ -402,8 +402,8 @@ class HeatConductionCorrection(OwnsArrays):
         :raises ValueError: for frequencies that are not positive and
             increasing, or columns of another length.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name, dtype in (("x", np.float64), ("transfer_function", np.complex128)):
             column = np.asarray(getattr(self, name), dtype=dtype).reshape(-1)
             if column.size != frequencies.size:
@@ -446,7 +446,7 @@ class HeatConductionCorrection(OwnsArrays):
 
 
 def heat_conduction_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     volume_m3: float,
     surface_area_m2: float,
@@ -463,7 +463,7 @@ def heat_conduction_correction(
     :func:`coupler_transfer_impedance` assembles; :math:`R` is that of the
     coupler.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param volume_m3: The total volume, in m³.
     :param surface_area_m2: The total surface, in m².
     :param length_to_diameter_ratio: :math:`R`.
@@ -474,7 +474,7 @@ def heat_conduction_correction(
     :raises ValueError: for a volume, surface or ratio that is not positive,
         or frequencies that are not positive and increasing.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     volume = require_positive(volume_m3, "volume_m3")
     surface = require_positive(surface_area_m2, "surface_area_m2")
     length = volume / surface
@@ -482,7 +482,7 @@ def heat_conduction_correction(
     x = frequencies * length**2 / (kappa * gas.thermal_diffusivity)
     transfer = temperature_transfer_function(length_to_diameter_ratio, x, method=method)
     return HeatConductionCorrection(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         length_to_diameter_ratio=float(length_to_diameter_ratio),
         volume_to_surface_m=length,
         x=x,
@@ -574,7 +574,7 @@ class CapillaryTubeImpedance(OwnsArrays):
     r"""The acoustic input impedance of an open capillary tube (IEC
     61094-2:2009 Formulas (B.1) to (B.3)).
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar length_m: :math:`l_\mathrm{C}`, in m.
     :ivar radius_m: :math:`a_\mathrm{t}`, in m.
     :ivar propagation_coefficient_per_m: :math:`\gamma`, complex, in 1/m.
@@ -582,7 +582,7 @@ class CapillaryTubeImpedance(OwnsArrays):
         of an infinite tube, complex, in Pa·s/m³.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     length_m: float
     radius_m: float
     propagation_coefficient_per_m: NDArray[np.complex128]
@@ -594,8 +594,8 @@ class CapillaryTubeImpedance(OwnsArrays):
         :raises ValueError: for frequencies that are not positive and
             increasing, or columns of another length.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("propagation_coefficient_per_m", "wave_impedance_pa_s_m3"):
             column = np.asarray(getattr(self, name), dtype=np.complex128).reshape(-1)
             if column.size != frequencies.size:
@@ -633,7 +633,7 @@ class CapillaryTubeImpedance(OwnsArrays):
 
 
 def capillary_tube_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     length_m: float,
     radius_m: float,
@@ -667,7 +667,7 @@ def capillary_tube_impedance(
     0,25 mm in radius; the first radius is 1/6 mm, which is what the printed
     values were computed with.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param length_m: :math:`l_\mathrm{C}`, in m.
     :param radius_m: :math:`a_\mathrm{t}`, in m.
     :param gas: The gas in the tube.
@@ -675,7 +675,7 @@ def capillary_tube_impedance(
     :raises ValueError: for a length or radius that is not positive, or
         frequencies that are not positive and increasing.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     length = require_positive(length_m, "length_m")
     radius = require_positive(radius_m, "radius_m")
     rho, c, kappa = gas.density, gas.speed_of_sound, gas.heat_capacity_ratio
@@ -696,7 +696,7 @@ def capillary_tube_impedance(
     gamma = np.sqrt(product * quotient)
     gamma = np.where(gamma.real < 0.0, -gamma, gamma)
     return CapillaryTubeImpedance(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         length_m=length,
         radius_m=radius,
         propagation_coefficient_per_m=gamma,
@@ -787,7 +787,7 @@ class ReciprocityMicrophone(RichDisplay):
         return self.loss_factor / (omega * self.compliance_m3_per_pa)
 
     def complex_equivalent_volume_m3(
-        self, frequencies_hz: ArrayLike
+        self, frequencies: ArrayLike
     ) -> NDArray[np.complex128]:
         r"""The complex equivalent volume :math:`V_\mathrm{e}` of Formula (3),
         in m³, which tends to :attr:`equivalent_volume_m3` at low frequencies:
@@ -797,29 +797,27 @@ class ReciprocityMicrophone(RichDisplay):
            V_\mathrm{e} = \frac{\kappa_\mathrm{r} p_\mathrm{s,r}}{\mathrm{j}\omega Z_\mathrm{a}}
            = \frac{V_\mathrm{eq}}{1 - (f/f_0)^2 + \mathrm{j}\,d\,f/f_0}
 
-        :param frequencies_hz: The frequencies, in Hz.
+        :param frequencies: The frequencies, in Hz.
         :return: :math:`V_\mathrm{e}` at each frequency, in m³.
         """
-        ratio = (
-            np.asarray(frequencies_hz, dtype=np.float64) / self.resonance_frequency_hz
-        )
+        ratio = np.asarray(frequencies, dtype=np.float64) / self.resonance_frequency_hz
         volume = self.equivalent_volume_m3 / (
             1.0 - ratio**2 + 1.0j * self.loss_factor * ratio
         )
         return np.asarray(volume, dtype=np.complex128)
 
     def acoustic_impedance_pa_s_m3(
-        self, frequencies_hz: ArrayLike
+        self, frequencies: ArrayLike
     ) -> NDArray[np.complex128]:
         r""":math:`Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a}
         + 1/(\mathrm{j}\omega c_\mathrm{a})`, in Pa·s/m³.
 
-        :param frequencies_hz: The frequencies, in Hz, positive.
+        :param frequencies: The frequencies, in Hz, positive.
         :return: :math:`Z_\mathrm{a}` at each frequency, in Pa·s/m³.
         """
-        omega = 2.0 * math.pi * np.asarray(frequencies_hz, dtype=np.float64)
+        omega = 2.0 * math.pi * np.asarray(frequencies, dtype=np.float64)
         return _reference_stiffness() / (
-            1.0j * omega * self.complex_equivalent_volume_m3(frequencies_hz)
+            1.0j * omega * self.complex_equivalent_volume_m3(frequencies)
         )
 
 
@@ -1103,7 +1101,7 @@ class CouplerTransferImpedance(OwnsArrays):
     r"""The acoustic transfer impedance of a coupler closed by two microphones,
     with its corrections (IEC 61094-2:2009 5.4 to 5.6).
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar coupler: ``"plane_wave"`` or ``"large_volume"``.
     :ivar adiabatic_impedance_pa_s_m3: :math:`Z'_{\mathrm{a},12}`, adiabatic
         and without losses (Formula (3) or (4)), in Pa·s/m³.
@@ -1117,7 +1115,7 @@ class CouplerTransferImpedance(OwnsArrays):
         large-volume coupler, ``None`` for a plane-wave one.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     coupler: str
     adiabatic_impedance_pa_s_m3: NDArray[np.complex128]
     heat_conducting_impedance_pa_s_m3: NDArray[np.complex128]
@@ -1131,8 +1129,8 @@ class CouplerTransferImpedance(OwnsArrays):
             positive and increasing, or columns of another length.
         """
         require_choice(self.coupler, "coupler", _COUPLER_KINDS)
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in (
             "adiabatic_impedance_pa_s_m3",
             "heat_conducting_impedance_pa_s_m3",
@@ -1233,7 +1231,7 @@ def _large_volume(
         1.0j * omega * (heat.volume_factor * volume / gas_stiffness + microphone_term)
     )
     return CouplerTransferImpedance(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         coupler="large_volume",
         adiabatic_impedance_pa_s_m3=adiabatic,
         heat_conducting_impedance_pa_s_m3=corrected,
@@ -1299,7 +1297,7 @@ def _plane_wave(
     )
     corrected = _line_impedance(gamma, wave, length, lossy_terminations)
     return CouplerTransferImpedance(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         coupler="plane_wave",
         adiabatic_impedance_pa_s_m3=adiabatic,
         heat_conducting_impedance_pa_s_m3=corrected,
@@ -1310,7 +1308,7 @@ def _plane_wave(
 
 
 def coupler_transfer_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     transmitter: ReciprocityMicrophone,
     receiver: ReciprocityMicrophone,
@@ -1345,7 +1343,7 @@ def coupler_transfer_impedance(
     capillary tubes. The pair is reciprocal, so which microphone transmits does
     not change the result.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param coupler: The coupler.
     :param transmitter: Microphone (1).
     :param receiver: Microphone (2).
@@ -1362,7 +1360,7 @@ def coupler_transfer_impedance(
     :raises ValueError: for frequencies that are not positive and increasing,
         a static pressure that is not positive, or an unknown method.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     pressure = require_positive(static_pressure_pa, "static_pressure_pa")
     medium = _gas(temperature_c, pressure, relative_humidity_percent, gas)
     pair = (transmitter, receiver)
@@ -1395,7 +1393,7 @@ def _acoustic(
     """
     count = frequencies.size
     if isinstance(value, CouplerTransferImpedance):
-        computed = value.frequencies_hz
+        computed = value.frequencies
         if computed.size != count or not np.allclose(
             computed, frequencies, rtol=_SAME_FREQUENCY_REL_TOL, atol=0.0
         ):
@@ -1410,7 +1408,7 @@ def _acoustic(
 
 
 def pressure_reciprocity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
     *,
@@ -1436,7 +1434,7 @@ def pressure_reciprocity(
     complex products together, on the branch described in
     :mod:`~phonometry.metrology.reciprocity_calibration`.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param electrical_transfer_impedances_ohm: :math:`Z_{\mathrm{e},12}`,
         :math:`Z_{\mathrm{e},23}` and :math:`Z_{\mathrm{e},31}`, complex, in Ω,
         each one value or one per frequency.
@@ -1455,7 +1453,7 @@ def pressure_reciprocity(
     :raises ValueError: for other than three pairs, values that are zero or not
         finite, or a column of the wrong length.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     if len(electrical_transfer_impedances_ohm) != len(_TRIAD_PAIRS) or len(
         acoustic_transfer_impedances
@@ -1485,7 +1483,7 @@ def pressure_reciprocity(
 
 
 def pressure_reciprocity_pair(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
     sensitivity_ratio: ArrayLike,
@@ -1505,7 +1503,7 @@ def pressure_reciprocity_pair(
     same pressure of the auxiliary source; only microphone (1) needs to be
     reciprocal (5.1.1).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param electrical_transfer_impedance_ohm: :math:`Z_{\mathrm{e},12}`,
         complex, in Ω.
     :param acoustic_transfer_impedance: :math:`Z_{\mathrm{a},12}`, a
@@ -1520,7 +1518,7 @@ def pressure_reciprocity_pair(
     :raises ValueError: for values that are zero or not finite, or a column
         of the wrong length.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     product = _complex_column(
         electrical_transfer_impedance_ohm, "electrical_transfer_impedance_ohm", count
@@ -1556,7 +1554,7 @@ class WaveMotionCorrection(OwnsArrays):
     """The wave-motion correction of the large-volume coupler for LS1P
     microphones (IEC 61094-2:2009 C.3, Table C.3).
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar correction_db: The correction added to the pressure sensitivity
         level, in dB.
     :ivar speed_of_sound_ratio: The ratio of the speed of sound in the gas of
@@ -1567,7 +1565,7 @@ class WaveMotionCorrection(OwnsArrays):
     is not a field.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     correction_db: NDArray[np.float64]
     speed_of_sound_ratio: float
 
@@ -1584,8 +1582,8 @@ class WaveMotionCorrection(OwnsArrays):
             last row of Table C.3, 2 500 Hz, or a correction that is not the
             one Table C.3 gives at its frequency.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         column = np.asarray(self.correction_db, dtype=np.float64).reshape(-1)
         if column.size != frequencies.size:
             msg = "WaveMotionCorrection: 'correction_db' must hold one value per frequency."
@@ -1614,7 +1612,7 @@ class WaveMotionCorrection(OwnsArrays):
         return np.array(
             [
                 _table_c3(float(f) / self.speed_of_sound_ratio)[1]
-                for f in self.frequencies_hz
+                for f in self.frequencies
             ],
             dtype=np.bool_,
         )
@@ -1662,7 +1660,7 @@ def _table_c3(frequency: float) -> tuple[float, bool]:
 
 
 def large_volume_wave_motion_correction(
-    frequencies_hz: ArrayLike, *, speed_of_sound_ratio: float = 1.0
+    frequencies: ArrayLike, *, speed_of_sound_ratio: float = 1.0
 ) -> WaveMotionCorrection:
     """The wave-motion correction of the large-volume coupler used with LS1P
     microphones (IEC 61094-2:2009 C.3, Table C.3).
@@ -1680,17 +1678,17 @@ def large_volume_wave_motion_correction(
     speed of sound": ``speed_of_sound_ratio`` is that factor, and each
     frequency is read at its value divided by it.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param speed_of_sound_ratio: The speed of sound in the gas re that in air
         (Default: 1, air).
     :return: The :class:`WaveMotionCorrection`.
     :raises ValueError: for a frequency whose air equivalent is above 2 500 Hz,
         or a ratio that is not positive.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     ratio = require_positive(speed_of_sound_ratio, "speed_of_sound_ratio")
     return WaveMotionCorrection(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         correction_db=np.array([_table_c3(float(f) / ratio)[0] for f in frequencies]),
         speed_of_sound_ratio=ratio,
     )
@@ -1876,7 +1874,7 @@ def _within(value: float, bounds: tuple[float, float]) -> bool:
 
 
 def check_coupler(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     *,
@@ -1899,7 +1897,7 @@ def check_coupler(
     conditions are checked against the domain Annex F states for its
     equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param coupler: The coupler.
     :param microphones: The microphones that close it, two or a triad of one
         type; the first two give the front cavities that add to the volume,
@@ -1914,7 +1912,7 @@ def check_coupler(
     :raises ValueError: for frequencies that are not positive and increasing,
         fewer than two microphones, or an unknown method.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     method = require_choice(
         heat_conduction_method, "heat_conduction_method", _HEAT_CONDUCTION_METHODS
     )
@@ -1989,14 +1987,14 @@ class CouplerParameterUncertainty(OwnsArrays):
     Built by :func:`coupler_parameter_uncertainty`; ready to pass to
     :func:`~phonometry.metrology.reciprocity_uncertainty_budget`.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar components_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_2_TABLE_1`, in dB at each
         frequency.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     components_db: Mapping[str, NDArray[np.float64]]
     microphone: int
 
@@ -2007,8 +2005,8 @@ class CouplerParameterUncertainty(OwnsArrays):
             increasing, or a component that is not one finite non-negative
             value per frequency.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         components = {}
         for name, value in self.components_db.items():
             column = np.asarray(value, dtype=np.float64).reshape(-1)
@@ -2145,7 +2143,7 @@ class CouplerInputUncertainties(RichDisplay):
 
 
 def coupler_parameter_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     uncertainties: CouplerInputUncertainties,
@@ -2175,7 +2173,7 @@ def coupler_parameter_uncertainty(
     and their changes combined in quadrature into the one row of Table 1; so
     are the length and the radius of the capillary tubes.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param coupler: The coupler, the same for the three pairs.
     :param microphones: The three microphones.
     :param uncertainties: The standard uncertainty of each input quantity, a
@@ -2202,7 +2200,7 @@ def coupler_parameter_uncertainty(
         pressure, the temperature or the humidity of a coupler filled with a
         given gas.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     if len(microphones) != len(_TRIAD_PAIRS):
         msg = "The triad needs three microphones."
         raise ValueError(msg)
@@ -2285,7 +2283,7 @@ def coupler_parameter_uncertainty(
                 )
             )
     return CouplerParameterUncertainty(
-        frequencies_hz=frequencies, components_db=components, microphone=microphone
+        frequencies=frequencies, components_db=components, microphone=microphone
     )
 
 

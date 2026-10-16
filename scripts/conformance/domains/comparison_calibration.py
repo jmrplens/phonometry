@@ -681,7 +681,7 @@ def _chk_impedance_semi_range() -> Outcome:
     """
     stated, divisor = ref.IEC61094_5_TABLE_D1_STATED["impedance"]
     ratio = cc.ImpedancePressureRatio(
-        frequencies_hz=np.array([2000.0]),
+        frequencies=np.array([2000.0]),
         ratio=np.array([10.0 ** (stated / 20.0)]),
         coupling="series",
         coupling_equivalent_volume_m3=np.array([1e-6]),
@@ -1011,7 +1011,7 @@ def _chk_validation() -> Outcome:
         ]
     ).astype(np.complex128)
     reciprocity = ReciprocityCalibration(
-        frequencies_hz=grid,
+        frequencies=grid,
         sensitivity_v_per_pa=sensitivities,
         products_v2_per_pa2=np.vstack(
             [
@@ -1057,7 +1057,7 @@ def _chk_validation_correlation() -> Outcome:
     for comparison, (printed, decimals) in ref.GUM_F123_EXAMPLE_2_CORRELATION.items():
         expanded = 2.0 * scale * math.hypot(comparison, standard)
         result = cc.JigCouplerVerification(
-            frequencies_hz=np.array([1000.0]),
+            frequencies=np.array([1000.0]),
             calibration_level_db=np.array([-26.3]),
             calibration_uncertainty_db=np.array([expanded]),
             validation_level_db=np.array([-26.3]),
@@ -1250,7 +1250,7 @@ def _chk_time_selective() -> Outcome:
         impulse = metrology.stepped_sine_impulse_response(frequencies, response)
         windowed = metrology.time_selective_response(
             impulse.impulse_response,
-            impulse.sample_rate_hz,
+            impulse.fs,
             window_start_s=0.0025,
             window_end_s=0.006,
         )

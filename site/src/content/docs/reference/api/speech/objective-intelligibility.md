@@ -90,7 +90,7 @@ STOIResult(
     extended: bool,
     segment_scores: NDArray[np.float64],
     band_scores: NDArray[np.float64] | None,
-    band_frequencies: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     fs: int,
 )
 ```
@@ -105,7 +105,7 @@ Result of a STOI or ESTOI intelligibility computation.
 | `extended` | `True` for ESTOI (Jensen & Taal 2016), `False` for STOI (Taal et al. 2011). |
 | `segment_scores` | Per-segment intermediate intelligibility (averaged over bands for STOI, the spectral correlation `d_m` for ESTOI). |
 | `band_scores` | Per-band mean intermediate correlation over the segments (STOI only; `None` for ESTOI, whose index mixes the bands). |
-| `band_frequencies` | The 15 one-third-octave band centre frequencies, in hertz. |
+| `frequencies` | The 15 one-third-octave band centre frequencies, in hertz. |
 | `fs` | The internal sample rate the measure runs at (10 kHz). |
 
 ### STOIResult.plot()

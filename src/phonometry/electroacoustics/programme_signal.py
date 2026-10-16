@@ -217,7 +217,7 @@ _BINDING_SLACK_DB = 1e-9
 _LIMIT_SLACK_DB = 1e-9
 
 
-def programme_signal_filter(frequencies_hz: ArrayLike) -> NDArray[np.complex128]:
+def programme_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]:
     r"""The transfer function of the filter of IEC 60268-1:1985 Figure 2.
 
     The voltage across the 10 kohm output resistor over the e.m.f. of the
@@ -226,15 +226,15 @@ def programme_signal_filter(frequencies_hz: ArrayLike) -> NDArray[np.complex128]
     first 430 ohm and the 10 kohm is the whole output shunt, the two
     conventions the figure's notes state.
 
-    :param frequencies_hz: Frequencies, in Hz, any shape; each must be
+    :param frequencies: Frequencies, in Hz, any shape; each must be
         positive.
     :return: The complex response, dimensionless, with the shape of
-        ``frequencies_hz``.
+        ``frequencies``.
     :raises ValueError: If a frequency is not a positive finite number.
     """
-    f = np.asarray(frequencies_hz, dtype=np.float64)
+    f = np.asarray(frequencies, dtype=np.float64)
     if f.size and not (np.all(np.isfinite(f)) and np.all(f > 0.0)):
-        msg = "'frequencies_hz' must hold positive, finite frequencies."
+        msg = "'frequencies' must hold positive, finite frequencies."
         raise ValueError(msg)
     s = 2j * np.pi * f
     z_first = _R_SOURCE_OHM + 1.0 / (s * _C_FIRST_F)
@@ -317,11 +317,11 @@ def _table_nodes_db() -> tuple[float, ...]:
     return tuple(float(value) for value in nodes)
 
 
-def _table_density_db(frequencies_hz: NDArray[np.float64]) -> NDArray[np.float64]:
+def _table_density_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """The ``"table"`` density at each frequency, in dB per unit of lg f."""
     nodes = np.asarray(_table_nodes_db())
     centres = np.arange(-17, 14) / 10.0 + 3.0  # lg of 1000 * 10^(n/10)
-    u = np.log10(frequencies_hz)
+    u = np.log10(frequencies)
     inner = np.interp(u, centres, nodes)
     low_slope = (nodes[1] - nodes[0]) / 0.1
     high_slope = (nodes[-1] - nodes[-2]) / 0.1
@@ -463,17 +463,17 @@ def _nominal_band(frequency: float) -> float:
 class ProgrammeSignalCheck(OwnsArrays):
     r"""A one-third-octave spectrum judged against IEC 60268-1:1985 Table II.
 
-    :ivar frequencies_hz: The nominal frequencies of the bands judged, in Hz,
+    :ivar frequencies: The nominal frequencies of the bands judged, in Hz,
         ascending.
     :ivar band_levels_db: The band levels as given, in dB, in the order of
-        :attr:`frequencies_hz`.
+        :attr:`frequencies`.
 
     Table II's relative levels and tolerances at the bands, and the offset
     that refers the levels to them, are read from the table, so a check
     cannot be built against other tolerances.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     band_levels_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -482,7 +482,7 @@ class ProgrammeSignalCheck(OwnsArrays):
         :raises ValueError: if a frequency is not a nominal band of Table II,
             or the levels do not hold one finite value per band.
         """
-        for value in np.atleast_1d(self.frequencies_hz):
+        for value in np.atleast_1d(self.frequencies):
             if float(value) not in SIMULATED_PROGRAMME_SPECTRUM:
                 msg = (
                     f"ProgrammeSignalCheck: {float(value):g} Hz is not a nominal "
@@ -490,7 +490,7 @@ class ProgrammeSignalCheck(OwnsArrays):
                 )
                 raise ValueError(msg)
         levels = np.asarray(self.band_levels_db, dtype=np.float64)
-        if levels.shape != np.shape(self.frequencies_hz) or not np.all(
+        if levels.shape != np.shape(self.frequencies) or not np.all(
             np.isfinite(levels)
         ):
             msg = "ProgrammeSignalCheck: one finite band level per band."
@@ -499,7 +499,7 @@ class ProgrammeSignalCheck(OwnsArrays):
     def _rows(self) -> list[ProgrammeSpectrumBand]:
         return [
             SIMULATED_PROGRAMME_SPECTRUM[float(value)]
-            for value in np.atleast_1d(self.frequencies_hz)
+            for value in np.atleast_1d(self.frequencies)
         ]
 
     @property
@@ -570,7 +570,7 @@ class ProgrammeSignalCheck(OwnsArrays):
             self.tolerance_plus_db - deviation, self.tolerance_minus_db + deviation
         )
         binding = margins <= float(np.min(margins)) + _BINDING_SLACK_DB
-        return tuple(float(value) for value in self.frequencies_hz[binding])
+        return tuple(float(value) for value in self.frequencies[binding])
 
     @property
     def passes(self) -> bool:
@@ -605,7 +605,7 @@ class ProgrammeSignalCheck(OwnsArrays):
 
 
 def check_programme_signal(
-    frequencies_hz: ArrayLike, band_levels_db: ArrayLike
+    frequencies: ArrayLike, band_levels_db: ArrayLike
 ) -> ProgrammeSignalCheck:
     r"""Is this one-third-octave spectrum the programme signal of IEC 60268-1?
 
@@ -620,7 +620,7 @@ def check_programme_signal(
     band centres (19,95 Hz, 25,12 Hz, ...) are read as the nominal ones of the
     table.
 
-    :param frequencies_hz: Band centre frequencies, in Hz, nominal or exact,
+    :param frequencies: Band centre frequencies, in Hz, nominal or exact,
         each a band of Table II (20 Hz to 20 kHz) and none repeated.
     :param band_levels_db: The band levels, in dB, on any reference.
     :return: A :class:`ProgrammeSignalCheck`.
@@ -628,10 +628,10 @@ def check_programme_signal(
         band of Table II or appears twice, a level is not finite, or fewer than
         two bands are given.
     """
-    f = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
+    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     levels = np.atleast_1d(np.asarray(band_levels_db, dtype=np.float64))
     if f.ndim != 1 or levels.shape != f.shape:
-        msg = "'frequencies_hz' and 'band_levels_db' must be 1-D and of equal length."
+        msg = "'frequencies' and 'band_levels_db' must be 1-D and of equal length."
         raise ValueError(msg)
     if f.size < _MIN_BANDS:
         msg = f"At least {_MIN_BANDS} bands are needed to judge a relative spectrum."
@@ -640,14 +640,14 @@ def check_programme_signal(
         msg = "'band_levels_db' must be finite."
         raise ValueError(msg)
     if not (np.all(np.isfinite(f)) and np.all(f > 0.0)):
-        msg = "'frequencies_hz' must hold positive, finite frequencies."
+        msg = "'frequencies' must hold positive, finite frequencies."
         raise ValueError(msg)
     nominal = np.array([_nominal_band(float(value)) for value in f])
     if np.unique(nominal).size != nominal.size:
-        msg = "'frequencies_hz' names a band of Table II more than once."
+        msg = "'frequencies' names a band of Table II more than once."
         raise ValueError(msg)
     order = np.argsort(nominal)
     return ProgrammeSignalCheck(
-        frequencies_hz=read_only(nominal[order]),
+        frequencies=read_only(nominal[order]),
         band_levels_db=levels[order],
     )

@@ -469,8 +469,8 @@ def test_round_robin_levels_are_a_read_only_copy() -> None:
     levels = _round_robin_levels()
     result = environment.round_robin_precision(levels)
     levels[0, 0] = 0.0
-    assert result.levels_db[0, 0] == pytest.approx(39.95)
-    assert not result.levels_db.flags.writeable
+    assert result.levels[0, 0] == pytest.approx(39.95)
+    assert not result.levels.flags.writeable
 
 
 def test_a_round_robin_needs_twenty_receivers() -> None:
@@ -494,10 +494,10 @@ def test_a_round_robin_needs_a_matrix() -> None:
 def test_a_round_robin_refuses_complex_levels() -> None:
     """A float64 cast would keep the real part and only warn."""
     levels = np.ones((20, 2)) * (1.0 + 1.0j)
-    with pytest.raises(ValueError, match="levels_db"):
+    with pytest.raises(ValueError, match="levels"):
         environment.round_robin_precision(levels)
-    with pytest.raises(ValueError, match="levels_db"):
-        environment.RoundRobinPrecision(levels_db=levels)
+    with pytest.raises(ValueError, match="levels"):
+        environment.RoundRobinPrecision(levels=levels)
 
 
 @pytest.mark.parametrize(
@@ -506,7 +506,7 @@ def test_a_round_robin_refuses_complex_levels() -> None:
     ids=["ragged", "strings"],
 )
 def test_a_round_robin_names_the_levels_it_cannot_read(bad: object) -> None:
-    with pytest.raises(ValueError, match="levels_db"):
+    with pytest.raises(ValueError, match="levels"):
         environment.round_robin_precision(bad)  # type: ignore[arg-type]
 
 

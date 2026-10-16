@@ -1505,7 +1505,7 @@ freqs = [63.0, 125.0, 250.0, 500.0]
 li_fmax = [65.3, 64.5, 58.0, 55.8]           # energy-averaged over ball positions
 t = [1.43, 3.70, 3.10, 2.38]                 # receiving-room reverberation time
 
-res = building.standardized_maximum_impact_level(li_fmax, 41.4, t, frequency=freqs)
+res = building.standardized_maximum_impact_level(li_fmax, 41.4, t, frequencies=freqs)
 print(res.volume_term)                        # 10 lg(41.4/50) = -0.8 dB
 print(building.fast_reverberation_correction([0.5]))   # exactly 0 dB at T = T0
 res.plot()   # measured and standardized spectra (needs matplotlib)
@@ -2189,8 +2189,8 @@ they are.*
 
 | Parameter | Type | Units | Default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels_db` | array | dB | required | Band levels of every reading, `(readings, bands)`; one row for a single reading |
-| `frequencies_hz` | array | Hz | required | Nominal centres, increasing: one-third octaves 25 Hz to 10 kHz or octaves 31.5 Hz to 8 kHz |
+| `levels` | array | dB | required | Band levels of every reading, `(readings, bands)`; one row for a single reading |
+| `frequencies` | array | Hz | required | Nominal centres, increasing: one-third octaves 25 Hz to 10 kHz or octaves 31.5 Hz to 8 kHz |
 | `quantity` | str | | required | `"Smax"`, `"Fmax"` or `"eq"`, the Table 1 quantity; it names the single numbers |
 | `band` | str | | `"third"` | `"third"` or `"octave"`; Clause 6 asks for one-third octaves, octaves are optional |
 | `background_db` | array | dB | `None` | One level per band, or one row per position, energy-averaged |
@@ -2298,7 +2298,7 @@ varying = building.check_varying_background(
     [36.5, 35.0, 31.0, 27.5, 24.0, 21.0, 17.5],   # background maximum over 12 min [dB]
     [44.0, 46.5, 43.0, 39.5, 36.0, 32.5, 28.0],   # the equipment, same bands [dB]
     observation_time_s=720.0,
-    frequencies_hz=octaves,
+    frequencies=octaves,
 )
 print(varying.margin_ok, varying.passes)
 # [False  True  True  True  True  True  True] False

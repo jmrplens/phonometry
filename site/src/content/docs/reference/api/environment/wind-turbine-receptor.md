@@ -111,7 +111,7 @@ level cannot be determined (11.6.4).
 
 ```python
 bin_sound_levels(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     wind_speeds_m_s: ArrayLike,
     wind_directions_deg: ArrayLike | None = None,
     *,
@@ -143,7 +143,7 @@ whose first member is centred on north. Per bin:
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The interval levels, in dB. |
+| `levels` | The interval levels, in dB. |
 | `wind_speeds_m_s` | The binning wind speed of each interval, in m/s. |
 | `wind_directions_deg` | Optional wind direction of each interval, in degrees from north. |
 | `averaging` | `"energy"` (Equation (1), for `LAeq`) or `"arithmetic"` (Equation (8), for statistical levels). |
@@ -346,7 +346,7 @@ LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES = {'A': GroundImpedanceClass(flow_resisti
 
 ```python
 LowFrequencyLevel(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     sound_power_levels_db: NDArray[np.float64],
     a_weighting_db: NDArray[np.float64],
     distance_terms_db: NDArray[np.float64],
@@ -371,7 +371,7 @@ band; the band arrays are summed over the turbines.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third-octave centres, in Hz. |
+| `frequencies` | The one-third-octave centres, in Hz. |
 | `sound_power_levels_db` | The turbines' band sound power levels. |
 | `a_weighting_db` | The A-weighting added to each band (zero when the result is unweighted). |
 | `distance_terms_db` | $10 \lg(l^2 + h^2)$ of each turbine, in dB. |
@@ -793,7 +793,7 @@ SWEDISH_LOW_FREQUENCY_LIMITS_DB = {31.5: 56.0, 40.0: 49.0, 50.0: 43.0, 63.0: 42.
 ```python
 ToneSearchLimit(
     distance_m: float,
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     attenuation_db: NDArray[np.float64],
     upper_frequency_hz: float,
     *,
@@ -810,7 +810,7 @@ The upper frequency of the tonal search range (12.5.2.4).
 | Name | Description |
 | :--- | :--- |
 | `distance_m` | Distance from the nearest turbine, in m. |
-| `frequencies_hz` | The nominal one-third-octave centres searched. |
+| `frequencies` | The nominal one-third-octave centres searched. |
 | `attenuation_db` | ISO 9613-1 attenuation of each band over the distance, at the exact mid-band frequency, in dB. |
 | `upper_frequency_hz` | The nominal centre of the lowest band attenuated by at least 20 dB, or 10 kHz when none is. |
 | `temperature_c` | Air temperature, in degrees C. |
@@ -1092,7 +1092,7 @@ wind_turbine_low_frequency_level(
     *,
     distance_m: ArrayLike,
     hub_height_m: ArrayLike,
-    frequencies_hz: ArrayLike = ...,
+    frequencies: ArrayLike = ...,
     ground_correction_db: ArrayLike | None = None,
     air_attenuation_db_per_km: ArrayLike | None = None,
     facade_insulation_db: ArrayLike | None = None,
@@ -1118,9 +1118,9 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 | Name | Description |
 | :--- | :--- |
 | `sound_power_levels_db` | Band sound power levels from IEC 61400-11, in dB: one row per turbine, or one row for a single turbine. |
-| `distance_m` | Horizontal distance $l$ from each tower to the receptor, in m. |
+| `distance_m` | Horizontal distance $l$ from each tower to the receptor, in m (scalar or one per turbine). |
 | `hub_height_m` | Hub height $h$ of each turbine, in m. |
-| `frequencies_hz` | Nominal centre of each column, in Hz (10 Hz to 200 Hz by default, [`LOW_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_bands_hz)). |
+| `frequencies` | Nominal centre of each column, in Hz (10 Hz to 200 Hz by default, [`LOW_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_bands_hz)). |
 | `ground_correction_db` | $\Delta L_\mathrm{g,LF}$ per band; `None` for Table C.2 (onshore, impedance class D). |
 | `air_attenuation_db_per_km` | $\alpha$ per band, in dB/km, zero or positive (the ISO 9613-1 absorption coefficient, C.2); `None` for Table C.2, as printed (see [`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_air_attenuation_db_per_km)). |
 | `facade_insulation_db` | $\Delta L_\sigma$ per band, for an indoor level (for instance a row of [`LOW_FREQUENCY_FACADE_INSULATION_DB`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_facade_insulation_db)); `None` for the outdoor level alone. |

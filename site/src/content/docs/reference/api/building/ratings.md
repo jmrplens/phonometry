@@ -85,7 +85,7 @@ ExtendedImpactRatingResult(
     ci: float,
     ci_50_2500: float | None,
     core: ImpactRatingResult,
-    band_centers: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
     measured: np.ndarray | None = None,
 )
 ```
@@ -102,7 +102,7 @@ Values are integers unless computed with `one_decimal=True`.
 | `ci` | Core spectrum adaptation term `CI` (100-2500 Hz), in dB. |
 | `ci_50_2500` | Enlarged-range term `CI,50-2500`, in dB, or `None` when the supplied bands do not cover 50-2500 Hz. |
 | `core` | The integer-mode [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) of the core bands (independent of `one_decimal`). |
-| `band_centers` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
+| `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured impact levels over the full enlarged range (after the one-decimal reduction of Clause 4.3), in dB. Defaults to `None`. |
 
 ### ExtendedImpactRatingResult.plot()
@@ -141,7 +141,7 @@ ExtendedWeightedRatingResult(
     ctr_50_5000: float | None,
     ctr_100_5000: float | None,
     core: WeightedRatingResult,
-    band_centers: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
     measured: np.ndarray | None = None,
 )
 ```
@@ -168,7 +168,7 @@ frequency range.
 | `ctr_50_5000` | `Ctr,50-5000`, in dB, or `None`. |
 | `ctr_100_5000` | `Ctr,100-5000`, in dB, or `None`. |
 | `core` | The integer-mode [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) of the core bands (independent of `one_decimal`), for plotting and the unfavourable-deviation sum. |
-| `band_centers` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
+| `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured band quantities over the full enlarged range (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
 
 ### ExtendedWeightedRatingResult.plot()
@@ -268,7 +268,7 @@ ImpactImprovementRatingResult(
     delta_lw: int,
     ci_delta: int,
     ci_r: int,
-    band_centers: np.ndarray,
+    frequencies: np.ndarray,
     improvement: np.ndarray,
 )
 ```
@@ -291,7 +291,7 @@ one of the two terms, so both are here.
 | `delta_lw` | The weighted reduction of impact sound pressure level $\Delta L_\mathrm{w}$, in dB, from [`weighted_impact_improvement`](/phonometry/reference/api/building/ratings/#weighted_impact_improvement). Integer. |
 | `ci_delta` | The spectrum adaptation term $C_{\mathrm{I},\Delta}$, in dB, from [`impact_improvement_adaptation_term`](/phonometry/reference/api/building/ratings/#impact_improvement_adaptation_term). Integer. |
 | `ci_r` | The spectrum adaptation term $C_\mathrm{I,r}$ of the reference floor with the covering, in dB, which is $C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}$. Integer. |
-| `band_centers` | The 16 one-third-octave centre frequencies rated, 100 Hz to 3150 Hz. |
+| `frequencies` | The 16 one-third-octave centre frequencies rated, 100 Hz to 3150 Hz. |
 | `improvement` | $\Delta L$ in those bands, in dB, as given. |
 
 ### ImpactImprovementRatingResult.plot()
@@ -317,7 +317,7 @@ ImpactRatingResult(
     rating: int,
     ci: int,
     unfavourable_sum: float,
-    band_centers: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
     measured: np.ndarray | None = None,
     shifted_reference: np.ndarray | None = None,
     quantity: Literal['impact'] = 'impact',
@@ -333,7 +333,7 @@ Single-number weighted impact rating and CI (ISO 717-2).
 | `rating` | Weighted impact rating (`Ln,w`, `L'n,w`, `L'nT,w`), the shifted reference read at 500 Hz, in dB (Clause 4.3; octave-band ratings include the -5 dB reduction of Clause 4.3.2). Integer. |
 | `ci` | Spectrum adaptation term `CI` (Clause A.2.1), in dB. Integer. |
 | `unfavourable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference`, with the impact sign, and is checked against them when both are present. |
-| `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
+| `frequencies` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. Defaults to `None`. |
 | `quantity` | Always `"impact"` (ISO 717-2), selecting the impact labels of the ISO 717 Annex C report. |
@@ -395,7 +395,7 @@ optional verdict row and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
+| ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`frequencies`, `measured`, `shifted_reference`). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
 ## LINING_REFERENCE_ELEMENTS
@@ -760,7 +760,7 @@ WeightedRatingResult(
     c: int,
     ctr: int,
     unfavourable_sum: float,
-    band_centers: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
     measured: np.ndarray | None = None,
     shifted_reference: np.ndarray | None = None,
     quantity: Literal['airborne'] = 'airborne',
@@ -777,7 +777,7 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 | `c` | Spectrum adaptation term `C` (spectrum No. 1), in dB (Clause 4.5). Integer. |
 | `ctr` | Spectrum adaptation term `Ctr` (spectrum No. 2), in dB (Clause 4.5). Integer. |
 | `unfavourable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference` and is checked against them when both are present. |
-| `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
+| `frequencies` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 reference curve after the final shift, in dB. Defaults to `None`. |
 | `quantity` | Always `"airborne"`: this class carries the ISO 717-1 airborne rating, and the renderers dispatch on this tag when handed the union with [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult), which carries `"impact"`. The field used to admit both values and promise that `"impact"` would select the impact labels; it never could, since the impact labels read `ci` off the result and this class does not have one, so the promise ended in the renderer's `AttributeError`. |
@@ -839,5 +839,5 @@ row and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
+| ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`frequencies`, `measured`, `shifted_reference`). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |

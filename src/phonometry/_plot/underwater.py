@@ -327,8 +327,8 @@ def plot_sound_speed_profile(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    depth = np.asarray(result.depth, dtype=np.float64)
-    speed = np.asarray(result.speed_of_sound, dtype=np.float64)
+    depth = np.asarray(result.depths, dtype=np.float64)
+    speed = np.asarray(result.speeds_of_sound, dtype=np.float64)
     label = f"{result.model} $c(z)$"
     ax.plot(speed, depth, **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label))
     if not ax.yaxis_inverted():

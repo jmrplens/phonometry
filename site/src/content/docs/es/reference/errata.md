@@ -2816,7 +2816,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   BS EN 61094-8:2012, el texto inglés de EN 61094-8:2012, que es
   IEC 61094-8:2012 sin cambios.
 - **Comportamiento de la biblioteca:** `metrology.SteppedSineImpulseResponse`
-  sigue el B.2.2: su `duration_s` es $1/\Delta f$ y su `sample_rate_hz` es
+  sigue el B.2.2: su `duration_s` es $1/\Delta f$ y su `fs` es
   $N\,\Delta f$; no hizo falta ningún cambio.
 - **Estado:** sin notificar (defecto de redacción, sin consecuencia
   numérica).
@@ -3273,7 +3273,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ventana de 10 s, y $L_J = L_W + 10 \lg(T/T_0)$ campo a campo en ambas
   familias; el informe de conformidad lleva la identidad como «ISO 3744:2010
   Eq. 23 / clause 3.4 NOTE 1». `sound_energy_hard_walled` lee la Ecuación (19)
-  de ISO 3743-1:2010 del mismo modo y exige `integration_time_s` con el fondo;
+  de ISO 3743-1:2010 del mismo modo y exige `integration_time` con el fondo;
   `test_steady_source_energy_is_power_plus_10_lg_t` en
   `tests/emission/test_sound_power_hard_walled.py` y la comprobación de
   conformidad «ISO 3743-1:2010 Eq. 20 / clause 3.4 NOTE 1» fijan allí la

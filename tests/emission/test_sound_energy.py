@@ -76,11 +76,11 @@ def test_steady_source_identity_lj_equals_lw_plus_10lg_t() -> None:
     room = emission.RoomEnvironment(absorption_area=150.0)
     lw = emission.sound_power_pressure(
         lp, "hemisphere", radius=2.0, background_levels=bg, frequencies=_FREQS,
-        room=room, omc_uncertainty=1.0,
+        room=room, sigma_omc_db=1.0,
     )  # fmt: skip
     lj = emission.sound_energy_pressure(
         lp + 10.0, "hemisphere", radius=2.0, background_levels=bg,
-        integration_time=10.0, frequencies=_FREQS, room=room, omc_uncertainty=1.0,
+        integration_time=10.0, frequencies=_FREQS, room=room, sigma_omc_db=1.0,
     )  # fmt: skip
     assert isinstance(lj, emission.SoundEnergyResult)
     np.testing.assert_allclose(lj.sound_energy_level, lw.sound_power_level + 10.0)
@@ -330,7 +330,7 @@ def test_uncertainty_is_the_sound_power_one_eq24() -> None:
     (the ISO 3744 9.5 EXAMPLE, sigma_R0 = 1.5 dB, sigma_omc = 2.0 dB, k = 2).
     """
     res = emission.sound_energy_pressure(
-        np.full((10, 1), 80.0), "hemisphere", radius=1.0, omc_uncertainty=2.0
+        np.full((10, 1), 80.0), "hemisphere", radius=1.0, sigma_omc_db=2.0
     )
     assert res.uncertainty == pytest.approx(5.0)
 

@@ -212,12 +212,12 @@ def _validate_reference_stability(
     envelope = time_weighting(signal_arr, fs, mode="fast")
     skip = int(1.0 * fs)
     steady = np.maximum(envelope[..., skip:], np.finfo(float).eps)
-    levels_db = 10 * np.log10(steady)
+    levels = 10 * np.log10(steady)
     # IEC 60942:2017 5.3.3: |max - mean| and |min - mean| shall each not
     # exceed the limit. Computed per channel: channels may sit at different
     # (individually stable) levels, which must not read as fluctuation.
-    mean = np.mean(levels_db, axis=-1, keepdims=True)
-    deviation = np.max(np.abs(levels_db - mean), axis=-1)
+    mean = np.mean(levels, axis=-1, keepdims=True)
+    deviation = np.max(np.abs(levels - mean), axis=-1)
     fluctuation = float(np.max(deviation))
     if fluctuation > max_fluctuation_db:
         warnings.warn(

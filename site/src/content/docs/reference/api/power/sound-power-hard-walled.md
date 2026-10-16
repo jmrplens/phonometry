@@ -60,7 +60,7 @@ Eq. (19) subtracts a time-averaged background level from a time-integrated
 event level, exactly as ISO 3744:2010 Eq. (21) does, and asks only that both
 be measured over one integration time $T$. The library reads the
 background as its exposure over that $T$, $L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)$, which is the reading under which the insistence on one
-$T$ does any work (see `docs/ERRATA.md`), so `integration_time_s` is
+$T$ does any work (see `docs/ERRATA.md`), so `integration_time` is
 required with a background.
 
 Annex A carries either level to the reference meteorological conditions of
@@ -100,7 +100,7 @@ check_hard_walled_room(
     orientation_levels: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     reference_box_m: ArrayLike,
     absorption_coefficients: ArrayLike | None = None,
 ) -> HardWalledRoomCheck
@@ -129,7 +129,7 @@ that meet it in words, and the coefficients are optional here.
 | :--- | :--- |
 | `orientation_levels` | Mean octave-band levels of the directional source, one row per orientation (eight in 4.4), `(orientations, bands)`, in decibels. |
 | `frequencies` | Nominal octave mid-band frequencies from 125 Hz to 8 kHz, one per band, ascending. |
-| `volume_m3` | Volume of the test room, in cubic metres. |
+| `volume` | Volume of the test room, in cubic metres. |
 | `reference_box_m` | The three dimensions of the reference box, in metres (4.1). |
 | `absorption_coefficients` | Sound absorption coefficients of the boundary surfaces, any shape (per surface and per band, say); only the largest is read. `None` leaves 4.3 unevaluated. |
 
@@ -188,7 +188,7 @@ HardWalledRoomCheck(
     frequencies: np.ndarray,
     level_range_db: np.ndarray,
     orientations: int,
-    volume_m3: float,
+    volume: float,
     reference_box_volume_m3: float,
     largest_box_dimension_m: float,
     max_absorption_coefficient: float,
@@ -200,7 +200,7 @@ Qualification of a hard-walled test room (ISO 3743-1:2010, 4.2 to 4.4).
 `level_range_db` is, per octave band, the largest difference between
 the mean levels of any two of the directional source's orientations
 (4.4), and `limit_db` the Table 3 value it may not exceed.
-`volume_m3` is the room, `reference_box_volume_m3` and
+`volume` is the room, `reference_box_volume_m3` and
 `largest_box_dimension_m` the reference box of 4.1, and
 `minimum_volume_m3` / `box_dimension_limit_m` what 4.2 asks
 of them. `max_absorption_coefficient` is the largest sound absorption
@@ -327,7 +327,7 @@ HardWalledSoundPowerResult(
     c2: float,
     sigma_r0: np.ndarray,
     sigma_r0_a: float,
-    sigma_omc: float,
+    sigma_omc_db: float,
     coverage_factor: float,
     sound_power_level_a: float,
     sound_energy_level_a: float,
@@ -372,7 +372,7 @@ background was measured.
 
 `sigma_r0` is the Table 3 value per band (`NaN` at 63 Hz, which the
 table does not reach) and `sigma_r0_a` its A-weighted row; with
-`sigma_omc` the properties give `sigma_tot` (Eq. 22) and the expanded
+`sigma_omc_db` the properties give `sigma_tot` (Eq. 22) and the expanded
 uncertainty (Eq. 23) for `coverage_factor`, all `NaN` without it.
 `microphone_positions` is $N_\mathrm{M}$ (1 for a traverse),
 `source_positions` is $N_\mathrm{S}$, and
@@ -400,7 +400,7 @@ settled, as $K_1$ is read from it.
 
 `U = k sigma_tot` of the A-weighted level (Eq. 23), in decibels.
 
-With `sigma_omc` = 2,0 dB and `k` = 2 this is the 5 dB of the 9.5
+With `sigma_omc_db` = 2,0 dB and `k` = 2 this is the 5 dB of the 9.5
 EXAMPLE.
 
 ### HardWalledSoundPowerResult.plot()
@@ -419,7 +419,7 @@ Plot the determined spectrum with the A-weighted total annotated.
 One bar per octave band of `LW` (or `LJ`), a band that 8.1.3 makes
 an upper bound hatched and named as one, a band that fails the
 background requirement of 4.5 otherwise cross-hatched and named as
-that, and the expanded uncertainty as an error bar where `sigma_omc`
+that, and the expanded uncertainty as an error bar where `sigma_omc_db`
 was given. Requires matplotlib (`pip install phonometry[plot]`).
 
 **Parameters**
@@ -485,7 +485,7 @@ marked `†` and named as not fulfilling it.
 *property*
 
 $\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ per band (Eq. 22), in decibels; `NaN` without
-`sigma_omc` and at 63 Hz.
+`sigma_omc_db` and at 63 Hz.
 
 ### HardWalledSoundPowerResult.sigma_tot_a
 
@@ -589,7 +589,7 @@ sound_energy_hard_walled(
     *,
     events: int | None = None,
     background_levels: ArrayLike | None = None,
-    integration_time_s: float | None = None,
+    integration_time: float | None = None,
     background_levels_ref: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -627,8 +627,8 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | `lw_ref` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 | `events` | The number $N_\mathrm{e}$ of events one measurement encompasses (Eq. 16); `None` when the events are on the first axis. Fewer than five warns (7.6). |
-| `background_levels` | Time-averaged background levels `Lpi(B)`, `(NM, bands)` or `(bands,)`, in decibels; requires `integration_time_s`. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout. |
-| `integration_time_s` | The integration time `T` of the single event levels, in seconds. The background is compared as its exposure over the same `T`, $L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)$, so that Eq. (19) subtracts one energy from another. |
+| `background_levels` | Time-averaged background levels `Lpi(B)`, `(NM, bands)` or `(bands,)`, in decibels; requires `integration_time`. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout. |
+| `integration_time` | The integration time `T` of the single event levels, in seconds. The background is compared as its exposure over the same `T`, $L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)$, so that Eq. (19) subtracts one energy from another. |
 | `background_levels_ref` | Background for the reference-source measurement; `None` reuses `background_levels`, compared with the time-averaged reference level as it stands. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals. |
@@ -641,7 +641,7 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `events`, a background without its `integration_time_s`, a non-positive `integration_time_s`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 
 ## sound_power_hard_walled
 

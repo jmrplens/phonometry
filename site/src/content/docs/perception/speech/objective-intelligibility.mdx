@@ -253,7 +253,7 @@ pos = np.arange(res.band_scores.size)
 fig, ax = plt.subplots()
 ax.bar(pos, res.band_scores)
 ax.set_xticks(pos)
-ax.set_xticklabels([f"{f:.0f}" for f in res.band_frequencies], rotation=45, ha="right")
+ax.set_xticklabels([f"{f:.0f}" for f in res.frequencies], rotation=45, ha="right")
 ax.set_xlabel("One-third-octave band [Hz]")
 ax.set_ylabel("Mean intermediate correlation")
 ax.set_title(f"STOI = {res.value:.3f}")
@@ -381,7 +381,7 @@ plt.show()
 | `extended` | bool | — | default `False` | `True` selects ESTOI |
 
 Returns a `STOIResult`: `value`, `band_scores` (15), `segment_scores`,
-`band_frequencies` and `extended`. It raises on unequal lengths, on non-finite
+`frequencies` and `extended`. It raises on unequal lengths, on non-finite
 input, and when fewer than 30 short-time frames survive the silent-frame
 removal.
 

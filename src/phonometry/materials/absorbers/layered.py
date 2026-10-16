@@ -715,7 +715,7 @@ def layered_absorber(
     extremely attenuating layers); the raw chain matrix is still returned in
     ``transfer_matrix`` and may overflow in such extreme cases.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param layers: Layer stack from the incidence side to the termination.
     :param angle_rad: Polar angle of incidence ``theta``, in radians
         (:math:`0 \le \theta < \pi/2 - 10^{-6}`; grazing incidence is
@@ -828,7 +828,7 @@ def diffuse_field_absorption(
     truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
     ``angle_limit_rad`` accordingly.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param layers: Layer stack, as in :func:`layered_absorber`.
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).

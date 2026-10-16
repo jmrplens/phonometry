@@ -579,7 +579,7 @@ def test_equation_c1_band_by_band() -> None:
         power,
         distance_m=500.0,
         hub_height_m=100.0,
-        frequencies_hz=[63.0, 125.0],
+        frequencies=[63.0, 125.0],
         facade_insulation_db=[16.6, 20.2],
     )
     slant = math.hypot(500.0, 100.0)
@@ -621,7 +621,7 @@ def test_a_zero_air_attenuation_takes_nothing_off() -> None:
         [95.0],
         distance_m=2000.0,
         hub_height_m=100.0,
-        frequencies_hz=[50.0],
+        frequencies=[50.0],
         air_attenuation_db_per_km=[0.0],
     )
     np.testing.assert_array_equal(result.air_attenuation_db, [[0.0]])
@@ -633,7 +633,7 @@ def test_a_zero_air_attenuation_takes_nothing_off() -> None:
 def test_a_band_without_a_table_value_needs_its_own() -> None:
     with pytest.raises(ValueError, match=r"Table C.2 has no value at 250 Hz"):
         env.wind_turbine_low_frequency_level(
-            [90.0], distance_m=500.0, hub_height_m=100.0, frequencies_hz=[250.0]
+            [90.0], distance_m=500.0, hub_height_m=100.0, frequencies=[250.0]
         )
 
 
@@ -734,7 +734,7 @@ def test_a_result_does_not_return_a_published_array() -> None:
     result = env.upper_tone_search_frequency(
         600.0, temperature_c=10.0, relative_humidity_percent=70.0
     )
-    assert result.frequencies_hz is not env.TONE_SEARCH_BANDS_HZ
+    assert result.frequencies is not env.TONE_SEARCH_BANDS_HZ
 
 
 def test_plots_draw_their_numbers() -> None:
@@ -799,7 +799,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
     half_metre = env.bin_sound_levels([38.0], [5.0], bin_width_m_s=0.5)
     profile = env.wind_shear_profile(4.5, 8.6, upper_height_m=120.0)
     relevant = env.sound_relevant_turbines([35.0, 33.0, 20.0])
-    one_band = {"frequencies_hz": [63.0], "hub_height_m": 100.0}
+    one_band = {"frequencies": [63.0], "hub_height_m": 100.0}
     return [
         (
             "power law, speed not finite",
@@ -962,7 +962,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         (
             "negative hub height",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance_m=500.0, frequencies_hz=[63.0], hub_height_m=-1.0
+                [95.0], distance_m=500.0, frequencies=[63.0], hub_height_m=-1.0
             ),
             r"'hub_height_m' must be finite and positive",
         ),
@@ -979,7 +979,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
                 [95.0],
                 distance_m=2000.0,
                 air_attenuation_db_per_km=[-5.0],
-                **{**one_band, "frequencies_hz": [50.0]},
+                **{**one_band, "frequencies": [50.0]},
             ),
             r"'air_attenuation_db_per_km' must not be negative",
         ),

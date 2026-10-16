@@ -817,14 +817,14 @@ class LoopImpedance(OwnsArrays):
 
     :ivar resistance_ohm: The series resistance, in ohms.
     :ivar inductance_h: The series inductance, in henries.
-    :ivar frequencies_hz: The frequencies the magnitude is tabulated at, in
+    :ivar frequencies: The frequencies the magnitude is tabulated at, in
         hertz.
     :ivar impedance_ohm: The magnitude of the impedance there, in ohms.
     """
 
     resistance_ohm: float
     inductance_h: float
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     impedance_ohm: np.ndarray
 
     @property
@@ -835,7 +835,7 @@ class LoopImpedance(OwnsArrays):
     def at(self, frequency_hz: ArrayLike) -> np.ndarray:
         """The magnitude of the impedance at any frequency, in ohms.
 
-        :param frequency_hz: Frequencies, in hertz, positive and finite.
+        :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
         :return: :math:`|Z|` there, in ohms.
         """
         f = _frequencies_to_read(frequency_hz)
@@ -845,7 +845,7 @@ class LoopImpedance(OwnsArrays):
         """The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 
         :param current_a: RMS loop current, in amperes.
-        :param frequency_hz: Frequencies, in hertz, positive and finite.
+        :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
         :return: :math:`U = I|Z|`, in volts.
         """
         current = require_finite(current_a, "current_a")
@@ -877,7 +877,7 @@ def loop_impedance(
     resistance_ohm: float,
     inductance_h: float,
     *,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> LoopImpedance:
     """The impedance of a loop from its resistance and inductance.
 
@@ -885,7 +885,7 @@ def loop_impedance(
         plus that of the feed cable).
     :param inductance_h: Series inductance, in henries
         (:func:`rectangular_loop_inductance`, plus that of the feed cable).
-    :param frequencies_hz: Frequencies to tabulate the magnitude at, in hertz;
+    :param frequencies: Frequencies to tabulate the magnitude at, in hertz;
         by default the one-third-octave centres from 50 Hz to 10 kHz.
     :return: A :class:`LoopImpedance`.
     """
@@ -893,14 +893,14 @@ def loop_impedance(
     inductance = require_positive(inductance_h, "inductance_h")
     f = (
         np.array(_THIRD_OCTAVE_CENTRES_HZ, dtype=np.float64)
-        if frequencies_hz is None
-        else require_positive_array(frequencies_hz, "frequencies_hz")
+        if frequencies is None
+        else require_positive_array(frequencies, "frequencies")
     )
     magnitude = np.hypot(resistance, 2.0 * math.pi * f * inductance)
     return LoopImpedance(
         resistance_ohm=resistance,
         inductance_h=inductance,
-        frequencies_hz=f,
+        frequencies=f,
         impedance_ohm=read_only(magnitude),
     )
 
@@ -1142,13 +1142,13 @@ def _ascending(frequencies: np.ndarray, name: str) -> None:
 class AmplifierFrequencyResponse(OwnsArrays):
     """The frequency response of an amplifier into its load (IEC 62489-1:2010 5.4.12).
 
-    :ivar frequencies_hz: The measurement frequencies, in hertz, ascending.
+    :ivar frequencies: The measurement frequencies, in hertz, ascending.
     :ivar output_current_a: The load current measured at each, in amperes.
     :ivar response_db: The current level relative to the one at 1 kHz, in dB,
         so 0 dB at 1 kHz (5.4.12.3).
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     output_current_a: np.ndarray
     response_db: np.ndarray
 
@@ -1158,20 +1158,20 @@ class AmplifierFrequencyResponse(OwnsArrays):
         Interpolated linearly against the logarithm of frequency, the way a
         response measured at one-third-octave centres is read between them.
 
-        :param frequency_hz: Frequencies, in hertz.
+        :param frequency_hz: Frequency or frequencies, in hertz.
         :return: The response there, dB re 1 kHz.
         :raises ValueError: for a frequency that is not finite and positive,
             or lies outside the measured range.
         """
         f = _frequencies_to_read(frequency_hz)
-        lo, hi = float(self.frequencies_hz[0]), float(self.frequencies_hz[-1])
+        lo, hi = float(self.frequencies[0]), float(self.frequencies[-1])
         if np.any(f < lo * (1.0 - _FREQUENCY_MATCH_RTOL)) or np.any(
             f > hi * (1.0 + _FREQUENCY_MATCH_RTOL)
         ):
             msg = f"frequency outside the measured range {lo:g} Hz to {hi:g} Hz."
             raise ValueError(msg)
         return np.asarray(
-            np.interp(np.log(f), np.log(self.frequencies_hz), self.response_db)
+            np.interp(np.log(f), np.log(self.frequencies), self.response_db)
         )
 
     def plot(
@@ -1194,7 +1194,7 @@ class AmplifierFrequencyResponse(OwnsArrays):
 
 
 def amplifier_frequency_response(
-    frequencies_hz: ArrayLike, output_current_a: ArrayLike
+    frequencies: ArrayLike, output_current_a: ArrayLike
 ) -> AmplifierFrequencyResponse:
     """The frequency response of an amplifier into its rated load (5.4.12).
 
@@ -1205,21 +1205,21 @@ def amplifier_frequency_response(
     (5.4.12.2). The result is presented with the response at 1 kHz taken as
     0 dB (5.4.12.3).
 
-    :param frequencies_hz: The measurement frequencies, in hertz, ascending
+    :param frequencies: The measurement frequencies, in hertz, ascending
         and including 1000 Hz.
     :param output_current_a: The RMS load current at each, in amperes.
     :return: An :class:`AmplifierFrequencyResponse`.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     current = require_positive_array(output_current_a, "output_current_a")
     if f.size != current.size:
-        msg = "'frequencies_hz' and 'output_current_a' must have the same length."
+        msg = "'frequencies' and 'output_current_a' must have the same length."
         raise ValueError(msg)
-    _ascending(f, "frequencies_hz")
-    ref = _reference_index(f, "frequencies_hz")
+    _ascending(f, "frequencies")
+    ref = _reference_index(f, "frequencies")
     response = 20.0 * np.log10(current / current[ref])
     return AmplifierFrequencyResponse(
-        frequencies_hz=f,
+        frequencies=f,
         output_current_a=current,
         response_db=read_only(response),
     )
@@ -1423,7 +1423,7 @@ class QuadraturePhaseError(OwnsArrays):
     subtract, by :math:`20\lg(1 \pm \sin\delta)` dB (5.4.14.1: at 85 degrees
     the in-phase part is :math:`\cos 85^\circ = 0{,}087`).
 
-    :ivar frequencies_hz: The measurement frequencies, in hertz.
+    :ivar frequencies: The measurement frequencies, in hertz.
     :ivar phase_difference_deg: The phase angle between the loop currents at
         each, in degrees.
     :ivar deviation_deg: Its absolute deviation from 90 degrees, in degrees.
@@ -1433,7 +1433,7 @@ class QuadraturePhaseError(OwnsArrays):
         it (5.4.14.4).
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     phase_difference_deg: np.ndarray
     deviation_deg: np.ndarray
     max_deviation_deg: float
@@ -1478,7 +1478,7 @@ class QuadraturePhaseError(OwnsArrays):
 
 
 def quadrature_phase_error(
-    frequencies_hz: ArrayLike, phase_difference_deg: ArrayLike
+    frequencies: ArrayLike, phase_difference_deg: ArrayLike
 ) -> QuadraturePhaseError:
     """The maximum deviation from 90 degrees between two loop currents (5.4.14).
 
@@ -1488,18 +1488,18 @@ def quadrature_phase_error(
     degrees before its distance from 90 degrees is taken, so -90 and 270
     degrees are as much in quadrature as 90.
 
-    :param frequencies_hz: The measurement frequencies, in hertz, ascending,
+    :param frequencies: The measurement frequencies, in hertz, ascending,
         at least one of them inside 100 Hz to 5 kHz.
     :param phase_difference_deg: The phase angle between the loop currents at
         each, in degrees.
     :return: A :class:`QuadraturePhaseError`.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     phase = require_finite_array(phase_difference_deg, "phase_difference_deg")
     if f.size != phase.size:
-        msg = "'frequencies_hz' and 'phase_difference_deg' must have the same length."
+        msg = "'frequencies' and 'phase_difference_deg' must have the same length."
         raise ValueError(msg)
-    _ascending(f, "frequencies_hz")
+    _ascending(f, "frequencies")
     wrapped = np.abs((phase + 180.0) % 360.0 - 180.0)
     deviation = np.abs(wrapped - _QUADRATURE_DEG)
     inside = (f >= _SPEECH_BAND_HZ[0]) & (f <= _SPEECH_BAND_HZ[1])
@@ -1509,7 +1509,7 @@ def quadrature_phase_error(
     indices = np.flatnonzero(inside)
     worst = int(indices[np.argmax(deviation[inside])])
     return QuadraturePhaseError(
-        frequencies_hz=f,
+        frequencies=f,
         phase_difference_deg=phase,
         deviation_deg=read_only(deviation),
         max_deviation_deg=float(deviation[worst]),
@@ -1540,7 +1540,7 @@ def _crossings(f: np.ndarray, response: np.ndarray, level: float) -> tuple[float
 class NeckLoopCharacteristics(OwnsArrays):
     """What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 
-    :ivar frequencies_hz: The measurement frequencies, in hertz.
+    :ivar frequencies: The measurement frequencies, in hertz.
     :ivar field_strength_level_db: The field strength level on the test jig at
         each, in dB re 400 mA/m, with :attr:`input_voltage_v` applied.
     :ivar impedance_ohm: The magnitude of the input impedance at each, in ohms.
@@ -1558,7 +1558,7 @@ class NeckLoopCharacteristics(OwnsArrays):
         given as text.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     field_strength_level_db: np.ndarray
     impedance_ohm: np.ndarray
     input_voltage_v: float
@@ -1587,7 +1587,7 @@ class NeckLoopCharacteristics(OwnsArrays):
 
 
 def neck_loop_characteristics(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     field_strength_level_db: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
@@ -1606,7 +1606,7 @@ def neck_loop_characteristics(
     re 400 mA/m. For an active loop that is not linear, measure at the voltage
     that gives 0 dB, where the scaling does nothing.
 
-    :param frequencies_hz: The measurement frequencies, in hertz, ascending
+    :param frequencies: The measurement frequencies, in hertz, ascending
         and including 1000 Hz.
     :param field_strength_level_db: The field strength level on the jig at
         each, in dB re 400 mA/m.
@@ -1617,7 +1617,7 @@ def neck_loop_characteristics(
         volts.
     :return: A :class:`NeckLoopCharacteristics`.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     level = require_finite_array(field_strength_level_db, "field_strength_level_db")
     try:
         complex_input = np.iscomplexobj(impedance_ohm)
@@ -1630,13 +1630,13 @@ def neck_loop_characteristics(
     )
     if not f.size == level.size == z.size:
         msg = (
-            "'frequencies_hz', 'field_strength_level_db' and 'impedance_ohm' "
+            "'frequencies', 'field_strength_level_db' and 'impedance_ohm' "
             "must have the same length."
         )
         raise ValueError(msg)
-    _ascending(f, "frequencies_hz")
+    _ascending(f, "frequencies")
     voltage = require_positive(input_voltage_v, "input_voltage_v")
-    ref = _reference_index(f, "frequencies_hz")
+    ref = _reference_index(f, "frequencies")
     inside = (f >= _SPEECH_BAND_HZ[0]) & (f <= _SPEECH_BAND_HZ[1])
     minimum = float(np.min(z[inside]))
     response = level - level[ref]
@@ -1644,7 +1644,7 @@ def neck_loop_characteristics(
         f, response, _NECK_LOOP_RESPONSE_STEP_DB
     )
     return NeckLoopCharacteristics(
-        frequencies_hz=f,
+        frequencies=f,
         field_strength_level_db=level,
         impedance_ohm=z,
         input_voltage_v=voltage,

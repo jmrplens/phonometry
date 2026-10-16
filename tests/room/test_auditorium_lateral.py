@@ -39,7 +39,7 @@ DIRECT = 100
 def reflection_pair(
     angles_deg: list[float],
     amplitudes: list[float],
-    times_s: list[float],
+    times: list[float],
     seconds: float = 0.3,
     fs: int = FS,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -54,7 +54,7 @@ def reflection_pair(
     n = round(seconds * fs)
     omni, lateral = np.zeros(n), np.zeros(n)
     omni[DIRECT] = 1.0
-    for angle, amplitude, time in zip(angles_deg, amplitudes, times_s, strict=True):
+    for angle, amplitude, time in zip(angles_deg, amplitudes, times, strict=True):
         index = DIRECT + round(time * fs)
         omni[index] += amplitude
         lateral[index] += amplitude * np.cos(np.deg2rad(angle))

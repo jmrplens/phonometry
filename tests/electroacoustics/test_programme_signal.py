@@ -115,7 +115,7 @@ def test_figure_2_with_pink_noise_lands_inside_table_ii() -> None:
 
 
 def test_figure_2_rejects_a_non_positive_frequency() -> None:
-    with pytest.raises(ValueError, match="frequencies_hz"):
+    with pytest.raises(ValueError, match="frequencies"):
         ea.programme_signal_filter([0.0, 100.0])
 
 
@@ -166,7 +166,7 @@ def test_generator_spectrum_conforms_over_a_long_record(
     bands = ph.filters.octave_filter(x, FS, fraction=3, limits=[19.95, 19952.6])
     check = ea.check_programme_signal(bands.frequencies, np.asarray(bands.levels))
     assert check.passes
-    assert check.frequencies_hz.size == 31
+    assert check.frequencies.size == 31
 
 
 def test_table_spectrum_sits_on_the_table() -> None:
@@ -174,7 +174,7 @@ def test_table_spectrum_sits_on_the_table() -> None:
     bands = ph.filters.octave_filter(x, FS, fraction=3, limits=[19.95, 19952.6])
     check = ea.check_programme_signal(bands.frequencies, np.asarray(bands.levels))
     # The middle bands are wide enough for 120 s to settle well inside 0,5 dB.
-    middle = (check.frequencies_hz >= 250.0) & (check.frequencies_hz <= 8000.0)
+    middle = (check.frequencies >= 250.0) & (check.frequencies <= 8000.0)
     assert np.max(np.abs(check.deviations_db[middle])) < 0.1
 
 
@@ -251,13 +251,13 @@ def test_exact_band_centres_are_read_as_nominal() -> None:
     frequencies, levels, _ = _table()
     exact = 1000.0 * 10.0 ** (np.round(10.0 * np.log10(frequencies / 1000.0)) / 10.0)
     check = ea.check_programme_signal(exact, levels)
-    np.testing.assert_array_equal(check.frequencies_hz, frequencies)
+    np.testing.assert_array_equal(check.frequencies, frequencies)
 
 
 def test_a_partial_spectrum_is_judged_on_its_bands() -> None:
     frequencies, levels, _ = _table()
     check = ea.check_programme_signal(frequencies[:30], levels[:30])
-    assert check.frequencies_hz.size == 30
+    assert check.frequencies.size == 30
     assert check.passes
 
 
@@ -265,7 +265,7 @@ def test_check_results_are_read_only() -> None:
     frequencies, levels, _ = _table()
     check = ea.check_programme_signal(frequencies, levels)
     assert not check.band_levels_db.flags.writeable
-    assert not check.frequencies_hz.flags.writeable
+    assert not check.frequencies.flags.writeable
 
 
 def test_check_has_no_truth_value() -> None:

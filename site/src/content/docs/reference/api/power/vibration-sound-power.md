@@ -266,7 +266,7 @@ r.m.s. velocity level.
 | Name | Description |
 | :--- | :--- |
 | `peak_acceleration` | Peak acceleration `a_peak` (scalar or array), in m/s^2. |
-| `frequency` | Frequency `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `reference` | Reference velocity `v0` (Default: 5e-8 m/s). |
 
 **Returns:** The velocity level `L_v`, in dB re `v0`.

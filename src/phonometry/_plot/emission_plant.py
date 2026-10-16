@@ -314,7 +314,7 @@ def plot_plant_sound_power(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "label", _t(_LABEL_LW, language))
     style_default(kwargs, "width", 0.6)
@@ -491,7 +491,7 @@ def plot_partial_plant_contributions(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     total_a = format_number(result.a_weighted_total_db, language, decimals=1)
     style_default(kwargs, "color", theme_fill(_C_PRIMARY, ax=ax))
     style_default(kwargs, "edgecolor", _C_PRIMARY)

@@ -272,7 +272,7 @@ def test_the_two_position_matrices_must_match() -> None:
 def test_the_rating_reads_the_rating_bands() -> None:
     insulation = np.linspace(12.0, 40.0, RATING_BANDS.size)
     rating = noise_control.weighted_insulation(insulation)
-    assert rating.band_centres_hz.tolist() == RATING_BANDS.tolist()
+    assert rating.frequencies.tolist() == RATING_BANDS.tolist()
     assert rating.quantity == "sound_power"
     assert isinstance(rating.rating, int)
 
@@ -287,7 +287,7 @@ def test_the_octave_rating_reads_five_bands() -> None:
     rating = noise_control.weighted_insulation(
         [15.0, 20.0, 25.0, 30.0, 35.0], band_fraction=1
     )
-    assert rating.band_centres_hz.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
+    assert rating.frequencies.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
 
 
 def test_a_flat_insulation_estimates_itself() -> None:

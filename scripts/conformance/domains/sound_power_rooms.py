@@ -69,7 +69,7 @@ def _special_direct(**kwargs: object) -> ph.emission.SpecialRoomSoundPowerResult
     return ph.emission.sound_power_special_room(
         _ST,
         _FREQS,
-        volume_m3=70.0,
+        volume=70.0,
         nominal_reverberation_time_s=0.73,
         **kwargs,  # type: ignore[arg-type]
     )
@@ -169,7 +169,7 @@ def _chk_iso3743_1_energy_identity() -> Outcome:
     power = _hard_walled(background_levels=background)
     energy = ph.emission.sound_energy_hard_walled(
         np.stack([_ST + 10.0 * math.log10(t)] * 5), _RSS, _LW_RSS, _FREQS,
-        background_levels=background, integration_time_s=t,
+        background_levels=background, integration_time=t,
     )  # fmt: skip
     worst = float(
         np.max(np.abs(energy.sound_energy_level - power.sound_power_level - 10.0))
@@ -188,11 +188,11 @@ def _chk_iso3743_1_event_forms() -> Outcome:
     n_events = 8
     one_at_a_time = ph.emission.sound_energy_hard_walled(
         np.stack([_ST] * n_events), _RSS, _LW_RSS, _FREQS,
-        background_levels=_BACKGROUND, integration_time_s=1.0,
+        background_levels=_BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     encompassing = ph.emission.sound_energy_hard_walled(
         _ST + 10.0 * math.log10(n_events), _RSS, _LW_RSS, _FREQS, events=n_events,
-        background_levels=_BACKGROUND, integration_time_s=1.0,
+        background_levels=_BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     worst = float(
         np.max(
@@ -250,7 +250,7 @@ def _chk_iso3743_1_room_size() -> Outcome:
     agree = 0
     for volume, box, volume_ok, box_ok in cases:
         check = ph.emission.check_hard_walled_room(
-            orientations, _FREQS, volume_m3=volume, reference_box_m=box
+            orientations, _FREQS, volume=volume, reference_box_m=box
         )
         agree += int(check.volume_adequate is volume_ok and check.box_fits is box_ok)
     return count(agree, len(cases), subject="room and box verdicts")
@@ -381,7 +381,7 @@ def _chk_iso3743_2_formula1() -> Outcome:
 def _chk_iso3743_2_centring() -> Outcome:
     r = ph.emission.reverberation_parameter(_THIRDS, 70.0)
     t = 0.8 * r / r[10]
-    check = ph.emission.check_special_room_reverberation(t, _THIRDS, volume_m3=70.0)
+    check = ph.emission.check_special_room_reverberation(t, _THIRDS, volume=70.0)
     return numeric(
         0.8 / float(r[10]),
         check.nominal_reverberation_time_s,
@@ -411,9 +411,9 @@ def _chk_iso3743_2_b5_example() -> Outcome:
     q = t / ph.emission.reverberation_parameter(_THIRDS, 70.0)
     midpoint = 0.8 / (0.5 * float(q.max() + q.min()))
     printed = ph.emission.check_special_room_reverberation(
-        t, _THIRDS, volume_m3=70.0, nominal_reverberation_time_s=0.73
+        t, _THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
     )
-    centred = ph.emission.check_special_room_reverberation(t, _THIRDS, volume_m3=70.0)
+    centred = ph.emission.check_special_room_reverberation(t, _THIRDS, volume=70.0)
     departure = 10.0 * math.log10(centred.nominal_reverberation_time_s / 0.73)
     facts = (
         abs(midpoint - 1.09) <= 0.015,
@@ -436,7 +436,7 @@ def _chk_iso3743_2_source_size() -> Outcome:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
             check = ph.emission.check_special_room_reverberation(
-                0.7 * r, _THIRDS, volume_m3=70.0, source_volume_m3=volume
+                0.7 * r, _THIRDS, volume=70.0, source_volume_m3=volume
             )
         verdicts.append((check.source_size_recommended, check.passes))
     return count(
@@ -455,7 +455,7 @@ def _chk_iso3743_2_limits() -> Outcome:
     check = ph.emission.check_special_room_reverberation(
         np.full(_THIRDS.size, 0.7),
         _THIRDS,
-        volume_m3=70.0,
+        volume=70.0,
         nominal_reverberation_time_s=0.7,
     )
     return record(
@@ -542,7 +542,7 @@ _TABLE_1_LIMITS = np.array([5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 4.0])
 
 def _uniform_calibration() -> ph.emission.ReferenceSourceCalibration:
     return ph.emission.reference_source_calibration(
-        np.full((20, _THIRDS.size), 80.0), frequencies_hz=_THIRDS, arrangement="fixed"
+        np.full((20, _THIRDS.size), 80.0), frequencies=_THIRDS, arrangement="fixed"
     )
 
 
@@ -551,7 +551,7 @@ def _unequal_calibration() -> ph.emission.ReferenceSourceCalibration:
     first = int(np.flatnonzero(_THIRDS == 800.0)[0])
     levels[:, first : first + 3] = _UNEQUAL_THIRDS_DB
     return ph.emission.reference_source_calibration(
-        levels, frequencies_hz=_THIRDS, arrangement="fixed"
+        levels, frequencies=_THIRDS, arrangement="fixed"
     )
 
 
@@ -788,7 +788,7 @@ def _chk_iso3743_2_climate() -> Outcome:
     verdicts = []
     for humidity, temperature in ((55.0, 20.0), (56.0, 20.0), (80.0, 10.0)):
         check = ph.emission.check_special_room_reverberation(
-            0.7 * r, _THIRDS, volume_m3=70.0,
+            0.7 * r, _THIRDS, volume=70.0,
             relative_humidity_percent=humidity, temperature_c=temperature,
             reverberation_relative_humidity_percent=50.0, reverberation_temperature_c=20.0,
         )  # fmt: skip

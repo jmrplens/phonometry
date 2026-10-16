@@ -168,7 +168,7 @@ class GroundSurface(CatalogueRow):
         fit, most of Cox's, every one of Bies's and a caller's own, is taken
         into both.
 
-        :param frequency: Frequency vector ``f``, in hertz.
+        :param frequency: Frequency ``f``, in hertz (scalar or array).
         :param model: ``"delany_bazley"`` (Default) or ``"miki"``, the two
             ground models the outdoor functions take.
         :param fluid: The air above the ground, a

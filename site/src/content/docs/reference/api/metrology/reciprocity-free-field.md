@@ -75,7 +75,7 @@ attenuation: its verdict is whether the arrangement is the recommended one.
 
 ```python
 acoustic_centre(
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     sound_pressures_pa: ArrayLike,
     *,
     attenuation_np_per_m: float = 0.0,
@@ -103,7 +103,7 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 
 | Name | Description |
 | :--- | :--- |
-| `distances_m` | The distances from the reference point, in m, at least three, positive. |
+| `distances` | The distances from the reference point, in m, at least three, positive. |
 | `sound_pressures_pa` | The modulus of the sound pressure at each, in Pa or any proportional unit, positive. |
 | `attenuation_np_per_m` | $\alpha$ at the frequency, in Np/m (Default: 0), from [`reciprocity_air_attenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation). |
 
@@ -119,7 +119,7 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 
 ```python
 AcousticCentre(
-    distances_m: NDArray[np.float64],
+    distances: NDArray[np.float64],
     inverse_readings: NDArray[np.float64],
     slope: float,
     intercept: float,
@@ -133,7 +133,7 @@ inverse-distance law (IEC 61094-3:2016 6.5).
 
 | Name | Description |
 | :--- | :--- |
-| `distances_m` | The distances from the reference point of the microphone to the observation points, in m. |
+| `distances` | The distances from the reference point of the microphone to the observation points, in m. |
 | `inverse_readings` | $1/\vert p\vert $, corrected for the attenuation of sound, at each distance, in the reciprocal of the unit the pressures were given in. |
 | `slope` | The slope of the straight line fitted by least squares. |
 | `intercept` | Its intercept at zero distance. |
@@ -175,7 +175,7 @@ front of it (Annex A).
 
 ```python
 check_free_field_arrangement(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     diaphragm_distances_m: Sequence[float],
     microphone_diameter_m: float,
@@ -201,7 +201,7 @@ between 150 mm and 500 mm, which is reported without entering the verdict.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies of the calibration, in Hz. |
+| `frequencies` | The frequencies of the calibration, in Hz. |
 | `diaphragm_distances_m` | The distance of each pair, in m. |
 | `microphone_diameter_m` | The nominal diameter of the microphones, in m (23,77 mm for LS1, 13,2 mm for LS2a: dimension A of Table C.1 of IEC 61094-2). |
 | `temperature_c` | The temperature, in °C. |
@@ -221,7 +221,7 @@ between 150 mm and 500 mm, which is reported without entering the verdict.
 
 ```python
 free_field_parameter_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     uncertainties: FreeFieldInputUncertainties,
     *,
     diaphragm_distances_m: Sequence[float],
@@ -251,7 +251,7 @@ is moved by a fraction of itself,
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `uncertainties` | The standard uncertainty of each input quantity, a [`FreeFieldInputUncertainties`](/phonometry/reference/api/metrology/reciprocity-free-field/#freefieldinputuncertainties). |
 | `diaphragm_distances_m` | $d_{\mathrm{m}12}$, $d_{\mathrm{m}23}$, $d_{\mathrm{m}31}$, in m. |
 | `temperature_c` | The temperature, in °C. |
@@ -273,7 +273,7 @@ is moved by a fraction of itself,
 
 ```python
 free_field_reciprocity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     *,
     diaphragm_distances_m: Sequence[float],
@@ -306,7 +306,7 @@ printed Formula (8) drops (module docstring).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedances_ohm` | $Z_{\mathrm{e},12}$, $Z_{\mathrm{e},23}$ and $Z_{\mathrm{e},31}$, complex, in Ω. |
 | `diaphragm_distances_m` | $d_{\mathrm{m}12}$, $d_{\mathrm{m}23}$ and $d_{\mathrm{m}31}$, in m. |
 | `temperature_c` | The temperature of the air, in °C. |
@@ -329,7 +329,7 @@ printed Formula (8) drops (module docstring).
 
 ```python
 free_field_reciprocity_pair(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     sensitivity_ratio: ArrayLike,
     *,
@@ -360,7 +360,7 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedance_ohm` | $Z_{\mathrm{e},12}$, complex, in Ω. |
 | `sensitivity_ratio` | $r_{12} = M_{\mathrm{f},1}/M_{\mathrm{f},2}$, complex, measured against the auxiliary source. |
 | `diaphragm_distance_m` | $d_{\mathrm{m}12}$, in m. |
@@ -384,7 +384,7 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 
 ```python
 free_field_transfer_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     sensitivity_1_v_per_pa: ArrayLike,
     sensitivity_2_v_per_pa: ArrayLike,
     *,
@@ -413,7 +413,7 @@ sensitivity and the scattering factor (Formula (4)).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `sensitivity_1_v_per_pa` | $M_{\mathrm{f},1}$, complex, in V/Pa. |
 | `sensitivity_2_v_per_pa` | $M_{\mathrm{f},2}$, complex, in V/Pa. |
 | `diaphragm_distance_m` | $d_{\mathrm{m}12}$, in m. |
@@ -568,7 +568,7 @@ Each one left at zero contributes no component.
 
 ```python
 FreeFieldParameterUncertainty(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     components_db: Mapping[str, NDArray[np.float64]],
     microphone: int,
 )
@@ -586,7 +586,7 @@ Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrolog
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `components_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
@@ -617,7 +617,7 @@ Plot each component against frequency.
 
 ```python
 reciprocity_air_attenuation(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float,
     static_pressure_pa: float,
@@ -647,7 +647,7 @@ refers to, not with the one it prints (`docs/ERRATA.md`).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `temperature_c` | $t$, in °C. |
 | `static_pressure_pa` | $p_\mathrm{s}$, in Pa. |
 | `relative_humidity_percent` | $H$, in %. |
@@ -664,7 +664,7 @@ refers to, not with the one it prints (`docs/ERRATA.md`).
 
 ```python
 ReciprocityAirAttenuation(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
@@ -686,7 +686,7 @@ The attenuation of sound in air of a free-field reciprocity calibration
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `temperature_c` | $t$, in °C. |
 | `static_pressure_pa` | $p_\mathrm{s}$, in Pa. |
 | `relative_humidity_percent` | $H$, in %. |

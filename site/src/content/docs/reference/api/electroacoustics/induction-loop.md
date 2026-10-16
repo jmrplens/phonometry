@@ -115,7 +115,7 @@ AmplifierOverloadVerification(
     test_current_a: float,
     doubling_frequency_hz: float,
     end_frequency_hz: float,
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     voltage_v: np.ndarray,
     test_frequency_voltage_v: float,
     compliance_voltage_v: float,
@@ -139,7 +139,7 @@ sweep on to the doubling; the voltage there is drawn and kept in
 | `test_current_a` | The loop current at 1 kHz, 7 dB below the one that gives the required field, in amperes. |
 | `doubling_frequency_hz` | Where the loop voltage first reaches twice its value at 1 kHz, in hertz; infinite when it does not double below 20 kHz (or below the top of the given current response). |
 | `end_frequency_hz` | Where the sweep ends: the higher of the doubling frequency and the Table 4 frequency, in hertz. |
-| `frequencies_hz` | The sweep from 1 kHz to its end, in hertz. |
+| `frequencies` | The sweep from 1 kHz to its end, in hertz. |
 | `voltage_v` | The RMS loop voltage along it, in volts. |
 | `test_frequency_voltage_v` | The RMS loop voltage at the frequency of Table 4, where 10.3.3 judges the test, in volts. |
 | `compliance_voltage_v` | The amplifier's compliance voltage (IEC 62489-1:2010 5.4.8), in volts. |
@@ -302,7 +302,7 @@ operator".
 ## band_limit_response
 
 ```python
-band_limit_response(frequencies_hz: ArrayLike) -> np.ndarray
+band_limit_response(frequencies: ArrayLike) -> np.ndarray
 ```
 
 The theoretical response of the band limiting of the pink noise, in dB.
@@ -323,7 +323,7 @@ the two exchanged (see `docs/ERRATA.md`). The plus or minus 1 dB flatness
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in hertz. |
+| `frequencies` | Frequencies, in hertz. |
 
 **Returns:** The response, in dB.
 
@@ -381,7 +381,7 @@ prints 566 mA/m, which is $400\sqrt{2}$).
 
 | Name | Description |
 | :--- | :--- |
-| `level_db` | Level, in dB re 400 mA/m. |
+| `level_db` | Level, in dB re 400 mA/m (scalar or array). |
 
 **Returns:** The RMS field strength, in A/m.
 
@@ -441,8 +441,8 @@ peak programme meter of 6.1.4, is definitive (6.1.1).
 FieldStrengthReading(
     fs: int,
     weighting: str,
-    times_s: np.ndarray,
-    levels_db: np.ndarray,
+    times: np.ndarray,
+    levels: np.ndarray,
     maximum_db: float,
     equivalent_db: float,
 )
@@ -456,8 +456,8 @@ What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 | :--- | :--- |
 | `fs` | Sample rate of the record, in hertz. |
 | `weighting` | `"Z"` (flat, 6.1.2) or `"A"` (the noise measurements of clause 7 and 10.4). |
-| `times_s` | The time of each reading, in seconds. |
-| `levels_db` | The time-weighted level, 125 ms exponential averaging, in dB re 400 mA/m. |
+| `times` | The time of each reading, in seconds. |
+| `levels` | The time-weighted level, 125 ms exponential averaging, in dB re 400 mA/m. |
 | `maximum_db` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
 | `equivalent_db` | The level of the mean square over the whole record, in dB re 400 mA/m. |
 
@@ -866,7 +866,7 @@ verify_induction_loop_system(
     field_strength_levels_db: ArrayLike,
     *,
     specified_level_db: float = 0.0,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
     background_noise_levels_db: ArrayLike | None = None,
     system_noise_levels_db: ArrayLike | None = None,
@@ -916,7 +916,7 @@ off is also assessed against the recommendations of 7.2
 | :--- | :--- |
 | `field_strength_levels_db` | The field strength level at each selected point, in dB re 400 mA/m. |
 | `specified_level_db` | The level specified according to 8.2.7 for the signal and meter used, in dB re 400 mA/m. |
-| `frequencies_hz` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
+| `frequencies` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
 | `response_db` | The response at each frequency, in dB on any fixed reference, for one point or one row per point. |
 | `background_noise_levels_db` | The A-weighted level at each point with the loop switched off, in dB re 400 mA/m. |
 | `system_noise_levels_db` | The A-weighted level at the same points with the system on and every input muted, in dB re 400 mA/m. |
@@ -933,7 +933,7 @@ verify_small_volume_system(
     layout: str,
     heights_m: ArrayLike | None = None,
     standing_area_levels_db: ArrayLike | None = None,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
 ) -> InductionLoopVerification
 ```
@@ -972,7 +972,7 @@ The informative Annex A.4 allows up to +12 dB at 1,45 m for a counter;
 | `layout` | `"refuge_small"`, `"refuge_large"` or `"counter"` for the points of Figures 2 and 3; `"refuge_useful_volume"` or `"counter_useful_volume"` for a useful volume of 9.4 in their place. |
 | `heights_m` | The height of each point of a useful volume above the floor, in metres, in the shape of `field_strength_levels_db`; required for a useful volume, and refused for the fixed layouts, whose heights are those of Figures 2 and 3. |
 | `standing_area_levels_db` | Levels surveyed elsewhere in the area where people are expected to stand, in dB re 400 mA/m. |
-| `frequencies_hz` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
+| `frequencies` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
 | `response_db` | The response at each frequency, one row per point. |
 
 **Returns:** An [`InductionLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#inductionloopverification).

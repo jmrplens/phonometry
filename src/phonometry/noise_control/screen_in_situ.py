@@ -177,7 +177,7 @@ class ScreenInSituWarning(PhonometryWarning):
 
 
 def background_corrected_level_db(
-    levels_db: ArrayLike, background_levels_db: ArrayLike
+    levels: ArrayLike, background_levels_db: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The level with the background taken off, clause 5.7.
 
@@ -195,17 +195,17 @@ def background_corrected_level_db(
     not a warning: the background it names includes wind-generated noise, so
     the remedy is to wait for a quieter day rather than to correct harder.
 
-    :param levels_db: The level with the sources on, per band, in decibels.
+    :param levels: The level with the sources on, per band, in decibels.
     :param background_levels_db: The level with them off, per band, in
         decibels.
     :return: The corrected level per band, in decibels.
     :raises ValueError: For inputs that do not match band for band, or a
         margin under :data:`ISO11821_MINIMUM_BACKGROUND_MARGIN_DB`.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels_db, "background_levels_db")
     if levels.shape != background.shape:
-        msg = "'levels_db' and 'background_levels_db' must match band for band."
+        msg = "'levels' and 'background_levels_db' must match band for band."
         raise ValueError(msg)
     lower, upper = BACKGROUND_CORRECTION_WINDOW_DB
     margin = levels - background
@@ -221,7 +221,7 @@ def background_corrected_level_db(
     return np.asarray(np.where(judged > upper, levels, corrected), dtype=np.float64)
 
 
-def directivity_index_db(levels_db: ArrayLike) -> NDArray[np.float64]:
+def directivity_index_db(levels: ArrayLike) -> NDArray[np.float64]:
     r"""The directivity index of a source, definition 3.10.
 
     :math:`DI_i = L_{360} - L_{30,i}`, where :math:`L_{360}` is the
@@ -237,12 +237,12 @@ def directivity_index_db(levels_db: ArrayLike) -> NDArray[np.float64]:
     :data:`DIRECTIVITY_INDEX_LIMIT_DB` below the mean, which is a bound on how
     much of a shadow the source casts on itself.
 
-    :param levels_db: The levels at the twelve positions, in decibels.
+    :param levels: The levels at the twelve positions, in decibels.
     :return: :math:`DI_i` at each position, in decibels.
     :raises ValueError: For a count that is not
         :data:`DIRECTIVITY_POSITIONS`.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     if levels.size != DIRECTIVITY_POSITIONS:
         msg = (
             f"Definition 3.10 of ISO 11821 reads the directivity index over "

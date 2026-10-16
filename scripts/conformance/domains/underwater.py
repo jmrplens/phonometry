@@ -240,9 +240,7 @@ def _chk_uwp_del_grosso_printed_check() -> Outcome:
 def _chk_uwp_wales_heitmeyer() -> Outcome:
     # Oracle: the mean-spectrum closed form printed in J. Acoust. Soc. Am.
     # 111(3), 2002, hand-evaluated at 100 Hz.
-    s = ph.underwater.ship_source_spectrum(
-        model="wales-heitmeyer", frequency_hz=[100.0]
-    )
+    s = ph.underwater.ship_source_spectrum(model="wales-heitmeyer", frequencies=[100.0])
     return numeric(158.4504, float(s.source_psd[0]), 1e-3, unit="dB", places=3)
 
 

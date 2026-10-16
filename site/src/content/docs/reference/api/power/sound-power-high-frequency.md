@@ -122,7 +122,7 @@ in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
 
 ```python
 air_absorption_np_per_m(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -147,12 +147,12 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequency or frequencies `f`, in hertz. |
+| `frequencies` | Frequency or frequencies `f`, in hertz. |
 | `temperature_c` | Air temperature, in degrees Celsius. Outside -20 °C to +50 °C emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning). |
 | `relative_humidity_percent` | Relative humidity `h_r`, in percent. |
 | `static_pressure_kpa` | Static pressure `p_s`, in kilopascals (default 101,325 kPa, the pressure Tables 1 and 2 are printed at). |
 
-**Returns:** $\alpha$ in Np/m, with the shape of `frequencies_hz`.
+**Returns:** $\alpha$ in Np/m, with the shape of `frequencies`.
 
 **Raises**
 
@@ -164,7 +164,7 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 
 ```python
 free_field_absorption_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     radius_m: float,
     temperature_c: float,
@@ -189,7 +189,7 @@ is the same thing.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Band centre or tone frequencies, in hertz. |
+| `frequencies` | Band centre or tone frequencies, in hertz. |
 | `radius_m` | Radius `r` of the measurement hemisphere, in metres. |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent. |
@@ -257,9 +257,9 @@ standard applies and no A-weighted level is asked for.
 
 ```python
 high_frequency_sound_power(
-    pressure_levels_db: ArrayLike,
+    pressure_levels: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     room_constant_m2: ArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -282,8 +282,8 @@ clause 7).
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_levels_db` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array of the time-averaged levels of the four orientations ($N = 4$) or three boom revolutions ($N = 3$), energy-averaged by Formula (1). |
-| `frequencies_hz` | Band centre or tone frequencies, in hertz, one per band. A frequency outside 11,2 kHz to 22,4 kHz emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
+| `pressure_levels` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array of the time-averaged levels of the four orientations ($N = 4$) or three boom revolutions ($N = 3$), energy-averaged by Formula (1). |
+| `frequencies` | Band centre or tone frequencies, in hertz, one per band. A frequency outside 11,2 kHz to 22,4 kHz emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
 | `room_constant_m2` | Room constant `R`, in square metres, a scalar or one value per band. |
 | `temperature_c` | Air temperature in the room, in degrees Celsius (default 23,0 °C, the reference temperature). |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101,325 kPa, the reference pressure). |
@@ -301,11 +301,11 @@ clause 7).
 
 ```python
 high_frequency_sound_power_comparison(
-    pressure_levels_db: ArrayLike,
+    pressure_levels: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
-    reference_pressure_levels_db: ArrayLike,
-    reference_sound_power_levels_db: ArrayLike | ReferenceSourceCalibration,
+    frequencies: ArrayLike,
+    reference_pressure_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     noise_bandwidth_hz: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -327,10 +327,10 @@ comparison method.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_levels_db` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array averaged by Formula (1). |
-| `frequencies_hz` | Band centre or tone frequencies, in hertz, one per band. |
-| `reference_pressure_levels_db` | $\overline{L_{p(\mathrm{FAR})}}$ per band, in dB re 20 µPa, measured with the same bandwidth at the same location (clauses 8.3, 8.4); a 2-D input is averaged by Formula (1) as well. |
-| `reference_sound_power_levels_db` | $L_{W(\mathrm{FAR})}$ of the calibrated reference source, in dB re 1 pW, a scalar or one value per band: per band for broadband noise, per hertz for tones. For broadband noise it may be the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies_hz` and carried from the reference conditions to those of the test by its own `C2`, since clause 10.1 corrects the result as ISO 3741 does. |
+| `pressure_levels` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array averaged by Formula (1). |
+| `frequencies` | Band centre or tone frequencies, in hertz, one per band. |
+| `reference_pressure_levels` | $\overline{L_{p(\mathrm{FAR})}}$ per band, in dB re 20 µPa, measured with the same bandwidth at the same location (clauses 8.3, 8.4); a 2-D input is averaged by Formula (1) as well. |
+| `reference_sound_power_levels` | $L_{W(\mathrm{FAR})}$ of the calibrated reference source, in dB re 1 pW, a scalar or one value per band: per band for broadband noise, per hertz for tones. For broadband noise it may be the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`, since clause 10.1 corrects the result as ISO 3741 does. |
 | `noise_bandwidth_hz` | $\Delta F$, the noise bandwidth of the analyser, in hertz, which selects Formula (9); `None` (default) selects Formula (8). Clause 8.5.2 allows 1 Hz for a constant percentage analyser, and holds an FFT to 112 Hz or less: a wider one emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
 | `temperature_c` | Air temperature in the room, in degrees Celsius (default 23,0 °C). |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101,325 kPa). |
@@ -463,7 +463,7 @@ summed with [`tone_level_from_sidebands`](/phonometry/reference/api/power/sound-
 room_absorption_coefficient(
     reverberation_time_s: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     surface_area_m2: float,
 ) -> NDArray[np.float64]
 ```
@@ -481,7 +481,7 @@ constant is the 0,16 the formula prints.
 | Name | Description |
 | :--- | :--- |
 | `reverberation_time_s` | Mean measured reverberation time `T` per band, in seconds (scalar or one value per band); clause 6.2 averages three or four points of the microphone path. |
-| `volume_m3` | Room volume `V`, in cubic metres. |
+| `volume` | Room volume `V`, in cubic metres. |
 | `surface_area_m2` | Total room surface `S`, in square metres. |
 
 **Returns:** $\alpha_\mathrm{room}$ per band, in (0, 1).
@@ -496,9 +496,9 @@ constant is the 0,16 the formula prints.
 
 ```python
 room_constant_from_air_absorption(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     surface_area_m2: float,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -521,8 +521,8 @@ longer negligible there and the measured reverberation time of
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Band centre or tone frequencies, in hertz. |
-| `volume_m3` | Room volume `V`, in cubic metres. |
+| `frequencies` | Band centre or tone frequencies, in hertz. |
+| `volume` | Room volume `V`, in cubic metres. |
 | `surface_area_m2` | Total room surface `S`, in square metres. |
 | `temperature_c` | Air temperature in the room, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity in the room, in percent. |
@@ -542,7 +542,7 @@ longer negligible there and the measured reverberation time of
 room_constant_from_reverberation_time(
     reverberation_time_s: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     surface_area_m2: float,
 ) -> NDArray[np.float64]
 ```
@@ -559,7 +559,7 @@ the room constant of the method of clause 6. It goes into
 | Name | Description |
 | :--- | :--- |
 | `reverberation_time_s` | Mean measured reverberation time `T` per band, in seconds (scalar or one value per band). |
-| `volume_m3` | Room volume `V`, in cubic metres. |
+| `volume` | Room volume `V`, in cubic metres. |
 | `surface_area_m2` | Total room surface `S`, in square metres. |
 
 **Returns:** `R` per band, in square metres.

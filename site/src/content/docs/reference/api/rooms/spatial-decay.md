@@ -143,7 +143,7 @@ The clause offers no correction for those. Judged settled.
 
 ```python
 check_background_margin(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     background_levels_db: ArrayLike,
 ) -> BackgroundMarginCheck
 ```
@@ -170,7 +170,7 @@ read band by band.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_p$ with the test source running, in decibels, one value per measured position of one octave band. |
+| `levels` | $L_p$ with the test source running, in decibels, one value per measured position of one octave band. |
 | `background_levels_db` | The background at the same positions, in decibels, as a scalar or one value per position. |
 
 **Returns:** The verdict, as a [`BackgroundMarginCheck`](/phonometry/reference/api/rooms/spatial-decay/#backgroundmargincheck).
@@ -187,7 +187,7 @@ read band by band.
 corrected_distribution_value(
     distribution_values_db: ArrayLike,
     measured_reference_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -213,7 +213,7 @@ meter saw.
 | :--- | :--- |
 | `distribution_values_db` | $D_j(r)$ in the room, in decibels. |
 | `measured_reference_db` | $D_{\mathrm{meas,ref}\,j}(r)$ measured for this source over a reflecting plane, in decibels. |
-| `distances_m` | $r$ at each position, in metres. |
+| `distances` | $r$ at each position, in metres. |
 | `source_height_m` | $h_\mathrm{S}$, in metres. |
 | `path_height_m` | $h_\mathrm{P}$, in metres. |
 
@@ -279,7 +279,7 @@ EVALUATION_DISTANCES_M = {'near': 4.0, 'middle': 10.0, 'far': 30.0}
 
 ```python
 floor_reference_value(
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -301,7 +301,7 @@ the free field folded into a half space.
 
 | Name | Description |
 | :--- | :--- |
-| `distances_m` | $r$ at each position, in metres. |
+| `distances` | $r$ at each position, in metres. |
 | `source_height_m` | $h_\mathrm{S}$, in metres; zero for a source on the floor. |
 | `path_height_m` | $h_\mathrm{P}$, in metres; omit it for a path at the source height. |
 
@@ -350,7 +350,7 @@ ISO14257_REFERENCE_DISTANCE_M = 1.0
 ```python
 level_excess(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -365,7 +365,7 @@ $$
 | Name | Description |
 | :--- | :--- |
 | `distribution_values_db` | $D$ at each position, in decibels. |
-| `distances_m` | $r$ at each position, in metres. |
+| `distances` | $r$ at each position, in metres. |
 
 **Returns:** $\mathrm{DL}_\mathrm{f}$ at each position, in decibels.
 
@@ -380,7 +380,7 @@ $$
 ```python
 level_excess_at(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     distance_m: float,
 ) -> float
 ```
@@ -406,7 +406,7 @@ the errata registry records it.
 | Name | Description |
 | :--- | :--- |
 | `distribution_values_db` | $D_i$ at the positions of the range, in decibels. |
-| `distances_m` | $r_i$ at the same positions, in metres. |
+| `distances` | $r_i$ at the same positions, in metres. |
 | `distance_m` | $r$, the distance to read at, in metres. |
 
 **Returns:** $\mathrm{DL}'_{\mathrm{f}r}$, in decibels.
@@ -430,7 +430,7 @@ MAX_DIRECTIVITY_INDEX_DB = 8.0
 ```python
 mean_level_excess(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
 ) -> float
 ```
 
@@ -449,7 +449,7 @@ far weighs the same as one twice as near rather than twice as much.
 | Name | Description |
 | :--- | :--- |
 | `distribution_values_db` | $D$ at the positions of the range, in decibels. |
-| `distances_m` | $r$ at the same positions, in metres, in increasing order. |
+| `distances` | $r$ at the same positions, in metres, in increasing order. |
 
 **Returns:** $\mathrm{DL}_\mathrm{f}(r_n, r_m)$, in decibels.
 
@@ -593,7 +593,7 @@ PREFERRED_MIDDLE_LIMIT_M = 24.0
 ## reference_distribution_value
 
 ```python
-reference_distribution_value(distances_m: ArrayLike) -> NDArray[np.float64]
+reference_distribution_value(distances: ArrayLike) -> NDArray[np.float64]
 ```
 
 The free-field reference curve, Equation (2).
@@ -610,7 +610,7 @@ used here, because it is the curve the standard draws in its own figures.
 
 | Name | Description |
 | :--- | :--- |
-| `distances_m` | $r$ at each position, in metres. |
+| `distances` | $r$ at each position, in metres. |
 
 **Returns:** $D_\mathrm{ref}(r)$, in decibels.
 
@@ -624,7 +624,7 @@ used here, because it is the curve the standard draws in its own figures.
 
 ```python
 sound_distribution_value(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     sound_power_levels_db: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -643,7 +643,7 @@ back the same.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L_{pj}(r)$ at each position, in decibels. |
+| `levels` | $L_{pj}(r)$ at each position, in decibels. |
 | `sound_power_levels_db` | $L_{Wj}$ of the source, in decibels, as a scalar or one value per position. |
 
 **Returns:** $D_j(r)$, in decibels.
@@ -675,7 +675,7 @@ SPATIAL_DECAY_BANDS_HZ = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
 ```python
 spatial_decay_curve(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     *,
     near_limit_m: float = 5.0,
     far_limit_m: float = 16.0,
@@ -691,7 +691,7 @@ The curve of one region with its two descriptors, clause 6.
 | Name | Description |
 | :--- | :--- |
 | `distribution_values_db` | $D$ at every measured position, in decibels, over the whole path. |
-| `distances_m` | $r$ at the same positions, in metres, in increasing order. |
+| `distances` | $r$ at the same positions, in metres, in increasing order. |
 | `near_limit_m` | $d_1$ of 6.2, in metres. |
 | `far_limit_m` | $d_2$ of 6.2, in metres. |
 | `region` | `"near"`, `"middle"`, `"far"` or `"whole"`. |
@@ -710,7 +710,7 @@ The curve of one region with its two descriptors, clause 6.
 ```python
 spatial_decay_rate(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
 ) -> float
 ```
 
@@ -733,7 +733,7 @@ number of decibels per doubling.
 | Name | Description |
 | :--- | :--- |
 | `distribution_values_db` | $D_i$ at the positions of the range, in decibels. |
-| `distances_m` | $r_i$ at the same positions, in metres. |
+| `distances` | $r_i$ at the same positions, in metres. |
 
 **Returns:** $\mathrm{DL}_2$, in decibels per distance doubling.
 
@@ -747,7 +747,7 @@ number of decibels per doubling.
 
 ```python
 SpatialDecayResult(
-    distances_m: NDArray[np.float64],
+    distances: NDArray[np.float64],
     distribution_values_db: NDArray[np.float64],
     reference_values_db: NDArray[np.float64],
     level_excess_db: NDArray[np.float64],
@@ -764,7 +764,7 @@ A spatial sound distribution curve and what clause 6 reads off it.
 
 | Name | Description |
 | :--- | :--- |
-| `distances_m` | The distance of each microphone position from the acoustical centre of the source, in metres. |
+| `distances` | The distance of each microphone position from the acoustical centre of the source, in metres. |
 | `distribution_values_db` | $D$ at each position, in decibels. |
 | `reference_values_db` | $D_\mathrm{ref}$ at each position, in decibels. |
 | `level_excess_db` | $\mathrm{DL}_\mathrm{f}$ at each position, in decibels. |

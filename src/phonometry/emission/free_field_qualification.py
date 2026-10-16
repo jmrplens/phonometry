@@ -252,9 +252,9 @@ _COORDINATES = 3
 
 def _band_index(frequency_hz: float) -> int:
     """The one-third octave band of a frequency, 0 at 1 kHz (base-ten bands)."""
-    require_scalar(frequency_hz, "frequencies_hz")
+    require_scalar(frequency_hz, "frequencies")
     if not math.isfinite(frequency_hz) or frequency_hz <= 0.0:
-        msg = f"'frequencies_hz' must be positive and finite; got {frequency_hz!r}."
+        msg = f"'frequencies' must be positive and finite; got {frequency_hz!r}."
         raise ValueError(msg)
     k = round(10.0 * math.log10(frequency_hz / 1000.0))
     if not 0 <= k - _LOWEST_K < len(_NOMINAL_THIRDS_HZ):
@@ -271,25 +271,25 @@ def _nominal(k: int) -> float:
     return _NOMINAL_THIRDS_HZ[k - _LOWEST_K]
 
 
-def _lookup_bands(frequencies_hz: ArrayLike) -> list[int]:
+def _lookup_bands(frequencies: ArrayLike) -> list[int]:
     """Band indices of one frequency or a 1-D array of them, for a table lookup."""
-    freqs = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
+    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1:
-        msg = "'frequencies_hz' must be one frequency or a 1-D array of frequencies."
+        msg = "'frequencies' must be one frequency or a 1-D array of frequencies."
         raise ValueError(msg)
     return [_band_index(float(f)) for f in freqs]
 
 
-def _band_indices(frequencies_hz: ArrayLike) -> np.ndarray:
+def _band_indices(frequencies: ArrayLike) -> np.ndarray:
     """Band indices of a 1-D frequency axis, refusing two in one band."""
-    freqs = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
+    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1 or freqs.size == 0:
-        msg = "'frequencies_hz' must be a non-empty 1-D array of frequencies."
+        msg = "'frequencies' must be a non-empty 1-D array of frequencies."
         raise ValueError(msg)
     ks = np.array([_band_index(float(f)) for f in freqs], dtype=np.int64)
     if np.unique(ks).size != ks.size:
         msg = (
-            "'frequencies_hz' holds two frequencies in the same one-third octave "
+            "'frequencies' holds two frequencies in the same one-third octave "
             "band; each band is qualified once."
         )
         raise ValueError(msg)
@@ -323,7 +323,7 @@ def _table_b1(k: int, room: str) -> float:
 
 
 def inverse_square_law_tolerance_db(
-    frequencies_hz: ArrayLike, *, room: FreeFieldRoom
+    frequencies: ArrayLike, *, room: FreeFieldRoom
 ) -> np.ndarray:
     """Allowable deviation from the inverse square law per band (Table A.1).
 
@@ -331,7 +331,7 @@ def inverse_square_law_tolerance_db(
     table. A frequency is read in the one-third octave band that contains it,
     so a tone at 794 Hz is held to the 800 Hz row.
 
-    :param frequencies_hz: Test frequencies or band mid-frequencies, in hertz.
+    :param frequencies: Test frequencies or band mid-frequencies, in hertz.
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
     :return: The half-width of the tolerance band, in dB, per frequency.
     :raises ValueError: for an unknown room, a non-positive frequency or
@@ -339,16 +339,16 @@ def inverse_square_law_tolerance_db(
     """
     _check_room(room)
     return np.array(
-        [_table_a1(k, room) for k in _lookup_bands(frequencies_hz)], dtype=np.float64
+        [_table_a1(k, room) for k in _lookup_bands(frequencies)], dtype=np.float64
     )
 
 
 def directionality_tolerance_db(
-    frequencies_hz: ArrayLike, *, room: FreeFieldRoom
+    frequencies: ArrayLike, *, room: FreeFieldRoom
 ) -> np.ndarray:
     """Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
-    :param frequencies_hz: One-third octave mid-band frequencies, in hertz.
+    :param frequencies: One-third octave mid-band frequencies, in hertz.
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
     :return: The half-width of the tolerance band, in dB, per frequency.
     :raises ValueError: for an unknown room, a non-positive frequency or
@@ -356,7 +356,7 @@ def directionality_tolerance_db(
     """
     _check_room(room)
     return np.array(
-        [_table_b1(k, room) for k in _lookup_bands(frequencies_hz)], dtype=np.float64
+        [_table_b1(k, room) for k in _lookup_bands(frequencies)], dtype=np.float64
     )
 
 
@@ -455,10 +455,10 @@ def _checked_positions(value: ArrayLike) -> np.ndarray:
 
 def _checked_traverse_levels(value: ArrayLike, n_points: int) -> np.ndarray:
     """The levels of a traverse: finite, or ``nan`` where not measured."""
-    levels = _as_levels(value, n_points, "levels_db")
+    levels = _as_levels(value, n_points, "levels")
     if np.any(np.isinf(levels)):
         msg = (
-            "'levels_db' must be finite, with nan only where a point was not "
+            "'levels' must be finite, with nan only where a point was not "
             "measured at a frequency."
         )
         raise ValueError(msg)
@@ -469,7 +469,7 @@ def _checked_monitor(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     """The monitor readings, finite wherever Formula (1) reads them."""
     monitor = _as_levels(value, levels.shape[0], "monitor_levels_db")
     if monitor.shape != levels.shape:
-        msg = "'monitor_levels_db' must have the shape of 'levels_db'."
+        msg = "'monitor_levels_db' must have the shape of 'levels'."
         raise ValueError(msg)
     # Formula (1) corrects every point to the reading of point 0.
     measured = np.isfinite(levels)
@@ -493,7 +493,7 @@ def _checked_background(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     background = _as_levels(background, levels.shape[0], "background_levels_db")
     if background.shape != levels.shape:
         msg = (
-            "'background_levels_db' must have the shape of 'levels_db', "
+            "'background_levels_db' must have the shape of 'levels', "
             "or be one row for the whole traverse."
         )
         raise ValueError(msg)
@@ -512,7 +512,7 @@ class MicrophoneTraverse(OwnsArrays):
         and, in a hemi-anechoic room, the reflecting plane is ``z = 0``. The
         mathematical origin of the traverse is given to
         :func:`inverse_square_law_deviations` in the same frame.
-    :ivar levels_db: The measured sound pressure level :math:`L'_{pi}` at each
+    :ivar levels: The measured sound pressure level :math:`L'_{pi}` at each
         point, one row per point and one column per test frequency, in dB. A
         ``nan`` marks a point not measured at that frequency, which is how a
         spacing that changes with frequency is written (ISO 3745 A.4.3 asks
@@ -540,7 +540,7 @@ class MicrophoneTraverse(OwnsArrays):
     """
 
     positions_m: np.ndarray
-    levels_db: np.ndarray
+    levels: np.ndarray
     monitor_levels_db: np.ndarray | None = None
     background_levels_db: np.ndarray | None = None
     name: str = ""
@@ -557,9 +557,9 @@ class MicrophoneTraverse(OwnsArrays):
         """
         object.__setattr__(self, "targets", _checked_targets(self.targets))
         positions = _checked_positions(self.positions_m)
-        levels = _checked_traverse_levels(self.levels_db, positions.shape[0])
+        levels = _checked_traverse_levels(self.levels, positions.shape[0])
         object.__setattr__(self, "positions_m", read_only(positions))
-        object.__setattr__(self, "levels_db", read_only(levels))
+        object.__setattr__(self, "levels", read_only(levels))
         if self.monitor_levels_db is not None:
             monitor = _checked_monitor(self.monitor_levels_db, levels)
             object.__setattr__(self, "monitor_levels_db", read_only(monitor))
@@ -571,8 +571,8 @@ class MicrophoneTraverse(OwnsArrays):
     def along(
         cls,
         direction: ArrayLike,
-        distances_m: ArrayLike,
-        levels_db: ArrayLike,
+        distances: ArrayLike,
+        levels: ArrayLike,
         *,
         start_m: ArrayLike = (0.0, 0.0, 0.0),
         monitor_levels_db: ArrayLike | None = None,
@@ -583,9 +583,9 @@ class MicrophoneTraverse(OwnsArrays):
         """A traverse laid out along a straight line from ``start_m``.
 
         :param direction: The direction of the path, any non-zero 3-vector.
-        :param distances_m: The distance of each point from ``start_m`` along
+        :param distances: The distance of each point from ``start_m`` along
             the path, in metres.
-        :param levels_db: One row per point, one column per frequency, in dB.
+        :param levels: One row per point, one column per frequency, in dB.
         :param start_m: The point the distances are counted from, in metres;
             the room frame's origin by default.
         :param monitor_levels_db: As for the class.
@@ -601,11 +601,11 @@ class MicrophoneTraverse(OwnsArrays):
             msg = "'direction' must be a finite, non-zero 3-vector."
             raise ValueError(msg)
         unit = unit / norm
-        s = np.atleast_1d(np.asarray(distances_m, dtype=np.float64))
+        s = np.atleast_1d(np.asarray(distances, dtype=np.float64))
         start = np.asarray(start_m, dtype=np.float64).reshape(_COORDINATES)
         return cls(
             positions_m=start[np.newaxis, :] + s[:, np.newaxis] * unit[np.newaxis, :],
-            levels_db=np.asarray(levels_db, dtype=np.float64),
+            levels=np.asarray(levels, dtype=np.float64),
             monitor_levels_db=(
                 None
                 if monitor_levels_db is None
@@ -628,7 +628,7 @@ class MicrophoneTraverse(OwnsArrays):
 
 def _stability_corrected(traverse: MicrophoneTraverse) -> tuple[np.ndarray, np.ndarray]:
     """Formula (1) and the largest monitor excursion per frequency."""
-    levels = traverse.levels_db
+    levels = traverse.levels
     if traverse.monitor_levels_db is None:
         return levels.copy(), np.full(levels.shape[1], np.nan)
     monitor = traverse.monitor_levels_db
@@ -877,7 +877,7 @@ def _same_radii(given: ArrayLike, qualified: np.ndarray) -> bool:
 class InverseSquareLawResult(OwnsArrays):
     r"""Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
 
-    :ivar frequencies_hz: The test frequencies, in hertz, as given.
+    :ivar frequencies: The test frequencies, in hertz, as given.
     :ivar room: ``"anechoic"`` or ``"hemi-anechoic"``.
     :ivar origin_m: The mathematical origin of the traverses, ``(x, y, z)`` in
         metres.
@@ -890,9 +890,9 @@ class InverseSquareLawResult(OwnsArrays):
     :ivar traverse_targets: What each traverse was selected towards (A.3.3
         a) to e)), as given.
     :ivar positions_m: The measurement points of each traverse, ``(N, 3)``.
-    :ivar distances_m: The distance :math:`r_i` of each point from the origin,
+    :ivar distances: The distance :math:`r_i` of each point from the origin,
         in metres.
-    :ivar levels_db: :math:`L_{pi}` of each traverse after the stability
+    :ivar levels: :math:`L_{pi}` of each traverse after the stability
         correction of Formula (1), ``(N, NF)``, ``nan`` where not measured.
     :ivar background_margin_db: :math:`L'_{pi}` less the background at each
         point, ``(N, NF)``, or ``None`` for a traverse without background.
@@ -913,7 +913,7 @@ class InverseSquareLawResult(OwnsArrays):
         every traverse at once, ``(NF,)``, in metres.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     room: str
     origin_m: np.ndarray
     origin_fitted: bool
@@ -921,8 +921,8 @@ class InverseSquareLawResult(OwnsArrays):
     traverse_names: tuple[str, ...]
     traverse_targets: tuple[tuple[str, ...], ...]
     positions_m: tuple[np.ndarray, ...]
-    distances_m: tuple[np.ndarray, ...]
-    levels_db: tuple[np.ndarray, ...]
+    distances: tuple[np.ndarray, ...]
+    levels: tuple[np.ndarray, ...]
     background_margin_db: tuple[np.ndarray | None, ...]
     source_stability_db: tuple[np.ndarray, ...]
     source_strength_db: np.ndarray
@@ -944,11 +944,11 @@ class InverseSquareLawResult(OwnsArrays):
             positive, or radii other than the ones the levels qualify.
         """
         _check_room(self.room)
-        _lookup_bands(self.frequencies_hz)
+        _lookup_bands(self.frequencies)
         evaluation = _evaluate(
             np.asarray(self.origin_m, dtype=np.float64),
             self.positions_m,
-            self.levels_db,
+            self.levels,
             self.tolerance_db,
         )
         if not (
@@ -966,10 +966,10 @@ class InverseSquareLawResult(OwnsArrays):
         """The Table A.1 limit of each frequency, in dB, read from the room.
 
         :return: :func:`inverse_square_law_tolerance_db` of
-            :attr:`frequencies_hz` in :attr:`room`.
+            :attr:`frequencies` in :attr:`room`.
         """
         return np.array(
-            [_table_a1(k, self.room) for k in _lookup_bands(self.frequencies_hz)],
+            [_table_a1(k, self.room) for k in _lookup_bands(self.frequencies)],
             dtype=np.float64,
         )
 
@@ -987,8 +987,8 @@ class InverseSquareLawResult(OwnsArrays):
 
         :return: One value per frequency, in dB.
         """
-        worst = np.zeros(self.frequencies_hz.size, dtype=np.float64)
-        for r, dev in zip(self.distances_m, self.deviations_db, strict=True):
+        worst = np.zeros(self.frequencies.size, dtype=np.float64)
+        for r, dev in zip(self.distances, self.deviations_db, strict=True):
             inside = (
                 r[:, np.newaxis] <= self.band_radius_m[np.newaxis, :] + _SLACK
             ) & (np.isfinite(dev))
@@ -1040,10 +1040,10 @@ def _prepared_traverses(
     margins: list[np.ndarray | None] = []
     stability: list[np.ndarray] = []
     for index, traverse in enumerate(traverses):
-        if traverse.levels_db.shape[1] != n_bands:
+        if traverse.levels.shape[1] != n_bands:
             msg = (
-                f"traverse {index} has {traverse.levels_db.shape[1]} level columns "
-                f"for {n_bands} frequencies in 'frequencies_hz'."
+                f"traverse {index} has {traverse.levels.shape[1]} level columns "
+                f"for {n_bands} frequencies in 'frequencies'."
             )
             raise ValueError(msg)
         corrected, excursion = _stability_corrected(traverse)
@@ -1056,7 +1056,7 @@ def _prepared_traverses(
         margins.append(
             None
             if traverse.background_levels_db is None
-            else traverse.levels_db - traverse.background_levels_db
+            else traverse.levels - traverse.background_levels_db
         )
     return _Prepared(positions, levels, tuple(margins), tuple(stability))
 
@@ -1132,7 +1132,7 @@ def _source_strengths(
 def inverse_square_law_deviations(
     traverses: Sequence[MicrophoneTraverse],
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     room: FreeFieldRoom,
     origin_m: ArrayLike | None = None,
     source_box_m: ArrayLike | None = None,
@@ -1150,8 +1150,8 @@ def inverse_square_law_deviations(
     :func:`check_free_field` takes one result per source.
 
     :param traverses: The straight traverses, all measured at
-        ``frequencies_hz``.
-    :param frequencies_hz: The test frequencies (tones or one-third octave
+        ``frequencies``.
+    :param frequencies: The test frequencies (tones or one-third octave
         mid-bands), in hertz, one per level column.
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``, which selects the
         Table A.1 limits.
@@ -1168,7 +1168,7 @@ def inverse_square_law_deviations(
         no level at a frequency, or a point coincides with the origin.
     """
     _check_room(room)
-    freqs = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
+    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     ks = _band_indices(freqs)
     if len(traverses) == 0:
         msg = "'traverses' must hold at least one MicrophoneTraverse."
@@ -1182,7 +1182,7 @@ def inverse_square_law_deviations(
     strengths, initial, deviations = _source_strengths(evaluation, levels)
 
     return InverseSquareLawResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         room=room,
         origin_m=np.asarray(origin, dtype=np.float64),
         origin_fitted=box is not None,
@@ -1190,8 +1190,8 @@ def inverse_square_law_deviations(
         traverse_names=tuple(t.name for t in traverses),
         traverse_targets=tuple(tuple(t.targets) for t in traverses),
         positions_m=tuple(positions),
-        distances_m=evaluation.distances,
-        levels_db=tuple(levels),
+        distances=evaluation.distances,
+        levels=tuple(levels),
         background_margin_db=prepared.margins,
         source_stability_db=prepared.stability,
         source_strength_db=strengths,
@@ -1243,7 +1243,7 @@ def directionality_positions(
 class SourceDirectionalityResult(OwnsArrays):
     """Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 
-    :ivar frequencies_hz: The one-third octave mid-band frequencies, in hertz.
+    :ivar frequencies: The one-third octave mid-band frequencies, in hertz.
     :ivar room: The room type the source is to qualify.
     :ivar mean_level_db: The arithmetic mean of the decibel levels per band.
     :ivar maximum_positive_deviation_db: The largest level above the mean.
@@ -1251,7 +1251,7 @@ class SourceDirectionalityResult(OwnsArrays):
         negative number.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     room: str
     mean_level_db: np.ndarray
     maximum_positive_deviation_db: np.ndarray
@@ -1264,17 +1264,17 @@ class SourceDirectionalityResult(OwnsArrays):
             positive.
         """
         _check_room(self.room)
-        _lookup_bands(self.frequencies_hz)
+        _lookup_bands(self.frequencies)
 
     @property
     def tolerance_db(self) -> np.ndarray:
         """The Table B.1 limit per band, in dB, read from the room.
 
-        :return: :func:`directionality_tolerance_db` of :attr:`frequencies_hz`
+        :return: :func:`directionality_tolerance_db` of :attr:`frequencies`
             in :attr:`room`.
         """
         return np.array(
-            [_table_b1(k, self.room) for k in _lookup_bands(self.frequencies_hz)],
+            [_table_b1(k, self.room) for k in _lookup_bands(self.frequencies)],
             dtype=np.float64,
         )
 
@@ -1328,7 +1328,7 @@ class SourceDirectionalityResult(OwnsArrays):
 
 
 def verify_source_directionality(
-    levels_db: ArrayLike, *, frequencies_hz: ArrayLike, room: FreeFieldRoom
+    levels: ArrayLike, *, frequencies: ArrayLike, room: FreeFieldRoom
 ) -> SourceDirectionalityResult:
     """May this source qualify an anechoic or hemi-anechoic room? (ISO 26101 Annex B).
 
@@ -1340,34 +1340,34 @@ def verify_source_directionality(
     Table B.1 (B.4). The amended ISO 3745 A.3.1 lets the measurement be made in
     the room being qualified.
 
-    :param levels_db: One row per position (32 hemi-anechoic, 64 anechoic),
+    :param levels: One row per position (32 hemi-anechoic, 64 anechoic),
         one column per band, in dB; a 1-D array is one band.
-    :param frequencies_hz: The one-third octave mid-band frequencies, in hertz.
+    :param frequencies: The one-third octave mid-band frequencies, in hertz.
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
     :return: :class:`SourceDirectionalityResult`.
     :raises ValueError: for the wrong number of positions, levels that are not
         finite, or bands that do not match.
     """
     _check_room(room)
-    freqs = np.atleast_1d(np.asarray(frequencies_hz, dtype=np.float64))
+    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     _band_indices(freqs)  # refuses two frequencies in one band
-    levels = np.asarray(levels_db, dtype=np.float64)
+    levels = np.asarray(levels, dtype=np.float64)
     if levels.ndim == 1:
         levels = levels[:, np.newaxis]
     expected = len(_DIRECTIONALITY_POLAR_DEG[room]) * len(_DIRECTIONALITY_AZIMUTH_DEG)
     if levels.ndim != _POSITIONS_RANK or levels.shape != (expected, freqs.size):
         msg = (
-            f"'levels_db' must be ({expected}, {freqs.size}): the {expected} "
+            f"'levels' must be ({expected}, {freqs.size}): the {expected} "
             f"positions of B.3.2 in a {room} room, one column per band."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(levels)):
-        msg = "'levels_db' must be finite."
+        msg = "'levels' must be finite."
         raise ValueError(msg)
     mean = levels.mean(axis=0)
     deviation = levels - mean[np.newaxis, :]
     return SourceDirectionalityResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         room=room,
         mean_level_db=mean,
         maximum_positive_deviation_db=deviation.max(axis=0),
@@ -1481,9 +1481,9 @@ def _judge_band(
     points = equal = spacing = spacing_26101 = length = True
     background: bool | None = True
     for r, p, lv, margin in zip(
-        fit.distances_m,
+        fit.distances,
         fit.positions_m,
-        fit.levels_db,
+        fit.levels,
         fit.background_margin_db,
         strict=True,
     ):
@@ -1512,7 +1512,7 @@ def _judge_band(
     points &= total >= _MIN_POINTS_TOTAL
     directional: bool | None = None
     if directionality is not None:
-        bands = [_band_index(float(f)) for f in directionality.frequencies_hz]
+        bands = [_band_index(float(f)) for f in directionality.frequencies]
         directional = band.k in bands and bool(
             directionality.within_tolerance[bands.index(band.k)]
         )
@@ -1540,7 +1540,7 @@ def _path_angles_ok(fit: InverseSquareLawResult, radius: float) -> bool:
         min(_DIRECTIONALITY_POLAR_DEG["hemi-anechoic"]),
         max(_DIRECTIONALITY_POLAR_DEG["hemi-anechoic"]),
     )
-    for p, r in zip(fit.positions_m, fit.distances_m, strict=True):
+    for p, r in zip(fit.positions_m, fit.distances, strict=True):
         inside = np.flatnonzero(r <= radius + _SLACK)
         if inside.size == 0:
             continue
@@ -1562,7 +1562,7 @@ class FreeFieldCheck(OwnsArrays):
 
     The verdict of the amended ISO 3745:2012 Annex A over the frequencies
     evaluated, with the ISO 26101:2017 clauses it defers to. Every per-band
-    array is aligned with :attr:`frequencies_hz` (ascending) and judged within
+    array is aligned with :attr:`frequencies` (ascending) and judged within
     :attr:`maximum_qualified_radius_m`.
 
     Every verdict, the radius and the reduced range are read from the
@@ -1650,9 +1650,9 @@ class FreeFieldCheck(OwnsArrays):
         return self.results[0].room
 
     @property
-    def frequencies_hz(self) -> np.ndarray:
+    def frequencies(self) -> np.ndarray:
         """Every evaluated frequency, ascending, in hertz."""
-        return self._reading.frequencies_hz.copy()
+        return self._reading.frequencies.copy()
 
     @property
     def band_radius_m(self) -> np.ndarray:
@@ -1765,14 +1765,14 @@ class FreeFieldCheck(OwnsArrays):
         return _plane_ok(
             self.reflecting_plane_absorption_coefficient,
             self.reflecting_plane_margin_m,
-            float(self._reading.frequencies_hz[0]),
+            float(self._reading.frequencies[0]),
             self.speed_of_sound,
         )
 
     @property
     def full_frequency_range(self) -> bool:
         """Whether every frequency A.2.3 requires from 100 Hz to 10 000 Hz was evaluated."""
-        evaluated = {_band_index(float(f)) for f in self._reading.frequencies_hz}
+        evaluated = {_band_index(float(f)) for f in self._reading.frequencies}
         return _grid_contiguous(_K_CORE_LOW, _K_CORE_HIGH, evaluated)
 
     @property
@@ -1889,7 +1889,7 @@ def _collect_bands(fits: Sequence[InverseSquareLawResult]) -> list[_Band]:
     bands: list[_Band] = []
     seen: set[int] = set()
     for s, fit in enumerate(fits):
-        for c, f in enumerate(fit.frequencies_hz):
+        for c, f in enumerate(fit.frequencies):
             k = _band_index(float(f))
             if k in seen:
                 msg = (
@@ -2141,7 +2141,7 @@ def check_free_field(
 class _FreeFieldEvaluation:
     """What a :class:`FreeFieldCheck` reads from its analyses, once."""
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     band_radius_m: np.ndarray
     verdicts: tuple[_BandVerdict, ...]
     conforming_range_hz: tuple[float, float] | None
@@ -2178,7 +2178,7 @@ def _evaluate_free_field(check: FreeFieldCheck) -> _FreeFieldEvaluation:
         margin=check.reflecting_plane_margin_m,
     )
     return _FreeFieldEvaluation(
-        frequencies_hz=read_only(
+        frequencies=read_only(
             np.array([b.frequency_hz for b in bands], dtype=np.float64)
         ),
         band_radius_m=read_only(band_radius),

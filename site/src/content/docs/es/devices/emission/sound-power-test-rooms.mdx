@@ -86,7 +86,7 @@ orientations = np.array([  # 4.4: una fuente directiva, nivel medio por orientac
     [72.1, 73.9, 75.5, 76.8, 76.2, 73.0, 67.9],
 ])
 room = emission.check_hard_walled_room(
-    orientations, freqs, volume_m3=60.0, reference_box_m=[0.5, 0.4, 0.9],
+    orientations, freqs, volume=60.0, reference_box_m=[0.5, 0.4, 0.9],
     absorption_coefficients=[0.02, 0.03, 0.05, 0.08, 0.12],
 )
 print(np.round(room.level_range_db, 1))           # [2.5 1.8 1.4 1.3 1.2 1.2 1.6]
@@ -251,7 +251,7 @@ La función devuelve un `HardWalledSoundPowerResult`: `sound_power_level`
 `mean_background_level` (Ec. 10 a 12), `reference_power_level`,
 `background_correction` y `background_correction_ref` por banda,
 `background_requirement_met`, `upper_bound`, `c2`, `sigma_r0` por banda (Tabla 3) y
-`sigma_r0_a`, `sigma_omc`, `coverage_factor`, `sound_power_level_a`,
+`sigma_r0_a`, `sigma_omc_db`, `coverage_factor`, `sound_power_level_a`,
 `microphone_positions` y `source_positions`; lo completan las propiedades
 `sigma_tot`, `expanded_uncertainty` (y sus formas `_a`) y
 `sound_power_level_ref`.
@@ -270,7 +270,7 @@ La Ec. 19 resta el ruido de fondo *promediado en el tiempo* de un nivel de
 suceso *integrado en el tiempo*, como hace ISO 3744; la biblioteca compara el
 ruido de fondo como su exposición sobre el mismo intervalo $T$,
 $\overline{L_{p(\mathrm{B})}} + 10 \log_{10}(T/T_0)$, y por eso pide
-`integration_time_s` cuando hay ruido de fondo (véanse las
+`integration_time` cuando hay ruido de fondo (véanse las
 [erratas](/phonometry/es/reference/errata/)).
 
 ```python
@@ -280,7 +280,7 @@ strokes = st + 12.0
 events = np.stack([strokes + d for d in (-0.4, 0.1, 0.3, -0.2, 0.2)])
 energy = emission.sound_energy_hard_walled(
     events, rss, lw_rss, freqs,                  # (5 sucesos, 5 posiciones, 7 bandas)
-    background_levels=background, integration_time_s=2.0, sigma_omc_db=2.0,
+    background_levels=background, integration_time=2.0, sigma_omc_db=2.0,
 )
 print(np.round(energy.sound_energy_level, 1))     # [102.2 104.4 106.3 108.3 105.7 101.6  96.2]
 print(round(energy.sound_energy_level_a, 1))      # 112.1 dB(A) re 1 pJ
@@ -365,7 +365,7 @@ t = np.array([
     0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67,
 ])
 room2 = emission.check_special_room_reverberation(
-    t, thirds, volume_m3=72.0,
+    t, thirds, volume=72.0,
     relative_humidity_percent=48.0, temperature_c=22.0,          # durante el ensayo
     reverberation_relative_humidity_percent=52.0, reverberation_temperature_c=21.0,
 )
@@ -435,7 +435,7 @@ rss2 = np.array([  # la fuente de referencia en el suelo, a 1,5 m de las paredes
     [74.1, 76.9, 79.4, 79.8, 79.8, 77.5, 73.6],
 ])
 in_room = emission.sound_power_special_room(
-    rss2, freqs, volume_m3=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
+    rss2, freqs, volume=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
 )
 suitability = emission.check_special_room_suitability(in_room.sound_power_level, lw_r, freqs)
 print(np.round(suitability.difference_db, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
@@ -468,7 +468,7 @@ certificado tal como está impreso.
 # 10 kHz (por brevedad, los niveles se toman iguales en todas las posiciones).
 hemisphere = np.tile(np.repeat(lw_r, 3) - 10.0 * np.log10(3.0 * 2.0 * np.pi * 2.0**2), (20, 1))
 calibration = emission.reference_source_calibration(
-    hemisphere, frequencies_hz=thirds, arrangement="fixed",
+    hemisphere, frequencies=thirds, arrangement="fixed",
 )
 print(np.round(calibration.sound_power_level_at(freqs, bandwidth="octave"), 2))
 # [79.87 83.37 86.07 86.77 86.27 84.17 80.57] dB en las condiciones de referencia
@@ -563,7 +563,7 @@ second = survey2 + np.array([
 levels = np.stack([survey2, second])                           # (2, 6, 7)
 levels_a = np.array([survey2_a, [68.8, 69.0, 69.4, 69.2, 68.5, 68.9]])
 direct = emission.sound_power_special_room(
-    levels, freqs, volume_m3=72.0, nominal_reverberation_time_s=tnom,
+    levels, freqs, volume=72.0, nominal_reverberation_time_s=tnom,
     background_levels=bg2, a_weighted_levels=levels_a, a_weighted_background_levels=46.0,
     sigma_omc_db=0.5,
 )
@@ -613,7 +613,7 @@ plt.show()
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 1D, 2D o 3D | dB | `(bandas,)`, `(NM, bandas)` o `(NS, NM, bandas)` | Niveles por banda medidos: un recorrido, una fila por posición o una rejilla por ubicación de la fuente; todas las entradas entran en la fórmula 8 |
 | `frequencies` | array 1D | Hz | octavas de 125 Hz a 8 kHz | Centros de octava ascendentes de la Tabla F.1; 63 Hz según su nota |
-| `volume_m3` | float | m³ | $> 0$ | Avisa por debajo de 70 m³, y por encima de 300 m³ cuando las bandas llegan a la octava de 8 kHz (6.2) |
+| `volume` | float | m³ | $> 0$ | Avisa por debajo de 70 m³, y por encima de 300 m³ cuando las bandas llegan a la octava de 8 kHz (6.2) |
 | `nominal_reverberation_time_s` | float | s | $> 0$ | $T_\mathrm{nom}$; avisa fuera de 0,5 s a 1,0 s (6.3) |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | Tabla 4 en cada posición; `None` avisa y no cumple nada |
 | `a_weighted_levels` | array 0D, 1D o 2D | dB | uno por posición | Los niveles ponderados A para la fórmula 9 directamente; `None` deja `sound_power_level_a_direct` en `NaN` |
@@ -630,7 +630,7 @@ devuelven un `SpecialRoomSoundPowerResult`: `sound_power_level`,
 `mean_pressure_level`, `background_correction`,
 `background_requirement_met`, el `mean_reference_level` y el
 `reference_power_level` de la fuente de referencia (comparación) o el
-`volume_m3` y el `nominal_reverberation_time_s` de la sala (directo), `c2`,
+`volume` y el `nominal_reverberation_time_s` de la sala (directo), `c2`,
 `sigma_r0` (Tabla 5), `sound_power_level_a` (Anexo F),
 `sound_power_level_a_direct` y `mean_a_weighted_level`, con las mismas
 propiedades de incertidumbre que en la Parte 1.

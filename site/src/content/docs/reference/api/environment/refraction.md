@@ -268,7 +268,7 @@ Plot the curved ray paths (height on the vertical axis).
 ```python
 EffectiveSoundSpeedProfile(
     heights: NDArray[np.float64],
-    sound_speeds: NDArray[np.float64],
+    speeds_of_sound: NDArray[np.float64],
     description: str = '',
 )
 ```
@@ -284,7 +284,7 @@ so a two-point profile represents an exact linear gradient.
 | Name | Description |
 | :--- | :--- |
 | `heights` | Heights `z` above the ground, in metres (from $z = 0$). |
-| `sound_speeds` | Effective sound speed at each height, in m/s. |
+| `speeds_of_sound` | Effective sound speed at each height, in m/s. |
 | `description` | Short human-readable label (e.g. `"linear, +0.1 s^-1"`). |
 
 ### EffectiveSoundSpeedProfile.plot()

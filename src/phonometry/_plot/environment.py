@@ -782,7 +782,7 @@ def plot_sound_speed_profile(
 
     ax = ax if ax is not None else _new_axes()
     z = np.asarray(profile.heights, dtype=np.float64)
-    c = np.asarray(profile.sound_speeds, dtype=np.float64)
+    c = np.asarray(profile.speeds_of_sound, dtype=np.float64)
     label = profile.description or r"$c_\mathrm{eff}(z)$"
     ax.plot(c, z, **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label))
     ax.set_xlabel(_t("Effective sound speed [m/s]", language))
@@ -1198,7 +1198,7 @@ def plot_road_device_rating(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.bands_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     labels = {
         "absorption": (
@@ -1283,7 +1283,7 @@ def plot_reflection_index(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.bands_hz, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     below = freqs < result.lowest_band_hz * _BAND_BELOW
     if np.any(below):

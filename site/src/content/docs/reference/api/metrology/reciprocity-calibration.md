@@ -75,7 +75,7 @@ changed one at a time by their associated uncertainty":
 
 ```python
 reciprocity_uncertainty_budget(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     standard_uncertainties_db: Mapping[str, ArrayLike],
     *,
     field: str = 'pressure',
@@ -109,7 +109,7 @@ freedom passes its own.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB, one value or one per frequency. |
 | `field` | `"pressure"` (default) or `"free_field"`. |
 | `additional_components_db` | Further components, by name, in the same form (Default: none). |
@@ -127,7 +127,7 @@ freedom passes its own.
 
 ```python
 ReciprocityCalibration(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     sensitivity_v_per_pa: NDArray[np.complex128],
     products_v2_per_pa2: NDArray[np.complex128],
     field: str,
@@ -149,7 +149,7 @@ Built by [`pressure_reciprocity`](/phonometry/reference/api/metrology/reciprocit
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `sensitivity_v_per_pa` | The complex sensitivity of each microphone, one row per microphone, in V/Pa: the pressure sensitivity $M_\mathrm{p}$ in a coupler, the free-field sensitivity $M_\mathrm{f}$ in a free field. |
 | `products_v2_per_pa2` | The product of the two sensitivities of each pair, one row per pair (12, 23, 31 in the three-microphone method, 12 alone with an auxiliary source), in V²/Pa². |
 | `field` | `"pressure"` (IEC 61094-2) or `"free_field"` (IEC 61094-3). |
@@ -223,7 +223,7 @@ The designation the calibration follows.
 
 ```python
 ReciprocityUncertaintyBudget(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     field: str,
     names: tuple[str, ...],
     components: tuple[str, ...],
@@ -244,7 +244,7 @@ coverage factor.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `field` | `"pressure"` (IEC 61094-2) or `"free_field"` (IEC 61094-3). |
 | `names` | The key of each component, those of the field's Table 1 in its order, then any additional ones. |
 | `components` | The component as the table prints it, or the name of an additional one. |

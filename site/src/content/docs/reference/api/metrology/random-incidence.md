@@ -176,7 +176,7 @@ the two planes of Annex A), so the pole readings enter every plane's sum
 
 ```python
 axisymmetric_directivity_factor(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     reference_level_db: float | None = None,
 ) -> DirectivityFactor
@@ -199,7 +199,7 @@ one plane.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L(\phi,\mathrm{h})$ in dB, one plane at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$: 36 readings for Annex A. |
+| `levels` | $L(\phi,\mathrm{h})$ in dB, one plane at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$: 36 readings for Annex A. |
 | `reference_level_db` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0°). |
 
 **Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
@@ -220,7 +220,7 @@ one plane.
 
 ```python
 diffuse_field_sensitivity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     indicated_level_db: ArrayLike,
     reference_indicated_level_db: ArrayLike,
     *,
@@ -265,7 +265,7 @@ frequency from 25 Hz to 20 kHz.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centres, in Hz, increasing. |
+| `frequencies` | The band centres, in Hz, increasing. |
 | `indicated_level_db` | $L_\mathrm{D}$, what the instrument under test indicates in the diffuse field, in dB, one per band. |
 | `reference_indicated_level_db` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
 | `reference_random_incidence_level_db` | $G_\mathrm{RI,ref}$ in dB, for a reference calibrated by clause 4 (Formula (9)). |
@@ -286,7 +286,7 @@ frequency from 25 Hz to 20 kHz.
 
 ```python
 DiffuseFieldSensitivity(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     indicated_level_db: NDArray[np.float64],
     reference_indicated_level_db: NDArray[np.float64],
     reference_sensitivity_level_db: NDArray[np.float64],
@@ -313,7 +313,7 @@ for a pressure calibration, Formula (11).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | the band centres, in Hz. |
+| `frequencies` | the band centres, in Hz. |
 | `indicated_level_db` | $L_\mathrm{D}$, what the instrument under test indicates, in dB. |
 | `reference_indicated_level_db` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
 | `reference_sensitivity_level_db` | the reference's calibrated sensitivity level, in dB: $G_\mathrm{RI,ref}$, $G_\mathrm{F,ref}$ or $G_\mathrm{P,ref}$. |
@@ -369,7 +369,7 @@ reference instrument, in dB.
 
 ```python
 directivity_factor(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     reference_level_db: float | None = None,
 ) -> DirectivityFactor
@@ -400,7 +400,7 @@ instrument and more for a directional one (see the module notes).
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | $L(\phi)$ in dB, one row per plane (the first the X-Y plane, `h`; the second the X-Z plane, `v`), each at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$ from the reference direction: shape `(2, 36)` for Annex A. An instrument measured in one plane under rotational symmetry goes to [`axisymmetric_directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor). |
+| `levels` | $L(\phi)$ in dB, one row per plane (the first the X-Y plane, `h`; the second the X-Z plane, `v`), each at $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$ from the reference direction: shape `(2, 36)` for Annex A. An instrument measured in one plane under rotational symmetry goes to [`axisymmetric_directivity_factor`](/phonometry/reference/api/metrology/random-incidence/#axisymmetric_directivity_factor). |
 | `reference_level_db` | $L_\mathrm{rd}$ in dB (Default: None, the reading at 0° in the first plane, which A.4.4 takes in the same position). |
 
 **Returns:** The [`DirectivityFactor`](/phonometry/reference/api/metrology/random-incidence/#directivityfactor).
@@ -423,7 +423,7 @@ instrument and more for a directional one (see the module notes).
 DirectivityFactor(
     incidence_angles_deg: NDArray[np.float64],
     plane_angles_deg: NDArray[np.float64],
-    levels_db: NDArray[np.float64],
+    levels: NDArray[np.float64],
     weights: NDArray[np.float64],
     reference_level_db: float,
     gamma: float,
@@ -449,7 +449,7 @@ each was taken in.
 | :--- | :--- |
 | `incidence_angles_deg` | $\phi$ of each reading from the reference direction, in degrees. |
 | `plane_angles_deg` | $\alpha$ of the plane of each reading, in degrees: 0 for the X-Y plane (`h` in Annex A), 90 for the X-Z plane (`v`), and $180°\,j/n$ for plane $j = 0, \ldots, n - 1$ of `n`. |
-| `levels_db` | $L(\phi)$, the level the instrument indicates for each direction, in dB. |
+| `levels` | $L(\phi)$, the level the instrument indicates for each direction, in dB. |
 | `weights` | $K$ of each reading, dimensionless; they sum to one. |
 | `reference_level_db` | $L_\mathrm{rd}$, in dB. |
 | `gamma` | $\gamma$, dimensionless. |
@@ -602,7 +602,7 @@ symmetry stands for the same two planes and is judged on their division.
 
 ```python
 random_incidence_sensitivity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     free_field_level_db: ArrayLike,
     directivity_index_db: ArrayLike,
 ) -> RandomIncidenceSensitivity
@@ -624,7 +624,7 @@ instrument of that model (4.2).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The preferred frequencies, in Hz, increasing. |
+| `frequencies` | The preferred frequencies, in Hz, increasing. |
 | `free_field_level_db` | $G_\mathrm{F}$ at each frequency, in dB (A.3). |
 | `directivity_index_db` | $10\lg\gamma$ at each frequency, in dB: [`DirectivityFactor.directivity_index_db`](/phonometry/reference/api/metrology/random-incidence/#directivityfactordirectivity_index_db) of the readings at that frequency. |
 
@@ -640,7 +640,7 @@ instrument of that model (4.2).
 
 ```python
 RandomIncidenceSensitivity(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     free_field_level_db: NDArray[np.float64],
     directivity_index_db: NDArray[np.float64],
     random_incidence_level_db: NDArray[np.float64],
@@ -656,7 +656,7 @@ $G_\mathrm{RI} = G_\mathrm{F} - 10\lg\gamma$ at each frequency.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | the preferred frequencies, in Hz. |
+| `frequencies` | the preferred frequencies, in Hz. |
 | `free_field_level_db` | $G_\mathrm{F} = L_\mathrm{rd} - L_\mathrm{o}$, the free-field sensitivity level for the reference direction, in dB. |
 | `directivity_index_db` | $10\lg\gamma$, in dB. |
 | `random_incidence_level_db` | $G_\mathrm{RI}$, in dB. |

@@ -358,9 +358,9 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     return math.floor((value + _TOLERANCE) * scale + 0.5) / scale
 
 
-def _energy_sum_db(levels_db: NDArray[np.float64]) -> float:
+def _energy_sum_db(levels: NDArray[np.float64]) -> float:
     """The energy sum of band levels, in decibels."""
-    return float(10.0 * np.log10(np.sum(10.0 ** (levels_db / 10.0))))
+    return float(10.0 * np.log10(np.sum(10.0 ** (levels / 10.0))))
 
 
 # ---------------------------------------------------------------------------
@@ -483,10 +483,10 @@ def acceleration_test_positions(unit_length_m: float) -> NDArray[np.float64]:
 class PassByMeasurement(OwnsArrays):
     r"""The levels of one pass-by record, 6.5 and 6.6.3.
 
-    :param times_s: The times of the stored level history, in seconds from the
+    :param times: The times of the stored level history, in seconds from the
         start of the record.
-    :param levels_db: :math:`L_{p\mathrm{AF}}(t)`, the A-weighted level with
-        time weighting F, at ``times_s``, in dB.
+    :param levels: :math:`L_{p\mathrm{AF}}(t)`, the A-weighted level with
+        time weighting F, at ``times``, in dB.
     :param start_s: :math:`T_1`, the start of the measurement time interval.
     :param end_s: :math:`T_2`, its end, in seconds.
     :param equivalent_level_db: :math:`L_{p\mathrm{Aeq},T}` over
@@ -502,8 +502,8 @@ class PassByMeasurement(OwnsArrays):
     :param pass_by_time_s: :math:`T_p`, in seconds, when given.
     """
 
-    times_s: NDArray[np.float64]
-    levels_db: NDArray[np.float64]
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     start_s: float
     end_s: float
     equivalent_level_db: float
@@ -517,10 +517,10 @@ class PassByMeasurement(OwnsArrays):
     def __post_init__(self) -> None:
         """Hold the history read-only."""
         object.__setattr__(
-            self, "times_s", read_only(np.asarray(self.times_s, dtype=np.float64))
+            self, "times", read_only(np.asarray(self.times, dtype=np.float64))
         )
         object.__setattr__(
-            self, "levels_db", read_only(np.asarray(self.levels_db, dtype=np.float64))
+            self, "levels", read_only(np.asarray(self.levels, dtype=np.float64))
         )
 
     @property
@@ -699,8 +699,8 @@ def pass_by_measurement(
         else require_positive(pass_by_time_s, "pass_by_time_s")
     )
     return PassByMeasurement(
-        times_s=history / rate,
-        levels_db=10.0 * np.log10(np.maximum(mean_square[history], floor) / _P0_PA**2),
+        times=history / rate,
+        levels=10.0 * np.log10(np.maximum(mean_square[history], floor) / _P0_PA**2),
         start_s=first / rate,
         end_s=last / rate,
         equivalent_level_db=level(float(np.mean(weighted[first:last] ** 2))),
@@ -718,7 +718,7 @@ def pass_by_measurement(
 # ---------------------------------------------------------------------------
 
 
-def stationary_unit_level(levels_db: ArrayLike, lengths_m: ArrayLike) -> float:
+def stationary_unit_level(levels: ArrayLike, lengths_m: ArrayLike) -> float:
     r"""The length-weighted energy average of a stationary mesh, Formulae 1 to 3.
 
     .. math::
@@ -731,17 +731,17 @@ def stationary_unit_level(levels_db: ArrayLike, lengths_m: ArrayLike) -> float:
     position takes the level of the equivalent one measured (5.5.1.2), and an
     end position stands for :data:`STATIONARY_END_POSITION_LENGTH_M`.
 
-    :param levels_db: :math:`L^i_{p\mathrm{Aeq},T}` of each position, in dB.
+    :param levels: :math:`L^i_{p\mathrm{Aeq},T}` of each position, in dB.
     :param lengths_m: The length :math:`l_i` each position stands for, in
         metres.
     :return: The average, in dB, unrounded.
     :raises ValueError: For levels that are not finite, lengths that are not
         positive, or arrays of different lengths.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     lengths = require_positive_array(lengths_m, "lengths_m")
     if levels.size != lengths.size:
-        msg = "'levels_db' and 'lengths_m' need one value per position each."
+        msg = "'levels' and 'lengths_m' need one value per position each."
         raise ValueError(msg)
     weights = lengths / np.sum(lengths)
     return float(10.0 * np.log10(np.sum(weights * 10.0 ** (levels / 10.0))))
@@ -755,13 +755,13 @@ def _spread(values: NDArray[np.float64]) -> float:
 class StationaryTestResult(OwnsArrays):
     r"""The stationary test of a unit, 5.8.1.
 
-    :param levels_db: :math:`L^i_{p\mathrm{Aeq},T}`, one row per set of
+    :param levels: :math:`L^i_{p\mathrm{Aeq},T}`, one row per set of
         measurements (one sample at every position) and one column per
         position, in dB.
     :param lengths_m: The length each position stands for, in metres.
     """
 
-    levels_db: NDArray[np.float64]
+    levels: NDArray[np.float64]
     lengths_m: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -771,25 +771,25 @@ class StationaryTestResult(OwnsArrays):
             missing, levels that are not finite or lengths that are not
             positive.
         """
-        levels = np.atleast_2d(np.asarray(self.levels_db, dtype=np.float64))
+        levels = np.atleast_2d(np.asarray(self.levels, dtype=np.float64))
         lengths = require_positive_array(self.lengths_m, "lengths_m")
         if levels.ndim != 2 or levels.shape[1] != lengths.size:  # noqa: PLR2004
-            msg = "'levels_db' needs one row per set and one column per position."
+            msg = "'levels' needs one row per set and one column per position."
             raise ValueError(msg)
         if not np.all(np.isfinite(levels)):
-            msg = "'levels_db' must be finite."
+            msg = "'levels' must be finite."
             raise ValueError(msg)
         if levels.shape[0] < _MINIMUM_RUNS:
             msg = f"5.7 asks for at least {_MINIMUM_RUNS} sets; got {levels.shape[0]}."
             raise ValueError(msg)
-        object.__setattr__(self, "levels_db", read_only(levels))
+        object.__setattr__(self, "levels", read_only(levels))
         object.__setattr__(self, "lengths_m", read_only(lengths))
 
     @property
     def set_levels_db(self) -> NDArray[np.float64]:
         r""":math:`\langle L_{p\mathrm{Aeq},T} \rangle_\mathrm{unit}` of each set, Formula 1, in dB."""
         return np.array(
-            [stationary_unit_level(row, self.lengths_m) for row in self.levels_db]
+            [stationary_unit_level(row, self.lengths_m) for row in self.levels]
         )
 
     @property
@@ -805,7 +805,7 @@ class StationaryTestResult(OwnsArrays):
     @property
     def position_spreads_db(self) -> NDArray[np.float64]:
         """The spread of the samples of each position across the sets, in dB (9.3)."""
-        return np.ptp(self.levels_db, axis=0)
+        return np.ptp(self.levels, axis=0)
 
     @property
     def valid(self) -> bool:
@@ -829,7 +829,7 @@ class StationaryTestResult(OwnsArrays):
         return plot_stationary_test(self, ax, language=language, **kwargs)
 
 
-def stationary_test(levels_db: ArrayLike, lengths_m: ArrayLike) -> StationaryTestResult:
+def stationary_test(levels: ArrayLike, lengths_m: ArrayLike) -> StationaryTestResult:
     r"""The stationary test of a unit from its measured mesh, 5.7 and 5.8.1.
 
     Each set gives the unit level of Formula 1, and the result is the mean of
@@ -837,14 +837,14 @@ def stationary_test(levels_db: ArrayLike, lengths_m: ArrayLike) -> StationaryTes
     (:attr:`StationaryTestResult.reported_level_db`). The samples of a
     position are valid when they are no more than 3 dB apart (9.3).
 
-    :param levels_db: One row per set, one column per position of the whole
+    :param levels: One row per set, one column per position of the whole
         mesh of 5.5.1.1 at 1,2 m, in dB; at least three sets.
     :param lengths_m: The length each position stands for, in metres.
     :return: The test.
     :raises ValueError: See :class:`StationaryTestResult`.
     """
     return StationaryTestResult(
-        levels_db=np.asarray(levels_db, dtype=np.float64),
+        levels=np.asarray(levels, dtype=np.float64),
         lengths_m=np.asarray(lengths_m, dtype=np.float64),
     )
 
@@ -989,26 +989,26 @@ def rolling_stock_test(
 class RiseSpeedResult(OwnsArrays):
     r"""The impulsive character of a level history, Annex A.
 
-    :param times_s: The times of the history, in seconds.
-    :param levels_db: :math:`L_{p\mathrm{AF}}(t)`, in dB.
+    :param times: The times of the history, in seconds.
+    :param levels: :math:`L_{p\mathrm{AF}}(t)`, in dB.
     :param slopes: The first and last sample of every slope that rises
         without a break by at least 10 dB.
     :param rise_speeds_db_per_s: The steepest rise :math:`s_j` of each slope,
         in dB/s (Formula A.1).
     """
 
-    times_s: NDArray[np.float64]
-    levels_db: NDArray[np.float64]
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     slopes: tuple[tuple[int, int], ...]
     rise_speeds_db_per_s: tuple[float, ...]
 
     def __post_init__(self) -> None:
         """Hold the history read-only and the slopes and speeds as tuples."""
         object.__setattr__(
-            self, "times_s", read_only(np.asarray(self.times_s, dtype=np.float64))
+            self, "times", read_only(np.asarray(self.times, dtype=np.float64))
         )
         object.__setattr__(
-            self, "levels_db", read_only(np.asarray(self.levels_db, dtype=np.float64))
+            self, "levels", read_only(np.asarray(self.levels, dtype=np.float64))
         )
         object.__setattr__(
             self,
@@ -1043,9 +1043,7 @@ class RiseSpeedResult(OwnsArrays):
         return plot_rise_speed(self, ax, language=language, **kwargs)
 
 
-def impulsiveness_rise_speed(
-    times_s: ArrayLike, levels_db: ArrayLike
-) -> RiseSpeedResult:
+def impulsiveness_rise_speed(times: ArrayLike, levels: ArrayLike) -> RiseSpeedResult:
     r"""The rise speed that characterises impulsive noise, Annex A.
 
     The rising slopes of :math:`L_{p\mathrm{AF}}(t)` are the stretches where
@@ -1063,21 +1061,21 @@ def impulsiveness_rise_speed(
     derivative to mean something; :func:`pass_by_measurement` stores it every
     10 ms.
 
-    :param times_s: The sample times, in seconds, increasing.
-    :param levels_db: :math:`L_{p\mathrm{AF}}(t)`, in dB.
+    :param times: The sample times, in seconds, increasing.
+    :param levels: :math:`L_{p\mathrm{AF}}(t)`, in dB.
     :return: The slopes and their rise speeds.
     :raises ValueError: For arrays of different lengths, fewer than two
         samples, or times that do not increase.
     """
-    times = require_finite_array(times_s, "times_s")
-    levels = require_finite_array(levels_db, "levels_db")
+    times = require_finite_array(times, "times")
+    levels = require_finite_array(levels, "levels")
     minimum_samples = 2
     if times.size != levels.size or times.size < minimum_samples:
-        msg = "'times_s' and 'levels_db' need one value per sample each, at least two."
+        msg = "'times' and 'levels' need one value per sample each, at least two."
         raise ValueError(msg)
     steps = np.diff(times)
     if np.any(steps <= 0.0):
-        msg = "'times_s' must increase."
+        msg = "'times' must increase."
         raise ValueError(msg)
     rises = np.diff(levels)
     slopes: list[tuple[int, int]] = []
@@ -1095,8 +1093,8 @@ def impulsiveness_rise_speed(
             slopes.append((start, index))
             speeds.append(float(np.max(rises[start:index] / steps[start:index])))
     return RiseSpeedResult(
-        times_s=times,
-        levels_db=levels,
+        times=times,
+        levels=levels,
         slopes=tuple(slopes),
         rise_speeds_db_per_s=tuple(speeds),
     )
@@ -1233,19 +1231,19 @@ def check_adjacent_vehicle_neutrality(
 
 
 def _frequency_bands(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.int64]]:
     """Nominal band frequencies and their base-ten band indices."""
-    frequencies = require_positive_array(frequencies_hz, "frequencies_hz")
+    frequencies = require_positive_array(frequencies, "frequencies")
     bands = np.round(10.0 * np.log10(frequencies)).astype(np.int64)
     if np.any(np.diff(bands) <= 0):
-        msg = "'frequencies_hz' must name distinct one-third octave bands in increasing order."
+        msg = "'frequencies' must name distinct one-third octave bands in increasing order."
         raise ValueError(msg)
     return frequencies, bands
 
 
 def _roughness_in_frequency(
-    levels_db: NDArray[np.float64],
+    levels: NDArray[np.float64],
     wavelength_bands: tuple[int, ...],
     speed_m_s: float,
     frequency_bands: NDArray[np.int64],
@@ -1261,7 +1259,7 @@ def _roughness_in_frequency(
     return redistributed_band_energies(
         speed_m_s * lower,
         speed_m_s * upper,
-        10.0 ** (levels_db / 10.0),
+        10.0 ** (levels / 10.0),
         target_lower,
         target_upper,
     )
@@ -1293,9 +1291,7 @@ def _just_compliant_levels(
     Where the limit sets no value the measured level stands.
     """
     limit = _limit_levels(roughness, limit_db)
-    return np.where(
-        np.isnan(limit), roughness.levels_db, np.fmin(roughness.levels_db, limit)
-    )
+    return np.where(np.isnan(limit), roughness.levels, np.fmin(roughness.levels, limit))
 
 
 @dataclass(frozen=True)
@@ -1308,7 +1304,7 @@ class SmallRoughnessDeviation(OwnsArrays):
         wavelength in metres to level, held as a read-only copy.
     :param corrected_roughness_levels_db: The just-compliant spectrum of
         Formula C.1, band by band with ``roughness``, in dB re 1 µm.
-    :param frequencies_hz: The nominal one-third octave bands of the noise
+    :param frequencies: The nominal one-third octave bands of the noise
         spectrum, in hertz.
     :param roughness_correction_db: :math:`\Delta L_{r,\mathrm{rail}}(f)` of
         Formula C.2, in dB.
@@ -1320,7 +1316,7 @@ class SmallRoughnessDeviation(OwnsArrays):
     roughness: AcousticRoughnessSpectrum
     limit_db: Mapping[float, float]
     corrected_roughness_levels_db: NDArray[np.float64]
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     roughness_correction_db: NDArray[np.float64]
     noise_levels_db: NDArray[np.float64]
 
@@ -1338,7 +1334,7 @@ class SmallRoughnessDeviation(OwnsArrays):
         object.__setattr__(self, "limit_db", limit)
         for name in (
             "corrected_roughness_levels_db",
-            "frequencies_hz",
+            "frequencies",
             "roughness_correction_db",
             "noise_levels_db",
         ):
@@ -1378,8 +1374,7 @@ class SmallRoughnessDeviation(OwnsArrays):
         """Whether the measured roughness exceeds the limit in any band at all."""
         return bool(
             np.any(
-                self.roughness.levels_db
-                > self.corrected_roughness_levels_db + _TOLERANCE
+                self.roughness.levels > self.corrected_roughness_levels_db + _TOLERANCE
             )
         )
 
@@ -1414,12 +1409,12 @@ class SmallRoughnessDeviation(OwnsArrays):
 
 
 def _noise_spectrum(
-    noise_levels_db: ArrayLike, frequencies_hz: ArrayLike
+    noise_levels_db: ArrayLike, frequencies: ArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.int64]]:
     noise = require_finite_array(noise_levels_db, "noise_levels_db")
-    frequencies, bands = _frequency_bands(frequencies_hz)
+    frequencies, bands = _frequency_bands(frequencies)
     if noise.size != frequencies.size:
-        msg = "'noise_levels_db' and 'frequencies_hz' need one value per band each."
+        msg = "'noise_levels_db' and 'frequencies' need one value per band each."
         raise ValueError(msg)
     return noise, frequencies, bands
 
@@ -1428,7 +1423,7 @@ def check_small_roughness_deviations(
     roughness: AcousticRoughnessSpectrum,
     noise_levels_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     speed_kmh: float,
     limit_db: Mapping[float, float] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
 ) -> SmallRoughnessDeviation:
@@ -1458,7 +1453,7 @@ def check_small_roughness_deviations(
         (:func:`~phonometry.environment.sources.acoustic_roughness.average_roughness_spectra`).
     :param noise_levels_db: The A-weighted one-third octave spectrum of the
         pass-by, :math:`L_{p\mathrm{Aeq},T_p}(f)`, in dB.
-    :param frequencies_hz: Its nominal band frequencies, in hertz.
+    :param frequencies: Its nominal band frequencies, in hertz.
     :param speed_kmh: The train speed, in km/h.
     :param limit_db: The upper limit, nominal wavelength in metres to level;
         Figure 2 by default. The verdict records it, and
@@ -1471,12 +1466,12 @@ def check_small_roughness_deviations(
         not positive or two in one one-third octave band.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
-    noise, frequencies, bands = _noise_spectrum(noise_levels_db, frequencies_hz)
+    noise, frequencies, bands = _noise_spectrum(noise_levels_db, frequencies)
     limit = _frozen_roughness_limit(limit_db, "limit_db")
     corrected = _just_compliant_levels(roughness, limit)
     speed_m_s = speed / 3.6
     measured_energy = _roughness_in_frequency(
-        roughness.levels_db, roughness.bands, speed_m_s, bands
+        roughness.levels, roughness.bands, speed_m_s, bands
     )
     corrected_energy = _roughness_in_frequency(
         corrected, roughness.bands, speed_m_s, bands
@@ -1486,7 +1481,7 @@ def check_small_roughness_deviations(
         roughness=roughness,
         limit_db=limit,
         corrected_roughness_levels_db=corrected,
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         roughness_correction_db=_level_difference(measured_energy, corrected_energy),
         noise_levels_db=noise,
     )
@@ -1499,7 +1494,7 @@ class RoughnessComparability(OwnsArrays):
     :param speed_kmh: The train speed, in km/h.
     :param roughness_1: The measured roughness of test situation 1.
     :param roughness_2: That of test situation 2.
-    :param frequencies_hz: The nominal bands of the two noise spectra, in hertz.
+    :param frequencies: The nominal bands of the two noise spectra, in hertz.
     :param noise_levels_1_db: The A-weighted pass-by spectrum of situation 1, in dB.
     :param noise_levels_2_db: That of situation 2, in dB.
     :param level_differences_db: :math:`\Delta L^{\mathrm{min},1}`,
@@ -1510,7 +1505,7 @@ class RoughnessComparability(OwnsArrays):
     speed_kmh: float
     roughness_1: AcousticRoughnessSpectrum
     roughness_2: AcousticRoughnessSpectrum
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     noise_levels_1_db: NDArray[np.float64]
     noise_levels_2_db: NDArray[np.float64]
     level_differences_db: tuple[float, float, float, float]
@@ -1520,7 +1515,7 @@ class RoughnessComparability(OwnsArrays):
 
         :raises ValueError: For other than four differences.
         """
-        for name in ("frequencies_hz", "noise_levels_1_db", "noise_levels_2_db"):
+        for name in ("frequencies", "noise_levels_1_db", "noise_levels_2_db"):
             object.__setattr__(
                 self, name, read_only(np.asarray(getattr(self, name), dtype=np.float64))
             )
@@ -1577,8 +1572,8 @@ def _common(
     if not bands:
         msg = "the two roughness spectra have no band in common."
         raise ValueError(msg)
-    one = dict(zip(first.bands, first.levels_db, strict=True))
-    two = dict(zip(second.bands, second.levels_db, strict=True))
+    one = dict(zip(first.bands, first.levels, strict=True))
+    two = dict(zip(second.bands, second.levels, strict=True))
     return bands, np.array([one[b] for b in bands]), np.array([two[b] for b in bands])
 
 
@@ -1590,7 +1585,7 @@ def _envelope(
     bands, one, two = _common(first, second)
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
-        levels_db=pick(one, two),
+        levels=pick(one, two),
     )
 
 
@@ -1600,7 +1595,7 @@ def roughness_comparability(
     noise_levels_1_db: ArrayLike,
     noise_levels_2_db: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     speed_kmh: float,
 ) -> RoughnessComparability:
     r"""Bound how much the roughness of two tracks could change a pass-by level, Annex E.
@@ -1622,15 +1617,15 @@ def roughness_comparability(
     :param noise_levels_1_db: The A-weighted pass-by spectrum measured in
         situation 1, in dB.
     :param noise_levels_2_db: That of situation 2, in dB.
-    :param frequencies_hz: The nominal bands of both noise spectra, in hertz.
+    :param frequencies: The nominal bands of both noise spectra, in hertz.
     :param speed_kmh: The train speed of both pass-bys, in km/h.
     :return: The four differences and the bound.
     :raises ValueError: For spectra with no band in common, a speed that is
         not positive, or noise spectra that do not match their bands.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
-    noise_1, frequencies, bands = _noise_spectrum(noise_levels_1_db, frequencies_hz)
-    noise_2, _, _ = _noise_spectrum(noise_levels_2_db, frequencies_hz)
+    noise_1, axis, bands = _noise_spectrum(noise_levels_1_db, frequencies)
+    noise_2, _, _ = _noise_spectrum(noise_levels_2_db, frequencies)
     common, one, two = _common(roughness_1, roughness_2)
     speed_m_s = speed / 3.6
     band_tuple = tuple(common)
@@ -1656,7 +1651,7 @@ def roughness_comparability(
         speed_kmh=speed,
         roughness_1=roughness_1,
         roughness_2=roughness_2,
-        frequencies_hz=frequencies,
+        frequencies=axis,
         noise_levels_1_db=noise_1,
         noise_levels_2_db=noise_2,
         level_differences_db=(
@@ -1938,7 +1933,7 @@ def _same_spectrum(
 ) -> bool:
     """Whether two roughness spectra hold the same bands at the same levels."""
     return first.bands == second.bands and bool(
-        np.all(np.abs(first.levels_db - second.levels_db) <= _TOLERANCE)
+        np.all(np.abs(first.levels - second.levels) <= _TOLERANCE)
     )
 
 
@@ -2043,7 +2038,7 @@ def _roughness_conditions(
     worst = -math.inf
     worst_band: int | None = None
     for spectrum in roughness:
-        excess = spectrum.levels_db - _limit_levels(spectrum, limit_db)
+        excess = spectrum.levels - _limit_levels(spectrum, limit_db)
         if np.any(np.isfinite(excess)):
             index = int(np.nanargmax(excess))
             if excess[index] > worst:
@@ -2134,7 +2129,7 @@ def _decay_condition(
     worst_frequency = math.nan
     missing: set[float] = set()
     for spectrum in spectra:
-        bands = [_frequency_band(f) for f in spectrum.frequencies_hz]
+        bands = [_frequency_band(f) for f in spectrum.frequencies]
         rates = dict(zip(bands, spectrum.decay_rates_db_per_m, strict=True))
         for band, (nominal, floor) in floors.items():
             if band not in rates:

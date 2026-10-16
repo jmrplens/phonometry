@@ -82,7 +82,7 @@ def _chk_table_a4_boundaries() -> Outcome:
     """
     dist = _annex_a(_PERIOD)
     matching = (
-        _cells_matching(dist.levels_db, _table_a4(1), 1)
+        _cells_matching(dist.levels, _table_a4(1), 1)
         + _cells_matching(dist.lower_bounds_db, _table_a4(3), 2)
         + _cells_matching(dist.upper_bounds_db, _table_a4(4), 2)
     )

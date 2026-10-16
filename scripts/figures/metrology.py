@@ -1697,7 +1697,7 @@ def generate_free_field_verification(output_dir: str) -> None:
             correction_db=value,
         )
         for frequency, a7, a11, a15, value in zip(
-            correction.frequencies_hz,
+            correction.frequencies,
             _OCTAVE_A7_DB,
             _OCTAVE_A11_DB,
             _OCTAVE_A15_DB,
@@ -1706,7 +1706,7 @@ def generate_free_field_verification(output_dir: str) -> None:
         )
     ]
     verdict = metrology.verify_correction_uncertainty(
-        correction.frequencies_hz,
+        correction.frequencies,
         [b.expanded_uncertainty_db for b in budgets],
         clause=correction.clause,
         correction_db=correction.correction_db,
@@ -1905,7 +1905,7 @@ def generate_comparison_diameter_correction(output_dir: str) -> None:
     fig, ax = plt.subplots(figsize=(10, 6))
     fine.plot(ax, language=_LANG, marker="none")
     ax.plot(
-        table.frequencies_hz,
+        table.frequencies,
         table.correction_db,
         ls="none",
         marker="D",
@@ -2067,13 +2067,13 @@ def _time_selective_pair() -> tuple[Any, Any, float]:
     start, end = direct - 0.0005, direct + tau
     ref = metrology.time_selective_response(
         ir_ref.impulse_response,
-        ir_ref.sample_rate_hz,
+        ir_ref.fs,
         window_start_s=start,
         window_end_s=end,
     )
     ws2f = metrology.time_selective_response(
         ir_ws2f.impulse_response,
-        ir_ws2f.sample_rate_hz,
+        ir_ws2f.fs,
         window_start_s=start,
         window_end_s=end,
     )
@@ -2210,7 +2210,7 @@ def generate_time_selective_response(output_dir: str) -> None:
     ws2f.plot(
         ax_response,
         quantity="response",
-        frequencies_hz=np.geomspace(1000.0, 40000.0, 300),
+        frequencies=np.geomspace(1000.0, 40000.0, 300),
         language=_LANG,
     )
     fig.tight_layout()

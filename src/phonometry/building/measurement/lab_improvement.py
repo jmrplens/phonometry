@@ -123,9 +123,9 @@ _BOUND_SLACK = 1e-9
 
 
 def _band_indices(
-    frequencies_hz: np.ndarray, targets: tuple[float, ...]
+    frequencies: np.ndarray, targets: tuple[float, ...]
 ) -> np.ndarray | None:
-    """Indices of ``targets`` in ``frequencies_hz`` (6 % match), or ``None``.
+    """Indices of ``targets`` in ``frequencies`` (6 % match), or ``None``.
 
     The 6 % window is the one the ISO 717 rating code matches nominal band
     centres with: wide enough for an exact midband frequency, narrower than
@@ -133,7 +133,7 @@ def _band_indices(
     """
     indices: list[int] = []
     for target in targets:
-        hits = np.nonzero(np.abs(frequencies_hz - target) <= 0.06 * target)[0]
+        hits = np.nonzero(np.abs(frequencies - target) <= 0.06 * target)[0]
         if hits.size != 1:
             return None
         indices.append(int(hits[0]))
@@ -142,17 +142,17 @@ def _band_indices(
 
 def _paired_spectra(
     owner: str,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     first: tuple[str, ArrayLike],
     second: tuple[str, ArrayLike],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Validate a band axis and the two spectra measured on it."""
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     a = require_finite_array(first[1], first[0])
     b = require_finite_array(second[1], second[0])
     require_equal_shapes(
         owner,
-        {"frequencies_hz": freqs.shape, first[0]: a.shape, second[0]: b.shape},
+        {"frequencies": freqs.shape, first[0]: a.shape, second[0]: b.shape},
         "band",
     )
     return freqs, a, b
@@ -165,7 +165,7 @@ def _paired_spectra(
 class LabLiningImprovementResult(OwnsArrays):
     r"""Improvement of airborne sound insulation by a lining (ISO 10140-1 Annex G).
 
-    :ivar frequencies_hz: One-third-octave band centre frequencies, in Hz.
+    :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar r_without_db: Sound reduction index of the basic element without the
         lining, ``Rwithout``, in dB.
     :ivar r_with_db: Sound reduction index with the lining, ``Rwith``, in dB.
@@ -184,7 +184,7 @@ class LabLiningImprovementResult(OwnsArrays):
     :ivar delta_rw_ctr_direct_db: ``Δ(Rw + Ctr)direct``, in dB, or ``None``.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     r_without_db: np.ndarray
     r_with_db: np.ndarray
     delta_r_db: np.ndarray
@@ -197,7 +197,7 @@ class LabLiningImprovementResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject spectra of different lengths and an unknown basic element.
 
-        The figure draws ``delta_r_db`` against ``frequencies_hz`` and the
+        The figure draws ``delta_r_db`` against ``frequencies`` and the
         octave conversion regroups the same pair, so a column of another
         length would be matched to the wrong bands. The element name is
         looked up to title the figure with its ISO 717-1 index.
@@ -205,9 +205,9 @@ class LabLiningImprovementResult(OwnsArrays):
         :raises ValueError: if the per-band columns disagree, or
             ``basic_element`` is neither a standard element nor ``None``.
         """
-        require_ranks(self, frequencies_hz=1, r_without_db=1, r_with_db=1, delta_r_db=1)
+        require_ranks(self, frequencies=1, r_without_db=1, r_with_db=1, delta_r_db=1)
         require_same_length(
-            self, "frequencies_hz", "r_without_db", "r_with_db", "delta_r_db"
+            self, "frequencies", "r_without_db", "r_with_db", "delta_r_db"
         )
         if self.basic_element is not None:
             require_choice(self.basic_element, "basic_element", tuple(_BASIC_ELEMENTS))
@@ -219,7 +219,7 @@ class LabLiningImprovementResult(OwnsArrays):
         over the three one-third-octave bands of each octave, for every octave
         whose three bands are present.
         """
-        return improvement_octave_bands(self.delta_r_db, self.frequencies_hz)
+        return improvement_octave_bands(self.delta_r_db, self.frequencies)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -239,7 +239,7 @@ class LabLiningImprovementResult(OwnsArrays):
 def lab_lining_improvement(
     r_without_db: ArrayLike,
     r_with_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     basic_element: BasicElement | None = "heavy_wall",
 ) -> LabLiningImprovementResult:
@@ -274,7 +274,7 @@ def lab_lining_improvement(
     :param r_without_db: ``Rwithout`` per one-third-octave band, in dB
         (e.g. ``lab_airborne_insulation(...).r``).
     :param r_with_db: ``Rwith`` per band, in dB.
-    :param frequencies_hz: Band centre frequencies, in Hz.
+    :param frequencies: Band centre frequencies, in Hz.
     :param basic_element: ``"heavy_wall"`` (default), ``"heavy_floor"``,
         ``"lightweight_wall"`` or ``None`` for a basic element that is not one
         of the three standard ones.
@@ -284,7 +284,7 @@ def lab_lining_improvement(
     """
     freqs, without, with_ = _paired_spectra(
         "lab_lining_improvement",
-        frequencies_hz,
+        frequencies,
         ("r_without_db", r_without_db),
         ("r_with_db", r_with_db),
     )
@@ -315,7 +315,7 @@ def lab_lining_improvement(
                 delta[inside], freqs[inside], basic_element=basic_element
             )
     return LabLiningImprovementResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         r_without_db=without,
         r_with_db=with_,
         delta_r_db=delta,
@@ -455,7 +455,7 @@ def check_lining_curing(
 class LabFloorCoveringImprovementResult(OwnsArrays):
     r"""Improvement of impact sound insulation by a floor covering (Annex H).
 
-    :ivar frequencies_hz: One-third-octave band centre frequencies, in Hz.
+    :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar l_n0_db: Normalized impact sound pressure level of the reference
         floor without the covering, ``Ln0``, in dB.
     :ivar l_n_db: Normalized impact sound pressure level with the covering,
@@ -478,7 +478,7 @@ class LabFloorCoveringImprovementResult(OwnsArrays):
         ``Ln,0,w`` and ``CI,0`` of H.5 i), or ``None``.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     l_n0_db: np.ndarray
     l_n_db: np.ndarray
     improvement_db: np.ndarray
@@ -492,16 +492,14 @@ class LabFloorCoveringImprovementResult(OwnsArrays):
         """Reject spectra of different lengths and an unknown reference floor.
 
         The figure and the octave conversion read ``improvement_db`` against
-        ``frequencies_hz`` band by band, and the designation of the rating is
+        ``frequencies`` band by band, and the designation of the rating is
         looked up from the floor name.
 
         :raises ValueError: if the per-band columns disagree, or the floor is
             not one of the four reference floors.
         """
-        require_ranks(self, frequencies_hz=1, l_n0_db=1, l_n_db=1, improvement_db=1)
-        require_same_length(
-            self, "frequencies_hz", "l_n0_db", "l_n_db", "improvement_db"
-        )
+        require_ranks(self, frequencies=1, l_n0_db=1, l_n_db=1, improvement_db=1)
+        require_same_length(self, "frequencies", "l_n0_db", "l_n_db", "improvement_db")
         require_choice(
             self.reference_floor, "reference_floor", tuple(_REFERENCE_FLOORS)
         )
@@ -517,7 +515,7 @@ class LabFloorCoveringImprovementResult(OwnsArrays):
         :math:`\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]`
         over the three one-third-octave bands of each octave present.
         """
-        return improvement_octave_bands(self.improvement_db, self.frequencies_hz)
+        return improvement_octave_bands(self.improvement_db, self.frequencies)
 
     def plot(
         self,
@@ -612,7 +610,7 @@ class LabFloorCoveringImprovementResult(OwnsArrays):
 def lab_floor_covering_improvement(
     l_n0_db: ArrayLike,
     l_n_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
 ) -> LabFloorCoveringImprovementResult:
@@ -644,7 +642,7 @@ def lab_floor_covering_improvement(
         measured with the tapping machine beside each specimen, it is the
         arithmetic mean of the two positions either side (H.4.6.1.1).
     :param l_n_db: ``Ln`` with the covering, per band, in dB.
-    :param frequencies_hz: Band centre frequencies, in Hz; the ratings are
+    :param frequencies: Band centre frequencies, in Hz; the ratings are
         formed on the 16 bands 100 Hz to 3 150 Hz when all are present.
     :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
         ``"lightweight_2"`` or ``"lightweight_3"``.
@@ -655,7 +653,7 @@ def lab_floor_covering_improvement(
     """
     freqs, bare, covered = _paired_spectra(
         "lab_floor_covering_improvement",
-        frequencies_hz,
+        frequencies,
         ("l_n0_db", l_n0_db),
         ("l_n_db", l_n_db),
     )
@@ -676,7 +674,7 @@ def lab_floor_covering_improvement(
         reference_rating = weighted_impact_rating(curve - rated)
         bare_rating = weighted_impact_rating(bare[core])
     return LabFloorCoveringImprovementResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         l_n0_db=bare,
         l_n_db=covered,
         improvement_db=improvement,
@@ -692,7 +690,7 @@ def lab_floor_covering_improvement(
 class HeavyImpactImprovementResult(OwnsArrays):
     r"""Improvement for the heavy/soft impact source (ISO 10140-1:2021 H.6.1).
 
-    :ivar frequencies_hz: Band centre frequencies, in Hz.
+    :ivar frequencies: Band centre frequencies, in Hz.
     :ivar l_i_fmax_0_db: Maximum impact sound pressure level of the reference
         floor without the covering, ``Li,Fmax,0``, in dB.
     :ivar l_i_fmax_db: The same with the covering, ``Li,Fmax``, in dB.
@@ -700,7 +698,7 @@ class HeavyImpactImprovementResult(OwnsArrays):
         L_\mathrm{i,Fmax}` per band, in dB (Formula (H.3)).
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     l_i_fmax_0_db: np.ndarray
     l_i_fmax_db: np.ndarray
     improvement_db: np.ndarray
@@ -712,13 +710,13 @@ class HeavyImpactImprovementResult(OwnsArrays):
         """
         require_ranks(
             self,
-            frequencies_hz=1,
+            frequencies=1,
             l_i_fmax_0_db=1,
             l_i_fmax_db=1,
             improvement_db=1,
         )
         require_same_length(
-            self, "frequencies_hz", "l_i_fmax_0_db", "l_i_fmax_db", "improvement_db"
+            self, "frequencies", "l_i_fmax_0_db", "l_i_fmax_db", "improvement_db"
         )
 
     def plot(
@@ -739,7 +737,7 @@ class HeavyImpactImprovementResult(OwnsArrays):
 def heavy_impact_improvement(
     l_i_fmax_0_db: ArrayLike,
     l_i_fmax_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> HeavyImpactImprovementResult:
     r"""Improvement of a floor covering under the rubber ball (H.6.1).
 
@@ -755,19 +753,19 @@ def heavy_impact_improvement(
 
     :param l_i_fmax_0_db: ``Li,Fmax,0`` per band, in dB.
     :param l_i_fmax_db: ``Li,Fmax`` per band, in dB.
-    :param frequencies_hz: Band centre frequencies, in Hz.
+    :param frequencies: Band centre frequencies, in Hz.
     :return: A :class:`HeavyImpactImprovementResult`.
     :raises ValueError: If the inputs disagree in length, a value is not finite
         or a frequency is not positive.
     """
     freqs, bare, covered = _paired_spectra(
         "heavy_impact_improvement",
-        frequencies_hz,
+        frequencies,
         ("l_i_fmax_0_db", l_i_fmax_0_db),
         ("l_i_fmax_db", l_i_fmax_db),
     )
     return HeavyImpactImprovementResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         l_i_fmax_0_db=bare,
         l_i_fmax_db=covered,
         improvement_db=bare - covered,

@@ -155,7 +155,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
     (IEC 61094-3:2016 7.4 and Annex B), and the speed of sound with dispersion
     (IEC 61094-2:2009 F.3, NOTE).
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar temperature_c: :math:`t`, in °C.
     :ivar static_pressure_pa: :math:`p_\mathrm{s}`, in Pa.
     :ivar relative_humidity_percent: :math:`H`, in %.
@@ -171,7 +171,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
     :ivar nitrogen_np_per_m: :math:`\alpha_\mathrm{vib,N}`, in Np/m.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     temperature_c: float
     static_pressure_pa: float
     relative_humidity_percent: float
@@ -189,8 +189,8 @@ class ReciprocityAirAttenuation(OwnsArrays):
         :raises ValueError: for frequencies that are not positive and
             increasing, or columns of another length.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("classical_np_per_m", "oxygen_np_per_m", "nitrogen_np_per_m"):
             column = _band_column(getattr(self, name), name, frequencies.size)
             object.__setattr__(self, name, read_only(column))
@@ -242,7 +242,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
         )
         # f/p_s of decimal readings is decimal: 40,8 Hz at 102 kPa is 0,4 Hz/kPa
         # and comes out 0,399 999 999 999 999 97 in binary; settled, it is 0,4.
-        per_kpa = settled(self.frequencies_hz / (self.static_pressure_pa / 1000.0))
+        per_kpa = settled(self.frequencies / (self.static_pressure_pa / 1000.0))
         return np.asarray(
             conditions
             & (per_kpa >= _ACCURACY_FREQUENCY_PER_KPA[0])
@@ -270,7 +270,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
 
 
 def reciprocity_air_attenuation(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float,
     static_pressure_pa: float,
@@ -299,7 +299,7 @@ def reciprocity_air_attenuation(
     Step 1 is computed with the coefficient of IEC 61094-2 Table F.2, which it
     refers to, not with the one it prints (``docs/ERRATA.md``).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param temperature_c: :math:`t`, in °C.
     :param static_pressure_pa: :math:`p_\mathrm{s}`, in Pa.
     :param relative_humidity_percent: :math:`H`, in %.
@@ -310,7 +310,7 @@ def reciprocity_air_attenuation(
     """
     from ..fluids import air
 
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     pressure = require_positive(static_pressure_pa, "static_pressure_pa")
     gas = air(
         temperature_c=temperature_c,
@@ -360,7 +360,7 @@ def reciprocity_air_attenuation(
         * math.exp(-_VIB_N[1] / kelvin)
     )
     return ReciprocityAirAttenuation(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         temperature_c=t,
         static_pressure_pa=pressure,
         relative_humidity_percent=float(relative_humidity_percent),
@@ -470,7 +470,7 @@ def _distances(diaphragm_distances_m: Sequence[float], count: int) -> list[float
 
 
 def free_field_reciprocity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     *,
     diaphragm_distances_m: Sequence[float],
@@ -501,7 +501,7 @@ def free_field_reciprocity(
     with the factor :math:`-\mathrm{j}` that Formula (7) carries and the
     printed Formula (8) drops (module docstring).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param electrical_transfer_impedances_ohm: :math:`Z_{\mathrm{e},12}`,
         :math:`Z_{\mathrm{e},23}` and :math:`Z_{\mathrm{e},31}`, complex, in Ω.
     :param diaphragm_distances_m: :math:`d_{\mathrm{m}12}`,
@@ -523,7 +523,7 @@ def free_field_reciprocity(
         positive or that the acoustic centres use up, or values that are zero
         or not finite.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     if len(electrical_transfer_impedances_ohm) != len(_TRIAD_PAIRS):
         msg = "Three pairs are needed, in the order 12, 23, 31 (Formula (8))."
@@ -567,7 +567,7 @@ def free_field_reciprocity(
 
 
 def free_field_reciprocity_pair(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     sensitivity_ratio: ArrayLike,
     *,
@@ -594,7 +594,7 @@ def free_field_reciprocity_pair(
     the complex sensitivity; the factor :math:`-\mathrm{j}` is that of
     Formula (7), which the printed Formula (9) drops (module docstring).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param electrical_transfer_impedance_ohm: :math:`Z_{\mathrm{e},12}`,
         complex, in Ω.
     :param sensitivity_ratio: :math:`r_{12} = M_{\mathrm{f},1}/M_{\mathrm{f},2}`,
@@ -615,7 +615,7 @@ def free_field_reciprocity_pair(
     :raises ValueError: for a distance that is not positive or that the
         acoustic centres use up, or values that are zero or not finite.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     distance = require_positive(diaphragm_distance_m, "diaphragm_distance_m")
     x1, x2 = _positions(acoustic_centres_m, count, 2)
@@ -648,7 +648,7 @@ def free_field_reciprocity_pair(
 
 
 def free_field_transfer_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     sensitivity_1_v_per_pa: ArrayLike,
     sensitivity_2_v_per_pa: ArrayLike,
     *,
@@ -672,7 +672,7 @@ def free_field_transfer_impedance(
     with the free-field sensitivities taken there from the pressure
     sensitivity and the scattering factor (Formula (4)).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param sensitivity_1_v_per_pa: :math:`M_{\mathrm{f},1}`, complex, in V/Pa.
     :param sensitivity_2_v_per_pa: :math:`M_{\mathrm{f},2}`, complex, in V/Pa.
     :param diaphragm_distance_m: :math:`d_{\mathrm{m}12}`, in m.
@@ -687,7 +687,7 @@ def free_field_transfer_impedance(
     :raises ValueError: for a distance that is not positive or that the
         acoustic centres use up, or values that are zero or not finite.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     distance = require_positive(diaphragm_distance_m, "diaphragm_distance_m")
     x1, x2 = _positions(acoustic_centres_m, count, 2)
@@ -723,7 +723,7 @@ class AcousticCentre(OwnsArrays):
     r"""The position of the acoustic centre of a microphone from the
     inverse-distance law (IEC 61094-3:2016 6.5).
 
-    :ivar distances_m: The distances from the reference point of the
+    :ivar distances: The distances from the reference point of the
         microphone to the observation points, in m.
     :ivar inverse_readings: :math:`1/|p|`, corrected for the attenuation of
         sound, at each distance, in the reciprocal of the unit the pressures
@@ -732,7 +732,7 @@ class AcousticCentre(OwnsArrays):
     :ivar intercept: Its intercept at zero distance.
     """
 
-    distances_m: NDArray[np.float64]
+    distances: NDArray[np.float64]
     inverse_readings: NDArray[np.float64]
     slope: float
     intercept: float
@@ -742,12 +742,12 @@ class AcousticCentre(OwnsArrays):
 
         :raises ValueError: for columns of different lengths.
         """
-        distances = np.asarray(self.distances_m, dtype=np.float64).reshape(-1)
+        distances = np.asarray(self.distances, dtype=np.float64).reshape(-1)
         inverse = np.asarray(self.inverse_readings, dtype=np.float64).reshape(-1)
         if distances.size != inverse.size:
             msg = "AcousticCentre: one inverse pressure per distance."
             raise ValueError(msg)
-        object.__setattr__(self, "distances_m", read_only(distances))
+        object.__setattr__(self, "distances", read_only(distances))
         object.__setattr__(self, "inverse_readings", read_only(inverse))
 
     @property
@@ -780,7 +780,7 @@ class AcousticCentre(OwnsArrays):
 
 
 def acoustic_centre(
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     sound_pressures_pa: ArrayLike,
     *,
     attenuation_np_per_m: float = 0.0,
@@ -802,7 +802,7 @@ def acoustic_centre(
     as the receiver's output voltage at one frequency; each is multiplied by
     :math:`\mathrm{e}^{\alpha r}` before it is inverted.
 
-    :param distances_m: The distances from the reference point, in m, at least
+    :param distances: The distances from the reference point, in m, at least
         three, positive.
     :param sound_pressures_pa: The modulus of the sound pressure at each, in Pa
         or any proportional unit, positive.
@@ -813,23 +813,23 @@ def acoustic_centre(
         lengths, values that are not positive and finite, or distances that
         are all the same.
     """
-    distances = np.asarray(distances_m, dtype=np.float64).reshape(-1)
+    distances = np.asarray(distances, dtype=np.float64).reshape(-1)
     pressures = np.abs(np.asarray(sound_pressures_pa, dtype=np.float64)).reshape(-1)
     if distances.size < _FEWEST_DISTANCES or distances.size != pressures.size:
         msg = "One pressure per distance is needed, at three distances or more."
         raise ValueError(msg)
-    for name, value in (("distances_m", distances), ("sound_pressures_pa", pressures)):
+    for name, value in (("distances", distances), ("sound_pressures_pa", pressures)):
         if not np.all(np.isfinite(value)) or np.any(value <= 0.0):
             msg = f"'{name}' must be positive and finite."
             raise ValueError(msg)
     if np.ptp(distances) <= 0.0:
-        msg = "'distances_m' must not all be the same."
+        msg = "'distances' must not all be the same."
         raise ValueError(msg)
     alpha = require_non_negative(attenuation_np_per_m, "attenuation_np_per_m")
     inverse = 1.0 / (pressures * np.exp(alpha * distances))
     slope, intercept = np.polyfit(distances, inverse, 1)
     return AcousticCentre(
-        distances_m=distances,
+        distances=distances,
         inverse_readings=inverse,
         slope=float(slope),
         intercept=float(intercept),
@@ -951,7 +951,7 @@ class FreeFieldArrangementCheck(RichDisplay):
 
 
 def check_free_field_arrangement(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     diaphragm_distances_m: Sequence[float],
     microphone_diameter_m: float,
@@ -971,7 +971,7 @@ def check_free_field_arrangement(
     frequency-to-pressure ratio. Annex A allows the published acoustic centres
     between 150 mm and 500 mm, which is reported without entering the verdict.
 
-    :param frequencies_hz: The frequencies of the calibration, in Hz.
+    :param frequencies: The frequencies of the calibration, in Hz.
     :param diaphragm_distances_m: The distance of each pair, in m.
     :param microphone_diameter_m: The nominal diameter of the microphones, in m
         (23,77 mm for LS1, 13,2 mm for LS2a: dimension A of Table C.1 of IEC
@@ -996,7 +996,7 @@ def check_free_field_arrangement(
     if support_length_m is not None:
         require_positive(support_length_m, "support_length_m")
     attenuation = reciprocity_air_attenuation(
-        frequencies_hz,
+        frequencies,
         temperature_c=temperature_c,
         static_pressure_pa=static_pressure_pa,
         relative_humidity_percent=relative_humidity_percent,
@@ -1024,14 +1024,14 @@ class FreeFieldParameterUncertainty(OwnsArrays):
     :func:`~phonometry.metrology.reciprocity_uncertainty_budget` with
     ``field="free_field"``.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar components_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_3_TABLE_1`, in dB at each
         frequency.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     components_db: Mapping[str, NDArray[np.float64]]
     microphone: int
 
@@ -1042,8 +1042,8 @@ class FreeFieldParameterUncertainty(OwnsArrays):
             increasing, or a component that is not one finite non-negative
             value per frequency.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         components = {}
         for name, value in self.components_db.items():
             column = np.asarray(value, dtype=np.float64).reshape(-1)
@@ -1185,7 +1185,7 @@ class FreeFieldInputUncertainties(OwnsArrays):
 
 
 def free_field_parameter_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     uncertainties: FreeFieldInputUncertainties,
     *,
     diaphragm_distances_m: Sequence[float],
@@ -1209,7 +1209,7 @@ def free_field_parameter_uncertainty(
     is moved by a fraction of itself,
     :attr:`FreeFieldInputUncertainties.u_air_attenuation_ratio`.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param uncertainties: The standard uncertainty of each input quantity, a
         :class:`FreeFieldInputUncertainties`.
     :param diaphragm_distances_m: :math:`d_{\mathrm{m}12}`,
@@ -1226,7 +1226,7 @@ def free_field_parameter_uncertainty(
         microphone that is not 1, 2 or 3, or acoustic-centre uncertainties
         that are not one value or one per frequency.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     if microphone not in _SIGNS:
         msg = "'microphone' must be 1, 2 or 3."
@@ -1291,5 +1291,5 @@ def free_field_parameter_uncertainty(
             level(scale=1.0 + u.u_air_attenuation_ratio) - nominal
         )
     return FreeFieldParameterUncertainty(
-        frequencies_hz=frequencies, components_db=components, microphone=microphone
+        frequencies=frequencies, components_db=components, microphone=microphone
     )

@@ -100,12 +100,12 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
 
     :ivar heights: Heights ``z`` above the ground, in metres (from
         :math:`z = 0`).
-    :ivar sound_speeds: Effective sound speed at each height, in m/s.
+    :ivar speeds_of_sound: Effective sound speed at each height, in m/s.
     :ivar description: Short human-readable label (e.g. ``"linear, +0.1 s^-1"``).
     """
 
     heights: NDArray[np.float64]
-    sound_speeds: NDArray[np.float64]
+    speeds_of_sound: NDArray[np.float64]
     description: str = ""
 
     def __post_init__(self) -> None:
@@ -119,16 +119,16 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
         that reaches them, and the one a reader plots or samples with
         :meth:`speed_at`, was already a polyline when it was built.
 
-        :raises ValueError: if ``heights`` and ``sound_speeds`` disagree.
+        :raises ValueError: if ``heights`` and ``speeds_of_sound`` disagree.
         """
-        require_ranks(self, heights=1, sound_speeds=1)
-        require_same_length(self, "heights", "sound_speeds", axis="profile node")
+        require_ranks(self, heights=1, speeds_of_sound=1)
+        require_same_length(self, "heights", "speeds_of_sound", axis="profile node")
 
     def speed_at(self, height: ArrayLike) -> NDArray[np.float64]:
         """Piecewise-linear effective sound speed at one or more heights."""
         z = np.asarray(height, dtype=np.float64)
         return np.asarray(
-            np.interp(z, self.heights, self.sound_speeds), dtype=np.float64
+            np.interp(z, self.heights, self.speeds_of_sound), dtype=np.float64
         )
 
     def plot(
@@ -178,7 +178,7 @@ def linear_sound_speed_profile(
     sign = "+" if gradient_per_s >= 0 else "-"
     return EffectiveSoundSpeedProfile(
         heights=np.array([0.0, h], dtype=np.float64),
-        sound_speeds=np.array([c0, top], dtype=np.float64),
+        speeds_of_sound=np.array([c0, top], dtype=np.float64),
         description=f"linear, {sign}{abs(gradient_per_s):g} s^-1",
     )
 
@@ -237,7 +237,7 @@ def log_linear_sound_speed_profile(
     sign = "+" if b >= 0 else "-"
     return EffectiveSoundSpeedProfile(
         heights=np.asarray(z, dtype=np.float64),
-        sound_speeds=np.asarray(c, dtype=np.float64),
+        speeds_of_sound=np.asarray(c, dtype=np.float64),
         description=f"log-linear, b={sign}{abs(b):g} m/s, z0={z0:g} m",
     )
 
@@ -247,13 +247,13 @@ def _clean_profile(
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate and return the height/speed arrays of a profile."""
     z = np.asarray(profile.heights, dtype=np.float64)
-    c = np.asarray(profile.sound_speeds, dtype=np.float64)
+    c = np.asarray(profile.speeds_of_sound, dtype=np.float64)
     if z.ndim != 1 or z.size < _MIN_POLYLINE_NODES:
         msg = "the profile must have at least two height samples."
         raise ValueError(msg)
     require_equal_shapes(
         "EffectiveSoundSpeedProfile",
-        {"heights": z.shape, "sound_speeds": c.shape},
+        {"heights": z.shape, "speeds_of_sound": c.shape},
         "profile node",
     )
     if not (np.all(np.isfinite(z)) and np.all(np.isfinite(c))):

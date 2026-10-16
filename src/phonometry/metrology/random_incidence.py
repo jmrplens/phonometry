@@ -503,7 +503,7 @@ class DirectivityFactor(OwnsArrays):
         degrees: 0 for the X-Y plane (``h`` in Annex A), 90 for the X-Z plane
         (``v``), and :math:`180°\,j/n` for plane :math:`j = 0, \ldots, n - 1`
         of ``n``.
-    :ivar levels_db: :math:`L(\phi)`, the level the instrument indicates for
+    :ivar levels: :math:`L(\phi)`, the level the instrument indicates for
         each direction, in dB.
     :ivar weights: :math:`K` of each reading, dimensionless; they sum to one.
     :ivar reference_level_db: :math:`L_\mathrm{rd}`, in dB.
@@ -520,7 +520,7 @@ class DirectivityFactor(OwnsArrays):
 
     incidence_angles_deg: NDArray[np.float64]
     plane_angles_deg: NDArray[np.float64]
-    levels_db: NDArray[np.float64]
+    levels: NDArray[np.float64]
     weights: NDArray[np.float64]
     reference_level_db: float
     gamma: float
@@ -542,15 +542,15 @@ class DirectivityFactor(OwnsArrays):
                 f"got {self.formula!r}."
             )
             raise ValueError(msg)
-        columns = ("incidence_angles_deg", "plane_angles_deg", "levels_db", "weights")
+        columns = ("incidence_angles_deg", "plane_angles_deg", "levels", "weights")
         arrays = {
             name: np.asarray(getattr(self, name), dtype=np.float64) for name in columns
         }
         shapes = {name: array.shape for name, array in arrays.items()}
-        if len(set(shapes.values())) != 1 or np.ndim(arrays["levels_db"]) != 1:
+        if len(set(shapes.values())) != 1 or np.ndim(arrays["levels"]) != 1:
             msg = (
                 "DirectivityFactor: 'incidence_angles_deg', 'plane_angles_deg', "
-                "'levels_db' and 'weights' must be 1-D arrays of the same length; "
+                "'levels' and 'weights' must be 1-D arrays of the same length; "
                 f"got {shapes}."
             )
             raise ValueError(msg)
@@ -582,7 +582,7 @@ class DirectivityFactor(OwnsArrays):
     @property
     def relative_levels_db(self) -> NDArray[np.float64]:
         r""":math:`L(\phi) - L_\mathrm{rd}` of each reading, in dB."""
-        return self.levels_db - self.reference_level_db
+        return self.levels - self.reference_level_db
 
     def plot(
         self,
@@ -670,7 +670,7 @@ def _from_planes(
         3 % of the sphere (A.1.6).
     """
     planes = levels.shape[0]
-    half_steps = _plane_count(levels.shape[1], "levels_db")
+    half_steps = _plane_count(levels.shape[1], "levels")
     largest = _largest_element(half_steps, planes)
     _warn_if_coarse(largest, stacklevel=4)
     angles, plane_angles, flat, weights = _plane_readings(
@@ -680,7 +680,7 @@ def _from_planes(
     return DirectivityFactor(
         incidence_angles_deg=angles,
         plane_angles_deg=plane_angles,
-        levels_db=flat,
+        levels=flat,
         weights=weights,
         reference_level_db=lrd,
         gamma=_gamma(flat, weights, lrd),
@@ -706,7 +706,7 @@ def _plane_count(count: int, name: str) -> int:
 
 
 def directivity_factor(
-    levels_db: ArrayLike, *, reference_level_db: float | None = None
+    levels: ArrayLike, *, reference_level_db: float | None = None
 ) -> DirectivityFactor:
     r"""Directivity factor from readings in two or more planes
     (IEC 61183:1994, Formula (A.3)).
@@ -732,7 +732,7 @@ def directivity_factor(
     :math:`10\lg\gamma` would come out 0,008 dB high for an omnidirectional
     instrument and more for a directional one (see the module notes).
 
-    :param levels_db: :math:`L(\phi)` in dB, one row per plane (the first the
+    :param levels: :math:`L(\phi)` in dB, one row per plane (the first the
         X-Y plane, ``h``; the second the X-Z plane, ``v``), each at
         :math:`\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi` from the
         reference direction: shape ``(2, 36)`` for Annex A. An instrument
@@ -747,19 +747,19 @@ def directivity_factor(
     :warns SphereDivisionWarning: when the step leaves an element larger than
         3 % of the sphere (A.1.6).
     """
-    levels = require_finite_matrix(levels_db, "levels_db")
-    if levels.shape[0] < _ANNEX_A_PLANES:
+    matrix = require_finite_matrix(levels, "levels")
+    if matrix.shape[0] < _ANNEX_A_PLANES:
         msg = (
-            "'levels_db' must hold one row per plane, at least two; an "
+            "'levels' must hold one row per plane, at least two; an "
             "instrument with rotational symmetry measured in one plane goes to "
-            f"axisymmetric_directivity_factor. Got shape {levels.shape}."
+            f"axisymmetric_directivity_factor. Got shape {matrix.shape}."
         )
         raise ValueError(msg)
-    return _from_planes(levels, reference_level_db, "A.3")
+    return _from_planes(matrix, reference_level_db, "A.3")
 
 
 def axisymmetric_directivity_factor(
-    levels_db: ArrayLike, *, reference_level_db: float | None = None
+    levels: ArrayLike, *, reference_level_db: float | None = None
 ) -> DirectivityFactor:
     r"""Directivity factor of an instrument with rotational symmetry, from one
     plane (IEC 61183:1994, Formula (A.4)).
@@ -775,7 +775,7 @@ def axisymmetric_directivity_factor(
     the factor 2 makes the weights those of :func:`adjustment_factors` with
     one plane.
 
-    :param levels_db: :math:`L(\phi,\mathrm{h})` in dB, one plane at
+    :param levels: :math:`L(\phi,\mathrm{h})` in dB, one plane at
         :math:`\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi`: 36 readings
         for Annex A.
     :param reference_level_db: :math:`L_\mathrm{rd}` in dB (Default: None,
@@ -786,14 +786,14 @@ def axisymmetric_directivity_factor(
     :warns SphereDivisionWarning: when the step leaves an element larger than
         3 % of the sphere in the two-plane division the one plane stands for.
     """
-    levels = require_finite_matrix(levels_db, "levels_db")
-    if levels.shape[0] != 1:
+    matrix = require_finite_matrix(levels, "levels")
+    if matrix.shape[0] != 1:
         msg = (
-            "'levels_db' must be the readings of one plane; readings in several "
-            f"planes go to directivity_factor. Got shape {levels.shape}."
+            "'levels' must be the readings of one plane; readings in several "
+            f"planes go to directivity_factor. Got shape {matrix.shape}."
         )
         raise ValueError(msg)
-    return _from_planes(levels, reference_level_db, "A.4")
+    return _from_planes(matrix, reference_level_db, "A.4")
 
 
 def equal_area_directivity_factor(
@@ -844,7 +844,7 @@ def equal_area_directivity_factor(
         plane_angles_deg=np.concatenate(
             (np.zeros(horizontal.size), np.full(vertical.size, 90.0))
         ),
-        levels_db=levels,
+        levels=levels,
         weights=weights,
         reference_level_db=lrd,
         gamma=_gamma(levels, weights, lrd),
@@ -877,14 +877,14 @@ def _band_column(
     return column
 
 
-def _frequency_axis(frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+def _frequency_axis(frequencies: ArrayLike) -> NDArray[np.float64]:
     """Positive, finite and strictly increasing frequencies.
 
     :raises ValueError: for anything else.
     """
-    frequencies = require_positive_array(frequencies_hz, "frequencies_hz")
+    frequencies = require_positive_array(frequencies, "frequencies")
     if np.any(np.diff(frequencies) <= 0.0):
-        msg = "'frequencies_hz' must be strictly increasing."
+        msg = "'frequencies' must be strictly increasing."
         raise ValueError(msg)
     return frequencies
 
@@ -896,7 +896,7 @@ class RandomIncidenceSensitivity(OwnsArrays):
 
     :math:`G_\mathrm{RI} = G_\mathrm{F} - 10\lg\gamma` at each frequency.
 
-    :ivar frequencies_hz: the preferred frequencies, in Hz.
+    :ivar frequencies: the preferred frequencies, in Hz.
     :ivar free_field_level_db: :math:`G_\mathrm{F} = L_\mathrm{rd} -
         L_\mathrm{o}`, the free-field sensitivity level for the reference
         direction, in dB.
@@ -904,7 +904,7 @@ class RandomIncidenceSensitivity(OwnsArrays):
     :ivar random_incidence_level_db: :math:`G_\mathrm{RI}`, in dB.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     free_field_level_db: NDArray[np.float64]
     directivity_index_db: NDArray[np.float64]
     random_incidence_level_db: NDArray[np.float64]
@@ -916,13 +916,13 @@ class RandomIncidenceSensitivity(OwnsArrays):
             finite, or the frequencies are not positive and increasing.
         """
         columns = (
-            "frequencies_hz",
+            "frequencies",
             "free_field_level_db",
             "directivity_index_db",
             "random_incidence_level_db",
         )
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in columns[1:]:
             column = require_finite_array(getattr(self, name), name)
             if column.size != frequencies.size:
@@ -973,7 +973,7 @@ class RandomIncidenceSensitivity(OwnsArrays):
 
 
 def random_incidence_sensitivity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     free_field_level_db: ArrayLike,
     directivity_index_db: ArrayLike,
 ) -> RandomIncidenceSensitivity:
@@ -989,7 +989,7 @@ def random_incidence_sensitivity(
     dimensions and geometry, so one model's directivity factors serve every
     instrument of that model (4.2).
 
-    :param frequencies_hz: The preferred frequencies, in Hz, increasing.
+    :param frequencies: The preferred frequencies, in Hz, increasing.
     :param free_field_level_db: :math:`G_\mathrm{F}` at each frequency, in dB
         (A.3).
     :param directivity_index_db: :math:`10\lg\gamma` at each frequency, in dB:
@@ -999,11 +999,11 @@ def random_incidence_sensitivity(
     :raises ValueError: for columns of different lengths, a value that is not
         finite, or frequencies that are not positive and increasing.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     free_field = _band_column(free_field_level_db, "free_field_level_db", frequencies)
     index = _band_column(directivity_index_db, "directivity_index_db", frequencies)
     return RandomIncidenceSensitivity(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         free_field_level_db=free_field,
         directivity_index_db=index,
         random_incidence_level_db=free_field - index,
@@ -1056,7 +1056,7 @@ class DiffuseFieldSensitivity(OwnsArrays):
     for a free-field calibration, Formula (10); :math:`+\Delta_\mathrm{DP}`
     for a pressure calibration, Formula (11).
 
-    :ivar frequencies_hz: the band centres, in Hz.
+    :ivar frequencies: the band centres, in Hz.
     :ivar indicated_level_db: :math:`L_\mathrm{D}`, what the instrument under
         test indicates, in dB.
     :ivar reference_indicated_level_db: :math:`L_\mathrm{D,ref}`, what the
@@ -1071,7 +1071,7 @@ class DiffuseFieldSensitivity(OwnsArrays):
         (Formula (10)) or ``"pressure"`` (Formula (11)).
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     indicated_level_db: NDArray[np.float64]
     reference_indicated_level_db: NDArray[np.float64]
     reference_sensitivity_level_db: NDArray[np.float64]
@@ -1092,8 +1092,8 @@ class DiffuseFieldSensitivity(OwnsArrays):
                 f"got {self.route!r}."
             )
             raise ValueError(msg)
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in (
             "indicated_level_db",
             "reference_indicated_level_db",
@@ -1159,7 +1159,7 @@ class DiffuseFieldSensitivity(OwnsArrays):
 
 
 def diffuse_field_sensitivity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     indicated_level_db: ArrayLike,
     reference_indicated_level_db: ArrayLike,
     *,
@@ -1200,7 +1200,7 @@ def diffuse_field_sensitivity(
     recommends for the reference, at each preferred
     frequency from 25 Hz to 20 kHz.
 
-    :param frequencies_hz: The band centres, in Hz, increasing.
+    :param frequencies: The band centres, in Hz, increasing.
     :param indicated_level_db: :math:`L_\mathrm{D}`, what the instrument under
         test indicates in the diffuse field, in dB, one per band.
     :param reference_indicated_level_db: :math:`L_\mathrm{D,ref}`, what the
@@ -1221,7 +1221,7 @@ def diffuse_field_sensitivity(
         not hold one value per band (or a single value), or a default is asked
         of Table B.1 at a frequency it does not print.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     given = {
         "random_incidence": reference_random_incidence_level_db,
         "free_field": reference_free_field_level_db,
@@ -1273,7 +1273,7 @@ def diffuse_field_sensitivity(
             )
         )
     return DiffuseFieldSensitivity(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         indicated_level_db=_band_column(
             indicated_level_db, "indicated_level_db", frequencies
         ),

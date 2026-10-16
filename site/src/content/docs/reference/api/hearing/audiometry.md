@@ -165,7 +165,7 @@ conservative reading.
 AmbientNoiseCheck(
     presentation: str,
     frequencies: np.ndarray,
-    levels_db: np.ndarray,
+    levels: np.ndarray,
     lowest_test_frequency_hz: float,
     lowest_hearing_level_db: float,
     noise_floor_db: np.ndarray | None = None,
@@ -189,7 +189,7 @@ choices, so a check cannot be built against another table.
 | :--- | :--- |
 | `presentation` | `"air"`, `"bone"` or `"sound field"`. |
 | `frequencies` | The one-third-octave mid-frequencies judged, in hertz, each one of `table_bands_hz`. |
-| `levels_db` | The measured ambient sound pressure level per band, in dB. |
+| `levels` | The measured ambient sound pressure level per band, in dB. |
 | `lowest_test_frequency_hz` | The lowest test tone frequency, in hertz. |
 | `lowest_hearing_level_db` | The lowest hearing threshold level to be measured the limits were raised for, in dB. |
 | `noise_floor_db` | The measuring chain's noise floor per band, in dB, or `None` when not given. |
@@ -1016,7 +1016,7 @@ Whether the ascents or the descents spread over more than 10 dB.
 
 ```python
 check_audiometric_ambient_noise(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     presentation: str = 'air',
     lowest_test_frequency_hz: float = 125.0,
@@ -1048,7 +1048,7 @@ a narrow-band noise signal.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The measured one-third-octave band levels, in dB re 20 µPa: one per band of the table, or one per band of `frequencies`. |
+| `levels` | The measured one-third-octave band levels, in dB re 20 µPa: one per band of the table, or one per band of `frequencies`. |
 | `presentation` | `"air"` (default), `"bone"` or `"sound field"`. |
 | `lowest_test_frequency_hz` | The lowest test tone frequency, 125 (default), 250, or for air conduction 500. |
 | `earphone` | A column of Table 3; air conduction only. |

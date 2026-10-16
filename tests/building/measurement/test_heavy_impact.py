@@ -427,15 +427,15 @@ def test_standardization_reproduces_a_published_25_band_example() -> None:
 
 def test_standardization_rejects_a_mismatched_reverberation_time() -> None:
     with pytest.raises(
-        ValueError, match=r"'reverberation_time' must be a scalar or match 'level'"
+        ValueError, match=r"'reverberation_time' must be a scalar or match 'levels'"
     ):
         building.standardized_maximum_impact_level([70.0, 65.0], 50.0, [1.0, 2.0, 3.0])
 
 
 def test_standardization_rejects_a_mismatched_frequency_axis() -> None:
-    with pytest.raises(ValueError, match=r"'frequency'.*same shape"):
+    with pytest.raises(ValueError, match=r"'frequencies'.*same shape"):
         building.standardized_maximum_impact_level(
-            [70.0, 65.0, 60.0], 50.0, 0.5, frequency=[63.0, 125.0]
+            [70.0, 65.0, 60.0], 50.0, 0.5, frequencies=[63.0, 125.0]
         )
 
 
@@ -488,7 +488,7 @@ def test_octave_conversion_groups_consecutive_thirds() -> None:
 def test_octave_conversion_rejects_a_non_multiple_of_three() -> None:
     with pytest.raises(
         ValueError,
-        match=r"'level' must be a 1-D array whose length is a multiple of 3",
+        match=r"'levels' must be a 1-D array whose length is a multiple of 3",
     ):
         building.heavy_impact_octave_levels([60.0, 61.0, 62.0, 63.0])
 
@@ -619,9 +619,16 @@ def test_rating_rejects_an_unsupported_band_count() -> None:
         building.a_weighted_maximum_impact_level([60.0] * 7)
 
 
+def test_rating_names_levels_when_their_count_disagrees_with_the_band() -> None:
+    with pytest.raises(
+        ValueError, match=r"'levels' must hold 4 values for band='octave'"
+    ):
+        building.a_weighted_maximum_impact_level([60.0] * 12, band="octave")
+
+
 def test_rating_rejects_mismatched_frequencies() -> None:
     with pytest.raises(
-        ValueError, match=r"'frequency' must be the ISO 717-2 Annex D rating bands"
+        ValueError, match=r"'frequencies' must be the ISO 717-2 Annex D rating bands"
     ):
         building.a_weighted_maximum_impact_level(
             ISO717_2_TABLE_D4_LEVELS, [125.0, 250.0, 500.0, 1000.0]

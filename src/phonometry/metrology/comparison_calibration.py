@@ -784,7 +784,7 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
     or one per frequency. Added to a sensitivity level valid at
     :math:`(p_{s,0}, t_0, H_0)`, it gives the level at :math:`(p_s, t, H)`.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar static_pressure_kpa: :math:`p_s`, where the level is wanted, in kPa.
     :ivar temperature_c: :math:`t`, in °C.
     :ivar relative_humidity_percent: :math:`H`, in %.
@@ -798,7 +798,7 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
     :ivar humidity_coefficient_db_per_percent: :math:`\delta_H`, in dB/%.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     static_pressure_kpa: float
     temperature_c: float
     relative_humidity_percent: float
@@ -819,8 +819,8 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
             0 % to 100 %, or a coefficient column that is not one finite value
             per frequency.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        frequencies = _frequency_axis(self.frequencies)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("static_pressure_kpa", "reference_static_pressure_kpa"):
             object.__setattr__(self, name, require_positive(getattr(self, name), name))
         for name in ("temperature_c", "reference_temperature_c"):
@@ -888,7 +888,7 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
 
 
 def environmental_sensitivity_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     static_pressure_kpa: float,
     temperature_c: float,
@@ -934,7 +934,7 @@ def environmental_sensitivity_correction(
     add it to the reference microphone's level (``reference_environment=``)
     or subtract it from the result (``test_environment=``).
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param static_pressure_kpa: :math:`p_s`, the static pressure the level is
         wanted at, in kPa.
     :param temperature_c: :math:`t`, in °C.
@@ -957,7 +957,7 @@ def environmental_sensitivity_correction(
         one value per frequency.
     """
     return EnvironmentalSensitivityCorrection(
-        frequencies_hz=np.asarray(frequencies_hz, dtype=np.float64),
+        frequencies=np.asarray(frequencies, dtype=np.float64),
         static_pressure_kpa=static_pressure_kpa,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
@@ -994,11 +994,11 @@ class JigDiameterCorrection(OwnsArrays):
     the library reads it as :math:`k = 2`, the factor 7.9 and D.2 report every
     expanded uncertainty with.
 
-    :ivar frequencies_hz: The frequencies of the table asked for, in Hz.
+    :ivar frequencies: The frequencies of the table asked for, in Hz.
     :ivar correction_db: The correction at each, in dB.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     correction_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
@@ -1007,9 +1007,9 @@ class JigDiameterCorrection(OwnsArrays):
         :raises ValueError: for columns of different lengths or values that
             are not finite.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
+        frequencies = _frequency_axis(self.frequencies)
         correction = _band_column(self.correction_db, "correction_db", frequencies.size)
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         object.__setattr__(self, "correction_db", read_only(correction))
 
     @property
@@ -1063,7 +1063,7 @@ def _table_a1_value(frequency: float) -> float:
 
 
 def jig_diameter_correction(
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> JigDiameterCorrection:
     r"""The corrections of IEC 61094-5:2016 Table A.1 for a type WS3 microphone
     against a type LS2aP reference in the jig of Figure A.4.
@@ -1077,18 +1077,18 @@ def jig_diameter_correction(
     one of its ``corrections_db`` and ``.standard_uncertainty_db`` to the
     budget as an additional component.
 
-    :param frequencies_hz: Frequencies of the table, in Hz, increasing
+    :param frequencies: Frequencies of the table, in Hz, increasing
         (Default: None, the 14 rows).
     :return: The :class:`JigDiameterCorrection`.
     :raises ValueError: for a frequency the table does not print.
     """
     frequencies = (
         np.array(sorted(IEC61094_5_TABLE_A1), dtype=np.float64)
-        if frequencies_hz is None
-        else _frequency_axis(frequencies_hz)
+        if frequencies is None
+        else _frequency_axis(frequencies)
     )
     correction = np.array([_table_a1_value(float(f)) for f in frequencies])
-    return JigDiameterCorrection(frequencies_hz=frequencies, correction_db=correction)
+    return JigDiameterCorrection(frequencies=frequencies, correction_db=correction)
 
 
 # ---------------------------------------------------------------------------
@@ -1118,7 +1118,7 @@ class DiameterSoundFieldCorrection(OwnsArrays):
     correction at twice the separation, which A.2 names as what the 10 %
     uncertainty of Table A.1 approximately is, comes with it.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar ratio: :math:`R_P` at each frequency, complex: the test microphone's
         effective pressure re the reference's.
     :ivar doubled_separation_ratio: :math:`R_P` with the diaphragms twice as
@@ -1134,7 +1134,7 @@ class DiameterSoundFieldCorrection(OwnsArrays):
     :ivar speed_of_sound: The speed of sound of the air in the gap, in m/s.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     ratio: NDArray[np.complex128]
     doubled_separation_ratio: NDArray[np.complex128]
     reference_radius_m: float
@@ -1150,9 +1150,9 @@ class DiameterSoundFieldCorrection(OwnsArrays):
             increasing, or a column that is not one finite value per
             frequency.
         """
-        frequencies = _frequency_axis(self.frequencies_hz)
+        frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("ratio", "doubled_separation_ratio"):
             column = _complex_column(getattr(self, name), name, count)
             object.__setattr__(self, name, read_only(column))
@@ -1357,7 +1357,7 @@ def _gap_ratio(
 
 
 def diameter_sound_field_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     reference_radius_m: float,
     test_diaphragm_radius_m: float,
@@ -1423,7 +1423,7 @@ def diameter_sound_field_correction(
     stays finite and is returned; the plane mode alone gives
     :math:`R_P = -1` at :math:`c/2L`.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing, each below
+    :param frequencies: The frequencies, in Hz, increasing, each below
         both resonance frequencies.
     :param reference_radius_m: :math:`a`, the radius of the reference
         microphone's front cavity, which the model also takes for its
@@ -1455,7 +1455,7 @@ def diameter_sound_field_correction(
         :math:`a`, conditions Annex F refuses, a gas at another pressure, or a
         frequency at which a mode of the gap is exactly at its cut-off.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     lengths = {
         name: require_positive(value, name)
         for name, value in (
@@ -1503,7 +1503,7 @@ def diameter_sound_field_correction(
     }
     separation = lengths["separation_m"]
     return DiameterSoundFieldCorrection(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         ratio=_gap_ratio(frequencies, separation=separation, **geometry),
         doubled_separation_ratio=_gap_ratio(
             frequencies, separation=2.0 * separation, **geometry
@@ -1531,7 +1531,7 @@ class ComparisonCalibration(OwnsArrays):
 
        L_\mathrm{test} = L_\mathrm{ref} + 20\lg R_V - 20\lg R_P + \sum_j C_j
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar reference_sensitivity_level_db: :math:`L_\mathrm{ref}`, the
         reference microphone's sensitivity level as calibrated, in dB re
         1 V/Pa.
@@ -1556,7 +1556,7 @@ class ComparisonCalibration(OwnsArrays):
         ``None``.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     reference_sensitivity_level_db: NDArray[np.float64]
     output_level_differences_db: NDArray[np.float64]
     pressure_level_difference_db: NDArray[np.float64]
@@ -1582,9 +1582,9 @@ class ComparisonCalibration(OwnsArrays):
         """
         require_choice(self.field, "field", _FIELDS)
         require_choice(self.excitation, "excitation", _EXCITATIONS)
-        frequencies = _frequency_axis(self.frequencies_hz)
+        frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("reference_sensitivity_level_db", "pressure_level_difference_db"):
             column = _band_column(getattr(self, name), name, count)
             object.__setattr__(self, name, read_only(column))
@@ -1677,7 +1677,7 @@ class ComparisonCalibration(OwnsArrays):
     @property
     def correction_db(self) -> NDArray[np.float64]:
         r""":math:`\sum_j C_j`, in dB (0 without corrections)."""
-        total = np.zeros(self.frequencies_hz.size)
+        total = np.zeros(self.frequencies.size)
         for value in self.corrections_db.values():
             total = total + value
         return total
@@ -1780,7 +1780,7 @@ def _frequencies_of(
     :raises ValueError: for a correction at another number of frequencies, or
         at as many but not the same ones.
     """
-    made = correction.frequencies_hz
+    made = correction.frequencies
     if made.size != frequencies.size:
         msg = (
             f"'{name}' was made at {made.size} frequencies; the calibration "
@@ -1840,7 +1840,7 @@ def _calibration(
             raise ValueError(msg)
         named[str(name)] = value
     return ComparisonCalibration(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         reference_sensitivity_level_db=np.asarray(
             reference_sensitivity_level_db, dtype=np.float64
         ),
@@ -2104,7 +2104,7 @@ def _sequential_phases(
 
 
 def simultaneous_comparison(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     reference_sensitivity_level_db: ArrayLike,
     channel_difference_db: ArrayLike,
     interchanged_channel_difference_db: ArrayLike | None = None,
@@ -2171,7 +2171,7 @@ def simultaneous_comparison(
     :math:`\arg R_V`. Neither part prints this form; it is (C.3) written for
     the complex ratio the sensitivity "both modulus and phase" is.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param reference_sensitivity_level_db: :math:`L_\mathrm{ref}`, the
         reference microphone's sensitivity level, in dB re 1 V/Pa, one value
         or one per frequency. For a free-field calibration it is the
@@ -2218,7 +2218,7 @@ def simultaneous_comparison(
         level readings.
     """
     field = require_choice(field, "field", _FIELDS)
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     first = _determinations(channel_difference_db, "channel_difference_db", count)
     if interchanged_channel_difference_db is None:
@@ -2265,7 +2265,7 @@ def simultaneous_comparison(
 
 
 def sequential_comparison(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     reference_sensitivity_level_db: ArrayLike,
     reference_output_level_db: ArrayLike,
     test_output_level_db: ArrayLike,
@@ -2325,7 +2325,7 @@ def sequential_comparison(
     microphones (IEC 61094-8 5.1); with each centre placed in turn at the
     same measurement point (7.3), :math:`\arg R_P` is 0.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param reference_sensitivity_level_db: :math:`L_\mathrm{ref}`, the
         reference microphone's sensitivity level, in dB re 1 V/Pa.
     :param reference_output_level_db: :math:`20\lg V_\mathrm{ref}`, the
@@ -2364,7 +2364,7 @@ def sequential_comparison(
         without the output phases.
     """
     field = require_choice(field, "field", _FIELDS)
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     readings = {
         "reference_output_level_db": _determinations(
@@ -2712,7 +2712,7 @@ class JigCouplerVerification(OwnsArrays):
     the covariance negative and widens the band beyond the root-sum-square,
     which this verification does not represent.
 
-    :ivar frequencies_hz: The frequencies the two calibrations share, in Hz.
+    :ivar frequencies: The frequencies the two calibrations share, in Hz.
     :ivar calibration_level_db: :math:`L_\mathrm{cal}`, the sensitivity level
         from the jig or coupler being validated, in dB re 1 V/Pa.
     :ivar calibration_uncertainty_db: :math:`U_\mathrm{cal}`, its expanded
@@ -2736,7 +2736,7 @@ class JigCouplerVerification(OwnsArrays):
         calibrations).
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     calibration_level_db: NDArray[np.float64]
     calibration_uncertainty_db: NDArray[np.float64]
     validation_level_db: NDArray[np.float64]
@@ -2760,9 +2760,9 @@ class JigCouplerVerification(OwnsArrays):
             validation.
         """
         require_choice(self.validation, "validation", _VALIDATIONS)
-        frequencies = _frequency_axis(self.frequencies_hz)
+        frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in (
             "calibration_level_db",
             "calibration_uncertainty_db",
@@ -2784,7 +2784,7 @@ class JigCouplerVerification(OwnsArrays):
                 "JigCouplerVerification: 'shared_standard_uncertainty_db' cannot "
                 "exceed the standard uncertainty of either calibration, its "
                 f"expanded uncertainty over k = {_COVERAGE_FACTOR:g}; it does at "
-                f"{self.frequencies_hz[larger].tolist()} Hz."
+                f"{self.frequencies[larger].tolist()} Hz."
             )
             raise ValueError(msg)
         if not np.all(settled(self.expanded_uncertainty_db) > 0.0):
@@ -2862,7 +2862,7 @@ class JigCouplerVerification(OwnsArrays):
     @property
     def failing_frequencies_hz(self) -> NDArray[np.float64]:
         """The frequencies where the two calibrations disagree, in Hz."""
-        return self.frequencies_hz[~self.agrees]
+        return self.frequencies[~self.agrees]
 
     @property
     def passes(self) -> bool:
@@ -3050,8 +3050,8 @@ def verify_jig_or_coupler(
         msg = "'calibration' must carry its expanded uncertainty."
         raise ValueError(msg)
     kind, level, uncertainty = _validation_columns(validation, microphone)
-    own = np.asarray(calibration.frequencies_hz, dtype=np.float64)
-    other = np.asarray(validation.frequencies_hz, dtype=np.float64)
+    own = np.asarray(calibration.frequencies, dtype=np.float64)
+    other = np.asarray(validation.frequencies, dtype=np.float64)
     match = np.array(
         [
             int(np.argmin(np.abs(other / frequency - 1.0)))
@@ -3072,7 +3072,7 @@ def verify_jig_or_coupler(
         msg = "'shared_standard_uncertainty_db' must be non-negative."
         raise ValueError(msg)
     return JigCouplerVerification(
-        frequencies_hz=own[covered],
+        frequencies=own[covered],
         calibration_level_db=np.asarray(calibration.sensitivity_level_db)[covered],
         calibration_uncertainty_db=np.asarray(calibration.expanded_uncertainty_db)[
             covered
@@ -3351,7 +3351,7 @@ class ImpedancePressureRatio(OwnsArrays):
     :attr:`level_difference_db`, is the ``pressure_level_difference_db`` of a
     comparison, and its phase the ``pressure_phase_difference_deg``.
 
-    :ivar frequencies_hz: The frequencies, in Hz.
+    :ivar frequencies: The frequencies, in Hz.
     :ivar ratio: :math:`R_P` at each frequency, complex.
     :ivar coupling: ``"coupler"``, a closed coupler small against the
         wavelength (IEC 61094-2 Formula (3)), or ``"series"``, the air between
@@ -3361,7 +3361,7 @@ class ImpedancePressureRatio(OwnsArrays):
         complex, in m³.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     ratio: NDArray[np.complex128]
     coupling: str
     coupling_equivalent_volume_m3: NDArray[np.complex128]
@@ -3374,9 +3374,9 @@ class ImpedancePressureRatio(OwnsArrays):
             finite value per frequency.
         """
         require_choice(self.coupling, "coupling", ("coupler", "series"))
-        frequencies = _frequency_axis(self.frequencies_hz)
+        frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
-        object.__setattr__(self, "frequencies_hz", read_only(frequencies))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("ratio", "coupling_equivalent_volume_m3"):
             column = _complex_column(getattr(self, name), name, count)
             object.__setattr__(self, name, read_only(column))
@@ -3444,7 +3444,7 @@ class ImpedancePressureRatio(OwnsArrays):
 
 
 def impedance_pressure_ratio(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     reference_equivalent_volume_m3: ArrayLike,
     test_equivalent_volume_m3: ArrayLike,
@@ -3500,7 +3500,7 @@ def impedance_pressure_ratio(
       length and radius; Table D.1 still asks for the effect to be
       "established experimentally" when the impedances differ significantly.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param reference_equivalent_volume_m3: :math:`V_\mathrm{e,ref}`, complex,
         in m³, one value or one per frequency, such as
         :meth:`ReciprocityMicrophone.complex_equivalent_volume_m3` gives it
@@ -3522,7 +3522,7 @@ def impedance_pressure_ratio(
         column that is not one finite value per frequency, or a coupling and
         a test microphone whose equivalent volumes cancel.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     if (coupling_equivalent_volume_m3 is None) == (coupling_impedance_pa_s_m3 is None):
         msg = (
@@ -3569,7 +3569,7 @@ def impedance_pressure_ratio(
         )
         raise ValueError(msg)
     return ImpedancePressureRatio(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         ratio=ratio,
         coupling=coupling,
         coupling_equivalent_volume_m3=volume,
@@ -3584,7 +3584,7 @@ _AIR_GAP_MASS_FRACTION = 1.0 / 12.0
 
 
 def air_gap_series_impedance_pa_s_m3(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     gap_length_m: float,
     gap_radius_m: float,
@@ -3630,7 +3630,7 @@ def air_gap_series_impedance_pa_s_m3(
     the printed ratio is the divider of :func:`impedance_pressure_ratio`
     given ``coupling_impedance_pa_s_m3`` = :math:`Z_x`, exactly.
 
-    :param frequencies_hz: The frequencies, in Hz, increasing.
+    :param frequencies: The frequencies, in Hz, increasing.
     :param gap_length_m: :math:`L`, the length of the space between the two
         diaphragms, in m (Appendix B's example: 2 mm).
     :param gap_radius_m: :math:`r`, its radius, in m (Appendix B's example:
@@ -3650,7 +3650,7 @@ def air_gap_series_impedance_pa_s_m3(
         a length or radius that is not positive, conditions Annex F refuses,
         or a gas at another pressure.
     """
-    frequencies = _frequency_axis(frequencies_hz)
+    frequencies = _frequency_axis(frequencies)
     length = require_positive(gap_length_m, "gap_length_m")
     radius = require_positive(gap_radius_m, "gap_radius_m")
     medium = _medium(temperature_c, static_pressure_kpa, relative_humidity_percent, gas)
@@ -3715,26 +3715,26 @@ class RectangularPulse(RichDisplay):
         r""":math:`X(0) = 2ab`, the area of the pulse, in V·s."""
         return self.amplitude_v * self.duration_s
 
-    def spectrum_at(self, frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+    def spectrum_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
         r""":math:`X(f)` of Formula (B.10), in V·s, the transform of the pulse
         centred on the time origin, where it is real.
 
-        :param frequencies_hz: Any frequencies, in Hz.
+        :param frequencies: Any frequencies, in Hz.
         :return: :math:`X(f)` at each.
         :raises ValueError: for a frequency that is not finite.
         """
-        frequencies = require_finite_array(frequencies_hz, "frequencies_hz")
+        frequencies = require_finite_array(frequencies, "frequencies")
         # numpy's sinc is sin(pi x)/(pi x): with x = 2 f b it is (B.10) over 2ab.
         return self.area_v_s * np.sinc(frequencies * self.duration_s)
 
-    def level_db_at(self, frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+    def level_db_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert X(f)/X(0)\rvert`, how far the spectrum has
         fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 
-        :param frequencies_hz: Any frequencies, in Hz.
+        :param frequencies: Any frequencies, in Hz.
         :return: The level at each, in dB.
         """
-        relative = np.abs(self.spectrum_at(frequencies_hz)) / self.area_v_s
+        relative = np.abs(self.spectrum_at(frequencies)) / self.area_v_s
         with np.errstate(divide="ignore"):
             return 20.0 * np.log10(relative)
 
@@ -3835,11 +3835,11 @@ def rectangular_pulse_duration_s(
     return 1.0 / (ratio * upper)
 
 
-def _sample_index(time_s: float, sample_rate_hz: float, *, up: bool) -> int:
+def _sample_index(time_s: float, fs: float, *, up: bool) -> int:
     """The first sample at or after a time (``up``), or the last at or before
     it, with a time within the rounding of a sample read as that sample.
     """
-    position = time_s * sample_rate_hz
+    position = time_s * fs
     nearest = round(position)
     if abs(position - nearest) <= _SAMPLE_TOLERANCE * max(1.0, abs(position)):
         return int(nearest)
@@ -3866,21 +3866,21 @@ def _window_shape(
 def _fourier_transform(
     samples: NDArray[np.float64],
     first_index: int,
-    sample_rate_hz: float,
+    fs: float,
     frequencies: NDArray[np.float64],
 ) -> NDArray[np.complex128]:
     r"""Formula (B.2) for sampled data at any frequencies:
     :math:`H(f) = \sum_n h_n \mathrm{e}^{-\mathrm{j}2\pi f t_n}/f_\mathrm{s}`,
     with :math:`t_n = n/f_\mathrm{s}` counted from the start of the record.
     """
-    times = (first_index + np.arange(samples.size)) / sample_rate_hz
+    times = (first_index + np.arange(samples.size)) / fs
     result = np.empty(frequencies.size, dtype=np.complex128)
     block = max(1, _TRANSFORM_BLOCK // max(1, samples.size))
     for start in range(0, frequencies.size, block):
         chunk = frequencies[start : start + block]
         kernel = np.exp(-2j * np.pi * np.outer(chunk, times))
         result[start : start + block] = kernel @ samples
-    return result / sample_rate_hz
+    return result / fs
 
 
 @dataclass(frozen=True)
@@ -3897,7 +3897,7 @@ class TimeSelectiveResponse(OwnsArrays):
     the pulse's, as a pulse that begins at the start of the record.
 
     :ivar impulse_response: The impulse response, sampled.
-    :ivar sample_rate_hz: Its sample rate, in Hz.
+    :ivar fs: Its sample rate, in Hz.
     :ivar window_start_s: Where the window begins, in s.
     :ivar window_end_s: Where it ends, in s.
     :ivar window_shape: ``"tukey"``, ``"hann"``, ``"hamming"`` or
@@ -3909,7 +3909,7 @@ class TimeSelectiveResponse(OwnsArrays):
     """
 
     impulse_response: NDArray[np.float64]
-    sample_rate_hz: float
+    fs: float
     window_start_s: float
     window_end_s: float
     window_shape: str = "tukey"
@@ -3931,8 +3931,8 @@ class TimeSelectiveResponse(OwnsArrays):
             msg = "'impulse_response' must be one value per sample, at least two."
             raise ValueError(msg)
         object.__setattr__(self, "impulse_response", read_only(response))
-        rate = require_positive(self.sample_rate_hz, "sample_rate_hz")
-        object.__setattr__(self, "sample_rate_hz", rate)
+        rate = require_positive(self.fs, "fs")
+        object.__setattr__(self, "fs", rate)
         require_choice(self.window_shape, "window_shape", _WINDOW_SHAPES)
         taper = require_positive(self.taper_fraction, "taper_fraction")
         if taper > 1.0:
@@ -3957,14 +3957,14 @@ class TimeSelectiveResponse(OwnsArrays):
     @property
     def _bounds(self) -> tuple[int, int]:
         """The first and the last sample of the window."""
-        first = _sample_index(self.window_start_s, self.sample_rate_hz, up=True)
-        last = _sample_index(self.window_end_s, self.sample_rate_hz, up=False)
+        first = _sample_index(self.window_start_s, self.fs, up=True)
+        last = _sample_index(self.window_end_s, self.fs, up=False)
         return first, last
 
     @property
-    def time_s(self) -> NDArray[np.float64]:
+    def times(self) -> NDArray[np.float64]:
         """The time of each sample from the start of the record, in s."""
-        return np.arange(self.impulse_response.size) / self.sample_rate_hz
+        return np.arange(self.impulse_response.size) / self.fs
 
     @property
     def window(self) -> NDArray[np.float64]:
@@ -3994,12 +3994,12 @@ class TimeSelectiveResponse(OwnsArrays):
         """
         return 1.0 / self.window_length_s
 
-    def response_at(self, frequencies_hz: ArrayLike) -> NDArray[np.complex128]:
+    def response_at(self, frequencies: ArrayLike) -> NDArray[np.complex128]:
         r""":math:`H(f)`, Formula (B.2) applied to the windowed response, at
         each frequency, complex, in the unit of the response times seconds
         (divided by the pulse's spectrum, in V·s, when there is one).
 
-        :param frequencies_hz: The frequencies, in Hz, increasing.
+        :param frequencies: The frequencies, in Hz, increasing.
         :return: :math:`H(f)` at each.
         :raises ValueError: for frequencies that are not positive and
             increasing, or, with an excitation, a frequency at or above the
@@ -4009,21 +4009,19 @@ class TimeSelectiveResponse(OwnsArrays):
         return self._transform(
             self.windowed_impulse_response[first : last + 1],
             first,
-            _frequency_axis(frequencies_hz),
+            _frequency_axis(frequencies),
         )
 
-    def record_response_at(self, frequencies_hz: ArrayLike) -> NDArray[np.complex128]:
+    def record_response_at(self, frequencies: ArrayLike) -> NDArray[np.complex128]:
         r""":math:`H(f)` of the whole record with no window, the reflections
         included: what the window takes away, for comparison.
 
-        :param frequencies_hz: The frequencies, in Hz, increasing.
+        :param frequencies: The frequencies, in Hz, increasing.
         :return: :math:`H(f)` at each.
         :raises ValueError: for frequencies that are not positive and
             increasing.
         """
-        return self._transform(
-            self.impulse_response, 0, _frequency_axis(frequencies_hz)
-        )
+        return self._transform(self.impulse_response, 0, _frequency_axis(frequencies))
 
     def _transform(
         self,
@@ -4034,7 +4032,7 @@ class TimeSelectiveResponse(OwnsArrays):
         """Formula (B.2) of the samples from ``first`` on, divided by the
         pulse's spectrum when there is one.
         """
-        response = _fourier_transform(samples, first, self.sample_rate_hz, frequencies)
+        response = _fourier_transform(samples, first, self.fs, frequencies)
         if self.excitation is not None:
             pulse = self.excitation
             if frequencies[-1] >= pulse.first_zero_hz:
@@ -4050,23 +4048,23 @@ class TimeSelectiveResponse(OwnsArrays):
             response = response / (pulse.spectrum_at(frequencies) * delay)
         return response
 
-    def level_db_at(self, frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+    def level_db_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert H(f)\rvert`, in dB re 1 of the response's unit
         times a second.
 
-        :param frequencies_hz: The frequencies, in Hz, increasing.
+        :param frequencies: The frequencies, in Hz, increasing.
         :return: The level at each, in dB.
         """
-        return 20.0 * np.log10(np.abs(self.response_at(frequencies_hz)))
+        return 20.0 * np.log10(np.abs(self.response_at(frequencies)))
 
-    def phase_deg_at(self, frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+    def phase_deg_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
         r""":math:`\arg H(f)`, in degrees, with the time origin at the start of
         the record.
 
-        :param frequencies_hz: The frequencies, in Hz, increasing.
+        :param frequencies: The frequencies, in Hz, increasing.
         :return: The phase at each, in degrees.
         """
-        return np.degrees(np.angle(self.response_at(frequencies_hz)))
+        return np.degrees(np.angle(self.response_at(frequencies)))
 
     def free_field_region(
         self,
@@ -4113,7 +4111,7 @@ class TimeSelectiveResponse(OwnsArrays):
         ax: Axes | None = None,
         *,
         quantity: str = "impulse",
-        frequencies_hz: ArrayLike | None = None,
+        frequencies: ArrayLike | None = None,
         language: str = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -4122,7 +4120,7 @@ class TimeSelectiveResponse(OwnsArrays):
 
         :param ax: Existing axes to draw on, or ``None`` to create a figure.
         :param quantity: ``"impulse"`` (default) or ``"response"``.
-        :param frequencies_hz: The frequencies of the response, in Hz
+        :param frequencies: The frequencies of the response, in Hz
             (Default: None, 200 from the frequency resolution to a quarter of
             the sample rate, or, with an :attr:`excitation`, to a tenth of
             the first zero of its spectrum if that is lower, B.6.1).
@@ -4136,14 +4134,12 @@ class TimeSelectiveResponse(OwnsArrays):
         from .._plot.metrology import plot_time_selective_response
 
         require_choice(quantity, "quantity", ("impulse", "response"))
-        frequencies = (
-            None if frequencies_hz is None else _frequency_axis(frequencies_hz)
-        )
+        frequencies = None if frequencies is None else _frequency_axis(frequencies)
         return plot_time_selective_response(
             self,
             ax=ax,
             quantity=quantity,
-            frequencies_hz=frequencies,
+            frequencies=frequencies,
             language=check_language(language),
             **kwargs,
         )
@@ -4151,7 +4147,7 @@ class TimeSelectiveResponse(OwnsArrays):
 
 def time_selective_response(
     impulse_response: ArrayLike,
-    sample_rate_hz: float,
+    fs: float,
     *,
     window_start_s: float,
     window_end_s: float,
@@ -4187,7 +4183,7 @@ def time_selective_response(
 
     :param impulse_response: The impulse response, one value per sample,
         from the start of the record.
-    :param sample_rate_hz: Its sample rate, in Hz.
+    :param fs: Its sample rate, in Hz.
     :param window_start_s: Where the window begins, in s from the start of the
         record: before the direct sound arrives.
     :param window_end_s: Where it ends, in s: before the first reflection.
@@ -4202,7 +4198,7 @@ def time_selective_response(
     """
     return TimeSelectiveResponse(
         impulse_response=np.asarray(impulse_response, dtype=np.float64),
-        sample_rate_hz=sample_rate_hz,
+        fs=fs,
         window_start_s=window_start_s,
         window_end_s=window_end_s,
         window_shape=window_shape,
@@ -4244,7 +4240,7 @@ class SteppedSineImpulseResponse(OwnsArrays):
         object.__setattr__(self, "impulse_response", read_only(response))
 
     @property
-    def sample_rate_hz(self) -> float:
+    def fs(self) -> float:
         r""":math:`f_\mathrm{s} = N\,\Delta f`, in Hz."""
         return self.impulse_response.size * self.frequency_step_hz
 
@@ -4257,9 +4253,9 @@ class SteppedSineImpulseResponse(OwnsArrays):
         return 1.0 / self.frequency_step_hz
 
     @property
-    def time_s(self) -> NDArray[np.float64]:
+    def times(self) -> NDArray[np.float64]:
         """The time of each sample, in s."""
-        return np.arange(self.impulse_response.size) / self.sample_rate_hz
+        return np.arange(self.impulse_response.size) / self.fs
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -4281,7 +4277,7 @@ class SteppedSineImpulseResponse(OwnsArrays):
 
 
 def stepped_sine_impulse_response(
-    frequencies_hz: ArrayLike, response: ArrayLike
+    frequencies: ArrayLike, response: ArrayLike
 ) -> SteppedSineImpulseResponse:
     r"""The impulse response of a frequency response measured at linearly
     spaced frequencies (IEC 61094-8:2012 B.2, Formula (B.3)).
@@ -4311,28 +4307,28 @@ def stepped_sine_impulse_response(
     whose primary reflections all arrive before 8 ms, about 30 Hz in a large
     one.
 
-    :param frequencies_hz: :math:`k\,\Delta f`, from 0 Hz, in Hz, equally
+    :param frequencies: :math:`k\,\Delta f`, from 0 Hz, in Hz, equally
         spaced.
     :param response: :math:`H(k\,\Delta f)`, complex, one value per frequency.
     :return: The :class:`SteppedSineImpulseResponse`; pass its
-        ``impulse_response`` and ``sample_rate_hz`` to
+        ``impulse_response`` and ``fs`` to
         :func:`time_selective_response`.
     :raises ValueError: for fewer than two frequencies, an axis that does not
         start at 0 Hz or is not equally spaced, or a response that is not one
         finite value per frequency.
     """
-    frequencies = require_finite_array(frequencies_hz, "frequencies_hz")
+    frequencies = require_finite_array(frequencies, "frequencies")
     if frequencies.size < _MIN_WINDOW_SAMPLES:
-        msg = "'frequencies_hz' must hold at least two frequencies, from 0 Hz."
+        msg = "'frequencies' must hold at least two frequencies, from 0 Hz."
         raise ValueError(msg)
     steps = np.diff(frequencies)
     step = float(frequencies[1] - frequencies[0])
     if step <= 0.0 or not np.allclose(steps, step, rtol=_STEP_REL_TOL, atol=0.0):
-        msg = "'frequencies_hz' must be equally spaced and increasing (B.2.1)."
+        msg = "'frequencies' must be equally spaced and increasing (B.2.1)."
         raise ValueError(msg)
     if abs(float(frequencies[0])) > _STEP_REL_TOL * step:
         msg = (
-            f"'frequencies_hz' must start at 0 Hz, not {frequencies[0]:g} Hz: extend "
+            f"'frequencies' must start at 0 Hz, not {frequencies[0]:g} Hz: extend "
             "the measurement to 0 Hz from the pressure sensitivities (B.2.1)."
         )
         raise ValueError(msg)

@@ -269,7 +269,7 @@ def test_the_verdict_has_no_truth_value_and_freezes_its_arrays(
     with pytest.raises(TypeError, match="TimeInvarianceResult has no truth value"):
         bool(swept)
     assert not swept.output_levels_db.flags.writeable
-    assert not swept.band_frequencies.flags.writeable
+    assert not swept.frequencies.flags.writeable
 
 
 def test_a_verdict_refuses_levels_of_the_wrong_shape(

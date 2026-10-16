@@ -97,7 +97,7 @@ coupler to be filled with hydrogen or helium.
 
 ```python
 capillary_tube_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     length_m: float,
     radius_m: float,
@@ -132,7 +132,7 @@ values were computed with.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `length_m` | $l_\mathrm{C}$, in m. |
 | `radius_m` | $a_\mathrm{t}$, in m. |
 | `gas` | The gas in the tube. |
@@ -166,7 +166,7 @@ coupler (IEC 61094-2:2009 5.6 and Annex B).
 
 ```python
 CapillaryTubeImpedance(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     length_m: float,
     radius_m: float,
     propagation_coefficient_per_m: NDArray[np.complex128],
@@ -181,7 +181,7 @@ The acoustic input impedance of an open capillary tube (IEC
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `length_m` | $l_\mathrm{C}$, in m. |
 | `radius_m` | $a_\mathrm{t}$, in m. |
 | `propagation_coefficient_per_m` | $\gamma$, complex, in 1/m. |
@@ -222,7 +222,7 @@ GPa·s/m³, the unit of Tables B.1 and B.2.
 
 ```python
 check_coupler(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     *,
@@ -251,7 +251,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `coupler` | The coupler. |
 | `microphones` | The microphones that close it, two or a triad of one type; the first two give the front cavities that add to the volume, surface and length. |
 | `temperature_c` | The temperature, in °C. |
@@ -272,7 +272,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 
 ```python
 coupler_parameter_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     uncertainties: CouplerInputUncertainties,
@@ -308,7 +308,7 @@ are the length and the radius of the capillary tubes.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `coupler` | The coupler, the same for the three pairs. |
 | `microphones` | The three microphones. |
 | `uncertainties` | The standard uncertainty of each input quantity, a [`CouplerInputUncertainties`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplerinputuncertainties). |
@@ -331,7 +331,7 @@ are the length and the radius of the capillary tubes.
 
 ```python
 coupler_transfer_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     transmitter: ReciprocityMicrophone,
     receiver: ReciprocityMicrophone,
@@ -372,7 +372,7 @@ not change the result.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `coupler` | The coupler. |
 | `transmitter` | Microphone (1). |
 | `receiver` | Microphone (2). |
@@ -595,7 +595,7 @@ the uncertainty of that parameter on each of the three microphones.
 
 ```python
 CouplerParameterUncertainty(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     components_db: Mapping[str, NDArray[np.float64]],
     microphone: int,
 )
@@ -611,7 +611,7 @@ Built by [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/r
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `components_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
@@ -642,7 +642,7 @@ Plot each component against frequency.
 
 ```python
 CouplerTransferImpedance(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     coupler: str,
     adiabatic_impedance_pa_s_m3: NDArray[np.complex128],
     heat_conducting_impedance_pa_s_m3: NDArray[np.complex128],
@@ -658,7 +658,7 @@ with its corrections (IEC 61094-2:2009 5.4 to 5.6).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `coupler` | `"plane_wave"` or `"large_volume"`. |
 | `adiabatic_impedance_pa_s_m3` | $Z'_{\mathrm{a},12}$, adiabatic and without losses (Formula (3) or (4)), in Pa·s/m³. |
 | `heat_conducting_impedance_pa_s_m3` | $Z''_{\mathrm{a},12}$, corrected for heat conduction (5.5): with $\Delta_\mathrm{H}$ in a large-volume coupler, with Formulas (A.3) to (A.5) in a plane-wave one, in Pa·s/m³. |
@@ -714,7 +714,7 @@ Pa·s/m³.
 
 ```python
 heat_conduction_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     volume_m3: float,
     surface_area_m2: float,
@@ -737,7 +737,7 @@ coupler.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `volume_m3` | The total volume, in m³. |
 | `surface_area_m2` | The total surface, in m². |
 | `length_to_diameter_ratio` | $R$. |
@@ -756,7 +756,7 @@ coupler.
 
 ```python
 HeatConductionCorrection(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     length_to_diameter_ratio: float,
     volume_to_surface_m: float,
     x: NDArray[np.float64],
@@ -773,7 +773,7 @@ The heat-conduction correction of a closed cavity at low frequencies
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `length_to_diameter_ratio` | $R$. |
 | `volume_to_surface_m` | $l$, the volume to surface ratio, in m. |
 | `x` | $X = f l^2/(\kappa\alpha_t)$ at each frequency. |
@@ -846,7 +846,7 @@ IEC61094_2_TABLE_C3 = {800.0: 0.0, 1000.0: -0.002, 1250.0: -0.013, 1600.0: -0.03
 
 ```python
 large_volume_wave_motion_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     speed_of_sound_ratio: float = 1.0,
 ) -> WaveMotionCorrection
@@ -872,7 +872,7 @@ frequency is read at its value divided by it.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `speed_of_sound_ratio` | The speed of sound in the gas re that in air (Default: 1, air). |
 
 **Returns:** The [`WaveMotionCorrection`](/phonometry/reference/api/metrology/reciprocity-coupler/#wavemotioncorrection).
@@ -1052,7 +1052,7 @@ A plane-wave coupler: a cylinder of the diameter of the front cavities
 
 ```python
 pressure_reciprocity(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
     *,
@@ -1081,7 +1081,7 @@ complex products together, on the branch described in
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedances_ohm` | $Z_{\mathrm{e},12}$, $Z_{\mathrm{e},23}$ and $Z_{\mathrm{e},31}$, complex, in Ω, each one value or one per frequency. |
 | `acoustic_transfer_impedances` | $Z_{\mathrm{a},12}$, $Z_{\mathrm{a},23}$ and $Z_{\mathrm{a},31}$, each a [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³ already corrected. |
 | `corrections_db` | Corrections added to every sensitivity level, by name, in dB: [`large_volume_wave_motion_correction`](/phonometry/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction) for the large-volume coupler of LS1P microphones (Default: none). |
@@ -1099,7 +1099,7 @@ complex products together, on the branch described in
 
 ```python
 pressure_reciprocity_pair(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
     sensitivity_ratio: ArrayLike,
@@ -1124,7 +1124,7 @@ reciprocal (5.1.1).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedance_ohm` | $Z_{\mathrm{e},12}$, complex, in Ω. |
 | `acoustic_transfer_impedance` | $Z_{\mathrm{a},12}$, a [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³. |
 | `sensitivity_ratio` | $M_{\mathrm{p},1}/M_{\mathrm{p},2}$, complex, one value or one per frequency. |
@@ -1183,7 +1183,7 @@ times the resonance frequency.
 
 ```python
 ReciprocityMicrophone.acoustic_impedance_pa_s_m3(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -1193,7 +1193,7 @@ $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\ome
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, positive. |
+| `frequencies` | The frequencies, in Hz, positive. |
 
 **Returns:** $Z_\mathrm{a}$ at each frequency, in Pa·s/m³.
 
@@ -1201,7 +1201,7 @@ $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\ome
 
 ```python
 ReciprocityMicrophone.complex_equivalent_volume_m3(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -1216,7 +1216,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 
 **Returns:** $V_\mathrm{e}$ at each frequency, in m³.
 
@@ -1295,7 +1295,7 @@ that is not a right circular cylinder.
 
 ```python
 WaveMotionCorrection(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     correction_db: NDArray[np.float64],
     speed_of_sound_ratio: float,
 )
@@ -1308,7 +1308,7 @@ microphones (IEC 61094-2:2009 C.3, Table C.3).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `correction_db` | The correction added to the pressure sensitivity level, in dB. |
 | `speed_of_sound_ratio` | The ratio of the speed of sound in the gas of the coupler to that in air, 1 for air. |
 

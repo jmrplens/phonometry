@@ -75,7 +75,7 @@ Plot the composite spectrum and its components versus frequency.
 
 ```python
 ocean_ambient_noise(
-    frequency_hz: NDArray[np.float64] | list[float],
+    frequencies_hz: NDArray[np.float64] | list[float],
     *,
     wind_speed_knots: float,
     shipping: NDArray[np.float64] | list[float] | None = None,
@@ -94,9 +94,9 @@ components, plus an optional caller-supplied shipping spectrum.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency_hz` | Frequencies, in Hz (1-D, strictly positive). |
+| `frequencies_hz` | Frequencies, in Hz (1-D, strictly positive). |
 | `wind_speed_knots` | Wind speed `U`, in knots. |
-| `shipping` | Optional shipping-noise spectrum level per frequency, in dB re 1 µPa²/Hz (same length as `frequency_hz`), or `None`. |
+| `shipping` | Optional shipping-noise spectrum level per frequency, in dB re 1 µPa²/Hz (same length as `frequencies_hz`), or `None`. |
 | `temperature_c` | Water temperature, in degrees Celsius. |
 | `density` | Water density, in kg/m³. |
 | `speed_of_sound` | Sound speed, in m/s. |

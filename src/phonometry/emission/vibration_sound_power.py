@@ -142,7 +142,7 @@ def velocity_level_from_acceleration(
 
     :param peak_acceleration: Peak acceleration ``a_peak`` (scalar or array),
         in m/s^2.
-    :param frequency: Frequency ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
     :return: The velocity level ``L_v``, in dB re ``v0``.
     :raises ValueError: for a non-positive frequency or reference.

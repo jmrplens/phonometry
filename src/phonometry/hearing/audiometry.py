@@ -561,7 +561,7 @@ class AmbientNoiseCheck(OwnsArrays):
     :ivar presentation: ``"air"``, ``"bone"`` or ``"sound field"``.
     :ivar frequencies: The one-third-octave mid-frequencies judged, in hertz,
         each one of :attr:`table_bands_hz`.
-    :ivar levels_db: The measured ambient sound pressure level per band, in dB.
+    :ivar levels: The measured ambient sound pressure level per band, in dB.
     :ivar lowest_test_frequency_hz: The lowest test tone frequency, in hertz.
     :ivar lowest_hearing_level_db: The lowest hearing threshold level to be
         measured the limits were raised for, in dB.
@@ -582,7 +582,7 @@ class AmbientNoiseCheck(OwnsArrays):
 
     presentation: str
     frequencies: np.ndarray
-    levels_db: np.ndarray
+    levels: np.ndarray
     lowest_test_frequency_hz: float
     lowest_hearing_level_db: float
     noise_floor_db: np.ndarray | None = None
@@ -610,8 +610,8 @@ class AmbientNoiseCheck(OwnsArrays):
             )
             raise ValueError(msg)
         rows = self._rows
-        if np.asarray(self.levels_db).shape != rows.shape:
-            msg = "AmbientNoiseCheck: 'levels_db' must hold one level per band."
+        if np.asarray(self.levels).shape != rows.shape:
+            msg = "AmbientNoiseCheck: 'levels' must hold one level per band."
             raise ValueError(msg)
         floor = self.noise_floor_db
         if floor is not None and np.asarray(floor).shape != rows.shape:
@@ -659,7 +659,7 @@ class AmbientNoiseCheck(OwnsArrays):
 
         :return: Positive where the room is too loud.
         """
-        return np.asarray(self.levels_db - self.limits_db, dtype=np.float64)
+        return np.asarray(self.levels - self.limits_db, dtype=np.float64)
 
     @property
     def within(self) -> np.ndarray:
@@ -667,7 +667,7 @@ class AmbientNoiseCheck(OwnsArrays):
 
         :return: One boolean per band.
         """
-        return _at_most(self.levels_db, self.limits_db)
+        return _at_most(self.levels, self.limits_db)
 
     @property
     def covers_all_bands(self) -> bool:
@@ -689,7 +689,7 @@ class AmbientNoiseCheck(OwnsArrays):
         """
         if self.noise_floor_db is None:
             return np.zeros(self.frequencies.size, dtype=bool)
-        return ~_at_least(self.levels_db - self.noise_floor_db, _NOISE_FLOOR_MARGIN_DB)
+        return ~_at_least(self.levels - self.noise_floor_db, _NOISE_FLOOR_MARGIN_DB)
 
     @property
     def lowest_measurable_hearing_level_db(self) -> float:
@@ -739,7 +739,7 @@ class AmbientNoiseCheck(OwnsArrays):
 
 
 def check_audiometric_ambient_noise(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     presentation: str = "air",
     lowest_test_frequency_hz: float = 125.0,
@@ -765,7 +765,7 @@ def check_audiometric_ambient_noise(
     the table as printed, and a room that passes it may still be too loud for
     a narrow-band noise signal.
 
-    :param levels_db: The measured one-third-octave band levels, in dB re
+    :param levels: The measured one-third-octave band levels, in dB re
         20 µPa: one per band of the table, or one per band of ``frequencies``.
     :param presentation: ``"air"`` (default), ``"bone"`` or ``"sound field"``.
     :param lowest_test_frequency_hz: The lowest test tone frequency, 125
@@ -803,9 +803,9 @@ def check_audiometric_ambient_noise(
         if frequencies is None
         else table[_table_rows(presentation, _levels(frequencies, "frequencies"))]
     )
-    levels = _levels(levels_db, "levels_db")
+    levels = _levels(levels, "levels")
     if levels.size != freqs.size:
-        msg = f"'levels_db' must hold one level per band; got {levels.size} for {freqs.size}."
+        msg = f"'levels' must hold one level per band; got {levels.size} for {freqs.size}."
         raise ValueError(msg)
     floor = None
     if noise_floor_db is not None:
@@ -819,7 +819,7 @@ def check_audiometric_ambient_noise(
     return AmbientNoiseCheck(
         presentation=presentation,
         frequencies=freqs,
-        levels_db=levels,
+        levels=levels,
         lowest_test_frequency_hz=float(lowest_test_frequency_hz),
         lowest_hearing_level_db=float(lowest_hearing_level_db),
         noise_floor_db=floor,

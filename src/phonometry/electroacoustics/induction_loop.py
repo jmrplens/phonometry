@@ -357,7 +357,7 @@ def field_strength(level_db: ArrayLike) -> np.ndarray:
     4.3, and plus or minus 3 dB span 283 mA/m to 565 mA/m (10.2 as amended
     prints 566 mA/m, which is :math:`400\sqrt{2}`).
 
-    :param level_db: Level, in dB re 400 mA/m.
+    :param level_db: Level, in dB re 400 mA/m (scalar or array).
     :return: The RMS field strength, in A/m.
     """
     level = _as_float64(level_db, "level_db")
@@ -426,8 +426,8 @@ class FieldStrengthReading(OwnsArrays):
     :ivar fs: Sample rate of the record, in hertz.
     :ivar weighting: ``"Z"`` (flat, 6.1.2) or ``"A"`` (the noise measurements
         of clause 7 and 10.4).
-    :ivar times_s: The time of each reading, in seconds.
-    :ivar levels_db: The time-weighted level, 125 ms exponential averaging, in
+    :ivar times: The time of each reading, in seconds.
+    :ivar levels: The time-weighted level, 125 ms exponential averaging, in
         dB re 400 mA/m.
     :ivar maximum_db: The maximum indication over the record, the "maximum
         value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re
@@ -438,8 +438,8 @@ class FieldStrengthReading(OwnsArrays):
 
     fs: int
     weighting: str
-    times_s: np.ndarray
-    levels_db: np.ndarray
+    times: np.ndarray
+    levels: np.ndarray
     maximum_db: float
     equivalent_db: float
 
@@ -500,8 +500,8 @@ def field_strength_meter(
     return FieldStrengthReading(
         fs=rate,
         weighting=curve,
-        times_s=read_only(np.arange(record.size, dtype=np.float64) / rate),
-        levels_db=read_only(levels),
+        times=read_only(np.arange(record.size, dtype=np.float64) / rate),
+        levels=read_only(levels),
         maximum_db=float(np.max(levels)),
         equivalent_db=10.0 * math.log10(equivalent / reference_square),
     )
@@ -512,7 +512,7 @@ def field_strength_meter(
 # ---------------------------------------------------------------------------
 
 
-def band_limit_response(frequencies_hz: ArrayLike) -> np.ndarray:
+def band_limit_response(frequencies: ArrayLike) -> np.ndarray:
     r"""The theoretical response of the band limiting of the pink noise, in dB.
 
     6.4 band-limits the pink noise with third-order Butterworth high-pass and
@@ -527,10 +527,10 @@ def band_limit_response(frequencies_hz: ArrayLike) -> np.ndarray:
     the two exchanged (see ``docs/ERRATA.md``). The plus or minus 1 dB flatness
     6.4 requires from 100 Hz to 5 kHz holds either way.
 
-    :param frequencies_hz: Frequencies, in hertz.
+    :param frequencies: Frequencies, in hertz.
     :return: The response, in dB.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     low, high = _BAND_LIMIT_HZ
     n2 = 2 * _BAND_LIMIT_ORDER
     power = 1.0 / ((1.0 + (low / f) ** n2) * (1.0 + (f / high) ** n2))
@@ -1026,10 +1026,10 @@ def _band_requirement(
 
 
 def _frequency_response_requirement(
-    frequencies_hz: ArrayLike, response_db: ArrayLike
+    frequencies: ArrayLike, response_db: ArrayLike
 ) -> LoopRequirement:
     """The 8.3.7 requirement on responses measured at one or more points."""
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     response = np.atleast_2d(_levels(response_db, "response_db"))
     if response.ndim != _POINTS_BY_FREQUENCIES or response.shape[1] != f.size:
         msg = (
@@ -1044,7 +1044,7 @@ def _frequency_response_requirement(
                 f"1 kHz and 5 kHz (8.3.3, 8.3.4); {required:g} Hz is missing."
             )
             raise ValueError(msg)
-    ref = _reference_index(f, "frequencies_hz")
+    ref = _reference_index(f, "frequencies")
     low, high = _RESPONSE_BAND_HZ
     inside = (f >= low * (1.0 - _FREQUENCY_MATCH_RTOL)) & (
         f <= high * (1.0 + _FREQUENCY_MATCH_RTOL)
@@ -1063,7 +1063,7 @@ def verify_induction_loop_system(
     field_strength_levels_db: ArrayLike,
     *,
     specified_level_db: float = 0.0,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
     background_noise_levels_db: ArrayLike | None = None,
     system_noise_levels_db: ArrayLike | None = None,
@@ -1109,7 +1109,7 @@ def verify_induction_loop_system(
         selected point, in dB re 400 mA/m.
     :param specified_level_db: The level specified according to 8.2.7 for the
         signal and meter used, in dB re 400 mA/m.
-    :param frequencies_hz: The frequencies of the response, in hertz,
+    :param frequencies: The frequencies of the response, in hertz,
         including 100 Hz, 1 kHz and 5 kHz.
     :param response_db: The response at each frequency, in dB on any fixed
         reference, for one point or one row per point.
@@ -1140,13 +1140,11 @@ def verify_induction_loop_system(
             math.inf,
         ),
     ]
-    if (frequencies_hz is None) != (response_db is None):
-        msg = "'frequencies_hz' and 'response_db' go together."
+    if (frequencies is None) != (response_db is None):
+        msg = "'frequencies' and 'response_db' go together."
         raise ValueError(msg)
-    if frequencies_hz is not None and response_db is not None:
-        requirements.append(
-            _frequency_response_requirement(frequencies_hz, response_db)
-        )
+    if frequencies is not None and response_db is not None:
+        requirements.append(_frequency_response_requirement(frequencies, response_db))
     background = None
     if background_noise_levels_db is not None:
         background = assess_background_noise(
@@ -1234,7 +1232,7 @@ def verify_small_volume_system(
     layout: str,
     heights_m: ArrayLike | None = None,
     standing_area_levels_db: ArrayLike | None = None,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
 ) -> InductionLoopVerification:
     """Does a refuge, call-point or counter loop meet clause 9 as amended?
@@ -1277,7 +1275,7 @@ def verify_small_volume_system(
         whose heights are those of Figures 2 and 3.
     :param standing_area_levels_db: Levels surveyed elsewhere in the area
         where people are expected to stand, in dB re 400 mA/m.
-    :param frequencies_hz: The frequencies of the response, in hertz,
+    :param frequencies: The frequencies of the response, in hertz,
         including 100 Hz, 1 kHz and 5 kHz.
     :param response_db: The response at each frequency, one row per point.
     :return: An :class:`InductionLoopVerification`.
@@ -1328,13 +1326,11 @@ def verify_small_volume_system(
             "standing_area", "9.5", standing, -math.inf, _STANDING_AREA_MAX_DB
         )
     )
-    if (frequencies_hz is None) != (response_db is None):
-        msg = "'frequencies_hz' and 'response_db' go together."
+    if (frequencies is None) != (response_db is None):
+        msg = "'frequencies' and 'response_db' go together."
         raise ValueError(msg)
-    if frequencies_hz is not None and response_db is not None:
-        requirements.append(
-            _frequency_response_requirement(frequencies_hz, response_db)
-        )
+    if frequencies is not None and response_db is not None:
+        requirements.append(_frequency_response_requirement(frequencies, response_db))
     return InductionLoopVerification(
         clause="9", layout=name, requirements=tuple(requirements)
     )
@@ -1406,7 +1402,7 @@ class AmplifierOverloadVerification(OwnsArrays):
         20 kHz (or below the top of the given current response).
     :ivar end_frequency_hz: Where the sweep ends: the higher of the doubling
         frequency and the Table 4 frequency, in hertz.
-    :ivar frequencies_hz: The sweep from 1 kHz to its end, in hertz.
+    :ivar frequencies: The sweep from 1 kHz to its end, in hertz.
     :ivar voltage_v: The RMS loop voltage along it, in volts.
     :ivar test_frequency_voltage_v: The RMS loop voltage at the frequency of
         Table 4, where 10.3.3 judges the test, in volts.
@@ -1418,7 +1414,7 @@ class AmplifierOverloadVerification(OwnsArrays):
     test_current_a: float
     doubling_frequency_hz: float
     end_frequency_hz: float
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     voltage_v: np.ndarray
     test_frequency_voltage_v: float
     compliance_voltage_v: float
@@ -1535,7 +1531,7 @@ def verify_amplifier_overload(
     test_current = required * 10.0 ** (_OVERLOAD_TEST_OFFSET_DB / 20.0)
     top = _OVERLOAD_SWEEP_LIMIT_HZ
     if current_response is not None:
-        top = float(current_response.frequencies_hz[-1])
+        top = float(current_response.frequencies[-1])
         if top < row.test_frequency_hz:
             msg = (
                 f"the current response stops at {top:g} Hz, below the "
@@ -1557,7 +1553,7 @@ def verify_amplifier_overload(
     if current_response is not None:
         breaks[1:1] = [
             float(f)
-            for f in current_response.frequencies_hz
+            for f in current_response.frequencies
             if _OVERLOAD_START_HZ < f < top
         ]
     doubling = math.inf
@@ -1586,7 +1582,7 @@ def verify_amplifier_overload(
         test_current_a=test_current,
         doubling_frequency_hz=doubling,
         end_frequency_hz=end,
-        frequencies_hz=read_only(grid),
+        frequencies=read_only(grid),
         voltage_v=read_only(np.asarray(voltage(grid), dtype=np.float64)),
         test_frequency_voltage_v=float(voltage(row.test_frequency_hz)),
         compliance_voltage_v=compliance,

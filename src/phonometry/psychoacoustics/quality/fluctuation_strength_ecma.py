@@ -208,7 +208,7 @@ class EcmaFluctuationStrength(OwnsArrays):
     ``specific_fluctuation_strength`` is the average specific fluctuation
     strength F'(z) in vacil_HMS/Bark_HMS over the 53 auditory bands
     (Clause 9.1.12), with ``bark`` the critical-band-rate scale z
-    (0.5..26.5 Bark_HMS) and ``centre_frequencies`` the band centre
+    (0.5..26.5 Bark_HMS) and ``frequencies`` the band centre
     frequencies F(z). ``times`` and ``fluctuation_strength_vs_time`` hold the
     time-dependent fluctuation strength F(l50) at 50 Hz (Formula 169);
     ``specific_fluctuation_strength_vs_time`` is the time-dependent specific
@@ -219,7 +219,7 @@ class EcmaFluctuationStrength(OwnsArrays):
     fluctuation_strength: float
     specific_fluctuation_strength: np.ndarray
     bark: np.ndarray
-    centre_frequencies: np.ndarray
+    frequencies: np.ndarray
     times: np.ndarray
     fluctuation_strength_vs_time: np.ndarray
     specific_fluctuation_strength_vs_time: np.ndarray
@@ -265,7 +265,7 @@ class EcmaFluctuationStrength(OwnsArrays):
             self,
             specific_fluctuation_strength=1,
             bark=1,
-            centre_frequencies=1,
+            frequencies=1,
             times=1,
             fluctuation_strength_vs_time=1,
             specific_fluctuation_strength_vs_time=2,
@@ -273,7 +273,7 @@ class EcmaFluctuationStrength(OwnsArrays):
         require_same_length(
             self,
             "bark",
-            "centre_frequencies",
+            "frequencies",
             "specific_fluctuation_strength",
             ("specific_fluctuation_strength_vs_time", 1),
             axis="auditory band",
@@ -973,7 +973,7 @@ def fluctuation_strength_ecma(
         fluctuation_strength=f_single,
         specific_fluctuation_strength=f_spec,
         bark=_Z,
-        centre_frequencies=_F_CENTRE,
+        frequencies=_F_CENTRE,
         times=grid,
         fluctuation_strength_vs_time=f_vs_time,
         specific_fluctuation_strength_vs_time=f_time,

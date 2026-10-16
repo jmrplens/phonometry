@@ -171,7 +171,7 @@ are still returned.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/phonometry/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or an explicit `(C1..C8)` tuple. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
@@ -362,7 +362,7 @@ $\omega \to \infty$ (Johnson et al. 1987), pinned in the tests.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `porosity` | Open porosity `phi` (0 \< phi \<= 1). |
 | `tortuosity` | High-frequency tortuosity $T = \alpha_\infty$ (>= 1). |
@@ -520,7 +520,7 @@ resistance for the internal/fixing losses.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `surface_density` | Mass per unit area `m`, in kg/m2. |
 | `resistance` | Series flow resistance `r`, in Pa s/m (default 0). |
 
@@ -594,7 +594,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `thickness` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres (submillimetre for a genuine microperforated design). |
 | `open_area` | Fractional open area `eps` (0..1). |
@@ -631,7 +631,7 @@ Sect. 4.1).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
@@ -683,7 +683,7 @@ holes.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `thickness` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres. |
 | `open_area` | Fractional open area `eps` (0..1). |

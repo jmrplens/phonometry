@@ -938,7 +938,7 @@ Share of the force energy above the range of interest (6.3).
 
 Per frequency, whether it lies in the frequency range of interest.
 
-### ForceSpectrumCheck.level_db
+### ForceSpectrumCheck.levels
 
 *property*
 

@@ -291,9 +291,9 @@ def _range_limits(working_range: str) -> tuple[float, float]:
     return WORKING_RANGES_HZ[name]
 
 
-def _frequencies(frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
     """Positive, finite frequencies as a float array."""
-    return require_positive_array(frequencies_hz, "frequencies_hz")
+    return require_positive_array(frequencies, "frequencies")
 
 
 def _record(
@@ -337,22 +337,22 @@ def _analog_zpk(
 
 @lru_cache(maxsize=16)
 def _cached_sos(
-    working_range: str, fs_hz: float, *, weighted: bool
+    working_range: str, fs: float, *, weighted: bool
 ) -> NDArray[np.float64]:
     """The shared, read-only digital design behind :func:`_sos`."""
     zeros, poles, gain = _analog_zpk(working_range, weighted=weighted)
-    sos = sig.zpk2sos(*sig.bilinear_zpk(zeros, poles, gain, fs_hz))
+    sos = sig.zpk2sos(*sig.bilinear_zpk(zeros, poles, gain, fs))
     shared = np.asarray(sos, dtype=np.float64)
     shared.setflags(write=False)
     return shared
 
 
-def _sos(working_range: str, fs_hz: float, *, weighted: bool) -> NDArray[np.float64]:
+def _sos(working_range: str, fs: float, *, weighted: bool) -> NDArray[np.float64]:
     """A writable copy of the cached second-order sections."""
-    return np.array(_cached_sos(working_range, fs_hz, weighted=weighted))
+    return np.array(_cached_sos(working_range, fs, weighted=weighted))
 
 
-def _sample_rate(fs_hz: float, working_range: str) -> float:
+def _sample_rate(fs: float, working_range: str) -> float:
     """A sampling frequency that can carry the working range it is asked for.
 
     The upper band limit has to be inside the digital band, and comfortably:
@@ -360,11 +360,11 @@ def _sample_rate(fs_hz: float, working_range: str) -> float:
     corner the response is graded at. Refused rather than warned about,
     because the numbers that come out of an aliased record look ordinary.
     """
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     upper_hz = _range_limits(working_range)[1]
     if fs <= 2.0 * upper_hz:
         msg = (
-            f"'fs_hz' must be above twice the upper band limit of the "
+            f"'fs' must be above twice the upper band limit of the "
             f"{working_range!r} working range ({upper_hz:g} Hz); got {fs:g} Hz."
         )
         raise ValueError(msg)
@@ -372,18 +372,18 @@ def _sample_rate(fs_hz: float, working_range: str) -> float:
 
 
 def band_limitation_response(
-    frequencies_hz: ArrayLike, *, working_range: str = "building"
+    frequencies: ArrayLike, *, working_range: str = "building"
 ) -> NDArray[np.complex128]:
     r"""The band limitation of the unweighted signal, Formula (3).
 
-    :param frequencies_hz: Frequencies, in hertz.
+    :param frequencies: Frequencies, in hertz.
     :param working_range: ``"building"`` (1 Hz to 80 Hz, the default) or
         ``"railway"`` (4 Hz to 315 Hz); see :data:`WORKING_RANGES_HZ`.
     :return: The complex response :math:`H_{u\mathrm{Soll}}`, whose magnitude
         is Formula (5).
     :raises ValueError: For a non-positive frequency or an unknown range.
     """
-    f = _frequencies(frequencies_hz)
+    f = _frequencies(frequencies)
     lower_hz, upper_hz = _range_limits(working_range)
     high = 1.0 - 1j * _SQRT2 * (BAND_LIMIT_CORNER_FACTOR * lower_hz / f)
     high = high - (BAND_LIMIT_CORNER_FACTOR * lower_hz / f) ** 2
@@ -393,27 +393,27 @@ def band_limitation_response(
 
 
 def kb_weighting_response(
-    frequencies_hz: ArrayLike, *, working_range: str = "building"
+    frequencies: ArrayLike, *, working_range: str = "building"
 ) -> NDArray[np.complex128]:
     r"""The KB frequency weighting, Formula (4).
 
-    :param frequencies_hz: Frequencies, in hertz.
+    :param frequencies: Frequencies, in hertz.
     :param working_range: See :func:`band_limitation_response`.
     :return: The complex response :math:`H_{B\mathrm{Soll}}`, whose magnitude
         is Formula (6).
     :raises ValueError: For a non-positive frequency or an unknown range.
     """
-    f = _frequencies(frequencies_hz)
+    f = _frequencies(frequencies)
     band = band_limitation_response(f, working_range=working_range)
     return np.asarray(band / (1.0 - 1j * KB_CORNER_HZ / f), dtype=np.complex128)
 
 
 def response_tolerance_percent(
-    frequencies_hz: ArrayLike, *, working_range: str = "building"
+    frequencies: ArrayLike, *, working_range: str = "building"
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The limits of Tables 2 and 3 at each frequency, in per cent.
 
-    :param frequencies_hz: Frequencies, in hertz.
+    :param frequencies: Frequencies, in hertz.
     :param working_range: See :func:`band_limitation_response`.
     :return: ``(lower, upper)``: the largest deviation allowed below and above
         the design response, both as positive percentages. A lower limit of
@@ -421,7 +421,7 @@ def response_tolerance_percent(
         outside the working range.
     :raises ValueError: For a non-positive frequency or an unknown range.
     """
-    f = _frequencies(frequencies_hz)
+    f = _frequencies(frequencies)
     lower_hz, upper_hz = _range_limits(working_range)
     central = (f >= 1.25 * lower_hz) & (f <= BAND_LIMIT_CORNER_FACTOR * upper_hz)
     skirt = (f > 0.5 * lower_hz) & (f < 2.0 * upper_hz)
@@ -437,7 +437,7 @@ def response_tolerance_percent(
 class VibrationMeterVerification(OwnsArrays):
     """One measured amplitude response against Tables 2 and 3.
 
-    :ivar frequencies_hz: The frequencies the response was measured at.
+    :ivar frequencies: The frequencies the response was measured at.
     :ivar deviation_percent: ``F(f)`` of Formula (7) at each of them: the
         measured response over the design response, both normalised at the
         reference frequency, as a percentage departure from unity.
@@ -455,7 +455,7 @@ class VibrationMeterVerification(OwnsArrays):
     built against other limits.
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     deviation_percent: NDArray[np.float64]
     measured_response: NDArray[np.float64]
     weighting: str
@@ -469,10 +469,8 @@ class VibrationMeterVerification(OwnsArrays):
             frequency that is not positive, or columns of different lengths.
         """
         require_choice(str(self.weighting), "weighting", _WEIGHTINGS)
-        response_tolerance_percent(
-            self.frequencies_hz, working_range=self.working_range
-        )
-        shape = np.shape(self.frequencies_hz)
+        response_tolerance_percent(self.frequencies, working_range=self.working_range)
+        shape = np.shape(self.frequencies)
         if np.shape(self.deviation_percent) != shape or (
             np.shape(self.measured_response) != shape
         ):
@@ -486,7 +484,7 @@ class VibrationMeterVerification(OwnsArrays):
     def lower_percent(self) -> NDArray[np.float64]:
         """The Table 2 limit at each frequency, in per cent."""
         return response_tolerance_percent(
-            self.frequencies_hz, working_range=self.working_range
+            self.frequencies, working_range=self.working_range
         )[0]
 
     @property
@@ -497,7 +495,7 @@ class VibrationMeterVerification(OwnsArrays):
         footnote a of Table 3 leaves unconstrained from above.
         """
         upper = response_tolerance_percent(
-            self.frequencies_hz, working_range=self.working_range
+            self.frequencies, working_range=self.working_range
         )[1]
         measured = np.asarray(self.measured_response, dtype=np.float64)
         return np.where(measured > _UPPER_TOLERANCE_FLOOR, upper, math.inf)
@@ -521,7 +519,7 @@ class VibrationMeterVerification(OwnsArrays):
             self.deviation_percent >= 0.0, self.upper_percent, self.lower_percent
         )
         used = np.abs(self.deviation_percent) / allowance
-        return float(self.frequencies_hz[int(np.argmax(used))])
+        return float(self.frequencies[int(np.argmax(used))])
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -546,7 +544,7 @@ class VibrationMeterVerification(OwnsArrays):
 
 
 def verify_vibration_meter(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     measured_response: ArrayLike,
     *,
     weighting: Literal["kb", "unweighted"] | str = "kb",
@@ -562,7 +560,7 @@ def verify_vibration_meter(
     the standard writing every limit "for all f not equal to f_r", and it is
     dropped from the verdict rather than passed for free.
 
-    :param frequencies_hz: The frequencies the response was measured at, in
+    :param frequencies: The frequencies the response was measured at, in
         hertz. The reference frequency has to be among them.
     :param measured_response: The measured amplitude response at those
         frequencies, in any consistent unit: only its shape is graded.
@@ -576,11 +574,11 @@ def verify_vibration_meter(
         a response is not positive and finite, or if the reference frequency
         is not one of the measured frequencies.
     """
-    f = _frequencies(frequencies_hz)
+    f = _frequencies(frequencies)
     measured = require_positive_array(measured_response, "measured_response")
     require_equal_shapes(
         "verify_vibration_meter",
-        {"frequencies_hz": f.shape, "measured_response": measured.shape},
+        {"frequencies": f.shape, "measured_response": measured.shape},
         quantity="frequency",
     )
     which = require_choice(str(weighting), "weighting", _WEIGHTINGS)
@@ -601,7 +599,7 @@ def verify_vibration_meter(
     )
     deviation = (ratio - 1.0) * 100.0
     return VibrationMeterVerification(
-        frequencies_hz=f[graded],
+        frequencies=f[graded],
         deviation_percent=deviation,
         measured_response=measured[graded],
         weighting=which,
@@ -611,7 +609,7 @@ def verify_vibration_meter(
 
 
 def kb_signal(
-    velocity_mm_s: ArrayLike, fs_hz: float, *, working_range: str = "building"
+    velocity_mm_s: ArrayLike, fs: float, *, working_range: str = "building"
 ) -> NDArray[np.float64]:
     """The KB signal :math:`KB(t)` of 3.10.1.1, which is dimensionless.
 
@@ -622,7 +620,7 @@ def kb_signal(
 
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param working_range: See :func:`band_limitation_response`.
     :return: :math:`KB(t)`, one value per sample.
     :raises ValueError: For a bad record, a rate that cannot carry the working
@@ -630,13 +628,13 @@ def kb_signal(
     """
     x = _record(velocity_mm_s)
     name = require_choice(str(working_range), "working_range", _WORKING_RANGES)
-    fs = _sample_rate(fs_hz, name)
+    fs = _sample_rate(fs, name)
     return np.asarray(sig.sosfilt(_sos(name, fs, weighted=True), x), dtype=np.float64)
 
 
 def kbf_signal(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     working_range: str = "building",
     time_constant_s: float = KB_TIME_CONSTANT_S,
@@ -652,7 +650,7 @@ def kbf_signal(
 
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param working_range: See :func:`band_limitation_response`.
     :param time_constant_s: The averaging time constant, in seconds. The
         standard fixes it at 0,125 s and the parameter exists so a comparison
@@ -662,13 +660,13 @@ def kbf_signal(
     :raises ValueError: For a bad record, a non-positive time constant, or a
         rate that cannot carry the working range.
     """
-    kb = kb_signal(velocity_mm_s, fs_hz, working_range=working_range)
-    return _exponential_running_rms(kb, fs_hz, time_constant_s=time_constant_s)
+    kb = kb_signal(velocity_mm_s, fs, working_range=working_range)
+    return _exponential_running_rms(kb, fs, time_constant_s=time_constant_s)
 
 
 def _exponential_running_rms(
     values: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
     name: str = "values",
@@ -683,7 +681,7 @@ def _exponential_running_rms(
 
     :param values: The signal to average (1-D), in whatever unit it carries;
         the result is in the same unit.
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param time_constant_s: The time constant, in seconds (default 0,125 s,
         the "Fast" both standards use).
     :param name: The public name of *values*, for the error a bad signal
@@ -692,7 +690,7 @@ def _exponential_running_rms(
     :raises ValueError: For a bad signal or a non-positive rate or constant.
     """
     x = _record(values, name)
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     tau = require_positive(time_constant_s, "time_constant_s")
     # expm1 keeps the coefficient exact where 1 - exp(-x) would cancel: at a
     # high rate x is small, and the difference of two numbers near one loses
@@ -705,7 +703,7 @@ def _exponential_running_rms(
 
 
 def takt_maxima(
-    kbf: ArrayLike, fs_hz: float, *, takt_duration_s: float = TAKT_DURATION_S
+    kbf: ArrayLike, fs: float, *, takt_duration_s: float = TAKT_DURATION_S
 ) -> NDArray[np.float64]:
     r"""The clock maxima :math:`KB_{\mathrm{FT}i}` of 3.10.1.4, one per whole clock interval.
 
@@ -714,14 +712,14 @@ def takt_maxima(
     part-interval is dropped rather than scaled up.
 
     :param kbf: The :math:`KB_\mathrm{F}(t)` signal (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param takt_duration_s: The clock interval, in seconds (default 30 s).
     :return: One maximum per whole clock interval, in order. Empty when the
         record is shorter than one interval.
     :raises ValueError: For a bad signal or a non-positive rate or interval.
     """
     y = _record(kbf, "kbf")
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     duration_s = require_positive(takt_duration_s, "takt_duration_s")
     per_takt = int(round(duration_s * fs))
     if per_takt <= 0:
@@ -772,7 +770,7 @@ class VibrationMeterReading(OwnsArrays):
     :ivar kbf_max: :math:`KB_\mathrm{Fmax}`, its maximum.
     :ivar takt_maxima: The clock maxima, one per whole clock interval.
     :ivar kbf_takt_rms: :math:`KB_\mathrm{FTm}` of Formula (2).
-    :ivar fs_hz: The sampling frequency the record was read at.
+    :ivar fs: The sampling frequency the record was read at.
     :ivar measuring_time_s: :math:`T_M`, the length of the record.
     :ivar averaging_time_s: :math:`T_m`, the whole clock intervals in it.
     :ivar working_range: The working range the chain was built for.
@@ -783,7 +781,7 @@ class VibrationMeterReading(OwnsArrays):
     kbf_max: float
     takt_maxima: NDArray[np.float64]
     kbf_takt_rms: float
-    fs_hz: float
+    fs: float
     measuring_time_s: float
     averaging_time_s: float
     working_range: str
@@ -822,7 +820,7 @@ class VibrationMeterReading(OwnsArrays):
 
 def measure_vibration_immission(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     working_range: str = "building",
     takt_duration_s: float = TAKT_DURATION_S,
@@ -840,7 +838,7 @@ def measure_vibration_immission(
 
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param working_range: See :func:`band_limitation_response`.
     :param takt_duration_s: The clock interval, in seconds (default 30 s).
     :return: The displayed quantities, as a :class:`VibrationMeterReading`.
@@ -849,7 +847,7 @@ def measure_vibration_immission(
     """
     x = _record(velocity_mm_s)
     name = require_choice(str(working_range), "working_range", _WORKING_RANGES)
-    fs = _sample_rate(fs_hz, name)
+    fs = _sample_rate(fs, name)
     band_limited = sig.sosfilt(_sos(name, fs, weighted=False), x)
     kbf = kbf_signal(x, fs, working_range=name)
     maxima = takt_maxima(kbf, fs, takt_duration_s=takt_duration_s)
@@ -859,7 +857,7 @@ def measure_vibration_immission(
         kbf_max=float(np.max(kbf)),
         takt_maxima=maxima,
         kbf_takt_rms=takt_maximum_rms(maxima),
-        fs_hz=fs,
+        fs=fs,
         measuring_time_s=float(x.size / fs),
         averaging_time_s=float(maxima.size * takt_duration_s),
         working_range=name,
@@ -867,7 +865,7 @@ def measure_vibration_immission(
 
 
 def assessment_weighting_response(
-    frequencies_hz: ArrayLike, *, building_class: str
+    frequencies: ArrayLike, *, building_class: str
 ) -> NDArray[np.float64]:
     """The target magnitude of an Annex E weighting filter, Table E.1.
 
@@ -878,13 +876,13 @@ def assessment_weighting_response(
     to 100 Hz and is flat above it, and Table E.1 carries that last segment
     up to the Nyquist frequency rather than stopping at 100 Hz.
 
-    :param frequencies_hz: Frequencies, in hertz.
+    :param frequencies: Frequencies, in hertz.
     :param building_class: The row of DIN 4150-3:1999-02 Table 1, as
         :data:`ASSESSMENT_GUIDE_VALUES_MM_S` keys it.
     :return: The target magnitude, dimensionless, 1 below 10 Hz.
     :raises ValueError: For a non-positive frequency or an unknown class.
     """
-    f = _frequencies(frequencies_hz)
+    f = _frequencies(frequencies)
     name = require_choice(
         str(building_class), "building_class", tuple(ASSESSMENT_GUIDE_VALUES_MM_S)
     )
@@ -904,7 +902,7 @@ def assessment_weighting_response(
 
 
 def assessment_weighting_taps(
-    fs_hz: float, *, building_class: str, numtaps: int | None = None
+    fs: float, *, building_class: str, numtaps: int | None = None
 ) -> NDArray[np.float64]:
     """A linear-phase FIR that realises an Annex E weighting.
 
@@ -914,7 +912,7 @@ def assessment_weighting_taps(
     a constant delay of half its length, which :func:`assessment_velocity`
     removes.
 
-    :param fs_hz: Sampling frequency, in hertz. Table E.1 requires the Nyquist
+    :param fs: Sampling frequency, in hertz. Table E.1 requires the Nyquist
         frequency to be above 315 Hz where the meter reaches that far, and
         this refuses a rate below 630 Hz for the same reason.
     :param building_class: See :func:`assessment_weighting_response`.
@@ -924,11 +922,11 @@ def assessment_weighting_taps(
     :raises ValueError: For a rate below 630 Hz, an even or non-positive
         length, or an unknown class.
     """
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     minimum_hz = 2.0 * WORKING_RANGES_HZ["railway"][1]
     if fs <= minimum_hz:
         msg = (
-            f"'fs_hz' must be above {minimum_hz:g} Hz: Table E.1 defines the "
+            f"'fs' must be above {minimum_hz:g} Hz: Table E.1 defines the "
             f"weighting up to the Nyquist frequency and requires it above "
             f"315 Hz; got {fs:g} Hz."
         )
@@ -957,7 +955,7 @@ def assessment_weighting_taps(
 
 def assessment_velocity(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     building_class: str,
     numtaps: int | None = None,
@@ -971,7 +969,7 @@ def assessment_velocity(
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D). Annex E filters the unweighted signal, which has already been
         band-limited by 5.2.3.
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param building_class: See :func:`assessment_weighting_response`.
     :param numtaps: See :func:`assessment_weighting_taps`.
     :return: ``v_Bn(t)``, one value per sample.
@@ -979,9 +977,7 @@ def assessment_velocity(
         class.
     """
     x = _record(velocity_mm_s)
-    taps = assessment_weighting_taps(
-        fs_hz, building_class=building_class, numtaps=numtaps
-    )
+    taps = assessment_weighting_taps(fs, building_class=building_class, numtaps=numtaps)
     delay = (taps.size - 1) // 2
     padded = np.concatenate((x, np.zeros(delay, dtype=np.float64)))
     return np.asarray(sig.lfilter(taps, [1.0], padded)[delay:], dtype=np.float64)
@@ -995,7 +991,7 @@ class AssessmentVelocity(OwnsArrays):
         of the weighted velocity, in millimetres per second.
     :ivar building_class: The row of DIN 4150-3 Table 1 that was used.
     :ivar velocity_mm_s: The weighted velocity itself, one value per sample.
-    :ivar fs_hz: The sampling frequency the record was read at.
+    :ivar fs: The sampling frequency the record was read at.
 
     The Table E.2 value (:attr:`guide_value_mm_s`) is read from the building
     class, so a record cannot be judged against another value.
@@ -1004,7 +1000,7 @@ class AssessmentVelocity(OwnsArrays):
     assessment_velocity_mm_s: float
     building_class: str
     velocity_mm_s: NDArray[np.float64]
-    fs_hz: float
+    fs: float
 
     def __post_init__(self) -> None:
         """Reject a building class Table E.2 does not list.
@@ -1059,7 +1055,7 @@ class AssessmentVelocity(OwnsArrays):
 
 def assess_short_term_vibration(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     building_class: str,
     numtaps: int | None = None,
@@ -1068,7 +1064,7 @@ def assess_short_term_vibration(
 
     :param velocity_mm_s: The measured velocity at the foundation, in
         millimetres per second (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param building_class: See :func:`assessment_weighting_response`.
     :param numtaps: See :func:`assessment_weighting_taps`.
     :return: The comparison, as an :class:`AssessmentVelocity`.
@@ -1079,13 +1075,13 @@ def assess_short_term_vibration(
         str(building_class), "building_class", tuple(ASSESSMENT_GUIDE_VALUES_MM_S)
     )
     weighted = assessment_velocity(
-        velocity_mm_s, fs_hz, building_class=name, numtaps=numtaps
+        velocity_mm_s, fs, building_class=name, numtaps=numtaps
     )
     return AssessmentVelocity(
         assessment_velocity_mm_s=float(np.max(np.abs(weighted))),
         building_class=name,
         velocity_mm_s=weighted,
-        fs_hz=float(fs_hz),
+        fs=float(fs),
     )
 
 
@@ -1108,7 +1104,7 @@ class DominantFrequency(RichDisplay):
 
 def dominant_frequency(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     method: Literal["zero_crossing", "fourier"] | str = "zero_crossing",
 ) -> DominantFrequency:
@@ -1123,7 +1119,7 @@ def dominant_frequency(
 
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
-    :param fs_hz: Sampling frequency, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param method: ``"zero_crossing"`` (D a), the default: the two zero
         crossings around the largest amplitude are half a period apart) or
         ``"fourier"`` (D b): the largest value of the spectrum of the whole
@@ -1135,7 +1131,7 @@ def dominant_frequency(
         both sides of it.
     """
     x = _record(velocity_mm_s)
-    fs = require_positive(fs_hz, "fs_hz")
+    fs = require_positive(fs, "fs")
     how = require_choice(str(method), "method", _DOMINANT_METHODS)
     if how == "fourier":
         window = np.hanning(x.size)

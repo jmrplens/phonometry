@@ -581,7 +581,7 @@ def plot_weighted_rating(
 
     _require_rating_curve(result)
     ax = _plot_rating(
-        np.asarray(result.band_centers, dtype=np.float64),
+        np.asarray(result.frequencies, dtype=np.float64),
         np.asarray(result.measured, dtype=np.float64),
         np.asarray(result.shifted_reference, dtype=np.float64),
         impact=False,
@@ -625,10 +625,10 @@ def plot_impact_rating(
     from .._i18n import format_number, localize_axes
 
     _require_rating_curve(result)
-    band_centers = np.asarray(result.band_centers, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     reference = np.asarray(result.shifted_reference, dtype=np.float64)
     ax = _plot_rating(
-        band_centers,
+        frequencies,
         np.asarray(result.measured, dtype=np.float64),
         reference,
         impact=True,
@@ -648,7 +648,7 @@ def plot_impact_rating(
         **kwargs,
     )
     _annotate_impact_500(
-        ax, band_centers, reference, int(result.rating), language=language
+        ax, frequencies, reference, int(result.rating), language=language
     )
     localize_axes(ax, language)
     return ax
@@ -657,10 +657,10 @@ def plot_impact_rating(
 def _require_extended_curve(
     result: ExtendedWeightedRatingResult | ExtendedImpactRatingResult,
 ) -> None:
-    if result.band_centers is None or result.measured is None:
+    if result.frequencies is None or result.measured is None:
         msg = (
             "This extended rating result carries no band curve to plot (it "
-            "was constructed without band_centers/measured data)."
+            "was constructed without frequencies/measured data)."
         )
         raise ValueError(msg)
 
@@ -683,9 +683,9 @@ def _plot_extended_rating(
     _require_extended_curve(result)
     _require_rating_curve(result.core)
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.band_centers, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     measured = np.asarray(result.measured, dtype=np.float64)
-    core_freqs = np.asarray(result.core.band_centers, dtype=np.float64)
+    core_freqs = np.asarray(result.core.frequencies, dtype=np.float64)
     core_measured = np.asarray(result.core.measured, dtype=np.float64)
     core_ref = np.asarray(result.core.shifted_reference, dtype=np.float64)
 
@@ -1736,7 +1736,7 @@ def plot_impact_improvement_rating(
     )
     return _plot_improvement(
         ax if ax is not None else _new_axes(),
-        result.band_centers,
+        result.frequencies,
         result.improvement,
         None,
         title,
@@ -2713,7 +2713,7 @@ def plot_service_equipment_level(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     if result.standardized_db is not None:
         shade = theme_fill(_C_MUTED, ax)
         for x in positions[~np.asarray(result.standardizable)]:
@@ -2788,7 +2788,7 @@ def plot_service_equipment_background(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = result.frequencies_hz
+    freqs = result.frequencies
     labels = freqs if freqs is not None else np.arange(result.measured_db.size) + 1.0
     positions = _band_axis(
         ax,
@@ -2859,7 +2859,7 @@ def plot_position_spread(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    levels = np.asarray(result.levels_db, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
     x = np.arange(levels.size, dtype=np.float64)
     corner = np.zeros(levels.size, dtype=bool)
     corner[::3] = True
@@ -3099,7 +3099,7 @@ def plot_calibration_deviation(
 
     ax = ax if ax is not None else _new_axes()
     previous = np.asarray(result.previous_levels_db, dtype=np.float64)
-    levels = np.asarray(result.levels_db, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
     history = np.concatenate((previous, levels))
     x_previous = np.arange(previous.size, dtype=np.float64)
     x_levels = previous.size + np.arange(levels.size, dtype=np.float64)
@@ -3292,7 +3292,7 @@ def plot_varying_background(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = result.frequencies_hz
+    freqs = result.frequencies
     equipment = np.asarray(result.equipment_levels_db, dtype=np.float64)
     background = np.asarray(result.background_maximum_db, dtype=np.float64)
     labels = freqs if freqs is not None else np.arange(equipment.size) + 1.0
@@ -3607,13 +3607,13 @@ def plot_reduction_improvement_rating(
 
     ax = ax if ax is not None else _new_axes()
     without, with_ = result.without_lining, result.with_lining
-    if without.band_centers is None or without.measured is None:
+    if without.frequencies is None or without.measured is None:
         msg = "The rating carries no reference curve to plot."
         raise ValueError(msg)
     if with_.measured is None:
         msg = "The rating carries no curve with the lining to plot."
         raise ValueError(msg)
-    positions = _band_axis(ax, without.band_centers, language=language)
+    positions = _band_axis(ax, without.frequencies, language=language)
     ax.plot(
         positions,
         without.measured,
@@ -3661,7 +3661,7 @@ def plot_lab_lining_improvement(
 
     ax = ax if ax is not None else _new_axes()
     _improvement_curve(
-        ax, result.frequencies_hz, result.delta_r_db, r"$\Delta R$", language, kwargs
+        ax, result.frequencies, result.delta_r_db, r"$\Delta R$", language, kwargs
     )
     ax.set_ylabel(_t(_DELTA_R_LABEL, language))
     if result.rating is not None:
@@ -3777,14 +3777,14 @@ def plot_lab_floor_covering_improvement(
     ax = ax if ax is not None else _new_axes()
     _improvement_curve(
         ax,
-        result.frequencies_hz,
+        result.frequencies,
         result.improvement_db,
         r"$\Delta L$",
         language,
         kwargs,
     )
     if rating_range:
-        freqs = np.asarray(result.frequencies_hz, dtype=np.float64)
+        freqs = np.asarray(result.frequencies, dtype=np.float64)
         label: str | None = _t("Frequency range for rating (ISO 717-2)", language)
         for edge in (100.0, 3150.0):
             hits = np.nonzero(np.abs(freqs - edge) <= 0.06 * edge)[0]
@@ -3828,7 +3828,7 @@ def plot_heavy_impact_improvement(
     ax = ax if ax is not None else _new_axes()
     _improvement_curve(
         ax,
-        result.frequencies_hz,
+        result.frequencies,
         result.improvement_db,
         r"$\Delta L_\mathrm{r}$",
         language,
@@ -3945,7 +3945,7 @@ def plot_rainfall_reference_correction(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     ax.fill_between(
         positions,
         result.l_ic_ref_db,
@@ -3993,7 +3993,7 @@ def plot_rainfall_sound(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    positions = _band_axis(ax, result.frequencies, language=language)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("label", r"$L_I$")

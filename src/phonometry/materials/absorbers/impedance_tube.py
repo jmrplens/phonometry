@@ -716,7 +716,7 @@ def two_microphone_impedance(
     :class:`ImpedanceTubeWarning`; the results are still returned.
 
     :param h12: Measured (mismatch-corrected) transfer function ``H12``.
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param spacing: Microphone spacing ``s``, in metres.
     :param x1: Distance from the sample to the farther microphone, in metres.
     :param speed_of_sound: Speed of sound ``c0``, in m/s (see

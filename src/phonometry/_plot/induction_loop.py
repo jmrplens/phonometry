@@ -292,7 +292,7 @@ def plot_loop_impedance(
 
     ax = ax if ax is not None else _new_axes()
     ax.plot(
-        result.frequencies_hz,
+        result.frequencies,
         result.impedance_ohm,
         **styled(kwargs, color=_C_PRIMARY, lw=1.6, marker="o", ms=3, label="$|Z|$"),
     )
@@ -304,7 +304,7 @@ def plot_loop_impedance(
         label=_t("Resistance", language),
     )
     corner = result.corner_frequency_hz
-    lo, hi = float(result.frequencies_hz[0]), float(result.frequencies_hz[-1])
+    lo, hi = float(result.frequencies[0]), float(result.frequencies[-1])
     if lo <= corner <= hi:
         ax.axvline(
             corner,
@@ -379,7 +379,7 @@ def plot_amplifier_frequency_response(
     ax = ax if ax is not None else _new_axes()
     _response_panel(
         ax,
-        result.frequencies_hz,
+        result.frequencies,
         result.response_db,
         kwargs,
         _t(_OUTPUT_CURRENT, language),
@@ -472,7 +472,7 @@ def plot_quadrature_phase_error(
 
     ax = ax if ax is not None else _new_axes()
     ax.plot(
-        result.frequencies_hz,
+        result.frequencies,
         result.deviation_deg,
         **styled(
             kwargs,
@@ -508,8 +508,8 @@ def plot_quadrature_phase_error(
     ax.set_xscale("log")
     format_frequency_axis(
         ax,
-        float(result.frequencies_hz[0]),
-        float(result.frequencies_hz[-1]),
+        float(result.frequencies[0]),
+        float(result.frequencies[-1]),
         language=language,
     )
     ax.set_xlabel(_t(_FREQUENCY, language))
@@ -542,7 +542,7 @@ def plot_neck_loop_characteristics(
     ax = ax if ax is not None else _new_axes()
     _response_panel(
         ax,
-        result.frequencies_hz,
+        result.frequencies,
         result.response_db,
         kwargs,
         _t("Response", language),
@@ -656,18 +656,18 @@ def plot_field_strength_reading(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    finite = np.isfinite(result.levels_db)
+    finite = np.isfinite(result.levels)
     ax.plot(
-        result.times_s[finite],
-        result.levels_db[finite],
+        result.times[finite],
+        result.levels[finite],
         **styled(kwargs, color=_C_PRIMARY, lw=1.2, label=_t("Level (F)", language)),
     )
     ax.axhline(0.0, color=_C_REFERENCE, lw=1.0, ls="--", label=_t(_REFERENCE, language))
     # The maximum as a point where it occurs: a line at its level would lie on
     # the reference whenever the level was set right, and vanish into it.
-    peak = int(np.argmax(np.where(finite, result.levels_db, -np.inf)))
+    peak = int(np.argmax(np.where(finite, result.levels, -np.inf)))
     ax.plot(
-        [result.times_s[peak]],
+        [result.times[peak]],
         [result.maximum_db],
         ls="none",
         marker="D",
@@ -907,7 +907,7 @@ def plot_amplifier_overload(
 
     ax = ax if ax is not None else _new_axes()
     ax.plot(
-        result.frequencies_hz,
+        result.frequencies,
         result.voltage_v,
         **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=_t("Loop voltage", language)),
     )
@@ -946,8 +946,8 @@ def plot_amplifier_overload(
     ax.set_xscale("log")
     # A margin either side, so the Table 4 frequency, where the sweep often
     # ends, is not drawn on the frame.
-    lo = float(result.frequencies_hz[0]) / _SWEEP_MARGIN
-    hi = float(result.frequencies_hz[-1]) * _SWEEP_MARGIN
+    lo = float(result.frequencies[0]) / _SWEEP_MARGIN
+    hi = float(result.frequencies[-1]) * _SWEEP_MARGIN
     ax.set_xlim(lo, hi)
     format_frequency_axis(ax, lo, hi, language=language)
     ax.set_xlabel(_t(_FREQUENCY, language))

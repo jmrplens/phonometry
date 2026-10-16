@@ -208,7 +208,7 @@ plt.show()
 
 Returns a `MooreGlasbergLoudness`: `loudness` ($N$, sone), `loudness_level`
 (phon), `specific` ($N'(i)$, 372 bins of 0.1 Cam), `erb_number`,
-`centre_frequencies`, `field`, `presentation`.
+`frequencies`, `field`, `presentation`.
 
 ## Time-varying loudness (ISO 532-3)
 
@@ -351,7 +351,7 @@ plt.show()
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter (Clause 5.1.3) |
 
 Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
-($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`, `loudness_vs_time`
+($N'(z)$, 53 bands), `bark`, `frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ at 187.5 Hz), `field`.
 
 ## Quick answers

@@ -72,8 +72,12 @@ _MAKE = re.compile(r"\bmake\s+([\w-]+)")
 _PIP_INSTALL = re.compile(r"\bpip3?\s+install\s+([^\n]*)")
 
 #: What in a ``pip install`` brings NumPy with it: a requirements file, the
-#: project itself (editable or not, with or without extras) or NumPy by name.
-_PULLS_NUMPY = re.compile(r"(?:^|\s)[\"']?(?:-r|-e|\.|phonometry|numpy)")
+#: project itself (editable or not, with or without extras), its built wheel
+#: (the release installs ``dist/phonometry-<version>-py3-none-any.whl``) or
+#: NumPy by name.
+_PULLS_NUMPY = re.compile(
+    r"(?:^|\s)[\"']?(?:-r|-e|\.|phonometry|numpy|[^\s\"']*/phonometry-[^\s\"']*\.whl)"
+)
 
 #: Imports one script by path, as ``__name__ != "__main__"`` so its entry
 #: point does not run, with the scripts directory on the path as every

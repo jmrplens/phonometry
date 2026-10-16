@@ -2,6 +2,12 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    # A release is proposed three days after it is published, not the
+    # morning it appears: a compromised version is usually yanked within that
+    # window, and a pin that lands on it would publish it with the next release.
+    # The same window on every ecosystem below.
+    cooldown:
+      default-days: 3
     schedule:
       interval: "weekly"
       day: "monday"
@@ -17,6 +23,8 @@ updates:
 
   - package-ecosystem: "pip"
     directory: "/"
+    cooldown:
+      default-days: 3
     schedule:
       interval: "weekly"
       day: "monday"
@@ -39,6 +47,8 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/site"
+    cooldown:
+      default-days: 3
     schedule:
       interval: "weekly"
       day: "monday"
@@ -63,6 +73,8 @@ updates:
   # what decides whether the package installs there.
   - package-ecosystem: "npm"
     directory: "/tests/pyodide"
+    cooldown:
+      default-days: 3
     schedule:
       interval: "weekly"
       day: "monday"

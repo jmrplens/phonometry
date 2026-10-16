@@ -1,11 +1,34 @@
-name: Publish to PyPI and Release
+name: Release
 
-# Releases are driven by the repository-root VERSION file: merging a change
-# to it on main validates, builds, publishes to PyPI and creates the GitHub
-# Release (which creates the tag and fires the Zenodo webhook). Creating the
-# tag from a separate workflow with GITHUB_TOKEN would NOT trigger this one
-# (GitHub suppresses recursive workflow triggers), hence this single
-# self-contained workflow.
+# One file decides a release: VERSION. Merging a change to it on main builds
+# that version once, proves the built wheel on every platform and Python the
+# project supports, publishes it to PyPI and creates the GitHub Release, which
+# creates the tag and fires the Zenodo webhook. Tagging from a separate
+# workflow with GITHUB_TOKEN would not start this one (GitHub suppresses
+# recursive triggers), hence a single self-contained workflow.
+#
+# A manual run is always a rehearsal, from any branch, and no input turns it
+# into a release. It does everything up to the upload and stops there: the
+# preflight, the build, the checks on the built files, the installed wheel on
+# the whole matrix, the SBOM, the release notes, and the exchange with PyPI
+# that proves the trusted publisher is configured for this workflow. Nothing
+# is uploaded, tagged or attested, so a rehearsal can run as often as needed,
+# for a version already released as well.
+#
+# Jobs, in order:
+#   preflight       the version, its changelog section, a green CI on this commit
+#   build           one sdist and one wheel, made once and checked against git
+#   verify          the wheel installed with every extra on 3 OS x 3 Pythons,
+#                   every module imported and the conformance report run on it
+#   publish         PyPI through trusted publishing (PEP 740 attestations)
+#   github-release  the tag, the notes, the files with checksums, SBOM and
+#                   build provenance, then the GitLab mirror
+#   confirm         the published version installed back from PyPI
+#
+# Every job states the tokens it needs and no other: nothing is granted at the
+# top. The only job that can publish to PyPI holds nothing but its OIDC token,
+# and the only one that can write to the repository runs no third-party code
+# besides GitHub's own attestation actions.
 
 on:
   push:
@@ -13,82 +36,109 @@ on:
     paths: ["VERSION"]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  # Reading the conclusion of the CI run on this commit, which is what the
-  # first step of the job refuses to publish without.
-  actions: read
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REHEARSAL: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
-  release:
+  preflight:
+    name: Preflight
+    if: github.repository == 'jmrplens/phonometry'
     runs-on: ubuntu-latest
-    # Ref guard: workflow_dispatch could otherwise be run from any branch
-    # and publish unreviewed code; only main may release.
-    if: github.repository == 'jmrplens/phonometry' && github.ref == 'refs/heads/main'
+    # Fifty, above the CI wait's own forty-five, so the message the wait
+    # writes is the one a reader gets. The ceiling is not redundant: the loop
+    # tests its deadline between iterations, so a `gh` call that hangs on a
+    # stalled connection never reaches the test.
+    timeout-minutes: 50
+    permissions:
+      contents: read
+      actions: read # the conclusion of the CI run on this commit
+    outputs:
+      skip: ${{ steps.version.outputs.skip }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Read VERSION and guard existing tag
         id: version
         run: |
           VERSION=$(tr -d ' \n' < VERSION)
           # The PEP 440 normal form, which is what the build back end writes
-          # into the artefact names a few steps down. Two ways to get that
-          # wrong both end at the same failure, an artefact whose name is not
-          # the one this file says: a pre-release marker carries no separator
-          # (4.0.0rc1, never 4.0.0-rc1), and no numeric component carries a
-          # leading zero (4.0.0, never 04.00.00, and rc1, never rc01). Both are
-          # normalised by the back end and neither is normalised here.
+          # into the artefact names. Two ways to get that wrong both end at an
+          # artefact whose name is not the one this file says: a pre-release
+          # marker carries no separator (4.0.0rc1, never 4.0.0-rc1), and no
+          # numeric component carries a leading zero (4.0.0, never 04.00.00,
+          # and rc1, never rc01). The back end normalises both; this does not.
           if ! echo "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?$'; then
             echo "::error::VERSION is not a PEP 440 normal-form version: '$VERSION'"
             exit 1
           fi
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "::notice::Tag v$VERSION already exists — nothing to release."
+          # A real release of a version already tagged has nothing to do. A
+          # rehearsal goes on: it publishes nothing, and rehearsing the
+          # released version is how the workflow itself is tested.
+          if git rev-parse "v$VERSION" >/dev/null 2>&1 && [ "$REHEARSAL" != "true" ]; then
+            echo "::notice::Tag v$VERSION already exists; nothing to release."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           # A release candidate is published as a pre-release, so it does not
-          # become the repository's "Latest release" and pip leaves it alone
-          # without --pre. Read off the version rather than set by hand: the
-          # VERSION file is the only thing that decides a release here, and a
-          # flag somebody has to remember is a flag that goes out wrong.
-          # PEP 440 counts a developmental release as a pre-release too, and
-          # one can follow a post-release (4.0.0.post1.dev1), so the marker is
+          # become the repository's latest release and pip leaves it alone
+          # without --pre. Read off the version rather than set by hand. PEP
+          # 440 counts a developmental release as a pre-release too, and one
+          # can follow a post-release (4.0.0.post1.dev1), so the marker is
           # looked for anywhere rather than right after the release segment.
-          # The string is already validated above, so nothing else can match.
           if echo "$VERSION" | grep -Eq '(a|b|rc)[0-9]+|\.dev[0-9]+'; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "skip=false" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          {
+            echo "skip=false"
+            echo "version=$VERSION"
+            echo "tag=v$VERSION"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Write the release notes from the changelog
+        if: steps.version.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python3 scripts/release_notes.py --version "$VERSION" --output "$RUNNER_TEMP/release-notes.md"
+          {
+            echo "## Release notes of $VERSION"
+            echo
+            cat "$RUNNER_TEMP/release-notes.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the release notes for the release job
+        if: steps.version.outputs.skip != 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/release-notes.md
+          retention-days: 7
 
       - name: Require a green Python CI on this commit
         if: steps.version.outputs.skip != 'true'
-        # Fifty, just above the loop's own forty-five, so the message the loop
-        # writes is the one a reader gets in the ordinary case. The ceiling is
-        # not redundant with it: the loop only tests its deadline between
-        # iterations, so a `gh` call that hangs on a stalled connection never
-        # reaches the test, and without this the job would sit on a runner
-        # until the six-hour default.
-        timeout-minutes: 50
-        # Publishing consulted no test result at all: a push to VERSION on a
-        # semantically broken main went to PyPI, and a version number cannot be
+        # Publishing used to consult no test result at all: a push to VERSION
+        # on a broken main went to PyPI, and a version number cannot be
         # re-uploaded once it is burned. `needs:` cannot cross workflow files,
-        # and branch protection would not cover the manual trigger below, so the
-        # job asks the API directly.
-        #
-        # Python CI runs on every push to main, which means it is in flight
-        # beside this job rather than finished before it: the loop waits for the
-        # run on this exact commit and then insists that it succeeded. A run
-        # that has not been registered yet is tolerated briefly, since the two
-        # workflows start together; one that never appears is a failure, because
-        # publishing on no evidence is the thing this step exists to stop.
+        # and branch protection would not cover a manual run, so the job asks
+        # the API. Python CI runs on every push to main, beside this job rather
+        # than before it, so the loop waits for the run on this exact commit
+        # and then insists it succeeded. A run not registered yet is tolerated
+        # briefly; one that never appears is a failure, because publishing on
+        # no evidence is what this step exists to stop.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -97,9 +147,8 @@ jobs:
           finish_deadline=$(( SECONDS + 2700 ))
           while :; do
             # A failed call leaves the substitution empty rather than killing
-            # the step: a here-string discards the substitution's exit status,
-            # so `set -e` never sees it. Name that state, so the log shows the
-            # retries and the deadline message says what it was waiting on.
+            # the step (a here-string discards its exit status), so name that
+            # state and let the deadline say what it was waiting on.
             read -r status conclusion <<<"$(gh run list \
               --repo "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" \
               --workflow python-app.yml --limit 1 \
@@ -115,18 +164,18 @@ jobs:
                   echo "Python CI succeeded on $GITHUB_SHA."
                   break
                 fi
-                echo "::error::Python CI concluded '$conclusion' on $GITHUB_SHA. Not publishing."
+                echo "::error::Python CI concluded '$conclusion' on $GITHUB_SHA. Not releasing."
                 exit 1
                 ;;
               missing)
                 if [ "$SECONDS" -ge "$appear_deadline" ]; then
-                  echo "::error::No Python CI run for $GITHUB_SHA after five minutes. Not publishing."
+                  echo "::error::No Python CI run for $GITHUB_SHA after five minutes. Not releasing."
                   exit 1
                 fi
                 ;;
               *)
                 if [ "$SECONDS" -ge "$finish_deadline" ]; then
-                  echo "::error::Python CI still '$status' on $GITHUB_SHA after 45 minutes. Not publishing."
+                  echo "::error::Python CI still '$status' on $GITHUB_SHA after 45 minutes. Not releasing."
                   exit 1
                 fi
                 ;;
@@ -134,55 +183,308 @@ jobs:
             sleep 30
           done
 
-      - name: Set up Python
-        if: steps.version.outputs.skip != 'true'
-        uses: actions/setup-python@v7
+  build:
+    name: Build
+    needs: preflight
+    if: needs.preflight.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
-      - name: Install build tooling
-        if: steps.version.outputs.skip != 'true'
+      - name: Install the release tooling
+        run: python -m pip install -r requirements-release.txt
+
+      # The sdist first, and the wheel from the sdist, which is what `build`
+      # does with no flag: a wheel that only builds from the checkout would
+      # pass here and fail for everyone who installs from source. The commit
+      # time stamps every file, so the wheel is the same bytes on any day.
+      - name: Build the sdist and the wheel
         run: |
-          python -m pip install --upgrade pip
-          pip install build twine
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export SOURCE_DATE_EPOCH
+          python -m build --outdir dist .
+          python -m build --outdir rebuild .
+          if ! cmp -s "dist/phonometry-$VERSION-py3-none-any.whl" "rebuild/phonometry-$VERSION-py3-none-any.whl"; then
+            echo "::error::two builds of the same commit gave two different wheels; the build is not reproducible"
+            exit 1
+          fi
+          echo "The wheel rebuilds to the same bytes."
 
-      - name: Build package
-        if: steps.version.outputs.skip != 'true'
-        run: python -m build
-
-      - name: Check package
-        if: steps.version.outputs.skip != 'true'
-        run: python -m twine check dist/*
-
-      - name: Verify built version matches VERSION
-        if: steps.version.outputs.skip != 'true'
+      - name: Check the metadata, the long description and the contents
         run: |
-          ls dist/phonometry-${{ steps.version.outputs.version }}.tar.gz
-          ls dist/phonometry-${{ steps.version.outputs.version }}-py3-none-any.whl
+          python -m twine check --strict dist/*
+          check-wheel-contents dist/*.whl
+          python scripts/check_release_artifacts.py dist --version "$VERSION"
 
-      - name: Publish to PyPI
-        if: steps.version.outputs.skip != 'true'
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: python -m twine upload dist/*
+      - name: Write the SBOM of what pip installs with the wheel
+        run: |
+          python -m venv --without-pip "$RUNNER_TEMP/sbom-env"
+          python -m pip --python "$RUNNER_TEMP/sbom-env/bin/python" install --no-cache-dir "dist/phonometry-$VERSION-py3-none-any.whl"
+          cyclonedx-py environment --pyproject pyproject.toml --mc-type library \
+            --output-reproducible --of JSON -o "phonometry-$VERSION.cdx.json" "$RUNNER_TEMP/sbom-env/bin/python"
+          python scripts/release_sbom.py "phonometry-$VERSION.cdx.json" --version "$VERSION"
 
-      - name: Create GitHub Release (creates the tag)
-        if: steps.version.outputs.skip != 'true'
-        uses: softprops/action-gh-release@v3
+      - name: Write the checksums
+        run: |
+          cd dist
+          sha256sum -- * > ../SHA256SUMS
+          cat ../SHA256SUMS
+
+      - uses: actions/upload-artifact@v7
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          # The tag has to name the commit these checks ran on. Left out,
-          # the tag is cut from whatever the default branch points at when
-          # this step runs, so a push landing meanwhile would be inside a
-          # release nobody built or tested, and the description uploaded a
-          # few steps earlier would name a tree the tag does not hold.
-          target_commitish: ${{ github.sha }}
-          name: Release ${{ steps.version.outputs.tag }}
-          body: |
-            See the [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) for the full details of this release.
-          generate_release_notes: true
-          draft: false
-          prerelease: ${{ steps.version.outputs.prerelease }}
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-extras
+          path: |
+            SHA256SUMS
+            phonometry-*.cdx.json
+          if-no-files-found: error
+          retention-days: 7
+
+  verify:
+    name: Verify (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    needs: [preflight, build]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.12", "3.13", "3.14"]
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+      # Windows writes a redirected stdout in its ANSI code page, where the
+      # report's symbols do not exist.
+      PYTHONUTF8: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The checkout supplies the conformance report and the tables it reads
+      # from tests/; the library itself comes from the wheel. With the src
+      # layout nothing on the path reaches src/phonometry, and the first check
+      # below refuses the run if anything did.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+
+      - name: Install the wheel with every extra
+        run: python -m pip install --no-cache-dir "dist/phonometry-$VERSION-py3-none-any.whl[full]"
+
+      - name: Import every module and read every data file of the installed package
+        run: python scripts/check_installed_package.py --version "$VERSION"
+
+      - name: Run the conformance report on the installed package
+        run: python scripts/conformance_report.py > conformance-report.md
+
+  publish:
+    name: Publish to PyPI
+    needs: [preflight, build, verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write # the OIDC exchange with PyPI's trusted publisher
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+
+      # Rehearsal only. The upload is the one step that touches the publisher
+      # PyPI keeps for this project, so without this a rehearsal would prove
+      # nothing about it, and a publisher naming the wrong workflow file would
+      # surface for the first time at a release. This performs the same OIDC
+      # exchange the upload would, receives a short-lived token, masks it and
+      # never uses it: it expires on its own.
+      - name: Prove PyPI accepts this workflow as the publisher (nothing is uploaded)
+        if: env.REHEARSAL == 'true'
+        run: |
+          set -euo pipefail
+          oidc=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=pypi" | jq -r '.value')
+          if [ -z "${oidc}" ] || [ "${oidc}" = "null" ]; then
+            echo "::error::GitHub issued no OIDC token for the audience 'pypi'"
+            exit 1
+          fi
+          response=$(curl -sS -X POST https://pypi.org/_/oidc/mint-token \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -cn --arg t "${oidc}" '{token: $t}')")
+          token=$(jq -r '.token // empty' <<<"${response}")
+          if [ -z "${token}" ]; then
+            echo "::error::pypi.org refused the exchange: $(jq -c '.message // .' <<<"${response}")"
+            echo "::error::the trusted publisher of phonometry must name owner jmrplens, repository phonometry, workflow release.yml and no environment"
+            exit 1
+          fi
+          echo "::add-mask::${token}"
+          echo "pypi.org accepted this workflow as the publisher of phonometry and issued a token; nothing was uploaded."
+
+      # Trusted publishing: no stored token, and the action attaches a PEP 740
+      # attestation to each file, signed with Sigstore for this workflow's
+      # identity, which pip and PyPI's page can verify. The publisher on
+      # pypi.org names this repository, this workflow file and no environment.
+      - name: Publish to PyPI
+        if: env.REHEARSAL != 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
+  github-release:
+    name: GitHub Release
+    needs: [preflight, build, verify, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # the tag and the release
+      id-token: write # Sigstore signing of the attestations
+      attestations: write # the attestation store
+      actions: write # dispatching the GitLab mirror
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+      TAG: ${{ needs.preflight.outputs.tag }}
+      PRERELEASE: ${{ needs.preflight.outputs.prerelease }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-extras
+          path: extras
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-notes
+          path: notes
+
+      # SLSA build provenance for the sdist and the wheel, in GitHub's
+      # attestation store: `gh attestation verify <file> -R jmrplens/phonometry`
+      # answers which workflow run built the file, from which commit.
+      - name: Attest the build provenance
+        if: env.REHEARSAL != 'true'
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/*
+
+      - name: Attest the SBOM
+        if: env.REHEARSAL != 'true'
+        uses: actions/attest-sbom@v4
+        with:
+          subject-path: dist/phonometry-*-py3-none-any.whl
+          sbom-path: extras/phonometry-${{ needs.preflight.outputs.version }}.cdx.json
+
+      # The tag names the commit every check above ran on. Left to default, it
+      # would be cut from whatever main points at when this step runs, so a
+      # push landing meanwhile would sit inside a release nobody built.
+      - name: Create the release and its tag
+        if: env.REHEARSAL != 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then
+            flags+=(--prerelease --latest=false)
+          fi
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Release $TAG" \
+            --notes-file notes/release-notes.md \
+            "${flags[@]}" \
+            dist/* extras/SHA256SUMS "extras/phonometry-$VERSION.cdx.json"
+
+      # The mirror links the GitLab release to these files. A workflow_run
+      # trigger on this workflow would run the mirror with its secrets in the
+      # context of whatever finished; a dispatch names it, from main, and only
+      # after a release exists.
+      - name: Dispatch the GitLab mirror
+        if: env.REHEARSAL != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run gitlab-mirror.yml --repo "$GITHUB_REPOSITORY" --ref main
+
+      - name: Describe the rehearsal
+        if: env.REHEARSAL == 'true'
+        run: |
+          {
+            echo "## Rehearsal of $TAG"
+            echo
+            echo "Nothing was published. A release would have uploaded and attached:"
+            echo
+            echo '```'
+            ls -l dist extras
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  confirm:
+    name: Install from PyPI (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    needs: [preflight, publish]
+    if: needs.preflight.outputs.skip != 'true' && github.event_name != 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions: {}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.12", "3.14"]
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # PyPI's CDN can take a few minutes to serve a new file everywhere.
+      - name: Install the published version
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if python -m pip install --no-cache-dir "phonometry==$VERSION"; then
+              break
+            fi
+            if [ "$attempt" = 10 ]; then
+              echo "::error::phonometry $VERSION could not be installed from PyPI after ten attempts"
+              exit 1
+            fi
+            sleep 60
+          done
+          python -c "import phonometry, sys; v = phonometry.__version__; print('phonometry', v, 'from PyPI'); sys.exit(v != '$VERSION')"
+
+      - name: Verify the PEP 740 attestation of the wheel on PyPI
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+        run: |
+          python -m pip install --no-cache-dir pypi-attestations
+          python -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \
+            "pypi:phonometry-$VERSION-py3-none-any.whl"

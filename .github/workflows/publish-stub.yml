@@ -1,14 +1,24 @@
 name: Publish PyOctaveBand transition stub
 
+# The PyOctaveBand bridge package, published by hand when its page or its pin
+# has to change. It goes through PyPI's trusted publisher for the PyOctaveBand
+# project (owner jmrplens, repository phonometry, workflow publish-stub.yml, no
+# environment), so no API token is stored, and PyPI attaches a PEP 740
+# attestation to each file. The build job holds no token; the publish job
+# holds nothing but its OIDC identity.
+
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
-  publish:
+  build:
+    name: Build the stub
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -16,13 +26,31 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-      - name: Build stub
+      - name: Build and check the stub
         run: |
-          python -m pip install --upgrade pip build twine
+          python -m pip install -r requirements-release.txt
           python -m build stub/
-          twine check stub/dist/*
+          python -m twine check --strict stub/dist/*
+      - uses: actions/upload-artifact@v7
+        with:
+          name: stub-dist
+          path: stub/dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write # the OIDC exchange with PyPI's trusted publisher
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: stub-dist
+          path: dist
       - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: twine upload stub/dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

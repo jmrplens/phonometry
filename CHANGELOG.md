@@ -3034,6 +3034,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Releases are uploaded through PyPI's trusted publishing, signed, with
+  their provenance and an SBOM, and a manual run of the release is a
+  rehearsal.** The release workflow published with a stored API token, from
+  one job that also held write access to the repository, and never installed
+  the wheel it uploaded: a data file left out of the package would have
+  reached PyPI with every test green, since the tests import from `src`. It
+  now builds the sdist and the wheel once, checks both against the files git
+  tracks, installs the wheel with every extra on Linux, macOS and Windows with
+  Python 3.12, 3.13 and 3.14 and runs the conformance report on it, and only
+  then uploads, through an OIDC identity in a job that holds nothing else.
+  PyPI attaches a PEP 740 attestation, signed with Sigstore, to each file; the
+  GitHub Release carries the wheel, the sdist, `SHA256SUMS` and a CycloneDX
+  SBOM, with build provenance for each, and its notes are the release's
+  CHANGELOG section instead of a link and a list of pull requests. Running the
+  workflow by hand is a rehearsal from any branch: everything up to the upload,
+  including asking PyPI for a token with the workflow's identity, and nothing
+  published. `SECURITY.md` says how to verify a release. The PyOctaveBand
+  bridge is published the same way, zizmor now audits every workflow in CI,
+  and Dependabot proposes a release three days after it is published.
+
 - **The documentation is published at https://docs.jmrp.io/phonometry/.**
   Every address the project gives for it now names that host instead of
   https://jmrplens.github.io/phonometry/: the site's canonical links, sitemap,
@@ -10760,7 +10780,7 @@ release.
 4.0.0 is a hard break with no compatibility layer. What it removes, moves and
 renames is written above under `[Unreleased]`, where the notes stay until the
 final release stamps them, and
-[Upgrading from 3.3 to 4.0](https://jmrplens.github.io/phonometry/start/upgrading/)
+[Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/)
 is the short version: the one rule for imports, the five modules that split
 rather than moved, the three places where the obvious fix is the wrong one,
 and the table of what each name became.

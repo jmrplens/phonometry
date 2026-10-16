@@ -1,0 +1,18 @@
+# zizmor reviews every workflow in CI (the "Audit the workflows" step of
+# python-app.yml). One policy is set here rather than in each workflow.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Actions are pinned to a release tag, the major one where the action
+        # keeps it (actions/checkout@v7), never to a commit SHA: a tag is what
+        # Dependabot moves and what a reader can check against the action's
+        # releases. ref-pin keeps the rule for an action used with no ref at
+        # all, and also accepts a branch, which is the half it cannot check:
+        # tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag
+        # fails on any ref that is not a release tag.
+        "*": ref-pin
+  dependabot-cooldown:
+    config:
+      # Three days, the window .github/dependabot.yml sets on every ecosystem.
+      days: 3

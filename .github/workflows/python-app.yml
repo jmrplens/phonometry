@@ -28,6 +28,8 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     # A conflict resolved carelessly during a rebase can leave markers behind in
     # a file no other gate reads. CHANGELOG.md is the usual victim: it collides
     # on every parallel branch and nothing lints it, so the markers ride a fully
@@ -96,6 +98,18 @@ jobs:
       run: mypy src scripts stub/src tests/static_typing
     - name: Security check with Bandit
       run: bandit -r src
+    # The workflows hold the repository's tokens and the release's identity, and
+    # nothing reviewed them: the release step expanded `${{ }}` straight into a
+    # shell, eight checkouts left their token in .git for any later step to
+    # read, and the mirror ran on a workflow_run trigger that had never fired.
+    # zizmor reads every file under .github/ and fails on any finding; its
+    # settings, including the rule that actions are pinned to a tag, are in
+    # .github/zizmor.yml. The token lets it ask GitHub whether a pinned action
+    # has a published advisory.
+    - name: Audit the workflows with zizmor
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: zizmor --config .github/zizmor.yml --format github .github/
 
   # The PyOctaveBand transition stub under stub/ is built from the tree by a
   # workflow_dispatch publish job, so until now the first time anything looked
@@ -138,6 +152,8 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     - name: Set up Python 3.13
       uses: actions/setup-python@v7
       with:
@@ -518,6 +534,8 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     - name: Set up Python 3.13
       uses: actions/setup-python@v7
       with:
@@ -1118,6 +1136,8 @@ jobs:
         python-version: ["3.12", "3.13", "3.14"]
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v7
       with:
@@ -1362,6 +1382,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
+        persist-credentials: false
         fetch-depth: 0
     - name: Download coverage report
       uses: actions/download-artifact@v8
@@ -1389,6 +1410,7 @@ jobs:
     # every pull request look like it changed nothing.
     - uses: actions/checkout@v7
       with:
+        persist-credentials: false
         fetch-depth: 0
 
     - name: Set up Python 3.13

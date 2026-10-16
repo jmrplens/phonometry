@@ -12,6 +12,7 @@
 ruff==0.17.0
 mypy==2.4.0
 bandit==1.9.4
+zizmor==1.31.1  # audits .github/: workflows (template injection, token permissions, persisted credentials) and Dependabot
 types-setuptools==84.0.0.20261006
 
 pytest==9.1.1

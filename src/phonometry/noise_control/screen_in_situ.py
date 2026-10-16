@@ -77,7 +77,6 @@ from .._internal.validation import (
     require_positive_array,
 )
 from .._internal.warnings import PhonometryWarning
-from .cabin_insulation import OPERATOR_SPHERE_RADIUS_M
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -100,7 +99,6 @@ __all__ = [
     "MINIMUM_SCREEN_DIMENSION_M",
     "OPERATOR_HEIGHT_M",
     "OPERATOR_HEIGHT_TOLERANCE_M",
-    "OPERATOR_SPHERE_RADIUS_M",
     "OUTDOOR_RANGE_M",
     "ISO11821_PREFERRED_BACKGROUND_MARGIN_DB",
     "SCREEN_DISTANCE_FACTORS",

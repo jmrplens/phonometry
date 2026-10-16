@@ -107,7 +107,7 @@ background_noise_correction_at_workstation(
     measured_level_db: ArrayLike,
     background_level_db: ArrayLike,
     *,
-    grade: Grade = 'engineering',
+    grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> tuple[float | NDArray[np.float64], bool]
 ```
 
@@ -230,7 +230,7 @@ EmissionPressureResult(
     measured_level_db: float | NDArray[np.float64],
     background_correction_db: float | NDArray[np.float64],
     local_correction_db: float | NDArray[np.float64],
-    grade: Grade,
+    grade: Literal['engineering', 'survey'],
     *,
     background_margin_db: float | NDArray[np.float64],
     standard: str,
@@ -362,7 +362,9 @@ GRADE_2_MAX_K3_DB = 4.0
 ## grade_from_local_correction
 
 ```python
-grade_from_local_correction(local_correction_db: ArrayLike) -> Grade
+grade_from_local_correction(
+    local_correction_db: ArrayLike,
+) -> Literal['engineering', 'survey']
 ```
 
 The accuracy grade a local environmental correction earns.

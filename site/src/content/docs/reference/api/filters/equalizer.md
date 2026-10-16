@@ -118,7 +118,7 @@ With `ax` given, only the magnitude panel is drawn on it.
 
 ```python
 EQSection(
-    filter_type: EQFilterType,
+    filter_type: Literal['peaking', 'lowshelf', 'highshelf', 'lowpass', 'highpass', 'bandpass', 'bandpass_skirt', 'notch', 'allpass'],
     f0: float,
     gain_db: float = 0.0,
     q: float | None = None,

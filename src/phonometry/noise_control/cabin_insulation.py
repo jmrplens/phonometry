@@ -47,8 +47,9 @@ which is ISO 717-1 with :math:`D_p` written where that standard writes
 ISO 3741 the clauses point at.
 
 The leak ratio of definition 3.14 and the seal ratio of its note are printed
-word for word as in ISO 11546, so they are imported from
-:mod:`phonometry.noise_control.enclosure_insulation` rather than written twice.
+word for word as in ISO 11546, and so are the band ranges, so they are written
+once and published by :mod:`phonometry.noise_control.enclosure_insulation`,
+the module of the older document, rather than a second time here.
 The scope is tighter here: ISO 11546 only prefers a leak ratio under 2 %, while
 clause 1 of ISO 11957 makes it a condition of applicability.
 
@@ -90,14 +91,11 @@ from ..emission._shared import _a_weighting_corrections
 from ..emission.sound_power_reverberation import reverberation_background_correction
 from ._insulation_shared import (
     _THIRD_OCTAVE,
-    MANDATORY_BAND_RANGE_HZ,
     PREFERRED_BAND_RANGE_HZ,
     _band_fraction,
     _check_band_range,
     _rating_bands,
     _require_rating_bands,
-    leak_ratio,
-    seal_ratio,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -116,7 +114,6 @@ __all__ = [
     "IN_SITU_EXCESS_STANDARD_DEVIATION_DB",
     "LOW_BAND_CLEARANCE_M",
     "LOW_BAND_CLEARANCE_RANGE_HZ",
-    "MANDATORY_BAND_RANGE_HZ",
     "MAX_LEAK_RATIO",
     "MAX_MICROPHONE_TO_CABIN_M",
     "MAX_SOURCE_POSITIONS_IN_SITU",
@@ -132,7 +129,6 @@ __all__ = [
     "MIN_SOURCE_TO_MICROPHONE_M",
     "OPERATOR_PATH_INCLINATION_DEG",
     "OPERATOR_SPHERE_RADIUS_M",
-    "PREFERRED_BAND_RANGE_HZ",
     "PREFERRED_SIGNAL_TO_BACKGROUND_DB",
     "STATED_UNCERTAINTY_BAND_RANGE_HZ",
     "WALL_CLEARANCE_FACTOR",
@@ -147,9 +143,7 @@ __all__ = [
     "check_source_positions",
     "estimated_cabin_noise_insulation",
     "internal_noise_level",
-    "leak_ratio",
     "minimum_cabin_clearance_m",
-    "seal_ratio",
     "uncertainty_conditions",
     "weighted_cabin_insulation",
 ]

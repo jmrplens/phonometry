@@ -481,7 +481,7 @@ spectrum by other means still conforms.
 
 ```python
 impact_force_exposure_level(
-    force: SignalInput,
+    force: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     reference_force: float = 1.0,

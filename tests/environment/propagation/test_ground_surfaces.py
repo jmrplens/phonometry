@@ -223,7 +223,7 @@ def test_a_row_is_frozen_and_so_are_the_mappings_it_holds() -> None:
     """The catalogue is one object shared by every caller."""
     row = PUBLISHED_GROUND["cox-2017-table-6-7/heath_line_1_marked_b"]
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"cannot assign to field 'name'"):
         row.name = "edited"  # type: ignore[misc]
     with pytest.raises(TypeError):
         row.unquantified["flow_resistivity_pa_s_m2"] = "edited"  # type: ignore[index]

@@ -333,7 +333,7 @@ def _chk_iso12999_annex_b_values() -> Outcome:
     "Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9)",
 )
 def _chk_iso12999_annex_b_uncertainties() -> Outcome:
-    from phonometry.building.measurement.insulation import (
+    from phonometry.building.measurement.ratings import (
         _SPECTRUM1_50_5000,
         _SPECTRUM2_50_5000,
     )

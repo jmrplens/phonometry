@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import dataclasses
+import inspect
 from importlib.resources import files
 
 import matplotlib as mpl
@@ -965,3 +966,47 @@ def test_a_database_built_by_hand_keeps_arrays_of_its_own() -> None:
     assert profile.path[1, 2] == 300.0
     for kept in (curves.distances, curves.powers, curves.levels, profile.path):
         assert not kept.flags.writeable
+
+
+def _hand_built_database() -> AnpDatabase:
+    path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0], [1000.0, 0.0, 300.0, 8000.0, 80.0]])
+    return AnpDatabase(
+        aircraft={"X": {"ACFT_ID": "X", "NPD_ID": "NX", "Power Parameter": "CNT"}},
+        npd={
+            ("NX", "SEL", "D"): (
+                np.array([8000.0, 12000.0]),
+                np.array([[95.0, 90.0, 85.0], [99.0, 94.0, 89.0]]),
+            )
+        },
+        distances=np.array([60.0, 120.0, 240.0]),
+        profiles={("X", "D", "DEFAULT", 1): path},
+    )
+
+
+def test_an_aircraft_names_the_database_it_was_read_from() -> None:
+    """``database`` is a public field, out of the repr and out of comparisons."""
+    aircraft = _DB.aircraft("747100")
+    assert aircraft.database is _DB
+    assert "database" not in repr(aircraft)
+    other = dataclasses.replace(aircraft, database=_hand_built_database())
+    assert other == aircraft
+    assert other.database is not aircraft.database
+
+
+def test_a_database_built_by_hand_takes_no_performance_tables() -> None:
+    """The tables are the parser's record; only an export carries them."""
+    parameters = inspect.signature(AnpDatabase).parameters
+    assert list(parameters) == [
+        "aircraft",
+        "npd",
+        "distances",
+        "profiles",
+        "spectral_classes",
+    ]
+
+
+def test_a_database_built_by_hand_flies_fixed_point_profiles_only() -> None:
+    db = _hand_built_database()
+    assert db.profile("X", "departure").path.shape == (2, 5)
+    with pytest.raises(ValueError, match=r"no performance tables"):
+        db.performance_aircraft("X")

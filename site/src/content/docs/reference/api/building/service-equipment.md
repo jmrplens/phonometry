@@ -146,7 +146,7 @@ additional_microphone_position(
     room_dimensions_m: ArrayLike,
     source_position_m: ArrayLike,
     *,
-    mounting: _Mounting,
+    mounting: Literal['wall', 'ceiling'],
 ) -> np.ndarray
 ```
 
@@ -988,13 +988,13 @@ service_equipment_level(
     levels_db: ArrayLike,
     frequencies_hz: ArrayLike,
     *,
-    quantity: _Quantity,
-    band: _Band = 'third',
+    quantity: Literal['Smax', 'Fmax', 'eq'],
+    band: Literal['third', 'octave'] = 'third',
     background_db: ArrayLike | None = None,
     reverberation_time_s: ArrayLike | None = None,
     volume_m3: float | None = None,
     reference_reverberation_time_s: float = 0.5,
-    a_weighting_range: _Range = 'restricted',
+    a_weighting_range: Literal['restricted', 'extended'] = 'restricted',
 ) -> ServiceEquipmentResult
 ```
 

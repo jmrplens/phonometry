@@ -39,7 +39,7 @@ area_factors(
     *,
     delta_theta: float,
     delta_phi: float | None = None,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Per-receiver area weights `N_i` (ISO 17497-2, Clause 8.3, Formula (8)).
@@ -114,7 +114,11 @@ are carried through when supplied.
 ## DiffusionResult
 
 ```python
-DiffusionResult(angles_deg: Real, levels: Real, coefficient: float)
+DiffusionResult(
+    angles_deg: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    coefficient: float,
+)
 ```
 
 A measured polar response and its diffusion coefficient (ISO 17497-2).
@@ -190,9 +194,9 @@ there is no pass/fail verdict.
 
 ```python
 DiffusionSpectrum(
-    frequencies: Real,
-    diffusion: Real,
-    normalized: Real | None = None,
+    frequencies: NDArray[np.float64],
+    diffusion: NDArray[np.float64],
+    normalized: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -361,7 +365,7 @@ are equal.
 normalized_diffusion_coefficient(
     d_theta: ArrayLike,
     d_theta_reference: ArrayLike,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Normalised directional diffusion coefficient (ISO 17497-2, Formula (7)).

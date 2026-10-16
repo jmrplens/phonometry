@@ -87,7 +87,7 @@ altitude or below 10 degrees C (clauses 8.2.5 and 8.3.6).
 background_noise_correction(
     source_levels: np.ndarray,
     background_levels: np.ndarray,
-    grade: Grade = 'engineering',
+    grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> np.ndarray
 ```
 
@@ -213,12 +213,12 @@ are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-
 
 ```python
 measurement_positions(
-    surface: Surface,
+    surface: Literal['hemisphere', 'box'],
     *,
     radius: float,
     reflecting_planes: int = 1,
     tones: bool = True,
-    grade: Grade = 'engineering',
+    grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> np.ndarray
 ```
 
@@ -396,7 +396,7 @@ per band with that shape.
 ```python
 sound_energy_pressure(
     levels_positions: np.ndarray,
-    surface: Surface,
+    surface: Literal['hemisphere', 'box'],
     *,
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
@@ -407,7 +407,7 @@ sound_energy_pressure(
     integration_time: float | None = None,
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
-    grade: Grade = 'engineering',
+    grade: Literal['engineering', 'survey'] = 'engineering',
     omc_uncertainty: float = 0.0,
 ) -> SoundEnergyResult
 ```
@@ -482,7 +482,7 @@ The level holds for the meteorological conditions of the test; above
 ```python
 sound_power_pressure(
     levels_positions: np.ndarray,
-    surface: Surface,
+    surface: Literal['hemisphere', 'box'],
     *,
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
@@ -491,7 +491,7 @@ sound_power_pressure(
     background_levels: np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
-    grade: Grade = 'engineering',
+    grade: Literal['engineering', 'survey'] = 'engineering',
     omc_uncertainty: float = 0.0,
 ) -> SoundPowerResult
 ```
@@ -641,7 +641,7 @@ SoundPowerResult.declare(
     operating_conditions: str | None = None,
     noise_test_code: str | None = None,
     basic_standards: str | Sequence[str] = (),
-    form: DeclarationForm = 'dual-number',
+    form: Literal['dual-number', 'single-number'] = 'dual-number',
 ) -> NoiseEmissionDeclaration
 ```
 

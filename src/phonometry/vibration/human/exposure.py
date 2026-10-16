@@ -93,7 +93,6 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 Complex = NDArray[np.complex128]
 
 __all__ = [
-    "BASIC_METHOD_MAX_CREST_FACTOR",
     "HAV_EAV_A8",
     "HAV_ELV_A8",
     "REFERENCE_ACCELERATION",
@@ -123,7 +122,6 @@ __all__ = [
     "hav_vwf_lifetime_years",
     "motion_sickness_dose_value",
     "mtvv",
-    "partial_exposure",
     "running_rms",
     "vibration_dose_value",
     "vibration_total_value",
@@ -1062,7 +1060,10 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
     :math:`A(8) = a_\mathrm{hv} \sqrt{T / T_0}` with :math:`T_0 = 8` h.  The
     identical form gives the whole-body ``A(8)`` of Directive 2002/44/EC,
     whose magnitude is the Annex Part B dominant-axis value (see
-    :func:`wbv_exposure_basis`) rather than a vector total.
+    :func:`wbv_exposure_basis`) rather than a vector total.  Called with the
+    value and duration of one operation of a working day, it returns that
+    operation's partial vibration exposure :math:`A_i(8)` (ISO 5349-2
+    Eq. (2)), the term :func:`combine_partial_exposures` sums.
 
     :param total_value: Vibration total value ``a_hv`` (or ``a_v``), in m/s2.
     :param duration_s: Daily exposure duration ``T``, in seconds.
@@ -1080,10 +1081,6 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
         msg = "'total_value' and 'duration_s' must be finite and non-negative."
         raise ValueError(msg)
     return a * math.sqrt(t / REFERENCE_DURATION_S)
-
-
-#: Alias for :func:`daily_exposure` reading naturally in a hand-arm context.
-partial_exposure = daily_exposure
 
 
 def combine_partial_exposures(partials: ArrayLike) -> float:

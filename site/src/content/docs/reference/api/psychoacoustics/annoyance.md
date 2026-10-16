@@ -85,7 +85,7 @@ $S \le 1.75$ acum.
 
 ```python
 psychoacoustic_annoyance_from_signal(
-    x: SignalInput,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: int | None = None,
     *,
     field: Literal['free', 'diffuse'] = 'free',

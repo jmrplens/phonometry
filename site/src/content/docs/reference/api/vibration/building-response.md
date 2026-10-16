@@ -156,7 +156,7 @@ EMPIRICAL_FREQUENCY_TOLERANCE = 0.5
 
 ```python
 estimate_fundamental_frequency(
-    model: PeriodModel | str,
+    model: Literal['storeys', 'height', 'height_width', 'slenderness'] | str,
     *,
     storeys: int | None = None,
     height_m: float | None = None,
@@ -189,7 +189,7 @@ One prediction, bundled with the coefficient and the error band.
 
 ```python
 fundamental_frequency(
-    model: PeriodModel | str,
+    model: Literal['storeys', 'height', 'height_width', 'slenderness'] | str,
     *,
     storeys: int | None = None,
     height_m: float | None = None,
@@ -220,7 +220,7 @@ reader should not have to remember which.
 
 ```python
 fundamental_period(
-    model: PeriodModel | str,
+    model: Literal['storeys', 'height', 'height_width', 'slenderness'] | str,
     *,
     storeys: int | None = None,
     height_m: float | None = None,

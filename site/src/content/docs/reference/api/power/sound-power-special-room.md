@@ -83,7 +83,7 @@ check_special_room_reverberation(
     nominal_reverberation_time_s: float | None = None,
     surface_area_m2: float | None = None,
     speed_of_sound: float | None = None,
-    method: Method = 'direct',
+    method: Literal['direct', 'comparison'] = 'direct',
     relative_humidity_percent: float | None = None,
     temperature_c: float | None = None,
     reverberation_relative_humidity_percent: float | None = None,

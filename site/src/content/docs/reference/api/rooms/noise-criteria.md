@@ -68,8 +68,8 @@ NCResult(
     levels: np.ndarray,
     sil: float = nan,
     tangency_rating: float = nan,
-    method: NCMethod = 'tangency',
-    out_of_range: NCOutOfRange | None = None,
+    method: Literal['SIL', 'tangency'] = 'tangency',
+    out_of_range: Literal['above', 'below'] | None = None,
 )
 ```
 

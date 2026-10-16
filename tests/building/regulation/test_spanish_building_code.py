@@ -32,7 +32,7 @@ import math
 import numpy as np
 import pytest
 
-from phonometry.building.measurement.insulation import weighted_rating_extended
+from phonometry.building.measurement.ratings import weighted_rating_extended
 from phonometry.building.regulation import spain as hr
 
 #: Manual Ejemplo 7.2, printed page 394: the apparent sound reduction index

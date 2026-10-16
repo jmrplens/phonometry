@@ -502,7 +502,7 @@ def test_the_mappings_inside_a_row_cannot_be_edited() -> None:
 
 def test_a_row_cannot_be_edited() -> None:
     row = PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"cannot assign to field 'porosity'"):
         row.porosity = 0.5  # type: ignore[misc]
 
 

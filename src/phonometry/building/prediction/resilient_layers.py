@@ -78,6 +78,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.boundary import settled
+from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
     require_choice,
@@ -93,21 +94,6 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
-# The ISO 12354-1 Annex D lining machinery now lives in :mod:`.linings`. Until
-# every caller in the tree reads it from there, the names this module used to
-# define stay importable from this path, unchanged; the ``__all__`` below
-# re-exports them.
-from ..._internal.frozen import OwnsArrays
-from .linings import (
-    LiningImprovementResult,
-    lining_improvement,
-    lining_improvement_in_situ,
-    lining_resonance_frequency,
-    weighted_lining_improvement,
-)
-
-# The Annex D names above are listed here so they keep resolving through this
-# module; everything else is defined below.
 __all__ = [
     "TAPPING_DROP_HEIGHT",
     "TAPPING_HAMMER_MASS",
@@ -115,7 +101,6 @@ __all__ = [
     "TAPPING_IMPACT_RATE",
     "CoveringImprovementResult",
     "FloatingFloorImprovementResult",
-    "LiningImprovementResult",
     "TappingForceResult",
     "combined_dynamic_stiffness",
     "covering_contact_stiffness",
@@ -126,16 +111,12 @@ __all__ = [
     "force_pulse",
     "hammer_impact_velocity",
     "hammer_limiting_frequency",
-    "lining_improvement",
-    "lining_improvement_in_situ",
-    "lining_resonance_frequency",
     "plate_contact_stiffness",
     "resilient_mount_improvement",
     "short_pulse_mean_square_force",
     "tapping_cut_off_frequency",
     "tapping_force_spectrum",
     "weighted_floating_floor_improvement",
-    "weighted_lining_improvement",
 ]
 
 #: Mass ``m`` of one ISO tapping-machine hammer, in kg (ISO 10140-5; Hopkins

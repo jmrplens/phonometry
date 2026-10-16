@@ -104,7 +104,7 @@ they describe the plane-wave mode alone and a measurement will show the rest.
 ## cascade
 
 ```python
-cascade(*matrices: _Complex) -> _Complex
+cascade(*matrices: NDArray[np.complex128]) -> NDArray[np.complex128]
 ```
 
 Cascade element four-pole matrices from inlet to outlet.
@@ -137,7 +137,7 @@ duct_matrix(
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-) -> _Complex
+) -> NDArray[np.complex128]
 ```
 
 Four-pole matrix of a straight duct (Bies Eq. (8.143), no flow).
@@ -255,7 +255,7 @@ helmholtz_impedance(
     resistance: float = 0.0,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-) -> _Complex
+) -> NDArray[np.complex128]
 ```
 
 Acoustic impedance of a Helmholtz side branch (Bies Eq. (8.152)).
@@ -324,7 +324,7 @@ Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 
 ```python
 insertion_loss(
-    transfer_matrix: _Complex,
+    transfer_matrix: NDArray[np.complex128],
     *,
     source_impedance: ArrayLike,
     radiation_impedance: ArrayLike,
@@ -416,7 +416,7 @@ quarter_wave_impedance(
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-) -> _Complex
+) -> NDArray[np.complex128]
 ```
 
 Acoustic impedance of a closed quarter-wave side branch (Bies Eq. (8.146)).
@@ -602,7 +602,7 @@ transmission-loss relation.
 ## shunt_matrix
 
 ```python
-shunt_matrix(branch_impedance: ArrayLike) -> _Complex
+shunt_matrix(branch_impedance: ArrayLike) -> NDArray[np.complex128]
 ```
 
 Four-pole matrix of a side branch of impedance `Z_b` (Bies Eq. (8.144)).
@@ -856,7 +856,7 @@ Whether this is a duct element (an element with a declared area).
 
 ```python
 transmission_loss(
-    transfer_matrix: _Complex,
+    transfer_matrix: NDArray[np.complex128],
     *,
     inlet_area: float,
     outlet_area: float,

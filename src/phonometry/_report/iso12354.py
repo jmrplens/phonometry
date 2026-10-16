@@ -61,10 +61,7 @@ from ._layout import (
 from .iso717 import _metadata_pairs
 
 if TYPE_CHECKING:
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..building.prediction.detailed_model import (
         DetailedAirborneResult,
         DetailedImpactResult,
@@ -598,7 +595,7 @@ def render_iso12354_facade_report(
             "facade_sound_reduction)."
         )
         raise ValueError(msg)
-    from ..building.measurement.insulation import weighted_rating
+    from ..building.measurement.ratings import weighted_rating
 
     shares = _facade_energy_shares(result) if verbose else {}
     metric_rows: list[tuple[str, str]] = []

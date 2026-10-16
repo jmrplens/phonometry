@@ -807,7 +807,9 @@ def test_the_decay_verdict_has_no_truth_value_of_its_own() -> None:
 
 def test_the_decay_verdict_is_frozen_and_keyword_only() -> None:
     result = ins.verify_running_rms_decay(0.99, integration_time_s=1.0, method="linear")
-    with pytest.raises(AttributeError):
+    with pytest.raises(
+        AttributeError, match=r"cannot assign to field 'measured_time_s'"
+    ):
         result.measured_time_s = 0.5  # type: ignore[misc]
     with pytest.raises(TypeError):
         ins.RunningRmsDecayVerification("linear", 1.0, 0.99)  # type: ignore[misc]

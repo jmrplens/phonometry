@@ -145,10 +145,10 @@ bounds (clause 9.4.2).
 
 ```python
 precision_positions(
-    surface: PrecisionSurface,
+    surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
-    array: PrecisionArray = 'general',
+    array: Literal['general', 'broadband'] = 'general',
     count: int = 40,
 ) -> np.ndarray
 ```
@@ -308,7 +308,7 @@ energy-averaged level `Lp'`.
 ```python
 sound_power_anechoic(
     levels_positions: np.ndarray,
-    surface: PrecisionSurface,
+    surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
     background_levels: np.ndarray,
@@ -324,7 +324,7 @@ sound_power_anechoic(
 
 sound_power_anechoic(
     levels_positions: np.ndarray,
-    surface: PrecisionSurface,
+    surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
     frequencies: np.ndarray | None = ...,

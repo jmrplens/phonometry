@@ -199,21 +199,21 @@ adaptation term the input covered. Requires matplotlib
 impact_improvement_adaptation_term(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
     *,
-    reference_floor: ReferenceFloor = ...,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[False] = ...,
 ) -> int
 
 impact_improvement_adaptation_term(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
     *,
-    reference_floor: ReferenceFloor = ...,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[True],
 ) -> float
 
 impact_improvement_adaptation_term(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
     *,
-    reference_floor: ReferenceFloor = ...,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: bool = ...,
 ) -> int | float
 ```
@@ -483,21 +483,21 @@ the `Axes`.
 weighted_impact_improvement(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
     *,
-    reference_floor: ReferenceFloor = ...,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[False] = ...,
 ) -> int
 
 weighted_impact_improvement(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
     *,
-    reference_floor: ReferenceFloor = ...,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[True],
 ) -> float
 
 weighted_impact_improvement(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
     *,
-    reference_floor: ReferenceFloor = ...,
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: bool = ...,
 ) -> int | float
 ```
@@ -708,7 +708,7 @@ weighted_reduction_improvement(
     delta_r: Sequence[float] | np.ndarray,
     frequencies: Sequence[float] | np.ndarray | None = None,
     *,
-    basic_element: BasicElement = 'heavy_wall',
+    basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] = 'heavy_wall',
     one_decimal: bool = False,
 ) -> ReductionImprovementRating
 ```

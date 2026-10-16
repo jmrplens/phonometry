@@ -63,10 +63,7 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
-from .insulation import (
-    impact_improvement_adaptation_term,
-    weighted_impact_improvement,
-)
+from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

@@ -54,8 +54,8 @@ Clause/table numbers refer to ISO 12999-1:2020(E).
 
 ```python
 band_uncertainty(
-    measurand: Measurand,
-    situation: Situation,
+    measurand: Literal['airborne', 'impact', 'impact_reduction'],
+    situation: Literal['A', 'B', 'C'],
     *,
     upper_limit: bool = False,
 ) -> BandUncertainty
@@ -330,7 +330,7 @@ the last bits of the sum.
 ```python
 single_number_uncertainty(
     quantity: str,
-    situation: Situation,
+    situation: Literal['A', 'B', 'C'],
     *,
     upper_limit: bool = False,
 ) -> float
@@ -409,7 +409,7 @@ and is not reproduced here.
 uncertain_value(
     value: float,
     quantity: str,
-    situation: Situation,
+    situation: Literal['A', 'B', 'C'],
     *,
     coverage: float = 0.95,
     one_sided: bool = False,

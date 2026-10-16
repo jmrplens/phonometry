@@ -121,7 +121,7 @@ peak deviation, and do not break the grid.
 check_free_field(
     results: InverseSquareLawResult | Sequence[InverseSquareLawResult],
     *,
-    bandwidth: QualificationBandwidth,
+    bandwidth: Literal['discrete-frequency', 'broadband'],
     source_directionality: SourceDirectionalityResult | Sequence[SourceDirectionalityResult | None] | None = None,
     measurement_radius_m: float | None = None,
     reflecting_plane_absorption_coefficient: float | None = None,
@@ -167,7 +167,7 @@ allows, "in conformity" but not "in full conformity".
 
 ```python
 directionality_positions(
-    room: FreeFieldRoom,
+    room: Literal['anechoic', 'hemi-anechoic'],
     *,
     radius_m: float = 1.5,
 ) -> np.ndarray
@@ -197,7 +197,7 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 directionality_tolerance_db(
     frequencies_hz: ArrayLike,
     *,
-    room: FreeFieldRoom,
+    room: Literal['anechoic', 'hemi-anechoic'],
 ) -> np.ndarray
 ```
 
@@ -464,7 +464,7 @@ inverse_square_law_deviations(
     traverses: Sequence[MicrophoneTraverse],
     *,
     frequencies_hz: ArrayLike,
-    room: FreeFieldRoom,
+    room: Literal['anechoic', 'hemi-anechoic'],
     origin_m: ArrayLike | None = None,
     source_box_m: ArrayLike | None = None,
 ) -> InverseSquareLawResult
@@ -506,7 +506,7 @@ span the frequency range, each with its own mathematical origin, and
 inverse_square_law_tolerance_db(
     frequencies_hz: ArrayLike,
     *,
-    room: FreeFieldRoom,
+    room: Literal['anechoic', 'hemi-anechoic'],
 ) -> np.ndarray
 ```
 
@@ -804,7 +804,7 @@ verify_source_directionality(
     levels_db: ArrayLike,
     *,
     frequencies_hz: ArrayLike,
-    room: FreeFieldRoom,
+    room: Literal['anechoic', 'hemi-anechoic'],
 ) -> SourceDirectionalityResult
 ```
 

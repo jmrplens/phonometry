@@ -130,3 +130,115 @@ def test_a_row_for_something_the_library_does_not_publish_is_left_alone() -> Non
 
 class _Owner(types.SimpleNamespace):
     """A stand-in for the package a name is published by."""
+
+
+# ---------------------------------------------------------------------------
+# One address per public name
+# ---------------------------------------------------------------------------
+_FAKE_DOMAIN = {
+    "__init__.py": (
+        "from ._private import Hidden\n"
+        "from .leaf import Owned, Typed, owned, second\n"
+        "from .other import Shared\n"
+        "__all__ = ['Hidden', 'Owned', 'Shared', 'Typed', 'owned', 'second', 'Mode']\n"
+        "from .leaf import Mode\n"
+    ),
+    "leaf.py": (
+        "from typing import TYPE_CHECKING, Literal\n"
+        "from ._private import Hidden\n"
+        "from .other import Shared\n"
+        "if TYPE_CHECKING:\n"
+        "    from .other import Typed\n"
+        "Mode = Literal['a', 'b']\n"
+        "class Owned:\n    pass\n"
+        "class Typed:\n    pass\n"
+        "def owned():\n    return 1\n"
+        "second = owned\n"
+        "_TABLE = (1, 2)\n"
+        "__all__ = ['Hidden', 'Mode', 'Owned', 'Shared', 'Typed', '_TABLE', 'owned']\n"
+    ),
+    "other.py": "class Shared:\n    pass\n__all__ = ['Shared']\n",
+    "twin.py": "from ._private import Hidden\n__all__ = ['Hidden']\n",
+    "_private.py": "class Hidden:\n    pass\n",
+}
+
+
+def _fake_domain(tmp_path: pathlib.Path, name: str) -> types.ModuleType:
+    package = tmp_path / name
+    package.mkdir()
+    for filename, source in _FAKE_DOMAIN.items():
+        (package / filename).write_text(source, encoding="utf-8")
+    sys.path.insert(0, str(tmp_path))
+    try:
+        import importlib
+
+        return importlib.import_module(name)
+    finally:
+        sys.path.remove(str(tmp_path))
+
+
+def test_every_second_or_private_address_is_reported(tmp_path: pathlib.Path) -> None:
+    """Underscore names, re-exports, aliases, second names and second listings.
+
+    What is not reported is as much the point. ``leaf`` lists ``Hidden``, which
+    a private module defines and the domain publishes: that is how private code
+    gets its one public address. ``leaf`` imports ``Typed`` from ``other`` only
+    for the type checker, which binds nothing, so its ``Typed`` is its own.
+    And ``other`` lists the ``Shared`` it defines although ``leaf`` listed it
+    first: a listing already reported does not make the owner the second one.
+    """
+    domain = _fake_domain(tmp_path, "fake_surface_domain")
+    problems = gate.surface_problems([domain])
+    assert problems == [
+        "fake_surface_domain.__all__ lists 'second', a second name for owned",
+        "fake_surface_domain.__all__ lists 'Mode', a type alias",
+        "fake_surface_domain.leaf.__all__ lists 'Mode', a type alias",
+        "fake_surface_domain.leaf.__all__ lists 'Shared', a second address for "
+        "fake_surface_domain.other.Shared",
+        "fake_surface_domain.leaf.__all__ lists '_TABLE', which "
+        "fake_surface_domain does not publish",
+        "fake_surface_domain.twin.__all__ lists 'Hidden', which "
+        "fake_surface_domain.leaf lists too",
+    ]
+
+
+def test_a_plain_name_row_must_name_something_public() -> None:
+    """A withdrawn name whose row stayed teaches an import that fails."""
+    markdown = (
+        "| Name | Kind | What |\n"
+        "| :--- | :--- | :--- |\n"
+        "| `leq` | `function` | prose |\n"
+        "| `Withdrawn` | `constant` | prose |\n"
+        "| `Result.plot` / `phonometry.io` | `method` | prose |\n"
+        "| `.plot()` | `convention` | prose |\n"
+        "| `language` | `convention` | prose |\n"
+    )
+    assert gate.stale_rows(markdown, {"leq"}) == [
+        "Withdrawn: has a row, and nothing publishes it"
+    ]
+
+
+def test_the_curated_table_has_no_row_for_a_withdrawn_name() -> None:
+    from api_taxonomy import public_names
+
+    markdown = (
+        pathlib.Path(__file__).resolve().parent.parent
+        / "docs"
+        / "reference"
+        / "api"
+        / "index.md"
+    ).read_text(encoding="utf-8")
+    assert gate.stale_rows(markdown, public_names()) == []
+
+
+def test_the_library_gives_every_public_name_one_address() -> None:
+    import inspect
+
+    import phonometry
+
+    domains = [
+        getattr(phonometry, name)
+        for name in phonometry.__all__
+        if inspect.ismodule(getattr(phonometry, name))
+    ]
+    assert gate.surface_problems(domains) == []

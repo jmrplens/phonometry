@@ -176,7 +176,7 @@ lab_floor_covering_improvement(
     l_n_db: ArrayLike,
     frequencies_hz: ArrayLike,
     *,
-    reference_floor: ReferenceFloor = 'heavyweight',
+    reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = 'heavyweight',
 ) -> LabFloorCoveringImprovementResult
 ```
 
@@ -227,7 +227,7 @@ lab_lining_improvement(
     r_with_db: ArrayLike,
     frequencies_hz: ArrayLike,
     *,
-    basic_element: BasicElement | None = 'heavy_wall',
+    basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None = 'heavy_wall',
 ) -> LabLiningImprovementResult
 ```
 

@@ -156,10 +156,10 @@ Source waveform at time `t` (seconds).
 
 ```python
 FDTD2D(
-    c: float | Field2D,
+    c: float | NDArray[np.float64],
     dx: float,
     *,
-    rho: float | Field2D = 1.2,
+    rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
     sponge_width: int = 0,
     sponge_sides: str | Iterable[str] | None = None,
@@ -295,7 +295,9 @@ cells), as a physical incident wave would be.
 ### FDTD2D.add_source()
 
 ```python
-FDTD2D.add_source(source: AnySource) -> None
+FDTD2D.add_source(
+    source: GaussianPulse | CWSource | SignalSource | PlaneWaveSource,
+) -> None
 ```
 
 Register a source: a point injection or a plane-wave line.
@@ -379,13 +381,13 @@ Elapsed simulated time [s].
 
 ```python
 fdtd_simulation(
-    c: float | Field2D,
+    c: float | NDArray[np.float64],
     dx: float,
     duration: float,
     *,
-    sources: Sequence[Source],
+    sources: Sequence[GaussianPulse | CWSource | SignalSource],
     shape: tuple[int, int] | None = None,
-    rho: float | Field2D = 1.2,
+    rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
     probes: Sequence[tuple[int, int]] = (),
     boundaries: str | Mapping[str, str | float | NDArray[np.float64]] = 'rigid',
@@ -457,7 +459,7 @@ FDTDResult(
     dx: float,
     dt: float,
     shape: tuple[int, int],
-    sources: tuple[Source, ...],
+    sources: tuple[GaussianPulse | CWSource | SignalSource, ...],
     snapshots: NDArray[np.float64] | None,
     snapshot_times: NDArray[np.float64] | None,
     obstacle_mask: NDArray[np.bool_] | None,

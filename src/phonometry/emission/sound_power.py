@@ -116,7 +116,6 @@ if TYPE_CHECKING:
     from .declaration import DeclarationForm, NoiseEmissionDeclaration
 
 __all__ = [
-    "Grade",
     "ReferenceAtmosphereCorrection",
     "RoomEnvironment",
     "SoundEnergyResult",
@@ -124,7 +123,6 @@ __all__ = [
     # Defined in :mod:`._shared`, which every method module imports; re-exported
     # here because this is the documented path of the warning class.
     "SoundPowerWarning",
-    "Surface",
     "background_noise_correction",
     "environmental_correction",
     "mean_single_event_level",

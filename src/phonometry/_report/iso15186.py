@@ -52,11 +52,11 @@ from ._layout import fmt_num
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ..building.measurement.insulation import WeightedRatingResult
     from ..building.measurement.intensity_insulation import (
         IntensityElementNormalizedResult,
         IntensityReductionResult,
     )
+    from ..building.measurement.ratings import WeightedRatingResult
     from .metadata import ReportMetadata
 
 #: Fixed labels for the intensity sound reduction index fiche: title, basis

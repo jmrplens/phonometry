@@ -10,11 +10,9 @@ The complete public API, one page per module. Import the domain subpackage and c
 ```python
 from phonometry import filters, underwater
 
-spl, freq = filters.octave_filter(x, fs)
+r = filters.octave_filter(x, fs)
 snr = underwater.passive_sonar_equation(185.0, 60.0, 50.0)
 ```
-
-Every documented name can also be imported directly from the top-level package (`from phonometry import leq`).
 
 :::note
 The API reference is generated from the English source docstrings and is published in English only.
@@ -26,7 +24,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 
 | Module | Summary |
 | :--- | :--- |
-| [`phonometry`](/phonometry/reference/api/filters/phonometry/) | Package-level names defined in `phonometry/__init__.py` itself. |
+| [`phonometry`](/phonometry/reference/api/filters/phonometry/) | The top level publishes the domain subpackages and four objects that belong to no single domain. |
 | [`filters.core`](/phonometry/reference/api/filters/core/) | Core processing logic and FilterBank class for phonometry. |
 | [`filters.weighting`](/phonometry/reference/api/filters/weighting/) | Weighting filters (A, B, C, D, G, AU, 468, Z), time weighting utilities and the Linkwitz-Riley crossover. |
 | [`filters.equalizer`](/phonometry/reference/api/filters/equalizer/) | Parametric equalizer biquads per the RBJ Audio EQ Cookbook. |

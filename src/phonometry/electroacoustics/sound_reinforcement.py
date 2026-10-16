@@ -92,11 +92,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 #: Feedback stability margin used by Long for an equalised system, dB.
-DEFAULT_STABILITY_MARGIN = 10.0
+DEFAULT_STABILITY_MARGIN_DB = 10.0
 
 #: Directivity index of a cardioid microphone toward the loudspeaker relative
 #: to the talker, dB (Long, Chapter 18: "-2 or -3 dB of relative directivity").
-CARDIOID_RELATIVE_DIRECTIVITY = -2.0
+CARDIOID_RELATIVE_DIRECTIVITY_DB = -2.0
 
 
 def open_microphone_correction(open_microphones: int) -> float:
@@ -137,7 +137,7 @@ def feedback_loop_gain(
     :param microphone_directivity: Directivity index :math:`D_\mathrm{M}(\theta)`
         of the microphone toward the loudspeaker relative to the talker,
         dB (0 for an omnidirectional microphone, about
-        :data:`CARDIOID_RELATIVE_DIRECTIVITY` for a cardioid).
+        :data:`CARDIOID_RELATIVE_DIRECTIVITY_DB` for a cardioid).
     :return: The feedback-loop gain :math:`G_\mathrm{S}`, dB.
     """
     named = (
@@ -238,7 +238,7 @@ def feedback_stability(
     *,
     microphone_directivity: float = 0.0,
     open_microphones: int = 1,
-    stability_margin: float = DEFAULT_STABILITY_MARGIN,
+    stability_margin: float = DEFAULT_STABILITY_MARGIN_DB,
 ) -> FeedbackStabilityResult:
     r"""Stability of a reinforcement loop (Long Equations (18.16) to
     (18.24)).
@@ -263,7 +263,7 @@ def feedback_stability(
     :param open_microphones: Number :math:`N_\mathrm{m}` of microphones open at
         once.
     :param stability_margin: Required margin below oscillation, dB (default
-        :data:`DEFAULT_STABILITY_MARGIN`, Long's equalised-system value).
+        :data:`DEFAULT_STABILITY_MARGIN_DB`, Long's equalised-system value).
     :return: A :class:`FeedbackStabilityResult`.
     """
     require_scalar(open_loop_gain, "open_loop_gain")

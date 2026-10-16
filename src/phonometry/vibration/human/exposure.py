@@ -93,13 +93,13 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 Complex = NDArray[np.complex128]
 
 __all__ = [
-    "HAV_EAV_A8",
-    "HAV_ELV_A8",
-    "REFERENCE_ACCELERATION",
+    "ACCELERATION_LEVEL_REFERENCE_M_S2",
+    "HAV_EAV_A8_M_S2",
+    "HAV_ELV_A8_M_S2",
     "REFERENCE_DURATION_S",
-    "WBV_EAV_A8",
+    "WBV_EAV_A8_M_S2",
     "WBV_EAV_VDV",
-    "WBV_ELV_A8",
+    "WBV_ELV_A8_M_S2",
     "WBV_ELV_VDV",
     "WEIGHTING_NAMES",
     "DailyVibrationExposure",
@@ -135,7 +135,9 @@ __all__ = [
 # ---------------------------------------------------------------------------
 #: Reference acceleration ``a0 = 10^-6 m/s2`` for vibration levels
 #: (ISO 8041-1:2017, 3.1.2.2, after ISO 1683:2015 Table 3).
-REFERENCE_ACCELERATION = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
+ACCELERATION_LEVEL_REFERENCE_M_S2 = ISO1683_REFERENCE_VALUES["solid"][
+    "acceleration"
+].value
 
 #: Reference duration ``T0 = 8 h = 28 800 s`` of the daily exposure ``A(8)``
 #: (ISO 5349-1:2001, 3.2; ISO 2631-1:1997, B.1).
@@ -143,16 +145,16 @@ REFERENCE_DURATION_S = 28800.0
 
 #: Daily hand-arm exposure action value ``A(8) = 2,5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(1)(a)).
-HAV_EAV_A8 = 2.5
+HAV_EAV_A8_M_S2 = 2.5
 #: Daily hand-arm exposure limit value ``A(8) = 5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(1)(b)).
-HAV_ELV_A8 = 5.0
+HAV_ELV_A8_M_S2 = 5.0
 #: Daily whole-body exposure action value ``A(8) = 0,5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(2)(a)).
-WBV_EAV_A8 = 0.5
+WBV_EAV_A8_M_S2 = 0.5
 #: Daily whole-body exposure limit value ``A(8) = 1,15 m/s2`` (Directive
 #: 2002/44/EC, Article 3(2)(b)).
-WBV_ELV_A8 = 1.15
+WBV_ELV_A8_M_S2 = 1.15
 #: Whole-body VDV exposure action value ``9,1 m/s^1,75`` (Directive
 #: 2002/44/EC, Article 3(2)(a), alternative dose metric).
 WBV_EAV_VDV = 9.1
@@ -1199,8 +1201,8 @@ _KIND_METRIC_MSG = (
 #: Article 3 of Directive 2002/44/EC: the (EAV, ELV) pair of each quantity.
 _DIRECTIVE_VALUES: Mapping[tuple[str, str], tuple[float, float]] = MappingProxyType(
     {
-        ("hav", "a8"): (HAV_EAV_A8, HAV_ELV_A8),
-        ("wbv", "a8"): (WBV_EAV_A8, WBV_ELV_A8),
+        ("hav", "a8"): (HAV_EAV_A8_M_S2, HAV_ELV_A8_M_S2),
+        ("wbv", "a8"): (WBV_EAV_A8_M_S2, WBV_ELV_A8_M_S2),
         ("wbv", "vdv"): (WBV_EAV_VDV, WBV_ELV_VDV),
     }
 )

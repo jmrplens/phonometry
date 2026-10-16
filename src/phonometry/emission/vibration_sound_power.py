@@ -69,8 +69,8 @@ from .._internal.validation import (
 )
 
 __all__ = [
-    "NORMALIZED_IMPEDANCE",
-    "REFERENCE_VELOCITY",
+    "NORMALIZED_IMPEDANCE_PA_S_M",
+    "REFERENCE_VELOCITY_M_S",
     "VibrationSoundPowerResult",
     "extraneous_velocity_correction",
     "mean_velocity_level",
@@ -84,9 +84,10 @@ __all__ = [
 #: Reference vibratory velocity ``v0`` (ISO/TS 7849-1:2009, Equation 3), m/s:
 #: the 50 nm/s ISO 1683:2015 keeps for structure-borne sound in note b of
 #: Table 3, not its 1 nm/s.
-REFERENCE_VELOCITY: float = 5.0e-8
-#: Normalized characteristic impedance ``Z_c,n`` at 23 degC, 101.3 kPa, N.s/m3.
-NORMALIZED_IMPEDANCE: float = 411.0
+REFERENCE_VELOCITY_M_S: float = 5.0e-8
+#: Normalized characteristic impedance ``Z_c,n`` at 23 degC, 101.3 kPa, in Pa.s/m
+#: (N.s/m3).
+NORMALIZED_IMPEDANCE_PA_S_M: float = 411.0
 #: Reference acoustic impedance of air ``Z_c,0``, N.s/m3.
 _REFERENCE_IMPEDANCE: float = 400.0
 #: Reference area ``S0``, m2.
@@ -112,7 +113,7 @@ _K1A_CLAMPED_BELOW_DB: float = 3.0
 
 
 def velocity_level(
-    velocity: ArrayLike, *, reference: float = REFERENCE_VELOCITY
+    velocity: ArrayLike, *, reference: float = REFERENCE_VELOCITY_M_S
 ) -> np.ndarray:
     r"""Vibratory velocity level (ISO/TS 7849-1, Eq. 3).
 
@@ -132,7 +133,7 @@ def velocity_level_from_acceleration(
     peak_acceleration: ArrayLike,
     frequency: ArrayLike,
     *,
-    reference: float = REFERENCE_VELOCITY,
+    reference: float = REFERENCE_VELOCITY_M_S,
 ) -> np.ndarray:
     r"""Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
 
@@ -189,7 +190,7 @@ def radiation_factor(
     area: float,
     mean_square_velocity: ArrayLike,
     *,
-    impedance: float = NORMALIZED_IMPEDANCE,
+    impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
 ) -> np.ndarray:
     r"""A-weighted radiation factor ``epsilon`` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
 
@@ -219,7 +220,7 @@ def radiated_sound_power_level(
     *,
     radiation_factor: ArrayLike = 1.0,
     reference_area: float = _REFERENCE_AREA,
-    normalized_impedance: float = NORMALIZED_IMPEDANCE,
+    normalized_impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
     reference_impedance: float = _REFERENCE_IMPEDANCE,
 ) -> np.ndarray:
     r"""Radiated sound power level (ISO/TS 7849-1 Eq. 12, -2 Eq. 15).

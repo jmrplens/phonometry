@@ -2515,7 +2515,7 @@
             }
           ]
         },
-        "decay_rate_db_s": {
+        "decay_rate_db_per_s": {
           "$ref": "#/$defs/number"
         },
         "temperature_c": {
@@ -2554,7 +2554,7 @@
     "DampingTreatment.cells": {
       "enum": [
         "adhered_area_percent",
-        "decay_rate_db_s",
+        "decay_rate_db_per_s",
         "group",
         "name",
         "note",
@@ -2569,7 +2569,7 @@
     "DampingTreatment.fields": {
       "enum": [
         "adhered_area_percent",
-        "decay_rate_db_s",
+        "decay_rate_db_per_s",
         "surface_density_kg_m2",
         "temperature_c",
         "surface_density_g_m2",

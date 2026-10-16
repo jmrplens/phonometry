@@ -311,7 +311,7 @@ print(high.passes, high.deviation_percent.round(1))   # False [26.9]
 Keep the asymmetry in view, because it is the point of those two rows. What
 the standard is preventing out there is a meter that **responds to vibration
 it should be ignoring**, never a meter that ignores it too well. The value is
-published as `UNCONSTRAINED_BELOW` so a report can name it instead of writing
+published as `UNCONSTRAINED_BELOW_PERCENT` so a report can name it instead of writing
 a bare number, and the verification compares against it as an ordinary limit:
 the tail rows need no special case, since every non-negative factor satisfies
 them by construction.
@@ -440,7 +440,7 @@ band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
 # In the two tails the lower limit is -100 %, which verify_weighting subtracts
 # nothing from, so the bar there has one arm.
 _ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
-arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW, 0.0, u),
+arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW_PERCENT, 0.0, u),
                   np.full(sweep_hz.shape, u)))
 kept = graded.within_tolerance
 
@@ -659,7 +659,7 @@ subject to.
 ```python
 from phonometry import vibration
 
-print(vibration.phase_tolerance_degrees("Wk", [0.2, 0.5, 16.0, 100.0, 200.0]))
+print(vibration.phase_tolerance_deg("Wk", [0.2, 0.5, 16.0, 100.0, 200.0]))
 # [inf 12.  6. 12. inf]
 ```
 
@@ -678,7 +678,7 @@ affects neither the measured parameters nor $\Delta\varphi_0$, while
 tolerances written on the raw phase error would have to be extremely narrow to
 buy the same measurement accuracy.
 
-`phase_tolerance_degrees` returns that band and nothing else: the limit that
+`phase_tolerance_deg` returns that band and nothing else: the limit that
 applies at each frequency, with no opinion about what is being compared to it.
 Computing a $\Delta\varphi_0$ from a measured phase response and grading it
 against the band is the next section.
@@ -838,7 +838,7 @@ errors = {
     "the same delay with a spare pole at 100 Hz": delay + spare_pole,
 }
 attributed = frequencies[:-1]
-limit = vibration.phase_tolerance_degrees("Wk", attributed)
+limit = vibration.phase_tolerance_deg("Wk", attributed)
 
 fig, (ax_error, ax_graded) = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
 for label, error in errors.items():

@@ -53,7 +53,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 
 __all__ = [
-    "BASE_PLATE_BANDS",
+    "BASE_PLATE_BANDS_HZ",
     "BASE_PLATE_MAX_SCATTERING",
     "ScatteringDiffusionWarning",
     "ScatteringResult",
@@ -99,7 +99,7 @@ _MIN_MEASUREMENTS = 2
 
 #: One-third-octave centre frequencies of ISO 17497-1 Table 1, in Hz
 #: (equivalent full-scale ``f / N``), 100 Hz to 5000 Hz.
-BASE_PLATE_BANDS: tuple[int, ...] = (
+BASE_PLATE_BANDS_HZ: tuple[int, ...] = (
     100,
     125,
     160,
@@ -597,7 +597,7 @@ def check_base_plate_scattering(
 
     :param scattering: Measured base-plate scattering coefficients, either a
         mapping keyed by one-third-octave centre frequency (Hz) or a sequence
-        of 18 values ordered as :data:`BASE_PLATE_BANDS`.
+        of 18 values ordered as :data:`BASE_PLATE_BANDS_HZ`.
     :return: Tuple of the centre frequencies (Hz) that exceed the limit, in
         ascending order (empty if the base plate is compliant).
     :raises ValueError: for a mapping missing a band or a sequence of the
@@ -605,7 +605,7 @@ def check_base_plate_scattering(
     """
     if isinstance(scattering, Mapping):
         values: dict[int, float] = {}
-        for band in BASE_PLATE_BANDS:
+        for band in BASE_PLATE_BANDS_HZ:
             if band in scattering:
                 values[band] = float(scattering[band])
             elif float(band) in scattering:
@@ -613,21 +613,21 @@ def check_base_plate_scattering(
             else:
                 msg = (
                     f"scattering mapping is missing band {band} Hz; "
-                    f"expected keys {BASE_PLATE_BANDS}"
+                    f"expected keys {BASE_PLATE_BANDS_HZ}"
                 )
                 raise ValueError(msg)
     else:
         arr = np.asarray(scattering, dtype=np.float64)
-        if arr.ndim != 1 or arr.size != len(BASE_PLATE_BANDS):
+        if arr.ndim != 1 or arr.size != len(BASE_PLATE_BANDS_HZ):
             msg = (
-                f"scattering must have {len(BASE_PLATE_BANDS)} values for "
-                f"bands {BASE_PLATE_BANDS}, got shape {arr.shape}"
+                f"scattering must have {len(BASE_PLATE_BANDS_HZ)} values for "
+                f"bands {BASE_PLATE_BANDS_HZ}, got shape {arr.shape}"
             )
             raise ValueError(msg)
-        values = dict(zip(BASE_PLATE_BANDS, arr.tolist(), strict=True))
+        values = dict(zip(BASE_PLATE_BANDS_HZ, arr.tolist(), strict=True))
     exceeded = tuple(
         band
-        for band in BASE_PLATE_BANDS
+        for band in BASE_PLATE_BANDS_HZ
         if values[band] > BASE_PLATE_MAX_SCATTERING[band]
     )
     if exceeded:

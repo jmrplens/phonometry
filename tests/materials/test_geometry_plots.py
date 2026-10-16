@@ -281,11 +281,11 @@ def test_goniometer_geometry_refuses_a_nan_source_distance() -> None:
 
 
 def test_insitu_geometry_refuses_a_nan_source_height() -> None:
-    """``source_height <= mic_height`` is False for a NaN, so the old guard
+    """``source_height_m <= microphone_height_m`` is False for a NaN, so the old guard
     waved one into every path length of the set-up.
     """
-    with pytest.raises(ValueError, match="'source_height' must be positive"):
-        m.plot_insitu_geometry(source_height=float("nan"))
+    with pytest.raises(ValueError, match="'source_height_m' must be positive"):
+        m.plot_insitu_geometry(source_height_m=float("nan"))
 
 
 def test_metadiffuser_panel_geometry_refuses_a_nan_depth() -> None:

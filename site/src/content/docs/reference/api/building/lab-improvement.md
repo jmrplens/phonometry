@@ -388,7 +388,7 @@ its place.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); its `product` and `curing_time_h` fill the product identification and curing time rows, `source_temperature_c` and `source_relative_humidity_percent` (or the single `temperature_c` and `relative_humidity_percent`) the climate of the source room, and `requirement` a verdict on the weighted reduction (passing at or above it). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); its `product` and `curing_time_hours` fill the product identification and curing time rows, `source_temperature_c` and `source_relative_humidity_percent` (or the single `temperature_c` and `relative_humidity_percent`) the climate of the source room, and `requirement` a verdict on the weighted reduction (passing at or above it). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table also shows $L_\mathrm{n}$ with the covering. |
 | `language` | `"en"` (default) or `"es"`. |

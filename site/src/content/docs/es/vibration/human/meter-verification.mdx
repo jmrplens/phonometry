@@ -369,7 +369,7 @@ print(high.passes, high.deviation_percent.round(1))   # False [26.9]
 No pierdas de vista la asimetría, porque es el sentido de esas dos filas. Lo que
 la norma impide ahí fuera es un instrumento que **responda a vibración que
 debería estar ignorando**, nunca uno que la ignore demasiado bien. El valor se
-publica como `UNCONSTRAINED_BELOW` para que un informe pueda nombrarlo en vez de
+publica como `UNCONSTRAINED_BELOW_PERCENT` para que un informe pueda nombrarlo en vez de
 escribir un número pelado, y la verificación lo compara como un límite
 cualquiera: las filas de cola no necesitan ningún caso especial, ya que todo
 factor no negativo las satisface por construcción.
@@ -500,7 +500,7 @@ band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
 # En las dos colas el límite inferior es -100 %, al que verify_weighting no le
 # resta nada, así que allí la barra tiene un solo brazo.
 _ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
-arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW, 0.0, u),
+arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW_PERCENT, 0.0, u),
                   np.full(sweep_hz.shape, u)))
 kept = graded.within_tolerance
 
@@ -725,7 +725,7 @@ fase al que no está sujeto.
 ```python
 from phonometry import vibration
 
-print(vibration.phase_tolerance_degrees("Wk", [0.2, 0.5, 16.0, 100.0, 200.0]))
+print(vibration.phase_tolerance_deg("Wk", [0.2, 0.5, 16.0, 100.0, 200.0]))
 # [inf 12.  6. 12. inf]
 ```
 
@@ -745,7 +745,7 @@ ni a $\Delta\varphi_0$, mientras que unas tolerancias escritas sobre el error de
 fase en bruto tendrían que ser extremadamente estrechas para comprar la misma
 exactitud de medida.
 
-`phase_tolerance_degrees` devuelve esa banda y nada más: el límite que se
+`phase_tolerance_deg` devuelve esa banda y nada más: el límite que se
 aplica a cada frecuencia, sin opinión alguna sobre qué se compara con él.
 Calcular un $\Delta\varphi_0$ a partir de una respuesta de fase medida y
 calificarlo frente a la banda es la sección siguiente.
@@ -911,7 +911,7 @@ errors = {
     "el mismo retardo con un polo de más en 100 Hz": delay + spare_pole,
 }
 attributed = frequencies[:-1]
-limit = vibration.phase_tolerance_degrees("Wk", attributed)
+limit = vibration.phase_tolerance_deg("Wk", attributed)
 
 fig, (ax_error, ax_graded) = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
 for label, error in errors.items():

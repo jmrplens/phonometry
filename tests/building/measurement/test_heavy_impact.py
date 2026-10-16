@@ -170,7 +170,7 @@ def test_bang_machine_force_exposure_table() -> None:
 
 def test_octave_bands_of_the_specification() -> None:
     """Both tables are printed over the five octaves 31,5 Hz to 500 Hz."""
-    assert building.HEAVY_IMPACT_OCTAVE_BANDS == (
+    assert building.HEAVY_IMPACT_OCTAVE_BANDS_HZ == (
         31.5,
         63.0,
         125.0,
@@ -188,7 +188,7 @@ def test_source_limits_bracket_the_printed_nominal(
 ) -> None:
     """The tolerance band is the printed nominal +/- the printed tolerance."""
     freqs, lower, upper = building.heavy_impact_source_limits(source)
-    np.testing.assert_allclose(freqs, building.HEAVY_IMPACT_OCTAVE_BANDS)
+    np.testing.assert_allclose(freqs, building.HEAVY_IMPACT_OCTAVE_BANDS_HZ)
     np.testing.assert_allclose(lower, [v - t for v, t in table])
     np.testing.assert_allclose(upper, [v + t for v, t in table])
 

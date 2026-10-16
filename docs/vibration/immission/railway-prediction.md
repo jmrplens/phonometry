@@ -87,7 +87,7 @@ speed while the resonances do not, and the shift is refused.
 ```python
 from phonometry import vibration
 
-shifted = vibration.rescale_emission_for_speed([50.0], speed_from_km_h=50.0, speed_to_km_h=60.0)
+shifted = vibration.rescale_emission_for_speed([50.0], speed_from_kmh=50.0, speed_to_kmh=60.0)
 print(f"{shifted[0]:.2f} dB")  # 51.58 dB
 ```
 

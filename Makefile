@@ -346,8 +346,12 @@ record-display:
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
-# name that ends in its unit, or in a suffix that says it carries none. Needs
-# the package importable: the surface it checks is the one a caller reaches.
+# name that ends in its unit, or in a suffix that says it carries none, holds
+# every published constant that is a single number, and every published table
+# whose name says a quantity, to the same rule, and refuses a unit spelled the
+# way the tree retired (_seconds, _degrees, _km_h, _db_s, _knots, an _h that
+# means hours) on any public name. Needs the package importable: the surface
+# it checks is the one a caller reaches.
 parameter-units:
 	$(PYTHON) scripts/check_parameter_units.py
 

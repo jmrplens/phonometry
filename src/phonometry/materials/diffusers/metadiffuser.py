@@ -37,7 +37,7 @@ from ..._internal.validation import require_positive, require_positive_array
 from ..absorbers.porous import PUBLISHED_AIR, Complex
 from ..absorbers.slow_sound import HelmholtzResonator, slit_helmholtz_absorber
 from .design import (
-    DEFAULT_POLAR_ANGLES,
+    DEFAULT_POLAR_ANGLES_DEG,
     DiffuserPolarResponse,
     predict_diffuser_polar_response,
 )
@@ -248,7 +248,7 @@ def metadiffuser_polar_response(
     *,
     depth: float,
     period_m: float,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
+    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = "slit",
@@ -315,7 +315,7 @@ def metadiffuser_diffusion_spectrum(
     *,
     depth: float,
     period_m: float,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
+    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = "slit",

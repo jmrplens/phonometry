@@ -752,12 +752,12 @@ $[K/(2 Z_\mathrm{dp}) - \sqrt{(K/(2 Z_\mathrm{dp}))^{2} - K/m}]/(2 \pi)$
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
 
-## TAPPING_DROP_HEIGHT
+## TAPPING_DROP_HEIGHT_M
 
 *Constant* (`float`).
 
 ```python
-TAPPING_DROP_HEIGHT = 0.04
+TAPPING_DROP_HEIGHT_M = 0.04
 ```
 
 ## tapping_force_spectrum
@@ -815,28 +815,28 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `band` is unknown. |
 
-## TAPPING_HAMMER_MASS
+## TAPPING_HAMMER_MASS_KG
 
 *Constant* (`float`).
 
 ```python
-TAPPING_HAMMER_MASS = 0.5
+TAPPING_HAMMER_MASS_KG = 0.5
 ```
 
-## TAPPING_HAMMER_RADIUS
+## TAPPING_HAMMER_RADIUS_M
 
 *Constant* (`float`).
 
 ```python
-TAPPING_HAMMER_RADIUS = 0.015
+TAPPING_HAMMER_RADIUS_M = 0.015
 ```
 
-## TAPPING_IMPACT_RATE
+## TAPPING_IMPACT_RATE_HZ
 
 *Constant* (`float`).
 
 ```python
-TAPPING_IMPACT_RATE = 10.0
+TAPPING_IMPACT_RATE_HZ = 10.0
 ```
 
 ## TappingForceResult

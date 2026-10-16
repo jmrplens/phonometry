@@ -37,12 +37,12 @@ import pytest
 import reference_data as ref
 
 from phonometry.environment.sources.cnossos_rail import (
-    AERODYNAMIC_REFERENCE_SPEED,
-    RAILWAY_MINIMUM_SPEED,
-    RAILWAY_OCTAVE_BANDS,
-    RAILWAY_THIRD_OCTAVE_BANDS,
-    REFERENCE_JOINT_DENSITY,
-    TRAM_MINIMUM_SPEED,
+    AERODYNAMIC_REFERENCE_SPEED_KMH,
+    RAILWAY_MINIMUM_SPEED_KMH,
+    RAILWAY_OCTAVE_BANDS_HZ,
+    RAILWAY_THIRD_OCTAVE_BANDS_HZ,
+    REFERENCE_JOINT_DENSITY_PER_M,
+    TRAM_MINIMUM_SPEED_KMH,
     BrakeType,
     BridgeType,
     ContactFilter,
@@ -170,7 +170,7 @@ def test_table_g5_carries_the_2021_correction_at_6300_hz() -> None:
     which is what makes them a typographical error rather than a measurement.
     """
     low, high = traction_sound_power(TractionVehicle.DIESEL_LOCO_2200)
-    index = RAILWAY_THIRD_OCTAVE_BANDS.index(6300.0)
+    index = RAILWAY_THIRD_OCTAVE_BANDS_HZ.index(6300.0)
     assert (low[index], high[index]) == (81.4, 80.7)
     assert abs(low[index] - low[index - 1]) < 10.0
     assert abs(low[index] - low[index + 1]) < 10.0
@@ -423,7 +423,7 @@ def test_horizontal_directivity_cardinal_values() -> None:
 
 def test_vertical_directivity_current_text_is_zero_below_the_horizon() -> None:
     """(2.3.16) as replaced by (EU) 2021/1226 point (4)(d)."""
-    freqs = np.asarray(RAILWAY_THIRD_OCTAVE_BANDS)
+    freqs = np.asarray(RAILWAY_THIRD_OCTAVE_BANDS_HZ)
     assert np.all(vertical_directivity(0.0) == 0.0)
     for psi in (-1.0, -30.0, -45.0, -89.0):
         assert np.all(vertical_directivity(psi) == 0.0)
@@ -477,11 +477,11 @@ def test_vertical_directivity_source_b() -> None:
 
 def test_aerodynamic_law_is_exact_at_the_reference_speed() -> None:
     """(2.3.13)/(2.3.14) reduce to Table G-6 at ``v_0`` and follow 50 lg(v/v_0)."""
-    low, high = aerodynamic_sound_power(AERODYNAMIC_REFERENCE_SPEED)
+    low, high = aerodynamic_sound_power(AERODYNAMIC_REFERENCE_SPEED_KMH)
     assert low.tolist() == list(ref.CNOSSOS_RAIL_G6_A)
     assert high.tolist() == list(ref.CNOSSOS_RAIL_G6_B)
     doubled_low, doubled_high = aerodynamic_sound_power(
-        2.0 * AERODYNAMIC_REFERENCE_SPEED
+        2.0 * AERODYNAMIC_REFERENCE_SPEED_KMH
     )
     step = ref.CNOSSOS_RAIL_G6_ALPHA * math.log10(2.0)
     np.testing.assert_allclose(doubled_low - low, step, atol=1e-12)
@@ -493,11 +493,11 @@ def test_impact_roughness_joint_density_law() -> None:
     _, single = impact_roughness_single()
     frequency_grid = np.asarray(single[:24])
     np.testing.assert_allclose(
-        impact_roughness(frequency_grid, REFERENCE_JOINT_DENSITY),
+        impact_roughness(frequency_grid, REFERENCE_JOINT_DENSITY_PER_M),
         frequency_grid,
         atol=1e-12,
     )
-    doubled = impact_roughness(frequency_grid, 2.0 * REFERENCE_JOINT_DENSITY)
+    doubled = impact_roughness(frequency_grid, 2.0 * REFERENCE_JOINT_DENSITY_PER_M)
     np.testing.assert_allclose(
         doubled - frequency_grid, 10.0 * math.log10(2.0), atol=1e-12
     )
@@ -540,7 +540,7 @@ def test_octave_summation_of_third_octaves() -> None:
     """Three equal 1/3-octave bands make one octave band 10 lg 3 dB higher."""
     octaves = octave_bands_from_third_octaves(np.full(24, 70.0))
     np.testing.assert_allclose(octaves, 70.0 + 10.0 * math.log10(3.0), atol=1e-12)
-    assert len(octaves) == len(RAILWAY_OCTAVE_BANDS)
+    assert len(octaves) == len(RAILWAY_OCTAVE_BANDS_HZ)
     # a single loud 1/3-octave band lands in exactly one octave band
     spectrum = np.full(24, -np.inf)
     spectrum[13] = 100.0  # 1 000 Hz
@@ -716,11 +716,13 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
         RailwayVehicle(_reference_stock(), flow_rate=10.0, speed=20.0), plain
     )
     floored = railway_source_power(
-        RailwayVehicle(_reference_stock(), flow_rate=10.0, speed=RAILWAY_MINIMUM_SPEED),
+        RailwayVehicle(
+            _reference_stock(), flow_rate=10.0, speed=RAILWAY_MINIMUM_SPEED_KMH
+        ),
         plain,
     )
     # the roughness is frozen at the floor, so only the flow term moves
-    shift = 10.0 * math.log10(RAILWAY_MINIMUM_SPEED / 20.0)
+    shift = 10.0 * math.log10(RAILWAY_MINIMUM_SPEED_KMH / 20.0)
     np.testing.assert_allclose(
         slow.components["rolling"][0],
         floored.components["rolling"][0],
@@ -736,7 +738,7 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     for speed, expect_impact in (
         (20.0, False),
         (49.9, False),
-        (RAILWAY_MINIMUM_SPEED, True),
+        (RAILWAY_MINIMUM_SPEED_KMH, True),
         (120.0, True),
     ):
         with_joints = railway_source_power(
@@ -755,13 +757,13 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
     # a tram keeps its impact noise down to 30 km/h
     tram = railway_source_power(
         RailwayVehicle(
-            _reference_stock(tram=True), flow_rate=10.0, speed=TRAM_MINIMUM_SPEED
+            _reference_stock(tram=True), flow_rate=10.0, speed=TRAM_MINIMUM_SPEED_KMH
         ),
         jointed,
     )
     tram_without = railway_source_power(
         RailwayVehicle(
-            _reference_stock(tram=True), flow_rate=10.0, speed=TRAM_MINIMUM_SPEED
+            _reference_stock(tram=True), flow_rate=10.0, speed=TRAM_MINIMUM_SPEED_KMH
         ),
         plain,
     )

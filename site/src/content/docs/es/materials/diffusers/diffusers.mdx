@@ -379,12 +379,12 @@ s_base = materials.base_plate_scattering(200.0, 10.0,
 print(round(float(s_base), 4))   # 0.0269
 
 # Los techos normativos por banda (Tabla 1): 0.05 hasta 500 Hz, ascendiendo a 0.25.
-# materials.BASE_PLATE_BANDS es la tupla de bandas; materials.BASE_PLATE_MAX_SCATTERING asigna banda -> techo.
-print(materials.BASE_PLATE_BANDS[0], materials.BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
+# materials.BASE_PLATE_BANDS_HZ es la tupla de bandas; materials.BASE_PLATE_MAX_SCATTERING asigna banda -> techo.
+print(materials.BASE_PLATE_BANDS_HZ[0], materials.BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
 
 # Una placa base cuya dispersión medida se mantiene bajo el techo pasa en silencio;
 # una banda que lo supera lanza un ScatteringDiffusionWarning que lista las infractoras.
-materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS))
+materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
 ```
 
 **Incertidumbre (Anexo A).** Las seis mediciones de posición de cada situación

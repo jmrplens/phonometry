@@ -401,7 +401,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
-    - name: Check that no pressure, temperature or humidity hides its unit
+    - name: Check that no public name or constant hides its unit or misspells it
       run: python scripts/check_parameter_units.py
 
   # A published table is shared by every caller in the process, so a dict

@@ -296,7 +296,7 @@ PLATEAU_COLUMNS = (
 #: A damping treatment on the chapter's standard panel: the decay rate leads,
 #: then what the treatment is and how it was laid.
 DAMPING_TREATMENT_COLUMNS = (
-    ("decay_rate_db_s", "Decay rate", "Tasa de decaimiento", "dB/s"),
+    ("decay_rate_db_per_s", "Decay rate", "Tasa de decaimiento", "dB/s"),
     ("temperature_c", "Temperature", "Temperatura", "°C"),
     ("adhered_area_percent", "Area bonded", "Área adherida", "%"),
     ("surface_density_kg_m2", "Surface density", "Masa superficial", "kg/m²"),

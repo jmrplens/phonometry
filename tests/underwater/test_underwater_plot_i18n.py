@@ -133,7 +133,7 @@ def test_ambient_noise_legend_localized() -> None:
     # A legend-heavy renderer: the composite curve plus its wind/thermal
     # components. Guards that every legend entry is localized (the composite
     # "Total"/"wind"/"thermal" labels), not only the axis titles.
-    result = ocean_ambient_noise([100.0, 1000.0, 10000.0], wind_speed_knots=15.0)
+    result = ocean_ambient_noise([100.0, 1000.0, 10000.0], wind_speed_kt=15.0)
     ax = result.plot(language="es")
     labels = [t.get_text() for t in ax.get_legend().get_texts()]
     assert any(text.startswith("Total") for text in labels)

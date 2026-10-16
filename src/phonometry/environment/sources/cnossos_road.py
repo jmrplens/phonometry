@@ -73,10 +73,10 @@ if TYPE_CHECKING:
 __all__ = [
     "CNOSSOS_A_WEIGHTING",
     "ROAD_COEFFICIENTS",
-    "ROAD_OCTAVE_BANDS",
-    "ROAD_REFERENCE_SPEED",
-    "ROAD_REFERENCE_TEMPERATURE",
-    "ROAD_SOURCE_HEIGHT",
+    "ROAD_OCTAVE_BANDS_HZ",
+    "ROAD_REFERENCE_SPEED_KMH",
+    "ROAD_REFERENCE_TEMPERATURE_C",
+    "ROAD_SOURCE_HEIGHT_M",
     "JunctionType",
     "RoadEmissionCoefficients",
     "RoadEmissionResult",
@@ -94,7 +94,7 @@ __all__ = [
 
 #: Octave-band midband frequencies of the road source, in Hz (2.2.1 as
 #: corrected by the corrigendum of OJ L 5, 10.1.2018: 63 Hz to 8 kHz).
-ROAD_OCTAVE_BANDS: tuple[float, ...] = (
+ROAD_OCTAVE_BANDS_HZ: tuple[float, ...] = (
     63.0,
     125.0,
     250.0,
@@ -105,11 +105,11 @@ ROAD_OCTAVE_BANDS: tuple[float, ...] = (
     8000.0,
 )
 #: Reference speed ``v_ref`` of (2.2.4), (2.2.6), (2.2.11) and (2.2.19), km/h.
-ROAD_REFERENCE_SPEED = 70.0
+ROAD_REFERENCE_SPEED_KMH = 70.0
 #: Reference air temperature ``tau_ref`` of (2.2.10), degrees Celsius.
-ROAD_REFERENCE_TEMPERATURE = 20.0
+ROAD_REFERENCE_TEMPERATURE_C = 20.0
 #: Height of the equivalent point source above the road surface (2.2.1), m.
-ROAD_SOURCE_HEIGHT = 0.05
+ROAD_SOURCE_HEIGHT_M = 0.05
 #: Speed below which the sound power of a vehicle is frozen (2.2.1), km/h.
 _ROAD_MINIMUM_SPEED = 20.0
 #: Distance beyond which the junction correction vanishes (2.2.17), m.
@@ -264,7 +264,7 @@ _TABLE_F3: dict[str, tuple[tuple[float, float], tuple[float, float]]] = {
 #: 0,08 for light vehicles, 0,04 for the two heavy categories, and no
 #: temperature dependence for the powered two-wheelers, which have no rolling
 #: noise at all.
-_TEMPERATURE_K: dict[str, float] = {
+_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[str, float] = {
     "1": 0.08,
     "2": 0.04,
     "3": 0.04,
@@ -434,7 +434,7 @@ class RoadEmissionCoefficients(RichDisplay):
     :ivar studded_b: ``b_i`` of Table F-2 (category 1 only), in dB.
     :ivar junction_c: ``(C_R, C_P)`` of Table F-3 per category and junction
         type, in dB.
-    :ivar temperature_k: ``K_m`` of (2.2.10), in dB per degree Celsius.
+    :ivar temperature_coefficient_db_per_c: ``K_m`` of (2.2.10), in dB per degree Celsius.
     """
 
     rolling_a: Mapping[str, tuple[float, ...]]
@@ -444,7 +444,7 @@ class RoadEmissionCoefficients(RichDisplay):
     studded_a: tuple[float, ...]
     studded_b: tuple[float, ...]
     junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]]
-    temperature_k: Mapping[str, float]
+    temperature_coefficient_db_per_c: Mapping[str, float]
 
     def __post_init__(self) -> None:
         """Hold every per-category table read-only.
@@ -485,7 +485,7 @@ ROAD_COEFFICIENTS = RoadEmissionCoefficients(
     studded_a=_TABLE_F2_A,
     studded_b=_TABLE_F2_B,
     junction_c=_TABLE_F3,
-    temperature_k=_TEMPERATURE_K,
+    temperature_coefficient_db_per_c=_TEMPERATURE_COEFFICIENTS_DB_PER_C,
 )
 
 
@@ -608,7 +608,10 @@ def _require_category(key: str, coefficients: RoadEmissionCoefficients) -> None:
             ("propulsion_a", coefficients.propulsion_a),
             ("propulsion_b", coefficients.propulsion_b),
             ("junction_c", coefficients.junction_c),
-            ("temperature_k", coefficients.temperature_k),
+            (
+                "temperature_coefficient_db_per_c",
+                coefficients.temperature_coefficient_db_per_c,
+            ),
         )
         if key not in table
     ]
@@ -670,11 +673,11 @@ def _studded_correction(
         or studded_months <= 0.0
         or studded_fraction <= 0.0
     ):
-        return np.zeros(len(ROAD_OCTAVE_BANDS))
+        return np.zeros(len(ROAD_OCTAVE_BANDS_HZ))
     # (2.2.6): the speed dependence saturates below 50 km/h and above 90 km/h.
     clipped = min(max(speed, 50.0), 90.0)
     d_stud = _bands(coefficients.studded_a) + _bands(coefficients.studded_b) * np.log10(
-        clipped / ROAD_REFERENCE_SPEED
+        clipped / ROAD_REFERENCE_SPEED_KMH
     )
     p_s = studded_fraction * studded_months / _MONTHS_PER_YEAR  # (2.2.7)
     return np.asarray(
@@ -715,7 +718,7 @@ def road_rolling_noise(
     speed: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
+    temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
@@ -750,7 +753,7 @@ def road_rolling_noise(
     _require_category(key, coefficients)
     v = max(_positive_speed(speed), _ROAD_MINIMUM_SPEED)
     row = _surface_of(surface, key)
-    log_speed = np.log10(v / ROAD_REFERENCE_SPEED)
+    log_speed = np.log10(v / ROAD_REFERENCE_SPEED_KMH)
 
     base = (
         _bands(coefficients.rolling_a[key])
@@ -772,8 +775,8 @@ def road_rolling_noise(
         else 0.0
     )
     # (2.2.10) air-temperature correction, equal in every octave band.
-    d_temp = coefficients.temperature_k[key] * (
-        ROAD_REFERENCE_TEMPERATURE - _finite(temperature_c, "temperature_c")
+    d_temp = coefficients.temperature_coefficient_db_per_c[key] * (
+        ROAD_REFERENCE_TEMPERATURE_C - _finite(temperature_c, "temperature_c")
     )
     return np.asarray(base + d_road + d_stud + d_acc + d_temp, dtype=np.float64)
 
@@ -819,7 +822,7 @@ def road_propulsion_noise(
 
     base = _bands(coefficients.propulsion_a[key]) + _bands(
         coefficients.propulsion_b[key]
-    ) * ((v - ROAD_REFERENCE_SPEED) / ROAD_REFERENCE_SPEED)
+    ) * ((v - ROAD_REFERENCE_SPEED_KMH) / ROAD_REFERENCE_SPEED_KMH)
     # (2.2.20): only an absorbing surface (alpha < 0) affects propulsion noise.
     d_road = np.minimum(_bands(row.alpha[key]), 0.0)
     factor = _junction_factor(junction_distance, junction_type)
@@ -847,7 +850,7 @@ def road_vehicle_sound_power(
     speed: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
+    temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
     road_slope_percent: float = 0.0,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
@@ -929,7 +932,7 @@ class RoadEmissionResult(OwnsArrays):
     vehicle_power: NDArray[np.float64]
     line_power: NDArray[np.float64]
     total_line_power: NDArray[np.float64]
-    source_height: float = ROAD_SOURCE_HEIGHT
+    source_height: float = ROAD_SOURCE_HEIGHT_M
 
     def __post_init__(self) -> None:
         """Reject an emission whose categories and bands do not line up.
@@ -1032,7 +1035,7 @@ def road_source_power(
     traffic: RoadTraffic | list[RoadTraffic] | tuple[RoadTraffic, ...],
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
+    temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
     road_slope_percent: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
@@ -1117,7 +1120,7 @@ def road_source_power(
     with np.errstate(divide="ignore"):
         total = 10.0 * np.log10(np.sum(10.0 ** (line_power / 10.0), axis=0))
     return RoadEmissionResult(
-        frequencies=np.asarray(ROAD_OCTAVE_BANDS, dtype=np.float64),
+        frequencies=np.asarray(ROAD_OCTAVE_BANDS_HZ, dtype=np.float64),
         categories=tuple(RoadVehicleCategory(key) for key in keys),
         rolling=np.asarray(rolling, dtype=np.float64),
         propulsion=np.asarray(propulsion, dtype=np.float64),

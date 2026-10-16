@@ -131,7 +131,7 @@ from .radiation_efficiency import (
 )
 from .transfer_stiffness import (
     MIN_FREQUENCIES_PER_BAND,
-    REFERENCE_STIFFNESS,
+    REFERENCE_STIFFNESS_N_M,
     TRANSMISSIBILITY_LIMIT,
     BandAveragedStiffness,
     DrivingPointStiffnessResult,
@@ -199,7 +199,7 @@ __all__ = [
     "PIPELINE_MATERIALS",
     "PIPELINE_MM_S",
     "PowerInjectionResult",
-    "REFERENCE_STIFFNESS",
+    "REFERENCE_STIFFNESS_N_M",
     "RESPONSE_END_RATIO",
     "RESPONSE_MIDPOINT_RATIO",
     "RadiationEfficiencyResult",

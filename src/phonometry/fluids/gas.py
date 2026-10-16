@@ -47,13 +47,13 @@ from .air import DEFAULT_STATIC_PRESSURE_PA
 
 __all__ = [
     "IDEAL_GAS_VALIDITY",
-    "MOLAR_GAS_CONSTANT",
+    "MOLAR_GAS_CONSTANT_J_MOL_K",
     "ideal_gas",
 ]
 
 #: The molar gas constant ``R``, in J/(mol K). Exact since the 2019 revision of
 #: the SI fixed the Boltzmann and Avogadro constants.
-MOLAR_GAS_CONSTANT = 8.31446261815324
+MOLAR_GAS_CONSTANT_J_MOL_K = 8.31446261815324
 
 #: What the ideal-gas closure is worth, stated so a caller can read it off the
 #: fluid it gets back.
@@ -130,8 +130,8 @@ def ideal_gas(
         pressure = require_positive(static_pressure_pa, "static_pressure_pa")
 
     kelvin = temperature + _ABSOLUTE_ZERO_C_OFFSET
-    speed = math.sqrt(gamma * MOLAR_GAS_CONSTANT * kelvin / molar_mass)
-    density = pressure * molar_mass / (MOLAR_GAS_CONSTANT * kelvin)
+    speed = math.sqrt(gamma * MOLAR_GAS_CONSTANT_J_MOL_K * kelvin / molar_mass)
+    density = pressure * molar_mass / (MOLAR_GAS_CONSTANT_J_MOL_K * kelvin)
     return Fluid(
         temperature_c=float(temperature),
         static_pressure_pa=float(pressure),

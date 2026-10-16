@@ -112,9 +112,9 @@ __all__ = [
     "EXTRAPOLATION_MAX_DEVIATION_DB",
     "EXTRAPOLATION_RANGE_FACTORS",
     "ISO11691_REPRODUCIBILITY",
-    "ISO7235_ABSOLUTE_ZERO_OFFSET",
+    "ISO7235_ABSOLUTE_ZERO_OFFSET_K",
     "ISO7235_COVERAGE_FACTOR",
-    "ISO7235_GAS_CONSTANT",
+    "ISO7235_AIR_GAS_CONSTANT_J_KG_K",
     "ISO7235_REPRODUCIBILITY",
     "ISO7235_SPREAD_LIMITS",
     "MINIMUM_FLOW_RATES",
@@ -284,14 +284,14 @@ _SOUND_SPEED_M_S = 343.0
 #: standard prints it, in N·m/(kg·K). The accurate value for dry air is
 #: 287,05; the printed 287 is 0,017 % low, which with the temperature offset
 #: scales a pressure loss coefficient by 0,069 % rather than shifting it.
-ISO7235_GAS_CONSTANT = 287.0
+ISO7235_AIR_GAS_CONSTANT_J_KG_K = 287.0
 
 #: ISO 7235:2003, Equations (10), (21) and (22). The offset the standard adds
 #: to a Celsius temperature to get an absolute one, in degrees. It prints 273
 #: rather than 273,15, which puts a density 0,051 % high at 20 °C; the value
 #: is kept as printed so that a result can be reproduced as the standard
 #: gives it.
-ISO7235_ABSOLUTE_ZERO_OFFSET = 273.0
+ISO7235_ABSOLUTE_ZERO_OFFSET_K = 273.0
 
 #: ISO 7235:2003, 6.5.2.1. The window the density ratio between the flow
 #: meter and the test object may sit in before Equation (9) has to replace
@@ -946,7 +946,7 @@ def normal_air_density(
     leaves it 0,069 % low. That is far under the uncertainty of a
     pressure-loss test, and using the printed constants is what reproduces a
     result computed to the standard, which is why
-    :data:`ISO7235_ABSOLUTE_ZERO_OFFSET` and :data:`ISO7235_GAS_CONSTANT`
+    :data:`ISO7235_ABSOLUTE_ZERO_OFFSET_K` and :data:`ISO7235_AIR_GAS_CONSTANT_J_KG_K`
     carry them as printed.
 
     :param static_gauge_pressure_pa: :math:`p_{s1}`, the duct static pressure
@@ -972,15 +972,15 @@ def normal_air_density(
             f"{ambient_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
-    kelvin = celsius + ISO7235_ABSOLUTE_ZERO_OFFSET
+    kelvin = celsius + ISO7235_ABSOLUTE_ZERO_OFFSET_K
     if kelvin <= 0.0:
         msg = (
             "Equation (10) divides by the absolute temperature, which "
-            f"ISO 7235 writes as theta + {ISO7235_ABSOLUTE_ZERO_OFFSET:.0f} "
+            f"ISO 7235 writes as theta + {ISO7235_ABSOLUTE_ZERO_OFFSET_K:.0f} "
             f"degrees Celsius; got {temperature_c!r} °C."
         )
         raise ValueError(msg)
-    return float(absolute / (ISO7235_GAS_CONSTANT * kelvin))
+    return float(absolute / (ISO7235_AIR_GAS_CONSTANT_J_KG_K * kelvin))
 
 
 def volume_flow_rate(mass_flow: float, density: float) -> float:

@@ -39,7 +39,7 @@ from .catalogue import (
 )
 from .gas import (
     IDEAL_GAS_VALIDITY,
-    MOLAR_GAS_CONSTANT,
+    MOLAR_GAS_CONSTANT_J_MOL_K,
     ideal_gas,
 )
 from .nonlinearity import (
@@ -60,7 +60,7 @@ __all__ = [
     "DEFAULT_RELATIVE_HUMIDITY_PERCENT",
     "DEFAULT_STATIC_PRESSURE_PA",
     "IDEAL_GAS_VALIDITY",
-    "MOLAR_GAS_CONSTANT",
+    "MOLAR_GAS_CONSTANT_J_MOL_K",
     "PUBLISHED_FLUIDS",
     "PUBLISHED_GASES",
     "PUBLISHED_NONLINEARITY",

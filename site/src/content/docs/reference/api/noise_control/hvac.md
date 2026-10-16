@@ -240,7 +240,7 @@ which is what `count` applies.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `face_area` | Cross-sectional face area `S_\mathrm{G}` of one device, m2. |
 | `volume_flow` | Volume flow `Q` through one device, m3/s. |
 | `pressure_drop_pa` | Static pressure drop `dP` across the device, Pa. |
@@ -430,7 +430,7 @@ the housing.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` (default) uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` (default) uses `OCTAVE_BANDS`. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
@@ -563,7 +563,7 @@ duty point, worth 0,1 dB at the optimum itself.
 | `specific_sound_power_level` | **VDI 2081 only.** The specific sound power level `L_\mathrm{WSM}`, dB. `None` (default) takes the representative value of the assembly, 34, 36 or 42 dB. Section 4.3.3 says a fan can sit up to 7 dB above its assembly average at the optimum duty point, so a manufacturer's own value belongs here. |
 | `blade_count` | **VDI 2081 only.** Number of impeller blades `z`, which places the blade-frequency allowance of Section 4.3.4 in the octave holding `n z / 60`. `None` (default) omits it. The allowance is nought for assemblies RR and T built to the state of the art and 4 dB for AM. |
 | `relative_flow` | **VDI 2081 only.** Duty as a fraction of the best efficiency point, `\dot{V} / \dot{V}_\mathrm{opt}` (default 1). |
-| `frequencies` | Octave-band centres, Hz; `None` (default) uses the 63 Hz to 8 kHz bands of [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` (default) uses the 63 Hz to 8 kHz bands of `OCTAVE_BANDS`. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
@@ -872,7 +872,7 @@ ignores it.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `diameter_m` | Internal diameter `d`, m. |
 | `length` | Duct run length `l`, m. |
 | `lining_thickness` | Lining thickness `t`, m. |
@@ -909,7 +909,7 @@ ducts). Flanking limits the total to 40 dB.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `width` | Duct width, m. |
 | `height` | Duct height, m. |
 | `length` | Duct run length `l`, m. |
@@ -950,7 +950,7 @@ test, since `K_A = -A - 5`.
 | Name | Description |
 | :--- | :--- |
 | `a_weighted_limit_db` | The A-weighted level the room is required to meet `L_A`, dB. |
-| `frequencies` | Octave-band centres, Hz; `None` (default) uses the 63 Hz to 8 kHz bands of [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` (default) uses the 63 Hz to 8 kHz bands of `OCTAVE_BANDS`. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the per-band limit, dB.
 
@@ -1206,7 +1206,7 @@ correction because the face size enters through `N` and `H`.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `airway_velocity` | Velocity `V` in the splitter airway, m/s. |
 | `passages` | Number of air passages `N` between the splitters. |
 | `height` | Silencer height `H` (or circumference, if round), m. |
@@ -1329,7 +1329,7 @@ noise is a separate quantity, [`silencer_self_noise`](/phonometry/reference/api/
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` (default) uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` (default) uses `OCTAVE_BANDS`. |
 | `height` | Height of the silencer face, m (the airway dimension the splitters do not divide). |
 | `length` | Length of the silencer in the flow direction, m. |
 | `airway_widths` | Free width of each airway between splitters, m (a scalar is taken as a single airway; give one value per airway when they differ). |
@@ -1373,7 +1373,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
+| `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
 | `length` | Duct run length, m. |
 | `diameter_m` | **VDI 2081 only.** Internal diameter, m, which selects the Table 5 row. The table stops at 1,00 m. |
 | `model` | `"ashrae"` (default, Long Table 14.1) or `"vdi2081"`. |

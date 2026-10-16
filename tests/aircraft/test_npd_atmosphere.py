@@ -37,7 +37,7 @@ from doc29_appendix_d_data import (
 from reference_data import IEC61672_TABLE3
 
 from phonometry.aircraft import (
-    NOY_BANDS,
+    NOY_BANDS_HZ,
     SAE_AIR1845_ATTENUATION_DB_PER_100M,
     AerodromeAtmosphere,
     AnpDatabase,
@@ -441,8 +441,8 @@ def test_spectral_class_plot_draws_its_levels() -> None:
 
 def test_frequencies_are_a_copy_not_the_published_bands() -> None:
     inc = _increment(103, "arp5534")
-    assert np.array_equal(inc.frequencies, NOY_BANDS)
-    assert inc.frequencies is not NOY_BANDS
+    assert np.array_equal(inc.frequencies, NOY_BANDS_HZ)
+    assert inc.frequencies is not NOY_BANDS_HZ
 
 
 def test_noise_contour_with_humidity_reads_the_revised_tables() -> None:

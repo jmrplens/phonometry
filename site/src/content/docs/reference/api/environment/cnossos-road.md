@@ -104,12 +104,12 @@ methodology". Only the per-metre line power is defined by the method.
 
 *Constant* (`phonometry.environment.sources.cnossos_road.RoadEmissionCoefficients`).
 
-## ROAD_OCTAVE_BANDS
+## ROAD_OCTAVE_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-ROAD_OCTAVE_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+ROAD_OCTAVE_BANDS_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
 ```
 
 ## road_propulsion_noise
@@ -156,20 +156,20 @@ propulsion noise, a noisy one does not increase it.
 | :--- | :--- |
 | ValueError | If an input is invalid. |
 
-## ROAD_REFERENCE_SPEED
+## ROAD_REFERENCE_SPEED_KMH
 
 *Constant* (`float`).
 
 ```python
-ROAD_REFERENCE_SPEED = 70.0
+ROAD_REFERENCE_SPEED_KMH = 70.0
 ```
 
-## ROAD_REFERENCE_TEMPERATURE
+## ROAD_REFERENCE_TEMPERATURE_C
 
 *Constant* (`float`).
 
 ```python
-ROAD_REFERENCE_TEMPERATURE = 20.0
+ROAD_REFERENCE_TEMPERATURE_C = 20.0
 ```
 
 ## road_rolling_noise
@@ -219,12 +219,12 @@ and their total power is the propulsion term alone (2.2.3).
 | :--- | :--- |
 | ValueError | If an input is invalid. |
 
-## ROAD_SOURCE_HEIGHT
+## ROAD_SOURCE_HEIGHT_M
 
 *Constant* (`float`).
 
 ```python
-ROAD_SOURCE_HEIGHT = 0.05
+ROAD_SOURCE_HEIGHT_M = 0.05
 ```
 
 ## road_source_power
@@ -358,7 +358,7 @@ RoadEmissionCoefficients(
     studded_a: tuple[float, ...],
     studded_b: tuple[float, ...],
     junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]],
-    temperature_k: Mapping[str, float],
+    temperature_coefficient_db_per_c: Mapping[str, float],
 )
 ```
 
@@ -382,7 +382,7 @@ reproduced for comparison with pre-2021 studies.
 | `studded_a` | `a_i` of Table F-2 (category 1 only), in dB. |
 | `studded_b` | `b_i` of Table F-2 (category 1 only), in dB. |
 | `junction_c` | `(C_R, C_P)` of Table F-3 per category and junction type, in dB. |
-| `temperature_k` | `K_m` of (2.2.10), in dB per degree Celsius. |
+| `temperature_coefficient_db_per_c` | `K_m` of (2.2.10), in dB per degree Celsius. |
 
 ## RoadEmissionResult
 

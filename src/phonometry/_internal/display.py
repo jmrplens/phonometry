@@ -129,7 +129,6 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "mm3": "mm\N{SUPERSCRIPT THREE}",
         # Time.
         "s": "s",
-        "seconds": "s",
         "ms": "ms",
         "hours": "h",
         "days": "d",
@@ -160,7 +159,6 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "rad_s": "rad/s",
         "kmh": "km/h",
         "kt": "kt",
-        "knots": "kn",
         "mm_h": "mm/h",
         "ft_per_min": "ft/min",
         # Rates and gradients.
@@ -170,7 +168,6 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "per_s": "1/s",
         "per_db": "1/dB",
         "per_mm_s": "s/mm",
-        "db_s": "dB/s",
         "db_per_s": "dB/s",
         "db_per_m": "dB/m",
         "db_per_100m": "dB/100 m",
@@ -206,18 +203,15 @@ _LETTER_UNITS = frozenset({"m", "s", "v"})
 #: quantity, each with the words that say it: ``temperature_c`` is in degrees
 #: Celsius and ``delta_rw_c`` is the spectrum adaptation term C,
 #: ``load_current_a`` is in amperes and ``sound_power_level_a`` is A-weighted,
-#: ``inductance_h`` is in henries and ``curing_time_h`` in hours, and
-#: ``subject_h`` is :math:`H_j` of ISO 4869-2.
+#: ``inductance_h`` is in henries, and ``subject_h`` is :math:`H_j` of
+#: ISO 4869-2. An hour is spelled ``_hours``, never ``_h``.
 _QUALIFIED_UNITS: Mapping[str, tuple[tuple[frozenset[str], str], ...]] = (
     MappingProxyType(
         {
             "c": ((frozenset({"temperature", "temperatures"}), "\N{DEGREE SIGN}C"),),
             "k": ((frozenset({"temperature", "temperatures"}), "K"),),
             "a": ((frozenset({"current", "currents"}), "A"),),
-            "h": (
-                (frozenset({"inductance"}), "H"),
-                (frozenset({"time", "times"}), "h"),
-            ),
+            "h": ((frozenset({"inductance"}), "H"),),
         }
     )
 )

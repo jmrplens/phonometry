@@ -475,8 +475,8 @@ def reflection_sampled_area_radius_m(
     """
     return max_sampled_area_radius(
         require_positive(window_length_s, "window_length_s"),
-        source_height=REFLECTION_SOURCE_DISTANCE_M,
-        mic_height=REFLECTION_MICROPHONE_DISTANCE_M,
+        source_height_m=REFLECTION_SOURCE_DISTANCE_M,
+        microphone_height_m=REFLECTION_MICROPHONE_DISTANCE_M,
         speed_of_sound=require_positive(speed_of_sound, "speed_of_sound"),
     )
 

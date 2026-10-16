@@ -58,7 +58,7 @@ standardized level difference $D_{\mathrm{n}T}$, $D_{2\mathrm{m,n}T}$ and so on)
 the normalised source spectrum. The sum runs over **eighteen** one-third-octave
 bands, 100 Hz to 5 kHz, two more than the sixteen of ISO 717-1 (100 Hz to
 3150 Hz): the 4 kHz and 5 kHz bands, which are the first reason the two routes
-do not always agree. The band centres are in `DB_HR_FREQUENCIES`.
+do not always agree. The band centres are in `DB_HR_FREQUENCIES_HZ`.
 
 | Normalised spectrum | Annex A table | Quantity it defines | Formula |
 | :--- | :--- | :--- | :--- |
@@ -178,7 +178,7 @@ d2m_nt = [28.5, 28.5, 18.9, 23.7, 30.7, 31.3, 37.8, 35.2, 34.7,
 direct = building.d2m_nt_atr(d2m_nt)
 direct.intermediate, direct.reported   # 32.8 dBA -> 33 dBA
 
-iso = building.weighted_rating_extended(d2m_nt, building.DB_HR_FREQUENCIES)
+iso = building.weighted_rating_extended(d2m_nt, building.DB_HR_FREQUENCIES_HZ)
 iso.rating, iso.ctr_100_5000           # 38 dB, -5 dB -> 33 dBA, the same figure
 iso.c, iso.c_100_5000                  # -2 and -1: core range versus enlarged range
 ```

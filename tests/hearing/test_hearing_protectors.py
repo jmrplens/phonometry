@@ -102,7 +102,7 @@ def test_the_a_weighting_matches_the_librarys_own_iec_table() -> None:
     from phonometry.filters.weighting_compliance import _WEIGHTING_TABLE3
 
     printed = {row[0]: row[1] for row in _WEIGHTING_TABLE3}
-    assert [printed[f] for f in hearing.PROTECTOR_OCTAVE_BANDS] == list(
+    assert [printed[f] for f in hearing.PROTECTOR_OCTAVE_BANDS_HZ] == list(
         hearing.PROTECTOR_A_WEIGHTING
     )
     # And they are the row Annex B prints beside its own spectrum.
@@ -155,7 +155,7 @@ def test_the_octave_band_method_drops_63_hz_when_asked_to() -> None:
         ref.ISO4869_2_ANNEX_B_NOISE[1:], ref.ISO4869_2_APV84_PRINTED[1:]
     )
     assert seven.frequencies is not None
-    assert seven.frequencies.tolist() == list(hearing.PROTECTOR_OCTAVE_BANDS[1:])
+    assert seven.frequencies.tolist() == list(hearing.PROTECTOR_OCTAVE_BANDS_HZ[1:])
     # 63 Hz contributes 44,7 dB against a total of 81,4 dB, so dropping it
     # moves the answer by less than the reported resolution.
     assert seven.reported_level == ref.ISO4869_2_ANNEX_B_REPORTED

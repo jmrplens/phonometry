@@ -42,7 +42,7 @@ from .tonality_ecma import (
 )
 from .tone_audibility import (
     HANNING_BANDWIDTH_FACTOR,
-    NO_TONE_AUDIBILITY,
+    NO_TONE_AUDIBILITY_DB,
     ToneAudibilityResult,
     analyze_spectrum,
     assess_tones,
@@ -65,7 +65,7 @@ from .tone_audibility import (
 
 __all__ = [
     "HANNING_BANDWIDTH_FACTOR",
-    "NO_TONE_AUDIBILITY",
+    "NO_TONE_AUDIBILITY_DB",
     "EcmaFluctuationStrength",
     "EcmaRoughness",
     "EcmaTonality",

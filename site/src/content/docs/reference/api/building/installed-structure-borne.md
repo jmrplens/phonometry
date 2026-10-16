@@ -363,12 +363,12 @@ the prediction disclaimer.
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
 | ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
 
-## MINIMUM_MULTI_JUNCTION_KIJ
+## MINIMUM_MULTI_JUNCTION_KIJ_DB
 
 *Constant* (`float`).
 
 ```python
-MINIMUM_MULTI_JUNCTION_KIJ = -5.0
+MINIMUM_MULTI_JUNCTION_KIJ_DB = -5.0
 ```
 
 ## multi_junction_adjustment
@@ -384,7 +384,7 @@ Formula (F.1) sums the junction `Kij` along the path and subtracts an
 adjustment `dK` that covers the transmission by wave types other than
 bending waves. Clause F.1 estimates it from published data as 4 dB for two
 junctions and 6 dB for three or more, with the resulting `Kij` floored at
-[`MINIMUM_MULTI_JUNCTION_KIJ`](/phonometry/reference/api/building/installed-structure-borne/#minimum_multi_junction_kij).
+[`MINIMUM_MULTI_JUNCTION_KIJ_DB`](/phonometry/reference/api/building/installed-structure-borne/#minimum_multi_junction_kij_db).
 
 **Parameters**
 
@@ -400,12 +400,12 @@ junctions and 6 dB for three or more, with the resulting `Kij` floored at
 | :--- | :--- |
 | ValueError | for fewer than one junction. |
 
-## REFERENCE_AREA
+## REFERENCE_AREA_M2
 
 *Constant* (`float`).
 
 ```python
-REFERENCE_AREA = 10.0
+REFERENCE_AREA_M2 = 10.0
 ```
 
 ## structure_borne_pressure_level_path
@@ -507,12 +507,12 @@ TABLE_D1_QUANTITIES = {'mass': ('mass',), 'bar_end': ('density', 'longitudinal_v
 TABLE_F1_FORCE_LEVEL = (139.0, 142.0, 145.0, 148.0, 151.0, 154.0, 156.0, 156.0)
 ```
 
-## TABLE_F1_OCTAVE_BANDS
+## TABLE_F1_OCTAVE_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-TABLE_F1_OCTAVE_BANDS = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
+TABLE_F1_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
 ```
 
 ## tapping_machine_characteristic_power_level
@@ -583,7 +583,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `receiver_mobility` | Real mobility `Y_i` of the supporting element, in m/(N.s) (> 0). |
-| `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass), the 0,5 kg of clause D.1.3 and ISO 10140-5). |
+| `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS_KG`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass_kg), the 0,5 kg of clause D.1.3 and ISO 10140-5). |
 
 **Returns:** The coupling term `D_C,i`, in dB.
 
@@ -602,7 +602,7 @@ tapping_machine_force_level() -> np.ndarray
 Tabulated ISO tapping machine force level (EN 12354-5, Table F.1).
 
 The eight octave-band values of Table F.1, in the order of
-[`TABLE_F1_OCTAVE_BANDS`](/phonometry/reference/api/building/installed-structure-borne/#table_f1_octave_bands) (31,5 Hz to 4 kHz). Clause F.4.2
+[`TABLE_F1_OCTAVE_BANDS_HZ`](/phonometry/reference/api/building/installed-structure-borne/#table_f1_octave_bands_hz) (31,5 Hz to 4 kHz). Clause F.4.2
 offers them for the tapping machine used in place of an electrodynamic
 shaker when measuring `D_Fp,n` (Formula F.9), and clause D.1.2.3
 restricts the source to low-mobility receiving structures.

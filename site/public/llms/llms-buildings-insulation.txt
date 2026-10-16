@@ -797,8 +797,8 @@ $V < 24.5$ m³.
 ```python
 from phonometry import building
 
-print(building.LOW_FREQUENCY_VOLUME_LIMIT)              # 25.0
-print(building.LOW_FREQUENCY_BANDS)                     # (50.0, 63.0, 80.0)
+print(building.LOW_FREQUENCY_VOLUME_LIMIT_M3)              # 25.0
+print(building.LOW_FREQUENCY_PROCEDURE_BANDS_HZ)                     # (50.0, 63.0, 80.0)
 print(building.low_frequency_procedure_applies(23.3))   # True
 print(building.low_frequency_procedure_applies(24.4))   # True   (rounds to 24)
 print(building.low_frequency_procedure_applies(24.5))   # False  (rounds to 25)

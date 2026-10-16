@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 #: Audiometric frequencies, in hertz (ISO 7029 Table 1 / ISO 389-7 Table 1).
-AUDIOMETRIC_FREQUENCIES: np.ndarray = read_only(
+AUDIOMETRIC_FREQUENCIES_HZ: np.ndarray = read_only(
     np.array(
         [
             125.0,
@@ -172,7 +172,7 @@ _SL = {"male": _SL_MALE, "female": _SL_FEMALE}
 SEXES: tuple[str, ...] = ("male", "female")
 
 #: Reference threshold of hearing, in dB, free-field then diffuse-field, at
-#: :data:`AUDIOMETRIC_FREQUENCIES` (ISO 389-7:2005 Table 1).
+#: :data:`AUDIOMETRIC_FREQUENCIES_HZ` (ISO 389-7:2005 Table 1).
 _REFERENCE_FREE: np.ndarray = np.array(
     [22.1, 11.4, 4.4, 2.4, 2.4, 2.4, -1.3, -5.8, -5.4, 4.3, 12.6],
     dtype=np.float64,
@@ -191,7 +191,7 @@ _REFERENCE_AGE = 18.0  # lower age limit of the ISO 7029 formulae.
 class AgeThresholdResult(OwnsArrays):
     """Age-related hearing threshold distribution (ISO 7029:2017).
 
-    All arrays are in dB and aligned with :data:`AUDIOMETRIC_FREQUENCIES`.
+    All arrays are in dB and aligned with :data:`AUDIOMETRIC_FREQUENCIES_HZ`.
 
     :ivar age: Listener age, in years.
     :ivar sex: ``"male"`` or ``"female"``.
@@ -276,7 +276,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
     fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     idx = []
     for f in fr:
-        matches = np.isclose(AUDIOMETRIC_FREQUENCIES, f, rtol=1e-3)
+        matches = np.isclose(AUDIOMETRIC_FREQUENCIES_HZ, f, rtol=1e-3)
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not an ISO 7029 audiometric frequency "
@@ -350,7 +350,7 @@ def age_threshold(
         age=float(age),
         sex=sex,
         fractile=float(fractile),
-        frequencies=_select(AUDIOMETRIC_FREQUENCIES, frequencies),
+        frequencies=_select(AUDIOMETRIC_FREQUENCIES_HZ, frequencies),
         median=_select(median, frequencies),
         spread_upper=_select(su, frequencies),
         spread_lower=_select(sl, frequencies),

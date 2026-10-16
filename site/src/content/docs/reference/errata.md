@@ -4658,7 +4658,7 @@ in the same order.
   range.
 - **Library behaviour:**
   [`cnossos_road`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/cnossos_road.py)
-  works over the corrected 63 Hz to 8 kHz grid (`ROAD_OCTAVE_BANDS`), pinned
+  works over the corrected 63 Hz to 8 kHz grid (`ROAD_OCTAVE_BANDS_HZ`), pinned
   by `test_octave_bands_are_the_corrected_range` and by the workbook cases,
   whose published levels cover all eight bands.
 - **Status:** corrected by the issuing body (corrigendum of 10 January 2018);
@@ -11055,8 +11055,8 @@ published sources:
   shifted, 0,069 % low, which is far under the uncertainty of a
   pressure-loss test and is what a result computed to the standard shows. The
   library keeps both printed constants, as
-  [`ISO7235_GAS_CONSTANT`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
-  and `ISO7235_ABSOLUTE_ZERO_OFFSET`, so that a worked result can be
+  [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
+  and `ISO7235_ABSOLUTE_ZERO_OFFSET_K`, so that a worked result can be
   reproduced as the standard gives it, and the conformance row "Normal air
   density (Eqs. (10), (21), (22))" records the size of the gap.
 

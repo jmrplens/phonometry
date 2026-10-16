@@ -49,7 +49,7 @@ def test_stability_margin_default_is_10_db() -> None:
     """Long p. 698: "This text uses a middle value of 10 dB for an equalised
     system" (12 dB unequalised, 6 dB carefully equalised).
     """
-    assert electroacoustics.DEFAULT_STABILITY_MARGIN == 10.0
+    assert electroacoustics.DEFAULT_STABILITY_MARGIN_DB == 10.0
 
 
 def test_feedback_loop_gain_is_equation_18_18() -> None:
@@ -111,7 +111,7 @@ def test_equation_18_22_cardioid_microphone_2_db_below() -> None:
         LONG_OPEN_LOOP_GAIN,
         LEVEL_AT_LISTENER - 2.0,
         LEVEL_AT_LISTENER,
-        microphone_directivity=electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY,
+        microphone_directivity=electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY_DB,
     )
     assert result.maximum_level_at_microphone == pytest.approx(LEVEL_AT_LISTENER - 2.0)
     assert result.is_stable

@@ -393,6 +393,6 @@ error (a percentage passed instead of a fraction).
 | `volume` | Room volume `V`, m3. |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array in `[0, 2]`. |
 | `air_attenuation` | Air power-attenuation coefficient `m`, in neper per metre (scalar or per-band); see [`air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). Default `0` (air absorption neglected). |
-| `speed_of_sound` | Speed of sound `c0`, m/s (default [`DEFAULT_SPEED_OF_SOUND`](/phonometry/reference/api/materials/road-absorption/#default_speed_of_sound), giving the factor `0.161`). |
+| `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C, giving the factor `0.161`). |
 
 **Returns:** The reverberation time `T`, s; a float for scalar inputs, otherwise a per-band array.

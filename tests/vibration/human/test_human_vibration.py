@@ -643,14 +643,14 @@ def test_exposure_assessment_hav_zones() -> None:
     limit = hv.exposure_assessment(5.5, kind="hav")
     assert limit.zone == "limit"
     assert limit.exceeds_limit
-    assert action.action_value == hv.HAV_EAV_A8
-    assert action.limit_value == hv.HAV_ELV_A8
+    assert action.action_value == hv.HAV_EAV_A8_M_S2
+    assert action.limit_value == hv.HAV_ELV_A8_M_S2
 
 
 def test_exposure_assessment_wbv_a8_and_vdv() -> None:
     a = hv.exposure_assessment(0.6, kind="wbv")
-    assert a.action_value == hv.WBV_EAV_A8
-    assert a.limit_value == hv.WBV_ELV_A8
+    assert a.action_value == hv.WBV_EAV_A8_M_S2
+    assert a.limit_value == hv.WBV_ELV_A8_M_S2
     assert a.zone == "action"
     v = hv.exposure_assessment(22.0, kind="wbv", metric="vdv")
     assert v.action_value == hv.WBV_EAV_VDV

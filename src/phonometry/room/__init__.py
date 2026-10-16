@@ -80,9 +80,9 @@ from .auditorium import (
     stage_support,
 )
 from .crowd_noise import (
-    COMMUNICATION_SNR,
+    COMMUNICATION_SNR_DB,
     NORMAL_VOICE_POWER_LEVEL,
-    PRIVACY_SNR,
+    PRIVACY_SNR_DB,
     TALKER_DIRECTIVITY,
     CrowdNoiseResult,
     absorption_per_table,
@@ -217,7 +217,7 @@ from .workroom_prediction import (
 
 __all__ = [
     "ADJACENT_BAND_LIMIT_DB",
-    "COMMUNICATION_SNR",
+    "COMMUNICATION_SNR_DB",
     "DECADE_TO_DOUBLING",
     "DECAY_UNCERTAINTY_COEFFICIENTS",
     "DIFFUSE_FIELD_REFERENCE_OFFSET_DB",
@@ -264,7 +264,7 @@ __all__ = [
     "PINK_NOISE_WEIGHTS_DB",
     "PREDICTION_METHODS",
     "PREFERRED_MIDDLE_LIMIT_M",
-    "PRIVACY_SNR",
+    "PRIVACY_SNR_DB",
     "RECOMMENDED_DETAIL",
     "REFERENCE_DISTANCE_M",
     "ROOM_DETAIL_LEVELS",

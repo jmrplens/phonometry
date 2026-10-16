@@ -154,7 +154,9 @@ def _chk_iso9613_2_ground_limit() -> Outcome:
 )
 def _chk_iso9613_2_barrier_single_cap() -> Outcome:
     b = ph.environment.Barrier(source_to_edge=50.0, edge_to_receiver=50.0)
-    dz = ph.environment.barrier_attenuation(b, 60.0, ph.environment.DEFAULT_FREQUENCIES)
+    dz = ph.environment.barrier_attenuation(
+        b, 60.0, ph.environment.DEFAULT_FREQUENCIES_HZ
+    )
     return numeric(
         ref.ISO9613_2_BARRIER_CAP_SINGLE,
         float(np.max(dz)),
@@ -173,7 +175,9 @@ def _chk_iso9613_2_barrier_double_cap() -> Outcome:
     b = ph.environment.Barrier(
         source_to_edge=50.0, edge_to_receiver=50.0, edge_separation=5.0
     )
-    dz = ph.environment.barrier_attenuation(b, 60.0, ph.environment.DEFAULT_FREQUENCIES)
+    dz = ph.environment.barrier_attenuation(
+        b, 60.0, ph.environment.DEFAULT_FREQUENCIES_HZ
+    )
     return numeric(
         ref.ISO9613_2_BARRIER_CAP_DOUBLE,
         float(np.max(dz)),

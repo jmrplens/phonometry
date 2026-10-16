@@ -530,7 +530,7 @@ def test_reference_workbook_noise_fraction(
     le_minus_lmax: float,
     df_ref: float,
 ) -> None:
-    d0_ft = (2.0 / np.pi) * 270.05 * 1.0  # Vref = 160 kn = 270.05 ft/s, t0 = 1 s
+    d0_ft = (2.0 / np.pi) * 270.05 * 1.0  # Vref = 160 kt = 270.05 ft/s, t0 = 1 s
     d_lambda = d0_ft * 10.0 ** (le_minus_lmax / 10.0)
     # abs=0.01: LE∞−Lmax is hardcoded to the workbook's 2-decimal precision.
     assert noise_fraction(q, length, d_lambda) == pytest.approx(df_ref, abs=1e-2)

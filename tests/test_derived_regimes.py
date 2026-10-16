@@ -214,9 +214,9 @@ def _gas(outlet_pressure_pa: float) -> noise_control.AerodynamicValveNoise:
                 inlet_pressure_pa=1.0e6,
                 outlet_pressure_pa=outlet_pressure_pa,
                 inlet_density=5.3,
-                inlet_temperature_k=450.0,
+                inlet_temperature_c=176.85,
                 specific_heat_ratio=1.22,
-                molecular_mass=19.8,
+                molar_mass_kg_kmol=19.8,
             ),
             noise_control.ValveTrim(
                 flow_coefficient=90.0,

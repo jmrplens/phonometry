@@ -15,8 +15,8 @@ from __future__ import annotations
 
 from .erb_scale import (
     CAM_C,
-    ERB_C1,
-    ERB_C2,
+    ERB_C1_HZ,
+    ERB_C2_PER_HZ,
     cam_from_frequency,
     erb_bandwidth,
     frequency_from_cam,
@@ -41,7 +41,7 @@ from .loudness import (
 )
 from .quality import (
     HANNING_BANDWIDTH_FACTOR,
-    NO_TONE_AUDIBILITY,
+    NO_TONE_AUDIBILITY_DB,
     EcmaFluctuationStrength,
     EcmaRoughness,
     EcmaTonality,
@@ -82,10 +82,10 @@ from .quality import (
 
 __all__ = [
     "CAM_C",
-    "ERB_C1",
-    "ERB_C2",
+    "ERB_C1_HZ",
+    "ERB_C2_PER_HZ",
     "HANNING_BANDWIDTH_FACTOR",
-    "NO_TONE_AUDIBILITY",
+    "NO_TONE_AUDIBILITY_DB",
     "EcmaFluctuationStrength",
     "EcmaLoudness",
     "EcmaRoughness",

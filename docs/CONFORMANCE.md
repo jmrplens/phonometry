@@ -1766,9 +1766,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Wales-Heitmeyer (2002) ensemble spectrum | Merchant-ship source PSD at 100 Hz (printed equation), dB re 1 µPa²/Hz | 158.45 dB (+/-0.001 dB) | 158.45 dB | 0 dB | 1 % | ![Pass][cv-pass] Pass |
 | Passive sonar equation (Urick/Etter) | Figure of merit SL − (NL − DI) − DT, dB | 85 dB (+/-0 dB) | 85 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Seabed reflection (Rayleigh, normal incidence) | Bottom loss at 90° grazing, sand ρ=1900 c=1650 over water, dB | 9.0506 dB (+/-0 dB) | 9.0506 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz | 51.0206 dB (+/-0.0001 dB) | 51.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kt (canonical anchor), dB re 1 µPa²/Hz | 51.0206 dB (+/-0.0001 dB) | 51.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Mellen thermal noise | Thermal spectrum level at 50 kHz, 16.85 °C (physical), dB re 1 µPa²/Hz | 19.3426 dB (+/-0 dB) | 19.3426 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| JOMOPANS-ECHO ship source level | Bulker V=13.5 kn L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m | 161.394 dB (+/-0.01 dB) | 161.394 dB | 0 dB | 3 % | ![Pass][cv-pass] Pass |
+| JOMOPANS-ECHO ship source level | Bulker V=13.5 kt L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m | 161.394 dB (+/-0.01 dB) | 161.394 dB | 0 dB | 3 % | ![Pass][cv-pass] Pass |
 | UNESCO sound speed (EOS-80 canonical value) | SVEL(S = 40, T68 = 40 °C, P = 1000 bar) vs Fofonoff & Millard 1983, m/s | 1731.995 m/s (+/-0.02 m/s) | 1732.004 m/s | 0.009 m/s | 45 % | ![Pass][cv-pass] Pass |
 | Medwin (1975) sound speed (Ainslie Eqs. 1.2-1.4) | ∂c/∂T at 10 °C, neglecting the bracketed terms, m/s per °C | 3.5 m/s per °C (+/-0.001 m/s per °C) | 3.5 m/s per °C | 0 m/s per °C | 0 % | ![Pass][cv-pass] Pass |
 

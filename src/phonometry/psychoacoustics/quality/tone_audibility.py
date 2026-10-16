@@ -138,7 +138,7 @@ _MASKING_OFFSET = 2.0
 HANNING_BANDWIDTH_FACTOR = 1.5
 
 #: Audibility (dB) assigned to a spectrum with no tone found (Formula (21)).
-NO_TONE_AUDIBILITY = -10.0
+NO_TONE_AUDIBILITY_DB = -10.0
 
 
 def _positive(value: float, name: str) -> float:

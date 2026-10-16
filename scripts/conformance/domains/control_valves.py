@@ -45,9 +45,9 @@ _IEC60534 = "Control valve noise (IEC 60534-8-3)"
 _STREAM: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
     "inlet_density": 5.3,
-    "inlet_temperature_k": 450.0,
+    "inlet_temperature_c": 176.85,
     "specific_heat_ratio": 1.22,
-    "molecular_mass": 19.8,
+    "molar_mass_kg_kmol": 19.8,
 }
 _VALVE: dict[str, Any] = {
     "pressure_recovery": 0.792 / 0.984,
@@ -403,9 +403,9 @@ _EXAMPLE_7 = {
     "inlet_pressure_pa": 7.0e6,
     "outlet_pressure_pa": 1.4e6,
     "inlet_density": 55.3,
-    "inlet_temperature_k": 290.0,
+    "inlet_temperature_c": 16.85,
     "specific_heat_ratio": 1.31,
-    "molecular_mass": 19.0,
+    "molar_mass_kg_kmol": 19.0,
     "flow_coefficient": 81.5,
     "last_stage_area": 6.44e-3,
     "passages": 432,
@@ -463,9 +463,9 @@ def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
             inlet_pressure_pa=conditions.stagnation_pressure_pa,
             outlet_pressure_pa=case["outlet_pressure_pa"],
             inlet_density=conditions.stagnation_density,
-            inlet_temperature_k=case["inlet_temperature_k"],
+            inlet_temperature_c=case["inlet_temperature_c"],
             specific_heat_ratio=case["specific_heat_ratio"],
-            molecular_mass=case["molecular_mass"],
+            molar_mass_kg_kmol=case["molar_mass_kg_kmol"],
         ),
         ph.noise_control.ValveTrim(
             flow_coefficient=conditions.flow_coefficient,

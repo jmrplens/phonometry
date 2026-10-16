@@ -39,7 +39,7 @@ reproduces RANDI 3.1 [Breeding et al.] and Wales & Heitmeyer (2002).
 
 ```python
 ship_source_spectrum(
-    speed_knots: float = 12.0,
+    speed_kt: float = 12.0,
     length_m: float = 100.0,
     *,
     vessel_class: str = 'containership',
@@ -54,7 +54,7 @@ Predicted underwater source-level spectrum of a ship.
 
 | Name | Description |
 | :--- | :--- |
-| `speed_knots` | Vessel speed, in knots (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
+| `speed_kt` | Vessel speed, in knots (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
 | `length_m` | Vessel length, in metres (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
 | `vessel_class` | JOMOPANS-ECHO vessel class (see [`VESSEL_CLASSES`](/phonometry/reference/api/underwater/ship-traffic-noise/#vessel_classes)); used only by `"jomopans-echo"`. |
 | `model` | `"jomopans-echo"` (default), `"randi"` or `"wales-heitmeyer"`. |
@@ -77,7 +77,7 @@ ShipTrafficSpectrum(
     band_level: NDArray[np.float64],
     model: str,
     vessel_class: str | None,
-    speed_knots: float | None,
+    speed_kt: float | None,
     length_m: float | None,
 )
 ```
@@ -93,7 +93,7 @@ Predicted ship source-level spectrum.
 | `band_level` | Decidecade-band source level, in dB re 1 µPa m (`source_psd` plus $10 \log_{10}(0.231 f)$). |
 | `model` | The model used. |
 | `vessel_class` | The vessel class (JOMOPANS-ECHO only; else `None`). |
-| `speed_knots` | Speed used, in knots (`None` if the model ignores it). |
+| `speed_kt` | Speed used, in knots (`None` if the model ignores it). |
 | `length_m` | Length used, in metres (`None` if the model ignores it). |
 
 ### ShipTrafficSpectrum.plot()

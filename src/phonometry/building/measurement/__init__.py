@@ -30,7 +30,7 @@ from .floor_covering_improvement import (
 )
 from .heavy_impact import (
     HEAVY_IMPACT_A_WEIGHTING,
-    HEAVY_IMPACT_OCTAVE_BANDS,
+    HEAVY_IMPACT_OCTAVE_BANDS_HZ,
     HEAVY_IMPACT_SOURCES,
     AWeightedMaximumImpactResult,
     HeavyImpactSourceCheck,
@@ -101,8 +101,8 @@ from .lab_insulation import (
     lab_impact_insulation,
 )
 from .low_frequency import (
-    LOW_FREQUENCY_BANDS,
-    LOW_FREQUENCY_VOLUME_LIMIT,
+    LOW_FREQUENCY_PROCEDURE_BANDS_HZ,
+    LOW_FREQUENCY_VOLUME_LIMIT_M3,
     LowFrequencyProcedure,
     LowFrequencyResult,
     LowFrequencyWarning,
@@ -256,10 +256,10 @@ __all__ = [
     "verify_rain_generator",
     "COVERAGE_FACTORS",
     "HEAVY_IMPACT_A_WEIGHTING",
-    "HEAVY_IMPACT_OCTAVE_BANDS",
+    "HEAVY_IMPACT_OCTAVE_BANDS_HZ",
     "HEAVY_IMPACT_SOURCES",
-    "LOW_FREQUENCY_BANDS",
-    "LOW_FREQUENCY_VOLUME_LIMIT",
+    "LOW_FREQUENCY_PROCEDURE_BANDS_HZ",
+    "LOW_FREQUENCY_VOLUME_LIMIT_M3",
     "SERVICE_EQUIPMENT_OPERATING_CONDITIONS",
     "SERVICE_EQUIPMENT_REPRODUCIBILITY",
     "SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY",

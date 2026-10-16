@@ -522,8 +522,8 @@ class TestFlowQuantities:
         # they put the density 0,069 % high at 20 degrees, and both cancel in
         # the pressure loss coefficient because the same density is in the
         # dynamic pressure of each series.
-        assert sm.ISO7235_ABSOLUTE_ZERO_OFFSET == pytest.approx(273.0)
-        assert sm.ISO7235_GAS_CONSTANT == pytest.approx(287.0)
+        assert sm.ISO7235_ABSOLUTE_ZERO_OFFSET_K == pytest.approx(273.0)
+        assert sm.ISO7235_AIR_GAS_CONSTANT_J_KG_K == pytest.approx(287.0)
         exact = 101525.0 / (287.05 * 293.15)
         printed = sm.normal_air_density(200.0, 101325.0, 20.0)
         assert printed / exact == pytest.approx(1.000686, abs=5e-6)

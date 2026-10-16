@@ -243,7 +243,7 @@ def test_table_f1_cells_as_printed() -> None:
     The header prints the first centre as "31"; it is the nominal 31,5 Hz
     octave band.
     """
-    assert building.TABLE_F1_OCTAVE_BANDS == (
+    assert building.TABLE_F1_OCTAVE_BANDS_HZ == (
         31.5,
         63.0,
         125.0,
@@ -270,7 +270,7 @@ def test_table_f1_cells_as_printed() -> None:
 
 def test_table_f1_closed_form_reproduces_the_table_up_to_1_khz() -> None:
     """ "Up till about 1000 Hz this corresponds to LF = 10 lg 2,5f/10^-12"."""
-    bands = np.array(building.TABLE_F1_OCTAVE_BANDS[:6])
+    bands = np.array(building.TABLE_F1_OCTAVE_BANDS_HZ[:6])
     assert np.round(building.tapping_machine_force_level_estimate(bands)).tolist() == [
         139.0,
         142.0,
@@ -317,7 +317,7 @@ def test_table_f1_is_referred_to_1e_6_newton_not_1_piconewton() -> None:
     docs/ERRATA.md.
     """
     hammer, drop, rate, gravity = (
-        building.TAPPING_HAMMER_MASS,
+        building.TAPPING_HAMMER_MASS_KG,
         0.04,
         10.0,
         9.81,
@@ -325,7 +325,7 @@ def test_table_f1_is_referred_to_1e_6_newton_not_1_piconewton() -> None:
     momentum = hammer * math.sqrt(2.0 * gravity * drop)
     harmonic = math.sqrt(2.0) * momentum * rate
     for centre, printed in zip(
-        building.TABLE_F1_OCTAVE_BANDS[:6],
+        building.TABLE_F1_OCTAVE_BANDS_HZ[:6],
         building.TABLE_F1_FORCE_LEVEL[:6],
         strict=True,
     ):
@@ -354,7 +354,7 @@ def test_formula_d9b_is_formula_19b_for_a_mass_like_source() -> None:
     """D.9b is Formula (19b) with Ys = 1/(j omega M): D_C agrees exactly."""
     bands = np.array([125.0, 250.0, 500.0, 1000.0])
     y_i = 2.5e-6  # a heavy concrete floor
-    source = 1.0 / (1j * 2.0 * math.pi * bands * building.TAPPING_HAMMER_MASS)
+    source = 1.0 / (1j * 2.0 * math.pi * bands * building.TAPPING_HAMMER_MASS_KG)
     assert building.tapping_machine_coupling_term(bands, y_i) == pytest.approx(
         building.coupling_term(source, np.full(bands.shape, y_i, dtype=complex))
     )
@@ -407,7 +407,7 @@ def test_clause_f1_multi_junction_adjustment_values() -> None:
 
 def test_clause_f1_kij_floor() -> None:
     """ "the resulting value for Kij should normally not become less than -5 dB"."""
-    assert building.MINIMUM_MULTI_JUNCTION_KIJ == -5.0
+    assert building.MINIMUM_MULTI_JUNCTION_KIJ_DB == -5.0
 
 
 def test_multi_junction_adjustment_rejects_zero_junctions() -> None:

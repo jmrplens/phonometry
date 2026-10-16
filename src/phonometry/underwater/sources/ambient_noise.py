@@ -55,7 +55,7 @@ _BOLTZMANN = 1.380649e-23
 _P_REF = ISO1683_REFERENCE_VALUES["liquid"]["sound_pressure"].value
 #: Wind-noise reference wind speed for the rule of fives (knots).
 _WIND_REF_KNOTS = 5.0
-#: Rule-of-fives anchor at 1 kHz / 5 kn, re 1 µPa²/Hz. Wenz/Knudsen state
+#: Rule-of-fives anchor at 1 kHz / 5 kt, re 1 µPa²/Hz. Wenz/Knudsen state
 #: "25 dB (5 × 5)" **re 0.0002 dyn/cm² = 20 µPa** (the historical reference
 #: pressure); converting to the ISO 18405 1 µPa reference adds
 #: ``20·lg(20) ≈ 26.02`` dB, the step between the two pressures of
@@ -66,7 +66,7 @@ _WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(
 
 
 def wind_noise_spectrum(
-    frequency_hz: NDArray[np.float64] | list[float] | float, wind_speed_knots: float
+    frequency_hz: NDArray[np.float64] | list[float] | float, wind_speed_kt: float
 ) -> NDArray[np.float64]:
     r"""Wind / sea-surface noise spectrum level (Wenz rule of fives), dB re
     1 µPa²/Hz.
@@ -82,14 +82,14 @@ def wind_noise_spectrum(
     outside both the formula extrapolates.
 
     :param frequency_hz: Frequency, in Hz (scalar or array).
-    :param wind_speed_knots: Wind speed ``U``, in knots. A calm sea (``0``) has
+    :param wind_speed_kt: Wind speed ``U``, in knots. A calm sea (``0``) has
         no wind-driven noise, returning ``-inf`` (zero contribution in the
         energy sum).
     :return: Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
     :raises ValueError: If the inputs are invalid (a negative wind speed).
     """
     f_khz = require_positive_array(frequency_hz, "frequency_hz") / 1000.0
-    u = require_non_negative(wind_speed_knots, "wind_speed_knots")
+    u = require_non_negative(wind_speed_kt, "wind_speed_kt")
     if u <= 0.0:  # calm sea: no wind-driven noise (u is non-negative here)
         return np.full(f_khz.shape, -np.inf, dtype=np.float64)
     nl = _WIND_ANCHOR_DB - (5.0 / 3.0) * 10.0 * (
@@ -136,7 +136,7 @@ class AmbientNoiseResult(OwnsArrays):
     :ivar wind: Wind-noise component per frequency, in dB re 1 µPa²/Hz.
     :ivar thermal: Thermal-noise component per frequency, in dB re 1 µPa²/Hz.
     :ivar shipping: Caller-supplied shipping component, or ``None``.
-    :ivar wind_speed_knots: The wind speed used, in knots.
+    :ivar wind_speed_kt: The wind speed used, in knots.
     """
 
     frequencies: NDArray[np.float64]
@@ -144,7 +144,7 @@ class AmbientNoiseResult(OwnsArrays):
     wind: NDArray[np.float64]
     thermal: NDArray[np.float64]
     shipping: NDArray[np.float64] | None
-    wind_speed_knots: float
+    wind_speed_kt: float
 
     def __post_init__(self) -> None:
         """Reject a spectrum whose components do not run over its frequencies.
@@ -194,7 +194,7 @@ class AmbientNoiseResult(OwnsArrays):
 def ocean_ambient_noise(
     frequencies_hz: NDArray[np.float64] | list[float],
     *,
-    wind_speed_knots: float,
+    wind_speed_kt: float,
     shipping: NDArray[np.float64] | list[float] | None = None,
     temperature_c: float = 16.85,
     density: float = 1025.0,
@@ -206,7 +206,7 @@ def ocean_ambient_noise(
     components, plus an optional caller-supplied shipping spectrum.
 
     :param frequencies_hz: Frequencies, in Hz (1-D, strictly positive).
-    :param wind_speed_knots: Wind speed ``U``, in knots.
+    :param wind_speed_kt: Wind speed ``U``, in knots.
     :param shipping: Optional shipping-noise spectrum level per frequency, in dB
         re 1 µPa²/Hz (same length as ``frequencies_hz``), or ``None``.
     :param temperature_c: Water temperature, in degrees Celsius.
@@ -216,7 +216,7 @@ def ocean_ambient_noise(
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequencies_hz, "frequencies_hz")
-    wind = wind_noise_spectrum(f, wind_speed_knots)
+    wind = wind_noise_spectrum(f, wind_speed_kt)
     thermal = thermal_noise_spectrum(
         f, temperature_c=temperature_c, density=density, speed_of_sound=speed_of_sound
     )
@@ -237,5 +237,5 @@ def ocean_ambient_noise(
         wind=wind,
         thermal=thermal,
         shipping=ship_arr,
-        wind_speed_knots=float(wind_speed_knots),
+        wind_speed_kt=float(wind_speed_kt),
     )

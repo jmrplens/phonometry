@@ -2822,11 +2822,11 @@ _ES_EXACT = {
     "Source spectral density [dB re 1 µPa²/Hz at 1 m]": "Densidad espectral de fuente [dB re 1 µPa²/Hz a 1 m]",
     "Wind": "Viento",
     "Thermal": "Térmico",
-    "Total (5 kn)": "Total (5 kn)",
-    "Total (20 kn)": "Total (20 kn)",
-    "containership (18 kn, 300 m)": "portacontenedores (18 kn, 300 m)",
-    "cruise (17 kn, 250 m)": "crucero (17 kn, 250 m)",
-    "tug (4 kn, 30 m)": "remolcador (4 kn, 30 m)",
+    "Total (5 kt)": "Total (5 kt)",
+    "Total (20 kt)": "Total (20 kt)",
+    "containership (18 kt, 300 m)": "portacontenedores (18 kt, 300 m)",
+    "cruise (17 kt, 250 m)": "crucero (17 kt, 250 m)",
+    "tug (4 kt, 30 m)": "remolcador (4 kt, 30 m)",
     # Underwater propagation, continued: detection range, normal modes, the
     # sonar budget, ray turning, the PE paraxial band, volume absorption and
     # the sound-speed equations. Vocabulary follows the Spanish underwater
@@ -4288,7 +4288,7 @@ _ES_EXACT = {
     "Propeller": "Hélice",
     r"$\Lambda = 0$ above 50°": r"$\Lambda = 0$ por encima de 50°",
     "observer alongside": "observador junto al segmento",
-    r"$V_{\mathrm{ref}}$ = 82.3 m/s (160 kn)": r"$V_{\mathrm{ref}}$ = 82,3 m/s (160 kn)",
+    r"$V_{\mathrm{ref}}$ = 82.3 m/s (160 kt)": r"$V_{\mathrm{ref}}$ = 82,3 m/s (160 kt)",
     "take-off ground roll": "carrera de despegue",
     "default ground track": "traza en tierra por defecto",
     # Rotorcraft: the ECAC Doc 32 hemisphere, its interpolation and its terrain.

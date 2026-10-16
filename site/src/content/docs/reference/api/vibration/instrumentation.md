@@ -317,10 +317,10 @@ angles of two frequency components in the most unfavourable manner."
 | ValueError | If a value is negative or not finite. Formula (6) prints the quantity inside absolute-value bars, so a negative one is not a characteristic phase deviation and is refused rather than folded. |
 | UserWarning | [`HumanVibrationWarning`](/phonometry/reference/api/vibration/exposure/#humanvibrationwarning) when a value exceeds the 30 degrees NOTE 2 limits the approximation to. |
 
-## phase_tolerance_degrees
+## phase_tolerance_deg
 
 ```python
-phase_tolerance_degrees(
+phase_tolerance_deg(
     name: str,
     frequencies: ArrayLike,
 ) -> NDArray[np.float64]
@@ -436,7 +436,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 The Table 5 limit at each characteristic frequency, in degrees.
 
-**Returns:** [`phase_tolerance_degrees`](/phonometry/reference/api/vibration/instrumentation/#phase_tolerance_degrees) of the weighting, infinite in the two tails.
+**Returns:** [`phase_tolerance_deg`](/phonometry/reference/api/vibration/instrumentation/#phase_tolerance_deg) of the weighting, infinite in the two tails.
 
 ### PhaseVerification.within_tolerance
 
@@ -681,12 +681,12 @@ TAIL_TOLERANCE_PERCENT = (26.0, -100.0, inf)
 TRANSITION_FREQUENCIES_HZ = {'Wb': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wc': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wd': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'We': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wf': (0.05011872336272722, 0.12589254117941673, 0.3981071705534972, 1.0), 'Wh': (3.9810717055349722, 10.0, 794.3282347242813, 1995.2623149688789), 'Wj': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wk': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wm': (0.5011872336272722, 1.2589254117941673, 63.09573444801933, 158.48931924611142)}
 ```
 
-## UNCONSTRAINED_BELOW
+## UNCONSTRAINED_BELOW_PERCENT
 
 *Constant* (`float`).
 
 ```python
-UNCONSTRAINED_BELOW = -100.0
+UNCONSTRAINED_BELOW_PERCENT = -100.0
 ```
 
 ## verify_phase_response
@@ -870,7 +870,7 @@ The Table 5 band around a weighting, region by region.
 | `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
-**Returns:** `(upper, lower)` percentages, elementwise. `lower` is [`UNCONSTRAINED_BELOW`](/phonometry/reference/api/vibration/instrumentation/#unconstrained_below) outside the two outer transition frequencies, where the standard sets no lower limit at all.
+**Returns:** `(upper, lower)` percentages, elementwise. `lower` is [`UNCONSTRAINED_BELOW_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#unconstrained_below_percent) outside the two outer transition frequencies, where the standard sets no lower limit at all.
 
 **Raises**
 

@@ -591,12 +591,12 @@ $10 \log_{10}(\Delta f/\Delta f_\mathrm{e})$ is
 | :--- | :--- |
 | ValueError | If the spectrum is invalid, the factor is not positive/finite, or no lines fall in the critical band. |
 
-## NO_TONE_AUDIBILITY
+## NO_TONE_AUDIBILITY_DB
 
 *Constant* (`float`).
 
 ```python
-NO_TONE_AUDIBILITY = -10.0
+NO_TONE_AUDIBILITY_DB = -10.0
 ```
 
 ## resolve_tones_separately

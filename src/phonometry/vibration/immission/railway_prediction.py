@@ -500,7 +500,7 @@ def predict_floor_spectrum(
 
 
 def rescale_emission_for_speed(
-    levels: ArrayLike, *, speed_from_km_h: float, speed_to_km_h: float
+    levels: ArrayLike, *, speed_from_kmh: float, speed_to_kmh: float
 ) -> NDArray[np.float64]:
     r"""An emission spectrum carried to another train speed, Formula (3).
 
@@ -513,15 +513,15 @@ def rescale_emission_for_speed(
 
     :param levels: :math:`L_{v,\mathrm{E1}}`, the spectrum measured at the first
         speed, in decibels.
-    :param speed_from_km_h: :math:`v_1`, the speed it was measured at.
-    :param speed_to_km_h: :math:`v_2`, the speed wanted, in the same unit.
+    :param speed_from_kmh: :math:`v_1`, the speed it was measured at.
+    :param speed_to_kmh: :math:`v_2`, the speed wanted, in the same unit.
     :return: :math:`L_{v,\mathrm{E2}}`.
     :raises ValueError: For a non-positive speed, a change of more than 30 %,
         or a non-finite spectrum.
     """
     levels = _levels(levels, "levels")
-    v_1 = require_positive(speed_from_km_h, "speed_from_km_h")
-    v_2 = require_positive(speed_to_km_h, "speed_to_km_h")
+    v_1 = require_positive(speed_from_kmh, "speed_from_kmh")
+    v_2 = require_positive(speed_to_kmh, "speed_to_kmh")
     change = abs(v_2 / v_1 - 1.0)
     if change > SPEED_RESCALING_LIMIT and not math.isclose(
         change, SPEED_RESCALING_LIMIT

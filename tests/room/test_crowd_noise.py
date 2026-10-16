@@ -95,7 +95,7 @@ def test_long_treated_room_drops_the_20_table_level_to_66_db() -> None:
 def test_long_communication_bound_is_6_3_square_metres_at_1_m() -> None:
     """Long p. 666: at 1 m, "at least 6.3 or more square metres (68 sq ft)"."""
     a_tab = float(
-        np.asarray(room.absorption_per_table(1.0, room.COMMUNICATION_SNR))[()]
+        np.asarray(room.absorption_per_table(1.0, room.COMMUNICATION_SNR_DB))[()]
     )
     assert round(a_tab, 1) == 6.3
     # 68 sq ft, Long's own conversion of the same number.
@@ -104,7 +104,7 @@ def test_long_communication_bound_is_6_3_square_metres_at_1_m() -> None:
 
 def test_long_privacy_bound_is_20_square_metres_at_2_5_m() -> None:
     """Long p. 666: at 2.5 m spacing, "no more than 20 m2 (215 ft2) per table"."""
-    a_tab = float(np.asarray(room.absorption_per_table(2.5, room.PRIVACY_SNR))[()])
+    a_tab = float(np.asarray(room.absorption_per_table(2.5, room.PRIVACY_SNR_DB))[()])
     assert round(a_tab, -1) == 20.0
     # 215 sq ft is Long's conversion of the rounded 20 m2, so it lands 0.2 m2
     # above the closed form.
@@ -114,7 +114,9 @@ def test_long_privacy_bound_is_20_square_metres_at_2_5_m() -> None:
 def test_long_privacy_constant_is_3_16() -> None:
     """Long Equation (17.54): A_tab < 3.16 rt^2 (printed constant, Q = 2)."""
     for rt in (1.0, 2.0, 3.5):
-        a_tab = float(np.asarray(room.absorption_per_table(rt, room.PRIVACY_SNR))[()])
+        a_tab = float(
+            np.asarray(room.absorption_per_table(rt, room.PRIVACY_SNR_DB))[()]
+        )
         assert a_tab / rt**2 == pytest.approx(3.16, abs=0.005)
 
 
@@ -128,7 +130,7 @@ def test_communication_constant_is_6_31_not_the_printed_6_33() -> None:
     """
     expected = 16.0 * math.pi * 10.0 ** (-0.6) / room.TALKER_DIRECTIVITY
     a_tab = float(
-        np.asarray(room.absorption_per_table(1.0, room.COMMUNICATION_SNR))[()]
+        np.asarray(room.absorption_per_table(1.0, room.COMMUNICATION_SNR_DB))[()]
     )
     assert a_tab == pytest.approx(expected)
     assert a_tab == pytest.approx(6.3131, abs=1e-4)
@@ -189,7 +191,7 @@ def test_crowd_noise_result_shape_and_fields() -> None:
     assert result.directivity == room.TALKER_DIRECTIVITY
     # Above this noise level the -6 dB communication limit is breached.
     assert result.communication_level == pytest.approx(
-        result.signal_level - room.COMMUNICATION_SNR
+        result.signal_level - room.COMMUNICATION_SNR_DB
     )
     assert np.allclose(result.speech_to_noise(), result.signal_level - result.levels)
 
@@ -289,7 +291,7 @@ def test_privacy_bound_passed_off_as_the_communication_limit() -> None:
     communication limit.
     """
     result = room.crowd_noise([20.0])
-    privacy_bound = result.signal_level - room.PRIVACY_SNR
+    privacy_bound = result.signal_level - room.PRIVACY_SNR_DB
     with pytest.raises(ValueError, match="'communication_level' must be the noise"):
         dataclasses.replace(result, communication_level=privacy_bound)
 
@@ -318,7 +320,7 @@ def test_a_variant_that_restates_itself_is_accepted() -> None:
         result,
         distance=3.0,
         signal_level=signal,
-        communication_level=signal - room.COMMUNICATION_SNR,
+        communication_level=signal - room.COMMUNICATION_SNR_DB,
     )
     assert round(moved.signal_level, 1) == 52.5
     assert moved.communication_level == pytest.approx(signal + 6.0)

@@ -81,8 +81,8 @@ from .._internal.validation import (
     require_scalar,
 )
 from .valves import (
-    AIR_SOUND_SPEED_M_S,
-    PIPE_SOUND_SPEED_M_S,
+    AIR_SPEED_OF_SOUND_M_S,
+    PIPE_SPEED_OF_SOUND_M_S,
     ValveNoiseWarning,
     jet_diameter_m,
 )
@@ -836,7 +836,7 @@ def cavitation_peak_frequency(
 
 
 def pipe_ring_frequency(
-    internal_diameter_m: float, *, pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S
+    internal_diameter_m: float, *, pipe_sound_speed: float = PIPE_SPEED_OF_SOUND_M_S
 ) -> float:
     r"""Equation (14): the ring frequency of the pipe.
 
@@ -865,9 +865,9 @@ def reference_transmission_loss(  # noqa: PLR0913
     wall_thickness: float,
     *,
     pipe_density: float,
-    pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S,
+    pipe_sound_speed: float = PIPE_SPEED_OF_SOUND_M_S,
     air_density: float = AIR_DENSITY_KG_M3,
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S,
+    air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S,
 ) -> float:
     r"""Equation (15): the transmission loss at the ring frequency.
 
@@ -1427,9 +1427,9 @@ class LiquidPipe(RichDisplay):
     internal_diameter_m: float
     wall_thickness: float
     density: float
-    speed_of_sound: float = PIPE_SOUND_SPEED_M_S
+    speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
     air_density: float = AIR_DENSITY_KG_M3
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S
+    air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S
 
 
 def valve_hydrodynamic_noise(

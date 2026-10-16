@@ -341,7 +341,7 @@ ToneBurstResult(
     frequency: float,
     cycles: int,
     amplitude: float,
-    burst_seconds: float,
+    burst_s: float,
     burst_samples: int,
     onset_sample: int,
     repetitions: int,
@@ -368,7 +368,7 @@ a train of identical bursts, one per repetition period (Clause A2.2).
 | `frequency` | Tone frequency, in Hz. |
 | `cycles` | Full tone periods per burst. |
 | `amplitude` | Peak amplitude of the tone. |
-| `burst_seconds` | Burst duration `cycles/frequency`, in seconds. |
+| `burst_s` | Burst duration `cycles/frequency`, in seconds. |
 | `burst_samples` | Samples per burst, `round(fs * cycles / frequency)`. |
 | `onset_sample` | Index of the first sample of the first burst. |
 | `repetitions` | Number of bursts in the record. |

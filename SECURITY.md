@@ -134,12 +134,47 @@ every pull request and on `main`:
   unreviewed subprocess use and hardcoded secrets.
 - **GitGuardian** secret scanning on every pull request.
 - **Dependabot** security and version updates for pip, npm and GitHub Actions,
-  grouped weekly.
+  grouped weekly, each proposed three days after it is published rather than
+  the morning it appears.
+- **zizmor** over everything under `.github/` in the `quality` job: a workflow
+  that expands untrusted input into a shell, grants a token it does not need,
+  leaves its token in `.git` or uses an action with a published advisory
+  fails the build.
 - **Snyk** through the `snyk` target in the `Makefile`, for an on-demand
   dependency audit.
 
 Workflows declare `contents: read` at the top level and widen permissions only
-on the individual jobs that need them.
+on the individual jobs that need them; the release workflow grants nothing at
+the top level at all.
+
+## Verifying a release
+
+Every release from 4.0.0 on is uploaded to PyPI through trusted publishing: no
+token is stored anywhere, and PyPI attaches to each file a
+[PEP 740](https://peps.python.org/pep-0740/) attestation signed with Sigstore
+for the identity of the workflow run that built it. The GitHub Release carries
+the same wheel and sdist, a `SHA256SUMS` file and a CycloneDX SBOM of what
+`pip install phonometry` resolved on the day, and GitHub keeps a build
+provenance attestation for each file and one for the SBOM.
+
+To check that a file is the one this repository's release workflow built:
+
+```bash
+# A wheel or sdist downloaded from PyPI or from the GitHub Release.
+gh attestation verify phonometry-4.0.0-py3-none-any.whl --repo jmrplens/phonometry
+
+# The PEP 740 attestation PyPI serves, without downloading anything first.
+python -m pip install pypi-attestations
+python -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \
+    pypi:phonometry-4.0.0-py3-none-any.whl
+
+# The checksums published with the release.
+sha256sum --check SHA256SUMS
+```
+
+The SBOM lists the runtime dependencies at the versions the release resolved
+(`numpy` and `scipy`); the optional extras are not in it, because a plain
+install does not bring them.
 
 Integrity of the numbers is gated too, which matters more here than in most
 libraries: `docs/CONFORMANCE.md` is regenerated in CI from the library's own

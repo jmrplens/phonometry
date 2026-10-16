@@ -1,0 +1,16 @@
+# The tools the release workflow (.github/workflows/release.yml) builds, checks
+# and describes the published files with, pinned exactly like every other
+# requirements file here, so Dependabot moves them in a pull request that runs
+# a rehearsal instead of a release picking up whatever came out that morning.
+#
+# - build: the sdist, then the wheel from the sdist.
+# - twine: `twine check --strict`, the long description PyPI will render.
+# - check-wheel-contents: a wheel with stray or duplicated files.
+# - cyclonedx-bom: the SBOM of the environment `pip install phonometry` makes.
+#
+# The upload itself is pypa/gh-action-pypi-publish, not twine: it holds the
+# trusted-publishing exchange and writes the PEP 740 attestations.
+build==1.6.1
+twine==7.0.0
+check-wheel-contents==0.6.3
+cyclonedx-bom==7.5.0

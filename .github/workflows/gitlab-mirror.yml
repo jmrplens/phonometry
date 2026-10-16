@@ -9,13 +9,13 @@ on:
       - "**"
     tags:
       - "**"
-  workflow_run:
-    workflows:
-      - Release
-    types:
-      - completed
   schedule:
     - cron: "17 */6 * * *"
+  # The release workflow dispatches this one once the GitHub Release exists,
+  # so the GitLab release links to its files at once rather than at the next
+  # schedule. It used to wait on a workflow_run of a workflow named "Release",
+  # which never fired (the release workflow had another name) and which would
+  # have run this workflow, secrets included, on whatever that run concluded.
   workflow_dispatch:
 
 permissions:
@@ -39,9 +39,7 @@ jobs:
     # secrets, so the SSH key below arrives empty and the guard fails the
     # job on every dependabot/* branch. Skip those pushes: the merge commit
     # on main and the six-hourly schedule keep the mirror current.
-    if: >-
-      github.actor != 'dependabot[bot]' &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Configure GitLab SSH key
         env:
@@ -90,11 +88,13 @@ jobs:
   releases:
     name: Sync linked releases
     runs-on: ubuntu-latest
+    # After the repository job, so a release's tag is on GitLab before the
+    # GitLab release that names it is created.
+    needs: repository
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'schedule' ||
-      startsWith(github.ref, 'refs/tags/') ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      startsWith(github.ref, 'refs/tags/')
     env:
       GH_TOKEN: ${{ github.token }}
       GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}

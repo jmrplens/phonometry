@@ -1272,12 +1272,30 @@ Releases are fully automated from the repository-root `VERSION` file:
      from `VERSION`, so a bump on its own leaves the whole guide map on the
      published page pointing at the previous release. The packaging tests
      fail until the page is regenerated.
-2. When the PR merges to `main`, the release workflow validates the version,
-   builds the package, publishes to PyPI and creates the GitHub Release
-   (tag included). Zenodo registers the DOI from the release webhook.
+2. Before merging it, rehearse the release: run the **Release** workflow by
+   hand on the PR's branch (Actions, Release, Run workflow). A manual run is
+   always a rehearsal and no input turns it into a release. It reads the
+   version and its CHANGELOG section, waits for the PR's CI, builds the sdist
+   and the wheel, checks both against git, installs the wheel with every extra
+   on Linux, macOS and Windows with each supported Python and runs the
+   conformance report on it, writes the SBOM and the release notes, and asks
+   PyPI for an upload token with this workflow's identity, which proves the
+   trusted publisher is configured, without uploading anything. The job
+   summary shows the notes the release will carry.
+3. When the PR merges to `main`, the same workflow runs for real: it uploads
+   to PyPI through trusted publishing (no token is stored; PyPI attaches a
+   signed PEP 740 attestation to each file), creates the GitHub Release with
+   its tag, the files, `SHA256SUMS` and the SBOM, records the build provenance
+   of each file, dispatches the GitLab mirror, and finally installs the
+   published version back from PyPI on every platform. Zenodo registers the
+   DOI from the release webhook. `SECURITY.md` says how anyone can verify the
+   files.
 
 Never push tags manually; the workflow is idempotent (an existing tag is
-skipped).
+skipped). The trusted publisher is configured on pypi.org, in the project's
+publishing settings: owner `jmrplens`, repository `phonometry`, workflow
+`release.yml`, no environment. The PyOctaveBand bridge is published the same
+way from `publish-stub.yml`.
 
 ## 🚀 How to Contribute
 

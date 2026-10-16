@@ -223,3 +223,31 @@ def test_the_glob_translation_agrees_with_the_matcher_coderabbit_uses(
 ) -> None:
     """Pinned against minimatch and picomatch, run by hand on these cases."""
     assert bool(_glob_to_regex(pattern).fullmatch(path)) is expected
+
+
+#: The one action whose maintainers publish no moving major tag: its README
+#: names the ``release/v1`` branch as the channel to follow, and every v1.x
+#: tag is cut from it.
+_ACTION_CHANNELS = {"pypa/gh-action-pypi-publish": "release/v1"}
+#: A release tag: ``v7``, ``v1.0``, ``v4.2.2``.
+_RELEASE_TAG = re.compile(r"v\d+(?:\.\d+)*")
+
+
+def test_every_action_is_pinned_to_a_release_tag() -> None:
+    """An action runs at a release its maintainers tagged, never at a branch.
+
+    zizmor's ``ref-pin`` policy (``.github/zizmor.yml``) accepts any ref, so a
+    workflow that used an action at ``@master`` passed it: the JOSS draft
+    action did, and a push to that branch would have run in the next build of
+    the paper. Commit SHAs are not used either; a tag is what Dependabot moves
+    and what a reader can check against the action's releases.
+    """
+    unpinned = []
+    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+        for action, ref in re.findall(
+            r"uses:\s*([\w.-]+/[\w./-]+)@(\S+)", path.read_text(encoding="utf-8")
+        ):
+            if _ACTION_CHANNELS.get(action) == ref or _RELEASE_TAG.fullmatch(ref):
+                continue
+            unpinned.append(f"{path.name}: {action}@{ref}")
+    assert unpinned == []

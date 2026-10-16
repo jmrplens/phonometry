@@ -10780,7 +10780,7 @@ release.
 4.0.0 is a hard break with no compatibility layer. What it removes, moves and
 renames is written above under `[Unreleased]`, where the notes stay until the
 final release stamps them, and
-[Upgrading from 3.3 to 4.0](https://jmrplens.github.io/phonometry/start/upgrading/)
+[Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/)
 is the short version: the one rule for imports, the five modules that split
 rather than moved, the three places where the obvious fix is the wrong one,
 and the table of what each name became.

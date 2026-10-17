@@ -30,12 +30,16 @@ from __future__ import annotations
 
 import functools
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration._choices import BuildingClass
 
 _IMMISSION = "Vibration immission measurement (DIN 45669)"
 _EDITION = "DIN 45669-1:2010-09"
@@ -96,7 +100,7 @@ _PULSE_TOLERANCE = 0.7
 #: weighting is the guideline curve of DIN 4150-3 Table 1 inverted and
 #: normalised to its 1 Hz to 10 Hz value, so at 50 Hz the commercial class,
 #: whose curve has risen from 20 mm/s to 40 mm/s, weighs 0,5.
-_TABLE_E1 = {
+_TABLE_E1: dict[tuple[BuildingClass, float], float] = {
     ("commercial", 50.0): 0.5,
     ("commercial", 100.0): 0.4,
     ("residential", 50.0): 1.0 / 3.0,
@@ -106,7 +110,11 @@ _TABLE_E1 = {
 }
 #: Table E.2 on printed folio 51: the guideline value each assessment velocity
 #: is compared with, in mm/s, independent of frequency.
-_TABLE_E2 = {"commercial": 20.0, "residential": 5.0, "sensitive": 3.0}
+_TABLE_E2: dict[BuildingClass, float] = {
+    "commercial": 20.0,
+    "residential": 5.0,
+    "sensitive": 3.0,
+}
 
 
 @functools.cache
@@ -174,7 +182,7 @@ def _chk_table_8(duration_ms: float) -> Outcome:
     )
 
 
-def _chk_table_e1(building_class: str, frequency_hz: float) -> Outcome:
+def _chk_table_e1(building_class: BuildingClass, frequency_hz: float) -> Outcome:
     """One corner of one Annex E weighting curve."""
     computed = float(
         ph.vibration.assessment_weighting_response(
@@ -184,7 +192,7 @@ def _chk_table_e1(building_class: str, frequency_hz: float) -> Outcome:
     return numeric(_TABLE_E1[(building_class, frequency_hz)], computed, 5e-5, places=5)
 
 
-def _chk_table_e2(building_class: str) -> Outcome:
+def _chk_table_e2(building_class: BuildingClass) -> Outcome:
     """One frequency-independent guideline value of Table E.2."""
     return numeric(
         _TABLE_E2[building_class],

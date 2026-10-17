@@ -372,7 +372,7 @@ lo que hace el `composite_rating_level` de
 | `fs` | int | Hz | > 0; tomada de `x` cuando `x` es un `Signal` | Lo necesita el detector de envolvente |
 | `n` | tupla de ints | % | por defecto `(10, 50, 90)` | Cualquier porcentaje de excedencia, p. ej. `(1, 5, 95)` |
 | `mode` | str | — | `'fast'` (por defecto), `'slow'`, `'impulse'` | Ponderación temporal IEC 61672-1 de la envolvente |
-| `weighting` | str o None | — | cualquier curva de `weighting_filter`: `'A'`, `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'468'`, `'Z'`, `None` (por defecto) | Ponderación frecuencial previa a la envolvente (`None` y `'Z'` dejan la señal sin ponderar) |
+| `weighting` | str | — | cualquier curva de `weighting_filter`: `'A'`, `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'468'`, `'Z'` (por defecto) | Ponderación frecuencial previa a la envolvente (`'Z'` deja la señal sin ponderar) |
 | `calibration_factor` / `dbfs` | float / bool | — | como `leq` | Misma semántica que en `leq()` |
 
 ## Nivel máximo con ponderación temporal (LAFmax, LASmax)
@@ -385,7 +385,7 @@ de retención para él). No es una medida aparte, solo el máximo de la misma tr
 de nivel sobre la que ya se calculan los percentiles:
 
 ```python
-weighted = filters.weighting_filter(varying, fs, curve="A")
+weighted = filters.weighting_filter(varying, fs, weighting="A")
 la_fmax = 10 * np.log10(filters.time_weighting(weighted, fs, mode="fast").max()
                         / (2e-5) ** 2)
 la_smax = 10 * np.log10(filters.time_weighting(weighted, fs, mode="slow").max()
@@ -705,7 +705,7 @@ plt.show()
 | Función | Parámetros clave | Devuelve | Ancla normativa |
 | :--- | :--- | :--- | :--- |
 | `lc_peak(x, fs=None, calibration_factor=None, dbfs=False, oversample=8)` | `dbfs=True` referencia el *pico* a fondo de escala (`1.0`), no el RMS; con `oversample=1` el pico se lee en la rejilla de muestreo | $L_\mathrm{Cpeak}$ [dB] | IEC 61672-1 §5.13, ráfagas tonales de la Tabla 5 |
-| `sel(x, fs=None, weighting=None, ...)` | `weighting='A'` da el $L_{\mathrm{A}E}$ | SEL [dB] | IEC 61672-1 Tabla 4 (columna $L_{\mathrm{A}E}$) |
+| `sel(x, fs=None, weighting='Z', ...)` | `weighting='A'` da el $L_{\mathrm{A}E}$ | SEL [dB] | IEC 61672-1 Tabla 4 (columna $L_{\mathrm{A}E}$) |
 | `sound_exposure(x, fs=None, duration_hours=None, ...)` | `duration_hours` trata `x` como muestra de ese periodo | $E$ [Pa²h] | IEC 61252 |
 | `lex_8h(x, fs=None, duration_hours=None, ...)` | misma semántica de muestreo | $L_\mathrm{EX,8h}$ [dB] | IEC 61252 ($\equiv L_\mathrm{EP,d}$) |
 

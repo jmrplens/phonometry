@@ -766,7 +766,7 @@ def high_frequency_sound_power_comparison(
         _reference_power_levels(
             reference_sound_power_levels,
             freqs,
-            bandwidth="one-third-octave",
+            fraction=3,
             name="reference_sound_power_levels",
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,

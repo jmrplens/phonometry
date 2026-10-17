@@ -88,7 +88,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -98,14 +98,17 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._internal.types import BandFraction
     from .._report.metadata import ReportMetadata
 
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, weighted_energy_mean
+from .._internal.types import BAND_SET_NAMES
 from .._internal.validation import (
     check_engine,
     require_above_absolute_zero,
+    require_band_fraction,
     require_equal_shapes,
     require_finite_fields,
     require_per_band,
@@ -126,7 +129,6 @@ _S0 = 1.0  #: Reference surface area, in square metres (ISO 9614-2, A.2.1).
 _FREQUENCIES_BAND_COUNT_MSG = "'frequencies' length must match the number of bands."
 
 Grade = Literal["engineering", "survey"]
-BandType = Literal["octave", "third"]
 
 #: Deviation error factor K, in dB (ISO 9614-2:1996 Table 1).
 _K: dict[str, float] = {"engineering": 10.0, "survey": 7.0}
@@ -142,13 +144,13 @@ _S_SURVEY = 4.0
 _MIN_SEGMENTS = 4
 
 
-def _table2_s(nominal: int, band_type: BandType) -> float:
+def _table2_s(nominal: int, fraction: int) -> float:
     """Grade-2 reproducibility standard deviation s (ISO 9614-2 Table 2), in dB.
 
     Octave 63-125 Hz / third 50-160 Hz -> 3; octave 250 Hz / third 200-315 Hz
     -> 2; octave 500-4000 Hz / third 400-5000 Hz -> 1,5; third 6300 Hz -> 2,5.
     """
-    if band_type == "octave":
+    if fraction == 1:
         table: dict[int, float] = {
             63: 3.0,
             125: 3.0,
@@ -186,8 +188,8 @@ def _table2_s(nominal: int, band_type: BandType) -> float:
     if nominal not in table:
         msg = (
             f"No ISO 9614-2 Table 2 standard deviation for {nominal} Hz "
-            f"({band_type}); expected a nominal band centre in the qualified "
-            "range (Table 2)."
+            f"({BAND_SET_NAMES[fraction]} bands); expected a nominal band "
+            "centre in the qualified range (Table 2)."
         )
         raise ValueError(msg)
     return table[nominal]
@@ -217,7 +219,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     given, and ``dynamic_capability_index`` the ``Ld`` it gives for the
     requested grade. ``repeatability_limit_db`` is the criterion-3 limit ``s``
     the caller chose per band, ``None`` to read Table 2 by ``frequencies`` and
-    ``band_type``.
+    ``fraction``, the band set (3 for one-third octaves, 1 for octaves).
 
     ``achieved_grade`` is the per-band class ``'engineering'``/
     ``'survey'``/``'none'`` (clause 8.4), ``None`` when the qualifying inputs
@@ -240,7 +242,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     repeatability: np.ndarray | None
     pressure_residual_index: np.ndarray | None
     surface_area: float
-    band_type: str
+    fraction: int
     grade: str
     repeatability_limit_db: np.ndarray | None = None
 
@@ -270,13 +272,11 @@ class SoundPowerIntensityResult(OwnsArrays):
         rather than where the grade is first read.
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
-            ``surface_area`` is not finite, the grade or the band type is
-            unknown, or the grade needs a limit ``s`` nothing gives.
+            ``surface_area`` is not finite, the grade is unknown, ``fraction``
+            is not 1 or 3, or the grade needs a limit ``s`` nothing gives.
         """
         _check_grade(self.grade)
-        if self.band_type not in ("octave", "third"):
-            msg = "'band_type' must be 'octave' or 'third'."
-            raise ValueError(msg)
+        require_band_fraction(self.fraction, "fraction")
         require_ranks(
             self,
             frequencies=1,
@@ -368,7 +368,7 @@ class SoundPowerIntensityResult(OwnsArrays):
             np.asarray(dpi0, dtype=np.float64),
             self.negative_band,
             self.frequencies,
-            cast("BandType", self.band_type),
+            self.fraction,
             self.repeatability_limit_db,
         )
 
@@ -497,16 +497,14 @@ def _validate_scan(
     normal_intensity: np.ndarray,
     areas: np.ndarray,
     frequencies: np.ndarray | None,
-    band_type: BandType,
+    fraction: BandFraction,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Validate an ISO 9614-2 scan and normalise its arrays.
 
     Returns the signed normal intensity as ``(N_seg, N_bands)`` and the segment
     areas as ``(N_seg,)``.
     """
-    if band_type not in ("octave", "third"):
-        msg = "'band_type' must be 'octave' or 'third'."
-        raise ValueError(msg)
+    require_band_fraction(fraction, "fraction")
 
     intensity = np.atleast_2d(np.asarray(normal_intensity, dtype=np.float64))
     seg = np.asarray(areas, dtype=np.float64)
@@ -558,7 +556,7 @@ def sound_power_intensity(
     pressure_levels: np.ndarray | None = None,
     pressure_residual_index: float | np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
-    band_type: BandType = "third",
+    fraction: BandFraction = 3,
     grade: Grade = "engineering",
     repeatability_limit: float | np.ndarray | None = None,
 ) -> SoundPowerIntensityResult:
@@ -594,7 +592,8 @@ def sound_power_intensity(
         the dynamic-capability index / criterion 1.
     :param frequencies: ``(N_bands,)`` nominal band centres (Hz), for the
         A-weighted total and the Table 2 repeatability limits.
-    :param band_type: ``'octave'`` or ``'third'`` (Table 2 lookup).
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves (Table 2 lookup).
     :param grade: ``'engineering'`` (grade 2) or ``'survey'`` (grade 3);
         selects ``K`` for the reported ``Ld`` and the criterion-2 warning.
     :param repeatability_limit: Override for the criterion-3 limit ``s`` (dB),
@@ -604,7 +603,7 @@ def sound_power_intensity(
     :return: :class:`SoundPowerIntensityResult`.
     """
     grade = _check_grade(grade)
-    intensity, seg = _validate_scan(normal_intensity, areas, frequencies, band_type)
+    intensity, seg = _validate_scan(normal_intensity, areas, frequencies, fraction)
     n_seg = seg.shape[0]
     n_bands = intensity.shape[1]
 
@@ -699,7 +698,7 @@ def sound_power_intensity(
         repeatability=repeatability,
         pressure_residual_index=dpi0_arr,
         surface_area=s_total,
-        band_type=band_type,
+        fraction=fraction,
         grade=grade,
         repeatability_limit_db=s_arr,
     )
@@ -734,7 +733,7 @@ def _classify(
     dpi0: np.ndarray,
     negative_band: np.ndarray,
     frequencies: np.ndarray | None,
-    band_type: BandType,
+    fraction: int,
     repeatability_limit: float | np.ndarray | None,
 ) -> np.ndarray:
     """Per-band class ('engineering'/'survey'/'none') from Annex B criteria."""
@@ -754,7 +753,7 @@ def _classify(
             )
             raise ValueError(msg)
         nominal = [round(float(f)) for f in np.asarray(frequencies)]
-        s_eng = np.array([_table2_s(f, band_type) for f in nominal], dtype=np.float64)
+        s_eng = np.array([_table2_s(f, fraction) for f in nominal], dtype=np.float64)
         s_sur = np.full(n_bands, _S_SURVEY, dtype=np.float64)
 
     result = np.empty(n_bands, dtype=object)

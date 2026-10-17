@@ -470,7 +470,7 @@ hemisphere = np.tile(np.repeat(lw_r, 3) - 10.0 * np.log10(3.0 * 2.0 * np.pi * 2.
 calibration = emission.reference_source_calibration(
     hemisphere, frequencies=thirds, arrangement="fixed",
 )
-print(np.round(calibration.sound_power_level_at(freqs, bandwidth="octave"), 2))
+print(np.round(calibration.sound_power_level_at(freqs, fraction=1), 2))
 # [79.87 83.37 86.07 86.77 86.27 84.17 80.57] dB en las condiciones de referencia
 suitability2 = emission.check_special_room_suitability(
     in_room.sound_power_level, calibration, freqs, temperature_c=22.0, static_pressure_kpa=97.5,

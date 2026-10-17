@@ -713,7 +713,7 @@ def test_two_reference_calibrations_are_refused() -> None:
 def test_a_correction_of_another_route_is_refused() -> None:
     frequencies = [1000.0]
     with pytest.raises(
-        ValueError, match="'reference_directivity_index' belongs to the free_field"
+        ValueError, match="'reference_directivity_index' belongs to the free"
     ):
         metrology.diffuse_field_sensitivity(
             frequencies,

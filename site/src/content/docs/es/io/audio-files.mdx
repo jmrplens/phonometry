@@ -156,7 +156,7 @@ pascales.
 
 Las rutas `dbfs` son la excepción deliberada: su referencia
 es el fondo de escala, así que ignoran el factor. Por eso mismo no encadenes un
-filtro con una lectura en dBFS: `leq(weighting_filter(sig, curve="A"),
+filtro con una lectura en dBFS: `leq(weighting_filter(sig, weighting="A"),
 dbfs=True)` mide en pascales una escala que dice ser de fondo de escala, y
 sale `20 log10(factor)` desviada. Para eso está `laeq(sig, dbfs=True)`, que
 pondera la señal cruda antes de leerla.
@@ -403,7 +403,7 @@ for block in io.read_blocks("measurement.wav", block_size=1 << 16,
     total_samples += weighted.shape[-1]
 
 streamed = 10 * np.log10((total_energy / total_samples) / (2e-5) ** 2)
-whole = float(signals.leq(filters.weighting_filter(sig, curve="A")))
+whole = float(signals.leq(filters.weighting_filter(sig, weighting="A")))
 print(f"por bloques {streamed:.4f} dB, archivo entero {whole:.4f} dB")
 # por bloques 67.2940 dB, archivo entero 67.2940 dB
 ```

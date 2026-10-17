@@ -109,7 +109,7 @@ a_weighted_max_impact_level(
     levels: ArrayLike,
     frequencies: ArrayLike | Sequence[float] | None = None,
     *,
-    band: str | None = None,
+    fraction: Literal[1, 3] | None = None,
 ) -> AWeightedMaxImpactResult
 ```
 
@@ -127,8 +127,8 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 | Name | Description |
 | :--- | :--- |
 | `levels` | Maximum impact sound pressure levels `Xi,Fmax,j`, in dB, in ascending band order. |
-| `frequencies` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band width. |
-| `band` | `"third"` or `"octave"`; inferred from the number of values (12 -> third, 4 -> octave) when omitted. |
+| `frequencies` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band set. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves; inferred from the number of values (12 one-third octaves, 4 octaves) when omitted. |
 
 **Returns:** An [`AWeightedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#aweightedmaximpactresult).
 
@@ -143,7 +143,7 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 ```python
 AWeightedMaxImpactResult(
     frequencies: np.ndarray,
-    band: str,
+    fraction: int,
     levels: np.ndarray,
     a_weighting: np.ndarray,
     corrected: np.ndarray,
@@ -159,7 +159,7 @@ A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `band` | `"third"` (50-630 Hz) or `"octave"` (63-500 Hz). |
+| `fraction` | The band set, 3 for one-third octaves (50-630 Hz) or 1 for octaves (63-500 Hz). |
 | `levels` | Input maximum levels `Xi,Fmax,j` per band, in dB. |
 | `a_weighting` | Table D.3 correction `Aj` per band, in dB. |
 | `corrected` | `Xi,Fmax,j + Aj` per band, in dB. |
@@ -255,7 +255,7 @@ when $T = T_0$.
 *Constant* (`mapping`).
 
 ```python
-HEAVY_IMPACT_A_WEIGHTING = {'third': {50.0: -30.3, 63.0: -26.2, 80.0: -22.4, 100.0: -19.1, 125.0: -16.2, 160.0: -13.2, 200.0: -10.8, 250.0: -8.7, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9}, 'octave': {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}}
+HEAVY_IMPACT_A_WEIGHTING = {3: {50.0: -30.3, 63.0: -26.2, 80.0: -22.4, 100.0: -19.1, 125.0: -16.2, 160.0: -13.2, 200.0: -10.8, 250.0: -8.7, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9}, 1: {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}}
 ```
 
 ## HEAVY_IMPACT_OCTAVE_BANDS_HZ

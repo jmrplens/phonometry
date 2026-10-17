@@ -664,7 +664,7 @@ def pass_by_measurement(
     from ...filters.weighting import time_weighting, weighting_filter
 
     weighted = np.asarray(
-        weighting_filter(samples, round(rate), curve="A"), dtype=np.float64
+        weighting_filter(samples, round(rate), weighting="A"), dtype=np.float64
     )
     window = min(weighted.size, max(1, round(_F_TIME_CONSTANT_S * rate)))
     warm_start = float(np.mean(weighted[:window] ** 2))

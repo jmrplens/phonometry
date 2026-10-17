@@ -417,7 +417,7 @@ def test_airborne_annex_h_example() -> None:
     assert result.r_direct_w == pytest.approx(57.0)
     # 1 direct + 12 flanking paths, energy fractions sum to 1.
     assert len(result.paths) == 13
-    assert sum(c.fraction for c in result.paths) == pytest.approx(1.0)
+    assert sum(c.energy_fraction for c in result.paths) == pytest.approx(1.0)
 
 
 def test_airborne_annex_h_all_twelve_path_values() -> None:
@@ -490,7 +490,7 @@ def test_airborne_no_flanking_equals_direct() -> None:
     result = building.predicted_airborne_insulation(r_direct=55.0)
     assert result.r_prime_w == pytest.approx(55.0)
     assert result.dominant.kind == "Dd"
-    assert result.paths[0].fraction == pytest.approx(1.0)
+    assert result.paths[0].energy_fraction == pytest.approx(1.0)
 
 
 def test_airborne_direct_lining() -> None:
@@ -559,7 +559,7 @@ def test_airborne_energy_composition_two_equal_paths() -> None:
     # Direct at r, plus one identical flanking path -> two equal paths.
     result = building.predicted_airborne_insulation(r_direct=r, flanking_paths=[p])
     assert result.r_prime_w == pytest.approx(r - 10.0 * math.log10(2.0))
-    assert result.paths[0].fraction == pytest.approx(0.5)
+    assert result.paths[0].energy_fraction == pytest.approx(0.5)
 
 
 def test_airborne_dominant_path_is_weakest() -> None:
@@ -709,10 +709,10 @@ def test_impact_non_finite_rejected() -> None:
 # neither the field nor the result it came from.
 
 
-@pytest.mark.parametrize("field", ["r_w", "fraction"])
+@pytest.mark.parametrize("field", ["r_w", "energy_fraction"])
 def test_path_contribution_non_finite_refused(field: str) -> None:
     """A hand-built path contribution names the field that is not finite."""
-    values = {"r_w": 55.0, "fraction": 1.0}
+    values = {"r_w": 55.0, "energy_fraction": 1.0}
     values[field] = float("nan")
     with pytest.raises(ValueError, match=rf"'{field}' must be a finite number"):
         building.PathContribution(label="Dd", kind="Dd", **values)
@@ -721,7 +721,9 @@ def test_path_contribution_non_finite_refused(field: str) -> None:
 @pytest.mark.parametrize("field", ["r_prime_w", "r_direct_w"])
 def test_airborne_result_non_finite_refused(field: str) -> None:
     """A hand-built airborne prediction names the rating that is not finite."""
-    path = building.PathContribution(label="Dd", kind="Dd", r_w=55.0, fraction=1.0)
+    path = building.PathContribution(
+        label="Dd", kind="Dd", r_w=55.0, energy_fraction=1.0
+    )
     values = {"r_prime_w": 52.0, "r_direct_w": 55.0}
     values[field] = float("nan")
     with pytest.raises(ValueError, match=rf"'{field}' must be a finite number"):

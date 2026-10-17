@@ -225,7 +225,7 @@ def test_the_improvement_plot_keeps_a_negative_band_in_view() -> None:
 def test_the_ratings_read_a_spectrum_band_by_band() -> None:
     row = _reduction(ref.ISO717_1_ANNEX_C2_R_50_5000, _BANDS)
     assert building.weighted_rating(row.spectrum()).rating == 30
-    assert building.weighted_rating(row.spectrum(), bands="octave").rating == (
+    assert building.weighted_rating(row.spectrum(), fraction=1).rating == (
         building.weighted_rating(
             [row.sound_reduction_index(b) for b in (125, 250, 500, 1000, 2000)]
         ).rating
@@ -270,8 +270,8 @@ def test_a_float_keyed_mapping_is_read_like_an_integer_keyed_one() -> None:
     keyed = dict(zip(_RATED, ref.ISO717_1_ANNEX_C_R, strict=True))
     floats = {float(band): value for band, value in keyed.items()}
     assert building.weighted_rating(floats).rating == 30
-    with pytest.raises(ValueError, match="'bands' must be"):
-        building.weighted_rating(floats, bands="thirds")
+    with pytest.raises(ValueError, match="'fraction' must be 1"):
+        building.weighted_rating(floats, fraction="thirds")  # type: ignore[arg-type]
 
 
 def test_the_rows_refuse_a_frequency_that_is_no_band() -> None:

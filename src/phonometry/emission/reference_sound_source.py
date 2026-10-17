@@ -88,7 +88,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
-from .._internal.validation import require_positive
+from .._internal.validation import require_band_fraction, require_positive
 from ._shared import (
     _PS0,
     _S0,
@@ -105,12 +105,12 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._internal.types import BandFraction
     from ._sound_power_anechoic import PrecisionSoundPowerResult
 
 RadiationCharacter = Literal["monopole", "dipole", "unknown"]
 MicrophoneArrangement = Literal["paths", "fixed"]
 CalibrationEnvironment = Literal["hemi-anechoic", "reverberation-room"]
-BandWidth = Literal["one-third-octave", "octave"]
 
 #: 8.2.1: hemispherical measurement surface of radius 2 m.
 _RADIUS_M = 2.0
@@ -185,6 +185,8 @@ _TABLE_2_A = (0.3, 0.5, 0.2)
 #: Octave mid-band frequencies fall on every third one-third octave band
 #: counted from 1 kHz.
 _OCTAVE_STEP = 3
+#: The ``fraction`` of the one-third-octave band set.
+_THIRD_OCTAVE = 3
 
 
 def _column(environment: str, arrangement: str | None) -> int:
@@ -337,7 +339,7 @@ def reference_source_reproducibility(
     *,
     environment: CalibrationEnvironment,
     arrangement: MicrophoneArrangement | None = None,
-    bandwidth: BandWidth = "one-third-octave",
+    fraction: BandFraction = 3,
 ) -> np.ndarray:
     r"""Standard deviation of reproducibility of a calibration (ISO 6926 Table 2).
 
@@ -350,23 +352,21 @@ def reference_source_reproducibility(
     :param arrangement: In a hemi-anechoic room, ``"paths"`` (meridional or
         spiral) or ``"fixed"`` (20 discrete positions or coaxial circular
         paths); ignored in a reverberation room.
-    :param bandwidth: ``"one-third-octave"`` (default) or ``"octave"``.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: :math:`\sigma_R` per band, in dB.
     :raises ValueError: for a band outside Table 2 or an unknown option.
     """
     column = _column(environment, arrangement)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if bandwidth == "one-third-octave":
+    if require_band_fraction(fraction, "fraction") == _THIRD_OCTAVE:
         rows, low = _TABLE_2_THIRDS, _K_50
-    elif bandwidth == "octave":
-        rows, low = _TABLE_2_OCTAVES, -12
     else:
-        msg = f"'bandwidth' must be 'one-third-octave' or 'octave'; got {bandwidth!r}."
-        raise ValueError(msg)
+        rows, low = _TABLE_2_OCTAVES, -12
     values = []
     for f in freqs:
         k = _band_index(float(f))
-        if bandwidth == "octave" and k % _OCTAVE_STEP != 0:
+        if fraction == 1 and k % _OCTAVE_STEP != 0:
             msg = f"{float(f):g} Hz is not an octave mid-band frequency."
             raise ValueError(msg)
         values.append(_stepped(k, rows, low, "ISO 6926 Table 2")[column])
@@ -592,7 +592,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         self,
         frequencies: ArrayLike,
         *,
-        bandwidth: BandWidth = "one-third-octave",
+        fraction: BandFraction = 3,
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
     ) -> np.ndarray:
@@ -609,7 +609,8 @@ class ReferenceSourceCalibration(OwnsArrays):
         calibrated.
 
         :param frequencies: Nominal mid-band frequencies, in hertz.
-        :param bandwidth: ``"one-third-octave"`` (default) or ``"octave"``.
+        :param fraction: The band set, 3 for one-third octaves (default) or 1
+            for octaves.
         :param temperature_c: Air temperature at the test, in degrees Celsius;
             ``None`` (default), with ``static_pressure_kpa``, reads the
             reference conditions.
@@ -622,6 +623,7 @@ class ReferenceSourceCalibration(OwnsArrays):
             that used the manufacturer's :math:`C_2`, whose value at the test
             only the manufacturer gives.
         """
+        fraction = require_band_fraction(fraction, "fraction")
         levels = np.asarray(self.sound_power_level, dtype=np.float64)
         if (temperature_c is None) != (static_pressure_kpa is None):
             msg = (
@@ -651,19 +653,13 @@ class ReferenceSourceCalibration(OwnsArrays):
         out = []
         for f in np.atleast_1d(np.asarray(frequencies, dtype=np.float64)):
             k = _band_index(float(f))
-            if bandwidth == "one-third-octave":
+            if fraction == _THIRD_OCTAVE:
                 wanted = [k]
-            elif bandwidth == "octave":
+            else:
                 if k % _OCTAVE_STEP != 0:
                     msg = f"{float(f):g} Hz is not an octave mid-band frequency."
                     raise ValueError(msg)
                 wanted = [k - 1, k, k + 1]
-            else:
-                msg = (
-                    "'bandwidth' must be 'one-third-octave' or 'octave'; "
-                    f"got {bandwidth!r}."
-                )
-                raise ValueError(msg)
             missing = [w for w in wanted if w not in known]
             if missing:
                 msg = (

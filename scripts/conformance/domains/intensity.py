@@ -36,8 +36,8 @@ from ..registry import (
 from .levels import _FS
 
 if TYPE_CHECKING:
+    from phonometry._internal.types import BandFraction
     from phonometry.emission._sound_power_intensity_points import (
-        BandType,
         DeterminationGrade,
     )
 
@@ -377,10 +377,10 @@ def _chk_annex_g_zero_at_120m() -> Outcome:
 
 def _iso9614_1_band_cells(
     table: list[tuple[float | None, float | None, float | None]],
-) -> list[tuple[BandType, DeterminationGrade, float, float]]:
+) -> list[tuple[BandFraction, DeterminationGrade, float, float]]:
     """Every printed per-band cell of an ISO 9614-1 graded table.
 
-    Yields ``(band_type, grade, frequency, value)`` for the cells the print
+    Yields ``(fraction, grade, frequency, value)`` for the cells the print
     fills. Grade 3 fills none of them in any of the three graded tables, so
     the blanks drop out here and are checked as refusals by the test suite
     instead.
@@ -395,17 +395,19 @@ def _iso9614_1_band_cells(
         "engineering",
         "survey",
     )
-    columns: tuple[tuple[BandType, tuple[float, float] | None, tuple[int, ...]], ...]
-    cells: list[tuple[BandType, DeterminationGrade, float, float]] = []
+    columns: tuple[
+        tuple[BandFraction, tuple[float, float] | None, tuple[int, ...]], ...
+    ]
+    cells: list[tuple[BandFraction, DeterminationGrade, float, float]] = []
     for row, values in zip(ref.ISO9614_1_BAND_ROWS, table, strict=True):
-        columns = (("octave", row[0], octave), ("third", row[1], third))
-        for band_type, span, series in columns:
+        columns = ((1, row[0], octave), (3, row[1], third))
+        for fraction, span, series in columns:
             if span is None:
                 continue
             for frequency in (f for f in series if span[0] <= f <= span[1]):
                 for grade, value in zip(grades, values, strict=True):
                     if value is not None:
-                        cells.append((band_type, grade, float(frequency), value))
+                        cells.append((fraction, grade, float(frequency), value))
     return cells
 
 
@@ -418,9 +420,9 @@ def _chk_iso9614_1_table_b2() -> Outcome:
     """Every printed cell of Table B.2, in both frequency columns."""
     cells = _iso9614_1_band_cells(ref.ISO9614_1_TABLE_B2_C)
     worst = 0.0
-    for band_type, grade, frequency, value in cells:
+    for fraction, grade, frequency, value in cells:
         computed = ph.emission.position_count_factor(
-            grade, frequency, band_type=band_type
+            grade, frequency, fraction=fraction
         )
         worst = max(worst, abs(computed - value))
     a_weighted = ref.ISO9614_1_TABLE_B2_C_A_WEIGHTED[2]
@@ -446,9 +448,9 @@ def _chk_iso9614_1_table_2() -> Outcome:
     """Every printed cell of Table 2, plus its A-weighted grade-3 value."""
     cells = _iso9614_1_band_cells(ref.ISO9614_1_TABLE_2_S)
     worst = 0.0
-    for band_type, grade, frequency, value in cells:
+    for fraction, grade, frequency, value in cells:
         computed = ph.emission.determination_standard_deviation(
-            grade, frequency, band_type=band_type
+            grade, frequency, fraction=fraction
         )
         worst = max(worst, abs(computed - value))
     a_weighted = ref.ISO9614_1_TABLE_2_S_A_WEIGHTED[2]
@@ -511,10 +513,10 @@ def _chk_iso9614_1_power_sum() -> Outcome:
         # supplied.
         warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
         points = ph.emission.sound_power_intensity_points(
-            intensity, areas, frequencies=frequencies, band_type="octave"
+            intensity, areas, frequencies=frequencies, fraction=1
         )
         scan = ph.emission.sound_power_intensity(
-            intensity, areas, frequencies=frequencies, band_type="octave"
+            intensity, areas, frequencies=frequencies, fraction=1
         )
     worst = float(
         np.max(np.abs(np.asarray(points.sound_power_level) - scan.sound_power_level))

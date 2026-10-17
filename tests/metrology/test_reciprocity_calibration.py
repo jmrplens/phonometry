@@ -78,7 +78,7 @@ def test_calibration_levels_phases_and_read_only_columns() -> None:
         frequencies=_F,
         sensitivity_v_per_pa=sensitivities,
         products_v2_per_pa2=np.ones((3, 3), dtype=complex),
-        field="free_field",
+        field="free",
         method="three_microphones",
         corrections={"c": [0.1, 0.0, -0.1]},
         expanded_uncertainty_db=0.1,
@@ -117,7 +117,7 @@ def test_budget_combines_in_quadrature_with_k_2() -> None:
 def test_budget_refuses_a_component_of_the_other_part() -> None:
     with pytest.raises(ValueError, match="are not components of Table 1"):
         metrology.reciprocity_uncertainty_budget(
-            _F, {"coupler_length": 0.01}, field="free_field"
+            _F, {"coupler_length": 0.01}, field="free"
         )
 
 

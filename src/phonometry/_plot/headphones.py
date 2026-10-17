@@ -392,7 +392,8 @@ def plot_programme_characteristic_voltage(
     floor = 10.0 * math.floor((float(np.min(levels)) - 5.0) / 10.0)
     # One correction alone gives an e.m.f. for 94 dB that the standard does
     # not name a characteristic voltage; the bars and the title say which.
-    partial = result.a_weighted != result.free_field_compensated
+    a_weighted = result.weighting == "A"
+    partial = a_weighted != result.free_field_compensated
     ax.bar(
         positions,
         levels - floor,
@@ -430,9 +431,9 @@ def plot_programme_characteristic_voltage(
     )
     ax.set_ylim(floor, total + 8.0)
     ax.set_xlabel(_t(_FREQUENCY, language))
-    if result.a_weighted and result.free_field_compensated:
+    if a_weighted and result.free_field_compensated:
         ylabel = "A-weighted, free-field compensated band level [dB re 20 µPa]"
-    elif result.a_weighted:
+    elif a_weighted:
         ylabel = "A-weighted band level [dB re 20 µPa]"
     elif result.free_field_compensated:
         ylabel = "Free-field compensated band level [dB re 20 µPa]"
@@ -441,9 +442,9 @@ def plot_programme_characteristic_voltage(
     ax.set_ylabel(_t(ylabel, language))
     # Only the uncorrected (8.3.4) and the fully corrected (8.3.5) voltages are
     # characteristics of the standard; one correction alone is named as such.
-    if result.a_weighted and result.free_field_compensated:
+    if a_weighted and result.free_field_compensated:
         title = "Corrected programme signal characteristic voltage (8.3.5) {voltage} V"
-    elif result.a_weighted:
+    elif a_weighted:
         title = "Programme signal e.m.f. for 94 dB, A-weighted only: {voltage} V"
     elif result.free_field_compensated:
         title = "Programme signal e.m.f. for 94 dB, free-field compensated only: {voltage} V"

@@ -389,7 +389,7 @@ elements = [
     building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # elemento pequeño
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (R'tr,s,w / Ctr / D2m,nT,w)
 
 fac.plot()   # índices parciales por elemento con R' y D2m,nT superpuestos (requiere matplotlib)
@@ -413,7 +413,7 @@ elements = [
     building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # elemento pequeño
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 
 x = np.arange(5)
 fig, ax = plt.subplots(figsize=(9, 5.5))
@@ -502,7 +502,7 @@ elements = [
     building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 fac.report("D2mnT_prediction.pdf", metadata=ReportMetadata(
     specimen="Muro de fábrica + ventana + tragaluz + entrada de aire", area=11.3,
     receiving_volume=50.0, requirement=30.0,
@@ -619,7 +619,7 @@ plt.show()
 | `radiated_sound_power(r_prime_cap)` | float | dB | por defecto `None` (sin tope) | Tope de campo opcional sobre $R'$, nota al pie del ejemplo del Anexo G (usa 40 dB), no parte de la Fórmula (2)/(3) |
 | `radiated_sound_power(octave_bands)` | sec. de int | Hz | por defecto `None` | Centros de octava que casan con las bandas; habilita el $L_{W\mathrm{A}}$ ponderado A |
 | `facade_sound_reduction(frequencies)` | secuencia | Hz | por defecto `None`; longitud = nº de bandas | Centros de banda que se conservan en el resultado para las gráficas |
-| `facade_sound_reduction(bands)` | str o `None` | — | `'octave'` / `'third-octave'` / `None` | En qué conjunto de bandas están los datos; `None` lo infiere del número, como en la [página de índices](/phonometry/es/buildings/insulation/insulation-ratings/) |
+| `facade_sound_reduction(fraction)` | int o `None` | — | `1` (octavas) / `3` (tercios de octava) / `None` | En qué conjunto de bandas están los datos; `None` lo infiere del número, como en la [página de índices](/phonometry/es/buildings/insulation/insulation-ratings/) |
 | `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Lado radiante finito y distancia de recepción (Anexo E) |
 | `outdoor_level(l_w, attenuation)` | float o sec. | dB | compatibles por difusión | $L_p$ exterior de uno o varios lados (Fórmula E.1) |
 
@@ -674,7 +674,7 @@ elements = [
 ]
 volume, area = 50.0, 11.3
 fac = building.facade_sound_reduction(elements, area=area, volume=volume,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 
 # Lo que leería la medición en campo: A = 0,16 V / T es el área de Sabine de
 # ISO 16283-3, y R' - 10 lg(S/A) es la diferencia de niveles que implica.

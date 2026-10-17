@@ -1912,12 +1912,6 @@ PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
         ("airspeed", "airspeed_m_s"),
     ),
     **_pair(
-        'the band width "third" or "octave", a label, beside the centre '
-        "frequency of one band a catalogue accessor takes",
-        "building",
-        ("band", "band_hz"),
-    ),
-    **_pair(
         "Delta(Rw + C), the C spectrum adaptation term of ISO 717-1, not degrees "
         "Celsius",
         "building",
@@ -2034,12 +2028,6 @@ PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
         ("acceleration", "acceleration_m_s2"),
         ("displacement", "displacement_um"),
         ("velocity", "velocity_mm_s"),
-    ),
-    **_pair(
-        'the analysis band width "octave" or "third", a label, beside a '
-        "frequency band (f_low, f_high) in hertz",
-        "vibration",
-        ("band", "band_hz"),
     ),
     **_pair(
         "a dimensionless coefficient of a building code beside the k of a "

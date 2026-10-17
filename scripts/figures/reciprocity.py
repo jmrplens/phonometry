@@ -216,7 +216,7 @@ def _free_field_budget(
             "polarizing_voltage": 0.0025,
             "repeatability": 0.01,
         },
-        field="free_field",
+        field="free",
     )
 
 

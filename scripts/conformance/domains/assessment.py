@@ -134,7 +134,7 @@ def _chk_hearing_spread() -> Outcome:
 
 @register(_HEAR, "ISO 389-7:2005 Table 1", "Free-field reference threshold at 1 kHz")
 def _chk_hearing_reference() -> Outcome:
-    value = float(ph.hearing.reference_threshold("free-field")[4])
+    value = float(ph.hearing.reference_threshold("free")[4])
     return numeric(ref.ISO389_7_REF_FREE_1KHZ, value, 1e-9, unit="dB", places=3)
 
 

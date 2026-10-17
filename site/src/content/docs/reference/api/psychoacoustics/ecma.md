@@ -59,7 +59,7 @@ EcmaLoudness(
     frequencies: np.ndarray,
     times: np.ndarray,
     loudness_vs_time: np.ndarray,
-    field: str,
+    field: Literal['free', 'diffuse'],
 )
 ```
 

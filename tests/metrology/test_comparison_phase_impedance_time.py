@@ -163,7 +163,7 @@ def test_determinations_either_side_of_half_a_turn_average_next_to_them() -> Non
         _F,
         _L_REF,
         readings,
-        field="free_field",
+        field="free",
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=0.0,
             channel_phase_difference_deg=phases,
@@ -179,7 +179,7 @@ def test_free_field_without_interchange_reads_the_channel_phase() -> None:
         _F,
         _L_REF,
         _L_REF - _L_TEST,
-        field="free_field",
+        field="free",
         phase=metrology.SimultaneousComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             channel_phase_difference_deg=_PHI_REF - _PHI_TEST,
@@ -242,7 +242,7 @@ def test_an_interchanged_phase_without_the_interchanged_level_is_refused() -> No
             _F,
             _L_REF,
             _L_REF - _L_TEST,
-            field="free_field",
+            field="free",
             phase=phase,
         )
 
@@ -284,7 +284,7 @@ def test_monitor_phases_cancel_a_source_that_drifts_in_phase() -> None:
             reference_phase_deg=monitor + field_1,
             test_phase_deg=monitor + field_2,
         ),
-        field="free_field",
+        field="free",
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             reference_output_phase_deg=cc._wrapped_deg(_PHI_REF + field_1),

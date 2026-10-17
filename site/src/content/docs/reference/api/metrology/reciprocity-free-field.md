@@ -580,7 +580,7 @@ parameter of the acoustic transfer impedance contributes (IEC
 
 Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty); ready to pass to
 [`reciprocity_uncertainty_budget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) with
-`field="free_field"`.
+`field="free"`.
 
 **Attributes**
 

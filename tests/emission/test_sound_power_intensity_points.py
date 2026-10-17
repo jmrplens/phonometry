@@ -55,24 +55,24 @@ _THIRD_BANDS = (
 _OCTAVE_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
 
 
-def _bands_of(span: tuple[float, float], band_type: str) -> list[float]:
+def _bands_of(span: tuple[float, float], fraction: int) -> list[float]:
     """The nominal centres a printed frequency range covers."""
-    series = _OCTAVE_BANDS if band_type == "octave" else _THIRD_BANDS
+    series = _OCTAVE_BANDS if fraction == 1 else _THIRD_BANDS
     return [f for f in series if span[0] <= f <= span[1]]
 
 
 def _table_cells(
     table: list[tuple[float | None, float | None, float | None]],
-) -> list[tuple[str, str, float, float | None]]:
-    """Every printed per-band cell as (band_type, grade, frequency, value)."""
-    cells: list[tuple[str, str, float, float | None]] = []
+) -> list[tuple[int, str, float, float | None]]:
+    """Every printed per-band cell as (fraction, grade, frequency, value)."""
+    cells: list[tuple[int, str, float, float | None]] = []
     for row, values in zip(ref.ISO9614_1_BAND_ROWS, table, strict=True):
-        for band_type, span in (("octave", row[0]), ("third", row[1])):
+        for fraction, span in ((1, row[0]), (3, row[1])):
             if span is None:
                 continue
-            for frequency in _bands_of(span, band_type):
+            for frequency in _bands_of(span, fraction):
                 for grade, value in zip(_GRADES, values, strict=True):
-                    cells.append((band_type, grade, frequency, value))
+                    cells.append((fraction, grade, frequency, value))
     return cells
 
 
@@ -113,22 +113,22 @@ def _qualified_case(
 # ---------------------------------------------------------------------------
 # Table B.2 (C) and Table 2 (s), cell by cell, and the grade-3 asymmetry
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize(("band_type", "grade", "frequency", "expected"), _C_CELLS)
+@pytest.mark.parametrize(("fraction", "grade", "frequency", "expected"), _C_CELLS)
 def test_table_b2_reproduces_every_printed_cell(
-    band_type: str, grade: str, frequency: float, expected: float | None
+    fraction: int, grade: str, frequency: float, expected: float | None
 ) -> None:
     """Every per-band cell of Table B.2, blanks included (Eq. B.2)."""
     if expected is None:
         with pytest.raises(ValueError, match="no per-band value"):
-            emission.position_count_factor(grade, frequency, band_type=band_type)  # type: ignore[arg-type]
+            emission.position_count_factor(grade, frequency, fraction=fraction)  # type: ignore[arg-type]
         return
-    factor = emission.position_count_factor(grade, frequency, band_type=band_type)  # type: ignore[arg-type]
+    factor = emission.position_count_factor(grade, frequency, fraction=fraction)  # type: ignore[arg-type]
     assert factor == pytest.approx(expected)
 
 
-@pytest.mark.parametrize(("band_type", "grade", "frequency", "expected"), _S_CELLS)
+@pytest.mark.parametrize(("fraction", "grade", "frequency", "expected"), _S_CELLS)
 def test_table_2_reproduces_every_printed_cell(
-    band_type: str, grade: str, frequency: float, expected: float | None
+    fraction: int, grade: str, frequency: float, expected: float | None
 ) -> None:
     """Every per-band cell of Table 2, blanks included (footnote 1: +/- 2s)."""
     if expected is None:
@@ -136,10 +136,10 @@ def test_table_2_reproduces_every_printed_cell(
             emission.determination_standard_deviation(
                 grade,  # type: ignore[arg-type]
                 frequency,
-                band_type=band_type,
+                fraction=fraction,  # type: ignore[arg-type]
             )
         return
-    s = emission.determination_standard_deviation(grade, frequency, band_type=band_type)  # type: ignore[arg-type]
+    s = emission.determination_standard_deviation(grade, frequency, fraction=fraction)  # type: ignore[arg-type]
     assert s == pytest.approx(expected)
 
 
@@ -240,24 +240,24 @@ def test_table_1_bias_error_factor_drives_the_dynamic_capability() -> None:
         assert result.dynamic_capability_index[0] == pytest.approx(18.0 - k)
 
 
-@pytest.mark.parametrize("band_type", ["octave", "third"])
-def test_untabulated_band_is_refused(band_type: str) -> None:
+@pytest.mark.parametrize("fraction", [1, 3])
+def test_untabulated_band_is_refused(fraction: int) -> None:
     """A band outside Tables B.2 and 2 is refused rather than extrapolated."""
     with pytest.raises(ValueError, match="not a band of ISO 9614-1"):
         emission.position_count_factor(
             "engineering",
             8000.0,
-            band_type=band_type,  # type: ignore[arg-type]
+            fraction=fraction,  # type: ignore[arg-type]
         )
 
 
 def test_6300_hz_row_has_no_octave_counterpart() -> None:
     """The 6 300 Hz row of Tables B.2 and 2 is printed for thirds only."""
     assert emission.position_count_factor(
-        "precision", 6300.0, band_type="third"
+        "precision", 6300.0, fraction=3
     ) == pytest.approx(19.0)
     with pytest.raises(ValueError, match="not a band of ISO 9614-1"):
-        emission.position_count_factor("precision", 6300.0, band_type="octave")
+        emission.position_count_factor("precision", 6300.0, fraction=1)
 
 
 def test_every_tabulated_band_has_a_row_in_both_tables() -> None:
@@ -267,7 +267,7 @@ def test_every_tabulated_band_has_a_row_in_both_tables() -> None:
     tables, not from the lists the code keeps, so this checks the code against
     the standard rather than against itself.
 
-    `_nominal_band` admits only a tabulated centre of the band type asked for,
+    `_nominal_band` admits only a tabulated centre of the band set asked for,
     and every centre it admits is spanned by a row of Table B.2 and of
     Table 2 alike, so `_row_for` cannot fail on anything a caller can reach it
     with. That is a property of two lists and two tables agreeing, not of the
@@ -275,13 +275,13 @@ def test_every_tabulated_band_has_a_row_in_both_tables() -> None:
     fails, rather than a `LookupError` surfacing to a user who did nothing
     wrong.
     """
-    for band_type, bands in (
-        ("octave", _OCTAVE_BANDS),
-        ("third", _THIRD_BANDS),
+    for fraction, bands in (
+        (1, _OCTAVE_BANDS),
+        (3, _THIRD_BANDS),
     ):
         for centre in bands:
             for table in (_TABLE_B2, _TABLE_2_S):
-                grade1, grade2 = _row_for(table, float(centre), band_type)  # type: ignore[arg-type]
+                grade1, grade2 = _row_for(table, float(centre), fraction)
                 assert math.isfinite(grade1)
                 assert math.isfinite(grade2)
 
@@ -302,7 +302,7 @@ def test_exact_base_ten_centre_designates_its_nominal_label() -> None:
     """1000*10**(0.1) Hz is the 1 250 Hz band, as in the IEC 61043 lookups."""
     exact = 1000.0 * 10.0 ** (1.0 / 10.0)
     assert emission.position_count_factor(
-        "engineering", exact, band_type="third"
+        "engineering", exact, fraction=3
     ) == pytest.approx(29.0)
 
 
@@ -316,7 +316,7 @@ def test_a_frequency_five_percent_off_a_centre_matches_no_band() -> None:
     of Tables B.2 and 2.
     """
     with pytest.raises(ValueError, match="not a band of ISO 9614-1"):
-        emission.position_count_factor("engineering", 1050.0, band_type="third")
+        emission.position_count_factor("engineering", 1050.0, fraction=3)
 
 
 def test_a_frequency_of_zero_is_refused_by_name() -> None:
@@ -327,9 +327,9 @@ def test_a_frequency_of_zero_is_refused_by_name() -> None:
     which input was wrong instead of surfacing a domain error from inside.
     """
     with pytest.raises(ValueError, match="finite and positive"):
-        emission.position_count_factor("engineering", 0.0, band_type="third")
+        emission.position_count_factor("engineering", 0.0, fraction=3)
     with pytest.raises(ValueError, match="finite and positive"):
-        emission.position_count_factor("engineering", -1000.0, band_type="third")
+        emission.position_count_factor("engineering", -1000.0, fraction=3)
 
 
 def test_a_frequency_that_is_not_a_number_is_refused_by_name() -> None:
@@ -340,17 +340,15 @@ def test_a_frequency_that_is_not_a_number_is_refused_by_name() -> None:
     blame the band table for an input that was never a frequency.
     """
     with pytest.raises(ValueError, match="finite and positive"):
-        emission.determination_standard_deviation(
-            "precision", float("nan"), band_type="third"
-        )
+        emission.determination_standard_deviation("precision", float("nan"), fraction=3)
 
 
-def test_unknown_grade_and_band_type_are_refused() -> None:
-    """The vocabulary of grades and band types is closed."""
+def test_unknown_grade_and_band_set_are_refused() -> None:
+    """The vocabulary of grades and band sets is closed."""
     with pytest.raises(ValueError, match="'grade' must be"):
         emission.position_count_factor("class 1", 1000.0)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'band_type' must be"):
-        emission.position_count_factor("engineering", 1000.0, band_type="decade")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'fraction' must be 1"):
+        emission.position_count_factor("engineering", 1000.0, fraction=10)  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------
@@ -506,10 +504,10 @@ def test_discrete_points_and_a_scan_of_the_same_surface_agree() -> None:
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
 
     points = emission.sound_power_intensity_points(
-        intensity, areas, frequencies=frequencies, band_type="octave"
+        intensity, areas, frequencies=frequencies, fraction=1
     )
     scan = emission.sound_power_intensity(
-        intensity, areas, frequencies=frequencies, band_type="octave"
+        intensity, areas, frequencies=frequencies, fraction=1
     )
     np.testing.assert_allclose(points.sound_power, scan.sound_power)
     np.testing.assert_allclose(points.sound_power_level, scan.sound_power_level)
@@ -793,7 +791,7 @@ def test_too_much_inward_flow_leaves_the_band_ungraded() -> None:
         pressure_levels=np.full(40, 80.0),
         pressure_residual_index=40.0,
         frequencies=[125.0],
-        band_type="octave",
+        fraction=1,
         grade="precision",
     )
     assert result.f2 is not None
@@ -1184,7 +1182,7 @@ def _three_bands_of_three_different_grades() -> emission.DiscretePointIntensityR
         pressure_levels=levels,
         pressure_residual_index=30.0,
         frequencies=[250.0, 1000.0, 2000.0],
-        band_type="octave",
+        fraction=1,
         grade="precision",
     )
 
@@ -1197,15 +1195,10 @@ def test_expanded_uncertainty_is_twice_the_table_2_standard_deviation() -> None:
     assert result.expanded_uncertainty is not None
     assert float(result.expanded_uncertainty[0]) == pytest.approx(
         2.0
-        * emission.determination_standard_deviation(
-            "engineering", 250.0, band_type="octave"
-        )
+        * emission.determination_standard_deviation("engineering", 250.0, fraction=1)
     )
     assert float(result.expanded_uncertainty[1]) == pytest.approx(
-        2.0
-        * emission.determination_standard_deviation(
-            "precision", 1000.0, band_type="octave"
-        )
+        2.0 * emission.determination_standard_deviation("precision", 1000.0, fraction=1)
     )
     np.testing.assert_allclose(result.expanded_uncertainty[:2], [4.0, 2.0])
 
@@ -1223,9 +1216,7 @@ def test_the_uncertainty_is_read_at_the_grade_the_band_achieved() -> None:
     assert result.expanded_uncertainty is not None
     requested = [
         2.0
-        * emission.determination_standard_deviation(
-            "precision", frequency, band_type="octave"
-        )
+        * emission.determination_standard_deviation("precision", frequency, fraction=1)
         for frequency in (250.0, 1000.0, 2000.0)
     ]
     assert float(result.expanded_uncertainty[0]) > requested[0]
@@ -1256,7 +1247,7 @@ def test_an_unqualified_determination_states_no_uncertainty_either() -> None:
         intensity,
         areas,
         frequencies=[125.0, 500.0, 2000.0],
-        band_type="octave",
+        fraction=1,
         grade="engineering",
     )
     assert result.achieved_grade is None
@@ -1280,7 +1271,7 @@ def test_a_weighted_total_omits_the_bands_that_failed_the_criteria() -> None:
         pressure_levels=levels,
         pressure_residual_index=25.0,
         frequencies=frequencies,
-        band_type="octave",
+        fraction=1,
     )
     assert result.a_weighting_omitted_bands is not None
     assert bool(result.a_weighting_omitted_bands[0])
@@ -1313,7 +1304,7 @@ def test_a_band_that_fails_only_criterion_2_leaves_the_sum_as_well() -> None:
         pressure_levels=np.full((10, 2), 80.0),
         pressure_residual_index=40.0,
         frequencies=[1000.0, 2000.0],
-        band_type="octave",
+        fraction=1,
     )
     assert result.criterion_1 is not None
     assert result.criterion_2 is not None
@@ -1346,7 +1337,7 @@ def test_note_11_reads_c_in_the_mid_row_when_the_top_bands_are_quiet() -> None:
         pressure_levels=np.full((20, 3), 80.0),
         pressure_residual_index=40.0,
         frequencies=frequencies,
-        band_type="octave",
+        fraction=1,
         grade="precision",
     )
     assert result.a_weighting_omitted_bands is not None
@@ -1358,9 +1349,9 @@ def test_note_11_reads_c_in_the_mid_row_when_the_top_bands_are_quiet() -> None:
 
     required = result.n_positions / result.field_nonuniformity_a**2
     assert (
-        emission.position_count_factor("precision", 250.0, band_type="octave")
+        emission.position_count_factor("precision", 250.0, fraction=1)
         < required
-        < emission.position_count_factor("precision", 1000.0, band_type="octave")
+        < emission.position_count_factor("precision", 1000.0, fraction=1)
     )
     assert result.achieved_grade_a == "precision"
 
@@ -1383,7 +1374,7 @@ def _three_octaves(top: float) -> emission.DiscretePointIntensityResult:
         pressure_levels=np.full((20, 3), 80.0),
         pressure_residual_index=40.0,
         frequencies=[250.0, 500.0, 1000.0],
-        band_type="octave",
+        fraction=1,
         grade="engineering",
     )
 
@@ -1438,7 +1429,7 @@ def test_the_800_hz_one_third_octave_belongs_to_note_11s_top_row() -> None:
         pressure_levels=np.full((20, 2), 80.0),
         pressure_residual_index=40.0,
         frequencies=[250.0, 800.0],
-        band_type="third",
+        fraction=3,
         grade="engineering",
     )
     assert result.achieved_grade_a == "engineering"
@@ -1462,7 +1453,7 @@ def test_note_11s_row_is_read_at_the_grade_being_tried() -> None:
         pressure_levels=np.full((20, 3), 80.0),
         pressure_residual_index=40.0,
         frequencies=[250.0, 500.0, 1000.0],
-        band_type="octave",
+        fraction=1,
         grade="engineering",
     )
     assert result.a_weighting_omitted_bands is not None
@@ -1489,7 +1480,7 @@ def test_one_band_of_inward_flow_stops_the_a_weighted_grade() -> None:
         pressure_levels=np.full((n, 2), 80.0),
         pressure_residual_index=30.0,
         frequencies=[1000.0, 2000.0],
-        band_type="octave",
+        fraction=1,
         grade="survey",
     )
     assert result.f2 is not None
@@ -1513,7 +1504,7 @@ def test_one_unsteady_band_stops_the_a_weighted_grade_too() -> None:
         pressure_residual_index=30.0,
         temporal_intensity=temporal,
         frequencies=[1000.0, 2000.0],
-        band_type="octave",
+        fraction=1,
         grade="precision",
     )
     assert result.f1 is not None
@@ -1539,7 +1530,7 @@ def test_criterion_1_must_hold_in_every_summed_band_at_the_grade_tried() -> None
         pressure_levels=levels,
         pressure_residual_index=17.0,
         frequencies=[1000.0, 2000.0],
-        band_type="octave",
+        fraction=1,
         grade="survey",
     )
     assert result.criterion_1 is not None
@@ -1593,7 +1584,7 @@ def test_a_weighted_screening_is_announced_when_it_cannot_be_done() -> None:
     intensity = np.full((10, 2), 1.0e-5)
     with pytest.warns(emission.SoundPowerWarning, match="clause 10.5 b"):
         result = emission.sound_power_intensity_points(
-            intensity, areas, frequencies=[500.0, 1000.0], band_type="octave"
+            intensity, areas, frequencies=[500.0, 1000.0], fraction=1
         )
     assert result.a_weighting_omitted_bands is None
 
@@ -1610,7 +1601,7 @@ def test_the_a_weighted_determination_has_its_own_field_non_uniformity() -> None
         pressure_levels=np.full((20, 3), 80.0),
         pressure_residual_index=40.0,
         frequencies=frequencies,
-        band_type="octave",
+        fraction=1,
     )
     corrections = np.array([-3.2, 0.0, 1.2])
     per_position = np.sum(intensity * 10.0 ** (0.1 * corrections), axis=1)
@@ -1637,7 +1628,7 @@ def test_the_survey_grade_is_reached_only_on_the_a_weighted_sum() -> None:
         pressure_levels=np.full((10, 3), 80.0),
         pressure_residual_index=40.0,
         frequencies=frequencies,
-        band_type="octave",
+        fraction=1,
         grade="survey",
     )
     assert result.achieved_grade_a == "survey"
@@ -2286,7 +2277,7 @@ def test_the_result_plots_as_a_sound_power_spectrum() -> None:
     areas = np.full(10, 1.0)
     intensity = np.full((10, 3), 1.0e-5)
     result = emission.sound_power_intensity_points(
-        intensity, areas, frequencies=[500.0, 1000.0, 2000.0], band_type="octave"
+        intensity, areas, frequencies=[500.0, 1000.0, 2000.0], fraction=1
     )
     ax = result.plot()
     assert "ISO 9614-1" in ax.get_title()

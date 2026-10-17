@@ -184,7 +184,7 @@ def _intensity_sound_power_example() -> tuple[object, ReportMetadata, str]:
         pressure_levels=np.full((6, 6), 80.0),
         pressure_residual_index=15.0,
         frequencies=freqs,
-        band_type="octave",
+        fraction=1,
         grade="engineering",
     )
     metadata = ReportMetadata(

@@ -20,10 +20,15 @@ printed folio 5, Table 3 on printed folio 6, and Clauses 5.1, 5.2, 6.3 and
 from __future__ import annotations
 
 import functools
+from typing import TYPE_CHECKING
 
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration._choices import BuildingClass
+    from phonometry.vibration.structural.building_damage import PipelineMaterial
 
 _STRUCTURAL_DAMAGE = "Vibration effects on structures (DIN 4150-3)"
 
@@ -31,7 +36,7 @@ _STRUCTURAL_DAMAGE = "Vibration effects on structures (DIN 4150-3)"
 #: velocity in mm/s at 1 Hz, 10 Hz, 50 Hz and 100 Hz. Read against the
 #: rendered page; the table prints two of the three bands as ranges, and
 #: these are their ends.
-_TABLE_1_FOUNDATION = {
+_TABLE_1_FOUNDATION: dict[BuildingClass, tuple[float, float, float, float]] = {
     "commercial": (20.0, 20.0, 40.0, 50.0),
     "residential": (5.0, 5.0, 15.0, 20.0),
     "sensitive": (3.0, 3.0, 8.0, 10.0),
@@ -39,13 +44,21 @@ _TABLE_1_FOUNDATION = {
 _TABLE_1_FREQUENCIES = (1.0, 10.0, 50.0, 100.0)
 
 #: Table 1, last column: the topmost floor plane, horizontal, all frequencies.
-_TABLE_1_TOP_FLOOR = {"commercial": 40.0, "residential": 15.0, "sensitive": 8.0}
+_TABLE_1_TOP_FLOOR: dict[BuildingClass, float] = {
+    "commercial": 40.0,
+    "residential": 15.0,
+    "sensitive": 8.0,
+}
 
 #: Table 3 on printed folio 6: long-term vibration, topmost floor plane.
-_TABLE_3 = {"commercial": 10.0, "residential": 5.0, "sensitive": 2.5}
+_TABLE_3: dict[BuildingClass, float] = {
+    "commercial": 10.0,
+    "residential": 5.0,
+    "sensitive": 2.5,
+}
 
 #: Table 2 on printed folio 5: buried pipelines, by pipe material.
-_TABLE_2 = {
+_TABLE_2: dict[PipelineMaterial, float] = {
     "welded_steel": 100.0,
     "concrete_or_flanged_metal": 80.0,
     "masonry_or_plastic": 50.0,
@@ -54,20 +67,23 @@ _TABLE_2 = {
 #: Bild 1 on printed folio 4, read at the middle of a band: a dwelling at
 #: 30 Hz sits halfway up the 5 mm/s to 15 mm/s band, and a commercial
 #: building at 75 Hz halfway up its 40 mm/s to 50 mm/s band.
-_BILD_1_MIDPOINTS = {("residential", 30.0): 10.0, ("commercial", 75.0): 45.0}
+_BILD_1_MIDPOINTS: dict[tuple[BuildingClass, float], float] = {
+    ("residential", 30.0): 10.0,
+    ("commercial", 75.0): 45.0,
+}
 
 #: The tables print whole millimetres per second, or one decimal for the
 #: 2,5 of Table 3.
 _TOLERANCE = 0.005
 
-_CLASS_LABELS = {
+_CLASS_LABELS: dict[BuildingClass, str] = {
     "commercial": "commercial and industrial buildings",
     "residential": "dwellings",
     "sensitive": "especially sensitive buildings",
 }
 
 
-def _chk_foundation(building_class: str, index: int) -> Outcome:
+def _chk_foundation(building_class: BuildingClass, index: int) -> Outcome:
     """One printed corner of the foundation columns of Table 1."""
     frequency = _TABLE_1_FREQUENCIES[index]
     printed = _TABLE_1_FOUNDATION[building_class][index]
@@ -89,7 +105,7 @@ def _register_foundation() -> None:
 _register_foundation()
 
 
-def _chk_top_floor(building_class: str) -> Outcome:
+def _chk_top_floor(building_class: BuildingClass) -> Outcome:
     """The topmost floor plane column of Table 1, which has no frequency."""
     printed = _TABLE_1_TOP_FLOOR[building_class]
     computed = float(
@@ -111,7 +127,7 @@ def _register_top_floor() -> None:
 _register_top_floor()
 
 
-def _chk_long_term(building_class: str) -> Outcome:
+def _chk_long_term(building_class: BuildingClass) -> Outcome:
     """One row of Table 3."""
     printed = _TABLE_3[building_class]
     computed = float(
@@ -135,14 +151,14 @@ def _register_long_term() -> None:
 _register_long_term()
 
 
-def _chk_pipeline(material: str) -> Outcome:
+def _chk_pipeline(material: PipelineMaterial) -> Outcome:
     """One row of Table 2."""
     printed = _TABLE_2[material]
     computed = ph.vibration.pipeline_guideline_velocity(material)
     return numeric(printed, computed, _TOLERANCE, unit="mm/s", places=3)
 
 
-_PIPE_LABELS = {
+_PIPE_LABELS: dict[PipelineMaterial, str] = {
     "welded_steel": "welded steel",
     "concrete_or_flanged_metal": "concrete and flanged metal",
     "masonry_or_plastic": "masonry and plastic",
@@ -202,7 +218,7 @@ def _chk_floor_vertical() -> Outcome:
     )
 
 
-def _chk_bild_1(building_class: str, frequency: float) -> Outcome:
+def _chk_bild_1(building_class: BuildingClass, frequency: float) -> Outcome:
     """A value inside a band, which only Bild 1 decides."""
     printed = _BILD_1_MIDPOINTS[(building_class, frequency)]
     computed = float(ph.vibration.guideline_velocity(building_class, frequency))

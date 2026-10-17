@@ -65,9 +65,9 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
 
     # Sort every path (direct + 12 flanking) by its share of the transmitted
     # energy, largest first.
-    contribs = sorted(result.paths, key=lambda c: c.fraction, reverse=True)
+    contribs = sorted(result.paths, key=lambda c: c.energy_fraction, reverse=True)
     labels = [c.label for c in contribs]
-    fracs = [c.fraction * 100.0 for c in contribs]
+    fracs = [c.energy_fraction * 100.0 for c in contribs]
     df_orange = "#ff7f0e"
     kind_color = {
         "Dd": COLOR_TERTIARY,
@@ -77,7 +77,9 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
     }
     colors = [kind_color[c.kind] for c in contribs]
 
-    direct_share = next(c.fraction for c in result.paths if c.kind == "Dd") * 100.0
+    direct_share = (
+        next(c.energy_fraction for c in result.paths if c.kind == "Dd") * 100.0
+    )
     flank_share = 100.0 - direct_share
 
     _fig, ax = plt.subplots(figsize=(11, 6.4))
@@ -1197,7 +1199,7 @@ def generate_detailed_prediction_paths(output_dir: str) -> None:
 
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     x = _band_index_axis(ax, bands)
-    order = list(np.argsort(-res.fractions.max(axis=1)))
+    order = list(np.argsort(-res.energy_fractions.max(axis=1)))
     palette = [
         COLOR_PRIMARY,
         COLOR_SECONDARY,
@@ -1208,7 +1210,7 @@ def generate_detailed_prediction_paths(output_dir: str) -> None:
     ]
     bottom = np.zeros(x.size)
     for colour, k in zip(palette, order[:6], strict=False):  # six colours, rest pooled
-        share = 100.0 * res.fractions[k]
+        share = 100.0 * res.energy_fractions[k]
         ax.bar(
             x,
             share,
@@ -1222,7 +1224,7 @@ def generate_detailed_prediction_paths(output_dir: str) -> None:
         bottom = bottom + share
     rest = order[6:]
     if rest:
-        share = 100.0 * res.fractions[rest].sum(axis=0)
+        share = 100.0 * res.energy_fractions[rest].sum(axis=0)
         # The pooled segment is de-emphasised *data*, so it takes the mid grey
         # that reads on both pages, not the gridline grey that hides in one.
         ax.bar(
@@ -1919,7 +1921,7 @@ def generate_detailed_impact_paths(output_dir: str) -> None:
     palette = [COLOR_TERTIARY, COLOR_PRIMARY, COLOR_SECONDARY, "#9467bd", "#ff9896"]
     bottom = np.zeros(x.size)
     for colour, k in enumerate_paths(res):
-        share = 100.0 * res.fractions[k]
+        share = 100.0 * res.energy_fractions[k]
         ax.bar(
             x,
             share,
@@ -1998,7 +2000,7 @@ def generate_detailed_impact_paths(output_dir: str) -> None:
 
 def enumerate_paths(result: object) -> list[tuple[int, int]]:
     """``(colour index, path index)`` with the largest contributor first."""
-    fractions = result.fractions  # type: ignore[attr-defined]
+    fractions = result.energy_fractions  # type: ignore[attr-defined]
     order = list(np.argsort(-fractions.max(axis=1)))
     return [(i, int(k)) for i, k in enumerate(order)]
 

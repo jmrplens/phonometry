@@ -69,6 +69,7 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import CALIBRATION_FIELDS, CalibrationField
 from .._internal.validation import require_choice, require_positive
 from .free_field_corrections import _band_column, _frequency_axis
 
@@ -77,6 +78,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
 
 __all__ = [
     "IEC61094_2_TABLE_1",
@@ -91,14 +93,12 @@ __all__ = [
 # Vocabulary
 # ---------------------------------------------------------------------------
 
-#: The two sound fields, one part each: a coupler (IEC 61094-2) and a free
-#: field (IEC 61094-3).
-_FIELDS = ("pressure", "free_field")
-
-#: The designation each field is calibrated by. IEC 61094-3 is read with its
-#: corrigendum, which makes Formula (9) the complex sensitivity.
+#: The designation each sound field is calibrated by, one part each: a
+#: pressure field in a coupler by IEC 61094-2 and a free field by IEC 61094-3.
+#: IEC 61094-3 is read with its corrigendum, which makes Formula (9) the
+#: complex sensitivity.
 _STANDARDS: Mapping[str, str] = MappingProxyType(
-    {"pressure": "IEC 61094-2:2009", "free_field": "IEC 61094-3:2016+COR1:2016"}
+    {"pressure": "IEC 61094-2:2009", "free": "IEC 61094-3:2016+COR1:2016"}
 )
 
 #: The two methods of 5.1 in both parts: three microphones, or two and an
@@ -200,7 +200,7 @@ class ReciprocityCalibration(OwnsArrays):
     :ivar products_v2_per_pa2: The product of the two sensitivities of each
         pair, one row per pair (12, 23, 31 in the three-microphone method,
         12 alone with an auxiliary source), in V²/Pa².
-    :ivar field: ``"pressure"`` (IEC 61094-2) or ``"free_field"`` (IEC 61094-3).
+    :ivar field: ``"pressure"`` (IEC 61094-2) or ``"free"`` (IEC 61094-3).
     :ivar method: ``"three_microphones"`` or ``"auxiliary_source"``.
     :ivar corrections: Corrections added to every microphone's sensitivity
         level, by name, in dB at each frequency: the wave-motion correction of
@@ -212,7 +212,7 @@ class ReciprocityCalibration(OwnsArrays):
     frequencies: NDArray[np.float64]
     sensitivity_v_per_pa: NDArray[np.complex128]
     products_v2_per_pa2: NDArray[np.complex128]
-    field: str
+    field: CalibrationField
     method: str
     corrections: Mapping[str, NDArray[np.float64]]
     expanded_uncertainty_db: NDArray[np.float64] | None = None
@@ -226,7 +226,7 @@ class ReciprocityCalibration(OwnsArrays):
             correction that is not one finite value per frequency, or a
             negative uncertainty.
         """
-        require_choice(self.field, "field", _FIELDS)
+        require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_choice(self.method, "method", _METHODS)
         frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
@@ -330,7 +330,7 @@ def _calibration(
     sensitivities: NDArray[np.complex128],
     products: NDArray[np.complex128],
     *,
-    field: str,
+    field: CalibrationField,
     method: str,
     corrections: Mapping[str, ArrayLike] | None,
     expanded_uncertainty_db: ArrayLike | None,
@@ -356,7 +356,7 @@ def _solved(
     products: Sequence[NDArray[np.complex128]],
     sensitivity_ratio: ArrayLike | None,
     *,
-    field: str,
+    field: CalibrationField,
     corrections: Mapping[str, ArrayLike] | None,
     expanded_uncertainty_db: ArrayLike | None,
 ) -> ReciprocityCalibration:
@@ -577,7 +577,7 @@ IEC61094_3_TABLE_1: Mapping[str, ReciprocityUncertaintyRow] = MappingProxyType(
 
 #: The table each field's budget draws its components from.
 _BUDGET_TABLES: Mapping[str, Mapping[str, ReciprocityUncertaintyRow]] = (
-    MappingProxyType({"pressure": IEC61094_2_TABLE_1, "free_field": IEC61094_3_TABLE_1})
+    MappingProxyType({"pressure": IEC61094_2_TABLE_1, "free": IEC61094_3_TABLE_1})
 )
 
 
@@ -592,7 +592,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
     coverage factor.
 
     :ivar frequencies: The frequencies, in Hz.
-    :ivar field: ``"pressure"`` (IEC 61094-2) or ``"free_field"`` (IEC 61094-3).
+    :ivar field: ``"pressure"`` (IEC 61094-2) or ``"free"`` (IEC 61094-3).
     :ivar names: The key of each component, those of the field's Table 1 in its
         order, then any additional ones.
     :ivar components: The component as the table prints it, or the name of an
@@ -603,7 +603,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    field: str
+    field: CalibrationField
     names: tuple[str, ...]
     components: tuple[str, ...]
     standard_uncertainties_db: NDArray[np.float64]
@@ -618,7 +618,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
             and one column per frequency, an uncertainty that is negative or
             not finite, or a coverage factor that is not positive.
         """
-        require_choice(self.field, "field", _FIELDS)
+        require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_positive(self.coverage_factor, "coverage_factor")
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
@@ -698,7 +698,7 @@ def reciprocity_uncertainty_budget(
     frequencies: ArrayLike,
     standard_uncertainties_db: Mapping[str, ArrayLike],
     *,
-    field: str = "pressure",
+    field: CalibrationField = "pressure",
     additional_components_db: Mapping[str, ArrayLike] | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReciprocityUncertaintyBudget:
@@ -726,7 +726,7 @@ def reciprocity_uncertainty_budget(
     :param frequencies: The frequencies, in Hz, increasing.
     :param standard_uncertainties_db: The components, keyed by name, each a
         standard uncertainty in dB, one value or one per frequency.
-    :param field: ``"pressure"`` (default) or ``"free_field"``.
+    :param field: ``"pressure"`` (default) or ``"free"``.
     :param additional_components_db: Further components, by name, in the same
         form (Default: none).
     :param coverage_factor: :math:`k` (Default: 2).
@@ -735,7 +735,7 @@ def reciprocity_uncertainty_budget(
         additional component with the name of another, no component at all,
         or a value that is negative or not finite.
     """
-    field = require_choice(field, "field", _FIELDS)
+    field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
     table = _BUDGET_TABLES[field]
     unknown = [key for key in standard_uncertainties_db if key not in table]

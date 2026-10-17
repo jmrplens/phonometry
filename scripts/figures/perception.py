@@ -2558,14 +2558,14 @@ def generate_hearing_threshold(output_dir: str) -> None:
     # --- Right: ISO 389-7 reference threshold, free vs diffuse field. ---
     ax_ref.plot(
         freqs,
-        hearing.reference_threshold("free-field"),
+        hearing.reference_threshold("free"),
         "o-",
         color=COLOR_PRIMARY,
         label="Free-field (frontal)",
     )
     ax_ref.plot(
         freqs,
-        hearing.reference_threshold("diffuse-field"),
+        hearing.reference_threshold("diffuse"),
         "s--",
         color=COLOR_SECONDARY,
         label="Diffuse-field",
@@ -4463,7 +4463,7 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
     # with the earphone table: the same audiogram, two different zeros.
     shared = [f for f in hearing.AUDIOMETRIC_FREQUENCIES_HZ if f in set(freqs)]
     coupler = hearing.earphone_reference_level("TDH 39", shared)
-    field = hearing.reference_threshold("free-field", shared)
+    field = hearing.reference_threshold("free", shared)
     ax_gap.plot(shared, coupler, "s-", color=COLOR_SECONDARY, label="TDH 39, coupler")
     ax_gap.plot(shared, field, "o-", color=COLOR_PRIMARY, label="ISO 389-7, free field")
     ax_gap.fill_between(

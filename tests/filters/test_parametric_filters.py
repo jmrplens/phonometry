@@ -125,7 +125,7 @@ def test_a_weighting_response() -> None:
     for f, expected in zip(test_freqs, expected_gain, strict=True):
         # Generate tone
         x = np.sin(2 * np.pi * f * t)
-        y = filters.weighting_filter(x, fs, curve="A")
+        y = filters.weighting_filter(x, fs, weighting="A")
 
         # Calculate gain in dB (RMS)
         gain_db = 20 * np.log10(np.std(y) / np.std(x))
@@ -157,7 +157,7 @@ def test_c_weighting_response() -> None:
 
     for f, expected in zip(test_freqs, expected_gain, strict=True):
         x = np.sin(2 * np.pi * f * t)
-        y = filters.weighting_filter(x, fs, curve="C")
+        y = filters.weighting_filter(x, fs, weighting="C")
 
         gain_db = 20 * np.log10(np.std(y) / np.std(x))
         assert abs(gain_db - expected) < 1.0, (
@@ -171,7 +171,7 @@ def test_weighting_filter_c_output_shape() -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(fs)
 
-    y = filters.weighting_filter(x, fs, curve="C")
+    y = filters.weighting_filter(x, fs, weighting="C")
 
     assert y.shape == x.shape
 
@@ -182,30 +182,30 @@ def test_weighting_filter_class_direct_use() -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal((2, fs))
 
-    wf = filters.WeightingFilter(fs, curve="A")
+    wf = filters.WeightingFilter(fs, weighting="A")
     y = wf.filter(x)
     assert y.shape == x.shape
 
-    wf_z = filters.WeightingFilter(fs, curve="Z")
+    wf_z = filters.WeightingFilter(fs, weighting="Z")
     y_z = wf_z.filter(x)
     np.testing.assert_allclose(y_z, x)
 
     with pytest.raises(ValueError, match="Sample rate 'fs' must be positive"):
         filters.WeightingFilter(0)
-    with pytest.raises(ValueError, match="Weighting curve must be"):
-        filters.WeightingFilter(fs, curve="invalid")
+    with pytest.raises(ValueError, match="'weighting' must be"):
+        filters.WeightingFilter(fs, weighting="invalid")
 
 
 def test_weighting_filter_class_rejects_non_string_curve() -> None:
     """A non-string curve used to die in str.upper before the curve message."""
-    with pytest.raises(TypeError, match="'curve' must be a string"):
-        filters.WeightingFilter(48000, curve=5)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'weighting' must be a string"):
+        filters.WeightingFilter(48000, weighting=5)  # type: ignore[arg-type]
 
 
 def test_weighting_filter_rejects_non_string_curve() -> None:
     x = np.zeros(100)
-    with pytest.raises(TypeError, match="'curve' must be a string"):
-        filters.weighting_filter(x, 48000, curve=5)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'weighting' must be a string"):
+        filters.weighting_filter(x, 48000, weighting=5)  # type: ignore[arg-type]
 
 
 def test_time_weighting_rejects_non_string_mode() -> None:
@@ -428,7 +428,7 @@ def test_weighting_z_bypass() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    y = filters.weighting_filter(x, 48000, curve="Z")
+    y = filters.weighting_filter(x, 48000, weighting="Z")
     assert np.all(x == y)
 
 

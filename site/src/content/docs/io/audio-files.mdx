@@ -153,7 +153,7 @@ calibrated `Signal` they have to be given in pascals.
 
 The `dbfs` routes are the deliberate exception: full scale is their
 reference, so they ignore the factor. For the same reason, do not chain a
-filter into a dBFS reading: `leq(weighting_filter(sig, curve="A"), dbfs=True)`
+filter into a dBFS reading: `leq(weighting_filter(sig, weighting="A"), dbfs=True)`
 measures pascals on a scale that claims to be full-scale referenced, and comes
 out `20 log10(factor)` off. That is what `laeq(sig, dbfs=True)` is for, which
 weights the raw samples before reading them.
@@ -389,7 +389,7 @@ for block in io.read_blocks("measurement.wav", block_size=1 << 16,
     total_samples += weighted.shape[-1]
 
 streamed = 10 * np.log10((total_energy / total_samples) / (2e-5) ** 2)
-whole = float(signals.leq(filters.weighting_filter(sig, curve="A")))
+whole = float(signals.leq(filters.weighting_filter(sig, weighting="A")))
 print(f"streamed {streamed:.4f} dB, whole file {whole:.4f} dB")
 # streamed 67.2940 dB, whole file 67.2940 dB
 ```

@@ -184,7 +184,7 @@ for name, rw, k_ff, k_fd, lf in elements:
 
 res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
 print(round(res.r_prime_w, 1))                          # 52.2  ->  R'w = 52 dB
-print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (domina el directo)
+print(res.dominant.label, round(res.dominant.energy_fraction, 2))   # Dd 0.33 (domina el directo)
 
 res.plot()   # fracción de energía transmitida por trayectoria, de mayor a menor (requiere matplotlib)
 ```
@@ -215,7 +215,7 @@ res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths
 # trayectoria para el resultado del Anexo H.3 calculado arriba.
 labels = [p.label for p in res.paths]
 r_w = [p.r_w for p in res.paths]
-frac = [100.0 * p.fraction for p in res.paths]
+frac = [100.0 * p.energy_fraction for p in res.paths]
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
 ax1.bar(labels, r_w, color="tab:blue")

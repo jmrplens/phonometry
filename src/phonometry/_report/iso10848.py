@@ -288,16 +288,16 @@ _KIJ_STATEMENT = (
 )
 
 
-def _kij_band_type(frequencies: np.ndarray) -> str:
-    """``"octave"`` when consecutive centres step by ~2, else third-octave."""
+def _kij_fraction(frequencies: np.ndarray) -> int:
+    """1 (octaves) when consecutive centres step by ~2, else 3 (one-third octaves)."""
     if frequencies.size < _MIN_BANDS_TO_INFER_FRACTION:
-        return "third-octave"
+        return 3
     ratio = float(np.median(frequencies[1:] / frequencies[:-1]))
-    return "octave" if ratio > _OCTAVE_STEP_THRESHOLD else "third-octave"
+    return 1 if ratio > _OCTAVE_STEP_THRESHOLD else 3
 
 
 def _kij_mean_membership(
-    frequencies: np.ndarray, bracketed: np.ndarray | None
+    frequencies: np.ndarray, bracketed: np.ndarray | None, fraction: int | None
 ) -> tuple[np.ndarray, float, float]:
     """Per-band single-number membership plus the Annex A band range.
 
@@ -305,8 +305,11 @@ def _kij_mean_membership(
     (200 Hz to 1250 Hz for one-third-octave bands, 125 Hz to 1000 Hz for
     octave bands) and is not bracketed for poor modal overlap. Returns the
     boolean membership per band together with the applicable ``(low, high)``.
+    The band set is the result's own ``fraction`` when it states one, and is
+    read from the spacing of the centres otherwise, as
+    :attr:`~phonometry.building.VibrationReductionResult.single_number` reads it.
     """
-    if _kij_band_type(frequencies) == "octave":
+    if (_kij_fraction(frequencies) if fraction is None else fraction) == 1:
         low, high = 125.0, 1000.0
     else:
         low, high = 200.0, 1250.0
@@ -470,7 +473,7 @@ def render_vibration_reduction_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    in_mean, low, high = _kij_mean_membership(frequencies, bracketed)
+    in_mean, low, high = _kij_mean_membership(frequencies, bracketed, result.fraction)
     caption = t("Vibration reduction index per band", language)
     left_cell = [
         fiche_paragraph(caption, caption_style),

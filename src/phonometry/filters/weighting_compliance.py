@@ -590,7 +590,7 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
     sections and nothing else, so that a verdict describes the filter the
     caller runs.
     """
-    if wf.curve == "Z" or wf.sos.size == 0:
+    if wf.weighting == "Z" or wf.sos.size == 0:
         return np.zeros_like(frequencies)
     worn = np.concatenate([frequencies, [1000.0]])
     h = _runtime_frequency_response(wf, worn)
@@ -646,7 +646,7 @@ def _between_nominals_sweep(
     """
     grid = np.geomspace(freqs_exact[0], freqs_exact[-1], n_sweep_points)
     sweep_dev = _weighting_response_db(wf, grid) - _analytic_weighting_db(
-        wf.curve, grid
+        wf.weighting, grid
     )
     seg = np.clip(
         np.searchsorted(freqs_exact, grid, side="right") - 1, 0, freqs_exact.size - 2
@@ -701,7 +701,7 @@ class WeightingComplianceResult(OwnsArrays):
     :ivar between_nominals: The subclause 5.5.7 sweep, ``{"worst_freq",
         "margin_class<c>_db"}``, read-only, or ``None`` when no tabulated
         frequency was in range and there was nothing to sweep between.
-    :ivar curve: The weighting the verdict is about (``"A"``, ``"B"``,
+    :ivar weighting: The weighting the verdict is about (``"A"``, ``"B"``,
         ``"C"``, ``"AU"`` or ``"Z"``).
     :ivar edition: ``"2013"`` (IEC 61672-1:2013, classes 1/2) or ``"1979"``
         (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3).
@@ -712,7 +712,7 @@ class WeightingComplianceResult(OwnsArrays):
 
     band_margins: tuple[Mapping[str, Any], ...]
     between_nominals: Mapping[str, float] | None
-    curve: str
+    weighting: str
     edition: str
     fs: float
     n_sweep_points: int
@@ -726,7 +726,7 @@ class WeightingComplianceResult(OwnsArrays):
         The class is therefore read from the two readings together
         (:attr:`overall_class`), and no row may state a class of its own.
 
-        The edition is pinned first, and the curve and the margin keys of
+        The edition is pinned first, and the weighting and the margin keys of
         every row against it: a verdict carried over from the other edition's
         table would be read against classes its rows carry no margins for,
         and die in a bare :class:`KeyError` naming neither the row nor the
@@ -741,7 +741,7 @@ class WeightingComplianceResult(OwnsArrays):
         and it always pairs it with no rows, no sweep and no class.
 
         :raises ValueError: if the edition is unknown or does not define the
-            curve, a row carries margins for other classes or states a class,
+            weighting, a row carries margins for other classes or states a class,
             or the sweep and the rows disagree on being empty or on their
             classes.
         """
@@ -749,7 +749,7 @@ class WeightingComplianceResult(OwnsArrays):
         object.__setattr__(self, "between_nominals", frozen_row(self.between_nominals))
         require_choice(self.edition, "edition", tuple(_WEIGHTING_EDITIONS))
         spec = _WEIGHTING_EDITIONS[self.edition]
-        require_choice(self.curve, "curve", tuple(spec["curves"]))
+        require_choice(self.weighting, "weighting", tuple(spec["curves"]))
         classes = spec["classes"]
         who = type(self).__name__
         rows = self.band_margins
@@ -844,7 +844,7 @@ class WeightingComplianceResult(OwnsArrays):
         the checked frequencies, not the standard's full range.
         """
         spec = _edition_spec(self.edition)
-        nominal, _, _ = _curve_design_and_limits(self.curve, spec)
+        nominal, _, _ = _curve_design_and_limits(self.weighting, spec)
         return bool(np.any(_exact_base10(nominal) >= self.fs / 2.0))
 
 
@@ -947,13 +947,13 @@ def verify_weighting_class(
         together with the per-frequency verdicts it rests on, the
         between-nominals sweep and the filter it was measured on.
     :raises ValueError: if the edition is unknown, the edition does not define
-        the filter's curve, or ``n_sweep_points`` is below 64.
+        the filter's weighting, or ``n_sweep_points`` is below 64.
     """
     spec = _edition_spec(edition)
-    if wf.curve not in spec["curves"]:
+    if wf.weighting not in spec["curves"]:
         msg = (
-            f"Weighting curve must be {_quoted_list(spec['curves'])} "
-            f"for edition '{edition}'."
+            f"'weighting' must be {_quoted_list(spec['curves'])} "
+            f"for edition '{edition}'; the filter's is {wf.weighting!r}."
         )
         raise ValueError(msg)
     require_scalar(n_sweep_points, "n_sweep_points")
@@ -962,7 +962,7 @@ def verify_weighting_class(
         raise ValueError(msg)
 
     nyquist = wf.fs / 2.0
-    nominal, design_all, masks_all = _curve_design_and_limits(wf.curve, spec)
+    nominal, design_all, masks_all = _curve_design_and_limits(wf.weighting, spec)
     exact = _exact_base10(nominal)
     # A row at or beyond Nyquist cannot be demonstrated (its acceptance
     # limits and the adjacent between-nominal interval go unchecked), so the
@@ -991,7 +991,7 @@ def verify_weighting_class(
     return WeightingComplianceResult(
         band_margins=tuple(bands),
         between_nominals=between,
-        curve=str(wf.curve),
+        weighting=str(wf.weighting),
         edition=edition,
         fs=float(wf.fs),
         n_sweep_points=int(n_sweep_points),

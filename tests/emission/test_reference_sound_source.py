@@ -115,7 +115,7 @@ def test_table_2_octave_cells() -> None:
         [63, 125, 250, 2000, 4000, 8000, 16000],
         environment="hemi-anechoic",
         arrangement="fixed",
-        bandwidth="octave",
+        fraction=1,
     )
     np.testing.assert_array_equal(got, [2.0, 0.8, 0.5, 0.5, 1.0, 1.0, 1.0])
 
@@ -297,7 +297,7 @@ def _energy_sum_of_the_unequal_thirds() -> float:
 def test_octave_bands_are_the_energy_sum_of_their_thirds() -> None:
     cal = _calibration()
     one_third = cal.sound_power_level[_THIRDS == 1000.0][0]
-    got = cal.sound_power_level_at([1000.0], bandwidth="octave")[0]
+    got = cal.sound_power_level_at([1000.0], fraction=1)[0]
     assert got == pytest.approx(one_third + 10.0 * math.log10(3.0), abs=1e-12)
     with pytest.raises(ValueError, match="does not cover"):
         cal.sound_power_level_at([12500.0])
@@ -311,7 +311,7 @@ def test_an_octave_of_unequal_thirds_is_their_energy_sum() -> None:
     to_power = (
         _AREA_TERM + 5.0 * math.log10(296.15 / 314.0) + 7.5 * math.log10(296.15 / 296.0)
     )
-    got = cal.sound_power_level_at([125.0, 250.0], bandwidth="octave")
+    got = cal.sound_power_level_at([125.0, 250.0], fraction=1)
     expected = np.array(
         [_energy_sum_of_the_unequal_thirds(), 80.0 + 10.0 * math.log10(3.0)]
     )
@@ -325,13 +325,13 @@ def test_an_octave_is_read_only_at_an_octave_mid_band() -> None:
     """160 Hz is a one-third octave; its "octave" would sum 125 to 200 Hz."""
     cal = _calibration()
     with pytest.raises(ValueError, match="160 Hz is not an octave mid-band"):
-        cal.sound_power_level_at([160.0], bandwidth="octave")
+        cal.sound_power_level_at([160.0], fraction=1)
     with pytest.raises(ValueError, match="160 Hz is not an octave mid-band"):
         emission.reference_source_reproducibility(
             [160.0],
             environment="hemi-anechoic",
             arrangement="fixed",
-            bandwidth="octave",
+            fraction=1,
         )
 
 
@@ -809,7 +809,7 @@ def test_iso_3747_reads_the_octave_bands() -> None:
     from_levels = emission.sound_power_in_situ(
         st,
         rss,
-        cal.sound_power_level_at(freqs, bandwidth="octave"),
+        cal.sound_power_level_at(freqs, fraction=1),
         freqs,
         background_levels=background,
         temperature_c=20.0,
@@ -832,7 +832,7 @@ def test_iso_3747_energy_reads_the_octave_bands() -> None:
     from_levels = emission.sound_energy_in_situ(
         events,
         rss,
-        cal.sound_power_level_at(freqs, bandwidth="octave"),
+        cal.sound_power_level_at(freqs, fraction=1),
         freqs,
         background_levels=background,
     )
@@ -876,7 +876,7 @@ def test_iso_3743_1_reads_the_octave_bands_at_the_test_conditions() -> None:
         got.sound_power_level_ref, octave + 4.0 + c2_3743, rtol=0, atol=1e-12
     )
     at_test = cal.sound_power_level_at(
-        freqs, bandwidth="octave", temperature_c=20.0, static_pressure_kpa=90.0
+        freqs, fraction=1, temperature_c=20.0, static_pressure_kpa=90.0
     )
     from_levels = emission.sound_power_hard_walled(
         st, rss, at_test, freqs, background_levels=background, temperature_c=20.0,
@@ -898,7 +898,7 @@ def test_iso_3743_1_energy_reads_the_calibration() -> None:
         integration_time=10.0, temperature_c=20.0, static_pressure_kpa=90.0,
     )  # fmt: skip
     at_test = cal.sound_power_level_at(
-        freqs, bandwidth="octave", temperature_c=20.0, static_pressure_kpa=90.0
+        freqs, fraction=1, temperature_c=20.0, static_pressure_kpa=90.0
     )
     from_levels = emission.sound_energy_hard_walled(
         events, rss, at_test, freqs, n_events=5, background_levels=background,
@@ -1000,7 +1000,7 @@ def test_iso_3743_2_suitability_fails_against_the_calibration_left_at_23_degc() 
     cal = _calibration()
     at_test = cal.sound_power_level_at(
         _SUITABILITY_FREQS,
-        bandwidth="octave",
+        fraction=1,
         temperature_c=20.0,
         static_pressure_kpa=90.0,
     )
@@ -1022,7 +1022,7 @@ def test_iso_3743_2_suitability_from_the_levels_read_at_the_test() -> None:
     cal = _calibration()
     at_test = cal.sound_power_level_at(
         _SUITABILITY_FREQS,
-        bandwidth="octave",
+        fraction=1,
         temperature_c=20.0,
         static_pressure_kpa=90.0,
     )

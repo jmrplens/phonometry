@@ -60,8 +60,8 @@ def test_weighting_filter_invalid() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="Weighting curve must be 'A'"):
-        filters.weighting_filter(x, 48000, curve="E")
+    with pytest.raises(ValueError, match="'weighting' must be 'A'"):
+        filters.weighting_filter(x, 48000, weighting="E")
 
 
 def test_time_weighting_invalid() -> None:

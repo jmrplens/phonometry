@@ -559,7 +559,7 @@ class MooreGlasbergLoudness(OwnsArrays):
     specific: np.ndarray
     erb_number: np.ndarray
     frequencies: np.ndarray
-    field: str
+    field: Literal["free", "diffuse", "eardrum"]
     presentation: str
 
     def __post_init__(self) -> None:
@@ -817,7 +817,10 @@ def _loudness_level(loudness: float) -> float:
 
 
 def _result_from_components(
-    freqs: np.ndarray, levels: np.ndarray, field: str, presentation: str
+    freqs: np.ndarray,
+    levels: np.ndarray,
+    field: Literal["free", "diffuse", "eardrum"],
+    presentation: str,
 ) -> MooreGlasbergLoudness:
     """Run the full signal chain for one spectrum and both ears."""
     if freqs.size == 0:

@@ -292,7 +292,7 @@ def test_the_weighting_object_agrees_with_its_function() -> None:
     x = _tone()
     sig = Signal(x, FS, calibration_factor=MIC)
     assert np.array_equal(
-        WeightingFilter(FS, "A").filter(sig), weighting_filter(sig, curve="A")
+        WeightingFilter(FS, "A").filter(sig), weighting_filter(sig, weighting="A")
     )
 
 

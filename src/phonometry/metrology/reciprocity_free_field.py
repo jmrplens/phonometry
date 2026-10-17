@@ -560,7 +560,7 @@ def free_field_reciprocity(
         frequencies,
         products,
         None,
-        field="free_field",
+        field="free",
         corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
@@ -641,7 +641,7 @@ def free_field_reciprocity_pair(
         frequencies,
         [product],
         sensitivity_ratio,
-        field="free_field",
+        field="free",
         corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
@@ -1022,7 +1022,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
 
     Built by :func:`free_field_parameter_uncertainty`; ready to pass to
     :func:`~phonometry.metrology.reciprocity_uncertainty_budget` with
-    ``field="free_field"``.
+    ``field="free"``.
 
     :ivar frequencies: The frequencies, in Hz.
     :ivar components_db: The component of each parameter, keyed by its name in
@@ -1075,7 +1075,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
         from .._plot.reciprocity import plot_parameter_uncertainty
 
         return plot_parameter_uncertainty(
-            self, ax=ax, language=check_language(language), field="free_field", **kwargs
+            self, ax=ax, language=check_language(language), field="free", **kwargs
         )
 
 

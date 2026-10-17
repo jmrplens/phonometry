@@ -606,6 +606,32 @@ estos aparecen en la tabla de los nombres que ya no están.
 | `signal_in=` en `loudness_ecma`, `tonality_ecma`, `roughness_ecma`, `fluctuation_strength_ecma` y `fluctuation_strength`; `signal=` en `loudness_moore_glasberg_time`, en las medidas de distorsión y de ruido de `electroacoustics` (`thd`, `thd_plus_noise`, `sinad`, `weighted_thd`, `harmonic_analysis`, `harmonic_distortion`, `dynamic_range`, `idle_channel_noise`, `modulation_distortion`, `difference_frequency_distortion`, `total_difference_frequency_distortion`, `dynamic_intermodulation_distortion`), en `impulsive_sound_adjustment` y `sound_pressure_level_history`, en las funciones de vibración humana (`running_rms`, `mtvv`, `vibration_dose_value`, `motion_sickness_dose_value`, `crest_factor`, `apply_weighting`, `apply_band_limiting`) y en `room.plot_excitation` | `x` |
 | `tone_freq=` en `tone_to_noise_ratio` y `prominence_ratio` | `tone_frequency=`, que, como `resolution_hz=`, pasa a ser keyword-only |
 
+Una elección se escribe igual allí donde se ofrece. Un conjunto de bandas es el
+entero `fraction` que ya recibían `OctaveFilterBank`, `decay_curve` y
+`sound_intensity`, `3` para tercios de octava y `1` para octavas; las palabras
+`"third"`, `"third-octave"`, `"one-third-octave"` y `"octave"` se rechazan, y
+una tabla que se lee por conjunto de bandas se indexa por el mismo entero. Un
+campo libre, uno difuso y uno de presión se escriben `"free"`, `"diffuse"` y
+`"pressure"`. Una ponderación frecuencial se elige con `weighting`, y la señal
+sin ponderar se escribe `"Z"` allí donde se ofrece: en las ponderaciones del
+nivel sonoro es la ponderación Z de IEC 61672-1, y en los demás casos es la
+respuesta que la norma deja sin ponderar, como la sola limitación de banda del
+medidor de vibraciones de DIN 45669-1.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `band=` en `field_incidence_correction`, `mass_law_transmission_loss`, `single_panel_transmission_loss`, `double_wall_transmission_loss`, `orthotropic_transmission_loss`, `short_pulse_mean_square_force`, `tapping_force_spectrum`, `covering_improvement`, `a_weighted_maximum_impact_level` y `cylindrical_shell_modal_density`, y `.band` en `TappingForceResult` y `AWeightedMaximumImpactResult` | `fraction=` y `.fraction`, `3` o `1` |
+| `bands=` en `weighted_rating`, `weighted_impact_rating`, `SoundReductionResult.rating`, `facade_sound_reduction`, `normalized_flanking_level_difference`, `normalized_flanking_impact_level`, `calculated_sound_reduction_index`, `reciprocity_impact_level`, `in_situ_element`, `detailed_airborne_prediction` y `detailed_impact_prediction` | `fraction=`; `None` sigue leyendo el conjunto de bandas de los valores donde lo hacía |
+| `band_type=` en `sound_power_intensity`, `sound_power_intensity_points`, `position_count_factor` y `determination_standard_deviation` | `fraction=` |
+| `bandwidth=` en `tapping_machine_force_level_estimate` | `fraction=` |
+| `building.HEAVY_IMPACT_A_WEIGHTING["third"]` y `["octave"]` | `[3]` y `[1]` |
+| `"free-field"` y `"diffuse-field"` en `hearing.reference_threshold`, y en `hearing.FIELDS` | `"free"` y `"diffuse"` |
+| `curve=` en `filters.weighting_filter` y `WeightingFilter`, `WeightingFilter.curve` y `WeightingComplianceResult.curve` | `weighting=` y `.weighting` |
+| `weighted=` en `broadcast.quasi_peak_meter`, y `QuasiPeakResult.weighted` | `weighting="468"` (por defecto) o `weighting="Z"`, y `.weighting` |
+| `weighting=None` en `signals.ln_levels` y `sel` | `weighting="Z"`, ahora por defecto |
+| `building.PathContribution.fraction`, la parte de la energía transmitida que lleva un camino | `.energy_fraction`, para que `fraction` nombre solo un conjunto de bandas |
+| `building.DetailedAirborneResult.fractions` y `DetailedImpactResult.fractions`, la parte de la energía que lleva cada camino en cada banda | `.energy_fractions` |
+
 ## Cada nombre público tiene una sola dirección
 
 Unos pocos nombres se podían importar desde un segundo módulo en la 3.3.0 o en
@@ -751,7 +777,8 @@ ruta pública que llegue a ellos: `PrecisionSurface`, `PrecisionArray` y
 `emission.sound_power_intensity`, y `DeterminationGrade` y `BandType` de
 `emission.sound_power_intensity_points`. Anota con el `Literal` que
 representaba cada uno: `Literal["sphere", "hemisphere"]` para
-`PrecisionSurface`, y así con los demás.
+`PrecisionSurface`, y así con los demás. `BandType` nombraba un conjunto de
+bandas, que ahora es el entero `fraction`: `Literal[1, 3]`.
 
 ```python
 from phonometry import room, signals
@@ -1305,7 +1332,7 @@ marca un campo que solo se pasa por nombre.
 | `emission.SpecialRoomSoundPowerResult` | `background_requirement_met`, `background_requirement_met_a` | gana `background_margin_db`, `background_margin_ref_db`, `background_margin_a_db` | después de 4.0.0rc1 |
 | `emission.EmissionPressureResult` | `upper_bound` | gana `background_margin_db`, solo por nombre | 4.0.0rc1 |
 | `emission.PrecisionCriteria` | de `criterion_1` a `criterion_5`, `qualified` | gana las lecturas: `indicators`, `scan_intensity_level_1`, `scan_intensity_level_2`, `frequencies`, `repeatability_limit_db`, `pressure_residual_index`, `field_nonuniformity_1`, `field_nonuniformity_2` | 3.3.0 |
-| `emission.DiscretePointIntensityResult` | todo salvo los indicadores y el grado: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, los dos criterios, las cifras con ponderación A y el resto | gana `normal_intensity`, `segment_areas_m2`, `pressure_residual_index`, `band_type` | 4.0.0rc1 |
+| `emission.DiscretePointIntensityResult` | todo salvo los indicadores y el grado: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, los dos criterios, las cifras con ponderación A y el resto | gana `normal_intensity`, `segment_areas_m2`, `pressure_residual_index`, `fraction` | 4.0.0rc1 |
 | `emission.TurbineTestEnvironmentCheck` | `correction_ok`, `wind_ok`, `windscreen_advised` | `environmental_correction`, `ratio`, `wind_speed_m_s` | después de 4.0.0rc1 |
 | `environment.ImpulseOnset` | `level_difference`, `prominence`, `qualifies` | `level_start`, `level_end`, `onset_rate` | 3.3.0 |
 | `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_minutes` | 3.3.0 |
@@ -1338,10 +1365,10 @@ marca un campo que solo se pasa por nombre.
 | `aircraft.AircraftSystemComplianceResult` | `passes`, `checks` | gana `directional`, `frequency_response`, `linearity`, `resolution`, los argumentos de `verify_aircraft_noise_system` | 4.0.0rc1 |
 | `broadcast.QuasiPeakDynamicsResult` | `passes`, `worst_margin_db`, `worst_deviation_db`, `stimuli` | gana `readings_percent`, las once lecturas en el orden de las tablas 2 y 3 | 4.0.0rc1 |
 | `building.FloorCoveringImprovementResult` | `limited` | gana `background_margin_db`, el menor margen de todas las posiciones y de los dos forjados | 3.1.0 |
-| `building.VibrationReductionResult` | `single_number`, `bracketed` | `frequencies`, `k_ij`; gana `modal_overlap`, `band_type` | 3.1.0 |
+| `building.VibrationReductionResult` | `single_number`, `bracketed` | `frequencies`, `k_ij`; gana `modal_overlap`, `fraction` | 3.1.0 |
 | `building.ServiceEquipmentBackgroundResult` | `difference`, `correction`, `corrected_db`, `regime` | `measured_db`, `background_db` | después de 4.0.0rc1 |
-| `building.ServiceEquipmentResult` | `standardizable` | `frequencies`, `band` | después de 4.0.0rc1 |
-| `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` y los indicadores; gana `pressure_residual_index`, `band_type`, `repeatability_limit_db` | 3.1.0 |
+| `building.ServiceEquipmentResult` | `standardizable` | `frequencies`, `fraction` | después de 4.0.0rc1 |
+| `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` y los indicadores; gana `pressure_residual_index`, `fraction`, `repeatability_limit_db` | 3.1.0 |
 | `emission.PrecisionIntensityResult` | `sound_power`, `sound_power_level`, `sound_power_level_normalized`, `not_applicable_band`, `sound_power_level_a` | `partial_power`; gana `temperature_c`, `static_pressure_pa`, solo por nombre | 3.1.0 |
 | `emission.InDuctSoundPowerResult` | `information_only_band` | `frequencies`, `flow_velocity` | 4.0.0rc1 |
 | `emission.SourceLocationPlan` | `spectral_character`, `a_weighted_spectral_character` | `standard`, `standard_deviation_db`, `a_weighted_standard_deviation_db` | después de 4.0.0rc1 |
@@ -1438,7 +1465,7 @@ Ecuación (9) devuelve cero y las dos ramas se encuentran sin escalón.
 Las funciones reciben los mismos argumentos y devuelven los mismos números.
 Tiene que cambiar el código que construye uno de estos resultados directamente
 o que sustituye uno de los campos de los que se lee su régimen, y también el que
-lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
+lee `fraction` de `vibration_reduction_index` (véase debajo de la tabla).
 
 | Resultado | Ya no es campo del constructor | Se lee de | Desde |
 | --- | --- | --- | --- |
@@ -1450,16 +1477,17 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 | `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels` | después de 4.0.0rc1 |
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | después de 4.0.0rc1 |
 | `noise_control.CabinInsulationResult` | `apparent` (ISO 11957, 3.6) | `method` | después de 4.0.0rc1 |
+| `noise_control.WeightedCabinInsulation` | `apparent` (ISO 11957, 3.9) | `method`, que `weighted_cabin_insulation` recibe ahora como lo recibe `cabin_insulation` | después de 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11, 9.5.2 a 9.5.4) | `levels`, `frequencies`; gana `candidate_frequency_hz`, solo por nombre | 3.3.0 |
 | `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_prime`, `r_s_max`; gana `limit_at_max`, solo por nombre | después de 4.0.0rc1 |
 | `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels`, `background_levels` | después de 4.0.0rc1 |
 | `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
 | `signals.SynchronousAverageResult` | `interpolated`, f_s T no es un número entero de muestras | `fs`, `period_s` | 4.0.0rc1 |
 
-`building.VibrationReductionResult.band_type` sigue siendo un campo, como el
-conjunto de bandas que declara quien llama: `octave_bands()` declara
-`"octave"`, porque una sola banda de octava no se distingue de una de tercio
-de octava por su espaciado. `vibration_reduction_index` ya no lo rellena con
+`building.VibrationReductionResult.fraction` es un campo, el conjunto de
+bandas que declara quien llama: `octave_bands()` declara `fraction=1`, porque
+una sola banda de octava no se distingue de una de tercio de octava por su
+espaciado. `vibration_reduction_index` ya no lo rellena con
 el conjunto de bandas que leía de las frecuencias; lo deja en `None`, y el
 resultado lee el espaciado cada vez que calcula la media del anexo A, que da la
 misma media que antes.

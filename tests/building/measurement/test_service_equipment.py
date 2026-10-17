@@ -63,21 +63,21 @@ def test_a_weighting_is_table_a1_as_printed() -> None:
     """Every A-weighting cell of Table A.1, both band widths, is the print."""
     table = building.SERVICE_EQUIPMENT_WEIGHTING
     for f, a, _ in ref.ISO16032_TABLE_A1_THIRD:
-        assert table["third"]["A"][f] == pytest.approx(a, abs=1e-12)
+        assert table[3]["A"][f] == pytest.approx(a, abs=1e-12)
     for f, a, _ in ref.ISO16032_TABLE_A1_OCTAVE:
-        assert table["octave"]["A"][f] == pytest.approx(a, abs=1e-12)
+        assert table[1]["A"][f] == pytest.approx(a, abs=1e-12)
 
 
 def test_octave_c_weighting_is_table_a1_as_printed() -> None:
     for f, _, c in ref.ISO16032_TABLE_A1_OCTAVE:
-        assert building.SERVICE_EQUIPMENT_WEIGHTING["octave"]["C"][f] == pytest.approx(
+        assert building.SERVICE_EQUIPMENT_WEIGHTING[1]["C"][f] == pytest.approx(
             c, abs=1e-12
         )
 
 
 def test_third_octave_c_weighting_departs_from_print_only_in_the_defect() -> None:
     """The C cells equal the print, except the ten registered in the errata."""
-    table = building.SERVICE_EQUIPMENT_WEIGHTING["third"]["C"]
+    table = building.SERVICE_EQUIPMENT_WEIGHTING[3]["C"]
     differing = {
         f for f, _, c in ref.ISO16032_TABLE_A1_THIRD if abs(table[f] - c) > 1e-9
     }
@@ -87,9 +87,7 @@ def test_third_octave_c_weighting_departs_from_print_only_in_the_defect() -> Non
 def test_corrected_c_cells_are_iec_61672_1_table_3() -> None:
     iec = {row[0]: (row[1], row[2]) for row in _WEIGHTING_TABLE3}
     for weighting, column in (("A", 0), ("C", 1)):
-        for f, value in building.SERVICE_EQUIPMENT_WEIGHTING["third"][
-            weighting
-        ].items():
+        for f, value in building.SERVICE_EQUIPMENT_WEIGHTING[3][weighting].items():
             assert value == pytest.approx(iec[f][column], abs=1e-12)
 
 
@@ -97,17 +95,17 @@ def test_third_octave_c_agrees_with_the_octave_column_the_draft_prints() -> None
     """The octave column is the internal evidence of the defect."""
     table = building.SERVICE_EQUIPMENT_WEIGHTING
     for f in (2000.0, 4000.0, 8000.0):
-        assert table["third"]["C"][f] == table["octave"]["C"][f]
+        assert table[3]["C"][f] == table[1]["C"][f]
 
 
 def test_reproducibility_is_table_2_as_printed() -> None:
     for thirds, octaves, sigma in ref.ISO16032_TABLE_2_BANDS:
         for f in thirds:
-            assert building.SERVICE_EQUIPMENT_REPRODUCIBILITY["third"][f] == sigma
+            assert building.SERVICE_EQUIPMENT_REPRODUCIBILITY[3][f] == sigma
         for f in octaves:
-            assert building.SERVICE_EQUIPMENT_REPRODUCIBILITY["octave"][f] == sigma
-    assert len(building.SERVICE_EQUIPMENT_REPRODUCIBILITY["third"]) == THIRD.size
-    assert len(building.SERVICE_EQUIPMENT_REPRODUCIBILITY["octave"]) == OCTAVE.size
+            assert building.SERVICE_EQUIPMENT_REPRODUCIBILITY[1][f] == sigma
+    assert len(building.SERVICE_EQUIPMENT_REPRODUCIBILITY[3]) == THIRD.size
+    assert len(building.SERVICE_EQUIPMENT_REPRODUCIBILITY[1]) == OCTAVE.size
     assert dict(building.SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY) == dict(
         ref.ISO16032_TABLE_2_WEIGHTED
     )
@@ -116,9 +114,9 @@ def test_reproducibility_is_table_2_as_printed() -> None:
 def test_published_tables_refuse_writes() -> None:
     tables = (
         building.SERVICE_EQUIPMENT_WEIGHTING,
-        building.SERVICE_EQUIPMENT_WEIGHTING["third"],
-        building.SERVICE_EQUIPMENT_WEIGHTING["third"]["C"],
-        building.SERVICE_EQUIPMENT_REPRODUCIBILITY["octave"],
+        building.SERVICE_EQUIPMENT_WEIGHTING[3],
+        building.SERVICE_EQUIPMENT_WEIGHTING[3]["C"],
+        building.SERVICE_EQUIPMENT_REPRODUCIBILITY[1],
         building.SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY,
         building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS,
         building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["lift"].parameters,
@@ -347,7 +345,7 @@ def test_a_half_decibel_single_number_rounds_up() -> None:
 
 def test_flat_spectrum_a_and_c_weighted_values() -> None:
     res = building.service_equipment_level(_flat(40.0), THIRD, quantity="Fmax")
-    table = building.SERVICE_EQUIPMENT_WEIGHTING["third"]
+    table = building.SERVICE_EQUIPMENT_WEIGHTING[3]
     a = [40.0 + table["A"][f] for f in RESTRICTED]
     c = [40.0 + table["C"][f] for f in THIRD]
     assert res.unrounded_ratings["LA,Fmax"] == pytest.approx(_energy_sum(a), abs=1e-9)
@@ -499,9 +497,9 @@ def test_upper_limit_names_a_weighting() -> None:
 
 def test_octave_bands() -> None:
     res = building.service_equipment_level(
-        _flat(40.0, OCTAVE), OCTAVE, quantity="eq", band="octave"
+        _flat(40.0, OCTAVE), OCTAVE, quantity="eq", fraction=1
     )
-    table = building.SERVICE_EQUIPMENT_WEIGHTING["octave"]
+    table = building.SERVICE_EQUIPMENT_WEIGHTING[1]
     a = [40.0 + table["A"][f] for f in OCTAVE if 63.0 <= f <= 4000.0]
     assert res.unrounded_ratings["LA,eq"] == pytest.approx(_energy_sum(a), abs=1e-9)
     assert "LC,eq" in res.ratings
@@ -517,7 +515,7 @@ def test_octave_standardization_leaves_out_31_5_and_8000_hz() -> None:
         _flat(40.0, OCTAVE),
         OCTAVE,
         quantity="eq",
-        band="octave",
+        fraction=1,
         reverberation_time=t,
     )
     assert res.standardized_db is not None
@@ -560,7 +558,7 @@ def test_reverberation_time_must_be_positive_in_the_range() -> None:
     ("kwargs", "fragment"),
     [
         ({"quantity": "Imax"}, "quantity"),
-        ({"quantity": "eq", "band": "sixth"}, "band"),
+        ({"quantity": "eq", "fraction": 6}, "fraction"),
         ({"quantity": "eq", "a_weighting_range": "wide"}, "a_weighting_range"),
     ],
 )

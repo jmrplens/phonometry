@@ -254,7 +254,7 @@ bf = metrology.reciprocity_uncertainty_budget(
         "series_impedance": 0.002, "voltage_ratio": 0.003, "cross_talk": 0.002 + 0.01 * xf,
         "noise": 0.005, "reflections": 0.01 + 0.02 * xf, "polarizing_voltage": 0.0025, "repeatability": 0.01,
     },
-    field="free_field",
+    field="free",
 )
 print(bf.expanded_uncertainty_db[[0, 10, 15]].round(3))   # [0.049 0.054 0.072]
 ```

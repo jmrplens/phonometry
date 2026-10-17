@@ -40,7 +40,7 @@ meter", gives signal-to-noise figures "that are not directly comparable" with
 the ones the Recommendation describes.
 
 The curve is
-[`weighting_filter(curve="468")`](/phonometry/signals/levels/weighting/). The
+[`weighting_filter(weighting="468")`](/phonometry/signals/levels/weighting/). The
 detector is `broadcast.quasi_peak_meter`.
 
 ## 1. What clause 2 specifies, and what it does not
@@ -137,7 +137,7 @@ plt.show()
 
 The result carries the `trace` the figure draws, sample for sample with the
 record, so the ballistics are visible rather than hidden behind a scalar. Set
-`weighted=False` to take the network out of the path, which is what clause 2.4
+`weighting="Z"` to take the network out of the path, which is what clause 2.4
 does and the only test in clause 2 that does.
 
 ## 3. The scale, and when a reading is dBqps
@@ -360,7 +360,7 @@ the reading and the needle, `BS468_BALLISTICS` holds the three fitted time
 scales and `verify_quasi_peak_dynamics` checks all eleven windows at any
 sample rate. Clauses 2.1, 2.3, 2.4 and 2.5 are exercised in the test suite as
 properties of the chain. Clause 1's weighting network is
-`weighting_filter(curve="468")`.
+`weighting_filter(weighting="468")`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">

@@ -47,7 +47,7 @@ def _annex_f_result() -> building.FacadePredictionResult:
         area=ref.EN12354_3_ANNEX_F_AREA,
         volume=ref.EN12354_3_ANNEX_F_VOLUME,
         frequencies=ref.EN12354_3_ANNEX_F_BANDS,
-        bands="octave",
+        fraction=1,
     )
 
 

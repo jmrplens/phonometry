@@ -339,7 +339,7 @@ class BinauralIndicators(RichDisplay):
     parameters: tuple[str, ...]
     fs: float
     duration_s: float
-    field: str
+    field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
         """Freeze the two mappings and refuse unknown rows.

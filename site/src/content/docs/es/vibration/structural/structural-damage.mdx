@@ -175,6 +175,11 @@ print(vibration.guideline_velocity("commercial", 50.0, massive_structure=True))
 # 80.0
 ```
 
+Cada elección de esta página es un `Literal` en la firma: la clase de edificio,
+el lugar de medida, la duración y el material de la tubería. Un comprobador de
+tipos señala así `"residental"` antes de que se ejecute la llamada, y la llamada
+lo sigue rechazando al ejecutarse con los tres nombres que admite.
+
 ## 3. Forjados, y el único número que los cubre
 
 Un forjado o un techo recibe una frase propia en lugar de una tabla. Apartado

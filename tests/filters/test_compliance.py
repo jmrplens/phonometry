@@ -559,7 +559,7 @@ def test_a_filter_verdict_keeps_a_copy_of_the_callers_rows() -> None:
 
 def test_a_weighting_verdict_row_and_sweep_cannot_be_written_into() -> None:
     result = filters.verify_weighting_class(
-        filters.WeightingFilter(fs=48000, curve="A")
+        filters.WeightingFilter(fs=48000, weighting="A")
     )
     row = result.band_margins[0]
     with pytest.raises(TypeError, match="does not support item assignment"):
@@ -575,7 +575,7 @@ def test_a_weighting_verdict_survives_a_round_trip_through_pickle() -> None:
     import pickle
 
     result = filters.verify_weighting_class(
-        filters.WeightingFilter(fs=48000, curve="A")
+        filters.WeightingFilter(fs=48000, weighting="A")
     )
     again = pickle.loads(pickle.dumps(result))  # noqa: S301 - our own bytes
     assert again.overall_class == result.overall_class

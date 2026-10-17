@@ -64,11 +64,11 @@ def test_mass_law_six_db_per_mass_doubling() -> None:
 
 
 def test_field_incidence_correction_values() -> None:
-    assert building.field_incidence_correction("third") == 5.5
-    assert building.field_incidence_correction("octave") == 4.0
+    assert building.field_incidence_correction(3) == 5.5
+    assert building.field_incidence_correction(1) == 4.0
     normal = building.mass_law_transmission_loss(500.0, 20.0, incidence="normal")
     field = building.mass_law_transmission_loss(
-        500.0, 20.0, incidence="field", band="third"
+        500.0, 20.0, incidence="field", fraction=3
     )
     assert float(normal - field) == pytest.approx(5.5)
 

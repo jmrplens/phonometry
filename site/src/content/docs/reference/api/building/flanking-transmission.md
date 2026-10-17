@@ -451,7 +451,7 @@ normalized_flanking_impact_level(
     absorption_area: Sequence[float] | np.ndarray,
     *,
     reference_area: float = 10.0,
-    bands: str | None = None,
+    fraction: Literal[1, 3] | None = None,
 ) -> FlankingImpactLevelResult
 ```
 
@@ -468,7 +468,7 @@ tapping machine on the source-room floor.
 | `receive_level` | Receiving-room average impact SPL `L2` per band, in dB. |
 | `absorption_area` | Receiving-room equivalent absorption area `A` per band, in m². |
 | `reference_area` | `A0`, in m² (default 10 m²). |
-| `bands` | Band spacing passed to [`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating); auto-detected when `None`. |
+| `fraction` | Band set passed to [`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating), 3 for one-third octaves or 1 for octaves; read from the number of bands when `None`. |
 
 **Returns:** A [`FlankingImpactLevelResult`](/phonometry/reference/api/building/flanking-transmission/#flankingimpactlevelresult); the single-number rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
 
@@ -487,7 +487,7 @@ normalized_flanking_level_difference(
     absorption_area: Sequence[float] | np.ndarray,
     *,
     reference_area: float = 10.0,
-    bands: str | None = None,
+    fraction: Literal[1, 3] | None = None,
 ) -> FlankingLevelDifferenceResult
 ```
 
@@ -504,7 +504,7 @@ area $A_0 = 10$ m².
 | `receive_level` | Receiving-room average SPL `L2` per band, in dB. |
 | `absorption_area` | Receiving-room equivalent absorption area `A` per band, in m². |
 | `reference_area` | `A0`, in m² (default 10 m²). |
-| `bands` | Band spacing passed to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating); auto-detected when `None`. |
+| `fraction` | Band set passed to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves; read from the number of bands when `None`. |
 
 **Returns:** A [`FlankingLevelDifferenceResult`](/phonometry/reference/api/building/flanking-transmission/#flankingleveldifferenceresult); the single-number rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
 
@@ -709,7 +709,7 @@ VibrationReductionResult(
     frequencies: np.ndarray | None,
     k_ij: np.ndarray,
     modal_overlap: np.ndarray | None = None,
-    band_type: str | None = None,
+    fraction: int | None = None,
 )
 ```
 
@@ -724,7 +724,7 @@ Per-band vibration reduction index `Kij` (ISO 10848-1:2006).
 | `single_number` | Arithmetic-mean single-number `K̄ij` over 200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave) per Annex A, in dB, or `None` when the frequencies do not cover the corresponding band set. Bands bracketed for poor modal overlap (ISO 10848-4:2010 Clause 9) are excluded from the mean. |
 | `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0,25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
 | `modal_overlap` | The modal overlap factor `M` per band the bands are bracketed by, or `None` when none was supplied. An octave band carries the smallest of its three one-third-octave bands, since it is bracketed when any of them is. |
-| `band_type` | `"third-octave"` or `"octave"`, the band set the caller states for the Annex A range the single number is averaged over, as `octave_bands` states it; `None` (the default, and what [`vibration_reduction_index`](/phonometry/reference/api/building/flanking-transmission/#vibration_reduction_index) leaves) reads it from the spacing of the frequencies each time. |
+| `fraction` | The band set the caller states for the Annex A range the single number is averaged over, 3 for one-third octaves or 1 for octaves, as `octave_bands` states it (`fraction=1`); `None` (the default, and what [`vibration_reduction_index`](/phonometry/reference/api/building/flanking-transmission/#vibration_reduction_index) leaves) reads it from the spacing of the frequencies each time. |
 
 `single_number` and `bracketed` are read from the fields, the
 0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not

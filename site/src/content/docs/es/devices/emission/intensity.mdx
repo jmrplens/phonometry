@@ -683,7 +683,7 @@ power = emission.sound_power_intensity_points(
     pressure_levels=pressure_levels,
     pressure_residual_index=19.0,
     frequencies=frequencies,
-    band_type="octave",
+    fraction=1,
 )
 print(np.round(power.sound_power_level, 1))  # [83.3 86.8 88.1 89.6 90.4 90.4]
 print(round(power.sound_power_level_a, 1))   # 96.1 dB(A)
@@ -767,7 +767,7 @@ número verosímil.
 
 ```python
 print(emission.position_count_factor("engineering", 1000.0,
-                                     band_type="octave"))   # 29.0
+                                     fraction=1))   # 29.0
 print(emission.position_count_factor("survey"))             # 8.0 (ponderado A)
 print(power.achieved_grade_a, round(power.field_nonuniformity_a, 2))
 # precision 0.13
@@ -842,7 +842,7 @@ survey = emission.sound_power_intensity_points(
     normal_intensity, areas,
     pressure_levels=np.full((areas.size, freqs.size), surface_pressure),
     pressure_residual_index=20.0,    # Ld = 20 - 10 = 10 dB (tabla 1, octavas)
-    frequencies=freqs, band_type="octave",
+    frequencies=freqs, fraction=1,
 )
 
 # Una línea: el espectro de potencia acústica por bandas, con las bandas fuera
@@ -855,7 +855,7 @@ plt.show()
 bands = np.arange(freqs.size)
 required = {
     grade: np.array([emission.position_count_factor(grade, float(f),
-                                                    band_type="octave")
+                                                    fraction=1)
                      for f in freqs]) * survey.f4 ** 2
     for grade in ("precision", "engineering")
 }

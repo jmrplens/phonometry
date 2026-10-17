@@ -204,7 +204,7 @@ double_wall_transmission_loss(
     loss_factor: float = 0.1,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
-    band: str = 'third',
+    fraction: Literal[1, 3] = 3,
     fluid: Fluid = ...,
 ) -> SoundReductionResult
 ```
@@ -233,7 +233,7 @@ unit area as *tie_stiffness_per_area* (see
 | `loss_factor` | Leaf loss factor `eta` (> 0, Default: 0.1); reserved for the coincidence extension and reported for reference. |
 | `cavity_medium` | Optional porous fill; see [`mass_spring_mass_resonance`](/phonometry/reference/api/building/panel-transmission/#mass_spring_mass_resonance). |
 | `tie_stiffness_per_area` | Stiffness per unit area $N k / S$ of a connection array bridging the cavity, in N/m^3 (>= 0, Default: 0). |
-| `band` | Band width for the field correction (`"third"`/`"octave"`). |
+| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
 **Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"double-wall"`).
@@ -247,7 +247,7 @@ unit area as *tie_stiffness_per_area* (see
 ## field_incidence_correction
 
 ```python
-field_incidence_correction(band: str = 'third') -> float
+field_incidence_correction(fraction: Literal[1, 3] = 3) -> float
 ```
 
 Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
@@ -256,7 +256,7 @@ Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
 
 | Name | Description |
 | :--- | :--- |
-| `band` | `"third"` (5.5 dB) or `"octave"` (4.0 dB). |
+| `fraction` | The band set, 3 for one-third octaves (5.5 dB) or 1 for octaves (4.0 dB). |
 
 **Returns:** The correction subtracted from the normal-incidence mass law, dB.
 
@@ -264,7 +264,7 @@ Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an unknown band width. |
+| ValueError | for a band set other than 1 or 3. |
 
 ## mass_law_transmission_loss
 
@@ -274,7 +274,7 @@ mass_law_transmission_loss(
     mass_per_area: float,
     *,
     incidence: str = 'field',
-    band: str = 'third',
+    fraction: Literal[1, 3] = 3,
     field_correction: float | None = None,
     fluid: Fluid = ...,
 ) -> np.ndarray
@@ -295,7 +295,7 @@ builds its estimate on).
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `incidence` | `"normal"` or `"field"` (Default: `"field"`). |
-| `band` | Band width for the field correction (`"third"`/`"octave"`). |
+| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. |
 | `field_correction` | Explicit field-incidence correction, in dB (>= 0), overriding the band table (Default: `None`). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
@@ -305,7 +305,7 @@ builds its estimate on).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input or unknown incidence/band. |
+| ValueError | for a non-positive input, an unknown incidence or a band set other than 1 or 3. |
 
 ## mass_spring_mass_resonance
 
@@ -463,7 +463,7 @@ orthotropic_transmission_loss(
     method: str = 'integral',
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
-    band: str = 'third',
+    fraction: Literal[1, 3] = 3,
     fluid: Fluid = ...,
 ) -> SoundReductionResult
 ```
@@ -532,7 +532,7 @@ no smooth model predicts.
 | `method` | `"integral"` (Default) or `"heckl"`. |
 | `area` | Panel area `S`, in m^2 (> 0), selecting the size-dependent limiting angle of Bies Eq. (7.36) (Default: `None`); used only by `method="integral"`, but validated on both routes. |
 | `limiting_angle_deg` | Fixed limiting angle `theta_L`, in degrees ($0 < \theta_\mathrm{L} < 90$, Default: 78.0), used when *area* is `None` and only by `method="integral"`, but validated on both routes. |
-| `band` | Band width for the field correction of the Heckl mass-law branch (`"third"`/`"octave"`). |
+| `fraction` | The band set of the field correction of the Heckl mass-law branch, 3 for one-third octaves or 1 for octaves. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
 **Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"orthotropic-integral"` or `"orthotropic-heckl"`) carrying `fc1` in [`critical_frequency`](/phonometry/reference/api/building/flanking-transmission/#critical_frequency) and `fc2` in [`critical_frequency_upper`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult).
@@ -694,7 +694,7 @@ single_panel_transmission_loss(
     critical_frequency: float | None = None,
     bending_stiffness: float | None = None,
     loss_factor: float = 0.01,
-    band: str = 'third',
+    fraction: Literal[1, 3] = 3,
     coincidence_model: str = 'sharp',
     field_correction: float | None = None,
     fluid: Fluid = ...,
@@ -741,7 +741,7 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 | `critical_frequency` | Coincidence frequency `fc`, in hertz (> 0). |
 | `bending_stiffness` | Bending stiffness per unit width `B'`, in N.m, used to compute `fc` when *critical_frequency* is not given. |
 | `loss_factor` | Total loss factor `eta` (> 0, Default: 0.01). |
-| `band` | Band width for the field correction (`"third"`/`"octave"`). |
+| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. |
 | `coincidence_model` | `"sharp"` (Default, Bies Eq. 7.44 above `fc` with the interpolated bridge from $f_\mathrm{c}/2$) or `"cremer"` (Norton Eq. 3.110, mass law right up to `fc`). |
 | `field_correction` | Explicit field-incidence correction of the mass-law region, in dB (>= 0), overriding the band table (Default: `None`; Norton's Eq. 3.106 uses a flat 5 dB). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
@@ -834,7 +834,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 SoundReductionResult.rating(
-    bands: str | None = None,
+    fraction: Literal[1, 3] | None = None,
 ) -> WeightedRatingResult
 ```
 
@@ -848,7 +848,7 @@ requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 
 | Name | Description |
 | :--- | :--- |
-| `bands` | Band set forwarded to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating). |
+| `fraction` | Band set forwarded to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves (Default: `None`, read from the number of values). |
 
 **Returns:** The [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult).
 

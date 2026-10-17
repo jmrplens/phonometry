@@ -146,7 +146,7 @@ MooreGlasbergLoudness(
     specific: np.ndarray,
     erb_number: np.ndarray,
     frequencies: np.ndarray,
-    field: str,
+    field: Literal['free', 'diffuse', 'eardrum'],
     presentation: str,
 )
 ```

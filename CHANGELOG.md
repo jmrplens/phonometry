@@ -3127,6 +3127,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   says decibel and that still ends in `_db`. The migration guide lists every
   name this renames that shipped in 3.3.0 or 4.0.0rc1.
 
+- **A band set is `fraction=1` or `fraction=3` wherever one is chosen.** The
+  filter bank, the room parameters and the intensity measurement took the
+  integer `fraction`, while the building, emission and vibration functions
+  that pick a band set spelled it `band="third"`, `bands="third-octave"`,
+  `band_type="third"` or `bandwidth="octave"`. Every one of them now takes
+  `fraction`, `3` for one-third octaves and `1` for octaves: the panel
+  predictions, the ISO 717 ratings and `SoundReductionResult.rating`, the
+  façade and flanking predictions, the detailed model of ISO 12354, the
+  resilient-layer and tapping-machine forces, the heavy-impact rating, the
+  intensity determinations of ISO 9614-1 and -2, the tapping-machine force
+  estimate of EN 12354-5 and the cylinder modal density. The results that
+  record the band set hold it as `fraction` too (`TappingForceResult`,
+  `AWeightedMaxImpactResult`, `VibrationReductionResult`,
+  `SoundPowerIntensityResult`, `DiscretePointIntensityResult`), and the
+  published table read by band set is keyed by the same integer:
+  `building.HEAVY_IMPACT_A_WEIGHTING[3]`. A word, a flag or a float is
+  refused with a message that names `fraction`, so `fraction=True` is not
+  read as octaves. The ISO 10848 junction fiche now averages over the Annex A
+  range of the band set a `VibrationReductionResult` states, as
+  `single_number` does, instead of reading it again from the spacing. The
+  functions added since 4.0.0rc1 that pick a band set take `fraction` as
+  well: the reference sound source of ISO 6926, the service equipment level
+  of ISO/DIS 16032 with its `SERVICE_EQUIPMENT_WEIGHTING[1]["A"]`, the cabins
+  of ISO 11957 and the enclosures of ISO 11546. The speech intelligibility
+  index keeps `method="one-third-octave"`, which names one of the four
+  procedures of ANSI S3.5, not a band set. `building.PathContribution` holds
+  the share of the transmitted energy a path carries as `energy_fraction`,
+  where it held `fraction`, so that `fraction` names only a band set, and
+  `building.DetailedAirborneResult` and `DetailedImpactResult` hold the share
+  each path carries in each band as `energy_fractions`, where they held
+  `fractions`.
+
+- **A sound field is `"free"`, `"diffuse"` or `"pressure"`.** The hearing
+  threshold of ISO 389-7 took `"free-field"` and `"diffuse-field"` where the
+  loudness models took `"free"` and `"diffuse"`; `hearing.reference_threshold`
+  and `hearing.FIELDS` now read `"free"` and `"diffuse"`. The microphone
+  calibrations added since 4.0.0rc1 write the field the same way: the
+  comparison and reciprocity calibrations take and hold `field="free"` beside
+  `"pressure"`, and `DiffuseFieldSensitivity.route` reads `"free"` for a
+  reference calibrated in a free field. Every `field` that names a sound field
+  states its options as a `Literal`, on the results that record it as well
+  (`ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergLoudness`, the ECMA-418-2
+  roughness, tonality and fluctuation strength, `BinauralIndicators`,
+  `FreeSoundFieldCheck`), so a type checker reads them. The few that name
+  something other than a free, diffuse or pressure field say so: the
+  quasi-free field of ISO 8253-2, the plane wave at normal incidence of the
+  slit transmission model, and the eardrum of the Moore-Glasberg models.
+
+- **A frequency weighting is chosen by `weighting`, and an unweighted signal
+  is `weighting="Z"`.** `filters.weighting_filter` and `WeightingFilter` take
+  `weighting=` instead of `curve=`, and `WeightingFilter.weighting` and
+  `WeightingComplianceResult.weighting` replace `.curve`.
+  `broadcast.quasi_peak_meter` takes `weighting="468"` (the default) or
+  `"Z"` instead of `weighted=True` or `False`, and `QuasiPeakResult` holds
+  `weighting`. `signals.ln_levels` and `sel` default to `weighting="Z"` and
+  refuse `None`, which left the signal unweighted as `"Z"` does. The
+  functions added since 4.0.0rc1 choose a weighting the same way:
+  `electroacoustics.program_signal_level` and
+  `program_characteristic_voltage` take `weighting="A"` or `"Z"` (the
+  default), `environment.wind_turbine_low_frequency_level` takes
+  `weighting="A"` (the default) or `"Z"`, and their results record it as
+  `ProgramCharacteristicVoltage.weighting` and `LowFrequencyLevel.weighting`;
+  `vibration.verify_vibration_meter` takes `weighting="kb"` (the default) or
+  `"Z"` for the band limitation of DIN 45669-1 alone. `"Z"` is the
+  Z-weighting of IEC 61672-1 on the sound-level weightings, and elsewhere the
+  response the standard in question leaves unweighted.
+
+- **The choices of the vibration package are typed.** The building class of
+  DIN 4150-3 and of the DIN 45669-1 assessment weightings, the place of
+  measurement, the duration, the pipe material, the period model of ISO 4866,
+  the working range and weighting of the vibration meter and the
+  dominant-frequency method are `Literal` types in every signature and on
+  every result that records them (`DamageAssessment`, `AssessmentVelocity`,
+  `VibrationMeterVerification`, `VibrationMeterReading`,
+  `DominantFrequency`, `BuildingFrequencyEstimate`), with no `| str` beside
+  them. A type checker flags a misspelt choice before the call runs; the call
+  refuses it at run time as before.
+
 - **A function is named for what it returns, and a unit stays in the name only
   where the quantity has two.** A level, a correction, a difference, an index
   or a tolerance is in decibels and a frequency in hertz wherever the library
@@ -3916,7 +3994,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   x_Fzp1 (p1 - pv) as turbulent, where Equation (9) returns zero.
   `CriticalCouplingResult` keeps `converged`, the outcome of its solve, but
   refuses it beside an absorption that does not exceed 0.999.
-  `vibration_reduction_index` no longer stores in `band_type` the band set it
+  `vibration_reduction_index` no longer stores in `fraction` the band set it
   read from the frequencies; the field now holds only a band set the caller
   states. The functions take the same arguments and return the same numbers,
   and every conformance row reads as before. The test that keeps verdicts out
@@ -5072,6 +5150,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carry the prime of definition 3.6, and the A-weighted difference of Equation
   (3) is refused under any method but the one that drives the room with the
   actual noise, because that is the only one the standard defines it for.
+  `weighted_cabin_insulation` is the single number of clause 8, rated by
+  ISO 717-1 under the same `method=` (`"laboratory"` by default,
+  `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`), and the
+  `WeightedCabinInsulation` it returns reads from that method whether the
+  rating carries the prime, as `CabinInsulationResult` does.
 
   The numeric acceptance rules of the clauses are here too:
   `check_source_positions` is the criterion of 7.2.1, where the number of

@@ -21,7 +21,7 @@ import numpy as np
 
 from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
-from ..filters.weighting import time_weighting, weighting_filter
+from ..filters.weighting import _require_str, time_weighting, weighting_filter
 from ..io._resolve import (
     resolve_calibration as _resolve_calibration,
 )
@@ -142,7 +142,7 @@ def ln_levels(
     fs: int | None = None,
     n: Sequence[int] = (10, 50, 90),
     mode: str = "fast",
-    weighting: str | None = None,
+    weighting: str = "Z",
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
@@ -160,10 +160,10 @@ def ln_levels(
         value that disagrees with it raises instead of silently winning.
     :param n: Percentile exceedance values, e.g. (10, 50, 90).
     :param mode: Time weighting for the envelope: 'fast', 'slow' or 'impulse'.
-    :param weighting: Optional frequency weighting, any curve accepted by
+    :param weighting: The frequency weighting, any curve accepted by
         :func:`~phonometry.filters.weighting.weighting_filter`: 'A', 'B', 'C',
-        'D', 'G', 'AU', '468' or 'Z'. None (the default) and 'Z' both leave
-        the signal unweighted.
+        'D', 'G', 'AU', '468' or 'Z' (the default), which leaves the signal
+        unweighted.
     :param calibration_factor: Multiplier converting digital units to
         Pascals. Precedence as in :func:`leq`: explicit value, then a
         calibrated Signal's own factor, then 1.0.
@@ -179,7 +179,7 @@ def ln_levels(
         if not 0 < value < 100:  # noqa: PLR2004
             msg = "Percentile values in 'n' must be between 0 and 100."
             raise ValueError(msg)
-    if weighting is not None and weighting.upper() != "Z":
+    if _require_str(weighting, "weighting").upper() != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
 
     envelope = time_weighting(x_proc, fs, mode=mode)
@@ -262,7 +262,7 @@ def lc_peak(
 def sel(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    weighting: str | None = None,
+    weighting: str = "Z",
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
@@ -280,10 +280,10 @@ def sel(
     :param fs: Sample rate in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit
         value that disagrees with it raises instead of silently winning.
-    :param weighting: Optional frequency weighting, any curve accepted by
+    :param weighting: The frequency weighting, any curve accepted by
         :func:`~phonometry.filters.weighting.weighting_filter`: 'A', 'B', 'C',
-        'D', 'G', 'AU', '468' or 'Z'. None (the default) and 'Z' both leave
-        the signal unweighted.
+        'D', 'G', 'AU', '468' or 'Z' (the default), which leaves the signal
+        unweighted.
     :param calibration_factor: Multiplier converting digital units to
         Pascals. Precedence as in :func:`leq`: explicit value, then a
         calibrated Signal's own factor, then 1.0.
@@ -297,7 +297,7 @@ def sel(
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
-    if weighting is not None and weighting.upper() != "Z":
+    if _require_str(weighting, "weighting").upper() != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
     duration_s = x_proc.shape[-1] / fs
     base = leq(x_proc, calibration_factor=calibration_factor, dbfs=dbfs)

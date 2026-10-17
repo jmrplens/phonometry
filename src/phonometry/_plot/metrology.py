@@ -1601,7 +1601,7 @@ _WEIGHT_LABELS = {
 #: The reference-term label of the diffuse-field plot, by route.
 _DIFFUSE_REFERENCE_LABELS = {
     "random_incidence": r"$G_\mathrm{D,ref}$, reference, Formula (9)",
-    "free_field": r"$G_\mathrm{D,ref}$, reference, Formula (10)",
+    "free": r"$G_\mathrm{D,ref}$, reference, Formula (10)",
     "pressure": r"$G_\mathrm{D,ref}$, reference, Formula (11)",
 }
 
@@ -2403,13 +2403,13 @@ def plot_correction_uncertainty_verification(
 #: The title of a calibration, by field.
 _COMPARISON_TITLES: dict[str, str] = {
     "pressure": "Pressure sensitivity by comparison (IEC 61094-5)",
-    "free_field": "Free-field sensitivity by comparison (IEC 61094-8)",
+    "free": "Free-field sensitivity by comparison (IEC 61094-8)",
 }
 
 #: The table a budget follows, named in its title, by field.
 _COMPARISON_BUDGET_TITLES: dict[str, str] = {
     "pressure": "Uncertainty budget at {f} Hz (IEC 61094-5 Table D.1)",
-    "free_field": "Uncertainty budget at {f} Hz (IEC 61094-8 Table 2)",
+    "free": "Uncertainty budget at {f} Hz (IEC 61094-8 Table 2)",
 }
 
 #: Short tick labels of the components of IEC 61094-5 Table D.1 and
@@ -2471,13 +2471,13 @@ _STRINGS.update(
             "pressure"
         ]: "Sensibilidad en presión por comparación (IEC 61094-5)",
         _COMPARISON_TITLES[
-            "free_field"
+            "free"
         ]: "Sensibilidad en campo libre por comparación (IEC 61094-8)",
         _COMPARISON_BUDGET_TITLES[
             "pressure"
         ]: "Balance de incertidumbre a {f} Hz (IEC 61094-5, tabla D.1)",
         _COMPARISON_BUDGET_TITLES[
-            "free_field"
+            "free"
         ]: "Balance de incertidumbre a {f} Hz (IEC 61094-8, tabla 2)",
         r"$L_\mathrm{test}$, microphone under test": r"$L_\mathrm{test}$, micrófono en ensayo",
         r"$L_\mathrm{ref}$, reference microphone": r"$L_\mathrm{ref}$, micrófono de referencia",
@@ -3117,7 +3117,7 @@ def plot_free_field_region(
 #: The title of the phase of a calibration, by field.
 _COMPARISON_PHASE_TITLES: dict[str, str] = {
     "pressure": "Phase of the pressure sensitivity by comparison (IEC 61094-5)",
-    "free_field": "Phase of the free-field sensitivity by comparison (IEC 61094-8)",
+    "free": "Phase of the free-field sensitivity by comparison (IEC 61094-8)",
 }
 
 #: The second title line of a pressure ratio, by coupling.
@@ -3176,7 +3176,7 @@ _STRINGS.update(
             "pressure"
         ]: "Fase de la sensibilidad en presión por comparación (IEC 61094-5)",
         _COMPARISON_PHASE_TITLES[
-            "free_field"
+            "free"
         ]: "Fase de la sensibilidad en campo libre por comparación (IEC 61094-8)",
         r"$\varphi_\mathrm{test}$, microphone under test": r"$\varphi_\mathrm{test}$, micrófono en ensayo",
         r"$\varphi_\mathrm{ref}$, reference microphone": r"$\varphi_\mathrm{ref}$, micrófono de referencia",

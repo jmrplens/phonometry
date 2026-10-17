@@ -1220,7 +1220,7 @@ def _chk_barron_pressure_bands() -> Outcome:
         _BARRON_LP_WITH_DB,
         frequencies=_BOOK_OCTAVES_HZ,
         base_standard="ISO 11201",
-        band_fraction=1,
+        fraction=1,
     )
     departure = np.abs(result.insulation - _BARRON_IL_DB)
     worst = float(np.max(departure))
@@ -1244,7 +1244,7 @@ def _chk_barron_a_weighted_insulation() -> Outcome:
         _BARRON_LP_WITH_DB,
         frequencies=_BOOK_OCTAVES_HZ,
         base_standard="ISO 11201",
-        band_fraction=1,
+        fraction=1,
     )
     assert result.a_weighted_insulation is not None
     # Each total is printed to a tenth, so their difference is good to a tenth
@@ -1296,7 +1296,7 @@ def _chk_barron_power_bands() -> Outcome:
         _BARRON_LW_OUT_DB[keep],
         frequencies=_BOOK_OCTAVES_HZ[keep],
         base_standard="ISO 3744",
-        band_fraction=1,
+        fraction=1,
     )
     departure = np.abs(result.insulation - _BARRON_IL_DB[keep])
     worst = float(np.max(departure))
@@ -1345,7 +1345,7 @@ def _chk_iso717_pass_through() -> Outcome:
     rated = ph.noise_control.weighted_enclosure_insulation(
         ref.ISO717_1_ANNEX_C_R,
         quantity="sound_power",
-        band_fraction=3,
+        fraction=3,
     )
     printed = {"rating": 30.0, "C": -2.0, "Ctr": -3.0, "unfavourable sum": 31.8}
     computed = {
@@ -1404,7 +1404,7 @@ def _chk_suva_a_weighted_total() -> Outcome:
         reference,
         frequencies=octaves,
         base_standard="ISO 3744",
-        band_fraction=1,
+        fraction=1,
     )
     assert result.a_weighted_insulation is not None
     return numeric(

@@ -318,7 +318,7 @@ for a pressure calibration, Formula (11).
 | `reference_indicated_level` | $L_\mathrm{D,ref}$, what the reference instrument indicates at the same positions, in dB. |
 | `reference_sensitivity_level` | the reference's calibrated sensitivity level, in dB: $G_\mathrm{RI,ref}$, $G_\mathrm{F,ref}$ or $G_\mathrm{P,ref}$. |
 | `reference_correction` | what turns that into the reference's diffuse-field sensitivity level, in dB: 0, $-10\lg \gamma_\mathrm{ref}$ or $\Delta_\mathrm{DP}$. |
-| `route` | `"random_incidence"` (Formula (9)), `"free_field"` (Formula (10)) or `"pressure"` (Formula (11)). |
+| `route` | `"random_incidence"` (Formula (9)), `"free"` (Formula (10)) or `"pressure"` (Formula (11)), the sound field the reference instrument was calibrated in. |
 
 ### DiffuseFieldSensitivity.diffuse_field_level
 

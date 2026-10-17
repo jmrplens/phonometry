@@ -336,7 +336,7 @@ def _chk_a_weighting_coefficients() -> Outcome:
     matching = sum(
         1
         for f in frequencies
-        if round(ea.program_signal_level([f], [0.0], a_weighted=True), 1) == table3[f]
+        if round(ea.program_signal_level([f], [0.0], weighting="A"), 1) == table3[f]
     )
     return count(matching, frequencies.size, subject="bands matching Table 3")
 

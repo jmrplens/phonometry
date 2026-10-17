@@ -209,7 +209,7 @@ def test_unknown_edition_is_refused_by_the_limits() -> None:
 def test_curve_outside_the_1979_edition_is_refused() -> None:
     """Z arrived with IEC 61672-1; IEC 651 never defined it."""
     weighting = filters.WeightingFilter(48000, "Z")
-    with pytest.raises(ValueError, match="Weighting curve must be .*for edition"):
+    with pytest.raises(ValueError, match="'weighting' must be .*for edition"):
         filters.verify_weighting_class(weighting, edition="1979")
 
 

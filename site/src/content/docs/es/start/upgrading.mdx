@@ -4,7 +4,7 @@ description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la gr
 ---
 
 La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
-de los 885 nombres que la raíz exportaba en la 3.3.0, cuarenta y cinco no existen ya
+de los 885 nombres que la raíz exportaba en la 3.3.0, cincuenta no existen ya
 en ningún sitio y el resto simplemente vive en una dirección con nombre en vez
 de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
@@ -30,7 +30,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # esta es la grafía nueva
 ```
 
-Medido sobre la superficie entera, 837 de aquellos 885 nombres de la raíz los
+Medido sobre la superficie entera, 832 de aquellos 885 nombres de la raíz los
 publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
 más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
 siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
@@ -313,7 +313,7 @@ campos `distance_m`, `spacing_m` y `source_height_m` de `RotorcraftHemisphere`,
 `IntensityResult` y `RoadEmissionResult`, los `thickness1_m` y `thickness2_m`
 que `JunctionTransmissionResult` guarda para su dibujo, y los `source_height_m`
 y `microphone_height_m` de la ISO 13472-1 en `geometric_spreading_factor`,
-`geometric_spreading_factor_angle` e `InsituAbsorptionResult`. La sección de
+`geometric_spreading_factor_angle` e `InSituAbsorptionResult`. La sección de
 conducto que lee `duct_path` es `{"width_m": a, "height_m": b}`, y
 `TABLE_D1_QUANTITIES` nombra `thickness_m` entre las magnitudes que describen
 una fila de la Tabla D.1. Las filas de los catálogos conservan `thickness_mm`,
@@ -505,6 +505,36 @@ aparecen en ningún sitio de la API pública.
 | `wind_speed_knots=` en `ocean_ambient_noise` y `wind_noise_spectrum`, y `AmbientNoiseResult.wind_speed_knots` | `wind_speed_kt`, la grafía que usan las velocidades de aeronaves |
 | `speed_knots=` en `ship_source_spectrum`, y `ShipTrafficSpectrum.speed_knots` | `speed_kt` |
 | `GasStream.molecular_mass`, en kg/kmol | `GasStream.molar_mass_kg_kmol`, el nombre que el catálogo de fluidos da a su `molar_mass_kg_mol` por mol |
+
+Un identificador se escribe en inglés estadounidense, e in situ se escribe
+`in_situ`. Quien llama escribe cada nombre, así que `center_frequency` en una
+función y `centre_frequency` en la siguiente era un `TypeError` que había que
+ir a buscar. Los valores que se escriben en la llamada siguen la misma regla:
+una opción de un `Literal`, un valor por defecto, la clave de una tabla
+publicada y una cadena de una tupla publicada de opciones. `catalogue`
+conserva su grafía: también es una variante
+estadounidense, todos los nombres la escriben igual y es el formato de archivo
+de tus propios catálogos. Una cadena que imprime una fuente conserva lo
+impreso, y por eso la superficie de CNOSSOS de abajo sigue siendo
+`"optimised brushed down concrete"`.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `materials.insitu_reflection_factor`, `insitu_absorption_from_reflection`, `insitu_absorption_coefficient`, `insitu_absorption_spectrum`, `plot_insitu_geometry` e `InsituAbsorptionResult` | `in_situ_reflection_factor`, `in_situ_absorption_from_reflection`, `in_situ_absorption_coefficient`, `in_situ_absorption_spectrum`, `plot_in_situ_geometry` e `InSituAbsorptionResult`, como ya se escribían los demás nombres in situ de la biblioteca |
+| `centre_frequency` en `critical_bandwidth`, `tonal_audibility`, `assess_tonal_audibility` y `TonalAssessmentResult` | `center_frequency` |
+| `centre=` en `room.filter_bandwidth` y `room.source_directivity_limit` | `center=` |
+| `location="centre"` en las movilidades e impedancias puntuales de placas y vigas infinitas de `vibration` | `location="center"` |
+| `.unfavourable_sum` en `WeightedRatingResult`, `ImpactRatingResult` y `AbsorptionRatingResult` | `.unfavorable_sum` |
+| `vibration.storey_fundamental_frequency(storeys)`, `STOREY_FREQUENCY_MIN_STOREYS`, `STOREY_FREQUENCY_NUMERATOR_HZ`, `STOREY_PERIOD_COEFFICIENT_S` | `vibration.story_fundamental_frequency(stories)`, `STORY_FREQUENCY_MIN_STORIES`, `STORY_FREQUENCY_NUMERATOR_HZ`, `STORY_PERIOD_COEFFICIENT_S` |
+| `storeys=` y el modelo `"storeys"` en `fundamental_period`, `fundamental_frequency` y `estimate_fundamental_frequency` | `stories=` y `"stories"` |
+| `draught=` en `underwater.monopole_source_level` | `draft_m=`, que además dice su unidad |
+| `procedure="aeroplane"` en `aircraft.effective_perceived_noise_level` | `procedure="airplane"`, que sigue siendo el valor por defecto |
+| `urbanisation=` en `environment.outdoor_quality_objectives` | `urbanization=` |
+| `vapour_pressure_pa` en las funciones de la IEC 60534-8-4 de `noise_control` (`differential_pressure_ratio`, `cavitation_differential`, `jet_strouhal_number`, `stage_conditions`, `last_stage_differential`) y en `LiquidStream` | `vapor_pressure_pa` |
+| `"water_vapour_mole_fraction"` en la `composition` de `fluids.air()` | `"water_vapor_mole_fraction"` |
+| `building.DB_HR_NORMALISED_SPECTRA`, `environment.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB` y `environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB` | `DB_HR_NORMALIZED_SPECTRA`, `NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB` y `NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB` |
+| `simulation.ALUMINIUM` | `simulation.ALUMINUM` |
+| `RoadSurface.OPTIMISED_BRUSHED_DOWN_CONCRETE` | `RoadSurface.OPTIMIZED_BRUSHED_DOWN_CONCRETE`, cuyo valor sigue siendo el `"optimised brushed down concrete"` que imprime la tabla F-4 de CNOSSOS-EU |
 
 ## Cada nombre público tiene una sola dirección
 
@@ -974,7 +1004,7 @@ indica en qué versión apareció cada veredicto.
 | `hearing.ReatSoundFieldCheck` | `allowable_variation_db` | gana `free_field_rejection_db` | después de 4.0.0rc1 |
 | `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gana `front_to_random_index_db` | después de 4.0.0rc1 |
 | `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference_db` | los seleccionan `field` y `loudspeaker_distance_m` | después de 4.0.0rc1 |
-| `electroacoustics.ProgrammeSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels_db` | después de 4.0.0rc1 |
+| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels_db` | después de 4.0.0rc1 |
 | `electroacoustics.NeckLoopVerification` | `limits` | lo selecciona `neck_loop_type` | después de 4.0.0rc1 |
 | `psychoacoustics.ToneAssessment` | `criterion_db`, `prominent` | gana `method`, `"tone_to_noise_ratio"` o `"prominence_ratio"` | 3.3.0 |
 | `underwater.WeightedExposureResult` | `criteria` | gana `impulsive` | 4.0.0rc1 |
@@ -1086,7 +1116,7 @@ marca un campo que solo se pasa por nombre.
 | `hearing.TaskContribution` | `spread_advisory` | `n_samples`, `sample_range_db` | 3.3.0 |
 | `hearing.ExposureResult` | `sampling_advisory` | gana `sample_range_db`, `n_workers`, `sample_duration_hours`, solo por nombre | 3.3.0 |
 | `hearing.AttenuationDifferenceResult` | `difference_db`, `criterion_db`, `significant` | las dos medias y sus incertidumbres expandidas | después de 4.0.0rc1 |
-| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gana las cifras medidas: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_centre_distance_m`, `lowest_relative_humidity_percent` | después de 4.0.0rc1 |
+| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gana las cifras medidas: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | después de 4.0.0rc1 |
 | `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, frente a la región que dan `values`, `method`, `alpha` y `median` | 3.3.0 |
 | `metrology.StationarityTestResult` | `stationary`, `bounds` | `count`, frente a la región que dan `segment_values`, `method` y `alpha` | 3.3.0 |
 | `metrology.CouplerCheck` | `ratio_recommended`, `approximation_valid`, `full_solution_advised`, `conditions_valid` | gana `heat_conduction_method`, `temperature_c`, `static_pressure_pa`, `relative_humidity_percent`, `in_air`, solo por nombre | después de 4.0.0rc1 |
@@ -1208,7 +1238,7 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 | Resultado | Ya no es campo del constructor | Se lee de | Desde |
 | --- | --- | --- | --- |
 | `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins, ecuación 3.95) | `contact_stiffness`, `impedance`; gana `mass`, solo por nombre | 4.0.0rc1 |
-| `noise_control.HydrodynamicValveNoise` | `regime`, con cavitación cuando Δp supera x_Fzp1 (p1 - pv) (IEC 60534-8-4, 5.1) | `differential`, `corrected_ratio`; gana `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
+| `noise_control.HydrodynamicValveNoise` | `regime`, con cavitación cuando Δp supera x_Fzp1 (p1 - pv) (IEC 60534-8-4, 5.1) | `differential`, `corrected_ratio`; gana `inlet_pressure_pa`, `vapor_pressure_pa` | 4.0.0rc1 |
 | `noise_control.AerodynamicValveNoise` | `regime`, los cinco intervalos de IEC 60534-8-3, 5.2 | `pressure_ratio`, `boundaries`; gana `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, solo por nombre | 4.0.0rc1 |
 | `aircraft.TerrainScreeningResult` | `screened`, terreno estrictamente por encima de la línea de visión | `source`, `receiver`, `distances_m`, `heights_m` | 3.3.0 |
 | `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1, 6.3.5 a)) | `reversal_levels_db` | después de 4.0.0rc1 |
@@ -1287,9 +1317,9 @@ except ValueError as error:
 # True
 ```
 
-## Los cuarenta y cinco nombres que ya no están
+## Los cincuenta nombres que ya no están
 
-Todo lo demás se movió. Estos cuarenta y cinco no existen en ningún módulo público:
+Todo lo demás se movió. Estos cincuenta no existen en ningún módulo público:
 
 | Ya no está | Qué escribir en su lugar |
 | --- | --- |
@@ -1301,6 +1331,7 @@ Todo lo demás se movió. Estos cuarenta y cinco no existen en ningún módulo p
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, que devuelve el mismo número, o `fluids.depth_to_absolute_pressure_pa` para la absoluta. Las dos son keyword-only y las dos toman un `latitude_deg` opcional |
 | `TransmissionLossResult` | `PropagationLossResult`, con `.tl` renombrado a `.pl` |
 | `partial_exposure` | `vibration.daily_exposure`, llamada con el valor y la duración de una sola operación. `partial_exposure` era un segundo nombre de la misma función, y el número no se mueve |
+| `insitu_reflection_factor`, `insitu_absorption_from_reflection`, `insitu_absorption_coefficient`, `insitu_absorption_spectrum`, `InsituAbsorptionResult` | `materials.in_situ_reflection_factor`, `materials.in_situ_absorption_from_reflection`, `materials.in_situ_absorption_coefficient`, `materials.in_situ_absorption_spectrum`, `materials.InSituAbsorptionResult`: in situ se escribe `in_situ` en todas partes, como ya lo escribían los nombres in situ de building, emission y noise_control |
 | `DEFAULT_SPEED_OF_SOUND` | `materials.ISO13472_SPEED_OF_SOUND_M_S`, los 340 m/s del Anexo A de la ISO 13472-1. Los 343 m/s que toman por omisión los módulos de salas son privados ahora; pasa `speed_of_sound=` para decir cuál quieres |
 | `OCTAVE_BANDS`, `THIRD_OCTAVE_BANDS` | `materials.RATING_OCTAVE_BANDS_HZ`, `materials.RATING_THIRD_OCTAVE_BANDS_HZ`, las bandas de la clasificación de la ISO 11654 |
 | `BASE_PLATE_BANDS` | `materials.BASE_PLATE_BANDS_HZ` |

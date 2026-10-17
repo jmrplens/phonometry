@@ -27,6 +27,7 @@ import pathlib
 import pkgutil
 import re
 from collections.abc import Callable, Mapping
+from types import MappingProxyType
 from typing import Any, cast
 
 #: Where the dump taken before the row shape was reworked is kept.
@@ -876,6 +877,54 @@ def catalogues_named_as_their_lookups(
     return dict(sorted(out.items()))
 
 
+#: The fields that spelled fiber the British way, by catalogue, before and
+#: after: the carpets' fiber and the porous materials' fiber diameter and its
+#: distribution parameter.
+FIBER_FIELDS: Mapping[str, tuple[tuple[str, str], ...]] = MappingProxyType(
+    {
+        "PUBLISHED_CARPETS": (("fibre", "fiber"),),
+        "PUBLISHED_POROUS_MATERIALS": (
+            ("fibre_diameter_um", "fiber_diameter_um"),
+            (
+                "fibre_diameter_distribution_parameter",
+                "fiber_diameter_distribution_parameter",
+            ),
+        ),
+    }
+)
+
+
+def fiber_spelled_the_american_way(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the American spelling of the fiber fields.
+
+    ``Carpet`` called the fiber of its pile ``fibre`` and ``PorousMaterial``
+    its fiber diameter ``fibre_diameter_um``, the British spelling the rest of
+    the library's names had left. One thing moved, and nothing else may:
+
+    * each field of :data:`FIBER_FIELDS` is named by its American spelling in
+      every row of its catalogue that holds it, wherever the row keys a cell
+      by its field. No value moved.
+
+    :raises ValueError: when no row of a catalogue holds one of the old
+        fields, so that the step can never claim a rename it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    for name, fields in FIBER_FIELDS.items():
+        rows = dict(out[name])
+        for old, new in fields:
+            moved_any = False
+            for key, row in rows.items():
+                rows[key], moved = _field_renamed(row, old, new)
+                moved_any = moved_any or moved
+            if not moved_any:
+                msg = f"{name}: no row holds {old!r}"
+                raise ValueError(msg)
+        out[name] = rows
+    return out
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -889,6 +938,7 @@ CHANGES: tuple[Change, ...] = (
     wet_sands_fit_in_words,
     decay_rate_spelled_once,
     catalogues_named_as_their_lookups,
+    fiber_spelled_the_american_way,
 )
 
 

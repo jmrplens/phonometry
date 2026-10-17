@@ -660,7 +660,7 @@ MINIMUM_BANDWIDTH_TIME_PRODUCT = 16.0
 MINIMUM_DETECTOR_MULTIPLE = 2.0
 
 
-def filter_bandwidth(centre: ArrayLike, fraction: int = 1) -> np.ndarray | float:
+def filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float:
     """Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
     The ``B`` of Equations (4) to (6), as the clause prints it: 0,71 times
@@ -668,10 +668,10 @@ def filter_bandwidth(centre: ArrayLike, fraction: int = 1) -> np.ndarray | float
     one-third-octave one. See :data:`FILTER_BANDWIDTH_FRACTION` for how
     those two figures sit against the exact IEC 61260 band edges.
 
-    :param centre: Mid-band frequency, in Hz.
+    :param center: Mid-band frequency, in Hz.
     :param fraction: Bandwidth fraction: 1 for an octave filter, 3 for a
         one-third-octave one.
-    :return: The bandwidth in Hz, in the shape of ``centre``.
+    :return: The bandwidth in Hz, in the shape of ``center``.
     :raises ValueError: If ``fraction`` is not one the clause prints a
         coefficient for, or a centre frequency is not positive and finite.
     """
@@ -682,9 +682,9 @@ def filter_bandwidth(centre: ArrayLike, fraction: int = 1) -> np.ndarray | float
             f"{sorted(FILTER_BANDWIDTH_FRACTION)}; got {fraction!r}."
         )
         raise ValueError(msg)
-    frequencies = np.asarray(centre, dtype=np.float64)
+    frequencies = np.asarray(center, dtype=np.float64)
     if not np.all(np.isfinite(frequencies)) or np.any(frequencies <= 0.0):
-        msg = "'centre' must be a positive, finite frequency in Hz."
+        msg = "'center' must be a positive, finite frequency in Hz."
         raise ValueError(msg)
     width = np.asarray(
         FILTER_BANDWIDTH_FRACTION[fraction] * frequencies, dtype=np.float64

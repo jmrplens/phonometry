@@ -116,7 +116,7 @@ __all__ = [
     "KB_WEIGHTING_TABLE_DB",
     "LINE_SOURCE_EXPONENT_CORRECTION",
     "PEAK_VELOCITY_FACTOR",
-    "PREDICTION_BAND_CENTRES_HZ",
+    "PREDICTION_BAND_CENTERS_HZ",
     "RECOMMENDED_DISTANCES_M",
     "SPEED_RESCALING_LIMIT",
     "TAKT_MAXIMUM_FACTOR",
@@ -142,7 +142,7 @@ __all__ = [
 #: The nominal third-octave centres of a prediction, 4 Hz to 250 Hz (Clause
 #: 5.2 and Tables A.1, A.2 and C.1). Annex A prints 6, 12 and 62,5 for three
 #: of them; the axis here is the nominal one.
-PREDICTION_BAND_CENTRES_HZ: tuple[float, ...] = (
+PREDICTION_BAND_CENTERS_HZ: tuple[float, ...] = (
     4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0,
     80.0, 100.0, 125.0, 160.0, 200.0, 250.0,
 )  # fmt: skip
@@ -227,7 +227,7 @@ FLOOR_NATURAL_FREQUENCIES_HZ: tuple[float, ...] = (
 #: Tables A.1 and A.2 (printed pages 24 and 25): the level difference
 #: :math:`\Delta L_{v,\mathrm{DB}}` from the ground to a floor, in decibels, for a
 #: building with concrete floors and one with timber floors, by the natural
-#: frequency of the floor (the key) and along :data:`PREDICTION_BAND_CENTRES_HZ`.
+#: frequency of the floor (the key) and along :data:`PREDICTION_BAND_CENTERS_HZ`.
 #: Valid for every storey. From building measurements, not a formula.
 GROUND_TO_FLOOR_DB: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingProxyType({
     "concrete": MappingProxyType({
@@ -626,7 +626,7 @@ def ground_to_floor_transfer(
 
     :math:`\Delta L_{v,\mathrm{DB}}` for a building with concrete or with
     timber floors whose floors have the given natural frequency, along
-    :data:`PREDICTION_BAND_CENTRES_HZ`, for any storey. The tables print a
+    :data:`PREDICTION_BAND_CENTERS_HZ`, for any storey. The tables print a
     column for each of :data:`FLOOR_NATURAL_FREQUENCIES_HZ` and no rule for a
     frequency between two, so the frequency has to be one of them. Clause
     5.4.4: run the prediction once for each natural frequency the building may
@@ -837,7 +837,7 @@ class TrainCategoryPrediction(OwnsArrays):
 def predict_train_category(
     emission_db: ArrayLike,
     *,
-    frequencies: ArrayLike = PREDICTION_BAND_CENTRES_HZ,
+    frequencies: ArrayLike = PREDICTION_BAND_CENTERS_HZ,
     ground_db: ArrayLike = 0.0,
     foundation_db: ArrayLike = 0.0,
     floor_db: ArrayLike = 0.0,

@@ -44,7 +44,7 @@ from phonometry.building.prediction.panel_transmission import mass_law_transmiss
 from phonometry.fluids import Fluid
 from phonometry.simulation import (
     AIR,
-    ALUMINIUM,
+    ALUMINUM,
     STEEL,
     WATER,
     ElasticFDTD2D,
@@ -172,7 +172,7 @@ def test_scholte_speed_matches_characteristic_roots() -> None:
     # speed (a true interface wave, B&G Section 4.4.3).
     cases = [
         (WATER, STEEL, 1479.6020),
-        (WATER, ALUMINIUM, 1476.7331),
+        (WATER, ALUMINUM, 1476.7331),
         (VV_FLUID, VV_SOLID, 1435.9734),
     ]
     for fluid, solid, expected in cases:
@@ -189,7 +189,7 @@ def test_scholte_speed_light_fluid_asymptotics() -> None:
     # reproduce that deficit, which is why the air-solid interface wave is
     # indistinguishable from the grazing airborne wave and is not testable
     # by time of flight.
-    for solid in (STEEL, ALUMINIUM):
+    for solid in (STEEL, ALUMINUM):
         q = solid.c_s**2 / solid.c_p**2
         r = solid.c_s**2 / AIR.c_p**2
         m = solid.rho / AIR.rho
@@ -200,7 +200,7 @@ def test_scholte_speed_light_fluid_asymptotics() -> None:
 
 def test_scholte_speed_rejects_wrong_material_roles() -> None:
     with pytest.raises(ValueError, match="fluid must have"):
-        scholte_speed(STEEL, ALUMINIUM)
+        scholte_speed(STEEL, ALUMINUM)
     with pytest.raises(ValueError, match="solid must have"):
         scholte_speed(WATER, (1500.0, 0.0, 1000.0))
     # Triples are accepted in both roles.
@@ -540,9 +540,9 @@ def test_from_regions_paints_in_order_and_accepts_masks() -> None:
         (10, 12),
         0.01,
         background=(343.0, 0.0, 1.2),
-        regions=[((slice(0, 6), slice(None)), ALUMINIUM), (mask, STEEL)],
+        regions=[((slice(0, 6), slice(None)), ALUMINUM), (mask, STEEL)],
     )
-    assert sim.c_p[0, 0] == ALUMINIUM.c_p  # first region
+    assert sim.c_p[0, 0] == ALUMINUM.c_p  # first region
     assert sim.c_p[3, 4] == STEEL.c_p  # later region wins
     assert sim.rho[3, 4] == STEEL.rho
     assert sim.c_p[8, 0] == 343.0  # background triple
@@ -577,6 +577,6 @@ def test_from_regions_and_material_validation() -> None:
     assert WATER.is_fluid
     assert AIR.is_fluid
     assert not STEEL.is_fluid
-    assert not ALUMINIUM.is_fluid
+    assert not ALUMINUM.is_fluid
     coerced = Material(c_p=1480, c_s=0, rho=1000)
     assert all(isinstance(v, float) for v in (coerced.c_p, coerced.c_s, coerced.rho))

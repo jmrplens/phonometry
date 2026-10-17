@@ -308,12 +308,12 @@ true_ff = [m0 / (1.0 - ratio**2 + 1.3j * ratio) for m0 in (0.0128, 0.0124, 0.013
 centre = 4.5e-3 / (1.0 + (ff / 30000.0) ** 2)
 ze_ff = [
     metrology.free_field_transfer_impedance(
-        ff, true_ff[i], true_ff[j], diaphragm_distance_m=0.25, acoustic_centres_m=(centre, centre), **ffc
+        ff, true_ff[i], true_ff[j], diaphragm_distance_m=0.25, acoustic_centers_m=(centre, centre), **ffc
     )
     for i, j in pairs
 ]   # Fórmula (D.1)
 cf = metrology.free_field_reciprocity(
-    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centres_m=(centre, centre, centre), **ffc
+    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc
 )
 print(cf.sensitivity_level_db[:, 10].round(2))   # [-37.76 -38.03 -37.55]
 print(np.abs(cf.sensitivity_v_per_pa - true_ff).max() < 1e-15)   # True
@@ -340,7 +340,7 @@ punto en que la recta corta el eje es el centro acústico:
 r = np.array([0.15, 0.20, 0.25, 0.30, 0.40, 0.50])
 alpha = metrology.reciprocity_air_attenuation([10000.0], **ffc).attenuation_np_per_m[0]
 p = 0.85 * np.exp(-alpha * r) / (r - 2.4e-3)     # sus lecturas a una frecuencia
-print(round(1000 * metrology.acoustic_centre(r, p, attenuation_np_per_m=alpha).position_m, 2))   # 2.4
+print(round(1000 * metrology.acoustic_center(r, p, attenuation_np_per_m=alpha).position_m, 2))   # 2.4
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reciprocity_acoustic_centre.svg" alt="La inversa de la presión acústica medida corregida por la atenuación, en 1/Pa, frente a la distancia al punto de referencia, de 0 m a 0,5 m: seis lecturas de 0,15 m a 0,50 m, que suben de 0,17 a 0,59 1/Pa, quedan sobre una recta de mínimos cuadrados que corta el cero en 2,4 mm, marcado como centro acústico" width="100%" />
@@ -405,10 +405,10 @@ print(b.expanded_uncertainty_db[[1, 16, 25]].round(3))   # [0.023 0.015 0.041]
 pf = metrology.free_field_parameter_uncertainty(
     ff,
     metrology.FreeFieldInputUncertainties(
-        u_distance_m=0.1e-3, u_acoustic_centre_m=0.5e-3, u_static_pressure_pa=20.0, u_temperature_k=0.1,
+        u_distance_m=0.1e-3, u_acoustic_center_m=0.5e-3, u_static_pressure_pa=20.0, u_temperature_k=0.1,
         u_relative_humidity_percent=2.0, u_air_attenuation_ratio=0.1 / np.sqrt(3.0),
     ),
-    diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centres_m=(centre, centre, centre), **ffc,
+    diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc,
 )
 xf = ff / 40000
 bf = metrology.reciprocity_uncertainty_budget(
@@ -446,7 +446,7 @@ import matplotlib.pyplot as plt
 # Las dos calibraciones otra vez, con sus balances como banda.
 c = metrology.pressure_reciprocity(f, ze, za, expanded_uncertainty_db=b.expanded_uncertainty_db)
 cf = metrology.free_field_reciprocity(
-    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centres_m=(centre, centre, centre),
+    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre),
     expanded_uncertainty_db=bf.expanded_uncertainty_db, **ffc,
 )
 
@@ -482,7 +482,7 @@ bf.plot(ax_f, language="es")
 fig.tight_layout()
 
 fig, ax = plt.subplots(figsize=(7.5, 5.2))
-metrology.acoustic_centre(r, p, attenuation_np_per_m=alpha).plot(ax, language="es")
+metrology.acoustic_center(r, p, attenuation_np_per_m=alpha).plot(ax, language="es")
 fig.tight_layout()
 plt.show()
 ```

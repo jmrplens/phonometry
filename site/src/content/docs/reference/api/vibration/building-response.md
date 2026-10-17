@@ -17,7 +17,7 @@ how useful it is.
 The annex offers four empirical predictors and is candid about all of them.
 The simplest is the storey count, $f = 10/n$ hertz, the same rule
 DIN 4150-3 prints in its 6.4 and this library already publishes as
-[`storey_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#storey_fundamental_frequency).
+[`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency).
 The other three are the forms the period $T$ takes in national codes,
 each with a coefficient the codes disagree about:
 
@@ -156,9 +156,9 @@ EMPIRICAL_FREQUENCY_TOLERANCE = 0.5
 
 ```python
 estimate_fundamental_frequency(
-    model: Literal['storeys', 'height', 'height_width', 'slenderness'] | str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'] | str,
     *,
-    storeys: int | None = None,
+    stories: int | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -172,7 +172,7 @@ One prediction, bundled with the coefficient and the error band.
 | Name | Description |
 | :--- | :--- |
 | `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). |
-| `storeys` | Number of storeys `n`, for the storey model. |
+| `stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
 | `coefficient` | The code coefficient, or `None` for the midpoint. |
@@ -189,9 +189,9 @@ One prediction, bundled with the coefficient and the error band.
 
 ```python
 fundamental_frequency(
-    model: Literal['storeys', 'height', 'height_width', 'slenderness'] | str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'] | str,
     *,
-    storeys: int | None = None,
+    stories: int | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -209,7 +209,7 @@ reader should not have to remember which.
 | Name | Description |
 | :--- | :--- |
 | `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). |
-| `storeys` | Number of storeys `n`, for the storey model. |
+| `stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
 | `coefficient` | The code coefficient, or `None` for the midpoint. |
@@ -220,9 +220,9 @@ reader should not have to remember which.
 
 ```python
 fundamental_period(
-    model: Literal['storeys', 'height', 'height_width', 'slenderness'] | str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'] | str,
     *,
-    storeys: int | None = None,
+    stories: int | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -233,7 +233,7 @@ The fundamental translation period of a building, in seconds (D.2).
 
 Four predictors, and which arguments are needed depends on which:
 
-* `"storeys"` needs *storeys*: $T = 0{,}1\,n$.
+* `"stories"` needs *stories*: $T = 0{,}1\,n$.
 * `"height"` needs *height_m*: $T = k_1 h$.
 * `"height_width"` needs both and *width_m*: $T = k_2 h/\sqrt{b}$.
 * `"slenderness"` needs both:
@@ -248,7 +248,7 @@ form, since the annex gives a range and no way to choose inside it; state
 | Name | Description |
 | :--- | :--- |
 | `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). |
-| `storeys` | Number of storeys `n`, for the storey model. |
+| `stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
 | `coefficient` | The code coefficient, or `None` for the midpoint of [`PERIOD_COEFFICIENT_RANGES`](/phonometry/reference/api/vibration/building-response/#period_coefficient_ranges). Not accepted by the storey model, which has no coefficient to choose. |
@@ -316,13 +316,13 @@ PERIOD_COEFFICIENT_RANGES = {'height': (0.014, 0.03), 'height_width': (0.087, 0.
 *Constant* (`tuple`).
 
 ```python
-PERIOD_MODELS = ('storeys', 'height', 'height_width', 'slenderness')
+PERIOD_MODELS = ('stories', 'height', 'height_width', 'slenderness')
 ```
 
-## STOREY_PERIOD_COEFFICIENT_S
+## STORY_PERIOD_COEFFICIENT_S
 
 *Constant* (`float`).
 
 ```python
-STOREY_PERIOD_COEFFICIENT_S = 0.1
+STORY_PERIOD_COEFFICIENT_S = 0.1
 ```

@@ -123,7 +123,7 @@ EDT/T20/T30 fit lines.
 ## filter_bandwidth
 
 ```python
-filter_bandwidth(centre: ArrayLike, fraction: int = 1) -> np.ndarray | float
+filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float
 ```
 
 Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
@@ -137,10 +137,10 @@ those two figures sit against the exact IEC 61260 band edges.
 
 | Name | Description |
 | :--- | :--- |
-| `centre` | Mid-band frequency, in Hz. |
+| `center` | Mid-band frequency, in Hz. |
 | `fraction` | Bandwidth fraction: 1 for an octave filter, 3 for a one-third-octave one. |
 
-**Returns:** The bandwidth in Hz, in the shape of `centre`.
+**Returns:** The bandwidth in Hz, in the shape of `center`.
 
 **Raises**
 

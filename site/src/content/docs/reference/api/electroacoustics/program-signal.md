@@ -1,8 +1,8 @@
 ---
-title: "electroacoustics.programme_signal"
+title: "electroacoustics.program_signal"
 description: "The simulated programme signal of IEC 60268-1:1985, Clause 7."
 sidebar:
-  label: "programme_signal"
+  label: "program_signal"
 ---
 
 The simulated programme signal of IEC 60268-1:1985, Clause 7.
@@ -23,7 +23,7 @@ defines a noise that stands in for that programme in a measurement, the
 Table II gives the relative level of each one-third-octave band from 20 Hz to
 20 kHz with its tolerance: 0 dB from 250 Hz to 800 Hz, falling to
 $-13{,}5$ dB at 20 Hz and $-21{,}6$ dB at 20 kHz
-([`SIMULATED_PROGRAMME_SPECTRUM`](/phonometry/reference/api/electroacoustics/programme-signal/#simulated_programme_spectrum)). The Note under the clause adds that the
+([`SIMULATED_PROGRAM_SPECTRUM`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_spectrum)). The Note under the clause adds that the
 power of the whole signal is about 12,5 dB above the 0 dB of one band, which is
 the power sum of the 31 relative levels, 12,56 dB.
 
@@ -42,7 +42,7 @@ which includes the source's own output impedance:
   adjusting the value of the 10 kohm resistor", so the 10 kohm is the whole
   shunt the network sees.
 
-[`programme_signal_filter`](/phonometry/reference/api/electroacoustics/programme-signal/#programme_signal_filter) is the exact transfer function of that ladder,
+[`program_signal_filter`](/phonometry/reference/api/electroacoustics/program-signal/#program_signal_filter) is the exact transfer function of that ladder,
 the voltage across the 10 kohm over the source e.m.f., from its nodal
 equations. The two 2,2 µF capacitors with the resistors behind them make the
 low-frequency roll-off and the 91 nF and 68 nF shunts the high-frequency one;
@@ -58,7 +58,7 @@ realisation within tolerance, not the definition: the definition is Table II.
 The generator
 -------------
 
-[`simulated_programme_signal`](/phonometry/reference/api/electroacoustics/programme-signal/#simulated_programme_signal) synthesises the signal in the frequency
+[`simulated_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_signal) synthesises the signal in the frequency
 domain: a white Gaussian spectrum, shaped and transformed back to a record
 that is stationary and Gaussian, as the clause asks, at any sample rate and
 with no bilinear warping near the Nyquist frequency. It offers two shapes.
@@ -85,7 +85,7 @@ inside its tolerance of 3 dB.
 The verdict
 -----------
 
-[`check_programme_signal`](/phonometry/reference/api/electroacoustics/programme-signal/#check_programme_signal) judges one-third-octave band levels against
+[`check_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#check_program_signal) judges one-third-octave band levels against
 Table II. The table is a relative spectrum: its 0 dB is not a level the signal
 has to reach, it is where the bands are referred to. The check therefore looks
 for the level that places every band inside its tolerance. Each band allows a
@@ -101,13 +101,13 @@ Amendment 2 replaces 12.1, the three coils that make a uniform magnetic field.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## check_programme_signal
+## check_program_signal
 
 ```python
-check_programme_signal(
+check_program_signal(
     frequencies: ArrayLike,
     band_levels_db: ArrayLike,
-) -> ProgrammeSignalCheck
+) -> ProgramSignalCheck
 ```
 
 Is this one-third-octave spectrum the programme signal of IEC 60268-1?
@@ -130,7 +130,7 @@ table.
 | `frequencies` | Band centre frequencies, in Hz, nominal or exact, each a band of Table II (20 Hz to 20 kHz) and none repeated. |
 | `band_levels_db` | The band levels, in dB, on any reference. |
 
-**Returns:** A [`ProgrammeSignalCheck`](/phonometry/reference/api/electroacoustics/programme-signal/#programmesignalcheck).
+**Returns:** A [`ProgramSignalCheck`](/phonometry/reference/api/electroacoustics/program-signal/#programsignalcheck).
 
 **Raises**
 
@@ -138,10 +138,10 @@ table.
 | :--- | :--- |
 | ValueError | If the inputs differ in length, a frequency is not a band of Table II or appears twice, a level is not finite, or fewer than two bands are given. |
 
-## programme_signal_filter
+## program_signal_filter
 
 ```python
-programme_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]
+program_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]
 ```
 
 The transfer function of the filter of IEC 60268-1:1985 Figure 2.
@@ -166,10 +166,10 @@ conventions the figure's notes state.
 | :--- | :--- |
 | ValueError | If a frequency is not a positive finite number. |
 
-## ProgrammeSignalCheck
+## ProgramSignalCheck
 
 ```python
-ProgrammeSignalCheck(
+ProgramSignalCheck(
     frequencies: NDArray[np.float64],
     band_levels_db: NDArray[np.float64],
 )
@@ -188,7 +188,7 @@ Table II's relative levels and tolerances at the bands, and the offset
 that refers the levels to them, are read from the table, so a check
 cannot be built against other tolerances.
 
-### ProgrammeSignalCheck.binding_bands_hz
+### ProgramSignalCheck.binding_bands_hz
 
 *property*
 
@@ -199,13 +199,13 @@ the smallest margin is reached by at least two bands, one against its
 upper limit and one against its lower; those are the bands that fix
 the verdict.
 
-### ProgrammeSignalCheck.deviations_db
+### ProgramSignalCheck.deviations_db
 
 *property*
 
 Each band's level, referred by `offset_db`, minus Table II, in dB.
 
-### ProgrammeSignalCheck.margin_db
+### ProgramSignalCheck.margin_db
 
 *property*
 
@@ -214,7 +214,7 @@ The smallest distance of a band from its nearer limit, in dB.
 Negative when the spectrum cannot be placed inside the tolerances: its
 magnitude is then the excursion of the worst band.
 
-### ProgrammeSignalCheck.offset_db
+### ProgramSignalCheck.offset_db
 
 *property*
 
@@ -224,16 +224,16 @@ The middle of the window of levels that keeps every band inside its
 tolerance, or, when no level does, the level that shares the worst
 excursion equally between the two sides.
 
-### ProgrammeSignalCheck.passes
+### ProgramSignalCheck.passes
 
 *property*
 
 Whether some level places every band inside its tolerance.
 
-### ProgrammeSignalCheck.plot()
+### ProgramSignalCheck.plot()
 
 ```python
-ProgrammeSignalCheck.plot(
+ProgramSignalCheck.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -255,28 +255,28 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
-### ProgrammeSignalCheck.relative_levels_db
+### ProgramSignalCheck.relative_levels_db
 
 *property*
 
 Table II's relative levels at the bands, in dB.
 
-### ProgrammeSignalCheck.tolerance_minus_db
+### ProgramSignalCheck.tolerance_minus_db
 
 *property*
 
 The lower tolerances of Table II at the bands, in dB.
 
-### ProgrammeSignalCheck.tolerance_plus_db
+### ProgramSignalCheck.tolerance_plus_db
 
 *property*
 
 The upper tolerances of Table II at the bands, in dB.
 
-## ProgrammeSpectrumBand
+## ProgramSpectrumBand
 
 ```python
-ProgrammeSpectrumBand(
+ProgramSpectrumBand(
     relative_level_db: float,
     tolerance_plus_db: float,
     tolerance_minus_db: float,
@@ -293,10 +293,10 @@ One row of IEC 60268-1:1985 Table II.
 | `tolerance_plus_db` | The upper tolerance, in dB, as printed (a positive number). |
 | `tolerance_minus_db` | The lower tolerance, in dB, as printed (a positive number). |
 
-## simulated_programme_signal
+## simulated_program_signal
 
 ```python
-simulated_programme_signal(
+simulated_program_signal(
     fs: int,
     seconds: float,
     *,
@@ -320,7 +320,7 @@ continued at the slope of the end segments below 20 Hz and above 20 kHz,
 and its nodes are set so that each band's power, integrated over the band
 in closed form, is the printed level. Every band then has its whole
 tolerance for the random fluctuation of a finite record. `"figure_2"` is
-pink noise through the filter of Figure 2 ([`programme_signal_filter`](/phonometry/reference/api/electroacoustics/programme-signal/#programme_signal_filter)),
+pink noise through the filter of Figure 2 ([`program_signal_filter`](/phonometry/reference/api/electroacoustics/program-signal/#program_signal_filter)),
 the circuit the clause offers: inside the tolerances, but only 0,18 dB
 inside at its worst band, so a short record can fall outside them.
 
@@ -355,6 +355,6 @@ the middle need a few seconds.
 | :--- | :--- |
 | ValueError | If an input is invalid, or `peak_to_rms` is not below the ratio of the unclipped record. |
 
-## SIMULATED_PROGRAMME_SPECTRUM
+## SIMULATED_PROGRAM_SPECTRUM
 
 *Constant* (`mapping`).

@@ -35,7 +35,7 @@ effective_perceived_noise_level(
     dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = 10.0,
-    procedure: str = 'aeroplane',
+    procedure: str = 'airplane',
 ) -> EPNLResult
 ```
 
@@ -54,7 +54,7 @@ the 10 dB-down window give $\mathrm{EPNL} = \mathrm{PNLTM} + D$.
 | `spectra` | Spectral time history, shape `(K, 24)`, in dB. |
 | `dt` | Per-record duration, in s (scalar or per record, default 0.5). |
 | `reference_time` | Normalising time `T0`, in s (default 10). |
-| `procedure` | Tone-correction procedure of App. 2 §4.3.1 Step 1: `"aeroplane"` (default) starts the slope analysis at the 80 Hz band (band 3), `"helicopter"` (helicopters and tilt-rotors) at the 50 Hz band (band 1), so rotor tones in the 50-80 Hz bands are not missed. |
+| `procedure` | Tone-correction procedure of App. 2 §4.3.1 Step 1: `"airplane"` (default) starts the slope analysis at the 80 Hz band (band 3), `"helicopter"` (helicopters and tilt-rotors) at the 50 Hz band (band 1), so rotor tones in the 50-80 Hz bands are not missed. |
 
 **Returns:** An [`EPNLResult`](/phonometry/reference/api/aeroacoustics/certification/#epnlresult).
 
@@ -62,7 +62,7 @@ the 10 dB-down window give $\mathrm{EPNL} = \mathrm{PNLTM} + D$.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the input is not a `(K, 24)` finite array, or `procedure` is not `"aeroplane"` or `"helicopter"`. |
+| ValueError | If the input is not a `(K, 24)` finite array, or `procedure` is not `"airplane"` or `"helicopter"`. |
 
 ## epnl_from_pnlt
 

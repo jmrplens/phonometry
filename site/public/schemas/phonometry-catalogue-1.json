@@ -1813,7 +1813,7 @@
         "pile_surface": {
           "$ref": "#/$defs/text"
         },
-        "fibre": {
+        "fiber": {
           "$ref": "#/$defs/text"
         },
         "mounting": {
@@ -1856,7 +1856,7 @@
     },
     "Carpet.cells": {
       "enum": [
-        "fibre",
+        "fiber",
         "group",
         "mounting",
         "name",
@@ -4933,10 +4933,10 @@
         "thermal_permeability_m2": {
           "$ref": "#/$defs/number_from_0"
         },
-        "fibre_diameter_um": {
+        "fiber_diameter_um": {
           "$ref": "#/$defs/number_from_0"
         },
-        "fibre_diameter_distribution_parameter": {
+        "fiber_diameter_distribution_parameter": {
           "$ref": "#/$defs/number"
         },
         "shot_content_percent": {
@@ -4963,17 +4963,17 @@
         "structural_loss_factor": {
           "$ref": "#/$defs/number"
         },
-        "fibre_diameter_cm": {
+        "fiber_diameter_cm": {
           "$ref": "#/$defs/number_from_0",
-          "description": "fibre_diameter_um written in cm; the reader converts the figure on its digits and keeps it in converted."
+          "description": "fiber_diameter_um written in cm; the reader converts the figure on its digits and keeps it in converted."
         },
-        "fibre_diameter_m": {
+        "fiber_diameter_m": {
           "$ref": "#/$defs/number_from_0",
-          "description": "fibre_diameter_um written in m; the reader converts the figure on its digits and keeps it in converted."
+          "description": "fiber_diameter_um written in m; the reader converts the figure on its digits and keeps it in converted."
         },
-        "fibre_diameter_mm": {
+        "fiber_diameter_mm": {
           "$ref": "#/$defs/number_from_0",
-          "description": "fibre_diameter_um written in mm; the reader converts the figure on its digits and keeps it in converted."
+          "description": "fiber_diameter_um written in mm; the reader converts the figure on its digits and keeps it in converted."
         },
         "flow_resistivity_kpa_s_m2": {
           "$ref": "#/$defs/number_from_0",
@@ -5070,8 +5070,8 @@
     "PorousMaterial.cells": {
       "enum": [
         "binder_content_percent",
-        "fibre_diameter_distribution_parameter",
-        "fibre_diameter_um",
+        "fiber_diameter_distribution_parameter",
+        "fiber_diameter_um",
         "flow_resistivity_pa_s_m2",
         "frame_density_kg_m3",
         "group",
@@ -5089,9 +5089,9 @@
         "variant",
         "viscous_length_um",
         "youngs_modulus_pa",
-        "fibre_diameter_cm",
-        "fibre_diameter_m",
-        "fibre_diameter_mm",
+        "fiber_diameter_cm",
+        "fiber_diameter_m",
+        "fiber_diameter_mm",
         "flow_resistivity_kpa_s_m2",
         "frame_density_g_cm3",
         "shear_modulus_gpa",
@@ -5117,8 +5117,8 @@
     "PorousMaterial.fields": {
       "enum": [
         "binder_content_percent",
-        "fibre_diameter_distribution_parameter",
-        "fibre_diameter_um",
+        "fiber_diameter_distribution_parameter",
+        "fiber_diameter_um",
         "flow_resistivity_pa_s_m2",
         "frame_density_kg_m3",
         "poisson_ratio",
@@ -5132,9 +5132,9 @@
         "tortuosity",
         "viscous_length_um",
         "youngs_modulus_pa",
-        "fibre_diameter_cm",
-        "fibre_diameter_m",
-        "fibre_diameter_mm",
+        "fiber_diameter_cm",
+        "fiber_diameter_m",
+        "fiber_diameter_mm",
         "flow_resistivity_kpa_s_m2",
         "frame_density_g_cm3",
         "shear_modulus_gpa",

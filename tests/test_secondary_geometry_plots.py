@@ -171,15 +171,17 @@ def test_junction_geometry_rejects_nan_second_thickness() -> None:
 
 
 def test_insitu_setup_defaults_and_retention() -> None:
-    assert pm.materials.plot_insitu_geometry() is not None
+    assert pm.materials.plot_in_situ_geometry() is not None
     with pytest.raises(
         ValueError, match=r"'source_height_m' must exceed 'microphone_height_m'"
     ):
-        pm.materials.plot_insitu_geometry(source_height_m=0.2, microphone_height_m=0.25)
+        pm.materials.plot_in_situ_geometry(
+            source_height_m=0.2, microphone_height_m=0.25
+        )
     fs = 48000
     impulse = np.zeros(2048)
     impulse[100] = 1.0
-    res = pm.materials.insitu_absorption_spectrum(
+    res = pm.materials.in_situ_absorption_spectrum(
         impulse, 0.4 * impulse, fs, source_height_m=1.25, microphone_height_m=0.25
     )
     assert res.source_height_m == pytest.approx(1.25)

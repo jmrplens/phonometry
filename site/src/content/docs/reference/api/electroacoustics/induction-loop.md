@@ -111,7 +111,7 @@ theoretical responses of the band-limiting filters as -0,8 dB at 100 Hz and
 
 ```python
 AmplifierOverloadVerification(
-    programme: OverloadTestFrequency,
+    program: OverloadTestFrequency,
     test_current_a: float,
     doubling_frequency_hz: float,
     end_frequency_hz: float,
@@ -135,7 +135,7 @@ sweep on to the doubling; the voltage there is drawn and kept in
 
 | Name | Description |
 | :--- | :--- |
-| `programme` | The row of Table 4 the test used. |
+| `program` | The row of Table 4 the test used. |
 | `test_current_a` | The loop current at 1 kHz, 7 dB below the one that gives the required field, in amperes. |
 | `doubling_frequency_hz` | Where the loop voltage first reaches twice its value at 1 kHz, in hertz; infinite when it does not double below 20 kHz (or below the top of the given current response). |
 | `end_frequency_hz` | Where the sweep ends: the higher of the doubling frequency and the Table 4 frequency, in hertz. |
@@ -714,14 +714,14 @@ $0{,}503\ \mu\mathrm{T}$. E.6 prints 1,256; the last digit rounds to
 *Constant* (`mapping`).
 
 ```python
-OVERLOAD_TEST_FREQUENCIES = {'transient_speech': OverloadTestFrequency(programme='speech for transient use, for example small-volume systems', power_bandwidth_limit_hz=1250.0, test_frequency_hz=2500.0), 'speech': OverloadTestFrequency(programme='speech (default)', power_bandwidth_limit_hz=1600.0, test_frequency_hz=3150.0), 'music': OverloadTestFrequency(programme='music', power_bandwidth_limit_hz=2000.0, test_frequency_hz=4000.0)}
+OVERLOAD_TEST_FREQUENCIES = {'transient_speech': OverloadTestFrequency(program='speech for transient use, for example small-volume systems', power_bandwidth_limit_hz=1250.0, test_frequency_hz=2500.0), 'speech': OverloadTestFrequency(program='speech (default)', power_bandwidth_limit_hz=1600.0, test_frequency_hz=3150.0), 'music': OverloadTestFrequency(program='music', power_bandwidth_limit_hz=2000.0, test_frequency_hz=4000.0)}
 ```
 
 ## OverloadTestFrequency
 
 ```python
 OverloadTestFrequency(
-    programme: str,
+    program: str,
     power_bandwidth_limit_hz: float,
     test_frequency_hz: float,
 )
@@ -733,7 +733,7 @@ One row of Table 4 of IEC 60118-4:2014/A1:2017.
 
 | Name | Description |
 | :--- | :--- |
-| `programme` | The typical programme material of the system. |
+| `program` | The typical programme material of the system. |
 | `power_bandwidth_limit_hz` | The upper limit of the maximum power bandwidth it needs, in hertz. |
 | `test_frequency_hz` | The frequency the overload test is run to, about twice that limit, in hertz. |
 
@@ -812,7 +812,7 @@ verify_amplifier_overload(
     impedance: LoopImpedance,
     compliance_voltage_v: float,
     *,
-    programme: str = 'speech',
+    program: str = 'speech',
     current_response: AmplifierFrequencyResponse | None = None,
 ) -> AmplifierOverloadVerification
 ```
@@ -854,7 +854,7 @@ first doubling.
 | `required_current_a` | The RMS loop current at 1 kHz that gives the required field strength at the chosen point, in amperes. |
 | `impedance` | The loop's [`LoopImpedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopimpedance) ([`loop_impedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_impedance)). |
 | `compliance_voltage_v` | The amplifier's compliance voltage, in volts ([`compliance_voltage`](/phonometry/reference/api/electroacoustics/induction-loop-components/#compliance_voltage)). |
-| `programme` | The row of [`OVERLOAD_TEST_FREQUENCIES`](/phonometry/reference/api/electroacoustics/induction-loop/#overload_test_frequencies): `"transient_speech"`, `"speech"` (the default of Table 4) or `"music"`. |
+| `program` | The row of [`OVERLOAD_TEST_FREQUENCIES`](/phonometry/reference/api/electroacoustics/induction-loop/#overload_test_frequencies): `"transient_speech"`, `"speech"` (the default of Table 4) or `"music"`. |
 | `current_response` | The amplifier's current response into the loop, relative to 1 kHz ([`amplifier_frequency_response`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifier_frequency_response)); `None` for a flat current, which is what a current-drive amplifier delivers (E.3). |
 
 **Returns:** An [`AmplifierOverloadVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#amplifieroverloadverification).

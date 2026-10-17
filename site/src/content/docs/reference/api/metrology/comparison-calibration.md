@@ -1394,7 +1394,7 @@ uncertainties when the calibrations share nothing.
 
 The frequencies where the two calibrations disagree, in Hz.
 
-### JigCouplerVerification.normalised_difference
+### JigCouplerVerification.normalized_difference
 
 *property*
 

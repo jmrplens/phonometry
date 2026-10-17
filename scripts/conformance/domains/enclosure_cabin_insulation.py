@@ -1008,13 +1008,13 @@ def _chk_clause_eight_on_the_iso717_example() -> Outcome:
             "D_p,w": printed["rw"],
             "C": printed["c"],
             "Ctr": printed["ctr"],
-            "unfavourable sum": printed["unfavourable_sum"],
+            "unfavourable sum": printed["unfavorable_sum"],
         },
         {
             "D_p,w": rating.rating,
             "C": rating.c,
             "Ctr": rating.ctr,
-            "unfavourable sum": round(rating.unfavourable_sum, 1),
+            "unfavourable sum": round(rating.unfavorable_sum, 1),
         },
         unit="dB",
     )
@@ -1087,7 +1087,7 @@ def _chk_sgs_pod_rating() -> Outcome:
         expected_label="D_p,w = 32 dB, the integer the report prints",
         computed_label=(
             f"D_p,w = {rating.rating} dB on an unfavourable sum of "
-            f"{rating.unfavourable_sum:.1f} dB"
+            f"{rating.unfavorable_sum:.1f} dB"
         ),
     )
 
@@ -1110,7 +1110,7 @@ def _chk_agh_booth_rating() -> Outcome:
         expected_label="D_p,w = 22 dB, the integer the report prints",
         computed_label=(
             f"D_p,w = {rating.rating} dB on an unfavourable sum of "
-            f"{rating.unfavourable_sum:.1f} dB"
+            f"{rating.unfavorable_sum:.1f} dB"
         ),
     )
 
@@ -1138,7 +1138,7 @@ def _chk_euronova_booth_rating() -> Outcome:
         expected_label="D_p,w = 30 dB, the integer the report prints",
         computed_label=(
             f"D_p,w = {rating.rating} dB on an unfavourable sum of "
-            f"{rating.unfavourable_sum:.1f} dB"
+            f"{rating.unfavorable_sum:.1f} dB"
         ),
     )
 
@@ -1352,7 +1352,7 @@ def _chk_iso717_pass_through() -> Outcome:
         "rating": float(rated.rating),
         "C": float(rated.c),
         "Ctr": float(rated.ctr),
-        "unfavourable sum": float(rated.unfavourable_sum),
+        "unfavourable sum": float(rated.unfavorable_sum),
     }
     return record(printed, computed, unit="dB")
 

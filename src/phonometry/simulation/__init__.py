@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from .elastic_fdtd import (
     AIR,
-    ALUMINIUM,
+    ALUMINUM,
     CONCRETE,
     STEEL,
     WATER,
@@ -34,7 +34,7 @@ from .ntff import SIMULATION_AIR, ContourPhasors, far_field_from_contour
 __all__ = [
     "AIR",
     "SIMULATION_AIR",
-    "ALUMINIUM",
+    "ALUMINUM",
     "CONCRETE",
     "FDTD2D",
     "STEEL",

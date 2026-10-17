@@ -27,10 +27,10 @@ from phonometry.materials.absorbers.porous import (
     ABSORBER_AIR,
     ROCK_WOOL_LATERAL_FIT,
     ROCK_WOOL_LONGITUDINAL_FIT,
-    FibreResistivityFit,
+    FiberResistivityFit,
     PorousAbsorberWarning,
     airflow_resistivity_from_bulk_density,
-    fibre_characteristic_lengths,
+    fiber_characteristic_lengths,
     porosity_from_bulk_density,
     viscous_characteristic_length,
 )
@@ -43,7 +43,7 @@ Specimen = tuple[str, str, int, int, float, float, float, float, float]
 _ROCK_WOOL_FIBRE_RADIUS_M = ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM / 2.0 * 1e-6
 
 
-def _fit_row(fit: FibreResistivityFit) -> tuple[float, float, float, float]:
+def _fit_row(fit: FiberResistivityFit) -> tuple[float, float, float, float]:
     """The four numbers Hopkins prints for one fit, in the order he prints them."""
     low, high = fit.bulk_density_range_kg_m3
     return fit.k1, fit.k2, low, high
@@ -75,10 +75,10 @@ def test_the_two_ends_of_the_printed_density_range_give_the_printed_porosities()
     highest_porosity, lowest_porosity = ref.HOPKINS_ROCK_WOOL_POROSITY_RANGE
 
     at_low = porosity_from_bulk_density(
-        low_density, fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
+        low_density, fiber_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
     )
     at_high = porosity_from_bulk_density(
-        high_density, fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
+        high_density, fiber_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
     )
 
     assert at_low == pytest.approx(highest_porosity, abs=0.005)
@@ -88,27 +88,27 @@ def test_the_two_ends_of_the_printed_density_range_give_the_printed_porosities()
 def test_a_denser_material_is_a_less_porous_one() -> None:
     """The one monotonicity the relation has, and the whole of its content."""
     fibre = ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
-    light = porosity_from_bulk_density(20.0, fibre_density_kg_m3=fibre)
-    heavy = porosity_from_bulk_density(200.0, fibre_density_kg_m3=fibre)
+    light = porosity_from_bulk_density(20.0, fiber_density_kg_m3=fibre)
+    heavy = porosity_from_bulk_density(200.0, fiber_density_kg_m3=fibre)
 
     assert light > heavy
 
 
 def test_a_bulk_density_at_the_fibre_density_is_refused() -> None:
     """Zero porosity is not a porous material, and neither is a negative one."""
-    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
-        porosity_from_bulk_density(2600.0, fibre_density_kg_m3=2600.0)
-    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
-        porosity_from_bulk_density(3000.0, fibre_density_kg_m3=2600.0)
+    with pytest.raises(ValueError, match="fiber_density_kg_m3"):
+        porosity_from_bulk_density(2600.0, fiber_density_kg_m3=2600.0)
+    with pytest.raises(ValueError, match="fiber_density_kg_m3"):
+        porosity_from_bulk_density(3000.0, fiber_density_kg_m3=2600.0)
 
 
 @pytest.mark.parametrize("bad", [0.0, -1.0, float("nan")])
 def test_both_porosity_densities_have_to_be_positive(bad: float) -> None:
     """A density of zero says nothing about a pore."""
     with pytest.raises(ValueError, match="bulk_density_kg_m3"):
-        porosity_from_bulk_density(bad, fibre_density_kg_m3=2600.0)
-    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
-        porosity_from_bulk_density(60.0, fibre_density_kg_m3=bad)
+        porosity_from_bulk_density(bad, fiber_density_kg_m3=2600.0)
+    with pytest.raises(ValueError, match="fiber_density_kg_m3"):
+        porosity_from_bulk_density(60.0, fiber_density_kg_m3=bad)
 
 
 # ---------------------------------------------------------------------------
@@ -120,10 +120,10 @@ def test_the_two_published_fits_carry_the_printed_coefficients() -> None:
     assert (
         _fit_row(ROCK_WOOL_LONGITUDINAL_FIT) == ref.HOPKINS_ROCK_WOOL_LONGITUDINAL_FIT
     )
-    assert ROCK_WOOL_LATERAL_FIT.fibre_diameter_um == (
+    assert ROCK_WOOL_LATERAL_FIT.fiber_diameter_um == (
         ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM
     )
-    assert ROCK_WOOL_LONGITUDINAL_FIT.fibre_diameter_um == (
+    assert ROCK_WOOL_LONGITUDINAL_FIT.fiber_diameter_um == (
         ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM
     )
 
@@ -185,10 +185,10 @@ def test_a_density_inside_the_fitted_range_is_silent(density: float) -> None:
 
 def test_a_finer_fibre_resists_more(recwarn: pytest.WarningsRecorder) -> None:
     """The diameter is squared in the denominator, so it is the strongest lever."""
-    coarse = FibreResistivityFit(
+    coarse = FiberResistivityFit(
         k1=353.0,
         k2=0.63,
-        fibre_diameter_um=9.5,
+        fiber_diameter_um=9.5,
         bulk_density_range_kg_m3=(31.0, 155.0),
         direction="lateral",
         source="a doubled fibre diameter, to halve nothing else",
@@ -302,10 +302,10 @@ def test_the_resistivity_and_the_shape_factor_have_to_be_positive(bad: float) ->
 # ---------------------------------------------------------------------------
 def test_the_thermal_length_is_twice_the_viscous_one() -> None:
     """Eq. (5.30) is Eq. (5.29) without the 2, so the ratio is the model."""
-    lengths = fibre_characteristic_lengths(
+    lengths = fiber_characteristic_lengths(
         _ROCK_WOOL_FIBRE_RADIUS_M,
         bulk_density_kg_m3=60.0,
-        fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
+        fiber_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
     )
 
     assert lengths.thermal_length_m == pytest.approx(2.0 * lengths.viscous_length_m)
@@ -323,8 +323,8 @@ def test_eliminating_the_fibre_length_reproduces_the_printed_equation() -> None:
     fibre_density = ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
     bulk = fibre_density * math.pi * radius**2 * fibre_length_per_m3
 
-    got = fibre_characteristic_lengths(
-        radius, bulk_density_kg_m3=bulk, fibre_density_kg_m3=fibre_density
+    got = fiber_characteristic_lengths(
+        radius, bulk_density_kg_m3=bulk, fiber_density_kg_m3=fibre_density
     )
 
     printed = 1.0 / (2.0 * math.pi * fibre_length_per_m3 * radius)
@@ -333,10 +333,10 @@ def test_eliminating_the_fibre_length_reproduces_the_printed_equation() -> None:
 
 def test_a_wool_of_the_usual_density_has_pores_of_the_usual_size() -> None:
     """Tens of micrometres, which is the range every published table prints."""
-    lengths = fibre_characteristic_lengths(
+    lengths = fiber_characteristic_lengths(
         _ROCK_WOOL_FIBRE_RADIUS_M,
         bulk_density_kg_m3=60.0,
-        fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
+        fiber_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
     )
 
     assert lengths.viscous_length_m > 20e-6
@@ -359,15 +359,15 @@ def test_the_two_routes_to_the_viscous_length_drift_apart_with_density(
         density, fit=ROCK_WOOL_LONGITUDINAL_FIT
     )
     porosity = porosity_from_bulk_density(
-        density, fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
+        density, fiber_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
     )
     from_parameters = viscous_characteristic_length(
         resistivity, porosity=porosity, tortuosity=1.0
     )
-    from_geometry = fibre_characteristic_lengths(
+    from_geometry = fiber_characteristic_lengths(
         _ROCK_WOOL_FIBRE_RADIUS_M,
         bulk_density_kg_m3=density,
-        fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
+        fiber_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
     ).viscous_length_m
 
     assert from_parameters / from_geometry == pytest.approx(expected, abs=0.01)
@@ -382,17 +382,17 @@ def test_a_layer_as_dense_as_its_own_fibre_is_refused() -> None:
     fibrous layer is.
     """
     fibre = ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
-    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
-        fibre_characteristic_lengths(
+    with pytest.raises(ValueError, match="fiber_density_kg_m3"):
+        fiber_characteristic_lengths(
             _ROCK_WOOL_FIBRE_RADIUS_M,
             bulk_density_kg_m3=fibre,
-            fibre_density_kg_m3=fibre,
+            fiber_density_kg_m3=fibre,
         )
-    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
-        fibre_characteristic_lengths(
+    with pytest.raises(ValueError, match="fiber_density_kg_m3"):
+        fiber_characteristic_lengths(
             _ROCK_WOOL_FIBRE_RADIUS_M,
             bulk_density_kg_m3=fibre + 1.0,
-            fibre_density_kg_m3=fibre,
+            fiber_density_kg_m3=fibre,
         )
 
 
@@ -400,19 +400,19 @@ def test_a_layer_as_dense_as_its_own_fibre_is_refused() -> None:
 def test_the_three_fibre_inputs_have_to_be_positive(bad: float) -> None:
     """A radius or a density of zero leaves no geometry to compute from."""
     fibre = ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
-    with pytest.raises(ValueError, match="fibre_radius_m"):
-        fibre_characteristic_lengths(
-            bad, bulk_density_kg_m3=60.0, fibre_density_kg_m3=fibre
+    with pytest.raises(ValueError, match="fiber_radius_m"):
+        fiber_characteristic_lengths(
+            bad, bulk_density_kg_m3=60.0, fiber_density_kg_m3=fibre
         )
     with pytest.raises(ValueError, match="bulk_density_kg_m3"):
-        fibre_characteristic_lengths(
+        fiber_characteristic_lengths(
             _ROCK_WOOL_FIBRE_RADIUS_M,
             bulk_density_kg_m3=bad,
-            fibre_density_kg_m3=fibre,
+            fiber_density_kg_m3=fibre,
         )
-    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
-        fibre_characteristic_lengths(
+    with pytest.raises(ValueError, match="fiber_density_kg_m3"):
+        fiber_characteristic_lengths(
             _ROCK_WOOL_FIBRE_RADIUS_M,
             bulk_density_kg_m3=60.0,
-            fibre_density_kg_m3=bad,
+            fiber_density_kg_m3=bad,
         )

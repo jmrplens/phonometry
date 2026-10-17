@@ -370,7 +370,7 @@ def _a_weighted(levels: np.ndarray, frequencies: np.ndarray) -> float | None:
 
 
 def rainfall_rate(
-    collected_volume_litres: float,
+    collected_volume_liters: float,
     collection_area_m2: float,
     duration_s: float,
 ) -> float:
@@ -381,13 +381,13 @@ def rainfall_rate(
     of that water, one litre per square metre being one millimetre, scaled to
     one hour (the definition under Table H.1).
 
-    :param collected_volume_litres: Volume of water collected, in litres.
+    :param collected_volume_liters: Volume of water collected, in litres.
     :param collection_area_m2: Horizontal area it was collected over, in m².
     :param duration_s: Collection time, in seconds.
     :return: The rainfall rate, in mm/h.
     :raises ValueError: If an input is not positive and finite.
     """
-    volume = require_positive(collected_volume_litres, "collected_volume_litres")
+    volume = require_positive(collected_volume_liters, "collected_volume_liters")
     area = require_positive(collection_area_m2, "collection_area_m2")
     duration = require_positive(duration_s, "duration_s")
     return volume / area * 3600.0 / duration

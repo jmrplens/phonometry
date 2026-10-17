@@ -40,7 +40,7 @@ it from the 6 × 10⁵ Pa the estimate is drawn at to the working inlet pressure
 from phonometry import noise_control
 
 x_f = noise_control.differential_pressure_ratio(
-    inlet_pressure_pa=1.0e6, outlet_pressure_pa=6.5e5, vapour_pressure_pa=2.32e3
+    inlet_pressure_pa=1.0e6, outlet_pressure_pa=6.5e5, vapor_pressure_pa=2.32e3
 )
 print(round(x_f, 4))                                    # 0.3508
 
@@ -83,7 +83,7 @@ Equation (6) into the stream power the valve dissipates:
 choked = noise_control.cavitation_differential(
     inlet_pressure_pa=1.0e6,
     outlet_pressure_pa=6.5e5,
-    vapour_pressure_pa=2.32e3,
+    vapor_pressure_pa=2.32e3,
     pressure_recovery=0.92,
 )
 speed = noise_control.vena_contracta_velocity(choked, 997.0, 0.92)
@@ -143,7 +143,7 @@ res = noise_control.valve_hydrodynamic_noise(
         mass_flow=40.0,                # kg/s
         inlet_pressure_pa=1.0e6,          # Pa, absolute
         outlet_pressure_pa=6.5e5,
-        vapour_pressure_pa=2.32e3,
+        vapor_pressure_pa=2.32e3,
         density=997.0,                 # kg/m3
         speed_of_sound=1400.0,            # m/s
     ),
@@ -238,7 +238,7 @@ form = dict(
     valve_diameter_m=0.1,
     seat_diameter_m=0.1,
     inlet_pressure_pa=1.0e6,
-    vapour_pressure_pa=2.32e3,
+    vapor_pressure_pa=2.32e3,
 )
 print(round(noise_control.jet_strouhal_number(**form, form="annex"), 3))   # 0.399
 print(round(noise_control.jet_strouhal_number(**form, form="clause"), 3))  # 0.425
@@ -260,7 +260,7 @@ coefficient, which is the series law $1/C^2 = \sum_i 1/C_i^2$:
 stages = noise_control.stage_conditions(
     inlet_pressure_pa=1.0e6,
     outlet_pressure_pa=4.0e5,
-    vapour_pressure_pa=2.32e3,
+    vapor_pressure_pa=2.32e3,
     stage_coefficients=[130.0, 160.0, 199.1],
     flow_coefficient=90.0,
 )
@@ -285,7 +285,7 @@ choking point:
 print(noise_control.last_stage_differential(
     inlet_pressure_pa=6.0e5,
     outlet_pressure_pa=4.0e5,
-    vapour_pressure_pa=2.32e3,
+    vapor_pressure_pa=2.32e3,
     corrected_ratio=0.30,
 ))                                                      # 179304.0
 

@@ -92,7 +92,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 
 def test_missing_band_data_rejected(tmp_path: Path) -> None:
     """A rating built without the per-band curves cannot be reported."""
-    bare = building.WeightedRatingResult(rating=52, c=-1, ctr=-4, unfavourable_sum=30.0)
+    bare = building.WeightedRatingResult(rating=52, c=-1, ctr=-4, unfavorable_sum=30.0)
     assert bare.frequencies is None
     out = str(tmp_path / "bare.pdf")
     with pytest.raises(ValueError, match="per-band data"):
@@ -108,7 +108,7 @@ def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path: Path) -> None:
     """
     result = building.weighted_rating(_AIRBORNE_R)
     assert (result.rating, result.c, result.ctr) == (30, -2, -3)
-    assert result.unfavourable_sum == pytest.approx(31.8, abs=0.05)
+    assert result.unfavorable_sum == pytest.approx(31.8, abs=0.05)
     # Reference values shifted by -22 dB (Table C.1, column 3).
     shifted = np.array(
         [11, 14, 17, 20, 23, 26, 29, 30, 31, 32, 33, 34, 34, 34, 34, 34], float
@@ -132,8 +132,8 @@ def test_impact_fiche_reproduces_iso717_2_annex_c1(tmp_path: Path) -> None:
     result = building.weighted_impact_rating(_IMPACT_LN)
     assert result.rating == _IMPACT_EXPECTED["ln_w"]
     assert result.ci == _IMPACT_EXPECTED["ci"]
-    assert result.unfavourable_sum == pytest.approx(
-        _IMPACT_EXPECTED["unfavourable_sum"], abs=0.05
+    assert result.unfavorable_sum == pytest.approx(
+        _IMPACT_EXPECTED["unfavorable_sum"], abs=0.05
     )
     assert_pdf(str(result.report(str(tmp_path / "impact_c1.pdf"))))
 

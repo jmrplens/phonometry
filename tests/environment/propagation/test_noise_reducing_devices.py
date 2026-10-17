@@ -43,12 +43,12 @@ class TestNormalisedSpectrum:
         assert _BANDS == 18
         assert prop.TRAFFIC_NOISE_BANDS_HZ[0] == pytest.approx(100.0)
         assert prop.TRAFFIC_NOISE_BANDS_HZ[-1] == pytest.approx(5000.0)
-        assert len(prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB) == _BANDS
+        assert len(prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB) == _BANDS
 
     def test_the_printed_levels(self) -> None:
         # Read from the rendered page: -20 at 100 Hz and 125 Hz, up to the
         # -8 dB peak at 1 kHz, back down to -18 at 5 kHz.
-        assert prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB == (
+        assert prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB == (
             -20.0,
             -20.0,
             -18.0,
@@ -70,7 +70,7 @@ class TestNormalisedSpectrum:
         )
 
     def test_the_peak_is_the_1_khz_band(self) -> None:
-        peak = int(np.argmax(prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB))
+        peak = int(np.argmax(prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB))
         assert prop.TRAFFIC_NOISE_BANDS_HZ[peak] == pytest.approx(1000.0)
 
 
@@ -235,7 +235,7 @@ class TestReporting:
         assert got.quantity == "absorption"
         np.testing.assert_allclose(got.values, alpha)
         np.testing.assert_allclose(
-            got.weights, prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB
+            got.weights, prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB
         )
         np.testing.assert_allclose(got.frequencies, prop.TRAFFIC_NOISE_BANDS_HZ)
 
@@ -244,7 +244,7 @@ class TestRailwaySpectrum:
     """EN 16272-3-1:2012, Table 1 and Clauses 5 and 6."""
 
     def test_the_printed_levels(self) -> None:
-        assert prop.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB == (
+        assert prop.NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB == (
             -27.0,
             -25.0,
             -23.0,
@@ -266,14 +266,14 @@ class TestRailwaySpectrum:
         )
 
     def test_it_covers_the_same_eighteen_bands(self) -> None:
-        assert len(prop.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB) == _BANDS
+        assert len(prop.NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB) == _BANDS
         assert set(prop.SPECTRA) == {"road", "railway"}
 
     def test_the_railway_plateau_is_where_rolling_noise_is(self) -> None:
         # Flat within a decibel from 1,25 kHz to 2,5 kHz, where the road
         # spectrum has already begun to fall away.
-        rail = np.asarray(prop.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB)
-        road = np.asarray(prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB)
+        rail = np.asarray(prop.NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB)
+        road = np.asarray(prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB)
         plateau = rail[11:15]
         assert float(plateau.max() - plateau.min()) == pytest.approx(0.0)
         assert rail[14] - rail[10] > road[14] - road[10]

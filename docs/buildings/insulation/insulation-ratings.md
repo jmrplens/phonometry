@@ -118,7 +118,7 @@ plt.show()
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_rating()` returns a `WeightedRatingResult`
-(`rating`, `c`, `ctr`, `unfavourable_sum`, all integers except the sum).
+(`rating`, `c`, `ctr`, `unfavorable_sum`, all integers except the sum).
 
 ## Impact ratings (ISO 717-2)
 
@@ -151,7 +151,7 @@ l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
 res_imp = building.weighted_impact_rating(l_n)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
+print(res_imp.rating, res_imp.ci, res_imp.unfavorable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
@@ -213,7 +213,7 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 | `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
-`ci` integers, `unfavourable_sum` in dB).
+`ci` integers, `unfavorable_sum` in dB).
 
 ## Enlarged frequency ranges and one-decimal ratings
 

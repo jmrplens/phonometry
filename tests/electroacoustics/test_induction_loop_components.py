@@ -26,13 +26,13 @@ def test_biot_savart_reproduces_the_e1_formula_for_a_square(side: float) -> None
     field = ea.rectangular_loop_field(2.0, side, side, 0.0, 0.0, 0.0)
     expected = 2.0 * math.sqrt(2.0) * 2.0 / (math.pi * side)
     assert float(field.h_z_a_per_m) == pytest.approx(expected, rel=1e-12)
-    assert ea.loop_centre_field(2.0, side) == pytest.approx(expected, rel=1e-12)
+    assert ea.loop_center_field(2.0, side) == pytest.approx(expected, rel=1e-12)
 
 
 def test_e1_rectangle_approximation_against_the_exact_field() -> None:
     d1, d2 = 15.0, 10.0
     exact = float(ea.rectangular_loop_field(1.0, d1, d2, 0.0, 0.0, 0.0).h_z_a_per_m)
-    approx = ea.loop_centre_field(1.0, d1, width_m=d2)
+    approx = ea.loop_center_field(1.0, d1, width_m=d2)
     ratio = math.sqrt((d1**2 + d2**2) / (2.0 * d1 * d2))
     assert exact / approx == pytest.approx(ratio, rel=1e-12)
     assert 20 * math.log10(ratio) == pytest.approx(0.35, abs=0.01)

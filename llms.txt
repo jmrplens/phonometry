@@ -548,7 +548,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [electroacoustics/microphone](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/microphone/)
 - [electroacoustics/noise-measurements](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/noise-measurements/)
 - [electroacoustics/piston](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/piston/)
-- [electroacoustics/programme-signal](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/programme-signal/)
+- [electroacoustics/program-signal](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
 - [electroacoustics/sound-reinforcement](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/sound-reinforcement/)
 - [electroacoustics/swept-sine](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/swept-sine/)
 - [environment/acoustic-roughness](https://docs.jmrp.io/phonometry/reference/api/environment/acoustic-roughness/)

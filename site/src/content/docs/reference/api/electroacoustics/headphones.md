@@ -13,7 +13,7 @@ Most of the clauses describe a set-up and a reading; this module holds the
 parts that are arithmetic on what was read, and the verdicts where the part
 sets a limit. The simulated programme signal several of them use is the one
 of IEC 60268-1:1985 Clause 7, in
-[`phonometry.electroacoustics.programme_signal`](/phonometry/reference/api/electroacoustics/programme-signal/).
+[`phonometry.electroacoustics.program_signal`](/phonometry/reference/api/electroacoustics/program-signal/).
 
 The code (Clause 4)
 -------------------
@@ -56,7 +56,7 @@ response of the head and torso simulator of IEC 60959 to the coupler's output.
 The NOTE under Figure 3 says how to do that without filters: "Power summation
 of the 1/3-octave-analized data multiplied by filtering coefficients given by
 IEC 61672-1 and/or IEC 60969 gives the corrected voltage" (the second
-standard is IEC 60959, see `docs/ERRATA.md`). [`programme_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#programme_signal_level)
+standard is IEC 60959, see `docs/ERRATA.md`). [`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)
 is that power sum,
 
 $$
@@ -65,7 +65,7 @@ $$
 
 with $A_k$ the A-weighting at the exact centre of band $k$ and
 $F_k$ the free-field response, and
-[`programme_characteristic_voltage`](/phonometry/reference/api/electroacoustics/headphones/#programme_characteristic_voltage) turns it into the e.m.f. for 94 dB,
+[`program_characteristic_voltage`](/phonometry/reference/api/electroacoustics/headphones/#program_characteristic_voltage) turns it into the e.m.f. for 94 dB,
 for each fitting of the headphone, and averages the e.m.f. of the fittings as
 8.3.5 g) asks ("3 to 5 measurements").
 
@@ -202,7 +202,7 @@ The headphone is linear at that level, so a reading of
 `sound_pressure_level_db` at `source_emf_v` scales to it:
 $E\,10^{(94 - L)/20}$. The same scaling serves the programme signal
 of 8.3.4 with the level of the whole signal
-([`programme_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#programme_signal_level)).
+([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)).
 
 **Parameters**
 
@@ -235,9 +235,9 @@ frequency distribution as specified in IEC 60268-1, and a peak-to-r.m.s
 ratio between 1,8 and 2,2." The record's one-third-octave bands from
 20 Hz up to the highest whose upper edge lies below the Nyquist frequency
 are judged against Table II of IEC 60268-1
-([`check_programme_signal`](/phonometry/reference/api/electroacoustics/programme-signal/#check_programme_signal)), and its
+([`check_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#check_program_signal)), and its
 peak over its RMS against the two limits.
-[`simulated_programme_signal`](/phonometry/reference/api/electroacoustics/programme-signal/#simulated_programme_signal) with
+[`simulated_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_signal) with
 `peak_to_rms` generates such a record.
 
 **Parameters**
@@ -631,7 +631,7 @@ EarCanalMicrophoneVerification(
     canal_section_area_mm2: float,
     ear_canal_area_mm2: float,
     volume_mm3: float,
-    neighbour_difference_db: float,
+    neighbor_difference_db: float,
     sealed_attenuation_db: float,
 )
 ```
@@ -646,7 +646,7 @@ A probe microphone judged by IEC 60268-7:2010 Annex B a) to e).
 | `canal_section_area_mm2` | Its cross-sectional area in the rest of the ear canal, in mm² (b). |
 | `ear_canal_area_mm2` | The cross-sectional area of the ear canal, in mm² (b; 45 mm² for an average adult). |
 | `volume_mm3` | The microphone's volume with its mounting parts, in mm³ (c). |
-| `neighbour_difference_db` | The largest difference between the responses to neighbouring one-third-octave bands of pink noise, in dB (d). |
+| `neighbor_difference_db` | The largest difference between the responses to neighbouring one-third-octave bands of pink noise, in dB (d). |
 | `sealed_attenuation_db` | The smallest drop of the output level when the sound entrance is sealed, over the measuring frequencies, in dB (e). |
 
 ### EarCanalMicrophoneVerification.area_ratio
@@ -1056,7 +1056,7 @@ example fixes (`06R2`, not `60R1`).
 ## LimitingTestSignalCheck
 
 ```python
-LimitingTestSignalCheck(peak_to_rms: float, spectrum: ProgrammeSignalCheck)
+LimitingTestSignalCheck(peak_to_rms: float, spectrum: ProgramSignalCheck)
 ```
 
 The test signal of the limiting voltages judged by IEC 60268-7 8.3.2.2 b).
@@ -1130,17 +1130,17 @@ Spaces around the hyphens are ignored, so the clause's own layout,
 | :--- | :--- |
 | ValueError | If the code does not have the form of the clause or a letter or number is not one it defines. |
 
-## programme_characteristic_voltage
+## program_characteristic_voltage
 
 ```python
-programme_characteristic_voltage(
+program_characteristic_voltage(
     source_emf_v: ArrayLike,
     frequencies: ArrayLike,
     band_levels_db: ArrayLike,
     *,
     a_weighted: bool = False,
     free_field_response_db: ArrayLike | None = None,
-) -> ProgrammeCharacteristicVoltage
+) -> ProgramCharacteristicVoltage
 ```
 
 The simulated programme signal characteristic voltage of IEC 60268-7.
@@ -1149,7 +1149,7 @@ The source e.m.f. of the simulated programme signal of IEC 60268-1 that
 produces 94 dB in the coupler or ear simulator (8.3.4), or 94 dB after the
 A-weighting and the free-field compensation of 8.3.5. Each fitting's
 one-third-octave band levels, read at a known e.m.f., are power-summed as
-the NOTE under Figure 3 describes ([`programme_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#programme_signal_level)) and
+the NOTE under Figure 3 describes ([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)) and
 scaled to 94 dB; 8.3.5 g) removes and refits the headphone between
 readings and states "the average value of source e.m.f. of 3 to 5
 measurements".
@@ -1164,7 +1164,7 @@ measurements".
 | `a_weighted` | Apply the A-weighting (8.3.5). |
 | `free_field_response_db` | The free-field response of the head and torso simulator in each band, in dB, compensated by its inverse (8.3.5); `None` for none. |
 
-**Returns:** A [`ProgrammeCharacteristicVoltage`](/phonometry/reference/api/electroacoustics/headphones/#programmecharacteristicvoltage).
+**Returns:** A [`ProgramCharacteristicVoltage`](/phonometry/reference/api/electroacoustics/headphones/#programcharacteristicvoltage).
 
 **Raises**
 
@@ -1172,10 +1172,10 @@ measurements".
 | :--- | :--- |
 | ValueError | If the shapes disagree or a value is out of range. |
 
-## programme_signal_level
+## program_signal_level
 
 ```python
-programme_signal_level(
+program_signal_level(
     frequencies: ArrayLike,
     band_levels_db: ArrayLike,
     *,
@@ -1216,10 +1216,10 @@ $$
 | :--- | :--- |
 | ValueError | If the inputs differ in length or are not finite. |
 
-## ProgrammeCharacteristicVoltage
+## ProgramCharacteristicVoltage
 
 ```python
-ProgrammeCharacteristicVoltage(
+ProgramCharacteristicVoltage(
     frequencies: NDArray[np.float64],
     band_levels_db: NDArray[np.float64],
     source_emf_v: NDArray[np.float64],
@@ -1242,7 +1242,7 @@ The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5)
 | `a_weighted` | Whether the A-weighting was applied. |
 | `free_field_compensated` | Whether the free-field response was compensated. |
 
-### ProgrammeCharacteristicVoltage.band_levels_at_characteristic_db
+### ProgramCharacteristicVoltage.band_levels_at_characteristic_db
 
 *property*
 
@@ -1252,28 +1252,28 @@ The mean of the fittings' corrected bands, each scaled to the
 characteristic voltage; their power sum is 94 dB when the fittings
 agree.
 
-### ProgrammeCharacteristicVoltage.characteristic_voltage_v
+### ProgramCharacteristicVoltage.characteristic_voltage_v
 
 *property*
 
 The arithmetic mean of `voltages_v`, in volts: 8.3.5 g).
 
-### ProgrammeCharacteristicVoltage.fittings_conform
+### ProgramCharacteristicVoltage.fittings_conform
 
 *property*
 
 Whether 3 to 5 fittings were averaged, as 8.3.5 g) asks.
 
-### ProgrammeCharacteristicVoltage.levels
+### ProgramCharacteristicVoltage.levels
 
 *property*
 
 The corrected level of the whole signal in each fitting, in dB re 20 µPa.
 
-### ProgrammeCharacteristicVoltage.plot()
+### ProgramCharacteristicVoltage.plot()
 
 ```python
-ProgrammeCharacteristicVoltage.plot(
+ProgramCharacteristicVoltage.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -1295,7 +1295,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
-### ProgrammeCharacteristicVoltage.voltages_v
+### ProgramCharacteristicVoltage.voltages_v
 
 *property*
 
@@ -1600,7 +1600,7 @@ The level produced by the e.m.f. "of such value that 1 mW would be
 dissipated in a pure resistance equal to the rated impedance of the
 headphone, connected in place of it", scaled from a reading at another
 e.m.f. With a 500 Hz sine it is 8.5.2 b); with the level of the
-simulated programme signal ([`programme_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#programme_signal_level)) it is c), and
+simulated programme signal ([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)) it is c), and
 d) when that level is A-weighted and free-field compensated.
 
 The method of 8.5.3 c) sets that e.m.f. another way: "so that the

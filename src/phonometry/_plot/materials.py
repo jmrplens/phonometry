@@ -51,7 +51,7 @@ if TYPE_CHECKING:
         DiffusionSpectrum,
     )
     from ..materials.resilient.dynamic_stiffness import DynamicStiffnessResult
-    from ..materials.surfaces.road_absorption import InsituAbsorptionResult
+    from ..materials.surfaces.road_absorption import InSituAbsorptionResult
 
 _FREQ_LABEL = "Frequency [Hz]"
 _SCATTERING_TITLE = "Random-incidence scattering coefficient (ISO 17497-1)"
@@ -71,7 +71,7 @@ _NO_DATA_MARK = "—"
 
 #: Height, on the 0..1 absorption axis, at which the em dash sits: low
 #: enough to read as a flattened bar, clear of the axis line beneath it.
-_INSITU_NO_DATA_Y = 0.05
+_IN_SITU_NO_DATA_Y = 0.05
 
 #: Spanish translations of the fixed strings rendered by the materials
 #: ``.plot()`` renderers, keyed by their verbatim English text.  ``_t`` returns
@@ -180,7 +180,7 @@ def plot_weighted_absorption(
             f"{decimal_comma(result.rating_label, language)}  "
             f"({_t('class ', language)}{result.absorption_class}, "
             f"{_t(_SIGMA_UNFAV_LABEL, language)}"
-            f"{format_number(result.unfavourable_sum, language, decimals=2)})"
+            f"{format_number(result.unfavorable_sum, language, decimals=2)})"
         ),
         ylabel=_t("Sound absorption coefficient", language),
         measured_label=_t(r"Practical $\alpha_\mathrm{p}$", language),
@@ -458,8 +458,8 @@ def plot_diffusion_polar_report(
     return cast("Axes", ax)
 
 
-def plot_insitu_absorption(
-    result: InsituAbsorptionResult,
+def plot_in_situ_absorption(
+    result: InSituAbsorptionResult,
     ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
@@ -475,7 +475,7 @@ def plot_insitu_absorption(
     indistinguishable from a measured one.
 
     :param result: An
-        :class:`~phonometry.materials.surfaces.road_absorption.InsituAbsorptionResult` exposing
+        :class:`~phonometry.materials.surfaces.road_absorption.InSituAbsorptionResult` exposing
         ``frequencies`` and ``absorption``.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the absorption :meth:`~matplotlib.axes.Axes.bar`.
@@ -493,7 +493,7 @@ def plot_insitu_absorption(
     for position in positions[~measured]:
         ax.text(
             float(position),
-            _INSITU_NO_DATA_Y,
+            _IN_SITU_NO_DATA_Y,
             _NO_DATA_MARK,
             ha="center",
             va="center",

@@ -420,7 +420,7 @@ class SelDistribution(OwnsArrays):
         (13)).
     :ivar class_densities_per_db: :math:`\rho_m`, the constant density of each
         class, in 1/dB (Equation (15)).
-    :ivar subclass_centres_db: :math:`\mu_{m,j}`, shape ``(M, subclasses)``, in
+    :ivar subclass_centers_db: :math:`\mu_{m,j}`, shape ``(M, subclasses)``, in
         dB (Equation (18)).
     :ivar sigma_db: :math:`\sigma` of the turbulent spread, in dB.
     :ivar level_shift_db: :math:`\Delta\mu`, in dB (Equation (22)).
@@ -441,7 +441,7 @@ class SelDistribution(OwnsArrays):
     lower_bounds_db: NDArray[np.float64]
     upper_bounds_db: NDArray[np.float64]
     class_densities_per_db: NDArray[np.float64]
-    subclass_centres_db: NDArray[np.float64]
+    subclass_centers_db: NDArray[np.float64]
     sigma_db: float
     level_shift_db: float
     subclasses: int
@@ -475,17 +475,17 @@ class SelDistribution(OwnsArrays):
                 f"the same length, at least two classes; got {sizes}."
             )
             raise ValueError(msg)
-        if np.shape(self.subclass_centres_db) != (count, self.subclasses):
+        if np.shape(self.subclass_centers_db) != (count, self.subclasses):
             msg = (
-                "SelDistribution: 'subclass_centres_db' must have one row of "
+                "SelDistribution: 'subclass_centers_db' must have one row of "
                 f"'subclasses' ({self.subclasses}) centres per class; got "
-                f"{np.shape(self.subclass_centres_db)}."
+                f"{np.shape(self.subclass_centers_db)}."
             )
             raise ValueError(msg)
         if len(self.replicas) != count:
             msg = "SelDistribution: 'replicas' must name the replicas of every class."
             raise ValueError(msg)
-        for name in (*per_class, "subclass_centres_db"):
+        for name in (*per_class, "subclass_centers_db"):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"SelDistribution: '{name}' must contain only finite values."
                 raise ValueError(msg)
@@ -518,7 +518,7 @@ class SelDistribution(OwnsArrays):
         The weight of subclass ``{m, j}`` is :math:`b_m\rho_m = \wp_m/N_\mathrm{sub}`
         (Equation (21)) and its mean :math:`\mu_{m,j} - \Delta\mu`.
         """
-        means = (self.subclass_centres_db - self.level_shift_db).ravel()
+        means = (self.subclass_centers_db - self.level_shift_db).ravel()
         weights = np.repeat(self.probabilities / self.subclasses, self.subclasses)
         return means, weights
 
@@ -725,7 +725,7 @@ def sel_distribution(
         lower_bounds_db=read_only(lower),
         upper_bounds_db=read_only(upper),
         class_densities_per_db=read_only(densities),
-        subclass_centres_db=read_only(centres),
+        subclass_centers_db=read_only(centres),
         sigma_db=sigma,
         level_shift_db=shift,
         subclasses=n_sub,

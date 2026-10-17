@@ -582,7 +582,7 @@ def generate_absorption_rating(output_dir: str) -> None:
         (
             0.23,
             (
-                f"Sum of unfavourable deviations = {result.unfavourable_sum:.2f}"
+                f"Sum of unfavourable deviations = {result.unfavorable_sum:.2f}"
                 f"  (limit 0.10)"
             ),
         ),
@@ -1802,7 +1802,7 @@ def generate_insitu_setup_geometry(output_dir: str) -> None:
     from phonometry import materials
 
     _fig, ax = plt.subplots(figsize=(9.0, 6.0))
-    materials.plot_insitu_geometry(ax=ax, language=_LANG)
+    materials.plot_in_situ_geometry(ax=ax, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "insitu_setup_geometry.svg")
     plt.close()
@@ -2495,7 +2495,7 @@ def generate_insitu_absorption(output_dir: str) -> None:
     taps = taps / taps.sum()
     shift = round(2.0 * 0.25 / 340.0 * fs)  # reflected-path delay 2 dm / c
     hr = kr * r0 * np.roll(scipy_signal.lfilter(taps, 1.0, hi), shift)
-    result = materials.insitu_absorption_spectrum(hi, hr, fs)
+    result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 
     freqs = result.frequencies
     positions = np.arange(freqs.size, dtype=float)

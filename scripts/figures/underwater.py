@@ -79,7 +79,7 @@ def generate_ship_source_level(output_dir: str) -> None:
         dtype=float,
     )
     rnl = 175.0 - 12.0 * np.log10(freqs / 20.0)
-    res = underwater.monopole_source_level(rnl, freqs, draught=6.0)
+    res = underwater.monopole_source_level(rnl, freqs, draft_m=6.0)
 
     _fig, ax = plt.subplots(figsize=(10, 6.0))
     ax.semilogx(

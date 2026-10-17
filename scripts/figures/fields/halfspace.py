@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 
-from phonometry.simulation import ALUMINIUM
+from phonometry.simulation import ALUMINUM
 
 from ..media import _ANIM_PILL_BOX, _anim_figure, _render_clip, _translate_str
 from ..theme import (
@@ -22,7 +22,7 @@ from ..theme import (
 # (simulation/elastic-waves.mdx section 3) and of the solver's own Rayleigh
 # test. Taken from the solver rather than copied, so the clip cannot end up
 # propagating a different aluminium from the one the library publishes.
-_HS_CP, _HS_CS, _HS_RHO = ALUMINIUM.c_p, ALUMINIUM.c_s, ALUMINIUM.rho
+_HS_CP, _HS_CS, _HS_RHO = ALUMINUM.c_p, ALUMINUM.c_s, ALUMINUM.rho
 # Mesh rule dx = min(smallest geometric dimension / 4, shortest wavelength
 # / 8). The block has no feature smaller than itself; the source is a
 # Gaussian of width 8 us, whose spectrum is 20 dB down at 60.4 kHz, and the

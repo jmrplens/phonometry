@@ -124,7 +124,7 @@ RAINFALL_CLASSIFICATION = {'moderate': RainfallType(rainfall_rate_mm_h=(None, 4.
 
 ```python
 rainfall_rate(
-    collected_volume_litres: float,
+    collected_volume_liters: float,
     collection_area_m2: float,
     duration_s: float,
 ) -> float
@@ -141,7 +141,7 @@ one hour (the definition under Table H.1).
 
 | Name | Description |
 | :--- | :--- |
-| `collected_volume_litres` | Volume of water collected, in litres. |
+| `collected_volume_liters` | Volume of water collected, in litres. |
 | `collection_area_m2` | Horizontal area it was collected over, in m². |
 | `duration_s` | Collection time, in seconds. |
 

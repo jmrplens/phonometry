@@ -378,7 +378,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     ``reverberation_time`` is the measured :math:`T` per band and
     ``reverberation_parameter`` the :math:`R` of Formula (1) (or its NOTE);
     ``nominal_reverberation_time_s`` is :math:`T_\mathrm{nom}`, supplied or,
-    with ``centred`` ``True``, found by centring the measured values within
+    with ``centered`` ``True``, found by centring the measured values within
     the limiting curves. :attr:`lower_limit` and :attr:`upper_limit` are the
     bounds on :math:`T/(R\,T_\mathrm{nom})`, 0,9 and 1,1, or 0,8 and 1,2 above
     6,3 kHz, read from the bands: the standard's, not fields.
@@ -398,7 +398,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     reverberation_time: np.ndarray
     reverberation_parameter: np.ndarray
     nominal_reverberation_time_s: float
-    centred: bool
+    centered: bool
     volume: float
     method: str
     climate_product_change: float = math.nan
@@ -704,12 +704,12 @@ def check_special_room_reverberation(
     half_width = _tolerance(freqs)
     if nominal_reverberation_time_s is None:
         nominal = 1.0 / _centred_scale(t / r, half_width)
-        centred = True
+        centered = True
     else:
         nominal = require_positive(
             nominal_reverberation_time_s, "nominal_reverberation_time_s"
         )
-        centred = False
+        centered = False
     change = _climate_change(
         (relative_humidity_percent, temperature_c),
         (reverberation_relative_humidity_percent, reverberation_temperature_c),
@@ -724,7 +724,7 @@ def check_special_room_reverberation(
         reverberation_time=t,
         reverberation_parameter=np.asarray(r, dtype=np.float64),
         nominal_reverberation_time_s=float(nominal),
-        centred=centred,
+        centered=centered,
         volume=float(volume),
         method=chosen,
         climate_product_change=change,

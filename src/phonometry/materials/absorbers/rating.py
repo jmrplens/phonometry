@@ -263,7 +263,7 @@ class AbsorptionRatingResult(OwnsArrays):
         ``"Not classified"`` from Table B.1 (Annex B).
     :ivar shift: Downward shift applied to the reference curve, in
         absorption units (Clause 4.2); :math:`\alpha_\mathrm{w} = 1.00 - \text{shift}`.
-    :ivar unfavourable_sum: Sum of the unfavourable deviations at the final
+    :ivar unfavorable_sum: Sum of the unfavourable deviations at the final
         shift (Clause 4.2): ``shifted_reference - measured`` over the bands
         where the measured coefficient falls below the curve, and nothing
         elsewhere; at most 0.10.
@@ -287,7 +287,7 @@ class AbsorptionRatingResult(OwnsArrays):
     shape_indicator: str
     absorption_class: str
     shift: float
-    unfavourable_sum: float
+    unfavorable_sum: float
     frequencies: NDArray[np.float64]
     measured: NDArray[np.float64]
     shifted_reference: NDArray[np.float64]
@@ -337,7 +337,7 @@ class AbsorptionRatingResult(OwnsArrays):
         requirement anyway, where ``nan >= requirement`` is ``False`` and the
         page printed a definitive FAIL computed from nothing.
 
-        ``unfavourable_sum`` is not a further measurement but a sentence about
+        ``unfavorable_sum`` is not a further measurement but a sentence about
         the two octave curves stored beside it, and the two readers of this
         result take it from opposite ends: :meth:`plot` shades the deviations
         it reads off the curves and prints the *field* in the title, while the
@@ -362,7 +362,7 @@ class AbsorptionRatingResult(OwnsArrays):
             if the octave curves disagree with each other, if the retained
             one-third-octave ``alpha_s`` disagrees with its band centres, if it
             does not hold three bands per rating octave, or if
-            ``unfavourable_sum`` does not restate the deviations between the
+            ``unfavorable_sum`` does not restate the deviations between the
             two octave curves.
         """
         require_scalar(self.alpha_w, "alpha_w")
@@ -420,12 +420,12 @@ class AbsorptionRatingResult(OwnsArrays):
             np.asarray(self.shifted_reference, dtype=np.float64),
             np.asarray(self.measured, dtype=np.float64),
         )
-        if not math.isclose(self.unfavourable_sum, stated, rel_tol=0.0, abs_tol=1e-9):
+        if not math.isclose(self.unfavorable_sum, stated, rel_tol=0.0, abs_tol=1e-9):
             msg = (
-                f"{type(self).__name__}: 'unfavourable_sum' must be the sum of "
+                f"{type(self).__name__}: 'unfavorable_sum' must be the sum of "
                 "the unfavourable deviations of Clause 4.2, 'shifted_reference' "
                 "minus 'measured' at the bands where the measured coefficient "
-                f"falls below the curve; got {self.unfavourable_sum!r} where "
+                f"falls below the curve; got {self.unfavorable_sum!r} where "
                 f"the two curves state {stated!r}."
             )
             raise ValueError(msg)
@@ -617,7 +617,7 @@ def _rate(
         shape_indicator=indicator,
         absorption_class=absorption_class(alpha_w_units / 20.0),
         shift=shift_units / 20.0,
-        unfavourable_sum=unfav_units / 20.0,
+        unfavorable_sum=unfav_units / 20.0,
         frequencies=np.asarray(RATING_OCTAVE_BANDS_HZ, dtype=np.float64),
         measured=np.asarray([u / 20.0 for u in measured_units], dtype=np.float64),
         shifted_reference=np.asarray(

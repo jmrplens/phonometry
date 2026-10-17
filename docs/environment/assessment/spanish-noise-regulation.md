@@ -138,13 +138,13 @@ value: footnote 2 refers it to the objectives of the adjoining areas, which is
 why `ACOUSTIC_AREA_TYPES` lists it but the limit functions do not accept it.
 And in areas urbanised after the regulation entered into force (24 October
 2007) the objective is 5 dB stricter (Article 14.2), which is what
-`urbanisation="new"` applies.
+`urbanization="new"` applies.
 
 ```python
 from phonometry import environment
 
 environment.outdoor_quality_objectives("a")                       # 65 / 65 / 55 dB
-environment.outdoor_quality_objectives("a", urbanisation="new")   # 60 / 60 / 50 dB
+environment.outdoor_quality_objectives("a", urbanization="new")   # 60 / 60 / 50 dB
 environment.indoor_quality_objectives("residential", "bedrooms")  # 40 / 40 / 30 dB
 environment.infrastructure_limits("a")                            # 60 / 60 / 50 dB
 environment.max_infrastructure_limit("a")                         # 85 dB (LAmax)

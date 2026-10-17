@@ -1211,7 +1211,7 @@ class PlantMeasurementContour(OwnsArrays):
         return float(np.max(np.hypot(rel[..., 0], rel[..., 1])))
 
     @property
-    def plant_centre_m(self) -> NDArray[np.float64]:
+    def plant_center_m(self) -> NDArray[np.float64]:
         """The geometrical centre of the plant area, where 0.2 a) places the
         point source that stands for the plant, in metres.
         """

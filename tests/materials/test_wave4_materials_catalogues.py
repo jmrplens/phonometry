@@ -144,7 +144,7 @@ def test_every_carpet_holds_the_printed_pile_and_rating(
     for row, (label, (_weight, height, surface, fibre, nrc)) in zip(
         rows, oracle, strict=True
     ):
-        assert (row.name, row.pile_surface, row.fibre) == (label, surface, fibre)
+        assert (row.name, row.pile_surface, row.fiber) == (label, surface, fibre)
         assert row.variant == f"{surface}, {fibre.lower()}"
         assert row.mounting.startswith(mounting)
         assert row.noise_reduction_coefficient == _num(nrc)

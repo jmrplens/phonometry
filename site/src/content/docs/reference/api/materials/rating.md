@@ -82,7 +82,7 @@ AbsorptionRatingResult(
     shape_indicator: str,
     absorption_class: str,
     shift: float,
-    unfavourable_sum: float,
+    unfavorable_sum: float,
     frequencies: NDArray[np.float64],
     measured: NDArray[np.float64],
     shifted_reference: NDArray[np.float64],
@@ -101,7 +101,7 @@ Weighted sound absorption rating (ISO 11654:1997).
 | `shape_indicator` | Concatenated shape indicators, `L`/`M`/`H` in that order, or an empty string when none applies (Clause 4.3). |
 | `absorption_class` | Sound absorption class `A`-`E` or `"Not classified"` from Table B.1 (Annex B). |
 | `shift` | Downward shift applied to the reference curve, in absorption units (Clause 4.2); $\alpha_\mathrm{w} = 1.00 - \text{shift}$. |
-| `unfavourable_sum` | Sum of the unfavourable deviations at the final shift (Clause 4.2): `shifted_reference - measured` over the bands where the measured coefficient falls below the curve, and nothing elsewhere; at most 0.10. |
+| `unfavorable_sum` | Sum of the unfavourable deviations at the final shift (Clause 4.2): `shifted_reference - measured` over the bands where the measured coefficient falls below the curve, and nothing elsewhere; at most 0.10. |
 | `frequencies` | Octave rating-band centre frequencies, in Hz (250 Hz to 4000 Hz). |
 | `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0,05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |

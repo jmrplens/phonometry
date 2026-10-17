@@ -6654,7 +6654,7 @@ def generate_building_transfer_spectra(output_dir: str) -> None:
     print("Generating building_transfer_spectra...")
     from phonometry import vibration
 
-    bands = np.asarray(vibration.PREDICTION_BAND_CENTRES_HZ)
+    bands = np.asarray(vibration.PREDICTION_BAND_CENTERS_HZ)
     positions = np.arange(bands.size)
     _fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
     styles = {

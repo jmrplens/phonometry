@@ -145,8 +145,8 @@ def test_step_1_uses_the_saturation_pressure_of_iec_61094_2() -> None:
     """The water vapour mole fraction is that of Annex F of IEC 61094-2."""
     attenuation = metrology.reciprocity_air_attenuation(_F, **_CONDITIONS)
     air = fluids.air(**_CONDITIONS)
-    assert attenuation.water_vapour_mole_fraction == pytest.approx(
-        air.composition["water_vapour_mole_fraction"], rel=1e-12
+    assert attenuation.water_vapor_mole_fraction == pytest.approx(
+        air.composition["water_vapor_mole_fraction"], rel=1e-12
     )
 
 
@@ -206,7 +206,7 @@ def test_three_microphones_give_their_sensitivities_back() -> None:
         _F,
         _electrical(),
         diaphragm_distances_m=_DISTANCES,
-        acoustic_centres_m=_CENTRES,
+        acoustic_centers_m=_CENTRES,
         dispersion=False,
         **_CONDITIONS,
     )
@@ -228,7 +228,7 @@ def test_the_printed_formula_8_is_45_degrees_off() -> None:
         _F,
         [z12, z23, z31],
         diaphragm_distances_m=_DISTANCES,
-        acoustic_centres_m=_CENTRES,
+        acoustic_centers_m=_CENTRES,
         dispersion=False,
         **_CONDITIONS,
     )
@@ -262,7 +262,7 @@ def test_two_microphones_and_a_source_give_their_sensitivities_back() -> None:
         electrical[0],
         _TRUE[0] / _TRUE[1],
         diaphragm_distance_m=_DISTANCES[0],
-        acoustic_centres_m=_CENTRES[:2],
+        acoustic_centers_m=_CENTRES[:2],
         dispersion=False,
         **_CONDITIONS,
     )
@@ -296,7 +296,7 @@ def test_transfer_impedance_is_formula_6_at_the_receiver() -> None:
         _TRUE[0],
         _TRUE[1],
         diaphragm_distance_m=d_m,
-        acoustic_centres_m=(0.009, 0.0085),
+        acoustic_centers_m=(0.009, 0.0085),
         dispersion=False,
         **_CONDITIONS,
     )
@@ -334,7 +334,7 @@ def test_acoustic_centres_that_meet_are_refused() -> None:
             _F,
             electrical,
             diaphragm_distances_m=_DISTANCES,
-            acoustic_centres_m=(0.15, 0.15, 0.0),
+            acoustic_centers_m=(0.15, 0.15, 0.0),
             **_CONDITIONS,
         )
 
@@ -355,7 +355,7 @@ def test_free_field_reciprocity_needs_three_pairs() -> None:
 def test_acoustic_centre_is_where_the_inverse_pressure_vanishes() -> None:
     distances = np.array([0.15, 0.2, 0.3, 0.4, 0.5])
     pressures = 1.0 / (distances - 0.008)
-    centre = metrology.acoustic_centre(distances, pressures)
+    centre = metrology.acoustic_center(distances, pressures)
     assert centre.position_m == pytest.approx(0.008, abs=1e-12)
 
 
@@ -363,15 +363,15 @@ def test_acoustic_centre_corrects_for_the_attenuation() -> None:
     distances = np.array([0.15, 0.2, 0.3, 0.4, 0.5])
     alpha = 0.05
     pressures = np.exp(-alpha * distances) / (distances - 0.004)
-    centre = metrology.acoustic_centre(distances, pressures, attenuation_np_per_m=alpha)
+    centre = metrology.acoustic_center(distances, pressures, attenuation_np_per_m=alpha)
     assert centre.position_m == pytest.approx(0.004, abs=1e-12)
-    uncorrected = metrology.acoustic_centre(distances, pressures)
+    uncorrected = metrology.acoustic_center(distances, pressures)
     assert abs(uncorrected.position_m - 0.004) > 1e-4
 
 
 def test_acoustic_centre_needs_three_distances() -> None:
     with pytest.raises(ValueError, match="three distances"):
-        metrology.acoustic_centre([0.2, 0.3], [5.0, 3.3])
+        metrology.acoustic_center([0.2, 0.3], [5.0, 3.3])
 
 
 # ---------------------------------------------------------------------------
@@ -446,18 +446,18 @@ def test_free_field_components_are_named_by_table_1() -> None:
     result = metrology.free_field_parameter_uncertainty(
         _F,
         metrology.FreeFieldInputUncertainties(
-            u_acoustic_centre_m=0.5e-3,
+            u_acoustic_center_m=0.5e-3,
             u_temperature_k=0.1,
             u_static_pressure_pa=20.0,
             u_relative_humidity_percent=2.0,
             u_air_attenuation_ratio=0.1 / math.sqrt(3.0),
         ),
         diaphragm_distances_m=_DISTANCES,
-        acoustic_centres_m=_CENTRES,
+        acoustic_centers_m=_CENTRES,
         **_CONDITIONS,
     )
     assert set(result.components_db) == {
-        "acoustic_centres",
+        "acoustic_centers",
         "temperature",
         "static_pressure",
         "relative_humidity",
@@ -475,8 +475,8 @@ def test_free_field_components_are_named_by_table_1() -> None:
     [
         ("u_distance_m", -1e-4, "'u_distance_m' must be non-negative"),
         ("u_air_attenuation_ratio", float("nan"), "'u_air_attenuation_ratio' must"),
-        ("u_acoustic_centre_m", [1e-3, -1e-3], "'u_acoustic_centre_m' must be"),
-        ("u_acoustic_centre_m", [[1e-3]], "'u_acoustic_centre_m' must be"),
+        ("u_acoustic_center_m", [1e-3, -1e-3], "'u_acoustic_center_m' must be"),
+        ("u_acoustic_center_m", [[1e-3]], "'u_acoustic_center_m' must be"),
     ],
 )
 def test_input_uncertainties_refuse_what_is_not_a_standard_uncertainty(
@@ -488,9 +488,9 @@ def test_input_uncertainties_refuse_what_is_not_a_standard_uncertainty(
 
 def test_acoustic_centre_uncertainty_is_held_read_only_and_per_frequency() -> None:
     column = np.array([0.2e-3, 0.5e-3, 1.0e-3])
-    uncertainties = metrology.FreeFieldInputUncertainties(u_acoustic_centre_m=column)
+    uncertainties = metrology.FreeFieldInputUncertainties(u_acoustic_center_m=column)
     column[0] = 9.0
-    held = np.asarray(uncertainties.u_acoustic_centre_m)
+    held = np.asarray(uncertainties.u_acoustic_center_m)
     assert held[0] == pytest.approx(0.2e-3)
     with pytest.raises(ValueError, match="read-only"):
         held[0] = 1.0
@@ -498,10 +498,10 @@ def test_acoustic_centre_uncertainty_is_held_read_only_and_per_frequency() -> No
         _F[:3],
         uncertainties,
         diaphragm_distances_m=_DISTANCES,
-        acoustic_centres_m=_CENTRES,
+        acoustic_centers_m=_CENTRES,
         **_CONDITIONS,
     )
-    assert result.components_db["acoustic_centres"].shape == (3,)
+    assert result.components_db["acoustic_centers"].shape == (3,)
     with pytest.raises(ValueError, match="one value per frequency"):
         metrology.free_field_parameter_uncertainty(
             _F[:2],

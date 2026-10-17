@@ -512,7 +512,7 @@ def test_agreement_is_within_the_root_sum_square() -> None:
     assert not result.passes
     assert result.validation == "comparison"
     np.testing.assert_allclose(
-        result.normalised_difference, [1.0, 1.1, 0.0, 0.0], atol=1e-9
+        result.normalized_difference, [1.0, 1.1, 0.0, 0.0], atol=1e-9
     )
 
 
@@ -824,7 +824,7 @@ def test_shared_part_tightens_the_verdict() -> None:
     assert shared.agrees.tolist() == [False, True, True, True]
     assert not shared.passes
     np.testing.assert_allclose(
-        shared.normalised_difference[0], 0.11 / _D1_DIFFERENCE_SHARED_DB, rtol=1e-9
+        shared.normalized_difference[0], 0.11 / _D1_DIFFERENCE_SHARED_DB, rtol=1e-9
     )
 
 

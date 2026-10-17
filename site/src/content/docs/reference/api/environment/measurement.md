@@ -58,7 +58,7 @@ repeated-measurement standard uncertainty (Formulae (17)–(20)) are provided.
 assess_tonal_audibility(
     tone_level: float,
     masking_noise_level: float,
-    centre_frequency: float,
+    center_frequency: float,
 ) -> TonalAssessmentResult
 ```
 
@@ -73,14 +73,14 @@ Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/
 | :--- | :--- |
 | `tone_level` | Energy-summed tone level `Lpt`, in dB. |
 | `masking_noise_level` | Masking-noise level `Lpn`, in dB. |
-| `centre_frequency` | Critical-band centre frequency `fc`, in Hz. |
+| `center_frequency` | Critical-band centre frequency `fc`, in Hz. |
 
 **Returns:** A [`TonalAssessmentResult`](/phonometry/reference/api/environment/measurement/#tonalassessmentresult).
 
 ## critical_bandwidth
 
 ```python
-critical_bandwidth(centre_frequency: float) -> float
+critical_bandwidth(center_frequency: float) -> float
 ```
 
 Critical bandwidth around a tone (ISO 1996-2 Annex C, Table C.1).
@@ -92,7 +92,7 @@ above 500 Hz.
 
 | Name | Description |
 | :--- | :--- |
-| `centre_frequency` | Critical-band centre frequency `fc`, in Hz. |
+| `center_frequency` | Critical-band centre frequency `fc`, in Hz. |
 
 **Returns:** Critical bandwidth, in Hz.
 
@@ -100,7 +100,7 @@ above 500 Hz.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `centre_frequency` is not positive/finite. |
+| ValueError | If `center_frequency` is not positive/finite. |
 
 ## environmental_expanded_uncertainty
 
@@ -370,7 +370,7 @@ $2 < \Delta L \le 9$ → 3, $\Delta L > 9$ → 6).
 tonal_audibility(
     tone_level: float,
     masking_noise_level: float,
-    centre_frequency: float,
+    center_frequency: float,
 ) -> float
 ```
 
@@ -385,7 +385,7 @@ dB.
 | :--- | :--- |
 | `tone_level` | Energy-summed tone level `Lpt` in the critical band, in dB (see Formula (C.1)). |
 | `masking_noise_level` | Masking-noise level `Lpn` in the critical band, in dB (see Formula (C.2)/(C.11)). |
-| `centre_frequency` | Critical-band centre frequency `fc`, in Hz. |
+| `center_frequency` | Critical-band centre frequency `fc`, in Hz. |
 
 **Returns:** Tonal audibility `ΔLta`, in dB (dB above the masking threshold).
 
@@ -393,7 +393,7 @@ dB.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `centre_frequency` is not positive/finite or the levels are not finite. |
+| ValueError | If `center_frequency` is not positive/finite or the levels are not finite. |
 
 ## tonal_seeking_survey
 
@@ -438,7 +438,7 @@ supplied outside that span are extrapolated with the nearest rule
 TonalAssessmentResult(
     tone_level: float,
     masking_noise_level: float,
-    centre_frequency: float,
+    center_frequency: float,
     critical_bandwidth: float,
     audibility: float,
     adjustment: float,
@@ -453,7 +453,7 @@ Tonal-audibility assessment of a tone in noise (ISO 1996-2 Annex C).
 | :--- | :--- |
 | `tone_level` | Energy-summed tone level `Lpt`, in dB. |
 | `masking_noise_level` | Masking-noise level `Lpn`, in dB. |
-| `centre_frequency` | Critical-band centre frequency `fc`, in Hz. |
+| `center_frequency` | Critical-band centre frequency `fc`, in Hz. |
 | `critical_bandwidth` | Critical bandwidth, in Hz (Table C.1). |
 | `audibility` | Tonal audibility `ΔLta`, in dB (Formula (C.3)). |
 | `adjustment` | Tonal adjustment `Kt`, in dB (Formulae (C.4)–(C.6)). |

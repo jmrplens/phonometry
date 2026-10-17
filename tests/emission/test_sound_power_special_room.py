@@ -108,7 +108,7 @@ def test_a_room_that_follows_the_curve_centres_on_formula_b2() -> None:
     r = emission.reverberation_parameter(THIRDS, 70.0)
     t = 0.8 * r / r[10]
     check = emission.check_special_room_reverberation(t, THIRDS, volume=70.0)
-    assert check.centred
+    assert check.centered
     assert check.nominal_reverberation_time_s == pytest.approx(0.8 / float(r[10]))
     np.testing.assert_allclose(check.normalized_ratio, 1.0, atol=1e-12)
     assert check.passes
@@ -167,7 +167,7 @@ def test_a_supplied_nominal_time_is_checked_as_given() -> None:
     check = emission.check_special_room_reverberation(
         0.73 * r * 1.15, THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
     )
-    assert not check.centred
+    assert not check.centered
     assert not bool(np.any(check.band_within[:-2]))
     assert not check.passes
 

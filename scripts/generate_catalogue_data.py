@@ -357,9 +357,9 @@ POROUS_COLUMNS = (
     ("viscous_length_um", "Viscous length", "Longitud viscosa", "µm"),
     ("thermal_length_um", "Thermal length", "Longitud térmica", "µm"),
     ("thermal_permeability_m2", "Thermal permeability", "Permeabilidad térmica", "m²"),
-    ("fibre_diameter_um", "Fibre diameter", "Diámetro de fibra", "µm"),
+    ("fiber_diameter_um", "Fibre diameter", "Diámetro de fibra", "µm"),
     (
-        "fibre_diameter_distribution_parameter",
+        "fiber_diameter_distribution_parameter",
         "Diameter distribution",
         "Distribución de diámetros",
         "",

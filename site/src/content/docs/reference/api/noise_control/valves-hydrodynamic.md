@@ -145,7 +145,7 @@ cavitation_differential(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     pressure_recovery: float,
 ) -> float
 ```
@@ -170,7 +170,7 @@ and no inequality; the minimum is what it means.
 | :--- | :--- |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 | `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
-| `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
+| `vapor_pressure_pa` | $p_v$, absolute, in Pa. |
 | `pressure_recovery` | $F_L$ of the valve, dimensionless. |
 
 **Returns:** $\Delta p_c$, in Pa.
@@ -450,7 +450,7 @@ differential_pressure_ratio(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
 ) -> float
 ```
 
@@ -470,7 +470,7 @@ far towards flashing this operating point is, and 1 is the whole way.
 | :--- | :--- |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 | `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
-| `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
+| `vapor_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 
 **Returns:** $x_F$, dimensionless.
 
@@ -487,7 +487,7 @@ HydrodynamicValveNoise(
     pressure_ratio: float,
     differential: float,
     inlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     cavitation_differential: float,
     incipient_ratio: float,
     corrected_ratio: float,
@@ -523,7 +523,7 @@ What IEC 60534-8-4 says about one operating point on a liquid line.
 | `pressure_ratio` | $x_F$ of Equation (1). |
 | `differential` | $p_1 - p_2$, in Pa. |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
-| `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
+| `vapor_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 | `cavitation_differential` | $\Delta p_c$ of Equation (2), in Pa. It stops following the differential once the flow chokes. |
 | `incipient_ratio` | $x_{Fz}$, the threshold as given, at 6 × 10⁵ Pa. |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c), the threshold at the working inlet pressure. This is the number the regime test is made against. |
@@ -672,7 +672,7 @@ jet_strouhal_number(
     valve_diameter_m: float,
     seat_diameter_m: float,
     inlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     coefficient: str = 'Cv',
     form: str = 'annex',
 ) -> float
@@ -706,7 +706,7 @@ and comes out anywhere between about 0,2 and 0,5.
 | `valve_diameter_m` | $d$, the valve inlet internal diameter, in m. |
 | `seat_diameter_m` | $d_o$, the seat or orifice diameter, in m. |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
-| `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
+| `vapor_pressure_pa` | $p_v$, absolute, in Pa. |
 | `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{34}$. |
 | `form` | Which printing of Equation (12) to use, `"annex"` or `"clause"`. |
 
@@ -725,7 +725,7 @@ last_stage_differential(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     corrected_ratio: float,
 ) -> float
 ```
@@ -749,7 +749,7 @@ the cap says so.
 | :--- | :--- |
 | `inlet_pressure_pa` | $p_{1,n}$ of the last stage, in Pa. |
 | `outlet_pressure_pa` | $p_2$ at the valve outlet, in Pa. |
-| `vapour_pressure_pa` | $p_v$, in Pa. |
+| `vapor_pressure_pa` | $p_v$, in Pa. |
 | `corrected_ratio` | $x_{Fzp1,n}$ of the last stage. |
 
 **Returns:** $\Delta p_c$, in Pa.
@@ -831,7 +831,7 @@ LiquidStream(
     mass_flow: float,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     density: float,
     speed_of_sound: float,
 )
@@ -846,7 +846,7 @@ The liquid and the operating point, which Clause 4.1 reads first.
 | `mass_flow` | $\dot m$, in kg/s. |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 | `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
-| `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
+| `vapor_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 | `density` | $\rho_L$, in kg/m³. |
 | `speed_of_sound` | $c_L$, in m/s. |
 
@@ -1053,7 +1053,7 @@ stage_conditions(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     stage_coefficients: Sequence[float],
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]
@@ -1085,7 +1085,7 @@ see `docs/ERRATA.md`.
 | :--- | :--- |
 | `inlet_pressure_pa` | $p_1$ at the valve, absolute, in Pa. |
 | `outlet_pressure_pa` | $p_2$ at the valve, absolute, in Pa. |
-| `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
+| `vapor_pressure_pa` | $p_v$, absolute, in Pa. |
 | `stage_coefficients` | $C_i$, the rated flow coefficient of each stage in flow order, two or more of them. |
 | `flow_coefficient` | $C$ of the whole valve, in the same units. |
 

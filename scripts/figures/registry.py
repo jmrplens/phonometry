@@ -378,6 +378,7 @@ from .materials import (
     generate_absorption_uncertainty,
     generate_adrienne_window,
     generate_airflow_resistance,
+    generate_base_plate_scattering,
     generate_biot_frame_resonance,
     generate_biot_waves,
     generate_critical_coupling_impedance,
@@ -1033,6 +1034,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Scattering/diffusion, in-situ road absorption, precision sound power
     # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
     generate_scattering_coefficient,
+    generate_base_plate_scattering,
     generate_published_scattering_agreement,
     generate_published_diffusion_arrays,
     generate_diffusion_measurement_chain,

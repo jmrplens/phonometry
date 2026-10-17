@@ -58,7 +58,8 @@ def test_floor_covering_background_subtracts_at_6_db(
     signal: float, background: float
 ) -> None:
     # ISO 16251-1 Formula (2): 6 dB is the first margin it energy-subtracts.
-    corrected, limited = building.background_corrected_level([signal], [background])
+    outcome = building.background_corrected_level([signal], [background])
+    corrected, limited = outcome.corrected_levels, outcome.limited
     expected = 10.0 * math.log10(10.0 ** (signal / 10.0) - 10.0 ** (background / 10.0))
     assert corrected[0] == pytest.approx(expected, abs=1e-9)
     assert not bool(limited[0])
@@ -68,7 +69,8 @@ def test_floor_covering_background_subtracts_at_6_db(
 def test_floor_covering_background_leaves_15_db_alone(
     signal: float, background: float
 ) -> None:
-    corrected, limited = building.background_corrected_level([signal], [background])
+    outcome = building.background_corrected_level([signal], [background])
+    corrected, limited = outcome.corrected_levels, outcome.limited
     assert corrected[0] == signal
     assert not bool(limited[0])
 
@@ -139,13 +141,33 @@ def test_iso3741_k1_is_zero_at_15_db(signal: float, background: float) -> None:
 
 @pytest.mark.parametrize(("signal", "background"), _pairs(15.0))
 def test_workstation_k1_is_not_zero_at_15_db(signal: float, background: float) -> None:
-    correction, held = emission.background_noise_correction_at_workstation(
+    outcome = emission.background_noise_correction_at_workstation(
         [signal], [background]
     )
+    correction, held = outcome.correction, outcome.upper_bound
     assert np.atleast_1d(correction)[0] == pytest.approx(
         -10.0 * math.log10(1.0 - 10.0**-1.5), abs=1e-9
     )
     assert not held
+
+
+@pytest.mark.parametrize(
+    ("grade", "signal", "background"),
+    [("engineering", *pair) for pair in _pairs(6.0)]
+    + [("survey", *pair) for pair in _pairs(3.0)],
+)
+def test_workstation_correction_at_the_grade_floor_is_not_held(
+    grade: str, signal: float, background: float
+) -> None:
+    # ISO 11201/11202/11204: a margin under the grade's 6 dB (engineering) or
+    # 3 dB (survey) holds K1 and makes the level an upper bound; a margin of
+    # exactly that many decibels is still a determination.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        outcome = emission.background_noise_correction_at_workstation(
+            [signal], [background], grade=grade
+        )
+    assert outcome.upper_bound is False
 
 
 @pytest.mark.parametrize(("signal", "background"), _pairs(6.0))
@@ -205,7 +227,7 @@ def test_spatial_decay_6_db_is_unusable(signal: float, background: float) -> Non
 @pytest.mark.parametrize(("signal", "background"), _pairs(10.0))
 def test_spatial_decay_10_db_is_satisfied(signal: float, background: float) -> None:
     check = room.check_background_margin([signal], [background])
-    assert check.satisfied
+    assert check.passes
     assert not bool(check.needs_correction[0])
 
 
@@ -247,7 +269,7 @@ def test_cabin_spread_of_3_db_asks_for_three_positions(
         [[signal, 20.0], [background, 20.0], [background, 20.0]]
     )
     assert check.n_required_positions == 3
-    assert check.satisfied
+    assert check.passes
 
 
 @pytest.mark.parametrize(("room_volume", "cabin_volume"), [(1.4, 0.07), (9.4, 0.47)])
@@ -328,9 +350,9 @@ def test_a_band_exactly_5_db_over_its_neighbours_is_flagged(
     tone: float, neighbour: float
 ) -> None:
     # ISO 1996-2 Annex K: from 500 Hz a band 5 dB or more above both neighbours.
-    flags = environment.tonal_seeking_survey(
+    flags = environment.assess_tonal_survey(
         [neighbour, tone, neighbour], [800.0, 1000.0, 1250.0]
-    )
+    ).prominent
     assert bool(flags[1])
 
 
@@ -354,7 +376,9 @@ def test_a_value_exactly_u_above_a_minimum_does_not_provably_exceed_it(
     value: float, requirement: float
 ) -> None:
     # ISO 12999-1 Formula (5) is a strict inequality.
-    assert not building.satisfies_lower_requirement(value, 2.0, requirement)
+    assert not building.assess_requirement_conformity(
+        value, 2.0, requirement, bound="minimum"
+    ).passes
 
 
 @pytest.mark.parametrize(("value", "requirement"), [(30.9, 32.2), (31.4, 32.7)])
@@ -362,20 +386,24 @@ def test_a_value_exactly_u_below_a_maximum_does_not_provably_stay_under_it(
     value: float, requirement: float
 ) -> None:
     # Formula (4), strict too: 30,9 + 1,3 is 32,2 in decimal, under it in binary.
-    assert not building.satisfies_upper_requirement(value, 1.3, requirement)
+    assert not building.assess_requirement_conformity(
+        value, 1.3, requirement, bound="maximum"
+    ).passes
 
 
 def test_like_elements_couple_strongly_at_exactly_3_db() -> None:
     # ISO 12354-1 (E.3): Dv,ij >= 3 - 10 lg(mi fcj / (mj fci)). These masses
     # and frequencies give a ratio of 1 in decimal, a unit under it in binary.
-    satisfied = building.strong_coupling_satisfied([3.0], 0.3, 3.0, 0.1, 1.0)
+    satisfied = building.check_strong_coupling([3.0], 0.3, 3.0, 0.1, 1.0).holds
     assert bool(satisfied[0])
 
 
 @pytest.mark.parametrize(("frame", "fluid"), [(0.01, 0.05), (0.07, 0.35)])
-def test_a_modulus_ratio_of_exactly_0_2_is_limp(frame: float, fluid: float) -> None:
-    # Doutres: limp while |Kc / Kf| does not exceed 0,2.
-    assert materials.limp_frame_applicable(frame, fluid_bulk_modulus=fluid)
+def test_a_modulus_ratio_of_exactly_0_2_is_not_limp(frame: float, fluid: float) -> None:
+    # Doutres, as Allard & Atalla print it: limp while |Kc / Kf| < 0,2. The
+    # ratio is 0,2 in decimal and a unit off it in binary, so it is on the
+    # threshold, and the threshold itself does not pass.
+    assert not materials.check_limp_frame(frame, fluid_bulk_modulus=fluid).passes
 
 
 @pytest.mark.parametrize(("with_specimen", "empty"), [(0.009, 0.008), (0.01, 0.009)])
@@ -412,7 +440,7 @@ def test_a_difference_of_exactly_one_jnd_is_perceptible(
     first: float, second: float
 ) -> None:
     # ISO 3382-1 Table A.1: the JND of C80 is 1 dB.
-    assert room.perceptibly_different("C80", [first], [second])
+    assert room.assess_perceptible_difference("C80", [first], [second]).different
 
 
 @pytest.mark.parametrize(("first", "second"), [(2.05, 1.95), (1.23, 1.17)])
@@ -421,7 +449,7 @@ def test_a_difference_of_exactly_one_relative_jnd_is_perceptible(
 ) -> None:
     # ISO 3382-1 Table A.1: the JND of EDT is 5 %, here of the mean of the
     # two; 2,05 and 1,95 s differ by 0,1 s, which is 5 % of 2,0 s.
-    assert room.perceptibly_different("EDT", [first], [second])
+    assert room.assess_perceptible_difference("EDT", [first], [second]).different
 
 
 @pytest.mark.parametrize(("measured", "mass"), [(0.525, 2.0), (0.21, 5.0)])
@@ -429,7 +457,7 @@ def test_a_rigid_mass_exactly_5_percent_off_is_within_tolerance(
     measured: float, mass: float
 ) -> None:
     # ISO 7626-2: the accelerance of a rigid mass is 1/m to within 5 %.
-    result = vibration.rigid_mass_calibration_check([measured], [100.0], mass)
+    result = vibration.verify_rigid_mass_calibration([measured], [100.0], mass)
     assert bool(result.within_tolerance[0])
 
 
@@ -692,7 +720,7 @@ def test_a_temporal_variability_of_exactly_0_6_is_stationary(
     indicators = emission.field_indicators(
         np.full(10, 121.0), np.ones(10), temporal_intensity=samples
     )
-    assert indicators.field_is_stationary()
+    assert indicators.check_field_stationarity().passes
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
         result = emission.sound_power_intensity_points(
@@ -912,13 +940,13 @@ def test_heights_a_tenth_of_the_distance_are_not_a_short_distance(
     source: float, receiver: float, first: float, second: float
 ) -> None:
     # ISO 10847 6.3: short distance when the height ratio exceeds 0,1.
-    before, _ = environment.is_short_distance(
+    before = environment.check_short_distance(
         source_height_m=source,
         receiver_height_m=receiver,
         barrier_height_m=1.0,
         source_to_barrier_m=first,
         barrier_to_receiver_m=second,
-    )
+    ).before
     assert not before
 
 
@@ -940,13 +968,13 @@ def test_a_barrier_a_tenth_of_its_distance_is_not_a_short_distance_after(
     source: float, receiver: float, barrier: float, first: float, second: float
 ) -> None:
     # ISO 10847 6.3.1: both "after" ratios must exceed 0,1.
-    _, after = environment.is_short_distance(
+    after = environment.check_short_distance(
         source_height_m=source,
         receiver_height_m=receiver,
         barrier_height_m=barrier,
         source_to_barrier_m=first,
         barrier_to_receiver_m=second,
-    )
+    ).after
     assert not after
 
 
@@ -1081,7 +1109,7 @@ def test_a_kb_value_exactly_15_percent_over_a_u_is_within_the_uncertainty(
     # Example 3 (C.3.3) reads as the requirement still met as a rule.
     guide = vibration.guide_values(area, time_of_day=time_of_day)
     verdict = vibration.assess_people_in_buildings(kb_fmax, guide)
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.within_uncertainty
     assert verdict.criterion == "A_u"
 
@@ -1309,7 +1337,7 @@ def test_thirds_6_db_apart_are_flat_enough_at_125_hz(high: float, low: float) ->
     check = noise_control.check_band_flatness(
         [high, 30.0, low], frequencies=[100.0, 125.0, 160.0]
     )
-    assert bool(check.satisfied[0])
+    assert bool(check.within_limit[0])
 
 
 @pytest.mark.parametrize(("signal", "background"), [*_pairs(15.0), *_pairs(6.0)])

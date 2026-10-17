@@ -465,6 +465,17 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         classes = [band["class"] for band in self.bands]
         return None if None in classes else max(classes)
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is the class, :attr:`overall_class`.
+        """
+        msg = (
+            "an IntensityInstrumentComplianceResult has no truth value; read its "
+            "'.overall_class'"
+        )
+        raise TypeError(msg)
+
     @property
     def range_limited(self) -> bool:
         """Whether the verified bands fall short of the range of clause 6.1.

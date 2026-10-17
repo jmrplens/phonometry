@@ -40,7 +40,10 @@ if TYPE_CHECKING:
 
     from ..environment.assessment.exposure_distribution import SELDistribution
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
-    from ..environment.assessment.measurement import TonalAssessmentResult
+    from ..environment.assessment.measurement import (
+        TonalAssessmentResult,
+        TonalSurveyAssessment,
+    )
     from ..environment.assessment.soundscape import (
         MethodASummary,
         MethodBSummary,
@@ -204,6 +207,10 @@ _STRINGS: dict[str, str] = {
     "Band level": "Nivel de banda",
     "$L_\\mathrm{t}$ vs neighbour mean": "$L_\\mathrm{t}$ frente a la media de contiguas",
     "Band level [dB]": "Nivel de banda [dB]",
+    "Prominent tone": "Tono prominente",
+    "Level a prominent tone needs": "Nivel que exige un tono prominente",
+    "Band sound pressure level [dB]": "Nivel de presión acústica de banda [dB]",
+    "ISO 1996-2 Annex K tonal survey": "Método de control de tonos, anexo K de ISO 1996-2",
     _LT_LABEL: _LT_LABEL,
     "RD 1367/2007 tonal correction $K_\\mathrm{{t}}$ = {kt} dB": "Corrección tonal $K_\\mathrm{{t}}$ = {kt} dB (RD 1367/2007)",
     "max $L_{\\mathrm{Keq},Ti}$": "máx. $L_{\\mathrm{Keq},Ti}$",
@@ -490,6 +497,67 @@ def plot_impulse_prominence(
     ax.set_ylim(bottom=0.0)
     ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
     ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_tonal_survey(
+    result: TonalSurveyAssessment,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One-third-octave band levels with the Annex K prominent tones marked.
+
+    Each inner band carries a bar mark at the level it would need to hold a
+    prominent tone: the louder neighbour plus the threshold of its range.
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.measurement.TonalSurveyAssessment`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the band bars.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    levels = np.asarray(result.levels, dtype=np.float64)
+    prominent = np.asarray(result.prominent, dtype=bool)
+    positions = np.arange(levels.size, dtype=np.float64)
+    needed = levels - np.asarray(result.level_differences, dtype=np.float64)
+    needed = needed + np.asarray(result.thresholds_db, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("width", 0.66)
+    kwargs.setdefault("label", _t("Band level", language))
+    ax.bar(positions, levels, zorder=3, **kwargs)
+    if np.any(prominent):
+        ax.bar(
+            positions[prominent],
+            levels[prominent],
+            width=kwargs["width"],
+            color=_C_SECONDARY,
+            zorder=4,
+            label=_t("Prominent tone", language),
+        )
+    ax.plot(
+        positions,
+        needed,
+        "_",
+        color=_C_REFERENCE,
+        markersize=18,
+        markeredgewidth=2.0,
+        zorder=5,
+        label=_t("Level a prominent tone needs", language),
+    )
+    _band_axis(ax, np.asarray(result.frequencies, dtype=np.float64), language=language)
+    finite = np.concatenate((levels, needed[np.isfinite(needed)]))
+    ax.set_ylim(float(np.min(finite)) - 10.0, float(np.max(finite)) + 8.0)
+    ax.set_ylabel(_t("Band sound pressure level [dB]", language))
+    ax.set_title(_t("ISO 1996-2 Annex K tonal survey", language))
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
     return ax
 

@@ -1219,6 +1219,24 @@ its reasons, so the return is a result dataclass rather than a bare `bool`: the
 caller who has to act on a failure needs to know which requirement failed and by
 how much.
 
+The overall pass or fail of a verdict is spelled `passes` in all three
+families, never `complies`, `satisfied`, `acceptable` or `applicable`. A flag
+that answers something other than pass or fail keeps its own name and its
+reason: `within_guideline`, because DIN 4150-3 does not call exceeding a
+guideline value a failure, and `significant`, a reason to investigate. A
+verdict also refuses to stand in for a bool: its `__bool__` raises `TypeError`
+naming the attribute to read, because a dataclass is always true and
+`if result:` would pass every failure. A predicate that only selects a
+procedure keeps its verb and returns a `bool`
+(`low_frequency_procedure_applies`, `resolve_tones_separately`): nothing passes
+or fails. And no public name starts with `test`, which pytest would collect from
+a user's test module. `tests/test_verdict_shape.py` reads the whole public API,
+the public methods of every published class included, and holds every one of
+these rules. A method that tests membership or provenance (`contains`,
+`is_derived`), looks up one requirement of a verdict by its clause, or says
+how a value is to be reported (`upper_limit`) answers no pass or fail, and is
+keyed there with its reason.
+
 ### Module length
 
 There is no line limit, because no Python authority sets one. PEP 8 limits the

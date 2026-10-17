@@ -222,7 +222,7 @@ plt.show()
 
 </details>
 
-**Base-plate check (Clause 6.4, Table 1).** The empty base plate must itself
+**Base-plate check (Clause 6.2, Table 1).** The empty base plate must itself
 scatter only negligibly, or it would bias the result. ISO 17497-1 caps the
 base-plate scattering coefficient per one-third-octave band; the library exposes
 those limits and a checker.
@@ -236,8 +236,20 @@ print(materials.BASE_PLATE_BANDS_HZ[0], materials.BASE_PLATE_MAX_SCATTERING[100]
 
 # A base plate whose measured scattering stays under the ceiling passes silently;
 # an over-limit band raises a ScatteringDiffusionWarning listing the offenders.
-materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+check = materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+print(check.passes, check.exceeded_frequencies.size)   # True 0
 ```
+
+The check holds the eighteen measured coefficients against the eighteen limits,
+band by band: `margins` is what each band has left, `exceeds` marks the bands
+over their limit and `exceeded_frequencies` names them, and `.plot()` draws the
+coefficients against the stepped limit with the bands over it ringed. A band at
+its limit is within it, because Table 1 is a ceiling that "shall not be
+exceeded". The bands are the full-scale frequencies $f/N$ that Table 1 is keyed
+to, and so is the axis of the figure: on a 1:N scale model each band is
+measured at N times the frequency shown.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/base_plate_scattering_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/base_plate_scattering.svg" alt="The scattering coefficient of a base plate alone over the 18 one-third-octave bands of Table 1, at the full-scale frequency f/N from 100 Hz to 5 kHz, rising from 0.01 to 0.2, drawn against the stepped limit of the table, which holds at 0.05 to 500 Hz, steps to 0.10, 0.15, 0.20 and 0.25; the point at 1 kHz, 0.105 against 0.10, is ringed as over the limit" width="88%"></picture>
 
 **Test-report fiche.** `ScatteringResult.report(path)` renders a one-page
 accredited scattering test report (ISO 17497-1): a metadata header, the

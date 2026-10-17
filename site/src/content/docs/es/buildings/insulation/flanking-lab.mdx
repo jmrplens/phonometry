@@ -203,7 +203,7 @@ plt.show()
 </details>
 
 **Validez.** $K_{ij}$ se apoya en una simplificación de análisis estadístico de
-energía: `strong_coupling_satisfied()` comprueba la desigualdad de la
+energía: `check_strong_coupling()` comprueba la desigualdad de la
 Fórmula (15) y, para las uniones pesadas de la Parte 4, `modal_density()`,
 `band_mode_count()` y `modal_overlap_factor()` (Fórmulas (5)/(4)/(6)) cuantifican
 dónde el número de modos es demasiado bajo para que $K_{ij}$ sea fiable. Pasa el
@@ -646,7 +646,7 @@ mediante `building.normalized_flanking_level_difference` y
 `building.normalized_flanking_impact_level`; la comprobación de acoplamiento
 fuerte (Fórmula (15)) y las comprobaciones de validez de ISO 10848-4:2010 por
 densidad modal, recuento de modos por banda y solape modal que ponen entre
-corchetes las bandas poco fiables (`building.strong_coupling_satisfied`,
+corchetes las bandas poco fiables (`building.check_strong_coupling`,
 `building.modal_density`, `building.band_mode_count`,
 `building.modal_overlap_factor`); y las tres fichas de una página con
 `.report()`.

@@ -57,7 +57,7 @@ Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
 the energy route of Equations (17) and (18) instead, and cap it: **the maximum
 correction is 3 dB**. A measurement that needs more than that does not yield
 the quantity at all, and the clause says what may be stated instead, which is
-an inequality. :func:`extraneous_corrected_mean_level` returns whether the
+an inequality. :func:`extraneous_corrected_mean_level` says whether the
 cap was reached so that a capped value cannot be reported as a determination.
 
 Clause 9.1.5 is the one prohibition worth reading twice: converting
@@ -115,6 +115,7 @@ __all__ = [
     "ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K",
     "UPSTREAM_DISTANCE_DIAMETERS",
     "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT",
+    "ExtraneousCorrectionResult",
     "InstallationCase",
     "SilencerInSituResult",
     "SilencerInSituWarning",
@@ -436,17 +437,66 @@ def silencer_mean_sound_pressure_level(levels: ArrayLike) -> float:
     return float(energy_mean(values))
 
 
+@dataclass(frozen=True)
+class ExtraneousCorrectionResult(RichDisplay):
+    r"""The mean level with the extraneous sound taken off, and whether it is capped.
+
+    9.1.1 and 9.1.2 cap the correction at 3 dB, and Table 1 prints where that
+    starts: a margin of the two energy means under 3 dB. Whether the cap was
+    reached is read from the margin, so it is not a field: a capped level
+    cannot be written down as a determination.
+
+    :ivar corrected_level: The corrected mean level, printed
+        :math:`\overline{L_{p1}}` in Equation (17) and
+        :math:`\overline{L_{pI}}` in Equation (18), in decibels; given either
+        way, capped or not.
+    :ivar margin_db: :math:`\overline{L_p} - \overline{L_e}`, the margin of
+        the energy mean of the levels as measured (:math:`\overline{L_p}` of
+        Equation (2), before any correction) over that of the extraneous
+        levels, in decibels.
+    """
+
+    corrected_level: float
+    margin_db: float
+
+    def __post_init__(self) -> None:
+        """Reject a level or a margin that is not a number.
+
+        :raises ValueError: For a value that is not finite.
+        """
+        require_finite(self.corrected_level, "corrected_level")
+        require_finite(self.margin_db, "margin_db")
+
+    @property
+    def capped(self) -> bool:
+        """Whether the correction reached the 3 dB cap: a margin under 3 dB.
+
+        The cap is judged on the margin of the two energy means and not on the
+        correction itself: the printed 3 dB is what Table 1 takes off at its
+        3 dB row, which the subtraction writes unrounded as 3,0206 dB. A
+        margin that floating point leaves a few parts in :math:`10^{14}` under
+        3 dB counts as 3 dB, on the side Table 1 accepts.
+        """
+        return self.margin_db < ISO11820_MIN_BACKGROUND_MARGIN_DB and not math.isclose(
+            self.margin_db,
+            ISO11820_MIN_BACKGROUND_MARGIN_DB,
+            rel_tol=0.0,
+            abs_tol=_MARGIN_TOLERANCE_DB,
+        )
+
+
 def extraneous_corrected_mean_level(
     levels: ArrayLike, extraneous_levels: ArrayLike
-) -> tuple[float, bool]:
+) -> ExtraneousCorrectionResult:
     r"""The mean level with the extraneous sound taken off, Equations (17) and (18).
 
     .. math::
 
-       \overline{L_p} = 10 \lg \left[\frac{1}{N} \sum_j
+       \overline{L_{p1}} = 10 \lg \left[\frac{1}{N} \sum_j
        \left(10^{0,1 L_{pj}} - 10^{0,1 L_{ej}}\right)\right]
 
-    The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
+    printed :math:`\overline{L_{p1}}` in Equation (17) and
+    :math:`\overline{L_{pI}}` in Equation (18). The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
     where the sources the silencer works on can be switched off and the
     extraneous sound measured at the same positions: corrections are made
     "using table 1 or the relationship" (9.1.1, printed folio 10, PDF page 18
@@ -459,7 +509,8 @@ def extraneous_corrected_mean_level(
     page 13) prints where that starts: a margin under 3 dB is invalid, and a
     margin of 3 dB takes off 3 dB. The subtraction reaches 3,0206 dB at that
     same margin, which is the printed 3 dB unrounded, so the cap is judged on
-    the margin of the two energy means:
+    the margin of the two energy means, :math:`\overline{L_p}` of the levels
+    as measured (Equation (2)) over that of the extraneous levels:
 
     .. math::
 
@@ -467,19 +518,18 @@ def extraneous_corrected_mean_level(
 
     That is the same condition as a correction of at most
     :math:`-10 \lg(1 - 10^{-0,3})` dB, and it keeps the two routes of the
-    standard in agreement at their shared boundary. A margin that floating
-    point leaves a few parts in :math:`10^{14}` under 3 dB counts as 3 dB.
+    standard in agreement at their shared boundary.
 
-    The second return value says whether the cap was reached, so that a
-    capped number cannot be written down as a determination, and a capped
+    The result's ``capped`` says whether the cap was reached, so that a capped
+    number cannot be written down as a determination, and a capped
     measurement also emits a :class:`SilencerInSituWarning`. The corrected
-    level itself is returned either way.
+    level itself is given either way.
 
     :param levels: The levels with everything running, in decibels.
     :param extraneous_levels: The extraneous levels at the same positions,
         in decibels.
-    :return: The corrected mean level in decibels, and whether the correction
-        reached the cap, which is a margin under 3 dB.
+    :return: The corrected mean level and the margin it was read at, as an
+        :class:`ExtraneousCorrectionResult`.
     :raises ValueError: For inputs that do not match point for point, or an
         extraneous level at or above the level it is subtracted from.
     """
@@ -496,30 +546,22 @@ def extraneous_corrected_mean_level(
             "that measurement invalid."
         )
         raise ValueError(msg)
-    corrected = float(10.0 * np.log10(np.mean(difference)))
-    # The cap is judged on the margin of the two energy means and not on the
-    # correction itself: the printed 3 dB is what Table 1 takes off at its
-    # 3 dB row, which the subtraction writes unrounded as 3,0206 dB. The
-    # tolerance keeps a printed 3,0 dB margin, which the two means can land a
-    # few parts in 10^14 under, on the side Table 1 accepts.
-    margin = float(energy_mean(levels)) - float(energy_mean(extraneous))
-    capped = margin < ISO11820_MIN_BACKGROUND_MARGIN_DB and not math.isclose(
-        margin,
-        ISO11820_MIN_BACKGROUND_MARGIN_DB,
-        rel_tol=0.0,
-        abs_tol=_MARGIN_TOLERANCE_DB,
+    result = ExtraneousCorrectionResult(
+        corrected_level=float(10.0 * np.log10(np.mean(difference))),
+        margin_db=float(energy_mean(levels)) - float(energy_mean(extraneous)),
     )
-    if capped:
+    if result.capped:
         msg = (
             "ISO 11820 caps the extraneous correction at "
             f"{MAX_EXTRANEOUS_CORRECTION:g} dB (9.1.1 and 9.1.2), the "
             "correction Table 1 applies at its "
             f"{ISO11820_MIN_BACKGROUND_MARGIN_DB:g} dB row; this measurement "
-            f"stands {margin:.2f} dB over the extraneous sound, so the level is "
-            "not determined and only the inequality of clause 4 may be stated."
+            f"stands {result.margin_db:.2f} dB over the extraneous sound, so the "
+            "level is not determined and only the inequality of clause 4 may be "
+            "stated."
         )
         warnings.warn(msg, SilencerInSituWarning, stacklevel=2)
-    return corrected, capped
+    return result
 
 
 def transmission_level_difference(

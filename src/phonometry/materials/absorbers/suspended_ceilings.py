@@ -308,8 +308,8 @@ class CeilingSpecimenCheck(RichDisplay):
         )
 
     @property
-    def satisfied(self) -> bool:
-        """Whether every judged limit holds.
+    def passes(self) -> bool:
+        """The verdict: every judged limit holds.
 
         The fixture, the substructure, the deflection, the supports and, when
         it was given, the humidity: a humidity that was not given is not
@@ -323,6 +323,14 @@ class CeilingSpecimenCheck(RichDisplay):
             and self.supports_ok
             and self.humidity_ok is not False
         )
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a CeilingSpecimenCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 def mounting_type(letter: str) -> str:
@@ -535,7 +543,7 @@ def check_ceiling_specimen(
       measurement (4.2.2, checked for each measurement by 4.2.3).
 
     Leaving one of them raises a :class:`SuspendedCeilingWarning` that names
-    it, and makes ``satisfied`` false. A substructure and support units are
+    it, and makes ``passes`` false. A substructure and support units are
     what 4.1.1.2.3.4 and 4.1.1.2.3.6 allow rather than require, so their
     dimensions default to zero, which is none at all, and the centre distance
     is judged only when it is given. The cap of 4.2.1 on the air-absorption

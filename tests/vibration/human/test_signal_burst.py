@@ -505,7 +505,10 @@ def test_the_verdict_refuses_what_it_cannot_judge() -> None:
         sb.verify_signal_burst_response("whole-body", "Wk", {1: {"rms": float("nan")}})
     with pytest.raises(ValueError, match="'measured' must be non-negative"):
         sb.verify_signal_burst_response("whole-body", "Wk", {1: {"rms": -0.0299}})
-    assert sb.verify_signal_burst_response("whole-body", "Wk", {1: {"rms": 0.0}})
+    # A zero reading is a reading, not a refusal: it is judged, and it fails.
+    assert not sb.verify_signal_burst_response(
+        "whole-body", "Wk", {1: {"rms": 0.0}}
+    ).passes
     with pytest.raises(ValueError, match="'amplitude_m_s2' must be positive"):
         sb.verify_signal_burst_response(
             "whole-body", "Wk", {1: {"rms": 0.0299}}, amplitude_m_s2=-1.0

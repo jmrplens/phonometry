@@ -550,7 +550,7 @@ def generate_rigid_mass_calibration(output_dir: str) -> None:
     ripple = 0.015 * np.sin(2.0 * np.pi * np.log10(freq))
     drift = 0.05 * (freq / 2500.0) ** 2
     measured = expected * (1.0 + ripple + drift)
-    res = vibration.rigid_mass_calibration_check(measured, freq, mass=m)
+    res = vibration.verify_rigid_mass_calibration(measured, freq, mass=m)
     within = res.within_tolerance
     tol = res.relative_tolerance
 

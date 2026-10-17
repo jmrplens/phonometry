@@ -777,6 +777,14 @@ class BackgroundNoiseAssessment(OwnsArrays):
             return _NOISE_CATEGORIES[2]
         return _NOISE_CATEGORIES[3]
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`category`.
+        """
+        msg = "a BackgroundNoiseAssessment has no truth value; read its '.category'"
+        raise TypeError(msg)
+
     @property
     def report_required(self) -> bool:
         """Whether the ratio is below 32 dB.

@@ -153,7 +153,7 @@ def frame_bulk_modulus(shear_modulus: complex, poisson_ratio: float) -> complex:
     Eq. (6.29), printed p. 116). ``Kb`` is the quantity the jacketed
     "gedanken experiment" of Eq. (6.7) measures, and the one the limp-frame
     rules of thumb of
-    :func:`~phonometry.materials.absorbers.porous.limp_frame_applicable` compare
+    :func:`~phonometry.materials.absorbers.porous.check_limp_frame` compare
     with the bulk modulus of the pore fluid.
 
     :param shear_modulus: Complex shear modulus ``N`` of the frame, in Pa

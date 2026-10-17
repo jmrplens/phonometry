@@ -536,7 +536,7 @@ def _chk_real_arrangements() -> Outcome:
         matching += int(
             abs(got.area_error_m2 - error_m2) <= 5e-9
             and got.ce_marking_depth is ce_marking
-            and got.satisfied is True
+            and got.passes is True
         )
     return count(
         matching,
@@ -602,7 +602,7 @@ def _chk_humidity_floor() -> Outcome:
                 relative_humidity_percent=climates,
             )
         expected = report not in below_the_floor
-        matching += int(got.humidity_ok is expected and got.satisfied is expected)
+        matching += int(got.humidity_ok is expected and got.passes is expected)
     return count(
         matching,
         len(printed),

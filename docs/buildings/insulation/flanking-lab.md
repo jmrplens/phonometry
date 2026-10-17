@@ -68,7 +68,7 @@ plt.show()
 </details>
 
 **Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
-`strong_coupling_satisfied()` checks the Formula (15) inequality and, for the
+`check_strong_coupling()` checks the Formula (15) inequality and, for the
 heavy junctions of Part 4, `modal_density()`, `band_mode_count()` and
 `modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
 is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor

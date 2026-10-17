@@ -58,7 +58,7 @@ already uses, ISO 3744:2010 Equation (16), but this group sets its own
 thresholds: 15 dB of margin makes it negligible, and 6 dB (grade 2) or 3 dB
 (grade 3) is as far down as a result may be claimed. Below that the correction
 is clamped and the level becomes an upper bound, which is why
-[`background_noise_correction_at_workstation`](/phonometry/reference/api/power/workstation/#background_noise_correction_at_workstation) returns the clamp rather than
+[`background_noise_correction_at_workstation`](/phonometry/reference/api/power/workstation/#background_noise_correction_at_workstation) reports the clamp rather than
 raising: the reading is still worth reporting, it just stops being a
 determination.
 
@@ -108,24 +108,17 @@ background_noise_correction_at_workstation(
     background_level: ArrayLike,
     *,
     grade: Literal['engineering', 'survey'] = 'engineering',
-) -> tuple[float | NDArray[np.float64], bool]
+) -> WorkstationBackgroundCorrection
 ```
 
 Background-noise correction $K_1$ for the ISO 11200 group.
 
-$$
-K_1 = -10 \lg \left( 1 - 10^{-0,1 \Delta L} \right)\ \mathrm{dB}, \qquad \Delta L = L'_p - L_p(B)
-$$
-
 ISO 11201:2010 Equation (5), ISO 11202:2010 Equation (8) and
 ISO 11204:2010 Equation (7), one expression printed three times. It is the
 same closed form as ISO 3744:2010 Equation (16) on the sound-power side, and
-this group puts its own thresholds around it: above
-[`NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#negligible_background_margin_db) the correction is taken as zero, and
-below the grade's entry in [`MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#min_background_margin_db) it is held
-at the value it has there. A held correction does not fail the measurement;
-it makes the level an upper bound, which the second return value reports and
-the caller must carry into what it publishes.
+this group puts its own thresholds around it, which
+[`WorkstationBackgroundCorrection`](/phonometry/reference/api/power/workstation/#workstationbackgroundcorrection) applies. A held correction emits
+a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning).
 
 **Parameters**
 
@@ -135,7 +128,7 @@ the caller must carry into what it publishes.
 | `background_level` | The reading with it stopped, $L_p(B)$, in decibels, of the same shape. |
 | `grade` | `'engineering'` (grade 2, 6 dB) or `'survey'` (grade 3, 3 dB), which sets how far down a determination may be claimed. |
 
-**Returns:** The correction in decibels, and whether any value was clamped.
+**Returns:** The correction, as a [`WorkstationBackgroundCorrection`](/phonometry/reference/api/power/workstation/#workstationbackgroundcorrection): $K_1$ in its `correction`, and in its `upper_bound` whether the background held it anywhere.
 
 **Raises**
 
@@ -550,3 +543,47 @@ the method and the other of the machine.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either component is negative. |
+
+## WorkstationBackgroundCorrection
+
+```python
+WorkstationBackgroundCorrection(
+    background_margin_db: float | NDArray[np.float64],
+    *,
+    grade: Literal['engineering', 'survey'] = 'engineering',
+)
+```
+
+The background-noise correction $K_1$ of the ISO 11200 group.
+
+$$
+K_1 = -10 \lg \left( 1 - 10^{-0,1 \Delta L} \right)\ \mathrm{dB}, \qquad \Delta L = L'_p - L_p(B)
+$$
+
+Above [`NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#negligible_background_margin_db) the correction is taken as
+zero, and below the grade's entry in [`MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#min_background_margin_db) it
+is held at the value it has there. The correction and whether it was held
+are read from the margin and the grade, so they are not fields: a record
+cannot be built to hold a correction its margin does not give.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `background_margin_db` | $\Delta L$, the reading with the machine running less the reading with it stopped, in decibels; a number, or one value per band. |
+| `grade` | `'engineering'` (grade 2, 6 dB) or `'survey'` (grade 3, 3 dB), which sets how far down a determination may be claimed. |
+
+### WorkstationBackgroundCorrection.correction
+
+*property*
+
+$K_1$, in decibels: a number, or one value per band.
+
+### WorkstationBackgroundCorrection.upper_bound
+
+*property*
+
+Whether the correction was held anywhere, which makes the level an upper bound.
+
+A held correction does not fail the measurement; it makes the level an
+upper bound, which the caller must carry into what it publishes.

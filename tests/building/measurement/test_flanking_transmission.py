@@ -374,8 +374,37 @@ def test_critical_frequency() -> None:
 def test_strong_coupling_check() -> None:
     """Formula (15): the threshold is 3 − 10 lg((mi·fcj)/(mj·fci))."""
     # equal masses and critical frequencies -> threshold = 3 dB
-    ok = building.strong_coupling_satisfied([4.0, 2.0], 20.0, 20.0, 100.0, 100.0)
+    ok = building.check_strong_coupling([4.0, 2.0], 20.0, 20.0, 100.0, 100.0).holds
     assert list(ok) == [True, False]
+
+
+def test_strong_coupling_threshold_of_unlike_elements() -> None:
+    """Formula (15) for unlike elements, so the logarithmic term counts.
+
+    With mi = 10 kg/m², mj = 20 kg/m², fci = 100 Hz and fcj = 400 Hz the ratio
+    (mi·fcj)/(mj·fci) is 2, and the least Dv,ij is 3 − 10 lg 2 dB, a hair
+    under 0 dB. One band on either side of it: the verdict needs every band.
+    """
+    check = building.check_strong_coupling([0.0, -0.1], 10.0, 20.0, 100.0, 400.0)
+    assert check.threshold_db == pytest.approx(3.0 - 10.0 * np.log10(2.0), abs=1e-12)
+    assert check.threshold_db == pytest.approx(-0.0103, abs=5e-5)
+    assert list(check.holds) == [True, False]
+    assert check.passes is False
+
+
+def test_strong_coupling_passes_when_every_band_holds() -> None:
+    check = building.check_strong_coupling([0.0, 1.5], 10.0, 20.0, 100.0, 400.0)
+    assert list(check.holds) == [True, True]
+    assert check.passes is True
+
+
+def test_strong_coupling_threshold_depends_on_the_direction() -> None:
+    """Dv,ij is one way: swapping i and j turns the ratio 2 into 1/2."""
+    forward = building.check_strong_coupling([3.0], 10.0, 20.0, 100.0, 400.0)
+    backward = building.check_strong_coupling([3.0], 20.0, 10.0, 400.0, 100.0)
+    assert backward.threshold_db == pytest.approx(3.0 + 10.0 * np.log10(2.0), abs=1e-12)
+    assert forward.passes is True
+    assert backward.passes is False
 
 
 def test_modal_density_and_overlap() -> None:

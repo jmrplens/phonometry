@@ -322,7 +322,7 @@ $K_\mathrm{b} = 2 N (\nu + 1) / (3 (1 - 2 \nu))$ (Allard & Atalla 2e,
 Eq. (6.29), printed p. 116). `Kb` is the quantity the jacketed
 "gedanken experiment" of Eq. (6.7) measures, and the one the limp-frame
 rules of thumb of
-[`limp_frame_applicable`](/phonometry/reference/api/materials/porous/#limp_frame_applicable) compare
+[`check_limp_frame`](/phonometry/reference/api/materials/porous/#check_limp_frame) compare
 with the bulk modulus of the pore fluid.
 
 **Parameters**

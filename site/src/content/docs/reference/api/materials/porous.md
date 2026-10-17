@@ -111,6 +111,43 @@ bulk density outside the range the fit was made over emits a
 | :--- | :--- |
 | ValueError | for a non-positive density. |
 
+## check_limp_frame
+
+```python
+check_limp_frame(
+    frame_bulk_modulus: float,
+    *,
+    criterion: str = 'doutres',
+    fluid_bulk_modulus: float = 101325.0,
+) -> LimpFrameCheck
+```
+
+May the limp-frame model be used for this frame? (A&A 2e pp. 253-254).
+
+With `K_f` taken as the isothermal bulk modulus of the fluid,
+$P_0 = 101.3$ kPa, the relaxed criterion of Doutres et al. is the
+book's statement that "the limp model is applicable for materials having a
+bulk modulus lower than 20 kPa". Neither criterion accounts for boundary
+or mounting conditions, and the book notes that a thin light foam
+decoupled from a vibrating structure by an air gap behaves limply well
+above the limit.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; pass `abs(K_c)` for a complex modulus). |
+| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0,2) or `"beranek"` (0,05). |
+| `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa (Default: 101 325, the isothermal value for fluid). |
+
+**Returns:** The verdict, as a [`LimpFrameCheck`](/phonometry/reference/api/materials/porous/#limpframecheck); it passes when $\lvert K_c/K_\mathrm{f} \rvert$ is below the threshold (the book prints both criteria as strict inequalities).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a negative modulus or an unknown criterion. |
+
 ## decoupling_frequency
 
 ```python
@@ -435,7 +472,7 @@ The corrected medium is a drop-in
 rigid-frame one.
 
 Use [`decoupling_frequency`](/phonometry/reference/api/materials/porous/#decoupling_frequency) to see where the frame stops following the
-fluid and [`limp_frame_applicable`](/phonometry/reference/api/materials/porous/#limp_frame_applicable) for the published bulk-modulus
+fluid and [`check_limp_frame`](/phonometry/reference/api/materials/porous/#check_limp_frame) for the published bulk-modulus
 rule of thumb on when the frame may be treated as limp at all.
 
 **Parameters**
@@ -454,48 +491,6 @@ rule of thumb on when the frame may be treated as limp at all.
 | :--- | :--- |
 | ValueError | for a non-positive input or a porosity above 1. |
 
-## limp_frame_applicable
-
-```python
-limp_frame_applicable(
-    frame_bulk_modulus: float,
-    *,
-    criterion: str = 'doutres',
-    fluid_bulk_modulus: float = 101325.0,
-) -> bool
-```
-
-Whether the limp-frame model may be used, by published rule of thumb.
-
-Both published criteria compare the bulk modulus of the frame *in vacuum*
-`K_c` with that of the fluid in the pores `K_f` (Allard & Atalla 2e,
-printed pp. 253-254): Beranek (1947) requires
-$\lvert K_c/K_\mathrm{f} \rvert < 0.05$, and the frame structural
-interaction study of Doutres et al. (2007) relaxes it to
-$\lvert K_c/K_\mathrm{f} \rvert < 0.2$. With `K_f` taken as the
-isothermal bulk modulus of fluid, $P_0 = 101.3$ kPa, the relaxed
-criterion is the book's statement that
-"the limp model is applicable for materials having a bulk modulus lower
-than 20 kPa". Neither criterion accounts for boundary or mounting
-conditions, and the book notes that a thin light foam decoupled from a
-vibrating structure by an air gap behaves limply well above the limit.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; pass `abs(K_c)` for a complex modulus). |
-| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0,2) or `"beranek"` (0,05). |
-| `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa (Default: 101 325, the isothermal value for fluid). |
-
-**Returns:** `True` when $\lvert K_c/K_\mathrm{f} \rvert$ does not exceed the threshold.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | for a negative modulus or an unknown criterion. |
-
 ## LIMP_FRAME_CRITERIA
 
 *Constant* (`mapping`).
@@ -503,6 +498,58 @@ vibrating structure by an air gap behaves limply well above the limit.
 ```python
 LIMP_FRAME_CRITERIA = {'beranek': 0.05, 'doutres': 0.2}
 ```
+
+## LimpFrameCheck
+
+```python
+LimpFrameCheck(
+    frame_bulk_modulus: float,
+    *,
+    criterion: str = 'doutres',
+    fluid_bulk_modulus: float = 101325.0,
+)
+```
+
+Whether the limp-frame model may be used, by a published rule of thumb.
+
+Both published criteria compare the bulk modulus of the frame *in vacuum*
+`K_c` with that of the fluid in the pores `K_f` (Allard & Atalla 2e,
+printed pp. 253-254): Beranek (1947) requires
+$\lvert K_c/K_\mathrm{f} \rvert < 0.05$, and the frame structural
+interaction study of Doutres et al. (2007) relaxes it to
+$\lvert K_c/K_\mathrm{f} \rvert < 0.2$. The threshold, the ratio and
+the verdict are read from the criterion and the two moduli, so they are
+not fields: a check cannot be built against another threshold.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; `abs(K_c)` for a complex modulus). |
+| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0,2) or `"beranek"` (0,05). |
+| `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa. |
+
+### LimpFrameCheck.passes
+
+*property*
+
+The verdict: the ratio is below the threshold, strictly, as printed.
+
+Judged settled to nine decimals, so moduli whose ratio is the printed
+threshold in decimal are on it, and a ratio on the threshold does not
+pass.
+
+### LimpFrameCheck.ratio
+
+*property*
+
+$\lvert K_c/K_\mathrm{f} \rvert$, the ratio judged.
+
+### LimpFrameCheck.threshold
+
+*property*
+
+The bound $\lvert K_c/K_\mathrm{f} \rvert$ must stay below.
 
 ## membrane_impedance
 

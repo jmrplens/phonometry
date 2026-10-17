@@ -75,7 +75,7 @@ used for its data-quality checks are
 [`phonometry.electroacoustics.frequency_response.coherence`](/phonometry/reference/api/electroacoustics/frequency-response/#coherence); both are
 exported at the package top level. This module adds the ISO 7626-2 acceptance
 criteria on top of them: the operational rigid-mass calibration of 7.5.2
-([`rigid_mass_calibration_check`](/phonometry/reference/api/vibration/mechanical-mobility/#rigid_mass_calibration_check), +/- 5 %) and the Annex A normalized
+([`verify_rigid_mass_calibration`](/phonometry/reference/api/vibration/mechanical-mobility/#verify_rigid_mass_calibration), +/- 5 %) and the Annex A normalized
 random error with its \< 5 % averaging criterion ([`random_error_percent`](/phonometry/reference/api/vibration/mechanical-mobility/#random_error_percent)).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -295,47 +295,6 @@ SDOF, in Hz.
 
 **Returns:** The natural frequency `f0`, in hertz.
 
-## rigid_mass_calibration_check
-
-```python
-rigid_mass_calibration_check(
-    frf: ArrayLike,
-    frequencies: ArrayLike,
-    mass: float,
-    *,
-    quantity: str = 'accelerance',
-) -> RigidMassCalibrationResult
-```
-
-Check an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
-
-The measured frequency response of a freely suspended rigid calibration
-block of known mass `m` shall agree within +/- 5 % with its known correct
-value: the accelerance magnitude $\lvert A \rvert = 1/m$ or the
-mobility magnitude
-$\lvert Y \rvert = 1/(2 \pi f m)$. All components of the
-measurement chain (including
-the attachment hardware) are connected as in the test series, so a failure
-flags transducer, chain or attachment-compliance errors. The 5 % is the
-clause's and is not a parameter.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `frf` | Measured calibration FRF (complex or magnitude, scalar or array), in 1/kg (accelerance) or m/(N.s) (mobility). |
-| `frequencies` | Frequencies of *frf*, in hertz (> 0, same shape). |
-| `mass` | Known mass `m` of the calibration block, in kg (> 0). |
-| `quantity` | `"accelerance"` ($\lvert A \rvert = 1/m$) or `"mobility"` ($\lvert Y \rvert = 1/(\omega m)$). (Default: `"accelerance"`.) |
-
-**Returns:** A [`RigidMassCalibrationResult`](/phonometry/reference/api/vibration/mechanical-mobility/#rigidmasscalibrationresult) with per-band pass flags.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |
-
 ## RigidMassCalibrationResult
 
 ```python
@@ -518,3 +477,44 @@ ISO 7626-1 (Table 1 / 3.1.2 definitions).
 | `damping` | Viscous damping coefficient `c`, in N.s/m (>= 0). |
 
 **Returns:** The complex receptance `H`, in m/N.
+
+## verify_rigid_mass_calibration
+
+```python
+verify_rigid_mass_calibration(
+    frf: ArrayLike,
+    frequencies: ArrayLike,
+    mass: float,
+    *,
+    quantity: str = 'accelerance',
+) -> RigidMassCalibrationResult
+```
+
+Verify an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
+
+The measured frequency response of a freely suspended rigid calibration
+block of known mass `m` shall agree within +/- 5 % with its known correct
+value: the accelerance magnitude $\lvert A \rvert = 1/m$ or the
+mobility magnitude
+$\lvert Y \rvert = 1/(2 \pi f m)$. All components of the
+measurement chain (including
+the attachment hardware) are connected as in the test series, so a failure
+flags transducer, chain or attachment-compliance errors. The 5 % is the
+clause's and is not a parameter.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frf` | Measured calibration FRF (complex or magnitude, scalar or array), in 1/kg (accelerance) or m/(N.s) (mobility). |
+| `frequencies` | Frequencies of *frf*, in hertz (> 0, same shape). |
+| `mass` | Known mass `m` of the calibration block, in kg (> 0). |
+| `quantity` | `"accelerance"` ($\lvert A \rvert = 1/m$) or `"mobility"` ($\lvert Y \rvert = 1/(\omega m)$). (Default: `"accelerance"`.) |
+
+**Returns:** A [`RigidMassCalibrationResult`](/phonometry/reference/api/vibration/mechanical-mobility/#rigidmasscalibrationresult) with per-band pass flags.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |

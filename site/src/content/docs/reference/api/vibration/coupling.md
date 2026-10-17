@@ -225,13 +225,6 @@ cannot be built against other limits.
 | `direction` | `"vertical"` or `"horizontal"`. |
 | `surface` | `"hard"` or `"soft"`. |
 
-### MountingCheck.acceptable
-
-*property*
-
-`True` when both the peak acceleration and the highest frequency
-of interest are within what a loose mounting carries.
-
 ### MountingCheck.device
 
 *property*
@@ -243,6 +236,13 @@ What the transducer has to stand on for the verdict to hold.
 *property*
 
 The frequency the direction allows a loose mounting up to, in hertz.
+
+### MountingCheck.passes
+
+*property*
+
+The verdict: the peak acceleration and the highest frequency of
+interest are both within what a loose mounting carries.
 
 ### MountingCheck.peak_acceleration_limit_m_s2
 

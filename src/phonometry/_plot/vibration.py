@@ -541,7 +541,7 @@ def _plot_verdict_points(
 ) -> None:
     """The measured points of a verifier, green inside the band and red outside.
 
-    The pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    The pair ``plot_db_hr_assessment`` already uses for a passes/fails
     verdict. The measured series cannot take _C_PRIMARY, which the design goal
     and its band carry in every verifier, and it must not take _C_REFERENCE,
     which would paint a conforming point in the colour of a refusal. The
@@ -3194,7 +3194,7 @@ def plot_people_assessment(
     ax.set_title(
         _t("People in buildings by DIN 4150-2 ({source}): {verdict}", language).format(
             source=_t(result.source.replace("_", " "), language),
-            verdict=_t("PASS" if result.complies else "FAIL", language),
+            verdict=_t("PASS" if result.passes else "FAIL", language),
         )
     )
     ax.grid(visible=True, axis="y", which="both", alpha=0.3)

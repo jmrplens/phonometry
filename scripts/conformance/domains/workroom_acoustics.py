@@ -840,13 +840,13 @@ def _chk_table_e1() -> Outcome:
     }
     matching = 0
     for category, room_detail, fitting, source, want in cases.values():
-        verdict = ph.room.detail_is_sufficient(
+        verdict = ph.room.check_prediction_detail(
             category,
             room_detail=room_detail,
             fitting_detail=fitting,
             source_detail=source,
         )
-        matching += int(verdict.satisfied is want)
+        matching += int(verdict.passes is want)
     return count(matching, len(cases), subject="combinations judged as printed")
 
 

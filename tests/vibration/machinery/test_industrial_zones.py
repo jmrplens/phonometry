@@ -176,11 +176,19 @@ def test_a_machine_it_cannot_place_is_refused(
 def test_a_change_is_significant_past_a_quarter_of_zone_b() -> None:
     """5.3, and the sign does not matter: a fall counts as much as a rise."""
     upper = 4.5
-    assert vibration.is_significant_change(1.2, upper)
-    assert vibration.is_significant_change(-1.2, upper)
-    assert not vibration.is_significant_change(1.0, upper)
+    assert vibration.assess_operational_change(1.2, upper).significant
+    assert vibration.assess_operational_change(-1.2, upper).significant
+    assert not vibration.assess_operational_change(1.0, upper).significant
     # Exactly a quarter is not "exceeding" it.
-    assert not vibration.is_significant_change(0.25 * upper, upper)
+    assert not vibration.assess_operational_change(0.25 * upper, upper).significant
+
+
+def test_the_significant_change_threshold_is_a_quarter_of_zone_b() -> None:
+    """5.3: a quarter of the 4,5 mm/s B/C boundary is 1,125 mm/s."""
+    change = vibration.assess_operational_change(1.2, 4.5)
+    assert change.threshold == pytest.approx(1.125, abs=1e-12)
+    assert change.change == 1.2
+    assert change.zone_b_upper == 4.5
 
 
 def test_the_alarm_sits_a_quarter_of_zone_b_above_the_baseline() -> None:
@@ -212,8 +220,8 @@ def test_the_two_published_fractions_are_the_ones_the_clauses_print() -> None:
 @pytest.mark.parametrize(
     ("call", "match"),
     [
-        (lambda: vibration.is_significant_change(math.nan, 4.5), "must be finite"),
-        (lambda: vibration.is_significant_change(1.0, 0.0), "must be positive"),
+        (lambda: vibration.assess_operational_change(math.nan, 4.5), "must be finite"),
+        (lambda: vibration.assess_operational_change(1.0, 0.0), "must be positive"),
         (lambda: vibration.alarm_limit(-1.0, 4.5), "non-negative"),
         (lambda: vibration.alarm_limit(1.0, -4.5), "must be positive"),
         (lambda: vibration.trip_limit(0.0), "must be positive"),

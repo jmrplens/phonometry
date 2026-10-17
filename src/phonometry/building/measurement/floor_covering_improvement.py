@@ -55,7 +55,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -69,10 +69,12 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
+    "BackgroundCorrectedLevel",
     "FloorCoveringImprovementResult",
     "acceleration_level",
     "background_corrected_level",
@@ -143,18 +145,89 @@ def acceleration_level(
     return 20.0 * np.log10(a / reference)
 
 
+@dataclass(frozen=True)
+class BackgroundCorrectedLevel(OwnsArrays):
+    r"""A measured level corrected for background noise (ISO 16251-1 F. (2)).
+
+    At a margin :math:`L' - L_\mathrm{b}` of 15 dB or more the level is used
+    unchanged; between 6 dB and 15 dB the background is subtracted in energy;
+    under 6 dB the correction is held at 1,3 dB, the limit of measurement,
+    and the band is reported as :math:`> \Delta L`. The margins, the corrected
+    levels and the bands at the limit are read from the two readings, so they
+    are not fields: a record cannot be built to claim a band clear of the
+    limit that its readings put on it.
+
+    :ivar signal_and_background: Measured level ``L'`` (with background), in
+        dB; one value per band, or a (positions, bands) array.
+    :ivar background: Background-noise level ``Lb``, in dB, of the same shape.
+    """
+
+    signal_and_background: NDArray[np.float64]
+    background: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Hold the readings read-only and reject readings that do not pair.
+
+        :raises ValueError: For readings of different shapes or values that are
+            not finite.
+        """
+        lp = _finite(self.signal_and_background, "signal_and_background")
+        lb = _finite(self.background, "background")
+        require_equal_shapes(
+            type(self).__name__,
+            {"signal_and_background": lp.shape, "background": lb.shape},
+            "band",
+        )
+        object.__setattr__(self, "signal_and_background", read_only(lp))
+        object.__setattr__(self, "background", read_only(lb))
+
+    @property
+    def margins_db(self) -> NDArray[np.float64]:
+        r""":math:`L' - L_\mathrm{b}`, in dB, in the shape of the readings."""
+        return np.asarray(
+            self.signal_and_background - self.background, dtype=np.float64
+        )
+
+    @property
+    def limited(self) -> NDArray[np.bool_]:
+        """Where the margin is under 6 dB, so the band is at the limit of measurement.
+
+        Judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996 in binary and
+        still the 6 dB it is.
+        """
+        return np.asarray(settled(self.margins_db) < _MARGIN_LIMIT, dtype=np.bool_)
+
+    @property
+    def corrected_levels(self) -> NDArray[np.float64]:
+        """The corrected levels ``L``, in dB, in the shape of the readings."""
+        lp = np.asarray(self.signal_and_background, dtype=np.float64)
+        lb = np.asarray(self.background, dtype=np.float64)
+        diff = 10.0 ** (lp / 10.0) - 10.0 ** (lb / 10.0)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            subtracted = 10.0 * np.log10(np.where(diff > 0.0, diff, 1.0))
+        # >= 15: unchanged; 6 <= margin < 15: energy subtraction; < 6: 1,3 dB.
+        judged = settled(self.margins_db)
+        corrected = np.where(judged >= _MARGIN_NEGLIGIBLE, lp, subtracted)
+        return np.asarray(
+            np.where(self.limited, lp - _LIMIT_CORRECTION, corrected), dtype=np.float64
+        )
+
+
 def background_corrected_level(
     signal_and_background: float | Sequence[float] | np.ndarray,
     background: float | Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> BackgroundCorrectedLevel:
     r"""Correct a measured level for background noise (ISO 16251-1 F. (2)).
 
     :param signal_and_background: Measured level ``L'`` (with background) per
-        band, in dB.
-    :param background: Background-noise level ``Lb`` per band, in dB.
-    :return: ``(corrected, limited)``: the corrected levels ``L`` per band,
-        in dB, and a boolean mask of bands at the 1.3 dB limit of measurement
-        (report as :math:`> \Delta L`).
+        band, in dB; a (positions, bands) array is corrected position by
+        position.
+    :param background: Background-noise level ``Lb`` per band, in dB, of the
+        same shape.
+    :return: The correction, as a :class:`BackgroundCorrectedLevel`: the
+        corrected levels ``L`` in its ``corrected_levels``, and in its
+        ``limited`` the bands at the 1.3 dB limit of measurement (report as
+        :math:`> \Delta L`).
     :raises ValueError: Mismatched shapes or non-finite values.
     """
     lp = _finite(signal_and_background, "signal_and_background")
@@ -164,18 +237,7 @@ def background_corrected_level(
         {"signal_and_background": lp.shape, "background": lb.shape},
         "band",
     )
-    margin = lp - lb
-    diff = 10.0 ** (lp / 10.0) - 10.0 ** (lb / 10.0)
-    with np.errstate(invalid="ignore", divide="ignore"):
-        subtracted = 10.0 * np.log10(np.where(diff > 0.0, diff, 1.0))
-    # >= 15: unchanged; 6 <= margin < 15: energy subtraction; < 6: 1,3 dB limit.
-    # The margin is judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996
-    # in binary and still the 6 dB it is.
-    judged = settled(margin)
-    corrected = np.where(judged >= _MARGIN_NEGLIGIBLE, lp, subtracted)
-    limited = judged < _MARGIN_LIMIT
-    corrected = np.where(limited, lp - _LIMIT_CORRECTION, corrected)
-    return corrected, limited
+    return BackgroundCorrectedLevel(lp, lb)
 
 
 @dataclass(frozen=True)
@@ -466,8 +528,8 @@ def impact_improvement(
         # is, so the smallest margin is the one the result keeps.
         margins = np.minimum(l0 - lb, l1 - lb)
         margin = margins.min(axis=0) if margins.ndim == 2 else margins  # noqa: PLR2004
-        l0, _ = background_corrected_level(l0, lb)
-        l1, _ = background_corrected_level(l1, lb)
+        l0 = background_corrected_level(l0, lb).corrected_levels
+        l1 = background_corrected_level(l1, lb).corrected_levels
 
     delta_per_position = l0 - l1  # Formula (3)
     if delta_per_position.ndim == 2:  # noqa: PLR2004

@@ -1948,8 +1948,8 @@ limited to the diffuse-field method, and ray tracing over the real shape needs a
 description gathered at that level first.
 
 ```python
-print(room.detail_is_sufficient("1", room_detail=3,
-                                fitting_detail=3, source_detail=1).satisfied)   # False
+print(room.check_prediction_detail("1", room_detail=3,
+                                   fitting_detail=3, source_detail=1).passes)   # False
 print(round(room.fitting_density(480.0, 1200.0), 2))                           # 0.1
 print(round(room.workstation_level(sound_power_level=95.0,
                                    emission_level=85.0,

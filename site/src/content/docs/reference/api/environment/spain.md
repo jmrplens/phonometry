@@ -40,10 +40,10 @@ variants rather than delegating:
   ISO 1996-2 Annex C engineering method: a critical-band audibility
   `ΔLta` mapped to a *continuous* `Kt` in 0 to 6 dB. The RD works on
   one-third-octave band differences and yields 0/3/6 dB only.
-  [`tonal_seeking_survey`](/phonometry/reference/api/environment/measurement/#tonal_seeking_survey) is the
+  [`assess_tonal_survey`](/phonometry/reference/api/environment/measurement/#assess_tonal_survey) is the
   closest relative (ISO 1996-2:2017 Annex K also splits the spectrum at
   125/400 Hz), but it requires the band to exceed *both* neighbours by
-  15/8/5 dB and returns a boolean flag, whereas the RD compares against the
+  15/8/5 dB and only says which bands are prominent, whereas the RD compares against the
   *mean* of the neighbours with 8/5/3 dB thresholds and grades the result.
 * [`impulsive_sound_adjustment`](/phonometry/reference/api/environment/impulsive-sound/#impulsive_sound_adjustment)
   is the ISO/PAS 1996-3 onset-rate method on a calibrated time signal. The
@@ -145,11 +145,11 @@ Compliance of an activity or port infrastructure (Article 25).
 | :--- | :--- |
 | ValueError | If `periods` is empty. |
 
-### ActivityAssessment.complies
+### ActivityAssessment.passes
 
 *property*
 
-Whether every period meets every evaluated criterion.
+The verdict: every period meets every evaluated criterion.
 
 ### ActivityAssessment.plot()
 
@@ -666,12 +666,6 @@ not fields: a period cannot be built to pass levels the article fails.
 | :--- | :--- |
 | ValueError | If `period` is not one of [`RD1367_EVALUATION_PERIODS`](/phonometry/reference/api/environment/spain/#rd1367_evaluation_periods). |
 
-### PeriodAssessment.complies
-
-*property*
-
-Whether every evaluated criterion of this period is met.
-
 ### PeriodAssessment.daily_limit
 
 *property*
@@ -698,6 +692,12 @@ was supplied, or the activity is not new.
 *property*
 
 The largest `LKeq,Ti` of the period, in dB.
+
+### PeriodAssessment.passes
+
+*property*
+
+The verdict: every evaluated criterion of this period is met.
 
 ### PeriodAssessment.phase_limit
 
@@ -849,7 +849,7 @@ emergent tone the largest `Kt` governs (step d).
 :::note
 This is *not* the ISO 1996-2 tonal adjustment. The closest ISO relative
 is the Annex K survey method
-([`tonal_seeking_survey`](/phonometry/reference/api/environment/measurement/#tonal_seeking_survey)),
+([`assess_tonal_survey`](/phonometry/reference/api/environment/measurement/#assess_tonal_survey)),
 which compares the band against *both* neighbours with 15/8/5 dB
 thresholds and only flags prominence; the RD compares against their
 arithmetic mean with 8/5/3 dB thresholds and grades the result 0/3/6 dB.

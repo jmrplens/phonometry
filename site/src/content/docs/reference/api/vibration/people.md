@@ -570,12 +570,6 @@ built to comply with an immission the standard fails.
 | `source` | The kind of source the rules were read for. |
 | `rare_short_events` | Whether the immission is at most three short events a day, such as blasting, which 6.5.1 judges on $A_\mathrm{o}$ alone. |
 
-### PeopleAssessment.complies
-
-*property*
-
-Whether the requirement of the standard is met.
-
 ### PeopleAssessment.criterion
 
 *property*
@@ -586,6 +580,12 @@ The comparison that decided the verdict.
 exceeded it by no more than the measurement is uncertain by; `"A_o"`
 when it exceeded the upper one or, for a rare short event, kept to it;
 and `"A_r"` when $KB_\mathrm{FTr}$ decided.
+
+### PeopleAssessment.passes
+
+*property*
+
+The verdict: the requirement of the standard is met.
 
 ### PeopleAssessment.plot()
 

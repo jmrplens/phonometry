@@ -127,10 +127,11 @@ __all__ = [
     "UNRESTRICTED_ENCLOSURE_VOLUME_M3",
     "EnclosureInsulationResult",
     "EnclosureInsulationWarning",
+    "EnclosureTestEnvironmentCheck",
     "MethodEntry",
-    "TestEnvironmentApplicability",
     "WeightedEnclosureInsulation",
     "applicable_methods",
+    "check_enclosure_test_environment",
     "enclosure_artificial_source_insulation",
     "estimated_a_weighted_enclosure_insulation",
     "fill_ratio",
@@ -140,7 +141,6 @@ __all__ = [
     "enclosure_sound_power_insulation",
     "enclosure_sound_pressure_insulation",
     "source_position_clearance_m",
-    "test_environment_applicability",
     "weighted_enclosure_insulation",
 ]
 
@@ -356,7 +356,7 @@ class WeightedEnclosureInsulation(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class TestEnvironmentApplicability(RichDisplay):
+class EnclosureTestEnvironmentCheck(RichDisplay):
     r"""Whether a room is good enough for a base standard, Annex C of part 2.
 
     Table C.1 is the annex's, so its two columns, the area ratio they call for
@@ -427,14 +427,22 @@ class TestEnvironmentApplicability(RichDisplay):
         return float(4.0 / ((10.0 ** (limit / 10.0) - 1.0) * alpha))
 
     @property
-    def applicable(self) -> bool:
-        """Whether the room meets the :math:`K_2` limit of the standard.
+    def passes(self) -> bool:
+        """The verdict: the room meets the :math:`K_2` limit of the standard.
 
         ``True`` for a standard with no :math:`K_2` limit, whose answer turns
         on the background margin alone, which this check does not see.
         """
         required = self.required_area_ratio
         return required is None or self.actual_area_ratio >= required
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "an EnclosureTestEnvironmentCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 @dataclass(frozen=True)
@@ -865,13 +873,13 @@ def fill_ratio(source_volume_m3: float, interior_volume_m3: float) -> float:
     return source / interior
 
 
-def test_environment_applicability(
+def check_enclosure_test_environment(
     *,
     base_standard: str,
     mean_absorption_coefficient: float,
     room_surface_area_m2: float,
     measurement_surface_area_m2: float,
-) -> TestEnvironmentApplicability:
+) -> EnclosureTestEnvironmentCheck:
     r"""Is this room good enough for that base standard? Annex C of part 2.
 
     Annex C asks the question the other way round from the emission
@@ -891,7 +899,7 @@ def test_environment_applicability(
     A standard that works by comparison with a reference sound source, ISO
     3743-1 and ISO 3747, states no :math:`K_2` requirement at all; for those
     the answer carries the background margin and nothing else, and
-    ``applicable`` is decided by the margin alone, which this function does
+    ``passes`` is decided by the margin alone, which this function does
     not see. It is reported as ``True`` there, with
     ``required_area_ratio`` at ``None``, so that the caller reads the table
     rather than a number the annex does not give.
@@ -904,7 +912,7 @@ def test_environment_applicability(
         boundary surfaces, in square metres.
     :param measurement_surface_area_m2: :math:`S`, the area of the measurement
         surface around the source, in square metres.
-    :return: The verdict, as a :class:`TestEnvironmentApplicability`.
+    :return: The verdict, as an :class:`EnclosureTestEnvironmentCheck`.
     :raises ValueError: For an unknown standard, a coefficient outside
         ``(0, 1]`` or a non-positive area.
     """
@@ -919,7 +927,7 @@ def test_environment_applicability(
     surface = require_positive(
         measurement_surface_area_m2, "measurement_surface_area_m2"
     )
-    return TestEnvironmentApplicability(
+    return EnclosureTestEnvironmentCheck(
         base_standard=name,
         actual_area_ratio=room / surface,
         mean_absorption_coefficient=alpha,

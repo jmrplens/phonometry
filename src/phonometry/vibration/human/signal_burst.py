@@ -785,6 +785,14 @@ class SignalBurstVerification(OwnsArrays):
         """
         return bool(np.all(self.within_tolerance))
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a SignalBurstVerification has no truth value; read its '.passes'"
+        raise TypeError(msg)
+
     @property
     def worst_deviation_percent(self) -> float:
         """The largest deviation in magnitude, signed as it was measured."""

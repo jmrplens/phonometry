@@ -1654,7 +1654,7 @@ def _chk_workstation_uncertainty() -> Outcome:
     "K_1A for a 9 dB margin over the background, dB",
 )
 def _chk_workstation_background() -> Outcome:
-    k1, _ = ph.emission.background_noise_correction_at_workstation(79.0, 70.0)
+    k1 = ph.emission.background_noise_correction_at_workstation(79.0, 70.0).correction
     return numeric(0.6, float(k1), 0.05, unit="dB", places=3)
 
 

@@ -378,7 +378,7 @@ Per band, whether all six positions stay within ±2,5 dB.
 
 ```python
 FreeSoundFieldCheck(
-    field: str,
+    field: Literal['free', 'quasi-free'],
     frequencies: np.ndarray,
     lateral_deviation_db: np.ndarray,
     axis_difference: np.ndarray,

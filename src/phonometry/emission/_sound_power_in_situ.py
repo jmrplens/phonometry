@@ -871,7 +871,7 @@ def _determine(
     freqs = _checked_frequencies(comparison.frequencies, n_bands)
     ref, power = _reference_grids(
         comparison.levels_ref,
-        _reference_power_levels(comparison.lw_ref, freqs, bandwidth="octave"),
+        _reference_power_levels(comparison.lw_ref, freqs, fraction=1),
         n_positions,
         n_bands,
     )

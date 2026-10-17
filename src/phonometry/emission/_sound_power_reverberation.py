@@ -685,7 +685,7 @@ def _comparison_inputs(
     lw_rss = _reference_power_levels(
         lw_ref,
         frequencies,
-        bandwidth="one-third-octave",
+        fraction=3,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,
     )

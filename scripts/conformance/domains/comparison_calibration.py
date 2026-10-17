@@ -458,7 +458,7 @@ def _chk_monitor() -> Outcome:
             reference_level=field_ref - 12.5,
             test_level=field_test - 12.5,
         ),
-        field="free_field",
+        field="free",
     )
     worst = float(np.max(np.abs(result.sensitivity_level - _L_TEST)))
     return numeric(
@@ -614,7 +614,7 @@ def _chk_monitor_phase() -> Outcome:
             reference_phase_deg=50.0 + field_1,
             test_phase_deg=50.0 + field_2,
         ),
-        field="free_field",
+        field="free",
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=_PHI_REF,
             reference_output_phase_deg=_PHI_REF + field_1,

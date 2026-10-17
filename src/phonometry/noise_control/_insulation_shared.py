@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.validation import require_choice, require_positive
+from .._internal.validation import require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -84,14 +84,9 @@ _RATING_BANDS: dict[int, tuple[float, ...]] = {
 _THIRD_OCTAVE = 3
 
 
-def _band_fraction(value: int) -> int:
-    """The band fraction, checked against the two the standards allow."""
-    return int(require_choice(str(value), "band_fraction", ("1", "3")))
-
-
 def _check_band_range(
     frequencies: NDArray[np.float64] | None,
-    band_fraction: int,
+    fraction: int,
     *,
     standard: str,
     category: type[PhonometryWarning],
@@ -100,7 +95,7 @@ def _check_band_range(
     """Warn when the bands given do not cover what the standard requires."""
     if frequencies is None or frequencies.size == 0:
         return
-    low, high = MANDATORY_BAND_RANGE_HZ[band_fraction]
+    low, high = MANDATORY_BAND_RANGE_HZ[fraction]
     lowest = float(np.min(frequencies))
     highest = float(np.max(frequencies))
     if lowest > low or highest < high:
@@ -111,11 +106,9 @@ def _check_band_range(
         warnings.warn(msg, category, stacklevel=stacklevel)
 
 
-def _rating_bands(band_fraction: int) -> tuple[NDArray[np.float64], str]:
-    """The ISO 717-1 rating bands and the name the rating machinery knows them by."""
-    bands = np.asarray(_RATING_BANDS[band_fraction], dtype=np.float64)
-    name = "third-octave" if band_fraction == _THIRD_OCTAVE else "octave"
-    return bands, name
+def _rating_bands(fraction: int) -> NDArray[np.float64]:
+    """The ISO 717-1 rating bands of a band set."""
+    return np.asarray(_RATING_BANDS[fraction], dtype=np.float64)
 
 
 def _require_rating_bands(

@@ -217,6 +217,7 @@ from scipy import special
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import CALIBRATION_FIELDS, CalibrationField
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -284,13 +285,10 @@ __all__ = [
 # Vocabulary and reference conditions
 # ---------------------------------------------------------------------------
 
-#: The two sound fields, one part each: a pressure field (IEC 61094-5) and a
-#: free field (IEC 61094-8).
-_FIELDS = ("pressure", "free_field")
-
-#: The designation each field is calibrated by.
+#: The designation each sound field is calibrated by, one part each: a
+#: pressure field by IEC 61094-5 and a free field by IEC 61094-8.
 _STANDARDS: Mapping[str, str] = MappingProxyType(
-    {"pressure": "IEC 61094-5:2016", "free_field": "IEC 61094-8:2012"}
+    {"pressure": "IEC 61094-5:2016", "free": "IEC 61094-8:2012"}
 )
 
 #: The two ways of exposing the microphones: at once, or in turn.
@@ -660,7 +658,7 @@ IEC61094_8_TABLE_2: Mapping[str, ComparisonUncertaintyRow] = MappingProxyType(
 
 #: The table each field's budget draws its components from.
 _BUDGET_TABLES: Mapping[str, Mapping[str, ComparisonUncertaintyRow]] = MappingProxyType(
-    {"pressure": IEC61094_5_TABLE_D1, "free_field": IEC61094_8_TABLE_2}
+    {"pressure": IEC61094_5_TABLE_D1, "free": IEC61094_8_TABLE_2}
 )
 
 
@@ -1542,7 +1540,7 @@ class ComparisonCalibration(OwnsArrays):
         pressure on the test microphone re that on the reference, in dB.
     :ivar corrections: The corrections :math:`C_j` added to the level, by
         name, each in dB at every frequency.
-    :ivar field: ``"pressure"`` (IEC 61094-5) or ``"free_field"``
+    :ivar field: ``"pressure"`` (IEC 61094-5) or ``"free"``
         (IEC 61094-8).
     :ivar excitation: ``"simultaneous"`` or ``"sequential"``.
     :ivar expanded_uncertainty_db: The expanded uncertainty (:math:`k = 2`) of
@@ -1561,7 +1559,7 @@ class ComparisonCalibration(OwnsArrays):
     output_level_differences: NDArray[np.float64]
     pressure_level_difference: NDArray[np.float64]
     corrections: Mapping[str, NDArray[np.float64]]
-    field: str
+    field: CalibrationField
     excitation: str
     expanded_uncertainty_db: NDArray[np.float64] | None = None
     _: KW_ONLY
@@ -1580,7 +1578,7 @@ class ComparisonCalibration(OwnsArrays):
             excitation, or the phase of the reference without the phase
             readings, or the other way round.
         """
-        require_choice(self.field, "field", _FIELDS)
+        require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_choice(self.excitation, "excitation", _EXCITATIONS)
         frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
@@ -1801,7 +1799,7 @@ def _calibration(
     reference_sensitivity_level: ArrayLike,
     output_level_differences: NDArray[np.float64],
     *,
-    field: str,
+    field: CalibrationField,
     excitation: str,
     pressure_level_difference: ArrayLike,
     corrections: Mapping[str, ArrayLike] | None,
@@ -1816,10 +1814,10 @@ def _calibration(
     The field is checked first, so that an unknown one is named as such and
     not taken for a pressure calibration by the free-field check below.
     """
-    field = require_choice(field, "field", _FIELDS)
+    field = require_choice(field, "field", CALIBRATION_FIELDS)
     named: dict[str, ArrayLike] = {}
     if reference_free_field_difference is not None:
-        if field != "free_field":
+        if field != "free":
             msg = (
                 "'reference_free_field_difference' belongs to a free-field "
                 "calibration (IEC 61094-8 Table 1), not to a pressure one."
@@ -2107,7 +2105,7 @@ def simultaneous_comparison(
     channel_difference: ArrayLike,
     interchanged_channel_difference: ArrayLike | None = None,
     *,
-    field: str = "pressure",
+    field: CalibrationField = "pressure",
     pressure_level_difference: ArrayLike = 0.0,
     corrections: Mapping[str, ArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
@@ -2181,7 +2179,7 @@ def simultaneous_comparison(
     :param interchanged_channel_difference: :math:`L_\mathrm{C21}`, the
         same difference after the interchange, the test microphone on
         channel 1, in dB (Default: None; required for ``field="pressure"``).
-    :param field: ``"pressure"`` (IEC 61094-5, default) or ``"free_field"``
+    :param field: ``"pressure"`` (IEC 61094-5, default) or ``"free"``
         (IEC 61094-8).
     :param pressure_level_difference: :math:`20\lg R_P`, the effective
         sound pressure on the test microphone re that on the reference, in dB
@@ -2215,7 +2213,7 @@ def simultaneous_comparison(
         finite value per frequency, or phase readings that do not follow the
         level readings.
     """
-    field = require_choice(field, "field", _FIELDS)
+    field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     first = _determinations(channel_difference, "channel_difference", count)
@@ -2269,7 +2267,7 @@ def sequential_comparison(
     test_output_level: ArrayLike,
     *,
     monitor: MonitorReadings | None = None,
-    field: str = "pressure",
+    field: CalibrationField = "pressure",
     pressure_level_difference: ArrayLike = 0.0,
     corrections: Mapping[str, ArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
@@ -2336,7 +2334,7 @@ def sequential_comparison(
         in the measurements of the reference and of the test microphone, with
         their phases when the calibration carries the phase (Default: None,
         no monitor).
-    :param field: ``"pressure"`` (IEC 61094-5, default) or ``"free_field"``
+    :param field: ``"pressure"`` (IEC 61094-5, default) or ``"free"``
         (IEC 61094-8).
     :param pressure_level_difference: :math:`20\lg R_P`, in dB (Default: 0).
     :param corrections: Further corrections added to the level, by name,
@@ -2361,7 +2359,7 @@ def sequential_comparison(
         column that is not one finite value per frequency, or monitor phases
         without the output phases.
     """
-    field = require_choice(field, "field", _FIELDS)
+    field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     readings = {
@@ -2421,7 +2419,7 @@ class ComparisonUncertaintyBudget(OwnsArrays):
     times it (7.9 of the first part, 8.8 of the second).
 
     :ivar frequency_hz: The frequency, in Hz.
-    :ivar field: ``"pressure"`` (Table D.1) or ``"free_field"`` (Table 2).
+    :ivar field: ``"pressure"`` (Table D.1) or ``"free"`` (Table 2).
     :ivar names: The key of each component, then the names of any additional
         ones.
     :ivar components: The component as the table prints it, or the name of an
@@ -2434,7 +2432,7 @@ class ComparisonUncertaintyBudget(OwnsArrays):
     """
 
     frequency_hz: float
-    field: str
+    field: CalibrationField
     names: tuple[str, ...]
     components: tuple[str, ...]
     standard_uncertainties_db: NDArray[np.float64]
@@ -2451,7 +2449,7 @@ class ComparisonUncertaintyBudget(OwnsArrays):
         """
         require_positive(self.frequency_hz, "frequency_hz")
         require_positive(self.coverage_factor, "coverage_factor")
-        require_choice(self.field, "field", _FIELDS)
+        require_choice(self.field, "field", CALIBRATION_FIELDS)
         count = len(self.names)
         if len(self.components) != count:
             msg = "ComparisonUncertaintyBudget: 'components' must hold one per name."
@@ -2557,7 +2555,7 @@ def comparison_uncertainty_budget(
     standard_uncertainties_db: Mapping[str, float | Quantity],
     *,
     frequency_hz: float,
-    field: str = "pressure",
+    field: CalibrationField = "pressure",
     additional_components: Sequence[Quantity] = (),
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ComparisonUncertaintyBudget:
@@ -2587,7 +2585,7 @@ def comparison_uncertainty_budget(
     :param standard_uncertainties_db: The components, keyed by name, each a
         standard uncertainty in dB or a :class:`~phonometry.metrology.Quantity`.
     :param frequency_hz: The frequency the budget is for, in Hz.
-    :param field: ``"pressure"`` (Table D.1, default) or ``"free_field"``
+    :param field: ``"pressure"`` (Table D.1, default) or ``"free"``
         (Table 2).
     :param additional_components: Further components, as named
         :class:`~phonometry.metrology.Quantity` objects (Default: none).
@@ -2598,7 +2596,7 @@ def comparison_uncertainty_budget(
         another component, no component at all, or a value that is negative
         or not finite.
     """
-    field = require_choice(field, "field", _FIELDS)
+    field = require_choice(field, "field", CALIBRATION_FIELDS)
     table = _BUDGET_TABLES[field]
     unknown = [key for key in standard_uncertainties_db if key not in table]
     if unknown:

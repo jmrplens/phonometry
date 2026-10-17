@@ -299,7 +299,7 @@ def test_path_fractions_sum_to_one_and_name_a_dominant_path(
     airborne: building.DetailedAirborneResult,
 ) -> None:
     """Every band's path shares partition the transmitted energy."""
-    assert airborne.fractions.sum(axis=0) == pytest.approx(1.0)
+    assert airborne.energy_fractions.sum(axis=0) == pytest.approx(1.0)
     assert len(airborne.dominant) == BANDS.size
     # At 50 Hz the direct path dominates; by 2 kHz a flanking path does.
     assert airborne.dominant[0] == "Dd"
@@ -579,7 +579,7 @@ def test_impact_prediction_without_a_direct_path_sums_the_flanking_paths() -> No
     )
     assert [p.label for p in result.paths] == ["Ff1", "Ff2"]
     assert result.l_prime_n == pytest.approx(50.0 + 10.0 * np.log10(2.0))
-    assert result.fractions == pytest.approx(0.5)
+    assert result.energy_fractions == pytest.approx(0.5)
     with pytest.raises(
         ValueError,
         match=r"'detailed_impact_prediction' needs a 'direct_level', "
@@ -711,10 +711,7 @@ def test_table_b2_octave_impact_levels_of_monolithic_floors() -> None:
         )
         octave = 10.0 * np.log10((10.0 ** (ln.reshape(-1, 3) / 10.0)).sum(axis=1))
         assert octave[1:6] == pytest.approx(printed[1:6], abs=2.0), material
-        assert (
-            abs(building.weighted_impact_rating(octave[1:6], "octave").rating - rating)
-            <= 1
-        )
+        assert abs(building.weighted_impact_rating(octave[1:6], 1).rating - rating) <= 1
 
 
 def test_reciprocity_relation_closes_on_itself() -> None:
@@ -722,7 +719,7 @@ def test_reciprocity_relation_closes_on_itself() -> None:
     r = np.linspace(30.0, 70.0, BANDS.size)
     ln = building.reciprocity_impact_level(r, BANDS)
     assert r + ln == pytest.approx(38.0 + 30.0 * np.log10(BANDS))
-    ln_oct = building.reciprocity_impact_level(r, BANDS, bands="octave")
+    ln_oct = building.reciprocity_impact_level(r, BANDS, fraction=1)
     assert ln_oct - ln == pytest.approx(5.0)
 
 
@@ -818,13 +815,13 @@ def test_resonant_only_raises_the_index_below_the_critical_frequency() -> None:
 
 
 def test_octave_bands_select_the_critical_band_and_rating_range(situ: dict) -> None:
-    """``bands="octave"`` widens the ``f ≈ fc`` window and rates 125-2000 Hz."""
+    """``fraction=1`` widens the ``f ≈ fc`` window and rates 125-2000 Hz."""
     octaves = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     element = iso12354_building.elements()["floor"]
-    got = building.in_situ_element(element, octaves, bands="octave")
+    got = building.in_situ_element(element, octaves, fraction=1)
     assert got.sound_reduction_index.size == octaves.size
     result = building.detailed_airborne_prediction(
-        octaves, direct_index=got.sound_reduction_index, bands="octave"
+        octaves, direct_index=got.sound_reduction_index, fraction=1
     )
     assert result.rating is not None
 
@@ -967,24 +964,26 @@ def test_a_share_column_short_of_a_path_is_refused(
 ) -> None:
     """The share column is printed beside the path rows and sums to 100 %.
 
-    A ``fractions`` array short of a path row leaves a sheet listing fewer
-    paths than the shares it prints sum over, so the column stops reaching
-    100 % under a box holding the rating of the whole transmission.
+    An ``energy_fractions`` array short of a path row leaves a sheet listing
+    fewer paths than the shares it prints sum over, so the column stops
+    reaching 100 % under a box holding the rating of the whole transmission.
     """
     import dataclasses
 
     with pytest.raises(ValueError, match="per transmission path"):
-        dataclasses.replace(airborne, fractions=airborne.fractions[:-1])
+        dataclasses.replace(airborne, energy_fractions=airborne.energy_fractions[:-1])
 
 
 def test_a_share_column_short_of_a_band_is_refused(
     airborne: building.DetailedAirborneResult,
 ) -> None:
-    """``fractions`` is paths by bands: axis 1 is the one that carries bands."""
+    """``energy_fractions`` is paths by bands: axis 1 carries the bands."""
     import dataclasses
 
-    with pytest.raises(ValueError, match=r"'fractions \(axis 1\)'"):
-        dataclasses.replace(airborne, fractions=airborne.fractions[:, :-1])
+    with pytest.raises(ValueError, match=r"'energy_fractions \(axis 1\)'"):
+        dataclasses.replace(
+            airborne, energy_fractions=airborne.energy_fractions[:, :-1]
+        )
 
 
 def test_a_path_row_off_the_band_axis_is_refused(
@@ -1004,17 +1003,17 @@ def test_a_share_column_with_an_extra_axis_is_refused(
 ) -> None:
     """Counting the axes is not enough on its own: their number is pinned too.
 
-    A ``fractions`` of shape ``(paths, bands, 2)`` has the right number of
-    paths on its first axis and the right number of bands on its second, so
+    An ``energy_fractions`` of shape ``(paths, bands, 2)`` has the right number
+    of paths on its first axis and the right number of bands on its second, so
     every count agrees. The extra axis then reaches ``dominant``, which feeds
     array indices to a tuple.
     """
     import dataclasses
 
-    values = np.asarray(airborne.fractions)
+    values = np.asarray(airborne.energy_fractions)
     three_dimensional = np.stack([values, values], axis=-1)
-    with pytest.raises(ValueError, match="'fractions' must have 2 axes"):
-        dataclasses.replace(airborne, fractions=three_dimensional)
+    with pytest.raises(ValueError, match="'energy_fractions' must have 2 axes"):
+        dataclasses.replace(airborne, energy_fractions=three_dimensional)
 
 
 def test_a_path_without_a_share_row_is_refused_on_the_impact_result(
@@ -1024,8 +1023,8 @@ def test_a_path_without_a_share_row_is_refused_on_the_impact_result(
 
     It shares the check with the airborne result, so nothing above would go
     red if this class stopped running it, and the path axis is the direction
-    that stays quiet: with a path appended and ``fractions`` left as it was,
-    ``plot`` drew and ``report`` wrote a sheet whose rows and whose shares
+    that stays quiet: with a path appended and ``energy_fractions`` left as it
+    was, ``plot`` drew and ``report`` wrote a sheet whose rows and whose shares
     disagree about how many paths there are, neither of them complaining.
     """
     import dataclasses

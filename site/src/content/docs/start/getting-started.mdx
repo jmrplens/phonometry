@@ -303,7 +303,7 @@ one line, because the A weighting and the energy average are both defined on
 the broadband pressure:
 
 ```python
-weighted = filters.weighting_filter(cal * recording, fs, curve="A")
+weighted = filters.weighting_filter(cal * recording, fs, weighting="A")
 laeq = 10 * np.log10(np.mean(weighted ** 2) / (2e-5) ** 2)
 print(f"LAeq = {laeq:.2f} dB(A)")
 # LAeq = 91.03 dB(A)

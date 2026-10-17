@@ -79,6 +79,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
+    require_band_fraction,
     require_choice,
     require_finite,
     require_finite_array,
@@ -92,7 +93,6 @@ from ..emission._sound_power_reverberation import reverberation_background_corre
 from ._insulation_shared import (
     _THIRD_OCTAVE,
     PREFERRED_BAND_RANGE_HZ,
-    _band_fraction,
     _check_band_range,
     _rating_bands,
     _require_rating_bands,
@@ -103,6 +103,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._internal.types import BandFraction
 
 __all__ = [
     "BAND_FLATNESS_LIMIT_DB",
@@ -341,7 +343,7 @@ class CabinInsulationResult(OwnsArrays):
         when the cabin has no integral source.
     :ivar method: ``"laboratory"``, ``"in-situ-loudspeaker"`` or
         ``"in-situ-actual-noise"``.
-    :ivar band_fraction: 3 for one-third octaves, 1 for octaves.
+    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves.
 
     Whether the answer carries the prime (:attr:`apparent`) is read from the
     method, so it is not a field.
@@ -354,7 +356,7 @@ class CabinInsulationResult(OwnsArrays):
     a_weighted_insulation: float | None
     internal_noise_level: float | None
     method: str
-    band_fraction: int
+    fraction: int
 
     def __post_init__(self) -> None:
         """Reject a method the standard does not describe, or a number it does not give.
@@ -363,9 +365,11 @@ class CabinInsulationResult(OwnsArrays):
         insulation :math:`D'_{pA}` exists: definition 3.7 and Equation (3)
         give it for the actual-noise method alone.
 
-        :raises ValueError: if ``method`` is not one of the three, or an
-            A-weighted insulation is carried under another method.
+        :raises ValueError: if ``method`` is not one of the three, an
+            A-weighted insulation is carried under another method, or
+            ``fraction`` is not 1 or 3.
         """
+        require_band_fraction(self.fraction, "fraction")
         how = require_choice(self.method, "method", _METHODS)
         if self.a_weighted_insulation is not None and how != _ACTUAL_NOISE:
             msg = (
@@ -424,7 +428,12 @@ class WeightedCabinInsulation(OwnsArrays):
     :ivar unfavorable_sum: The sum of unfavourable deviations at the shift
         the rating was read at, in decibels.
     :ivar frequencies: The bands the rating was read over, in hertz.
-    :ivar apparent: Whether the rating carries the prime of 3.9.
+    :ivar method: The method the spectrum was measured by: ``"laboratory"``,
+        ``"in-situ-loudspeaker"`` or ``"in-situ-actual-noise"``.
+
+    Whether the rating carries the prime of 3.9 (:attr:`apparent`) is read
+    from the method, as on :class:`CabinInsulationResult`, so it is not a
+    field.
     """
 
     rating: int
@@ -432,7 +441,24 @@ class WeightedCabinInsulation(OwnsArrays):
     ctr: int
     unfavorable_sum: float
     frequencies: NDArray[np.float64]
-    apparent: bool
+    method: str
+
+    def __post_init__(self) -> None:
+        """Reject a method the standard does not describe.
+
+        :raises ValueError: if ``method`` is not one of the three.
+        """
+        require_choice(self.method, "method", _METHODS)
+
+    @property
+    def apparent(self) -> bool:
+        r"""Whether the rating carries the prime of 3.9.
+
+        Read from the method as :attr:`CabinInsulationResult.apparent` reads
+        it: both in-situ methods give :math:`D'_{p,\mathrm{w}}`, the laboratory
+        method :math:`D_{p,\mathrm{w}}`.
+        """
+        return self.method in _IN_SITU_METHODS
 
 
 @dataclass(frozen=True)
@@ -658,7 +684,7 @@ def cabin_insulation(
     *,
     frequencies: ArrayLike | None = None,
     method: CabinMethod = "laboratory",
-    band_fraction: int = 3,
+    fraction: BandFraction = 3,
     room_background_levels: ArrayLike | None = None,
     cabin_background_levels: ArrayLike | None = None,
     a_weighted_room_level: float | None = None,
@@ -690,7 +716,8 @@ def cabin_insulation(
     :param frequencies: Nominal band centres, in hertz.
     :param method: ``"laboratory"`` (default), ``"in-situ-loudspeaker"`` or
         ``"in-situ-actual-noise"``.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :param room_background_levels: Background in the room per band, in
         decibels, for the correction of 7.2.2.
     :param cabin_background_levels: Background inside the cabin per band, in
@@ -718,7 +745,7 @@ def cabin_insulation(
         if np.any(freqs <= 0.0):
             msg = "'frequencies' must be positive."
             raise ValueError(msg)
-    fraction = _band_fraction(band_fraction)
+    fraction = require_band_fraction(fraction, "fraction")
     how = require_choice(str(method), "method", _METHODS)
     _check_band_range(
         freqs, fraction, standard="ISO 11957", category=CabinInsulationWarning
@@ -756,15 +783,15 @@ def cabin_insulation(
             else require_finite(internal_noise_level, "internal_noise_level")
         ),
         method=how,
-        band_fraction=fraction,
+        fraction=fraction,
     )
 
 
 def weighted_cabin_insulation(
     insulation: ArrayLike,
     *,
-    apparent: bool = False,
-    band_fraction: int = 3,
+    method: CabinMethod = "laboratory",
+    fraction: BandFraction = 3,
 ) -> WeightedCabinInsulation:
     r"""The single-number rating of a cabin, clause 8.
 
@@ -780,26 +807,31 @@ def weighted_cabin_insulation(
 
     :param insulation: :math:`D_p` or :math:`D'_p` over the 16 one-third-octave
         rating bands or the 5 octave ones, in decibels.
-    :param apparent: Whether the spectrum is the in-situ one, which decides
-        whether the rating is :math:`D_{p,\mathrm{w}}` or :math:`D'_{p,\mathrm{w}}`.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param method: The method the spectrum was measured by, ``"laboratory"``
+        (default), ``"in-situ-loudspeaker"`` or ``"in-situ-actual-noise"``, as
+        :func:`cabin_insulation` takes it. It decides whether the rating is
+        :math:`D_{p,\mathrm{w}}` or :math:`D'_{p,\mathrm{w}}`.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: The rating, as a :class:`WeightedCabinInsulation`.
-    :raises ValueError: For a spectrum that is not the rating bands.
+    :raises ValueError: For a spectrum that is not the rating bands, an
+        unknown method or a band set other than 1 or 3.
     """
     from ..building import weighted_rating
 
     values = require_finite_array(insulation, "insulation")
-    fraction = _band_fraction(band_fraction)
-    bands, band_set = _rating_bands(fraction)
+    fraction = require_band_fraction(fraction, "fraction")
+    how = require_choice(str(method), "method", _METHODS)
+    bands = _rating_bands(fraction)
     _require_rating_bands(values, bands)
-    result = weighted_rating(values, band_set)
+    result = weighted_rating(values, fraction)
     return WeightedCabinInsulation(
         rating=int(result.rating),
         c=int(result.c),
         ctr=int(result.ctr),
         unfavorable_sum=float(result.unfavorable_sum),
         frequencies=bands,
-        apparent=bool(apparent),
+        method=how,
     )
 
 

@@ -664,7 +664,7 @@ def weighted_thd(
     else:
         from ..filters.weighting import weighting_filter
 
-        weighted = weighting_filter(residual, int(fs_v), curve=weighting)
+        weighted = weighting_filter(residual, int(fs_v), weighting=weighting)
         weighted_rms = float(np.sqrt(np.mean(weighted[sl] ** 2)))
     return float(weighted_rms / total_rms)
 

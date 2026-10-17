@@ -989,7 +989,7 @@ service_equipment_level(
     frequencies: ArrayLike,
     *,
     quantity: Literal['Smax', 'Fmax', 'eq'],
-    band: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
     background_db: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
@@ -1018,9 +1018,9 @@ over the integration time of Annex B for an equivalent level.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Band levels of each reading, shape `(readings, bands)` (one-dimensional for a single reading), in dB. |
-| `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `band` says. |
+| `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `fraction` says. |
 | `quantity` | The Table 1 quantity measured: `"Smax"`, `"Fmax"` or `"eq"`. It names the single numbers and nothing else. |
-| `band` | `"third"` (default) or `"octave"`. 6 asks for the weighted values from one-third-octave bands; octave results are optional. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. 6 asks for the weighted values from one-third-octave bands; octave results are optional. |
 | `background_db` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
 | `reverberation_time` | Reverberation time of each band, in s, measured by ISO 3382-2 (Clause 8). Only the bands of the standardization range are read; the others may be `nan`. |
 | `volume` | Room volume, in m³, for the normalized levels. |
@@ -1044,7 +1044,7 @@ over the integration time of Annex B for an equivalent level.
 *Constant* (`mapping`).
 
 ```python
-SERVICE_EQUIPMENT_REPRODUCIBILITY = {'third': {25.0: 1.9, 31.5: 1.9, 40.0: 1.9, 50.0: 1.9, 63.0: 1.9, 80.0: 1.9, 100.0: 1.9, 125.0: 1.9, 160.0: 1.9, 200.0: 1.5, 250.0: 1.5, 315.0: 1.5, 400.0: 1.2, 500.0: 1.2, 630.0: 1.2, 800.0: 1.0, 1000.0: 1.0, 1250.0: 1.0, 1600.0: 1.0, 2000.0: 1.0, 2500.0: 1.0, 3150.0: 1.0, 4000.0: 1.0, 5000.0: 1.0, 6300.0: 1.0, 8000.0: 1.0, 10000.0: 1.0}, 'octave': {31.5: 1.9, 63.0: 1.9, 125.0: 1.9, 250.0: 1.5, 500.0: 1.2, 1000.0: 1.0, 2000.0: 1.0, 4000.0: 1.0, 8000.0: 1.0}}
+SERVICE_EQUIPMENT_REPRODUCIBILITY = {3: {25.0: 1.9, 31.5: 1.9, 40.0: 1.9, 50.0: 1.9, 63.0: 1.9, 80.0: 1.9, 100.0: 1.9, 125.0: 1.9, 160.0: 1.9, 200.0: 1.5, 250.0: 1.5, 315.0: 1.5, 400.0: 1.2, 500.0: 1.2, 630.0: 1.2, 800.0: 1.0, 1000.0: 1.0, 1250.0: 1.0, 1600.0: 1.0, 2000.0: 1.0, 2500.0: 1.0, 3150.0: 1.0, 4000.0: 1.0, 5000.0: 1.0, 6300.0: 1.0, 8000.0: 1.0, 10000.0: 1.0}, 1: {31.5: 1.9, 63.0: 1.9, 125.0: 1.9, 250.0: 1.5, 500.0: 1.2, 1000.0: 1.0, 2000.0: 1.0, 4000.0: 1.0, 8000.0: 1.0}}
 ```
 
 ## SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY
@@ -1060,7 +1060,7 @@ SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY = {'A': 0.8, 'C': 1.2}
 *Constant* (`mapping`).
 
 ```python
-SERVICE_EQUIPMENT_WEIGHTING = {'third': {'A': {25.0: -44.7, 31.5: -39.4, 40.0: -34.6, 50.0: -30.2, 63.0: -26.2, 80.0: -22.5, 100.0: -19.1, 125.0: -16.1, 160.0: -13.4, 200.0: -10.9, 250.0: -8.6, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9, 800.0: -0.8, 1000.0: 0.0, 1250.0: 0.6, 1600.0: 1.0, 2000.0: 1.2, 2500.0: 1.3, 3150.0: 1.2, 4000.0: 1.0, 5000.0: 0.5, 6300.0: -0.1, 8000.0: -1.1, 10000.0: -2.5}, 'C': {25.0: -4.4, 31.5: -3.0, 40.0: -2.0, 50.0: -1.3, 63.0: -0.8, 80.0: -0.5, 100.0: -0.3, 125.0: -0.2, 160.0: -0.1, 200.0: 0.0, 250.0: 0.0, 315.0: 0.0, 400.0: 0.0, 500.0: 0.0, 630.0: 0.0, 800.0: 0.0, 1000.0: 0.0, 1250.0: 0.0, 1600.0: -0.1, 2000.0: -0.2, 2500.0: -0.3, 3150.0: -0.5, 4000.0: -0.8, 5000.0: -1.3, 6300.0: -2.0, 8000.0: -3.0, 10000.0: -4.4}}, 'octave': {'A': {31.5: -39.4, 63.0: -26.2, 125.0: -16.1, 250.0: -8.6, 500.0: -3.2, 1000.0: 0.0, 2000.0: 1.2, 4000.0: 1.0, 8000.0: -1.1}, 'C': {31.5: -3.0, 63.0: -0.8, 125.0: -0.2, 250.0: 0.0, 500.0: 0.0, 1000.0: 0.0, 2000.0: -0.2, 4000.0: -0.8, 8000.0: -3.0}}}
+SERVICE_EQUIPMENT_WEIGHTING = {3: {'A': {25.0: -44.7, 31.5: -39.4, 40.0: -34.6, 50.0: -30.2, 63.0: -26.2, 80.0: -22.5, 100.0: -19.1, 125.0: -16.1, 160.0: -13.4, 200.0: -10.9, 250.0: -8.6, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9, 800.0: -0.8, 1000.0: 0.0, 1250.0: 0.6, 1600.0: 1.0, 2000.0: 1.2, 2500.0: 1.3, 3150.0: 1.2, 4000.0: 1.0, 5000.0: 0.5, 6300.0: -0.1, 8000.0: -1.1, 10000.0: -2.5}, 'C': {25.0: -4.4, 31.5: -3.0, 40.0: -2.0, 50.0: -1.3, 63.0: -0.8, 80.0: -0.5, 100.0: -0.3, 125.0: -0.2, 160.0: -0.1, 200.0: 0.0, 250.0: 0.0, 315.0: 0.0, 400.0: 0.0, 500.0: 0.0, 630.0: 0.0, 800.0: 0.0, 1000.0: 0.0, 1250.0: 0.0, 1600.0: -0.1, 2000.0: -0.2, 2500.0: -0.3, 3150.0: -0.5, 4000.0: -0.8, 5000.0: -1.3, 6300.0: -2.0, 8000.0: -3.0, 10000.0: -4.4}}, 1: {'A': {31.5: -39.4, 63.0: -26.2, 125.0: -16.1, 250.0: -8.6, 500.0: -3.2, 1000.0: 0.0, 2000.0: 1.2, 4000.0: 1.0, 8000.0: -1.1}, 'C': {31.5: -3.0, 63.0: -0.8, 125.0: -0.2, 250.0: 0.0, 500.0: 0.0, 1000.0: 0.0, 2000.0: -0.2, 4000.0: -0.8, 8000.0: -3.0}}}
 ```
 
 ## ServiceEquipmentBackgroundResult
@@ -1349,7 +1349,7 @@ At least 0,50 m (0,30 m in a small room) from every surface.
 ```python
 ServiceEquipmentResult(
     frequencies: np.ndarray,
-    band: str,
+    fraction: int,
     quantity: str,
     a_weighting_range: str,
     readings_db: np.ndarray,
@@ -1374,14 +1374,14 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in Hz. |
-| `band` | `"third"` or `"octave"`. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
 | `quantity` | The Table 1 quantity: `"Smax"`, `"Fmax"` or `"eq"`. |
 | `a_weighting_range` | `"restricted"` (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz; octave 31,5 Hz to 8 000 Hz), the range the A-weighted values were summed over. |
 | `readings_db` | The band levels of every reading, shape `(readings, bands)`, in dB. |
 | `average_db` | Formula (1) over the readings, rounded to one decimal (7.5), in dB. |
 | `background` | The Clause 9 correction, or `None` when no background was given. |
 | `corrected_db` | The average corrected for the background, in dB (the average itself when there is no background). |
-| `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies` and `band`, so it is not a field. |
+| `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies` and `fraction`, so it is not a field. |
 | `standardized_db` | $L_{\mathrm{n}T}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
 | `normalized_db` | $L_\mathrm{n}$ per band (Formula (6)), in dB, or `None` without a reverberation time and a volume. |
 | `ratings` | The weighted single numbers of Table 1, rounded to whole decibels (7.8), keyed by their notation: `"LA,eq"`, `"LA,Smax,nT"`, `"LC,Fmax,n"` and so on. The C-weighted ones are present only when the bands cover the extended range. |
@@ -1430,7 +1430,7 @@ A-weighted single numbers in the title. Requires matplotlib
 
 Per band, whether 7.7 lets it be standardized or normalized.
 
-**Returns:** One boolean per band, `True` inside the range 7.7 gives for `band`.
+**Returns:** One boolean per band, `True` inside the range 7.7 gives for `fraction`.
 
 ### ServiceEquipmentResult.unstandardized_bands_hz
 

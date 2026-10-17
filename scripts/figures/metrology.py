@@ -1809,7 +1809,7 @@ def _free_field_budget(frequency_hz: float) -> "ComparisonUncertaintyBudget":
             "repeatability": 0.02,
         },
         frequency_hz=frequency_hz,
-        field="free_field",
+        field="free",
     )
 
 
@@ -1834,7 +1834,7 @@ def _free_field_comparison() -> "ComparisonCalibration":
             reference_level=monitor + field_1,
             test_level=monitor + field_2,
         ),
-        field="free_field",
+        field="free",
         reference_free_field_difference=c_ff,
         expanded_uncertainty_db=[
             _free_field_budget(fx).expanded_uncertainty_db for fx in f
@@ -2094,7 +2094,7 @@ def _time_selective_calibration() -> "ComparisonCalibration":
         20 * np.log10(np.abs(m_ref)),
         ref.level_at(fw),
         ws2f.level_at(fw),
-        field="free_field",
+        field="free",
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
             reference_output_phase_deg=ref.phase_deg_at(fw),

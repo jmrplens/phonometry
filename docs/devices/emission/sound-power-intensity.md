@@ -75,7 +75,7 @@ pressure = np.full((6, 6), 80.0)
 res = emission.sound_power_intensity(
     scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
     pressure_residual_index=12.0, frequencies=freqs,
-    band_type="octave", grade="engineering",
+    fraction=1, grade="engineering",
 )
 print(np.round(res.sound_power_level, 1))               # per-band LW
 print(round(res.sound_power_level_a, 1))                # LWA, determinable + qualified bands
@@ -112,7 +112,7 @@ pressure = np.full((6, 6), 80.0)
 res = emission.sound_power_intensity(
     scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
     pressure_residual_index=12.0, frequencies=freqs,
-    band_type="octave", grade="engineering",
+    fraction=1, grade="engineering",
 )
 
 # res is the SoundPowerIntensityResult computed above. One line:
@@ -153,7 +153,7 @@ frequency-dependent bias handled in the [intensity guide](intensity.md).
 | `pressure_levels` | 2D array | dB | same shape | Segment SPL $L_{pi}$ → $F_{pI}$ |
 | `pressure_residual_index` | float or 1D array | dB | — | $\delta_{pI0}$ → $L_\mathrm{d}$ / criterion 1 |
 | `frequencies` | 1D array | Hz | nominal centres | $L_{W\mathrm{A}}$ and Table 2 limits |
-| `band_type` | str | — | `'third'` (default) / `'octave'` | Table 2 lookup |
+| `fraction` | int | — | `3` (one-third octaves, default) / `1` (octaves) | Table 2 lookup |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | Selects $K$ |
 | `repeatability_limit` | float or 1D array | dB | default Table 2 | Override criterion-3 $s$ |
 
@@ -300,7 +300,7 @@ scan = np.tile(intensity, (6, 1))
 res = emission.sound_power_intensity(
     scan, np.full(6, 0.5), normal_intensity_2=scan.copy(),
     pressure_levels=np.full((6, 6), 80.0), pressure_residual_index=15.0,
-    frequencies=freqs, band_type="octave", grade="engineering",
+    frequencies=freqs, fraction=1, grade="engineering",
 )
 
 res.report(

@@ -68,6 +68,8 @@ from .._internal.warnings import PhonometryWarning
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from .._internal.types import BandFraction
+
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 #: Reference static pressure of the ISO 3740 family, in kilopascals
 #: (ISO 3741:2010 clause 4; ISO 3747:2010 Annex C prints 1,013 25 x 10^5 Pa).
@@ -354,7 +356,7 @@ def _reference_power_levels(
     lw_ref: object,
     frequencies: object,
     *,
-    bandwidth: Literal["one-third-octave", "octave"],
+    fraction: BandFraction,
     name: str = "lw_ref",
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
@@ -373,8 +375,8 @@ def _reference_power_levels(
     :param lw_ref: The levels, or a calibration.
     :param frequencies: The bands the method works in; required with a
         calibration.
-    :param bandwidth: ``"one-third-octave"`` or ``"octave"``, the bands of the
-        method.
+    :param fraction: The bands of the method, 3 for one-third octaves or 1 for
+        octaves.
     :param name: The parameter name for the error message.
     :param temperature_c: Air temperature at the test, in degrees Celsius, or
         ``None`` for the calibrated levels as they are.
@@ -396,7 +398,7 @@ def _reference_power_levels(
         raise ValueError(msg)
     return lw_ref.sound_power_level_at(
         np.asarray(frequencies, dtype=np.float64),
-        bandwidth=bandwidth,
+        fraction=fraction,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,
     )

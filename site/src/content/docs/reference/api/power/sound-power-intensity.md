@@ -478,7 +478,7 @@ sound_power_intensity(
     pressure_levels: np.ndarray | None = None,
     pressure_residual_index: float | np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
-    band_type: Literal['octave', 'third'] = 'third',
+    fraction: Literal[1, 3] = 3,
     grade: Literal['engineering', 'survey'] = 'engineering',
     repeatability_limit: float | np.ndarray | None = None,
 ) -> SoundPowerIntensityResult
@@ -518,7 +518,7 @@ screening.
 | `pressure_levels` | Optional `(N_seg, N_bands)` `Lpi` (dB) for FpI. |
 | `pressure_residual_index` | `delta_pI0` (dB), scalar or per band, for the dynamic-capability index / criterion 1. |
 | `frequencies` | `(N_bands,)` nominal band centres (Hz), for the A-weighted total and the Table 2 repeatability limits. |
-| `band_type` | `'octave'` or `'third'` (Table 2 lookup). |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves (Table 2 lookup). |
 | `grade` | `'engineering'` (grade 2) or `'survey'` (grade 3); selects `K` for the reported `Ld` and the criterion-2 warning. |
 | `repeatability_limit` | Override for the criterion-3 limit `s` (dB), scalar or per band; defaults to ISO 9614-2 Table 2 by `frequencies` for `'engineering'`. For `'survey'` the default is the A-weighted 4 dB reused per band (extrapolated -- non-normative). |
 
@@ -574,7 +574,7 @@ SoundPowerIntensityResult(
     repeatability: np.ndarray | None,
     pressure_residual_index: np.ndarray | None,
     surface_area: float,
-    band_type: str,
+    fraction: int,
     grade: str,
     repeatability_limit_db: np.ndarray | None = None,
 )
@@ -602,7 +602,7 @@ $\delta_{pI0}$ of the instrument per band, `None` when it was not
 given, and `dynamic_capability_index` the `Ld` it gives for the
 requested grade. `repeatability_limit_db` is the criterion-3 limit `s`
 the caller chose per band, `None` to read Table 2 by `frequencies` and
-`band_type`.
+`fraction`, the band set (3 for one-third octaves, 1 for octaves).
 
 `achieved_grade` is the per-band class `'engineering'`/
 `'survey'`/`'none'` (clause 8.4), `None` when the qualifying inputs

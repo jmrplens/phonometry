@@ -144,7 +144,7 @@ over the standard's full frequency range.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if the edition is unknown, the edition does not define the filter's curve, or `n_sweep_points` is below 64. |
+| ValueError | if the edition is unknown, the edition does not define the filter's weighting, or `n_sweep_points` is below 64. |
 
 ## weighting_class_limits
 
@@ -188,7 +188,7 @@ footnote makes one mask govern every weighting characteristic, B included.
 WeightingComplianceResult(
     band_margins: tuple[Mapping[str, Any], ...],
     between_nominals: Mapping[str, float] | None,
-    curve: str,
+    weighting: str,
     edition: str,
     fs: float,
     n_sweep_points: int,
@@ -209,7 +209,7 @@ built to state a class its margins do not reach.
 | :--- | :--- |
 | `band_margins` | What each tabulated frequency below the Nyquist frequency was measured to, without its class: one `{"freq", "deviation_db", "margin_class<c>_db"}` per frequency, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each one reaches. |
 | `between_nominals` | The subclause 5.5.7 sweep, `{"worst_freq", "margin_class<c>_db"}`, read-only, or `None` when no tabulated frequency was in range and there was nothing to sweep between. |
-| `curve` | The weighting the verdict is about (`"A"`, `"B"`, `"C"`, `"AU"` or `"Z"`). |
+| `weighting` | The weighting the verdict is about (`"A"`, `"B"`, `"C"`, `"AU"` or `"Z"`). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 | `fs` | Sampling rate of the verified filter, in Hz. It is what puts rows out of range, so the verdict carries it. |
 | `n_sweep_points` | Grid frequencies used by the 5.5.7 sweep. |

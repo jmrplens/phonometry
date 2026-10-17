@@ -213,7 +213,7 @@ elements = [
     building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (R'tr,s,w / Ctr / D2m,nT,w)
 
 fac.plot()   # per-element partial indices with R' and D2m,nT overlaid (needs matplotlib)
@@ -237,7 +237,7 @@ elements = [
     building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 
 x = np.arange(5)
 fig, ax = plt.subplots(figsize=(9, 5.5))
@@ -321,7 +321,7 @@ elements = [
     building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 fac.report("D2mnT_prediction.pdf", metadata=ReportMetadata(
     specimen="Masonry wall + window + roof light + air inlet", area=11.3,
     receiving_volume=50.0, requirement=30.0,
@@ -478,7 +478,7 @@ elements = [
 ]
 volume, area = 50.0, 11.3
 fac = building.facade_sound_reduction(elements, area=area, volume=volume,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+                             frequencies=[125, 250, 500, 1000, 2000], fraction=1)
 
 # What the field measurement would read: A = 0.16 V / T is the Sabine area of
 # ISO 16283-3, and R' - 10 lg(S/A) is the level difference it implies.

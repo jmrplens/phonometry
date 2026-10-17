@@ -319,7 +319,7 @@ def to_db(env):
 
 # Ambos lados usan el mismo diseño por defecto; el streaming no cede nada.
 reference = to_db(filters.time_weighting(
-    filters.weighting_filter(x, fs, curve="A"), fs,
+    filters.weighting_filter(x, fs, weighting="A"), fs,
     mode="fast"))
 
 aw = filters.WeightingFilter(fs, "A", stateful=True)

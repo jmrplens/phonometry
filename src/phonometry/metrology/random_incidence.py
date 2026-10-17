@@ -221,7 +221,16 @@ _SENSITIVITY_VIEWS = ("levels", "correction")
 
 #: The routes of clause 5, named by how the reference instrument was
 #: calibrated: Formulas (9), (10) and (11), in that order.
-_ROUTES = ("random_incidence", "free_field", "pressure")
+_ROUTES = ("random_incidence", "free", "pressure")
+
+#: The parameter that carries the reference calibration of each route.
+_ROUTE_PARAMETERS: Mapping[str, str] = MappingProxyType(
+    {
+        "random_incidence": "reference_random_incidence_level",
+        "free": "reference_free_field_level",
+        "pressure": "reference_pressure_level",
+    }
+)
 
 #: The formulas a :class:`DirectivityFactor` can come from: two or more planes,
 #: one plane under rotational symmetry, and 38 equal-area elements.
@@ -1067,8 +1076,9 @@ class DiffuseFieldSensitivity(OwnsArrays):
     :ivar reference_correction: what turns that into the reference's
         diffuse-field sensitivity level, in dB: 0, :math:`-10\lg
         \gamma_\mathrm{ref}` or :math:`\Delta_\mathrm{DP}`.
-    :ivar route: ``"random_incidence"`` (Formula (9)), ``"free_field"``
-        (Formula (10)) or ``"pressure"`` (Formula (11)).
+    :ivar route: ``"random_incidence"`` (Formula (9)), ``"free"``
+        (Formula (10)) or ``"pressure"`` (Formula (11)), the sound field the
+        reference instrument was calibrated in.
     """
 
     frequencies: NDArray[np.float64]
@@ -1224,7 +1234,7 @@ def diffuse_field_sensitivity(
     frequencies = _frequency_axis(frequencies)
     given = {
         "random_incidence": reference_random_incidence_level,
-        "free_field": reference_free_field_level,
+        "free": reference_free_field_level,
         "pressure": reference_pressure_level,
     }
     chosen = [(route, value) for route, value in given.items() if value is not None]
@@ -1241,7 +1251,7 @@ def diffuse_field_sensitivity(
     stray = {
         "reference_directivity_index": (
             reference_directivity_index,
-            "free_field",
+            "free",
         ),
         "reference_diffuse_pressure_difference_db": (
             reference_diffuse_pressure_difference_db,
@@ -1252,11 +1262,11 @@ def diffuse_field_sensitivity(
         if value is not None and route != owner:
             msg = f"'{name}' belongs to the {owner} route, not to the {route} route."
             raise ValueError(msg)
-    sensitivity_name = f"reference_{route}_level_db"
+    sensitivity_name = _ROUTE_PARAMETERS[route]
     sensitivity = _band_column(reference_sensitivity, sensitivity_name, frequencies)
     if route == "random_incidence":
         correction = np.zeros(frequencies.size)
-    elif route == "free_field":
+    elif route == "free":
         name = "reference_directivity_index"
         correction = -(
             _table_b1_column(frequencies, "directivity_index", name)

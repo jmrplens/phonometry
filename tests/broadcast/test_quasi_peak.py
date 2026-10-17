@@ -309,8 +309,8 @@ def test_reversing_the_polarity_leaves_the_reading_unchanged() -> None:
     width = int(round(1e-3 * FS))
     for start in range(0, n - period, period):
         pulses[start : start + width] = 0.8
-    forward = quasi_peak_meter(pulses, FS, weighted=False).level
-    reversed_ = quasi_peak_meter(-pulses, FS, weighted=False).level
+    forward = quasi_peak_meter(pulses, FS, weighting="Z").level
+    reversed_ = quasi_peak_meter(-pulses, FS, weighting="Z").level
     assert abs(forward - reversed_) < BS468_REVERSIBILITY_TOL_DB
     assert forward == reversed_
 
@@ -352,7 +352,7 @@ def test_the_trace_is_the_needle_over_the_record_the_caller_gave() -> None:
     assert result.times.size == burst.size
     assert result.reading == float(result.trace.max())
     assert result.fs == FS
-    assert result.weighted
+    assert result.weighting == "468"
 
 
 def test_the_reading_does_not_depend_on_where_the_record_ends() -> None:
@@ -377,11 +377,28 @@ def test_switching_out_the_weighting_network_changes_the_reading() -> None:
     """Clause 2's preamble: every test but 2.4 runs through the network."""
     burst = tone_burst(FS, BS468_BURST_HZ, 25, post_silence=0.5).signal
     weighted = quasi_peak_meter(burst, FS)
-    unweighted = quasi_peak_meter(burst, FS, weighted=False)
-    assert weighted.weighted
-    assert not unweighted.weighted
+    unweighted = quasi_peak_meter(burst, FS, weighting="Z")
+    assert weighted.weighting == "468"
+    assert unweighted.weighting == "Z"
     # The network is +11.7 dB at 5 kHz, so the weighted reading is far larger.
     assert weighted.reading > 3.0 * unweighted.reading
+
+
+_468_OR_Z = r"'weighting' must be one of \('468', 'Z'\); got 'A'"
+
+
+def test_the_meter_refuses_a_weighting_it_does_not_have() -> None:
+    """The meter has the BS.468-4 network or none; an A-weighting is not none."""
+    burst = tone_burst(FS, BS468_BURST_HZ, 25, post_silence=0.5).signal
+    with pytest.raises(ValueError, match=_468_OR_Z):
+        quasi_peak_meter(burst, FS, weighting="A")  # type: ignore[arg-type]
+
+
+def test_a_reading_built_by_hand_refuses_another_weighting() -> None:
+    burst = tone_burst(FS, BS468_BURST_HZ, 25, post_silence=0.5).signal
+    result = quasi_peak_meter(burst, FS)
+    with pytest.raises(ValueError, match=_468_OR_Z):
+        replace(result, weighting="A")
 
 
 @pytest.mark.parametrize(
@@ -497,7 +514,7 @@ def test_a_two_dimensional_trace_is_refused() -> None:
             reference=DBQPS_REFERENCE_V,
             trace=np.ones((2, 3)),
             fs=FS,
-            weighted=True,
+            weighting="468",
         )
 
 

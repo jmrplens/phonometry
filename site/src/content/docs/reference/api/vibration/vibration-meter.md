@@ -75,7 +75,7 @@ assess_short_term_vibration(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,
-    building_class: str,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
     n_taps: int | None = None,
 ) -> AssessmentVelocity
 ```
@@ -114,7 +114,7 @@ assessment_velocity(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,
-    building_class: str,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
     n_taps: int | None = None,
 ) -> NDArray[np.float64]
 ```
@@ -148,7 +148,7 @@ in time with the record it came from.
 assessment_weighting_response(
     frequencies: ArrayLike,
     *,
-    building_class: str,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
 ) -> NDArray[np.float64]
 ```
 
@@ -182,7 +182,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 assessment_weighting_taps(
     fs: float,
     *,
-    building_class: str,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
     n_taps: int | None = None,
 ) -> NDArray[np.float64]
 ```
@@ -224,7 +224,7 @@ ASSESSMENT_WEIGHTING_TOLERANCE = 0.05
 ```python
 AssessmentVelocity(
     assessment_velocity_mm_s: float,
-    building_class: str,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
     velocity_mm_s: NDArray[np.float64],
     fs: float,
 )
@@ -304,7 +304,7 @@ BAND_LIMIT_CORNER_FACTOR = 0.8
 band_limitation_response(
     frequencies: ArrayLike,
     *,
-    working_range: str = 'building',
+    working_range: Literal['building', 'railway'] = 'building',
 ) -> NDArray[np.complex128]
 ```
 
@@ -332,7 +332,7 @@ dominant_frequency(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,
-    method: Literal['zero_crossing', 'fourier'] | str = 'zero_crossing',
+    method: Literal['zero_crossing', 'fourier'] = 'zero_crossing',
 ) -> DominantFrequency
 ```
 
@@ -366,7 +366,7 @@ has to be reported.
 ```python
 DominantFrequency(
     frequency_hz: float,
-    method: str,
+    method: Literal['zero_crossing', 'fourier'],
     candidates: tuple[tuple[float, float], ...],
 )
 ```
@@ -436,7 +436,7 @@ kb_signal(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,
-    working_range: str = 'building',
+    working_range: Literal['building', 'railway'] = 'building',
 ) -> NDArray[np.float64]
 ```
 
@@ -485,7 +485,7 @@ KB_TIME_CONSTANT_S = 0.125
 kb_weighting_response(
     frequencies: ArrayLike,
     *,
-    working_range: str = 'building',
+    working_range: Literal['building', 'railway'] = 'building',
 ) -> NDArray[np.complex128]
 ```
 
@@ -513,7 +513,7 @@ kbf_signal(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,
-    working_range: str = 'building',
+    working_range: Literal['building', 'railway'] = 'building',
     time_constant_s: float = 0.125,
 ) -> NDArray[np.float64]
 ```
@@ -551,7 +551,7 @@ measure_vibration_immission(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,
-    working_range: str = 'building',
+    working_range: Literal['building', 'railway'] = 'building',
     takt_duration_s: float = 30.0,
 ) -> VibrationMeterReading
 ```
@@ -598,7 +598,7 @@ RESPONSE_TOLERANCE_LOWER_PERCENT = ((1.25, 0.8, 10.0), (0.5, 2.0, 20.0))
 response_tolerance_percent(
     frequencies: ArrayLike,
     *,
-    working_range: str = 'building',
+    working_range: Literal['building', 'railway'] = 'building',
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 
@@ -718,8 +718,8 @@ verify_vibration_meter(
     frequencies: ArrayLike,
     measured_response: ArrayLike,
     *,
-    weighting: Literal['kb', 'unweighted'] | str = 'kb',
-    working_range: str = 'building',
+    weighting: Literal['kb', 'Z'] = 'kb',
+    working_range: Literal['building', 'railway'] = 'building',
     reference_frequency_hz: float = 16.0,
 ) -> VibrationMeterVerification
 ```
@@ -739,7 +739,7 @@ dropped from the verdict rather than passed for free.
 | :--- | :--- |
 | `frequencies` | The frequencies the response was measured at, in hertz. The reference frequency has to be among them. |
 | `measured_response` | The measured amplitude response at those frequencies, in any consistent unit: only its shape is graded. |
-| `weighting` | `"kb"` for the weighted response of Formula (4), the default, or `"unweighted"` for the band limitation of Formula (3). |
+| `weighting` | `"kb"` for the weighted response of Formula (4), the default, or `"Z"` for none, the band limitation of Formula (3) alone. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 | `reference_frequency_hz` | The reference frequency of 5.2.10, in hertz (default 16 Hz). |
 
@@ -763,7 +763,7 @@ VibrationMeterReading(
     fs: float,
     measuring_time_s: float,
     averaging_time_s: float,
-    working_range: str,
+    working_range: Literal['building', 'railway'],
 )
 ```
 
@@ -823,8 +823,8 @@ VibrationMeterVerification(
     frequencies: NDArray[np.float64],
     deviation_percent: NDArray[np.float64],
     measured_response: NDArray[np.float64],
-    weighting: str,
-    working_range: str,
+    weighting: Literal['kb', 'Z'],
+    working_range: Literal['building', 'railway'],
     reference_frequency_hz: float,
 )
 ```
@@ -838,7 +838,7 @@ One measured amplitude response against Tables 2 and 3.
 | `frequencies` | The frequencies the response was measured at. |
 | `deviation_percent` | `F(f)` of Formula (7) at each of them: the measured response over the design response, both normalised at the reference frequency, as a percentage departure from unity. |
 | `measured_response` | The measured amplitude response at each of them, as supplied, which footnote a of Table 3 reads. |
-| `weighting` | `"kb"` or `"unweighted"`, which design response the deviation is against. |
+| `weighting` | `"kb"` or `"Z"` (unweighted), which design response the deviation is against. |
 | `working_range` | The working range the limits were read for. |
 | `reference_frequency_hz` | The frequency both responses were normalised at. |
 

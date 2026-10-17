@@ -73,8 +73,8 @@ def test_male_median_exceeds_female_at_high_frequency() -> None:
 
 
 def test_reference_threshold_matches_iso389_7() -> None:
-    free = h.reference_threshold("free-field")
-    diffuse = h.reference_threshold("diffuse-field")
+    free = h.reference_threshold("free")
+    diffuse = h.reference_threshold("diffuse")
     # ISO 389-7:2005 Table 1 (audiometric frequencies).
     assert free[4] == pytest.approx(ISO389_7_REF_FREE_1KHZ)  # 1000 Hz free-field
     assert free[10] == pytest.approx(12.6)  # 8000 Hz free-field
@@ -88,7 +88,7 @@ def test_subset_by_frequency() -> None:
     result = h.age_threshold(60, "male", 0.5, frequencies=[1000, 4000])
     np.testing.assert_allclose(result.frequencies, [1000.0, 4000.0])
     assert result.median[0] == pytest.approx(7.8473, abs=1e-3)
-    ref = h.reference_threshold("free-field", frequencies=[1000, 8000])
+    ref = h.reference_threshold("free", frequencies=[1000, 8000])
     np.testing.assert_allclose(ref, [2.4, 12.6])
 
 
@@ -103,8 +103,8 @@ def test_invalid_inputs_raise() -> None:
         ValueError, match=r"frequency .* is not an ISO 7029 audiometric frequency"
     ):
         h.age_threshold(40, "male", frequencies=[777.0])
-    with pytest.raises(ValueError, match="field must be"):
-        h.reference_threshold("random")
+    with pytest.raises(ValueError, match="'field' must be one of"):
+        h.reference_threshold("random")  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize("case", ["short", "long", "own-database"])

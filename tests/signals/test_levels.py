@@ -5,6 +5,7 @@ import inspect
 import pathlib
 import re
 import string
+from collections.abc import Callable
 
 import numpy as np
 import pytest
@@ -437,7 +438,7 @@ def _levels_guide(relative_path: str) -> str:
 
 
 #: A first-column cell of the "Peak / event / dose parameters" table, e.g.
-#: ``| `sel(x, fs, weighting=None, ...)` | ...``.
+#: ``| `sel(x, fs, weighting='Z', ...)` | ...``.
 _SIGNATURE_CELL = re.compile(r"^\|\s*`([a-z_0-9]+)\((.*?)\)`\s*\|")
 
 
@@ -517,7 +518,7 @@ def _accepted_weighting_curves() -> set[str]:
     accepted = set()
     for candidate in [*string.ascii_uppercase, "AU", "468"]:
         try:
-            filters.weighting_filter(silence, FS, curve=candidate)
+            filters.weighting_filter(silence, FS, weighting=candidate)
         except ValueError:
             continue
         accepted.add(candidate)
@@ -562,10 +563,26 @@ def test_ln_levels_and_sel_accept_every_weighting_filter_curve(curve: str) -> No
 def test_ln_levels_and_sel_reject_an_unknown_weighting() -> None:
 
     x = _tone(1000)
-    with pytest.raises(ValueError, match=r"Weighting curve must be"):
+    with pytest.raises(ValueError, match=r"'weighting' must be"):
         signals.ln_levels(x, FS, weighting="Q")
-    with pytest.raises(ValueError, match=r"Weighting curve must be"):
+    with pytest.raises(ValueError, match=r"'weighting' must be"):
         signals.sel(x, FS, weighting="Q")
+
+
+@pytest.mark.parametrize("level", [signals.ln_levels, signals.sel])
+def test_no_weighting_is_z_and_none_is_refused_by_name(
+    level: Callable[..., object],
+) -> None:
+    """``"Z"``, the default, leaves the signal as it is; ``None`` is no spelling of it.
+
+    ``None`` used to mean the same as ``"Z"``. A flat weighting is now ``"Z"``
+    wherever one is offered, and ``None`` is refused with a message that
+    names the parameter rather than dying on ``None.upper``.
+    """
+    x = _tone(1000)
+    assert level(x, FS) == level(x, FS, weighting="Z")
+    with pytest.raises(TypeError, match=r"'weighting' must be a string"):
+        level(x, FS, weighting=None)
 
 
 # ---------------------------------------------------------------------------

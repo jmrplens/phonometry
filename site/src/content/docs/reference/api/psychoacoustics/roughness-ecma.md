@@ -65,7 +65,7 @@ EcmaRoughness(
     times: np.ndarray,
     roughness_vs_time: np.ndarray,
     specific_roughness_vs_time: np.ndarray,
-    field: str,
+    field: Literal['free', 'diffuse'],
 )
 ```
 

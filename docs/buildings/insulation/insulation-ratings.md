@@ -115,7 +115,7 @@ plt.show()
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $R$, $R'$, $D_{\mathrm{n}T}$ … per band |
-| `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
+| `fraction` | int or `None` | — | `3` (one-third octaves) / `1` (octaves) / `None` | `None` infers from the count |
 
 `weighted_rating()` returns a `WeightedRatingResult`
 (`rating`, `c`, `ctr`, `unfavorable_sum`, all integers except the sum).
@@ -210,7 +210,7 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $L_\mathrm{n}$, $L'_\mathrm{n}$ or $L'_{\mathrm{n}T}$ per band |
-| `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
+| `fraction` | int or `None` | — | `3` (one-third octaves) / `1` (octaves) / `None` | `None` infers from the count |
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
 `ci` integers, `unfavorable_sum` in dB).

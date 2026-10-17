@@ -149,7 +149,7 @@ def _facade_prediction_example() -> tuple[object, ReportMetadata, str]:
         area=11.3,
         volume=50.0,
         frequencies=[125, 250, 500, 1000, 2000],
-        bands="octave",
+        fraction=1,
     )
     metadata = ReportMetadata(
         specimen="Masonry wall + window + roof light + air inlet (Annex F)",

@@ -1658,7 +1658,7 @@ def generate_slm_level_track(output_dir: str) -> None:
     from phonometry import signals as level_signals
 
     fs, recording, cal = _slm_walkthrough_signals()
-    weighted = filters.weighting_filter(cal * recording, fs, curve="A")
+    weighted = filters.weighting_filter(cal * recording, fs, weighting="A")
     envelope = filters.time_weighting(weighted, fs, mode="fast")
     laf_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
 
@@ -1724,7 +1724,7 @@ def generate_slm_third_octave(output_dir: str) -> None:
         calibration=filters.LevelCalibration(factor=cal),
     )
     spl_z, centres = filtered4.require_levels(), filtered4.frequencies
-    weighted = filters.weighting_filter(cal * recording, fs, curve="A")
+    weighted = filters.weighting_filter(cal * recording, fs, weighting="A")
     spl_a = filters.octave_filter(weighted, fs, fraction=3).require_levels()
 
     total_z = 10 * np.log10(np.sum(10 ** (np.asarray(spl_z) / 10)))
@@ -1920,7 +1920,7 @@ def generate_level_distribution(output_dir: str) -> None:
     ]
     for name, x, color, style in styles:
         env = filters.time_weighting(
-            filters.weighting_filter(x, fs, curve="A"), fs, mode="fast"
+            filters.weighting_filter(x, fs, weighting="A"), fs, mode="fast"
         )
         track = 10 * np.log10(np.maximum(env, 1e-12) / (2e-5) ** 2)
         t = np.arange(x.size) / fs
@@ -2308,7 +2308,7 @@ def generate_c_minus_a_spectrum(output_dir: str) -> None:
     ]
     for ax, (title, x) in zip(axes, scenes, strict=True):
         for curve, color, style in curves:
-            weighted = filters.weighting_filter(x, fs, curve=curve)
+            weighted = filters.weighting_filter(x, fs, weighting=curve)
             filtered8 = filters.octave_filter(weighted, fs, fraction=3)
             band_levels, centres = filtered8.require_levels(), filtered8.frequencies
             ax.semilogx(
@@ -2319,8 +2319,8 @@ def generate_c_minus_a_spectrum(output_dir: str) -> None:
                 linewidth=1.8,
                 label=f"{curve}-weighted bands",
             )
-        la = float(signals.leq(filters.weighting_filter(x, fs, curve="A")))
-        lc = float(signals.leq(filters.weighting_filter(x, fs, curve="C")))
+        la = float(signals.leq(filters.weighting_filter(x, fs, weighting="A")))
+        lc = float(signals.leq(filters.weighting_filter(x, fs, weighting="C")))
         ax.text(
             0.03,
             0.05,
@@ -2740,7 +2740,7 @@ def generate_streaming_level_seams(output_dir: str) -> None:
     # nothing else.
     continuous = to_db(
         filters.time_weighting(
-            filters.weighting_filter(x, fs, curve="A"),
+            filters.weighting_filter(x, fs, weighting="A"),
             fs,
             mode="fast",
         )
@@ -2762,7 +2762,7 @@ def generate_streaming_level_seams(output_dir: str) -> None:
                     filters.weighting_filter(
                         x[i * block : (i + 1) * block],
                         fs,
-                        curve="A",
+                        weighting="A",
                     ),
                     fs,
                     mode="fast",

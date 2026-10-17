@@ -20,6 +20,7 @@ test names the document its numbers were read from.
 
 from __future__ import annotations
 
+import dataclasses
 import warnings
 
 import numpy as np
@@ -226,7 +227,7 @@ def test_the_internal_noise_level_rides_along() -> None:
 
 def test_the_rating_reads_the_rating_bands_and_keeps_the_prime() -> None:
     rating = noise_control.weighted_cabin_insulation(
-        np.linspace(12.0, 40.0, RATING_BANDS.size), apparent=True
+        np.linspace(12.0, 40.0, RATING_BANDS.size), method="in-situ-loudspeaker"
     )
     assert rating.frequencies.tolist() == RATING_BANDS.tolist()
     assert rating.apparent is True
@@ -767,11 +768,13 @@ def test_clause_eight_rates_the_printed_example_of_iso_717_1() -> None:
 
 
 def test_the_prime_changes_nothing_but_the_name() -> None:
-    """The same printed example under the in-situ flag: four identical
-    numbers, and only the symbol the clause attaches to them moves.
+    """The same printed example measured in situ: four identical numbers,
+    and only the symbol the clause attaches to them moves.
     """
     laboratory = noise_control.weighted_cabin_insulation(_ANNEX_C_R)
-    in_situ = noise_control.weighted_cabin_insulation(_ANNEX_C_R, apparent=True)
+    in_situ = noise_control.weighted_cabin_insulation(
+        _ANNEX_C_R, method="in-situ-actual-noise"
+    )
     assert (in_situ.rating, in_situ.c, in_situ.ctr) == (
         laboratory.rating,
         laboratory.c,
@@ -779,6 +782,29 @@ def test_the_prime_changes_nothing_but_the_name() -> None:
     )
     assert in_situ.unfavorable_sum == pytest.approx(laboratory.unfavorable_sum)
     assert in_situ.apparent is True
+
+
+def test_the_rating_reads_the_prime_from_the_method() -> None:
+    """Both in-situ methods give the primed rating, the laboratory the bare one."""
+    for method, apparent in (
+        ("laboratory", False),
+        ("in-situ-loudspeaker", True),
+        ("in-situ-actual-noise", True),
+    ):
+        rating = noise_control.weighted_cabin_insulation(_ANNEX_C_R, method=method)
+        assert rating.method == method
+        assert rating.apparent is apparent
+
+
+def test_the_rating_refuses_a_method_the_standard_does_not_describe() -> None:
+    with pytest.raises(ValueError, match="'method' must be one of"):
+        noise_control.weighted_cabin_insulation(_ANNEX_C_R, method="field")  # type: ignore[arg-type]
+
+
+def test_a_rating_built_by_hand_refuses_an_unknown_method() -> None:
+    rating = noise_control.weighted_cabin_insulation(_ANNEX_C_R)
+    with pytest.raises(ValueError, match="'method' must be one of"):
+        dataclasses.replace(rating, method="in situ")
 
 
 def test_the_annex_a_estimate_reproduces_the_printed_sums() -> None:

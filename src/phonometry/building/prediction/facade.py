@@ -87,6 +87,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -457,13 +458,15 @@ def _apparent_reduction(
     return r_prime, element_r
 
 
-def _single_number(values: np.ndarray, bands: str | None) -> tuple[int, int] | None:
+def _single_number(
+    values: np.ndarray, fraction: BandFraction | None
+) -> tuple[int, int] | None:
     """(rating, Ctr) via ISO 717-1 for 5 octave or 16 third-octave bands."""
     from ..measurement.ratings import weighted_rating
 
     if values.size not in (5, 16):
         return None
-    result = weighted_rating(values, bands=bands)
+    result = weighted_rating(values, fraction=fraction)
     return result.rating, result.ctr
 
 
@@ -473,7 +476,7 @@ def facade_sound_reduction(
     area: float,
     volume: float,
     delta_l_fs: float = 0.0,
-    bands: str | None = None,
+    fraction: BandFraction | None = None,
     frequencies: Sequence[float] | None = None,
 ) -> FacadePredictionResult:
     """Predict façade airborne sound insulation ``D2m,nT`` (EN 12354-3:2000).
@@ -489,8 +492,9 @@ def facade_sound_reduction(
     :param volume: Receiving-room volume ``V``, in m³ (Formula 13).
     :param delta_l_fs: Façade-shape term ``ΔLfs`` in dB (Annex C; 0 for a flat
         reflecting façade).
-    :param bands: ``"octave"``, ``"third-octave"`` or ``None`` (auto) for the
-        single number ratings, passed to :func:`weighted_rating`.
+    :param fraction: The band set of the single-number ratings, passed to
+        :func:`weighted_rating`: 3 for one-third octaves, 1 for octaves or
+        ``None`` (Default) to read it from the number of bands.
     :param frequencies: Optional band centre frequencies (Hz), stored on the
         result for plotting; must match the element band count.
     :return: A :class:`FacadePredictionResult`.
@@ -513,8 +517,8 @@ def facade_sound_reduction(
     r_tr_s = r_prime
     d_2m_nt = r_prime + delta + 10.0 * log10(v / (6.0 * _T0 * float(area)))
 
-    r_tr = _single_number(r_tr_s, bands)
-    d_num = _single_number(d_2m_nt, bands)
+    r_tr = _single_number(r_tr_s, fraction)
+    d_num = _single_number(d_2m_nt, fraction)
     return FacadePredictionResult(
         r_prime=r_prime,
         r_45=r_45,

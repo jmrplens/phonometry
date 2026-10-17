@@ -2593,7 +2593,7 @@ def _d_slm_pipeline(s: SVG, th: Theme) -> None:
         (
             40.0,
             "Display and statistics",
-            "weighting_filter(curve='A')",
+            "weighting_filter(weighting='A')",
             "time_weighting(mode='fast')",
             "exponential detector, $τ_F$ = 125 ms",
             "$L_{AF}(t)$   $L_{10} / L_{50} / L_{90}$",

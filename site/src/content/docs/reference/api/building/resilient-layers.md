@@ -149,7 +149,7 @@ covering_improvement(
     *,
     mass: float = 0.5,
     impact_rate: float = 10.0,
-    band: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> CoveringImprovementResult
 ```
 
@@ -193,7 +193,7 @@ model identifies the general features rather than replacing a measurement.
 | `impedance` | Driving-point impedance `Zdp` of the base floor, in N.s/m; unchanged by the covering. |
 | `mass` | Hammer mass `m`, in kg (Default: 0,5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10); it sets the spacing of the Fourier lines the bands average over. |
-| `band` | `"third"` or `"octave"`. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
 
 **Returns:** A [`CoveringImprovementResult`](/phonometry/reference/api/building/resilient-layers/#coveringimprovementresult).
 
@@ -201,7 +201,7 @@ model identifies the general features rather than replacing a measurement.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If an input is not positive and finite, or `band` is unknown. |
+| ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
 
 ## CoveringImprovementResult
 
@@ -686,7 +686,7 @@ gives; the two forms agree.
 short_pulse_mean_square_force(
     frequencies: ArrayLike,
     *,
-    band: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> np.ndarray
 ```
 
@@ -704,7 +704,7 @@ concrete slabs of at least 100 mm.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies `f`, in Hz. |
-| `band` | `"third"` ($B = 0.23 f$) or `"octave"` ($B = 0.707 f$). |
+| `fraction` | The band set, 3 for one-third octaves ($B = 0.23 f$) or 1 for octaves ($B = 0.707 f$). |
 
 **Returns:** The band mean-square force `F²rms`, in N².
 
@@ -712,7 +712,7 @@ concrete slabs of at least 100 mm.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If an input is not positive and finite, or `band` is unknown. |
+| ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
 
 ## tapping_cut_off_frequency
 
@@ -771,7 +771,7 @@ tapping_force_spectrum(
     mass: float = 0.5,
     impact_rate: float = 10.0,
     impact_velocity: float | None = None,
-    band: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> TappingForceResult
 ```
 
@@ -805,7 +805,7 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 | `mass` | Hammer mass `m`, in kg (Default: 0,5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10). |
 | `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
-| `band` | `"third"` or `"octave"`, the band width of Eq. (3.91). |
+| `fraction` | The band set of Eq. (3.91), 3 for one-third octaves or 1 for octaves. |
 
 **Returns:** A [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult).
 
@@ -813,7 +813,7 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If an input is not positive and finite, or `band` is unknown. |
+| ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
 
 ## TAPPING_HAMMER_MASS_KG
 
@@ -854,7 +854,7 @@ TappingForceResult(
     impedance: float,
     lower_limit: float,
     upper_limit: float,
-    band: str = 'third',
+    fraction: int = 3,
     mass: float = 0.5,
 )
 ```
@@ -875,7 +875,7 @@ Force spectrum of the ISO tapping machine on one walking surface.
 | `impedance` | Driving-point impedance `Zdp` used, in N.s/m. |
 | `lower_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{lower}} = m v_0/T_\mathrm{i}$, in N (Eq. 3.99). |
 | `upper_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, in N (Eq. 3.100); 6 dB above `lower_limit` in mean square. |
-| `band` | Band width used for `mean_square_force`. |
+| `fraction` | Band set used for `mean_square_force`, 3 for one-third octaves or 1 for octaves. |
 | `mass` | Hammer mass `m` used, in kg (Default: 0,5). |
 
 Whether the oscillation is over-critical is read from `K`, `Zdp` and

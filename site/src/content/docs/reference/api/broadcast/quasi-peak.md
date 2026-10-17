@@ -10,7 +10,7 @@ Psophometric quasi-peak programme-level meter (ITU-R BS.468-4 clause 2).
 ITU-R BS.468-4 specifies the instrument that measures audio-frequency noise
 voltage in sound broadcasting as two parts. Clause 1 is the weighting
 network, realised elsewhere in this library
-([`phonometry.filters.weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) with `curve="468"`, from the
+([`phonometry.filters.weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) with `weighting="468"`, from the
 Fig. 1a ladder). Clause 2 is the detector this module implements: a
 **quasi-peak** value method, whose reading is reported in **dBqps**
 (clause 3).
@@ -124,7 +124,7 @@ quasi_peak_meter(
     x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
-    weighted: bool = True,
+    weighting: Literal['468', 'Z'] = '468',
     reference: float | None = None,
 ) -> QuasiPeakResult
 ```
@@ -160,7 +160,7 @@ scale came out.
 | :--- | :--- |
 | `x` | The record: a 1-D array, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). Multichannel input is refused rather than mixed, because a quasi-peak reading is one needle over one channel. |
 | `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `weighted` | Whether to run the record through the clause 1 weighting network first (default `True`, which is what clause 2's preamble requires of every test but the clause 2.4 reversibility check). |
+| `weighting` | `"468"` (default) to run the record through the clause 1 weighting network first, which is what clause 2's preamble requires of every test but the clause 2.4 reversibility check, or `"Z"` to read it unweighted. |
 | `reference` | The reference of `level`, in the record's own unit. `None` (the default) is the 0.775 V of clause 2.6, and is refused for a calibrated Signal, whose samples are pascals. |
 
 **Returns:** A [`QuasiPeakResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakresult).
@@ -169,7 +169,7 @@ scale came out.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the record is empty or not 1-D, if *fs* is not positive, if *reference* is not positive, or if a calibrated Signal arrives without one. |
+| ValueError | If the record is empty or not 1-D, if *fs* is not positive, if *reference* is not positive, if a calibrated Signal arrives without one, or if `weighting` is neither `"468"` nor `"Z"`. |
 
 ## QuasiPeakBallistics
 
@@ -251,7 +251,7 @@ QuasiPeakResult(
     trace: np.ndarray,
     fs: float,
     *,
-    weighted: bool,
+    weighting: Literal['468', 'Z'],
 )
 ```
 
@@ -266,7 +266,7 @@ A quasi-peak reading of one record (ITU-R BS.468-4 clause 2).
 | `reference` | The reference `level` is taken against, in the record's own unit. |
 | `trace` | The reading device's output over the record, sample for sample with it, in the record's own unit. This is the needle, and the shape of its rise and decay is the whole content of clause 2. |
 | `fs` | Sample rate of the record, Hz. |
-| `weighted` | Whether the ITU-R BS.468-4 weighting network was in the path. Clause 2's preamble runs every test but the clause 2.4 reversibility check through it. |
+| `weighting` | `"468"` when the ITU-R BS.468-4 weighting network was in the path, `"Z"` when it was not. Clause 2's preamble runs every test but the clause 2.4 reversibility check through it. |
 
 ### QuasiPeakResult.level_unit
 

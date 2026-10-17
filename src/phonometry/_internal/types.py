@@ -9,11 +9,45 @@ they are touched.
 
 from __future__ import annotations
 
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Literal
+
 import numpy as np
 from numpy.typing import NDArray
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
 #: Real-valued float64 array alias shared across the library.
 Real = NDArray[np.float64]
+
+#: The band set of a spectrum, as every public ``fraction`` writes it: 1 for
+#: octaves, 3 for one-third octaves (the denominator ``b`` of the IEC 61260-1
+#: bandwidth designator ``1/b``).
+BandFraction = Literal[1, 3]
+
+#: The band set of each :data:`BandFraction`, in the words a message uses.
+BAND_SET_NAMES: Mapping[int, str] = MappingProxyType(
+    {1: "octave", 3: "one-third-octave"}
+)
+
+#: A frequency weighting that is either the A-weighting of IEC 61672-1 or
+#: none at all, written ``"Z"`` as everywhere a flat weighting is chosen.
+AOrZWeighting = Literal["A", "Z"]
+
+#: A free or a diffuse sound field, the two listening conditions a hearing
+#: threshold is referred to.
+FreeOrDiffuseField = Literal["free", "diffuse"]
+
+#: The sound field a microphone is calibrated in: a pressure field (a closed
+#: coupler) or a free field.
+CalibrationField = Literal["pressure", "free"]
+
+#: The two weightings :data:`AOrZWeighting` accepts.
+A_OR_Z_WEIGHTINGS: tuple[AOrZWeighting, ...] = ("A", "Z")
+
+#: The two fields :data:`CalibrationField` accepts.
+CALIBRATION_FIELDS: tuple[CalibrationField, ...] = ("pressure", "free")
 
 
 def as_float_or_array(x: np.ndarray | float) -> np.ndarray | float:

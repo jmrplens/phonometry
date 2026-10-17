@@ -500,7 +500,7 @@ def test_octave_conversion_rejects_a_non_multiple_of_three() -> None:
 
 def test_a_weighting_table_third_octave() -> None:
     """ISO 717-2:2020 Table D.3, one-third-octave row, 50 Hz to 630 Hz."""
-    table = building.HEAVY_IMPACT_A_WEIGHTING["third"]
+    table = building.HEAVY_IMPACT_A_WEIGHTING[3]
     values = tuple(table[f] for f in sorted(table))
     assert values == ISO717_2_TABLE_D3_THIRD
     assert sorted(table) == [
@@ -521,7 +521,7 @@ def test_a_weighting_table_third_octave() -> None:
 
 def test_a_weighting_table_octave() -> None:
     """ISO 717-2:2020 Table D.3, octave row, 63 Hz to 500 Hz."""
-    table = building.HEAVY_IMPACT_A_WEIGHTING["octave"]
+    table = building.HEAVY_IMPACT_A_WEIGHTING[1]
     values = tuple(table[f] for f in sorted(table))
     assert values == ISO717_2_TABLE_D3_OCTAVE
     assert sorted(table) == [63.0, 125.0, 250.0, 500.0]
@@ -529,8 +529,8 @@ def test_a_weighting_table_octave() -> None:
 
 def test_octave_a_weighting_matches_the_third_octave_row() -> None:
     """The octave row of Table D.3 repeats the mid-band third-octave values."""
-    third = building.HEAVY_IMPACT_A_WEIGHTING["third"]
-    for band, value in building.HEAVY_IMPACT_A_WEIGHTING["octave"].items():
+    third = building.HEAVY_IMPACT_A_WEIGHTING[3]
+    for band, value in building.HEAVY_IMPACT_A_WEIGHTING[1].items():
         assert third[band] == value
 
 
@@ -542,7 +542,7 @@ def test_iso717_2_table_d4_worked_example() -> None:
     52,6 dB and LiA,Fmax = 55,350 66... = 55 dB.
     """
     res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
-    assert res.band == "octave"
+    assert res.fraction == 1
     np.testing.assert_allclose(res.a_weighting, ISO717_2_TABLE_D3_OCTAVE)
     np.testing.assert_allclose(res.corrected, ISO717_2_TABLE_D4_CORRECTED, atol=5e-2)
     assert res.unrounded == pytest.approx(55.35066, abs=5e-5)
@@ -606,7 +606,7 @@ def test_rating_is_dominated_by_the_low_bands() -> None:
 def test_third_octave_rating_uses_twelve_bands() -> None:
     """A one-third-octave measurement is rated in one-third octaves (Clause D.3)."""
     res = building.a_weighted_max_impact_level([60.0] * 12)
-    assert res.band == "third"
+    assert res.fraction == 3
     assert res.frequencies.size == 12
     expected = 10.0 * np.log10(
         np.sum(10.0 ** ((60.0 + np.asarray(ISO717_2_TABLE_D3_THIRD)) / 10.0))
@@ -620,10 +620,8 @@ def test_rating_rejects_an_unsupported_band_count() -> None:
 
 
 def test_rating_names_levels_when_their_count_disagrees_with_the_band() -> None:
-    with pytest.raises(
-        ValueError, match=r"'levels' must hold 4 values for band='octave'"
-    ):
-        building.a_weighted_max_impact_level([60.0] * 12, band="octave")
+    with pytest.raises(ValueError, match=r"'levels' must hold 4 values for fraction=1"):
+        building.a_weighted_max_impact_level([60.0] * 12, fraction=1)
 
 
 def test_rating_rejects_mismatched_frequencies() -> None:
@@ -648,15 +646,15 @@ def test_rating_rejects_a_stretched_a_weighting() -> None:
 
 
 def test_rating_rejects_a_band_width_outside_annex_d() -> None:
-    """The bar figure titles itself from a label table keyed by ``band``.
+    """The bar figure titles itself from a label table keyed by ``fraction``.
 
-    ``a_weighted_max_impact_level`` validates the tag at the call, but a
-    result rewritten by hand reaches the lookup once the bars are drawn and
-    dies mid-render with a bare ``KeyError`` naming the tag alone.
+    ``a_weighted_max_impact_level`` validates the band set at the call,
+    but a result rewritten by hand reaches the lookup once the bars are drawn
+    and dies mid-render with a bare ``KeyError`` naming the value alone.
     """
     res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
-    with pytest.raises(ValueError, match="'band' must be one of"):
-        dataclasses.replace(res, band="octaves")
+    with pytest.raises(ValueError, match="'fraction' must be 1"):
+        dataclasses.replace(res, fraction=2)
 
 
 def test_rating_and_standardization_compose() -> None:

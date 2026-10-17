@@ -133,7 +133,7 @@ except ImportError:  # pragma: no cover - depends on install extras
 def _require_str(value: object, name: str) -> str:
     """Require *value* to be a string before any case folding touches it.
 
-    The choice checks in this module fold case first (``curve.upper()``,
+    The choice checks in this module fold case first (``weighting.upper()``,
     ``mode.lower()``), so a non-string used to die in the stdlib's attribute
     lookup before the module's own message could name the parameter.
 
@@ -554,7 +554,7 @@ class WeightingFilter:
     def __init__(
         self,
         fs: int,
-        curve: str = "A",
+        weighting: str = "A",
         *,
         stateful: bool = False,
         steady_ic: bool = False,
@@ -563,7 +563,7 @@ class WeightingFilter:
         """Initialize the weighting filter.
 
         :param fs: Sample rate in Hz.
-        :param curve: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983,
+        :param weighting: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983,
             historical: removed from the IEC sound-level-meter standards),
             'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196
             infrasound), 'AU' (IEC 61012, audible sound in the presence of
@@ -610,7 +610,7 @@ class WeightingFilter:
         """
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
-        curve = _require_str(curve, "curve")
+        weighting = _require_str(weighting, "weighting")
         if high_accuracy is None:
             # ``None`` used to mean "True unless stateful", because the two
             # were mutually exclusive. They are not any more, so it resolves
@@ -621,21 +621,24 @@ class WeightingFilter:
             high_accuracy = True
 
         self.fs = fs
-        self.curve = curve.upper()
+        self.weighting = weighting.upper()
         self.stateful = stateful
         self.high_accuracy = high_accuracy
 
-        if self.curve == "Z":
+        if self.weighting == "Z":
             self.sos = np.array([])
             if self.stateful:
                 self.zi = np.array([])
             return
 
-        if self.curve not in _PROTOTYPE_CURVES:
-            msg = "Weighting curve must be 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z'"
+        if self.weighting not in _PROTOTYPE_CURVES:
+            msg = (
+                "'weighting' must be 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z'; "
+                f"got {weighting!r}."
+            )
             raise ValueError(msg)
 
-        if self.curve == "468" and not self.high_accuracy:
+        if self.weighting == "468" and not self.high_accuracy:
             # The plain bilinear design compresses frequency quadratically in
             # f / fs over a skirt falling at about -30 dB/octave: at 48 kHz it
             # reads -23.2 dB at the 16 kHz row of ITU-R BS.468-4 Table 1, whose
@@ -644,7 +647,7 @@ class WeightingFilter:
             # refused rather than documented. Stateful processing no longer
             # implies it, so stateful '468' is now available.
             msg = (
-                "Weighting curve '468' needs the fitted design: "
+                "Weighting '468' needs the fitted design: "
                 "high_accuracy=False puts the response 23 dB below the "
                 "ITU-R BS.468-4 Table 1 nominal at 16 kHz for fs = 48000 Hz, "
                 "against a +/-1.6 dB tolerance."
@@ -652,7 +655,7 @@ class WeightingFilter:
             raise ValueError(msg)
 
         self.sos = _weighting_sos(
-            curve=self.curve, fs=fs, high_accuracy=self.high_accuracy
+            curve=self.weighting, fs=fs, high_accuracy=self.high_accuracy
         )
 
         # Initialize filter state for stateful block-wise processing.
@@ -689,7 +692,7 @@ class WeightingFilter:
         """
         refuse_foreign_rate(x, self.fs, "weighting filter")
         x_proc = resolve_samples(x)
-        if self.curve == "Z" or x_proc.shape[-1] == 0:
+        if self.weighting == "Z" or x_proc.shape[-1] == 0:
             # ``sosfilt`` refuses a record with no samples, and there is
             # nothing to weight in one: hand it back in the shape it arrived
             # in, leaving any carried state where it was.
@@ -726,7 +729,7 @@ def _runtime_frequency_response(
     :return: Complex voltage response at each frequency (not normalized).
     """
     f = np.asarray(frequencies, dtype=np.float64)
-    if wf.curve == "Z" or wf.sos.size == 0:
+    if wf.weighting == "Z" or wf.sos.size == 0:
         return np.ones_like(f, dtype=np.complex128)
     _, h = signal.sosfreqz(wf.sos, worN=f, fs=wf.fs)
     return np.asarray(h, dtype=np.complex128)
@@ -864,7 +867,7 @@ class TimeWeightedEnvelope(OwnsArrays):
 def weighting_filter(
     x: Signal,
     fs: int | None = ...,
-    curve: str = ...,
+    weighting: str = ...,
     *,
     high_accuracy: bool = ...,
 ) -> Signal: ...
@@ -874,7 +877,7 @@ def weighting_filter(
 def weighting_filter(
     x: list[float] | np.ndarray,
     fs: int,
-    curve: str = ...,
+    weighting: str = ...,
     *,
     high_accuracy: bool = ...,
 ) -> np.ndarray: ...
@@ -883,7 +886,7 @@ def weighting_filter(
 def weighting_filter(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    curve: str = "A",
+    weighting: str = "A",
     *,
     high_accuracy: bool = True,
 ) -> Signal | np.ndarray:
@@ -896,10 +899,10 @@ def weighting_filter(
     :param fs: Sample rate. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :param curve: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical),
-        'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196
-        infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric
-        noise weighting) or 'Z' (bypass).
+    :param weighting: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983,
+        historical), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G'
+        (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4
+        psophometric noise weighting) or 'Z' (bypass).
     :param high_accuracy: Design the filter by fitting the analog prototype at
         *fs* (default True), rather than by the plain bilinear transform, which
         warps frequency and loses class 1 below 44.1 kHz. See
@@ -910,7 +913,7 @@ def weighting_filter(
         already in pascals and whose factor therefore reads 1.0.
     """
     fs = resolve_fs(x, fs)
-    wf = _cached_weighting_filter(fs, curve, high_accuracy=high_accuracy)
+    wf = _cached_weighting_filter(fs, weighting, high_accuracy=high_accuracy)
     # The object form wraps for itself now, so hand it the caller's input
     # rather than the resolved samples: doing both would wrap twice.
     return wf.filter(x)

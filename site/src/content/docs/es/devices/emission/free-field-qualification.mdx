@@ -670,7 +670,7 @@ print(test.sound_power_level[[0, 10, 20]].round(2))       # [90.   91.72 82.36] 
 print(calibration.sound_power_level_at(
     [1000.0], temperature_c=18.0, static_pressure_kpa=96.0).round(2))   # [87.59] dB
 print(calibration.sound_power_level_at(
-    [125.0, 1000.0, 8000.0], bandwidth="octave").round(2))   # [91.64 92.52 84.65] dB
+    [125.0, 1000.0, 8000.0], fraction=1).round(2))   # [91.64 92.52 84.65] dB
 ```
 
 A 18 °C y 96 kPa la fuente radia 0,18 dB menos que en las condiciones de
@@ -684,13 +684,13 @@ ensayo.
 | :--- | :--- | :--- | :--- |
 | `reference_source_calibration(levels, *, frequencies, arrangement, background_levels=None, max_levels=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2=None, intensity_sound_power_level=None, room_qualification=None, coverage_factor=1.96)` | 8, fórmula (2) | `ReferenceSourceCalibration` | `arrangement` es `"paths"` o `"fixed"`, la columna de la tabla 2; `room_qualification` avisa cuando la sala no cubre las bandas a 2 m (8.1) |
 | `CalibrationConditions(*, temperature_c=23.0, static_pressure_kpa=101.325, air_absorption_db_per_m=None)` | 4, 8.4 | el aire de la fórmula (2) | Temperatura y presión estática para $C_1$ y $C_2$, $a(f)$ por banda para $C_3$ |
-| `ReferenceSourceCalibration.sound_power_level_at(frequencies, *, bandwidth="one-third-octave", temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ por banda [dB] | Con las condiciones de un ensayo, $L_W - C_2$ allí |
+| `ReferenceSourceCalibration.sound_power_level_at(frequencies, *, fraction=3, temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ por banda [dB] | Con las condiciones de un ensayo, $L_W - C_2$ allí |
 | `verify_reference_sound_source(calibration, *, frequencies=None, repeated_levels=None, supply_variation_db=None, directivity_index=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Tres repeticiones de potencia o cinco de presión; el mayor cambio en el intervalo de alimentación declarado |
 | `verify_reference_source_drift(reference_levels, latest_levels, *, frequencies)` | 5.6 | `ReferenceSourceDriftResult` | 2,83 veces la tabla 1 |
 | `repeatability_standard_deviation(levels)` | Fórmula (1) | $\sigma_r$ por banda [dB] | Respecto a la media energética |
 | `radiation_impedance_correction(*, temperature_c=23.0, static_pressure_kpa=101.325, radiation="unknown", frequencies=None, knee_frequency_hz=None)` | Anexo A | $C_2$ [dB] | Monopolo, dipolo aerodinámico o desconocida |
 | `knee_frequency(d0_m, *, speed_of_sound=343.0)` | Fórmula (A.1) | $f_\mathrm{k}$ [Hz] | $c/(2\pi d_0)$ |
-| `reference_source_reproducibility(frequencies, *, environment, arrangement=None, bandwidth="one-third-octave")` | Tabla 2 | $\sigma_R$ por banda [dB] | Las columnas de tercio de octava y de octava se leen por separado |
+| `reference_source_reproducibility(frequencies, *, environment, arrangement=None, fraction=3)` | Tabla 2 | $\sigma_R$ por banda [dB] | Las columnas de tercio de octava y de octava se leen por separado |
 
 La fórmula (A.1) tiene un defecto propio: el anexo A define su $d_0$ como la
 mitad de la dimensión característica de la fuente de ISO 3745, que el

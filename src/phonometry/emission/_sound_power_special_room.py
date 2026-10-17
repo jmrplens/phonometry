@@ -1102,7 +1102,7 @@ def check_special_room_suitability(
         _reference_power_levels(
             calibrated_power_levels,
             freqs,
-            bandwidth="octave",
+            fraction=1,
             name="calibrated_power_levels",
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
@@ -1847,7 +1847,7 @@ def sound_power_special_room_comparison(
         _reference_power_levels(
             lw_ref,
             freqs,
-            bandwidth="octave",
+            fraction=1,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
         ),

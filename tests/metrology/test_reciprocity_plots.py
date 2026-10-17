@@ -242,7 +242,7 @@ def test_large_volume_check_with_the_approximation_draws_x_and_20_hz(ax: Axes) -
     assert "advisory" in ticks[1]
 
 
-@pytest.mark.parametrize("field", ["pressure", "free_field"])
+@pytest.mark.parametrize("field", ["pressure", "free"])
 def test_parameter_uncertainty_draws_each_component(ax: Axes, field: str) -> None:
     if field == "pressure":
         result: (

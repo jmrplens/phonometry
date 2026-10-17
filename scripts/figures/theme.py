@@ -448,7 +448,7 @@ def measure_weighting_response(
 
     impulse = np.zeros(fs)
     impulse[fs // 2] = 1.0
-    weighted = filters.weighting_filter(impulse, fs, curve=curve)
+    weighted = filters.weighting_filter(impulse, fs, weighting=curve)
 
     worn = 8192 if freqs is None else np.asarray(freqs, dtype=float)
     w, h = scipy_signal.freqz(weighted, [1], worN=worn, fs=fs)

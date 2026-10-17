@@ -194,10 +194,10 @@ judged settled, as Formula (2) itself is.
 ### FloorCoveringImprovementResult.octave_bands()
 
 ```python
-FloorCoveringImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+FloorCoveringImprovementResult.octave_bands() -> OctaveBandSpectrum
 ```
 
-Return `(octave_freqs, ΔLoct)` via Formula (5) (needs 16 1/3-oct bands).
+`ΔLoct` in octave bands, via Formula (5) (needs whole octave triplets).
 
 ### FloorCoveringImprovementResult.plot()
 
@@ -312,7 +312,9 @@ over positions $\Delta L = \mathrm{mean}(\Delta L_{t,a})$
 improvement_octave_bands(
     improvement: Sequence[float] | np.ndarray,
     frequencies: Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]
+    *,
+    quantity: str = 'ΔL',
+) -> OctaveBandSpectrum
 ```
 
 Convert a one-third-octave improvement spectrum to octaves (F. (5)).
@@ -327,11 +329,62 @@ each octave.
 | :--- | :--- |
 | `improvement` | Improvement `ΔL` per one-third-octave band, in dB. |
 | `frequencies` | The matching one-third-octave centre frequencies, in Hz; must contain whole octave triplets (centre / centre·2^(±1/3)). |
+| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. |
 
-**Returns:** `(octave_freqs, ΔLoct)`.
+**Returns:** An [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) with the octave centres (`.frequencies`) and the octave values (`.values`).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | The thirds do not group into complete octave triplets. |
+| ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three. |
+
+## OctaveBandSpectrum
+
+```python
+OctaveBandSpectrum(
+    frequencies: np.ndarray,
+    values: np.ndarray,
+    quantity: str,
+)
+```
+
+A one-third-octave result folded into octave bands, with what it holds.
+
+What [`improvement_octave_bands`](/phonometry/reference/api/building/floor-covering-improvement/#improvement_octave_bands) returns, and what the
+`octave_bands()` methods of the floor-covering, laboratory lining,
+laboratory floor-covering, joint and rainfall results return: the octave
+centres and the octave values side by side, named, so that neither can be
+read as the other, and the quantity they are values of.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The octave centre frequencies, in hertz. |
+| `values` | The octave value of `quantity` in each band, in dB. |
+| `quantity` | Which quantity the values are: `"ΔL"` (an impact improvement), `"ΔR"` (a sound reduction improvement), `"Rs"` (the sound reduction index of a joint), `"LI"` or `"LI,norm"` (the rainfall sound intensity level, raw or normalized). |
+
+### OctaveBandSpectrum.plot()
+
+```python
+OctaveBandSpectrum.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the octave values against their octave bands.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the octave curve `plot` call. |

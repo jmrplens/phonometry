@@ -127,6 +127,9 @@ START_ROUTES = (
     "start/support",
 )
 
+#: The start page that travels in a shard of its own (see :func:`build_shards`).
+UPGRADING_ROUTE = "start/upgrading"
+
 
 def _check_areas_cover_the_tree() -> None:
     """AREAS keeps the order and the labels; the tree decides membership.
@@ -829,15 +832,19 @@ def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
         "",
         f"- [Start here]({SITE_URL}/llms/llms-start.txt)",
     ]
+    if "upgrading" in shard_slugs:
+        lines.append(
+            f"- [Upgrading from 3.3 to 4.0]({SITE_URL}/llms/llms-upgrading.txt)"
+        )
     if "theory" in shard_slugs:
         lines.append(f"- [Theory and reference]({SITE_URL}/llms/llms-theory.txt)")
     # Grouped by topic in the order the site lists them, the topic's own shard
     # first, so the list reads like the navigation rather than like a sort key.
     # The slugs are the shards actually built this run: a hand-kept list here
     # published a link to a shard that a content move could stop producing.
-    # "theory" is listed by hand just above, next to "start": neither is a
-    # topic, so the loop below would otherwise never place them.
-    listed: set[str] = {"start", "theory"}
+    # "upgrading" and "theory" are listed by hand just above, next to "start":
+    # none is a topic, so the loop below would otherwise never place them.
+    listed: set[str] = {"start", "upgrading", "theory"}
     folders = _shard_folders()
     for topic, _label in AREAS:
         # Subgroups in the order the topic overview teaches them, matching the
@@ -973,7 +980,13 @@ def build_shards() -> dict[str, str]:
         route for route in pages.values() if route.startswith("reference/theory")
     )
     start_overview = ["start"] if "start" in route_to_file else []
-    shards = {"start": emit("start here", [*start_overview, *START_ROUTES])}
+    # The migration guide gets the same treatment: one row per 4.0 break, it
+    # alone took llms-start.txt over budget, and a client after the
+    # getting-started page has no reason to fetch every renamed parameter.
+    start_routes = [route for route in START_ROUTES if route != UPGRADING_ROUTE]
+    shards = {"start": emit("start here", [*start_overview, *start_routes])}
+    if UPGRADING_ROUTE in route_to_file:
+        shards["upgrading"] = emit("Upgrading from 3.3 to 4.0", [UPGRADING_ROUTE])
     if theory:
         shards["theory"] = emit("Theory and reference", theory)
 

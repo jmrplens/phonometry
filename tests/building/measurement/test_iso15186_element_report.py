@@ -213,17 +213,3 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
     out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match=r"element-normalized report supports only"):
         result.report(out)
-
-
-def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
-    """A manually built rating lacking the per-band arrays is rejected."""
-    bare_rating = building.WeightedRatingResult(
-        rating=30, c=-2, ctr=-3, unfavorable_sum=0.0
-    )
-    result = IntensityElementNormalizedResult(
-        d_i_n_e=np.asarray(ref.ISO717_1_ANNEX_C_R, dtype=np.float64),
-        rating=bare_rating,
-    )
-    out = str(tmp_path / "x.pdf")
-    with pytest.raises(ValueError, match=r"per-band rating data \('frequencies'"):
-        result.report(out)

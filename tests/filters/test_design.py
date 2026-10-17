@@ -24,7 +24,7 @@ def _edge_gains_db(
     def gain_at(f: float) -> float:
         return float(mag[np.argmin(np.abs(w - f))])
 
-    return gain_at(bank.freq_d[band_idx]), gain_at(bank.freq_u[band_idx])
+    return gain_at(bank.lower_edges[band_idx]), gain_at(bank.upper_edges[band_idx])
 
 
 @pytest.mark.parametrize("fraction", [1, 3])
@@ -46,7 +46,7 @@ def test_cheby2_minus3db_at_band_edges(fraction: float) -> None:
         limits=[100, 5000],
         design=filters.FilterDesign(filter_type="cheby2", attenuation=60.0),
     )
-    for idx in range(bank.num_bands):
+    for idx in range(bank.n_bands):
         g_lo, g_hi = _edge_gains_db(bank, idx)
         assert g_lo == pytest.approx(-3.01, abs=0.4), (
             f"band {idx} lower edge: {g_lo:.2f} dB"
@@ -104,7 +104,7 @@ def test_bessel_minus3db_at_band_edges(fraction: float) -> None:
         limits=[100, 5000],
         design=filters.FilterDesign(filter_type="bessel"),
     )
-    for idx in range(bank.num_bands):
+    for idx in range(bank.n_bands):
         g_lo, g_hi = _edge_gains_db(bank, idx)
         assert g_lo == pytest.approx(-3.01, abs=0.6), (
             f"band {idx} lower edge: {g_lo:.2f} dB"

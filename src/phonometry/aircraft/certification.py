@@ -23,7 +23,8 @@ is built from a half-second spectral time history (24 one-third-octave bands,
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -33,11 +34,15 @@ from .._internal.validation import (
     check_engine,
     is_scalar,
     require_equal_shapes,
+    require_finite,
+    require_non_negative,
     require_ranks,
     require_same_length,
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -45,6 +50,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "NOY_BANDS_HZ",
+    "EPNLIntegration",
     "EPNLResult",
     "effective_perceived_noise_level",
     "epnl_from_pnlt",
@@ -460,13 +466,81 @@ def _ten_db_down_limits(pnlt: NDArray[np.float64], threshold: float) -> tuple[in
     return kf, kl
 
 
+@dataclass(frozen=True)
+class EPNLIntegration(OwnsArrays):
+    r"""The integration of a PNLT history into EPNL (ICAO Annex 16 App. 2 §4.5-4.6).
+
+    What :func:`epnl_from_pnlt` returns: the integral and the window it was
+    taken over, named, where a ``(epnl, pnltm, kF, kL)`` tuple used to be
+    unpacked by position. :class:`EPNLResult` carries the same four numbers
+    beside the record histories they were integrated from.
+
+    :ivar epnl: Effective perceived noise level, in EPNdB, including the
+        bandsharing adjustment.
+    :ivar pnltm: Maximum tone-corrected perceived noise level, in TPNdB,
+        including the bandsharing adjustment ``ΔB`` (App. 2 §4.4.2), the
+        adjusted value §4.4.3 requires for EPNL.
+    :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in dB
+        (App. 2 §4.4.2; zero unless the tone correction at PNLTM is
+        suppressed).
+    :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``,
+        both inclusive.
+    """
+
+    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-6):
+    #: EPNdB for the EPNL, TPNdB for a tone-corrected perceived noise level.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"epnl": "EPNdB", "pnltm": "TPNdB"}
+    )
+
+    epnl: float
+    pnltm: float
+    bandsharing_adjustment: float
+    band_limits: tuple[int, int]
+
+    def __post_init__(self) -> None:
+        """Reject a non-finite level or a window that is not a pair of indices.
+
+        :raises ValueError: if a level is not one finite number, the
+            bandsharing adjustment is negative, or ``band_limits`` is not a
+            pair of record indices with ``0 <= kF <= kL``.
+        """
+        require_finite(self.epnl, "epnl")
+        require_finite(self.pnltm, "pnltm")
+        # ΔB is an addition to PNLTM (App. 2 §4.4.2), zero or positive.
+        require_non_negative(self.bandsharing_adjustment, "bandsharing_adjustment")
+        limits = tuple(self.band_limits)
+        pair = 2
+        if len(limits) != pair or not all(
+            isinstance(k, (int, np.integer)) and not isinstance(k, bool) for k in limits
+        ):
+            msg = (
+                "EPNLIntegration: 'band_limits' must be a pair of 0-based "
+                f"record indices (kF, kL); got {self.band_limits!r}."
+            )
+            raise ValueError(msg)
+        kf, kl = int(limits[0]), int(limits[1])
+        if not 0 <= kf <= kl:
+            msg = (
+                "EPNLIntegration: 'band_limits' must satisfy 0 <= kF <= kL; "
+                f"got {self.band_limits!r}."
+            )
+            raise ValueError(msg)
+        object.__setattr__(self, "band_limits", (kf, kl))
+
+    @property
+    def duration_correction(self) -> float:
+        r"""Duration correction :math:`D = \mathrm{EPNL} - \mathrm{PNLTM}`, in dB."""
+        return float(self.epnl - self.pnltm)
+
+
 def epnl_from_pnlt(
     pnlt: NDArray[np.float64] | list[float],
     dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
     tone_corrections: NDArray[np.float64] | list[float] | None = None,
-) -> tuple[float, float, int, int]:
+) -> EPNLIntegration:
     r"""EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
 
     .. math::
@@ -489,14 +563,16 @@ def epnl_from_pnlt(
     that shortfall, added to PNLTM before the 10 dB-down window is found and
     included in the reported EPNL.
 
-    :param pnlt: The tone-corrected perceived noise levels ``PNLT(k)``, in PNdB.
+    :param pnlt: The tone-corrected perceived noise levels ``PNLT(k)``, in TPNdB.
     :param dt: Per-record duration, in s (scalar broadcast or per record).
     :param reference_time: Normalising time ``T0``, in s (default 10).
     :param tone_corrections: Optional tone corrections ``C(k)``, in dB, one per
         ``pnlt`` record; enables the bandsharing adjustment ``ΔB`` described
         above. Default ``None`` (no adjustment).
-    :return: ``(epnl, pnltm, kF, kL)`` -- EPNL in EPNdB, the peak PNLTM, and the
-        0-based 10 dB-down record indices (inclusive).
+    :return: An :class:`EPNLIntegration`: ``.epnl`` in EPNdB, the peak
+        ``.pnltm``, the ``.bandsharing_adjustment`` and the 0-based 10 dB-down
+        record indices ``.band_limits`` (inclusive), with the duration
+        correction as ``.duration_correction``.
     :raises ValueError: If the inputs are invalid.
     """
     p = np.atleast_1d(np.asarray(pnlt, dtype=np.float64))
@@ -534,7 +610,12 @@ def epnl_from_pnlt(
     kf, kl = _ten_db_down_limits(p, pnltm - _TEN_DB_DOWN)
     energy = np.sum(10.0 ** (p[kf : kl + 1] / 10.0) * dt_arr[kf : kl + 1])
     epnl = float(10.0 * np.log10(energy) - 10.0 * np.log10(reference_time)) + delta_b
-    return epnl, pnltm, kf, kl
+    return EPNLIntegration(
+        epnl=epnl,
+        pnltm=pnltm,
+        bandsharing_adjustment=delta_b,
+        band_limits=(kf, kl),
+    )
 
 
 @dataclass(frozen=True)
@@ -545,16 +626,24 @@ class EPNLResult(OwnsArrays):
     :ivar times: Record times, in s.
     :ivar pnl: Perceived noise level per record, in PNdB.
     :ivar tone_correction: Tone-correction factor per record, in dB.
-    :ivar pnlt: Tone-corrected perceived noise level per record, in PNdB.
-    :ivar pnltm: Maximum tone-corrected perceived noise level, in PNdB,
-        including the bandsharing adjustment ``ΔB`` (App. 2 §4.4.3).
+    :ivar pnlt: Tone-corrected perceived noise level per record, in TPNdB.
+    :ivar pnltm: Maximum tone-corrected perceived noise level, in TPNdB,
+        including the bandsharing adjustment ``ΔB`` (App. 2 §4.4.2), the
+        adjusted value §4.4.3 requires for EPNL.
     :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in dB
-        (zero unless the tone correction at PNLTM is suppressed).
+        (App. 2 §4.4.2; zero unless the tone correction at PNLTM is
+        suppressed).
     :ivar duration_correction: Duration correction
         :math:`D = \mathrm{EPNL} - \mathrm{PNLTM}`, in dB.
     :ivar epnl: Effective perceived noise level, in EPNdB.
     :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``.
     """
+
+    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-6): PNdB
+    #: for the PNL, TPNdB once the tone correction is added, EPNdB for the EPNL.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"pnl": "PNdB", "pnlt": "TPNdB", "pnltm": "TPNdB", "epnl": "EPNdB"}
+    )
 
     frequencies: NDArray[np.float64]
     times: NDArray[np.float64]
@@ -767,7 +856,7 @@ def effective_perceived_noise_level(
     corr = np.array([tone_correction(row, start_band=start_band) for row in arr])
     pnlt = pnl + corr
 
-    epnl, pnltm, kf, kl = epnl_from_pnlt(
+    integration = epnl_from_pnlt(
         pnlt, dt, reference_time=reference_time, tone_corrections=corr
     )
 
@@ -783,9 +872,9 @@ def effective_perceived_noise_level(
         pnl=pnl,
         tone_correction=corr,
         pnlt=pnlt,
-        pnltm=pnltm,
-        bandsharing_adjustment=float(pnltm - float(np.max(pnlt))),
-        duration_correction=float(epnl - pnltm),
-        epnl=epnl,
-        band_limits=(kf, kl),
+        pnltm=integration.pnltm,
+        bandsharing_adjustment=integration.bandsharing_adjustment,
+        duration_correction=integration.duration_correction,
+        epnl=integration.epnl,
+        band_limits=integration.band_limits,
     )

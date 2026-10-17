@@ -77,6 +77,7 @@ from ..._internal.validation import (
     require_equal_counts,
     require_equal_shapes,
     require_positive,
+    require_present,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -235,8 +236,7 @@ class FacadePredictionResult(OwnsArrays):
     :ivar frequencies: Band centre frequencies (Hz) for plotting; ``None`` labels
         the axis by band index.
     :ivar elements: The element sequence the prediction was run with,
-        retained so :meth:`plot_geometry` can draw the elevation; appended
-        after the original fields and ``None`` for hand-built results.
+        kept so :meth:`plot_geometry` can draw the elevation.
     """
 
     r_prime: np.ndarray
@@ -244,11 +244,11 @@ class FacadePredictionResult(OwnsArrays):
     r_tr_s: np.ndarray
     d_2m_nt: np.ndarray
     element_r: dict[str, np.ndarray]
+    elements: tuple[FacadeElement, ...]
     r_tr_s_w: int | None = None
     d_2m_nt_w: int | None = None
     c_tr: int | None = None
     frequencies: np.ndarray | None = None
-    elements: tuple[FacadeElement, ...] | None = None
 
     def __post_init__(self) -> None:
         """Reject a prediction whose element rows and bands do not line up.
@@ -271,7 +271,9 @@ class FacadePredictionResult(OwnsArrays):
         :raises ValueError: if the per-band quantities disagree, if an element
             partial index does not run over the predicted bands, or if the
             retained geometry holds a different number of elements.
+        :raises TypeError: if ``elements`` is ``None``.
         """
+        require_present(self, "elements")
         require_ranks(self, r_prime=1, r_45=1, r_tr_s=1, d_2m_nt=1, frequencies=1)
         require_same_length(self, "r_prime", "r_45", "r_tr_s", "d_2m_nt", "frequencies")
         owner = type(self).__name__
@@ -285,12 +287,11 @@ class FacadePredictionResult(OwnsArrays):
                     label: require_axis_count(partial, owner, label, rank=1),
                 },
             )
-        if self.elements is not None:
-            require_equal_counts(
-                owner,
-                {"elements": len(self.elements), "element_r": len(self.element_r)},
-                "façade element",
-            )
+        require_equal_counts(
+            owner,
+            {"elements": len(self.elements), "element_r": len(self.element_r)},
+            "façade element",
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -309,8 +310,6 @@ class FacadePredictionResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_facade_result_geometry

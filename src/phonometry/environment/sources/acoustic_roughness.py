@@ -860,7 +860,7 @@ def filtered_roughness_spectrum(
         longest_wavelength_m=_nominal_wavelength_m(_longest_resolved_band(analysed_m)),
     )
     settled = 0
-    for index in range(candidates.num_bands - 1, -1, -1):
+    for index in range(candidates.n_bands - 1, -1, -1):
         deficit = _settling_deficit_db(candidates, index, discard, stop)
         if abs(deficit) > _SETTLING_TOLERANCE_DB:
             break
@@ -868,7 +868,7 @@ def filtered_roughness_spectrum(
     if not settled:
         msg = "no band of the filter bank settles within the length analysed."
         raise ValueError(msg)
-    first = round(10.0 * math.log10(float(candidates.freq[-settled])))
+    first = round(10.0 * math.log10(float(candidates.frequencies[-settled])))
     bank = roughness_filter_bank(
         sample_spacing_m=spacing, longest_wavelength_m=_nominal_wavelength_m(first)
     )
@@ -880,7 +880,7 @@ def filtered_roughness_spectrum(
         band = np.asarray(output, dtype=np.float64)[discard:stop]
         mean_square = max(float(np.mean(band**2)), np.finfo(np.float64).tiny)
         levels.append(10.0 * math.log10(mean_square / _REFERENCE_ROUGHNESS_UM**2))
-    bands = [round(10.0 * math.log10(float(f))) for f in bank.freq]
+    bands = [round(10.0 * math.log10(float(f))) for f in bank.frequencies]
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
         levels=np.asarray(levels),

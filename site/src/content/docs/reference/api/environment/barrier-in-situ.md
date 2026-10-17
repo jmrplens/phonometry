@@ -463,11 +463,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The `Axes`.
 
-### MeasuredBarrierInsertionLoss.rounded()
+### MeasuredBarrierInsertionLoss.rounded
 
-```python
-MeasuredBarrierInsertionLoss.rounded() -> NDArray[np.int_]
-```
+*property*
 
 The values as clause 10 c) reports them, to the nearest decibel.
 

@@ -1261,8 +1261,8 @@ def test_a_screen_attenuation_on_a_half_is_reported_even(
         a_weighted_unscreened_level=pair[0],
         a_weighted_screened_level=pair[1],
     )
-    assert int(result.rounded()[0]) == reported
-    assert result.rounded_a_weighted() == reported
+    assert int(result.rounded[0]) == reported
+    assert result.rounded_a_weighted == reported
 
 
 @pytest.mark.parametrize(("pair", "reported"), _HALVES)
@@ -1272,7 +1272,7 @@ def test_a_cabin_insulation_on_a_half_is_reported_even(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", noise_control.CabinInsulationWarning)
         result = noise_control.cabin_insulation([pair[0]], [pair[1]])
-    assert int(result.rounded()[0]) == reported
+    assert int(result.rounded[0]) == reported
 
 
 @pytest.mark.parametrize(("pair", "reported"), _HALVES)
@@ -1282,7 +1282,7 @@ def test_an_enclosure_insulation_on_a_half_is_reported_even(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", noise_control.EnclosureInsulationWarning)
         result = noise_control.enclosure_sound_pressure_insulation([pair[0]], [pair[1]])
-    assert int(result.rounded()[0]) == reported
+    assert int(result.rounded[0]) == reported
 
 
 @pytest.mark.parametrize(("pair", "reported"), _HALVES)
@@ -1293,7 +1293,7 @@ def test_a_barrier_insertion_loss_on_a_half_is_reported_even(
     result = environment.measured_insertion_loss_direct(
         [50.0], [50.0], [pair[0]], [pair[1]]
     )
-    assert int(result.rounded()[0]) == reported
+    assert int(result.rounded[0]) == reported
 
 
 @pytest.mark.parametrize(

@@ -181,6 +181,30 @@ Apply the pre-designed filter bank to a signal.
 
 **Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`.
 
+### OctaveFilterBank.frequencies
+
+*property*
+
+The exact mid-band frequency of each band, in hertz (read-only).
+
+### OctaveFilterBank.labels
+
+*property*
+
+The IEC 61260-1 nominal mid-band frequency of each band, as text.
+
+### OctaveFilterBank.lower_edges
+
+*property*
+
+The lower band-edge frequency of each band, in hertz (read-only).
+
+### OctaveFilterBank.n_bands
+
+*property*
+
+How many bands the bank holds.
+
 ### OctaveFilterBank.spectrogram()
 
 ```python
@@ -192,7 +216,7 @@ OctaveFilterBank.spectrogram(
     *,
     detrend: bool = True,
     zero_phase: bool = False,
-) -> tuple[np.ndarray, list[float], np.ndarray]
+) -> OctaveSpectrogramResult
 ```
 
 Short-time fractional-octave analysis: level per band over time.
@@ -208,7 +232,13 @@ Short-time fractional-octave analysis: level per band over time.
 | `detrend` | If True, remove DC offset before filtering. |
 | `zero_phase` | If True, filter bands forward-backward so their group delays don't skew the frames (offline analysis only). |
 
-**Returns:** Tuple (levels, freq, times). `levels` has shape (num_bands, num_frames) for 1D input and (channels, num_bands, num_frames) for 2D input; `times` holds each window's center in seconds.
+**Returns:** An [`OctaveSpectrogramResult`](/phonometry/reference/api/filters/core/#octavespectrogramresult). Its `levels` are shaped `(bands, frames)` for 1D input and `(channels, bands, frames)` for 2D input, `frequencies` holds the exact mid-band frequencies and `times` each window's centre in seconds.
+
+### OctaveFilterBank.upper_edges
+
+*property*
+
+The upper band-edge frequency of each band, in hertz (read-only).
 
 ## OctaveFilterResult
 
@@ -298,6 +328,62 @@ lines later, as an operation on it. This says what happened.
 | Exception | When |
 | :--- | :--- |
 | ValueError | when the call asked for no level. |
+
+## OctaveSpectrogramResult
+
+```python
+OctaveSpectrogramResult(
+    levels: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    times: NDArray[np.float64],
+)
+```
+
+Band levels over time: what [`OctaveFilterBank.spectrogram`](/phonometry/reference/api/filters/core/#octavefilterbankspectrogram) returns.
+
+A record with named fields rather than a `(levels, frequencies, times)`
+tuple, so it cannot be unpacked by position: read `.levels`,
+`.frequencies` and `.times`, or draw it with `plot`.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | The level of each band in each analysis window, in decibels: shaped `(bands, frames)` for a single-channel input and `(channels, bands, frames)` for a multichannel one. |
+| `frequencies` | The exact mid-band frequency of each band, in hertz, as a read-only array. |
+| `times` | The centre of each analysis window, in seconds. |
+
+### OctaveSpectrogramResult.plot()
+
+```python
+OctaveSpectrogramResult.plot(
+    ax: Axes | None = None,
+    *,
+    channel: int | None = None,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Draw the levels as one raster over time and band centre, with a colour bar.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `channel` | Which channel of a multichannel result to draw, counted from 0. A multichannel result needs it; a single-channel one takes `None` or `0`. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to `imshow`. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a multichannel result drawn without `channel`, or a `channel` the result does not hold. |
 
 ## ResponsePlot
 

@@ -196,11 +196,11 @@ FacadePredictionResult(
     r_tr_s: np.ndarray,
     d_2m_nt: np.ndarray,
     element_r: dict[str, np.ndarray],
+    elements: tuple[FacadeElement, ...],
     r_tr_s_w: int | None = None,
     d_2m_nt_w: int | None = None,
     c_tr: int | None = None,
     frequencies: np.ndarray | None = None,
-    elements: tuple[FacadeElement, ...] | None = None,
 )
 ```
 
@@ -219,7 +219,7 @@ Predicted façade airborne insulation (EN 12354-3:2000).
 | `d_2m_nt_w` | Single-number `D2m,nT,w` (ISO 717-1); `None` as above. |
 | `c_tr` | Spectrum adaptation term `Ctr` of `R'` (ISO 717-1). |
 | `frequencies` | Band centre frequencies (Hz) for plotting; `None` labels the axis by band index. |
-| `elements` | The element sequence the prediction was run with, retained so `plot_geometry` can draw the elevation; appended after the original fields and `None` for hand-built results. |
+| `elements` | The element sequence the prediction was run with, kept so `plot_geometry` can draw the elevation. |
 
 ### FacadePredictionResult.plot()
 
@@ -249,12 +249,6 @@ Draw the composite facade elevation, element areas to scale.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ### FacadePredictionResult.report()
 

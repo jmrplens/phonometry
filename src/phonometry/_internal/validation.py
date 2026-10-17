@@ -558,6 +558,27 @@ def require_axis_rank(value: object, owner: str, name: str, rank: int) -> None:
         raise ValueError(msg)
 
 
+def require_present(owner: object, *fields: str) -> None:
+    """Require each named field of *owner* to hold a value, not ``None``.
+
+    A required field cannot be left out of the call, but ``None`` can still
+    be passed for it, or put there with :func:`dataclasses.replace`. The
+    shape and value guards skip ``None`` on purpose, since an optional
+    quantity may be absent, so without this the record would build and
+    fail later, in a report or a plot, with an error that names neither the
+    field nor the record.
+
+    :param owner: The instance whose fields are read.
+    :param fields: Names of the fields that must not be ``None``.
+    :raises TypeError: naming the record and the first field that holds
+        ``None``.
+    """
+    for name in fields:
+        if getattr(owner, name) is None:
+            msg = f"{type(owner).__name__}: '{name}' is required and cannot be None."
+            raise TypeError(msg)
+
+
 def require_ranks(owner: object, **ranks: int) -> None:
     """Require each named field of *owner* to have the given number of axes.
 

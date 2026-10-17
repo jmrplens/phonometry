@@ -402,9 +402,10 @@ def test_laboratory_lining_improvement_on_the_heavy_wall() -> None:
         res.delta_rw_c_direct,
         res.delta_rw_ctr_direct,
     ) == (10, 10, 10)
-    centres, octaves = res.octave_bands()
-    np.testing.assert_allclose(centres, [125, 250, 500, 1000, 2000, 4000])
-    np.testing.assert_allclose(octaves, 10.0)
+    octaves = res.octave_bands()
+    assert octaves.quantity == "ΔR"
+    np.testing.assert_allclose(octaves.frequencies, [125, 250, 500, 1000, 2000, 4000])
+    np.testing.assert_allclose(octaves.values, 10.0)
 
 
 def test_other_basic_element_keeps_only_the_direct_difference() -> None:
@@ -425,7 +426,7 @@ def test_octave_formula_d1_averages_energy_not_decibels() -> None:
     res = building.laboratory_lining_improvement(
         [40.0, 40.0, 40.0], [40.0, 50.0, 60.0], [100.0, 125.0, 160.0]
     )
-    _, octaves = res.octave_bands()
+    octaves = res.octave_bands().values
     expected = -10.0 * np.log10((1.0 + 0.1 + 0.01) / 3.0)
     assert octaves[0] == pytest.approx(expected, abs=1e-12)
 
@@ -572,9 +573,12 @@ def test_octave_formula_h2() -> None:
     res = building.laboratory_floor_covering_improvement(
         [70.0, 70.0, 70.0], [70.0, 60.0, 50.0], [800.0, 1000.0, 1250.0]
     )
-    centres, octaves = res.octave_bands()
-    assert centres.tolist() == [1000.0]
-    assert octaves[0] == pytest.approx(-10.0 * np.log10((1.0 + 0.1 + 0.01) / 3.0))
+    octaves = res.octave_bands()
+    assert octaves.quantity == "ΔL"
+    assert octaves.frequencies.tolist() == [1000.0]
+    assert octaves.values[0] == pytest.approx(
+        -10.0 * np.log10((1.0 + 0.1 + 0.01) / 3.0)
+    )
     assert res.delta_lw is None
 
 

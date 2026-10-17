@@ -42,8 +42,7 @@ para el código que tiraba de la raíz:
 ```python
 from phonometry import filters
 
-_, _, _, labels = filters.nominal_frequencies(1)
-print(labels)
+print(filters.nominal_frequencies(1).labels)
 ```
 
 ### Encontrar la casa nueva de un nombre
@@ -467,6 +466,7 @@ muestreo es `fs` en todas las funciones.
 | `speed_of_sound_m_s=` en `thickness_critical_frequency_product` | `speed_of_sound=` |
 | `sample_rate` en el `SignalSource` de FDTD, `STOIResult` e `impact_force_exposure_level` | `fs` |
 | `freq=` en `linkwitz_riley` y `adaptation_term_kc` | `frequency=` y `frequencies=` |
+| `band["freq"]` en las filas `bands` de `FilterComplianceResult`, `WeightingComplianceResult` e `IntensityInstrumentComplianceResult`, y `between_nominals["worst_freq"]` en `WeightingComplianceResult` | `band["frequency"]` y `between_nominals["worst_frequency"]` |
 | `.frequency` en los resultados que llevan un eje de frecuencias: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, los cinco resultados de auditorio, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, los dos resultados de ruido de válvulas, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
 | `.band_centers` en las clasificaciones de ISO 717 e ISO 11654 (`WeightedRatingResult`, `ImpactRatingResult`, `ExtendedWeightedRatingResult`, `ExtendedImpactRatingResult`, `AbsorptionRatingResult`), `.centre_frequencies` en `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `EcmaFluctuationStrength` y `MooreGlasbergLoudness`, `.band_frequencies` en `FilterComplianceResult` y `STOIResult`, `.bands_hz` en `RoadDeviceRating` | `.frequencies`, el eje de bandas de todos los resultados |
 | `frequency=` con un array: las funciones de transmisión por flancos, `internal_spectrum`, `pipe_transmission_loss`, `expander_noise`, `transfer_matrix_one_load`, `transfer_matrix_two_load`, `TransferMatrix.plot` | `frequencies=` |
@@ -950,8 +950,10 @@ que ese par necesitaba doce declaraciones `@overload` para poder tiparse, y por
 la que `_, _, bands = bank.filter(...)` era una línea en la que había que contar
 comas.
 
-Ahora devuelven un `OctaveFilterResult` con campos con nombre, como cualquier
-otro cálculo de la biblioteca.
+Ahora devuelven un `OctaveFilterResult` con campos con nombre. Las demás
+respuestas del banco que eran tuplas también son registros: el espectrograma es
+un `OctaveSpectrogramResult`, y el conjunto de bandas sobre el que se diseña el
+banco se lee de atributos con el nombre completo.
 
 | 3.3.0 | 4.0 |
 | --- | --- |
@@ -959,6 +961,8 @@ otro cálculo de la biblioteca.
 | `spl, _ = octave_filter(x, fs)` | `octave_filter(x, fs).levels` |
 | `_, freq = octave_filter(x, fs)` | `octave_filter(x, fs).frequencies` |
 | `_, _, bands = bank.filter(x, sigbands=True)` | `bank.filter(x, sigbands=True).require_bands()` |
+| `levels, freq, times = bank.spectrogram(x)` | `r = bank.spectrogram(x)`, y luego `r.levels`, `r.frequencies` y `r.times` (un `OctaveSpectrogramResult`, que se dibuja con `r.plot()`) |
+| `bank.freq`, `bank.freq_d`, `bank.freq_u`, `bank.nominal_freq`, `bank.num_bands` | `bank.frequencies`, `bank.lower_edges`, `bank.upper_edges`, `bank.labels`, `bank.n_bands`, de solo lectura: los arrays rechazan la escritura y `labels` es una tupla |
 
 ```python
 import numpy as np
@@ -981,6 +985,99 @@ llamada:
 ```python
 ax = result.plot()
 ```
+
+## Otras respuestas que eran tuplas son registros
+
+Cuatro respuestas más volvían como una tupla que había que desempaquetar por
+posición. Ahora cada una es un registro con campos con nombre, y ninguna se
+desempaqueta: una línea que aún lo haga lanza
+`TypeError: cannot unpack non-iterable ...` en vez de entregar la columna
+equivocada.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `freq, lower, upper, labels = filters.nominal_frequencies(3)` | `b = filters.nominal_frequencies(3)`, y luego `b.frequencies`, `b.lower_edges`, `b.upper_edges` y `b.labels` (un `FractionalOctaveBands`) |
+| `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` | `r = aircraft.epnl_from_pnlt(pnlt)`, y luego `r.epnl`, `r.pnltm`, `r.band_limits` (el par `(kF, kL)`), `r.bandsharing_adjustment` y `r.duration_correction` (un `EPNLIntegration`) |
+| `freqs, delta_l = building.improvement_octave_bands(dl, f)` | `s = building.improvement_octave_bands(dl, f)`, y luego `s.frequencies` y `s.values` (un `OctaveBandSpectrum`, cuyo `quantity` dice qué son los valores) |
+| `freqs, values = result.octave_bands()` en un `building.FloorCoveringImprovementResult` | `result.octave_bands().frequencies` y `.values`, el mismo `OctaveBandSpectrum` |
+
+```python
+import numpy as np
+from phonometry import aircraft, filters
+
+bands = filters.nominal_frequencies(1, [125, 1000])
+print(bands.labels)
+# ('125', '250', '500', '1k')
+
+epnl = aircraft.epnl_from_pnlt(np.array([90.0, 95.0, 90.0]), 0.5)
+print(epnl.band_limits, round(epnl.duration_correction, 2))
+# (0, 2) -10.88
+```
+
+El espectro en octavas se dibuja solo con `.plot()`, rotulado con su magnitud.
+
+## Los límites de tolerancia van primero el inferior, y con signo
+
+`vibration.weighting_tolerance_percent` devolvía la banda de la Tabla 5 de
+ISO 8041-1 como `(upper, lower)`, y las tres constantes
+`CENTRAL_TOLERANCE_PERCENT`, `SKIRT_TOLERANCE_PERCENT` y
+`TAIL_TOLERANCE_PERCENT` guardaban `(upper %, lower %, fase °)`. Todos los demás
+pares de límites de la biblioteca son `(lower, upper)`, así que estos también lo
+son ahora. El límite inferior sigue siendo negativo, como lo imprime la tabla, y
+`-100.0` sigue queriendo decir que la norma no fija límite inferior.
+
+Este cambio no renombra nada ni lanza nada: `upper, lower = ...` sigue
+desempaquetando dos arrays, e intercambiados. Revisa cada desempaquetado de los
+cuatro:
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `upper, lower = vibration.weighting_tolerance_percent(name, f)` | `lower, upper = vibration.weighting_tolerance_percent(name, f)` |
+| `vibration.CENTRAL_TOLERANCE_PERCENT == (12.0, -11.0, 6.0)` | `(-11.0, 12.0, 6.0)` |
+| `vibration.SKIRT_TOLERANCE_PERCENT == (26.0, -21.0, 12.0)` | `(-21.0, 26.0, 12.0)` |
+| `vibration.TAIL_TOLERANCE_PERCENT == (26.0, -100.0, inf)` | `(-100.0, 26.0, inf)` |
+
+```python
+from phonometry import vibration
+
+lower, upper = vibration.weighting_tolerance_percent("Wk", [16.0])
+print(lower, upper)
+# [-11.] [12.]
+```
+
+## Los campos de un registro son obligatorios
+
+Varios registros tenían campos que valían `None` por defecto, para que un
+resultado construido a mano con unos pocos de sus números se pudiera seguir
+construyendo. Cada lector tenía entonces que preguntar si el campo estaba: la
+ficha rechazaba un índice desnudo solo cuando se le pedía el informe, y un
+dibujo de la geometría avisaba de que el resultado «no conserva su geometría».
+Ahora los campos son obligatorios, y un registro construido sin uno de ellos,
+o con `None` en uno (también mediante `dataclasses.replace`), lanza
+`TypeError` nombrándolo.
+
+| Registro | Obligatorio ahora |
+| --- | --- |
+| `building.AirborneInsulationResult` | `l1`, `l2`, `t2`, `t0` |
+| `building.ImpactInsulationResult` | `li`, `t2`, `t0` |
+| `building.WeightedRatingResult`, `building.ImpactRatingResult` | `frequencies`, `measured`, `shifted_reference` |
+| `building.ExtendedWeightedRatingResult`, `building.ExtendedImpactRatingResult` | `frequencies`, `measured` |
+| `building.ApertureTransmissionResult` | `depth`, ahora el cuarto campo; y `width_m` para una rendija o `radius` para una abertura circular |
+| `building.FacadePredictionResult` | `elements`, ahora el sexto campo |
+| `emission.IntensityResult` | `spacing_m`, keyword-only |
+| `environment.BarrierInsertionLoss` | `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`, keyword-only |
+| `psychoacoustics.ZwickerLoudness` | `field` (`"free"` o `"diffuse"`), ahora el cuarto campo, antes de `n5` |
+
+`filters.WeightingFilter(..., high_accuracy=None)` seleccionaba el valor por
+defecto. Ahora `high_accuracy` es un `bool` sin más, `True` por defecto, y
+`None` lanza `TypeError` en vez de leerse como falso, lo que elegiría el diseño
+simple.
+
+`building.CeilingAttenuationResult.rounded` era un campo que pasaba quien
+llamaba. Ahora se lee de `measured`, redondeado al entero más próximo como
+pide la cláusula 5.2 de ASTM E413 (la cláusula no dice hacia dónde va la
+mitad, y la biblioteca la redondea hacia arriba), así que no puede contradecir
+los datos; déjalo fuera al construir el registro a mano.
 
 ## Las formas de onda dentro de los resultados vuelven como el `Signal` del que salieron
 

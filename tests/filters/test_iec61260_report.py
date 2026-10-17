@@ -51,9 +51,9 @@ def test_the_filter_verdict_carries_the_bank_data() -> None:
     verdict = filters.verify_filter_class(bank)
 
     assert result.overall_class == verdict.overall_class
-    assert len(result.bands) == bank.num_bands
-    assert len(result.sos) == bank.num_bands
-    assert result.frequencies.shape == (bank.num_bands,)
+    assert len(result.bands) == bank.n_bands
+    assert len(result.sos) == bank.n_bands
+    assert result.frequencies.shape == (bank.n_bands,)
     assert result.factors == tuple(int(f) for f in bank.factor)
     assert result.fs == float(bank.fs)
     assert result.fraction == int(bank.fraction)
@@ -185,7 +185,7 @@ def test_range_limited_verdict_prints_qualifying_note(tmp_path: Path) -> None:
     )
     assert result.range_limited is True
     for band in result.bands:
-        assert band["checked_to_omega"] * band["freq"] == pytest.approx(24000.0)
+        assert band["checked_to_omega"] * band["frequency"] == pytest.approx(24000.0)
     out = tmp_path / "qualified.pdf"
     result.report(str(out))
     text = _extract_text(str(out)).replace("\n", " ")

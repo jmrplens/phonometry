@@ -324,8 +324,8 @@ def test_barrons_a_weighted_pair_gives_the_printed_reduction() -> None:
         oracle.BARRON_EXAMPLE_7_9_A_REDUCTION_DB
     )
     # 7.4 c) gives D_pA the same rounding as D_p.
-    assert res.rounded_a_weighted() == 14
-    assert isinstance(res.rounded_a_weighted(), int)
+    assert res.rounded_a_weighted == 14
+    assert isinstance(res.rounded_a_weighted, int)
 
 
 def test_the_reported_integers_round_a_tie_to_the_even_decibel() -> None:
@@ -334,20 +334,20 @@ def test_the_reported_integers_round_a_tie_to_the_even_decibel() -> None:
     # standards of this library take Rule A of ISO 80000-1:2009 Annex B, the
     # even multiple, and so does this one. The halves are binary-exact.
     res = noise_control.screen_attenuation([0.5, 1.5, 2.5, 3.5], [0.0, 0.0, 0.0, 0.0])
-    assert res.rounded().tolist() == [0, 2, 2, 4]
+    assert res.rounded.tolist() == [0, 2, 2, 4]
     weighted = noise_control.screen_attenuation(
         [80.0],
         [70.0],
         a_weighted_unscreened_level=80.5,
         a_weighted_screened_level=78.0,
     )
-    assert weighted.rounded_a_weighted() == 2
+    assert weighted.rounded_a_weighted == 2
 
 
 def test_no_a_weighted_pair_reports_no_a_weighted_integer() -> None:
     res = noise_control.screen_attenuation([78.0, 80.0], [70.0, 71.0])
     assert res.a_weighted_attenuation is None
-    assert res.rounded_a_weighted() is None
+    assert res.rounded_a_weighted is None
     # The raw band values are left alone by the rounding.
     assert res.attenuation.tolist() == [8.0, 9.0]
 
@@ -379,9 +379,9 @@ def test_the_office_screen_example_rounds_to_the_printed_integers() -> None:
     assert res.attenuation.tolist() == pytest.approx([9.8, 15.2, 19.6])
     # Clause 7.4 c) reports D_p rounded to the nearest integer, which is the
     # "Reduction due to barrier 10 15 20" row of folio 318. The raw difference
-    # stays on the result and the reported integers come from rounded().
-    assert res.rounded().tolist() == list(oracle.HANSEN_EXAMPLE_6_23_REDUCTION_DB)
-    assert res.rounded().dtype.kind == "i"
+    # stays on the result and the reported integers come from rounded.
+    assert res.rounded.tolist() == list(oracle.HANSEN_EXAMPLE_6_23_REDUCTION_DB)
+    assert res.rounded.dtype.kind == "i"
 
 
 def test_the_single_path_levels_of_the_1991_example_subtract() -> None:

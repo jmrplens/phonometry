@@ -181,12 +181,15 @@ UNCONSTRAINED_BELOW_PERCENT = -100.0
 
 #: Table 5, from the middle of the range outwards: the central region, the two
 #: skirts around it, and the two tails. Each entry is
-#: ``(upper %, lower %, characteristic phase deviation in degrees)``. The phase
-#: tolerance applies only to instruments that provide a measurement parameter
-#: not based on r.m.s. values, which is footnote a of the table.
-CENTRAL_TOLERANCE_PERCENT = (12.0, -11.0, 6.0)
-SKIRT_TOLERANCE_PERCENT = (26.0, -21.0, 12.0)
-TAIL_TOLERANCE_PERCENT = (26.0, UNCONSTRAINED_BELOW_PERCENT, math.inf)
+#: ``(lower %, upper %, characteristic phase deviation in degrees)``. The
+#: limits are signed as the table prints them, so the lower one is negative;
+#: the table prints the upper limit first (``+12 %, -11 %``) and the library
+#: puts the lower one first, as every ``(lower, upper)`` pair in it does. The
+#: phase tolerance applies only to instruments that provide a measurement
+#: parameter not based on r.m.s. values, which is footnote a of the table.
+CENTRAL_TOLERANCE_PERCENT = (-11.0, 12.0, 6.0)
+SKIRT_TOLERANCE_PERCENT = (-21.0, 26.0, 12.0)
+TAIL_TOLERANCE_PERCENT = (UNCONSTRAINED_BELOW_PERCENT, 26.0, math.inf)
 
 #: Table 1: the frequency at which each weighting is calibrated, in hertz. The
 #: standard prints them in radians per second (100 rad/s for whole-body,
@@ -405,9 +408,11 @@ def weighting_tolerance_percent(
 
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :param frequencies: Frequencies at which the band is wanted, in hertz.
-    :return: ``(upper, lower)`` percentages, elementwise. ``lower`` is
-        :data:`UNCONSTRAINED_BELOW_PERCENT` outside the two outer transition
-        frequencies, where the standard sets no lower limit at all.
+    :return: ``(lower, upper)`` percentages, elementwise, lower first and
+        signed as Table 5 prints them: ``lower`` is negative (``-11.0`` in the
+        central region) and ``upper`` positive (``12.0``). ``lower`` is
+        :data:`UNCONSTRAINED_BELOW_PERCENT` (``-100.0``) outside the two outer
+        transition frequencies, where the standard sets no lower limit at all.
     :raises ValueError: If the weighting is not one of the nine, or a
         frequency is not positive and finite.
     """
@@ -418,13 +423,13 @@ def weighting_tolerance_percent(
         raise ValueError(msg)
     ft1, ft2, ft3, ft4 = TRANSITION_FREQUENCIES_HZ[weighting]
 
-    upper = np.full(f.shape, TAIL_TOLERANCE_PERCENT[0], dtype=np.float64)
-    lower = np.full(f.shape, TAIL_TOLERANCE_PERCENT[1], dtype=np.float64)
+    lower = np.full(f.shape, TAIL_TOLERANCE_PERCENT[0], dtype=np.float64)
+    upper = np.full(f.shape, TAIL_TOLERANCE_PERCENT[1], dtype=np.float64)
     skirt = ((f > ft1) & (f < ft2)) | ((f > ft3) & (f < ft4))
     central = (f >= ft2) & (f <= ft3)
-    upper[skirt], lower[skirt] = SKIRT_TOLERANCE_PERCENT[:2]
-    upper[central], lower[central] = CENTRAL_TOLERANCE_PERCENT[:2]
-    return upper, lower
+    lower[skirt], upper[skirt] = SKIRT_TOLERANCE_PERCENT[:2]
+    lower[central], upper[central] = CENTRAL_TOLERANCE_PERCENT[:2]
+    return lower, upper
 
 
 def phase_tolerance_deg(name: str, frequencies: ArrayLike) -> NDArray[np.float64]:
@@ -523,7 +528,7 @@ class WeightingVerification(OwnsArrays):
         laboratory's uncertainty is not subtracted: a response of exactly zero
         deviates by -100 % and still conforms.
         """
-        upper, lower = weighting_tolerance_percent(self.weighting, self.frequencies)
+        lower, upper = weighting_tolerance_percent(self.weighting, self.frequencies)
         deviation = np.asarray(self.deviation_percent, dtype=np.float64)
         uncertainty = self.expanded_uncertainty_percent
         unconstrained = lower <= UNCONSTRAINED_BELOW_PERCENT

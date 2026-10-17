@@ -287,7 +287,7 @@ bank = filters.OctaveFilterBank(
     fs=48000, fraction=3, design=filters.FilterDesign(filter_type='butter'))
 
 # Access computed properties
-# bank.freq (center), bank.freq_d (lower), bank.freq_u (upper), bank.sos (coefficients)
+# bank.frequencies (center), bank.lower_edges (lower), bank.upper_edges (upper), bank.sos (coefficients)
 
 # Process multiple signals efficiently
 stream = [stereo]                 # your sequence of multichannel frames

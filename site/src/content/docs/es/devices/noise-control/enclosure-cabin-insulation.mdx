@@ -91,13 +91,13 @@ with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, con el encapsulado
 res = noise_control.enclosure_sound_power_insulation(
     without, with_box, frequencies=bands, fraction=1,
 )
-print(res.rounded())                    # [ 8 12 18 23 26 26] dB
+print(res.rounded)                    # [ 8 12 18 23 26 26] dB
 print(round(res.a_weighted_insulation, 1))   # 19.3 dB
 ```
 
 El número ponderado A es $D_{W\mathrm{A}}$ de la ecuación (2), y es la cifra única que
 lleva una declaración. El apartado 9.4 informa cada valor de banda redondeado
-al decibelio más próximo, que es lo que hace `.rounded()`.
+al decibelio más próximo, que es lo que contiene `.rounded`.
 
 Las dos partes miden además un aislamiento a la **presión acústica** en una
 posición declarada, ecuaciones (3) y (4), con `enclosure_sound_pressure_insulation`. Es
@@ -225,7 +225,7 @@ cab = noise_control.cabin_insulation(
     room, inside, frequencies=bands, fraction=1,
     method="in-situ-loudspeaker",
 )
-print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
+print(cab.symbol, cab.rounded)   # D'_p [12 18 25 30 34 35] dB
 ```
 
 Hay un tercer método, y es el que un puesto de trabajo suele querer: excitar la

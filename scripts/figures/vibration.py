@@ -3575,7 +3575,7 @@ def _table_5_row(region: str, limits: tuple[float, float, float]) -> str:
     Every number comes from the library constants rather than from the label,
     so the key and the drawing cannot disagree.
     """
-    upper, lower, phase = limits
+    lower, upper, phase = limits
     degrees = "±∞" if not math.isfinite(phase) else f"±{phase:.0f}°"
     return f"{region}: +{upper:.0f} %, {_fmt_minus(lower, '.0f')} %, {degrees}"
 
@@ -3618,8 +3618,8 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
     freqs = np.unique(np.concatenate((np.geomspace(fmin, fmax, 420), edges)))
     steps = np.unique(np.concatenate(([fmin, fmax], edges)))
     design = np.asarray(vibration.weighting_factors(name, freqs))
-    upper, lower = vibration.weighting_tolerance_percent(name, freqs)
-    step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
+    lower, upper = vibration.weighting_tolerance_percent(name, freqs)
+    step_lower, step_upper = vibration.weighting_tolerance_percent(name, steps)
     step_phase = vibration.phase_tolerance_deg(name, steps)
     top = design * (1.0 + upper / 100.0)
     bottom = design * (1.0 + lower / 100.0)
@@ -3682,7 +3682,7 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
     # the left one, just above the upper edge of the band, which is empty on
     # both sides of every one of them.
     edge_design = np.asarray(vibration.weighting_factors(name, np.asarray(transitions)))
-    edge_upper, _edge_lower = vibration.weighting_tolerance_percent(name, transitions)
+    _edge_lower, edge_upper = vibration.weighting_tolerance_percent(name, transitions)
     for index, (frequency, ceiling) in enumerate(
         zip(transitions, edge_design * (1.0 + edge_upper / 100.0), strict=True), start=1
     ):
@@ -3777,8 +3777,8 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
         },
     )
 
-    central_upper, central_lower, central_phase = vibration.CENTRAL_TOLERANCE_PERCENT
-    skirt_upper, skirt_lower, skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT
+    central_lower, central_upper, central_phase = vibration.CENTRAL_TOLERANCE_PERCENT
+    skirt_lower, skirt_upper, skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT
     magnitude_ticks = (skirt_upper, central_upper, 0.0, central_lower, skirt_lower)
     # Room under the lower skirt limit for the note about the two tails, and
     # a little air over the upper one for the boundary line.
@@ -4456,8 +4456,8 @@ def generate_meter_weighting_verification(output_dir: str) -> None:
     moved_hz = float(swept[int(np.argmin(accepted.deviation_percent))])
     shortfall = _fmt_minus(refused.worst_deviation_percent, ".1f")
 
-    central_upper, central_lower, _central_phase = vibration.CENTRAL_TOLERANCE_PERCENT
-    skirt_upper, skirt_lower, _skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT
+    central_lower, central_upper, _central_phase = vibration.CENTRAL_TOLERANCE_PERCENT
+    skirt_lower, skirt_upper, _skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT
 
     # The band, on a grid that opens just inside ft1 and closes just inside
     # ft4: Table 5 prints its first and last rows closed (f <= ft1, f >= ft4),
@@ -4483,8 +4483,8 @@ def generate_meter_weighting_verification(output_dir: str) -> None:
     # of four hundred.
     steps = np.unique(np.concatenate(([inside_ft1, inside_ft4], edges)))
     design = np.asarray(vibration.weighting_factors(name, freqs))
-    upper, lower = vibration.weighting_tolerance_percent(name, freqs)
-    step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
+    lower, upper = vibration.weighting_tolerance_percent(name, freqs)
+    step_lower, step_upper = vibration.weighting_tolerance_percent(name, steps)
 
     # How far the refused point sits below the limit of its own region. The
     # upper panel cannot show a gap this small, so it is the number that panel
@@ -4492,7 +4492,7 @@ def generate_meter_weighting_verification(output_dir: str) -> None:
     # in: deviation from the design goal, so that the chip above and the two
     # lines below are one arithmetic (-15.0 against -11) and not two
     # percentages of two different denominators.
-    swept_lower = vibration.weighting_tolerance_percent(name, swept)[1]
+    swept_lower = vibration.weighting_tolerance_percent(name, swept)[0]
     below_limit = swept_lower - refused.deviation_percent
     failing = int(np.flatnonzero(outside)[np.argmax(below_limit[outside])])
     gap, failing_limit = float(below_limit[failing]), float(swept_lower[failing])
@@ -4751,8 +4751,8 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     fmin, fmax = 0.1, 400.0
     # The same limits the panels are drawn against, unpacked once so no label
     # can write a number the drawing did not use.
-    central_upper, central_lower = vibration.CENTRAL_TOLERANCE_PERCENT[:2]
-    skirt_upper, skirt_lower = vibration.SKIRT_TOLERANCE_PERCENT[:2]
+    central_lower, central_upper = vibration.CENTRAL_TOLERANCE_PERCENT[:2]
+    skirt_lower, skirt_upper = vibration.SKIRT_TOLERANCE_PERCENT[:2]
 
     # The bench sweep. 12.11.1 asks for steps of not more than one-third
     # octave, and the centres are built from Formula (B.1) rather than typed
@@ -4810,7 +4810,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
         [f * scale for f in transitions for scale in (1.0 - 1e-9, 1.0 + 1e-9)]
     )
     steps = np.unique(np.concatenate(([fmin, fmax], edges)))
-    step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
+    step_lower, step_upper = vibration.weighting_tolerance_percent(name, steps)
     step_masks = _table_5_masks(steps, transitions)
 
     # The three distinct rows of Table 5, in the colours the tolerance-regions
@@ -4821,9 +4821,9 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
         (
             COLOR_PRIMARY,
             "the central region of Table 5",
-            (central_upper, central_lower),
+            (central_lower, central_upper),
         ),
-        (COLOR_TERTIARY, "the two skirts of Table 5", (skirt_upper, skirt_lower)),
+        (COLOR_TERTIARY, "the two skirts of Table 5", (skirt_lower, skirt_upper)),
         (
             COLOR_MUTED,
             "the two tails, with no lower limit",
@@ -4878,7 +4878,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     # The bar 13.1 adds, and the one place it has only one arm. Where the
     # lower limit is -100 % the verification subtracts nothing, so drawing a
     # downward arm there would draw a comparison the library does not make.
-    _point_upper, point_lower = vibration.weighting_tolerance_percent(name, freqs)
+    point_lower, _point_upper = vibration.weighting_tolerance_percent(name, freqs)
     unconstrained = point_lower <= vibration.UNCONSTRAINED_BELOW_PERCENT
     arms = np.vstack(
         (
@@ -4970,13 +4970,13 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
     )
 
     # Right: the same comparison solved for the deviation instead. A region
-    # whose limits are (upper, lower) certifies from lower + U to upper - U,
+    # whose limits are (lower, upper) certifies from lower + U to upper - U,
     # so each row of Table 5 is a wedge narrowing as U grows, and the two
     # limits are straight lines because the extension is a subtraction. Two
     # abscissae are enough for a straight line, and the wedges are drawn
     # widest first so the narrower ones sit on top.
     u_axis = np.array([0.0, widest])
-    for colour, _region, (upper, lower) in reversed(regions):
+    for colour, _region, (lower, upper) in reversed(regions):
         floor = (
             np.full(u_axis.shape, lower)
             if lower <= vibration.UNCONSTRAINED_BELOW_PERCENT
@@ -4989,7 +4989,7 @@ def generate_meter_uncertainty_allowance(output_dir: str) -> None:
             color=theme_fill(colour, ax_window),
             zorder=0,
         )
-    for _colour, _region, (upper, lower) in regions:
+    for _colour, _region, (lower, upper) in regions:
         if lower <= vibration.UNCONSTRAINED_BELOW_PERCENT:
             # The tail shares its ceiling with the skirt and has no floor, so
             # it contributes no edge of its own.

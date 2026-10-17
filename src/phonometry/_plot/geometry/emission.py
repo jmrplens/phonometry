@@ -376,11 +376,5 @@ def plot_intensity_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Probe drawing for a result that retained its spacer."""
-    if result.spacing_m is None:
-        msg = (
-            "This result does not retain its microphone spacing; call "
-            "plot_pp_probe_geometry(spacing)."
-        )
-        raise ValueError(msg)
+    """Probe drawing for a result, from the spacer it keeps."""
     return plot_pp_probe_geometry(result.spacing_m, ax=ax, language=language, **kwargs)

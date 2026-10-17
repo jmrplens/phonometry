@@ -1569,7 +1569,7 @@ def plot_weighting_verification(
     measured = result.measured[order]
     inside = result.within_tolerance[order]
 
-    upper, lower = weighting_tolerance_percent(result.weighting, freqs)
+    lower, upper = weighting_tolerance_percent(result.weighting, freqs)
     ax.fill_between(
         freqs,
         design * (1.0 + lower / 100.0),
@@ -2796,7 +2796,7 @@ def plot_vibration_meter_verification(
     limits as a shaded region around zero. The band is drawn from the tables
     rather than from a fixed number, so it steps out from 10 % to 20 % at
     ``1,25 f_u`` and ``0,8 f_o`` exactly where the standard steps it, and the
-    frequencies where the lower limit is 100 % are where the standard stops
+    frequencies where the lower limit is -100 % are where the standard stops
     constraining the response from below at all.
 
     :param result: A
@@ -2824,7 +2824,7 @@ def plot_vibration_meter_verification(
     ceiling = float(np.max(finite_upper)) if finite_upper.size else 100.0
     ax.fill_between(
         freqs,
-        -lower,
+        lower,
         np.where(np.isfinite(upper), upper, ceiling),
         color=_C_PRIMARY,
         alpha=0.15,

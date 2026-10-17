@@ -40,6 +40,7 @@ from ..._internal.validation import (
     check_engine,
     require_choice,
     require_positive,
+    require_present,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -133,18 +134,17 @@ class ZwickerLoudness(OwnsArrays):
     stationary results.
     ``field`` records the sound field the calculation assumed (``"free"``
     or ``"diffuse"``), one of the items clause 7 requires a loudness report
-    to state; it defaults to ``None`` only for backward-compatible manual
-    construction (the library constructors always set it).
+    to state.
     """
 
     loudness: float
     loudness_level: float
     specific: np.ndarray
+    field: Literal["free", "diffuse"]
     n5: float | None = None
     n10: float | None = None
     times: np.ndarray | None = None
     loudness_vs_time: np.ndarray | None = None
-    field: Literal["free", "diffuse"] | None = None
 
     def __post_init__(self) -> None:
         """Reject a misshapen specific-loudness pattern or loudness-vs-time trace.
@@ -206,14 +206,14 @@ class ZwickerLoudness(OwnsArrays):
         ``field`` is one of the items clause 7 makes a loudness report state,
         and the fiche dispatches on it: pinning it here keeps a mistyped tag
         from silently dropping the mandatory "Sound field" declaration.
-        ``None`` (backward-compatible manual construction, sound field not
-        recorded) is allowed and stays unstated.
 
         :raises ValueError: if ``specific`` is not one-dimensional, if
             ``times`` and ``loudness_vs_time`` are not both one-dimensional and
             of one length, if a loudness quantity is not finite, or if
-            ``field`` is given and is neither ``'free'`` nor ``'diffuse'``.
+            ``field`` is neither ``'free'`` nor ``'diffuse'``.
+        :raises TypeError: if ``field`` is ``None``.
         """
+        require_present(self, "field")
         require_ranks(self, specific=1, times=1, loudness_vs_time=1)
         require_same_length(self, "times", "loudness_vs_time", axis="time step")
         for name in ("loudness", "loudness_level", "n5", "n10"):
@@ -221,8 +221,7 @@ class ZwickerLoudness(OwnsArrays):
             if value is not None and not math.isfinite(float(value)):
                 msg = f"ZwickerLoudness: '{name}' must be finite; got {value!r}."
                 raise ValueError(msg)
-        if self.field is not None:
-            require_choice(self.field, "field", ("free", "diffuse"))
+        require_choice(self.field, "field", ("free", "diffuse"))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

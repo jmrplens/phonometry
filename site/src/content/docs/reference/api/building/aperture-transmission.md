@@ -60,9 +60,9 @@ ApertureTransmissionResult(
     frequencies: np.ndarray,
     transmission_coefficient: np.ndarray,
     kind: str,
+    depth: float,
     width_m: float | None = None,
     radius: float | None = None,
-    depth: float | None = None,
 )
 ```
 
@@ -75,9 +75,9 @@ Transmission through a slit or circular aperture (Hopkins 4.3.10).
 | `frequencies` | Band centre frequencies, in hertz. |
 | `transmission_coefficient` | Transmission coefficient `tau` per band. |
 | `kind` | `"slit"` or `"circular"`. |
-| `width_m` | Slit width, in metres, retained (with `depth`) so `plot_geometry` can draw the section; appended after the original fields and `None` for circular apertures or hand-built results. |
-| `radius` | Circular-aperture radius, in metres, or `None`. |
-| `depth` | Wall thickness, in metres, or `None`. |
+| `depth` | Wall thickness, in metres. |
+| `width_m` | Slit width, in metres, kept (with `depth`) so `plot_geometry` can draw the section; given for a slit and `None` for a circular aperture. |
+| `radius` | Circular-aperture radius, in metres; given for a circular aperture and `None` for a slit. |
 
 ### ApertureTransmissionResult.plot()
 
@@ -110,12 +110,6 @@ Draw the wall-aperture cross-section to scale.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ### ApertureTransmissionResult.transmission_loss
 

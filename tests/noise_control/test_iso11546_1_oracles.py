@@ -293,7 +293,7 @@ def test_clause_9_4_rounding_is_rule_a_of_iso_80000_1() -> None:
     given = [multiple for multiple, _ in printed.values()]
     rounded = noise_control.enclosure_sound_power_insulation(
         given, [0.0] * len(given)
-    ).rounded()
+    ).rounded
     for got, (name, (_, want)) in zip(rounded.tolist(), printed.items(), strict=True):
         assert got == want, name
 

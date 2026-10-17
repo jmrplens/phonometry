@@ -182,7 +182,7 @@ def _band_rows(
         margin = float(band["residual_index_db"]) - float(band[key])
         rows.append(
             [
-                decimal_comma(_format_nominal_freq(float(band["freq"])), language),
+                decimal_comma(_format_nominal_freq(float(band["frequency"])), language),
                 format_number(float(band["limit_class1_db"]), language, decimals=1),
                 format_number(float(band["limit_class2_db"]), language, decimals=1),
                 format_number(float(band["residual_index_db"]), language, decimals=1),

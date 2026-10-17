@@ -73,7 +73,7 @@ epnl_from_pnlt(
     *,
     reference_time: float = 10.0,
     tone_corrections: NDArray[np.float64] | list[float] | None = None,
-) -> tuple[float, float, int, int]
+) -> EPNLIntegration
 ```
 
 EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
@@ -100,18 +100,51 @@ included in the reported EPNL.
 
 | Name | Description |
 | :--- | :--- |
-| `pnlt` | The tone-corrected perceived noise levels `PNLT(k)`, in PNdB. |
+| `pnlt` | The tone-corrected perceived noise levels `PNLT(k)`, in TPNdB. |
 | `dt` | Per-record duration, in s (scalar broadcast or per record). |
 | `reference_time` | Normalising time `T0`, in s (default 10). |
 | `tone_corrections` | Optional tone corrections `C(k)`, in dB, one per `pnlt` record; enables the bandsharing adjustment `ΔB` described above. Default `None` (no adjustment). |
 
-**Returns:** `(epnl, pnltm, kF, kL)` -- EPNL in EPNdB, the peak PNLTM, and the 0-based 10 dB-down record indices (inclusive).
+**Returns:** An [`EPNLIntegration`](/phonometry/reference/api/aeroacoustics/certification/#epnlintegration): `.epnl` in EPNdB, the peak `.pnltm`, the `.bandsharing_adjustment` and the 0-based 10 dB-down record indices `.band_limits` (inclusive), with the duration correction as `.duration_correction`.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+
+## EPNLIntegration
+
+```python
+EPNLIntegration(
+    epnl: float,
+    pnltm: float,
+    bandsharing_adjustment: float,
+    band_limits: tuple[int, int],
+)
+```
+
+The integration of a PNLT history into EPNL (ICAO Annex 16 App. 2 §4.5-4.6).
+
+What [`epnl_from_pnlt`](/phonometry/reference/api/aeroacoustics/certification/#epnl_from_pnlt) returns: the integral and the window it was
+taken over, named, where a `(epnl, pnltm, kF, kL)` tuple used to be
+unpacked by position. [`EPNLResult`](/phonometry/reference/api/aeroacoustics/certification/#epnlresult) carries the same four numbers
+beside the record histories they were integrated from.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `epnl` | Effective perceived noise level, in EPNdB, including the bandsharing adjustment. |
+| `pnltm` | Maximum tone-corrected perceived noise level, in TPNdB, including the bandsharing adjustment `ΔB` (App. 2 §4.4.2), the adjusted value §4.4.3 requires for EPNL. |
+| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in dB (App. 2 §4.4.2; zero unless the tone correction at PNLTM is suppressed). |
+| `band_limits` | The 0-based 10 dB-down record indices `(kF, kL)`, both inclusive. |
+
+### EPNLIntegration.duration_correction
+
+*property*
+
+Duration correction $D = \mathrm{EPNL} - \mathrm{PNLTM}$, in dB.
 
 ## EPNLResult
 
@@ -140,9 +173,9 @@ Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
 | `times` | Record times, in s. |
 | `pnl` | Perceived noise level per record, in PNdB. |
 | `tone_correction` | Tone-correction factor per record, in dB. |
-| `pnlt` | Tone-corrected perceived noise level per record, in PNdB. |
-| `pnltm` | Maximum tone-corrected perceived noise level, in PNdB, including the bandsharing adjustment `ΔB` (App. 2 §4.4.3). |
-| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in dB (zero unless the tone correction at PNLTM is suppressed). |
+| `pnlt` | Tone-corrected perceived noise level per record, in TPNdB. |
+| `pnltm` | Maximum tone-corrected perceived noise level, in TPNdB, including the bandsharing adjustment `ΔB` (App. 2 §4.4.2), the adjusted value §4.4.3 requires for EPNL. |
+| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in dB (App. 2 §4.4.2; zero unless the tone correction at PNLTM is suppressed). |
 | `duration_correction` | Duration correction $D = \mathrm{EPNL} - \mathrm{PNLTM}$, in dB. |
 | `epnl` | Effective perceived noise level, in EPNdB. |
 | `band_limits` | The 0-based 10 dB-down record indices `(kF, kL)`. |

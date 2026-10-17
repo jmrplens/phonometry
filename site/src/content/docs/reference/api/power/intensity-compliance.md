@@ -135,7 +135,7 @@ index does not reach.
 
 The per-band verdicts, read from the spectrum and Table 2.
 
-One `{"freq", "class", "residual_index_db", "limit_class1_db",
+One `{"frequency", "class", "residual_index_db", "limit_class1_db",
 "limit_class2_db", "margin_class1_db", "margin_class2_db"}` per band:
 a band meets a class when its index is at least that class's minimum,
 so a band exactly on the limit passes. A fresh copy at every read.

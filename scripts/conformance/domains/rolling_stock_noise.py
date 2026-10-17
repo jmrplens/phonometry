@@ -281,13 +281,13 @@ def _chk_method_b_filter_class() -> Outcome:
     class_0 = sum(
         1
         for band, centre, factor in zip(
-            result.bands, bank.freq, bank.factor, strict=True
+            result.bands, bank.frequencies, bank.factor, strict=True
         )
         if band["class"] == 0
         and int(factor) == 1
         and band["checked_to_omega"] * float(centre) >= nyquist * (1.0 - 1e-9)
     )
-    return count(class_0, bank.num_bands, subject="bands")
+    return count(class_0, bank.n_bands, subject="bands")
 
 
 @register(
@@ -306,7 +306,7 @@ def _chk_method_b_alias_rejection() -> Outcome:
     steady = slice(25_000, None)
     g = 10.0**0.3
     omega_h = 1.0 + (g ** (1.0 / 6.0) - 1.0) / (g**0.5 - 1.0) * (g**4 - 1.0)
-    centres = [float(f) for f in bank.freq]
+    centres = [float(f) for f in bank.frequencies]
 
     def outputs(wavenumber: float) -> list[float]:
         tone = np.cos(2.0 * np.pi * wavenumber * x + 0.4)

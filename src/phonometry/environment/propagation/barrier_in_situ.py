@@ -608,6 +608,7 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
         """The symbol clause 8.2 reports this as, ``"D_IL"`` or ``"D'_IL"``."""
         return "D_IL" if self.method == "direct" else "D'_IL"
 
+    @property
     def rounded(self) -> NDArray[np.int_]:
         """The values as clause 10 c) reports them, to the nearest decibel."""
         return np.asarray(round_half_even(self.insertion_loss), dtype=np.int_)

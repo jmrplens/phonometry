@@ -78,6 +78,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from .floor_covering_improvement import OctaveBandSpectrum
 from .laboratory_insulation import background_correction
 
 if TYPE_CHECKING:
@@ -749,16 +750,18 @@ class RainfallSoundResult(OwnsArrays):
         require_same_length(self, "frequencies", "l_i", "correction", "l_i_norm")
         require_choice(self.method, "method", ("pressure", "intensity"))
 
-    def octave_bands(
-        self, *, normalized: bool = False
-    ) -> tuple[np.ndarray, np.ndarray]:
-        r"""``(octave centres in Hz, LIoct in dB)`` by Formula (K.3).
+    def octave_bands(self, *, normalized: bool = False) -> OctaveBandSpectrum:
+        r""":math:`L_{I\mathrm{oct}}` in octave bands, by Formula (K.3).
 
         :math:`L_{I\mathrm{oct}} = 10 \log_{10} \sum_{j=1}^{3} 10^{0.1 L_{I,j}}`
         over the three one-third-octave bands of each octave present.
 
         :param normalized: Combine :math:`L_{I\mathrm{norm}}` instead of
-            :math:`L_I`.
+            :math:`L_I`. The standard defines :math:`L_{I\mathrm{norm}}` in
+            one-third-octave bands only (Formula (K.5)) and prints Formula
+            (K.3) for :math:`L_I`; combining the normalized levels the same
+            way is this library's extension, and the result keeps the symbol
+            :math:`L_{I\mathrm{norm}}`.
         :raises ValueError: If ``normalized`` is set on levels that were not
             normalized.
         """
@@ -776,7 +779,11 @@ class RainfallSoundResult(OwnsArrays):
             if idx is not None:
                 centres.append(centre)
                 values.append(float(energy_sum(levels[idx])))
-        return np.asarray(centres), np.asarray(values)
+        return OctaveBandSpectrum(
+            frequencies=np.asarray(centres, dtype=np.float64),
+            values=np.asarray(values, dtype=np.float64),
+            quantity="LI,norm" if normalized else "LI",
+        )
 
     def sound_power_levels(self, specimen_area_m2: float) -> np.ndarray:
         r"""Sound power level radiated by the whole specimen, per band.

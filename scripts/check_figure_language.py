@@ -188,6 +188,9 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "follows its source (laboratory_lining_improvement)",
     r"$L_{I,\mathrm{m,ref}}$": "the symbol of ISO 10140-5:2021 Formula (I.2); the m,ref subscript is "
     "the one the standard prints, and a subscript follows its source (rainfall_sound)",
+    r"$L_{I\mathrm{oct}}$": "the octave-band intensity level of ISO 10140-1:2021 Formula (K.3); the "
+    "oct subscript is the one the standard prints, and a subscript follows its source "
+    "(OctaveBandSpectrum.plot)",
     r"$R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$ [dB]": "the traffic single number of a "
     "joint as ISO 10140-1:2021 prints it in J.5.1 and on the axis of Figure J.8, whose Atr subscript "
     "is the one the standard prints; a subscript follows its source (JointGapSeries.plot)",

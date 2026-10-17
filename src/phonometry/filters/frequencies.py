@@ -4,14 +4,23 @@
 from __future__ import annotations
 
 import warnings
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_positive
 from .._internal.warnings import PhonometryWarning
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from numpy.typing import NDArray
+
 __all__ = [
+    "FractionalOctaveBands",
     "nominal_frequencies",
     "normalized_frequencies",
 ]
@@ -34,15 +43,108 @@ _OCTAVE_SPACING_MIN_RATIO = 2.0 ** (2.0 / 3.0)
 _HZ_PER_KHZ = 1000
 
 
+@dataclass(frozen=True)
+class FractionalOctaveBands(OwnsArrays):
+    r"""A set of fractional-octave bands: centres, edges and nominal labels.
+
+    What :func:`nominal_frequencies` returns and what an
+    :class:`~phonometry.filters.OctaveFilterBank` is designed on. The three
+    frequency arrays are read-only, in hertz, one value per band in ascending
+    order; the labels are the IEC 61260-1 nominal mid-band frequencies, as
+    text (``"31.5"``, ``"1k"``). It is a record with named fields rather than
+    a tuple, so it cannot be unpacked by position: read ``.frequencies``,
+    ``.lower_edges``, ``.upper_edges`` or ``.labels``.
+
+    :ivar frequencies: The exact mid-band frequencies :math:`f_\mathrm{m}`,
+        in hertz (IEC 61260-1:2014 5.4).
+    :ivar lower_edges: The lower band-edge frequencies :math:`f_1`, in hertz.
+    :ivar upper_edges: The upper band-edge frequencies :math:`f_2`, in hertz.
+    :ivar labels: The nominal mid-band frequency of each band, as a string.
+    """
+
+    frequencies: NDArray[np.float64]
+    lower_edges: NDArray[np.float64]
+    upper_edges: NDArray[np.float64]
+    labels: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        """Hold every column as a read-only array or a tuple, one entry per band.
+
+        :raises ValueError: if a column is not one-dimensional, the columns
+            disagree in length, or a band's edges do not enclose its centre.
+        :raises TypeError: if ``labels`` is one string rather than one label
+            per band, which would otherwise be split into its characters.
+        """
+        if isinstance(self.labels, (str, bytes)):
+            msg = (
+                "FractionalOctaveBands: 'labels' must hold one label per band, "
+                f"not a single string; got {self.labels!r}."
+            )
+            raise TypeError(msg)
+        columns = {}
+        for name in ("frequencies", "lower_edges", "upper_edges"):
+            values = np.asarray(getattr(self, name), dtype=np.float64)
+            if values.ndim != 1:
+                msg = (
+                    f"FractionalOctaveBands: '{name}' must be one-dimensional; "
+                    f"got shape {values.shape}."
+                )
+                raise ValueError(msg)
+            columns[name] = values
+            object.__setattr__(self, name, read_only(values))
+        labels = tuple(str(label) for label in self.labels)
+        object.__setattr__(self, "labels", labels)
+        counts = {name: values.size for name, values in columns.items()}
+        counts["labels"] = len(labels)
+        if len(set(counts.values())) > 1:
+            listed = ", ".join(f"{name}={count}" for name, count in counts.items())
+            msg = f"FractionalOctaveBands: one entry per band in every column; got {listed}."
+            raise ValueError(msg)
+        if not np.all(
+            (columns["lower_edges"] < columns["frequencies"])
+            & (columns["frequencies"] < columns["upper_edges"])
+        ):
+            msg = (
+                "FractionalOctaveBands: every band's edges must enclose its "
+                "centre (lower_edges < frequencies < upper_edges)."
+            )
+            raise ValueError(msg)
+
+
+def _band_set(
+    frequencies: Sequence[float] | NDArray[np.float64],
+    lower_edges: Sequence[float] | NDArray[np.float64],
+    upper_edges: Sequence[float] | NDArray[np.float64],
+    labels: Sequence[str],
+) -> FractionalOctaveBands:
+    """A :class:`FractionalOctaveBands` built from the computed columns."""
+    return FractionalOctaveBands(
+        frequencies=np.asarray(frequencies, dtype=np.float64),
+        lower_edges=np.asarray(lower_edges, dtype=np.float64),
+        upper_edges=np.asarray(upper_edges, dtype=np.float64),
+        labels=tuple(labels),
+    )
+
+
 def nominal_frequencies(
     fraction: float,
     limits: list[float] | None = None,
-) -> tuple[list[float], list[float], list[float], list[str]]:
-    """Calculate frequencies according to ANSI/IEC standards.
+) -> FractionalOctaveBands:
+    r"""The fractional-octave bands that cover a frequency range.
 
-    :param fraction: Bandwidth fraction (e.g., 1, 3).
-    :param limits: [f_min, f_max] limits.
-    :return: Tuple of (center_freqs, lower_edges, upper_edges, nominal_labels).
+    The mid-band frequencies are the base-ten series of IEC 61260-1:2014 5.4,
+    :math:`f_\mathrm{m} = 1000\,G^{x/b}` Hz with :math:`G = 10^{3/10}` (an
+    even ``fraction`` shifts the series by half a band), and the band edges
+    sit a factor :math:`G^{1/(2b)}` either side of each centre. The first band
+    is the one nearest ``limits[0]`` and the last the first whose upper edge
+    reaches ``limits[1]``.
+
+    :param fraction: Bandwidth fraction ``b`` (e.g., 1 for octaves, 3 for
+        one-third octaves).
+    :param limits: ``[f_min, f_max]`` in hertz (Default: ``[12, 20000]``).
+    :return: A :class:`FractionalOctaveBands` with the exact centres
+        (``.frequencies``), the band edges (``.lower_edges`` and
+        ``.upper_edges``) and the nominal labels (``.labels``).
     :raises ValueError: for a non-positive or non-finite ``fraction``.
     """
     # Zero used to reach _bandedge's division, NaN the index rounding, and a
@@ -69,7 +171,7 @@ def nominal_frequencies(
     labels = [
         _format_nominal_freq(_nominal_freq_for_band(f, fraction)) for f in freq.tolist()
     ]
-    return freq.tolist(), freq_d.tolist(), freq_u.tolist(), labels
+    return _band_set(freq, freq_d, freq_u, labels)
 
 
 def _initindex(f: float, fr: float, g: float, b: float) -> int:
@@ -109,50 +211,38 @@ def _bandedge(g: float, b: float) -> float:
     return float(g ** (1 / (2 * b)))
 
 
-def _deleteouters(
-    freq: list[float], freq_d: list[float], freq_u: list[float], fs: int
-) -> tuple[list[float], list[float], list[float]]:
-    """Remove bands exceeding the Nyquist frequency.
+def _deleteouters(bands: FractionalOctaveBands, fs: int) -> FractionalOctaveBands:
+    """Remove the bands whose upper edge exceeds the Nyquist frequency.
 
-    :param freq: Center frequencies.
-    :param freq_d: Lower edges.
-    :param freq_u: Upper edges.
+    :param bands: The bands the limits asked for.
     :param fs: Sample rate.
-    :return: Filtered (center, lower, upper) frequencies.
+    :return: The bands a bank at ``fs`` can hold, in the same order.
     """
-    freq_arr = np.array(freq)
-    freq_d_arr = np.array(freq_d)
-    freq_u_arr = np.array(freq_u)
-
-    idx = np.nonzero(freq_u_arr > fs / 2)[0]
-    if len(idx) > 0:
-        warnings.warn(
-            "Low sampling rate: frequencies above fs/2 removed",
-            PhonometryWarning,
-            stacklevel=3,
-        )
-        freq_arr = np.delete(freq_arr, idx)
-        freq_d_arr = np.delete(freq_d_arr, idx)
-        freq_u_arr = np.delete(freq_u_arr, idx)
-
-    return freq_arr.tolist(), freq_d_arr.tolist(), freq_u_arr.tolist()
+    keep = bands.upper_edges <= fs / 2
+    if np.all(keep):
+        return bands
+    warnings.warn(
+        "Low sampling rate: frequencies above fs/2 removed",
+        PhonometryWarning,
+        stacklevel=3,
+    )
+    return _band_set(
+        bands.frequencies[keep],
+        bands.lower_edges[keep],
+        bands.upper_edges[keep],
+        [label for label, kept in zip(bands.labels, keep, strict=True) if kept],
+    )
 
 
-def _genfreqs(
-    limits: list[float], fraction: float, fs: int
-) -> tuple[list[float], list[float], list[float], list[str]]:
-    """Determine band frequencies within limits.
+def _genfreqs(limits: list[float], fraction: float, fs: int) -> FractionalOctaveBands:
+    """Determine the bands within limits that a bank at ``fs`` can hold.
 
     :param limits: [f_min, f_max].
     :param fraction: Bandwidth fraction.
     :param fs: Sample rate.
-    :return: Tuple of center, lower, upper frequencies, and nominal labels.
+    :return: The bands, without those above the Nyquist frequency.
     """
-    freq, freq_d, freq_u, labels = nominal_frequencies(fraction, limits)
-    freq, freq_d, freq_u = _deleteouters(freq, freq_d, freq_u, fs)
-    # _deleteouters only removes trailing bands above Nyquist, so slice labels
-    labels = labels[: len(freq)]
-    return freq, freq_d, freq_u, labels
+    return _deleteouters(nominal_frequencies(fraction, limits), fs)
 
 
 def _iec_e3_round(f: float) -> float:

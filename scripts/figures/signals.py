@@ -80,7 +80,7 @@ def generate_filter_type_comparison(output_dir: str) -> None:
         )
 
         # Find index of 1000Hz band
-        idx = np.argmin(np.abs(np.array(bank.freq) - 1000))
+        idx = np.argmin(np.abs(np.array(bank.frequencies) - 1000))
 
         fsd = fs / bank.factor[idx]
         w, h = scipy_signal.sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
@@ -158,9 +158,9 @@ def generate_filter_responses(output_dir: str) -> None:
             # live figure's text artists right before the save).
             _showfilter(
                 bank.sos,
-                bank.freq,
-                bank.freq_u,
-                bank.freq_d,
+                bank.frequencies.tolist(),
+                bank.upper_edges.tolist(),
+                bank.lower_edges.tolist(),
                 fs,
                 bank.factor,
                 show=False,
@@ -828,18 +828,13 @@ def generate_spectrogram_example(output_dir: str) -> None:
     # times finer on each axis than the band spacing and hop it replaces, so
     # the sweep reads as a line instead of a staircase of cells.
     bank = filters.OctaveFilterBank(fs=fs, fraction=12, order=6, limits=[50.0, 12000.0])
-    levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.875)
+    result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 
+    # The result draws itself: one raster on the band edges of the bank, the
+    # logarithmic frequency axis and the dB colour bar.
     _, ax = plt.subplots()
-    mesh = ax.pcolormesh(times, freq, levels, shading="auto", cmap="magma")
-    ax.set_yscale("log")
+    result.plot(ax=ax, language=_LANG)
     ax.set_title("1/12 Octave Spectrogram (Fast windows, 87.5% overlap)", pad=12)
-    ax.set_xlabel("Time [s]")
-    ax.set_ylabel(LABEL_FREQ_HZ)
-    yticks = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
-    ax.set_yticks(yticks)
-    ax.set_yticklabels(["63", "125", "250", "500", "1k", "2k", "4k", "8k"])
-    plt.colorbar(mesh, ax=ax, label=LABEL_LEVEL_DB)
     save_figure(output_dir, "spectrogram_example.png")
     plt.close()
 
@@ -1048,7 +1043,7 @@ def generate_group_delay_comparison(output_dir: str) -> None:
             limits=limits,
             design=filters.FilterDesign(filter_type=f_type),
         )
-        idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+        idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
         fsd = fs / bank.factor[idx]
         # Group delay of an SOS cascade = sum of the sections' group delays.
         w = np.logspace(np.log10(500), np.log10(2000), 1024)
@@ -1266,8 +1261,8 @@ def generate_class_mask_overlay(output_dir: str) -> None:
         limits=[800, 1200],
         design=filters.FilterDesign(filter_type="butter"),
     )
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-    fm = bank.freq[idx]
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+    fm = bank.frequencies[idx]
     fsd = fs / bank.factor[idx]
     w, h = scipy_signal.sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
     attenuation = -20 * np.log10(np.abs(h) + 1e-12)
@@ -1343,8 +1338,8 @@ def generate_filter_class0_mask(output_dir: str) -> None:
         limits=[800, 1200],
         design=filters.FilterDesign(filter_type="butter"),
     )
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-    fm = bank.freq[idx]
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+    fm = bank.frequencies[idx]
     fsd = fs / bank.factor[idx]
     w, h = scipy_signal.sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
     attenuation = -20 * np.log10(np.abs(h) + 1e-12)
@@ -1548,7 +1543,7 @@ def generate_weighting_class_mask(output_dir: str) -> None:
 
     for curve, colour, marker in (("A", COLOR_PRIMARY, "o"), ("C", "#9467bd", "s")):
         result = filters.verify_weighting_class(filters.WeightingFilter(48000, curve))
-        f = np.array([b["freq"] for b in result.bands])
+        f = np.array([b["frequency"] for b in result.bands])
         dev = np.array([b["deviation_db"] for b in result.bands])
         ax.plot(
             f,
@@ -2357,8 +2352,8 @@ def generate_pole_migration(output_dir: str) -> None:
     full = filters.OctaveFilterBank(
         fs=fs, fraction=3, design=filters.FilterDesign(resample=False)
     )
-    idx = int(np.argmin(np.abs(np.asarray(bank.freq) - 25.0)))
-    f_m = float(bank.freq[idx])
+    idx = int(np.argmin(np.abs(np.asarray(bank.frequencies) - 25.0)))
+    f_m = float(bank.frequencies[idx])
     factor = int(bank.factor[idx])
 
     _, p_full, _ = sos2zpk(np.asarray(full.sos[idx]))
@@ -2445,7 +2440,7 @@ def generate_pole_migration(output_dir: str) -> None:
         1.0 - float(np.max(np.abs(sos2zpk(np.asarray(s))[1]))) for s in full.sos
     ]
     ax_c.loglog(
-        bank.freq,
+        bank.frequencies,
         radius_full,
         "o-",
         color=COLOR_SECONDARY,
@@ -2454,7 +2449,7 @@ def generate_pole_migration(output_dir: str) -> None:
         label="resample=False (one rate)",
     )
     ax_c.loglog(
-        bank.freq,
+        bank.frequencies,
         radius_dec,
         "s-",
         color=COLOR_PRIMARY,
@@ -2548,8 +2543,8 @@ def generate_architecture_tradeoff(output_dir: str) -> None:
             limits=[800, 1200],
             design=filters.FilterDesign(filter_type=ftype, resample=False),
         )
-        idx = int(np.argmin(np.abs(np.asarray(bank.freq) - 1000.0)))
-        f_m = float(bank.freq[idx])
+        idx = int(np.argmin(np.abs(np.asarray(bank.frequencies) - 1000.0)))
+        f_m = float(bank.frequencies[idx])
         w, h = sosfreqz(bank.sos[idx], worN=1 << 17, fs=fs)
         mag = 20 * np.log10(np.abs(h) + 1e-15)
         mag -= mag.max()

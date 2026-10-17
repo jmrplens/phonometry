@@ -3780,7 +3780,7 @@ def animate_loudness_gating(output_dir: str) -> None:
 # correction D exist. The clip runs that order. The synthetic flyover is the
 # page's own (41 records at dt = 0.5 s, a Gaussian gain envelope and a
 # 2500 Hz fan tone), and reproduces its printed numbers: PNLTM = 120.57
-# PNdB, C = 3.97 dB at the peak, window records 16 to 24, D = -6.56 dB,
+# TPNdB, C = 3.97 dB at the peak, window records 16 to 24, D = -6.56 dB,
 # EPNL = 114.01 EPNdB.
 
 _EPNL_RECORDS = 41
@@ -3917,7 +3917,7 @@ def animate_epnl_flyover(output_dir: str) -> None:
     ax_h.set_xlim(0.0, duration)
     ax_h.set_ylim(75.0, 128.0)
     ax_h.set_xlabel(T("Time [s]"), fontsize=8.5)
-    ax_h.set_ylabel(T("Level [PNdB]"), fontsize=8.5)
+    ax_h.set_ylabel(T("Level [PNdB, TPNdB]"), fontsize=8.5)
     ax_h.tick_params(labelsize=8)
     (pnl_line,) = ax_h.plot(
         [], [], color=COLOR_MUTED, lw=1.6, marker="o", ms=2.4, label=T("PNL")
@@ -3959,12 +3959,14 @@ def animate_epnl_flyover(output_dir: str) -> None:
     ax_v.plot([0.15, 4.6], [3.55, 3.55], color=COLOR_GRID, lw=1.0, ls="--")
     ax_v.plot([2.35, 2.35], [0.30, 0.95], color=COLOR_FG, lw=1.2)
     ax_v.plot([2.35], [1.02], marker="o", ms=5.0, color=COLOR_FG, ls="none")
+    # Beside the stand and above the ground line, which would strike
+    # through a label centred under the microphone.
     ax_v.text(
-        2.35,
-        0.05,
+        2.15,
+        0.66,
         T("microphone"),
-        ha="center",
-        va="bottom",
+        ha="right",
+        va="center",
         color=COLOR_FG,
         fontsize=7.5,
     )
@@ -4093,7 +4095,7 @@ def animate_epnl_flyover(output_dir: str) -> None:
         for box in boxes:
             _dim_box(box)
         if known_peak:
-            _light_box(boxes[0], T(f"{d['pnltm']:.2f} PNdB"), COLOR_SECONDARY)
+            _light_box(boxes[0], T(f"{d['pnltm']:.2f} TPNdB"), COLOR_SECONDARY)
         if k >= epnl_at:
             _light_box(
                 boxes[1],

@@ -15,11 +15,13 @@ from .core import (
     LevelCalibration,
     OctaveFilterBank,
     OctaveFilterResult,
+    OctaveSpectrogramResult,
     ResponsePlot,
     octave_filter,
 )
 from .equalizer import EQResponseResult, EQSection, ParametricEQ, parametric_eq
 from .frequencies import (
+    FractionalOctaveBands,
     nominal_frequencies,
     normalized_frequencies,
 )
@@ -61,9 +63,11 @@ __all__ = [
     "FilterDesign",
     "FilterPeriodicMeasurements",
     "FilterPeriodicVerification",
+    "FractionalOctaveBands",
     "LevelCalibration",
     "OctaveFilterBank",
     "OctaveFilterResult",
+    "OctaveSpectrogramResult",
     "ParametricEQ",
     "PeriodicTestClause",
     "ResponsePlot",

@@ -117,7 +117,7 @@ def test_rounding_is_the_report_rule() -> None:
         res = noise_control.enclosure_sound_power_insulation(
             [90.0, 90.0], [79.4, 79.6], frequencies=[500.0, 1000.0]
         )
-    assert res.rounded().tolist() == [11, 10]
+    assert res.rounded.tolist() == [11, 10]
 
 
 def test_mismatched_spectra_are_refused() -> None:

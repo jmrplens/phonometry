@@ -12,9 +12,10 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from matplotlib.transforms import Transform
 
     from ..filters.compliance import FilterComplianceResult
-    from ..filters.core import OctaveFilterResult
+    from ..filters.core import OctaveFilterResult, OctaveSpectrogramResult
     from ..filters.equalizer import EQResponseResult
     from ..filters.periodic_tests import (
         FilterPeriodicVerification,
@@ -138,6 +139,8 @@ _STRINGS: dict[str, str] = {
     "not passed": "no superados",
     "Clause": "Apartado",
     "Measurement": "Medida",
+    "Band levels over time": "Niveles de banda en el tiempo",
+    "Band levels over time, channel {n}": "Niveles de banda en el tiempo, canal {n}",
 }
 
 
@@ -1157,5 +1160,166 @@ def plot_octave_levels(
     axw.set_ylabel(_t("Band level [dB]", language))
     if new_figure:
         axw.set_title(_t("Band levels", language))
+    localize_axes(axw, language)
+    return axw
+
+
+#: How many decibels below the loudest cell the default colour range reaches.
+_SPECTROGRAM_RANGE_DB = 80.0
+
+
+def _log_band_extent(frequencies: np.ndarray) -> tuple[float, float]:
+    """The lower edge of the first row and the upper edge of the last.
+
+    A filter bank's centres form a geometric series, so on a logarithmic axis
+    the rows of the raster are equally tall, and each one spans half a step
+    of the series either side of its centre. A single band carries no step,
+    and is drawn one octave tall.
+    """
+    first, last = float(frequencies[0]), float(frequencies[-1])
+    if frequencies.size > 1:
+        half_step = (last / first) ** (1.0 / (2.0 * (frequencies.size - 1)))
+    else:
+        half_step = math.sqrt(2.0)
+    return first / half_step, last * half_step
+
+
+def _frame_extent(times: np.ndarray) -> tuple[float, float]:
+    """The start of the first window column and the end of the last.
+
+    Each column is one hop wide and centred on its window. A single frame has
+    no hop; its window starts at the first sample, so it spans twice the
+    time of its centre.
+    """
+    first, last = float(times[0]), float(times[-1])
+    if times.size > 1:
+        half_hop = (last - first) / (2.0 * (times.size - 1))
+        return first - half_hop, last + half_hop
+    return 0.0, 2.0 * first
+
+
+def _log_frequency_rows(ax: Axes) -> Transform:
+    """Data transform of an image whose y coordinate is log10 of the frequency."""
+    from matplotlib.scale import LogTransform
+    from matplotlib.transforms import IdentityTransform, blended_transform_factory
+
+    return (
+        blended_transform_factory(IdentityTransform(), LogTransform(10.0).inverted())
+        + ax.transData
+    )
+
+
+def _spectrogram_grid(
+    result: OctaveSpectrogramResult, channel: int | None
+) -> np.ndarray:
+    """The ``(bands, frames)`` grid of the channel to draw.
+
+    :raises ValueError: for a multichannel result without a channel, or a
+        channel the result does not hold.
+    """
+    levels = np.asarray(result.levels, dtype=np.float64)
+    if levels.ndim == 2:  # noqa: PLR2004
+        if channel not in (None, 0):
+            msg = (
+                f"this spectrogram holds one channel; channel={channel!r} is "
+                "not one of its channels"
+            )
+            raise ValueError(msg)
+        return levels
+    n_channels = levels.shape[0]
+    if channel is None:
+        msg = (
+            f"this spectrogram holds {n_channels} channels; pass channel= "
+            f"(0 to {n_channels - 1}) to choose the one to draw"
+        )
+        raise ValueError(msg)
+    if isinstance(channel, bool) or not isinstance(channel, int | np.integer):
+        msg = f"'channel' must be an integer; got {type(channel).__name__}"
+        raise TypeError(msg)
+    if not 0 <= int(channel) < n_channels:
+        msg = (
+            f"channel={channel} is not one of this spectrogram's "
+            f"{n_channels} channels (0 to {n_channels - 1})"
+        )
+        raise ValueError(msg)
+    return np.asarray(levels[int(channel)], dtype=np.float64)
+
+
+def plot_octave_spectrogram(
+    result: OctaveSpectrogramResult,
+    ax: Axes | None = None,
+    *,
+    channel: int | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Band levels over time, as one raster on a logarithmic frequency axis.
+
+    The grid is drawn as a single ``imshow`` image rather than one vector
+    quad per cell, which keeps the figure light and free of moire. Its rows
+    are placed by the band centres: on the logarithmic axis a geometric
+    series of centres gives rows of equal height, each spanning half a band
+    step either side of its centre, so the image needs no resampling to land
+    every band where it was measured. The columns are centred on the window
+    times, one hop wide. The default colour range spans the 80 dB below the
+    loudest finite cell; pass ``vmin``/``vmax`` to change it.
+
+    :param result: An :class:`~phonometry.filters.OctaveSpectrogramResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param channel: The channel of a multichannel result to draw, counted
+        from 0 as the first axis of ``levels`` is; the title numbers it from
+        1, as the channel legends of the other filter plots do.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to ``imshow``.
+    :return: The axes drawn on.
+    :raises ValueError: for a multichannel result drawn without ``channel``,
+        or a ``channel`` the result does not hold.
+    """
+    from .._i18n import localize_axes
+
+    grid = _spectrogram_grid(result, channel)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
+    times = np.asarray(result.times, dtype=np.float64)
+    finite = grid[np.isfinite(grid)]
+    vmax = float(np.max(finite)) if finite.size else 0.0
+    new_figure = ax is None
+    axw = _new_axes() if ax is None else ax
+    left, right = _frame_extent(times)
+    bottom, top = _log_band_extent(frequencies)
+    axw.set_yscale("log")
+    img = axw.imshow(
+        grid,
+        **{
+            "cmap": "magma",
+            "vmin": vmax - _SPECTROGRAM_RANGE_DB,
+            "vmax": vmax,
+            "aspect": "auto",
+            "origin": "lower",
+            "interpolation": "nearest",
+            # The rows are spaced evenly in log frequency, and an image is
+            # laid out evenly in its own coordinates: placed straight on the
+            # logarithmic axis it would be spread evenly in hertz instead,
+            # and every band would land far from its centre. So the raster
+            # is laid out in log10 of the frequency and carried onto the axis
+            # through 10**y, which puts each row on the band it measured.
+            "extent": (left, right, math.log10(bottom), math.log10(top)),
+            "transform": _log_frequency_rows(axw),
+            **kwargs,
+        },
+    )
+    cbar = axw.figure.colorbar(img, ax=axw, label=_t("Band level [dB]", language))
+    localize_axes(cbar.ax, language)
+    axw.set_xlim(left, right)
+    axw.set_ylim(bottom, top)
+    axw.set_xlabel(_t("Time [s]", language))
+    axw.set_ylabel(_t(_FREQ_LABEL, language))
+    format_frequency_axis(axw, bottom, top, axis="y", language=language)
+    if new_figure:
+        title = (
+            _t("Band levels over time", language)
+            if channel is None or np.ndim(result.levels) == 2  # noqa: PLR2004
+            else _t("Band levels over time, channel {n}", language, n=int(channel) + 1)
+        )
+        axw.set_title(title)
     localize_axes(axw, language)
     return axw

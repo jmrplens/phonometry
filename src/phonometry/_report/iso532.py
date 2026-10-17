@@ -168,7 +168,7 @@ def _basis_line(
 
     States the method used (stationary sounds, clause 5, or time-varying
     sounds, clause 6) and the sound field the calculation assumed (free F or
-    diffuse D, when the result carries it).
+    diffuse D).
     """
     method = (
         t("method for time-varying sounds (clause 6)", language)
@@ -187,13 +187,12 @@ def _basis_line(
         basis = t(
             "Loudness rating per ISO 532-1:2017 (Zwicker method), {method}.", language
         ).format(method=method)
-    if result.field in ("free", "diffuse"):
-        field_text = (
-            t("free (F)", language)
-            if result.field == "free"
-            else t("diffuse (D)", language)
-        )
-        basis += " " + t("Sound field: {field}.", language).format(field=field_text)
+    field_text = (
+        t("free (F)", language)
+        if result.field == "free"
+        else t("diffuse (D)", language)
+    )
+    basis += " " + t("Sound field: {field}.", language).format(field=field_text)
     return basis
 
 

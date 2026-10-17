@@ -462,7 +462,7 @@ def _require_finite_curves(owner: object, *fields: str) -> None:
 def _require_unfavourable_sum(
     owner: WeightedRatingResult | ImpactRatingResult, *, impact: bool
 ) -> None:
-    """Require ``unfavourable_sum`` to restate *owner*'s own two curves.
+    """Require ``unfavorable_sum`` to restate *owner*'s own two curves.
 
     The sum of unfavourable deviations is not a number kept beside the
     curves; it *is* those curves, added up. ISO 717-1 Clause 4.4 counts a
@@ -489,10 +489,10 @@ def _require_unfavourable_sum(
     first), so the sum is always determined. A rating built from the single
     numbers alone carries no curves and is skipped.
 
-    :param owner: The rating whose ``unfavourable_sum`` is checked.
+    :param owner: The rating whose ``unfavorable_sum`` is checked.
     :param impact: ``True`` for the ISO 717-2 sign (measurement above the
         reference), ``False`` for the ISO 717-1 one.
-    :raises ValueError: if ``unfavourable_sum`` is not the sum its own
+    :raises ValueError: if ``unfavorable_sum`` is not the sum its own
         ``measured`` and ``shifted_reference`` state.
     """
     measured = owner.measured
@@ -504,7 +504,7 @@ def _require_unfavourable_sum(
     )
     expected = float(np.sum(np.maximum(excess if impact else -excess, 0.0)))
     if not math.isclose(
-        owner.unfavourable_sum, expected, rel_tol=0.0, abs_tol=_SUM_TOLERANCE
+        owner.unfavorable_sum, expected, rel_tol=0.0, abs_tol=_SUM_TOLERANCE
     ):
         sense = (
             "'measured' above 'shifted_reference' (ISO 717-2 Clause 4.3)"
@@ -512,9 +512,9 @@ def _require_unfavourable_sum(
             else "'measured' below 'shifted_reference' (ISO 717-1 Clause 4.4)"
         )
         msg = (
-            f"{type(owner).__name__}: 'unfavourable_sum' must be the sum of "
+            f"{type(owner).__name__}: 'unfavorable_sum' must be the sum of "
             f"the unfavourable deviations of its own curves, {sense}; got "
-            f"{owner.unfavourable_sum!r} where the curves sum to {expected!r}."
+            f"{owner.unfavorable_sum!r} where the curves sum to {expected!r}."
         )
         raise ValueError(msg)
 
@@ -529,7 +529,7 @@ class WeightedRatingResult(OwnsArrays):
         (Clause 4.5). Integer.
     :ivar ctr: Spectrum adaptation term ``Ctr`` (spectrum No. 2), in dB
         (Clause 4.5). Integer.
-    :ivar unfavourable_sum: Sum of unfavourable deviations at the final
+    :ivar unfavorable_sum: Sum of unfavourable deviations at the final
         shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5
         bands). Restates ``measured`` against ``shifted_reference`` and is
         checked against them when both are present.
@@ -552,7 +552,7 @@ class WeightedRatingResult(OwnsArrays):
     rating: int
     c: int
     ctr: int
-    unfavourable_sum: float
+    unfavorable_sum: float
     frequencies: np.ndarray | None = None
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
@@ -586,11 +586,11 @@ class WeightedRatingResult(OwnsArrays):
         "deviation below 0,05 dB" -- asserting no unfavourable deviation for
         a band that was never determined.
 
-        Last, ``unfavourable_sum`` must be the sum those same two curves
+        Last, ``unfavorable_sum`` must be the sum those same two curves
         state, for the reasons set out on :func:`_require_unfavourable_sum`.
 
         :raises ValueError: if the band curves supplied disagree, one of them
-            carries a non-finite value, or ``unfavourable_sum`` is not their
+            carries a non-finite value, or ``unfavorable_sum`` is not their
             own sum of unfavourable deviations.
         """
         require_ranks(self, frequencies=1, measured=1, shifted_reference=1)
@@ -678,7 +678,7 @@ class ImpactRatingResult(OwnsArrays):
         Clause 4.3.2). Integer.
     :ivar ci: Spectrum adaptation term ``CI`` (Clause A.2.1), in dB.
         Integer.
-    :ivar unfavourable_sum: Sum of unfavourable deviations at the final
+    :ivar unfavorable_sum: Sum of unfavourable deviations at the final
         shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5
         bands). Restates ``measured`` against ``shifted_reference``, with the
         impact sign, and is checked against them when both are present.
@@ -695,7 +695,7 @@ class ImpactRatingResult(OwnsArrays):
 
     rating: int
     ci: int
-    unfavourable_sum: float
+    unfavorable_sum: float
     frequencies: np.ndarray | None = None
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
@@ -722,12 +722,12 @@ class ImpactRatingResult(OwnsArrays):
         :class:`WeightedRatingResult` (no constructor can emit a non-finite
         band; the fiche prints them raw or crashes namelessly on them).
 
-        Last, ``unfavourable_sum`` must be the sum those same two curves
+        Last, ``unfavorable_sum`` must be the sum those same two curves
         state, taken with the impact sign of Clause 4.3; see
         :func:`_require_unfavourable_sum`.
 
         :raises ValueError: if the band curves supplied disagree, one of them
-            carries a non-finite value, or ``unfavourable_sum`` is not their
+            carries a non-finite value, or ``unfavorable_sum`` is not their
             own sum of unfavourable deviations.
         """
         require_ranks(self, frequencies=1, measured=1, shifted_reference=1)
@@ -990,7 +990,7 @@ def weighted_rating(
     :param bands: ``"third-octave"``, ``"octave"`` or ``None`` to infer
         the band set from the number of values or the keys of the mapping.
     :return: :class:`WeightedRatingResult` with ``rating``, ``c``,
-        ``ctr`` and ``unfavourable_sum``.
+        ``ctr`` and ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
@@ -1016,7 +1016,7 @@ def weighted_rating(
         rating=rating,
         c=c,
         ctr=ctr,
-        unfavourable_sum=unfavourable,
+        unfavorable_sum=unfavourable,
         frequencies=np.asarray(centers, dtype=np.float64),
         measured=measured,
         shifted_reference=ref + shift,
@@ -1111,7 +1111,7 @@ def weighted_impact_rating(
     :param bands: ``"third-octave"``, ``"octave"`` or ``None`` to infer
         the band set from the number of values or the keys of the mapping.
     :return: :class:`ImpactRatingResult` with ``rating``, ``ci`` and
-        ``unfavourable_sum``.
+        ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
@@ -1139,7 +1139,7 @@ def weighted_impact_rating(
     return ImpactRatingResult(
         rating=rating,
         ci=ci,
-        unfavourable_sum=unfavourable,
+        unfavorable_sum=unfavourable,
         frequencies=np.asarray(centers, dtype=np.float64),
         measured=measured,
         shifted_reference=ref - shift,

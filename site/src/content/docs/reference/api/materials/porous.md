@@ -81,7 +81,7 @@ stack of them and solving it with the transfer matrix is the subject of
 airflow_resistivity_from_bulk_density(
     bulk_density_kg_m3: float,
     *,
-    fit: FibreResistivityFit,
+    fit: FiberResistivityFit,
 ) -> float
 ```
 
@@ -199,15 +199,15 @@ DELANY_BAZLEY_COEFFICIENTS = {'delany_bazley': (0.0571, 0.754, 0.087, 0.732, 0.0
 DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
 ```
 
-## fibre_characteristic_lengths
+## fiber_characteristic_lengths
 
 ```python
-fibre_characteristic_lengths(
-    fibre_radius_m: float,
+fiber_characteristic_lengths(
+    fiber_radius_m: float,
     *,
     bulk_density_kg_m3: float,
-    fibre_density_kg_m3: float,
-) -> FibreCharacteristicLengths
+    fiber_density_kg_m3: float,
+) -> FiberCharacteristicLengths
 ```
 
 Both characteristic lengths of a fibrous layer, from its geometry.
@@ -237,9 +237,9 @@ question about the material, and neither is a substitute for measuring it.
 
 | Name | Description |
 | :--- | :--- |
-| `fibre_radius_m` | Fibre radius `R`, in metres (> 0). A table that prints a diameter in micrometres wants half of it, divided by a million. |
+| `fiber_radius_m` | Fibre radius `R`, in metres (> 0). A table that prints a diameter in micrometres wants half of it, divided by a million. |
 | `bulk_density_kg_m3` | Bulk density of the layer, in kg/m3 (> 0), below the fibre density: the ratio of the two is the fibre volume fraction, and Eqs. (5.29) and (5.30) are stated for a porosity close to 1. |
-| `fibre_density_kg_m3` | Density of the fibre itself, in kg/m3 (> 0). |
+| `fiber_density_kg_m3` | Density of the fibre itself, in kg/m3 (> 0). |
 
 **Returns:** The viscous and thermal lengths, in metres.
 
@@ -249,10 +249,10 @@ question about the material, and neither is a substitute for measuring it.
 | :--- | :--- |
 | ValueError | for a non-positive input, or a bulk density at or above the fibre density, which leaves no pore for a length to describe. |
 
-## FibreCharacteristicLengths
+## FiberCharacteristicLengths
 
 ```python
-FibreCharacteristicLengths(
+FiberCharacteristicLengths(
     viscous_length_m: ForwardRef('float'),
     thermal_length_m: ForwardRef('float'),
 )
@@ -260,13 +260,13 @@ FibreCharacteristicLengths(
 
 The two characteristic lengths of a fibrous layer, in metres.
 
-## FibreResistivityFit
+## FiberResistivityFit
 
 ```python
-FibreResistivityFit(
+FiberResistivityFit(
     k1: ForwardRef('float'),
     k2: ForwardRef('float'),
-    fibre_diameter_um: ForwardRef('float'),
+    fiber_diameter_um: ForwardRef('float'),
     bulk_density_range_kg_m3: ForwardRef('tuple[float, float]'),
     direction: ForwardRef('str'),
     source: ForwardRef('str'),
@@ -287,7 +287,7 @@ announced rather than silent.
 | :--- | :--- |
 | `k1` | The constant of the manufacture. |
 | `k2` | The exponent of the fibre orientation. |
-| `fibre_diameter_um` | Average fibre diameter of the fitted material, in micrometres, which is the unit Eq. (1.165) is written in. |
+| `fiber_diameter_um` | Average fibre diameter of the fitted material, in micrometres, which is the unit Eq. (1.165) is written in. |
 | `bulk_density_range_kg_m3` | The `(low, high)` the fit was made over. |
 | `direction` | `"lateral"` in the plane of the sheet or `"longitudinal"` through it. Mineral wool is anisotropic and the lateral resistivity is the lower of the two. |
 | `source` | Document, table or equation, PDF page and printed folio. |
@@ -758,7 +758,7 @@ depth) is drawn as a thin sheet.
 porosity_from_bulk_density(
     bulk_density_kg_m3: float,
     *,
-    fibre_density_kg_m3: float,
+    fiber_density_kg_m3: float,
 ) -> float
 ```
 
@@ -777,7 +777,7 @@ It closes on its own data: at the 2 600 kg/m3 fibre density and the 31 to
 | Name | Description |
 | :--- | :--- |
 | `bulk_density_kg_m3` | Bulk density of the material, in kg/m3 (> 0). |
-| `fibre_density_kg_m3` | Density of the fibre itself, in kg/m3, larger than the bulk density. |
+| `fiber_density_kg_m3` | Density of the fibre itself, in kg/m3, larger than the bulk density. |
 
 **Returns:** The open porosity `phi`, between 0 and 1.
 
@@ -848,21 +848,21 @@ Plot the normalised `Zc` and `k` components against frequency.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-## ROCK_WOOL_FIBRE_DENSITY_KG_M3
+## ROCK_WOOL_FIBER_DENSITY_KG_M3
 
 *Constant* (`float`).
 
 ```python
-ROCK_WOOL_FIBRE_DENSITY_KG_M3 = 2600.0
+ROCK_WOOL_FIBER_DENSITY_KG_M3 = 2600.0
 ```
 
 ## ROCK_WOOL_LATERAL_FIT
 
-*Constant* (`phonometry.materials.absorbers.porous.FibreResistivityFit`).
+*Constant* (`phonometry.materials.absorbers.porous.FiberResistivityFit`).
 
 ## ROCK_WOOL_LONGITUDINAL_FIT
 
-*Constant* (`phonometry.materials.absorbers.porous.FibreResistivityFit`).
+*Constant* (`phonometry.materials.absorbers.porous.FiberResistivityFit`).
 
 ## viscous_characteristic_length
 

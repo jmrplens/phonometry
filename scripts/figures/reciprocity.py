@@ -167,7 +167,7 @@ def _free_field_example() -> "ReciprocityCalibration":
             true[i],
             true[j],
             diaphragm_distance_m=d,
-            acoustic_centres_m=(centre, centre),
+            acoustic_centers_m=(centre, centre),
             **_FREE_FIELD_CONDITIONS,
         )
         for (i, j), d in zip(_PAIRS, distances, strict=True)
@@ -177,7 +177,7 @@ def _free_field_example() -> "ReciprocityCalibration":
         f,
         ze,
         diaphragm_distances_m=distances,
-        acoustic_centres_m=(centre, centre, centre),
+        acoustic_centers_m=(centre, centre, centre),
         expanded_uncertainty_db=budget.expanded_uncertainty_db,
         **_FREE_FIELD_CONDITIONS,
     )
@@ -193,14 +193,14 @@ def _free_field_budget(
         f,
         metrology.FreeFieldInputUncertainties(
             u_distance_m=0.1e-3,
-            u_acoustic_centre_m=0.5e-3,
+            u_acoustic_center_m=0.5e-3,
             u_static_pressure_pa=20.0,
             u_temperature_k=0.1,
             u_relative_humidity_percent=2.0,
             u_air_attenuation_ratio=0.1 / np.sqrt(3.0),
         ),
         diaphragm_distances_m=distances,
-        acoustic_centres_m=(centre, centre, centre),
+        acoustic_centers_m=(centre, centre, centre),
         **_FREE_FIELD_CONDITIONS,
     )
     x = f / 40000.0
@@ -326,7 +326,7 @@ def generate_reciprocity_acoustic_centre(output_dir: str) -> None:
         [10000.0], **_FREE_FIELD_CONDITIONS
     ).attenuation_np_per_m[0]
     pressures = 0.85 * np.exp(-alpha * distances) / (distances - 2.4e-3)
-    centre = metrology.acoustic_centre(distances, pressures, attenuation_np_per_m=alpha)
+    centre = metrology.acoustic_center(distances, pressures, attenuation_np_per_m=alpha)
     fig, ax = plt.subplots(figsize=(7.5, 5.2))
     centre.plot(ax, language=_LANG)
     fig.tight_layout()

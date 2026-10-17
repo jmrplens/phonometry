@@ -53,7 +53,7 @@ from phonometry.environment import (
     sound_pressure_level_history,
 )
 from phonometry.io import Signal
-from phonometry.materials import insitu_absorption_spectrum
+from phonometry.materials import in_situ_absorption_spectrum
 from phonometry.metrology import sensitivity
 from phonometry.underwater import (
     pile_strike_metrics,
@@ -163,14 +163,14 @@ def test_a_ratio_of_two_records_still_applies_both_factors() -> None:
     incident = np.zeros(2048)
     incident[100] = 1.0
     reflected = 0.4 * np.roll(incident, 96)
-    both = insitu_absorption_spectrum(
+    both = in_situ_absorption_spectrum(
         Signal(incident, FS, calibration_factor=CAL),
         Signal(reflected, FS, calibration_factor=CAL),
     )
-    assert_same(both, insitu_absorption_spectrum(CAL * incident, CAL * reflected, FS))
-    bare = insitu_absorption_spectrum(incident, reflected, FS)
+    assert_same(both, in_situ_absorption_spectrum(CAL * incident, CAL * reflected, FS))
+    bare = in_situ_absorption_spectrum(incident, reflected, FS)
     assert np.allclose(both.absorption, bare.absorption, equal_nan=True)
-    one_only = insitu_absorption_spectrum(
+    one_only = in_situ_absorption_spectrum(
         Signal(incident, FS, calibration_factor=CAL), reflected
     )
     assert not np.allclose(one_only.absorption, bare.absorption, equal_nan=True)

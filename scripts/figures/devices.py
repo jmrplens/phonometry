@@ -5863,7 +5863,7 @@ _FF_WEDGE_R = (0.30, 0.22, 0.12, 0.07, 0.05)
 _FF_PATHS = (
     ("dihedral corner", "diedro", (4.0, 3.0, 2.5), ("dihedral corner",)),
     ("trihedral corner", "triedro", (-4.0, 3.0, 5.0), ("trihedral corner",)),
-    ("centre of a wall", "centro de una pared", (0.0, -3.0, 2.5), ("boundary centre",)),
+    ("centre of a wall", "centro de una pared", (0.0, -3.0, 2.5), ("boundary center",)),
     ("nearest wall", "pared más cercana", (0.0, 3.0, 1.2), ("closest boundary",)),
     ("door", "puerta", (-4.0, -1.5, 1.0), ("unique features",)),
     ("towards the ceiling", "hacia el techo", (1.5, 1.0, 4.0), ()),
@@ -6761,7 +6761,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
 
     liquid: dict[str, Any] = {
         "inlet_pressure_pa": 1.0e6,
-        "vapour_pressure_pa": 2.32e3,
+        "vapor_pressure_pa": 2.32e3,
         "density": 997.0,
         "speed_of_sound": 1400.0,
     }
@@ -6792,7 +6792,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         choked = noise_control.cavitation_differential(
             inlet_pressure_pa=inlet,
             outlet_pressure_pa=outlet,
-            vapour_pressure_pa=vapour,
+            vapor_pressure_pa=vapour,
             pressure_recovery=0.92,
         )
         return noise_control.valve_hydrodynamic_noise(
@@ -8501,7 +8501,7 @@ def generate_induction_loop_overload(output_dir: str) -> None:
         electroacoustics.loop_current(10.0, 20.0, height_m=1.2),
         impedance,
         11.0,
-        programme="music",
+        program="music",
         current_response=response,
     )
     fig, (ax_z, ax_overload) = plt.subplots(1, 2, figsize=(13.5, 5.6))
@@ -8955,7 +8955,7 @@ def _ear_simulator_bands() -> NDArray[np.float64]:
     """
     from phonometry import electroacoustics
 
-    table = electroacoustics.SIMULATED_PROGRAMME_SPECTRUM
+    table = electroacoustics.SIMULATED_PROGRAM_SPECTRUM
     f = np.array(list(table))
     levels = np.array([band.relative_level_db for band in table.values()])
     keep = (f >= 100.0) & (f <= 10000.0)
@@ -8969,14 +8969,14 @@ def generate_headphones_programme_signal(output_dir: str) -> None:
     from phonometry import electroacoustics
     from phonometry.filters import octave_filter
 
-    x = electroacoustics.simulated_programme_signal(
+    x = electroacoustics.simulated_program_signal(
         _HEADPHONE_FS, 60.0, spectrum="figure_2", seed=2
     )
     bands = octave_filter(x, _HEADPHONE_FS, fraction=3, limits=[19.95, 19952.6])
-    figure_2 = electroacoustics.check_programme_signal(
+    figure_2 = electroacoustics.check_program_signal(
         bands.frequencies, np.asarray(bands.levels)
     )
-    clipped = electroacoustics.simulated_programme_signal(
+    clipped = electroacoustics.simulated_program_signal(
         _HEADPHONE_FS, 60.0, peak_to_rms=2.0, seed=2
     )
     limiting = electroacoustics.check_limiting_test_signal(clipped, _HEADPHONE_FS)
@@ -9018,7 +9018,7 @@ def generate_headphones_characteristic_voltage(output_dir: str) -> None:
 
     bands = _ear_simulator_bands()
     fittings = np.vstack([bands, bands + 0.6, bands - 0.4])
-    result = electroacoustics.programme_characteristic_voltage(
+    result = electroacoustics.program_characteristic_voltage(
         0.1, _HEADPHONE_BANDS, fittings, a_weighted=True
     )
     fig, ax = plt.subplots(figsize=(10, 5.4))

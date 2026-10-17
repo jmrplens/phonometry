@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from .spain import (
     DB_HR_FREQUENCIES_HZ,
-    DB_HR_NORMALISED_SPECTRA,
+    DB_HR_NORMALIZED_SPECTRA,
     DbHrAssessment,
     DbHrCheck,
     DbHrGlobalIndexResult,
@@ -28,7 +28,7 @@ from .spain import (
 
 __all__ = [
     "DB_HR_FREQUENCIES_HZ",
-    "DB_HR_NORMALISED_SPECTRA",
+    "DB_HR_NORMALIZED_SPECTRA",
     "DbHrAssessment",
     "DbHrCheck",
     "DbHrGlobalIndexResult",

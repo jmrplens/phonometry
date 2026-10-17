@@ -66,7 +66,7 @@ $d = d_{\mathrm{CPA}} \tan(\mathrm{angle})$.
 monopole_source_level(
     rnl: float | NDArray[np.float64] | list[float],
     frequency: float | NDArray[np.float64] | list[float],
-    draught: float,
+    draft_m: float,
     *,
     speed_of_sound: float = 1500.0,
 ) -> ShipSourceLevelResult
@@ -90,7 +90,7 @@ depth is $d_\mathrm{s} = 0.7 D$ (Formula 1).
 | :--- | :--- |
 | `rnl` | Radiated noise level per frequency, in dB re 1 µPa·m (scalar or array; array length must match `frequency`). |
 | `frequency` | Frequency or frequencies, in Hz. |
-| `draught` | Ship draught `D` (mean of bow and stern), in m. |
+| `draft_m` | Ship draught `D` (mean of bow and stern), in m. |
 | `speed_of_sound` | Speed of sound in sea water, in m/s (default 1500). |
 
 **Returns:** A [`ShipSourceLevelResult`](/phonometry/reference/api/underwater/ship-radiated-noise/#shipsourcelevelresult).

@@ -166,7 +166,7 @@ import numpy as np
 
 from phonometry import vibration
 
-bands = np.asarray(vibration.PREDICTION_BAND_CENTRES_HZ)
+bands = np.asarray(vibration.PREDICTION_BAND_CENTERS_HZ)
 positions = np.arange(bands.size)
 fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
 for ax, floor in zip(axes, ("concrete", "timber"), strict=True):

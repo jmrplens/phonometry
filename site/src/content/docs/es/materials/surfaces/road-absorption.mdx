@@ -129,7 +129,7 @@ kr = materials.geometric_spreading_factor()          # (ds - dm)/(ds + dm) = 2/3
 hr = kr * 0.4 * np.roll(hi, 96)
 
 # Absorción de banda estrecha, luego reducida a tercios de octava en 250-4000 Hz.
-alpha = materials.insitu_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
+alpha = materials.in_situ_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
 freq = np.fft.rfftfreq(n, 1.0 / fs)
 centres, band = materials.one_third_octave_absorption(freq, alpha)
 print(round(kr, 4))                # 0.6667
@@ -253,10 +253,10 @@ plt.show()
 
 </details>
 
-**Espectro de principio a fin.** `insitu_absorption_spectrum` ejecuta toda la
+**Espectro de principio a fin.** `in_situ_absorption_spectrum` ejecuta toda la
 cadena (de las respuestas al impulso incidente y reflejada enventanadas a la
 absorción de banda estrecha y de ahí a las bandas de tercio de octava) y devuelve
-un `InsituAbsorptionResult` representable:
+un `InSituAbsorptionResult` representable:
 
 ```python
 import numpy as np
@@ -277,7 +277,7 @@ taps = taps / taps.sum()
 shift = int(round(2.0 * 0.25 / 340.0 * fs))     # retardo del camino reflejado 2 dm / c
 hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
 
-result = materials.insitu_absorption_spectrum(hi, hr, fs)
+result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 print(result.frequencies[[0, -1]].astype(int))     # [ 250 4000]
 print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
 result.plot()   # diagrama de barras alpha(f) en 250-4000 Hz (requiere matplotlib)
@@ -311,9 +311,9 @@ taps = firwin(41, 1200.0, fs=fs)
 taps = taps / taps.sum()
 shift = int(round(2.0 * 0.25 / 340.0 * fs))     # retardo del camino reflejado 2 dm / c
 hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
-result = materials.insitu_absorption_spectrum(hi, hr, fs)
+result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 
-# result es el InsituAbsorptionResult calculado arriba. En una línea:
+# result es el InSituAbsorptionResult calculado arriba. En una línea:
 result.plot(language="es")
 plt.show()
 
@@ -344,9 +344,9 @@ from phonometry import materials
 print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metros)
 ```
 
-Todo el montaje cabe en un dibujo a escala. `plot_insitu_geometry` dibuja la
+Todo el montaje cabe en un dibujo a escala. `plot_in_situ_geometry` dibuja la
 disposición estándar con ese radio muestreado sobre la superficie, y un
-`InsituAbsorptionResult` medido que retuvo sus alturas redibuja el suyo con
+`InSituAbsorptionResult` medido que retuvo sus alturas redibuja el suyo con
 `result.plot_geometry()`.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_setup_geometry.svg" alt="Vista lateral a escala del montaje de absorción in situ: el altavoz en su mástil a 1,25 m sobre la superficie rayada de la calzada, el micrófono en la misma vertical a 0,25 m, el trayecto reflejado en la superficie a trazos bajo él y el radio de 1,34 m de la zona muestreada acotado sobre la superficie" width="88%" />
@@ -364,11 +364,11 @@ from phonometry import materials
 
 # La geometría estándar: fuente a 1.25 m, micrófono a 0.25 m y el radio
 # muestreado de 1.34 m de la ventana de 5 ms.
-materials.plot_insitu_geometry(language="es")
+materials.plot_in_situ_geometry(language="es")
 plt.show()
 
 # Un espectro medido retiene sus alturas y redibuja su propio montaje:
-#   result = materials.insitu_absorption_spectrum(hi, hr, fs)
+#   result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 #   result.plot_geometry(language="es")
 ```
 
@@ -418,7 +418,7 @@ expuestas:
 - El factor de divergencia geométrica adquiere una forma angular,
   $K_{\mathrm{r},\theta}^2 = 1 - \cos^2\theta\,(1 - K_\mathrm{r}^2)$, que calcula
   `geometric_spreading_factor_angle` y que usa automáticamente
-  `insitu_absorption_spectrum` cuando se le da un `incidence_angle_rad`. Las dos
+  `in_situ_absorption_spectrum` cuando se le da un `incidence_angle_rad`. Las dos
   toman el ángulo en **radianes**, al contrario que los grados que cita el resto
   de esta página.
 - El área muestreada deja de ser el círculo de la figura de arriba. Pasa a ser
@@ -658,14 +658,14 @@ medición por sustracción en unas pocas posiciones.
 La técnica de sustracción de la ISO 13472-1:2002: la divergencia geométrica
 del apartado 4.1 (`materials.geometric_spreading_factor`), la ventana temporal
 Adrienne del apartado 6.4 (`materials.adrienne_window`), la reducción de banda
-estrecha y a tercios de octava (`materials.insitu_absorption_coefficient`,
+estrecha y a tercios de octava (`materials.in_situ_absorption_coefficient`,
 `materials.one_third_octave_absorption`,
-`materials.insitu_absorption_spectrum`) y el radio de área muestreada del
+`materials.in_situ_absorption_spectrum`) y el radio de área muestreada del
 Anexo A (`materials.max_sampled_area_radius`), con la corrección de superficie
 de referencia del Anexo B (`materials.absorption_reference_corrected`) y el
 caso de incidencia oblicua del Anexo F
 (`materials.geometric_spreading_factor_angle`, `materials.msa_major_axis` y el
-argumento `incidence_angle_rad` de `materials.insitu_absorption_spectrum`); y el
+argumento `incidence_angle_rad` de `materials.in_situ_absorption_spectrum`); y el
 límite de frecuencia de onda plana, la geometría de separación de micrófonos y
 la corrección de pérdidas internas del Anexo A del método puntual de la ISO
 13472-2:2010 (`materials.spot_tube_upper_frequency`,

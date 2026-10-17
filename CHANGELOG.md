@@ -219,7 +219,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   attenuation of `metrology.reciprocity_air_attenuation` (Annex B) and the
   speed of sound with the dispersion of IEC 61094-2 F.3;
   `metrology.free_field_transfer_impedance` is Formula (D.1) and
-  `metrology.acoustic_centre` finds an acoustic centre from the
+  `metrology.acoustic_center` finds an acoustic centre from the
   inverse-distance law of 6.5. `metrology.check_coupler` holds a coupler to
   what its formulas need, and `metrology.check_free_field_arrangement` an
   arrangement to what 6.4 and 7.3 recommend,
@@ -287,14 +287,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **Measure headphones and earphones by IEC 60268-7:2010 with the simulated
   programme signal of IEC 60268-1:1985.** Two new modules.
-  `electroacoustics.programme_signal` holds the noise that stands in for
-  programme: `SIMULATED_PROGRAMME_SPECTRUM` is Table II of IEC 60268-1, the
-  31 one-third-octave levels and their tolerances; `programme_signal_filter`
+  `electroacoustics.program_signal` holds the noise that stands in for
+  programme: `SIMULATED_PROGRAM_SPECTRUM` is Table II of IEC 60268-1, the
+  31 one-third-octave levels and their tolerances; `program_signal_filter`
   is the exact transfer function of the filter of its Figure 2, which with
   pink noise lands inside every tolerance of the table by 0.18 dB at its
-  closest; `simulated_programme_signal` generates the stationary Gaussian
+  closest; `simulated_program_signal` generates the stationary Gaussian
   signal with every band on its printed level or through that filter, and
-  clips it to a peak-to-RMS ratio when asked; and `check_programme_signal`
+  clips it to a peak-to-RMS ratio when asked; and `check_program_signal`
   judges a one-third-octave spectrum against the table, up to the constant a
   relative spectrum leaves free. Neither amendment of 1988 touches the
   clause. `electroacoustics.headphones` holds the characteristics of
@@ -302,10 +302,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`HeadphoneClassification`, `impedance_code`, `parse_classification_code`,
   with 600 ohm as `06R2` as printed); `verify_rated_impedance`, the 80 % of
   8.2.1 with the dips up to 20 kHz to be stated; `characteristic_voltage`
-  (8.3.3) and `programme_characteristic_voltage` (8.3.4, and 8.3.5 with the
+  (8.3.3) and `program_characteristic_voltage` (8.3.4, and 8.3.5 with the
   A-weighting and the free-field compensation summed over the bands as the
   note under Figure 3 describes, averaged over 3 to 5 fittings), with
-  `programme_signal_level` for that power sum; `headphone_input_power` and
+  `program_signal_level` for that power sum; `headphone_input_power` and
   `headphone_source_emf` for the powers of 8.4 and
   `working_sound_pressure_level` for the 1 mW level of 8.5.2, which also
   gives the reading of the method of 8.5.3 c) when it is passed the
@@ -3301,8 +3301,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `fluids.MOLAR_GAS_CONSTANT_J_MOL_K`. The ISO 13472-1 heights,
   `DEFAULT_MICROPHONE_HEIGHT_M` and `DEFAULT_SOURCE_HEIGHT_M`, rename the
   parameters they default too: `microphone_height_m=` and `source_height_m=`
-  on every function that takes them and on `plot_insitu_geometry`, and the
-  two fields of `InsituAbsorptionResult`. No value moved.
+  on every function that takes them and on `plot_in_situ_geometry`, and the
+  two fields of `InSituAbsorptionResult`. No value moved.
   `make parameter-units` holds both halves of the rule, the single numbers by
   their value and the tables by their name, with every count, label and pure
   number it lets through listed with its reason, and the upgrading guide lists
@@ -3351,7 +3351,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `thickness1_m` and `thickness2_m` that `JunctionTransmissionResult` keeps,
   and the ISO 13472-1 `source_height_m` and `microphone_height_m` of
   `geometric_spreading_factor`, `geometric_spreading_factor_angle` and
-  `InsituAbsorptionResult` are written by name, the `section` mapping of
+  `InSituAbsorptionResult` are written by name, the `section` mapping of
   `duct_path` takes `height_m`, and `TABLE_D1_QUANTITIES` lists
   `thickness_m`.
   `vertical_directivity(height=)` keeps its name, because it picks source A
@@ -3495,6 +3495,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the package that publishes it, with each pair it lets through listed with
   its reason. The migration guide
   maps every name that shipped in 3.3.0 or 4.0.0rc1.
+- **Every identifier is spelled in American English, and in situ is
+  `in_situ`.** The public names had both spellings, `acoustic_centre` beside
+  `center_frequencies` and `programme` beside `program_loudness`, so a caller
+  who wrote one on a function met the other on the next. Every public module,
+  name, parameter, field and enum member is now American, and so is every value
+  a caller types, a `Literal` choice, a default and a key of a published table.
+  `materials.insitu_reflection_factor`, `insitu_absorption_from_reflection`,
+  `insitu_absorption_coefficient`, `insitu_absorption_spectrum`,
+  `plot_insitu_geometry` and `InsituAbsorptionResult` are
+  `in_situ_reflection_factor`, `in_situ_absorption_from_reflection`,
+  `in_situ_absorption_coefficient`, `in_situ_absorption_spectrum`,
+  `plot_in_situ_geometry` and `InSituAbsorptionResult`, the spelling the
+  building, emission and noise-control in-situ names already had.
+  `centre_frequency` on `critical_bandwidth`, `tonal_audibility`,
+  `assess_tonal_audibility` and `TonalAssessmentResult` is `center_frequency`,
+  `centre=` on `filter_bandwidth` and `source_directivity_limit` is `center=`,
+  and `location="centre"` on the infinite plate and beam mobilities and
+  impedances is `location="center"`. `unfavourable_sum` on the ISO 717 and
+  ISO 11654 ratings is `unfavorable_sum`. `storey_fundamental_frequency(storeys)`
+  is `story_fundamental_frequency(stories)`, with `STORY_FREQUENCY_MIN_STORIES`,
+  `STORY_FREQUENCY_NUMERATOR_HZ` and `STORY_PERIOD_COEFFICIENT_S`, and the ISO
+  4866 building models take `stories=` and the model `"stories"`.
+  `monopole_source_level` takes `draft_m=`, which says its unit too, where it
+  took `draught=`; `effective_perceived_noise_level` takes
+  `procedure="airplane"`; `outdoor_quality_objectives` takes `urbanization=`;
+  the IEC 60534-8-4 valve functions and `LiquidStream` take `vapor_pressure_pa`,
+  and the `composition` of `fluids.air()` holds `"water_vapor_mole_fraction"`.
+  `DB_HR_NORMALISED_SPECTRA`, `NORMALISED_RAILWAY_NOISE_SPECTRUM_DB`,
+  `NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB`, `simulation.ALUMINIUM` and
+  `RoadSurface.OPTIMISED_BRUSHED_DOWN_CONCRETE` are `DB_HR_NORMALIZED_SPECTRA`,
+  `NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB`, `NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB`,
+  `ALUMINUM` and `OPTIMIZED_BRUSHED_DOWN_CONCRETE`, whose value is still the
+  "optimised brushed down concrete" Table F-4 of CNOSSOS-EU prints. The names
+  added since 4.0.0rc1 are spelled the American way where this changelog
+  introduces them: the IEC 60268-1 program signal
+  (`electroacoustics.program_signal` and its functions,
+  `ProgramCharacteristicVoltage`, `program_characteristic_voltage` and
+  `program_signal_level`), the reciprocity `acoustic_center`, `AcousticCenter`,
+  `acoustic_centers_m`, `u_acoustic_center_m`, `water_vapor_mole_fraction` and
+  the `"acoustic_centers"` component, `loop_center_field`,
+  `centered_interval`, `PREDICTION_BAND_CENTERS_HZ`,
+  `INTERNAL_NOISE_CENTER_HEIGHT_M` and `INTERNAL_NOISE_CENTER_TOLERANCE_M`,
+  `MODELING_UNCERTAINTY_DB`, the fiber names of the porous absorbers
+  (`fiber_characteristic_lengths`, `FiberResistivityFit`,
+  `ROCK_WOOL_FIBER_DENSITY_KG_M3`), the `fiber`, `fiber_diameter_um` and
+  `fiber_diameter_distribution_parameter` columns of the carpet and porous
+  catalogues (in the catalogue file format and its schema too), the
+  `"boundary center"` target of a microphone traverse, and the fields
+  `centered`, `program`, `normalized_difference`, `neighbor_difference_db`,
+  `behavior_observation`, `subclass_centers_db`, `plant_center_m`,
+  `support_center_distance_m`, `collected_volume_liters`, the
+  `unfavorable_sum` of the enclosure and cabin ratings and the
+  `vapor_pressure_pa` of `HydrodynamicValveNoise`.
+  `catalogue` keeps its spelling, the one British form the library keeps: it
+  is an American variant too, every name writes it the same way, and it is
+  the file format of a user's own catalogues. The names are all that moved;
+  every number is the one it was. `scripts/check_identifier_spelling.py`
+  (`make identifier-spelling`, and a CI step beside the unit check) walks the
+  imported package and fails on a British form in any public identifier or in
+  any value a caller types (a `Literal` choice, a default, an enum value, a
+  table key, a string of a published tuple). It reads the `-ise`, `-yse`,
+  `-our`, `-tre` and `-bre` endings as whole families, so a word it was never
+  told about (`harmonised`, `theatre`) fails too. The strings a source prints
+  (the CNOSSOS surface, the Norton and Karczub material key, item i) of the
+  ISO 3382-1 test report) and the surname of the Doutres limp-frame criterion
+  are exempt by location; the migration guide maps each name that shipped in
+  3.3.0 or 4.0.0rc1 to its new spelling.
 
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,
@@ -3616,7 +3683,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   had to interpolate its periods. Each is now a read-only property read from
   the values the result keeps, and the results that did not keep what the
   test reads now do: `TappingForceResult` gains `mass`,
-  `HydrodynamicValveNoise` gains `inlet_pressure_pa` and `vapour_pressure_pa`,
+  `HydrodynamicValveNoise` gains `inlet_pressure_pa` and `vapor_pressure_pa`,
   `AerodynamicValveNoise` gains `specific_heat_ratio`, `pressure_recovery`
   and `efficiency_correction`, `WindTurbineTonalityResult` gains
   `candidate_frequency_hz` and `LabJointInsulationResult` gains
@@ -4615,12 +4682,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   porosity of a fibrous material from its bulk and fibre densities.
   `airflow_resistivity_from_bulk_density` is his Eq. (1.165), the resistivity of
   a mineral wool from its bulk density and fibre diameter, taking a
-  `FibreResistivityFit` and warning outside the range that fit was made over;
+  `FiberResistivityFit` and warning outside the range that fit was made over;
   the rock wool of his Fig. 1.49 is published both ways round, lateral and
   longitudinal, because mineral wool is anisotropic and resists more through the
   sheet than across it. `viscous_characteristic_length` is Allard & Atalla
   Eq. (5.25), the viscous length from the three parameters that are measured
-  routinely, and `fibre_characteristic_lengths` their Eqs. (5.29) and (5.30),
+  routinely, and `fiber_characteristic_lengths` their Eqs. (5.29) and (5.30),
   both lengths from the fibre geometry instead.
 
   Each of them is an estimate and each says how good an estimate it is, measured
@@ -5267,7 +5334,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `check_ceiling_specimen` judged three of the limits clause 4 of EN 16487
   prints and published the rest as constants nothing applied. It judges the
   support units of 4.1.1.2.3.6 (`support_width_mm`, `support_height_mm`,
-  `support_centre_distance_m`) and, given one value per measurement in
+  `support_center_distance_m`) and, given one value per measurement in
   `relative_humidity_percent`, the 50 % of 4.2.2. `CeilingSpecimenCheck` gains
   `supports_ok` and `humidity_ok`, and `satisfied` covers them; the conformance
   row on the room climates of three real test reports reads that verdict
@@ -5863,7 +5930,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   guide values by storeys, two storeys taking the union of the two ranges the
   clause prints it in, `foundation_transfer_max` and `floor_transfer_max`
   as 1 over twice the damping, and the storey estimate of Formula (4) is
-  `storey_fundamental_frequency`, the one function for the estimate
+  `story_fundamental_frequency`, the one function for the estimate
   DIN 4150-3 6.4 and ISO 4866 D.2 print as well. A blast and a
   falling mass are Formulae (5) and (6) with the user's constants; a hall of
   machines is Formula (7) with the nomogram of Figure 3 read off the page at a

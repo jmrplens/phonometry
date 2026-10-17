@@ -295,7 +295,7 @@ def test_a_negative_source_impedance_is_refused() -> None:
 
 
 def test_programme_level_is_the_power_sum_of_the_bands() -> None:
-    level = ea.programme_signal_level(BANDS, np.full(BANDS.size, 70.0))
+    level = ea.program_signal_level(BANDS, np.full(BANDS.size, 70.0))
     assert level == pytest.approx(70.0 + 10.0 * math.log10(BANDS.size), abs=1e-12)
 
 
@@ -306,16 +306,14 @@ def test_a_weighting_reproduces_iec_61672_table_3(
     frequency: float, a_weighting: float
 ) -> None:
     pair = np.array([frequency, frequency * 10.0**0.1])
-    level = ea.programme_signal_level(pair, [80.0, -300.0], a_weighted=True)
+    level = ea.program_signal_level(pair, [80.0, -300.0], a_weighted=True)
     assert round(level - 80.0, 1) == a_weighting
 
 
 def test_free_field_compensation_subtracts_the_response() -> None:
     response = np.linspace(0.0, 10.0, BANDS.size)
     flat = np.full(BANDS.size, 70.0)
-    compensated = ea.programme_signal_level(
-        BANDS, flat, free_field_response_db=response
-    )
+    compensated = ea.program_signal_level(BANDS, flat, free_field_response_db=response)
     expected = 10.0 * math.log10(float(np.sum(10.0 ** ((flat - response) / 10.0))))
     assert compensated == pytest.approx(expected, abs=1e-12)
 
@@ -324,7 +322,7 @@ def test_programme_characteristic_voltage_averages_the_fittings() -> None:
     levels = np.array(
         [np.full(BANDS.size, 80.0) + offset for offset in (0.0, 1.0, -1.0)]
     )
-    result = ea.programme_characteristic_voltage(0.05, BANDS, levels)
+    result = ea.program_characteristic_voltage(0.05, BANDS, levels)
     sums = 80.0 + 10.0 * math.log10(BANDS.size) + np.array([0.0, 1.0, -1.0])
     expected = 0.05 * 10.0 ** ((94.0 - sums) / 20.0)
     np.testing.assert_allclose(result.voltages_v, expected, rtol=1e-12)
@@ -333,13 +331,13 @@ def test_programme_characteristic_voltage_averages_the_fittings() -> None:
 
 
 def test_one_fitting_does_not_conform_to_8_3_5() -> None:
-    result = ea.programme_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
+    result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
     assert not result.fittings_conform
 
 
 def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
     levels = np.tile(np.linspace(70.0, 85.0, BANDS.size), (3, 1))
-    result = ea.programme_characteristic_voltage(
+    result = ea.program_characteristic_voltage(
         [0.05, 0.05, 0.05], BANDS, levels, a_weighted=True
     )
     at_voltage = result.band_levels_at_characteristic_db
@@ -348,7 +346,7 @@ def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
 
 
 def test_programme_characteristic_voltage_results_are_read_only() -> None:
-    result = ea.programme_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
+    result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
     assert not result.band_levels_db.flags.writeable
     with pytest.raises(dataclasses.FrozenInstanceError, match="a_weighted"):
         result.a_weighted = True  # type: ignore[misc]
@@ -361,7 +359,7 @@ def test_programme_characteristic_voltage_results_are_read_only() -> None:
 
 @pytest.mark.parametrize("ratio", [1.8, 2.0, 2.2])
 def test_the_clipped_programme_signal_passes(ratio: float) -> None:
-    x = ea.simulated_programme_signal(FS, 30.0, peak_to_rms=ratio, seed=8)
+    x = ea.simulated_program_signal(FS, 30.0, peak_to_rms=ratio, seed=8)
     check = ea.check_limiting_test_signal(x, FS)
     assert check.peak_to_rms == pytest.approx(ratio, rel=1e-9)
     assert check.passes
@@ -369,7 +367,7 @@ def test_the_clipped_programme_signal_passes(ratio: float) -> None:
 
 @pytest.mark.parametrize("ratio", [1.7, 2.3])
 def test_a_ratio_just_outside_1_8_to_2_2_fails(ratio: float) -> None:
-    x = ea.simulated_programme_signal(FS, 30.0, peak_to_rms=ratio, seed=8)
+    x = ea.simulated_program_signal(FS, 30.0, peak_to_rms=ratio, seed=8)
     check = ea.check_limiting_test_signal(x, FS)
     assert check.peak_to_rms == pytest.approx(ratio, rel=1e-9)
     assert check.spectrum.passes
@@ -378,7 +376,7 @@ def test_a_ratio_just_outside_1_8_to_2_2_fails(ratio: float) -> None:
 
 
 def test_the_unclipped_programme_signal_fails_on_its_peaks() -> None:
-    x = ea.simulated_programme_signal(FS, 30.0, seed=8)
+    x = ea.simulated_program_signal(FS, 30.0, seed=8)
     check = ea.check_limiting_test_signal(x, FS)
     assert check.spectrum.passes
     assert not check.peak_to_rms_passes
@@ -386,14 +384,14 @@ def test_the_unclipped_programme_signal_fails_on_its_peaks() -> None:
 
 
 def test_at_44_1_khz_the_20_khz_band_is_left_out() -> None:
-    x = ea.simulated_programme_signal(44100, 30.0, peak_to_rms=2.0, seed=8)
+    x = ea.simulated_program_signal(44100, 30.0, peak_to_rms=2.0, seed=8)
     check = ea.check_limiting_test_signal(x, 44100)
     assert check.spectrum.frequencies[-1] == 16000.0
     assert check.passes
 
 
 def test_limiting_check_has_no_truth_value() -> None:
-    x = ea.simulated_programme_signal(FS, 5.0, peak_to_rms=2.0, seed=8)
+    x = ea.simulated_program_signal(FS, 5.0, peak_to_rms=2.0, seed=8)
     check = ea.check_limiting_test_signal(x, FS)
     with pytest.raises(TypeError, match="passes"):
         bool(check)
@@ -628,7 +626,7 @@ def _microphone(**overrides: object) -> ea.EarCanalMicrophoneVerification:
 
 def test_a_microphone_on_its_inclusive_limits_passes() -> None:
     verdict = _microphone()
-    assert verdict.neighbour_difference_db == 3.0
+    assert verdict.neighbor_difference_db == 3.0
     assert verdict.sealed_attenuation_db == 15.0
     assert verdict.passes
 
@@ -844,7 +842,7 @@ def test_microphone_plot_marks_item_e_as_a_minimum(
         100.0 * verdict.entrance_area_mm2 / limits["entrance_area_mm2"],
         100.0 * verdict.area_ratio / limits["canal_area_ratio"],
         100.0 * verdict.volume_mm3 / limits["volume_mm3"],
-        100.0 * verdict.neighbour_difference_db / limits["neighbour_difference_db"],
+        100.0 * verdict.neighbor_difference_db / limits["neighbor_difference_db"],
         100.0 * verdict.sealed_attenuation_db / limits["sealed_attenuation_db"],
     ]
     np.testing.assert_allclose(heights, expected)
@@ -872,7 +870,7 @@ def test_characteristic_voltage_plot_names_what_was_corrected(
 ) -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
     levels = np.tile(np.linspace(70.0, 85.0, BANDS.size), (3, 1))
-    result = ea.programme_characteristic_voltage(
+    result = ea.program_characteristic_voltage(
         0.05,
         BANDS,
         levels,

@@ -169,12 +169,12 @@ true_ff = [m0 / (1.0 - ratio**2 + 1.3j * ratio) for m0 in (0.0128, 0.0124, 0.013
 centre = 4.5e-3 / (1.0 + (ff / 30000.0) ** 2)
 ze_ff = [
     metrology.free_field_transfer_impedance(
-        ff, true_ff[i], true_ff[j], diaphragm_distance_m=0.25, acoustic_centres_m=(centre, centre), **ffc
+        ff, true_ff[i], true_ff[j], diaphragm_distance_m=0.25, acoustic_centers_m=(centre, centre), **ffc
     )
     for i, j in pairs
 ]   # Formula (D.1)
 cf = metrology.free_field_reciprocity(
-    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centres_m=(centre, centre, centre), **ffc
+    ff, ze_ff, diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc
 )
 print(cf.sensitivity_level_db[:, 10].round(2))   # [-37.76 -38.03 -37.55]
 print(np.abs(cf.sensitivity_v_per_pa - true_ff).max() < 1e-15)   # True
@@ -191,7 +191,7 @@ supporting cylinder and the accuracy domain of B.2:
 r = np.array([0.15, 0.20, 0.25, 0.30, 0.40, 0.50])
 alpha = metrology.reciprocity_air_attenuation([10000.0], **ffc).attenuation_np_per_m[0]
 p = 0.85 * np.exp(-alpha * r) / (r - 2.4e-3)     # your readings at one frequency
-print(round(1000 * metrology.acoustic_centre(r, p, attenuation_np_per_m=alpha).position_m, 2))   # 2.4
+print(round(1000 * metrology.acoustic_center(r, p, attenuation_np_per_m=alpha).position_m, 2))   # 2.4
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reciprocity_acoustic_centre_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reciprocity_acoustic_centre.svg" alt="The inverse of the measured sound pressure corrected for the attenuation against the distance from the reference point, with the least-squares line crossing zero at the acoustic centre, 2.4 mm" width="100%"></picture>
@@ -241,10 +241,10 @@ print(b.expanded_uncertainty_db[[1, 16, 25]].round(3))   # [0.023 0.015 0.041]
 pf = metrology.free_field_parameter_uncertainty(
     ff,
     metrology.FreeFieldInputUncertainties(
-        u_distance_m=0.1e-3, u_acoustic_centre_m=0.5e-3, u_static_pressure_pa=20.0, u_temperature_k=0.1,
+        u_distance_m=0.1e-3, u_acoustic_center_m=0.5e-3, u_static_pressure_pa=20.0, u_temperature_k=0.1,
         u_relative_humidity_percent=2.0, u_air_attenuation_ratio=0.1 / np.sqrt(3.0),
     ),
-    diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centres_m=(centre, centre, centre), **ffc,
+    diaphragm_distances_m=(0.25, 0.25, 0.25), acoustic_centers_m=(centre, centre, centre), **ffc,
 )
 xf = ff / 40000
 bf = metrology.reciprocity_uncertainty_budget(

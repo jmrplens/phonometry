@@ -102,7 +102,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "DB_HR_FREQUENCIES_HZ",
-    "DB_HR_NORMALISED_SPECTRA",
+    "DB_HR_NORMALIZED_SPECTRA",
     "DbHrAssessment",
     "DbHrCheck",
     "DbHrGlobalIndexResult",
@@ -157,7 +157,7 @@ DB_HR_FREQUENCIES_HZ: tuple[float, ...] = (
 #: ``"pink"`` is Table A.5 (``LAr,i``), ``"traffic"`` Table A.3 (``LAtr,i``),
 #: ``"railway"`` Table A.4 (``LAef,i``, numerically equal to Table A.3) and
 #: ``"aircraft"`` Table A.2 (``LAav,i``).
-DB_HR_NORMALISED_SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
+DB_HR_NORMALIZED_SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
     {
         "pink": (
             -30.1,
@@ -425,7 +425,7 @@ class DbHrGlobalIndexResult(OwnsArrays):
             if one of them carries an axis beyond the band axis, or if
             ``spectrum`` is not one of the Annex A table keys.
         """
-        require_choice(self.spectrum, "spectrum", tuple(DB_HR_NORMALISED_SPECTRA))
+        require_choice(self.spectrum, "spectrum", tuple(DB_HR_NORMALIZED_SPECTRA))
         require_ranks(
             self,
             frequencies=1,
@@ -497,10 +497,10 @@ def db_hr_global_index(
         non-finite values.
     """
     key = str(spectrum).strip().lower()
-    if key not in DB_HR_NORMALISED_SPECTRA:
+    if key not in DB_HR_NORMALIZED_SPECTRA:
         msg = (
             "'spectrum' must be one of "
-            f"{sorted(DB_HR_NORMALISED_SPECTRA)}; got {spectrum!r}."
+            f"{sorted(DB_HR_NORMALIZED_SPECTRA)}; got {spectrum!r}."
         )
         raise ValueError(msg)
     values = np.asarray(band_values, dtype=np.float64)
@@ -535,7 +535,7 @@ def db_hr_global_index(
         freqs = given[index]
         selected = values[index]
 
-    levels = np.asarray(DB_HR_NORMALISED_SPECTRA[key], dtype=np.float64)
+    levels = np.asarray(DB_HR_NORMALIZED_SPECTRA[key], dtype=np.float64)
     contributions = levels - selected
     value = float(-10.0 * np.log10(np.sum(10.0 ** (contributions / 10.0))))
     return DbHrGlobalIndexResult(

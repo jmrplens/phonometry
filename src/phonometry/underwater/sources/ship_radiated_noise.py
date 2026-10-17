@@ -212,7 +212,7 @@ class ShipSourceLevelResult(OwnsArrays):
 def monopole_source_level(
     rnl: float | NDArray[np.float64] | list[float],
     frequency: float | NDArray[np.float64] | list[float],
-    draught: float,
+    draft_m: float,
     *,
     speed_of_sound: float = _DEFAULT_SOUND_SPEED,
 ) -> ShipSourceLevelResult:
@@ -232,12 +232,12 @@ def monopole_source_level(
     :param rnl: Radiated noise level per frequency, in dB re 1 µPa·m (scalar or
         array; array length must match ``frequency``).
     :param frequency: Frequency or frequencies, in Hz.
-    :param draught: Ship draught ``D`` (mean of bow and stern), in m.
+    :param draft_m: Ship draught ``D`` (mean of bow and stern), in m.
     :param speed_of_sound: Speed of sound in sea water, in m/s (default 1500).
     :return: A :class:`ShipSourceLevelResult`.
     :raises ValueError: If the inputs are invalid or the shapes mismatch.
     """
-    d = _positive(draught, "draught")
+    d = _positive(draft_m, "draft_m")
     speed = _positive(speed_of_sound, "speed_of_sound")
     # The shared guards also reject the empty array, which used to pass the
     # sign and finiteness predicates vacuously and come back as a zero-band

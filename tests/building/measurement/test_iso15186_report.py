@@ -263,7 +263,7 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
         rating=30,
         c=-2,
         ctr=-3,
-        unfavourable_sum=0.0,
+        unfavorable_sum=0.0,
         frequencies=centers,
         measured=curve,
         shifted_reference=curve,
@@ -279,7 +279,7 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
 def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
     """A manually built rating lacking the per-band arrays is rejected."""
     bare_rating = building.WeightedRatingResult(
-        rating=30, c=-2, ctr=-3, unfavourable_sum=0.0
+        rating=30, c=-2, ctr=-3, unfavorable_sum=0.0
     )
     result = IntensityReductionResult(
         r_i=np.asarray(ref.ISO15186_1_REF_RI, dtype=np.float64),

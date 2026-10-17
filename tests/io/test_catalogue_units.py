@@ -442,7 +442,7 @@ _FAMILY_FIELDS: dict[str, frozenset[str]] = {
             "construction_depth_mm",
             "diameter_mm",
             "duct_length_m",
-            "fibre_diameter_um",
+            "fiber_diameter_um",
             "first_side_mm",
             "pile_height_mm",
             "second_side_mm",

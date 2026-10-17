@@ -31,7 +31,7 @@ $$
 and extends it to a rectangle of sides $d_1$ and $d_2$:
 "Provided that the sides d1, d2 of a rectangular loop are not extremely
 different", $d$ is taken as $\sqrt{d_1 d_2}$
-([`loop_centre_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_centre_field)). Everything else about the field is a figure in
+([`loop_center_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_center_field)). Everything else about the field is a figure in
 that standard. Here it is computed: [`rectangular_loop_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field) sums the
 Biot-Savart field of the four straight sides exactly, at any point, which is
 how the E.1 formula is checked (it is exact for the square and off by 0,35 dB
@@ -426,10 +426,10 @@ $$
 
 **Returns:** The equivalent input noise voltage, in volts.
 
-## loop_centre_field
+## loop_center_field
 
 ```python
-loop_centre_field(
+loop_center_field(
     current_a: float,
     length_m: float,
     *,

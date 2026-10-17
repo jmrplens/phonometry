@@ -618,7 +618,7 @@ def _chk_iso717_rw() -> Outcome:
         label=f"Rw {exp['rw']} (C {exp['c']}; Ctr {exp['ctr']})",
         computed_label=(
             f"Rw {res.rating} (C {res.c}; Ctr {res.ctr}), "
-            f"unfavourable sum {res.unfavourable_sum:.1f} dB"
+            f"unfavourable sum {res.unfavorable_sum:.1f} dB"
         ),
     )
 
@@ -693,11 +693,11 @@ def _chk_iso717_2_lnw() -> Outcome:
     # one-decimal tabulated intermediate, so 1e-9 = exact up to float noise.
     exp = ref.ISO717_2_ANNEX_C1_EXPECTED
     res = ph.building.weighted_impact_rating(ref.ISO717_2_ANNEX_C1_LN)
-    sum_ok = abs(res.unfavourable_sum - exp["unfavourable_sum"]) <= 1e-9
+    sum_ok = abs(res.unfavorable_sum - exp["unfavorable_sum"]) <= 1e-9
     ok = res.rating == exp["ln_w"] and res.ci == exp["ci"] and sum_ok
     return Outcome(
-        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
-        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
+        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavorable_sum']:.1f} dB)",
+        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavorable_sum:.1f} dB)",
         delta=f"{res.rating - exp['ln_w']:+d} dB",
         passed=ok,
     )
@@ -711,11 +711,11 @@ def _chk_iso717_2_lnw() -> Outcome:
 def _chk_iso717_2_lnw_covered() -> Outcome:
     exp = ref.ISO717_2_ANNEX_C1_COVERED_EXPECTED
     res = ph.building.weighted_impact_rating(ref.ISO717_2_ANNEX_C1_COVERED_LN)
-    sum_ok = abs(res.unfavourable_sum - exp["unfavourable_sum"]) <= 1e-9
+    sum_ok = abs(res.unfavorable_sum - exp["unfavorable_sum"]) <= 1e-9
     ok = res.rating == exp["ln_w"] and res.ci == exp["ci"] and sum_ok
     return Outcome(
-        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
-        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
+        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavorable_sum']:.1f} dB)",
+        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavorable_sum:.1f} dB)",
         delta=f"{res.rating - exp['ln_w']:+d} dB",
         passed=ok,
     )

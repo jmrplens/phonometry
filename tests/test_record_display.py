@@ -144,8 +144,8 @@ def test_every_public_record_shows_itself_through_the_mechanism() -> None:
         or cls._repr_pretty_ is not RichDisplay._repr_pretty_  # type: ignore[attr-defined]
     ] == []
     assert {cls.__name__ for cls in named_tuples} == {
-        "FibreCharacteristicLengths",
-        "FibreResistivityFit",
+        "FiberCharacteristicLengths",
+        "FiberResistivityFit",
     }
 
 
@@ -180,16 +180,16 @@ def test_ipython_prints_every_public_record_with_the_table() -> None:
 def test_a_named_tuple_shows_the_same_table() -> None:
     from phonometry import materials
 
-    fit = materials.FibreResistivityFit(
+    fit = materials.FiberResistivityFit(
         k1=3.18e-9,
         k2=1.53,
-        fibre_diameter_um=6.0,
+        fiber_diameter_um=6.0,
         bulk_density_range_kg_m3=(10.0, 100.0),
         direction="lateral",
         source="test",
     )
-    lengths = materials.fibre_characteristic_lengths(
-        3e-6, bulk_density_kg_m3=20.0, fibre_density_kg_m3=2500.0
+    lengths = materials.fiber_characteristic_lengths(
+        3e-6, bulk_density_kg_m3=20.0, fiber_density_kg_m3=2500.0
     )
     for record in (fit, lengths):
         assert record._repr_html_() == display.record_html(record)
@@ -545,7 +545,7 @@ def test_the_worst_case_stays_bounded() -> None:
         ("peak_temperature_at_10_hz_c", "\N{DEGREE SIGN}C"),
         ("inlet_temperature_k", "K"),
         ("load_current_a", "A"),
-        ("fibre_diameter_um", "\N{MICRO SIGN}m"),
+        ("fiber_diameter_um", "\N{MICRO SIGN}m"),
         ("relative_humidity_percent", "%"),
         ("thickness_critical_frequency_product_m_hz", "m\N{MIDDLE DOT}Hz"),
         ("burst_s", "s"),

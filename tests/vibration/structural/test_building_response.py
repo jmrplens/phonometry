@@ -28,9 +28,9 @@ def test_the_three_coefficient_ranges_are_the_printed_ones() -> None:
 def test_the_storey_model_is_the_rule_din_4150_3_also_prints() -> None:
     """``T = 0,1 n`` and ``f = 10/n`` are the same sentence twice."""
     for n in (5, 8, 10, 20):
-        assert br.fundamental_period("storeys", storeys=n) == pytest.approx(0.1 * n)
-        assert br.fundamental_frequency("storeys", storeys=n) == pytest.approx(
-            vibration.storey_fundamental_frequency(n)
+        assert br.fundamental_period("stories", stories=n) == pytest.approx(0.1 * n)
+        assert br.fundamental_frequency("stories", stories=n) == pytest.approx(
+            vibration.story_fundamental_frequency(n)
         )
 
 
@@ -128,8 +128,8 @@ def test_the_damping_range_of_d_4() -> None:
 
 
 def test_a_model_needs_the_arguments_it_is_written_on() -> None:
-    with pytest.raises(ValueError, match=r"needs 'storeys'"):
-        br.fundamental_period("storeys")
+    with pytest.raises(ValueError, match=r"needs 'stories'"):
+        br.fundamental_period("stories")
     with pytest.raises(ValueError, match=r"'height' model needs 'height_m'"):
         br.fundamental_period("height")
     with pytest.raises(ValueError, match=r"'height_width' model needs 'width_m'"):
@@ -145,20 +145,20 @@ def test_a_model_refuses_an_argument_it_does_not_use() -> None:
     handed to the storey model would be carried into the estimate and drawn on
     Figure D.1 as if the prediction had used it.
     """
-    with pytest.raises(ValueError, match=r"'storeys' model does not use 'coefficient'"):
-        br.fundamental_period("storeys", storeys=10, coefficient=0.022)
-    with pytest.raises(ValueError, match=r"'storeys' model does not use 'height_m'"):
-        br.fundamental_period("storeys", storeys=10, height_m=60.0)
+    with pytest.raises(ValueError, match=r"'stories' model does not use 'coefficient'"):
+        br.fundamental_period("stories", stories=10, coefficient=0.022)
+    with pytest.raises(ValueError, match=r"'stories' model does not use 'height_m'"):
+        br.fundamental_period("stories", stories=10, height_m=60.0)
     with pytest.raises(ValueError, match=r"'height' model does not use 'width_m'"):
         br.fundamental_period("height", height_m=60.0, width_m=15.0)
-    with pytest.raises(ValueError, match=r"does not use 'storeys'"):
-        br.fundamental_period("height_width", height_m=60.0, width_m=15.0, storeys=18)
+    with pytest.raises(ValueError, match=r"does not use 'stories'"):
+        br.fundamental_period("height_width", height_m=60.0, width_m=15.0, stories=18)
 
 
 def test_the_estimate_refuses_the_height_it_would_have_drawn_wrongly() -> None:
     """The regression behind the rule above, at the entry point that draws."""
-    with pytest.raises(ValueError, match=r"'storeys' model does not use 'height_m'"):
-        br.estimate_fundamental_frequency("storeys", storeys=10, height_m=60.0)
+    with pytest.raises(ValueError, match=r"'stories' model does not use 'height_m'"):
+        br.estimate_fundamental_frequency("stories", stories=10, height_m=60.0)
 
 
 def test_a_model_outside_the_four_is_refused() -> None:
@@ -190,7 +190,7 @@ def test_the_estimate_carries_the_coefficient_and_the_band() -> None:
 
 
 def test_the_storey_estimate_carries_no_coefficient_and_no_height() -> None:
-    got = br.estimate_fundamental_frequency("storeys", storeys=10)
+    got = br.estimate_fundamental_frequency("stories", stories=10)
     assert got.coefficient is None
     assert got.height_m is None
     assert got.frequency_hz == pytest.approx(1.0)
@@ -198,12 +198,12 @@ def test_the_storey_estimate_carries_no_coefficient_and_no_height() -> None:
 
 def test_the_storey_estimate_cannot_be_placed_on_figure_d_1() -> None:
     """The figure is drawn against height, and this model never saw one."""
-    got = br.estimate_fundamental_frequency("storeys", storeys=10)
+    got = br.estimate_fundamental_frequency("stories", stories=10)
     with pytest.raises(ValueError, match=r"storey model has no height"):
         got.plot()
 
 
 def test_the_names_are_exported_from_the_domain() -> None:
-    assert vibration.fundamental_frequency("storeys", storeys=10) == pytest.approx(1.0)
+    assert vibration.fundamental_frequency("stories", stories=10) == pytest.approx(1.0)
     assert vibration.PERIOD_MODELS == br.PERIOD_MODELS
     assert vibration.DAMPING_RATIO_RANGE == pytest.approx((0.005, 0.021))

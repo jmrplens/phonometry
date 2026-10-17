@@ -352,7 +352,7 @@ from .prediction import (
 )
 from .regulation import (
     DB_HR_FREQUENCIES_HZ,
-    DB_HR_NORMALISED_SPECTRA,
+    DB_HR_NORMALIZED_SPECTRA,
     DbHrAssessment,
     DbHrCheck,
     DbHrGlobalIndexResult,
@@ -425,7 +425,7 @@ __all__ = [
     "CEILING_ATTENUATION_CONTOUR",
     "COVERAGE_FACTORS",
     "DB_HR_FREQUENCIES_HZ",
-    "DB_HR_NORMALISED_SPECTRA",
+    "DB_HR_NORMALIZED_SPECTRA",
     "HEAVY_IMPACT_A_WEIGHTING",
     "HEAVY_IMPACT_OCTAVE_BANDS_HZ",
     "EN_12354_AIR",

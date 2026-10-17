@@ -246,7 +246,7 @@ espectro medido toca ahí 26,6 dB, y $R_\mathrm{w}$ es 30 dB.*
 ```python
 # `building`, `R` y `w` vienen del bloque de la curva de referencia de arriba.
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
-print(w.unfavourable_sum)                            # 31.8  (tope 32.0 = 2.0 x 16)
+print(w.unfavorable_sum)                            # 31.8  (tope 32.0 = 2.0 x 16)
 
 w.plot()   # R medido frente a la referencia ISO 717-1 desplazada, desviaciones sombreadas (requiere matplotlib)
 ```
@@ -291,7 +291,7 @@ plt.show()
 | `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
 
 `weighted_rating()` devuelve un `WeightedRatingResult` (`rating`, `c`, `ctr`,
-`unfavourable_sum`, todos enteros salvo la suma), más los tres campos con los
+`unfavorable_sum`, todos enteros salvo la suma), más los tres campos con los
 que se dibujan las figuras de esta página: `frequencies`, `measured` y
 `shifted_reference`, y `quantity`, que nombra lo que se ha valorado.
 
@@ -351,7 +351,7 @@ l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
 
 # Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
 res_imp = building.weighted_impact_rating(l_n)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
+print(res_imp.rating, res_imp.ci, res_imp.unfavorable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
 
 # Los datos en banda de octava llevan la reducción extra de -5 dB (apartado 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
@@ -413,7 +413,7 @@ celda las dieciséis bandas y da $-10$; la entrada del registro está en
 | `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
 
 `weighted_impact_rating()` devuelve un `ImpactRatingResult` (`rating`,
-`ci` enteros, `unfavourable_sum` en dB), con los mismos tres campos de dibujo
+`ci` enteros, `unfavorable_sum` en dB), con los mismos tres campos de dibujo
 que el resultado aéreo: `frequencies`, `measured` y `shifted_reference`.
 
 ## Rangos de frecuencia ampliados e índices con un decimal

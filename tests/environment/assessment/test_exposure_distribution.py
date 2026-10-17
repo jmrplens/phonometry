@@ -301,7 +301,7 @@ def test_turbulence_level_shift_is_the_integral_of_equation_22(sigma: float) -> 
 def test_each_subclass_keeps_its_energy_after_the_shift() -> None:
     """The reason for Equation (22): the spread subclass averages to its centre."""
     dist = sd.sel_distribution([40.0, 50.0], [0.5, 0.5], sigma_db=4.0, subclasses=1)
-    mean = float(dist.subclass_centres_db[0, 0])
+    mean = float(dist.subclass_centers_db[0, 0])
     shift = dist.level_shift_db
 
     def integrand(x: float) -> float:
@@ -369,7 +369,7 @@ def test_subclass_centres_follow_equation_18() -> None:
     dist = sd.sel_distribution([40.0, 44.0], [0.25, 0.75], subclasses=4)
     # Classes [38, 42] and [42, 46]: b = 1 dB, centres at g_L + (j - 1/2) b.
     np.testing.assert_allclose(
-        dist.subclass_centres_db,
+        dist.subclass_centers_db,
         [[38.5, 39.5, 40.5, 41.5], [42.5, 43.5, 44.5, 45.5]],
     )
     np.testing.assert_allclose(dist.class_densities_per_db, [0.25 / 4.0, 0.75 / 4.0])
@@ -379,7 +379,7 @@ def test_sigma_and_subclasses_default_to_the_annex() -> None:
     dist = sd.sel_distribution([40.0, 44.0], [0.5, 0.5])
     assert dist.sigma_db == 5.0
     assert dist.subclasses == 10
-    assert dist.subclass_centres_db.shape == (2, 10)
+    assert dist.subclass_centers_db.shape == (2, 10)
 
 
 def test_result_arrays_are_read_only() -> None:
@@ -395,12 +395,12 @@ def test_result_arrays_are_read_only() -> None:
         "lower_bounds_db",
         "upper_bounds_db",
         "class_densities_per_db",
-        "subclass_centres_db",
+        "subclass_centers_db",
     }
     writable = [name for name, array in arrays.items() if array.flags.writeable]
     assert writable == []
     with pytest.raises(ValueError, match="read-only"):
-        dist.subclass_centres_db[0, 0] = 0.0
+        dist.subclass_centers_db[0, 0] = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -631,8 +631,8 @@ def test_result_refuses_columns_of_different_length() -> None:
 
 
 def test_result_refuses_subclass_centres_of_the_wrong_shape() -> None:
-    fields = _fields(subclass_centres_db=np.zeros((2, 3)))
-    with pytest.raises(ValueError, match="'subclass_centres_db' must have one row"):
+    fields = _fields(subclass_centers_db=np.zeros((2, 3)))
+    with pytest.raises(ValueError, match="'subclass_centers_db' must have one row"):
         sd.SelDistribution(**fields)  # type: ignore[arg-type]
 
 

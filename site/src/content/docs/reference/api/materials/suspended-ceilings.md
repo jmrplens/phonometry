@@ -124,7 +124,7 @@ CeilingSpecimenCheck(
     fixture_density_kg_m2: float,
     support_width_mm: float,
     support_height_mm: float,
-    support_centre_distance_m: float | None,
+    support_center_distance_m: float | None,
     lowest_relative_humidity_percent: float | None,
 )
 ```
@@ -158,7 +158,7 @@ pass an arrangement the clause fails.
 | `fixture_density_kg_m2` | The surface density of the mounting fixture, in kilograms per square metre. |
 | `support_width_mm` | One side of the cross-section of the support units, in millimetres. |
 | `support_height_mm` | The other side, in millimetres. |
-| `support_centre_distance_m` | The centre distance between support units, in metres, or `None`. |
+| `support_center_distance_m` | The centre distance between support units, in metres, or `None`. |
 | `lowest_relative_humidity_percent` | The driest of the measurements, in percent, or `None` when no humidity was given. |
 
 ### CeilingSpecimenCheck.area_error_m2
@@ -248,7 +248,7 @@ check_ceiling_specimen(
     fixture_density_kg_m2: float = 20.0,
     support_width_mm: float = 0.0,
     support_height_mm: float = 0.0,
-    support_centre_distance_m: float | None = None,
+    support_center_distance_m: float | None = None,
     relative_humidity_percent: ArrayLike | None = None,
 ) -> CeilingSpecimenCheck
 ```
@@ -303,7 +303,7 @@ substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
 | `fixture_density_kg_m2` | The surface density of the mounting fixture, in kilograms per square metre. |
 | `support_width_mm` | One side of the cross-section of the support units, in millimetres; zero when the substructure has none. |
 | `support_height_mm` | The other side, in millimetres. |
-| `support_centre_distance_m` | The centre distance between support units, in metres, or `None` when there are none or it was not recorded. |
+| `support_center_distance_m` | The centre distance between support units, in metres, or `None` when there are none or it was not recorded. |
 | `relative_humidity_percent` | The relative humidity of the room in each measurement, in percent, one value per measurement, or `None` to leave 4.2.2 unjudged. |
 
 **Returns:** The verdict, as a [`CeilingSpecimenCheck`](/phonometry/reference/api/materials/suspended-ceilings/#ceilingspecimencheck).

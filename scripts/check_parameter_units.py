@@ -685,7 +685,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
         "BENDING_STRESS_CONSTANT",
     ),
     **_exempt(
-        _A_COUNT, "vibration.structural.building_damage", "STOREY_FREQUENCY_MIN_STOREYS"
+        _A_COUNT, "vibration.structural.building_damage", "STORY_FREQUENCY_MIN_STORIES"
     ),
     **_exempt(
         "the ranges of k_1, k_2 and k_3 of ISO 4866 Annex D, Formulas (D.1) to "
@@ -746,7 +746,7 @@ EXEMPT: dict[tuple[str, str, str], str] = {
     (
         "phonometry.materials.absorbers.catalogue",
         "PorousMaterial",
-        "fibre_diameter_distribution_parameter",
+        "fiber_diameter_distribution_parameter",
     ): _OF_A_DISTRIBUTION,
     ("phonometry.underwater.acoustics", "sound_pressure_level", "pressure"): _ACOUSTIC,
     ("phonometry.underwater.acoustics", "sound_exposure_level", "pressure"): _ACOUSTIC,

@@ -46,7 +46,7 @@ _IEC60534_8_4 = "Control valve noise (IEC 60534-8-4)"
 #: A.1's given data, shared by the three columns, in SI units.
 _LIQUID: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
-    "vapour_pressure_pa": 2.32e3,
+    "vapor_pressure_pa": 2.32e3,
     "density": 997.0,
     "speed_of_sound": 1400.0,
 }

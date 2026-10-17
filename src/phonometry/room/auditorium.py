@@ -1849,22 +1849,22 @@ def gliding_directivity_deviation(levels: ArrayLike) -> NDArray[np.float64]:
     return np.asarray(10.0 * np.log10(arcs / float(np.mean(energies))))
 
 
-def source_directivity_limit(centre: float) -> float:
+def source_directivity_limit(center: float) -> float:
     """The Table 1 limit for one octave band, in dB.
 
-    :param centre: Nominal octave band centre frequency in Hz.
+    :param center: Nominal octave band centre frequency in Hz.
     :return: The maximum deviation from omnidirectionality the table prints.
     :raises ValueError: If Table 1 has no row for that band. It prints six,
         125 Hz to 4 kHz, and a survey in the 63 Hz or 8 kHz octave has no
         printed limit to be held to rather than the nearest one.
     """
-    if centre not in MAX_SOURCE_DIRECTIVITY_DEVIATION_DB:
+    if center not in MAX_SOURCE_DIRECTIVITY_DEVIATION_DB:
         printed = ", ".join(
             f"{band:g}" for band in sorted(MAX_SOURCE_DIRECTIVITY_DEVIATION_DB)
         )
         msg = (
             f"ISO 3382-1:2009, Table 1 prints a directivity limit for the "
-            f"{printed} Hz octave bands and no others; got {centre!r} Hz."
+            f"{printed} Hz octave bands and no others; got {center!r} Hz."
         )
         raise ValueError(msg)
-    return MAX_SOURCE_DIRECTIVITY_DEVIATION_DB[centre]
+    return MAX_SOURCE_DIRECTIVITY_DEVIATION_DB[center]

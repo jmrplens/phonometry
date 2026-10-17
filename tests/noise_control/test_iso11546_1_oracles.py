@@ -261,8 +261,8 @@ def test_iso717_calculation_example_through_clause_7_4() -> None:
         ISO717_TABLE_C1_DB, quantity="sound_power", band_fraction=3
     )
     assert (rated.rating, rated.c, rated.ctr) == (30, -2, -3)
-    assert rated.unfavourable_sum == pytest.approx(31.8, abs=0.05)
-    assert rated.unfavourable_sum < 32.0
+    assert rated.unfavorable_sum == pytest.approx(31.8, abs=0.05)
+    assert rated.unfavorable_sum < 32.0
     assert rated.quantity == "sound_power"
     assert rated.frequencies[0] == 100.0
     assert rated.frequencies[-1] == 3150.0

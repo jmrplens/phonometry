@@ -47,7 +47,7 @@ has the tables needs them in the same breath:
   more is roughly :math:`f_i \approx 10/n` with :math:`n` the storey count
   (6.4), which is the estimate that tells you whether the topmost floor plane
   will be excited at all. DIN 4150-1 prints it as Formula (4) and ISO 4866 in
-  D.2, and :func:`storey_fundamental_frequency` is the one function for all
+  D.2, and :func:`story_fundamental_frequency` is the one function for all
   three.
 
 Clause 6.2 turns a measured velocity into a bending stress for a beam or a
@@ -193,12 +193,12 @@ BENDING_STRESS_CONSTANT: float = 1.73
 #: The numerator of the storey estimate ``f ~ 10 / n``, in hertz, for
 #: buildings from about five storeys up: DIN 4150-3 6.4, the same estimate as
 #: DIN 4150-1 Formula (4) and ISO 4866 D.2.
-STOREY_FREQUENCY_NUMERATOR_HZ: float = 10.0
+STORY_FREQUENCY_NUMERATOR_HZ: float = 10.0
 
 #: The storey count from which the estimate is offered: about five in
 #: DIN 4150-3 6.4, five and more in DIN 4150-1 Formula (4). ISO 4866 D.2
 #: offers it for tall buildings without a count.
-STOREY_FREQUENCY_MIN_STOREYS: int = 5
+STORY_FREQUENCY_MIN_STORIES: int = 5
 
 
 def _refuse_unread_frequency(
@@ -225,8 +225,8 @@ def _refuse_unread_frequency(
 class BuildingDamageWarning(PhonometryWarning):
     """A DIN 4150-3 rule is used outside the range the standard offers it for.
 
-    Raised by :func:`storey_fundamental_frequency` below
-    :data:`STOREY_FREQUENCY_MIN_STOREYS`. The estimate is still returned:
+    Raised by :func:`story_fundamental_frequency` below
+    :data:`STORY_FREQUENCY_MIN_STORIES`. The estimate is still returned:
     DIN 4150-3 6.4 offers ``10 / n`` from about five storeys up, DIN 4150-1
     Formula (4) for five and more, ISO 4866 D.2 for tall buildings, and below
     five none of them says anything, so the number is an extrapolation
@@ -478,7 +478,7 @@ def assess_building_vibration(
     )
 
 
-def storey_fundamental_frequency(storeys: int) -> float:
+def story_fundamental_frequency(stories: int) -> float:
     """The rough lowest horizontal natural frequency of a building.
 
     ``f ~ 10 / n``, offered for buildings from about five storeys up. Three
@@ -490,35 +490,35 @@ def storey_fundamental_frequency(storeys: int) -> float:
     its use is to tell whether the excitation is anywhere near the frequency
     at which the topmost floor plane will answer.
 
-    :param storeys: The number of storeys ``n``.
+    :param stories: The number of storeys ``n``.
     :return: The estimated lowest horizontal natural frequency, in hertz.
     :raises ValueError: If the storey count is not a positive integer.
     :warns BuildingDamageWarning: Below
-        :data:`STOREY_FREQUENCY_MIN_STOREYS`, where the estimate is an
+        :data:`STORY_FREQUENCY_MIN_STORIES`, where the estimate is an
         extrapolation of a rule the standard offers for taller buildings.
     """
     # ValueError rather than TypeError, so every argument this module refuses
     # raises the same class.
-    if isinstance(storeys, bool) or not isinstance(storeys, (int, np.integer)):
-        msg = "'storeys' must be an integer."
+    if isinstance(stories, bool) or not isinstance(stories, (int, np.integer)):
+        msg = "'stories' must be an integer."
         raise ValueError(msg)  # noqa: TRY004
-    n = int(storeys)
+    n = int(stories)
     if n < 1:
-        msg = f"'storeys' must be at least 1; got {n}."
+        msg = f"'stories' must be at least 1; got {n}."
         raise ValueError(msg)
-    if n < STOREY_FREQUENCY_MIN_STOREYS:
+    if n < STORY_FREQUENCY_MIN_STORIES:
         # A warning and not a refusal: 6.4 says "about five storeys", and a
         # four-storey building is not on the far side of a line the standard
         # drew. What it is not is covered, and silence would say it was.
         warnings.warn(
             f"DIN 4150-3 6.4 offers f_i ~ 10/n from about "
-            f"{STOREY_FREQUENCY_MIN_STOREYS} storeys up; got {n}, so the "
-            f"{STOREY_FREQUENCY_NUMERATOR_HZ / n:.3g} Hz returned is an "
+            f"{STORY_FREQUENCY_MIN_STORIES} storeys up; got {n}, so the "
+            f"{STORY_FREQUENCY_NUMERATOR_HZ / n:.3g} Hz returned is an "
             "extrapolation of the rule rather than the rule.",
             BuildingDamageWarning,
             stacklevel=2,
         )
-    return STOREY_FREQUENCY_NUMERATOR_HZ / n
+    return STORY_FREQUENCY_NUMERATOR_HZ / n
 
 
 def bending_stress(

@@ -41,7 +41,7 @@ floor amplifies by at most $1 / (2 D_1)$, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
 storeys or more is about $10 / n$ Hz (Formula (4)), the estimate
 DIN 4150-3 prints in 6.4 and ISO 4866 in D.2 as well, so it has one home:
-[`storey_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#storey_fundamental_frequency).
+[`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency).
 
 **Sources** (Clause 5). A blast in the far field follows
 $v_{\max} = k (L/L_0)^b (R/R_0)^{-m}$ (Formula (5)) with the charge per
@@ -538,7 +538,7 @@ than it Formula (2) does not hold.
 ## soil_building_frequency_guide
 
 ```python
-soil_building_frequency_guide(storeys: int) -> tuple[float, float]
+soil_building_frequency_guide(stories: int) -> tuple[float, float]
 ```
 
 The natural frequency Clause 4.3 gives a building on medium ground.
@@ -552,7 +552,7 @@ building gets the union, 8 Hz to 15 Hz.
 
 | Name | Description |
 | :--- | :--- |
-| `storeys` | The number of storeys, at least one. |
+| `stories` | The number of storeys, at least one. |
 
 **Returns:** `(low, high)` in hertz; the low bound is 0 above six storeys and both are 15 for a single storey.
 

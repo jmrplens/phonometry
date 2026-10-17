@@ -203,7 +203,7 @@ The level difference from the ground to a floor, Tables A.1 and A.2.
 
 $\Delta L_{v,\mathrm{DB}}$ for a building with concrete or with
 timber floors whose floors have the given natural frequency, along
-[`PREDICTION_BAND_CENTRES_HZ`](/phonometry/reference/api/vibration/railway-prediction/#prediction_band_centres_hz), for any storey. The tables print a
+[`PREDICTION_BAND_CENTERS_HZ`](/phonometry/reference/api/vibration/railway-prediction/#prediction_band_centers_hz), for any storey. The tables print a
 column for each of [`FLOOR_NATURAL_FREQUENCIES_HZ`](/phonometry/reference/api/vibration/railway-prediction/#floor_natural_frequencies_hz) and no rule for a
 frequency between two, so the frequency has to be one of them. Clause
 5.4.4: run the prediction once for each natural frequency the building may
@@ -556,12 +556,12 @@ category at or below 0,1 counting as zero.
 | :--- | :--- |
 | ValueError | For a spectrum that does not hold the 14 bands of the KB assessment, or a bad term. |
 
-## PREDICTION_BAND_CENTRES_HZ
+## PREDICTION_BAND_CENTERS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-PREDICTION_BAND_CENTRES_HZ = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0)
+PREDICTION_BAND_CENTERS_HZ = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0)
 ```
 
 ## RECOMMENDED_DISTANCES_M

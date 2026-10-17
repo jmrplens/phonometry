@@ -232,7 +232,7 @@ def _chk_storey_frequency() -> Outcome:
     """Clause 6.4: ``f_i ~ 10 / n``, at ten storeys."""
     return numeric(
         1.0,
-        ph.vibration.storey_fundamental_frequency(10),
+        ph.vibration.story_fundamental_frequency(10),
         0.0005,
         unit="Hz",
         places=4,

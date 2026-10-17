@@ -135,7 +135,7 @@ from phonometry import environment
 
 # ISO 1996-2:2007 Annex C.5, Example 2 (two tones near 400 Hz):
 res = environment.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
-                              centre_frequency=430.0)
+                              center_frequency=430.0)
 print(res.audibility, res.adjustment)   # ΔLta ≈ 11.1 dB -> Kt = 6 dB
 res.plot()
 plt.show()

@@ -25662,13 +25662,13 @@ export const catalogues = {
         "unit": "m²"
       },
       {
-        "field": "fibre_diameter_um",
+        "field": "fiber_diameter_um",
         "heading": "Fibre diameter",
         "headingEs": "Diámetro de fibra",
         "unit": "µm"
       },
       {
-        "field": "fibre_diameter_distribution_parameter",
+        "field": "fiber_diameter_distribution_parameter",
         "heading": "Diameter distribution",
         "headingEs": "Distribución de diámetros",
         "unit": ""

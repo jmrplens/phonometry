@@ -35,7 +35,7 @@ floor amplifies by at most :math:`1 / (2 D_1)`, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
 storeys or more is about :math:`10 / n` Hz (Formula (4)), the estimate
 DIN 4150-3 prints in 6.4 and ISO 4866 in D.2 as well, so it has one home:
-:func:`~phonometry.vibration.storey_fundamental_frequency`.
+:func:`~phonometry.vibration.story_fundamental_frequency`.
 
 **Sources** (Clause 5). A blast in the far field follows
 :math:`v_{\max} = k (L/L_0)^b (R/R_0)^{-m}` (Formula (5)) with the charge per
@@ -419,7 +419,7 @@ def soil_building_natural_frequency(stiffness: float, *, mass: float) -> float:
     return math.sqrt(stiffness / mass) / (2.0 * math.pi)
 
 
-def soil_building_frequency_guide(storeys: int) -> tuple[float, float]:
+def soil_building_frequency_guide(stories: int) -> tuple[float, float]:
     """The natural frequency Clause 4.3 gives a building on medium ground.
 
     About 15 Hz for one or two storeys, 8 Hz to 12 Hz for two to six, under
@@ -427,13 +427,13 @@ def soil_building_frequency_guide(storeys: int) -> tuple[float, float]:
     200 m/s. The clause prints two storeys in both ranges, so a two-storey
     building gets the union, 8 Hz to 15 Hz.
 
-    :param storeys: The number of storeys, at least one.
+    :param stories: The number of storeys, at least one.
     :return: ``(low, high)`` in hertz; the low bound is 0 above six storeys
         and both are 15 for a single storey.
     :raises ValueError: For fewer than one storey or a count that is not
         whole.
     """
-    count = require_count(storeys, "storeys")
+    count = require_count(stories, "stories")
     if count < _LOW_RISE_STOREYS:
         return _LOW_RISE_HZ
     if count == _LOW_RISE_STOREYS:

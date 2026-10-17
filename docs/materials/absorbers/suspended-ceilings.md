@@ -47,7 +47,7 @@ clause asks to be aimed at, published as constants to build to and not judged.
 ```python
 dry = materials.check_ceiling_specimen(
     area=10.8, mounting="E", depth_mm=200.0,
-    support_width_mm=40.0, support_height_mm=40.0, support_centre_distance_m=1.2,
+    support_width_mm=40.0, support_height_mm=40.0, support_center_distance_m=1.2,
     relative_humidity_percent=[41.0, 44.0],
 )
 print(dry.supports_ok, dry.humidity_ok, dry.satisfied)   # True False False

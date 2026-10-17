@@ -2726,7 +2726,7 @@ anti-alias requirement, turned into an explicit, checkable specification by
 **Not covered.** IEC 60268-1:1985 is a general standard for sound system
 equipment; only the Annex A tone-burst clauses are implemented on this page.
 Its Clause 7, the simulated programme signal, is in
-`electroacoustics.programme_signal` and has its walk-through in the
+`electroacoustics.program_signal` and has its walk-through in the
 [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/)
 guide. The device parts are not covered here, but they are not untouched
 either: amplifiers (IEC 60268-3), microphones (IEC 60268-4), loudspeakers

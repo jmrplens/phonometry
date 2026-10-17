@@ -369,7 +369,7 @@ when the fibres are solid and the binder has negligible mass.
 **Resistivity from the bulk density.** `airflow_resistivity_from_bulk_density`
 is his Eq. (1.165), $r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$ with
 the fibre diameter in micrometres. The constants belong to a material, not to
-mineral wool in general, so they travel in a `FibreResistivityFit` that carries
+mineral wool in general, so they travel in a `FiberResistivityFit` that carries
 the fibre diameter they were fitted at and the bulk-density range they were
 fitted over, and a density outside that range is announced rather than
 extrapolated in silence. Two are published from Hopkins' page, for the same rock
@@ -383,7 +383,7 @@ sigma = materials.airflow_resistivity_from_bulk_density(
     60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
 )
 phi = materials.porosity_from_bulk_density(
-    60.0, fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3
+    60.0, fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3
 )
 print(round(sigma), round(phi, 3))
 # 23226 0.977
@@ -412,7 +412,7 @@ two rows whose lengths the book took from a different model. So the relation is
 worth a factor of two on a bulk fibrous or open-cell absorber, and nothing at
 all on a floor covering.
 
-**Both lengths from the fibre geometry.** `fibre_characteristic_lengths` is
+**Both lengths from the fibre geometry.** `fiber_characteristic_lengths` is
 their Eqs. (5.29) and (5.30) for a bundle of cylinders, $\Lambda = 1/(2\pi L R)$
 and $\Lambda' = 2\Lambda$, with the fibre length per unit volume $L$ eliminated
 through its own definition, leaving
@@ -427,10 +427,10 @@ lower estimate throughout, by 1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
 from_parameters = materials.viscous_characteristic_length(
     sigma, porosity=phi, tortuosity=1.0
 )
-from_geometry = materials.fibre_characteristic_lengths(
+from_geometry = materials.fiber_characteristic_lengths(
     2.375e-6,  # half of Hopkins' 4,75 um fibre diameter
     bulk_density_kg_m3=60.0,
-    fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3,
+    fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3,
 )
 print(round(from_parameters * 1e6, 1), round(from_geometry.viscous_length_m * 1e6, 1))
 # 80.5 51.5

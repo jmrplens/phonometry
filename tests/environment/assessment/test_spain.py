@@ -286,7 +286,7 @@ def test_outdoor_objectives_of_newly_urbanised_areas_are_five_decibels_stricter(
 ):
     """Article 14.2: for the rest of the urbanised areas, Table A minus 5 dB."""
     existing = rd.outdoor_quality_objectives("a")
-    new = rd.outdoor_quality_objectives("a", urbanisation="new")
+    new = rd.outdoor_quality_objectives("a", urbanization="new")
     assert (new.day, new.evening, new.night) == (60.0, 60.0, 50.0)
     for period in rd.RD1367_EVALUATION_PERIODS:
         assert new[period] == existing[period] - 5.0
@@ -647,8 +647,8 @@ def test_limit_lookup_validation() -> None:
         ValueError, match=r"Unknown \(building_use, room_type\) combination"
     ):
         rd.indoor_quality_objectives("residential", "classrooms")
-    with pytest.raises(ValueError, match=r"'urbanisation' must be 'existing'"):
-        rd.outdoor_quality_objectives("a", urbanisation="future")
+    with pytest.raises(ValueError, match=r"'urbanization' must be 'existing'"):
+        rd.outdoor_quality_objectives("a", urbanization="future")
     with pytest.raises(ValueError, match=r"'period' must be one of"):
         rd.activity_limits("a")["afternoon"]
 

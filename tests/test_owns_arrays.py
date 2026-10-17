@@ -670,7 +670,7 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
         ),
         "WeightedRatingResult": (
             lambda a: building.WeightedRatingResult(
-                rating=50, c=-1, ctr=-4, unfavourable_sum=20.0, measured=a
+                rating=50, c=-1, ctr=-4, unfavorable_sum=20.0, measured=a
             ),
             "measured",
         ),

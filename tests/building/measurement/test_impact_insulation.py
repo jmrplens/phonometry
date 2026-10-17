@@ -108,7 +108,7 @@ def test_annex_c1_worked_example_third_octave() -> None:
     assert isinstance(res, building.ImpactRatingResult)
     assert res.rating == 79
     assert res.ci == -11
-    assert res.unfavourable_sum == pytest.approx(28.0, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(28.0, abs=1e-9)
 
 
 def test_annex_c3_worked_example_octave() -> None:
@@ -116,7 +116,7 @@ def test_annex_c3_worked_example_octave() -> None:
     res = building.weighted_impact_rating(_ANNEX_C3_LN)
     assert res.rating == 54
     assert res.ci == 0
-    assert res.unfavourable_sum == pytest.approx(7.8, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(7.8, abs=1e-9)
 
 
 def test_octave_minus_five_rule_vs_third_octave() -> None:
@@ -128,11 +128,11 @@ def test_octave_minus_five_rule_vs_third_octave() -> None:
     # One-third octave: shift down 2 dB, read at 500 Hz => 60 - 2 = 58.
     third = building.weighted_impact_rating(_REF_IMPACT_THIRD)
     assert third.rating == _REF_IMPACT_THIRD[_INDEX_500_THIRD] - 2  # 58
-    assert third.unfavourable_sum == pytest.approx(32.0, abs=1e-9)
+    assert third.unfavorable_sum == pytest.approx(32.0, abs=1e-9)
     # Octave: shift down 2 dB then -5 dB => 65 - 2 - 5 = 58.
     octave = building.weighted_impact_rating(_REF_IMPACT_OCTAVE)
     assert octave.rating == _REF_IMPACT_OCTAVE[_INDEX_500_OCTAVE] - 2 - 5  # 58
-    assert octave.unfavourable_sum == pytest.approx(10.0, abs=1e-9)
+    assert octave.unfavorable_sum == pytest.approx(10.0, abs=1e-9)
 
 
 def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
@@ -142,7 +142,7 @@ def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
     # The unshifted reference already sits 2 dB below measured (sum 32,0),
     # so no shift is needed; the rating is read at 500 Hz unchanged.
     assert res.rating == _REF_IMPACT_THIRD[_INDEX_500_THIRD]  # 60
-    assert res.unfavourable_sum == pytest.approx(32.0, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(32.0, abs=1e-9)
 
 
 def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
@@ -152,7 +152,7 @@ def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
     res = building.weighted_impact_rating(measured)
     assert res.rating == _REF_IMPACT_THIRD[_INDEX_500_THIRD] + 1  # 61
     # At +1 dB: 15 bands contribute 1,0 dB each and the bumped band 1,1 dB.
-    assert res.unfavourable_sum == pytest.approx(16.1, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(16.1, abs=1e-9)
 
 
 def test_explicit_band_set_override() -> None:
@@ -196,7 +196,7 @@ def test_engine_matches_brute_force_third_octave() -> None:
         ci = _brute_force_ci(list(curve), rating, 15)
         assert res.rating == rating
         assert res.ci == ci
-        assert res.unfavourable_sum == pytest.approx(dev, abs=1e-9)
+        assert res.unfavorable_sum == pytest.approx(dev, abs=1e-9)
 
 
 def test_engine_matches_brute_force_octave() -> None:
@@ -211,7 +211,7 @@ def test_engine_matches_brute_force_octave() -> None:
         ci = _brute_force_ci(list(curve), rating, 5)
         assert res.rating == rating
         assert res.ci == ci
-        assert res.unfavourable_sum == pytest.approx(dev, abs=1e-9)
+        assert res.unfavorable_sum == pytest.approx(dev, abs=1e-9)
 
 
 # --------------------------------------------------------------------------

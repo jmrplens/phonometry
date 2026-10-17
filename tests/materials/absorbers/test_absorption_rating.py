@@ -98,7 +98,7 @@ def test_annex_a1_no_indicator() -> None:
     assert _almost(res.alpha_w, ISO11654_ANNEX_A1_ALPHA_W)
     assert res.shape_indicator == ISO11654_ANNEX_A1_INDICATOR
     assert _almost(res.shift, 0.40)
-    assert _almost(res.unfavourable_sum, 0.05)
+    assert _almost(res.unfavorable_sum, 0.05)
     assert res.absorption_class == ISO11654_ANNEX_A1_CLASS
     assert res.rating_label == "0.60"
     np.testing.assert_allclose(res.shifted_reference, _ANNEX_A_SHIFTED_REF)
@@ -109,7 +109,7 @@ def test_annex_a2_shape_indicator_m() -> None:
     assert _almost(res.alpha_w, ISO11654_ANNEX_A2_ALPHA_W)
     assert res.shape_indicator == ISO11654_ANNEX_A2_INDICATOR
     assert _almost(res.shift, 0.40)
-    assert _almost(res.unfavourable_sum, 0.05)
+    assert _almost(res.unfavorable_sum, 0.05)
     assert res.absorption_class == "C"
     assert res.rating_label == "0.60(M)"
     np.testing.assert_allclose(res.shifted_reference, _ANNEX_A_SHIFTED_REF)
@@ -118,7 +118,7 @@ def test_annex_a2_shape_indicator_m() -> None:
 def test_annex_a_unfavourable_sum_within_budget() -> None:
     for alpha_p in (_ANNEX_A1_ALPHA_P, _ANNEX_A2_ALPHA_P):
         res = weighted_absorption(alpha_p)
-        assert res.unfavourable_sum <= 0.10 + 1e-9
+        assert res.unfavorable_sum <= 0.10 + 1e-9
 
 
 def test_shift_is_the_smallest_qualifying_one() -> None:
@@ -252,7 +252,7 @@ def test_weak_absorber_drives_shift() -> None:
     res = weighted_absorption([0.10, 0.10, 0.10, 0.10, 0.10])
     # Reference 1.00 at 500 Hz must drop to within 0.10 total of measured.
     assert res.alpha_w <= 0.15
-    assert res.unfavourable_sum <= 0.10 + 1e-9
+    assert res.unfavorable_sum <= 0.10 + 1e-9
     assert res.shift > 0.0
 
 
@@ -260,7 +260,7 @@ def test_curve_needing_shift_from_reference() -> None:
     # Exactly the reference-shaped curve one notch low: unfav > 0.10 at s=0.
     res = weighted_absorption([0.80, 0.90, 0.90, 0.90, 0.80])
     assert res.shift > 0.0
-    assert res.unfavourable_sum <= 0.10 + 1e-9
+    assert res.unfavorable_sum <= 0.10 + 1e-9
 
 
 # --- result plumbing ------------------------------------------------------
@@ -341,9 +341,9 @@ def test_a_sum_contradicting_its_own_curves_is_refused() -> None:
     import dataclasses
 
     res = weighted_absorption(_ANNEX_A2_ALPHA_P)  # sum 0.05, all of it at 250 Hz
-    assert _almost(res.unfavourable_sum, 0.05)
+    assert _almost(res.unfavorable_sum, 0.05)
     remeasured = np.asarray([0.05, *_ANNEX_A2_ALPHA_P[1:]], dtype=float)
-    with pytest.raises(ValueError, match="'unfavourable_sum' must be the sum"):
+    with pytest.raises(ValueError, match="'unfavorable_sum' must be the sum"):
         dataclasses.replace(res, measured=remeasured)
 
 
@@ -357,8 +357,8 @@ def test_a_sum_off_by_a_last_bit_is_kept() -> None:
     import dataclasses
 
     res = weighted_absorption(_ANNEX_A2_ALPHA_P)
-    kept = dataclasses.replace(res, unfavourable_sum=res.unfavourable_sum + 1e-12)
-    assert _almost(kept.unfavourable_sum, res.unfavourable_sum)
+    kept = dataclasses.replace(res, unfavorable_sum=res.unfavorable_sum + 1e-12)
+    assert _almost(kept.unfavorable_sum, res.unfavorable_sum)
 
 
 def test_weighted_mapping_matches_sequence() -> None:

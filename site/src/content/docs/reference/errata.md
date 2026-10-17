@@ -10879,7 +10879,7 @@ in the same order.
   16), and Clause 2 on PDF page 9 (printed p. 7), of IEC 60268-7:2010,
   Edition 3.0.
 - **Library behaviour:** none needed.
-  [`programme_signal_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/headphones.py)
+  [`program_signal_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/headphones.py)
   takes the free-field response of the head and torso simulator as an input
   and compensates it.
 - **Status:** unreported (cross-reference defect, no numerical consequence).
@@ -10965,7 +10965,7 @@ in the same order.
   page 15 (printed p. 13), Table II on PDF page 23 (printed p. 21) and
   Figures 1 and 2 on PDF page 24 (printed p. 22) of IEC 60268-1:1985.
 - **Library behaviour:** none needed.
-  [`simulated_programme_signal`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/programme_signal.py)
+  [`simulated_program_signal`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/program_signal.py)
   is unclipped by default, as Clause 7 asks, and clips to a peak-to-RMS ratio
   only when `peak_to_rms` is given, which the library credits to 8.3.2.2 b).
 - **Status:** unreported (cross-reference defect, no numerical consequence).

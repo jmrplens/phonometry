@@ -32,7 +32,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 #: the pipe are the same in every one, and so is the valve.
 LIQUID: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
-    "vapour_pressure_pa": 2.32e3,
+    "vapor_pressure_pa": 2.32e3,
     "density": 997.0,
     "speed_of_sound": 1400.0,
 }
@@ -132,7 +132,7 @@ class TestPreliminaryCalculations:
         choked = hydro.cavitation_differential(
             inlet_pressure_pa=1.0e6,
             outlet_pressure_pa=1.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             pressure_recovery=0.92,
         )
         assert choked == pytest.approx(0.92**2 * (1.0e6 - 2.32e3), rel=1e-12)
@@ -355,7 +355,7 @@ class TestPeakFrequencies:
             "pressure_recovery": 0.92,
             "corrected_ratio": 0.2386,
             "inlet_pressure_pa": 1.0e6,
-            "vapour_pressure_pa": 2.32e3,
+            "vapor_pressure_pa": 2.32e3,
         }
         wide = hydro.jet_strouhal_number(
             **shared, valve_diameter_m=0.1, seat_diameter_m=0.05
@@ -378,7 +378,7 @@ class TestPeakFrequencies:
             "valve_diameter_m": 0.1,
             "seat_diameter_m": 0.1,
             "inlet_pressure_pa": 1.0e6,
-            "vapour_pressure_pa": 2.32e3,
+            "vapor_pressure_pa": 2.32e3,
         }
         annex = hydro.jet_strouhal_number(**shared, form="annex")
         clause = hydro.jet_strouhal_number(**shared, form="clause")
@@ -396,7 +396,7 @@ class TestPeakFrequencies:
             "valve_diameter_m": 0.1,
             "seat_diameter_m": 0.1,
             "inlet_pressure_pa": 1.0e6,
-            "vapour_pressure_pa": 2.32e3,
+            "vapor_pressure_pa": 2.32e3,
         }
         assert hydro.jet_strouhal_number(**shared, form="annex") == pytest.approx(
             hydro.jet_strouhal_number(**shared, form="clause"), rel=1e-12
@@ -753,7 +753,7 @@ class TestWholeChain:
 
     def test_the_chain_stops_at_flashing(self) -> None:
         stream = hydro.LiquidStream(
-            **{**LIQUID, "vapour_pressure_pa": 8.0e5},
+            **{**LIQUID, "vapor_pressure_pa": 8.0e5},
             mass_flow=30.0,
             outlet_pressure_pa=7.0e5,
         )
@@ -773,7 +773,7 @@ class TestMultistageTrim:
         stages = hydro.stage_conditions(
             inlet_pressure_pa=1.0e6,
             outlet_pressure_pa=4.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             stage_coefficients=[90.0 * math.sqrt(3.0)] * 3,
             flow_coefficient=90.0,
         )
@@ -788,7 +788,7 @@ class TestMultistageTrim:
         stages = hydro.stage_conditions(
             inlet_pressure_pa=1.0e6,
             outlet_pressure_pa=4.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             stage_coefficients=[110.0, 156.5],
             flow_coefficient=90.0,
         )
@@ -801,7 +801,7 @@ class TestMultistageTrim:
         stages = hydro.stage_conditions(
             inlet_pressure_pa=1.0e6,
             outlet_pressure_pa=4.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             stage_coefficients=[130.0, 160.0, 199.1],
             flow_coefficient=90.0,
         )
@@ -816,7 +816,7 @@ class TestMultistageTrim:
         stages = hydro.stage_conditions(
             inlet_pressure_pa=1.0e6,
             outlet_pressure_pa=4.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             stage_coefficients=[130.0, 160.0, 199.1],
             flow_coefficient=90.0,
         )
@@ -830,7 +830,7 @@ class TestMultistageTrim:
         stages = hydro.stage_conditions(
             inlet_pressure_pa=1.0e6,
             outlet_pressure_pa=4.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             stage_coefficients=[90.0 * math.sqrt(3.0)] * 3,
             flow_coefficient=90.0,
         )
@@ -847,7 +847,7 @@ class TestMultistageTrim:
             hydro.stage_conditions(
                 inlet_pressure_pa=1.0e6,
                 outlet_pressure_pa=4.0e5,
-                vapour_pressure_pa=2.32e3,
+                vapor_pressure_pa=2.32e3,
                 stage_coefficients=[95.0, 95.0, 95.0],
                 flow_coefficient=90.0,
             )
@@ -857,7 +857,7 @@ class TestMultistageTrim:
             hydro.stage_conditions(
                 inlet_pressure_pa=1.0e6,
                 outlet_pressure_pa=4.0e5,
-                vapour_pressure_pa=2.32e3,
+                vapor_pressure_pa=2.32e3,
                 stage_coefficients=[200.0],
                 flow_coefficient=90.0,
             )
@@ -890,7 +890,7 @@ class TestMultistageTrim:
         capped = hydro.last_stage_differential(
             inlet_pressure_pa=6.0e5,
             outlet_pressure_pa=4.0e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             corrected_ratio=0.25,
         )
         assert capped == pytest.approx(0.25 * (6.0e5 - 2.32e3), rel=1e-12)
@@ -900,7 +900,7 @@ class TestMultistageTrim:
         kept = hydro.last_stage_differential(
             inlet_pressure_pa=6.0e5,
             outlet_pressure_pa=5.5e5,
-            vapour_pressure_pa=2.32e3,
+            vapor_pressure_pa=2.32e3,
             corrected_ratio=0.25,
         )
         assert kept == pytest.approx(5.0e4, rel=1e-12)
@@ -931,7 +931,7 @@ class TestGuards:
             hydro.differential_pressure_ratio(
                 inlet_pressure_pa=8.0e5,
                 outlet_pressure_pa=1.0e6,
-                vapour_pressure_pa=2.32e3,
+                vapor_pressure_pa=2.32e3,
             )
 
     def test_it_refuses_an_inlet_at_the_vapour_pressure(self) -> None:
@@ -939,7 +939,7 @@ class TestGuards:
             hydro.differential_pressure_ratio(
                 inlet_pressure_pa=1.0e6,
                 outlet_pressure_pa=8.0e5,
-                vapour_pressure_pa=1.0e6,
+                vapor_pressure_pa=1.0e6,
             )
 
     def test_the_differential_refuses_the_same_two_things(self) -> None:
@@ -947,14 +947,14 @@ class TestGuards:
             hydro.cavitation_differential(
                 inlet_pressure_pa=8.0e5,
                 outlet_pressure_pa=1.0e6,
-                vapour_pressure_pa=2.32e3,
+                vapor_pressure_pa=2.32e3,
                 pressure_recovery=0.92,
             )
         with pytest.raises(ValueError, match="vapour pressure"):
             hydro.cavitation_differential(
                 inlet_pressure_pa=1.0e6,
                 outlet_pressure_pa=8.0e5,
-                vapour_pressure_pa=1.2e6,
+                vapor_pressure_pa=1.2e6,
                 pressure_recovery=0.92,
             )
 
@@ -1006,7 +1006,7 @@ class TestGuards:
                 valve_diameter_m=0.1,
                 seat_diameter_m=0.1,
                 inlet_pressure_pa=1.0e6,
-                vapour_pressure_pa=2.32e3,
+                vapor_pressure_pa=2.32e3,
                 form="table",
             )
 
@@ -1072,7 +1072,7 @@ class TestGuards:
             hydro.stage_conditions(
                 inlet_pressure_pa=1.0e6,
                 outlet_pressure_pa=4.0e5,
-                vapour_pressure_pa=2.32e3,
+                vapor_pressure_pa=2.32e3,
                 stage_coefficients=[900.0, 900.0, 900.0],
                 flow_coefficient=90.0,
             )

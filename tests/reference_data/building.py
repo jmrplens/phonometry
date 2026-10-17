@@ -45,7 +45,7 @@ ISO717_1_ANNEX_C_EXPECTED = {
     "rw": 30,
     "c": -2,
     "ctr": -3,
-    "unfavourable_sum": 31.8,
+    "unfavorable_sum": 31.8,
 }
 # ISO 717-1:2020 Annex C, Table C.2 - the same element measured over the
 # enlarged range 50-5000 Hz (21 bands). The worked example states
@@ -429,7 +429,7 @@ ISO717_2_ANNEX_C1_LN: list[float] = [
 ISO717_2_ANNEX_C1_EXPECTED = {
     "ln_w": 79,
     "ci": -11,
-    "unfavourable_sum": 28.0,
+    "unfavorable_sum": 28.0,
 }
 # Same Table C.1, right-hand columns: the floor WITH the floor covering.
 # Ln,w = 64 dB, CI = -3 dB, unfavourable-deviation sum 30,0 dB.
@@ -454,7 +454,7 @@ ISO717_2_ANNEX_C1_COVERED_LN: list[float] = [
 ISO717_2_ANNEX_C1_COVERED_EXPECTED = {
     "ln_w": 64,
     "ci": -3,
-    "unfavourable_sum": 30.0,
+    "unfavorable_sum": 30.0,
 }
 
 # ---------------------------------------------------------------------------

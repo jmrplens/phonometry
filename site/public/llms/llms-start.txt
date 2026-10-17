@@ -35,7 +35,7 @@ one step that matters most.
 [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/) is the map: the one rule
 that moves almost every import, a resolver to paste when you would rather not
 look a name up, the four places where the obvious fix is the wrong one, and
-the forty-five names that are gone.
+the fifty names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes the library by
@@ -685,7 +685,7 @@ Source: https://docs.jmrp.io/phonometry/start/upgrading/
 # Upgrading from 3.3 to 4.0
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, forty-five exist nowhere any more
+of the 885 names the root exported in 3.3.0, fifty exist nowhere any more
 and the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
@@ -709,7 +709,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 837 of those 885 root names are published
+Measured across the whole surface, 832 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -985,7 +985,7 @@ and the name is the only place the unit shows: `npd_curve(query_distances_m=)`,
 `RoadEmissionResult`, the `thickness1_m` and `thickness2_m` that
 `JunctionTransmissionResult` keeps for its drawing, and the ISO 13472-1
 `source_height_m` and `microphone_height_m` of `geometric_spreading_factor`,
-`geometric_spreading_factor_angle` and `InsituAbsorptionResult`. The duct
+`geometric_spreading_factor_angle` and `InSituAbsorptionResult`. The duct
 `section` that `duct_path` reads is `{"width_m": a, "height_m": b}`, and
 `TABLE_D1_QUANTITIES` names `thickness_m` among the quantities a Table D.1 row
 is described by. The catalogue rows keep `thickness_mm`, the unit the catalogue
@@ -1171,6 +1171,34 @@ and an `_h` that means hours appear nowhere in the public API any more.
 | `wind_speed_knots=` on `ocean_ambient_noise` and `wind_noise_spectrum`, and `AmbientNoiseResult.wind_speed_knots` | `wind_speed_kt`, the spelling the aircraft speeds use |
 | `speed_knots=` on `ship_source_spectrum`, and `ShipTrafficSpectrum.speed_knots` | `speed_kt` |
 | `GasStream.molecular_mass`, in kg/kmol | `GasStream.molar_mass_kg_kmol`, the name the fluids catalogue gives its `molar_mass_kg_mol` per mole |
+
+An identifier is spelled in American English, and in situ is spelled
+`in_situ`. A caller types every name, so `center_frequency` on one function
+and `centre_frequency` on the next was a `TypeError` to look up. The values a
+caller types are held to it too: a `Literal` choice, a default, the key of a
+published table and a string of a published tuple of choices. `catalogue`
+keeps its spelling: it is an American variant too, every name writes it the
+same way, and it is the file format of your own catalogues. A string a source
+prints keeps its print, which is why the CNOSSOS surface below is still
+`"optimised brushed down concrete"`.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `materials.insitu_reflection_factor`, `insitu_absorption_from_reflection`, `insitu_absorption_coefficient`, `insitu_absorption_spectrum`, `plot_insitu_geometry` and `InsituAbsorptionResult` | `in_situ_reflection_factor`, `in_situ_absorption_from_reflection`, `in_situ_absorption_coefficient`, `in_situ_absorption_spectrum`, `plot_in_situ_geometry` and `InSituAbsorptionResult`, as the other in-situ names of the library were already spelled |
+| `centre_frequency` on `critical_bandwidth`, `tonal_audibility`, `assess_tonal_audibility` and `TonalAssessmentResult` | `center_frequency` |
+| `centre=` on `room.filter_bandwidth` and `room.source_directivity_limit` | `center=` |
+| `location="centre"` on the infinite plate and beam point mobilities and impedances of `vibration` | `location="center"` |
+| `.unfavourable_sum` on `WeightedRatingResult`, `ImpactRatingResult` and `AbsorptionRatingResult` | `.unfavorable_sum` |
+| `vibration.storey_fundamental_frequency(storeys)`, `STOREY_FREQUENCY_MIN_STOREYS`, `STOREY_FREQUENCY_NUMERATOR_HZ`, `STOREY_PERIOD_COEFFICIENT_S` | `vibration.story_fundamental_frequency(stories)`, `STORY_FREQUENCY_MIN_STORIES`, `STORY_FREQUENCY_NUMERATOR_HZ`, `STORY_PERIOD_COEFFICIENT_S` |
+| `storeys=` and the model `"storeys"` on `fundamental_period`, `fundamental_frequency` and `estimate_fundamental_frequency` | `stories=` and `"stories"` |
+| `draught=` on `underwater.monopole_source_level` | `draft_m=`, which says its unit as well |
+| `procedure="aeroplane"` on `aircraft.effective_perceived_noise_level` | `procedure="airplane"`, still the default |
+| `urbanisation=` on `environment.outdoor_quality_objectives` | `urbanization=` |
+| `vapour_pressure_pa` on the IEC 60534-8-4 functions of `noise_control` (`differential_pressure_ratio`, `cavitation_differential`, `jet_strouhal_number`, `stage_conditions`, `last_stage_differential`) and on `LiquidStream` | `vapor_pressure_pa` |
+| `"water_vapour_mole_fraction"` in the `composition` of `fluids.air()` | `"water_vapor_mole_fraction"` |
+| `building.DB_HR_NORMALISED_SPECTRA`, `environment.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB` and `environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB` | `DB_HR_NORMALIZED_SPECTRA`, `NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB` and `NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB` |
+| `simulation.ALUMINIUM` | `simulation.ALUMINUM` |
+| `RoadSurface.OPTIMISED_BRUSHED_DOWN_CONCRETE` | `RoadSurface.OPTIMIZED_BRUSHED_DOWN_CONCRETE`, whose value is still the `"optimised brushed down concrete"` that CNOSSOS-EU Table F-4 prints |
 
 ## Every public name has one address
 
@@ -1625,7 +1653,7 @@ says where each verdict first shipped.
 | `hearing.ReatSoundFieldCheck` | `allowable_variation_db` | gains `free_field_rejection_db` | after 4.0.0rc1 |
 | `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gains `front_to_random_index_db` | after 4.0.0rc1 |
 | `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference_db` | `field` and `loudspeaker_distance_m` select them | after 4.0.0rc1 |
-| `electroacoustics.ProgrammeSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels_db` | after 4.0.0rc1 |
+| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels_db` | after 4.0.0rc1 |
 | `electroacoustics.NeckLoopVerification` | `limits` | `neck_loop_type` selects it | after 4.0.0rc1 |
 | `psychoacoustics.ToneAssessment` | `criterion_db`, `prominent` | gains `method`, `"tone_to_noise_ratio"` or `"prominence_ratio"` | 3.3.0 |
 | `underwater.WeightedExposureResult` | `criteria` | gains `impulsive` | 4.0.0rc1 |
@@ -1732,7 +1760,7 @@ that is keyword-only.
 | `hearing.TaskContribution` | `spread_advisory` | `n_samples`, `sample_range_db` | 3.3.0 |
 | `hearing.ExposureResult` | `sampling_advisory` | gains `sample_range_db`, `n_workers`, `sample_duration_hours`, by name only | 3.3.0 |
 | `hearing.AttenuationDifferenceResult` | `difference_db`, `criterion_db`, `significant` | the two means and their expanded uncertainties | after 4.0.0rc1 |
-| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gains the measured figures: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_centre_distance_m`, `lowest_relative_humidity_percent` | after 4.0.0rc1 |
+| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gains the measured figures: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | after 4.0.0rc1 |
 | `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, against the region `values`, `method`, `alpha` and `median` give | 3.3.0 |
 | `metrology.StationarityTestResult` | `stationary`, `bounds` | `count`, against the region `segment_values`, `method` and `alpha` give | 3.3.0 |
 | `metrology.CouplerCheck` | `ratio_recommended`, `approximation_valid`, `full_solution_advised`, `conditions_valid` | gains `heat_conduction_method`, `temperature_c`, `static_pressure_pa`, `relative_humidity_percent`, `in_air`, by name only | after 4.0.0rc1 |
@@ -1851,7 +1879,7 @@ is read from, has to change, and so does code that reads `band_type` from
 | Result | No longer a constructor field | Read from | Since |
 | --- | --- | --- | --- |
 | `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins Eq. 3.95) | `contact_stiffness`, `impedance`; gains `mass`, by name only | 4.0.0rc1 |
-| `noise_control.HydrodynamicValveNoise` | `regime`, cavitating when Δp exceeds x_Fzp1 (p1 - pv) (IEC 60534-8-4 5.1) | `differential`, `corrected_ratio`; gains `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
+| `noise_control.HydrodynamicValveNoise` | `regime`, cavitating when Δp exceeds x_Fzp1 (p1 - pv) (IEC 60534-8-4 5.1) | `differential`, `corrected_ratio`; gains `inlet_pressure_pa`, `vapor_pressure_pa` | 4.0.0rc1 |
 | `noise_control.AerodynamicValveNoise` | `regime`, the five intervals of IEC 60534-8-3 5.2 | `pressure_ratio`, `boundaries`; gains `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, by name only | 4.0.0rc1 |
 | `aircraft.TerrainScreeningResult` | `screened`, terrain strictly above the line of sight | `source`, `receiver`, `distances_m`, `heights_m` | 3.3.0 |
 | `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1 6.3.5 a)) | `reversal_levels_db` | after 4.0.0rc1 |
@@ -1928,9 +1956,9 @@ except ValueError as error:
 # True
 ```
 
-## The forty-five names that are gone
+## The fifty names that are gone
 
-Everything else moved. These forty-five exist in no public module:
+Everything else moved. These fifty exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -1942,6 +1970,7 @@ Everything else moved. These forty-five exist in no public module:
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, which returns the same number, or `fluids.depth_to_absolute_pressure_pa` for the absolute one. Both are keyword-only and both take an optional `latitude_deg` |
 | `TransmissionLossResult` | `PropagationLossResult`, with `.tl` renamed to `.pl` |
 | `partial_exposure` | `vibration.daily_exposure`, called with one operation's value and duration. `partial_exposure` was a second name for the same function, and the number does not move |
+| `insitu_reflection_factor`, `insitu_absorption_from_reflection`, `insitu_absorption_coefficient`, `insitu_absorption_spectrum`, `InsituAbsorptionResult` | `materials.in_situ_reflection_factor`, `materials.in_situ_absorption_from_reflection`, `materials.in_situ_absorption_coefficient`, `materials.in_situ_absorption_spectrum`, `materials.InSituAbsorptionResult`: in situ is spelled `in_situ` everywhere, as the building, emission and noise-control in-situ names already were |
 | `DEFAULT_SPEED_OF_SOUND` | `materials.ISO13472_SPEED_OF_SOUND_M_S`, the 340 m/s of ISO 13472-1 Annex A. The 343 m/s the room modules default to is private now; pass `speed_of_sound=` to say which you mean |
 | `OCTAVE_BANDS`, `THIRD_OCTAVE_BANDS` | `materials.RATING_OCTAVE_BANDS_HZ`, `materials.RATING_THIRD_OCTAVE_BANDS_HZ`, the bands of the ISO 11654 rating |
 | `BASE_PLATE_BANDS` | `materials.BASE_PLATE_BANDS_HZ` |

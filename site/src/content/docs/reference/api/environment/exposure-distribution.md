@@ -247,7 +247,7 @@ SelDistribution(
     lower_bounds_db: NDArray[np.float64],
     upper_bounds_db: NDArray[np.float64],
     class_densities_per_db: NDArray[np.float64],
-    subclass_centres_db: NDArray[np.float64],
+    subclass_centers_db: NDArray[np.float64],
     sigma_db: float,
     level_shift_db: float,
     subclasses: int,
@@ -275,7 +275,7 @@ normal distribution of standard deviation `sigma_db` centred
 | `lower_bounds_db` | $g_{\mathrm{L},m}$, in dB (Equations (11), (12)). |
 | `upper_bounds_db` | $g_{\mathrm{U},m}$, in dB (Equations (11), (13)). |
 | `class_densities_per_db` | $\rho_m$, the constant density of each class, in 1/dB (Equation (15)). |
-| `subclass_centres_db` | $\mu_{m,j}$, shape `(M, subclasses)`, in dB (Equation (18)). |
+| `subclass_centers_db` | $\mu_{m,j}$, shape `(M, subclasses)`, in dB (Equation (18)). |
 | `sigma_db` | $\sigma$ of the turbulent spread, in dB. |
 | `level_shift_db` | $\Delta\mu$, in dB (Equation (22)). |
 | `subclasses` | $N_\mathrm{sub}$, the subclasses per class. |

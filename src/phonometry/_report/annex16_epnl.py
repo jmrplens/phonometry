@@ -97,7 +97,7 @@ def _metric_rows(result: EPNLResult, language: str = "en") -> list[tuple[str, st
     """
     k_first, k_last = result.band_limits
     rows = [
-        (t("PNLTM [PNdB]", language), fmt_num(result.pnltm, language)),
+        (t("PNLTM [TPNdB]", language), fmt_num(result.pnltm, language)),
         (
             t("Duration correction D [dB]", language),
             fmt_num(result.duration_correction, language),

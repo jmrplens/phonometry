@@ -856,6 +856,7 @@ def test_a_zero_total_may_state_its_level_either_way(spelling: str) -> None:
         total_pressure_intensity_index=60.0 - level,
         total_direction=1,
         max_valid_frequency=0.1 * C / SPACING,
+        spacing_m=SPACING,
     )
     assert result.total_intensity_level == level
 

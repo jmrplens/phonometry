@@ -38,6 +38,7 @@ from .frequencies import _genfreqs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
 __all__ = [
     "BlockProcessing",
@@ -46,6 +47,7 @@ __all__ = [
     "LevelCalibration",
     "OctaveFilterBank",
     "OctaveFilterResult",
+    "OctaveSpectrogramResult",
     "ResponsePlot",
     "octave_filter",
 ]
@@ -203,6 +205,106 @@ class OctaveFilterResult(OwnsArrays):
 
         check_language(language)
         return plot_octave_levels(self, ax=ax, language=language, **kwargs)
+
+
+#: The ranks a spectrogram's ``levels`` can have: ``(bands, frames)`` for one
+#: channel, ``(channels, bands, frames)`` for several.
+_SPECTROGRAM_RANKS = (2, 3)
+
+
+@dataclass(frozen=True)
+class OctaveSpectrogramResult(OwnsArrays):
+    """Band levels over time: what :meth:`OctaveFilterBank.spectrogram` returns.
+
+    A record with named fields rather than a ``(levels, frequencies, times)``
+    tuple, so it cannot be unpacked by position: read ``.levels``,
+    ``.frequencies`` and ``.times``, or draw it with :meth:`plot`.
+
+    :ivar levels: The level of each band in each analysis window, in
+        decibels: shaped ``(bands, frames)`` for a single-channel input and
+        ``(channels, bands, frames)`` for a multichannel one.
+    :ivar frequencies: The exact mid-band frequency of each band, in hertz,
+        as a read-only array.
+    :ivar times: The centre of each analysis window, in seconds.
+    """
+
+    levels: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    times: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Hold the axes as float arrays and pin the level grid to both of them.
+
+        The plot places the raster by the ends of :attr:`frequencies` and
+        :attr:`times`, so a grid with one band or one frame too many would be
+        stretched across the axes without complaint. It is refused here.
+
+        :raises ValueError: if ``levels`` is neither two- nor
+            three-dimensional, an axis is not one-dimensional, or the band or
+            frame axis of ``levels`` disagrees with ``frequencies`` or
+            ``times``.
+        """
+        levels = np.asarray(self.levels, dtype=np.float64)
+        frequencies = np.asarray(self.frequencies, dtype=np.float64)
+        times = np.asarray(self.times, dtype=np.float64)
+        if levels.ndim not in _SPECTROGRAM_RANKS:
+            msg = (
+                "OctaveSpectrogramResult: 'levels' must be (bands, frames) or "
+                f"(channels, bands, frames); got shape {levels.shape}."
+            )
+            raise ValueError(msg)
+        for name, axis in (("frequencies", frequencies), ("times", times)):
+            if axis.ndim != 1:
+                msg = (
+                    f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
+                    f"got shape {axis.shape}."
+                )
+                raise ValueError(msg)
+        if levels.shape[-2] != frequencies.size:
+            msg = (
+                f"OctaveSpectrogramResult: 'levels' holds {levels.shape[-2]} "
+                f"bands and 'frequencies' {frequencies.size}."
+            )
+            raise ValueError(msg)
+        if levels.shape[-1] != times.size:
+            msg = (
+                f"OctaveSpectrogramResult: 'levels' holds {levels.shape[-1]} "
+                f"frames and 'times' {times.size}."
+            )
+            raise ValueError(msg)
+        object.__setattr__(self, "levels", read_only(levels))
+        object.__setattr__(self, "frequencies", read_only(frequencies))
+        object.__setattr__(self, "times", read_only(times))
+
+    def plot(
+        self,
+        ax: Axes | None = None,
+        *,
+        channel: int | None = None,
+        language: str = "en",
+        **kwargs: Any,
+    ) -> Axes:
+        """Draw the levels as one raster over time and band centre, with a colour bar.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param channel: Which channel of a multichannel result to draw,
+            counted from 0. A multichannel result needs it; a single-channel
+            one takes ``None`` or ``0``.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to ``imshow``.
+        :raises ValueError: for a multichannel result drawn without
+            ``channel``, or a ``channel`` the result does not hold.
+        """
+        from .._i18n import check_language
+        from .._plot.filters import plot_octave_spectrogram
+
+        check_language(language)
+        return plot_octave_spectrogram(
+            self, ax=ax, channel=channel, language=language, **kwargs
+        )
 
 
 @dataclass(frozen=True)
@@ -477,11 +579,9 @@ class OctaveFilterBank:
         self._default_calibration = calibration == _DEFAULT_CALIBRATION
         self.stateful = block_processing.stateful
 
-        # Generate frequencies
-        self.freq, self.freq_d, self.freq_u, self.nominal_freq = _genfreqs(
-            limits, fraction, fs
-        )
-        self.num_bands = len(self.freq)
+        # The band set the bank is designed on, held as one immutable record
+        # and read through the properties below.
+        self._bands = _genfreqs(limits, fraction, fs)
 
         # Calculate factors and design SOS
         if design.resample:
@@ -493,14 +593,14 @@ class OctaveFilterBank:
                     headroom,
                     1.05 * _cheby2_headroom(fraction, order, design.attenuation),
                 )
-            self.factor = _downsamplingfactor(self.freq_u, fs, headroom)
+            self.factor = _downsamplingfactor(self.upper_edges.tolist(), fs, headroom)
         else:
-            self.factor = np.ones(self.num_bands, dtype=int)
+            self.factor = np.ones(self.n_bands, dtype=int)
 
         self.sos = _design_sos_filter(
-            freq=self.freq,
-            freq_d=self.freq_d,
-            freq_u=self.freq_u,
+            freq=self.frequencies.tolist(),
+            freq_d=self.lower_edges.tolist(),
+            freq_u=self.upper_edges.tolist(),
             fs=fs,
             order=order,
             factor=self.factor,
@@ -521,15 +621,40 @@ class OctaveFilterBank:
         Uses lazy initialization: zi arrays are allocated on first use in
         _filter_and_resample() so the channel count matches the actual input.
         """
-        self.zi: list[np.ndarray] = [np.array([]) for _ in range(self.num_bands)]
+        self.zi: list[np.ndarray] = [np.array([]) for _ in range(self.n_bands)]
         self._steady_ic = steady_ic
+
+    @property
+    def frequencies(self) -> NDArray[np.float64]:
+        """The exact mid-band frequency of each band, in hertz (read-only)."""
+        return self._bands.frequencies
+
+    @property
+    def lower_edges(self) -> NDArray[np.float64]:
+        """The lower band-edge frequency of each band, in hertz (read-only)."""
+        return self._bands.lower_edges
+
+    @property
+    def upper_edges(self) -> NDArray[np.float64]:
+        """The upper band-edge frequency of each band, in hertz (read-only)."""
+        return self._bands.upper_edges
+
+    @property
+    def labels(self) -> tuple[str, ...]:
+        """The IEC 61260-1 nominal mid-band frequency of each band, as text."""
+        return self._bands.labels
+
+    @property
+    def n_bands(self) -> int:
+        """How many bands the bank holds."""
+        return int(self._bands.frequencies.size)
 
     def __repr__(self) -> str:
         """Design summary: fs, fraction, order, limits, filter family and band count."""
         return (
             f"OctaveFilterBank(fs={self.fs}, fraction={self.fraction}, order={self.order}, "
             f"limits={self.limits}, filter_type='{self.filter_type}', "
-            f"num_bands={self.num_bands})"
+            f"n_bands={self.n_bands})"
         )
 
     def filter(
@@ -600,7 +725,7 @@ class OctaveFilterBank:
         # Return a copy: the bank (possibly shared via the octave_filter()
         # design cache) must not be corrupted by callers mutating the list.
         freq_out: list[float] | list[str] = (
-            list(self.nominal_freq) if nominal else list(self.freq)
+            list(self.labels) if nominal else self.frequencies.tolist()
         )
 
         if sigbands and xb is not None:
@@ -663,7 +788,7 @@ class OctaveFilterBank:
         *,
         detrend: bool = True,
         zero_phase: bool = False,
-    ) -> tuple[np.ndarray, list[float], np.ndarray]:
+    ) -> OctaveSpectrogramResult:
         """Short-time fractional-octave analysis: level per band over time.
 
         :param x: Input signal (1D array or 2D array [channels, samples]), or
@@ -679,10 +804,11 @@ class OctaveFilterBank:
         :param detrend: If True, remove DC offset before filtering.
         :param zero_phase: If True, filter bands forward-backward so their
             group delays don't skew the frames (offline analysis only).
-        :return: Tuple (levels, freq, times). ``levels`` has shape
-            (num_bands, num_frames) for 1D input and
-            (channels, num_bands, num_frames) for 2D input; ``times`` holds
-            each window's center in seconds.
+        :return: An :class:`OctaveSpectrogramResult`. Its ``levels`` are
+            shaped ``(bands, frames)`` for 1D input and
+            ``(channels, bands, frames)`` for 2D input, ``frequencies`` holds
+            the exact mid-band frequencies and ``times`` each window's centre
+            in seconds.
         """
         if self.stateful:
             msg = "spectrogram() is not supported on stateful banks."
@@ -723,7 +849,7 @@ class OctaveFilterBank:
         starts = np.arange(0, n_samples - win + 1, hop)
         times = (starts + win / 2) / self.fs
 
-        levels = np.zeros((x_2d.shape[0], self.num_bands, len(starts)))
+        levels = np.zeros((x_2d.shape[0], self.n_bands, len(starts)))
         # Frames are processed in chunks: the strided view itself is free,
         # but reducing it materializes temporaries of chunk*win samples, so
         # chunking keeps memory bounded for long signals / high overlap.
@@ -736,9 +862,11 @@ class OctaveFilterBank:
                 seg = windows[:, j0 : j0 + frame_chunk, :]
                 levels[:, b, j0 : j0 + frame_chunk] = self._calculate_level(seg, mode)
 
-        if not is_multichannel:
-            return levels[0], list(self.freq), times
-        return levels, list(self.freq), times
+        return OctaveSpectrogramResult(
+            levels=levels if is_multichannel else levels[0],
+            frequencies=self.frequencies,
+            times=times,
+        )
 
     def _process_bands(
         self,
@@ -760,12 +888,12 @@ class OctaveFilterBank:
         :param zero_phase: If True, use forward-backward filtering.
         :return: A tuple containing (SPL_array, Optional_List_of_filtered_signals).
         """
-        spl = np.zeros([num_channels, self.num_bands]) if calculate_level else None
+        spl = np.zeros([num_channels, self.n_bands]) if calculate_level else None
         xb: list[np.ndarray] | None = (
-            [np.array([]) for _ in range(self.num_bands)] if sigbands else None
+            [np.array([]) for _ in range(self.n_bands)] if sigbands else None
         )
 
-        for idx in range(self.num_bands):
+        for idx in range(self.n_bands):
             # Vectorized processing for all channels
             filtered_signal = self._filter_and_resample(
                 x=x_proc, idx=idx, zero_phase=zero_phase

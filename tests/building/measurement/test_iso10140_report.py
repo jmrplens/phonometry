@@ -229,25 +229,6 @@ def test_missing_rating_rejected(tmp_path: Path) -> None:
         result.report(out)
 
 
-def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
-    """A manually built rating lacking the per-band arrays is rejected."""
-    # A backward-compatibly constructed rating (frequencies / measured /
-    # shifted_reference default to None) would otherwise crash the table.
-    bare_rating = building.WeightedRatingResult(
-        rating=30, c=-2, ctr=-3, unfavorable_sum=0.0
-    )
-    result = building.LaboratoryAirborneInsulationResult(
-        r=np.asarray(_AIRBORNE_R, dtype=np.float64),
-        absorption_area=np.full(16, 10.0),
-        rating=bare_rating,
-    )
-    out = str(tmp_path / "x.pdf")
-    with pytest.raises(
-        ValueError, match=r"report needs the ISO 717 per-band rating data"
-    ):
-        result.report(out)
-
-
 def test_manual_impact_result_renders(tmp_path: Path) -> None:
     """A manually built lab impact result reports its Ln fiche."""
     result = _impact_result()

@@ -45,7 +45,7 @@ for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     # limits picks out the single 1 kHz octave band
     bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             design=filters.FilterDesign(filter_type=ftype))
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
     fsd = fs / bank.factor[idx]           # rate the band actually runs at
     w, h = sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
     ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=ftype)

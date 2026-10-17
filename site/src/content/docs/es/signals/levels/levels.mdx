@@ -737,8 +737,9 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
-# levels: (bandas, ventanas) — listo para pcolormesh(times, freq, levels)
+result = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
+# result.levels: (bandas, ventanas), sobre los ejes result.frequencies y result.times
+print(result.levels.shape == (result.frequencies.size, result.times.size))  # True
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.webp" alt="Espectrograma en bandas de 1/12 de octava de un barrido logarítmico con dos ráfagas tonales" width="80%" />
@@ -764,19 +765,45 @@ x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[: int(0.3 * fs)])
 x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
 
 bank = filters.OctaveFilterBank(fs=fs, fraction=12, order=6, limits=[50.0, 12000.0])
-levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.875)
+result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 
+# En una línea:
+result.plot(language="es")
+plt.show()
+
+# A mano, desde los campos del resultado. Las filas están espaciadas por
+# igual en log10 de la frecuencia, así que el ráster se coloca ahí, a medio
+# paso de banda a cada lado de cada centro, y se lleva al eje logarítmico
+# con 10**y: una imagen puesta tal cual en un eje log reparte sus filas por
+# igual en Hz.
+from matplotlib.scale import LogTransform
+from matplotlib.transforms import IdentityTransform, blended_transform_factory
+
+f, t = result.frequencies, result.times
+half_band = np.log10(f[-1] / f[0]) / (2 * (f.size - 1))
+half_hop = (t[1] - t[0]) / 2
 fig, ax = plt.subplots()
-mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
+rows = blended_transform_factory(IdentityTransform(),
+                                 LogTransform(10).inverted()) + ax.transData
+image = ax.imshow(result.levels, origin="lower", aspect="auto", cmap="magma",
+                  interpolation="nearest", transform=rows,
+                  vmin=result.levels.max() - 80.0, vmax=result.levels.max(),
+                  extent=(t[0] - half_hop, t[-1] + half_hop,
+                          np.log10(f[0]) - half_band, np.log10(f[-1]) + half_band))
+ax.set_xlim(t[0] - half_hop, t[-1] + half_hop)
+ax.set_ylim(f[0] / 10**half_band, f[-1] * 10**half_band)
 ax.set(xlabel="Tiempo [s]", ylabel="Frecuencia [Hz]")
-fig.colorbar(mesh, label="Nivel [dB]")
+fig.colorbar(image, label="Nivel de banda [dB]")
 plt.show()
 ```
 
 </details>
 
-- Una entrada multicanal `(channels, samples)` devuelve `(channels, bands, frames)`.
+- El resultado es un `OctaveSpectrogramResult`: lee `levels`, `frequencies` y
+  `times` por su nombre, o dibújalo con `result.plot()`.
+- Una entrada multicanal `(channels, samples)` da `levels` con forma
+  `(channels, bands, frames)`; `result.plot(channel=0)` dibuja un canal.
 - `times` contiene el centro de cada ventana en segundos.
 - `mode='peak'` da niveles de pico por ventana en lugar de RMS.
 - `zero_phase=True` filtra las bandas hacia delante y atrás para que el retardo

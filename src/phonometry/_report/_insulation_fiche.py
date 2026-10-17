@@ -298,20 +298,9 @@ def render_insulation_fiche(
         raise ImportError(_REPORTLAB_HINT) from exc
 
     # Guard a manually constructed rating: its quantity must match the reported
-    # result, and it must carry the per-band arrays the table and plot consume
-    # (np.asarray(None) would otherwise yield a 0-d array and crash the table).
+    # result.
     if rating.quantity != ("impact" if is_impact else "airborne"):
         msg = "The ISO 717 rating quantity does not match the reported result."
-        raise ValueError(msg)
-    if (
-        rating.frequencies is None
-        or rating.measured is None
-        or rating.shifted_reference is None
-    ):
-        msg = (
-            "The report needs the ISO 717 per-band rating data ('frequencies', "
-            "'measured' and 'shifted_reference') on the rating."
-        )
         raise ValueError(msg)
 
     rating_symbol = spec["rating_symbol"]

@@ -1101,7 +1101,7 @@ over the length analysed: a 5 m record reports from 0,25 m, a 20 m one from
 from phonometry import filters
 
 bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
-print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+print(bank.order, bank.n_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
 # 4 24 0
 x = np.arange(0.0, 20.0, 1.0e-3)
 record = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength

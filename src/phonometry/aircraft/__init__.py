@@ -36,6 +36,7 @@ from .atmospheric_absorption import (
 )
 from .certification import (
     NOY_BANDS_HZ,
+    EPNLIntegration,
     EPNLResult,
     effective_perceived_noise_level,
     epnl_from_pnlt,
@@ -110,6 +111,7 @@ __all__ = [
     "ApproachStep",
     "ARP866AAttenuation",
     "DepartureStep",
+    "EPNLIntegration",
     "EPNLResult",
     "FlightConditionInterpolation",
     "FlightPathKinematics",

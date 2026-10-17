@@ -300,7 +300,7 @@ IntensityResult(
     total_direction: int,
     max_valid_frequency: float,
     *,
-    spacing_m: float | None = None,
+    spacing_m: float,
 )
 ```
 
@@ -321,10 +321,9 @@ at and beyond the first null $k \Delta r \ge \pi$.
 `max_valid_frequency`
 is the usable-bandwidth bound $0.1 \, c / \Delta r$
 (bias \< ~0.3 dB).
-`spacing_m` retains the microphone separation the measurement was
-reduced with so `plot_geometry` can draw the probe; it is
-appended after the original fields and `None` for hand-built
-results.
+`spacing_m` keeps the microphone separation the measurement was
+reduced with, in metres, so `plot_geometry` can draw the probe;
+it is keyword-only.
 
 ### IntensityResult.plot()
 
@@ -358,12 +357,6 @@ Draw the p-p probe with its spacer to scale.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ## plot_pp_probe_geometry
 

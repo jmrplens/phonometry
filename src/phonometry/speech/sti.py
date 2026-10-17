@@ -339,10 +339,10 @@ def _masking_amdb(level: np.ndarray | float) -> np.ndarray:
 def _octave_bank(fs: int) -> OctaveFilterBank:
     """Octave filter bank for the 7 STI bands (IEC 61260-1 class 0/1)."""
     bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=list(_BAND_LIMITS))
-    if bank.num_bands != _NUM_BANDS:
+    if bank.n_bands != _NUM_BANDS:
         msg = (
             f"Expected {_NUM_BANDS} octave bands between 125 Hz and 8 kHz, "
-            f"got {bank.num_bands} at fs={fs}."
+            f"got {bank.n_bands} at fs={fs}."
         )
         raise ValueError(msg)
     return bank
@@ -1075,7 +1075,7 @@ def stipa_signal(
     rng = np.random.default_rng(seed)
     pink = _pink_noise(n, rng)
     t = np.arange(n) / fs
-    centers, _, _, _ = nominal_frequencies(1, list(_BAND_LIMITS))
+    centers = nominal_frequencies(1, list(_BAND_LIMITS)).frequencies
     half_octave = 2.0**0.25
     out = np.zeros(n)
     for k in range(_NUM_BANDS):

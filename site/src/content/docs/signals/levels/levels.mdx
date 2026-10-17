@@ -726,8 +726,9 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
-# levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
+result = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
+# result.levels: (bands, frames), on the axes result.frequencies and result.times
+print(result.levels.shape == (result.frequencies.size, result.times.size))  # True
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.webp" alt="One-twelfth-octave spectrogram of a logarithmic sweep with two tone bursts" width="80%" />
@@ -753,19 +754,44 @@ x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[: int(0.3 * fs)])
 x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
 
 bank = filters.OctaveFilterBank(fs=fs, fraction=12, order=6, limits=[50.0, 12000.0])
-levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.875)
+result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 
+# One line:
+result.plot()
+plt.show()
+
+# By hand, from the result's fields. The rows are spaced evenly in log10
+# of the frequency, so the raster is laid out there, half a band step
+# either side of each centre, and carried onto the logarithmic axis through
+# 10**y: an image placed straight on a log axis spreads its rows evenly in Hz.
+from matplotlib.scale import LogTransform
+from matplotlib.transforms import IdentityTransform, blended_transform_factory
+
+f, t = result.frequencies, result.times
+half_band = np.log10(f[-1] / f[0]) / (2 * (f.size - 1))
+half_hop = (t[1] - t[0]) / 2
 fig, ax = plt.subplots()
-mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
+rows = blended_transform_factory(IdentityTransform(),
+                                 LogTransform(10).inverted()) + ax.transData
+image = ax.imshow(result.levels, origin="lower", aspect="auto", cmap="magma",
+                  interpolation="nearest", transform=rows,
+                  vmin=result.levels.max() - 80.0, vmax=result.levels.max(),
+                  extent=(t[0] - half_hop, t[-1] + half_hop,
+                          np.log10(f[0]) - half_band, np.log10(f[-1]) + half_band))
+ax.set_xlim(t[0] - half_hop, t[-1] + half_hop)
+ax.set_ylim(f[0] / 10**half_band, f[-1] * 10**half_band)
 ax.set(xlabel="Time [s]", ylabel="Frequency [Hz]")
-fig.colorbar(mesh, label="Level [dB]")
+fig.colorbar(image, label="Band level [dB]")
 plt.show()
 ```
 
 </details>
 
-- Multichannel input `(channels, samples)` returns `(channels, bands, frames)`.
+- The result is an `OctaveSpectrogramResult`: read `levels`, `frequencies` and
+  `times` by name, or draw it with `result.plot()`.
+- Multichannel input `(channels, samples)` gives `levels` shaped
+  `(channels, bands, frames)`; `result.plot(channel=0)` draws one channel.
 - `times` holds each window's center in seconds.
 - `mode='peak'` gives per-window peak-holding levels instead of RMS.
 - `zero_phase=True` filters bands forward-backward so per-band group delay does

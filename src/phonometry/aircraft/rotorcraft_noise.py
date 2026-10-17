@@ -51,7 +51,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar, Final
 
 import numpy as np
 
@@ -1040,6 +1040,12 @@ class RotorcraftEventResult(OwnsArrays):
         in EPNdB; ``NaN`` if no step has a defined ``PNLT``.
     """
 
+    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-6):
+    #: TPNdB for a tone-corrected perceived noise level, EPNdB for the EPNL.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"pnlt": "TPNdB", "pnltm": "TPNdB", "epnl": "EPNdB"}
+    )
+
     frequencies: NDArray[np.float64]
     emission_times: NDArray[np.float64]
     times: NDArray[np.float64]
@@ -1865,9 +1871,10 @@ def _event_metrics(
     valid = np.isfinite(pnlt)
     if np.any(valid):
         dt = np.gradient(trec)
-        epnl, pnltm, _, _ = epnl_from_pnlt(
+        integration = epnl_from_pnlt(
             pnlt[valid], dt[valid], tone_corrections=tcs[valid]
         )
+        epnl, pnltm = integration.epnl, integration.pnltm
     else:
         epnl = pnltm = float("nan")
     return la_max, sel, sel_10db, pnlt, pnltm, epnl

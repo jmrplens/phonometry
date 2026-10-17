@@ -486,9 +486,9 @@ from phonometry import filters
 result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
 print(result.overall_class)          # 1
 print(result.range_limited)          # False
-print(result.between_nominals)       # {'worst_freq': ..., 'margin_class1_db': ...}
+print(result.between_nominals)       # {'worst_frequency': ..., 'margin_class1_db': ...}
 print(result.bands[20])
-# {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
+# {'frequency': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```
 
 The Table 3 acceptance mask itself is public too: `weighting_class_limits(1)`
@@ -552,7 +552,7 @@ ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
     bands = filters.verify_weighting_class(filters.WeightingFilter(48000, curve)).bands
-    f = [b["freq"] for b in bands]
+    f = [b["frequency"] for b in bands]
     dev = [b["deviation_db"] for b in bands]
     ax.plot(f, dev, marker=marker, label=f"{curve} weighting deviation (48 kHz)")
 

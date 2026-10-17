@@ -236,13 +236,13 @@ def _tenths(bank: filters.OctaveFilterBank, points: int) -> list[int]:
                 bank.sos[idx],
                 int(bank.factor[idx]),
                 float(bank.fs),
-                float(bank.freq[idx]),
+                float(bank.frequencies[idx]),
                 bank.fraction,
                 points,
                 "1995",
             )
         )
-        for idx in range(bank.num_bands)
+        for idx in range(bank.n_bands)
     ]
 
 
@@ -278,12 +278,12 @@ def test_s_is_raised_in_steps_of_12_until_the_tenths_settle() -> None:
             _GRADED_BANK.sos[idx],
             int(_GRADED_BANK.factor[idx]),
             float(_GRADED_BANK.fs),
-            float(_GRADED_BANK.freq[idx]),
+            float(_GRADED_BANK.frequencies[idx]),
             1,
             36,
             "1995",
         )
-        for idx in range(_GRADED_BANK.num_bands)
+        for idx in range(_GRADED_BANK.n_bands)
     ]
     np.testing.assert_allclose(
         [b["bandwidth_deviation_db"] for b in result.bands], expected, rtol=1e-12
@@ -314,8 +314,8 @@ def test_the_end_bands_are_read_on_the_half_facing_the_set() -> None:
     """
     bank = _GRADED_BANK
     fs = float(bank.fs)
-    mids = np.asarray(bank.freq, dtype=np.float64)
-    last = bank.num_bands - 1
+    mids = np.asarray(bank.frequencies, dtype=np.float64)
+    last = bank.n_bands - 1
     omega, curve = _bank_summation(bank.sos, bank.factor, fs, mids, 1, 24, 0, "1995")
     np.testing.assert_allclose(omega, _test_frequencies(1, 24, 0, 12), rtol=1e-15)
     freqs = omega * mids[0]

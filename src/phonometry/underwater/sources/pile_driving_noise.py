@@ -521,7 +521,8 @@ def strike_sel_spectrum(
         msg = "'limits' must be a finite, increasing, positive pair."
         raise ValueError(msg)
 
-    centres, lower, upper, _ = nominal_frequencies(int(fraction), [lo, hi])
+    bands = nominal_frequencies(int(fraction), [lo, hi])
+    centres, lower, upper = bands.frequencies, bands.lower_edges, bands.upper_edges
     n = sig.size
     spectrum = np.fft.rfft(sig)
     freqs = np.fft.rfftfreq(n, d=1.0 / fs_v)

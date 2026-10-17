@@ -628,3 +628,14 @@ def test_a_weighting_positive_gain_region() -> None:
         assert gain == pytest.approx(expected, abs=0.15), (
             f"{f0} Hz: {gain:.2f} dB vs Table 2 {expected}"
         )
+
+
+def test_high_accuracy_is_a_bool_and_none_is_refused() -> None:
+    """``None`` used to select the default; it is refused rather than read as false.
+
+    Read as a truth value, a ``None`` left over from code that relied on the
+    old sentinel would quietly pick the plain bilinear design, which is not
+    class 1 below 44,1 kHz.
+    """
+    with pytest.raises(TypeError, match="'high_accuracy' must be True or False"):
+        filters.WeightingFilter(48000, "A", high_accuracy=None)  # type: ignore[arg-type]

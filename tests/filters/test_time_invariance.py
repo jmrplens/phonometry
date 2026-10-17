@@ -193,7 +193,7 @@ def test_a_time_invariant_bank_reads_its_effective_bandwidth(
         swept.deviations_db, np.vstack([delta_b, delta_b]), atol=0.01
     )
     assert swept.overall_class == 1
-    assert swept.band_classes == (1,) * third_octave_bank.num_bands
+    assert swept.band_classes == (1,) * third_octave_bank.n_bands
 
 
 def test_the_sweep_starts_and_ends_a_decade_past_the_55_db_points(
@@ -201,7 +201,7 @@ def test_the_sweep_starts_and_ends_a_decade_past_the_55_db_points(
     swept: filters.TimeInvarianceResult,
 ) -> None:
     """7.4.2: at least 55 dB below the lowest edge; the design adds a decade."""
-    lowest = third_octave_bank.freq[0]
+    lowest = third_octave_bank.frequencies[0]
     assert swept.start_frequency_hz < lowest / 10.0
     assert swept.end_frequency_hz == 24000.0
     decades = math.log10(swept.end_frequency_hz / swept.start_frequency_hz)

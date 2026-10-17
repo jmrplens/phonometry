@@ -335,6 +335,22 @@ def test_clause_5_2_rounding_breaks_ties_upward_not_to_even() -> None:
     assert float(res.rounded[0]) == 25.0
 
 
+def test_the_rounded_data_are_read_from_the_measured_data() -> None:
+    """``rounded`` is the clause 5.2 rule over ``measured``, never a stored column.
+
+    It used to be a field of its own, so a variant that restated the data
+    kept the rounding of the data it replaced; it is a read-only property
+    now, and it follows whatever ``measured`` holds.
+    """
+    res = building.ceiling_attenuation_class(INTERTEK_2019_DNC)
+    shifted = dataclasses.replace(res, measured=np.asarray(res.measured) + 0.5)
+    np.testing.assert_allclose(
+        shifted.rounded, np.floor(np.asarray(res.measured) + 1.0)
+    )
+    with pytest.raises(TypeError, match="rounded"):
+        dataclasses.replace(res, rounded=res.rounded)
+
+
 def test_rating_rejects_a_wrong_band_count() -> None:
     with pytest.raises(
         ValueError, match=r"'attenuation' must hold \d+ one-third-octave"
@@ -448,7 +464,6 @@ def test_rating_result_names_the_field_on_an_all_scalar_column() -> None:
     scalars = {
         "frequencies": np.asarray(res.frequencies[band]),
         "measured": np.asarray(res.measured[band]),
-        "rounded": np.asarray(res.rounded[band]),
         "shifted_reference": np.asarray(res.shifted_reference[band]),
         "deficiencies": np.asarray(np.nan),
     }

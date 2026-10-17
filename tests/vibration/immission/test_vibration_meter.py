@@ -158,13 +158,13 @@ def test_the_band_limits_sit_where_the_note_of_5_2_3_2_says() -> None:
 @pytest.mark.parametrize(
     ("frequency_hz", "lower", "upper"),
     [
-        (16.0, 10.0, 10.0),  # inside 1,25 f_u to 0,8 f_o
-        (1.25, 10.0, 10.0),  # the lower edge of the central band
-        (64.0, 10.0, 10.0),  # 0,8 f_o, still central
-        (1.0, 20.0, 20.0),  # below 1,25 f_u, inside 0,5 f_u to 2 f_o
-        (100.0, 20.0, 20.0),  # above 0,8 f_o, inside 2 f_o
-        (0.4, 100.0, 20.0),  # outside every band of Table 2
-        (200.0, 100.0, 20.0),
+        (16.0, -10.0, 10.0),  # inside 1,25 f_u to 0,8 f_o
+        (1.25, -10.0, 10.0),  # the lower edge of the central band
+        (64.0, -10.0, 10.0),  # 0,8 f_o, still central
+        (1.0, -20.0, 20.0),  # below 1,25 f_u, inside 0,5 f_u to 2 f_o
+        (100.0, -20.0, 20.0),  # above 0,8 f_o, inside 2 f_o
+        (0.4, -100.0, 20.0),  # outside every band of Table 2
+        (200.0, -100.0, 20.0),
     ],
 )
 def test_tables_2_and_3_limits(frequency_hz: float, lower: float, upper: float) -> None:
@@ -209,6 +209,26 @@ def test_a_meter_outside_the_central_band_fails_there_and_only_there() -> None:
     graded = dict(zip(result.frequencies, result.within_tolerance, strict=True))
     assert not graded[31.5]
     assert graded[1.0]  # 15 % is inside the 20 % of the skirt
+    assert result.worst_frequency_hz == pytest.approx(31.5)
+
+
+def test_a_meter_below_the_central_band_is_judged_by_the_signed_lower_limit() -> None:
+    """A response 12 % low fails the -10 % of Table 2; 15 % low keeps to -20 %.
+
+    The lower limit comes back negative, so the deviation is compared with it
+    as it is: ``-12 >= -10`` is false, ``-15 >= -20`` is true, and the worst
+    frequency is the one that spends the larger share of its own allowance.
+    """
+    f = np.array([1.0, 16.0, 31.5, 80.0])
+    measured = np.abs(im.kb_weighting_response(f))
+    measured[2] *= 0.88
+    measured[0] *= 0.85
+    result = im.verify_vibration_meter(f, measured)
+    graded = dict(zip(result.frequencies, result.within_tolerance, strict=True))
+    assert result.lower_percent[list(result.frequencies).index(31.5)] == -10.0
+    assert not graded[31.5]
+    assert graded[1.0]
+    assert not result.passes
     assert result.worst_frequency_hz == pytest.approx(31.5)
 
 

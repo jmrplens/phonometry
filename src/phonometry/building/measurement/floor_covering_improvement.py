@@ -50,7 +50,8 @@ results (Clause 8 e)) also carries the spectrum adaptation term ``CI,Δ`` (ISO
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -58,6 +59,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -66,7 +68,7 @@ from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
@@ -76,6 +78,7 @@ if TYPE_CHECKING:
 __all__ = [
     "BackgroundCorrectedLevel",
     "FloorCoveringImprovementResult",
+    "OctaveBandSpectrum",
     "acceleration_level",
     "background_corrected_level",
     "impact_improvement",
@@ -350,8 +353,8 @@ class FloorCoveringImprovementResult(OwnsArrays):
             settled(self.background_margin_db) < _MARGIN_LIMIT, dtype=bool
         )
 
-    def octave_bands(self) -> tuple[np.ndarray, np.ndarray]:
-        """Return ``(octave_freqs, ΔLoct)`` via Formula (5) (needs 16 1/3-oct bands)."""
+    def octave_bands(self) -> OctaveBandSpectrum:
+        """``ΔLoct`` in octave bands, via Formula (5) (needs whole octave triplets)."""
         return improvement_octave_bands(self.improvement, self.frequencies)
 
     def plot(
@@ -546,10 +549,73 @@ def impact_improvement(
     )
 
 
+#: The quantities an :class:`OctaveBandSpectrum` can hold: the improvements
+#: of ISO 16251-1 and ISO 10140-1 Annexes G and H, the sound reduction index
+#: of a joint (ISO 10140-1 Annex J) and the rainfall intensity level, raw and
+#: normalized (ISO 10140-1 Annex K).
+_OCTAVE_BAND_QUANTITIES: tuple[str, ...] = ("ΔL", "ΔR", "Rs", "LI", "LI,norm")
+
+
+@dataclass(frozen=True)
+class OctaveBandSpectrum(OwnsArrays):
+    """A one-third-octave result folded into octave bands, with what it holds.
+
+    What :func:`improvement_octave_bands` returns, and what the
+    ``octave_bands()`` methods of the floor-covering, laboratory lining,
+    laboratory floor-covering, joint and rainfall results return: the octave
+    centres and the octave values side by side, named, so that neither can be
+    read as the other, and the quantity they are values of.
+
+    :ivar frequencies: The octave centre frequencies, in hertz.
+    :ivar values: The octave value of :attr:`quantity` in each band, in dB.
+    :ivar quantity: Which quantity the values are: ``"ΔL"`` (an impact
+        improvement), ``"ΔR"`` (a sound reduction improvement), ``"Rs"`` (the
+        sound reduction index of a joint), ``"LI"`` or ``"LI,norm"`` (the
+        rainfall sound intensity level, raw or normalized).
+    """
+
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"values": "dB"})
+
+    frequencies: np.ndarray
+    values: np.ndarray
+    quantity: str
+
+    def __post_init__(self) -> None:
+        """Reject an unknown quantity or columns of different lengths.
+
+        :raises ValueError: if ``quantity`` is not one of the five above, or
+            the two columns are not one-dimensional arrays of one value per
+            octave.
+        """
+        require_choice(self.quantity, "quantity", _OCTAVE_BAND_QUANTITIES)
+        require_ranks(self, frequencies=1, values=1)
+        require_same_length(self, "frequencies", "values")
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the octave values against their octave bands.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the octave curve ``plot`` call.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_octave_band_spectrum
+
+        check_language(language)
+        return plot_octave_band_spectrum(self, ax=ax, language=language, **kwargs)
+
+
 def improvement_octave_bands(
     improvement: Sequence[float] | np.ndarray,
     frequencies: Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+    *,
+    quantity: str = "ΔL",
+) -> OctaveBandSpectrum:
     r"""Convert a one-third-octave improvement spectrum to octaves (F. (5)).
 
     :math:`\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum_{j=1}^{3} 10^{-\Delta L_j/10}]`
@@ -559,9 +625,15 @@ def improvement_octave_bands(
     :param improvement: Improvement ``ΔL`` per one-third-octave band, in dB.
     :param frequencies: The matching one-third-octave centre frequencies, in Hz;
         must contain whole octave triplets (centre / centre·2^(±1/3)).
-    :return: ``(octave_freqs, ΔLoct)``.
-    :raises ValueError: The thirds do not group into complete octave triplets.
+    :param quantity: What the values are, for the record and its plot:
+        ``"ΔL"`` (Default), ``"ΔR"`` or ``"Rs"``, the three quantities folded
+        into octaves by this average of transmitted power.
+    :return: An :class:`OctaveBandSpectrum` with the octave centres
+        (``.frequencies``) and the octave values (``.values``).
+    :raises ValueError: The thirds do not group into complete octave triplets,
+        or ``quantity`` is not one of the three.
     """
+    require_choice(quantity, "quantity", _OCTAVE_BAND_QUANTITIES[:3])
     dl = _finite(improvement, "improvement")
     freqs = _finite(frequencies, "frequencies")
     require_equal_shapes(
@@ -586,7 +658,11 @@ def improvement_octave_bands(
         octave_values.append(
             -10.0 * np.log10(np.mean([10.0 ** (-v / 10.0) for v in vals]))
         )
-    return np.asarray(octave_freqs), np.asarray(octave_values)
+    return OctaveBandSpectrum(
+        frequencies=np.asarray(octave_freqs, dtype=np.float64),
+        values=np.asarray(octave_values, dtype=np.float64),
+        quantity=quantity,
+    )
 
 
 def _octave_centres(freqs: np.ndarray) -> list[float]:

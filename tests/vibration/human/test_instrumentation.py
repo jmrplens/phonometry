@@ -89,7 +89,7 @@ def test_the_tolerance_band_widens_at_the_table_4_corners() -> None:
     """Table 5, region by region, read across one weighting."""
     ft1, ft2, ft3, ft4 = ins.TRANSITION_FREQUENCIES_HZ["Wk"]
     inside = [ft1 * 0.5, ft1 * 1.5, ft2, (ft2 + ft3) / 2, ft3, ft3 * 1.5, ft4 * 2.0]
-    upper, lower = ins.weighting_tolerance_percent("Wk", inside)
+    lower, upper = ins.weighting_tolerance_percent("Wk", inside)
     assert list(upper) == pytest.approx([26, 26, 12, 12, 12, 26, 26])
     assert list(lower) == pytest.approx([-100, -21, -11, -11, -11, -21, -100])
 
@@ -101,7 +101,7 @@ def test_the_transition_frequencies_belong_to_the_region_they_close() -> None:
     tighter tolerance rather than the wider one on either side of them.
     """
     _, ft2, ft3, _ = ins.TRANSITION_FREQUENCIES_HZ["Wd"]
-    upper, lower = ins.weighting_tolerance_percent("Wd", [ft2, ft3])
+    lower, upper = ins.weighting_tolerance_percent("Wd", [ft2, ft3])
     assert list(upper) == pytest.approx([12.0, 12.0])
     assert list(lower) == pytest.approx([-11.0, -11.0])
 
@@ -257,8 +257,8 @@ def test_the_band_is_not_widened_by_the_uncertainty() -> None:
     so they are returned as printed however large the laboratory's own
     uncertainty is; what 13.1 moves is the measurement.
     """
-    upper, lower = ins.weighting_tolerance_percent("Wk", [16.0])
-    assert (float(upper[0]), float(lower[0])) == pytest.approx((12.0, -11.0))
+    lower, upper = ins.weighting_tolerance_percent("Wk", [16.0])
+    assert (float(lower[0]), float(upper[0])) == pytest.approx((-11.0, 12.0))
     verdict = vibration.verify_weighting(
         "Wk", [16.0], _measured_at("Wk", 16.0, 11.5), expanded_uncertainty_percent=1.0
     )

@@ -54,7 +54,7 @@ def _tone_attenuation_db(
         return float(np.mean(y[y.size // 2 :] ** 2))
 
     return 10.0 * math.log10(
-        mean_square(float(bank.freq[index])) / mean_square(frequency_hz)
+        mean_square(float(bank.frequencies[index])) / mean_square(frequency_hz)
     )
 
 
@@ -67,11 +67,11 @@ def test_the_graded_images_are_what_tones_through_the_bank_read() -> None:
     grades, to a hundredth of a decibel, more than 120 dB down.
     """
     bank = filters.OctaveFilterBank(16000, fraction=1)
-    index = int(np.argmin(np.abs(np.asarray(bank.freq) - 63.0)))
+    index = int(np.argmin(np.abs(np.asarray(bank.frequencies) - 63.0)))
     factor = int(bank.factor[index])
     assert factor == 5
     rate = bank.fs / factor
-    mid = float(bank.freq[index])
+    mid = float(bank.frequencies[index])
     tones = np.array([rate - mid, rate + mid, 2.0 * rate - mid])
     graded = _band_relative_attenuation(
         bank.sos[index], factor, float(bank.fs), mid, tones
@@ -92,17 +92,17 @@ def test_every_image_the_verdict_reads_is_what_a_tone_reads() -> None:
     decibel.
     """
     bank = filters.OctaveFilterBank(16000, fraction=1)
-    index = int(np.argmin(np.abs(np.asarray(bank.freq) - 63.0)))
+    index = int(np.argmin(np.abs(np.asarray(bank.frequencies) - 63.0)))
     factor = int(bank.factor[index])
     assert factor == 5
     grid = _BandGrid(
         np.asarray(bank.sos[index]),
         factor,
         float(bank.fs),
-        float(bank.freq[index]),
+        float(bank.frequencies[index]),
         2**8,
     )
-    offset = round(float(bank.freq[index]) / grid.spacing_hz) * grid.spacing_hz
+    offset = round(float(bank.frequencies[index]) / grid.spacing_hz) * grid.spacing_hz
     read = {
         round(float(f), 6): float(d)
         for freqs, delta_a in grid.images(0, grid.n_points)
@@ -120,7 +120,7 @@ def test_a_decimated_band_is_graded_up_to_half_the_input_rate() -> None:
     bank = filters.OctaveFilterBank(48000, fraction=3, limits=[100, 10000])
     assert max(bank.factor) > 1
     result = filters.verify_filter_class(bank)
-    reach = [b["checked_to_omega"] * b["freq"] for b in result.bands]
+    reach = [b["checked_to_omega"] * b["frequency"] for b in result.bands]
     np.testing.assert_allclose(reach, 24000.0, rtol=1e-12)
 
 
@@ -164,7 +164,7 @@ def test_the_bank_keeps_every_image_more_than_125_db_down(
     """The anti-aliasing filter of the bank leaves no image within 125 dB."""
     bank = filters.OctaveFilterBank(fs, fraction=fraction)
     worst = math.inf
-    for index in range(bank.num_bands):
+    for index in range(bank.n_bands):
         factor = int(bank.factor[index])
         if factor == 1:
             continue
@@ -172,7 +172,7 @@ def test_the_bank_keeps_every_image_more_than_125_db_down(
             np.asarray(bank.sos[index]),
             factor,
             float(bank.fs),
-            float(bank.freq[index]),
+            float(bank.frequencies[index]),
             2**12,
         )
         for _, delta_a in grid.images(0, grid.n_points):
@@ -215,7 +215,7 @@ def test_the_bank_decimates_and_interpolates_through_the_graded_filter() -> None
     assert factor > 1
     assert float(np.sum(_multirate_lowpass(factor))) == pytest.approx(1.0, abs=1e-12)
     t = np.arange(8 * bank.fs) / bank.fs
-    tone = np.cos(2.0 * np.pi * float(bank.freq[index]) * t)
+    tone = np.cos(2.0 * np.pi * float(bank.frequencies[index]) * t)
     out = bank.filter(tone, sigbands=True, calculate_level=False, detrend=False)
     band = np.asarray(out.require_bands()[index])
     decimated = _decimate_and_filter(tone, bank.sos[index], factor)

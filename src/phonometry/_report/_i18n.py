@@ -166,7 +166,7 @@ _STRINGS: dict[str, str] = {
     "Loudness level L<sub>N</sub> [phon]": "Nivel de sonoridad L<sub>N</sub> [phon]",
     "N<sub>5</sub> [sone]": "N<sub>5</sub> [sone]",
     "N<sub>10</sub> [sone]": "N<sub>10</sub> [sone]",
-    "PNLTM [PNdB]": "PNLTM [PNdB]",
+    "PNLTM [TPNdB]": "PNLTM [TPNdB]",
     "Duration correction D [dB]": "Corrección de duración D [dB]",
     "10 dB-down window (records)": "Ventana 10 dB por debajo (registros)",
     "Bandsharing adjustment [dB]": "Ajuste por reparto de bandas [dB]",

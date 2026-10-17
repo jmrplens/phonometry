@@ -99,8 +99,8 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
     result = verify_filter_class(bank)
     bands = result.bands
     worst = min(bands, key=lambda b: b["margin_class1_db"])
-    idx = [b["freq"] for b in bands].index(worst["freq"])
-    fm = float(bank.freq[idx])
+    idx = [b["frequency"] for b in bands].index(worst["frequency"])
+    fm = float(bank.frequencies[idx])
     # The points the verifier reads: the band's response at the input rate on
     # its decimated half-band, on the Table 1 breakpoints and on every alias
     # image up to half the input rate.

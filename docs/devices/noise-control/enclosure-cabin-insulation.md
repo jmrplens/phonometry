@@ -54,7 +54,7 @@ with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, enclosure fitted
 res = noise_control.enclosure_sound_power_insulation(
     without, with_box, frequencies=bands, fraction=1,
 )
-print(res.rounded())                    # [ 8 12 18 23 26 26] dB
+print(res.rounded)                    # [ 8 12 18 23 26 26] dB
 print(round(res.a_weighted_insulation, 1))   # 19.3 dB
 ```
 
@@ -152,7 +152,7 @@ cab = noise_control.cabin_insulation(
     room, inside, frequencies=bands, fraction=1,
     method="in-situ-loudspeaker",
 )
-print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
+print(cab.symbol, cab.rounded)   # D'_p [12 18 25 30 34 35] dB
 ```
 
 There is a third method, and it is the one a workplace usually wants: drive the

@@ -81,6 +81,7 @@ from .._internal.validation import (
     require_equal_shapes,
     require_finite_array,
     require_finite_fields,
+    require_present,
     require_ranks,
     require_same_length,
 )
@@ -219,10 +220,9 @@ class IntensityResult(OwnsArrays):
     ``max_valid_frequency``
     is the usable-bandwidth bound :math:`0.1 \, c / \Delta r`
     (bias < ~0.3 dB).
-    ``spacing_m`` retains the microphone separation the measurement was
-    reduced with so :meth:`plot_geometry` can draw the probe; it is
-    appended after the original fields and ``None`` for hand-built
-    results.
+    ``spacing_m`` keeps the microphone separation the measurement was
+    reduced with, in metres, so :meth:`plot_geometry` can draw the probe;
+    it is keyword-only.
     """
 
     #: The bias correction is the linear factor :math:`k\Delta r/\sin(k\Delta r)`
@@ -245,7 +245,7 @@ class IntensityResult(OwnsArrays):
     total_direction: int
     max_valid_frequency: float
     _: KW_ONLY
-    spacing_m: float | None = None
+    spacing_m: float
 
     def __post_init__(self) -> None:
         r"""Reject a measurement whose own fields contradict one another.
@@ -295,7 +295,9 @@ class IntensityResult(OwnsArrays):
             ``total_pressure_level`` is not finite; or if
             ``total_intensity_level`` or ``total_pressure_intensity_index``
             does not restate the totals it is computed from.
+        :raises TypeError: if ``spacing_m`` is ``None``.
         """
+        require_present(self, "spacing_m")
         require_ranks(
             self,
             frequencies=1,
@@ -356,8 +358,6 @@ class IntensityResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_intensity_result_geometry
@@ -600,11 +600,16 @@ def _band_integrals(
     pressures); bands with no spectral bin of their own are dropped, so the
     arrays can be shorter than the nominal band list.
     """
-    freq, freq_d, freq_u, _ = _genfreqs(band_limits, fraction, fs)
+    bands = _genfreqs(band_limits, fraction, fs)
     centers: list[float] = []
     band_i: list[float] = []
     band_msp: list[float] = []
-    for fc, lo, hi in zip(freq, freq_d, freq_u, strict=True):
+    for fc, lo, hi in zip(
+        bands.frequencies.tolist(),
+        bands.lower_edges.tolist(),
+        bands.upper_edges.tolist(),
+        strict=True,
+    ):
         mask = (fpos > lo) & (fpos <= hi)
         if not np.any(mask):
             continue  # band narrower than the spectral resolution

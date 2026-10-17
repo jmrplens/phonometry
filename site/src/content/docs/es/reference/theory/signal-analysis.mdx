@@ -120,7 +120,7 @@ $$
 
 **Centro exacto frente a etiqueta impresa.** El $f_\mathrm{m}$ de arriba es la frecuencia
 central exacta; lo que imprime un instrumento (y lo que `nominal_frequencies`
-devuelve como cuarto elemento, o `octave_filter(..., nominal=True)`) es el
+devuelve en `labels`, o `octave_filter(..., nominal=True)`) es el
 número preferente de ISO 266 más próximo a ella. La banda de tercio de octava
 cuyo centro exacto es 1258,9 Hz se etiqueta 1250 Hz, y la banda de sexto de
 octava centrada en 1059,3 Hz se etiqueta 1.06k. Los niveles de banda se comparan
@@ -151,8 +151,10 @@ Puedes inspeccionar las bandas exactas con:
 ```python
 from phonometry import filters
 
-fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20000])
-for label, center, lower, upper in zip(labels, fc, fl, fu):
+bands = filters.nominal_frequencies(fraction=3, limits=[12, 20000])
+for label, center, lower, upper in zip(
+    bands.labels, bands.frequencies, bands.lower_edges, bands.upper_edges
+):
     print(label, center, lower, upper, upper - lower)
 ```
 
@@ -180,7 +182,8 @@ filtered = filters.octave_filter(
 levels, centers = filtered.levels, filtered.frequencies
 
 # Las mismas definiciones de banda, incluidos los bordes.
-fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])
+bands = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])
+fc, fl, fu = bands.frequencies, bands.lower_edges, bands.upper_edges
 
 # Estimación Welch de banda estrecha sobre la señal original.
 nperseg = min(2**15, len(x))
@@ -197,7 +200,7 @@ freq_bins, psd = signal.welch(
 band_index = int(np.argmin(np.abs(np.asarray(fc) - 1000.0)))
 in_band = (freq_bins >= fl[band_index]) & (freq_bins <= fu[band_index])
 
-print("Banda de tercio de octava seleccionada:", labels[band_index])
+print("Banda de tercio de octava seleccionada:", bands.labels[band_index])
 print("Separación de bins Welch:", freq_bins[1] - freq_bins[0], "Hz")
 for f, pxx in zip(freq_bins[in_band], psd[in_band]):
     print(f, pxx)

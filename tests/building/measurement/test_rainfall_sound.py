@@ -361,9 +361,10 @@ def test_formula_k3_sums_three_bands() -> None:
     res = building.rainfall_sound(
         np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
     )
-    centres, octaves = res.octave_bands()
-    assert centres.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
-    np.testing.assert_allclose(octaves, 46.0 + 10.0 * np.log10(3.0))
+    octaves = res.octave_bands()
+    assert octaves.quantity == "LI"
+    assert octaves.frequencies.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+    np.testing.assert_allclose(octaves.values, 46.0 + 10.0 * np.log10(3.0))
 
 
 def test_background_is_removed_before_the_sum() -> None:
@@ -403,8 +404,9 @@ def test_normalization_formula_k5() -> None:
         reference_correction=correction.correction,
     )
     assert as_array.l_ia_norm == pytest.approx(res.l_ia_norm)
-    _, octaves = res.octave_bands(normalized=True)
-    assert octaves.size == 6
+    octaves = res.octave_bands(normalized=True)
+    assert octaves.quantity == "LI,norm"
+    assert octaves.values.size == 6
 
 
 def test_octaves_of_levels_never_normalized_are_refused() -> None:

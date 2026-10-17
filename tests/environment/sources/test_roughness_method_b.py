@@ -131,7 +131,7 @@ def test_the_bank_is_class_0_on_table_1_of_en_61260_1995(spacing_m: float) -> No
     nyquist = bank.fs / 2.0
     reach = [
         band["checked_to_omega"] * float(centre) / nyquist
-        for band, centre in zip(result.bands, bank.freq, strict=True)
+        for band, centre in zip(result.bands, bank.frequencies, strict=True)
     ]
     np.testing.assert_allclose(reach, 1.0, rtol=1e-9)
 
@@ -161,7 +161,7 @@ def test_the_bank_attenuates_class_0_beyond_g4_on_a_record() -> None:
         ).require_bands()
         return np.array([np.mean(np.asarray(b)[settled:] ** 2) for b in bands])
 
-    centres = np.asarray(bank.freq, dtype=float)
+    centres = np.asarray(bank.frequencies, dtype=float)
     reference = np.array([mean_squares(float(f))[i] for i, f in enumerate(centres)])
     wavenumbers = [*np.geomspace(0.3, 499.0, 61), 74.773, 88.202]
     worst = math.inf
@@ -188,7 +188,7 @@ def _relative_attenuation_db(
     Read as the class check reads it: the response the band has at the
     record's own rate, a decimated band's alias images included.
     """
-    mid = float(bank.freq[index])
+    mid = float(bank.frequencies[index])
     return _band_relative_attenuation(
         bank.sos[index], int(bank.factor[index]), float(bank.fs), mid, omega * mid
     )
@@ -205,7 +205,7 @@ def test_the_integrated_response_of_every_band_is_within_class_0() -> None:
     omega = np.linspace(1.0e-4, 20.0, 200001)
     reference = _G ** (1.0 / 6.0) - _G ** (-1.0 / 6.0)
     deviations = []
-    for index in range(bank.num_bands):
+    for index in range(bank.n_bands):
         power = 10.0 ** (-0.1 * _relative_attenuation_db(bank, index, omega))
         effective = float(np.trapezoid(power, omega))
         deviations.append(10.0 * math.log10(effective / reference))
@@ -216,11 +216,13 @@ def test_the_summation_of_outputs_is_within_class_0() -> None:
     """EN 61260:1995 4.9: between two midbands, the summed outputs within ±1,0 dB."""
     bank = roughness_filter_bank(sample_spacing_m=_DX)
     worst = 0.0
-    for index in range(1, bank.num_bands - 1):
-        frequencies = np.geomspace(bank.freq[index - 1], bank.freq[index + 1], 201)
+    for index in range(1, bank.n_bands - 1):
+        frequencies = np.geomspace(
+            bank.frequencies[index - 1], bank.frequencies[index + 1], 201
+        )
         total = np.zeros(frequencies.size)
-        for other in range(max(0, index - 3), min(bank.num_bands, index + 4)):
-            omega = frequencies / float(bank.freq[other])
+        for other in range(max(0, index - 3), min(bank.n_bands, index + 4)):
+            omega = frequencies / float(bank.frequencies[other])
             total += 10.0 ** (-0.1 * _relative_attenuation_db(bank, other, omega))
         worst = max(worst, float(np.max(np.abs(10.0 * np.log10(total)))))
     assert worst <= _CLASS_0_SUMMATION_DB
@@ -242,11 +244,11 @@ def test_the_bank_holds_the_bands_the_annex_b_listing_filters() -> None:
     """At 1 mm the default bank runs the 24 bands of ``wl_d``, 0,5 m to 2,5 mm (B.9.2)."""
     bank = roughness_filter_bank(sample_spacing_m=_DX)
     listing = ref.EN15610_LISTING_FILTER_WAVELENGTHS_M
-    centres = np.asarray(bank.freq)
+    centres = np.asarray(bank.frequencies)
     assert bank.order == 4
     assert bank.fs == 1000
     np.testing.assert_allclose(centres, 10.0 ** (np.arange(3, 27) / 10.0), rtol=1e-12)
-    nominal = [1.0 / float(f) for f in bank.nominal_freq]
+    nominal = [1.0 / float(f) for f in bank.labels]
     np.testing.assert_allclose(nominal, listing, rtol=0.01)
 
 

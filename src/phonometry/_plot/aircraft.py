@@ -70,7 +70,7 @@ _ORIGINAL_NPD_LABEL = "original (SAE AIR-1845)"
 _STRINGS: dict[str, str] = {
     _TEN_DB_DOWN_LABEL: "Ventana 10 dB por debajo",
     _TIME_LABEL: "Tiempo [s]",
-    "Level [PNdB]": "Nivel [PNdB]",
+    "Level [PNdB, TPNdB]": "Nivel [PNdB, TPNdB]",
     "SAE band": "Banda SAE",
     "Pure-tone mid-band (ISO 9613-1)": "Banda media de tono puro (ISO 9613-1)",
     _FREQUENCY_LABEL: "Frecuencia [Hz]",
@@ -194,10 +194,10 @@ def plot_epnl(
         [result.pnltm],
         "o",
         color=_C_REFERENCE,
-        label=f"PNLTM = {format_number(result.pnltm, language)} PNdB",
+        label=f"PNLTM = {format_number(result.pnltm, language)} TPNdB",
     )
     ax.set_xlabel(_t(_TIME_LABEL, language))
-    ax.set_ylabel(_t("Level [PNdB]", language))
+    ax.set_ylabel(_t("Level [PNdB, TPNdB]", language))
     ax.set_title(
         f"ICAO EPNL = {format_number(result.epnl, language)} EPNdB "
         f"($D$ = {decimal_comma(fmt_minus(result.duration_correction, '+.1f'), language)} dB)"

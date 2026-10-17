@@ -354,6 +354,7 @@ class ScreenInSituResult(OwnsArrays):
     source_kind: str
     distance: float | None
 
+    @property
     def rounded(self) -> NDArray[np.int_]:
         """The band values as 7.4 c) reports them, to the nearest integer.
 
@@ -363,6 +364,7 @@ class ScreenInSituResult(OwnsArrays):
         """
         return np.asarray(round_half_even(self.attenuation), dtype=np.int_)
 
+    @property
     def rounded_a_weighted(self) -> int | None:
         r""":math:`D_{p\mathrm{A}}` as 7.4 c) reports it, to the nearest integer.
 

@@ -185,11 +185,11 @@ BarrierInsertionLoss(
     method: str,
     *,
     ground: bool,
-    source_height_m: float | None = None,
-    barrier_distance: float | None = None,
-    barrier_height_m: float | None = None,
-    receiver_distance: float | None = None,
-    receiver_height_m: float | None = None,
+    source_height_m: float,
+    barrier_distance: float,
+    barrier_height_m: float,
+    receiver_distance: float,
+    receiver_height_m: float,
     thickness_m: float | None = None,
 )
 ```
@@ -205,7 +205,7 @@ Per-frequency barrier insertion loss (IL vs frequency).
 | `fresnel_number` | Fresnel number `N` per frequency (single-edge geometry; the double-edge `N` for a thick barrier). |
 | `method` | Diffraction model used, and the tag the fiche and the plot name it by: `"kurze_anderson"` or `"exact"`, the two models the library implements. Any other tag is refused at construction. |
 | `ground` | Whether the coherent four-path ground model was applied. |
-| `source_height_m` | Source height the loss was computed for, in metres, retained (with the other five geometry fields) so `plot_geometry` can draw the section; appended after the original fields and `None` for hand-built results. |
+| `source_height_m` | Source height the loss was computed for, in metres, kept (with the other geometry fields) so `plot_geometry` can draw the section. |
 | `barrier_distance` | Source-to-barrier horizontal distance, in metres. |
 | `barrier_height_m` | Barrier height, in metres. |
 | `receiver_distance` | Source-to-receiver horizontal distance, in metres. |
@@ -243,12 +243,6 @@ Draw the source-barrier-receiver section to scale.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ### BarrierInsertionLoss.report()
 

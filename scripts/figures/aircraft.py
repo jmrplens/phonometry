@@ -77,10 +77,10 @@ def generate_epnl(output_dir: str) -> None:
         "o",
         color=COLOR_SECONDARY,
         markersize=9,
-        label=f"PNLTM = {res.pnltm:.1f} PNdB",
+        label=f"PNLTM = {res.pnltm:.1f} TPNdB",
     )
     ax.set_xlabel("Time [s]")
-    ax.set_ylabel("Level [PNdB]")
+    ax.set_ylabel("Level [PNdB, TPNdB]")
     ax.set_title(
         "ICAO Aircraft Flyover: Effective Perceived Noise Level (Annex 16)", pad=12
     )

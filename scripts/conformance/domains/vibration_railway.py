@@ -81,7 +81,9 @@ def _chk_block_length() -> Outcome:
 @register(_RAILWAY, f"{_EDITION} 7.1", "Relative bandwidth of a third octave, %")
 def _chk_bandwidth() -> Outcome:
     bank = ph.filters.OctaveFilterBank(2048, fraction=3, limits=[4.0, 315.0])
-    width = (np.asarray(bank.freq_u) - np.asarray(bank.freq_d)) / np.asarray(bank.freq)
+    width = (np.asarray(bank.upper_edges) - np.asarray(bank.lower_edges)) / np.asarray(
+        bank.frequencies
+    )
     return numeric(23.0, 100.0 * float(np.mean(width)), _PERCENT_TOLERANCE, unit="%")
 
 

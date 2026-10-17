@@ -101,7 +101,7 @@ def test_zero_phase_short_signal_does_not_crash() -> None:
 def test_spectrogram_supports_zero_phase() -> None:
     bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[800, 1200])
     x = np.random.default_rng(4).standard_normal(FS)
-    levels_zp, _, _times = bank.spectrogram(x, window_time=0.125, zero_phase=True)
-    levels_fwd, _, _ = bank.spectrogram(x, window_time=0.125, zero_phase=False)
+    levels_zp = bank.spectrogram(x, window_time=0.125, zero_phase=True).levels
+    levels_fwd = bank.spectrogram(x, window_time=0.125, zero_phase=False).levels
     assert levels_zp.shape == levels_fwd.shape
     assert np.all(np.isfinite(levels_zp))

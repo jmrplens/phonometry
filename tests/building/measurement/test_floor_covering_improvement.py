@@ -375,20 +375,37 @@ def test_impact_improvement_background_shape_validation() -> None:
 def test_octave_conversion_formula_5() -> None:
     freqs = [400.0, 500.0, 630.0]  # the 500 Hz octave triplet
     dl = np.array([10.0, 10.0, 10.0])
-    oct_f, oct_dl = building.improvement_octave_bands(dl, freqs)
-    np.testing.assert_allclose(oct_f, [500.0])
+    octaves = building.improvement_octave_bands(dl, freqs)
+    assert isinstance(octaves, building.OctaveBandSpectrum)
+    assert octaves.quantity == "ΔL"
+    np.testing.assert_allclose(octaves.frequencies, [500.0])
     # Equal thirds => octave equals the common value.
-    np.testing.assert_allclose(oct_dl, [10.0])
+    np.testing.assert_allclose(octaves.values, [10.0])
 
 
 def test_octave_conversion_energy_mean() -> None:
     freqs = [400.0, 500.0, 630.0]
     dl = np.array([6.0, 10.0, 14.0])
-    _, oct_dl = building.improvement_octave_bands(dl, freqs)
+    oct_dl = building.improvement_octave_bands(dl, freqs).values
     expected = -10.0 * np.log10(
         np.mean([10.0 ** (-6 / 10), 10.0 ** (-10 / 10), 10.0 ** (-14 / 10)])
     )
     np.testing.assert_allclose(oct_dl, [expected])
+
+
+def test_the_octave_spectrum_is_a_record_with_its_quantity() -> None:
+    """The octaves and their values by name, never a pair unpacked by position."""
+    freqs = [400.0, 500.0, 630.0]
+    dl = np.array([6.0, 10.0, 14.0])
+    octaves = building.improvement_octave_bands(dl, freqs, quantity="ΔR")
+    assert octaves.quantity == "ΔR"
+    assert not octaves.values.flags.writeable
+    with pytest.raises(TypeError, match="cannot unpack non-iterable"):
+        _centres, _values = octaves  # type: ignore[misc]
+    with pytest.raises(ValueError, match="quantity"):
+        building.improvement_octave_bands(dl, freqs, quantity="LI")
+    with pytest.raises(ValueError, match="quantity"):
+        building.OctaveBandSpectrum(np.array([500.0]), np.array([10.0]), "dB")
 
 
 # ---------------------------------------------------------------------------
@@ -451,9 +468,10 @@ def test_result_octave_bands_method() -> None:
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     bare = np.full(16, 75.0)
     res = building.impact_improvement(bare, bare - 5.0, freqs)
-    oct_f, oct_dl = res.octave_bands()
-    assert oct_f.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
-    np.testing.assert_allclose(oct_dl, np.full(5, 5.0))
+    octaves = res.octave_bands()
+    assert octaves.quantity == "ΔL"
+    assert octaves.frequencies.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
+    np.testing.assert_allclose(octaves.values, np.full(5, 5.0))
 
 
 def test_plot_returns_axes() -> None:
@@ -466,3 +484,85 @@ def test_plot_returns_axes() -> None:
     res = building.impact_improvement(bare, bare - 8.0, freqs)
     ax = res.plot()
     assert ax.get_title().startswith("ISO 16251-1")
+
+
+@pytest.mark.parametrize(
+    ("language", "ylabel", "title", "xlabel"),
+    [
+        (
+            "en",
+            r"Sound reduction improvement index $\Delta R$ [dB]",
+            "In octave bands",
+            "Octave band [Hz]",
+        ),
+        (
+            "es",
+            r"Mejora del índice de reducción acústica $\Delta R$ [dB]",
+            "En bandas de octava",
+            "Banda de octava [Hz]",
+        ),
+    ],
+)
+def test_the_octave_spectrum_plot_draws_one_point_per_octave(
+    language: str, ylabel: str, title: str, xlabel: str
+) -> None:
+    """The octave values, on one categorical tick per octave, labelled by quantity."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
+    octaves = building.improvement_octave_bands(
+        np.linspace(2.0, 17.0, 16), freqs, quantity="ΔR"
+    )
+    ax = octaves.plot(language=language)
+    curve = next(line for line in ax.lines if line.get_marker() == "s")
+    np.testing.assert_allclose(curve.get_ydata(), octaves.values)
+    assert curve.get_label() == r"$\Delta R_\mathrm{oct}$"
+    assert [t.get_text() for t in ax.get_xticklabels()] == [
+        "125",
+        "250",
+        "500",
+        "1k",
+        "2k",
+    ]
+    assert ax.get_ylabel() == ylabel
+    assert ax.get_xlabel() == xlabel
+    assert ax.get_title() == title
+    plt.close("all")
+
+
+@pytest.mark.parametrize(
+    ("quantity", "symbol"),
+    [
+        ("ΔL", r"$\Delta L_\mathrm{oct}$"),
+        ("ΔR", r"$\Delta R_\mathrm{oct}$"),
+        ("Rs", r"$R_\mathrm{s}$"),
+        ("LI", r"$L_{I\mathrm{oct}}$"),
+        ("LI,norm", r"$L_{I\mathrm{norm}}$"),
+    ],
+)
+def test_octave_spectrum_legend_uses_the_printed_symbol(
+    quantity: str, symbol: str
+) -> None:
+    """The octave form where a source prints one, the plain symbol where not.
+
+    ISO 10140-1:2021 prints ΔL_oct (H.2) and L_Ioct (K.3), ISO 717-1:2020
+    prints ΔR_oct (D.1); Figure J.9 keys the joint plainly as R_s, and
+    Annex K defines L_Inorm in one-third-octave bands only.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    octaves = building.OctaveBandSpectrum(
+        np.array([500.0, 1000.0]), np.array([10.0, 12.0]), quantity
+    )
+    ax = octaves.plot()
+    curve = next(line for line in ax.lines if line.get_marker() == "s")
+    assert curve.get_label() == symbol
+    plt.close("all")

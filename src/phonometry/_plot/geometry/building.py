@@ -13,7 +13,7 @@ leaf never imports domain code at module level.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -182,32 +182,25 @@ def plot_aperture_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Aperture section for a result that retained its geometry."""
+    """Aperture section for a result, drawn from the geometry it keeps."""
     # One branch per shape, which is what the result carries: a 'slit' keeps
-    # its width and a 'circular' aperture its radius, never both. Passing both
-    # through and letting one be None would not match either call form.
-    if result.depth is not None:
-        if result.width_m is not None:
-            return plot_aperture_geometry(
-                result.depth,
-                ax=ax,
-                width_m=result.width_m,
-                language=language,
-                **kwargs,
-            )
-        if result.radius is not None:
-            return plot_aperture_geometry(
-                result.depth,
-                ax=ax,
-                radius=result.radius,
-                language=language,
-                **kwargs,
-            )
-    msg = (
-        "This result does not retain its geometry; call "
-        "plot_aperture_geometry(depth, ...) with the original arguments."
+    # its width and a 'circular' aperture its radius, always one and never
+    # both (the result refuses anything else when it is built).
+    if result.width_m is not None:
+        return plot_aperture_geometry(
+            result.depth,
+            ax=ax,
+            width_m=result.width_m,
+            language=language,
+            **kwargs,
+        )
+    return plot_aperture_geometry(
+        result.depth,
+        ax=ax,
+        radius=cast(float, result.radius),
+        language=language,
+        **kwargs,
     )
-    raise ValueError(msg)
 
 
 # ---------------------------------------------------------------------------
@@ -312,13 +305,7 @@ def plot_facade_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Facade elevation for a prediction that retained its ``elements``."""
-    if result.elements is None:
-        msg = (
-            "This result does not retain its elements; call "
-            "plot_facade_elements(elements) with the original sequence."
-        )
-        raise ValueError(msg)
+    """Facade elevation for a prediction, drawn from the ``elements`` it keeps."""
     return plot_facade_elements(result.elements, ax=ax, language=language, **kwargs)
 
 

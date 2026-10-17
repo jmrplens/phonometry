@@ -90,6 +90,7 @@ from ..._internal.validation import (
     require_band_fraction,
     require_choice,
     require_equal_shapes,
+    require_present,
     require_ranks,
     require_same_length,
 )
@@ -440,24 +441,21 @@ def _by_band(
 
 
 def _require_finite_curves(owner: object, *fields: str) -> None:
-    """Require each named optional band curve of *owner* to be finite.
+    """Require each named band curve of *owner* to be finite.
 
     The ``__post_init__`` companion of the entry points' own finiteness
     refusals: :func:`weighted_rating` and :func:`weighted_impact_rating`
     refuse non-finite input by name, so no constructor ever stores a
     non-finite band, and an instance carrying one can only have been
-    assembled by hand or through :func:`dataclasses.replace`. ``None``
-    fields (a rating built from the single numbers alone) are skipped.
+    assembled by hand or through :func:`dataclasses.replace`.
 
     :param owner: The instance whose curve fields are checked.
-    :param fields: Names of the optional per-band array fields.
-    :raises ValueError: if a present curve carries a non-finite value.
+    :param fields: Names of the per-band array fields.
+    :raises ValueError: if a curve carries a non-finite value.
     """
     for name in fields:
         value = getattr(owner, name)
-        if value is not None and not np.all(
-            np.isfinite(np.asarray(value, dtype=np.float64))
-        ):
+        if not np.all(np.isfinite(np.asarray(value, dtype=np.float64))):
             msg = f"{type(owner).__name__}: '{name}' must contain only finite values."
             raise ValueError(msg)
 
@@ -489,8 +487,7 @@ def _require_unfavourable_sum(
     The em dash there is Table C.1's own mark for a band with no
     unfavourable deviation, not for one left undetermined: both curves are
     finite by the time this runs (:func:`_require_finite_curves` goes
-    first), so the sum is always determined. A rating built from the single
-    numbers alone carries no curves and is skipped.
+    first), so the sum is always determined.
 
     :param owner: The rating whose ``unfavorable_sum`` is checked.
     :param impact: ``True`` for the ISO 717-2 sign (measurement above the
@@ -498,12 +495,8 @@ def _require_unfavourable_sum(
     :raises ValueError: if ``unfavorable_sum`` is not the sum its own
         ``measured`` and ``shifted_reference`` state.
     """
-    measured = owner.measured
-    shifted = owner.shifted_reference
-    if measured is None or shifted is None:
-        return
-    excess = np.asarray(measured, dtype=np.float64) - np.asarray(
-        shifted, dtype=np.float64
+    excess = np.asarray(owner.measured, dtype=np.float64) - np.asarray(
+        owner.shifted_reference, dtype=np.float64
     )
     expected = float(np.sum(np.maximum(excess if impact else -excess, 0.0)))
     if not math.isclose(
@@ -535,14 +528,13 @@ class WeightedRatingResult(OwnsArrays):
     :ivar unfavorable_sum: Sum of unfavourable deviations at the final
         shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5
         bands). Restates ``measured`` against ``shifted_reference`` and is
-        checked against them when both are present.
+        checked against them.
     :ivar frequencies: Band centre frequencies of the measured curve, in
-        Hz. Defaults to ``None`` for backward-compatible construction.
+        Hz.
     :ivar measured: The measured band quantities used for the rating (after
-        the one-decimal reduction of Clause 4.4), in dB. Defaults to
-        ``None``.
+        the one-decimal reduction of Clause 4.4), in dB.
     :ivar shifted_reference: Table 3 reference curve after the final shift,
-        in dB. Defaults to ``None``.
+        in dB.
     :ivar quantity: Always ``"airborne"``: this class carries the ISO 717-1
         airborne rating, and the renderers dispatch on this tag when handed
         the union with :class:`ImpactRatingResult`, which carries
@@ -556,9 +548,9 @@ class WeightedRatingResult(OwnsArrays):
     c: int
     ctr: int
     unfavorable_sum: float
-    frequencies: np.ndarray | None = None
-    measured: np.ndarray | None = None
-    shifted_reference: np.ndarray | None = None
+    frequencies: np.ndarray
+    measured: np.ndarray
+    shifted_reference: np.ndarray
     quantity: Literal["airborne"] = "airborne"
 
     def __post_init__(self) -> None:
@@ -573,10 +565,6 @@ class WeightedRatingResult(OwnsArrays):
         was built and passed on; :meth:`plot` compares nothing and hands the
         curves to matplotlib, whose complaint about first dimensions names
         neither the field nor the type it came from.
-
-        The three arrays default to ``None`` on a rating built from the
-        single numbers alone, and an absent curve is skipped rather than read
-        as a disagreement.
 
         The curves must also be finite. No constructor can emit a non-finite
         band -- :func:`weighted_rating` refuses non-finite input, the centres
@@ -595,7 +583,9 @@ class WeightedRatingResult(OwnsArrays):
         :raises ValueError: if the band curves supplied disagree, one of them
             carries a non-finite value, or ``unfavorable_sum`` is not their
             own sum of unfavourable deviations.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(self, "frequencies", "measured", "shifted_reference")
         require_ranks(self, frequencies=1, measured=1, shifted_reference=1)
         require_same_length(self, "frequencies", "measured", "shifted_reference")
         _require_finite_curves(self, "frequencies", "measured", "shifted_reference")
@@ -684,14 +674,13 @@ class ImpactRatingResult(OwnsArrays):
     :ivar unfavorable_sum: Sum of unfavourable deviations at the final
         shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5
         bands). Restates ``measured`` against ``shifted_reference``, with the
-        impact sign, and is checked against them when both are present.
+        impact sign, and is checked against them.
     :ivar frequencies: Band centre frequencies of the measured curve, in
-        Hz. Defaults to ``None`` for backward-compatible construction.
+        Hz.
     :ivar measured: The measured impact levels used for the rating (after
-        the one-decimal reduction of Clause 4.3.1), in dB. Defaults to
-        ``None``.
+        the one-decimal reduction of Clause 4.3.1), in dB.
     :ivar shifted_reference: Table 3 impact reference curve after the final
-        shift, in dB. Defaults to ``None``.
+        shift, in dB.
     :ivar quantity: Always ``"impact"`` (ISO 717-2), selecting the impact
         labels of the ISO 717 Annex C report.
     """
@@ -699,9 +688,9 @@ class ImpactRatingResult(OwnsArrays):
     rating: int
     ci: int
     unfavorable_sum: float
-    frequencies: np.ndarray | None = None
-    measured: np.ndarray | None = None
-    shifted_reference: np.ndarray | None = None
+    frequencies: np.ndarray
+    measured: np.ndarray
+    shifted_reference: np.ndarray
     quantity: Literal["impact"] = "impact"
 
     def __post_init__(self) -> None:
@@ -717,10 +706,6 @@ class ImpactRatingResult(OwnsArrays):
         mismatch, but not until a report is asked for, and a rating is
         usually built long before that.
 
-        The three arrays default to ``None`` on a rating built from the
-        single numbers alone, and an absent curve is skipped rather than read
-        as a disagreement.
-
         The curves must also be finite, for the reasons given on
         :class:`WeightedRatingResult` (no constructor can emit a non-finite
         band; the fiche prints them raw or crashes namelessly on them).
@@ -732,7 +717,9 @@ class ImpactRatingResult(OwnsArrays):
         :raises ValueError: if the band curves supplied disagree, one of them
             carries a non-finite value, or ``unfavorable_sum`` is not their
             own sum of unfavourable deviations.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(self, "frequencies", "measured", "shifted_reference")
         require_ranks(self, frequencies=1, measured=1, shifted_reference=1)
         require_same_length(self, "frequencies", "measured", "shifted_reference")
         _require_finite_curves(self, "frequencies", "measured", "shifted_reference")
@@ -820,25 +807,14 @@ def _render_iso717(
     """Validate the report request and delegate to the reportlab renderer.
 
     Shared by :meth:`WeightedRatingResult.report` and
-    :meth:`ImpactRatingResult.report`: it rejects unknown engines and results
-    built without the per-band data, then calls the reportlab renderer (which
-    raises a clear :class:`ImportError` when reportlab is absent).
+    :meth:`ImpactRatingResult.report`: it rejects unknown engines, then
+    calls the reportlab renderer (which raises a clear :class:`ImportError`
+    when reportlab is absent).
     """
     from ..._i18n import check_language
 
     check_language(language)
     check_engine(engine)
-    if (
-        result.frequencies is None
-        or result.measured is None
-        or result.shifted_reference is None
-    ):
-        msg = (
-            "report() needs the per-band data ('frequencies', 'measured', "
-            "'shifted_reference'); build the rating with weighted_rating() or "
-            "weighted_impact_rating() so they are populated."
-        )
-        raise ValueError(msg)
     from ..._report.iso717 import render_iso717_report
 
     return render_iso717_report(
@@ -1253,11 +1229,9 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         bands (independent of ``one_decimal``), for plotting and the
         unfavourable-deviation sum.
     :ivar frequencies: Band centre frequencies of the full (enlarged-range)
-        measured curve, in Hz. Defaults to ``None`` for
-        backward-compatible construction.
+        measured curve, in Hz.
     :ivar measured: The measured band quantities over the full enlarged
         range (after the one-decimal reduction of Clause 4.4), in dB.
-        Defaults to ``None``.
     """
 
     rating: float
@@ -1270,8 +1244,8 @@ class ExtendedWeightedRatingResult(OwnsArrays):
     ctr_50_5000: float | None
     ctr_100_5000: float | None
     core: WeightedRatingResult
-    frequencies: np.ndarray | None = None
-    measured: np.ndarray | None = None
+    frequencies: np.ndarray
+    measured: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject an enlarged-range rating whose curve and bands disagree.
@@ -1289,7 +1263,9 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         the enlarged range is, and checks its own three curves.
 
         :raises ValueError: if ``frequencies`` and ``measured`` disagree.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(self, "frequencies", "measured")
         require_ranks(self, frequencies=1, measured=1)
         require_same_length(self, "frequencies", "measured")
 
@@ -1328,19 +1304,17 @@ class ExtendedImpactRatingResult(OwnsArrays):
     :ivar core: The integer-mode :class:`ImpactRatingResult` of the core
         bands (independent of ``one_decimal``).
     :ivar frequencies: Band centre frequencies of the full (enlarged-range)
-        measured curve, in Hz. Defaults to ``None`` for
-        backward-compatible construction.
+        measured curve, in Hz.
     :ivar measured: The measured impact levels over the full enlarged range
-        (after the one-decimal reduction of Clause 4.3), in dB. Defaults to
-        ``None``.
+        (after the one-decimal reduction of Clause 4.3), in dB.
     """
 
     rating: float
     ci: float
     ci_50_2500: float | None
     core: ImpactRatingResult
-    frequencies: np.ndarray | None = None
-    measured: np.ndarray | None = None
+    frequencies: np.ndarray
+    measured: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject an enlarged-range rating whose curve and bands disagree.
@@ -1357,7 +1331,9 @@ class ExtendedImpactRatingResult(OwnsArrays):
         the enlarged range is, and checks its own three curves.
 
         :raises ValueError: if ``frequencies`` and ``measured`` disagree.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(self, "frequencies", "measured")
         require_ranks(self, frequencies=1, measured=1)
         require_same_length(self, "frequencies", "measured")
 

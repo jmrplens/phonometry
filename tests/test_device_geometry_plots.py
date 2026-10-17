@@ -435,6 +435,17 @@ def test_a_circular_result_refuses_a_retained_slit_width() -> None:
         dataclasses.replace(hole, width_m=0.005, radius=None)
 
 
+def test_an_aperture_result_refuses_to_keep_no_shape() -> None:
+    """A result keeps the shape its ``kind`` names: a circular aperture
+    without its radius has no section to draw and no opening to report.
+    """
+    import dataclasses
+
+    hole = pm.building.circular_aperture_transmission_coefficient(FREQ, 0.005, 0.1)
+    with pytest.raises(ValueError, match="'circular' aperture keeps its 'radius'"):
+        dataclasses.replace(hole, radius=None)
+
+
 def test_a_slit_result_refuses_a_retained_hole_radius() -> None:
     """The mirror case: a ``"slit"`` carrying a ``radius`` draws the hole
     section of the doubled opening.

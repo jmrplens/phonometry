@@ -111,6 +111,7 @@ from ..._internal.validation import (
     require_choice,
     require_positive,
     require_positive_array,
+    require_present,
     require_ranks,
     require_same_length,
 )
@@ -627,9 +628,8 @@ class BarrierInsertionLoss(OwnsArrays):
         library implements. Any other tag is refused at construction.
     :ivar ground: Whether the coherent four-path ground model was applied.
     :ivar source_height_m: Source height the loss was computed for, in metres,
-        retained (with the other five geometry fields) so
-        :meth:`plot_geometry` can draw the section; appended after the
-        original fields and ``None`` for hand-built results.
+        kept (with the other geometry fields) so :meth:`plot_geometry` can
+        draw the section.
     :ivar barrier_distance: Source-to-barrier horizontal distance, in metres.
     :ivar barrier_height_m: Barrier height, in metres.
     :ivar receiver_distance: Source-to-receiver horizontal distance, in
@@ -644,11 +644,11 @@ class BarrierInsertionLoss(OwnsArrays):
     method: str
     _: KW_ONLY
     ground: bool
-    source_height_m: float | None = None
-    barrier_distance: float | None = None
-    barrier_height_m: float | None = None
-    receiver_distance: float | None = None
-    receiver_height_m: float | None = None
+    source_height_m: float
+    barrier_distance: float
+    barrier_height_m: float
+    receiver_distance: float
+    receiver_height_m: float
     thickness_m: float | None = None
 
     def __post_init__(self) -> None:
@@ -692,7 +692,16 @@ class BarrierInsertionLoss(OwnsArrays):
         :raises ValueError: if the method is not a model the library
             implements, the loss covers no frequency, or the per-frequency
             fields disagree in length or carry a non-finite value.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(
+            self,
+            "source_height_m",
+            "barrier_distance",
+            "barrier_height_m",
+            "receiver_distance",
+            "receiver_height_m",
+        )
         require_choice(self.method, "method", _BARRIER_METHODS)
         require_ranks(self, frequencies=1, insertion_loss=1, fresnel_number=1)
         require_same_length(
@@ -732,8 +741,6 @@ class BarrierInsertionLoss(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_barrier_result_geometry

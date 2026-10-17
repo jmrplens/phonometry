@@ -16,9 +16,9 @@ transfer functions and exact time weightings, then grades a real meter against
 them.
 
 **The chain.** A velocity signal is band-limited (5.2.3.2, Formula (3)), which
-is two Butterworth pairs: a two-pole high pass at $0{,}8 f_u$ and a
-two-pole low pass at $f_o / 0{,}8$. The working range is
-$f_u = 1$ Hz to $f_o = 80$ Hz for buildings, and 4 Hz to 315 Hz
+is two Butterworth pairs: a two-pole high pass at $0{,}8 f_\mathrm{u}$ and a
+two-pole low pass at $f_\mathrm{o} / 0{,}8$. The working range is
+$f_\mathrm{u} = 1$ Hz to $f_\mathrm{o} = 80$ Hz for buildings, and 4 Hz to 315 Hz
 next to a railway, which is where DIN 45672-1 works. Frequency weighting
 (Formula (4)) divides that by $1 - \mathrm{j}\,5{,}6\,\mathrm{Hz}/f$,
 one more pole and one more zero, and normalising by 1 mm/s turns the result
@@ -611,7 +611,7 @@ The limits of Tables 2 and 3 at each frequency, in per cent.
 | `frequencies` | Frequencies, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 
-**Returns:** `(lower, upper)`: the largest deviation allowed below and above the design response, both as positive percentages. A lower limit of 100 % is the standard declining to constrain the response from below outside the working range.
+**Returns:** `(lower, upper)`, lower first and signed: the deviation allowed below the design response as a negative percentage and above it as a positive one, so that a deviation keeps to them when `lower <= F(f) <= upper`. Table 2 prints the lower limit $G_\mathrm{u}$ as a magnitude, and 5.2.3.3 states the condition as $-G_\mathrm{u} \le F(f) \le G_\mathrm{o}$; `lower` is $-G_\mathrm{u}$. It is `-10.0` from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$, `-20.0` from $0{,}5\,f_\mathrm{u}$ to $1{,}25\,f_\mathrm{u}$ and from $0{,}8\,f_\mathrm{o}$ to $2\,f_\mathrm{o}$, and `-100.0` outside $0{,}5\,f_\mathrm{u}$ to $2\,f_\mathrm{o}$, where the standard declines to constrain the response from below: a response of zero deviates by -100 % and still keeps to it. `upper` is the Table 3 limit, `10.0` from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$ and `20.0` elsewhere.
 
 **Raises**
 
@@ -851,7 +851,13 @@ built against other limits.
 
 *property*
 
-The Table 2 limit at each frequency, in per cent.
+The Table 2 lower limit at each frequency, in per cent.
+
+Negative, as [`response_tolerance_percent`](/phonometry/reference/api/vibration/vibration-meter/#response_tolerance_percent) returns it: `-10.0`
+from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$,
+`-20.0` on the skirts out to $0{,}5\,f_\mathrm{u}$ and
+$2\,f_\mathrm{o}$, and `-100.0` beyond them, where the
+standard sets no lower limit.
 
 ### VibrationMeterVerification.passes
 

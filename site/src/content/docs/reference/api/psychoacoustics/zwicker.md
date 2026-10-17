@@ -110,11 +110,11 @@ ZwickerLoudness(
     loudness: float,
     loudness_level: float,
     specific: np.ndarray,
+    field: Literal['free', 'diffuse'],
     n5: float | None = None,
     n10: float | None = None,
     times: np.ndarray | None = None,
     loudness_vs_time: np.ndarray | None = None,
-    field: Literal['free', 'diffuse'] | None = None,
 )
 ```
 
@@ -132,8 +132,7 @@ loudness-vs-time trace (clause 6.3); these four are `None` for
 stationary results.
 `field` records the sound field the calculation assumed (`"free"`
 or `"diffuse"`), one of the items clause 7 requires a loudness report
-to state; it defaults to `None` only for backward-compatible manual
-construction (the library constructors always set it).
+to state.
 
 ### ZwickerLoudness.plot()
 

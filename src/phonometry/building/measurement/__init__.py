@@ -42,6 +42,7 @@ from .flanking_transmission import (
 from .floor_covering_improvement import (
     BackgroundCorrectedLevel,
     FloorCoveringImprovementResult,
+    OctaveBandSpectrum,
     acceleration_level,
     background_corrected_level,
     impact_improvement,
@@ -289,6 +290,7 @@ __all__ = [
     "LowFrequencyProcedure",
     "LowFrequencyResult",
     "LowFrequencyWarning",
+    "OctaveBandSpectrum",
     "OperatingCondition",
     "PositionSpreadCheck",
     "ServiceEquipmentBackgroundResult",

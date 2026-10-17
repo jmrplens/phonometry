@@ -254,11 +254,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The `Axes`.
 
-### CabinInsulationResult.rounded()
+### CabinInsulationResult.rounded
 
-```python
-CabinInsulationResult.rounded() -> NDArray[np.int_]
-```
+*property*
 
 The band values as 11.4 e) reports them, to the nearest decibel.
 

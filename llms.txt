@@ -437,6 +437,7 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 One file per area, each small enough to fetch whole. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
 - [Start here](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
+- [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/llms/llms-upgrading.txt)
 - [Theory and reference](https://docs.jmrp.io/phonometry/llms/llms-theory.txt)
 - [Signal analysis](https://docs.jmrp.io/phonometry/llms/llms-signals.txt)
 - [Octave filtering](https://docs.jmrp.io/phonometry/llms/llms-signals-filters.txt)

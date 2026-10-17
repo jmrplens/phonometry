@@ -95,6 +95,7 @@ from figures.building_lab_rules import (
     generate_joint_insulation,
     generate_lab_floor_covering_improvement,
     generate_lab_lining_improvement,
+    generate_rainfall_octave_bands,
     generate_rainfall_sound,
 )
 from figures.correlation_analysis import (
@@ -825,6 +826,7 @@ __all__ = [
     "generate_quarter_wave_geometry",
     "generate_quasi_peak_meter",
     "generate_radiated_power_outdoor",
+    "generate_rainfall_octave_bands",
     "generate_rainfall_sound",
     "generate_radiation_plate_geometry",
     "generate_random_incidence_correction",

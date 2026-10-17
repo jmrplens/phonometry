@@ -670,7 +670,15 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
         ),
         "WeightedRatingResult": (
             lambda a: building.WeightedRatingResult(
-                rating=50, c=-1, ctr=-4, unfavorable_sum=20.0, measured=a
+                rating=50,
+                c=-1,
+                ctr=-4,
+                # 30 - 10, 30 - 20 and nothing at 30: the sum of the
+                # unfavourable deviations of the measured curve given.
+                unfavorable_sum=30.0,
+                frequencies=np.array([500.0, 1000.0, 2000.0]),
+                measured=a,
+                shifted_reference=np.full(3, 30.0),
             ),
             "measured",
         ),

@@ -791,14 +791,22 @@ class DBHRCheck(RichDisplay):
         return self.requirement.limit - self.reported
 
     @property
-    def complies(self) -> bool:
-        """Whether the requirement is met.
+    def passes(self) -> bool:
+        """The verdict: the requirement is met.
 
-        The value exactly at the limit after the rounding complies, with a
+        The value exactly at the limit after the rounding passes, with a
         billionth of a decibel of slack so that binary representation error
         in the subtraction cannot turn it into a failure.
         """
         return bool(self.margin >= _COMPLIANCE_SLACK)
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a DBHRCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 @dataclass(frozen=True)
@@ -811,9 +819,17 @@ class DBHRAssessment(RichDisplay):
     checks: tuple[DBHRCheck, ...]
 
     @property
-    def complies(self) -> bool:
-        """Whether every check is met."""
-        return all(c.complies for c in self.checks)
+    def passes(self) -> bool:
+        """The verdict: every requirement is met."""
+        return all(c.passes for c in self.checks)
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a DBHRAssessment has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

@@ -138,6 +138,38 @@ fastest, and flat in between. A machine-specific part that states its own
 | :--- | :--- |
 | ValueError | If a frequency is not positive, a velocity or corner is not positive and finite, or the corners are not in order. |
 
+## assess_operational_change
+
+```python
+assess_operational_change(
+    change: float,
+    zone_b_upper: float,
+) -> OperationalChange
+```
+
+Is a change from the baseline significant? (5.3).
+
+A change exceeding a quarter of the upper limit of zone B, in either
+direction, is one that 5.3 asks to be investigated even when zone C of
+Criterion I has not been reached: the machine can go wrong well inside
+zone B, and the criterion that catches it is the change rather than the
+magnitude.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `change` | The change from the established baseline, in the unit the boundaries are in; the sign is ignored. |
+| `zone_b_upper` | The upper limit of zone B, which is the B/C boundary. |
+
+**Returns:** The answer, as an [`OperationalChange`](/phonometry/reference/api/vibration/evaluation/#operationalchange).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the change is not finite or the limit is not positive. |
+
 ## evaluation_zone
 
 ```python
@@ -389,35 +421,6 @@ reason the tables state each class twice.
 INDUSTRIAL_MACHINE_ZONES = {('group_1', 'rigid'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=29.0, b_c=57.0, c_d=90.0), velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1)), ('group_1', 'flexible'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=45.0, b_c=90.0, c_d=140.0), velocity_mm_s=ZoneBoundaries(a_b=3.5, b_c=7.1, c_d=11.0)), ('group_2', 'rigid'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=22.0, b_c=45.0, c_d=71.0), velocity_mm_s=ZoneBoundaries(a_b=1.4, b_c=2.8, c_d=4.5)), ('group_2', 'flexible'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=37.0, b_c=71.0, c_d=113.0), velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1))}
 ```
 
-## is_significant_change
-
-```python
-is_significant_change(change: float, zone_b_upper: float) -> bool
-```
-
-Whether a change from the baseline is significant (5.3).
-
-A change exceeding a quarter of the upper limit of zone B, in either
-direction, is one that 5.3 asks to be investigated even when zone C of
-Criterion I has not been reached: the machine can go wrong well inside
-zone B, and the criterion that catches it is the change rather than the
-magnitude.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `change` | The change from the established baseline, in the unit the boundaries are in; the sign is ignored. |
-| `zone_b_upper` | The upper limit of zone B, which is the B/C boundary. |
-
-**Returns:** Whether the change is significant.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the change is not finite or the limit is not positive. |
-
 ## MachineZoneLimits
 
 ```python
@@ -450,6 +453,40 @@ both.
 ```python
 OPERATIONAL_LIMIT_HEADROOM = 1.25
 ```
+
+## OperationalChange
+
+```python
+OperationalChange(change: float, zone_b_upper: float)
+```
+
+A change from the baseline against what 5.3 calls significant.
+
+The threshold and the answer are read from the change and the boundary,
+so they are not fields: a record cannot be built to call a change
+significant that the clause does not.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `change` | The change from the established baseline, in the unit the boundaries are in; signed, and judged by its size. |
+| `zone_b_upper` | The upper limit of zone B, which is the B/C boundary. |
+
+### OperationalChange.significant
+
+*property*
+
+Whether the change, in either direction, exceeds `threshold`.
+
+A significant change is a reason to investigate, not a failure: the
+machine may still be inside zone B.
+
+### OperationalChange.threshold
+
+*property*
+
+A quarter of the upper limit of zone B, the size 5.3 asks to investigate.
 
 ## SIGNIFICANT_CHANGE_FRACTION
 

@@ -71,13 +71,13 @@ are bracketed and excluded from the single-number mean when the per-band
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     require_band_fraction,
@@ -99,6 +99,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
@@ -106,8 +107,10 @@ if TYPE_CHECKING:
 __all__ = [
     "FlankingImpactLevelResult",
     "FlankingLevelDifferenceResult",
+    "StrongCouplingCheck",
     "VibrationReductionResult",
     "band_mode_count",
+    "check_strong_coupling",
     "critical_frequency",
     "direction_averaged_level_difference",
     "equivalent_absorption_length",
@@ -115,7 +118,6 @@ __all__ = [
     "modal_overlap_factor",
     "normalized_flanking_impact_level",
     "normalized_flanking_level_difference",
-    "strong_coupling_satisfied",
     "total_loss_factor",
     "velocity_level_difference",
     "vibration_reduction_index",
@@ -1067,38 +1069,130 @@ def critical_frequency(
     return c0**2 / (_CRITICAL_FREQUENCY_CONSTANT * c_l * h)
 
 
-def strong_coupling_satisfied(
+@dataclass(frozen=True)
+class StrongCouplingCheck(OwnsArrays):
+    r"""The strong-coupling condition of Part 1, Formula (15), band by band.
+
+    ``Kij`` is relevant only where the elements couple strongly,
+
+    .. math::
+
+       D_{\mathrm{v},ij} \ge 3 - 10 \lg
+       \frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}
+
+    The difference is the one-way ``Dv,ij`` from element ``i`` to element
+    ``j``, not the direction average: the threshold changes when ``i`` and
+    ``j`` swap, so each direction is judged on its own.
+
+    The threshold and the verdicts are read from the two elements and the
+    measured differences, so they are not fields: a check cannot be built
+    against another threshold.
+
+    :ivar velocity_level_difference: Velocity level difference ``Dv,ij``
+        per band, element ``i`` excited, in dB.
+    :ivar mass_i: Mass per unit area ``mi`` of element ``i``, in kg/m².
+    :ivar mass_j: Mass per unit area ``mj`` of element ``j``, in kg/m².
+    :ivar critical_frequency_i: Critical frequency ``fci`` of element ``i``,
+        in Hz.
+    :ivar critical_frequency_j: Critical frequency ``fcj`` of element ``j``,
+        in Hz.
+    """
+
+    velocity_level_difference: NDArray[np.float64]
+    _: KW_ONLY
+    mass_i: float
+    mass_j: float
+    critical_frequency_i: float
+    critical_frequency_j: float
+
+    def __post_init__(self) -> None:
+        """Reject differences or elements the formula cannot judge.
+
+        :raises ValueError: For differences that are not a finite 1-D array
+            or an element quantity that is not positive and finite.
+        """
+        object.__setattr__(
+            self,
+            "velocity_level_difference",
+            read_only(
+                _as_1d(self.velocity_level_difference, "velocity_level_difference")
+            ),
+        )
+        for name in (
+            "mass_i",
+            "mass_j",
+            "critical_frequency_i",
+            "critical_frequency_j",
+        ):
+            _positive(getattr(self, name), name)
+
+    @property
+    def threshold_db(self) -> float:
+        r"""The least ``Dv,ij``, :math:`3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))`, in dB."""
+        ratio = (self.mass_i * self.critical_frequency_j) / (
+            self.mass_j * self.critical_frequency_i
+        )
+        return float(3.0 - 10.0 * np.log10(ratio))
+
+    @property
+    def holds(self) -> NDArray[np.bool_]:
+        """Whether the inequality holds in each band.
+
+        Judged settled: for two like elements the threshold is 3 dB to the
+        last bits of the logarithm of a ratio that is 1 in decimal.
+        """
+        difference = np.asarray(self.velocity_level_difference, dtype=np.float64)
+        return np.asarray(
+            settled(difference - self.threshold_db) >= 0.0, dtype=np.bool_
+        )
+
+    @property
+    def passes(self) -> bool:
+        """The verdict: the elements couple strongly in every band given."""
+        return bool(np.all(self.holds))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`, and band by
+            band :attr:`holds`.
+        """
+        msg = "a StrongCouplingCheck has no truth value; read its '.passes' or '.holds'"
+        raise TypeError(msg)
+
+
+def check_strong_coupling(
     velocity_level_difference: Sequence[float] | np.ndarray,
     mass_i: float,
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
-) -> np.ndarray:
-    r"""Strong-coupling applicability check (Part 1, Formula (15)).
+) -> StrongCouplingCheck:
+    r"""Do the two elements couple strongly enough for ``Kij``? (Part 1, Formula (15)).
 
     ``Kij`` is relevant only where
-    :math:`\overline{D}_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}`.
+    :math:`D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}`.
 
-    :param velocity_level_difference: Direction-averaged ``D̄v,ij`` per band,
-        in dB.
+    :param velocity_level_difference: Velocity level difference ``Dv,ij``
+        per band from element ``i`` (excited) to element ``j``, in dB; one
+        direction, not the average of both.
     :param mass_i: Mass per unit area ``mi`` of element ``i``, in kg/m².
     :param mass_j: Mass per unit area ``mj`` of element ``j``, in kg/m².
     :param critical_frequency_i: Critical frequency ``fci`` of element ``i``,
         in Hz.
     :param critical_frequency_j: Critical frequency ``fcj`` of element ``j``,
         in Hz.
-    :return: Boolean array, ``True`` where the inequality holds.
+    :return: The verdict, as a :class:`StrongCouplingCheck`; band by band in
+        its :attr:`~StrongCouplingCheck.holds`.
     :raises ValueError: If any scalar input is not positive/finite.
     """
-    dv = _as_1d(velocity_level_difference, "velocity_level_difference")
-    m_i = _positive(mass_i, "mass_i")
-    m_j = _positive(mass_j, "mass_j")
-    fc_i = _positive(critical_frequency_i, "critical_frequency_i")
-    fc_j = _positive(critical_frequency_j, "critical_frequency_j")
-    threshold = 3.0 - 10.0 * np.log10((m_i * fc_j) / (m_j * fc_i))
-    # Judged settled: for two like elements the threshold is 3 dB to the last
-    # bits of the logarithm of a ratio that is 1 in decimal.
-    return np.asarray(settled(dv - threshold) >= 0.0, dtype=np.bool_)
+    return StrongCouplingCheck(
+        _as_1d(velocity_level_difference, "velocity_level_difference"),
+        mass_i=_positive(mass_i, "mass_i"),
+        mass_j=_positive(mass_j, "mass_j"),
+        critical_frequency_i=_positive(critical_frequency_i, "critical_frequency_i"),
+        critical_frequency_j=_positive(critical_frequency_j, "critical_frequency_j"),
+    )
 
 
 def modal_density(

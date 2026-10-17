@@ -295,8 +295,8 @@ from phonometry import vibration
 
 limits = vibration.INDUSTRIAL_MACHINE_ZONES["group_2", "rigid"].velocity_mm_s
 
-print(vibration.is_significant_change(0.8, limits.b_c))   # True
-print(vibration.is_significant_change(0.6, limits.b_c))   # False
+print(vibration.assess_operational_change(0.8, limits.b_c).significant)   # True
+print(vibration.assess_operational_change(0.6, limits.b_c).significant)   # False
 print(round(vibration.alarm_limit(0.9, limits.b_c), 3))   # 1.6
 print(round(vibration.alarm_limit(2.9, limits.b_c), 3))   # 3.5, at the cap
 print(round(vibration.trip_limit(limits.c_d), 3))         # 5.625

@@ -702,7 +702,7 @@ says that this is the depth the data for CE marking is compiled at.
 from phonometry import materials
 
 check = materials.check_ceiling_specimen(area=10.8, mounting="E", depth_mm=200.0)
-print(check.satisfied)            # True
+print(check.passes)            # True
 print(check.ce_marking_depth)     # True
 print(materials.mounting_type("E"))
 # suspended from a hard surface with an air space behind it
@@ -716,7 +716,7 @@ arrangement can be held to: a substructure no more than 30 mm wide and 50 mm
 deep, support units no larger than 50 mm by 50 mm at centre distances of at
 least 1,2 m, a mounting fixture of at least 20 kg/m2, a deflection of no more
 than 5 mm and, when `relative_humidity_percent` gives one value per measurement,
-the 50 % of 4.2.2 in every one of them. Leaving one makes `satisfied` false and
+the 50 % of 4.2.2 in every one of them. Leaving one makes `passes` false and
 raises a `SuspendedCeilingWarning` that says which. The 0,6 m test object, the
 10 degree edge angle and the substructure pitch of about 0,6 m are targets the
 clause asks to be aimed at, published as constants to build to and not judged.
@@ -727,7 +727,7 @@ dry = materials.check_ceiling_specimen(
     support_width_mm=40.0, support_height_mm=40.0, support_center_distance_m=1.2,
     relative_humidity_percent=[41.0, 44.0],
 )
-print(dry.supports_ok, dry.humidity_ok, dry.satisfied)   # True False False
+print(dry.supports_ok, dry.humidity_ok, dry.passes)   # True False False
 ```
 
 ## How the measurement goes
@@ -2031,8 +2031,8 @@ print(round(materials.decoupling_frequency(
 print(round(float(limp.effective_density[0].real), 1))     # 31.2 = rho_t
 # Both arguments are a frame bulk modulus in pascals, not a flow resistivity:
 # the criterion is the book's 20 kPa.
-print(materials.limp_frame_applicable(20e3),
-      materials.limp_frame_applicable(25e3))  # True False
+print(materials.check_limp_frame(20e3).passes,
+      materials.check_limp_frame(25e3).passes)  # True False
 
 limp.plot()   # normalised Zc and k of the corrected medium
 plt.show()
@@ -2054,7 +2054,7 @@ The correction is only worth applying where the frame really is limp. Beranek
 vacuum and that of the fluid in the pores; the frame-structural-interaction
 study of Doutres et al. (2007) relaxed that to $0.2$, which for air
 ($K_\mathrm{f} \approx P_0 = 101.3$ kPa) is the rule of thumb that the frame must be
-softer than about 20 kPa. `limp_frame_applicable` applies either threshold.
+softer than about 20 kPa. `check_limp_frame` applies either threshold.
 Neither accounts for mounting: a thin light foam decoupled from a vibrating
 structure by an air gap behaves limply well above the limit, and a material
 bonded to a vibrating structure should not be treated as rigid-framed at all.
@@ -2599,7 +2599,7 @@ $F_\mathrm{d} = \sigma\phi^2/2\pi\rho_1$. Below it a light frame moves with the 
 fluid, and `limp_frame` adds its inertia (Allard & Atalla Eqs 11.53-11.55).
 Use it for felts, screens and light fibreglass, for anything measured
 unconstrained in an impedance tube, and wherever the frame in vacuum is softer
-than about 20 kPa (`limp_frame_applicable`); do not use it, or the rigid model
+than about 20 kPa (`check_limp_frame`); do not use it, or the rigid model
 either, for a material bonded to a vibrating structure. When the frame is stiff
 and heavy enough to resonate in the band of interest, neither equivalent fluid
 will do at all: use a `PoroelasticLayer` and the full Biot theory.

@@ -102,12 +102,6 @@ fields: a check cannot be built against another limit.
 | `octave_frequencies` | The nominal octave centre frequencies read, in hertz. |
 | `spread_db` | The difference between the loudest and the quietest of the three one-third-octave bands in each, in decibels. |
 
-### BandFlatnessCheck.all_satisfied
-
-*property*
-
-Whether every octave with a printed limit meets it.
-
 ### BandFlatnessCheck.limit_db
 
 *property*
@@ -116,7 +110,13 @@ What 6.4 allows in each octave, in decibels.
 
 **Returns:** 6 dB at 125 Hz, 5 dB at 250 Hz and 4 dB above, and `nan` in the octaves below 125 Hz, for which the clause prints no limit.
 
-### BandFlatnessCheck.satisfied
+### BandFlatnessCheck.passes
+
+*property*
+
+The verdict: every octave with a printed limit meets it.
+
+### BandFlatnessCheck.within_limit
 
 *property*
 
@@ -124,7 +124,7 @@ Whether each octave meets its limit.
 
 Judged settled: three readings 6,0 dB apart in decimal are within the
 6 dB of 125 Hz whichever way the last bits of their difference fall.
-An octave with no printed limit is reported as satisfied.
+An octave with no printed limit is reported as within it.
 
 ## cabin_insulation
 
@@ -745,11 +745,11 @@ The fewest positions the spread calls for, 7.2.1.
 
 **Returns:** The spread in decibels rounded up, never below [`MIN_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) nor above [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
 
-### SourcePositionCheck.satisfied
+### SourcePositionCheck.passes
 
 *property*
 
-Whether `n_positions_used` reaches `n_required_positions`.
+The verdict: `n_positions_used` reaches `n_required_positions`.
 
 ## STATED_UNCERTAINTY_BAND_RANGE_HZ
 

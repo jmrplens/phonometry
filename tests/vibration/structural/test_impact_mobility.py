@@ -273,7 +273,7 @@ def test_a_rigid_mass_calibrates_to_one_over_its_mass() -> None:
     )
     band = _band(res.frequencies)
     np.testing.assert_allclose(res.to("accelerance")[band], 1.0 / block_kg, rtol=1e-12)
-    check = vibration.rigid_mass_calibration_check(
+    check = vibration.verify_rigid_mass_calibration(
         res.to("accelerance")[band], res.frequencies[band], block_kg
     )
     assert check.passes

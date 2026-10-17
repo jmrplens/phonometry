@@ -458,11 +458,11 @@ A set of DB-HR requirement checks.
 | :--- | :--- |
 | `checks` | The individual [`DBHRCheck`](/phonometry/reference/api/building/spain/#dbhrcheck) results. |
 
-### DBHRAssessment.complies
+### DBHRAssessment.passes
 
 *property*
 
-Whether every check is met.
+The verdict: every requirement is met.
 
 ### DBHRAssessment.plot()
 
@@ -496,16 +496,6 @@ comply with a value DB-HR fails.
 | `requirement` | The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) checked. |
 | `value` | The achieved value, unrounded. |
 
-### DBHRCheck.complies
-
-*property*
-
-Whether the requirement is met.
-
-The value exactly at the limit after the rounding complies, with a
-billionth of a decibel of slack so that binary representation error
-in the subtraction cannot turn it into a failure.
-
 ### DBHRCheck.margin
 
 *property*
@@ -514,6 +504,16 @@ How far the reported value clears the limit.
 
 `reported - limit` for a `"min"` requirement and
 `limit - reported` for a `"max"` one; non-negative when compliant.
+
+### DBHRCheck.passes
+
+*property*
+
+The verdict: the requirement is met.
+
+The value exactly at the limit after the rounding passes, with a
+billionth of a decibel of slack so that binary representation error
+in the subtraction cannot turn it into a failure.
 
 ### DBHRCheck.reported
 

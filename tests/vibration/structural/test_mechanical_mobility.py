@@ -173,7 +173,7 @@ def test_non_positive_frequency_raises() -> None:
 def test_rigid_mass_calibration_accelerance_passes() -> None:
     """A 10 kg rigid block has |A| = 1/m = 0.100 1/kg at every frequency."""
     f = np.array([10.0, 100.0, 1000.0])
-    res = vibration.rigid_mass_calibration_check(np.full(3, 0.1), f, 10.0)
+    res = vibration.verify_rigid_mass_calibration(np.full(3, 0.1), f, 10.0)
     assert isinstance(res, vibration.RigidMassCalibrationResult)
     assert res.passes
     assert np.allclose(res.expected, 0.100)
@@ -183,7 +183,7 @@ def test_rigid_mass_calibration_accelerance_passes() -> None:
 def test_rigid_mass_calibration_mobility_expected_value() -> None:
     """|Y| = 1/(2 pi f m): 1.59155e-4 m/(N.s) at 100 Hz for m = 10 kg."""
     y = 1.0 / (2.0 * math.pi * 100.0 * 10.0)
-    res = vibration.rigid_mass_calibration_check(
+    res = vibration.verify_rigid_mass_calibration(
         [y], [100.0], 10.0, quantity="mobility"
     )
     assert res.expected[0] == pytest.approx(1.59155e-4, rel=1e-5)
@@ -194,7 +194,7 @@ def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
     # +4 % passes the +/-5 % criterion; -7 % fails, only in its band.
     f = np.array([50.0, 500.0])
     frf = np.array([0.104, 0.093])
-    res = vibration.rigid_mass_calibration_check(frf, f, 10.0)
+    res = vibration.verify_rigid_mass_calibration(frf, f, 10.0)
     assert res.within_tolerance.tolist() == [True, False]
     assert not res.passes
     assert res.relative_deviation[0] == pytest.approx(0.04)
@@ -203,27 +203,27 @@ def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
 def test_rigid_mass_calibration_accepts_complex_frf() -> None:
     # The criterion applies to the magnitude; phase is irrelevant.
     frf = 0.1 * np.exp(1j * np.linspace(0.0, 1.0, 4))
-    res = vibration.rigid_mass_calibration_check(frf, [10.0, 20.0, 40.0, 80.0], 10.0)
+    res = vibration.verify_rigid_mass_calibration(frf, [10.0, 20.0, 40.0, 80.0], 10.0)
     assert res.passes
 
 
 def test_rigid_mass_calibration_validation() -> None:
     with pytest.raises(ValueError, match=r"'quantity' must be 'accelerance'"):
-        vibration.rigid_mass_calibration_check(
+        vibration.verify_rigid_mass_calibration(
             [0.1], [100.0], 10.0, quantity="receptance"
         )
     with pytest.raises(ValueError, match=r"'mass' must be positive"):
-        vibration.rigid_mass_calibration_check([0.1], [100.0], 0.0)
+        vibration.verify_rigid_mass_calibration([0.1], [100.0], 0.0)
     with pytest.raises(
         ValueError,
-        match=r"rigid_mass_calibration_check: 'frf'.*'frequencies'.*same shape",
+        match=r"verify_rigid_mass_calibration: 'frf'.*'frequencies'.*same shape",
     ):
-        vibration.rigid_mass_calibration_check([0.1, 0.1], [100.0], 10.0)
+        vibration.verify_rigid_mass_calibration([0.1, 0.1], [100.0], 10.0)
     with pytest.raises(
         ValueError,
         match=r"'frequencies' must be positive \(mobility conversions divide by omega\)",
     ):
-        vibration.rigid_mass_calibration_check([0.1], [0.0], 10.0)
+        vibration.verify_rigid_mass_calibration([0.1], [0.0], 10.0)
 
 
 def test_a_rigid_mass_record_names_its_frequency_axis() -> None:
@@ -237,7 +237,7 @@ def test_a_rigid_mass_record_names_its_frequency_axis() -> None:
 def test_a_measurement_short_of_its_frequencies_is_refused() -> None:
     """A measurement that stops early would leave a pass over the rest."""
     f = np.geomspace(20.0, 2000.0, 12)
-    res = vibration.rigid_mass_calibration_check(np.full(12, 0.1), f, mass=10.0)
+    res = vibration.verify_rigid_mass_calibration(np.full(12, 0.1), f, mass=10.0)
     short = res.measured[:8]
     with pytest.raises(
         ValueError, match=r"'measured' \(8\).*must each carry one value"
@@ -247,7 +247,7 @@ def test_a_measurement_short_of_its_frequencies_is_refused() -> None:
 
 def test_the_five_percent_of_7_5_2_is_not_a_constructor_field() -> None:
     """ISO 7626-2:2015 7.5.2 prints +/-5 %, so no check holds another one."""
-    res = vibration.rigid_mass_calibration_check([0.1], [100.0], mass=10.0)
+    res = vibration.verify_rigid_mass_calibration([0.1], [100.0], mass=10.0)
     names = {field.name for field in dataclasses.fields(res)}
     assert names == {"frequencies", "measured", "mass", "quantity"}
     assert res.relative_tolerance == pytest.approx(0.05)
@@ -383,7 +383,7 @@ def test_rigid_mass_plot_two_panels_and_external_ax() -> None:
     f = np.logspace(np.log10(20.0), np.log10(2000.0), 40)
     # A calibration that drifts out of the +/-5 % band above ~1.2 kHz.
     meas = (1.0 / 10.0) * (1.0 + 0.02 * np.sin(f / 200.0) + 0.06 * (f > 1200.0))
-    res = vibration.rigid_mass_calibration_check(meas, f, mass=10.0)
+    res = vibration.verify_rigid_mass_calibration(meas, f, mass=10.0)
     axes = res.plot()
     assert len(axes) == 2  # magnitude + deviation panels
     _fig, ext = plt.subplots()
@@ -396,7 +396,7 @@ def test_rigid_mass_plot_rejects_unknown_language() -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
-    res = vibration.rigid_mass_calibration_check([0.1], [100.0], 10.0)
+    res = vibration.verify_rigid_mass_calibration([0.1], [100.0], 10.0)
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
 

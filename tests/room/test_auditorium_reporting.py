@@ -108,8 +108,8 @@ class TestSingleNumberAverage:
         assert room.single_number_average("J_LFC", values, OCTAVES) == pytest.approx(
             room.single_number_average("J_LF", values, OCTAVES)
         )
-        assert room.perceptibly_different("J_LFC", 0.20, 0.26)
-        assert not room.perceptibly_different("J_LFC", 0.20, 0.24)
+        assert room.assess_perceptible_difference("J_LFC", 0.20, 0.26).different
+        assert not room.assess_perceptible_difference("J_LFC", 0.20, 0.24).different
 
     def test_it_names_both_printed_symbols_when_it_refuses_one(self) -> None:
         with pytest.raises(ValueError, match="J_LFC"):
@@ -190,23 +190,35 @@ class TestPerceptiblyDifferent:
     """The just-noticeable differences, absolute and relative."""
 
     def test_an_absolute_jnd_is_compared_as_a_difference(self) -> None:
-        assert room.perceptibly_different("G", 4.0, 5.0)
-        assert not room.perceptibly_different("G", 4.0, 4.9)
+        assert room.assess_perceptible_difference("G", 4.0, 5.0).different
+        assert not room.assess_perceptible_difference("G", 4.0, 4.9).different
 
     def test_the_early_decay_time_is_compared_as_a_fraction(self) -> None:
         # 5 % of a 2 s decay is 0,1 s and 5 % of a 0,5 s decay is 0,025 s,
         # so the same 0,06 s difference is imperceptible in one hall and
         # plain in the other.
-        assert not room.perceptibly_different("EDT", 2.0, 2.06)
-        assert room.perceptibly_different("EDT", 0.5, 0.56)
+        assert not room.assess_perceptible_difference("EDT", 2.0, 2.06).different
+        assert room.assess_perceptible_difference("EDT", 0.5, 0.56).different
 
     def test_the_late_lateral_level_refuses_the_comparison(self) -> None:
         with pytest.raises(ValueError, match="'Not known'"):
-            room.perceptibly_different("L_J", -8.0, -2.0)
+            room.assess_perceptible_difference("L_J", -8.0, -2.0)
 
     def test_it_compares_whole_bands_at_once(self) -> None:
-        assert room.perceptibly_different("C80", [0.0, 1.0], [2.0, 3.0])
-        assert not room.perceptibly_different("C80", [0.0, 1.0], [2.0, 1.5])
+        assert room.assess_perceptible_difference(
+            "C80", [0.0, 1.0], [2.0, 3.0]
+        ).different
+        assert not room.assess_perceptible_difference(
+            "C80", [0.0, 1.0], [2.0, 1.5]
+        ).different
+
+    def test_it_refuses_two_values_of_different_shapes(self) -> None:
+        # Two bands against one value used to broadcast and answer True.
+        first = [0.0, 1.0]
+        with pytest.raises(
+            ValueError, match="'first' and 'second' must have the same shape"
+        ):
+            room.assess_perceptible_difference("C80", first, 3.0)
 
 
 class TestMinimumReceiverPositions:

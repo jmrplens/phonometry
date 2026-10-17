@@ -267,7 +267,7 @@ d_nt = np.asarray(r_prime) + 10 * np.log10(16.0 / 12.0) + 10 * np.log10(0.5 / 0.
 building.dnt_a(d_nt).intermediate                   # 52.7 dBA (R'A was 51.4 dBA)
 
 check = building.assess_db_hr([(33.0, facade), (52.7, airborne[0])])
-check.complies                                      # True
+check.passes                                      # True
 ```
 
 The quantity has to match the requirement. DB-HR states the between-rooms limit

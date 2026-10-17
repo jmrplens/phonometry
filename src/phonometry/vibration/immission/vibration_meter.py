@@ -526,6 +526,14 @@ class VibrationMeterVerification(OwnsArrays):
         """Whether every graded frequency keeps to its limits."""
         return bool(np.all(self.within_tolerance))
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a VibrationMeterVerification has no truth value; read its '.passes'"
+        raise TypeError(msg)
+
     @property
     def worst_frequency_hz(self) -> float:
         """The frequency that uses the largest share of its allowance."""
@@ -1039,6 +1047,14 @@ class AssessmentVelocity(OwnsArrays):
         Clauses 4.2 to 4.4 rather than that damage has occurred.
         """
         return bool(self.assessment_velocity_mm_s <= self.guide_value_mm_s)
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`within_guideline`.
+        """
+        msg = "an AssessmentVelocity has no truth value; read its '.within_guideline'"
+        raise TypeError(msg)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

@@ -40,6 +40,7 @@ from phonometry.materials import power_attenuation_from_alpha
 from phonometry.materials.diffusers.reverberation_room_scattering import (
     BASE_PLATE_BANDS_HZ,
     BASE_PLATE_MAX_SCATTERING,
+    BasePlateScatteringCheck,
     ScatteringDiffusionWarning,
     ScatteringResult,
     ScatteringUncertainty,
@@ -215,22 +216,94 @@ def test_base_plate_within_limits_no_warning() -> None:
     values = {b: BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS_HZ}
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        exceeded = check_base_plate_scattering(values)
-    assert exceeded == ()
+        check = check_base_plate_scattering(values)
+    assert check.passes
+    assert check.exceeded_frequencies.size == 0
 
 
 def test_base_plate_over_limit_warns_and_lists_bands() -> None:
     values = dict.fromkeys(BASE_PLATE_BANDS_HZ, 0.0)
     values[100] = 0.06  # limit 0.05
     values[5000] = 0.30  # limit 0.25
+    with pytest.warns(ScatteringDiffusionWarning, match=r"\[100, 5000\] Hz"):
+        check = check_base_plate_scattering(values)
+    assert not check.passes
+    assert check.exceeded_frequencies.tolist() == [100.0, 5000.0]
+    assert check.exceeds.sum() == 2
+    assert check.margins[0] == pytest.approx(-0.01)
+
+
+@pytest.mark.parametrize(
+    ("language", "title", "over_label", "xlabel"),
+    [
+        (
+            "en",
+            "Base plate alone against Table 1 (ISO 17497-1)",
+            "Over the limit",
+            "Frequency $f/N$ [Hz]",
+        ),
+        (
+            "es",
+            "Placa base sola frente a la tabla 1 (ISO 17497-1)",
+            "Por encima del límite",
+            "Frecuencia $f/N$ [Hz]",
+        ),
+    ],
+)
+def test_the_base_plate_plot_draws_the_limit_the_curve_and_the_bands_over_it(
+    language: str, title: str, over_label: str, xlabel: str
+) -> None:
+    """The stepped limit spans each band, the measured curve has one point a
+    band, and only the bands over the limit are ringed. The axis is the
+    full-scale f/N that Table 1 is keyed to (ISO 17497-1, Table 1 header).
+    """
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    values = dict.fromkeys(BASE_PLATE_BANDS_HZ, 0.0)
+    values[100] = 0.06
+    values[5000] = 0.30
     with pytest.warns(ScatteringDiffusionWarning):
-        exceeded = check_base_plate_scattering(values)
-    assert exceeded == (100, 5000)
+        check = check_base_plate_scattering(values)
+    ax = check.plot(language=language)
+    try:
+        assert ax.get_title() == title
+        assert ax.get_xlabel() == xlabel
+        (steps,) = ax.patches
+        np.testing.assert_allclose(
+            steps.get_data().values,
+            [BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS_HZ],
+        )
+        curve, ringed = ax.get_lines()
+        assert len(curve.get_xdata()) == len(BASE_PLATE_BANDS_HZ)
+        assert list(ringed.get_xdata()) == [100.0, 5000.0]
+        labels = [text.get_text() for text in ax.get_legend().get_texts()]
+        assert over_label in labels
+    finally:
+        plt.close(ax.figure)
+
+
+def test_the_base_plate_plot_rings_nothing_when_every_band_passes() -> None:
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    check = check_base_plate_scattering(
+        [BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS_HZ]
+    )
+    ax = check.plot()
+    try:
+        assert len(ax.get_lines()) == 1
+    finally:
+        plt.close(ax.figure)
 
 
 def test_base_plate_checker_accepts_sequence() -> None:
     seq = [BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS_HZ]
-    assert check_base_plate_scattering(seq) == ()
+    assert check_base_plate_scattering(seq).passes
 
 
 # ---------------------------------------------------------------------------
@@ -588,6 +661,48 @@ def test_base_plate_checker_rejects_missing_band() -> None:
     incomplete = {b: 0.0 for b in BASE_PLATE_BANDS_HZ if b != 500}
     with pytest.raises(ValueError, match="missing band 500 Hz"):
         check_base_plate_scattering(incomplete)
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+def test_base_plate_checker_refuses_a_coefficient_that_is_not_finite(
+    bad: float,
+) -> None:
+    # A NaN compared with its limit is never over it, so it used to pass.
+    values = [0.0] * len(BASE_PLATE_BANDS_HZ)
+    values[3] = bad
+    with pytest.raises(ValueError, match="'scattering' must be finite"):
+        check_base_plate_scattering(values)
+
+
+def test_base_plate_check_refuses_arrays_of_two_dimensions() -> None:
+    bands = np.array([BASE_PLATE_BANDS_HZ], dtype=np.float64)
+    values = np.zeros_like(bands)
+    with pytest.raises(ValueError, match="must be one-dimensional"):
+        BasePlateScatteringCheck(bands, values)
+
+
+def test_base_plate_check_refuses_a_value_count_other_than_one_per_band() -> None:
+    bands = np.asarray(BASE_PLATE_BANDS_HZ, dtype=np.float64)
+    values = np.zeros(len(BASE_PLATE_BANDS_HZ) - 1)
+    with pytest.raises(ValueError, match="must carry one value per band"):
+        BasePlateScatteringCheck(bands, values)
+
+
+def test_base_plate_check_refuses_bands_table_1_does_not_list() -> None:
+    bands = np.arange(float(len(BASE_PLATE_BANDS_HZ)))
+    values = np.zeros(len(BASE_PLATE_BANDS_HZ))
+    with pytest.raises(ValueError, match="must be the bands of Table 1"):
+        BasePlateScatteringCheck(bands, values)
+
+
+def test_base_plate_check_holds_the_bands_and_coefficients_read_only() -> None:
+    bands = np.asarray(BASE_PLATE_BANDS_HZ, dtype=np.float64)
+    values = np.full(len(BASE_PLATE_BANDS_HZ), 0.02)
+    check = BasePlateScatteringCheck(bands, values)
+    values[0] = 0.9
+    assert check.scattering[0] == pytest.approx(0.02)
+    assert not check.scattering.flags.writeable
+    assert not check.frequencies.flags.writeable
 
 
 # ---------------------------------------------------------------------------

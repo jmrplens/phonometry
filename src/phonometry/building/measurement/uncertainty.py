@@ -54,7 +54,11 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
-from ..._internal.validation import require_choice, require_equal_shapes
+from ..._internal.validation import (
+    require_choice,
+    require_equal_shapes,
+    require_finite,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -64,15 +68,15 @@ if TYPE_CHECKING:
 __all__ = [
     "COVERAGE_FACTORS",
     "BandUncertainty",
+    "RequirementConformity",
     "UncertainValue",
+    "assess_requirement_conformity",
     "band_uncertainty",
     "insulation_coverage_factor",
     "insulation_expanded_uncertainty",
     "max_repeatability_standard_deviation",
     "prediction_input_uncertainty",
     "reduce_by_independent_measurements",
-    "satisfies_lower_requirement",
-    "satisfies_upper_requirement",
     "single_number_uncertainty",
     "single_number_uncertainty_uncorrelated",
     "uncertain_value",
@@ -811,38 +815,115 @@ def single_number_uncertainty_uncorrelated(
 # --------------------------------------------------------------------------- #
 # Conformity with a requirement (Clause 8, Formulae 4/5).
 # --------------------------------------------------------------------------- #
-def satisfies_lower_requirement(
-    value: float,
-    expanded_uncertainty_value: float,
-    requirement: float,
-) -> bool:
-    r"""Test a minimum requirement with one-sided uncertainty (Formula 5).
+#: The two sides a requirement can bound: a minimum the value must exceed
+#: (Formula (5)) and a maximum it must stay under (Formula (4)).
+_BOUNDS = ("minimum", "maximum")
 
-    Returns ``True`` when
-    :math:`\text{value} - U > \text{requirement}`, e.g. an apparent sound
-    reduction index ``R'w`` provably exceeds a minimum. ``U`` should be computed
-    with the one-sided coverage factor. The margin is settled before it is
-    judged, so a value exactly ``U`` above the requirement in decimal does not
-    pass on the last bits of the subtraction.
+
+@dataclass(frozen=True)
+class RequirementConformity(RichDisplay):
+    r"""A measured value against a requirement, with its uncertainty (Clause 8).
+
+    ISO 12999-1:2020 Clause 8 declares conformity only when the whole one-sided
+    interval clears the requirement: :math:`y - U > Y_\mathrm{required}` for a
+    minimum (Formula (5)) and :math:`y + U < Y_\mathrm{required}` for a maximum
+    (Formula (4)). Both are strict, so a value that clears the requirement by
+    exactly :math:`U` does not conform. The margin and the verdict are read
+    from the three values and the side, so they are not fields: a record cannot
+    be built to conform with a value the clause refuses.
+
+    :ivar value_db: The best estimate :math:`y`, in dB.
+    :ivar expanded_uncertainty_db: :math:`U`, worked with the one-sided
+        coverage factor, in dB.
+    :ivar requirement_db: :math:`Y_\mathrm{required}`, in dB.
+    :ivar bound: ``"minimum"`` when the requirement is a value to exceed (an
+        apparent sound reduction index ``R'w``) or ``"maximum"`` when it is
+        one to stay under (a normalized impact level ``L'n,w``).
     """
-    return bool(settled(value - expanded_uncertainty_value - requirement) > 0.0)
+
+    value_db: float
+    expanded_uncertainty_db: float
+    requirement_db: float
+    _: KW_ONLY
+    bound: Literal["minimum", "maximum"]
+
+    def __post_init__(self) -> None:
+        """Reject a side the clause does not name, or numbers it cannot judge.
+
+        :raises ValueError: For a ``bound`` other than ``"minimum"`` and
+            ``"maximum"``, a value that is not finite, or a negative
+            uncertainty.
+        """
+        require_choice(self.bound, "bound", _BOUNDS)
+        for name in ("value_db", "expanded_uncertainty_db", "requirement_db"):
+            require_finite(getattr(self, name), name)
+        if self.expanded_uncertainty_db < 0.0:
+            msg = "'expanded_uncertainty_db' must not be negative."
+            raise ValueError(msg)
+
+    @property
+    def margin_db(self) -> float:
+        r"""How far the uncertain interval clears the requirement, in dB.
+
+        :math:`y - U - Y_\mathrm{required}` for a minimum and
+        :math:`Y_\mathrm{required} - (y + U)` for a maximum: positive when the
+        value conforms. Settled, so a value exactly :math:`U` from the
+        requirement in decimal gives a margin of zero whichever way the last
+        bits of the subtraction fall.
+        """
+        if self.bound == "minimum":
+            margin = self.value_db - self.expanded_uncertainty_db - self.requirement_db
+        else:
+            margin = self.requirement_db - self.value_db - self.expanded_uncertainty_db
+        return float(settled(margin))
+
+    @property
+    def passes(self) -> bool:
+        """The verdict: the margin is positive, Formula (5) or (4) holds."""
+        return self.margin_db > 0.0
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a RequirementConformity has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
-def satisfies_upper_requirement(
-    value: float,
-    expanded_uncertainty_value: float,
-    requirement: float,
-) -> bool:
-    r"""Test a maximum requirement with one-sided uncertainty (Formula 4).
+def assess_requirement_conformity(
+    value_db: float,
+    expanded_uncertainty_db: float,
+    requirement_db: float,
+    *,
+    bound: Literal["minimum", "maximum"],
+) -> RequirementConformity:
+    r"""Does a measured value meet a requirement beyond its uncertainty? (Clause 8).
 
-    Returns ``True`` when
-    :math:`\text{value} + U < \text{requirement}`, e.g. a normalized impact
-    level ``L'n,w`` provably stays below a maximum. ``U`` should be computed with
-    the one-sided coverage factor. The margin is settled before it is judged,
-    so a value exactly ``U`` below the requirement in decimal does not pass on
-    the last bits of the sum.
+    The expanded uncertainty is worked with the one-sided coverage factor of
+    Table 8 (:func:`insulation_coverage_factor` with ``one_sided=True``) and
+    then taken off the best estimate for a minimum,
+    :math:`y - U > Y_\mathrm{required}` (Formula (5)), or added to it for a
+    maximum, :math:`y + U < Y_\mathrm{required}` (Formula (4)): an apparent
+    sound reduction index ``R'w`` provably above its minimum, a normalized
+    impact level ``L'n,w`` provably below its maximum.
+
+    :param value_db: The best estimate :math:`y`, in dB.
+    :param expanded_uncertainty_db: :math:`U`, one-sided, in dB.
+    :param requirement_db: :math:`Y_\mathrm{required}`, in dB.
+    :param bound: ``"minimum"`` (Formula (5)) or ``"maximum"`` (Formula (4)).
+    :return: The verdict, as a :class:`RequirementConformity`.
+    :raises ValueError: For an unknown ``bound``, a value that is not finite or
+        a negative uncertainty.
     """
-    return bool(settled(value + expanded_uncertainty_value - requirement) < 0.0)
+    return RequirementConformity(
+        value_db=float(require_finite(value_db, "value_db")),
+        expanded_uncertainty_db=float(
+            require_finite(expanded_uncertainty_db, "expanded_uncertainty_db")
+        ),
+        requirement_db=float(require_finite(requirement_db, "requirement_db")),
+        bound=bound,
+    )
 
 
 #: Coverage factors of Table 8 keyed by ``(coverage, one_sided)`` (read-only view).

@@ -108,11 +108,11 @@ from .mechanical_mobility import (
     convert_frf,
     random_error_percent,
     resonance_frequency,
-    rigid_mass_calibration_check,
     sdof_accelerance,
     sdof_mobility,
     sdof_mobility_result,
     sdof_receptance,
+    verify_rigid_mass_calibration,
 )
 from .point_mobility import (
     beam_bending_wave_speed,
@@ -279,7 +279,7 @@ __all__ = [
     "random_error_percent",
     "resonance_frequency",
     "right_angle_transmission_coefficient",
-    "rigid_mass_calibration_check",
+    "verify_rigid_mass_calibration",
     "ring_frequency",
     "sdof_accelerance",
     "sdof_mobility",

@@ -61,13 +61,14 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from ..._internal.boundary import round_half_even, settled
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -113,9 +114,10 @@ __all__ = [
     "WIND_VECTOR_TOLERANCE_M_S",
     "BarrierInSituWarning",
     "MeasuredBarrierInsertionLoss",
+    "ShortDistanceCheck",
     "barrier_background_correction",
+    "check_short_distance",
     "hemi_free_field_distance_m",
-    "is_short_distance",
     "measured_insertion_loss_direct",
     "measured_insertion_loss_indirect",
     "reference_microphone_height_m",
@@ -313,14 +315,8 @@ def barrier_background_correction(
     )
 
 
-def is_short_distance(
-    *,
-    source_height_m: float,
-    receiver_height_m: float,
-    barrier_height_m: float,
-    source_to_barrier_m: float,
-    barrier_to_receiver_m: float,
-) -> tuple[bool, bool]:
+@dataclass(frozen=True)
+class ShortDistanceCheck(RichDisplay):
     r"""Whether the geometry counts as a short distance, 6.3.1.
 
     The clause prints one condition for the "before" campaign and two for the
@@ -332,36 +328,121 @@ def is_short_distance(
        \frac{H_s + H}{d_1} > 0,1, \qquad
        \frac{H + H_R}{d_2} > 0,1
 
-    The "after" pair must both hold. What hangs on the answer is Table 1: the
-    upwind class exists only over short distances, so a long-distance
-    measurement may be made downwind or calm and not into the wind at all.
+    The ratios and the two answers are read from the five lengths, so they
+    are not fields. There is no verdict to pass: the answer selects the wind
+    classes of Table 1 that each campaign may be made in, so it is read as
+    :attr:`before` and :attr:`after`.
 
-    The inequalities are strict, so a ratio of exactly 0,1 is not a short
-    distance.
+    :ivar source_height_m: :math:`H_s`, in metres.
+    :ivar receiver_height_m: :math:`H_R`, in metres.
+    :ivar barrier_height_m: :math:`H`, in metres.
+    :ivar source_to_barrier_m: :math:`d_1`, in metres.
+    :ivar barrier_to_receiver_m: :math:`d_2`, in metres.
+    """
+
+    _: KW_ONLY
+    source_height_m: float
+    receiver_height_m: float
+    barrier_height_m: float
+    source_to_barrier_m: float
+    barrier_to_receiver_m: float
+
+    def __post_init__(self) -> None:
+        """Reject a length that is not positive.
+
+        :raises ValueError: For a non-positive height or distance.
+        """
+        for name in (
+            "source_height_m",
+            "receiver_height_m",
+            "barrier_height_m",
+            "source_to_barrier_m",
+            "barrier_to_receiver_m",
+        ):
+            require_positive(getattr(self, name), name)
+
+    @property
+    def before_ratio(self) -> float:
+        r""":math:`(H_s + H_R) / (d_1 + d_2)`, the ratio of the "before" campaign."""
+        return (self.source_height_m + self.receiver_height_m) / (
+            self.source_to_barrier_m + self.barrier_to_receiver_m
+        )
+
+    @property
+    def after_source_side_ratio(self) -> float:
+        r""":math:`(H_s + H) / d_1`, the first ratio of the "after" campaign."""
+        return (self.source_height_m + self.barrier_height_m) / self.source_to_barrier_m
+
+    @property
+    def after_receiver_side_ratio(self) -> float:
+        r""":math:`(H + H_R) / d_2`, the second ratio of the "after" campaign."""
+        return (
+            self.barrier_height_m + self.receiver_height_m
+        ) / self.barrier_to_receiver_m
+
+    @property
+    def before(self) -> bool:
+        """Whether the "before" geometry is a short distance.
+
+        The inequality is strict, so a ratio of exactly 0,1 is not one. The
+        ratio is judged settled, so lengths whose ratio is the printed one in
+        decimal are not taken past it by the last bits.
+        """
+        return bool(settled(self.before_ratio) > SHORT_DISTANCE_RATIO)
+
+    @property
+    def after(self) -> bool:
+        """Whether the "after" geometry is a short distance: both its ratios exceed 0,1."""
+        return bool(
+            settled(self.after_source_side_ratio) > SHORT_DISTANCE_RATIO
+        ) and bool(settled(self.after_receiver_side_ratio) > SHORT_DISTANCE_RATIO)
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the two answers it carries.
+
+        :raises TypeError: Always; the answers are :attr:`before` and
+            :attr:`after`.
+        """
+        msg = "a ShortDistanceCheck has no truth value; read its '.before' or '.after'"
+        raise TypeError(msg)
+
+
+def check_short_distance(
+    *,
+    source_height_m: float,
+    receiver_height_m: float,
+    barrier_height_m: float,
+    source_to_barrier_m: float,
+    barrier_to_receiver_m: float,
+) -> ShortDistanceCheck:
+    r"""Does the geometry count as a short distance? 6.3.1.
+
+    What hangs on the answer is Table 1: the upwind class exists only over
+    short distances, so a long-distance measurement may be made downwind or
+    calm and not into the wind at all. The "before" campaign is judged on one
+    ratio and the "after" one on two; pass :attr:`ShortDistanceCheck.before`
+    or :attr:`ShortDistanceCheck.after` to :func:`wind_class` for the
+    campaign at hand.
 
     :param source_height_m: :math:`H_s`, in metres.
     :param receiver_height_m: :math:`H_R`, in metres.
     :param barrier_height_m: :math:`H`, in metres.
     :param source_to_barrier_m: :math:`d_1`, in metres.
     :param barrier_to_receiver_m: :math:`d_2`, in metres.
-    :return: Whether the "before" and the "after" geometry each count as a
-        short distance.
+    :return: The answer for each campaign, as a :class:`ShortDistanceCheck`.
     :raises ValueError: For a non-positive height or distance.
     """
-    source = require_positive(source_height_m, "source_height_m")
-    receiver = require_positive(receiver_height_m, "receiver_height_m")
-    barrier = require_positive(barrier_height_m, "barrier_height_m")
-    first = require_positive(source_to_barrier_m, "source_to_barrier_m")
-    second = require_positive(barrier_to_receiver_m, "barrier_to_receiver_m")
-    # The ratios are judged settled, so heights and distances whose ratio is
-    # the printed one in decimal are not taken past it by the last bits.
-    before = bool(
-        settled((source + receiver) / (first + second)) > SHORT_DISTANCE_RATIO
+    return ShortDistanceCheck(
+        source_height_m=require_positive(source_height_m, "source_height_m"),
+        receiver_height_m=require_positive(receiver_height_m, "receiver_height_m"),
+        barrier_height_m=require_positive(barrier_height_m, "barrier_height_m"),
+        source_to_barrier_m=require_positive(
+            source_to_barrier_m, "source_to_barrier_m"
+        ),
+        barrier_to_receiver_m=require_positive(
+            barrier_to_receiver_m, "barrier_to_receiver_m"
+        ),
     )
-    after = bool(settled((source + barrier) / first) > SHORT_DISTANCE_RATIO) and bool(
-        settled((barrier + receiver) / second) > SHORT_DISTANCE_RATIO
-    )
-    return before, after
 
 
 def wind_class(
@@ -382,8 +463,10 @@ def wind_class(
     made at all, which is a refusal rather than a class.
 
     :param vector_component_m_s: The vector component, in metres per second.
-    :param short_distance: Whether the geometry is a short distance in the
-        sense of :func:`is_short_distance`.
+    :param short_distance: Whether the geometry of the campaign is a short
+        distance: :attr:`ShortDistanceCheck.before` for the "before" campaign
+        and :attr:`ShortDistanceCheck.after` for the "after" one, from
+        :func:`check_short_distance`.
     :return: The class name, or ``None`` where the component falls in no class
         the table prints, which over long distances is any upwind component.
     :raises ValueError: For a component that is not finite, or past

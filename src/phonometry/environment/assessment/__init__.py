@@ -31,7 +31,9 @@ from .measurement import (
     RepeatedMeasurementResult,
     ResidualCorrectionResult,
     TonalAssessmentResult,
+    TonalSurveyAssessment,
     assess_tonal_audibility,
+    assess_tonal_survey,
     critical_bandwidth,
     environmental_expanded_uncertainty,
     gaussian_residual_level,
@@ -40,7 +42,6 @@ from .measurement import (
     tonal_adjustment,
     tonal_adjustment_from_mean_audibility,
     tonal_audibility,
-    tonal_seeking_survey,
     uncertainty_from_repeated_measurements,
 )
 from .rating import (
@@ -306,7 +307,8 @@ __all__ = [
     "tonal_adjustment_from_mean_audibility",
     "tonal_audibility",
     "tonal_correction",
-    "tonal_seeking_survey",
+    "TonalSurveyAssessment",
+    "assess_tonal_survey",
     "total_correction",
     "turbine_sound_levels",
     "turbulence_level_shift",

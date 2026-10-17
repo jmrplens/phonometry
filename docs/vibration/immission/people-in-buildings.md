@@ -43,12 +43,12 @@ print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', editi
 
 # Annex C, Example 1: a sawmill's stationary 5 Hz vibration at KB_Fmax = 0.25.
 verdict = vibration.assess_people_in_buildings(0.25, guide)
-print(verdict.complies, verdict.criterion)  # True A_u
+print(verdict.passes, verdict.criterion)  # True A_u
 
 # Above A_o the question ends the other way, unless the events are rare.
 print(vibration.assess_people_in_buildings(6.5, guide).criterion)  # A_o
 blast = vibration.assess_people_in_buildings(2.0, guide, rare_short_events=True)
-print(blast.complies)  # True
+print(blast.passes)  # True
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/people_guide_values_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/people_guide_values.svg" alt="Two panels, by day and by night, with the five kinds of area of Table 1 along the horizontal axis and guide values on a logarithmic vertical axis from 0.05 to 10. In each panel a blue bar is the lower value A u, a green bar beside it the assessment value A r, and a red triangle above them the upper value A o. By day the lower values fall from 0.4 in an industrial area to 0.1 in a sensitive one and the upper values from 6 to 3; by night the lower values fall from 0.3 to 0.1 and the upper values from 0.6 to 0.15, a full decade lower than by day" width="96%"></picture>
@@ -135,8 +135,8 @@ evening = vibration.assessment_vibration_severity(
 print(f"KB_FTr = {evening:.2f}")  # 0.20
 
 guide = vibration.guide_values("commercial")
-print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=kb_ftr).complies)   # True
-print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=evening).complies)  # False
+print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=kb_ftr).passes)   # True
+print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=evening).passes)  # False
 ```
 
 The same formula turned around says how long a source may act before
@@ -228,7 +228,7 @@ guide = vibration.guide_values("residential")
 verdict = vibration.assess_people_in_buildings(
     0.92, guide, kb_ftr=railway.kb_ftr, source="railway"
 )
-print(verdict.complies, verdict.criterion)  # False A_r
+print(verdict.passes, verdict.criterion)  # False A_r
 ```
 
 Annex D turns Formula (A.3) around into a figure: with one class of train and

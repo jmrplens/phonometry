@@ -615,10 +615,13 @@ print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
 uc = building.uncertain_value(52.0, "rprime_w", "B", one_sided=True)
 print(round(uc.expanded_uncertainty, 2))                # 1.48  = 1.65 x 0.9
 print(round(52.0 - uc.expanded_uncertainty, 2))         # 50.52 = the lower bound
-print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+conformity = building.assess_requirement_conformity(
+    52.0, uc.expanded_uncertainty, 50.0, bound="minimum"
+)
+print(conformity.passes)   # True
 ```
 
-That is the whole content of `satisfies_lower_requirement`: the measured 52.0
+That is the whole content of `assess_requirement_conformity`: the measured 52.0
 minus the one-sided expanded uncertainty 1.48 is 50.52, which still clears
 50.0, so conformity can be *declared* rather than merely observed. The choice
 of factor is the point. Reporting a value is a two-sided statement (the true

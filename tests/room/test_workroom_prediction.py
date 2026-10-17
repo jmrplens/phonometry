@@ -116,32 +116,32 @@ def test_an_unknown_category_is_refused() -> None:
 
 
 def test_the_diffuse_field_method_asks_for_the_least() -> None:
-    verdict = room.detail_is_sufficient(
+    verdict = room.check_prediction_detail(
         "1", room_detail=1, fitting_detail=1, source_detail=1
     )
-    assert verdict.satisfied is True
+    assert verdict.passes is True
 
 
 def test_a_room_described_too_coarsely_for_ray_tracing_is_reported() -> None:
-    verdict = room.detail_is_sufficient(
+    verdict = room.check_prediction_detail(
         "1", room_detail=4, fitting_detail=1, source_detail=1
     )
-    assert verdict.satisfied is False
+    assert verdict.passes is False
     assert verdict.room_ok is False
     assert verdict.fittings_ok is True
 
 
 def test_the_annex_d_example_matches_table_d1() -> None:
     """D.1 picks category 2a with room 2, fittings 1 and source 1."""
-    verdict = room.detail_is_sufficient(
+    verdict = room.check_prediction_detail(
         "2a", room_detail=2, fitting_detail=1, source_detail=1
     )
-    assert verdict.satisfied is True
+    assert verdict.passes is True
 
 
 def test_a_level_no_table_prints_is_refused() -> None:
     with pytest.raises(ValueError, match="Table 3"):
-        room.detail_is_sufficient(
+        room.check_prediction_detail(
             "2a", room_detail=1, fitting_detail=1, source_detail=4
         )
 

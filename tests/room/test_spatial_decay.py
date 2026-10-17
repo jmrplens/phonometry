@@ -702,7 +702,7 @@ def test_a_clear_background_says_nothing() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         check = room.check_background_margin([80.0, 75.0], [70.0, 60.0])
-    assert check.satisfied
+    assert check.passes
     assert not check.needs_correction.any()
     assert not check.unusable.any()
     assert check.margins_db == pytest.approx([10.0, 15.0])
@@ -712,7 +712,7 @@ def test_a_margin_in_the_correction_window_asks_for_iso_3744() -> None:
     """Between 6 dB and 10 dB the clause corrects rather than refuses."""
     with pytest.warns(room.SpatialDecayWarning, match="5.1.4"):
         check = room.check_background_margin([80.0], [72.0])
-    assert not check.satisfied
+    assert not check.passes
     assert check.needs_correction.tolist() == [True]
     assert check.unusable.tolist() == [False]
 

@@ -188,36 +188,72 @@ def test_this_table_is_not_the_one_the_silencer_standard_prints() -> None:
 
 
 def test_the_short_distance_predicate_is_the_printed_pair() -> None:
-    before, after = environment.is_short_distance(
+    outcome = environment.check_short_distance(
         source_height_m=1.0,
         receiver_height_m=1.5,
         barrier_height_m=4.0,
         source_to_barrier_m=10.0,
         barrier_to_receiver_m=15.0,
     )
+    before, after = outcome.before, outcome.after
     assert before is ((1.0 + 1.5) / 25.0 > SHORT_DISTANCE_RATIO)
     assert after is True
 
 
 def test_the_inequality_is_strict_at_the_ratio() -> None:
-    before, _ = environment.is_short_distance(
+    before = environment.check_short_distance(
         source_height_m=1.0,
         receiver_height_m=1.0,
         barrier_height_m=4.0,
         source_to_barrier_m=10.0,
         barrier_to_receiver_m=10.0,
-    )
+    ).before
     assert before is False
 
 
+def test_a_geometry_past_the_ratio_is_short_before_and_after() -> None:
+    # 6.3.1: (Hs + HR) / (d1 + d2) = 4 / 20 = 0,2 and (Hs + H) / d1 =
+    # (H + HR) / d2 = 5 / 10 = 0,5, all past 0,1.
+    check = environment.check_short_distance(
+        source_height_m=2.0,
+        receiver_height_m=2.0,
+        barrier_height_m=3.0,
+        source_to_barrier_m=10.0,
+        barrier_to_receiver_m=10.0,
+    )
+    assert check.before_ratio == pytest.approx(0.2)
+    assert check.after_source_side_ratio == pytest.approx(0.5)
+    assert check.after_receiver_side_ratio == pytest.approx(0.5)
+    assert check.before is True
+    assert check.after is True
+
+
+def test_the_ratios_are_read_from_their_own_lengths() -> None:
+    # Each after ratio pairs its own side: Hs with d1 on the source side, HR
+    # with d2 on the receiver side. Unequal lengths on every side tell a
+    # swapped pair apart from the right one.
+    check = environment.check_short_distance(
+        source_height_m=1.0,
+        receiver_height_m=3.0,
+        barrier_height_m=5.0,
+        source_to_barrier_m=20.0,
+        barrier_to_receiver_m=40.0,
+    )
+    assert check.before_ratio == pytest.approx(4.0 / 60.0)
+    assert check.after_source_side_ratio == pytest.approx(6.0 / 20.0)
+    assert check.after_receiver_side_ratio == pytest.approx(8.0 / 40.0)
+    assert check.before is False
+    assert check.after is True
+
+
 def test_the_after_pair_needs_both_halves() -> None:
-    _, after = environment.is_short_distance(
+    after = environment.check_short_distance(
         source_height_m=1.0,
         receiver_height_m=1.0,
         barrier_height_m=1.0,
         source_to_barrier_m=10.0,
         barrier_to_receiver_m=100.0,
-    )
+    ).after
     assert after is False
 
 

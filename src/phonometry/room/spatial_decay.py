@@ -331,13 +331,21 @@ class BackgroundMarginCheck(OwnsArrays):
         )
 
     @property
-    def satisfied(self) -> bool:
-        """True when every margin clears :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`.
+    def passes(self) -> bool:
+        """The verdict: every margin clears :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`.
 
         That is the only case that needs nothing done to it.
         """
         judged = settled(self.margins_db)
         return not bool(np.any(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a BackgroundMarginCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 def check_background_margin(
@@ -383,7 +391,7 @@ def check_background_margin(
     check = BackgroundMarginCheck(margins_db=margins)
     judged = settled(margins)
     unusable = check.unusable
-    if not check.satisfied:
+    if not check.passes:
         worst = float(np.min(margins))
         detail = (
             f"{int(np.count_nonzero(unusable))} of them at or under "

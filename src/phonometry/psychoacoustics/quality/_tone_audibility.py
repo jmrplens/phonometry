@@ -1358,6 +1358,18 @@ class ToneAudibilityResult(OwnsArrays):
         """Decisive audibility ``ΔLj`` of the spectrum: the largest ``ΔL`` (Step 4)."""
         return float(np.max(self.audibilities))
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`decisive_audibility`,
+            and tone by tone :attr:`audible`.
+        """
+        msg = (
+            "a ToneAudibilityResult has no truth value; read its "
+            "'.decisive_audibility' or '.audible'"
+        )
+        raise TypeError(msg)
+
     @property
     def decisive_frequency(self) -> float:
         """Tone frequency of the decisive (most audible) tone, in Hz."""

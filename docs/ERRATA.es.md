@@ -8812,7 +8812,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Consecuencia para las tablas de la propia norma:** ninguna; la figura C.1
   es una curva y el anexo no imprime ningún caso resuelto.
 - **Comportamiento de la biblioteca:**
-  [`test_environment_applicability`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`check_enclosure_test_environment`](../src/phonometry/noise_control/enclosure_insulation.py)
   devuelve `actual_area_ratio` y `required_area_ratio` como dos cocientes con
   nombre de la misma superficie de medida, de modo que la comparación no
   puede leerse al revés.

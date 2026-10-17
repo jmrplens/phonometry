@@ -140,7 +140,7 @@ octaves = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 lateral = np.array([0.20, 0.26, 0.31, 0.28, 0.24, 0.19])
 
 print(round(room.single_number_average("J_LFC", lateral, octaves), 4))  # 0.2625
-print(room.perceptibly_different("J_LFC", 0.20, 0.26))                  # True
+print(room.assess_perceptible_difference("J_LFC", 0.20, 0.26).different)                  # True
 ```
 
 Footnote a of the table makes one row an exception to the arithmetic: the
@@ -154,8 +154,8 @@ is printed as "Not known", and the library refuses to invent one.
 ```python
 from phonometry import room
 
-print(room.perceptibly_different("EDT", 2.0, 2.06))    # False
-print(room.perceptibly_different("EDT", 0.5, 0.56))    # True
+print(room.assess_perceptible_difference("EDT", 2.0, 2.06).different)    # False
+print(room.assess_perceptible_difference("EDT", 0.5, 0.56).different)    # True
 print(room.TABLE_A1["L_J"].just_noticeable_difference) # None
 ```
 

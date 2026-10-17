@@ -383,13 +383,13 @@ sobre baldosas o parqué la cera adhesiva lleva la componente horizontal hasta
 from phonometry import vibration
 
 floor = vibration.check_loose_mounting(1.2, 63.0, direction="horizontal")
-print(f"suelto, horizontal hasta 63 Hz: {floor.acceptable}")  # False
+print(f"suelto, horizontal hasta 63 Hz: {floor.passes}")  # False
 print(f"  límite {floor.frequency_limit_hz:g} Hz, {floor.peak_acceleration_limit_m_s2:g} m/s2")
 
 carpet = vibration.check_loose_mounting(
     1.2, 80.0, direction="vertical", surface="soft"
 )
-print(f"suelto, vertical hasta 80 Hz sobre moqueta: {carpet.acceptable}")  # True
+print(f"suelto, vertical hasta 80 Hz sobre moqueta: {carpet.passes}")  # True
 print(f"  sobre {carpet.device}")
 ```
 

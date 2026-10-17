@@ -178,10 +178,10 @@ módulo implementa las variantes propias del RD en lugar de delegar en aquellas:
   banda crítica del tono, y devuelven un $K_\mathrm{t}$ **continuo** entre 0 y 6 dB. El
   RD trabaja sobre diferencias entre bandas de tercio de octava y solo produce
   0, 3 o 6 dB.
-- [`tonal_seeking_survey()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-método-de-ingeniería-anexo-c-de-iso-1996-22007) (método de cribado, anexo K de ISO 1996-2:2017) es
+- [`assess_tonal_survey()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-método-de-ingeniería-anexo-c-de-iso-1996-22007) (método de cribado, anexo K de ISO 1996-2:2017) es
   el pariente más cercano, porque también parte el espectro en 125 y 400 Hz,
   pero exige que la banda supere a **ambas** vecinas en 15/8/5 dB y solo
-  devuelve un indicador de prominencia; el RD compara con la **media** de
+  dice qué bandas son prominentes; el RD compara con la **media** de
   las vecinas con umbrales 8/5/3 dB y gradúa el resultado.
 - [`impulsive_sound_adjustment()`](/phonometry/es/environment/assessment/impulsive-sound/) es el método de tasa de crecimiento de
   ISO/PAS 1996-3 sobre una señal calibrada. El $K_\mathrm{i}$ del RD es la diferencia
@@ -216,7 +216,7 @@ shallow[4] = 69.0                      # Lt = 7,5 dB en lugar de 10,5 dB
 
 for spectrum in (levels, shallow):
     rd = environment.tonal_correction(spectrum, freqs)
-    flags = np.asarray(environment.tonal_seeking_survey(spectrum, freqs))
+    flags = np.asarray(environment.assess_tonal_survey(spectrum, freqs).prominent)
     print(rd.correction, rd.governing_frequency, bool(flags[4]))
 # 6.0 250.0 True     <- los dos coinciden
 # 3.0 250.0 False    <- el RD lo gradúa, el método de cribado no lo marca
@@ -347,7 +347,7 @@ verdict = environment.assess_activity(
 
 verdict.periods[0].reported_level        # 57 dB  (LKeq,d)
 verdict.periods[0].reported_long_term    # 56 dB  (LK,d)
-verdict.complies                         # False: LK,d supera los 55 dB
+verdict.passes                         # False: LK,d supera los 55 dB
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_activity_assessment.svg" alt="Evaluación de una actividad según el RD 1367/2007: nivel máximo de fase, LKeq,x diario y LK,x anual de cada periodo frente a los valores límite +5 dB, +3 dB y de tabla, con el nivel anual del periodo día superando su límite" width="80%" />
@@ -395,7 +395,7 @@ existing = environment.assess_activity(
     {"day": day, "evening": evening}, limits, operating_days=303,
     new_activity=False,
 )
-print(existing.complies)                 # True: el criterio anual no se aplica
+print(existing.passes)                 # True: el criterio anual no se aplica
 ```
 
 ## Gráficos e informe de inspección

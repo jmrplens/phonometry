@@ -76,9 +76,9 @@ __all__ = [
     "SOURCE_DETAIL_LEVELS",
     "TYPICAL_DECAY_RANGE_DB",
     "TYPICAL_EXCESS_RANGE_DB",
-    "DetailVerdict",
+    "PredictionDetailCheck",
     "PredictionMethod",
-    "detail_is_sufficient",
+    "check_prediction_detail",
     "fitting_density",
     "prediction_method",
     "total_workstation_level",
@@ -222,7 +222,7 @@ RECOMMENDED_DETAIL: Mapping[
 
 
 @dataclass(frozen=True)
-class DetailVerdict(RichDisplay):
+class PredictionDetailCheck(RichDisplay):
     """Whether the data in hand is what a category of method asks for.
 
     The verdicts are read from the three levels and the row of Table E.1 the
@@ -255,9 +255,17 @@ class DetailVerdict(RichDisplay):
         return self.source_detail in prediction_method(self.category).source_detail
 
     @property
-    def satisfied(self) -> bool:
-        """Whether all three levels fall inside Table E.1."""
+    def passes(self) -> bool:
+        """The verdict: all three levels fall inside Table E.1."""
         return self.room_ok and self.fittings_ok and self.sources_ok
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a PredictionDetailCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 def prediction_method(category: str) -> PredictionMethod:
@@ -274,13 +282,13 @@ def prediction_method(category: str) -> PredictionMethod:
     return PREDICTION_METHODS[category]
 
 
-def detail_is_sufficient(
+def check_prediction_detail(
     category: str,
     *,
     room_detail: int,
     fitting_detail: int,
     source_detail: int,
-) -> DetailVerdict:
+) -> PredictionDetailCheck:
     """Does the data in hand match what Table E.1 asks of this category?
 
     The table reads in both directions and both are useful: a reader with a
@@ -292,14 +300,14 @@ def detail_is_sufficient(
     :param room_detail: The level of Table 1 the room is described at.
     :param fitting_detail: The level of Table 2 the fittings are described at.
     :param source_detail: The level of Table 3 the sources are described at.
-    :return: The verdict, as a :class:`DetailVerdict`.
+    :return: The verdict, as a :class:`PredictionDetailCheck`.
     :raises ValueError: For an unknown category or a level no table prints.
     """
     method = prediction_method(category)
     _require_level(room_detail, ROOM_DETAIL_LEVELS, "room_detail", 1)
     _require_level(fitting_detail, FITTING_DETAIL_LEVELS, "fitting_detail", 2)
     _require_level(source_detail, SOURCE_DETAIL_LEVELS, "source_detail", 3)
-    return DetailVerdict(
+    return PredictionDetailCheck(
         category=method.category,
         room_detail=room_detail,
         fitting_detail=fitting_detail,

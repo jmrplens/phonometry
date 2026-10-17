@@ -327,8 +327,8 @@ from phonometry import vibration
 
 limits = vibration.INDUSTRIAL_MACHINE_ZONES["group_2", "rigid"].velocity_mm_s
 
-print(vibration.is_significant_change(0.8, limits.b_c))   # True
-print(vibration.is_significant_change(0.6, limits.b_c))   # False
+print(vibration.assess_operational_change(0.8, limits.b_c).significant)   # True
+print(vibration.assess_operational_change(0.6, limits.b_c).significant)   # False
 print(round(vibration.alarm_limit(0.9, limits.b_c), 3))   # 1.6
 print(round(vibration.alarm_limit(2.9, limits.b_c), 3))   # 3.5, en el tope
 print(round(vibration.trip_limit(limits.c_d), 3))         # 5.625
@@ -435,7 +435,7 @@ máquinas industriales, las fronteras de las Tablas A.1 y A.2 en las dos
 magnitudes, la regla de la más restrictiva del 5.2.3, el cambio significativo
 del 5.3 y los ajustes de ALARMA y DISPARO del 5.4, mediante
 `INDUSTRIAL_MACHINE_ZONES`, `industrial_machine_zone`,
-`is_significant_change`, `alarm_limit` y `trip_limit`. Para reductores, las
+`assess_operational_change`, `alarm_limit` y `trip_limit`. Para reductores, las
 tres tablas de calificación y la clasificación de la ISO 20816-9, y las dos
 curvas de calificación de su Anexo A, mediante `GEAR_UNIT_ZONES`,
 `GEAR_UNIT_CLASSES`, `gear_unit_zone_boundaries`,

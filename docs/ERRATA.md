@@ -8299,7 +8299,7 @@ in the same order.
 - **Consequence for the standard's own tables:** none; Figure C.1 is a curve
   and the annex prints no worked case.
 - **Library behaviour:**
-  [`test_environment_applicability`](../src/phonometry/noise_control/enclosure_insulation.py)
+  [`check_enclosure_test_environment`](../src/phonometry/noise_control/enclosure_insulation.py)
   returns `actual_area_ratio` and `required_area_ratio` as two named ratios of
   the same measurement surface, so the comparison cannot be read the other
   way.

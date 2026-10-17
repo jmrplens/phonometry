@@ -211,11 +211,7 @@ class _Unsettle(ast.NodeTransformer):
             "sound_absorption_rating",
             "_RATIO_SLACK",
         ),
-        (
-            "building/measurement/floor_covering_improvement.py",
-            "background_corrected_level",
-            None,
-        ),
+        ("building/measurement/floor_covering_improvement.py", "limited", None),
         ("emission/_sound_power_intensity_points.py", "_test_conditions_met", None),
         ("noise_control/_cabin_insulation.py", "ratio_satisfied", None),
         ("emission/_sound_power_in_situ.py", "_background_correction", None),
@@ -223,7 +219,7 @@ class _Unsettle(ast.NodeTransformer):
         ("electroacoustics/headphones.py", "requirements", None),
         ("metrology/reciprocity_coupler.py", "_within", None),
         # The limit is a field of a row of ISO 3382-1 Table A.1.
-        ("room/auditorium.py", "perceptibly_different", None),
+        ("room/auditorium.py", "different", None),
     ],
 )
 def test_a_settled_site_unsettled_again_is_refused(

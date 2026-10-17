@@ -347,7 +347,7 @@ def _chk_significant_change() -> Outcome:
     upper, low, high = 4.5, 0.0, 1.0
     for _ in range(60):
         middle = 0.5 * (low + high)
-        if ph.vibration.is_significant_change(middle * upper, upper):
+        if ph.vibration.assess_operational_change(middle * upper, upper).significant:
             high = middle
         else:
             low = middle

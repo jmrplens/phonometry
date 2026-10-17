@@ -542,6 +542,14 @@ class WeightingVerification(OwnsArrays):
         """
         return bool(np.all(self.within_tolerance))
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a WeightingVerification has no truth value; read its '.passes'"
+        raise TypeError(msg)
+
     @property
     def failing_frequencies_hz(self) -> NDArray[np.float64]:
         """The frequencies whose deviation falls outside the band."""
@@ -996,6 +1004,14 @@ class PhaseVerification(OwnsArrays):
         this is not a verdict on its magnitude response.
         """
         return bool(np.all(self.within_tolerance))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a PhaseVerification has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
     @property
     def failing_frequencies_hz(self) -> NDArray[np.float64]:

@@ -123,11 +123,11 @@ True where the margin is under the preferred 10 dB and over the 6 dB.
 [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db) bound the window where
 the clause asks for the ISO 3744 background correction.
 
-### BackgroundMarginCheck.satisfied
+### BackgroundMarginCheck.passes
 
 *property*
 
-True when every margin clears [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db).
+The verdict: every margin clears [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db).
 
 That is the only case that needs nothing done to it.
 

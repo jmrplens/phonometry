@@ -519,8 +519,8 @@ print(round(materials.decoupling_frequency(
 print(round(float(limp.effective_density[0].real), 1))     # 31.2 = rho_t
 # Both arguments are a frame bulk modulus in pascals, not a flow resistivity:
 # the criterion is the book's 20 kPa.
-print(materials.limp_frame_applicable(20e3),
-      materials.limp_frame_applicable(25e3))  # True False
+print(materials.check_limp_frame(20e3).passes,
+      materials.check_limp_frame(25e3).passes)  # True False
 
 limp.plot()   # normalised Zc and k of the corrected medium
 plt.show()
@@ -542,7 +542,7 @@ The correction is only worth applying where the frame really is limp. Beranek
 vacuum and that of the fluid in the pores; the frame-structural-interaction
 study of Doutres et al. (2007) relaxed that to $0.2$, which for air
 ($K_\mathrm{f} \approx P_0 = 101.3$ kPa) is the rule of thumb that the frame must be
-softer than about 20 kPa. `limp_frame_applicable` applies either threshold.
+softer than about 20 kPa. `check_limp_frame` applies either threshold.
 Neither accounts for mounting: a thin light foam decoupled from a vibrating
 structure by an air gap behaves limply well above the limit, and a material
 bonded to a vibrating structure should not be treated as rigid-framed at all.
@@ -1345,7 +1345,7 @@ $F_\mathrm{d} = \sigma\phi^2/2\pi\rho_1$. Below it a light frame moves with the 
 fluid, and `limp_frame` adds its inertia (Allard & Atalla Eqs 11.53-11.55).
 Use it for felts, screens and light fibreglass, for anything measured
 unconstrained in an impedance tube, and wherever the frame in vacuum is softer
-than about 20 kPa (`limp_frame_applicable`); do not use it, or the rigid model
+than about 20 kPa (`check_limp_frame`); do not use it, or the rigid model
 either, for a material bonded to a vibrating structure. When the frame is stiff
 and heavy enough to resonate in the band of interest, neither equivalent fluid
 will do at all: use a `PoroelasticLayer` and the full Biot theory.

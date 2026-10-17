@@ -137,7 +137,8 @@ def test_background_correction_three_branches() -> None:
     # margin 30 (>=15, unchanged), 10 (6..15, energy subtraction), 3 (<6, limit).
     lp = np.array([80.0, 80.0, 65.0])
     lb = np.array([50.0, 70.0, 62.0])
-    corrected, limited = building.background_corrected_level(lp, lb)
+    outcome = building.background_corrected_level(lp, lb)
+    corrected, limited = outcome.corrected_levels, outcome.limited
     expected_mid = 10.0 * np.log10(10.0**8 - 10.0**7)  # ~79.54
     np.testing.assert_allclose(corrected, [80.0, expected_mid, 65.0 - 1.3])
     np.testing.assert_array_equal(limited, [False, False, True])
@@ -145,9 +146,20 @@ def test_background_correction_three_branches() -> None:
 
 def test_background_correction_boundary_at_6_subtracts() -> None:
     # ISO 16251-1 (unlike ISO 10140-4) energy-subtracts at exactly margin = 6 dB.
-    corrected, limited = building.background_corrected_level([56.0], [50.0])
+    outcome = building.background_corrected_level([56.0], [50.0])
+    corrected, limited = outcome.corrected_levels, outcome.limited
     np.testing.assert_allclose(corrected, [10.0 * np.log10(10.0**5.6 - 10.0**5.0)])
     assert not bool(limited[0])
+
+
+def test_background_margins_are_read_position_by_position() -> None:
+    # A (positions, bands) pair: each margin is its own L' - Lb, and only the
+    # 3 dB one is under the 6 dB limit of measurement.
+    outcome = building.background_corrected_level(
+        [[80.0, 65.0], [70.0, 66.0]], [[50.0, 62.0], [60.0, 60.0]]
+    )
+    np.testing.assert_allclose(outcome.margins_db, [[30.0, 3.0], [10.0, 6.0]])
+    np.testing.assert_array_equal(outcome.limited, [[False, True], [False, False]])
 
 
 def test_background_correction_shape_mismatch() -> None:

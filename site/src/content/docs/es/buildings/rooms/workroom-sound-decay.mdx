@@ -169,7 +169,7 @@ ISO 3744, y aplicarla aquí movería un nivel medido a tus espaldas.
 check = room.check_background_margin([80.0, 70.0, 66.0], 60.0)
 print(check.margins_db)        # [20. 10.  6.]
 print(check.unusable)          # [False False  True]
-print(check.satisfied)         # False
+print(check.passes)         # False
 ```
 
 Otras dos condiciones se leen donde se ven, sin que haya que preguntar por
@@ -265,10 +265,10 @@ print(room.prediction_method("2b").family)          # geometrical
 print(room.ROOM_DETAIL_LEVELS[1])
 # the volume and the mean absorption coefficient of the surfaces
 
-print(room.detail_is_sufficient("1", room_detail=3,
-                                fitting_detail=3, source_detail=1).satisfied)   # False
-print(room.detail_is_sufficient("2b", room_detail=3,
-                                fitting_detail=3, source_detail=1).satisfied)   # True
+print(room.check_prediction_detail("1", room_detail=3,
+                                   fitting_detail=3, source_detail=1).passes)   # False
+print(room.check_prediction_detail("2b", room_detail=3,
+                                   fitting_detail=3, source_detail=1).passes)   # True
 ```
 
 La tabla E.1 se lee en los dos sentidos, que es lo aprovechable. Quien no tiene

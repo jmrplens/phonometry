@@ -61,7 +61,7 @@ sala no compartan dirección.
 from phonometry import materials
 
 check = materials.check_ceiling_specimen(area=10.8, mounting="E", depth_mm=200.0)
-print(check.satisfied)            # True
+print(check.passes)            # True
 print(check.ce_marking_depth)     # True
 print(check.area_error_m2)        # 0.0
 ```
@@ -97,7 +97,7 @@ import warnings
 with warnings.catch_warnings(record=True) as raised:
     warnings.simplefilter("always")
     deep = materials.check_ceiling_specimen(area=10.8, mounting="E", depth_mm=400.0)
-print(deep.satisfied)           # True
+print(deep.passes)           # True
 print(deep.ce_marking_depth)    # False
 print(len(raised))              # 1
 ```
@@ -109,7 +109,7 @@ menos; un marco de montaje de material macizo de 20 kg/m² o más; y una muestra
 que no flecte más de 5 mm en ningún punto. Se juzga cada uno de esos límites que
 se pueda contrastar con una dimensión del montaje tal como se construyó: la
 sección de la subestructura, la sección y la distancia entre ejes de los
-soportes, la densidad del marco y la flecha. Salirse de uno pone `satisfied` a
+soportes, la densidad del marco y la flecha. Salirse de uno pone `passes` a
 falso y lanza un `SuspendedCeilingWarning` que dice cuál.
 
 ```python
@@ -123,7 +123,7 @@ with warnings.catch_warnings(record=True) as raised:
     )
 print(hung.substructure_ok)     # True
 print(hung.supports_ok)         # False
-print(hung.satisfied)           # False
+print(hung.passes)           # False
 ```
 
 La subestructura y los soportes son algo que el apartado permite y no exige, así
@@ -177,7 +177,7 @@ with warnings.catch_warnings(record=True) as raised:
         relative_humidity_percent=[41.0, 44.0],   # sala vacía, después con la muestra
     )
 print(dry.humidity_ok)          # False
-print(dry.satisfied)            # False
+print(dry.passes)            # False
 ```
 
 Si no se da la humedad, `humidity_ok` es `None`: el veredicto cubre entonces la

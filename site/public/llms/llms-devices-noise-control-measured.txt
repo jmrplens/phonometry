@@ -690,7 +690,7 @@ measurement surface, which is Figure C.1 in closed form: the curve the annex
 asks the reader to read off by eye.
 
 ```python
-verdict = noise_control.test_environment_applicability(
+verdict = noise_control.check_enclosure_test_environment(
     base_standard="ISO 3744",
     mean_absorption_coefficient=0.15,
     room_surface_area_m2=520.0,
@@ -698,7 +698,7 @@ verdict = noise_control.test_environment_applicability(
 )
 print(round(verdict.required_area_ratio, 1))  # 45.6
 print(round(verdict.actual_area_ratio, 1))    # 36.9
-print(verdict.applicable)                     # False
+print(verdict.passes)                     # False
 ```
 
 That room cannot carry a precision determination. It can carry a survey one,
@@ -763,7 +763,7 @@ by_position = [
 check = noise_control.check_source_positions(by_position)
 print(check.max_octave_spread_db)   # 4.5
 print(check.n_required_positions)     # 5
-print(check.satisfied)              # False
+print(check.passes)                   # False
 ```
 
 Two more positions, and the clause adds that the three used first should not be
@@ -1027,7 +1027,7 @@ facade.
 
 The weather is part of the measurement. `wind_class` is Table 1, with a downwind
 class and a calm one over any distance and an upwind class over short distances
-alone; `is_short_distance` is the geometry test of 6.3.1 that decides whether
+alone; `check_short_distance` is the geometry test of 6.3.1 that decides whether
 that class exists at all, and the two campaigns can disagree about it. Past 5 m/s
 no measurement is made, the two campaigns must agree within 2 m/s and 10 °C, and
 the cloud cover is recorded in the four classes of Table 2.

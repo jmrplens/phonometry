@@ -112,6 +112,41 @@ band is
 | :--- | :--- |
 | ValueError | If any input is not positive/finite. |
 
+## check_strong_coupling
+
+```python
+check_strong_coupling(
+    velocity_level_difference: Sequence[float] | np.ndarray,
+    mass_i: float,
+    mass_j: float,
+    critical_frequency_i: float,
+    critical_frequency_j: float,
+) -> StrongCouplingCheck
+```
+
+Do the two elements couple strongly enough for `Kij`? (Part 1, Formula (15)).
+
+`Kij` is relevant only where
+$D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}$.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `velocity_level_difference` | Velocity level difference `Dv,ij` per band from element `i` (excited) to element `j`, in dB; one direction, not the average of both. |
+| `mass_i` | Mass per unit area `mi` of element `i`, in kg/m². |
+| `mass_j` | Mass per unit area `mj` of element `j`, in kg/m². |
+| `critical_frequency_i` | Critical frequency `fci` of element `i`, in Hz. |
+| `critical_frequency_j` | Critical frequency `fcj` of element `j`, in Hz. |
+
+**Returns:** The verdict, as a [`StrongCouplingCheck`](/phonometry/reference/api/building/flanking-transmission/#strongcouplingcheck); band by band in its [`holds`](/phonometry/reference/api/building/flanking-transmission/#strongcouplingcheckholds).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If any scalar input is not positive/finite. |
+
 ## critical_frequency
 
 ```python
@@ -514,40 +549,65 @@ area $A_0 = 10$ m².
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
 
-## strong_coupling_satisfied
+## StrongCouplingCheck
 
 ```python
-strong_coupling_satisfied(
-    velocity_level_difference: Sequence[float] | np.ndarray,
+StrongCouplingCheck(
+    velocity_level_difference: NDArray[np.float64],
+    *,
     mass_i: float,
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
-) -> np.ndarray
+)
 ```
 
-Strong-coupling applicability check (Part 1, Formula (15)).
+The strong-coupling condition of Part 1, Formula (15), band by band.
 
-`Kij` is relevant only where
-$\overline{D}_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}$.
+`Kij` is relevant only where the elements couple strongly,
 
-**Parameters**
+$$
+D_{\mathrm{v},ij} \ge 3 - 10 \lg \frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}
+$$
+
+The difference is the one-way `Dv,ij` from element `i` to element
+`j`, not the direction average: the threshold changes when `i` and
+`j` swap, so each direction is judged on its own.
+
+The threshold and the verdicts are read from the two elements and the
+measured differences, so they are not fields: a check cannot be built
+against another threshold.
+
+**Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_level_difference` | Direction-averaged `D̄v,ij` per band, in dB. |
+| `velocity_level_difference` | Velocity level difference `Dv,ij` per band, element `i` excited, in dB. |
 | `mass_i` | Mass per unit area `mi` of element `i`, in kg/m². |
 | `mass_j` | Mass per unit area `mj` of element `j`, in kg/m². |
 | `critical_frequency_i` | Critical frequency `fci` of element `i`, in Hz. |
 | `critical_frequency_j` | Critical frequency `fcj` of element `j`, in Hz. |
 
-**Returns:** Boolean array, `True` where the inequality holds.
+### StrongCouplingCheck.holds
 
-**Raises**
+*property*
 
-| Exception | When |
-| :--- | :--- |
-| ValueError | If any scalar input is not positive/finite. |
+Whether the inequality holds in each band.
+
+Judged settled: for two like elements the threshold is 3 dB to the
+last bits of the logarithm of a ratio that is 1 in decimal.
+
+### StrongCouplingCheck.passes
+
+*property*
+
+The verdict: the elements couple strongly in every band given.
+
+### StrongCouplingCheck.threshold_db
+
+*property*
+
+The least `Dv,ij`, $3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))$, in dB.
 
 ## total_loss_factor
 

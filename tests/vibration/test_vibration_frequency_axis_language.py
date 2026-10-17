@@ -70,7 +70,7 @@ def _mobility() -> MobilityResult:
 
 
 def _rigid_mass_calibration() -> RigidMassCalibrationResult:
-    return vibration.rigid_mass_calibration_check(
+    return vibration.verify_rigid_mass_calibration(
         [0.100, 0.102, 0.101, 0.097], [20.0, 50.0, 100.0, 500.0], mass=10.0
     )
 

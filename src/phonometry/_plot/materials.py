@@ -14,6 +14,7 @@ from .common import (
     _C_PRIMARY,
     _C_PRIMARY_LIGHT,
     _C_REFERENCE,
+    _C_SECONDARY,
     _band_axis,
     _freq_axis,
     _import_pyplot,
@@ -45,7 +46,10 @@ if TYPE_CHECKING:
     from ..materials.absorbers.uncertainty import AbsorptionUncertaintyResult
     from ..materials.diffusers.design import DiffuserPolarResponse
     from ..materials.diffusers.metadiffuser import MetadiffuserResult
-    from ..materials.diffusers.reverberation_room_scattering import ScatteringResult
+    from ..materials.diffusers.reverberation_room_scattering import (
+        BasePlateScatteringCheck,
+        ScatteringResult,
+    )
     from ..materials.diffusers.scattering_diffusion import (
         DiffusionResult,
         DiffusionSpectrum,
@@ -55,6 +59,13 @@ if TYPE_CHECKING:
 
 _FREQ_LABEL = "Frequency [Hz]"
 _SCATTERING_TITLE = "Random-incidence scattering coefficient (ISO 17497-1)"
+_BASE_PLATE_TITLE = "Base plate alone against Table 1 (ISO 17497-1)"
+_BASE_PLATE_LIMIT_LABEL = "Table 1 limit"
+_BASE_PLATE_CURVE_LABEL = r"Base plate $s_\mathrm{base}$"
+_BASE_PLATE_OVER_LABEL = "Over the limit"
+_BASE_PLATE_YLABEL = r"Scattering coefficient $s_\mathrm{base}$"
+# Table 1 is keyed to the full-scale frequency f/N, so the axis says so.
+_BASE_PLATE_XLABEL = r"Frequency $f/N$ [Hz]"
 _DIFFUSION_TITLE = "Directional diffusion coefficient (ISO 17497-2)"
 _HARD_BACKED_ALPHA_LABEL = r"Hard-backed absorption $\alpha$"
 _SIGMA_UNFAV_LABEL = r"$\Sigma$ unfav. = "
@@ -87,6 +98,12 @@ _STRINGS: dict[str, str] = {
     _SIGMA_UNFAV_LABEL: r"$\Sigma$ desfav. = ",
     "Scattering coefficient $s$": "Coeficiente de dispersión $s$",
     _SCATTERING_TITLE: "Coeficiente de dispersión de incidencia aleatoria (ISO 17497-1)",
+    _BASE_PLATE_TITLE: "Placa base sola frente a la tabla 1 (ISO 17497-1)",
+    _BASE_PLATE_LIMIT_LABEL: "Límite de la tabla 1",
+    _BASE_PLATE_CURVE_LABEL: r"Placa base $s_\mathrm{base}$",
+    _BASE_PLATE_OVER_LABEL: "Por encima del límite",
+    _BASE_PLATE_YLABEL: r"Coeficiente de dispersión $s_\mathrm{base}$",
+    _BASE_PLATE_XLABEL: r"Frecuencia $f/N$ [Hz]",
     "Diffusion coefficient $d$ = ": "Coeficiente de difusión $d$ = ",
     "Predicted diffuser polar response": "Respuesta polar predicha del difusor",
     _DIFFUSION_TITLE: "Coeficiente de difusión direccional (ISO 17497-2)",
@@ -260,6 +277,76 @@ def plot_scattering_coefficient(
     ax.set_ylim(0.0, top)
     ax.set_title(_t(_SCATTERING_TITLE, language))
     ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_base_plate_scattering(
+    result: BasePlateScatteringCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The base plate's scattering coefficient against the stepped limit of Table 1.
+
+    The limit is drawn band by band, each step spanning its one-third-octave
+    band, so the reader sees which ceiling each point is held to; the bands
+    over it are ringed. The frequency axis is the full-scale ``f/N`` Table 1
+    is keyed to.
+
+    :param result: A
+        :class:`~phonometry.materials.diffusers.reverberation_room_scattering.BasePlateScatteringCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured coefficient curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    s = np.asarray(result.scattering, dtype=np.float64)
+    limits = np.asarray(result.limits, dtype=np.float64)
+    over = np.asarray(result.exceeds, dtype=bool)
+    # The band edges of the one-third octaves, so each step of the limit
+    # spans its own band on the log axis.
+    half_band = 2.0 ** (1.0 / 6.0)
+    edges = np.concatenate(([freqs[0] / half_band], freqs * half_band))
+    ax.stairs(
+        limits,
+        edges,
+        baseline=None,
+        color=_C_REFERENCE,
+        linestyle="--",
+        linewidth=1.2,
+        label=_t(_BASE_PLATE_LIMIT_LABEL, language),
+    )
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t(_BASE_PLATE_CURVE_LABEL, language))
+    ax.plot(freqs, s, **kwargs)
+    if np.any(over):
+        ax.plot(
+            freqs[over],
+            s[over],
+            "o",
+            markersize=11,
+            markerfacecolor="none",
+            markeredgewidth=1.6,
+            color=_C_SECONDARY,
+            zorder=3,
+            label=_t(_BASE_PLATE_OVER_LABEL, language),
+        )
+    ax.set_xlim(float(edges[0]), float(edges[-1]))
+    format_frequency_axis(ax, float(edges[0]), float(edges[-1]), language=language)
+    ax.set_xlabel(_t(_BASE_PLATE_XLABEL, language))
+    ax.set_ylabel(_t(_BASE_PLATE_YLABEL, language))
+    bottom = min(0.0, float(np.min(s)) * 1.1)
+    top = max(float(np.max(limits)), float(np.max(s))) * 1.25
+    ax.set_ylim(bottom, top)
+    ax.set_title(_t(_BASE_PLATE_TITLE, language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
     return ax
 

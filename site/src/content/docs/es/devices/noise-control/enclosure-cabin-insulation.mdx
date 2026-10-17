@@ -157,11 +157,11 @@ $$
 $$
 
 que es la figura C.1 en forma cerrada: la curva que el anexo pide leer a ojo.
-`test_environment_applicability` la evalúa y la compara con la sala que se
+`check_enclosure_test_environment` la evalúa y la compara con la sala que se
 tiene delante.
 
 ```python
-verdict = noise_control.test_environment_applicability(
+verdict = noise_control.check_enclosure_test_environment(
     base_standard="ISO 3744",
     mean_absorption_coefficient=0.15,
     room_surface_area_m2=520.0,
@@ -169,7 +169,7 @@ verdict = noise_control.test_environment_applicability(
 )
 print(round(verdict.required_area_ratio, 1))  # 45.6
 print(round(verdict.actual_area_ratio, 1))    # 36.9
-print(verdict.applicable)                     # False
+print(verdict.passes)                     # False
 ```
 
 Esa sala no puede sostener una determinación de precisión. Sí puede sostener
@@ -196,7 +196,7 @@ máquina sin el encapsulado, monte el encapsulado sin mover ni la máquina ni lo
 micrófonos, y vuelva a determinarla. Cuando la máquina no se pueda hacer
 funcionar dos veces, use el método de reciprocidad o la fuente artificial del
 anexo A, y diga cuál en el informe. En obra, pase la sala por
-`test_environment_applicability` antes que nada: a una sala que no puede cumplir
+`check_enclosure_test_environment` antes que nada: a una sala que no puede cumplir
 la corrección ambiental que pide la norma base no la salva una medida cuidadosa.
 
 ## 4. La cabina es el problema inverso
@@ -256,7 +256,7 @@ by_position = [
 check = noise_control.check_source_positions(by_position)
 print(check.max_octave_spread_db)   # 4.5
 print(check.n_required_positions)     # 5
-print(check.satisfied)              # False
+print(check.passes)                   # False
 ```
 
 Dos posiciones más, y el apartado añade que las tres usadas primero no deberían
@@ -361,7 +361,7 @@ ISO 717-1 del apartado 7 con `weighted_enclosure_insulation`; la estimación del
 y del anexo D con `estimated_a_weighted_enclosure_insulation`; los cocientes de fuga, de
 estanquidad y de llenado de las definiciones; la distancia de la fuente de
 7.2; y el anexo C entero de la parte 2, con la tabla C.1, la tabla C.2 y la
-figura C.1 en forma cerrada con `test_environment_applicability`, contrastada
+figura C.1 en forma cerrada con `check_enclosure_test_environment`, contrastada
 con la corrección ambiental de la ISO 3744. De la ISO 11957: las ecuaciones
 (1), (2) y (3) con `cabin_insulation`, con la prima de la definición 3.6 y el
 rechazo a nombrar un aislamiento ponderado A fuera del método del ruido real;

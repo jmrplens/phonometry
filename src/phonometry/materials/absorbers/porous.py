@@ -68,7 +68,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -77,7 +77,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy import special
 
 from ..._internal.boundary import settled
-from ..._internal.display import record_html, record_pretty
+from ..._internal.display import RichDisplay, record_html, record_pretty
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -172,6 +172,7 @@ __all__ = [
     "FiberCharacteristicLengths",
     "FiberResistivityFit",
     "PorousAbsorberWarning",
+    "LimpFrameCheck",
     "PorousMediumResult",
     "airflow_resistivity_from_bulk_density",
     "decoupling_frequency",
@@ -180,7 +181,7 @@ __all__ = [
     "helmholtz_resonance_frequency",
     "johnson_champoux_allard",
     "limp_frame",
-    "limp_frame_applicable",
+    "check_limp_frame",
     "membrane_impedance",
     "membrane_resonance_frequency",
     "microperforated_plate_impedance",
@@ -577,26 +578,85 @@ def decoupling_frequency(
     return float(sigma * phi**2 / (2.0 * np.pi * rho1))
 
 
-def limp_frame_applicable(
-    frame_bulk_modulus: float,
-    *,
-    criterion: str = "doutres",
-    fluid_bulk_modulus: float = _ATMOSPHERIC_PRESSURE,
-) -> bool:
-    r"""Whether the limp-frame model may be used, by published rule of thumb.
+@dataclass(frozen=True)
+class LimpFrameCheck(RichDisplay):
+    r"""Whether the limp-frame model may be used, by a published rule of thumb.
 
     Both published criteria compare the bulk modulus of the frame *in vacuum*
     ``K_c`` with that of the fluid in the pores ``K_f`` (Allard & Atalla 2e,
     printed pp. 253-254): Beranek (1947) requires
     :math:`\lvert K_c/K_\mathrm{f} \rvert < 0.05`, and the frame structural
     interaction study of Doutres et al. (2007) relaxes it to
-    :math:`\lvert K_c/K_\mathrm{f} \rvert < 0.2`. With ``K_f`` taken as the
-    isothermal bulk modulus of fluid, :math:`P_0 = 101.3` kPa, the relaxed
-    criterion is the book's statement that
-    "the limp model is applicable for materials having a bulk modulus lower
-    than 20 kPa". Neither criterion accounts for boundary or mounting
-    conditions, and the book notes that a thin light foam decoupled from a
-    vibrating structure by an air gap behaves limply well above the limit.
+    :math:`\lvert K_c/K_\mathrm{f} \rvert < 0.2`. The threshold, the ratio and
+    the verdict are read from the criterion and the two moduli, so they are
+    not fields: a check cannot be built against another threshold.
+
+    :ivar frame_bulk_modulus: Bulk modulus of the frame in vacuum ``K_c``, in
+        Pa (>= 0; ``abs(K_c)`` for a complex modulus).
+    :ivar criterion: Key into :data:`LIMP_FRAME_CRITERIA`, ``"doutres"``
+        (Default, 0,2) or ``"beranek"`` (0,05).
+    :ivar fluid_bulk_modulus: Bulk modulus of the pore fluid ``K_f``, in Pa.
+    """
+
+    frame_bulk_modulus: float
+    _: KW_ONLY
+    criterion: str = "doutres"
+    fluid_bulk_modulus: float = _ATMOSPHERIC_PRESSURE
+
+    def __post_init__(self) -> None:
+        """Reject a criterion the book does not print, or a modulus it cannot take.
+
+        :raises ValueError: for a negative frame modulus, a fluid modulus that
+            is not positive, or an unknown criterion.
+        """
+        require_choice(self.criterion, "criterion", tuple(LIMP_FRAME_CRITERIA))
+        require_non_negative(self.frame_bulk_modulus, "frame_bulk_modulus")
+        require_positive(self.fluid_bulk_modulus, "fluid_bulk_modulus")
+
+    @property
+    def threshold(self) -> float:
+        r"""The bound :math:`\lvert K_c/K_\mathrm{f} \rvert` must stay below."""
+        return LIMP_FRAME_CRITERIA[self.criterion]
+
+    @property
+    def ratio(self) -> float:
+        r""":math:`\lvert K_c/K_\mathrm{f} \rvert`, the ratio judged."""
+        return float(self.frame_bulk_modulus / self.fluid_bulk_modulus)
+
+    @property
+    def passes(self) -> bool:
+        """The verdict: the ratio is below the threshold, strictly, as printed.
+
+        Judged settled to nine decimals, so moduli whose ratio is the printed
+        threshold in decimal are on it, and a ratio on the threshold does not
+        pass.
+        """
+        return bool(settled(self.ratio) < self.threshold)
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a LimpFrameCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
+
+
+def check_limp_frame(
+    frame_bulk_modulus: float,
+    *,
+    criterion: str = "doutres",
+    fluid_bulk_modulus: float = _ATMOSPHERIC_PRESSURE,
+) -> LimpFrameCheck:
+    r"""May the limp-frame model be used for this frame? (A&A 2e pp. 253-254).
+
+    With ``K_f`` taken as the isothermal bulk modulus of the fluid,
+    :math:`P_0 = 101.3` kPa, the relaxed criterion of Doutres et al. is the
+    book's statement that "the limp model is applicable for materials having a
+    bulk modulus lower than 20 kPa". Neither criterion accounts for boundary
+    or mounting conditions, and the book notes that a thin light foam
+    decoupled from a vibrating structure by an air gap behaves limply well
+    above the limit.
 
     :param frame_bulk_modulus: Bulk modulus of the frame in vacuum ``K_c``, in
         Pa (>= 0; pass ``abs(K_c)`` for a complex modulus).
@@ -604,14 +664,16 @@ def limp_frame_applicable(
         (Default, 0,2) or ``"beranek"`` (0,05).
     :param fluid_bulk_modulus: Bulk modulus of the pore fluid ``K_f``, in Pa
         (Default: 101 325, the isothermal value for fluid).
-    :return: ``True`` when :math:`\lvert K_c/K_\mathrm{f} \rvert` does not exceed
-        the threshold.
+    :return: The verdict, as a :class:`LimpFrameCheck`; it passes when
+        :math:`\lvert K_c/K_\mathrm{f} \rvert` is below the threshold (the
+        book prints both criteria as strict inequalities).
     :raises ValueError: for a negative modulus or an unknown criterion.
     """
-    key = require_choice(criterion, "criterion", tuple(LIMP_FRAME_CRITERIA))
-    k_c = require_non_negative(frame_bulk_modulus, "frame_bulk_modulus")
-    k_f = require_positive(fluid_bulk_modulus, "fluid_bulk_modulus")
-    return bool(settled(k_c / k_f) <= LIMP_FRAME_CRITERIA[key])
+    return LimpFrameCheck(
+        require_non_negative(frame_bulk_modulus, "frame_bulk_modulus"),
+        criterion=require_choice(criterion, "criterion", tuple(LIMP_FRAME_CRITERIA)),
+        fluid_bulk_modulus=require_positive(fluid_bulk_modulus, "fluid_bulk_modulus"),
+    )
 
 
 def limp_frame(
@@ -669,7 +731,7 @@ def limp_frame(
     rigid-frame one.
 
     Use :func:`decoupling_frequency` to see where the frame stops following the
-    fluid and :func:`limp_frame_applicable` for the published bulk-modulus
+    fluid and :func:`check_limp_frame` for the published bulk-modulus
     rule of thumb on when the frame may be treated as limp at all.
 
     :param medium: A rigid-frame :class:`PorousMediumResult` (its

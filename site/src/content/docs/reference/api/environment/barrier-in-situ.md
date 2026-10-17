@@ -103,6 +103,46 @@ one takes off 1. They are two tables and they stay two tables.
 
 The measurement is outside a condition ISO 10847 states.
 
+## check_short_distance
+
+```python
+check_short_distance(
+    *,
+    source_height_m: float,
+    receiver_height_m: float,
+    barrier_height_m: float,
+    source_to_barrier_m: float,
+    barrier_to_receiver_m: float,
+) -> ShortDistanceCheck
+```
+
+Does the geometry count as a short distance? 6.3.1.
+
+What hangs on the answer is Table 1: the upwind class exists only over
+short distances, so a long-distance measurement may be made downwind or
+calm and not into the wind at all. The "before" campaign is judged on one
+ratio and the "after" one on two; pass [`ShortDistanceCheck.before`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckbefore)
+or [`ShortDistanceCheck.after`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckafter) to [`wind_class`](/phonometry/reference/api/environment/barrier-in-situ/#wind_class) for the
+campaign at hand.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `source_height_m` | $H_s$, in metres. |
+| `receiver_height_m` | $H_R$, in metres. |
+| `barrier_height_m` | $H$, in metres. |
+| `source_to_barrier_m` | $d_1$, in metres. |
+| `barrier_to_receiver_m` | $d_2$, in metres. |
+
+**Returns:** The answer for each campaign, as a [`ShortDistanceCheck`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a non-positive height or distance. |
+
 ## CLOSE_SOURCE_DISTANCE_M
 
 *Constant* (`float`).
@@ -178,53 +218,6 @@ cross at 15 m.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance. |
-
-## is_short_distance
-
-```python
-is_short_distance(
-    *,
-    source_height_m: float,
-    receiver_height_m: float,
-    barrier_height_m: float,
-    source_to_barrier_m: float,
-    barrier_to_receiver_m: float,
-) -> tuple[bool, bool]
-```
-
-Whether the geometry counts as a short distance, 6.3.1.
-
-The clause prints one condition for the "before" campaign and two for the
-"after" one, all against the same ratio of 0,1:
-
-$$
-\frac{H_s + H_R}{d_1 + d_2} > 0,1, \qquad \frac{H_s + H}{d_1} > 0,1, \qquad \frac{H + H_R}{d_2} > 0,1
-$$
-
-The "after" pair must both hold. What hangs on the answer is Table 1: the
-upwind class exists only over short distances, so a long-distance
-measurement may be made downwind or calm and not into the wind at all.
-
-The inequalities are strict, so a ratio of exactly 0,1 is not a short
-distance.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `source_height_m` | $H_s$, in metres. |
-| `receiver_height_m` | $H_R$, in metres. |
-| `barrier_height_m` | $H$, in metres. |
-| `source_to_barrier_m` | $d_1$, in metres. |
-| `barrier_to_receiver_m` | $d_2$, in metres. |
-
-**Returns:** Whether the "before" and the "after" geometry each count as a short distance.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | For a non-positive height or distance. |
 
 ## ISO10847_BACKGROUND_CORRECTIONS
 
@@ -600,6 +593,77 @@ enforced.
 SHORT_DISTANCE_RATIO = 0.1
 ```
 
+## ShortDistanceCheck
+
+```python
+ShortDistanceCheck(
+    *,
+    source_height_m: float,
+    receiver_height_m: float,
+    barrier_height_m: float,
+    source_to_barrier_m: float,
+    barrier_to_receiver_m: float,
+)
+```
+
+Whether the geometry counts as a short distance, 6.3.1.
+
+The clause prints one condition for the "before" campaign and two for the
+"after" one, all against the same ratio of 0,1:
+
+$$
+\frac{H_s + H_R}{d_1 + d_2} > 0,1, \qquad \frac{H_s + H}{d_1} > 0,1, \qquad \frac{H + H_R}{d_2} > 0,1
+$$
+
+The ratios and the two answers are read from the five lengths, so they
+are not fields. There is no verdict to pass: the answer selects the wind
+classes of Table 1 that each campaign may be made in, so it is read as
+`before` and `after`.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `source_height_m` | $H_s$, in metres. |
+| `receiver_height_m` | $H_R$, in metres. |
+| `barrier_height_m` | $H$, in metres. |
+| `source_to_barrier_m` | $d_1$, in metres. |
+| `barrier_to_receiver_m` | $d_2$, in metres. |
+
+### ShortDistanceCheck.after
+
+*property*
+
+Whether the "after" geometry is a short distance: both its ratios exceed 0,1.
+
+### ShortDistanceCheck.after_receiver_side_ratio
+
+*property*
+
+$(H + H_R) / d_2$, the second ratio of the "after" campaign.
+
+### ShortDistanceCheck.after_source_side_ratio
+
+*property*
+
+$(H_s + H) / d_1$, the first ratio of the "after" campaign.
+
+### ShortDistanceCheck.before
+
+*property*
+
+Whether the "before" geometry is a short distance.
+
+The inequality is strict, so a ratio of exactly 0,1 is not one. The
+ratio is judged settled, so lengths whose ratio is the printed one in
+decimal are not taken past it by the last bits.
+
+### ShortDistanceCheck.before_ratio
+
+*property*
+
+$(H_s + H_R) / (d_1 + d_2)$, the ratio of the "before" campaign.
+
 ## TEMPERATURE_TOLERANCE_C
 
 *Constant* (`float`).
@@ -637,7 +701,7 @@ made at all, which is a refusal rather than a class.
 | Name | Description |
 | :--- | :--- |
 | `vector_component_m_s` | The vector component, in metres per second. |
-| `short_distance` | Whether the geometry is a short distance in the sense of [`is_short_distance`](/phonometry/reference/api/environment/barrier-in-situ/#is_short_distance). |
+| `short_distance` | Whether the geometry of the campaign is a short distance: [`ShortDistanceCheck.before`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckbefore) for the "before" campaign and [`ShortDistanceCheck.after`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckafter) for the "after" one, from [`check_short_distance`](/phonometry/reference/api/environment/barrier-in-situ/#check_short_distance). |
 
 **Returns:** The class name, or `None` where the component falls in no class the table prints, which over long distances is any upwind component.
 

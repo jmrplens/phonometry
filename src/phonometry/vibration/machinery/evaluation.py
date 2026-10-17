@@ -99,16 +99,17 @@ __all__ = [
     "ZONE_LIMIT_FACTORS",
     "GearUnitRatings",
     "MachineZoneLimits",
+    "OperationalChange",
     "VectorChangeResult",
     "ZoneBoundaries",
     "alarm_limit",
     "allowable_velocity",
+    "assess_operational_change",
     "evaluation_zone",
     "gear_housing_velocity_limit",
     "gear_shaft_displacement_limit",
     "gear_unit_zone_boundaries",
     "industrial_machine_zone",
-    "is_significant_change",
     "trip_limit",
     "vibration_vector_change",
 ]
@@ -534,8 +535,59 @@ def industrial_machine_zone(
     return _zone_letters(functools.reduce(np.maximum, graded))
 
 
-def is_significant_change(change: float, zone_b_upper: float) -> bool:
-    """Whether a change from the baseline is significant (5.3).
+@dataclass(frozen=True)
+class OperationalChange(RichDisplay):
+    """A change from the baseline against what 5.3 calls significant.
+
+    The threshold and the answer are read from the change and the boundary,
+    so they are not fields: a record cannot be built to call a change
+    significant that the clause does not.
+
+    :ivar change: The change from the established baseline, in the unit the
+        boundaries are in; signed, and judged by its size.
+    :ivar zone_b_upper: The upper limit of zone B, which is the B/C boundary.
+    """
+
+    change: float
+    zone_b_upper: float
+
+    def __post_init__(self) -> None:
+        """Reject a change that is not a number, or a boundary that is not one.
+
+        :raises ValueError: If the change is not finite or the limit is not
+            positive.
+        """
+        require_scalar(self.change, "change")
+        if not math.isfinite(self.change):
+            msg = "'change' must be finite."
+            raise ValueError(msg)
+        require_positive(self.zone_b_upper, "zone_b_upper")
+
+    @property
+    def threshold(self) -> float:
+        """A quarter of the upper limit of zone B, the size 5.3 asks to investigate."""
+        return SIGNIFICANT_CHANGE_FRACTION * self.zone_b_upper
+
+    @property
+    def significant(self) -> bool:
+        """Whether the change, in either direction, exceeds :attr:`threshold`.
+
+        A significant change is a reason to investigate, not a failure: the
+        machine may still be inside zone B.
+        """
+        return abs(self.change) > self.threshold
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`significant`.
+        """
+        msg = "an OperationalChange has no truth value; read its '.significant'"
+        raise TypeError(msg)
+
+
+def assess_operational_change(change: float, zone_b_upper: float) -> OperationalChange:
+    """Is a change from the baseline significant? (5.3).
 
     A change exceeding a quarter of the upper limit of zone B, in either
     direction, is one that 5.3 asks to be investigated even when zone C of
@@ -546,16 +598,15 @@ def is_significant_change(change: float, zone_b_upper: float) -> bool:
     :param change: The change from the established baseline, in the unit the
         boundaries are in; the sign is ignored.
     :param zone_b_upper: The upper limit of zone B, which is the B/C boundary.
-    :return: Whether the change is significant.
+    :return: The answer, as an :class:`OperationalChange`.
     :raises ValueError: If the change is not finite or the limit is not
         positive.
     """
     require_scalar(change, "change")
-    if not math.isfinite(change):
-        msg = "'change' must be finite."
-        raise ValueError(msg)
-    upper = require_positive(zone_b_upper, "zone_b_upper")
-    return abs(change) > SIGNIFICANT_CHANGE_FRACTION * upper
+    return OperationalChange(
+        change=float(change),
+        zone_b_upper=float(require_positive(zone_b_upper, "zone_b_upper")),
+    )
 
 
 def alarm_limit(baseline: float, zone_b_upper: float) -> float:

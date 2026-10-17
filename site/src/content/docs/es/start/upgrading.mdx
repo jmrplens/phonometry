@@ -4,7 +4,7 @@ description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la gr
 ---
 
 La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
-de los 885 nombres que la raíz exportaba en la 3.3.0, sesenta y nueve no existen ya
+de los 885 nombres que la raíz exportaba en la 3.3.0, setenta y cuatro no existen ya
 en ningún sitio y el resto simplemente vive en una dirección con nombre en vez
 de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
@@ -30,7 +30,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # esta es la grafía nueva
 ```
 
-Medido sobre la superficie entera, 813 de aquellos 885 nombres de la raíz los
+Medido sobre la superficie entera, 808 de aquellos 885 nombres de la raíz los
 publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
 más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
 siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
@@ -889,6 +889,58 @@ se niega a leerse como valor de verdad, así que un
 `if verify_running_rms_decay(...):` escrito contra la versión candidata levanta
 `TypeError` en vez de dar por buenos todos los vibrómetros.
 
+## Un veredicto dice `passes`, se niega a ser un valor de verdad y sale de un verbo
+
+Un juicio se nombra por lo que juzga: `verify_` un instrumento, `assess_` una
+situación medida, `check_` la disposición que pide un método. Cada uno devuelve
+un registro que conserva sus razones, y el apto o no apto se escribe `passes` en
+todos ellos. Un registro que devuelve una función de juicio, y todo registro con
+un `passes`, se niega a leerse como valor de verdad: `if verdict:` lanza
+`TypeError` y el mensaje dice qué leer. En la 3.3.0 y la 4.0.0rc1 estos
+registros eran siempre verdaderos, así que un `if` escrito contra ellos daba por
+buenos todos los fallos: lee `.passes` en `QuasiPeakDynamicsResult`,
+`AircraftSystemComplianceResult`, `WeightingVerification`, `PhaseVerification`,
+`SignalBurstVerification`, `DBHRCheck`, `DBHRAssessment`, `ActivityAssessment` y
+`PeriodAssessment`; `.overall_class` en `FilterComplianceResult`,
+`WeightingComplianceResult` e `IntensityInstrumentComplianceResult`;
+`.within_guideline` en `DamageAssessment`, porque superar un valor guía de
+DIN 4150-3 no es un fallo; `.qualified` en `PrecisionCriteria`; `.adjustment` en
+`TonalAssessmentResult`; y `.decisive_audibility` o `.audible` en
+`ToneAudibilityResult`.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `.complies` en `DbHrCheck`, `DbHrAssessment` (ahora `DBHRCheck`, `DBHRAssessment`), `ActivityAssessment` y `PeriodAssessment` | `.passes` |
+| `vibration.is_significant_change(change, zone_b_upper)` | `vibration.assess_operational_change(change, zone_b_upper).significant`, junto al `.threshold` contra el que se lee. Un cambio significativo es un motivo para investigar, no un fallo, así que la bandera conserva su nombre |
+| `materials.limp_frame_applicable(k_c, criterion=...)` | `materials.check_limp_frame(k_c, criterion=...).passes`, junto a `.ratio` y `.threshold`. Una razón justo en el umbral ya no pasa: Allard y Atalla imprimen los dos criterios como desigualdades estrictas |
+| `fi.field_is_stationary(limit=...)` en un `FieldIndicators` | `fi.check_field_stationarity().passes`, y banda a banda su `.stationary`. El límite es el 0,6 de la tabla B.3, que se lee en `.limit`, y ya no es un argumento |
+| `room.perceptibly_different(symbol, first, second)` | `room.assess_perceptible_difference(symbol, first, second).different`; los dos valores tienen ahora que tener la misma forma |
+| `materials.check_base_plate_scattering(s) == ()` | `materials.check_base_plate_scattering(s).passes`, con las bandas que superan el límite en `.exceeded_frequencies` y, junto a ellas, `.margins`, `.exceeds` y `.limits` por banda. Un coeficiente que no es finito lanza `ValueError`, donde antes pasaba |
+| `corrected, limited = building.background_corrected_level(lp, lb)` | `result = building.background_corrected_level(lp, lb)`, y luego `result.corrected_levels` y `result.limited` |
+| `k1, held = emission.background_noise_correction_at_workstation(lp, lb)` | `result = emission.background_noise_correction_at_workstation(lp, lb)`, y luego `result.correction` y `result.upper_bound` |
+
+Los nombres de primer nivel de la 3.3.0 que esto renombra
+(`rigid_mass_calibration_check`, `satisfies_lower_requirement`,
+`satisfies_upper_requirement`, `strong_coupling_satisfied` y
+`tonal_seeking_survey`) están en la tabla de los nombres que ya no están, al
+final de esta página.
+
+```python
+from phonometry import building, materials
+
+conformity = building.assess_requirement_conformity(52.0, 1.5, 50.0, bound="minimum")
+print(conformity.passes, conformity.margin_db)
+# True 0.5
+check = materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+print(check.passes, check.exceeded_frequencies.size)
+# True 0
+try:
+    bool(check)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+```
+
 ## El banco de filtros devuelve un resultado, no una tupla
 
 `octave_filter()` y `OctaveFilterBank.filter()` devolvían dos elementos
@@ -1221,9 +1273,9 @@ indica en qué versión apareció cada veredicto.
 | --- | --- | --- | --- |
 | `building.PositionSpreadCheck` | `limit_db`, `stage`, `spread_db`, `action`, `next_positions`, `corner_standard_deviation_db` | `levels`, del que se leen todos | después de 4.0.0rc1 |
 | `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance_db`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
-| `noise_control.BandFlatnessCheck` | `limit_db`, `satisfied` | `octave_frequencies`, `spread_db` | después de 4.0.0rc1 |
-| `noise_control.SourcePositionCheck` | `n_required_positions`, `satisfied`, `exceeds_max` | `n_positions_used`, `max_octave_spread_db` | después de 4.0.0rc1 |
-| `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | después de 4.0.0rc1 |
+| `noise_control.BandFlatnessCheck` | `limit_db`, `within_limit`, `passes` | `octave_frequencies`, `spread_db` | después de 4.0.0rc1 |
+| `noise_control.SourcePositionCheck` | `n_required_positions`, `passes`, `exceeds_max` | `n_positions_used`, `max_octave_spread_db` | después de 4.0.0rc1 |
+| `noise_control.EnclosureTestEnvironmentCheck` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `passes` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | después de 4.0.0rc1 |
 | `environment.ReflectionGridCheck` | `nominal_m`, `deviations_m`, `within` | `check`, `path_differences_m` | después de 4.0.0rc1 |
 | `emission.HardWalledRoomCheck` | `limit_db`, `min_volume_m3`, `box_dimension_limit_m`, `min_microphone_distance_m` | las bandas, la sala y la caja de referencia | después de 4.0.0rc1 |
 | `emission.ReferenceSoundSourceVerdict` | todos los `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | las bandas, los niveles y las cifras medidas | después de 4.0.0rc1 |
@@ -1232,7 +1284,7 @@ indica en qué versión apareció cada veredicto.
 | `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing_m`; las filas por banda se leen de ellos, véase la sección siguiente | 4.0.0rc1 |
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | lo selecciona `room`; los radios cualificados deben ser los que alcanzan los niveles | después de 4.0.0rc1 |
 | `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gana `earphone_attenuation` y `allowed_threshold_shift_db` | después de 4.0.0rc1 |
-| `hearing.FixtureIsolationCheck` | `required_db` | las bandas | después de 4.0.0rc1 |
+| `hearing.FixtureIsolationVerification` | `required_db` | las bandas | después de 4.0.0rc1 |
 | `hearing.REATSoundFieldCheck` | `allowable_variation_db` | gana `free_field_rejection` | después de 4.0.0rc1 |
 | `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gana `front_to_random_index` | después de 4.0.0rc1 |
 | `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference` | los seleccionan `field` y `loudspeaker_distance_m` | después de 4.0.0rc1 |
@@ -1246,14 +1298,14 @@ indica en qué versión apareció cada veredicto.
 | `vibration.SignalBurstVerification` | `printed`, `deviation_percent`, `tolerance_percent`, `within_tolerance` | la fila de la tabla, las columnas y `measured` | 4.0.0rc1 |
 | `vibration.VibrationMeterVerification` | `lower_percent`, `upper_percent`, `within_tolerance` | gana `measured_response` | después de 4.0.0rc1 |
 | `vibration.AssessmentVelocity` | `guide_value_mm_s` | lo selecciona `building_class` | después de 4.0.0rc1 |
-| `vibration.MountingCheck` | `acceptable`, `frequency_limit_hz`, `peak_acceleration_limit_m_s2`, `device` | gana `peak_acceleration_m_s2` y `upper_frequency_hz` | después de 4.0.0rc1 |
+| `vibration.MountingCheck` | `passes`, `frequency_limit_hz`, `peak_acceleration_limit_m_s2`, `device` | gana `peak_acceleration_m_s2` y `upper_frequency_hz` | después de 4.0.0rc1 |
 | `vibration.DamageAssessment` | `guideline_mm_s` | gana `massive_structure`, solo por nombre | 4.0.0rc1 |
 | `vibration.RigidMassCalibrationResult` | `expected`, `relative_deviation`, `within_tolerance`, `passes`, `relative_tolerance` | `frequencies`, `measured`, `mass`, `quantity` | 3.3.0 |
 | `vibration.LevelDifferenceCheck` | `limit_db` | lo selecciona `condition` | después de 4.0.0rc1 |
 | `vibration.OutputMassCheck` | `mass_limit_kg` | gana `output_apparent_mass_kg`, la fuerza de salida medida entre la aceleración de salida | después de 4.0.0rc1 |
 
-También cambian dos llamadas. `rigid_mass_calibration_check` ya no recibe
-`tolerance`: el apartado 7.5.2 de ISO 7626-2:2015 dice que el bloque «shall
+También cambian dos llamadas. `rigid_mass_calibration_check`, hoy
+`verify_rigid_mass_calibration`, ya no recibe `tolerance`: el apartado 7.5.2 de ISO 7626-2:2015 dice que el bloque «shall
 agree within ±5 %», así que una aceptación interna más estricta se lee de
 `.relative_deviation`. Y `HeavyImpactSourceCheck` y `RigidMassCalibrationResult`, cuyo
 `passes` era un campo almacenado, se niegan a leerse como valor de verdad
@@ -1273,7 +1325,7 @@ try:
 except TypeError as error:
     print(type(error).__name__)
 # TypeError
-calibration = vibration.rigid_mass_calibration_check([0.104, 0.093], [50.0, 500.0], 10.0)
+calibration = vibration.verify_rigid_mass_calibration([0.104, 0.093], [50.0, 500.0], 10.0)
 print(calibration.relative_tolerance, calibration.within_tolerance.tolist())
 # 0.05 [True, False]
 ```
@@ -1294,7 +1346,7 @@ especificada o el ruido medido con el bucle apagado.
 ## Un veredicto se lee de los valores que guarda
 
 La sección anterior sacó de los constructores los límites impresos. Las
-banderas del veredicto se quedaron dentro: `passes`, `complies`, `qualified`,
+banderas del veredicto se quedaron dentro: `passes`, `qualified`,
 todos los `*_met` y `*_ok`, los avisos y la clase de cada banda de un
 veredicto de filtro, de ponderación o de instrumento de intensidad. La función
 que construía el resultado las calculaba y las guardaba junto a las lecturas
@@ -1320,7 +1372,7 @@ marca un campo que solo se pasa por nombre.
 | `building.LiningCuringCheck` | `cured`, `lag_within_third`, `passes` | `curing_time_days`, `time_lag_days`, `required_curing_days` | después de 4.0.0rc1 |
 | `building.RainGeneratorVerification` | `rate_deviation_mm_h`, `rate_ok`, `drop_share`, `drops_ok`, `velocity_share`, `velocities_ok`, `passes` | `rain_type`, `rainfall_rate_mm_h`, `drop_diameters_mm`, `fall_velocities_m_s` | después de 4.0.0rc1 |
 | `building.ServiceEquipmentPositionCheck` | `separation_m`, `surface_distance_m`, `source_distance_m`, `heights_m`, `corner_height_m`, `corner_wall_distances_m` y los seis `*_ok` | la sala, la esquina y las posiciones | después de 4.0.0rc1 |
-| `building.DBHRCheck` | `reported`, `margin`, `complies` | `requirement`, `value` | 4.0.0rc1 |
+| `building.DBHRCheck` | `reported`, `margin`, `passes` | `requirement`, `value` | 4.0.0rc1 |
 | `building.LowFrequencyIntensityResult`, `building.LowFrequencyElementResult` | `qualified` | `surface_pressure_intensity_indicator`, frente al límite de 6.4.2 que selecciona `absorbing_specimen_surface` | 4.0.0rc1 |
 | `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels`, `noise_is_tonal` | después de 4.0.0rc1 |
 | `electroacoustics.FeedbackStabilityResult` | `is_stable` | `loop_gain`, `stability_margin` | 4.0.0rc1 |
@@ -1348,18 +1400,18 @@ marca un campo que solo se pasa por nombre.
 | `hearing.TaskContribution` | `spread_advisory` | `n_samples`, `sample_range_db` | 3.3.0 |
 | `hearing.ExposureResult` | `sampling_advisory` | gana `sample_range_db`, `n_workers`, `sample_duration_hours`, solo por nombre | 3.3.0 |
 | `hearing.AttenuationDifferenceResult` | `difference`, `criterion_db`, `significant` | las dos medias y sus incertidumbres expandidas | después de 4.0.0rc1 |
-| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gana las cifras medidas: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | después de 4.0.0rc1 |
+| `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `passes` | gana las cifras medidas: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | después de 4.0.0rc1 |
 | `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, frente a la región que dan `values`, `method`, `alpha` y `median` | 3.3.0 |
 | `metrology.StationarityTestResult` | `stationary`, `bounds` | `trend_statistic`, frente a la región que dan `segment_values`, `method` y `alpha` | 3.3.0 |
 | `metrology.CouplerCheck` | `ratio_recommended`, `approximation_valid`, `full_solution_advised`, `conditions_valid` | gana `heat_conduction_method`, `temperature_c`, `static_pressure_pa`, `relative_humidity_percent`, `in_air`, solo por nombre | después de 4.0.0rc1 |
 | `metrology.FreeFieldArrangementCheck` | `distances_ok`, `support_ok`, `annex_a_range`, `attenuation_accuracy` | gana `air_attenuation` | después de 4.0.0rc1 |
 | `noise_control.CabinUncertainty` | `ratio_satisfied`, `stateable`, `stated_band_range_hz`, `increased_uncertainty_band_range_hz`, `excess_standard_deviation_db` | `method`, `volume_ratio` | después de 4.0.0rc1 |
 | `room.RoomAcousticsResult` | `edt_valid`, `t20_valid`, `t30_valid` | `dynamic_range` y los tiempos de caída | 3.3.0 |
-| `room.BackgroundMarginCheck` | `needs_correction`, `unusable`, `satisfied` | `margins_db` | después de 4.0.0rc1 |
-| `room.DetailVerdict` | `satisfied`, `room_ok`, `fittings_ok`, `sources_ok` | gana `room_detail`, `fitting_detail`, `source_detail` | después de 4.0.0rc1 |
+| `room.BackgroundMarginCheck` | `needs_correction`, `unusable`, `passes` | `margins_db` | después de 4.0.0rc1 |
+| `room.PredictionDetailCheck` | `passes`, `room_ok`, `fittings_ok`, `sources_ok` | gana `room_detail`, `fitting_detail`, `source_detail` | después de 4.0.0rc1 |
 | `underwater.WeightedExposureResult` | `exceeds_injury`, `exceeds_tts` | `sel_margin`, `peak_margin`, `tts_margin`, `tts_peak_margin` | 4.0.0rc1 |
-| `vibration.PeopleAssessment` | `complies`, `criterion`, `within_uncertainty` | `kb_fmax`, `kb_ftr`, `guide`, `source`; gana `rare_short_events`, solo por nombre | después de 4.0.0rc1 |
-| `vibration.RailwayChange` | `complies`, `kb_fmax_met`, `kb_ftr_met`, `kb_fmax_increase_percent`, `kb_ftr_increase_percent` | gana `kb_fmax_before`, `kb_fmax_after`, `kb_ftr_before`, `kb_ftr_after` | después de 4.0.0rc1 |
+| `vibration.PeopleAssessment` | `passes`, `criterion`, `within_uncertainty` | `kb_fmax`, `kb_ftr`, `guide`, `source`; gana `rare_short_events`, solo por nombre | después de 4.0.0rc1 |
+| `vibration.RailwayChange` | `passes`, `kb_fmax_met`, `kb_ftr_met`, `kb_fmax_increase_percent`, `kb_ftr_increase_percent` | gana `kb_fmax_before`, `kb_fmax_after`, `kb_ftr_before`, `kb_ftr_after` | después de 4.0.0rc1 |
 | `vibration.TransferStiffnessResult` | `valid` | gana `transmissibility`, el \|T\| del método indirecto | 3.3.0 |
 | `vibration.DrivingPointStiffnessResult` | `adequate` | gana `blocked_output_difference`, `unwanted_input_difference` | después de 4.0.0rc1 |
 | `aircraft.AircraftSystemComplianceResult` | `passes`, `checks` | gana `directional`, `frequency_response`, `linearity`, `resolution`, los argumentos de `verify_aircraft_noise_system` | 4.0.0rc1 |
@@ -1550,9 +1602,9 @@ except ValueError as error:
 # True
 ```
 
-## Los sesenta y nueve nombres que ya no están
+## Los setenta y cuatro nombres que ya no están
 
-Todo lo demás se movió. Estos sesenta y nueve no existen en ningún módulo público:
+Todo lo demás se movió. Estos setenta y cuatro no existen en ningún módulo público:
 
 | Ya no está | Qué escribir en su lugar |
 | --- | --- |
@@ -1595,6 +1647,10 @@ Todo lo demás se movió. Estos sesenta y nueve no existen en ningún módulo p�
 | `lab_airborne_insulation`, `lab_impact_insulation`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `LabInsulationWarning` | `building.laboratory_airborne_insulation`, `building.laboratory_impact_insulation`, `building.LaboratoryAirborneInsulationResult`, `building.LaboratoryImpactInsulationResult`, `building.LaboratoryInsulationWarning` |
 | `EnclosureResult` | `noise_control.EnclosureInsertionLossResult`, lo que devuelve `enclosure_insertion_loss`, junto a `EnclosureInsulationResult` |
 | `maximum_repeatability_standard_deviation`, `minimum_cumulative_duration_hours`, `minimum_phase` | `building.max_repeatability_standard_deviation`, `hearing.min_cumulative_duration_hours`, `signals.min_phase`: `max` y `min` en todo nombre público |
+| `rigid_mass_calibration_check` | `vibration.verify_rigid_mass_calibration`, con los mismos argumentos y el mismo `RigidMassCalibrationResult`: juzga una cadena de medida, así que su verbo es `verify_` |
+| `satisfies_lower_requirement`, `satisfies_upper_requirement` | `building.assess_requirement_conformity(value_db, expanded_uncertainty_db, requirement_db, bound="minimum")` o `bound="maximum"`. El booleano es su `.passes`, junto al `.margin_db` del que se lee, y las dos fórmulas siguen siendo estrictas |
+| `strong_coupling_satisfied` | `building.check_strong_coupling`, con los mismos argumentos. El array booleano es su `.holds`, y `.passes` es todas las bandas |
+| `tonal_seeking_survey` | `environment.assess_tonal_survey(levels, frequencies)`. El array booleano es su `.prominent`, junto a los `.thresholds_db` y `.level_differences` de los que se lee |
 
 ## Lo que no ha cambiado
 

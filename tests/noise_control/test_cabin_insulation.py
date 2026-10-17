@@ -321,7 +321,7 @@ def test_the_source_count_criterion_of_7_2_1() -> None:
     assert verdict.n_positions_used == MIN_SOURCE_POSITIONS_IN_SITU
     assert verdict.max_octave_spread_db == pytest.approx(2.0)
     assert verdict.n_required_positions == MIN_SOURCE_POSITIONS_IN_SITU
-    assert verdict.satisfied is True
+    assert verdict.passes is True
     assert verdict.exceeds_max is False
 
 
@@ -336,7 +336,7 @@ def test_a_wide_spread_asks_for_more_positions() -> None:
     verdict = noise_control.check_source_positions(wide)
     assert verdict.max_octave_spread_db == pytest.approx(9.5)
     assert verdict.n_required_positions == MAX_SOURCE_POSITIONS_IN_SITU
-    assert verdict.satisfied is False
+    assert verdict.passes is False
     assert verdict.exceeds_max is True
 
 
@@ -360,8 +360,8 @@ def test_a_spread_between_whole_decibels_rounds_the_count_up() -> None:
     four = noise_control.check_source_positions(np.vstack(spread[:4]))
     five = noise_control.check_source_positions(np.vstack(spread))
     assert four.max_octave_spread_db == pytest.approx(4.2)
-    assert (four.n_required_positions, four.satisfied) == (5, False)
-    assert (five.n_required_positions, five.satisfied) == (5, True)
+    assert (four.n_required_positions, four.passes) == (5, False)
+    assert (five.n_required_positions, five.passes) == (5, True)
 
 
 def test_fewer_than_three_positions_is_refused() -> None:
@@ -382,7 +382,7 @@ def test_the_flatness_limits_are_the_printed_ones() -> None:
     check = noise_control.check_band_flatness(levels, frequencies=frequencies)
     assert check.octave_frequencies.tolist() == [125.0, 250.0, 500.0]
     assert check.limit_db.tolist() == [6.0, 5.0, 4.0]
-    assert check.all_satisfied is True
+    assert check.passes is True
 
 
 def test_a_peaky_octave_fails_its_limit() -> None:
@@ -390,8 +390,8 @@ def test_a_peaky_octave_fails_its_limit() -> None:
     frequencies = np.array([200.0, 250.0, 315.0])
     check = noise_control.check_band_flatness(levels, frequencies=frequencies)
     assert check.spread_db[0] == pytest.approx(6.5)
-    assert check.satisfied.tolist() == [False]
-    assert check.all_satisfied is False
+    assert check.within_limit.tolist() == [False]
+    assert check.passes is False
 
 
 def test_an_octave_below_125_hz_has_no_printed_limit() -> None:
@@ -400,7 +400,7 @@ def test_an_octave_below_125_hz_has_no_printed_limit() -> None:
     check = noise_control.check_band_flatness(levels, frequencies=frequencies)
     assert check.octave_frequencies.tolist() == [63.0]
     assert np.isnan(check.limit_db[0])
-    assert check.satisfied.tolist() == [True]
+    assert check.within_limit.tolist() == [True]
 
 
 def test_an_incomplete_octave_is_refused() -> None:

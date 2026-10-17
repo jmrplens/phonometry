@@ -36,7 +36,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.boundary import settled
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     require_above_absolute_zero_array,
@@ -49,7 +50,7 @@ from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._internal.types import Real
     from ..._report.metadata import ReportMetadata
@@ -58,6 +59,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 __all__ = [
     "BASE_PLATE_BANDS_HZ",
     "BASE_PLATE_MAX_SCATTERING",
+    "BasePlateScatteringCheck",
     "ScatteringDiffusionWarning",
     "ScatteringResult",
     "ScatteringUncertainty",
@@ -564,23 +566,136 @@ def base_plate_scattering(
     return _sabine_absorption(volume, area, (c1, t1, m1), (c3, t3, m3))
 
 
+@dataclass(frozen=True)
+class BasePlateScatteringCheck(OwnsArrays):
+    r"""The scattering of the base plate alone against Table 1 (ISO 17497-1, 6.2).
+
+    6.2 has the scattering coefficient of the base plate alone, worked by
+    8.1.4 (:func:`base_plate_scattering`), measured to check the quality of
+    the arrangement, and says the values of Table 1 "shall not be exceeded".
+    The limits are the table's, so they are read from the bands and are not
+    fields: a check cannot be built against other limits, nor on bands the
+    table does not list.
+
+    :ivar frequencies: The eighteen one-third-octave bands of Table 1,
+        :data:`BASE_PLATE_BANDS_HZ`, in hertz (equivalent full scale).
+    :ivar scattering: :math:`s_\mathrm{base}` in each band, dimensionless.
+    """
+
+    frequencies: NDArray[np.float64]
+    scattering: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Hold the arrays read-only and reject bands Table 1 does not list.
+
+        :raises ValueError: For an array that is not one-dimensional, a
+            scattering coefficient that is not finite, a length other than one
+            value per band, or bands other than :data:`BASE_PLATE_BANDS_HZ`.
+        """
+        owner = type(self).__name__
+        bands = np.asarray(self.frequencies, dtype=np.float64)
+        values = np.asarray(self.scattering, dtype=np.float64)
+        if bands.ndim != 1 or values.ndim != 1:
+            msg = f"{owner}: 'frequencies' and 'scattering' must be one-dimensional."
+            raise ValueError(msg)
+        if values.shape != bands.shape:
+            msg = f"{owner}: 'scattering' must carry one value per band."
+            raise ValueError(msg)
+        if not np.array_equal(bands, np.asarray(BASE_PLATE_BANDS_HZ, dtype=np.float64)):
+            msg = (
+                f"{owner}: 'frequencies' must be the bands of Table 1, "
+                f"{BASE_PLATE_BANDS_HZ} Hz."
+            )
+            raise ValueError(msg)
+        if not np.all(np.isfinite(values)):
+            msg = f"{owner}: 'scattering' must be finite."
+            raise ValueError(msg)
+        object.__setattr__(self, "frequencies", read_only(bands))
+        object.__setattr__(self, "scattering", read_only(values))
+
+    @property
+    def limits(self) -> NDArray[np.float64]:
+        r"""The largest :math:`s_\mathrm{base}` Table 1 allows in each band."""
+        return np.array(
+            [BASE_PLATE_MAX_SCATTERING[band] for band in BASE_PLATE_BANDS_HZ],
+            dtype=np.float64,
+        )
+
+    @property
+    def margins(self) -> NDArray[np.float64]:
+        """The limit less the measured coefficient in each band, settled.
+
+        Positive or zero inside the limit, negative over it, judged to nine
+        decimals so a coefficient worked out to the printed limit in decimal
+        is not taken past it by the last bits.
+        """
+        return settled(self.limits - np.asarray(self.scattering, dtype=np.float64))
+
+    @property
+    def exceeds(self) -> NDArray[np.bool_]:
+        """Whether each band is over its limit; at the limit is not over it."""
+        return np.asarray(self.margins < 0.0, dtype=np.bool_)
+
+    @property
+    def exceeded_frequencies(self) -> NDArray[np.float64]:
+        """The bands over their limit, in hertz, in ascending order."""
+        return np.asarray(self.frequencies, dtype=np.float64)[self.exceeds]
+
+    @property
+    def passes(self) -> bool:
+        """The verdict: no band exceeds its Table 1 limit."""
+        return not bool(np.any(self.exceeds))
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`, and the
+            bands over the limit are :attr:`exceeded_frequencies`.
+        """
+        msg = (
+            "a BasePlateScatteringCheck has no truth value; read its '.passes' "
+            "or '.exceeded_frequencies'"
+        )
+        raise TypeError(msg)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        r"""Draw :math:`s_\mathrm{base}` against the stepped limit of Table 1.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the measured coefficient curve.
+        :return: The axes, with the bands over the limit marked.
+        """
+        from ..._i18n import check_language
+        from ..._plot.materials import plot_base_plate_scattering
+
+        return plot_base_plate_scattering(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
 def check_base_plate_scattering(
     scattering: Mapping[Any, float] | Sequence[float] | ArrayLike,
-) -> tuple[int, ...]:
-    """Check base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
+) -> BasePlateScatteringCheck:
+    """Is the base plate good enough for the measurement? (ISO 17497-1, 6.2).
 
-    Every band whose measured base-plate scattering coefficient exceeds the
-    :data:`BASE_PLATE_MAX_SCATTERING` limit is collected and a single
-    :class:`ScatteringDiffusionWarning` is issued when any band is over the
-    limit.
+    The scattering coefficient of the base plate alone, from
+    :func:`base_plate_scattering`, is held to the
+    :data:`BASE_PLATE_MAX_SCATTERING` limit of each band of Table 1. A single
+    :class:`ScatteringDiffusionWarning` names the bands over the limit, when
+    there are any.
 
     :param scattering: Measured base-plate scattering coefficients, either a
         mapping keyed by one-third-octave centre frequency (Hz) or a sequence
         of 18 values ordered as :data:`BASE_PLATE_BANDS_HZ`.
-    :return: Tuple of the centre frequencies (Hz) that exceed the limit, in
-        ascending order (empty if the base plate is compliant).
-    :raises ValueError: for a mapping missing a band or a sequence of the
-        wrong length.
+    :return: The verdict, as a :class:`BasePlateScatteringCheck`; the bands
+        over the limit are its :attr:`~BasePlateScatteringCheck.exceeded_frequencies`.
+    :raises ValueError: for a mapping missing a band, a sequence of the wrong
+        length, or a coefficient that is not finite (NaN or infinite).
     """
     if isinstance(scattering, Mapping):
         values: dict[int, float] = {}
@@ -595,29 +710,29 @@ def check_base_plate_scattering(
                     f"expected keys {BASE_PLATE_BANDS_HZ}"
                 )
                 raise ValueError(msg)
+        measured = np.array([values[band] for band in BASE_PLATE_BANDS_HZ])
     else:
-        arr = np.asarray(scattering, dtype=np.float64)
-        if arr.ndim != 1 or arr.size != len(BASE_PLATE_BANDS_HZ):
+        measured = np.asarray(scattering, dtype=np.float64)
+        if measured.ndim != 1 or measured.size != len(BASE_PLATE_BANDS_HZ):
             msg = (
                 f"scattering must have {len(BASE_PLATE_BANDS_HZ)} values for "
-                f"bands {BASE_PLATE_BANDS_HZ}, got shape {arr.shape}"
+                f"bands {BASE_PLATE_BANDS_HZ}, got shape {measured.shape}"
             )
             raise ValueError(msg)
-        values = dict(zip(BASE_PLATE_BANDS_HZ, arr.tolist(), strict=True))
-    exceeded = tuple(
-        band
-        for band in BASE_PLATE_BANDS_HZ
-        if values[band] > BASE_PLATE_MAX_SCATTERING[band]
+    check = BasePlateScatteringCheck(
+        frequencies=np.asarray(BASE_PLATE_BANDS_HZ, dtype=np.float64),
+        scattering=measured,
     )
-    if exceeded:
+    if not check.passes:
+        exceeded = [int(band) for band in check.exceeded_frequencies.tolist()]
         warnings.warn(
             "Base-plate scattering coefficient exceeds the ISO 17497-1 Table 1 "
-            f"limit at {list(exceeded)} Hz; the turntable is not compliant "
+            f"limit at {exceeded} Hz; the turntable is not compliant "
             "(Clause 6.2).",
             ScatteringDiffusionWarning,
             stacklevel=2,
         )
-    return exceeded
+    return check
 
 
 # ---------------------------------------------------------------------------

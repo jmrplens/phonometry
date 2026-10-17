@@ -179,13 +179,13 @@ With per-position *and* per-band input (2D arrays passed to
 `frequencies` carries the band centres; with 1D per-position input they
 are scalars and `frequencies` is `None`.
 
-### FieldIndicators.field_is_stationary()
+### FieldIndicators.check_field_stationarity()
 
 ```python
-FieldIndicators.field_is_stationary(limit: float = 0.6) -> bool | np.ndarray
+FieldIndicators.check_field_stationarity() -> FieldStationarityCheck
 ```
 
-Whether the temporal variability stays within the Table B.3 limit.
+Is the field steady enough for the measurement? (ISO 9614-1 Table B.3).
 
 ISO 9614-1:1993 Table B.3 lists $F_1 > 0.6$ as the condition
 that calls for action code (e), i.e. reducing the temporal variability
@@ -193,13 +193,7 @@ of the extraneous intensity, measuring during quieter periods or
 lengthening the averaging time at each position. A field at exactly
 the limit is not flagged.
 
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `limit` | The Table B.3 threshold (default [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit), 0.6). |
-
-**Returns:** `True`/`False` for a scalar `f1`, or a boolean array per band for a per-band `f1`.
+**Returns:** The verdict, as a [`FieldStationarityCheck`](/phonometry/reference/api/power/intensity/#fieldstationaritycheck): `passes` over every band, and band by band its `stationary`.
 
 **Raises**
 
@@ -244,6 +238,49 @@ Requires per-band data (call [`field_indicators`](/phonometry/reference/api/powe
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the result carries no per-band data. |
+
+## FieldStationarityCheck
+
+```python
+FieldStationarityCheck(f1: float | NDArray[np.float64])
+```
+
+The temporal variability $F_1$ against Table B.3 (ISO 9614-1:1993).
+
+Table B.3 lists $F_1 > 0.6$ as the condition that calls for action
+code (e): reducing the temporal variability of the extraneous intensity,
+measuring during quieter periods or lengthening the averaging time at
+each position. A field at exactly the limit is not flagged, so it passes.
+The limit is the table's, [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit), and the
+answers are read from $F_1$ and it, so they are not fields: a check
+cannot be built against another limit.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `f1` | The temporal variability indicator $F_1$ (equation (A.1)); a number, or one value per band. |
+
+### FieldStationarityCheck.limit
+
+*property*
+
+The Table B.3 limit on $F_1$, [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/intensity/#temporal_variability_limit).
+
+### FieldStationarityCheck.passes
+
+*property*
+
+The verdict: $F_1$ stays within the limit in every band.
+
+### FieldStationarityCheck.stationary
+
+*property*
+
+Whether $F_1$ stays within the limit: a bool, or one per band.
+
+Judged settled: samples whose standard deviation is 0,6 of their mean
+in decimal are at the limit, whichever side of it the last bits fall.
 
 ## IntensityResult
 

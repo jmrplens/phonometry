@@ -59425,7 +59425,7 @@
       "verdict": "pass"
     },
     {
-      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-10847-1997-6-3-1/the-short-distance-ratio-is-strict-at-0-1-and-the-after-case-needs-both-of-its-two-inequalities",
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-10847-1997-6-3-1/the-short-distance-ratio-is-strict-at-0-1-the-after-case-needs-both-of-its-two-inequalities-and-a-geometry-past-0-1-on-every-ratio-is-short",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
         "cite": "ISO 10847:1997 6.3.1",
@@ -59438,11 +59438,11 @@
           }
         ]
       },
-      "quantity": "The short-distance ratio is strict at 0,1, and the after case needs both of its two inequalities",
+      "quantity": "The short-distance ratio is strict at 0,1, the after case needs both of its two inequalities, and a geometry past 0,1 on every ratio is short",
       "kind": "count",
       "expected": {
         "value": 1.0,
-        "label": "0,1 exactly is not short, and both halves must hold"
+        "label": "0,1 exactly is not short, both halves must hold, and 0,2 and 0,5 are short"
       },
       "computed": {
         "value": 1.0,

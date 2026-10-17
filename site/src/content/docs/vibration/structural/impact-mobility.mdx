@@ -70,7 +70,7 @@ The order of work the part implies, and the function that judges each step:
 
 1. **Calibrate on a rigid block** of known mass, freely suspended, at the start
    and end of each series and whenever the tip or the mass changes (7.2). Its
-   accelerance should read $1/m$ within ±5 %: `rigid_mass_calibration_check`,
+   accelerance should read $1/m$ within ±5 %: `verify_rigid_mass_calibration`,
    the ISO 7626-2 check that 7.2 calls essentially the same procedure.
 2. **Check the channels against each other** by feeding one broad-band signal
    to both: unity within ±5 % and zero phase within ±5° (8.1),
@@ -623,7 +623,7 @@ one check here that judges the instrument rather than the record, hence
 `verify_` rather than `check_`.
 
 **Calibration (7.2).** The rigid-block check of ISO 7626-2 7.5.2,
-`rigid_mass_calibration_check`, described on the [mobility
+`verify_rigid_mass_calibration`, described on the [mobility
 page](/phonometry/vibration/structural/mechanical-mobility/). The block's mass
 shall be chosen so its mobility is representative of the mobilities to be
 measured, and the hammer and the analyser shall be set up exactly as in the

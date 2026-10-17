@@ -483,7 +483,7 @@ def _chk_doc32_kinematics() -> Outcome:
         ]
     )
     kin = ph.aircraft.flight_path_kinematics(t, pos)
-    return numeric(40.152786, float(kin.airspeed[10]), 1e-4, unit="m/s", places=5)
+    return numeric(40.152786, float(kin.airspeed_m_s[10]), 1e-4, unit="m/s", places=5)
 
 
 @register(
@@ -629,14 +629,16 @@ def _chk_arp5534_coefficient() -> Outcome:
             1000.0,
             temperature_c=25.0,
             relative_humidity_percent=same_h,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
             exact_midband=True,
         )
     )
     res = ph.aircraft.sae_band_attenuation(
         [1000.0], 1000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
-    return numeric(expected, float(res.coefficient[0]), 1e-9, unit="dB/m", places=6)
+    return numeric(
+        expected, float(res.coefficient_db_per_m[0]), 1e-9, unit="dB/m", places=6
+    )
 
 
 # ICAO Doc 9501 ETM Vol. I (2018) Table 3-7 turbofan spectrum (bands 1-2 blank).

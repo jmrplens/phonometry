@@ -1500,7 +1500,7 @@ def generate_reverberation_models(output_dir: str) -> None:
     res = room.reverberation_time_models(
         (10.0, 7.0, 3.5),
         (alpha_x, alpha_y, alpha_z),
-        air_attenuation=m,
+        air_attenuation_per_m=m,
         frequencies=bands,
     )
 
@@ -2630,7 +2630,7 @@ def generate_image_source_bands(output_dir: str) -> None:
             fs=48000,
             max_order=60,
             frequencies=freqs,
-            air_attenuation=attenuation,
+            air_attenuation_per_m=attenuation,
         )
         for row, freq, colour in zip(banded.ir, freqs, colours, strict=True):
             time, level = room.decay_curve(row, banded.fs)

@@ -280,10 +280,10 @@ class SoundReductionResult(OwnsArrays):
     :ivar resonance_frequency: Mass-spring-mass resonance ``f0``, in hertz, or
         ``None`` (single panel).
     :ivar mass1: First-leaf surface density, in kg/m2, retained (with
-        ``mass2`` and ``gap``) by the double-wall constructor so
+        ``mass2`` and ``gap_m``) by the double-wall constructor so
         :meth:`plot_geometry` can draw the section; ``None`` otherwise.
     :ivar mass2: Second-leaf surface density, in kg/m2, or ``None``.
-    :ivar gap: Cavity depth, in metres, or ``None``.
+    :ivar gap_m: Cavity depth, in metres, or ``None``.
     :ivar plateau_height_db: Height of the coincidence plateau, in dB, or
         ``None`` (only the plateau model sets these three).
     :ivar plateau_start: Frequency of point A, where the mass-law line meets
@@ -303,7 +303,7 @@ class SoundReductionResult(OwnsArrays):
     resonance_frequency: float | None = None
     mass1: float | None = None
     mass2: float | None = None
-    gap: float | None = None
+    gap_m: float | None = None
     plateau_height_db: float | None = None
     plateau_start: float | None = None
     plateau_end: float | None = None
@@ -1297,7 +1297,7 @@ def orthotropic_transmission_loss(
 def mass_spring_mass_resonance(
     mass1: float,
     mass2: float,
-    gap: float,
+    gap_m: float,
     *,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
@@ -1321,7 +1321,7 @@ def mass_spring_mass_resonance(
 
     :param mass1: Surface density of leaf 1 ``m1``, in kg/m^2 (> 0).
     :param mass2: Surface density of leaf 2 ``m2``, in kg/m^2 (> 0).
-    :param gap: Cavity depth ``d``, in m (> 0).
+    :param gap_m: Cavity depth ``d``, in m (> 0).
     :param cavity_medium: Optional porous fill (a
         :class:`~phonometry.materials.PorousMediumResult`) whose effective bulk
         modulus sets the cavity stiffness.
@@ -1334,7 +1334,7 @@ def mass_spring_mass_resonance(
     """
     m1 = require_positive(mass1, "mass1")
     m2 = require_positive(mass2, "mass2")
-    d = require_positive(gap, "gap")
+    d = require_positive(gap_m, "gap_m")
     ties = require_non_negative(tie_stiffness_per_area, "tie_stiffness_per_area")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
@@ -1356,7 +1356,7 @@ def double_wall_transmission_loss(
     frequency: ArrayLike,
     mass1: float,
     mass2: float,
-    gap: float,
+    gap_m: float,
     *,
     loss_factor: float = 0.1,
     cavity_medium: PorousMediumResult | None = None,
@@ -1380,7 +1380,7 @@ def double_wall_transmission_loss(
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param mass1: Surface density of leaf 1 ``m1``, in kg/m^2 (> 0).
     :param mass2: Surface density of leaf 2 ``m2``, in kg/m^2 (> 0).
-    :param gap: Cavity depth ``d``, in m (> 0).
+    :param gap_m: Cavity depth ``d``, in m (> 0).
     :param loss_factor: Leaf loss factor ``eta`` (> 0, Default: 0.1); reserved
         for the coincidence extension and reported for reference.
     :param cavity_medium: Optional porous fill; see
@@ -1395,7 +1395,7 @@ def double_wall_transmission_loss(
     """
     m1 = require_positive(mass1, "mass1")
     m2 = require_positive(mass2, "mass2")
-    d = require_positive(gap, "gap")
+    d = require_positive(gap_m, "gap_m")
     require_positive(loss_factor, "loss_factor")
     c0 = fluid.speed_of_sound
     f = _band_axis(frequency)
@@ -1440,5 +1440,5 @@ def double_wall_transmission_loss(
         resonance_frequency=f0,
         mass1=float(mass1),
         mass2=float(mass2),
-        gap=float(gap),
+        gap_m=float(gap_m),
     )

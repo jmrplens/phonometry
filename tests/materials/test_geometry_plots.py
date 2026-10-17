@@ -38,10 +38,10 @@ def _close_figures() -> Iterator[None]:
 
 def _resonator() -> m.HelmholtzResonator:
     return m.HelmholtzResonator(
-        neck_length=0.002,
-        neck_side=0.002,
-        cavity_length=0.015,
-        cavity_side=0.01,
+        neck_length_m=0.002,
+        neck_side_m=0.002,
+        cavity_length_m=0.015,
+        cavity_side_m=0.01,
     )
 
 
@@ -63,7 +63,7 @@ def _geometry_axes() -> Iterator[Axes]:
     yield m.plot_slit_absorber_geometry(
         [_resonator()] * 3,
         slit_height_m=0.002,
-        lattice_step=0.015,
+        lattice_step_m=0.015,
         period_m=0.02,
     )
     yield m.plot_qrd_geometry(m.qrd_well_depths(7, 500.0), 0.12, repetitions=2)
@@ -135,12 +135,12 @@ def test_slit_result_retains_geometry_and_draws() -> None:
         FREQ,
         [_resonator()] * 3,
         slit_height_m=0.002,
-        lattice_step=0.015,
+        lattice_step_m=0.015,
         period_m=0.02,
     )
     assert res.resonators == (_resonator(),) * 3
     assert res.slit_height_m == pytest.approx(0.002)
-    assert res.lattice_step == pytest.approx(0.015)
+    assert res.lattice_step_m == pytest.approx(0.015)
     assert res.period_m == pytest.approx(0.02)
     assert res.plot_geometry() is not None
 
@@ -289,19 +289,19 @@ def test_insitu_geometry_refuses_a_nan_source_height() -> None:
 
 
 def test_metadiffuser_panel_geometry_refuses_a_nan_depth() -> None:
-    with pytest.raises(ValueError, match="'depth' must be positive"):
+    with pytest.raises(ValueError, match="'depth_m' must be positive"):
         m.plot_metadiffuser_panel_geometry(
-            [None, None], depth=float("nan"), period_m=0.02
+            [None, None], depth_m=float("nan"), period_m=0.02
         )
 
 
 def test_slit_absorber_geometry_refuses_a_nan_lattice_step() -> None:
     resonator = _resonator()
-    with pytest.raises(ValueError, match="'lattice_step' must be positive"):
+    with pytest.raises(ValueError, match="'lattice_step_m' must be positive"):
         m.plot_slit_absorber_geometry(
             resonator,
             slit_height_m=0.002,
-            lattice_step=float("nan"),
+            lattice_step_m=float("nan"),
             period_m=0.02,
         )
 
@@ -321,13 +321,13 @@ def test_slit_geometry_validation() -> None:
     resonator = _resonator()
     with pytest.raises(ValueError, match="'slit_height_m' must be positive"):
         m.plot_slit_absorber_geometry(
-            resonator, slit_height_m=0.0, lattice_step=0.015, period_m=0.02
+            resonator, slit_height_m=0.0, lattice_step_m=0.015, period_m=0.02
         )
     with pytest.raises(
         ValueError, match=r"'resonators' must contain at least one resonator"
     ):
         m.plot_slit_absorber_geometry(
-            [], slit_height_m=0.002, lattice_step=0.015, period_m=0.02
+            [], slit_height_m=0.002, lattice_step_m=0.015, period_m=0.02
         )
 
 

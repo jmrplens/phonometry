@@ -57,7 +57,7 @@ atmospheric_absorption(
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 ) -> NDArray[np.float64]
 ```
 
@@ -85,7 +85,7 @@ the nearest exact midband.
 | `frequencies` | Octave-band midband frequencies, in hertz. |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent (default 70). |
-| `atmospheric_pressure_kpa` | Atmospheric pressure, in kilopascals. |
+| `static_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 
 **Returns:** `Aatm` per band, in decibels.
 
@@ -96,7 +96,7 @@ AtmosphericConditions(
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 )
 ```
 
@@ -112,7 +112,7 @@ reference conditions of the tabulated coefficients.
 | :--- | :--- |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent; `None` uses 70. |
-| `atmospheric_pressure_kpa` | Atmospheric pressure, in kilopascals. |
+| `static_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 
 ## Barrier
 
@@ -507,7 +507,7 @@ outdoor_propagation_attenuation(
     barrier: Barrier | None = None,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     projected_distance: float | None = None,
 ) -> OutdoorAttenuation
 ```
@@ -537,7 +537,7 @@ barrier $A_\mathrm{bar} = D_z$
 | `barrier` | Optional screening obstacle ([`Barrier`](/phonometry/reference/api/environment/outdoor-propagation/#barrier)). |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent (default 70). |
-| `atmospheric_pressure_kpa` | Atmospheric pressure, in kilopascals. |
+| `static_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres; defaults to $\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}$. |
 
 **Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown.
@@ -635,7 +635,7 @@ the total attenuation `A`.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature_c` / `relative_humidity_percent` / `static_pressure_kpa` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True and a `source_emission` is supplied, the per-band table adds the A-weighted band level (`LfT(DW)` plus the band A-weighting), whose energy sum is the boxed `LAT(DW)`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

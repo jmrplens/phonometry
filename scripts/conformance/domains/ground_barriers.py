@@ -66,7 +66,9 @@ def _chk_salomons_fig_d3_dip() -> Outcome:
         # The bands sit below the Delany-Bazley published fit range for this
         # sigma; the model extrapolates there by design (Salomons Sec. 3.1).
         warnings.simplefilter("ignore")
-        res = ph.environment.ground_effect(freqs, 2.0, 2.0, 100.0, flow_resistivity=2e5)
+        res = ph.environment.ground_effect(
+            freqs, 2.0, 2.0, 100.0, flow_resistivity_pa_s_m2=2e5
+        )
     return numeric(-12.7, float(res.excess_attenuation.min()), 0.3, unit="dB", places=2)
 
 

@@ -55,10 +55,10 @@ Read from BS EN 16487:2014.
 ```python
 air_absorption_correction(
     *,
-    volume_m3: float,
+    volume: float,
     specimen_area_m2: float,
-    attenuation_with: ArrayLike,
-    attenuation_empty: ArrayLike,
+    attenuation_with_per_m: ArrayLike,
+    attenuation_empty_per_m: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -82,10 +82,10 @@ humidity or more.
 
 | Name | Description |
 | :--- | :--- |
-| `volume_m3` | $V$ of the reverberation room, in cubic metres. |
+| `volume` | $V$ of the reverberation room, in cubic metres. |
 | `specimen_area_m2` | $S$ of the specimen, in square metres. |
-| `attenuation_with` | $m_2$ per band, in reciprocal metres. |
-| `attenuation_empty` | $m_1$ per band, in reciprocal metres. |
+| `attenuation_with_per_m` | $m_2$ per band, in reciprocal metres. |
+| `attenuation_empty_per_m` | $m_1$ per band, in reciprocal metres. |
 
 **Returns:** $\Delta\alpha$ per band.
 
@@ -115,7 +115,7 @@ CEILING_UNCERTAINTY = {125.0: 0.23, 250.0: 0.23, 500.0: 0.11, 1000.0: 0.1, 2000.
 
 ```python
 CeilingSpecimenCheck(
-    area_m2: float,
+    area: float,
     mounting: str,
     depth_mm: float | None,
     deflection_mm: float,
@@ -149,7 +149,7 @@ pass an arrangement the clause fails.
 
 | Name | Description |
 | :--- | :--- |
-| `area_m2` | The specimen area as built, in square metres. |
+| `area` | The specimen area as built, in square metres. |
 | `mounting` | The mounting letter the arrangement uses. |
 | `depth_mm` | The overall depth of construction, in millimetres, for a type E mounting, or `None` for the others. |
 | `deflection_mm` | The largest deflection of the specimen, in millimetres. |
@@ -239,7 +239,7 @@ The centre distance is judged only when it was given (4.1.1.2.3.6).
 ```python
 check_ceiling_specimen(
     *,
-    area_m2: float,
+    area: float,
     mounting: str = 'E',
     depth_mm: float | None = None,
     deflection_mm: float = 0.0,
@@ -294,7 +294,7 @@ substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
 
 | Name | Description |
 | :--- | :--- |
-| `area_m2` | The specimen area as built, in square metres. |
+| `area` | The specimen area as built, in square metres. |
 | `mounting` | The mounting letter, `"E"` by default. |
 | `depth_mm` | The overall depth of construction, in millimetres, required for a type E mounting. |
 | `deflection_mm` | The largest deflection of the specimen, in millimetres. |

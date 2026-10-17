@@ -189,7 +189,7 @@ class NpdAtmosphereIncrement(OwnsArrays):
         specified atmosphere.
     :ivar temperature_c: Air temperature, in degrees Celsius.
     :ivar relative_humidity_percent: Relative humidity, in percent.
-    :ivar atmospheric_pressure_kpa: Air pressure, in kPa. SAE ARP 866A does
+    :ivar static_pressure_kpa: Air pressure, in kPa. SAE ARP 866A does
         not use it.
     """
 
@@ -205,7 +205,7 @@ class NpdAtmosphereIncrement(OwnsArrays):
     absorption: str
     temperature_c: float
     relative_humidity_percent: float
-    atmospheric_pressure_kpa: float
+    static_pressure_kpa: float
 
     def __post_init__(self) -> None:
         """Reject an increment whose tables do not share its bands and distances.
@@ -315,7 +315,7 @@ def npd_atmosphere_increment(
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     absorption: str = "arp5534",
     distances_m: ArrayLike | None = None,
 ) -> NpdAtmosphereIncrement:
@@ -364,7 +364,7 @@ def npd_atmosphere_increment(
         one-third-octave-band levels from 50 Hz to 10 kHz at 1 000 ft, in dB.
     :param temperature_c: Air temperature ``T``, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent.
-    :param atmospheric_pressure_kpa: Air pressure ``pa``, in kPa (default
+    :param static_pressure_kpa: Air pressure ``pa``, in kPa (default
         101.325, sea level). Read by ARP 5534 only.
     :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
     :param distances_m: The NPD slant distances, in metres. ``None`` takes the
@@ -392,7 +392,7 @@ def npd_atmosphere_increment(
             frequencies,
             float(temperature_c),
             float(relative_humidity_percent),
-            float(atmospheric_pressure_kpa),
+            float(static_pressure_kpa),
         )
         specified_attenuation = _sae_band(np.multiply.outer(alpha, d))
     else:
@@ -420,7 +420,7 @@ def npd_atmosphere_increment(
         absorption=route,
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),
-        atmospheric_pressure_kpa=float(atmospheric_pressure_kpa),
+        static_pressure_kpa=float(static_pressure_kpa),
     )
 
 
@@ -479,7 +479,7 @@ def revise_npd_curves(
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     absorption: str = "arp5534",
 ) -> RevisedNpdCurves:
     """NPD curves recalculated for a specified atmosphere (Doc 29 Vol. 2 Appendix D).
@@ -496,7 +496,7 @@ def revise_npd_curves(
         (see :meth:`~phonometry.aircraft.anp_fleet.AnpAircraft.spectral_class`).
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent.
-    :param atmospheric_pressure_kpa: Air pressure, in kPa (default 101.325).
+    :param static_pressure_kpa: Air pressure, in kPa (default 101.325).
     :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
     :return: A :class:`RevisedNpdCurves`.
     :raises ValueError: as :func:`npd_atmosphere_increment` does.
@@ -505,7 +505,7 @@ def revise_npd_curves(
         spectrum,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
-        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+        static_pressure_kpa=static_pressure_kpa,
         absorption=absorption,
         distances_m=curves.distances_m,
     )

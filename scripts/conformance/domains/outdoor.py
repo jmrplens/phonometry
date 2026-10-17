@@ -87,7 +87,7 @@ def _chk_iso9613_2_table2_grid() -> Outcome:
                 ref.ISO9613_2_TABLE2_BANDS,
                 temperature_c=temp,
                 relative_humidity_percent=rh,
-                atmospheric_pressure_kpa=101.325,
+                static_pressure_kpa=101.325,
                 exact_midband=True,
             )
             * 1000.0

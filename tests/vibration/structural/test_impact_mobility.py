@@ -279,6 +279,22 @@ def test_a_rigid_mass_calibrates_to_one_over_its_mass() -> None:
     assert check.passes
 
 
+def test_the_mobility_of_a_rigid_mass_lags_a_quarter_period_in_radians() -> None:
+    r"""A free block's mobility is :math:`1/(j \omega m)`: its phase is
+    :math:`-\pi/2` rad at every line, the unit the name promises.
+    """
+    force, _ = _sdof_impact(0.1)
+    res = vibration.impact_mobility(
+        force,
+        force / 3.0,
+        FS,
+        exponential_decay_rate_per_s=10.0,
+        force_window_s=0.02,
+    )
+    band = _band(res.frequencies)
+    np.testing.assert_allclose(res.phase_rad[band], -np.pi / 2.0, atol=1e-9)
+
+
 def test_averaging_is_the_ratio_of_averaged_spectra() -> None:
     """8.6: the averaged cross-spectrum over the averaged force auto-spectrum."""
     rng = np.random.default_rng(7)

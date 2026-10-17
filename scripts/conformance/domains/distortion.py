@@ -215,7 +215,7 @@ def _chk_microphone_equivalent_noise() -> Outcome:
         rel,
         12.5,
         tolerance_db=3.0,
-        noise=ph.electroacoustics.MicrophoneNoise(voltage=2.5e-6),
+        noise=ph.electroacoustics.MicrophoneNoise(voltage_v=2.5e-6),
     )
     noise = result.equivalent_noise_level_db
     if noise is None:

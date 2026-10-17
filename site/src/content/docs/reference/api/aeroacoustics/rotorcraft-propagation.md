@@ -65,7 +65,7 @@ atmospheric_adjustment(
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     reference_distance_m: float = 60.0,
 ) -> NDArray[np.float64]
 ```
@@ -108,7 +108,7 @@ advisory warning propagates, since `α` is large and extrapolated.
 | `distance_m` | Slant distance `r`, in metres (`> 0`; below `rh` the adjustment is a small positive value, i.e. less absorption than the reference path). |
 | `temperature_c` | Air temperature, in °C (default 25 °C, ICAO reference). |
 | `relative_humidity_percent` | Relative humidity, in % (default 70 %). |
-| `atmospheric_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
+| `static_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
 | `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance. |
 
 **Returns:** The adjustment `ΔLa` per band, in dB (added to the level, $\le 0$ for $r \ge r_\mathrm{h}$).

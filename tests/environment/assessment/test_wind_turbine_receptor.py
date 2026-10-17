@@ -255,7 +255,7 @@ def test_bins_pair_by_class_and_sector() -> None:
     assert total.sector_width_deg == pytest.approx(20.0)
     corrected = total.background_corrected(background)
     np.testing.assert_allclose(corrected.wind_speeds_m_s, [2.5, 7.0])
-    np.testing.assert_allclose(corrected.background_levels_db, [38.0, 39.0])
+    np.testing.assert_allclose(corrected.background_levels, [38.0, 39.0])
 
 
 def test_one_wind_speed_class_pairs_sector_by_sector() -> None:
@@ -269,7 +269,7 @@ def test_one_wind_speed_class_pairs_sector_by_sector() -> None:
     corrected = total.background_corrected(background)
     np.testing.assert_allclose(corrected.wind_speeds_m_s, [5.0, 5.0])
     np.testing.assert_allclose(corrected.total_levels_db, [45.0, 50.0])
-    np.testing.assert_allclose(corrected.background_levels_db, [38.0, 44.0])
+    np.testing.assert_allclose(corrected.background_levels, [38.0, 44.0])
     expected = [
         10.0 * math.log10(10.0**4.5 - 10.0**3.8),
         10.0 * math.log10(10.0**5.0 - 10.0**4.4),
@@ -346,7 +346,7 @@ def test_the_corrected_plot_draws_each_sector_apart(
             keys,
             (
                 corrected.total_levels_db,
-                corrected.background_levels_db,
+                corrected.background_levels,
                 corrected.turbine_levels_db,
             ),
             strict=True,
@@ -577,7 +577,7 @@ def test_equation_c1_band_by_band() -> None:
     power = np.array([95.0, 96.0])
     result = env.wind_turbine_low_frequency_level(
         power,
-        distance_m=500.0,
+        distance=500.0,
         hub_height_m=100.0,
         frequencies=[63.0, 125.0],
         facade_insulation_db=[16.6, 20.2],
@@ -602,10 +602,10 @@ def test_equation_c1_band_by_band() -> None:
 
 def test_turbines_sum_energetically_per_band() -> None:
     one = env.wind_turbine_low_frequency_level(
-        np.full(14, 100.0), distance_m=600.0, hub_height_m=120.0
+        np.full(14, 100.0), distance=600.0, hub_height_m=120.0
     )
     two = env.wind_turbine_low_frequency_level(
-        np.full((2, 14), 100.0), distance_m=[600.0, 600.0], hub_height_m=120.0
+        np.full((2, 14), 100.0), distance=[600.0, 600.0], hub_height_m=120.0
     )
     np.testing.assert_allclose(
         two.outdoor_levels_db, one.outdoor_levels_db + 10.0 * math.log10(2.0)
@@ -619,7 +619,7 @@ def test_a_zero_air_attenuation_takes_nothing_off() -> None:
     """
     result = env.wind_turbine_low_frequency_level(
         [95.0],
-        distance_m=2000.0,
+        distance=2000.0,
         hub_height_m=100.0,
         frequencies=[50.0],
         air_attenuation_db_per_km=[0.0],
@@ -633,7 +633,7 @@ def test_a_zero_air_attenuation_takes_nothing_off() -> None:
 def test_a_band_without_a_table_value_needs_its_own() -> None:
     with pytest.raises(ValueError, match=r"Table C.2 has no value at 250 Hz"):
         env.wind_turbine_low_frequency_level(
-            [90.0], distance_m=500.0, hub_height_m=100.0, frequencies=[250.0]
+            [90.0], distance=500.0, hub_height_m=100.0, frequencies=[250.0]
         )
 
 
@@ -740,7 +740,7 @@ def test_a_result_does_not_return_a_published_array() -> None:
 def test_plots_draw_their_numbers() -> None:
     lf = env.wind_turbine_low_frequency_level(
         np.full(14, 100.0),
-        distance_m=600.0,
+        distance=600.0,
         hub_height_m=120.0,
         facade_insulation_db=env.LOW_FREQUENCY_FACADE_INSULATION_DB[
             "Denmark brick or similar"
@@ -948,28 +948,28 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         (
             "three columns for fourteen bands",
             lambda: env.wind_turbine_low_frequency_level(
-                np.zeros((1, 3)), distance_m=500.0, hub_height_m=100.0
+                np.zeros((1, 3)), distance=500.0, hub_height_m=100.0
             ),
             r"one row per turbine and one column per band \(14\)",
         ),
         (
             "zero distance",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance_m=0.0, **one_band
+                [95.0], distance=0.0, **one_band
             ),
-            r"'distance_m' must be finite and positive",
+            r"'distance' must be finite and positive",
         ),
         (
             "negative hub height",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance_m=500.0, frequencies=[63.0], hub_height_m=-1.0
+                [95.0], distance=500.0, frequencies=[63.0], hub_height_m=-1.0
             ),
             r"'hub_height_m' must be finite and positive",
         ),
         (
             "a string as the weighting flag",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance_m=500.0, a_weighted="False", **one_band
+                [95.0], distance=500.0, a_weighted="False", **one_band
             ),
             r"'a_weighted' must be True or False; got 'False'",
         ),
@@ -977,7 +977,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
             "negative air attenuation",
             lambda: env.wind_turbine_low_frequency_level(
                 [95.0],
-                distance_m=2000.0,
+                distance=2000.0,
                 air_attenuation_db_per_km=[-5.0],
                 **{**one_band, "frequencies": [50.0]},
             ),
@@ -986,7 +986,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         (
             "facade of two bands for one",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance_m=500.0, facade_insulation_db=[1.0, 2.0], **one_band
+                [95.0], distance=500.0, facade_insulation_db=[1.0, 2.0], **one_band
             ),
             r"'facade_insulation_db' must hold one value per band \(1\)",
         ),

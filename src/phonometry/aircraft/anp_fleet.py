@@ -521,7 +521,7 @@ class AnpAircraft(RichDisplay):
         *,
         temperature_c: float,
         relative_humidity_percent: float,
-        atmospheric_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
+        static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
         absorption: str = "arp5534",
     ) -> RevisedNpdCurves:
         """NPD curves for another atmosphere (see :meth:`AnpDatabase.revised_npd_curves`)."""
@@ -531,7 +531,7 @@ class AnpAircraft(RichDisplay):
             metric,
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
-            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            static_pressure_kpa=static_pressure_kpa,
             absorption=absorption,
         )
 
@@ -552,7 +552,7 @@ class AnpAircraft(RichDisplay):
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
-        atmospheric_pressure_kpa: float | None = None,
+        static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
         absorption: str = "arp5534",
     ) -> FlyoverResult:
@@ -565,7 +565,7 @@ class AnpAircraft(RichDisplay):
             stage_length=stage_length,
             metric=metric,
             temperature_c=temperature_c,
-            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            static_pressure_kpa=static_pressure_kpa,
             relative_humidity_percent=relative_humidity_percent,
             absorption=absorption,
         )
@@ -580,7 +580,7 @@ class AnpAircraft(RichDisplay):
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
-        atmospheric_pressure_kpa: float | None = None,
+        static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
         absorption: str = "arp5534",
     ) -> NoiseContourResult:
@@ -594,7 +594,7 @@ class AnpAircraft(RichDisplay):
             stage_length=stage_length,
             metric=metric,
             temperature_c=temperature_c,
-            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            static_pressure_kpa=static_pressure_kpa,
             relative_humidity_percent=relative_humidity_percent,
             absorption=absorption,
         )
@@ -752,7 +752,7 @@ class AnpDatabase:
         *,
         temperature_c: float,
         relative_humidity_percent: float,
-        atmospheric_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
+        static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
         absorption: str = "arp5534",
     ) -> RevisedNpdCurves:
         """NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
@@ -767,7 +767,7 @@ class AnpDatabase:
         :param metric: ``"SEL"`` (default) or ``"LAmax"``.
         :param temperature_c: Air temperature, in degrees Celsius.
         :param relative_humidity_percent: Relative humidity, in percent.
-        :param atmospheric_pressure_kpa: Air pressure, in kPa (default 101.325).
+        :param static_pressure_kpa: Air pressure, in kPa (default 101.325).
         :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
         :return: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNpdCurves`.
         :raises KeyError: if the aircraft, its NPD data or its spectral class is
@@ -782,7 +782,7 @@ class AnpDatabase:
             self.aircraft(aircraft_id).spectral_class(operation),
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
-            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            static_pressure_kpa=static_pressure_kpa,
             absorption=absorption,
         )
 
@@ -1232,7 +1232,7 @@ class AnpDatabase:
             acft.spectral_class(operation),
             temperature_c=npd_air.atmosphere.temperature_c,
             relative_humidity_percent=npd_air.relative_humidity_percent,
-            atmospheric_pressure_kpa=npd_air.atmosphere.atmospheric_pressure_kpa,
+            static_pressure_kpa=npd_air.atmosphere.static_pressure_kpa,
             absorption=npd_air.absorption,
             distances_m=sel.distances_m,
         ).increment_db
@@ -1255,7 +1255,7 @@ class AnpDatabase:
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
-        atmospheric_pressure_kpa: float | None = None,
+        static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
         absorption: str = "arp5534",
     ) -> FlyoverResult:
@@ -1276,7 +1276,7 @@ class AnpDatabase:
         :param temperature_c: Air temperature at the field, in °C, for the
             atmospheric impedance adjustment. Left unset it follows
             *aerodrome*, or the standard atmosphere when there is none.
-        :param atmospheric_pressure_kpa: Air pressure at the field, in kPa, likewise.
+        :param static_pressure_kpa: Air pressure at the field, in kPa, likewise.
         :param relative_humidity_percent: Relative humidity at the field, in
             percent. Given, the SEL and LAmax NPD curves are recalculated for
             that humidity and the temperature and pressure above by ECAC Doc 29
@@ -1288,7 +1288,7 @@ class AnpDatabase:
         :return: A :class:`~phonometry.aircraft.airport_noise.FlyoverResult`.
         """
         atmosphere = _impedance_atmosphere(
-            aerodrome, temperature_c, atmospheric_pressure_kpa
+            aerodrome, temperature_c, static_pressure_kpa
         )
         acft, prof, p, d, sel, lmax = self._doc29_inputs(
             aircraft_id,
@@ -1323,7 +1323,7 @@ class AnpDatabase:
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
         temperature_c: float | None = None,
-        atmospheric_pressure_kpa: float | None = None,
+        static_pressure_kpa: float | None = None,
         relative_humidity_percent: float | None = None,
         absorption: str = "arp5534",
     ) -> NoiseContourResult:
@@ -1345,7 +1345,7 @@ class AnpDatabase:
         :param temperature_c: Air temperature at the field, in °C, for the
             atmospheric impedance adjustment. Left unset it follows
             *aerodrome*, or the standard atmosphere when there is none.
-        :param atmospheric_pressure_kpa: Air pressure at the field, in kPa, likewise.
+        :param static_pressure_kpa: Air pressure at the field, in kPa, likewise.
         :param relative_humidity_percent: Relative humidity at the field, in
             percent. Given, the SEL and LAmax NPD curves are recalculated for
             that humidity and the temperature and pressure above by ECAC Doc 29
@@ -1357,7 +1357,7 @@ class AnpDatabase:
         :return: A :class:`~phonometry.aircraft.airport_noise.NoiseContourResult`.
         """
         atmosphere = _impedance_atmosphere(
-            aerodrome, temperature_c, atmospheric_pressure_kpa
+            aerodrome, temperature_c, static_pressure_kpa
         )
         acft, prof, p, d, sel, lmax = self._doc29_inputs(
             aircraft_id,
@@ -1386,7 +1386,7 @@ class AnpDatabase:
 def _impedance_atmosphere(
     aerodrome: Aerodrome | None,
     temperature_c: float | None,
-    atmospheric_pressure_kpa: float | None,
+    static_pressure_kpa: float | None,
 ) -> AerodromeAtmosphere:
     """Conditions for the Doc 29 atmospheric impedance adjustment.
 
@@ -1404,9 +1404,9 @@ def _impedance_atmosphere(
     if aerodrome is None:
         return AerodromeAtmosphere(
             temperature_c=15.0 if temperature_c is None else temperature_c,
-            atmospheric_pressure_kpa=_STANDARD_PRESSURE_KPA
-            if atmospheric_pressure_kpa is None
-            else atmospheric_pressure_kpa,
+            static_pressure_kpa=_STANDARD_PRESSURE_KPA
+            if static_pressure_kpa is None
+            else static_pressure_kpa,
         )
     at_field_kpa = (
         aerodrome.pressure_ratio(aerodrome.elevation_ft) * _STANDARD_PRESSURE_KPA
@@ -1415,9 +1415,9 @@ def _impedance_atmosphere(
         temperature_c=aerodrome.temperature_c
         if temperature_c is None
         else temperature_c,
-        atmospheric_pressure_kpa=at_field_kpa
-        if atmospheric_pressure_kpa is None
-        else atmospheric_pressure_kpa,
+        static_pressure_kpa=at_field_kpa
+        if static_pressure_kpa is None
+        else static_pressure_kpa,
     )
 
 

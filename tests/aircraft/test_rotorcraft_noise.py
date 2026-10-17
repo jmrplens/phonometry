@@ -207,7 +207,7 @@ def test_hemisphere_nearest_bin_fill_for_missing() -> None:
     h = _synthetic_hemisphere()
     lv = h.levels.copy()
     lv[2, 2, 0] = np.nan  # drop φ=0, θ=90, 500 Hz
-    hole = RotorcraftHemisphere(h.frequencies, h.azimuth, h.polar, lv)
+    hole = RotorcraftHemisphere(h.frequencies, h.azimuth_deg, h.polar_deg, lv)
     out = hemisphere_source_level(hole, 0.0, 90.0)
     # The four axis-neighbours (±45°,90°), (0°,45°), (0°,135°) are all exactly
     # equidistant (ρ = 45°), so the fill is their energetic average (Eq. 14/15).
@@ -224,7 +224,7 @@ def test_hemisphere_partial_cell_keeps_valid_corners() -> None:
     h = _synthetic_hemisphere()
     lv = h.levels.copy()
     lv[2, 2, 0] = np.nan  # drop φ=0, θ=90 at 500 Hz
-    hole = RotorcraftHemisphere(h.frequencies, h.azimuth, h.polar, lv)
+    hole = RotorcraftHemisphere(h.frequencies, h.azimuth_deg, h.polar_deg, lv)
     got = hemisphere_source_level(hole, 22.5, 112.5)[
         0
     ]  # centre of the φ 0-45/θ 90-135 cell
@@ -259,7 +259,7 @@ def test_hemisphere_all_nan_band_returns_nan() -> None:
     h = _synthetic_hemisphere()
     lv = h.levels.copy()
     lv[:, :, 1] = np.nan
-    hole = RotorcraftHemisphere(h.frequencies, h.azimuth, h.polar, lv)
+    hole = RotorcraftHemisphere(h.frequencies, h.azimuth_deg, h.polar_deg, lv)
     out = hemisphere_source_level(hole, 10.0, 70.0)
     assert np.isnan(out[1])
     assert np.isfinite(out[0])
@@ -879,8 +879,8 @@ def _ring(levels_per_bearing: np.ndarray, bands: int = 2) -> np.ndarray:
 def test_hover_ring_uniform_ring_gives_uniform_hemisphere() -> None:
     h = hover_ring_hemisphere([500.0, 1000.0], _RING_BEARINGS, _ring(np.full(12, 80.0)))
     assert h.distance_m == 70.0
-    assert h.azimuth.size == 19
-    assert h.polar.size == 19
+    assert h.azimuth_deg.size == 19
+    assert h.polar_deg.size == 19
     assert np.allclose(h.levels, 80.0)
     # Arbitrary off-node lookups stay at the uniform level.
     assert hemisphere_source_level(h, 37.0, 112.0) == pytest.approx([80.0, 80.0])
@@ -892,8 +892,8 @@ def test_hover_ring_constant_phi_closed_form() -> None:
     h = hover_ring_hemisphere(
         [500.0, 1000.0], _RING_BEARINGS, _ring(60.0 + _RING_BEARINGS / 10.0)
     )
-    ia = {a: i for i, a in enumerate(h.azimuth)}
-    ip = {p: i for i, p in enumerate(h.polar)}
+    ia = {a: i for i, a in enumerate(h.azimuth_deg)}
+    ip = {p: i for i, p in enumerate(h.polar_deg)}
     assert h.levels[ia[30.0], ip[60.0], 0] == pytest.approx(66.0)  # ring(+60)
     assert h.levels[ia[-30.0], ip[60.0], 0] == pytest.approx(54.0)  # ring(-60)
     assert h.levels[ia[90.0], ip[150.0], 0] == pytest.approx(75.0)  # ring(+150)
@@ -916,8 +916,8 @@ def test_hover_ring_periodic_energy_interpolation() -> None:
     assert hemisphere_source_level(h, 90.0, 15.0)[0] == pytest.approx(expected)
     # Grid node on the wrap: ring(170), two thirds from +150 (80 dB) towards
     # -180 (70 dB).
-    ia = {a: i for i, a in enumerate(h.azimuth)}
-    ip = {p: i for i, p in enumerate(h.polar)}
+    ia = {a: i for i, a in enumerate(h.azimuth_deg)}
+    ip = {p: i for i, p in enumerate(h.polar_deg)}
     wrap = 10.0 * np.log10((10.0**8.0 + 2.0 * 10.0**7.0) / 3.0)
     assert h.levels[ia[90.0], ip[170.0], 0] == pytest.approx(wrap)
 
@@ -934,8 +934,8 @@ def test_hover_ring_middle_column_survives_inexact_step() -> None:
         _ring(60.0 + _RING_BEARINGS / 10.0),
         azimuth_step=180.0 / 14.0,
     )
-    assert h.azimuth.size == 15
-    ip = {p: i for i, p in enumerate(h.polar)}
+    assert h.azimuth_deg.size == 15
+    ip = {p: i for i, p in enumerate(h.polar_deg)}
     mid = 10.0 * np.log10((10.0**6.9 + 10.0**5.1) / 2.0)
     assert h.levels[7, ip[90.0], 0] == pytest.approx(mid)
     assert h.levels[8, ip[60.0], 0] == pytest.approx(66.0)  # starboard side
@@ -951,8 +951,8 @@ def test_hover_ring_bearing_mapping_closed_form() -> None:
         _ring(60.0 + _RING_BEARINGS / 10.0),
         mapping="bearing",
     )
-    ia = {a: i for i, a in enumerate(h.azimuth)}
-    ip = {p: i for i, p in enumerate(h.polar)}
+    ia = {a: i for i, a in enumerate(h.azimuth_deg)}
+    ip = {p: i for i, p in enumerate(h.polar_deg)}
     # The nadir bin reads the ring at bearing 0 (the prototype's convention).
     assert h.levels[ia[0.0], ip[90.0], 0] == pytest.approx(60.0)
     # Behind and below (phi = 0, theta = 120): bearing 180, the -180 row.
@@ -987,8 +987,8 @@ def test_hover_derived_offsets_are_the_published_constants() -> None:
         assert np.isnan(got.levels[3, 4, 0])
         assert got.distance_m == 70.0
         assert np.array_equal(got.frequencies, freqs)
-        assert np.array_equal(got.azimuth, az)
-        assert np.array_equal(got.polar, po)
+        assert np.array_equal(got.azimuth_deg, az)
+        assert np.array_equal(got.polar_deg, po)
     # The input hemisphere is left untouched.
     assert np.array_equal(hige.levels, levels, equal_nan=True)
 
@@ -1051,12 +1051,12 @@ def test_hemisphere_axes_must_span_the_level_grid() -> None:
     extra_band = np.append(h.frequencies, 2000.0)
     with pytest.raises(ValueError, match=r"'frequencies'.*per band"):
         dataclasses.replace(h, frequencies=extra_band)
-    short_azimuth = h.azimuth[:-1]
-    with pytest.raises(ValueError, match=r"'azimuth'.*per azimuth angle"):
-        dataclasses.replace(h, azimuth=short_azimuth)
-    extra_polar = np.append(h.polar, 200.0)
-    with pytest.raises(ValueError, match=r"'polar'.*per polar angle"):
-        dataclasses.replace(h, polar=extra_polar)
+    short_azimuth = h.azimuth_deg[:-1]
+    with pytest.raises(ValueError, match=r"'azimuth_deg'.*per azimuth angle"):
+        dataclasses.replace(h, azimuth_deg=short_azimuth)
+    extra_polar = np.append(h.polar_deg, 200.0)
+    with pytest.raises(ValueError, match=r"'polar_deg'.*per polar angle"):
+        dataclasses.replace(h, polar_deg=extra_polar)
 
 
 # --------------------------------------------------------------------------- #
@@ -1206,7 +1206,7 @@ def test_hemisphere_mirrored_reverses_azimuth() -> None:
     )
     back = m.mirrored()
     assert np.allclose(back.levels, h.levels)
-    assert np.allclose(back.azimuth, h.azimuth)
+    assert np.allclose(back.azimuth_deg, h.azimuth_deg)
 
 
 # --------------------------------------------------------------------------- #
@@ -1225,8 +1225,8 @@ def test_kinematics_straight_climb_closed_form() -> None:
         ]
     )
     kin = flight_path_kinematics(t, pos)
-    assert np.allclose(kin.ground_speed, 40.0)
-    assert np.allclose(kin.airspeed, 40.0 / np.cos(gamma))
+    assert np.allclose(kin.ground_speed_m_s, 40.0)
+    assert np.allclose(kin.airspeed_m_s, 40.0 / np.cos(gamma))
     assert np.allclose(kin.heading, 30.0)
     assert np.allclose(kin.path_angle_deg, 5.0)
     assert np.allclose(kin.curvature, 0.0, atol=1e-12)
@@ -1249,7 +1249,7 @@ def test_kinematics_turn_bank_closed_form() -> None:
     # circle centred at (0, radius): heading starts at 0 and increases
     kin = flight_path_kinematics(t, pos)
     mid = slice(10, -10)
-    assert np.allclose(kin.ground_speed[mid], speed, rtol=1e-3)
+    assert np.allclose(kin.ground_speed_m_s[mid], speed, rtol=1e-3)
     assert np.allclose(kin.curvature[mid], 1.0 / radius, rtol=1e-2)
     expected_bank = np.degrees(np.arctan(speed**2 / (9.80665 * radius)))
     assert np.allclose(kin.bank_angle_deg[mid], expected_bank, atol=0.2)
@@ -1269,7 +1269,7 @@ def test_kinematics_hover_is_finite() -> None:
     t = np.arange(0.0, 5.5, 0.5)
     pos = np.column_stack([np.zeros_like(t), np.zeros_like(t), np.full_like(t, 20.0)])
     kin = flight_path_kinematics(t, pos)
-    assert np.allclose(kin.ground_speed, 0.0)
+    assert np.allclose(kin.ground_speed_m_s, 0.0)
     assert np.all(np.isfinite(kin.curvature))
     assert np.allclose(kin.bank_angle_deg, 0.0)
 
@@ -1289,9 +1289,9 @@ def test_kinematics_columns_must_span_the_track() -> None:
     t = np.arange(0.0, 5.5, 0.5)
     pos = np.column_stack([np.zeros_like(t), 40.0 * t, np.full_like(t, 100.0)])
     kin = flight_path_kinematics(t, pos)
-    short_airspeed = kin.airspeed[:-1]
-    with pytest.raises(ValueError, match=r"'airspeed'.*per track point"):
-        dataclasses.replace(kin, airspeed=short_airspeed)
+    short_airspeed = kin.airspeed_m_s[:-1]
+    with pytest.raises(ValueError, match=r"'airspeed_m_s'.*per track point"):
+        dataclasses.replace(kin, airspeed_m_s=short_airspeed)
     flat_positions = kin.positions[:, 0]
     with pytest.raises(ValueError, match=r"'positions' must have 2 axes"):
         dataclasses.replace(kin, positions=flat_positions)
@@ -1330,13 +1330,13 @@ def test_event_geometry_overhead() -> None:
     _t, _pos, res = _flyover(bands=[31.5])
     k = int(np.argmin(res.distances_m))
     assert res.distances_m[k] == pytest.approx(100.0, abs=1e-9)
-    assert res.polar[k] == pytest.approx(90.0, abs=1e-6)
-    assert abs(res.azimuth[k]) == pytest.approx(0.0, abs=1e-6)
+    assert res.polar_deg[k] == pytest.approx(90.0, abs=1e-6)
+    assert abs(res.azimuth_deg[k]) == pytest.approx(0.0, abs=1e-6)
     # Retarded time (Eq. 22) with c = 346.1 m/s, at every step.
     assert np.allclose(res.times, res.emission_times + res.distances_m / 346.1)
     # Approaching rows look forward (theta < 90), receding rows rearward.
-    assert np.all(res.polar[:k] < 90.0)
-    assert np.all(res.polar[k + 1 :] > 90.0)
+    assert np.all(res.polar_deg[:k] < 90.0)
+    assert np.all(res.polar_deg[k + 1 :] > 90.0)
 
 
 def test_event_bank_tilt_moves_azimuth() -> None:
@@ -1347,8 +1347,8 @@ def test_event_bank_tilt_moves_azimuth() -> None:
         bands=[31.5], track_state=RotorcraftTrackState(bank_angle_deg=25.0)
     )
     k = int(np.argmin(level_res.distances_m))
-    assert level_res.azimuth[k] == pytest.approx(0.0, abs=1e-6)
-    assert banked.azimuth[k] == pytest.approx(25.0, abs=1e-6)
+    assert level_res.azimuth_deg[k] == pytest.approx(0.0, abs=1e-6)
+    assert banked.azimuth_deg[k] == pytest.approx(25.0, abs=1e-6)
 
 
 def test_event_heading_override_mirrors_polar() -> None:
@@ -1356,7 +1356,7 @@ def test_event_heading_override_mirrors_polar() -> None:
     # angles mirror about 90 deg (the frame is heading-only, no pitch tilt).
     _, _, fwd = _flyover(bands=[31.5])
     _, _, rev = _flyover(bands=[31.5], track_state=RotorcraftTrackState(heading=180.0))
-    assert np.allclose(fwd.polar + rev.polar, 180.0, atol=1e-9)
+    assert np.allclose(fwd.polar_deg + rev.polar_deg, 180.0, atol=1e-9)
 
 
 def test_event_lamax_assembles_the_propagation_chain() -> None:
@@ -1543,8 +1543,8 @@ def test_an_empty_history_keeps_its_undetermined_peak() -> None:
         emission_times=empty,
         times=empty,
         distances_m=empty,
-        azimuth=empty,
-        polar=empty,
+        azimuth_deg=empty,
+        polar_deg=empty,
         band_levels=np.zeros((0, 0)),
         a_levels=empty,
         la_max=float("nan"),

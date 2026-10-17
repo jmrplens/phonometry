@@ -107,7 +107,7 @@ def test_the_facade_elevation_documents_a_conditional_area_refusal() -> None:
 
 def test_double_wall_result_retains_geometry_and_draws() -> None:
     res = pm.building.double_wall_transmission_loss(FREQ, 8.8, 8.8, 0.1)
-    assert res.gap == pytest.approx(0.1)
+    assert res.gap_m == pytest.approx(0.1)
     assert res.plot_geometry() is not None
     single = pm.building.single_panel_transmission_loss(
         FREQ, 10.0, critical_frequency=1200.0

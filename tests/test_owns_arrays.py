@@ -498,7 +498,7 @@ def _atmospheric_pe() -> object:
         500.0,
         environment.linear_sound_speed_profile(0.1),
         source_height_m=2.0,
-        flow_resistivity=50e3,
+        flow_resistivity_pa_s_m2=50e3,
         max_range=1000.0,
         max_height_m=50.0,
     )

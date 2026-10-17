@@ -79,10 +79,10 @@ def test_coefficient_is_iso9613_at_the_arp5534_molar_concentration() -> None:
         f,
         temperature_c=15.0,
         relative_humidity_percent=same_h,
-        atmospheric_pressure_kpa=101.325,
+        static_pressure_kpa=101.325,
         exact_midband=True,
     )
-    assert np.allclose(res.coefficient, expected, rtol=1e-12, atol=0.0)
+    assert np.allclose(res.coefficient_db_per_m, expected, rtol=1e-12, atol=0.0)
     assert np.allclose(res.midband_attenuation, expected * 500.0, rtol=1e-12)
 
 
@@ -98,7 +98,7 @@ def test_saturation_pressure_is_eq6_not_iso9613_annex_b() -> None:
     iso = air_attenuation([10000.0], temperature_c=10.0, relative_humidity_percent=80.0)
     arp = sae_band_attenuation(
         [10000.0], 1.0, temperature_c=10.0, relative_humidity_percent=80.0
-    ).coefficient
+    ).coefficient_db_per_m
     assert float(arp[0]) != pytest.approx(float(iso[0]), rel=1e-5)
 
 
@@ -171,7 +171,7 @@ def test_large_attenuation_no_nan_or_warning() -> None:
 def test_invalid_inputs_rejected() -> None:
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):
         sae_band_attenuation([-1.0], 100.0)
-    with pytest.raises(ValueError, match=r"'path_length' must be non-negative"):
+    with pytest.raises(ValueError, match=r"'path_length_m' must be non-negative"):
         sae_band_attenuation([1000.0], -5.0)
 
 
@@ -181,12 +181,12 @@ def test_per_band_arrays_must_agree() -> None:
     # length, and collapsed to a single value numpy broadcasts it over every
     # band of that spectrum. The other three stop the figure instead.
     res = sae_band_attenuation([500.0, 1000.0, 2000.0, 4000.0], 1000.0)
-    collapsed = res.coefficient[:1]
-    with pytest.raises(ValueError, match=r"'coefficient' \(1\)"):
-        replace(res, coefficient=collapsed)
-    scalar = float(res.coefficient[0])
-    with pytest.raises(ValueError, match=r"'coefficient' must have one axis"):
-        replace(res, coefficient=scalar)
+    collapsed = res.coefficient_db_per_m[:1]
+    with pytest.raises(ValueError, match=r"'coefficient_db_per_m' \(1\)"):
+        replace(res, coefficient_db_per_m=collapsed)
+    scalar = float(res.coefficient_db_per_m[0])
+    with pytest.raises(ValueError, match=r"'coefficient_db_per_m' must have one axis"):
+        replace(res, coefficient_db_per_m=scalar)
     short = res.band_attenuation[:-1]
     with pytest.raises(ValueError, match=r"'band_attenuation' \(3\)"):
         replace(res, band_attenuation=short)
@@ -198,9 +198,9 @@ def test_per_band_array_must_carry_one_axis() -> None:
     # the caller who multiplies it by a path length and subtracts it from a
     # spectrum gets a band-by-band matrix instead of a spectrum.
     res = sae_band_attenuation([500.0, 1000.0, 2000.0, 4000.0], 1000.0)
-    column = res.coefficient.reshape(-1, 1)
-    with pytest.raises(ValueError, match="'coefficient' must have one axis"):
-        replace(res, coefficient=column)
+    column = res.coefficient_db_per_m.reshape(-1, 1)
+    with pytest.raises(ValueError, match="'coefficient_db_per_m' must have one axis"):
+        replace(res, coefficient_db_per_m=column)
 
 
 def test_plot_smoke() -> None:
@@ -457,3 +457,22 @@ def test_unknown_eta_interpolation_is_refused() -> None:
             relative_humidity_percent=80.0,
             eta_interpolation="cubic",
         )
+
+
+def test_sae_band_attenuation_passes_its_pressure_on() -> None:
+    """ARP 5534 takes the same static pressure ISO 9613-1 does: at 80 kPa the
+    mid-band coefficient moves from its sea-level value by the ratio the
+    ISO 9613-1 alpha moves by, and the band attenuation over the path follows.
+    """
+    f = [1000.0, 4000.0]
+    conditions = {"temperature_c": 20.0, "relative_humidity_percent": 50.0}
+    high = sae_band_attenuation(f, 1000.0, static_pressure_kpa=80.0, **conditions)
+    sea = sae_band_attenuation(f, 1000.0, **conditions)
+    iso_ratio = air_attenuation(
+        f, static_pressure_kpa=80.0, **conditions
+    ) / air_attenuation(f, **conditions)
+    np.testing.assert_allclose(
+        high.coefficient_db_per_m / sea.coefficient_db_per_m, iso_ratio, rtol=1e-3
+    )
+    assert np.all(high.band_attenuation < sea.band_attenuation)
+    assert high.static_pressure_kpa == 80.0

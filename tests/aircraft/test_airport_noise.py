@@ -182,14 +182,12 @@ def test_impedance_adjustment() -> None:
     # ECAC-documented +0.074 dB (Doc 29 Vol 2 §4.2.1).
     assert impedance_adjustment() == pytest.approx(0.074, abs=5e-4)
     assert impedance_adjustment(
-        temperature_c=15.0, atmospheric_pressure_kpa=101.325
+        temperature_c=15.0, static_pressure_kpa=101.325
     ) == pytest.approx(0.074, abs=5e-4)
     # Hotter, lower-pressure air is less dense: negative adjustment.
-    assert impedance_adjustment(temperature_c=35.0, atmospheric_pressure_kpa=95.0) < 0.0
-    with pytest.raises(
-        ValueError, match=r"'atmospheric_pressure_kpa' must be positive"
-    ):
-        impedance_adjustment(temperature_c=15.0, atmospheric_pressure_kpa=0.0)
+    assert impedance_adjustment(temperature_c=35.0, static_pressure_kpa=95.0) < 0.0
+    with pytest.raises(ValueError, match=r"'static_pressure_kpa' must be positive"):
+        impedance_adjustment(temperature_c=15.0, static_pressure_kpa=0.0)
 
 
 def test_event_level_long_level_flyover_matches_infinite_path() -> None:
@@ -710,7 +708,7 @@ def test_impedance_adjustment_rejects_absolute_zero() -> None:
     from phonometry.aircraft.airport_noise import impedance_adjustment
 
     with pytest.raises(ValueError, match=r"'temperature_c' must be finite and above"):
-        impedance_adjustment(temperature_c=-300.0, atmospheric_pressure_kpa=101.325)
+        impedance_adjustment(temperature_c=-300.0, static_pressure_kpa=101.325)
 
 
 # --------------------------------------------------------------------------- #
@@ -917,6 +915,16 @@ def test_banked_segment_installation_favours_starboard() -> None:
         segments=banked15,
     ).level
     assert stbd == pytest.approx(port)
+
+
+def test_noise_contour_names_the_reference_speed_it_refuses() -> None:
+    """The grid path refuses a non-positive reference speed by the keyword the
+    caller wrote, as the scalar path of ``event_level`` does.
+    """
+    path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 400.0, 10000.0, _VREF]]
+    kw = {"x": [1400.0, 1600.0], "y": [-500.0, 500.0], "reference_speed_m_s": 0.0}
+    with pytest.raises(ValueError, match=r"'reference_speed_m_s' must be positive"):
+        noise_contour(path, _NP, _ND, _NSEL, _NMAX, **kw)
 
 
 def test_noise_contour_accepts_bank() -> None:

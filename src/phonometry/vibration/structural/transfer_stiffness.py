@@ -1560,12 +1560,12 @@ class EffectiveBlockingMass(OwnsArrays):
     :ivar frequencies: Frequencies, in hertz, strictly increasing.
     :ivar effective_mass_kg: :math:`m_{2,\mathrm{eff}}` at each frequency,
         in kg.
-    :ivar blocking_mass_kg: The mass ``m2`` of the block, in kg.
+    :ivar blocking_mass: The mass ``m2`` of the block, in kg.
     """
 
     frequencies: np.ndarray
     effective_mass_kg: np.ndarray
-    blocking_mass_kg: float
+    blocking_mass: float
 
     def __post_init__(self) -> None:
         """Reject fields that disagree, masses that are not positive, or an unsorted sweep.
@@ -1579,8 +1579,8 @@ class EffectiveBlockingMass(OwnsArrays):
         require_same_length(self, "frequencies", "effective_mass_kg", axis="frequency")
         require_finite_fields(self, "frequencies", "effective_mass_kg")
         require_finite(
-            require_positive(self.blocking_mass_kg, "blocking_mass_kg"),
-            "blocking_mass_kg",
+            require_positive(self.blocking_mass, "blocking_mass"),
+            "blocking_mass",
         )
         if np.any(np.asarray(self.effective_mass_kg, dtype=np.float64) <= 0.0):
             msg = f"{owner}: 'effective_mass_kg' must be positive."
@@ -1595,7 +1595,7 @@ class EffectiveBlockingMass(OwnsArrays):
         :return: One deviation per frequency.
         """
         m_eff = np.asarray(self.effective_mass_kg, dtype=np.float64)
-        return np.asarray(20.0 * np.log10(m_eff / self.blocking_mass_kg))
+        return np.asarray(20.0 * np.log10(m_eff / self.blocking_mass))
 
     @property
     def ignored_below_hz(self) -> float:
@@ -1658,11 +1658,11 @@ class EffectiveBlockingMass(OwnsArrays):
 
 def effective_blocking_mass(
     frequencies: ArrayLike,
-    force_n: ArrayLike,
+    force: ArrayLike,
     first_acceleration_m_s2: ArrayLike,
     second_acceleration_m_s2: ArrayLike,
     *,
-    blocking_mass_kg: float,
+    blocking_mass: float,
 ) -> EffectiveBlockingMass:
     r"""Effective mass of a blocking mass from one force and two accelerations.
 
@@ -1676,22 +1676,22 @@ def effective_blocking_mass(
     ``f3``.
 
     :param frequencies: Frequencies, in hertz, strictly increasing.
-    :param force_n: Excitation force phasor ``F2``, in N, one per frequency.
+    :param force: Excitation force phasor ``F2``, in N, one per frequency.
     :param first_acceleration_m_s2: Acceleration phasor :math:`a'_1`, in
         m/s², one per frequency.
     :param second_acceleration_m_s2: Acceleration phasor :math:`a''_1`, in
         m/s², one per frequency.
-    :param blocking_mass_kg: The mass ``m2`` of the block, in kg.
+    :param blocking_mass: The mass ``m2`` of the block, in kg.
     :return: The :class:`EffectiveBlockingMass`.
     :raises ValueError: for frequencies that are not finite, positive and
         strictly increasing, phasors of another length, a zero or non-finite
         effective mass, or a non-positive ``m2``.
     """
     owner = "effective_blocking_mass"
-    blocking_mass_kg = require_positive(blocking_mass_kg, "blocking_mass_kg")
+    blocking_mass = require_positive(blocking_mass, "blocking_mass")
     freq = _frequency_axis(frequencies, owner)
     _require_increasing(freq, owner)
-    force = np.asarray(force_n, dtype=np.complex128)
+    force = np.asarray(force, dtype=np.complex128)
     first = np.asarray(first_acceleration_m_s2, dtype=np.complex128)
     second = np.asarray(second_acceleration_m_s2, dtype=np.complex128)
     if (
@@ -1718,7 +1718,7 @@ def effective_blocking_mass(
     return EffectiveBlockingMass(
         frequencies=freq,
         effective_mass_kg=np.asarray(m_eff, dtype=np.float64),
-        blocking_mass_kg=blocking_mass_kg,
+        blocking_mass=blocking_mass,
     )
 
 

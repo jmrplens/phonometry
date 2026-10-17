@@ -140,7 +140,7 @@ Whether the source description falls inside Table E.1.
 ## fitting_density
 
 ```python
-fitting_density(surface_area_m2: float, volume_m3: float) -> float
+fitting_density(surface_area: float, volume: float) -> float
 ```
 
 The density of the fittings, NOTE 3 of 6.2.2.
@@ -158,8 +158,8 @@ themselves.
 
 | Name | Description |
 | :--- | :--- |
-| `surface_area_m2` | $S$, in square metres. |
-| `volume_m3` | $V$, in cubic metres. |
+| `surface_area` | $S$, in square metres. |
+| `volume` | $V$, in cubic metres. |
 
 **Returns:** $q$, in reciprocal metres.
 
@@ -360,7 +360,7 @@ workstation_level(
     *,
     sound_power_level_db: float,
     emission_level_db: float,
-    absorption_area_m2: float,
+    absorption_area: float,
 ) -> float
 ```
 
@@ -375,7 +375,7 @@ declared with plus what the room adds to it.
 | :--- | :--- |
 | `sound_power_level_db` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
 | `emission_level_db` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
-| `absorption_area_m2` | $A$ of the room, in square metres. |
+| `absorption_area` | $A$ of the room, in square metres. |
 
 **Returns:** $L'_{p\mathrm{A}}$, in decibels.
 
@@ -392,7 +392,7 @@ workstation_level_increase(
     *,
     sound_power_level_db: float,
     emission_level_db: float,
-    absorption_area_m2: float,
+    absorption_area: float,
 ) -> float
 ```
 
@@ -415,7 +415,7 @@ $L_{W\mathrm{A}} - L_{p\mathrm{A}}$ as the parameter.
 | :--- | :--- |
 | `sound_power_level_db` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
 | `emission_level_db` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
-| `absorption_area_m2` | $A$ of the room, in square metres. |
+| `absorption_area` | $A$ of the room, in square metres. |
 
 **Returns:** $\Delta L_\mathrm{A}$, in decibels.
 

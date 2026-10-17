@@ -571,7 +571,7 @@ GaussianBeamResult(
     wavefront_curvatures: NDArray[np.float64],
     initial_beam_widths: NDArray[np.float64],
     absorption_model: str | None,
-    absorption_coefficient: float,
+    absorption_db_per_km: float,
     seabed_density: float | None,
     seabed_sound_speed: float | None,
     source_depth: float,
@@ -603,7 +603,7 @@ can be subtracted.
 | `wavefront_curvatures` | Beam wavefront curvature $K(s)$ on that grid, in 1/m: Jensen Eq. (3.90) with the sign that belongs to the conjugated field this result exposes, so that a beam spreading in free space reproduces Eq. (3.85), $K = x/(x^2 + a^2)$, as a positive number. |
 | `initial_beam_widths` | The $W_0$ of Eq. (3.91) actually used by each beam of the fan, in metres, shape `(n_beams,)`. An explicit `fan.beam_width` fills it with one value; the default is per launch angle (see `_default_beam_widths`), widest on the axis of the fan whenever a shallow channel's modal-resolution term is in play and flat across it otherwise. |
 | `absorption_model` | The seawater absorption model applied along the beams, or `None` when the run propagated without volume absorption (the default). |
-| `absorption_coefficient` | The absorption coefficient $\alpha$ actually applied, in dB/km (0.0 when `absorption_model` is `None`), as [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption) evaluated it at the source frequency and depth. Recorded so a run's loss can be decomposed without re-deriving what was subtracted. |
+| `absorption_db_per_km` | The absorption coefficient $\alpha$ actually applied, in dB/km (0.0 when `absorption_model` is `None`), as [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption) evaluated it at the source frequency and depth. Recorded so a run's loss can be decomposed without re-deriving what was subtracted. |
 | `seabed_density` | Sediment density of the fluid seabed the bottom bounces were charged with, or `None` when the bottom was one of the perfect reflectors (the default). |
 | `seabed_sound_speed` | Sediment sound speed of that seabed, in m/s, or `None` likewise. Together the pair names the Rayleigh interface of [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient) each beam's bottom reflections multiplied it by. |
 | `source_depth` | Source depth, in metres. |
@@ -914,7 +914,7 @@ RayTraceResult(
     source_depth: float,
     water_depth: float,
     profile_depths: NDArray[np.float64],
-    profile_speeds: NDArray[np.float64],
+    profile_speeds_of_sound: NDArray[np.float64],
     bathymetry_ranges: NDArray[np.float64] | None = None,
     bathymetry_depths: NDArray[np.float64] | None = None,
 )
@@ -936,7 +936,7 @@ Ray-tracing solution through a sound-speed profile.
 | `source_depth` | Source depth, in metres. |
 | `water_depth` | Water-column depth, in metres. |
 | `profile_depths` | Depth samples of the sound-speed profile the rays were traced through, in metres, exactly as cleaned on the way in. The pair below *is* the medium (both solvers interpolate it piecewise linearly and nothing else about the water enters the geometry), so recording it makes the result self-contained: [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays) needs it to put fresh rays through the same water the fan flew. |
-| `profile_speeds` | Sound speed at each of those depths, in m/s. |
+| `profile_speeds_of_sound` | Sound speed at each of those depths, in m/s. |
 | `bathymetry_ranges` | Node ranges of the bottom profile the rays were traced over, in metres, or `None` for the level bottom at `water_depth` (the default). With a sloping bottom two of the flat record's invariants fall, and the arrays here say so honestly rather than quietly keep their old meaning. A ray reflected past the vertical by the accumulating slope cannot be carried by a range march (see [`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace)); its `depths`, `travel_times` and `arc_lengths` are `NaN` from the sample of the terminating bounce on, so a plot simply ends where the ray turned and nothing downstream can mistake a frozen sample for a traced one (the reflection counts, being integers, instead hold their last value). And the crossing angle at the bottom is no longer one per ray: each slope bounce rotates Snell's invariant, so the per-bounce record that sufficed for a flat guide (counts alone) does not price a sloping one, which is why [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays) declines such a trace. |
 | `bathymetry_depths` | Bottom depth at each of those nodes, in metres (`None` likewise). Between nodes the bottom is the straight facet, beyond the last node it continues level: exactly the boundary the marcher reflected off. |
 

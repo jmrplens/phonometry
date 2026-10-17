@@ -39,7 +39,7 @@ def test_h1_recovers_known_magnitude_and_phase() -> None:
     _, h = sp_signal.freqz(b, a, worN=res.frequencies, fs=FS)
     idx = int(np.argmin(np.abs(res.frequencies - 1000.0)))
     assert abs(res.response[idx]) == pytest.approx(abs(h[idx]), rel=0.02)
-    assert res.phase[idx] == pytest.approx(np.angle(h[idx]), abs=0.02)
+    assert res.phase_rad[idx] == pytest.approx(np.angle(h[idx]), abs=0.02)
 
 
 def test_h2_recovers_known_magnitude() -> None:
@@ -97,7 +97,7 @@ def test_result_fields_and_plot() -> None:
 def test_response_curves_must_share_one_frequency_axis() -> None:
     """An estimate whose five curves disagree cannot be built.
 
-    Only ``frequencies``, ``magnitude_db``, ``phase`` and ``coherence`` reach
+    Only ``frequencies``, ``magnitude_db``, ``phase_rad`` and ``coherence`` reach
     the figure, and a wrong length there raises from inside numpy's boolean
     index, which reports two axis sizes and names neither the field nor the
     result. ``response`` is drawn by nothing: it is read positionally at an
@@ -108,7 +108,7 @@ def test_response_curves_must_share_one_frequency_axis() -> None:
     x, y, _, _ = _known_system()
     good = electroacoustics.transfer_function(x, y, FS)
     per_frequency = "must each carry one value per frequency"
-    for field in ("frequencies", "response", "magnitude_db", "phase", "coherence"):
+    for field in ("frequencies", "response", "magnitude_db", "phase_rad", "coherence"):
         curve = getattr(good, field)
         for value in (curve[:-1], np.append(curve, curve[-1])):
             with pytest.raises(ValueError, match=rf"'{field}'.*{per_frequency}"):

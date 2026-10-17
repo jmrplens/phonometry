@@ -215,7 +215,7 @@ def _statement(
             language,
         ).format(margin=decimal_comma(f"{margin:+.2f}", language))
 
-    phase = np.asarray(result.phase_mismatch(), dtype=np.float64)
+    phase = np.asarray(result.phase_mismatch_deg(), dtype=np.float64)
     extended = [
         t("Verified as: {device}", language).format(device=device),
         t(

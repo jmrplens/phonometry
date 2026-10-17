@@ -204,7 +204,7 @@ class CeilingSpecimenCheck(RichDisplay):
     limits clause 4 prints, so they are not fields: a check cannot be built to
     pass an arrangement the clause fails.
 
-    :ivar area_m2: The specimen area as built, in square metres.
+    :ivar area: The specimen area as built, in square metres.
     :ivar mounting: The mounting letter the arrangement uses.
     :ivar depth_mm: The overall depth of construction, in millimetres, for a
         type E mounting, or ``None`` for the others.
@@ -224,7 +224,7 @@ class CeilingSpecimenCheck(RichDisplay):
         in percent, or ``None`` when no humidity was given.
     """
 
-    area_m2: float
+    area: float
     mounting: str
     depth_mm: float | None
     deflection_mm: float
@@ -239,7 +239,7 @@ class CeilingSpecimenCheck(RichDisplay):
     @property
     def area_error_m2(self) -> float:
         """How far the area sits from the 10,80 m2 the code aims at, reported and not judged."""
-        return self.area_m2 - TARGET_SPECIMEN_AREA_M2
+        return self.area - TARGET_SPECIMEN_AREA_M2
 
     @property
     def deflection_ok(self) -> bool:
@@ -338,10 +338,10 @@ def mounting_type(letter: str) -> str:
 
 def air_absorption_correction(
     *,
-    volume_m3: float,
+    volume: float,
     specimen_area_m2: float,
-    attenuation_with: ArrayLike,
-    attenuation_empty: ArrayLike,
+    attenuation_with_per_m: ArrayLike,
+    attenuation_empty_per_m: ArrayLike,
 ) -> NDArray[np.float64]:
     r"""The correction 4.2.1 caps, as an absorption coefficient.
 
@@ -359,20 +359,22 @@ def air_absorption_correction(
     clause caps it at :data:`AIR_CORRECTION_LIMIT` and asks for 50 % relative
     humidity or more.
 
-    :param volume_m3: :math:`V` of the reverberation room, in cubic metres.
+    :param volume: :math:`V` of the reverberation room, in cubic metres.
     :param specimen_area_m2: :math:`S` of the specimen, in square metres.
-    :param attenuation_with: :math:`m_2` per band, in reciprocal metres.
-    :param attenuation_empty: :math:`m_1` per band, in reciprocal metres.
+    :param attenuation_with_per_m: :math:`m_2` per band, in reciprocal metres.
+    :param attenuation_empty_per_m: :math:`m_1` per band, in reciprocal metres.
     :return: :math:`\Delta\alpha` per band.
     :raises ValueError: For a non-positive volume or area, or coefficients
         that do not match band for band.
     """
-    volume = require_positive(volume_m3, "volume_m3")
+    volume = require_positive(volume, "volume")
     area = require_positive(specimen_area_m2, "specimen_area_m2")
-    with_specimen = require_finite_array(attenuation_with, "attenuation_with")
-    empty = require_finite_array(attenuation_empty, "attenuation_empty")
+    with_specimen = require_finite_array(
+        attenuation_with_per_m, "attenuation_with_per_m"
+    )
+    empty = require_finite_array(attenuation_empty_per_m, "attenuation_empty_per_m")
     if with_specimen.shape != empty.shape:
-        msg = "'attenuation_with' and 'attenuation_empty' must match band for band."
+        msg = "'attenuation_with_per_m' and 'attenuation_empty_per_m' must match band for band."
         raise ValueError(msg)
     correction = np.asarray(
         4.0 * volume * (with_specimen - empty) / area, dtype=np.float64
@@ -505,7 +507,7 @@ def _warn_about(*, check: CeilingSpecimenCheck) -> None:
 
 def check_ceiling_specimen(
     *,
-    area_m2: float,
+    area: float,
     mounting: str = "E",
     depth_mm: float | None = None,
     deflection_mm: float = 0.0,
@@ -554,7 +556,7 @@ def check_ceiling_specimen(
     substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
     (:data:`SUBSTRUCTURE_SPACING_M`).
 
-    :param area_m2: The specimen area as built, in square metres.
+    :param area: The specimen area as built, in square metres.
     :param mounting: The mounting letter, ``"E"`` by default.
     :param depth_mm: The overall depth of construction, in millimetres,
         required for a type E mounting.
@@ -582,7 +584,7 @@ def check_ceiling_specimen(
         outside 0 % to 100 %, an unknown mounting letter, or a type E
         arrangement with no depth given.
     """
-    area = require_positive(area_m2, "area_m2")
+    area = require_positive(area, "area")
     letter = require_choice(str(mounting).upper(), "mounting", tuple(MOUNTING_TYPES))
     if letter == "E" and depth_mm is None:
         msg = (
@@ -606,7 +608,7 @@ def check_ceiling_specimen(
         else require_positive(support_centre_distance_m, "support_centre_distance_m")
     )
     check = CeilingSpecimenCheck(
-        area_m2=area,
+        area=area,
         mounting=letter,
         depth_mm=depth,
         deflection_mm=deflection,

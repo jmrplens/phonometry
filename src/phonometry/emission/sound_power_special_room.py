@@ -287,7 +287,7 @@ def reverberation_parameter(
     frequencies: ArrayLike,
     volume: float,
     *,
-    surface_area_m2: float | None = None,
+    surface_area: float | None = None,
     speed_of_sound: float | None = None,
 ) -> np.ndarray:
     r"""The reverberation parameter :math:`R` of ISO 3743-2:2018, 6.3.
@@ -315,10 +315,10 @@ def reverberation_parameter(
 
     :param frequencies: Band centre frequencies, in hertz.
     :param volume: Volume of the test room, in cubic metres.
-    :param surface_area_m2: Total surface area of the room, in square metres;
+    :param surface_area: Total surface area of the room, in square metres;
         with ``speed_of_sound`` it selects the NOTE form.
     :param speed_of_sound: Speed of sound, in metres per second, required
-        with ``surface_area_m2`` and refused without it.
+        with ``surface_area`` and refused without it.
     :return: :math:`R` per frequency.
     :raises ValueError: for a non-positive frequency, volume, area or speed,
         or only one of the NOTE's two inputs.
@@ -328,15 +328,15 @@ def reverberation_parameter(
         msg = "'frequencies' must be finite and positive."
         raise ValueError(msg)
     volume = require_positive(volume, "volume")
-    if (surface_area_m2 is None) != (speed_of_sound is None):
+    if (surface_area is None) != (speed_of_sound is None):
         msg = (
-            "'surface_area_m2' and 'speed_of_sound' select the NOTE form of "
+            "'surface_area' and 'speed_of_sound' select the NOTE form of "
             "6.3 together; give both or neither."
         )
         raise ValueError(msg)
-    if surface_area_m2 is None or speed_of_sound is None:
+    if surface_area is None or speed_of_sound is None:
         return np.asarray(1.0 + _R_CONSTANT / (freqs * volume ** (1.0 / 3.0)))
-    area = require_positive(surface_area_m2, "surface_area_m2")
+    area = require_positive(surface_area, "surface_area")
     speed = require_positive(speed_of_sound, "speed_of_sound")
     return np.asarray(1.0 + speed * area / (8.0 * volume * freqs))
 
@@ -375,7 +375,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     r"""Qualification of a special reverberation test room by its
     reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
 
-    ``reverberation_time_s`` is the measured :math:`T` per band and
+    ``reverberation_time`` is the measured :math:`T` per band and
     ``reverberation_parameter`` the :math:`R` of Formula (1) (or its NOTE);
     ``nominal_reverberation_time_s`` is :math:`T_\mathrm{nom}`, supplied or,
     with ``centred`` ``True``, found by centring the measured values within
@@ -395,7 +395,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    reverberation_time_s: np.ndarray
+    reverberation_time: np.ndarray
     reverberation_parameter: np.ndarray
     nominal_reverberation_time_s: float
     centred: bool
@@ -420,7 +420,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
             require_positive(self.source_volume_m3, "source_volume_m3")
         bands = (
             "frequencies",
-            "reverberation_time_s",
+            "reverberation_time",
             "reverberation_parameter",
         )
         require_ranks(self, **dict.fromkeys(bands, 1))
@@ -446,7 +446,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     def normalized_ratio(self) -> np.ndarray:
         r""":math:`T/(R\,T_\mathrm{nom})` per band, which 6.3 bounds."""
         return np.asarray(
-            self.reverberation_time_s
+            self.reverberation_time
             / (self.reverberation_parameter * self.nominal_reverberation_time_s),
             dtype=np.float64,
         )
@@ -455,7 +455,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     def ratio_to_nominal(self) -> np.ndarray:
         r""":math:`T/T_\mathrm{nom}` per band, the quantity Figure B.3 draws."""
         return np.asarray(
-            self.reverberation_time_s / self.nominal_reverberation_time_s,
+            self.reverberation_time / self.nominal_reverberation_time_s,
             dtype=np.float64,
         )
 
@@ -605,12 +605,12 @@ def _climate_change(
 
 
 def check_special_room_reverberation(
-    reverberation_time_s: ArrayLike,
+    reverberation_time: ArrayLike,
     frequencies: ArrayLike,
     *,
     volume: float,
     nominal_reverberation_time_s: float | None = None,
-    surface_area_m2: float | None = None,
+    surface_area: float | None = None,
     speed_of_sound: float | None = None,
     method: Method = "direct",
     relative_humidity_percent: float | None = None,
@@ -659,13 +659,13 @@ def check_special_room_reverberation(
     70 m³; given ``source_volume_m3``, the check reads it, and warns above it,
     but keeps it out of the verdict, the clause saying "should".
 
-    :param reverberation_time_s: Measured reverberation time per band, in
+    :param reverberation_time: Measured reverberation time per band, in
         seconds, in one-third-octave bands as Figure B.3 has them.
     :param frequencies: Band centre frequencies, in hertz.
     :param volume: Volume of the test room, in cubic metres.
     :param nominal_reverberation_time_s: :math:`T_\mathrm{nom}` to check, in
         seconds; ``None`` centres it.
-    :param surface_area_m2: Room surface area for the NOTE form of
+    :param surface_area: Room surface area for the NOTE form of
         :math:`R`, in square metres, with ``speed_of_sound``.
     :param speed_of_sound: Speed of sound for the NOTE form, in metres per
         second.
@@ -686,9 +686,9 @@ def check_special_room_reverberation(
         :func:`reverberation_parameter`, an unknown method, a climate given
         in part or out of range, or a source volume that is not positive.
     """
-    t = np.asarray(reverberation_time_s, dtype=np.float64)
+    t = np.asarray(reverberation_time, dtype=np.float64)
     if t.ndim != 1 or t.size == 0 or not np.all(np.isfinite(t)) or np.any(t <= 0.0):
-        msg = "'reverberation_time_s' must be a 1D array of positive, finite seconds."
+        msg = "'reverberation_time' must be a 1D array of positive, finite seconds."
         raise ValueError(msg)
     freqs = np.asarray(frequencies, dtype=np.float64)
     if freqs.shape != t.shape:
@@ -698,7 +698,7 @@ def check_special_room_reverberation(
     r = reverberation_parameter(
         freqs,
         volume,
-        surface_area_m2=surface_area_m2,
+        surface_area=surface_area,
         speed_of_sound=speed_of_sound,
     )
     half_width = _tolerance(freqs)
@@ -721,7 +721,7 @@ def check_special_room_reverberation(
     )
     check = SpecialRoomReverberationCheck(
         frequencies=freqs,
-        reverberation_time_s=t,
+        reverberation_time=t,
         reverberation_parameter=np.asarray(r, dtype=np.float64),
         nominal_reverberation_time_s=float(nominal),
         centred=centred,

@@ -343,13 +343,13 @@ class RigidMassCalibrationResult(OwnsArrays):
         return np.asarray(1.0 / (_omega(freq) * self.mass), dtype=np.float64)
 
     @property
-    def deviation(self) -> np.ndarray:
+    def relative_deviation(self) -> np.ndarray:
         """Relative deviation ``measured/expected - 1`` per frequency."""
         measured = np.asarray(self.measured, dtype=np.float64)
         return np.asarray(measured / self.expected - 1.0, dtype=np.float64)
 
     @property
-    def tolerance(self) -> float:
+    def relative_tolerance(self) -> float:
         """The +/- 5 % of 7.5.2, as a relative tolerance (0.05)."""
         return _RIGID_MASS_TOLERANCE
 
@@ -362,7 +362,9 @@ class RigidMassCalibrationResult(OwnsArrays):
         bits of the ratio fall.
         """
         return np.asarray(
-            settled_ratio(np.abs(self.deviation), self.tolerance) <= 1.0, dtype=bool
+            settled_ratio(np.abs(self.relative_deviation), self.relative_tolerance)
+            <= 1.0,
+            dtype=bool,
         )
 
     @property
@@ -561,7 +563,7 @@ class MobilityResult(OwnsArrays):
         return np.asarray(np.abs(self.mobility), dtype=np.float64)
 
     @property
-    def phase(self) -> np.ndarray:
+    def phase_rad(self) -> np.ndarray:
         """Mobility phase, in radians."""
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 

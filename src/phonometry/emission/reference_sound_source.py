@@ -761,7 +761,7 @@ def _calibration_bands(frequencies: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
 def _hemisphere_levels(
     levels: ArrayLike,
     freqs: np.ndarray,
-    background_levels_db: ArrayLike | None,
+    background_levels: ArrayLike | None,
     maximum_levels_db: ArrayLike | None,
 ) -> PrecisionSoundPowerResult:
     """The surface level over the 2 m hemisphere, refusing levels that are not finite.
@@ -774,7 +774,7 @@ def _hemisphere_levels(
         msg = "'levels' must hold the finite levels of at least one position."
         raise ValueError(msg)
     for name, extra in (
-        ("background_levels_db", background_levels_db),
+        ("background_levels", background_levels),
         ("maximum_levels_db", maximum_levels_db),
     ):
         if extra is not None and not np.all(
@@ -782,7 +782,7 @@ def _hemisphere_levels(
         ):
             msg = f"'{name}' must be finite."
             raise ValueError(msg)
-    if background_levels_db is None:
+    if background_levels is None:
         return sound_power_anechoic(
             levels, "hemisphere", radius=_RADIUS_M, frequencies=freqs
         )
@@ -790,7 +790,7 @@ def _hemisphere_levels(
         levels,
         "hemisphere",
         radius=_RADIUS_M,
-        background_levels=np.asarray(background_levels_db, dtype=np.float64),
+        background_levels=np.asarray(background_levels, dtype=np.float64),
         frequencies=freqs,
     )
 
@@ -870,7 +870,7 @@ def reference_source_calibration(
     *,
     frequencies: ArrayLike,
     arrangement: MicrophoneArrangement,
-    background_levels_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     maximum_levels_db: ArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: RadiationCharacter = "unknown",
@@ -904,7 +904,7 @@ def reference_source_calibration(
     :param arrangement: ``"paths"`` (meridional or spiral paths) or
         ``"fixed"`` (the 20 fixed positions or coaxial circular paths), which
         selects the column of Table 2.
-    :param background_levels_db: Background levels, per position or one
+    :param background_levels: Background levels, per position or one
         spectrum, for the ISO 3745 correction; ``None`` applies none.
     :param maximum_levels_db: For traverses, the highest level recorded on
         each (8.3.2), same shape as ``levels``.
@@ -940,9 +940,7 @@ def reference_source_calibration(
     _column("hemi-anechoic", arrangement)
     air = CalibrationConditions() if conditions is None else conditions
     k = require_positive(coverage_factor, "coverage_factor")
-    precision = _hemisphere_levels(
-        levels, freqs, background_levels_db, maximum_levels_db
-    )
+    precision = _hemisphere_levels(levels, freqs, background_levels, maximum_levels_db)
     lp_bar = precision.surface_pressure_level
     area = 2.0 * math.pi * _RADIUS_M**2
     c1 = _c1_correction(air.temperature_c, air.static_pressure_kpa)

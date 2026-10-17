@@ -174,7 +174,7 @@ mapa queda desviado varios decibelios. De aquí se lee cada uno.
 | Argumento | Qué significa | De dónde se lee | La trampa |
 | :--- | :--- | :--- | :--- |
 | `RoadTraffic.flow_rate` ($Q_m$) | Vehículos de la categoría $m$ por hora | Promedio anual por hora, por periodo temporal (día / tarde / noche), por clase de vehículo y **por línea fuente**, a partir de aforos o de un modelo de tráfico (2.2.1) | Un aforo de hora punta. $Q$ es un promedio anual del periodo, que es lo que convierte el resultado en un ingrediente del $L_\mathrm{den}$ |
-| `RoadTraffic.speed` ($v_m$) | Velocidad representativa de la categoría $m$ | En la mayoría de los casos, la **menor** entre el máximo legal del tramo de vía y el máximo legal de la categoría de vehículo; donde no haya datos de medida locales, el máximo legal de la categoría (2.2.1) | Suponer que hace falta una media medida. No hace falta: el valor por defecto de la norma *es* el límite legal, y los vehículos pesados suelen tener uno más bajo que el del tramo |
+| `RoadTraffic.speed_kmh` ($v_m$) | Velocidad representativa de la categoría $m$ | En la mayoría de los casos, la **menor** entre el máximo legal del tramo de vía y el máximo legal de la categoría de vehículo; donde no haya datos de medida locales, el máximo legal de la categoría (2.2.1) | Suponer que hace falta una media medida. No hace falta: el valor por defecto de la norma *es* el límite legal, y los vehículos pesados suelen tener uno más bajo que el del tramo |
 | `temperature_c` ($\tau$) | Temperatura del aire | La temperatura del aire **promedio anual** del periodo, a partir de datos meteorológicos de largo plazo (2.2.10) | El valor del día de la campaña. Con $K_1 = 0{,}08$ dB/°C, una media anual de 12 °C frente a una tarde de 20 °C son 0,6 dB en el término de rodadura de los ligeros |
 | `RoadTraffic.studded_fraction`, `studded_months` ($Q_{\mathrm{stud,ratio}}$, $T_\mathrm{s}$) | Cuota de flota y temporada | La proporción media de vehículos ligeros por hora con neumáticos con clavos **durante** los meses en que los llevan, y el número de esos meses; el propio método forma $p_\mathrm{s} = Q_{\mathrm{stud,ratio}}\,T_\mathrm{s}/12$ (2.2.7) | Pasar la cuota promediada al año, que aplica $T_\mathrm{s}/12$ dos veces |
 | `junction_distance` ($x$) | Distancia al cruce | Medida a lo largo de la vía desde la fuente puntual hasta la **intersección más próxima de esta línea fuente con otra línea fuente** (2.2.5) | Medir hasta la línea de detención o hasta el bordillo. Es el cruce de líneas, y solo afectan los últimos 100 m |
@@ -444,7 +444,7 @@ neumático, y el ruido de neumático ya es el término de rodadura.
 from phonometry import environment
 
 row = environment.road_surface_coefficients(environment.RoadSurface.TWO_LAYER_ZOAB_FINE)
-row.speed_range          # (80.0, 130.0) km/h, el rango de validez impreso
+row.speed_range_kmh          # (80.0, 130.0) km/h, el rango de validez impreso
 row.alpha["1"]           # alpha por banda de octava para vehículos ligeros
 row.beta["1"]            # -0.1, el coeficiente de velocidad
 ```
@@ -475,8 +475,8 @@ for surface in (environment.RoadSurface.REFERENCE, environment.RoadSurface.TWO_L
                 environment.RoadSurface.SMA_NL8, environment.RoadSurface.HARD_ELEMENTS_NOT_HERRINGBONE):
     row = environment.road_surface_coefficients(surface)
     # La fila de referencia no lleva rango de velocidad: es válida por definición.
-    span = ("todas las velocidades" if row.speed_range is None
-            else "{:g}-{:g} km/h".format(*row.speed_range))
+    span = ("todas las velocidades" if row.speed_range_kmh is None
+            else "{:g}-{:g} km/h".format(*row.speed_range_kmh))
     ax.semilogx(bands, row.alpha["1"], label=f"{surface.value} ({span})")
 ax.axhline(0.0, color="k", lw=0.8)
 ax.set_xlabel("Frecuencia central de banda de octava [Hz]")

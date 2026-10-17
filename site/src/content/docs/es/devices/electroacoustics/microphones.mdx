@@ -360,7 +360,7 @@ corte por cada frecuencia declarada, en un plano que contenga el eje de
 referencia y manteniendo constantes la distancia, la presión acústica y la
 frecuencia mientras se avanza en $\theta$ (13.1.2 a). El **espectro de ruido
 propio** es el desglose en tercios de octava de la medición del apartado 17.2,
-con el ancho de banda del analizador declarado, y el `voltage` único es el valor
+con el ancho de banda del analizador declarado, y el `voltage_v` único es el valor
 eficaz ponderado de esa misma medición. La **curva de distorsión frente a
 nivel** sale de ir subiendo la presión acústica de una fuente de nivel alto
 mientras se mide la distorsión a la salida (15.2.2), y el nivel de sobrecarga se
@@ -383,7 +383,7 @@ result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,          # 12,5 mV/Pa a 1 kHz
     directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # ponderada A, V
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
     overload=electroacoustics.MicrophoneOverload(
@@ -392,7 +392,7 @@ result = electroacoustics.microphone_characteristics(
         thd_percent=0.5,
     ),
     electrical=electroacoustics.MicrophoneElectrical(
-        rated_impedance=150.0, minimum_load_impedance=1000.0,
+        rated_impedance_ohm=150.0, minimum_load_impedance_ohm=1000.0,
         powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
     ),
 )
@@ -430,7 +430,7 @@ leída a través de la ITU-R BS.468-4 con detector de cuasipico se informaría u
 ponerse nunca al lado de una cifra en dB(468) de otra hoja.
 
 Hay una trampa que la API reproduce y que la página tiene que cerrar:
-`MicrophoneNoise.voltage` es la tensión de ruido propio **medida a través de la
+`MicrophoneNoise.voltage_v` es la tensión de ruido propio **medida a través de la
 red de ponderación**, no un valor eficaz de banda ancha en bruto, y `weighting=`
 registra qué red fue esa. Toma en silencio el valor por defecto `'A'`
 (IEC 60268-1 6.2.1). El campo es una *etiqueta, no un filtro*: la función no
@@ -557,7 +557,7 @@ noise_f = np.geomspace(20, 20000, 31)
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,
     noise=electroacoustics.MicrophoneNoise(
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
 )

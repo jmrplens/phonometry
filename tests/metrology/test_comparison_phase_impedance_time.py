@@ -755,7 +755,7 @@ def test_a_zero_ratio_of_one_or_less_is_refused() -> None:
 
 
 def test_a_pulse_of_no_duration_is_refused() -> None:
-    with pytest.raises(ValueError, match="duration_s"):
+    with pytest.raises(ValueError, match="'duration_s' must be positive"):
         metrology.rectangular_pulse(0.0)
 
 

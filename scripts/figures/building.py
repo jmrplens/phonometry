@@ -2364,7 +2364,7 @@ def generate_insulation_adaptation_terms(output_dir: str) -> None:
     # Light: metal-stud double leaf, 12 kg/m2 per leaf, 90 mm cavity, whose
     # mass-air-mass resonance lands at 81.5 Hz and drags the low bands down.
     light_result = building.double_wall_transmission_loss(
-        freqs, mass1=12.0, mass2=12.0, gap=0.09
+        freqs, mass1=12.0, mass2=12.0, gap_m=0.09
     )
     light = np.round(light_result.transmission_loss, 1)
     f0 = light_result.resonance_frequency
@@ -3372,8 +3372,8 @@ def _service_equipment_measurement() -> "ServiceEquipmentResult":
         freqs,
         quantity="eq",
         background_db=background,
-        reverberation_time_s=reverberation,
-        volume_m3=float(np.prod(_SERVICE_ROOM)),
+        reverberation_time=reverberation,
+        volume=float(np.prod(_SERVICE_ROOM)),
     )
 
 

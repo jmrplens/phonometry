@@ -341,7 +341,7 @@ class BackgroundMarginCheck(OwnsArrays):
 
 
 def check_background_margin(
-    levels: ArrayLike, background_levels_db: ArrayLike
+    levels: ArrayLike, background_levels: ArrayLike
 ) -> BackgroundMarginCheck:
     """Does the source stand clear of the background? 5.1.4.
 
@@ -363,17 +363,17 @@ def check_background_margin(
 
     :param levels: :math:`L_p` with the test source running, in decibels,
         one value per measured position of one octave band.
-    :param background_levels_db: The background at the same positions, in
+    :param background_levels: The background at the same positions, in
         decibels, as a scalar or one value per position.
     :return: The verdict, as a :class:`BackgroundMarginCheck`.
     :raises ValueError: For inputs that are not finite or do not match position
         for position.
     """
     levels = require_finite_array(levels, "levels")
-    background = require_finite_array(background_levels_db, "background_levels_db")
+    background = require_finite_array(background_levels, "background_levels")
     if background.size not in (1, levels.size):
         msg = (
-            "'background_levels_db' must be a scalar or match 'levels' "
+            "'background_levels' must be a scalar or match 'levels' "
             "position for position."
         )
         raise ValueError(msg)
@@ -423,7 +423,7 @@ class SpatialDecayResult(OwnsArrays):
     :param mean_excess_db: :math:`\mathrm{DL}_\mathrm{f}(r_n, r_m)` over the
         range, in decibels.
     :param region: ``"near"``, ``"middle"``, ``"far"`` or ``"whole"``.
-    :param band_hz: The nominal octave centre the curve belongs to, in hertz,
+    :param band: The nominal octave centre the curve belongs to, in hertz,
         or ``None`` for a curve that stands for a spectrum.
     """
 
@@ -434,7 +434,7 @@ class SpatialDecayResult(OwnsArrays):
     decay_rate_db: float
     mean_excess_db: float
     region: str
-    band_hz: float | None = None
+    band: float | None = None
 
     def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Draw the curve, the free-field reference and the fitted slope.
@@ -861,7 +861,7 @@ def mean_level_excess(distribution_values_db: ArrayLike, distances: ArrayLike) -
 def level_excess_at(
     distribution_values_db: ArrayLike,
     distances: ArrayLike,
-    distance_m: float,
+    distance: float,
 ) -> float:
     r"""The excess read off the regression line at one distance, Equation (8).
 
@@ -886,14 +886,14 @@ def level_excess_at(
     :param distribution_values_db: :math:`D_i` at the positions of the range,
         in decibels.
     :param distances: :math:`r_i` at the same positions, in metres.
-    :param distance_m: :math:`r`, the distance to read at, in metres.
+    :param distance: :math:`r`, the distance to read at, in metres.
     :return: :math:`\mathrm{DL}'_{\mathrm{f}r}`, in decibels.
     :raises ValueError: For inputs that do not match, fewer than two
         positions, or a non-positive distance.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
     radii = require_positive_array(distances, "distances")
-    target = require_positive(distance_m, "distance_m")
+    target = require_positive(distance, "distance")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
     nearest, farthest = float(np.min(radii)), float(np.max(radii))
@@ -924,7 +924,7 @@ def level_excess_at(
 
 
 def distance_region(
-    distance_m: float,
+    distance: float,
     *,
     near_limit_m: float = TYPICAL_NEAR_LIMIT_M,
     far_limit_m: float = TYPICAL_FAR_LIMIT_M,
@@ -936,7 +936,7 @@ def distance_region(
     boundaries are 5 m and 16 m; other values may be used and are then
     recorded and reported, which is why they are arguments here.
 
-    :param distance_m: The distance from the acoustical centre, in metres.
+    :param distance: The distance from the acoustical centre, in metres.
     :param near_limit_m: :math:`d_1`, in metres.
     :param far_limit_m: :math:`d_2`, in metres.
     :return: ``"near"``, ``"middle"`` or ``"far"``.
@@ -945,7 +945,7 @@ def distance_region(
         near region empty, or a distance inside that first metre, which the
         clause does not evaluate.
     """
-    radius = require_positive(distance_m, "distance_m")
+    radius = require_positive(distance, "distance")
     near = require_positive(near_limit_m, "near_limit_m")
     far = require_positive(far_limit_m, "far_limit_m")
     if far <= near:
@@ -1022,7 +1022,7 @@ def spatial_decay_curve(
     near_limit_m: float = TYPICAL_NEAR_LIMIT_M,
     far_limit_m: float = TYPICAL_FAR_LIMIT_M,
     region: str = "middle",
-    band_hz: float | None = None,
+    band: float | None = None,
 ) -> SpatialDecayResult:
     """The curve of one region with its two descriptors, clause 6.
 
@@ -1033,7 +1033,7 @@ def spatial_decay_curve(
     :param near_limit_m: :math:`d_1` of 6.2, in metres.
     :param far_limit_m: :math:`d_2` of 6.2, in metres.
     :param region: ``"near"``, ``"middle"``, ``"far"`` or ``"whole"``.
-    :param band_hz: The octave centre the curve belongs to, in hertz.
+    :param band: The octave centre the curve belongs to, in hertz.
     :return: The curve and its descriptors, as a :class:`SpatialDecayResult`.
     :raises ValueError: For an unknown region, inputs that do not match, or a
         region holding fewer than two measured positions.
@@ -1080,5 +1080,5 @@ def spatial_decay_curve(
         decay_rate_db=spatial_decay_rate(chosen, chosen_radii),
         mean_excess_db=mean_level_excess(chosen, chosen_radii),
         region=region,
-        band_hz=None if band_hz is None else require_positive(band_hz, "band_hz"),
+        band=None if band is None else require_positive(band, "band"),
     )

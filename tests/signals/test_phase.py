@@ -181,7 +181,16 @@ def test_phase_decomposition_bundles_consistently() -> None:
     delayed = _biquad_response() * np.exp(-1j * omega * delay_samples)
     res = ph.signals.phase_decomposition(delayed, FS)
     np.testing.assert_allclose(
-        res.excess_phase, res.phase - res.minimum_phase, atol=0.0
+        res.excess_phase_rad, res.phase_rad - res.minimum_phase_rad, atol=0.0
+    )
+    # Each part pinned on its own, so a swap of the two cannot hide behind
+    # the identity above: the all-pass part is the pure delay -omega D, and
+    # the minimum-phase part is the biquad's own unwrapped phase.
+    np.testing.assert_allclose(res.excess_phase_rad, -omega * delay_samples, atol=1e-9)
+    np.testing.assert_allclose(
+        res.minimum_phase_rad,
+        np.unwrap(np.angle(_biquad_response())),
+        atol=MINPHASE_TOL_RAD,
     )
     np.testing.assert_allclose(res.magnitude, np.abs(delayed))
     assert res.frequencies[0] == 0.0
@@ -203,7 +212,7 @@ def test_phase_referenced_to_dc() -> None:
     """The measured phase is unwrapped from a zero-DC reference."""
     response = -1.0 * _biquad_response()  # polarity flip: arg = pi at DC
     res = ph.signals.phase_decomposition(response, FS)
-    assert res.phase[0] == 0.0
+    assert res.phase_rad[0] == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -250,9 +259,9 @@ def test_decomposition_parts_must_lie_on_one_grid() -> None:
     fields = (
         "frequencies",
         "magnitude",
-        "phase",
-        "minimum_phase",
-        "excess_phase",
+        "phase_rad",
+        "minimum_phase_rad",
+        "excess_phase_rad",
         "group_delay",
         "excess_group_delay",
         "minimum_phase_response",

@@ -175,7 +175,7 @@ def test_air_absorption_shortens_reverberation() -> None:
     """The 4mV air term adds absorption, so T falls."""
     dry = room.eyring_reverberation_time(VOLUME, UNIFORM_SURFACES)
     humid = room.eyring_reverberation_time(
-        VOLUME, UNIFORM_SURFACES, air_attenuation=0.003
+        VOLUME, UNIFORM_SURFACES, air_attenuation_per_m=0.003
     )
     assert humid < dry
     # Explicit denominator: -S ln0.8 + 4*m*V.
@@ -445,18 +445,22 @@ def test_non_positive_volume_raises() -> None:
 
 def test_negative_air_attenuation_raises() -> None:
     with pytest.raises(
-        ValueError, match=r"'air_attenuation' must be finite and non-negative"
+        ValueError, match=r"'air_attenuation_per_m' must be finite and non-negative"
     ):
-        room.sabine_reverberation_time(VOLUME, UNIFORM_SURFACES, air_attenuation=-1.0)
+        room.sabine_reverberation_time(
+            VOLUME, UNIFORM_SURFACES, air_attenuation_per_m=-1.0
+        )
 
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf])
 def test_non_finite_air_attenuation_raises(bad: float) -> None:
     """NaN used to slip through the old m < 0 comparison and return NaN."""
     with pytest.raises(
-        ValueError, match=r"'air_attenuation' must be finite and non-negative"
+        ValueError, match=r"'air_attenuation_per_m' must be finite and non-negative"
     ):
-        room.sabine_reverberation_time(VOLUME, UNIFORM_SURFACES, air_attenuation=bad)
+        room.sabine_reverberation_time(
+            VOLUME, UNIFORM_SURFACES, air_attenuation_per_m=bad
+        )
 
 
 def test_bad_dimensions_raise() -> None:
@@ -497,7 +501,9 @@ def test_mismatched_air_band_count_raises() -> None:
         ValueError,
         match=r"per-band absorption and air attenuation have incompatible shapes",
     ):
-        room.sabine_reverberation_time(VOLUME, surfaces, air_attenuation=[0.001, 0.002])
+        room.sabine_reverberation_time(
+            VOLUME, surfaces, air_attenuation_per_m=[0.001, 0.002]
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -86,7 +86,7 @@ amplitud formada por la divergencia esférica $1/(4\pi r_n)$, el producto de los
 **factores de reflexión de presión** de pared $R_\mathrm{w} = \sqrt{1 - \alpha_\mathrm{w}}$ cada
 uno elevado al número de reflexiones $k_{w,n}$ que esa imagen hizo en la pared
 $w$, y la pérdida de presión del aire $\mathrm{e}^{-m r_n/2}$ a lo largo del camino ($m$
-el coeficiente de atenuación de potencia (intensidad) en neperios por metro, de modo
+el coeficiente de atenuación de potencia (intensidad) de la ISO 354 8.1.2.1, en 1/m, de modo
 que la intensidad cae como $\mathrm{e}^{-m r}$ y la presión como $\mathrm{e}^{-m r/2}$: el mismo $m$
 que las guías de
 [tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/)
@@ -237,7 +237,7 @@ plt.show()
 **Por banda, por pared y con aire.** Pasa coeficientes por banda (un array por
 pared `(6, n_bandas)`, un vector por banda o una lista `frequencies`) para
 sintetizar un decaimiento por banda de octava; un vector de longitud 6 fija cada
-pared por separado (orden `x0, xL, y0, yL, z0, zL`); y `air_attenuation` (el
+pared por separado (orden `x0, xL, y0, yL, z0, zL`); y `air_attenuation_per_m` (el
 coeficiente de intensidad `m` de `air_attenuation_m`) añade la pérdida de aire
 `exp(-m r / 2)` que se come la cola de altas frecuencias.
 
@@ -282,7 +282,7 @@ for attenuation, style in ((0.0, "-"), (m, "--")):
     banded = room.image_source_rir(
         (7.0, 5.0, 3.0), (2.0, 1.6, 1.5), (5.2, 3.4, 1.7), alpha,
         fs=48000, max_order=60, frequencies=freqs,
-        air_attenuation=attenuation,
+        air_attenuation_per_m=attenuation,
     )
     for row, f in zip(banded.ir, freqs):
         time, level = room.decay_curve(row, banded.fs)
@@ -368,7 +368,7 @@ plt.show()
 | `fs` | int | Hz | > 0 | Frecuencia de muestreo |
 | `max_order` | int | — | ≥ 0, defecto 20 | Corte de orden de reflexión |
 | `speed_of_sound` | float | m/s | > 0, defecto 343 | Velocidad del sonido `c` |
-| `air_attenuation` | float o (n,) | 1/m | ≥ 0, defecto 0 | Coeficiente de intensidad del aire `m` |
+| `air_attenuation_per_m` | float o (n,) | 1/m | ≥ 0, defecto 0 | Coeficiente de intensidad del aire `m` |
 | `duration` | float, opcional | s | > 0 | Longitud de la RIR (defecto: última llegada) |
 | `frequencies` | (n,), opcional | Hz | — | Centros de banda que etiquetan un resultado por banda |
 

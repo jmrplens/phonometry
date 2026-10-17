@@ -147,7 +147,7 @@ level itself is returned either way.
 ```python
 flow_velocity_m_s(
     velocity_pressure_pa: ArrayLike,
-    density_kg_m3: float,
+    density: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -160,7 +160,7 @@ $w = \sqrt{2 p_\mathrm{v} / \rho}$.
 | Name | Description |
 | :--- | :--- |
 | `velocity_pressure_pa` | $p_\mathrm{v}$, in pascals. |
-| `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
+| `density` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $w$, in metres per second.
 
@@ -177,7 +177,7 @@ gas_density_kg_m3(
     *,
     temperature_c: float,
     molar_mass_kg_kmol: float | None = None,
-    ambient_pressure_pa: float = 100000.0,
+    atmospheric_pressure_pa: float = 100000.0,
 ) -> float
 ```
 
@@ -203,7 +203,7 @@ Equation (29) prints it and admits any gas through its molar mass.
 | :--- | :--- |
 | `temperature_c` | $\theta$, in degrees Celsius. |
 | `molar_mass_kg_kmol` | $M$, in kilograms per kilomole. Omit it for air. |
-| `ambient_pressure_pa` | $p_{\text{amb}}$, in pascals. |
+| `atmospheric_pressure_pa` | $p_{\text{amb}}$, in pascals. |
 
 **Returns:** $\rho$, in kilograms per cubic metre.
 
@@ -424,12 +424,12 @@ One of the twenty installations of Figure 1, with its area rules.
 ISO11820_AIR_GAS_CONSTANT_J_KG_K = 287.0
 ```
 
-## ISO11820_AMBIENT_PRESSURE_PA
+## ISO11820_ATMOSPHERIC_PRESSURE_PA
 
 *Constant* (`float`).
 
 ```python
-ISO11820_AMBIENT_PRESSURE_PA = 100000.0
+ISO11820_ATMOSPHERIC_PRESSURE_PA = 100000.0
 ```
 
 ## ISO11820_BACKGROUND_CORRECTIONS_DB
@@ -545,7 +545,7 @@ sound pressure level".
 
 ```python
 measurement_distance_downstream_m(
-    downstream_area_m2: float,
+    downstream_area: float,
     free_area_m2: float,
 ) -> float
 ```
@@ -565,7 +565,7 @@ reported rather than returned as a distance nobody can stand at.
 
 | Name | Description |
 | :--- | :--- |
-| `downstream_area_m2` | $S_\mathrm{d}$, in square metres. |
+| `downstream_area` | $S_\mathrm{d}$, in square metres. |
 | `free_area_m2` | $S_\mathrm{f}$, in square metres. |
 
 **Returns:** $d_\mathrm{d}$, in metres.
@@ -579,7 +579,7 @@ reported rather than returned as a distance nobody can stand at.
 ## measurement_distance_upstream_m
 
 ```python
-measurement_distance_upstream_m(upstream_area_m2: float) -> float
+measurement_distance_upstream_m(upstream_area: float) -> float
 ```
 
 How far upstream the measurement surface stands, Equation (15).
@@ -591,7 +591,7 @@ diameters of the upstream measurement cross-section.
 
 | Name | Description |
 | :--- | :--- |
-| `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
+| `upstream_area` | $S_\mathrm{u}$, in square metres. |
 
 **Returns:** $d_\mathrm{u}$, in metres.
 
@@ -732,7 +732,7 @@ the 10 dB row.
 silencer_flow_velocity_m_s(
     upstream_mean_velocity_m_s: float,
     *,
-    upstream_area_m2: float,
+    upstream_area: float,
     free_area_m2: float,
 ) -> float
 ```
@@ -749,7 +749,7 @@ why 9.2 asks for it rather than for the duct velocity.
 | Name | Description |
 | :--- | :--- |
 | `upstream_mean_velocity_m_s` | $\overline{w_\mathrm{u}}$, in metres per second, the arithmetic mean of Equation (30). |
-| `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
+| `upstream_area` | $S_\mathrm{u}$, in square metres. |
 | `free_area_m2` | $S_\mathrm{f}$, the free cross-section, in square metres. |
 
 **Returns:** $\overline{w_\mathrm{f}}$, in metres per second.
@@ -829,7 +829,7 @@ The measurement is outside a condition ISO 11820 states.
 sound_power_level_db(
     mean_level_db: ArrayLike,
     *,
-    area_m2: ArrayLike,
+    area: ArrayLike,
     field_correction_db: ArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
@@ -852,7 +852,7 @@ have been chosen as 3.3 and 3.4 define them.
 | Name | Description |
 | :--- | :--- |
 | `mean_level_db` | $\overline{L_p}$ per band, in decibels. |
-| `area_m2` | $S$, in square metres. |
+| `area` | $S$, in square metres. |
 | `field_correction_db` | $K$, in decibels. |
 
 **Returns:** $L_W$ per band, in decibels.
@@ -869,10 +869,10 @@ have been chosen as 3.3 and 3.4 define them.
 static_pressure_difference_pa(
     total_pressure_loss_pa: float,
     *,
-    volume_flow_m3_s: float,
-    density_kg_m3: float,
-    upstream_area_m2: float,
-    downstream_area_m2: float,
+    volume_flow: float,
+    density: float,
+    upstream_area: float,
+    downstream_area: float,
 ) -> float
 ```
 
@@ -892,10 +892,10 @@ says in words.
 | Name | Description |
 | :--- | :--- |
 | `total_pressure_loss_pa` | $\Delta p_\mathrm{T}$, in pascals. |
-| `volume_flow_m3_s` | $q_V$, in cubic metres per second. |
-| `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
-| `upstream_area_m2` | $S_\mathrm{u}$, in square metres. |
-| `downstream_area_m2` | $S_\mathrm{d}$, in square metres. |
+| `volume_flow` | $q_V$, in cubic metres per second. |
+| `density` | $\rho$, in kilograms per cubic metre. |
+| `upstream_area` | $S_\mathrm{u}$, in square metres. |
+| `downstream_area` | $S_\mathrm{d}$, in square metres. |
 
 **Returns:** $\Delta p_\mathrm{S}$, in pascals.
 

@@ -153,7 +153,7 @@ delay = int(0.002 * fs)                                     # a 2 ms delay path
 noise = signals.noise_signal(fs, 20.0, rms=0.3, seed=9)     # uncorrelated noise
 y = 0.9 * np.concatenate([np.zeros(delay), x[:-delay]]) + noise
 res = signals.cross_spectral_density(x, y, fs)
-print(res.magnitude_random_error[100], res.phase_std[100])  # bin 100 errors
+print(res.magnitude_random_error[100], res.phase_standard_deviation_rad[100])  # bin 100 errors
 res.plot()   # magnitude, phase with ±sigma band, coherence
 ```
 
@@ -193,9 +193,9 @@ fig, (ax_m, ax_p) = plt.subplots(2, 1, sharex=True)
 ax_m.semilogx(freqs, 10 * np.log10(res.magnitude[band]),
               label="|Gxy| (Welch estimate)")
 ax_m.set_ylabel("Magnitude [dB]")
-ax_p.semilogx(freqs, res.phase[band], label="Unwrapped phase")
-ax_p.fill_between(freqs, res.phase[band] - res.phase_std[band],
-                  res.phase[band] + res.phase_std[band], alpha=0.25,
+ax_p.semilogx(freqs, res.phase_rad[band], label="Unwrapped phase")
+ax_p.fill_between(freqs, res.phase_rad[band] - res.phase_standard_deviation_rad[band],
+                  res.phase_rad[band] + res.phase_standard_deviation_rad[band], alpha=0.25,
                   label="±1 s.d. (Eq. 9.52)")
 ax_p.semilogx(freqs, -2 * np.pi * freqs * tau, "r--",
               label="slope -2·pi·f·tau")

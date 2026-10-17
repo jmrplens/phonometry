@@ -136,18 +136,18 @@ def _rated_rows(
             _range_text(*result.effective_range, language=language),
         ),
     ]
-    if result.rated_impedance is not None:
+    if result.rated_impedance_ohm is not None:
         rows.append(
             (
                 t("Rated impedance", language),
-                f"{fmt_num(result.rated_impedance, language)} {_OHM}",
+                f"{fmt_num(result.rated_impedance_ohm, language)} {_OHM}",
             )
         )
-    if result.minimum_load_impedance is not None:
+    if result.minimum_load_impedance_ohm is not None:
         rows.append(
             (
                 t("Min. load impedance", language),
-                f"{fmt_num(result.minimum_load_impedance, language)} {_OHM}",
+                f"{fmt_num(result.minimum_load_impedance_ohm, language)} {_OHM}",
             )
         )
     rows.extend(_noise_rows(result, language))
@@ -276,7 +276,7 @@ def _statement(result: MicrophoneCharacteristics, language: str = "en") -> str:
     ).format(
         mv=_db_1(result.sensitivity_mv_per_pa, language),
         level=_db_1(result.sensitivity_level_db, language),
-        freq=_freq(result.reference_frequency, language),
+        freq=_freq(result.reference_frequency_hz, language),
         range=_range_text(*result.effective_range, language=language),
         tol=fmt_num(result.tolerance_db, language),
     )

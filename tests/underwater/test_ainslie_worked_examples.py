@@ -206,7 +206,19 @@ def test_detection_range_inverts_spherical_spreading_exactly() -> None:
     """With the absorption switched off by a very low frequency, r = 10^(FOM/20)."""
     res = detection_range(60.0, 1.0, model="thorp")
     assert res.detection_range == pytest.approx(1000.0, rel=1e-6)
-    assert res.absorption_coefficient == pytest.approx(0.0, abs=1e-6)
+    assert res.absorption_db_per_km == pytest.approx(0.0, abs=1e-6)
+
+
+def test_detection_range_records_its_absorption_in_db_per_km() -> None:
+    """At 50 kHz, where sea water absorbs about 15 dB/km, the result keeps
+    the rate of the model it solved with, in dB/km and not in dB/m.
+    """
+    from phonometry.underwater.propagation import seawater_absorption
+
+    res = detection_range(82.7, 50e3, temperature_c=4.0, salinity=35.0, depth=50.0)
+    alpha = seawater_absorption(50e3, temperature_c=4.0, salinity=35.0, depth=50.0)
+    assert res.absorption_db_per_km == pytest.approx(float(alpha[0]), rel=1e-12)
+    assert res.absorption_db_per_km > 10.0
 
 
 def test_detection_range_matches_the_loss_it_inverts() -> None:

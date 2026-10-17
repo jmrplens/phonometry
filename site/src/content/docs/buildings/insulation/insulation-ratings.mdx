@@ -172,7 +172,7 @@ heavy = np.round(building.single_panel_transmission_loss(
     freqs, 345.0, critical_frequency=125.0).transmission_loss, 1)
 # Metal-stud double leaf: 12 kg/m2 per leaf, 90 mm cavity.
 light_result = building.double_wall_transmission_loss(freqs, mass1=12.0,
-                                                      mass2=12.0, gap=0.09)
+                                                      mass2=12.0, gap_m=0.09)
 light = np.round(light_result.transmission_loss, 1)
 
 w_heavy = building.weighted_rating(heavy)

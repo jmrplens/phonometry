@@ -118,7 +118,11 @@ DAMPING_TEST_MASS_TOLERANCE = 0.01
 ## mean_of_test_runs
 
 ```python
-mean_of_test_runs(values: ArrayLike, *, tolerance: float = 0.05) -> float
+mean_of_test_runs(
+    values: ArrayLike,
+    *,
+    relative_tolerance: float = 0.05,
+) -> float
 ```
 
 The arithmetic mean of the runs of one test (10.2.1, 10.3).
@@ -133,7 +137,7 @@ here rather than quietly returned.
 | Name | Description |
 | :--- | :--- |
 | `values` | The r.m.s. accelerations of the runs, one per reading, in any consistent unit. Three of them, as the standard asks; a different count is accepted rather than enforced, because 10.2.1 asks for three runs that *agree*, and its own warm-up note recommends discarding the first reading of each series, which leaves a laboratory holding a different number of them. Two is the floor: a spread needs two readings to exist. |
-| `tolerance` | The permitted spread as a fraction of the mean; [`RUN_AGREEMENT_TOLERANCE`](/phonometry/reference/api/vibration/seat-vibration/#run_agreement_tolerance) by default. |
+| `relative_tolerance` | The permitted spread as a fraction of the mean; [`RUN_AGREEMENT_TOLERANCE`](/phonometry/reference/api/vibration/seat-vibration/#run_agreement_tolerance) by default. |
 
 **Returns:** The arithmetic mean, in the unit the values were given in.
 
@@ -214,7 +218,7 @@ seat_transmission(
     seat_runs: ArrayLike,
     platform_runs: ArrayLike,
     *,
-    tolerance: float = 0.05,
+    relative_tolerance: float = 0.05,
 ) -> SeatTransmissionResult
 ```
 
@@ -231,7 +235,7 @@ this is stricter than the clause.
 | :--- | :--- |
 | `seat_runs` | The frequency-weighted r.m.s. accelerations measured at the seat, one per run, in metres per second squared. |
 | `platform_runs` | The same at the platform, one per run. |
-| `tolerance` | The permitted spread of each set, as a fraction of its mean. |
+| `relative_tolerance` | The permitted spread of each set, as a fraction of its mean. |
 
 **Returns:** The test, as a [`SeatTransmissionResult`](/phonometry/reference/api/vibration/seat-vibration/#seattransmissionresult).
 

@@ -314,7 +314,11 @@ supplies the target `D2m,nT,w`.
 ## outdoor_attenuation
 
 ```python
-outdoor_attenuation(width: float, height_m: float, distance: float) -> float
+outdoor_attenuation(
+    width_m: float,
+    height_m: float,
+    distance: float,
+) -> float
 ```
 
 Simplified attenuation `Atot` of a finite side (EN 12354-4 Annex E).
@@ -333,7 +337,7 @@ into the quarter-space over hard ground is built into the formula.
 
 | Name | Description |
 | :--- | :--- |
-| `width` | Side width `L`, in m. |
+| `width_m` | Side width `L`, in m. |
 | `height_m` | Side height `H`, in m. |
 | `distance` | Perpendicular distance `d` to the reception point, in m. |
 

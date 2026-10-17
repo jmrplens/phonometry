@@ -218,7 +218,7 @@ class SweptSineDistortionResult(OwnsArrays):
     :ivar delays: Arrival advances :math:`L \ln(n)` of each order before
         the linear response, in seconds.
     :ivar thd_frequencies: Excitation-frequency axis of the THD curve, Hz.
-    :ivar thd: Total harmonic distortion at each excitation frequency
+    :ivar thd_ratio: Total harmonic distortion at each excitation frequency
         :math:`f`:
         :math:`\sqrt{\sum_n \lvert H_n(n f) \rvert^2} / \lvert H_1(f)
         \rvert` over the orders available below Nyquist and inside their
@@ -240,7 +240,7 @@ class SweptSineDistortionResult(OwnsArrays):
     harmonic_irs: NDArray[np.float64]
     delays: NDArray[np.float64]
     thd_frequencies: NDArray[np.float64]
-    thd: NDArray[np.float64]
+    thd_ratio: NDArray[np.float64]
     distortion_ratios: NDArray[np.float64]
     fs: float
     f1: float
@@ -256,7 +256,7 @@ class SweptSineDistortionResult(OwnsArrays):
         the readers cross them: :meth:`plot` labels row ``k`` of
         :attr:`harmonic_responses` as order ``k + 1``, band-limits it to
         ``[n f1, n f2]`` computed from that label, and draws the survivors over
-        :attr:`frequencies`; the THD panel pairs :attr:`thd` with
+        :attr:`frequencies`; the THD panel pairs :attr:`thd_ratio` with
         :attr:`thd_frequencies` point by point. A row missing from the response
         matrix moves every higher order down one label and band-limits it to
         the window of an order it is not, which leaves a plausible curve drawn
@@ -283,7 +283,7 @@ class SweptSineDistortionResult(OwnsArrays):
             harmonic_irs=2,
             delays=1,
             thd_frequencies=1,
-            thd=1,
+            thd_ratio=1,
             distortion_ratios=2,
         )
         require_same_length(
@@ -299,7 +299,7 @@ class SweptSineDistortionResult(OwnsArrays):
         require_same_length(
             self,
             "thd_frequencies",
-            "thd",
+            "thd_ratio",
             ("distortion_ratios", 1),
             axis="excitation frequency",
         )
@@ -642,7 +642,7 @@ def swept_sine_distortion(
         Accepts a :class:`phonometry.io.Signal`, whose calibration is
         applied to the samples: ``harmonic_responses`` and ``harmonic_irs``
         carry the unit and so come out in pascals per unit of excitation,
-        while ``thd`` and ``distortion_ratios`` are ratios of harmonics
+        while ``thd_ratio`` and ``distortion_ratios`` are ratios of harmonics
         drawn from the same record and do not move.
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
@@ -737,7 +737,7 @@ def swept_sine_distortion(
         harmonic_irs=irs,
         delays=delays_samples / fs_v,
         thd_frequencies=thd_freqs,
-        thd=thd,
+        thd_ratio=thd,
         distortion_ratios=ratios,
         fs=fs_v,
         f1=f1_v,

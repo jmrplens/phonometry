@@ -1398,7 +1398,7 @@ def _chk_iso10140_1_formula_k1() -> Outcome:
         60.0 - 10.0 * math.log10(2.0) + 10.0 * math.log10(100.0) - 14.0
     ) - 10.0 * math.log10(4.0)
     res = ph.building.rainfall_sound(
-        [60.0], [2.0], [1000.0], volume_m3=100.0, excited_area_m2=4.0
+        [60.0], [2.0], [1000.0], volume=100.0, excited_area_m2=4.0
     )
     return numeric(expected, float(res.l_i_db[0]), 1e-12, unit="dB", places=6)
 
@@ -2290,8 +2290,8 @@ def _chk_vigran_plenum_convergence() -> Outcome:
         [100.0],
         ceiling_length=4.75,
         plenum_height_m=0.43,
-        attenuation_source=[1e-5],
-        attenuation_receiving=[1e-5],
+        attenuation_source_per_m=[1e-5],
+        attenuation_receiving_per_m=[1e-5],
     )
     return numeric(
         float(undamped.reduction_index[0]),
@@ -3037,7 +3037,7 @@ def _chk_iso10846_4_rigid_block() -> Outcome:
     f = np.geomspace(10.0, 5000.0, 50)
     force = np.full(f.size, 10.0 + 0j)
     a = force / 25.0
-    em = ph.vibration.effective_blocking_mass(f, force, a, a, blocking_mass_kg=25.0)
+    em = ph.vibration.effective_blocking_mass(f, force, a, a, blocking_mass=25.0)
     worst = float(np.max(np.abs(em.effective_mass_kg - 25.0)))
     return numeric(0.0, worst, 1e-12, unit="kg", places=6)
 
@@ -3053,7 +3053,7 @@ def _chk_iso10846_4_f3() -> Outcome:
     ones = np.ones(f.size, dtype=complex)
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     em = ph.vibration.effective_blocking_mass(
-        f, m_eff * ones, ones, ones, blocking_mass_kg=m2
+        f, m_eff * ones, ones, ones, blocking_mass=m2
     )
     expected = fc * math.sqrt(
         10.0 ** (ref.ISO10846_4_EFFECTIVE_MASS_TOL_DB / 20.0) - 1.0

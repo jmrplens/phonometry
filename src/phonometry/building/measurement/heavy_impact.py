@@ -236,7 +236,7 @@ class HeavyImpactSourceSpec(RichDisplay):
     :ivar name: ``"rubber_ball"`` or ``"bang_machine"``.
     :ivar frequencies: Octave-band centre frequencies, in Hz.
     :ivar force_exposure_level: Nominal ``LFE`` per band, in dB re 1 N.
-    :ivar tolerance: Tolerance on ``LFE`` per band, in dB.
+    :ivar tolerance_db: Tolerance on ``LFE`` per band, in dB.
     :ivar drop_height_m: Free-fall drop height, in m.
     :ivar drop_height_tolerance_m: Tolerance on the drop height, in m.
     :ivar effective_mass: Effective (equivalent) mass of the source, in kg.
@@ -252,7 +252,7 @@ class HeavyImpactSourceSpec(RichDisplay):
     name: str
     frequencies: tuple[float, ...]
     force_exposure_level: tuple[float, ...]
-    tolerance: tuple[float, ...]
+    tolerance_db: tuple[float, ...]
     drop_height_m: float
     drop_height_tolerance_m: float
     effective_mass: float
@@ -273,7 +273,7 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
         name="rubber_ball",
         frequencies=HEAVY_IMPACT_OCTAVE_BANDS_HZ,
         force_exposure_level=tuple(v for v, _ in HEAVY_IMPACT_SOURCES["rubber_ball"]),
-        tolerance=tuple(t for _, t in HEAVY_IMPACT_SOURCES["rubber_ball"]),
+        tolerance_db=tuple(t for _, t in HEAVY_IMPACT_SOURCES["rubber_ball"]),
         drop_height_m=1.00,
         drop_height_tolerance_m=0.01,
         effective_mass=2.5,
@@ -291,7 +291,7 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
         name="bang_machine",
         frequencies=HEAVY_IMPACT_OCTAVE_BANDS_HZ,
         force_exposure_level=tuple(v for v, _ in HEAVY_IMPACT_SOURCES["bang_machine"]),
-        tolerance=tuple(t for _, t in HEAVY_IMPACT_SOURCES["bang_machine"]),
+        tolerance_db=tuple(t for _, t in HEAVY_IMPACT_SOURCES["bang_machine"]),
         drop_height_m=0.85,
         drop_height_tolerance_m=0.0,
         effective_mass=7.3,
@@ -335,7 +335,7 @@ def heavy_impact_source_limits(
     """
     spec = heavy_impact_source_specification(source)
     nominal = np.asarray(spec.force_exposure_level, dtype=np.float64)
-    tol = np.asarray(spec.tolerance, dtype=np.float64)
+    tol = np.asarray(spec.tolerance_db, dtype=np.float64)
     return (
         np.asarray(spec.frequencies, dtype=np.float64),
         nominal - tol,
@@ -454,9 +454,9 @@ class HeavyImpactSourceCheck(OwnsArrays):
         return np.asarray(_SPECS[self.source].force_exposure_level, dtype=np.float64)
 
     @property
-    def tolerance(self) -> np.ndarray:
+    def tolerance_db(self) -> np.ndarray:
         """Printed tolerance per band, in dB."""
-        return np.asarray(_SPECS[self.source].tolerance, dtype=np.float64)
+        return np.asarray(_SPECS[self.source].tolerance_db, dtype=np.float64)
 
     @property
     def deviation(self) -> np.ndarray:
@@ -469,7 +469,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
     @property
     def within_tolerance(self) -> np.ndarray:
         """Per-band boolean mask of conforming bands."""
-        return np.asarray(np.abs(self.deviation) <= self.tolerance, dtype=bool)
+        return np.asarray(np.abs(self.deviation) <= self.tolerance_db, dtype=bool)
 
     @property
     def passes(self) -> bool:

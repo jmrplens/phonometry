@@ -553,7 +553,7 @@ def logarithmic_wind_speed(
     *,
     height_m: float,
     reference_height_m: float,
-    roughness_length_m: float = REFERENCE_ROUGHNESS_LENGTH_M,
+    roughness_length: float = REFERENCE_ROUGHNESS_LENGTH_M,
 ) -> NDArray[np.float64] | float:
     r"""Wind speed at another height by the logarithmic profile.
 
@@ -566,7 +566,7 @@ def logarithmic_wind_speed(
     :param reference_speed_m_s: Wind speed at the reference height, in m/s.
     :param height_m: Height of the wanted wind speed, in m.
     :param reference_height_m: Height of the known wind speed, in m.
-    :param roughness_length_m: Roughness length :math:`z_0`, in m.
+    :param roughness_length: Roughness length :math:`z_0`, in m.
     :return: The wind speed at ``height_m``, in m/s; a ``float`` for scalar
         inputs.
     :raises ValueError: If a height or the roughness length is not positive,
@@ -574,7 +574,7 @@ def logarithmic_wind_speed(
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
-    z0 = require_positive(roughness_length_m, "roughness_length_m")
+    z0 = require_positive(roughness_length, "roughness_length")
     if z <= z0 or z_ref <= z0:
         msg = "Both heights must exceed the roughness length."
         raise ValueError(msg)
@@ -1040,7 +1040,7 @@ class TurbineSoundLevels(OwnsArrays):
     """Background-corrected wind turbine levels per bin (10.3.2, 11.7).
 
     :ivar total_levels_db: The total (turbines on) bin levels, in dB.
-    :ivar background_levels_db: The background (turbines off) bin levels.
+    :ivar background_levels: The background (turbines off) bin levels.
     :ivar level_differences_db: Total minus background, in dB.
     :ivar turbine_levels_db: The turbine level :math:`L_{c,k}`, in dB:
         Equation (6) where the difference is at least 3 dB, the total minus
@@ -1059,7 +1059,7 @@ class TurbineSoundLevels(OwnsArrays):
     """
 
     total_levels_db: NDArray[np.float64]
-    background_levels_db: NDArray[np.float64]
+    background_levels: NDArray[np.float64]
     level_differences_db: NDArray[np.float64]
     turbine_levels_db: NDArray[np.float64]
     turbine_uncertainty_db: NDArray[np.float64]
@@ -1085,7 +1085,7 @@ class TurbineSoundLevels(OwnsArrays):
         require_ranks(
             self,
             total_levels_db=1,
-            background_levels_db=1,
+            background_levels=1,
             level_differences_db=1,
             turbine_levels_db=1,
             turbine_uncertainty_db=1,
@@ -1093,14 +1093,14 @@ class TurbineSoundLevels(OwnsArrays):
         require_same_length(
             self,
             "total_levels_db",
-            "background_levels_db",
+            "background_levels",
             "level_differences_db",
             "turbine_levels_db",
             "turbine_uncertainty_db",
             axis="bin",
         )
         total = np.asarray(self.total_levels_db, dtype=np.float64)
-        background = np.asarray(self.background_levels_db, dtype=np.float64)
+        background = np.asarray(self.background_levels, dtype=np.float64)
         levels = _turbine_levels(total, background)
         for name, expected, rule in (
             (
@@ -1135,14 +1135,14 @@ class TurbineSoundLevels(OwnsArrays):
     def regimes(self) -> tuple[BackgroundCorrectionRegime, ...]:
         """The :class:`BackgroundCorrectionRegime` of each bin (11.7).
 
-        Read from :attr:`total_levels_db` and :attr:`background_levels_db`:
+        Read from :attr:`total_levels_db` and :attr:`background_levels`:
         the logarithmic subtraction where the total is at least 3 dB above the
         background, the 3 dB correction where it is at least 0 dB but less
         than 3 dB above, and undetermined where the background is louder. A
         difference within a nanodecibel of 3 dB or of 0 dB is on that limit.
         """
         difference = np.asarray(self.total_levels_db) - np.asarray(
-            self.background_levels_db
+            self.background_levels
         )
         return tuple(_correction_regime(float(delta)) for delta in difference)
 
@@ -1210,7 +1210,7 @@ def _turbine_levels(
 
 def turbine_sound_levels(
     total_levels_db: ArrayLike,
-    background_levels_db: ArrayLike,
+    background_levels: ArrayLike,
     *,
     total_uncertainty_db: ArrayLike = 0.0,
     background_uncertainty_db: ArrayLike = 0.0,
@@ -1231,7 +1231,7 @@ def turbine_sound_levels(
     other.
 
     :param total_levels_db: Bin levels with the turbines operating, in dB.
-    :param background_levels_db: Bin levels with the turbines off, in dB.
+    :param background_levels: Bin levels with the turbines off, in dB.
     :param total_uncertainty_db: Combined standard uncertainty of each total
         level, Equation (5), in dB; NaN for a bin of one interval, whose
         uncertainty Equation (2) cannot give.
@@ -1246,9 +1246,9 @@ def turbine_sound_levels(
         or an uncertainty is infinite or negative.
     """
     total = require_finite_array(total_levels_db, "total_levels_db")
-    background = require_finite_array(background_levels_db, "background_levels_db")
+    background = require_finite_array(background_levels, "background_levels")
     if total.size != background.size:
-        msg = "'total_levels_db' and 'background_levels_db' must pair bin by bin."
+        msg = "'total_levels_db' and 'background_levels' must pair bin by bin."
         raise ValueError(msg)
     u_t = np.broadcast_to(
         np.asarray(total_uncertainty_db, dtype=np.float64), total.shape
@@ -1282,7 +1282,7 @@ def turbine_sound_levels(
             uncertainty[i] = u_t[i]
     return TurbineSoundLevels(
         total_levels_db=total,
-        background_levels_db=background,
+        background_levels=background,
         level_differences_db=read_only(difference),
         turbine_levels_db=read_only(corrected),
         turbine_uncertainty_db=read_only(uncertainty),
@@ -1580,7 +1580,7 @@ class LowFrequencyLevel(OwnsArrays):
 def wind_turbine_low_frequency_level(
     sound_power_levels_db: ArrayLike,
     *,
-    distance_m: ArrayLike,
+    distance: ArrayLike,
     hub_height_m: ArrayLike,
     frequencies: ArrayLike = LOW_FREQUENCY_BANDS_HZ,
     ground_correction_db: ArrayLike | None = None,
@@ -1605,7 +1605,7 @@ def wind_turbine_low_frequency_level(
 
     :param sound_power_levels_db: Band sound power levels from IEC 61400-11,
         in dB: one row per turbine, or one row for a single turbine.
-    :param distance_m: Horizontal distance :math:`l` from each tower to the
+    :param distance: Horizontal distance :math:`l` from each tower to the
         receptor, in m (scalar or one per turbine).
     :param hub_height_m: Hub height :math:`h` of each turbine, in m.
     :param frequencies: Nominal centre of each column, in Hz (10 Hz to
@@ -1642,9 +1642,9 @@ def wind_turbine_low_frequency_level(
         )
         raise ValueError(msg)
     turbines = power.shape[0]
-    distances = np.broadcast_to(np.asarray(distance_m, dtype=np.float64), (turbines,))
+    distances = np.broadcast_to(np.asarray(distance, dtype=np.float64), (turbines,))
     heights = np.broadcast_to(np.asarray(hub_height_m, dtype=np.float64), (turbines,))
-    for name, values in (("distance_m", distances), ("hub_height_m", heights)):
+    for name, values in (("distance", distances), ("hub_height_m", heights)):
         if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
             msg = f"'{name}' must be finite and positive."
             raise ValueError(msg)
@@ -1735,13 +1735,13 @@ class SoundEmergence(OwnsArrays):
     r"""The emergence criterion per wind speed class (Annex J, Equation (J.1)).
 
     :ivar ambient_levels_db: The ambient sound criterion per class, in dB.
-    :ivar background_levels_db: The background sound criterion per class.
+    :ivar background_levels: The background sound criterion per class.
     :ivar emergence_db: :math:`E(j) = L_\mathrm{Amb}(j) - L_\mathrm{Res}(j)`.
     :ivar wind_speeds_m_s: The wind speed classes, in m/s, when given.
     """
 
     ambient_levels_db: NDArray[np.float64]
-    background_levels_db: NDArray[np.float64]
+    background_levels: NDArray[np.float64]
     emergence_db: NDArray[np.float64]
     _: KW_ONLY
     wind_speeds_m_s: NDArray[np.float64] | None
@@ -1766,7 +1766,7 @@ class SoundEmergence(OwnsArrays):
 
 def sound_emergence(
     ambient_levels_db: ArrayLike,
-    background_levels_db: ArrayLike,
+    background_levels: ArrayLike,
     *,
     wind_speeds_m_s: ArrayLike | None = None,
 ) -> SoundEmergence:
@@ -1780,15 +1780,15 @@ def sound_emergence(
     background.
 
     :param ambient_levels_db: The ambient sound criterion of each class, in dB.
-    :param background_levels_db: The background sound criterion of each class.
+    :param background_levels: The background sound criterion of each class.
     :param wind_speeds_m_s: Optional wind speed of each class, in m/s.
     :return: A :class:`SoundEmergence`.
     :raises ValueError: If the inputs disagree in length or are not finite.
     """
     ambient = require_finite_array(ambient_levels_db, "ambient_levels_db")
-    background = require_finite_array(background_levels_db, "background_levels_db")
+    background = require_finite_array(background_levels, "background_levels")
     if ambient.size != background.size:
-        msg = "'ambient_levels_db' and 'background_levels_db' must pair class by class."
+        msg = "'ambient_levels_db' and 'background_levels' must pair class by class."
         raise ValueError(msg)
     speeds = None
     if wind_speeds_m_s is not None:
@@ -1798,7 +1798,7 @@ def sound_emergence(
             raise ValueError(msg)
     return SoundEmergence(
         ambient_levels_db=ambient,
-        background_levels_db=background,
+        background_levels=background,
         emergence_db=read_only(ambient - background),
         wind_speeds_m_s=speeds,
     )
@@ -1926,7 +1926,7 @@ def wind_turbine_rating_level(
 class ToneSearchLimit(OwnsArrays):
     """The upper frequency of the tonal search range (12.5.2.4).
 
-    :ivar distance_m: Distance from the nearest turbine, in m.
+    :ivar distance: Distance from the nearest turbine, in m.
     :ivar frequencies: The nominal one-third-octave centres searched.
     :ivar attenuation_db: ISO 9613-1 attenuation of each band over the
         distance, at the exact mid-band frequency, in dB.
@@ -1934,17 +1934,17 @@ class ToneSearchLimit(OwnsArrays):
         attenuated by at least 20 dB, or 10 kHz when none is.
     :ivar temperature_c: Air temperature, in degrees C.
     :ivar relative_humidity_percent: Relative humidity, in %.
-    :ivar atmospheric_pressure_kpa: Atmospheric pressure, in kPa.
+    :ivar static_pressure_kpa: Atmospheric pressure, in kPa.
     """
 
-    distance_m: float
+    distance: float
     frequencies: NDArray[np.float64]
     attenuation_db: NDArray[np.float64]
     upper_frequency_hz: float
     _: KW_ONLY
     temperature_c: float
     relative_humidity_percent: float
-    atmospheric_pressure_kpa: float
+    static_pressure_kpa: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1965,11 +1965,11 @@ class ToneSearchLimit(OwnsArrays):
 
 
 def upper_tone_search_frequency(
-    distance_m: float,
+    distance: float,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 ) -> ToneSearchLimit:
     """Upper frequency of the search for tones at a receptor (12.5.2.4).
 
@@ -1981,23 +1981,23 @@ def upper_tone_search_frequency(
     reproduces the printed rows of Table 7; the search stops at 10 kHz, the
     top of ISO 9613-1, when no band reaches 20 dB.
 
-    :param distance_m: Distance from the source to the receiver, in m.
+    :param distance: Distance from the source to the receiver, in m.
     :param temperature_c: Air temperature, in degrees C.
     :param relative_humidity_percent: Relative humidity, in %.
-    :param atmospheric_pressure_kpa: Atmospheric pressure, in kPa.
+    :param static_pressure_kpa: Atmospheric pressure, in kPa.
     :return: A :class:`ToneSearchLimit`.
     :raises ValueError: If the distance is not positive or the atmosphere is
         outside what ISO 9613-1 accepts.
     """
     from ..propagation.air_absorption import air_attenuation
 
-    distance = require_positive(distance_m, "distance_m")
+    distance = require_positive(distance, "distance")
     alpha = np.asarray(
         air_attenuation(
             TONE_SEARCH_BANDS_HZ,
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
-            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            static_pressure_kpa=static_pressure_kpa,
             exact_midband=True,
         ),
         dtype=np.float64,
@@ -2010,11 +2010,11 @@ def upper_tone_search_frequency(
         else float(TONE_SEARCH_BANDS_HZ[-1])
     )
     return ToneSearchLimit(
-        distance_m=distance,
+        distance=distance,
         frequencies=TONE_SEARCH_BANDS_HZ,
         attenuation_db=read_only(attenuation),
         upper_frequency_hz=upper,
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),
-        atmospheric_pressure_kpa=float(atmospheric_pressure_kpa),
+        static_pressure_kpa=float(static_pressure_kpa),
     )

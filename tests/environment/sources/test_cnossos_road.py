@@ -202,7 +202,7 @@ def test_octave_bands_are_the_corrected_range() -> None:
 def test_table_f4_speed_ranges(surface: RoadSurface) -> None:
     """The validity ranges printed in the two leading columns of Table F-4."""
     expected = ref.CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE[surface.value]
-    assert road_surface_coefficients(surface).speed_range == expected
+    assert road_surface_coefficients(surface).speed_range_kmh == expected
 
 
 def test_temperature_coefficients_match_the_directive() -> None:
@@ -675,7 +675,9 @@ def test_unknown_category_and_surface_are_rejected() -> None:
 
 
 def test_invalid_inputs_are_rejected() -> None:
-    with pytest.raises(ValueError, match="'speed' must be a positive number of km/h"):
+    with pytest.raises(
+        ValueError, match="'speed_kmh' must be a positive number of km/h"
+    ):
         road_rolling_noise("1", 0.0)
     with pytest.raises(ValueError, match=r"'temperature_c' must be a finite number"):
         road_rolling_noise("1", 50.0, temperature_c=float("nan"))
@@ -791,7 +793,7 @@ def test_incomplete_surface_row_is_rejected_as_an_invalid_input() -> None:
         name="light vehicles only",
         alpha={"1": published.alpha["1"]},
         beta={"1": published.beta["1"]},
-        speed_range=published.speed_range,
+        speed_range_kmh=published.speed_range_kmh,
     )
     assert road_rolling_noise("1", 70.0, surface=partial).shape == (8,)
     with pytest.raises(ValueError, match="no coefficients for category '2'"):

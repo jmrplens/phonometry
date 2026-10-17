@@ -98,12 +98,12 @@ wells = [
 ]
 
 f = np.arange(1800.0, 2601.0, 5.0)
-panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period_m=0.07)
+panel = materials.metadiffuser_reflection(f, wells, depth_m=0.02, period_m=0.07)
 alpha1 = panel.well_absorption[0]
 print(round(float(alpha1.max()), 2), int(f[alpha1.argmax()]))  # 0.99 2305
 
 # Far-field comparison: the five-well sequence repeated six times (2.1 m).
-polar = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02,
+polar = materials.metadiffuser_polar_response(2000.0, wells, depth_m=0.02,
                                               period_m=0.07, repetitions=6)
 print(round(polar.coefficient, 2))                             # 0.32
 ```
@@ -135,7 +135,7 @@ wells = [
 
 # The metadiffuser panel and the QRD it was tuned to at 2 kHz, both with
 # six repetitions of the period_m (2.1 m panels).
-meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period_m=0.07,
+meta = materials.metadiffuser_polar_response(2000.0, wells, depth_m=0.02, period_m=0.07,
                                              repetitions=6)
 sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
 depths = sequence * (343.0 / 500.0) / (2 * 5)
@@ -185,7 +185,7 @@ from phonometry import materials
 
 # wells: the five published slits from the example above.
 panel = materials.metadiffuser_reflection(np.array([2000.0]), wells,
-                                          depth=0.02, period_m=0.07)
+                                          depth_m=0.02, period_m=0.07)
 phases = np.degrees(np.angle(panel.reflection[:, 0]))
 print(np.round(np.abs(panel.reflection[:, 0]), 2))  # [0.97 1.   1.   0.97 0.98]
 print(np.round(phases))                             # [ 75. -71. -71.  74.   2.]

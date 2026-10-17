@@ -411,7 +411,7 @@ def _validate_point(
 def _resolve_band_maps(
     reflection: NDArray[np.float64],
     n_alpha_bands: int,
-    air_attenuation: ArrayLike,
+    air_attenuation_per_m: ArrayLike,
     freq: np.ndarray | None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], int, bool]:
     """Resolve the per-band reflection map, air map, band count and flag.
@@ -421,18 +421,18 @@ def _resolve_band_maps(
     broadband curve).
 
     :raises ValueError: for a non-finite/negative or multi-dimensional air
-        attenuation, or an ``absorption`` / ``air_attenuation`` band count
+        attenuation, or an ``absorption`` / ``air_attenuation_per_m`` band count
         that neither is 1 nor matches the resolved band count.
     """
-    m = np.asarray(air_attenuation, dtype=np.float64)
+    m = np.asarray(air_attenuation_per_m, dtype=np.float64)
     if m.ndim > 1:
         msg = (
-            "'air_attenuation' must be a scalar or a 1-D per-band vector; "
+            "'air_attenuation_per_m' must be a scalar or a 1-D per-band vector; "
             f"got shape {m.shape}."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(m)) or np.any(m < 0.0):
-        msg = "'air_attenuation' must be finite and non-negative."
+        msg = "'air_attenuation_per_m' must be finite and non-negative."
         raise ValueError(msg)
     banded = freq is not None or n_alpha_bands > 1 or m.size > 1
     if freq is not None:
@@ -452,7 +452,7 @@ def _resolve_band_maps(
         raise ValueError(msg)
     if m.size not in (1, n_bands):
         msg = (
-            f"'air_attenuation' has {m.size} bands but the result has "
+            f"'air_attenuation_per_m' has {m.size} bands but the result has "
             f"{n_bands}; they must match."
         )
         raise ValueError(msg)
@@ -563,7 +563,7 @@ def image_source_rir(
     fs: int,
     max_order: int = 20,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-    air_attenuation: ArrayLike = 0.0,
+    air_attenuation_per_m: ArrayLike = 0.0,
     duration: float | None = None,
     frequencies: ArrayLike | None = None,
 ) -> ImageSourceResult:
@@ -604,8 +604,10 @@ def image_source_rir(
         up to order ``i0`` (Kuttruff Equation (9.23)). Default 20.
     :param speed_of_sound: Speed of sound ``c``, m/s (default
         343 m/s, dry air at 20 °C).
-    :param air_attenuation: Air *intensity* attenuation constant ``m``, in
-        neper per metre (scalar or per-band); the pressure amplitude of each
+    :param air_attenuation_per_m: Air *intensity* attenuation coefficient ``m``,
+        in reciprocal metres (the power attenuation coefficient of ISO 354
+        8.1.2.1, :math:`m = \alpha / (10 \lg \mathrm{e})`), scalar or
+        per-band; the pressure amplitude of each
         path is scaled by :math:`\mathrm{e}^{-m r / 2}` (Kuttruff 4.1). Default 0 (air
         absorption neglected). Obtain a physical ``m`` from
         :func:`~phonometry.environment.propagation.air_absorption.air_attenuation_m`.
@@ -619,7 +621,7 @@ def image_source_rir(
         lengths, a non-positive sample rate, a non-integer or negative
         ``max_order``, a source/receiver outside the room, an absorption
         outside ``[0, 1]`` or of an unsupported shape, a negative
-        ``air_attenuation``, or a ``frequencies`` length that does not match
+        ``air_attenuation_per_m``, or a ``frequencies`` length that does not match
         the band count.
     """
     d = np.asarray(dimensions, dtype=np.float64)
@@ -664,7 +666,7 @@ def image_source_rir(
         n_freq = freq.size
     reflection, n_alpha_bands = _resolve_walls(absorption, n_freq)
     reflection, m_bands, n_bands, banded = _resolve_band_maps(
-        reflection, n_alpha_bands, air_attenuation, freq
+        reflection, n_alpha_bands, air_attenuation_per_m, freq
     )
 
     times, distances, orders, positions, counts = _image_lattice(

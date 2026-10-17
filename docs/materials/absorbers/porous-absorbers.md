@@ -125,7 +125,7 @@ db = materials.delany_bazley(f, 20000.0)          # sigma in Pa s/m2
 mk = materials.miki(f, 20000.0)
 jca = materials.johnson_champoux_allard(
     f, 20000.0, porosity=0.98, tortuosity=1.0,
-    viscous_length=8.7e-5, thermal_length=8.7e-5,
+    viscous_length_m=8.7e-5, thermal_length_m=8.7e-5,
 )
 print(np.round(db.normalized_impedance[0], 3))    # (2.598-2.209j)
 print(np.round(mk.normalized_impedance[0], 3))    # (2.286-1.965j)

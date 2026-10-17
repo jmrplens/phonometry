@@ -144,7 +144,7 @@ class FrequencyResponseResult(OwnsArrays):
     :ivar frequencies: Frequency axis, in Hz.
     :ivar response: Complex frequency-response estimate ``H(f)``.
     :ivar magnitude_db: Magnitude :math:`20 \log_{10} \lvert H \rvert`, in dB.
-    :ivar phase: Phase of ``H``, in radians (unwrapped).
+    :ivar phase_rad: Phase of ``H``, in radians (unwrapped).
     :ivar coherence: Ordinary coherence :math:`\gamma^2(f) \in [0, 1]`.
     :ivar estimator: Estimator used (``'H1'`` or ``'H2'``).
     """
@@ -152,7 +152,7 @@ class FrequencyResponseResult(OwnsArrays):
     frequencies: NDArray[np.float64]
     response: NDArray[np.complex128]
     magnitude_db: NDArray[np.float64]
-    phase: NDArray[np.float64]
+    phase_rad: NDArray[np.float64]
     coherence: NDArray[np.float64]
     estimator: str
 
@@ -182,7 +182,7 @@ class FrequencyResponseResult(OwnsArrays):
             frequencies=1,
             response=1,
             magnitude_db=1,
-            phase=1,
+            phase_rad=1,
             coherence=1,
         )
         require_same_length(
@@ -190,7 +190,7 @@ class FrequencyResponseResult(OwnsArrays):
             "frequencies",
             "response",
             "magnitude_db",
-            "phase",
+            "phase_rad",
             "coherence",
             axis="frequency",
         )
@@ -280,7 +280,7 @@ def transfer_function(
         frequencies=freqs,
         response=response,
         magnitude_db=magnitude_db,
-        phase=phase,
+        phase_rad=phase,
         coherence=coh,
         estimator=estimator,
     )

@@ -3285,6 +3285,139 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   metres, so a new bare one fails CI; the migration guide maps each old name
   to the new one.
 
+- **Attenuation rates, vehicle speeds and phases say their unit.** An
+  absorption coefficient in dB/km sat under the same `absorption_coefficient`
+  as the dimensionless coefficient of a wall, a vehicle speed in km/h under the
+  same `speed` as wind speeds in m/s and flight speeds in knots, and a phase in
+  radians under the same `phase` as calibration phases in degrees. Each now
+  ends in its unit: `absorption_db_per_km` on the underwater propagation,
+  Gaussian-beam and detection-range results; `air_absorption_db_per_m=` on
+  `sound_power_anechoic` and `meteorological_corrections`;
+  `AtmosphericAttenuation.attenuation_db_per_m`; `air_attenuation_per_m` on
+  the room reverberation models, `image_source_rir` and
+  `SoundAbsorptionMeasurement`; `attenuation_np_per_m=` on `tube_wavenumber`
+  and `two_microphone_impedance`; `attenuation_source_per_m=` and
+  `attenuation_receiving_per_m=` on `plenum_flanking_reduction_index`, and
+  `attenuation_with_per_m=` and `attenuation_empty_per_m=` on
+  `air_absorption_correction`; `speed_kmh` on the CNOSSOS-EU road and railway
+  functions and records, `speed_range_kmh` on `RoadSurfaceCoefficients` and
+  `minimum_speed_kmh=` on `railway_source_power`; `reference_speed_m_s=` and
+  `segment_speed_m_s=` on the Doc 29 functions; `airspeed_m_s` and
+  `ground_speed_m_s` on `FlightPathKinematics`; `rotational_speed_rpm=` on
+  `blade_passing_frequency`; `phase_rad` on the frequency-response,
+  cross-spectrum, phase-decomposition, envelope and mobility results, with
+  `minimum_phase_rad`, `excess_phase_rad` and
+  `CrossSpectralDensityResult.phase_standard_deviation_rad`; and
+  `phase_mismatch_deg` on `residual_index_from_phase_mismatch` and
+  `IntensityInstrumentComplianceResult.phase_mismatch_deg()`. The sound speed
+  at the ground that the refraction profiles took as `ground_speed` is
+  `ground_speed_of_sound`, and `RayTraceResult.profile_speeds` is
+  `profile_speeds_of_sound`, so neither reads as the speed of an aircraft.
+  `RailwayVehicle(speed_kmh=)` and `TurbineTestEnvironmentCheck(wind_speed_m_s=)`
+  are written by name. The old names are gone.
+
+- **The pressure of the medium has one name.** The same absolute pressure of
+  the medium, the air, a gas or sea water, was `atmospheric_pressure_kpa` on the ISO 9613-1 and aircraft
+  functions, `atmospheric_pressure_pa` on the EN 29052-1 functions,
+  `barometric_pressure_pa` on `sound_power_intensity_precision`,
+  `absolute_pressure_pa` on `sea_water_density` and `static_pressure_kpa` on
+  the sound-power family beside them. It is `static_pressure_kpa` or
+  `static_pressure_pa` everywhere now, keeping the unit its clause writes:
+  `air_attenuation`, `air_attenuation_m`, `atmospheric_attenuation`,
+  `AtmosphericAttenuation`, `AtmosphericConditions`, `atmospheric_absorption`,
+  `outdoor_propagation_attenuation`, `upper_tone_search_frequency` and
+  `ToneSearchLimit`; `sae_band_attenuation`, `AircraftBandAttenuation`,
+  `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`,
+  `atmospheric_adjustment`, `npd_atmosphere_increment`,
+  `NpdAtmosphereIncrement`, `revise_npd_curves` and the `AnpAircraft` and
+  `AnpDatabase` methods; `air_density_iso10534`, `air_density_astm`,
+  `enclosed_gas_stiffness` and `floating_floor_resonance`;
+  `sound_power_intensity_precision` and `PrecisionIntensityResult`; and
+  `sea_water_density`. `atmospheric_pressure_pa` is kept for the outside
+  atmosphere where the same method measures a stream pressure beside it:
+  `pipe_transmission_loss` and `DownstreamPipe` keep it,
+  `normal_air_density` takes it where it took `ambient_pressure_pa`, and
+  `gas_density_kg_m3` takes it too, with
+  `noise_control.ISO11820_ATMOSPHERIC_PRESSURE_PA` as the default. The gauge `static_pressure_pa` of `velocity_pressure_pa`
+  and `total_pressure` stays.
+
+- **A quantity has one spelling inside a package.** Where the same quantity
+  was public both bare and with its unit in one package, the name now keeps
+  its unit if a second unit competes for the word and drops it if the word
+  only ever had one. The unit is added on `RotorcraftHemisphere` and
+  `RotorcraftEventResult` (`azimuth_deg`, `polar_deg`), on
+  `sae_band_attenuation` and `AircraftBandAttenuation` (`path_length_m`), on
+  `double_wall_transmission_loss`, `mass_spring_mass_resonance` and
+  `SoundReductionResult` (`gap_m`), on `HeavyImpactSourceSpec` and
+  `HeavyImpactSourceCheck` (`tolerance_db`), on the loudspeaker and
+  microphone records (`input_voltage_v`, `voltage_v`,
+  `rated_frequency_range_hz`, `reference_frequency_hz`), on
+  `SweptSineDistortionResult` (`thd_ratio`), on `roughness_to_frequency`
+  (`wavelengths_mm`), on `sea_water_sound_speed` (`depth_m`, `latitude_deg`),
+  on the metadiffuser functions, `plot_metadiffuser_panel_geometry` and
+  `MetadiffuserResult` (`depth_m`), on `DynamicStiffnessResult`
+  (`resonant_frequency_hz`, `apparent_stiffness_n_m3`,
+  `dynamic_stiffness_n_m3`, `gas_stiffness_n_m3`,
+  `floor_mass_per_area_kg_m2`, the units of the EN 29052-1 functions that
+  build it), on `johnson_champoux_allard` (`viscous_length_m`,
+  `thermal_length_m`), on `CorrelationResult` and `correlation_random_error`
+  (`duration_s`), on `LevelCrossingResult`, `PeakStatisticsResult`, the
+  comparison-calibration pulses and `SteppedSineImpulseResponse`
+  (`duration_s`, beside the `duration_ms` of a toneburst), on
+  `AircraftBandAttenuation` (`coefficient_db_per_m`, beside the
+  `coefficient_db_per_100m` of ARP 866A), on the loudspeaker and microphone
+  records and `loudspeaker_characteristics` (`rated_impedance_ohm`,
+  `minimum_impedance_ohm`, `impedance_modulus_ohm`,
+  `minimum_load_impedance_ohm`, as the headphone records spell them), on
+  `ground_effect`, `atmospheric_parabolic_equation`, `barrier_insertion_loss`,
+  `delany_bazley`, `miki`, `johnson_champoux_allard`, `decoupling_frequency`
+  and `PorousMediumResult` (`flow_resistivity_pa_s_m2`,
+  `ground_flow_resistivity_pa_s_m2`, beside the kPa s/m2 of the ground
+  classes and of EN 29052-1), on `sea_water_sound_speed` (`salinity_psu`, as
+  `sea_water` takes it), on `outdoor_attenuation`, `typical_element_mobility`,
+  the slit functions, `ApertureTransmissionResult` and
+  `plot_aperture_geometry` (`width_m`), on `plot_double_wall_geometry`
+  (`gap_m`), on
+  `ImpactMobilityResult.phase_rad`, on `HelmholtzResonator` and the
+  slit-resonator functions (`neck_length_m`, `neck_side_m`,
+  `cavity_length_m`, `cavity_side_m`, `lattice_step_m`,
+  `cavity_length_bounds_m`, `side_m`) and on the rectangular duct functions
+  (`width_m` beside their `height_m`); `RigidMassCalibrationResult` and the
+  seat-test functions say `relative_tolerance` and `relative_deviation`, and
+  the laboratory insulation results `absorption_area`. The unit is dropped on
+  the IEC 61063 turbine functions and records, `environmental_ratio_from_absorption`,
+  the special-room and high-frequency sound-power functions, `free_field_absorption_correction`,
+  `directionality_positions`, the wind-turbine receptor functions, the
+  in-situ silencer and screen functions, the workroom and spatial-decay
+  functions, `HomogeneousElement.from_solid`, the rainfall and service
+  equipment functions, `air_absorption_correction` and `CeilingSpecimenCheck`,
+  `effective_blocking_mass`, the running-r.m.s. decay checks,
+  `soil_building_natural_frequency_hz`, `bending_stress`, the DIN 45672-1
+  ground constants, `flow_velocity_m_s` and `static_pressure_difference_pa`
+  (`volume`, `area`, `surface_area`, `absorption_area`, `room_constant`,
+  `radius`, `distance`, `roughness_length`, `reverberation_time`,
+  `structural_reverberation_time`, `mass`, `blocking_mass`, `force`,
+  `stiffness`, `density`, `volume_flow`, `integration_time`, `band`,
+  `length1`, `length2`, `perimeter_absorption`, `downstream_area`,
+  `upstream_area`), and `background_levels` and
+  `pressure_levels` replace the `_db` spellings on the turbine, free-field,
+  reference-source, screen, spatial-decay and wind-turbine functions, as on
+  the rest of the sound-power family. `anr_total_attenuation` takes
+  `insertion_loss_db`, the name of the value it reads back.
+  `scripts/check_parameter_units.py` now walks properties as well as
+  parameters and fields, holds speeds and phases to the rule (the speed of
+  sound excepted), refuses an absorption or attenuation documented per
+  distance whose name does not end in `_db_per_m`, `_db_per_km` or `_per_m`,
+  refuses any word for the pressure of the medium but `static_pressure_`
+  (with `atmospheric_pressure_` admitted only beside a stream pressure),
+  holds a bare `coefficient` documented per distance to the same rate rule,
+  and fails when a name is public both bare and with its unit inside one
+  package, the unit written in one word or in several (`_ohm`, `_ms`,
+  `_kg_m3`, `_pa_s_m2`, `_n_per_m`, `_db_per_100m`) and a renderer read in
+  the package that publishes it, with each pair it lets through listed with
+  its reason. The migration guide
+  maps every name that shipped in 3.3.0 or 4.0.0rc1.
+
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,
   and every floor in the package metadata is now the oldest release the
@@ -3404,7 +3537,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of Weston's regimes holds at each range and whether a synchronous average
   had to interpolate its periods. Each is now a read-only property read from
   the values the result keeps, and the results that did not keep what the
-  test reads now do: `TappingForceResult` gains `mass_kg`,
+  test reads now do: `TappingForceResult` gains `mass`,
   `HydrodynamicValveNoise` gains `inlet_pressure_pa` and `vapour_pressure_pa`,
   `AerodynamicValveNoise` gains `specific_heat_ratio`, `pressure_recovery`
   and `efficiency_correction`, `WindTurbineTonalityResult` gains
@@ -7777,9 +7910,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   air, with no exception raised and nothing in the signature to say which unit
   was wanted. The helpers are now
   `speed_of_sound_iso10534(temperature_c=...)`,
-  `air_density_iso10534(temperature_c=..., atmospheric_pressure_kpa=...)`,
+  `air_density_iso10534(temperature_c=..., static_pressure_kpa=...)`,
   `speed_of_sound_astm(temperature_c=...)`,
-  `air_density_astm(temperature_c=..., atmospheric_pressure_kpa=...)` and
+  `air_density_astm(temperature_c=..., static_pressure_kpa=...)` and
   `speed_of_sound_iso17497(temperature_c=...)`.
 
   `speed_of_sound` is gone as a bare name and will not be reassigned. It was

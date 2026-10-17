@@ -158,7 +158,7 @@ def enclosed_gas_stiffness(
     thickness_m: ArrayLike,
     porosity: float,
     *,
-    atmospheric_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
+    static_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> np.ndarray | float:
     r"""Enclosed-gas dynamic stiffness per unit area ``s'a`` (Formula 7).
 
@@ -168,7 +168,7 @@ def enclosed_gas_stiffness(
     :param thickness_m: Thickness ``d`` of the specimen under the static load,
         in metres (scalar or array).
     :param porosity: Porosity ``epsilon`` of the specimen (0-1).
-    :param atmospheric_pressure_pa: Atmospheric pressure ``p0``, in pascals
+    :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals
         (default :data:`STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa).
     :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3.
 
@@ -177,9 +177,7 @@ def enclosed_gas_stiffness(
         this reduces to :math:`s'_\mathrm{a} = 111/d` MN/m3 for ``d`` in millimetres
         (clause 8.2 NOTE).
     """
-    atmospheric_pressure_pa = require_positive(
-        atmospheric_pressure_pa, "atmospheric_pressure_pa"
-    )
+    static_pressure_pa = require_positive(static_pressure_pa, "static_pressure_pa")
     if not 0.0 < porosity <= 1.0:
         msg = "'porosity' must be in the range (0, 1]."
         raise ValueError(msg)
@@ -187,7 +185,7 @@ def enclosed_gas_stiffness(
     if np.any(d <= 0.0):
         msg = "'thickness_m' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(atmospheric_pressure_pa / (d * porosity))
+    return as_float_or_array(static_pressure_pa / (d * porosity))
 
 
 def installed_dynamic_stiffness(
@@ -636,19 +634,19 @@ def resilient_layer(layer: str | ResilientLayer) -> ResilientLayer:
 class DynamicStiffnessResult(RichDisplay):
     """Dynamic stiffness of a resilient layer and the floating-floor resonance.
 
-    :ivar apparent_stiffness: Apparent dynamic stiffness ``s't``, in N/m3.
-    :ivar gas_stiffness: Enclosed-gas dynamic stiffness ``s'a``, in N/m3.
-    :ivar dynamic_stiffness: Installed dynamic stiffness ``s'``, in N/m3.
-    :ivar resonant_frequency: Measured test resonant frequency ``fr``, in hertz.
-    :ivar floor_mass_per_area: Supported-floor mass per unit area ``m'``, kg/m2.
+    :ivar apparent_stiffness_n_m3: Apparent dynamic stiffness ``s't``, in N/m3.
+    :ivar gas_stiffness_n_m3: Enclosed-gas dynamic stiffness ``s'a``, in N/m3.
+    :ivar dynamic_stiffness_n_m3: Installed dynamic stiffness ``s'``, in N/m3.
+    :ivar resonant_frequency_hz: Measured test resonant frequency ``fr``, in hertz.
+    :ivar floor_mass_per_area_kg_m2: Supported-floor mass per unit area ``m'``, kg/m2.
     :ivar natural_frequency: Installed-floor natural frequency ``f0``, in hertz.
     """
 
-    apparent_stiffness: float
-    gas_stiffness: float
-    dynamic_stiffness: float
-    resonant_frequency: float
-    floor_mass_per_area: float
+    apparent_stiffness_n_m3: float
+    gas_stiffness_n_m3: float
+    dynamic_stiffness_n_m3: float
+    resonant_frequency_hz: float
+    floor_mass_per_area_kg_m2: float
     natural_frequency: float
 
     def __post_init__(self) -> None:
@@ -658,11 +656,11 @@ class DynamicStiffnessResult(RichDisplay):
         apparent stiffness from a positive resonance and load mass and pins
         the floor mass positive, so a non-finite (or non-positive) value in
         those fields is never the library's own output, and the fiche prints
-        them unconditionally: a NaN ``apparent_stiffness`` becomes the BOXED
-        headline ``s't = nan MN/m3`` and a NaN ``resonant_frequency`` prints
+        them unconditionally: a NaN ``apparent_stiffness_n_m3`` becomes the BOXED
+        headline ``s't = nan MN/m3`` and a NaN ``resonant_frequency_hz`` prints
         ``fr = nan Hz``, both on a fully rendered accredited page.
 
-        :attr:`dynamic_stiffness` and :attr:`natural_frequency` are left
+        :attr:`dynamic_stiffness_n_m3` and :attr:`natural_frequency` are left
         alone on purpose: EN 29052-1 clause 8.2 c) cannot resolve ``s'`` for
         an airy specimen below 10 kPa.s/m2, the producer then hands back NaN
         for both, and the fiche prints the em dash and omits ``f0`` for
@@ -672,10 +670,10 @@ class DynamicStiffnessResult(RichDisplay):
         :raises ValueError: if a determined quantity is not positive and
             finite (the enclosed-gas term may be zero).
         """
-        require_positive(self.apparent_stiffness, "apparent_stiffness")
-        require_non_negative(self.gas_stiffness, "gas_stiffness")
-        require_positive(self.resonant_frequency, "resonant_frequency")
-        require_positive(self.floor_mass_per_area, "floor_mass_per_area")
+        require_positive(self.apparent_stiffness_n_m3, "apparent_stiffness_n_m3")
+        require_non_negative(self.gas_stiffness_n_m3, "gas_stiffness_n_m3")
+        require_positive(self.resonant_frequency_hz, "resonant_frequency_hz")
+        require_positive(self.floor_mass_per_area_kg_m2, "floor_mass_per_area_kg_m2")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -763,7 +761,7 @@ def floating_floor_resonance(
     airflow_resistivity_kpa_s_m2: float = float("inf"),
     thickness_m: float | None = None,
     porosity: float | None = None,
-    atmospheric_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
+    static_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> DynamicStiffnessResult:
     r"""Full EN 29052-1 chain: measured resonance -> installed ``s'`` and ``f0``.
 
@@ -787,7 +785,7 @@ def floating_floor_resonance(
         so a signature cannot state it: it is checked here and raises.
     :param porosity: Specimen porosity ``epsilon``, required with
         ``thickness_m`` (see above).
-    :param atmospheric_pressure_pa: Atmospheric pressure ``p0``, in pascals.
+    :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals.
     :return: The :class:`DynamicStiffnessResult`.
     """
     s_apparent = float(
@@ -803,7 +801,7 @@ def floating_floor_resonance(
             raise ValueError(msg)
         s_gas = float(
             enclosed_gas_stiffness(
-                thickness_m, porosity, atmospheric_pressure_pa=atmospheric_pressure_pa
+                thickness_m, porosity, static_pressure_pa=static_pressure_pa
             )
         )
     s_installed = installed_dynamic_stiffness(
@@ -817,10 +815,10 @@ def floating_floor_resonance(
         else float("nan")
     )
     return DynamicStiffnessResult(
-        apparent_stiffness=s_apparent,
-        gas_stiffness=s_gas,
-        dynamic_stiffness=s_installed,
-        resonant_frequency=float(resonant_frequency_hz),
-        floor_mass_per_area=float(floor_mass_per_area_kg_m2),
+        apparent_stiffness_n_m3=s_apparent,
+        gas_stiffness_n_m3=s_gas,
+        dynamic_stiffness_n_m3=s_installed,
+        resonant_frequency_hz=float(resonant_frequency_hz),
+        floor_mass_per_area_kg_m2=float(floor_mass_per_area_kg_m2),
         natural_frequency=f0,
     )

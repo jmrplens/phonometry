@@ -113,9 +113,9 @@ class RotorcraftHemisphere(OwnsArrays):
     lookup.
 
     :ivar frequencies: Band centre frequencies, in Hz, shape ``(F,)``.
-    :ivar azimuth: Azimuth angles ``φ``, in degrees, shape ``(A,)`` (``-90``
+    :ivar azimuth_deg: Azimuth angles ``φ``, in degrees, shape ``(A,)`` (``-90``
         port … ``+90`` starboard).
-    :ivar polar: Polar angles ``θ``, in degrees, shape ``(P,)`` (``0`` forward …
+    :ivar polar_deg: Polar angles ``θ``, in degrees, shape ``(P,)`` (``0`` forward …
         ``180`` rearward).
     :ivar levels: Band levels, in dB, shape ``(A, P, F)``.
     :ivar distance_m: Reference distance, in metres (default 60). The standard
@@ -128,8 +128,8 @@ class RotorcraftHemisphere(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    azimuth: NDArray[np.float64]
-    polar: NDArray[np.float64]
+    azimuth_deg: NDArray[np.float64]
+    polar_deg: NDArray[np.float64]
     levels: NDArray[np.float64]
     _: KW_ONLY
     distance_m: float = _RH
@@ -143,7 +143,7 @@ class RotorcraftHemisphere(OwnsArrays):
         Eq. 14/15 gap fill, only once someone looks a direction up, and in
         numpy's own words: a failed broadcast quotes the two shapes it could
         not reconcile, a failed stack quotes none at all, and neither message
-        names ``azimuth`` or ``polar``, let alone the hemisphere. The band
+        names ``azimuth_deg`` or ``polar_deg``, let alone the hemisphere. The band
         axis is the one that fails quietly: the lookup hands back one level
         per band of ``levels`` whatever ``frequencies`` holds, and the
         directivity plot picks its band by index and reads the label from
@@ -154,9 +154,9 @@ class RotorcraftHemisphere(OwnsArrays):
 
         :raises ValueError: if the level grid disagrees with an angle or band axis.
         """
-        require_ranks(self, frequencies=1, azimuth=1, polar=1, levels=3)
-        require_same_length(self, "azimuth", "levels", axis="azimuth angle")
-        require_same_length(self, "polar", ("levels", 1), axis="polar angle")
+        require_ranks(self, frequencies=1, azimuth_deg=1, polar_deg=1, levels=3)
+        require_same_length(self, "azimuth_deg", "levels", axis="azimuth angle")
+        require_same_length(self, "polar_deg", ("levels", 1), axis="polar angle")
         require_same_length(self, "frequencies", ("levels", 2))
 
     def plot(
@@ -180,12 +180,12 @@ class RotorcraftHemisphere(OwnsArrays):
 
         :return: A new :class:`RotorcraftHemisphere` with mirrored azimuth.
         """
-        az = np.asarray(self.azimuth, dtype=np.float64)
+        az = np.asarray(self.azimuth_deg, dtype=np.float64)
         lv = np.asarray(self.levels, dtype=np.float64)
         return RotorcraftHemisphere(
             frequencies=np.asarray(self.frequencies, dtype=np.float64),
-            azimuth=-az[::-1],
-            polar=np.asarray(self.polar, dtype=np.float64),
+            azimuth_deg=-az[::-1],
+            polar_deg=np.asarray(self.polar_deg, dtype=np.float64),
             levels=lv[::-1, :, :],
             distance_m=self.distance_m,
         )
@@ -199,8 +199,8 @@ class RotorcraftHemisphere(OwnsArrays):
         cached = self.__dict__.get("_filled_cache")
         if cached is None:
             cached = _fill_grid(
-                np.asarray(self.azimuth, dtype=np.float64),
-                np.asarray(self.polar, dtype=np.float64),
+                np.asarray(self.azimuth_deg, dtype=np.float64),
+                np.asarray(self.polar_deg, dtype=np.float64),
                 np.asarray(self.levels, dtype=np.float64),
             )
             object.__setattr__(self, "_filled_cache", cached)
@@ -252,8 +252,8 @@ def _source_levels(
     no per-corner ``NaN`` handling: an all-``NaN`` band is ``NaN`` regardless
     of the corner weights, exactly as in the scalar lookup.
     """
-    az = np.asarray(hemisphere.azimuth, dtype=np.float64)
-    po = np.asarray(hemisphere.polar, dtype=np.float64)
+    az = np.asarray(hemisphere.azimuth_deg, dtype=np.float64)
+    po = np.asarray(hemisphere.polar_deg, dtype=np.float64)
     lv = hemisphere._filled()
     phi = np.clip(azimuth_deg, az[0], az[-1])
     theta = np.clip(polar_deg, po[0], po[-1])
@@ -493,7 +493,7 @@ def hover_ring_hemisphere(
             energy = 0.5 * (10.0 ** (starboard / 10.0) + 10.0 ** (port / 10.0))
             grid[cells // 2] = 10.0 * np.log10(energy)
     return RotorcraftHemisphere(
-        frequencies=freqs, azimuth=az, polar=po, levels=grid, distance_m=dist
+        frequencies=freqs, azimuth_deg=az, polar_deg=po, levels=grid, distance_m=dist
     )
 
 
@@ -543,8 +543,8 @@ def hover_derived_hemisphere(
         raise ValueError(msg)
     return RotorcraftHemisphere(
         frequencies=np.asarray(hemisphere.frequencies, dtype=np.float64),
-        azimuth=np.asarray(hemisphere.azimuth, dtype=np.float64),
-        polar=np.asarray(hemisphere.polar, dtype=np.float64),
+        azimuth_deg=np.asarray(hemisphere.azimuth_deg, dtype=np.float64),
+        polar_deg=np.asarray(hemisphere.polar_deg, dtype=np.float64),
         levels=np.asarray(hemisphere.levels, dtype=np.float64) + offset,
         distance_m=hemisphere.distance_m,
     )
@@ -787,8 +787,8 @@ class FlightPathKinematics(OwnsArrays):
 
     :ivar times: Track times, in s, shape ``(N,)``.
     :ivar positions: Track positions ``(x, y, z)``, in metres, shape ``(N, 3)``.
-    :ivar ground_speed: Ground speed ``V_g`` (Eq. 16), in m/s, shape ``(N,)``.
-    :ivar airspeed: Airspeed ``V_A`` (Eq. 17, zero-wind), in m/s, shape ``(N,)``.
+    :ivar ground_speed_m_s: Ground speed ``V_g`` (Eq. 16), in m/s, shape ``(N,)``.
+    :ivar airspeed_m_s: Airspeed ``V_A`` (Eq. 17, zero-wind), in m/s, shape ``(N,)``.
     :ivar heading: Heading
         :math:`\Theta = \operatorname{atan2}(\Delta X, \Delta Y)` (Eq. 19),
         in degrees, shape ``(N,)``.
@@ -812,8 +812,8 @@ class FlightPathKinematics(OwnsArrays):
 
     times: NDArray[np.float64]
     positions: NDArray[np.float64]
-    ground_speed: NDArray[np.float64]
-    airspeed: NDArray[np.float64]
+    ground_speed_m_s: NDArray[np.float64]
+    airspeed_m_s: NDArray[np.float64]
     heading: NDArray[np.float64]
     curvature: NDArray[np.float64]
     bank_angle_deg: NDArray[np.float64]
@@ -838,8 +838,8 @@ class FlightPathKinematics(OwnsArrays):
             self,
             times=1,
             positions=2,
-            ground_speed=1,
-            airspeed=1,
+            ground_speed_m_s=1,
+            airspeed_m_s=1,
             heading=1,
             curvature=1,
             bank_angle_deg=1,
@@ -849,8 +849,8 @@ class FlightPathKinematics(OwnsArrays):
             self,
             "times",
             "positions",
-            "ground_speed",
-            "airspeed",
+            "ground_speed_m_s",
+            "airspeed_m_s",
             "heading",
             "curvature",
             "bank_angle_deg",
@@ -918,8 +918,8 @@ def flight_path_kinematics(
     return FlightPathKinematics(
         times=t,
         positions=p,
-        ground_speed=vg,
-        airspeed=va,
+        ground_speed_m_s=vg,
+        airspeed_m_s=va,
         heading=heading,
         curvature=np.asarray(curvature, dtype=np.float64),
         bank_angle_deg=bank,
@@ -999,8 +999,8 @@ class RotorcraftEventResult(OwnsArrays):
     :ivar times: Recorded times :math:`t_\mathrm{r} = t_\mathrm{e} + r/c` (Eq. 22), in s, shape
         ``(K,)``.
     :ivar distances_m: Slant distance ``r`` per step, in metres, shape ``(K,)``.
-    :ivar azimuth: Emission azimuth ``φ`` per step, in degrees, shape ``(K,)``.
-    :ivar polar: Emission polar angle ``θ`` per step, in degrees, shape ``(K,)``.
+    :ivar azimuth_deg: Emission azimuth ``φ`` per step, in degrees, shape ``(K,)``.
+    :ivar polar_deg: Emission polar angle ``θ`` per step, in degrees, shape ``(K,)``.
     :ivar band_levels: Received (unweighted) band levels, in dB, shape
         ``(K, F)``.
     :ivar a_levels: A-weighted overall level ``L_A(t)`` per step, in dB(A),
@@ -1025,8 +1025,8 @@ class RotorcraftEventResult(OwnsArrays):
     emission_times: NDArray[np.float64]
     times: NDArray[np.float64]
     distances_m: NDArray[np.float64]
-    azimuth: NDArray[np.float64]
-    polar: NDArray[np.float64]
+    azimuth_deg: NDArray[np.float64]
+    polar_deg: NDArray[np.float64]
     band_levels: NDArray[np.float64]
     a_levels: NDArray[np.float64]
     la_max: float
@@ -1081,8 +1081,8 @@ class RotorcraftEventResult(OwnsArrays):
             emission_times=1,
             times=1,
             distances_m=1,
-            azimuth=1,
-            polar=1,
+            azimuth_deg=1,
+            polar_deg=1,
             band_levels=2,
             a_levels=1,
             pnlt=1,
@@ -1093,8 +1093,8 @@ class RotorcraftEventResult(OwnsArrays):
             "emission_times",
             "times",
             "distances_m",
-            "azimuth",
-            "polar",
+            "azimuth_deg",
+            "polar_deg",
             "band_levels",
             "a_levels",
             "pnlt",
@@ -1252,7 +1252,7 @@ class RotorcraftAtmosphere(RichDisplay):
 
     :ivar temperature_c: Air temperature, in °C (default 25, ICAO reference).
     :ivar relative_humidity_percent: Relative humidity, in % (default 70).
-    :ivar atmospheric_pressure_kpa: Ambient pressure, in kPa (default 101.325).
+    :ivar static_pressure_kpa: Ambient pressure, in kPa (default 101.325).
     :ivar atmospheric_method: ``"iso9613"`` for the pure-tone Eq. 26/27 term
         (the guidance text), or ``"sae"`` for the SAE ARP 5534 band-integrated
         mapping used by the NORAH2 reference implementation (they agree to
@@ -1261,7 +1261,7 @@ class RotorcraftAtmosphere(RichDisplay):
 
     temperature_c: float = 25.0
     relative_humidity_percent: float = 70.0
-    atmospheric_pressure_kpa: float = 101.325
+    static_pressure_kpa: float = 101.325
     atmospheric_method: str = "iso9613"
 
 
@@ -1498,7 +1498,7 @@ def _event_setup(
         freqs,
         atmosphere.temperature_c,
         atmosphere.relative_humidity_percent,
-        atmosphere.atmospheric_pressure_kpa,
+        atmosphere.static_pressure_kpa,
     )
     return _EventSetup(
         hemispheres=tuple(hemispheres),
@@ -1882,7 +1882,7 @@ def _resolved_track_state(
     bank = _per_point(state.bank_angle_deg, n, "bank_angle_deg")
     if spd is None or gam is None or hdg is None or bank is None:
         kin = flight_path_kinematics(times, positions)
-        spd = kin.airspeed if spd is None else spd
+        spd = kin.airspeed_m_s if spd is None else spd
         gam = kin.path_angle_deg if gam is None else gam
         hdg = kin.heading if hdg is None else hdg
         bank = kin.bank_angle_deg if bank is None else bank
@@ -1992,8 +1992,8 @@ def rotorcraft_event_level(
         emission_times=setup.times,
         times=trec[:, 0],
         distances_m=dist,
-        azimuth=phi,
-        polar=theta,
+        azimuth_deg=phi,
+        polar_deg=theta,
         band_levels=spectra,
         a_levels=la[:, 0],
         la_max=la_max,

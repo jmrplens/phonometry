@@ -174,7 +174,7 @@ which is the one the regenerated noise answers to.
 ```python
 print(round(noise_control.gas_density_kg_m3(temperature_c=120.0), 3))   # 0.887
 print(round(noise_control.silencer_flow_velocity_m_s(
-    8.0, upstream_area_m2=0.9, free_area_m2=0.45), 1))                  # 16.0
+    8.0, upstream_area=0.9, free_area_m2=0.45), 1))                  # 16.0
 ```
 
 The measurement surfaces have their own geometry. Upstream, one and a half

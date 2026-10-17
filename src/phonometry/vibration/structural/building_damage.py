@@ -514,7 +514,7 @@ def bending_stress(
     peak_velocity_m_s: ArrayLike,
     *,
     dynamic_modulus_pa: float,
-    density_kg_m3: float,
+    density: float,
     load_ratio: float = 1.0,
     mode_factor: float = 1.0,
 ) -> np.ndarray | float:
@@ -541,7 +541,7 @@ def bending_stress(
         in millimetres per second and this formula is not.
     :param dynamic_modulus_pa: Dynamic modulus of elasticity
         :math:`E_\mathrm{dyn}`, in pascals.
-    :param density_kg_m3: Material density :math:`\varrho`, in kilograms per
+    :param density: Material density :math:`\varrho`, in kilograms per
         cubic metre.
     :param load_ratio: The load coefficient
         :math:`G_\mathrm{ges}/G_\mathrm{balken}`, the beam's own weight plus
@@ -554,7 +554,7 @@ def bending_stress(
         factor is not positive and finite, or a velocity is negative.
     """
     e_dyn = require_positive(dynamic_modulus_pa, "dynamic_modulus_pa")
-    rho = require_positive(density_kg_m3, "density_kg_m3")
+    rho = require_positive(density, "density")
     ratio = require_positive(load_ratio, "load_ratio")
     k_n = require_positive(mode_factor, "mode_factor")
     v = np.asarray(peak_velocity_m_s, dtype=np.float64)

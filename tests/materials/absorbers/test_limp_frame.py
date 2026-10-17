@@ -94,7 +94,7 @@ def test_decoupling_frequency_scaling() -> None:
 
 
 def test_decoupling_frequency_rejects_bad_input() -> None:
-    with pytest.raises(ValueError, match="'flow_resistivity' must be positive"):
+    with pytest.raises(ValueError, match="'flow_resistivity_pa_s_m2' must be positive"):
         materials.decoupling_frequency(-1.0, porosity=0.98, frame_density=30.0)
     with pytest.raises(ValueError, match="'porosity' must not exceed 1"):
         materials.decoupling_frequency(25.0e3, porosity=1.5, frame_density=30.0)
@@ -184,7 +184,7 @@ def test_limp_frame_keeps_the_bulk_modulus_and_the_equivalent_fluid_relations() 
         rtol=1e-12,
     )
     assert limp.model == "limp_frame(johnson_champoux_allard)"
-    assert limp.flow_resistivity == TABLE_11_2_RESISTIVITY
+    assert limp.flow_resistivity_pa_s_m2 == TABLE_11_2_RESISTIVITY
 
 
 def test_limp_frame_stays_passive() -> None:

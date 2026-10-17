@@ -68,10 +68,11 @@ def test_lining_resonance_takes_one_formula_not_both() -> None:
 
 
 def test_ground_effect_takes_one_ground_description() -> None:
-    both = {"flow_resistivity": 200e3, "impedance": np.ones(4, dtype=complex)}
+    both = {"flow_resistivity_pa_s_m2": 200e3, "impedance": np.ones(4, dtype=complex)}
     for kwargs in ({}, both):
         with pytest.raises(
-            ValueError, match=r"exactly one of 'impedance' or 'flow_resistivity'"
+            ValueError,
+            match=r"exactly one of 'impedance' or 'flow_resistivity_pa_s_m2'",
         ):
             ground_effect(  # type: ignore[call-overload]
                 OCTAVES, 1.0, 1.5, 10.0, **kwargs
@@ -123,10 +124,10 @@ def test_plenum_attenuations_travel_together() -> None:
     r = np.full(4, 30.0)
     with pytest.raises(
         ValueError,
-        match=r"'attenuation_source' and 'attenuation_receiving' must be given together",
+        match=r"'attenuation_source_per_m' and 'attenuation_receiving_per_m' must be given together",
     ):
         plenum_flanking_reduction_index(  # type: ignore[call-overload]
-            r, r, ceiling_length=3.0, plenum_height_m=1.0, attenuation_source=r
+            r, r, ceiling_length=3.0, plenum_height_m=1.0, attenuation_source_per_m=r
         )
 
 

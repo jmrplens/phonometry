@@ -68,7 +68,7 @@ def plot_aperture_geometry(
     depth: float,
     ax: Axes | None = ...,
     *,
-    width: float,
+    width_m: float,
     language: str = ...,
     **kwargs: Any,
 ) -> Axes: ...
@@ -89,30 +89,30 @@ def plot_aperture_geometry(
     depth: float,
     ax: Axes | None = None,
     *,
-    width: float | None = None,
+    width_m: float | None = None,
     radius: float | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Draw the section through a wall aperture to scale.
 
-    Wall of thickness ``depth`` with a slit of the given ``width`` (or the
+    Wall of thickness ``depth`` with a slit of the given ``width_m`` (or the
     diametral section of a circular hole of the given ``radius``), incident
     sound on the left and the transmitted wavefronts sketched on the right.
-    Give exactly one of ``width``/``radius``, matching
+    Give exactly one of ``width_m``/``radius``, matching
     :func:`~phonometry.building.slit_transmission_coefficient` /
     :func:`~phonometry.building.circular_aperture_transmission_coefficient`.
 
     :param depth: Wall thickness ``d``, in metres.
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param width: Slit width ``w``, in metres.
+    :param width_m: Slit width ``w``, in metres.
     :param radius: Circular-hole radius, in metres.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the wall rectangles.
     :return: The axes.
-    :raises ValueError: for a ``depth``, ``width`` or ``radius`` that is not
+    :raises ValueError: for a ``depth``, ``width_m`` or ``radius`` that is not
         finite and positive, or for anything other than exactly one of
-        ``width``/``radius``.
+        ``width_m``/``radius``.
     """
     from matplotlib.patches import Arc
 
@@ -121,12 +121,12 @@ def plot_aperture_geometry(
     # ``<= 0.0`` waved through: a non-finite depth or opening poisons every
     # coordinate and leaves a titled, blank section.
     require_positive(depth, "depth")
-    if width is not None and radius is None:
-        opening = require_positive(width, "width")
-    elif radius is not None and width is None:
+    if width_m is not None and radius is None:
+        opening = require_positive(width_m, "width_m")
+    elif radius is not None and width_m is None:
         opening = 2.0 * require_positive(radius, "radius")
     else:
-        msg = "Give exactly one of 'width' or 'radius'."
+        msg = "Give exactly one of 'width_m' or 'radius'."
         raise ValueError(msg)
     if ax is None:
         ax = _new_axes()
@@ -187,11 +187,11 @@ def plot_aperture_result_geometry(
     # its width and a 'circular' aperture its radius, never both. Passing both
     # through and letting one be None would not match either call form.
     if result.depth is not None:
-        if result.width is not None:
+        if result.width_m is not None:
             return plot_aperture_geometry(
                 result.depth,
                 ax=ax,
-                width=result.width,
+                width_m=result.width_m,
                 language=language,
                 **kwargs,
             )
@@ -333,7 +333,7 @@ _LEAF_DENSITY = 700.0
 def plot_double_wall_geometry(
     mass1: float,
     mass2: float,
-    gap: float,
+    gap_m: float,
     ax: Axes | None = None,
     *,
     resonance_frequency: float | None = None,
@@ -342,13 +342,13 @@ def plot_double_wall_geometry(
 ) -> Axes:
     """Draw the mass-spring-mass double wall to scale.
 
-    Two leaves separated by the ``gap``; leaf thicknesses are drawn from the
+    Two leaves separated by the ``gap_m``; leaf thicknesses are drawn from the
     surface densities at a nominal board density, and the mass-spring-mass
     resonance is annotated when given.
 
     :param mass1: Surface density of the first leaf, in kg/m2.
     :param mass2: Surface density of the second leaf, in kg/m2.
-    :param gap: Cavity depth, in metres.
+    :param gap_m: Cavity depth, in metres.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param resonance_frequency: Optional ``f0`` to annotate, in Hz.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -360,7 +360,7 @@ def plot_double_wall_geometry(
     _check_language(language)
     require_positive(mass1, "mass1")
     require_positive(mass2, "mass2")
-    require_positive(gap, "gap")
+    require_positive(gap_m, "gap_m")
     # The annotation between the leaves is the one number the drawing does
     # not derive from the geometry, and it went through unchecked: a NaN
     # lettered 'f$_0$ = nan Hz' across an otherwise complete section. The one
@@ -373,12 +373,12 @@ def plot_double_wall_geometry(
         ax = _new_axes()
     t1 = mass1 / _LEAF_DENSITY
     t2 = mass2 / _LEAF_DENSITY
-    height = 2.6 * (t1 + gap + t2)
+    height = 2.6 * (t1 + gap_m + t2)
     from ..._i18n import format_number
 
     _material_rect(ax, 0.0, 0.0, t1, height, "plate", **kwargs)
-    _material_rect(ax, t1 + gap, 0.0, t2, height, "plate")
-    for x, mass, thickness in ((0.0, mass1, t1), (t1 + gap, mass2, t2)):
+    _material_rect(ax, t1 + gap_m, 0.0, t2, height, "plate")
+    for x, mass, thickness in ((0.0, mass1, t1), (t1 + gap_m, mass2, t2)):
         ax.text(
             x + 0.5 * thickness,
             0.72 * height,
@@ -388,14 +388,14 @@ def plot_double_wall_geometry(
             va="center",
             rotation=90,
         )
-    _dim(ax, (t1, 0.0), (t1 + gap, 0.0), _mm(gap, language), offset=-0.06 * height)
+    _dim(ax, (t1, 0.0), (t1 + gap_m, 0.0), _mm(gap_m, language), offset=-0.06 * height)
     _dim(
         ax, (0.0, 0.0), (t1, 0.0), _mm(t1, language), offset=-0.16 * height, tight=True
     )
     _incidence_arrow(ax, -0.5 * height * 0.5, 0.5 * height, 0.2 * height, language)
     if resonance_frequency is not None:
         ax.text(
-            t1 + 0.5 * gap,
+            t1 + 0.5 * gap_m,
             0.5 * height,
             "f$_0$ = "
             + format_number(resonance_frequency, language, decimals=0, trim=True)
@@ -417,16 +417,16 @@ def plot_double_wall_result_geometry(
     **kwargs: Any,
 ) -> Axes:
     """Double-wall drawing for a result that retained its geometry."""
-    if result.mass1 is None or result.mass2 is None or result.gap is None:
+    if result.mass1 is None or result.mass2 is None or result.gap_m is None:
         msg = (
             "This result does not retain its double-wall geometry; call "
-            "plot_double_wall_geometry(mass1, mass2, gap)."
+            "plot_double_wall_geometry(mass1, mass2, gap_m)."
         )
         raise ValueError(msg)
     return plot_double_wall_geometry(
         result.mass1,
         result.mass2,
-        result.gap,
+        result.gap_m,
         ax=ax,
         resonance_frequency=result.resonance_frequency,
         language=language,

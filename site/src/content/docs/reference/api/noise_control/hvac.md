@@ -157,7 +157,7 @@ has to be reduced accordingly.
 ## blade_passing_frequency
 
 ```python
-blade_passing_frequency(rotational_speed: float, blades: int) -> float
+blade_passing_frequency(rotational_speed_rpm: float, blades: int) -> float
 ```
 
 Blade passing frequency (Long Eq. 13.4).
@@ -168,7 +168,7 @@ $f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60$.
 
 | Name | Description |
 | :--- | :--- |
-| `rotational_speed` | Fan speed, revolutions per minute. |
+| `rotational_speed_rpm` | Fan speed, revolutions per minute. |
 | `blades` | Number of impeller blades. |
 
 **Returns:** The blade passing frequency, Hz.
@@ -260,7 +260,7 @@ which is what `count` applies.
 ```python
 elbow_insertion_loss(
     frequencies: ArrayLike,
-    width: float,
+    width_m: float,
     *,
     bend_type: str = 'square',
     vanes: bool = False,
@@ -288,7 +288,7 @@ statement that a bend reflects nothing while only plane waves run.
 
 The two methods index the same physics on the same ratio, but they do not
 tabulate the same bends: Table 7 distinguishes lining before, after, or on
-both sides of the corner, which the ASHRAE table does not, and `width` is
+both sides of the corner, which the ASHRAE table does not, and `width_m` is
 read there as the largest side of a rectangular duct or the bore of a round
 one rather than as the width in the plane of the bend.
 
@@ -297,7 +297,7 @@ one rather than as the width in the plane of the bend.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies `f`, Hz (1-D array). |
-| `width` | Duct width `W` in the plane of the bend, m. For `model="vdi2081"` it is the largest side of a rectangular duct, or the internal diameter of a round one. |
+| `width_m` | Duct width `W` in the plane of the bend, m. For `model="vdi2081"` it is the largest side of a rectangular duct, or the internal diameter of a round one. |
 | `bend_type` | `"square"` or `"round"`. VDI 2081 reads a square bend as sharp-edged and a round one as radiused with `r <= 2 D`. |
 | `vanes` | Turning vanes fitted (square bends only). |
 | `lined` | Acoustically lined bend (square bends only). |
@@ -884,7 +884,7 @@ ignores it.
 ```python
 lined_rectangular_duct_attenuation(
     frequencies: ArrayLike | None,
-    width: float,
+    width_m: float,
     height_m: float,
     length: float,
     lining_thickness_m: float,
@@ -910,7 +910,7 @@ ducts). Flanking limits the total to 40 dB.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` uses `OCTAVE_BANDS`. |
-| `width` | Duct width, m. |
+| `width_m` | Duct width, m. |
 | `height_m` | Duct height, m. |
 | `length` | Duct run length `l`, m. |
 | `lining_thickness_m` | Lining thickness `t`, m. |
@@ -1385,7 +1385,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 ```python
 unlined_rectangular_duct_attenuation(
     frequencies: ArrayLike,
-    width: float,
+    width_m: float,
     height_m: float,
     length: float,
     *,
@@ -1420,7 +1420,7 @@ and is refused.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centre frequencies `f`, Hz (1-D array). |
-| `width` | Duct width, m. |
+| `width_m` | Duct width, m. |
 | `height_m` | Duct height, m. |
 | `length` | Duct run length `l`, m. |
 | `wrapped` | The duct is externally wrapped with a fibreglass blanket, which doubles the 63 Hz to 250 Hz attenuation. |

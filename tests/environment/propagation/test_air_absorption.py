@@ -172,7 +172,7 @@ def test_humidity_sweep_has_interior_peak() -> None:
         {"temperature_c": -30.0},  # below -20 degC tabulated range
         {"temperature_c": 60.0},  # above +50 degC
         {"relative_humidity_percent": 5.0},  # below 10 %
-        {"atmospheric_pressure_kpa": 250.0},  # above 200 kPa envelope (clause 7)
+        {"static_pressure_kpa": 250.0},  # above 200 kPa envelope (clause 7)
     ],
 )
 def test_out_of_range_warns(kwargs: dict[str, float]) -> None:
@@ -213,8 +213,8 @@ def test_out_of_range_frequency_warns() -> None:
         # non-positive pressure
         (
             (1000.0,),
-            {"atmospheric_pressure_kpa": 0.0},
-            "'atmospheric_pressure_kpa' must be positive",
+            {"static_pressure_kpa": 0.0},
+            "'static_pressure_kpa' must be positive",
         ),
     ],
 )
@@ -281,7 +281,7 @@ def test_iso9613_2_table2_grid_exact_midbands() -> None:
                 ref.ISO9613_2_TABLE2_BANDS,
                 temperature_c=temp,
                 relative_humidity_percent=rh,
-                atmospheric_pressure_kpa=101.325,
+                static_pressure_kpa=101.325,
                 exact_midband=True,
             )
             * 1000.0
@@ -307,7 +307,7 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
     )
     assert isinstance(res, environment.AtmosphericAttenuation)
     np.testing.assert_allclose(
-        res.attenuation_coefficient,
+        res.attenuation_db_per_m,
         environment.air_attenuation(
             bands, temperature_c=20.0, relative_humidity_percent=50.0
         ),
@@ -316,7 +316,7 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
     assert (
         res.temperature_c,
         res.relative_humidity_percent,
-        res.atmospheric_pressure_kpa,
+        res.static_pressure_kpa,
     ) == (
         20.0,
         50.0,
@@ -336,7 +336,7 @@ def test_atmospheric_attenuation_matches_table1_cell() -> None:
             relative_humidity_percent=70.0,
             exact_midband=True,
         )
-    assert float(res.attenuation_coefficient[0]) * 1e3 == pytest.approx(3.66, abs=0.01)
+    assert float(res.attenuation_db_per_m[0]) * 1e3 == pytest.approx(3.66, abs=0.01)
     # exact_midband stores the snapped midband the coefficient was computed at.
     assert float(res.frequencies[0]) == pytest.approx(1000.0 * 10.0**0.0)
 
@@ -349,9 +349,7 @@ def test_atmospheric_attenuation_total_over_distance() -> None:
         relative_humidity_percent=50.0,
         distance=200.0,
     )
-    np.testing.assert_allclose(
-        res.total_attenuation, res.attenuation_coefficient * 200.0
-    )
+    np.testing.assert_allclose(res.total_attenuation, res.attenuation_db_per_m * 200.0)
     assert res.distance == 200.0
 
 
@@ -362,10 +360,10 @@ def test_atmospheric_attenuation_total_coerces_list_fields() -> None:
     # TypeError instead of multiplying.
     res = environment.AtmosphericAttenuation(
         frequencies=[100.0],
-        attenuation_coefficient=[0.001],
+        attenuation_db_per_m=[0.001],
         temperature_c=20.0,
         relative_humidity_percent=50.0,
-        atmospheric_pressure_kpa=101.325,
+        static_pressure_kpa=101.325,
         distance=10.0,
     )
     np.testing.assert_allclose(res.total_attenuation, [0.01])
@@ -399,10 +397,10 @@ def test_atmospheric_attenuation_direct_construction_guards_distance(
     with pytest.raises(ValueError, match="'distance' must be a finite"):
         environment.AtmosphericAttenuation(
             frequencies=freqs,
-            attenuation_coefficient=alpha,
+            attenuation_db_per_m=alpha,
             temperature_c=20.0,
             relative_humidity_percent=50.0,
-            atmospheric_pressure_kpa=101.325,
+            static_pressure_kpa=101.325,
             distance=bad,
         )
 
@@ -419,11 +417,9 @@ def test_atmospheric_attenuation_rejects_stacked_coefficient() -> None:
     warm = environment.atmospheric_attenuation(
         [63.0, 250.0, 1000.0], temperature_c=20.0, relative_humidity_percent=50.0
     )
-    stacked = np.column_stack(
-        [cold.attenuation_coefficient, warm.attenuation_coefficient]
-    )
-    with pytest.raises(ValueError, match="'attenuation_coefficient'.*same shape"):
-        dataclasses.replace(warm, attenuation_coefficient=stacked)
+    stacked = np.column_stack([cold.attenuation_db_per_m, warm.attenuation_db_per_m])
+    with pytest.raises(ValueError, match="'attenuation_db_per_m'.*same shape"):
+        dataclasses.replace(warm, attenuation_db_per_m=stacked)
 
 
 def test_atmospheric_attenuation_rejects_coefficient_of_other_length() -> None:
@@ -433,9 +429,9 @@ def test_atmospheric_attenuation_rejects_coefficient_of_other_length() -> None:
     res = environment.atmospheric_attenuation(
         [63.0, 250.0, 1000.0], temperature_c=20.0, relative_humidity_percent=50.0
     )
-    short = res.attenuation_coefficient[:-1]
-    with pytest.raises(ValueError, match="'attenuation_coefficient'.*same shape"):
-        dataclasses.replace(res, attenuation_coefficient=short)
+    short = res.attenuation_db_per_m[:-1]
+    with pytest.raises(ValueError, match="'attenuation_db_per_m'.*same shape"):
+        dataclasses.replace(res, attenuation_db_per_m=short)
 
 
 def test_atmospheric_attenuation_plot_returns_axes() -> None:
@@ -474,3 +470,70 @@ def test_atmospheric_attenuation_plot_rejects_unknown_language() -> None:
     )
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
+
+
+def _iso9613_alpha_db_per_m(
+    f: np.ndarray, temperature_c: float, relative_humidity: float, pa_kpa: float
+) -> np.ndarray:
+    """ISO 9613-1:1993 Eqs. (3) to (5) and Annex B, written out on their own.
+
+    Read on the printed pages: Eqs. (3)-(5) in 6.2 (PDF page 6, folio 3) and
+    Eqs. (B.1)-(B.3) in Annex B (PDF page 20, folio 17).
+    """
+    pr, t0, t01 = 101.325, 293.15, 273.16
+    t = temperature_c + 273.15
+    c = -6.8346 * (t01 / t) ** 1.261 + 4.6151  # (B.3)
+    h = relative_humidity * 10.0**c / (pa_kpa / pr)  # (B.2) into (B.1)
+    fro = (pa_kpa / pr) * (24.0 + 4.04e4 * h * (0.02 + h) / (0.391 + h))  # (3)
+    frn = (  # (4)
+        (pa_kpa / pr)
+        * (t / t0) ** -0.5
+        * (9.0 + 280.0 * h * np.exp(-4.170 * ((t / t0) ** (-1.0 / 3.0) - 1.0)))
+    )
+    return (  # (5)
+        8.686
+        * f**2
+        * (
+            1.84e-11 * (pa_kpa / pr) ** -1 * (t / t0) ** 0.5
+            + (t / t0) ** -2.5
+            * (
+                0.01275 * np.exp(-2239.1 / t) / (fro + f**2 / fro)
+                + 0.1068 * np.exp(-3352.0 / t) / (frn + f**2 / frn)
+            )
+        )
+    )
+
+
+def test_the_static_pressure_enters_every_term_of_iso9613_1() -> None:
+    """At 80 kPa, an altitude of about 2 km, the pressure scales both
+    relaxation frequencies, the classical term and the molar concentration of
+    water vapour; the result follows Eqs. (3) to (5) and not the sea-level
+    figures.
+    """
+    f = np.array([125.0, 1000.0, 4000.0, 8000.0])
+    expected = _iso9613_alpha_db_per_m(f, 20.0, 50.0, 80.0)
+    alpha = environment.air_attenuation(
+        f, temperature_c=20.0, relative_humidity_percent=50.0, static_pressure_kpa=80.0
+    )
+    np.testing.assert_allclose(alpha, expected, rtol=1e-12)
+    sea_level = environment.air_attenuation(
+        f, temperature_c=20.0, relative_humidity_percent=50.0
+    )
+    assert not np.allclose(alpha, sea_level, rtol=1e-3)
+
+
+def test_atmospheric_attenuation_passes_its_pressure_on() -> None:
+    f = np.array([1000.0, 4000.0])
+    res = environment.atmospheric_attenuation(
+        f,
+        temperature_c=20.0,
+        relative_humidity_percent=50.0,
+        static_pressure_kpa=80.0,
+        distance=1000.0,
+    )
+    np.testing.assert_allclose(
+        res.attenuation_db_per_m,
+        _iso9613_alpha_db_per_m(f, 20.0, 50.0, 80.0),
+        rtol=1e-12,
+    )
+    assert res.static_pressure_kpa == 80.0

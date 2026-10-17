@@ -530,7 +530,7 @@ import numpy as np
 from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz–10 kHz
-att = aircraft.sae_band_attenuation(freqs, path_length=7620.0,
+att = aircraft.sae_band_attenuation(freqs, path_length_m=7620.0,
                               temperature_c=25.0, relative_humidity_percent=70.0)
 att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 ```

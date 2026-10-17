@@ -246,7 +246,7 @@ def test_equivalent_noise_level_from_noise_voltage() -> None:
         rel,
         _M_MV,
         tolerance_db=_TOL,
-        noise=electroacoustics.MicrophoneNoise(voltage=2.5e-6),
+        noise=electroacoustics.MicrophoneNoise(voltage_v=2.5e-6),
     )
     assert result.equivalent_noise_level_db == pytest.approx(20.0, abs=1e-12)
     # SNR re 1 Pa: 20 lg(1 Pa / 20 uPa) - L_N = 93,98 - 20,0.
@@ -327,21 +327,21 @@ def test_reference_frequency_outside_band_rejected() -> None:
     f, rel = _flat_response()
     with pytest.raises(
         ValueError,
-        match=r"'reference_frequency' must lie within the measured frequency band",
+        match=r"'reference_frequency_hz' must lie within the measured frequency band",
     ):
         electroacoustics.microphone_characteristics(
-            f, rel, _M_MV, reference_frequency=30000.0
+            f, rel, _M_MV, reference_frequency_hz=30000.0
         )
 
 
 def test_noise_voltage_and_stated_level_conflict() -> None:
     f, rel = _flat_response()
     conflicting_noise = electroacoustics.MicrophoneNoise(
-        voltage=1e-6, equivalent_level_db=14.0
+        voltage_v=1e-6, equivalent_level_db=14.0
     )
     with pytest.raises(
         ValueError,
-        match=r"either 'noise\.voltage' or 'noise\.equivalent_level_db', not both",
+        match=r"either 'noise\.voltage_v' or 'noise\.equivalent_level_db', not both",
     ):
         electroacoustics.microphone_characteristics(
             f, rel, _M_MV, noise=conflicting_noise
@@ -458,13 +458,13 @@ def _example_result() -> electroacoustics.MicrophoneCharacteristics:
         directivity=electroacoustics.MicrophoneDirectivity(
             polar=(angles, pattern), frequency=1000.0
         ),
-        noise=electroacoustics.MicrophoneNoise(voltage=1.25e-6, spectrum=(nf, nl)),
+        noise=electroacoustics.MicrophoneNoise(voltage_v=1.25e-6, spectrum=(nf, nl)),
         overload=electroacoustics.MicrophoneOverload(
             distortion=(spl, thd), thd_percent=0.5
         ),
         electrical=electroacoustics.MicrophoneElectrical(
-            rated_impedance=150.0,
-            minimum_load_impedance=1000.0,
+            rated_impedance_ohm=150.0,
+            minimum_load_impedance_ohm=1000.0,
             powering="Phantom P48 (IEC 61938)",
             supply_current_ma=3.1,
         ),
@@ -649,7 +649,7 @@ def test_a_non_finite_response_axis_no_longer_reaches_the_fiche(
     [
         "sensitivity_mv_per_pa",
         "sensitivity_level_db",
-        "reference_frequency",
+        "reference_frequency_hz",
         "polar_frequency",
         "equivalent_noise_level_db",
         "tolerance_db",

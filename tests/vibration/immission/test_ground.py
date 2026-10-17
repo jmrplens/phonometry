@@ -26,15 +26,15 @@ POISSON = 0.3
 def test_the_shear_wave_gives_the_shear_modulus() -> None:
     """Formulae (2) and (5): G = v_s² rho, both ways round."""
     v_s = math.sqrt(SHEAR_MODULUS / DENSITY)
-    assert im.shear_modulus_from_wave_speed(
-        v_s, density_kg_m3=DENSITY
-    ) == pytest.approx(SHEAR_MODULUS)
+    assert im.shear_modulus_from_wave_speed(v_s, density=DENSITY) == pytest.approx(
+        SHEAR_MODULUS
+    )
 
 
 def test_the_compression_speed_is_the_p_wave_of_a_continuum() -> None:
     """sqrt(M / rho), with M the P-wave modulus the Biot frame uses too."""
     v_p = im.compression_wave_speed(
-        SHEAR_MODULUS, poisson_ratio=POISSON, density_kg_m3=DENSITY
+        SHEAR_MODULUS, poisson_ratio=POISSON, density=DENSITY
     )
     modulus = frame_elastic_coefficient(SHEAR_MODULUS, POISSON)
     assert v_p == pytest.approx(math.sqrt(modulus.real / DENSITY))
@@ -44,7 +44,7 @@ def test_formula_3_inverts_the_speeds_the_continuum_carries() -> None:
     """The speeds of a known continuum give back its Poisson's ratio."""
     for nu in (0.1, 0.25, 0.3, 0.4, 0.45, 0.49):
         v_p = im.compression_wave_speed(
-            SHEAR_MODULUS, poisson_ratio=nu, density_kg_m3=DENSITY
+            SHEAR_MODULUS, poisson_ratio=nu, density=DENSITY
         )
         v_s = math.sqrt(SHEAR_MODULUS / DENSITY)
         assert im.poisson_ratio_from_wave_speeds(v_p, v_s) == pytest.approx(nu)
@@ -53,9 +53,9 @@ def test_formula_3_inverts_the_speeds_the_continuum_carries() -> None:
 def test_the_elastic_modulus_is_two_g_times_one_plus_nu() -> None:
     v_s = math.sqrt(SHEAR_MODULUS / DENSITY)
     v_p = im.compression_wave_speed(
-        SHEAR_MODULUS, poisson_ratio=POISSON, density_kg_m3=DENSITY
+        SHEAR_MODULUS, poisson_ratio=POISSON, density=DENSITY
     )
-    e = im.youngs_modulus_from_wave_speeds(v_p, v_s, density_kg_m3=DENSITY)
+    e = im.youngs_modulus_from_wave_speeds(v_p, v_s, density=DENSITY)
     assert e == pytest.approx(2.0 * SHEAR_MODULUS * (1.0 + POISSON))
 
 
@@ -64,10 +64,10 @@ def test_formula_5_as_printed_gives_the_p_wave_modulus_not_e() -> None:
     v_s = math.sqrt(SHEAR_MODULUS / DENSITY)
     for nu, factor in ((0.3, 1.346), (0.45, 3.79)):
         v_p = im.compression_wave_speed(
-            SHEAR_MODULUS, poisson_ratio=nu, density_kg_m3=DENSITY
+            SHEAR_MODULUS, poisson_ratio=nu, density=DENSITY
         )
         printed = v_p**2 * DENSITY
-        e = im.youngs_modulus_from_wave_speeds(v_p, v_s, density_kg_m3=DENSITY)
+        e = im.youngs_modulus_from_wave_speeds(v_p, v_s, density=DENSITY)
         assert printed / e == pytest.approx(factor, abs=0.005)
 
 
@@ -75,7 +75,7 @@ def test_formula_1_as_printed_is_short_of_a_factor_two() -> None:
     """The second radical of Formula (1) is sqrt(2) slow at every ratio."""
     for nu in (0.2, 0.3, 0.45):
         v_p = im.compression_wave_speed(
-            SHEAR_MODULUS, poisson_ratio=nu, density_kg_m3=DENSITY
+            SHEAR_MODULUS, poisson_ratio=nu, density=DENSITY
         )
         printed = math.sqrt(SHEAR_MODULUS * (1 - nu) / (DENSITY * (1 - 2 * nu)))
         assert v_p / printed == pytest.approx(math.sqrt(2.0))
@@ -109,9 +109,9 @@ def test_a_compression_wave_slower_than_the_shear_wave_is_refused() -> None:
     with pytest.raises(ValueError, match="stable continuum"):
         im.poisson_ratio_from_wave_speeds(100.0, 150.0)
     with pytest.raises(ValueError, match="stable continuum"):
-        im.youngs_modulus_from_wave_speeds(1.1, 1.0, density_kg_m3=1.0)
+        im.youngs_modulus_from_wave_speeds(1.1, 1.0, density=1.0)
     with pytest.raises(ValueError, match="poisson_ratio"):
-        im.compression_wave_speed(1e6, poisson_ratio=0.5, density_kg_m3=1800.0)
+        im.compression_wave_speed(1e6, poisson_ratio=0.5, density=1800.0)
     with pytest.raises(ValueError, match="velocity_amplitude_m_s"):
         im.shear_strain_amplitude(-1.0, shear_wave_speed_m_s=100.0)
 

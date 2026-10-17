@@ -238,7 +238,7 @@ _NOT_LIMITS = {
 _DERIVED_LIMITS = {
     "phonometry.building.measurement.heavy_impact.HeavyImpactSourceCheck": (
         "nominal",
-        "tolerance",
+        "tolerance_db",
     ),
     "phonometry.building.measurement.service_equipment.PositionSpreadCheck": (
         "limit_db",
@@ -370,7 +370,7 @@ _DERIVED_LIMITS = {
         "guideline_mm_s",
     ),
     "phonometry.vibration.structural.mechanical_mobility.RigidMassCalibrationResult": (
-        "tolerance",
+        "relative_tolerance",
         "within_tolerance",
         "passes",
     ),

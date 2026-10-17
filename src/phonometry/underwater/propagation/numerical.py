@@ -706,7 +706,7 @@ class RayTraceResult(OwnsArrays):
         linearly and nothing else about the water enters the geometry), so
         recording it makes the result self-contained: :func:`eigenrays` needs
         it to put fresh rays through the same water the fan flew.
-    :ivar profile_speeds: Sound speed at each of those depths, in m/s.
+    :ivar profile_speeds_of_sound: Sound speed at each of those depths, in m/s.
     :ivar bathymetry_ranges: Node ranges of the bottom profile the rays were
         traced over, in metres, or ``None`` for the level bottom at
         ``water_depth`` (the default). With a sloping bottom two of the flat
@@ -738,7 +738,7 @@ class RayTraceResult(OwnsArrays):
     source_depth: float
     water_depth: float
     profile_depths: NDArray[np.float64]
-    profile_speeds: NDArray[np.float64]
+    profile_speeds_of_sound: NDArray[np.float64]
     bathymetry_ranges: NDArray[np.float64] | None = None
     bathymetry_depths: NDArray[np.float64] | None = None
 
@@ -755,7 +755,7 @@ class RayTraceResult(OwnsArrays):
         by ``ranges`` alone and simply stops, leaving a ray out of the picture
         with nothing to say it was ever traced.
 
-        ``profile_depths`` and ``profile_speeds`` are the medium itself, the
+        ``profile_depths`` and ``profile_speeds_of_sound`` are the medium itself, the
         polyline the marcher interpolates and the one :func:`eigenrays` flies
         fresh rays through; ``bathymetry_ranges`` and ``bathymetry_depths`` are
         the bottom polyline on the same terms, absent together for a level
@@ -775,7 +775,7 @@ class RayTraceResult(OwnsArrays):
             surface_reflections=2,
             bottom_reflections=2,
             profile_depths=1,
-            profile_speeds=1,
+            profile_speeds_of_sound=1,
             bathymetry_ranges=1,
             bathymetry_depths=1,
         )
@@ -801,7 +801,7 @@ class RayTraceResult(OwnsArrays):
             axis="range sample",
         )
         require_same_length(
-            self, "profile_depths", "profile_speeds", axis="profile node"
+            self, "profile_depths", "profile_speeds_of_sound", axis="profile node"
         )
         require_same_length(
             self, "bathymetry_ranges", "bathymetry_depths", axis="bathymetry node"
@@ -977,7 +977,7 @@ def ray_trace(
         source_depth=zs,
         water_depth=water_depth,
         profile_depths=z_prof,
-        profile_speeds=c_prof,
+        profile_speeds_of_sound=c_prof,
         bathymetry_ranges=None if bathy is None else bathy[0],
         bathymetry_depths=None if bathy is None else bathy[1],
     )
@@ -1491,7 +1491,7 @@ def eigenrays(
         )
         raise ValueError(msg)
     z_prof = np.asarray(trace.profile_depths, dtype=np.float64)
-    c_prof = np.asarray(trace.profile_speeds, dtype=np.float64)
+    c_prof = np.asarray(trace.profile_speeds_of_sound, dtype=np.float64)
     water_depth = float(trace.water_depth)
     zs = float(trace.source_depth)
     r_rec = require_positive(receiver_range, "receiver_range")
@@ -1737,7 +1737,7 @@ class GaussianBeamResult(OwnsArrays):
     :ivar absorption_model: The seawater absorption model applied along the
         beams, or ``None`` when the run propagated without volume absorption
         (the default).
-    :ivar absorption_coefficient: The absorption coefficient :math:`\alpha`
+    :ivar absorption_db_per_km: The absorption coefficient :math:`\alpha`
         actually applied, in dB/km (0.0 when ``absorption_model`` is ``None``),
         as :func:`~phonometry.underwater.propagation.closed_form.seawater_absorption`
         evaluated it at the source frequency and depth. Recorded so a run's
@@ -1778,7 +1778,7 @@ class GaussianBeamResult(OwnsArrays):
     wavefront_curvatures: NDArray[np.float64]
     initial_beam_widths: NDArray[np.float64]
     absorption_model: str | None
-    absorption_coefficient: float
+    absorption_db_per_km: float
     seabed_density: float | None
     seabed_sound_speed: float | None
     source_depth: float
@@ -3472,7 +3472,7 @@ def gaussian_beams(
         wavefront_curvatures=ray_curvatures,
         initial_beam_widths=np.asarray(w0, dtype=np.float64),
         absorption_model=absorption_key,
-        absorption_coefficient=alpha,
+        absorption_db_per_km=alpha,
         seabed_density=None if seabed is None else seabed[1],
         seabed_sound_speed=None if seabed is None else seabed[2],
         source_depth=zs,

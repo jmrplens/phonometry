@@ -874,9 +874,9 @@ def plot_rigid_mass_calibration(
     freq = np.asarray(result.frequencies, dtype=np.float64)
     measured = np.asarray(result.measured, dtype=np.float64)
     expected = np.asarray(result.expected, dtype=np.float64)
-    deviation = np.asarray(result.deviation, dtype=np.float64)
+    deviation = np.asarray(result.relative_deviation, dtype=np.float64)
     within = np.asarray(result.within_tolerance, dtype=bool)
-    tol = float(result.tolerance)
+    tol = float(result.relative_tolerance)
     tol_pct = 100.0 * tol
     fmin, fmax = float(freq.min()), float(freq.max())
     p = format_number(tol_pct, language, decimals=1, trim=True)
@@ -1719,7 +1719,7 @@ def plot_running_rms_decay_verification(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    tau = result.integration_time_s
+    tau = result.integration_time
     criterion_db = 20.0 * np.log10(0.1)
     span_end = 1.25 * max(result.upper_time_s, result.measured_time_s)
     t = np.linspace(0.0, span_end, 512)

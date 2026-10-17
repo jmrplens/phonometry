@@ -241,10 +241,10 @@ CrossSpectralDensityResult(
     frequencies: NDArray[np.float64],
     csd: NDArray[np.complex128],
     magnitude: NDArray[np.float64],
-    phase: NDArray[np.float64],
+    phase_rad: NDArray[np.float64],
     coherence: NDArray[np.float64],
     magnitude_random_error: NDArray[np.float64],
-    phase_std: NDArray[np.float64],
+    phase_standard_deviation_rad: NDArray[np.float64],
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
@@ -267,10 +267,10 @@ estimate, as Bendat & Piersol recommend for measured data (Section 9.2).
 | `frequencies` | One-sided frequency axis, in Hz. |
 | `csd` | Complex cross-spectral density $\hat{G}_{xy}(f)$. |
 | `magnitude` | $\lvert \hat{G}_{xy}(f) \rvert$. |
-| `phase` | Cross-spectrum phase $\hat{\theta}_{xy}(f)$, in radians (unwrapped). |
+| `phase_rad` | Cross-spectrum phase $\hat{\theta}_{xy}(f)$, in radians (unwrapped). |
 | `coherence` | Ordinary coherence $\hat{\gamma}^2_{xy}(f) \in [0, 1]$. |
 | `magnitude_random_error` | Normalized random error of $\lvert \hat{G}_{xy} \rvert$, $\varepsilon = 1/(\lvert \gamma_{xy} \rvert \sqrt{n_\mathrm{d}})$ (Eq. 9.33). |
-| `phase_std` | Standard deviation of the phase estimate, in radians, $\mathrm{s.d.} = (1 - \gamma^2_{xy})^{1/2} / (\lvert \gamma_{xy} \rvert \sqrt{2 n_\mathrm{d}})$ (Eq. 9.52). |
+| `phase_standard_deviation_rad` | Standard deviation of the phase estimate, in radians, $\mathrm{s.d.} = (1 - \gamma^2_{xy})^{1/2} / (\lvert \gamma_{xy} \rvert \sqrt{2 n_\mathrm{d}})$ (Eq. 9.52). |
 | `n_segments` | Raw number of segments averaged. |
 | `n_averages` | Effective number of independent averages $n_\mathrm{d}$. |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$, in Hz. |

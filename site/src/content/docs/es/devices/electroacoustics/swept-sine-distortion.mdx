@@ -104,7 +104,7 @@ y = x + 0.12 * x**2 + 0.08 * x**3     # un cúbico sin memoria hace de grabació
 res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3)
 
 res.harmonic_responses    # H1..H3 complejas sobre res.frequencies
-res.thd, res.thd_frequencies
+res.thd_ratio, res.thd_frequencies
 res.distortion_ratios     # |Hn(n f)| / |H1(f)| por orden
 res.plot()                # magnitudes |Hn| + THD(f)
 ```
@@ -202,7 +202,7 @@ res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=second
 
 h1 = 1.0 + 3.0 * a3 / 4.0                              # ganancia de Chebyshev
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.loglog(res.thd_frequencies, 100.0 * res.thd, label="THD(f) total")
+ax.loglog(res.thd_frequencies, 100.0 * res.thd_ratio, label="THD(f) total")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[0],
           ls="--", label="2º armónico d2(f)")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[1],
@@ -512,7 +512,7 @@ gruesas.
   RI *lineal* de la misma grabación de barrido y simplemente descarta los
   productos de distorsión a tiempos negativos; `swept_sine_distortion` es
   la herramienta que los lee.
-- [`thd` / `harmonic_analysis`](/phonometry/es/devices/electroacoustics/electroacoustics/)
+- [`thd_ratio` / `harmonic_analysis`](/phonometry/es/devices/electroacoustics/electroacoustics/)
   miden la distorsión de un tono estacionario a una frecuencia; el
   separador por barrido devuelve las mismas razones como función continua
   de la frecuencia, con una sola medición. La rapidez es la menor de las

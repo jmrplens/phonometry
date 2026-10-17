@@ -543,7 +543,7 @@ def meteorological_corrections(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    air_absorption_coefficient: float | np.ndarray | None = None,
+    air_absorption_db_per_m: float | np.ndarray | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection:
     r"""Meteorological corrections C1, C2, C3 (ISO 3745:2012 Eq. 14 block).
@@ -574,7 +574,7 @@ def meteorological_corrections(
 
     :param temperature_c: Air temperature ``theta`` at the test, in degrees C.
     :param static_pressure_kpa: Static pressure ``ps`` at the test, in kilopascals.
-    :param air_absorption_coefficient: ``a(f)`` (dB/m), scalar or per band, for
+    :param air_absorption_db_per_m: ``a(f)`` (dB/m), scalar or per band, for
         C3; ``None`` leaves :math:`C_3 = 0`.
     :param radius: Measurement radius ``r`` (m), used only in
         :math:`A_0 = \alpha(f)\,r`.
@@ -593,12 +593,12 @@ def meteorological_corrections(
     p_term = -10.0 * np.log10(static_pressure_kpa / _PS0_KPA)
     c1 = float(p_term + 5.0 * np.log10(theta_k / _THETA0_K))
     c2 = float(p_term + 15.0 * np.log10(theta_k / _THETA1_K))
-    if air_absorption_coefficient is None:
+    if air_absorption_db_per_m is None:
         c3: float | np.ndarray = 0.0
     else:
-        a0 = np.asarray(air_absorption_coefficient, dtype=np.float64) * radius
+        a0 = np.asarray(air_absorption_db_per_m, dtype=np.float64) * radius
         if np.any(a0 < 0.0):
-            msg = "'air_absorption_coefficient' must be non-negative."
+            msg = "'air_absorption_db_per_m' must be non-negative."
             raise ValueError(msg)
         c3_arr = a0 * (1.0053 - 0.0012 * a0) ** 1.6
         c3 = as_float_or_array(c3_arr)
@@ -800,7 +800,7 @@ def sound_power_anechoic(
     areas: np.ndarray | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_coefficient: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: float | np.ndarray | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -817,7 +817,7 @@ def sound_power_anechoic(
     areas: np.ndarray | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_coefficient: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: float | np.ndarray | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -834,7 +834,7 @@ def sound_power_anechoic(
     areas: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    air_absorption_coefficient: float | np.ndarray | None = None,
+    air_absorption_db_per_m: float | np.ndarray | None = None,
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
     room_qualification: FreeFieldCheck | None = None,
@@ -872,7 +872,7 @@ def sound_power_anechoic(
         (Eq. 13); omit for the equal-area average (Eq. 12).
     :param temperature_c: Air temperature ``theta`` (deg C), for C1/C2.
     :param static_pressure_kpa: Static pressure ``ps`` (kPa), for C1/C2.
-    :param air_absorption_coefficient: ``a(f)`` (dB/m) for C3, scalar or
+    :param air_absorption_db_per_m: ``a(f)`` (dB/m) for C3, scalar or
         per band; ``None`` leaves :math:`C_3 = 0`.
     :param sigma_omc_db: Operating/mounting standard deviation, dB.
     :param coverage_factor: ``k`` (2 two-sided, 1.6 one-sided).
@@ -918,7 +918,7 @@ def sound_power_anechoic(
     mc = meteorological_corrections(
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,
-        air_absorption_coefficient=air_absorption_coefficient,
+        air_absorption_db_per_m=air_absorption_db_per_m,
         radius=radius,
     )
     c3 = np.broadcast_to(np.asarray(mc.c3, dtype=np.float64), (n_bands,))

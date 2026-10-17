@@ -206,7 +206,7 @@ def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
     c0 = float(speed_of_sound_iso10534(temperature_c=temperature_c))
     rho = float(
         air_density_iso10534(
-            temperature_c=temperature_c, atmospheric_pressure_kpa=pressure_kpa
+            temperature_c=temperature_c, static_pressure_kpa=pressure_kpa
         )
     )
     rc = ph.fluids.characteristic_impedance(rho, c0)

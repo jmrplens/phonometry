@@ -580,7 +580,7 @@ def _chk_barron_mean_and_area_term() -> Outcome:
         area_label: round(
             float(
                 ph.noise_control.sound_power_level_db(
-                    [0.0], area_m2=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
+                    [0.0], area=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
                 )[0]
             ),
             2,
@@ -608,7 +608,7 @@ def _chk_barron_sound_power() -> Outcome:
     level = float(
         ph.noise_control.sound_power_level_db(
             [mean],
-            area_m2=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
+            area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
             field_correction_db=[correction],
         )[0]
     )
@@ -652,7 +652,7 @@ def _chk_ver_beranek_area_term() -> Outcome:
         oracle.VER_BERANEK_EXAMPLE_4_2_REVERBERATION_TIME_S,
         oracle.VER_BERANEK_EXAMPLE_4_2_SPEED_M_S,
     )
-    term = float(ph.noise_control.sound_power_level_db([0.0], area_m2=[absorption])[0])
+    term = float(ph.noise_control.sound_power_level_db([0.0], area=[absorption])[0])
     return numeric(
         oracle.VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB, term, 0.05, unit="dB", places=2
     )
@@ -705,7 +705,7 @@ def _chk_barron_gas_density() -> Outcome:
     computed = {
         name: round(
             ph.noise_control.gas_density_kg_m3(
-                temperature_c=values[0], ambient_pressure_pa=values[1]
+                temperature_c=values[0], atmospheric_pressure_pa=values[1]
             ),
             3,
         )
@@ -753,7 +753,7 @@ def _chk_vdi2081_gap_velocity() -> Outcome:
     )
     velocity = ph.noise_control.silencer_flow_velocity_m_s(
         face_velocity,
-        upstream_area_m2=oracle.VDI2081_SPLITTER_HOUSING_AREA_M2,
+        upstream_area=oracle.VDI2081_SPLITTER_HOUSING_AREA_M2,
         free_area_m2=oracle.VDI2081_SPLITTER_FREE_AREA_M2,
     )
     # Driven from the volume flow rather than from the printed face velocity
@@ -784,7 +784,7 @@ def _chk_fuchs_airway_velocity() -> Outcome:
             free_m2 = housing_m2 / (1.0 + ratio)
             computed = ph.noise_control.silencer_flow_velocity_m_s(
                 flow_m3_h / 3600.0 / housing_m2,
-                upstream_area_m2=housing_m2,
+                upstream_area=housing_m2,
                 free_area_m2=free_m2,
             )
             # The table truncates towards zero rather than rounding, which is
@@ -920,7 +920,7 @@ def _chk_iso11821_printed_band_pair() -> Outcome:
         screen_oracle.BARRON_TABLE_7_6_SCREENED_DB,
         frequencies=screen_oracle.BARRON_TABLE_7_6_BANDS_HZ,
         source_kind="actual",
-        distance_m=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
+        distance=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     computed = {
         "63 Hz": float(result.attenuation_db[0]),
@@ -954,7 +954,7 @@ def _chk_iso11821_printed_a_weighted_pair() -> Outcome:
         source_kind="actual",
         a_weighted_unscreened_level_db=unscreened,
         a_weighted_screened_level_db=screened,
-        distance_m=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
+        distance=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     weighted = result.a_weighted_attenuation_db
     computed = math.nan if weighted is None else float(weighted)
@@ -984,7 +984,7 @@ def _chk_iso11821_indoor_screen_pair() -> Outcome:
         [screened],
         frequencies=[1000.0],
         source_kind="actual",
-        distance_m=screen_oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
+        distance=screen_oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
     )
     return numeric(printed, float(result.attenuation_db[0]), 1e-12, unit="dB", places=1)
 
@@ -1000,7 +1000,7 @@ def _chk_iso11821_printed_rounded_reductions() -> Outcome:
         screen_oracle.HANSEN_EXAMPLE_6_23_UNSCREENED_DB,
         screen_oracle.HANSEN_EXAMPLE_6_23_SCREENED_DB,
         frequencies=screen_oracle.HANSEN_EXAMPLE_6_23_BANDS_HZ,
-        distance_m=2.0,
+        distance=2.0,
     )
     printed = {
         f"{band:g} Hz": float(value)

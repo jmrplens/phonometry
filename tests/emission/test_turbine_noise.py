@@ -135,7 +135,7 @@ def test_one_box_is_the_iso_3746_parallelepiped() -> None:
     assert surface.widths_m.tolist() == [width]
     assert surface.heights_m.tolist() == [height]
     expected = length * width + 2 * length * height + 2 * width * height
-    assert surface.area_m2 == pytest.approx(expected, rel=1e-12)
+    assert surface.area == pytest.approx(expected, rel=1e-12)
     assert surface.enveloping_area_m2 == pytest.approx(expected, rel=1e-12)
 
 
@@ -150,7 +150,7 @@ def test_equation_1_for_the_large_set_by_hand() -> None:
     )
     np.testing.assert_allclose(surface.lengths_m, lengths)
     np.testing.assert_allclose(surface.x_edges_m, [0.0, 7.0, 12.0, 19.0, 23.0])
-    assert surface.area_m2 == pytest.approx(expected, rel=1e-12)
+    assert surface.area == pytest.approx(expected, rel=1e-12)
     assert surface.max_height_m == 5.5
     assert surface.max_width_m == 7.0
 
@@ -158,7 +158,7 @@ def test_equation_1_for_the_large_set_by_hand() -> None:
 def test_equation_1_is_the_exact_area_when_the_sections_nest() -> None:
     """Both drawings of Figure 2 nest: the largest section, then smaller ones."""
     surface = emission.turbine_measurement_surface(LARGE_SET)
-    assert surface.area_m2 == pytest.approx(surface.enveloping_area_m2, rel=1e-12)
+    assert surface.area == pytest.approx(surface.enveloping_area_m2, rel=1e-12)
 
 
 def test_equation_1_overcounts_when_the_tallest_box_is_not_the_widest() -> None:
@@ -172,7 +172,7 @@ def test_equation_1_overcounts_when_the_tallest_box_is_not_the_widest() -> None:
     # Sections 3 m wide by 6 m tall and 7 m by 2 m: ends of 18 and 14 m2 and
     # a step of 18 + 14 - 2 (3 x 2) = 20 m2, 52 m2 of transverse faces, where
     # Equation (1) counts 2 x 6 x 7 = 84 m2.
-    assert surface.area_m2 - surface.enveloping_area_m2 == pytest.approx(
+    assert surface.area - surface.enveloping_area_m2 == pytest.approx(
         84.0 - 52.0, rel=1e-12
     )
 
@@ -187,7 +187,7 @@ def test_equation_1_undercounts_a_small_box_between_two_large_ones() -> None:
     )
     # Sections 5 x 5, 3 x 2 and 5 x 5: ends of 25 m2 each and two steps of
     # 25 - 6 = 19 m2, 88 m2 where Equation (1) counts 2 x 5 x 5 = 50 m2.
-    assert surface.enveloping_area_m2 - surface.area_m2 == pytest.approx(
+    assert surface.enveloping_area_m2 - surface.area == pytest.approx(
         88.0 - 50.0, rel=1e-12
     )
 
@@ -404,9 +404,7 @@ def test_positions_refuse_a_spacing_that_is_not_positive() -> None:
 
 
 def test_figure_a3_at_a_over_s_of_one_is_ten_lg_five() -> None:
-    correction = emission.turbine_environmental_correction(
-        200.0, absorption_area_m2=200.0
-    )
+    correction = emission.turbine_environmental_correction(200.0, absorption_area=200.0)
     assert correction.environmental_correction_db == pytest.approx(
         10.0 * math.log10(5.0)
     )
@@ -415,10 +413,10 @@ def test_figure_a3_at_a_over_s_of_one_is_ten_lg_five() -> None:
 
 def test_absorption_area_from_the_reverberation_time() -> None:
     correction = emission.turbine_environmental_correction(
-        400.0, volume_m3=30000.0, reverberation_time_s=2.4
+        400.0, volume=30000.0, reverberation_time=2.4
     )
     area = 0.16 * 30000.0 / 2.4
-    assert correction.absorption_area_m2 == pytest.approx(area)
+    assert correction.absorption_area == pytest.approx(area)
     assert correction.environmental_correction_db == pytest.approx(
         10.0 * math.log10(1.0 + 4.0 / (area / 400.0))
     )
@@ -427,13 +425,13 @@ def test_absorption_area_from_the_reverberation_time() -> None:
 def test_environmental_correction_needs_exactly_one_route() -> None:
     with pytest.raises(ValueError, match="not both"):
         emission.turbine_environmental_correction(
-            100.0, absorption_area_m2=50.0, volume_m3=1000.0
+            100.0, absorption_area=50.0, volume=1000.0
         )
 
 
 def test_environmental_correction_needs_both_halves_of_the_room() -> None:
-    with pytest.raises(ValueError, match="reverberation_time_s"):
-        emission.turbine_environmental_correction(100.0, volume_m3=1000.0)
+    with pytest.raises(ValueError, match="reverberation_time"):
+        emission.turbine_environmental_correction(100.0, volume=1000.0)
 
 
 def test_reference_source_takes_the_mean_of_the_determinations() -> None:
@@ -479,15 +477,15 @@ def test_seven_decibels_from_two_decimal_readings_qualifies() -> None:
     levels, background = _levels()
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=background,
+        surface_area=100.0,
+        background_levels=background,
         environmental_correction_db=correction.environmental_correction_db,
     )
     assert result.conforms
 
 
 def test_the_check_takes_a_correction_or_a_bare_k_but_not_both() -> None:
-    room = emission.turbine_environmental_correction(100.0, absorption_area_m2=400.0)
+    room = emission.turbine_environmental_correction(100.0, absorption_area=400.0)
     with pytest.raises(ValueError, match="one of the two"):
         emission.check_turbine_test_environment(room, environmental_correction_db=1.0)
 
@@ -506,7 +504,7 @@ def test_the_a_over_s_bound_and_the_seven_decibels_agree_to_the_decibel() -> Non
     ratio_at_limit = 4.0 / (10.0 ** (oracle.IEC61063_K_LIMIT_DB / 10.0) - 1.0)
     assert ratio_at_limit == pytest.approx(oracle.IEC61063_MINIMUM_RATIO, abs=0.003)
     check = emission.check_turbine_test_environment(
-        emission.turbine_environmental_correction(100.0, absorption_area_m2=100.0)
+        emission.turbine_environmental_correction(100.0, absorption_area=100.0)
     )
     assert check.passes
     assert check.ratio == 1.0
@@ -550,8 +548,8 @@ def test_equations_2_and_3_by_hand() -> None:
     levels, background = _levels()
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=410.1,
-        background_levels_db=background,
+        surface_area=410.1,
+        background_levels=background,
         environmental_correction_db=2.0,
     )
     # Table 2 at 12, 7, 4, 9,3, 20 and 5,6 dB: 0, 1, 2, 0,5, 0 and 1 dB.
@@ -570,8 +568,8 @@ def test_without_a_background_no_correction_is_applied() -> None:
     levels, _ = _levels()
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
     )
     assert result.level_differences_db is None
@@ -585,8 +583,8 @@ def test_a_background_within_three_decibels_is_an_upper_limit() -> None:
     with pytest.warns(SoundPowerWarning, match="upper limit"):
         result = emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=background,
+            surface_area=100.0,
+            background_levels=background,
             environmental_correction_db=0.0,
         )
     assert result.upper_limit
@@ -606,8 +604,8 @@ def test_a_background_3_db_below_in_decimal_readings_is_valid() -> None:
         warnings.simplefilter("error", SoundPowerWarning)
         result = emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=background,
+            surface_area=100.0,
+            background_levels=background,
             environmental_correction_db=0.0,
         )
     assert result.level_differences_db is not None
@@ -621,8 +619,8 @@ def test_seven_decibels_exactly_conforms_and_is_reported() -> None:
     levels, background = _levels()
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=background,
+        surface_area=100.0,
+        background_levels=background,
         environmental_correction_db=oracle.IEC61063_K_LIMIT_DB,
     )
     assert result.conforms
@@ -644,8 +642,8 @@ def test_a_room_beyond_seven_decibels_is_reported() -> None:
     with pytest.warns(SoundPowerWarning, match="7 dB"):
         result = emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=background,
+            surface_area=100.0,
+            background_levels=background,
             environmental_correction_db=7.5,
         )
     assert not result.conforms
@@ -655,8 +653,8 @@ def test_the_level_is_reported_to_the_whole_decibel_halves_up() -> None:
     levels = np.full(5, 90.0)
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=10.0**2.25,  # 10 lg S = 22,5 dB
-        background_levels_db=None,
+        surface_area=10.0**2.25,  # 10 lg S = 22,5 dB
+        background_levels=None,
         environmental_correction_db=0.0,
     )
     assert result.sound_power_level_db == pytest.approx(112.5)
@@ -667,8 +665,8 @@ def test_a_half_a_hair_under_in_binary_still_rounds_up() -> None:
     """80,2 - 0,7 + 20 dB is 99,5 dB, and 99,499 999 999 999 99 in binary."""
     result = emission.turbine_sound_power(
         np.full(4, 80.2),
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.7,
     )
     assert result.sound_power_level_db < 99.5
@@ -680,8 +678,8 @@ def test_the_arithmetic_average_of_the_note_of_8_3() -> None:
     levels = np.array([88.0, 89.0, 90.0, 91.0, 92.0])
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=1.0,
     )
     assert result.level_range_db == 4.0
@@ -695,16 +693,16 @@ def test_the_arithmetic_average_at_a_range_of_exactly_five_decibels() -> None:
     levels = np.array([90.0, 91.0, 93.0, 95.0])
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
     )
     assert result.level_range_db == oracle.IEC61063_ARITHMETIC_RANGE_DB
     assert result.arithmetic_mean_allowed
     wider = emission.turbine_sound_power(
         np.array([90.0, 91.0, 93.0, 95.01]),
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
     )
     assert not wider.arithmetic_mean_allowed
@@ -714,8 +712,8 @@ def test_a_range_of_five_decibels_in_decimal_readings_is_within_the_note() -> No
     """20,1 - 15,1 dB is 5,000 000 000 000 002 in binary: 5 dB, not above it."""
     result = emission.turbine_sound_power(
         np.array([15.1, 17.0, 18.0, 20.1]),
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
     )
     assert result.level_range_db > oracle.IEC61063_ARITHMETIC_RANGE_DB
@@ -742,8 +740,8 @@ def test_overhead_positions_and_their_effect() -> None:
     mask = np.array([False, False, False, False, True, True])
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
         overhead_mask=mask,
     )
@@ -756,8 +754,8 @@ def _overhead_effect(overhead_db: float) -> emission.TurbineSoundPowerResult:
     """Four positions at 80 dB and one overhead position."""
     return emission.turbine_sound_power(
         np.array([80.0, 80.0, 80.0, 80.0, overhead_db]),
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
         overhead_mask=np.array([False, False, False, False, True]),
     )
@@ -802,19 +800,19 @@ def test_determination_refuses_fewer_than_four_positions() -> None:
     with pytest.raises(ValueError, match="at least 4"):
         emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=None,
+            surface_area=100.0,
+            background_levels=None,
             environmental_correction_db=0.0,
         )
 
 
 def test_determination_refuses_a_background_of_another_length() -> None:
     levels, background = _levels()
-    with pytest.raises(ValueError, match="background_levels_db"):
+    with pytest.raises(ValueError, match="background_levels"):
         emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=background[:-1],
+            surface_area=100.0,
+            background_levels=background[:-1],
             environmental_correction_db=0.0,
         )
 
@@ -823,12 +821,12 @@ def test_result_arrays_are_read_only_and_not_the_callers() -> None:
     levels, background = _levels()
     result = emission.turbine_sound_power(
         levels,
-        surface_area_m2=100.0,
-        background_levels_db=background,
+        surface_area=100.0,
+        background_levels=background,
         environmental_correction_db=0.0,
     )
     levels[0] = 0.0
-    assert result.pressure_levels_db[0] == 88.0
+    assert result.pressure_levels[0] == 88.0
     with pytest.raises(ValueError, match="read-only"):
         result.corrected_levels_db[0] = 1.0
 
@@ -840,8 +838,8 @@ def _result(offset: float) -> emission.TurbineSoundPowerResult:
     levels, background = _levels()
     return emission.turbine_sound_power(
         levels + offset,
-        surface_area_m2=410.1,
-        background_levels_db=background + offset,
+        surface_area=410.1,
+        background_levels=background + offset,
         environmental_correction_db=2.0,
     )
 
@@ -873,8 +871,8 @@ def _uniform(level_db: float) -> emission.TurbineSoundPowerResult:
     """Six equal levels over 100 m², outdoors: L_WA = level + 20 dB exactly."""
     return emission.turbine_sound_power(
         np.full(6, level_db),
-        surface_area_m2=100.0,
-        background_levels_db=None,
+        surface_area=100.0,
+        background_levels=None,
         environmental_correction_db=0.0,
     )
 
@@ -961,8 +959,8 @@ def test_the_report_refuses_an_upper_limit() -> None:
         warnings.simplefilter("ignore", SoundPowerWarning)
         upper = emission.turbine_sound_power(
             levels,
-            surface_area_m2=100.0,
-            background_levels_db=background,
+            surface_area=100.0,
+            background_levels=background,
             environmental_correction_db=0.0,
         )
     determinations = {"rated": upper}
@@ -1017,7 +1015,7 @@ def test_the_layout_refuses_an_unknown_view() -> None:
 
 def test_figure_a3_draws_the_limit_and_the_room() -> None:
     correction = emission.turbine_environmental_correction(
-        400.0, absorption_area_m2=2000.0
+        400.0, absorption_area=2000.0
     )
     ax = emission.check_turbine_test_environment(correction).plot()
     ys = [line.get_ydata() for line in ax.lines]
@@ -1041,7 +1039,7 @@ def test_figure_a3_labels_its_axis_as_the_figure_does(
     language: str, labels: list[str]
 ) -> None:
     correction = emission.turbine_environmental_correction(
-        400.0, absorption_area_m2=2000.0
+        400.0, absorption_area=2000.0
     )
     ax = correction.plot(language=language)
     ax.figure.canvas.draw()

@@ -496,7 +496,7 @@ class RoadSurfaceCoefficients(RichDisplay):
     :ivar name: The surface description as printed in Table F-4.
     :ivar alpha: ``alpha_i,m`` per category, eight octave bands, in dB.
     :ivar beta: ``beta_m`` per category (dimensionless speed coefficient).
-    :ivar speed_range: ``(v_min, v_max)`` over which the row is declared valid,
+    :ivar speed_range_kmh: ``(v_min, v_max)`` over which the row is declared valid,
         in km/h, or ``None`` for the reference surface, which carries no range.
         Carried for the reader, not enforced: Table F-4 prints these columns
         without attaching a consequence to them, so refusing a speed outside
@@ -506,7 +506,7 @@ class RoadSurfaceCoefficients(RichDisplay):
     name: str
     alpha: dict[str, tuple[float, ...]]
     beta: dict[str, float]
-    speed_range: tuple[float, float] | None
+    speed_range_kmh: tuple[float, float] | None
 
 
 def road_surface_coefficients(surface: RoadSurface | str) -> RoadSurfaceCoefficients:
@@ -528,7 +528,7 @@ def road_surface_coefficients(surface: RoadSurface | str) -> RoadSurfaceCoeffici
         name=key,
         alpha={k: v[0] for k, v in per_category.items()},
         beta={k: v[1] for k, v in per_category.items()},
-        speed_range=None if v_min is None or v_max is None else (v_min, v_max),
+        speed_range_kmh=None if v_min is None or v_max is None else (v_min, v_max),
     )
 
 
@@ -538,7 +538,7 @@ class RoadTraffic(RichDisplay):
 
     :ivar category: The :class:`RoadVehicleCategory` of the flow.
     :ivar flow_rate: Hourly flow ``Q_m``, in vehicles per hour.
-    :ivar speed: Average speed ``v_m``, in km/h. Sound powers are frozen at
+    :ivar speed_kmh: Average speed ``v_m``, in km/h. Sound powers are frozen at
         20 km/h below that speed (2.2.1); the flow term still uses the true
         speed.
     :ivar studded_fraction: ``Q_stud,ratio`` of (2.2.7), the fraction of the
@@ -548,7 +548,7 @@ class RoadTraffic(RichDisplay):
 
     category: RoadVehicleCategory
     flow_rate: float
-    speed: float
+    speed_kmh: float
     studded_fraction: float = 0.0
 
 
@@ -715,7 +715,7 @@ def _gradient_correction(key: str, slope: float, speed: float) -> float:
 
 def road_rolling_noise(
     category: RoadVehicleCategory | str,
-    speed: float,
+    speed_kmh: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
@@ -735,7 +735,7 @@ def road_rolling_noise(
     and their total power is the propulsion term alone (2.2.3).
 
     :param category: Vehicle category (Table [2.2.a]).
-    :param speed: Average speed ``v_m``, in km/h; values below 20 km/h are
+    :param speed_kmh: Average speed ``v_m``, in km/h; values below 20 km/h are
         raised to 20 km/h (2.2.1).
     :param surface: Road surface, as a :class:`RoadSurface`, its description or
         an explicit :class:`RoadSurfaceCoefficients`.
@@ -751,7 +751,7 @@ def road_rolling_noise(
     """
     key = _category_key(category)
     _require_category(key, coefficients)
-    v = max(_positive_speed(speed), _ROAD_MINIMUM_SPEED)
+    v = max(_positive_speed(speed_kmh), _ROAD_MINIMUM_SPEED)
     row = _surface_of(surface, key)
     log_speed = np.log10(v / ROAD_REFERENCE_SPEED_KMH)
 
@@ -783,7 +783,7 @@ def road_rolling_noise(
 
 def road_propulsion_noise(
     category: RoadVehicleCategory | str,
-    speed: float,
+    speed_kmh: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
     road_slope_percent: float = 0.0,
@@ -802,7 +802,7 @@ def road_propulsion_noise(
     propulsion noise, a noisy one does not increase it.
 
     :param category: Vehicle category (Table [2.2.a]).
-    :param speed: Average speed ``v_m``, in km/h; values below 20 km/h are
+    :param speed_kmh: Average speed ``v_m``, in km/h; values below 20 km/h are
         raised to 20 km/h (2.2.1).
     :param surface: Road surface, as a :class:`RoadSurface`, its description or
         an explicit :class:`RoadSurfaceCoefficients`.
@@ -817,7 +817,7 @@ def road_propulsion_noise(
     """
     key = _category_key(category)
     _require_category(key, coefficients)
-    v = max(_positive_speed(speed), _ROAD_MINIMUM_SPEED)
+    v = max(_positive_speed(speed_kmh), _ROAD_MINIMUM_SPEED)
     row = _surface_of(surface, key)
 
     base = _bands(coefficients.propulsion_a[key]) + _bands(
@@ -837,17 +837,17 @@ def road_propulsion_noise(
     return np.asarray(base + d_road + d_acc + d_grad, dtype=np.float64)
 
 
-def _positive_speed(speed: float) -> float:
-    v = _finite(speed, "speed")
+def _positive_speed(speed_kmh: float) -> float:
+    v = _finite(speed_kmh, "speed_kmh")
     if v <= 0.0:
-        msg = "'speed' must be a positive number of km/h."
+        msg = "'speed_kmh' must be a positive number of km/h."
         raise ValueError(msg)
     return v
 
 
 def road_vehicle_sound_power(
     category: RoadVehicleCategory | str,
-    speed: float,
+    speed_kmh: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE_C,
@@ -865,7 +865,7 @@ def road_vehicle_sound_power(
     propulsion term is the whole of it (2.2.3).
 
     :param category: Vehicle category (Table [2.2.a]).
-    :param speed: Average speed ``v_m``, in km/h.
+    :param speed_kmh: Average speed ``v_m``, in km/h.
     :param surface: Road surface (Table F-4).
     :param temperature_c: Air temperature ``tau``, in degrees Celsius.
     :param road_slope_percent: Road slope ``s``, in per cent.
@@ -880,7 +880,7 @@ def road_vehicle_sound_power(
     key = _category_key(category)
     propulsion = road_propulsion_noise(
         key,
-        speed,
+        speed_kmh,
         surface=surface,
         road_slope_percent=road_slope_percent,
         junction_distance=junction_distance,
@@ -891,7 +891,7 @@ def road_vehicle_sound_power(
         return propulsion
     rolling = road_rolling_noise(
         key,
-        speed,
+        speed_kmh,
         surface=surface,
         temperature_c=temperature_c,
         studded_fraction=studded_fraction,
@@ -1086,7 +1086,7 @@ def road_source_power(
         if q < 0.0:
             msg = "'flow_rate' must be a non-negative number of vehicles/h."
             raise ValueError(msg)
-        v = _positive_speed(flow.speed)
+        v = _positive_speed(flow.speed_kmh)
         lwr = road_rolling_noise(
             key,
             v,

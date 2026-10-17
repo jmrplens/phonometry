@@ -97,11 +97,11 @@ $s'_\mathrm{t} = 4 \pi^2 m'_\mathrm{t} f_\mathrm{r}^2$.
 
 ```python
 DynamicStiffnessResult(
-    apparent_stiffness: float,
-    gas_stiffness: float,
-    dynamic_stiffness: float,
-    resonant_frequency: float,
-    floor_mass_per_area: float,
+    apparent_stiffness_n_m3: float,
+    gas_stiffness_n_m3: float,
+    dynamic_stiffness_n_m3: float,
+    resonant_frequency_hz: float,
+    floor_mass_per_area_kg_m2: float,
     natural_frequency: float,
 )
 ```
@@ -112,11 +112,11 @@ Dynamic stiffness of a resilient layer and the floating-floor resonance.
 
 | Name | Description |
 | :--- | :--- |
-| `apparent_stiffness` | Apparent dynamic stiffness `s't`, in N/m3. |
-| `gas_stiffness` | Enclosed-gas dynamic stiffness `s'a`, in N/m3. |
-| `dynamic_stiffness` | Installed dynamic stiffness `s'`, in N/m3. |
-| `resonant_frequency` | Measured test resonant frequency `fr`, in hertz. |
-| `floor_mass_per_area` | Supported-floor mass per unit area `m'`, kg/m2. |
+| `apparent_stiffness_n_m3` | Apparent dynamic stiffness `s't`, in N/m3. |
+| `gas_stiffness_n_m3` | Enclosed-gas dynamic stiffness `s'a`, in N/m3. |
+| `dynamic_stiffness_n_m3` | Installed dynamic stiffness `s'`, in N/m3. |
+| `resonant_frequency_hz` | Measured test resonant frequency `fr`, in hertz. |
+| `floor_mass_per_area_kg_m2` | Supported-floor mass per unit area `m'`, kg/m2. |
 | `natural_frequency` | Installed-floor natural frequency `f0`, in hertz. |
 
 ### DynamicStiffnessResult.plot()
@@ -199,7 +199,7 @@ enclosed_gas_stiffness(
     thickness_m: ArrayLike,
     porosity: float,
     *,
-    atmospheric_pressure_pa: float = 100000.0,
+    static_pressure_pa: float = 100000.0,
 ) -> np.ndarray | float
 ```
 
@@ -214,7 +214,7 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 | :--- | :--- |
 | `thickness_m` | Thickness `d` of the specimen under the static load, in metres (scalar or array). |
 | `porosity` | Porosity `epsilon` of the specimen (0-1). |
-| `atmospheric_pressure_pa` | Atmospheric pressure `p0`, in pascals (default `STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa). |
+| `static_pressure_pa` | Atmospheric pressure `p0`, in pascals (default `STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa). |
 
 **Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3.
 
@@ -235,7 +235,7 @@ floating_floor_resonance(
     airflow_resistivity_kpa_s_m2: float = inf,
     thickness_m: float | None = None,
     porosity: float | None = None,
-    atmospheric_pressure_pa: float = 100000.0,
+    static_pressure_pa: float = 100000.0,
 ) -> DynamicStiffnessResult
 ```
 
@@ -256,7 +256,7 @@ frequency (Formula 2).
 | `airflow_resistivity_kpa_s_m2` | Lateral airflow resistivity `r`, in kPa.s/m2 (default `inf` -> the high-resistivity case $s' = s'_\mathrm{t}$). |
 | `thickness_m` | Specimen thickness `d` under load, in metres. Required together with `porosity` for the enclosed-gas term, which applies when $r < 100$ kPa.s/m2. That condition is on the *value* of `airflow_resistivity_kpa_s_m2` rather than on a literal, so a signature cannot state it: it is checked here and raises. |
 | `porosity` | Specimen porosity `epsilon`, required with `thickness_m` (see above). |
-| `atmospheric_pressure_pa` | Atmospheric pressure `p0`, in pascals. |
+| `static_pressure_pa` | Atmospheric pressure `p0`, in pascals. |
 
 **Returns:** The [`DynamicStiffnessResult`](/phonometry/reference/api/materials/dynamic-stiffness/#dynamicstiffnessresult).
 

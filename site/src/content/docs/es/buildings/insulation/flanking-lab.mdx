@@ -492,7 +492,7 @@ res.plot()                            # Rcl frente a los dos techos
 # Un plenum revestido atenúa el trayecto lateral (Ec. (9.18) en vez de (9.20)):
 damped = building.plenum_flanking_reduction_index(
     ceiling, ceiling, ceiling_length=4.75, plenum_height_m=0.43,
-    attenuation_source=[0.5] * 7, attenuation_receiving=[0.5] * 7,
+    attenuation_source_per_m=[0.5] * 7, attenuation_receiving_per_m=[0.5] * 7,
 )
 
 # Referido al tabique en lugar de al techo (Ec. (9.13)):

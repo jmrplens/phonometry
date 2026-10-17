@@ -251,7 +251,7 @@ class PorousMediumResult(OwnsArrays):
     effective_density: Complex
     bulk_modulus: Complex
     model: str
-    flow_resistivity: float
+    flow_resistivity_pa_s_m2: float
     speed_of_sound: float
     air_density: float
 
@@ -303,7 +303,7 @@ def _medium_from_zc_k(
         effective_density=np.asarray(zc * k / omega, dtype=np.complex128),
         bulk_modulus=np.asarray(zc * omega / k, dtype=np.complex128),
         model=model,
-        flow_resistivity=flow_resistivity,
+        flow_resistivity_pa_s_m2=flow_resistivity,
         speed_of_sound=speed_of_sound,
         air_density=air_density,
     )
@@ -325,7 +325,7 @@ def _warn_fit_range(
 
 def delany_bazley(
     frequency: ArrayLike,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     coefficients: str | tuple[float, ...] = "delany_bazley",
     fluid: Fluid = PUBLISHED_AIR,
@@ -342,7 +342,7 @@ def delany_bazley(
     are still returned.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
+    :param flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2.
     :param coefficients: Preset name from :data:`DELANY_BAZLEY_COEFFICIENTS`
         (``"delany_bazley"`` rockwool/fibreglass default, ``"garai_pompoli"``
         polyester, ``"dunn_davern"`` / ``"wu"`` foams) or an explicit
@@ -354,7 +354,7 @@ def delany_bazley(
     :return: A :class:`PorousMediumResult`.
     """
     f = require_positive_array(frequency, "frequency")
-    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
     if isinstance(coefficients, str):
@@ -389,7 +389,7 @@ def delany_bazley(
 
 def miki(
     frequency: ArrayLike,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     fluid: Fluid = PUBLISHED_AIR,
 ) -> PorousMediumResult:
@@ -407,7 +407,7 @@ def miki(
     Sect. 4.1).
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
+    :param flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`PUBLISHED_AIR`, the air this model was published
         with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
@@ -415,7 +415,7 @@ def miki(
     :return: A :class:`PorousMediumResult`.
     """
     f = require_positive_array(frequency, "frequency")
-    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
     y = np.asarray(f / sigma, dtype=np.float64)
@@ -435,12 +435,12 @@ def miki(
 
 def johnson_champoux_allard(
     frequency: ArrayLike,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     porosity: float,
     tortuosity: float,
-    viscous_length: float,
-    thermal_length: float,
+    viscous_length_m: float,
+    thermal_length_m: float,
     fluid: Fluid = PUBLISHED_AIR,
 ) -> PorousMediumResult:
     r"""Johnson-Champoux-Allard five-parameter rigid-frame model.
@@ -473,12 +473,12 @@ def johnson_champoux_allard(
     :math:`\omega \to \infty` (Johnson et al. 1987), pinned in the tests.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
+    :param flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2.
     :param porosity: Open porosity ``phi`` (0 < phi <= 1).
     :param tortuosity: High-frequency tortuosity :math:`T = \alpha_\infty`
         (>= 1).
-    :param viscous_length: Viscous characteristic length ``L``, in metres.
-    :param thermal_length: Thermal characteristic length ``L'``, in metres
+    :param viscous_length_m: Viscous characteristic length ``L``, in metres.
+    :param thermal_length_m: Thermal characteristic length ``L'``, in metres
         (physically :math:`L' \ge L`).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`PUBLISHED_AIR`, the air this model was published
@@ -487,7 +487,7 @@ def johnson_champoux_allard(
     :return: A :class:`PorousMediumResult`.
     """
     f = require_positive_array(frequency, "frequency")
-    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     phi = require_positive(porosity, "porosity")
     if phi > 1.0:
         raise ValueError(_POROSITY_MESSAGE)
@@ -495,8 +495,8 @@ def johnson_champoux_allard(
     if t_inf < 1.0:
         msg = "'tortuosity' must be >= 1."
         raise ValueError(msg)
-    lam_v = require_positive(viscous_length, "viscous_length")
-    lam_t = require_positive(thermal_length, "thermal_length")
+    lam_v = require_positive(viscous_length_m, "viscous_length_m")
+    lam_t = require_positive(thermal_length_m, "thermal_length_m")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
     eta = fluid.viscosity
@@ -525,14 +525,14 @@ def johnson_champoux_allard(
         effective_density=np.asarray(rho_e, dtype=np.complex128),
         bulk_modulus=np.asarray(k_e, dtype=np.complex128),
         model="johnson_champoux_allard",
-        flow_resistivity=sigma,
+        flow_resistivity_pa_s_m2=sigma,
         speed_of_sound=c0,
         air_density=rho0,
     )
 
 
 def decoupling_frequency(
-    flow_resistivity: float, *, porosity: float, frame_density: float
+    flow_resistivity_pa_s_m2: float, *, porosity: float, frame_density: float
 ) -> float:
     r"""Zwikker-Kosten decoupling frequency ``Fd`` of a porous frame.
 
@@ -545,7 +545,7 @@ def decoupling_frequency(
     below it the frame moves and the limp correction of :func:`limp_frame`
     matters.
 
-    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2 (> 0).
+    :param flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2 (> 0).
     :param porosity: Open porosity ``phi`` (0 < phi <= 1).
     :param frame_density: Bulk density of the frame ``rho1``, in kg/m3 (> 0):
         the mass of solid per unit volume of material, i.e. the density of the
@@ -554,7 +554,7 @@ def decoupling_frequency(
     :return: The decoupling frequency ``Fd``, in hertz.
     :raises ValueError: for a non-positive input or a porosity above 1.
     """
-    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     phi = require_positive(porosity, "porosity")
     if phi > 1.0:
         raise ValueError(_POROSITY_MESSAGE)
@@ -686,7 +686,7 @@ def limp_frame(
         effective_density=np.asarray(rho_limp, dtype=np.complex128),
         bulk_modulus=k_e,
         model=f"limp_frame({medium.model})",
-        flow_resistivity=medium.flow_resistivity,
+        flow_resistivity_pa_s_m2=medium.flow_resistivity_pa_s_m2,
         speed_of_sound=medium.speed_of_sound,
         air_density=rho0,
     )

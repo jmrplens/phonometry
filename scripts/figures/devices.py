@@ -443,7 +443,7 @@ def generate_swept_sine_thd(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6))
     ax.loglog(
         freqs,
-        100.0 * res.thd[sel],
+        100.0 * res.thd_ratio[sel],
         color=COLOR_PRIMARY,
         linewidth=2.0,
         label="Total $\\mathrm{THD}(f)$",
@@ -528,7 +528,7 @@ def _loudspeaker_datasheet_example() -> "LoudspeakerCharacteristics":
     return electroacoustics.loudspeaker_characteristics(
         freqs,
         spl,
-        rated_impedance=8.0,
+        rated_impedance_ohm=8.0,
         sensitivity_band=(200.0, 4000.0),
         impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
         distortion=(
@@ -567,7 +567,7 @@ def _microphone_datasheet_example() -> "MicrophoneCharacteristics":
             polar=(angles, cardioid), frequency=1000.0
         ),
         noise=electroacoustics.MicrophoneNoise(
-            voltage=1.25e-6,
+            voltage_v=1.25e-6,
             spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
         ),
         overload=electroacoustics.MicrophoneOverload(
@@ -575,8 +575,8 @@ def _microphone_datasheet_example() -> "MicrophoneCharacteristics":
             thd_percent=0.5,
         ),
         electrical=electroacoustics.MicrophoneElectrical(
-            rated_impedance=150.0,
-            minimum_load_impedance=1000.0,
+            rated_impedance_ohm=150.0,
+            minimum_load_impedance_ohm=1000.0,
             powering="Phantom P48 (IEC 61938)",
             supply_current_ma=3.1,
         ),
@@ -3695,7 +3695,7 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
         ("Square, vanes", {"bend_type": "square", "vanes": True}, COLOR_TERTIARY, "-."),
         ("Round, bare", {"bend_type": "round"}, COLOR_FG, ":"),
     ):
-        el = hvac.elbow_insertion_loss(bands, width=24 * inch, **kwargs)
+        el = hvac.elbow_insertion_loss(bands, width_m=24 * inch, **kwargs)
         ax.semilogx(
             bands,
             np.asarray(el.values),
@@ -4127,7 +4127,7 @@ def generate_hvac_elbow_flow_noise(output_dir: str) -> None:
         ("Round, bare", {"bend_type": "round"}, COLOR_FG, ":"),
     )
     for label, kwargs, color, style in families:
-        el = hvac.elbow_insertion_loss(bands, width=width, **kwargs)
+        el = hvac.elbow_insertion_loss(bands, width_m=width, **kwargs)
         ax.semilogx(
             np.asarray(el.frequencies),
             np.asarray(el.values),
@@ -5823,7 +5823,7 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
     room = emission.room_constant_from_air_absorption(
         thirds,
         volume=200.0,
-        surface_area_m2=210.0,
+        surface_area=210.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
     )
@@ -5836,7 +5836,7 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
         ]
     )
     broadband = emission.high_frequency_sound_power(
-        orientations, frequencies=thirds, room_constant_m2=room
+        orientations, frequencies=thirds, room_constant=room
     )
     tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
     tones = emission.high_frequency_sound_power_comparison(
@@ -5905,7 +5905,7 @@ def _free_field_room() -> tuple[Any, Any, Any]:
                 target,
                 d,
                 levels_at(d[:, None] * unit[None, :]),
-                background_levels_db=np.full(grid.size, 25.0),
+                background_levels=np.full(grid.size, 25.0),
                 name=name_es if _LANG == "es" else name,
                 targets=aims,
             )
@@ -5983,7 +5983,7 @@ def generate_reference_source_calibration(output_dir: str) -> None:
         _RSS_THIRDS,
         temperature_c=20.0,
         relative_humidity_percent=45.0,
-        atmospheric_pressure_kpa=98.6,
+        static_pressure_kpa=98.6,
     )
     levels = (
         _RSS_LW[None, :]
@@ -8228,7 +8228,7 @@ def _turbine_example() -> tuple[
         surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2
     )
     room = emission.turbine_environmental_correction(
-        surface.area_m2, volume_m3=60000.0, reverberation_time_s=3.2
+        surface.area, volume=60000.0, reverberation_time=3.2
     )
     return surface, array, room
 
@@ -8341,8 +8341,8 @@ def generate_turbine_sound_power(output_dir: str) -> None:
     def run(drop_db: float) -> "TurbineSoundPowerResult":
         return emission.turbine_sound_power(
             levels - drop_db,
-            surface_area_m2=surface.area_m2,
-            background_levels_db=background,
+            surface_area=surface.area,
+            background_levels=background,
             environmental_correction_db=room.environmental_correction_db,
             overhead_mask=array.overhead_mask,
         )

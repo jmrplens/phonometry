@@ -177,7 +177,7 @@ def test_rigid_mass_calibration_accelerance_passes() -> None:
     assert isinstance(res, vibration.RigidMassCalibrationResult)
     assert res.passes
     assert np.allclose(res.expected, 0.100)
-    assert np.allclose(res.deviation, 0.0)
+    assert np.allclose(res.relative_deviation, 0.0)
 
 
 def test_rigid_mass_calibration_mobility_expected_value() -> None:
@@ -197,7 +197,7 @@ def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
     res = vibration.rigid_mass_calibration_check(frf, f, 10.0)
     assert res.within_tolerance.tolist() == [True, False]
     assert not res.passes
-    assert res.deviation[0] == pytest.approx(0.04)
+    assert res.relative_deviation[0] == pytest.approx(0.04)
 
 
 def test_rigid_mass_calibration_accepts_complex_frf() -> None:
@@ -250,7 +250,7 @@ def test_the_five_percent_of_7_5_2_is_not_a_constructor_field() -> None:
     res = vibration.rigid_mass_calibration_check([0.1], [100.0], mass=10.0)
     names = {field.name for field in dataclasses.fields(res)}
     assert names == {"frequencies", "measured", "mass", "quantity"}
-    assert res.tolerance == pytest.approx(0.05)
+    assert res.relative_tolerance == pytest.approx(0.05)
     with pytest.raises(TypeError, match="passes"):
         bool(res)
 
@@ -452,3 +452,15 @@ def test_resonance_hopkins_contact_stiffness_cutoffs() -> None:
     assert vibration.resonance_frequency(m_hammer, k_plate) == pytest.approx(
         7000.0, abs=100.0
     )
+
+
+def test_the_phase_of_a_mobility_is_in_radians() -> None:
+    r"""A free mass, :math:`Y = 1/(j \omega m)`, lags its force by a quarter
+    period: :math:`-\pi/2` rad, not -90. The SDOF resonator is real at its
+    resonance and leads by :math:`+\pi/2` well below it, on the stiffness.
+    """
+    f = np.array([10.0, 100.0, 1000.0])
+    free_mass = vibration.MobilityResult(f, 1.0 / (1j * 2.0 * np.pi * f * M))
+    assert free_mass.phase_rad == pytest.approx(np.full(3, -np.pi / 2.0), abs=1e-12)
+    sdof = vibration.sdof_mobility_result([F0, F0 / 1000.0], M, K, C)
+    assert sdof.phase_rad == pytest.approx([0.0, np.pi / 2.0], abs=1e-3)

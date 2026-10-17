@@ -63,7 +63,7 @@ def test_plot_spherical_ground_spanish_xaxis_label() -> None:
     # plot_spherical_ground draws its frequency axis through the shared
     # ``_freq_axis`` helper without overriding the xlabel afterwards.
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
-    result = ground_effect(freqs, 2.0, 1.5, 20.0, flow_resistivity=2.0e4)
+    result = ground_effect(freqs, 2.0, 1.5, 20.0, flow_resistivity_pa_s_m2=2.0e4)
     ax = result.plot(language="es")
     assert ax.get_xlabel() == "Frecuencia [Hz]"
     plt.close("all")

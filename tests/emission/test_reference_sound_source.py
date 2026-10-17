@@ -410,7 +410,7 @@ def test_a_calibration_needs_finite_levels(bad: object) -> None:
         _calibration(levels)
 
 
-@pytest.mark.parametrize("name", ["background_levels_db", "maximum_levels_db"])
+@pytest.mark.parametrize("name", ["background_levels", "maximum_levels_db"])
 def test_the_background_and_the_maxima_must_be_finite(name: str) -> None:
     extra = np.full((20, _THIRDS.size), 60.0)
     extra[4, 3] = np.nan
@@ -477,7 +477,7 @@ def _hemi_check(radius_end: float) -> emission.FreeFieldCheck:
             u,
             d,
             np.repeat(level[:, None], grid.size, axis=1),
-            background_levels_db=np.full(grid.size, 20.0),
+            background_levels=np.full(grid.size, 20.0),
             targets=targets,
         )
         for u, targets in directions

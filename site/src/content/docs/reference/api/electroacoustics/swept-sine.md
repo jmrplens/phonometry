@@ -100,7 +100,7 @@ capped at `f2` by the inverse filter).
 
 | Name | Description |
 | :--- | :--- |
-| `recorded` | Recorded system response (1-D). Include enough trailing room for the system to decay; at least the sweep length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: `harmonic_responses` and `harmonic_irs` carry the unit and so come out in pascals per unit of excitation, while `thd` and `distortion_ratios` are ratios of harmonics drawn from the same record and do not move. |
+| `recorded` | Recorded system response (1-D). Include enough trailing room for the system to decay; at least the sweep length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: `harmonic_responses` and `harmonic_irs` carry the unit and so come out in pascals per unit of excitation, while `thd_ratio` and `distortion_ratios` are ratios of harmonics drawn from the same record and do not move. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Sweep start frequency, in Hz. |
 | `f2` | Sweep stop frequency, in Hz. Distortion products above Nyquist fold back in any real recording, so keep `n_harmonics*f2` in mind when choosing the sweep band. |
@@ -129,7 +129,7 @@ SweptSineDistortionResult(
     harmonic_irs: NDArray[np.float64],
     delays: NDArray[np.float64],
     thd_frequencies: NDArray[np.float64],
-    thd: NDArray[np.float64],
+    thd_ratio: NDArray[np.float64],
     distortion_ratios: NDArray[np.float64],
     fs: float,
     f1: float,
@@ -161,7 +161,7 @@ magnitudes are meaningful.
 | `harmonic_irs` | Windowed harmonic impulse responses, shape `(n_harmonics, ir_length)`; each is centred in its window (time zero at sample `ir_length // 2`). |
 | `delays` | Arrival advances $L \ln(n)$ of each order before the linear response, in seconds. |
 | `thd_frequencies` | Excitation-frequency axis of the THD curve, Hz. |
-| `thd` | Total harmonic distortion at each excitation frequency $f$: $\sqrt{\sum_n \lvert H_n(n f) \rvert^2} / \lvert H_1(f) \rvert$ over the orders available below Nyquist and inside their deconvolved band. |
+| `thd_ratio` | Total harmonic distortion at each excitation frequency $f$: $\sqrt{\sum_n \lvert H_n(n f) \rvert^2} / \lvert H_1(f) \rvert$ over the orders available below Nyquist and inside their deconvolved band. |
 | `distortion_ratios` | Per-order ratios $\lvert H_n(n f) \rvert / \lvert H_1(f) \rvert$ on `thd_frequencies`; row `k` is order `k + 2`. An order reads 0 where its product $n f$ leaves the valid band. |
 | `fs` | Sample rate, in Hz. |
 | `f1` | Sweep start frequency, in Hz. |

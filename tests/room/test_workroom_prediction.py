@@ -46,12 +46,12 @@ def test_the_increase_reproduces_table_c2(machine: str) -> None:
     increase = room.workstation_level_increase(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
+        absorption_area=oracle.ANNEX_C_ABSORPTION_M2,
     )
     level = room.workstation_level(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
+        absorption_area=oracle.ANNEX_C_ABSORPTION_M2,
     )
     assert increase == pytest.approx(printed_increase, abs=0.45)
     assert level == pytest.approx(printed_level, abs=0.45)
@@ -63,7 +63,7 @@ def test_the_eighth_machine_runs_off_the_top_of_figure_c1() -> None:
     increase = room.workstation_level_increase(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
+        absorption_area=oracle.ANNEX_C_ABSORPTION_M2,
     )
     assert increase == pytest.approx(12.4, abs=0.1)
     assert increase > printed_increase
@@ -71,10 +71,10 @@ def test_the_eighth_machine_runs_off_the_top_of_figure_c1() -> None:
 
 def test_a_bigger_room_adds_less() -> None:
     small = room.workstation_level_increase(
-        sound_power_level_db=100.0, emission_level_db=80.0, absorption_area_m2=50.0
+        sound_power_level_db=100.0, emission_level_db=80.0, absorption_area=50.0
     )
     large = room.workstation_level_increase(
-        sound_power_level_db=100.0, emission_level_db=80.0, absorption_area_m2=5000.0
+        sound_power_level_db=100.0, emission_level_db=80.0, absorption_area=5000.0
     )
     assert small > large
     assert large == pytest.approx(0.3, abs=0.1)
@@ -83,7 +83,7 @@ def test_a_bigger_room_adds_less() -> None:
 def test_an_emission_level_above_the_power_level_is_refused() -> None:
     with pytest.raises(ValueError, match="no surface at all"):
         room.workstation_level_increase(
-            sound_power_level_db=90.0, emission_level_db=95.0, absorption_area_m2=200.0
+            sound_power_level_db=90.0, emission_level_db=95.0, absorption_area=200.0
         )
 
 
@@ -180,7 +180,7 @@ def test_the_workstation_level_rounds_to_the_printed_integer(machine: str) -> No
     level = room.workstation_level(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
+        absorption_area=oracle.ANNEX_C_ABSORPTION_M2,
     )
     assert round(level) == printed_level
 
@@ -246,7 +246,7 @@ def annex_b_level(
                 room.workstation_level(
                     sound_power_level_db=power,
                     emission_level_db=emission,
-                    absorption_area_m2=absorption,
+                    absorption_area=absorption,
                 )
             )
         else:
@@ -306,7 +306,7 @@ def test_the_two_kinds_of_contribution_of_annex_b() -> None:
         )
     )
     own = room.workstation_level(
-        sound_power_level_db=90.0, emission_level_db=77.0, absorption_area_m2=absorption
+        sound_power_level_db=90.0, emission_level_db=77.0, absorption_area=absorption
     )
     assert math.dist((10.0, 3.0, 1.0), BESIDE_M2) == pytest.approx(7.0965, abs=1e-4)
     assert distant == pytest.approx(79.413, abs=1e-3)

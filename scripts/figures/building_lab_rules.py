@@ -158,7 +158,7 @@ def generate_rainfall_sound(output_dir: str) -> None:
         l_pr,
         t,
         _BANDS_100_5000,
-        volume_m3=62.0,
+        volume=62.0,
         excited_area_m2=1.875,
         reference_correction=correction,
     )

@@ -252,7 +252,7 @@ atmospheric conditions straight into `absorption_area` /
 | `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
 | `temperature_c` | float | °C | default `20.0` | −20…+50 tabulated; outside warns |
 | `relative_humidity_percent` | float | % | default `50.0` | 10…100 tabulated; `[0, 100]` allowed |
-| `atmospheric_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
+| `static_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
 | `exact_midband` | bool | — | default `False` | Snap to $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduces Table 1) |
 
 `air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
@@ -590,7 +590,7 @@ works when the wavelength is short next to the path difference.
 | `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
-| `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |
+| `temperature_c` / `relative_humidity_percent` / `static_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |
 | `projected_distance` | float or None | m | default $\sqrt{d^2-(h_\mathrm{s}-h_\mathrm{r})^2}$ | Ground-plane $d_\mathrm{p}$ |
 
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,
@@ -993,13 +993,13 @@ bands = np.array([63., 125., 250., 500., 1000., 2000., 4000., 8000.])
 # Grassland (effective flow resistivity sigma = 200 kPa.s/m^2), source 1 m and
 # receiver 1.5 m high, 50 m apart. The impedance comes from the Delany-Bazley
 # porous model of phonometry.materials (a semi-infinite ground).
-res = environment.ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity=2e5)
+res = environment.ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=2e5)
 print(res.excess_attenuation)     # the ground dip (dB re free field)
 print(res.reflection_coefficient) # complex Q per band
 res.plot()                        # excess attenuation vs frequency
 ```
 
-The ground impedance is either derived from an effective `flow_resistivity`
+The ground impedance is either derived from an effective `flow_resistivity_pa_s_m2`
 (via the `delany_bazley` or `miki` model of
 [`phonometry.materials`](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), which model a semi-infinite porous
 ground) or supplied directly as a normalized complex `impedance` (a scalar,
@@ -1008,7 +1008,7 @@ in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, in which a passive grou
 $\operatorname{Im}(Z) > 0$; the porous models of `phonometry.materials` work
 in the opposite $\mathrm{e}^{+j\omega t}$ convention ($\operatorname{Im}(Z) < 0$), so
 anything obtained from them (a
-`flow_resistivity` or a `PorousMediumResult`) is conjugated internally before
+`flow_resistivity_pa_s_m2` or a `PorousMediumResult`) is conjugated internally before
 it enters the Weyl-Van der Pol formulas.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical.svg" alt="Excess attenuation (level re free field) against frequency on a log axis for four ground types. Fresh snow (10 kPa) dips deepest and lowest in frequency, near minus 18 dB around 150 Hz; forest floor (50 kPa) reaches about minus 15 dB near 290 Hz and grassland (200 kPa) about minus 12 dB near 540 Hz; asphalt (20000 kPa) hugs the plus 6 dB hard-ground enhancement limit until a deep dip near 2.4 kHz. A dotted line marks the plus 6 dB hard-ground limit and a solid line the 0 dB free field" width="90%"></picture>
@@ -1030,7 +1030,7 @@ grounds = [
 ]
 fig, ax = plt.subplots(figsize=(11, 6.4))
 for label, sigma, color in grounds:
-    res = environment.ground_effect(freqs, 1.0, 1.5, 50.0, flow_resistivity=sigma)
+    res = environment.ground_effect(freqs, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=sigma)
     ax.plot(freqs, res.excess_attenuation, color=color, label=label)
 ax.axhline(6.0, color="k", ls=":", label="Hard-ground limit (+6 dB)")
 ax.axhline(0.0, color="k", lw=0.8)
@@ -1152,7 +1152,7 @@ Bies Eq. 5.157, so a thick barrier or a soil mound attenuates monotonically more
 than the thin screen of the same height.
 
 **Coherent barrier on the ground.** With a `ground_impedance` (or a
-`ground_flow_resistivity`) the four source-image / receiver-image diffracted
+`ground_flow_resistivity_pa_s_m2`) the four source-image / receiver-image diffracted
 paths are combined coherently, each ground reflection weighted by the
 spherical-wave coefficient $Q$ above (Attenborough Ch. 9; Bies Sec. 5.3.5).
 This exposes the ground-barrier interference structure that a purely energetic
@@ -1164,7 +1164,7 @@ boundary-element solution.
 
 ```python
 il = environment.barrier_insertion_loss(bands, 1.0, 50.0, 4.0, 100.0, 1.5,
-                                        method="exact", ground_flow_resistivity=2e5)
+                                        method="exact", ground_flow_resistivity_pa_s_m2=2e5)
 il.ground        # True: the four-path coherent ground model was applied
 il.plot()
 ```
@@ -1193,7 +1193,7 @@ il_ka = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5,
 il_ex = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5,
                                            method="exact")
 il_gr = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5,
-                                           method="exact", ground_flow_resistivity=2e5)
+                                           method="exact", ground_flow_resistivity_pa_s_m2=2e5)
 fig, ax = plt.subplots(figsize=(11, 6.4))
 ax.semilogx(freqs, il_ka.insertion_loss, "--", label="Kurze-Anderson (thin screen)")
 ax.semilogx(freqs, il_ex.insertion_loss, label="Exact rigid half-plane")
@@ -1385,7 +1385,7 @@ reciprocal, but it is not a boundary-element solution.
 
 - [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): the octave-band ISO 9613-2 fits these models sit underneath, and the rule an obstacle has to satisfy to be a barrier at all.
 - [Atmospheric refraction: rays and the GFPE](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): the vertical sound-speed gradient both models here assume away.
-- [Porous absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity`, and their fit range.
+- [Porous absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity_pa_s_m2`, and their fit range.
 - Theory: [Outdoor propagation](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
 - API reference: [`environment.propagation.ground_barriers`](https://docs.jmrp.io/phonometry/reference/api/environment/ground-barriers/).
 - [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
@@ -1472,7 +1472,7 @@ import numpy as np
 from phonometry import environment
 
 c0 = 340.0
-profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height_m=60.0)
+profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=c0, max_height_m=60.0)
 zs = 2.0
 fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
 
@@ -1483,7 +1483,7 @@ for i in range(rays.heights_m.shape[0]):
     axes[0].plot(rays.ranges[i], rays.heights_m[i], color="#1f77b4", lw=0.8, alpha=0.7)
 axes[0].plot([0.0], [zs], "o", color="#d62728", label="Source")
 grad = (profile.speed_at(10.0) - c0) / 10.0
-x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
+x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed_of_sound=c0)
 axes[0].axvline(x_sh, color="#d62728", ls="--", label="Shadow-zone boundary")
 axes[0].set(ylabel="Height [m]", ylim=(0, 40), title="Sound rays (upward refraction)")
 axes[0].legend()
@@ -1491,7 +1491,7 @@ axes[0].legend()
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=zs,
-                                                    flow_resistivity=200e3,
+                                                    flow_resistivity_pa_s_m2=200e3,
                                                     max_range=600.0, max_height_m=40.0)
 img = axes[1].imshow(pe.relative_level, cmap="RdBu_r", vmin=-30, vmax=6,
                      aspect="auto", origin="lower", interpolation="bilinear",
@@ -1531,7 +1531,7 @@ opens an acoustic **shadow** near the ground.
 ```python
 from phonometry import environment
 
-profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # upward
+profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0)  # upward
 profile.speed_at(10.0)   # effective sound speed 10 m above the ground
 profile.plot()           # c_eff(z) with height on the vertical axis
 ```
@@ -1546,8 +1546,8 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 # The two canonical surface layers of Salomons Eq. 4.5 over grassland.
-down = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height_m=60.0)
-up = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height_m=60.0)
+down = environment.log_linear_sound_speed_profile(+1.0, ground_speed_of_sound=340.0, max_height_m=60.0)
+up = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0, max_height_m=60.0)
 ax = down.plot(color="#1f77b4")
 up.plot(ax=ax, color="#d62728")
 plt.show()
@@ -1567,7 +1567,7 @@ travel times and the number of ground reflections.
 import numpy as np
 from phonometry import environment
 
-profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)
+profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0)
 rays = environment.atmospheric_ray_paths(profile, source_height_m=2.0,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0)
@@ -1590,7 +1590,7 @@ import numpy as np
 from phonometry import environment
 
 # Downward refraction: the favourable-propagation mirror of the shadow case.
-profile = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0)
+profile = environment.log_linear_sound_speed_profile(+1.0, ground_speed_of_sound=340.0)
 rays = environment.atmospheric_ray_paths(profile, source_height_m=2.0,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0, n_steps=600)
@@ -1656,9 +1656,9 @@ the whole range-height plane.
 ```python
 from phonometry import environment
 
-profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # upward
+profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0)  # upward
 pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=2.0,
-                                                flow_resistivity=200e3,  # grassland
+                                                flow_resistivity_pa_s_m2=200e3,  # grassland
                                                 max_range=600.0, max_height_m=40.0)
 pe.level_at_height(2.0)   # relative level vs range at 2 m
 pe.plot()                 # the range-height relative-level field
@@ -1681,23 +1681,23 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 cases = [
-    (environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0), "Downward (b = +1 m/s)"),
-    (environment.linear_sound_speed_profile(0.0, ground_speed=340.0), "Homogeneous (b = 0)"),
-    (environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0), "Upward (b = -1 m/s)"),
+    (environment.log_linear_sound_speed_profile(+1.0, ground_speed_of_sound=340.0), "Downward (b = +1 m/s)"),
+    (environment.linear_sound_speed_profile(0.0, ground_speed_of_sound=340.0), "Homogeneous (b = 0)"),
+    (environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0), "Upward (b = -1 m/s)"),
 ]
 fig, ax = plt.subplots(figsize=(11, 6.2))
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     for profile, label in cases:
         pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=2.0,
-                                                        flow_resistivity=200e3,
+                                                        flow_resistivity_pa_s_m2=200e3,
                                                         max_range=600.0, max_height_m=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=label)
 # The closed-form boundary of the equivalent linear upward gradient_per_s (its
 # 10 m mean), the dotted line of the figure.
 up = cases[2][0]
 grad = float(up.speed_at(10.0) - 340.0) / 10.0
-ax.axvline(environment.shadow_zone_distance(grad, 2.0, 2.0, ground_speed=340.0),
+ax.axvline(environment.shadow_zone_distance(grad, 2.0, 2.0, ground_speed_of_sound=340.0),
            color="k", ls=":", label="Shadow-zone boundary")
 ax.set(xlabel="Range [m]", ylabel="Level re free field [dB]", ylim=(-40, 10))
 ax.legend()
@@ -1709,7 +1709,7 @@ plt.show()
 The ground impedance is supplied directly (`impedance=`, a normalized complex
 value in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, with
 $\operatorname{Im}(Z) > 0$ for a passive ground), as a `PorousMediumResult`,
-or from an effective `flow_resistivity` via
+or from an effective `flow_resistivity_pa_s_m2` via
 the [porous models](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/) of the materials domain; the porous
 models work in the opposite $\mathrm{e}^{+j\omega t}$ convention, so their impedance is
 conjugated internally.

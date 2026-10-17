@@ -80,7 +80,7 @@ import numpy as np
 from phonometry import environment
 
 c0 = 340.0
-perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height_m=60.0)
+perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=c0, max_height_m=60.0)
 zs = 2.0
 fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
 
@@ -91,7 +91,7 @@ for i in range(rayos.heights_m.shape[0]):
     axes[0].plot(rayos.ranges[i], rayos.heights_m[i], color="#1f77b4", lw=0.8, alpha=0.7)
 axes[0].plot([0.0], [zs], "o", color="#d62728", label="Fuente")
 grad = (perfil.speed_at(10.0) - c0) / 10.0
-x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
+x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed_of_sound=c0)
 axes[0].axvline(x_sh, color="#d62728", ls="--", label="Límite de la zona de sombra")
 axes[0].set(ylabel="Altura [m]", ylim=(0, 40), title="Rayos sonoros (refracción hacia arriba)")
 axes[0].legend()
@@ -103,7 +103,7 @@ with warnings.catch_warnings():
     # suelo» en la guía de efecto suelo).
     warnings.simplefilter("ignore")
     pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height_m=zs,
-                                                    flow_resistivity=200e3,
+                                                    flow_resistivity_pa_s_m2=200e3,
                                                     max_range=600.0, max_height_m=40.0)
 img = axes[1].imshow(pe.relative_level, cmap="RdBu_r", vmin=-30, vmax=6,
                      aspect="auto", origin="lower", interpolation="bilinear",
@@ -188,7 +188,7 @@ emplazamiento no es un campo.
 ```python
 from phonometry import environment
 
-perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # hacia arriba
+perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0)  # hacia arriba
 perfil.speed_at(10.0)   # velocidad efectiva del sonido a 10 m del suelo
 perfil.plot()           # c_eff(z) con la altura en el eje vertical
 ```
@@ -208,8 +208,8 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 # Las dos capas superficiales canónicas de la Ec. 4.5 de Salomons sobre pradera.
-bajada = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height_m=60.0)
-subida = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height_m=60.0)
+bajada = environment.log_linear_sound_speed_profile(+1.0, ground_speed_of_sound=340.0, max_height_m=60.0)
+subida = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0, max_height_m=60.0)
 ax = bajada.plot(color="#1f77b4", language="es")
 subida.plot(ax=ax, color="#d62728", language="es")
 plt.show()
@@ -229,7 +229,7 @@ retorno, los tiempos de propagación y el número de reflexiones en el suelo.
 import numpy as np
 from phonometry import environment
 
-perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)
+perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0)
 rayos = environment.atmospheric_ray_paths(perfil, source_height_m=2.0,
                                           launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                           max_range=600.0)
@@ -259,7 +259,7 @@ import numpy as np
 from phonometry import environment
 
 # Refracción hacia abajo: el espejo favorable del caso con sombra.
-perfil = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0)
+perfil = environment.log_linear_sound_speed_profile(+1.0, ground_speed_of_sound=340.0)
 rayos = environment.atmospheric_ray_paths(perfil, source_height_m=2.0,
                                           launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                           max_range=600.0, n_steps=600)
@@ -323,7 +323,7 @@ fig, ax = plt.subplots()
 for hs, hr, etiqueta in [(0.5, 1.5, "0,5 / 1,5 m"), (2.0, 2.0, "2 / 2 m"),
                          (2.0, 10.0, "2 / 10 m")]:
     ax.loglog(gradientes,
-              [environment.shadow_zone_distance(-g, hs, hr, ground_speed=340.0)
+              [environment.shadow_zone_distance(-g, hs, hr, ground_speed_of_sound=340.0)
                for g in gradientes], label=etiqueta)
 ax.set_xlabel("Gradiente hacia arriba |g| [1/s]")
 ax.set_ylabel("Distancia de zona de sombra [m]")
@@ -358,9 +358,9 @@ libre) en todo el plano distancia-altura.
 ```python
 from phonometry import environment
 
-perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # hacia arriba
+perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0)  # hacia arriba
 pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height_m=2.0,
-                                                flow_resistivity=200e3,  # pradera
+                                                flow_resistivity_pa_s_m2=200e3,  # pradera
                                                 max_range=600.0, max_height_m=40.0)
 pe.level_at_height(2.0)   # nivel relativo frente a distancia a 2 m
 pe.plot()                 # el campo de nivel relativo distancia-altura (necesita matplotlib)
@@ -388,9 +388,9 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 casos = [
-    (environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0), "Hacia abajo (b = +1 m/s)"),
-    (environment.linear_sound_speed_profile(0.0, ground_speed=340.0), "Homogénea (b = 0)"),
-    (environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0), "Hacia arriba (b = -1 m/s)"),
+    (environment.log_linear_sound_speed_profile(+1.0, ground_speed_of_sound=340.0), "Hacia abajo (b = +1 m/s)"),
+    (environment.linear_sound_speed_profile(0.0, ground_speed_of_sound=340.0), "Homogénea (b = 0)"),
+    (environment.log_linear_sound_speed_profile(-1.0, ground_speed_of_sound=340.0), "Hacia arriba (b = -1 m/s)"),
 ]
 fig, ax = plt.subplots(figsize=(11, 6.2))
 with warnings.catch_warnings():
@@ -401,14 +401,14 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     for perfil, etiqueta in casos:
         pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height_m=2.0,
-                                                        flow_resistivity=200e3,
+                                                        flow_resistivity_pa_s_m2=200e3,
                                                         max_range=600.0, max_height_m=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=etiqueta)
 # El límite en forma cerrada del gradiente lineal equivalente hacia arriba
 # (su media a 10 m), la línea punteada de la figura.
 subida = casos[2][0]
 grad = float(subida.speed_at(10.0) - 340.0) / 10.0
-ax.axvline(environment.shadow_zone_distance(grad, 2.0, 2.0, ground_speed=340.0),
+ax.axvline(environment.shadow_zone_distance(grad, 2.0, 2.0, ground_speed_of_sound=340.0),
            color="k", ls=":", label="Límite de la zona de sombra")
 ax.set(xlabel="Distancia [m]", ylabel="Nivel respecto al campo libre [dB]",
        ylim=(-40, 10))
@@ -422,7 +422,7 @@ La impedancia del suelo se proporciona directamente (`impedance=`, un valor
 complejo normalizado en el convenio $\mathrm{e}^{-i\omega t}$ de Salomons, con
 $\operatorname{Im}(Z) > 0$ para un suelo pasivo), como un
 `PorousMediumResult`, o a partir de una
-`flow_resistivity` efectiva mediante los
+`flow_resistivity_pa_s_m2` efectiva mediante los
 [modelos porosos](/phonometry/es/materials/absorbers/porous-absorbers/) del dominio de
 materiales; los modelos porosos trabajan en el convenio opuesto
 $\mathrm{e}^{+j\omega t}$, así que su impedancia se conjuga internamente.
@@ -489,7 +489,7 @@ import numpy as np
 # los fragmentos de arriba. Un suelo rígido no necesita modelo poroso, así que
 # este caso no levanta ningún aviso.
 c0, freq, zs = 343.0, 500.0, 2.0
-plano = environment.linear_sound_speed_profile(1e-12, ground_speed=c0, max_height_m=200.0)
+plano = environment.linear_sound_speed_profile(1e-12, ground_speed_of_sound=c0, max_height_m=200.0)
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     pe = environment.atmospheric_parabolic_equation(freq, plano, source_height_m=zs,

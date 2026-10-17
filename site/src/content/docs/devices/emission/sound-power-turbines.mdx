@@ -130,7 +130,7 @@ boxes = [                      # length, width, height above the floor [m]
 surface = emission.turbine_measurement_surface(boxes)
 print(surface.lengths_m, surface.widths_m, surface.heights_m)
 # [7. 5. 7. 4.] [6.  7.  5.5 4.5] [4.5 5.5 4.  3.2]
-print(round(surface.area_m2, 1), round(surface.enveloping_area_m2, 1))   # 410.1 410.1
+print(round(surface.area, 1), round(surface.enveloping_area_m2, 1))   # 410.1 410.1
 ```
 
 ## 3. The microphone positions
@@ -278,8 +278,8 @@ to stay below 6 m/s, with a windscreen above 1 m/s (4.3).
 
 ```python
 room = emission.turbine_environmental_correction(
-    surface.area_m2, volume_m3=60_000.0, reverberation_time_s=3.2)
-print(room.absorption_area_m2, round(room.ratio, 2),
+    surface.area, volume=60_000.0, reverberation_time=3.2)
+print(room.absorption_area, round(room.ratio, 2),
       round(room.environmental_correction_db, 2))           # 3000.0 7.32 1.89
 print(emission.check_turbine_test_environment(room).passes)  # True
 
@@ -317,7 +317,7 @@ background = np.array([     # computed from the auxiliary plant (8.1, NOTE 1)
     84.0, 84.2, 84.5, 84.8, 85.0, 83.2, 82.5, 81.4, 80.6, 81.3, 82.9, 83.4,
     85.0, 84.8, 84.5, 84.2, 83.0, 83.0, 83.0, 83.0, 83.0, 82.0, 81.0])
 full = emission.turbine_sound_power(
-    levels, surface_area_m2=surface.area_m2, background_levels_db=background,
+    levels, surface_area=surface.area, background_levels=background,
     environmental_correction_db=room.environmental_correction_db,
     overhead_mask=array.overhead_mask)
 print(round(full.surface_pressure_level_db, 2),
@@ -352,8 +352,8 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", emission.SoundPowerWarning)
     quarter = emission.turbine_sound_power(
-        levels - 4.5, surface_area_m2=surface.area_m2,
-        background_levels_db=background,
+        levels - 4.5, surface_area=surface.area,
+        background_levels=background,
         environmental_correction_db=room.environmental_correction_db)
 print(quarter.upper_limit, quarter.conforms)                 # True False
 ```
@@ -383,7 +383,7 @@ refused with a `ValueError`.
 
 ```python
 half = emission.turbine_sound_power(
-    levels - 1.5, surface_area_m2=surface.area_m2, background_levels_db=background,
+    levels - 1.5, surface_area=surface.area, background_levels=background,
     environmental_correction_db=room.environmental_correction_db,
     overhead_mask=array.overhead_mask)
 report = emission.turbine_noise_declaration(
@@ -402,9 +402,9 @@ report.plot()
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `pressure_levels_db` | 1D array | dB | at least 4 positions | $L_{p\mathrm{A}i}$ with the set operating |
-| `surface_area_m2` | float | m² | positive | $S$ of Equation (1) |
-| `background_levels_db` | 1D array or `None` | dB | required | One per position; `None` states that none was determined |
+| `pressure_levels` | 1D array | dB | at least 4 positions | $L_{p\mathrm{A}i}$ with the set operating |
+| `surface_area` | float | m² | positive | $S$ of Equation (1) |
+| `background_levels` | 1D array or `None` | dB | required | One per position; `None` states that none was determined |
 | `environmental_correction_db` | float | dB | required | $K$; 0 outdoors; a value above 7 dB warns |
 | `overhead_mask` | bool array | | `None` | For `overhead_effect_db` (NOTE of 7.2.2) |
 

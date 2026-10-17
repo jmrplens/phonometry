@@ -181,7 +181,7 @@ _SINGLE_NUMBERS = ("r_s_w", "r_s_w_c", "r_s_w_ctr")
 def joint_sound_reduction_index(
     l1_db: ArrayLike,
     l2_db: ArrayLike,
-    absorption_m2: ArrayLike,
+    absorption_area: ArrayLike,
     *,
     joint_length_m: float,
 ) -> np.ndarray:
@@ -203,7 +203,7 @@ def joint_sound_reduction_index(
         dB, one value per band, or a ``(positions, bands)`` array that is
         energy-averaged over the positions (ISO 10140-2).
     :param l2_db: The same in the receiving room, in dB.
-    :param absorption_m2: Equivalent absorption area :math:`A` of the
+    :param absorption_area: Equivalent absorption area :math:`A` of the
         receiving room per band, in m².
     :param joint_length_m: Length :math:`l` of the joint under test, in m.
     :return: :math:`R_\mathrm{s}` per band, in dB.
@@ -212,10 +212,10 @@ def joint_sound_reduction_index(
     """
     l1 = _as_band_levels(np.asarray(l1_db, dtype=np.float64), "l1_db")
     l2 = _as_band_levels(np.asarray(l2_db, dtype=np.float64), "l2_db")
-    area = require_positive_array(absorption_m2, "absorption_m2")
+    area = require_positive_array(absorption_area, "absorption_area")
     require_equal_shapes(
         "joint_sound_reduction_index",
-        {"l1_db": l1.shape, "l2_db": l2.shape, "absorption_m2": area.shape},
+        {"l1_db": l1.shape, "l2_db": l2.shape, "absorption_area": area.shape},
         "band",
     )
     length = require_positive(joint_length_m, "joint_length_m")

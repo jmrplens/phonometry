@@ -334,7 +334,7 @@ def plot_atmospheric_attenuation(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    alpha_km = np.asarray(result.attenuation_coefficient, dtype=np.float64) * 1000.0
+    alpha_km = np.asarray(result.attenuation_db_per_m, dtype=np.float64) * 1000.0
     # ISO 9613-1 is tabulated down to -20 degC, so the reading really can be
     # negative: fmt_minus signs it typographically without touching the hyphen
     # of an exponent that ":g" may emit.

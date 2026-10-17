@@ -139,7 +139,7 @@ excitación baja.
 ```python
 from phonometry import vibration
 
-print(f"{vibration.soil_building_natural_frequency_hz(2.5e9, mass_kg=4.0e5):.1f} Hz")  # 12.6 Hz
+print(f"{vibration.soil_building_natural_frequency_hz(2.5e9, mass=4.0e5):.1f} Hz")  # 12.6 Hz
 print(vibration.soil_building_frequency_guide_hz(4))  # (8.0, 12.0)
 print(vibration.foundation_transfer_max())  # 2.0
 print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7

@@ -54,6 +54,7 @@ from ..._internal.validation import (
     require_count,
     require_non_negative,
     require_positive_array,
+    require_present,
     require_scalar,
 )
 from .porous import (
@@ -146,6 +147,7 @@ class AirLayer(_DrawableLayer):
         layer would draw a blank stack rather than refuse.
 
         :raises ValueError: if ``thickness_m`` is negative or not finite.
+        :raises TypeError: if ``thickness_m`` is not a single number.
         """
         require_non_negative(self.thickness_m, "thickness_m")
 
@@ -259,9 +261,7 @@ class LayeredAbsorberResult(OwnsArrays):
     (unimodular: every layer is reciprocal).
 
     ``layers`` retains the layer sequence the stack was solved with (front
-    layer first) so :meth:`plot_geometry` can draw the cross-section; it is
-    appended after the original fields and defaults to ``None`` for
-    hand-built results.
+    layer first) so :meth:`plot_geometry` can draw the cross-section.
     """
 
     frequencies: Real
@@ -271,7 +271,14 @@ class LayeredAbsorberResult(OwnsArrays):
     reflection: Complex
     absorption: Real
     transfer_matrix: Complex
-    layers: tuple[Layer, ...] | None = None
+    layers: tuple[Layer, ...]
+
+    def __post_init__(self) -> None:
+        """Refuse a prediction built without the stack it was solved for.
+
+        :raises TypeError: if ``layers`` is ``None``.
+        """
+        require_present(self, "layers")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -295,8 +302,6 @@ class LayeredAbsorberResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its ``layers``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_layered_absorber_geometry
@@ -743,6 +748,8 @@ def layered_absorber(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`LayeredAbsorberResult`.
+    :raises TypeError: if ``angle_rad`` is not a single number, or ``frequency`` holds a
+        text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     if not layers:
@@ -855,6 +862,9 @@ def diffuse_field_absorption(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`DiffuseFieldAbsorptionResult`.
+    :raises TypeError: if ``angle_limit_rad`` is not a single number,
+        ``n_quadrature_points`` is a flag, a text or an array where a count goes, or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     require_scalar(angle_limit_rad, "angle_limit_rad")
@@ -918,6 +928,7 @@ def statistical_absorption(
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
     :return: Statistical absorption coefficient ``alpha_dif``.
+    :raises TypeError: if ``angle_limit_rad`` is not a single number.
     """
     z = np.asarray(normalized_impedance, dtype=np.complex128)
     if np.any(z.real <= 0.0):

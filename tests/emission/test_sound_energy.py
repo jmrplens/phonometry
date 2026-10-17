@@ -703,7 +703,8 @@ def test_room_result_rejects_inconsistent_fields() -> None:
 def test_octave_band_levels_three_equal_thirds_add_10lg3() -> None:
     """Eq. (F.4): three equal thirds sum to L + 10 lg 3 = L + 4.7712 dB."""
     thirds = np.array([800.0, 1000.0, 1250.0])
-    freqs, levels = emission.octave_band_levels(np.full(3, 90.0), frequencies=thirds)
+    octaves = emission.octave_band_levels(np.full(3, 90.0), frequencies=thirds)
+    freqs, levels = octaves.frequencies, octaves.levels
     np.testing.assert_allclose(freqs, [1000.0])
     assert levels[0] == pytest.approx(90.0 + 4.771213, abs=1e-5)
 
@@ -717,7 +718,8 @@ def test_octave_band_levels_group_by_table_f1() -> None:
          1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000], dtype=float,
     )  # fmt: skip
     levels = np.arange(24, dtype=float)
-    freqs, out = emission.octave_band_levels(levels, frequencies=thirds)
+    octaves = emission.octave_band_levels(levels, frequencies=thirds)
+    freqs, out = octaves.frequencies, octaves.levels
     np.testing.assert_allclose(freqs, [63, 125, 250, 500, 1000, 2000, 4000, 8000])
     expected = [
         10.0 * np.log10(np.sum(10.0 ** (0.1 * levels[3 * i : 3 * i + 3])))
@@ -727,14 +729,17 @@ def test_octave_band_levels_group_by_table_f1() -> None:
     # Order of the input does not matter, only membership.
     rng = np.random.default_rng(1)
     perm = rng.permutation(24)
-    _, shuffled = emission.octave_band_levels(levels[perm], frequencies=thirds[perm])
+    shuffled = emission.octave_band_levels(
+        levels[perm], frequencies=thirds[perm]
+    ).levels
     np.testing.assert_allclose(shuffled, expected)
 
 
 def test_octave_band_levels_several_spectra_on_the_last_axis() -> None:
     thirds = np.array([400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0])
     levels = np.array([[80.0] * 6, [70.0] * 6])
-    freqs, out = emission.octave_band_levels(levels, frequencies=thirds)
+    octaves = emission.octave_band_levels(levels, frequencies=thirds)
+    freqs, out = octaves.frequencies, octaves.levels
     assert out.shape == (2, 2)
     np.testing.assert_allclose(freqs, [500.0, 1000.0])
     np.testing.assert_allclose(out[1], 70.0 + 10.0 * np.log10(3.0))

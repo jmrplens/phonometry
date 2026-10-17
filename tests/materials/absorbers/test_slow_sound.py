@@ -84,7 +84,7 @@ def test_slit_dc_flow_resistivity() -> None:
     """j w rho_s -> 12 eta / h^2 (parallel-plate Poiseuille) as w -> 0."""
     h = 1.2e-3
     f = np.array([1.0e-2])
-    rho_s, _ = slit_effective_properties(f, slit_height_m=h, fluid=_AIR)
+    rho_s = slit_effective_properties(f, slit_height_m=h, fluid=_AIR).effective_density
     sigma = float((1j * 2.0 * np.pi * f * rho_s)[0].real)
     assert sigma == pytest.approx(12.0 * _ETA / h**2, rel=1e-4)
 
@@ -92,7 +92,8 @@ def test_slit_dc_flow_resistivity() -> None:
 def test_slit_high_frequency_limits() -> None:
     """rho_s -> rho0 and kappa_s -> kappa0 as the boundary layers vanish."""
     f = np.array([2.0e4])
-    rho_s, kap_s = slit_effective_properties(f, slit_height_m=5.0e-2, fluid=_AIR)
+    channel = slit_effective_properties(f, slit_height_m=5.0e-2, fluid=_AIR)
+    rho_s, kap_s = channel.effective_density, channel.bulk_modulus
     assert rho_s[0].real == pytest.approx(_RHO0, rel=2e-2)
     assert kap_s[0].real == pytest.approx(_GAMMA * _P0, rel=2e-2)
 
@@ -101,7 +102,7 @@ def test_square_duct_dc_flow_resistivity() -> None:
     """j w rho -> 28.454 eta / side^2 (square-duct Poiseuille) as w -> 0."""
     side = 3.0e-3
     f = np.array([1.0e-2])
-    rho, _ = rectangular_duct_properties(f, side_m=side, fluid=_AIR)
+    rho = rectangular_duct_properties(f, side_m=side, fluid=_AIR).effective_density
     sigma = float((1j * 2.0 * np.pi * f * rho)[0].real)
     assert sigma == pytest.approx(28.454 * _ETA / side**2, rel=1e-3)
 
@@ -109,12 +110,13 @@ def test_square_duct_dc_flow_resistivity() -> None:
 def test_square_duct_high_frequency_limits() -> None:
     """rho -> rho0 and kappa -> kappa0 for a wide duct at high frequency."""
     f = np.array([5.0e4])
-    rho, kap = rectangular_duct_properties(
+    channel = rectangular_duct_properties(
         f,
         side_m=5.0e-2,
         fluid=_AIR,
         n_sum_terms=120,
     )
+    rho, kap = channel.effective_density, channel.bulk_modulus
     assert rho[0].real == pytest.approx(_RHO0, rel=1e-2)
     assert kap[0].real == pytest.approx(_GAMMA * _P0, rel=1e-2)
 
@@ -122,7 +124,8 @@ def test_square_duct_high_frequency_limits() -> None:
 def test_square_duct_passive_convention() -> None:
     """The duct is passive in e^{+jwt}: Im(k) < 0 and Re(Z) > 0."""
     f = np.linspace(100.0, 3000.0, 40)
-    rho, kap = rectangular_duct_properties(f, side_m=4.0e-3)
+    channel = rectangular_duct_properties(f, side_m=4.0e-3)
+    rho, kap = channel.effective_density, channel.bulk_modulus
     k = 2.0 * np.pi * f * np.sqrt(rho / kap)
     z = np.sqrt(kap * rho)
     assert np.all(k.imag < 0.0)
@@ -139,7 +142,8 @@ def test_duct_reduces_to_slit_in_wide_limit() -> None:
     """
     h = 3.0e-3
     f = np.array([1500.0])
-    rho_s, kap_s = slit_effective_properties(f, slit_height_m=h)
+    channel = slit_effective_properties(f, slit_height_m=h)
+    rho_s, kap_s = channel.effective_density, channel.bulk_modulus
     # Rebuild the rectangular series directly with a != b (b wide), on the
     # same air the model defaults to.
     air = ABSORBER_AIR

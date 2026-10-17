@@ -95,6 +95,12 @@ from ISO 9613-1 (not computed here); without it $C_3 = 0$.
 
 **Returns:** [`MeteorologicalCorrection`](/phonometry/reference/api/power/sound-power-anechoic/#meteorologicalcorrection).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `radius`, `static_pressure_kpa` or `temperature_c` is not a single number. |
+
 ## MeteorologicalCorrection
 
 ```python
@@ -177,6 +183,12 @@ scaled to metres by `radius`.
 
 **Returns:** `(n_positions, 3)` microphone coordinates, in metres.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `radius` is not a single number. |
+
 ## precision_uncertainty
 
 ```python
@@ -203,6 +215,12 @@ $k = 1.6$ (95 %, one-sided, when comparing to a limit).
 | `coverage_factor` | `k` (typically 2 or 1.6). |
 
 **Returns:** `U` in decibels, scalar or per band matching `sigma_r0`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `coverage_factor` or `sigma_omc_db` is not a single number. |
 
 ## PrecisionSoundPowerResult
 
@@ -385,3 +403,4 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a room qualification of the other room type. |
+| TypeError | if `radius` is not a single number. |

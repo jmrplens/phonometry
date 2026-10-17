@@ -91,6 +91,7 @@ judged here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a time is negative or not finite, or the required curing period is not positive. |
+| TypeError | if `curing_time_days`, `required_curing_days` or `time_lag_days` is not a single number. |
 
 ## heavy_impact_improvement
 
@@ -130,6 +131,7 @@ octaves 63 Hz to 500 Hz or the matching one-third octaves
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a value is not finite or a frequency is not positive. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## HeavyImpactImprovementResult
 
@@ -219,6 +221,7 @@ is the one of the `reference_floor` the caller names.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the three inputs disagree in length, a value is not finite, a frequency is not positive, or `reference_floor` is not one of the four floors. |
+| TypeError | if `reference_floor` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## laboratory_lining_improvement
 
@@ -276,6 +279,7 @@ read off the numbers, so neither is refused here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the three inputs disagree in length, a value is not finite, a frequency is not positive, or `basic_element` is unknown. |
+| TypeError | if `basic_element` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## LaboratoryFloorCoveringImprovementResult
 

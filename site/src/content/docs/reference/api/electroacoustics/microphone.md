@@ -115,6 +115,7 @@ them, one bundle per clause, so each may be omitted whole.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `reference_frequency_hz`, `sensitivity_mv_per_pa` or `tolerance_db` is not a single number. |
 
 ## MicrophoneCharacteristics
 
@@ -138,7 +139,7 @@ MicrophoneCharacteristics(
     noise_frequencies: NDArray[np.float64] | None,
     noise_band_levels: NDArray[np.float64] | None,
     polar_angles_deg: NDArray[np.float64] | None,
-    polar_db: NDArray[np.float64] | None,
+    polar_response_db: NDArray[np.float64] | None,
     polar_frequency: float | None,
     directivity_index: float | None,
     powering: str | None,
@@ -177,7 +178,7 @@ standard's definitions (see the module docstring).
 | `noise_frequencies` | Inherent-noise spectrum frequency axis, in Hz (17.2 b), or `None`. |
 | `noise_band_levels` | Inherent-noise equivalent band levels, in dB SPL (17.2 b), or `None`. |
 | `polar_angles_deg` | Directional-pattern angles, in degrees (13.1), or `None`. |
-| `polar_db` | Directional pattern $G(\theta)$ relative to the reference-axis response, in dB (13.1.2), or `None`. |
+| `polar_response_db` | Directional pattern $G(\theta)$ relative to the reference-axis response, in dB (13.1.2), or `None`. |
 | `polar_frequency` | Stated frequency of the directional pattern, in Hz, or `None`. |
 | `directivity_index` | Directivity index at `polar_frequency`, in dB (13.2), or `None`. |
 | `powering` | Rated power supply description, e.g. the IEC 61938 phantom-powering designation and voltage (9.1), or `None`. |

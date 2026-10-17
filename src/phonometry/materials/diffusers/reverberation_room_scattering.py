@@ -199,6 +199,8 @@ def speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> Real:
         per band).
     :return: Speed of sound ``c``, in metres per second.
     :raises ValueError: if any temperature is at or below -273.15 degC.
+    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
+        number.
     """
     kelvin = _T0 + require_above_absolute_zero_array(temperature_c, "temperature_c")
     return np.asarray(_C_REF * np.sqrt(kelvin / _T_REF_K), dtype=np.float64)
@@ -278,6 +280,7 @@ def random_incidence_absorption(
     :param m2: Energy attenuation coefficient during ``t2``, in 1/m; defaults to 0.
     :return: Random-incidence absorption coefficient ``alpha_s`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     return _sabine_absorption(volume, area, (c1, t1, m1), (c2, t2, m2))
 
@@ -315,6 +318,7 @@ def specular_absorption_coefficient(
     :param m4: Energy attenuation coefficient during ``t4``, in 1/m; defaults to 0.
     :return: Specular absorption coefficient ``alpha_spec`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     return _sabine_absorption(volume, area, (c3, t3, m3), (c4, t4, m4))
 
@@ -562,6 +566,7 @@ def base_plate_scattering(
     :param m3: Energy attenuation coefficient during ``t3``, in 1/m; defaults to 0.
     :return: Base-plate scattering coefficient ``s_base`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     return _sabine_absorption(volume, area, (c1, t1, m1), (c3, t3, m3))
 
@@ -797,6 +802,7 @@ def absorption_coefficient_uncertainty(
     :param u_b: Standard uncertainty of ``t_b`` (Eq. (A.1)), in seconds.
     :return: Combined standard uncertainty of the absorption coefficient (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     vol = _positive_scalar(volume, "volume")
     surf = _positive_scalar(area, "area")

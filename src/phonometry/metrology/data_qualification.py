@@ -548,6 +548,8 @@ class TrendTestResult(OwnsArrays):
         :raises ValueError: if the tested sequence spans a different number
             of observations than the declared count, or the null mean is not
             the one that sequence and method state.
+        :raises TypeError: if ``alpha`` is not a single number, or ``values`` is a
+            single number where an array goes.
         """
         require_ranks(self, values=1)
         owner = type(self).__name__
@@ -704,6 +706,7 @@ def trend_test(
         tabulated by B&P).
     :return: A :class:`TrendTestResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``alpha`` is not a single number.
     """
     seq = _validate_trend_inputs(values, method, alpha)
     if method == "reverse_arrangements":
@@ -803,6 +806,8 @@ class StationarityTestResult(OwnsArrays):
         :raises ValueError: if either per-segment sequence disagrees with the
             other or with the declared number of segments, or the null mean
             is not the one those segment values and that method state.
+        :raises TypeError: if ``alpha`` is not a single number, or ``segment_values`` is
+            a single number where an array goes.
         """
         require_ranks(self, segment_values=1, segment_times=1)
         require_same_length(self, "segment_values", "segment_times", axis="segment")
@@ -894,6 +899,8 @@ def stationarity_test(
     :param alpha: Two-sided significance level (default 0.05).
     :return: A :class:`StationarityTestResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``n_segments`` is a flag, a text or an array where a count
+        goes.
     """
     xa = _validate_signal(x, "x", context="a stationarity test")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -1345,6 +1352,8 @@ class PeakStatisticsResult(OwnsArrays):
             measured rate is not the stored peaks over the stored duration;
             or if the expected rates and the irregularity factor do not
             state one another.
+        :raises TypeError: if ``duration_s`` or ``peak_rate_rice`` is not a single
+            number.
         """
         require_ranks(self, peak_values=1)
         require_finite_fields(self, "peak_values")

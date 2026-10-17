@@ -322,6 +322,8 @@ def ranking_positions(sample_size: int) -> tuple[int, int]:
     :raises ValueError: for a sample smaller than 20, which C.2 does not
         allow and Table C.1 does not cover, or a count that is not a whole
         number.
+    :raises TypeError: if ``sample_size`` is a flag, a text or an array where a count
+        goes.
     """
     n = require_count(sample_size, "sample_size", at_least=MIN_SAMPLE_SIZE)
     printed = RANKING_POSITIONS.get(n)
@@ -352,6 +354,8 @@ class LevelDifferenceQuantiles(OwnsArrays):
         :raises ValueError: for a sample that is not one-dimensional, holds a
             non-finite value, has fewer than 20 values or is not sorted in
             ascending order.
+        :raises TypeError: if ``sorted_differences`` holds a text or a value that is not
+            a real number.
         """
         values = np.asarray(
             require_finite_array(self.sorted_differences, "sorted_differences"),
@@ -392,7 +396,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
         return self.sample_size in RANKING_POSITIONS
 
     @property
-    def q01_db(self) -> float:
+    def q01_level_difference(self) -> float:
         """:math:`q_{0,1}`, the value at rank :math:`R(q_{0,1})`, in dB.
 
         C.2, NOTE 2: 10 % of all the differences are expected below it.
@@ -400,7 +404,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
         return float(self.sorted_differences[self.rank_q01 - 1])
 
     @property
-    def q09_db(self) -> float:
+    def q09_level_difference(self) -> float:
         """:math:`q_{0,9}`, the value at rank :math:`R(q_{0,9})`, in dB.
 
         C.2, NOTE 2: 10 % of all the differences are expected above it.
@@ -408,7 +412,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
         return float(self.sorted_differences[self.rank_q09 - 1])
 
     @property
-    def mean_db(self) -> float:
+    def mean_level_difference(self) -> float:
         """The average of the difference group, in dB.
 
         C.5: the value "specified for considering a systematic deviation".
@@ -473,6 +477,8 @@ def level_difference_quantiles(
     :return: A :class:`LevelDifferenceQuantiles`.
     :raises ValueError: for fewer than 20 values, a non-finite value or an
         input that is not one-dimensional.
+    :raises TypeError: if ``level_differences`` holds a text or a value that is not a
+        real number.
     """
     values = require_finite_array(level_differences, "level_differences")
     if values.size < MIN_SAMPLE_SIZE:
@@ -523,6 +529,9 @@ def uniform_sample_indices(
     :raises ValueError: for a sample smaller than 20 or larger than the
         points that remain, or clearances that are not one finite,
         non-negative value per point.
+    :raises TypeError: if ``n_points`` or ``sample_size`` is a flag, a text or an array
+        where a count goes, or ``horizontal_clearances_m`` holds a text or a value that
+        is not a real number.
     """
     count = require_count(n_points, "n_points")
     size = require_count(sample_size, "sample_size", at_least=MIN_SAMPLE_SIZE)
@@ -593,8 +602,8 @@ def contour_sample_chainages_m(
     :param sample_size: ``M``, at least :data:`MIN_SAMPLE_SIZE`.
     :return: The ``M`` chainages, in metres, in increasing order.
     :raises TypeError: for a length that is a text, a bool or anything else
-        that is not a number, or a sample size that is not a whole number's
-        type.
+        that is not a number, or a ``sample_size`` that is a bool, a text or an
+        array.
     :raises ValueError: for a sample smaller than 20, a length that is not a
         finite, positive number, or contours so short that two points would
         fall on the same whole metre, which happens only below ``M`` metres.
@@ -687,6 +696,8 @@ class RoundRobinPrecision(OwnsArrays):
         :raises ValueError: for a matrix that is not two-dimensional, is not
             numeric, holds a complex or a non-finite value, has fewer than 20
             receivers or fewer than two participants.
+        :raises TypeError: if ``levels`` holds a text or a value that is not a real
+            number.
         """
         object.__setattr__(self, "levels", read_only(_level_matrix(self.levels)))
 
@@ -721,7 +732,7 @@ class RoundRobinPrecision(OwnsArrays):
         return ranking_positions(self.n_receivers)[1]
 
     @property
-    def q09_db(self) -> float:
+    def q09_level_difference(self) -> float:
         r""":math:`q_{0,9}` of the ``N`` values of :math:`|dL_n|_{\max}`, in dB.
 
         "A value showing up the precision of the calculation method applied
@@ -761,10 +772,11 @@ def round_robin_precision(levels: ArrayLike) -> RoundRobinPrecision:
     :param levels: :math:`L_{n,m}`, the level each of ``M`` participants
         calculated at each of ``N`` receivers, in dB: shape ``(N, M)``, at
         least 20 receivers and two participants.
-    :return: A :class:`RoundRobinPrecision`; its ``q09_db`` is the result of
+    :return: A :class:`RoundRobinPrecision`; its ``q09_level_difference`` is the result of
         the round robin.
     :raises ValueError: for a matrix of the wrong shape, one that is not
         numeric, or one with a complex or a non-finite level.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     return RoundRobinPrecision(levels=_level_matrix(levels))
 
@@ -798,7 +810,7 @@ class CalculationVerification(OwnsArrays):
     A limit is included: a deviation that reaches the tolerance "does not
     exceed" it.
 
-    :ivar results_db: The program's results, in dB, in the reference
+    :ivar computed_levels: The program's results, in dB, in the reference
         configuration.
     :ivar lower_limits_db: The lower limit of each certified result, in dB.
     :ivar upper_limits_db: The upper limit of each certified result, in dB.
@@ -806,7 +818,7 @@ class CalculationVerification(OwnsArrays):
         500 Hz"``).
     """
 
-    results_db: NDArray[np.float64]
+    computed_levels: NDArray[np.float64]
     lower_limits_db: NDArray[np.float64]
     upper_limits_db: NDArray[np.float64]
     labels: tuple[str, ...]
@@ -819,7 +831,7 @@ class CalculationVerification(OwnsArrays):
             label count that does not match.
         """
         columns = {}
-        for name in ("results_db", "lower_limits_db", "upper_limits_db"):
+        for name in ("computed_levels", "lower_limits_db", "upper_limits_db"):
             columns[name] = np.asarray(
                 require_finite_array(getattr(self, name), name), dtype=np.float64
             )
@@ -837,10 +849,10 @@ class CalculationVerification(OwnsArrays):
             )
             raise ValueError(msg)
         labels = tuple(str(label) for label in self.labels)
-        if len(labels) != sizes["results_db"]:
+        if len(labels) != sizes["computed_levels"]:
             msg = (
                 "CalculationVerification: 'labels' must name every row; got "
-                f"{len(labels)} labels for {sizes['results_db']} rows."
+                f"{len(labels)} labels for {sizes['computed_levels']} rows."
             )
             raise ValueError(msg)
         for name, column in columns.items():
@@ -853,7 +865,7 @@ class CalculationVerification(OwnsArrays):
         return tuple(
             _inside(float(value), float(lower), float(upper))
             for value, lower, upper in zip(
-                self.results_db,
+                self.computed_levels,
                 self.lower_limits_db,
                 self.upper_limits_db,
                 strict=True,
@@ -876,7 +888,7 @@ class CalculationVerification(OwnsArrays):
     def deviations_db(self) -> NDArray[np.float64]:
         """Each result minus the centre of its certified interval, in dB."""
         centres = 0.5 * (self.lower_limits_db + self.upper_limits_db)
-        return self.results_db - centres
+        return self.computed_levels - centres
 
     @property
     def margins_db(self) -> NDArray[np.float64]:
@@ -886,8 +898,8 @@ class CalculationVerification(OwnsArrays):
         a result is outside.
         """
         return np.minimum(
-            self.results_db - self.lower_limits_db,
-            self.upper_limits_db - self.results_db,
+            self.computed_levels - self.lower_limits_db,
+            self.upper_limits_db - self.computed_levels,
         )
 
     def __bool__(self) -> bool:
@@ -930,7 +942,7 @@ class CalculationVerification(OwnsArrays):
 
 
 def verify_calculation_results(
-    results_db: ArrayLike,
+    computed_levels: ArrayLike,
     lower_limits_db: ArrayLike,
     upper_limits_db: ArrayLike,
     *,
@@ -950,7 +962,7 @@ def verify_calculation_results(
     eight octave bands and a total of the test case "T XX", every result
     inside.
 
-    :param results_db: The program's results, in dB, one per row.
+    :param computed_levels: The program's results, in dB, one per row.
     :param lower_limits_db: The lower limit of each certified result, in dB.
     :param upper_limits_db: The upper limit of each certified result, in dB.
     :param labels: A name for each row; by default ``"1"``, ``"2"``, and so
@@ -959,15 +971,17 @@ def verify_calculation_results(
         verdict and ``inside`` the column of the form.
     :raises ValueError: for columns of different lengths, a non-finite value
         or a lower limit above its upper limit.
+    :raises TypeError: if ``computed_levels``, ``lower_limits_db`` or
+        ``upper_limits_db`` holds a text or a value that is not a real number.
     """
-    results = require_finite_array(results_db, "results_db")
+    results = require_finite_array(computed_levels, "computed_levels")
     names = (
         tuple(str(index + 1) for index in range(results.size))
         if labels is None
         else tuple(labels)
     )
     return CalculationVerification(
-        results_db=results,
+        computed_levels=results,
         lower_limits_db=require_finite_array(lower_limits_db, "lower_limits_db"),
         upper_limits_db=require_finite_array(upper_limits_db, "upper_limits_db"),
         labels=names,

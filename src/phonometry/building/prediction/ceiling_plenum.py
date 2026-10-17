@@ -235,6 +235,9 @@ def normalized_ceiling_attenuation(
     :param reference_area: Reference area ``A0``, in m2 (Default: 10 m2).
     :return: The normalized ceiling attenuation ``Dn,c`` per band, in dB.
     :raises ValueError: for mismatched shapes or a non-positive area.
+    :raises TypeError: if ``reference_area`` is not a single number, or
+        ``absorption_area``, ``level_receiving`` or ``level_source`` holds a text or a
+        value that is not a real number.
     """
     l1 = require_finite_array(level_source, "level_source")
     l2 = require_finite_array(level_receiving, "level_receiving")
@@ -436,6 +439,8 @@ def ceiling_attenuation_class(
         must be exactly the 16 contour bands.
     :return: A :class:`CeilingAttenuationResult`.
     :raises ValueError: for a wrong number of bands or mismatched frequencies.
+    :raises TypeError: if ``attenuation`` or ``frequencies`` holds a text or a value
+        that is not a real number.
     """
     bands = np.asarray(sorted(CEILING_ATTENUATION_CONTOUR), dtype=np.float64)
     contour = np.asarray(
@@ -650,6 +655,11 @@ def plenum_flanking_reduction_index(
     :return: A :class:`PlenumFlankingResult`.
     :raises ValueError: for mismatched shapes, an unknown sidewall case, or a
         non-positive dimension.
+    :raises TypeError: if ``sidewalls`` is not a text, ``ceiling_length``,
+        ``plenum_height_m``, ``source_length``, ``split_receiving`` or ``split_source``
+        is not a single number, or ``attenuation_receiving_per_m``,
+        ``attenuation_source_per_m``, ``frequencies``, ``reduction_index_receiving`` or
+        ``reduction_index_source`` holds a text or a value that is not a real number.
     """
     rs = require_finite_array(reduction_index_source, "reduction_index_source")
     rr = require_finite_array(reduction_index_receiving, "reduction_index_receiving")
@@ -774,6 +784,8 @@ def partition_referenced_reduction_index(
     :param room_length: Sending-room length ``LS``, in m (> 0).
     :return: The partition-referenced ``Rcl,p`` per band, in dB.
     :raises ValueError: for a non-positive dimension.
+    :raises TypeError: if ``room_height_m`` or ``room_length`` is not a single number,
+        or ``reduction_index`` holds a text or a value that is not a real number.
     """
     rcl = require_finite_array(reduction_index, "reduction_index")
     hs = require_positive(room_height_m, "room_height_m")

@@ -199,8 +199,8 @@ def _draw_programme_check(
     table = check.relative_levels
     ax.fill_between(
         f,
-        table - check.tolerance_minus_db,
-        table + check.tolerance_plus_db,
+        table - check.lower_tolerance_db,
+        table + check.upper_tolerance_db,
         color=theme_fill(_C_PRIMARY, ax),
         lw=0,
         zorder=0,
@@ -648,7 +648,7 @@ def plot_crosstalk_attenuation(
         _t(
             "Crosstalk attenuation (8.12), minimum {value} dB",
             language,
-            value=_num(result.min_db, language, 1),
+            value=_num(result.min_attenuation, language, 1),
         )
     )
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -702,7 +702,7 @@ def plot_field_comparison_response(
 
     ax = ax if ax is not None else _new_axes()
     positions = np.arange(result.frequencies.size)
-    mean = result.mean_db
+    mean = result.mean_response_db
     spread = result.standard_deviation_db
     ax.bar(
         positions,
@@ -782,7 +782,7 @@ def plot_ear_canal_frequency_response(
 
     ax = ax if ax is not None else _new_axes()
     f = result.frequencies
-    mean = result.mean_db
+    mean = result.mean_response_db
     spread = result.standard_deviation_db
     ax.fill_between(
         f,

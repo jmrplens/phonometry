@@ -43,6 +43,7 @@ from ..._internal.validation import (
     require_above_absolute_zero_array,
     require_equal_shapes,
     require_per_band,
+    require_present,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -132,6 +133,8 @@ def speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> Real:
     :param temperature_c: Air temperature, in **degrees Celsius**.
     :return: Speed of sound ``c0``, in metres per second.
     :raises ValueError: if any temperature is at or below -273.15 degC.
+    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
+        number.
     """
     kelvin = _ABSOLUTE_ZERO_C_OFFSET + require_above_absolute_zero_array(
         temperature_c, "temperature_c"
@@ -156,6 +159,8 @@ def air_density_iso10534(
     :return: Air density ``rho``, in kilograms per cubic metre.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
+    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
+        number.
     """
     kelvin = _ABSOLUTE_ZERO_C_OFFSET + require_above_absolute_zero_array(
         temperature_c, "temperature_c"
@@ -199,6 +204,7 @@ def hydraulic_diameter(width_m: float, height_m: float) -> float:
     :param width_m: Inner side length ``w``, in metres.
     :param height_m: Inner side length ``h``, in metres.
     :return: Hydraulic diameter :math:`d_\mathrm{h} = 4A/P`, in metres.
+    :raises TypeError: if ``height_m`` or ``width_m`` is not a single number.
     """
     require_scalar(height_m, "height_m")
     require_scalar(width_m, "width_m")
@@ -223,6 +229,7 @@ def tube_attenuation_constant(
         diameter ``4 * area / perimeter`` for a rectangular tube (see
         :func:`hydraulic_diameter`).
     :return: Attenuation constant ``k0''``, in nepers per metre.
+    :raises TypeError: if ``diameter_m`` or ``speed_of_sound`` is not a single number.
     """
     require_scalar(diameter_m, "diameter_m")
     require_scalar(speed_of_sound, "speed_of_sound")
@@ -259,6 +266,8 @@ def tube_wavenumber(
         wavenumber. Obtain a lower-bound estimate from
         :func:`tube_attenuation_constant`.
     :return: Complex wavenumber ``k0``, in reciprocal metres.
+    :raises TypeError: if ``speed_of_sound`` is not a single number, or
+        ``attenuation_np_per_m`` holds a text or a value that is not a real number.
     """
     require_scalar(speed_of_sound, "speed_of_sound")
     if speed_of_sound <= 0.0:
@@ -328,6 +337,7 @@ def reflection_factor(
     :param wavenumber: Complex wavenumber ``k0`` (from :func:`tube_wavenumber`),
         scalar or per band.
     :return: Complex reflection factor ``r`` at the reference plane.
+    :raises TypeError: if ``spacing_m`` or ``x1`` is not a single number.
     """
     require_scalar(spacing_m, "spacing_m")
     require_scalar(x1, "x1")
@@ -368,6 +378,7 @@ def surface_impedance(
     :param characteristic_impedance: Characteristic impedance of air
         ``rho c0``, in rayls (``rho`` and ``c0`` from the Clause 7.2 helpers).
     :return: Surface impedance ``Z``, in rayls (complex).
+    :raises TypeError: if ``characteristic_impedance`` is not a single number.
     """
     require_scalar(characteristic_impedance, "characteristic_impedance")
     if characteristic_impedance <= 0.0:
@@ -464,6 +475,8 @@ def plane_wave_frequency_range(
     :param shape: ``"circular"``, ``"rectangular"`` or ``"square"`` (a square
         tube is the rectangular bound with ``d`` the side length).
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
+    :raises TypeError: if ``diameter_m``, ``spacing_m`` or ``speed_of_sound`` is not a
+        single number.
     """
     require_scalar(spacing_m, "spacing_m")
     return _frequency_range(
@@ -542,8 +555,10 @@ class ImpedanceTubeResult(OwnsArrays):
     (microphone ``spacing_m`` ``s``, distance ``x1`` from the sample to the
     farther microphone, tube ``diameter_m`` and cross-section ``shape``, stored
     canonically as ``"circular"``/``"rectangular"`` - a ``"square"`` input is
-    kept as ``"rectangular"``); they default to ``None`` when not supplied to
-    :func:`two_microphone_impedance`.
+    kept as ``"rectangular"``). The diameter and the shape are ``None`` when
+    they were not supplied to :func:`two_microphone_impedance`; the spacing
+    and ``x1`` are always there, because the reduction cannot run without
+    them.
     """
 
     frequencies: Real
@@ -552,8 +567,8 @@ class ImpedanceTubeResult(OwnsArrays):
     normalized_impedance: Complex
     absorption: Real
     _: KW_ONLY
-    spacing_m: float | None = None
-    x1: float | None = None
+    spacing_m: float
+    x1: float
     diameter_m: float | None = None
     shape: str | None = None
 
@@ -581,7 +596,9 @@ class ImpedanceTubeResult(OwnsArrays):
         :raises ValueError: if ``frequencies`` is empty or not one-dimensional,
             if the per-frequency fields disagree with it in rank or length, or
             if any of them carries a non-finite value.
+        :raises TypeError: if ``spacing_m`` or ``x1`` is ``None``.
         """
+        require_present(self, "spacing_m", "x1")
         freq = np.asarray(self.frequencies)
         if freq.ndim != 1 or freq.size == 0:
             msg = (
@@ -641,9 +658,6 @@ class ImpedanceTubeResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its tube geometry
-            (``spacing_m``/``x1``).
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_impedance_tube_result_geometry

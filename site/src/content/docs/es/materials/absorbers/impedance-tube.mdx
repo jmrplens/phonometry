@@ -346,7 +346,7 @@ print(round(float(materials.tube_attenuation_constant(500.0, c0, 0.10)), 4))
 </details>
 
 El módulo y la posición son las dos mitades de la lectura, y la biblioteca las
-toma juntas: `standing_wave_reflection(swr, x_min1, wavelength)` devuelve la $r$
+toma juntas: `standing_wave_reflection(swr, x_min1, wavelength=lam)` devuelve la $r$
 compleja (Ecs. (17)-(23)) y `standing_wave_normalized_impedance`, la relación
 $Z/\rho c_0$ (Ecs. (24)-(26)). Las dos aceptan arrays, así que un recorrido con
 motor paso a paso que registre $(\Delta L, x_{\min,1})$ por tono se reduce a dos
@@ -365,8 +365,8 @@ x_min1 = np.array([0.120, 0.061, 0.030])             # primer mínimo [m]
 
 swr = materials.standing_wave_ratio_from_level(level_difference)
 lam = c0 / f
-r = materials.standing_wave_reflection(swr, x_min1, lam)
-z = materials.standing_wave_normalized_impedance(swr, x_min1, lam)
+r = materials.standing_wave_reflection(swr, x_min1, wavelength=lam)
+z = materials.standing_wave_normalized_impedance(swr, x_min1, wavelength=lam)
 print(np.round(np.abs(r), 2))                  # [0.5  0.33 0.2 ]
 print(np.round(np.degrees(np.angle(r)), 1))    # [-54.1 -52.  -54.1]
 print(np.round(z, 2))                          # Z / rho c0

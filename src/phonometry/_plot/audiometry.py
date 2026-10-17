@@ -406,9 +406,9 @@ def plot_ascending_threshold(
         ax.plot(span, ascents, "-o", zorder=3, **line)
         ax.set_xlabel(_t("ascents", language).capitalize())
     if result.determined:
-        level = _number(result.threshold_db, language, "g")
+        level = _number(result.threshold_level, language, "g")
         ax.axhline(
-            result.threshold_db,
+            result.threshold_level,
             color=_C_REFERENCE,
             ls="--",
             lw=1.4,
@@ -466,22 +466,22 @@ def plot_bracketing_threshold(
         label=_t("descents", language),
     )
     ax.axhline(
-        result.ascent_mean_db,
+        result.ascent_mean_level,
         color=_C_PRIMARY,
         ls=":",
         lw=1.2,
         label=_t("mean of the ascents", language),
     )
     ax.axhline(
-        result.descent_mean_db,
+        result.descent_mean_level,
         color=_C_SECONDARY,
         ls=":",
         lw=1.2,
         label=_t("mean of the descents", language),
     )
-    level = _number(result.threshold_db, language, "g")
+    level = _number(result.threshold_level, language, "g")
     ax.axhline(
-        result.threshold_db,
+        result.threshold_level,
         color=_C_REFERENCE,
         ls="--",
         lw=1.6,
@@ -538,22 +538,22 @@ def plot_automatic_threshold(
         label=_t("ignored reversal", language),
     )
     ax.axhline(
-        float(np.mean(result.peaks_db)),
+        float(np.mean(result.peak_levels)),
         color=_C_SECONDARY,
         ls=":",
         lw=1.2,
         label=_t("mean of the peaks", language),
     )
     ax.axhline(
-        float(np.mean(result.valleys_db)),
+        float(np.mean(result.valley_levels)),
         color=_C_TERTIARY,
         ls=":",
         lw=1.2,
         label=_t("mean of the valleys", language),
     )
-    level = _number(result.threshold_db, language, "g")
+    level = _number(result.threshold_level, language, "g")
     ax.axhline(
-        result.threshold_db,
+        result.threshold_level,
         color=_C_REFERENCE,
         ls="--",
         lw=1.6,
@@ -604,14 +604,14 @@ def plot_sweep_threshold(
     running.setdefault("label", _t("running threshold", language))
     ax.plot(
         np.asarray(result.running_frequencies, dtype=np.float64),
-        np.asarray(result.running_threshold_db, dtype=np.float64),
+        np.asarray(result.running_threshold_levels, dtype=np.float64),
         "-",
         zorder=2,
         **running,
     )
     ax.plot(
         np.asarray(result.frequencies, dtype=np.float64),
-        np.asarray(result.threshold_db, dtype=np.float64),
+        np.asarray(result.threshold_level, dtype=np.float64),
         "s",
         color=_C_REFERENCE,
         ms=7,
@@ -650,7 +650,7 @@ def plot_retest_agreement(
 
     check_language(language)
     ax = ax if ax is not None else _new_axes()
-    first = float(result.first_db)
+    first = float(result.first_threshold_level)
     ax.axhspan(
         first - _RETEST_AGREEMENT_DB,
         first + _RETEST_AGREEMENT_DB,
@@ -663,12 +663,19 @@ def plot_retest_agreement(
     style_default(marks, "color", _C_PRIMARY)
     style_default(marks, "linewidth", 1.4)
     marks.setdefault("label", _t("hearing threshold level", language))
-    ax.plot([0, 1], [first, float(result.repeat_db)], "-o", ms=9, zorder=3, **marks)
+    ax.plot(
+        [0, 1],
+        [first, float(result.repeat_threshold_level)],
+        "-o",
+        ms=9,
+        zorder=3,
+        **marks,
+    )
     ax.set_xticks([0, 1])
     ax.set_xticklabels([_t("first measurement", language), _t("repeat", language)])
     ax.set_xlim(-0.5, 1.5)
-    low = min(first, float(result.repeat_db)) - _RETEST_DISAGREEMENT_DB
-    high = max(first, float(result.repeat_db)) + _RETEST_DISAGREEMENT_DB
+    low = min(first, float(result.repeat_threshold_level)) - _RETEST_DISAGREEMENT_DB
+    high = max(first, float(result.repeat_threshold_level)) + _RETEST_DISAGREEMENT_DB
     ax.set_ylim(low, high)
     ax.set_xlabel(_t("Measurement", language))
     ax.set_ylabel(_t(_HEARING_LEVEL_LABEL, language))
@@ -715,8 +722,8 @@ def plot_audiogram_cautions(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     flagged_f: list[np.ndarray] = []
     flagged_l: list[np.ndarray] = []
-    if result.air_conduction_db is not None:
-        air = np.asarray(result.air_conduction_db, dtype=np.float64)
+    if result.air_conduction_threshold_levels is not None:
+        air = np.asarray(result.air_conduction_threshold_levels, dtype=np.float64)
         curve = dict(kwargs)
         style_default(curve, "color", _C_PRIMARY)
         style_default(curve, "linewidth", 2.0)
@@ -732,8 +739,8 @@ def plot_audiogram_cautions(
         )
         flagged_f.append(freqs[result.cross_hearing])
         flagged_l.append(air[result.cross_hearing])
-    if result.bone_conduction_db is not None:
-        bone = np.asarray(result.bone_conduction_db, dtype=np.float64)
+    if result.bone_conduction_threshold_levels is not None:
+        bone = np.asarray(result.bone_conduction_threshold_levels, dtype=np.float64)
         ax.plot(
             freqs,
             bone,
@@ -866,11 +873,17 @@ def plot_audiometric_uncertainty(
     # A.6 reports the expanded uncertainty rounded to the nearest full
     # decibel, as Table A.2 prints it (U = 10 dB for u = 4,9 dB).
     title = _t(_BUDGET_TITLE, language).format(
-        u=_number(result.combined_db, language),
-        big_u=_number(result.expanded_db, language, ".0f"),
+        u=_number(result.combined_uncertainty_db, language),
+        big_u=_number(result.expanded_uncertainty_db, language, ".0f"),
     )
     return _plot_budget(
-        ax, labels, result.components_db, result.combined_db, title, language, kwargs
+        ax,
+        labels,
+        result.standard_uncertainties_db,
+        result.combined_uncertainty_db,
+        title,
+        language,
+        kwargs,
     )
 
 
@@ -904,11 +917,17 @@ def plot_insertion_loss_uncertainty(
         r"$\delta_3$",
     ]
     title = _t(_IL_BUDGET_TITLE, language).format(
-        u=_number(result.combined_db, language),
-        big_u=_number(result.expanded_db, language),
+        u=_number(result.combined_uncertainty_db, language),
+        big_u=_number(result.expanded_uncertainty_db, language),
     )
     return _plot_budget(
-        ax, labels, result.components_db, result.combined_db, title, language, kwargs
+        ax,
+        labels,
+        result.standard_uncertainties_db,
+        result.combined_uncertainty_db,
+        title,
+        language,
+        kwargs,
     )
 
 
@@ -1282,7 +1301,7 @@ def plot_plane_progressive_wave(
         zorder=1,
         label=_t("2 dB limit", language),
     )
-    margin = np.asarray(result.front_to_back_db, dtype=np.float64)
+    margin = np.asarray(result.front_to_back_ratio_db, dtype=np.float64)
     read = np.isfinite(margin)
     if np.any(read):
         ax.plot(
@@ -1332,7 +1351,7 @@ def plot_fixture_isolation(
     check_language(language)
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    required = np.asarray(result.required_db, dtype=np.float64)
+    required = np.asarray(result.min_isolation, dtype=np.float64)
     ax.step(
         freqs,
         required,

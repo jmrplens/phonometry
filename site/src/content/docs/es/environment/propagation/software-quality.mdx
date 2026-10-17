@@ -232,8 +232,8 @@ d = [-1.4, -1.0, -0.4, 0.8, 1.0, 1.0, 1.0, 1.2, 1.4, 1.4, 1.4, 1.6, 1.8,
      1.8, 2.0, 2.0, 2.0, 2.2, 2.2, 2.4, 2.6, 2.8, 2.8, 3.0, 3.4]
 q = environment.level_difference_quantiles(d)
 print(q.rank_q01, q.rank_q09)                                   # 2 24
-print(q.q01_db, q.q09_db)                                       # -1.0 3.0
-print(round(q.mean_db, 2), round(q.standard_deviation_db, 2))   # 1.56 1.17
+print(q.q01_level_difference, q.q09_level_difference)                                       # -1.0 3.0
+print(round(q.mean_level_difference, 2), round(q.standard_deviation_db, 2))   # 1.56 1.17
 q.plot(language="es")
 ```
 
@@ -436,7 +436,7 @@ dispersion = 0.15 + 0.6 * rng.gamma(1.5, 0.4, 400)
 niveles = comun[:, None] + dispersion[:, None] * rng.standard_normal((400, 4))
 
 rr = environment.round_robin_precision(niveles)
-print(rr.n_receivers, rr.n_participants, rr.rank_q09, round(rr.q09_db, 2))   # 400 4 361 1.28
+print(rr.n_receivers, rr.n_participants, rr.rank_q09, round(rr.q09_level_difference, 2))   # 400 4 361 1.28
 rr.plot(language="es")
 ```
 

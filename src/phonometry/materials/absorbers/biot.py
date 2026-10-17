@@ -164,6 +164,7 @@ def frame_bulk_modulus(shear_modulus: complex, poisson_ratio: float) -> complex:
     :return: The complex bulk modulus ``Kb`` of the frame in vacuum, in Pa.
     :raises ValueError: for a non-positive or non-finite ``N``, a negative
         :math:`\operatorname{Im}(N)` or a ``nu`` outside :math:`(-1, 0.5)`.
+    :raises TypeError: if ``poisson_ratio`` is not a single number.
     """
     n = _require_shear_modulus(shear_modulus, "shear_modulus")
     nu = _require_poisson_ratio(poisson_ratio)
@@ -186,6 +187,7 @@ def frame_elastic_coefficient(shear_modulus: complex, poisson_ratio: float) -> c
     :param poisson_ratio: Poisson coefficient ``nu`` of the frame.
     :return: The complex elastic coefficient ``Kc``, in Pa.
     :raises ValueError: as :func:`frame_bulk_modulus`.
+    :raises TypeError: if ``poisson_ratio`` is not a single number.
     """
     n = _require_shear_modulus(shear_modulus, "shear_modulus")
     nu = _require_poisson_ratio(poisson_ratio)
@@ -227,6 +229,7 @@ def frame_quarter_wave_resonance(
     :return: The resonance frequency ``fr``, in hertz.
     :raises ValueError: for a non-positive thickness or frame density, or an
         invalid ``N`` / ``nu``.
+    :raises TypeError: if ``frame_density`` or ``thickness_m`` is not a single number.
     """
     length = require_positive(thickness_m, "thickness_m")
     rho1 = require_positive(frame_density, "frame_density")
@@ -435,6 +438,8 @@ def biot_waves(
     :return: A :class:`BiotWavesResult`.
     :raises ValueError: for an out-of-range porosity, tortuosity, frame
         density, shear modulus or Poisson coefficient.
+    :raises TypeError: if ``frame_density``, ``poisson_ratio``, ``porosity`` or
+        ``tortuosity`` is not a single number.
     """
     phi = require_positive(porosity, "porosity")
     if phi > 1.0:
@@ -547,6 +552,7 @@ def biot_surface_impedance(waves: BiotWavesResult, thickness_m: float) -> Comple
     :param thickness_m: Layer thickness ``l``, in metres (> 0).
     :return: The complex surface impedance ``Z``, in Pa s/m.
     :raises ValueError: for a non-positive thickness.
+    :raises TypeError: if ``thickness_m`` is not a single number.
     """
     length = require_positive(thickness_m, "thickness_m")
     phi = waves.porosity
@@ -694,6 +700,7 @@ def poroelastic_transfer_matrix(
         frequency.
     :return: The transfer matrix with shape ``(len(frequency), 6, 6)``.
     :raises ValueError: for a non-positive thickness.
+    :raises TypeError: if ``thickness_m`` is not a single number.
     """
     h = require_positive(thickness_m, "thickness_m")
     k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)

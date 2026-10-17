@@ -202,6 +202,7 @@ the characteristic phase deviation values".
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two arrays do not have the same shape, if a frequency is not positive and finite, if a phase deviation is not finite, or if there are fewer than two frequencies or they do not strictly ascend. |
+| TypeError | if `frequencies` or `phase_deviation_deg` holds a text or a value that is not a real number. |
 
 ## INDICATION_TOLERANCE_PERCENT
 
@@ -316,6 +317,7 @@ angles of two frequency components in the most unfavourable manner."
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is negative or not finite. Formula (6) prints the quantity inside absolute-value bars, so a negative one is not a characteristic phase deviation and is refused rather than folded. |
+| TypeError | if `characteristic_phase_deviation_deg` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -562,6 +564,7 @@ for the three time constants the standard tabulates.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `method` is neither average, or the integration time is not positive and finite. |
+| TypeError | if `integration_time` is not a single number. |
 
 ## RUNNING_RMS_DECAY_TIME_S
 
@@ -760,6 +763,7 @@ this function does not perform.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, if the two arrays do not have the same shape, if a frequency is not positive and finite, if a phase is not finite, or if there are fewer than two frequencies or they do not strictly ascend. |
+| TypeError | if `frequencies` or `measured_phase_deg` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -805,6 +809,7 @@ against a band the standard does not give.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `method` is neither average, if the measured time is not positive and finite, or if the integration time is not one of the three printed time constants. |
+| TypeError | if `measured_time_s` is not a single number. |
 
 ## verify_weighting
 
@@ -855,6 +860,7 @@ by [`MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/inst
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, if the two arrays do not have the same shape, if a frequency is not positive and finite, if a measured factor is negative or not finite, or if the expanded uncertainty is negative or not finite. |
+| TypeError | if `expanded_uncertainty_percent` is not a single number. |
 
 ## WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT
 

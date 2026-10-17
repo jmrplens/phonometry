@@ -120,6 +120,7 @@ the reference method itself overestimates it above 4 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal is invalid or `fs` is not positive. |
+| TypeError | if `fs` is not a single number. |
 
 ## fluctuation_strength_am_noise
 
@@ -158,6 +159,7 @@ vanishes).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `modulation_factor` is outside [0, 1] or `mod_frequency` is not positive/finite, or the level is not finite. |
+| TypeError | if `level`, `mod_frequency` or `modulation_factor` is not a single number. |
 
 ## FluctuationStrengthResult
 

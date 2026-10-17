@@ -42,6 +42,7 @@ reads is data, so a field of the wrong type in it is a malformed file and a
 from __future__ import annotations
 
 import ast
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -769,16 +770,172 @@ def _raises_type_error(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int 
     return None
 
 
-def undocumented_type_errors(source: str) -> list[str]:
+def _validators_raising_type_error() -> frozenset[str]:
+    """The public validators of ``_internal/validation.py`` that raise TypeError.
+
+    A validator raises it itself, or calls another of the module that does,
+    as :func:`require_positive` reaches it through the number check every
+    scalar guard shares.
+    """
+    tree = ast.parse((SRC / "_internal" / "validation.py").read_text(encoding="utf-8"))
+    functions = {f.name: f for f in tree.body if isinstance(f, ast.FunctionDef)}
+    raising = {
+        name for name, function in functions.items() if _raises_type_error(function)
+    }
+    grown = True
+    while grown:
+        grown = False
+        for name, function in functions.items():
+            called = {
+                node.func.id
+                for node in ast.walk(function)
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+            }
+            if name not in raising and called & raising:
+                raising.add(name)
+                grown = True
+    return frozenset(name for name in raising if not name.startswith("_"))
+
+
+#: What a parameter goes through on its way to a validator and stays itself:
+#: ``float(x)`` is still the caller's ``x``.
+_PASS_THROUGH = frozenset(
+    {
+        "float",
+        "int",
+        "complex",
+        "tuple",
+        "list",
+        "np.asarray",
+        "np.array",
+        "np.atleast_1d",
+        "np.asanyarray",
+        "operator.index",
+    }
+)
+
+
+def _handed_parameter(
+    argument: ast.expr, parameters: set[str], *, through_self: bool
+) -> str | None:
+    """The parameter *argument* is, as given (``x``, ``float(x)``, ``self.x``)."""
+    while (
+        isinstance(argument, ast.Call)
+        and ast.unparse(argument.func) in _PASS_THROUGH
+        and argument.args
+    ):
+        argument = argument.args[0]
+    if isinstance(argument, ast.Name) and argument.id in parameters:
+        return argument.id
+    if (
+        through_self
+        and isinstance(argument, ast.Attribute)
+        and isinstance(argument.value, ast.Name)
+        and argument.value.id == "self"
+    ):
+        return argument.attr
+    return None
+
+
+def _parameters(function: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+    arguments = function.args
+    return [
+        a.arg
+        for a in (
+            *arguments.posonlyargs,
+            *arguments.args,
+            *arguments.kwonlyargs,
+            *([arguments.vararg] if arguments.vararg else []),
+            *([arguments.kwarg] if arguments.kwarg else []),
+        )
+    ]
+
+
+def _hands_to_a_type_checking_validator(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    helpers: dict[str, ast.FunctionDef],
+    validators: frozenset[str],
+    *,
+    through_self: bool,
+    depth: int = 0,
+) -> set[str]:
+    """The parameters *function* hands as given to a validator raising TypeError.
+
+    The validator is called with the parameter itself as its first argument,
+    by *function* or by a private helper of the same module it hands the
+    parameter to, four calls deep at most. A parameter only read to build
+    another value (``fluid.density``) is not handed: the validator refuses
+    that value, not the caller's argument.
+    """
+    parameters = set(_parameters(function)) - {"self", "cls"}
+    handed: set[str] = set()
+    for node in _own_statements(function):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)):
+            continue
+        name = node.func.id
+        if name in validators and node.args:
+            parameter = _handed_parameter(
+                node.args[0], parameters, through_self=through_self
+            )
+            if parameter is not None:
+                handed.add(parameter)
+        elif name in helpers and depth < 4:  # noqa: PLR2004 - four calls deep
+            helper = helpers[name]
+            reached = _hands_to_a_type_checking_validator(
+                helper, helpers, validators, through_self=False, depth=depth + 1
+            )
+            bound = dict(zip(_parameters(helper), node.args, strict=False))
+            bound.update({k.arg: k.value for k in node.keywords if k.arg})
+            for helper_parameter in reached:
+                if helper_parameter in bound:
+                    parameter = _handed_parameter(
+                        bound[helper_parameter], parameters, through_self=through_self
+                    )
+                    if parameter is not None:
+                        handed.add(parameter)
+    return handed
+
+
+#: The text of the ``:raises TypeError:`` fields of a docstring, each up to the
+#: next field; a continuation line that opens with a role (``:class:``) stays.
+_TYPE_ERROR_FIELD = re.compile(
+    r":raises TypeError:(.*?)"
+    r"(?=\n\s*:(?:param|raises|return|returns|rtype|ivar|var|cvar|type|yields?)\b|\Z)",
+    re.DOTALL,
+)
+
+
+def _unnamed(handed: set[str], documented: str) -> list[str]:
+    """The parameters of *handed* no ``:raises TypeError:`` field names."""
+    field = " ".join(m.group(1) for m in _TYPE_ERROR_FIELD.finditer(documented))
+    return sorted(p for p in handed if not re.search(rf"\b{re.escape(p)}\b", field))
+
+
+def undocumented_type_errors(
+    source: str, validators: frozenset[str] | None = None
+) -> list[str]:
     """Every public function that raises ``TypeError`` and does not say so.
 
     The API reference is generated from the ``:raises`` fields, so a refusal
     whose class changed to ``TypeError`` while the docstring kept listing the
     case under ``ValueError`` publishes the old class. A public function (or
     the constructor of a public class, whose class docstring may carry the
-    field instead) that raises ``TypeError`` itself documents it with
-    ``:raises TypeError:``.
+    field instead) that raises ``TypeError`` itself, or hands a parameter as
+    it was given to a shared validator of ``_internal/validation.py`` that
+    raises it (:func:`require_band_fraction` for a band set written as a word,
+    :func:`require_scalar` for an array where one number goes), documents it
+    with ``:raises TypeError:``, and that field names every parameter it hands
+    on: a field about one parameter does not tell the caller that another is
+    refused the same way.
     """
+    if validators is None:
+        validators = _validators_raising_type_error()
+    tree = ast.parse(source)
+    helpers = {
+        f.name: f
+        for f in tree.body
+        if isinstance(f, ast.FunctionDef) and f.name.startswith("_")
+    }
     found: list[str] = []
 
     def visit(node: ast.AST, owner: ast.ClassDef | None) -> None:
@@ -794,17 +951,27 @@ def undocumented_type_errors(source: str) -> list[str]:
                 public = not owner.name.startswith("_") and (
                     not child.name.startswith("_") or child.name in _PUBLIC_METHODS
                 )
-            line = _raises_type_error(child) if public else None
+            if not public:
+                continue
+            through_self = owner is not None and child.name in _PUBLIC_METHODS
+            handed = _hands_to_a_type_checking_validator(
+                child, helpers, validators, through_self=through_self
+            )
+            line = _raises_type_error(child)
+            if line is None and handed:
+                line = child.lineno
             if line is None:
                 continue
             documented = ast.get_docstring(child) or ""
             if owner is not None and child.name in {"__post_init__", "__init__"}:
-                documented += ast.get_docstring(owner) or ""
+                documented += "\n" + (ast.get_docstring(owner) or "")
+            where = child.name if owner is None else f"{owner.name}.{child.name}"
             if ":raises TypeError" not in documented:
-                where = child.name if owner is None else f"{owner.name}.{child.name}"
                 found.append(f"{where}:{line}")
+            elif unnamed := _unnamed(handed, documented):
+                found.append(f"{where}:{line} names no {', '.join(unnamed)}")
 
-    visit(ast.parse(source), None)
+    visit(tree, None)
     return found
 
 
@@ -871,3 +1038,106 @@ def test_the_docstring_rule_finds_an_undocumented_type_error() -> None:
         "Rating.__post_init__",
     ]
     assert undocumented_type_errors(_DOCUMENTED) == []
+
+
+_THROUGH_VALIDATORS = '''
+def rating(levels, fraction=3):
+    """A rating.
+
+    :raises ValueError: for a fraction other than 1 and 3.
+    """
+    require_band_fraction(fraction)
+    return levels
+
+
+def corrected(level, fs):
+    """A correction, its sample rate checked by a helper.
+
+    :raises ValueError: for a negative level.
+    """
+    return _checked(float(fs)) + level
+
+
+def _checked(rate):
+    return require_positive(rate, "fs")
+
+
+def derived(fluid):
+    """A value read off a record: the record is not the number refused.
+
+    :raises ValueError: for a negative density.
+    """
+    return require_positive(fluid.density, "density")
+
+
+def documented(levels, fraction=3):
+    """A rating.
+
+    :raises TypeError: if ``fraction`` is not an integer.
+    """
+    require_band_fraction(fraction)
+    return levels
+
+
+class Check:
+    def __post_init__(self):
+        """Check the check.
+
+        :raises ValueError: for an unknown mode.
+        """
+        require_choice(self.mode, "mode", ("a", "b"))
+'''
+
+
+def test_a_type_error_a_shared_validator_raises_is_documented_too() -> None:
+    """A parameter handed as given to a validator that raises TypeError makes
+    the TypeError the function's own, called directly, through a private
+    helper or off ``self`` in a constructor; a value read off a record is not
+    the caller's argument and does not count.
+    """
+    validators = frozenset(
+        {"require_band_fraction", "require_positive", "require_choice"}
+    )
+    found = [
+        where.split(":")[0]
+        for where in undocumented_type_errors(_THROUGH_VALIDATORS, validators)
+    ]
+    assert found == ["rating", "corrected", "Check.__post_init__"]
+
+
+_NAMES_ANOTHER = '''
+def sound_power(speed, alpha, *, reference=None):
+    """A source spectrum.
+
+    :raises TypeError: If ``reference`` is not a spectrum.
+    """
+    require_scalar(speed, "speed")
+    require_scalar(alpha, "alpha")
+    if reference is not None and not isinstance(reference, tuple):
+        raise TypeError("'reference' must be a spectrum")
+    return speed
+
+
+def named(speed, alpha):
+    """A source spectrum.
+
+    :raises TypeError: If ``reference`` is not a spectrum, or ``speed`` or
+        ``alpha`` is not one number.
+    """
+    require_scalar(speed, "speed")
+    return require_scalar(alpha, "alpha")
+'''
+
+
+def test_a_type_error_field_names_every_parameter_it_hands_on() -> None:
+    """A field about another parameter does not document the refusal of the
+    ones handed to a validator: each is named in a ``:raises TypeError:``.
+    """
+    found = undocumented_type_errors(_NAMES_ANOTHER, frozenset({"require_scalar"}))
+    assert found == ["sound_power:10 names no alpha, speed"]
+
+
+def test_the_validators_the_rule_follows_include_the_band_set_and_the_scalar() -> None:
+    validators = _validators_raising_type_error()
+    assert {"require_band_fraction", "require_scalar", "require_choice"} <= validators
+    assert not any(name.startswith("_") for name in validators)

@@ -376,6 +376,7 @@ def read_at_most(path: Path, limit: int) -> bytes:
     :raises NotRegularError: for a name that holds anything but a regular file.
     :raises TooLargeError: for a file that holds more than *limit* bytes.
     :raises OSError: as the file system raises it, untouched.
+    :raises TypeError: if ``limit`` is not a single number.
     """
     require_scalar(limit, "limit")
     kind = _not_regular(path.stat().st_mode)

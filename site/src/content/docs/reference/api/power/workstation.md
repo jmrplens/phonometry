@@ -176,6 +176,7 @@ compared with a limit value, and is this function's default.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either argument is negative. |
+| TypeError | if `coverage_factor` or `total_standard_deviation_db` is not a single number. |
 
 ## emission_sound_pressure_level
 
@@ -304,6 +305,7 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either area is not strictly positive. |
+| TypeError | if `measurement_surface_m2` is not a single number, or `absorption_area` holds a text or a value that is not a real number. |
 
 ## environmental_ratio_from_k2
 
@@ -416,6 +418,7 @@ correction cannot be negative: the room can only add to the reading.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any value is not strictly positive. |
+| TypeError | if `ratio` holds a text or a value that is not a real number. |
 
 ## MAX_K3
 
@@ -508,13 +511,14 @@ weighted by how long each lasts, not by how many there are.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two are of different lengths, or a duration is not strictly positive. |
+| TypeError | if `durations_s` holds a text or a value that is not a real number. |
 
 ## total_standard_deviation
 
 ```python
 total_standard_deviation(
     reproducibility_db: float,
-    operating_db: float = 0.0,
+    sigma_omc_db: float = 0.0,
 ) -> float
 ```
 
@@ -534,7 +538,7 @@ the method and the other of the machine.
 | Name | Description |
 | :--- | :--- |
 | `reproducibility_db` | $\sigma_{R0}$ of the method, in decibels. |
-| `operating_db` | $\sigma_\mathrm{omc}$ of the machine, in decibels (default 0, a source whose emission does not wander). |
+| `sigma_omc_db` | $\sigma_\mathrm{omc}$ of the machine, in decibels (default 0, a source whose emission does not wander). |
 
 **Returns:** $\sigma_\mathrm{tot}$ in decibels.
 
@@ -543,6 +547,7 @@ the method and the other of the machine.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either component is negative. |
+| TypeError | if `reproducibility_db` or `sigma_omc_db` is not a single number. |
 
 ## WorkstationBackgroundCorrection
 

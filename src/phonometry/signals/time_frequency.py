@@ -428,6 +428,8 @@ def zoom_fft(
         ``'boxcar'`` for none).
     :return: A :class:`ZoomFFTResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``f_max`` or ``f_min`` is not a single number, or ``n_points``
+        is a flag, a text or an array where a count goes.
     """
     from scipy import signal as sp_signal
 

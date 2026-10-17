@@ -550,6 +550,7 @@ class ParametricEQ:
         :param stateful: If True, :meth:`filter` carries the filter state
             across calls (block processing).
         :param steady_ic: If True, initialize the state at steady state.
+        :raises TypeError: if ``fs`` is not a single number.
         """
         require_scalar(fs, "fs")
         if fs <= 0:
@@ -609,6 +610,8 @@ class ParametricEQ:
         :param f_max: Highest frequency, in Hz (default: Nyquist).
         :return: An :class:`EQResponseResult` (carries the SOS cascade and
             plots the magnitude/phase response).
+        :raises TypeError: if ``f_max``, ``f_min`` or ``n_points`` is not a single
+            number.
         """
         require_scalar(f_max, "f_max")
         require_scalar(f_min, "f_min")

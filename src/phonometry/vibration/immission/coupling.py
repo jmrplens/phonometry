@@ -162,6 +162,8 @@ class MountingCheck(RichDisplay):
 
         :raises ValueError: For a negative acceleration, a non-positive
             frequency, or an unknown direction or surface.
+        :raises TypeError: if ``peak_acceleration_m_s2`` or ``upper_frequency_hz`` is
+            not a single number.
         """
         require_non_negative(self.peak_acceleration_m_s2, "peak_acceleration_m_s2")
         require_positive(self.upper_frequency_hz, "upper_frequency_hz")
@@ -229,6 +231,8 @@ def check_loose_mounting(
         :class:`MountingCheck`.
     :raises ValueError: For a negative acceleration, a non-positive
         frequency, or an unknown direction or surface.
+    :raises TypeError: if ``peak_acceleration_m_s2`` or ``upper_frequency_hz`` is not a
+        single number.
     """
     peak = require_non_negative(peak_acceleration_m_s2, "peak_acceleration_m_s2")
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
@@ -278,6 +282,8 @@ def mass_loading_ratio(coupled_mass_kg: float, *, vibrating_mass_kg: float) -> f
     :return: The ratio of the two, dimensionless; compare it with
         :data:`MASS_LOADING_RATIO_LIMIT`.
     :raises ValueError: For a non-positive mass.
+    :raises TypeError: if ``coupled_mass_kg`` or ``vibrating_mass_kg`` is not a single
+        number.
     """
     coupled = require_positive(coupled_mass_kg, "coupled_mass_kg")
     vibrating = require_positive(vibrating_mass_kg, "vibrating_mass_kg")

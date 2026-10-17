@@ -88,6 +88,12 @@ Airflow resistance $R = \Delta p / q_v$ (ISO 9053-1:2018, 3.1).
 specimen (Pa) and `volume_flow_rate` is the volumetric airflow rate
 `q_v` (m3/s). Returns `R` in Pa\*s/m3.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `pressure_drop_pa` or `volume_flow_rate` is not a single number. |
+
 ## airflow_resistivity
 
 ```python
@@ -98,6 +104,12 @@ Airflow resistivity $\sigma = R_\mathrm{s} / d$ (ISO 9053-1:2018, 3.3).
 
 `specific_resistance` is `R_s` (Pa\*s/m) and `thickness_m` is `d` (m),
 the specimen thickness in the flow direction. Returns `sigma` in Pa\*s/m2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `specific_resistance` or `thickness_m` is not a single number. |
 
 ## AirflowResistanceWarning
 
@@ -153,6 +165,12 @@ piston area and the specimen area, and this function is handed neither. Compute 
 with [`piston_volume_flow_rate`](/phonometry/reference/api/materials/airflow-resistance/#piston_volume_flow_rate) and [`linear_airflow_velocity`](/phonometry/reference/api/materials/airflow-resistance/#linear_airflow_velocity) if
 the rig is near either end of the range.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cavity_volume`, `frequency`, `kappa_prime`, `level_specimen`, `level_termination`, `piston_stroke_specimen`, `piston_stroke_termination` or `static_pressure_pa` is not a single number. |
+
 ## ANNEX_A_AIR
 
 *Constant* (`phonometry.fluids.Fluid`).
@@ -192,6 +210,12 @@ Annex A.3 prints). Returns the dimensionless `kappa'` for use in
 ($S = 0.0471$ m2, $V = 7.854\times 10^{-4}$ m3,
 $f = 2$ Hz) yields $\kappa' = 1.370$.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cavity_surface` or `cavity_volume` is not a single number. |
+
 ## linear_airflow_velocity
 
 ```python
@@ -202,6 +226,12 @@ Linear airflow velocity $u = q_v / A$ (ISO 9053-1:2018, 3.4).
 
 `volume_flow_rate` is `q_v` (m3/s) and `area` is `A` (m2); returns
 `u` in m/s.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area` or `volume_flow_rate` is not a single number. |
 
 ## piston_volume_flow_rate
 
@@ -218,6 +248,12 @@ RMS piston volume flow $q_v = 2\pi f h A_\mathrm{P}$ (ISO 9053-2, 6.2).
 `frequency` is the piston frequency `f` (Hz), `stroke_amplitude` the
 stroke amplitude `h` (m) and `piston_area` the piston cross-section
 `A_P` (m2). Returns `q_v` in m3/s.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency`, `piston_area` or `stroke_amplitude` is not a single number. |
 
 ## specific_airflow_resistance
 
@@ -242,6 +278,12 @@ Two equivalent routes are accepted; supply exactly one:
   $u = q_v / A$).
 
 The unit is pascal second per metre (Pa\*s/m), not Pa\*s/m2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area`, `pressure_drop_pa`, `resistance` or `velocity` is not a single number. |
 
 ## static_airflow_resistance
 
@@ -273,6 +315,12 @@ Because $R_\mathrm{s} = \Delta p / u = a + b u$, the returned
 `linear_coefficient` `a` is the zero-velocity specific airflow
 resistance. A velocity above the clause 7.5 upper limit (15 mm/s) raises
 [`AirflowResistanceWarning`](/phonometry/reference/api/materials/airflow-resistance/#airflowresistancewarning).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area`, `evaluation_velocity` or `thickness_m` is not a single number. |
 
 ## StaticAirflowResult
 
@@ -403,3 +451,9 @@ Annex F gives at that state, which it credits to IEC 61094-2:2009 but which cann
 be found there (see `docs/ERRATA.md`). The defaults here are the Annex F values;
 with the Annex A.3 example ($f = 2$ Hz) both pairs give `1.83e-3 m`, because
 the printed pair preserves the tabulated diffusivity.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` is not a single number. |

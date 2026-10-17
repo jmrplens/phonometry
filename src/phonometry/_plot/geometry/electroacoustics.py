@@ -126,6 +126,7 @@ def plot_piston_geometry(
     :raises ValueError: for a non-positive radius, only one of the lobe
         pair, a lobe whose two arrays disagree, or a non-finite value in
         either of them.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     _check_language(language)
     require_positive(radius, "radius")
@@ -202,6 +203,8 @@ def plot_piston_result_geometry(
     The result always retains ``radius``; when it also carries a computed
     directivity, the lobe of the selected frequency is overlaid with its
     ``ka`` in the legend.
+
+    :raises TypeError: if ``frequency_index`` is not a single number.
     """
     require_scalar(frequency_index, "frequency_index")
     angles_rad = None
@@ -264,6 +267,8 @@ def plot_sound_reinforcement_geometry(
     :return: The axes.
     :raises ValueError: naming the first distance that is not finite and
         positive.
+    :raises TypeError: if ``listener_distance``, ``microphone_distance`` or
+        ``talker_distance`` is not a single number.
     """
     from matplotlib.patches import Polygon
 

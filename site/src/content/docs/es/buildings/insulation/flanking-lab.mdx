@@ -215,6 +215,34 @@ Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se
 ancla en identidades de forma cerrada ($K_{ij}$ simplificado, $a_j$ a
 $f_\mathrm{ref}$, $\eta$).
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/strong_coupling_check.svg" alt="Fórmula (15) de ISO 10848-1 en las bandas de tercio de octava de 100 Hz a 5000 Hz para una pared de hormigón de 140 mm excitada y la de 200 mm con la que se une: la diferencia de niveles de velocidad en un sentido Dv,ij, que sube de 4,2 dB a 12,6 dB, frente a la cota de 6,1 dB, con sombreado el lado de acoplamiento fuerte bajo la cota y marcadas las cinco bandas más bajas, donde la desigualdad no se cumple" width="80%" />
+
+*La fórmula (15) exige a una pared de hormigón de 140 mm excitada ($m_i$ = 322 kg/m², $f_{\mathrm{c}i}$ = 133 Hz) y a la de 200 mm con la que se une ($m_j$ = 460 kg/m², $f_{\mathrm{c}j}$ = 93 Hz) una $D_{\mathrm{v},ij}$ en un solo sentido de al menos 6,1 dB. La diferencia medida no la alcanza en las cinco bandas más bajas: ahí las dos paredes están fuertemente acopladas, no pueden tratarse como subsistemas SEA separados y el $K_{ij}$ medido puede no ser pertinente (4.3.3). A partir de 315 Hz la desigualdad se cumple, así que el acoplamiento es lo bastante débil para el modelo SEA en que se apoya $K_{ij}$. La cota cambia al intercambiar $i$ y $j$, así que cada sentido se juzga por separado.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+# Diferencia de niveles de velocidad en un sentido, excitada la pared i de 140 mm (dB):
+dv_ij = [4.2, 4.7, 5.1, 5.5, 5.9, 6.4, 6.8, 7.4, 7.9,
+         8.5, 9.0, 9.6, 10.1, 10.7, 11.2, 11.7, 12.1, 12.6]
+check = building.check_strong_coupling(
+    dv_ij, mass_i=322.0, mass_j=460.0,
+    critical_frequency_i=133.0, critical_frequency_j=93.0, frequencies=freqs,
+)
+print(round(check.min_velocity_level_difference, 1))   # 6.1 dB
+print(int(check.holds.sum()), check.passes)            # 13 False
+check.plot(language="es")
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import building

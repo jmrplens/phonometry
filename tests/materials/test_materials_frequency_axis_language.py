@@ -70,6 +70,8 @@ def _impedance_tube(language: str) -> Axes:
         reflection=reflection,
         surface_impedance=_RHO_C * normalized,
         normalized_impedance=normalized,
+        spacing_m=0.05,
+        x1=0.1,
         absorption=1.0 - np.abs(reflection) ** 2,
     )
     return result.plot(language=language)
@@ -91,7 +93,8 @@ def _biot_waves(language: str) -> Axes:
     glass_wool = materials.PUBLISHED_POROUS_MATERIALS[
         "allard-2009-table-6-1/domisol_coffrage"
     ]
-    shear, poisson = glass_wool.frame_constants()
+    frame = glass_wool.frame_constants()
+    shear, poisson = frame.shear_modulus_pa, frame.poisson_ratio
     result = materials.biot_waves(
         glass_wool.medium(_FREQUENCIES),
         porosity=glass_wool.porosity,

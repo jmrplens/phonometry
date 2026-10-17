@@ -564,6 +564,9 @@ def normal_modes(
         and an explicit ``n_depth_points`` overrides the cap).
     :return: A :class:`NormalModeResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``density``, ``frequency_hz``, ``receiver_depth`` or
+        ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
+        or an array where a count goes.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     rho = require_positive(density, "density")
@@ -933,6 +936,8 @@ def ray_trace(
         level bottom at the profile's last depth.
     :return: A :class:`RayTraceResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``max_range`` or ``source_depth`` is not a single number, or
+        ``n_steps`` is a flag, a text or an array where a count goes.
     """
     z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "ray_trace")
     bathy = _clean_bathymetry(bathymetry, z_prof, "ray_trace")
@@ -1508,6 +1513,9 @@ def eigenrays(
         outside the aperture) has no eigenrays to list, which is an answer
         and not an error.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``receiver_depth`` or ``receiver_range`` is not a single
+        number, or ``max_n_arrivals`` or ``n_steps`` is a flag, a text or an array where
+        a count goes.
     """
     key, seabed = _resolve_boundary(bottom)
     if trace.bathymetry_ranges is not None:
@@ -3341,6 +3349,9 @@ def gaussian_beams(
         every validation number of this module.
     :return: A :class:`GaussianBeamResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``frequency_hz``, ``max_range``, ``range_step`` or
+        ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
+        or an array where a count goes.
     :warns NumericalPropagationWarning: when the source sits on a kink of the profile
         (Sect. 3.7.4's spurious horizontal jet), and when one marching step
         carries the steepest beam of the fan across more than a quarter of
@@ -3712,6 +3723,9 @@ def parabolic_equation(
     :param n_depth_points: Number of depth points (interior sine-transform grid).
     :return: A :class:`ParabolicEquationResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``frequency_hz``, ``max_range``, ``range_step`` or
+        ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
+        or an array where a count goes.
     """
     from scipy.fft import dst, idst
 

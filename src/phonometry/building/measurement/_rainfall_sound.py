@@ -92,7 +92,7 @@ __all__ = [
     "ARTIFICIAL_RAIN",
     "RAINFALL_A_WEIGHTING",
     "RAINFALL_CLASSIFICATION",
-    "RAINFALL_REFERENCE_INTENSITY_DB",
+    "RAINFALL_REFERENCE_INTENSITY_LEVELS",
     "RAINFALL_REFERENCE_LOSS_FACTOR_DB",
     "ArtificialRain",
     "RainGeneratorVerification",
@@ -259,7 +259,7 @@ RAINFALL_REFERENCE_LOSS_FACTOR_DB: Mapping[float, float] = _band_table(
 #: reference specimen under heavy rain, in dB re 1 pW/m², keyed by
 #: one-third-octave band centre frequency in Hz, 100 Hz to 5 000 Hz
 #: (ISO 10140-5:2021 Table I.1, PDF page 44, printed folio 38).
-RAINFALL_REFERENCE_INTENSITY_DB: Mapping[float, float] = _band_table(
+RAINFALL_REFERENCE_INTENSITY_LEVELS: Mapping[float, float] = _band_table(
     (45.0, 45.0, 46.0, 46.0, 47.0, 47.0, 47.0, 47.0, 47.0)
     + (46.0, 44.0, 42.0, 43.0, 46.0, 51.0, 50.0, 46.0, 44.0)
 )
@@ -388,6 +388,8 @@ def rainfall_rate(
     :param duration_s: Collection time, in seconds.
     :return: The rainfall rate, in mm/h.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``collected_volume_liters``, ``collection_area_m2`` or
+        ``duration_s`` is not a single number.
     """
     volume = require_positive(collected_volume_liters, "collected_volume_liters")
     area = require_positive(collection_area_m2, "collection_area_m2")
@@ -420,6 +422,7 @@ class RainGeneratorVerification(OwnsArrays):
 
         :raises ValueError: if ``rain_type`` is not ``"intense"`` or
             ``"heavy"``.
+        :raises TypeError: if ``rain_type`` is not a text.
         """
         require_choice(self.rain_type, "rain_type", tuple(ARTIFICIAL_RAIN))
 
@@ -546,6 +549,9 @@ def verify_rain_generator(
     :return: A :class:`RainGeneratorVerification`.
     :raises ValueError: If the rate or a sample is not positive and finite, or
         ``rain_type`` is unknown.
+    :raises TypeError: if ``rain_type`` is not a text, ``rainfall_rate_mm_h`` is not a
+        single number, or ``drop_diameters_mm`` or ``fall_velocities_m_s`` holds a text
+        or a value that is not a real number.
     """
     require_choice(rain_type, "rain_type", tuple(ARTIFICIAL_RAIN))
     rate = require_positive(rainfall_rate_mm_h, "rainfall_rate_mm_h")
@@ -673,6 +679,9 @@ def rainfall_reference_correction(
     :raises ValueError: If the inputs disagree in length, a level is not
         finite, a time or frequency is not positive, or a band is not in
         Table I.1.
+    :raises TypeError: if ``frequencies``, ``l_i_ref`` or
+        ``structural_reverberation_time`` holds a text or a value that is not a real
+        number.
     """
     freqs = (
         np.asarray(_RAIN_BANDS_HZ, dtype=np.float64)
@@ -695,7 +704,9 @@ def rainfall_reference_correction(
     eta_ref_db = _table_values(
         RAINFALL_REFERENCE_LOSS_FACTOR_DB, freqs, _outside_table_i1
     )
-    l_ic_ref = _table_values(RAINFALL_REFERENCE_INTENSITY_DB, freqs, _outside_table_i1)
+    l_ic_ref = _table_values(
+        RAINFALL_REFERENCE_INTENSITY_LEVELS, freqs, _outside_table_i1
+    )
     eta = _LOSS_FACTOR_CONSTANT / (freqs * t_s)  # Formula (I.1)
     eta_ref = 10.0 ** (eta_ref_db / 10.0)
     l_i_m_ref = level + 10.0 * np.log10(eta / eta_ref)  # Formula (I.2)
@@ -747,6 +758,7 @@ class RainfallSoundResult(OwnsArrays):
 
         :raises ValueError: if the per-band columns disagree, or ``method`` is
             neither ``"pressure"`` nor ``"intensity"``.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_ranks(self, frequencies=1, l_i=1, correction=1, l_i_norm=1)
         require_same_length(self, "frequencies", "l_i", "correction", "l_i_norm")
@@ -796,6 +808,7 @@ class RainfallSoundResult(OwnsArrays):
         :param specimen_area_m2: Area of the specimen, in m².
         :return: :math:`L_W` per band, in dB re 1 pW.
         :raises ValueError: If the area is not positive and finite.
+        :raises TypeError: if ``specimen_area_m2`` is not a single number.
         """
         area = require_positive(specimen_area_m2, "specimen_area_m2")
         return np.asarray(self.l_i + 10.0 * np.log10(area), dtype=np.float64)
@@ -855,7 +868,7 @@ def rainfall_sound(
     frequencies: ArrayLike,
     volume: float,
     excited_area_m2: float,
-    background_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
 ) -> RainfallSoundResult:
     r"""Sound intensity level of a specimen under artificial rain (K.4.2).
@@ -890,14 +903,17 @@ def rainfall_sound(
     :param volume: Volume of the test room, in m³.
     :param excited_area_m2: Area of the specimen directly excited by the rain,
         :math:`S_\mathrm{e}`, in m².
-    :param background_db: Background noise level per band, in dB, or ``None``.
+    :param background_levels: Background noise level per band, in dB, or ``None``.
         When given, each position's level is corrected by ISO 10140-4
         (:func:`~phonometry.building.background_correction`) before the sum.
     :param reference_correction: The laboratory correction: a
         :class:`RainfallReferenceCorrection` covering every band, or
         :math:`\Delta L_{I\mathrm{c}}` per band in dB, or ``None``.
     :return: A :class:`RainfallSoundResult`.
-    :raises TypeError: If ``l_pr`` holds an element that is not a number.
+    :raises TypeError: If ``l_pr``, ``reverberation_time``, ``frequencies``,
+        ``background_levels`` or a per-band ``reference_correction`` holds an
+        element that is not a number, or ``volume`` or ``excited_area_m2`` is
+        not one number.
     :raises ValueError: If the shapes disagree, a level is not finite, a time,
         frequency, volume or area is not positive, or a band has no correction.
     """
@@ -923,11 +939,11 @@ def rainfall_sound(
     )
     volume = require_positive(volume, "volume")
     area = require_positive(excited_area_m2, "excited_area_m2")
-    if background_db is not None:
-        background = require_finite_array(background_db, "background_db")
+    if background_levels is not None:
+        background = require_finite_array(background_levels, "background_levels")
         require_equal_shapes(
             "rainfall_sound",
-            {"frequencies": freqs.shape, "background_db": background.shape},
+            {"frequencies": freqs.shape, "background_levels": background.shape},
             "band",
         )
         levels = np.vstack([background_correction(row, background) for row in levels])
@@ -981,6 +997,9 @@ def rainfall_sound_from_intensity(
     :return: A :class:`RainfallSoundResult` with ``method="intensity"``.
     :raises ValueError: If the shapes disagree, a level is not finite, or a
         frequency or area is not positive.
+    :raises TypeError: if ``excited_area_m2`` or ``measuring_area_m2`` is not a single
+        number, or ``frequencies``, ``l_im`` or ``reference_correction`` holds a text or
+        a value that is not a real number.
     """
     freqs = require_positive_array(frequencies, "frequencies")
     l_im = require_finite_array(l_im, "l_im")

@@ -398,7 +398,8 @@ res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
 print(res.magnitude_db, res.phase_rad, res.coherence)
 res.plot()   # Bode magnitude/phase + coherence (needs matplotlib)
 
-freqs, gamma2 = electroacoustics.coherence(x, y, fs)
+coh = electroacoustics.coherence(x, y, fs)
+freqs, gamma2 = coh.frequencies, coh.coherence
 ```
 
 Coherence needs averaging over several Welch segments to be meaningful; a single
@@ -1794,8 +1795,10 @@ print(round(electroacoustics.loop_center_field(1.0, 10.0, width_m=14.0), 4))  # 
 exact = electroacoustics.rectangular_loop_field(1.0, 10.0, 14.0, 0.0, 0.0, 0.0)
 print(round(float(exact.h_z_a_per_m), 4))                                   # 0.0782 A/m
 
-print([round(v, 1) for v in electroacoustics.loop_dimensions(5.0)])                    # [10.3, 10.3] m
-print([round(v, 1) for v in electroacoustics.loop_dimensions(5.0, aspect_ratio=3.0)])  # [7.4, 22.1] m
+square = electroacoustics.loop_dimensions(5.0)
+print(round(square.width_m, 1), round(square.length_m, 1))  # 10.3 10.3 (m)
+oblong = electroacoustics.loop_dimensions(5.0, aspect_ratio=3.0)
+print(round(oblong.width_m, 1), round(oblong.length_m, 1))  # 7.4 22.1 (m)
 
 print([round(electroacoustics.loop_current(10.0 * r, 10.0), 2) for r in (1, 1.5, 2, 3, 5)])
 # [4.88, 5.63, 6.04, 6.41, 6.64] A: Figure H.1 at a 10 m shorter side
@@ -1920,7 +1923,7 @@ print(round(20 * np.log10(np.ptp(noise) / np.sqrt(np.mean(noise**2))), 2))  # 18
 
 combi = 0.4 * electroacoustics.combi_signal(fs, n_cycles=2, seed=7)  # sine bursts at 400 mA/m
 reading = electroacoustics.field_strength_meter(combi, fs)
-print(round(reading.max_level, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
+print(round(reading.max_level, 2), round(reading.equivalent_level, 2))  # 0.0 -3.98 dB
 ```
 
 6.4 NOTE 2, and NOTE 3 to 5.4.8.2 of IEC 62489-1, print the theoretical
@@ -2758,7 +2761,7 @@ response = electroacoustics.coupler_frequency_response(
 crosstalk = electroacoustics.crosstalk_attenuation(
     np.full(frequencies.size, 100.0), 52.0 - 12.0 * np.log10(frequencies / 1000.0) ** 2, frequencies=frequencies
 )
-print(response.covers_rated_range, round(crosstalk.min_db, 1))  # True 48.0
+print(response.covers_rated_range, round(crosstalk.min_attenuation, 1))  # True 48.0
 ```
 
 None of these responses has a tolerance: "It is not at present possible to set
@@ -2827,8 +2830,8 @@ field = 70.0 + rng.normal(0.0, 0.4, (8, 2, frequencies.size))
 earphone = field + shape_db + rng.normal(0.0, 0.6, (8, 2, frequencies.size))
 ear_canal = electroacoustics.ear_canal_frequency_response(earphone, field, frequencies=frequencies)
 band = list(frequencies).index(2500.0)
-print(comparison.meets_panel_size, round(comparison.mean_db[band], 1))  # True 2.8
-print(round(ear_canal.mean_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True
+print(comparison.meets_panel_size, round(comparison.mean_response_db[band], 1))  # True 2.8
+print(round(ear_canal.mean_response_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True
 print(comparison.reference_frequency_hz, ear_canal.reference_frequency_hz)  # 1000.0 500.0
 ```
 

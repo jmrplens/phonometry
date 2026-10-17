@@ -48,7 +48,7 @@ from __future__ import annotations
 from dataclasses import KW_ONLY, dataclass
 from math import sqrt
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -444,13 +444,6 @@ class BandUncertainty(RichDisplay):
     _: KW_ONLY
     upper_limit: bool = False
 
-    def to_arrays(self) -> tuple[np.ndarray, np.ndarray]:
-        """Return ``(frequencies, uncertainties)`` as float :class:`numpy.ndarray`."""
-        return (
-            np.asarray(self.frequencies, dtype=float),
-            np.asarray(self.uncertainties, dtype=float),
-        )
-
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
     ) -> Axes:
@@ -527,6 +520,7 @@ def band_uncertainty(
     :param situation: Measurement situation ``"A"``, ``"B"`` or ``"C"`` (Clause 5.2).
     :param upper_limit: Select the ``σR95`` upper limit (airborne, situation A).
     :raises ValueError: Unknown measurand, or a situation not tabulated for it.
+    :raises TypeError: if ``measurand`` is not a text.
     """
     # The measurand is validated on its own first, so an unknown one is
     # refused by name instead of being misreported by the ``upper_limit``
@@ -627,6 +621,7 @@ def insulation_coverage_factor(
         ``0.84, 0.90, 0.95, 0.975, 0.995, 0.9995``.
     :param one_sided: Use the one-sided column (conformity checks, Formulae 4/5).
     :raises ValueError: Coverage probability not tabulated in Table 8.
+    :raises TypeError: if ``coverage`` is not a single number.
     """
     require_scalar(coverage, "coverage")
     table = _COVERAGE_ONE_SIDED if one_sided else _COVERAGE_TWO_SIDED
@@ -658,6 +653,7 @@ def insulation_expanded_uncertainty(
         :func:`insulation_coverage_factor`).
     :param one_sided: Use the one-sided coverage factor (conformity checks).
     :raises ValueError: Negative ``u`` or an untabulated coverage probability.
+    :raises TypeError: if ``u`` is not a single number.
     """
     require_scalar(u, "u")
     if u < 0:
@@ -728,6 +724,8 @@ def prediction_input_uncertainty(
     :param n: Number of measurements of the product (:math:`n \ge 1`).
     :raises ValueError: A non-integer or non-positive ``n``, or a negative
         standard deviation.
+    :raises TypeError: if ``sigma_product`` or ``sigma_reproducibility`` is not a single
+        number, or ``n`` is a flag, a text or an array where a count goes.
     """
     require_scalar(sigma_product, "sigma_product")
     require_scalar(sigma_reproducibility, "sigma_reproducibility")
@@ -750,6 +748,7 @@ def reduce_by_independent_measurements(u: float, m: int) -> float:
     :param u: Standard uncertainty of a single measurement, in dB (non-negative).
     :param m: Number of independent measurements (:math:`m \ge 1`).
     :raises ValueError: Non-positive ``m`` or negative ``u``.
+    :raises TypeError: if ``m`` or ``u`` is not a single number.
     """
     require_scalar(m, "m")
     require_scalar(u, "u")
@@ -838,34 +837,41 @@ class RequirementConformity(RichDisplay):
     from the three values and the side, so they are not fields: a record cannot
     be built to conform with a value the clause refuses.
 
-    :ivar value_db: The best estimate :math:`y`, in dB.
+    :ivar rating: The best estimate :math:`y`, in dB.
     :ivar expanded_uncertainty_db: :math:`U`, worked with the one-sided
         coverage factor, in dB.
-    :ivar requirement_db: :math:`Y_\mathrm{required}`, in dB.
+    :ivar required_rating: :math:`Y_\mathrm{required}`, in dB.
     :ivar bound: ``"minimum"`` when the requirement is a value to exceed (an
         apparent sound reduction index ``R'w``) or ``"maximum"`` when it is
         one to stay under (a normalized impact level ``L'n,w``).
     """
 
-    value_db: float
+    #: The rating and its requirement are single-number ratings of ISO 717
+    #: (``R'w``, ``L'n,w``), in dB like the ratings of :mod:`.ratings`.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"rating": "dB", "required_rating": "dB"}
+    )
+
+    rating: float
     expanded_uncertainty_db: float
-    requirement_db: float
+    required_rating: float
     _: KW_ONLY
     bound: Literal["minimum", "maximum"]
 
     def __post_init__(self) -> None:
         """Reject a side the clause does not name, or numbers it cannot judge.
 
-        :raises TypeError: For a value that is not one number, or a ``bound``
-            that is not a text.
+        :raises TypeError: For a ``rating``, ``expanded_uncertainty_db`` or
+            ``required_rating`` that is not one number, or a ``bound`` that is
+            not a text.
         :raises ValueError: For a ``bound`` other than ``"minimum"`` and
             ``"maximum"``, a value that is not finite, or a negative
             uncertainty.
         """
         require_choice(self.bound, "bound", _BOUNDS)
-        require_finite(self.value_db, "value_db")
+        require_finite(self.rating, "rating")
         require_finite(self.expanded_uncertainty_db, "expanded_uncertainty_db")
-        require_finite(self.requirement_db, "requirement_db")
+        require_finite(self.required_rating, "required_rating")
         if self.expanded_uncertainty_db < 0.0:
             msg = "'expanded_uncertainty_db' must not be negative."
             raise ValueError(msg)
@@ -881,9 +887,9 @@ class RequirementConformity(RichDisplay):
         bits of the subtraction fall.
         """
         if self.bound == "minimum":
-            margin = self.value_db - self.expanded_uncertainty_db - self.requirement_db
+            margin = self.rating - self.expanded_uncertainty_db - self.required_rating
         else:
-            margin = self.requirement_db - self.value_db - self.expanded_uncertainty_db
+            margin = self.required_rating - self.rating - self.expanded_uncertainty_db
         return float(settled(margin))
 
     @property
@@ -901,9 +907,9 @@ class RequirementConformity(RichDisplay):
 
 
 def assess_requirement_conformity(
-    value_db: float,
+    rating: float,
     expanded_uncertainty_db: float,
-    requirement_db: float,
+    required_rating: float,
     *,
     bound: Literal["minimum", "maximum"],
 ) -> RequirementConformity:
@@ -917,22 +923,23 @@ def assess_requirement_conformity(
     sound reduction index ``R'w`` provably above its minimum, a normalized
     impact level ``L'n,w`` provably below its maximum.
 
-    :param value_db: The best estimate :math:`y`, in dB.
+    :param rating: The best estimate :math:`y`, in dB.
     :param expanded_uncertainty_db: :math:`U`, one-sided, in dB.
-    :param requirement_db: :math:`Y_\mathrm{required}`, in dB.
+    :param required_rating: :math:`Y_\mathrm{required}`, in dB.
     :param bound: ``"minimum"`` (Formula (5)) or ``"maximum"`` (Formula (4)).
     :return: The verdict, as a :class:`RequirementConformity`.
-    :raises TypeError: For a value that is not one number, or a ``bound`` that
-        is not a text.
+    :raises TypeError: For a ``rating``, ``expanded_uncertainty_db`` or
+        ``required_rating`` that is not one number, or a ``bound`` that is not
+        a text.
     :raises ValueError: For an unknown ``bound``, a value that is not finite or
         a negative uncertainty.
     """
     return RequirementConformity(
-        value_db=float(require_finite(value_db, "value_db")),
+        rating=float(require_finite(rating, "rating")),
         expanded_uncertainty_db=float(
             require_finite(expanded_uncertainty_db, "expanded_uncertainty_db")
         ),
-        requirement_db=float(require_finite(requirement_db, "requirement_db")),
+        required_rating=float(require_finite(required_rating, "required_rating")),
         bound=bound,
     )
 

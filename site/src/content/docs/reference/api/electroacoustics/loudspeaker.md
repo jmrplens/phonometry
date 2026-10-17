@@ -100,6 +100,7 @@ distortion and directivity data feed the corresponding report panels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `distance`, `input_voltage_v`, `rated_impedance_ohm` or `tolerance_db` is not a single number. |
 
 ## LoudspeakerCharacteristics
 
@@ -124,7 +125,7 @@ LoudspeakerCharacteristics(
     thd_frequencies: NDArray[np.float64] | None,
     thd_percent: NDArray[np.float64] | None,
     polar_angles_deg: NDArray[np.float64] | None,
-    polar_db: NDArray[np.float64] | None,
+    polar_response_db: NDArray[np.float64] | None,
     polar_frequency: float | None,
     directivity_index: float | None,
 )
@@ -161,7 +162,7 @@ computed from the on-axis response (see the module docstring).
 | `thd_frequencies` | THD-curve frequency axis, Hz, or `None`. |
 | `thd_percent` | Total harmonic distortion, in %, or `None`. |
 | `polar_angles_deg` | Polar-response angles, in degrees, or `None`. |
-| `polar_db` | Polar response relative to the on-axis level, in dB, or `None`. |
+| `polar_response_db` | Polar response relative to the on-axis level, in dB, or `None`. |
 | `polar_frequency` | Frequency of the polar response, in Hz, or `None`. |
 | `directivity_index` | Directivity index at `polar_frequency`, in dB (23.3), or `None`. |
 

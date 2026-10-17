@@ -423,7 +423,7 @@ def test_the_reversals_kept_are_read_from_the_levels() -> None:
         True,
     ]
     assert narrowed.is_peak.tolist() == [True, False] * 4
-    assert narrowed.peaks_db.tolist() == [43.0]
+    assert narrowed.peak_levels.tolist() == [43.0]
 
 
 def test_an_automatic_threshold_is_held_to_its_reversals() -> None:
@@ -431,7 +431,7 @@ def test_an_automatic_threshold_is_held_to_its_reversals() -> None:
         [40.0, 30.0, 42.0, 31.0, 41.0, 32.0]
     )
     other = np.array([40.0, 30.0, 42.0, 31.0, 41.0, 33.0])
-    with pytest.raises(ValueError, match="mean_db"):
+    with pytest.raises(ValueError, match="mean_level"):
         dataclasses.replace(result, reversal_levels=other)
 
 
@@ -466,7 +466,7 @@ def test_a_sweep_threshold_is_held_to_its_reversals() -> None:
     result = hearing.sweep_audiometry_threshold(
         levels, reversal_frequencies=frequencies
     )
-    with pytest.raises(ValueError, match="mean_db"):
+    with pytest.raises(ValueError, match="mean_level"):
         dataclasses.replace(result, reversal_levels=levels + 1.0)
 
 

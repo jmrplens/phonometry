@@ -66,6 +66,12 @@ $$
 
 **Returns:** Lden in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `lday`, `levening` or `lnight` is not a single number. |
+
 ## ldn
 
 ```python
@@ -92,3 +98,9 @@ $$
 | `period_hours` | `(t_day, t_night)`, the duration of each period in hours, summing to 24. Default (15, 9). |
 
 **Returns:** Ldn in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `lday` or `lnight` is not a single number. |

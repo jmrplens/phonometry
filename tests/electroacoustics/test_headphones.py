@@ -521,7 +521,7 @@ def test_crosstalk_is_the_difference_of_the_levels() -> None:
         other_level=np.linspace(40.0, 60.0, BANDS.size),
     )
     np.testing.assert_allclose(result.attenuation, np.linspace(60.0, 40.0, BANDS.size))
-    assert result.min_db == pytest.approx(40.0)
+    assert result.min_attenuation == pytest.approx(40.0)
 
 
 # ---------------------------------------------------------------------------
@@ -547,7 +547,9 @@ def test_field_comparison_response_is_the_quotient_referred_to_1_khz() -> None:
         result.response_db, quotient - quotient[:, [reference]], atol=1e-12
     )
     assert np.all(result.response_db[:, reference] == 0.0)
-    np.testing.assert_allclose(result.mean_db, np.mean(result.response_db, axis=0))
+    np.testing.assert_allclose(
+        result.mean_response_db, np.mean(result.response_db, axis=0)
+    )
     np.testing.assert_allclose(
         result.standard_deviation_db, np.std(result.response_db, axis=0, ddof=1)
     )
@@ -579,7 +581,7 @@ def test_sixteen_persons_qualify_a_substitution_reference() -> None:
         frequencies=BANDS, field_level=70.0, source_emf_v=emf, field="diffuse"
     )
     assert result.qualifies_as_reference
-    np.testing.assert_allclose(result.mean_db, 0.0, atol=1e-12)
+    np.testing.assert_allclose(result.mean_response_db, 0.0, atol=1e-12)
 
 
 def test_seven_persons_are_too_few() -> None:
@@ -630,7 +632,7 @@ def test_ear_canal_response_is_formula_1() -> None:
     np.testing.assert_allclose(
         result.response_db, difference - difference[:, [reference]], atol=1e-12
     )
-    np.testing.assert_allclose(result.mean_db, result.response_db.mean(axis=0))
+    np.testing.assert_allclose(result.mean_response_db, result.response_db.mean(axis=0))
     np.testing.assert_allclose(
         result.standard_deviation_db, np.std(result.response_db, axis=0, ddof=1)
     )
@@ -889,12 +891,16 @@ def test_comparison_plot_draws_the_mean_and_the_spread(
     )
     ax = result.plot(language=language, iec_scale=iec_scale)
     heights = [patch.get_height() for patch in ax.patches]
-    np.testing.assert_allclose(heights, result.mean_db)
+    np.testing.assert_allclose(heights, result.mean_response_db)
     bars = ax.containers[1]
     segments = bars.lines[2][0].get_segments()
     spread = result.standard_deviation_db
-    np.testing.assert_allclose([seg[0][1] for seg in segments], result.mean_db - spread)
-    np.testing.assert_allclose([seg[1][1] for seg in segments], result.mean_db + spread)
+    np.testing.assert_allclose(
+        [seg[0][1] for seg in segments], result.mean_response_db - spread
+    )
+    np.testing.assert_allclose(
+        [seg[1][1] for seg in segments], result.mean_response_db + spread
+    )
     if iec_scale:
         # Ten bands to the decade, so 50 dB is ten bar positions long.
         assert ax.get_aspect() == pytest.approx(10.0 / 50.0)
@@ -920,11 +926,11 @@ def test_ear_canal_plot_draws_the_persons_the_mean_and_the_spread(
     for line, response in zip(persons, result.response_db, strict=True):
         np.testing.assert_array_equal(line.get_ydata(), response)
     np.testing.assert_array_equal(
-        ax.lines[result.n_persons].get_ydata(), result.mean_db
+        ax.lines[result.n_persons].get_ydata(), result.mean_response_db
     )
     band = ax.collections[0].get_paths()[0].vertices[:, 1]
-    lowest = result.mean_db - result.standard_deviation_db
-    highest = result.mean_db + result.standard_deviation_db
+    lowest = result.mean_response_db - result.standard_deviation_db
+    highest = result.mean_response_db + result.standard_deviation_db
     assert float(np.min(band)) == pytest.approx(float(np.min(lowest)))
     assert float(np.max(band)) == pytest.approx(float(np.max(highest)))
     if iec_scale:

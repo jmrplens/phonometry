@@ -145,6 +145,7 @@ coefficient in the annex is transcribed and none of them warns.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band that is not a nominal centre, a diameter outside 0,15 m to 2 m, a velocity beyond the shield's limit (60 m/s for the sampling tube, 20 m/s for the nose cone, 15 m/s for the foam ball), a velocity beyond 40 m/s asked for in a band above 10 kHz, where Annex A tabulates no coefficients, or a non-positive speed of sound. |
+| TypeError | if `shield` is not a text, `duct_diameter_m`, `flow_velocity` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## in_duct_reproducibility
 
@@ -174,6 +175,7 @@ carries those bands says so in `information_only_band`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band that is not a nominal centre. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## InDuctSoundPowerResult
 
@@ -329,3 +331,4 @@ Table 2, is carried per band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels of the wrong shape or not finite, a band that is not a nominal centre, a diameter, velocity or temperature that is not a real number or is outside the scope of the standard, a velocity beyond 40 m/s asked for in a band above 10 kHz, a correction that is neither a scalar nor one value per band, or a non-positive static pressure. |
+| TypeError | if `shield` is not a text, `duct_diameter_m`, `flow_velocity`, `static_pressure_kpa` or `temperature_c` is not a single number, or `frequencies`, `microphone_correction` or `shield_correction` holds a text or a value that is not a real number. |

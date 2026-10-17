@@ -109,6 +109,12 @@ bound (Equation (17.54)).
 
 **Returns:** The equivalent absorption area per table `A_tab`, m2.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `directivity` or `speech_to_noise` is not a single number. |
+
 ## COMMUNICATION_SNR_DB
 
 *Constant* (`float`).
@@ -147,6 +153,12 @@ Equation (17.50) at the listener across the table.
 | `directivity` | Talker directivity factor `Q` (default [`TALKER_DIRECTIVITY`](/phonometry/reference/api/rooms/crowd-noise/#talker_directivity)). |
 
 **Returns:** A [`CrowdNoiseResult`](/phonometry/reference/api/rooms/crowd-noise/#crowdnoiseresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `directivity` or `distance` is not a single number. |
 
 ## crowd_noise_level
 
@@ -275,6 +287,12 @@ across the table receives.
 
 **Returns:** The direct-field sound pressure level, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `directivity` is not a single number. |
+
 ## speech_to_noise_ratio
 
 ```python
@@ -301,6 +319,12 @@ number of talkers appears: a busier room brings its own absorption with it.
 | `directivity` | Talker directivity factor `Q`. |
 
 **Returns:** The speech-to-noise ratio, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `directivity` is not a single number. |
 
 ## TALKER_DIRECTIVITY
 

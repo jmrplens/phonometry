@@ -232,6 +232,8 @@ def read_blocks(
         block that reaches the end of it).
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
+    :raises TypeError: if ``calibration_factor`` is not a single number, or
+        ``block_size`` or ``overlap`` is a flag, a text or an array where a count goes.
     """
     require_scalar(block_size, "block_size")
     block_size = require_count(block_size, "block_size", at_least=None)

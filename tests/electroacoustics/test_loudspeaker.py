@@ -536,7 +536,7 @@ def test_a_narrow_curve_is_still_fine_where_no_panel_scales_by_it() -> None:
         ("spl", float("nan")),
         ("impedance_modulus_ohm", float("nan")),
         ("thd_percent", float("nan")),
-        ("polar_db", float("nan")),
+        ("polar_response_db", float("nan")),
     ],
 )
 def test_a_non_finite_curve_is_refused_where_the_result_is_built(

@@ -100,6 +100,7 @@ standard normal cumulative distribution at the protection performance
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the grid is not two-dimensional or holds fewer than two subjects, if any value is not finite, if `performance` is not one Table 1 tabulates, or if `frequencies` does not match the grid. |
+| TypeError | if `performance` is a flag, a text or an array where a count goes. |
 
 :::note
 Annex A prints its `APV` row as the difference of the *rounded*
@@ -266,6 +267,7 @@ reduces the attenuation (Formulas (3) to (11)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the grid is not two-dimensional, holds fewer than two subjects, carries neither seven nor eight bands, or if `performance` is not one Table 1 tabulates. |
+| TypeError | if `performance` is a flag, a text or an array where a count goes. |
 
 ## HML_REFERENCE_C_MINUS_A
 
@@ -581,6 +583,7 @@ what the `HML` method's three values recover.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the grid is not two-dimensional, holds fewer than two subjects, carries neither seven nor eight bands, or if `performance` is not one Table 1 tabulates. |
+| TypeError | if `performance` is a flag, a text or an array where a count goes. |
 
 ## SNRRatingResult
 

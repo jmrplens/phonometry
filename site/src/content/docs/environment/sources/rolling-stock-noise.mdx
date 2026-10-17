@@ -478,7 +478,7 @@ average = environment.average_roughness_spectra(spectra)
 small = environment.check_small_roughness_deviations(
     average, noise, frequencies=bands, speed_kmh=160.0
 )
-print(round(small.impact_db, 2), small.passes)
+print(round(small.level_increase, 2), small.passes)
 # 0.57 True
 check = environment.check_reference_track(
     spectra, decay, speed_kmh=160.0, curve_radius_m=6000.0,

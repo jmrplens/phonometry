@@ -477,9 +477,10 @@ with it.
 
 ```python
 # The empty slit, at the design frequency and slit height.
-rho_e, k_e = materials.slit_effective_properties(
+channel = materials.slit_effective_properties(
     np.array([300.0]), slit_height_m=design.slit_height_m
 )
+rho_e, k_e = channel.effective_density, channel.bulk_modulus
 print(np.round(rho_e, 3))      # [1.355-0.203j]  against free air 1.205 kg/m^3
 print(f"{k_e[0]:.3e}")         # 1.332e+05+7.725e+03j  against adiabatic 1.419e+05 Pa
 

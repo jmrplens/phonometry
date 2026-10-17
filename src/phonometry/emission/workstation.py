@@ -378,6 +378,7 @@ def local_environmental_correction(ratio: ArrayLike) -> float | NDArray[np.float
         one value per band.
     :return: :math:`K_3` in decibels, of the same shape.
     :raises ValueError: If any value is not strictly positive.
+    :raises TypeError: if ``ratio`` holds a text or a value that is not a real number.
     """
     z = require_positive_array(ratio, "ratio")
     correction = np.where(
@@ -456,6 +457,8 @@ def environmental_ratio_from_absorption(
         (default 0).
     :return: The ratio :math:`z`.
     :raises ValueError: If either area is not strictly positive.
+    :raises TypeError: if ``measurement_surface_m2`` is not a single number, or
+        ``absorption_area`` holds a text or a value that is not a real number.
     """
     a = require_positive_array(absorption_area, "absorption_area")
     s_m = require_positive(measurement_surface_m2, "measurement_surface_m2")
@@ -533,7 +536,7 @@ def operating_standard_deviation(levels: ArrayLike) -> float:
 
 
 def total_standard_deviation(
-    reproducibility_db: float, operating_db: float = 0.0
+    reproducibility_db: float, sigma_omc_db: float = 0.0
 ) -> float:
     r"""Total standard deviation of the determination.
 
@@ -547,13 +550,15 @@ def total_standard_deviation(
     the method and the other of the machine.
 
     :param reproducibility_db: :math:`\sigma_{R0}` of the method, in decibels.
-    :param operating_db: :math:`\sigma_\mathrm{omc}` of the machine, in decibels
+    :param sigma_omc_db: :math:`\sigma_\mathrm{omc}` of the machine, in decibels
         (default 0, a source whose emission does not wander).
     :return: :math:`\sigma_\mathrm{tot}` in decibels.
     :raises ValueError: If either component is negative.
+    :raises TypeError: if ``reproducibility_db`` or ``sigma_omc_db`` is not a single
+        number.
     """
     sigma_r0 = require_non_negative(reproducibility_db, "reproducibility_db")
-    sigma_omc = require_non_negative(operating_db, "operating_db")
+    sigma_omc = require_non_negative(sigma_omc_db, "sigma_omc_db")
     return math.hypot(sigma_r0, sigma_omc)
 
 
@@ -575,6 +580,8 @@ def emission_expanded_uncertainty(
         :data:`DEFAULT_COVERAGE_FACTOR`).
     :return: :math:`U` in decibels.
     :raises ValueError: If either argument is negative.
+    :raises TypeError: if ``coverage_factor`` or ``total_standard_deviation_db`` is not
+        a single number.
     """
     sigma = require_non_negative(
         total_standard_deviation_db, "total_standard_deviation_db"
@@ -603,6 +610,8 @@ def subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float:
     :return: The level of the whole interval, in decibels.
     :raises ValueError: If the two are of different lengths, or a duration is
         not strictly positive.
+    :raises TypeError: if ``durations_s`` holds a text or a value that is not a real
+        number.
     """
     levels = np.asarray(levels, dtype=np.float64).ravel()
     durations = require_positive_array(durations_s, "durations_s").ravel()

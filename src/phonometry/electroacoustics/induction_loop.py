@@ -432,7 +432,7 @@ class FieldStrengthReading(OwnsArrays):
     :ivar max_level: The maximum indication over the record, the "maximum
         value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re
         400 mA/m.
-    :ivar equivalent_db: The level of the mean square over the whole record,
+    :ivar equivalent_level: The level of the mean square over the whole record,
         in dB re 400 mA/m.
     """
 
@@ -441,7 +441,7 @@ class FieldStrengthReading(OwnsArrays):
     times: np.ndarray
     levels: np.ndarray
     max_level: float
-    equivalent_db: float
+    equivalent_level: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -480,6 +480,9 @@ def field_strength_meter(
     :param weighting: ``"Z"`` for the flat response of 6.1.2, ``"A"`` for the
         A-weighted noise measurements of 7.1 and 10.4.6.
     :return: A :class:`FieldStrengthReading`.
+    :raises TypeError: if ``weighting`` is not a text, ``fs`` is a flag, a text or an
+        array where a count goes, or ``x`` holds a text or a value that is not a real
+        number.
     """
     from ..filters.weighting import time_weighting, weighting_filter
 
@@ -503,7 +506,7 @@ def field_strength_meter(
         times=read_only(np.arange(record.size, dtype=np.float64) / rate),
         levels=read_only(levels),
         max_level=float(np.max(levels)),
-        equivalent_db=10.0 * math.log10(equivalent / reference_square),
+        equivalent_level=10.0 * math.log10(equivalent / reference_square),
     )
 
 
@@ -529,6 +532,8 @@ def band_limit_response(frequencies: ArrayLike) -> np.ndarray:
 
     :param frequencies: Frequencies, in hertz.
     :return: The response, in dB.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(frequencies, "frequencies")
     low, high = _BAND_LIMIT_HZ
@@ -584,6 +589,8 @@ def loop_test_noise(
     :param seed: Seed for the noise generator; the same seed reproduces the
         same record.
     :return: The signal.
+    :raises TypeError: if ``duration_s`` or ``rms`` is not a single number, or ``fs`` is
+        a flag, a text or an array where a count goes.
     """
     rate = require_count(fs, "fs")
     duration = require_positive(duration_s, "duration_s")
@@ -640,6 +647,8 @@ def combi_signal(
     :param n_cycles: Number of burst-and-noise cycles.
     :param seed: Seed for the noise generator.
     :return: The signal, starting with a sine burst.
+    :raises TypeError: if ``noise_s`` or ``sine_s`` is not a single number, or ``fs`` or
+        ``n_cycles`` is a flag, a text or an array where a count goes.
     """
     rate = require_count(fs, "fs")
     if rate <= 2 * _BAND_LIMIT_HZ[1]:
@@ -715,6 +724,7 @@ def small_volume_measurement_points(layout: str) -> np.ndarray:
     :return: The points, shape ``(heights, points, 3)``: :math:`x` across,
         :math:`y` away from the reference into the area where people stand,
         :math:`z` the height above the floor, all in metres.
+    :raises TypeError: if ``layout`` is not a text.
     """
     name = require_choice(layout, "layout", tuple(_LAYOUT_HEIGHTS))
     plan = np.array(_PLAN_POINTS_M[name], dtype=np.float64)
@@ -838,6 +848,8 @@ def assess_background_noise(
     :param noise_is_tonal: The noise has a significant undesirable tonal
         quality and is not mostly at low frequencies.
     :return: A :class:`BackgroundNoiseAssessment`.
+    :raises TypeError: if ``noise_levels`` holds a text or a value that is not a real
+        number.
     """
     levels = require_finite_array(noise_levels, "noise_levels")
     return BackgroundNoiseAssessment(
@@ -863,16 +875,16 @@ class LoopRequirement(RichDisplay):
         (8.3.7), ``"system_noise"`` (10.4.7), ``"field_strength_range"`` or
         ``"standing_area"`` (9.5).
     :ivar clause: The subclause that states it, as amended.
-    :ivar values_db: The judged values, in dB.
-    :ivar lower_db: The lower limit of each, in dB.
-    :ivar upper_db: The upper limit of each, in dB.
+    :ivar levels: The judged values, in dB.
+    :ivar lower_limits_db: The lower limit of each, in dB.
+    :ivar upper_limits_db: The upper limit of each, in dB.
     """
 
     name: str
     clause: str
-    values_db: tuple[float, ...]
-    lower_db: tuple[float, ...]
-    upper_db: tuple[float, ...]
+    levels: tuple[float, ...]
+    lower_limits_db: tuple[float, ...]
+    upper_limits_db: tuple[float, ...]
 
     @property
     def margins_db(self) -> tuple[float, ...]:
@@ -887,7 +899,7 @@ class LoopRequirement(RichDisplay):
         return tuple(
             float(settled(min(value - low, high - value))) + 0.0
             for value, low, high in zip(
-                self.values_db, self.lower_db, self.upper_db, strict=True
+                self.levels, self.lower_limits_db, self.upper_limits_db, strict=True
             )
         )
 
@@ -903,7 +915,7 @@ class LoopRequirement(RichDisplay):
         Judged on the settled :attr:`margins_db`, so an edge reached from
         decimal readings passes.
         """
-        return bool(self.values_db) and all(
+        return bool(self.levels) and all(
             is_at_most(0.0, margin) for margin in self.margins_db
         )
 
@@ -1027,9 +1039,9 @@ def _band_requirement(
     return LoopRequirement(
         name=name,
         clause=clause,
-        values_db=flat,
-        lower_db=(low,) * len(flat),
-        upper_db=(high,) * len(flat),
+        levels=flat,
+        lower_limits_db=(low,) * len(flat),
+        upper_limits_db=(high,) * len(flat),
     )
 
 
@@ -1129,6 +1141,8 @@ def verify_induction_loop_system(
         tonal quality and is not mostly at low frequencies, which withholds
         the 22 dB relaxation of 7.2 (:func:`assess_background_noise`).
     :return: An :class:`InductionLoopVerification`.
+    :raises TypeError: if ``specified_level`` is not a single number, or ``frequencies``
+        or ``system_noise_levels`` holds a text or a value that is not a real number.
     """
     levels = _levels(field_strength_levels, "field_strength_levels")
     specified = require_finite(specified_level, "specified_level")
@@ -1181,9 +1195,9 @@ def verify_induction_loop_system(
             LoopRequirement(
                 name="system_noise",
                 clause="10.4.7",
-                values_db=tuple(float(v) for v in on),
-                lower_db=(-math.inf,) * on.size,
-                upper_db=upper,
+                levels=tuple(float(v) for v in on),
+                lower_limits_db=(-math.inf,) * on.size,
+                upper_limits_db=upper,
             )
         )
     return InductionLoopVerification(
@@ -1289,6 +1303,8 @@ def verify_small_volume_system(
     :return: An :class:`InductionLoopVerification`.
     :raises ValueError: for a fixed layout's levels of the wrong shape, or a
         useful volume without a point at a height of 9.2 or 9.3.
+    :raises TypeError: if ``layout`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     name = require_choice(layout, "layout", _SMALL_VOLUME_LAYOUTS)
     levels = _levels(field_strength_levels, "field_strength_levels")
@@ -1530,6 +1546,8 @@ def verify_amplifier_overload(
         ``None`` for a flat current, which is what a current-drive amplifier
         delivers (E.3).
     :return: An :class:`AmplifierOverloadVerification`.
+    :raises TypeError: if ``program`` is not a text, or ``compliance_voltage_v`` or
+        ``required_current_a`` is not a single number.
     """
     required = require_positive(required_current_a, "required_current_a")
     compliance = require_positive(compliance_voltage_v, "compliance_voltage_v")

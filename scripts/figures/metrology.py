@@ -236,10 +236,10 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
         static_pressures_kpa=[100.9, 100.7],
         air_temperatures_c=[22.8, 23.3],
         relative_humidities_percent=[48.0, 46.0],
-        calibration_check_initial_db=93.8,
-        calibration_check_adjusted_db=94.0,
-        self_noise_microphone_db=16.9,
-        self_noise_electrical_db={"A": 11.8, "C": 13.9, "Z": 19.2},
+        calibration_check_initial_level=93.8,
+        calibration_check_adjusted_level=94.0,
+        microphone_self_noise_level=16.9,
+        electrical_self_noise_levels={"A": 11.8, "C": 13.9, "Z": 19.2},
         acoustic_weighting_deviations_db=[0.3, -0.9],
         acoustic_weighting_uncertainties_db=[0.28, 0.45],
         electrical_weighting_deviations_db={
@@ -257,7 +257,7 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
         long_term_stability_db=0.04,
         long_term_stability_uncertainty_db=0.07,
         linear_operating_range_db=[40.0, 120.0],
-        linearity_starting_point_db=94.0,
+        linearity_starting_level=94.0,
         linearity_levels=[
             *(94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0),
             *(89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0),
@@ -817,7 +817,8 @@ def generate_uncertainty(output_dir: str) -> None:
     mc = ph.metrology.monte_carlo(
         model, quantities, n_trials=1_000_000, coverage=0.95, seed=1
     )
-    k, big = result.expanded(0.95)
+    expanded = result.expanded(0.95)
+    k, big = expanded.coverage_factor, expanded.expanded_uncertainty
 
     _fig, (ax_b, ax_m) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
@@ -1179,7 +1180,8 @@ def generate_uncertainty_gum_vs_mc(output_dir: str) -> None:
             seed=1,
             keep_samples=True,
         )
-        _k, big = gum.expanded(0.95)
+        expanded = gum.expanded(0.95)
+        _k, big = expanded.coverage_factor, expanded.expanded_uncertainty
         # Asked for with `keep_samples=True` above. The type is optional
         # because callers that only want the interval do not pay for them.
         samples = np.asarray(mc.samples if mc.samples is not None else [])
@@ -1625,7 +1627,8 @@ def generate_free_field_adjustment(output_dir: str) -> None:
     from phonometry import filters, metrology
 
     f3 = metrology.exact_frequencies(63, 16000, fraction=3)
-    nominal, lower, upper = filters.weighting_class_limits(1)
+    limits = filters.weighting_class_limits(1)
+    nominal, lower, upper = limits.frequencies, limits.lower, limits.upper
     band = (nominal >= 63) & (nominal <= 16000)
     tolerance = np.minimum(upper, -lower)[band]
     x = f3 / 1000
@@ -1633,7 +1636,7 @@ def generate_free_field_adjustment(output_dir: str) -> None:
     result = metrology.adjustment_value(
         frequencies=f3,
         free_field_indicated_level=94.0 + response,
-        calibrator_reading_db=94.35,
+        calibrator_indicated_level_before=94.35,
         calibrator_level=94.0,
         tolerance_db=tolerance,
     )

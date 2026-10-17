@@ -195,8 +195,10 @@ is drawn in [Filter Class Verification](/phonometry/signals/filters/filter-compl
 import matplotlib.pyplot as plt
 import numpy as np
 
-freqs, lower1, upper1 = filters.weighting_class_limits(1)
-_, lower2, upper2 = filters.weighting_class_limits(2)
+limits = filters.weighting_class_limits(1)
+freqs, lower1, upper1 = limits.frequencies, limits.lower, limits.upper
+limits = filters.weighting_class_limits(2)
+lower2, upper2 = limits.lower, limits.upper
 lo1, lo2 = np.clip(lower1, -7, 7), np.clip(lower2, -7, 7)
 
 fig, ax = plt.subplots(figsize=(10, 6.5))

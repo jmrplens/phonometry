@@ -64,13 +64,15 @@ def test_silencer_results_retain_geometry_and_draw() -> None:
     }
 
 
-def test_silencer_hand_built_refuses() -> None:
-    result = pm.noise_control.expansion_chamber(FREQ, 0.3, 0.03, 0.005)
+def test_a_silencer_result_holds_exactly_one_geometry() -> None:
+    """A named device holds its constructor geometry and no chain; a result
+    with neither has nothing to draw, and one with both two things to draw.
+    """
     import dataclasses
 
-    bare = dataclasses.replace(result, geometry=None)
-    with pytest.raises(ValueError, match="does not retain its geometry"):
-        bare.plot_geometry()
+    result = pm.noise_control.expansion_chamber(FREQ, 0.3, 0.03, 0.005)
+    with pytest.raises(TypeError, match="exactly one of 'geometry'"):
+        dataclasses.replace(result, geometry=None)
 
 
 #: A 1 Hz grid, fine enough to resolve a branch tuning exactly and low

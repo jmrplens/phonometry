@@ -309,6 +309,8 @@ class ImageSourceResult(OwnsArrays):
         band it describes, counted here as the one band it is.
 
         :raises ValueError: if the image, coordinate or band axes disagree.
+        :raises TypeError: if ``amplitudes``, ``frequencies`` or ``ir`` is a single
+            number where an array goes.
         """
         owner = type(self).__name__
         require_ranks(self, times=1, distances=1, orders=1, image_positions=2)
@@ -631,6 +633,8 @@ def image_source_rir(
         outside ``[0, 1]`` or of an unsupported shape, a negative
         ``air_attenuation_per_m``, or a ``frequencies`` length that does not match
         the band count.
+    :raises TypeError: if ``duration_s`` or ``speed_of_sound`` is not a single number,
+        or ``fs`` or ``max_order`` is a flag, a text or an array where a count goes.
     """
     d = np.asarray(dimensions, dtype=np.float64)
     if d.shape != (3,):
@@ -716,6 +720,8 @@ def audible_image_count(max_order: int) -> int:
 
     :param max_order: Reflection-order cut-off ``i0`` (non-negative integer).
     :return: The audible image count.
+    :raises TypeError: if ``max_order`` is a flag, a text or an array where a count
+        goes.
     """
     i0 = require_count(max_order, "max_order", at_least=0)
     return (2 * (2 * i0**3 + 3 * i0**2 + 4 * i0)) // 3
@@ -737,6 +743,7 @@ def reflection_density(
     :param volume: Room volume ``V``, m3.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :return: ``dN/dt`` in reflections per second.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")

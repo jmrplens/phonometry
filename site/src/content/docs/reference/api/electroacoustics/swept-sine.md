@@ -119,6 +119,7 @@ capped at `f2` by the inverse filter).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid; if `ir_length` (explicit or default) cannot fit between the harmonic arrivals -- lengthen the sweep, lower `n_harmonics` or pass a shorter `ir_length`; if `method="farina"` is asked for orders beyond the anticausal span of its linear deconvolution; or if no excitation frequency has a measurable order-2 product (`f1` above `fs/4`, where every order-2 product would exceed Nyquist). |
+| TypeError | if `amplitude`, `duration_s`, `f1`, `f2` or `fs` is not a single number, or `ir_length` or `n_harmonics` is a flag, a text or an array where a count goes. |
 
 ## SweptSineDistortionResult
 
@@ -241,3 +242,9 @@ $\ln(f_2/f_1)/2$ periods of `f1`).
 | `fade` | Optional half-Hann fade-in/out as a fraction of the sweep duration (default 0.0: the analytic deconvolution assumes the unfaded sweep, and fades only reshape the band edges). Keep it small if the playback chain needs one, and pass the same value to [`swept_sine_distortion`](/phonometry/reference/api/electroacoustics/swept-sine/#swept_sine_distortion). |
 
 **Returns:** The sweep samples, length $\lceil T f_\mathrm{s} \rceil$.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `amplitude`, `duration_s`, `f1`, `f2`, `fade` or `fs` is not a single number. |

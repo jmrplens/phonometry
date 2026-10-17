@@ -251,6 +251,8 @@ class InSituSoundPowerResult(OwnsArrays):
         :raises ValueError: if ``quantity`` or ``grade`` is not one of its
             two values, ``coverage_factor`` is not positive, or any array
             disagrees with the rest in bands, positions or locations.
+        :raises TypeError: if ``quantity`` is not a text, or ``coverage_factor`` or
+            ``directivity_range_db`` is not a single number.
         """
         require_choice(self.quantity, "quantity", ("power", "energy"))
         require_positive(self.coverage_factor, "coverage_factor")
@@ -1127,6 +1129,8 @@ def sound_energy_in_situ(
         ``n_events`` is given with the 3D form or missing or not a positive
         integer with the 2D form, ``integration_time`` is not positive, or
         any of the refusals of :func:`sound_power_in_situ` applies.
+    :raises TypeError: if ``integration_time`` is not a single number, or ``n_events``
+        is a flag, a text or an array where a count goes.
     """
     arr = _finite_grid(event_levels, "event_levels", (2, 3))
     one_at_a_time, n_positions, n_events, n_bands = _event_shape(arr, n_events)

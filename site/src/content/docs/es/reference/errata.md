@@ -9001,8 +9001,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   tal como se publica en la BS EN ISO 11957:2009.
 - **Consecuencia para las tablas de la propia norma:** ninguna.
 - **Comportamiento de la biblioteca:**
-  [`MIN_SIGNAL_TO_BACKGROUND_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/_cabin_insulation.py)
-  y `PREFERRED_SIGNAL_TO_BACKGROUND_DB` llevan 6 dB y 12 dB, y el aviso
+  [`ISO11957_MIN_BACKGROUND_MARGIN_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/_cabin_insulation.py)
+  y `ISO11957_PREFERRED_BACKGROUND_MARGIN_DB` llevan 6 dB y 12 dB, y el aviso
   nombra el margen que realmente se alcanzó.
 - **Estado:** sin comunicar.
 
@@ -9470,7 +9470,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Evidencia:** verificado en la página 30 del PDF (p. 22 impresa) y en las
   páginas 31 a 34 del PDF (pp. 23 a 26 impresas) de la BS EN ISO 11819-1:2001.
 - **Comportamiento de la biblioteca:** no hace falta ninguno.
-  `SPB_ANNEX_D_SURFACES_DB` cita la tabla por su anexo y dice que va impresa
+  `SPB_ANNEX_D_SURFACE_LEVELS` cita la tabla por su anexo y dice que va impresa
   como "Table E.1".
 - **Estado:** no reportada.
 

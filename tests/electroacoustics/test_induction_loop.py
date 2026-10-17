@@ -169,7 +169,7 @@ def _sine(level: float, frequency_hz: float, seconds: float = 2.0) -> np.ndarray
 def test_meter_reads_a_sine_at_its_level() -> None:
     reading = ea.field_strength_meter(_sine(-6.0, 1000.0), FS)
     assert reading.max_level == pytest.approx(-6.0, abs=0.01)
-    assert reading.equivalent_db == pytest.approx(-6.0, abs=1e-6)
+    assert reading.equivalent_level == pytest.approx(-6.0, abs=1e-6)
     assert reading.weighting == "Z"
     assert reading.levels.shape == reading.times.shape
 
@@ -178,7 +178,7 @@ def test_meter_a_weighting_is_transparent_at_1_khz_and_19_db_down_at_100_hz() ->
     at_1k = ea.field_strength_meter(_sine(0.0, 1000.0), FS, weighting="A")
     at_100 = ea.field_strength_meter(_sine(0.0, 100.0), FS, weighting="A")
     assert at_1k.max_level == pytest.approx(0.0, abs=0.02)
-    assert at_100.equivalent_db == pytest.approx(-19.1, abs=0.1)
+    assert at_100.equivalent_level == pytest.approx(-19.1, abs=0.1)
 
 
 def test_meter_levels_are_read_only() -> None:
@@ -456,7 +456,7 @@ def test_specified_level_moves_the_window() -> None:
     specified = ref.IEC60118_4_TABLE3["pink_noise"][0]
     result = ea.verify_induction_loop_system([-8.0, -4.0], specified_level=specified)
     assert result.passes
-    assert result.requirement("field_strength_reached").lower_db == (specified,)
+    assert result.requirement("field_strength_reached").lower_limits_db == (specified,)
 
 
 def test_clause_8_judges_the_window_and_the_maximum() -> None:
@@ -467,8 +467,8 @@ def test_clause_8_judges_the_window_and_the_maximum() -> None:
     ]
     reached = result.requirement("field_strength_reached")
     assert reached.clause == "8.2.7"
-    assert reached.values_db == (0.0,)
-    assert reached.upper_db == (math.inf,)
+    assert reached.levels == (0.0,)
+    assert reached.upper_limits_db == (math.inf,)
 
 
 def test_a_spread_wholly_below_400_ma_per_m_fails_8_2_7() -> None:
@@ -493,7 +493,7 @@ def test_frequency_response_is_normalized_to_1_khz_per_point() -> None:
         response_db=[[10.0, 12.0, 9.0], [-5.0, -5.0, -8.0]],
     )
     req = result.requirement("frequency_response")
-    assert req.values_db == pytest.approx((-2.0, 0.0, -3.0, 0.0, 0.0, -3.0))
+    assert req.levels == pytest.approx((-2.0, 0.0, -3.0, 0.0, 0.0, -3.0))
     assert req.passes
 
 
@@ -504,7 +504,7 @@ def test_frequency_response_outside_the_band_is_not_judged() -> None:
         response_db=[-20.0, 0.0, 0.0, -1.0, -30.0],
     )
     assert result.passes
-    assert len(result.requirement("frequency_response").values_db) == 3
+    assert len(result.requirement("frequency_response").levels) == 3
 
 
 def test_frequency_response_beyond_3_db_fails() -> None:
@@ -546,7 +546,7 @@ def test_system_noise_on_a_quiet_site_is_held_to_minus_47_db() -> None:
         system_noise_levels=[-47.0, -48.0],
     )
     req = result.requirement("system_noise")
-    assert req.upper_db == (-47.0, -47.0)
+    assert req.upper_limits_db == (-47.0, -47.0)
     assert req.passes
     assert result.background_noise is not None
     assert result.background_noise.category == "ideal"
@@ -559,8 +559,8 @@ def test_system_noise_on_a_noisier_site_may_rise_by_1_db() -> None:
         system_noise_levels=[-39.0, -43.9],
     )
     req = result.requirement("system_noise")
-    assert req.upper_db == pytest.approx((-39.0, -44.0))
-    assert req.values_db[1] > req.upper_db[1]
+    assert req.upper_limits_db == pytest.approx((-39.0, -44.0))
+    assert req.levels[1] > req.upper_limits_db[1]
     assert result.failed == ("system_noise",)
 
 
@@ -570,7 +570,7 @@ def test_system_noise_at_exactly_47_db_uses_the_1_db_rule() -> None:
         background_noise_levels=[-47.0],
         system_noise_levels=[-46.0],
     )
-    assert result.requirement("system_noise").upper_db == pytest.approx((-46.0,))
+    assert result.requirement("system_noise").upper_limits_db == pytest.approx((-46.0,))
     assert result.passes
 
 
@@ -1138,7 +1138,7 @@ def test_requirement_plot_draws_each_value_against_its_limits(language: str) -> 
         "field_strength"
     )
     ax = requirement.plot(language=language)
-    np.testing.assert_array_equal(ax.lines[0].get_ydata(), requirement.values_db)
+    np.testing.assert_array_equal(ax.lines[0].get_ydata(), requirement.levels)
     steps = {tuple(np.unique(line.get_ydata())) for line in ax.lines[1:]}
     assert (-3.0,) in steps
     assert (3.0,) in steps

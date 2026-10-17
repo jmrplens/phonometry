@@ -375,6 +375,7 @@ def correlation_random_error(
         :math:`\rho = 0`).
     :raises ValueError: If the bandwidth or duration is not positive, or
         the coefficient is outside [-1, 1].
+    :raises TypeError: if ``coefficient`` is not a single number.
     """
     b = _positive(signal_bandwidth, "signal_bandwidth")
     t = _positive(duration_s, "duration_s")
@@ -811,6 +812,7 @@ def time_delay(
         Eq. 8.129 delay uncertainty (``None``: no error reported).
     :return: A :class:`TimeDelayResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``upsample`` is a flag, a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x", context="a time-delay estimate")
     ya = _validate_signal(y, "y", context="a time-delay estimate")
@@ -922,6 +924,7 @@ def impulse_response_delay(
     :param upsample: Integer local-upsampling factor (default 8).
     :return: Delay in seconds (relative to :math:`t = 0` or to ``reference``).
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``upsample`` is a flag, a text or an array where a count goes.
     """
     ira = _validate_signal(ir, "ir", context=_DELAY_CONTEXT)
     if reference is None:

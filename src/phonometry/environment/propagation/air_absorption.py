@@ -264,6 +264,8 @@ def air_attenuation(
         ``False`` (use ``frequencies`` verbatim).
     :return: Attenuation coefficient ``alpha``, in dB/m, with the shape of
         ``frequencies``.
+    :raises TypeError: if ``relative_humidity_percent``, ``static_pressure_kpa`` or
+        ``temperature_c`` is not a single number.
 
     .. note::
         ISO 354:2003 defers its air power-attenuation coefficient ``m`` (1/m)
@@ -438,6 +440,7 @@ class AtmosphericAttenuation(OwnsArrays):
             the coefficient and the frequency axis do not have one and the same
             shape -- a different length either way, a scalar against an array,
             or an extra axis on one of the two.
+        :raises TypeError: if ``distance`` is not a single number.
         """
         require_scalar(self.distance, "distance")
         if self.distance is not None and (

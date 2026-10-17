@@ -366,7 +366,7 @@ def test_epnl_records_show_the_units_annex_16_prints() -> None:
     assert units(integration) == {
         "epnl": "EPNdB",
         "pnltm": "TPNdB",
-        "bandsharing_adjustment": "dB",
+        "bandsharing_adjustment": "TPNdB",
         "band_limits": "",
     }
     rng = np.random.default_rng(0)
@@ -375,12 +375,13 @@ def test_epnl_records_show_the_units_annex_16_prints() -> None:
         60.0 + peak[:, None] + rng.standard_normal((20, 24))
     )
     shown = units(result)
-    assert (shown["pnl"], shown["pnlt"], shown["pnltm"], shown["epnl"]) == (
-        "PNdB",
-        "TPNdB",
-        "TPNdB",
-        "EPNdB",
-    )
+    assert (
+        shown["pnl"],
+        shown["pnlt"],
+        shown["pnltm"],
+        shown["bandsharing_adjustment"],
+        shown["epnl"],
+    ) == ("PNdB", "TPNdB", "TPNdB", "TPNdB", "EPNdB")
 
 
 def test_epnl_exposed_at_package_top_level() -> None:

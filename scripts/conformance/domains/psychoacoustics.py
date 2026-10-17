@@ -200,7 +200,8 @@ def _chk_iso226_contour() -> Outcome:
     # Anchored off 1 kHz (where SPL == phon is a trivial identity) at a
     # tabulated point that exercises the Table 1 contour formula.
     phon, freq, spl_ref = ref.ISO226_2023_TABLE_B1_ANCHOR
-    freqs, spl = ph.psychoacoustics.equal_loudness_contour(phon)
+    contour = ph.psychoacoustics.equal_loudness_contour(phon)
+    freqs, spl = contour.frequencies, contour.levels
     computed = float(spl[np.asarray(freqs) == freq][0])
     return numeric(spl_ref, computed, 0.05, unit="dB SPL", places=3)
 

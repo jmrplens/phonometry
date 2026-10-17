@@ -974,6 +974,7 @@ def weighted_rating(
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
     """
     data, fraction = _by_band(values_by_band, fraction, "values_by_band")
     if data.ndim != 1:
@@ -1094,6 +1095,7 @@ def weighted_impact_rating(
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
     """
     data, fraction = _by_band(values_by_band, fraction, "values_by_band")
     if data.ndim != 1:
@@ -1164,6 +1166,7 @@ class ImpactImprovementRatingResult(OwnsArrays):
         :raises ValueError: if the band centres and the improvement differ in
             length or hold a value that is not finite, or if ``ci_r`` is not
             :math:`C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}`.
+        :raises TypeError: if ``ci_delta`` or ``ci_r`` is not a single number.
         """
         require_scalar(self.ci_delta, "ci_delta")
         require_scalar(self.ci_r, "ci_r")
@@ -1775,6 +1778,7 @@ def weighted_impact_improvement(
     :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave values,
         a mapping lacks one of them, or ``reference_floor`` is not one of the
         four floors.
+    :raises TypeError: if ``reference_floor`` is not a text.
     """
     delta_lw, _ = _impact_improvement_ratings(
         delta_l, reference_floor, one_decimal=one_decimal
@@ -1847,6 +1851,7 @@ def impact_improvement_adaptation_term(
     :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave
         values, a mapping lacks one of them, or ``reference_floor`` is not one
         of the four floors.
+    :raises TypeError: if ``reference_floor`` is not a text.
     """
     _, ci_delta = _impact_improvement_ratings(
         delta_l, reference_floor, one_decimal=one_decimal
@@ -1911,6 +1916,7 @@ class ReductionImprovementRating(RichDisplay):
         would reach the figure before anything had said which names there are.
 
         :raises ValueError: if ``basic_element`` is not a standard element.
+        :raises TypeError: if ``basic_element`` is not a text.
         """
         require_choice(
             self.basic_element, "basic_element", tuple(LINING_REFERENCE_ELEMENTS)
@@ -1984,6 +1990,7 @@ def weighted_reduction_improvement(
     :raises ValueError: If ``delta_r`` is not one-dimensional and finite, the
         band counts differ, a band is not in Table E.1, the core bands are
         missing, or ``basic_element`` is not a standard element.
+    :raises TypeError: if ``basic_element`` is not a text.
     """
     require_choice(basic_element, "basic_element", tuple(LINING_REFERENCE_ELEMENTS))
     delta = np.asarray(delta_r, dtype=np.float64)

@@ -314,6 +314,8 @@ def absorption_area(
         :func:`power_attenuation_from_alpha`.
     :return: Equivalent sound absorption area ``A``, in square metres, with the
         shape of ``t60``.
+    :raises TypeError: if ``speed_of_sound``, ``temperature_c`` or ``volume`` is not a
+        single number.
     """
     area = _absorption_area(
         t60, volume, temperature_c=temperature_c, speed_of_sound=speed_of_sound, m=m
@@ -380,6 +382,8 @@ def absorption_coefficient(
         (default 0).
     :return: Sound absorption coefficient ``alpha_s`` with the broadcast shape of
         ``t1`` and ``t2``.
+    :raises TypeError: if ``sample_area``, ``speed_of_sound1``, ``speed_of_sound2``,
+        ``temperature1_c``, ``temperature2_c`` or ``volume`` is not a single number.
     """
     require_scalar(sample_area, "sample_area")
     require_scalar(volume, "volume")
@@ -659,6 +663,8 @@ def measure_sound_absorption(
     :raises ValueError: If the frequency and reverberation-time arrays do not
         share one shape, ``relative_humidity_percent`` is not within ``[0, 100]`` %, or an
         input is non-physical (see :func:`absorption_coefficient`).
+    :raises TypeError: if ``relative_humidity_percent``, ``speed_of_sound``,
+        ``temperature_c`` or ``volume`` is not a single number.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     t1 = np.asarray(t_empty, dtype=np.float64)

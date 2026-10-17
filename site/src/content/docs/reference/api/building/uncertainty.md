@@ -54,9 +54,9 @@ Clause/table numbers refer to ISO 12999-1:2020(E).
 
 ```python
 assess_requirement_conformity(
-    value_db: float,
+    rating: float,
     expanded_uncertainty_db: float,
-    requirement_db: float,
+    required_rating: float,
     *,
     bound: Literal['minimum', 'maximum'],
 ) -> RequirementConformity
@@ -76,9 +76,9 @@ impact level `L'n,w` provably below its maximum.
 
 | Name | Description |
 | :--- | :--- |
-| `value_db` | The best estimate $y$, in dB. |
+| `rating` | The best estimate $y$, in dB. |
 | `expanded_uncertainty_db` | $U$, one-sided, in dB. |
-| `requirement_db` | $Y_\mathrm{required}$, in dB. |
+| `required_rating` | $Y_\mathrm{required}$, in dB. |
 | `bound` | `"minimum"` (Formula (5)) or `"maximum"` (Formula (4)). |
 
 **Returns:** The verdict, as a [`RequirementConformity`](/phonometry/reference/api/building/uncertainty/#requirementconformity).
@@ -87,7 +87,7 @@ impact level `L'n,w` provably below its maximum.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a value that is not one number, or a `bound` that is not a text. |
+| TypeError | For a `rating`, `expanded_uncertainty_db` or `required_rating` that is not one number, or a `bound` that is not a text. |
 | ValueError | For an unknown `bound`, a value that is not finite or a negative uncertainty. |
 
 ## band_uncertainty
@@ -120,6 +120,7 @@ upper limit for airborne, situation A (Annex D Table D.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Unknown measurand, or a situation not tabulated for it. |
+| TypeError | if `measurand` is not a text. |
 
 ## BandUncertainty
 
@@ -162,14 +163,6 @@ Plot the per-band standard uncertainty spectrum.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### BandUncertainty.to_arrays()
-
-```python
-BandUncertainty.to_arrays() -> tuple[np.ndarray, np.ndarray]
-```
-
-Return `(frequencies, uncertainties)` as float `numpy.ndarray`.
-
 ## COVERAGE_FACTORS
 
 *Constant* (`mapping`).
@@ -202,6 +195,7 @@ Return the coverage factor `k` for a coverage probability (Table 8).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Coverage probability not tabulated in Table 8. |
+| TypeError | if `coverage` is not a single number. |
 
 ## insulation_expanded_uncertainty
 
@@ -232,6 +226,7 @@ probability; a minimum of $k = 1$ is enforced (Clause 8).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Negative `u` or an untabulated coverage probability. |
+| TypeError | if `u` is not a single number. |
 
 ## max_repeatability_standard_deviation
 
@@ -277,6 +272,7 @@ reproducibility standard deviation with the product-homogeneity scatter over
 | Exception | When |
 | :--- | :--- |
 | ValueError | A non-integer or non-positive `n`, or a negative standard deviation. |
+| TypeError | if `sigma_product` or `sigma_reproducibility` is not a single number, or `n` is a flag, a text or an array where a count goes. |
 
 ## reduce_by_independent_measurements
 
@@ -302,14 +298,15 @@ equipment lower the in-situ uncertainty.
 | Exception | When |
 | :--- | :--- |
 | ValueError | Non-positive `m` or negative `u`. |
+| TypeError | if `m` or `u` is not a single number. |
 
 ## RequirementConformity
 
 ```python
 RequirementConformity(
-    value_db: float,
+    rating: float,
     expanded_uncertainty_db: float,
-    requirement_db: float,
+    required_rating: float,
     *,
     bound: Literal['minimum', 'maximum'],
 )
@@ -329,9 +326,9 @@ be built to conform with a value the clause refuses.
 
 | Name | Description |
 | :--- | :--- |
-| `value_db` | The best estimate $y$, in dB. |
+| `rating` | The best estimate $y$, in dB. |
 | `expanded_uncertainty_db` | $U$, worked with the one-sided coverage factor, in dB. |
-| `requirement_db` | $Y_\mathrm{required}$, in dB. |
+| `required_rating` | $Y_\mathrm{required}$, in dB. |
 | `bound` | `"minimum"` when the requirement is a value to exceed (an apparent sound reduction index `R'w`) or `"maximum"` when it is one to stay under (a normalized impact level `L'n,w`). |
 
 ### RequirementConformity.margin_db

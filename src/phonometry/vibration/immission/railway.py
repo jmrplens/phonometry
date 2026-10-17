@@ -107,6 +107,7 @@ __all__ = [
     "running_velocity_rms",
     "spectral_density_level",
     "third_octaves_from_narrowband",
+    "ThirdOctaveVelocities",
     "velocity_psd_from_voltage",
 ]
 
@@ -310,6 +311,7 @@ def interval_rms(
     :return: :math:`\tilde v_j`, in the unit of *values*.
     :raises ValueError: For a bad record, a non-positive rate, or an interval
         that is empty or runs outside the record.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     x = _record(values, "values")
     fs = require_positive(fs, "fs")
@@ -329,6 +331,8 @@ def event_velocity(interval_rms_mm_s: float, duration_s: float) -> float:
     :param duration_s: :math:`T_3`, in seconds.
     :return: :math:`v_\mathrm{E}`, in millimetres per second.
     :raises ValueError: For a negative velocity or a non-positive duration.
+    :raises TypeError: if ``duration_s`` or ``interval_rms_mm_s`` is not a single
+        number.
     """
     require_scalar(interval_rms_mm_s, "interval_rms_mm_s")
     v = float(interval_rms_mm_s)
@@ -351,6 +355,8 @@ def event_velocity_level(interval_rms_mm_s: float, duration_s: float) -> float:
     :param duration_s: :math:`T_3`, in seconds.
     :return: :math:`L_{v\mathrm{E}}`, in decibels.
     :raises ValueError: For a non-positive velocity or duration.
+    :raises TypeError: if ``duration_s`` or ``interval_rms_mm_s`` is not a single
+        number.
     """
     v = require_positive(interval_rms_mm_s, "interval_rms_mm_s")
     duration = require_positive(duration_s, "duration_s")
@@ -379,6 +385,8 @@ def combined_event_velocity(event_velocities_mm_s: ArrayLike) -> float:
         millimetres per second.
     :return: :math:`v_{\mathrm{E\,ges}}`, in millimetres per second.
     :raises ValueError: For an empty, non-finite or negative input.
+    :raises TypeError: if ``event_velocities_mm_s`` holds a text or a value that is not
+        a real number.
     """
     values = _non_negative(event_velocities_mm_s, "event_velocities_mm_s")
     return float(np.sqrt(np.sum(values**2)))
@@ -396,6 +404,8 @@ def passage_average_velocity(interval_rms_mm_s: ArrayLike) -> float:
         second.
     :return: The energy average, in millimetres per second.
     :raises ValueError: For an empty, non-finite or negative input.
+    :raises TypeError: if ``interval_rms_mm_s`` holds a text or a value that is not a
+        real number.
     """
     values = _non_negative(interval_rms_mm_s, "interval_rms_mm_s")
     return float(np.sqrt(np.mean(values**2)))
@@ -416,6 +426,7 @@ def passage_average_level(
         every value.
     :return: The average level: a float, or one level per band.
     :raises ValueError: For an empty or non-finite input.
+    :raises TypeError: if ``axis`` is a flag, a text or an array where a count goes.
     """
     levels = _as_float64(levels, "levels")
     if levels.size == 0 or not np.all(np.isfinite(levels)):
@@ -460,6 +471,7 @@ def amplitude_distribution(
     :return: The density and its cumulative function, as an
         :class:`AmplitudeDistribution`.
     :raises ValueError: For a bad record or fewer than two bins.
+    :raises TypeError: if ``n_bins`` is a flag, a text or an array where a count goes.
     """
     x = _record(velocity_mm_s)
     require_scalar(n_bins, "n_bins")
@@ -503,6 +515,7 @@ def narrowband_psd(
         :class:`~phonometry.signals.SpectralDensityResult`.
     :raises ValueError: For a bad record, a non-positive rate or resolution, or
         a stretch shorter than one block.
+    :raises TypeError: if ``fs`` or ``resolution_hz`` is not a single number.
     """
     from ...signals import power_spectral_density
 
@@ -544,6 +557,8 @@ def passage_energy_spectral_density(
     :return: :math:`e_2` at the same lines, in (mm/s)²/Hz².
     :raises ValueError: For a negative or non-finite density or a non-positive
         duration.
+    :raises TypeError: if ``duration_s`` is not a single number, or ``psd`` holds a text
+        or a value that is not a real number.
     """
     g = _non_negative(psd, "psd")
     duration = require_positive(duration_s, "duration_s")
@@ -561,6 +576,7 @@ def spectral_density_level(psd: ArrayLike) -> NDArray[np.float64]:
     :return: The level at each line, in decibels; ``-inf`` where the density is
         exactly zero.
     :raises ValueError: For a negative or non-finite density.
+    :raises TypeError: if ``psd`` holds a text or a value that is not a real number.
     """
     g = _non_negative(psd, "psd")
     with np.errstate(divide="ignore"):
@@ -586,6 +602,8 @@ def velocity_psd_from_voltage(
     :return: The density of the velocity, in (mm/s)²/Hz.
     :raises ValueError: For a negative or non-finite density or a non-positive
         coefficient.
+    :raises TypeError: if ``gain`` or ``sensitivity_v_per_mm_s`` is not a single number,
+        or ``psd_v2_per_hz`` holds a text or a value that is not a real number.
     """
     g = _non_negative(psd_v2_per_hz, "psd_v2_per_hz")
     kappa_a = require_positive(sensitivity_v_per_mm_s, "sensitivity_v_per_mm_s")
@@ -610,9 +628,26 @@ def _check_resolution(frequencies: NDArray[np.float64]) -> float:
     return spacing
 
 
+@dataclass(frozen=True)
+class ThirdOctaveVelocities(OwnsArrays):
+    """Band r.m.s. velocities added back from a narrow-band spectrum (Formula (23)).
+
+    What :func:`third_octaves_from_narrowband` returns: the band centres and
+    the band r.m.s. values, named, where a ``(centres, rms)`` tuple used to be
+    unpacked by position.
+
+    :ivar frequencies: The nominal centres of the bands the spectrum holds
+        whole, in hertz.
+    :ivar velocities_mm_s: The band r.m.s. velocity in each, in mm/s.
+    """
+
+    frequencies: NDArray[np.float64]
+    velocities_mm_s: NDArray[np.float64]
+
+
 def third_octaves_from_narrowband(
     psd: ArrayLike, *, frequencies: ArrayLike
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> ThirdOctaveVelocities:
     r"""Add a narrow-band spectrum back into third octaves, Formula (23).
 
     Each band takes the number of lines Table 1 gives it, and the band r.m.s.
@@ -639,11 +674,13 @@ def third_octaves_from_narrowband(
         evenly spaced at 1,25 Hz.
     :param psd: The one-sided power spectral density at those lines, in
         (mm/s)²/Hz.
-    :return: ``(centres, rms)``: the nominal centres of the bands the spectrum
-        holds whole, from :data:`THIRD_OCTAVE_LINES`, in hertz, and the band
-        r.m.s. in each, in mm/s.
+    :return: The nominal centres of the bands the spectrum holds whole, from
+        :data:`THIRD_OCTAVE_LINES`, in hertz, and the band r.m.s. in each, in
+        mm/s, as a :class:`ThirdOctaveVelocities`.
     :raises ValueError: For mismatched or non-finite inputs, a negative
         density, uneven spacing, or a spacing Table 1 is not written for.
+    :raises TypeError: if ``frequencies`` or ``psd`` holds a text or a value that is not
+        a real number.
     """
     f = require_finite_array(frequencies, "frequencies")
     g = require_finite_array(psd, "psd")
@@ -673,7 +710,10 @@ def third_octaves_from_narrowband(
             continue
         centres.append(nominal)
         rms.append(float(np.sqrt(np.sum(g[chosen - first]) * spacing)))
-    return np.asarray(centres, dtype=np.float64), np.asarray(rms, dtype=np.float64)
+    return ThirdOctaveVelocities(
+        frequencies=np.asarray(centres, dtype=np.float64),
+        velocities_mm_s=np.asarray(rms, dtype=np.float64),
+    )
 
 
 def elastic_insertion_loss(
@@ -692,6 +732,8 @@ def elastic_insertion_loss(
     :return: :math:`L_1 - L_2` per band, positive where the element reduces
         the level.
     :raises ValueError: If the two do not match band for band.
+    :raises TypeError: if ``levels_after`` or ``levels_before`` holds a text or a value
+        that is not a real number.
     """
     before = require_finite_array(levels_before, "levels_before")
     after = require_finite_array(levels_after, "levels_after")
@@ -709,6 +751,7 @@ def band_sum_level(levels: ArrayLike) -> float:
     :param levels: The band levels, in decibels.
     :return: :math:`\Sigma L`, in decibels.
     :raises ValueError: For an empty or non-finite input.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     levels = require_finite_array(levels, "levels")
     if levels.size == 0:
@@ -733,6 +776,7 @@ def centered_interval(
     :return: ``(start, end)``, in seconds from the start of the record. A
         record shorter than *duration_s* is returned whole.
     :raises ValueError: For a bad record or a non-positive rate or duration.
+    :raises TypeError: if ``duration_s`` or ``fs`` is not a single number.
     """
     x = _record(velocity_mm_s)
     fs = require_positive(fs, "fs")
@@ -923,6 +967,7 @@ def evaluate_train_passage(
         cannot take, a stretch outside the record, stretches that do not nest
         or a :math:`T_1` longer than :math:`T_2`, or an upper band that is not
         a nominal centre from 80 Hz to 315 Hz.
+    :raises TypeError: if ``upper_band_hz`` is not a single number.
     """
     raw = _record(velocity_mm_s)
     fs = _sample_rate(fs, "railway")

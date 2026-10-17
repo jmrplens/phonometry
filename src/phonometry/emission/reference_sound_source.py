@@ -269,6 +269,7 @@ def knee_frequency(d0_m: float, *, speed_of_sound: float = 343.0) -> float:
     :param d0_m: :math:`d_0`, in metres.
     :param speed_of_sound: Speed of sound, in m/s (default 343).
     :return: :math:`f_\mathrm{k}`, in hertz.
+    :raises TypeError: if ``d0_m`` or ``speed_of_sound`` is not a single number.
     """
     d0 = require_positive(d0_m, "d0_m")
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -304,6 +305,7 @@ def radiation_impedance_correction(
     :raises ValueError: for an unknown radiation character, a monopole or
         dipole without frequencies and knee frequency, or a dipole band below
         the knee frequency, for which Annex A gives no formula.
+    :raises TypeError: if ``knee_frequency_hz`` is not a single number.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     theta = temperature_c + _KELVIN_OFFSET
@@ -362,6 +364,7 @@ def reference_source_reproducibility(
         octaves.
     :return: :math:`\sigma_R` per band, in dB.
     :raises ValueError: for a band outside Table 2 or an unknown option.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
     """
     column = _column(environment, arrangement)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
@@ -628,6 +631,8 @@ class ReferenceSourceCalibration(OwnsArrays):
             one of the two conditions, or conditions asked of a calibration
             that used the manufacturer's :math:`C_2`, whose value at the test
             only the manufacturer gives.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         fraction = require_band_fraction(fraction, "fraction")
         levels = np.asarray(self.sound_power_level, dtype=np.float64)
@@ -933,6 +938,7 @@ def reference_source_calibration(
         from 50 Hz to 20 kHz, no position, levels, background levels, maxima
         or a manufacturer's :math:`C_2` that are not finite, or inconsistent
         shapes.
+    :raises TypeError: if ``coverage_factor`` is not a single number.
     """
     freqs, ks = _calibration_bands(frequencies)
     _column("hemi-anechoic", arrangement)

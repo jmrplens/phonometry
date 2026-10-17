@@ -282,29 +282,29 @@ class InsertionLossUncertaintyBudget(RichDisplay):
     combined standard uncertainty is their root sum of squares (Formula
     (B.2)) and the expanded one twice that (B.4).
 
-    :ivar open_level_db: The standard uncertainty of :math:`L_\mathrm{open}`,
+    :ivar open_level_uncertainty_db: The standard uncertainty of :math:`L_\mathrm{open}`,
         the standard deviation of the mean of repeated measurements, in dB.
-    :ivar occluded_level_db: That of :math:`L_\mathrm{occl}`, which also
+    :ivar occluded_level_uncertainty_db: That of :math:`L_\mathrm{occl}`, which also
         carries the refitting of the earmuff, in dB.
-    :ivar fixture_db: :math:`\delta_1`, the fixture's departure from its
+    :ivar fixture_uncertainty_db: :math:`\delta_1`, the fixture's departure from its
         specification, in dB.
-    :ivar sound_field_db: :math:`\delta_2`, the field's departure from an
+    :ivar sound_field_uncertainty_db: :math:`\delta_2`, the field's departure from an
         ideal random-incidence field or plane wave, in dB.
-    :ivar equipment_db: :math:`\delta_3`, the measuring equipment, in dB.
+    :ivar equipment_uncertainty_db: :math:`\delta_3`, the measuring equipment, in dB.
     """
 
-    open_level_db: float
-    occluded_level_db: float
-    fixture_db: float
-    sound_field_db: float
-    equipment_db: float
+    open_level_uncertainty_db: float
+    occluded_level_uncertainty_db: float
+    fixture_uncertainty_db: float
+    sound_field_uncertainty_db: float
+    equipment_uncertainty_db: float
 
     def __post_init__(self) -> None:
         """Refuse a component that is negative or not finite.
 
         :raises ValueError: for such a component.
         """
-        for value in self.components_db:
+        for value in self.standard_uncertainties_db:
             if not math.isfinite(value) or value < 0.0:
                 msg = "every component must be finite and not negative, in dB."
                 raise ValueError(msg)
@@ -318,34 +318,34 @@ class InsertionLossUncertaintyBudget(RichDisplay):
         return ("L_open", "L_occl", "delta_1", "delta_2", "delta_3")
 
     @property
-    def components_db(self) -> tuple[float, ...]:
+    def standard_uncertainties_db(self) -> tuple[float, ...]:
         """The five standard uncertainties in the order of Table B.1, in dB.
 
         :return: The components.
         """
         return (
-            float(self.open_level_db),
-            float(self.occluded_level_db),
-            float(self.fixture_db),
-            float(self.sound_field_db),
-            float(self.equipment_db),
+            float(self.open_level_uncertainty_db),
+            float(self.occluded_level_uncertainty_db),
+            float(self.fixture_uncertainty_db),
+            float(self.sound_field_uncertainty_db),
+            float(self.equipment_uncertainty_db),
         )
 
     @property
-    def combined_db(self) -> float:
+    def combined_uncertainty_db(self) -> float:
         r""":math:`u = \sqrt{\sum (c_i u_i)^2}` (Formula (B.2)), in dB.
 
         :return: The combined standard uncertainty, unrounded.
         """
-        return math.hypot(*self.components_db)
+        return math.hypot(*self.standard_uncertainties_db)
 
     @property
-    def expanded_db(self) -> float:
+    def expanded_uncertainty_db(self) -> float:
         """:math:`U = 2u` (B.4), in dB.
 
         :return: The expanded uncertainty, unrounded.
         """
-        return _COVERAGE_FACTOR * self.combined_db
+        return _COVERAGE_FACTOR * self.combined_uncertainty_db
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -366,11 +366,11 @@ class InsertionLossUncertaintyBudget(RichDisplay):
 #: and for ear-muff type protectors that are not especially sensitive to the
 #: positioning on the ATF": :math:`u` = 1,3 dB and :math:`U` = 2,6 dB.
 EARMUFF_INSERTION_LOSS_UNCERTAINTY = InsertionLossUncertaintyBudget(
-    open_level_db=_OPEN_LEVEL_U_DB,
-    occluded_level_db=_OCCLUDED_LEVEL_U_DB,
-    fixture_db=0.3,
-    sound_field_db=0.5,
-    equipment_db=0.2,
+    open_level_uncertainty_db=_OPEN_LEVEL_U_DB,
+    occluded_level_uncertainty_db=_OCCLUDED_LEVEL_U_DB,
+    fixture_uncertainty_db=0.3,
+    sound_field_uncertainty_db=0.5,
+    equipment_uncertainty_db=0.2,
 )
 
 
@@ -435,7 +435,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return self.n_repetitions >= _MINIMUM_REPETITIONS
 
     @property
-    def reported_db(self) -> np.ndarray:
+    def reported_insertion_loss(self) -> np.ndarray:
         """The insertion loss as Clause 6 reports it, to the nearest 0,1 dB.
 
         :return: One value per band, halves rounded upwards.
@@ -480,11 +480,11 @@ class EarmuffInsertionLossResult(OwnsArrays):
             raise ValueError(msg)
         k = int(np.argmax(matches))
         return InsertionLossUncertaintyBudget(
-            open_level_db=float(self.open_uncertainty_db[k]),
-            occluded_level_db=float(self.occluded_uncertainty_db[k]),
-            fixture_db=self.fixture_uncertainty_db,
-            sound_field_db=self.sound_field_uncertainty_db,
-            equipment_db=self.equipment_uncertainty_db,
+            open_level_uncertainty_db=float(self.open_uncertainty_db[k]),
+            occluded_level_uncertainty_db=float(self.occluded_uncertainty_db[k]),
+            fixture_uncertainty_db=self.fixture_uncertainty_db,
+            sound_field_uncertainty_db=self.sound_field_uncertainty_db,
+            equipment_uncertainty_db=self.equipment_uncertainty_db,
         )
 
     @property
@@ -732,7 +732,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
     :ivar end_face_difference: The difference between the levels at the
         two points the centres of the fixture's end faces occupy, as an
         absolute value per band, in dB.
-    :ivar front_to_back_db: From 500 Hz up, the level a directional microphone
+    :ivar front_to_back_ratio_db: From 500 Hz up, the level a directional microphone
         at the reference point reads facing the source less the level facing
         away from it, per band, in dB; NaN below 500 Hz or where not measured.
     :ivar front_to_rear_index: The microphone's front-to-rear sensitivity
@@ -741,7 +741,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
     frequencies: np.ndarray
     end_face_difference: np.ndarray
-    front_to_back_db: np.ndarray
+    front_to_back_ratio_db: np.ndarray
     front_to_rear_index: np.ndarray
 
     @property
@@ -777,7 +777,10 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
         :return: One boolean per band.
         """
-        margin = self.front_to_back_db >= _FRONT_TO_BACK_MINIMUM_DB - _BOUNDARY_SLACK_DB
+        margin = (
+            self.front_to_back_ratio_db
+            >= _FRONT_TO_BACK_MINIMUM_DB - _BOUNDARY_SLACK_DB
+        )
         judged = margin & self.microphone_suitable
         return np.asarray(~self.directional_required | judged, dtype=bool)
 
@@ -787,7 +790,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
         :return: ``True`` when none is left unjudged.
         """
-        read = np.isfinite(self.front_to_back_db) & self.microphone_suitable
+        read = np.isfinite(self.front_to_back_ratio_db) & self.microphone_suitable
         return bool(np.all(~self.directional_required | read))
 
     @property
@@ -906,7 +909,7 @@ def check_plane_progressive_wave(
     return PlaneProgressiveWaveCheck(
         frequencies=freqs,
         end_face_difference=np.abs(faces[0] - faces[1]),
-        front_to_back_db=front_to_back,
+        front_to_back_ratio_db=front_to_back,
         front_to_rear_index=index,
     )
 
@@ -933,7 +936,7 @@ class FixtureIsolationVerification(OwnsArrays):
     """Whether the test fixture isolates its microphone well enough (5.1.4).
 
     The requirement is the clause's, read from the bands as
-    :attr:`required_db`, so a check cannot be built against another one.
+    :attr:`min_isolation`, so a check cannot be built against another one.
 
     :ivar frequencies: The centre frequencies, in hertz.
     :ivar isolation: The acoustic isolation (3.7), the level with the
@@ -954,7 +957,7 @@ class FixtureIsolationVerification(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def required_db(self) -> np.ndarray:
+    def min_isolation(self) -> np.ndarray:
         """The least isolation 5.1.4 asks per band, in dB.
 
         :return: 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and
@@ -968,8 +971,8 @@ class FixtureIsolationVerification(OwnsArrays):
 
         :return: One boolean per band; ``True`` where nothing is required.
         """
-        reached = self.isolation >= self.required_db - _BOUNDARY_SLACK_DB
-        return np.asarray(np.isnan(self.required_db) | reached, dtype=bool)
+        reached = self.isolation >= self.min_isolation - _BOUNDARY_SLACK_DB
+        return np.asarray(np.isnan(self.min_isolation) | reached, dtype=bool)
 
     @property
     def margin_db(self) -> np.ndarray:
@@ -978,7 +981,7 @@ class FixtureIsolationVerification(OwnsArrays):
         :return: Negative where the fixture falls short, NaN where nothing is
             required.
         """
-        return np.asarray(self.isolation - self.required_db, dtype=np.float64)
+        return np.asarray(self.isolation - self.min_isolation, dtype=np.float64)
 
     @property
     def passes(self) -> bool:

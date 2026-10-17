@@ -109,7 +109,8 @@ def _chk_iec61043_table2() -> Outcome:
     columns = {"probe": (1, 2), "processor": (3, 4), "instrument": (5, 6)}
     worst = 0.0
     for device, (col1, col2) in columns.items():
-        _, class1, class2 = ph.emission.residual_index_limits(device)
+        limits = ph.emission.residual_index_limits(device)
+        class1, class2 = limits.class_1, limits.class_2
         for i, row in enumerate(ref.IEC61043_TABLE2):
             worst = max(
                 worst,
@@ -146,7 +147,13 @@ def _chk_iec61043_spacing_rule() -> Outcome:
         base = ph.emission.residual_index_limits(device)
         wide = ph.emission.residual_index_limits(device, spacing_m=0.050)
         for cls in (1, 2):
-            offsets.extend((np.asarray(wide[cls]) - np.asarray(base[cls])).tolist())
+            column = f"class_{cls}"
+            offsets.extend(
+                (
+                    np.asarray(getattr(wide, column))
+                    - np.asarray(getattr(base, column))
+                ).tolist()
+            )
     # Report the single offset furthest from the rule, so one column that
     # failed to shift cannot average out against five that did.
     worst = max(offsets, key=lambda v: abs(v - expected))
@@ -363,9 +370,9 @@ def _chk_reverberation_lj() -> Outcome:
     "Three equal one-third-octave bands sum to an octave level 10 lg 3 higher",
 )
 def _chk_octave_band_levels_annex_f() -> Outcome:
-    _, octave = ph.emission.octave_band_levels(
+    octave = ph.emission.octave_band_levels(
         np.full(3, 90.0), frequencies=np.array([800.0, 1000.0, 1250.0])
-    )
+    ).levels
     return numeric(
         10.0 * math.log10(3.0), float(octave[0]) - 90.0, 1e-12, unit="dB", places=6
     )

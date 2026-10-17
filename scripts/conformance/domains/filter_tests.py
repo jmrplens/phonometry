@@ -330,9 +330,9 @@ def _chk_bank_bandwidth() -> Outcome:
 )
 def _chk_bank_summation() -> Outcome:
     result = ph.filters.verify_filter_class(_third_octave_bank())
-    inner = [b for b in result.bands if b["summation_min_db"] is not None]
-    low = min(b["summation_min_db"] for b in inner)
-    high = max(b["summation_max_db"] for b in inner)
+    inner = [b for b in result.bands if b["summation_difference_lower"] is not None]
+    low = min(b["summation_difference_lower"] for b in inner)
+    high = max(b["summation_difference_upper"] for b in inner)
     margin = result.binding_margin("summation", 1)
     return Outcome(
         expected="class 1 (-1.8 dB <= Delta P <= +0.8 dB)",

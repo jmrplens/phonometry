@@ -1498,8 +1498,10 @@ def generate_weighting_class_mask(output_dir: str) -> None:
     """A/C weighting deviation against the IEC 61672-1:2013 Table 3 mask."""
     print("Generating weighting_class_mask.png...")
 
-    freqs, lower1, upper1 = filters.weighting_class_limits(1)
-    _, lower2, upper2 = filters.weighting_class_limits(2)
+    limits = filters.weighting_class_limits(1)
+    freqs, lower1, upper1 = limits.frequencies, limits.lower, limits.upper
+    limits = filters.weighting_class_limits(2)
+    lower2, upper2 = limits.lower, limits.upper
     floor, ceil = -7.0, 7.0  # plotting bounds; -inf limits clip to the floor
     lo1 = np.clip(lower1, floor, ceil)
     lo2 = np.clip(lower2, floor, ceil)

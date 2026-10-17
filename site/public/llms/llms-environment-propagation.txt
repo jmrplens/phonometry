@@ -2117,7 +2117,7 @@ print(annex_b.rating.reported)                 # 8 dB, as printed under the tabl
 print(round(annex_b.rating.rating, 2))         # 7.65 dB before rounding, see below
 
 u = environment.reflection_index_expanded_uncertainty()  # Table A.1, high column, k = 1.96
-print(round(u.rating_db, 2))                             # 1.59 dB, Table B.2
+print(round(u.rating_expanded_uncertainty_db, 2))                             # 1.59 dB, Table B.2
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg" alt="The sound reflection index of the Annex B barrier over the eighteen one-third octave bands from 100 Hz to 5 kHz: twelve light points per band for the twelve grid positions and a line through their average, near 0.58 in the three hatched bands below 200 Hz, falling from 0.39 at 250 Hz to 0.05 at 630 Hz, around 0.1 up to 1.25 kHz, a peak of 0.30 at 1.6 kHz and a rise to 0.43 at 5 kHz. The title gives DL RI of 8 dB from 200 Hz to 5 kHz." width="92%"></picture>
@@ -2427,8 +2427,8 @@ d = [-1.4, -1.0, -0.4, 0.8, 1.0, 1.0, 1.0, 1.2, 1.4, 1.4, 1.4, 1.6, 1.8,
      1.8, 2.0, 2.0, 2.0, 2.2, 2.2, 2.4, 2.6, 2.8, 2.8, 3.0, 3.4]
 q = environment.level_difference_quantiles(d)
 print(q.rank_q01, q.rank_q09)                                   # 2 24
-print(q.q01_db, q.q09_db)                                       # -1.0 3.0
-print(round(q.mean_db, 2), round(q.standard_deviation_db, 2))   # 1.56 1.17
+print(q.q01_level_difference, q.q09_level_difference)                                       # -1.0 3.0
+print(round(q.mean_level_difference, 2), round(q.standard_deviation_db, 2))   # 1.56 1.17
 q.plot()
 ```
 
@@ -2628,7 +2628,7 @@ spread = 0.15 + 0.6 * rng.gamma(1.5, 0.4, 400)
 levels = common[:, None] + spread[:, None] * rng.standard_normal((400, 4))
 
 rr = environment.round_robin_precision(levels)
-print(rr.n_receivers, rr.n_participants, rr.rank_q09, round(rr.q09_db, 2))   # 400 4 361 1.28
+print(rr.n_receivers, rr.n_participants, rr.rank_q09, round(rr.q09_level_difference, 2))   # 400 4 361 1.28
 rr.plot()
 ```
 

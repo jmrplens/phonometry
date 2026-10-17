@@ -112,6 +112,7 @@ included in the reported EPNL.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `reference_time` is not a single number. |
 
 ## EPNLIntegration
 
@@ -137,7 +138,7 @@ beside the record histories they were integrated from.
 | :--- | :--- |
 | `epnl` | Effective perceived noise level, in EPNdB, including the bandsharing adjustment. |
 | `pnltm` | Maximum tone-corrected perceived noise level, in TPNdB, including the bandsharing adjustment `ΔB` (App. 2 §4.4.2), the adjusted value §4.4.3 requires for EPNL. |
-| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in dB (App. 2 §4.4.2; zero unless the tone correction at PNLTM is suppressed). |
+| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in TPNdB, the unit the Nomenclature prints for it (I-7), since it is added to the maximum PNLT (App. 2 §4.4.2; zero unless the tone correction at PNLTM is suppressed). |
 | `band_limits` | The 0-based 10 dB-down record indices `(kF, kL)`, both inclusive. |
 
 ### EPNLIntegration.duration_correction
@@ -175,7 +176,7 @@ Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
 | `tone_correction` | Tone-correction factor per record, in dB. |
 | `pnlt` | Tone-corrected perceived noise level per record, in TPNdB. |
 | `pnltm` | Maximum tone-corrected perceived noise level, in TPNdB, including the bandsharing adjustment `ΔB` (App. 2 §4.4.2), the adjusted value §4.4.3 requires for EPNL. |
-| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in dB (App. 2 §4.4.2; zero unless the tone correction at PNLTM is suppressed). |
+| `bandsharing_adjustment` | The bandsharing adjustment `ΔB`, in TPNdB, the unit the Nomenclature prints for it (I-7), since it is added to the maximum PNLT (App. 2 §4.4.2; zero unless the tone correction at PNLTM is suppressed). |
 | `duration_correction` | Duration correction $D = \mathrm{EPNL} - \mathrm{PNLTM}$, in dB. |
 | `epnl` | Effective perceived noise level, in EPNdB. |
 | `band_limits` | The 0-based 10 dB-down record indices `(kF, kL)`. |

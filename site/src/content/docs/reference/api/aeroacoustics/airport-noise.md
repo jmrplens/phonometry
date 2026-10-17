@@ -93,6 +93,7 @@ $\Delta V = 10 \cdot \log_{10}(V_{\mathrm{ref}}/V_{\mathrm{seg}})$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a speed is not strictly positive. |
+| TypeError | if `reference_speed_m_s` or `segment_speed_m_s` is not a single number. |
 
 ## engine_installation_correction
 
@@ -119,6 +120,7 @@ Engine-installation lateral-directivity correction `ΔI(φ)` (Eq. 4-15/4-16).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mounting` is unknown or the angle is non-finite. |
+| TypeError | if `depression_deg` is not a single number. |
 
 ## event_level
 
@@ -264,6 +266,7 @@ added to the NPD levels. Under the standard atmosphere it is +0.074 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the pressure is not positive, the temperature is at or below -273,15 degC, or either input is non-finite. |
+| TypeError | if `static_pressure_kpa` or `temperature_c` is not a single number. |
 
 ## lateral_attenuation
 
@@ -287,6 +290,7 @@ Excess lateral attenuation `Λ(β, ℓ)` over soft ground (Eq. 4-18/4-19).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `lateral_m` is negative or non-finite. |
+| TypeError | if `elevation_deg` or `lateral_m` is not a single number. |
 
 ## noise_contour
 
@@ -364,6 +368,7 @@ Finite-segment correction (noise fraction) `ΔF` (Eq. 4-20, exposure only).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `segment_length` or `scaled_distance_m` is not positive. |
+| TypeError | if `q`, `scaled_distance_m` or `segment_length` is not a single number. |
 
 ## NoiseContourResult
 
@@ -468,6 +473,7 @@ tabulated envelope are extrapolated from the terminal segments.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the table or inputs are invalid. |
+| TypeError | if `power` is not a single number. |
 
 ## NPDLevelResult
 
@@ -543,3 +549,4 @@ aircraft ($\psi < 90^\circ$) it is zero.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or the inputs are invalid. |
+| TypeError | if `azimuth_deg` or `distance_m` is not a single number. |

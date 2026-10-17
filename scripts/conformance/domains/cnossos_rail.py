@@ -42,35 +42,44 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
     wavelength = ref.cnossos_rail_2015_wavelength_tables()
     frequency = ref.cnossos_rail_2015_frequency_tables()
     vehicle = ref.cnossos_rail_2015_vehicles()[case["vehicle"]]
-    lam = [float(w) for w in ref.CNOSSOS_RAIL_2015_WAVELENGTHS]
+    lam = np.array([float(w) for w in ref.CNOSSOS_RAIL_2015_WAVELENGTHS])
     idling = case["condition"] == "idling"
     traction = "traction_idling" if idling else "traction_constant"
     stock = ph.environment.RollingStock(
         n_axles=int(vehicle["axles"]),
-        wheel_roughness=(
-            lam,
-            wavelength[("wheel_roughness", vehicle["wheel_roughness"])],
+        wheel_roughness=ph.environment.WavelengthSpectrum(
+            wavelengths_mm=lam,
+            levels=wavelength[("wheel_roughness", vehicle["wheel_roughness"])],
         ),
-        contact_filter=(lam, wavelength[("contact_filter", vehicle["contact_filter"])]),
+        contact_filter=ph.environment.WavelengthSpectrum(
+            wavelengths_mm=lam,
+            levels=wavelength[("contact_filter", vehicle["contact_filter"])],
+        ),
         wheel_transfer=frequency[("wheel_transfer", vehicle["wheel_transfer"], "")],
         superstructure_transfer=frequency[
             ("superstructure_transfer", case["superstructure_transfer"], "")
         ],
-        traction=(
-            frequency[(traction, vehicle["traction"], "A")],
-            frequency[(traction, vehicle["traction"], "B")],
+        traction=ph.environment.RailSourceSpectra(
+            source_a=frequency[(traction, vehicle["traction"], "A")],
+            source_b=frequency[(traction, vehicle["traction"], "B")],
         ),
-        aerodynamic=(
-            frequency[("aerodynamic", vehicle["aerodynamic"], "A")],
-            frequency[("aerodynamic", vehicle["aerodynamic"], "B")],
+        aerodynamic=ph.environment.RailSourceSpectra(
+            source_a=frequency[("aerodynamic", vehicle["aerodynamic"], "A")],
+            source_b=frequency[("aerodynamic", vehicle["aerodynamic"], "B")],
         ),
         aerodynamic_alpha=float(case["aero_alpha"]),
     )
     track = ph.environment.RailwayTrack(
-        rail_roughness=(lam, wavelength[("rail_roughness", case["rail_roughness"])]),
+        rail_roughness=ph.environment.WavelengthSpectrum(
+            wavelengths_mm=lam,
+            levels=wavelength[("rail_roughness", case["rail_roughness"])],
+        ),
         track_transfer=frequency[("track_transfer", case["track_transfer"], "")],
         impact_roughness=(
-            (lam, wavelength[("impact_roughness", case["impact_roughness"])])
+            ph.environment.WavelengthSpectrum(
+                wavelengths_mm=lam,
+                levels=wavelength[("impact_roughness", case["impact_roughness"])],
+            )
             if case["impact_roughness"]
             else None
         ),
@@ -135,10 +144,10 @@ def _chk_cnossos_rail_roughness_tables() -> Outcome:
         ("k", ref.CNOSSOS_RAIL_G1A_COMPOSITE),
         ("n", ref.CNOSSOS_RAIL_G1A_NON_TREAD),
     ):
-        _, levels = ph.environment.wheel_roughness(brake)
+        levels = ph.environment.wheel_roughness(brake).levels
         bad += sum(1 for a, b in zip(levels, expected, strict=True) if a != b)
     for cls, expected in (("E", ref.CNOSSOS_RAIL_G1B_E), ("M", ref.CNOSSOS_RAIL_G1B_M)):
-        _, levels = ph.environment.rail_roughness(cls)
+        levels = ph.environment.rail_roughness(cls).levels
         bad += sum(1 for a, b in zip(levels, expected, strict=True) if a != b)
     return count(
         166 - bad,
@@ -156,7 +165,7 @@ def _chk_cnossos_rail_roughness_tables() -> Outcome:
 def _chk_cnossos_rail_table_g2() -> Outcome:
     bad = 0
     for key, expected in ref.CNOSSOS_RAIL_G2.items():
-        _, levels = ph.environment.contact_filter(key)
+        levels = ph.environment.contact_filter(key).levels
         bad += sum(1 for a, b in zip(levels, expected, strict=True) if a != b)
     return count(
         175 - bad,
@@ -211,13 +220,15 @@ def _chk_cnossos_rail_table_g3() -> Outcome:
 )
 def _chk_cnossos_rail_source_tables() -> Outcome:
     bad = 0
-    _, impact = ph.environment.impact_roughness_single()
+    impact = ph.environment.impact_roughness_single().levels
     bad += sum(1 for a, b in zip(impact, ref.CNOSSOS_RAIL_G4, strict=True) if a != b)
     for key, (low, high) in ref.CNOSSOS_RAIL_G5.items():
-        got_low, got_high = ph.environment.traction_sound_power(key)
+        power = ph.environment.traction_sound_power(key)
+        got_low, got_high = power.source_a, power.source_b
         bad += sum(1 for a, b in zip(got_low, low, strict=True) if a != b)
         bad += sum(1 for a, b in zip(got_high, high, strict=True) if a != b)
-    got_low, got_high = ph.environment.aerodynamic_sound_power()
+    power = ph.environment.aerodynamic_sound_power()
+    got_low, got_high = power.source_a, power.source_b
     bad += sum(1 for a, b in zip(got_low, ref.CNOSSOS_RAIL_G6_A, strict=True) if a != b)
     bad += sum(
         1 for a, b in zip(got_high, ref.CNOSSOS_RAIL_G6_B, strict=True) if a != b
@@ -252,7 +263,8 @@ def _chk_cnossos_rail_horizontal_directivity() -> Outcome:
     "Aerodynamic speed law at v0 = 300 km/h reduces to Table G-6 verbatim",
 )
 def _chk_cnossos_rail_aerodynamic_law() -> Outcome:
-    low, high = ph.environment.aerodynamic_sound_power(600.0)
+    power = ph.environment.aerodynamic_sound_power(600.0)
+    low, high = power.source_a, power.source_b
     step = ref.CNOSSOS_RAIL_G6_ALPHA * math.log10(2.0)
     worst = max(
         max(
@@ -280,7 +292,7 @@ def _chk_cnossos_rail_aerodynamic_law() -> Outcome:
     "Impact roughness at the tabulated joint density n_l = 0,01 per m",
 )
 def _chk_cnossos_rail_joint_density() -> Outcome:
-    _, single = ph.environment.impact_roughness_single()
+    single = ph.environment.impact_roughness_single().levels
     frequency_grid = np.asarray(single[:24])
     got = ph.environment.impact_roughness(frequency_grid, 0.01)
     worst = float(np.max(np.abs(got - frequency_grid)))

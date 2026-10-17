@@ -226,10 +226,10 @@ def _record(**over: Any) -> ph.metrology.SoundLevelMeterPeriodicMeasurements:
         "static_pressures_kpa": [100.8, 100.6],
         "air_temperatures_c": [23.1, 23.4],
         "relative_humidities_percent": [45.0, 47.0],
-        "calibration_check_initial_db": 93.9,
-        "calibration_check_adjusted_db": 94.0,
-        "self_noise_microphone_db": 17.2,
-        "self_noise_electrical_db": {"A": 12.1, "C": 14.0, "Z": 19.5},
+        "calibration_check_initial_level": 93.9,
+        "calibration_check_adjusted_level": 94.0,
+        "microphone_self_noise_level": 17.2,
+        "electrical_self_noise_levels": {"A": 12.1, "C": 14.0, "Z": 19.5},
         "acoustic_weighting_deviations_db": [0.0, 0.0],
         "acoustic_weighting_uncertainties_db": [0.3, 0.4],
         "electrical_weighting_deviations_db": {k: [0.0] * 9 for k in "ACZ"},
@@ -244,7 +244,7 @@ def _record(**over: Any) -> ph.metrology.SoundLevelMeterPeriodicMeasurements:
         "linearity_uncertainties_db": [0.2] * len(_STEPS_DB),
         "linearity_levels": list(_STEPS_DB),
         "linear_operating_range_db": [55.0, 120.0],
-        "linearity_starting_point_db": 94.0,
+        "linearity_starting_level": 94.0,
         "linearity_overload_level": 121.0,
         "linearity_under_range_level": 54.0,
         "range_linearity_deviations_db": {"17.3": [0.0], "17.4": [0.0, 0.0]},
@@ -899,7 +899,7 @@ def _chk_correction_data() -> Outcome:
 )
 def _chk_c_from_peak() -> Outcome:
     record_a = _class_2(
-        self_noise_electrical_db={"A": 12.1},
+        electrical_self_noise_levels={"A": 12.1},
         electrical_weighting_deviations_db={"A": [0.0] * 8},
         electrical_weighting_uncertainties_db={"A": [0.15] * 8},
         weighting_at_1khz_deviations_db=None,

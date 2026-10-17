@@ -218,6 +218,7 @@ def table_c4_contribution(n_samples: int, u1: float) -> float:
     :param n_samples: Number of job/full-day samples ``N`` (>= 2).
     :param u1: Standard uncertainty of the samples, dB (>= 0).
     :return: The contribution :math:`c_1 u_1` in dB.
+    :raises TypeError: if ``n_samples`` or ``u1`` is not a single number.
     """
     require_scalar(n_samples, "n_samples")
     require_scalar(u1, "u1")
@@ -252,6 +253,7 @@ def min_cumulative_duration_hours(n_workers: int) -> float:
     :return: The minimum cumulative measurement duration in hours. For
         ``n_G > 40`` the standard advises splitting the group; the returned 17 h
         is the tabulated fallback.
+    :raises TypeError: if ``n_workers`` is not a single number.
     """
     require_scalar(n_workers, "n_workers")
     if n_workers < 1:
@@ -328,6 +330,9 @@ class Task(RichDisplay):
         pass a bare emptiness/sign check, make ``lex_8h`` NaN, and stop the
         exposure plot inside matplotlib with "Axis limits cannot be NaN or
         Inf" -- naming neither the task nor the sample that carried it.
+
+        :raises TypeError: if ``duration_hours`` is not a single number, or ``samples``
+            holds a text or a value that is not a real number.
         """
         if len(self.samples) == 0:
             msg = "A Task needs at least one Lp,A,eqT sample."
@@ -512,6 +517,7 @@ class ExposureResult(RichDisplay):
         :raises ValueError: for an unknown strategy or instrument tag, a
             non-finite level or uncertainty, or a result missing the work
             analysis its strategy reports.
+        :raises TypeError: if ``instrument`` or ``strategy`` is not a text.
         """
         require_choice(self.strategy, "strategy", ("task", "job", "full_day"))
         if self.instrument is not None:
@@ -768,6 +774,7 @@ def task_based_exposure(
     :param warn: Emit :class:`OccupationalExposureWarning` when a task triggers the 3 dB
         spread rule (Clause 9.3).
     :return: An :class:`ExposureResult` with per-task contributions.
+    :raises TypeError: if ``u3`` is not a single number.
     """
     require_scalar(u3, "u3")
     if not tasks:
@@ -900,6 +907,8 @@ def job_based_exposure(
         Table 1 cumulative-duration check.
     :param warn: Emit :class:`OccupationalExposureWarning` for the Table C.4 / Table 1 advisories.
     :return: An :class:`ExposureResult`.
+    :raises TypeError: if ``effective_duration_hours``, ``sample_duration_hours`` or
+        ``u3`` is not a single number.
     """
     require_scalar(sample_duration_hours, "sample_duration_hours")
     if sample_duration_hours is not None and sample_duration_hours <= 0.0:
@@ -952,6 +961,7 @@ def full_day_exposure(
     :param warn: Emit :class:`OccupationalExposureWarning` for the 3 dB spread rule and the
         Table C.4 advisory.
     :return: An :class:`ExposureResult`.
+    :raises TypeError: if ``effective_duration_hours`` or ``u3`` is not a single number.
     """
     arr = np.asarray(samples, dtype=float)
     spread = (

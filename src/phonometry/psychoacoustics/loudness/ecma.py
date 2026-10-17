@@ -737,6 +737,7 @@ def loudness_ecma(
     :return: An :class:`EcmaLoudness` with the single loudness value N
         (Formula 117), the average specific loudness N'(z) (Formula 115) and
         the time-dependent loudness N(l) (Formula 116).
+    :raises TypeError: if ``fs`` is not a single number.
 
     The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
     constant of Formula (23); with the full Clause 6.2.3 averaging this

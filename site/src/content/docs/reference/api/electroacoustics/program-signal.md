@@ -206,6 +206,12 @@ the verdict.
 
 Each band's level, referred by `offset_db`, minus Table II, in dB.
 
+### ProgramSignalCheck.lower_tolerance_db
+
+*property*
+
+The lower tolerances of Table II at the bands, in dB.
+
 ### ProgramSignalCheck.margin_db
 
 *property*
@@ -262,13 +268,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 Table II's relative levels at the bands, in dB.
 
-### ProgramSignalCheck.tolerance_minus_db
-
-*property*
-
-The lower tolerances of Table II at the bands, in dB.
-
-### ProgramSignalCheck.tolerance_plus_db
+### ProgramSignalCheck.upper_tolerance_db
 
 *property*
 
@@ -279,8 +279,8 @@ The upper tolerances of Table II at the bands, in dB.
 ```python
 ProgramSpectrumBand(
     relative_level: float,
-    tolerance_plus_db: float,
-    tolerance_minus_db: float,
+    upper_tolerance_db: float,
+    lower_tolerance_db: float,
 )
 ```
 
@@ -291,8 +291,8 @@ One row of IEC 60268-1:1985 Table II.
 | Name | Description |
 | :--- | :--- |
 | `relative_level` | The relative level of the one-third-octave band, in dB. |
-| `tolerance_plus_db` | The upper tolerance, in dB, as printed (a positive number). |
-| `tolerance_minus_db` | The lower tolerance, in dB, as printed (a positive number). |
+| `upper_tolerance_db` | The upper tolerance, in dB, as printed (a positive number). |
+| `lower_tolerance_db` | The lower tolerance, in dB, as printed (a positive number). |
 
 ## simulated_program_signal
 
@@ -355,6 +355,7 @@ the middle need a few seconds.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid, or `peak_to_rms` is not below the ratio of the unclipped record. |
+| TypeError | if `duration_s`, `peak_to_rms` or `rms` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
 
 ## SIMULATED_PROGRAM_SPECTRUM
 

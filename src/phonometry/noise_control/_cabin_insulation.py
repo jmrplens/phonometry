@@ -124,14 +124,14 @@ __all__ = [
     "MIN_LOUDSPEAKER_SEPARATION_M",
     "MIN_MICROPHONE_HEIGHT_M",
     "MIN_ROOM_TO_CABIN_VOLUME_RATIO",
-    "MIN_SIGNAL_TO_BACKGROUND_DB",
+    "ISO11957_MIN_BACKGROUND_MARGIN_DB",
     "MIN_SOURCE_POSITIONS_IN_SITU",
     "MIN_SOURCE_TO_CABIN_M",
     "MIN_SOURCE_TO_MICROPHONE_IN_SITU_M",
     "MIN_SOURCE_TO_MICROPHONE_M",
     "OPERATOR_PATH_INCLINATION_DEG",
     "OPERATOR_SPHERE_RADIUS_M",
-    "PREFERRED_SIGNAL_TO_BACKGROUND_DB",
+    "ISO11957_PREFERRED_BACKGROUND_MARGIN_DB",
     "STATED_UNCERTAINTY_BAND_RANGE_HZ",
     "WALL_CLEARANCE_FACTOR",
     "BandFlatnessCheck",
@@ -224,8 +224,8 @@ DEFAULT_BAND_FLATNESS_LIMIT_DB: float = 4.0
 
 #: 6.4 and 7.2.1: the margin the level inside the cabin keeps over the
 #: background, and the margin the standard would rather have.
-MIN_SIGNAL_TO_BACKGROUND_DB: float = 6.0
-PREFERRED_SIGNAL_TO_BACKGROUND_DB: float = 12.0
+ISO11957_MIN_BACKGROUND_MARGIN_DB: float = 6.0
+ISO11957_PREFERRED_BACKGROUND_MARGIN_DB: float = 12.0
 
 #: 6.7: the internal noise level is corrected for the background only inside
 #: this window. Below it the measurement does not stand; above it the
@@ -315,11 +315,11 @@ def _corrected(
         msg = f"'{where}_background_levels' must match '{where}_levels' band for band."
         raise ValueError(msg)
     margin = levels - background
-    if float(np.min(settled(margin))) < MIN_SIGNAL_TO_BACKGROUND_DB:
+    if float(np.min(settled(margin))) < ISO11957_MIN_BACKGROUND_MARGIN_DB:
         msg = (
-            f"ISO 11957 asks for at least {MIN_SIGNAL_TO_BACKGROUND_DB:g} dB over "
+            f"ISO 11957 asks for at least {ISO11957_MIN_BACKGROUND_MARGIN_DB:g} dB over "
             f"the background in the {where}, and preferably more than "
-            f"{PREFERRED_SIGNAL_TO_BACKGROUND_DB:g} dB; the smallest margin is "
+            f"{ISO11957_PREFERRED_BACKGROUND_MARGIN_DB:g} dB; the smallest margin is "
             f"{float(np.min(margin)):.1f} dB."
         )
         warnings.warn(msg, CabinInsulationWarning, stacklevel=3)
@@ -370,6 +370,8 @@ class CabinInsulationResult(OwnsArrays):
         :raises ValueError: if ``method`` is not one of the three, an
             A-weighted insulation is carried under another method, or
             ``fraction`` is not 1 or 3.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float), or ``method`` is not a text.
         """
         require_band_fraction(self.fraction, "fraction")
         how = require_choice(self.method, "method", _METHODS)
@@ -450,6 +452,7 @@ class WeightedCabinInsulation(OwnsArrays):
         """Reject a method the standard does not describe.
 
         :raises ValueError: if ``method`` is not one of the three.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_choice(self.method, "method", _METHODS)
 
@@ -487,6 +490,8 @@ class SourcePositionCheck(RichDisplay):
         :raises ValueError: For fewer than
             :data:`MIN_SOURCE_POSITIONS_IN_SITU` positions or a spread that is
             negative or not finite.
+        :raises TypeError: if ``max_octave_spread_db`` or ``n_positions_used`` is not a
+            single number.
         """
         require_scalar(self.n_positions_used, "n_positions_used")
         if int(self.n_positions_used) < MIN_SOURCE_POSITIONS_IN_SITU:
@@ -663,6 +668,8 @@ class CabinUncertainty(RichDisplay):
 
         :raises ValueError: if ``method`` is not one of the three, or the
             volume ratio is not positive and finite.
+        :raises TypeError: if ``method`` is not a text, or ``volume_ratio`` is not a
+            single number.
         """
         require_choice(self.method, "method", _METHODS)
         require_positive(self.volume_ratio, "volume_ratio")
@@ -732,7 +739,7 @@ def cabin_insulation(
 
     Where a background spectrum is supplied it is taken off first, by the
     ISO 3741 correction 6.4 asks for, and a margin under
-    :data:`MIN_SIGNAL_TO_BACKGROUND_DB` is reported.
+    :data:`ISO11957_MIN_BACKGROUND_MARGIN_DB` is reported.
 
     :param room_levels: :math:`(L_p)_{\text{room}}` per band, in decibels.
     :param cabin_levels: :math:`(L_p)_{\text{cabin}}` per band, in decibels.
@@ -753,6 +760,11 @@ def cabin_insulation(
     :raises ValueError: For spectra that do not match, an unknown method or
         band fraction, or an A-weighted pair under a method that does not
         define one.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``a_weighted_cabin_level``, ``a_weighted_room_level`` or
+        ``internal_noise_level`` is not a single number, or ``cabin_background_levels``,
+        ``cabin_levels``, ``frequencies``, ``room_background_levels`` or ``room_levels``
+        holds a text or a value that is not a real number.
     """
     room = require_finite_array(room_levels, "room_levels")
     cabin = require_finite_array(cabin_levels, "cabin_levels")
@@ -839,6 +851,8 @@ def weighted_cabin_insulation(
     :return: The rating, as a :class:`WeightedCabinInsulation`.
     :raises ValueError: For a spectrum that is not the rating bands, an
         unknown method or a band set other than 1 or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``insulation`` holds a text or a value that is not a real number.
     """
     from ..building import weighted_rating
 
@@ -890,6 +904,8 @@ def estimated_cabin_noise_insulation(
     :param frequencies: Nominal band centres, in hertz.
     :return: :math:`D_{p\mathrm{A},\mathrm{e}}` or :math:`D'_{p\mathrm{A},\mathrm{e}}`, in decibels.
     :raises ValueError: For inputs that do not match band for band.
+    :raises TypeError: if ``frequencies``, ``insulation`` or ``spectrum_levels`` holds a
+        text or a value that is not a real number.
     """
     levels = require_finite_array(spectrum_levels, "spectrum_levels")
     loss = require_finite_array(insulation, "insulation")
@@ -918,7 +934,7 @@ def internal_noise_level(
     the external sources switched off.
 
     The background rule of 6.7 is not the one of 6.4. The margin over the
-    background must reach :data:`MIN_SIGNAL_TO_BACKGROUND_DB`, and the
+    background must reach :data:`ISO11957_MIN_BACKGROUND_MARGIN_DB`, and the
     correction is made **only** while the margin stays inside
     :data:`INTERNAL_NOISE_CORRECTION_WINDOW_DB`: past the top of that window
     the correction is under a tenth of a decibel and the clause does not ask
@@ -933,6 +949,8 @@ def internal_noise_level(
         the integral sources switched off, in decibels.
     :return: :math:`L_{pA}`, in decibels.
     :raises ValueError: For an empty or non-finite set of levels.
+    :raises TypeError: if ``background_level`` is not a single number, or ``levels``
+        holds a text or a value that is not a real number.
     """
     values = require_finite_array(levels, "levels")
     if values.size == 0:
@@ -950,7 +968,7 @@ def internal_noise_level(
         msg = (
             f"ISO 11957 6.7 asks for at least {lower:g} dB over the background "
             f"inside the cabin, and preferably more than "
-            f"{PREFERRED_SIGNAL_TO_BACKGROUND_DB:g} dB; the margin is "
+            f"{ISO11957_PREFERRED_BACKGROUND_MARGIN_DB:g} dB; the margin is "
             f"{margin:.1f} dB, so L_pA is an upper bound."
         )
         warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
@@ -983,6 +1001,8 @@ def check_source_positions(
     :return: The verdict, as a :class:`SourcePositionCheck`.
     :raises ValueError: For fewer than :data:`MIN_SOURCE_POSITIONS_IN_SITU`
         positions, or an array that is not rectangular.
+    :raises TypeError: if ``insulation_by_position`` holds a text or a value that is not
+        a real number.
     """
     values = require_finite_matrix(insulation_by_position, "insulation_by_position")
     positions = int(values.shape[0])
@@ -1036,6 +1056,8 @@ def check_band_flatness(
     :raises ValueError: For inputs that do not match, a frequency that names no
         one-third-octave band, a band given twice, or an octave that is not
         covered by its three bands.
+    :raises TypeError: if ``frequencies`` or ``third_octave_levels`` holds a text or a
+        value that is not a real number.
     """
     levels = require_finite_array(third_octave_levels, "third_octave_levels")
     freqs = require_finite_array(frequencies, "frequencies")
@@ -1092,6 +1114,8 @@ def min_cabin_clearance_m(
     :param speed_of_sound: Speed of sound in the room, in metres per second.
     :return: The least clearance, in metres.
     :raises ValueError: For a non-positive frequency or speed.
+    :raises TypeError: if ``lowest_band_frequency_hz`` or ``speed_of_sound`` is not a
+        single number.
     """
     frequency = require_positive(lowest_band_frequency_hz, "lowest_band_frequency_hz")
     celerity = require_positive(speed_of_sound, "speed_of_sound")
@@ -1131,6 +1155,8 @@ def uncertainty_conditions(
         ``"in-situ-actual-noise"``.
     :return: The statement, as a :class:`CabinUncertainty`.
     :raises ValueError: For a non-positive volume or an unknown method.
+    :raises TypeError: if ``cabin_volume_m3`` or ``room_volume_m3`` is not a single
+        number.
     """
     room = require_positive(room_volume_m3, "room_volume_m3")
     cabin = require_positive(cabin_volume_m3, "cabin_volume_m3")

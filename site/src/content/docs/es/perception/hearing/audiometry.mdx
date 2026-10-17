@@ -119,7 +119,7 @@ print(hearing.check_audiometric_ambient_noise(
 ```
 
 Una medición a la que le faltan bandas se juzga en las que tiene y no cumple: la
-sala no demuestra cumplir las bandas que nadie midió. `noise_floor_db=` señala
+sala no demuestra cumplir las bandas que nadie midió. `noise_floor_levels=` señala
 las bandas donde la lectura queda a menos de 6 dB del ruido de fondo propio del
 sonómetro, que el 11.1 prohíbe; esa lectura sobrestima la sala, así que una
 banda dentro de su límite sigue estándolo, y una por encima puede serlo por
@@ -146,7 +146,7 @@ series = hearing.ascending_method_threshold(
     familiarization_level=40.0,
 )
 print(series.ascent_levels)   # [25. 25. 20. 25.]
-print(series.threshold_db)       # 25.0
+print(series.threshold_level)       # 25.0
 print(series.doubtful)           # False: los ascensos abarcan 5 dB, no más de 10 dB
 
 # Reproducida sobre la marcha, la misma regla dice qué presentar después.
@@ -179,7 +179,7 @@ biblioteca lee «más próximo» siempre que una norma deja abierto el empate:
 
 ```python
 bracket = hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35])
-print(bracket.mean_db, bracket.threshold_db)   # 32.5 35.0
+print(bracket.mean_level, bracket.threshold_level)   # 32.5 35.0
 print(bracket.complete, bracket.repeat_advised)  # True False
 ```
 
@@ -199,9 +199,9 @@ siguiente, es el umbral:
 tracing = hearing.automatic_audiometry_threshold(
     [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
 )
-print(tracing.peaks_db)                      # [31. 32. 30. 31.]
-print(tracing.valleys_db)                    # [22. 21. 20. 19. 20. 21.]
-print(tracing.mean_db, tracing.threshold_db) # 25.75 26.0
+print(tracing.peak_levels)                      # [31. 32. 30. 31.]
+print(tracing.valley_levels)                    # [22. 21. 20. 19. 20. 21.]
+print(tracing.mean_level, tracing.threshold_level) # 25.75 26.0
 ```
 
 El registro es de fiabilidad dudosa cuando los picos o los valles se dispersan
@@ -244,7 +244,7 @@ reversal_levels = [34, 24, 33, 23, 35, 25, 36, 24, 38, 27, 40, 29,
 sweep = hearing.sweep_audiometry_threshold(reversal_levels,
                                            reversal_frequencies=reversal_frequencies)
 print(sweep.frequencies)     # [ 500.  750. 1000. 1500. 2000. 3000. 4000.]
-print(sweep.threshold_db)    # [29. 29. 30. 32. 36. 40. 40.]
+print(sweep.threshold_level)    # [29. 29. 30. 32. 36. 40. 40.]
 print(np.round(sweep.running_frequencies[:2]))  # [679. 767.]
 ```
 
@@ -268,8 +268,8 @@ print(repeat.passes, repeat.retest_further_frequencies)   # False True
 
 cautions = hearing.audiogram_cautions(
     [250, 500, 1000, 2000, 4000],
-    air_conduction_db=[20, 25, 30, 45, 55],
-    bone_conduction_db=[40, 20, 25, 40, 50],
+    air_conduction_threshold_levels=[20, 25, 30, 45, 55],
+    bone_conduction_threshold_levels=[40, 20, 25, 40, 50],
 )
 print(cautions.cross_hearing)   # [False False False  True  True]
 print(cautions.vibrotactile)    # [ True False False False False]
@@ -305,18 +305,18 @@ la Tabla A.2:
 
 ```python
 budget = hearing.audiometric_uncertainty(1000.0)
-print(np.round(budget.components_db[:4], 1))           # [2.5 2.3 2.9 2. ]
-print(round(budget.combined_db, 1), round(budget.expanded_db))  # 4.9 10
+print(np.round(budget.standard_uncertainties_db[:4], 1))           # [2.5 2.3 2.9 2. ]
+print(round(budget.combined_uncertainty_db, 1), round(budget.expanded_uncertainty_db))  # 4.9 10
 
 # Vía ósea por encima de 4 kHz con ruido de enmascaramiento: crecen todos.
 masked_bone = hearing.audiometric_uncertainty(6000.0, conduction="bone", masked=True)
-print(round(masked_bone.expanded_db, 1))               # 15.3
+print(round(masked_bone.expanded_uncertainty_db, 1))               # 15.3
 ```
 
 Una incertidumbre expandida de 10 dB son dos pasos del audiómetro a cada lado,
-que es lo que puede afirmar un único audiograma. `environment_db=` sustituye los
+que es lo que puede afirmar un único audiograma. `environment_uncertainty_db=` sustituye los
 2 dB del A.3.5 para una sala que supera el apartado 11, o los suprime para
-umbrales muy por encima de 0 dB, y `tester_db=`, `subject_db=` y `special_db=`
+umbrales muy por encima de 0 dB, y `tester_uncertainty_db=`, `subject_uncertainty_db=` y `special_uncertainty_db=`
 llevan las componentes excepcionales de los apartados A.3.7 a A.3.9;
 `budget.plot(language="es")` dibuja las ocho como barras.
 

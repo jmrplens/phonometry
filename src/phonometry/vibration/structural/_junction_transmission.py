@@ -177,6 +177,7 @@ from ..._internal.validation import (
     require_choice,
     require_count,
     require_positive,
+    require_present,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -212,11 +213,29 @@ __all__ = [
     "inline_transmission_coefficient",
     "junction_transmission",
     "junction_wave_parameters",
+    "JunctionWaveParameters",
     "point_connection_coupling_loss_factor",
     "right_angle_transmission_coefficient",
     "straight_transmission_coefficient",
     "wave_vibration_reduction_index",
 ]
+
+
+@dataclass(frozen=True)
+class JunctionWaveParameters(OwnsArrays):
+    r"""The wave parameters of a rigid plate junction (Hopkins Eqs. 5.10/5.11, p. 541).
+
+    What :func:`junction_wave_parameters` returns: :math:`\chi` and
+    :math:`\psi`, named, where a ``(chi, psi)`` tuple used to be unpacked by
+    position.
+
+    :ivar chi: :math:`\chi`, the ratio of the bending wavenumbers.
+    :ivar psi: :math:`\psi`, the ratio of the bending stiffnesses scaled by
+        the wavenumbers.
+    """
+
+    chi: float
+    psi: float
 
 
 def junction_wave_parameters(
@@ -226,7 +245,7 @@ def junction_wave_parameters(
     thickness2_m: float,
     wave_speed2: float,
     surface_density2: float,
-) -> tuple[float, float]:
+) -> JunctionWaveParameters:
     r"""Wave parameters ``chi`` and ``psi`` of a plate pair (Hopkins 5.10/5.11).
 
     :math:`\chi = \sqrt{h_1 c_{\mathrm{L}1} / (h_2 c_{\mathrm{L}2})}` (Eq. 5.10) and
@@ -243,8 +262,11 @@ def junction_wave_parameters(
         (> 0).
     :param surface_density2: Surface density ``rho_s2`` of plate 2, in kg/m^2
         (> 0).
-    :return: The pair ``(chi, psi)``.
+    :return: :math:`\chi` and :math:`\psi`, as a
+        :class:`JunctionWaveParameters`.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``surface_density1``, ``surface_density2``, ``thickness1_m``,
+        ``thickness2_m``, ``wave_speed1`` or ``wave_speed2`` is not a single number.
     """
     h1 = require_positive(thickness1_m, "thickness1_m")
     c1 = require_positive(wave_speed1, "wave_speed1")
@@ -256,7 +278,7 @@ def junction_wave_parameters(
     hc2 = h2 * c2
     chi = math.sqrt(hc1 / hc2)
     psi = (hc2 * r2) / (hc1 * r1)
-    return chi, psi
+    return JunctionWaveParameters(chi=chi, psi=psi)
 
 
 def _critical_frequency(thickness: float, wave_speed: float) -> float:
@@ -322,6 +344,7 @@ def corner_transmission_coefficient(
     :return: ``tau12(theta)`` (same shape as *angle*).
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle or an unknown junction.
+    :raises TypeError: if ``chi`` or ``psi`` is not a single number.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
@@ -354,6 +377,7 @@ def straight_transmission_coefficient(
     :return: ``tau13(theta)`` (same shape as *angle*).
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle, or a junction without a straight section.
+    :raises TypeError: if ``chi`` or ``psi`` is not a single number.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
@@ -392,6 +416,7 @@ def inline_transmission_coefficient(chi: float, psi: float) -> float:
     :param psi: Wave parameter ``psi`` (Eq. 5.11, > 0).
     :return: ``tau12(0 deg)``.
     :raises ValueError: for a non-positive ``chi``/``psi``.
+    :raises TypeError: if ``chi`` or ``psi`` is not a single number.
     """
     c = require_positive(chi, "chi")
     p = require_positive(psi, "psi")
@@ -421,6 +446,7 @@ def angular_average_transmission_coefficient(
     :return: The angular-average transmission coefficient ``tau_bar``.
     :raises ValueError: for a non-positive ``chi``/``psi``, an unknown junction
         or section, or a straight section that does not exist.
+    :raises TypeError: if ``chi`` is not a single number.
     """
     require_scalar(chi, "chi")
     section = require_choice(str(section).lower(), "section", ("corner", "straight"))
@@ -468,6 +494,8 @@ def coupling_loss_factor(
     :return: The coupling loss factor ``eta_ij`` (broadcast of the inputs).
     :raises ValueError: for a non-positive input, or a coefficient and a
         frequency whose shapes cannot be broadcast together.
+    :raises TypeError: if ``group_velocity``, ``junction_length`` or ``plate_area`` is
+        not a single number.
     """
     tau = np.asarray(transmission_coefficient, dtype=np.float64)
     if np.any(tau < 0.0):
@@ -540,6 +568,9 @@ def right_angle_transmission_coefficient(
         (Eq. 6.53 alone).
     :return: The transmission coefficient ``tau12``.
     :raises ValueError: for a non-positive input or an unknown incidence.
+    :raises TypeError: if ``incidence`` is not a text, or ``density1``, ``density2``,
+        ``thickness1_m``, ``thickness2_m``, ``wave_speed1`` or ``wave_speed2`` is not a
+        single number.
     """
     h_1 = require_positive(thickness1_m, "thickness1_m")
     h_2 = require_positive(thickness2_m, "thickness2_m")
@@ -609,6 +640,10 @@ def point_connection_coupling_loss_factor(
     :param plate_area1: Source-plate area ``S1``, in m^2 (> 0).
     :return: The coupling loss factor ``eta_12`` per band.
     :raises ValueError: for a non-positive or non-integer input.
+    :raises TypeError: if ``plate_area1``, ``surface_density1``, ``surface_density2``,
+        ``thickness1_m``, ``thickness2_m``, ``wave_speed1`` or ``wave_speed2`` is not a
+        single number, or ``n_connections`` is a flag, a text or an array where a count
+        goes.
     """
     freq = np.asarray(frequency, dtype=np.float64)
     if np.any(freq <= 0.0):
@@ -662,6 +697,7 @@ def wave_vibration_reduction_index(
         receiving plate, in hertz (> 0).
     :return: The vibration reduction index ``K_ij``, in dB.
     :raises ValueError: for a non-positive ``tau`` or ``fc_j``.
+    :raises TypeError: if ``critical_frequency_receiver`` is not a single number.
     """
     tau = np.asarray(transmission_coefficient, dtype=np.float64)
     if np.any(tau <= 0.0):
@@ -690,10 +726,8 @@ class JunctionTransmissionResult(OwnsArrays):
     :ivar corner_average: Diffuse-field angular average ``tau_bar_12`` (Eq. 5.6).
     :ivar straight_average: Angular average ``tau_bar_13``, or ``None``.
     :ivar thickness1_m: Plate 1 thickness, in metres, retained (with
-        ``thickness2_m``) so :meth:`plot_geometry` can draw the junction;
-        appended after the original fields and ``None`` for hand-built
-        results.
-    :ivar thickness2_m: Plate 2 thickness, in metres, or ``None``.
+        ``thickness2_m``) so :meth:`plot_geometry` can draw the junction.
+    :ivar thickness2_m: Plate 2 thickness, in metres.
     """
 
     junction: str
@@ -707,8 +741,8 @@ class JunctionTransmissionResult(OwnsArrays):
     corner_average: float
     straight_average: float | None
     _: KW_ONLY
-    thickness1_m: float | None = None
-    thickness2_m: float | None = None
+    thickness1_m: float
+    thickness2_m: float
 
     def __post_init__(self) -> None:
         r"""Reject coefficients that do not lie on the junction's angle grid.
@@ -732,7 +766,9 @@ class JunctionTransmissionResult(OwnsArrays):
 
         :raises ValueError: if the transmission coefficients do not lie on the
             incidence-angle grid.
+        :raises TypeError: if a plate thickness is ``None``.
         """
+        require_present(self, "thickness1_m", "thickness2_m")
         require_ranks(self, angles_deg=1, corner=1, straight=1)
         require_same_length(
             self, "angles_deg", "corner", "straight", axis="incidence angle"
@@ -775,8 +811,6 @@ class JunctionTransmissionResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_junction_result_geometry
@@ -823,7 +857,7 @@ def junction_transmission(
     :raises ValueError: for a non-positive input or an unknown junction.
     """
     name = require_choice(str(junction).upper(), "junction", tuple(_JUNCTIONS))
-    chi, psi = junction_wave_parameters(
+    params = junction_wave_parameters(
         thickness1_m,
         wave_speed1,
         surface_density1,
@@ -831,6 +865,7 @@ def junction_transmission(
         wave_speed2,
         surface_density2,
     )
+    chi, psi = params.chi, params.psi
     if angles_deg is None:
         grid = np.linspace(0.0, 90.0, 91)
     else:

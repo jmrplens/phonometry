@@ -154,6 +154,12 @@ Initialize the Octave Filter Bank.
 | `block_processing` | Whether the bank carries its filter state between calls, and how that state starts ([`BlockProcessing`](/phonometry/reference/api/filters/core/#blockprocessing)). |
 | `response_plot` | Whether to show or save the filter response plot drawn while designing the bank ([`ResponsePlot`](/phonometry/reference/api/filters/core/#responseplot)). |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction`, `fs` or `order` is not a single number. |
+
 ### OctaveFilterBank.filter()
 
 ```python
@@ -237,6 +243,12 @@ Short-time fractional-octave analysis: level per band over time.
 | `zero_phase` | If True, filter bands forward-backward so their group delays don't skew the frames (offline analysis only). |
 
 **Returns:** An [`OctaveSpectrogramResult`](/phonometry/reference/api/filters/core/#octavespectrogramresult). Its `levels` are shaped `(bands, frames)` for 1D input and `(channels, bands, frames)` for 2D input, `frequencies` holds the exact mid-band frequencies and `times` each window's centre in seconds.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `overlap` or `window_time` is not a single number. |
 
 ### OctaveFilterBank.upper_edges
 

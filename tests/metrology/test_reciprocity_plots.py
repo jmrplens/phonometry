@@ -274,7 +274,9 @@ def test_parameter_uncertainty_draws_each_component(ax: Axes, field: str) -> Non
             **_CONDITIONS,
         )
     result.plot(ax, language="es")
-    for line, values in zip(ax.get_lines(), result.components_db.values(), strict=True):
+    for line, values in zip(
+        ax.get_lines(), result.component_uncertainties_db.values(), strict=True
+    ):
         np.testing.assert_allclose(line.get_ydata(), values)
     part = "IEC 61094-2, 7.5" if field == "pressure" else "IEC 61094-3, 7.8"
     assert (

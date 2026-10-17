@@ -109,7 +109,7 @@ they describe the plane-wave mode alone and a measurement will show the rest.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -120,6 +120,7 @@ from .._internal.validation import (
     check_engine,
     require_non_negative,
     require_positive,
+    require_present,
     require_ranks,
     require_same_length,
 )
@@ -216,6 +217,8 @@ def duct_matrix(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
     :return: A ``(n_freq, 2, 2)`` complex transfer-matrix array.
+    :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
+        a single number.
     """
     f = _frequencies(frequencies)
     length = require_non_negative(length, "length")
@@ -341,6 +344,8 @@ def transmission_loss(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
     :return: The transmission loss per frequency, dB.
+    :raises TypeError: if ``density``, ``inlet_area``, ``outlet_area`` or
+        ``speed_of_sound`` is not a single number.
     """
     s_in = require_positive(inlet_area, "inlet_area")
     s_out = require_positive(outlet_area, "outlet_area")
@@ -427,6 +432,8 @@ def helmholtz_impedance(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
     :return: The complex branch impedance per frequency, Pa s/m3.
+    :raises TypeError: if ``cavity_volume``, ``density``, ``neck_area``,
+        ``neck_length``, ``resistance`` or ``speed_of_sound`` is not a single number.
     """
     f = _frequencies(frequencies)
     s_neck = require_positive(neck_area, "neck_area")
@@ -461,6 +468,8 @@ def quarter_wave_impedance(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
     :return: The complex branch impedance per frequency, Pa s/m3.
+    :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
+        a single number.
     """
     f = _frequencies(frequencies)
     le = require_positive(length, "length")
@@ -536,8 +545,8 @@ class ReactiveSilencerResult(OwnsArrays):
     :ivar geometry: The defining geometry the constructor was called with
         (keys matching its keyword names, e.g. ``length``/``chamber_area``/
         ``pipe_area`` for a chamber), retained so :meth:`plot_geometry` can
-        draw the device; appended after the original fields and ``None`` for
-        hand-built results that were not assembled by a :class:`SilencerChain`.
+        draw the device, or ``None`` for a result assembled by a
+        :class:`SilencerChain`, which carries its geometry in ``chain``.
     :ivar plane_wave_limit: The first higher-order-mode cut-on frequency of the
         widest cross section of the device, Hz (Norton & Karczub Eq. 7.6,
         :func:`phonometry.noise_control.duct_modes.plane_wave_limit`). The
@@ -545,13 +554,13 @@ class ReactiveSilencerResult(OwnsArrays):
         it; above it several modes propagate at once and the result describes
         the plane-wave mode only, which is why a
         :class:`~phonometry.noise_control.duct_modes.PlaneWaveWarning` is
-        raised when the analysis reaches past it. ``None`` for hand-built
-        results that do not retain their geometry.
+        raised when the analysis reaches past it.
     :ivar chain: The :class:`SilencerChain` that assembled this result, for a
-        result built by :meth:`SilencerChain.result`, and ``None`` otherwise.
-        A chain is a list of four-pole elements rather than a named device, so
-        it carries its geometry element by element instead of in ``geometry``;
-        :meth:`plot_geometry` draws whichever of the two is present.
+        result built by :meth:`SilencerChain.result`, and ``None`` for a
+        named device. A chain is a list of four-pole elements rather than a
+        named device, so it carries its geometry element by element instead of
+        in ``geometry``; exactly one of the two is present, and
+        :meth:`plot_geometry` draws it.
     """
 
     frequencies: np.ndarray
@@ -559,10 +568,11 @@ class ReactiveSilencerResult(OwnsArrays):
     insertion_loss: np.ndarray | None
     transfer_matrix: np.ndarray
     kind: str
-    resonances: np.ndarray | None = None
-    geometry: dict[str, float] | None = None
-    plane_wave_limit: float | None = None
-    chain: SilencerChain | None = None
+    _: KW_ONLY
+    resonances: np.ndarray | None
+    geometry: dict[str, float] | None
+    plane_wave_limit: float
+    chain: SilencerChain | None
 
     def __post_init__(self) -> None:
         """Reject a device whose curves do not all run over the same grid.
@@ -602,7 +612,17 @@ class ReactiveSilencerResult(OwnsArrays):
         :raises ValueError: if the curves disagree, the matrix is not a
             stack of four-poles over frequency, or the retained geometry
             carries an unknown key or a value that is not a finite number.
+        :raises TypeError: if ``plane_wave_limit`` is ``None``, or not
+            exactly one of ``geometry`` and ``chain`` is given.
         """
+        require_present(self, "plane_wave_limit")
+        if (self.geometry is None) == (self.chain is None):
+            msg = (
+                f"{type(self).__name__}: exactly one of 'geometry' (a named "
+                "device) and 'chain' (a SilencerChain) is required; got "
+                f"{'neither' if self.geometry is None else 'both'}."
+            )
+            raise TypeError(msg)
         if self.geometry is not None:
             unknown = sorted(set(self.geometry) - _GEOMETRY_KEYS)
             if unknown:
@@ -657,8 +677,10 @@ class ReactiveSilencerResult(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :return: The axes.
-        :raises ValueError: If the result retains neither its ``geometry`` nor
-            the ``chain`` that built it.
+        :raises ValueError: If ``language`` is not one the labels are written
+            in, or the retained ``geometry`` cannot be drawn: an expansion
+            chamber no wider than its pipe, or inlet and outlet extensions
+            that together exceed its length.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_silencer_result_geometry
@@ -746,16 +768,20 @@ def _result(
     ``geometry``; a :class:`SilencerChain` has one per element and passes them
     in ``areas``.
     """
-    limit: float | None = None
     if areas is None and geometry is not None:
         areas = [
             value
             for key, value in geometry.items()
             if key.endswith("_area") and value > 0.0
         ]
-    if areas:
-        limit = _plane_wave_limit(area=max(areas), speed_of_sound=c)
-        _warn_above_plane_wave_limit(f, limit, kind, stacklevel=4)
+    if not areas:
+        msg = (
+            f"a {kind} needs the cross sections of its device to know where "
+            "the plane-wave analysis stops; none was declared."
+        )
+        raise ValueError(msg)
+    limit = _plane_wave_limit(area=max(areas), speed_of_sound=c)
+    _warn_above_plane_wave_limit(f, limit, kind, stacklevel=4)
     tl = transmission_loss(
         t,
         inlet_area=inlet_area,
@@ -809,6 +835,8 @@ def expansion_chamber(
     :return: A :class:`ReactiveSilencerResult` (its ``transmission_loss``
         equals the closed form
         :math:`10 \log_{10}[1 + (1/4)(m - 1/m)^2 \sin^2(kL)]`).
+    :raises TypeError: if ``chamber_area``, ``density``, ``pipe_area`` or
+        ``speed_of_sound`` is not a single number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -861,6 +889,8 @@ def helmholtz_resonator(
     :param radiation_impedance: Optional radiation impedance ``Z_r``, Pa s/m3.
     :return: A :class:`ReactiveSilencerResult`; ``resonances`` holds
         :math:`f_0 = (c / 2 \pi) \sqrt{S_{\mathrm{neck}} / (l_\mathrm{e} V)}`.
+    :raises TypeError: if ``density``, ``duct_area`` or ``speed_of_sound`` is not a
+        single number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -920,6 +950,8 @@ def quarter_wave_resonator(
     :param radiation_impedance: Optional radiation impedance ``Z_r``, Pa s/m3.
     :return: A :class:`ReactiveSilencerResult`; ``resonances`` holds the odd
         multiples of :math:`f = c / (4 l_\mathrm{e})` within the frequency range.
+    :raises TypeError: if ``density``, ``duct_area``, ``length`` or ``speed_of_sound``
+        is not a single number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -998,6 +1030,9 @@ def extended_tube_chamber(
     :param source_impedance: Optional source impedance ``Z_s``, Pa s/m3.
     :param radiation_impedance: Optional radiation impedance ``Z_r``, Pa s/m3.
     :return: A :class:`ReactiveSilencerResult`.
+    :raises TypeError: if ``chamber_area``, ``density``, ``inlet_extension``,
+        ``length``, ``outlet_extension``, ``pipe_area`` or ``speed_of_sound`` is not a
+        single number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -1142,6 +1177,7 @@ class SilencerChain:
         element of the chain.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
+    :raises TypeError: if ``density`` or ``speed_of_sound`` is not a single number.
     """
 
     def __init__(
@@ -1189,6 +1225,7 @@ class SilencerChain:
             identity matrix, so it is neither computed against nor drawn.
         :param area: Cross-sectional area ``S``, m2.
         :return: The chain, so the calls can be written one after another.
+        :raises TypeError: if ``area`` or ``length`` is not a single number.
         """
         length = require_non_negative(length, "length")
         area = require_positive(area, "area")

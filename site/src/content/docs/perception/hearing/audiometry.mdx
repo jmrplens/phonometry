@@ -117,7 +117,7 @@ print(hearing.check_audiometric_ambient_noise(
 ```
 
 A measurement that leaves bands out is judged on those it has and does not
-pass: the room is not shown to meet the bands nobody measured. `noise_floor_db=`
+pass: the room is not shown to meet the bands nobody measured. `noise_floor_levels=`
 flags the bands where the reading is within 6 dB of the meter's own floor,
 which 11.1 forbids; such a reading overstates the room, so a band within its
 limit still is, and one over it may be the meter's.
@@ -143,7 +143,7 @@ series = hearing.ascending_method_threshold(
     familiarization_level=40.0,
 )
 print(series.ascent_levels)   # [25. 25. 20. 25.]
-print(series.threshold_db)       # 25.0
+print(series.threshold_level)       # 25.0
 print(series.doubtful)           # False: the ascents span 5 dB, not over 10 dB
 
 # Replayed as it happens, the same rule says what to present next.
@@ -175,7 +175,7 @@ halfway between two steps goes to the higher one, the library's reading of
 
 ```python
 bracket = hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35])
-print(bracket.mean_db, bracket.threshold_db)   # 32.5 35.0
+print(bracket.mean_level, bracket.threshold_level)   # 32.5 35.0
 print(bracket.complete, bracket.repeat_advised)  # True False
 ```
 
@@ -194,9 +194,9 @@ the two averages, **rounded up** to the next whole decibel, is the threshold:
 tracing = hearing.automatic_audiometry_threshold(
     [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
 )
-print(tracing.peaks_db)                      # [31. 32. 30. 31.]
-print(tracing.valleys_db)                    # [22. 21. 20. 19. 20. 21.]
-print(tracing.mean_db, tracing.threshold_db) # 25.75 26.0
+print(tracing.peak_levels)                      # [31. 32. 30. 31.]
+print(tracing.valley_levels)                    # [22. 21. 20. 19. 20. 21.]
+print(tracing.mean_level, tracing.threshold_level) # 25.75 26.0
 ```
 
 The recording is of doubtful reliability when the peaks or the valleys spread
@@ -238,7 +238,7 @@ reversal_levels = [34, 24, 33, 23, 35, 25, 36, 24, 38, 27, 40, 29,
 sweep = hearing.sweep_audiometry_threshold(reversal_levels,
                                            reversal_frequencies=reversal_frequencies)
 print(sweep.frequencies)     # [ 500.  750. 1000. 1500. 2000. 3000. 4000.]
-print(sweep.threshold_db)    # [29. 29. 30. 32. 36. 40. 40.]
+print(sweep.threshold_level)    # [29. 29. 30. 32. 36. 40. 40.]
 print(np.round(sweep.running_frequencies[:2]))  # [679. 767.]
 ```
 
@@ -262,8 +262,8 @@ print(repeat.passes, repeat.retest_further_frequencies)   # False True
 
 cautions = hearing.audiogram_cautions(
     [250, 500, 1000, 2000, 4000],
-    air_conduction_db=[20, 25, 30, 45, 55],
-    bone_conduction_db=[40, 20, 25, 40, 50],
+    air_conduction_threshold_levels=[20, 25, 30, 45, 55],
+    bone_conduction_threshold_levels=[40, 20, 25, 40, 50],
 )
 print(cautions.cross_hearing)   # [False False False  True  True]
 print(cautions.vibrotactile)    # [ True False False False False]
@@ -297,18 +297,18 @@ and 2 dB for a room that meets Clause 11. That is the example of Table A.2:
 
 ```python
 budget = hearing.audiometric_uncertainty(1000.0)
-print(np.round(budget.components_db[:4], 1))           # [2.5 2.3 2.9 2. ]
-print(round(budget.combined_db, 1), round(budget.expanded_db))  # 4.9 10
+print(np.round(budget.standard_uncertainties_db[:4], 1))           # [2.5 2.3 2.9 2. ]
+print(round(budget.combined_uncertainty_db, 1), round(budget.expanded_uncertainty_db))  # 4.9 10
 
 # Bone conduction above 4 kHz with masking noise: every component grows.
 masked_bone = hearing.audiometric_uncertainty(6000.0, conduction="bone", masked=True)
-print(round(masked_bone.expanded_db, 1))               # 15.3
+print(round(masked_bone.expanded_uncertainty_db, 1))               # 15.3
 ```
 
 An expanded uncertainty of 10 dB is two audiometer steps either way, which is
-what a single audiogram can claim. `environment_db=` replaces the 2 dB of A.3.5
+what a single audiogram can claim. `environment_uncertainty_db=` replaces the 2 dB of A.3.5
 for a room that exceeds Clause 11, or drops it for thresholds well above 0 dB,
-and `tester_db=`, `subject_db=` and `special_db=` carry the exceptional
+and `tester_uncertainty_db=`, `subject_uncertainty_db=` and `special_uncertainty_db=` carry the exceptional
 components of A.3.7 to A.3.9; `budget.plot()` draws the eight as bars.
 
 ## The sound field (ISO 8253-2)

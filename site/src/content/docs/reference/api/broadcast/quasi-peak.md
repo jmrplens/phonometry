@@ -170,6 +170,7 @@ scale came out.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the record is empty or not 1-D, if *fs* is not positive, if *reference* is not positive, if a calibrated Signal arrives without one, or if `weighting` is neither `"468"` nor `"Z"`. |
+| TypeError | if `weighting` is not a text, or `reference` is not a single number. |
 
 ## QuasiPeakBallistics
 
@@ -369,3 +370,4 @@ answer by construction.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If *fs* is not positive. |
+| TypeError | if `fs` is not a single number. |

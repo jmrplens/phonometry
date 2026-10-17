@@ -35,7 +35,7 @@ and the heavy ones by the ratio of the car reference speed to their own:
 for predicting a traffic noise level (9.5 NOTE), and the comparison clause 10
 has in mind is a difference from a reference surface, of which Annex D gives an
 example built from seven dense bituminous surfaces
-(:func:`normalized_reference_levels`, :data:`SPB_NORMALIZED_REFERENCE_DB`).
+(:func:`normalized_reference_levels`, :data:`SPB_NORMALIZED_REFERENCE_LEVELS`).
 
 **The rounding chain.** 9.2 ends "All levels shall be calculated to two decimal
 places and rounded to one decimal place", and 9.5 defines the levels the index
@@ -126,10 +126,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "SPB_ANNEX_D_SURFACES_DB",
+    "SPB_ANNEX_D_SURFACE_LEVELS",
     "SPB_CONFIDENCE_INTERVALS_DB",
     "SPB_MIN_VEHICLE_COUNTS",
-    "SPB_NORMALIZED_REFERENCE_DB",
+    "SPB_NORMALIZED_REFERENCE_LEVELS",
     "SPB_REFERENCE_AIR_TEMPERATURE_C",
     "SPB_REFERENCE_SPEEDS_KMH",
     "SPB_ROAD_SPEED_CATEGORIES",
@@ -217,7 +217,7 @@ SPB_REFERENCE_AIR_TEMPERATURE_C: float = 20.0
 #: and 5 years old, maximum chippings 12, 14, 11 and 16 mm) and B1 to B3 stone
 #: mastic asphalt (4, 3 and 7 years, 12, 14 and 16 mm). An example, not a
 #: reference the standard sets.
-SPB_ANNEX_D_SURFACES_DB: Mapping[str, Mapping[str, float]] = MappingProxyType(
+SPB_ANNEX_D_SURFACE_LEVELS: Mapping[str, Mapping[str, float]] = MappingProxyType(
     {
         "A1": MappingProxyType({"1": 76.6, "2a": 81.1, "2b": 84.1}),
         "A2": MappingProxyType({"1": 75.9, "2a": 80.0, "2b": 83.0}),
@@ -232,7 +232,7 @@ SPB_ANNEX_D_SURFACES_DB: Mapping[str, Mapping[str, float]] = MappingProxyType(
 #: Annex D: the "Average surface (Normalized reference case)" row, the vehicle
 #: sound levels of the example's fictitious reference surface for the medium
 #: speed range, in decibels.
-SPB_NORMALIZED_REFERENCE_DB: Mapping[str, float] = MappingProxyType(
+SPB_NORMALIZED_REFERENCE_LEVELS: Mapping[str, float] = MappingProxyType(
     {"1": 76.4, "2a": 81.0, "2b": 84.0}
 )
 
@@ -370,6 +370,7 @@ def statistical_pass_by_index(
     :raises ValueError: For a road speed category the standard does not define,
         a level missing, unknown or not finite, or weighting factors that are
         negative or do not add up to 1.
+    :raises TypeError: if ``road_speed_category`` is not a text.
     """
     road = _road_category(road_speed_category)
     levels = _per_category(vehicle_sound_levels, "vehicle_sound_levels")
@@ -399,7 +400,7 @@ class PassByRegression(OwnsArrays):
         weighting F, in decibels, read-only.
     :param reference_speed_kmh: The Table 1 reference speed of the category,
         in km/h.
-    :param intercept_db: :math:`a`, the ordinate of the line at 1 km/h, in
+    :param intercept_level: :math:`a`, the ordinate of the line at 1 km/h, in
         decibels.
     :param slope_db_per_decade: :math:`b`, in decibels per decade of speed.
     :param correlation: The correlation coefficient of level and
@@ -418,7 +419,7 @@ class PassByRegression(OwnsArrays):
     speeds_kmh: NDArray[np.float64]
     max_levels: NDArray[np.float64]
     reference_speed_kmh: float
-    intercept_db: float
+    intercept_level: float
     slope_db_per_decade: float
     correlation: float
     level_standard_deviation_db: float
@@ -449,7 +450,7 @@ class PassByRegression(OwnsArrays):
     def vehicle_sound_level(self) -> float:
         r""":math:`L_\mathrm{veh}`, the line at the reference speed, unrounded (9.2)."""
         return float(
-            self.intercept_db
+            self.intercept_level
             + self.slope_db_per_decade * math.log10(self.reference_speed_kmh)
         )
 
@@ -577,7 +578,7 @@ def _fit(
         reference_speed_kmh=SPB_REFERENCE_SPEEDS_KMH[road_speed_category][
             vehicle_category
         ],
-        intercept_db=float(intercept),
+        intercept_level=float(intercept),
         slope_db_per_decade=float(slope),
         correlation=float(correlation),
         level_standard_deviation_db=math.sqrt(syy / (n - 1)),
@@ -645,6 +646,8 @@ def pass_by_regression(
     :raises ValueError: For an unknown category, a speed that is not positive,
         a level that is not finite, inputs that do not match pass-by for
         pass-by, fewer than three pass-bys, or pass-bys all at one speed.
+    :raises TypeError: if ``road_speed_category`` is not a text, or ``max_levels`` or
+        ``speeds_kmh`` holds a text or a value that is not a real number.
     """
     road = _road_category(road_speed_category)
     category = _vehicle_category(vehicle_category)
@@ -825,7 +828,7 @@ def statistical_pass_by(
     *,
     road_speed_category: str,
     corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
-    reference_db: float | Mapping[str, float] | None = None,
+    reference_levels: float | Mapping[str, float] | None = None,
     weighting_factors: Mapping[str, float] | None = None,
 ) -> StatisticalPassByResult:
     r"""The Statistical Pass-By method of ISO 11819-1 from a list of pass-bys.
@@ -855,9 +858,9 @@ def statistical_pass_by(
         from the levels rounded to one decimal. 9.4 gives no method. To correct
         each pass-by instead, which 9.4 prefers, correct ``max_levels`` and
         call this again.
-    :param reference_db: The reference surface of clause 10: either its SPBI in
+    :param reference_levels: The reference surface of clause 10: either its SPBI in
         decibels, used as given, or its three vehicle sound levels keyed by
-        category (for instance :data:`SPB_NORMALIZED_REFERENCE_DB`), whose
+        category (for instance :data:`SPB_NORMALIZED_REFERENCE_LEVELS`), whose
         index is then computed from the levels rounded to one decimal, with
         the same weighting factors.
     :param weighting_factors: Other proportions of the three categories (9.5);
@@ -867,6 +870,8 @@ def statistical_pass_by(
     :raises ValueError: For a category the method does not use, rows that do
         not match, a category with fewer than three pass-bys or all at one
         speed, or invalid weighting factors or levels.
+    :raises TypeError: if ``road_speed_category`` is not a text, or ``reference_levels``
+        is not a single number.
     """
     road = _road_category(road_speed_category)
     labels = np.asarray(vehicle_categories, dtype=object).ravel()
@@ -920,16 +925,16 @@ def statistical_pass_by(
             weighting_factors=weights,
         )
     reference_index: float | None = None
-    if reference_db is not None:
-        if isinstance(reference_db, Mapping):
-            reference_levels = _per_category(reference_db, "reference_db")
+    if reference_levels is not None:
+        if isinstance(reference_levels, Mapping):
+            reference_levels = _per_category(reference_levels, "reference_levels")
             reference_index = statistical_pass_by_index(
                 _reported_levels(reference_levels),
                 road_speed_category=road,
                 weighting_factors=weights,
             )
         else:
-            reference_index = require_finite(reference_db, "reference_db")
+            reference_index = require_finite(reference_levels, "reference_levels")
     return StatisticalPassByResult(
         road_speed_category=road,
         regressions=MappingProxyType(regressions),
@@ -951,7 +956,7 @@ def normalized_reference_levels(
     :math:`L_\mathrm{veh}` are set by convention, "for instance ... the
     average results of a great number of SPB measurements" on dense asphalt
     surfaces. Annex D builds one from seven surfaces
-    (:data:`SPB_ANNEX_D_SURFACES_DB`) and prints the average of each column,
+    (:data:`SPB_ANNEX_D_SURFACE_LEVELS`) and prints the average of each column,
     which is what this returns: the arithmetic mean, category by category.
 
     The energetic mean would print the same row there (76,4, 81,0 and 84,0 dB

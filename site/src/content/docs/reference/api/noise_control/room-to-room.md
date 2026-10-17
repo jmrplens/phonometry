@@ -188,6 +188,7 @@ added, as it is not in [`phonometry.room.steady_state_spl`](/phonometry/referenc
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectra do not share one value per band, if neither or both source descriptions are given, if the criterion family or the sound power model is unknown, or if `receiver_distance_m` is given and is not a positive finite number. |
+| TypeError | if `partition_area` or `receiver_distance_m` is not a single number. |
 
 ## RoomToRoomResult
 

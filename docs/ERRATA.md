@@ -8445,8 +8445,8 @@ in the same order.
   13 (printed p. 4) of ISO 11957:1996 as published in BS EN ISO 11957:2009.
 - **Consequence for the standard's own tables:** none.
 - **Library behaviour:**
-  [`MIN_SIGNAL_TO_BACKGROUND_DB`](../src/phonometry/noise_control/_cabin_insulation.py)
-  and `PREFERRED_SIGNAL_TO_BACKGROUND_DB` carry 6 dB and 12 dB, and the
+  [`ISO11957_MIN_BACKGROUND_MARGIN_DB`](../src/phonometry/noise_control/_cabin_insulation.py)
+  and `ISO11957_PREFERRED_BACKGROUND_MARGIN_DB` carry 6 dB and 12 dB, and the
   warning names the margin that was actually reached.
 - **Status:** not reported.
 
@@ -8889,7 +8889,7 @@ in the same order.
 - **Evidence:** Verified on PDF page 30 (printed p. 22) and PDF pages 31 to 34
   (printed pp. 23 to 26) of BS EN ISO 11819-1:2001.
 - **Library behaviour:** none needed.
-  `SPB_ANNEX_D_SURFACES_DB` cites the table by its annex and says it is
+  `SPB_ANNEX_D_SURFACE_LEVELS` cites the table by its annex and says it is
   printed as "Table E.1".
 - **Status:** unreported.
 

@@ -484,7 +484,7 @@ def plot_rolling_stock_test(
     x = np.arange(len(result.positions), dtype=np.float64)
     spreads = result.spreads_db
     for i, position in enumerate(result.positions):
-        runs = result.samples_db[position]
+        runs = result.run_levels[position]
         ax.plot(
             np.full(len(runs), x[i]),
             runs,
@@ -695,7 +695,7 @@ def plot_small_roughness_deviation(
     )
     ax.set_title(
         f"{_t('ISO 3095 Annex C', language)}: "
-        rf"$\Delta L_{{p\mathrm{{Aeq}},T_p}}$ = {format_number(result.impact_db, language, decimals=2)} dB, "
+        rf"$\Delta L_{{p\mathrm{{Aeq}},T_p}}$ = {format_number(result.level_increase, language, decimals=2)} dB, "
         f"{verdict}"
     )
     ax.grid(visible=True, alpha=0.3)
@@ -868,7 +868,9 @@ def _reference_track_title(
     if panel == "roughness" and result.small_deviations is not None:
         # The roughness drawn exceeds the limit and the verdict rests on
         # Annex C, which the curves alone do not show.
-        impact = format_number(result.small_deviations.impact_db, language, decimals=2)
+        impact = format_number(
+            result.small_deviations.level_increase, language, decimals=2
+        )
         title += f" ({_t('Annex C', language)}, $\\Delta L$ = {impact} dB)"
     return title
 

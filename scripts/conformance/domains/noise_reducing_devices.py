@@ -476,7 +476,7 @@ def _chk_reflection_rating() -> Outcome:
     "1,96 times the high reproducibility of Table A.1, 0,81 dB",
 )
 def _chk_reflection_rating_uncertainty() -> Outcome:
-    expanded = ph.environment.reflection_index_expanded_uncertainty().rating_db
+    expanded = ph.environment.reflection_index_expanded_uncertainty().rating_expanded_uncertainty_db
     return numeric(
         ref_reflection.TABLE_B2_RATING_EXPANDED_DB, expanded, 0.005, unit="dB"
     )

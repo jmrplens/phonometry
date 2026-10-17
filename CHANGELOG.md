@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The background correction of ISO 16251-1 and the strong-coupling check of
+  ISO 10848-1 draw themselves.** `building.BackgroundCorrectedLevel.plot()`
+  draws the margin of each band above the background over the three regimes
+  of Formula (2): 15 dB and more used unchanged, 6 dB to 15 dB with the
+  background subtracted, and under 6 dB held at the 1.3 dB limit of
+  measurement, with one bar per band, or one line per position for a
+  (positions, bands) record. `building.StrongCouplingCheck.plot()` draws the
+  one-way `Dv,ij` band by band against the bound of Formula (15), with the
+  side under it shaded, where the elements are strongly coupled and the
+  measured `Kij` may not be relevant, and every band where the inequality
+  does not hold marked. Both records take the band `frequencies` by name, as
+  `background_corrected_level(..., frequencies=)` and
+  `check_strong_coupling(..., frequencies=)` do, to label the bands, and number
+  them where none are given. The impact-improvement and flanking-lab guides
+  draw both, in English and Spanish.
+
 - **The survey positions for a source beside three reflecting planes
   (ISO 3746).** `emission.measurement_positions("hemisphere", ...,
   n_reflecting_planes=3, grade="survey")` raised `NotImplementedError`, because
@@ -1054,7 +1070,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ISO 10140-5 no longer prints, beside `RAINFALL_CLASSIFICATION`,
   `ARTIFICIAL_RAIN`, `RAINFALL_A_WEIGHTING` and the two decibel columns of
   Table I.1, `RAINFALL_REFERENCE_LOSS_FACTOR_DB` and
-  `RAINFALL_REFERENCE_INTENSITY_DB`. Every result has `.plot()`, and a new
+  `RAINFALL_REFERENCE_INTENSITY_LEVELS`. Every result has `.plot()`, and a new
   guide in both languages walks a lining, a vinyl on a timber floor and a
   rooflight under heavy rain through the three annexes. The conformance rows
   hold the reference curves band by band against a reading of the page, every
@@ -3156,6 +3172,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   says decibel and that still ends in `_db`. The migration guide lists every
   name this renames that shipped in 3.3.0 or 4.0.0rc1.
 
+- **A name says the quantity it holds.** A public name that put `_db` after
+  words that only qualify it said the unit of a number and never what the
+  number is. Each now carries the noun of what it holds: a level takes `level`
+  or `levels` and loses its `_db` (the audiometric threshold results read
+  `threshold_level`, the service equipment results
+  `corrected_levels`, `measured_levels`, `background_levels`, the railway
+  prediction `emission_levels` and `floor_levels`, the ISO 11819-1 tables
+  `SPB_ANNEX_D_SURFACE_LEVELS` and `SPB_NORMALIZED_REFERENCE_LEVELS`, the NC
+  curves `room.NC_CURVE_LEVELS`, `WindowMetricsResult.highest_sidelobe_level`),
+  a level difference takes its own noun (the railway terms
+  `ground_level_difference`, `foundation_level_difference`,
+  `floor_level_difference` and `mitigation_level_difference`, the hearing
+  protector means `mean_attenuation` and `mean_insertion_loss`, the fixture
+  requirement `min_isolation`, the strong-coupling bound
+  `StrongCouplingCheck.min_velocity_level_difference`), and any other quantity
+  keeps `_db` after its noun (the uncertainty budgets of ISO 8253-1, ISO 4869-1
+  and ISO 4869-3 read `equipment_uncertainty_db`, `fixture_uncertainty_db`,
+  `combined_uncertainty_db`, `expanded_uncertainty_db` and the rest, with
+  `open_level_uncertainty_db` and `occluded_level_uncertainty_db` no longer an
+  exception; `ToneAssessment.prominence_limit_db`, the program signal's
+  `lower_tolerance_db` and `upper_tolerance_db`, the K-weighting stages
+  `shelf_magnitude_db` and `highpass_magnitude_db`,
+  `LifterResult.liftered_spectrum_db`, the microphone and loudspeaker
+  `polar_response_db`, and `sigma_omc_db=` on
+  `emission.total_standard_deviation`). The signal-to-background constants of
+  ISO 11957 and ISO 14257 are background margins, as their ISO 10847 and
+  ISO 11820 neighbours already were. `make parameter-units` fails on a public
+  name whose last word before `_db` names no quantity, and the migration guide
+  lists the names that shipped in 3.3.0 or 4.0.0rc1. No number changes.
+
+- **An answer of several quantities is a record.** Thirty-three public
+  functions, methods and properties answered with a tuple of different
+  quantities, or a named tuple, to be unpacked by position. Each returns a
+  frozen record now, with a field for each quantity, its arrays read-only
+  and, where a figure says something, a `.plot()`:
+  `building.subarea_intensity_level` (`SubareaIntensityLevel`),
+  `corrugated_plate_stiffness`, `heavy_impact_source_limits`,
+  `wall_tie_stiffness` and the rows of `WALL_TIE_STIFFNESS`;
+  `electroacoustics.coherence` (`CoherenceResult`, drawn on 0 to 1) and
+  `loop_dimensions`; `emission.octave_band_levels` (`OctaveBandLevels`) and
+  `residual_index_limits`; `environment.roughness_measurement_lines`, the
+  CNOSSOS-EU wavelength tables `wheel_roughness`, `rail_roughness`,
+  `contact_filter` and `impact_roughness_single` (`WavelengthSpectrum`, drawn
+  against wavelength) and the source spectra `traction_sound_power` and
+  `aerodynamic_sound_power` (`RailSourceSpectra`), which `RollingStock` and
+  `RailwayTrack` take in place of the bare pairs and refuse otherwise with a
+  `TypeError` that names the field; `filters.weighting_class_limits`;
+  `materials.slit_effective_properties` and `rectangular_duct_properties`
+  (`EffectiveFluidProperties`), `one_third_octave_absorption`
+  (`OneThirdOctaveAbsorption`), `wave_decomposition`, `face_quantities`,
+  `PorousMaterial.frame_constants`, and `FiberResistivityFit` and
+  `fiber_characteristic_lengths`, which were named tuples;
+  `metrology.equal_area_incidence_angles` and `UncertaintyResult.expanded`
+  (`ExpandedUncertainty`); `psychoacoustics.equal_loudness_contour` and
+  `hearing_threshold` (`LoudnessContour`, whose `phon` is `None` for the
+  threshold); and `vibration.foundation_guideline_curve`,
+  `junction_wave_parameters`, `third_octaves_from_narrowband` and
+  `energy_spectral_density` (`EnergySpectralDensity`, drawn in dB re its
+  highest bin). `BandUncertainty.to_arrays()` and
+  `LiningImprovementResult.ratings` are gone: they only repacked fields the
+  record already names. A tuple stays where its items are alike, above all
+  the two ends of a range, lower first, and `make parameter-units` fails on a
+  public function, method or property that returns a fixed-length tuple or a
+  named tuple unless it is listed with that reason. The migration guide maps
+  each answer that shipped in 3.3.0 or 4.0.0rc1. No number changes.
+
 - **A band set is `fraction=1` or `fraction=3` wherever one is chosen.** The
   filter bank, the room parameters and the intensity measurement took the
   integer `fraction`, while the building, emission and vibration functions
@@ -3351,13 +3433,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `tests/test_public_vocabulary.py` reads the row keys of a verdict of each
   kind and holds them to the spelled-out words.
 
-- **A tone-corrected perceived noise level is stated in TPNdB.** The PNLT
-  series and the PNLTM of `aircraft.EPNLResult`, `aircraft.EPNLIntegration`
-  and `aircraft.RotorcraftEventResult` read TPNdB, the unit the Nomenclature of
-  ICAO Annex 16 Volume I prints for them (I-6), in their documentation, in the
-  notebook table, on the `.plot()` of `EPNLResult` and on the EPNL fiche, where
-  they read PNdB; the PNL stays in PNdB and the EPNL in EPNdB. No number
-  changes.
+- **A tone-corrected perceived noise level and the bandsharing adjustment are
+  stated in TPNdB.** The PNLT series and the PNLTM of `aircraft.EPNLResult`,
+  `aircraft.EPNLIntegration` and `aircraft.RotorcraftEventResult` read TPNdB,
+  the unit the Nomenclature of ICAO Annex 16 Volume I prints for them (I-6), in
+  their documentation, in the notebook table, on the `.plot()` of `EPNLResult`
+  and on the EPNL fiche, where they read PNdB; so does the
+  `bandsharing_adjustment` of `EPNLResult` and `EPNLIntegration`, the
+  adjustment the Nomenclature prints in TPNdB because it is added to the
+  maximum PNLT (I-7), where it read dB. The PNL stays in PNdB and the EPNL in
+  EPNdB. No number changes.
 
 - **Tolerance limits come lower first, and signed.**
   `vibration.weighting_tolerance_percent` returns the ISO 8041-1 Table 5 band
@@ -3380,8 +3465,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `building.FacadePredictionResult`; `spacing_m` of `emission.IntensityResult`;
   the five geometry fields of `environment.BarrierInsertionLoss`; and `field`
   of `psychoacoustics.ZwickerLoudness`, typed `"free"` or `"diffuse"` and now
-  the fourth field. The reports, plots and geometry drawings lose the branches
-  that refused a record without them. `filters.WeightingFilter` takes
+  the fourth field. The geometry the drawings read is required in the same
+  way, since the function that builds each of these records always fills it:
+  `positions_m` of `room.OpenPlanResult`; `wells`, `depth_m` and `period_m` of
+  `materials.MetadiffuserResult`; `thickness1_m` and `thickness2_m` of
+  `vibration.JunctionTransmissionResult`; `source_height_m` and
+  `microphone_height_m` of `materials.InSituAbsorptionResult`; `layers` of
+  `materials.LayeredAbsorberResult`; `resonators`, `slit_height_m`,
+  `lattice_step_m` and `period_m` of `materials.SlitResonatorAbsorberResult`;
+  `well_width` and `n_repetitions` of `materials.DiffuserPolarResponse`;
+  `spacing_m` and `x1` of `materials.ImpedanceTubeResult`; and
+  `plane_wave_limit` of `noise_control.ReactiveSilencerResult`, which holds
+  exactly one of `geometry` (a named device) and `chain` (a `SilencerChain`)
+  and refuses neither or both. A field that is absent by meaning keeps `None`:
+  the depths of a diffuser predicted from an explicit reflection, the tube
+  diameter not supplied, the blocking mass of the direct method, the
+  receiver distance of a reverberant-field prediction, the per-model fields of
+  a panel's sound reduction and of a silencer chain element. The reports,
+  plots and geometry drawings lose the branches that refused a record without
+  them. `filters.WeightingFilter` takes
   `high_accuracy` as a `bool`, `True` by default, and refuses `None`, which
   used to select the default and would now read as false.
 
@@ -3469,7 +3571,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   malformed file and a `ValueError` naming it. It also reads every `int()` of
   a parameter written as an `int`, and every public function that raises
   `TypeError` for a `:raises TypeError:` field, so the API reference names
-  the class a call raises; `tests/test_scalar_guards.py` calls every public
+  the class a call raises. It follows the argument into the shared checks as
+  well: a function that hands a parameter, as it was given, to
+  `require_band_fraction`, `require_scalar`, `require_count` or another check
+  that raises `TypeError`, directly or through a private helper of its own
+  module, documents that `TypeError` too. 1328 functions and methods did
+  not, `building.weighted_rating` among them, whose band set written as
+  `"third"` was refused with a class its reference page never named; each
+  now says which of its parameters is refused and for what (a word, a flag or
+  a float where the band set goes, a text where a choice goes, an array where
+  one number goes). The field names every parameter the function hands on:
+  `environment.aerodynamic_sound_power` documented the `TypeError` of a
+  `reference` that is not a `RailSourceSpectra`, and said nothing of the one
+  an array of speeds raises; 37 functions named one parameter and handed on
+  others. `tests/test_scalar_guards.py` calls every public
   function whose parameters all take one number with an array and a text in
   each of them.
 
@@ -3563,9 +3678,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `hearing.sweep_audiometry_threshold`, the `critical_frequencies` of
   `building.perimeter_absorption_coefficient` and the
   `damped_natural_frequency_hz` of `vibration.exponential_window_correction`.
-  A positional value that came after the axis moves up one place.
-  `scripts/check_parameter_units.py` fails on a public function that takes a
-  frequency array by position beside another array of numbers.
+  A positional value that came after the axis moves up one place. A record a
+  caller builds and hands to a function is written by name the same way:
+  `aircraft.RotorcraftHemisphere`, `aircraft.SpectralClass`,
+  `filters.FilterPeriodicMeasurements`, `electroacoustics.LoopImpedance`,
+  `electroacoustics.AmplifierFrequencyResponse`,
+  `metrology.EnvironmentalSensitivityCorrection` and
+  `environment.TrackDecayRate` take every field by name, and a positional
+  call raises `TypeError`. So do the spectra a caller builds over wavelength,
+  where the wavelengths and the levels bind either way round just as a
+  frequency axis does: `environment.WavelengthSpectrum`, which a
+  `RollingStock` or a `RailwayTrack` holds for a national roughness table,
+  and `environment.AcousticRoughnessSpectrum`, built from the band levels of
+  an EN 15610 report. A wavelength axis is an axis in a function too:
+  `environment.roughness_to_frequency(levels, *, wavelengths_mm, speed_kmh,
+  ...)` takes the wavelengths of its table by name, with the speed after
+  them, and `materials.standing_wave_reflection(swr, first_min_distance, *,
+  wavelength)` and `standing_wave_normalized_impedance` take the wavelength
+  of each tone by name, a length of the same shape as the distance to the
+  first minimum beside it. `scripts/check_parameter_units.py` fails on a
+  public function that takes a frequency or wavelength array by position
+  beside another array of numbers, and on a record another public function
+  takes as an argument, or that such a record holds in a field, that takes
+  its frequency or wavelength axis that way; a result one function builds and
+  another takes whole is listed with that reason.
 
 - **Every public `plot_*` helper takes the axes and the language by name.**
   The 23 geometry helpers drew from two shapes: seventeen took the axes after
@@ -4207,7 +4343,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   catalogues (in the catalogue file format and its schema too), the
   `"boundary center"` target of a microphone traverse, and the fields
   `centered`, `program`, `normalized_difference`, `neighbor_difference`,
-  `behavior_observation`, `subclass_centers_db`, `plant_center_m`,
+  `behavior_observation`, `subclass_center_levels`, `plant_center_m`,
   `support_center_distance_m`, `collected_volume_liters`, the
   `unfavorable_sum` of the enclosure and cabin ratings and the
   `vapor_pressure_pa` of `HydrodynamicValveNoise`.
@@ -4674,7 +4810,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   dictionaries, even where the annotation said `Mapping`, so
   `GUIDE_VALUES["residential"] = ...` or `REFERENCE_CURVE[500] = 0.0` changed
   a printed number for every caller in the process without anything raising,
-  and published arrays such as the NC curves (`room.NC_CURVES_DB`) took in-place
+  and published arrays such as the NC curves (`room.NC_CURVE_LEVELS`) took in-place
   arithmetic the same way. The tables are now read-only mappings
   (`types.MappingProxyType`) down to the dictionaries nested inside them, the
   arrays have their `writeable` flag cleared, and
@@ -4726,8 +4862,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   takes the same arguments and returns the same `RigidMassCalibrationResult`;
   it judges a measuring chain, so its verb is `verify_`. The two conformity
   tests of ISO 12999-1 Formulae (4) and (5) are one
-  `building.assess_requirement_conformity(value_db, expanded_uncertainty_db,
-  requirement_db, bound=...)`, a `RequirementConformity` with the settled
+  `building.assess_requirement_conformity(rating, expanded_uncertainty_db,
+  required_rating, bound=...)`, a `RequirementConformity` with the settled
   `margin_db` and `passes`, both formulae still strict.
   `building.check_strong_coupling` returns a `StrongCouplingCheck` whose
   `holds` is the boolean array `strong_coupling_satisfied` returned, and
@@ -4845,7 +4981,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   scripts through the full module path. Every public module now lists what it
   defines and its package publishes, and anything else it defines is private.
   The NC curves a guide drew by hand are published by `room` with their unit:
-  `room.NC_OCTAVE_BANDS_HZ`, `room.NC_RATINGS` and `room.NC_CURVES_DB` (they
+  `room.NC_OCTAVE_BANDS_HZ`, `room.NC_RATINGS` and `room.NC_CURVE_LEVELS` (they
   were `OCTAVE_BANDS`, `NC_INDICES` and `NC_CURVES` of
   `room.noise_criteria`). The SII band importances, band centres and vocal
   efforts are read from `speech.sii_procedure(...)` and
@@ -5944,8 +6080,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   when it is asked to read the fitted line outside the distances it was fitted
   over, which is what the 30 m of 6.4.3 asks of a path that stopped at 24 m.
 
-  `ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` and
-  `ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` were published in the same release and
+  `ISO14257_PREFERRED_BACKGROUND_MARGIN_DB` and
+  `ISO14257_MIN_BACKGROUND_MARGIN_DB` were published in the same release and
   read by nothing; they are what the first of the three compares against.
 
 - The em dash guard exempted italics, and a figure caption is a whole paragraph
@@ -6646,7 +6782,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `predict_floor_spectrum` is Formula (1), the spectrum on a floor as an
   emission spectrum plus what the ground, the foundation, the floor and a
   mitigation add, every term as printed, so the mitigation term, which is
-  called `mitigation_db` and not an insertion loss for that reason, goes in
+  called `mitigation_level_difference` and not an insertion loss for that reason, goes in
   negative.
   `rescale_emission_for_speed` carries an emission to another speed by 20 lg
   of the ratio, for a change of up to 30 %; `ground_transmission` is

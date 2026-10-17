@@ -82,6 +82,7 @@ $L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_
 | Exception | When |
 | :--- | :--- |
 | ValueError | Non-finite or non-positive acceleration, or a non-positive reference. |
+| TypeError | if `reference` is not a single number. |
 
 ## background_corrected_level
 
@@ -89,6 +90,8 @@ $L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_
 background_corrected_level(
     signal_and_background: float | Sequence[float] | np.ndarray,
     background: float | Sequence[float] | np.ndarray,
+    *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> BackgroundCorrectedLevel
 ```
 
@@ -100,6 +103,7 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 | :--- | :--- |
 | `signal_and_background` | Measured level `L'` (with background) per band, in dB; a (positions, bands) array is corrected position by position. |
 | `background` | Background-noise level `Lb` per band, in dB, of the same shape. |
+| `frequencies` | The band centre frequencies, in Hz, one per band, for the plot to name the bands by; `None` (the default) numbers them. |
 
 **Returns:** The correction, as a [`BackgroundCorrectedLevel`](/phonometry/reference/api/building/floor-covering-improvement/#backgroundcorrectedlevel): the corrected levels `L` in its `corrected_levels`, and in its `limited` the bands at the 1.3 dB limit of measurement (report as $> \Delta L$).
 
@@ -107,7 +111,7 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Mismatched shapes or non-finite values. |
+| ValueError | Mismatched shapes, non-finite values, or band frequencies that are not one positive value per band. |
 
 ## BackgroundCorrectedLevel
 
@@ -115,6 +119,8 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 BackgroundCorrectedLevel(
     signal_and_background: NDArray[np.float64],
     background: NDArray[np.float64],
+    *,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -134,6 +140,7 @@ limit that its readings put on it.
 | :--- | :--- |
 | `signal_and_background` | Measured level `L'` (with background), in dB; one value per band, or a (positions, bands) array. |
 | `background` | Background-noise level `Lb`, in dB, of the same shape. |
+| `frequencies` | The band centre frequencies, in Hz, one per band (the last axis of the readings), or `None` where the bands were not named; only the plot reads them. |
 
 ### BackgroundCorrectedLevel.corrected_levels
 
@@ -155,6 +162,37 @@ still the 6 dB it is.
 *property*
 
 $L' - L_\mathrm{b}$, in dB, in the shape of the readings.
+
+### BackgroundCorrectedLevel.plot()
+
+```python
+BackgroundCorrectedLevel.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the margin $L' - L_\mathrm{b}$ of each band against the criterion.
+
+The bands at 15 dB or more are used unchanged, those between 6 dB
+and 15 dB have the background subtracted in energy, and those under
+6 dB are held at the 1.3 dB limit of measurement; the two boundaries
+are drawn across the bands and the three regimes are told apart. A
+(positions, bands) record draws one line per position.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the margin bars, or to the line of each position. |
+
+**Returns:** The axes.
 
 ## FloorCoveringImprovementResult
 
@@ -338,6 +376,7 @@ each octave.
 | Exception | When |
 | :--- | :--- |
 | ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three. |
+| TypeError | if `quantity` is not a text. |
 
 ## OctaveBandSpectrum
 

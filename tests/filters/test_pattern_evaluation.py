@@ -298,11 +298,11 @@ def test_end_bands_carry_no_summation() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
     for band in (result.bands[0], result.bands[-1]):
-        assert band["summation_min_db"] is None
-        assert band["summation_max_db"] is None
+        assert band["summation_difference_lower"] is None
+        assert band["summation_difference_upper"] is None
         assert band["summation_margin_class1_db"] is None
     for band in result.bands[1:-1]:
-        assert band["summation_min_db"] <= band["summation_max_db"]
+        assert band["summation_difference_lower"] <= band["summation_difference_upper"]
 
 
 @pytest.mark.parametrize("limits", [[800, 1200], [500, 1000]])
@@ -359,7 +359,7 @@ def test_stateful_bank_grades_like_its_stateless_twin() -> None:
     b = filters.verify_filter_class(stateless)
     for x, y in zip(a.bands, b.bands, strict=True):
         assert x["bandwidth_deviation_db"] == y["bandwidth_deviation_db"]
-        assert x["summation_max_db"] == y["summation_max_db"]
+        assert x["summation_difference_upper"] == y["summation_difference_upper"]
 
 
 def test_binding_margin_reads_the_requirement_and_refuses_a_foreign_class() -> None:

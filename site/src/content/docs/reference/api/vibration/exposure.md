@@ -110,6 +110,7 @@ and the switch-on transient is part of what they measure.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `x` is not 1-D, `fs` is not positive, or `name` is unknown. |
+| TypeError | if `fs` is not a single number. |
 
 ## apply_weighting
 
@@ -146,6 +147,7 @@ negligible, as for any block frequency-domain filtering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `x` is not 1-D, `fs` is not positive, or `name` is unknown. |
+| TypeError | if `fs` is not a single number. |
 
 ## band_limiting_factors
 
@@ -295,6 +297,7 @@ Eq. (2)), the term [`combined_daily_exposure`](/phonometry/reference/api/vibrati
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite or negative magnitude or duration. |
+| TypeError | if `duration_s` or `total_value` is not a single number. |
 
 ## daily_vibration_exposure
 
@@ -337,6 +340,7 @@ Eq. (10) vector total `a_v`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in length, carry non-finite values, or `labels` mismatches. |
+| TypeError | if `durations_s` or `total_values` holds a text or a value that is not a real number. |
 
 ## DailyVibrationExposure
 
@@ -631,6 +635,7 @@ that produces finger blanching in 10 % of an exposed group
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `a8` is not positive. |
+| TypeError | if `a8` is not a single number. |
 
 ## HumanVibrationWarning
 
@@ -665,6 +670,7 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad signal or non-positive `fs`. |
+| TypeError | if `fs` is not a single number. |
 
 ## mtvv
 
@@ -745,6 +751,7 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad signal, non-positive `fs`/`tau` or an unknown `method`. |
+| TypeError | if `fs` or `integration_time` is not a single number. |
 
 ## vibration_dose_value
 
@@ -774,6 +781,7 @@ m/s^1.75; more sensitive to peaks than the r.m.s. value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad signal or non-positive `fs`. |
+| TypeError | if `fs` is not a single number. |
 
 ## vibration_total_value
 
@@ -873,6 +881,7 @@ vector total `a_hv` instead (Annex, Part A, point 1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative or non-finite axis value. |
+| TypeError | if `a_wx`, `a_wy` or `a_wz` is not a single number. |
 
 ## weighted_acceleration
 
@@ -918,6 +927,7 @@ comparing against the tabulated factors; a nominal label (e.g.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in length, are empty or carry non-finite values. |
+| TypeError | if `band_accelerations` or `frequencies` holds a text or a value that is not a real number. |
 
 ## WeightedSpectrum
 

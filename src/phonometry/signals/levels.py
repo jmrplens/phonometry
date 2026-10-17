@@ -175,6 +175,7 @@ def ln_levels(
     :param dbfs: If True, return dBFS instead of dB SPL.
     :return: Dict mapping each N to its level (scalar for 1D input,
         array (channels,) for 2D input).
+    :raises TypeError: if ``calibration_factor`` is not a single number.
     """
     fs = _resolve_fs(x, fs)
     calibration_factor = _resolve_calibration(x, calibration_factor)
@@ -246,6 +247,8 @@ def lc_peak(
         detection (default 8, the audit-validated value). Use 1 to disable
         oversampling and detect the peak on the original sample grid.
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
+    :raises TypeError: if ``calibration_factor`` is not a single number, or
+        ``oversample`` is a flag, a text or an array where a count goes.
     """
     oversample = require_count(oversample, "oversample")
     fs = _resolve_fs(x, fs)
@@ -292,6 +295,7 @@ def sel(
         calibrated Signal's own factor, then 1.0.
     :param dbfs: If True, reference digital full scale instead of 20 uPa.
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
+    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     fs = _resolve_fs(x, fs)
@@ -335,6 +339,7 @@ def sound_exposure(
         Pascals. Precedence as in :func:`leq`: explicit value, then a
         calibrated Signal's own factor, then 1.0.
     :return: Exposure in Pa²·h (scalar or per-channel array).
+    :raises TypeError: if ``duration_hours`` is not a single number.
     """
     require_scalar(duration_hours, "duration_hours")
     fs = _resolve_fs(x, fs)

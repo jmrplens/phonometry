@@ -50,6 +50,7 @@ from phonometry.environment.sources.cnossos_rail import (
     RailJoints,
     RailPad,
     RailRoughnessClass,
+    RailSourceSpectra,
     RailwayEmissionResult,
     RailwayTrack,
     RailwayVehicle,
@@ -64,6 +65,7 @@ from phonometry.environment.sources.cnossos_rail import (
     TractionVehicle,
     VehicleDescriptor,
     VehicleType,
+    WavelengthSpectrum,
     WheelDiameter,
     WheelMeasure,
     aerodynamic_sound_power,
@@ -99,7 +101,8 @@ def test_wheel_roughness_matches_table_g1a() -> None:
         (BrakeType.COMPOSITE, ref.CNOSSOS_RAIL_G1A_COMPOSITE),
         (BrakeType.NON_TREAD, ref.CNOSSOS_RAIL_G1A_NON_TREAD),
     ):
-        lam, levels = wheel_roughness(brake)
+        spectrum = wheel_roughness(brake)
+        lam, levels = spectrum.wavelengths_mm, spectrum.levels
         assert lam.tolist() == list(ref.CNOSSOS_RAIL_WHEEL_WAVELENGTHS)
         assert levels.tolist() == list(expected)
 
@@ -110,7 +113,8 @@ def test_rail_roughness_matches_table_g1b() -> None:
         (RailRoughnessClass.WELL_MAINTAINED, ref.CNOSSOS_RAIL_G1B_E),
         (RailRoughnessClass.NORMAL, ref.CNOSSOS_RAIL_G1B_M),
     ):
-        lam, levels = rail_roughness(cls)
+        spectrum = rail_roughness(cls)
+        lam, levels = spectrum.wavelengths_mm, spectrum.levels
         assert lam.tolist() == list(ref.CNOSSOS_RAIL_WAVELENGTHS)
         assert levels.tolist() == list(expected)
 
@@ -119,7 +123,8 @@ def test_contact_filter_matches_table_g2() -> None:
     """Table G-2 as replaced by (EU) 2021/1226 Annex point (20)(b)."""
     assert len(ContactFilter) == len(ref.CNOSSOS_RAIL_G2)
     for member in ContactFilter:
-        lam, levels = contact_filter(member)
+        spectrum = contact_filter(member)
+        lam, levels = spectrum.wavelengths_mm, spectrum.levels
         assert lam.tolist() == list(ref.CNOSSOS_RAIL_WAVELENGTHS)
         assert levels.tolist() == list(ref.CNOSSOS_RAIL_G2[member.value])
 
@@ -141,18 +146,21 @@ def test_transfer_functions_match_table_g3() -> None:
 
 def test_impact_traction_aerodynamic_and_bridge_tables() -> None:
     """Tables G-4, G-5, G-6 and G-7."""
-    lam, impact = impact_roughness_single()
+    spectrum = impact_roughness_single()
+    lam, impact = spectrum.wavelengths_mm, spectrum.levels
     assert lam.tolist() == list(ref.CNOSSOS_RAIL_WAVELENGTHS)
     assert impact.tolist() == list(ref.CNOSSOS_RAIL_G4)
 
     assert len(TractionVehicle) == len(ref.CNOSSOS_RAIL_G5)
     for vehicle in TractionVehicle:
-        low, high = traction_sound_power(vehicle)
+        power = traction_sound_power(vehicle)
+        low, high = power.source_a, power.source_b
         expected_low, expected_high = ref.CNOSSOS_RAIL_G5[vehicle.value]
         assert low.tolist() == list(expected_low)
         assert high.tolist() == list(expected_high)
 
-    low, high = aerodynamic_sound_power()
+    power = aerodynamic_sound_power()
+    low, high = power.source_a, power.source_b
     assert low.tolist() == list(ref.CNOSSOS_RAIL_G6_A)
     assert high.tolist() == list(ref.CNOSSOS_RAIL_G6_B)
 
@@ -169,7 +177,8 @@ def test_table_g5_carries_the_2021_correction_at_6300_hz() -> None:
     The 2015 values are about 50 dB below both neighbours of the same column,
     which is what makes them a typographical error rather than a measurement.
     """
-    low, high = traction_sound_power(TractionVehicle.DIESEL_LOCO_2200)
+    power = traction_sound_power(TractionVehicle.DIESEL_LOCO_2200)
+    low, high = power.source_a, power.source_b
     index = RAILWAY_THIRD_OCTAVE_BANDS_HZ.index(6300.0)
     assert (low[index], high[index]) == (81.4, 80.7)
     assert abs(low[index] - low[index - 1]) < 10.0
@@ -217,13 +226,13 @@ def _case_result(case: dict[str, str]) -> RailwayEmissionResult:
     speed = float(case["speed_kmh"])
     stock = RollingStock(
         n_axles=int(vehicle["axles"]),
-        wheel_roughness=(
-            lam,
-            list(wavelength[("wheel_roughness", vehicle["wheel_roughness"])]),
+        wheel_roughness=WavelengthSpectrum(
+            wavelengths_mm=lam,
+            levels=list(wavelength[("wheel_roughness", vehicle["wheel_roughness"])]),
         ),
-        contact_filter=(
-            lam,
-            list(wavelength[("contact_filter", vehicle["contact_filter"])]),
+        contact_filter=WavelengthSpectrum(
+            wavelengths_mm=lam,
+            levels=list(wavelength[("contact_filter", vehicle["contact_filter"])]),
         ),
         wheel_transfer=np.asarray(
             frequency[("wheel_transfer", vehicle["wheel_transfer"], "")]
@@ -231,20 +240,24 @@ def _case_result(case: dict[str, str]) -> RailwayEmissionResult:
         superstructure_transfer=np.asarray(
             frequency[("superstructure_transfer", case["superstructure_transfer"], "")]
         ),
-        traction=(
-            np.asarray(frequency[(traction_key, vehicle["traction"], "A")]),
-            np.asarray(frequency[(traction_key, vehicle["traction"], "B")]),
+        traction=RailSourceSpectra(
+            source_a=np.asarray(frequency[(traction_key, vehicle["traction"], "A")]),
+            source_b=np.asarray(frequency[(traction_key, vehicle["traction"], "B")]),
         ),
-        aerodynamic=(
-            np.asarray(frequency[("aerodynamic", vehicle["aerodynamic"], "A")]),
-            np.asarray(frequency[("aerodynamic", vehicle["aerodynamic"], "B")]),
+        aerodynamic=RailSourceSpectra(
+            source_a=np.asarray(
+                frequency[("aerodynamic", vehicle["aerodynamic"], "A")]
+            ),
+            source_b=np.asarray(
+                frequency[("aerodynamic", vehicle["aerodynamic"], "B")]
+            ),
         ),
         aerodynamic_alpha=float(case["aero_alpha"]),
     )
     track = RailwayTrack(
-        rail_roughness=(
-            lam,
-            list(wavelength[("rail_roughness", case["rail_roughness"])]),
+        rail_roughness=WavelengthSpectrum(
+            wavelengths_mm=lam,
+            levels=list(wavelength[("rail_roughness", case["rail_roughness"])]),
         ),
         track_transfer=np.asarray(
             frequency[("track_transfer", case["track_transfer"], "")]
@@ -252,7 +265,10 @@ def _case_result(case: dict[str, str]) -> RailwayEmissionResult:
         # A joint density of zero means no joint at all, so the workbook's
         # impact spectrum for that case is never read and is not committed.
         impact_roughness=(
-            (lam, list(wavelength[("impact_roughness", case["impact_roughness"])]))
+            WavelengthSpectrum(
+                wavelengths_mm=lam,
+                levels=list(wavelength[("impact_roughness", case["impact_roughness"])]),
+            )
             if case["impact_roughness"]
             else None
         ),
@@ -477,12 +493,12 @@ def test_vertical_directivity_source_b() -> None:
 
 def test_aerodynamic_law_is_exact_at_the_reference_speed() -> None:
     """(2.3.13)/(2.3.14) reduce to Table G-6 at ``v_0`` and follow 50 lg(v/v_0)."""
-    low, high = aerodynamic_sound_power(AERODYNAMIC_REFERENCE_SPEED_KMH)
+    power = aerodynamic_sound_power(AERODYNAMIC_REFERENCE_SPEED_KMH)
+    low, high = power.source_a, power.source_b
     assert low.tolist() == list(ref.CNOSSOS_RAIL_G6_A)
     assert high.tolist() == list(ref.CNOSSOS_RAIL_G6_B)
-    doubled_low, doubled_high = aerodynamic_sound_power(
-        2.0 * AERODYNAMIC_REFERENCE_SPEED_KMH
-    )
+    power = aerodynamic_sound_power(2.0 * AERODYNAMIC_REFERENCE_SPEED_KMH)
+    doubled_low, doubled_high = power.source_a, power.source_b
     step = ref.CNOSSOS_RAIL_G6_ALPHA * math.log10(2.0)
     np.testing.assert_allclose(doubled_low - low, step, atol=1e-12)
     np.testing.assert_allclose(doubled_high - high, step, atol=1e-12)
@@ -490,7 +506,7 @@ def test_aerodynamic_law_is_exact_at_the_reference_speed() -> None:
 
 def test_impact_roughness_joint_density_law() -> None:
     """(2.3.12): the table verbatim at ``n_l = 0,01`` and ``+10 lg(n_l/0,01)``."""
-    _, single = impact_roughness_single()
+    single = impact_roughness_single().levels
     frequency_grid = np.asarray(single[:24])
     np.testing.assert_allclose(
         impact_roughness(frequency_grid, REFERENCE_JOINT_DENSITY_PER_M),
@@ -557,24 +573,40 @@ def test_roughness_conversion_invariants() -> None:
     for rule in RoughnessInterpolation:
         for speed in (30.0, 80.0, 250.0):
             np.testing.assert_allclose(
-                roughness_to_frequency(flat, lam, speed, interpolation=rule),
+                roughness_to_frequency(
+                    flat, wavelengths_mm=lam, speed_kmh=speed, interpolation=rule
+                ),
                 7.0,
                 atol=1e-12,
             )
     # reading the table at f = v/lambda: at 36 km/h (10 m/s) the 100 Hz band
     # wants lambda = 0,1 m = 100 mm, which is tabulated, so no interpolation
     levels = [0.0, 12.0, -6.0, 3.0]
-    got = roughness_to_frequency(levels, lam, 36.0, frequencies=[100.0])
+    got = roughness_to_frequency(
+        levels, wavelengths_mm=lam, speed_kmh=36.0, frequencies=[100.0]
+    )
     assert got[0] == pytest.approx(12.0)
     # beyond the ends of the table the end value is held
-    assert roughness_to_frequency(levels, lam, 36.0, frequencies=[0.001])[0] == 0.0
-    assert roughness_to_frequency(levels, lam, 36.0, frequencies=[1e9])[0] == 3.0
+    assert (
+        roughness_to_frequency(
+            levels, wavelengths_mm=lam, speed_kmh=36.0, frequencies=[0.001]
+        )[0]
+        == 0.0
+    )
+    assert (
+        roughness_to_frequency(
+            levels, wavelengths_mm=lam, speed_kmh=36.0, frequencies=[1e9]
+        )[0]
+        == 3.0
+    )
     # the two rules bracket each other: the energy rule never reads lower
-    mid = roughness_to_frequency(levels, lam, 36.0, frequencies=[40.0])
+    mid = roughness_to_frequency(
+        levels, wavelengths_mm=lam, speed_kmh=36.0, frequencies=[40.0]
+    )
     mid_energy = roughness_to_frequency(
         levels,
-        lam,
-        36.0,
+        wavelengths_mm=lam,
+        speed_kmh=36.0,
         frequencies=[40.0],
         interpolation=RoughnessInterpolation.ENERGY,
     )
@@ -666,6 +698,48 @@ def _reference_track(**overrides: object) -> RailwayTrack:
     return RailwayTrack(**fields)  # type: ignore[arg-type]
 
 
+@pytest.mark.parametrize(
+    ("build", "field"),
+    [
+        (lambda pair: _reference_stock(wheel_roughness=pair), "wheel_roughness"),
+        (lambda pair: _reference_stock(contact_filter=pair), "contact_filter"),
+        (lambda pair: _reference_stock(traction=pair), "traction"),
+        (lambda pair: _reference_stock(aerodynamic=pair), "aerodynamic"),
+        (lambda pair: _reference_track(rail_roughness=pair), "rail_roughness"),
+        (lambda pair: _reference_track(impact_roughness=pair), "impact_roughness"),
+    ],
+)
+def test_a_bare_pair_in_place_of_a_spectrum_is_refused_by_name(
+    build: object, field: str
+) -> None:
+    """A wavelength table or a pair of source spectra is a record, read by name.
+
+    The tuple the 3.x look-ups returned is refused with the field it was given
+    for, rather than failing inside the resampling.
+    """
+    pair = (np.arange(1.0, 25.0), np.zeros(24))
+    with pytest.raises(TypeError, match=rf"\.{field} must be a "):
+        build(pair)  # type: ignore[operator]
+
+
+def test_a_bare_pair_as_the_aerodynamic_reference_is_refused_by_name() -> None:
+    """The reference spectra of the aerodynamic source are a record too.
+
+    The ``(source A, source B)`` tuple of 3.x is refused with the keyword it
+    was given for, rather than failing on an attribute of a tuple.
+    """
+    pair = (np.zeros(24), np.zeros(24))
+    with pytest.raises(TypeError, match="'reference' must be"):
+        aerodynamic_sound_power(300.0, reference=pair)  # type: ignore[arg-type]
+
+
+def test_the_records_of_the_look_ups_are_what_the_inputs_take() -> None:
+    stock = _reference_stock(aerodynamic=aerodynamic_sound_power(300.0))
+    assert isinstance(stock.wheel_roughness, WavelengthSpectrum)
+    assert isinstance(stock.aerodynamic, RailSourceSpectra)
+    assert _reference_track(impact_roughness=None).impact_roughness is None
+
+
 def test_flow_term_is_exact() -> None:
     """(2.3.2): doubling the flow raises the line power by exactly 10 lg 2."""
     track = _reference_track(impact_roughness=None)
@@ -695,7 +769,7 @@ def test_idling_excludes_rolling_and_uses_the_idling_flow_term() -> None:
         reference_time=12.0,
     )
     assert np.all(np.isneginf(idling.components["rolling"][0]))
-    low, _ = traction_sound_power(TractionVehicle.ELECTRIC_LOCO)
+    low = traction_sound_power(TractionVehicle.ELECTRIC_LOCO).source_a
     expected = octave_bands_from_third_octaves(
         np.asarray(low) + 10.0 * math.log10(1.0 / (12.0 * 100.0))
     )
@@ -776,7 +850,10 @@ def test_minimum_speed_floor_and_impact_exclusion() -> None:
 
 def test_aerodynamic_noise_only_above_200_kmh() -> None:
     track = _reference_track(impact_roughness=None)
-    aero = (np.asarray(ref.CNOSSOS_RAIL_G6_A), np.asarray(ref.CNOSSOS_RAIL_G6_B))
+    aero = RailSourceSpectra(
+        source_a=np.asarray(ref.CNOSSOS_RAIL_G6_A),
+        source_b=np.asarray(ref.CNOSSOS_RAIL_G6_B),
+    )
     below = railway_source_power(
         RailwayVehicle(
             _reference_stock(aerodynamic=aero), flow_rate=1.0, speed_kmh=200.0
@@ -906,15 +983,17 @@ def test_invalid_inputs() -> None:
         ValueError,
         match=r"roughness_to_frequency: 'levels' .*'wavelengths_mm' .*same shape",
     ):
-        roughness_to_frequency([1.0, 2.0], [1.0], 50.0)
+        roughness_to_frequency([1.0, 2.0], wavelengths_mm=[1.0], speed_kmh=50.0)
     with pytest.raises(
         ValueError, match=r"roughness_to_frequency: 'levels' must have one axis"
     ):
-        roughness_to_frequency([[1.0, 2.0]], [1.0, 2.0], 50.0)
+        roughness_to_frequency([[1.0, 2.0]], wavelengths_mm=[1.0, 2.0], speed_kmh=50.0)
     with pytest.raises(ValueError, match="'wavelengths_mm' must all be positive"):
-        roughness_to_frequency([1.0, 2.0], [1.0, 0.0], 50.0)
+        roughness_to_frequency([1.0, 2.0], wavelengths_mm=[1.0, 0.0], speed_kmh=50.0)
     with pytest.raises(ValueError, match="'frequencies' must all be positive"):
-        roughness_to_frequency([1.0, 2.0], [1.0, 2.0], 50.0, frequencies=[0.0])
+        roughness_to_frequency(
+            [1.0, 2.0], wavelengths_mm=[1.0, 2.0], speed_kmh=50.0, frequencies=[0.0]
+        )
     with pytest.raises(
         ValueError, match=r"'radius' must be a positive number of metres"
     ):

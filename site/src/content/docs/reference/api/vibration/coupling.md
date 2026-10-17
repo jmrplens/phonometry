@@ -81,6 +81,7 @@ names.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative acceleration, a non-positive frequency, or an unknown direction or surface. |
+| TypeError | if `peak_acceleration_m_s2` or `upper_frequency_hz` is not a single number. |
 
 ## CLEARANCE_TO_DISTURBING_BODY_FACTOR
 
@@ -189,6 +190,7 @@ beside the transducer and see whether the reading moves.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive mass. |
+| TypeError | if `coupled_mass_kg` or `vibrating_mass_kg` is not a single number. |
 
 ## MASS_LOADING_RATIO_LIMIT
 

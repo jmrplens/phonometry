@@ -209,6 +209,7 @@ class ReverberationSoundPowerResult(OwnsArrays):
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
             or ``method`` is neither ``'direct'`` nor ``'comparison'``.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_choice(self.method, "method", ("direct", "comparison"))
         require_ranks(
@@ -372,6 +373,8 @@ def reverberation_background_correction(
         ``levels``.
     :raises ValueError: For inputs that do not match band for band, that are
         not finite, or a band centre that is not strictly positive.
+    :raises TypeError: if ``background_levels``, ``frequencies`` or ``levels`` holds a
+        text or a value that is not a real number.
     """
     signal = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -770,6 +773,7 @@ def sound_power_reverberation(
     :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
     :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult`.
+    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number.
     """
     _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
     mean_level = _mean_level(levels)
@@ -972,6 +976,8 @@ class ReverberationSoundEnergyResult(OwnsArrays):
         :raises ValueError: if any per-band quantity disagrees with the rest,
             ``method`` is neither ``'direct'`` nor ``'comparison'``,
             ``n_events`` is below one or ``integration_time`` is not positive.
+        :raises TypeError: if ``method`` is not a text, or ``integration_time`` is not a
+            single number.
         """
         require_choice(self.method, "method", ("direct", "comparison"))
         object.__setattr__(
@@ -1128,6 +1134,8 @@ def sound_energy_reverberation(
     :raises ValueError: for a malformed or non-finite level array, a
         non-physical room or climate, a background without its
         ``integration_time``, or mismatched band counts.
+    :raises TypeError: if ``integration_time``, ``surface_area`` or ``volume`` is not a
+        single number, or ``n_events`` is a flag, a text or an array where a count goes.
     """
     _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
     event_levels, event_count = _room_event_levels(levels, n_events)
@@ -1228,6 +1236,8 @@ def sound_energy_comparison(
     :raises ValueError: for a malformed or non-finite level array, a
         non-physical climate, a background without its ``integration_time``
         or without ``frequencies``, or mismatched band counts.
+    :raises TypeError: if ``integration_time`` is not a single number, or ``n_events``
+        is a flag, a text or an array where a count goes.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     event_levels, event_count = _room_event_levels(levels, n_events)
@@ -1275,9 +1285,44 @@ def sound_energy_comparison(
     )
 
 
+@dataclass(frozen=True)
+class OctaveBandLevels(OwnsArrays):
+    """Octave-band levels summed from one-third-octave bands (ISO 3741 Annex F).
+
+    What :func:`octave_band_levels` returns: the octave centres and the
+    levels, named, where a ``(frequencies, levels)`` tuple used to be
+    unpacked by position.
+
+    :ivar frequencies: The octave mid-band frequencies, ascending, in Hz.
+    :ivar levels: The octave-band levels, in dB, with the octaves on the last
+        axis.
+    """
+
+    frequencies: np.ndarray
+    levels: np.ndarray
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the octave-band levels against their octaves.
+
+        A level array of several spectra draws one curve per spectrum.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the level curves.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.emission import plot_octave_band_levels
+
+        check_language(language)
+        return plot_octave_band_levels(self, ax=ax, language=language, **kwargs)
+
+
 def octave_band_levels(
     levels: np.ndarray, *, frequencies: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+) -> OctaveBandLevels:
     r"""Octave-band levels from one-third-octave band levels (ISO 3741 Annex F).
 
     The level in the :math:`i`-th octave band, :math:`1 \le i \le 8` for the
@@ -1299,9 +1344,9 @@ def octave_band_levels(
         (``(NB,)``, or ``(..., NB)`` for several spectra at once).
     :param frequencies: The ``NB`` nominal one-third-octave mid-band
         frequencies of ``levels``, in hertz, from 50 Hz to 10 kHz.
-    :return: ``(octave mid-band frequencies, octave-band levels)``, the
-        frequencies ascending and the levels with the octaves on the last
-        axis.
+    :return: The octave mid-band frequencies, ascending, and the octave-band
+        levels with the octaves on the last axis, as an
+        :class:`OctaveBandLevels`.
     :raises ValueError: for a frequency outside Table F.1, a repeated
         frequency, an octave whose three thirds are not all present, or
         levels that do not carry one value per frequency.
@@ -1357,4 +1402,6 @@ def octave_band_levels(
     summed = np.stack(
         [energy_sum(arr[..., columns[i]], axis=-1) for i in order], axis=-1
     )
-    return octave_freqs, np.asarray(summed, dtype=np.float64)
+    return OctaveBandLevels(
+        frequencies=octave_freqs, levels=np.asarray(summed, dtype=np.float64)
+    )

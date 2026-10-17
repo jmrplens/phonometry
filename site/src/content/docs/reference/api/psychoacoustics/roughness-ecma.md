@@ -120,6 +120,12 @@ Psychoacoustic roughness per ECMA-418-2:2025 (Sottek Hearing Model).
 
 **Returns:** An [`EcmaRoughness`](/phonometry/reference/api/psychoacoustics/roughness-ecma/#ecmaroughness) with the single value R (Clause 7.1.10), the average specific roughness R'(z) (Clause 7.1.8) and the time-dependent roughness R(l50) (Formula 111).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 A 1 kHz carrier 100 %-amplitude-modulated at 70 Hz with an overall level
 of 60 dB SPL yields 1 asper (Clause 7 calibration; reproduced to 0.9999
 asper with the tabulated c_R of Formula (104)).

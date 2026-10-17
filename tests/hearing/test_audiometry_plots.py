@@ -86,14 +86,14 @@ def test_the_sweep_figure_draws_hearing_level_downwards() -> None:
     assert ax.yaxis_inverted()
     assert ax.get_ylabel() == "Nivel de audición [dB]"
     squares = _line(ax, "umbral en la frecuencia")
-    np.testing.assert_array_equal(squares.get_ydata(), result.threshold_db)
+    np.testing.assert_array_equal(squares.get_ydata(), result.threshold_level)
 
 
 def test_the_budget_figure_draws_one_bar_per_component() -> None:
     ax = hearing.audiometric_uncertainty(1000.0).plot(language="es")
     heights = [patch.get_height() for patch in ax.patches]
     np.testing.assert_allclose(
-        heights, hearing.audiometric_uncertainty(1000.0).components_db
+        heights, hearing.audiometric_uncertainty(1000.0).standard_uncertainties_db
     )
     # A.6 reports U rounded to the nearest full decibel: Table A.2's 10 dB.
     assert ax.get_title() == "ISO 8253-1 anexo A: $u$ = 4,9 dB, $U$ = 10 dB"
@@ -281,8 +281,8 @@ def test_the_retest_figure_draws_the_band_of_agreement() -> None:
 def test_the_cautions_figure_crosses_the_flagged_levels() -> None:
     cautions = hearing.audiogram_cautions(
         [250.0, 500.0, 1000.0, 2000.0],
-        air_conduction_db=[20.0, 30.0, 40.0, 50.0],
-        bone_conduction_db=[40.0, 25.0, 30.0, 45.0],
+        air_conduction_threshold_levels=[20.0, 30.0, 40.0, 50.0],
+        bone_conduction_threshold_levels=[40.0, 25.0, 30.0, 45.0],
     )
     ax = cautions.plot()
     assert ax.yaxis_inverted()
@@ -295,7 +295,7 @@ def test_the_cautions_figure_crosses_the_flagged_levels() -> None:
         "ISO 8253-1 audiogram: cross-hearing and vibrotactile caution"
     )
     quiet = hearing.audiogram_cautions(
-        [250.0, 1000.0], air_conduction_db=[10.0, 15.0]
+        [250.0, 1000.0], air_conduction_threshold_levels=[10.0, 15.0]
     ).plot(language="es")
     assert "pide precaución" not in _labels(quiet)
     assert quiet.get_title() == "ISO 8253-1 audiograma: ningún nivel pide precaución"

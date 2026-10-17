@@ -39,7 +39,11 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import check_engine, require_equal_shapes
+from .._internal.validation import (
+    check_engine,
+    require_equal_shapes,
+    require_present,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -105,14 +109,21 @@ class OpenPlanResult(OwnsArrays):
         ``nan`` under the same condition as ``rd``.
     :ivar positions_m: The microphone distances the metrics were fitted
         on, in metres, retained so :meth:`plot_geometry` can draw the
-        line; ``None`` for hand-built results.
+        line.
     """
 
     d2s: float
     lp_as_4m: float
     rd: float
     rp: float
-    positions_m: np.ndarray | None = None
+    positions_m: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Refuse a result built without the positions it was fitted on.
+
+        :raises TypeError: if ``positions_m`` is ``None``.
+        """
+        require_present(self, "positions_m")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -137,8 +148,6 @@ class OpenPlanResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_open_plan_result_geometry

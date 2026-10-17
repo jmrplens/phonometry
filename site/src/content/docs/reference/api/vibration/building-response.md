@@ -143,6 +143,7 @@ The ± 50 % band D.2 puts around an empirical prediction, in hertz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite. |
+| TypeError | if `frequency_hz` is not a single number. |
 
 ## EMPIRICAL_FREQUENCY_TOLERANCE
 
@@ -184,6 +185,7 @@ One prediction, bundled with the coefficient and the error band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For anything [`fundamental_period`](/phonometry/reference/api/vibration/building-response/#fundamental_period) refuses. |
+| TypeError | if `coefficient` is not a single number. |
 
 ## fundamental_frequency
 
@@ -260,6 +262,7 @@ form, since the annex gives a range and no way to choose inside it; state
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the model is not one of the four, if an argument the model needs is missing or not positive, or if an argument the model does not use is given. |
+| TypeError | if `model` is not a text, or `coefficient`, `height_m` or `width_m` is not a single number. |
 
 ## HEIGHT_FREQUENCY_CONSTANT_HZ_M
 

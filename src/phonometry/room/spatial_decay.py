@@ -115,8 +115,8 @@ __all__ = [
     "DECADE_TO_DOUBLING",
     "EVALUATION_DISTANCES_M",
     "FREE_FIELD_OFFSET_DB",
-    "ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB",
-    "ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB",
+    "ISO14257_MIN_BACKGROUND_MARGIN_DB",
+    "ISO14257_PREFERRED_BACKGROUND_MARGIN_DB",
     "ISO14257_REFERENCE_DISTANCE_M",
     "MAX_DIRECTIVITY_INDEX",
     "MIN_SOURCE_TO_WALL_M",
@@ -227,10 +227,10 @@ SOURCE_ON_FLOOR_HEIGHT_M: float = 0.5
 
 #: 5.1.4: the source shall be this far over the background in every band and
 #: at every distance, in decibels; between this and
-#: :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` an ISO 3744 correction is made, and
+#: :data:`ISO14257_MIN_BACKGROUND_MARGIN_DB` an ISO 3744 correction is made, and
 #: below it the point is not measured.
-ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB: float = 10.0
-ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB: float = 6.0
+ISO14257_PREFERRED_BACKGROUND_MARGIN_DB: float = 10.0
+ISO14257_MIN_BACKGROUND_MARGIN_DB: float = 6.0
 
 #: A.1: the largest absolute directivity index the source may show in any
 #: one-third-octave band from 100 Hz to 5 kHz, in decibels.
@@ -279,7 +279,7 @@ _MIN_REGRESSION_POINTS = 2
 #: Every curve of clause 6 is read position by position, so a value without a
 #: distance is a curve with a hole in it rather than a shorter curve.
 _MISMATCH_MSG = (
-    "'distribution_values_db' and 'distances' must match position for position."
+    "'distribution_levels' and 'distances' must match position for position."
 )
 
 #: A.4: the repeatability tolerance on the source's sound power, in decibels,
@@ -307,12 +307,12 @@ class BackgroundMarginCheck(OwnsArrays):
 
     @property
     def unusable(self) -> NDArray[np.bool_]:
-        """True where the margin is at or under :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`.
+        """True where the margin is at or under :data:`ISO14257_MIN_BACKGROUND_MARGIN_DB`.
 
         The clause offers no correction for those. Judged settled.
         """
         return np.asarray(
-            settled(self.margins_db) <= ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB,
+            settled(self.margins_db) <= ISO14257_MIN_BACKGROUND_MARGIN_DB,
             dtype=np.bool_,
         )
 
@@ -320,24 +320,24 @@ class BackgroundMarginCheck(OwnsArrays):
     def needs_correction(self) -> NDArray[np.bool_]:
         """True where the margin is under the preferred 10 dB and over the 6 dB.
 
-        :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` and
-        :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` bound the window where
+        :data:`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB` and
+        :data:`ISO14257_MIN_BACKGROUND_MARGIN_DB` bound the window where
         the clause asks for the ISO 3744 background correction.
         """
         judged = settled(self.margins_db)
         return np.asarray(
-            (judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB) & ~self.unusable,
+            (judged < ISO14257_PREFERRED_BACKGROUND_MARGIN_DB) & ~self.unusable,
             dtype=np.bool_,
         )
 
     @property
     def passes(self) -> bool:
-        """The verdict: every margin clears :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`.
+        """The verdict: every margin clears :data:`ISO14257_PREFERRED_BACKGROUND_MARGIN_DB`.
 
         That is the only case that needs nothing done to it.
         """
         judged = settled(self.margins_db)
-        return not bool(np.any(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
+        return not bool(np.any(judged < ISO14257_PREFERRED_BACKGROUND_MARGIN_DB))
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -376,6 +376,8 @@ def check_background_margin(
     :return: The verdict, as a :class:`BackgroundMarginCheck`.
     :raises ValueError: For inputs that are not finite or do not match position
         for position.
+    :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
+        that is not a real number.
     """
     levels = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -395,7 +397,7 @@ def check_background_margin(
         worst = float(np.min(margins))
         detail = (
             f"{int(np.count_nonzero(unusable))} of them at or under "
-            f"{ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB:g} dB, which 5.1.4 offers no "
+            f"{ISO14257_MIN_BACKGROUND_MARGIN_DB:g} dB, which 5.1.4 offers no "
             "correction for"
             if bool(np.any(unusable))
             else (
@@ -404,9 +406,9 @@ def check_background_margin(
             )
         )
         warnings.warn(
-            f"ISO 14257 5.1.4 asks for {ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB:g} dB over the "
+            f"ISO 14257 5.1.4 asks for {ISO14257_PREFERRED_BACKGROUND_MARGIN_DB:g} dB over the "
             f"background at every position and in every octave band; "
-            f"{int(np.count_nonzero(judged < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))} of "
+            f"{int(np.count_nonzero(judged < ISO14257_PREFERRED_BACKGROUND_MARGIN_DB))} of "
             f"{margins.size} clear less than that and the worst is "
             f"{worst:.1f} dB, {detail}.",
             SpatialDecayWarning,
@@ -421,8 +423,8 @@ class SpatialDecayResult(OwnsArrays):
 
     :param distances: The distance of each microphone position from the
         acoustical centre of the source, in metres.
-    :param distribution_values_db: :math:`D` at each position, in decibels.
-    :param reference_values_db: :math:`D_\mathrm{ref}` at each position, in
+    :param distribution_levels: :math:`D` at each position, in decibels.
+    :param reference_distribution_levels: :math:`D_\mathrm{ref}` at each position, in
         decibels.
     :param level_excess: :math:`\mathrm{DL}_\mathrm{f}` at each position,
         in decibels.
@@ -436,8 +438,8 @@ class SpatialDecayResult(OwnsArrays):
     """
 
     distances: NDArray[np.float64]
-    distribution_values_db: NDArray[np.float64]
-    reference_values_db: NDArray[np.float64]
+    distribution_levels: NDArray[np.float64]
+    reference_distribution_levels: NDArray[np.float64]
     level_excess: NDArray[np.float64]
     decay_rate_db: float
     mean_level_excess: float
@@ -476,6 +478,8 @@ def sound_distribution_value(
         as a scalar or one value per position.
     :return: :math:`D_j(r)`, in decibels.
     :raises ValueError: For inputs that are not finite or do not broadcast.
+    :raises TypeError: if ``levels`` or ``sound_power_levels`` holds a text or a value
+        that is not a real number.
     """
     levels = require_finite_array(levels, "levels")
     power = require_finite_array(sound_power_levels, "sound_power_levels")
@@ -503,6 +507,8 @@ def reference_distribution_value(distances: ArrayLike) -> NDArray[np.float64]:
     :param distances: :math:`r` at each position, in metres.
     :return: :math:`D_\mathrm{ref}(r)`, in decibels.
     :raises ValueError: For a distance that is not strictly positive.
+    :raises TypeError: if ``distances`` holds a text or a value that is not a real
+        number.
     """
     radii = require_positive_array(distances, "distances")
     return np.asarray(
@@ -537,6 +543,8 @@ def floor_reference_value(
     :return: :math:`D_\mathrm{floor,ref}(r)`, in decibels.
     :raises ValueError: For a distance that is not strictly positive or a
         negative height.
+    :raises TypeError: if ``path_height_m`` or ``source_height_m`` is not a single
+        number, or ``distances`` holds a text or a value that is not a real number.
     """
     radii = require_positive_array(distances, "distances")
     source = require_finite(source_height_m, "source_height_m")
@@ -557,8 +565,8 @@ def floor_reference_value(
 
 
 def corrected_distribution_value(
-    distribution_values_db: ArrayLike,
-    measured_reference_db: ArrayLike,
+    distribution_levels: ArrayLike,
+    measured_reference_levels: ArrayLike,
     distances: ArrayLike,
     *,
     source_height_m: float = 0.0,
@@ -579,8 +587,8 @@ def corrected_distribution_value(
     source's directivity and the floor reflection are a large part of what the
     meter saw.
 
-    :param distribution_values_db: :math:`D_j(r)` in the room, in decibels.
-    :param measured_reference_db: :math:`D_{\mathrm{meas,ref}\,j}(r)` measured
+    :param distribution_levels: :math:`D_j(r)` in the room, in decibels.
+    :param measured_reference_levels: :math:`D_{\mathrm{meas,ref}\,j}(r)` measured
         for this source over a reflecting plane, in decibels.
     :param distances: :math:`r` at each position, in metres.
     :param source_height_m: :math:`h_\mathrm{S}`, in metres.
@@ -588,13 +596,17 @@ def corrected_distribution_value(
     :return: :math:`D_{\mathrm{corr}\,j}(r)`, in decibels.
     :raises ValueError: For inputs that do not match position for position, or
         a correction that leaves no energy at all.
+    :raises TypeError: if ``distances``, ``distribution_levels`` or
+        ``measured_reference_levels`` holds a text or a value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
-    measured = require_finite_array(measured_reference_db, "measured_reference_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
+    measured = require_finite_array(
+        measured_reference_levels, "measured_reference_levels"
+    )
     radii = require_positive_array(distances, "distances")
     if values.shape != measured.shape or values.shape != radii.shape:
         msg = (
-            "'distribution_values_db', 'measured_reference_db' and "
+            "'distribution_levels', 'measured_reference_levels' and "
             "'distances' must match position for position."
         )
         raise ValueError(msg)
@@ -616,7 +628,7 @@ def corrected_distribution_value(
 
 
 def spectrum_distribution_value(
-    distribution_values_db: ArrayLike, machine_power_levels: ArrayLike
+    distribution_levels: ArrayLike, machine_power_levels: ArrayLike
 ) -> float:
     r"""The curve collapsed onto one machine's spectrum, Equation (3).
 
@@ -629,18 +641,19 @@ def spectrum_distribution_value(
     the room does to one particular machine, which is the number a layout
     decision is made on.
 
-    :param distribution_values_db: :math:`D_j(r)` in each band, in decibels.
+    :param distribution_levels: :math:`D_j(r)` in each band, in decibels.
     :param machine_power_levels: :math:`L_{W\mathrm{mach}\,j}` of the
         machine in the same bands, in decibels.
     :return: :math:`D_S(r)`, in decibels.
     :raises ValueError: For inputs that do not match band for band.
+    :raises TypeError: if ``distribution_levels`` or ``machine_power_levels`` holds a
+        text or a value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     power = require_finite_array(machine_power_levels, "machine_power_levels")
     if values.shape != power.shape:
         msg = (
-            "'distribution_values_db' and 'machine_power_levels' must "
-            "match band for band."
+            "'distribution_levels' and 'machine_power_levels' must match band for band."
         )
         raise ValueError(msg)
     numerator = float(np.sum(10.0 ** ((values + power) / 10.0)))
@@ -649,7 +662,7 @@ def spectrum_distribution_value(
 
 
 def normalized_distribution_value(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> float:
@@ -674,7 +687,7 @@ def normalized_distribution_value(
     :func:`spectrum_distribution_value` with the values of
     :data:`PINK_NOISE_WEIGHTS_DB` as the machine spectrum.
 
-    :param distribution_values_db: :math:`D_j` in each band, in decibels, in
+    :param distribution_levels: :math:`D_j` in each band, in decibels, in
         the order of :data:`SPATIAL_DECAY_BANDS_HZ` unless ``frequencies``
         says otherwise.
     :param frequencies: The nominal octave centres the values belong to, in
@@ -682,8 +695,10 @@ def normalized_distribution_value(
     :return: :math:`D_\mathrm{Norm}`, in decibels.
     :raises ValueError: For a count that is not the six bands of Table 1, or a
         frequency the table does not name.
+    :raises TypeError: if ``distribution_levels`` or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     if frequencies is None:
         bands = np.asarray(SPATIAL_DECAY_BANDS_HZ, dtype=np.float64)
     else:
@@ -744,9 +759,7 @@ def _regression(
     return numerator / denominator, float(np.mean(logs))
 
 
-def spatial_decay_rate(
-    distribution_values_db: ArrayLike, distances: ArrayLike
-) -> float:
+def spatial_decay_rate(distribution_levels: ArrayLike, distances: ArrayLike) -> float:
     r"""The rate of spatial decay per distance doubling, Equation (5).
 
     .. math::
@@ -763,14 +776,16 @@ def spatial_decay_rate(
     negative, so a room that gets quieter with distance returns a positive
     number of decibels per doubling.
 
-    :param distribution_values_db: :math:`D_i` at the positions of the range,
+    :param distribution_levels: :math:`D_i` at the positions of the range,
         in decibels.
     :param distances: :math:`r_i` at the same positions, in metres.
     :return: :math:`\mathrm{DL}_2`, in decibels per distance doubling.
     :raises ValueError: For inputs that do not match position for position,
         fewer than two positions, or positions that are all at one distance.
+    :raises TypeError: if ``distances`` or ``distribution_levels`` holds a text or a
+        value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
@@ -804,7 +819,7 @@ def spatial_decay_rate(
 
 
 def level_excess(
-    distribution_values_db: ArrayLike, distances: ArrayLike
+    distribution_levels: ArrayLike, distances: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The excess over a free field at each position, Equation (6).
 
@@ -812,19 +827,21 @@ def level_excess(
 
        \mathrm{DL}_\mathrm{f} = D - D_\mathrm{ref}
 
-    :param distribution_values_db: :math:`D` at each position, in decibels.
+    :param distribution_levels: :math:`D` at each position, in decibels.
     :param distances: :math:`r` at each position, in metres.
     :return: :math:`\mathrm{DL}_\mathrm{f}` at each position, in decibels.
     :raises ValueError: For inputs that do not match position for position.
+    :raises TypeError: if ``distances`` or ``distribution_levels`` holds a text or a
+        value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
     return np.asarray(values - reference_distribution_value(radii), dtype=np.float64)
 
 
-def mean_level_excess(distribution_values_db: ArrayLike, distances: ArrayLike) -> float:
+def mean_level_excess(distribution_levels: ArrayLike, distances: ArrayLike) -> float:
     r"""The excess averaged over a distance range, Equation (7).
 
     .. math::
@@ -839,15 +856,17 @@ def mean_level_excess(distribution_values_db: ArrayLike, distances: ArrayLike) -
     distance, which is the axis the curve is drawn on, so a position twice as
     far weighs the same as one twice as near rather than twice as much.
 
-    :param distribution_values_db: :math:`D` at the positions of the range, in
+    :param distribution_levels: :math:`D` at the positions of the range, in
         decibels.
     :param distances: :math:`r` at the same positions, in metres, in
         increasing order.
     :return: :math:`\mathrm{DL}_\mathrm{f}(r_n, r_m)`, in decibels.
     :raises ValueError: For inputs that do not match, fewer than two
         positions, or distances that do not increase.
+    :raises TypeError: if ``distances`` or ``distribution_levels`` holds a text or a
+        value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
@@ -867,7 +886,7 @@ def mean_level_excess(distribution_values_db: ArrayLike, distances: ArrayLike) -
 
 
 def level_excess_at(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
     distance: float,
 ) -> float:
@@ -891,15 +910,17 @@ def level_excess_at(
     (5) multiplies by the rounded 0,3; the two constants differ by 0,3 % and
     the errata registry records it.
 
-    :param distribution_values_db: :math:`D_i` at the positions of the range,
+    :param distribution_levels: :math:`D_i` at the positions of the range,
         in decibels.
     :param distances: :math:`r_i` at the same positions, in metres.
     :param distance: :math:`r`, the distance to read at, in metres.
     :return: :math:`\mathrm{DL}'_{\mathrm{f}r}`, in decibels.
     :raises ValueError: For inputs that do not match, fewer than two
         positions, or a non-positive distance.
+    :raises TypeError: if ``distance`` is not a single number, or ``distances`` or
+        ``distribution_levels`` holds a text or a value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     radii = require_positive_array(distances, "distances")
     target = require_positive(distance, "distance")
     if values.shape != radii.shape:
@@ -952,6 +973,8 @@ def distance_region(
         increase, a near boundary inside the first metre, which would leave the
         near region empty, or a distance inside that first metre, which the
         clause does not evaluate.
+    :raises TypeError: if ``distance``, ``far_limit_m`` or ``near_limit_m`` is not a
+        single number.
     """
     radius = require_positive(distance, "distance")
     near = require_positive(near_limit_m, "near_limit_m")
@@ -995,6 +1018,7 @@ def omnidirectionality_tolerance(frequency_hz: float) -> float:
     :param frequency_hz: The one-third-octave centre, in hertz.
     :return: The largest absolute directivity index allowed, in decibels.
     :raises ValueError: For a non-positive frequency.
+    :raises TypeError: if ``frequency_hz`` is not a single number.
     """
     centre = require_positive(frequency_hz, "frequency_hz")
     low_db, high_db = OMNIDIRECTIONAL_TOLERANCE_DB
@@ -1024,7 +1048,7 @@ def _third_octave_index(frequency_hz: float) -> int:
 
 
 def spatial_decay_curve(
-    distribution_values_db: ArrayLike,
+    distribution_levels: ArrayLike,
     distances: ArrayLike,
     *,
     near_limit_m: float = TYPICAL_NEAR_LIMIT_M,
@@ -1034,7 +1058,7 @@ def spatial_decay_curve(
 ) -> SpatialDecayResult:
     """The curve of one region with its two descriptors, clause 6.
 
-    :param distribution_values_db: :math:`D` at every measured position, in
+    :param distribution_levels: :math:`D` at every measured position, in
         decibels, over the whole path.
     :param distances: :math:`r` at the same positions, in metres, in
         increasing order.
@@ -1045,8 +1069,10 @@ def spatial_decay_curve(
     :return: The curve and its descriptors, as a :class:`SpatialDecayResult`.
     :raises ValueError: For an unknown region, inputs that do not match, or a
         region holding fewer than two measured positions.
+    :raises TypeError: if ``band`` is not a single number, or ``distances`` or
+        ``distribution_levels`` holds a text or a value that is not a real number.
     """
-    values = require_finite_array(distribution_values_db, "distribution_values_db")
+    values = require_finite_array(distribution_levels, "distribution_levels")
     radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
@@ -1082,8 +1108,8 @@ def spatial_decay_curve(
     chosen, chosen_radii = values[keep], radii[keep]
     return SpatialDecayResult(
         distances=chosen_radii,
-        distribution_values_db=chosen,
-        reference_values_db=reference_distribution_value(chosen_radii),
+        distribution_levels=chosen,
+        reference_distribution_levels=reference_distribution_value(chosen_radii),
         level_excess=level_excess(chosen, chosen_radii),
         decay_rate_db=spatial_decay_rate(chosen, chosen_radii),
         mean_level_excess=mean_level_excess(chosen, chosen_radii),

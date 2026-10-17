@@ -144,6 +144,7 @@ values were computed with.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a length or radius that is not positive, or frequencies that are not positive and increasing. |
+| TypeError | if `length_m` or `radius_m` is not a single number. |
 
 ## CapillaryTube
 
@@ -267,6 +268,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, fewer than two microphones, or an unknown method. |
+| TypeError | if `heat_conduction_method` is not a text. |
 
 ## coupler_parameter_uncertainty
 
@@ -326,6 +328,7 @@ are the length and the radius of the capillary tubes.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for other than three microphones, a microphone index that is not 1, 2 or 3, an uncertainty on the volume or surface of a plane-wave coupler (they follow from its length and diameter), one on capillary tubes the coupler does not have, or one on the static pressure, the temperature or the humidity of a coupler filled with a given gas. |
+| TypeError | if `heat_conduction_method` is not a text. |
 
 ## coupler_transfer_impedance
 
@@ -388,7 +391,7 @@ not change the result.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `coupler` that is neither a [`PlaneWaveCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#planewavecoupler) nor a [`LargeVolumeCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecoupler). |
+| TypeError | for a `coupler` that is neither a [`PlaneWaveCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#planewavecoupler) nor a [`LargeVolumeCoupler`](/phonometry/reference/api/metrology/reciprocity-coupler/#largevolumecoupler), a `static_pressure_pa` that is not one number, or a `heat_conduction_method` that is not a text. |
 | ValueError | for frequencies that are not positive and increasing, a static pressure that is not positive, or an unknown method. |
 
 ## CouplerCheck
@@ -597,7 +600,7 @@ the uncertainty of that parameter on each of the three microphones.
 ```python
 CouplerParameterUncertainty(
     frequencies: NDArray[np.float64],
-    components_db: Mapping[str, NDArray[np.float64]],
+    component_uncertainties_db: Mapping[str, NDArray[np.float64]],
     microphone: int,
 )
 ```
@@ -613,7 +616,7 @@ Built by [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/r
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `components_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. |
+| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
 ### CouplerParameterUncertainty.plot()
@@ -752,6 +755,7 @@ coupler.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a volume, surface or ratio that is not positive, or frequencies that are not positive and increasing. |
+| TypeError | if `surface_area_m2` or `volume_m3` is not a single number. |
 
 ## HeatConductionCorrection
 
@@ -883,6 +887,7 @@ frequency is read at its value divided by it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency whose air equivalent is above 2 500 Hz, or a ratio that is not positive. |
+| TypeError | if `speed_of_sound_ratio` is not a single number. |
 
 ## LargeVolumeCoupler
 
@@ -1291,6 +1296,7 @@ that is not a right circular cylinder.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a ratio or an $X$ that is not positive and finite, or an unknown method. |
+| TypeError | if `method` is not a text, or `length_to_diameter_ratio` is not a single number. |
 
 ## WaveMotionCorrection
 

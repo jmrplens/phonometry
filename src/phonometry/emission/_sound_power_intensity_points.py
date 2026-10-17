@@ -508,6 +508,8 @@ def position_count_factor(
         if a per-band value is asked for at the survey grade, or an A-weighted
         one at the precision or engineering grade; or if ``frequency`` is not a
         tabulated band.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequency`` is not a single number.
     """
     grade = _check_grade(grade)
     if frequency is None:
@@ -554,6 +556,8 @@ def determination_standard_deviation(
     :return: ``s`` in decibels.
     :raises ValueError: On the same mismatches
         :func:`position_count_factor` refuses.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequency`` is not a single number.
     """
     grade = _check_grade(grade)
     if frequency is None:
@@ -986,6 +990,8 @@ class DiscretePointIntensityResult(OwnsArrays):
         :raises ValueError: if any per-band quantity disagrees with the rest,
             the positions and the areas disagree, an area is not positive and
             finite, the grade is unknown or ``fraction`` is not 1 or 3.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         _check_grade(self.grade)
         _check_fraction(self.fraction)
@@ -1979,6 +1985,7 @@ def sound_power_intensity_points(
         ``temporal_intensity`` is neither 1D nor 2D, carries fewer than two
         samples, or holds a band whose mean is not positive and so leaves
         ``F1`` nothing to normalize by.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
     """
     grade = _check_grade(grade)
     fraction = _check_fraction(fraction)

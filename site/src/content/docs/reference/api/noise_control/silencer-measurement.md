@@ -131,6 +131,7 @@ and the lowest has to produce more than
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite, if a dynamic pressure is not positive, or if a series' two arrays are of different lengths. |
+| TypeError | if `object_dynamic_pressure_pa`, `object_static_pressure_pa`, `substitution_dynamic_pressure_pa` or `substitution_static_pressure_pa` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -194,6 +195,7 @@ instead, and then no correction is applied at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite, or if the two arrays carry different numbers of bands. Both are per-band quantities, so neither stands in for a whole run. |
+| TypeError | if `end_reflection_loss` or `room_sound_power_level` holds a text or a value that is not a real number. |
 
 ## dynamic_pressure
 
@@ -229,6 +231,7 @@ way a flow meter reports it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `area`, `density` or `volume_flow` is not a single number. |
 
 ## EXTRAPOLATION_MAX_DEVIATION_DB
 
@@ -274,6 +277,7 @@ serves both.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a duty is not positive and finite, if a level is not finite, if the two arrays are of different lengths, if there are fewer than two points, or if every point is at the same duty. |
+| TypeError | if `duty` or `levels` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -321,6 +325,7 @@ room's volume and reverberation time.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite, if the level and the open-end loss carry different numbers of bands, or if the room correction is neither a single value nor one per band. |
+| TypeError | if `open_end_loss`, `pressure_level` or `room_correction` holds a text or a value that is not a real number. |
 
 ## ISO11691_REPRODUCIBILITY
 
@@ -408,6 +413,7 @@ $D_\mathrm{td}$ goes to zero and the two quantities meet.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite, or if the two arrays carry different numbers of bands. Both are per-band quantities, so neither stands in for a whole run. |
+| TypeError | if `insertion_loss` or `open_end_loss` holds a text or a value that is not a real number. |
 
 ## measurement_expanded_uncertainty
 
@@ -476,6 +482,7 @@ silencers, and that the other two rest on experience.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite, if it is above the range the column covers, or if the quantity is not one of the three the table prints. |
+| TypeError | if `quantity` is not a text, or `frequency` is not a single number. |
 
 ## microphone_positions_required
 
@@ -499,6 +506,7 @@ ISO 7235 6.2.1: three microphone positions, or five.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite, if there are not three of them, or if the frequency is not positive and finite. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## microphone_spread_limit
 
@@ -536,6 +544,7 @@ between 125 and its `> 160` row.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite. |
+| TypeError | if `frequency` is not a single number. |
 
 ## MIN_FLOW_RATES
 
@@ -607,6 +616,7 @@ the mean-flow correction this equation does not have.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither dimension or both are given, or if a value is not positive and finite. |
+| TypeError | if `diameter_m`, `larger_dimension` or `speed_of_sound` is not a single number. |
 
 ## normal_air_density
 
@@ -660,6 +670,7 @@ carry them as printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the ambient pressure is not positive and finite, if the gauge pressure is not finite, if the absolute pressure they make is not positive, or if the temperature is at or below the printed absolute zero. |
+| TypeError | if `atmospheric_pressure_pa`, `static_gauge_pressure_pa` or `temperature_c` is not a single number, or `static_gauge_pressure_pa` or `temperature_c` holds a text or a value that is not a real number. |
 
 ## octave_insertion_loss
 
@@ -697,6 +708,7 @@ the substitution duct, so their energies can be weighted equally here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite, if the array is empty, or if it does not hold a multiple of three bands. |
+| TypeError | if `insertion_loss` holds a text or a value that is not a real number. |
 
 ## open_end_reflection_coefficient
 
@@ -742,6 +754,7 @@ reflection coefficient is no greater than 0,3.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `area`, `solid_angle_sr` or `speed_of_sound` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## open_end_transmission_loss
 
@@ -803,6 +816,7 @@ the middle.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `area`, `solid_angle_sr` or `speed_of_sound` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## OperatingLine
 
@@ -868,6 +882,7 @@ The fitted level at one duty, in dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the duty is not positive and finite. |
+| TypeError | if `duty` is not a single number. |
 
 **Warns**
 
@@ -932,6 +947,7 @@ of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the loss is not finite, or if the dynamic pressure is not positive and finite. |
+| TypeError | if `inlet_dynamic_pressure_pa` or `total_loss` is not a single number, or `total_loss` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -1001,6 +1017,7 @@ transition elements may be fitted.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an area is not positive and finite. |
+| TypeError | if `duct_area` or `element_area` is not a single number. |
 
 **Warns**
 
@@ -1057,6 +1074,7 @@ then the term is zero and the pair can be left out.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite, if the arguments do not all carry the same number of bands, or if a reverberation time is not positive and finite. |
+| TypeError | if `object_level` or `substitution_level` holds a text or a value that is not a real number. |
 
 ## SURVEY_AREA_RATIO_RANGE
 
@@ -1117,6 +1135,7 @@ what makes it a survey standard.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite, or above the 10 kHz the table stops at. |
+| TypeError | if `frequency` is not a single number. |
 
 ## total_pressure
 
@@ -1151,6 +1170,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the static pressure is not finite, or if another value is not positive and finite. |
+| TypeError | if `static_pressure_pa` is not a single number, or `static_pressure_pa` holds a text or a value that is not a real number. |
 
 ## total_pressure_loss
 
@@ -1192,6 +1212,7 @@ to it: as a rule $S_1 = S_2$, and it vanishes.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the static loss is not finite, or if another value is not positive and finite. |
+| TypeError | if `inlet_area`, `inlet_dynamic_pressure_pa`, `outlet_area` or `static_pressure_loss_pa` is not a single number, or `static_pressure_loss_pa` holds a text or a value that is not a real number. |
 
 ## UPSTREAM_STRAIGHT_DIAMETERS
 
@@ -1233,6 +1254,7 @@ $1{,}5 d_e$ upstream.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the area is not positive and finite. |
+| TypeError | if `area` is not a single number. |
 
 ## UPSTREAM_STRAIGHT_MIN_M
 
@@ -1284,3 +1306,4 @@ meter is no longer measuring the flow the test object sees.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `density` or `mass_flow` is not a single number. |

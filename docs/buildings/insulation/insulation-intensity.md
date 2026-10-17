@@ -151,8 +151,8 @@ background by 10 dB.
 `r_i_modified`, `rating`, `rating_modified`);
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
-`surface_pressure_intensity_indicator()` and `subarea_intensity_level()` return
-arrays.
+`surface_pressure_intensity_indicator()` returns an array and
+`subarea_intensity_level()` a `SubareaIntensityLevel` (`levels`, `measurement_area`).
 
 ## ISO 15186-1 intensity test report (`.report()`)
 

@@ -181,6 +181,7 @@ source along that wall's inward normal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, the source lies outside the room, or the position would. |
+| TypeError | if `mounting` is not a text. |
 
 ## BackgroundDurationCheck
 
@@ -615,8 +616,8 @@ of the microphone positions"; the draft names the corner.
 
 ```python
 InstrumentAgreementCheck(
-    calculated_db: Mapping[str, float],
-    instrument_db: Mapping[str, float],
+    calculated_levels: Mapping[str, float],
+    instrument_levels: Mapping[str, float],
 )
 ```
 
@@ -626,8 +627,8 @@ Whether the calculated single numbers agree with the instrument (7.8).
 
 | Name | Description |
 | :--- | :--- |
-| `calculated_db` | The single numbers of the result compared, as 7.8 rounds them, keyed by their Table 1 notation (`"LA,eq"`...), in dB. |
-| `instrument_db` | The value the instrument registered for each, in dB; the energy average when several readings were given. |
+| `calculated_levels` | The single numbers of the result compared, as 7.8 rounds them, keyed by their Table 1 notation (`"LA,eq"`...), in dB. |
+| `instrument_levels` | The value the instrument registered for each, in dB; the energy average when several readings were given. |
 
 ### InstrumentAgreementCheck.differences
 
@@ -635,7 +636,7 @@ Whether the calculated single numbers agree with the instrument (7.8).
 
 The calculated value less the instrument's, per single number, in dB.
 
-**Returns:** Keyed like `calculated_db`.
+**Returns:** Keyed like `calculated_levels`.
 
 ### InstrumentAgreementCheck.disagreeing
 
@@ -643,7 +644,7 @@ The calculated value less the instrument's, per single number, in dB.
 
 The single numbers more than 2 dB from the instrument.
 
-**Returns:** Their notations, in the order of `calculated_db`.
+**Returns:** Their notations, in the order of `calculated_levels`.
 
 ### InstrumentAgreementCheck.limit_db
 
@@ -945,7 +946,7 @@ How many sets of three readings there are: 1, 2 or 3.
 ```python
 service_equipment_background_correction(
     levels: ArrayLike,
-    background_db: ArrayLike,
+    background_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> ServiceEquipmentBackgroundResult
@@ -973,7 +974,7 @@ the equipment, the result stands without correction
 | Name | Description |
 | :--- | :--- |
 | `levels` | Measured band levels $L_1$, background included, in dB. |
-| `background_db` | Background band levels $L_2$, in dB, the same shape. |
+| `background_levels` | Background band levels $L_2$, in dB, the same shape. |
 | `frequencies` | Band centres in Hz, kept for the plot only. |
 
 **Returns:** [`ServiceEquipmentBackgroundResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentbackgroundresult).
@@ -993,7 +994,7 @@ service_equipment_level(
     frequencies: ArrayLike,
     quantity: Literal['Smax', 'Fmax', 'eq'],
     fraction: Literal[1, 3] = 3,
-    background_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
     reference_reverberation_time_s: float = 0.5,
@@ -1024,7 +1025,7 @@ over the integration time of Annex B for an equivalent level.
 | `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `fraction` says. |
 | `quantity` | The Table 1 quantity measured: `"Smax"`, `"Fmax"` or `"eq"`. It names the single numbers and nothing else. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. 6 asks for the weighted values from one-third-octave bands; octave results are optional. |
-| `background_db` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
+| `background_levels` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
 | `reverberation_time` | Reverberation time of each band, in s, measured by ISO 3382-2 (Clause 8). Only the bands of the standardization range are read; the others may be `nan`. |
 | `volume` | Room volume, in m³, for the normalized levels. |
 | `reference_reverberation_time_s` | $T_0$ of Formula (5), in s (0,5 s unless a regulation specifies another value). |
@@ -1037,6 +1038,7 @@ over the integration time of Annex B for an equivalent level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a centre is not a nominal band, the bands do not cover the A-weighting range, the shapes disagree, a level is not a finite real number, a reverberation time in the standardization range is not positive, `volume` or `reference_reverberation_time_s` is not one positive number, or `volume` is given without a reverberation time. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `a_weighting_range` or `quantity` is not a text. |
 
 ## SERVICE_EQUIPMENT_OPERATING_CONDITIONS
 
@@ -1070,8 +1072,8 @@ SERVICE_EQUIPMENT_WEIGHTING = {3: {'A': {25.0: -44.7, 31.5: -39.4, 40.0: -34.6, 
 
 ```python
 ServiceEquipmentBackgroundResult(
-    measured_db: np.ndarray,
-    background_db: np.ndarray,
+    measured_levels: np.ndarray,
+    background_levels: np.ndarray,
     frequencies: np.ndarray | None = None,
 )
 ```
@@ -1082,11 +1084,11 @@ Band levels corrected for the background by Clause 9.
 
 | Name | Description |
 | :--- | :--- |
-| `measured_db` | The measured band levels $L_1$, background included, in dB. |
-| `background_db` | The background band levels $L_2$, in dB. |
+| `measured_levels` | The measured band levels $L_1$, background included, in dB. |
+| `background_levels` | The background band levels $L_2$, in dB. |
 | `difference` | $\Delta L = L_1 - L_2$ per band, in dB (Formula (9)). |
 | `correction` | The correction $K$ per band, in dB: 0 at 10 dB or more, Formula (8) from 4 dB, and 2,2 dB below 4 dB. |
-| `corrected_db` | $L = L_1 - K$ per band, in dB (Formula (7)). |
+| `corrected_levels` | $L = L_1 - K$ per band, in dB (Formula (7)). |
 | `regime` | Per band, `"none"` (no correction), `"corrected"` (Formula (8)) or `"limited"` (held at 2,2 dB: the band is an upper limit of the equipment level). |
 | `frequencies` | The band centres, in Hz, or `None` when not given. |
 
@@ -1094,7 +1096,7 @@ The difference, the regime, the correction and the corrected level are
 read from the two measured levels and the 10 dB and 4 dB of Clause 9, so
 they are read-only properties and not fields.
 
-### ServiceEquipmentBackgroundResult.corrected_db
+### ServiceEquipmentBackgroundResult.corrected_levels
 
 *property*
 
@@ -1355,12 +1357,12 @@ ServiceEquipmentResult(
     fraction: int,
     quantity: str,
     a_weighting_range: str,
-    readings_db: np.ndarray,
-    average_db: np.ndarray,
+    reading_levels: np.ndarray,
+    average_levels: np.ndarray,
     background: ServiceEquipmentBackgroundResult | None,
-    corrected_db: np.ndarray,
-    standardized_db: np.ndarray | None,
-    normalized_db: np.ndarray | None,
+    corrected_levels: np.ndarray,
+    standardized_levels: np.ndarray | None,
+    normalized_levels: np.ndarray | None,
     ratings: Mapping[str, int],
     unrounded_ratings: Mapping[str, float],
     reproducibility_db: np.ndarray,
@@ -1380,13 +1382,13 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
 | `quantity` | The Table 1 quantity: `"Smax"`, `"Fmax"` or `"eq"`. |
 | `a_weighting_range` | `"restricted"` (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz; octave 31,5 Hz to 8 000 Hz), the range the A-weighted values were summed over. |
-| `readings_db` | The band levels of every reading, shape `(readings, bands)`, in dB. |
-| `average_db` | Formula (1) over the readings, rounded to one decimal (7.5), in dB. |
+| `reading_levels` | The band levels of every reading, shape `(readings, bands)`, in dB. |
+| `average_levels` | Formula (1) over the readings, rounded to one decimal (7.5), in dB. |
 | `background` | The Clause 9 correction, or `None` when no background was given. |
-| `corrected_db` | The average corrected for the background, in dB (the average itself when there is no background). |
+| `corrected_levels` | The average corrected for the background, in dB (the average itself when there is no background). |
 | `standardizable` | Per band, whether 7.7 lets it be standardized or normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from `frequencies` and `fraction`, so it is not a field. |
-| `standardized_db` | $L_{\mathrm{n}T}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
-| `normalized_db` | $L_\mathrm{n}$ per band (Formula (6)), in dB, or `None` without a reverberation time and a volume. |
+| `standardized_levels` | $L_{\mathrm{n}T}$ per band (Formula (5)), in dB, or `None` without a reverberation time. Bands outside the range are the corrected level, unstandardized. |
+| `normalized_levels` | $L_\mathrm{n}$ per band (Formula (6)), in dB, or `None` without a reverberation time and a volume. |
 | `ratings` | The weighted single numbers of Table 1, rounded to whole decibels (7.8), keyed by their notation: `"LA,eq"`, `"LA,Smax,nT"`, `"LC,Fmax,n"` and so on. The C-weighted ones are present only when the bands cover the extended range. |
 | `unrounded_ratings` | The same single numbers before rounding, in dB. |
 | `reproducibility_db` | The Table 2 standard deviation of each band, in dB. |
@@ -1397,7 +1399,7 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 
 The number of readings averaged by Formula (1).
 
-**Returns:** The number of rows of `readings_db`.
+**Returns:** The number of rows of `reading_levels`.
 
 ### ServiceEquipmentResult.plot()
 
@@ -1472,6 +1474,7 @@ report to say whether the A- and the C-weighted value are influenced.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a weighting other than A or C. |
+| TypeError | if `weighting` is not a text. |
 
 ### ServiceEquipmentResult.weighted_reproducibility_db
 

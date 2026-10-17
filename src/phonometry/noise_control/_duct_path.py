@@ -206,6 +206,8 @@ class DuctPathResult(OwnsArrays):
         :raises ValueError: if any spectrum disagrees with ``frequencies``,
             ``criterion`` is not one of the known families, or
             ``received_level`` carries a non-finite band.
+        :raises TypeError: if ``criterion`` is not a text, or ``frequencies`` is a
+            single number where an array goes.
         """
         require_choice(self.criterion, "criterion", CRITERION_FAMILIES)
         require_ranks(

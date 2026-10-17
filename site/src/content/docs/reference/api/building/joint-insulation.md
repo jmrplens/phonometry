@@ -89,6 +89,7 @@ distributed is not judged, since only the widths are given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If there is no reading, or a reading is negative or not finite. |
+| TypeError | if `readings_mm` holds a text or a value that is not a real number. |
 
 ## check_joint_gap_series
 
@@ -157,6 +158,7 @@ number and are not judged here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the length is not positive or the width is negative or not finite. |
+| TypeError | if `joint_length_m` or `joint_width_mm` is not a single number. |
 
 ## GapWidthCheck
 
@@ -266,6 +268,7 @@ them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the widths and results disagree in number, two widths coincide, a width is negative, or a result carries no rating. |
+| TypeError | if `min_gap_mm` or `nominal_gap_mm` is not a single number, or `gap_widths_mm` holds a text or a value that is not a real number. |
 
 ## joint_sound_reduction_index
 
@@ -309,6 +312,7 @@ of the test arrangement $R_\mathrm{s,max}$ that
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in band count, a level is not finite, an area is not positive, or the length is not positive. |
+| TypeError | if `joint_length_m` is not a single number, or `absorption_area` holds a text or a value that is not a real number. |
 
 ## JointGapSeries
 
@@ -367,6 +371,7 @@ reads the straight line between the two widths either side.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the width lies outside the measured widths. |
+| TypeError | if `gap_mm` is not a single number. |
 
 ### JointGapSeries.plot()
 
@@ -387,6 +392,12 @@ $b_\mathrm{min}$, $b_\mathrm{n}$ and
 $b_\mathrm{n} + 3$ marked. Requires matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `quantity` is not a text. |
 
 ### JointGapSeries.plot_octave_bands()
 
@@ -414,6 +425,12 @@ JointGapSeries.single_number(
 ```
 
 The single number at each width: `"r_s_w"`, `"r_s_w_c"` or `"r_s_w_ctr"`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `quantity` is not a text. |
 
 ### JointGapSeries.working_range_mm
 
@@ -673,6 +690,7 @@ the bracketed lower limit, whichever rule corrected them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the three inputs disagree in length, a value is not finite, a frequency or the joint length is not positive. |
+| TypeError | if `joint_length_m` is not a single number, or `frequencies`, `r_s_max` or `r_s_prime` holds a text or a value that is not a real number. |
 
 ## LaboratoryJointInsulationResult
 

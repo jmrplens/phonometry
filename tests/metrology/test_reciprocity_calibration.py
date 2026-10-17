@@ -100,7 +100,7 @@ def test_budget_combines_in_quadrature_with_k_2() -> None:
             "voltage_ratio": 0.003,
             "coupler_length": [0.004, 0.004, 0.012],
         },
-        additional_components_db={"leakage check": 0.0},
+        additional_uncertainties_db={"leakage check": 0.0},
     )
     np.testing.assert_allclose(
         budget.combined_uncertainty_db,
@@ -131,7 +131,7 @@ def test_budget_refuses_an_additional_component_named_like_a_row() -> None:
         metrology.reciprocity_uncertainty_budget(
             frequencies=_F,
             standard_uncertainties_db={},
-            additional_components_db={"rounding": 0.001},
+            additional_uncertainties_db={"rounding": 0.001},
         )
 
 

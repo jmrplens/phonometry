@@ -162,6 +162,12 @@ rejected.
 
 **Returns:** `(stage1, stage2)`, each a `(b, a)` coefficient pair: the spherical-head shelving filter and the RLB high-pass filter.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 ## k_weighting_response
 
 ```python
@@ -203,6 +209,7 @@ RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fs` is below 16 kHz, `n` is not positive, or a supplied frequency is outside `(0, fs/2]`. |
+| TypeError | if `fs` is not a single number, or `n` is a flag, a text or an array where a count goes. |
 
 ## KWeightingResponse
 
@@ -210,8 +217,8 @@ RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
 KWeightingResponse(
     frequencies: np.ndarray,
     magnitude_db: np.ndarray,
-    shelf_db: np.ndarray,
-    highpass_db: np.ndarray,
+    shelf_magnitude_db: np.ndarray,
+    highpass_magnitude_db: np.ndarray,
     fs: float,
 )
 ```
@@ -234,8 +241,8 @@ Build it with [`k_weighting_response`](/phonometry/reference/api/broadcast/progr
 | :--- | :--- |
 | `frequencies` | Frequency grid, in Hz (log-spaced up to the Nyquist rate by default). |
 | `magnitude_db` | Combined K-weighting magnitude response, in dB (the product of the two stages). It tends to the +4 dB shelf plateau at high frequency and rolls off below a few hundred hertz. |
-| `shelf_db` | Stage 1 (spherical-head shelf) magnitude response, in dB. |
-| `highpass_db` | Stage 2 (RLB high-pass) magnitude response, in dB. |
+| `shelf_magnitude_db` | Stage 1 (spherical-head shelf) magnitude response, in dB. |
+| `highpass_magnitude_db` | Stage 2 (RLB high-pass) magnitude response, in dB. |
 | `fs` | Sample rate the response was evaluated at, in Hz. |
 
 ### KWeightingResponse.plot()
@@ -331,6 +338,12 @@ finished programme:
 | `oversample` | True-peak oversampling factor; `None` picks the smallest factor reaching 192 kHz (4 at 48 kHz). |
 
 **Returns:** The frozen [`ProgramLoudnessResult`](/phonometry/reference/api/broadcast/program-loudness/#programloudnessresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs`, `momentary_step` or `short_term_step` is not a single number. |
 
 ## ProgramLoudnessResult
 
@@ -475,3 +488,9 @@ and inter-sample peaks above full scale give positive values.
 | `oversample` | Integer oversampling factor >= 1, or `None` (the default) for the smallest factor whose oversampled rate reaches 192 kHz (4 at 48 kHz, 2 at 96 kHz, 1 at 192 kHz and above, matching the Annex 2 guidance that higher input rates need proportionately less oversampling). |
 
 **Returns:** The true-peak level in dBTP: a float for 1D input, an array of shape `(channels,)` for 2D input.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `oversample` is a flag, a text or an array where a count goes. |

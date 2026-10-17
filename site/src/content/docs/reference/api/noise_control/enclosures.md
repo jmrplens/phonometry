@@ -102,7 +102,7 @@ constant $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i}
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `panel_transmission_loss` is none of the forms above. |
+| TypeError | if `panel_transmission_loss` is none of the forms above, `model` is not a text, or `internal_area` or `external_area` is not one number. |
 | ValueError | if an area is not positive, `internal_absorption` is not in `(0, 1)` or does not carry one value per band, a callable is given without `frequencies`, or `model` is unknown. |
 
 ## ENCLOSURE_MODELS
@@ -149,6 +149,12 @@ produces in the room and a noise-criterion curve.
 | `model` | Interior build-up model, one of [`ENCLOSURE_MODELS`](/phonometry/reference/api/noise_control/enclosures/#enclosure_models) (see [`enclosure_insertion_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_insertion_loss)). |
 
 **Returns:** An [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult) whose `panel_transmission_loss` is the **required** `R` and whose `insertion_loss` is the requested target, so it plots and reports like a forward calculation.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `model` is not a text, or `external_area` or `internal_area` is not a single number. |
 
 ## EnclosureInsertionLossResult
 

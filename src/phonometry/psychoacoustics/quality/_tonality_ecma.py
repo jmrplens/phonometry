@@ -294,6 +294,7 @@ def tonality_ecma(
         the average specific tonality T'(z) (Formula 53), the tonal
         frequencies f_ton,z(z) (Formula 55) and the time-dependent tonality
         T(l) (Formula 61) with its frequency (Formula 62).
+    :raises TypeError: if ``f_high``, ``f_low`` or ``fs`` is not a single number.
 
     The 1 kHz / 40 dB SPL sinusoid yields 1 tu_HMS by construction of the
     calibration factor of Formula (51).

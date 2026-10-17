@@ -512,6 +512,7 @@ class WeightingVerification(OwnsArrays):
         :raises ValueError: if the weighting is not one of the nine, a
             frequency is not positive and finite, or the uncertainty is
             negative or not finite.
+        :raises TypeError: if ``expanded_uncertainty_percent`` is not a single number.
         """
         weighting_tolerance_percent(self.weighting, self.frequencies)
         _checked_uncertainty(
@@ -631,6 +632,7 @@ def verify_weighting(
         arrays do not have the same shape, if a frequency is not positive and
         finite, if a measured factor is negative or not finite, or if the
         expanded uncertainty is negative or not finite.
+    :raises TypeError: if ``expanded_uncertainty_percent`` is not a single number.
     """
     weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
     uncertainty = _checked_uncertainty(
@@ -781,6 +783,8 @@ def characteristic_phase_deviation(
         frequency is not positive and finite, if a phase deviation is not
         finite, or if there are fewer than two frequencies or they do not
         strictly ascend.
+    :raises TypeError: if ``frequencies`` or ``phase_deviation_deg`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     deviation = require_finite_array(phase_deviation_deg, "phase_deviation_deg")
@@ -840,6 +844,8 @@ def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> flo
         prints the quantity inside absolute-value bars, so a negative one is
         not a characteristic phase deviation and is refused rather than
         folded.
+    :raises TypeError: if ``characteristic_phase_deviation_deg`` holds a text or a value
+        that is not a real number.
     :warns HumanVibrationWarning: When a value exceeds the 30 degrees NOTE 2
         limits the approximation to.
     """
@@ -1106,6 +1112,8 @@ def verify_phase_response(
         arrays do not have the same shape, if a frequency is not positive and
         finite, if a phase is not finite, or if there are fewer than two
         frequencies or they do not strictly ascend.
+    :raises TypeError: if ``frequencies`` or ``measured_phase_deg`` holds a text or a
+        value that is not a real number.
     :warns HumanVibrationWarning: When every phase error is a half turn,
         which is an inverted signal rather than a phase response the
         criterion can grade.
@@ -1276,6 +1284,7 @@ def running_rms_decay_time(integration_time: float, *, method: str) -> float:
     :return: The time to 10 % of the initial indicated value, in seconds.
     :raises ValueError: If ``method`` is neither average, or the integration
         time is not positive and finite.
+    :raises TypeError: if ``integration_time`` is not a single number.
     """
     averaging = require_choice(str(method), "method", ("linear", "exponential"))
     require_scalar(integration_time, "integration_time")
@@ -1438,6 +1447,7 @@ def verify_running_rms_decay(
     :raises ValueError: If ``method`` is neither average, if the measured time
         is not positive and finite, or if the integration time is not one of
         the three printed time constants.
+    :raises TypeError: if ``measured_time_s`` is not a single number.
     """
     averaging = require_choice(str(method), "method", ("linear", "exponential"))
     require_scalar(measured_time_s, "measured_time_s")

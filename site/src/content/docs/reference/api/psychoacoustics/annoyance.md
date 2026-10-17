@@ -81,6 +81,7 @@ $S \le 1.75$ acum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any quantity is negative or non-finite. |
+| TypeError | if `fluctuation_strength`, `n5`, `roughness` or `sharpness` is not a single number. |
 
 ## psychoacoustic_annoyance_from_signal
 

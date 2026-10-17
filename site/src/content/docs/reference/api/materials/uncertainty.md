@@ -66,6 +66,7 @@ Return the coverage factor `k` for a coverage probability (Table 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Coverage probability not tabulated in Table 3. |
+| TypeError | if `coverage` is not a single number. |
 
 ## AbsorptionUncertaintyResult
 
@@ -232,6 +233,7 @@ $\sigma_\mathrm{r} = 0.02\,D_{L\alpha,\mathrm{NRD}}$ (Formula (9)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Negative `dl_alpha`, unknown `condition` or an untabulated `coverage`. |
+| TypeError | if `dl_alpha` is not a single number. |
 
 ## sound_absorption_coefficient_uncertainty
 
@@ -297,3 +299,4 @@ the value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | Unknown `condition` or an untabulated `coverage`. |
+| TypeError | if `alpha_w` is not a single number. |

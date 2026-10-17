@@ -137,6 +137,7 @@ def shaft_rate(speed_rpm: float) -> float:
     :param speed_rpm: Shaft speed ``N``, in r/min (> 0).
     :return: The shaft rotational frequency :math:`f_\mathrm{s}`, in hertz.
     :raises ValueError: for a non-positive speed.
+    :raises TypeError: if ``speed_rpm`` is not a single number.
     """
     return require_positive(speed_rpm, "speed_rpm") / 60.0
 
@@ -236,6 +237,8 @@ class FaultFrequencyResult(RichDisplay):
         :return: Frequencies :math:`n f` for ``n = 1 .. n_harmonics``, in hertz.
         :raises KeyError: If no line carries that name.
         :raises ValueError: If *n_harmonics* is not a positive integer.
+        :raises TypeError: if ``n_harmonics`` is a flag, a text or an array where a
+            count goes.
         """
         n = require_count(n_harmonics, "n_harmonics")
         return self[name] * np.arange(1, n + 1, dtype=np.float64)
@@ -250,6 +253,7 @@ class FaultFrequencyResult(RichDisplay):
         :param high: Upper edge, in hertz (> *low*).
         :return: A :class:`FaultFrequencyResult` with the surviving lines.
         :raises ValueError: If the edges are invalid.
+        :raises TypeError: if ``high`` or ``low`` is not a single number.
         """
         lo = require_non_negative(low, "low")
         hi = require_positive(high, "high")
@@ -375,6 +379,9 @@ def bearing_fault_frequencies(
     :return: A :class:`FaultFrequencyResult` (source
         ``"rolling-contact bearing"``).
     :raises ValueError: for a non-positive or inconsistent geometry.
+    :raises TypeError: if ``rotating_race`` is not a text, ``contact_angle_deg``,
+        ``element_diameter`` or ``pitch_diameter`` is not a single number, or
+        ``n_elements`` is a flag, a text or an array where a count goes.
     """
     fs = shaft_rate(speed_rpm)
     z = require_count(n_elements, "n_elements")
@@ -490,6 +497,8 @@ def gear_mesh_frequencies(
         the wheel's own shaft rate).
     :return: A :class:`FaultFrequencyResult` (source ``"gear pair"``).
     :raises ValueError: for a non-positive or non-integer input.
+    :raises TypeError: if ``sideband_rate`` is not a single number, or ``n_harmonics``,
+        ``n_sidebands`` or ``n_teeth`` is a flag, a text or an array where a count goes.
     """
     fs = shaft_rate(speed_rpm)
     teeth = require_count(n_teeth, "n_teeth")
@@ -610,6 +619,9 @@ def induction_motor_frequencies(
         Default: 0).
     :return: A :class:`FaultFrequencyResult` (source ``"induction motor"``).
     :raises ValueError: for a non-positive, non-integer or inconsistent input.
+    :raises TypeError: if ``slip`` or ``supply_frequency`` is not a single number, or
+        ``n_poles``, ``n_rotor_bars``, ``n_sidebands`` or ``n_slot_harmonics`` is a
+        flag, a text or an array where a count goes.
     """
     fs = shaft_rate(speed_rpm)
     require_scalar(n_poles, "n_poles")
@@ -754,6 +766,8 @@ def blade_pass_frequencies(
         (integer >= 1, Default: 1).
     :return: A :class:`FaultFrequencyResult` (source ``"bladed rotor"``).
     :raises ValueError: for a non-positive or non-integer input.
+    :raises TypeError: if ``n_blades``, ``n_harmonics``, ``n_lobe_orders`` or
+        ``n_vanes`` is a flag, a text or an array where a count goes.
     """
     fs = shaft_rate(speed_rpm)
     blades = require_count(n_blades, "n_blades")

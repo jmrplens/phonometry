@@ -83,7 +83,7 @@ def test_table_k2_is_the_iec_61672_a_weighting() -> None:
 def test_table_i1_reads_as_printed() -> None:
     """All 36 cells of ISO 10140-5:2021 Table I.1."""
     loss = building.RAINFALL_REFERENCE_LOSS_FACTOR_DB
-    level = building.RAINFALL_REFERENCE_INTENSITY_DB
+    level = building.RAINFALL_REFERENCE_INTENSITY_LEVELS
     printed = ref.ISO10140_5_TABLE_I1
     assert tuple(loss.items()) == tuple((band, eta) for band, eta, _ in printed)
     assert tuple(level.items()) == tuple((band, lic) for band, _, lic in printed)
@@ -397,7 +397,7 @@ def test_background_is_removed_before_the_sum() -> None:
         frequencies=_BANDS,
         volume=1.0,
         excited_area_m2=1.0,
-        background_db=background,
+        background_levels=background,
     )
     corrected = 10.0 * np.log10(10.0**6.0 - 10.0**5.0)
     np.testing.assert_allclose(res.l_i, corrected - 14.0)

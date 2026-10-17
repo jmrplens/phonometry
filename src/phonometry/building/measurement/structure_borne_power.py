@@ -141,6 +141,7 @@ def spatial_mean_velocity_level(levels: ArrayLike) -> float:
     :param levels: Velocity levels ``L_v,i`` at the ``N`` positions, in dB.
     :return: The spatial mean velocity level, in dB.
     :raises ValueError: for an empty, multi-dimensional or non-finite input.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     lv = require_finite_array(levels, "levels")
     return float(10.0 * np.log10(np.mean(10.0 ** (0.1 * lv))))
@@ -206,6 +207,8 @@ def structure_borne_power_level(
         frequency or loss factor that is not positive and finite, a
         non-finite velocity level, or per-band inputs whose shapes do not
         broadcast together.
+    :raises TypeError: if ``area``, ``mass_per_area`` or ``reference_velocity`` is not a
+        single number.
     """
     mass_per_area = require_positive(mass_per_area, "mass_per_area")
     area = require_positive(area, "area")
@@ -285,6 +288,7 @@ class StructureBornePowerResult(OwnsArrays):
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
             or ``mass_per_area`` or ``area`` is not positive and finite.
+        :raises TypeError: if ``area`` or ``mass_per_area`` is not a single number.
         """
         require_ranks(
             self,
@@ -406,6 +410,8 @@ def reception_plate_power(
     :raises ValueError: if neither ``loss_factor`` nor ``reverberation_time``
         is given, or if ``velocity_level`` or ``loss_factor`` is neither a
         scalar nor one value per band.
+    :raises TypeError: if ``loss_factor`` or ``velocity_level`` holds a text or a value
+        that is not a real number.
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
     lv = require_per_band(velocity_level, "velocity_level", freq, "frequency")
@@ -502,6 +508,7 @@ def characteristic_reception_plate_power(
         (Default: 5e-6, clause 7.2.4).
     :return: The characteristic power level ``L_Wsn``, in dB re 1 pW.
     :raises ValueError: for a non-positive characteristic mobility.
+    :raises TypeError: if ``characteristic_mobility`` is not a single number.
     """
     characteristic_mobility = require_positive(
         characteristic_mobility, "characteristic_mobility"

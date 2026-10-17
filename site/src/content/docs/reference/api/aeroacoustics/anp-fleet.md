@@ -257,6 +257,12 @@ Feeds the aircraft's profile and NPD curves into
 
 **Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `absorption` is not a text. |
+
 ### ANPDatabase.flight_profile()
 
 ```python
@@ -337,6 +343,12 @@ Feeds the aircraft's profile and NPD curves into
 | `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
 **Returns:** A [`NoiseContourResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `absorption` is not a text. |
 
 ### ANPDatabase.npd_curves()
 
@@ -707,6 +719,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
 ```python
 SpectralClass(
+    *,
     class_id: str,
     operation: str,
     description: str,

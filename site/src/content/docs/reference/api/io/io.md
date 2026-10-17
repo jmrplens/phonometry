@@ -1412,6 +1412,7 @@ the per-backend mechanics and the exact overlap rule.
 | :--- | :--- |
 | ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
+| TypeError | if `calibration_factor` is not a single number, or `block_size` or `overlap` is a flag, a text or an array where a count goes. |
 
 ## read_catalogue
 
@@ -1555,6 +1556,12 @@ calibration is actually known -- the object never invents one.
 an EXTENSIBLE channel mask); `provenance` carries the `bext`
 broadcast metadata when the file had it; `source` records the file,
 container, codec, bit depth and lossy flag of the origin.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `calibration_factor` or `fs` is not a single number. |
 
 ### Signal.crop()
 
@@ -1770,6 +1777,7 @@ out of calibrated results.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
+| TypeError | if `fs` is a flag, a text or an array where a count goes. |
 
 ## write_catalogue
 

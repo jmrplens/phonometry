@@ -70,10 +70,10 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     air_temperatures_c=[22.8, 23.3],
     relative_humidities_percent=[48.0, 46.0],
     # Clauses 10 and 11: recorded, not graded.
-    calibration_check_initial_db=93.8,
-    calibration_check_adjusted_db=94.0,
-    self_noise_microphone_db=16.9,
-    self_noise_electrical_db={"A": 11.8, "C": 13.9, "Z": 19.2},
+    calibration_check_initial_level=93.8,
+    calibration_check_adjusted_level=94.0,
+    microphone_self_noise_level=16.9,
+    electrical_self_noise_levels={"A": 11.8, "C": 13.9, "Z": 19.2},
     # Clause 12: 125 Hz and 8 kHz, relative to 1 kHz, after the corrections.
     acoustic_weighting_deviations_db=[0.3, -0.9],
     acoustic_weighting_uncertainties_db=[0.28, 0.45],
@@ -100,7 +100,7 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     # upper boundary, then down the same way, and the levels that first
     # indicated overload and under-range.
     linear_operating_range_db=[40.0, 120.0],
-    linearity_starting_point_db=94.0,
+    linearity_starting_level=94.0,
     linearity_levels=[
         94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0,
         89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0,

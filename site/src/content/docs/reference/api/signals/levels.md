@@ -85,6 +85,12 @@ maximum is taken, recovering the inter-sample peak to within about
 
 **Returns:** Scalar for 1D input, array of shape (channels,) for 2D input.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `calibration_factor` is not a single number, or `oversample` is a flag, a text or an array where a count goes. |
+
 ## leq
 
 ```python
@@ -172,6 +178,12 @@ distribution), L90 the level exceeded 90% of the time, etc.
 
 **Returns:** Dict mapping each N to its level (scalar for 1D input, array (channels,) for 2D input).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `calibration_factor` is not a single number. |
+
 ## sel
 
 ```python
@@ -205,6 +217,12 @@ reference responses, Equation 8, in the test suite).
 
 **Returns:** Scalar for 1D input, array of shape (channels,) for 2D input.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `calibration_factor` or `fs` is not a single number. |
+
 ## sound_exposure
 
 ```python
@@ -235,3 +253,9 @@ BS EN 61252:1995 (3.3 NOTE 4): 3.2 Pa²h \<-> LEX,8h of exactly 90 dB.
 | `calibration_factor` | Multiplier converting digital units to Pascals. Precedence as in [`leq`](/phonometry/reference/api/signals/levels/#leq): explicit value, then a calibrated Signal's own factor, then 1.0. |
 
 **Returns:** Exposure in Pa²·h (scalar or per-channel array).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `duration_hours` is not a single number. |

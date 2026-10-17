@@ -142,7 +142,7 @@ def _pressure_budget(
     return metrology.reciprocity_uncertainty_budget(
         frequencies=f,
         standard_uncertainties_db={
-            **parameters.components_db,
+            **parameters.component_uncertainties_db,
             "series_impedance": 0.002,
             "voltage_ratio": 0.003,
             "cross_talk": 0.001 + 0.004 * x**2,
@@ -210,7 +210,7 @@ def _free_field_budget(
     return metrology.reciprocity_uncertainty_budget(
         frequencies=f,
         standard_uncertainties_db={
-            **parameters.components_db,
+            **parameters.component_uncertainties_db,
             "series_impedance": 0.002,
             "voltage_ratio": 0.003,
             "cross_talk": 0.002 + 0.01 * x,

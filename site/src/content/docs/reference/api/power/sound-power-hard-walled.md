@@ -142,6 +142,7 @@ that meet it in words, and the coefficients are optional here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not a finite 2D array of at least two orientations, frequencies outside 125 Hz to 8 kHz, a non-positive volume or box dimension, or an absorption coefficient outside [0, 1]. |
+| TypeError | if `volume` is not a single number. |
 
 ## hard_walled_source_locations
 
@@ -538,8 +539,8 @@ The margin of the source under test was measured and fell below
 
 ```python
 reproducibility_from_round_robin(
-    total_db: float,
-    operating_db: float,
+    sigma_tot_db: float,
+    sigma_omc_db: float,
 ) -> float
 ```
 
@@ -570,8 +571,8 @@ value is still returned.
 
 | Name | Description |
 | :--- | :--- |
-| `total_db` | $\sigma'_\mathrm{tot}$ of the round robin, in decibels. |
-| `operating_db` | $\sigma'_\mathrm{omc}$ of the source used in it, in decibels. |
+| `sigma_tot_db` | $\sigma'_\mathrm{tot}$ of the round robin, in decibels. |
+| `sigma_omc_db` | $\sigma'_\mathrm{omc}$ of the source used in it, in decibels. |
 
 **Returns:** $\sigma'_{R0}$, in decibels.
 
@@ -579,7 +580,8 @@ value is still returned.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if either is negative or not finite, or `operating_db` exceeds `total_db`, which no round robin can produce. |
+| ValueError | if either is negative or not finite, or `sigma_omc_db` exceeds `sigma_tot_db`, which no round robin can produce. |
+| TypeError | if `sigma_omc_db` or `sigma_tot_db` is not a single number. |
 
 ## sound_energy_hard_walled
 
@@ -645,6 +647,7 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `n_events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
 
 ## sound_power_hard_walled
 

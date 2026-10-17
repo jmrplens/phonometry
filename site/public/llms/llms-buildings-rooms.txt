@@ -2114,7 +2114,7 @@ nc, rc = room.noise_criterion(spl), room.room_criterion(spl)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
 bands = room.NC_OCTAVE_BANDS_HZ   # the ten octave bands of ANSI/ASA S12.2 Table 1
-for row, idx in zip(room.NC_CURVES_DB, room.NC_RATINGS):
+for row, idx in zip(room.NC_CURVE_LEVELS, room.NC_RATINGS):
     ax1.plot(bands, row, color="#bbbbbb", lw=0.8)
 ax1.plot(bands, spl, "o-", label="Measured")
 gov = spl[bands == nc.governing_frequency][0]

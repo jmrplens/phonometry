@@ -1625,7 +1625,7 @@ def _chk_iso10140_1_j4_widths() -> Outcome:
 )
 def _chk_iso10140_5_table_i1() -> Outcome:
     loss = ph.building.RAINFALL_REFERENCE_LOSS_FACTOR_DB
-    level = ph.building.RAINFALL_REFERENCE_INTENSITY_DB
+    level = ph.building.RAINFALL_REFERENCE_INTENSITY_LEVELS
     matching = total = 0
     for band, eta_ref_db, l_ic_ref in ref.ISO10140_5_TABLE_I1:
         total += 2
@@ -2203,7 +2203,8 @@ def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
     # ISO 16283-2 Table A.1, ISO 10140-5 Table F.1 and JIS A 1418-2 Table A.2
     # print the same five values; the tolerance band is +/-1,0 / 1,5 / 1,5 /
     # 2,0 / 2,0 dB, and a source on the nominal must conform in every band.
-    freqs, lower, upper = ph.building.heavy_impact_source_limits("rubber_ball")
+    limits = ph.building.heavy_impact_source_limits("rubber_ball")
+    freqs, lower, upper = limits.frequencies, limits.lower, limits.upper
     nominal = 0.5 * (lower + upper)
     check = ph.building.check_heavy_impact_source(nominal)
     printed = "39,0 / 31,0 / 23,0 / 17,0 / 12,5 dB re 1 N"
@@ -2369,12 +2370,14 @@ def _chk_hopkins_wall_tie_table() -> Outcome:
     }
     computed = {name: ph.building.wall_tie_stiffness(name) for name in printed}
     ok = all(
-        abs(computed[n][0] - x) < 1e-12 and abs(computed[n][1] - k) < 1e-3
+        abs(computed[n].cavity_width_m - x) < 1e-12
+        and abs(computed[n].stiffness - k) < 1e-3
         for n, (x, k) in printed.items()
     )
     return Outcome(
         expected="1,7 / 16,1 / 94,0 MN/m at 50 mm; 43,4 MN/m at 100 mm",
-        computed=" / ".join(f"{computed[n][1] / 1e6:g}" for n in printed) + " MN/m",
+        computed=" / ".join(f"{computed[n].stiffness / 1e6:g}" for n in printed)
+        + " MN/m",
         delta="exact",
         passed=ok,
     )
@@ -2667,8 +2670,8 @@ def _chk_iso7626_5_double_hit_notches() -> Outcome:
     shift = 256
     double = force + np.roll(force, shift)
     fs = ref.ISO7626_5_FS_HZ
-    _, esd = ph.vibration.energy_spectral_density(double, fs)
-    _, single = ph.vibration.energy_spectral_density(force, fs)
+    esd = ph.vibration.energy_spectral_density(double, fs).density
+    single = ph.vibration.energy_spectral_density(force, fs).density
     notches = (2 * np.arange(3) + 1) * (ref.ISO7626_5_SAMPLES // (2 * shift))
     zeros = bool(np.all(esd[notches] <= 1e-20 * single[notches]))
     check = ph.vibration.check_double_hit(double, fs)

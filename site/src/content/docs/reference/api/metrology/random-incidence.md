@@ -165,6 +165,7 @@ the two planes of Annex A), so the pole readings enter every plane's sum
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a step that does not divide 180°, or a number of planes that is not a whole number of at least one. |
+| TypeError | if `step_deg` is not a single number, or `n_planes` is a flag, a text or an array where a count goes. |
 
 **Warns**
 
@@ -209,6 +210,7 @@ one plane.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for readings in more than one plane, an odd number of readings or fewer than four, or a value that is not finite. |
+| TypeError | if `reference_level` is not a single number, or `levels` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -281,6 +283,7 @@ frequency from 25 Hz to 20 kHz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if not exactly one reference calibration is given, a correction is given for a formula that does not take it, a column does not hold one value per band (or a single value), or a default is asked of Table B.1 at a frequency it does not print. |
+| TypeError | if `frequencies`, `indicated_level`, `reference_diffuse_pressure_difference_db`, `reference_directivity_index` or `reference_indicated_level` holds a text or a value that is not a real number. |
 
 ## DiffuseFieldSensitivity
 
@@ -410,6 +413,7 @@ instrument and more for a directional one (see the module notes).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than two planes, an odd number of readings in a plane or fewer than four, or a value that is not finite. |
+| TypeError | if `reference_level` is not a single number, or `levels` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -536,11 +540,12 @@ is 1/38 of the sphere (2,6 %) and every reading weighs the same.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for readings not 20 and 18, or a value that is not finite. |
+| TypeError | if `reference_level` is not a single number, or `horizontal_levels` or `vertical_levels` holds a text or a value that is not a real number. |
 
 ## equal_area_incidence_angles
 
 ```python
-equal_area_incidence_angles() -> tuple[NDArray[np.float64], NDArray[np.float64]]
+equal_area_incidence_angles() -> IncidenceAngles
 ```
 
 The 38 directions of equal-area elements (IEC 61183:1994, note to
@@ -560,11 +565,33 @@ which is 32,6°, 50,8°, 65,1°, 77,8° and 90° up to grazing incidence. The
 note prints the same angles to 0,1°, except 77,9° and its mirror 282,1°,
 which are errata (see the module notes).
 
-**Returns:** `(horizontal, vertical)` in degrees, read-only. The horizontal plane holds both poles and runs 0°, $\phi_1, \ldots, \phi_9$, 180°, $360° - \phi_9, \ldots, 360° - \phi_1$: 20 directions in the order the note prints them. The vertical plane holds the same without the poles: 18.
+**Returns:** The two planes, in degrees, read-only, as an [`IncidenceAngles`](/phonometry/reference/api/metrology/random-incidence/#incidenceangles). The horizontal plane holds both poles and runs 0°, $\phi_1, \ldots, \phi_9$, 180°, $360° - \phi_9, \ldots, 360° - \phi_1$: 20 directions in the order the note prints them. The vertical plane holds the same without the poles: 18.
 
 ## IEC61183_TABLE_B1
 
 *Constant* (`mapping`).
+
+## IncidenceAngles
+
+```python
+IncidenceAngles(
+    horizontal_deg: NDArray[np.float64],
+    vertical_deg: NDArray[np.float64],
+)
+```
+
+The directions of the 38 equal-area elements of IEC 61183, by plane.
+
+What [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles) returns: the angles of the two
+planes, named, where a `(horizontal, vertical)` tuple used to be
+unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `horizontal_deg` | The 20 directions of the horizontal (X-Y) plane, in degrees, poles included, in the order the note prints them. |
+| `vertical_deg` | The 18 directions of the vertical (X-Z) plane, in degrees, without the poles. |
 
 ## largest_element_fraction
 
@@ -597,6 +624,7 @@ symmetry stands for the same two planes and is judged on their division.
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`adjustment_factors`](/phonometry/reference/api/metrology/random-incidence/#adjustment_factors). |
+| TypeError | if `step_deg` is not a single number, or `n_planes` is a flag, a text or an array where a count goes. |
 
 ## random_incidence_sensitivity
 
@@ -636,6 +664,7 @@ instrument of that model (4.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for columns of different lengths, a value that is not finite, or frequencies that are not positive and increasing. |
+| TypeError | if `directivity_index`, `free_field_level` or `frequencies` holds a text or a value that is not a real number. |
 
 ## RandomIncidenceSensitivity
 

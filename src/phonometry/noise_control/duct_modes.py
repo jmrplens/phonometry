@@ -234,6 +234,8 @@ def circular_duct_cut_on(
     :return: A :class:`DuctModeResult`.
     :raises ValueError: For a non-positive diameter, a sonic or supersonic
         flow, or an ``n_modes`` outside 1 to 12.
+    :raises TypeError: if ``diameter_m``, ``flow_velocity``, ``n_modes`` or
+        ``speed_of_sound`` is not a single number.
     """
     require_scalar(n_modes, "n_modes")
     d = require_positive(diameter_m, "diameter_m")
@@ -289,6 +291,8 @@ def rectangular_duct_cut_on(
     :return: A :class:`DuctModeResult`.
     :raises ValueError: For non-positive dimensions, a sonic or supersonic
         flow, or a non-positive ``n_modes``.
+    :raises TypeError: if ``flow_velocity``, ``height_m``, ``n_modes``,
+        ``speed_of_sound`` or ``width_m`` is not a single number.
     """
     require_scalar(n_modes, "n_modes")
     a = require_positive(width_m, "width_m")
@@ -347,6 +351,7 @@ def plane_wave_limit(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :return: The lowest cut-on frequency, Hz.
     :raises ValueError: If the cross section is not described exactly once.
+    :raises TypeError: if ``area`` is not a single number.
     """
     if width_m is not None and height_m is not None:
         return rectangular_duct_cut_on(

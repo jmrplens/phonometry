@@ -778,6 +778,7 @@ def sti_from_impulse_response(
     :param ambient: Optional ambient noise octave-band levels in dB SPL
         (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 14).
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     fs = resolve_fs(ir, fs, name="ir")
@@ -975,6 +976,7 @@ def stipa(
     :param ambient: Optional ambient noise octave-band levels in dB SPL
         (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 2).
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     # The reference is a second recording of the same test signal, so it has
@@ -1061,6 +1063,7 @@ def stipa_signal(
         scale headroom for the 12-14 dB crest factor).
     :param seed: Seed for the pink-noise generator (None: random).
     :return: Test signal, 1D array of ``round(duration_s * fs)`` samples.
+    :raises TypeError: if ``duration_s`` or ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     require_scalar(duration_s, "duration_s")

@@ -39,6 +39,8 @@ def validate_target(criterion: str, target: float | None) -> tuple[str, float | 
     :param target: The curve designation (e.g. ``45``), or ``None`` for none.
     :return: The validated ``(family, target)``.
     :raises ValueError: If the family is unknown or the target is not finite.
+    :raises TypeError: if ``criterion`` is not a text, or ``target`` is not a single
+        number.
     """
     family = require_choice(criterion, "criterion", CRITERION_FAMILIES)
     if target is None:

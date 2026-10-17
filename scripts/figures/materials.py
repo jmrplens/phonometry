@@ -1065,7 +1065,8 @@ def generate_biot_frame_resonance(output_dir: str) -> None:
     porosity = specimen.printed("porosity")
     tortuosity = specimen.printed("tortuosity")
     frame_density = specimen.printed("frame_density_kg_m3")
-    shear_modulus, poisson_ratio = specimen.frame_constants()
+    frame = specimen.frame_constants()
+    shear_modulus, poisson_ratio = frame.shear_modulus_pa, frame.poisson_ratio
     thickness = 0.10
     f = np.linspace(200.0, 1500.0, 1300)
     medium = specimen.medium(f)
@@ -3895,7 +3896,8 @@ def generate_biot_waves(output_dir: str) -> None:
     specimen = materials.PUBLISHED_POROUS_MATERIALS[
         "allard-2009-table-6-1/domisol_coffrage"
     ]
-    shear, poisson_ratio = specimen.frame_constants()
+    frame = specimen.frame_constants()
+    shear, poisson_ratio = frame.shear_modulus_pa, frame.poisson_ratio
     freq = np.linspace(50.0, 1500.0, 1451)
     waves = materials.biot_waves(
         specimen.medium(freq),

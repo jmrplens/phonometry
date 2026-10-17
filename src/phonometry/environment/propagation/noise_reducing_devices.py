@@ -349,6 +349,8 @@ def sound_absorption_rating(
         Annex A category.
     :raises ValueError: If the input does not cover the eighteen bands, is
         not finite, or the spectrum is not one of the two.
+    :raises TypeError: if ``absorption_coefficients`` holds a text or a value that is
+        not a real number.
     :warns RoadDeviceWarning: If the weighted ratio reaches the 0,99 limit
         both standards put on it, which means the rating is the limit and
         not the data.
@@ -400,6 +402,8 @@ def airborne_insulation_rating(
         Annex A category.
     :raises ValueError: If the input does not cover the eighteen bands, is
         not finite, or the spectrum is not one of the two.
+    :raises TypeError: if ``sound_reduction_index`` holds a text or a value that is not
+        a real number.
     """
     reduction, weights = _weighted(
         sound_reduction_index, "sound_reduction_index", spectrum
@@ -447,6 +451,7 @@ def sound_reflection_rating(
         ``lowest_band_hz`` up is not a finite non-negative number, the band is
         not positive or not one of the eighteen, or the weighted ratio is
         zero.
+    :raises TypeError: if ``lowest_band_hz`` is not a single number.
     :warns RoadDeviceWarning: If the weighted ratio exceeds the maximum of
         0,99 Clause 5.8 limits it to; a ratio of 0,99 itself is not limited.
     """

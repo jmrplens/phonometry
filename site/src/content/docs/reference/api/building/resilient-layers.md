@@ -102,6 +102,7 @@ devices.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `layers` is empty or holds a non-positive value. |
+| TypeError | if `layers` holds a text or a value that is not a real number. |
 
 ## covering_contact_stiffness
 
@@ -137,6 +138,7 @@ quoted there as 7 cm² against the 7.07 cm² of a 15 mm radius.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `radius`, `thickness_m` or `youngs_modulus` is not a single number. |
 
 ## covering_improvement
 
@@ -202,6 +204,7 @@ model identifies the general features rather than replacing a measurement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `impact_rate` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## CoveringImprovementResult
 
@@ -295,6 +298,7 @@ and $1.618 f_\mathrm{ms}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `lower_mass_per_area`, `lower_stiffness`, `upper_mass_per_area` or `upper_stiffness` is not a single number. |
 
 ## floating_floor_improvement_spectrum
 
@@ -380,6 +384,7 @@ reported to hold in $f_\mathrm{o} < f < 4 f_\mathrm{o}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, `model` is unknown, or `"cremer_hammer"` is used without a limiting frequency. |
+| TypeError | if `model` is not a text, `limiting_frequency` or `resonance_frequency` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## floating_floor_resonance_frequency
 
@@ -417,6 +422,7 @@ $m' = 73.5$ kg/m².
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `dynamic_stiffness` or `mass_per_area` is not a single number. |
 
 ## FloatingFloorImprovementResult
 
@@ -514,6 +520,7 @@ impacts rather than one that overflows partway through it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `time` contains a negative value. |
+| TypeError | if `contact_stiffness`, `impact_velocity`, `impedance` or `mass` is not a single number. |
 
 ## hammer_impact_velocity
 
@@ -545,6 +552,7 @@ $v_0 = 0.886$ m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `drop_height_m` or `gravity` is not a single number. |
 
 ## hammer_limiting_frequency
 
@@ -576,6 +584,7 @@ $f_z = 4 \sqrt{m_1 B_1}/(\pi m_\mathrm{h})$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `impedance` or `mass` is not a single number. |
 
 ## plate_contact_stiffness
 
@@ -611,6 +620,7 @@ top of it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or $\lvert \nu \rvert \ge 1$. |
+| TypeError | if `poisson_ratio`, `radius` or `youngs_modulus` is not a single number. |
 
 ## resilient_mount_improvement
 
@@ -679,6 +689,7 @@ gives; the two forms agree.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `impedance`, `mass_per_area`, `mount_density` or `mount_stiffness` is not a single number, or `frequencies` or `loss_factor` holds a text or a value that is not a real number. |
 
 ## short_pulse_mean_square_force
 
@@ -713,6 +724,7 @@ concrete slabs of at least 100 mm.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
 
 ## tapping_cut_off_frequency
 
@@ -751,6 +763,7 @@ $[K/(2 Z_\mathrm{dp}) - \sqrt{(K/(2 Z_\mathrm{dp}))^{2} - K/m}]/(2 \pi)$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `contact_stiffness`, `impedance` or `mass` is not a single number. |
 
 ## TAPPING_DROP_HEIGHT_M
 
@@ -814,6 +827,7 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `contact_stiffness`, `impact_rate`, `impact_velocity`, `impedance` or `mass` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## TAPPING_HAMMER_MASS_KG
 
@@ -954,3 +968,4 @@ Figures C.1 and C.2 and prints the fits:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `floor` is unknown. |
+| TypeError | if `floor` is not a text, or `dynamic_stiffness` or `mass_per_area` is not a single number. |

@@ -952,14 +952,14 @@ def _refuse_truth_value(owner: str) -> str:
 class ServiceEquipmentBackgroundResult(OwnsArrays):
     r"""Band levels corrected for the background by Clause 9.
 
-    :ivar measured_db: The measured band levels :math:`L_1`, background
+    :ivar measured_levels: The measured band levels :math:`L_1`, background
         included, in dB.
-    :ivar background_db: The background band levels :math:`L_2`, in dB.
+    :ivar background_levels: The background band levels :math:`L_2`, in dB.
     :ivar difference: :math:`\Delta L = L_1 - L_2` per band, in dB
         (Formula (9)).
     :ivar correction: The correction :math:`K` per band, in dB: 0 at 10 dB or
         more, Formula (8) from 4 dB, and 2,2 dB below 4 dB.
-    :ivar corrected_db: :math:`L = L_1 - K` per band, in dB (Formula (7)).
+    :ivar corrected_levels: :math:`L = L_1 - K` per band, in dB (Formula (7)).
     :ivar regime: Per band, ``"none"`` (no correction), ``"corrected"``
         (Formula (8)) or ``"limited"`` (held at 2,2 dB: the band is an upper
         limit of the equipment level).
@@ -970,8 +970,8 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
     they are read-only properties and not fields.
     """
 
-    measured_db: np.ndarray
-    background_db: np.ndarray
+    measured_levels: np.ndarray
+    background_levels: np.ndarray
     frequencies: np.ndarray | None = None
 
     def __post_init__(self) -> None:
@@ -980,8 +980,8 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         :raises ValueError: if the arrays or the regimes do not share one band
             count.
         """
-        n = np.asarray(self.measured_db).shape
-        if len(n) != 1 or np.asarray(self.background_db).shape != n:
+        n = np.asarray(self.measured_levels).shape
+        if len(n) != 1 or np.asarray(self.background_levels).shape != n:
             msg = "ServiceEquipmentBackgroundResult: every band quantity needs one value per band."
             raise ValueError(msg)
         if self.frequencies is not None and np.asarray(self.frequencies).shape != n:
@@ -992,7 +992,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
     def difference(self) -> np.ndarray:
         r""":math:`\Delta L = L_1 - L_2` per band, in dB (Formula (9))."""
         return np.asarray(
-            np.asarray(self.measured_db) - np.asarray(self.background_db),
+            np.asarray(self.measured_levels) - np.asarray(self.background_levels),
             dtype=np.float64,
         )
 
@@ -1007,10 +1007,10 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         return _background_regime(self.difference)[0]
 
     @property
-    def corrected_db(self) -> np.ndarray:
+    def corrected_levels(self) -> np.ndarray:
         """:math:`L = L_1 - K` per band, in dB (Formula (7))."""
         return np.asarray(
-            np.asarray(self.measured_db) - self.correction, dtype=np.float64
+            np.asarray(self.measured_levels) - self.correction, dtype=np.float64
         )
 
     @property
@@ -1053,7 +1053,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
 
 def service_equipment_background_correction(
     levels: ArrayLike,
-    background_db: ArrayLike,
+    background_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> ServiceEquipmentBackgroundResult:
@@ -1076,18 +1076,16 @@ def service_equipment_background_correction(
 
     :param levels: Measured band levels :math:`L_1`, background included,
         in dB.
-    :param background_db: Background band levels :math:`L_2`, in dB, the same
+    :param background_levels: Background band levels :math:`L_2`, in dB, the same
         shape.
     :param frequencies: Band centres in Hz, kept for the plot only.
     :return: :class:`ServiceEquipmentBackgroundResult`.
     :raises ValueError: If a level is not finite or the shapes differ.
     """
     measured = np.atleast_1d(_as_levels(levels, "levels"))
-    background = np.atleast_1d(_as_levels(background_db, "background_db"))
+    background = np.atleast_1d(_as_levels(background_levels, "background_levels"))
     if measured.ndim != 1 or background.shape != measured.shape:
-        msg = (
-            "'levels' and 'background_db' must be one level per band, the same length."
-        )
+        msg = "'levels' and 'background_levels' must be one level per band, the same length."
         raise ValueError(msg)
     freqs = None
     if frequencies is not None:
@@ -1098,8 +1096,8 @@ def service_equipment_background_correction(
     # The difference, the regime and the correction are read by the result
     # from the two levels it keeps.
     return ServiceEquipmentBackgroundResult(
-        measured_db=measured,
-        background_db=background,
+        measured_levels=measured,
+        background_levels=background,
         frequencies=freqs,
     )
 
@@ -1144,21 +1142,21 @@ class ServiceEquipmentResult(OwnsArrays):
     :ivar a_weighting_range: ``"restricted"`` (50 Hz to 5 000 Hz; octave
         63 Hz to 4 000 Hz) or ``"extended"`` (25 Hz to 10 000 Hz; octave
         31,5 Hz to 8 000 Hz), the range the A-weighted values were summed over.
-    :ivar readings_db: The band levels of every reading, shape
+    :ivar reading_levels: The band levels of every reading, shape
         ``(readings, bands)``, in dB.
-    :ivar average_db: Formula (1) over the readings, rounded to one decimal
+    :ivar average_levels: Formula (1) over the readings, rounded to one decimal
         (7.5), in dB.
     :ivar background: The Clause 9 correction, or ``None`` when no background
         was given.
-    :ivar corrected_db: The average corrected for the background, in dB (the
+    :ivar corrected_levels: The average corrected for the background, in dB (the
         average itself when there is no background).
     :ivar standardizable: Per band, whether 7.7 lets it be standardized or
         normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from
         ``frequencies`` and ``fraction``, so it is not a field.
-    :ivar standardized_db: :math:`L_{\mathrm{n}T}` per band (Formula (5)), in dB,
+    :ivar standardized_levels: :math:`L_{\mathrm{n}T}` per band (Formula (5)), in dB,
         or ``None`` without a reverberation time. Bands outside the range are
         the corrected level, unstandardized.
-    :ivar normalized_db: :math:`L_\mathrm{n}` per band (Formula (6)), in dB, or
+    :ivar normalized_levels: :math:`L_\mathrm{n}` per band (Formula (6)), in dB, or
         ``None`` without a reverberation time and a volume.
     :ivar ratings: The weighted single numbers of Table 1, rounded to whole
         decibels (7.8), keyed by their notation: ``"LA,eq"``,
@@ -1173,12 +1171,12 @@ class ServiceEquipmentResult(OwnsArrays):
     fraction: int
     quantity: str
     a_weighting_range: str
-    readings_db: np.ndarray
-    average_db: np.ndarray
+    reading_levels: np.ndarray
+    average_levels: np.ndarray
     background: ServiceEquipmentBackgroundResult | None
-    corrected_db: np.ndarray
-    standardized_db: np.ndarray | None
-    normalized_db: np.ndarray | None
+    corrected_levels: np.ndarray
+    standardized_levels: np.ndarray | None
+    normalized_levels: np.ndarray | None
     ratings: Mapping[str, int]
     unrounded_ratings: Mapping[str, float]
     reproducibility_db: np.ndarray
@@ -1189,25 +1187,29 @@ class ServiceEquipmentResult(OwnsArrays):
         :raises ValueError: if a band array differs in length from
             :attr:`frequencies`, the readings are not two-dimensional or
             ``fraction`` is not 1 or 3.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         require_band_fraction(self.fraction, "fraction")
         shape = np.asarray(self.frequencies).shape
         bands = [
-            self.average_db,
-            self.corrected_db,
+            self.average_levels,
+            self.corrected_levels,
             self.reproducibility_db,
         ]
         bands += [
-            a for a in (self.standardized_db, self.normalized_db) if a is not None
+            a
+            for a in (self.standardized_levels, self.normalized_levels)
+            if a is not None
         ]
         if any(np.asarray(a).shape != shape for a in bands):
             msg = (
                 "ServiceEquipmentResult: every band quantity needs one value per band."
             )
             raise ValueError(msg)
-        readings = np.asarray(self.readings_db)
+        readings = np.asarray(self.reading_levels)
         if readings.ndim != _PER_POSITION_RANK or readings.shape[1:] != shape:
-            msg = "ServiceEquipmentResult: 'readings_db' must be (readings, bands)."
+            msg = "ServiceEquipmentResult: 'reading_levels' must be (readings, bands)."
             raise ValueError(msg)
 
     @property
@@ -1228,9 +1230,9 @@ class ServiceEquipmentResult(OwnsArrays):
     def n_readings(self) -> int:
         """The number of readings averaged by Formula (1).
 
-        :return: The number of rows of :attr:`readings_db`.
+        :return: The number of rows of :attr:`reading_levels`.
         """
-        return int(np.asarray(self.readings_db).shape[0])
+        return int(np.asarray(self.reading_levels).shape[0])
 
     def _range_mask(self, weighting: str) -> np.ndarray:
         """The bands a weighted value of this result was summed over."""
@@ -1249,6 +1251,7 @@ class ServiceEquipmentResult(OwnsArrays):
         :param weighting: ``"A"`` or ``"C"``.
         :return: ``True`` when a band of the range was held at 2,2 dB.
         :raises ValueError: for a weighting other than A or C.
+        :raises TypeError: if ``weighting`` is not a text.
         """
         require_choice(weighting, "weighting", ("A", "C"))
         if self.background is None:
@@ -1266,7 +1269,7 @@ class ServiceEquipmentResult(OwnsArrays):
         :return: The centres, in Hz, of the bands inside a weighted range that
             were left unstandardized; empty when nothing was standardized.
         """
-        if self.standardized_db is None:
+        if self.standardized_levels is None:
             return ()
         used = self._range_mask("A")
         if any(k.startswith("LC") for k in self.ratings):
@@ -1323,7 +1326,7 @@ def service_equipment_level(
     frequencies: ArrayLike,
     quantity: _Quantity,
     fraction: BandFraction = 3,
-    background_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
     reference_reverberation_time_s: float = _T0,
@@ -1354,7 +1357,7 @@ def service_equipment_level(
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves. 6 asks for the weighted values from one-third-octave bands;
         octave results are optional.
-    :param background_db: Background band levels, in dB, one per band or one
+    :param background_levels: Background band levels, in dB, one per band or one
         row per microphone position (energy-averaged over the positions, as the
         2004 edition says in so many words and the draft leaves implicit).
     :param reverberation_time: Reverberation time of each band, in s,
@@ -1374,6 +1377,8 @@ def service_equipment_level(
         is not positive, ``volume`` or ``reference_reverberation_time_s``
         is not one positive number, or ``volume`` is given without a
         reverberation time.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``a_weighting_range`` or ``quantity`` is not a text.
     """
     require_choice(quantity, "quantity", _QUANTITIES)
     fraction = require_band_fraction(fraction, "fraction")
@@ -1408,14 +1413,14 @@ def service_equipment_level(
 
     background = None
     corrected = average
-    if background_db is not None:
-        bg = _as_levels(background_db, "background_db")
+    if background_levels is not None:
+        bg = _as_levels(background_levels, "background_levels")
         if bg.ndim == _PER_POSITION_RANK:
             bg = energy_mean(bg, axis=0)
         background = service_equipment_background_correction(
             average, bg, frequencies=nominal
         )
-        corrected = background.corrected_db
+        corrected = background.corrected_levels
 
     standardizable = _in_range(nominal, _STANDARDIZATION_RANGE[fraction])
     standardized, normalized = _standardize(
@@ -1447,12 +1452,12 @@ def service_equipment_level(
         fraction=fraction,
         quantity=quantity,
         a_weighting_range=a_weighting_range,
-        readings_db=readings,
-        average_db=average,
+        reading_levels=readings,
+        average_levels=average,
         background=background,
-        corrected_db=corrected,
-        standardized_db=standardized,
-        normalized_db=normalized,
+        corrected_levels=corrected,
+        standardized_levels=standardized,
+        normalized_levels=normalized,
         ratings=MappingProxyType(ratings),
         unrounded_ratings=MappingProxyType(unrounded),
         reproducibility_db=reproducibility,
@@ -2119,6 +2124,7 @@ def additional_microphone_position(
     :return: The position ``(x, y, z)``, in m.
     :raises ValueError: If a dimension is not positive, the source lies
         outside the room, or the position would.
+    :raises TypeError: if ``mounting`` is not a text.
     """
     require_choice(mounting, "mounting", _MOUNTINGS)
     dims = _room(room_dimensions_m)
@@ -2743,14 +2749,14 @@ def check_measurement_disturbance(
 class InstrumentAgreementCheck(RichDisplay):
     r"""Whether the calculated single numbers agree with the instrument (7.8).
 
-    :ivar calculated_db: The single numbers of the result compared, as 7.8
+    :ivar calculated_levels: The single numbers of the result compared, as 7.8
         rounds them, keyed by their Table 1 notation (``"LA,eq"``...), in dB.
-    :ivar instrument_db: The value the instrument registered for each, in dB;
+    :ivar instrument_levels: The value the instrument registered for each, in dB;
         the energy average when several readings were given.
     """
 
-    calculated_db: Mapping[str, float]
-    instrument_db: Mapping[str, float]
+    calculated_levels: Mapping[str, float]
+    instrument_levels: Mapping[str, float]
 
     @property
     def limit_db(self) -> float:
@@ -2766,10 +2772,12 @@ class InstrumentAgreementCheck(RichDisplay):
         :raises ValueError: if the two mappings do not name the same single
             numbers, or name none.
         """
-        if not self.calculated_db or set(self.calculated_db) != set(self.instrument_db):
+        if not self.calculated_levels or set(self.calculated_levels) != set(
+            self.instrument_levels
+        ):
             msg = "InstrumentAgreementCheck: the calculated and instrument values must name the same single numbers."
             raise ValueError(msg)
-        for name in ("calculated_db", "instrument_db"):
+        for name in ("calculated_levels", "instrument_levels"):
             value = getattr(self, name)
             if not isinstance(value, MappingProxyType):
                 object.__setattr__(self, name, MappingProxyType(dict(value)))
@@ -2778,12 +2786,12 @@ class InstrumentAgreementCheck(RichDisplay):
     def differences(self) -> Mapping[str, float]:
         """The calculated value less the instrument's, per single number, in dB.
 
-        :return: Keyed like :attr:`calculated_db`.
+        :return: Keyed like :attr:`calculated_levels`.
         """
         return MappingProxyType(
             {
-                key: self.calculated_db[key] - self.instrument_db[key]
-                for key in self.calculated_db
+                key: self.calculated_levels[key] - self.instrument_levels[key]
+                for key in self.calculated_levels
             }
         )
 
@@ -2791,7 +2799,7 @@ class InstrumentAgreementCheck(RichDisplay):
     def disagreeing(self) -> tuple[str, ...]:
         """The single numbers more than 2 dB from the instrument.
 
-        :return: Their notations, in the order of :attr:`calculated_db`.
+        :return: Their notations, in the order of :attr:`calculated_levels`.
         """
         return tuple(
             key
@@ -2892,6 +2900,6 @@ def check_instrument_agreement(
             float(readings[0]) if readings.size == 1 else energy_mean(readings)
         )
     return InstrumentAgreementCheck(
-        calculated_db=MappingProxyType(calculated),
-        instrument_db=MappingProxyType(instrument),
+        calculated_levels=MappingProxyType(calculated),
+        instrument_levels=MappingProxyType(instrument),
     )

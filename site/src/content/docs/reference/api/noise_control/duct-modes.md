@@ -89,6 +89,7 @@ tabulated by Norton, so `n_modes` cannot exceed twelve.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive diameter, a sonic or supersonic flow, or an `n_modes` outside 1 to 12. |
+| TypeError | if `diameter_m`, `flow_velocity`, `n_modes` or `speed_of_sound` is not a single number. |
 
 ## DuctModeResult
 
@@ -189,6 +190,7 @@ diameter $\sqrt{4S/\pi}$).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the cross section is not described exactly once. |
+| TypeError | if `area` is not a single number. |
 
 ## PlaneWaveWarning
 
@@ -244,3 +246,4 @@ wavelength across the wider side.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For non-positive dimensions, a sonic or supersonic flow, or a non-positive `n_modes`. |
+| TypeError | if `flow_velocity`, `height_m`, `n_modes`, `speed_of_sound` or `width_m` is not a single number. |

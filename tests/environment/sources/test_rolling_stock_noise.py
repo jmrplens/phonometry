@@ -84,8 +84,8 @@ def _energy_sum(levels: np.ndarray) -> float:
 def _limit_spectrum(offset_db: float = 0.0) -> AcousticRoughnessSpectrum:
     wavelengths = sorted(REFERENCE_TRACK_ROUGHNESS_LIMIT_DB, reverse=True)
     return AcousticRoughnessSpectrum(
-        wavelengths,
-        [REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] + offset_db for w in wavelengths],
+        wavelengths_m=wavelengths,
+        levels=[REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] + offset_db for w in wavelengths],
     )
 
 
@@ -191,7 +191,7 @@ def test_figure_g1_draws_the_shares_largest_first() -> None:
 def test_a_budget_built_from_lists_holds_tuples() -> None:
     """Direct construction with lists cannot leave the budget open to appends."""
     budget = environment.PassByUncertainty(
-        reading_db=55.0, names=["tripod"], corrections=[0.0],
+        pressure_level=55.0, names=["tripod"], corrections=[0.0],
         standard_uncertainties_db=[0.35],
     )  # fmt: skip
     assert budget.names == ("tripod",)
@@ -729,7 +729,7 @@ def test_roughness_below_the_limit_changes_nothing() -> None:
     )
     assert verdict.exceeded is False
     np.testing.assert_allclose(verdict.roughness_correction, 0.0, atol=1e-12)
-    assert verdict.impact_db == pytest.approx(0.0, abs=1e-12)
+    assert verdict.level_increase == pytest.approx(0.0, abs=1e-12)
     assert verdict.passes is True
 
 
@@ -764,7 +764,9 @@ def test_one_band_over_the_limit_at_36_kmh_corrects_one_noise_band() -> None:
     levels = np.array(roughness.levels)
     index = roughness.bands.index(14)  # 4 cm
     levels[index] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.04] + 3.0
-    roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
+    roughness = AcousticRoughnessSpectrum(
+        wavelengths_m=roughness.wavelengths_m, levels=levels
+    )
     noise = np.full(len(_NOISE_BANDS_HZ), 70.0)
     verdict = check_small_roughness_deviations(
         roughness, noise, frequencies=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
@@ -774,7 +776,7 @@ def test_one_band_over_the_limit_at_36_kmh_corrects_one_noise_band() -> None:
     np.testing.assert_allclose(verdict.roughness_correction, correction, atol=1e-9)
     count = len(_NOISE_BANDS_HZ)
     expected = 10.0 * math.log10(count) - 10.0 * math.log10(count - 1 + 10**-0.3)
-    assert verdict.impact_db == pytest.approx(expected, abs=1e-9)
+    assert verdict.level_increase == pytest.approx(expected, abs=1e-9)
     assert verdict.passes is True
 
 
@@ -783,13 +785,15 @@ def test_a_large_exceedance_is_not_accepted() -> None:
     roughness = _limit_spectrum(-1.0)
     levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.04] + 20.0
-    roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
+    roughness = AcousticRoughnessSpectrum(
+        wavelengths_m=roughness.wavelengths_m, levels=levels
+    )
     noise = np.full(len(_NOISE_BANDS_HZ), 60.0)
     noise[_NOISE_BANDS_HZ.index(250.0)] = 80.0
     verdict = check_small_roughness_deviations(
         roughness, noise, frequencies=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
     )
-    assert verdict.impact_db > 1.0
+    assert verdict.level_increase > 1.0
     assert verdict.passes is False
     with pytest.raises(TypeError, match="has no truth value; read its '.passes'"):
         bool(verdict)
@@ -817,7 +821,9 @@ def test_annex_c_accepts_an_effect_of_1_db_and_no_more(
     levels[roughness.bands.index(14)] = (
         REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.04] + exceedance_db
     )
-    roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
+    roughness = AcousticRoughnessSpectrum(
+        wavelengths_m=roughness.wavelengths_m, levels=levels
+    )
     noise = np.full(len(_NOISE_BANDS_HZ), 60.0)
     noise[_NOISE_BANDS_HZ.index(250.0)] = 80.0
     verdict = check_small_roughness_deviations(
@@ -827,7 +833,7 @@ def test_annex_c_accepts_an_effect_of_1_db_and_no_more(
         24.0 + 100.0 * 10.0 ** (-exceedance_db / 10.0)
     )
     assert abs(expected - 1.0) < 0.06  # 0,948 dB, 1 dB and 1,016 dB
-    assert verdict.impact_db == pytest.approx(expected, abs=1e-9)
+    assert verdict.level_increase == pytest.approx(expected, abs=1e-9)
     assert verdict.passes is accepted
 
 
@@ -849,7 +855,7 @@ def test_annex_e_bounds_a_one_band_difference() -> None:
     one = _limit_spectrum(-2.0)
     levels = np.array(one.levels)
     levels[one.bands.index(14)] += 5.0
-    two = AcousticRoughnessSpectrum(one.wavelengths_m, levels)
+    two = AcousticRoughnessSpectrum(wavelengths_m=one.wavelengths_m, levels=levels)
     noise_1 = np.full(len(_NOISE_BANDS_HZ), 70.0)
     noise_2 = np.full(len(_NOISE_BANDS_HZ), 72.0)
     result = roughness_comparability(
@@ -875,8 +881,8 @@ def test_annex_e_bounds_a_one_band_difference() -> None:
 
 def test_annex_e_needs_a_band_in_common() -> None:
     """Two spectra with no band in common cannot be compared."""
-    one = AcousticRoughnessSpectrum([0.25, 0.2], [0.0, 0.0])
-    two = AcousticRoughnessSpectrum([0.01, 0.008], [0.0, 0.0])
+    one = AcousticRoughnessSpectrum(wavelengths_m=[0.25, 0.2], levels=[0.0, 0.0])
+    two = AcousticRoughnessSpectrum(wavelengths_m=[0.01, 0.008], levels=[0.0, 0.0])
     noise = np.full(3, 70.0)
     with pytest.raises(
         ValueError, match="two roughness spectra have no band in common"
@@ -893,7 +899,11 @@ def test_annex_e_needs_a_band_in_common() -> None:
 
 def _decay_at(scale: float, direction: str) -> TrackDecayRate:
     limit = REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M[direction]
-    return TrackDecayRate(direction, list(limit), [scale * v for v in limit.values()])
+    return TrackDecayRate(
+        direction=direction,
+        frequencies=list(limit),
+        decay_rates_db_per_m=[scale * v for v in limit.values()],
+    )
 
 
 def test_a_track_inside_every_limit_passes() -> None:
@@ -949,7 +959,11 @@ def test_the_roughness_limit_is_judged_in_every_band() -> None:
     levels = np.array(roughness.levels)
     levels[5] += 1.5
     check = check_reference_track(
-        [AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)],
+        [
+            AcousticRoughnessSpectrum(
+                wavelengths_m=roughness.wavelengths_m, levels=levels
+            )
+        ],
         [_decay_at(1.1, "vertical"), _decay_at(1.1, "lateral")],
         speed_kmh=80.0,
     )
@@ -964,7 +978,9 @@ def test_annex_c_accepts_a_small_exceedance() -> None:
     roughness = _limit_spectrum(-1.0)
     levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] += 1.5
-    roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
+    roughness = AcousticRoughnessSpectrum(
+        wavelengths_m=roughness.wavelengths_m, levels=levels
+    )
     annex_c = check_small_roughness_deviations(
         roughness,
         np.full(len(_NOISE_BANDS_HZ), 70.0),
@@ -1008,7 +1024,8 @@ def test_the_roughness_reaches_down_to_3_mm() -> None:
     """6.2.5: a spectrum that stops at 4 mm misses the 3,15 mm band."""
     wavelengths = [w for w in REFERENCE_TRACK_ROUGHNESS_LIMIT_DB if w >= 0.004]
     short = AcousticRoughnessSpectrum(
-        wavelengths, [REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0 for w in wavelengths]
+        wavelengths_m=wavelengths,
+        levels=[REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0 for w in wavelengths],
     )
     decay = [_decay_at(1.1, "vertical"), _decay_at(1.1, "lateral")]
     check = check_reference_track([short], decay, speed_kmh=80.0)
@@ -1025,7 +1042,8 @@ def test_above_190_kmh_the_roughness_reaches_0_25_m() -> None:
     """
     wavelengths = [w for w in REFERENCE_TRACK_ROUGHNESS_LIMIT_DB if w <= 0.1]
     short = AcousticRoughnessSpectrum(
-        wavelengths, [REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0 for w in wavelengths]
+        wavelengths_m=wavelengths,
+        levels=[REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0 for w in wavelengths],
     )
     decay = [_decay_at(1.1, "vertical"), _decay_at(1.1, "lateral")]
     assert check_reference_track([short], decay, speed_kmh=190.0).passes is True
@@ -1035,7 +1053,8 @@ def test_above_190_kmh_the_roughness_reaches_0_25_m() -> None:
         assert "0.25 m" in fast.failed[0].detail
     wavelengths = [w for w in REFERENCE_TRACK_ROUGHNESS_LIMIT_DB if w <= 0.25]
     enough = AcousticRoughnessSpectrum(
-        wavelengths, [REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0 for w in wavelengths]
+        wavelengths_m=wavelengths,
+        levels=[REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0 for w in wavelengths],
     )
     assert check_reference_track([enough], decay, speed_kmh=250.0).passes is True
 
@@ -1142,7 +1161,9 @@ def _exceeding_roughness() -> AcousticRoughnessSpectrum:
     roughness = _limit_spectrum(-1.0)
     levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] += 1.5
-    return AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
+    return AcousticRoughnessSpectrum(
+        wavelengths_m=roughness.wavelengths_m, levels=levels
+    )
 
 
 def _annex_c(
@@ -1379,7 +1400,11 @@ def test_a_verdict_never_holds_a_decay_limit_it_did_not_apply() -> None:
     """Of 5 dB/m at 250 Hz and 1 dB/m at 251 Hz only one could be judged; neither verdict is built."""
     limits = {"vertical": {250.0: 5.0, 251.0: 1.0}, "lateral": {250.0: 1.0}}
     rates = [
-        TrackDecayRate(direction, [250.0, 315.0], [3.0, 3.0])
+        TrackDecayRate(
+            direction=direction,
+            frequencies=[250.0, 315.0],
+            decay_rates_db_per_m=[3.0, 3.0],
+        )
         for direction in TRACK_DECAY_DIRECTIONS
     ]
     with pytest.raises(
@@ -1544,7 +1569,8 @@ def test_the_uncertainty_plot_is_figure_g1() -> None:
 
 def test_the_figure_2_limit_is_the_cnossos_class_e_rail_roughness() -> None:
     """Appendix G names class E after ISO 3095 and prints the same 22 levels."""
-    wavelengths_mm, levels = environment.rail_roughness("E")
+    spectrum = environment.rail_roughness("E")
+    wavelengths_mm, levels = spectrum.wavelengths_mm, spectrum.levels
     class_e = {
         round(float(w) / 1000.0, 5): float(v)
         for w, v in zip(wavelengths_mm, levels, strict=True)

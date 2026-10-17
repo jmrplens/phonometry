@@ -167,6 +167,7 @@ def critical_bandwidth(center_frequency: float) -> float:
     :param center_frequency: Critical-band centre frequency ``fc``, in Hz.
     :return: Critical bandwidth, in Hz.
     :raises ValueError: If ``center_frequency`` is not positive/finite.
+    :raises TypeError: if ``center_frequency`` is not a single number.
     """
     fc = _positive(center_frequency, "center_frequency")
     if fc <= _CRITICAL_BAND_SPLIT:
@@ -190,6 +191,8 @@ def tonal_audibility(
     :return: Tonal audibility ``ΔLta``, in dB (dB above the masking threshold).
     :raises ValueError: If ``center_frequency`` is not positive/finite or the
         levels are not finite.
+    :raises TypeError: if ``center_frequency``, ``masking_noise_level`` or
+        ``tone_level`` is not a single number.
     """
     lpt = _finite(tone_level, "tone_level")
     lpn = _finite(masking_noise_level, "masking_noise_level")
@@ -212,6 +215,7 @@ def tonal_adjustment(audibility: float) -> float:
     :param audibility: Tonal audibility ``ΔLta``, in dB.
     :return: Tonal adjustment ``Kt``, in dB (0 to 6).
     :raises ValueError: If ``audibility`` is not finite.
+    :raises TypeError: if ``audibility`` is not a single number.
     """
     delta = _finite(audibility, "audibility")
     if delta < _KT_LOW:
@@ -302,6 +306,7 @@ def tonal_adjustment_from_mean_audibility(
     :param coarse: Use the coarse 3-dB-step mapping instead of Table J.1.
     :return: Tonal adjustment ``Kt``, in dB (integer, 0 to 6).
     :raises ValueError: If ``mean_audibility`` is not finite.
+    :raises TypeError: if ``mean_audibility`` is not a single number.
     """
     delta = _finite(mean_audibility, "mean_audibility")
     if coarse:
@@ -376,7 +381,7 @@ class TonalSurveyAssessment(OwnsArrays):
         object.__setattr__(self, "frequencies", read_only(freq))
 
     @property
-    def thresholds_db(self) -> NDArray[np.float64]:
+    def min_level_differences(self) -> NDArray[np.float64]:
         """The level difference Annex K asks of each band, in dB."""
         return np.array(
             [_survey_threshold(f) for f in self.frequencies.tolist()], dtype=np.float64
@@ -400,7 +405,7 @@ class TonalSurveyAssessment(OwnsArrays):
         differences = self.level_differences
         flags = np.zeros(differences.size, dtype=np.bool_)
         inner = slice(1, -1)
-        flags[inner] = settled(differences[inner]) >= self.thresholds_db[inner]
+        flags[inner] = settled(differences[inner]) >= self.min_level_differences[inner]
         return flags
 
     @property
@@ -520,6 +525,8 @@ def residual_sound_correction(
     :return: A :class:`ResidualCorrectionResult`.
     :raises ValueError: If the levels are not finite or the residual is not
         below the measured level.
+    :raises TypeError: if ``measured_level`` or ``residual_level`` is not a single
+        number.
     """
     import warnings
 
@@ -574,6 +581,7 @@ def gaussian_residual_level(
         inputs are not finite, or the percentile ordering is inverted
         (``L90``/``L95`` cannot exceed ``L50``, almost certainly swapped
         arguments, which the squared spread would otherwise hide).
+    :raises TypeError: if ``l50``, ``l90`` or ``l95`` is not a single number.
     """
     median = _finite(l50, "l50")
     if (l90 is None) == (l95 is None):
@@ -629,6 +637,8 @@ def environmental_expanded_uncertainty(
     :return: The expanded uncertainty ``U``, in dB.
     :raises ValueError: If ``u`` is negative/non-finite or ``coverage`` is
         not one of the tabulated values.
+    :raises TypeError: if ``coverage`` or ``standard_uncertainty`` is not a single
+        number.
     """
     require_scalar(coverage, "coverage")
     u = _finite(standard_uncertainty, "standard_uncertainty")
@@ -661,6 +671,8 @@ def residual_correction_uncertainty(
     :return: The combined standard uncertainty of the corrected level, in dB.
     :raises ValueError: If the residual is not below the measured level or an
         uncertainty is negative/non-finite.
+    :raises TypeError: if ``measured_level``, ``measured_uncertainty``,
+        ``residual_level`` or ``residual_uncertainty`` is not a single number.
     """
     lp = _finite(measured_level, "measured_level")
     lres = _finite(residual_level, "residual_level")

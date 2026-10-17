@@ -235,7 +235,7 @@ def test_below_4_db_the_correction_is_held_at_2_2_db() -> None:
 def test_ten_db_or_more_is_left_uncorrected() -> None:
     res = building.service_equipment_background_correction([50.0, 50.0], [40.0, 30.0])
     np.testing.assert_array_equal(res.correction, [0.0, 0.0])
-    np.testing.assert_array_equal(res.corrected_db, [50.0, 50.0])
+    np.testing.assert_array_equal(res.corrected_levels, [50.0, 50.0])
     assert res.regime == ("none", "none")
     assert not res.influenced
 
@@ -264,7 +264,7 @@ def test_a_4_db_margin_in_decimal_levels_is_not_an_upper_limit() -> None:
         _flat(32.3),
         frequencies=THIRD,
         quantity="eq",
-        background_db=np.full(THIRD.size, 28.3),
+        background_levels=np.full(THIRD.size, 28.3),
     )
     assert res.background is not None
     assert set(res.background.regime) == {"corrected"}
@@ -277,12 +277,12 @@ def test_formula_8_is_the_energy_subtraction() -> None:
     l2 = np.array([46.0, 43.0, 40.1])
     res = building.service_equipment_background_correction(l1, l2)
     expected = 10.0 * np.log10(10.0 ** (0.1 * l1) - 10.0 ** (0.1 * l2))
-    np.testing.assert_allclose(res.corrected_db, expected, atol=1e-12)
+    np.testing.assert_allclose(res.corrected_levels, expected, atol=1e-12)
     np.testing.assert_allclose(res.difference, l1 - l2)
 
 
 def test_background_correction_refuses_mismatched_bands() -> None:
-    with pytest.raises(ValueError, match="background_db"):
+    with pytest.raises(ValueError, match="background_levels"):
         building.service_equipment_background_correction([50.0, 50.0], [40.0])
 
 
@@ -303,7 +303,7 @@ def test_background_centres_are_refused_when_complex(centres: object) -> None:
 def test_background_result_checks_its_own_bands() -> None:
     res = building.service_equipment_background_correction([50.0, 50.0], [40.0, 41.0])
     with pytest.raises(ValueError, match="one value per band"):
-        dataclasses.replace(res, background_db=np.array([40.0]))
+        dataclasses.replace(res, background_levels=np.array([40.0]))
 
 
 # ---------------------------------------------------------------------------
@@ -317,7 +317,7 @@ def test_average_is_formula_1_rounded_to_one_decimal() -> None:
         np.repeat(readings, THIRD.size, axis=1), frequencies=THIRD, quantity="eq"
     )
     expected = 10.0 * math.log10((10**4.0 + 10**4.3 + 10**4.6) / 3.0)
-    np.testing.assert_allclose(res.average_db, round(expected, 1))
+    np.testing.assert_allclose(res.average_levels, round(expected, 1))
     assert res.n_readings == 3
 
 
@@ -334,7 +334,7 @@ def test_a_half_tenth_rounds_up(level: float, rounded: float) -> None:
     res = building.service_equipment_level(
         _flat(level), frequencies=THIRD, quantity="eq"
     )
-    np.testing.assert_array_equal(res.average_db, np.full(THIRD.size, rounded))
+    np.testing.assert_array_equal(res.average_levels, np.full(THIRD.size, rounded))
 
 
 def test_a_half_decibel_single_number_rounds_up() -> None:
@@ -410,8 +410,10 @@ def test_reverberation_time_equal_to_t0_leaves_the_levels() -> None:
         quantity="Smax",
         reverberation_time=np.full(THIRD.size, 0.5),
     )
-    assert res.standardized_db is not None
-    np.testing.assert_allclose(res.standardized_db, res.corrected_db, atol=1e-12)
+    assert res.standardized_levels is not None
+    np.testing.assert_allclose(
+        res.standardized_levels, res.corrected_levels, atol=1e-12
+    )
     assert res.ratings["LA,Smax,nT"] == res.ratings["LA,Smax"]
 
 
@@ -421,12 +423,12 @@ def test_formula_5_in_the_standardization_range_only() -> None:
     res = building.service_equipment_level(
         _flat(40.0), frequencies=THIRD, quantity="eq", reverberation_time=t
     )
-    assert res.standardized_db is not None
+    assert res.standardized_levels is not None
     inside = res.standardizable
     np.testing.assert_allclose(
-        res.standardized_db[inside], 40.0 - 10.0 * math.log10(2.0), atol=1e-12
+        res.standardized_levels[inside], 40.0 - 10.0 * math.log10(2.0), atol=1e-12
     )
-    np.testing.assert_allclose(res.standardized_db[~inside], 40.0, atol=1e-12)
+    np.testing.assert_allclose(res.standardized_levels[~inside], 40.0, atol=1e-12)
     assert res.unstandardized_bands_hz == (25.0, 31.5, 40.0, 6300.0, 8000.0, 10000.0)
 
 
@@ -440,8 +442,8 @@ def test_formula_6_at_the_reference_absorption_leaves_the_levels() -> None:
         reverberation_time=np.full(THIRD.size, t),
         volume=volume,
     )
-    assert res.normalized_db is not None
-    np.testing.assert_allclose(res.normalized_db, res.corrected_db, atol=1e-12)
+    assert res.normalized_levels is not None
+    np.testing.assert_allclose(res.normalized_levels, res.corrected_levels, atol=1e-12)
     assert {"LA,eq,n", "LC,eq,n", "LA,eq,nT", "LC,eq,nT"} <= set(res.ratings)
 
 
@@ -454,13 +456,13 @@ def test_formula_6_raises_a_room_more_absorbing_than_a0() -> None:
         reverberation_time=np.full(THIRD.size, 0.5),
         volume=50.0,
     )
-    assert res.normalized_db is not None
+    assert res.normalized_levels is not None
     inside = res.standardizable
     np.testing.assert_allclose(
-        res.normalized_db[inside], 40.0 + 10.0 * math.log10(1.6), atol=1e-12
+        res.normalized_levels[inside], 40.0 + 10.0 * math.log10(1.6), atol=1e-12
     )
-    np.testing.assert_allclose(res.normalized_db[~inside], 40.0, atol=1e-12)
-    assert float(res.normalized_db[16]) == pytest.approx(42.0412, abs=5e-5)
+    np.testing.assert_allclose(res.normalized_levels[~inside], 40.0, atol=1e-12)
+    assert float(res.normalized_levels[16]) == pytest.approx(42.0412, abs=5e-5)
 
 
 def test_reference_reverberation_time_can_be_specified() -> None:
@@ -471,31 +473,31 @@ def test_reference_reverberation_time_can_be_specified() -> None:
         reverberation_time=np.full(THIRD.size, 0.8),
         reference_reverberation_time_s=0.8,
     )
-    assert res.standardized_db is not None
-    np.testing.assert_allclose(res.standardized_db, 40.0, atol=1e-12)
+    assert res.standardized_levels is not None
+    np.testing.assert_allclose(res.standardized_levels, 40.0, atol=1e-12)
 
 
 def test_background_rows_are_energy_averaged() -> None:
     background = np.vstack((np.full(THIRD.size, 30.0), np.full(THIRD.size, 33.0)))
     res = building.service_equipment_level(
-        _flat(40.0), frequencies=THIRD, quantity="eq", background_db=background
+        _flat(40.0), frequencies=THIRD, quantity="eq", background_levels=background
     )
     assert res.background is not None
     expected = 10.0 * math.log10((10**3.0 + 10**3.3) / 2.0)
-    np.testing.assert_allclose(res.background.background_db, expected)
+    np.testing.assert_allclose(res.background.background_levels, expected)
 
 
 def test_limited_band_makes_the_weighted_value_an_upper_limit() -> None:
     background = np.full(THIRD.size, 20.0)
     background[-1] = 39.0  # 10 000 Hz: in the C range, outside the restricted A range
     res = building.service_equipment_level(
-        _flat(40.0), frequencies=THIRD, quantity="eq", background_db=background
+        _flat(40.0), frequencies=THIRD, quantity="eq", background_levels=background
     )
     assert res.upper_limit("C")
     assert not res.upper_limit("A")
     background[10] = 39.0  # 250 Hz: in both
     res = building.service_equipment_level(
-        _flat(40.0), frequencies=THIRD, quantity="eq", background_db=background
+        _flat(40.0), frequencies=THIRD, quantity="eq", background_levels=background
     )
     assert res.upper_limit("A")
 
@@ -532,10 +534,10 @@ def test_octave_standardization_leaves_out_31_5_and_8000_hz() -> None:
         fraction=1,
         reverberation_time=t,
     )
-    assert res.standardized_db is not None
+    assert res.standardized_levels is not None
     expected = np.full(OCTAVE.size, 40.0 - 10.0 * math.log10(2.0))
     expected[[0, -1]] = 40.0
-    np.testing.assert_allclose(res.standardized_db, expected, atol=1e-12)
+    np.testing.assert_allclose(res.standardized_levels, expected, atol=1e-12)
     assert res.unstandardized_bands_hz == (31.5, 8000.0)
 
 
@@ -551,7 +553,7 @@ def test_a_single_reading_is_one_row() -> None:
     res = building.service_equipment_level(
         np.full(THIRD.size, 40.0), frequencies=THIRD, quantity="eq"
     )
-    assert res.readings_db.shape == (1, THIRD.size)
+    assert res.reading_levels.shape == (1, THIRD.size)
 
 
 def test_volume_needs_a_reverberation_time() -> None:
@@ -590,7 +592,7 @@ def _level_inputs() -> dict[str, object]:
     return {
         "levels": _flat(40.0),
         "frequencies": THIRD,
-        "background_db": np.full(THIRD.size, 20.0),
+        "background_levels": np.full(THIRD.size, 20.0),
         "reverberation_time": np.full(THIRD.size, 0.5),
         "volume": 50.0,
     }
@@ -603,7 +605,7 @@ def _level_call(**overrides: object) -> building.ServiceEquipmentResult:
 
 @pytest.mark.parametrize(
     "name",
-    ["levels", "frequencies", "background_db", "reverberation_time"],
+    ["levels", "frequencies", "background_levels", "reverberation_time"],
 )
 def test_a_complex_array_is_refused_not_cut_to_its_real_part(name: str) -> None:
     # np.asarray(z, dtype=float) keeps the real part with only a warning: a
@@ -691,9 +693,9 @@ def test_result_checks_its_band_arrays() -> None:
     res = building.service_equipment_level(
         _flat(40.0), frequencies=THIRD, quantity="eq"
     )
-    short = res.average_db[:-1]
+    short = res.average_levels[:-1]
     with pytest.raises(ValueError, match="one value per band"):
-        dataclasses.replace(res, average_db=short)
+        dataclasses.replace(res, average_levels=short)
 
 
 # ---------------------------------------------------------------------------
@@ -1201,7 +1203,7 @@ def _chain() -> building.ServiceEquipmentResult:
         _flat(40.0),
         frequencies=THIRD,
         quantity="eq",
-        background_db=background,
+        background_levels=background,
         reverberation_time=t,
     )
 
@@ -1671,7 +1673,7 @@ def test_the_calculation_within_2_db_of_the_instrument_agrees() -> None:
     check = building.check_instrument_agreement(
         res, {"LA,eq": la - 2.0, "LC,eq": lc + 2.1}
     )
-    assert check.calculated_db == {"LA,eq": float(la), "LC,eq": float(lc)}
+    assert check.calculated_levels == {"LA,eq": float(la), "LC,eq": float(lc)}
     assert check.differences["LA,eq"] == pytest.approx(2.0)
     assert check.disagreeing == ("LC,eq",)
     assert not check.passes
@@ -1695,7 +1697,7 @@ def test_instrument_readings_at_each_position_are_energy_averaged() -> None:
     res = _chain()
     readings = [res.ratings["LA,eq"] - 1.0, res.ratings["LA,eq"] + 1.0]
     check = building.check_instrument_agreement(res, {"LA,eq": readings})
-    assert check.instrument_db["LA,eq"] == pytest.approx(
+    assert check.instrument_levels["LA,eq"] == pytest.approx(
         10.0 * math.log10(np.mean(10.0 ** (0.1 * np.asarray(readings))))
     )
     assert check.passes
@@ -1703,7 +1705,7 @@ def test_instrument_readings_at_each_position_are_energy_averaged() -> None:
 
 def test_one_instrument_reading_is_kept_as_read() -> None:
     check = building.check_instrument_agreement(_chain(), {"LA,eq": 46.2})
-    assert check.instrument_db["LA,eq"] == 46.2
+    assert check.instrument_levels["LA,eq"] == 46.2
 
 
 def test_instrument_agreement_names_a_single_number_the_result_carries() -> None:
@@ -1729,7 +1731,7 @@ def test_instrument_agreement_needs_a_service_equipment_result() -> None:
 def test_instrument_agreement_mappings_refuse_writes() -> None:
     check = building.check_instrument_agreement(_chain(), {"LA,eq": 46.0})
     with pytest.raises(TypeError, match="does not support item assignment"):
-        check.instrument_db["LA,eq"] = 0.0  # type: ignore[index]
+        check.instrument_levels["LA,eq"] = 0.0  # type: ignore[index]
     with pytest.raises(TypeError, match="does not support item assignment"):
         check.differences["LA,eq"] = 0.0  # type: ignore[index]
 
@@ -1737,16 +1739,16 @@ def test_instrument_agreement_mappings_refuse_writes() -> None:
 def test_instrument_agreement_pairs_its_single_numbers() -> None:
     with pytest.raises(ValueError, match="name the same single numbers"):
         building.InstrumentAgreementCheck(
-            calculated_db={"LA,eq": 45.0}, instrument_db={"LC,eq": 50.0}
+            calculated_levels={"LA,eq": 45.0}, instrument_levels={"LC,eq": 50.0}
         )
 
 
 def test_a_plain_dict_is_frozen_by_the_agreement_check() -> None:
     check = building.InstrumentAgreementCheck(
-        calculated_db={"LA,eq": 45.0}, instrument_db={"LA,eq": 46.0}
+        calculated_levels={"LA,eq": 45.0}, instrument_levels={"LA,eq": 46.0}
     )
-    assert isinstance(check.calculated_db, types.MappingProxyType)
-    assert isinstance(check.instrument_db, types.MappingProxyType)
+    assert isinstance(check.calculated_levels, types.MappingProxyType)
+    assert isinstance(check.instrument_levels, types.MappingProxyType)
 
 
 def _on_site_checks() -> list[object]:

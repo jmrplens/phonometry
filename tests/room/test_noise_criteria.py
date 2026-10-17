@@ -34,7 +34,7 @@ def test_octave_band_layout() -> None:
     assert rn.NC_OCTAVE_BANDS_HZ.size == 10
     assert rn.NC_OCTAVE_BANDS_HZ[0] == 16.0
     assert rn.NC_OCTAVE_BANDS_HZ[-1] == 8000.0
-    assert rn.NC_CURVES_DB.shape == (rn.NC_RATINGS.size, 10)
+    assert rn.NC_CURVE_LEVELS.shape == (rn.NC_RATINGS.size, 10)
 
 
 def test_the_published_nc_curves_are_table_1_cell_by_cell() -> None:
@@ -46,7 +46,7 @@ def test_the_published_nc_curves_are_table_1_cell_by_cell() -> None:
         room.NC_RATINGS, [rating for rating, _ in ANSIS12_2_NC_TABLE_1]
     )
     np.testing.assert_array_equal(
-        room.NC_CURVES_DB, [levels for _, levels in ANSIS12_2_NC_TABLE_1]
+        room.NC_CURVE_LEVELS, [levels for _, levels in ANSIS12_2_NC_TABLE_1]
     )
 
 
@@ -126,18 +126,18 @@ def test_nc_sub_nc15_spectrum_is_below_the_family() -> None:
 
 def test_nc_marginal_cases_on_the_family_edges() -> None:
     # Exactly on the NC-70 curve: still inside the family (rating 70).
-    on_top = rn.noise_criterion(rn.NC_CURVES_DB[-1].copy())
+    on_top = rn.noise_criterion(rn.NC_CURVE_LEVELS[-1].copy())
     assert on_top.out_of_range is None
     assert on_top.rating == pytest.approx(70.0)
     # 1 dB above the NC-70 curve in one band: above the family, and that
     # band governs even though other bands would interpolate higher values.
-    over = rn.NC_CURVES_DB[-1].copy()
+    over = rn.NC_CURVE_LEVELS[-1].copy()
     over[2] += 1.0  # 63 Hz
     result = rn.noise_criterion(over)
     assert result.out_of_range == "above"
     assert result.governing_frequency == 63.0
     # Exactly on the NC-15 curve: inside the family (tangency 15).
-    on_bottom = rn.noise_criterion(rn.NC_CURVES_DB[0].copy())
+    on_bottom = rn.noise_criterion(rn.NC_CURVE_LEVELS[0].copy())
     assert on_bottom.out_of_range is None
     assert on_bottom.tangency_rating == pytest.approx(15.0)
 
@@ -504,7 +504,7 @@ def test_an_nc_rating_outside_the_family_keeps_its_flag() -> None:
     flag alone leaves the NaN to be formatted verbatim and to crash the
     verdict's rounding.
     """
-    over = rn.NC_CURVES_DB[-1].copy()
+    over = rn.NC_CURVE_LEVELS[-1].copy()
     over[2] += 1.0  # 63 Hz, 1 dB above the highest tabulated curve
     result = rn.noise_criterion(over)
     assert result.out_of_range == "above"

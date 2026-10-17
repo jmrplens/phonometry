@@ -95,6 +95,7 @@ prominence `P`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `dt` or fewer than two samples. |
+| TypeError | if `dt` is not a single number. |
 
 ## impulse_adjustment
 
@@ -156,6 +157,7 @@ the adjustment is 0 dB when no event qualifies).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for empty input, mismatched lengths, a non-positive onset rate or level difference, or an assessment period that is not positive and finite. |
+| TypeError | if `assessment_period_minutes` is not a single number. |
 
 ## ImpulseOnset
 
@@ -566,6 +568,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched lengths or a non-positive time. |
+| TypeError | if `reference_time` is not a single number. |
 
 ## sound_pressure_level_history
 
@@ -604,3 +607,4 @@ standard.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `fs` or `dt` outside 10-25 ms. |
+| TypeError | if `dt` or `fs` is not a single number. |

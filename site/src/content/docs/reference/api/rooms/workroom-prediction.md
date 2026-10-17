@@ -119,6 +119,7 @@ themselves.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area or volume. |
+| TypeError | if `surface_area` or `volume` is not a single number. |
 
 ## FITTING_DETAIL_LEVELS
 
@@ -261,7 +262,7 @@ SOURCE_DETAIL_LEVELS = {1: 'omnidirectional point sources', 2: 'point sources wi
 
 ```python
 total_workstation_level(
-    contributions_db: ArrayLike,
+    contribution_levels: ArrayLike,
     *,
     existing_level: float | None = None,
 ) -> float
@@ -279,7 +280,7 @@ and the workstation, except at a machine's own workstation, where
 
 | Name | Description |
 | :--- | :--- |
-| `contributions_db` | The level each new machine alone would give at this workstation, in decibels. |
+| `contribution_levels` | The level each new machine alone would give at this workstation, in decibels. |
 | `existing_level` | The level already there, in decibels, which for a workstation with no machine is the background noise. |
 
 **Returns:** The total, in decibels.
@@ -289,6 +290,7 @@ and the workstation, except at a machine's own workstation, where
 | Exception | When |
 | :--- | :--- |
 | ValueError | For levels that are not finite. |
+| TypeError | if `existing_level` is not a single number, or `contribution_levels` holds a text or a value that is not a real number. |
 
 ## typical_decay_range
 
@@ -424,3 +426,4 @@ $L_{W\mathrm{A}} - L_{p\mathrm{A}}$ as the parameter.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-finite level, a non-positive absorption area, or an emission level above the sound power level, which would put the workstation inside a measurement surface smaller than a square metre. |
+| TypeError | if `absorption_area`, `emission_level` or `sound_power_level` is not a single number. |

@@ -84,6 +84,7 @@ kelvin.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC, or any pressure is not positive. |
+| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
 
 ## apply_microphone_calibration
 
@@ -130,6 +131,12 @@ rectangular tubes (see [`tube_attenuation_constant`](/phonometry/reference/api/m
 
 **Returns:** Hydraulic diameter $d_\mathrm{h} = 4A/P$, in metres.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `height_m` or `width_m` is not a single number. |
+
 ## ImpedanceTubeResult
 
 ```python
@@ -140,8 +147,8 @@ ImpedanceTubeResult(
     normalized_impedance: NDArray[np.complex128],
     absorption: NDArray[np.float64],
     *,
-    spacing_m: float | None = None,
-    x1: float | None = None,
+    spacing_m: float,
+    x1: float,
     diameter_m: float | None = None,
     shape: str | None = None,
 )
@@ -160,8 +167,10 @@ The trailing fields retain the tube geometry the reduction was run with
 (microphone `spacing_m` `s`, distance `x1` from the sample to the
 farther microphone, tube `diameter_m` and cross-section `shape`, stored
 canonically as `"circular"`/`"rectangular"` - a `"square"` input is
-kept as `"rectangular"`); they default to `None` when not supplied to
-[`two_microphone_impedance`](/phonometry/reference/api/materials/impedance-tube/#two_microphone_impedance).
+kept as `"rectangular"`). The diameter and the shape are `None` when
+they were not supplied to [`two_microphone_impedance`](/phonometry/reference/api/materials/impedance-tube/#two_microphone_impedance); the spacing
+and `x1` are always there, because the reduction cannot run without
+them.
 
 ### ImpedanceTubeResult.plot()
 
@@ -194,12 +203,6 @@ Draw the two-microphone tube to scale (dimensioned side view).
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its tube geometry (`spacing_m`/`x1`). |
 
 ### ImpedanceTubeResult.report()
 
@@ -349,6 +352,12 @@ The lower limit uses the Clause 4.2 guideline that the spacing exceed
 
 **Returns:** Tuple `(f_l, f_u)` of the lower and upper frequency limits, in Hz.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m`, `spacing_m` or `speed_of_sound` is not a single number. |
+
 ## plot_impedance_tube_geometry
 
 ```python
@@ -395,6 +404,7 @@ working range of [`plane_wave_frequency_range`](/phonometry/reference/api/materi
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a spacing, distance, diameter or sample thickness that is not finite and positive, or an `x1` no greater than the spacing. |
+| TypeError | if `diameter_m`, `sample_thickness_m`, `spacing_m` or `x1` is not a single number. |
 
 ## plot_transmission_tube_geometry
 
@@ -448,6 +458,7 @@ range of
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first length or diameter that is not finite and positive, or an `l2` no greater than the thickness. |
+| TypeError | if `diameter_m`, `l2` or `thickness_m` is not a single number. |
 
 ## reflection_factor
 
@@ -483,6 +494,12 @@ the sample to the **farther** microphone (Clause 7.7).
 
 **Returns:** Complex reflection factor `r` at the reference plane.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `spacing_m` or `x1` is not a single number. |
+
 ## speed_of_sound_iso10534
 
 ```python
@@ -506,6 +523,7 @@ $c_0 = 343.2 \sqrt{T / 293}$, with $T$ in kelvin.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC. |
+| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
 
 ## surface_impedance
 
@@ -528,6 +546,12 @@ $Z = \rho c_0 (1 + r) / (1 - r)$.
 | `characteristic_impedance` | Characteristic impedance of air `rho c0`, in rayls (`rho` and `c0` from the Clause 7.2 helpers). |
 
 **Returns:** Surface impedance `Z`, in rayls (complex).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_impedance` is not a single number. |
 
 ## tube_attenuation_constant
 
@@ -555,6 +579,12 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 
 **Returns:** Attenuation constant `k0''`, in nepers per metre.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m` or `speed_of_sound` is not a single number. |
+
 ## tube_wavenumber
 
 ```python
@@ -581,6 +611,12 @@ constant `k0''` enters with a **minus** sign on the imaginary part
 | `attenuation_np_per_m` | Attenuation constant `k0''`, in nepers per metre (scalar or matching `frequency`); `None` gives the lossless real wavenumber. Obtain a lower-bound estimate from [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant). |
 
 **Returns:** Complex wavenumber `k0`, in reciprocal metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound` is not a single number, or `attenuation_np_per_m` holds a text or a value that is not a real number. |
 
 ## two_microphone_impedance
 

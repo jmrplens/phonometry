@@ -137,6 +137,7 @@ def speech_direct_level(
     :param directivity: Talker directivity factor ``Q`` (default
         :data:`TALKER_DIRECTIVITY`).
     :return: The direct-field sound pressure level, dB.
+    :raises TypeError: if ``directivity`` is not a single number.
     """
     r = _require_distance(distance, "distance")
     q = require_positive(directivity, "directivity")
@@ -195,6 +196,7 @@ def speech_to_noise_ratio(
         ``A_tab``, m2.
     :param directivity: Talker directivity factor ``Q``.
     :return: The speech-to-noise ratio, dB.
+    :raises TypeError: if ``directivity`` is not a single number.
     """
     r = _require_distance(distance, "distance")
     a_tab = np.asarray(absorption_per_table, dtype=np.float64)
@@ -226,6 +228,7 @@ def absorption_per_table(
     :param speech_to_noise: Target speech-to-noise ratio ``L_SN``, dB.
     :param directivity: Talker directivity factor ``Q``.
     :return: The equivalent absorption area per table ``A_tab``, m2.
+    :raises TypeError: if ``directivity`` or ``speech_to_noise`` is not a single number.
     """
     r = _require_distance(distance, "distance")
     q = require_positive(directivity, "directivity")
@@ -415,6 +418,7 @@ def crowd_noise(
     :param directivity: Talker directivity factor ``Q`` (default
         :data:`TALKER_DIRECTIVITY`).
     :return: A :class:`CrowdNoiseResult`.
+    :raises TypeError: if ``directivity`` or ``distance`` is not a single number.
     """
     areas = np.atleast_1d(np.asarray(absorption_areas, dtype=np.float64))
     if areas.ndim != 1 or areas.size == 0:

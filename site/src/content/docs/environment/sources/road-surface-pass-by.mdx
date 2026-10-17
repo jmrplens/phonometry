@@ -239,8 +239,8 @@ Annex D shows how a normalized case is built, from seven dense bituminous
 surfaces for the medium speed range (four asphalt concrete and three stone
 mastic asphalt), and prints their average. `normalized_reference_levels`
 averages any set of surfaces the same way, and the Annex D rows and their
-average are published as `SPB_ANNEX_D_SURFACES_DB` and
-`SPB_NORMALIZED_REFERENCE_DB`. Hand the reference to `statistical_pass_by` as an
+average are published as `SPB_ANNEX_D_SURFACE_LEVELS` and
+`SPB_NORMALIZED_REFERENCE_LEVELS`. Hand the reference to `statistical_pass_by` as an
 index, used as given, or as its three levels, whose index is computed from
 them to one decimal with the same weighting factors:
 
@@ -250,7 +250,7 @@ result = environment.statistical_pass_by(
     speeds,
     levels,
     road_speed_category="medium",
-    reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+    reference_levels=environment.SPB_NORMALIZED_REFERENCE_LEVELS,
 )
 print(round(result.reference_index, 2), round(result.difference, 2))
 # 78.92 1.22   dB: this surface is 1.2 dB louder than the Annex D reference

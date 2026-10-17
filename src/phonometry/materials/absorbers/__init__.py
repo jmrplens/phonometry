@@ -29,12 +29,15 @@ from .biot import (
 from .carpets import PUBLISHED_CARPETS, Carpet, carpets_named
 from .catalogue import (
     PUBLISHED_POROUS_MATERIALS,
+    FrameConstants,
     PorousMaterial,
     porous_materials_named,
 )
 from .datasheets import PracticalAbsorptionSpectrum, ThirdOctaveAbsorptionSpectrum
 from .four_microphone import (
+    FaceQuantities,
     TransferMatrix,
+    WaveAmplitudes,
     air_density_astm,
     air_layer_transfer_matrix,
     face_quantities,
@@ -131,6 +134,7 @@ from .resistive_sheets import (
 )
 from .slow_sound import (
     CriticalCouplingResult,
+    EffectiveFluidProperties,
     HelmholtzResonator,
     SlitResonatorAbsorberResult,
     SlowSoundAbsorberWarning,
@@ -240,6 +244,7 @@ __all__ = [
     "PorousAbsorberWarning",
     "PorousLayer",
     "PorousMaterial",
+    "FrameConstants",
     "PorousMediumResult",
     "REFERENCE_CURVE",
     "ROCK_WOOL_FIBER_DENSITY_KG_M3",
@@ -286,6 +291,7 @@ __all__ = [
     "effective_kappa",
     "equivalent_area_uncertainty",
     "face_quantities",
+    "FaceQuantities",
     "fiber_characteristic_lengths",
     "frame_bulk_modulus",
     "frame_elastic_coefficient",
@@ -324,6 +330,7 @@ __all__ = [
     "resistive_sheets_named",
     "single_number_rating_uncertainty",
     "slit_effective_properties",
+    "EffectiveFluidProperties",
     "slit_helmholtz_absorber",
     "sound_absorption_coefficient_uncertainty",
     "specific_airflow_resistance",
@@ -345,6 +352,7 @@ __all__ = [
     "two_microphone_impedance",
     "viscous_characteristic_length",
     "wave_decomposition",
+    "WaveAmplitudes",
     "weighted_absorption",
     "weighted_absorption_from_third_octave",
     "weighted_coefficient_uncertainty",

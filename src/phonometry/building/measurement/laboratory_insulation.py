@@ -546,6 +546,7 @@ def laboratory_airborne_insulation(
     :raises ValueError: If the band counts of ``l1``, ``l2`` and ``t2``
         differ, if ``area``/``volume``/``t2`` are not positive, or if inputs
         are non-finite.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     require_scalar(area, "area")
     l1_bands = _as_band_levels(l1, "l1")
@@ -601,6 +602,7 @@ def laboratory_impact_insulation(
         ``absorption_area`` and ``rating``.
     :raises ValueError: If the band counts of ``li`` and ``t2`` differ, if
         ``volume``/``t2`` are not positive, or if inputs are non-finite.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     li_bands = _as_band_levels(li, "li")
     absorption = _absorption_area(t2, volume, int(li_bands.size))

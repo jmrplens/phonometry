@@ -73,6 +73,12 @@ exactly as the paper reports `delta_n`.
 
 **Returns:** A [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum) carrying the raw `d(f)` and the normalised `d_n(f)`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `depth_m` or `period_m` is not a single number. |
+
 ## metadiffuser_polar_response
 
 ```python
@@ -115,6 +121,12 @@ with
 
 **Returns:** A [`DiffuserPolarResponse`](/phonometry/reference/api/materials/design/#diffuserpolarresponse).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` is not a single number. |
+
 ## metadiffuser_reflection
 
 ```python
@@ -156,6 +168,12 @@ air impedance.
 
 **Returns:** A [`MetadiffuserResult`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserresult) with one reflection row per well.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `depth_m` or `period_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+
 ## MetadiffuserResult
 
 ```python
@@ -165,9 +183,9 @@ MetadiffuserResult(
     absorption: NDArray[np.float64],
     well_absorption: NDArray[np.float64],
     *,
-    wells: tuple[MetadiffuserWell | None, ...] | None = None,
-    depth_m: float | None = None,
-    period_m: float | None = None,
+    wells: tuple[MetadiffuserWell | None, ...],
+    depth_m: float,
+    period_m: float,
 )
 ```
 
@@ -180,8 +198,7 @@ $\alpha(f) = 1 - \operatorname{mean}_n \lvert R_n \rvert^2$ and
 `well_absorption` the per-well
 $\alpha_n = 1 - \lvert R_n \rvert^2$. The trailing fields retain the geometry the
 prediction was run with (`wells`, `depth_m`, `period_m`) so
-`plot_geometry` can draw the panel section; they default to
-`None` for hand-built results.
+`plot_geometry` can draw the panel section.
 
 ### MetadiffuserResult.plot()
 
@@ -214,12 +231,6 @@ Draw the panel cross-section to scale (slits and resonators).
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ## MetadiffuserWell
 
@@ -281,3 +292,4 @@ at the lattice step `a = L / M` shelved sideways into the septum;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a depth or period that is not finite and positive, fewer than two wells, or a slit height that is not smaller than the period. |
+| TypeError | if `depth_m` or `period_m` is not a single number. |

@@ -162,6 +162,8 @@ def min_phase(
     :return: Complex minimum-phase response on the same bins (same
         magnitude, reconstructed phase).
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``oversample`` is a flag, a text or an array where a count
+        goes.
 
     .. note::
         Magnitude zeros cannot be represented by a minimum-phase system;
@@ -202,6 +204,7 @@ def group_delay(
     :param fs: Sample rate the response grid corresponds to, in Hz.
     :return: Group delay per bin, in seconds.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     resp = _validate_response(response)
     require_scalar(fs, "fs")
@@ -381,6 +384,7 @@ def phase_decomposition(
     :param oversample: Cepstral anti-aliasing factor (default 8).
     :return: A :class:`PhaseDecompositionResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     resp = _validate_response(response)
     require_scalar(fs, "fs")

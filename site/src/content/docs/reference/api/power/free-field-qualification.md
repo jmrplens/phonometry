@@ -191,6 +191,12 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 **Returns:** `(32, 3)` or `(64, 3)` coordinates, in metres.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `radius` is not a single number. |
+
 ## directionality_tolerance
 
 ```python
@@ -725,6 +731,7 @@ frequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the range is empty. |
+| TypeError | if `high_hz` or `low_hz` is not a single number. |
 
 ## SourceDirectionalityResult
 

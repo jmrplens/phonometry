@@ -110,6 +110,7 @@ not one of them, as the clause is printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative quantity, an unknown time of day, or guide values of the 1999 edition or of the other period. |
+| TypeError | if `kb_fmax_after`, `kb_fmax_before`, `kb_ftr_after` or `kb_ftr_before` is not a single number. |
 
 ## RAILWAY_CHANGE_TOLERANCE_PERCENT
 
@@ -300,6 +301,7 @@ two tracks can each carry a train in the same interval.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched, negative or non-finite inputs, a count that is not whole, or an unknown time of day. |
+| TypeError | if `alpha`, `kb_ftm_zug` or `trains` holds a text or a value that is not a real number. |
 
 ## train_category_rms
 
@@ -329,6 +331,7 @@ $KB_\mathrm{Fmax}$ of Formula (7) is formed from this value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty, non-finite or negative input. |
+| TypeError | if `kb_fti_zug` holds a text or a value that is not a real number. |
 
 ## train_kb_fmax
 
@@ -357,6 +360,7 @@ prints as 0,568.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty, non-finite or negative input. |
+| TypeError | if `kb_ftm_zug` holds a text or a value that is not a real number. |
 
 ## TRAIN_KB_FMAX_FACTOR
 

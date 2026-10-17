@@ -324,6 +324,8 @@ def reverberation_parameter(
     :return: :math:`R` per frequency.
     :raises ValueError: for a non-positive frequency, volume, area or speed,
         or only one of the NOTE's two inputs.
+    :raises TypeError: if ``speed_of_sound``, ``surface_area`` or ``volume`` is not a
+        single number.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     if freqs.size == 0 or not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
@@ -412,6 +414,9 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         :raises ValueError: if the per-band arrays differ in length or rank,
             the nominal reverberation time, the volume or a given source
             volume is not positive, or the method is unknown.
+        :raises TypeError: if ``method`` is not a text, or
+            ``nominal_reverberation_time_s``, ``source_volume_m3`` or ``volume`` is not
+            a single number.
         """
         require_choice(self.method, "method", ("direct", "comparison"))
         require_positive(
@@ -687,6 +692,8 @@ def check_special_room_reverberation(
         finite, a length mismatch, the refusals of
         :func:`reverberation_parameter`, an unknown method, a climate given
         in part or out of range, or a source volume that is not positive.
+    :raises TypeError: if ``method`` is not a text, or ``nominal_reverberation_time_s``
+        or ``source_volume_m3`` is not a single number.
     """
     t = np.asarray(reverberation_time, dtype=np.float64)
     if t.ndim != 1 or t.size == 0 or not np.all(np.isfinite(t)) or np.any(t <= 0.0):
@@ -1199,6 +1206,8 @@ def special_room_source_locations(
     :raises ValueError: for levels that are not a finite 2D array of at least
         two positions, bands outside 125 Hz to 8 kHz, a column Table 3 does
         not have, or A-weighted levels not one per position.
+    :raises TypeError: if ``n_microphone_positions`` is a flag, a text or an array where
+        a count goes.
     """
     arr = _finite(levels, "levels", (2,))
     n_positions, n_bands = arr.shape
@@ -1323,6 +1332,8 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         :raises ValueError: if ``method`` is unknown, ``coverage_factor`` is not
             positive, a count is below one, or a per-band array disagrees with
             the rest.
+        :raises TypeError: if ``method`` is not a text, or ``coverage_factor``,
+            ``n_microphone_positions`` or ``n_source_positions`` is not a single number.
         """
         require_scalar(self.n_microphone_positions, "n_microphone_positions")
         require_scalar(self.n_source_positions, "n_source_positions")
@@ -1702,6 +1713,8 @@ def sound_power_special_room(
         not finite, frequencies outside Table F.1, a non-positive volume or
         nominal reverberation time, a climate out of range, a negative
         ``sigma_omc_db`` or a coverage factor that is not positive.
+    :raises TypeError: if ``nominal_reverberation_time_s`` or ``volume`` is not a single
+        number.
     """
     grid, traverse = _measurement_grid(levels, "levels")
     n_sources, n_positions, n_bands = grid.shape

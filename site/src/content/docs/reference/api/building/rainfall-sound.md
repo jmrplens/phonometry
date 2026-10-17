@@ -154,6 +154,7 @@ one hour (the definition under Table H.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite. |
+| TypeError | if `collected_volume_liters`, `collection_area_m2` or `duration_s` is not a single number. |
 
 ## rainfall_reference_correction
 
@@ -197,13 +198,14 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a level is not finite, a time or frequency is not positive, or a band is not in Table I.1. |
+| TypeError | if `frequencies`, `l_i_ref` or `structural_reverberation_time` holds a text or a value that is not a real number. |
 
-## RAINFALL_REFERENCE_INTENSITY_DB
+## RAINFALL_REFERENCE_INTENSITY_LEVELS
 
 *Constant* (`mapping`).
 
 ```python
-RAINFALL_REFERENCE_INTENSITY_DB = {100.0: 45.0, 125.0: 45.0, 160.0: 46.0, 200.0: 46.0, 250.0: 47.0, 315.0: 47.0, 400.0: 47.0, 500.0: 47.0, 630.0: 47.0, 800.0: 46.0, 1000.0: 44.0, 1250.0: 42.0, 1600.0: 43.0, 2000.0: 46.0, 2500.0: 51.0, 3150.0: 50.0, 4000.0: 46.0, 5000.0: 44.0}
+RAINFALL_REFERENCE_INTENSITY_LEVELS = {100.0: 45.0, 125.0: 45.0, 160.0: 46.0, 200.0: 46.0, 250.0: 47.0, 315.0: 47.0, 400.0: 47.0, 500.0: 47.0, 630.0: 47.0, 800.0: 46.0, 1000.0: 44.0, 1250.0: 42.0, 1600.0: 43.0, 2000.0: 46.0, 2500.0: 51.0, 3150.0: 50.0, 4000.0: 46.0, 5000.0: 44.0}
 ```
 
 ## RAINFALL_REFERENCE_LOSS_FACTOR_DB
@@ -224,7 +226,7 @@ rainfall_sound(
     frequencies: ArrayLike,
     volume: float,
     excited_area_m2: float,
-    background_db: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
 ) -> RainfallSoundResult
 ```
@@ -260,7 +262,7 @@ for comparison between laboratories.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `volume` | Volume of the test room, in m³. |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
-| `background_db` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)) before the sum. |
+| `background_levels` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)) before the sum. |
 | `reference_correction` | The laboratory correction: a [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection) covering every band, or $\Delta L_{I\mathrm{c}}$ per band in dB, or `None`. |
 
 **Returns:** A [`RainfallSoundResult`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresult).
@@ -269,7 +271,7 @@ for comparison between laboratories.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `l_pr` holds an element that is not a number. |
+| TypeError | If `l_pr`, `reverberation_time`, `frequencies`, `background_levels` or a per-band `reference_correction` holds an element that is not a number, or `volume` or `excited_area_m2` is not one number. |
 | ValueError | If the shapes disagree, a level is not finite, a time, frequency, volume or area is not positive, or a band has no correction. |
 
 ## rainfall_sound_from_intensity
@@ -312,6 +314,7 @@ then follow as in K.4.2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes disagree, a level is not finite, or a frequency or area is not positive. |
+| TypeError | if `excited_area_m2` or `measuring_area_m2` is not a single number, or `frequencies`, `l_im` or `reference_correction` holds a text or a value that is not a real number. |
 
 ## RainfallReferenceCorrection
 
@@ -457,6 +460,7 @@ with $S$ the area of the whole specimen.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the area is not positive and finite. |
+| TypeError | if `specimen_area_m2` is not a single number. |
 
 ## RainfallType
 
@@ -614,3 +618,4 @@ bounds: a rate exactly 2 mm/h from the nominal one passes, also when
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the rate or a sample is not positive and finite, or `rain_type` is unknown. |
+| TypeError | if `rain_type` is not a text, `rainfall_rate_mm_h` is not a single number, or `drop_diameters_mm` or `fall_velocities_m_s` holds a text or a value that is not a real number. |

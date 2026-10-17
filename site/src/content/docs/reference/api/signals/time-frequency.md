@@ -224,6 +224,7 @@ tones closer than $B_\mathrm{e}$ (Eq. 11.127).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `f_max` or `f_min` is not a single number, or `n_points` is a flag, a text or an array where a count goes. |
 
 ## ZoomFFTResult
 

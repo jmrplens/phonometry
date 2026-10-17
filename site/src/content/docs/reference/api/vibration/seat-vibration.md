@@ -98,6 +98,7 @@ symbol and reduces to an identity; `docs/ERRATA.md` records it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any acceleration is not positive and finite. |
+| TypeError | if `intended_platform_acceleration` is not a single number. |
 
 ## DAMPING_TEST_MASS_KG
 
@@ -146,6 +147,7 @@ here rather than quietly returned.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the values are not one-dimensional, if fewer than two are given, if any is not positive and finite, if the tolerance is not positive, or if any value lies outside the tolerance band around the mean. |
+| TypeError | if `relative_tolerance` is not a single number. |
 
 ## resonance_transmissibility
 
@@ -179,6 +181,7 @@ Clause 11 makes it the acceptance value of a different test.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either acceleration is not positive and finite. |
+| TypeError | if `platform_acceleration` or `seat_acceleration` is not a single number. |
 
 ## RUN_AGREEMENT_TOLERANCE
 
@@ -210,6 +213,7 @@ The SEAT factor of Formula (2), dimensionless.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either acceleration is not positive and finite. |
+| TypeError | if `platform_acceleration` or `seat_acceleration` is not a single number. |
 
 ## seat_transmission
 

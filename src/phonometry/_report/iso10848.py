@@ -207,6 +207,7 @@ def render_flanking_level_difference_report(
     :raises ValueError: If ``part`` is not 2, 3 or 4.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
+    :raises TypeError: if ``part`` is a flag, a text or an array where a count goes.
     """
     rating = _require_rating(result.rating)
     spec = _dnf_spec(_part_designation(part), language)
@@ -253,6 +254,7 @@ def render_flanking_impact_level_report(
     :raises ValueError: If ``part`` is not 2, 3 or 4.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
+    :raises TypeError: if ``part`` is a flag, a text or an array where a count goes.
     """
     rating = _require_rating(result.rating)
     spec = _lnf_spec(_part_designation(part), language)

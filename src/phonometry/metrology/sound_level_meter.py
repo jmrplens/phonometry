@@ -247,6 +247,8 @@ class ToneburstReference(RichDisplay):
         :param meter_class: 1 or 2.
         :return: The limits of that class's column.
         :raises ValueError: for another class.
+        :raises TypeError: if ``meter_class`` is a flag, a text or an array where a
+            count goes.
         """
         return _limits_for(meter_class, self.class_1_limits_db, self.class_2_limits_db)
 
@@ -279,6 +281,8 @@ class PeakReference(RichDisplay):
         :param meter_class: 1 or 2.
         :return: The limits of that class's column.
         :raises ValueError: for another class.
+        :raises TypeError: if ``meter_class`` is a flag, a text or an array where a
+            count goes.
         """
         return _limits_for(meter_class, self.class_1_limits_db, self.class_2_limits_db)
 
@@ -748,7 +752,7 @@ _RANGE_LABEL_REFERENCE = "reference range"
 #: The fields of the record that say what the steps of Clause 16 cover.
 _LINEARITY_PROCEDURE: tuple[str, ...] = (
     "linear_operating_range_db",
-    "linearity_starting_point_db",
+    "linearity_starting_level",
     "linearity_overload_level",
     "linearity_under_range_level",
 )
@@ -1036,15 +1040,15 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     :ivar air_temperatures_c: The air temperature at the same times, in
         degrees Celsius.
     :ivar relative_humidities_percent: The relative humidity, in per cent.
-    :ivar calibration_check_initial_db: Clause 10: the indication at the
+    :ivar calibration_check_initial_level: Clause 10: the indication at the
         calibration check frequency on the sound calibrator before any
         adjustment.
-    :ivar calibration_check_adjusted_db: The indication after adjustment (the
+    :ivar calibration_check_adjusted_level: The indication after adjustment (the
         same number when none was needed).
-    :ivar self_noise_microphone_db: 11.1: the A-weighted self-generated noise
+    :ivar microphone_self_noise_level: 11.1: the A-weighted self-generated noise
         with the microphone installed, on the most-sensitive level range;
         reported for information only, without an uncertainty.
-    :ivar self_noise_electrical_db: 11.2: the self-generated noise with the
+    :ivar electrical_self_noise_levels: 11.2: the self-generated noise with the
         electrical input-signal device, keyed by frequency weighting
         (``"A"``, ``"C"``, ``"Z"``), every weighting the meter provides.
     :ivar acoustic_weighting_deviations_db: 12.16: the deviations of the
@@ -1089,7 +1093,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         linear operating range at 8 kHz on the reference level range, as the
         instruction manual states them (IEC 61672-1 5.6.10): the extent the
         steps of 16.3 cover and 16.4 holds to the limits.
-    :ivar linearity_starting_point_db: The starting point the instruction
+    :ivar linearity_starting_level: The starting point the instruction
         manual gives for the tests of level linearity at 8 kHz on the
         reference level range (16.2; IEC 61672-1 5.6.11).
     :ivar linearity_overload_level: The anticipated level of the step that
@@ -1139,10 +1143,10 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     static_pressures_kpa: Sequence[float] | None = None
     air_temperatures_c: Sequence[float] | None = None
     relative_humidities_percent: Sequence[float] | None = None
-    calibration_check_initial_db: float | None = None
-    calibration_check_adjusted_db: float | None = None
-    self_noise_microphone_db: float | None = None
-    self_noise_electrical_db: Mapping[str, float] | None = None
+    calibration_check_initial_level: float | None = None
+    calibration_check_adjusted_level: float | None = None
+    microphone_self_noise_level: float | None = None
+    electrical_self_noise_levels: Mapping[str, float] | None = None
     acoustic_weighting_deviations_db: Sequence[float] | None = None
     acoustic_weighting_uncertainties_db: Sequence[float] | None = None
     acoustic_weighting_uncertainties_without_correction_data_db: (
@@ -1163,7 +1167,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     linearity_uncertainties_db: Sequence[float] | None = None
     linearity_levels: Sequence[float] | None = None
     linear_operating_range_db: Sequence[float] | None = None
-    linearity_starting_point_db: float | None = None
+    linearity_starting_level: float | None = None
     linearity_overload_level: float | None = None
     linearity_under_range_level: float | None = None
     range_linearity_deviations_db: Mapping[str, Sequence[float]] | None = None
@@ -1231,12 +1235,12 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     def _freeze_scalars(self) -> None:
         """The single numbers of Clauses 10, 11.1, 15, 16, 20 and 21."""
         for name in (
-            "calibration_check_initial_db",
-            "calibration_check_adjusted_db",
-            "self_noise_microphone_db",
+            "calibration_check_initial_level",
+            "calibration_check_adjusted_level",
+            "microphone_self_noise_level",
             "long_term_stability_db",
             "long_term_stability_uncertainty_db",
-            "linearity_starting_point_db",
+            "linearity_starting_level",
             "linearity_overload_level",
             "linearity_under_range_level",
             "overload_difference",
@@ -1276,14 +1280,14 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
 
     def _freeze_mappings(self) -> None:
         """The keyed fields of Clauses 11.2, 13, 14 and 18."""
-        noise = self.self_noise_electrical_db
+        noise = self.electrical_self_noise_levels
         if noise is not None:
-            items = _keyed(noise, "self_noise_electrical_db", _WEIGHTINGS)
+            items = _keyed(noise, "electrical_self_noise_levels", _WEIGHTINGS)
             self._set(
-                "self_noise_electrical_db",
+                "electrical_self_noise_levels",
                 MappingProxyType(
                     {
-                        k: _scalar(v, f"self_noise_electrical_db[{k!r}]")
+                        k: _scalar(v, f"electrical_self_noise_levels[{k!r}]")
                         for k, v in items.items()
                     }
                 ),
@@ -1354,7 +1358,8 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     def _check_pairs(self) -> None:
         """Each result with its uncertainty, the same length, keys and gaps."""
         self._together(
-            "10", ("calibration_check_initial_db", "calibration_check_adjusted_db")
+            "10",
+            ("calibration_check_initial_level", "calibration_check_adjusted_level"),
         )
         for requirement, (values_name, spread_name) in _PAIRS.items():
             clause = _CLAUSES[requirement]
@@ -1401,7 +1406,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             msg = f"{given} describe the steps of Clause 16, whose results are missing."
             raise ValueError(msg)
         bounds = self.linear_operating_range_db
-        start = self.linearity_starting_point_db
+        start = self.linearity_starting_level
         if bounds is not None and bounds[0] >= bounds[1]:
             msg = (
                 "'linear_operating_range_db' is (lower, upper) with the lower "
@@ -1968,6 +1973,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             has besides the reference one, or sound exposure level toneburst
             responses from a meter declared to neither measure sound
             exposure level nor display time-averaged sound level (18.2).
+        :raises TypeError: if ``meter_class`` is not a single number.
         """
         require_scalar(self.meter_class, "meter_class")
         declared = self.features
@@ -2019,11 +2025,11 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         present = {r.clause for r in self.requirements}
         if m.static_pressures_kpa is not None:
             present.add("7")
-        if m.calibration_check_initial_db is not None:
+        if m.calibration_check_initial_level is not None:
             present.add("10")
         if (
-            m.self_noise_microphone_db is not None
-            or m.self_noise_electrical_db is not None
+            m.microphone_self_noise_level is not None
+            or m.electrical_self_noise_levels is not None
         ):
             present.add("11")
         return present
@@ -2347,14 +2353,17 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
     def _noise_gaps(self) -> list[tuple[str, str]]:
         """11.1 and 11.2, the latter for every weighting the meter provides."""
         m = self.measurements
-        if m.self_noise_microphone_db is None and m.self_noise_electrical_db is None:
+        if (
+            m.microphone_self_noise_level is None
+            and m.electrical_self_noise_levels is None
+        ):
             return []
         short = []
-        if m.self_noise_microphone_db is None:
+        if m.microphone_self_noise_level is None:
             short.append(
                 ("11", "11.1, with the microphone installed, was not recorded")
             )
-        if m.self_noise_electrical_db is None:
+        if m.electrical_self_noise_levels is None:
             short.append(
                 (
                     "11",
@@ -2369,7 +2378,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
                 "every weighting the meter provides",
             )
             for weighting in self._weightings_provided()
-            if weighting not in m.self_noise_electrical_db
+            if weighting not in m.electrical_self_noise_levels
         )
         return short
 
@@ -2422,7 +2431,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         named: set[str] = set()
         for keyed in (
             m.electrical_weighting_deviations_db,
-            m.self_noise_electrical_db,
+            m.electrical_self_noise_levels,
             m.weighting_at_1khz_deviations_db,
         ):
             named |= set(keyed or {})
@@ -2505,7 +2514,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             return []
         levels = m.linearity_levels
         bounds = m.linear_operating_range_db
-        start = m.linearity_starting_point_db
+        start = m.linearity_starting_level
         overload = m.linearity_overload_level
         under_range = m.linearity_under_range_level
         if (
@@ -3035,7 +3044,8 @@ def _weighting_limits(meter_class: int) -> dict[float, tuple[float, float]]:
     """
     from ..filters.weighting_compliance import weighting_class_limits
 
-    frequencies, lower, upper = weighting_class_limits(meter_class)
+    limits = weighting_class_limits(meter_class)
+    frequencies, lower, upper = limits.frequencies, limits.lower, limits.upper
     return {
         float(f): (float(lo), float(up))
         for f, lo, up in zip(frequencies, lower, upper, strict=True)
@@ -3391,6 +3401,8 @@ def verify_sound_level_meter_periodic(
     :raises ValueError: for a class other than 1 or 2, a Clause 13 row of the
         wrong length for the class, a record with nothing graded in it, or
         ``features`` that the class or a result of the record contradicts.
+    :raises TypeError: if ``meter_class`` is a flag, a text or an array where a count
+        goes.
     """
     if not is_class_designation(meter_class, _CLASSES):
         msg = f"'meter_class' must be 1 or 2 (IEC 61672-1:2013); got {meter_class!r}."

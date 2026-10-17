@@ -95,6 +95,12 @@ vibrational absorption terms (Eq. (5)). Fully vectorized over
 
 **Returns:** Attenuation coefficient `alpha`, in dB/m, with the shape of `frequencies`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `relative_humidity_percent`, `static_pressure_kpa` or `temperature_c` is not a single number. |
+
 :::note
 ISO 354:2003 defers its air power-attenuation coefficient `m` (1/m)
 entirely to this `alpha` via $m = \alpha / (10 \log_{10} e)$. Use

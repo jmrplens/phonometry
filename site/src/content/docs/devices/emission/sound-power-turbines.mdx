@@ -323,7 +323,7 @@ full = emission.turbine_sound_power(
 print(round(full.surface_pressure_level, 2),
       round(full.sound_power_level, 2))                   # 89.78 115.91
 print(full.reported_sound_power_level)                    # 116.0
-print(round(full.overhead_effect_db, 2), full.overhead_may_be_deleted)  # 0.27 True
+print(round(full.overhead_level_difference, 2), full.overhead_may_be_deleted)  # 0.27 True
 print(round(full.level_range_db, 1), full.arithmetic_mean_allowed)      # 8.6 False
 full.plot(position_labels=array.labels)   # the key bars numbered as in Figure 2
 ```
@@ -406,7 +406,7 @@ report.plot()
 | `surface_area` | float | m² | positive | $S$ of Equation (1) |
 | `background_levels` | 1D array or `None` | dB | required | One per position; `None` states that none was determined |
 | `environmental_correction` | float | dB | required | $K$; 0 outdoors; a value above 7 dB warns |
-| `overhead_mask` | bool array | | `None` | For `overhead_effect_db` (NOTE of 7.2.2) |
+| `overhead_mask` | bool array | | `None` | For `overhead_level_difference` (NOTE of 7.2.2) |
 
 ## What this guide covers
 

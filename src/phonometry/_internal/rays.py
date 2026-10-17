@@ -1186,6 +1186,7 @@ def march_rays(
         returns is not bit-for-bit the one it returns without (see the module
         docstring).
     :return: A :class:`RayMarch`.
+    :raises TypeError: if ``n_steps`` is a flag, a text or an array where a count goes.
     """
     ns = require_count(n_steps, "n_steps", at_least=None)
     zeta = np.array(zeta0, dtype=np.float64)

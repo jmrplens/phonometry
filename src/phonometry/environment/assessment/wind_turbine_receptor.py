@@ -99,7 +99,7 @@ __all__ = [
     "ROUGHNESS_LENGTHS_M",
     "SWEDISH_LOW_FREQUENCY_LIMITS_DB",
     "TONE_SEARCH_BANDS_HZ",
-    "TYPE_B_UNCERTAINTY_EXAMPLES_DB",
+    "EXAMPLE_TYPE_B_UNCERTAINTIES_DB",
     "TYPICAL_WIND_SHEAR_EXPONENT_RANGE",
     "BackgroundCorrectionRegime",
     "BinnedSoundLevels",
@@ -155,7 +155,7 @@ TYPICAL_WIND_SHEAR_EXPONENT_RANGE: tuple[float, float] = (-0.1, 0.5)
 #: Examples of type B uncertainty components of a measurement period, in dB,
 #: each as ``(typical range, standard uncertainty)`` (Table 3). Equation (3)
 #: combines the standard uncertainties in quadrature.
-TYPE_B_UNCERTAINTY_EXAMPLES_DB: Mapping[str, tuple[float, float]] = MappingProxyType(
+EXAMPLE_TYPE_B_UNCERTAINTIES_DB: Mapping[str, tuple[float, float]] = MappingProxyType(
     {
         "calibration": (0.3, 0.2),
         "instrument": (0.5, 0.3),
@@ -496,6 +496,7 @@ def power_law_wind_speed(
         inputs.
     :raises ValueError: If a height is not positive, a speed is negative or a
         value is not finite.
+    :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number.
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
@@ -532,6 +533,7 @@ def wind_shear_exponent(
     :return: The shear exponent; a ``float`` for scalar inputs.
     :raises ValueError: If a speed or height is not positive, or the two
         heights are the same.
+    :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number.
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
@@ -573,6 +575,8 @@ def logarithmic_wind_speed(
         inputs.
     :raises ValueError: If a height or the roughness length is not positive,
         a height does not exceed the roughness length, or a speed is negative.
+    :raises TypeError: if ``height_m``, ``reference_height_m`` or ``roughness_length``
+        is not a single number.
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
@@ -664,6 +668,8 @@ def wind_shear_profile(
     :return: A :class:`WindShearProfile`.
     :raises ValueError: If a speed or height is not positive or the upper
         height is not above the lower one.
+    :raises TypeError: if ``lower_height_m``, ``lower_speed_m_s``, ``upper_height_m`` or
+        ``upper_speed_m_s`` is not a single number.
     """
     require_scalar(lower_speed_m_s, "lower_speed_m_s")
     require_scalar(upper_speed_m_s, "upper_speed_m_s")
@@ -959,7 +965,7 @@ def bin_sound_levels(
     :param type_b_uncertainty_db: Combined type B standard uncertainty of each
         interval, Equation (3), in dB: one value for all or one per interval.
         Combine the components in quadrature, for example those of
-        :data:`TYPE_B_UNCERTAINTY_EXAMPLES_DB`.
+        :data:`EXAMPLE_TYPE_B_UNCERTAINTIES_DB`.
     :param bin_width_m_s: Width of the wind speed bins, in m/s (1 m/s by
         default, 10.1).
     :param sector_width_deg: Width of the direction sectors, in degrees (30
@@ -968,6 +974,9 @@ def bin_sound_levels(
     :raises ValueError: If the inputs disagree in length, a value is not
         finite, a wind speed or an uncertainty is negative, or ``averaging``
         is unknown.
+    :raises TypeError: if ``bin_width_m_s`` or ``sector_width_deg`` is not a single
+        number, or ``levels``, ``wind_directions_deg`` or ``wind_speeds_m_s`` holds a
+        text or a value that is not a real number.
     """
     known = tuple(member.value for member in _Averaging)
     if averaging not in known:
@@ -1247,6 +1256,9 @@ def turbine_sound_levels(
     :return: A :class:`TurbineSoundLevels`.
     :raises ValueError: If the inputs disagree in length or are not finite,
         or an uncertainty is infinite or negative.
+    :raises TypeError: if ``background_levels``, ``total_levels``,
+        ``wind_directions_deg`` or ``wind_speeds_m_s`` holds a text or a value that is
+        not a real number.
     """
     total = require_finite_array(total_levels, "total_levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -1386,6 +1398,9 @@ def predicted_receptor_level(
     :return: A :class:`PredictedReceptorLevel`.
     :raises ValueError: If a value is not finite or an uncertainty is
         negative.
+    :raises TypeError: if ``modeling_uncertainty_db`` or
+        ``prediction_model_uncertainty_db`` is not a single number, or
+        ``turbine_levels`` holds a text or a value that is not a real number.
     """
     levels = require_finite_array(turbine_levels, "turbine_levels")
     u_w = np.broadcast_to(
@@ -1475,6 +1490,8 @@ class SoundRelevantTurbines(OwnsArrays):
         :return: The mean of the relevant turbines' wind speeds, in m/s.
         :raises ValueError: If the speeds are not one per turbine or not
             finite.
+        :raises TypeError: if ``turbine_wind_speeds_m_s`` holds a text or a value that
+            is not a real number.
         """
         speeds = require_finite_array(
             turbine_wind_speeds_m_s, "turbine_wind_speeds_m_s"
@@ -1518,6 +1535,8 @@ def sound_relevant_turbines(predicted_levels: ArrayLike) -> SoundRelevantTurbine
         receptor, in dB.
     :return: A :class:`SoundRelevantTurbines`.
     :raises ValueError: If the levels are empty or not finite.
+    :raises TypeError: if ``predicted_levels`` holds a text or a value that is not a
+        real number.
     """
     levels = require_finite_array(predicted_levels, "predicted_levels")
     return SoundRelevantTurbines(predicted_levels=levels)
@@ -1568,6 +1587,7 @@ class LowFrequencyLevel(OwnsArrays):
         """Refuse a weighting Annex C does not apply.
 
         :raises ValueError: if ``weighting`` is neither ``"A"`` nor ``"Z"``.
+        :raises TypeError: if ``weighting`` is not a text.
         """
         require_choice(self.weighting, "weighting", A_OR_Z_WEIGHTINGS)
 
@@ -1635,7 +1655,10 @@ def wind_turbine_low_frequency_level(
     :param weighting: ``"A"`` (default) to add the A-weighting of Table C.4
         (IEC 61672-1) to each band, or ``"Z"`` for unweighted levels.
     :return: A :class:`LowFrequencyLevel`.
-    :raises TypeError: If ``weighting`` is not a text.
+    :raises TypeError: If ``weighting`` is not a text, or
+        ``sound_power_levels``, ``frequencies``, ``facade_insulation``,
+        ``ground_correction`` or ``air_attenuation_db_per_km`` holds a text or a
+        value that is not a number.
     :raises ValueError: If the shapes disagree, a distance or height is not
         positive, an air attenuation coefficient is negative, a default table
         has no value at a supplied band, or ``weighting`` is neither ``"A"``
@@ -1794,6 +1817,8 @@ def sound_emergence(
     :param wind_speeds_m_s: Optional wind speed of each class, in m/s.
     :return: A :class:`SoundEmergence`.
     :raises ValueError: If the inputs disagree in length or are not finite.
+    :raises TypeError: if ``ambient_levels``, ``background_levels`` or
+        ``wind_speeds_m_s`` holds a text or a value that is not a real number.
     """
     ambient = require_finite_array(ambient_levels, "ambient_levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -1907,6 +1932,8 @@ def wind_turbine_rating_level(
     :param impulsive_adjustment: :math:`K_\mathrm{I}`, in dB.
     :return: A :class:`WindTurbineRatingLevel`.
     :raises ValueError: If a value is not finite or an adjustment is negative.
+    :raises TypeError: if ``amplitude_modulation_adjustment``, ``equivalent_level``,
+        ``impulsive_adjustment`` or ``tonal_adjustment`` is not a single number.
     """
     leq = require_finite(equivalent_level, "equivalent_level")
     adjustments = {
@@ -1998,6 +2025,7 @@ def upper_tone_search_frequency(
     :return: A :class:`ToneSearchLimit`.
     :raises ValueError: If the distance is not positive or the atmosphere is
         outside what ISO 9613-1 accepts.
+    :raises TypeError: if ``distance`` is not a single number.
     """
     from ..propagation.air_absorption import air_attenuation
 

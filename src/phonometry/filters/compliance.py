@@ -310,6 +310,7 @@ def class_limits(
         (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
     :return: Tuple (minimum, maximum) relative attenuation in dB per point;
         the maximum is ``+inf`` outside the pass-band.
+    :raises TypeError: if ``fraction`` is not a single number.
 
     .. note::
         The exact band-edge point :math:`\Omega = G^{1/2}` is treated as
@@ -1016,14 +1017,14 @@ def _grade_pattern_requirements(
                 edition,
             )
             low, high = float(np.min(curve)), float(np.max(curve))
-            band["summation_min_db"] = low
-            band["summation_max_db"] = high
+            band["summation_difference_lower"] = low
+            band["summation_difference_upper"] = high
             for cls in classes_ordered:
                 lower, upper = summation_limits[cls]
                 band[f"summation_margin_class{cls}_db"] = min(low - lower, upper - high)
         else:
-            band["summation_min_db"] = None
-            band["summation_max_db"] = None
+            band["summation_difference_lower"] = None
+            band["summation_difference_upper"] = None
             for cls in classes_ordered:
                 band[f"summation_margin_class{cls}_db"] = None
 
@@ -1101,6 +1102,8 @@ def verify_filter_class(
         and sampling rate it was measured through, so it can redraw the
         relative attenuation and render an accredited ``.report()`` fiche
         without keeping a reference to the (possibly stateful) bank.
+    :raises TypeError: if ``n_points`` or ``points_per_bandwidth`` is a flag, a text or
+        an array where a count goes.
     """
     require_scalar(n_points, "n_points")
     if n_points < _MIN_GRID_POINTS:
@@ -1258,9 +1261,13 @@ class FilterComplianceResult(OwnsArrays):
       :math:`\Delta B` of 5.12 (the filter integrated response of 4.5 in the
       1995 edition), and ``bandwidth_margin_class<c>_db``, its distance to
       each class's limit;
-    * ``summation_min_db`` and ``summation_max_db``, the range of the
-      summation :math:`\Delta P_j` of 5.16 (4.9 in the 1995 edition) across
-      the band, and ``summation_margin_class<c>_db``, the nearer of its
+    * ``summation_difference_lower`` and ``summation_difference_upper``, the
+      lowest and the highest value across the band of the summation
+      :math:`\Delta P_j` of 5.16 (4.9 in the 1995 edition) as IEC 61260-2
+      Formula (3) prints it: the level of the summed output of adjacent
+      filters less the level of the input signal minus the reference
+      attenuation, (b) minus (a) in the words of 5.16, the sign 7.2.4.5
+      grades (see the errata registry), in dB, lower first; and ``summation_margin_class<c>_db``, the nearer of their
       distances to each class's two limits; all three are ``None`` on a band
       the summation does not apply to: in the 2014 edition the first and the
       last band, which have a neighbour on one side only (IEC 61260-2
@@ -1309,6 +1316,7 @@ class FilterComplianceResult(OwnsArrays):
         :raises ValueError: if the per-band entries disagree, the edition is
             unknown or does not match the per-band margin keys, a band states
             a class, or a per-band value is not finite.
+        :raises TypeError: if ``edition`` is not a text.
         """
         object.__setattr__(self, "band_margins", frozen_rows(self.band_margins))
         require_ranks(self, frequencies=1)
@@ -1527,6 +1535,7 @@ class FilterComplianceResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the renderer's measured curve.
         :raises ValueError: for a requirement this verdict did not grade.
+        :raises TypeError: if ``requirement`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.filters import (

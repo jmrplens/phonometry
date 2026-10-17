@@ -357,6 +357,7 @@ def installation_case(number: int) -> InstallationCase:
     :param number: The case number Figure 1 prints, 1 to 20.
     :return: The case, as an :class:`InstallationCase`.
     :raises ValueError: For a number outside the figure.
+    :raises TypeError: if ``number`` is a flag, a text or an array where a count goes.
     """
     require_scalar(number, "number")
     case = INSTALLATION_CASES.get(require_count(number, "number", at_least=None))
@@ -395,6 +396,8 @@ def silencer_background_correction(
     :return: The correction to subtract, in decibels.
     :raises ValueError: For a margin under
         :data:`ISO11820_MIN_BACKGROUND_MARGIN_DB`, which Table 1 calls invalid.
+    :raises TypeError: if ``level_difference`` holds a text or a value that is not a
+        real number.
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
     # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
@@ -435,6 +438,7 @@ def silencer_mean_sound_pressure_level(levels: ArrayLike) -> float:
     :param levels: The levels at the measuring points, in decibels.
     :return: :math:`\overline{L_p}`, in decibels.
     :raises ValueError: For an empty or non-finite set of levels.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     values = require_finite_array(levels, "levels")
     return float(energy_mean(values))
@@ -466,6 +470,8 @@ class ExtraneousCorrectionResult(RichDisplay):
         """Reject a level or a margin that is not a number.
 
         :raises ValueError: For a value that is not finite.
+        :raises TypeError: if ``corrected_level`` or ``margin_db`` is not a single
+            number.
         """
         require_finite(self.corrected_level, "corrected_level")
         require_finite(self.margin_db, "margin_db")
@@ -535,6 +541,8 @@ def extraneous_corrected_mean_level(
         :class:`ExtraneousCorrectionResult`.
     :raises ValueError: For inputs that do not match point for point, or an
         extraneous level at or above the level it is subtracted from.
+    :raises TypeError: if ``extraneous_levels`` or ``levels`` holds a text or a value
+        that is not a real number.
     """
     levels = require_finite_array(levels, "levels")
     extraneous = require_finite_array(extraneous_levels, "extraneous_levels")
@@ -585,6 +593,8 @@ def transmission_level_difference(
     :param receiver_levels: :math:`\overline{L_{p1}}` per band, in decibels.
     :return: :math:`D_{\mathrm{t}p\mathrm{s}}` per band, in decibels.
     :raises ValueError: For spectra that do not match band for band.
+    :raises TypeError: if ``receiver_levels`` or ``source_levels`` holds a text or a
+        value that is not a real number.
     """
     source = require_finite_array(source_levels, "source_levels")
     receiver = require_finite_array(receiver_levels, "receiver_levels")
@@ -608,6 +618,8 @@ def insertion_level_difference(
     :param levels_with: :math:`L_{p\mathrm{I}}` per band, in decibels.
     :return: :math:`D_{\mathrm{i}p\mathrm{s}}` per band, in decibels.
     :raises ValueError: For spectra that do not match band for band.
+    :raises TypeError: if ``levels_with`` or ``levels_without`` holds a text or a value
+        that is not a real number.
     """
     without = require_finite_array(levels_without, "levels_without")
     with_ = require_finite_array(levels_with, "levels_with")
@@ -644,6 +656,8 @@ def reverberant_surface_area_m2(
     :param speed_of_sound: The speed of sound, in metres per second.
     :return: The area, in square metres.
     :raises ValueError: For a non-positive volume, time or speed.
+    :raises TypeError: if ``speed_of_sound`` or ``volume_m3`` is not a single number, or
+        ``reverberation_time_s`` holds a text or a value that is not a real number.
     """
     volume = require_positive(volume_m3, "volume_m3")
     celerity = require_positive(speed_of_sound, "speed_of_sound")
@@ -678,6 +692,8 @@ def silencer_sound_power_level(
     :param field_correction: :math:`K`, in decibels.
     :return: :math:`L_W` per band, in decibels.
     :raises ValueError: For a non-positive area or mismatched shapes.
+    :raises TypeError: if ``area``, ``field_correction`` or ``mean_level`` holds a text
+        or a value that is not a real number.
     """
     levels = require_finite_array(mean_level, "mean_level")
     area = require_finite_array(area, "area")
@@ -734,6 +750,8 @@ def temperature_field_correction(
     :return: :math:`K_2 - K_1` or :math:`K_\mathrm{II} - K_\mathrm{I}`, in decibels.
     :raises ValueError: For a temperature that is not finite or at or below
         the absolute zero the equation uses.
+    :raises TypeError: if ``receiver_temperature_c`` or ``source_temperature_c`` is not
+        a single number.
     """
     receiver = require_finite(receiver_temperature_c, "receiver_temperature_c")
     source = require_finite(source_temperature_c, "source_temperature_c")
@@ -904,6 +922,9 @@ def in_situ_transmission_loss(
         correction that is neither one value nor one per band, a non-positive
         area or band centre, a field correction that is not finite, or a case
         that is not a transmission one.
+    :raises TypeError: if ``field_correction_difference``, ``frequencies``,
+        ``receiver_area_m2`` or ``source_area_m2`` holds a text or a value that is not a
+        real number.
     """
     difference = transmission_level_difference(source_levels, receiver_levels)
     entry = None
@@ -978,6 +999,9 @@ def in_situ_insertion_loss(
         correction that is neither one value nor one per band, a non-positive
         area or band centre, a field correction that is not finite, or a case
         that is not an insertion one.
+    :raises TypeError: if ``area_with_m2``, ``area_without_m2``,
+        ``field_correction_difference`` or ``frequencies`` holds a text or a value that
+        is not a real number.
     """
     difference = insertion_level_difference(levels_without, levels_with)
     entry = None
@@ -1021,6 +1045,7 @@ def octave_levels_from_third_octave(levels: ArrayLike) -> NDArray[np.float64]:
         three bands in ascending order.
     :return: The octave levels, in decibels.
     :raises ValueError: For a count that is not a multiple of three.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     values = require_finite_array(levels, "levels")
     if values.size % _THIRDS_PER_OCTAVE:
@@ -1052,6 +1077,8 @@ def total_pressure_loss_pa(
     :param downstream_total_pressure_pa: :math:`\overline{p_\mathrm{Td}}`, in
         pascals, on the same basis.
     :return: :math:`\Delta p_\mathrm{T}`, in pascals.
+    :raises TypeError: if ``downstream_total_pressure_pa`` or
+        ``upstream_total_pressure_pa`` is not a single number.
     """
     return require_finite(
         upstream_total_pressure_pa, "upstream_total_pressure_pa"
@@ -1086,6 +1113,8 @@ def static_pressure_difference_pa(
     :return: :math:`\Delta p_\mathrm{S}`, in pascals.
     :raises ValueError: For a value that is not finite, or a non-positive
         density or area.
+    :raises TypeError: if ``density``, ``downstream_area``, ``total_pressure_loss_pa``,
+        ``upstream_area`` or ``volume_flow`` is not a single number.
     """
     density = require_positive(density, "density")
     upstream = require_positive(upstream_area, "upstream_area")
@@ -1105,6 +1134,7 @@ def measurement_distance_upstream_m(upstream_area: float) -> float:
     :param upstream_area: :math:`S_\mathrm{u}`, in square metres.
     :return: :math:`d_\mathrm{u}`, in metres.
     :raises ValueError: For a non-positive area.
+    :raises TypeError: if ``upstream_area`` is not a single number.
     """
     area = require_positive(upstream_area, "upstream_area")
     return UPSTREAM_DISTANCE_DIAMETERS * math.sqrt(4.0 * area / math.pi)
@@ -1128,6 +1158,8 @@ def measurement_distance_downstream_m(
     :param free_area_m2: :math:`S_\mathrm{f}`, in square metres.
     :return: :math:`d_\mathrm{d}`, in metres.
     :raises ValueError: For a non-positive area.
+    :raises TypeError: if ``downstream_area`` or ``free_area_m2`` is not a single
+        number.
     """
     downstream = require_positive(downstream_area, "downstream_area")
     free = require_positive(free_area_m2, "free_area_m2")
@@ -1156,6 +1188,8 @@ def velocity_pressure_pa(
     :param static_pressure_pa: :math:`p_\mathrm{S}`, in pascals.
     :return: :math:`p_\mathrm{v}`, in pascals.
     :raises ValueError: For inputs that do not match.
+    :raises TypeError: if ``static_pressure_pa`` or ``total_pressure_pa`` holds a text
+        or a value that is not a real number.
     """
     total = require_finite_array(total_pressure_pa, "total_pressure_pa")
     static = require_finite_array(static_pressure_pa, "static_pressure_pa")
@@ -1177,6 +1211,8 @@ def flow_velocity_m_s(
     :return: :math:`w`, in metres per second.
     :raises ValueError: For a non-positive density or a negative velocity
         pressure.
+    :raises TypeError: if ``density`` is not a single number, or
+        ``velocity_pressure_pa`` holds a text or a value that is not a real number.
     """
     pressure = require_finite_array(velocity_pressure_pa, "velocity_pressure_pa")
     density = require_positive(density, "density")
@@ -1216,6 +1252,8 @@ def gas_density_kg_m3(
     :raises ValueError: For a temperature that is not finite or at or below
         the absolute zero the equation uses, or a non-positive pressure or
         molar mass.
+    :raises TypeError: if ``atmospheric_pressure_pa``, ``molar_mass_kg_kmol`` or
+        ``temperature_c`` is not a single number.
     """
     pressure = require_positive(atmospheric_pressure_pa, "atmospheric_pressure_pa")
     absolute = 273.0 + require_finite(temperature_c, "temperature_c")
@@ -1251,6 +1289,8 @@ def silencer_flow_velocity_m_s(
         metres.
     :return: :math:`\overline{w_\mathrm{f}}`, in metres per second.
     :raises ValueError: For a non-positive area.
+    :raises TypeError: if ``free_area_m2``, ``upstream_area`` or
+        ``upstream_mean_velocity_m_s`` is not a single number.
     """
     upstream = require_positive(upstream_area, "upstream_area")
     free = require_positive(free_area_m2, "free_area_m2")

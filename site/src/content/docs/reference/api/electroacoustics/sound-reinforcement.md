@@ -126,6 +126,12 @@ $G_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{M}} - L_{\mathrm{H}\text{-}\mathrm{
 
 **Returns:** The feedback-loop gain $G_\mathrm{S}$, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `level_loudspeaker_at_listener`, `level_loudspeaker_at_microphone` or `microphone_directivity` is not a single number. |
+
 ## feedback_stability
 
 ```python
@@ -160,6 +166,12 @@ Equation (18.20) (see the module docstring).
 | `stability_margin` | Required margin below oscillation, dB (default [`DEFAULT_STABILITY_MARGIN_DB`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#default_stability_margin_db), Long's equalised-system value). |
 
 **Returns:** A [`FeedbackStabilityResult`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#feedbackstabilityresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `level_loudspeaker_at_listener`, `level_loudspeaker_at_microphone`, `microphone_directivity`, `open_loop_gain` or `stability_margin` is not a single number, or `n_open_microphones` is a flag, a text or an array where a count goes. |
 
 ## FeedbackStabilityResult
 
@@ -251,6 +263,12 @@ feedback.
 
 **Returns:** The correction $\Delta L_\text{nom}$, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `n_open_microphones` is a flag, a text or an array where a count goes. |
+
 ## plot_sound_reinforcement_geometry
 
 ```python
@@ -296,3 +314,4 @@ and a listener 20 m from the loudspeaker cannot share one usable scale.
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first distance that is not finite and positive. |
+| TypeError | if `listener_distance`, `microphone_distance` or `talker_distance` is not a single number. |

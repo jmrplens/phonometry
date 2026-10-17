@@ -374,6 +374,7 @@ def qualification_frequencies(
     :param high_hz: Highest band of the range, in hertz.
     :return: The nominal frequencies to evaluate, ascending, in hertz.
     :raises ValueError: if the range is empty.
+    :raises TypeError: if ``high_hz`` or ``low_hz`` is not a single number.
     """
     require_scalar(high_hz, "high_hz")
     require_scalar(low_hz, "low_hz")
@@ -1226,6 +1227,7 @@ def directionality_positions(
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
     :param radius: The radius, in metres; 1,5 m in B.3.2.
     :return: ``(32, 3)`` or ``(64, 3)`` coordinates, in metres.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     _check_room(room)
     radius = require_positive(radius, "radius")
@@ -1612,6 +1614,9 @@ class FreeFieldCheck(OwnsArrays):
             ``results``, an unknown bandwidth, an absorption coefficient
             outside 0 to 1, a margin that is not finite, or a working-area
             declaration that is not ``True``, ``False`` or ``None``.
+        :raises TypeError: if ``measurement_radius_m``,
+            ``reflecting_plane_absorption_coefficient``, ``reflecting_plane_margin_m``
+            or ``speed_of_sound`` is not a single number.
         """
         fits = _checked_fits(self.results, self.bandwidth)
         room = fits[0].room

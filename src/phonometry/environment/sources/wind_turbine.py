@@ -105,6 +105,8 @@ def slant_distance(
     :return: The slant distance ``R1``, in m.
     :raises ValueError: If a dimension is not positive or ``rotor_axis`` is
         not one of the two orientations.
+    :raises TypeError: if ``hub_height_m`` or ``rotor_diameter_m`` is not a single
+        number.
     """
     h = _positive(hub_height_m, "hub_height_m")
     d = _positive(rotor_diameter_m, "rotor_diameter_m")
@@ -138,6 +140,7 @@ def apparent_sound_power_level(
     :param r1: Slant distance ``R1`` to the rotor centre, in m.
     :return: The apparent sound power level ``L_WA``, in dB re 1 pW.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``r1`` is not a single number.
     """
     levels = np.atleast_1d(np.asarray(band_levels, dtype=np.float64))
     if levels.size == 0 or not np.all(np.isfinite(levels)):
@@ -315,6 +318,7 @@ class WindTurbineTonalityResult(OwnsArrays):
             narrowband spectrum, a metric of the Formula 30 to 34 chain is not
             finite or not the one the spectrum gives, or the candidate is not a
             line of the spectrum at or above 20 Hz.
+        :raises TypeError: if ``candidate_frequency_hz`` is not a single number.
         """
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels", axis="spectral line")
@@ -574,6 +578,7 @@ def wind_turbine_tonality(
     :return: A :class:`WindTurbineTonalityResult`.
     :raises ValueError: If the inputs are invalid or the candidate lies below
         20 Hz.
+    :raises TypeError: if ``tone_frequency`` is not a single number.
     """
     lv, fr, df = _validate_narrowband(levels, frequencies)
 

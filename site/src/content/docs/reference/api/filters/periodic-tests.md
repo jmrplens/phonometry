@@ -102,6 +102,7 @@ the one Clause 14 k) or l) prescribes for the case at hand.
 
 ```python
 FilterPeriodicMeasurements(
+    *,
     midband_attenuations: Sequence[float] | None = None,
     midband_uncertainties_db: Sequence[float] | None = None,
     bandwidth_deviations_db: Sequence[float] | None = None,
@@ -327,6 +328,7 @@ lowest mid-band frequency of the set or above 1.5 times the highest.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a `fraction` that is not positive. |
+| TypeError | if `fraction` is not a single number. |
 
 ## PeriodicTestClause
 
@@ -442,3 +444,4 @@ is the text Clause 14 prescribes for the case.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a class other than 1 or 2, a `fraction` that is not positive, or a record with nothing measured. |
+| TypeError | if `fraction` is not a single number, or `filter_class` is a flag, a text or an array where a count goes. |

@@ -7,8 +7,11 @@ documentation:
   - changed-files:
       - any-glob-to-any-file:
           - docs/**
+          - docs/contributing/**
           - README.md
           - CONTRIBUTING.md
+          - AGENTS.md
+          - CLAUDE.md
           - CHANGELOG.md
 
 site:

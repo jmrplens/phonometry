@@ -1,10 +1,12 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 #
 # Review guidance that would otherwise be retyped in every pull request. The
-# entries here answer a claim the bot has made repeatedly and that is not true
-# of this repository: that everything under `docs/` is generated output. The
-# second entry is the narrow exception, so its glob has to name exactly the
-# files `scripts/mirror_overviews.py` writes and no others.
+# first entries send every review of code, tests, scripts and docs to the
+# contributor style guide, whose rules each carry an identifier a review can
+# cite. The `docs/**` entry also answers a claim the bot has made repeatedly
+# and that is not true of this repository: that everything under `docs/` is
+# generated output. The last entry is the narrow exception, so its glob has to
+# name exactly the files `scripts/mirror_overviews.py` writes and no others.
 reviews:
   # Review a pull request whatever it is aimed at, not only the ones aimed at
   # the default branch. Work here is often stacked, and the lower pull request
@@ -22,38 +24,50 @@ reviews:
       - "github-actions[bot]"
       - "dependabot[bot]"
   path_instructions:
+    - path: "src/**"
+      instructions: >-
+        Review changes against the contributor style guide in docs/contributing/
+        and cite the rule ID (for example N4) when a change departs from it.
+    - path: "tests/**"
+      instructions: >-
+        Review changes against the contributor style guide in docs/contributing/
+        and cite the rule ID (for example N4) when a change departs from it.
+    - path: "scripts/**"
+      instructions: >-
+        Review changes against the contributor style guide in docs/contributing/
+        and cite the rule ID (for example N4) when a change departs from it.
     - path: "docs/**"
       instructions: >-
+        Review changes against the contributor style guide in docs/contributing/
+        and cite the rule ID (for example N4) when a change departs from it.
+
         `docs/` is NOT a generated mirror of the website, and edits to it are
         not build output to be skipped or regenerated. It is the plain-markdown
         edition of the guides, authored by hand for people reading the
         repository on GitHub and for the llms.txt artifacts built from it. Each
         guide deliberately exists twice, as `docs/<path>.md` and as
         `site/src/content/docs/<path>.md` or `.mdx`, and the two are written
-        differently on purpose: the mirror carries no frontmatter and no Astro
-        components. It DOES carry figures, as a plain `<picture>` with absolute
-        raw.githubusercontent.com URLs, because GitHub resolves nothing else;
-        116 of its 160 pages have one, so an added figure there is the
-        convention and not a mistake. What it does not carry is the site's
-        `<ThemeImage>` component, which is how the same figure is written on
-        the other side. Review changes here as ordinary prose, and
-        expect a guide edit to touch the English page, its Spanish twin under
-        `site/src/content/docs/es/` and this mirror together. Flag it when one
-        of the three is missing.
+        differently on purpose, as rule F2 of
+        docs/contributing/docs-and-figures.md#f2 says: an added `<picture>`
+        figure in the mirror is the convention and not a mistake. Review
+        changes here as ordinary prose, and expect a guide edit to touch the
+        English page, its Spanish twin and this mirror together (rule F1,
+        docs/contributing/docs-and-figures.md#f1). Flag it when one of the
+        three is missing. The one exception is `docs/contributing/`, the
+        contributor guide itself: it is repository-only, with no site page and
+        no Spanish twin (rule F1), so an edit there touches only the guide and
+        is reviewed against its own rules.
 
-        The only generated files under `docs/` are the topic and section
-        overview indexes (`scripts/mirror_overviews.py`),
-        `docs/reference/glossary.md` (`scripts/mirror_glossary.py`) and
-        `docs/CONFORMANCE.md` (`make conformance`). Those three are the
-        exception, not the rule. `docs/README.md` is not one of them: it is the
-        hand-kept front door of the mirror, and both `mirror_overviews.py
-        --check` and `generate_llms.py` fail when a new guide goes unlinked
-        from it. Neither are the two indexes under `docs/reference/`, which the
-        overview generator skips: `docs/reference/api/index.md` is a
-        hand-maintained table that `scripts/check_api_reference.py` requires to
-        be extended whenever a public name is added, so an edit to it is the
-        expected shape of a pull request, not build output.
-    - path: "docs/!(reference)/**/index.md"
+        The generated files under `docs/` are the topic and section overview
+        indexes (`scripts/mirror_overviews.py`), `docs/reference/glossary.md`
+        (`scripts/mirror_glossary.py`) and `docs/CONFORMANCE.md`
+        (`make conformance`); everything else there is written by hand,
+        `docs/README.md` included (rule F5,
+        docs/contributing/docs-and-figures.md#f5). An edit to the
+        hand-maintained `docs/reference/api/index.md` is the expected shape of
+        a pull request that adds a public name (rule A7,
+        docs/contributing/api.md#a7), not build output.
+    - path: "docs/!(reference|contributing)/**/index.md"
       instructions: >-
         This file is generated by `scripts/mirror_overviews.py` from the
         matching `index.md*` under `site/src/content/docs/`, and CI fails on
@@ -61,3 +75,5 @@ reviews:
         in the site page it is generated from, with `make llms` re-run to
         regenerate this one. The pattern excludes `docs/reference/` on purpose,
         because the generator does: the indexes under it are written by hand.
+        It excludes `docs/contributing/` too: the contributor guide has no
+        site page, so nothing generates its index.

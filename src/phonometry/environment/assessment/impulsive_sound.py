@@ -68,6 +68,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_1d_signal,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -731,13 +732,14 @@ def sound_pressure_level_history(
         for the callers that always did: the sample times in seconds and ``LpAF`` in
         dB. The realised interval is ``times[1] - times[0]`` and may differ
         slightly from ``dt`` because it is an integer number of samples.
-    :raises ValueError: for a non-positive ``fs`` or ``dt`` outside 10-25 ms.
+    :raises ValueError: for a non-positive ``fs``, ``dt`` outside 10-25 ms, or
+        an ``x`` that is not one channel (a 1-D series).
     :raises TypeError: if ``dt`` or ``fs`` is not a single number.
     """
     from ...filters.weighting import time_weighting, weighting_filter
 
     fs = resolve_fs(x, fs, name="x")
-    x = np.asarray(resolve_samples(x, name="x"), dtype=np.float64).ravel()
+    x = require_1d_signal(resolve_samples(x, name="x"), "x")
     require_scalar(fs, "fs")
     if not math.isfinite(fs) or fs <= 0.0:
         msg = "fs must be positive."
@@ -981,10 +983,11 @@ def impulsive_sound_adjustment(
         computed from the A-weighted signal energy.
     :return: An :class:`ImpulsiveSoundResult` with the level history, onsets,
         prominence, adjustment, category and adjusted ``LAeq``.
-    :raises ValueError: for invalid ``fs``, ``dt`` or an empty signal.
+    :raises ValueError: for invalid ``fs``, ``dt``, an empty signal, or an ``x``
+        that is not one channel (a 1-D series).
     """
     fs = resolve_fs(x, fs, name="x")
-    x = np.asarray(resolve_samples(x, name="x"), dtype=np.float64).ravel()
+    x = require_1d_signal(resolve_samples(x, name="x"), "x")
     times, levels = sound_pressure_level_history(
         x,
         fs,

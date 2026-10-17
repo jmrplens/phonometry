@@ -369,7 +369,7 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for invalid `fs`, `dt` or an empty signal. |
+| ValueError | for invalid `fs`, `dt`, an empty signal, or an `x` that is not one channel (a 1-D series). |
 
 ## ImpulsiveSoundResult
 
@@ -606,5 +606,5 @@ standard.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive `fs` or `dt` outside 10-25 ms. |
+| ValueError | for a non-positive `fs`, `dt` outside 10-25 ms, or an `x` that is not one channel (a 1-D series). |
 | TypeError | if `dt` or `fs` is not a single number. |

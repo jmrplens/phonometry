@@ -33,7 +33,8 @@ def _labels(ax: Axes) -> list[str]:
     return ax.get_legend_handles_labels()[1]
 
 
-def _line(ax: Axes, label: str):  # noqa: ANN202 - a matplotlib Line2D
+# A matplotlib Line2D
+def _line(ax: Axes, label: str):  # noqa: ANN202
     return next(line for line in ax.lines if line.get_label() == label)
 
 

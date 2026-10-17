@@ -331,7 +331,8 @@ jobs:
   # variable from a different room sat in scope, so reading top to bottom gave
   # numbers that were not the annotated ones. Reader-owned placeholders (the
   # reader's measurement, never invented by the page) are registered in the
-  # script. See scripts/check_fence_names.py and CONTRIBUTING.md.
+  # script. See scripts/check_fence_names.py and
+  # docs/contributing/docs-and-figures.md#f17.
   fence-names:
     name: Documentation fences read in order
     runs-on: ubuntu-latest
@@ -728,6 +729,10 @@ jobs:
         # here for the pages that draw and render.
         pip install -e ".[audio]"
         pip install -r requirements-figures.txt -r requirements-reports.txt
+        # The contributor guide's examples of tests wait on errors with
+        # pytest.raises, so its pinned pytest is installed too.
+        grep -E '^pytest==' requirements-dev.txt | cut -d' ' -f1 > snippet-tools.txt
+        pip install -r snippet-tools.txt
     - name: Run every snippet the guides print
       run: python scripts/check_doc_snippets.py
 

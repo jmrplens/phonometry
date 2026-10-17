@@ -982,7 +982,8 @@ def _table_strings(value: ast.expr) -> list[ast.Constant]:
             pair.elts[1]
             for pair in value.elts
             if isinstance(pair, ast.Tuple)
-            and len(pair.elts) == 2  # noqa: PLR2004 - a (pattern, replacement) pair
+            # A (pattern, replacement) pair
+            and len(pair.elts) == 2  # noqa: PLR2004
             and isinstance(pair.elts[1], ast.Constant)
             and isinstance(pair.elts[1].value, str)
         ]

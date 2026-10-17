@@ -64,6 +64,7 @@ DEFAULT_ROOTS = (
     "README.md",
     "README_PYPI.md",
     "CONTRIBUTING.md",
+    "AGENTS.md",
 )
 
 #: Bold markers, which are not italics and are taken out before counting.

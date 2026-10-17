@@ -47,8 +47,8 @@ public module and fails on five things:
   public module, which is a second address for the same object (a name a
   private module defines is published through the module that owns it,
   which is how private code gets its one public address);
-* an ``__all__`` lists a type alias (``Literal[...]``, a union, ``type X``).
-  No alias is public: publishing one later costs nothing, withdrawing one
+* an ``__all__`` lists a type alias (``Literal[...]``, a union, ``type X``),
+  a ``TypeVar`` or a ``Protocol``. None of them is public: publishing one later costs nothing, withdrawing one
   would break a release, and the reference prints each alias as its
   definition wherever a signature uses it;
 * a domain publishes a function or a class under a name that is not its own
@@ -357,8 +357,8 @@ def surface_problems(domains: list[ModuleType]) -> list[str]:
         for name in domain.__all__:
             obj = getattr(domain, name, None)
             where = f"{domain.__name__}.__all__ lists {name!r}"
-            if is_type_alias(obj):
-                problems.append(f"{where}, a type alias")
+            if kind := typing_kind(obj):
+                problems.append(f"{where}, {kind}")
             elif (inspect.isroutine(obj) or inspect.isclass(obj)) and getattr(
                 obj, "__name__", name
             ) != name:
@@ -406,8 +406,8 @@ def _listing_problem(
         subpackage, whose ``__init__`` gathers its leaves' names on purpose.
     :return: The problem in a few words, or ``""`` when there is none.
     """
-    if is_type_alias(getattr(module, name, None)):
-        return "a type alias"
+    if kind := typing_kind(getattr(module, name, None)):
+        return kind
     if name not in domain.__all__:
         return f"which {domain.__name__} does not publish"
     if _is_public_path(sources.get(name, "_")):
@@ -466,6 +466,22 @@ def defined_names(module: ModuleType) -> list[str]:
     return list(found)
 
 
+def typing_kind(obj: object) -> str:
+    """Which construct that only describes types *obj* is, in a few words.
+
+    :param obj: The object a module-level name resolves to.
+    :return: ``"a type alias"``, ``"a TypeVar"``, ``"a Protocol"``, or ``""``
+        for anything else.
+    """
+    if is_type_alias(obj):
+        return "a type alias"
+    if isinstance(obj, TypeVar):
+        return "a TypeVar"
+    if inspect.isclass(obj) and getattr(obj, "_is_protocol", False):
+        return "a Protocol"
+    return ""
+
+
 def is_typing_construct(obj: object) -> bool:
     """Whether *obj* only describes types: an alias, a ``TypeVar``, a ``Protocol``.
 
@@ -474,11 +490,7 @@ def is_typing_construct(obj: object) -> bool:
 
     :param obj: The object a module-level name resolves to.
     """
-    return (
-        is_type_alias(obj)
-        or isinstance(obj, TypeVar)
-        or (inspect.isclass(obj) and bool(getattr(obj, "_is_protocol", False)))
-    )
+    return bool(typing_kind(obj))
 
 
 def module_problems(domains: list[ModuleType]) -> list[str]:

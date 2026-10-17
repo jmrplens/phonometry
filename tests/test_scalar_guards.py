@@ -1421,7 +1421,8 @@ def _baseline(
         }
         try:
             _quietly(function, arguments)
-        except Exception:  # noqa: BLE001 - any refusal means: try the next value
+        # Any refusal means: try the next value
+        except Exception:  # noqa: BLE001
             continue
         return arguments
     return None
@@ -1489,7 +1490,8 @@ def _array_refusals() -> tuple[list[str], int]:
                     if name in str(refusal):
                         continue
                     outcome = f"an anonymous TypeError ({refusal})"
-                except Exception as refusal:  # noqa: BLE001 - reported, not hidden
+                # Reported, not hidden
+                except Exception as refusal:  # noqa: BLE001
                     outcome = f"{type(refusal).__name__} ({refusal})"
                 else:
                     outcome = "accepted"

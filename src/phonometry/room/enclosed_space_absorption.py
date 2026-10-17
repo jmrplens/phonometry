@@ -408,9 +408,9 @@ def enclosed_space_reverberation(
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The :class:`ReverberationResult`.
     """
-    # A copy, so the result never hands out _OCTAVE_BANDS (read-only) or the
-    # caller's own array.
-    freq = np.array(frequencies, dtype=np.float64)
+    # The result owns its arrays and copies them on construction, so neither
+    # the caller's array nor _OCTAVE_BANDS needs a copy of its own here.
+    freq = np.asarray(frequencies, dtype=np.float64)
     if air_condition is not None and not np.array_equal(freq, _OCTAVE_BANDS):
         msg = (
             "the built-in air_condition profiles cover the seven octave bands "

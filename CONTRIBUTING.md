@@ -55,11 +55,14 @@ To set up your development environment:
    source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
    ```
 
-3. **Install dependencies:**
-   Install both production and development dependencies to run tests and linters.
+3. **Install dependencies and the package:**
+   Install both production and development dependencies to run tests and
+   linters, then phonometry itself in editable mode, as CI does (`make install`
+   runs the same three lines).
    ```bash
    pip install -r requirements.txt
    pip install -r requirements-dev.txt
+   pip install -e ".[full]"
    ```
 
 ## ✅ Code Quality Standards
@@ -67,15 +70,17 @@ To set up your development environment:
 We enforce strict code quality standards. Before submitting a Pull Request, please ensure your code passes the following checks:
 
 ### 1. Type Checking (MyPy)
-We use strict type checking. Ensure no errors are reported:
+We use strict type checking. Ensure no errors are reported on the paths CI
+checks:
 ```bash
-mypy .
+mypy src scripts stub/src tests/static_typing
 ```
 
 ### 2. Linting & Formatting (Ruff)
 We use `ruff` for fast linting and formatting.
 ```bash
 ruff check .
+ruff format --check .
 ```
 
 ### 3. Testing (Pytest)
@@ -88,16 +93,11 @@ To check coverage locally:
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
 
-A test that expects an error or a warning holds **one call that could raise
-or warn** inside its `pytest.raises`, `pytest.warns` or `pytest.deprecated_call`
-block: build the input first, then call the code under test alone in the
-block. A block that also builds its input passes on a refusal from the
-builder, and goes on passing the day the code under test stops refusing. Ruff
-holds the block to one statement, and
-[`scripts/check_raises_blocks.py`](scripts/check_raises_blocks.py)
-(`make raises-blocks`) holds that statement to one call, with the definition
-SonarCloud uses for python:S5778 and S9088; conversions such as
-`float("nan")`, containers and NumPy calls do not count.
+How a test is written, from where its expected values come from to how it
+waits on an error or a warning, is in the [Tests](docs/contributing/tests.md)
+page of the style guide. `make raises-blocks` runs
+[`scripts/check_raises_blocks.py`](scripts/check_raises_blocks.py), which holds
+an error or warning block to one call ([T7](docs/contributing/tests.md#t7)).
 
 ### 3a. Pinned versions and dependency floors
 
@@ -141,22 +141,16 @@ NUMBA_DISABLE_JIT=0 pytest -n auto --without-pinned-stack
 ```
 
 The figure, diagram and badge tooling is tied to the pinned stack its
-committed artefacts are drawn with, so its test modules carry the
-`pinned_stack` mark, and `--without-pinned-stack` leaves every module that
-carries it out of the run before importing it: some of them import names the
-floor matplotlib does not have, and a module that fails on import is an error
-whatever mark it carries. `tests/test_minimum_requirements.py` keeps every test
-module that imports that tooling marked, and every marked module one that
-imports it.
+committed artefacts are drawn with, so `--without-pinned-stack` leaves every
+test module marked `pinned_stack` out of the run before importing it: some of
+them import names the floor matplotlib does not have, and a module that fails
+on import is an error whatever mark it carries. Which modules carry the mark is
+[T18](docs/contributing/tests.md#t18).
 
 The NumPy floor is also why a guard asks a value its rank before it reads it
 as one number: `float()`, `int()` and `math` take a one-element array as its
-element on NumPy 2.0 to 2.3 and refuse it from 2.4 on, so a guard that leaves
-the refusal to them behaves differently at the floor and at the pin. Validate
-a scalar through the shared checks in `phonometry._internal.validation`
-(`require_positive`, `require_finite` and their siblings), or open the guard
-with `require_scalar(value, "name")`; `tests/test_scalar_guards.py` reads the
-tree and refuses a guard that converts its parameter without it.
+element on NumPy 2.0 to 2.3 and refuse it from 2.4 on. How a guard does that
+is [X6](docs/contributing/numerics.md#x6).
 
 ### 3b. Oracle data (committed vs local)
 
@@ -166,10 +160,9 @@ redistributable. Each of them keeps a small committed oracle under
 a representative subset) and prefers a full local copy when one is available.
 Resolution order, applied by `tests/oracle_data.py`: the dataset's environment
 variable, then the gitignored `tests/data-local/<dataset>/`, then the committed
-data. **The assertions on the committed data never skip**: that is what CI
-runs. Tests that exist only to exercise the full set, and have no committed
-counterpart, do skip there and say so. `pytest` prints which copy each dataset
-resolved to in its run header.
+data, which is what CI runs. What is committed and which tests may skip are
+[T5](docs/contributing/tests.md#t5) and [T6](docs/contributing/tests.md#t6).
+`pytest` prints which copy each dataset resolved to in its run header.
 
 To run a suite against the full original set, drop it in `tests/data-local/`:
 
@@ -215,74 +208,23 @@ make graphs   # runs both: python scripts/generate_graphs.py && python scripts/g
 make figures  # the same generation, then the legibility and staleness checks CI runs
 ```
 
-A label drawn across a curve gets the opaque chip the corpus uses everywhere
-else, with a `zorder` above the curves and the `pad` its neighbours use:
+`make figures` then reads every figure for what makes it hard to read, the
+English one and the Spanish one, because Spanish prose is longer and grows into
+curves the English strings clear: its contrast and its language, a label
+across a curve ([F44](docs/contributing/docs-and-figures.md#f44)), the tick labels of
+an axis ([F35](docs/contributing/docs-and-figures.md#f35)), anything drawn over a tick
+label ([F45](docs/contributing/docs-and-figures.md#f45)), a label placed by hand
+([F46](docs/contributing/docs-and-figures.md#f46)), the decimal marker of a Spanish
+number and the sign of a negative one. The script behind each target says what
+it measures and keeps its exemptions, each with its reason.
 
-```python
-bbox={"boxstyle": "round,pad=0.5", "facecolor": COLOR_PANEL, "edgecolor": COLOR_GRID}
-```
-
-That is not the translucent box a note in an empty corner takes
-(`{"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6}`), which loses its
-contrast over a line on the dark page. The `zorder` is half of the convention
-and not a detail: a chip drawn under the curve is painted over with the letters
-it was meant to back.
-
-`make figures` measures both halves, on the English figure and on the Spanish
-one, because Spanish prose is longer and grows into curves the English strings
-clear. For every label it counts how many of its glyph pixels a stroke paints
-underneath and how many never reach the page at all, and fails on the ones a
-reader would struggle with. The two counts carry their own thresholds, because
-they are two measurements: a struck pixel is a character still fully drawn and
-merely competing with a curve, while a covered one is ink the reader never
-receives. See `scripts/check_figure_annotations.py` for both numbers and for
-the exemption file, which is where an annotation that must stay as it is gets
-recorded with its reason.
-
-The same run measures the tick labels of every axis. Set a frequency axis with
-`format_frequency_axis(ax, language=_LANG)`; if you place the ticks of a
-logarithmic axis yourself, clear its minor labels with
-`ax.xaxis.set_minor_formatter(NullFormatter())`, or matplotlib keeps writing
-its own between yours. `make figures` fails on either defect: minor labels
-left to the scale beside major ticks set by hand, and two labels of one axis
-that touch. See `scripts/check_figure_ticks.py`.
-
-Nothing may be drawn over a tick label either. A polar plot writes its radial
-labels inside the plot, along one ray, so park them where no curve runs with
-`ax.set_rlabel_position(angle)` (or the `angle=` of `set_rgrids`), and label
-every other ring if the curves leave no ray all of them clear. An inset writes
-its labels over the data of the panel it sits in, so place it where the
-parent's curves do not run under them. A legend moved out beside the axes has
-to clear their labels as well as the data. `make figure-tick-clearance` reads
-the committed figures for a legend, a stroke or a marker over any tick label;
-see `scripts/check_figure_tick_clearance.py`.
-
-A label you place by hand must not land on a tick label, on another label or
-under a line. The Spanish wording is longer, so anchor a note near the right
-of the axes by its right end (`ha="right"`) rather than letting it run out
-through the spine; stop a guide line short of the words above or below it
-(`axvline(..., ymin=..., ymax=...)`); and where a line has to pass behind a
-note, give the note a chip and a `zorder` above the line. The same holds for
-the headings and values of a plate. `make figure-text-clearance` reads the
-committed figures and plates for a text over a tick label or over another
-text, and for a stroke run across a text or into its letters; the leader of an
-annotation, the grid and a line behind a chip pass. A text that has to stay
-where it is goes in the exemption list of
-`scripts/check_figure_text_clearance.py` with its reason.
-
-When adding a feature with visual output, write its `generate_*` function in the
-package the two commands are a front end for, not in the command itself:
-
-| What you are adding | Where the builder goes | Where you register it |
-| --- | --- | --- |
-| A plot | `scripts/figures/<subject>.py`, beside the figures of the guide that embeds it | `_FIGURE_FUNCS` in `scripts/figures/registry.py` |
-| A setup or signal-flow diagram | `scripts/diagrams/<domain>.py` | `DIAGRAMS` in `scripts/diagrams/registry.py` |
-| An example `.report()` fiche | `scripts/reports/<subject>.py` | `_FICHES` in `scripts/generate_reports.py`, then `make reports` |
-
-`scripts/generate_graphs.py` and `scripts/generate_diagrams.py` hold no builders:
-they are the command lines, and `make graphs` walks the registry, so a function
-added to them is never drawn. Reference the resulting image from the docs; do
-not commit images produced any other way.
+When adding a feature with visual output, write its builder in the package the
+two commands are a front end for and register it there
+([F41](docs/contributing/docs-and-figures.md#f41)): `make graphs` walks the registry,
+so a function added to `scripts/generate_graphs.py` or
+`scripts/generate_diagrams.py` is never drawn. Reference the resulting image
+from the docs, and commit exactly what the generation wrote
+([F40](docs/contributing/docs-and-figures.md#f40)).
 
 #### Clips
 
@@ -295,8 +237,8 @@ published from it in the same command. Where that checkout is:
   clones, and fast-forwards when it already exists.
 
 Nothing falls back to `.github/images`. A clip written there would be reported
-by `check_figures.py` as a figure nobody committed, and no clip enters this
-repository again.
+by `check_figures.py` as a figure nobody committed
+([F51](docs/contributing/docs-and-figures.md#f51)).
 
 ```bash
 make assets                                              # once: the checkout
@@ -392,14 +334,29 @@ Nothing else states them by hand:
   a recognised claim, so unrelated numbers and the surrounding prose are left
   alone.
 
-Run `make conformance` and commit whatever it changes; do not edit those counts
-by hand. The read-only `python scripts/check_conformance_claims.py` is the CI
+Run `make conformance` and commit whatever it changes
+([F6](docs/contributing/docs-and-figures.md#f6)). The read-only `python scripts/check_conformance_claims.py` is the CI
 gate, and is worth running after every rebase: a file that quotes two counts and
 only disagrees on one merges without a conflict and comes out silently wrong.
 
 Optionally run `make install-hooks` once to install a pre-commit hook that does
 this automatically when relevant sources change; the CI check is the enforcement,
 the hook is just convenience.
+
+### 5a. API reference and llms files (auto-generated)
+Two more sets of committed files are generated, and CI fails when either is
+stale:
+
+```bash
+make api-docs   # site/src/content/docs/reference/api/ and site/src/generated/api-sidebar.mjs
+make llms       # llms.txt, llms-full.txt, site/public/llms/, and the section indexes and glossary under docs/
+```
+
+`make api-docs` reads every public module's `__all__` and docstrings, so run it
+after changing a public name, a signature or a docstring; `make llms` reads the
+guides, so run it after changing one. Commit whatever each changes: the
+"Generated API reference up to date" and "llms artifacts up to date" jobs diff
+those paths and fail on any difference.
 
 ### 6. Filing an errata entry
 
@@ -411,7 +368,7 @@ it carries a higher evidential bar than the rest of the documentation.
 > **The page rule.** Every errata entry whose claim depends on the exact
 > characters of a formula, constant, coefficient, symbol, inequality or table
 > cell must be verified against the **page as printed**, read as an image, and
-> its Evidence bullet must cite that page by PDF page index and printed folio.
+> its Evidence bullet cites that page as [F57](docs/contributing/docs-and-figures.md#f57) says.
 > Extracted text may locate a page; it may never be
 > quoted as "the print". Establish the page offset empirically. Before filing,
 > run the entry's own arithmetic against the familiar irrationals: if the ratio
@@ -433,6 +390,16 @@ own ISO/PAS 20065 entry is the live example: `pdftotext` reads DIN 45681's
 `f_T/√2` back as `f_T/2` on both edges, which makes the DIN and ISO prints look
 identical when they are not.
 
+An entry is a `## ` heading that names the document and the place, then its
+bullets in this order: **Location** (the clause, table or formula, with its
+printed folio), **The print** (what the page prints, quoted as printed),
+**The problem**, **Evidence** (how the claim was established, citing the page),
+**Library behaviour** (what the library implements, and the test or check that
+pins it) and **Status**. Status says whether the defect has been reported to
+its issuing body or author: `unreported` until the maintainer reports it, then
+`reported` with the date and the reference. Every entry closes with its Status,
+in both registers.
+
 Practical notes:
 
 - Render with `pypdfium2` (or any renderer) into a **private temporary
@@ -444,46 +411,46 @@ Practical notes:
 - The page offset differs per document and drifts inside one document
   (books omit blank versos), so confirm the printed folio on the render itself
   rather than assuming a constant offset.
-- Close the Evidence bullet with `Verified on PDF page N (printed p. M) of
-  <designation>:<year>.` Cite the document, never a file path: the registry is
-  a public statement about a published source, and a path pins it to one
-  machine. Two checks read that sentence.
-- Keep the procedure out of the entry. The resolution you rendered at is on
-  this page because you need it; in the registry it reads as a machine's
-  account of itself rather than a finding a maintainer stands behind, and a
-  third check rejects it.
+- How the Evidence bullet cites the page is [F57](docs/contributing/docs-and-figures.md#f57), and
+  the procedure stays out of the entry ([P10](docs/contributing/prose.md#p10)): the
+  resolution you rendered at is on this page because you need it, never in the
+  registry.
 
-Three checks run in CI over the registry
+Five checks run in CI over the registers
 ([`scripts/check_errata_evidence.py`](scripts/check_errata_evidence.py)):
 
 ```bash
-python scripts/check_errata_evidence.py          # all three checks
+python scripts/check_errata_evidence.py          # every check
 python scripts/check_errata_evidence.py --ratios # only the irrational-ratio linter
 ```
 
 1. **The ratio linter** parses each entry for printed-versus-derived value
    pairs and flags any ratio within 0,5 % of √2, √3, π, 2π, 1/√2, ln 2 or a
    small integer. A flagged entry is not necessarily wrong (a genuine
-   factor-of-ten misprint trips it too), but it must then say, in the same
-   entry, that the page was read as an image. The withdrawn entry above tripped
-   it twice on its own text.
+   factor-of-ten misprint trips it too), but it must then cite, in the same
+   entry, the page it read ([F57](docs/contributing/docs-and-figures.md#f57)).
+   The withdrawn entry above tripped it twice on its own text.
 2. **The page-citation check** requires every entry to cite the page it quotes,
-   or to be listed, with a reason, in the allowlist at the top of the script.
-   The allowlist is meant to shrink: do not add to it to get a new entry
-   through, and a line whose entry now cites its page fails the build until it
-   is deleted.
+   or to be listed, with a reason, in the allowlist at the top of the script
+   ([F57](docs/contributing/docs-and-figures.md#f57) says how that list may
+   change). A line whose entry now cites its page fails the build until it is
+   deleted.
 3. **The procedure check** rejects an entry that says how its page was read:
    a dpi figure, or the word render. That belongs here, not in a public
    statement about someone else's document.
+4. **The record check** requires every entry, in both registers, to close with
+   its Status bullet.
+5. **The count check** requires the two registers to hold the same number of
+   entries.
 
 A Spanish edition of the registry lives in
-[`docs/ERRATA.es.md`](docs/ERRATA.es.md), translated entry for entry. A new or
-removed entry must land in both files: `make site-reports` (and its CI job)
-fails while the two editions differ in entry count, order, or the document
-each heading names. Quoted print, mathematics, printed values and decimal
-separators stay exactly as the cited source prints them, in both editions; the
-English wording is the authoritative one and the three checks above run on it
-alone.
+[`docs/ERRATA.es.md`](docs/ERRATA.es.md), translated entry for entry, and
+`make site-reports` (and its CI job) fails while the two editions differ in
+entry count, order, or the document each heading names
+([F59](docs/contributing/docs-and-figures.md#f59)). How both quote the print, its mathematics
+and its separators is [F58](docs/contributing/docs-and-figures.md#f58). The English wording is
+the authoritative one, and the ratio, page-citation and procedure checks
+read it alone.
 
 A second script is a contributor tool rather than a gate:
 
@@ -502,928 +469,21 @@ installed in this environment, so it is not wired up. If it is added, the
 comparison has to be **asymmetric**: flag tokens that OCR sees and the
 extraction lacks, which is the direction a dropped glyph shows up in.
 
-### 7. Setting a subscript
-
-The slope of a subscript is a claim about what the subscript is, and
-ISO 80000-2 fixes it. A subscript that is itself a **quantity symbol** stays
-italic: the $p$ of $L_p$ is the pressure and the $W$ of $L_W$ is the power,
-so both keep the slope they have standing alone. A subscript that is a
-**word, a name or an abbreviation** is upright: the w of $R_\mathrm{w}$ is
-"weighted". A subscript that is a **number** is upright by definition, and an
-**index** that runs over a sum is a variable, so it is italic.
-
-Where nothing in this documentation expands the letter, leave it italic.
-Setting a subscript upright asserts that it abbreviates something; leaving it
-italic merely omits the claim, and an omission costs less than a wrong claim.
-That is why the pass which applied this rule stopped where the meaning was not
-established rather than guessing, and why a new upright subscript is expected
-to arrive with the sentence in this corpus, or the clause in its standard,
-that expands the letter.
-
-**Where the standard prints both slopes, the print wins.** The rule above is
-the default, not a correction of the sources. A standard that sets some
-letters of its subscripts italic and others upright has drawn the line
-itself, and the documentation follows it letter by letter: ISO 7235 prints
-the italic p and the upright series I of $L_{p\mathrm{I}}$, and ISO 16283-1
-the upright n and the italic T of $D_{\mathrm{n}T}$. Read the symbol on its
-printed page before setting it.
-
-**Where the standard prints one slope, ISO 80000-2 decides.** Some standards
-set every subscript of their symbol set the same way: IEC 60534-8-3,
-CNOSSOS-EU, RD 1367/2007, NT ACOU 112, EN 12354-5:2009 and UNE-EN 15657:2018
-print all of them upright, and ECAC Doc 29 prints all of them italic. Such a
-print cannot tell an index from an abbreviation, so the rule above decides
-there: a running index (i, j, n...) is italic, and a descriptive abbreviation
-is upright. UNE-EN 15657:2018 prints the position levels of Formula (12) as
-$L_\mathrm{v,i}$, the index as upright as the v; the documentation writes
-$L_{\mathrm{v},i}$, and keeps upright the descriptive parts of the symbol set
-(v, vf, Fb, Ws, eq, inst, RMS), which name what each level is of:
-$L_\mathrm{v}$, $L_\mathrm{Ws}$, $L_\mathrm{Wsn}$, $L_\mathrm{Fb,eq}$ and
-$L_\mathrm{vf,eq}$. The EN 12354-5 page that consumes them writes
-$L_\mathrm{Ws,c}$, $L_{\mathrm{Ws,inst},i}$ and $D_{\mathrm{C},i}$ the same
-way, and the RD 1367 phase level is $L_{\mathrm{Keq},Ti}$.
-
-**A base can carry a slope too.** A run of letters is one symbol, and the
-weighted vibration severity is the one whose sources disagree: DIN 4150-2, its
-2023 draft, DIN 45672-2 and E DIN 45672-3 print it with an italic KB, while
-the list of symbols of DIN 45669-1:2010-09 (Clause 4) sets it upright. The
-corpus follows DIN 4150-2 everywhere, the errata register and the vibration
-meter of DIN 45669-1 included, and says so where that standard is the subject.
-On a plate the composer sets a run of two or more letters upright as an
-operator name or an acronym, except the runs of `_ITALIC_BASE_RUNS` in
-`scripts/diagrams/canvas.py`, of which KB is the one. The checker below holds
-every base listed in its `BASES` table to its slope in every file and every
-image.
-
-**Euler's number is upright.** ISO 80000-2:2019, Clause 4, prints the
-mathematical constants upright, $\mathrm{e} = 2{,}718\,281\,828\ldots$ beside
-$\pi$, and keeps the italic letter for a variable. KaTeX and mathtext set a
-bare letter italic, so write the exponential as `\mathrm{e}^{-t/\tau}`; a
-plate, which has no commands, writes `exp(...)`. The italic e stays where it is
-a variable, as the strain $e^s_{ij}$ of a Biot frame is; a subscript e is
-another letter and takes the slope of what it names ($T_\mathrm{e}$). The base
-of the natural logarithm is the constant again, and ISO 80000-2 (Table 9, item
-2-13.5) prints it upright: $\ln x = \log_\mathrm{e} x$. `make euler-number`
-(`scripts/check_euler_number.py`) fails on an italic exponential or an italic
-$\log_e$ in any formula of the docstrings, the guides, the errata register and
-the label of any figure or plate, the rows of a `cases` or `aligned` block and
-a formula that wraps onto the next line included.
-
-The drawn labels reach the same result by another route. The plate composer
-keys the slope on the letter run (`_ROMAN_SCRIPTS` in
-`scripts/diagrams/canvas.py`), so a run in that set is upright in every plate,
-and the runs that have to stay italic somewhere (the i of an index, the p of
-$L_p$) are deliberately absent from it. Extend it only for a run that
-abbreviates a word and is never an index. Where one of those absent letters is
-descriptive, the call that draws it says so: `SVG.text` (and `text_width`,
-`fit_size` and `dim`) take `upright=("S_p", "h_r")`, keys that name the symbol
-as the label writes it and the letter run of its subscript, so the plant area
-of ISO 8297 is upright on its plate while $L_i$ stays an italic index on the
-next one. `sloped=` is the other direction, for the rarer source that prints a
-letter of the set italic, as ISO 3747 prints the f of $\Delta L_f$. A key no
-label of the plate uses is refused when the plate is written.
-
-**One meaning per subscript per file.** The rule above settles a subscript
-once its meaning is known, and some glyphs honestly have two meanings. $D_z$
-is the ISO 9613-2 barrier screening, whose *z* is the difference between the
-diffracted and the direct path length (a quantity, italic) and it is the
-ISO 2631-5 acceleration dose, whose *z* names a direction (upright). Both
-documents print `D_z`, so neither spelling is ours to change, and a single
-slope applied to that pair across the whole tree would be wrong in one of the
-two modules by construction. Twenty pairs behave this way here: $L_N$ is a
-percentile level, a loudness level and a microphone's inherent noise; $K_c$ is
-a bulk modulus in the Biot model and the ISO 15186 intensity correction.
-
-So the unit of decision is the file, not the glyph. Every module opens with
-the standard it implements and every guide with the standard it explains, so
-within one file a subscript has one meaning, and it is set once accordingly.
-Across files, nothing is required to agree, and requiring it would force a
-false claim onto one side of every pair above.
-
-**Re-letter an index; never re-letter a quantity.** When the collision does
-fall inside one file, look first at whether one of the two is an index. An
-index is a bound variable: the letter is ours, it means nothing outside the
-formula it runs over, and re-lettering it changes no claim. A named quantity's
-letter belongs to the standard that defines it, and changing that breaks the
-citation. `insulation.py` energy-averaged microphone positions with
-$\sum_i 10^{L_i/10}$ on the same page as ISO 16283-2's impact sound pressure
-level $L_\mathrm{i}$; the index moved to *j* and the quantity could not move at
-all. Before proposing any rename, check what the source prints: in this corpus
-the clash is nearly always the standards' and not ours.
-
-**A page whose subject is the collision registers it.** The glossary exists to
-put colliding symbols side by side, and cannot do that without printing both
-slopes. Such a page is listed in `DECLARED` in the checker below, with both
-meanings named. That list is the escape hatch for a page about the ambiguity,
-not a way to land one, and it is meant to stay short.
-
-A collision where **both uses take the same slope** is a different problem, and
-typography cannot solve it: $L_\mathrm{U}$ is the magnitude of the ISO 226
-linear transfer function and the upper contiguous critical band of the
-prominence ratio, one section apart on one page, and $C_\mathrm{P}$ is a
-specific heat capacity in a porous absorber and a propulsion coefficient in
-CNOSSOS-EU. Those belong in the ambiguity table at the top of
-[the glossary](docs/reference/glossary.md), beside $T_\mathrm{s}$, $R$ and
-$L_N$, which is where a reader holding a symbol from someone else's report
-goes to find out which one they have.
-
-The file-level invariant is a gate; the reading behind it is not:
-
-```bash
-python scripts/check_subscript_slope.py   # or: make subscripts
-```
-
-It fails when one file writes the same base and subscript both ways, and
-prints the lines of each. A comma-separated subscript is read component by
-component, because that is how it is written: $\alpha_{\mathrm{s},i}$ is one
-abbreviation and one index, and the run inside a single wrapper
-($L_\mathrm{n,w,eq}$) is upright throughout, also where it follows an index
-inside the same braces: $D_{I,\mathrm{n,e}}$ is an italic intensity and an
-upright n and e. A run of letters is one base: $TL_n$ is a transmission loss
-and $KB_\mathrm{F}$ a weighted vibration severity, not a level $L$ or a $B$
-carrying a subscript, so they are compared with themselves and never with
-$L_n$.
-
-It also reads the diagram plates each page embeds, from the committed SVG
-under `.github/images`: a plate keeps the source string of every label in a
-comment and draws each glyph from a named face, so the slope a reader sees is
-recoverable without a font. A page and its plates are one scope, so a plate
-that draws $L_i$ sloped on a page that sets the impact level
-$L_\mathrm{i}$ upright fails here, and a Spanish page is held against the
-Spanish plate. A subscript inside an exponent, the $i$ of
-$10^{L_i/10}$, is read against the symbol in the exponent it hangs from.
-After changing a plate, regenerate it
-(`python scripts/generate_diagrams.py`) before running the check.
-
-The matplotlib figures a page embeds are read the same way, from the same
-directory: mathtext sets a bare letter italic and a `\mathrm` run upright, so
-the slope is the source's own, and matplotlib keeps that source in a comment
-ahead of the glyphs of every text it draws. A figure that labels a curve
-$L_{K,x}$ on a page that writes $L_{\mathrm{K},x}$ fails here, and a Spanish
-page is held against the `_es` figure. After changing a label in
-`scripts/figures` or in `src/phonometry/_plot`, regenerate the figure
-(`python scripts/generate_graphs.py --figure NAME`) before running the check.
-
-One letter can keep its meaning under several bases, and then it takes one
-slope in a file whichever symbol carries it. DIN 4150-2 names its assessment
-quantities by the r of "Beurteilung": $KB_\mathrm{FTr}$, the guide value
-$A_\mathrm{r}$, the assessment time $T_\mathrm{r}$ and the clock count
-$N_\mathrm{r}$, all printed with the same upright r. Four symbols are four
-single-valued pairs even when one of them leans, so the checker holds the
-families listed in its `LINKED` table to one slope per file, and a page that
-sets $KB_\mathrm{FTr}$ beside an italic $A_r$ fails there. On a plate, where
-the composer keeps a bare r italic for the reflected path $r_r$, the label
-names the symbol in its `upright` key (`upright=("A_r",)`).
-
-It cannot check that the slope a file chose is the right one for its
-standard: that is a reading of a source document, and no script does it. It
-does not hold `docs/ERRATA.md` to one slope per symbol, because a symbol
-there reproduces what a published page prints and restyling it would make the
-citation say something its source does not. And it does not hold the drawing
-modules (`src/phonometry/_plot`, `src/phonometry/_report`, `scripts/`) to it
-either, since they are filed by domain rather than by standard: one plotting
-module holds the figures of a dozen of them, so the file is not the scope in
-which a letter has one meaning. The guide that embeds the figure is, and its
-snippets are read here, as are its plates and its figures. The bases of
-`BASES` are the exception: they are a choice the corpus made between its
-sources, so the errata register, the drawing modules and every image are held
-to them too.
-
-The running index is the other choice held everywhere. Every file the checker
-reads, the drawing modules included, and every image are held to an italic
-index: the letter a sum runs over ($\sum_i$, the Σ of a plate) and an i, j or
-k that follows another component of the same subscript
-($L_{\mathrm{v},i}$, $D_{\mathrm{C},i}$, $L_{\mathrm{n,s},ij}$). An upright i
-that opens a subscript is not read, because that is the impact level
-$L_\mathrm{i}$ of ISO 16283-2 as often as an index, and the one-meaning rule
-already holds it against an index on the same page. The errata register is
-not read for this either: it quotes prints that set the index upright, and
-the quotation keeps the print.
-
-The other half of the same subject is the backslash, and it has its own gate:
-
-```bash
-python scripts/check_docstring_math.py   # or: make docstring-math
-```
-
-`generate_api_docs.py` copies the mathematics of a docstring to the site
-verbatim, so KaTeX reads what the docstring actually holds. A doubled
-backslash is not a command: `\\mathrm` is a line break with a `mathrm` after
-it, which KaTeX refuses, and the page still ships with everything after the
-bad block swallowed. What makes it invisible in review is that the same four
-characters are right in one kind of docstring and wrong in the other: a raw
-docstring (`r"""`) takes `\mathrm`, a plain one takes `\\mathrm`. The gate
-reads the value Python builds rather than the text of the file, which is the
-only way to tell the two apart. The site's own `check:math` catches it too,
-after a full build of every page.
-
-### 7b. Passing the language on
-
-A result's `.plot(language="es")` reaches the page in Spanish only if every
-helper on the way is handed the language, and every one of them defaults to
-English. A call that drops it raises nothing: the Spanish figure ships with an
-English label, or with `31.5` on its frequency axis where it should read
-`31,5`. The axis is where it cannot be caught later. `format_frequency_axis`
-writes the band centres as fixed strings, which `localize_axes` will not
-overwrite, so the comma can only be written by the call that makes the labels.
-The rule is therefore at the call: a function that has a language in scope
-passes it to every helper that takes one.
-
-A plot function ends on `localize_axes(ax, language)`, and it needs one call
-per axes it built, not one per figure: a twin axis, a colorbar and the `z` of a
-3-D panel each carry a formatter of their own, and each shipped in English
-beside a panel already in Spanish. A panel the save-time pass of
-`scripts/figures/i18n.py` cannot reach, a zoom inset made with
-`Axes.inset_axes` (a child of its host panel rather than of the figure) or a
-contour colorbar (spaced by its boundaries, so its scale is not linear), is
-localised by the generator with `figures.i18n.localize_panel`.
-
-```bash
-python scripts/check_language_forwarding.py   # or: make language-forwarding
-```
-
-The gate indexes every function and method of `src/phonometry` and `scripts`
-that takes a `language` parameter and prints `file:line` and the helper for
-each call that does not forward it, from a function that names `language` as
-a parameter or a local (or one nested in it), or from any figure generator in
-`scripts/figures`, which reads the language of its pass from `_LANG`. It
-follows a helper through the imports, a result's `.plot()` through the class of
-its receiver, and a `**kwargs` through what it can carry; a helper that takes
-`**kwargs` and hands them to one that takes the language is held to the rule
-too, and so is a helper reached through a local alias or a
-`functools.partial`. Three shapes stay out of reach and the gate says so rather
-than claiming them: a callable pulled out of a mapping, one reached by
-`getattr`, and one passed in as a `Callable` parameter. Writing `language="en"`
-in place of the caller's language counts as dropping it. A call that must stay
-English on purpose goes in `EXEMPT` at the top of the script with its reason,
-keyed by its line so one approved call cannot cover a second one written beside
-it; an entry whose call has since learned to forward the language, or that has
-moved, fails, so the table cannot rot.
-
-The untyped-receiver fallback needs every method of a name to take the
-language, so one namesake without it switches the name off for every call. That
-state is now a failure of its own, naming the outlier, unless the name belongs
-to two unrelated things and is declared in `MIXED_NAMESAKES`.
-
-The figures are read from the other end as well, after they are drawn:
-
-```bash
-python scripts/check_figure_decimal_point.py   # or: make figure-decimal-point
-```
-
-It reads every committed `*_es.svg` and fails on a tick label that is a number
-with a point in it, whichever pass was meant to write the comma. That is the
-gate that closes the class: a panel none of the three passes reached shipped
-`31.5` beside `52,4` in the same figure, and nothing else could see it.
-
-The sign is read the same way, in both languages:
-
-```bash
-python scripts/check_figure_minus_sign.py   # or: make figure-minus-sign
-```
-
-A negative number is signed with U+2212. Build a reading with `_fmt_minus`
-(the library's renderers with `fmt_minus`), restate the angle grid of a polar
-plot that reaches below zero with explicit labels, since its formatter ignores
-`axes.unicode_minus`, and format a number on a plate with `signed` from
-`scripts/diagrams/canvas.py`. The check reads every committed SVG and fails on
-a hyphen in front of a number; a hyphen that is not a sign, such as the part
-number in "ISO 9053-1/-2", goes in its `ALLOWED` table with the reason.
-
-The Spanish words are read too:
-
-```bash
-python scripts/check_spanish_accents.py   # or: make spanish-accents
-```
-
-Write every Spanish string with its accents and eñes. A translation typed
-without the Spanish keyboard layout reads fine to every other gate, and
-twenty-nine labels of the building-acoustics figures shipped as "Correccion",
-"medicion" and "aqui". The check reads the translation tables of the figures,
-the diagrams and the library's renderers, with the `language == "es"` branches
-of the renderers and the builders in `scripts/reports` that ask for a Spanish
-fiche, and fails on a form that is never correct Spanish without its mark: a
-singular in -ción or -sión, `aquí`, `señal`, `límite`, `número`, `máximo` and
-the rest of its `NEEDS_MARK` list. It leaves alone what a list cannot decide
-(`si` and `sí`, `aun` and `aún`, `mas` and `más`), so those stay with the
-author. A listed form that really is a verb, such as `limite` in "que limite la
-banda", goes in its `ALLOWED` table keyed by the string and the word, with the
-reason; an entry that no longer matches fails. An example fiche built in
-Spanish names its language (`{"language": "es"}` among the keywords its
-builder returns) even where that is the renderer's default, because that is
-how the check finds the header and labels the builder writes into the page.
-
-The labels of every published Spanish figure are read the same way, from the
-text comment Matplotlib writes into the SVG before each string it draws, so a
-Spanish string a figure module draws on its own, past both translation tables,
-is held to the same list once the figure is regenerated.
-
-The same check holds the translation glossary, because a word the glossary has
-replaced reads as correct Spanish to every other gate. Besides the tables and
-the figures it reads the Spanish pages for it: the site's Spanish edition, its
-strings (`site/src/content/i18n/es.json`), its data files and components, the
-modules generated for it under `site/src/generated` (the Spanish labels of the
-API sidebar among them), and the Spanish twins under `docs/`. A Markdown page
-has its mathematics and inline code blanked; a script, a component, a data file
-or a generated module is read as written, since its dollars and backticks are
-JavaScript. The rulings it enforces are in its
-`GLOSSARY_TERMS` and `GLOSSARY_PHRASES`: "diezmado" for decimation,
-"sinusoide" (with "sinusoidal" and "semisinusoidal") for the waveform, never
-"senoide", "senoidal" or "semiseno", and "incertidumbre expandida" for the
-GUM's expanded uncertainty. The bare word "seno" fails wherever it stands,
-because "seno" is the trigonometric function and a word cannot tell the two
-senses apart. Where it really is the function (the sine of an angle, the sine
-terms of a printed formula, the discrete sine transform), add a pattern for
-that context to its `TRIGONOMETRIC` table with the reason; a pattern that no
-longer exempts any "seno" fails the run, like a stale `ALLOWED` entry.
-
-The mean square is read the same way. Spanish calls it "valor cuadrático
-medio", or puts the adjective after its noun ("presión cuadrática media"), and
-"media cuadrática" is the quadratic mean, the root of the mean of the squares,
-which is another number. So "media cuadrática" fails wherever it stands, and
-where the English says root mean square or quadratic mean, and the phrase is
-right, its context goes in the `QUADRATIC_MEAN` table with the reason, under
-the same rule as `TRIGONOMETRIC`. Write the context on the words of the one
-sentence it exempts, never on a shape such as "de los extremos" or "beside an
-arithmetic mean", which a mean square can take as well.
-
-The statistician's "cuadrado medio" is right only in an analysis of variance,
-so it fails wherever it stands except in a sentence of the analysis, by the
-vocabulary listed in its `ANALYSIS_OF_VARIANCE` table: a sentence that names
-the analysis ("análisis de la varianza", "ANOVA"), names the mean square by
-its row of the table ("cuadrado medio entre grupos", "cuadrado medio dentro
-de los grupos", or "cuadrado medio residual" beside its "grados de
-libertad"), or is the header of a Markdown table that sets a sum of squares,
-its degrees of freedom and their mean square side by side. A word the mean
-square of a signal says as well is not enough on its own: the time weighting
-guide shipped "del cuadrado medio (un grado de libertad)", a level is a sum
-of squares, a noise is residual, and the ECMA-418-2 guide recalculates its
-bands "entre grupos". A sentence ends at a stop (a full stop, a semicolon, a
-colon, a question or an exclamation mark), and also before an item of a list
-or a heading and after a heading, which carry none; a wrapped line runs on,
-and the rows of a table are one sentence with its header. No analysis of
-variance is written yet, so that table is a vocabulary rather than the words
-of one sentence each, and it does not fail the run for matching nothing. A
-sentence of an analysis of variance exempts every "cuadrado medio" it holds
-and nothing else: a "seno", a "media cuadrática" or a "presupuesto" beside it
-is read against its own table. A label of the analysis that is none of these
-(the axis label of a figure, an entry of a translation table) goes in
-`ALLOWED`, keyed by its value and the term, with the reason.
-
-A budget is read the same way. Every budget of quantities that add up (an
-uncertainty, a noise, an absorption, an error or a link budget) is a "balance"
-in Spanish, as the Spanish adoption of ISO 3746 titles its uncertainty table
-"Balance de incertidumbre", and "presupuesto" is money. So "presupuesto" and
-every word of its family ("presupuestos", "presupuestario", the verb with its
-accented forms such as "presupuéstese") fail wherever they stand; an
-identifier such as `presupuesto_ruido` is code and is left alone. Where a
-sentence really means money, its context goes in the `MONEY` table with the
-reason, written on the words of that one sentence, under the same rule as
-`TRIGONOMETRIC`. A "presupuesto" that is a premise ("los presupuestos del
-modelo") is neither: reword it ("los supuestos", "las hipótesis").
-
-### 7c. Defaulting a style the caller may spell either way
-
-Matplotlib gives seven artist properties two names: `color` is also `c`,
-`linewidth` is `lw`, `linestyle` is `ls`, `markersize` is `ms`, and the
-marker-edge and marker-face colours and widths have short forms of their own.
-Since matplotlib 3.3 an artist that receives both spellings of one property
-raises `TypeError: Got both 'color' and 'c', which are aliases of one another`.
-
-A renderer that installs its own default and then forwards `**kwargs` is
-therefore choosing a spelling on the caller's behalf. `result.plot(c="red")`
-came back as a traceback, and the shape that reads the default back out was
-quieter and worse: `kwargs.pop("color", _C_PRIMARY)` takes one name, so the
-second artist was drawn in the library's blue while the first kept the
-caller's red, with nothing in the figure to say why.
-
-Use the helpers of `phonometry._plot.common` rather than touching the mapping
-by hand:
-
-| Instead of | Write |
-|---|---|
-| `kwargs.setdefault("color", _C_PRIMARY)` | `style_default(kwargs, "color", _C_PRIMARY)` |
-| `kwargs["color"]` | `style_get(kwargs, "color", _C_PRIMARY)` |
-| `kwargs.pop("color", _C_PRIMARY)` | `style_pop(kwargs, "color", _C_PRIMARY)` |
-| `{"color": _C_PRIMARY, "lw": 1.5, **kwargs}` | `styled(kwargs, color=_C_PRIMARY, lw=1.5)` |
-
-```bash
-python scripts/check_plot_style_defaults.py   # or: make plot-style-defaults
-```
-
-The gate reads every module of `src/phonometry` and prints `file:line` for each
-of those four shapes on a mapping that is the function's own `**kwargs`. A
-local dictionary the caller never sees is left alone, and so are the properties
-with one name: `label`, `marker` and `zorder` cost nothing. It also compares its
-own alias table against the one the helpers read, so teaching the helpers an
-eighth pair without teaching the gate fails rather than passing quietly.
-
-### 7d. Writing a long number
-
-ISO 80000-1 and the SI Brochure group long strings of digits in threes on both
-sides of the decimal marker, and the standards this library reads print their
-numbers that way, so the corpus does too: `6,251 5`, `0,647 829`, `101 325`.
-
-The separator is **U+202F, the narrow no-break space**, not an ordinary space.
-With an ordinary one a line break may fall inside the number and leave `6,251`
-at the end of one line and `5` at the start of the next, which reads as two
-numbers. The character is in the font the figures are drawn with and in the web
-fonts the site loads, and it survives the plain-Markdown twins and `llms.txt`.
-
-```bash
-python scripts/check_digit_grouping.py   # or: make digit-grouping
-```
-
-Two things the gate deliberately leaves alone, and the reasons are worth
-knowing before writing a sweep of your own.
-
-A figure or diagram label is exempt, because the defect cannot occur there: the
-label is drawn as one line of text in an SVG and SVG text does not reflow.
-Inside `$...$` mathtext the separator is `\,`, which is a different rule for a
-different renderer.
-
-In a Python file only the docstrings and the comments count as prose. Every
-other string may be data, and one of them is: the CNOSSOS traction table is
-keyed by names such as `"diesel locomotive, c. 2 200 kW"` that a caller passes
-in, and an invisible character inside a key breaks the lookup on the spot. A
-first pass over the corpus did exactly that and the conformance run caught it.
-
-### 7e. Judging a computed value at a printed limit
-
-A standard prints its limits in decimal, and the value judged against one is
-usually computed: the difference of two readings, a mean, a ratio of two
-areas. In binary a margin that is 6 dB in decimal comes out
-5,999 999 999 999 996 or 6,000 000 000 000 004 depending on the readings, so
-`margin >= 6.0` gives two verdicts for the same 6 dB. Settle the computed side
-before it meets the limit, through `phonometry._internal.boundary`: `settled`
-for a quantity of ordinary size, `settled_ratio` for one in the caller's own
-unit, `settled_net_share` for a signed sum judged against zero, and the
-`round_half_*` helpers for a half. A named slack (`_RATIO_SLACK = 1e-12`) is
-the other way out, added to the computed side, taken from the limit or as a
-constant factor `1 + _REL_TOL`; an epsilon that keeps a divisor off zero is no
-slack. The result keeps the value it computed either way.
-
-```bash
-python scripts/check_boundary_comparisons.py   # or: make boundary-comparisons
-```
-
-The gate follows a value through assignments, calls and dataclass fields and
-refuses a computed decimal compared unsettled with a published constant or a
-field of a published table row, or with zero when its sign can be wrong (a
-fit, a sum of terms that can cancel). It cannot tell whether a value can
-really sit on its limit, so a comparison of that shape that cannot (a level
-through a logarithm, a band edge at an irrational ratio) goes into
-`scripts/boundary_comparison_exemptions.tsv` with the reason. A line there
-excuses one comparison, so a function that writes the same comparison twice
-lists it twice, and an entry that no longer matches anything fails the gate
-too. The docstring of the script lists what it cannot see.
-
-### 7f. Keeping an array a function was given
-
-`np.asarray(levels, dtype=np.float64)` hands back the caller's own array when
-it is already `float64`, and so do the validation helpers of
-`phonometry._internal.validation`, which are built on it. A result that
-stores what they return shares memory with the caller, so the caller's next
-`levels[0] = 0.0` changes a result already computed, and nothing raises. A
-view does the same: `levels[:, 0]`, `levels.T`, `levels.reshape(-1)`.
-
-A public record that can hold an array inherits
-`phonometry._internal.frozen.OwnsArrays`, last among its bases. It replaces
-every array the record is built with (also inside a tuple, a list or a
-mapping) by a read-only copy of its own, whoever builds the record, so a
-caller writing the class by hand is covered as surely as a factory, and it
-runs before the class's own `__post_init__`, which it wraps rather than
-replaces: what `__post_init__` reads back from `self` is already the
-record's copy, so normalise and seal it there with `read_only`, never with a
-second copy. A factory hands such a record the array as it is; a
-`read_only_copy`, a `.copy()` or an `.astype` around it copies the same
-array twice, and a type that has to change is written
-`np.asarray(values, dtype=...)`, which converts only when it must. A record
-held in a field is left alone and answers for its own arrays, an
-`io.Signal` included, whose samples stay writeable.
-
-The one array a record keeps without a copy is one the factory allocates
-itself and fills, the frames of a simulation or the field of a march, so
-that a result of hundreds of megabytes is not held twice while the record
-is built. Allocate it before the loop (`np.zeros`, `np.empty` or
-`np.ones`), write into it there or in helpers it is passed to, and hand it
-over as `snapshots=handed_over(snapshots)`, from
-`phonometry._internal.frozen`, in the record the function returns. The
-record seals that array and keeps it, and only the first record it reaches
-does; one that does not own its memory or is not C-ordered is copied all
-the same.
-
-Anything else that keeps an array it was handed (a plain class, a private
-record) stores a copy of its own through
-`phonometry._internal.frozen.read_only_copy`, which copies and clears the
-`writeable` flag on the copy; never call `read_only` on an array that came
-in as an argument, because it clears the flag on the caller's array, or on a
-view of it while the result still shares its memory.
-
-```bash
-python scripts/check_array_aliasing.py   # or: make array-aliasing
-```
-
-The gate first reads the classes: a public record with a field annotated as
-something that can hold an array and no `OwnsArrays` among its bases fails,
-and so does a copy written around an array handed to one that has it, or
-made first into a name (`f = levels.copy()`) that is only read before it is
-handed over (`frequencies=read_only(f)`); a copy the function writes
-into, binds again or keeps a view of is left alone. Every `handed_over`
-call has to be proved from the code, with no exemption: it is an argument
-of the record built in the `return` statement, its name is bound once to
-one of those allocations (or `None` in one branch of a conditional), and
-every other use of the name writes into the array (`name[...] = value`),
-tests it against `None`, or passes it to a helper of the package, with no
-decorator, that does only that, three calls deep at most; a view, a second
-name, a closure, a generator or `locals()` fails it. The call is held to
-this however the function is spelt, a dotted path to its module or
-`getattr` with its name included. Then
-it follows every parameter of every function through assignments, views,
-containers and the package's own helpers to the places an array is kept: a
-field of a public record that does not copy it, `object.__setattr__` on a
-public record, `dataclasses.replace` on a record that came in as an argument
-and does not copy, an attribute a plain public class sets on itself in any
-of its methods (`self._grid = grid`, `self._layers.append(layer)`), and
-`read_only` anywhere. An attribute with no annotation of its own is read
-through the annotation of the parameter it came from, so `self.fs = fs` with
-`fs: float` keeps a number and `self._grid = grid` with `grid: ArrayLike`
-keeps an array; the package's type aliases are read too. Arithmetic, a copy,
-a mask or a stack ends the trail, and a helper used as an index counts as a
-mask only when every return of its own is one. It reads names, not types, so
-a private helper is held to the rule whatever its callers pass today, and a
-value that only looks like an array to it can go into `EXEMPT` at the top of
-the script with the reason; an entry that no longer covers anything fails the
-gate too, and `RECORD_EXEMPT` does the same for a record class. The
-docstring of the script lists what it does not read: records a result holds
-whole, and arrays returned bare.
-
-### 7g. Showing a record in a notebook
-
-Jupyter, JupyterLab, VS Code, Colab and the IPython terminal display the last
-line of a cell whole, and a dataclass with nothing else to show is its `repr`:
-every field, and every array as numpy prints it, in full up to a thousand
-values, so a record of a few such arrays fills pages. Every public record
-therefore inherits `phonometry._internal.display.RichDisplay`, which gives
-IPython `_repr_html_` (a table Jupyter renders) and `_repr_pretty_` (the same
-table as text). A record that can hold an array already has it, because
-`OwnsArrays` extends it; any other public record lists `RichDisplay` among its
-bases. A public record is never a named tuple, which would unpack by
-position; a private one that cannot take a base defines the two methods in its
-body as calls to `record_html` and `record_pretty` from the same module.
-
-The table reads the fields and, on a verdict, `passes`. That one is a
-property, and it may read others of the record, so keep it cheap; the display
-itself calls no other property, draws no plot and runs no other computation of
-the record's own, so do not give a record a display method of its own, and
-keep anything expensive out of its fields. A field's unit is read from the end
-of its name, the way the API already spells it (`_db`, `_hz`, `_m`, `_m_s`,
-`_kg_m3`...), and a name with no unit whose head noun is a level or a level
-difference (`insertion_loss`, `band_levels`, `r_s_w` in `building`) is in dB,
-read by `says_decibels` the way the Levels naming rule reads it, except a
-loudness level, which is in phon (ISO 532-1:2017, 3.16). That decibel is
-shown only beside a real number: a truth value, a text, a complex factor or
-a record whose name says a level (`OperatingCondition.max_level` is a
-flag, `SphericalGroundResult.boundary_loss` the complex factor F(w)) shows
-no unit. A number the head noun misreads (a reflection index that is a ratio
-of energies, the decimal exponent A_eta of IEC 60534-8-3 named
-`efficiency_correction`) maps its name to its own unit, or to `""`, in a
-`_display_units` class attribute, and `tests/test_record_display.py` pins
-each one; a name that ends in the letters of a unit and is a symbol
-(`alpha_s`, `r_tr_s`) is read as one, and the rare name that defeats the
-reading goes in `_SYMBOLS` in that module. A unit suffix the module does not
-spell yet goes in its `_UNITS`: `tests/test_record_display.py` fails on a
-public field whose name ends in a unit and shows none. An axis the vocabulary
-names by the bare concept has its one unit in `_NAMED_UNITS` (`frequencies`
-in Hz, `levels` in dB, `times` in s, `distances` in m); a record whose field
-of one of those names holds another quantity maps it to its unit, or to
-`""`, in a `_display_units` class attribute (`LevelCrossingResult.levels`
-are crossing levels in the units of the signal). An array is one line,
-its shape, its type and its range, never its values, and a verdict shows
-`passes` as PASS or FAIL in the title, or "no verdict" when it is not a bool.
-`repr()` and `print()` keep the dataclass's.
-
-```bash
-python scripts/check_record_display.py   # or: make record-display
-```
-
-The gate reads the same public records `scripts/check_array_aliasing.py`
-does, and fails on one that does not inherit `RichDisplay`, itself or
-through a class of the package (`OwnsArrays` counts because it extends
-`RichDisplay`, and only while it does), on one that defines `_repr_html_`
-or `_repr_pretty_` of its own, and on a named tuple whose two methods are not
-the calls to the mechanism. `EXEMPT` at the top of the script takes a record
-that has to display itself otherwise, with the reason. A notebook kernel
-runs it for real in CI: `scripts/check_notebook.py` executes
-`tests/notebooks/smoke.ipynb` with nbclient on an ipykernel
-(`requirements-notebook.txt`) and reads what each cell put out.
-
-### 8. Writing the code fences of a documentation page
-
-The Python fences of one page form **one sequential example**: a later fence
-may use names an earlier fence defined, so a page can build a result step by
-step without repeating a prelude in every block. Two rules keep that
-readable, and the first is enforced in CI by
-[`scripts/check_fence_names.py`](scripts/check_fence_names.py)
-(`make fence-names`):
-
-1. **A fence may only use names defined by an earlier fence of the same
-   page**: never a later one, never another page. One shipped page used
-   names its own figure block defined further down, while a same-named
-   variable from a different room sat in scope, so reading the page top to
-   bottom produced numbers that were not the annotated ones, with no visible
-   error. That is the failure mode the gate exists for.
-2. **When a value carries an annotated output** (`# 62.9 dB`), the fence
-   that annotates should define it itself or stand right after the fence
-   that does, not a section away. This one is editorial: no script can tell
-   which values matter.
-
-Names the reader owns (their measurement, their recording, their stream)
-are deliberately never defined by the page, because inventing a value would
-replace the reader's data with the page's. Register each one in the
-`PLACEHOLDERS` table at the top of the script, keyed by the page's route
-with the `es/` prefix stripped, so the Spanish twin is held to the same set;
-the page must introduce the name as the reader's own, in prose or in the
-fence's own marker comment (`# audio_blocks: successive frames of your
-microphone recording`), which travels with the code wherever the fence is
-copied. Binding the name to `...` (Ellipsis) with the same comment is the
-older idiom and also valid: it defines the name, so no registry line is
-needed, at the price of a fence that cannot run. A page's language twins
-(site English, site Spanish, `docs/` mirror) are fixed together, never one
-at a time; the `docs/` mirror is hand-written for GitHub and may carry fewer
-examples, but what it does carry follows the same rules.
-
-A script that reads a page reads its fences through
-[`scripts/markdown_fences.py`](scripts/markdown_fences.py): `code_lines()` says
-which lines are code, and `fences()` and `python_fences()` hand out the blocks.
-The site's own code reads them through
-[`site/src/lib/markdown-fences.mjs`](site/src/lib/markdown-fences.mjs), the
-same reading in JavaScript (`codeLines()`, `prose()` and `fences()`), and a
-test holds the two to the same answer on every page. A fence closes only on a
-run of its own marker at least as long as the one that opened it, so a reader
-that works this out for itself reads a page that shows a fence inside another
-one inside out.
-[`scripts/check_fence_readers.py`](scripts/check_fence_readers.py)
-(`make fence-readers`) fails on a Python script that flips a flag on a fence,
-looks for three backticks or tildes in a line or matches them with a regular
-expression, however the string is built, and on a line of the site's code that
-spells them at all.
-
-## 🏷️ Naming Conventions
-
-All identifiers follow PEP 8 with the project-specific rules below (validated
-against numpy/scipy, pandas, matplotlib, scikit-learn, statsmodels and librosa).
-
-| Group | Convention | Examples |
-|---|---|---|
-| Modules | `snake_case` **concept** name, ≤3-4 words: never a standard number (the standard designation lives in the docstring and the guide) | `noise_induced_hearing_loss.py`, `sound_power.py` |
-| Classes | `PascalCase`; the primary result of a computation is `<Concept>Result`; psychoacoustic family `<Method><Metric>` is sanctioned; value/input objects get a plain name. An acronym is written in capitals, as PEP 8 asks (`HTLANResult`, `ANPNPDCurves`, `DBHRCheck`, beside `EPNLResult` and `STIResult`); Ecma is the named exception, because Ecma International spells its own name so and it is not an acronym (`EcmaLoudness`). `tests/test_public_vocabulary.py` reads every public class against the acronyms the others write in capitals and a curated list | `ImpulseProminenceResult`, `ZwickerLoudness`, `Quantity`, `HVACSpectrumResult` |
-| Functions | `snake_case` noun phrase for computations; a verb only for actions/predicates; no `get_`/`calculate_` prefixes. A function is named for the quantity it returns. It carries a unit suffix only where that quantity has more than one customary unit (mm/s or µm/s against m/s, s against hours, m², 1/m against dB/m against Np/m), because a hazard is fixed by naming; a level, correction, difference, index or tolerance in dB and a frequency in Hz carry none. Where the bare name would collide with another function or claim more than this one computes, it takes its family's prefix. One formula has one function, whichever documents print it, and one computation one name (`metrology.combined_standard_uncertainty` is the root-sum-square of every domain). An answer of several different quantities is a frozen record with a field for each, never a tuple to unpack by position; a tuple is kept only for like items, the two ends of a range above all, lower first. `scripts/check_parameter_units.py` fails on a public function or method that ends in `_db` or `_hz`, and on one, or a property, that returns a fixed-length tuple or a named tuple unless `TUPLE_RETURN_EXEMPT` lists it with the reason its items are alike | `reverberation_time`, `apply_weighting`, `sensitivity` (not `calculate_sensitivity`), `plant_background_correction` (not `plant_background_correction_db`), `silencer_sound_power_level`, `peak_velocity_from_kb_mm_s`, `air_power_attenuation_per_m` |
-| Public constants | `UPPER_SNAKE_CASE`. A constant that holds **one number ends in its unit**, whatever its name says, in the one spelling each unit has (`_HZ`, `_M`, `_M_S`, `_KMH`, `_KT`, `_DEG`, `_S`, `_HOURS`, `_DB_PER_S`, never `_SECONDS`, `_KM_H`, `_KNOTS`, `_DEGREES`), or in `_DB` when it is in decibels and its head noun does not say so (a tolerance, a margin, a ratio); a constant named for a level or a level difference carries none (the Levels row); a factor (`_FACTOR`), a fraction (`_FRACTION`) or a ratio (`_RATIO`) carries none, and a count, a label or a pure number whose name cannot say so goes in `CONSTANT_EXEMPT` of `scripts/check_parameter_units.py` with its reason. A table ends in its unit when its name says what it holds (bands, speeds, heights, masses, temperatures and the other quantities the guard lists). `make parameter-units` holds both | `NOY_BANDS_HZ`, `ACCELERATION_LEVEL_REFERENCE_M_S2`, `ROAD_REFERENCE_SPEED_KMH`, `TAPPING_IMPACT_RATE_HZ`, `PRIVACY_SNR_DB`, `MOLAR_GAS_CONSTANT_J_MOL_K` |
-| Private constants | `_UPPER_SNAKE` named after the standard's table | `_TABLE1`, `_UVL0` |
-| Parameters | `snake_case` with the canonical vocabulary: `fs`, `x` (the time signal, first, never `signal` or `signal_in`); `frequencies`, `levels`, `times` and `distances` for arrays; `volume`, `temperature_c`, `relative_humidity_percent`, `static_pressure_*`. A unit goes in a name only where two units compete (the quantities `scripts/check_parameter_units.py` lists), so an axis whose unit never changes carries none. Lengths are among those quantities: a thickness, a spacing and a height end in their unit (`thickness_m` beside the catalogue's `thickness_mm`, `spacing_m` beside `line_spacing_hz`, `source_height_m` beside `plateau_height_db`), and so does every distance in `aircraft`, whose NPD tables are printed in feet beside the metres it computes in. A parameter after the first that ends in a unit and carries a default is keyword-only, so the unit is written at the call site, and so is a condition of the medium or of the measuring chain whatever its suffix (`speed_of_sound`, `air_density`, `air_sound_speed`, `water_density`, `calibration_factor`, the ground factors `ground_source`, `ground_middle` and `ground_receiver`), because a bare 343 or 0.5 says nothing about which it is. A frequency axis (`frequencies`, `frequencies_hz` in `underwater`, `frequency` where a function is vectorised over it, or an array whose name ends in one of them such as `tone_frequencies`) is keyword-only beside any other array a caller passes by position, and the values it labels stay positional in their order (`noise_criterion(levels, *, frequencies=None)`, `fractional_octave_smoothing(values, *, frequencies, fraction=3.0)`): two arrays of one length bind either way round without a complaint. A wavelength axis (`wavelengths`, a name that starts with it such as `wavelengths_mm`, or `wavelength` where a function is vectorised over it) is an axis in the same way (`roughness_to_frequency(levels, *, wavelengths_mm, speed_kmh, ...)`, `standing_wave_reflection(swr, first_min_distance, *, wavelength)`). A record a caller builds and hands to a function (`RotorcraftHemisphere`, `LoopImpedance`), or builds to put inside one (the `WavelengthSpectrum` a `RollingStock` holds), is `@dataclass(kw_only=True)` for the same reason, its frequency or wavelength axis included. A public `plot_*` helper takes what it draws by position and everything else by name, `plot_x(<data>, *, ax=None, ..., language="en", **kwargs)`, while a result's `.plot(ax=None, *, ...)` keeps the axes first. An option (`mode`, `method`, `fraction`, `n`, `seed`) and the subject of a call are not held to these two rules. Durations carry `_s`/`_hours` only where mixed units coexist. The pressure of the medium is `static_pressure_kpa` or `static_pressure_pa`, in the unit its clause writes it in, and `atmospheric_pressure_pa` names only the outside atmosphere beside a stream pressure (`pipe_transmission_loss`, `normal_air_density`); no other word for it is public. A rate per distance named for absorption, attenuation or a coefficient ends in `_db_per_m`, `_db_per_km` or `_per_m`, a vehicle or shaft speed and a phase carry their unit (the speed of sound excepted), and a name is never public both bare and with its unit inside one package: the unit stays where a second unit competes for the word and goes where the word only ever had one | `thickness_m`, `spacing_m`, `line_spacing_hz`, `distances_m` (in `aircraft`), `static_pressure_kpa`, `absorption_db_per_km`, `speed_kmh`, `phase_rad` |
-| Levels | A level and a level difference are in decibels by definition (a loudness level in phon, ISO 532-1:2017, 3.16), so a public name whose **head noun** is one carries no `_db`, in a parameter, a field, a property, a function or a constant. The head noun is the last noun of the name once the words that qualify it from behind are set aside (a band `_1000`, a weighting `_a`, `_before`/`_after`, `_with`/`_without`, `_max`/`_min`), or the noun before a phrase that follows it (`band_levels_at_characteristic`): a level (`level`, `levels`, `spl`), a loss, an insulation, an isolation, a reduction, a rejection, a difference, an improvement, a single-value attenuation, a correction, an adjustment (ISO 1996-1:2016, 3.3.1: a quantity added to a level), an index, an emergence or the adaptation term of ISO 717, a shift, an increase, a decrease, an excess, a drop, a rise, a change or an increment of a level the name names (`level_shift`, `level_excess`; a bare `shift` or `drop_db` names no level and keeps its unit), and a name spelled as the printed symbol of one, as its first word or as its head (`l_n`, `delta_lw`; in `building` `r_s_w`, `d_2m_nt`, `c`, `ctr` and the vibration reduction index `k_ij`, `kij` in `MIN_MULTI_JUNCTION_KIJ`; in `emission` the corrections `c1` to `c3` and `k1` to `k3`, so the cap on K3 is `MAX_K3`; in `materials` an `l1` is the length of ASTM E2611 and not a level). A name whose head noun does not say decibel keeps the suffix: a tolerance, a margin, a limit not itself named a level, an uncertainty, a deviation, a step, a slope (`_db_per_decade`) or a rate (`_db_per_m`), a ratio (`signal_to_noise_ratio_db`), a statistic of a level (`sigma_level_db`), and a difference of another quantity (`phase_difference_deg`; a pressure loss is in pascals). A notebook table shows such a field in dB (a loudness level in phon) by the same reading, beside a real number only. `make parameter-units` fails on a public name whose head noun says decibel and that ends in `_db`; `LEVEL_SUFFIX_EXEMPT` in `scripts/check_parameter_units.py` lists, with its reason, a name that holds something else under the word. A name in decibels **says the quantity it holds**: one made only of qualifiers and the unit (`corrected_db`, `floor_db`, `threshold_db`, `mean_db`) says that a number is in decibels and never what it is, so a level takes the noun that says so and then loses its `_db` (`corrected_levels`, `threshold_level`), a level difference its own (`floor_level_difference`, `mean_attenuation`), and any other quantity keeps `_db` after its noun (`fixture_uncertainty_db`, `lower_tolerance_db`). `make parameter-units` fails on a public name whose last word before `_db` is none of these: the nouns it reads as a quantity in decibels are `DECIBEL_QUANTITY_NOUNS`, and `QUALIFIER_ONLY_EXEMPT` lists, with its reason, a name whose `_db` is not the unit of a number it holds (a flag, a printed symbol, the Spanish DB HR) | `insertion_loss`, `band_levels`, `sound_reduction_index_1000`, `velocity_level_difference`, `ground_to_floor_level_difference`, `EARPHONE_ATTENUATION`, beside `tolerance_db`, `background_margin_db`, `expanded_uncertainty_db` |
-| Words | One spelling per word, in every public name: `microphone`, `laboratory`, `standard_deviation` and `frequency`/`frequencies`, never `mic`, `lab`, `std` or `freq`/`freqs`. The public attributes a plain class sets on `self` are held to these words as a dataclass field is. A count held in a parameter, a field or a property is `n_<plural>` (`n_points`, `n_engines`, `n_events`), never `num_points`, `point_count`, `numtaps`, a bare `count` or a bare plural such as `events`; a limit on a count is `min_n_`/`max_n_` (`min_n_records`, `max_n_arrivals`). A class or grade number (`filter_class`), an axis, a number of decimals and a length counted in samples (`delay_samples`) are not counts; an array of tallies (`counts`, `cycle_counts`) and a vectorised argument that takes one count or many keep their names; a duration names its quantity before its unit (`exposure_duration_years`, `duration_s`, `period_hours`), never the unit alone (`seconds`, `hours`, `years`), whatever it holds: one number, the durations of several periods or an array, and a minute is `_minutes` (`assessment_period_minutes`), never `_min`, which is a minimum (`f_min`). `minimum` and `maximum` are written `min` and `max` in every public name, `MIN`/`MAX` in a constant and `Min`/`Max` in a class, as numpy, SciPy, scikit-learn and Matplotlib write them, terms of art included: the maximum and minimum levels Lmax and Lmin are `max_level` and `min_level` (never a bare `max_db`), the takt maximum is `TAKT_MAX_FACTOR` and the minimum-phase reconstruction `min_phase`. A confidence bound is `confidence_lower`/`confidence_upper`, never `ci_lower`, and `ci` is a word of no public name but the impact sound adaptation term C_I of ISO 717-2 (`ci`, `ci_delta`, `ci_r`). `tests/test_public_vocabulary.py` holds all of them, with each exception keyed by location and its reason | `microphone_calibration_factor`, `n_points`, `n_events`, `min_n_records`, `MIN_MICROPHONE_DISTANCE_M`, `max_qualified_radius_m`, `max_levels`, `min_phase` |
-| Type aliases / Literals | `PascalCase` aliases; plain-string `Literal` values | `Real`, `Sex = Literal["male", "female"]` |
-| Warnings | `<Topic>Warning`, a strict subclass of `PhonometryWarning` that its package publishes, so a caller filters one topic by name and every topic through the root. Every `warnings.warn` passes its topic class explicitly, never the root and never nothing (a bare `UserWarning`); a helper that warns for several topics takes the class as a parameter typed `type[PhonometryWarning]`. A filter the library sets inside its own code names the topic it silences, never `UserWarning` or the root, and a docstring lists a warning under `:warns <Topic>Warning:`, never `:raises`. `tests/test_package_architecture.py` holds all of them | `OccupationalExposureWarning`, `FilterBankWarning` |
-| Exceptions | `<Topic>Error`, subclassing the built-in it refines, so the `except` a caller already writes still catches it: a catalogue that does not hold what a row needs is a `CatalogueError(ValueError)`, a quantity a fluid's model does not determine a `FluidPropertyUnavailableError(AttributeError)`, which keeps `hasattr` and `getattr` with a default answering as they do for any missing attribute. `tests/test_package_architecture.py` reads every exception a package publishes against the suffix | `CatalogueError`, `FluidPropertyUnavailableError` |
-| Spelling | American English in every identifier, and in every value a caller types (a `Literal` choice, a default, an enum value, a key of a published table, a string of a published tuple of choices): `center`, `program`, `fiber`, `story` and `stories`, `vapor`, `modeling`, `normalized`, `behavior`, `neighbor`, `unfavorable`, `liter`, `aluminum`, `-ize`. In situ is one spelling, `in_situ` (`InSitu` in a class name). **`catalogue` is the one British form kept**: it is an American variant too, every name writes it the same way, and it is part of the versioned file format a user writes (the `"catalogue"` key, `phonometry-catalogue` and the schema URN `urn:phonometry:schema:catalogue:1`), so renaming it would break every catalogue file already written. A string a published source prints keeps its print, keyed by where it is in `EXEMPT` of `scripts/check_identifier_spelling.py` (the CNOSSOS road surface `"optimised brushed down concrete"`), and so does a surname (the `"doutres"` limp-frame criterion). `make identifier-spelling` holds it, and reads the `-ise`, `-yse`, `-our`, `-tre` and `-bre` endings as whole families, so a word it has never seen (`harmonised`, `theatre`) is caught too | `normalized_frequencies`, `center_frequency`, `story_fundamental_frequency`, `in_situ_absorption_spectrum`, `read_catalogue` |
-| Choices | A choice offered in more than one place reads the same in every one. A band set is `fraction`, `1` for octaves and `3` for one-third octaves, the integer `OctaveFilterBank` takes, never `band="third"`, `bands="third-octave"`, `band_type`, `bandwidth` or `band_fraction`, and a table read by band set is keyed by that integer; the speech intelligibility index keeps `method="one-third-octave"`, which names a procedure of ANSI S3.5. A choice named for a band set never takes a `str`. A free, a diffuse and a pressure field are written `"free"`, `"diffuse"` and `"pressure"`, never `"free-field"` or `"free_field"`, and every `field` that names a sound field states its options in a `Literal`; the quasi-free field of ISO 8253-2, the plane wave at normal incidence of the slit model and the eardrum of the Moore-Glasberg models keep their own words. A frequency weighting is chosen by `weighting`, never `curve`, `a_weighted` or `weighted`, and an unweighted signal is `weighting="Z"`, never `"unweighted"` or `None`: the Z-weighting of IEC 61672-1 on the sound-level weightings, and elsewhere whatever the standard leaves unweighted. A flag that reads the A-weighted single-number row of a printed table instead of its band rows is not a choice of curve and keeps its name (`emission.error_factor(a_weighted=)`, `building.estimate_reverberation_index(weighted=)`). A choice is a `Literal` in the signature, with no `\| str` beside it, and its tuple of options is typed with the same alias, so `require_choice` hands the value back as that alias. `tests/test_choice_vocabulary.py` holds them, reading every alias as its definition and every module-level tuple and table, private ones included, and calling each retired spelling to see it refused, with each exception keyed by location and its reason | `fraction=3`, `field="free"`, `weighting="Z"`, `building_class: BuildingClass` |
-| Tests | `test_<module>.py`, 1:1 with the module; cross-cutting suites get a descriptive name | `test_impulse_prominence.py` |
-
-### The three verbs of a judgement
-
-Of the public functions, the overwhelming majority are noun phrases, because
-they return a magnitude: `reverberation_time`, `sound_power_level`,
-`airflow_resistivity`. A verb marks the few that return a *judgement* instead,
-and there are three of them. They are not interchangeable, and the difference
-is what is being judged, not how strict the answer is.
-
-| Prefix | Judges | Answers | Returns |
-|---|---|---|---|
-| `verify_` | an instrument or a measuring system, against the requirements a standard sets for it | may this device be used for this grade of measurement | a result dataclass with one verdict per requirement and an overall pass |
-| `assess_` | a situation that was measured, against limits or categories | how bad is what we measured, and in which class does it fall | a result dataclass with the rating, the category and what drove it |
-| `check_` | the arrangement or the input a method requires before its numbers mean anything | am I allowed to apply this method here | a result dataclass with the conditions and whether each holds, or nothing at all when the answer is only an advisory warning |
-
-The boundary that used to be blurred is `check_` against `verify_`, and it is
-this: `verify_` judges the **instrument**, `check_` judges the **setup**.
-`verify_weighting` asks whether a vibration meter's weighting filter is inside
-the tolerances of ISO 8041-1; `check_source_positions` asks whether the source
-positions of a room measurement are far enough apart for the clause to apply.
-Both may fail, and only the first is about a piece of equipment.
-
-Two consequences worth stating. A summary line may open however it reads best,
-as a question ("Is the band flat enough for the clause?") or with any verb that
-is not one of these three, but it must not open with *another family's* verb: a
-`check_` function whose docstring begins "Verify", or a `verify_` one that
-begins "Check", tells a reader the family was arbitrary. And a judgement carries
-its reasons, so the return is a result dataclass rather than a bare `bool`: the
-caller who has to act on a failure needs to know which requirement failed and by
-how much.
-
-The overall pass or fail of a verdict is spelled `passes` in all three
-families, never `complies`, `satisfied`, `acceptable` or `applicable`. A flag
-that answers something other than pass or fail keeps its own name and its
-reason: `within_guideline`, because DIN 4150-3 does not call exceeding a
-guideline value a failure, and `significant`, a reason to investigate. A
-verdict also refuses to stand in for a bool: its `__bool__` raises `TypeError`
-naming the attribute to read, because a dataclass is always true and
-`if result:` would pass every failure. A predicate that only selects a
-procedure keeps its verb and returns a `bool`
-(`low_frequency_procedure_applies`, `resolve_tones_separately`): nothing passes
-or fails. And no public name starts with `test`, which pytest would collect from
-a user's test module. `tests/test_verdict_shape.py` reads the whole public API,
-the public methods of every published class included, and holds every one of
-these rules. A method that tests membership or provenance (`contains`,
-`is_derived`), looks up one requirement of a verdict by its clause, or says
-how a value is to be reported (`upper_limit`) answers no pass or fail, and is
-keyed there with its reason.
-
-### A lookup that misses
-
-A judgement or a result is often asked for one of the things it holds, and the
-exception a miss raises says which kind of asking it was:
-
-| Asked for | Missing | Raises |
-|---|---|---|
-| a name or a key, by `method(name)` or `obj[key]` | the result does not hold it | `KeyError`, as `dict` does, with the key matched exactly as a `dict` key is: `RegulationLimits["noon"]` and `RegulationLimits["Day"]`, `FilterComplianceResult.binding_margin("no_such_requirement", 1)`, a verdict's `.requirement(name)` |
-| a number: a frequency, a wavelength, a class | it lies outside what the result covers or the standard defines | `ValueError`: `TrackDecayRate.rate_at(400.0)` on rates without that band, `AcousticRoughnessSpectrum.level_at(0.2)`, `binding_margin(requirement, 0)` for a class the edition does not define |
-| a cell of a published row | the page prints no number there | `ValueError`, from `CatalogueRow.printed`, naming what the page holds instead |
-
-A choice passed to a function (`period="noon"`, `fraction=2`, a weighting
-name) that names none of the options raises `ValueError`, whatever it looks
-up inside; a choice among names given as something other than a text
-(`period=5`) is the wrong type, a `TypeError`, as `require_choice` has it.
-That holds for the selectors of a plot too:
-`FilterComplianceResult.plot(requirement=...)` and
-`BinauralIndicators.plot(parameter=...)` refuse an unknown name with
-`ValueError`, because the name chooses what to draw rather than reading an
-entry back. The same name read back from the result,
-`binding_margin(requirement, ...)`, is a key, and a miss is a `KeyError`.
-
-### The class of a refusal
-
-The Python documentation draws the line between the two exceptions a guard
-raises. [`TypeError`](https://docs.python.org/3/library/exceptions.html#TypeError)
-is "raised when an operation or function is applied to an object of
-inappropriate type", and
-[`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError)
-"when an operation or function receives an argument that has the right type
-but an inappropriate value". The library follows it:
-
-- **A wrong type is a `TypeError`**: a text, a bool or `None` where a number
-  is asked for, an array where one number is (numpy 2.4 itself refuses
-  `float()` of one with `TypeError`), a complex value where a real one is, an
-  array of the wrong dtype (a mask that is not boolean, counts that are not
-  integers, readings held as text), a number where a pair or a sequence is,
-  an object that is not the record a function takes, a choice among names
-  given as something other than a text. The shared guards ask
-  the rank first and refuse an array that way, naming the parameter
-  (`require_scalar`, `require_positive` and the rest); `require_count` refuses
-  a count that is not a number with `TypeError` and one that is not a whole
-  number at or above its minimum with `ValueError`.
-- **A text is the wrong type wherever a number is asked for, whatever it
-  reads as.** `float()` and `np.asarray(..., dtype=float)` parse text, which
-  is what they are for, but a guard is not a parser: `math.sqrt("4")` and
-  `np.sqrt("4")` refuse it with `TypeError`, and so do the shared guards,
-  one value or an array of them, for `"94.0"` and `"fifty"` alike.
-- **A whole number goes through `require_count`, never through `int()`
-  alone.** `int()` truncates 2,5 to 2 without a word, takes `True` as 1 and
-  parses `"3"`; every parameter written as an `int` is read through
-  `require_count`, with `at_least=None` where it has no lower bound.
-- **A right type with a wrong value is a `ValueError`**: a negative length, a
-  count of 2,5, a level that is not finite, a choice that is not one of the
-  options.
-- **A condition that asks both is two refusals**: `if not isinstance(n, int)
-  or n < 1` becomes a `TypeError` for the type and a `ValueError` for the
-  value, because one exception cannot be both. A handler that rewords a
-  refusal keeps its class: `except TypeError` re-raises `TypeError` and
-  `except ValueError` re-raises `ValueError`.
-- **Data the library reads is a `ValueError`** whatever is wrong in it: a
-  sidecar whose factor is a text, a catalogue cell holding a word where a
-  number goes. The file is malformed; the call is not, and the refusal names
-  the file. `CatalogueError` is a `ValueError` for that reason, and the
-  sidecar parser and `CalibrationSidecar`'s own checks are the named
-  exemptions of the guard.
-
-`tests/test_error_kinds.py` reads `src` for the shapes a type refusal takes
-(an `if` that asks only for a type, a dtype or a rank against one number, an
-`or` that joins one of those to a value, a chain of type dispatches falling
-through to a `raise`, an `except TypeError` that raises another class) and
-fails on each one that raises anything but `TypeError`, with its exemptions
-keyed by function and their reasons. It also fails on an `int()` of an
-`int` parameter that `require_count` does not read, and on a public function
-that raises `TypeError` without a `:raises TypeError:` field, since the API
-reference is written from those fields. A function that hands a parameter, as
-it was given, to a check of `_internal/validation.py` that raises `TypeError`
-(`require_band_fraction`, `require_scalar`, `require_count` and the rest),
-directly or through a private helper of its own module, raises it too and
-documents it: name the parameter and what the check refuses in it, every
-parameter it hands on, since a field about one says nothing of another.
-`tests/test_scalar_guards.py` calls
-every public function whose parameters all take one number and gives each
-such parameter a one-element array, a two-element array and a text in turn:
-each must be a `TypeError` that names it.
-
-### Module length
-
-There is no line limit, because no Python authority sets one. PEP 8 limits the
-*line*, not the file, and subordinates its own rules to context; the Google
-style guide sets no file limit either. Only two tools ship the rule at all,
-both at 1000 physical lines: pylint's `too-many-lines` (C0302) and Sonar's
-`python:S104`. Both hedge it. pylint's own configuration raises the limit to
-2000 and then disables the checker that carries it; `S104` is not in Sonar's
-default Python profile. ruff has rejected the rule twice as incompatible with
-its formatter, and flake8 has never had it.
-
-What matters is whether the file is **one subject**. A module that implements
-one standard end to end is not too long at 1800 lines when half of it is the
-prose that makes the implementation auditable; that prose is the reason a
-reader can check the code against the clause. A module is too long when it
-holds several subjects that would each be a module someone would look for by
-name: three standards behind three banner comments, a translation table beside
-a plot library, a topography solver inside an aircraft-noise chain.
-
-So the test is not `wc -l`. Ask what the file is about. If the answer needs the
-word "and", and each half has its own constants, its own result types and its
-own callers, it is two modules. If the answer is one sentence and the length is
-what documenting that sentence costs, leave it alone: forcing a split is worse
-than a long file, and a package of fragments is harder to read than the file it
-came from.
-
-A split is a **move**: every name keeps its spelling, its docstring and its
-body, the public API does not change, and the artifacts the module generates
-come out byte-identical. That last one is the proof, and it is why the
-conformance report, the figures and the diagrams are regenerated and diffed
-after any such change.
-
-The one rename a split may carry is a private name that named nothing: the
-diagram builders were `_d1` to `_d9`, referenced from a registry that already
-carried the real name, and moving them was the moment to call them what they
-draw. That is a separate, deliberate change with its own justification, not
-part of the move, and it stops at names no caller outside the file can see.
-
-### A module and what it publishes
-
-A **module never takes the name of a function its package publishes.** When
-`signals` publishes the function `correlation`, a module `signals/correlation.py`
-beside it is hidden: the package attribute `signals.correlation` is the
-function, so `import phonometry.signals.correlation as m` binds the function,
-`signals.correlation.time_delay` raises `AttributeError`, and the module can be
-reached only by a `from` import of its file path, an address nobody can guess
-and the reference cannot honestly print. Such a module is private, with a
-leading underscore (`signals/_correlation.py`), and every name in it is reached
-through the package. It is the convention PEP 8 sets for internal interfaces
-and the one NumPy (`numpy._core`) and SciPy (since 1.8) follow for their
-implementation modules. The API reference keeps one page for it, titled by its
-domain and its subject in words (`signals: correlation`), and the page says
-which package its names are imported from. The subject never names a standard:
-the site search weighs a title above the standards a guide declares, so a page
-titled `tonality (ECMA-418-2)` would compete with the guides written to
-ECMA-418-2 on a search for it. `tests/test_api_docs_generator.py` refuses a
-title with a number in it.
-
-**Every public module declares `__all__`, and the list is the whole truth.** It
-lists the names the module defines and its package publishes, no more and no
-fewer. Anything else the module defines at the top level takes a leading
-underscore: a constant it reads for itself (`_OCTAVE_BANDS`), a helper a
-sibling calls (`_warn_above_plane_wave_limit`). A name without the underscore
-reads as public to every reader and every tool, so a constant left bare ends up
-in a guide or a script through the full module path and cannot be renamed
-without breaking it. The exceptions are typing constructs, which stay
-`PascalCase` and are not published (a type alias, a `TypeVar`, a `Protocol`),
-and the rare name listed in `UNLISTED_EXEMPTIONS` of
-`scripts/check_api_reference.py`, keyed by location with its reason. When a
-guide needs a value a module kept for itself, publish it through the package
-with its unit in the name and a row in the curated API table, as `room` does
-with `NC_CURVE_LEVELS`; more often the value is already on a result
-(`nipts(...).frequencies`) and that is what the guide should read.
-
-`scripts/check_api_reference.py` holds both rules: it walks every public
-module and fails on a module hidden behind a name of its package, on a module
-without `__all__`, on a published name a module defines and does not list, and
-on a public-looking name it defines and neither lists nor makes private. A
-hidden module is looked for twice, because importing a submodule replaces the
-package attribute of its name: the walk reads that attribute before it imports
-the module, and it reads the package's `__init__`, where any statement but
-`from . import <module>` that binds the module's name hides it.
-
-### Deprecations
-
-Renames of **published** API keep the old name working for one cycle:
-
-- Warn with `warnings.warn(msg, DeprecationWarning, stacklevel=...)` using
-  the NEP 23 message format (deprecated-since version, removal version, and
-  the replacement to use). Pick the `stacklevel` so the warning points at the
-  *caller's* line: `2` when warning directly from the deprecated function,
-  `3` when the warning is emitted through a shared helper.
-- Renamed **modules**: keep a shim using a PEP 562 module `__getattr__`
-  (scipy pattern).
-- Renamed **keyword arguments**: accept the old keyword with a `"deprecated"`
-  string sentinel default (scikit-learn pattern) and forward to the new one.
-- Each alias gets a `pytest.warns(DeprecationWarning)` test.
-- Deprecated names are removed only in a **major** release. Unpublished API
-  (merged since the last release) is renamed outright, without shims.
+## 🧭 Style
+
+How phonometry names things, shapes its API, writes docstrings and comments,
+handles numbers, writes tests, documents and draws, and words its prose is in
+the [contributor style guide](docs/contributing/index.md): read the index, then
+the page for the area you are changing. Every rule there says which check
+enforces it.
+
+- [Naming](docs/contributing/naming.md)
+- [API shape](docs/contributing/api.md)
+- [Docstrings and comments](docs/contributing/docstrings.md)
+- [Numbers and data](docs/contributing/numerics.md)
+- [Tests](docs/contributing/tests.md)
+- [Documentation and figures](docs/contributing/docs-and-figures.md)
+- [Prose, commits and pull requests](docs/contributing/prose.md)
 
 ## 📦 Releasing
 
@@ -1487,16 +547,17 @@ Pull requests are labelled automatically from the paths they touch, through
 ### Pull Requests
 1. **Fork** the repository.
 2. **Create a branch** for your feature (`git checkout -b feature/amazing-feature`).
-3. **Commit** your changes with clear messages.
+3. **Commit** your changes, with messages written as
+   [Prose, commits and pull requests](docs/contributing/prose.md) asks.
 4. **Verify** your code using the commands above (`pytest`, `mypy`, `ruff`).
 5. **Push** to your fork and **Open a Pull Request**.
 
 The pull request description is prefilled from
 [`.github/pull_request_template.md`](.github/pull_request_template.md). Its
 checklist is the CI gates written out, including the regeneration steps above
-and the rule that matters most here: a new normative implementation must name
-the numeric oracle it was validated against, and that oracle must be independent
-of the implementation.
+and the rule that matters most here: a new normative implementation names the
+numeric oracle it was validated against, independent of the implementation
+([T3](docs/contributing/tests.md#t3)).
 
 ### Manufacturers' data
 

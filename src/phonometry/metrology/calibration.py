@@ -104,7 +104,7 @@ def sensitivity(
     calibrator_class: str = "1",
     narrowband: bool = False,
 ) -> float:
-    r"""Calculate the calibration factor (multiplier) to convert digital units
+    r"""The calibration factor (multiplier) that converts digital units
     to Pascals based on a reference recording (e.g., 1kHz @ 94dB).
 
     When ``fs`` is provided (and ``validate`` is True), the recording's

@@ -53,7 +53,7 @@ exposes the rounded view through [`AbsorptionUncertaintyResult.reported_expanded
 absorption_coverage_factor(coverage: float = 0.95) -> float
 ```
 
-Return the coverage factor `k` for a coverage probability (Table 3).
+The coverage factor `k` for a coverage probability (Table 3).
 
 **Parameters**
 

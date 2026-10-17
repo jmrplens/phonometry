@@ -321,5 +321,5 @@ class ReportMetadata(RichDisplay):
             raise ValueError(msg)
 
     def is_empty(self) -> bool:
-        """Return ``True`` when no field is set (an all-``None`` instance)."""
+        """Whether no field is set (an all-``None`` instance)."""
         return all(getattr(self, f.name) is None for f in fields(self))

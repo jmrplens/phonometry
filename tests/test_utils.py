@@ -40,9 +40,10 @@ def test_typesignal_refuses_none_as_the_whole_signal() -> None:
     ],
 )
 def test_typesignal_refuses_what_is_not_numeric_by_name(
-    bad: Any,  # noqa: ANN401 - the point is that anything at all may arrive here
+    # The point is that anything at all may arrive here
+    bad: Any,  # noqa: ANN401
     refusal: type[Exception],
-) -> None:  # noqa: ANN401 - the point is that anything at all may arrive here
+) -> None:
     """What numpy cannot read as numbers is refused naming the parameter.
 
     Numpy answers a string or a ragged list in its own words and an object or
@@ -74,7 +75,8 @@ def test_typesignal_refuses_a_complex_signal_saying_so() -> None:
         pytest.param([1.0, None, 3.0], id="none-inside-the-sequence"),
     ],
 )
-def test_typesignal_refuses_a_non_finite_sample(bad: Any) -> None:  # noqa: ANN401 - a list carrying a None is not a Sequence[float]
+# A list carrying a None is not a Sequence[float]
+def test_typesignal_refuses_a_non_finite_sample(bad: Any) -> None:  # noqa: ANN401
     """One poisoned sample is refused, whichever of the two routes it came by.
 
     A None inside the sequence and a NaN the caller passed are the same value
@@ -106,7 +108,8 @@ def test_typesignal_names_the_parameter_it_was_given() -> None:
     ],
 )
 def test_typesignal_still_accepts_every_legal_shape_of_signal(
-    legal: Any,  # noqa: ANN401 - the parametrization is over unrelated array-likes
+    # The parametrization is over unrelated array-likes
+    legal: Any,  # noqa: ANN401
     shape: tuple[int, ...],
 ) -> None:
     """The refusals must not have narrowed what a signal is allowed to be.

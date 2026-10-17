@@ -29,6 +29,8 @@ _STEREO = np.zeros((2, 4800))
         ph.psychoacoustics.roughness_ecma,
         ph.psychoacoustics.fluctuation_strength_ecma,
         ph.psychoacoustics.loudness_moore_glasberg,
+        ph.environment.sound_pressure_level_history,
+        ph.environment.impulsive_sound_adjustment,
     ],
     ids=[
         "loudness_ecma",
@@ -36,6 +38,8 @@ _STEREO = np.zeros((2, 4800))
         "roughness_ecma",
         "fluctuation_strength_ecma",
         "moore_glasberg",
+        "sound_pressure_level_history",
+        "impulsive_sound_adjustment",
     ],
 )
 def test_stereo_input_is_rejected(

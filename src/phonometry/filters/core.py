@@ -1068,21 +1068,14 @@ def octave_filter(
 
     :param x: Input signal (1D array or 2D array [channels, samples]), or a
         :class:`phonometry.io.Signal` read from a measurement file.
-    :type x: Union[List[float], np.ndarray, phonometry.io.Signal]
     :param fs: Sample rate in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :type fs: Optional[int]
     :param fraction: Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1.
-    :type fraction: float
     :param order: Order of the filter. Default: 6.
-    :type order: int
     :param limits: Minimum and maximum limit frequencies [f_min, f_max]. Default [12, 20000].
-    :type limits: Optional[List[float]]
     :param sigbands: If True, also return the signal in the time domain divided into bands.
-    :type sigbands: bool
     :param detrend: If True, remove DC offset before filtering. Default: True.
-    :type detrend: bool
     :param mode: 'rms' or 'peak'. Default: 'rms'.
     :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
     :param design: How the band filters are designed: family, ripple, stopband

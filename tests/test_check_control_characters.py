@@ -125,8 +125,10 @@ def test_nothing_the_scan_skips_is_text() -> None:
     four kilobytes, or an SVG, which is text nobody reads as prose.
     """
     root = ccc.ROOT
-    listed = subprocess.run(  # noqa: S603 - a fixed argument vector
-        ["git", "-C", str(root), "ls-files", "-z"],  # noqa: S607 - git is on PATH
+    # A fixed argument vector
+    listed = subprocess.run(  # noqa: S603
+        # git is on PATH
+        ["git", "-C", str(root), "ls-files", "-z"],  # noqa: S607
         capture_output=True,
         check=True,
         text=True,

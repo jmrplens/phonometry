@@ -305,12 +305,18 @@ def _headings(path: Path) -> list[str]:
     return headings
 
 
+#: An anchor a page declares itself, ``<a id="n4"></a>``: GitHub keeps it (as
+#: ``user-content-n4``, which a ``#n4`` link reaches), and it survives a
+#: reworded heading, which is why the contributor guide pins its rules with it.
+_EXPLICIT_ANCHOR = re.compile(r'<a\s+(?:id|name)="([^"]+)"\s*>\s*</a>')
+
+
 def _fragments(path: Path) -> set[str]:
     """The anchors ``path`` answers for.
 
     Includes the ``-1``, ``-2`` GitHub appends when the same slug recurs
-    later on the page, in appearance order — the second "References" heading
-    on a page is not the same anchor as the first.
+    later on the page, in appearance order, and every explicit
+    ``<a id="...">`` anchor outside a fence.
     """
     seen: dict[str, int] = {}
     fragments: set[str] = set()
@@ -319,6 +325,8 @@ def _fragments(path: Path) -> set[str]:
         n = seen.get(slug, 0)
         seen[slug] = n + 1
         fragments.add(slug if n == 0 else f"{slug}-{n}")
+    for _lineno, line in _unfenced_lines(path.read_text(encoding="utf-8")):
+        fragments.update(_EXPLICIT_ANCHOR.findall(line))
     return fragments
 
 

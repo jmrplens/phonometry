@@ -403,7 +403,9 @@ class SurveyAirborneResult(OwnsArrays):
         require_ranks(self, d=1, d_nt=1, d_n=1, r_prime=1)
         require_same_length(self, "d", "d_nt", "d_n", "r_prime")
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``DnT`` against the shifted ISO 717-1 reference curve.
 
         Delegates to the weighted-rating plot. Requires the automatic rating
@@ -413,7 +415,7 @@ class SurveyAirborneResult(OwnsArrays):
         """
         if self.rating is None:
             raise ValueError(_NO_RATING_TO_PLOT)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,
@@ -520,11 +522,13 @@ class SurveyImpactResult(OwnsArrays):
         require_ranks(self, l_i=1, l_nt=1, l_n=1)
         require_same_length(self, "l_i", "l_nt", "l_n")
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``L'nT`` against the shifted ISO 717-2 reference curve."""
         if self.rating is None:
             raise ValueError(_NO_RATING_TO_PLOT)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,
@@ -618,11 +622,13 @@ class SurveyFacadeResult(OwnsArrays):
         require_ranks(self, d_2m=1, d_2m_nt=1, d_2m_n=1)
         require_same_length(self, "d_2m", "d_2m_nt", "d_2m_n")
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``D2m,nT`` against the shifted ISO 717-1 reference curve."""
         if self.rating is None:
             raise ValueError(_NO_RATING_TO_PLOT)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,

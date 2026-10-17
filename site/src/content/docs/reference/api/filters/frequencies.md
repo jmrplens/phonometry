@@ -79,7 +79,7 @@ reaches `limits[1]`.
 normalized_frequencies(fraction: int) -> list[float]
 ```
 
-Get standardized IEC center frequencies.
+Standardized IEC center frequencies.
 
 **Parameters**
 

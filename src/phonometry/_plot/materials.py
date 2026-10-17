@@ -848,7 +848,9 @@ def _absorption_reflection_axes(
         language=language,
         **kwargs,
     )
-    ax.semilogx(
+    # The axis is already logarithmic and labeled; a second ``semilogx``
+    # would reset its scale and put matplotlib's 10^2, 10^3 labels back.
+    ax.plot(
         freqs,
         np.abs(np.asarray(reflection, dtype=np.complex128)),
         ls="--",

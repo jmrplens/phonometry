@@ -139,8 +139,10 @@ FORBIDDEN: dict[int, str] = {
 
 def tracked_files() -> list[pathlib.Path]:
     """Every tracked file this check reads, in the order git lists them."""
-    listed = subprocess.run(  # noqa: S603 - a fixed argument vector
-        ["git", "-C", str(ROOT), "ls-files", "-z"],  # noqa: S607 - git is on PATH
+    # A fixed argument vector
+    listed = subprocess.run(  # noqa: S603
+        # git is on PATH
+        ["git", "-C", str(ROOT), "ls-files", "-z"],  # noqa: S607
         capture_output=True,
         check=True,
         text=True,

@@ -225,7 +225,8 @@ def test_the_banner_reads_its_counts_and_never_carries_its_own() -> None:
         "4 of 7 conformance checks pass, 3 failing, across 2 domains and 5 standards"
     )
     svg = cb.render_banner(FIXTURE["counts"], cb.LIGHT)
-    root = ET.fromstring(svg)  # noqa: S314 - our own output
+    # Our own output
+    root = ET.fromstring(svg)  # noqa: S314
     assert root.get("aria-label") == alt
     # Read off the title rather than searched for as a substring: the drawn
     # figures are outlines, so "566" turns up in path coordinates by chance.
@@ -396,7 +397,8 @@ def test_no_asset_reaches_outside_itself() -> None:
 def test_every_asset_says_in_words_what_it_shows() -> None:
     """An image of a tick is not a verdict to anyone who cannot see it."""
     for name, source in cb.assets().items():
-        root = ET.fromstring(source)  # noqa: S314 - our own output
+        # Our own output
+        root = ET.fromstring(source)  # noqa: S314
         assert root.get("role") == "img", name
         label = root.get("aria-label")
         assert label, name
@@ -425,7 +427,8 @@ def test_nothing_generated_contains_an_emoji() -> None:
 @pytest.mark.parametrize("name", cb.asset_names())
 def test_each_asset_is_well_formed_and_declares_its_own_size(name: str) -> None:
     source = _committed(name)
-    root = ET.fromstring(source)  # noqa: S314 - our own output
+    # Our own output
+    root = ET.fromstring(source)  # noqa: S314
     assert root.tag == "{http://www.w3.org/2000/svg}svg"
     # Intrinsic width and height as well as a viewBox: without them GitHub
     # cannot reserve the box before the bytes arrive, and a mark in a table

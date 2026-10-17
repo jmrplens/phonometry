@@ -250,7 +250,9 @@ class IntensityReductionResult(OwnsArrays):
             if value is not None:
                 _positive_area(value, name)
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``RI`` against the shifted ISO 717-1 reference curve.
 
         Delegates to the weighted-rating plot (measured ``RI`` versus the
@@ -265,7 +267,7 @@ class IntensityReductionResult(OwnsArrays):
                 "one-third-octave or 5 octave bands)."
             )
             raise ValueError(msg)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,
@@ -376,7 +378,9 @@ class IntensityElementNormalizedResult(OwnsArrays):
     measurement_area: float | None = None
     n: int = 1
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot ``DI,n,e`` against the shifted ISO 717-1 reference curve.
 
         Delegates to the weighted-rating plot. Requires the automatic rating
@@ -390,7 +394,7 @@ class IntensityElementNormalizedResult(OwnsArrays):
                 "one-third-octave or 5 octave bands)."
             )
             raise ValueError(msg)
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
     def report(
         self,

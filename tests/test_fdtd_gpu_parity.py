@@ -53,7 +53,8 @@ def _cupy_or_none() -> ModuleType | None:
 
         cupy.cuda.runtime.getDeviceCount()
         cupy.arange(1).sum()
-    except Exception:  # noqa: BLE001 - any import/CUDA failure means no GPU
+    # Any import/CUDA failure means no GPU
+    except Exception:  # noqa: BLE001
         return None
     return cupy
 

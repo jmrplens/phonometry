@@ -37,8 +37,8 @@ body:
     attributes:
       label: Proposed module and public names
       description: >
-        A concept name in snake_case, never a standard number. See the naming conventions
-        in CONTRIBUTING.md.
+        A concept name in snake_case, never a standard number. See the naming rules
+        in docs/contributing/naming.md.
       placeholder: "emission/survey_sound_power.py, survey_sound_power()"
     validations:
       required: false
